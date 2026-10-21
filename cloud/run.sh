@@ -38,7 +38,13 @@ save_state() {
   git -C "$STORE" rev-parse HEAD > "$STATE/worktree/base"
   log "uncommitted store work saved: $(wc -c < "$STATE/worktree/patch") bytes on $(cat "$STATE/worktree/base" | cut -c1-8)"
   cd "$STATE"
-  git add -A loop docs worktree
+  # A finished round (or a job stopped by its time limit) starts the next job at once; the push is made with the PAT,
+  # so it triggers the workflow. Paused or failed states do not, so the loop stops there.
+  case "$(jq -r '.phase // ""' "$LOOP/status.json" 2>/dev/null)" in
+    ROUND_LIMIT_REACHED|A_IMPLEMENTING|C_VERIFYING|G_ROOT_GATE|B_PLANNING_NEXT)
+      [ "$rc" -eq 0 ] && date -u +%FT%TZ > "$STATE/cloud/KICK" ;;
+  esac
+  git add -A loop docs worktree cloud/KICK
   if ! git diff --cached --quiet; then
     local ph rd
     ph="$(jq -r '.phase // "?"' "$LOOP/status.json" 2>/dev/null)"; rd="$(jq -r '.round // "?"' "$LOOP/status.json" 2>/dev/null)"

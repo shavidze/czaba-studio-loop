@@ -101,6 +101,7 @@ B ყოველი დაგეგმვისას აახლებს `tm
 - **Servers.** Only the store dev server runs, at `http://127.0.0.1:5173/studio-lab`. The .NET backend (`:5199`) and SQL Server are not available. `/studio-lab` does not need them. An acceptance row that truly needs the backend is BLOCKED with the reason "backend unavailable in cloud". It is never PASS and never a FAIL of A's work.
 - **No `.env`.** Firebase, Shopify, R2 and Brevo are not configured. The console errors "Failed to load cart" / `ERR_CONNECTION_REFUSED` / `ERR_TUNNEL_CONNECTION_FAILED` are expected here and are not Studio bugs.
 - **Fresh machine per job.** Each job starts on a new machine. Uncommitted store work from the previous job is restored before the round starts. Background processes and files outside `store/` and the loop folder do not survive. Never depend on them.
+- **browserVerified in the cloud.** A row that is BLOCKED only because the backend is unavailable in the cloud does not make `browserVerified` (or `realVerified`) false. Those two flags are false only when a browser row that CAN run here was not run. List the backend-blocked rows under `"blocked"` and keep them out of `"passed"`; B keeps them as open evidence for a later backend-enabled check, not as a reason to call the round unverified.
 - **Time.** A job can be stopped at its time limit. The next job resumes the same phase, so write the round's report files as you go, not only at the end.
 
 ## Speed rules (user decision, 2026-10-21) — take precedence over older test-repetition instructions
