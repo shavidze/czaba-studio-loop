@@ -1,0 +1,89 @@
+name: Studio loop
+
+# One agent-loop-kit round per job. The schedule keeps it going; concurrency keeps it to one job at a time.
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: studio-loop
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  round:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      CZ_ROOT: /home/runner/czaba-project
+      KIT_DIR: /home/runner/agent-loop-kit
+      LOOP_TIMEOUT_MIN: "320"
+      GH_TOKEN: ${{ github.token }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+    steps:
+      - name: Check secrets
+        run: |
+          [ -n "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}" ] || { echo "::error::Add the CLAUDE_CODE_OAUTH_TOKEN secret (claude setup-token)"; exit 1; }
+          [ -n "${{ secrets.STORE_PUSH_TOKEN }}" ] || { echo "::error::Add the STORE_PUSH_TOKEN secret (classic PAT with repo + workflow)"; exit 1; }
+
+      - name: Checkout loop state
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Is the cloud loop switched on?
+        id: enabled
+        run: |
+          if [ -f cloud/ENABLED ] && [ -f loop/status.json ]; then echo "on=true" >> "$GITHUB_OUTPUT"; else echo "Cloud loop is off (no cloud/ENABLED)."; echo "on=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Git identity and credentials
+        if: steps.enabled.outputs.on == 'true'
+        run: |
+          git config --global user.name "Saba Shavidze"
+          git config --global user.email "sabashavidze@gmail.com"
+          git config --global url."https://x-access-token:${{ secrets.STORE_PUSH_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Get store and kit
+        if: steps.enabled.outputs.on == 'true'
+        run: |
+          mkdir -p "$CZ_ROOT"
+          git clone -q https://github.com/shavidze/czaba-store.git "$CZ_ROOT/store"
+          git clone -q --depth 1 https://github.com/shavidze/agent-loop-kit.git "$KIT_DIR"
+          git -C "$CZ_ROOT/store" log --oneline -1
+          git -C "$KIT_DIR" log --oneline -1
+
+      - uses: actions/setup-node@v4
+        if: steps.enabled.outputs.on == 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: /home/runner/czaba-project/store/package-lock.json
+
+      - name: Install store, browser and Claude Code
+        if: steps.enabled.outputs.on == 'true'
+        run: |
+          cd "$CZ_ROOT/store" && npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          npm install -g @anthropic-ai/claude-code
+          claude --version
+          pwsh --version
+
+      - name: Run one loop round
+        if: steps.enabled.outputs.on == 'true'
+        run: bash cloud/run.sh
+
+      - name: Upload loop logs
+        if: always() && steps.enabled.outputs.on == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: loop-logs-${{ github.run_id }}
+          path: |
+            loop/loop.log
+            loop/status.json
+            loop/gates/
+          retention-days: 14
+          if-no-files-found: ignore
