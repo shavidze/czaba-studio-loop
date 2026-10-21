@@ -72,6 +72,12 @@ jobs:
           claude --version
           pwsh --version
 
+      - name: Claude Code settings (Fable advisor, as on the PC)
+        if: steps.enabled.outputs.on == 'true'
+        run: |
+          mkdir -p ~/.claude
+          echo '{"advisorModel": "fable"}' > ~/.claude/settings.json
+
       - name: Run one loop round
         if: steps.enabled.outputs.on == 'true'
         env:
