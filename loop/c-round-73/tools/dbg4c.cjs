@@ -1,0 +1,11 @@
+const L=require('./lib.cjs');const sleep=L.sleep;
+const posOf=async p=>{const t=await p.textContent('[data-testid=arrangement-position]');const m=/(\d+):(\d+\.\d+)/.exec(t);return m?+m[1]*60+ +m[2]:NaN;};
+(async()=>{const vp=process.argv[2]||'1440x900';const s=await L.open(vp);const p=s.page;await L.fresh(p);
+ await L.setupME(p,530);
+ const info=async lab=>{const r=await p.evaluate(()=>document.querySelector('[data-testid=arrangement-ruler]').getBoundingClientRect().toJSON());const x=r.left+25*40,y=r.top+r.height/2;const hit=await p.evaluate(([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.getAttribute('data-testid')||e.tagName)+' '+(e.className||'').toString().slice(0,60)},[x,y]);
+  await p.mouse.click(x,y);await sleep(200);console.log(lab,JSON.stringify({pos:await posOf(p),hit,ruler:r,zoom:await p.textContent('[data-testid=arrangement-zoom-readout]'),status:(await p.textContent('[data-testid=arrangement-status]')).trim(),scroll:await p.evaluate(()=>document.querySelector('[data-testid=arrangement-timeline-scroller]').scrollLeft)}));};
+ await info('noRange');await p.keyboard.press('Home');
+ const cbx=await p.locator('[data-clip-id]').first().boundingBox();const rl=await p.evaluate(()=>document.querySelector('[data-testid=arrangement-ruler]').getBoundingClientRect().left);
+ await p.mouse.move(rl+12*40,cbx.y+40);await p.mouse.down();await p.mouse.move(rl+16*40,cbx.y+40,{steps:10});await p.mouse.up();await sleep(250);
+ await info('range');await p.keyboard.press('Control+Shift+L');await sleep(200);await p.keyboard.press('Home');await info('rangeAll');
+ await s.browser.close();})();

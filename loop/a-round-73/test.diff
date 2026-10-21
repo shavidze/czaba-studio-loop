@@ -1,0 +1,146 @@
+diff --git a/../tmp/studio-real-loop/b-round-72-r73-snapshots/markers-ui.test.tsx b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+index af91d47..9520050 100644
+--- a/../tmp/studio-real-loop/b-round-72-r73-snapshots/markers-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+@@ -204,6 +204,24 @@ function nameInput(view: MarkerView): HTMLInputElement {
+   return input;
+ }
+ 
++function stubPointerCapture(element: HTMLElement) {
++  Object.defineProperty(element, 'setPointerCapture', { configurable: true, value: () => {} });
++  Object.defineProperty(element, 'hasPointerCapture', { configurable: true, value: () => false });
++  Object.defineProperty(element, 'releasePointerCapture', { configurable: true, value: () => {} });
++}
++
++function clickClipBody(view: MarkerView, clipId: string, pointerId: number) {
++  const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
++  const body = root?.querySelector<HTMLElement>('[title^="drag = დროის მონიშვნა"]');
++  if (!root || !body) {
++    throw new Error(`clip ${clipId} not rendered`);
++  }
++  stubPointerCapture(root);
++  stubPointerCapture(body);
++  fireEvent.pointerDown(body, { button: 0, buttons: 1, pointerId, clientX: 120, clientY: 10 });
++  fireEvent.pointerUp(body, { button: 0, buttons: 0, pointerId, clientX: 120, clientY: 10 });
++}
++
+ function statusText(view: MarkerView): string {
+   return view.getByTestId('arrangement-status').textContent ?? '';
+ }
+@@ -538,6 +556,116 @@ describe('marker row: rename and delete', { timeout: 15000 }, () => {
+     expect(document.activeElement).toBe(view.getByTestId('arrangement-marker-add'));
+   });
+ 
++  it('MU8c: a clip click after a marker add releases the flag, so Delete and plain arrows act on the clip (C-R72-01)', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    pressM();
++    fireEvent.keyDown(nameInput(view), { key: 'Enter', code: 'Enter' });
++    const added = flagAt(view, '0.000');
++    expect(document.activeElement).toBe(added);
++    const markersBefore = live(api).arrangement.markers;
++    expect(markersBefore).toHaveLength(4);
++    clickClipBody(view, 'm1', 70);
++    expect(document.activeElement).not.toBe(added);
++    expect(live(api).selectedClipIds).toEqual(['m1']);
++    const released =
++      document.activeElement instanceof HTMLElement ? document.activeElement : document.body;
++    fireEvent.keyDown(released, { key: 'Delete', code: 'Delete' });
++    fireEvent.keyDown(document.body, { key: 'Delete', code: 'Delete' });
++    expect(live(api).arrangement.clips).toHaveLength(0);
++    expect(live(api).arrangement.markers).toEqual(markersBefore);
++    expect(markerTimes(view)).toEqual(['0.000', '12.000', '20.000', '40.000']);
++    expect(live(api).undoLabel).toBe('კლიპის წაშლა');
++    act(() => live(api).undo());
++    expect(live(api).arrangement.clips).toHaveLength(1);
++    expect(live(api).arrangement.clips[0]).toMatchObject({ id: 'm1', start: 0, duration: 50 });
++
++    flagAt(view, '20.000').focus();
++    clickClipBody(view, 'm1', 71);
++    expect(document.activeElement).not.toBe(flagAt(view, '20.000'));
++    expect(live(api).selectedClipIds).toEqual(['m1']);
++    const active =
++      document.activeElement instanceof HTMLElement ? document.activeElement : document.body;
++    fireEvent.keyDown(active, { key: 'ArrowRight', code: 'ArrowRight' });
++    expect(live(api).arrangement.clips[0].start).toBeGreaterThan(0);
++    expect(live(api).arrangement.markers).toEqual(markersBefore);
++    act(() => live(api).undo());
++    expect(live(api).arrangement.clips[0].start).toBe(0);
++
++    flagAt(view, '40.000').focus();
++    clickClipBody(view, 'm1', 72);
++    const afterClick =
++      document.activeElement instanceof HTMLElement ? document.activeElement : document.body;
++    fireEvent.keyDown(afterClick, { key: 'Delete', code: 'Delete' });
++    expect(live(api).arrangement.clips).toHaveLength(0);
++    expect(live(api).arrangement.markers).toEqual(markersBefore);
++  });
++
++  it('MU8d: a press on a lane background, the ruler or a Markers header button releases a focused flag', async () => {
++    const { view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    const intro = flagAt(view, '12.000');
++    intro.focus();
++    const lane = view.getByTestId('arrangement-video-dropzone');
++    fireEvent.pointerDown(lane, { button: 0, buttons: 1, pointerId: 73, clientX: 300 });
++    fireEvent.pointerUp(window, { pointerId: 73, clientX: 300 });
++    expect(document.activeElement).not.toBe(intro);
++
++    intro.focus();
++    const ruler = view.getByTestId('arrangement-ruler');
++    stubPointerCapture(ruler);
++    fireEvent.pointerDown(ruler, { button: 0, buttons: 1, pointerId: 74, clientX: 300 });
++    fireEvent.pointerUp(ruler, { pointerId: 74, clientX: 300 });
++    expect(document.activeElement).not.toBe(intro);
++
++    intro.focus();
++    fireEvent.pointerDown(view.getByTestId('arrangement-marker-next'), {
++      button: 0,
++      buttons: 1,
++      pointerId: 78,
++    });
++    expect(document.activeElement).not.toBe(intro);
++  });
++
++  it('MU8e: a press on another flag or inside the open name editor keeps marker focus', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    const intro = flagAt(view, '12.000');
++    intro.focus();
++    const drop = flagAt(view, '20.000');
++    fireEvent.pointerDown(drop, { button: 0, buttons: 1, pointerId: 75 });
++    expect(document.activeElement).toBe(intro);
++    const label = drop.querySelector('[data-marker-label]');
++    if (!(label instanceof HTMLElement)) {
++      throw new Error('marker label missing');
++    }
++    fireEvent.pointerDown(label, { button: 0, buttons: 1, pointerId: 76 });
++    expect(document.activeElement).toBe(intro);
++
++    fireEvent.keyDown(intro, { key: 'F2', code: 'F2' });
++    const input = nameInput(view);
++    expect(document.activeElement).toBe(input);
++    fireEvent.pointerDown(input, { button: 0, buttons: 1, pointerId: 77 });
++    expect(document.activeElement).toBe(input);
++    expect(view.queryByTestId('arrangement-marker-name-input')).not.toBeNull();
++    fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' });
++    expect(live(api).undoLabel).toBeNull();
++  });
++
++  it('MU8f: Delete or a plain arrow dispatched from inside a flag (not the flag itself) touches neither the clip nor the marker', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    act(() => live(api).selectClip('m1'));
++    const markersBefore = live(api).arrangement.markers;
++    const label = flagAt(view, '20.000').querySelector('[data-marker-label]');
++    if (!(label instanceof HTMLElement)) {
++      throw new Error('marker label missing');
++    }
++    fireEvent.keyDown(label, { key: 'Delete', code: 'Delete' });
++    fireEvent.keyDown(label, { key: 'Backspace', code: 'Backspace' });
++    fireEvent.keyDown(label, { key: 'ArrowRight', code: 'ArrowRight' });
++    expect(live(api).arrangement.clips).toHaveLength(1);
++    expect(live(api).arrangement.clips[0].start).toBe(0);
++    expect(live(api).arrangement.markers).toEqual(markersBefore);
++    expect(live(api).undoLabel).toBeNull();
++  });
++
+   it('MU9: Cut Time removes markers inside, shifts later ones, reports the count, and Undo restores them', async () => {
+     const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
+     act(() => live(api).setTimeRange({ start: 15, end: 25, trackId: 'music' }));

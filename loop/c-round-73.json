@@ -1,0 +1,53 @@
+{
+ "round": 73,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-21T21:23:05.8458150Z",
+  "round": 73,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "C73-1 (both viewports: Delete removes the clip, marker kept, exact SRW-24 status; Undo restores; ArrowRight moves clip 0.000->1.000, markers unchanged, flag not focused)",
+  "C73-2 (both viewports: lane background and ruler blur the flag to BODY; another flag takes focus + aria-current; click in rename input keeps input focus and editor open)",
+  "MK-DELETE (Delete on focused flag removes only that marker, focus lands on next flag 8.000, clip count unchanged, Undo restores)",
+  "C73-3 (both viewports: + button opens editor, Escape returns focus to arrangement-marker-add, no marker, status 'მარკერი არ დაემატა'; 'm' typed in search and BPM stays text, no editor)",
+  "MK-NAV (Ctrl+Right 5,8,101.352; Ctrl+Left 8,5,0)",
+  "MK-ADD-PLAYING (marker within 0.009 s of readout at M, 0 extra createBufferSource, position keeps advancing)",
+  "C73-4a (header 'Studio Lab Demo' link click -> /studio-lab, workspace + demo badge, both viewports)",
+  "C73-4b (REAL vertical overflow at 1280x500 natively and at 1280x720 after REAL track-height drags; wheel scroll 154/119 px; ruler/tempo/marker row tops unchanged 229/258.5/277, lanes scroll under)",
+  "C73-4c (range 12-16 all lanes, ruler click 17, M adds at 12.000, range kept, default name Marker 3)",
+  "REG-KEYS (fader = track Volume input type=range, isRangeInputTarget branch; Space/Home/G/1/2, arrow nudge with body focused, Ctrl+Shift+L all lanes, fader click -> clip click -> Delete removes clip; both viewports)",
+  "REG-HYD (0 hydration warnings, 0 non-environment console errors)",
+  "G73-3 non-backend rows (/studio-lab anonymous demo badge; /studio/middle-east 'Sign in required' with no workspace; anonymous /api/studio-token?product&file 401; 0 forbidden requests, 0 Authorization headers, localStorage only czaba_spotlight_last_shown + czaba_session_id)",
+  "SOURCE-UNCHANGED (3 owned files equal A's hashes at C start and end; other7 OK; frozen 449 OK; 10 status lines; HEAD 1e469e5)"
+ ],
+ "blocked": [
+  "G73-3 fake-Bearer 403: backend unavailable in cloud (got 500 'Unable to prepare Studio access')"
+ ],
+ "notRun": [
+  "Safari/WebKit flag-to-flag focus (A review Medium 1): Chromium only; signal for B, pre-existing, outside ownership"
+ ],
+ "gate": [
+  "vitest (markers-ui, markers, delete-selection*)",
+  "typecheck",
+  "lint/Biome",
+  "build",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "info": [
+  "Harness: C's 1440 runs needed two harness corrections. Attempt 1 (log run-mt73-1440x900-attempt1.txt) FAILED C73-3, C73-4c and MK-ADD-PLAYING: ruler clicks at 30/40 s were off-screen (ruler left 512 px), and a 20 ms tolerance was used instead of the task's 0.15 s. Attempt 2 (30/40 changed to 20/25 s, tolerance 0.15 s) still failed C73-4c, because 25 s was off-screen too. Its log was overwritten by attempt 3. Attempt 3 adds an on-screen guard and uses 15/17 s; it is the final run-mt73-1440x900.txt. 1280x720 ran once with the final harness. None of these were app bugs.",
+  "Snap toggle is off by default on /studio-lab; C's setup click turned it on (r72 harness assumed the reverse); all rows ran with Snap on, grid 1 s",
+  "/api/studio-token without product/file returns 400 before the auth check (parameter validation first); with params anonymous is 401",
+  "ROW-RANGE-M confirmed again as written (M at range.start after a later ruler click); B signal for stage 2"
+ ],
+ "ableton": {
+  "C73-1..C73-4": "არ ეხება (CZABA focus hand-off model)",
+  "clip select + Delete/nudge": "დადასტურებული (ableton_round72 reference, not re-researched)",
+  "MK-NAV/MK-ADD-PLAYING": "as round 72 verdicts, not re-researched"
+ }
+}

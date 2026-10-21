@@ -1,0 +1,43 @@
+diff --git a/../tmp/studio-real-loop/b-round-72-r73-snapshots/064-studio-lab-markers.md b/docs/implementation/2026/quarter-IV/064-studio-lab-markers.md
+index dd9a5e0..5e06c4f 100644
+--- a/../tmp/studio-real-loop/b-round-72-r73-snapshots/064-studio-lab-markers.md
++++ b/docs/implementation/2026/quarter-IV/064-studio-lab-markers.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — სახელიანი მარკერები, ეტაპი 1 (SRW-16 / FB-10)
+ 
+ **თარიღი:** 2026-10-21
+-**სტატუსი:** Round 72 — D-29z37; C-ის შემოწმებას ელოდება
++**სტატუსი:** Round 73 — C-R72-01-ის გასწორება (D-29z38); C-ის შემოწმებას ელოდება
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -57,8 +57,8 @@ flowchart LR
+ - `app/lib/arrangement/model.ts` — `deleteTime` მარკერებსაც remap-ავს; სხვა ქცევა უცვლელია.
+ - `app/contexts/ArrangementContext.tsx` — Cut Time-ის სტატუსს ემატება „N მარკერი წაიშალა.“.
+ - `app/components/arrangement/ArrangementMarkerRow.tsx` (ახალი) — Markers რიგი: header-ის ღილაკები (+ ◀ ▶), flag-ები, სახელის editor.
+-- `app/components/arrangement/StudioWorkspace.tsx` — რიგის ჩასმა chrome-ში; M და Ctrl+←/→; ორივე drag-ის დროს უარყოფილია; Delete და ისრით კლიპის გადაწევა მარკერზე ფოკუსისას არ მუშაობს.
+-- `app/lib/arrangement/__tests__/markers.test.ts`, `markers-ui.test.tsx` (ახალი) — MK1–MK10, MU1–MU12.
++- `app/components/arrangement/StudioWorkspace.tsx` — რიგის ჩასმა chrome-ში; M და Ctrl+←/→; ორივე drag-ის დროს უარყოფილია; Delete და ისრით კლიპის გადაწევა მარკერზე ფოკუსისას არ მუშაობს. Round 73: timeline-ზე დაჭერა მარკერის გარეთ ფოკუსირებულ flag-ს blur-ს უკეთებს.
++- `app/lib/arrangement/__tests__/markers.test.ts`, `markers-ui.test.tsx` (ახალი) — MK1–MK10, MU1–MU14. Round 73: MU8c–MU8f.
+ 
+ ## პრობლემები და გადაწყვეტები
+ 
+@@ -68,6 +68,9 @@ flowchart LR
+ - **drag-ის დროს რედაქტირება.** → M და Ctrl+←/→ window-ის უარყოფის სიაშია (`GESTURE_EDIT_BLOCKED_MESSAGE`). ღილაკებს და flag-ის Delete-ს თავისი შემოწმება აქვს, რადგან ისინი window-ის სიას არ გადიან.
+ - **Blur drag-ის დაწყებისას.** კლიპზე დაჭერა input-ს blur-ს უკეთებს, gesture-ის `before` snapshot-ი კი მარკერს გადაფარავდა. Undo-ში ცარიელი `Add Marker` რჩებოდა (code-review #1). → blur აქტიური gesture-ის დროს არაფერს ინახავს და `GESTURE_EDIT_BLOCKED_MESSAGE`-ს აჩვენებს (MU13).
+ - **Blur-ის შემდეგ ფოკუსი flag-ზე ბრუნდებოდა** (code-review #2). → ფოკუსი მხოლოდ Enter-ზე და Escape-ზე გადადის. blur-ისას ის იქ რჩება, სადაც მომხმარებელმა გადაიტანა (MU14). ორივე R6-ის ტექსტიდან გადახვევაა და B-მ უნდა დაადასტუროს.
++- **C-R72-01: მარკერის დამატების შემდეგ კლიპზე click და Delete მარკერს შლიდა** (round 73). Enter-ის შემდეგ ფოკუსი flag-ზე რჩება. `ArrangementClip.beginGesture` pointerdown-ზე `preventDefault`-ს აკეთებს, ამიტომ ბრაუზერი ფოკუსს არ გადაიტანდა. `releaseEditFocusOnTimelinePointerDown`-ს flag-ის შემთხვევა არ ჰქონდა, window-ის Delete-ისა და ისრის შტოები კი marker target-ზე ჩერდებოდა. → loop brace-ის პარალელური ერთი პირობა: ფოკუსი flag-ზეა და pointer-ის სამიზნე მარკერის გარეთაა → blur. Handler scroller-ის capture-ზეა და ფარავს ruler-ს, ტემპის რიგს, Markers რიგს, Loop რიგს, ხაზების ფონსა და კლიპებს. capture კლიპის gesture-ის claim-მდე სრულდება, ამიტომ `isPointerGestureActive()` იქ ჯერ false-ია. Markers header-ის ღილაკები (+ ◀ ▶) მარკერის გარეთაა: დაჭერა flag-ს blur-ს უკეთებს (MU8d). შემდეგ ფოკუსს Chrome-ში ღილაკი იღებს, Safari-ში კი body (ღილაკი click-ზე ფოკუსს არ იღებს). სახელის input-იც მარკერის გარეთაა (გვერდით დგას), მაგრამ ღია editor-ის დროს ფოკუსი input-ზეა და არსებული `focused.contains(target)` დაცვა მას ტოვებს. flag-ზე ფოკუსი და ღია editor ერთად ვერ იარსებებს, რადგან input-ის blur editor-ს ხურავს.
++- **ორი მიღებული გადახვევა (B, D-29z38).** gesture-ის დროს blur არაფერს ინახავს; blur ფოკუსს არსად გადაიტანს. ფოკუსს მომხმარებლის click წყვეტს. ეს CZABA-ს მოდელია, Ableton-თან შესაბამისობა არ ეხება.
++- **window-ის Delete/ისრის `isMarkerTarget` დაცვა** (C round 72-ის მუტაცია h). flag-ი კლავიშს თვითონ ამუშავებს მხოლოდ მაშინ, როცა `event.target` თვითონ flag-ია. MU8f კლავიშს flag-ის შიგნითა label-იდან აგზავნის, რომელიც `stopPropagation`-ს არ აკეთებს. ასე window-ის დაცვა პირდაპირ მოწმდება. ეს სინთეზური გზაა (რეალური კლავიატურა ფოკუსირებულ ღილაკს მიმართავს), ანუ defense-in-depth.
+ - **ES2022 lib-ში `findLast` არ არის.** → წინა მარკერი უკუღმა ციკლით იძებნება.
+ 
+ ## ტესტირება
+@@ -78,6 +81,8 @@ flowchart LR
+ - **Gates (A):** `tsc` 0; Biome შეცვლილ ფაილებში 0 დიაგნოსტიკა, `./app` 0 error / 218 warning / 1 info. სრული vitest და `npm run verify` root-ის gate-ია (speed rules, 2026-10-21).
+ - **ბრაუზერის smoke** (A, PASS არ არის): `/studio-lab`, 1440×900. Middle East 0-ზე; ruler-ზე click 12 წმ-ზე; M; „აქ შედის მუსიკა“; Enter. flag-ი 12 წმ-ის tick-ზეა (480 px, 40 px/წმ). Undo-ს სათაურია `Add Marker`. დაჭერისას 12.000. double-click-იდან 1 წმ-ში პოზიცია 12.972 იყო. დაკვრისას M-მა `createBufferSource` 0-ჯერ გამოიძახა. Ctrl+→ ×4: 12 → 12.98 → ბოლო → სტატუსი. აკრძალული მოთხოვნა 0, hydration warning 0.
+ 
++- **Round 73:** MU8c (bug: flag focus → clip body click → Delete/ArrowRight კლიპზე მოქმედებს, მარკერები უცვლელია, Undo), MU8d (ხაზის ფონი, ruler), MU8e (სხვა flag, label, ღია input — ფოკუსი რჩება), MU8f (window-ის დაცვა). მუტაციები (`tmp/studio-real-loop/a-round-73.md`): (i) პირობის წაშლა → MU8c/MU8d წითელი; (ii) `!isMarkerTarget(event.target)`-ის მოხსნა → MU8e წითელი; (h1) window-ის Delete-ის დაცვის მოხსნა → MU8f წითელი; (h2) ისრის დაცვის მოხსნა → MU8 და MU8f წითელი. A-ის ბრაუზერის self-check (PASS არ არის): Chromium 1440×900 და 1280×720, M → Enter → clip body click → → → Delete: კლიპი 0.050 → 0.150 → წაიშალა, მარკერი დარჩა.
++
+ ## TODO / შემდეგი ნაბიჯები
+ 
+ - **SRW-16 ეტაპი 2** (შემდეგი რაუნდი):

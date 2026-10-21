@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-21T20:59:28.551Z)
+# Active loop summary (2026-10-21T21:36:24.826Z)
 
-- backlog.json 711 KB -> active view 129 KB
-- status: G_ROOT_GATE round 72
-- servers: `{"checkedUtc":"2026-10-21T20:46:50.4898290Z","round":72,"attempt":1,"store":200}`
-- last publication: 1e469e59d28aebf2e2a90f3d9d6d614d4e599bd1 (rounds 71-71)
-- last root gate: round 72 skipped - C taskStatus FAIL
+- backlog.json 664 KB -> active view 101 KB
+- status: G_ROOT_GATE round 73
+- servers: `{"checkedUtc":"2026-10-21T21:23:05.8458150Z","round":73,"attempt":1,"store":200}`
+- last publication: 6b574e853d2c5c4317e38927d9d06ce2a3dba91b (rounds 72-73)
+- last root gate: round 73 published - commit 6b574e853d2c5c4317e38927d9d06ce2a3dba91b pushed
 
-## Current items: SRW-04, SRW-14, SRW-16
+## Current items: SRW-16
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -144,12 +144,16 @@
 - INFO-C71-GSTACK-START / info / acknowledged (ENV-BROWSE-DAEMON pattern; second invocation started it) / gstack daemon failed to start within 15 s on first invocation
 - INFO-C71-MH-END-METHOD / info / acknowledged / MH-END used Snap off + zoom out + a plain REAL ruler click
 - R72-T-TECH-LEAD / info / open / real Chrome: add three named markers on a long project with video; row placement, M + typed name, click/double-click/Ctrl+arrows feel, F2 re
+- C-R72-01 / medium / open - fix dispatched round 73 (D-29z38) / Delete/plain arrows act on the focused marker flag instead of the selected clip after a marker add then clip click: releaseEditFocusOnTimeli
+- ROW-RANGE-M / info / signal for stage 2 (not a task) / M adds at range.start even after a later ruler click (spec R6 as written); Live drops the selection on click; consider clearing/documenting 
+- GATE-72-SKIPPED / info / open_root / Round 72 root gate skipped (C FAIL); round-72 code is uncommitted in the tree; rounds 72+73 publish together after C PASS
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
 - SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
+- SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-17 [todo] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [todo] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
