@@ -1,0 +1,13 @@
+const L=require('./lib.cjs');const sleep=L.sleep;
+(async()=>{const s=await L.open('1280x720');const p=s.page;await L.fresh(p);
+ await p.click('[data-testid=arrangement-snap-toggle]');await L.setupME(p,530);
+ const r=await p.evaluate(()=>document.querySelector('[data-testid=arrangement-ruler]').getBoundingClientRect().toJSON());await p.mouse.click(r.left+5*40,r.top+14);
+ await p.keyboard.press('m');await sleep(100);await p.keyboard.press('Enter');await sleep(150);
+ await p.locator('[data-clip-id]').first().click({position:{x:200,y:40}});await sleep(150);
+ const st=()=>p.evaluate(()=>document.querySelector('[data-clip-id]').getAttribute('data-clip-start'));
+ const a=await st();await p.keyboard.press('ArrowRight');await sleep(200);const b=await st();
+ const foc=await p.evaluate(()=>document.activeElement.getAttribute('data-testid'));
+ console.log(JSON.stringify({vp:'1280x720',focus:foc,clipStartBefore:a,afterArrowRight:b,markers:await p.locator('[data-testid=arrangement-marker]').count()}));
+ await p.keyboard.press('Delete');await sleep(200);
+ console.log(JSON.stringify({afterDelete:{markers:await p.locator('[data-testid=arrangement-marker]').count(),clips:await p.locator('[data-clip-id]').count()}}));
+ await s.browser.close();})();

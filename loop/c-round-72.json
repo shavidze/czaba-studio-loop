@@ -1,0 +1,72 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {"checkedUtc":"2026-10-21T20:46:50.4898290Z","round":72,"attempt":1,"store":200},
+ "bugs": [
+  {
+   "id": "C-R72-01",
+   "severity": "medium",
+   "steps": [
+    "Fresh /studio-lab (new context), Snap on, drop 'Middle East' on the music lane at 0 s (REAL mouse).",
+    "REAL ruler click at 5 s, REAL key M, REAL Enter (the marker is committed and focus returns to its flag, as specified).",
+    "REAL click on the music clip body (the clip gets the brand ring = selected; document.activeElement is still the marker flag).",
+    "Press Delete (or plain ArrowRight)."
+   ],
+   "expected": "Delete removes the selected clip (SRW-24: clip removed, gap left) and ArrowRight nudges the selected clip; the marker is untouched. The task (R10, MU8) says: 'Then the clip has focus/selection with the marker unfocused'.",
+   "actual": "The clip click does not take focus away from the marker flag. Delete deletes the MARKER (status 'მარკერი «Marker 1» წაიშალა.', clips 1, markers 0) and the clip stays; ArrowRight does not nudge the selected clip (clip start 0.000 before and after). Reproduced at 1440x900 and 1280x720. Control: with focus blurred first, the same click+Delete removes the clip and keeps the marker. Every Add leaves focus on the flag, so this is the normal flow: add a marker, click a clip, press Delete.",
+   "evidence": "c-round-72/tools/dbg3.cjs (control vs marker-focused), dbg2.cjs, dbg6.cjs; c-round-72/bug-b72-1-1280.txt. Not covered by A's tests: mutation h (remove the window-branch guard) survives, and MU8 does not click a clip after a marker has focus. Suggested fix direction for B: make a clip/lane pointerdown move focus off the marker (or have the marker handler/exclusions act only while the marker really is the interaction target, e.g. clear focus on clip select), and add a UI test: marker focused, click clip, Delete removes the clip."
+  }
+ ],
+ "passed": [
+  "R72-S-static-diff (owned files only; 10 git-status lines; markers.ts imports only types; no timers/listeners/AudioContext/any/comments in new files; LF)",
+  "G72-2-tree (HEAD 1e469e5 start and end, 10 status lines, owned-file sha256 equal at start and end; 17 frozen-list mismatches are Windows-EOL entries, git status clean, none owned, same count as A)",
+  "R72-U-partial (new tests 44/44 + delete-selection 23/23 green; tsc 0; C mutations a, c green=killed; h survives)",
+  "MK-ADD (1440x900 and 1280x720)",
+  "MK-ADD-undoredo",
+  "MK-ADD-RANGE (marker at range.start 20.000, default name; 'range stays' not separately verified)",
+  "MK-ADD-PLAYING + MK-NO-RESYNC (add, rename, delete while playing: 0 extra createBufferSource; position monotonic)",
+  "MK-ESC",
+  "MK-DUP",
+  "MK-JUMP",
+  "MK-PLAYFROM (both viewports; master meter rise within 0.6 s after dblclick, none before; readout 12.96 after 1 s)",
+  "MK-NAV (keys and buttons, both viewports)",
+  "MK-RENAME",
+  "MK-DELETE (only with focus blurred before the clip step; see C-R72-01)",
+  "MK-CUT-TIME (both viewports; markers 12/30, status ends '1 მარკერი წაიშალა.', clip right part moved 10 s, Undo restores clips+markers, Redo re-applies)",
+  "MK-LAYOUT (both viewports; no overlap; row 20 px; sticky row y unchanged on horizontal scroll)",
+  "MK-TYPING",
+  "MK-EXPORT-REG (24-bit 48 kHz stereo 101.352 s, 4864896 frames, 0 NaN, 30 full-scale, RMS equal, maxDelta 0, byte-identical, both viewports)",
+  "REG-CHROME (ruler seek, playhead x, BPM 90, loop brace create+drag, marquee select, ruler dblclick Fit 3/3 at both viewports, Ctrl+Shift+L)",
+  "REG-KEYS",
+  "REG-HYD",
+  "G72-3-partial (/studio-lab anonymous with demo badge; /studio/middle-east shows 'Sign in required'; anonymous /api/studio-token 401; 0 forbidden requests, 0 Authorization headers in all runs)"
+ ],
+ "blocked": [
+  "fake-Bearer /api/studio-token expected 403: returned 500 because the backend (:5199) is unavailable in cloud; backend unavailable in cloud",
+  "gate rows (vitest 103 files, npm run verify, build, Biome ./app) belong to the root gate per the speed rules; not claimed by C"
+ ],
+ "notRun": [
+  "MK-LAYOUT vertical scroll keeps marker row y: no vertical overflow at both viewports (scrollHeight == clientHeight), so not verifiable",
+  "G72-3 via the header link (only direct URL tested)",
+  "C mutations b,d-g,i-n and 3x duration runs (A's mutation table not independently repeated; only a, c, h)",
+  "ruler dblclick under REG-CHROME at tab-order level, macOS keys, video sync, e2e smoke"
+ ],
+ "info": [
+  "ROW-RANGE-M: when a time range exists M adds at range.start even after a later ruler click (spec R6 as written); the range is not cleared by the ruler click or Escape. In Live the click sets the insert marker and drops the selection. UX note for B, not a bug against the task.",
+  "Blur commits (D1 ruler click, D2 library search click): both committed 'Add Marker', focus stayed where the user clicked (BODY / search). Matches A's deviation; B to confirm.",
+  "At 16.4 px/s two markers 1 s apart: first label shrinks to ~12 px (only flag visible); at 10.5 px/s it is invisible. Matches spec (flag always visible, no overlap).",
+  "Cut Time default Snap-on fixture: F-ME ends at 01:41.352 as in round 71."
+ ],
+ "ableton": {
+  "Add (stopped / playing)": "CZABA PASS; Ableton: confirmed (insert marker/time-selection start, real-time during playback); no quantization = deliberate difference",
+  "Name at creation": "CZABA PASS; Ableton: unconfirmed (CZABA choice)",
+  "Click / double-click": "CZABA PASS; Ableton: confirmed (text, not run in Live)",
+  "Previous/next": "CZABA PASS; Ableton: confirmed buttons and start/end fallback; markers only + no auto-play = deliberate difference",
+  "Rename F2": "CZABA PASS; Ableton Ctrl+R: deliberate difference",
+  "Delete": "CZABA PASS when focus is on the marker; focus handling FAIL (C-R72-01); Ableton: confirmed",
+  "Cut Time remap": "CZABA PASS; Ableton: unconfirmed for locators",
+  "M key": "CZABA choice; Ableton: no default key listed"
+ },
+ "commitReadiness": "NOT READY: fix C-R72-01 first (medium, destructive key hits the wrong target in the normal add-then-edit flow)"
+}

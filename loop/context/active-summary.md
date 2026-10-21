@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-21T20:03:05.253Z)
+# Active loop summary (2026-10-21T20:59:28.551Z)
 
 - backlog.json 711 KB -> active view 129 KB
-- status: B_PLANNING_NEXT round 71
-- servers: `{"checkedUtc":"2026-10-21T20:03:04.0431393Z","round":72,"attempt":1,"backend":200,"store":200}`
+- status: G_ROOT_GATE round 72
+- servers: `{"checkedUtc":"2026-10-21T20:46:50.4898290Z","round":72,"attempt":1,"store":200}`
 - last publication: 1e469e59d28aebf2e2a90f3d9d6d614d4e599bd1 (rounds 71-71)
-- last root gate: round 71 published - commit 1e469e59d28aebf2e2a90f3d9d6d614d4e599bd1 pushed
+- last root gate: round 72 skipped - C taskStatus FAIL
 
 ## Current items: SRW-04, SRW-14, SRW-16
 

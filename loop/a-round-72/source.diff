@@ -1,0 +1,200 @@
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 3753103..59ece47 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -85,6 +85,7 @@ import {
+ } from './ArrangementLane';
+ import { ArrangementLibrary } from './ArrangementLibrary';
+ import { ArrangementLoopBrace } from './ArrangementLoopBrace';
++import { ArrangementMarkerRow, type ArrangementMarkerRowHandle } from './ArrangementMarkerRow';
+ import { ArrangementMaster } from './ArrangementMaster';
+ import { ArrangementOverview } from './ArrangementOverview';
+ import { ArrangementRuler } from './ArrangementRuler';
+@@ -286,6 +287,12 @@ function isLoopBraceTarget(target: EventTarget | null): boolean {
+   );
+ }
+ 
++function isMarkerTarget(target: EventTarget | null): boolean {
++  return (
++    target instanceof HTMLElement && target.closest('[data-testid="arrangement-marker"]') !== null
++  );
++}
++
+ function isSeparatorTarget(target: EventTarget | null): boolean {
+   return target instanceof HTMLElement && target.getAttribute('role') === 'separator';
+ }
+@@ -380,6 +387,7 @@ export function StudioWorkspace() {
+   const scrollerRef = useRef<HTMLDivElement>(null);
+   const timelineRef = useRef<HTMLDivElement>(null);
+   const timelineChromeRef = useRef<HTMLDivElement>(null);
++  const markerRowRef = useRef<ArrangementMarkerRowHandle>(null);
+   const marqueeCleanupRef = useRef<(() => void) | null>(null);
+   const workspaceRef = useRef(workspace);
+   workspaceRef.current = workspace;
+@@ -1339,9 +1347,12 @@ export function StudioWorkspace() {
+             key === 'd' ||
+             key === 'c' ||
+             key === 'x' ||
+-            key === 'v')) ||
++            key === 'v' ||
++            event.key === 'ArrowLeft' ||
++            event.key === 'ArrowRight')) ||
+           (!modifier &&
+-            (event.key === 'Delete' ||
++            (key === 'm' ||
++              event.key === 'Delete' ||
+               event.key === 'Backspace' ||
+               event.key === 'ArrowLeft' ||
+               event.key === 'ArrowRight' ||
+@@ -1417,9 +1428,35 @@ export function StudioWorkspace() {
+         }
+         return;
+       }
++      if (
++        event.ctrlKey &&
++        !event.metaKey &&
++        !event.altKey &&
++        !event.shiftKey &&
++        (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
++      ) {
++        if (
++          isSliderTarget(event.target) ||
++          isSeparatorTarget(event.target) ||
++          isLoopBraceTarget(event.target) ||
++          onOverview
++        ) {
++          return;
++        }
++        event.preventDefault();
++        markerRowRef.current?.stepMarker(event.key === 'ArrowLeft' ? -1 : 1);
++        return;
++      }
+       if (modifier) {
+         return;
+       }
++      if (key === 'm' && !event.altKey && !event.shiftKey) {
++        event.preventDefault();
++        if (!event.repeat) {
++          markerRowRef.current?.beginAddMarker();
++        }
++        return;
++      }
+       if (key === 'g' && !event.altKey && !event.shiftKey) {
+         event.preventDefault();
+         if (!event.repeat) {
+@@ -1454,7 +1491,7 @@ export function StudioWorkspace() {
+         return;
+       }
+       if (event.key === 'Delete' || event.key === 'Backspace') {
+-        if (isRangeInputTarget(event.target)) {
++        if (isRangeInputTarget(event.target) || isMarkerTarget(event.target)) {
+           return;
+         }
+         event.preventDefault();
+@@ -1468,7 +1505,8 @@ export function StudioWorkspace() {
+         current.selectedClipId &&
+         !isSliderTarget(event.target) &&
+         !isLoopBraceTarget(event.target) &&
+-        !isSeparatorTarget(event.target)
++        !isSeparatorTarget(event.target) &&
++        !isMarkerTarget(event.target)
+       ) {
+         event.preventDefault();
+         const direction = event.key === 'ArrowLeft' ? -1 : 1;
+@@ -1814,6 +1852,11 @@ export function StudioWorkspace() {
+                   getTimelineViewportPx={getTimelineViewportPx}
+                   subscribeTimelineScroll={subscribeTimelineScroll}
+                 />
++                <ArrangementMarkerRow
++                  ref={markerRowRef}
++                  timelineWidth={timelineWidth}
++                  pxPerSecond={pxPerSecond}
++                />
+                 <div className="flex">
+                   <div
+                     className="sticky left-0 z-30 flex h-4 shrink-0 items-center overflow-hidden whitespace-nowrap border-r border-b border-outline bg-surface px-2 text-xs text-muted"
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 9eea13d..58b24be 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -1869,8 +1869,10 @@ export function ArrangementProvider({
+     setRange(null);
+     setSelection(NO_SELECTION);
+     const loopRemoved = arrangement.loop !== null && result.arrangement.loop === null;
++    const markersRemoved =
++      (arrangement.markers?.length ?? 0) - (result.arrangement.markers?.length ?? 0);
+     setStatus(
+-      `Cut Time ${formatArrangementTime(a)} — ${formatArrangementTime(b)}: ${hasMaterial ? `${result.clipboard.items.length} ნაწილი ბუფერშია` : 'მონაკვეთში ხმა არ იყო, ბუფერი არ შეცვლილა'}; სიცარიელე დაიხურა ყველა ხაზზე.${loopRemoved ? ` ${LOOP_REMOVED_MESSAGE}` : ''}`,
++      `Cut Time ${formatArrangementTime(a)} — ${formatArrangementTime(b)}: ${hasMaterial ? `${result.clipboard.items.length} ნაწილი ბუფერშია` : 'მონაკვეთში ხმა არ იყო, ბუფერი არ შეცვლილა'}; სიცარიელე დაიხურა ყველა ხაზზე.${loopRemoved ? ` ${LOOP_REMOVED_MESSAGE}` : ''}${markersRemoved > 0 ? ` ${markersRemoved} მარკერი წაიშალა.` : ''}`,
+     );
+   }, [applyEdit, refuseEditDuringGesture, setRange, setSelection, updatePosition]);
+ 
+diff --git a/app/lib/arrangement/model.ts b/app/lib/arrangement/model.ts
+index cca89b6..2914ab0 100644
+--- a/app/lib/arrangement/model.ts
++++ b/app/lib/arrangement/model.ts
+@@ -7,6 +7,7 @@ import type {
+   ArrangementTrackKind,
+   TimeRange,
+ } from '~/types/arrangement';
++import { remapMarkersAfterDeleteTime, replaceArrangementMarkers } from './markers';
+ import { nextVideoStart } from './video';
+ 
+ export const ARRANGEMENT_EPS = 1e-4;
+@@ -407,7 +408,10 @@ export function deleteTime(arrangement: Arrangement, a: number, b: number): Arra
+     }
+     return parts.filter((part) => part.duration >= MIN_PART_DURATION);
+   });
+-  return { ...arrangement, clips, loop: remapLoopAfterDeleteTime(arrangement.loop, a, b) };
++  const next = { ...arrangement, clips, loop: remapLoopAfterDeleteTime(arrangement.loop, a, b) };
++  return arrangement.markers === undefined
++    ? next
++    : replaceArrangementMarkers(next, remapMarkersAfterDeleteTime(arrangement.markers, a, b));
+ }
+ 
+ function remapLoopAfterDeleteTime(
+diff --git a/app/types/arrangement.ts b/app/types/arrangement.ts
+index 5b50ff7..f85be20 100644
+--- a/app/types/arrangement.ts
++++ b/app/types/arrangement.ts
+@@ -31,11 +31,18 @@ export interface ArrangementMaster {
+   mute: boolean;
+ }
+ 
++export interface ArrangementMarker {
++  id: string;
++  time: number;
++  name: string;
++}
++
+ export interface Arrangement {
+   tracks: ArrangementTrack[];
+   clips: ArrangementClip[];
+   loop: ArrangementLoop | null;
+   master: ArrangementMaster;
++  markers?: ArrangementMarker[];
+ }
+ 
+ export interface TimeRange {
+diff --git a/docs/implementation/2026/quarter-IV/063-studio-lab-metronome-horizon.md b/docs/implementation/2026/quarter-IV/063-studio-lab-metronome-horizon.md
+index b32951b..fd1180f 100644
+--- a/docs/implementation/2026/quarter-IV/063-studio-lab-metronome-horizon.md
++++ b/docs/implementation/2026/quarter-IV/063-studio-lab-metronome-horizon.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — მეტრონომის კლიკები horizon-ით, loop-ის გარეშე (SRW-15, ROOT-R66-M1)
+ 
+ **თარიღი:** 2026-10-21
+-**სტატუსი:** Round 71 — D-29z36; C-ის შემოწმებას ელოდება
++**სტატუსი:** Round 71 — D-29z36; C PASS (round 71), გამოქვეყნდა 1e469e5
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -81,7 +81,7 @@ sequenceDiagram
+ - **HU1–HU8** (workspace, jsdom, fake `setInterval`/`Date`): საწყისი 4 კლიკი; 120 დარტყმა ზუსტად ერთხელ 61 წმ-ში; seek; late pump (8.0/8.5/9.0 იკარგება, 9.5-იდან გრძელდება, resync არ ხდება); Stop და გამორთვა; ტემპის ცვლილება; პროექტის ბოლო (59.5-ის კლიკი 30 ms); 999 BPM-ზე 20 seek → თითო graph ≤ 35 კლიკი.
+ - **Red run** (წყაროს ცვლილებამდე): 13 ჩავარდა / 64 გავიდა; frozen `metronome.test.ts`, `graph.test.ts`, `loop.test.ts` მწვანეა.
+ - **მუტაციები a–l** (`tmp/studio-real-loop/a-round-71/mutations.txt`): h-ის გარდა ყველა დაიჭირეს (h ექვივალენტურია). C-ის დამატებითი m დაიჭირეს; n (late margin 0) და o (`soundUntil` loop-ის შტოში) ცოცხალი დარჩა და ტესტების ხარვეზად ჩაიწერა.
+-- **Gates:** `tsc` 0; vitest 101 ფაილი / 1696 ტესტი; `npm run build` rc 0; Biome შეცვლილ ფაილებში 0 დიაგნოსტიკა. `npm run verify` სამივე მცდელობაზე ჩავარდა. პირველ ორზე მიზეზი დატვირთულ მანქანაზე სხვა ფაილების timeout-ები იყო (`pan-release-recovery`, `meter-ui`, UI5); ეს ფაილები ცალკე მწვანეა. მესამეზე ჩავარდა რეალურ დროზე დამოკიდებული `render-budget` R9-L2 (Play-ის შემდეგ პოზიცია 0.015 იყო 0-ის ნაცვლად). ეს ტესტი მეტრონომს არ რთავს; საბოლოო ხეზე 8 გაშვებიდან 1-ში ჩავარდა, baseline-ზე 5-დან 0-ში. ღია საკითხია C/root-ისთვის; საბოლოო verify root-ის gate-ია.
++- **Gates:** `tsc` 0; vitest 101 ფაილი / 1696 ტესტი; `npm run build` rc 0; Biome შეცვლილ ფაილებში 0 დიაგნოსტიკა. `npm run verify` სამივე მცდელობაზე ჩავარდა. პირველ ორზე მიზეზი დატვირთულ მანქანაზე სხვა ფაილების timeout-ები იყო (`pan-release-recovery`, `meter-ui`, UI5); ეს ფაილები ცალკე მწვანეა. მესამეზე ჩავარდა რეალურ დროზე დამოკიდებული `render-budget` R9-L2 (Play-ის შემდეგ პოზიცია 0.015 იყო 0-ის ნაცვლად). ეს ტესტი მეტრონომს არ რთავს; საბოლოო ხეზე 8 გაშვებიდან 1-ში ჩავარდა, baseline-ზე 5-დან 0-ში. ღია საკითხია C/root-ისთვის; საბოლოო verify root-ის gate-ია. root-ის საბოლოო gate-ზე `npm run verify` გავიდა (101 ფაილი / 1696 ტესტი, `gates/round-71/verify.log`).
+ - **ბრაუზერის smoke** (A, PASS არ არის): `/studio-lab`, 1440×900, Soft impact 20 წმ-ზე, BPM 40, მეტრონომი ჩართული, Space. 6 წმ-ში master meter-მა 5-ჯერ აიწია (~1.5 წმ-ში ერთხელ), `createBufferSource` +0.5 წმ-ზე 4 იყო, +5 წმ-ზე 8.
+ 
+ ## TODO / შემდეგი ნაბიჯები

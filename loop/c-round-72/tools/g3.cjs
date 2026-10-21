@@ -1,0 +1,11 @@
+const L=require('./lib.cjs');
+(async()=>{const s=await L.open('1440x900');const p=s.page;
+ await p.goto('http://127.0.0.1:5173/studio/middle-east',{waitUntil:'domcontentloaded'});await L.sleep(6000);
+ const t=await p.evaluate(()=>document.body.innerText.slice(0,400));
+ const hasStudio=await p.locator('[data-testid=arrangement-grid-control]').count();
+ console.log(JSON.stringify({url:p.url(),signIn:/sign in/i.test(t),hasWorkspace:hasStudio,t:t.slice(0,200)}));
+ await p.screenshot({path:L.OUT+'/shots/studio-middle-east-anon.png'});
+ await p.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'domcontentloaded'});await p.waitForSelector('[data-testid=arrangement-grid-control]',{timeout:60000});
+ const badge=await p.evaluate(()=>/დემო კოლექცია/.test(document.body.innerText));
+ console.log(JSON.stringify({labDirect:true,badge,auth:s.reqs.filter(r=>r.auth).length,forbidden:s.reqs.filter(r=>/\/api\/studio-token|\/api\/recording-|\/api\/download|r2\.cloudflarestorage|r2\.dev|r2-proxy|workers\.dev/.test(r.url)).length}));
+ await s.browser.close();})();

@@ -1,0 +1,1913 @@
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+new file mode 100644
+index 0000000..fd726b7
+--- /dev/null
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -0,0 +1,431 @@
++import {
++  forwardRef,
++  type KeyboardEvent,
++  useCallback,
++  useEffect,
++  useImperativeHandle,
++  useRef,
++  useState,
++} from 'react';
++import {
++  formatArrangementTime,
++  GESTURE_EDIT_BLOCKED_MESSAGE,
++  useArrangement,
++} from '~/contexts/ArrangementContext';
++import {
++  addMarker,
++  adjacentMarkerTarget,
++  arrangementMarkers,
++  deleteMarker,
++  MARKER_NAME_MAX_LENGTH,
++  markerAtTime,
++  nextDefaultMarkerName,
++  normalizeMarkerName,
++  renameMarker,
++  roundMarkerTime,
++} from '~/lib/arrangement/markers';
++import { cn } from '~/lib/utils';
++import type { ArrangementMarker } from '~/types/arrangement';
++import { ARRANGEMENT_HEADER_WIDTH_PX } from './ArrangementLane';
++
++const MARKER_LABEL_MAX_PX = 160;
++const MARKER_LABEL_GAP_PX = 4;
++const MARKER_LABEL_MIN_VISIBLE_PX = 12;
++const MARKER_ADD_FOCUS = 'add';
++const MARKER_HEADER_BUTTON_CLASS =
++  'h-4 shrink-0 rounded-sm border border-outline px-1 text-xs leading-none text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
++const MARKER_FLAG_HINT =
++  'დაწკაპუნება: გადასვლა · ორმაგი დაწკაპუნება: დაკვრა აქედან · F2: სახელის შეცვლა · Delete: წაშლა';
++
++type MarkerEditor =
++  | { kind: 'add'; session: number; time: number; draft: string; fallback: string }
++  | { kind: 'rename'; session: number; id: string; time: number; draft: string };
++
++export interface ArrangementMarkerRowHandle {
++  beginAddMarker: () => void;
++  stepMarker: (direction: -1 | 1) => void;
++}
++
++interface ArrangementMarkerRowProps {
++  timelineWidth: number;
++  pxPerSecond: number;
++}
++
++function markerLabelWidth(
++  markers: readonly ArrangementMarker[],
++  index: number,
++  pxPerSecond: number,
++): number {
++  const next = markers[index + 1];
++  if (!next) {
++    return MARKER_LABEL_MAX_PX;
++  }
++  const gap = (next.time - markers[index].time) * pxPerSecond - MARKER_LABEL_GAP_PX;
++  return Math.max(0, Math.min(MARKER_LABEL_MAX_PX, gap));
++}
++
++export const ArrangementMarkerRow = forwardRef<
++  ArrangementMarkerRowHandle,
++  ArrangementMarkerRowProps
++>(({ timelineWidth, pxPerSecond }, ref) => {
++  const {
++    arrangement,
++    range,
++    isPlaying,
++    projectEnd,
++    getArrangement,
++    getLivePosition,
++    commitArrangement,
++    seekTo,
++    togglePlayback,
++    setStatus,
++    isPointerGestureActive,
++  } = useArrangement();
++  const markers = arrangementMarkers(arrangement);
++  const [editor, setEditor] = useState<MarkerEditor | null>(null);
++  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
++  const flagRefs = useRef(new Map<string, HTMLButtonElement>());
++  const addButtonRef = useRef<HTMLButtonElement>(null);
++  const inputRef = useRef<HTMLInputElement>(null);
++  const settledRef = useRef(true);
++  const sessionRef = useRef(0);
++  const restoreFocusRef = useRef<HTMLElement | null>(null);
++  const pendingFocusRef = useRef<string | null>(null);
++
++  const focusMarkerTarget = useCallback((target: string) => {
++    const element =
++      target === MARKER_ADD_FOCUS ? addButtonRef.current : flagRefs.current.get(target);
++    if (element?.isConnected) {
++      pendingFocusRef.current = null;
++      element.focus({ preventScroll: true });
++      return;
++    }
++    pendingFocusRef.current = target;
++  }, []);
++
++  useEffect(() => {
++    const target = pendingFocusRef.current;
++    if (target !== null) {
++      pendingFocusRef.current = null;
++      const element =
++        target === MARKER_ADD_FOCUS ? addButtonRef.current : flagRefs.current.get(target);
++      element?.focus({ preventScroll: true });
++    }
++  });
++
++  const editorSession = editor?.session ?? null;
++  useEffect(() => {
++    if (editorSession === null) {
++      return;
++    }
++    const input = inputRef.current;
++    if (input) {
++      input.focus();
++      input.select();
++    }
++  }, [editorSession]);
++
++  const openEditor = useCallback((next: MarkerEditor) => {
++    const active = document.activeElement;
++    restoreFocusRef.current = active instanceof HTMLElement ? active : null;
++    settledRef.current = false;
++    sessionRef.current += 1;
++    setEditor({ ...next, session: sessionRef.current });
++  }, []);
++
++  const beginAddMarker = useCallback(() => {
++    const current = getArrangement();
++    const time = roundMarkerTime(range ? Math.min(range.start, range.end) : getLivePosition());
++    const existing = markerAtTime(current, time);
++    if (existing) {
++      setSelectedMarkerId(existing.id);
++      setStatus(`ამ დროზე მარკერი უკვე არის: «${existing.name}»`);
++      focusMarkerTarget(existing.id);
++      return;
++    }
++    const fallback = nextDefaultMarkerName(current);
++    openEditor({ kind: 'add', session: 0, time, draft: fallback, fallback });
++  }, [focusMarkerTarget, getArrangement, getLivePosition, openEditor, range, setStatus]);
++
++  const stepMarker = useCallback(
++    (direction: -1 | 1) => {
++      const target = adjacentMarkerTarget(
++        getArrangement(),
++        getLivePosition(),
++        direction,
++        projectEnd,
++      );
++      if (!target) {
++        setStatus(direction === 1 ? 'წინ მარკერი აღარ არის' : 'უკან მარკერი აღარ არის');
++        return;
++      }
++      seekTo(target.time);
++      if (target.marker) {
++        setSelectedMarkerId(target.marker.id);
++      }
++    },
++    [getArrangement, getLivePosition, projectEnd, seekTo, setStatus],
++  );
++
++  useImperativeHandle(ref, () => ({ beginAddMarker, stepMarker }), [beginAddMarker, stepMarker]);
++
++  const runUnlessGesture = (action: () => void) => {
++    if (isPointerGestureActive()) {
++      setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
++      return;
++    }
++    action();
++  };
++
++  const settleEditor = (reason: 'enter' | 'escape' | 'blur') => {
++    if (settledRef.current || !editor) {
++      return;
++    }
++    settledRef.current = true;
++    setEditor(null);
++    const moveFocus = reason !== 'blur';
++    if (reason === 'blur' && isPointerGestureActive()) {
++      setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
++      return;
++    }
++    if (editor.kind === 'add') {
++      if (reason === 'escape') {
++        setStatus('მარკერი არ დაემატა');
++        const restore = restoreFocusRef.current;
++        if (restore?.isConnected) {
++          restore.focus({ preventScroll: true });
++        }
++        return;
++      }
++      const before = getArrangement();
++      const result = addMarker(
++        before,
++        editor.time,
++        normalizeMarkerName(editor.draft, editor.fallback),
++      );
++      if (result.arrangement === null) {
++        setSelectedMarkerId(result.existing.id);
++        setStatus(`ამ დროზე მარკერი უკვე არის: «${result.existing.name}»`);
++        if (moveFocus) {
++          focusMarkerTarget(result.existing.id);
++        }
++        return;
++      }
++      commitArrangement(result.arrangement, 'Add Marker', before);
++      setSelectedMarkerId(result.marker.id);
++      setStatus(
++        `მარკერი «${result.marker.name}» დაემატა: ${formatArrangementTime(result.marker.time)}.`,
++      );
++      if (moveFocus) {
++        focusMarkerTarget(result.marker.id);
++      }
++      return;
++    }
++    const before = getArrangement();
++    const marker = arrangementMarkers(before).find((entry) => entry.id === editor.id);
++    if (!marker) {
++      return;
++    }
++    if (moveFocus) {
++      focusMarkerTarget(editor.id);
++    }
++    if (reason === 'escape') {
++      return;
++    }
++    if (editor.draft.trim().length === 0) {
++      setStatus(`სახელი ცარიელია — დარჩა «${marker.name}»`);
++      return;
++    }
++    const next = renameMarker(before, editor.id, editor.draft);
++    setSelectedMarkerId(editor.id);
++    if (next === before) {
++      return;
++    }
++    commitArrangement(next, 'Rename Marker', before);
++    const renamed = arrangementMarkers(next).find((entry) => entry.id === editor.id);
++    setStatus(`მარკერის სახელი: «${renamed?.name ?? marker.name}».`);
++  };
++
++  const removeMarker = (marker: ArrangementMarker) => {
++    const before = getArrangement();
++    const list = arrangementMarkers(before);
++    const index = list.findIndex((entry) => entry.id === marker.id);
++    if (index < 0) {
++      return;
++    }
++    const neighbour = list[index + 1] ?? list[index - 1] ?? null;
++    commitArrangement(deleteMarker(before, marker.id), 'Delete Marker', before);
++    if (selectedMarkerId === marker.id) {
++      setSelectedMarkerId(null);
++    }
++    setStatus(`მარკერი «${marker.name}» წაიშალა.`);
++    focusMarkerTarget(neighbour ? neighbour.id : MARKER_ADD_FOCUS);
++  };
++
++  const handleFlagKeyDown = (
++    event: KeyboardEvent<HTMLButtonElement>,
++    marker: ArrangementMarker,
++  ) => {
++    if (event.target !== event.currentTarget || event.ctrlKey || event.metaKey || event.altKey) {
++      return;
++    }
++    if (event.key === 'F2') {
++      event.preventDefault();
++      event.stopPropagation();
++      if (!event.repeat) {
++        openEditor({
++          kind: 'rename',
++          session: 0,
++          id: marker.id,
++          time: marker.time,
++          draft: marker.name,
++        });
++      }
++      return;
++    }
++    if (event.key === 'Delete' || event.key === 'Backspace') {
++      event.preventDefault();
++      event.stopPropagation();
++      if (!event.repeat) {
++        runUnlessGesture(() => removeMarker(marker));
++      }
++    }
++  };
++
++  const jumpToMarker = (marker: ArrangementMarker) => {
++    seekTo(marker.time);
++    setSelectedMarkerId(marker.id);
++  };
++
++  return (
++    <div className="flex h-5" data-testid="arrangement-marker-row">
++      <div
++        className="sticky left-0 z-30 flex h-5 shrink-0 items-center gap-1.5 overflow-hidden whitespace-nowrap border-r border-b border-outline bg-surface px-2 text-xs text-muted"
++        style={{ width: ARRANGEMENT_HEADER_WIDTH_PX }}
++      >
++        <span>Markers</span>
++        <button
++          ref={addButtonRef}
++          type="button"
++          onClick={() => runUnlessGesture(beginAddMarker)}
++          aria-label="Add marker (M)"
++          aria-keyshortcuts="M"
++          title="მარკერის დამატება playhead-ზე ან მონიშვნის დასაწყისში (M)"
++          className={MARKER_HEADER_BUTTON_CLASS}
++          data-testid="arrangement-marker-add"
++        >
++          +
++        </button>
++        <button
++          type="button"
++          onClick={() => runUnlessGesture(() => stepMarker(-1))}
++          aria-label="Previous marker (Ctrl+←)"
++          aria-keyshortcuts="Control+ArrowLeft"
++          title="წინა მარკერზე გადასვლა (Ctrl+←)"
++          className={MARKER_HEADER_BUTTON_CLASS}
++          data-testid="arrangement-marker-prev"
++        >
++          ◀
++        </button>
++        <button
++          type="button"
++          onClick={() => runUnlessGesture(() => stepMarker(1))}
++          aria-label="Next marker (Ctrl+→)"
++          aria-keyshortcuts="Control+ArrowRight"
++          title="შემდეგ მარკერზე გადასვლა (Ctrl+→)"
++          className={MARKER_HEADER_BUTTON_CLASS}
++          data-testid="arrangement-marker-next"
++        >
++          ▶
++        </button>
++      </div>
++      <div
++        className="relative h-5 shrink-0 border-b border-outline bg-surface"
++        style={{ width: timelineWidth }}
++        data-testid="arrangement-marker-strip"
++      >
++        {markers.map((marker, index) => {
++          const selected = marker.id === selectedMarkerId;
++          const labelWidth = markerLabelWidth(markers, index, pxPerSecond);
++          const time = formatArrangementTime(marker.time);
++          return (
++            <button
++              key={marker.id}
++              ref={(node) => {
++                if (node) {
++                  flagRefs.current.set(marker.id, node);
++                } else {
++                  flagRefs.current.delete(marker.id);
++                }
++              }}
++              type="button"
++              onClick={() => jumpToMarker(marker)}
++              onDoubleClick={() => {
++                jumpToMarker(marker);
++                if (!isPlaying) {
++                  togglePlayback();
++                }
++              }}
++              onKeyDown={(event) => handleFlagKeyDown(event, marker)}
++              aria-label={`Marker «${marker.name}» — ${time}`}
++              aria-current={selected ? 'true' : undefined}
++              title={`«${marker.name}» — ${time}\n${MARKER_FLAG_HINT}`}
++              className="group absolute top-0 flex h-5 items-center pl-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-surface"
++              style={{ left: marker.time * pxPerSecond }}
++              data-testid="arrangement-marker"
++              data-marker-id={marker.id}
++              data-marker-time={marker.time.toFixed(3)}
++            >
++              <span
++                aria-hidden="true"
++                className={cn(
++                  'pointer-events-none absolute top-0 left-0 h-full w-px',
++                  selected ? 'bg-brand' : 'bg-muted',
++                )}
++              />
++              <span
++                className={cn(
++                  'h-4 truncate rounded-sm border px-1 text-xs leading-4',
++                  selected
++                    ? 'border-brand bg-brand/20 text-brand'
++                    : 'border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20',
++                  labelWidth < MARKER_LABEL_MIN_VISIBLE_PX && 'invisible',
++                )}
++                style={{ maxWidth: labelWidth }}
++                data-marker-label=""
++              >
++                {marker.name}
++              </span>
++            </button>
++          );
++        })}
++        {editor ? (
++          <input
++            ref={inputRef}
++            type="text"
++            maxLength={MARKER_NAME_MAX_LENGTH}
++            value={editor.draft}
++            onChange={(event) => {
++              const draft = event.target.value;
++              setEditor((current) => (current ? { ...current, draft } : current));
++            }}
++            onKeyDown={(event) => {
++              if (event.key === 'Enter' || event.key === 'Escape') {
++                event.preventDefault();
++                event.stopPropagation();
++                settleEditor(event.key === 'Enter' ? 'enter' : 'escape');
++              }
++            }}
++            onBlur={() => settleEditor('blur')}
++            aria-label="მარკერის სახელი"
++            className="absolute top-0 z-10 h-5 w-40 rounded-sm border border-brand bg-background px-1 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
++            style={{ left: editor.time * pxPerSecond }}
++            data-testid="arrangement-marker-name-input"
++          />
++        ) : null}
++      </div>
++    </div>
++  );
++});
++
++ArrangementMarkerRow.displayName = 'ArrangementMarkerRow';
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 3753103..59ece47 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -85,6 +85,7 @@ import {
+ } from './ArrangementLane';
+ import { ArrangementLibrary } from './ArrangementLibrary';
+ import { ArrangementLoopBrace } from './ArrangementLoopBrace';
++import { ArrangementMarkerRow, type ArrangementMarkerRowHandle } from './ArrangementMarkerRow';
+ import { ArrangementMaster } from './ArrangementMaster';
+ import { ArrangementOverview } from './ArrangementOverview';
+ import { ArrangementRuler } from './ArrangementRuler';
+@@ -286,6 +287,12 @@ function isLoopBraceTarget(target: EventTarget | null): boolean {
+   );
+ }
+ 
++function isMarkerTarget(target: EventTarget | null): boolean {
++  return (
++    target instanceof HTMLElement && target.closest('[data-testid="arrangement-marker"]') !== null
++  );
++}
++
+ function isSeparatorTarget(target: EventTarget | null): boolean {
+   return target instanceof HTMLElement && target.getAttribute('role') === 'separator';
+ }
+@@ -380,6 +387,7 @@ export function StudioWorkspace() {
+   const scrollerRef = useRef<HTMLDivElement>(null);
+   const timelineRef = useRef<HTMLDivElement>(null);
+   const timelineChromeRef = useRef<HTMLDivElement>(null);
++  const markerRowRef = useRef<ArrangementMarkerRowHandle>(null);
+   const marqueeCleanupRef = useRef<(() => void) | null>(null);
+   const workspaceRef = useRef(workspace);
+   workspaceRef.current = workspace;
+@@ -1339,9 +1347,12 @@ export function StudioWorkspace() {
+             key === 'd' ||
+             key === 'c' ||
+             key === 'x' ||
+-            key === 'v')) ||
++            key === 'v' ||
++            event.key === 'ArrowLeft' ||
++            event.key === 'ArrowRight')) ||
+           (!modifier &&
+-            (event.key === 'Delete' ||
++            (key === 'm' ||
++              event.key === 'Delete' ||
+               event.key === 'Backspace' ||
+               event.key === 'ArrowLeft' ||
+               event.key === 'ArrowRight' ||
+@@ -1417,9 +1428,35 @@ export function StudioWorkspace() {
+         }
+         return;
+       }
++      if (
++        event.ctrlKey &&
++        !event.metaKey &&
++        !event.altKey &&
++        !event.shiftKey &&
++        (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
++      ) {
++        if (
++          isSliderTarget(event.target) ||
++          isSeparatorTarget(event.target) ||
++          isLoopBraceTarget(event.target) ||
++          onOverview
++        ) {
++          return;
++        }
++        event.preventDefault();
++        markerRowRef.current?.stepMarker(event.key === 'ArrowLeft' ? -1 : 1);
++        return;
++      }
+       if (modifier) {
+         return;
+       }
++      if (key === 'm' && !event.altKey && !event.shiftKey) {
++        event.preventDefault();
++        if (!event.repeat) {
++          markerRowRef.current?.beginAddMarker();
++        }
++        return;
++      }
+       if (key === 'g' && !event.altKey && !event.shiftKey) {
+         event.preventDefault();
+         if (!event.repeat) {
+@@ -1454,7 +1491,7 @@ export function StudioWorkspace() {
+         return;
+       }
+       if (event.key === 'Delete' || event.key === 'Backspace') {
+-        if (isRangeInputTarget(event.target)) {
++        if (isRangeInputTarget(event.target) || isMarkerTarget(event.target)) {
+           return;
+         }
+         event.preventDefault();
+@@ -1468,7 +1505,8 @@ export function StudioWorkspace() {
+         current.selectedClipId &&
+         !isSliderTarget(event.target) &&
+         !isLoopBraceTarget(event.target) &&
+-        !isSeparatorTarget(event.target)
++        !isSeparatorTarget(event.target) &&
++        !isMarkerTarget(event.target)
+       ) {
+         event.preventDefault();
+         const direction = event.key === 'ArrowLeft' ? -1 : 1;
+@@ -1814,6 +1852,11 @@ export function StudioWorkspace() {
+                   getTimelineViewportPx={getTimelineViewportPx}
+                   subscribeTimelineScroll={subscribeTimelineScroll}
+                 />
++                <ArrangementMarkerRow
++                  ref={markerRowRef}
++                  timelineWidth={timelineWidth}
++                  pxPerSecond={pxPerSecond}
++                />
+                 <div className="flex">
+                   <div
+                     className="sticky left-0 z-30 flex h-4 shrink-0 items-center overflow-hidden whitespace-nowrap border-r border-b border-outline bg-surface px-2 text-xs text-muted"
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 9eea13d..58b24be 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -1869,8 +1869,10 @@ export function ArrangementProvider({
+     setRange(null);
+     setSelection(NO_SELECTION);
+     const loopRemoved = arrangement.loop !== null && result.arrangement.loop === null;
++    const markersRemoved =
++      (arrangement.markers?.length ?? 0) - (result.arrangement.markers?.length ?? 0);
+     setStatus(
+-      `Cut Time ${formatArrangementTime(a)} — ${formatArrangementTime(b)}: ${hasMaterial ? `${result.clipboard.items.length} ნაწილი ბუფერშია` : 'მონაკვეთში ხმა არ იყო, ბუფერი არ შეცვლილა'}; სიცარიელე დაიხურა ყველა ხაზზე.${loopRemoved ? ` ${LOOP_REMOVED_MESSAGE}` : ''}`,
++      `Cut Time ${formatArrangementTime(a)} — ${formatArrangementTime(b)}: ${hasMaterial ? `${result.clipboard.items.length} ნაწილი ბუფერშია` : 'მონაკვეთში ხმა არ იყო, ბუფერი არ შეცვლილა'}; სიცარიელე დაიხურა ყველა ხაზზე.${loopRemoved ? ` ${LOOP_REMOVED_MESSAGE}` : ''}${markersRemoved > 0 ? ` ${markersRemoved} მარკერი წაიშალა.` : ''}`,
+     );
+   }, [applyEdit, refuseEditDuringGesture, setRange, setSelection, updatePosition]);
+ 
+diff --git a/app/lib/arrangement/__tests__/markers-ui.test.tsx b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+new file mode 100644
+index 0000000..af91d47
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+@@ -0,0 +1,705 @@
++import { act, fireEvent, render } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import {
++  type ArrangementContextValue,
++  ArrangementProvider,
++  GESTURE_EDIT_BLOCKED_MESSAGE,
++  useArrangement,
++} from '~/contexts/ArrangementContext';
++import type { Arrangement, ArrangementMarker, WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++const fakeClock = { base: 0 };
++const sourceCounter = { created: 0 };
++
++function fakeNow(): number {
++  return Date.now() / 1000 - fakeClock.base;
++}
++
++class FakeParam {
++  value = 0;
++  setTargetAtTime(target: number) {
++    this.value = target;
++  }
++}
++
++class FakeNode {
++  connect(destination: FakeNode) {
++    return destination;
++  }
++  disconnect() {}
++}
++
++class FakeGain extends FakeNode {
++  gain = new FakeParam();
++}
++
++class FakePanner extends FakeNode {
++  pan = new FakeParam();
++}
++
++class FakeSource extends FakeNode {
++  buffer: unknown = null;
++  onended: (() => void) | null = null;
++  start() {}
++  stop() {}
++}
++
++class FakeAudioContext {
++  state = 'running';
++  destination = new FakeNode();
++  sampleRate = 48000;
++  get currentTime() {
++    return fakeNow();
++  }
++  resume() {
++    return Promise.resolve();
++  }
++  close() {
++    return Promise.resolve();
++  }
++  createGain() {
++    return new FakeGain();
++  }
++  createStereoPanner() {
++    return new FakePanner();
++  }
++  createBufferSource() {
++    sourceCounter.created += 1;
++    return new FakeSource();
++  }
++}
++
++class FakeOfflineAudioContext {}
++
++class FakeAudioBuffer {
++  readonly length: number;
++  readonly numberOfChannels: number;
++  readonly sampleRate: number;
++  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
++    this.length = options.length;
++    this.numberOfChannels = options.numberOfChannels;
++    this.sampleRate = options.sampleRate;
++  }
++  get duration() {
++    return this.length / this.sampleRate;
++  }
++  getChannelData() {
++    return new Float32Array(this.length);
++  }
++}
++
++class FakeResizeObserver {
++  observe() {}
++  disconnect() {}
++}
++
++const markerCollection: WorkspaceCollection = {
++  id: 'markers',
++  label: 'markers',
++  origin: 'demo',
++  sources: [
++    { id: 'song', title: 'Song', collectionLabel: 'markers', kind: 'music', origin: 'demo' },
++  ],
++  loadSource: async () => new AudioBuffer({ length: 6000, numberOfChannels: 1, sampleRate: 100 }),
++};
++
++const PROJECT_END = 50;
++
++function markerArrangement(markers?: ArrangementMarker[]): Arrangement {
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'ვიდეო' },
++    { id: 'music', kind: 'audio', name: 'მუსიკა' },
++  ]);
++  const arrangement: Arrangement = {
++    ...base,
++    clips: [
++      {
++        id: 'm1',
++        trackId: 'music',
++        sourceId: 'song',
++        start: 0,
++        sourceOffset: 0,
++        duration: PROJECT_END,
++      },
++    ],
++  };
++  return markers ? { ...arrangement, markers } : arrangement;
++}
++
++const THREE_MARKERS: ArrangementMarker[] = [
++  { id: 'k12', time: 12, name: 'Intro' },
++  { id: 'k20', time: 20, name: 'Drop' },
++  { id: 'k40', time: 40, name: 'Outro' },
++];
++
++interface MarkerApiRef {
++  current: ArrangementContextValue | null;
++}
++
++function MarkerProbe({ api }: { api: MarkerApiRef }) {
++  api.current = useArrangement();
++  return null;
++}
++
++function live(api: MarkerApiRef): ArrangementContextValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++async function flushLoads() {
++  await act(async () => {
++    await Promise.resolve();
++    await Promise.resolve();
++  });
++}
++
++async function mountMarkerWorkspace(initial: Arrangement = markerArrangement()) {
++  const api: MarkerApiRef = { current: null };
++  const view = render(
++    <ArrangementProvider collection={markerCollection} initialArrangement={initial}>
++      <StudioWorkspace />
++      <MarkerProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await flushLoads();
++  return { api, view };
++}
++
++type MarkerView = ReturnType<typeof render>;
++
++function markerFlags(view: MarkerView): HTMLElement[] {
++  return view.queryAllByTestId('arrangement-marker');
++}
++
++function markerTimes(view: MarkerView): string[] {
++  return markerFlags(view).map((flag) => flag.dataset.markerTime ?? '');
++}
++
++function flagAt(view: MarkerView, time: string): HTMLElement {
++  const flag = markerFlags(view).find((entry) => entry.dataset.markerTime === time);
++  if (!flag) {
++    throw new Error(`no marker at ${time}`);
++  }
++  return flag;
++}
++
++function nameInput(view: MarkerView): HTMLInputElement {
++  const input = view.getByTestId('arrangement-marker-name-input');
++  if (!(input instanceof HTMLInputElement)) {
++    throw new Error('name input missing');
++  }
++  return input;
++}
++
++function statusText(view: MarkerView): string {
++  return view.getByTestId('arrangement-status').textContent ?? '';
++}
++
++function pressM(target: Element = document.body) {
++  fireEvent.keyDown(target, { key: 'm', code: 'KeyM' });
++}
++
++function pressCtrlArrow(direction: 'ArrowLeft' | 'ArrowRight', target: Element = document.body) {
++  fireEvent.keyDown(target, { key: direction, code: direction, ctrlKey: true });
++}
++
++function addNamedMarker(view: MarkerView, name: string) {
++  pressM();
++  const input = nameInput(view);
++  fireEvent.change(input, { target: { value: name } });
++  fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++}
++
++beforeEach(() => {
++  fakeClock.base = Date.now() / 1000;
++  sourceCounter.created = 0;
++  vi.stubGlobal('AudioContext', FakeAudioContext);
++  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++  vi.stubGlobal('requestAnimationFrame', () => 1);
++  vi.stubGlobal('cancelAnimationFrame', () => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++  vi.useRealTimers();
++  vi.unstubAllGlobals();
++  vi.restoreAllMocks();
++});
++
++describe('marker row: add, cancel and duplicates (SRW-16 stage 1)', { timeout: 15000 }, () => {
++  it('MU1: M opens a selected default name, Enter commits one Add Marker entry, Undo/Redo work', async () => {
++    const { api, view } = await mountMarkerWorkspace();
++    act(() => live(api).seekTo(12));
++    expect(view.getByTestId('arrangement-marker-add').getAttribute('aria-keyshortcuts')).toBe('M');
++    pressM();
++    const input = nameInput(view);
++    expect(document.activeElement).toBe(input);
++    expect(input.value).toBe('Marker 1');
++    expect(input.selectionStart).toBe(0);
++    expect(input.selectionEnd).toBe('Marker 1'.length);
++    expect(input.maxLength).toBe(64);
++    expect(input.getAttribute('aria-label')).toBe('მარკერის სახელი');
++    expect(live(api).arrangement.markers).toBeUndefined();
++    expect(live(api).undoLabel).toBeNull();
++    fireEvent.change(input, { target: { value: 'აქ შედის მუსიკა' } });
++    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(markerTimes(view)).toEqual(['12.000']);
++    const flag = flagAt(view, '12.000');
++    expect(flag.getAttribute('aria-label')).toContain('აქ შედის მუსიკა');
++    expect(flag.getAttribute('aria-label')).toContain('00:12.000');
++    expect(flag.getAttribute('aria-current')).toBe('true');
++    expect(flag.title).toContain('აქ შედის მუსიკა');
++    expect(document.activeElement).toBe(flag);
++    expect(statusText(view)).not.toContain('უკვე არის');
++    expect(live(api).undoLabel).toBe('Add Marker');
++    const undoButton = view.getByTitle('Undo: Add Marker');
++    expect(undoButton).toBeTruthy();
++    act(() => live(api).undo());
++    expect(live(api).undoLabel).toBeNull();
++    expect(markerFlags(view)).toHaveLength(0);
++    expect('markers' in live(api).arrangement).toBe(false);
++    fireEvent.keyDown(document.body, { key: 'z', code: 'KeyZ', ctrlKey: true });
++    fireEvent.keyDown(document.body, { key: 'y', code: 'KeyY', ctrlKey: true });
++    expect(markerTimes(view)).toEqual(['12.000']);
++    expect(live(api).undoLabel).toBe('Add Marker');
++    expect(live(api).arrangement.markers?.map((entry) => entry.name)).toEqual(['აქ შედის მუსიკა']);
++  });
++
++  it('MU2: Escape adds nothing even after the input unmounts; a blur after typing commits exactly once', async () => {
++    const { api, view } = await mountMarkerWorkspace();
++    act(() => live(api).seekTo(7));
++    const snap = view.getByTestId('arrangement-snap-toggle');
++    snap.focus();
++    pressM(snap);
++    const input = nameInput(view);
++    fireEvent.change(input, { target: { value: 'typed' } });
++    fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' });
++    fireEvent.blur(input);
++    expect(document.activeElement).toBe(snap);
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(markerFlags(view)).toHaveLength(0);
++    expect(live(api).undoLabel).toBeNull();
++    expect(statusText(view)).toBe('მარკერი არ დაემატა');
++    pressM();
++    const second = nameInput(view);
++    fireEvent.change(second, { target: { value: 'ბლური' } });
++    fireEvent.blur(second);
++    fireEvent.blur(second);
++    expect(markerTimes(view)).toEqual(['7.000']);
++    expect(live(api).undoLabel).toBe('Add Marker');
++    act(() => live(api).undo());
++    expect(live(api).undoLabel).toBeNull();
++    expect(markerFlags(view)).toHaveLength(0);
++  });
++
++  it('MU2b: Enter followed by the unmount blur commits once and shows no duplicate refusal', async () => {
++    const { api, view } = await mountMarkerWorkspace();
++    act(() => live(api).seekTo(3));
++    pressM();
++    const input = nameInput(view);
++    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++    fireEvent.blur(input);
++    expect(markerTimes(view)).toEqual(['3.000']);
++    expect(live(api).undoLabel).toBe('Add Marker');
++    act(() => live(api).undo());
++    expect(live(api).undoLabel).toBeNull();
++    expect(statusText(view)).not.toContain('უკვე არის');
++  });
++
++  it('MU3: with a time range the Add button uses the range start and keeps the range', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement([THREE_MARKERS[0]]));
++    act(() => live(api).seekTo(33));
++    act(() => live(api).setTimeRange({ start: 20, end: 25, trackId: 'music' }));
++    fireEvent.click(view.getByTestId('arrangement-marker-add'));
++    const input = nameInput(view);
++    expect(input.value).toBe('Marker 1');
++    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++    expect(markerTimes(view)).toEqual(['12.000', '20.000']);
++    expect(flagAt(view, '20.000').getAttribute('aria-label')).toContain('Marker 1');
++    expect(live(api).range).toEqual({ start: 20, end: 25, trackId: 'music' });
++  });
++
++  it('MU4: M on an existing marker time opens no editor and focuses the existing flag', async () => {
++    const { api, view } = await mountMarkerWorkspace();
++    act(() => live(api).seekTo(12));
++    addNamedMarker(view, 'აქ შედის მუსიკა');
++    act(() => live(api).seekTo(0));
++    act(() => live(api).seekTo(12.0003));
++    const undoBefore = live(api).undoLabel;
++    const arrangementBefore = live(api).arrangement;
++    (document.activeElement instanceof HTMLElement ? document.activeElement : document.body).blur();
++    pressM();
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(statusText(view)).toBe('ამ დროზე მარკერი უკვე არის: «აქ შედის მუსიკა»');
++    expect(document.activeElement).toBe(flagAt(view, '12.000'));
++    expect(flagAt(view, '12.000').getAttribute('aria-current')).toBe('true');
++    expect(live(api).arrangement).toBe(arrangementBefore);
++    expect(live(api).undoLabel).toBe(undoBefore);
++  });
++});
++
++describe('marker row: jump, play from and navigation', { timeout: 15000 }, () => {
++  it('MU5: click jumps, double-click while stopped plays from the marker, double-click while playing keeps playing', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    const flag = flagAt(view, '12.000');
++    fireEvent.click(flag);
++    expect(live(api).getLivePosition()).toBe(12);
++    expect(live(api).isPlaying).toBe(false);
++    expect(flag.getAttribute('aria-current')).toBe('true');
++    act(() => live(api).seekTo(0));
++    fireEvent.click(flag);
++    fireEvent.click(flag);
++    fireEvent.doubleClick(flag);
++    expect(live(api).isPlaying).toBe(true);
++    expect(live(api).getLivePosition()).toBeGreaterThanOrEqual(12);
++    expect(live(api).getLivePosition()).toBeLessThan(12.5);
++    const drop = flagAt(view, '20.000');
++    fireEvent.click(drop);
++    fireEvent.click(drop);
++    fireEvent.doubleClick(drop);
++    expect(live(api).isPlaying).toBe(true);
++    expect(live(api).getLivePosition()).toBeGreaterThanOrEqual(20);
++    expect(live(api).getLivePosition()).toBeLessThan(20.5);
++    act(() => live(api).togglePlayback());
++    expect(live(api).isPlaying).toBe(false);
++  });
++
++  it('MU6: Ctrl+arrows and the buttons visit markers, the end and the start, then refuse', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    expect(live(api).projectEnd).toBe(PROJECT_END);
++    act(() => live(api).seekTo(0));
++    const forward: number[] = [];
++    for (let step = 0; step < 4; step += 1) {
++      pressCtrlArrow('ArrowRight');
++      forward.push(live(api).getLivePosition());
++    }
++    expect(forward).toEqual([12, 20, 40, PROJECT_END]);
++    expect(flagAt(view, '40.000').getAttribute('aria-current')).toBe('true');
++    pressCtrlArrow('ArrowRight');
++    expect(live(api).getLivePosition()).toBe(PROJECT_END);
++    expect(statusText(view)).toBe('წინ მარკერი აღარ არის');
++    const backward: number[] = [];
++    for (let step = 0; step < 4; step += 1) {
++      pressCtrlArrow('ArrowLeft');
++      backward.push(live(api).getLivePosition());
++    }
++    expect(backward).toEqual([40, 20, 12, 0]);
++    pressCtrlArrow('ArrowLeft');
++    expect(live(api).getLivePosition()).toBe(0);
++    expect(statusText(view)).toBe('უკან მარკერი აღარ არის');
++    const next = view.getByTestId('arrangement-marker-next');
++    const prev = view.getByTestId('arrangement-marker-prev');
++    expect(next.getAttribute('aria-keyshortcuts')).toBe('Control+ArrowRight');
++    expect(prev.getAttribute('aria-keyshortcuts')).toBe('Control+ArrowLeft');
++    const buttons: number[] = [];
++    for (let step = 0; step < 4; step += 1) {
++      fireEvent.click(next);
++      buttons.push(live(api).getLivePosition());
++    }
++    fireEvent.click(next);
++    expect(statusText(view)).toBe('წინ მარკერი აღარ არის');
++    for (let step = 0; step < 4; step += 1) {
++      fireEvent.click(prev);
++      buttons.push(live(api).getLivePosition());
++    }
++    fireEvent.click(prev);
++    expect(statusText(view)).toBe('უკან მარკერი აღარ არის');
++    expect(buttons).toEqual([12, 20, 40, PROJECT_END, 40, 20, 12, 0]);
++    const tempo = view.getByTestId('arrangement-tempo-input');
++    tempo.focus();
++    pressCtrlArrow('ArrowRight', tempo);
++    expect(live(api).getLivePosition()).toBe(0);
++    tempo.blur();
++    const fader = view.container.querySelector('input[type="range"]');
++    if (!(fader instanceof HTMLInputElement)) {
++      throw new Error('fader missing');
++    }
++    fader.focus();
++    pressCtrlArrow('ArrowRight', fader);
++    expect(live(api).getLivePosition()).toBe(0);
++  });
++
++  it('MU6b: Ctrl+Right while playing jumps to the next marker and keeps playing', async () => {
++    const { api } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    act(() => live(api).seekTo(0));
++    act(() => live(api).togglePlayback());
++    expect(live(api).isPlaying).toBe(true);
++    pressCtrlArrow('ArrowRight');
++    expect(live(api).isPlaying).toBe(true);
++    expect(live(api).getLivePosition()).toBeGreaterThanOrEqual(12);
++    expect(live(api).getLivePosition()).toBeLessThan(12.5);
++    act(() => live(api).togglePlayback());
++  });
++});
++
++describe('marker row: rename and delete', { timeout: 15000 }, () => {
++  it('MU7: F2 renames, Escape cancels without a later commit, and Delete inside the input never deletes the marker', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    const drop = flagAt(view, '20.000');
++    drop.focus();
++    fireEvent.keyDown(drop, { key: 'F2', code: 'F2' });
++    let input = nameInput(view);
++    expect(input.value).toBe('Drop');
++    expect(document.activeElement).toBe(input);
++    fireEvent.change(input, { target: { value: 'რეკლამა' } });
++    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++    fireEvent.blur(input);
++    expect(live(api).undoLabel).toBe('Rename Marker');
++    expect(flagAt(view, '20.000').getAttribute('aria-label')).toContain('რეკლამა');
++    expect(document.activeElement).toBe(flagAt(view, '20.000'));
++    act(() => live(api).undo());
++    expect(live(api).undoLabel).toBeNull();
++    act(() => live(api).redo());
++    expect(live(api).undoLabel).toBe('Rename Marker');
++    act(() => live(api).undo());
++    act(() => live(api).redo());
++    const renamedArrangement = live(api).arrangement;
++    const flag = flagAt(view, '20.000');
++    flag.focus();
++    fireEvent.keyDown(flag, { key: 'F2', code: 'F2' });
++    input = nameInput(view);
++    fireEvent.change(input, { target: { value: 'თითქმის' } });
++    fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' });
++    fireEvent.blur(input);
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(live(api).arrangement).toBe(renamedArrangement);
++    expect(live(api).undoLabel).toBe('Rename Marker');
++    const again = flagAt(view, '20.000');
++    again.focus();
++    fireEvent.keyDown(again, { key: 'F2', code: 'F2' });
++    input = nameInput(view);
++    input.select();
++    fireEvent.keyDown(input, { key: 'Delete', code: 'Delete' });
++    fireEvent.keyDown(input, { key: 'Backspace', code: 'Backspace' });
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    fireEvent.change(input, { target: { value: '   ' } });
++    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    expect(live(api).arrangement).toBe(renamedArrangement);
++    expect(statusText(view)).toBe('სახელი ცარიელია — დარჩა «რეკლამა»');
++  });
++
++  it('MU8: Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a marker do not nudge', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    act(() => live(api).selectClip('m1'));
++    const outro = flagAt(view, '40.000');
++    outro.focus();
++    fireEvent.keyDown(outro, { key: 'ArrowRight', code: 'ArrowRight' });
++    fireEvent.keyDown(outro, { key: 'ArrowLeft', code: 'ArrowLeft' });
++    expect(live(api).arrangement.clips[0].start).toBe(0);
++    expect(live(api).undoLabel).toBeNull();
++    fireEvent.keyDown(outro, { key: 'Delete', code: 'Delete' });
++    expect(markerTimes(view)).toEqual(['12.000', '20.000']);
++    expect(live(api).undoLabel).toBe('Delete Marker');
++    expect(live(api).arrangement.clips).toHaveLength(1);
++    expect(live(api).arrangement.clips[0]).toMatchObject({ id: 'm1', start: 0, duration: 50 });
++    expect(live(api).selectedClipIds).toEqual(['m1']);
++    expect(document.activeElement).toBe(flagAt(view, '20.000'));
++    const drop = flagAt(view, '20.000');
++    fireEvent.keyDown(drop, { key: 'Backspace', code: 'Backspace' });
++    expect(markerTimes(view)).toEqual(['12.000']);
++    expect(document.activeElement).toBe(flagAt(view, '12.000'));
++    act(() => live(api).undo());
++    act(() => live(api).undo());
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    const markersBefore = live(api).arrangement.markers;
++    (document.activeElement instanceof HTMLElement ? document.activeElement : document.body).blur();
++    act(() => live(api).selectClip('m1'));
++    fireEvent.keyDown(document.body, { key: 'Delete', code: 'Delete' });
++    expect(live(api).arrangement.clips).toHaveLength(0);
++    expect(live(api).arrangement.markers).toEqual(markersBefore);
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++  });
++
++  it('MU8b: deleting the only marker moves focus to the Add button', async () => {
++    const { view } = await mountMarkerWorkspace(markerArrangement([THREE_MARKERS[0]]));
++    const intro = flagAt(view, '12.000');
++    intro.focus();
++    fireEvent.keyDown(intro, { key: 'Delete', code: 'Delete' });
++    expect(markerFlags(view)).toHaveLength(0);
++    expect(document.activeElement).toBe(view.getByTestId('arrangement-marker-add'));
++  });
++
++  it('MU9: Cut Time removes markers inside, shifts later ones, reports the count, and Undo restores them', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    act(() => live(api).setTimeRange({ start: 15, end: 25, trackId: 'music' }));
++    fireEvent.keyDown(document.body, { key: 'X', code: 'KeyX', ctrlKey: true, shiftKey: true });
++    expect(live(api).undoLabel).toBe('Cut Time');
++    expect(markerTimes(view)).toEqual(['12.000', '30.000']);
++    expect(statusText(view).endsWith(' 1 მარკერი წაიშალა.')).toBe(true);
++    expect(live(api).arrangement.clips.map((clip) => [clip.start, clip.duration])).toEqual([
++      [0, 15],
++      [15, 25],
++    ]);
++    act(() => live(api).undo());
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    expect(live(api).arrangement.clips).toHaveLength(1);
++    act(() => live(api).setTimeRange({ start: 42, end: 45, trackId: 'music' }));
++    fireEvent.keyDown(document.body, { key: 'X', code: 'KeyX', ctrlKey: true, shiftKey: true });
++    expect(statusText(view)).not.toContain('მარკერი წაიშალა');
++  });
++});
++
++describe('marker row: playback continuity, gestures and typing', { timeout: 15000 }, () => {
++  it('MU10: add, rename and delete while playing create no new buffer sources', async () => {
++    vi.useFakeTimers();
++    fakeClock.base = Date.now() / 1000;
++    const { api, view } = await mountMarkerWorkspace(markerArrangement([THREE_MARKERS[2]]));
++    act(() => live(api).seekTo(5));
++    act(() => live(api).togglePlayback());
++    expect(live(api).isPlaying).toBe(true);
++    const before = sourceCounter.created;
++    expect(before).toBeGreaterThan(0);
++    addNamedMarker(view, 'live');
++    expect(live(api).undoLabel).toBe('Add Marker');
++    const added = markerFlags(view).find((flag) => flag.dataset.markerTime !== '40.000');
++    if (!added) {
++      throw new Error('added marker missing');
++    }
++    fireEvent.keyDown(added, { key: 'F2', code: 'F2' });
++    const input = nameInput(view);
++    fireEvent.change(input, { target: { value: 'renamed' } });
++    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++    expect(live(api).undoLabel).toBe('Rename Marker');
++    const renamed = markerFlags(view).find((flag) => flag.dataset.markerTime !== '40.000');
++    if (!renamed) {
++      throw new Error('renamed marker missing');
++    }
++    fireEvent.keyDown(renamed, { key: 'Delete', code: 'Delete' });
++    expect(live(api).undoLabel).toBe('Delete Marker');
++    expect(live(api).isPlaying).toBe(true);
++    expect(sourceCounter.created).toBe(before);
++    act(() => live(api).togglePlayback());
++  });
++
++  it('MU11: during a pointer gesture M and Ctrl+Right are refused', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    act(() => live(api).seekTo(1));
++    let release: (() => void) | null = null;
++    act(() => {
++      release = live(api).claimPointerGesture(4, () => undefined);
++    });
++    pressM();
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(statusText(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    act(() => live(api).setStatus('ready'));
++    pressCtrlArrow('ArrowRight');
++    expect(live(api).getLivePosition()).toBe(1);
++    expect(statusText(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    act(() => live(api).setStatus('ready'));
++    fireEvent.click(view.getByTestId('arrangement-marker-add'));
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(statusText(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    act(() => live(api).setStatus('ready'));
++    fireEvent.click(view.getByTestId('arrangement-marker-next'));
++    expect(live(api).getLivePosition()).toBe(1);
++    expect(statusText(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    const intro = flagAt(view, '12.000');
++    intro.focus();
++    fireEvent.keyDown(intro, { key: 'Delete', code: 'Delete' });
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    expect(live(api).undoLabel).toBeNull();
++    act(() => {
++      const releaseGesture: (() => void) | null = release;
++      releaseGesture?.();
++    });
++    pressM();
++    expect(view.queryByTestId('arrangement-marker-name-input')).not.toBeNull();
++  });
++
++  it('MU13: a blur during a pointer gesture commits nothing and reports the refusal', async () => {
++    const { api, view } = await mountMarkerWorkspace();
++    act(() => live(api).seekTo(7));
++    pressM();
++    const input = nameInput(view);
++    fireEvent.change(input, { target: { value: 'drag' } });
++    let release: (() => void) | null = null;
++    act(() => {
++      release = live(api).claimPointerGesture(5, () => undefined);
++    });
++    fireEvent.blur(input);
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(markerFlags(view)).toHaveLength(0);
++    expect(live(api).undoLabel).toBeNull();
++    expect(statusText(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    act(() => {
++      const releaseGesture: (() => void) | null = release;
++      releaseGesture?.();
++    });
++  });
++
++  it('MU14: committing by moving focus elsewhere keeps focus where the user put it', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement([THREE_MARKERS[1]]));
++    act(() => live(api).seekTo(9));
++    pressM();
++    fireEvent.change(nameInput(view), { target: { value: 'ფოკუსი' } });
++    const search = view.getByTestId('arrangement-library-search');
++    act(() => search.focus());
++    expect(markerTimes(view)).toEqual(['9.000', '20.000']);
++    expect(live(api).undoLabel).toBe('Add Marker');
++    expect(document.activeElement).toBe(search);
++    const drop = flagAt(view, '20.000');
++    drop.focus();
++    fireEvent.keyDown(drop, { key: 'F2', code: 'F2' });
++    fireEvent.change(nameInput(view), { target: { value: 'გადარქმეული' } });
++    act(() => search.focus());
++    expect(live(api).undoLabel).toBe('Rename Marker');
++    expect(document.activeElement).toBe(search);
++  });
++
++  it('MU12: m typed into the library search stays text and opens no editor', async () => {
++    const { api, view } = await mountMarkerWorkspace();
++    const search = view.getByTestId('arrangement-library-search');
++    search.focus();
++    fireEvent.keyDown(search, { key: 'm', code: 'KeyM' });
++    fireEvent.change(search, { target: { value: 'm' } });
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(live(api).arrangement.markers).toBeUndefined();
++    expect(search instanceof HTMLInputElement ? search.value : '').toBe('m');
++    const tempo = view.getByTestId('arrangement-tempo-input');
++    tempo.focus();
++    fireEvent.keyDown(tempo, { key: 'm', code: 'KeyM' });
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++  });
++
++  it('lays labels out without overlap and keeps the flag position in the marker row', async () => {
++    const longName = 'გ'.repeat(60);
++    const { api, view } = await mountMarkerWorkspace(
++      markerArrangement([
++        { id: 'a', time: 30, name: longName },
++        { id: 'b', time: 31, name: `${longName}b` },
++      ]),
++    );
++    const pxPerSecond = live(api).pxPerSecond;
++    const [first, second] = markerFlags(view);
++    expect(first.style.left).toBe(`${30 * pxPerSecond}px`);
++    expect(second.style.left).toBe(`${31 * pxPerSecond}px`);
++    const label = first.querySelector<HTMLElement>('[data-marker-label]');
++    if (!label) {
++      throw new Error('label missing');
++    }
++    const width = Number.parseFloat(label.style.maxWidth);
++    expect(width).toBeLessThanOrEqual(Math.max(0, pxPerSecond - 4));
++    expect(width).toBeGreaterThanOrEqual(0);
++    expect(first.title).toContain(longName);
++    expect(view.getByTestId('arrangement-marker-row').className).toContain('h-5');
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/markers.test.ts b/app/lib/arrangement/__tests__/markers.test.ts
+new file mode 100644
+index 0000000..e772790
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/markers.test.ts
+@@ -0,0 +1,301 @@
++import { describe, expect, it } from 'vitest';
++import type { Arrangement, ArrangementMarker } from '~/types/arrangement';
++import {
++  addMarker,
++  adjacentMarkerTarget,
++  arrangementMarkers,
++  deleteMarker,
++  MARKER_DEFAULT_NAME_PREFIX,
++  MARKER_NAME_MAX_LENGTH,
++  markerAtTime,
++  nextDefaultMarkerName,
++  normalizeMarkerName,
++  remapMarkersAfterDeleteTime,
++  renameMarker,
++} from '../markers';
++import {
++  commitHistory,
++  createArrangement,
++  createHistory,
++  deleteTime,
++  isSameArrangement,
++  redoHistory,
++  undoHistory,
++} from '../model';
++
++function freshArrangement(): Arrangement {
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'ვიდეო' },
++    { id: 'music', kind: 'audio', name: 'მუსიკა' },
++  ]);
++  return {
++    ...base,
++    clips: [
++      { id: 'm1', trackId: 'music', sourceId: 'song', start: 0, sourceOffset: 0, duration: 50 },
++      { id: 'm2', trackId: 'music', sourceId: 'song', start: 60, sourceOffset: 0, duration: 5 },
++    ],
++    loop: { start: 8, end: 30, enabled: true },
++  };
++}
++
++function withMarkers(arrangement: Arrangement, markers: ArrangementMarker[]): Arrangement {
++  return { ...arrangement, markers };
++}
++
++function marker(id: string, time: number, name = id): ArrangementMarker {
++  return { id, time, name };
++}
++
++function addOrThrow(arrangement: Arrangement, time: number, name: string) {
++  const result = addMarker(arrangement, time, name);
++  if (result.arrangement === null) {
++    throw new Error(`marker at ${time} already exists`);
++  }
++  return { arrangement: result.arrangement, marker: result.marker };
++}
++
++function times(arrangement: Arrangement): number[] {
++  return arrangementMarkers(arrangement).map((entry) => entry.time);
++}
++
++describe('marker normal form (MK1)', () => {
++  it('reads an absent key as empty, rounds to ms, keeps the list sorted, and add+delete restores the JSON', () => {
++    const fresh = freshArrangement();
++    expect('markers' in fresh).toBe(false);
++    expect(arrangementMarkers(fresh)).toEqual([]);
++    const first = addOrThrow(fresh, 12.0004, 'Intro');
++    expect(first.marker.time).toBe(12);
++    expect(first.marker.name).toBe('Intro');
++    expect(typeof first.marker.id).toBe('string');
++    expect(first.marker.id.length).toBeGreaterThan(0);
++    expect(times(first.arrangement)).toEqual([12]);
++    expect(fresh.markers).toBeUndefined();
++    const sorted = addOrThrow(
++      addOrThrow(addOrThrow(fresh, 30, 'a').arrangement, 5, 'b').arrangement,
++      12,
++      'c',
++    );
++    expect(times(sorted.arrangement)).toEqual([5, 12, 30]);
++    const negative = addOrThrow(fresh, -3, 'neg');
++    expect(negative.marker.time).toBe(0);
++    const removed = deleteMarker(first.arrangement, first.marker.id);
++    expect('markers' in removed).toBe(false);
++    expect(isSameArrangement(fresh, removed)).toBe(true);
++    expect(JSON.stringify(removed)).toBe(JSON.stringify(fresh));
++  });
++
++  it('keeps distinct ms as distinct markers and gives every marker its own id', () => {
++    const fresh = freshArrangement();
++    const one = addOrThrow(fresh, 12, 'a');
++    const two = addOrThrow(one.arrangement, 12.0006, 'b');
++    expect(times(two.arrangement)).toEqual([12, 12.001]);
++    expect(one.marker.id).not.toBe(two.marker.id);
++  });
++});
++
++describe('duplicates (MK2)', () => {
++  it('refuses a second marker on the same ms and returns the existing one', () => {
++    const first = addOrThrow(freshArrangement(), 12, 'Intro');
++    const again = addMarker(first.arrangement, 12.0003, 'Other');
++    expect(again.arrangement).toBeNull();
++    if (again.arrangement !== null) {
++      throw new Error('expected refusal');
++    }
++    expect(again.existing).toEqual(first.marker);
++    expect(markerAtTime(first.arrangement, 12.0003)).toEqual(first.marker);
++    expect(markerAtTime(first.arrangement, 12.001)).toBeNull();
++  });
++});
++
++describe('default names (MK3)', () => {
++  it('numbers after the largest Marker N', () => {
++    const fresh = freshArrangement();
++    expect(MARKER_DEFAULT_NAME_PREFIX).toBe('Marker');
++    expect(nextDefaultMarkerName(fresh)).toBe('Marker 1');
++    const named = withMarkers(fresh, [
++      marker('a', 1, 'Marker 1'),
++      marker('b', 2, 'Marker 3'),
++      marker('c', 3, 'Intro'),
++    ]);
++    expect(nextDefaultMarkerName(named)).toBe('Marker 4');
++    expect(nextDefaultMarkerName(withMarkers(fresh, [marker('a', 1, 'Marker 07')]))).toBe(
++      'Marker 8',
++    );
++    expect(
++      nextDefaultMarkerName(
++        withMarkers(fresh, [marker('a', 1, 'Marker 2x'), marker('b', 2, 'marker 9')]),
++      ),
++    ).toBe('Marker 1');
++  });
++});
++
++describe('normalizeMarkerName (MK4)', () => {
++  it('trims, cuts to 64 code points and falls back on empty', () => {
++    expect(MARKER_NAME_MAX_LENGTH).toBe(64);
++    expect(normalizeMarkerName('  აქ შედის მუსიკა  ', 'Marker 1')).toBe('აქ შედის მუსიკა');
++    const long = 'ა'.repeat(70);
++    const cut = normalizeMarkerName(long, 'Marker 1');
++    expect(Array.from(cut)).toHaveLength(64);
++    expect(cut).toBe('ა'.repeat(64));
++    expect(normalizeMarkerName('   ', 'Marker 2')).toBe('Marker 2');
++    expect(normalizeMarkerName('', 'Marker 3')).toBe('Marker 3');
++    const emoji = '🎬'.repeat(70);
++    expect(Array.from(normalizeMarkerName(emoji, 'x'))).toHaveLength(64);
++  });
++
++  it('stores the normalized name when adding', () => {
++    const added = addOrThrow(freshArrangement(), 4, '   ');
++    expect(added.marker.name).toBe('Marker 1');
++  });
++});
++
++describe('renameMarker (MK5)', () => {
++  it('returns the same object for an unknown id or an unchanged name, and a new one otherwise', () => {
++    const base = withMarkers(freshArrangement(), [marker('a', 5, 'Intro'), marker('b', 9, 'Drop')]);
++    expect(renameMarker(base, 'missing', 'X')).toBe(base);
++    expect(renameMarker(base, 'a', 'Intro')).toBe(base);
++    expect(renameMarker(base, 'a', '  Intro  ')).toBe(base);
++    expect(renameMarker(base, 'a', '   ')).toBe(base);
++    const renamed = renameMarker(base, 'a', '  რეკლამა ');
++    expect(renamed).not.toBe(base);
++    expect(arrangementMarkers(renamed)).toEqual([
++      marker('a', 5, 'რეკლამა'),
++      marker('b', 9, 'Drop'),
++    ]);
++    expect(arrangementMarkers(base)[0].name).toBe('Intro');
++  });
++});
++
++describe('deleteMarker (MK6)', () => {
++  it('returns the same object for an unknown id and deletes the key with the last marker', () => {
++    const base = withMarkers(freshArrangement(), [marker('a', 5), marker('b', 9)]);
++    expect(deleteMarker(base, 'missing')).toBe(base);
++    const one = deleteMarker(base, 'a');
++    expect(arrangementMarkers(one)).toEqual([marker('b', 9)]);
++    const none = deleteMarker(one, 'b');
++    expect('markers' in none).toBe(false);
++    expect(none.markers).toBeUndefined();
++  });
++});
++
++describe('adjacentMarkerTarget (MK7)', () => {
++  const base = withMarkers(freshArrangement(), [marker('a', 5), marker('b', 12), marker('c', 30)]);
++  const cases: Array<[1 | -1, number, number | null, string | null]> = [
++    [1, 0, 5, 'a'],
++    [1, 5, 12, 'b'],
++    [1, 12.0004, 30, 'c'],
++    [1, 30, 40, null],
++    [-1, 12, 5, 'a'],
++    [-1, 5, 0, null],
++    [-1, 45, 30, 'c'],
++    [-1, 11.9996, 5, 'a'],
++    [1, 4.9996, 12, 'b'],
++  ];
++  it.each(cases)('direction %i from %f', (direction, from, time, id) => {
++    const target = adjacentMarkerTarget(base, from, direction, 40);
++    expect(target).not.toBeNull();
++    expect(target?.time).toBe(time);
++    expect(target?.marker?.id ?? null).toBe(id);
++  });
++
++  it('returns null when there is nothing further', () => {
++    expect(adjacentMarkerTarget(base, 40, 1, 40)).toBeNull();
++    expect(adjacentMarkerTarget(base, 45, 1, 40)).toBeNull();
++    expect(adjacentMarkerTarget(base, 39.9996, 1, 40)).toBeNull();
++    expect(adjacentMarkerTarget(base, 0, -1, 40)).toBeNull();
++    expect(adjacentMarkerTarget(base, 0.0004, -1, 40)).toBeNull();
++  });
++
++  it('falls back to the project start and end without markers', () => {
++    const empty = freshArrangement();
++    expect(adjacentMarkerTarget(empty, 3, 1, 40)).toEqual({ time: 40, marker: null });
++    expect(adjacentMarkerTarget(empty, 3, -1, 40)).toEqual({ time: 0, marker: null });
++  });
++});
++
++describe('remapMarkersAfterDeleteTime (MK8)', () => {
++  it('keeps, removes inside, shifts after, and drops a same-ms collision keeping the earlier marker', () => {
++    const markers = [
++      marker('m2', 2),
++      marker('m5', 5),
++      marker('m7', 7),
++      marker('m10', 10),
++      marker('m15', 15),
++    ];
++    const remapped = remapMarkersAfterDeleteTime(markers, 5, 10);
++    expect(remapped).toEqual([marker('m2', 2), marker('m5', 5), marker('m15', 10)]);
++    expect(markers.map((entry) => entry.time)).toEqual([2, 5, 7, 10, 15]);
++  });
++
++  it('returns an empty list when everything inside is removed', () => {
++    expect(remapMarkersAfterDeleteTime([marker('x', 0.5)], 0, 1)).toEqual([]);
++  });
++
++  it('keeps a marker exactly at a and rounds the shifted times to ms', () => {
++    const remapped = remapMarkersAfterDeleteTime([marker('a', 1), marker('b', 3.3333)], 1, 2.1111);
++    expect(remapped).toEqual([marker('a', 1), marker('b', 2.222)]);
++  });
++});
++
++describe('deleteTime with markers (MK9)', () => {
++  it('remaps markers and leaves clips and the loop exactly as without markers', () => {
++    const plain = freshArrangement();
++    const marked = withMarkers(plain, [
++      marker('m2', 2),
++      marker('m5', 5),
++      marker('m7', 7),
++      marker('m10', 10),
++      marker('m15', 15),
++    ]);
++    const expected = deleteTime(plain, 5, 10);
++    const actual = deleteTime(marked, 5, 10);
++    expect(actual.clips.map(({ id: _id, ...rest }) => rest)).toEqual(
++      expected.clips.map(({ id: _id, ...rest }) => rest),
++    );
++    expect(actual.loop).toEqual(expected.loop);
++    expect(actual.markers).toEqual([marker('m2', 2), marker('m5', 5), marker('m15', 10)]);
++    expect('markers' in expected).toBe(false);
++  });
++
++  it('deletes the key when every marker is removed and returns the input for an empty window', () => {
++    const marked = withMarkers(freshArrangement(), [marker('x', 0.5)]);
++    const cut = deleteTime(marked, 0, 1);
++    expect('markers' in cut).toBe(false);
++    expect(deleteTime(marked, 3, 3)).toBe(marked);
++  });
++});
++
++describe('history covers markers (MK10)', () => {
++  it('undo removes an added marker key, redo restores it, and the labels survive', () => {
++    const fresh = freshArrangement();
++    const added = addOrThrow(fresh, 12, 'Intro');
++    let history = commitHistory(createHistory(fresh), added.arrangement, 'Add Marker');
++    const renamed = renameMarker(history.present, added.marker.id, 'Drop');
++    history = commitHistory(history, renamed, 'Rename Marker');
++    const deleted = deleteMarker(history.present, added.marker.id);
++    history = commitHistory(history, deleted, 'Delete Marker');
++    expect(history.past.map((entry) => entry.label)).toEqual([
++      'Add Marker',
++      'Rename Marker',
++      'Delete Marker',
++    ]);
++    history = undoHistory(undoHistory(undoHistory(history)));
++    expect('markers' in history.present).toBe(false);
++    expect(isSameArrangement(history.present, fresh)).toBe(true);
++    history = redoHistory(history);
++    expect(arrangementMarkers(history.present)).toEqual([added.marker]);
++    expect(history.past.at(-1)?.label).toBe('Add Marker');
++  });
++
++  it('a rename that changes nothing commits no history entry', () => {
++    const added = addOrThrow(freshArrangement(), 12, 'Intro');
++    const history = createHistory(added.arrangement);
++    expect(
++      commitHistory(
++        history,
++        renameMarker(history.present, added.marker.id, 'Intro'),
++        'Rename Marker',
++      ),
++    ).toBe(history);
++  });
++});
+diff --git a/app/lib/arrangement/markers.ts b/app/lib/arrangement/markers.ts
+new file mode 100644
+index 0000000..2736f98
+--- /dev/null
++++ b/app/lib/arrangement/markers.ts
+@@ -0,0 +1,157 @@
++import type { Arrangement, ArrangementMarker } from '~/types/arrangement';
++
++export const MARKER_NAME_MAX_LENGTH = 64;
++export const MARKER_DEFAULT_NAME_PREFIX = 'Marker';
++export const MARKER_TIME_EPS = 0.0005;
++
++const DEFAULT_MARKER_NAME_PATTERN = /^Marker (\d+)$/;
++const NO_MARKERS: readonly ArrangementMarker[] = [];
++
++export type AddMarkerResult =
++  | { arrangement: Arrangement; marker: ArrangementMarker }
++  | { arrangement: null; existing: ArrangementMarker };
++
++export interface AdjacentMarkerTarget {
++  time: number;
++  marker: ArrangementMarker | null;
++}
++
++export function roundMarkerTime(time: number): number {
++  return Math.max(0, Math.round(time * 1000) / 1000);
++}
++
++function sortMarkersByTime(markers: readonly ArrangementMarker[]): ArrangementMarker[] {
++  return [...markers].sort((left, right) => left.time - right.time);
++}
++
++export function arrangementMarkers(arrangement: Arrangement): readonly ArrangementMarker[] {
++  return arrangement.markers ?? NO_MARKERS;
++}
++
++export function replaceArrangementMarkers(
++  arrangement: Arrangement,
++  markers: readonly ArrangementMarker[],
++): Arrangement {
++  if (markers.length === 0) {
++    const { markers: _removed, ...withoutMarkers } = arrangement;
++    return withoutMarkers;
++  }
++  return { ...arrangement, markers: [...markers] };
++}
++
++export function nextDefaultMarkerName(arrangement: Arrangement): string {
++  let largest = 0;
++  for (const marker of arrangementMarkers(arrangement)) {
++    const match = DEFAULT_MARKER_NAME_PATTERN.exec(marker.name);
++    if (match) {
++      largest = Math.max(largest, Number.parseInt(match[1], 10));
++    }
++  }
++  return `${MARKER_DEFAULT_NAME_PREFIX} ${largest + 1}`;
++}
++
++export function normalizeMarkerName(raw: string, fallback: string): string {
++  const name = Array.from(raw.trim()).slice(0, MARKER_NAME_MAX_LENGTH).join('').trimEnd();
++  return name.length > 0 ? name : fallback;
++}
++
++export function markerAtTime(arrangement: Arrangement, time: number): ArrangementMarker | null {
++  return (
++    arrangementMarkers(arrangement).find(
++      (marker) => Math.abs(marker.time - time) < MARKER_TIME_EPS,
++    ) ?? null
++  );
++}
++
++export function addMarker(arrangement: Arrangement, time: number, name: string): AddMarkerResult {
++  const at = roundMarkerTime(time);
++  const existing = markerAtTime(arrangement, at);
++  if (existing) {
++    return { arrangement: null, existing };
++  }
++  const marker: ArrangementMarker = {
++    id: crypto.randomUUID(),
++    time: at,
++    name: normalizeMarkerName(name, nextDefaultMarkerName(arrangement)),
++  };
++  return {
++    arrangement: replaceArrangementMarkers(
++      arrangement,
++      sortMarkersByTime([...arrangementMarkers(arrangement), marker]),
++    ),
++    marker,
++  };
++}
++
++export function renameMarker(arrangement: Arrangement, id: string, name: string): Arrangement {
++  const markers = arrangementMarkers(arrangement);
++  const current = markers.find((marker) => marker.id === id);
++  if (!current) {
++    return arrangement;
++  }
++  const nextName = normalizeMarkerName(name, current.name);
++  if (nextName === current.name) {
++    return arrangement;
++  }
++  return replaceArrangementMarkers(
++    arrangement,
++    markers.map((marker) => (marker.id === id ? { ...marker, name: nextName } : marker)),
++  );
++}
++
++export function deleteMarker(arrangement: Arrangement, id: string): Arrangement {
++  const markers = arrangementMarkers(arrangement);
++  const remaining = markers.filter((marker) => marker.id !== id);
++  if (remaining.length === markers.length) {
++    return arrangement;
++  }
++  return replaceArrangementMarkers(arrangement, remaining);
++}
++
++export function adjacentMarkerTarget(
++  arrangement: Arrangement,
++  position: number,
++  direction: -1 | 1,
++  end: number,
++): AdjacentMarkerTarget | null {
++  const markers = arrangementMarkers(arrangement);
++  if (direction === 1) {
++    const next = markers.find((marker) => marker.time > position + MARKER_TIME_EPS);
++    if (next) {
++      return { time: next.time, marker: next };
++    }
++    return end > position + MARKER_TIME_EPS ? { time: end, marker: null } : null;
++  }
++  for (let index = markers.length - 1; index >= 0; index -= 1) {
++    const previous = markers[index];
++    if (previous.time < position - MARKER_TIME_EPS) {
++      return { time: previous.time, marker: previous };
++    }
++  }
++  return position > MARKER_TIME_EPS ? { time: 0, marker: null } : null;
++}
++
++export function remapMarkersAfterDeleteTime(
++  markers: readonly ArrangementMarker[],
++  a: number,
++  b: number,
++): ArrangementMarker[] {
++  const length = b - a;
++  const moved = markers.flatMap((marker): ArrangementMarker[] => {
++    if (marker.time <= a + MARKER_TIME_EPS) {
++      return [marker];
++    }
++    if (marker.time >= b - MARKER_TIME_EPS) {
++      return [{ ...marker, time: roundMarkerTime(marker.time - length) }];
++    }
++    return [];
++  });
++  const result: ArrangementMarker[] = [];
++  for (const marker of sortMarkersByTime(moved)) {
++    const last = result.at(-1);
++    if (!last || Math.abs(marker.time - last.time) >= MARKER_TIME_EPS) {
++      result.push(marker);
++    }
++  }
++  return result;
++}
+diff --git a/app/lib/arrangement/model.ts b/app/lib/arrangement/model.ts
+index cca89b6..2914ab0 100644
+--- a/app/lib/arrangement/model.ts
++++ b/app/lib/arrangement/model.ts
+@@ -7,6 +7,7 @@ import type {
+   ArrangementTrackKind,
+   TimeRange,
+ } from '~/types/arrangement';
++import { remapMarkersAfterDeleteTime, replaceArrangementMarkers } from './markers';
+ import { nextVideoStart } from './video';
+ 
+ export const ARRANGEMENT_EPS = 1e-4;
+@@ -407,7 +408,10 @@ export function deleteTime(arrangement: Arrangement, a: number, b: number): Arra
+     }
+     return parts.filter((part) => part.duration >= MIN_PART_DURATION);
+   });
+-  return { ...arrangement, clips, loop: remapLoopAfterDeleteTime(arrangement.loop, a, b) };
++  const next = { ...arrangement, clips, loop: remapLoopAfterDeleteTime(arrangement.loop, a, b) };
++  return arrangement.markers === undefined
++    ? next
++    : replaceArrangementMarkers(next, remapMarkersAfterDeleteTime(arrangement.markers, a, b));
+ }
+ 
+ function remapLoopAfterDeleteTime(
+diff --git a/app/types/arrangement.ts b/app/types/arrangement.ts
+index 5b50ff7..f85be20 100644
+--- a/app/types/arrangement.ts
++++ b/app/types/arrangement.ts
+@@ -31,11 +31,18 @@ export interface ArrangementMaster {
+   mute: boolean;
+ }
+ 
++export interface ArrangementMarker {
++  id: string;
++  time: number;
++  name: string;
++}
++
+ export interface Arrangement {
+   tracks: ArrangementTrack[];
+   clips: ArrangementClip[];
+   loop: ArrangementLoop | null;
+   master: ArrangementMaster;
++  markers?: ArrangementMarker[];
+ }
+ 
+ export interface TimeRange {
+diff --git a/docs/implementation/2026/quarter-IV/063-studio-lab-metronome-horizon.md b/docs/implementation/2026/quarter-IV/063-studio-lab-metronome-horizon.md
+index b32951b..fd1180f 100644
+--- a/docs/implementation/2026/quarter-IV/063-studio-lab-metronome-horizon.md
++++ b/docs/implementation/2026/quarter-IV/063-studio-lab-metronome-horizon.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — მეტრონომის კლიკები horizon-ით, loop-ის გარეშე (SRW-15, ROOT-R66-M1)
+ 
+ **თარიღი:** 2026-10-21
+-**სტატუსი:** Round 71 — D-29z36; C-ის შემოწმებას ელოდება
++**სტატუსი:** Round 71 — D-29z36; C PASS (round 71), გამოქვეყნდა 1e469e5
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -81,7 +81,7 @@ sequenceDiagram
+ - **HU1–HU8** (workspace, jsdom, fake `setInterval`/`Date`): საწყისი 4 კლიკი; 120 დარტყმა ზუსტად ერთხელ 61 წმ-ში; seek; late pump (8.0/8.5/9.0 იკარგება, 9.5-იდან გრძელდება, resync არ ხდება); Stop და გამორთვა; ტემპის ცვლილება; პროექტის ბოლო (59.5-ის კლიკი 30 ms); 999 BPM-ზე 20 seek → თითო graph ≤ 35 კლიკი.
+ - **Red run** (წყაროს ცვლილებამდე): 13 ჩავარდა / 64 გავიდა; frozen `metronome.test.ts`, `graph.test.ts`, `loop.test.ts` მწვანეა.
+ - **მუტაციები a–l** (`tmp/studio-real-loop/a-round-71/mutations.txt`): h-ის გარდა ყველა დაიჭირეს (h ექვივალენტურია). C-ის დამატებითი m დაიჭირეს; n (late margin 0) და o (`soundUntil` loop-ის შტოში) ცოცხალი დარჩა და ტესტების ხარვეზად ჩაიწერა.
+-- **Gates:** `tsc` 0; vitest 101 ფაილი / 1696 ტესტი; `npm run build` rc 0; Biome შეცვლილ ფაილებში 0 დიაგნოსტიკა. `npm run verify` სამივე მცდელობაზე ჩავარდა. პირველ ორზე მიზეზი დატვირთულ მანქანაზე სხვა ფაილების timeout-ები იყო (`pan-release-recovery`, `meter-ui`, UI5); ეს ფაილები ცალკე მწვანეა. მესამეზე ჩავარდა რეალურ დროზე დამოკიდებული `render-budget` R9-L2 (Play-ის შემდეგ პოზიცია 0.015 იყო 0-ის ნაცვლად). ეს ტესტი მეტრონომს არ რთავს; საბოლოო ხეზე 8 გაშვებიდან 1-ში ჩავარდა, baseline-ზე 5-დან 0-ში. ღია საკითხია C/root-ისთვის; საბოლოო verify root-ის gate-ია.
++- **Gates:** `tsc` 0; vitest 101 ფაილი / 1696 ტესტი; `npm run build` rc 0; Biome შეცვლილ ფაილებში 0 დიაგნოსტიკა. `npm run verify` სამივე მცდელობაზე ჩავარდა. პირველ ორზე მიზეზი დატვირთულ მანქანაზე სხვა ფაილების timeout-ები იყო (`pan-release-recovery`, `meter-ui`, UI5); ეს ფაილები ცალკე მწვანეა. მესამეზე ჩავარდა რეალურ დროზე დამოკიდებული `render-budget` R9-L2 (Play-ის შემდეგ პოზიცია 0.015 იყო 0-ის ნაცვლად). ეს ტესტი მეტრონომს არ რთავს; საბოლოო ხეზე 8 გაშვებიდან 1-ში ჩავარდა, baseline-ზე 5-დან 0-ში. ღია საკითხია C/root-ისთვის; საბოლოო verify root-ის gate-ია. root-ის საბოლოო gate-ზე `npm run verify` გავიდა (101 ფაილი / 1696 ტესტი, `gates/round-71/verify.log`).
+ - **ბრაუზერის smoke** (A, PASS არ არის): `/studio-lab`, 1440×900, Soft impact 20 წმ-ზე, BPM 40, მეტრონომი ჩართული, Space. 6 წმ-ში master meter-მა 5-ჯერ აიწია (~1.5 წმ-ში ერთხელ), `createBufferSource` +0.5 წმ-ზე 4 იყო, +5 წმ-ზე 8.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+diff --git a/docs/implementation/2026/quarter-IV/064-studio-lab-markers.md b/docs/implementation/2026/quarter-IV/064-studio-lab-markers.md
+new file mode 100644
+index 0000000..dd9a5e0
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/064-studio-lab-markers.md
+@@ -0,0 +1,89 @@
++# Studio Lab — სახელიანი მარკერები, ეტაპი 1 (SRW-16 / FB-10)
++
++**თარიღი:** 2026-10-21
++**სტატუსი:** Round 72 — D-29z37; C-ის შემოწმებას ელოდება
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++მომხმარებელს (FB-10, `transcripts/2.srt` 01:28–02:12) გრძელ პროექტში სახელიანი ნიშნულები სჭირდება, მაგალითად „აქ შედის მუსიკა“. მათგან უნდა შეეძლოს დაკვრის დაწყება და მათ შორის გადასვლა. ნიშნულები ზემოთ უნდა ჩანდეს, რომ ბევრი ხაზის და ვიდეოს მონტაჟისას ორიენტაცია არ დაკარგოს. Ableton-ში ამას locator ჰქვია (Live 12 manual, §6.4).
++
++SRW-16 ორ ეტაპად იყოფა. ეს დოკუმენტი პირველ ეტაპს აღწერს: მონაცემთა მოდელი, დამატება სახელით, ჩვენება, გადასვლა, დაკვრა მარკერიდან, წინა/შემდეგი, სახელის შეცვლა, წაშლა, Undo/Redo და Cut Time-ის remap.
++
++## მიდგომა
++
++- **მარკერები `Arrangement`-ის ნაწილია** (`markers?`, არასავალდებულო ველი). ამიტომ Undo/Redo, `isSameArrangement` და `commitHistory` მათ ახალი history კოდის გარეშე ფარავს. ველი არასავალდებულოა, რომ Studio-ს გარეთ არსებული `Arrangement`-ის literal-ები (SFX scene, free downloads) და ძველი ტესტები არ დაზიანდეს.
++- **Normal form:** სია დროით დალაგებულია, ერთ მილიწამზე მაქსიმუმ ერთი მარკერია, დრო ms-ზე მრგვალდება და ≥ 0-ია, სახელი trim-ირებულია და 1–64 code point-ია. ბოლო მარკერის წაშლისას გასაღები იშლება და `[]` არასოდეს რჩება. ამის გამო მარკერის დამატება+წაშლა პროექტის JSON-ს ზუსტად აღადგენს.
++- **აუდიოს resync არ ხდება.** `scheduleKey` კვლავ `[clips, loop]`-ია, ამიტომ მარკერის ცვლილება დაკვრას არ წყვეტს და graph-ს თავიდან არ აგებს. ექსპორტი მარკერებს არ იყენებს.
++- **სუფთა ლოგიკა ცალკე ფაილშია** (`markers.ts`). ის React-ს და `model.ts`-ს არ იმპორტებს, რაც import cycle-ს გამორიცხავს. `model.ts`-ის `deleteTime` მას იყენებს.
++- **ცალკე რიგი timeline chrome-ში**, ტემპის რიგსა და Loop რიგს შორის. ruler ხელშეუხებელი დარჩა, რომ მისი double-click Fit-ის ქცევა არ დაზიანდეს. რიგი sticky-ა, ამიტომ ხაზების ვერტიკალური scroll-ისას ზემოთ რჩება.
++- **Wiring:** `ArrangementMarkerRow` არის `forwardRef` კომპონენტი, რომელიც `useImperativeHandle`-ით `{ beginAddMarker, stepMarker }`-ს აჩენს. `StudioWorkspace` მხოლოდ კლავიშებს გადასცემს. ასე workspace-ის ცვლილება მცირეა.
++- **ვიზუალი** (design-philosopher-ის რჩევით): მარკერი ნეიტრალურია (`bg-muted` ხაზი, `bg-foreground/10` ტეგი). არჩეული მარკერი `brand`-ია. `accent` რიგში არ გამოიყენება, რადგან playhead-ი და Loop უკვე accent-ია.
++
++### Ableton-თან მიმართება (Live 12 manual, §6.4, §6.9, §6.11; B-ის 2026-10-21 capture)
++
++| ქცევა | CZABA |
++|---|---|
++| დამატება insert marker-ზე ან მონიშვნის დასაწყისში | იგივე: position ან `range.start` |
++| დამატება დაკვრისას | live position-ზე, quantization-ის გარეშე (შეგნებული განსხვავება) |
++| სახელი შექმნისას | CZABA-ს არჩევანი (editor მაშინვე იხსნება); Ableton-ში ეს არ წერია |
++| click / double-click | იგივე: გადასვლა / გაჩერებულისას დაკვრა |
++| Ctrl+←/→ | მხოლოდ მარკერებზე, 0-ზე და ბოლოზე; კლიპის კიდეები მე-2 ეტაპშია. ღილაკები დაკვრას არ იწყებენ (D-15) |
++| სახელის შეცვლა | F2 (Ctrl+R ბრაუზერის reload-ია) — შეგნებული განსხვავება |
++| Delete Time | შიგნით მოხვედრილი მარკერი იშლება, შემდეგი გადაიწევს; Ableton-თან თანხვედრა დაუდასტურებელია |
++
++## არქიტექტურა
++
++```mermaid
++flowchart LR
++  K[window keydown<br/>StudioWorkspace] -- M --> H[ArrangementMarkerRow handle<br/>beginAddMarker]
++  K -- Ctrl+←/→ --> S[stepMarker]
++  B[Markers ღილაკები] --> H
++  B --> S
++  H --> E[name editor<br/>Enter / Escape / blur — ერთხელ]
++  E -- Add Marker --> C[commitArrangement]
++  F[მარკერის flag<br/>click / dblclick / F2 / Delete] --> C
++  F --> P[seekTo / togglePlayback]
++  S --> P
++  C --> HI[history: Undo/Redo]
++  C -.scheduleKey უცვლელია.-> NA[აუდიოს resync არ ხდება]
++  X[Ctrl+Shift+X Cut Time] --> D[deleteTime → remapMarkersAfterDeleteTime]
++```
++
++## შეცვლილი ფაილები
++
++- `app/types/arrangement.ts` — `ArrangementMarker` და არასავალდებულო `markers?`.
++- `app/lib/arrangement/markers.ts` (ახალი) — normal form, ნაგულისხმევი სახელი `Marker N`, დამატება/სახელის შეცვლა/წაშლა, წინა/შემდეგი სამიზნე, Delete Time-ის remap.
++- `app/lib/arrangement/model.ts` — `deleteTime` მარკერებსაც remap-ავს; სხვა ქცევა უცვლელია.
++- `app/contexts/ArrangementContext.tsx` — Cut Time-ის სტატუსს ემატება „N მარკერი წაიშალა.“.
++- `app/components/arrangement/ArrangementMarkerRow.tsx` (ახალი) — Markers რიგი: header-ის ღილაკები (+ ◀ ▶), flag-ები, სახელის editor.
++- `app/components/arrangement/StudioWorkspace.tsx` — რიგის ჩასმა chrome-ში; M და Ctrl+←/→; ორივე drag-ის დროს უარყოფილია; Delete და ისრით კლიპის გადაწევა მარკერზე ფოკუსისას არ მუშაობს.
++- `app/lib/arrangement/__tests__/markers.test.ts`, `markers-ui.test.tsx` (ახალი) — MK1–MK10, MU1–MU12.
++
++## პრობლემები და გადაწყვეტები
++
++- **Enter-ის შემდეგ blur-მა შეიძლება მეორედ დაამატოს.** → editor ერთხელ წყდება (`settledRef`). პირველი Enter, Escape ან blur წყვეტს, შემდეგი არაფერს აკეთებს. Escape-ის შემდეგ ფოკუსი წინა ელემენტს უბრუნდება და input-ის სინქრონული blur-ი არაფერს ამატებს.
++- **Delete სახელის input-ში მარკერს არ უნდა შლიდეს.** → input მარკერის ღილაკის შიგნით კი არა, მის გვერდით დგას. window handler typing target-ს უგულებელყოფს. ამიტომ მუტაცია (m) ექვივალენტურია.
++- **მარკერზე Delete-მა არჩეული კლიპი არ უნდა წაშალოს.** → flag-ი კლავიშს თვითონ ამუშავებს და `stopPropagation`-ს აკეთებს. window-ის Delete-ის და ისრის შტოები `isMarkerTarget`-ს გამორიცხავს.
++- **drag-ის დროს რედაქტირება.** → M და Ctrl+←/→ window-ის უარყოფის სიაშია (`GESTURE_EDIT_BLOCKED_MESSAGE`). ღილაკებს და flag-ის Delete-ს თავისი შემოწმება აქვს, რადგან ისინი window-ის სიას არ გადიან.
++- **Blur drag-ის დაწყებისას.** კლიპზე დაჭერა input-ს blur-ს უკეთებს, gesture-ის `before` snapshot-ი კი მარკერს გადაფარავდა. Undo-ში ცარიელი `Add Marker` რჩებოდა (code-review #1). → blur აქტიური gesture-ის დროს არაფერს ინახავს და `GESTURE_EDIT_BLOCKED_MESSAGE`-ს აჩვენებს (MU13).
++- **Blur-ის შემდეგ ფოკუსი flag-ზე ბრუნდებოდა** (code-review #2). → ფოკუსი მხოლოდ Enter-ზე და Escape-ზე გადადის. blur-ისას ის იქ რჩება, სადაც მომხმარებელმა გადაიტანა (MU14). ორივე R6-ის ტექსტიდან გადახვევაა და B-მ უნდა დაადასტუროს.
++- **ES2022 lib-ში `findLast` არ არის.** → წინა მარკერი უკუღმა ციკლით იძებნება.
++
++## ტესტირება
++
++- **Red run** (წყაროს ცვლილებამდე): `markers.test.ts` — მოდული არ არსებობს; `markers-ui.test.tsx` — 15 ჩავარდა / 1 გავიდა. MU12 typing-ის დაცვის ტესტია და baseline-ზეც მწვანეა.
++- **ახალი ტესტები:** 26 pure + 18 UI. ასევე 44 ფაილი / 835 ტესტი, რომლებიც `StudioWorkspace`-ს ან `ArrangementContext`-ს ეხება — ყველა მწვანეა.
++- **მუტაციები** (`tmp/studio-real-loop/a-round-72/mutations.txt`): a–l და n დაიჭირეს, ასევე o, p, q და review-ის შემდეგ დამატებული r, s. m ექვივალენტურია (input მარკერის გვერდით დგას).
++- **Gates (A):** `tsc` 0; Biome შეცვლილ ფაილებში 0 დიაგნოსტიკა, `./app` 0 error / 218 warning / 1 info. სრული vitest და `npm run verify` root-ის gate-ია (speed rules, 2026-10-21).
++- **ბრაუზერის smoke** (A, PASS არ არის): `/studio-lab`, 1440×900. Middle East 0-ზე; ruler-ზე click 12 წმ-ზე; M; „აქ შედის მუსიკა“; Enter. flag-ი 12 წმ-ის tick-ზეა (480 px, 40 px/წმ). Undo-ს სათაურია `Add Marker`. დაჭერისას 12.000. double-click-იდან 1 წმ-ში პოზიცია 12.972 იყო. დაკვრისას M-მა `createBufferSource` 0-ჯერ გამოიძახა. Ctrl+→ ×4: 12 → 12.98 → ბოლო → სტატუსი. აკრძალული მოთხოვნა 0, hydration warning 0.
++
++## TODO / შემდეგი ნაბიჯები
++
++- **SRW-16 ეტაპი 2** (შემდეგი რაუნდი):
++  - მარკერის გადაადგილება drag-ითა და ისრებით, snap-ით;
++  - მარჯვენა click-ის მენიუ (Rename, Delete, Play from here) — სახელის შეცვლის mouse-გზა;
++  - კლიპების, მონიშვნისა და playhead-ის snap მარკერებზე (Live 6.7, SRW-14-ის გაგრძელება);
++  - Ctrl+←/→ კლიპის კიდეებზეც.
++- C-ის ბრაუზერის შემოწმება (§4.6–§4.8) და Ableton-ის ორი ვერდიქტი თითო ქცევაზე.
++- workspace-ის ქვედა shortcut-ის ზოლში M და Ctrl+←/→ ჯერ არ წერია (ამ რაუნდში `StudioWorkspace`-ის ცვლილება §2.1-ის wiring-ით შემოიფარგლა).

@@ -1217,6 +1217,15 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z38 — Round 72-ის შედეგი; Round 73: C-R72-01 (SRW-16 ეტაპი 1-ის ბაგი).**
+
+C round 72 (`tmp/studio-real-loop/c-round-72.md`, `c-round-72.json`) — **FAIL, `browserVerified: false`**, ერთი საშუალო ბაგი. დანარჩენი ეტაპი 1-ის სტრიქონები (დამატება, jump, play-from, prev/next, rename, Cut Time remap, layout, export, regression) რეალურ ბრაუზერში ორივე viewport-ზე PASS. Root gate 72 გამოტოვებულია (C FAIL), ამიტომ round 72-ის 10 ფაილი დაუკომიტებელია და ინახება.
+
+- **C-R72-01:** marker-ის დამატების შემდეგ focus flag-ზე რჩება; კლიპზე click (`preventDefault`) focus-ს არ ცვლის, ამიტომ Delete/→ marker-ს ეხება. მიზეზი: `releaseEditFocusOnTimelinePointerDown`-ს marker-ის პუნქტი არ აქვს (loop brace-ს აქვს).
+- **გადაწყვეტილება:** მინიმალური fix — ერთი პუნქტი იმავე ფუნქციაში (`isMarkerTarget(focused) && !isMarkerTarget(event.target)` → blur). ტესტები MU8c–MU8e; mutation h-ის გადაწყვეტილება (ტესტი ან დოკუმენტირებული defense-in-depth). Round 73 = მხოლოდ ეს ბაგი (ერთი owner, 3 ფაილი).
+- **მიღებულია:** A-ს ორი გადახრა (blur ჟესტის დროს არ ადასტურებს; blur focus-ს არ ამოძრავებს) — უმცირესი პატიოსანი ქცევა, C-მ დაადასტურა. ROW-RANGE-M (`M` range.start-ზე ხაზზე click-ის შემდეგაც) — R6 უცვლელი, სიგნალია ეტაპი 2-ისთვის. Ableton: focus-ის გადაცემა CZABA-ს მოდელია, პარიტეტი არ მოითხოვება.
+- **შემდეგ:** Round 74 — SRW-16 ეტაპი 2 (გადატანა, მენიუ, snap მარკერებზე, Ctrl+←/→ კლიპის კიდეებზე), შემდეგ SRW-17…SRW-20.
+
 **D-29z37 — Round 71-ის შედეგი; Round 72: SRW-16 (FB-10) სახელიანი მარკერები, ეტაპი 1.**
 
 C round 71 (`tmp/studio-real-loop/c-round-71.md`, `c-round-71.json`) — **PASS, `browserVerified: true`**, ბაგები არ არის: MH-NODES* ≤ 120 (ადრე ≈ 2200), MH-SCRUB-PERF, MT-BEATS*, MH-LONG, MH-END, MH-SCRUB. Root-მა გამოაქვეყნა `1e469e5` (ორივე remote, `gates/gate-round-71.json`; review 9/10, ყველა Low). ROOT-R66-M1, DOC-059-STATUS-LINE და ROOT-R70-L6 დაიხურა. Root-ის L1 (doc 063-ის სტატუსი და verify-ის წინადადება) — Round 72; L2/L3 — Low-ების ჯგუფი; L4 — დაკვირვება. Architecture note (მეორე refill pipeline) — ARCH-CHECKPOINT-SRW14-PREFS-ის მერვე თხოვნა.
