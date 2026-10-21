@@ -1,0 +1,324 @@
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 961c1b3..9eea13d 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -56,7 +56,13 @@ import {
+   stepMeter,
+   type TrackMeterStore,
+ } from '~/lib/arrangement/meter';
+-import { generateMetronomeClickSamples, planMetronomeClicks } from '~/lib/arrangement/metronome';
++import {
++  generateMetronomeClickSamples,
++  METRONOME_SCHEDULE_HORIZON_SECONDS,
++  type MetronomeHorizonState,
++  nextMetronomeChunk,
++  planMetronomeClicks,
++} from '~/lib/arrangement/metronome';
+ import {
+   ARRANGEMENT_EPS,
+   type ArrangementHistory,
+@@ -506,6 +512,7 @@ export function ArrangementProvider({
+   const handleRef = useRef<ScheduleHandle | null>(null);
+   const metronomeBpmRef = useRef<number | null>(null);
+   const metronomeBuffersRef = useRef<{ accent: AudioBuffer; beat: AudioBuffer } | null>(null);
++  const metronomeHorizonRef = useRef<MetronomeHorizonState | null>(null);
+   const retiredRef = useRef<RetiredGraph[]>([]);
+   const anchorRef = useRef<PlaybackAnchor>(createPlaybackAnchor(0, 0));
+   const scrubbingRef = useRef(false);
+@@ -681,6 +688,32 @@ export function ArrangementProvider({
+     return result === 'late';
+   }, []);
+ 
++  const fillMetronomeHorizon = useCallback(() => {
++    const ctx = audioContextRef.current;
++    const handle = handleRef.current;
++    const state = metronomeHorizonRef.current;
++    if (!ctx || !handle || !state) {
++      return;
++    }
++    for (;;) {
++      const chunk = nextMetronomeChunk(
++        state,
++        ctx.currentTime,
++        METRONOME_SCHEDULE_HORIZON_SECONDS,
++        LOOP_LATE_MARGIN,
++      );
++      if (!chunk) {
++        return;
++      }
++      handle.appendClicks(
++        planMetronomeClicks(state.bpm, chunk.from, chunk.until, state.end),
++        state.from,
++        state.startAt,
++      );
++      state.nextFrom = chunk.until;
++    }
++  }, []);
++
+   const releaseRetiredGraphs = useCallback((all: boolean) => {
+     const now = audioContextRef.current?.currentTime ?? 0;
+     retiredRef.current = retiredRef.current.filter((entry) => {
+@@ -698,6 +731,7 @@ export function ArrangementProvider({
+       handleRef.current.disconnect();
+       handleRef.current = null;
+     }
++    metronomeHorizonRef.current = null;
+     loopScheduleRef.current = null;
+     for (const entry of retiredRef.current) {
+       entry.handle.stop();
+@@ -720,6 +754,8 @@ export function ArrangementProvider({
+         : planSchedule(arrangement, from);
+       const panOverride = panOverrideRef.current;
+       const metronomeBpm = metronomeBpmRef.current;
++      const end = projectEnd(arrangement);
++      const horizonUntil = Math.min(end, from + METRONOME_SCHEDULE_HORIZON_SECONDS);
+       let clickBuffers = metronomeBuffersRef.current;
+       if (metronomeBpm !== null && !clickBuffers) {
+         const createClickBuffer = (accent: boolean): AudioBuffer => {
+@@ -754,11 +790,9 @@ export function ArrangementProvider({
+           metronomeBpm !== null && clickBuffers
+             ? {
+                 ...clickBuffers,
+-                clicks: planMetronomeClicks(
+-                  metronomeBpm,
+-                  from,
+-                  loop ? loop.end : projectEnd(arrangement),
+-                ),
++                clicks: loop
++                  ? planMetronomeClicks(metronomeBpm, from, loop.end)
++                  : planMetronomeClicks(metronomeBpm, from, horizonUntil, end),
+               }
+             : undefined,
+       });
+@@ -771,14 +805,19 @@ export function ArrangementProvider({
+         retiredRef.current.push({ handle: previous, stopAt });
+       }
+       handleRef.current = handle;
++      metronomeHorizonRef.current =
++        metronomeBpm !== null && clickBuffers && !loop
++          ? { bpm: metronomeBpm, from, startAt, end, nextFrom: horizonUntil }
++          : null;
+       anchorRef.current = anchor;
+       loopScheduleRef.current = params ? { params, arrangement, nextIteration: 1 } : null;
+       scheduledKeyRef.current = scheduleKey(arrangement);
+       scheduledEndRef.current = projectEnd(arrangement);
+       fillLoopIterations();
++      fillMetronomeHorizon();
+       releaseRetiredGraphs(false);
+     },
+-    [fillLoopIterations, releaseRetiredGraphs],
++    [fillLoopIterations, fillMetronomeHorizon, releaseRetiredGraphs],
+   );
+ 
+   const stopPlayback = useCallback(
+@@ -869,8 +908,9 @@ export function ArrangementProvider({
+     if (fillLoopIterations()) {
+       resyncLoopRef.current();
+     }
++    fillMetronomeHorizon();
+     releaseRetiredGraphs(false);
+-  }, [fillLoopIterations, releaseRetiredGraphs]);
++  }, [fillLoopIterations, fillMetronomeHorizon, releaseRetiredGraphs]);
+ 
+   const tick = useCallback(() => {
+     if (!isPlayingRef.current) {
+diff --git a/app/lib/arrangement/__tests__/metronome-ui.test.tsx b/app/lib/arrangement/__tests__/metronome-ui.test.tsx
+index 5a1e44f..9def865 100644
+--- a/app/lib/arrangement/__tests__/metronome-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/metronome-ui.test.tsx
+@@ -16,6 +16,7 @@ import {
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import {
+   METRONOME_NEEDS_TEMPO_TITLE,
++  METRONOME_SCHEDULE_HORIZON_SECONDS,
+   METRONOME_TITLE,
+   metronomeStatusMessage,
+   planMetronomeClicks,
+@@ -307,11 +308,16 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+     play(api);
+     const options = lastScheduleOptions();
+     expect(options.from).toBe(0);
+-    const expected = planMetronomeClicks(120, 0, PROJECT_END);
+-    expect(expected).toHaveLength(16);
++    const expected = planMetronomeClicks(
++      120,
++      0,
++      Math.min(PROJECT_END, METRONOME_SCHEDULE_HORIZON_SECONDS),
++      PROJECT_END,
++    );
++    expect(expected).toHaveLength(4);
+     expect(options.metronome?.clicks).toEqual(expected);
+     const clickStarts = startedSources.filter((source) => isClickBuffer(source.buffer));
+-    expect(clickStarts).toHaveLength(16);
++    expect(clickStarts).toHaveLength(4);
+     expect(clickStarts[0].starts[0][0]).toBeCloseTo(options.startAt, 9);
+     expect(clickStarts[1].starts[0][0]).toBeCloseTo(options.startAt + 0.5, 9);
+   });
+@@ -346,7 +352,14 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+     expect(applyScheduleMock.mock.calls.length).toBe(before + 1);
+     const options = lastScheduleOptions();
+     expect(options.from).toBeGreaterThanOrEqual(3.2 - 1e-9);
+-    expect(options.metronome?.clicks).toEqual(planMetronomeClicks(120, options.from, PROJECT_END));
++    expect(options.metronome?.clicks).toEqual(
++      planMetronomeClicks(
++        120,
++        options.from,
++        Math.min(PROJECT_END, options.from + METRONOME_SCHEDULE_HORIZON_SECONDS),
++        PROJECT_END,
++      ),
++    );
+     expect(options.metronome?.clicks[0].when).toBeGreaterThanOrEqual(options.from);
+   });
+ 
+@@ -359,7 +372,14 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+     commitTempo(view, '60');
+     expect(applyScheduleMock.mock.calls.length).toBe(before + 1);
+     const options = lastScheduleOptions();
+-    expect(options.metronome?.clicks).toEqual(planMetronomeClicks(60, options.from, PROJECT_END));
++    expect(options.metronome?.clicks).toEqual(
++      planMetronomeClicks(
++        60,
++        options.from,
++        Math.min(PROJECT_END, options.from + METRONOME_SCHEDULE_HORIZON_SECONDS),
++        PROJECT_END,
++      ),
++    );
+     expect(statusText(view)).toBe(tempoStatusMessage(60));
+     expect(metronomeToggle(view).getAttribute('aria-pressed')).toBe('true');
+   });
+@@ -462,7 +482,12 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+     expect(live(api).isPlaying).toBe(true);
+     expect(toggle.getAttribute('aria-pressed')).toBe('true');
+     expect(lastScheduleOptions().metronome?.clicks).toEqual(
+-      planMetronomeClicks(120, 0, PROJECT_END),
++      planMetronomeClicks(
++        120,
++        0,
++        Math.min(PROJECT_END, METRONOME_SCHEDULE_HORIZON_SECONDS),
++        PROJECT_END,
++      ),
+     );
+   });
+ });
+diff --git a/app/lib/arrangement/metronome.ts b/app/lib/arrangement/metronome.ts
+index 95a3657..1990631 100644
+--- a/app/lib/arrangement/metronome.ts
++++ b/app/lib/arrangement/metronome.ts
+@@ -6,6 +6,7 @@ export const METRONOME_ACCENT_FREQUENCY_HZ = 1600;
+ export const METRONOME_BEAT_FREQUENCY_HZ = 1000;
+ export const METRONOME_ACCENT_PEAK = 0.5;
+ export const METRONOME_BEAT_PEAK = 0.25;
++export const METRONOME_SCHEDULE_HORIZON_SECONDS = 2;
+ export const METRONOME_NEEDS_TEMPO_TITLE = 'მეტრონომი — ჯერ მიუთითე BPM';
+ export const METRONOME_TITLE = `მეტრონომი — კლიკი ყოველ დარტყმაზე დაკვრისას (${TEMPO_BEATS_PER_BAR}/4, ტაქტის პირველი დარტყმა უფრო ხმამაღლა). Master-ის ხმა და Mute მასზეც მოქმედებს. ექსპორტში არ შედის.`;
+ 
+@@ -19,7 +20,20 @@ export interface MetronomeClick {
+   accent: boolean;
+ }
+ 
+-export function planMetronomeClicks(bpm: number, from: number, until: number): MetronomeClick[] {
++export interface MetronomeHorizonState {
++  bpm: number;
++  from: number;
++  startAt: number;
++  end: number;
++  nextFrom: number;
++}
++
++export function planMetronomeClicks(
++  bpm: number,
++  from: number,
++  until: number,
++  soundUntil?: number,
++): MetronomeClick[] {
+   if (
+     !Number.isFinite(bpm) ||
+     bpm <= 0 ||
+@@ -29,6 +43,10 @@ export function planMetronomeClicks(bpm: number, from: number, until: number): M
+   ) {
+     return [];
+   }
++  const soundEnd =
++    soundUntil !== undefined && Number.isFinite(soundUntil) && soundUntil >= until
++      ? soundUntil
++      : until;
+   const clicks: MetronomeClick[] = [];
+   let k = Math.max(0, Math.floor((from * bpm) / SECONDS_PER_MINUTE) - 1);
+   let time = (k * SECONDS_PER_MINUTE) / bpm;
+@@ -39,7 +57,7 @@ export function planMetronomeClicks(bpm: number, from: number, until: number): M
+       clicks.push({
+         when,
+         offset,
+-        duration: Math.min(METRONOME_CLICK_SECONDS - offset, until - when),
++        duration: Math.min(METRONOME_CLICK_SECONDS - offset, soundEnd - when),
+         accent: k % TEMPO_BEATS_PER_BAR === 0,
+       });
+     }
+@@ -49,6 +67,33 @@ export function planMetronomeClicks(bpm: number, from: number, until: number): M
+   return clicks;
+ }
+ 
++export function nextMetronomeChunk(
++  state: MetronomeHorizonState,
++  now: number,
++  horizon: number,
++  lateMargin: number,
++): { from: number; until: number } | null {
++  if (
++    !Number.isFinite(state.from) ||
++    !Number.isFinite(state.startAt) ||
++    !Number.isFinite(state.end) ||
++    !Number.isFinite(state.nextFrom) ||
++    state.nextFrom >= state.end - ARRANGEMENT_EPS
++  ) {
++    return null;
++  }
++  const chunkCtx = state.startAt + (state.nextFrom - state.from);
++  if (chunkCtx > now + horizon) {
++    return null;
++  }
++  const from =
++    chunkCtx < now + lateMargin ? state.from + (now + lateMargin - state.startAt) : state.nextFrom;
++  if (from >= state.end - ARRANGEMENT_EPS) {
++    return null;
++  }
++  return { from, until: Math.min(state.end, from + horizon) };
++}
++
+ export function generateMetronomeClickSamples(
+   sampleRate: number,
+   accent: boolean,
+diff --git a/docs/implementation/2026/quarter-IV/059-studio-lab-metronome.md b/docs/implementation/2026/quarter-IV/059-studio-lab-metronome.md
+index 3cfae36..1f90f77 100644
+--- a/docs/implementation/2026/quarter-IV/059-studio-lab-metronome.md
++++ b/docs/implementation/2026/quarter-IV/059-studio-lab-metronome.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — მეტრონომი (SRW-15, ეტაპი 2)
+ 
+ **თარიღი:** 2026-10-20
+-**სტატუსი:** Round 66 — D-29z31; C-ის შემოწმებას ელოდება
++**სტატუსი:** Round 66 — D-29z31; C PASS (round 66), გამოქვეყნდა b5fb12b
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -27,6 +27,7 @@
+ 5. **ხმა** (`generateMetronomeClickSamples`): 30 ms სინუსი exponential decay-ით (5 ms). Accent არის 1600 Hz, peak 0.5 (−6 dBFS); დანარჩენი დარტყმა 1000 Hz, peak 0.25 (−12 dBFS).
+ 6. **მარშრუტი:** კლიკის source-ები → ერთი metronome `GainNode` → schedule-ის master gain. ამიტომ Master-ის ხმა და Mute მოქმედებს და master meter კლიკს აჩვენებს. ტრეკის meter, volume, mute/solo და pan მასზე არ მოქმედებს.
+ 7. **დაგეგმვა:** loop-ის გარეშე კლიკები წინასწარ იგეგმება პროექტის ბოლომდე, ისევე როგორც კლიპები. Loop-ის 0-ოვან iteration-ზე კლიკები იგეგმება `loop.end`-მდე. ყოველი შემდეგი iteration `appendClicks`-ით ემატება, `planLoopIteration`-ის იმავე `from`/`startAt`-ით.
++   - Round 71-დან (D-29z36, doc 063) loop-ის გარეშე კლიკები წინასწარ მხოლოდ 2 წმ-ით იგეგმება და დაკვრისას `pumpPlaybackAudio`-დან ივსება.
+ 8. **დაკვრისას ცვლილება:** ჩართვა, გამორთვა ან ტემპის შეცვლა იწვევს ერთ იძულებით resync-ს (`syncPlayback(present, undefined, true)`). კლიპები არსებული handoff-ით გრძელდება.
+ 9. **Export:** `renderArrangementWav` არ შეცვლილა და მეტრონომს არასოდეს იღებს.
+ 10. **Lazy buffer-ები:** კლიკის `AudioBuffer`-ები იქმნება მხოლოდ მაშინ, როცა graph მეტრონომით იგეგმება და არა `ensureAudioContext`-ში. Cache ერთ `AudioContext`-ზეა და unmount-ზე იშლება. ამის მიზეზია ის, რომ frozen UI ტესტების fake-ებს `copyToChannel` არ აქვთ.
+diff --git a/docs/implementation/2026/quarter-IV/062-studio-lab-bars-ruler-window.md b/docs/implementation/2026/quarter-IV/062-studio-lab-bars-ruler-window.md
+index 95fd0ff..070ddcf 100644
+--- a/docs/implementation/2026/quarter-IV/062-studio-lab-bars-ruler-window.md
++++ b/docs/implementation/2026/quarter-IV/062-studio-lab-bars-ruler-window.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — ტაქტების სახაზავი მხოლოდ ხილვად ფანჯარაში (SRW-15, ROOT-R65-M1)
+ 
+ **თარიღი:** 2026-10-21
+-**სტატუსი:** Round 70 — D-29z35; C-ის შემოწმებას ელოდება
++**სტატუსი:** Round 70 — D-29z35; C PASS (round 70), გამოქვეყნდა 2be45df
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი

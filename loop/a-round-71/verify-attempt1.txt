@@ -1,0 +1,1608 @@
+
+> music-store@1.0.0 verify
+> npm run agents:check && npm run test:agents && npm run lint && npm run typecheck && npm run test:run && npm run build
+
+
+> music-store@1.0.0 agents:check
+> node scripts/check-agents.mjs
+
+Agent references, review roles and skill mirrors passed.
+
+> music-store@1.0.0 test:agents
+> node --test scripts/agent-hooks.test.mjs
+
+TAP version 13
+# Subtest: hook resolves active project from a nested cwd, preserves normal permissions, and deduplicates references
+ok 1 - hook resolves active project from a nested cwd, preserves normal permissions, and deduplicates references
+  ---
+  duration_ms: 17.5589
+  type: 'test'
+  ...
+# Subtest: unrelated tools produce no permission decision
+ok 2 - unrelated tools produce no permission decision
+  ---
+  duration_ms: 0.1686
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 668.181
+
+> music-store@1.0.0 lint
+> biome lint ./app
+
+app\components\animations\ScrollReveal.tsx:283:20 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    281 │     >
+    282 │       {words.map((word, wordIndex) => (
+  > 283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+        │                    ^^^^^^^^^
+    284 │           {word.split('').map((char, charIndex) => (
+    285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+  
+  i This is the source of the key value.
+  
+    280 │       aria-label={text}
+    281 │     >
+  > 282 │       {words.map((word, wordIndex) => (
+        │                         ^^^^^^^^^
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+    284 │           {word.split('').map((char, charIndex) => (
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app\components\animations\ScrollReveal.tsx:285:31 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+    284 │           {word.split('').map((char, charIndex) => (
+  > 285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+        │                               ^^^^^^^^^
+    286 │               {char}
+    287 │             </motion.span>
+  
+  i This is the source of the key value.
+  
+    282 │       {words.map((word, wordIndex) => (
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+  > 284 │           {word.split('').map((char, charIndex) => (
+        │                                      ^^^^^^^^^
+    285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+    286 │               {char}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app\components\audio\AudioPlayer.tsx:48:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    46 │           </div>
+    47 │           {/* Close Button */}
+  > 48 │           <button
+       │           ^^^^^^^
+  > 49 │             onClick={closePlayer}
+  > 50 │             className="absolute top-1/2 right-0 -translate-y-1/2 bg-transparent border-none text-muted p-2 flex items-center justify-center rounded-full transition-all duration-200 opacity-60 hover:bg-white/10 hover:text-error hover:opacity-100 hover:scale-110 cursor-pointer"
+  > 51 │             aria-label="Close player"
+  > 52 │             title="Close player"
+  > 53 │           >
+       │           ^
+    54 │             <X size={18} />
+    55 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app\components\audio\AudioPlayer.tsx:61:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    59 │         <div className="flex flex-col items-center gap-4">
+    60 │           <div className="flex items-center gap-6">
+  > 61 │             <button
+       │             ^^^^^^^
+  > 62 │               onClick={skipPrevious}
+  > 63 │               className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+  > 64 │               aria-label="Previous track"
+  > 65 │             >
+       │             ^
+    66 │               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    67 │                 <path
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app\components\audio\AudioPlayer.tsx:76:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    74 │             </button>
+    75 │ 
+  > 76 │             <button
+       │             ^^^^^^^
+  > 77 │               onClick={togglePlayPause}
+  > 78 │               className="audio-player-button-play flex items-center justify-center rounded-full cursor-pointer"
+  > 79 │               aria-busy={isLoading}
+  > 80 │               aria-label={isLoading ? 'Cancel loading preview' : isPlaying ? 'Pause' : 'Play'}
+  > 81 │             >
+       │             ^
+    82 │               {isLoading ? (
+    83 │                 <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app\components\audio\AudioPlayer.tsx:95:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+     93 │             </button>
+     94 │ 
+   > 95 │             <button
+        │             ^^^^^^^
+   > 96 │               onClick={skipNext}
+   > 97 │               className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+   > 98 │               aria-label="Next track"
+   > 99 │             >
+        │             ^
+    100 │               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    101 │                 <path
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app\components\audio\AudioPlayer.tsx:139:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    137 │         {/* Volume Control */}
+    138 │         <div className="flex items-center gap-4 justify-end">
+  > 139 │           <button
+        │           ^^^^^^^
+  > 140 │             onClick={() => setVolume(volume === 0 ? 0.7 : 0)}
+  > 141 │             className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+  > 142 │             aria-label={volume === 0 ? 'Unmute' : 'Mute'}
+  > 143 │           >
+        │           ^
+    144 │             {volume === 0 ? (
+    145 │               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app\components\audio\StemControl.tsx:19:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    18 │       {/* Solo Button */}
+  > 19 │       <button
+       │       ^^^^^^^
+  > 20 │         onClick={() => toggleSolo(stemId)}
+        ...
+  > 27 │         title={isSoloed ? 'Unsolo' : 'Solo'}
+  > 28 │       >
+       │       ^
+    29 │         S
+    30 │       </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app\components\audio\StemControl.tsx:33:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    32 │       {/* Mute Button */}
+  > 33 │       <button
+       │       ^^^^^^^
+  > 34 │         onClick={() => toggleMute(stemId)}
+        ...
+  > 41 │         title={isMuted ? 'Unmute' : 'Mute'}
+  > 42 │       >
+       │       ^
+    43 │         M
+    44 │       </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app\components\audio\StemsPlayerModal.tsx:43:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    42 │   return (
+  > 43 │     <div
+       │     ^^^^
+  > 44 │       className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-md"
+  > 45 │       onClick={closeStemsPlayer}
+  > 46 │     >
+       │     ^
+    47 │       <div
+    48 │         className="relative w-full max-w-4xl max-h-[85vh] overflow-y-auto bg-surface rounded-2xl shadow-2xl m-4"
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app\components\audio\StemsPlayerModal.tsx:47:7 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    45 │       onClick={closeStemsPlayer}
+    46 │     >
+  > 47 │       <div
+       │       ^^^^
+  > 48 │         className="relative w-full max-w-4xl max-h-[85vh] overflow-y-auto bg-surface rounded-2xl shadow-2xl m-4"
+  > 49 │         onClick={(e) => e.stopPropagation()}
+  > 50 │       >
+       │       ^
+    51 │         {/* Header */}
+    52 │         <div className="sticky top-0 z-10 flex items-center justify-between px-8 py-6 bg-surface border-b border-outline">
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app\components\audio\StemsPlayerModal.tsx:7:66 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━
+
+  ! This variable seek is unused.
+  
+    6 │ export function StemsPlayerModal() {
+  > 7 │   const { state, isModalOpen, closeStemsPlayer, togglePlayPause, seek } = useStems();
+      │                                                                  ^^^^
+    8 │ 
+    9 │   // Handle ESC key
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+app\components\audio\StemsPlayerModal.tsx:54:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    52 │         <div className="sticky top-0 z-10 flex items-center justify-between px-8 py-6 bg-surface border-b border-outline">
+    53 │           <h2 className="text-3xl font-bold text-foreground">Stems</h2>
+  > 54 │           <button
+       │           ^^^^^^^
+  > 55 │             onClick={closeStemsPlayer}
+  > 56 │             className="p-2 text-muted hover:text-foreground hover:bg-elevated rounded-lg transition-colors cursor-pointer"
+  > 57 │             aria-label="Close"
+  > 58 │           >
+       │           ^
+    59 │             <X size={24} />
+    60 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app\components\audio\StemsPlayerModal.tsx:92:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    91 │               {/* Play/Pause Button */}
+  > 92 │               <button
+       │               ^^^^^^^
+  > 93 │                 onClick={togglePlayPause}
+  > 94 │                 className="flex items-center justify-center w-12 h-12 bg-white text-black rounded-full hover:bg-neutral-100 transition-colors shadow-md cursor-pointer flex-shrink-0"
+  > 95 │                 aria-label={state.isPlaying ? 'Pause' : 'Play'}
+  > 96 │               >
+       │               ^
+    97 │                 {state.isPlaying ? (
+    98 │                   <Pause size={20} fill="currentColor" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app\components\audio\StemsPlayerModal.tsx:153:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    151 │           <div className="p-8 text-center">
+    152 │             <p className="text-destructive mb-4">Failed to load stems. Please try again.</p>
+  > 153 │             <button
+        │             ^^^^^^^
+  > 154 │               onClick={closeStemsPlayer}
+  > 155 │               className="px-6 py-2 bg-elevated text-foreground rounded-lg hover:bg-muted-bg transition-colors cursor-pointer"
+  > 156 │             >
+        │             ^
+    157 │               Close
+    158 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app\components\audio\Timeline.tsx:67:19 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━
+
+  ! handleMouseMove changes on every re-render and should not be used as a hook dependency.
+  
+    65 │       };
+    66 │     }
+  > 67 │   }, [isDragging, handleMouseMove, handleMouseUp]);
+       │                   ^^^^^^^^^^^^^^^
+    68 │ 
+    69 │   // Calculate playhead position
+  
+  i To fix this, wrap the definition of handleMouseMove in its own useCallback() hook.
+  
+
+app\components\audio\Timeline.tsx:67:36 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━
+
+  ! handleMouseUp changes on every re-render and should not be used as a hook dependency.
+  
+    65 │       };
+    66 │     }
+  > 67 │   }, [isDragging, handleMouseMove, handleMouseUp]);
+       │                                    ^^^^^^^^^^^^^
+    68 │ 
+    69 │   // Calculate playhead position
+  
+  i To fix this, wrap the definition of handleMouseUp in its own useCallback() hook.
+  
+
+app\components\audio\Timeline.tsx:108:20 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    106 │           return (
+    107 │             <div
+  > 108 │               key={i}
+        │                    ^
+    109 │               className="absolute top-0 h-full w-px bg-outline"
+    110 │               style={{ left: `${position}%` }}
+  
+  i This is the source of the key value.
+  
+    101 │         {/* Time Markers (every 5 seconds for demo) */}
+  > 102 │         {Array.from({ length: Math.floor(duration / 5) + 1 }).map((_, i) => {
+        │                                                                       ^
+    103 │           const time = i * 5;
+    104 │           const position = (time / duration) * 100;
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app\components\audio\WaveForm.tsx:48:18 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    46 │         return (
+    47 │           <div
+  > 48 │             key={i}
+       │                  ^
+    49 │             className={`waveform-bar ${isActive ? 'active' : ''} ${isPlaying ? 'playing' : ''}`}
+    50 │             style={{
+  
+  i This is the source of the key value.
+  
+    41 │   return (
+    42 │     <div className="waveform-container" key={waveIndex}>
+  > 43 │       {barsData.map((finalHeight, i) => {
+       │                                   ^
+    44 │         const isActive = (i / bars) * 100 <= progress && isPlaying;
+    45 │ 
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app\utils\ableton-export.ts:36:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable projectName is unused.
+  
+    34 │  */
+    35 │ function generateALSXml(options: ExportOptions): string {
+  > 36 │   const { projectName, bpm, stems } = options;
+       │           ^^^^^^^^^^^
+    37 │ 
+    38 │   // Ableton uses a specific volume curve
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 199.
+Checked 379 files in 1008ms. No fixes applied.
+Found 218 warnings.
+Found 1 info.
+
+> music-store@1.0.0 typecheck
+> tsc --noEmit
+
+
+> music-store@1.0.0 test:run
+> vitest run
+
+
+ RUN  v4.0.16 C:/Apps/czaba-project/store
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | app/lib/arrangement/__tests__/track-layout.test.tsx > track fold, height and lane auto-fit (SRW-11B stage 2, D-29, R11-U) > ignores a height-handle pointerdown while another gesture is active
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+
+Not implemented: Window's scrollTo() method
+stderr | app/lib/arrangement/__tests__/track-layout.test.tsx > track fold, height and lane auto-fit (SRW-11B stage 2, D-29, R11-U) > ignores a fold click while another pointer gesture is active
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+
+ ✓ app/lib/arrangement/__tests__/floating-video.test.tsx (45 tests) 23814ms
+     ✓ expands the same box over the library, keeps both <video> nodes and shows the placeholder  1260ms
+     ✓ returns to compact with ✕ and keeps the same <video> nodes  815ms
+     ✓ returns to compact with the placeholder button and keeps the same <video> nodes  490ms
+     ✓ returns to compact with Esc and keeps the same <video> nodes  429ms
+     ✓ ignores Esc that was already handled (defaultPrevented)  498ms
+     ✓ ignores Esc in a plain text field that does not handle Escape itself  321ms
+     ✓ clears a non-empty library search on the first Esc and returns the video on the second  464ms
+     ✓ does not change the video on Esc while the Export dialog is open  2224ms
+     ✓ keeps the video when Esc closes Export and React flushes between listeners (real browser order)  1106ms
+     ✓ collapses both video and library on ◀ while expanded, with the status text  579ms
+     ✓ opens a collapsed library for the video and collapses it again on return  390ms
+     ✓ places the box on the next frame under reduced motion (transition-property none, duration kept)  414ms
+     ✓ waits for the library width transitionend before placing the box  431ms
+     ✓ moves the box 16 px per arrow on ⠿ without nudging a selected clip, seeking or zooming  392ms
+     ✓ releases an active drag when the video returns to compact  409ms
+     ✓ re-clamps on window resize and does not follow a library width change  952ms
+     ✓ keeps Space as the workspace transport toggle on the float buttons  409ms
+     ✓ places the box by the fallback timer when transitionend never arrives  1030ms
+     ✓ never places a box whose expand was cancelled (collapse) before the library transition ended  931ms
+     ✓ never places a box whose expand was cancelled (escape) before the library transition ended  798ms
+     ✓ commits the dragged position so the next arrow step starts from it  438ms
+     ✓ focuses ⠿ on pointerdown so arrows work after a mouse click on the handle  432ms
+     ✓ returns focus to ⤢ after ✕ or Esc from a float control, but not after ◀  890ms
+     ✓ ignores ⠿ arrows and resize re-clamps during a drag, then commits the clamped drag position  537ms
+     ✓ applies every arrow of a synchronous burst (no stale rect between React renders)  331ms
+     ✓ places the expanded box inside the library body, clear of the header, search and preview (D-29e)  525ms
+     ✓ places the box inside the remounted library body after a temporary opening (D-29e)  447ms
+     ✓ writes the return status after ✕ when the library was already open (C-R13-02)  376ms
+     ✓ writes the return status after the placeholder button when the library was already open (C-R13-02)  334ms
+     ✓ writes the re-collapse status after ✕ from a temporary opening (C-R13-02)  325ms
+     ✓ writes the re-collapse status after the placeholder button from a temporary opening (C-R13-02)  422ms
+     ✓ writes the re-collapse status after Esc from a temporary opening (C-R13-02)  381ms
+     ✓ writes the return status when ⤢ itself returns an expanded video (C-R13-02)  437ms
+     ✓ writes no status for a no-op return or for ▶/◀ without an expanded video (C-R13-02)  361ms
+     ✓ keeps the ◀ status text, not a return text, when ◀ collapses an expanded video  363ms
+     ✓ pads the library tree and list by the box height + 16 while expanded (D-29f, C-R14-01)  329ms
+     ✓ keeps the inset at 0 while the box waits for placement after a temporary opening (D-29f)  345ms
+     ✓ renders the tree and list without a style attribute after ◀ and ▶ from an expanded video (D-29f, R15-P3)  328ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-menu.test.tsx (39 tests) 25320ms
+     ✓ GM1 a right-click on an empty audio lane opens the grid menu at the pointer  2772ms
+     ✓ GM2 a right-click on another clip body opens the menu and edits nothing  852ms
+     ✓ GM3 the video lane opens the same single menu on its empty area and its clip body  693ms
+     ✓ GM4 choosing 0.25 s drives the shared grid state without history  773ms
+     ✓ GM5 a division chosen in the menu snaps the next clip drag  848ms
+     ✓ GM6 the Snap item toggles Snap with the G status text and reflects it on reopen  627ms
+     ✓ GM7 keyboard: focus on the checked item, wrap, Home/End, Enter and Space choose  1336ms
+     ✓ GM8 Escape closes the menu without a change and keeps the floating video expanded  420ms
+     ✓ GM9 workspace shortcuts do not run while focus is in the menu  390ms
+     ✓ GM10 the press that dismisses the menu does nothing else; the next press works  550ms
+     ✓ GM11 Escape returns focus to the element that had it before the menu opened  378ms
+     ✓ GM12 a right-click during a left clip drag opens no menu and leaves the drag intact  504ms
+     ✓ GM13 scrolling the timeline, resizing or leaving the window closes the menu  563ms
+     ✓ GM14 headers, ruler, loop strip and library keep the native context menu  402ms
+     ✓ GM15 choosing a division while playing keeps playback running  587ms
+     ✓ GM16 the dismissing press also swallows its click on the Snap toggle and on Play  1502ms
+     ✓ GM17 a dismiss with no click releases the swallow on pointerup or on the next press  707ms
+     ✓ GM18 C-R57-01 choosing a division returns focus to the element focused before the menu  462ms
+     ✓ GM19 C-R57-02 a reposition keeps the original focus origin for Escape  405ms
+     ✓ GM20 G7 no grid menu opens while the export dialog is open  1213ms
+     ✓ GM21 G6 a Follow scroll keeps the menu open; a user scroll while playing closes it  867ms
+     ✓ GM22 C-R58-01 a full press inside the menu chooses the item and arms no swallow  829ms
+     ✓ GM23 C-R58-02 the press that releases a pending swallow is not cancelled  735ms
+     ✓ GM24 C-R58-INFO-M with Follow paused a scroll back onto the follow anchor closes the menu  483ms
+     ✓ GM25 ROOT-R50-58-L3 a right-click on the open menu is prevented and changes nothing  543ms
+     ✓ GM26 ROOT-R50-58-L2 any key after a dismiss with a lost pointerup releases the swallow  509ms
+     ✓ GM27 ROOT-R50-58-L2 a window blur after a dismiss with a lost pointerup releases the swallow  378ms
+     ✓ GM28 a pointercancel on the dismissing press releases the swallow after one task  437ms
+     ✓ GM29 a right-button dismiss keeps the native context menu and releases on its pointerup  533ms
+     ✓ GM30 Tab in the open menu is not prevented and closes it without a change  443ms
+     ✓ GM32 C-R60-01 a press on the menu padding or divider keeps focus; an item press is not prevented  534ms
+     ✓ GM33 C-R60-02 an auto-repeat key keeps the swallow armed; a fresh key releases it  385ms
+     ✓ GM34 ROOT-R50-58-L1 a vertical scroll during Follow playback closes the menu  429ms
+     ✓ FR1 a clip header click releases the focused brace so ArrowRight nudges the clip  434ms
+     ✓ FR2 LK-CLIP order: clip header, then a brace press keeps ArrowRight on the brace  430ms
+     ✓ FR3 a right-click on the lane releases the brace and the menu does not restore it  488ms
+     ✓ FR4 a press on the brace start edge keeps the brace focused and moving  336ms
+ ✓ app/lib/arrangement/__tests__/track-layout.test.tsx (36 tests) 29588ms
+     ✓ folds a lane to a 36 px row with compact M/S that keep their aria-pressed and click behaviour  4457ms
+     ✓ keeps the video lane picker reachable as a compact ＋ when folded and hides the original-sound line  2094ms
+     ✓ writes no history for fold, height or auto-fit, and Undo leaves every height alone  839ms
+     ✓ claims the gesture registry while dragging a height handle and restores the start height on pointercancel  1219ms
+     ✓ ignores a height-handle pointerdown while another gesture is active  417ms
+     ✓ steps ↓ +8 / ↑ −8 on the focused handle, clamps per kind and never nudges the selected clip  1258ms
+     ✓ a key on the handle of a folded lane only unfolds it first  534ms
+     ✓ Space on the focused fold button folds the lane and does not start the transport  489ms
+     ✓ sets one height on the row so the header and the lane body share it  376ms
+     ✓ renders no range body on a folded clip, adds the title line, and keeps trim with one history entry  914ms
+     ✓ auto-fit shrinks the lanes, gives a folded lane’s height back, and the first manual change turns it off  1126ms
+     ✓ keeps auto-fit on after a fold and after a cancelled height drag  669ms
+     ✓ skips the lane refit while the detail panel animates and refits once on its height transitionend  403ms
+     ✓ does not re-render the workspace on observer ticks whose metrics change nothing  488ms
+     ✓ restores the start height and auto-fit when the registry aborts a height drag (window blur)  662ms
+     ✓ a committed height drag turns auto-fit off and a move back to the start is honoured  988ms
+     ✓ a pointerdown on the handle of a folded lane neither unfolds it nor starts a gesture (C-R11-01)  673ms
+     ✓ ignores a fold click while another pointer gesture is active  625ms
+     ✓ caps the detail panel while auto-fit is on, keeps the cap after a click or a cancelled drag, and keeps the rendered height when a manual lane change drops it  526ms
+     ✓ lands cross-lane header drags by real row rectangles on mixed heights (music folded, SFX 140)  1157ms
+     ✓ resizes the panel without a transition when only the cap changes it, and animates the next toggle again  302ms
+     ✓ keeps the cap when a separator key only opens the collapsed panel or a drag moves only sideways  333ms
+     ✓ forwards a drop over the height handle to the lane body only when it is over the lane, not the header strip  956ms
+     ✓ gives a folded lane’s height handle no pointer hit area but keeps it focusable, and restores the round-15 classes when unfolded (C-R11-01)  623ms
+     ✓ reserves the selected-clip row with an aria-hidden placeholder and renders the real line as one truncated full-width row (C-R11-02, C-R15-02)  372ms
+     ✓ keeps the capped panel height when the first manual lane change turns auto-fit off, through resize and reopen (C-R11-03)  346ms
+     ✓ still restores the stored height when the cap is released because the room grows (C-R11-03 control)  302ms
+     ✓ restores the pre-clamp stored height after a cancelled lane-height drag (C-R11-03 snapshot path)  411ms
+     ✓ keeps the capped height when a committed lane drag is followed by a cancelled one  382ms
+     ✓ does not override a user panel resize made during a lane drag when that drag is cancelled  570ms
+     ✓ writes the gesture refusal status when a fold is refused during a pointer gesture (deviation 9)  689ms
+     ✓ points every fold button’s aria-controls at its own lane body, outside the header, through fold and unfold (R23-F1)  1244ms
+     ✓ draws the track-name button’s focus ring inset on folded and unfolded lanes (R23-N)  2409ms
+     ✓ keeps the position, status and aria-valuenow when Home is pressed on each focused separator, but still prevents the default (R24-H)  399ms
+ ✓ app/lib/arrangement/__tests__/fader-guards.test.tsx (71 tests) 35235ms
+       ✓ Delete and Backspace on the focused musicVolume slider keep the selected clip, history, status and value  1163ms
+       ✓ Delete and Backspace on the focused sfxVolume slider keep the selected clip, history, status and value  684ms
+       ✓ Delete and Backspace on the focused master slider keep the selected clip, history, status and value  522ms
+       ✓ Delete and Backspace on the focused zoom slider keep the selected clip, history, status and value  410ms
+       ✓ Delete and Backspace on the focused pan slider keep the selected clip, history, status and value  486ms
+       ✓ positive control: Delete on document.body deletes the selected clip with one entry and leaves a gap  448ms
+       ✓ narrow guard: Delete on the focused playhead handle (role="slider") still deletes the selected clip  1744ms
+       ✓ the Pan slider no longer stops Delete: a window keydown listener receives it  334ms
+       ✓ during another pointer gesture Delete on a focused Volume keeps the gesture-blocked status (unchanged)  383ms
+       ✓ after a blur the same held pointer writes nothing: no entry, stored pan, stored slider value, no panner push  700ms
+       ✓ after that pointer is released a fresh drag gives exactly one Pan entry  536ms
+       ✓ after a pointercancel of that pointer one keyboard-style change gives exactly one Pan entry  534ms
+       ✓ a new successful pointerdown while suppressed starts a normal drag; the old pointer release does nothing  475ms
+       ✓ a pointerup of another pointer and a refused pointerdown keep the suppression  505ms
+       ✓ unmounting with a pending suppression removes its window listeners  333ms
+       ✓ the same sequence on the music Volume gives exactly one Volume entry on release  556ms
+       ✓ a pending keyboard Volume preview is committed before the Pan gesture starts  377ms
+       ✓ a pending keyboard Master preview is committed before the Pan gesture starts  481ms
+       ✓ musicVolume focused → clip header click → Delete deletes the SFX clip with one entry and a gap  580ms
+       ✓ pan focused → clip header click → Delete deletes the SFX clip with one entry and a gap  486ms
+       ✓ master focused → clip header click → Delete deletes the SFX clip with one entry and a gap  602ms
+       ✓ zoom focused → clip header click → Delete deletes the SFX clip with one entry and a gap  499ms
+       ✓ music Volume focused → empty SFX lane body → clip header → Delete deletes with one entry  519ms
+       ✓ music Volume focused → clip body pointerdown releases the fader focus  383ms
+       ✓ music Volume focused → ruler click releases the fader focus; Delete then acts as with body focus  351ms
+       ✓ a pending keyboard Volume preview is committed by the blur before the clip gesture, then Delete adds its own entry  471ms
+       ✓ music Volume focused → clip header click → ArrowRight nudges the selected clip with one entry  543ms
+       ✓ during an active Pan drag a clip header pointerdown does not blur Pan; the drag still commits one Pan entry  575ms
+       ✓ a plain blur of Pan by a clip header click creates no suppression: one keyboard-style change gives one Pan entry  764ms
+       ✓ round-32 regression: Delete on the focused music Volume with no click in between changes nothing  509ms
+       ✓ self-check: a clip drag started while the music Volume is focused moves the clip with one entry  668ms
+       ✓ self-check: a drag on the SFX Volume while the music Volume is focused writes one Volume entry  460ms
+       ✓ review: a pending keyboard Master preview is committed by the blur before the clip gesture, then Delete adds its own entry  567ms
+       ✓ review: the Pan readout reset blurs Pan on pointerdown, then returns to C with one entry and refocuses the slider  425ms
+       ✓ self-check: Backspace in the focused library search is left to the text field  362ms
+       ✓ search focused, typed "ab" → SFX clip header click → Delete deletes the SFX clip; the search text and filter are unchanged  433ms
+       ✓ search focused, typed "ab" → SFX clip header click → Backspace deletes the SFX clip; the search text and filter are unchanged  445ms
+       ✓ Clip Gain typed "3" → music clip header pointerdown commits one Clip Gain entry to SFX before the music gesture; Delete then removes the music clip  691ms
+       ✓ Clip Gain typed "3" → the same SFX header click commits one entry and releases focus; Delete then removes the SFX clip  460ms
+       ✓ Clip Gain typed "3" → empty SFX lane body pointerdown commits one Clip Gain entry on SFX  411ms
+       ✓ Clip Gain emptied → music clip header click gives exactly the status and history of a plain blur of the same text  602ms
+       ✓ music Volume focused → pointerdown in the scroller scrollbar gutter keeps the Volume focus  349ms
+       ✓ search focused → pointerdown on the scroller itself inside its client box releases the search focus  314ms
+       ✓ review: the gutter boundary subtracts the scroller border (x = 499 releases, x = 500 keeps)  310ms
+       ✓ review: during an active Pan drag a clip header pointerdown edits nothing; the Pan press itself released the search (D-29z)  310ms
+       ✓ regression: search focused, typed "ab", Backspace with no click is left to the text field  338ms
+       ✓ self-check: a clip drag started while the search is focused moves the clip with one entry  558ms
+       ✓ self-check: Clip Gain typed "3" → a drag of the same SFX clip keeps the committed gain and adds its own entry  613ms
+       ✓ Clip Gain typed "3" → music Volume pointerdown commits Clip Gain first; the Volume drag adds its own entry; two Undos restore Volume, then the gain  625ms
+       ✓ Clip Gain typed "3" → music Pan pointerdown commits Clip Gain first; the Pan entry follows  654ms
+       ✓ Clip Gain typed "3" → Master Volume pointerdown (outside the scroller) commits Clip Gain first; the Master entry follows  481ms
+       ✓ Clip Gain typed "3" → video Volume pointerdown commits Clip Gain first; the Volume entry follows  473ms
+       ✓ regression: Clip Gain typed "3" → Zoom pointerdown commits one Clip Gain entry; Zoom writes no entry  377ms
+       ✓ Clip Gain with its unchanged text → music Volume pointerdown releases the field and writes no Clip Gain entry  432ms
+       ✓ Clip Gain emptied → Master pointerdown gives exactly the status and history of a plain blur of the same text  1028ms
+       ✓ detail start typed without Enter → Master pointerdown releases the field, writes no entry from it and applies no range  431ms
+       ✓ search typed "ab" → Master pointerdown releases the search; its text and filter are unchanged  341ms
+       ✓ must-not: during a detail-separator gesture a Master pointerdown of a second pointer keeps the Clip Gain focus and writes no entry  599ms
+         ✓ "3" typed → blur during the gesture keeps "3" with the blocked status and no entry; Enter after release commits +3.0 dB once  505ms
+         ✓ "3" typed → a second-pointer Master press and the native blur keep "3" and leave Master unchanged; the blur after release commits once  497ms
+         ✓ emptied text → blur during the gesture keeps "" with the blocked status; Enter after release gives the invalid status and resets  541ms
+         ✓ must-not: Enter during the gesture still shows the blocked status, resets the text and writes no entry  535ms
+         ✓ must-not (limitation): the text kept by the blur is discarded by a selection change with no entry  458ms
+stderr | app/lib/arrangement/__tests__/grid-snap-ui.test.tsx > SRW-14 stage 1 grid control and lines > GS15 a lane rendered without gridSeconds keeps its previous body: no lines, no grid attributes
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+
+ ✓ app/lib/arrangement/__tests__/render-budget.test.tsx (7 tests) 14112ms
+     ✓ does not re-render clips, overview bars, library rows or ruler ticks over Play → Pause → Play  7926ms
+     ✓ moves the playhead, ruler handle and transport time on playback frames without React renders  1823ms
+     ✓ does not re-render the detail panel content over 60 position frames or Play → Pause → Play (R11-P1e)  2007ms
+     ✓ writes the library playhead text on 60 position frames without rendering LibraryPlayheadText (R9-L1, C-R6-02)  496ms
+     ✓ keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02)  1319ms
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/grid-snap-ui.test.tsx (20 tests) 9861ms
+     ✓ GS1 starts with Snap off, 1 s division and visible lines in every lane  1138ms
+     ✓ GS14 keeps the transport toolbar unchanged and without a Snap control  1844ms
+     ✓ GS3 G turns Snap on without history; a drag lands on the 1 s grid; a sub-half drag locks onto a nearer clip edge  574ms
+     ✓ GS5 a group follows the grabbed clip onto the grid with one history entry  377ms
+     ✓ GS5b a group blocked by an unselected neighbour stops on the last grid line before it  373ms
+     ✓ GS6 a cross-lane move shows a grid ghost and lands on the grid with one entry  547ms
+     ✓ GS6b a group moved to another lane puts the off-grid anchor on the grid despite a same-lane neighbour  381ms
+     ✓ GS11 G is ignored in the select, with Ctrl, on auto-repeat and while Export is open  1685ms
+     ✓ GS16 a select value outside the seven divisions changes nothing  305ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-edit.test.tsx (25 tests) 10601ms
+     ✓ SE2 Snap off keeps a free right trim of exactly +0.375 s  813ms
+     ✓ SE3 Snap on 1 s puts a right trim on the next line with one Undo entry  488ms
+     ✓ SE4 Snap on 1 s puts a left trim on 7 and lowers the source offset by 0.3  387ms
+     ✓ SE6 a 0.25 s snapped right trim below the minimum length stops at 0.05 s  370ms
+     ✓ SE20 a snapped left trim whose line lies past an off-grid source start stops at that start  891ms
+     ✓ SE7 Snap on 1 s snaps both range ends inside the clip  858ms
+     ✓ SE12 Alt enables the current division while Snap is off and leaves Snap off  630ms
+     ✓ SE12b Alt with Snap off uses the chosen 0.25 s division  498ms
+     ✓ SE13 Alt frees a trim with Snap on and snaps a range with Snap off  923ms
+     ✓ SE14 Alt pressed mid-drag frees the final position; one Undo entry  815ms
+     ✓ SE14b Alt released mid-drag snaps again on the next move  603ms
+     ✓ SE15 Shift time lock wins over Alt on a cross-lane move with Snap off  433ms
+     ✓ SE17 Snap off: before-start text, no lane ghosts, time-only commit  601ms
+     ✓ SE18 a group onto an occupied lane still shows blocked ghosts and the overlap text  306ms
+     ✓ SE21 a group whose bottom member has no lane below shows no ghosts and moves in time only  369ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx (44 tests) 18865ms
+     ✓ CM1 the moved end touches the next clip start on the same lane  3520ms
+     ✓ CM2 the moved start touches the start of a clip on another lane  895ms
+     ✓ CM3 a grid line nearer than any edge wins  418ms
+     ✓ CM5 Alt with Snap on bypasses grid and edges  309ms
+     ✓ CM6 Alt with Snap off enables grid and edges  595ms
+     ✓ CM8 a cross-lane move lands with its end on a clip start of the target lane  342ms
+     ✓ CT1 a right trim stops on the next clip start of the same lane  526ms
+     ✓ CT2 a right trim lands on a clip start of another lane  326ms
+     ✓ CM16 a cross-lane move locks its start onto a sub-millisecond clip end of the target lane  819ms
+     ✓ CT9 a right trim stops exactly on a sub-millisecond clip start of another lane  597ms
+     ✓ CM9h the Shift ghost sits at the exact start next to a touching clip  684ms
+     ✓ CG1 a group move lands the anchor start on a clip end of another lane  682ms
+     ✓ CG2 the edges of other group members are not targets  531ms
+     ✓ CG3 a group move touches a sub-millisecond clip end exactly  650ms
+     ✓ CG4 an edge that would push a member into its neighbour falls back to the grid  806ms
+     ✓ CG5 a cross-lane group move applies the lane rule to the anchor target lane  649ms
+     ✓ CG6 Alt with Snap on keeps a group move free of grid and edges  606ms
+     ✓ CG7 an unreachable edge does not report a completed group move as stopped (C-R62-01)  318ms
+     ✓ CG9 Alt with Snap off enables grid and edges for a group  527ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/export-dialog-focus.test.tsx (19 tests) 17568ms
+     ✓ moves focus to დახურვა inside the dialog when it opens  2866ms
+     ✓ wraps Tab from the last control to the first and Shift+Tab from the first to the last  890ms
+     ✓ skips disabled controls when it wraps (empty project: WAV disabled)  2293ms
+     ✓ ignores every key except Tab and never stops propagation (Esc still reaches the Modal)  1423ms
+     ✓ restores focus to the remembered opener when the dialog closes  1486ms
+     ✓ does not swallow Enter on დახურვა, and its activation closes without starting an export  817ms
+     ✓ keeps Space on a dialog button away from the transport  802ms
+     ✓ returns focus to ✕ of the expanded video after Esc closes Export, and keeps the video expanded  672ms
+     ✓ keeps focus inside the dialog while a WAV render disables its buttons, then returns it to დახურვა  824ms
+     ✓ leaves focus on an enabled control while a render starts and ends  387ms
+     ✓ sends Tab to the first control and Shift+Tab to the last when focus sits on the dialog itself  632ms
+     ✓ keeps X → radio → დახურვა → WAV-ის ექსპორტი in DOM order and intercepts Tab only at the ends (C-R14-02)  574ms
+     ✓ keeps Shift+Tab from the X inside the dialog (the exact C-R14-02 repro)  422ms
+     ✓ does not steal focus from the X while a render starts and ends  609ms
+     ✓ handles only Tab on the X: Enter is not prevented and Esc still closes the Modal  1288ms
+     ✓ removes the Tab listener from the Modal content when the dialog closes  782ms
+     ✓ leaves Enter and Space alone on the last control and Enter on the first, so focus stays put (C-R15-03, D-29g)  567ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx (36 tests) 15255ms
+     ✓ SD1 Snap off keeps a free drop and its ghost  3518ms
+     ✓ SD2 Snap on 1 s puts the ghost and the drop on the nearest line  1721ms
+     ✓ SD3 Alt bypasses Snap for the ghost and the drop  417ms
+     ✓ SD4 Alt with Snap off uses the chosen division for the ghost and the drop  530ms
+     ✓ SD6 a snapped start that overlaps a clip is refused; Alt drops at the free time  437ms
+     ✓ DE1 a lane clip end captures the drop start  310ms
+     ✓ DE2 a lane clip start captures the drop end  361ms
+     ✓ DE3 another lane's clip end captures the drop end  325ms
+     ✓ DE6 Alt with Snap off enables edges for the drop  342ms
+     ✓ SL5 Snap on puts a dragged end edge on the nearest line  473ms
+     ✓ SL6 Snap on snaps the end edge first, then clamps to the minimum length  674ms
+     ✓ SL7 Snap on keeps a brace moved below time 0 at 0  384ms
+     ✓ SK5 Snap on: Shift+ArrowLeft clamps the end to the minimum length, then is blocked  369ms
+     ✓ SK7 brace keys move the brace, not the selected clip  379ms
+     ✓ SL10 a release further along does not re-snap the brace  464ms
+ ✓ app/lib/arrangement/__tests__/grid-musical-ui.test.tsx (14 tests) 9298ms
+     ✓ GU1 without a BPM offers only the seconds divisions  2569ms
+     ✓ GU2 a BPM adds the musical group without switching; choosing 1/4 at 120 sets 0.5 s  1153ms
+     ✓ GU3 R14-G1 Snap on, 1/4 at 120: a clip drag lands on 0.5 s multiples  764ms
+     ✓ GU4 90 BPM 1/4: a drag and a ruler click land on 2/3 s lines  534ms
+     ✓ GU5 90 BPM 1/4: the keyboard nudge steps line by line and never sticks  414ms
+     ✓ GU6 a BPM change re-derives the musical step and moves no clip  406ms
+     ✓ GU7 clearing the BPM returns to the last seconds division and keeps it  395ms
+     ✓ GU8 the 1 and 2 keys step within the musical list  338ms
+     ✓ GU9 the lane menu lists both families with a separator and chooses 1/8  1067ms
+     ✓ GU12 a Snap-on nudge from an off-line start reaches the nearest stored line  364ms
+     ✓ GU13 a brace body drag keeps the loop length in grid lines; Alt keeps it in ms  387ms
+     ✓ GU14 brace arrow keys move the loop by grid lines and keep its line length  484ms
+ ✓ app/lib/arrangement/__tests__/track-meter-ui.test.tsx (11 tests) 6976ms
+     ✓ creates 1 + N stereo splitters and 2 + 2N analysers on Play, master first, and passes every track tap  1261ms
+     ✓ reuses the same track taps after Pause/Play and after a reschedule edit while playing  1117ms
+     ✓ meters each track independently: music −12, SFX −6, video silent  849ms
+     ✓ latches an over on the SFX track only (+3.5, warning, sr-only text) and leaves music clear  583ms
+     ✓ keeps the track latch through quiet frames and Pause/Play  580ms
+     ✓ a Master Peak click clears the Master and the SFX latch with no history entry and no status  581ms
+     ✓ Pause floors every track meter to -inf/-inf and keeps data-peak  414ms
+     ✓ renders ArrangementLane and ArrangementTrackMeter 0 times per frame and one meter once on its latch and its reset  513ms
+     ✓ without createAnalyser, Play works, no track taps are passed and every track meter stays -inf  651ms
+ ✓ app/lib/arrangement/__tests__/fader-click.test.tsx (26 tests) 5881ms
+     ✓ F1: a press with no movement keeps the music Volume at 0.6, writes no entry and focuses the fader  846ms
+     ✓ F2: a −25 px drag over 100 px moves the music Volume from 0.6 to 0.35 with one Volume entry; undo restores  994ms
+     ✓ F4: a −24 px Master drag over 132 px gives −12 dB with one Master Volume entry  313ms
+     ✓ D2: a double-click resets Master from −12 dB to 0 dB with one Master Volume entry  367ms
+     ✓ R1: Clip Gain typed "3" then a music Volume press with no move commits only the Clip Gain and focuses the fader  379ms
+     ✓ must-not: a foreign pointer and a purely vertical move change nothing during the drag  338ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/grid-snap-keys.test.tsx (13 tests) 8300ms
+     ✓ GK1 plain 1 narrows the grid to 0.5 s with the Snap-off status and the select hint  670ms
+     ✓ GK2 plain 2 widens the grid to 2 s  1074ms
+     ✓ GK3 at the narrowest and widest division the keys stay and report the end  1254ms
+     ✓ GK5 a 1 typed in the library search or pressed with Export open changes nothing  1701ms
+     ✓ GK6 an auto-repeated 1 does not step the grid  385ms
+     ✓ GK7 after 1 with Snap on, ArrowRight nudges a whole-second clip by the new 0.5 s grid  485ms
+     ✓ GK8 with Snap on from G, 1 narrows and Snap stays on  660ms
+     ✓ GK9 C-R59-01 1 and 2 on the focused division select step the grid instead of type-ahead  450ms
+     ✓ GK10 a 1 inside the open grid menu changes nothing and the menu stays open  324ms
+     ✓ GK11 the focused select ignores modified, repeated and other digits, stops at the end and yields to Export  1070ms
+ ✓ app/lib/arrangement/__tests__/tempo-window-ui.test.tsx (8 tests) 8404ms
+     ✓ BU1 an unmeasured viewport renders the whole ruler  1447ms
+     ✓ BU2 a measured viewport renders only the three-viewport window at load  1118ms
+     ✓ BU3 a scroll into another page moves the window with one viewport of margin  954ms
+     ✓ BU4 scrolling inside a page renders nothing; the next page renders once  766ms
+     ✓ BU5 the first render after a keyboard zoom already uses the new view  718ms
+     ✓ BU6 a resize notification re-measures the viewport  358ms
+     ✓ BU7 clearing and setting the tempo keeps the window; no tempo means no mark work  992ms
+     ✓ BU8 playhead position frames neither recompute marks nor read layout  2050ms
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx (10 tests) 11856ms
+     ✓ TU1 without a BPM the 3 key refuses and the menu has no triplet item  2438ms
+     ✓ TU2 with a BPM a seconds or bar division refuses the triplet and stays  921ms
+     ✓ TU3 the 3 key toggles 1/4 to 1/4T and back with the select families  782ms
+     ✓ TU4 drag and ruler snap to triplet lines; Alt keeps the drag free  776ms
+     ✓ TU5 the keyboard nudge steps along stored triplet lines  861ms
+     ✓ TU6 the 1 and 2 keys stay inside the triplet family  1963ms
+     ✓ TU7 the lane menu triplet item toggles the mode and closes the menu  1359ms
+     ✓ TU8 the focused select takes 3; text fields, repeat, Shift and Alt do not  960ms
+     ✓ TU9 toggles write no history; a BPM change re-derives and a clear forgets  1073ms
+     ✓ TU10 the brace drag and brace keys move a loop along triplet lines  721ms
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/meter-ui.test.tsx (12 tests) 4313ms
+     ✓ creates one stereo splitter with an analyser per channel (fftSize ≥ 4096) as the live tap  340ms
+     ✓ latches an over that is only on the right channel (no mono down-mix)  357ms
+     ✓ latches over at 1.5, shows +3.5 and keeps it through quiet frames and Pause/Play  341ms
+     ✓ puts Master Peak after Master Volume and before Play in the header  1790ms
+stderr | app/lib/arrangement/__tests__/detail-panel.test.tsx > Clip Detail panel (SRW-11B stage 1, D-29, D-29a, R11-U1) > ignores a separator pointerdown while another gesture is active
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+
+stderr | app/lib/arrangement/__tests__/detail-panel.test.tsx > Clip Detail panel (SRW-11B stage 1, D-29, D-29a, R11-U1) > refuses a range during an active pointer gesture
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+
+stderr | app/lib/arrangement/__tests__/detail-panel.test.tsx > C-R11-03 cap release keeps the rendered height only when lane auto-fit turns off (D-29c 3) > stores the capped height when auto-fit turns off and keeps it afterwards
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+
+stderr | app/lib/arrangement/__tests__/detail-panel.test.tsx > C-R11-03 cap release keeps the rendered height only when lane auto-fit turns off (D-29c 3) > restores the stored height when the cap is released with auto-fit still on
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+
+stderr | app/lib/arrangement/__tests__/detail-panel.test.tsx > C-R11-03 cap release keeps the rendered height only when lane auto-fit turns off (D-29c 3) > gives the pre-clamp height back when auto-fit returns with the cap (cancelled lane drag)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+
+stderr | app/lib/arrangement/__tests__/detail-panel.test.tsx > C-R11-03 cap release keeps the rendered height only when lane auto-fit turns off (D-29c 3) > stores the capped open height also while collapsed, so it reopens at the height its separator announced
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+
+stderr | app/lib/arrangement/__tests__/detail-panel.test.tsx > C-R11-03 cap release keeps the rendered height only when lane auto-fit turns off (D-29c 3) > keeps the stored height when auto-fit turns off with a cap that was not limiting it
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:168:3)
+    at CapHarness (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+
+ ✓ app/lib/arrangement/__tests__/detail-panel.test.tsx (24 tests) 5309ms
+     ✓ collapses and expands to the previous height without a history entry  663ms
+     ✓ claims the gesture registry while dragging the separator: a second pointer on a clip and Mute are refused  1296ms
+     ✓ refuses out-of-clip values, end ≤ start and empty input with the exact status  321ms
+Not implemented: navigation to another Document
+Not implemented: navigation to another Document
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx (10 tests) 4604ms
+     ✓ UI1 is disabled and unpressed without a tempo, and Play schedules no metronome  724ms
+     ✓ UI2 turns on at 120 BPM with its status and Play schedules a click on every beat  356ms
+     ✓ UI3 turning it off while playing forces one resync without a metronome  438ms
+     ✓ UI4 turning it on while playing resyncs once with clicks from the live position  833ms
+     ✓ UI5 a tempo change while it is on resyncs once with the new beat and keeps it pressed  740ms
+     ✓ UI6 clearing the tempo turns it off and setting a tempo again does not re-enable it  534ms
+     ✓ UI7 plans the clicks for loop iteration 0 and appends them for every refilled iteration  340ms
+ ✓ app/lib/__tests__/sfx-export.test.ts (10 tests) 5270ms
+     ✓ sends only selected source windows to the worker and preserves exact source sample positions  1151ms
+     ✓ keeps 44.1 kHz millisecond selections and exact half-selection crossfades valid  2123ms
+     ✓ creates the exact combined preview WAV and a readable three-file ZIP whose sum matches it  901ms
+     ✓ exports compact clips with the exact same fades, level, pan and loop as aligned files  805ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-position.test.tsx (17 tests) 6696ms
+     ✓ SP2 Snap off keeps a free ruler click  861ms
+     ✓ SP4 Alt on the pointerup bypasses Snap on a ruler click  1173ms
+     ✓ SP5 Alt with Snap off uses the chosen division for a ruler click  524ms
+     ✓ SP6 a ruler drag navigates and does not seek  579ms
+     ✓ SP7 Snap on 1 s snaps every drag sample and the release  454ms
+     ✓ SP11 Snap on 1 s puts an empty-lane click on the nearest line  368ms
+     ✓ SP13 a marquee drag from an empty lane selects and does not seek  404ms
+     ✓ SP14 paste after a snapped ruler click lands on the grid; Alt keeps it free  484ms
+     ✓ SP16 a snapped clip-body click is not clamped to the clip  383ms
+ ✓ app/lib/__tests__/sfx-library.test.tsx (3 tests) 13808ms
+     ✓ searches tags, filters collections and keeps filters and favorites across close/open  2241ms
+     ✓ adds three sounds from two collections at exact positions and preserves their export after save/open  10010ms
+     ✓ stops a pending preview when closing the library and keeps the scene playhead  1555ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/master-ui.test.tsx (18 tests) 12461ms
+       ✓ renders the Master group with Mute, the fader and a readout that follows the value  1343ms
+       ✓ sits in the workspace header before the transport and renders 0 times per Play frame  8613ms
+       ✓ shows the master-mute note only when muted and keeps the export button enabled  398ms
+       ✓ shows the gain note only at a non-zero Master gain  1024ms
+       ✓ renders the overload warning as an alert after a clipped export and removes it on close  757ms
+ ❯ app/lib/arrangement/__tests__/pan-release-recovery.test.tsx (8 tests | 1 failed) 13486ms
+       × PK1: ArrowRight on the Pan slider after a lost release writes the next change once 6124ms
+       ✓ PK2: a keydown on the music Volume slider does not end the Pan suppression  3806ms
+       ✓ PK3: after the keyboard entry a late pointerup and pointercancel of the old pointer write nothing  1053ms
+       ✓ PK4: Delete on the suppressed Pan slider still reaches the window unprevented and makes no Pan entry  321ms
+       ✓ RW1: the slider and the reset button show the stored pan, with no gesture and no entry 279ms
+       ✓ RW2: a Pan change during another gesture is refused without a draft and is written after its release  606ms
+       ✓ RW3: a window blur after a finished drag changes nothing  607ms
+       ✓ RW4: the window blur does not suppress the next change without a keydown  630ms
+ ✓ app/lib/arrangement/__tests__/clip-gain.test.tsx (28 tests) 15491ms
+       ✓ setClipGain commits one Clip Gain entry; Undo removes the key and Redo re-applies it  1027ms
+       ✓ a gain change while playing does not reschedule and ramps the clip gain node; Undo too  400ms
+       ✓ type 6 + Enter commits one entry, shows the status and the stored text  4083ms
+       ✓ Escape reverts the text and the following blur commits nothing; blur with changed text commits  2771ms
+       ✓ Enter on an unchanged value, empty text and out-of-range values give the exact statuses  651ms
+       ✓ 0 dB reset removes the key with one entry and is disabled afterwards  335ms
+       ✓ 0 dB with dirty text keeps focus in the field, discards the text and makes one entry  326ms
+       ✓ a blur with unchanged or normalised-equal text commits nothing and shows no status  491ms
+       ✓ nothing, a group and a video clip disable the field and reset with the exact linked reasons  979ms
+       ✓ Delete and Backspace inside the focused field do not delete the clip  606ms
+       ✓ dirty text discarded on a selection change: no entry and each clip keeps its own gain  717ms
+       ✓ a commit or 0 dB reset during a pointer gesture shows the gesture status and adds no entry  1032ms
+       ✓ labels the column Clip Gain, dB and never uses sensitivity or trim wording  1185ms
+ ✓ app/lib/arrangement/__tests__/detail-panel-polish.test.tsx (16 tests) 20775ms
+       ✓ keeps typed start text when a range on another lane appears and when it is cleared  4712ms
+       ✓ keeps typed start text when the same range is set again as a new object  3865ms
+       ✓ resets to a changed on-clip range, to the clip bounds when it leaves, and follows a nudged clip  1919ms
+       ✓ keeps typed text for a same-lane range off the clip and resets for a range equal to the clip bounds  720ms
+       ✓ follows a trimmed clip duration  1844ms
+       ✓ shows the normalized applied values after Apply even when the on-clip bounds do not change  1301ms
+       ✓ shows the clamped overlap for a range that only partly lies on the clip  467ms
+       ✓ prevents the wheel default on the focused start and end inputs  392ms
+       ✓ keeps preventing the wheel on the focused input after the selection changes and the content remounts  444ms
+       ✓ leaves the wheel alone on an unfocused input and on the waveform box  648ms
+       ✓ leaves the wheel alone on disabled inputs with no clip selected  465ms
+       ✓ registers one non-passive wheel listener on the content and removes the same handler on unmount  767ms
+       ✓ draws the detail range overlay at /30 with the foreground border and keeps the waveform box class  725ms
+       ✓ labels the single clip info and the range inputs in Georgian and keeps the aria-labels  749ms
+       ✓ labels the group info and the range inputs in Georgian and keeps the aria-labels  948ms
+       ✓ sizes the info column wrapper with w-72 instead of w-56  772ms
+ ✓ app/lib/arrangement/__tests__/fader-focus-order.test.tsx (5 tests) 8600ms
+     ✓ S1 must-not: Clip Gain "3" typed on SFX → music Volume press commits Clip Gain once before the gesture; focus on the Volume; no blocked status  3584ms
+     ✓ S2 must-not: a pending music Volume key preview → SFX Volume press writes exactly one Volume entry; focus on the SFX Volume  1807ms
+     ✓ S3 must-not: a pending Master key preview → music Volume press writes exactly one Master Volume entry; focus on the music Volume  1293ms
+     ✓ S4 must-not: music Pan focused after a key step → music Volume press adds no entry to the Pan step; focus on the Volume  1251ms
+     ✓ S5 must-not: a pending music Volume key preview → Master press writes exactly one Volume entry; focus on Master  649ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx (8 tests) 13826ms
+     ✓ HU1 Play from 0 schedules only the first 2 s of clicks  3742ms
+     ✓ HU2 the pump refills every beat exactly once to the end, never late, then stops appending  2329ms
+     ✓ HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues  1748ms
+     ✓ HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs  844ms
+     ✓ HU5 Stop, or turning the metronome off while playing, ends every refill  2061ms
+     ✓ HU6 a tempo change resyncs once and every later click is on the new beat  884ms
+     ✓ HU7 near the end every beat sounds once, the last click is whole and nothing is past the end  1110ms
+     ✓ HU8 at 999 BPM every scrub-like seek plans at most one horizon of clicks  1077ms
+ ✓ app/lib/arrangement/__tests__/video-sync.test.ts (58 tests) 5058ms
+     ✓ is monotone non-increasing in the drift  592ms
+     ✓ is monotone non-increasing in the drift  601ms
+     ✓ never leaves [VIDEO_SETTLE_RATE_MIN, VIDEO_SETTLE_RATE_MAX] and uses the 0.05 step  1224ms
+     ✓ equals the steady rule when it was never armed  318ms
+     ✓ ends on endSettle()  375ms
+     ✓ marks a sample as a stall edge under settle exactly when the steady rule does  343ms
+ ✓ app/lib/arrangement/__tests__/track-pan.test.tsx (26 tests) 11768ms
+       ✓ setTrackPan commits one Pan entry; Undo removes the key and Redo re-applies it  417ms
+       ✓ audio lanes show Pan and its reset; the video lane and a folded lane do not  3260ms
+       ✓ row 1 DOM order is fold, name, Pan, readout  715ms
+       ✓ a pointer drag follows the draft live without history, then commits one entry showing NL  2661ms
+       ✓ each keyboard value change is one entry immediately  914ms
+       ✓ the readout click returns to C with one entry and is disabled afterwards  722ms
+       ✓ a blur during a drag makes no entry and shows the stored pan again  657ms
+       ✓ a window pointercancel during a drag clears the draft without an entry  765ms
+       ✓ Delete and Backspace on the focused Pan slider do not delete the selected clip  620ms
+       ✓ Space on the focused Pan slider toggles playback like Volume  438ms
+ ✓ app/lib/arrangement/__tests__/delete-selection-ui.test.tsx (13 tests) 10966ms
+     ✓ cuts only the window, keeps the playhead and the loop, and is one exact Undo/Redo step  444ms
+     ✓ Delete, Backspace, Shift+Delete and Shift+Backspace each leave a gap  4373ms
+     ✓ Ctrl+Shift+L sets the flag without toggling the loop; Ctrl+L still toggles the loop  987ms
+     ✓ Ctrl+Shift+X still closes the gap on every lane  858ms
+     ✓ Backspace in the detail number input or the library search and Delete without a selection change no clip  1029ms
+     ✓ after Ctrl+Shift+L every lane shows one overlay, the label once, and no clip-level overlay  1236ms
+     ✓ titles the transport delete button for a clip, a range and an all-lane range  1428ms
+ ✓ app/lib/arrangement/__tests__/tempo-ui.test.tsx (12 tests) 12697ms
+     ✓ U1 has no tempo by default: empty field, hint, no marks, 4/4 shown  3603ms
+     ✓ U2 setting 90 BPM draws bars 1–4 at their times and blurs the field  1388ms
+     ✓ U3 a tempo changes only the bars ruler: seconds ruler, model, Undo and Snap stay  1082ms
+     ✓ U4 changing 90 to 120 rescales the bars  676ms
+     ✓ U5 invalid text changes nothing and shows the current value again  1095ms
+     ✓ U6 Escape restores the current value without writing a status  758ms
+     ✓ U7 blur commits the typed tempo  720ms
+     ✓ U8 empty text clears the tempo and the marks  927ms
+     ✓ U9 committing the same value again is a no-op without a status  641ms
+     ✓ U12 a click inside the focused field keeps it focused; a lane click still releases it  657ms
+     ✓ U11 zoom rescales the bars strip and its width  838ms
+ ✓ app/lib/__tests__/sfx-video-transport.test.tsx (2 tests) 6177ms
+     ✓ keeps sound stopped and shows a recoverable error when video playback is rejected  3886ms
+     ✓ anchors sound to the actual video time after the play promise resolves and pauses both  2248ms
+ ✓ app/lib/arrangement/__tests__/detail-panel-reason.test.tsx (6 tests) 9356ms
+     ✓ RF1: a group shows the range reason and then the Clip Gain reason in the middle box, still linked  3279ms
+     ✓ RF2: a video clip shows the Clip Gain reason in the waveform box below the placeholder, not inside it  924ms
+     ✓ RF3: with nothing selected both reasons stay in their columns and the middle box stays empty  2341ms
+     ✓ RF4: an audio clip has no reason, no text in the waveform and the pending marker in the reset row  1515ms
+     ✓ RF5: the content scroller uses the Studio scrollbar class and keeps overflow-y-auto  687ms
+     ✓ RF6: every visible reason stays text-dim, untruncated, without a title and whole (group, then video)  607ms
+ ✓ app/lib/arrangement/__tests__/gesture-guard.test.tsx (19 tests) 13486ms
+     ✓ ignores a second pointer dragging another clip; only the first gesture commits  1688ms
+     ✓ ignores a second pointer on the loop brace while a clip is dragged  375ms
+     ✓ refuses Mute, Solo and Volume during a gesture without a history entry  3474ms
+     ✓ refuses library add and library drop during a gesture  392ms
+     ✓ ends a stale gesture of the same pointer on another clip before the new one starts  389ms
+     ✓ ends a stale brace gesture of the same pointer when a clip drag starts  320ms
+     ✓ treats a Volume slider drag as the gesture: a second pointer cannot drag a clip and Volume commits on release (D-30, R30-1)  979ms
+     ✓ writes one Volume entry with the final value for a normal drag and undo restores it (R30-2)  1616ms
+     ✓ keeps refusing a Volume drag that starts while a clip is dragged (R26-2 order)  957ms
+     ✓ restores the stored Volume without an entry when the slider blurs mid-drag (D-30 abort)  540ms
+     ✓ aborts a Volume drag on window blur and commits one whose release reached only the window  630ms
+     ✓ keeps a Volume drag when another slider loses focus as the drag starts (D-30)  371ms
+     ✓ keeps a keyboard Volume change pending during a clip drag and writes it before the move  343ms
+ ✓ app/lib/arrangement/__tests__/pending-status.test.tsx (22 tests) 13583ms
+       ✓ S1: an edit refusal during a gesture shows the blocked status, then the previous status after release  347ms
+       ✓ S7: a refused music Volume press during the separator drag shows blocked, then the prior status after pointerup  3992ms
+       ✓ S9: a Clip Gain blur kept during a gesture restores the prior status and keeps the text with its marker  1235ms
+       ✓ PM1: typed text that differs from the stored value shows the marker, the warning border and the description  2114ms
+       ✓ PM2: Enter commits one Clip Gain entry and removes the marker and the description  1972ms
+       ✓ PM3: Escape reverts the text, removes the marker and writes no entry  867ms
+       ✓ PM4: a raw text that differs only in format shows the marker until the blur reverts it  542ms
+       ✓ PM5: a disabled field for a video clip or a group shows no marker and keeps the reason description  591ms
+       ✓ PM6: the 0 dB reset after a typed value stores 0, shows 0.0 and removes the marker  1034ms
+ ✓ app/lib/arrangement/__tests__/detail-panel-fit.test.tsx (7 tests) 8725ms
+     ✓ F1: the pending marker shows one truncating label and keeps the full hint for screen readers and hover  2867ms
+     ✓ F2: the marker shares one flex row with the 0 dB button  700ms
+     ✓ F3: the input carries the full hint as its title only while pending (Enter and Escape)  1507ms
+     ✓ F4: while pending the focus ring is warning, otherwise brand  609ms
+     ✓ F5: the disabled reason lines stay whole, untruncated and linked (video, then a group)  456ms
+     ✓ F8: the truncating info lines keep their line box (shrink-0) for a clip and a group  1175ms
+     ✓ F9: the 0 dB reset from a pending value still stores 0 and removes the marker  1390ms
+ ✓ app/lib/arrangement/__tests__/master-hold-tick.test.tsx (3 tests) 2601ms
+     ✓ HT1: at +6 dB, at +12 dB (its fraction clamps to the top) and at +5.5 dB the hold stops 1 px before the right edge, so the 2 px tick stays inside; +4.9 dB keeps the unclamped position  1969ms
+     ✓ HT2: at 0 dBFS the hold transform is the unclamped position (60/66 of the box), on the 0 dBFS mark  336ms
+Error: useArrangementPositionStore must be used within an ArrangementProvider
+    at Module.useArrangementPositionStore (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:2890:11)
+    at PositionStoreOutsideProvider (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:311:3)
+    at renderWithHooks (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+Error: useArrangementPositionStore must be used within an ArrangementProvider
+    at Module.useArrangementPositionStore (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:2890:11)
+    at PositionStoreOutsideProvider (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:311:3)
+    at renderWithHooks (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+Error: useArrangement must be used within an ArrangementProvider
+    at Module.useArrangement (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:2882:11)
+    at ArrangementOutsideProvider (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:316:3)
+    at renderWithHooks (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+Error: useArrangement must be used within an ArrangementProvider
+    at Module.useArrangement (C:/Apps/czaba-project/store/app/contexts/ArrangementContext.tsx:2882:11)
+    at ArrangementOutsideProvider (C:/Apps/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:316:3)
+    at renderWithHooks (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\Apps\czaba-project\store\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\Apps\czaba-project\store\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+ ✓ app/lib/arrangement/__tests__/context-hygiene.test.tsx (10 tests) 1815ms
+       ✓ PV4: a double-click on the music Volume fader at 100 % causes 0 provider and 0 consumer renders and 0 entries  901ms
+       ✓ PV5: an off-default round trip writes one Volume entry per change and Undo returns to 0.72  439ms
+ ✓ app/lib/arrangement/__tests__/grid.test.ts (12 tests) 1014ms
+     ✓ returns whole milliseconds on the grid for 1000 seeded values at every division  782ms
+ ✓ app/lib/__tests__/gift-card-input.test.tsx (3 tests) 947ms
+     ✓ preserves the code and displays rejected application feedback  645ms
+ ✓ app/lib/__tests__/sfx-scene-route.test.tsx (3 tests) 3987ms
+     ✓ loads once despite new audio callbacks, provider rerenders and token refresh  1113ms
+     ✓ stops on a failed request until the user explicitly retries  2319ms
+     ✓ backs off a rate limit without issuing automatic retries  529ms
+ ✓ app/hooks/__tests__/useRecordingPlayer.test.ts (15 tests) 485ms
+ ✓ app/lib/__tests__/sfx-scene.test.ts (8 tests) 2656ms
+     ✓ reopens video sync metadata and preserves leading silence and exact three cue positions in a full-duration WAV  1191ms
+     ✓ reopens a saved 30-second, three-recording scene and exports the exact preview samples  1218ms
+ ✓ app/lib/arrangement/__tests__/all-lane-clipboard.test.tsx (14 tests) 6005ms
+     ✓ all-lane Ctrl+X then Ctrl+V with SFX active puts the part back on music (C repro)  435ms
+     ✓ after Ctrl+Shift+L the range line says ყველა ხაზი  3545ms
+     ✓ a single-lane range line has no all-lane label  1277ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/export-dialog-focus-restore.test.tsx (7 tests) 3174ms
+     ✓ FR1: restores focus to the opener after დახურვა although a later layout effect focused a decoy during the opening commit  2251ms
+ ✓ app/lib/__tests__/sfx-edit.test.ts (3 tests) 2635ms
+     ✓ exports exactly the heard 12 seconds with original rate, stereo, gain and fades  2612ms
+ ✓ app/lib/arrangement/__tests__/library-preview.test.tsx (4 tests) 4670ms
+     ✓ reserves exactly two clamped lines for the active-lane row on an audio lane (C-R16-01)  719ms
+     ✓ keeps the video note in the title and visible text when the video lane is active (C-R16-01)  2465ms
+     ✓ titles the row with a dash when no lane is active (C-R16-01)  852ms
+     ✓ advances the library-preview cursor without rendering LibraryPlayheadText (M-R10-1/M2)  590ms
+ ✓ app/lib/arrangement/__tests__/demo-synth.test.ts (5 tests) 761ms
+     ✓ keeps every stem non-silent and at or below −6 dBFS  383ms
+ ✓ app/lib/arrangement/__tests__/gesture-reentry.test.tsx (14 tests) 703ms
+ ✓ app/lib/arrangement/__tests__/grid-musical.test.ts (12 tests) 1623ms
+     ✓ GM9 every musical line is stable, whole-ms and reachable by the neighbour lines  310ms
+     ✓ GM10 adjacentGridLine from an off-line time returns the nearest stored line beyond  509ms
+     ✓ GM11 snapGroupDelta clamps to the farthest stored line inside the bounds  551ms
+ ✓ app/lib/arrangement/__tests__/grid-triplet.test.ts (7 tests) 316ms
+     ✓ TR7 the frozen snap, line and loop rules land on stored triplet lines  306ms
+ ✓ app/lib/arrangement/__tests__/ArrangementContext.test.ts (21 tests) 479ms
+ ✓ app/lib/arrangement/__tests__/view.test.ts (41 tests) 385ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon.test.ts (5 tests) 115ms
+ ✓ app/lib/arrangement/__tests__/peaks.test.ts (5 tests) 11ms
+ ✓ app/lib/arrangement/__tests__/library.test.ts (11 tests) 8ms
+ ✓ app/lib/__tests__/bug-hunting/product-utils-bugs.test.ts (10 tests) 8ms
+ ✓ app/contexts/__tests__/audio.test.tsx (5 tests) 154ms
+ ✓ app/lib/__tests__/r2-tokens.server.test.ts (11 tests) 13ms
+ ✓ app/contexts/__tests__/toast.test.tsx (15 tests) 54ms
+ ✓ app/lib/__tests__/bug-hunting/cart-context-bugs.test.ts (17 tests) 9ms
+ ✓ app/lib/__tests__/auth-validation.test.ts (23 tests) 8ms
+ ✓ app/contexts/__tests__/filters.test.tsx (17 tests) 109ms
+ ✓ app/lib/arrangement/__tests__/schedule.test.ts (12 tests) 7ms
+ ✓ app/lib/__tests__/bug-hunting/cart-context-race-bugs.test.ts (8 tests) 8ms
+ ✓ app/lib/__tests__/recording-original-route.test.ts (38 tests) 41ms
+ ✓ app/lib/arrangement/__tests__/ssr-layout-effect.test.tsx (4 tests) 59ms
+ ✓ app/lib/arrangement/__tests__/tempo-window.test.ts (6 tests) 38ms
+ ✓ app/lib/arrangement/__tests__/grid-edges.test.ts (11 tests) 8ms
+ ✓ app/lib/arrangement/__tests__/video.test.ts (27 tests) 34ms
+ ✓ app/contexts/__tests__/purchases-helpers.test.ts (17 tests) 6ms
+ ✓ app/lib/arrangement/__tests__/position-store.test.ts (2 tests) 41ms
+ ✓ app/lib/__tests__/download-routes.test.ts (21 tests) 558ms
+ ✓ app/lib/__tests__/cart-utils.test.ts (26 tests) 493ms
+     ✓ formats USD price correctly  342ms
+stderr | app/lib/__tests__/product-presentation.test.tsx > SFX product presentation > does not show music stems on SFX even with an incorrect stems flag
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at MotionDOMComponent (file:///C:/Apps/czaba-project/store/node_modules/framer-motion/dist/es/motion/index.mjs:42:16)
+    at button
+    at h2
+    at section
+    at ProductAccordion (C:/Apps/czaba-project/store/app/components/product/ProductAccordion.tsx:10:29)
+    at ProductFeatures (C:/Apps/czaba-project/store/app/components/product/ProductFeatures.tsx:9:3)
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at MotionDOMComponent (file:///C:/Apps/czaba-project/store/node_modules/framer-motion/dist/es/motion/index.mjs:42:16)
+    at section
+    at ProductAccordion (C:/Apps/czaba-project/store/app/components/product/ProductAccordion.tsx:10:29)
+    at ProductFeatures (C:/Apps/czaba-project/store/app/components/product/ProductFeatures.tsx:9:3)
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at MotionDOMComponent (file:///C:/Apps/czaba-project/store/node_modules/framer-motion/dist/es/motion/index.mjs:42:16)
+    at div
+    at MotionDOMComponent (file:///C:/Apps/czaba-project/store/node_modules/framer-motion/dist/es/motion/index.mjs:42:16)
+    at section
+    at ProductAccordion (C:/Apps/czaba-project/store/app/components/product/ProductAccordion.tsx:10:29)
+    at ProductFeatures (C:/Apps/czaba-project/store/app/components/product/ProductFeatures.tsx:9:3)
+
+stderr | app/lib/__tests__/product-presentation.test.tsx > SFX product presentation > retains explicit music stems
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at MotionDOMComponent (file:///C:/Apps/czaba-project/store/node_modules/framer-motion/dist/es/motion/index.mjs:42:16)
+    at button
+    at h2
+    at section
+    at ProductAccordion (C:/Apps/czaba-project/store/app/components/product/ProductAccordion.tsx:10:29)
+    at ProductFeatures (C:/Apps/czaba-project/store/app/components/product/ProductFeatures.tsx:9:3)
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at MotionDOMComponent (file:///C:/Apps/czaba-project/store/node_modules/framer-motion/dist/es/motion/index.mjs:42:16)
+    at section
+    at ProductAccordion (C:/Apps/czaba-project/store/app/components/product/ProductAccordion.tsx:10:29)
+    at ProductFeatures (C:/Apps/czaba-project/store/app/components/product/ProductFeatures.tsx:9:3)
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at MotionDOMComponent (file:///C:/Apps/czaba-project/store/node_modules/framer-motion/dist/es/motion/index.mjs:42:16)
+    at div
+    at MotionDOMComponent (file:///C:/Apps/czaba-project/store/node_modules/framer-motion/dist/es/motion/index.mjs:42:16)
+    at section
+    at ProductAccordion (C:/Apps/czaba-project/store/app/components/product/ProductAccordion.tsx:10:29)
+    at ProductFeatures (C:/Apps/czaba-project/store/app/components/product/ProductFeatures.tsx:9:3)
+
+ ✓ app/lib/__tests__/product-presentation.test.tsx (8 tests) 263ms
+ ✓ app/lib/__tests__/recording-stream-route.test.ts (14 tests) 455ms
+ ✓ app/lib/arrangement/__tests__/clipboard.test.ts (11 tests) 219ms
+ ✓ app/lib/arrangement/__tests__/delete-selection.test.ts (10 tests) 185ms
+ ✓ app/lib/arrangement/__tests__/meter.test.ts (15 tests) 11ms
+ ✓ app/lib/__tests__/utils.test.ts (25 tests) 199ms
+ ✓ app/lib/__tests__/bug-hunting/auth-bugs.test.ts (16 tests) 82ms
+ ✓ app/lib/arrangement/__tests__/transport.test.ts (12 tests) 129ms
+ ✓ app/lib/__tests__/bug-hunting/product-adapter-edge-cases.test.ts (9 tests) 36ms
+ ✓ app/lib/arrangement/__tests__/panels.test.ts (53 tests) 145ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts (11 tests) 225ms
+ ✓ app/lib/__tests__/sfx-video.test.ts (4 tests) 144ms
+ ✓ app/lib/arrangement/__tests__/master.test.ts (17 tests) 16ms
+ ✓ app/lib/arrangement/__tests__/model.test.ts (38 tests) 127ms
+ ✓ app/hooks/__tests__/useIsomorphicLayoutEffect.test.ts (2 tests) 126ms
+ ✓ app/services/api/__tests__/productAdapter.test.ts (38 tests) 256ms
+ ✓ app/lib/arrangement/__tests__/selection.test.ts (25 tests) 206ms
+ ✓ app/lib/arrangement/__tests__/track-meter.test.ts (13 tests) 161ms
+ ✓ app/lib/arrangement/__tests__/tempo.test.ts (10 tests) 204ms
+ ✓ app/contexts/__tests__/cart-helpers.test.ts (39 tests) 116ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts (19 tests) 186ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts (24 tests) 274ms
+ ✓ app/lib/__tests__/product-utils.test.ts (33 tests) 141ms
+ ✓ app/lib/__tests__/bug-hunting/api-client-bugs.test.ts (7 tests) 64ms
+ ✓ app/lib/__tests__/bug-hunting/product-adapter-bugs.test.ts (16 tests) 79ms
+ ✓ app/lib/__tests__/bug-hunting/purchases-context-bugs.test.ts (6 tests) 18ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/pan-release-recovery.test.tsx > Pan release recovery (A-R32-REVIEW-1, A-R31-REVIEW-2; D-29z7) > a keydown on the Pan slider ends the blur suppression (R42-PK) > PK1: ArrowRight on the Pan slider after a lost release writes the next change once
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ app/lib/arrangement/__tests__/pan-release-recovery.test.tsx:269:5
+    267|     }
+    268| 
+    269|     it('PK1: ArrowRight on the Pan slider after a lost release writes …
+       |     ^
+    270|       const { api, controls } = await mountSuppressed();
+    271|       controls.pan().focus();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 100 passed (101)
+      Tests  1 failed | 1695 passed (1696)
+   Start at  21:01:50
+   Duration  439.04s (transform 94.98s, setup 0ms, import 478.06s, tests 507.49s, environment 546.25s)
+

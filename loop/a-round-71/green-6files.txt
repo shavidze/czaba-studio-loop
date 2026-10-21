@@ -1,0 +1,88 @@
+
+ RUN  v4.0.16 C:/Apps/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M1 plans 8 clicks at 120 BPM over 0–4 s with accents on each bar downbeat 3ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M2 computes every beat time from its index, never by accumulation 3ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M3 keeps only the beats inside the window and never plays the tail of an earlier click 1ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M4 includes a beat that lies within ARRANGEMENT_EPS before the window start, clamped to it 1ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M5 truncates the last click at the window end 0ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M6 returns no clicks for an invalid tempo or an empty window 0ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M7 generates a short decaying click: 1600 Hz accent at 0.5, 1000 Hz beat at 0.25 2ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M8 writes the on/off status and the two toggle titles verbatim 0ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M9 routes every click through one metronome gain into the master gain only 3ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M10 appends clicks, honours stop(when), counts clips only and disconnects everything 1ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M11 creates exactly the existing nodes without a metronome and appendClicks does nothing 1ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH1 an omitted, equal, non-finite or too-small soundUntil gives the 3-argument plan 37ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH2 any chunking with soundUntil = end reproduces the full plan click for click 15ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH3 soundUntil caps a click only at the project end, never at the chunk end 1ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH4 nextMetronomeChunk follows the due, late-skip and end rules 1ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH5 a random audio clock never starts a click in the past and drops only skipped beats 7ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > starts each source at startAt + (when - from) with offset and duration 5ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > wires clip -> clipGain -> trackGain -> pan -> master -> destination 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > gives muted and non-soloed tracks gain 0 and still creates their sources 2ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > setTrackGain ramps the track gain without restarting sources 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > setTrackGain uses the short de-click constant for mute and unmute 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > seeds the last target from construction: muted track unmutes with the short constant 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > seeds the last target from construction: audible track volume change keeps smoothing 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > seeds a track silenced by another track solo so unsolo uses the short constant 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > keeps the last target per track: muting sfx does not change music smoothing 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > same-target re-sends keep their class and never restart sources 2ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > stop() stops every source and activeSourceCount returns to 0 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > a scheduled stop keeps sources active until the handoff time 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > counts sources that ended naturally as inactive 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > creates a video trackGain and plays video-track clips through it 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > keeps a muted video clip scheduled with track gain 0 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > solo on the video lane silences audio lanes and vice versa 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > appendPlan schedules a loop iteration on the same track gains and releases ended sources 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > skips clips without a loaded buffer 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > renderArrangementWav uses the same applySchedule as live playback 1ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > setLoopFromRange > creates an enabled loop from a range 2ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > setLoopFromRange > replaces a different brace and re-enables it 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > setLoopFromRange > refuses a range shorter than 0.1 s 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > setLoopFromRange > returns the same reference when the brace already matches 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > toggleLoop > keeps start and end when toggling off and on 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > toggleLoop > is a no-op returning the same reference when there is no loop 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > moveLoop > keeps the length 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > moveLoop > clamps the start at 0 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > moveLoop > returns the same reference when nothing changes 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resizeLoop > enforces the 0.1 s minimum on both edges 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resizeLoop > has no 60 s or project-end cap 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > deleteTime remaps the loop > shifts a loop after the deleted span 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > deleteTime remaps the loop > shrinks a loop the span cuts across (brace 2–4, delete 1–2 → 1–3) 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > deleteTime remaps the loop > removes a loop that becomes shorter than 0.1 s 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > deleteTime remaps the loop > leaves a loop before the span untouched 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resolveActiveLoop / loopTimelinePosition > is the identity before the loop end 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resolveActiveLoop / loopTimelinePosition > maps the loop end to the loop start 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resolveActiveLoop / loopTimelinePosition > maps 2.5 iterations after the first pass correctly 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resolveActiveLoop / loopTimelinePosition > stays linear when the schedule starts at or after the loop end 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resolveActiveLoop / loopTimelinePosition > stays linear when the loop is disabled or missing 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > planLoopIteration > truncates a clip that straddles the loop end at the end 1ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > planLoopIteration > gives a clip straddling the loop start the offset at loop.start 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > planLoopIteration > starts iteration k+1 exactly where iteration k ends 1ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > planLoopIteration > does not plan a clip fully outside the loop in iterations >= 1 1ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI1 is disabled and unpressed without a tempo, and Play schedules no metronome 586ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU1 Play from 0 schedules only the first 2 s of clicks 928ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI2 turns on at 120 BPM with its status and Play schedules a click on every beat 615ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending 674ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI3 turning it off while playing forces one resync without a metronome 437ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI4 turning it on while playing resyncs once with clicks from the live position 515ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues 610ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI5 a tempo change while it is on resyncs once with the new beat and keeps it pressed 340ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs 355ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI6 clearing the tempo turns it off and setting a tempo again does not re-enable it 392ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU5 Stop, or turning the metronome off while playing, ends every refill 382ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI7 plans the clicks for loop iteration 0 and appends them for every refilled iteration 249ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat 401ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI8 is not part of history: Undo title, arrangement and Ctrl+Z leave it unchanged 320ms
+Not implemented: navigation to another Document
+Not implemented: navigation to another Document
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end 278ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI9 export never receives the metronome: two arguments and the same buffers 228ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI10 Space on the focused toggle starts playback and does not toggle the metronome 291ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU8 at 999 BPM every scrub-like seek plans at most one horizon of clicks 355ms
+
+ Test Files  6 passed (6)
+      Tests  77 passed (77)
+   Start at  20:43:48
+   Duration  8.36s (transform 3.65s, setup 0ms, import 6.40s, tests 8.09s, environment 6.97s)
+

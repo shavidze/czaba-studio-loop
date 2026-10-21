@@ -1,0 +1,356 @@
+
+> music-store@1.0.0 verify
+> npm run agents:check && npm run test:agents && npm run lint && npm run typecheck && npm run test:run && npm run build
+
+
+> music-store@1.0.0 agents:check
+> node scripts/check-agents.mjs
+
+Agent references, review roles and skill mirrors passed.
+
+> music-store@1.0.0 test:agents
+> node --test scripts/agent-hooks.test.mjs
+
+TAP version 13
+# Subtest: hook resolves active project from a nested cwd, preserves normal permissions, and deduplicates references
+ok 1 - hook resolves active project from a nested cwd, preserves normal permissions, and deduplicates references
+  ---
+  duration_ms: 12.846
+  type: 'test'
+  ...
+# Subtest: unrelated tools produce no permission decision
+ok 2 - unrelated tools produce no permission decision
+  ---
+  duration_ms: 0.1954
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 178.4233
+
+> music-store@1.0.0 lint
+> biome lint ./app
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 199.
+Checked 379 files in 311ms. No fixes applied.
+Found 218 warnings.
+Found 1 info.
+
+> music-store@1.0.0 typecheck
+> tsc --noEmit
+
+
+> music-store@1.0.0 test:run
+> vitest run
+
+
+ RUN  v4.0.16 C:/Apps/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/render-budget.test.tsx (7 tests) 11878ms
+     ✓ does not re-render clips, overview bars, library rows or ruler ticks over Play → Pause → Play  6082ms
+     ✓ moves the playhead, ruler handle and transport time on playback frames without React renders  1464ms
+     ✓ does not re-render the detail panel content over 60 position frames or Play → Pause → Play (R11-P1e)  2336ms
+     ✓ writes only transform on the detail playhead per frame and never left, width or height (R9-D3, C-R8-01)  318ms
+     ✓ keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02)  1224ms
+ ✓ app/lib/arrangement/__tests__/floating-video.test.tsx (45 tests) 15215ms
+     ✓ expands the same box over the library, keeps both <video> nodes and shows the placeholder  907ms
+     ✓ returns to compact with ✕ and keeps the same <video> nodes  553ms
+     ✓ returns to compact with the placeholder button and keeps the same <video> nodes  698ms
+     ✓ returns to compact with Esc and keeps the same <video> nodes  392ms
+     ✓ clears a non-empty library search on the first Esc and returns the video on the second  427ms
+     ✓ does not change the video on Esc while the Export dialog is open  2800ms
+     ✓ keeps the video when Esc closes Export and React flushes between listeners (real browser order)  666ms
+     ✓ places the box on the next frame under reduced motion (transition-property none, duration kept)  328ms
+     ✓ waits for the library width transitionend before placing the box  356ms
+     ✓ re-clamps on window resize and does not follow a library width change  396ms
+     ✓ places the box by the fallback timer when transitionend never arrives  695ms
+     ✓ never places a box whose expand was cancelled (collapse) before the library transition ended  664ms
+     ✓ never places a box whose expand was cancelled (escape) before the library transition ended  618ms
+ ✓ app/lib/arrangement/__tests__/track-layout.test.tsx (36 tests) 16276ms
+     ✓ folds a lane to a 36 px row with compact M/S that keep their aria-pressed and click behaviour  3373ms
+     ✓ keeps the video lane picker reachable as a compact ＋ when folded and hides the original-sound line  2475ms
+     ✓ writes no history for fold, height or auto-fit, and Undo leaves every height alone  793ms
+     ✓ claims the gesture registry while dragging a height handle and restores the start height on pointercancel  662ms
+     ✓ steps ↓ +8 / ↑ −8 on the focused handle, clamps per kind and never nudges the selected clip  1025ms
+     ✓ a key on the handle of a folded lane only unfolds it first  332ms
+     ✓ renders no range body on a folded clip, adds the title line, and keeps trim with one history entry  386ms
+     ✓ auto-fit shrinks the lanes, gives a folded lane’s height back, and the first manual change turns it off  362ms
+     ✓ keeps auto-fit on after a fold and after a cancelled height drag  468ms
+     ✓ lands cross-lane header drags by real row rectangles on mixed heights (music folded, SFX 140)  473ms
+     ✓ forwards a drop over the height handle to the lane body only when it is over the lane, not the header strip  370ms
+     ✓ gives a folded lane’s height handle no pointer hit area but keeps it focusable, and restores the round-15 classes when unfolded (C-R11-01)  315ms
+     ✓ points every fold button’s aria-controls at its own lane body, outside the header, through fold and unfold (R23-F1)  428ms
+     ✓ draws the track-name button’s focus ring inset on folded and unfolded lanes (R23-N)  1032ms
+ ✓ app/lib/arrangement/__tests__/fader-guards.test.tsx (71 tests) 18028ms
+       ✓ Delete and Backspace on the focused musicVolume slider keep the selected clip, history, status and value  906ms
+       ✓ Delete and Backspace on the focused sfxVolume slider keep the selected clip, history, status and value  441ms
+       ✓ Delete and Backspace on the focused master slider keep the selected clip, history, status and value  621ms
+       ✓ Delete and Backspace on the focused zoom slider keep the selected clip, history, status and value  381ms
+       ✓ Delete and Backspace on the focused pan slider keep the selected clip, history, status and value  340ms
+       ✓ narrow guard: Delete on the focused playhead handle (role="slider") still deletes the selected clip  2090ms
+       ✓ during another pointer gesture Delete on a focused Volume keeps the gesture-blocked status (unchanged)  674ms
+       ✓ after a blur the same held pointer writes nothing: no entry, stored pan, stored slider value, no panner push  552ms
+       ✓ a new successful pointerdown while suppressed starts a normal drag; the old pointer release does nothing  346ms
+       ✓ a pointerup of another pointer and a refused pointerdown keep the suppression  485ms
+       ✓ the same sequence on the music Volume gives exactly one Volume entry on release  451ms
+       ✓ Clip Gain emptied → music clip header click gives exactly the status and history of a plain blur of the same text  305ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-menu.test.tsx (39 tests) 6586ms
+     ✓ GM1 a right-click on an empty audio lane opens the grid menu at the pointer  356ms
+     ✓ GM16 the dismissing press also swallows its click on the Snap toggle and on Play  580ms
+     ✓ GM20 G7 no grid menu opens while the export dialog is open  372ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx (36 tests) 5372ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-ui.test.tsx (20 tests) 4955ms
+     ✓ GS14 keeps the transport toolbar unchanged and without a Snap control  312ms
+     ✓ GS3 G turns Snap on without history; a drag lands on the 1 s grid; a sub-half drag locks onto a nearer clip edge  465ms
+     ✓ GS5 a group follows the grabbed clip onto the grid with one history entry  344ms
+     ✓ GS11 G is ignored in the select, with Ctrl, on auto-repeat and while Export is open  544ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx (44 tests) 8058ms
+     ✓ CG7 an unreachable edge does not report a completed group move as stopped (C-R62-01)  347ms
+ ✓ app/lib/arrangement/__tests__/export-dialog-focus.test.tsx (19 tests) 4086ms
+     ✓ moves focus to დახურვა inside the dialog when it opens  381ms
+     ✓ returns focus to ✕ of the expanded video after Esc closes Export, and keeps the video expanded  644ms
+     ✓ keeps focus inside the dialog while a WAV render disables its buttons, then returns it to დახურვა  465ms
+     ✓ leaves focus on an enabled control while a render starts and ends  500ms
+ ✓ app/lib/arrangement/__tests__/grid-musical-ui.test.tsx (14 tests) 2309ms
+     ✓ GU1 without a BPM offers only the seconds divisions  392ms
+ ✓ app/lib/arrangement/__tests__/detail-panel.test.tsx (24 tests) 2353ms
+     ✓ claims the gesture registry while dragging the separator: a second pointer on a clip and Mute are refused  331ms
+ ✓ app/lib/arrangement/__tests__/meter-ui.test.tsx (12 tests) 2896ms
+     ✓ puts Master Peak after Master Volume and before Play in the header  772ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-keys.test.tsx (13 tests) 1151ms
+ ✓ app/lib/arrangement/__tests__/track-meter-ui.test.tsx (11 tests) 3078ms
+     ✓ creates 1 + N stereo splitters and 2 + 2N analysers on Play, master first, and passes every track tap  355ms
+     ✓ meters each track independently: music −12, SFX −6, video silent  322ms
+     ✓ latches an over on the SFX track only (+3.5, warning, sr-only text) and leaves music clear  441ms
+     ✓ keeps the track latch through quiet frames and Pause/Play  487ms
+     ✓ a Master Peak click clears the Master and the SFX latch with no history entry and no status  321ms
+ ✓ app/lib/arrangement/__tests__/clip-gain.test.tsx (28 tests) 872ms
+ ✓ app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx (10 tests) 2294ms
+     ✓ TU1 without a BPM the 3 key refuses and the menu has no triplet item  363ms
+     ✓ TU7 the lane menu triplet item toggles the mode and closes the menu  390ms
+ ✓ app/lib/__tests__/sfx-library.test.tsx (3 tests) 1076ms
+     ✓ searches tags, filters collections and keeps filters and favorites across close/open  388ms
+     ✓ adds three sounds from two collections at exact positions and preserves their export after save/open  612ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-edit.test.tsx (25 tests) 2463ms
+     ✓ SE13 Alt frees a trim with Snap on and snaps a range with Snap off  345ms
+ ✓ app/lib/__tests__/sfx-export.test.ts (10 tests) 1404ms
+     ✓ sends only selected source windows to the worker and preserves exact source sample positions  317ms
+     ✓ keeps 44.1 kHz millisecond selections and exact half-selection crossfades valid  403ms
+ ✓ app/lib/arrangement/__tests__/fader-click.test.tsx (26 tests) 1342ms
+ ✓ app/lib/arrangement/__tests__/master-ui.test.tsx (18 tests) 1166ms
+       ✓ sits in the workspace header before the transport and renders 0 times per Play frame  821ms
+ ✓ app/lib/arrangement/__tests__/tempo-window-ui.test.tsx (8 tests) 1081ms
+ ✓ app/lib/arrangement/__tests__/detail-panel-polish.test.tsx (16 tests) 1167ms
+ ✓ app/lib/arrangement/__tests__/master-hold-tick.test.tsx (3 tests) 1046ms
+     ✓ HT1: at +6 dB, at +12 dB (its fraction clamps to the top) and at +5.5 dB the hold stops 1 px before the right edge, so the 2 px tick stays inside; +4.9 dB keeps the unclamped position  714ms
+ ✓ app/lib/arrangement/__tests__/grid-snap-position.test.tsx (17 tests) 1122ms
+ ✓ app/lib/arrangement/__tests__/track-pan.test.tsx (26 tests) 904ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx (8 tests) 916ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx (10 tests) 999ms
+ ✓ app/lib/arrangement/__tests__/tempo-ui.test.tsx (12 tests) 1043ms
+ ✓ app/lib/arrangement/__tests__/delete-selection-ui.test.tsx (13 tests) 788ms
+ ✓ app/lib/arrangement/__tests__/gesture-guard.test.tsx (19 tests) 951ms
+ ✓ app/lib/arrangement/__tests__/pending-status.test.tsx (22 tests) 853ms
+ ✓ app/lib/arrangement/__tests__/pan-release-recovery.test.tsx (8 tests) 1042ms
+       ✓ PK1: ArrowRight on the Pan slider after a lost release writes the next change once  374ms
+ ✓ app/lib/arrangement/__tests__/detail-panel-fit.test.tsx (7 tests) 728ms
+ ✓ app/lib/arrangement/__tests__/detail-panel-reason.test.tsx (6 tests) 571ms
+ ✓ app/lib/arrangement/__tests__/video-sync.test.ts (58 tests) 474ms
+ ✓ app/lib/__tests__/sfx-video-transport.test.tsx (2 tests) 538ms
+     ✓ keeps sound stopped and shows a recoverable error when video playback is rejected  406ms
+ ✓ app/lib/arrangement/__tests__/fader-focus-order.test.tsx (5 tests) 588ms
+ ✓ app/lib/arrangement/__tests__/grid.test.ts (12 tests) 426ms
+     ✓ returns whole milliseconds on the grid for 1000 seeded values at every division  316ms
+ ✓ app/lib/arrangement/__tests__/all-lane-clipboard.test.tsx (14 tests) 322ms
+ ✓ app/lib/arrangement/__tests__/context-hygiene.test.tsx (10 tests) 374ms
+ ✓ app/lib/__tests__/sfx-scene-route.test.tsx (3 tests) 281ms
+ ✓ app/lib/arrangement/__tests__/export-dialog-focus-restore.test.tsx (7 tests) 297ms
+ ✓ app/lib/__tests__/sfx-scene.test.ts (8 tests) 271ms
+ ✓ app/lib/__tests__/sfx-edit.test.ts (3 tests) 257ms
+ ✓ app/lib/arrangement/__tests__/library-preview.test.tsx (4 tests) 271ms
+ ✓ app/lib/arrangement/__tests__/grid-musical.test.ts (12 tests) 220ms
+ ✓ app/lib/arrangement/__tests__/gesture-reentry.test.tsx (14 tests) 174ms
+ ✓ app/lib/__tests__/gift-card-input.test.tsx (3 tests) 209ms
+ ✓ app/lib/arrangement/__tests__/demo-synth.test.ts (5 tests) 202ms
+ ✓ app/lib/arrangement/__tests__/view.test.ts (41 tests) 185ms
+ ✓ app/lib/arrangement/__tests__/grid-triplet.test.ts (7 tests) 85ms
+ ✓ app/lib/arrangement/__tests__/ArrangementContext.test.ts (21 tests) 161ms
+ ✓ app/hooks/__tests__/useRecordingPlayer.test.ts (15 tests) 65ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon.test.ts (5 tests) 58ms
+ ✓ app/contexts/__tests__/toast.test.tsx (15 tests) 47ms
+ ✓ app/lib/arrangement/__tests__/ssr-layout-effect.test.tsx (4 tests) 51ms
+ ✓ app/contexts/__tests__/audio.test.tsx (5 tests) 42ms
+ ✓ app/lib/arrangement/__tests__/tempo-window.test.ts (6 tests) 32ms
+ ✓ app/lib/__tests__/recording-original-route.test.ts (38 tests) 29ms
+ ✓ app/lib/arrangement/__tests__/video.test.ts (27 tests) 26ms
+ ✓ app/contexts/__tests__/filters.test.tsx (17 tests) 41ms
+ ✓ app/lib/__tests__/download-routes.test.ts (21 tests) 28ms
+ ✓ app/lib/__tests__/cart-utils.test.ts (26 tests) 24ms
+ ✓ app/lib/arrangement/__tests__/position-store.test.ts (2 tests) 30ms
+ ✓ app/lib/__tests__/product-presentation.test.tsx (8 tests) 25ms
+ ✓ app/lib/arrangement/__tests__/clipboard.test.ts (11 tests) 22ms
+ ✓ app/lib/__tests__/recording-stream-route.test.ts (14 tests) 21ms
+ ✓ app/lib/arrangement/__tests__/delete-selection.test.ts (10 tests) 20ms
+ ✓ app/lib/__tests__/utils.test.ts (25 tests) 17ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts (11 tests) 15ms
+ ✓ app/lib/arrangement/__tests__/transport.test.ts (12 tests) 14ms
+ ✓ app/lib/__tests__/bug-hunting/auth-bugs.test.ts (16 tests) 6ms
+ ✓ app/hooks/__tests__/useIsomorphicLayoutEffect.test.ts (2 tests) 14ms
+ ✓ app/lib/arrangement/__tests__/model.test.ts (38 tests) 14ms
+ ✓ app/lib/arrangement/__tests__/panels.test.ts (53 tests) 17ms
+ ✓ app/lib/arrangement/__tests__/master.test.ts (17 tests) 12ms
+ ✓ app/lib/__tests__/sfx-video.test.ts (4 tests) 13ms
+ ✓ app/contexts/__tests__/cart-helpers.test.ts (39 tests) 11ms
+ ✓ app/lib/arrangement/__tests__/peaks.test.ts (5 tests) 9ms
+ ✓ app/lib/arrangement/__tests__/track-meter.test.ts (13 tests) 11ms
+ ✓ app/lib/__tests__/product-utils.test.ts (33 tests) 11ms
+ ✓ app/lib/arrangement/__tests__/selection.test.ts (25 tests) 12ms
+ ✓ app/lib/arrangement/__tests__/tempo.test.ts (10 tests) 10ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts (19 tests) 11ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts (24 tests) 9ms
+ ✓ app/lib/arrangement/__tests__/meter.test.ts (15 tests) 12ms
+ ✓ app/services/api/__tests__/productAdapter.test.ts (38 tests) 10ms
+ ✓ app/lib/__tests__/bug-hunting/api-client-bugs.test.ts (7 tests) 5ms
+ ✓ app/lib/__tests__/bug-hunting/cart-context-bugs.test.ts (17 tests) 7ms
+ ✓ app/lib/arrangement/__tests__/library.test.ts (11 tests) 7ms
+ ✓ app/lib/__tests__/bug-hunting/product-adapter-bugs.test.ts (16 tests) 8ms
+ ✓ app/lib/arrangement/__tests__/grid-edges.test.ts (11 tests) 7ms
+ ✓ app/lib/__tests__/r2-tokens.server.test.ts (11 tests) 9ms
+ ✓ app/lib/__tests__/auth-validation.test.ts (23 tests) 6ms
+ ✓ app/lib/__tests__/bug-hunting/product-utils-bugs.test.ts (10 tests) 6ms
+ ✓ app/lib/__tests__/bug-hunting/cart-context-race-bugs.test.ts (8 tests) 6ms
+ ✓ app/lib/arrangement/__tests__/schedule.test.ts (12 tests) 6ms
+ ✓ app/contexts/__tests__/purchases-helpers.test.ts (17 tests) 5ms
+ ✓ app/lib/__tests__/bug-hunting/product-adapter-edge-cases.test.ts (9 tests) 5ms
+ ✓ app/lib/__tests__/bug-hunting/purchases-context-bugs.test.ts (6 tests) 3ms
+
+ Test Files  101 passed (101)
+      Tests  1696 passed (1696)
+   Start at  23:30:28
+   Duration  78.61s (transform 15.14s, setup 0ms, import 55.59s, tests 132.27s, environment 95.35s)
+
+
+> music-store@1.0.0 build
+> remix vite:build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 2474 modules transformed.
+rendering chunks...
+computing gzip size...
+build/client/assets/audio-encoder.worker-CZf07YBY.js        1.52 kB
+build/client/assets/worker-BAOIWoxA.js                      2.53 kB
+build/client/assets/sfx-export.worker-CJXO4W-q.js          11.68 kB
+build/client/.vite/manifest.json                           30.42 kB │ gzip:  3.48 kB
+build/client/assets/studio-DTQ5s2Tn.css                     1.35 kB │ gzip:  0.41 kB
+build/client/assets/app-Bo8OcdZs.css                      197.67 kB │ gzip: 29.60 kB
+build/client/assets/api.recording-original-l0sNRNKZ.js      0.00 kB │ gzip:  0.02 kB
+build/client/assets/api.recording-stream-l0sNRNKZ.js        0.00 kB │ gzip:  0.02 kB
+build/client/assets/api.studio-token-l0sNRNKZ.js            0.00 kB │ gzip:  0.02 kB
+build/client/assets/api.backup-user-l0sNRNKZ.js             0.00 kB │ gzip:  0.02 kB
+build/client/assets/api.proxy.audio-l0sNRNKZ.js             0.00 kB │ gzip:  0.02 kB
+build/client/assets/api.subscribe-l0sNRNKZ.js               0.00 kB │ gzip:  0.02 kB
+build/client/assets/sitemap_._xml-l0sNRNKZ.js               0.00 kB │ gzip:  0.02 kB
+build/client/assets/api.download-l0sNRNKZ.js                0.00 kB │ gzip:  0.02 kB
+build/client/assets/cart-utils-CtERY4B5.js                  0.12 kB │ gzip:  0.13 kB
+build/client/assets/use-reduced-motion-DCKbTjpQ.js          0.18 kB │ gzip:  0.16 kB
+build/client/assets/useCart-CJJc4B8o.js                     0.21 kB │ gzip:  0.18 kB
+build/client/assets/useToast-CnewGrPp.js                    0.22 kB │ gzip:  0.19 kB
+build/client/assets/minus-dSYlA6BN.js                       0.30 kB │ gzip:  0.25 kB
+build/client/assets/check-U0OL7VaN.js                       0.30 kB │ gzip:  0.25 kB
+build/client/assets/chevron-down-DdFXOAbg.js                0.31 kB │ gzip:  0.25 kB
+build/client/assets/arrow-up-CCItza2z.js                    0.35 kB │ gzip:  0.27 kB
+build/client/assets/arrow-right-Bx89WQSc.js                 0.35 kB │ gzip:  0.27 kB
+build/client/assets/arrow-left-ChuMkLRM.js                  0.35 kB │ gzip:  0.27 kB
+build/client/assets/search-ByUUFrh4.js                      0.35 kB │ gzip:  0.28 kB
+build/client/assets/circle-check-big-DV3rYEZd.js            0.37 kB │ gzip:  0.29 kB
+build/client/assets/circle-x-CahCnQjX.js                    0.39 kB │ gzip:  0.28 kB
+build/client/assets/credit-card-DKLEPe_Y.js                 0.39 kB │ gzip:  0.30 kB
+build/client/assets/mail-TF6Lyabf.js                        0.40 kB │ gzip:  0.31 kB
+build/client/assets/music-ChphZRoE.js                       0.40 kB │ gzip:  0.29 kB
+build/client/assets/mic-BZIe5idf.js                         0.41 kB │ gzip:  0.31 kB
+build/client/assets/download-i-iv7vKL.js                    0.42 kB │ gzip:  0.30 kB
+build/client/assets/triangle-alert-CreLBc2b.js              0.45 kB │ gzip:  0.32 kB
+build/client/assets/house-CL6COuZY.js                       0.47 kB │ gzip:  0.32 kB
+build/client/assets/shopping-cart-mUaXvKyR.js               0.47 kB │ gzip:  0.34 kB
+build/client/assets/send-CZJzzfR8.js                        0.47 kB │ gzip:  0.34 kB
+build/client/assets/audio-lines-CnfKEwlF.js                 0.49 kB │ gzip:  0.31 kB
+build/client/assets/users-eeGaSXOJ.js                       0.49 kB │ gzip:  0.33 kB
+build/client/assets/refresh-cw-CAJDeMrg.js                  0.51 kB │ gzip:  0.33 kB
+build/client/assets/account_.login-BR69_7Cy.js              0.52 kB │ gzip:  0.34 kB
+build/client/assets/shopping-bag-h8WPHplj.js                0.52 kB │ gzip:  0.35 kB
+build/client/assets/search-DVPJQscO.js                      0.53 kB │ gzip:  0.34 kB
+build/client/assets/gift-BIeQiYqu.js                        0.54 kB │ gzip:  0.36 kB
+build/client/assets/package-py_7E2LF.js                     0.56 kB │ gzip:  0.37 kB
+build/client/assets/file-text-CXaIMD3Z.js                   0.57 kB │ gzip:  0.36 kB
+build/client/assets/volume-x-B2Y0q8XZ.js                    0.57 kB │ gzip:  0.39 kB
+build/client/assets/volume-2-BXB_LidL.js                    0.57 kB │ gzip:  0.39 kB
+build/client/assets/film-rJCh0nmG.js                        0.59 kB │ gzip:  0.35 kB
+build/client/assets/sparkles-DEjsZnTw.js                    0.68 kB │ gzip:  0.39 kB
+build/client/assets/play-SYU5bDzq.js                        0.71 kB │ gzip:  0.36 kB
+build/client/assets/globe-AEqP0cjH.js                       0.82 kB │ gzip:  0.42 kB
+build/client/assets/sfx-video.client-DAfjVGc_.js            0.90 kB │ gzip:  0.45 kB
+build/client/assets/RequireAuth-BPiYYRqL.js                 1.74 kB │ gzip:  0.85 kB
+build/client/assets/createLucideIcon-Bxzkng7s.js            1.86 kB │ gzip:  0.80 kB
+build/client/assets/facebook-pixel-ByEltgVS.js              1.94 kB │ gzip:  0.66 kB
+build/client/assets/checkout.cancel-CxC7iWjS.js             2.13 kB │ gzip:  0.93 kB
+build/client/assets/_-DDHxlTxB.js                           2.21 kB │ gzip:  0.83 kB
+build/client/assets/sfx-edit-DGjIE1ro.js                    2.39 kB │ gzip:  1.17 kB
+build/client/assets/StemsContext-CO-58u11.js                2.98 kB │ gzip:  1.19 kB
+build/client/assets/ErrorBoundary-BlwbQtrI.js               3.07 kB │ gzip:  1.22 kB
+build/client/assets/EmptyState-DPED11Qu.js                  3.20 kB │ gzip:  1.26 kB
+build/client/assets/r2.config-BUzhu7D2.js                   3.41 kB │ gzip:  1.38 kB
+build/client/assets/index-f8HZt8x0.js                       3.54 kB │ gzip:  1.70 kB
+build/client/assets/entry.client-B_vz5bNv.js                3.77 kB │ gzip:  1.42 kB
+build/client/assets/account.reset._id._token-B45bqSt_.js    4.13 kB │ gzip:  1.72 kB
+build/client/assets/useRecordingPlayer-9Z32udkK.js          4.19 kB │ gzip:  1.43 kB
+build/client/assets/Footer-DZtVISEW.js                      4.48 kB │ gzip:  1.47 kB
+build/client/assets/checkout.success-BQCfT3CH.js            4.78 kB │ gzip:  1.81 kB
+build/client/assets/SocialIcons-D7fK7GR3.js                 5.02 kB │ gzip:  1.61 kB
+build/client/assets/faq-DlTAC0kZ.js                         6.24 kB │ gzip:  2.62 kB
+build/client/assets/account.orders-CqPHlS7W.js              6.53 kB │ gzip:  2.24 kB
+build/client/assets/free-downloads-Bo2-wRqC.js              6.93 kB │ gzip:  2.50 kB
+build/client/assets/hire-us-B8OBpN_T.js                     7.50 kB │ gzip:  2.68 kB
+build/client/assets/cookies-qwkXWc0a.js                     7.86 kB │ gzip:  2.75 kB
+build/client/assets/about-BsUZvQzH.js                       8.33 kB │ gzip:  2.29 kB
+build/client/assets/account-BFt5BIlq.js                     8.88 kB │ gzip:  2.53 kB
+build/client/assets/gift-cards-C356jMLv.js                 10.83 kB │ gzip:  3.58 kB
+build/client/assets/terms-DRR-SVSQ.js                      11.03 kB │ gzip:  3.78 kB
+build/client/assets/store-CQJNzjqJ.js                      11.77 kB │ gzip:  3.44 kB
+build/client/assets/support-CRGBG0CQ.js                    12.56 kB │ gzip:  3.76 kB
+build/client/assets/account.downloads-BZ9ccq2q.js          12.87 kB │ gzip:  4.21 kB
+build/client/assets/cart-DR84UI6C.js                       13.75 kB │ gzip:  4.35 kB
+build/client/assets/Modal-wM65quyQ.js                      14.76 kB │ gzip:  4.12 kB
+build/client/assets/recordings._productId-z4sh9k7z.js      16.42 kB │ gzip:  5.84 kB
+build/client/assets/privacy-DFPC51uU.js                    20.69 kB │ gzip:  5.80 kB
+build/client/assets/utils-fNskMoFt.js                      25.51 kB │ gzip:  8.18 kB
+build/client/assets/products._handle-B3PdzxTL.js           33.30 kB │ gzip:  8.69 kB
+build/client/assets/_index-CYO8Yh8Z.js                     38.49 kB │ gzip: 11.04 kB
+build/client/assets/wavesurfer.esm-BdqnAE-j.js             39.48 kB │ gzip: 11.84 kB
+build/client/assets/scenes._productId-CWOPTqwO.js          50.52 kB │ gzip: 15.51 kB
+build/client/assets/components-hjPn2b4b.js                 53.98 kB │ gzip: 17.87 kB
+build/client/assets/index-WeQYoEkw.js                      61.02 kB │ gzip: 20.88 kB
+build/client/assets/root--ZrK-jzq.js                       66.72 kB │ gzip: 18.02 kB
+build/client/assets/pako.esm--5j6-2oi.js                   74.63 kB │ gzip: 24.28 kB
+build/client/assets/studio._productId-z7FnF32Y.js          91.24 kB │ gzip: 20.36 kB
+build/client/assets/proxy-CqwQ83n6.js                     113.60 kB │ gzip: 37.40 kB
+build/client/assets/index-Cw6WSpeA.js                     142.20 kB │ gzip: 45.58 kB
+build/client/assets/studio-lab-Kcu6yDLn.js                220.44 kB │ gzip: 70.88 kB
+build/client/assets/ToastContext-FyR0_sCU.js              247.91 kB │ gzip: 57.45 kB
+✓ built in 16.36s
+vite v5.4.21 building SSR bundle for production...
+transforming...
+✓ 251 modules transformed.
+rendering chunks...
+build/server/.vite/manifest.json             0.57 kB
+build/server/assets/studio-DTQ5s2Tn.css      1.35 kB
+build/server/assets/app-Bo8OcdZs.css       197.67 kB
+build/server/index.js                    1,397.45 kB
+✓ built in 5.25s

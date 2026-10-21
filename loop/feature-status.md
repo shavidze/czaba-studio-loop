@@ -1,6 +1,6 @@
 # Studio — ფუნქციების სტატუსის დაფა
 
-განახლდა: 2026-10-21 · ავტორი: B (round 70 → round 71 დაგეგმვა) · წესი: `docs/technical/studio-real-workspace/agent-workflow.md`
+განახლდა: 2026-10-21 · ავტორი: B (round 71 → round 72 დაგეგმვა) · წესი: `docs/technical/studio-real-workspace/agent-workflow.md`
 
 სტატუსები: **მზადაა** · **მუშავდება** · **მოწმდება** · **ბაგია** · **არ დაწყებულა** · **დაბლოკილია**.
 
@@ -59,15 +59,17 @@
 - Tracked `frontend-architect.md` Write/Bash-ს იძლევა.
 - Dev server: B-ის round-43 დაგეგმვისას `/studio-lab` 200 (2026-10-15 12:06), `node.exe` 15. ENV-BROWSE-DAEMON: C round 43-ში CLI-ით გაშვებული 7 daemon 60–90 წამში კვდებოდა, `about:blank`-ზე უმოქმედოდაც. მუშა გზა იყო საკუთარი `server-node.mjs` (`BROWSE_PARENT_PID=0`, ახალი state file, log). Round 44-იდან ეს **დამტკიცებული fallback-ია** ერთი წარუმატებელი CLI-მცდელობის შემდეგ. `$B restart` ისევ აკრძალულია; უცხო პროცესს არავინ კლავს.
 
-მიმდინარე რაუნდი: **Round 71** (`current-task.md`, D-29z36) — **ROOT-R66-M1 (SRW-15 perf): მეტრონომის კლიკები horizon-ით, loop-ის გარეშეც:**
-- **რა იცვლება:** loop-ის გარეშე კლიკები აღარ იგეგმება ერთბაშად პროექტის ბოლომდე (133 წმ-ზე 999 BPM-ით ≈ 2200 node ყოველ resync-ზე, scrub-ისას ყოველ 100 ms-ში). იგეგმება 2 წამი წინ და ივსება `pumpPlaybackAudio`-დან (`appendClicks`), როგორც loop-ის გზაზე. დაგვიანებული pump-ისას გამოტოვებული კლიკები იკარგება (burst-ი და resync არ ხდება).
-- **უცვლელია:** რაც ისმის — კლიკი ყოველ დარტყმაზე პროექტის ბოლომდე, იგივე ხმა და აქცენტები; loop-ის გზა, ექსპორტი (კლიკის გარეშე), ღილაკი, სტატუსები, ისტორია.
-- **Ableton:** კლიკი ყოველ დარტყმაზე — დადასტურებული (§19.4, round 66); დაგეგმვის ტექნიკა — არ ეხება.
-- **კოდი:** `metronome.ts` (`METRONOME_SCHEDULE_HORIZON_SECONDS`, `soundUntil`, `nextMetronomeChunk`), `ArrangementContext.tsx`; `metronome-ui` UI2/UI4/UI5/UI10-ის ვიწრო ნებართვა; ახალი MH1–MH5, HU1–HU8 → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება; doc 062 — სტატუსი.
-- **C:** MT-BEATS*, MH-LONG, MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB (რეალური აუდიო); MH-NODES*, MH-SCRUB-PERF (node-ების რაოდენობა); MT-LOOP, MT-EXPORT-REG, MT-OFF, REG-HYD, G71-3.
-- **შემდეგ:** SRW-16 (FB-10, მარკერები) ეტაპი 1 → SRW-17…SRW-20.
+მიმდინარე რაუნდი: **Round 72** (`current-task.md`, D-29z37) — **SRW-16 (FB-10) სახელიანი მარკერები, ეტაპი 1:**
+- **რა ემატება:** `Arrangement.markers?` (არჩევითი; ცარიელი სია არასდროს ინახება), სუფთა `markers.ts`; ახალი `ArrangementMarkerRow` sticky chrome-ში TempoRow-სა და Loop-ის ხაზს შორის („ზემოდან“). `M` ან Add ღილაკი → მარკერი range-ის დასაწყისში ან მიმდინარე პოზიციაზე, სახელის ველით (Enter/blur — შენახვა, Escape — გაუქმება); click — გადასვლა; ორმაგი click გაჩერებულზე — დაკვრა მარკერიდან; Ctrl+←/→ და ◀/▶ — წინა/შემდეგი (ბოლოს 0 / პროექტის ბოლო); F2 — სახელის შეცვლა; Delete ფოკუსირებულ მარკერზე; Undo/Redo. Cut Time (Ctrl+Shift+X): შიგნით მყოფი მარკერი იშლება, შემდეგი — იწევს, სტატუსში რაოდენობა.
+- **უცვლელია:** აუდიო (`scheduleKey` — resync არ ხდება), ექსპორტი, SRW-24-ის Delete, ruler (გაყინულია), Paste.
+- **Ableton (Live 12 §6.4/6.9/6.11, B-მ 2026-10-21-ს gstack-ით ხელახლა წაიკითხა):** დამატება insert marker-ზე/selection-ის დასაწყისში, click/ორმაგი click, წინა/შემდეგი ბოლოებით, Delete — დადასტურებული. F2 (Ctrl+R ბრაუზერის reload-ია) და დაკვრის ავტომატური დაწყების არარსებობა — შეგნებული განსხვავება; Delete Time-ში locator-ები — დაუდასტურებელი.
+- **კოდი:** `arrangement.ts`, `markers.ts` (ახალი), `model.ts` (`deleteTime`), `ArrangementContext.tsx` (Cut Time-ის სტატუსი), `ArrangementMarkerRow.tsx` (ახალი), `StudioWorkspace.tsx`; MK1–MK10, MU1–MU12 → 103 ფაილი; doc 064 ახალი; doc 063 — სტატუსი და verify-ის წინადადება (ROOT-R71-L1).
+- **C:** MK-ADD*, MK-ADD-RANGE, MK-ADD-PLAYING / MK-NO-RESYNC, MK-ESC, MK-DUP, MK-JUMP, MK-PLAYFROM* (რეალური აუდიო), MK-NAV, MK-RENAME, MK-DELETE, MK-CUT-TIME, MK-LAYOUT*, MK-TYPING, MK-EXPORT-REG, REG-CHROME, REG-KEYS, REG-HYD, G72-3.
+- **შემდეგ:** SRW-16 ეტაპი 2 (გადატანა drag/ისრებით snap-ით, მარჯვენა click-ის მენიუ, snap მარკერებზე, Ctrl+←/→ კლიპის კიდეებზეც) → SRW-17…SRW-20.
 
-წინა რაუნდი: **Round 70 — C PASS, `browserVerified: true`** (`c-round-70.md`) (D-29z35) — **ROOT-R65-M1: ტაქტების სახაზავი ხილულ ფანჯარაში:** G70-1/2/3, R70-S, R70-U (a–k მოკლულია; m/n/o — ტესტის ხარვეზები, Low-ებში), BR-COUNT*, BR-SCROLL*, BR-ZOOM (მედიანა 25.8 ms, ადრე 69–107), BR-FOLLOW, BR-RESIZE, BR-90*, BR-LOOK*, TB/RU/TR-RULER-REG, REG-HYD — ყველა PASS, ბაგები არ არის. DOM-ში 96–144 ნიშნული (ადრე 2215). Root-მა გამოაქვეყნა: `2be45df`. ROOT-R65-M1 დაიხურა.
+წინა რაუნდი: **Round 71 — C PASS, `browserVerified: true`** (`c-round-71.md`) (D-29z36) — **ROOT-R66-M1: მეტრონომის კლიკები horizon-ით:** G71-1/2/3, R71-S, R71-U (a–l მოკლულია, h ექვივალენტურია; n/o — ტესტის ხარვეზები, Low-ებში), MT-BEATS*, MH-LONG, MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB, MH-NODES* (≤ 120, ადრე ≈ 2200), MH-SCRUB-PERF, MT-LOOP, MT-EXPORT-REG, MT-OFF, REG-HYD — ყველა PASS, ბაგები არ არის. Root-მა გამოაქვეყნა: `1e469e5` (review 9/10). ROOT-R66-M1 დაიხურა.
+
+უფრო ადრე: **Round 70 — C PASS, `browserVerified: true`** (`c-round-70.md`) (D-29z35) — **ROOT-R65-M1: ტაქტების სახაზავი ხილულ ფანჯარაში:** G70-1/2/3, R70-S, R70-U (a–k მოკლულია; m/n/o — ტესტის ხარვეზები, Low-ებში), BR-COUNT*, BR-SCROLL*, BR-ZOOM (მედიანა 25.8 ms, ადრე 69–107), BR-FOLLOW, BR-RESIZE, BR-90*, BR-LOOK*, TB/RU/TR-RULER-REG, REG-HYD — ყველა PASS, ბაგები არ არის. DOM-ში 96–144 ნიშნული (ადრე 2215). Root-მა გამოაქვეყნა: `2be45df`. ROOT-R65-M1 დაიხურა.
 
 უფრო ადრე: **Round 69 — C PASS, `browserVerified: true`** (`c-round-69.md`) (D-29z34) — **SRW-14 ეტაპი 5b: ტრიოლები:** R69-S, R69-U (a–k + C-ის l–t მოკლულია), G69-1/2/3, TR-NOBPM, TR-TOGGLE*, TR-MENU*, TR-DRAG, TR-NUDGE, TR-KEYS, TR-SELECT, TR-BRACE, TR-TEMPO, TR-PLAY* (რეალური აუდიო: onset 4.450 / 4.461), TR-RULER, TR-UNDO, TR-LAYOUT*, GM/GK/MENU-REG, REG-HYD — ყველა PASS, ბაგები არ არის. Root-მა გამოაქვეყნა: `ae4fc39`. **SRW-14 სრულად C-ითაა დადასტურებული**; რჩება Tech Lead-ის R67-T/R68-T/R69-T.
 
@@ -255,8 +257,8 @@
 | FB-06 | ხმის ავტომაცია და fade-ები | **არ დაწყებულა** | — | SRW-18 (SRW-13-ის შემდეგ) |
 | FB-07 | ვიდეოს Opacity fade | **არ დაწყებულა** | — | SRW-19 |
 | FB-08 | პანელების განლაგება | **ბაგია**. ღიაა C-R8-01 (Medium, Tech Lead quiet Chrome). SRW-11B end to end milestone run 2-ში PASS-ია; A-ს round-11-ის ყველა follow-up დახურულია (round 23 + round 24 C PASS) | ეტაპები 1–3 და polish: `c-round-8.md`, `c-round-9.md`, `c-round-11.md`, `c-round-13.md`–`c-round-19.md`; milestone run 2: `c-round-21.md` §2.6; a11y: `c-round-23.md` §2.1–§2.4, `c-round-24.md` §3–§5 | C-R8-01: Tech Lead quiet Chrome. round-9 M1/L8 → SRW-13 ეტაპი 4. Tech Lead: R11-P3m, R11-SB, R13-RM, R15-SB, R17-T, R18-T, R19-T |
-| FB-09 | Bars/Beats + Metronome | **მოწმდება** (C-ის ყველა ID PASS-ია, ბრაუზერში დადასტურებული: ტაქტების სახაზავი — Round 65, მეტრონომი — Round 66, `b5fb12b`. ROOT-R65-M1 — Round 70 C PASS, `2be45df`. რჩება: Tech Lead-ის R65-T/R66-T/R70-T; perf Medium ROOT-R66-M1 — Round 71 (D-29z36)) | `c-round-65.md`, `c-round-66.md`, `c-round-70.md` | Round 71 |
-| FB-10 | Markers/Locators | **არ დაწყებულა** | — | SRW-16 |
+| FB-09 | Bars/Beats + Metronome | **მოწმდება** (C-ის ყველა ID PASS-ია, ბრაუზერში დადასტურებული: ტაქტების სახაზავი — Round 65, მეტრონომი — Round 66, `b5fb12b`. ROOT-R65-M1 — Round 70, `2be45df`; ROOT-R66-M1 — Round 71, `1e469e5`. რჩება: Tech Lead-ის R65-T/R66-T/R70-T/R71-T) | `c-round-65.md`, `c-round-66.md`, `c-round-70.md`, `c-round-71.md` | Tech Lead |
+| FB-10 | Markers/Locators | **მუშავდება** (SRW-16 ეტაპი 1 — Round 72, D-29z37; ეტაპი 2 შემდეგია) | `current-task.md` | Round 72 |
 | FB-11 | Tempo (მხოლოდ ბადე, stretch-ის გარეშე) | **მოწმდება** (C-ის ყველა ID PASS-ია; რჩება მხოლოდ Tech Lead-ის R65-T. Round 65: პროექტის BPM, მხოლოდ ბადე; C PASS `browserVerified: true`, TB-NOSTRETCH — WAV byte-identical; R65-T — Tech Lead-ის შეგრძნება) | `c-round-65.md` | მეტრონომი (FB-09) და მუსიკალური დანაყოფები (SRW-14 ეტაპი 5) ამ BPM-ს გამოიყენებს |
 | FB-12 | ტრეკების ჯგუფები/ქვეჯგუფები | **არ დაწყებულა** | — | SRW-17 |
 | FB-13 | Grid, Snap, თავისუფალი რეჟიმი | **მოწმდება** (ეტაპი 1–5 — C PASS ბრაუზერის მტკიცებულებით: 1–4 `f9d768c`, 5a `8bf9db4`, 5b ტრიოლები Round 69 `ae4fc39`. რჩება Tech Lead-ის R67-T/R68-T/R69-T) | `c-round-47.md`, `c-round-49.md`–`c-round-64.md`, `c-round-67.md`–`c-round-69.md` | Tech Lead R67-T/R68-T/R69-T |
@@ -283,8 +285,8 @@
 | SRW-12 | ბიბლიოთეკა: ხე, ძებნა, preview, drag, სტემები | **მოწმდება** (FOCUS-TEXT-STALE დაიხურა Round 34-ში — C R34-TS; ფუნქციები C-ით დადასტურებულია; დარჩა Tech Lead-ის ხელით შემოწმება) | `c-round-4.md`–`c-round-7.md`; `c-round-10.md` §5; `c-round-17.md` §2–§4; `c-round-20.md` §2.13, §2.16–§2.17; `c-round-34.md` R34-TS | R12-L4: Tech Lead-ის რეალური HTML5 drag. R17-T: Windows-ის ფონტები. R34-T(1)/(3) |
 | SRW-13 | Clip gain, pan, master, meters | **ბაგია** (ეტაპები 1, 2a, 3, 4a-fix2…4a-fix5, 4b-1, 4b-2 ჯგუფი 1 (Round 39–41), ჯგუფი 2 (Round 42), ჯგუფი 4 (Round 43), 4c (Round 44), polish ნაწილი 1 (Round 45) და 2 (Round 46) მზადაა; ჯგუფი 3 კოდის გარეშე გადაწყდა (D-29z8); 2b და 4a — ყველა ID PASS-ია; ღიაა C-R27-01 (Medium, Tech Lead) და C-R41-01 (Low, Tech Lead-ის viewport-ის კითხვა)) | ეტაპი 1: `c-round-25.md`; 2a: `c-round-26.md`; 2b: `c-round-27.md`, `c-round-28.md` §6; 3: `c-round-30.md`; 4a: `c-round-31.md`; 4a-fix: `c-round-32.md`; 4a-fix2: `c-round-33.md`; 4a-fix3: `c-round-34.md`; 4a-fix4: `c-round-36.md`; 4a-fix5: `c-round-37.md`; 4b-1: `c-round-38.md`; 4b-2 ჯგუფი 1: `c-round-39.md`, `c-round-40.md`, `c-round-41.md`; ჯგუფი 2: `c-round-42.md`; ჯგუფი 4: `c-round-43.md`; 4c: `c-round-44.md`; polish 1: `c-round-45.md`; polish 2: `c-round-46.md` | კოდის ეტაპები დასრულდა; ARCH-CHECKPOINT-SRW13 root-ს ეთხოვა (არ აჩერებს). C-R27-01, C-R41-01: Tech Lead |
 | SRW-14 | Grid/Snap | **მოწმდება** (ეტაპი 1–5 — C PASS ბრაუზერის მტკიცებულებით: 1–4 `f9d768c`, 5a `8bf9db4`, 5b ტრიოლები Round 69 `ae4fc39`. რჩება Tech Lead-ის R67-T/R68-T/R69-T) | `c-round-47.md`, `c-round-49.md`–`c-round-64.md`, `c-round-67.md`–`c-round-69.md` | Tech Lead R67-T/R68-T/R69-T |
-| SRW-15 | Bars/Beats, BPM (მხოლოდ ბადე), მეტრონომი | **მოწმდება** (R15-T1 — Round 65, R15-T2 — Round 66; C-ის ყველა ID PASS-ია, `browserVerified: true`, `b5fb12b`. ROOT-R65-M1 — Round 70 C PASS, `2be45df`. რჩება: Tech Lead-ის R65-T/R66-T/R70-T; perf Medium ROOT-R66-M1 — Round 71) | `c-round-65.md`, `c-round-66.md`, `c-round-70.md` | Round 71 (ROOT-R66-M1) |
-| SRW-16 | Markers/Locators | **არ დაწყებულა** | — | SRW-15-ის შემდეგ |
+| SRW-15 | Bars/Beats, BPM (მხოლოდ ბადე), მეტრონომი | **მოწმდება** (R15-T1 — Round 65, R15-T2 — Round 66; C-ის ყველა ID PASS-ია, `browserVerified: true`, `b5fb12b`. ROOT-R65-M1 — Round 70, `2be45df`; ROOT-R66-M1 — Round 71 C PASS, `1e469e5`. რჩება: Tech Lead-ის R65-T/R66-T/R70-T/R71-T) | `c-round-65.md`, `c-round-66.md`, `c-round-70.md`, `c-round-71.md` | Tech Lead |
+| SRW-16 | Markers/Locators | **მუშავდება** (ეტაპი 1 — Round 72, D-29z37: მოდელი, დამატება სახელით, გადასვლა, დაკვრა მარკერიდან, წინა/შემდეგი, F2, Delete, Cut Time-ის remap; ეტაპი 2 — გადატანა, მენიუ, snap მარკერებზე) | `current-task.md` | Round 72 → ეტაპი 2 |
 | SRW-17 | ტრეკების ჯგუფები | **არ დაწყებულა** | — | SRW-13-ის შემდეგ |
 | SRW-18 | Fades + volume envelope | **არ დაწყებულა** | — | SRW-13-ის შემდეგ |
 | SRW-19 | ვიდეოს opacity fade (preview) | **არ დაწყებულა** | — | SRW-18-ის შემდეგ |
@@ -617,6 +619,7 @@ R3-V2 Round 22-ში ხელახლა შემოწმდა (R22-M1 + R
 | **R69-T** | BPM 90, `1/4`: `3` და clip-ის გადატანა ტრიოლის ხაზებზე — `3` მოსახერხებელია? ტაქტზე ტრიოლის უარი მისაღებია? | რეალური მაუსი და შეგრძნება headless-ში არ მოწმდება |
 | **R70-T** | 999 BPM, max zoom: ტაქტების სახაზავის scroll და zoom მდორეა? სწრაფი trackpad scroll-ისას კიდეზე ნიშნული ხომ არ აკლია? | headless wheel არ არის smooth; C-მ 0 არასრული კადრი ნახა |
 | **R71-T** | მეტრონომი სწრაფ ტემპზე, გრძელ პროექტზე: დაკვრა და scrub — კლიკები სტაბილურია, არც აკლია, არც ორმაგდება? | ყურით შეფასება headless-ში შეუძლებელია |
+| **R72-T** | გრძელ პროექტზე ვიდეოთი სამი სახელიანი მარკერი: ხაზი „ზემოდან“ სწორ ადგილასაა? M + სახელი სწრაფია? click, ორმაგი click და Ctrl+←/→ ბუნებრივია? F2 მისაღებია ეტაპი 2-ის მენიუმდე? | შეგრძნება და ვიდეოს მონტაჟის კონტექსტი headless-ში არ ფასდება |
 
 ## 6. Root-ის გადატანილი საკითხები (`root-pre-push-review.md`, `publication-checkpoint.json`)
 
@@ -651,8 +654,11 @@ Root M1–M3, L1–L4, L6, L7 და L8 დახურულია.
 | ID | სტატუსი | შენიშვნა |
 |---|---|---|
 | T12-GAIN-VOLUME | **არ დაწყებულა** | იწყება მხოლოდ თავდაპირველი scope-ის (SRW-01..24) დადასტურებული დასრულების შემდეგ. წყაროები: `docs/technical/studio-real-workspace/next-stage-t12/` |
+| VISUAL-A-OBSIDIAN | **არ დაწყებულა** | root-ის შენიშვნა 2026-10-21 (მომხმარებელმა დაამტკიცა): T12-ის შემდეგ, დამატებითი დასტურის გარეშე; მხოლოდ ფერები, ხატულები, ტიპოგრაფია, ღილაკების ზედაპირი + M1–M4 (M2 — Studio UI ინგლისურად ერთი strings მოდულით). სპეციფიკაცია: `docs/technical/studio-real-workspace/visual-direction-a.md`. ფაზა 1-სა და T12-ში არ ერევა |
 
 ფარგლებს გარეთაა მთელი პროექტისთვის: plugins/effects, pitch, ვიდეოს რამდენიმე ფენა და აუდიოს time-stretch. Grid-ის tempo აუდიოს stretch არ არის.
+
+Round 72 (D-29z37): SRW-16 (FB-10) ეტაპი 1 — სახელიანი მარკერები (მოდელი, `markers.ts`, მარკერების ხაზი, M/Add, click/ორმაგი click, Ctrl+←/→, F2, Delete, Cut Time-ის remap); 103 ფაილი; doc 064; doc 063-ის სტატუსი. შემდეგ SRW-16 ეტაპი 2 → SRW-17 → SRW-18 → SRW-19 → SRW-20 → Low-ების ჯგუფი → SRW-21 → სრული რეგრესია → T12 → VISUAL-A-OBSIDIAN. **ფაზა 2 (root 2026-10-20):** ამის შემდეგ B-ის გადაწყვეტილება იქნება BLOCKED — „phase 2 awaiting user go-ahead“. ფარგლები არ მცირდება.
 
 Round 71 (D-29z36): ROOT-R66-M1 — მეტრონომის კლიკები 2 წმ-იანი horizon-ით და `pumpPlaybackAudio`-დან შევსებით (loop-ის გარეშე); 101 ფაილი; doc 063; doc 059/062-ის სტატუსები. შემდეგ SRW-16 (FB-10) → SRW-17 → SRW-18 → SRW-19 → SRW-20 → Low-ების ჯგუფი → SRW-21 → სრული რეგრესია → T12. **ფაზა 2 (root-ის შენიშვნა 2026-10-20):** PHASE2-VIDEO-SCORING არ იგეგმება ფაზა 1-ისა და T12-ის დასრულებამდე; მაშინ B-ის გადაწყვეტილება იქნება BLOCKED — „phase 2 awaiting user go-ahead“.
 
@@ -690,4 +696,4 @@ COMPLETE დგება მხოლოდ მაშინ, როცა ყვ
 - `/studio-lab` ანონიმურად იხსნება (C round 21-ში G21-3 დაადასტურა);
 - გაკეთებულია სრული რეგრესია და root-ის შემოწმება.
 
-ამის შემდეგ იწყება T12. T12-ის შემდეგ ფაზა 2 (PHASE2-VIDEO-SCORING) მხოლოდ მომხმარებლის დასტურით — root-ის ჩანაწერამდე B-ის გადაწყვეტილებაა BLOCKED („phase 2 awaiting user go-ahead“).
+ამის შემდეგ იწყება T12, შემდეგ VISUAL-A-OBSIDIAN (root-ის შენიშვნა 2026-10-21, დამატებითი დასტური არ სჭირდება). ამის შემდეგ ფაზა 2 (PHASE2-VIDEO-SCORING) მხოლოდ მომხმარებლის დასტურით — root-ის ჩანაწერამდე B-ის გადაწყვეტილებაა BLOCKED („phase 2 awaiting user go-ahead“).

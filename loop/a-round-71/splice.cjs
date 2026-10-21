@@ -1,0 +1,13 @@
+const fs = require('node:fs');
+const dir = 'C:/Apps/czaba-project/tmp/studio-real-loop/';
+const report = fs.readFileSync(`${dir}a-round-71.md`, 'utf8');
+const f5 = fs.readFileSync(`${dir}a-round-71/report-fragment-5.md`, 'utf8');
+const f7 = fs.readFileSync(`${dir}a-round-71/report-fragment-7.md`, 'utf8');
+const i5 = report.indexOf('## 5. Browser smoke');
+const i6 = report.indexOf('## 6. Code review');
+const i7 = report.indexOf('## 7. Command tails');
+const i8 = report.indexOf('## 8. Deviations');
+if ([i5, i6, i7, i8].some((i) => i < 0) || !(i5 < i6 && i6 < i7 && i7 < i8)) throw new Error('markers');
+const out = report.slice(0, i5) + f5 + report.slice(i6, i7) + f7 + report.slice(i8);
+fs.writeFileSync(`${dir}a-round-71.md`, out);
+console.log('ok', out.split('\n').length);

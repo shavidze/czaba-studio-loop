@@ -1,0 +1,1893 @@
+
+ RUN  v4.0.16 C:/Apps/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > starts each source at startAt + (when - from) with offset and duration 2ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > wires clip -> clipGain -> trackGain -> pan -> master -> destination 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > gives muted and non-soloed tracks gain 0 and still creates their sources 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > setTrackGain ramps the track gain without restarting sources 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > setTrackGain uses the short de-click constant for mute and unmute 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > seeds the last target from construction: muted track unmutes with the short constant 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > seeds the last target from construction: audible track volume change keeps smoothing 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > seeds a track silenced by another track solo so unsolo uses the short constant 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > keeps the last target per track: muting sfx does not change music smoothing 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > same-target re-sends keep their class and never restart sources 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > stop() stops every source and activeSourceCount returns to 0 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > a scheduled stop keeps sources active until the handoff time 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > counts sources that ended naturally as inactive 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > creates a video trackGain and plays video-track clips through it 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > keeps a muted video clip scheduled with track gain 0 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > solo on the video lane silences audio lanes and vice versa 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > appendPlan schedules a loop iteration on the same track gains and releases ended sources 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > skips clips without a loaded buffer 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > renderArrangementWav uses the same applySchedule as live playback 0ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M1 plans 8 clicks at 120 BPM over 0–4 s with accents on each bar downbeat 4ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M2 computes every beat time from its index, never by accumulation 4ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M3 keeps only the beats inside the window and never plays the tail of an earlier click 1ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M4 includes a beat that lies within ARRANGEMENT_EPS before the window start, clamped to it 1ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M5 truncates the last click at the window end 1ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M6 returns no clicks for an invalid tempo or an empty window 1ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M7 generates a short decaying click: 1600 Hz accent at 0.5, 1000 Hz beat at 0.25 3ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M8 writes the on/off status and the two toggle titles verbatim 0ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M9 routes every click through one metronome gain into the master gain only 4ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M10 appends clicks, honours stop(when), counts clips only and disconnects everything 3ms
+ ✓ app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M11 creates exactly the existing nodes without a metronome and appendClicks does nothing 1ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH1 an omitted, equal, non-finite or too-small soundUntil gives the 3-argument plan 31ms
+ × app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH2 any chunking with soundUntil = end reproduces the full plan click for click 23ms
+   → expected { count: 3638, first: [ …(5) ] } to deeply equal { count: +0, first: [] }
+ ✓ app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH3 soundUntil caps a click only at the project end, never at the chunk end 0ms
+ × app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH4 nextMetronomeChunk follows the due, late-skip and end rules 1ms
+   → (0 , __vite_ssr_import_1__.nextMetronomeChunk) is not a function
+ × app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH5 a random audio clock never starts a click in the past and drops only skipped beats 0ms
+   → (0 , __vite_ssr_import_1__.nextMetronomeChunk) is not a function
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > setLoopFromRange > creates an enabled loop from a range 1ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > setLoopFromRange > replaces a different brace and re-enables it 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > setLoopFromRange > refuses a range shorter than 0.1 s 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > setLoopFromRange > returns the same reference when the brace already matches 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > toggleLoop > keeps start and end when toggling off and on 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > toggleLoop > is a no-op returning the same reference when there is no loop 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > moveLoop > keeps the length 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > moveLoop > clamps the start at 0 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > moveLoop > returns the same reference when nothing changes 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resizeLoop > enforces the 0.1 s minimum on both edges 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resizeLoop > has no 60 s or project-end cap 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > deleteTime remaps the loop > shifts a loop after the deleted span 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > deleteTime remaps the loop > shrinks a loop the span cuts across (brace 2–4, delete 1–2 → 1–3) 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > deleteTime remaps the loop > removes a loop that becomes shorter than 0.1 s 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > deleteTime remaps the loop > leaves a loop before the span untouched 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resolveActiveLoop / loopTimelinePosition > is the identity before the loop end 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resolveActiveLoop / loopTimelinePosition > maps the loop end to the loop start 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resolveActiveLoop / loopTimelinePosition > maps 2.5 iterations after the first pass correctly 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resolveActiveLoop / loopTimelinePosition > stays linear when the schedule starts at or after the loop end 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > resolveActiveLoop / loopTimelinePosition > stays linear when the loop is disabled or missing 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > planLoopIteration > truncates a clip that straddles the loop end at the end 1ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > planLoopIteration > gives a clip straddling the loop start the offset at loop.start 0ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > planLoopIteration > starts iteration k+1 exactly where iteration k ends 1ms
+ ✓ app/lib/arrangement/__tests__/loop.test.ts > planLoopIteration > does not plan a clip fully outside the loop in iterations >= 1 1ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI1 is disabled and unpressed without a tempo, and Play schedules no metronome 251ms
+ × app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU1 Play from 0 schedules only the first 2 s of clicks 1038ms
+   → expected [ …(120) ] to deeply equal [ Array(4) ]
+ × app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI2 turns on at 120 BPM with its status and Play schedules a click on every beat 1686ms
+   → expected [] to have a length of 4 but got +0
+ × app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending 1741ms
+   → expected 0 to be greater than 0
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI3 turning it off while playing forces one resync without a metronome 944ms
+ × app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues 1546ms
+   → expected [ …(59) ] to deeply equal [ …(4) ]
+ × app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI4 turning it on while playing resyncs once with clicks from the live position 1608ms
+   → expected [ …(9) ] to deeply equal []
+ × app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI5 a tempo change while it is on resyncs once with the new beat and keeps it pressed 1410ms
+   → expected [ { when: 1, offset: +0, …(2) }, …(6) ] to deeply equal []
+ × app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs 1630ms
+   → Cannot read properties of undefined (reading 'when')
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI6 clearing the tempo turns it off and setting a tempo again does not re-enable it 1148ms
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU5 Stop, or turning the metronome off while playing, ends every refill 1095ms
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI7 plans the clicks for loop iteration 0 and appends them for every refilled iteration 796ms
+ × app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat 1173ms
+   → expected [ Array(57) ] to deeply equal [ { when: 3, offset: +0, …(2) }, …(1) ]
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI8 is not part of history: Undo title, arrangement and Ctrl+Z leave it unchanged 845ms
+Not implemented: navigation to another Document
+ ✓ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end 745ms
+ × app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU8 at 999 BPM every scrub-like seek plans at most one horizon of clicks 811ms
+   → expected 999 to be less than or equal to 35
+Not implemented: navigation to another Document
+ ✓ app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI9 export never receives the metronome: two arguments and the same buffers 1108ms
+ × app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI10 Space on the focused toggle starts playback and does not toggle the metronome 89ms
+   → expected [ …(16) ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 13 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU1 Play from 0 schedules only the first 2 s of clicks
+AssertionError: expected [ …(120) ] to deeply equal [ Array(4) ]
+
+- Expected
++ Received
+
+@@ -21,6 +21,702 @@
+      "accent": false,
+      "duration": 0.03,
+      "offset": 0,
+      "when": 1.5,
+    },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 2,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 2.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 3,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 3.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 4,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 4.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 5.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 6,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 6.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 7,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 7.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 8,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 8.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 9,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 9.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 10,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 10.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 11,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 11.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 12,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 12.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 13,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 13.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 14,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 14.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 15,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 15.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 16,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 16.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 17,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 17.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 18,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 18.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 19,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 19.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 20,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 20.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 21,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 21.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 22,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 22.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 23,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 23.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 24,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 24.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 25,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 25.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 26,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 26.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 27,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 27.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 28,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 28.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 29,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 29.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 30,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 30.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 31,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 31.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 32,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 32.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 33,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 33.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 34,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 34.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 35,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 35.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 36,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 36.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 37,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 37.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 38,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 38.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 39,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 39.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 40,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 40.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 41,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 41.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 42,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 42.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 43,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 43.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 44,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 44.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 45,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 45.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 46,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 46.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 47,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 47.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 48,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 48.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 49,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 49.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 50,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 50.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 51,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 51.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 52,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 52.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 53,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 53.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 54,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 54.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 55,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 55.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 56,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 56.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 57,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 57.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 58,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 58.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 59,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 59.5,
++   },
+  ]
+
+ ❯ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx:287:45
+    285|     const [graph] = trackGraphs([]);
+    286|     expect(graph.options.from).toBe(0);
+    287|     expect(graph.options.metronome?.clicks).toEqual(planMetronomeClick…
+       |                                             ^
+    288|     expect(graph.options.metronome?.clicks).toHaveLength(4);
+    289|     expect(startedSources.filter((source) => isClickSource(source, gra…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+AssertionError: expected 0 to be greater than 0
+ ❯ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx:324:26
+    322|     expect(lateStarts).toHaveLength(0);
+    323|     const calls = graphs[0].appendClicks.mock.calls;
+    324|     expect(calls.length).toBeGreaterThan(0);
+       |                          ^
+    325|     expect(calls.at(-1)?.[0].at(-1)?.when).toBe(59.5);
+    326|     const count = calls.length;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+AssertionError: expected [ …(59) ] to deeply equal [ …(4) ]
+
+- Expected
++ Received
+
+@@ -21,6 +21,336 @@
+      "accent": true,
+      "duration": 0.03,
+      "offset": 0,
+      "when": 32,
+    },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 32.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 33,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 33.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 34,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 34.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 35,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 35.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 36,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 36.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 37,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 37.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 38,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 38.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 39,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 39.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 40,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 40.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 41,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 41.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 42,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 42.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 43,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 43.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 44,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 44.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 45,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 45.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 46,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 46.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 47,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 47.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 48,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 48.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 49,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 49.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 50,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 50.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 51,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 51.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 52,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 52.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 53,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 53.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 54,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 54.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 55,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 55.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 56,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 56.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 57,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 57.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 58,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 58.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 59,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 59.5,
++   },
+  ]
+
+ ❯ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx:344:44
+    342|     const from = next.options.from;
+    343|     expect(from).toBeCloseTo(30.2, 9);
+    344|     expect(next.options.metronome?.clicks).toEqual(
+       |                                            ^
+    345|       planMetronomeClicks(120, from, from + 2, PROJECT_END),
+    346|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+TypeError: Cannot read properties of undefined (reading 'when')
+ ❯ beatTime app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx:249:16
+    247| 
+    248| function beatTime(click: MetronomeClick): number {
+    249|   return click.when - click.offset;
+       |                ^
+    250| }
+    251| 
+ ❯ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx:371:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+AssertionError: expected [ Array(57) ] to deeply equal [ { when: 3, offset: +0, …(2) }, …(1) ]
+
+- Expected
++ Received
+
+@@ -9,6 +9,336 @@
+      "accent": true,
+      "duration": 0.03,
+      "offset": 0,
+      "when": 4,
+    },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 6,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 7,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 8,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 9,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 10,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 11,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 12,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 13,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 14,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 15,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 16,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 17,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 18,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 19,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 20,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 21,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 22,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 23,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 24,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 25,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 26,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 27,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 28,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 29,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 30,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 31,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 32,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 33,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 34,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 35,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 36,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 37,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 38,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 39,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 40,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 41,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 42,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 43,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 44,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 45,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 46,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 47,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 48,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 49,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 50,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 51,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 52,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 53,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 54,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 55,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 56,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 57,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 58,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 59,
++   },
+  ]
+
+ ❯ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx:445:44
+    443|     const next = graphs[graphs.length - 1];
+    444|     const from = next.options.from;
+    445|     expect(next.options.metronome?.clicks).toEqual(
+       |                                            ^
+    446|       planMetronomeClicks(60, from, Math.min(PROJECT_END, from + 2), P…
+    447|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU8 at 999 BPM every scrub-like seek plans at most one horizon of clicks
+AssertionError: expected 999 to be less than or equal to 35
+ ❯ app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx:492:59
+    490|     for (const graph of graphs) {
+    491|       expect(graph.options.metronome?.clicks.length ?? 0).toBeGreaterT…
+    492|       expect(graph.options.metronome?.clicks.length ?? 0).toBeLessThan…
+       |                                                           ^
+    493|     }
+    494|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH2 any chunking with soundUntil = end reproduces the full plan click for click
+AssertionError: expected { count: 3638, first: [ …(5) ] } to deeply equal { count: +0, first: [] }
+
+- Expected
++ Received
+
+  {
+-   "count": 0,
+-   "first": [],
++   "count": 3638,
++   "first": [
++     "40/8/insideClick#0: end 0.02 vs 0.03",
++     "40/8/insideClick#1: end 1.52 vs 1.53",
++     "40/8/insideClick#2: end 3.02 vs 3.03",
++     "40/8/insideClick#3: end 4.52 vs 4.53",
++     "40/8/insideClick#4: end 6.02 vs 6.03",
++   ],
+  }
+
+ ❯ app/lib/arrangement/__tests__/metronome-horizon.test.ts:113:69
+    111|       }
+    112|     }
+    113|     expect({ count: failures.length, first: failures.slice(0, 5) }).to…
+       |                                                                     ^
+    114|       count: 0,
+    115|       first: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH4 nextMetronomeChunk follows the due, late-skip and end rules
+TypeError: (0 , __vite_ssr_import_1__.nextMetronomeChunk) is not a function
+ ❯ app/lib/arrangement/__tests__/metronome-horizon.test.ts:135:12
+    133|   it('MH4 nextMetronomeChunk follows the due, late-skip and end rules'…
+    134|     const base: MetronomeHorizonState = { bpm: 120, from: 10, startAt:…
+    135|     expect(nextMetronomeChunk(base, 99.9, HORIZON, LATE_MARGIN)).toBeN…
+       |            ^
+    136|     expect(nextMetronomeChunk(base, 100.5, HORIZON, LATE_MARGIN)).toEq…
+    137|     const late = nextMetronomeChunk(base, 103, HORIZON, LATE_MARGIN);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH5 a random audio clock never starts a click in the past and drops only skipped beats
+TypeError: (0 , __vite_ssr_import_1__.nextMetronomeChunk) is not a function
+ ❯ app/lib/arrangement/__tests__/metronome-horizon.test.ts:161:23
+    159|       now += 0.01 + random() * 4.99;
+    160|       for (;;) {
+    161|         const chunk = nextMetronomeChunk(state, now, HORIZON, LATE_MAR…
+       |                       ^
+    162|         if (!chunk) {
+    163|           break;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI2 turns on at 120 BPM with its status and Play schedules a click on every beat
+AssertionError: expected [] to have a length of 4 but got +0
+
+- Expected
++ Received
+
+- 4
++ 0
+
+ ❯ app/lib/arrangement/__tests__/metronome-ui.test.tsx:317:22
+    315|       PROJECT_END,
+    316|     );
+    317|     expect(expected).toHaveLength(4);
+       |                      ^
+    318|     expect(options.metronome?.clicks).toEqual(expected);
+    319|     const clickStarts = startedSources.filter((source) => isClickBuffe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI4 turning it on while playing resyncs once with clicks from the live position
+AssertionError: expected [ …(9) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 3.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 4,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 4.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 5.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 6,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 6.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 7,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 7.5,
++   },
++ ]
+
+ ❯ app/lib/arrangement/__tests__/metronome-ui.test.tsx:355:39
+    353|     const options = lastScheduleOptions();
+    354|     expect(options.from).toBeGreaterThanOrEqual(3.2 - 1e-9);
+    355|     expect(options.metronome?.clicks).toEqual(
+       |                                       ^
+    356|       planMetronomeClicks(
+    357|         120,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI5 a tempo change while it is on resyncs once with the new beat and keeps it pressed
+AssertionError: expected [ { when: 1, offset: +0, …(2) }, …(6) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 1,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 2,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 3,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 4,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 6,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 7,
++   },
++ ]
+
+ ❯ app/lib/arrangement/__tests__/metronome-ui.test.tsx:375:39
+    373|     expect(applyScheduleMock.mock.calls.length).toBe(before + 1);
+    374|     const options = lastScheduleOptions();
+    375|     expect(options.metronome?.clicks).toEqual(
+       |                                       ^
+    376|       planMetronomeClicks(
+    377|         60,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/13]⎯
+
+ FAIL  app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI10 Space on the focused toggle starts playback and does not toggle the metronome
+AssertionError: expected [ …(16) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 0,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 0.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 1,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 1.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 2,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 2.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 3,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 3.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 4,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 4.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 5.5,
++   },
++   {
++     "accent": true,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 6,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 6.5,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 7,
++   },
++   {
++     "accent": false,
++     "duration": 0.03,
++     "offset": 0,
++     "when": 7.5,
++   },
++ ]
+
+ ❯ app/lib/arrangement/__tests__/metronome-ui.test.tsx:484:53
+    482|     expect(live(api).isPlaying).toBe(true);
+    483|     expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    484|     expect(lastScheduleOptions().metronome?.clicks).toEqual(
+       |                                                     ^
+    485|       planMetronomeClicks(
+    486|         120,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/13]⎯
+
+
+ Test Files  3 failed | 3 passed (6)
+      Tests  13 failed | 64 passed (77)
+   Start at  20:41:20
+   Duration  67.89s (transform 16.68s, setup 0ms, import 48.86s, tests 19.79s, environment 136.23s)
+

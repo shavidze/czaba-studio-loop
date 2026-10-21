@@ -1,0 +1,99 @@
+{
+  "round": 71,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-21T18:42:13.9769525Z",
+    "round": 71,
+    "attempt": 1,
+    "backend": 200,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "G71-2",
+    "R71-S",
+    "R71-U",
+    "G71-1",
+    "MT-BEATS*1440x900",
+    "MT-BEATS*1280x720",
+    "MH-LONG",
+    "MH-END",
+    "MT-SEEK",
+    "MT-TEMPO-CHANGE",
+    "MT-LIVE-TOGGLE",
+    "MH-SCRUB",
+    "MH-NODES*1440x900",
+    "MH-NODES*1280x720",
+    "MH-SCRUB-PERF",
+    "MT-LOOP",
+    "MT-EXPORT-REG",
+    "MT-OFF",
+    "REG-HYD",
+    "G71-3",
+    "ABLETON-0.2-ROW1",
+    "ABLETON-0.2-ROW2"
+  ],
+  "blocked": [
+    "not run (environment / out of round scope per task 4.10): hidden-tab late pump in a real browser (HU4, MH4, MH5 cover the rule offline only)",
+    "not run (out of scope 4.10): video sync and C-R27-01; bars ruler rows; FB-01..FB-16 stage regression; npm run test:e2e:smoke (root)",
+    "Tech Lead R71-T (real Chrome, ears: fast tempo, long project, scrub) open; R65-T..R70-T unchanged"
+  ],
+  "info": [
+    {
+      "id": "INFO-C71-MUT-H-EQUIVALENT",
+      "severity": "info",
+      "detail": "Mutation h (stopGraph does not clear metronomeHorizonRef) survives: it is equivalent. handleRef.current is assigned only in startGraph (l.807), immediately followed by the horizon-state assignment (l.808); stopGraph nulls handleRef; fillMetronomeHorizon returns when handleRef is null. No test can kill it; the task 2.3 row h -> HU5 cannot be met as written. R71-U is passed with this exception."
+    },
+    {
+      "id": "INFO-C71-MUT-N-O-GAPS",
+      "severity": "info",
+      "detail": "C extras n (late margin 0 in fillMetronomeHorizon) and o (soundUntil passed in the loop branch) survive: test gaps (no HU row with a late chunk closer than 20 ms; no loop fixture where a click straddles loop.end). m (horizon 0.25) is killed by HU1-4, HU6, UI2, UI4."
+    },
+    {
+      "id": "INFO-C71-ME-LENGTH",
+      "severity": "info",
+      "detail": "The demo Middle East clip is 01:41.352, so F-LONG-SILENT (drop at 1 s) ends at 102.352 s, not 133 s as the task assumed. Node counts do not depend on the project length after the change; the old-code estimate scales to about 1700 clicks per resync at 999 BPM."
+    },
+    {
+      "id": "INFO-C71-LOOP-FIXTURE",
+      "severity": "info",
+      "detail": "MT-LOOP with F-SILENT alone cannot create the 2-5 s range: a drag on the empty music lane gives the status that a range must be selected on a waveform. As in C round 66, Middle East was dropped muted on music at 0 before the range drag. This is a harness fixture deviation, not an app bug."
+    },
+    {
+      "id": "INFO-C71-A-VITEST-CACHE",
+      "severity": "info",
+      "detail": "A reported a stray tmp/studio-real-loop/node_modules/.vitest-cache created by a mis-quoted shell command in A's phase; left for root."
+    },
+    {
+      "id": "INFO-C71-GSTACK-START",
+      "severity": "info",
+      "detail": "The gstack CLI daemon failed to start within 15 s on its first invocation; the next invocation started it, and the session then worked. The server-node.mjs fallback was not needed."
+    },
+    {
+      "id": "INFO-C71-RB-R9L2-SERIES",
+      "severity": "info",
+      "detail": "render-budget R9-L2 (A open item): C ran final sources 8/8 plus the verify run, and the snapshot baseline 8/8. Across A and C: final 1 failure in 17 runs, baseline 0 in 13. No signal distinguishing the versions; the test never enables the metronome."
+    },
+    {
+      "id": "INFO-C71-MH-END-METHOD",
+      "severity": "info",
+      "detail": "MH-END used Snap off, zoom out, then a plain REAL ruler click (not Alt-click or Home plus keys); p = 96.483 was recorded from the readout."
+    }
+  ],
+  "commitReadiness": "ready for the root gate: round 71 alone (8 paths). C verify attempt 1 returned rc 0, the tree matches the expected 8-line status, and the owned files were unchanged during C's phase",
+  "evidence": "c-round-71.md; c-round-71/checkpoint.md; c-round-71/gates/*; c-round-71/mut/*; c-round-71/runs/*; c-round-71/shots/*; c-round-71/tools/*",
+  "ableton": [
+    {
+      "row": "ticks on every beat",
+      "czaba": "PASS",
+      "ableton": "confirmed (Live 12 Manual 19.4/19.4.1, B capture 2026-10-19, not re-fetched by C)"
+    },
+    {
+      "row": "internal click scheduling",
+      "czaba": "PASS",
+      "ableton": "not applicable"
+    }
+  ]
+}

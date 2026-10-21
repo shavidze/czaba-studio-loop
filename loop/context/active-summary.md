@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-21T13:29:57.754Z)
+# Active loop summary (2026-10-21T20:03:05.253Z)
 
-- backlog.json 696 KB -> active view 98 KB
-- status: B_PLANNING_NEXT round 70
-- servers: `{"checkedUtc":"2026-10-21T13:29:57.5974447Z","round":71,"attempt":1,"backend":200,"store":200}`
-- last publication: 2be45dfea67f8289c77c83c9db47612d34f7c29f (rounds 70-70)
-- last root gate: round 70 published - commit 2be45dfea67f8289c77c83c9db47612d34f7c29f pushed
+- backlog.json 711 KB -> active view 129 KB
+- status: B_PLANNING_NEXT round 71
+- servers: `{"checkedUtc":"2026-10-21T20:03:04.0431393Z","round":72,"attempt":1,"backend":200,"store":200}`
+- last publication: 1e469e59d28aebf2e2a90f3d9d6d614d4e599bd1 (rounds 71-71)
+- last root gate: round 71 published - commit 1e469e59d28aebf2e2a90f3d9d6d614d4e599bd1 pushed
 
-## Current items: SRW-15
+## Current items: SRW-04, SRW-14, SRW-16
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -98,11 +98,9 @@
 - INFO-C66-RU-DBLCLICK-MISS-2 / info / watch (one more miss in round 70, inside the TB script; dedicated RU script 18/18 in rounds 67 and 70; ruler frozen) / ruler double-click Fit missed once in the TB script; dedicated script 18/18
 - INFO-C66-METER-120BPM / info / applied as a harness rule (timing rows at slow tempi or a single onset) / the meter rise detector cannot resolve beats 0.5 s apart (20 dB/s release vs 10 dB threshold)
 - INFO-C66-BD-COST / info / evidence on ROOT-R65-M1-BEAT-DENSITY / 999 BPM, max zoom, 133 s timeline: 2215 marks, 69-107 ms per zoom step; 30 s empty: 500 marks, 21-46 ms
-- ROOT-R66-M1-METRONOME-HORIZON / medium (reviewer, perf) / scheduled round 71 (D-29z36): METRONOME_SCHEDULE_HORIZON_SECONDS=2, planMetronomeClicks optional soundUntil, pure nextMetronomeChunk with late-drop rule, metronomeHorizonRef + fillMetronomeHorizon from pumpPlaybackAudio; grant to metronome-ui UI2/UI4/UI5/UI10 (UI10 also pins PROJECT_END); closes on C evidence (MT-BEATS*, MH-LONG, MH-END, MH-SCRUB, MH-NODES*, MH-SCRUB-PERF); createMetronomeBuffers extraction stays ARCH (f) / non-loop metronome clicks are planned to projectEnd and re-created on every resync (scrub every 100 ms, ~3 live graphs); fix: horizon-based 
 - ROOT-R66-L2 / low / open_tech_lead_decision (R66-T): deliberate D-29z31 R5 routing through the master tap for C-verifiability / the metronome click enters the master tap/peak and can latch Peak while the export has no click
 - ROOT-R66-L3 / low / open - Lows batch (merged with A-R66 review #7 and ROOT-R65-L2) / metronome toggle 16 px (WCAG 2.5.8 24 px); the disabled reason only in title
 - A-R66-REVIEW-RESIDUALS / low / open - Lows batch (#3 UI7 mid-loop start, #6 AudioBuffer constructor guard, #7 16 px button); #5 -> ROOT-R66-M1; #8 info (provider and workspace share one lifetime) / A round-66 code-review residuals
-- DOC-059-STATUS-LINE / low / scheduled round 71 (doc 059 status line -> C PASS (round 66), b5fb12b + one superseding sentence after item 7) / doc 059 status line still says C-ის შემოწმებას ელოდება
 - R67-T-TECH-LEAD / info / open / real Chrome: BPM 90, Snap on, 1/4 from the lane menu, drag a clip onto the beats; 1/2 step within the musical list; clearing the BPM returns
 - A-R67-REVIEW-RESIDUALS / low / open - Lows batch (L2 no tests for the two guards; N2 adjacentGridDivision used only by a frozen test; N4 menu activeIndex if the list shrinks while open - not reachable today); L3 covered in browser by C GM-MENU; N1 kept by spec; N3 info / A round-67 code-review residuals
 - INFO-C67-MUT-P / low (test gap) / open - Lows batch (round 68 removed the constant; re-check p in the Lows batch) / mutation p (snapGroupDelta in-bounds checks widened to 0.000501) survives; round 68 removes the constant, re-check after
@@ -131,19 +129,28 @@
 - ROOT-R70-L3-FIBER-PROBE / low / open - Lows batch / ARCH (c) shared harness / tempo-window-ui counts renders through the __REACT_DEVTOOLS_GLOBAL_HOOK__ fiber walk (React-internal; copied from render-budget); move to on
 - ROOT-R70-L4-BW5-WALLCLOCK / low / open - Lows batch (C measured 4-6 ms over 3 runs, stable) / BW5 elapsed < 100 ms wall-clock assertion may flake on a loaded CI runner; the 180-240 count bound already proves no full build
 - ROOT-R70-L5-MUT-GAPS / low / open - Lows batch (merged with INFO-C70-MUT-M-UNSUB, INFO-C70-MUT-N-NEGSCROLL, INFO-C70-MUT-O-BREAK) / tempo-window test gaps: unsubscribe no-op (unmount + scroll), negative scrollLeft -> page 0, early break past toPx (window at start/middle o
-- ROOT-R70-L6-DOC062 / low / scheduled round 71 (doc 062 status line only) / doc 062 status line still says awaiting C
 - ROOT-R70-ARCH-TIMELINE-TRIO / info / signal - merged into ARCH-CHECKPOINT-SRW14-PREFS (seventh request); both reviewers: keep until a fourth consumer / getTimelineView/getTimelineViewportPx/subscribeTimelineScroll passed by hand to three consumers; proposal useTimelinePageKey or one Timeline
 - INFO-C70-DOC058-PLACEMENT / info / acknowledged (one line, two hunks; no action) / doc 058 sentence sits one sub-bullet below the exports line
 - INFO-C70-SCROLL-END / low / open (pre-existing, not filed as a bug by C; Lows batch triage: scroller max scrollLeft is 10 px short because of the vertical scrollbar gutter) / the last ~10 px of a long timeline never come into view (offsetWidth-clientWidth = 10 px vertical scrollbar)
 - R71-T-TECH-LEAD / info / open / real Chrome, metronome on at a fast tempo, long project, play and scrub: clicks steady, never missing or doubled?
+- ROOT-R71-L1-DOC063 / low / scheduled round 72 (doc 063 status line -> C PASS (round 71), 1e469e5; append root verify passed 101/1696 to the Gates bullet l.84) / doc 063 says verify failed on all attempts and still awaits C; root verify passed
+- ROOT-R71-L2-HORIZON-CONST / low / open - Lows batch (optional) / METRONOME_SCHEDULE_HORIZON_SECONDS (metronome.ts:9) and LOOP_SCHEDULE_HORIZON (ArrangementContext.tsx:138) are both 2 with nothing enforcing
+- ROOT-R71-L3-MUT-N-O / low / open - Lows batch (merged with INFO-C71-MUT-N-O-GAPS) / metronome horizon test gaps: n (late margin 0: HU4 variant with a late pump < 20 ms before a beat), o (soundUntil in the loop branch: loop f
+- ROOT-R71-L4-RB-R9L2 / info / watch (merged with INFO-C71-RB-R9L2-SERIES: final 1/17, baseline 0/13; no distinguishing signal; the test never enables the metronome) / render-budget R9-L2 flaked once on the final round-71 tree
+- ROOT-R71-ARCH-REFILL / info / signal - merged into ARCH-CHECKPOINT-SRW14-PREFS (eighth request); reviewers: keep until a third refill kind / second refill pipeline (metronomeHorizonRef/fillMetronomeHorizon) beside loopScheduleRef/fillLoopIterations; startGraph touched in rounds 66
+- INFO-C71-ME-LENGTH / info / acknowledged; round 72 fixtures use the measured 01:41.352 project end (B task assumption of 133 s corrected) / demo Middle East clip is 101.352 s, not 133 s
+- INFO-C71-LOOP-FIXTURE / info / acknowledged (harness fixture note: a range needs a waveform; drop a muted clip first, as in round 66) / MT-LOOP with F-SILENT alone cannot create the 2-5 s range
+- INFO-C71-A-VITEST-CACHE / info / root_note (stray tmp/studio-real-loop/node_modules/.vitest-cache from A round 71; root removes; agents do not run tools from tmp/studio-real-loop) / stray vitest cache folder in the loop directory
+- INFO-C71-GSTACK-START / info / acknowledged (ENV-BROWSE-DAEMON pattern; second invocation started it) / gstack daemon failed to start within 15 s on first invocation
+- INFO-C71-MH-END-METHOD / info / acknowledged / MH-END used Snap off + zoom out + a plain REAL ruler click
+- R72-T-TECH-LEAD / info / open / real Chrome: add three named markers on a long project with video; row placement, M + typed name, click/double-click/Ctrl+arrows feel, F2 re
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
 - SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
-- SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
-- SRW-16 [todo] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next
+- SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-17 [todo] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [todo] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [todo] Simple video opacity fade (from/to black) on single video lane, preview only

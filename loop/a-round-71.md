@@ -122,6 +122,14 @@ Result: **0 Critical / 0 High / 0 Medium**, score 9/10. Verified: from/startAt p
     - my background wrapper hit its time limit after vitest printed its summary, so the build step inside verify never ran.
   - **Re-run alone on the final tree** (`rerun-failed-files.txt`): `meter-ui` and `pan-release-recovery` plus the 6 owned and frozen files gave **8 files / 97 tests passed in 10.1 s**. The quiet full vitest run above also passed.
   - I attribute both failures to machine load, not to the code. Under §4.3 this is still **not** a verify PASS, so root's gate must run verify.
+  - **Attempt 3** (`verify-attempt3.txt`, final tree, node.exe 52 → 52; I ran it because §2.4 sets no attempt cap for A, only "run quietly"):
+    - rc 1 after 140 s: `1 failed | 1695 passed (1696)`;
+    - the failure is **not a timeout**: `render-budget.test.tsx:549` "keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02)", `expected 0.015000057220458995 to be +0` on `getLivePosition()` right after Play. That test waits on real time and never enables the metronome, so with `metronomeBpm === null` my `startGraph` change only adds one extra `projectEnd` call and a ref set to `null`.
+  - **Flake evidence:**
+    - store, final tree, alone ×3: pass, pass, **fail** (`render-budget-alone.txt`);
+    - scratch, round-70 snapshot sources ×5: 5/5 pass (`render-budget-baseline.txt`);
+    - scratch, final sources ×5: 5/5 pass (`render-budget-final.txt`).
+    - In total the final tree failed 1 of 8 runs and the baseline 0 of 5. That looks like a real-time flake: a stall of more than 50 ms of lookahead between Play and the read. I cannot fully rule out a small timing contribution from my change, so this is an **open item for C/root**. A larger baseline series would settle it.
 - Tree:
   - HEAD `2be45dfea67f8289c77c83c9db47612d34f7c29f` at the start and at the end;
   - `git status --short` shows exactly the 8 lines listed in §3.1;
@@ -147,17 +155,17 @@ Result: **0 Critical / 0 High / 0 Medium**, score 9/10. Verified: from/startAt p
 - docs 059, 062 and 063;
 - the smoke, recorded.
 
-**Not met:** §2.4 `npm run verify` → exit 0. Both attempts failed on timeouts under load. I claim nothing in §4 (C's acceptance).
+**Not met:** §2.4 `npm run verify` → exit 0. Attempts 1–2 failed on timeouts under load. Attempt 3 failed on the `render-budget` real-time flake described in §7. I claim nothing in §4 (C's acceptance).
 
 ## 10. Exact next C checks
 
 1. G71-2, then R71-S: `diff -u` against `b-round-70-r71-snapshots`. Note the additive finite guard in `nextMetronomeChunk` and the extra MH3 and MH4 rows (§8).
 2. R71-U: the red run on the snapshots (expect 14 failed, because of the strengthened MH3); mutations a–l plus m/n/o in C's own scratch; confirm that h is equivalent.
-3. G71-1: run `npm run verify` quietly. My two attempts timed out under load, so this gate is still open.
+3. G71-1: run `npm run verify` quietly; this gate is still open. Run `render-budget.test.tsx` several times (R9-L2 at line 549) on both the snapshot sources and the final tree, to confirm or rule out a regression.
 4. The §4.6 browser rows: MT-BEATS*, MH-LONG, MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB, MH-NODES* and MH-SCRUB-PERF. Then the §4.7 rows (MT-LOOP, MT-EXPORT-REG, MT-OFF, REG-HYD) and G71-3.
 5. Harness note: `/studio-lab` cannot play without a clip, so create F-SILENT or F-LONG-SILENT first.
 
-## 8. Deviations
+## 11. Deviations (task §7 item 8)
 
 - **Server port:** orchestrator override — dev server `:5173` (already running), not 5183; not started/stopped.
 - **Browser tool:** gstack `/browse` was **not** used, so no daemon was started and no `a-browse.json` was created. The smoke used standalone Playwright, which `harness_rules` allows for clicks and typing and requires for drags, labelled REAL-mouse (PW) / instrumentation (PW). No processes were started or stopped except my own Playwright chromium, which closed itself.

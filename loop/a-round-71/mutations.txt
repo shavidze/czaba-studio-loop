@@ -1,0 +1,205 @@
+# Round 71 mutations (A). Script a-round-71/mut.mjs; scratch a-round-71/scratch (copy of store/app + node_modules junction + own vitest.config.mts). Each mutation applied in scratch only, run, restored (diff -rq scratch/app store/app identical after every run).
+# Suite: metronome-horizon.test.ts, metronome-horizon-ui.test.tsx, metronome-ui.test.tsx, metronome.test.ts, graph.test.ts, loop.test.ts
+# Pass 1 = mut-all-pass1.log (before MH3 strengthening). After pass 1 MH3 got a straddling-click assertion (chunk [0,1.51) with soundUntil 8 -> 0.03); c, h re-run in mut-none,c,h.log.
+# a..l = task 2.3; m,n,o = C-suggested extras (info).
+# Survivors: h (equivalent mutant: fillMetronomeHorizon returns when handleRef is null, stopGraph nulls handleRef, every startGraph overwrites the state before filling -> stale state unobservable); n (late margin 0: no test separates 0 from 0.02); o (soundUntil in loop branch: no loop fixture has a click straddling loop.end).
+# c: killed by MH2 + MH3 (after strengthening), not by HU2/HU7 (120 BPM chunk edges fall on beats).
+
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+none: Test Files  6 passed (6) | Tests  77 passed (77)
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+red: Test Files  3 failed | 3 passed (6) | Tests  13 failed | 64 passed (77)
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH2 any chunking with soundUntil = end reproduces the full plan click for click
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH4 nextMetronomeChunk follows the due, late-skip and end rules
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH5 a random audio clock never starts a click in the past and drops only skipped beats
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU1 Play from 0 schedules only the first 2 s of clicks
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI2 turns on at 120 BPM with its status and Play schedules a click on every beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI4 turning it on while playing resyncs once with clicks from the live position
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI5 a tempo change while it is on resyncs once with the new beat and keeps it pressed
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU8 at 999 BPM every scrub-like seek plans at most one horizon of clicks
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI10 Space on the focused toggle starts playback and does not toggle the metronome
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+a: Test Files  2 failed | 4 passed (6) | Tests  10 failed | 67 passed (77)
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI2 turns on at 120 BPM with its status and Play schedules a click on every beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU1 Play from 0 schedules only the first 2 s of clicks
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI4 turning it on while playing resyncs once with clicks from the live position
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI5 a tempo change while it is on resyncs once with the new beat and keeps it pressed
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI10 Space on the focused toggle starts playback and does not toggle the metronome
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU8 at 999 BPM every scrub-like seek plans at most one horizon of clicks
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+b: Test Files  1 failed | 5 passed (6) | Tests  5 failed | 72 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+c: Test Files  1 failed | 5 passed (6) | Tests  1 failed | 76 passed (77)
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH2 any chunking with soundUntil = end reproduces the full plan click for click
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+d: Test Files  1 failed | 5 passed (6) | Tests  3 failed | 74 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+e: Test Files  2 failed | 4 passed (6) | Tests  3 failed | 74 passed (77)
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH4 nextMetronomeChunk follows the due, late-skip and end rules
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH5 a random audio clock never starts a click in the past and drops only skipped beats
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+f: Test Files  1 failed | 5 passed (6) | Tests  1 failed | 76 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+g: Test Files  1 failed | 5 passed (6) | Tests  3 failed | 74 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU5 Stop, or turning the metronome off while playing, ends every refill
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+h: Test Files  6 passed (6) | Tests  77 passed (77)
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+i: Test Files  1 failed | 5 passed (6) | Tests  5 failed | 72 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+j: Test Files  2 failed | 4 passed (6) | Tests  4 failed | 73 passed (77)
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH4 nextMetronomeChunk follows the due, late-skip and end rules
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH5 a random audio clock never starts a click in the past and drops only skipped beats
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+k: Test Files  1 failed | 5 passed (6) | Tests  1 failed | 76 passed (77)
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI7 plans the clicks for loop iteration 0 and appends them for every refilled iteration
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+l: Test Files  2 failed | 4 passed (6) | Tests  2 failed | 75 passed (77)
+   × metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M4 includes a beat that lies within ARRANGEMENT_EPS before the window start, clamped to it
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH2 any chunking with soundUntil = end reproduces the full plan click for click
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+m: Test Files  2 failed | 4 passed (6) | Tests  7 failed | 70 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU1 Play from 0 schedules only the first 2 s of clicks
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI2 turns on at 120 BPM with its status and Play schedules a click on every beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI4 turning it on while playing resyncs once with clicks from the live position
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+n: Test Files  6 passed (6) | Tests  77 passed (77)
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+o: Test Files  6 passed (6) | Tests  77 passed (77)
+
+## re-run after MH3 strengthening
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+none: Test Files  6 passed (6) | Tests  77 passed (77)
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+c: Test Files  1 failed | 5 passed (6) | Tests  2 failed | 75 passed (77)
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH2 any chunking with soundUntil = end reproduces the full plan click for click
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH3 soundUntil caps a click only at the project end, never at the chunk end
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+h: Test Files  6 passed (6) | Tests  77 passed (77)
+
+## FINAL TREE re-run (after code-review L1 NaN guard + MH4 NaN row + HU4 click-source filter) — same kill table; red now 14 failed (MH3 straddle assertion also red on snapshots)
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+none: Test Files  6 passed (6) | Tests  77 passed (77)
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+red: Test Files  3 failed | 3 passed (6) | Tests  14 failed | 63 passed (77)
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH2 any chunking with soundUntil = end reproduces the full plan click for click
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH3 soundUntil caps a click only at the project end, never at the chunk end
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH4 nextMetronomeChunk follows the due, late-skip and end rules
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH5 a random audio clock never starts a click in the past and drops only skipped beats
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU1 Play from 0 schedules only the first 2 s of clicks
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI2 turns on at 120 BPM with its status and Play schedules a click on every beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI4 turning it on while playing resyncs once with clicks from the live position
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI5 a tempo change while it is on resyncs once with the new beat and keeps it pressed
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU8 at 999 BPM every scrub-like seek plans at most one horizon of clicks
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI10 Space on the focused toggle starts playback and does not toggle the metronome
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+a: Test Files  2 failed | 4 passed (6) | Tests  10 failed | 67 passed (77)
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI2 turns on at 120 BPM with its status and Play schedules a click on every beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU1 Play from 0 schedules only the first 2 s of clicks
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI4 turning it on while playing resyncs once with clicks from the live position
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI5 a tempo change while it is on resyncs once with the new beat and keeps it pressed
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI10 Space on the focused toggle starts playback and does not toggle the metronome
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU8 at 999 BPM every scrub-like seek plans at most one horizon of clicks
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+b: Test Files  1 failed | 5 passed (6) | Tests  5 failed | 72 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+c: Test Files  1 failed | 5 passed (6) | Tests  2 failed | 75 passed (77)
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH2 any chunking with soundUntil = end reproduces the full plan click for click
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH3 soundUntil caps a click only at the project end, never at the chunk end
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+d: Test Files  1 failed | 5 passed (6) | Tests  3 failed | 74 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+e: Test Files  2 failed | 4 passed (6) | Tests  3 failed | 74 passed (77)
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH4 nextMetronomeChunk follows the due, late-skip and end rules
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH5 a random audio clock never starts a click in the past and drops only skipped beats
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+f: Test Files  1 failed | 5 passed (6) | Tests  1 failed | 76 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+g: Test Files  1 failed | 5 passed (6) | Tests  3 failed | 74 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU5 Stop, or turning the metronome off while playing, ends every refill
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+h: Test Files  6 passed (6) | Tests  77 passed (77)
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+i: Test Files  1 failed | 5 passed (6) | Tests  5 failed | 72 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+j: Test Files  2 failed | 4 passed (6) | Tests  4 failed | 73 passed (77)
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH4 nextMetronomeChunk follows the due, late-skip and end rules
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH5 a random audio clock never starts a click in the past and drops only skipped beats
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU7 near the end every beat sounds once, the last click is whole and nothing is past the end
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+k: Test Files  1 failed | 5 passed (6) | Tests  1 failed | 76 passed (77)
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI7 plans the clicks for loop iteration 0 and appends them for every refilled iteration
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+l: Test Files  2 failed | 4 passed (6) | Tests  2 failed | 75 passed (77)
+   × metronome.test.ts > SRW-15 stage 2 metronome plan, sound and graph (D-29z31) > M4 includes a beat that lies within ARRANGEMENT_EPS before the window start, clamped to it
+   × metronome-horizon.test.ts > D-29z36 metronome horizon planning (pure) > MH2 any chunking with soundUntil = end reproduces the full plan click for click
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+m: Test Files  2 failed | 4 passed (6) | Tests  7 failed | 70 passed (77)
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU1 Play from 0 schedules only the first 2 s of clicks
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI2 turns on at 120 BPM with its status and Play schedules a click on every beat
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU2 the pump refills every beat exactly once to the end, never late, then stops appending
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU3 a seek replaces the horizon: the old graph gets nothing, the new one continues
+   × metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI4 turning it on while playing resyncs once with clicks from the live position
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU4 a late pump drops the missed clicks, never starts one in the past and never resyncs
+   × metronome-horizon-ui.test.tsx > D-29z36 metronome horizon refill in the mounted workspace > HU6 a tempo change resyncs once and every later click is on the new beat
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+n: Test Files  6 passed (6) | Tests  77 passed (77)
+command (cwd C:/Apps/czaba-project/tmp/studio-real-loop/a-round-71/scratch/): npx vitest run --config vitest.config.mts app/lib/arrangement/__tests__/metronome-horizon.test.ts app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx app/lib/arrangement/__tests__/metronome-ui.test.tsx app/lib/arrangement/__tests__/metronome.test.ts app/lib/arrangement/__tests__/graph.test.ts app/lib/arrangement/__tests__/loop.test.ts --reporter=verbose
+o: Test Files  6 passed (6) | Tests  77 passed (77)
