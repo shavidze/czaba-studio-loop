@@ -36,6 +36,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          # pushes made with the PAT (not GITHUB_TOKEN) start the next job, which keeps the loop going between rounds
+          token: ${{ secrets.STORE_PUSH_TOKEN }}
 
       - name: Is the cloud loop switched on?
         id: enabled
