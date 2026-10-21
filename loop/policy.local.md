@@ -102,3 +102,10 @@ B ყოველი დაგეგმვისას აახლებს `tm
 - **No `.env`.** Firebase, Shopify, R2 and Brevo are not configured. The console errors "Failed to load cart" / `ERR_CONNECTION_REFUSED` / `ERR_TUNNEL_CONNECTION_FAILED` are expected here and are not Studio bugs.
 - **Fresh machine per job.** Each job starts on a new machine. Uncommitted store work from the previous job is restored before the round starts. Background processes and files outside `store/` and the loop folder do not survive. Never depend on them.
 - **Time.** A job can be stopped at its time limit. The next job resumes the same phase, so write the round's report files as you go, not only at the end.
+
+## Speed rules (user decision, 2026-10-21) — take precedence over older test-repetition instructions
+
+- **A** runs only the checks for what it changed: `npm run typecheck`, `npm run lint`, and the test files that cover the changed code (`npx vitest run <files>`). A does not run the full test suite or the full `npm run verify`; the root gate does, on the exact commit it publishes. A still asks the code-reviewer for 3+ changed files.
+- **C** does not run the full test suite or `npm run verify`. C spends the round on real browser verification. Acceptance rows of the type "verify passes" / "all tests pass" are marked `gate` in `c-round-N.json` (`"passed"` must not claim them). The gate's result is in `gates/gate-round-N.json` and `gates/round-N/verify.log`.
+- **B** writes no task acceptance that requires A or C to run the full suite; "full verify" belongs to the gate.
+- **Regression round every 3 days.** Keep `regression-last.json` in the loop folder: `{"date":"YYYY-MM-DD","round":N}`. When it is missing or 3 or more days old at the time B plans the next round, the next round is a REGRESSION round instead of new scope: C re-verifies in the browser the key acceptance of every item already done or c_pass (one short check per item, both viewports), runs `npm run test:e2e:smoke`, and reports regressions as bugs. A only fixes what C finds in that round. When the round closes, B updates `regression-last.json`.

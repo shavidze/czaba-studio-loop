@@ -74,6 +74,9 @@ jobs:
 
       - name: Run one loop round
         if: steps.enabled.outputs.on == 'true'
+        env:
+          # The root gate runs npm run verify on the exact commit it pushes, so the pre-push hook would only repeat it.
+          HUSKY: "0"
         run: bash cloud/run.sh
 
       - name: Upload loop logs
