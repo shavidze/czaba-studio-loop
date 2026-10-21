@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-21T21:36:24.826Z)
+# Active loop summary (2026-10-21T22:49:36.262Z)
 
-- backlog.json 664 KB -> active view 101 KB
-- status: G_ROOT_GATE round 73
-- servers: `{"checkedUtc":"2026-10-21T21:23:05.8458150Z","round":73,"attempt":1,"store":200}`
+- backlog.json 671 KB -> active view 134 KB
+- status: G_ROOT_GATE round 74
+- servers: `{"checkedUtc":"2026-10-21T22:35:42.0671139Z","round":74,"attempt":1,"store":200}`
 - last publication: 6b574e853d2c5c4317e38927d9d06ce2a3dba91b (rounds 72-73)
-- last root gate: round 73 published - commit 6b574e853d2c5c4317e38927d9d06ce2a3dba91b pushed
+- last root gate: round 74 skipped - C taskStatus FAIL
 
-## Current items: SRW-16
+## Current items: SRW-14, SRW-16
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -147,13 +147,20 @@
 - C-R72-01 / medium / open - fix dispatched round 73 (D-29z38) / Delete/plain arrows act on the focused marker flag instead of the selected clip after a marker add then clip click: releaseEditFocusOnTimeli
 - ROW-RANGE-M / info / signal for stage 2 (not a task) / M adds at range.start even after a later ruler click (spec R6 as written); Live drops the selection on click; consider clearing/documenting 
 - GATE-72-SKIPPED / info / open_root / Round 72 root gate skipped (C FAIL); round-72 code is uncommitted in the tree; rounds 72+73 publish together after C PASS
+- A-R73-SAFARI-FLAG-FOCUS / medium / scheduled (round 74 B1: press explicitly focuses the flag; MV8 test); C verifies Chromium only, WebKit not available as evidence / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
+- ROOT-R73-S1-MAC-CTRL-ARROWS / low / scheduled round 75 (SRW-16 stage 2b): Live 12 6.9 uses Option+arrows on Mac / macOS reserves Ctrl+Left/Right for Spaces; marker prev/next reachable only by buttons
+- ROOT-R73-S2-FLAG-A11Y / low / partly scheduled round 74 (aria-keyshortcuts B12); aria-current semantics kept (C harness), Lows batch / F2/Delete only in title; aria-current=true for selection
+- ROOT-R73-S3-MARKER-BUTTON-SIZE / low / open - Lows batch / marker +/◀/▶ buttons 16 px tall, below WCAG 2.2 2.5.8 24 px (matches existing chrome)
+- ROOT-R73-S4-EDITOR-OVERFLOW / low / open - Lows batch / marker name editor w-40 near the timeline end can widen horizontal scroll; markers past project end
+- ROOT-R73-S5-REF-CALLBACK / low / open - Lows batch / flag ref callback recreated every render (correct, cheap; nit)
+- ROOT-R73-S6-PENDING-FOCUS / low / open - Lows batch / pendingFocusRef may stay set if a commit is refused; low risk
+- MARKER-STRIP-CONTEXT-ADD / info / signal (not scheduled; not requested by the user) / Live 6.4: scrub area context menu has Add Locator; CZABA empty marker strip has no custom menu
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
 - SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
-- SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-17 [todo] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [todo] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)

@@ -1,0 +1,40 @@
+     [32m✓[39m MU8d: a press on a lane background, the ruler or a Markers header button releases a focused flag[32m 52[2mms[22m[39m
+     [32m✓[39m MU8e: a press on another flag or inside the open name editor keeps marker focus[32m 68[2mms[22m[39m
+     [32m✓[39m MU8f: Delete or a plain arrow dispatched from inside a flag (not the flag itself) touches neither the clip nor the marker[32m 64[2mms[22m[39m
+     [32m✓[39m MU9: Cut Time removes markers inside, shifts later ones, reports the count, and Undo restores them[32m 100[2mms[22m[39m
+     [32m✓[39m MU10: add, rename and delete while playing create no new buffer sources[32m 86[2mms[22m[39m
+     [32m✓[39m MU11: during a pointer gesture M and Ctrl+Right are refused[32m 87[2mms[22m[39m
+     [32m✓[39m MU13: a blur during a pointer gesture commits nothing and reports the refusal[32m 64[2mms[22m[39m
+     [32m✓[39m MU14: committing by moving focus elsewhere keeps focus where the user put it[32m 54[2mms[22m[39m
+     [32m✓[39m MU12: m typed into the library search stays text and opens no editor[32m 44[2mms[22m[39m
+     [32m✓[39m lays labels out without overlap and keeps the flag position in the marker row[32m 55[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/markers-ui.test.tsx[2m > [22mmarker row: rename and delete[2m > [22mMU8: Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a marker do not nudge
+[31m[1mAssertionError[22m: expected 'Move Marker' to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+"Move Marker"
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/markers-ui.test.tsx:[2m526:33[22m[39m
+    [90m524| [39m    fireEvent[33m.[39m[34mkeyDown[39m(outro[33m,[39m { key[33m:[39m [32m'ArrowLeft'[39m[33m,[39m code[33m:[39m [32m'ArrowLeft'[39m })[33m;[39m
+    [90m525| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement[33m.[39mclips[[34m0[39m][33m.[39mstart)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m526| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m527| [39m    fireEvent[33m.[39m[34mkeyDown[39m(outro[33m,[39m { key[33m:[39m [32m'Delete'[39m[33m,[39m code[33m:[39m [32m'Delete'[39m })[33m;[39m
+    [90m528| [39m    [34mexpect[39m([34mmarkerTimes[39m(view))[33m.[39m[34mtoEqual[39m([[32m'12.000'[39m[33m,[39m [32m'20.000'[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m36 passed[39m[22m[90m (37)[39m
+[2m   Start at [22m 22:38:31
+[2m   Duration [22m 4.34s[2m (transform 1.76s, setup 0ms, import 3.10s, tests 3.98s, environment 1.10s)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/markers-ui.test.tsx,title=app/lib/arrangement/__tests__/markers-ui.test.tsx > marker row%3A rename and delete > MU8%3A Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a marker do not nudge,line=526,column=33::AssertionError: expected 'Move Marker' to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A"Move Marker"%0A%0A ❯ app/lib/arrangement/__tests__/markers-ui.test.tsx:526:33%0A%0A

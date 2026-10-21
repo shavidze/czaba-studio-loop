@@ -1,0 +1,85 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-21T22:35:42.0671139Z",
+  "round": 74,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R74-01",
+   "severity": "medium",
+   "steps": [
+    "cd store",
+    "npx vitest run app/lib/arrangement/__tests__/markers-ui.test.tsx"
+   ],
+   "expected": "markers-ui.test.tsx green so the root gate full vitest can pass; the test contract matches B5 (plain arrows on a focused flag move it with Snap off by 0.1 s, one Move Marker each)",
+   "actual": "1 failed / 36 passed (with markers-move-ui): MU8 line 526 expect(live(api).undoLabel).toBeNull() receives 'Move Marker'. The old stage-1 assertion contradicts the new B5 contract; A had no grant to change it. The root gate will be red and publication is blocked until B grants the l.526 change (e.g. toBe('Move Marker')) or removes it. Browser behaviour itself matches B5.",
+   "evidence": "c-round-74/vitest-markers.txt; a-round-74.md section 4"
+  },
+  {
+   "id": "C-R74-02",
+   "severity": "low",
+   "steps": [
+    "/studio-lab 1440x900 or 1280x720, drop Middle East, add a marker near the right of the visible timeline",
+    "right-click the flag -> marker menu opens at the pointer",
+    "wheel-scroll the timeline horizontally by 300 px (mouse over a lane)"
+   ],
+   "expected": "the menu closes on a user timeline scroll like the lane grid menu, or stays attached to its flag",
+   "actual": "the menu stays open at its old fixed position (left 1276/1116) while its flag moved 300 px left (1270->970 at 1440, 1110->810 at 1280); the menu points at empty timeline. A documented this as a known gap (a-round-74.md section 8, close-on-scroll lives in StudioWorkspace, outside the grant)",
+   "evidence": "c-round-74/mk74-*.json row MK-MENU-SCROLL; shots/menu-scrolled-1440x900.png, menu-scrolled-1280x720.png"
+  }
+ ],
+ "passed": [
+  "MK-DRAG-SNAP",
+  "MK-DRAG-FREE",
+  "MK-DRAG-CLICK",
+  "MK-MOVE-DUP",
+  "MK-ARROW",
+  "MK-DRAG-PLAYING",
+  "MK-MENU",
+  "MK-MENU-RENAME",
+  "MK-MENU-PLAY",
+  "MK-MENU-DELETE",
+  "REG-STAGE1",
+  "REG-KEYS",
+  "REG-HYD",
+  "G74-3 (non-backend rows)",
+  "SOURCE-UNCHANGED"
+ ],
+ "blocked": [
+  "G74-3 fake-Bearer 403: backend unavailable in cloud (got 500 'Unable to prepare Studio access')"
+ ],
+ "notRun": [
+  "menu over the floating expanded video dock (A extra check; not exercised)",
+  "menu bottom-edge clamp: not reachable at 1440x900/1280x720 (flag row y 239/277, menu bottom 343/381); only right-edge clamp measured",
+  "real-keyboard contextmenu event button value: CDP key presses generate no contextmenu event in Chromium (window.__cm empty); menu opens through the keydown Shift+F10/ContextMenu branch; native-key path unverified (same class as ALT-CHROME-MENU)",
+  "macOS Ctrl+click / WebKit flag focus (A-R73-SAFARI-FLAG-FOCUS): Chromium only"
+ ],
+ "gate": [
+  "vitest full suite",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "info": [
+  "C ran only markers-ui + markers-move-ui (37 tests) to confirm C-R74-01; no full suite",
+  "Tab from the open menu closes it and focus moves to arrangement-track-fold (default Tab after the flag)",
+  "MK-DRAG-CROSS extra: dragging flag 5 across 12 to 14 keeps focus on the dragged flag mid-drag (act @13.000 while DOM order still [13,12]); final [12,14], labels correct, one Move Marker, Undo -> [5,12]",
+  "menu right-edge clamp: right exactly vw-4 (1436 / 1276)",
+  "MK-CUT-TIME one run: range 7-10 all lanes, markers [5,8,9,10,12] -> [5,7,9], status '2 მარკერი წაიშალა', Undo restores",
+  "Shift+F10 menu anchored at flag bottom-left (712,259 vs flag 712,239+20); second Shift+F10 keeps one menu"
+ ],
+ "ableton": {
+  "MK-DRAG/MK-ARROW movement": "დადასტურებული (Live 12 manual 6.4 text)",
+  "step size / snap / Alt inversion / collision refusal": "დაუდასტურებელი (CZABA choice)",
+  "menu items Rename/Play/Delete": "შეგნებული განსხვავება (Live: Edit Info Text, Loop to Next Locator, Set Song Start Time Here)",
+  "menu Play from here": "დადასტურებული via double-click play (6.4)",
+  "focus hand-off": "არ ეხება"
+ }
+}

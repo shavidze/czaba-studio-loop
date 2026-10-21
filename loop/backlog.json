@@ -1,9 +1,9 @@
 {
- "version": 73,
- "updated": "2026-10-21 (B round 73 review -> round 74 task, D-29z39)",
+ "version": 74,
+ "updated": "2026-10-21 (B round 74 review -> round 75 task, D-29z40)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 74: D-29z39 - SRW-16 stage 2a: move markers by drag/arrows with snap, collision refusal, right-click and Shift+F10 marker menu Rename/Play from here/Delete; baseline HEAD 6b574e8 clean; owned markers.ts, ArrangementMarkerRow.tsx, ArrangementMarkerMenu.tsx (new), ArrangementGridMenu.tsx (one export), StudioWorkspace.tsx (two props), markers.test.ts, markers-move-ui.test.tsx (new), markers-ui.test.tsx (MU8e two assertions), doc 065 (new), doc 064 status line). C rows MK-DRAG-SNAP/FREE/CLICK, MK-MOVE-DUP, MK-ARROW, MK-DRAG-PLAYING, MK-MENU*, REG-STAGE1, REG-KEYS, REG-HYD, G74-3. Next: SRW-16 stage 2b (round 75).",
+ "current_task": "current-task.md (round 75: D-29z40 - SRW-16 stage 2a fix-up: C-R74-01 MU8 l.526 test contract (Move Marker) + A-R74-MU8E-POINTERUP; C-R74-02 marker menu closes on a user horizontal timeline scroll (grid-menu follow predicate, follow auto-scroll keeps it open) and on a zoom change. Baseline HEAD 6b574e8 + round-74 tree (7 M + 3 ??); owned ArrangementMarkerRow.tsx, ArrangementMarkerMenu.tsx (one union member), StudioWorkspace.tsx (handleTimelineScroll only), markers-ui.test.tsx (MU8 title + l.526 + one assertion; MU8e two pointerUps + one release assertion), markers-move-ui.test.tsx (append MV15-MV17), doc 065. C rows MK-MENU-SCROLL, MK-MENU-VSCROLL, MK-MENU-ZOOM, MK-MENU-FOLLOW, MK-MENU-DOCK, MK-74-RECHECK, T75-TARGETED, REG-HYD, G75-3. Next: SRW-16 stage 2b (round 76).",
  "advisor_used_by_B": "round 63 planning (round 64 task): advisor available; consulted after orientation (round shape 4c-2 + carried round-63 browser rows rather than browser-only, grid.ts frozen, SD6 flip check, canPlaceLibraryClip touching check, A-R63 OOB ruling, Ableton row, root env gate) and after writing the outputs | round 64 planning (round 65 task): advisor available; consulted after orientation (baseline committed_not_pushed, explicit C-R64-01 ruling, stage split, no default BPM, 4/4 difference, ARCH (a) re-request, chrome-row placement with c-round-6 wrap evidence, Ableton confirmed/unconfirmed rows, WAV sha256 no-stretch check, typing-shortcut test, not-in-history test, render-budget static check) and before b-next | round 65 planning (round 66 task): advisor available; consulted after orientation (baseline regeneration, C-only backlog updates, 999.5 adoption, metronome contracts: setter into context without prejudging ARCH, index-based beat plan, loop appendClicks, upfront node bound, routing through master meter for C-verifiability, slow-BPM meter rows, lazy creation because frozen fakes lack createBuffer, export sha oracle, Ableton 19.4 rows; B diverged on folding the beat-density Medium: a 16 px floor does not bound the width-driven count, so it is measured as BD-INFO instead) | round 66 planning (round 67 task): advisor available; consulted after orientation (frozen tempo-ui U3 check, root review routing, explicit precision rule + property test, split 5a/5b, C-evidence-only backlog). B diverged on one point with evidence: the advisor proposed gridBeats with the effective step switching to musical whenever a BPM is set; frozen tempo-ui U3 asserts data-grid-seconds unchanged after a tempo is set (and D-29z30 says the tempo changes only the bars ruler), so musical divisions are an explicit choice with no auto-switch | round 67 planning (round 68 task): advisor available; consulted once after orientation and before writing. Adopted: baseline = b5fb12b + the 7 uncommitted round-67 lines with a regenerated frozen list/snapshots; normative stored-line scan instead of the reviewer two-candidate form (stuck case 999 BPM 1/4 t=0.3 confirmed in node); ceil-branch instance verified against live grid.ts (-0.038 vs -0.037); keyboard loop move included (same mechanism); clip-end/group-offset ms ruled deliberate; statuses from C evidence only (5a -> bug); Ableton loop-brace citation from the existing capture; bounded sweeps; second call (round 68 task review) before reporting: GM12 sweep limited to w*step >= MIN_LOOP_LENGTH (800 guard cases would have failed a correct implementation; verified in node, 11011 checks 0 failures) + guard oracle row, x defined in the clamp rule, R68-S compares whole-ms expressions not branch structure, brace keys dispatched on the brace element (pressArrow targets document.body), GM-BRACE-KEYS Snap off via the button | round 68 planning (round 69 task): advisor available; consulted after orientation (mode-toggle model vs list entries, frozen published tests + new test files, Digit3 in window and select, bar/no-BPM refusals, menu item placement vs frozen menu tests, grid.ts frozen with oracle, 404 capture not a source, doc 060 ownership, ARCH sixth request) and before completion | round 69 planning (round 70 task): advisor available; consulted after orientation (SRW-14 status convention, close-on-evidence list, reviewer L1 aria-live check, perf round order, floor vs culling, UI2/UI4/UI5 PROJECT_END pin for the horizon round, harness rule) and before completion | round 70 planning (round 71 task): advisor available; consulted after orientation (UI10 also pins PROJECT_END, stored from/startAt pair, late-drop rule without resync, union-of-chunks oracle, worst-case perf rows, Phase 2 root note, close-on-evidence list) and before completion | round 71 planning (round 72 task): advisor available; consulted after orientation (optional markers field + never [], no-resync row, Delete Time decision + unconfirmed Ableton, range.start add, keys F2/Ctrl+arrows, isMarkerTarget + SRW-24 regression, own row keeps ruler frozen, VISUAL-A root note, F-ME length correction) and before completion",
  "baseline": {
   "tsc_errors": 0,
@@ -3482,7 +3482,7 @@
    "depends_on": [
     "SRW-04"
    ],
-   "status": "in_progress (stage 1 C PASS round 73 browserVerified=true, published 6b574e8; stage 2a dispatched round 74 D-29z39; stage 2b scheduled round 75, not deferred)",
+   "status": "in_progress (stage 1 C PASS round 73, published 6b574e8; stage 2a: every browser row C PASS round 74 browserVerified=true, verdict FAIL on C-R74-01 (red unit test), gate 74 skipped, unpublished; fix-up round 75 D-29z40; stage 2b round 76, not deferred)",
    "files": [
     "app/types/arrangement.ts",
     "app/lib/arrangement/markers.ts",
@@ -3602,15 +3602,15 @@
     },
     {
      "stage": 2,
-     "round": "74 (2a) + 75 (2b)",
-     "status": "split: 2a dispatched round 74 (D-29z39); 2b scheduled round 75 (not deferred)",
+     "round": "74-75 (2a + fix-up) + 76 (2b)",
+     "status": "split: 2a browser rows C PASS round 74 but verdict FAIL (C-R74-01), fix-up round 75 (D-29z40); 2b scheduled round 76 (not deferred)",
      "scope": "move markers by drag and arrows (with snap), right-click marker menu (Rename / Delete / Play from here = mouse rename path), snapping clips/range/playhead to markers (Live 6.7, SRW-14 extension), Ctrl+Left/Right also at clip edges (Live 6.9)",
      "substages": [
       {
        "stage": "2a",
        "round": 74,
        "decision": "D-29z39",
-       "status": "dispatched",
+       "status": "bug (browser rows C PASS round 74, verdict FAIL on C-R74-01; gate 74 skipped; fix-up round 75)",
        "scope": "move markers by drag (3 px threshold, Snap grid / Snap off ms / Alt inverts Snap (SRW-14 resolveSnapStep), clamp 0) and plain arrows on a focused flag (grid line or 0.1 s), collision refusal, one Move Marker history entry, no click-jump after drag, press focuses flag; right-click / Shift+F10 / ContextMenu marker menu Rename / Play from here / Delete; aria-keyshortcuts (gate-73 reviewer S2 partial)",
        "c_ids": [
         "MK-DRAG-SNAP",
@@ -3627,12 +3627,73 @@
         "REG-KEYS",
         "REG-HYD",
         "G74-3"
+       ],
+       "c_round74": {
+        "verdict": "FAIL",
+        "browserVerified": true,
+        "realVerified": true,
+        "passed": [
+         "MK-DRAG-SNAP",
+         "MK-DRAG-FREE",
+         "MK-DRAG-CLICK",
+         "MK-MOVE-DUP",
+         "MK-ARROW",
+         "MK-DRAG-PLAYING",
+         "MK-MENU",
+         "MK-MENU-RENAME",
+         "MK-MENU-PLAY",
+         "MK-MENU-DELETE",
+         "REG-STAGE1",
+         "REG-KEYS",
+         "REG-HYD",
+         "G74-3 (non-backend rows)",
+         "SOURCE-UNCHANGED"
+        ],
+        "extra_passed_info": [
+         "MK-DRAG-CROSS",
+         "MK-MENU-EDGE (right edge only)",
+         "MK-MENU-ONE",
+         "MK-CUT-TIME one run"
+        ],
+        "bugs": [
+         "C-R74-01 (medium, red MU8 l.526 blocks the gate)",
+         "C-R74-02 (low, menu stays at its fixed position after a timeline scroll)"
+        ],
+        "blocked": [
+         "G74-3 fake-Bearer 403: backend unavailable in cloud (got 500)"
+        ],
+        "notRun": [
+         "menu over the floating expanded video dock",
+         "menu bottom-edge clamp (unreachable at both viewports)",
+         "native keyboard contextmenu button value (CDP sends no contextmenu)",
+         "WebKit/macOS Ctrl+click"
+        ],
+        "gate": "skipped (gates/gate-round-74.json: C taskStatus FAIL)",
+        "evidence": "c-round-74.md, c-round-74.json, c-round-74/"
+       }
+      },
+      {
+       "stage": "2a-fix",
+       "round": 75,
+       "decision": "D-29z40",
+       "status": "dispatched",
+       "scope": "C-R74-01 MU8 contract grant + A-R74-MU8E-POINTERUP; C-R74-02 marker menu closes on a user horizontal timeline scroll (same follow predicate as the grid menu; Follow auto-scroll keeps it open; vertical scroll keeps it, the marker row is sticky) and on a pxPerSecond change; focus back to the flag with preventScroll",
+       "c_ids": [
+        "MK-MENU-SCROLL",
+        "MK-MENU-VSCROLL",
+        "MK-MENU-ZOOM",
+        "MK-MENU-FOLLOW",
+        "MK-MENU-DOCK",
+        "MK-74-RECHECK",
+        "T75-TARGETED",
+        "REG-HYD",
+        "G75-3"
        ]
       },
       {
        "stage": "2b",
-       "round": 75,
-       "status": "scheduled (not deferred)",
+       "round": 76,
+       "status": "scheduled round 76 (not deferred; moved one round by the 2a fix-up)",
        "scope": "clips / range / playhead snap to markers (Live 12 6.7); Ctrl+Left/Right (macOS Option+Left/Right, Live 12 6.9 text) also stopping at clip edges of the selected tracks; gate-73 reviewer S1 macOS binding; ROW-RANGE-M UX signal review"
       }
      ]
@@ -6368,7 +6429,7 @@
    "round": 74,
    "task": "current-task.md",
    "decision": "D-29z39",
-   "status": "dispatched",
+   "status": "C FAIL (browserVerified true; every browser row PASS; C-R74-01 medium test contract, C-R74-02 low); gate 74 skipped, round-74 code uncommitted in the tree",
    "items": [
     "SRW-16 stage 2a (FB-10): marker move (drag/arrows, snap) + marker context menu"
    ],
@@ -6400,6 +6461,35 @@
     "REG-KEYS",
     "REG-HYD",
     "G74-3"
+   ]
+  },
+  {
+   "round": 75,
+   "task": "current-task.md",
+   "decision": "D-29z40",
+   "status": "dispatched",
+   "items": [
+    "SRW-16 stage 2a fix-up: C-R74-01 + A-R74-MU8E-POINTERUP + C-R74-02"
+   ],
+   "note": "baseline HEAD 6b574e8 + round-74 tree (7 M + 3 ??, A hashes confirmed by B); frozen b-round-74-r75-tree-sha256.txt 449/449; snapshots b-round-74-r75-snapshots (ArrangementMarkerRow 8b805616 789, ArrangementMarkerMenu 592bc1a7 160, StudioWorkspace d5a1ac9c 2012, markers-ui.test 5c7c697a 833, markers-move-ui.test a8508b4a 716, doc 065 608d86ec 82); protected 4/4; rounds 74+75 publish together",
+   "owned": [
+    "app/components/arrangement/ArrangementMarkerRow.tsx (closeMenu handle + zoom close)",
+    "app/components/arrangement/ArrangementMarkerMenu.tsx (one union member)",
+    "app/components/arrangement/StudioWorkspace.tsx (handleTimelineScroll only)",
+    "app/lib/arrangement/__tests__/markers-ui.test.tsx (MU8 title, l.526, one assertion; MU8e two pointerUps + one assertion)",
+    "app/lib/arrangement/__tests__/markers-move-ui.test.tsx (append MV15-MV17)",
+    "docs/implementation/2026/quarter-IV/065-studio-lab-marker-move-menu.md"
+   ],
+   "c_ids": [
+    "MK-MENU-SCROLL",
+    "MK-MENU-VSCROLL",
+    "MK-MENU-ZOOM",
+    "MK-MENU-FOLLOW",
+    "MK-MENU-DOCK",
+    "MK-74-RECHECK",
+    "T75-TARGETED",
+    "REG-HYD",
+    "G75-3"
    ]
   }
  ],
@@ -8279,7 +8369,8 @@
    "note_round70": "still unanswered after round 69 (SRW-14 now complete). Round 69 reviewer (gates/round-69/review.md) repeats (a) useGridPreferences and (c) shared workspace harness (4th copy); A round-69 reviewer: keep for now. Re-stated in round-70 task section 6; non-gating; B does not schedule an extraction",
    "note_round71": "seventh request (round 71 task section 6): still unanswered; round 70 reviewers add the timeline trio plumbing signal (getTimelineView/getTimelineViewportPx/subscribeTimelineScroll passed to three consumers; keep until a fourth; proposal: one stable timelineViewport object + getTimelineViewportPx from viewportWidthRef). Non-gating; B does not schedule an extraction",
    "note_round72": "eighth request (round 72 task section 6): still unanswered; round 71 signals: root review Signal 4 (metronomeHorizonRef second refill state beside loopScheduleRef) and Signal 3 (startGraph changed rounds 66, 71), A reviewer note (fillMetronomeHorizon mirrors fillLoopIterations; keep, one scheduler unit only if a third refill kind appears); round 72 adds a 7th key-routing clause isMarkerTarget (ARCH (e)) and a 5th UI harness copy (ARCH (c)). Non-gating; B does not schedule an extraction",
-   "note_round74": "gate-73 reviewer Architecture note (signals 2+3): every self-key-handling widget (loop brace, separator, marker) needs isXTarget guards in the blur, Delete, Arrow and Ctrl+Arrow branches; C-R72-01 was one forgotten branch. Proposal isSelfHandledKeyTarget via data-studio-key-owner (value medium, risk low). Same as item (e); appended here instead of a seventh request. B asks root for the bounded frontend-architect checkpoint at the SRW-16 feature boundary (after stage 2b, round 75); non-gating."
+   "note_round74": "gate-73 reviewer Architecture note (signals 2+3): every self-key-handling widget (loop brace, separator, marker) needs isXTarget guards in the blur, Delete, Arrow and Ctrl+Arrow branches; C-R72-01 was one forgotten branch. Proposal isSelfHandledKeyTarget via data-studio-key-owner (value medium, risk low). Same as item (e); appended here instead of a seventh request. B asks root for the bounded frontend-architect checkpoint at the SRW-16 feature boundary (after stage 2b, round 75); non-gating.",
+   "note_round75": "A round-74 reviewer Architecture note: ArrangementMarkerRow is the third copy of the claimPointerGesture + setPointerCapture + watchUncapturedPointerGesture + stale-end scaffold (ArrangementMarkerRow, ArrangementLoopBrace, ArrangementClip); keep for now, after SRW-16 consider one bounded extraction with the three callers' tests as the gate. Round 75 adds a second copy of the follow-scroll predicate (grid-menu effect + handleTimelineScroll marker close) - recorded, not refactored. Both go into the bounded frontend-architect checkpoint request at the SRW-16 boundary (after stage 2b, round 76); non-gating."
   },
   {
    "id": "C-R49-01",
@@ -10224,6 +10315,70 @@
    "to": "B",
    "title": "Live 6.4: scrub area context menu has Add Locator; CZABA empty marker strip has no custom menu",
    "evidence": "b-round-71/ableton-arrangement-view-20261021.txt"
+  },
+  {
+   "id": "C-R74-01",
+   "severity": "medium",
+   "status": "scheduled round 75 (D-29z40 grant: MU8 l.526 toBe Move Marker + round-trip times assertion + title)",
+   "to": "B",
+   "title": "markers-ui.test.tsx MU8 l.526 expects no undo entry after plain arrows on a focused flag; B5 (round 74) moves the marker by 0.1 s; red test blocks the gate. B spec defect (frozen stage-1 assertion contradicted the new contract), not an A deviation",
+   "evidence": "c-round-74.json, c-round-74/vitest-markers.txt, a-round-74.md section 4"
+  },
+  {
+   "id": "A-R74-MU8E-POINTERUP",
+   "severity": "low",
+   "status": "scheduled round 75 (test-only)",
+   "to": "B",
+   "title": "MU8e pointerdowns 75/76 never get a pointerUp, so a gesture claim stays active for the rest of MU8e (the name-editor half runs with isPointerGestureActive true)",
+   "evidence": "a-round-74.md section 7"
+  },
+  {
+   "id": "C-R74-02",
+   "severity": "low",
+   "status": "scheduled round 75 (D-29z40)",
+   "to": "B",
+   "title": "marker menu stays open at its old fixed position after a 300 px wheel scroll of the timeline (the flag moved away); the lane grid menu closes on a user scroll",
+   "evidence": "c-round-74.json, c-round-74/shots/menu-scrolled-*.png"
+  },
+  {
+   "id": "GATE-74-SKIPPED",
+   "severity": "info",
+   "status": "open_root",
+   "to": "root",
+   "title": "Round 74 root gate skipped (C FAIL); round-74 code is uncommitted in the tree; rounds 74+75 publish together after C PASS",
+   "evidence": "gates/gate-round-74.json"
+  },
+  {
+   "id": "INFO-C74-KEYBOARD-CONTEXTMENU-BUTTON",
+   "severity": "info",
+   "status": "open (untestable by C: CDP key presses send no contextmenu event; ALT-CHROME-MENU class); Tech Lead real-keyboard check",
+   "to": "B",
+   "title": "native ContextMenu-key / Shift+F10 contextmenu event button value and the A guard (button !== 2) are unverified in a real keyboard path; the keydown branch opens the menu",
+   "evidence": "c-round-74.json notRun"
+  },
+  {
+   "id": "INFO-C74-MENU-BOTTOM-UNREACHABLE",
+   "severity": "info",
+   "status": "acknowledged (marker row is in the sticky top chrome; bottom clamp unreachable at 1440x900/1280x720)",
+   "to": "B",
+   "title": "marker menu bottom-edge clamp cannot be reached at the two user viewports (menu bottom 343/381)",
+   "evidence": "c-round-74.json notRun"
+  },
+  {
+   "id": "A-R74-MACOS-CTRL-CLICK",
+   "severity": "low",
+   "status": "open - with ROOT-R64-L5 (macOS Ctrl+click) in the Lows batch; needs a real Mac",
+   "to": "B",
+   "title": "macOS Ctrl+click (button 0) on a flag starts a drag claim and the contextmenu anchors at the flag",
+   "evidence": "a-round-74.md section 7"
+  },
+  {
+   "id": "R74-T-TECH-LEAD",
+   "severity": "info",
+   "status": "open",
+   "to": "tech_lead",
+   "title": "real Chrome: drag a marker with Snap on/off/Alt, arrows on a focused flag, right-click and the ContextMenu key on a flag - menu feel, items and Play from here",
+   "evidence": "c-round-74.md"
   }
  ],
  "tech_lead_notes": [
@@ -11235,6 +11390,11 @@
    "round": 73,
    "source": "gates/round-73/review.md Architecture note + a-round-73.md reviewer note",
    "note": "FOCUS_OWNING_TARGETS / isSelfHandledKeyTarget proposal; keep for now (reviewer); appended to ARCH-CHECKPOINT-SRW14-PREFS (e); checkpoint request at SRW-16 boundary. Not scheduled on its own."
+  },
+  {
+   "round": 74,
+   "source": "a-round-74.md section 7 Architecture note",
+   "note": "third copy of the pointer-gesture claim scaffold (marker row, loop brace, clip); keep for now; candidate bounded extraction after SRW-16; plus round-75 duplicated follow-scroll predicate. Appended to ARCH-CHECKPOINT-SRW14-PREFS; not scheduled on its own."
   }
  ],
  "vitest_floor_round46": 1357,
