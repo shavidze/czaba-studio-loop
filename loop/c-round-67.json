@@ -1,0 +1,90 @@
+{
+  "taskStatus": "FAIL",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-20T12:53:30.6854817Z",
+    "round": 67,
+    "attempt": 1,
+    "backend": 200,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R67-01",
+      "severity": "medium",
+      "steps": [
+        "Fresh /studio-lab (1440x900), drop Soft impact on SFX, type BPM 120, Snap off, zoom to max (320 px/s)",
+        "REAL-mouse free drag of the clip to start 0.187 (selected-clip readout start 00:00.187)",
+        "Lane menu: choose 1/32 (step 0.0625, stored line 3 = 0.188); press g (Snap on); select the clip",
+        "Undo title before: Undo: კლიპის გადატანა; press ArrowRight"
+      ],
+      "expected": "Clip start 0.188 (the nearest stored 1/32 line above 0.187)",
+      "actual": "Clip start 0.250 (skips the 0.188 line); ArrowLeft then 0.188. Cause: §0.1(9) fixed MUSICAL_GRID_INDEX_TOLERANCE 0.000501 in adjacentGridLine treats a time 0.5 ms below k*step as on line k. Also used by loop-brace arrow keys. Spec-rule defect (A reviewer M1), needs B amendment of §0.1(9) plus an off-line GM9 sweep.",
+      "evidence": "c-round-67/runs/gb67-1440x900-m1-repro-fractional.txt; c-round-67/shots/m1-repro-1440x900.png; a-round-67/m1-probe.ts (484/1.5M forward cases)"
+    },
+    {
+      "id": "C-R67-02",
+      "severity": "low",
+      "steps": [
+        "Fresh /studio-lab (1440x900), drop Middle East preview on music, BPM 90, lane menu 1/4, Snap on",
+        "Range drag on the clip body raw 1.2 -> 2.9 => 00:01.333 — 00:02.667; Ctrl+L => Loop 00:01.333 — 00:02.667",
+        "REAL-mouse drag of the loop brace body by +0.9 s (repeats +1.6 s, +3.05 s)"
+      ],
+      "expected": "GM-BRACE: loop start and end on round(k*2/3,3): 2.000 — 3.333",
+      "actual": "2.000 — 3.334; repeats 2.667 — 4.001 and 4.667 — 6.001 (3/3). Start on a line; end-edge drag lands on a line. moveLoop keeps the stored length 1.334 (difference of two ms-rounded lines), so the end is 1 ms off the musical line.",
+      "evidence": "c-round-67/runs/gc67-1440x900-c3.txt, gc67-1440x900-c3-bdt1.6.txt, gc67-1440x900-c3-bdt3.05.txt; c-round-67/shots/gm-brace-c3-1440x900.png; ArrangementLoopBrace.tsx l.139-147"
+    }
+  ],
+  "passed": [
+    "G67-2",
+    "R67-S",
+    "R67-U",
+    "G67-1",
+    "GM-NOBPM*",
+    "GM-OPTIONS*",
+    "GM-G1 (R14-G1)",
+    "GM-90",
+    "GM-POS",
+    "GM-TRIM-RANGE",
+    "GM-DROP",
+    "GM-NUDGE",
+    "GM-GROUP",
+    "GM-KEYS*",
+    "GM-MENU*",
+    "GM-TEMPO",
+    "GM-CLEAR",
+    "GM-SNAPOFF",
+    "GM-PLAY",
+    "GM-UNDO",
+    "GM-LAYOUT*",
+    "SN-REG",
+    "TB-REG",
+    "MT-REG",
+    "RU-REG",
+    "REG-HYD",
+    "G67-3"
+  ],
+  "failed": [
+    "GM-BRACE"
+  ],
+  "info": [
+    "MT-SCRUB-INFO: metronome off 0 longtasks / max frame gap 20.9 ms; on 0 longtasks / 21.9 ms (5 s playhead-handle scrub during playback)",
+    "mutation p (snapGroupDelta in-bounds widened) survives: test gap, info",
+    "INFO-C66-RU-DBLCLICK-MISS-2 watch: one more TB-script miss (3/47); dedicated RU 18/18",
+    "GM-DROP read from the drop-ghost time label (no data-ghost-start on the drop ghost)",
+    "node.exe 14 while mutations ran during DOM-only group A; 7 for timing rows",
+    "R67-U durations (C alone run): 20 tests 2.70 s, GM9 52 ms, max GU1 218 ms",
+    "mid-run server curl not done; store 200 on every load, backend re-checked only at end (200)"
+  ],
+  "blocked": [],
+  "notRun": [
+    "video sync / C-R27-01",
+    "full find->add->fit video->export flow (no export change this round)",
+    "FB-01..FB-16 stage regression",
+    "npm run test:e2e:smoke (root)",
+    "triplets (stage 5b)",
+    "R67-T Tech Lead feel"
+  ],
+  "commitReady": false
+}

@@ -1,0 +1,49 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R11-01",
+      "severity": "low",
+      "steps": ["/studio-lab 1440x900, scene video+music+stems+sfx", "fold music (row 36)", "pointerdown at row.bottom-4 (6 px height handle overlays the folded row and the bottom ~2 px of the folded clip)", "or drag the folded SFX handle +40"],
+      "expected": "Task 2.2: 'On a folded lane, a drag or a key first unfolds it' (ambiguous whether the drag continues after unfolding); no accidental unfold when aiming at the folded clip",
+      "actual": "Any pointerdown in the bottom 6 px of the 36 px folded row unfolds the lane; a drag on a folded handle only unfolds and ignores the drag (height stays 90). A's declared deviation 3.",
+      "evidence": "c-round-11/runs/unfold-manual-1440.json; first p2fold attempt lowerTarget=arrangement-track-height"
+    },
+    {
+      "id": "C-R11-02",
+      "severity": "low",
+      "steps": ["/studio-lab 1280x720, open detail panel (auto-fit on)", "select an audio clip, then click empty lane to deselect"],
+      "expected": "Stable layout on ordinary selection clicks",
+      "actual": "Footer selected-clip line changes the scroller by 20 px, so lanes jump 60<->66 and the capped panel 142<->144 with no transition. Within spec ([120,144]) but visible reflow on each select/deselect.",
+      "evidence": "c-round-11/runs/p2a-1280-open-selected.json, p2a-1280-open-noselect.json"
+    },
+    {
+      "id": "C-R11-03",
+      "severity": "low",
+      "steps": ["/studio-lab 1280x720, selected clip, open panel (capped 142)", "drag SFX height handle +60"],
+      "expected": "B decision: whether the panel keeps its rendered height when auto-fit (and the cap) turn off",
+      "actual": "Panel jumps 142 -> 144 and timeline starts scrolling (278/340). A's declared deviation 10 (contract-literal).",
+      "evidence": "c-round-11/runs/p2a-1280-afoff-a.json"
+    },
+    {
+      "id": "C-R11-04",
+      "severity": "low",
+      "steps": ["fold SFX with manual height 90", "read handle aria-valuenow"],
+      "expected": "B confirms convention for folded separator value",
+      "actual": "aria-valuenow 90 while the rendered row is 36; aria-valuetext 'დაკეცილია · 90 px'. A's deviation 4.",
+      "evidence": "c-round-11/runs/unfold-manual-1440.json"
+    }
+  ],
+  "passed": [
+    "R11-P2", "R11-P2k", "R11-P2a", "R11-P4", "R11-U", "R11-Doc",
+    "R11-P1b", "R11-P1c-quick", "R9-D3-quick", "RF7-P2", "R8-M1", "R6-S2", "R12-L3", "R10-N8", "R11A-3",
+    "G11-1", "G11-2", "G11-3"
+  ],
+  "blocked": [
+    "R3-V1 mode D: 1 informational run only (raw .0131/.0212, cover 5.5%, app LoAF 0) - not a C-R8-01 verdict; Tech Lead quiet Chrome still required",
+    "Real 10 px horizontal scrollbar in visible-area formula not testable in headless (offsetHeight-clientHeight=0); Tech Lead real Chrome",
+    "Real-mouse height-handle drag (R11-P3m) is Tech Lead manual",
+    "fake-Bearer studio-token check partial: backend 5199 down (500, no token issued); anon 401 verified",
+    "Carried open (not this round): C-R7-01 (round 12 D-19a), C-R8-01, C-R6-02, R11-P3 stage 3, panel polish round, 21 regression-debt IDs, root carry: SRW-21 middle-east loader, Lenis /studio/*, portable instruction paths, export hard-clip R13-M4 (peak 1.0 seen again), final commit/push; foreign untracked .claude/agents/frontend-architect.md and .codex/agents/frontend-architect.toml for root"
+  ]
+}

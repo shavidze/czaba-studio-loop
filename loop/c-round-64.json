@@ -1,0 +1,106 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-19T08:10:34.2445188Z",
+  "round": 64,
+  "store": 200,
+  "backend": 200,
+  "attempt": 1
+ },
+ "serverChecks": [
+  {
+   "t": "12:11",
+   "store": 200,
+   "backend": 200
+  },
+  {
+   "t": "12:20",
+   "store": 200,
+   "backend": 200
+  },
+  {
+   "t": "12:31",
+   "store": 200,
+   "backend": 200
+  },
+  {
+   "t": "12:41",
+   "store": 200,
+   "backend": 200
+  }
+ ],
+ "bugs": [
+  {
+   "id": "C-R64-01",
+   "severity": "low",
+   "steps": [
+    "Open http://127.0.0.1:5173/studio-lab in a fresh Playwright context (empty cache) at 1440x900.",
+    "At ~0.7 s, while library options still read იტვირთება… (draggable=false), press on \"Soft impact\" and drag it onto the SFX lane at 1 s, then release."
+   ],
+   "expected": "Per current-task §4.8 step 2: ghost \"00:01.000 · ხმა ჯერ არ ჩატვირთულა\" during the drag and status \"ეს ხმა ჯერ არ ჩატვირთულა — დაელოდე და სცადე თავიდან.\" after the drop; nothing added.",
+   "actual": "No HTML5 drag starts (option draggable=false while loading): no ghost, status unchanged (\"დემო კოლექცია მზადაა. …\"), nothing added. The not-ready ghost/status path (DE5/SD) is reachable only in jsdom. Items become ready within ~2-4 s; no data loss. B to rule: accept gating and correct spec/tests, or allow dragging loading items so the existing feedback shows.",
+   "evidence": "c-round-64/runs/probe64-1440x900-immediate.txt (EARLY t+689ms line); ArrangementLibrary.tsx l.87 draggable={state?.status === \"ready\"}"
+  }
+ ],
+ "passed": [
+  "G64-2",
+  "R64-S",
+  "R64-U",
+  "G64-1",
+  "GE-OOB-STATUS@1440",
+  "GE-OOB-STATUS@1280",
+  "GE-OOB-PLAY@1440",
+  "GE-BOUNDS-REG@1440",
+  "GE-START-REG@1440",
+  "GE-START-REG@1280",
+  "GE-CROSS-REG@1440",
+  "GE-ALT-ENABLE@1440",
+  "GE-ALT-ENABLE@1280",
+  "LD-EDGE@1440",
+  "LD-EDGE@1280",
+  "LD-EDGE-END",
+  "LD-OTHER",
+  "LD-ALT-ENABLE@1440",
+  "LD-ALT-ENABLE@1280",
+  "LD-ALT-BYPASS",
+  "LD-BLOCK-REG",
+  "LD-BLOCK-REG-EDGE-WIN",
+  "LD-VIDEO-REG",
+  "LD-PLAY(adapted: schedule on LD-EDGE + literal meter on LD-OTHER)",
+  "G64-3-workspace-direct",
+  "G64-3-workspace-header",
+  "G64-3-network",
+  "G64-3-signin-gate",
+  "G64-3-token-anon-401",
+  "G64-3-token-fakebearer-403",
+  "R64-PROBE-steps-1-3-4 (INFO-R62-LIB-LOADING-DROP not reproduced)",
+  "EXTRA-EXPORT-EDGE-DROP-WAV"
+ ],
+ "info": [
+  "GE-CROSS-OOB ran: construction 1 refused by placement (no change); construction 2 gave the D-29z28 grid-line result (12) with the OOB edge 11.2 not tried = known Low A-R63-REVIEW-OOB-HIDES-REACHABLE-EDGE",
+  "INFO-R64-TYPE-IMPORT: extra `type LibraryDragSource` import line in ArrangementLane.tsx beyond §0.3 wording; needed for the signature; B to acknowledge",
+  "B-R64-SPEC-LDPLAY: LD-PLAY meter criterion is not applicable after LD-EDGE (previous clip on the same lane sounds until the drop start)",
+  "INFO-R64-BLOCKED-NO-STATUS: real-browser blocked drop fires no drop event, so no status line; DE4 asserts the status in jsdom",
+  "INFO-R64-DROPEFFECT-PROBE: en-route dropEffect none read by the probe; final position is copy (diag64c)",
+  "GE-OOB-STATUS@1280 attempt 1 invalid (harness: setup drop off-screen at x=1284); attempt 2 PASS",
+  "Closed: C-R62-01, C-R62-ALT-ENABLE-GROUP-GAP (both viewports)",
+  "Reconfirmed: DEMO-SFX-FULL-SCALE (2 full-scale samples in export), INFO-R62-GEPLAY-UNDO",
+  "Attempt 2 resume: tree, owned hashes and servers re-checked unchanged; attempt-1 verdict stands"
+ ],
+ "notRun": [
+  "Video sync / C-R27-01 (RF3-1, RF3-2, R5-L6)",
+  "Full find->add->fit video->export flow and FB-01..FB-16 regression (out of round scope)",
+  "npm run test:e2e:smoke (root)",
+  "Round 57-61 menu browser re-run",
+  "R64-T (Tech Lead manual)"
+ ],
+ "blocked": [],
+ "commitReadiness": {
+  "round64": "ready",
+  "round63": "ready (browser rows passed this round)",
+  "round62": "ready",
+  "rounds59_61": "ready per B (combined tree verified only)",
+  "rounds50_58": "ready per B (combined tree verified only)"
+ }
+}

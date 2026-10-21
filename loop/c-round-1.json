@@ -1,0 +1,89 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R1-01",
+      "severity": "low",
+      "steps": [
+        "Open /studio-lab, add Middle East to მუსიკა at 0, click the ruler at 20 s (Pause state).",
+        "Dispatch 10 Space keydowns 8 ms apart (5 Play/Pause pairs), or press Play and pause within 50 ms.",
+        "Read [data-testid=arrangement-position]."
+      ],
+      "expected": "Pausing before audio has started (before startAt = now + 50 ms lookahead) leaves the position at the Play position. The playhead never moves left of where playback started.",
+      "actual": "Position 20.000 -> 19.819 after 5 Play/Pause pairs (about -36 ms per pair). On every Play the displayed playhead first steps back about 42-50 ms (sampled 7.000 -> 6.958) before advancing. Cause: togglePlayback/seekTo set anchor {ctxTime: now + PLAYBACK_LOOKAHEAD, position: from}, and livePosition() = from + (ctx.currentTime - anchor.ctxTime) is below from until startAt; stopPlayback stores that value.",
+      "evidence": "tmp/studio-real-loop/c-round-1.md §3 B11/B12 (drift test, b12v2 backwardSteps[0]); scripts/s_b12v2b.js; ArrangementContext.tsx livePosition/togglePlayback/stopPlayback"
+    },
+    {
+      "id": "C-R1-02",
+      "severity": "low",
+      "steps": [
+        "Open /studio-lab at 1440x900 (or 1280x720), decline the cookie banner.",
+        "Run window.scrollTo(0, 500), or wheel-scroll over the library or empty area."
+      ],
+      "expected": "The h-screen workspace fills the viewport and the page itself does not scroll. Transport and header stay visible.",
+      "actual": "document.scrollHeight = 990 at 900 (810 at 720). body has padding-bottom: 90px from the root layout. The page scrolls 90 px and the header and transport move to top = -90. This is root-owned (root.tsx is forbidden for A), so it needs a routing decision by B or the root owner.",
+      "evidence": "c-round-1.md §3 V1; getComputedStyle(document.body).paddingBottom = '90px'; wrapper chain html.lenis > body(990) > .page-transition-wrapper(900) > workspace(900)"
+    },
+    {
+      "id": "C-R1-03",
+      "severity": "low",
+      "steps": [
+        "Layout: Middle East on მუსიკა 0-101 (muted), Slow rise on სტემები at 11, Soft impact on SFX at 12; range 4-6 on the music clip; play from 7.",
+        "At ~8 s press Delete (Delete Time); the impact is now at 10 and is heard at playhead 10.",
+        "At ~11 s press Ctrl+Z while playing."
+      ],
+      "expected": "Product decision is needed and is not specified by SRW-01. Either keep the playhead at the same timeline time (current behaviour, Ableton-like), or map the position back with the inverse of remapTime so the same material keeps playing.",
+      "actual": "Undo restores the clips exactly. The playhead stays at 10.98 -> 11.02, so music source jumps back about 2 s (source ~12.98 -> ~11.05). The impact, already heard at timeline 10, is rescheduled and sounds again at timeline 12 (new source node when = 12.962 ctx). Audio stays consistent with the restored timeline. This is A's known limitation L10, not an SRW-01 acceptance failure.",
+      "evidence": "c-round-1.md §3 B12 (undoNodes, playheadAtUndoNodeStart); scripts/s_b12v2.js + s_b12v2b.js"
+    },
+    {
+      "id": "C-R1-04",
+      "severity": "low",
+      "steps": [
+        "1440x900: create a range on a selected clip so the footer shows status + range + clip details."
+      ],
+      "expected": "Status messages, including blocked move/trim reasons, stay readable.",
+      "actual": "The status output is truncated to about 17 characters ('„Soft impact“ დაემატ…') at 1440 when range and clip details are present. At 1280 it wraps to a second row and is readable. Blocked-trim and Delete Time feedback live only in this line.",
+      "evidence": "c-round-1/v1-1440x900.png bottom-left"
+    }
+  ],
+  "passed": [
+    "R1-U1",
+    "R1-U2",
+    "R1-U3",
+    "R1-G1",
+    "R1-S1",
+    "R1-S2",
+    "R1-B1",
+    "R1-B2",
+    "R1-B3",
+    "R1-B4",
+    "R1-B5",
+    "R1-B6",
+    "R1-B7",
+    "R1-B8",
+    "R1-B9",
+    "R1-B10",
+    "R1-B11",
+    "R1-B12",
+    "R1-E1",
+    "R1-E2",
+    "R1-E3",
+    "R1-E4",
+    "R1-E5",
+    "R1-V1"
+  ],
+  "blocked": [],
+  "notes": {
+    "criterionWording": "R1-E1 says the silent gap 3-5 s must be < -80 dBFS, but Soft impact at 2 s lasts until 4 s. Measured: 3-4 s = -41.2 dBFS (designed decay tail), 4-5 s = exact zeros (-240 dB). B should reword the window to 4-5 s.",
+    "outOfScopeNotPassed": "FB-03..FB-16, video import/sync, loop, multi-select, clipboard, grid/snap, markers, groups, fades, clip gain, pan, master, MP3/range export were not in SRW-01 and are not passed. The product flow find -> add -> fit video -> export is only partly possible: there is no search or preview (SRW-12) and no video (SRW-02/03); add and real WAV export work.",
+    "authNotBypassed": "Anonymous GET /api/studio-token?product=middle-east&file=drums.wav -> 401; fake bearer -> 500 (no token issued, backend down); anonymous /studio/middle-east -> 'Sign in required', no stem/R2/token requests.",
+    "verificationLimitations": [
+      "Real mouse drags were not possible: the gstack CDP allowlist has no Input.* domain. All clip and ruler drags used synthetic PointerEvents dispatched on the real DOM; keys used real gstack press where noted.",
+      "Headless Chromium has no audible device. 'Audible' means measured at the master bus through an AudioWorklet tap connected in parallel to the app's master -> destination. No acoustic listening was done.",
+      "Delete Time on the video lane is covered only by unit test 'splits a clip spanning both edges, including the video track'. Video clips cannot be created in the browser this round (SRW-02).",
+      "Ctrl shortcuts were not tested on a real Georgian keyboard layout."
+    ],
+    "codeRules": "grep for // comments, /*, as-assertions, any, @ts-ignore, hex colours over A-owned non-test files: no matches. Implementation doc 010-studio-lab-arrangement-core.md (88 lines) has the template sections."
+  }
+}

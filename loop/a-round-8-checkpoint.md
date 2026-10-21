@@ -1,0 +1,9 @@
+# A round 8 checkpoint (context handoff)
+
+- Done: panels.ts + panels.test.ts (11 pass); ArrangementDetailPanel.tsx; StudioWorkspace mount (detailSelection/detailGroup/measureTimelineFit); ArrangementClip `export buildPeakShape` only. tsc 0, biome clean on these.
+- design-philosopher ruling received (title `კლიპის დეტალები`, labels in component constants); quote in report.
+- Next: detail-panel.test.tsx (component tests §4 R11-U1), render-budget additions (content `ArrangementDetailContentInner` 0 renders), guard-revert run, browser checks via gstack (port 5173, state a-browse.json), R3-V1 3 runs with temp writer wrapper (%TEMP%/a7 harness), code-reviewer x2, docs 016/017, report a-round-8.md.
+- Note: render-budget test 1 timed out once (5 s) under full arrangement parallel run; passes alone 2.8 s.
+- [19:20] tests: detail-panel 13 + panels 11 + render-budget +1 = 804/804 full (after adding 15000 timeout to RF7-P2 test 1, which timed out under full-suite load with and without the panel; sfx-library flake once, passes alone + next full run). Guard revert: 3 fail (saved %TEMP%/a8/a8-guard-revert.txt), restored cmp-identical. tsc 0, biome owned 0, ./app 218 warn 0 err, build OK, hashes OK. Next: browser + R3-V1 + reviewer + docs + report.
+- [19:55] browser checks done (fn8/play8/hid8/lay8 in %TEMP%/a8). R3-V1 D_1..3 PASS; detail writer p50 0/p95 0.1/max 0.9,1.3,0.4; tick+micro p50 1.7/1.4/1.5 p95 3.7/3.1/2.6 vs no-panel A/B N_1 1.4/2.8, N_2(INVALID) 1.4/2.4. Measurement patch removed (cmp). Reviewer #1 done: fix M1 (clamp both + recheck), M2 (reset inputs on clip move), L3 pointer capture, L4 before after claim, L5 ring-inset/hit area, L7 iso layout effect?, L8 hygiene, L9 clips.length. Then re-review delta.
+- DONE — report at a-round-8.md; all temp patches restored (cmp); reviewer x2 done; docs 016/017 done; nothing pending for A round 8.

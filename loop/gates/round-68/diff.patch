@@ -1,0 +1,575 @@
+diff --git a/app/components/arrangement/ArrangementGridMenu.tsx b/app/components/arrangement/ArrangementGridMenu.tsx
+index 4b8ff9c..8f8845c 100644
+--- a/app/components/arrangement/ArrangementGridMenu.tsx
++++ b/app/components/arrangement/ArrangementGridMenu.tsx
+@@ -1,6 +1,6 @@
+-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
++import { Fragment, type KeyboardEvent, useEffect, useRef, useState } from 'react';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+-import { formatGridDivision } from '~/lib/arrangement/grid';
++import type { GridDivisionOption } from '~/lib/arrangement/grid-divisions';
+ 
+ const GRID_MENU_VIEWPORT_MARGIN_PX = 4;
+ const GRID_MENU_LABEL = 'ბადის დანაყოფი';
+@@ -11,10 +11,10 @@ const GRID_MENU_ITEM_CLASS =
+ interface ArrangementGridMenuProps {
+   x: number;
+   y: number;
+-  divisions: readonly number[];
+-  gridSeconds: number;
++  divisions: readonly GridDivisionOption[];
++  checkedId: string;
+   snapEnabled: boolean;
+-  onChooseDivision: (next: number) => void;
++  onChooseDivision: (id: string) => void;
+   onToggleSnap: () => void;
+   onClose: () => void;
+ }
+@@ -65,7 +65,7 @@ export function ArrangementGridMenu({
+   x,
+   y,
+   divisions,
+-  gridSeconds,
++  checkedId,
+   snapEnabled,
+   onChooseDivision,
+   onToggleSnap,
+@@ -73,7 +73,10 @@ export function ArrangementGridMenu({
+ }: ArrangementGridMenuProps) {
+   const menuRef = useRef<HTMLDivElement>(null);
+   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+-  const checkedIndex = Math.max(0, divisions.indexOf(gridSeconds));
++  const checkedIndex = Math.max(
++    0,
++    divisions.findIndex((option) => option.id === checkedId),
++  );
+   const initialIndexRef = useRef(checkedIndex);
+   const [activeIndex, setActiveIndex] = useState(checkedIndex);
+   const [position, setPosition] = useState({ left: x, top: y });
+@@ -123,7 +126,7 @@ export function ArrangementGridMenu({
+       onToggleSnap();
+       return;
+     }
+-    onChooseDivision(division);
++    onChooseDivision(division.id);
+   };
+ 
+   const handleGridMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+@@ -169,25 +172,29 @@ export function ArrangementGridMenu({
+       onKeyUp={(event) => event.stopPropagation()}
+       data-testid="arrangement-grid-menu"
+     >
+-      {divisions.map((step, index) => (
+-        <button
+-          key={step}
+-          ref={(element) => {
+-            itemRefs.current[index] = element;
+-          }}
+-          type="button"
+-          role="menuitemradio"
+-          aria-checked={step === gridSeconds}
+-          tabIndex={index === activeIndex ? 0 : -1}
+-          onClick={() => chooseGridMenuItem(index)}
+-          onFocus={() => setActiveIndex(index)}
+-          className={GRID_MENU_ITEM_CLASS}
+-        >
+-          <span aria-hidden="true" className="w-3 text-accent">
+-            {step === gridSeconds ? '✓' : ''}
+-          </span>
+-          {formatGridDivision(step)}
+-        </button>
++      {divisions.map((option, index) => (
++        <Fragment key={option.id}>
++          {option.family === 'musical' && divisions[index - 1]?.family !== 'musical' ? (
++            <hr className="my-1 border-outline" />
++          ) : null}
++          <button
++            ref={(element) => {
++              itemRefs.current[index] = element;
++            }}
++            type="button"
++            role="menuitemradio"
++            aria-checked={option.id === checkedId}
++            tabIndex={index === activeIndex ? 0 : -1}
++            onClick={() => chooseGridMenuItem(index)}
++            onFocus={() => setActiveIndex(index)}
++            className={GRID_MENU_ITEM_CLASS}
++          >
++            <span aria-hidden="true" className="w-3 text-accent">
++              {option.id === checkedId ? '✓' : ''}
++            </span>
++            {option.label}
++          </button>
++        </Fragment>
+       ))}
+       <hr className="my-1 border-outline" />
+       <button
+diff --git a/app/components/arrangement/ArrangementLoopBrace.tsx b/app/components/arrangement/ArrangementLoopBrace.tsx
+index 4f37ae8..969287c 100644
+--- a/app/components/arrangement/ArrangementLoopBrace.tsx
++++ b/app/components/arrangement/ArrangementLoopBrace.tsx
+@@ -1,6 +1,6 @@
+ import { type KeyboardEvent, type PointerEvent, useEffect, useRef } from 'react';
+ import { formatArrangementTime, useArrangement } from '~/contexts/ArrangementContext';
+-import { adjacentGridLine, resolveGridTime } from '~/lib/arrangement/grid';
++import { adjacentGridLine, resolveGridTime, resolveSnapStep } from '~/lib/arrangement/grid';
+ import { type LoopEdge, moveLoop, resizeLoop } from '~/lib/arrangement/loop';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementLoop } from '~/types/arrangement';
+@@ -145,6 +145,7 @@ export function ArrangementLoopBrace({
+               gridSeconds,
+               event.altKey,
+             ),
++            resolveSnapStep(snapSeconds, gridSeconds, event.altKey),
+           )
+         : resizeLoop(
+             before,
+@@ -189,7 +190,11 @@ export function ArrangementLoopBrace({
+     }
+     const from = kind === 'end' ? current.end : current.start;
+     const target = adjacentGridLine(from, snapSeconds, event.key === 'ArrowLeft' ? -1 : 1);
+-    stepLoopRange(kind, target === null ? -LOOP_KEY_STEP_SECONDS : target - from);
++    stepLoopRange(
++      kind,
++      target === null ? -LOOP_KEY_STEP_SECONDS : target - from,
++      kind === 'move' ? snapSeconds : null,
++    );
+   };
+ 
+   const span = loop
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 3213868..39b7a69 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -17,14 +17,25 @@ import {
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import {
+-  adjacentGridDivision,
+   adjacentGridLine,
+-  formatGridDivision,
+   GRID_DEFAULT_DIVISION_SECONDS,
+   GRID_DIVISIONS_SECONDS,
+   gridLinesVisible,
+   resolveGridTime,
+ } from '~/lib/arrangement/grid';
++import {
++  adjacentGridDivisionId,
++  gridDivisionEndMessage,
++  gridDivisionLabel,
++  gridDivisionOptions,
++  gridDivisionStatusMessage,
++  gridDivisionTitle,
++  gridMusicalGroupLabel,
++  gridTempoClearedMessage,
++  isMusicalGridDivisionId,
++  type MusicalGridDivisionId,
++  musicalGridDivisionSeconds,
++} from '~/lib/arrangement/grid-divisions';
+ import { metronomeStatusMessage } from '~/lib/arrangement/metronome';
+ import {
+   clampTrackHeight,
+@@ -99,8 +110,6 @@ export const VIDEO_RETURNED_LIBRARY_RECOLLAPSED_MESSAGE =
+ const LIBRARY_TRANSITION_FALLBACK_MS = 100;
+ const SNAP_OFF_MESSAGE = 'Snap გამორთულია — თავისუფალი გადაადგილება (G)';
+ const NUDGE_AT_TIME_START_MESSAGE = 'ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.';
+-const GRID_NARROWEST_MESSAGE = `ბადე უკვე ყველაზე მჭიდროა — ${formatGridDivision(GRID_DIVISIONS_SECONDS[6])} (1)`;
+-const GRID_WIDEST_MESSAGE = `ბადე უკვე ყველაზე ფართოა — ${formatGridDivision(GRID_DIVISIONS_SECONDS[0])} (2)`;
+ 
+ function parseTransitionTimesMs(value: string): number[] {
+   return value.split(',').map((entry) => {
+@@ -330,11 +339,32 @@ export function StudioWorkspace() {
+   const [isExportOpen, setIsExportOpen] = useState(false);
+   const [followMode, setFollowModeState] = useState<TimelineFollowMode>('on');
+   const [snapEnabled, setSnapEnabled] = useState(false);
+-  const [gridSeconds, setGridSeconds] = useState<number>(GRID_DEFAULT_DIVISION_SECONDS);
++  const [secondsGridDivision, setSecondsGridDivision] = useState<number>(
++    GRID_DEFAULT_DIVISION_SECONDS,
++  );
++  const [musicalGridDivision, setMusicalGridDivision] = useState<MusicalGridDivisionId | null>(
++    null,
++  );
+   const [tempoBpm, setTempoBpm] = useState<number | null>(null);
+   const [metronomeOn, setMetronomeOn] = useState(false);
+   const snapEnabledRef = useRef(snapEnabled);
+   snapEnabledRef.current = snapEnabled;
++  const gridSeconds =
++    musicalGridDivision !== null && tempoBpm !== null
++      ? musicalGridDivisionSeconds(musicalGridDivision, tempoBpm)
++      : secondsGridDivision;
++  const gridDivisionId =
++    musicalGridDivision !== null && tempoBpm !== null
++      ? musicalGridDivision
++      : String(secondsGridDivision);
++  const secondsGridDivisionRef = useRef(secondsGridDivision);
++  secondsGridDivisionRef.current = secondsGridDivision;
++  const musicalGridDivisionRef = useRef(musicalGridDivision);
++  musicalGridDivisionRef.current = musicalGridDivision;
++  const tempoBpmRef = useRef(tempoBpm);
++  tempoBpmRef.current = tempoBpm;
++  const gridDivisionIdRef = useRef(gridDivisionId);
++  gridDivisionIdRef.current = gridDivisionId;
+   const gridSecondsRef = useRef(gridSeconds);
+   gridSecondsRef.current = gridSeconds;
+   const [gridMenu, setGridMenu] = useState<{ x: number; y: number } | null>(null);
+@@ -829,24 +859,54 @@ export function StudioWorkspace() {
+     setSnapEnabled(next);
+     workspaceRef.current.setStatus(
+       next
+-        ? `Snap ჩართულია — ბადე ${formatGridDivision(gridSecondsRef.current)} (G)`
++        ? `Snap ჩართულია — ბადე ${gridDivisionLabel(gridDivisionIdRef.current)} (G)`
+         : SNAP_OFF_MESSAGE,
+     );
+   }, []);
+ 
+-  const changeGridDivision = useCallback((next: number) => {
+-    gridSecondsRef.current = next;
+-    setGridSeconds(next);
+-    workspaceRef.current.setStatus(
+-      `ბადე: ${formatGridDivision(next)} (Snap ${snapEnabledRef.current ? 'ჩართულია' : 'გამორთულია'})`,
+-    );
++  const changeGridDivision = useCallback((id: string) => {
++    const tempo = tempoBpmRef.current;
++    if (isMusicalGridDivisionId(id)) {
++      if (tempo === null) {
++        return;
++      }
++      musicalGridDivisionRef.current = id;
++      gridSecondsRef.current = musicalGridDivisionSeconds(id, tempo);
++      setMusicalGridDivision(id);
++    } else {
++      const step = GRID_DIVISIONS_SECONDS.find((division) => String(division) === id);
++      if (step === undefined) {
++        return;
++      }
++      secondsGridDivisionRef.current = step;
++      musicalGridDivisionRef.current = null;
++      gridSecondsRef.current = step;
++      setSecondsGridDivision(step);
++      setMusicalGridDivision(null);
++    }
++    gridDivisionIdRef.current = id;
++    workspaceRef.current.setStatus(gridDivisionStatusMessage(id, tempo, snapEnabledRef.current));
+   }, []);
+ 
+   const changeTempo = useCallback((next: number | null) => {
++    tempoBpmRef.current = next;
+     setTempoBpm(next);
+     if (next === null) {
+       setMetronomeOn(false);
+     }
++    const musical = musicalGridDivisionRef.current;
++    if (musical !== null && next !== null) {
++      gridSecondsRef.current = musicalGridDivisionSeconds(musical, next);
++    }
++    if (musical !== null && next === null) {
++      const seconds = secondsGridDivisionRef.current;
++      musicalGridDivisionRef.current = null;
++      gridSecondsRef.current = seconds;
++      gridDivisionIdRef.current = String(seconds);
++      setMusicalGridDivision(null);
++      workspaceRef.current.setStatus(gridTempoClearedMessage(seconds));
++      return;
++    }
+     workspaceRef.current.setStatus(tempoStatusMessage(next));
+   }, []);
+ 
+@@ -869,11 +929,10 @@ export function StudioWorkspace() {
+ 
+   const stepGridDivision = useCallback(
+     (direction: 'narrow' | 'widen') => {
+-      const next = adjacentGridDivision(gridSecondsRef.current, direction);
++      const current = gridDivisionIdRef.current;
++      const next = adjacentGridDivisionId(current, direction);
+       if (next === null) {
+-        workspaceRef.current.setStatus(
+-          direction === 'narrow' ? GRID_NARROWEST_MESSAGE : GRID_WIDEST_MESSAGE,
+-        );
++        workspaceRef.current.setStatus(gridDivisionEndMessage(current, direction));
+       } else {
+         changeGridDivision(next);
+       }
+@@ -907,8 +966,8 @@ export function StudioWorkspace() {
+   }, []);
+ 
+   const chooseGridMenuDivision = useCallback(
+-    (next: number) => {
+-      changeGridDivision(next);
++    (id: string) => {
++      changeGridDivision(id);
+       closeGridMenu();
+     },
+     [changeGridDivision, closeGridMenu],
+@@ -1529,6 +1588,7 @@ export function StudioWorkspace() {
+     };
+   }, []);
+   const gridLinesShown = gridLinesVisible(gridSeconds, pxPerSecond);
++  const gridOptions = gridDivisionOptions(tempoBpm);
+   const loopTimesText = arrangement.loop
+     ? `Loop ${formatArrangementTime(arrangement.loop.start)} — ${formatArrangementTime(arrangement.loop.end)}${arrangement.loop.enabled ? '' : ' · off'}`
+     : null;
+@@ -1615,6 +1675,7 @@ export function StudioWorkspace() {
+                     data-testid="arrangement-grid-control"
+                     data-snap={snapEnabled ? 'on' : 'off'}
+                     data-grid-seconds={gridSeconds}
++                    data-grid-division={gridDivisionId}
+                     data-grid-lines={gridLinesShown ? 'visible' : 'hidden'}
+                   >
+                     <button
+@@ -1636,13 +1697,11 @@ export function StudioWorkspace() {
+                       Snap
+                     </button>
+                     <select
+-                      value={gridSeconds}
++                      value={gridDivisionId}
+                       onChange={(event) => {
+-                        const next = GRID_DIVISIONS_SECONDS.find(
+-                          (step) => String(step) === event.target.value,
+-                        );
++                        const next = gridOptions.find((option) => option.id === event.target.value);
+                         if (next !== undefined) {
+-                          changeGridDivision(next);
++                          changeGridDivision(next.id);
+                         }
+                       }}
+                       onKeyDown={(event) => {
+@@ -1663,19 +1722,28 @@ export function StudioWorkspace() {
+                       }}
+                       aria-label="ბადის დანაყოფი"
+                       aria-keyshortcuts="1 2"
+-                      title={
+-                        gridLinesShown
+-                          ? `ბადე ${formatGridDivision(gridSeconds)} · 1 — უფრო მჭიდრო, 2 — უფრო ფართო`
+-                          : `ბადე ${formatGridDivision(gridSeconds)} — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom. · 1 — უფრო მჭიდრო, 2 — უფრო ფართო`
+-                      }
++                      title={gridDivisionTitle(gridDivisionId, gridLinesShown)}
+                       className="h-6 shrink-0 rounded-sm border border-outline bg-surface px-1 text-xs leading-none tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                       data-testid="arrangement-grid-division"
+                     >
+-                      {GRID_DIVISIONS_SECONDS.map((step) => (
+-                        <option key={step} value={step}>
+-                          {formatGridDivision(step)}
+-                        </option>
+-                      ))}
++                      {gridOptions
++                        .filter((option) => option.family === 'seconds')
++                        .map((option) => (
++                          <option key={option.id} value={option.id}>
++                            {option.label}
++                          </option>
++                        ))}
++                      {tempoBpm !== null ? (
++                        <optgroup label={gridMusicalGroupLabel(tempoBpm)}>
++                          {gridOptions
++                            .filter((option) => option.family === 'musical')
++                            .map((option) => (
++                              <option key={option.id} value={option.id}>
++                                {option.label}
++                              </option>
++                            ))}
++                        </optgroup>
++                      ) : null}
+                     </select>
+                   </div>
+                   <ArrangementRuler
+@@ -1838,8 +1906,8 @@ export function StudioWorkspace() {
+         <ArrangementGridMenu
+           x={gridMenu.x}
+           y={gridMenu.y}
+-          divisions={GRID_DIVISIONS_SECONDS}
+-          gridSeconds={gridSeconds}
++          divisions={gridOptions}
++          checkedId={gridDivisionId}
+           snapEnabled={snapEnabled}
+           onChooseDivision={chooseGridMenuDivision}
+           onToggleSnap={toggleGridMenuSnap}
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 9b63068..961c1b3 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -253,7 +253,7 @@ interface ArrangementContextValue {
+   extendRangeToAllTracks: () => void;
+   previewLoopArrangement: (next: Arrangement) => void;
+   commitLoopRange: (before: Arrangement) => void;
+-  stepLoopRange: (kind: 'move' | LoopEdge, delta: number) => void;
++  stepLoopRange: (kind: 'move' | LoopEdge, delta: number, gridStep?: number | null) => void;
+   setTimeRange: (range: TimeRange | null) => void;
+   setActiveTrack: (trackId: string) => void;
+   getArrangement: () => Arrangement;
+@@ -1522,7 +1522,7 @@ export function ArrangementProvider({
+   );
+ 
+   const stepLoopRange = useCallback(
+-    (kind: 'move' | LoopEdge, delta: number) => {
++    (kind: 'move' | LoopEdge, delta: number, gridStep: number | null = null) => {
+       const arrangement = historyRef.current.present;
+       const loop = arrangement.loop;
+       if (!loop) {
+@@ -1530,7 +1530,7 @@ export function ArrangementProvider({
+       }
+       const next =
+         kind === 'move'
+-          ? moveLoop(arrangement, roundToMs(loop.start + delta))
++          ? moveLoop(arrangement, roundToMs(loop.start + delta), gridStep)
+           : resizeLoop(arrangement, kind, roundToMs(loop[kind] + delta));
+       if (next === arrangement) {
+         setStatus(LOOP_STEP_BLOCKED_MESSAGE);
+diff --git a/app/lib/arrangement/grid.ts b/app/lib/arrangement/grid.ts
+index 20206e4..a1bc53e 100644
+--- a/app/lib/arrangement/grid.ts
++++ b/app/lib/arrangement/grid.ts
+@@ -8,6 +8,44 @@ export const GRID_LINE_MIN_SPACING_PX = 6;
+ 
+ const GRID_TIME_TOLERANCE = 1e-6;
+ 
++function isWholeMillisecondStep(step: number): boolean {
++  return Math.abs(step * 1000 - Math.round(step * 1000)) < 1e-6;
++}
++
++function storedGridLine(index: number, step: number): number {
++  return Math.max(0, Math.round(index * step * 1000)) / 1000;
++}
++
++function storedGridLineAtOrBelow(time: number, step: number): number | null {
++  const base = Math.floor(time / step);
++  for (let offset = 1; offset >= -1; offset--) {
++    const index = base + offset;
++    if (index < 0) {
++      return null;
++    }
++    const line = storedGridLine(index, step);
++    if (line <= time + GRID_TIME_TOLERANCE) {
++      return line;
++    }
++  }
++  return null;
++}
++
++function storedGridLineAtOrAbove(time: number, step: number): number | null {
++  const first = Math.max(0, Math.ceil(time / step)) - 1;
++  for (let offset = 0; offset <= 2; offset++) {
++    const index = first + offset;
++    if (index < 0) {
++      continue;
++    }
++    const line = storedGridLine(index, step);
++    if (line >= time - GRID_TIME_TOLERANCE) {
++      return line;
++    }
++  }
++  return null;
++}
++
+ function roundGridTime(value: number): number {
+   return Math.round(value * 1000) / 1000 || 0;
+ }
+@@ -17,6 +55,9 @@ function toWholeMilliseconds(value: number): number {
+ }
+ 
+ export function snapTimeToGrid(time: number, step: number): number {
++  if (!isWholeMillisecondStep(step)) {
++    return storedGridLine(Math.floor(time / step + 0.5), step);
++  }
+   const stepMs = toWholeMilliseconds(step);
+   const lineIndex = Math.floor(toWholeMilliseconds(time) / stepMs + 0.5);
+   return Math.max(0, lineIndex * stepMs) / 1000;
+@@ -43,7 +84,35 @@ export function resolveGridTime(
+   return step === null ? time : snapTimeToGrid(time, step);
+ }
+ 
++function adjacentStoredGridLine(time: number, step: number, direction: -1 | 1): number | null {
++  if (direction === 1) {
++    const base = Math.floor(time / step);
++    for (let offset = 0; offset <= 2; offset++) {
++      const line = storedGridLine(base + offset, step);
++      if (line > time + GRID_TIME_TOLERANCE) {
++        return line;
++      }
++    }
++    return storedGridLine(base + 3, step);
++  }
++  const base = Math.ceil(time / step);
++  for (let offset = 0; offset <= 2; offset++) {
++    const index = base - offset;
++    if (index < 0) {
++      return null;
++    }
++    const line = storedGridLine(index, step);
++    if (line < time - GRID_TIME_TOLERANCE) {
++      return line;
++    }
++  }
++  return null;
++}
++
+ export function adjacentGridLine(time: number, step: number, direction: -1 | 1): number | null {
++  if (!isWholeMillisecondStep(step)) {
++    return adjacentStoredGridLine(time, step, direction);
++  }
+   if (direction === 1) {
+     return roundGridTime((Math.floor((time + GRID_TIME_TOLERANCE) / step) + 1) * step);
+   }
+@@ -64,6 +133,18 @@ export function snapGroupDelta(
+   }
+   const low = Math.max(minDelta, Math.min(0, snapped));
+   const high = Math.min(maxDelta, Math.max(0, snapped));
++  if (!isWholeMillisecondStep(step)) {
++    const line =
++      snapped > 0
++        ? storedGridLineAtOrBelow(anchorStart + high, step)
++        : storedGridLineAtOrAbove(anchorStart + low, step);
++    const stored = line === null ? null : roundGridTime(line - anchorStart);
++    return stored !== null &&
++      stored >= low - GRID_TIME_TOLERANCE &&
++      stored <= high + GRID_TIME_TOLERANCE
++      ? stored
++      : 0;
++  }
+   const candidate =
+     snapped > 0
+       ? roundGridTime(
+diff --git a/app/lib/arrangement/loop.ts b/app/lib/arrangement/loop.ts
+index 152bc92..ffa56a1 100644
+--- a/app/lib/arrangement/loop.ts
++++ b/app/lib/arrangement/loop.ts
+@@ -1,4 +1,5 @@
+ import type { Arrangement, ArrangementLoop, ScheduledClip } from '~/types/arrangement';
++import { snapTimeToGrid } from './grid';
+ import { ARRANGEMENT_EPS, MIN_LOOP_LENGTH } from './model';
+ 
+ export { MIN_LOOP_LENGTH } from './model';
+@@ -53,14 +54,32 @@ export function toggleLoop(arrangement: Arrangement): Arrangement {
+   return withLoop(arrangement, { ...loop, enabled: !loop.enabled });
+ }
+ 
+-export function moveLoop(arrangement: Arrangement, start: number): Arrangement {
++function isOnGridLine(time: number, step: number): boolean {
++  return Math.abs(snapTimeToGrid(time, step) - time) < 1e-6;
++}
++
++export function moveLoop(
++  arrangement: Arrangement,
++  start: number,
++  gridStep: number | null = null,
++): Arrangement {
+   const loop = arrangement.loop;
+   if (!loop) {
+     return arrangement;
+   }
+   const length = loop.end - loop.start;
+   const nextStart = Math.max(0, start);
+-  const end = Math.round((nextStart + length) * 1e6) / 1e6;
++  const msEnd = Math.round((nextStart + length) * 1e6) / 1e6;
++  let end = msEnd;
++  if (
++    gridStep !== null &&
++    isOnGridLine(loop.start, gridStep) &&
++    isOnGridLine(loop.end, gridStep) &&
++    isOnGridLine(nextStart, gridStep)
++  ) {
++    const gridEnd = snapTimeToGrid(loop.end + (nextStart - loop.start), gridStep);
++    end = gridEnd - nextStart < MIN_LOOP_LENGTH - 1e-9 ? msEnd : gridEnd;
++  }
+   return withLoop(arrangement, { ...loop, start: nextStart, end });
+ }
+ 

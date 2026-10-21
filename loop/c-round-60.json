@@ -1,0 +1,68 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R60-01",
+      "severity": "low",
+      "steps": [
+        "Fresh /studio-lab at 1440x900 or 1280x720, no credentials (PW REAL-mouse)",
+        "Right-click the music lane body at x+300: grid menu opens, focus on the checked item",
+        "Right-click (or left-click) the menu padding (menu left+2, vertical middle) or its <hr>",
+        "Press ArrowDown, then Escape"
+      ],
+      "expected": "Per D-29z25-C / MN-CONTEXT: no native menu, focus stays inside the menu, Escape closes it",
+      "actual": "contextmenu is prevented (OK) but document.activeElement becomes BODY; ArrowDown and Escape do nothing and the menu stays open until an outside press. A left press does the same, so the defect existed before round 60 (round-57 menu); round 60 criterion exposes it",
+      "evidence": "tmp/studio-real-loop/c-round-60/runs/edgediag-1440x900.txt; runs/pw60-1440x900-context.txt; runs/pw60-1280x720-context.txt; test gap: GM25 uses fireEvent.contextMenu with no mousedown, so jsdom never moves focus and GM25 cannot catch this"
+    },
+    {
+      "id": "C-R60-02",
+      "severity": "low",
+      "steps": [
+        "Open the grid menu (right-click a lane)",
+        "keyboard.down(Shift)",
+        "mouse.down on the header Snap toggle (dismisses menu, arms swallow)",
+        "keyboard.down(Shift) again (repeat:true, like OS auto-repeat while held)",
+        "mouse.up; keyboard.up(Shift)"
+      ],
+      "expected": "Round-58 intent: the dismissing click is swallowed (control run without repeat is swallowed)",
+      "actual": "Snap toggles on the dismissing press; the repeat keydown released the swallow. Conforms to the written D-29z25-R (any key), so B must rule; suggested fix: ignore event.repeat in the keydown release (confirms A-R60-REVIEW-REPEAT-RELEASE). OS auto-repeat timing (~0.5 s) is the A reviewer claim, not measured by C -> R60-T",
+      "evidence": "tmp/studio-real-loop/c-round-60/runs/pw60-1440x900-repeat.txt"
+    }
+  ],
+  "passed": [
+    "G60-2",
+    "R60-S",
+    "R60-U",
+    "G60-1",
+    "G60-3",
+    "SEL-KEYS-1440",
+    "SEL-KEYS-1280",
+    "SEL-ENDS",
+    "SEL-NATIVE",
+    "SEL-MOD",
+    "SEL-SNAP",
+    "MN-KEY-RELEASE (fallback focus method)",
+    "MN-BLUR-PROBE (PROBE, synthetic)",
+    "MN-DISMISS-BUTTON-1440",
+    "MN-DISMISS-BUTTON-1280",
+    "MN-KEYS",
+    "KEY-NARROW",
+    "KEY-TYPE",
+    "MN-FOLLOW",
+    "EG-GROUP (read-only, corrected criterion)",
+    "ABLETON-ROW-1-CZABA",
+    "ABLETON-ROW-2-CZABA",
+    "ABLETON-ROW-4-CZABA",
+    "ABLETON-ROW-5-CZABA",
+    "C-R59-01 closed (SEL-KEYS 1440+1280)"
+  ],
+  "blocked": [
+    "MN-CONTEXT is FAIL (not blocked): item half passes, edge half fails -> C-R60-01",
+    "VSCROLL-PROBE is evidence only: overflow 382px, vertical wheel scrollTop 282->382, 1 scroll event, menu stays open, Follow on (confirms ROOT-R50-58-L1)",
+    "Not testable headless (R60-T): keys with native select popup open; real Alt-Tab during held press; Ctrl/Cmd+digit; SEL-AFTER-MOUSE; real-keyboard Shift+1 (INFO-R60-SHIFT1-SYNTH: synthetic key 1+Shift type-aheads to 10 s; layout-faithful Shift+Digit1 key ! does nothing, runs/shift1-probe-1440x900.txt)",
+    "Not run by task scope (4.9): video sync / C-R27-01 (RF3-1, RF3-2, R5-L6); full find->add->fit video->export flow with WAV checks; FB-01..FB-16 regression; test:e2e:smoke (root); full stage 4a/4b re-run",
+    "Ableton conformance: rows 3-5 unconfirmed (no source); row 1 not applicable (Live has no division select); only row 2 confirmed by Live 12 manual 6.10",
+    "Info for B: INFO-R60-FOCUS-RETURN (mouse-opened menu does not restore focus to the prior button: lane mousedown moves focus to body first; matches the round-57 M10 design, not a regression; the round-60 MN-KEY-RELEASE premise was wrong); xblurcap mutation survives (A-R60-REVIEW-BLUR-CAPTURE-TEST); GK11 export step only killed by return value",
+    "Commit readiness (info, see c-round-60.md): rounds 50-58 ready (interim checkpoint); round 59 ready (interim checkpoint); round 60 hold until B rules on C-R60-01 and C-R60-02"
+  ]
+}

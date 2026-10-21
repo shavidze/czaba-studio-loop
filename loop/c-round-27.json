@@ -1,0 +1,56 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R27-01",
+      "severity": "medium",
+      "steps": [
+        "Run c-round-27/setup.sh at 1440x900 and apply the lay11 layout (video 0-6.008, music 0-16, stems 2-18, SFX 4-6)",
+        "Run c-round-25/scripts/vm-start.js, real-click Master Mute at ~0.5 s and again at ~2.3 s, then press ArrowDown 12 times on Master Volume at ~3.2 s",
+        "Run c-round-25/scripts/vm-an.js and read video.driftMaxAbs and the dock counters"
+      ],
+      "expected": "The video drift max is <= 30.1 ms (round 26's 20.1 ms + 10 ms) and the dock counters go from 0 to 0 (R27-RB cost oracle)",
+      "actual": "4 of 5 runs exceed 30.1 ms: 81.7, 36.2, 46.1, 20.6 and 41.6 ms. Every run has dock hardSeeks 2/2 (round 26: 0/0). Two control runs with the track analyser reads replaced by zeros give 60.4 and 130.6 ms, so the track reads are probably not the cause. Round 26 sampled a music-muted layout, so attribution is open.",
+      "evidence": "c-round-27/runs/vm-1..5.txt, vm-ctl-skip-1..2.txt, c-round-26/runs/vm-1.txt"
+    },
+    {
+      "id": "C-R27-02",
+      "severity": "low",
+      "steps": [
+        "cd store",
+        "Run npx vitest run with the 8 frozen files (render-budget, track-layout, master-ui, meter, master, graph, ArrangementContext, export-dialog-focus) as one batch, 3 times"
+      ],
+      "expected": "152/152 on every batch run",
+      "actual": "Run 1: 151/152 (track-layout fold test timed out at 5000 ms). Run 2: 150/152 (the same timeout, plus render-budget 'start hold releases': expected 0.051 to be +0). Run 3: 152/152. Both tests pass alone and in the full suite (1096/1096). A also saw the timeout.",
+      "evidence": "c-round-27/gates/vitest-frozen8.txt, vitest-frozen8-rerun.txt, vitest-frozen8-run3.txt, vitest-render-budget-alone-1/2.txt, vitest-track-layout-alone.txt"
+    }
+  ],
+  "passed": [
+    "G27-1",
+    "G27-2",
+    "G27-3",
+    "R27-TL-music",
+    "R27-TL-stems",
+    "R27-TL-video",
+    "R27-TI-levels",
+    "R27-TM",
+    "R27-TV",
+    "R27-TW",
+    "R27-TO-latch",
+    "R27-TO-cue",
+    "R27-TR",
+    "R27-TF",
+    "R27-RB-render",
+    "R27-E-file",
+    "R27-K-1280",
+    "R27-L-geometry",
+    "R27-S",
+    "R27-U",
+    "R27-Doc"
+  ],
+  "blocked": [
+    "The dev server at 127.0.0.1:5173 was down on 2026-10-12 (nothing listening, curl 000) and the task forbids starting it. These were therefore not run: R27-K at 1440 and Space on M; the R27-L floating-video numbers; the R27-TO reset with a non-empty Redo stack; the R27-E OfflineAudioContext analyser/splitter count measured live (static and unit evidence only, because C's h26 hook counts AudioContext only); R27-R track Mute de-click, loop 8-12 seam and the library drop of the full mix onto music at 7; the C-R23-01 post-hydration code points; and the C-R27-01 attribution run on the round-26 layout",
+    "R27-TL SFX decay windows (5-6 and 6-7 s): the meter's 20 dB/s release stays 7-15 dB above the tap, the same as the Master meter, because Soft impact decays faster than the release. The literal +/-1.0 dB window oracle does not hold. A release model matches (p95 0.11 dB), but the oracle is not relaxed, so this is not a PASS. B needs to restate the oracle.",
+    "R27-TI video floor time after 6.008 s was not computed precisely (only -inf observed at 8.019 s vs a 7.96 s deadline); G27-3 network was not captured during a reset click (static: no network code in resetMasterPeak)"
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R13-01",
+      "severity": "low",
+      "steps": [
+        "Open /studio-lab at 1440x900 with the library open (288 px)",
+        "Click the expand button (⤢) on the video dock; the box floats at 8,92, 272x153 per D-29d",
+        "Click the library collapse button (◀, data-testid arrangement-library-collapse) with a real mouse/$B click"
+      ],
+      "expected": "The 'collapse library while expanded' path (D-29d, R13-F4) is reachable by pointer.",
+      "actual": "At the D-29d initial placement (8,92, 272x153 at 1440) the floating box covers the library header. The main problem is the search field (11,136, 264x30): it is the entry point of the find -> add flow and cannot be reached until the user drags the box. ◀ (247,90, 28x28) is covered too: elementFromPoint at its centre returns arrangement-video-close, and $B click fails with \"not interactable\". ◀ still works by keyboard (focus + Enter) or after moving the box. The placement follows the contract, so this is a contract/UX decision for B. Medium is defensible if B weighs it against the find -> add flow.",
+      "evidence": "tmp/studio-real-loop/c-round-13/runs/f4-collapse-occluded-1440.json, c-round-13/shots/collapse-occluded-1440.png, c-round-13.md §6"
+    },
+    {
+      "id": "C-R13-02",
+      "severity": "low",
+      "steps": [
+        "Expand the video (or expand from a collapsed library)",
+        "Return it with ✕, Esc or the placeholder button"
+      ],
+      "expected": "The footer status no longer claims the video is expanded or the library is temporarily open. The contract defines no return status, so this is not an acceptance failure.",
+      "actual": "The status keeps 'ვიდეო გაფართოვდა … Esc ან ✕ აბრუნებს.' or 'ბიბლიოთეკა დროებით გაიხსნა … ვიდეოს დახურვისას ისევ დაიკეცება.' after the video is compact and the library is collapsed, and also after manual ▶/◀ (A's L6).",
+      "evidence": "c-round-13/shots/video-compact-after-1280.png, c-round-13/runs/f3-1440.txt, c-round-13/runs/r11a1-1440.txt"
+    },
+    {
+      "id": "C-R13-03",
+      "severity": "low",
+      "steps": [
+        "Expand the video (⤢)",
+        "Focus ✕ (arrangement-video-close)",
+        "Open Export by click",
+        "Press Enter (real key)"
+      ],
+      "expected": "While the Export dialog is open, keyboard input does not act on workspace controls behind it.",
+      "actual": "The Modal does not take focus. activeElement stays on ✕ behind the overlay, and Enter activates it, so the video returns to compact behind the open dialog. Esc follows R13-F3. The cause is the shared Modal focus handling, outside the R13 files.",
+      "evidence": "c-round-13/runs/export-focus-probe.txt"
+    }
+  ],
+  "passed": [
+    "R13-F1",
+    "R13-F2",
+    "R13-F3",
+    "R13-F4",
+    "R13-F5",
+    "R13-F6",
+    "R13-U",
+    "R13-Doc",
+    "R12-W1-expanded-x1",
+    "RF5-3-x1-H2-counters",
+    "dock-sync-diff",
+    "dock-quick-check",
+    "R11A-1-quick",
+    "RF7-P2",
+    "G13-1",
+    "G13-2",
+    "G13-3"
+  ],
+  "blocked": [
+    "Real prefers-reduced-motion emulation: gstack browse denies CDP Emulation.setEmulatedMedia. C used an inline transition-property:none simulation (the exact rule the build CSS applies). Tech Lead Chrome should confirm.",
+    "Fake-Bearer studio-token check is partial: backend localhost:5199 is down (000); the route returned 500 with no token."
+  ]
+}

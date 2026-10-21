@@ -1,0 +1,11 @@
+# B round 54 checkpoint (planning round 55)
+- 19:25 archived current-task.md -> tasks/round-54.md; backups *.before-b-round-55.* made.
+- 19:3x read c-round-54 (FAIL: C-R54-01 Medium Shift sub-ms cross-lane regression; C-R54-02 Low same-lane Shift pre-existing; C-R48-01 recurred verify rc1 x2), a-round-54. Gates b-round-54/gates.txt: HEAD 038ed5a, 17 lines, 5173/5199 000, node 9, protected 4/4, frozen r54 0 non-OK.
+- Plan draft: round 55 = C-R54-01+02 in ArrangementClip.tsx (requestedStart = original.start when timeLocked) + CM9c/CM9d tests + carried browser half; round 56 = C-R48-01 headroom; 4b 57, 4c 58.
+- 19:34 advisor 1 applied; frozen b-round-54-r55-tree-sha256.txt (410) + snapshots b-round-54-r55-snapshots; current-task.md round 55 written (D-29z20). Next: backlog v57, feature-status, plan D-29z20, b-round-54.md, b-next.json
+- 19:36 backlog v57 written (b-round-54/update_backlog.py)
+- 19:37 feature-status updated
+- 19:37 plan.md D-29z20 written
+- 19:38 b-next.json written; SPEC-R53-G-CT8 closed in backlog
+- 19:38 b-round-54.md written; awaiting final advisor call
+- 19:41 advisor 2 applied (fs ARCH line, task order/CM9e/ghost note, b-round-54 §8.1); DONE

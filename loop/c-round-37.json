@@ -1,0 +1,48 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R37-01",
+      "severity": "low",
+      "steps": [
+        "Open /studio-lab anonymously at 1440x900, layout L37 (video at 0, music mix at 7, Soft impact on SFX at 4), detail panel expanded",
+        "REAL click SFX header, REAL click into Clip Gain, Ctrl+A, type 3 (no Enter)",
+        "SYNTHETIC pointerdown id 41 on [data-testid=arrangement-detail-separator]; REAL click Master Volume; SYNTHETIC window pointerup 41",
+        "REAL click on [aria-label='Volume — მუსიკა'] (no gesture)",
+        "REAL click into Clip Gain, then blur"
+      ],
+      "expected": "The kept, uncommitted Clip Gain text is recognisable as pending (dirty marker or accurate status), and the stale refusal status does not survive a later successful edit",
+      "actual": "Field shows '3' with no dirty marker while SFX gainDb is unset; the Volume click writes 'Volume' (past 4) and does not commit the kept text; the status stays 'რედაქტირება drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.' after the successful Volume edit; the later focus+blur commits Clip Gain after Volume (tail [Volume, Clip Gain]). No data loss. Accepted by D-29z2 and documented by A (review R3); stale status = C-R31-INFO-REFUSAL-STATUS. Stage 4b candidate, not an acceptance failure.",
+      "evidence": "tmp/studio-real-loop/c-round-37/runs/kept.txt (KEPT-1, KEPT-2)"
+    },
+    {
+      "id": "C-R37-02",
+      "severity": "low",
+      "steps": [
+        "Select SFX, REAL click into Clip Gain, Ctrl+A, type 0.00 (stored value shows 0.0)",
+        "SYNTHETIC pointerdown 41 on the detail separator; REAL click Master Volume",
+        "SYNTHETIC window pointerup 41; REAL click into the field + Enter"
+      ],
+      "expected": "Per B's D-29z2 row 5 (current-task.md §0, plan.md): normalised-equal text blurs during a gesture -> early return, no status, text not specially kept",
+      "actual": "Field keeps '0.00' with the blocked status (raw-text comparison at ArrangementDetailPanel.tsx l.330); Enter after release gives 'Clip Gain უცვლელია: 0.0 dB.' and no entry. Code and doc 036 (corrected row 5) agree; only B's plan/task wording is wrong. Wording fix for B, no code change required.",
+      "evidence": "tmp/studio-real-loop/c-round-37/runs/mn.txt (MN-2b)"
+    }
+  ],
+  "passed": [
+    "G37-1",
+    "G37-2",
+    "G37-3",
+    "R37-S",
+    "R37-PG",
+    "R37-MN",
+    "R37-CR",
+    "R37-K",
+    "R37-U",
+    "R37-Doc"
+  ],
+  "blocked": [
+    "not run (C may not start servers): npm run test:e2e:smoke starts its own dev server - root should run it",
+    "not run (out of round scope per task 4.7, not PASS): exports/WAV data-duration-sample integrity, R31-PE/PV/PL audio graph, R36-CL live audio, PUI geometry, video sync/transport, C-R27-01 table, full find sound -> add -> fit video -> export flow and FB-01..FB-16",
+    "not run: real multi-pointer (CDP touch) input for C-R36-01; verified with synthetic separator gesture 41 + real mouse click as specified"
+  ]
+}

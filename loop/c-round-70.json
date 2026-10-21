@@ -1,0 +1,101 @@
+{
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-21T12:29:10.7922523Z",
+    "round": 70,
+    "attempt": 1,
+    "backend": 200,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "G70-2",
+    "R70-S",
+    "R70-U",
+    "G70-1",
+    "BR-COUNT-1440x900",
+    "BR-COUNT-1280x720",
+    "BR-SCROLL-1440x900",
+    "BR-SCROLL-1280x720",
+    "BR-ZOOM",
+    "BR-FOLLOW",
+    "BR-RESIZE",
+    "BR-90-1440x900",
+    "BR-90-1280x720",
+    "BR-LOOK-1440x900",
+    "BR-LOOK-1280x720",
+    "TB-REG",
+    "RU-REG",
+    "TR-RULER-REG",
+    "REG-HYD",
+    "G70-3",
+    "ABLETON-ZOOM-ADAPTIVE",
+    "ABLETON-OFFSCREEN-RENDER"
+  ],
+  "blocked": [],
+  "info": [
+    {
+      "id": "INFO-C70-MUT-O-BREAK",
+      "severity": "low",
+      "note": "test gap: mutation o (early break on bars past toPx removed) survives; BW5 window [1e8, 1e8+3648] sits near the end of the 1.152e8 px ruler, so the never-build-past-the-window half of the cost rule is not pinned"
+    },
+    {
+      "id": "INFO-C70-MUT-M-UNSUB",
+      "severity": "low",
+      "note": "test gap (same as A): unsubscribe replaced by a no-op survives; no test unmounts and re-notifies"
+    },
+    {
+      "id": "INFO-C70-MUT-N-NEGSCROLL",
+      "severity": "low",
+      "note": "test gap (same as A): Math.max(0, scrollLeft) removed survives; no test sets a negative scrollLeft"
+    },
+    {
+      "id": "INFO-C70-MUT-P-EQUIV",
+      "severity": "info",
+      "note": "mutation p (reversed-window guard removed) survives but is behaviour-equivalent: the px filter already returns [] for toPx < fromPx"
+    },
+    {
+      "id": "INFO-C66-RU-DBLCLICK-MISS-2",
+      "severity": "info",
+      "note": "watch: one more ruler double-click Fit miss inside the TB script (91.4 -> 77 -> 77); dedicated RU script 18/18 this round"
+    },
+    {
+      "id": "INFO-C70-DOC058-PLACEMENT",
+      "severity": "info",
+      "note": "doc 058 sentence is a sub-bullet after the constants line of the tempo.ts list item, not directly after the exports line; still one line, two hunks"
+    },
+    {
+      "id": "INFO-C70-SCROLL-END",
+      "severity": "info",
+      "note": "scroller layout max scrollLeft is 10 px below scrollWidth-clientWidth (programmatic scrollLeft=1e9 reads 41632 vs 41642 at 1440, 41792 vs 41802 at 1280; offsetWidth-clientWidth=10 = vertical scrollbar); last ~10 px of the ruler never visible; predates round 70 (frozen 436/436, round-70 diff does not touch the scroller); not filed as a bug, for B triage"
+    },
+    {
+      "id": "INFO-C70-ZOOM-RAF",
+      "severity": "info",
+      "note": "browser evidence for the 0.1 zoom clause: 12 REAL = steps 22->320 px/s with a per-rAF completeness check: 0 incomplete frames (242 at 1440, 237 at 1280)"
+    },
+    {
+      "id": "INFO-C70-FAST-SCROLL",
+      "severity": "info",
+      "note": "R70-T headless probe: fast REAL wheel sweeps (25 events, 16 ms apart, 600/-600/1500 px) 0 incomplete frames at both viewports; headless wheel is not smooth-animated, real trackpad feel stays with the Tech Lead"
+    }
+  ],
+  "commitReady": true,
+  "ableton": {
+    "ABLETON-ZOOM-ADAPTIVE": {
+      "czaba": "PASS",
+      "ableton": "confirmed (Live 12 6.10 zoom-adaptive editing grid); CZABA thinning steps are its own, not compared"
+    },
+    "ABLETON-OFFSCREEN-RENDER": {
+      "czaba": "PASS",
+      "ableton": "not applicable"
+    }
+  },
+  "notes": {
+    "g70_1": "vitest 99/1683 from inside npm run verify attempt 1 (rc 0); no separate standalone vitest run",
+    "order": "G70-3 run before 4.6/4.7 (order deviation, rows unchanged)",
+    "processes": "no browse/bun/server-node process left after the run; none killed"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R8-01",
+      "severity": "medium",
+      "steps": [
+        "cd C:/Apps/czaba-project/tmp/studio-real-loop",
+        "bash c-round-9/batch9.sh D_1 N_1 P_1 D_2 N_2 P_2 D_3 N_3 P_3 (1440x900, setup.sh -> c-round-7/scripts/r3v1lay.js -> drift9.sh with c-round-9/scripts/modeD|N|P.js, R3-V1 13 s)",
+        "Read c-round-9/runs/drift-summary.txt and node c-round-9/scripts/tab9.js"
+      ],
+      "expected": "R9-D1: mode D D-24 PASS on 3 valid runs; R9-D2.3: same-session median tick+microtasks D - N <= 0.2 ms at p50 and p95.",
+      "actual": "Clean source (round-9 fix, no wrapper): D 2/3 valid PASS; D_3 valid FAIL max 0.1564 s (video lag -0.106 @11.409 s, -0.156 @11.67 s inside the second video clip 8-12.008, escalation -> hard seek @11.91 s), cover 2.7 %, app LoAF 0, forced 0. N 3/3 PASS, P 3/3 PASS. Medians tick+mt p50/p95: D 0.4/0.9, N 0.3/0.6, P 0.4/0.7 -> D-N +0.1/+0.3 (p95 over 0.2). A's session: D_1 FAIL (hard seek 10.8 s, second video clip), D-N +0.1/+0.2 (at limit). Large improvement vs round 8 (tick+mt p95 3.3-3.8 -> 0.6-0.9; D 0/3 -> 2/3), and the compositor-only contract R9-D3 passes, but the round's verdict IDs R9-D1 and R9-D2 fail. Remaining cost is not in script (forced 0, app LoAF 0); candidates unconfirmed: compositor/raster (702x89 will-change layer, contain:strict SVG) or environment (CPU med 34-49 %). Next per task section 4: Tech Lead quiet-Chrome D-layout run; optional DevTools paint/raster trace D vs N in the 8-12 s window.",
+      "evidence": "tmp/studio-real-loop/c-round-9/runs/drift-summary.txt, runs/table9.txt, runs/D_3.json, c-round-9.md section 2 and 7"
+    },
+    {
+      "id": "C-R6-02",
+      "severity": "medium",
+      "steps": [
+        "Same batch as C-R8-01 plus F_1 F_2 F_3 (c-round-5/scripts/rf43.js after fresh setup + r3v1lay)"
+      ],
+      "expected": "Closure: D-24 PASS on 3 valid runs in R3-V1 mode N, mode D and RF5-3, no steady app LoAF >= 10 ms.",
+      "actual": "N 3/3 PASS; RF5-3 3/3 PASS on raw harness (preAllPaused true, preMaxAbsVt 0, play-startAt -0.010/+0.0007/+0.0007, w1 <= .0495, w2 <= .0572); mode D 2/3 (see C-R8-01). Both app-side candidates are fixed and verified (R9-L1, R9-L2 PASS). Stays open only on D; required next evidence remains the Tech Lead quiet-Chrome run.",
+      "evidence": "c-round-9/runs/F_1.json..F_3.json, N_*.json, c-round-9.md section 3"
+    }
+  ],
+  "passed": [
+    "R9-D3",
+    "R9-L1",
+    "R9-L2",
+    "R9-U",
+    "R9-Doc",
+    "R11-P1c",
+    "R11-P1d",
+    "R11-P1e",
+    "R4-M2",
+    "RF7-P2",
+    "R10-N4",
+    "R26-1",
+    "G9-1",
+    "G9-2",
+    "G9-3",
+    "e2e-find-add-video-export-wav",
+    "premium-auth-not-bypassed"
+  ],
+  "blocked": [
+    "R9-D2.2 capture: C is source read-only and cannot re-run the temporary writer wrapper; C verified A's computation only (A's D_1 from the broken session is outside the envelope: 16.7 ms at frame 41 with rAF delta 33.3, just under the 33.4 exclusion cutoff).",
+    "Guard proofs (R9-U) and pre-fix failures are A's evidence (source revert forbidden for C); logs read and consistent.",
+    "Fake-Bearer token check partial: backend 5199 is down, route returns 500 without issuing a token (same as round 8)."
+  ]
+}

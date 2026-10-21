@@ -1,0 +1,46 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R16-01",
+      "severity": "low",
+      "steps": [
+        "1440x900, fresh anonymous /studio-lab, library 288, synthetic video on the video track plus the standard 3 demo clips (C lay11)",
+        "Click the empty SFX lane background (SFX becomes the active lane, no clip selected): the library body is 233-680, because the preview line 'აქტიური ხაზი: SFX' fits on one line",
+        "Real $B click on the expand button: the box is placed at 8,519 272x153 (bottom 672 = body.bottom - 8)",
+        "Real $B click on the music clip header: the active lane becomes 'მუსიკა', whose preview line wraps to 2 lines, so the library body becomes 233-664 while the footer stays 69"
+      ],
+      "expected": "The expanded box stays inside the library body and does not cover the preview strip, or B explicitly accepts the overlap as the D-29g price (no re-placement after placement)",
+      "actual": "The box keeps bottom 672 over a body that now ends at 664. It covers the top 8 px of the preview strip: elementFromPoint returns the box on 136/216 points sampled in the preview's top 12 px. No control is covered (wave, toggle, collapse, search, separator all hit-test to themselves). The cause is the active-lane text wrap in the frozen ArrangementLibraryPreview.tsx (A's round-16 confounder), not the footer. The same mechanism existed before round 16, so this is not a regression. A one-line preview text (truncate) in round 18 (14c) would remove it.",
+      "evidence": "tmp/studio-real-loop/c-round-16/runs/active-lane-residual-1440-288.txt, c-round-16/shots/active-lane-residual-1440-288.png; confounder at 1280: c-round-16/runs/f1-extra-1280.txt (SEL_stems body 271-484 vs SEL_sfx 271-500, footer 69)"
+    }
+  ],
+  "passed": [
+    "R16-L1",
+    "R16-F1",
+    "R16-F2",
+    "R16-F3",
+    "R16-H1",
+    "R16-G1",
+    "R16-T1",
+    "R16-U",
+    "R16-Doc",
+    "R15-P3-quick (D-29g reading)",
+    "R13-F2-quick",
+    "R13-F3-quick",
+    "R11-P2-quick",
+    "R11-P2a-quick",
+    "R14-E-quick",
+    "R11A-1-quick",
+    "dock-quick",
+    "RF7-P2",
+    "G16-1",
+    "G16-2",
+    "G16-3"
+  ],
+  "blocked": [
+    "Information, not pass/fail (D-29g residual): a range or >=2 selected clips still add a +20 px footer row. At 1280/480 with the video expanded, the box then covers 162/360 sampled points of the preview strip's top 12 px; no control is covered.",
+    "Known carry, not new: the export hard-clips at 0 dBFS (R13-M4/SRW-13); this round's 18.000 s WAV has 1802 samples at full scale.",
+    "Not this round and not PASS: C-R6-02, C-R8-01, RF7-3 (Tech Lead quiet Chrome), C-R12-01 (RF5-3), polish 14b/14c (rounds 17-18), the 21 regression-debt IDs, SRW-13..20, the SRW-21 adapter, T12, and the Tech Lead manual checks (R11-P3m, R11-SB, R13-RM, R15-SB)."
+  ]
+}

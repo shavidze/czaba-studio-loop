@@ -1,0 +1,64 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R15-01",
+      "severity": "low",
+      "steps": [
+        "1440x900 (also 1280x720), fresh anonymous /studio-lab, library open, synthetic video imported on the video track",
+        "Real $B click on the expand button: the tree nav and the listbox get style=\"padding-bottom: 169px; scroll-padding-bottom: 169px;\"",
+        "Return the video with a real $B click on the close button, or blur and press a real Escape",
+        "Read getAttribute('style') on [data-testid=arrangement-library-tree] and [data-testid=arrangement-library-list]"
+      ],
+      "expected": "R15-P3: after the close button and after Esc, the tree nav and the listbox have no inline style attribute (round-14 DOM)",
+      "actual": "Both keep an empty style=\"\" attribute after the close button and after Esc. Computed padding-bottom is back to 4px, scroll-padding-bottom is auto, scrollHeight equals the pre-expand value (637/451 at 1440/288; 516/245 at 1280/480) and the texts are verbatim. After collapse then expand, the attribute is absent. A declared this as not ready (deviation 1) and asked B to rule.",
+      "evidence": "tmp/studio-real-loop/c-round-15/runs/p3-1440-288.txt, p3-1280-480.txt, f2-arrows-resize-1440-480.txt (close line)"
+    },
+    {
+      "id": "C-R15-02",
+      "severity": "low",
+      "steps": [
+        "1280x720, library 480 (separator ArrowRight x14), synthetic video on the video track, no clip selected (footer has no selected-clip line; aside 122-671, body 255-520)",
+        "Real $B click on the expand button: the box is at 8,379.5 235.55x132.48 (bottom 512), inside the body",
+        "Real click on search, type soft, real click on the option, real Enter: the clip is added and selected",
+        "The footer gains the selected-clip line (+20 px). The aside becomes 122-651 and the body 255-500, but the box stays at top 379.5, bottom 512"
+      ],
+      "expected": "Gap in the acceptance set, for B to rule on. R15-P1 (box inside the body, measured at placement with no clip selected) and R15-P2.1 (the box neither moved nor returned) both pass as written, yet the R15-P2.1 flow itself leaves the box outside the body. No criterion covers a body change after placement. Expected: either the box stays inside the body while expanded (re-place when the body shrinks), or B explicitly accepts the overlap.",
+      "actual": "The box is outside the body: it overlaps the preview strip's top 12 px (500-512), and elementFromPoint returns the box on 72 sampled preview points. No preview control (wave 541-573, toggle 605-639) is covered, and every list row is still reachable. Placement is computed only on expand and on a window resize, so the same mechanism existed in round 14.",
+      "evidence": "tmp/studio-real-loop/c-round-15/runs/selection-footer-1280-480.txt, shots/selection-footer-box-over-preview-1280-480.png, runs/p3-1280-480-attempt1-started-expanded.txt (first line); P1 placement-time containment: runs/p1-1280-480.json"
+    },
+    {
+      "id": "C-R15-03",
+      "severity": "low",
+      "steps": [
+        "Copy app/ to tmp/studio-real-loop/c-round-15/guard (node_modules junction), and run the 3 focused test files: 116/116",
+        "Mutation G6: in ArrangementExportDialog's content keydown handler, change `event.key !== 'Tab'` to `event.key !== 'Tab' && event.key !== 'Enter'`. Enter on the last control (WAV-ის ექსპორტი) would then be preventDefault-ed and move focus to the X instead of exporting.",
+        "Re-run the 3 focused test files"
+      ],
+      "expected": "R15-U 'only Tab is handled (Enter and Esc are not prevented or stopped)': at least one test fails under a mutation that handles Enter",
+      "actual": "116/116 still pass. The 'only Tab' test presses Enter only on the X (the first control), where the mutated handler is a no-op, so it cannot detect key-filter regressions at the last control. Real-browser Enter on WAV works today (E5), so this is a test-strength gap, not a product defect.",
+      "evidence": "tmp/studio-real-loop/c-round-15/gates/guard-c15.txt (G6), guard/mut.cjs"
+    }
+  ],
+  "passed": [
+    "R15-P1",
+    "R15-P2",
+    "R15-E",
+    "R15-U",
+    "R15-Doc",
+    "R13-F2-quick",
+    "R13-F3-quick",
+    "R13-F4-quick (reduced motion by simulation only)",
+    "R11A-1-quick",
+    "dock-quick",
+    "RF7-P2",
+    "G15-1",
+    "G15-2",
+    "G15-3"
+  ],
+  "blocked": [
+    "R15-P3 not passed: the literal 'no inline style attribute' sub-check fails after the close button and Esc (C-R15-01); the padding, scrollHeight, status-text, collapse-then-expand and pending-inset sub-checks pass. B must rule or name a mechanism.",
+    "Real prefers-reduced-motion cannot be emulated in gstack browse (CDP allowlist); simulated only, so it goes to the Tech Lead (R13-RM)",
+    "Not this round and not PASS: C-R6-02, C-R8-01, RF7-3 (Tech Lead quiet Chrome), C-R12-01 (RF5-3), polish rounds 16-18, the 21 regression-debt IDs, SRW-13..20, the SRW-21 adapter and T12"
+  ]
+}

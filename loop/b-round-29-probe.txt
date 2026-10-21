@@ -1,0 +1,7 @@
+B round-29 planning probe for round 30 (scratch copy b-scratch-r30/ outside store/, node_modules junction removed with cmd rmdir afterwards; store/ untouched)
+1) types ArrangementClip + optional gainDb?: number; graph ScheduleHandle + setClipGain(clipId, value); ApplyScheduleOptions + optional clipGains?: ReadonlyMap<string, number>
+   -> npx tsc --noEmit exit 0, 0 lines (b-round-29-probe-tsc.txt)
+2) detail panel: a 4th column data-testid="arrangement-detail-clip-gain" with one <label> + one <input type=number aria-label="Clip Gain (dB)">
+   -> detail-panel-polish.test.tsx 2 failed / 14 passed: "labels the single clip info ... aria-labels" and "labels the group info ... aria-labels" (rangeLabels/ariaLabels toEqual 2 items); detail-panel.test.tsx 24/24
+3) amendment only in detailLabelTexts (l.372 and l.375): querySelectorAll('label:not([data-testid="arrangement-detail-clip-gain"] *)') and the same for 'input'
+   -> detail-panel-polish.test.tsx 16/16; lines 1-371 byte-identical; every expectation line unchanged

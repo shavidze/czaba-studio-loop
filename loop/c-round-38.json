@@ -1,0 +1,72 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R38-01",
+      "severity": "low",
+      "steps": [
+        "curl -s http://127.0.0.1:5173/studio-lab > page.html; count NUL bytes and offsets (tr -cd '\u0000' | wc -c; grep -obUaP '\u0000')",
+        "Open /studio-lab anonymously in gstack browse (fresh context), wait for hydration",
+        "Read every attribute and text node containing U+0000 or U+FFFD"
+      ],
+      "expected": "SSR HTML has no NUL bytes; every aria-label in the live DOM is valid Georgian text",
+      "actual": "63611 bytes, 5 NUL at 11729,28025,28026,58745,58746 (3 identical repeats; round 37: 63520 B, 2 NUL at 28013/28014). Hydration repairs the text node but two attributes stay corrupted: BUTTON aria-label 'ბიბ�ლიოთეკის დაკეცვა' (library collapse) and INPUT aria-label 'range-ის დ��ასაწყისი (წამი)'. Offsets moved with A's touch-none class bytes; root cause is the open C-R23-01 stream defect, not A's logic. Production build not checked.",
+      "evidence": "tmp/studio-real-loop/c-round-38/runs/studio-lab.html, sl1.html..sl3.html, c-r23-01-dom.txt, g3-anon.txt"
+    }
+  ],
+  "passed": [
+    "G38-1",
+    "G38-2",
+    "G38-3",
+    "R38-S",
+    "R38-PG",
+    "PG-V",
+    "PG-S",
+    "PG-VID",
+    "PG-M",
+    "PG-P",
+    "PG-KEY",
+    "PG-DEL",
+    "PG-1280",
+    "R38-DR",
+    "DR-V",
+    "DR-VID",
+    "DR-M",
+    "DR-P",
+    "DR-0",
+    "DR-Y",
+    "DR-AU",
+    "DR-AU-P",
+    "DR-1280",
+    "R38-DC",
+    "DC-V",
+    "DC-M",
+    "DC-P",
+    "DC-VID",
+    "DC-0",
+    "DC-G",
+    "DC-SEQ",
+    "R38-MN",
+    "MN-Z",
+    "MN-G",
+    "MN-CR36",
+    "MN-BLUR",
+    "MN-CANCEL",
+    "MN-RESET",
+    "R38-CR",
+    "CR-1",
+    "CR-2",
+    "CR-3",
+    "CR-4",
+    "CR-5",
+    "R38-K",
+    "R38-U",
+    "R38-Doc"
+  ],
+  "blocked": [
+    "DC-REAL / R38-T: harness cannot produce a real dblclick (CDP clickCount=1 per click, no dblclick fired) -> Tech Lead",
+    "A-R38-REVIEW-TOUCH and touch no-scroll: no real touch device in headless gstack -> Tech Lead R38-T",
+    "Not run this round by contract: export/WAV integrity, PUI geometry, video sync, C-R27-01 table, full find->add->fit video->export flow, FB-01..FB-16 stage regression",
+    "npm run test:e2e:smoke: root only (starts its own dev server)"
+  ]
+}

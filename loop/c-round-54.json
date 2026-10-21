@@ -1,0 +1,55 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R54-01",
+      "severity": "medium",
+      "steps": [
+        "Mounted StudioWorkspace (jsdom, scratch probe PS-TOUCH in c-round-54/scratch/mut/app/lib/arrangement/__tests__/c-probe-r54.test.tsx): m1 music start 6.0004 dur 2; st0 stems 0..6.0004",
+        "Snap on (G), division 1 s",
+        "Drag m1 header +40 px down to stems lane with Shift held"
+      ],
+      "expected": "Shift time lock keeps start exactly: m1 on stems at 6.0004 touching st0 (round-53 snapshot behaviour)",
+      "actual": "Move refused, m1 stays on music, status 'კლიპის გადატანა: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.', no undo. Without neighbour (PS-FREE) m1 lands at 6 (moved 0.4 ms while time-locked). Cause: ArrangementClip moveStartOnGrid roundTime(start) with snapStep null gives timeDelta -0.0004, which ms rounding absorbed and D-29z19 µs rounding keeps. Regression introduced by round 54 (= A-R54-REVIEW-SHIFT-SUBMS).",
+      "evidence": "tmp/studio-real-loop/c-round-54/runs/probes.txt (PS-FREE, PS-TOUCH on round-54 vs snapshot selection.ts)"
+    },
+    {
+      "id": "C-R54-02",
+      "severity": "low",
+      "steps": [
+        "m1 music start 6.0004 dur 2, Snap on",
+        "Shift-drag header +40 px on the same lane"
+      ],
+      "expected": "No change and no history entry (time and lane both unchanged)",
+      "actual": "start becomes 6, Undo 'კლიპის გადატანა', status 'კლიპის გადატანა: start 00:06.000, ...'. Pre-existing: identical with snapshot selection.ts.",
+      "evidence": "tmp/studio-real-loop/c-round-54/runs/probes.txt (PS-SAME)"
+    },
+    {
+      "id": "C-R48-01",
+      "severity": "medium",
+      "steps": [
+        "node.exe 9; quiet `npx vitest run` and two quiet `npm run verify` in store/"
+      ],
+      "expected": "87 files / 1501 tests, 0 failures; verify rc 0",
+      "actual": "Full run 3 failed/1498 (track-layout, sfx-library, master-ui timeouts 5000ms); verify run 1 rc 1 (fader-guards timeout); verify run 2 rc 1 (track-layout, sfx-library). All failing files green alone (~2.1 s per test). Unchanged files; load flakiness, recurrence. Frozen-suite run: §5 11-file command 224/224 rc 0; remaining 8 §4.8 files 148/149 (track-layout timeout 5716 ms again).",
+      "evidence": "tmp/studio-real-loop/c-round-54/gates/full-vitest.txt, verify.txt, verify-2.txt, timeouts-alone.txt, frozen-suites.txt"
+    }
+  ],
+  "passed": [
+    "G54-2",
+    "R54-S",
+    "R54-U"
+  ],
+  "blocked": [
+    "Store dev server http://127.0.0.1:5173 and backend :5199 returned 000 at 18:47, 19:09 and 19:18 +04 (ENV-DEV-SERVER-DOWN-R52 / ENV-VITE-ENOMEM-R53, third round); C did not start servers",
+    "Not run (environment): R52-EDGE (EG-OFF, EG-1, EG-VIDEO, EG-LINE, EG-ALT, EG-ALT-ON, EG-CROSS, EG-GROUP, EG-1280)",
+    "Not run (environment): R54-CROSS (CX-VIDEO, CX-NOTE; V not measured)",
+    "Not run (environment): R53-LANE (LN-TOUCH, LN-AFTER, LN-SHORT)",
+    "Not run (environment): R52-TRIM (ET-START, ET-END, ET-ALT, ET-CLAMP)",
+    "Not run (environment): R52-PLAY (EP-VIDEO, EP-OFF, EP-CROSS) — no real audio graph/source timing/transport measured",
+    "Not run (environment): R52-REG browser spot checks and REG-HYD",
+    "Not run (environment): G54-3 anonymous workspace + purchase protection (third round without browser evidence)",
+    "G54-1 verify rc 0 not achieved (C-R48-01)",
+    "Not in scope / not run: video sync RF3-1, RF3-2, R5-L6; full find->add->fit video->export flow with WAV checks; FB-01..FB-16 stage regression; test:e2e:smoke (root)"
+  ]
+}

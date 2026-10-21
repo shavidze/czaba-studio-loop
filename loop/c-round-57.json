@@ -1,0 +1,50 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R57-01",
+      "severity": "low",
+      "steps": [
+        "In a scratch copy of store/app, insert `gridMenuReturnFocusRef.current = null;` before `closeGridMenu()` in StudioWorkspace chooseGridMenuDivision (c-round-57/scripts/cmut.cjs mutation h)",
+        "Run vitest on grid-snap-menu, grid-snap-ui and gesture-guard"
+      ],
+      "expected": "At least one test fails, because M10 requires focus return after a close with a choice",
+      "actual": "58/58 pass; focus return after a choice is unguarded by tests (behaviour present in code)",
+      "evidence": "tmp/studio-real-loop/c-round-57/mutations.txt (h failed=0), mut-h.json"
+    },
+    {
+      "id": "C-R57-02",
+      "severity": "low",
+      "steps": [
+        "In scratch, change `if (!gridMenuOpenRef.current) {` in handleGridMenuRequest to `if (gridMenuOpenRef.current || !gridMenuOpenRef.current) {` (mutation i)",
+        "Run vitest on grid-snap-menu, grid-snap-ui and gesture-guard"
+      ],
+      "expected": "GM3 (strengthened per A report §6 #4) detects focus being re-stored on a reposition while the menu is open",
+      "actual": "58/58 pass; A's claim that GM3 covers C extra (i) is wrong. A bare contextmenu on an open menu then Escape would lose the original return target, and no test covers that",
+      "evidence": "tmp/studio-real-loop/c-round-57/mutations.txt (i failed=0), mut-i.json"
+    }
+  ],
+  "passed": [
+    "G57-2",
+    "R57-S",
+    "R57-S-AST-EQUIVALENCE",
+    "R57-U",
+    "R57-U-a",
+    "R57-U-b",
+    "R57-U-c",
+    "R57-U-d",
+    "R57-U-e",
+    "R57-U-f",
+    "R57-U-g",
+    "R57-U-durations",
+    "G57-1"
+  ],
+  "blocked": [
+    "§4.6 browser acceptance of 4b-1 (MN-OPEN, MN-EDGE, MN-NATIVE, MN-CHOOSE, MN-SNAP, MN-KEYS, MN-DISMISS, MN-NOEDIT, R57-FOCUS, R57-PLAY real audio, R57-LOOK at 1440x900 and 1280x720): not run (environment). 127.0.0.1:5173/studio-lab and :5199 returned 000 at 21:52, 22:05:36 and 22:05:50; no listener. SIXTH round without a browser",
+    "§4.7 carried stage-4a browser half (R55-SHIFT, R52-EDGE, R54-CROSS, R53-LANE, R52-TRIM, R52-PLAY EP-*, R52-REG, REG-HYD): not run (environment)",
+    "G57-3 anonymous /studio-lab and purchase protection: not run (environment); last browser PASS was round 51",
+    "C-R51-02 browser close (R57-FOCUS): unit-level only (FR1-FR4 and mutations f/g); not closed",
+    "G1 browser probe (click after a cancelled pointerdown; spec says click still fires, so M9 is unmeetable with the specified mechanism for button targets) and G6/G5 probes: need a browser; details in c-round-57.md Open probes",
+    "Full find -> add -> fit video -> export WAV flow and FB-01..FB-16 regression: not run (environment; outside round scope)"
+  ]
+}

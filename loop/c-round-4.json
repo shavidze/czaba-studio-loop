@@ -1,0 +1,91 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R4-01",
+      "severity": "medium",
+      "steps": [
+        "Anonymous /studio-lab at 1440x900; import beeps-6s-vp9-opus.webm (0-6.008) and clip-4s-vp9-opus.webm moved to 8 (8-12.008), plus Middle East music at 0 (R3-V1 layout)",
+        "Home, Play for 12.4 s; sample [data-video-role=active].currentTime every 250 ms against the AudioContext clock, with the RF4-1 exclusions (300 ms after start, boundaries, swaps, hard seek to seeked+300 ms)",
+        "Repeat 10x in one load, plus 5x with a reload before each; for RF4-2 use video 0-6.008, loop 2-4, play from 1.0 for 8.6 s, 5 runs"
+      ],
+      "expected": "Every run: median |d| <= 0.05 s and max |d| <= 0.1 s (RF4-1, RF4-2)",
+      "actual": "R3-V1 same-load 8/10 (L6 0.354, L8 0.181); after the 2 allowed starvation re-runs 9/10 (re-run 1 max 0.1031). Reload 2/5 (Lr1 0.183, Lr2 0.118, Lr5 0.303). RF4-2 4/5 (L6_5 0.1106). All failures are video lag (d<0). Every failing R3-V1 run has coincident long tasks or rAF gaps of 50-117 ms. In Lr5 (first Play after a fresh load) the element clock advanced only 0.72-1.08x while playbackRate was 1.75-2.0, so |d| grew to 0.30 and soft sync could not recover until about 1.7 s, because a hard seek only triggers above 1.0 s. R2-V3 5/5 and H.264 diagnostic 3/3 pass. All hard D-19 rules held in every run: 0 writes while seeking, rate within [0.5, 2], both elements rate 1 and paused after Pause, always muted, 2 elements with 1 visible, 0 ms with both playing. The machine was loaded (Brave, ChatGPT, VS Code installer).",
+      "evidence": "tmp/studio-real-loop/c-round-4/runs/L_*.json, Lr_*.json, Lre_*.json, L6_*.json, V3*.json, H_*.json; c-round-4/scripts/rf4.js + m4.js; c-round-4.md section 2"
+    },
+    {
+      "id": "C-R4-02",
+      "severity": "medium",
+      "steps": [
+        "Anonymous /studio-lab; add Middle East at 0 (music clip) or import a video clip; for the brace variant create loop 2-4",
+        "Dispatch pointerdown (pointerId 1, touch) on the clip header (or on the loop brace), then pointerdown (pointerId 2) on the same element, as with two fingers or pen + mouse",
+        "pointerup id 2, pointerup id 1 (also window pointerup/pointercancel id 1)",
+        "Real Ctrl+Z, click the Undo button, real Delete"
+      ],
+      "expected": "After both pointers are released, the gesture count returns to 0 and Undo/Redo and edits work (D-20: a gesture clears its own state)",
+      "actual": "Permanently blocked. The status shows 'Undo/Redo drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.' or 'რედაქტირება drag-ის დროს არ მუშაობს…', and history is unchanged. Only a reload recovers, which loses the demo arrangement. Read-only cause: ArrangementClip beginGesture overwrites gestureRef.current without calling the previous gesture's release(), and the watchUncapturedPointerGesture handler returns early because gestureRef.current !== gesture, so gestureCountRef stays at 1 or more. Scope confirmed in the browser: ArrangementClip (music and video clips) and ArrangementLoopBrace leak; ArrangementRuler (releases previous dragRef first) and the lane marquee (calls marqueeCleanupRef first) recover, Ctrl+Z works. The root cause does not depend on the capture path. With successful capture (a real two-finger touch), pointerdown 2 overwrites g1 without releasing it, pointerup 2 releases g2 and nulls gestureRef, and pointerup 1 returns early, so the count stays at 1. The early return in the uncaptured listener is a secondary symptom. ArrangementContext.test.ts lines 200-201 already pass for nested beginPointerGesture, so the fix and its test belong in ArrangementClip and ArrangementLoopBrace; the ruler's dragRef.current?.release() before overwriting is the in-repo pattern.",
+      "evidence": "tmp/studio-real-loop/c-round-4/scripts/leak.js, leakmusic.js, leak2.js, probeundo.js; runs/leak-scope.txt; leak-blocked-1280.png; also triggered by the stray pointerdown in c-round-2/scripts/r3v3.js (see c-round-4.md section 4, R3-V3)"
+    },
+    {
+      "id": "C-R4-03",
+      "severity": "low",
+      "steps": [
+        "Open /studio-lab at 1280x720 or 1440x900 with the library open"
+      ],
+      "expected": "LIB-02: collection and folder names are readable, so the synthetic and public collections can be told apart",
+      "actual": "The 96 px tree truncates the labels to 'ყველა …', 'დემო კო…' and 'სინთეზ…', readable only through the title tooltip",
+      "evidence": "tmp/studio-real-loop/c-round-4/shot-1280x720-open.png, shot-1440x900-open.png"
+    },
+    {
+      "id": "C-R4-04",
+      "severity": "low",
+      "steps": [
+        "Select 'ღამის პულსი · ბასი' or '· მელოდია' in the library and look at the preview waveform"
+      ],
+      "expected": "The preview waveform with progress is readable (PRE)",
+      "actual": "Bars reach at most 7 of 32 px for the bass and 5 of 32 px for the melody, against 32 of 32 for the Middle East MP3. The peaks are not normalised, so the synthetic stems look almost flat.",
+      "evidence": "Measured in the browser (c-round-4.md section 5); tmp/studio-real-loop/c-round-4/shot-1280x720-ghost.png"
+    }
+  ],
+  "passed": [
+    "RF4-3",
+    "RF4-U",
+    "R4-B1",
+    "R4-B2",
+    "R4-B3",
+    "R4-B4",
+    "R4-B5",
+    "R4-B6",
+    "R4-B7",
+    "R4-M2",
+    "R22-1",
+    "R22-2",
+    "R22-3",
+    "R22-4",
+    "R23-3",
+    "R23-4",
+    "R12-L1",
+    "R12-L2",
+    "R12-L3",
+    "R12-L4",
+    "R12-L5",
+    "R12-S1",
+    "R12-S2",
+    "R12-U",
+    "R11A-1",
+    "R11A-2",
+    "R11A-3",
+    "G4-1",
+    "G4-2",
+    "G4-3",
+    "G4-R",
+    "G4-shots"
+  ],
+  "blocked": [
+    "R23-1: headless Chromium hides native scrollbars, so the visual (graphite track, slim rounded thumb, no arrows or white rail, mint hover/drag) cannot be seen in screenshots. Only the generated CSS rules, the 10 px gutter and the 3.67:1 thumb contrast were verified. Needs a Tech Lead check in real Windows Chrome.",
+    "R23-2 (partial): keyboard scrolling passed; wheel/trackpad and thumb drag are not available in gstack browse (no wheel command and no CDP Input in the allowlist). Needs a Tech Lead real-mouse check.",
+    "R12-L4 was verified with synthetic HTML5 DragEvents only; a real-mouse drag from the library to a lane still goes on the Tech Lead list.",
+    "RF4-1 and RF4-2 failed as written on a loaded machine; a clean real-Chrome re-measure by the Tech Lead is recommended before B decides between a fix and an environment cause (C-R4-01).",
+    "RF4-3 passed with a spec conflict for B: rule 7 allows play() up to 20 ms before startAt, but the hold criterion says the element is 'paused while ctx < startAt'. In F3, play() came at -10 ms and vt stayed 0."
+  ]
+}

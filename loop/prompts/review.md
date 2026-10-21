@@ -1,0 +1,1 @@
+Review what tests cannot catch: real-browser event ordering, listener/timer leaks, regressions in existing flows, render cost, accessibility, Tailwind/tokens, TS strict, and any touch of auth/purchase/download code (must be none). Read-only. After the verdict line give findings ranked with file:line and a fix, and an Architecture note (proposal only).

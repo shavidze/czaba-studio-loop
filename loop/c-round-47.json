@@ -1,0 +1,45 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "B-EXPECT-R47-RB",
+      "severity": "medium",
+      "steps": [
+        "cd store at HEAD d2f6715 + round-47 working tree",
+        "npx vitest run",
+        "observe app/lib/arrangement/__tests__/render-budget.test.tsx:309"
+      ],
+      "expected": "G47-1: 1387/1387 green (1364 + 23 new)",
+      "actual": "1 failed / 1386 passed: expect(view.getAllByRole('option')).toHaveLength(2) got 9 - the required native <select> (7 options, task section 0.2) adds options; the frozen test cannot pass. Not an app defect.",
+      "evidence": "c-round-47/runs/full-vitest.txt, c-round-47/runs/frozen-focus.txt; scratch fix within(view.getByRole('listbox')).getAllByRole('option') -> 7/7 in c-round-47/runs/rb-scratch-scoped.txt"
+    },
+    {
+      "id": "C-R47-01",
+      "severity": "low",
+      "steps": [
+        "fresh /studio-lab 1440x900, L47 layout; delete Soft impact; place stem 'პულსი' on stems at 0.4",
+        "click music clip, Ctrl+click the stem (group of 2), press G (Snap on, 1 s)",
+        "REAL-mouse: grab the music header and drag down one lane and left by 292 px (-7.3 s)"
+      ],
+      "expected": "Task section 0.4: cross-lane group timeDelta = snapGroupDelta(...) with group bounds = 0, so the lane plan (music -> stems at 7.000, stem -> sfx at 0.400) succeeds, as it does for a -0.3 s drag",
+      "actual": "Refused: blocked ghosts at the valid places 7.000@stems and 0.400@sfx, status 'ჯგუფის ნაწილისთვის ხაზი არ არსებობს — მხოლოდ დრო იცვლება.', no change. The same drag with Snap off is also refused (time-only -0.4), so this keeps the pre-existing structure; it is A's declared deviation A-R47-GROUP-LANE-DELTA, not a regression. B decides.",
+      "evidence": "c-round-47/runs/grouplane2--292.txt, grouplane2--12.txt, grouplane2-snapoff--292.txt; c-round-47.md section 5"
+    }
+  ],
+  "passed": [
+    "G47-2", "G47-3", "R47-S",
+    "R47-U-NEW", "R47-U-MUT-a", "R47-U-MUT-b", "R47-U-MUT-c", "R47-U-MUT-d", "R47-U-MUT-e", "R47-U-MUT-f", "R47-U-MUT-g", "R47-U-MUT-h", "R47-U-MUT-i", "R47-U-MUT-j", "R47-U-MUT-k",
+    "UI-1", "UI-2", "UI-3", "UI-4", "UI-5", "UI-6", "R47-RELOAD-RESET",
+    "SN-OFF", "SN-1", "SN-025", "SN-GROUP", "SN-LANE", "SN-SHIFT", "SN-MID", "SN-BLOCK", "SN-VIDEO", "SN-1280",
+    "NU-1", "NU-2", "NU-3",
+    "LN-1", "LN-2", "LN-3", "LN-4",
+    "AU-1", "AU-2",
+    "REG-HYD", "REG-TRIM", "REG-RANGE", "REG-KEYS", "R47-SSR-DELTA",
+    "R47-Doc"
+  ],
+  "blocked": [
+    "G47-1 and R47-U-FROZEN / REG-RB fail on render-budget.test.tsx:309 (B-EXPECT-R47-RB, frozen test vs required select); fix is a B/root test edit",
+    "REAL-mouse drags were produced with standalone Playwright 1.57 (chromium rev 1200), not gstack: the browse CLI, its CDP allowlist and the server-node.mjs fallback expose no mouse down/move/up; harness rule needs updating",
+    "Not run this round (not PASS): video sync / C-R27-01, full find sound -> add -> fit video -> export flow, FB-01..FB-16 stage regression, npm run test:e2e:smoke (root only), Ableton behaviour in a real Live install (none available)"
+  ]
+}

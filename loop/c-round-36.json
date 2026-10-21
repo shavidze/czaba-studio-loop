@@ -1,0 +1,37 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R36-01",
+      "severity": "medium",
+      "steps": [
+        "Open /studio-lab anonymously at 1440x900 with layout L36 (video at 0, music mix at 7, Soft impact on SFX at 4), detail panel expanded",
+        "Real click on the SFX clip header, real click into Clip Gain, Ctrl+A, type 3 (no Enter)",
+        "SYNTHETIC pointerdown id 41 on [data-testid=arrangement-detail-separator] (preventDefault, gesture active)",
+        "REAL click on [aria-label='Master Volume'] while gesture 41 is held",
+        "SYNTHETIC window pointerup id 41"
+      ],
+      "expected": "The typed Clip Gain value is not silently lost; it commits (or stays pending) and no refusal hides the user's edit",
+      "actual": "SFX gainDb stays unset (3 lost), field resets to 0.0, status 'რედაქტირება drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.', focus Master Volume, history unchanged; still lost after pointerup 41. Pre-existing path (D-29z row 2 leaves gesture-active presses unchanged); reachable in practice only with two simultaneous pointers. Same as A's code-review finding A-R36-REVIEW-1. Not a round-36 regression; stage 4b candidate. Doc 036 sentence 'ბრაუზერში არ შემოწმებულა' for this path is now outdated.",
+      "evidence": "tmp/studio-real-loop/c-round-36/runs/ot.txt (block OT-5b); contrast OT-5 (fully synthetic id 42: handler does not blur, value kept)"
+    }
+  ],
+  "passed": [
+    "G36-1",
+    "G36-2",
+    "G36-3",
+    "R36-S",
+    "R36-CR",
+    "R36-OT",
+    "R36-CL",
+    "R36-R34",
+    "R36-K",
+    "R36-U",
+    "R36-Doc"
+  ],
+  "blocked": [
+    "not run (C may not start servers): npm run test:e2e:smoke starts its own dev server on 5187 - root should run it",
+    "not run (out of round scope per task 4.7, not PASS): exports/WAV integrity, R31-PE/PV/PL audio graph, PUI geometry, R32-BC, video sync, C-R27-01 table, full find sound -> add -> fit video -> export flow and FB-01..FB-16",
+    "not run: real multi-pointer (CDP touch) input for C-R36-01; reproduced with synthetic gesture + real mouse click instead"
+  ]
+}

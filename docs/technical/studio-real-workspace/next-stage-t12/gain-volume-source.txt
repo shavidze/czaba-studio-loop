@@ -1,0 +1,1049 @@
+# T12 — Gain / Volume System
+
+## 1. Gain-ის ძირითადი მოდელი
+
+სისტემაში ერთმანეთისგან მკაფიოდ უნდა გაიმიჯნოს:
+
+1. **Clip Gain**
+2. **Clip Gain Envelope**
+3. **Clip Fade / Crossfade**
+4. **Device / FX Gain**
+5. **Track Volume**
+6. **Track Volume Automation**
+7. **Main / Master Output Level**
+8. **Waveform Vertical Zoom**
+
+ამ პარამეტრების ერთმანეთში გაერთიანება არ შეიძლება.
+
+საბაზისო audio signal flow:
+
+```text
+Source Audio
+    ↓
+Clip Gain
+    ↓
+Clip Gain Envelope / Clip Fades
+    ↓
+Track Device / FX Chain
+    ↓
+Track Volume
+    ↓
+Track Pan / Mixer Stage
+    ↓
+Group / Main Output
+```
+
+---
+
+# T12.1 — Clip Gain
+
+ყველა **Audio Clip-ს** უნდა ჰქონდეს დამოუკიდებელი `Clip Gain`.
+
+Default:
+
+```text
+Clip Gain = 0.0 dB
+```
+
+`0 dB` ნიშნავს:
+
+```text
+original level
+no amplification
+no attenuation
+```
+
+მაგალითად ერთ Track-ზე შეიძლება იყოს:
+
+```text
+Clip A = 0 dB
+Clip B = -4 dB
+Clip C = +3 dB
+```
+
+და ეს სამი მნიშვნელობა ერთმანეთისგან სრულიად დამოუკიდებელია.
+
+Clip Gain მხოლოდ კონკრეტულ Clip-ს ეკუთვნის.
+
+---
+
+# T12.2 — Clip Gain is non-destructive
+
+Clip Gain-ის ცვლილებამ original audio file არ უნდა შეცვალოს.
+
+მაგალითად:
+
+```text
+kick.wav
+```
+
+თუ Clip Gain შევცვალეთ:
+
+```text
+0 dB → -8 dB
+```
+
+`kick.wav` არ გადაიწერება.
+
+Clip-ში ინახება მხოლოდ:
+
+```text
+clipGainDb = -8
+```
+
+Playback-ის დროს შესაბამისი gain multiplier გამოიყენება.
+
+---
+
+# T12.3 — dB → Linear Gain
+
+Audio engine-ში dB პირდაპირ sample-ზე არ მრავლდება.
+
+უნდა გადაითარგმნოს linear multiplier-ში:
+
+```text
+linearGain = 10 ^ (gainDb / 20)
+```
+
+მაგალითები:
+
+```text
+0 dB   ≈ 1.000
++6 dB  ≈ 1.995
+-6 dB  ≈ 0.501
+-12 dB ≈ 0.251
+```
+
+ამიტომ:
+
+```text
+outputSample = inputSample * linearGain
+```
+
+თუ Gain არის:
+
+```text
+-inf dB
+```
+
+მაშინ:
+
+```text
+linearGain = 0
+```
+
+ანუ სრული silence.
+
+---
+
+# T12.4 — Clip Gain acts before Track Effects
+
+Clip Gain უნდა მუშაობდეს **Track Device / FX Chain-მდე**.
+
+მაგალითად გვაქვს:
+
+```text
+Audio Clip
+↓
+Compressor
+↓
+Track Volume
+```
+
+Clip Gain:
+
+```text
+0 dB → +8 dB
+```
+
+უნდა გაზარდოს Compressor-ის input level-იც.
+
+შესაბამისად შეიძლება შეიცვალოს:
+
+- compression amount;
+- saturation;
+- distortion;
+- limiter response;
+- gate behavior;
+- ნებისმიერი dynamics-sensitive effect-ის რეაქცია.
+
+ეს არის ერთ-ერთი მთავარი განსხვავება Clip Gain-სა და Track Volume-ს შორის.
+
+---
+
+# T12.5 — Track Volume
+
+ყველა Track-ს უნდა ჰქონდეს დამოუკიდებელი **Track Volume**.
+
+Track Volume მოქმედებს მთლიან Track-ზე და არა ცალკეულ Clip-ზე.
+
+მაგალითად:
+
+```text
+Track 1
+ ├ Clip A: -3 dB
+ ├ Clip B: +1 dB
+ └ Clip C:  0 dB
+
+Track Volume: -5 dB
+```
+
+ჯერ გამოიყენება თითოეული Clip-ის Gain, შემდეგ FX chain, შემდეგ მთელ მიღებულ Track signal-ზე:
+
+```text
+Track Volume = -5 dB
+```
+
+---
+
+# T12.6 — Clip Gain vs Track Volume
+
+### Clip Gain
+
+გამოიყენება კონკრეტული Clip-ის level-ის გასასწორებლად.
+
+მაგალითად:
+
+```text
+Vocal Take 1 = quiet
+Vocal Take 2 = loud
+Vocal Take 3 = medium
+```
+
+შეგვიძლია გავასწოროთ:
+
+```text
+Take 1 = +4 dB
+Take 2 = -3 dB
+Take 3 = 0 dB
+```
+
+Track fader-ის შეხების გარეშე.
+
+### Track Volume
+
+გამოიყენება მთლიან mix-ში Track-ის level-ის დასაყენებლად.
+
+მაგალითად:
+
+```text
+Vocals Track = -4 dB
+Drums Track  = -2 dB
+Bass Track   = -6 dB
+```
+
+---
+
+# T12.7 — Multiple Clip Gain Editing
+
+თუ მომხმარებელი მონიშნავს რამდენიმე Audio Clip-ს:
+
+```text
+Clip A = -6 dB
+Clip B = -2 dB
+Clip C = +1 dB
+```
+
+და Gain control-ს გადაადგილებს, Clips-ს შორის არსებული **relative difference** მაქსიმალურად უნდა შენარჩუნდეს.
+
+მაგალითად +2 dB ცვლილება:
+
+```text
+Clip A = -4 dB
+Clip B =  0 dB
+Clip C = +3 dB
+```
+
+Ableton-ის მსგავსად UI-მ უნდა აჩვენოს, რომ multi-selection-ში განსხვავებული Gain values არსებობს.
+
+არ უნდა გამოჩნდეს შეცდომაში შემყვანი ერთი ჩვეულებრივი value თითქოს ყველა Clip-ს ერთი Gain აქვს.
+
+შესაძლო UI:
+
+```text
+Gain: -6 … +1 dB
+```
+
+ან slider-ზე min/max range indicator.
+
+---
+
+# T12.8 — Gain UI on selected clip
+
+Audio Clip-ის არჩევისას Clip Properties / Inspector-ში უნდა გამოჩნდეს:
+
+```text
+GAIN
+0.0 dB
+```
+
+სასურველია slider + numeric field.
+
+მომხმარებელს უნდა შეეძლოს:
+
+- slider drag;
+- exact numeric input;
+- keyboard fine adjustment;
+- reset.
+
+### Reset
+
+Gain control-ზე double-click:
+
+```text
+→ 0.0 dB
+```
+
+ან Context Menu:
+
+```text
+Reset Gain
+```
+
+---
+
+# T12.9 — Fine Gain Adjustment
+
+Gain-ის editing-ისას უნდა არსებობდეს precision mode.
+
+მაგალითად ჩვეულებრივი drag:
+
+```text
+larger changes
+```
+
+modifier + drag:
+
+```text
+fine changes
+```
+
+მაგალითად:
+
+```text
+Shift + Drag
+```
+
+შეიძლება გამოიყენებოდეს უფრო მცირე ნაბიჯებისთვის.
+
+Numeric field-ში მომხმარებელს უნდა შეეძლოს პირდაპირ შეიყვანოს:
+
+```text
+-3
+-3.5
++6
+0
+```
+
+რომლებიც ინტერპრეტირდება dB-ად.
+
+---
+
+# T12.10 — Clip Gain Envelope
+
+Clip Gain-ისგან ცალკე უნდა არსებობდეს **Clip Gain Envelope**.
+
+Clip Gain არის baseline/maximum clip level.
+
+Envelope კი ამ level-ს დროში ცვლის.
+
+მაგალითად:
+
+```text
+Clip Gain = -3 dB
+```
+
+მაგრამ Clip Envelope:
+
+```text
+Start       = 100%
+Middle      = 50%
+End         = 0%
+```
+
+შედეგად Clip თანდათან ჩუმდება.
+
+მნიშვნელოვანი Ableton behavior:
+
+Clip Gain Envelope არის **relative modulation**.
+
+იგი Clip Gain-ის მნიშვნელობას ზემოთ არ ზრდის.
+
+ანუ თუ:
+
+```text
+Clip Gain = -4 dB
+```
+
+Gain Envelope-ს შეუძლია signal ჩამოიყვანოს:
+
+```text
+-4 dB
+↓
+quieter
+↓
+silence
+```
+
+მაგრამ Clip Gain-ის მიერ განსაზღვრულ maximum level-ს არ გადააჭარბოს.
+
+---
+
+# T12.11 — Clip Fade is not Clip Gain
+
+Clip-ის დასაწყისისა და ბოლოს Fade დამოუკიდებელი ფუნქცია უნდა იყოს.
+
+Audio Clip-ზე hover-ისას შესაძლებელი უნდა იყოს:
+
+### Fade In
+
+```text
+silence → clip level
+```
+
+### Fade Out
+
+```text
+clip level → silence
+```
+
+Fade-ს უნდა ჰქონდეს:
+
+- Start/End position;
+- Length;
+- Curve/Shape.
+
+Fade-ის ცვლილება არ უნდა ცვლიდეს:
+
+```text
+clipGainDb
+```
+
+---
+
+# T12.12 — Crossfade
+
+თუ ერთ Audio Track-ზე ორი Clip ერთმანეთს ეხება ან overlap აქვს:
+
+```text
+Clip A ─────────┐
+                X
+       ┌──────── Clip B
+```
+
+უნდა შეგვეძლოს **Crossfade**.
+
+ამ პერიოდში:
+
+```text
+Clip A volume ↓
+Clip B volume ↑
+```
+
+უნდა არსებობდეს editable crossfade curve.
+
+Crossfade არ ნიშნავს ორი Clip-ის Merge/Consolidate-ს.
+
+Clips კვლავ დამოუკიდებელ object-ებად რჩება.
+
+---
+
+# T12.13 — Automatic micro fades
+
+სასურველია არსებობდეს setting:
+
+```text
+Create Fades on Clip Edges
+```
+
+ჩართული მდგომარეობისას newly created/cut Audio Clips-ზე ავტომატურად შეიქმნას ძალიან მოკლე fade.
+
+მისი მიზანია clip boundary-ზე:
+
+```text
+click
+pop
+digital discontinuity
+```
+
+პრობლემების შემცირება.
+
+Ableton იყენებს მოკლე, დაახლოებით რამდენიმე მილიწამიან fades-ს.
+
+პირველი implementation-ისთვის შეგვიძლია:
+
+```text
+Default Micro Fade = 4 ms
+```
+
+მაგრამ ეს იყოს preference-ით ჩასართავი/გამოსართავი.
+
+---
+
+# T12.14 — Track Volume Automation
+
+Track Volume-ის მნიშვნელობა Timeline-ის მიხედვით უნდა შეიძლებოდეს შეიცვალოს.
+
+მაგალითად:
+
+```text
+Bar 1     -6 dB
+Bar 8     -6 dB
+Bar 12     0 dB
+Bar 16   -12 dB
+```
+
+ამისთვის Track-ს ექნება automation envelope.
+
+Automation points:
+
+```text
+time
+valueDb
+```
+
+მაგალითად:
+
+```text
+[
+  { time: 0,  valueDb: -6 },
+  { time: 16, valueDb: -6 },
+  { time: 24, valueDb:  0 }
+]
+```
+
+Playback-ის დროს Volume smooth interpolation-ით უნდა იცვლებოდეს.
+
+---
+
+# T12.15 — Automation Override
+
+თუ Track Volume automated არის და playback-ისას ან გაჩერებულ მდგომარეობაში მომხმარებელი ხელით შეცვლის Volume-ს:
+
+```text
+automation = temporarily overridden
+```
+
+UI-მ უნდა აჩვენოს, რომ parameter აღარ მიჰყვება automation-ს.
+
+შემდეგ უნდა არსებობდეს:
+
+```text
+Re-enable Automation
+```
+
+რის შემდეგაც Track Volume ისევ automation curve-ის value-ს მიჰყვება.
+
+Manual volume adjustment-მა automation points ავტომატურად არ უნდა წაშალოს.
+
+---
+
+# T12.16 — Utility / Additional Gain Stage
+
+შემდგომ ეტაპზე სასურველია გვქონდეს Ableton Utility-ის მსგავსი **Gain Device**.
+
+იგი Track Device Chain-ის ნებისმიერ ადგილას შეიძლება ჩაისვას.
+
+მაგალითად:
+
+```text
+Clip
+ ↓
+EQ
+ ↓
+Utility Gain -6 dB
+ ↓
+Compressor
+ ↓
+Utility Gain +2 dB
+ ↓
+Track Volume
+```
+
+ამის მთავარი აზრია:
+
+Gain-ის გამოყენება შეიძლება სხვადასხვა processing stage-ის წინ ან შემდეგ.
+
+მაგალითად:
+
+```text
+Utility before Compressor
+```
+
+ცვლის compressor input-ს.
+
+ხოლო:
+
+```text
+Utility after Compressor
+```
+
+ცვლის compressor output-ს და არა compressor-ის რეაქციას.
+
+Ableton Utility-ის მიმდინარე Gain range არის:
+
+```text
+-inf dB → +35 dB
+```
+
+---
+
+# T12.17 — Prefer Utility Gain for automation when appropriate
+
+Track Volume შეიძლება მომხმარებელს საბოლოო mix balance-ისთვის დასჭირდეს.
+
+ამიტომ advanced workflow-ში სასარგებლოა:
+
+```text
+Utility Gain
+```
+
+volume automation-ისთვის.
+
+მაგალითად:
+
+```text
+Utility Gain Automation:
+verse = 0 dB
+chorus = +2 dB
+```
+
+Track Volume კი რჩება თავისუფალი საბოლოო mix adjustment-ისთვის.
+
+---
+
+# T12.18 — Waveform Vertical Zoom is NOT Gain
+
+უნდა არსებობდეს ცალკე:
+
+```text
+Waveform Vertical Zoom
+```
+
+ის მხოლოდ ვიზუალურად ზრდის ან ამცირებს waveform-ს.
+
+მაგალითად:
+
+```text
+Waveform Zoom = +12 dB visual equivalent
+```
+
+არ ნიშნავს:
+
+```text
+Clip Gain = +12 dB
+```
+
+Audio output საერთოდ არ უნდა შეიცვალოს.
+
+ეს ორი state ცალ-ცალკე უნდა ინახებოდეს:
+
+```text
+clipGainDb
+waveformZoom
+```
+
+---
+
+# T12.19 — Waveform response to actual Clip Gain
+
+Clip Gain-ის ცვლილებისას UI-ს შეუძლია waveform-ზე gain-ის ეფექტიც ასახოს, რათა მომხმარებელმა visually დაინახოს clip level.
+
+მაგრამ ამისგან დამოუკიდებლად უნდა არსებობდეს Waveform Vertical Zoom.
+
+ანუ renderer-ს ფაქტობრივად შეიძლება ჰქონდეს:
+
+```text
+displayAmplitude =
+sourceWaveformAmplitude
+× clipGainDisplayScale
+× waveformZoomScale
+```
+
+მაშინ როცა audio engine-ში:
+
+```text
+audioAmplitude =
+sourceAudio
+× clipGainLinear
+```
+
+`waveformZoomScale` Audio Engine-ში არასდროს უნდა მოხვდეს.
+
+---
+
+# T12.20 — Track Meter
+
+ყველა Track-ს უნდა ჰქონდეს realtime level meter.
+
+მინიმუმ:
+
+- Peak Level;
+- clipping indication.
+
+შემდგომში:
+
+- RMS;
+- LUFS;
+- Peak Hold.
+
+Ableton Mixer ერთდროულად Peak და RMS level-ს აჩვენებს.
+
+Meter Track Volume-ის შესაბამის output stage-ს უნდა ასახავდეს.
+
+---
+
+# T12.21 — 0 dBFS and clipping
+
+უნდა გავმიჯნოთ:
+
+```text
+Gain setting in dB
+```
+
+და
+
+```text
+Signal level in dBFS
+```
+
+მაგალითად:
+
+```text
+Clip Gain = +6 dB
+```
+
+არ ნიშნავს ავტომატურად, რომ signal არის:
+
+```text
++6 dBFS
+```
+
+თუ source peak იყო:
+
+```text
+-12 dBFS
+```
+
+და დავამატეთ:
+
+```text
++6 dB
+```
+
+ახალი peak დაახლოებით იქნება:
+
+```text
+-6 dBFS
+```
+
+---
+
+# T12.22 — Internal headroom
+
+Audio engine-ში სასურველია floating-point processing.
+
+Ableton იყენებს 32-bit floating-point internal processing-ს და intermediate tracks-ს შეუძლია 0 dBFS-ს გადააჭარბოს შიდა processing-ისას.
+
+ამიტომ Track meter-ზე:
+
+```text
+> 0 dBFS
+```
+
+უნდა ჩაითვალოს warning/over-level indication-ად და არა აუცილებლობით იმავე წამს destructive clipping-ად.
+
+მაგრამ განსაკუთრებით მნიშვნელოვანი არის:
+
+```text
+Main Output
+hardware output
+integer export
+```
+
+სადაც over-0 level უკვე რეალური clipping-ის პრობლემაა.
+
+---
+
+# T12.23 — Meter clipping UI
+
+როდესაც signal გადააჭარბებს:
+
+```text
+0 dBFS
+```
+
+Track Meter-ზე უნდა გამოჩნდეს clipping/over indicator.
+
+მაგალითად:
+
+```text
+Peak: +2.1 dB
+```
+
+indicator დარჩეს visible მანამდე, სანამ მომხმარებელი reset-ს არ მისცემს ან განსაზღვრული timeout არ გავა.
+
+Main Output-ის clipping indication განსაკუთრებით მკაფიო უნდა იყოს.
+
+---
+
+# T12.24 — Gain state model
+
+Audio Clip:
+
+```text
+clipGainDb: number
+
+clipGainEnvelope?: {
+    points: [
+        {
+            time: number,
+            value: number
+        }
+    ]
+}
+
+fadeIn?: {
+    duration: number,
+    curve: number
+}
+
+fadeOut?: {
+    duration: number,
+    curve: number
+}
+```
+
+Track:
+
+```text
+trackVolumeDb: number
+
+trackVolumeAutomation?: {
+    points: [
+        {
+            time: number,
+            valueDb: number
+        }
+    ]
+}
+```
+
+View:
+
+```text
+waveformVerticalZoom: number
+```
+
+ეს სამი state ერთმანეთისგან სრულიად დამოუკიდებელი უნდა იყოს.
+
+---
+
+# T12.25 — Required processing order
+
+პირველი ვერსიისთვის:
+
+```text
+Source PCM
+    ↓
+Clip Gain
+    ↓
+Clip Gain Envelope
+    ↓
+Fade In / Fade Out / Crossfade
+    ↓
+Track FX
+    ↓
+Track Volume Automation
+    ↓
+Track Volume
+    ↓
+Pan
+    ↓
+Track Meter / Routing
+    ↓
+Main Mixer
+    ↓
+Main Output
+```
+
+თუ Track FX ჯერ საერთოდ არ გვაქვს, architecture მაინც ამ ordering-ის გათვალისწინებით უნდა დაიწეროს, რომ მოგვიანებით FX დამატებისას Clip Gain და Track Volume-ის semantics არ შეიცვალოს.
+
+---
+
+# T12.26 — Basic acceptance tests
+
+### Test 1 — 0 dB
+
+Source sample:
+
+```text
+Peak = -10 dBFS
+Clip Gain = 0 dB
+Track Volume = 0 dB
+```
+
+Expected:
+
+```text
+Peak ≈ -10 dBFS
+```
+
+---
+
+### Test 2 — Clip Gain
+
+```text
+Source Peak = -10 dBFS
+Clip Gain = +6 dB
+Track Volume = 0 dB
+```
+
+Expected:
+
+```text
+Peak ≈ -4 dBFS
+```
+
+---
+
+### Test 3 — Track Volume
+
+```text
+Source Peak = -10 dBFS
+Clip Gain = 0 dB
+Track Volume = -6 dB
+```
+
+Expected:
+
+```text
+Peak ≈ -16 dBFS
+```
+
+---
+
+### Test 4 — Combined gain
+
+```text
+Source = -10 dBFS
+Clip Gain = +6 dB
+Track Volume = -3 dB
+```
+
+Expected approximately:
+
+```text
+-7 dBFS
+```
+
+FX-ის გარეშე.
+
+---
+
+### Test 5 — Gain must affect FX input
+
+```text
+Clip Gain 0 dB
+→ Compressor receives original level
+
+Clip Gain +12 dB
+→ Compressor receives 12 dB hotter signal
+```
+
+Compressor-ის gain reduction უნდა შეიცვალოს.
+
+---
+
+### Test 6 — Track Volume must NOT affect FX input
+
+```text
+Track Volume 0 dB
+vs
+Track Volume -12 dB
+```
+
+Compressor-ის gain reduction იგივე უნდა დარჩეს.
+
+მხოლოდ final Track output level იცვლება.
+
+---
+
+### Test 7 — Waveform Zoom
+
+```text
+Waveform Zoom:
+100% → 200%
+```
+
+Expected:
+
+- waveform visually larger;
+- audio samples unchanged;
+- meter output unchanged.
+
+---
+
+### Test 8 — Individual Clips
+
+```text
+Clip A = -6 dB
+Clip B = +3 dB
+```
+
+ერთ Clip-ზე Gain-ის ცვლილება მეორე Clip-ზე გავლენას არ უნდა ახდენდეს.
+
+---
+
+### Test 9 — Fade
+
+Clip Gain:
+
+```text
+0 dB
+```
+
+Fade Out:
+
+```text
+2 sec
+```
+
+Fade-ის ბოლოს:
+
+```text
+output → silence
+```
+
+მაგრამ:
+
+```text
+clipGainDb
+```
+
+კვლავ `0 dB` უნდა დარჩეს.
+
+---
+
+# T12.27 — Recommended V1
+
+პირველ ეტაპზე აუცილებელია:
+
+1. Clip Gain;
+2. Track Volume;
+3. dB-based processing;
+4. Gain control UI;
+5. Multi-clip Gain editing;
+6. Track Meter;
+7. Fade In / Fade Out;
+8. Waveform Zoom-ის Gain-ისგან განცალკევება.
+
+შემდეგ ეტაპზე:
+
+9. Gain envelopes;
+10. Volume automation;
+11. Crossfades;
+12. Utility Gain;
+13. RMS/LUFS metering.
+
+ეს separation თავიდანვე უნდა გაკეთდეს, მიუხედავად იმისა, რომ UI-ში V1-ზე ყველა ფუნქცია ჯერ არ გამოჩნდება.

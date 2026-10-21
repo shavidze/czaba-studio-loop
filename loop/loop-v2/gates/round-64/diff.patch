@@ -1,0 +1,2948 @@
+﻿diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index 9fc0b50..5c4eb85 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -4,7 +4,15 @@ import {
+   type ClipLaneGhost,
+   formatArrangementTime,
+ } from '~/contexts/ArrangementContext';
+-import { resolveSnapStep, snapGroupDelta, snapTimeToGrid } from '~/lib/arrangement/grid';
++import {
++  clipEdgeTargets,
++  resolveGridTime,
++  resolveSnapStep,
++  snapGroupMoveDelta,
++  snapMoveStartToGridOrEdges,
++  snapTimeToGrid,
++  snapTimeToGridOrEdges,
++} from '~/lib/arrangement/grid';
+ import { moveClip, trimClipEnd, trimClipStart } from '~/lib/arrangement/model';
+ import { PEAK_BUCKETS_PER_SECOND } from '~/lib/arrangement/peaks';
+ import {
+@@ -87,18 +95,28 @@ function roundTime(value: number): number {
+   return Math.round(value * 1000) / 1000;
+ }
+ 
+-function moveStartOnGrid(start: number, delta: number, snapStep: number | null): number {
++function moveStartOnGrid(
++  start: number,
++  delta: number,
++  duration: number,
++  snapStep: number | null,
++  startEdges: readonly number[],
++  endEdges: readonly number[],
++): number {
+   return snapStep === null
+     ? Math.max(0, roundTime(start + delta))
+-    : snapTimeToGrid(start + delta, snapStep);
++    : snapMoveStartToGridOrEdges(start + delta, duration, snapStep, startEdges, endEdges);
+ }
+ 
+ function groupDeltaOnGrid(
+-  anchorStart: number,
++  anchor: ArrangementClip,
+   delta: number,
+   snapStep: number | null,
+-  bounds: GroupMoveBounds,
++  group: { ids: readonly string[]; bounds: GroupMoveBounds },
++  clips: readonly ArrangementClip[],
++  laneTrackId: string,
+ ): { requested: number; allowed: number } {
++  const { bounds } = group;
+   if (snapStep === null) {
+     const requested = roundTime(delta);
+     return {
+@@ -106,10 +124,21 @@ function groupDeltaOnGrid(
+       allowed: Math.min(bounds.maxDelta, Math.max(bounds.minDelta, requested)),
+     };
+   }
+-  return {
+-    requested: roundTime(snapTimeToGrid(anchorStart + delta, snapStep) - anchorStart),
+-    allowed: snapGroupDelta(anchorStart, delta, snapStep, bounds.minDelta, bounds.maxDelta),
+-  };
++  const targets = clipEdgeTargets(
++    clips.filter((entry) => !group.ids.includes(entry.id)),
++    anchor.id,
++    laneTrackId,
++  );
++  return snapGroupMoveDelta(
++    anchor.start,
++    anchor.duration,
++    delta,
++    snapStep,
++    bounds.minDelta,
++    bounds.maxDelta,
++    targets.startEdges,
++    targets.endEdges,
++  );
+ }
+ 
+ export function watchUncapturedPointerGesture(
+@@ -365,10 +394,12 @@ function ArrangementClipViewInner({
+     const isCrossLane = hoverTrackId !== original.trackId;
+     if (gesture.group) {
+       const { requested, allowed } = groupDeltaOnGrid(
+-        original.start,
++        original,
+         delta,
+         snapStep,
+-        gesture.group.bounds,
++        gesture.group,
++        gesture.before.clips,
++        hoverTrackId,
+       );
+       if (isCrossLane) {
+         const plan = planClipLaneMove(gesture.before, {
+@@ -417,7 +448,17 @@ function ArrangementClipViewInner({
+       return;
+     }
+     if (gesture.kind === 'move') {
+-      const requestedStart = moveStartOnGrid(original.start, delta, snapStep);
++      const targets = clipEdgeTargets(gesture.before.clips, original.id, hoverTrackId);
++      const requestedStart = timeLocked
++        ? original.start
++        : moveStartOnGrid(
++            original.start,
++            delta,
++            original.duration,
++            snapStep,
++            targets.startEdges,
++            targets.endEdges,
++          );
+       const keptGhosts = gesture.laneTarget
+         ? laneGhostsFrom(gesture.laneTarget.placements, false, null)
+         : [];
+@@ -467,7 +508,15 @@ function ArrangementClipViewInner({
+       const edge =
+         gesture.kind === 'trimStart' ? original.start : original.start + original.duration;
+       const requested =
+-        step === null ? roundTime(edge + delta) : snapTimeToGrid(edge + delta, step);
++        step === null
++          ? roundTime(edge + delta)
++          : snapTimeToGridOrEdges(
++              edge + delta,
++              step,
++              clipEdgeTargets(gesture.before.clips, original.id, original.trackId)[
++                gesture.kind === 'trimStart' ? 'startEdges' : 'endEdges'
++              ],
++            );
+       const next =
+         gesture.kind === 'trimStart'
+           ? trimClipStart(gesture.before, original.id, requested)
+@@ -514,7 +563,9 @@ function ArrangementClipViewInner({
+     if (gesture.kind === 'range') {
+       if (!gesture.moved) {
+         setTimeRange(null);
+-        seekTo(gesture.anchorTime);
++        if (event.type !== 'pointercancel') {
++          seekTo(resolveGridTime(gesture.anchorTime, snapSeconds, gridSeconds, event.altKey));
++        }
+       }
+       return;
+     }
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index 79cbd5e..1fd3f7f 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -2,6 +2,7 @@ import {
+   type ChangeEvent,
+   type DragEvent,
+   type KeyboardEvent,
++  type MouseEvent,
+   type PointerEvent,
+   useEffect,
+   useId,
+@@ -11,10 +12,17 @@ import {
+ import {
+   formatArrangementTime,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
++  type LibraryDragSource,
+   useArrangement,
+ } from '~/contexts/ArrangementContext';
+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
+-import { gridLinesVisible } from '~/lib/arrangement/grid';
++import {
++  clipEdgeTargets,
++  gridLinesVisible,
++  resolveSnapStep,
++  snapMoveStartToGridOrEdges,
++  snapTimeToGrid,
++} from '~/lib/arrangement/grid';
+ import { canPlaceLibraryClip, LIBRARY_DRAG_MIME, libraryDropTime } from '~/lib/arrangement/library';
+ import { formatTrackPan, TRACK_PAN_STEPS, trackPanValue } from '~/lib/arrangement/model';
+ import {
+@@ -82,6 +90,7 @@ interface ArrangementLaneProps {
+   onSnapshotTrackLayout?: (trackId: string) => () => void;
+   gridSeconds?: number;
+   snapSeconds?: number | null;
++  onGridMenuRequest?: (event: MouseEvent<HTMLDivElement>, trackId: string) => void;
+ }
+ 
+ export function ArrangementLane({
+@@ -96,6 +105,7 @@ export function ArrangementLane({
+   onSnapshotTrackLayout,
+   gridSeconds,
+   snapSeconds = null,
++  onGridMenuRequest,
+ }: ArrangementLaneProps) {
+   const {
+     arrangement,
+@@ -171,17 +181,30 @@ export function ArrangementLane({
+     importVideoFiles(files);
+   };
+ 
+-  const libraryDropStart = (event: DragEvent<HTMLDivElement>) =>
+-    libraryDropTime({
++  const libraryDropStart = (
++    event: DragEvent<HTMLDivElement>,
++    dragged: LibraryDragSource | null,
++  ): number => {
++    const raw = libraryDropTime({
+       clientX: event.clientX,
+       laneLeft: (laneBodyRef.current ?? event.currentTarget).getBoundingClientRect().left,
+       pxPerSecond,
+     });
++    const step = resolveSnapStep(snapSeconds, gridSeconds, event.altKey);
++    if (step === null) {
++      return raw;
++    }
++    if (isVideo || dragged === null) {
++      return snapTimeToGrid(raw, step);
++    }
++    const { startEdges, endEdges } = clipEdgeTargets(getArrangement().clips, '', track.id);
++    return snapMoveStartToGridOrEdges(raw, dragged.duration, step, startEdges, endEdges);
++  };
+ 
+   const handleLibraryDragOver = (event: DragEvent<HTMLDivElement>) => {
+     event.preventDefault();
+     const dragged = getLibraryDragSource();
+-    const start = libraryDropStart(event);
++    const start = libraryDropStart(event, dragged);
+     const blocked =
+       !isVideo &&
+       dragged !== null &&
+@@ -239,7 +262,8 @@ export function ArrangementLane({
+     if (hasLibrarySource(event)) {
+       event.preventDefault();
+       setLibraryGhost(null);
+-      dropLibrarySource(track.id, libraryDropStart(event));
++      const dragged = getLibraryDragSource();
++      dropLibrarySource(track.id, libraryDropStart(event, dragged));
+       return;
+     }
+     if (!hasDraggedFiles(event)) {
+@@ -732,6 +756,10 @@ export function ArrangementLane({
+         data-grid-seconds={gridSeconds}
+         data-grid-lines={gridLinesState}
+         onPointerDown={(event) => onBackgroundPointerDown(event, track.id)}
++        onContextMenu={(event) => {
++          event.preventDefault();
++          onGridMenuRequest?.(event, track.id);
++        }}
+         onDragOver={handleDragOver}
+         onDragEnter={handleDragOver}
+         onDragLeave={handleDragLeave}
+diff --git a/app/components/arrangement/ArrangementLoopBrace.tsx b/app/components/arrangement/ArrangementLoopBrace.tsx
+index 0385ff0..4f37ae8 100644
+--- a/app/components/arrangement/ArrangementLoopBrace.tsx
++++ b/app/components/arrangement/ArrangementLoopBrace.tsx
+@@ -1,5 +1,6 @@
+ import { type KeyboardEvent, type PointerEvent, useEffect, useRef } from 'react';
+ import { formatArrangementTime, useArrangement } from '~/contexts/ArrangementContext';
++import { adjacentGridLine, resolveGridTime } from '~/lib/arrangement/grid';
+ import { type LoopEdge, moveLoop, resizeLoop } from '~/lib/arrangement/loop';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementLoop } from '~/types/arrangement';
+@@ -25,13 +26,20 @@ interface LoopGesture {
+ interface ArrangementLoopBraceProps {
+   seconds: number;
+   pxPerSecond: number;
++  snapSeconds?: number | null;
++  gridSeconds?: number;
+ }
+ 
+ function roundLoopTime(value: number): number {
+   return Math.round(value * 1000) / 1000;
+ }
+ 
+-export function ArrangementLoopBrace({ seconds, pxPerSecond }: ArrangementLoopBraceProps) {
++export function ArrangementLoopBrace({
++  seconds,
++  pxPerSecond,
++  snapSeconds = null,
++  gridSeconds,
++}: ArrangementLoopBraceProps) {
+   const {
+     arrangement,
+     getArrangement,
+@@ -129,8 +137,25 @@ export function ArrangementLoopBrace({ seconds, pxPerSecond }: ArrangementLoopBr
+     const { original, before, kind } = gesture;
+     const next =
+       kind === 'move'
+-        ? moveLoop(before, roundLoopTime(original.start + delta))
+-        : resizeLoop(before, kind, roundLoopTime(original[kind] + delta));
++        ? moveLoop(
++            before,
++            resolveGridTime(
++              roundLoopTime(original.start + delta),
++              snapSeconds,
++              gridSeconds,
++              event.altKey,
++            ),
++          )
++        : resizeLoop(
++            before,
++            kind,
++            resolveGridTime(
++              roundLoopTime(original[kind] + delta),
++              snapSeconds,
++              gridSeconds,
++              event.altKey,
++            ),
++          );
+     previewLoopArrangement(next);
+   };
+ 
+@@ -155,8 +180,16 @@ export function ArrangementLoopBrace({ seconds, pxPerSecond }: ArrangementLoopBr
+     }
+     event.preventDefault();
+     event.stopPropagation();
+-    const delta = event.key === 'ArrowLeft' ? -LOOP_KEY_STEP_SECONDS : LOOP_KEY_STEP_SECONDS;
+-    stepLoopRange(event.shiftKey ? 'end' : 'move', delta);
++    const kind = event.shiftKey ? 'end' : 'move';
++    const current = getArrangement().loop;
++    if (snapSeconds === null || !current) {
++      const delta = event.key === 'ArrowLeft' ? -LOOP_KEY_STEP_SECONDS : LOOP_KEY_STEP_SECONDS;
++      stepLoopRange(kind, delta);
++      return;
++    }
++    const from = kind === 'end' ? current.end : current.start;
++    const target = adjacentGridLine(from, snapSeconds, event.key === 'ArrowLeft' ? -1 : 1);
++    stepLoopRange(kind, target === null ? -LOOP_KEY_STEP_SECONDS : target - from);
+   };
+ 
+   const span = loop
+diff --git a/app/components/arrangement/ArrangementRuler.tsx b/app/components/arrangement/ArrangementRuler.tsx
+index a43bfa2..c05e283 100644
+--- a/app/components/arrangement/ArrangementRuler.tsx
++++ b/app/components/arrangement/ArrangementRuler.tsx
+@@ -12,6 +12,7 @@ import {
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+ } from '~/contexts/ArrangementContext';
++import { resolveGridTime } from '~/lib/arrangement/grid';
+ import {
+   RULER_TICK_STEPS_SECONDS,
+   rulerDragView,
+@@ -36,6 +37,8 @@ interface ArrangementRulerProps {
+   applyTimelineView: (view: TimelineView) => void;
+   onNavigationMove: () => void;
+   onRulerDoubleClick: () => void;
++  snapSeconds?: number | null;
++  gridSeconds?: number;
+ }
+ 
+ interface ArrangementRulerPlayheadProps extends ArrangementRulerProps {
+@@ -71,6 +74,8 @@ function ArrangementRulerPlayhead({
+   onScrub,
+   onScrubEnd,
+   onGestureClaim,
++  snapSeconds = null,
++  gridSeconds,
+ }: ArrangementRulerPlayheadProps) {
+   const positionStore = useArrangementPositionStore();
+   const dragRef = useRef<PlayheadDrag | null>(null);
+@@ -158,7 +163,7 @@ function ArrangementRulerPlayhead({
+       return;
+     }
+     drag.moved = true;
+-    drag.time = pointerTime(event.clientX);
++    drag.time = resolveGridTime(pointerTime(event.clientX), snapSeconds, gridSeconds, event.altKey);
+     onScrub(drag.time);
+   };
+ 
+@@ -173,7 +178,11 @@ function ArrangementRulerPlayhead({
+       event.currentTarget.releasePointerCapture(event.pointerId);
+     }
+     if (drag.moved) {
+-      onScrubEnd(event.type === 'pointerup' ? pointerTime(event.clientX) : drag.time);
++      onScrubEnd(
++        event.type === 'pointerup'
++          ? resolveGridTime(pointerTime(event.clientX), snapSeconds, gridSeconds, event.altKey)
++          : drag.time,
++      );
+     }
+   };
+ 
+@@ -252,6 +261,8 @@ export function ArrangementRuler(props: ArrangementRulerProps) {
+     applyTimelineView,
+     onNavigationMove,
+     onRulerDoubleClick,
++    snapSeconds = null,
++    gridSeconds,
+   } = props;
+   const rulerRef = useRef<HTMLDivElement>(null);
+   const navigationRef = useRef<RulerNavigation | null>(null);
+@@ -286,7 +297,7 @@ export function ArrangementRuler(props: ArrangementRulerProps) {
+     );
+   };
+ 
+-  const endRulerNavigation = (navigation: RulerNavigation, seek: boolean) => {
++  const endRulerNavigation = (navigation: RulerNavigation, seek: boolean, bypass = false) => {
+     if (navigationRef.current === navigation) {
+       navigationRef.current = null;
+     }
+@@ -300,7 +311,7 @@ export function ArrangementRuler(props: ArrangementRulerProps) {
+       return;
+     }
+     if (seek) {
+-      onSeek(navigation.anchorTime);
++      onSeek(resolveGridTime(navigation.anchorTime, snapSeconds, gridSeconds, bypass));
+     }
+   };
+ 
+@@ -376,7 +387,7 @@ export function ArrangementRuler(props: ArrangementRulerProps) {
+     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+       event.currentTarget.releasePointerCapture(event.pointerId);
+     }
+-    endRulerNavigation(navigation, event.type === 'pointerup');
++    endRulerNavigation(navigation, event.type === 'pointerup', event.altKey);
+   };
+ 
+   const handleDoubleClick = () => {
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index f16eea1..0ea4ef6 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -1,5 +1,6 @@
+ import { Link } from '@remix-run/react';
+ import {
++  type MouseEvent as ReactMouseEvent,
+   type PointerEvent as ReactPointerEvent,
+   useCallback,
+   useEffect,
+@@ -16,11 +17,13 @@ import {
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import {
++  adjacentGridDivision,
+   adjacentGridLine,
+   formatGridDivision,
+   GRID_DEFAULT_DIVISION_SECONDS,
+   GRID_DIVISIONS_SECONDS,
+   gridLinesVisible,
++  resolveGridTime,
+ } from '~/lib/arrangement/grid';
+ import {
+   clampTrackHeight,
+@@ -57,6 +60,7 @@ import {
+   type ArrangementDetailSelection,
+ } from './ArrangementDetailPanel';
+ import { ArrangementExportDialog } from './ArrangementExportDialog';
++import { ArrangementGridMenu } from './ArrangementGridMenu';
+ import {
+   ARRANGEMENT_HEADER_WIDTH_PX,
+   ArrangementLane,
+@@ -92,6 +96,8 @@ export const VIDEO_RETURNED_LIBRARY_RECOLLAPSED_MESSAGE =
+ const LIBRARY_TRANSITION_FALLBACK_MS = 100;
+ const SNAP_OFF_MESSAGE = 'Snap გამორთულია — თავისუფალი გადაადგილება (G)';
+ const NUDGE_AT_TIME_START_MESSAGE = 'ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.';
++const GRID_NARROWEST_MESSAGE = `ბადე უკვე ყველაზე მჭიდროა — ${formatGridDivision(GRID_DIVISIONS_SECONDS[6])} (1)`;
++const GRID_WIDEST_MESSAGE = `ბადე უკვე ყველაზე ფართოა — ${formatGridDivision(GRID_DIVISIONS_SECONDS[0])} (2)`;
+ 
+ function parseTransitionTimesMs(value: string): number[] {
+   return value.split(',').map((entry) => {
+@@ -326,6 +332,9 @@ export function StudioWorkspace() {
+   snapEnabledRef.current = snapEnabled;
+   const gridSecondsRef = useRef(gridSeconds);
+   gridSecondsRef.current = gridSeconds;
++  const [gridMenu, setGridMenu] = useState<{ x: number; y: number } | null>(null);
++  const gridMenuOpenRef = useRef(false);
++  const gridMenuReturnFocusRef = useRef<HTMLElement | null>(null);
+   const [canZoomBack, setCanZoomBack] = useState(false);
+   const [viewportWidth, setViewportWidth] = useState(0);
+   const [marquee, setMarquee] = useState<MarqueeRect | null>(null);
+@@ -828,6 +837,94 @@ export function StudioWorkspace() {
+     );
+   }, []);
+ 
++  const stepGridDivision = useCallback(
++    (direction: 'narrow' | 'widen') => {
++      const next = adjacentGridDivision(gridSecondsRef.current, direction);
++      if (next === null) {
++        workspaceRef.current.setStatus(
++          direction === 'narrow' ? GRID_NARROWEST_MESSAGE : GRID_WIDEST_MESSAGE,
++        );
++      } else {
++        changeGridDivision(next);
++      }
++    },
++    [changeGridDivision],
++  );
++
++  const closeGridMenu = useCallback(() => {
++    if (!gridMenuOpenRef.current) {
++      return;
++    }
++    gridMenuOpenRef.current = false;
++    setGridMenu(null);
++    const returnFocus = gridMenuReturnFocusRef.current;
++    gridMenuReturnFocusRef.current = null;
++    if (returnFocus?.isConnected && returnFocus !== returnFocus.ownerDocument.body) {
++      returnFocus.focus({ preventScroll: true });
++    }
++  }, []);
++
++  const handleGridMenuRequest = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
++    if (exportOpenRef.current || workspaceRef.current.isPointerGestureActive()) {
++      return;
++    }
++    if (!gridMenuOpenRef.current) {
++      const focused = event.currentTarget.ownerDocument.activeElement;
++      gridMenuReturnFocusRef.current = focused instanceof HTMLElement ? focused : null;
++      gridMenuOpenRef.current = true;
++    }
++    setGridMenu({ x: event.clientX, y: event.clientY });
++  }, []);
++
++  const chooseGridMenuDivision = useCallback(
++    (next: number) => {
++      changeGridDivision(next);
++      closeGridMenu();
++    },
++    [changeGridDivision, closeGridMenu],
++  );
++
++  const toggleGridMenuSnap = useCallback(() => {
++    toggleSnap();
++    closeGridMenu();
++  }, [toggleSnap, closeGridMenu]);
++
++  const isGridMenuOpen = gridMenu !== null;
++  useEffect(() => {
++    const scroller = scrollerRef.current;
++    if (!isGridMenuOpen) {
++      return;
++    }
++    const openScrollTop = scroller?.scrollTop ?? 0;
++    const closeGridMenuOnUserScroll = () => {
++      if (scroller && scroller.scrollTop !== openScrollTop) {
++        closeGridMenu();
++        return;
++      }
++      if (scroller && workspaceRef.current.isPlaying && followModeRef.current === 'on') {
++        const left = scroller.scrollLeft;
++        const clampedByBrowser =
++          left < autoScrollLeftRef.current &&
++          left >= scroller.scrollWidth - scroller.clientWidth - FOLLOW_SCROLL_TOLERANCE_PX;
++        if (
++          clampedByBrowser ||
++          Math.abs(left - autoScrollLeftRef.current) <= FOLLOW_SCROLL_TOLERANCE_PX
++        ) {
++          return;
++        }
++      }
++      closeGridMenu();
++    };
++    scroller?.addEventListener('scroll', closeGridMenuOnUserScroll);
++    window.addEventListener('resize', closeGridMenu);
++    window.addEventListener('blur', closeGridMenu);
++    return () => {
++      scroller?.removeEventListener('scroll', closeGridMenuOnUserScroll);
++      window.removeEventListener('resize', closeGridMenu);
++      window.removeEventListener('blur', closeGridMenu);
++    };
++  }, [isGridMenuOpen, closeGridMenu]);
++
+   const handleTimelineScroll = useCallback(() => {
+     const scroller = scrollerRef.current;
+     if (!scroller) {
+@@ -931,8 +1028,9 @@ export function StudioWorkspace() {
+       const focused = event.currentTarget.ownerDocument.activeElement;
+       if (
+         focused instanceof HTMLElement &&
+-        (isRangeInputTarget(focused) || isTypingTarget(focused)) &&
+-        !isRangeInputTarget(event.target) &&
++        (((isRangeInputTarget(focused) || isTypingTarget(focused)) &&
++          !isRangeInputTarget(event.target)) ||
++          (isLoopBraceTarget(focused) && !isLoopBraceTarget(event.target))) &&
+         !isScrollerGutterPointer(event) &&
+         !workspaceRef.current.isPointerGestureActive()
+       ) {
+@@ -1048,7 +1146,14 @@ export function StudioWorkspace() {
+         latest.setActiveTrack(gesture.trackId);
+         latest.selectClip(null);
+         latest.setTimeRange(null);
+-        latest.seekTo(gesture.clickTime);
++        latest.seekTo(
++          resolveGridTime(
++            gesture.clickTime,
++            snapEnabledRef.current ? gridSecondsRef.current : null,
++            gridSecondsRef.current,
++            end.altKey,
++          ),
++        );
+       };
+       window.addEventListener('pointermove', handleMove);
+       window.addEventListener('pointerup', finish);
+@@ -1212,6 +1317,18 @@ export function StudioWorkspace() {
+         }
+         return;
+       }
++      if (
++        (event.code === 'Digit1' || event.code === 'Digit2') &&
++        !event.altKey &&
++        !event.shiftKey
++      ) {
++        event.preventDefault();
++        if (event.repeat) {
++          return;
++        }
++        stepGridDivision(event.code === 'Digit1' ? 'narrow' : 'widen');
++        return;
++      }
+       if (event.key === 'Home' && !isSliderTarget(event.target)) {
+         event.preventDefault();
+         if (!isSeparatorTarget(event.target)) {
+@@ -1298,7 +1415,7 @@ export function StudioWorkspace() {
+       window.removeEventListener('dragover', handleStrayFileDrag);
+       window.removeEventListener('drop', handleStrayFileDrag);
+     };
+-  }, [returnFloatingVideo, toggleSnap]);
++  }, [returnFloatingVideo, stepGridDivision, toggleSnap]);
+ 
+   const viewportSeconds = Math.max(0, viewportWidth - ARRANGEMENT_HEADER_WIDTH_PX) / pxPerSecond;
+   const timelineSeconds = Math.ceil(Math.max(projectEnd + TIMELINE_TAIL_SECONDS, viewportSeconds));
+@@ -1497,11 +1614,28 @@ export function StudioWorkspace() {
+                           changeGridDivision(next);
+                         }
+                       }}
++                      onKeyDown={(event) => {
++                        if (
++                          exportOpenRef.current ||
++                          (event.code !== 'Digit1' && event.code !== 'Digit2') ||
++                          event.ctrlKey ||
++                          event.metaKey ||
++                          event.altKey ||
++                          event.shiftKey
++                        ) {
++                          return;
++                        }
++                        event.preventDefault();
++                        if (!event.repeat) {
++                          stepGridDivision(event.code === 'Digit1' ? 'narrow' : 'widen');
++                        }
++                      }}
+                       aria-label="ბადის დანაყოფი"
++                      aria-keyshortcuts="1 2"
+                       title={
+                         gridLinesShown
+-                          ? `ბადე ${formatGridDivision(gridSeconds)}`
+-                          : `ბადე ${formatGridDivision(gridSeconds)} — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom.`
++                          ? `ბადე ${formatGridDivision(gridSeconds)} · 1 — უფრო მჭიდრო, 2 — უფრო ფართო`
++                          : `ბადე ${formatGridDivision(gridSeconds)} — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom. · 1 — უფრო მჭიდრო, 2 — უფრო ფართო`
+                       }
+                       className="h-6 shrink-0 rounded-sm border border-outline bg-surface px-1 text-xs leading-none tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                       data-testid="arrangement-grid-division"
+@@ -1524,6 +1658,8 @@ export function StudioWorkspace() {
+                     applyTimelineView={applyTimelineView}
+                     onNavigationMove={pauseFollowForNavigation}
+                     onRulerDoubleClick={handleRulerDoubleClick}
++                    snapSeconds={snapEnabled ? gridSeconds : null}
++                    gridSeconds={gridSeconds}
+                   />
+                 </div>
+                 <div className="flex">
+@@ -1543,7 +1679,12 @@ export function StudioWorkspace() {
+                       'Loop'
+                     )}
+                   </div>
+-                  <ArrangementLoopBrace seconds={timelineSeconds} pxPerSecond={pxPerSecond} />
++                  <ArrangementLoopBrace
++                    seconds={timelineSeconds}
++                    pxPerSecond={pxPerSecond}
++                    snapSeconds={snapEnabled ? gridSeconds : null}
++                    gridSeconds={gridSeconds}
++                  />
+                 </div>
+               </div>
+               {arrangement.tracks.map((track) => (
+@@ -1552,6 +1693,7 @@ export function StudioWorkspace() {
+                   track={track}
+                   timelineWidth={timelineWidth}
+                   onBackgroundPointerDown={handleLaneBackgroundPointerDown}
++                  onGridMenuRequest={handleGridMenuRequest}
+                   height={trackLaneLayout.heights[track.id] ?? TRACK_DEFAULT_HEIGHT_PX}
+                   folded={trackLaneLayout.folded[track.id] ?? false}
+                   isMotionArmed={trackLaneLayout.isMotionArmed}
+@@ -1652,6 +1794,18 @@ export function StudioWorkspace() {
+           </p>
+         )}
+       </footer>
++      {gridMenu ? (
++        <ArrangementGridMenu
++          x={gridMenu.x}
++          y={gridMenu.y}
++          divisions={GRID_DIVISIONS_SECONDS}
++          gridSeconds={gridSeconds}
++          snapEnabled={snapEnabled}
++          onChooseDivision={chooseGridMenuDivision}
++          onToggleSnap={toggleGridMenuSnap}
++          onClose={closeGridMenu}
++        />
++      ) : null}
+       <ArrangementExportDialog isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} />
+     </div>
+   );
+diff --git a/app/lib/__tests__/sfx-library.test.tsx b/app/lib/__tests__/sfx-library.test.tsx
+index ee64211..067b14e 100644
+--- a/app/lib/__tests__/sfx-library.test.tsx
++++ b/app/lib/__tests__/sfx-library.test.tsx
+@@ -89,7 +89,7 @@ async function addSound(name: string, offset: number) {
+     ),
+   );
+ }
+-describe('Purchased SFX library', () => {
++describe('Purchased SFX library', { timeout: 15_000 }, () => {
+   it('searches tags, filters collections and keeps filters and favorites across close/open', async () => {
+     mountScene();
+     fireEvent.change(screen.getByLabelText('Search sounds'), { target: { value: 'door' } });
+diff --git a/app/lib/arrangement/__tests__/fader-guards.test.tsx b/app/lib/arrangement/__tests__/fader-guards.test.tsx
+index 7a67e91..808f3d0 100644
+--- a/app/lib/arrangement/__tests__/fader-guards.test.tsx
++++ b/app/lib/arrangement/__tests__/fader-guards.test.tsx
+@@ -248,7 +248,7 @@ function windowPointer(type: 'pointerup' | 'pointercancel', pointerId: number) {
+   });
+ }
+ 
+-describe('fader keys and pointers (C-R31-02, C-R31-01; D-29w)', () => {
++describe('fader keys and pointers (C-R31-02, C-R31-01; D-29w)', { timeout: 15_000 }, () => {
+   beforeEach(() => {
+     fakeClock.base = Date.now() / 1000;
+     audioLog.panners = [];
+diff --git a/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx b/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
+index 7d6f08f..2fbb611 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
+@@ -402,6 +402,17 @@ describe('SRW-14 stage 2 trim edges on the grid', () => {
+     expect(clipOf(api, 'm1').duration).toBeCloseTo(0.05, 9);
+     expect(clipOf(api, 'm1').start).toBe(7);
+   });
++
++  it('SE20 a snapped left trim whose line lies past an off-grid source start stops at that start', async () => {
++    const { api, view, clipParts } = await mountEditWorkspace([clipAt('m1', 'music', 7.7, 3, 0.1)]);
++    pressG();
++    const parts = clipParts('m1');
++    dragFrom(parts.trimStart, parts.root, 2, [{ dx: -10 }], { release: false });
++    expect(clipOf(api, 'm1').start).toBeCloseTo(7.6, 9);
++    expect(statusText(view)).toBe(TRIM_START_BLOCKED);
++    fireEvent.pointerUp(parts.root, { pointerId: 1, clientX: -8, clientY: MUSIC_LANE_Y });
++    expect(parts.root.dataset.clipStart).toBe('7.600');
++  });
+ });
+ 
+ describe('SRW-14 stage 2 clip-body time range on the grid', () => {
+@@ -441,13 +452,30 @@ describe('SRW-14 stage 2 clip-body time range on the grid', () => {
+     expect(live(api).range).toBeNull();
+   });
+ 
+-  it('SE10 a click in the body with Snap on seeks to the unsnapped time', async () => {
++  it('SE10 a click in the body with Snap on 1 s seeks to the nearest line', async () => {
+     const music = clipAt('m1', 'music', 7, 16);
+     const { api, clipParts } = await mountEditWorkspace([music]);
+     pressG();
+     const parts = clipParts('m1');
+     dragFrom(parts.body, parts.root, xAt(music, 7.3), []);
+     expect(live(api).range).toBeNull();
++    expect(positionOf(api)).toBe(7);
++  });
++
++  it('SE10b Alt on the pointerup of a body click keeps the free time', async () => {
++    const music = clipAt('m1', 'music', 7, 16);
++    const { api, clipParts } = await mountEditWorkspace([music]);
++    pressG();
++    const parts = clipParts('m1');
++    const x = xAt(music, 7.3);
++    dragFrom(parts.body, parts.root, x, [], { release: false });
++    fireEvent.pointerUp(parts.root, {
++      pointerId: 1,
++      clientX: x,
++      clientY: MUSIC_LANE_Y,
++      altKey: true,
++    });
++    expect(live(api).range).toBeNull();
+     expect(positionOf(api)).toBeCloseTo(7.3, 9);
+   });
+ });
+@@ -623,6 +651,27 @@ describe('SRW-14 stage 2 group lane refusal before time 0', () => {
+     fireEvent.pointerUp(parts.root, { pointerId: 1, clientX: 404, clientY: STEMS_LANE_Y });
+     expect(clipOf(api, 'st1').trackId).toBe('stems');
+   });
++
++  it('SE21 a group whose bottom member has no lane below shows no ghosts and moves in time only', async () => {
++    const { api, view, clipParts } = await mountEditWorkspace([
++      clipAt('m1', 'music', 7, 16),
++      clipAt('s1', 'sfx', 2, 1),
++    ]);
++    act(() => live(api).selectClip('s1'));
++    act(() => live(api).toggleClipSelection('m1', 'toggle'));
++    expect(snapState(view)).toBe('off');
++    const parts = clipParts('m1');
++    dragFrom(parts.header, parts.root, 400, [{ dx: 6, y: STEMS_LANE_Y }], { release: false });
++    expect(statusText(view)).toBe(OUT_OF_RANGE_TEXT);
++    expect(view.container.querySelectorAll('[data-ghost-start]').length).toBe(0);
++    fireEvent.pointerUp(parts.root, { pointerId: 1, clientX: 406, clientY: STEMS_LANE_Y });
++    expect(clipOf(api, 'm1').trackId).toBe('music');
++    expect(clipOf(api, 's1').trackId).toBe('sfx');
++    expect(clipOf(api, 'm1').start).toBeCloseTo(7.15, 9);
++    expect(clipOf(api, 's1').start).toBeCloseTo(2.15, 9);
++    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(undoAll(api)).toBe(1);
++  });
+ });
+ 
+ describe('SRW-14 stage 2 all-tracks range overlay', () => {
+diff --git a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+index 431907f..1d05c57 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+@@ -105,7 +105,7 @@ const SFX_LANE_Y = 250;
+ const SNAP_ON_STATUS = 'Snap ჩართულია — ბადე 1 წმ (G)';
+ const NUDGE_AT_ZERO_STATUS = 'ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.';
+ const HIDDEN_LINES_TITLE =
+-  'ბადე 0.1 წმ — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom.';
++  'ბადე 0.1 წმ — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom. · 1 — უფრო მჭიდრო, 2 — უფრო ფართო';
+ const GROUP_BLOCKED_STATUS = 'ჯგუფის გადატანა შეჩერდა — მეზობელი კლიპი ან დროის დასაწყისი.';
+ const MOVE_BLOCKED_STATUS =
+   'გადატანა დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი. კლიპი ბოლო თავისუფალ ადგილას დარჩა.';
+@@ -278,7 +278,7 @@ afterEach(() => {
+   vi.restoreAllMocks();
+ });
+ 
+-describe('SRW-14 stage 1 grid control and lines', () => {
++describe('SRW-14 stage 1 grid control and lines', { timeout: 15_000 }, () => {
+   it('GS1 starts with Snap off, 1 s division and visible lines in every lane', async () => {
+     const { view } = await mountGridWorkspace();
+     expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
+@@ -294,7 +294,7 @@ describe('SRW-14 stage 1 grid control and lines', () => {
+     const select = divisionSelect(view);
+     expect(select.value).toBe('1');
+     expect(select.getAttribute('aria-label')).toBe('ბადის დანაყოფი');
+-    expect(select.title).toBe('ბადე 1 წმ');
++    expect(select.title).toBe('ბადე 1 წმ · 1 — უფრო მჭიდრო, 2 — უფრო ფართო');
+     expect(Array.from(select.options).map((option) => [option.value, option.textContent])).toEqual([
+       ['10', '10 წმ'],
+       ['5', '5 წმ'],
+@@ -388,7 +388,7 @@ describe('SRW-14 stage 1 grid control and lines', () => {
+   });
+ });
+ 
+-describe('SRW-14 stage 1 snapping of clip moves', () => {
++describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+   it('GS2 Snap off keeps free millisecond placement', async () => {
+     const { api, clipParts } = await mountGridWorkspace();
+     dragClip(clipParts('m1'), [{ dx: 37 }]);
+@@ -396,7 +396,7 @@ describe('SRW-14 stage 1 snapping of clip moves', () => {
+     expect(live(api).undoLabel).toBe('კლიპის გადატანა');
+   });
+ 
+-  it('GS3 G turns Snap on without history; a drag lands on the 1 s grid; a sub-half drag changes nothing', async () => {
++  it('GS3 G turns Snap on without history; a drag lands on the 1 s grid; a sub-half drag locks onto a nearer clip edge', async () => {
+     const { api, view, clipParts } = await mountGridWorkspace();
+     const before = live(api).arrangement;
+     pressG();
+@@ -410,8 +410,9 @@ describe('SRW-14 stage 1 snapping of clip moves', () => {
+     expect(clipOf(api, 'm1').start).toBe(8);
+     expect(clipParts('m1').root.dataset.clipStart).toBe('8.000');
+     dragClip(clipParts('m1'), [{ dx: 15 }], 2);
+-    expect(clipOf(api, 'm1').start).toBe(8);
+-    expect(undoAll(api)).toBe(1);
++    expect(clipOf(api, 'm1').start).toBe(8.5);
++    expect(clipParts('m1').root.dataset.clipStart).toBe('8.500');
++    expect(undoAll(api)).toBe(2);
+     expect(clipOf(api, 'm1').start).toBe(7);
+   });
+ 
+@@ -579,7 +580,7 @@ describe('SRW-14 stage 1 snapping of clip moves', () => {
+     expect(clipOf(api, 'm1').start).toBe(7.3);
+     act(() => live(api).setPxPerSecond(60));
+     expect(view.getByTestId('arrangement-grid-control').dataset.gridLines).toBe('visible');
+-    expect(divisionSelect(view).title).toBe('ბადე 0.1 წმ');
++    expect(divisionSelect(view).title).toBe('ბადე 0.1 წმ · 1 — უფრო მჭიდრო, 2 — უფრო ფართო');
+     for (const body of laneBodies(view)) {
+       expect(body.dataset.gridLines).toBe('visible');
+       expect(body.style.backgroundImage).toContain('6px');
+@@ -606,7 +607,7 @@ describe('SRW-14 stage 1 snapping of clip moves', () => {
+     expect(clipOf(api, 'm1').start).toBe(7);
+   });
+ 
+-  it('GS13 a snapped move never overlaps a neighbour; the clip keeps its last free grid place', async () => {
++  it('GS13 a snapped move never overlaps a neighbour; the clip keeps its last free place', async () => {
+     const { api, view, clipParts } = await mountGridWorkspace();
+     pressG();
+     const parts = clipParts('m1');
+@@ -617,20 +618,21 @@ describe('SRW-14 stage 1 snapping of clip moves', () => {
+       clientY: MUSIC_LANE_Y,
+     });
+     fireEvent.pointerMove(parts.root, { pointerId: 6, clientX: 156, clientY: MUSIC_LANE_Y });
+-    expect(clipOf(api, 'm1').start).toBe(8);
+-    fireEvent.pointerMove(parts.root, { pointerId: 6, clientX: 164, clientY: MUSIC_LANE_Y });
++    expect(clipOf(api, 'm1').start).toBe(8.5);
++    expect(view.getByTestId('arrangement-status').textContent).not.toBe(MOVE_BLOCKED_STATUS);
++    fireEvent.pointerMove(parts.root, { pointerId: 6, clientX: 176, clientY: MUSIC_LANE_Y });
+     expect(view.getByTestId('arrangement-status').textContent).toBe(MOVE_BLOCKED_STATUS);
+-    expect(clipOf(api, 'm1').start).toBe(8);
+-    fireEvent.pointerUp(parts.root, { pointerId: 6, clientX: 164, clientY: MUSIC_LANE_Y });
++    expect(clipOf(api, 'm1').start).toBe(8.5);
++    fireEvent.pointerUp(parts.root, { pointerId: 6, clientX: 176, clientY: MUSIC_LANE_Y });
+     const moved = clipOf(api, 'm1');
+     const neighbour = clipOf(api, 'm2');
+-    expect(moved.start).toBe(8);
++    expect(moved.start).toBe(8.5);
+     expect(moved.start + moved.duration).toBeLessThanOrEqual(neighbour.start);
+     expect(undoAll(api)).toBe(1);
+   });
+ });
+ 
+-describe('SRW-14 stage 1 keyboard', () => {
++describe('SRW-14 stage 1 keyboard', { timeout: 15_000 }, () => {
+   it('GS8 arrows nudge to the next and previous grid line with Snap on, 0.1 s with Snap off', async () => {
+     const clips = DEFAULT_CLIPS.map((clip) => (clip.id === 'm1' ? { ...clip, start: 7.3 } : clip));
+     const { api } = await mountGridWorkspace(clips);
+diff --git a/app/lib/arrangement/__tests__/master-ui.test.tsx b/app/lib/arrangement/__tests__/master-ui.test.tsx
+index 5d70f00..822bda1 100644
+--- a/app/lib/arrangement/__tests__/master-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/master-ui.test.tsx
+@@ -257,7 +257,7 @@ function latestHandle(): ScheduleHandle {
+ 
+ const DONE_MESSAGE = 'WAV შეიქმნა: 00:20.000, 24-bit · 48 kHz · stereo.';
+ 
+-describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', () => {
++describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () => {
+   const frames: FrameRequestCallback[] = [];
+ 
+   beforeEach(() => {
+diff --git a/app/lib/arrangement/__tests__/selection.test.ts b/app/lib/arrangement/__tests__/selection.test.ts
+index aee4a47..dee2b95 100644
+--- a/app/lib/arrangement/__tests__/selection.test.ts
++++ b/app/lib/arrangement/__tests__/selection.test.ts
+@@ -323,3 +323,43 @@ describe('planClipLaneMove (SRW-08, R8-U)', () => {
+     expect(plan.conflict).toMatchObject({ trackId: 'sfx', occupantId: 'x1' });
+   });
+ });
++
++describe('planClipLaneMove exact time delta (C-R53-01, D-29z19)', () => {
++  it('SL1 locks a cross-lane move onto a sub-millisecond clip end and still refuses a real overlap', () => {
++    const base = fourLaneArrangement([clip('m1', 'music', 2, 2), clip('t0', 'stems', 0, 6.000437)]);
++    const exact = planClipLaneMove(base, {
++      clipIds: ['m1'],
++      anchorClipId: 'm1',
++      targetTrackId: 'stems',
++      timeDelta: 6.000437 - 2,
++    });
++    expect(exact.refusal).toBeNull();
++    expect(exact.conflict).toBeNull();
++    const moved = exact.arrangement?.clips.find((entry) => entry.id === 'm1');
++    expect(moved?.trackId).toBe('stems');
++    expect(moved?.start).toBeCloseTo(6.000437, 9);
++    const overlapping = planClipLaneMove(base, {
++      clipIds: ['m1'],
++      anchorClipId: 'm1',
++      targetTrackId: 'stems',
++      timeDelta: 4,
++    });
++    expect(overlapping.refusal).toBe('overlap');
++    expect(overlapping.conflict?.occupantId).toBe('t0');
++  });
++
++  it('SL2 keeps grid-snapped group starts free of float noise', () => {
++    const base = fourLaneArrangement([clip('m1', 'music', 0, 2), clip('t1', 'stems', 3, 2)]);
++    const plan = planClipLaneMove(base, {
++      clipIds: ['m1', 't1'],
++      anchorClipId: 'm1',
++      targetTrackId: 'stems',
++      timeDelta: 0.1 * 3,
++    });
++    expect(plan.refusal).toBeNull();
++    expect(plan.arrangement?.clips.map((entry) => [entry.trackId, entry.start])).toEqual([
++      ['stems', 0.3],
++      ['sfx', 3.3],
++    ]);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/track-layout.test.tsx b/app/lib/arrangement/__tests__/track-layout.test.tsx
+index c351ebb..67ac29a 100644
+--- a/app/lib/arrangement/__tests__/track-layout.test.tsx
++++ b/app/lib/arrangement/__tests__/track-layout.test.tsx
+@@ -253,923 +253,939 @@ function stubPointerCapture(element: Element) {
+ const press = { button: 0, buttons: 1 };
+ const FOLDED_TITLE_LINE = 'ხაზი დაკეცილია — დროის მოსანიშნად გაშალე';
+ 
+-describe('track fold, height and lane auto-fit (SRW-11B stage 2, D-29, R11-U)', () => {
+-  beforeEach(() => {
+-    fakeClock.base = Date.now() / 1000;
+-    resizeCallbacks.clear();
+-    vi.stubGlobal('AudioContext', FakeAudioContext);
+-    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+-    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+-    vi.stubGlobal('ResizeObserver', ControlledResizeObserver);
+-    vi.stubGlobal('requestAnimationFrame', () => 1);
+-    vi.stubGlobal('cancelAnimationFrame', () => undefined);
+-    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+-    vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+-    vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
+-  });
++describe(
++  'track fold, height and lane auto-fit (SRW-11B stage 2, D-29, R11-U)',
++  { timeout: 15_000 },
++  () => {
++    beforeEach(() => {
++      fakeClock.base = Date.now() / 1000;
++      resizeCallbacks.clear();
++      vi.stubGlobal('AudioContext', FakeAudioContext);
++      vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++      vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++      vi.stubGlobal('ResizeObserver', ControlledResizeObserver);
++      vi.stubGlobal('requestAnimationFrame', () => 1);
++      vi.stubGlobal('cancelAnimationFrame', () => undefined);
++      vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++      vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++      vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++    });
+ 
+-  afterEach(() => {
+-    vi.unstubAllGlobals();
+-    vi.restoreAllMocks();
+-  });
++    afterEach(() => {
++      vi.unstubAllGlobals();
++      vi.restoreAllMocks();
++    });
+ 
+-  it('folds a lane to a 36 px row with compact M/S that keep their aria-pressed and click behaviour', async () => {
+-    stubTimelineFrame(660);
+-    const { api, view, row, rowHeight, fold } = await mountTrackLayout();
+-    expect(rowHeight('music')).toBe(81);
+-    const button = fold('music');
+-    expect(button.getAttribute('aria-expanded')).toBe('true');
+-    expect(button.getAttribute('aria-label')).toBe('მუსიკა დაკეცვა ან გახსნა');
+-    expect(button.title).toBe('დაკეცვა / გახსნა');
+-    expect(button.textContent).toBe('▾');
+-    fireEvent.click(button);
+-    expect(rowHeight('music')).toBe(36);
+-    expect(row('music').dataset.trackFolded).toBe('true');
+-    expect(button.getAttribute('aria-expanded')).toBe('false');
+-    expect(button.textContent).toBe('▸');
+-    expect(view.queryByRole('slider', { name: 'Volume — მუსიკა' })).toBeNull();
+-    const mute = view.getByRole('button', { name: 'Mute — მუსიკა' });
+-    const solo = view.getByRole('button', { name: 'Solo — მუსიკა (Ctrl/Cmd+click ამატებს)' });
+-    expect(mute.getAttribute('aria-pressed')).toBe('false');
+-    fireEvent.click(mute);
+-    expect(mute.getAttribute('aria-pressed')).toBe('true');
+-    expect(live(api).arrangement.tracks.find((track) => track.id === 'music')?.mute).toBe(true);
+-    fireEvent.click(solo);
+-    expect(solo.getAttribute('aria-pressed')).toBe('true');
+-    expect(live(api).arrangement.tracks.find((track) => track.id === 'music')?.solo).toBe(true);
+-    fireEvent.click(button);
+-    expect(rowHeight('music')).toBe(81);
+-    expect(view.getByRole('slider', { name: 'Volume — მუსიკა' })).toBeTruthy();
+-  });
++    it('folds a lane to a 36 px row with compact M/S that keep their aria-pressed and click behaviour', async () => {
++      stubTimelineFrame(660);
++      const { api, view, row, rowHeight, fold } = await mountTrackLayout();
++      expect(rowHeight('music')).toBe(81);
++      const button = fold('music');
++      expect(button.getAttribute('aria-expanded')).toBe('true');
++      expect(button.getAttribute('aria-label')).toBe('მუსიკა დაკეცვა ან გახსნა');
++      expect(button.title).toBe('დაკეცვა / გახსნა');
++      expect(button.textContent).toBe('▾');
++      fireEvent.click(button);
++      expect(rowHeight('music')).toBe(36);
++      expect(row('music').dataset.trackFolded).toBe('true');
++      expect(button.getAttribute('aria-expanded')).toBe('false');
++      expect(button.textContent).toBe('▸');
++      expect(view.queryByRole('slider', { name: 'Volume — მუსიკა' })).toBeNull();
++      const mute = view.getByRole('button', { name: 'Mute — მუსიკა' });
++      const solo = view.getByRole('button', { name: 'Solo — მუსიკა (Ctrl/Cmd+click ამატებს)' });
++      expect(mute.getAttribute('aria-pressed')).toBe('false');
++      fireEvent.click(mute);
++      expect(mute.getAttribute('aria-pressed')).toBe('true');
++      expect(live(api).arrangement.tracks.find((track) => track.id === 'music')?.mute).toBe(true);
++      fireEvent.click(solo);
++      expect(solo.getAttribute('aria-pressed')).toBe('true');
++      expect(live(api).arrangement.tracks.find((track) => track.id === 'music')?.solo).toBe(true);
++      fireEvent.click(button);
++      expect(rowHeight('music')).toBe(81);
++      expect(view.getByRole('slider', { name: 'Volume — მუსიკა' })).toBeTruthy();
++    });
+ 
+-  it('keeps the video lane picker reachable as a compact ＋ when folded and hides the original-sound line', async () => {
+-    stubTimelineFrame(660);
+-    const { view, header, fold } = await mountTrackLayout();
+-    expect(header('video').textContent).toContain('ორიგინალი ხმა');
+-    expect(view.getByRole('button', { name: '＋ საკუთარი ვიდეო' }).textContent).toBe(
+-      '＋ საკუთარი ვიდეო',
+-    );
+-    fireEvent.click(fold('video'));
+-    expect(header('video').textContent).not.toContain('ორიგინალი ხმა');
+-    const compact = view.getByRole('button', { name: '＋ საკუთარი ვიდეო' });
+-    expect(compact.textContent).toBe('＋');
+-    expect(view.getByTestId('arrangement-video-dropzone')).toBeTruthy();
+-  });
++    it('keeps the video lane picker reachable as a compact ＋ when folded and hides the original-sound line', async () => {
++      stubTimelineFrame(660);
++      const { view, header, fold } = await mountTrackLayout();
++      expect(header('video').textContent).toContain('ორიგინალი ხმა');
++      expect(view.getByRole('button', { name: '＋ საკუთარი ვიდეო' }).textContent).toBe(
++        '＋ საკუთარი ვიდეო',
++      );
++      fireEvent.click(fold('video'));
++      expect(header('video').textContent).not.toContain('ორიგინალი ხმა');
++      const compact = view.getByRole('button', { name: '＋ საკუთარი ვიდეო' });
++      expect(compact.textContent).toBe('＋');
++      expect(view.getByTestId('arrangement-video-dropzone')).toBeTruthy();
++    });
+ 
+-  it('writes no history for fold, height or auto-fit, and Undo leaves every height alone', async () => {
+-    stubTimelineFrame(442);
+-    const { api, view, rowHeight, fold, handle } = await mountTrackLayout();
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    fireTimelineResize(442);
+-    expect(rowHeight('music')).toBe(67);
+-    fireEvent.click(fold('stems'));
+-    fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
+-    expect(live(api).undoLabel).toBeNull();
+-    act(() => live(api).nudgeSelectedClip(0.5));
+-    act(() => live(api).selectClip('hit-1'));
+-    act(() => live(api).nudgeSelectedClip(0.5));
+-    expect(live(api).undoLabel).not.toBeNull();
+-    const before = ['video', 'music', 'stems', 'sfx'].map(rowHeight);
+-    act(() => live(api).undo());
+-    expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual(before);
+-    expect(live(api).undoLabel).toBeNull();
+-  });
++    it('writes no history for fold, height or auto-fit, and Undo leaves every height alone', async () => {
++      stubTimelineFrame(442);
++      const { api, view, rowHeight, fold, handle } = await mountTrackLayout();
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      fireTimelineResize(442);
++      expect(rowHeight('music')).toBe(67);
++      fireEvent.click(fold('stems'));
++      fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
++      expect(live(api).undoLabel).toBeNull();
++      act(() => live(api).nudgeSelectedClip(0.5));
++      act(() => live(api).selectClip('hit-1'));
++      act(() => live(api).nudgeSelectedClip(0.5));
++      expect(live(api).undoLabel).not.toBeNull();
++      const before = ['video', 'music', 'stems', 'sfx'].map(rowHeight);
++      act(() => live(api).undo());
++      expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual(before);
++      expect(live(api).undoLabel).toBeNull();
++    });
+ 
+-  it('claims the gesture registry while dragging a height handle and restores the start height on pointercancel', async () => {
+-    stubTimelineFrame(660);
+-    const { api, view, rowHeight, handle } = await mountTrackLayout();
+-    const sfxHandle = handle('sfx');
+-    expect(sfxHandle.getAttribute('role')).toBe('separator');
+-    expect(sfxHandle.getAttribute('aria-label')).toBe('SFX სიმაღლე');
+-    expect(sfxHandle.getAttribute('aria-valuemin')).toBe('60');
+-    expect(sfxHandle.getAttribute('aria-valuemax')).toBe('180');
+-    expect(handle('video').getAttribute('aria-valuemin')).toBe('52');
+-    fireEvent.pointerDown(sfxHandle, { ...press, pointerId: 1, clientX: 300, clientY: 500 });
+-    expect(live(api).isPointerGestureActive()).toBe(true);
+-    fireEvent.pointerMove(window, { pointerId: 1, clientX: 300, clientY: 560 });
+-    expect(rowHeight('sfx')).toBe(141);
+-    expect(sfxHandle.getAttribute('aria-valuenow')).toBe('140');
+-    const clipHeader = clipRoot(view.container, 'music-1').firstElementChild;
+-    if (!(clipHeader instanceof HTMLElement)) {
+-      throw new Error('clip header missing');
+-    }
+-    fireEvent.pointerDown(clipHeader, { ...press, pointerId: 2, clientX: 500, clientY: 200 });
+-    fireEvent.pointerMove(clipHeader, { pointerId: 2, clientX: 600, clientY: 200 });
+-    fireEvent.pointerUp(clipHeader, { pointerId: 2, clientX: 600, clientY: 200 });
+-    expect(live(api).selectedClipIds).toEqual([]);
+-    expect(live(api).arrangement.clips.find((clip) => clip.id === 'music-1')?.start).toBe(2);
+-    fireEvent.click(view.getByRole('button', { name: 'Mute — მუსიკა' }));
+-    expect(view.getByTestId('arrangement-status').textContent).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+-    expect(live(api).arrangement.tracks.find((track) => track.id === 'music')?.mute).toBe(false);
+-    fireEvent.pointerMove(window, { pointerId: 1, clientX: 300, clientY: 900 });
+-    expect(rowHeight('sfx')).toBe(181);
+-    fireEvent.pointerCancel(window, { pointerId: 1 });
+-    expect(rowHeight('sfx')).toBe(81);
+-    expect(sfxHandle.getAttribute('aria-valuenow')).toBe('80');
+-    expect(live(api).isPointerGestureActive()).toBe(false);
+-    fireEvent.pointerDown(sfxHandle, { ...press, pointerId: 3, clientY: 500 });
+-    fireEvent.pointerMove(window, { pointerId: 3, clientY: 400 });
+-    expect(rowHeight('sfx')).toBe(61);
+-    fireEvent.pointerUp(window, { pointerId: 3, clientY: 400 });
+-    expect(rowHeight('sfx')).toBe(61);
+-    expect(live(api).isPointerGestureActive()).toBe(false);
+-    expect(live(api).undoLabel).toBeNull();
+-  });
++    it('claims the gesture registry while dragging a height handle and restores the start height on pointercancel', async () => {
++      stubTimelineFrame(660);
++      const { api, view, rowHeight, handle } = await mountTrackLayout();
++      const sfxHandle = handle('sfx');
++      expect(sfxHandle.getAttribute('role')).toBe('separator');
++      expect(sfxHandle.getAttribute('aria-label')).toBe('SFX სიმაღლე');
++      expect(sfxHandle.getAttribute('aria-valuemin')).toBe('60');
++      expect(sfxHandle.getAttribute('aria-valuemax')).toBe('180');
++      expect(handle('video').getAttribute('aria-valuemin')).toBe('52');
++      fireEvent.pointerDown(sfxHandle, { ...press, pointerId: 1, clientX: 300, clientY: 500 });
++      expect(live(api).isPointerGestureActive()).toBe(true);
++      fireEvent.pointerMove(window, { pointerId: 1, clientX: 300, clientY: 560 });
++      expect(rowHeight('sfx')).toBe(141);
++      expect(sfxHandle.getAttribute('aria-valuenow')).toBe('140');
++      const clipHeader = clipRoot(view.container, 'music-1').firstElementChild;
++      if (!(clipHeader instanceof HTMLElement)) {
++        throw new Error('clip header missing');
++      }
++      fireEvent.pointerDown(clipHeader, { ...press, pointerId: 2, clientX: 500, clientY: 200 });
++      fireEvent.pointerMove(clipHeader, { pointerId: 2, clientX: 600, clientY: 200 });
++      fireEvent.pointerUp(clipHeader, { pointerId: 2, clientX: 600, clientY: 200 });
++      expect(live(api).selectedClipIds).toEqual([]);
++      expect(live(api).arrangement.clips.find((clip) => clip.id === 'music-1')?.start).toBe(2);
++      fireEvent.click(view.getByRole('button', { name: 'Mute — მუსიკა' }));
++      expect(view.getByTestId('arrangement-status').textContent).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++      expect(live(api).arrangement.tracks.find((track) => track.id === 'music')?.mute).toBe(false);
++      fireEvent.pointerMove(window, { pointerId: 1, clientX: 300, clientY: 900 });
++      expect(rowHeight('sfx')).toBe(181);
++      fireEvent.pointerCancel(window, { pointerId: 1 });
++      expect(rowHeight('sfx')).toBe(81);
++      expect(sfxHandle.getAttribute('aria-valuenow')).toBe('80');
++      expect(live(api).isPointerGestureActive()).toBe(false);
++      fireEvent.pointerDown(sfxHandle, { ...press, pointerId: 3, clientY: 500 });
++      fireEvent.pointerMove(window, { pointerId: 3, clientY: 400 });
++      expect(rowHeight('sfx')).toBe(61);
++      fireEvent.pointerUp(window, { pointerId: 3, clientY: 400 });
++      expect(rowHeight('sfx')).toBe(61);
++      expect(live(api).isPointerGestureActive()).toBe(false);
++      expect(live(api).undoLabel).toBeNull();
++    });
+ 
+-  it('ignores a height-handle pointerdown while another gesture is active', async () => {
+-    stubTimelineFrame(660);
+-    const { api, rowHeight, handle } = await mountTrackLayout();
+-    const release = live(api).claimPointerGesture(9, () => undefined);
+-    fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 4, clientY: 500 });
+-    fireEvent.pointerMove(window, { pointerId: 4, clientY: 560 });
+-    expect(rowHeight('sfx')).toBe(81);
+-    release?.();
+-  });
++    it('ignores a height-handle pointerdown while another gesture is active', async () => {
++      stubTimelineFrame(660);
++      const { api, rowHeight, handle } = await mountTrackLayout();
++      const release = live(api).claimPointerGesture(9, () => undefined);
++      fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 4, clientY: 500 });
++      fireEvent.pointerMove(window, { pointerId: 4, clientY: 560 });
++      expect(rowHeight('sfx')).toBe(81);
++      release?.();
++    });
+ 
+-  it('steps ↓ +8 / ↑ −8 on the focused handle, clamps per kind and never nudges the selected clip', async () => {
+-    stubTimelineFrame(660);
+-    const { api, rowHeight, handle, row } = await mountTrackLayout();
+-    act(() => live(api).selectClip('hit-1'));
+-    const sfxHandle = handle('sfx');
+-    sfxHandle.focus();
+-    fireEvent.keyDown(sfxHandle, { key: 'ArrowDown' });
+-    expect(rowHeight('sfx')).toBe(89);
+-    expect(sfxHandle.getAttribute('aria-valuenow')).toBe('88');
+-    expect(row('sfx').className).toContain('motion-safe:transition-[height]');
+-    for (let i = 0; i < 3; i++) {
+-      fireEvent.keyDown(sfxHandle, { key: 'ArrowUp' });
+-    }
+-    expect(sfxHandle.getAttribute('aria-valuenow')).toBe('64');
+-    fireEvent.keyDown(sfxHandle, { key: 'ArrowUp' });
+-    expect(sfxHandle.getAttribute('aria-valuenow')).toBe('60');
+-    for (let i = 0; i < 20; i++) {
++    it('steps ↓ +8 / ↑ −8 on the focused handle, clamps per kind and never nudges the selected clip', async () => {
++      stubTimelineFrame(660);
++      const { api, rowHeight, handle, row } = await mountTrackLayout();
++      act(() => live(api).selectClip('hit-1'));
++      const sfxHandle = handle('sfx');
++      sfxHandle.focus();
+       fireEvent.keyDown(sfxHandle, { key: 'ArrowDown' });
+-    }
+-    expect(sfxHandle.getAttribute('aria-valuenow')).toBe('180');
+-    const videoHandle = handle('video');
+-    for (let i = 0; i < 5; i++) {
+-      fireEvent.keyDown(videoHandle, { key: 'ArrowUp' });
+-    }
+-    expect(videoHandle.getAttribute('aria-valuenow')).toBe('52');
+-    fireEvent.keyDown(sfxHandle, { key: 'ArrowLeft' });
+-    fireEvent.keyDown(sfxHandle, { key: 'ArrowRight' });
+-    expect(live(api).arrangement.clips.find((clip) => clip.id === 'hit-1')?.start).toBe(12);
+-    expect(live(api).undoLabel).toBeNull();
+-  });
+-
+-  it('a key on the handle of a folded lane only unfolds it first', async () => {
+-    stubTimelineFrame(660);
+-    const { rowHeight, handle, fold } = await mountTrackLayout();
+-    fireEvent.click(fold('sfx'));
+-    expect(rowHeight('sfx')).toBe(36);
+-    expect(handle('sfx').getAttribute('aria-valuetext')).toBe('დაკეცილია · 80 px');
+-    fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
+-    expect(rowHeight('sfx')).toBe(81);
+-    fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
+-    expect(rowHeight('sfx')).toBe(89);
+-  });
++      expect(rowHeight('sfx')).toBe(89);
++      expect(sfxHandle.getAttribute('aria-valuenow')).toBe('88');
++      expect(row('sfx').className).toContain('motion-safe:transition-[height]');
++      for (let i = 0; i < 3; i++) {
++        fireEvent.keyDown(sfxHandle, { key: 'ArrowUp' });
++      }
++      expect(sfxHandle.getAttribute('aria-valuenow')).toBe('64');
++      fireEvent.keyDown(sfxHandle, { key: 'ArrowUp' });
++      expect(sfxHandle.getAttribute('aria-valuenow')).toBe('60');
++      for (let i = 0; i < 20; i++) {
++        fireEvent.keyDown(sfxHandle, { key: 'ArrowDown' });
++      }
++      expect(sfxHandle.getAttribute('aria-valuenow')).toBe('180');
++      const videoHandle = handle('video');
++      for (let i = 0; i < 5; i++) {
++        fireEvent.keyDown(videoHandle, { key: 'ArrowUp' });
++      }
++      expect(videoHandle.getAttribute('aria-valuenow')).toBe('52');
++      fireEvent.keyDown(sfxHandle, { key: 'ArrowLeft' });
++      fireEvent.keyDown(sfxHandle, { key: 'ArrowRight' });
++      expect(live(api).arrangement.clips.find((clip) => clip.id === 'hit-1')?.start).toBe(12);
++      expect(live(api).undoLabel).toBeNull();
++    });
+ 
+-  it('Space on the focused fold button folds the lane and does not start the transport', async () => {
+-    stubTimelineFrame(660);
+-    const { api, rowHeight, fold } = await mountTrackLayout();
+-    const button = fold('music');
+-    button.focus();
+-    const notPrevented = fireEvent.keyDown(button, { key: ' ', code: 'Space' });
+-    fireEvent.keyUp(button, { key: ' ', code: 'Space' });
+-    expect(notPrevented).toBe(false);
+-    expect(rowHeight('music')).toBe(36);
+-    expect(live(api).isPlaying).toBe(false);
+-    fireEvent.keyDown(button, { key: ' ', code: 'Space', repeat: true });
+-    expect(rowHeight('music')).toBe(36);
+-    expect(live(api).isPlaying).toBe(false);
+-  });
++    it('a key on the handle of a folded lane only unfolds it first', async () => {
++      stubTimelineFrame(660);
++      const { rowHeight, handle, fold } = await mountTrackLayout();
++      fireEvent.click(fold('sfx'));
++      expect(rowHeight('sfx')).toBe(36);
++      expect(handle('sfx').getAttribute('aria-valuetext')).toBe('დაკეცილია · 80 px');
++      fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
++      expect(rowHeight('sfx')).toBe(81);
++      fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
++      expect(rowHeight('sfx')).toBe(89);
++    });
+ 
+-  it('sets one height on the row so the header and the lane body share it', async () => {
+-    stubTimelineFrame(660);
+-    const { row, header } = await mountTrackLayout();
+-    const sfx = row('sfx');
+-    expect(sfx.style.height).toBe('81px');
+-    const body = sfx.children[1];
+-    if (!(body instanceof HTMLElement)) {
+-      throw new Error('lane body missing');
+-    }
+-    expect(body.className).not.toContain('h-20');
+-    expect(body.style.height).toBe('');
+-    expect(header('sfx').style.height).toBe('');
+-    expect(sfx.className).toContain('flex');
+-  });
++    it('Space on the focused fold button folds the lane and does not start the transport', async () => {
++      stubTimelineFrame(660);
++      const { api, rowHeight, fold } = await mountTrackLayout();
++      const button = fold('music');
++      button.focus();
++      const notPrevented = fireEvent.keyDown(button, { key: ' ', code: 'Space' });
++      fireEvent.keyUp(button, { key: ' ', code: 'Space' });
++      expect(notPrevented).toBe(false);
++      expect(rowHeight('music')).toBe(36);
++      expect(live(api).isPlaying).toBe(false);
++      fireEvent.keyDown(button, { key: ' ', code: 'Space', repeat: true });
++      expect(rowHeight('music')).toBe(36);
++      expect(live(api).isPlaying).toBe(false);
++    });
+ 
+-  it('renders no range body on a folded clip, adds the title line, and keeps trim with one history entry', async () => {
+-    stubTimelineFrame(660);
+-    const { api, view, fold } = await mountTrackLayout();
+-    const rangeBodySelector = '[title="drag = დროის მონიშვნა · click = playhead"]';
+-    const openRoot = clipRoot(view.container, 'music-1');
+-    stubPointerCapture(openRoot);
+-    const openBody = openRoot.querySelector<HTMLElement>(rangeBodySelector);
+-    if (!openBody) {
+-      throw new Error('range body missing on the open lane');
+-    }
+-    expect(openRoot.title).toBe('');
+-    fireEvent.pointerDown(openBody, { ...press, pointerId: 4, clientX: 300, clientY: 60 });
+-    fireEvent.pointerMove(openRoot, { pointerId: 4, clientX: 360, clientY: 60 });
+-    fireEvent.pointerUp(openRoot, { pointerId: 4, clientX: 360, clientY: 60 });
+-    expect(live(api).range).not.toBeNull();
+-    act(() => live(api).setTimeRange(null));
+-    fireEvent.click(fold('music'));
+-    const root = clipRoot(view.container, 'music-1');
+-    stubPointerCapture(root);
+-    expect(root.querySelector(rangeBodySelector)).toBeNull();
+-    expect(root.children).toHaveLength(3);
+-    expect(root.title).toContain(FOLDED_TITLE_LINE);
+-    expect(root.firstElementChild?.getAttribute('title')).toContain(FOLDED_TITLE_LINE);
+-    fireEvent.pointerDown(root, { ...press, pointerId: 5, clientX: 300, clientY: 30 });
+-    fireEvent.pointerMove(root, { pointerId: 5, clientX: 360, clientY: 30 });
+-    fireEvent.pointerUp(root, { pointerId: 5, clientX: 360, clientY: 30 });
+-    expect(live(api).range).toBeNull();
+-    expect(live(api).isPointerGestureActive()).toBe(false);
+-    const trimStart = root.querySelector<HTMLElement>('[title="Trim — მარცხენა კიდე"]');
+-    if (!trimStart) {
+-      throw new Error('trim edge missing');
+-    }
+-    const pxPerSecond = live(api).pxPerSecond;
+-    fireEvent.pointerDown(trimStart, { ...press, pointerId: 6, clientX: 400, clientY: 30 });
+-    fireEvent.pointerMove(root, { pointerId: 6, clientX: 400 + pxPerSecond, clientY: 30 });
+-    fireEvent.pointerUp(root, { pointerId: 6, clientX: 400 + pxPerSecond, clientY: 30 });
+-    const trimmed = live(api).arrangement.clips.find((clip) => clip.id === 'music-1');
+-    expect(trimmed?.start).toBe(3);
+-    expect(trimmed?.duration).toBe(7);
+-    expect(live(api).undoLabel).toBe('Trim — მარცხენა კიდე');
+-    act(() => live(api).undo());
+-    expect(live(api).undoLabel).toBeNull();
+-    fireEvent.click(fold('music'));
+-    expect(clipRoot(view.container, 'music-1').querySelector(rangeBodySelector)).toBeTruthy();
+-  });
++    it('sets one height on the row so the header and the lane body share it', async () => {
++      stubTimelineFrame(660);
++      const { row, header } = await mountTrackLayout();
++      const sfx = row('sfx');
++      expect(sfx.style.height).toBe('81px');
++      const body = sfx.children[1];
++      if (!(body instanceof HTMLElement)) {
++        throw new Error('lane body missing');
++      }
++      expect(body.className).not.toContain('h-20');
++      expect(body.style.height).toBe('');
++      expect(header('sfx').style.height).toBe('');
++      expect(sfx.className).toContain('flex');
++    });
+ 
+-  it('auto-fit shrinks the lanes, gives a folded lane’s height back, and the first manual change turns it off', async () => {
+-    stubTimelineFrame(442);
+-    const { view, rowHeight, fold, handle } = await mountTrackLayout();
+-    expect(rowHeight('music')).toBe(81);
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    fireTimelineResize(442);
+-    expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 67, 67, 67]);
+-    fireEvent.click(fold('music'));
+-    expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 36, 81, 81]);
+-    fireEvent.click(fold('music'));
+-    expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 67, 67, 67]);
+-    fireTimelineResize(560);
+-    expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([81, 81, 81, 81]);
+-    fireTimelineResize(442);
+-    expect(rowHeight('sfx')).toBe(67);
+-    fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
+-    expect(rowHeight('sfx')).toBe(75);
+-    fireTimelineResize(700);
+-    expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 67, 67, 75]);
+-    fireTimelineResize(380);
+-    expect(rowHeight('sfx')).toBe(75);
+-  });
++    it('renders no range body on a folded clip, adds the title line, and keeps trim with one history entry', async () => {
++      stubTimelineFrame(660);
++      const { api, view, fold } = await mountTrackLayout();
++      const rangeBodySelector = '[title="drag = დროის მონიშვნა · click = playhead"]';
++      const openRoot = clipRoot(view.container, 'music-1');
++      stubPointerCapture(openRoot);
++      const openBody = openRoot.querySelector<HTMLElement>(rangeBodySelector);
++      if (!openBody) {
++        throw new Error('range body missing on the open lane');
++      }
++      expect(openRoot.title).toBe('');
++      fireEvent.pointerDown(openBody, { ...press, pointerId: 4, clientX: 300, clientY: 60 });
++      fireEvent.pointerMove(openRoot, { pointerId: 4, clientX: 360, clientY: 60 });
++      fireEvent.pointerUp(openRoot, { pointerId: 4, clientX: 360, clientY: 60 });
++      expect(live(api).range).not.toBeNull();
++      act(() => live(api).setTimeRange(null));
++      fireEvent.click(fold('music'));
++      const root = clipRoot(view.container, 'music-1');
++      stubPointerCapture(root);
++      expect(root.querySelector(rangeBodySelector)).toBeNull();
++      expect(root.children).toHaveLength(3);
++      expect(root.title).toContain(FOLDED_TITLE_LINE);
++      expect(root.firstElementChild?.getAttribute('title')).toContain(FOLDED_TITLE_LINE);
++      fireEvent.pointerDown(root, { ...press, pointerId: 5, clientX: 300, clientY: 30 });
++      fireEvent.pointerMove(root, { pointerId: 5, clientX: 360, clientY: 30 });
++      fireEvent.pointerUp(root, { pointerId: 5, clientX: 360, clientY: 30 });
++      expect(live(api).range).toBeNull();
++      expect(live(api).isPointerGestureActive()).toBe(false);
++      const trimStart = root.querySelector<HTMLElement>('[title="Trim — მარცხენა კიდე"]');
++      if (!trimStart) {
++        throw new Error('trim edge missing');
++      }
++      const pxPerSecond = live(api).pxPerSecond;
++      fireEvent.pointerDown(trimStart, { ...press, pointerId: 6, clientX: 400, clientY: 30 });
++      fireEvent.pointerMove(root, { pointerId: 6, clientX: 400 + pxPerSecond, clientY: 30 });
++      fireEvent.pointerUp(root, { pointerId: 6, clientX: 400 + pxPerSecond, clientY: 30 });
++      const trimmed = live(api).arrangement.clips.find((clip) => clip.id === 'music-1');
++      expect(trimmed?.start).toBe(3);
++      expect(trimmed?.duration).toBe(7);
++      expect(live(api).undoLabel).toBe('Trim — მარცხენა კიდე');
++      act(() => live(api).undo());
++      expect(live(api).undoLabel).toBeNull();
++      fireEvent.click(fold('music'));
++      expect(clipRoot(view.container, 'music-1').querySelector(rangeBodySelector)).toBeTruthy();
++    });
+ 
+-  it('keeps auto-fit on after a fold and after a cancelled height drag', async () => {
+-    stubTimelineFrame(442);
+-    const { view, rowHeight, fold, handle } = await mountTrackLayout();
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    fireTimelineResize(442);
+-    fireEvent.click(fold('stems'));
+-    fireEvent.click(fold('stems'));
+-    fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 7, clientY: 300 });
+-    fireEvent.pointerMove(window, { pointerId: 7, clientY: 340 });
+-    expect(rowHeight('sfx')).toBe(107);
+-    fireEvent.pointerCancel(window, { pointerId: 7 });
+-    expect(rowHeight('sfx')).toBe(67);
+-    fireTimelineResize(560);
+-    expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([81, 81, 81, 81]);
+-  });
+-  it('skips the lane refit while the detail panel animates and refits once on its height transitionend', async () => {
+-    stubTimelineFrame(442);
+-    let commits = 0;
+-    const { view, rowHeight } = await mountTrackLayout(() => {
+-      commits += 1;
++    it('auto-fit shrinks the lanes, gives a folded lane’s height back, and the first manual change turns it off', async () => {
++      stubTimelineFrame(442);
++      const { view, rowHeight, fold, handle } = await mountTrackLayout();
++      expect(rowHeight('music')).toBe(81);
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      fireTimelineResize(442);
++      expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 67, 67, 67]);
++      fireEvent.click(fold('music'));
++      expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 36, 81, 81]);
++      fireEvent.click(fold('music'));
++      expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 67, 67, 67]);
++      fireTimelineResize(560);
++      expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([81, 81, 81, 81]);
++      fireTimelineResize(442);
++      expect(rowHeight('sfx')).toBe(67);
++      fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
++      expect(rowHeight('sfx')).toBe(75);
++      fireTimelineResize(700);
++      expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 67, 67, 75]);
++      fireTimelineResize(380);
++      expect(rowHeight('sfx')).toBe(75);
+     });
+-    const panel = view.getByTestId('arrangement-detail-panel');
+-    Object.defineProperty(panel, 'getAnimations', { configurable: true, value: () => [{}] });
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    commits = 0;
+-    fireTimelineResize(442);
+-    fireTimelineResize(442);
+-    expect(rowHeight('music')).toBe(81);
+-    expect(commits).toBe(0);
+-    Object.defineProperty(panel, 'getAnimations', { configurable: true, value: () => [] });
+-    fireEvent.transitionEnd(panel, { propertyName: 'opacity' });
+-    expect(rowHeight('music')).toBe(81);
+-    fireEvent.transitionEnd(panel, { propertyName: 'height' });
+-    expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 67, 67, 67]);
+-    expect(commits).toBe(1);
+-  });
+ 
+-  it('does not re-render the workspace on observer ticks whose metrics change nothing', async () => {
+-    stubTimelineFrame(442);
+-    let commits = 0;
+-    const { view } = await mountTrackLayout(() => {
+-      commits += 1;
++    it('keeps auto-fit on after a fold and after a cancelled height drag', async () => {
++      stubTimelineFrame(442);
++      const { view, rowHeight, fold, handle } = await mountTrackLayout();
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      fireTimelineResize(442);
++      fireEvent.click(fold('stems'));
++      fireEvent.click(fold('stems'));
++      fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 7, clientY: 300 });
++      fireEvent.pointerMove(window, { pointerId: 7, clientY: 340 });
++      expect(rowHeight('sfx')).toBe(107);
++      fireEvent.pointerCancel(window, { pointerId: 7 });
++      expect(rowHeight('sfx')).toBe(67);
++      fireTimelineResize(560);
++      expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([81, 81, 81, 81]);
+     });
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    fireTimelineResize(442);
+-    fireTimelineResize(442);
+-    commits = 0;
+-    for (let i = 0; i < 5; i++) {
++    it('skips the lane refit while the detail panel animates and refits once on its height transitionend', async () => {
++      stubTimelineFrame(442);
++      let commits = 0;
++      const { view, rowHeight } = await mountTrackLayout(() => {
++        commits += 1;
++      });
++      const panel = view.getByTestId('arrangement-detail-panel');
++      Object.defineProperty(panel, 'getAnimations', { configurable: true, value: () => [{}] });
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      commits = 0;
+       fireTimelineResize(442);
+-    }
+-    expect(commits).toBe(0);
+-    fireTimelineResize(441);
+-    expect(commits).toBe(1);
+-  });
++      fireTimelineResize(442);
++      expect(rowHeight('music')).toBe(81);
++      expect(commits).toBe(0);
++      Object.defineProperty(panel, 'getAnimations', { configurable: true, value: () => [] });
++      fireEvent.transitionEnd(panel, { propertyName: 'opacity' });
++      expect(rowHeight('music')).toBe(81);
++      fireEvent.transitionEnd(panel, { propertyName: 'height' });
++      expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 67, 67, 67]);
++      expect(commits).toBe(1);
++    });
+ 
+-  it('restores the start height and auto-fit when the registry aborts a height drag (window blur)', async () => {
+-    stubTimelineFrame(442);
+-    const { api, view, rowHeight, handle } = await mountTrackLayout();
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    fireTimelineResize(442);
+-    fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 11, clientY: 300 });
+-    fireEvent.pointerMove(window, { pointerId: 11, clientY: 380 });
+-    expect(rowHeight('sfx')).toBe(147);
+-    act(() => {
+-      window.dispatchEvent(new Event('blur'));
++    it('does not re-render the workspace on observer ticks whose metrics change nothing', async () => {
++      stubTimelineFrame(442);
++      let commits = 0;
++      const { view } = await mountTrackLayout(() => {
++        commits += 1;
++      });
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      fireTimelineResize(442);
++      fireTimelineResize(442);
++      commits = 0;
++      for (let i = 0; i < 5; i++) {
++        fireTimelineResize(442);
++      }
++      expect(commits).toBe(0);
++      fireTimelineResize(441);
++      expect(commits).toBe(1);
+     });
+-    expect(rowHeight('sfx')).toBe(67);
+-    expect(live(api).isPointerGestureActive()).toBe(false);
+-    fireTimelineResize(560);
+-    expect(rowHeight('sfx')).toBe(81);
+-  });
+ 
+-  it('a committed height drag turns auto-fit off and a move back to the start is honoured', async () => {
+-    stubTimelineFrame(442);
+-    const { view, rowHeight, handle } = await mountTrackLayout();
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    fireTimelineResize(442);
+-    fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 12, clientY: 300 });
+-    fireEvent.pointerMove(window, { pointerId: 12, clientY: 320 });
+-    expect(rowHeight('sfx')).toBe(87);
+-    fireEvent.pointerMove(window, { pointerId: 12, clientY: 300 });
+-    expect(rowHeight('sfx')).toBe(67);
+-    fireEvent.pointerMove(window, { pointerId: 12, clientY: 310 });
+-    fireEvent.pointerUp(window, { pointerId: 12, clientY: 310 });
+-    expect(rowHeight('sfx')).toBe(77);
+-    fireTimelineResize(700);
+-    expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 67, 67, 77]);
+-  });
++    it('restores the start height and auto-fit when the registry aborts a height drag (window blur)', async () => {
++      stubTimelineFrame(442);
++      const { api, view, rowHeight, handle } = await mountTrackLayout();
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      fireTimelineResize(442);
++      fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 11, clientY: 300 });
++      fireEvent.pointerMove(window, { pointerId: 11, clientY: 380 });
++      expect(rowHeight('sfx')).toBe(147);
++      act(() => {
++        window.dispatchEvent(new Event('blur'));
++      });
++      expect(rowHeight('sfx')).toBe(67);
++      expect(live(api).isPointerGestureActive()).toBe(false);
++      fireTimelineResize(560);
++      expect(rowHeight('sfx')).toBe(81);
++    });
+ 
+-  it('a pointerdown on the handle of a folded lane neither unfolds it nor starts a gesture (C-R11-01)', async () => {
+-    stubTimelineFrame(660);
+-    const { api, rowHeight, handle, fold } = await mountTrackLayout();
+-    fireEvent.click(fold('stems'));
+-    fireEvent.pointerDown(handle('stems'), { ...press, pointerId: 13, clientY: 300 });
+-    expect(rowHeight('stems')).toBe(36);
+-    expect(live(api).isPointerGestureActive()).toBe(false);
+-    fireEvent.pointerMove(window, { pointerId: 13, clientY: 360 });
+-    expect(rowHeight('stems')).toBe(36);
+-  });
++    it('a committed height drag turns auto-fit off and a move back to the start is honoured', async () => {
++      stubTimelineFrame(442);
++      const { view, rowHeight, handle } = await mountTrackLayout();
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      fireTimelineResize(442);
++      fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 12, clientY: 300 });
++      fireEvent.pointerMove(window, { pointerId: 12, clientY: 320 });
++      expect(rowHeight('sfx')).toBe(87);
++      fireEvent.pointerMove(window, { pointerId: 12, clientY: 300 });
++      expect(rowHeight('sfx')).toBe(67);
++      fireEvent.pointerMove(window, { pointerId: 12, clientY: 310 });
++      fireEvent.pointerUp(window, { pointerId: 12, clientY: 310 });
++      expect(rowHeight('sfx')).toBe(77);
++      fireTimelineResize(700);
++      expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([53, 67, 67, 77]);
++    });
+ 
+-  it('ignores a fold click while another pointer gesture is active', async () => {
+-    stubTimelineFrame(660);
+-    const { api, rowHeight, fold } = await mountTrackLayout();
+-    const release = live(api).claimPointerGesture(14, () => undefined);
+-    fireEvent.click(fold('music'));
+-    expect(rowHeight('music')).toBe(81);
+-    release?.();
+-    fireEvent.click(fold('music'));
+-    expect(rowHeight('music')).toBe(36);
+-  });
++    it('a pointerdown on the handle of a folded lane neither unfolds it nor starts a gesture (C-R11-01)', async () => {
++      stubTimelineFrame(660);
++      const { api, rowHeight, handle, fold } = await mountTrackLayout();
++      fireEvent.click(fold('stems'));
++      fireEvent.pointerDown(handle('stems'), { ...press, pointerId: 13, clientY: 300 });
++      expect(rowHeight('stems')).toBe(36);
++      expect(live(api).isPointerGestureActive()).toBe(false);
++      fireEvent.pointerMove(window, { pointerId: 13, clientY: 360 });
++      expect(rowHeight('stems')).toBe(36);
++    });
+ 
+-  it('caps the detail panel while auto-fit is on, keeps the cap after a click or a cancelled drag, and keeps the rendered height when a manual lane change drops it', async () => {
+-    stubTimelineFrame(410);
+-    const { view, handle } = await mountTrackLayout();
+-    const panel = view.getByTestId('arrangement-detail-panel');
+-    const separator = view.getByTestId('arrangement-detail-separator');
+-    const toggle = view.getByTestId('arrangement-detail-toggle');
+-    fireEvent.click(toggle);
+-    expect(panel.style.height).toBe('130px');
+-    expect(separator.getAttribute('aria-valuenow')).toBe('130');
+-    fireEvent.pointerDown(separator, { ...press, pointerId: 15, clientY: 500 });
+-    fireEvent.pointerUp(window, { pointerId: 15, clientY: 500 });
+-    fireEvent.pointerDown(separator, { ...press, pointerId: 16, clientY: 500 });
+-    fireEvent.pointerMove(window, { pointerId: 16, clientY: 440 });
+-    expect(panel.style.height).toBe('190px');
+-    fireEvent.pointerCancel(window, { pointerId: 16 });
+-    expect(panel.style.height).toBe('130px');
+-    fireEvent.click(toggle);
+-    fireEvent.click(toggle);
+-    expect(panel.style.height).toBe('130px');
+-    fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
+-    expect(panel.style.height).toBe('130px');
+-    expect(separator.getAttribute('aria-valuenow')).toBe('130');
+-  });
++    it('ignores a fold click while another pointer gesture is active', async () => {
++      stubTimelineFrame(660);
++      const { api, rowHeight, fold } = await mountTrackLayout();
++      const release = live(api).claimPointerGesture(14, () => undefined);
++      fireEvent.click(fold('music'));
++      expect(rowHeight('music')).toBe(81);
++      release?.();
++      fireEvent.click(fold('music'));
++      expect(rowHeight('music')).toBe(36);
++    });
+ 
+-  it('lands cross-lane header drags by real row rectangles on mixed heights (music folded, SFX 140)', async () => {
+-    stubTimelineFrame(660);
+-    const { api, view, row, rowHeight, fold, handle } = await mountTrackLayout();
+-    fireEvent.click(fold('music'));
+-    fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 20, clientY: 500 });
+-    fireEvent.pointerMove(window, { pointerId: 20, clientY: 560 });
+-    fireEvent.pointerUp(window, { pointerId: 20, clientY: 560 });
+-    expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([81, 36, 81, 141]);
+-    let top = 0;
+-    for (const trackId of ['video', 'music', 'stems', 'sfx']) {
+-      const height = rowHeight(trackId);
+-      const rowTop = top;
+-      Object.defineProperty(row(trackId), 'getBoundingClientRect', {
+-        configurable: true,
+-        value: () => new DOMRect(0, rowTop, 900, height),
+-      });
+-      top += height;
+-    }
+-    const drag = (clipId: string, fromY: number, toY: number, pointerId: number) => {
+-      const root = clipRoot(view.container, clipId);
+-      stubPointerCapture(root);
+-      const header = root.firstElementChild;
+-      if (!(header instanceof HTMLElement)) {
+-        throw new Error('clip header missing');
+-      }
+-      fireEvent.pointerDown(header, { ...press, pointerId, clientX: 300, clientY: fromY });
+-      fireEvent.pointerMove(root, { pointerId, clientX: 300, clientY: toY });
+-      fireEvent.pointerUp(root, { pointerId, clientX: 300, clientY: toY });
+-    };
+-    drag('music-1', 100, 150, 21);
+-    expect(live(api).arrangement.clips.find((clip) => clip.id === 'music-1')?.trackId).toBe(
+-      'stems',
+-    );
+-    drag('stem-1', 150, 100, 22);
+-    expect(live(api).arrangement.clips.find((clip) => clip.id === 'stem-1')?.trackId).toBe('music');
+-    drag('music-1', 150, 300, 23);
+-    expect(live(api).arrangement.clips.find((clip) => clip.id === 'music-1')?.trackId).toBe('sfx');
+-  });
+-  it('resizes the panel without a transition when only the cap changes it, and animates the next toggle again', async () => {
+-    stubTimelineFrame(410);
+-    const { view, fold } = await mountTrackLayout();
+-    const panel = view.getByTestId('arrangement-detail-panel');
+-    const toggle = view.getByTestId('arrangement-detail-toggle');
+-    fireEvent.click(toggle);
+-    expect(panel.style.height).toBe('130px');
+-    expect(panel.className).toContain('motion-safe:transition-[height]');
+-    fireEvent.click(fold('music'));
+-    expect(panel.style.height).toBe('144px');
+-    expect(panel.className).not.toContain('motion-safe:transition-[height]');
+-    fireEvent.click(toggle);
+-    expect(panel.className).toContain('motion-safe:transition-[height]');
+-    fireEvent.click(toggle);
+-    expect(panel.style.height).toBe('144px');
+-  });
++    it('caps the detail panel while auto-fit is on, keeps the cap after a click or a cancelled drag, and keeps the rendered height when a manual lane change drops it', async () => {
++      stubTimelineFrame(410);
++      const { view, handle } = await mountTrackLayout();
++      const panel = view.getByTestId('arrangement-detail-panel');
++      const separator = view.getByTestId('arrangement-detail-separator');
++      const toggle = view.getByTestId('arrangement-detail-toggle');
++      fireEvent.click(toggle);
++      expect(panel.style.height).toBe('130px');
++      expect(separator.getAttribute('aria-valuenow')).toBe('130');
++      fireEvent.pointerDown(separator, { ...press, pointerId: 15, clientY: 500 });
++      fireEvent.pointerUp(window, { pointerId: 15, clientY: 500 });
++      fireEvent.pointerDown(separator, { ...press, pointerId: 16, clientY: 500 });
++      fireEvent.pointerMove(window, { pointerId: 16, clientY: 440 });
++      expect(panel.style.height).toBe('190px');
++      fireEvent.pointerCancel(window, { pointerId: 16 });
++      expect(panel.style.height).toBe('130px');
++      fireEvent.click(toggle);
++      fireEvent.click(toggle);
++      expect(panel.style.height).toBe('130px');
++      fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
++      expect(panel.style.height).toBe('130px');
++      expect(separator.getAttribute('aria-valuenow')).toBe('130');
++    });
+ 
+-  it('keeps the cap when a separator key only opens the collapsed panel or a drag moves only sideways', async () => {
+-    stubTimelineFrame(410);
+-    const { view } = await mountTrackLayout();
+-    const panel = view.getByTestId('arrangement-detail-panel');
+-    const separator = view.getByTestId('arrangement-detail-separator');
+-    const toggle = view.getByTestId('arrangement-detail-toggle');
+-    fireEvent.keyDown(separator, { key: 'ArrowDown' });
+-    expect(panel.style.height).toBe('130px');
+-    fireEvent.pointerDown(separator, { ...press, pointerId: 30, clientX: 400, clientY: 500 });
+-    fireEvent.pointerMove(window, { pointerId: 30, clientX: 480, clientY: 500 });
+-    fireEvent.pointerUp(window, { pointerId: 30, clientX: 480, clientY: 500 });
+-    fireEvent.click(toggle);
+-    fireEvent.click(toggle);
+-    expect(panel.style.height).toBe('130px');
+-    fireEvent.keyDown(separator, { key: 'ArrowUp' });
+-    expect(panel.style.height).toBe('146px');
+-    expect(panel.className).toContain('motion-safe:transition-[height]');
+-  });
++    it('lands cross-lane header drags by real row rectangles on mixed heights (music folded, SFX 140)', async () => {
++      stubTimelineFrame(660);
++      const { api, view, row, rowHeight, fold, handle } = await mountTrackLayout();
++      fireEvent.click(fold('music'));
++      fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 20, clientY: 500 });
++      fireEvent.pointerMove(window, { pointerId: 20, clientY: 560 });
++      fireEvent.pointerUp(window, { pointerId: 20, clientY: 560 });
++      expect(['video', 'music', 'stems', 'sfx'].map(rowHeight)).toEqual([81, 36, 81, 141]);
++      let top = 0;
++      for (const trackId of ['video', 'music', 'stems', 'sfx']) {
++        const height = rowHeight(trackId);
++        const rowTop = top;
++        Object.defineProperty(row(trackId), 'getBoundingClientRect', {
++          configurable: true,
++          value: () => new DOMRect(0, rowTop, 900, height),
++        });
++        top += height;
++      }
++      const drag = (clipId: string, fromY: number, toY: number, pointerId: number) => {
++        const root = clipRoot(view.container, clipId);
++        stubPointerCapture(root);
++        const header = root.firstElementChild;
++        if (!(header instanceof HTMLElement)) {
++          throw new Error('clip header missing');
++        }
++        fireEvent.pointerDown(header, { ...press, pointerId, clientX: 300, clientY: fromY });
++        fireEvent.pointerMove(root, { pointerId, clientX: 300, clientY: toY });
++        fireEvent.pointerUp(root, { pointerId, clientX: 300, clientY: toY });
++      };
++      drag('music-1', 100, 150, 21);
++      expect(live(api).arrangement.clips.find((clip) => clip.id === 'music-1')?.trackId).toBe(
++        'stems',
++      );
++      drag('stem-1', 150, 100, 22);
++      expect(live(api).arrangement.clips.find((clip) => clip.id === 'stem-1')?.trackId).toBe(
++        'music',
++      );
++      drag('music-1', 150, 300, 23);
++      expect(live(api).arrangement.clips.find((clip) => clip.id === 'music-1')?.trackId).toBe(
++        'sfx',
++      );
++    });
++    it('resizes the panel without a transition when only the cap changes it, and animates the next toggle again', async () => {
++      stubTimelineFrame(410);
++      const { view, fold } = await mountTrackLayout();
++      const panel = view.getByTestId('arrangement-detail-panel');
++      const toggle = view.getByTestId('arrangement-detail-toggle');
++      fireEvent.click(toggle);
++      expect(panel.style.height).toBe('130px');
++      expect(panel.className).toContain('motion-safe:transition-[height]');
++      fireEvent.click(fold('music'));
++      expect(panel.style.height).toBe('144px');
++      expect(panel.className).not.toContain('motion-safe:transition-[height]');
++      fireEvent.click(toggle);
++      expect(panel.className).toContain('motion-safe:transition-[height]');
++      fireEvent.click(toggle);
++      expect(panel.style.height).toBe('144px');
++    });
+ 
+-  it('forwards a drop over the height handle to the lane body only when it is over the lane, not the header strip', async () => {
+-    stubTimelineFrame(660);
+-    const { api, view, row, handle, header } = await mountTrackLayout();
+-    const body = row('sfx').children[1];
+-    if (!(body instanceof HTMLElement)) {
+-      throw new Error('lane body missing');
+-    }
+-    let bodyLeft = 224;
+-    Object.defineProperty(body, 'getBoundingClientRect', {
+-      configurable: true,
+-      value: () => new DOMRect(bodyLeft, 0, 900, 80),
++    it('keeps the cap when a separator key only opens the collapsed panel or a drag moves only sideways', async () => {
++      stubTimelineFrame(410);
++      const { view } = await mountTrackLayout();
++      const panel = view.getByTestId('arrangement-detail-panel');
++      const separator = view.getByTestId('arrangement-detail-separator');
++      const toggle = view.getByTestId('arrangement-detail-toggle');
++      fireEvent.keyDown(separator, { key: 'ArrowDown' });
++      expect(panel.style.height).toBe('130px');
++      fireEvent.pointerDown(separator, { ...press, pointerId: 30, clientX: 400, clientY: 500 });
++      fireEvent.pointerMove(window, { pointerId: 30, clientX: 480, clientY: 500 });
++      fireEvent.pointerUp(window, { pointerId: 30, clientX: 480, clientY: 500 });
++      fireEvent.click(toggle);
++      fireEvent.click(toggle);
++      expect(panel.style.height).toBe('130px');
++      fireEvent.keyDown(separator, { key: 'ArrowUp' });
++      expect(panel.style.height).toBe('146px');
++      expect(panel.className).toContain('motion-safe:transition-[height]');
+     });
+-    Object.defineProperty(header('sfx'), 'getBoundingClientRect', {
+-      configurable: true,
+-      value: () => new DOMRect(0, 0, 224, 80),
++
++    it('forwards a drop over the height handle to the lane body only when it is over the lane, not the header strip', async () => {
++      stubTimelineFrame(660);
++      const { api, view, row, handle, header } = await mountTrackLayout();
++      const body = row('sfx').children[1];
++      if (!(body instanceof HTMLElement)) {
++        throw new Error('lane body missing');
++      }
++      let bodyLeft = 224;
++      Object.defineProperty(body, 'getBoundingClientRect', {
++        configurable: true,
++        value: () => new DOMRect(bodyLeft, 0, 900, 80),
++      });
++      Object.defineProperty(header('sfx'), 'getBoundingClientRect', {
++        configurable: true,
++        value: () => new DOMRect(0, 0, 224, 80),
++      });
++      vi.stubGlobal('DragEvent', class TestDragEvent extends MouseEvent {});
++      const files = [new File(['x'], 'clip.mp4', { type: 'video/mp4' })];
++      const dataTransfer = { types: ['Files'], files, dropEffect: 'none' };
++      const status = () => view.getByTestId('arrangement-status').textContent;
++      fireEvent.dragOver(handle('sfx'), { clientX: 100, dataTransfer });
++      expect(body.className).not.toContain('ring-2');
++      fireEvent.dragOver(handle('sfx'), { clientX: 500, dataTransfer });
++      expect(body.className).toContain('ring-2');
++      fireEvent.dragLeave(body, { relatedTarget: handle('sfx'), dataTransfer });
++      expect(body.className).toContain('ring-2');
++      fireEvent.dragOver(handle('sfx'), { clientX: 100, dataTransfer });
++      expect(body.className).not.toContain('ring-2');
++      fireEvent.drop(body, { clientX: 500, dataTransfer });
++      const bodyMessage = status();
++      expect(bodyMessage).toBeTruthy();
++      act(() => live(api).setStatus('—'));
++      fireEvent.drop(handle('sfx'), { clientX: 100, dataTransfer });
++      expect(status()).toBe('—');
++      fireEvent.drop(handle('sfx'), { clientX: 500, dataTransfer });
++      expect(status()).toBe(bodyMessage);
++      bodyLeft = 124;
++      act(() => live(api).setStatus('—'));
++      fireEvent.dragOver(handle('sfx'), { clientX: 200, dataTransfer });
++      expect(body.className).not.toContain('ring-2');
++      fireEvent.drop(handle('sfx'), { clientX: 200, dataTransfer });
++      expect(status()).toBe('—');
++      fireEvent.drop(handle('sfx'), { clientX: 300, dataTransfer });
++      expect(status()).toBe(bodyMessage);
+     });
+-    vi.stubGlobal('DragEvent', class TestDragEvent extends MouseEvent {});
+-    const files = [new File(['x'], 'clip.mp4', { type: 'video/mp4' })];
+-    const dataTransfer = { types: ['Files'], files, dropEffect: 'none' };
+-    const status = () => view.getByTestId('arrangement-status').textContent;
+-    fireEvent.dragOver(handle('sfx'), { clientX: 100, dataTransfer });
+-    expect(body.className).not.toContain('ring-2');
+-    fireEvent.dragOver(handle('sfx'), { clientX: 500, dataTransfer });
+-    expect(body.className).toContain('ring-2');
+-    fireEvent.dragLeave(body, { relatedTarget: handle('sfx'), dataTransfer });
+-    expect(body.className).toContain('ring-2');
+-    fireEvent.dragOver(handle('sfx'), { clientX: 100, dataTransfer });
+-    expect(body.className).not.toContain('ring-2');
+-    fireEvent.drop(body, { clientX: 500, dataTransfer });
+-    const bodyMessage = status();
+-    expect(bodyMessage).toBeTruthy();
+-    act(() => live(api).setStatus('—'));
+-    fireEvent.drop(handle('sfx'), { clientX: 100, dataTransfer });
+-    expect(status()).toBe('—');
+-    fireEvent.drop(handle('sfx'), { clientX: 500, dataTransfer });
+-    expect(status()).toBe(bodyMessage);
+-    bodyLeft = 124;
+-    act(() => live(api).setStatus('—'));
+-    fireEvent.dragOver(handle('sfx'), { clientX: 200, dataTransfer });
+-    expect(body.className).not.toContain('ring-2');
+-    fireEvent.drop(handle('sfx'), { clientX: 200, dataTransfer });
+-    expect(status()).toBe('—');
+-    fireEvent.drop(handle('sfx'), { clientX: 300, dataTransfer });
+-    expect(status()).toBe(bodyMessage);
+-  });
+-});
++  },
++);
+ 
+ const UNFOLDED_HANDLE_CLASS =
+   'absolute inset-x-0 bottom-0 z-20 h-1.5 cursor-row-resize touch-none hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand';
+ 
+-describe('panel polish 14a (C-R11-01..03, deviation 9, C-R15-02; D-29c, D-29g, R16-U)', () => {
+-  beforeEach(() => {
+-    fakeClock.base = Date.now() / 1000;
+-    resizeCallbacks.clear();
+-    vi.stubGlobal('AudioContext', FakeAudioContext);
+-    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+-    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+-    vi.stubGlobal('ResizeObserver', ControlledResizeObserver);
+-    vi.stubGlobal('requestAnimationFrame', () => 1);
+-    vi.stubGlobal('cancelAnimationFrame', () => undefined);
+-    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+-    vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+-    vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
+-  });
++describe(
++  'panel polish 14a (C-R11-01..03, deviation 9, C-R15-02; D-29c, D-29g, R16-U)',
++  { timeout: 15_000 },
++  () => {
++    beforeEach(() => {
++      fakeClock.base = Date.now() / 1000;
++      resizeCallbacks.clear();
++      vi.stubGlobal('AudioContext', FakeAudioContext);
++      vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++      vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++      vi.stubGlobal('ResizeObserver', ControlledResizeObserver);
++      vi.stubGlobal('requestAnimationFrame', () => 1);
++      vi.stubGlobal('cancelAnimationFrame', () => undefined);
++      vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++      vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++      vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++    });
+ 
+-  afterEach(() => {
+-    vi.unstubAllGlobals();
+-    vi.restoreAllMocks();
+-  });
++    afterEach(() => {
++      vi.unstubAllGlobals();
++      vi.restoreAllMocks();
++    });
+ 
+-  it('gives a folded lane’s height handle no pointer hit area but keeps it focusable, and restores the round-15 classes when unfolded (C-R11-01)', async () => {
+-    stubTimelineFrame(660);
+-    const { rowHeight, handle, fold } = await mountTrackLayout();
+-    expect(handle('music').className).toBe(UNFOLDED_HANDLE_CLASS);
+-    fireEvent.click(fold('music'));
+-    expect(rowHeight('music')).toBe(36);
+-    const folded = handle('music');
+-    expect(folded.className).toContain('pointer-events-none');
+-    expect(folded.className).not.toContain('cursor-row-resize');
+-    expect(folded.className).not.toContain('hover:bg-accent/60');
+-    expect(folded.tabIndex).toBe(0);
+-    expect(folded.getAttribute('role')).toBe('separator');
+-    expect(folded.getAttribute('aria-valuenow')).toBe('80');
+-    expect(folded.getAttribute('aria-valuetext')).toBe('დაკეცილია · 80 px');
+-    fireEvent.keyDown(folded, { key: 'ArrowUp' });
+-    expect(rowHeight('music')).toBe(81);
+-    expect(handle('music').className).toBe(UNFOLDED_HANDLE_CLASS);
+-    expect(handle('music').getAttribute('aria-valuetext')).toBe('80 px');
+-    fireEvent.click(fold('music'));
+-    fireEvent.keyDown(handle('music'), { key: 'ArrowDown' });
+-    expect(rowHeight('music')).toBe(81);
+-  });
++    it('gives a folded lane’s height handle no pointer hit area but keeps it focusable, and restores the round-15 classes when unfolded (C-R11-01)', async () => {
++      stubTimelineFrame(660);
++      const { rowHeight, handle, fold } = await mountTrackLayout();
++      expect(handle('music').className).toBe(UNFOLDED_HANDLE_CLASS);
++      fireEvent.click(fold('music'));
++      expect(rowHeight('music')).toBe(36);
++      const folded = handle('music');
++      expect(folded.className).toContain('pointer-events-none');
++      expect(folded.className).not.toContain('cursor-row-resize');
++      expect(folded.className).not.toContain('hover:bg-accent/60');
++      expect(folded.tabIndex).toBe(0);
++      expect(folded.getAttribute('role')).toBe('separator');
++      expect(folded.getAttribute('aria-valuenow')).toBe('80');
++      expect(folded.getAttribute('aria-valuetext')).toBe('დაკეცილია · 80 px');
++      fireEvent.keyDown(folded, { key: 'ArrowUp' });
++      expect(rowHeight('music')).toBe(81);
++      expect(handle('music').className).toBe(UNFOLDED_HANDLE_CLASS);
++      expect(handle('music').getAttribute('aria-valuetext')).toBe('80 px');
++      fireEvent.click(fold('music'));
++      fireEvent.keyDown(handle('music'), { key: 'ArrowDown' });
++      expect(rowHeight('music')).toBe(81);
++    });
+ 
+-  it('reserves the selected-clip row with an aria-hidden placeholder and renders the real line as one truncated full-width row (C-R11-02, C-R15-02)', async () => {
+-    stubTimelineFrame(660);
+-    const { api, view } = await mountTrackLayout();
+-    const reserve = () => view.queryByTestId('arrangement-selected-clip-reserve');
+-    const line = () => view.queryByTestId('arrangement-selected-clip');
+-    const placeholder = reserve();
+-    expect(placeholder).not.toBeNull();
+-    expect(line()).toBeNull();
+-    expect(placeholder?.getAttribute('aria-hidden')).toBe('true');
+-    expect(placeholder?.textContent).toBe(String.fromCharCode(160));
+-    expect(placeholder?.className.split(' ').sort()).toEqual(
+-      ['basis-full', 'tabular-nums', 'text-muted'].sort(),
+-    );
+-    act(() => live(api).selectClip('music-1'));
+-    const selected = line();
+-    expect(selected).not.toBeNull();
+-    expect(reserve()).toBeNull();
+-    expect(selected?.className.split(' ')).toEqual(
+-      expect.arrayContaining(['basis-full', 'truncate', 'tabular-nums', 'text-muted']),
+-    );
+-    expect(selected?.textContent).toBe(
+-      'კლიპი: Song · start 00:02.000 · length 00:08.000 · source offset 00:01.000',
+-    );
+-    expect(selected?.getAttribute('title')).toBe(selected?.textContent);
+-    expect(selected?.getAttribute('aria-hidden')).toBeNull();
+-    act(() => live(api).selectClip(null));
+-    expect(line()).toBeNull();
+-    expect(reserve()?.getAttribute('data-testid')).toBe('arrangement-selected-clip-reserve');
+-  });
++    it('reserves the selected-clip row with an aria-hidden placeholder and renders the real line as one truncated full-width row (C-R11-02, C-R15-02)', async () => {
++      stubTimelineFrame(660);
++      const { api, view } = await mountTrackLayout();
++      const reserve = () => view.queryByTestId('arrangement-selected-clip-reserve');
++      const line = () => view.queryByTestId('arrangement-selected-clip');
++      const placeholder = reserve();
++      expect(placeholder).not.toBeNull();
++      expect(line()).toBeNull();
++      expect(placeholder?.getAttribute('aria-hidden')).toBe('true');
++      expect(placeholder?.textContent).toBe(String.fromCharCode(160));
++      expect(placeholder?.className.split(' ').sort()).toEqual(
++        ['basis-full', 'tabular-nums', 'text-muted'].sort(),
++      );
++      act(() => live(api).selectClip('music-1'));
++      const selected = line();
++      expect(selected).not.toBeNull();
++      expect(reserve()).toBeNull();
++      expect(selected?.className.split(' ')).toEqual(
++        expect.arrayContaining(['basis-full', 'truncate', 'tabular-nums', 'text-muted']),
++      );
++      expect(selected?.textContent).toBe(
++        'კლიპი: Song · start 00:02.000 · length 00:08.000 · source offset 00:01.000',
++      );
++      expect(selected?.getAttribute('title')).toBe(selected?.textContent);
++      expect(selected?.getAttribute('aria-hidden')).toBeNull();
++      act(() => live(api).selectClip(null));
++      expect(line()).toBeNull();
++      expect(reserve()?.getAttribute('data-testid')).toBe('arrangement-selected-clip-reserve');
++    });
+ 
+-  it('keeps the capped panel height when the first manual lane change turns auto-fit off, through resize and reopen (C-R11-03)', async () => {
+-    stubTimelineFrame(410);
+-    const { view, handle } = await mountTrackLayout();
+-    const panel = view.getByTestId('arrangement-detail-panel');
+-    const separator = view.getByTestId('arrangement-detail-separator');
+-    const toggle = view.getByTestId('arrangement-detail-toggle');
+-    fireEvent.click(toggle);
+-    expect(panel.style.height).toBe('130px');
+-    expect(panel.className).toContain('motion-safe:transition-[height]');
+-    fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
+-    expect(panel.style.height).toBe('130px');
+-    expect(separator.getAttribute('aria-valuenow')).toBe('130');
+-    expect(panel.className).not.toContain('motion-safe:transition-[height]');
+-    fireTimelineResize(560);
+-    expect(panel.style.height).toBe('130px');
+-    fireTimelineResize(410);
+-    expect(panel.style.height).toBe('130px');
+-    fireEvent.click(toggle);
+-    expect(panel.style.height).toBe('36px');
+-    fireEvent.click(toggle);
+-    expect(panel.style.height).toBe('130px');
+-    fireEvent.keyDown(handle('music'), { key: 'ArrowDown' });
+-    expect(panel.style.height).toBe('130px');
+-    fireEvent.pointerDown(separator, { ...press, pointerId: 40, clientY: 500 });
+-    fireEvent.pointerMove(window, { pointerId: 40, clientY: 490 });
+-    fireEvent.pointerUp(window, { pointerId: 40, clientY: 490 });
+-    expect(panel.style.height).toBe('140px');
+-    expect(separator.getAttribute('aria-valuenow')).toBe('140');
+-    fireTimelineResize(560);
+-    expect(panel.style.height).toBe('140px');
+-  });
++    it('keeps the capped panel height when the first manual lane change turns auto-fit off, through resize and reopen (C-R11-03)', async () => {
++      stubTimelineFrame(410);
++      const { view, handle } = await mountTrackLayout();
++      const panel = view.getByTestId('arrangement-detail-panel');
++      const separator = view.getByTestId('arrangement-detail-separator');
++      const toggle = view.getByTestId('arrangement-detail-toggle');
++      fireEvent.click(toggle);
++      expect(panel.style.height).toBe('130px');
++      expect(panel.className).toContain('motion-safe:transition-[height]');
++      fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
++      expect(panel.style.height).toBe('130px');
++      expect(separator.getAttribute('aria-valuenow')).toBe('130');
++      expect(panel.className).not.toContain('motion-safe:transition-[height]');
++      fireTimelineResize(560);
++      expect(panel.style.height).toBe('130px');
++      fireTimelineResize(410);
++      expect(panel.style.height).toBe('130px');
++      fireEvent.click(toggle);
++      expect(panel.style.height).toBe('36px');
++      fireEvent.click(toggle);
++      expect(panel.style.height).toBe('130px');
++      fireEvent.keyDown(handle('music'), { key: 'ArrowDown' });
++      expect(panel.style.height).toBe('130px');
++      fireEvent.pointerDown(separator, { ...press, pointerId: 40, clientY: 500 });
++      fireEvent.pointerMove(window, { pointerId: 40, clientY: 490 });
++      fireEvent.pointerUp(window, { pointerId: 40, clientY: 490 });
++      expect(panel.style.height).toBe('140px');
++      expect(separator.getAttribute('aria-valuenow')).toBe('140');
++      fireTimelineResize(560);
++      expect(panel.style.height).toBe('140px');
++    });
+ 
+-  it('still restores the stored height when the cap is released because the room grows (C-R11-03 control)', async () => {
+-    stubTimelineFrame(410);
+-    const { view } = await mountTrackLayout();
+-    const panel = view.getByTestId('arrangement-detail-panel');
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    expect(panel.style.height).toBe('130px');
+-    fireTimelineResize(560);
+-    expect(panel.style.height).toBe('144px');
+-    fireTimelineResize(410);
+-    expect(panel.style.height).toBe('130px');
+-  });
++    it('still restores the stored height when the cap is released because the room grows (C-R11-03 control)', async () => {
++      stubTimelineFrame(410);
++      const { view } = await mountTrackLayout();
++      const panel = view.getByTestId('arrangement-detail-panel');
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      expect(panel.style.height).toBe('130px');
++      fireTimelineResize(560);
++      expect(panel.style.height).toBe('144px');
++      fireTimelineResize(410);
++      expect(panel.style.height).toBe('130px');
++    });
+ 
+-  it('restores the pre-clamp stored height after a cancelled lane-height drag (C-R11-03 snapshot path)', async () => {
+-    stubTimelineFrame(410);
+-    const { view, rowHeight, handle } = await mountTrackLayout();
+-    const panel = view.getByTestId('arrangement-detail-panel');
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    fireTimelineResize(410);
+-    expect(panel.style.height).toBe('130px');
+-    const sfxBefore = rowHeight('sfx');
+-    fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 41, clientY: 300 });
+-    fireEvent.pointerMove(window, { pointerId: 41, clientY: 340 });
+-    expect(panel.style.height).toBe('130px');
+-    fireEvent.pointerCancel(window, { pointerId: 41 });
+-    expect(rowHeight('sfx')).toBe(sfxBefore);
+-    expect(panel.style.height).toBe('130px');
+-    fireTimelineResize(560);
+-    expect(panel.style.height).toBe('144px');
+-  });
++    it('restores the pre-clamp stored height after a cancelled lane-height drag (C-R11-03 snapshot path)', async () => {
++      stubTimelineFrame(410);
++      const { view, rowHeight, handle } = await mountTrackLayout();
++      const panel = view.getByTestId('arrangement-detail-panel');
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      fireTimelineResize(410);
++      expect(panel.style.height).toBe('130px');
++      const sfxBefore = rowHeight('sfx');
++      fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 41, clientY: 300 });
++      fireEvent.pointerMove(window, { pointerId: 41, clientY: 340 });
++      expect(panel.style.height).toBe('130px');
++      fireEvent.pointerCancel(window, { pointerId: 41 });
++      expect(rowHeight('sfx')).toBe(sfxBefore);
++      expect(panel.style.height).toBe('130px');
++      fireTimelineResize(560);
++      expect(panel.style.height).toBe('144px');
++    });
+ 
+-  it('keeps the capped height when a committed lane drag is followed by a cancelled one', async () => {
+-    stubTimelineFrame(410);
+-    const { view, handle } = await mountTrackLayout();
+-    const panel = view.getByTestId('arrangement-detail-panel');
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    fireTimelineResize(410);
+-    fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 43, clientY: 300 });
+-    fireEvent.pointerMove(window, { pointerId: 43, clientY: 320 });
+-    fireEvent.pointerUp(window, { pointerId: 43, clientY: 320 });
+-    expect(panel.style.height).toBe('130px');
+-    fireEvent.pointerDown(handle('stems'), { ...press, pointerId: 44, clientY: 300 });
+-    fireEvent.pointerMove(window, { pointerId: 44, clientY: 320 });
+-    fireEvent.pointerCancel(window, { pointerId: 44 });
+-    expect(panel.style.height).toBe('130px');
+-    fireTimelineResize(560);
+-    expect(panel.style.height).toBe('130px');
+-  });
++    it('keeps the capped height when a committed lane drag is followed by a cancelled one', async () => {
++      stubTimelineFrame(410);
++      const { view, handle } = await mountTrackLayout();
++      const panel = view.getByTestId('arrangement-detail-panel');
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      fireTimelineResize(410);
++      fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 43, clientY: 300 });
++      fireEvent.pointerMove(window, { pointerId: 43, clientY: 320 });
++      fireEvent.pointerUp(window, { pointerId: 43, clientY: 320 });
++      expect(panel.style.height).toBe('130px');
++      fireEvent.pointerDown(handle('stems'), { ...press, pointerId: 44, clientY: 300 });
++      fireEvent.pointerMove(window, { pointerId: 44, clientY: 320 });
++      fireEvent.pointerCancel(window, { pointerId: 44 });
++      expect(panel.style.height).toBe('130px');
++      fireTimelineResize(560);
++      expect(panel.style.height).toBe('130px');
++    });
+ 
+-  it('does not override a user panel resize made during a lane drag when that drag is cancelled', async () => {
+-    stubTimelineFrame(410);
+-    const { view, handle } = await mountTrackLayout();
+-    const panel = view.getByTestId('arrangement-detail-panel');
+-    const separator = view.getByTestId('arrangement-detail-separator');
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    fireTimelineResize(410);
+-    fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 45, clientY: 300 });
+-    fireEvent.pointerMove(window, { pointerId: 45, clientY: 320 });
+-    fireEvent.keyDown(separator, { key: 'ArrowUp' });
+-    fireEvent.keyDown(separator, { key: 'ArrowDown' });
+-    expect(panel.style.height).toBe('130px');
+-    fireEvent.pointerCancel(window, { pointerId: 45 });
+-    fireTimelineResize(560);
+-    expect(panel.style.height).toBe('130px');
+-  });
++    it('does not override a user panel resize made during a lane drag when that drag is cancelled', async () => {
++      stubTimelineFrame(410);
++      const { view, handle } = await mountTrackLayout();
++      const panel = view.getByTestId('arrangement-detail-panel');
++      const separator = view.getByTestId('arrangement-detail-separator');
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      fireTimelineResize(410);
++      fireEvent.pointerDown(handle('sfx'), { ...press, pointerId: 45, clientY: 300 });
++      fireEvent.pointerMove(window, { pointerId: 45, clientY: 320 });
++      fireEvent.keyDown(separator, { key: 'ArrowUp' });
++      fireEvent.keyDown(separator, { key: 'ArrowDown' });
++      expect(panel.style.height).toBe('130px');
++      fireEvent.pointerCancel(window, { pointerId: 45 });
++      fireTimelineResize(560);
++      expect(panel.style.height).toBe('130px');
++    });
+ 
+-  it('writes the gesture refusal status when a fold is refused during a pointer gesture (deviation 9)', async () => {
+-    stubTimelineFrame(660);
+-    const { api, view, rowHeight, fold } = await mountTrackLayout();
+-    const status = () => view.getByTestId('arrangement-status').textContent;
+-    act(() => live(api).setStatus('—'));
+-    const release = live(api).claimPointerGesture(42, () => undefined);
+-    fireEvent.click(fold('music'));
+-    expect(rowHeight('music')).toBe(81);
+-    expect(status()).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+-    act(() => live(api).setStatus('—'));
+-    fireEvent.keyDown(fold('music'), { key: ' ', code: 'Space' });
+-    expect(rowHeight('music')).toBe(81);
+-    expect(status()).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+-    act(() => {
+-      release?.();
++    it('writes the gesture refusal status when a fold is refused during a pointer gesture (deviation 9)', async () => {
++      stubTimelineFrame(660);
++      const { api, view, rowHeight, fold } = await mountTrackLayout();
++      const status = () => view.getByTestId('arrangement-status').textContent;
++      act(() => live(api).setStatus('—'));
++      const release = live(api).claimPointerGesture(42, () => undefined);
++      fireEvent.click(fold('music'));
++      expect(rowHeight('music')).toBe(81);
++      expect(status()).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++      act(() => live(api).setStatus('—'));
++      fireEvent.keyDown(fold('music'), { key: ' ', code: 'Space' });
++      expect(rowHeight('music')).toBe(81);
++      expect(status()).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++      act(() => {
++        release?.();
++      });
++      fireEvent.click(fold('music'));
++      expect(rowHeight('music')).toBe(36);
+     });
+-    fireEvent.click(fold('music'));
+-    expect(rowHeight('music')).toBe(36);
+-  });
+ 
+-  it('points every fold button’s aria-controls at its own lane body, outside the header, through fold and unfold (R23-F1)', async () => {
+-    stubTimelineFrame(660);
+-    const { row, header, fold } = await mountTrackLayout();
+-    const controlled = (trackId: string) => {
+-      const value = fold(trackId).getAttribute('aria-controls') ?? '';
+-      expect(value).not.toBe('');
+-      const target = document.getElementById(value);
+-      if (!target) {
+-        throw new Error(`aria-controls of ${trackId} does not resolve`);
+-      }
+-      expect(row(trackId).contains(target)).toBe(true);
+-      expect(header(trackId).contains(target)).toBe(false);
+-      expect(target).toBe(header(trackId).nextElementSibling);
+-      return { value, target };
+-    };
+-    const ids = new Set<string>();
+-    for (const trackId of ['video', 'music', 'stems', 'sfx']) {
+-      const { value, target } = controlled(trackId);
+-      ids.add(value);
+-      const laneClipIds = Array.from(
+-        row(trackId).querySelectorAll<HTMLElement>('[data-clip-id]'),
+-        (clip) => clip.dataset.clipId,
+-      );
+-      for (const clipId of laneClipIds) {
+-        expect(target.querySelector(`[data-clip-id="${clipId}"]`)).not.toBeNull();
++    it('points every fold button’s aria-controls at its own lane body, outside the header, through fold and unfold (R23-F1)', async () => {
++      stubTimelineFrame(660);
++      const { row, header, fold } = await mountTrackLayout();
++      const controlled = (trackId: string) => {
++        const value = fold(trackId).getAttribute('aria-controls') ?? '';
++        expect(value).not.toBe('');
++        const target = document.getElementById(value);
++        if (!target) {
++          throw new Error(`aria-controls of ${trackId} does not resolve`);
++        }
++        expect(row(trackId).contains(target)).toBe(true);
++        expect(header(trackId).contains(target)).toBe(false);
++        expect(target).toBe(header(trackId).nextElementSibling);
++        return { value, target };
++      };
++      const ids = new Set<string>();
++      for (const trackId of ['video', 'music', 'stems', 'sfx']) {
++        const { value, target } = controlled(trackId);
++        ids.add(value);
++        const laneClipIds = Array.from(
++          row(trackId).querySelectorAll<HTMLElement>('[data-clip-id]'),
++          (clip) => clip.dataset.clipId,
++        );
++        for (const clipId of laneClipIds) {
++          expect(target.querySelector(`[data-clip-id="${clipId}"]`)).not.toBeNull();
++        }
++        if (trackId !== 'video') {
++          expect(laneClipIds.length).toBeGreaterThan(0);
++        }
+       }
+-      if (trackId !== 'video') {
+-        expect(laneClipIds.length).toBeGreaterThan(0);
+-      }
+-    }
+-    expect(ids.size).toBe(4);
+-    const before = controlled('music').value;
+-    fireEvent.click(fold('music'));
+-    expect(fold('music').getAttribute('aria-expanded')).toBe('false');
+-    expect(controlled('music').value).toBe(before);
+-    fireEvent.click(fold('music'));
+-    expect(fold('music').getAttribute('aria-expanded')).toBe('true');
+-    expect(controlled('music').value).toBe(before);
+-  });
+-
+-  it('draws the track-name button’s focus ring inset on folded and unfolded lanes (R23-N)', async () => {
+-    stubTimelineFrame(660);
+-    const { view, fold } = await mountTrackLayout();
+-    const expectInsetRing = (name: string) => {
+-      const classes = view
+-        .getByRole('button', { name: `${name} — აქტიური ხაზის არჩევა` })
+-        .className.split(/\s+/);
+-      expect(classes).toContain('focus-visible:ring-2');
+-      expect(classes).toContain('focus-visible:ring-inset');
+-      expect(classes).toContain('focus-visible:ring-brand');
+-    };
+-    expectInsetRing('მუსიკა');
+-    expectInsetRing('ვიდეო');
+-    fireEvent.click(fold('music'));
+-    fireEvent.click(fold('video'));
+-    expect(fold('music').getAttribute('aria-expanded')).toBe('false');
+-    expect(fold('video').getAttribute('aria-expanded')).toBe('false');
+-    expectInsetRing('მუსიკა');
+-    expectInsetRing('ვიდეო');
+-  });
+-});
+-
+-describe('separator Home and the detail-panel ref (R24-H, R24-HC, R24-F; D-29o)', () => {
+-  beforeEach(() => {
+-    fakeClock.base = Date.now() / 1000;
+-    resizeCallbacks.clear();
+-    vi.stubGlobal('AudioContext', FakeAudioContext);
+-    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+-    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+-    vi.stubGlobal('ResizeObserver', ControlledResizeObserver);
+-    vi.stubGlobal('requestAnimationFrame', () => 1);
+-    vi.stubGlobal('cancelAnimationFrame', () => undefined);
+-    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+-    vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+-    vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
+-  });
+-
+-  afterEach(() => {
+-    vi.unstubAllGlobals();
+-    vi.restoreAllMocks();
+-  });
+-
+-  interface PositionStoreRef {
+-    current: ArrangementPositionStore | null;
+-  }
++      expect(ids.size).toBe(4);
++      const before = controlled('music').value;
++      fireEvent.click(fold('music'));
++      expect(fold('music').getAttribute('aria-expanded')).toBe('false');
++      expect(controlled('music').value).toBe(before);
++      fireEvent.click(fold('music'));
++      expect(fold('music').getAttribute('aria-expanded')).toBe('true');
++      expect(controlled('music').value).toBe(before);
++    });
+ 
+-  function PositionStoreProbe({ store }: { store: PositionStoreRef }) {
+-    store.current = useArrangementPositionStore();
+-    return null;
+-  }
++    it('draws the track-name button’s focus ring inset on folded and unfolded lanes (R23-N)', async () => {
++      stubTimelineFrame(660);
++      const { view, fold } = await mountTrackLayout();
++      const expectInsetRing = (name: string) => {
++        const classes = view
++          .getByRole('button', { name: `${name} — აქტიური ხაზის არჩევა` })
++          .className.split(/\s+/);
++        expect(classes).toContain('focus-visible:ring-2');
++        expect(classes).toContain('focus-visible:ring-inset');
++        expect(classes).toContain('focus-visible:ring-brand');
++      };
++      expectInsetRing('მუსიკა');
++      expectInsetRing('ვიდეო');
++      fireEvent.click(fold('music'));
++      fireEvent.click(fold('video'));
++      expect(fold('music').getAttribute('aria-expanded')).toBe('false');
++      expect(fold('video').getAttribute('aria-expanded')).toBe('false');
++      expectInsetRing('მუსიკა');
++      expectInsetRing('ვიდეო');
++    });
++  },
++);
++
++describe(
++  'separator Home and the detail-panel ref (R24-H, R24-HC, R24-F; D-29o)',
++  { timeout: 15_000 },
++  () => {
++    beforeEach(() => {
++      fakeClock.base = Date.now() / 1000;
++      resizeCallbacks.clear();
++      vi.stubGlobal('AudioContext', FakeAudioContext);
++      vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++      vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++      vi.stubGlobal('ResizeObserver', ControlledResizeObserver);
++      vi.stubGlobal('requestAnimationFrame', () => 1);
++      vi.stubGlobal('cancelAnimationFrame', () => undefined);
++      vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++      vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++      vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++    });
+ 
+-  async function mountHomeHarness() {
+-    const api: LayoutApiRef = { current: null };
+-    const store: PositionStoreRef = { current: null };
+-    const view = render(
+-      <ArrangementProvider collection={layoutCollection} initialArrangement={layoutArrangement()}>
+-        <StudioWorkspace />
+-        <LayoutProbe api={api} />
+-        <PositionStoreProbe store={store} />
+-      </ArrangementProvider>,
+-    );
+-    await act(async () => {
+-      await Promise.resolve();
+-      await Promise.resolve();
++    afterEach(() => {
++      vi.unstubAllGlobals();
++      vi.restoreAllMocks();
+     });
+-    const readPosition = () => {
+-      if (!store.current) {
+-        throw new Error('position store not mounted');
+-      }
+-      return store.current.getPosition();
+-    };
+-    const seekToFive = () => {
+-      act(() => live(api).seekTo(5));
+-      expect(readPosition()).toBe(5);
+-    };
+-    const pressHome = (target: HTMLElement) => {
+-      target.focus();
+-      return fireEvent.keyDown(target, { key: 'Home', code: 'Home' });
+-    };
+-    return { api, view, readPosition, seekToFive, pressHome };
+-  }
+ 
+-  it('keeps the position, status and aria-valuenow when Home is pressed on each focused separator, but still prevents the default (R24-H)', async () => {
+-    stubTimelineFrame(660);
+-    const { api, view, readPosition, seekToFive, pressHome } = await mountHomeHarness();
+-    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+-    seekToFive();
+-    const separators = [
+-      view.getByRole('separator', { name: 'მუსიკა სიმაღლე' }),
+-      view.getByTestId('arrangement-detail-separator'),
+-      view.getByTestId('arrangement-library-separator'),
+-    ];
+-    for (const separator of separators) {
+-      const valueBefore = separator.getAttribute('aria-valuenow');
+-      const statusBefore = live(api).status;
+-      const isNotPrevented = pressHome(separator);
+-      expect(isNotPrevented).toBe(false);
+-      expect(document.activeElement).toBe(separator);
+-      expect(readPosition()).toBe(5);
+-      expect(separator.getAttribute('aria-valuenow')).toBe(valueBefore);
+-      expect(live(api).status).toBe(statusBefore);
++    interface PositionStoreRef {
++      current: ArrangementPositionStore | null;
+     }
+-  });
+ 
+-  it('still seeks to 0 on Home from the body and a fold button, and leaves a focused volume slider to the browser (R24-HC)', async () => {
+-    stubTimelineFrame(660);
+-    const { view, readPosition, seekToFive, pressHome } = await mountHomeHarness();
+-    seekToFive();
+-    expect(pressHome(document.body)).toBe(false);
+-    expect(readPosition()).toBe(0);
+-    seekToFive();
+-    const fold = view.container.querySelector<HTMLElement>(
+-      '[data-track-id="music"] [data-testid="arrangement-track-fold"]',
+-    );
+-    if (!fold) {
+-      throw new Error('music fold button missing');
++    function PositionStoreProbe({ store }: { store: PositionStoreRef }) {
++      store.current = useArrangementPositionStore();
++      return null;
+     }
+-    expect(pressHome(fold)).toBe(false);
+-    expect(readPosition()).toBe(0);
+-    seekToFive();
+-    const volume = view.container.querySelector<HTMLInputElement>(
+-      '[data-track-id="music"] input[type="range"]',
+-    );
+-    if (!volume) {
+-      throw new Error('music volume slider missing');
++
++    async function mountHomeHarness() {
++      const api: LayoutApiRef = { current: null };
++      const store: PositionStoreRef = { current: null };
++      const view = render(
++        <ArrangementProvider collection={layoutCollection} initialArrangement={layoutArrangement()}>
++          <StudioWorkspace />
++          <LayoutProbe api={api} />
++          <PositionStoreProbe store={store} />
++        </ArrangementProvider>,
++      );
++      await act(async () => {
++        await Promise.resolve();
++        await Promise.resolve();
++      });
++      const readPosition = () => {
++        if (!store.current) {
++          throw new Error('position store not mounted');
++        }
++        return store.current.getPosition();
++      };
++      const seekToFive = () => {
++        act(() => live(api).seekTo(5));
++        expect(readPosition()).toBe(5);
++      };
++      const pressHome = (target: HTMLElement) => {
++        target.focus();
++        return fireEvent.keyDown(target, { key: 'Home', code: 'Home' });
++      };
++      return { api, view, readPosition, seekToFive, pressHome };
+     }
+-    expect(pressHome(volume)).toBe(true);
+-    expect(readPosition()).toBe(5);
+-  });
+ 
+-  it('points an optional panelRef at the detail panel section (R24-F)', async () => {
+-    const panelRef: { current: HTMLElement | null } = { current: null };
+-    const view = render(
+-      <ArrangementProvider collection={layoutCollection} initialArrangement={layoutArrangement()}>
+-        <ArrangementDetailPanel
+-          selection={null}
+-          group={null}
+-          peaks={undefined}
+-          range={null}
+-          setTimeRange={() => undefined}
+-          setStatus={() => undefined}
+-          isPointerGestureActive={() => false}
+-          claimPointerGesture={() => () => undefined}
+-          measureTimelineFit={() => null}
+-          panelRef={panelRef}
+-        />
+-      </ArrangementProvider>,
+-    );
+-    await act(async () => {
+-      await Promise.resolve();
+-      await Promise.resolve();
++    it('keeps the position, status and aria-valuenow when Home is pressed on each focused separator, but still prevents the default (R24-H)', async () => {
++      stubTimelineFrame(660);
++      const { api, view, readPosition, seekToFive, pressHome } = await mountHomeHarness();
++      fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++      seekToFive();
++      const separators = [
++        view.getByRole('separator', { name: 'მუსიკა სიმაღლე' }),
++        view.getByTestId('arrangement-detail-separator'),
++        view.getByTestId('arrangement-library-separator'),
++      ];
++      for (const separator of separators) {
++        const valueBefore = separator.getAttribute('aria-valuenow');
++        const statusBefore = live(api).status;
++        const isNotPrevented = pressHome(separator);
++        expect(isNotPrevented).toBe(false);
++        expect(document.activeElement).toBe(separator);
++        expect(readPosition()).toBe(5);
++        expect(separator.getAttribute('aria-valuenow')).toBe(valueBefore);
++        expect(live(api).status).toBe(statusBefore);
++      }
+     });
+-    expect(panelRef.current).not.toBeNull();
+-    expect(panelRef.current).toBe(view.getByTestId('arrangement-detail-panel'));
+-  });
+-});
++
++    it('still seeks to 0 on Home from the body and a fold button, and leaves a focused volume slider to the browser (R24-HC)', async () => {
++      stubTimelineFrame(660);
++      const { view, readPosition, seekToFive, pressHome } = await mountHomeHarness();
++      seekToFive();
++      expect(pressHome(document.body)).toBe(false);
++      expect(readPosition()).toBe(0);
++      seekToFive();
++      const fold = view.container.querySelector<HTMLElement>(
++        '[data-track-id="music"] [data-testid="arrangement-track-fold"]',
++      );
++      if (!fold) {
++        throw new Error('music fold button missing');
++      }
++      expect(pressHome(fold)).toBe(false);
++      expect(readPosition()).toBe(0);
++      seekToFive();
++      const volume = view.container.querySelector<HTMLInputElement>(
++        '[data-track-id="music"] input[type="range"]',
++      );
++      if (!volume) {
++        throw new Error('music volume slider missing');
++      }
++      expect(pressHome(volume)).toBe(true);
++      expect(readPosition()).toBe(5);
++    });
++
++    it('points an optional panelRef at the detail panel section (R24-F)', async () => {
++      const panelRef: { current: HTMLElement | null } = { current: null };
++      const view = render(
++        <ArrangementProvider collection={layoutCollection} initialArrangement={layoutArrangement()}>
++          <ArrangementDetailPanel
++            selection={null}
++            group={null}
++            peaks={undefined}
++            range={null}
++            setTimeRange={() => undefined}
++            setStatus={() => undefined}
++            isPointerGestureActive={() => false}
++            claimPointerGesture={() => () => undefined}
++            measureTimelineFit={() => null}
++            panelRef={panelRef}
++          />
++        </ArrangementProvider>,
++      );
++      await act(async () => {
++        await Promise.resolve();
++        await Promise.resolve();
++      });
++      expect(panelRef.current).not.toBeNull();
++      expect(panelRef.current).toBe(view.getByTestId('arrangement-detail-panel'));
++    });
++  },
++);
+diff --git a/app/lib/arrangement/grid.ts b/app/lib/arrangement/grid.ts
+index 43073f9..20206e4 100644
+--- a/app/lib/arrangement/grid.ts
++++ b/app/lib/arrangement/grid.ts
+@@ -1,3 +1,5 @@
++import type { ArrangementClip } from '~/types/arrangement';
++
+ export const GRID_DIVISIONS_SECONDS = [10, 5, 2, 1, 0.5, 0.25, 0.1] as const;
+ 
+ export const GRID_DEFAULT_DIVISION_SECONDS = 1;
+@@ -31,6 +33,16 @@ export function resolveSnapStep(
+   return bypass ? (gridSeconds ?? null) : null;
+ }
+ 
++export function resolveGridTime(
++  time: number,
++  snapSeconds: number | null,
++  gridSeconds: number | undefined,
++  bypass: boolean,
++): number {
++  const step = resolveSnapStep(snapSeconds, gridSeconds, bypass);
++  return step === null ? time : snapTimeToGrid(time, step);
++}
++
+ export function adjacentGridLine(time: number, step: number, direction: -1 | 1): number | null {
+   if (direction === 1) {
+     return roundGridTime((Math.floor((time + GRID_TIME_TOLERANCE) / step) + 1) * step);
+@@ -72,3 +84,125 @@ export function gridLinesVisible(step: number, pxPerSecond: number): boolean {
+ export function formatGridDivision(step: number): string {
+   return `${step} წმ`;
+ }
++
++export function adjacentGridDivision(
++  current: number,
++  direction: 'narrow' | 'widen',
++): number | null {
++  const divisions: readonly number[] = GRID_DIVISIONS_SECONDS;
++  const index = divisions.indexOf(current);
++  if (index < 0) {
++    return null;
++  }
++  return divisions[direction === 'narrow' ? index + 1 : index - 1] ?? null;
++}
++
++function toWholeMicroseconds(value: number): number {
++  return Math.round(value * 1e6);
++}
++
++function sortedUniqueEdgeTimes(times: readonly number[]): number[] {
++  const unique: number[] = [];
++  for (const time of [...times].sort((a, b) => a - b)) {
++    const last = unique.at(-1);
++    if (last === undefined || toWholeMicroseconds(time) !== toWholeMicroseconds(last)) {
++      unique.push(time);
++    }
++  }
++  return unique;
++}
++
++export function clipEdgeTimes(clips: readonly ArrangementClip[], excludeClipId: string): number[] {
++  const edges: number[] = [];
++  for (const clip of clips) {
++    if (clip.id !== excludeClipId) {
++      edges.push(clip.start, clip.start + clip.duration);
++    }
++  }
++  return sortedUniqueEdgeTimes(edges);
++}
++
++export function clipEdgeTargets(
++  clips: readonly ArrangementClip[],
++  excludeClipId: string,
++  laneTrackId: string,
++): { startEdges: number[]; endEdges: number[] } {
++  const laneClips = clips.filter(
++    (clip) => clip.id !== excludeClipId && clip.trackId === laneTrackId,
++  );
++  const otherEdges = clipEdgeTimes(
++    clips.filter((clip) => clip.trackId !== laneTrackId),
++    excludeClipId,
++  );
++  return {
++    startEdges: sortedUniqueEdgeTimes([
++      ...otherEdges,
++      ...laneClips.map((clip) => clip.start + clip.duration),
++    ]),
++    endEdges: sortedUniqueEdgeTimes([...otherEdges, ...laneClips.map((clip) => clip.start)]),
++  };
++}
++
++function nearestGridOrEdge(
++  raw: number,
++  gridLine: number,
++  edgeCandidates: readonly number[],
++): number {
++  let best = gridLine;
++  let bestDistance = toWholeMicroseconds(Math.abs(gridLine - raw));
++  for (const candidate of edgeCandidates
++    .filter((time) => toWholeMicroseconds(time) >= 0)
++    .sort((a, b) => a - b)) {
++    const distance = toWholeMicroseconds(Math.abs(candidate - raw));
++    if (distance < bestDistance) {
++      best = candidate;
++      bestDistance = distance;
++    }
++  }
++  return best;
++}
++
++export function snapTimeToGridOrEdges(
++  time: number,
++  step: number,
++  edges: readonly number[],
++): number {
++  return nearestGridOrEdge(time, snapTimeToGrid(time, step), edges);
++}
++
++export function snapMoveStartToGridOrEdges(
++  start: number,
++  duration: number,
++  step: number,
++  edges: readonly number[],
++  endEdges: readonly number[] = edges,
++): number {
++  return nearestGridOrEdge(start, snapTimeToGrid(start, step), [
++    ...edges,
++    ...endEdges.map((edge) => edge - duration),
++  ]);
++}
++
++export function snapGroupMoveDelta(
++  anchorStart: number,
++  anchorDuration: number,
++  rawDelta: number,
++  step: number,
++  minDelta: number,
++  maxDelta: number,
++  startEdges: readonly number[],
++  endEdges: readonly number[],
++): { requested: number; allowed: number } {
++  const rawStart = anchorStart + rawDelta;
++  const gridStart = snapTimeToGrid(rawStart, step);
++  const target = snapMoveStartToGridOrEdges(rawStart, anchorDuration, step, startEdges, endEdges);
++  const gridFallback = snapGroupDelta(anchorStart, rawDelta, step, minDelta, maxDelta);
++  const gridResult = { requested: roundGridTime(gridStart - anchorStart), allowed: gridFallback };
++  if (toWholeMicroseconds(target) === toWholeMicroseconds(gridStart)) {
++    return gridResult;
++  }
++  const requested = toWholeMicroseconds(target - anchorStart) / 1e6;
++  const inBounds =
++    requested >= minDelta - GRID_TIME_TOLERANCE && requested <= maxDelta + GRID_TIME_TOLERANCE;
++  return inBounds ? { requested, allowed: requested } : gridResult;
++}
+diff --git a/app/lib/arrangement/selection.ts b/app/lib/arrangement/selection.ts
+index 7bfbb63..5beeeed 100644
+--- a/app/lib/arrangement/selection.ts
++++ b/app/lib/arrangement/selection.ts
+@@ -169,7 +169,7 @@ export function planClipLaneMove(
+   if (!anchor || !targetTrack) {
+     return refusedLanePlan('out-of-range');
+   }
+-  const delta = Math.round(params.timeDelta * 1000) / 1000;
++  const delta = Math.round(params.timeDelta * 1e6) / 1e6;
+   const anchorPlacement: ClipLanePlacement = {
+     clipId: anchor.id,
+     trackId: targetTrack.id,

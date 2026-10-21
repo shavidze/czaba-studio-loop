@@ -1,0 +1,12 @@
+# B round 35 checkpoint
+- 2026-10-13T16:56:50+04:00 archived current-task.md -> tasks/round-35.md (cmp SAME); backups *.before-b-round-35 / .bak-before-b-round-35 created.
+- A stopped (frozen fader-guards l.1265/l.1272 conflict); C BLOCKED, C-R34-01 reproduces, G35-2/3 PASS. Next: ruling + round-36 re-dispatch.
+- gates done (b-round-35/gates.txt): HEAD 1cefea1, 9 lines, 376 OK, owned shas = snapshots, protected 4/4, tsc 0, vitest 69/1247, build ok
+- b-round-35-tree-sha256.txt (=r34 list, 376) + b-round-35-snapshots/ created
+- plan D-29z1 written
+- backlog v37 written
+- feature-status written
+- current-task.md round 36 written
+- b-round-35.md + b-next.json written; pending final advisor
+- final advisor sharpenings applied (mutation c kill list, intermediate count, R36-S diff wording). DONE 2026-10-13T17:06:44+04:00
+- task-fix: restored diff -u wording at R36-S (shell substitution slip). DONE 2026-10-13T17:06:55+04:00

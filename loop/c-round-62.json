@@ -1,0 +1,67 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R62-01",
+      "severity": "low",
+      "steps": [
+        "Open http://127.0.0.1:5173/studio-lab in a fresh context at 1440x900 and use the L52 fixture: video 0/6.008, music 7/16, SFX 'Soft impact' 4/2.",
+        "With Snap off, drag 'Slow rise' from the library to the stems lane at 12.3, and 'Middle East' to the stems lane at 19.3 (Slow rise maxDelta = 2.0).",
+        "Set division 1 and Snap on (REAL g).",
+        "Click the 'Soft impact' header, then Ctrl+click the 'Slow rise' header.",
+        "Drag the 'Soft impact' header +81 px (raw start 6.025) and release."
+      ],
+      "expected": "The group lands on grid line 6 (delta 2), as it did before round 62 when this was a normal unblocked move, and the release status reads 'გადატანა (2): 2 კლიპი გადავიდა 00:02.000-ით მარჯვნივ.' At minimum, the user is not told that a completed move was stopped. B must rule: D-29z27 G3 as written keeps gesture.blocked = requested != allowed.",
+      "actual": "Both clips move +2 (SI 6; Slow rise 14.3-19.3) and Undo reads 'გადატანა (2)'. However, both the mid-drag status and the status after release read 'ჯგუფის გადატანა შეჩერდა — მეზობელი კლიპი ან დროის დასაწყისი.' and no success status is written. Cause: the nearer video edge 6.008 (delta 2.008) is out of bounds, so requested != allowed.",
+      "evidence": "c-round-62/runs/pw62-1440x900-r2.txt (A's R2 / A-R62-REVIEW-OOB-EDGE-STATUS); code: ArrangementClip.tsx l.440-443 and l.606-612"
+    }
+  ],
+  "passed": [
+    "G62-2",
+    "R62-S",
+    "R62-U",
+    "G62-1",
+    "CE7",
+    "CE8",
+    "CE9",
+    "CM10",
+    "CG1",
+    "CG2",
+    "CG3-unit-only",
+    "CG4",
+    "CG5",
+    "CG6",
+    "CM9f",
+    "CM9g",
+    "CM9h",
+    "CM17",
+    "GE-START-1440x900",
+    "GE-START-1280x720",
+    "GE-END-1440x900",
+    "GE-END-1280x720",
+    "GE-MEMBER-1440x900",
+    "GE-MEMBER-1280x720",
+    "GE-BOUNDS-1440x900",
+    "GE-CROSS-1440x900",
+    "GE-ALT-1440x900",
+    "GE-ALT-1280x720",
+    "GE-OFF-1440x900",
+    "GE-OFF-1280x720",
+    "GE-PLAY-1440x900",
+    "EG-REG-1440x900",
+    "EG-REG-1280x720",
+    "EG-GROUP-1440x900",
+    "G62-3-workspace-direct",
+    "G62-3-workspace-header",
+    "G62-3-network",
+    "G62-3-sign-in-gate"
+  ],
+  "blocked": [
+    "G62-3 token rows (anonymous 401 and fake-Bearer 403): not run (environment). Backend :5199 returned 000 for the whole C run. Codes recorded: 401 and 500.",
+    "Sub-ms group exactness in the browser: not testable. Every probed /studio-lab duration is whole-ms (6.008, 16, 2, 5, 101.352), so CG3 is unit-only.",
+    "Ableton rows for anchor-only snapping, snap priority, out-of-bounds fallback and Shift time lock: unconfirmed (no source); CZABA requirement verified separately.",
+    "Out of round-62 scope (§4.9), not run: video sync (C-R27-01), the full find->add->fit video->export WAV flow, the FB-01..FB-16 stage regression, test:e2e:smoke.",
+    "Tech Lead manual R62-T (real mouse feel, real Windows Alt key): not measurable headless.",
+    "Ableton conformance is reported in c-round-62.md. Confirmed: edge snap for a single dragged clip (§6.7), and Alt bypass (§6.10). The Alt temporary-enable half was not re-tested for groups."
+  ]
+}

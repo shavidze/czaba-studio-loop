@@ -1,0 +1,152 @@
+# Active loop summary (2026-10-21T13:29:57.754Z)
+
+- backlog.json 696 KB -> active view 98 KB
+- status: B_PLANNING_NEXT round 70
+- servers: `{"checkedUtc":"2026-10-21T13:29:57.5974447Z","round":71,"attempt":1,"backend":200,"store":200}`
+- last publication: 2be45dfea67f8289c77c83c9db47612d34f7c29f (rounds 70-70)
+- last root gate: round 70 published - commit 2be45dfea67f8289c77c83c9db47612d34f7c29f pushed
+
+## Current items: SRW-15
+
+## Open findings
+- lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
+- untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
+- untracked-codex-frontend-architect-toml / - / root / 
+- vitest-sfx-library-timeout-flake / - / watch / 
+- dirty-tree-exposure / - / root / No commit since c5ed47b; the Studio work of rounds 6-19 (18 M + 22 untracked) is uncommitted. Policy-correct (final commit/push by root afte
+- shared-modal-no-focus-management / low / root / components/ui/Modal.tsx (shared, read-only for the Studio loop) does not move focus into the dialog or trap Tab; round 14 fixes only Arrange
+- root-ga-scroll-consent-denied / low / root / C round 14 (G14-3): with consent denied (gcs=G100, npa=1) root GA also sends a scroll event besides page_view. Root analytics, outside the S
+- a-r17-dev-4-python-kill / - / root / A round 17 killed two python.exe processes (one unknown PID); recorded orchestrator PIDs still ran. Root confirms no needed helper was kille
+- a-r22-dev-4-inplace-mutation / low / carried / A round 22 mutated graph.client.ts in place for a few seconds; the shared dev server may have served it via HMR; file restored byte-identica
+- C-R23-01 / medium / open_tech_lead_decision / SSR stream contains NUL bytes: react-dom@18.3.1 server writeStringChunk flushes the whole 2048-byte view (unwritten zero bytes) when a 3-byt
+- R26-M1 / low / scheduled / A round 26 code-reviewer M1: meters sample once per rAF from 4096-sample analysers (85 ms at 48 kHz); a frame stall over ~85 ms or a hidden 
+- DEMO-SFX-FULL-SCALE / low / open_tech_lead_decision / The stock demo SFX "Soft impact" alone reaches full scale: at Master 0 dB the live Master Peak shows +0.0 Clip and the export clamps 2 sampl
+- C-R27-01 / medium / open_tech_lead_quiet_chrome / 
+- L3-REMOVED-TRACK-TAPS / low / open / 
+- machine-load-node-processes / info / open_root / 
+- C-R28-INFO-NO-EDGE-FADES / info / routed / cuts at range edges are hard (no automatic fade); Ableton applies short automatic fades. CZABA has no fade feature yet; SRW-18 covers fades.
+- C-R29-NPX-CACHE / info / root_note / C round 29 first mutation attempt (invalid, no node_modules) made npx fetch vitest@5.0.4 into the npm cache; project, lockfile and store unc
+- ROOT-CRLF-AUTH / info / root_note / after the 1cefea1 merge, app/lib/auth.ts and auth-bugs.test.ts working copies are CRLF (core.autocrlf=true, index LF): Biome ./app reports 2
+- ROOT-AGENT-WRITE-GRANT / info / root_note / tracked .claude/agents/frontend-architect.md grants Write/Bash while its text says app code is read-only
+- A-R33-REVIEW-TOUCH / low / open_tech_lead_check / a touch scroll on the timeline blurs a focused fader at pointerdown, so a pending keyboard Volume/Master preview commits early (no data loss
+- A-R34-REVIEW-RESIDUALS / low / open / A round-34 review residuals: RTL left scrollbar not counted as gutter; Firefox overlay scrollbars (0 px client-box gutter); a right-button p
+- CHECKPOINT-OCT13-REVIEW-TRIAGE / info / triaged / checkpoint-oct13-review.md suggestions 1-10 triaged
+- C-R38-01 / low / open_tech_lead_decision / C-R23-01 NUL bytes now fall inside two aria-label attributes (library collapse button, detail range start input); hydration does not repair 
+- A-R38-REVIEW-TOUCH / medium / open_tech_lead_check / possible native touch slide on the range faders: pointerdown.preventDefault does not stop touch events, so a touch press might still jump th
+- DETAIL-REASON-FIT / low / converted / the disabled Clip Gain reason (video 345.5 px, group 320.6 px nowrap) wraps to 3 lines in the w-32 slot and the range group reason (w-44) to
+- MARKER-LIVE-REGION / info / rejected / the unsaved marker is not a live region (a-round-39.md review #8)
+- DETAIL-RESET-SHRINK / info / open (B option, no measured defect) / the 0 dB button in the marker row has no shrink-0 (a-round-40 reviewer Low #4); C measured 44.2 px stable at both viewports with the 69.8 px
+- ENV-BROWSE-DAEMON / info / open (environment) / the gstack browse daemon failed to start within 15 s twice in C round 40, one restart hung 10 min and it stopped responding after 18:05; the
+- CHECKPOINT-R40-REVIEW-TRIAGE / info / triaged / checkpoint-r40-reviews.md (round 40 review 9/10, round 39 review 8.5/10) triaged
+- C-R41-01 / low / open (Tech Lead viewport question TL-Q-VIEWPORT) / at 1024x768 (below the user-named 1280x720 / 1440x900 viewports) the middle/waveform box shrinks to min-w-32 (128 px): the video Clip Gain r
+- GSTACK-ACL / low / open_root / tmp/studio-real-loop and tmp carry a single non-inherited owner-only ACE (sshav:(OI)(CI)(F)); gstack printed a failed icacls /inheritance:r 
+- SETTRACKMIX-NAN-IDENTITY / low / open / setTrackMix has no Number.isFinite guard (NaN would be stored) and always returns a new object even when nothing changes
+- BIOME-HOOKS-DEPS / low / open / Biome useExhaustiveDependencies does not check custom effect hooks (useIsomorphicLayoutEffect: 8 sites after round 46; usePositionWriterEffe
+- HOMEPAGE-SSR-FETCH-INFO / info / root / homepage SSR logs 'Error loading homepage products: fetch failed' while the backend is down
+- ARCH-CHECKPOINT-SRW13 / info / requested_from_root / bounded architecture checkpoint at the SRW-13 feature boundary: ArrangementContext.tsx (2850 lines), StudioWorkspace.tsx (1552), Arrangement
+- GSTACK-NO-MOUSE / info / open / gstack browse CLI, its CDP allowlist and the server-node.mjs fallback expose no mouse down/move/up; C47 REAL-mouse drags used standalone Pla
+- ALT-CHROME-MENU / info / unconfirmed / Windows Chrome may focus its app-menu button when a lone Alt is released after an Alt+drag; CDP-dispatched keys (gstack/Playwright) never re
+- VIDEO-CLIP-TRANSLUCENT-GRID / low / open / video clip background bg-accent/10 (header /30) is translucent, so grid lines show through video clips (design-philosopher, root r47 review)
+- ARCH-CHECKPOINT-SRW14-PREFS / info / requested (sixth request, round 69 planning, SRW-14 feature boundary): (a) useGridPreferences proposal from the root round-68 reviewer (gates/round-68/review.md Architecture note), (b) time precision incl. the 1.334 s range readout, (c) shared UI test harness (4th grid UI file in round 69), (d) grid-menu state, (e) focus-release predicate, (f) metronome buffers; non-gating / bounded checkpoint: StudioWorkspace view/edit preferences (followMode, snapEnabled, gridSeconds + refs) vs a non-history edit-preferences sl
+- ABLETON-R49-CLICK-ROW / info / corrected / round-49 task section 4.8 marked 'click in a clip selects a point (insert marker)' as Confirmed from 6.9; the saved 6.9 text names clicking 
+- ROOT-COMMIT-ROUND50 / info / open / round 50 (7 paths) C PASS and commit-ready; root owns e2e smoke, review, commit and push to both URLs; round 51 baseline tolerates either st
+- A-R51-REVIEW-SL7-CLAMP / info / scheduled / SL7 (loop 0.3-1.5, bar -30 px) is green on the snapshot because moveLoop clamps -0.45 to 0; it cannot tell snapping from clamping; fixture 0
+- CTRL-DIGIT-BROWSER-RESERVED / info / decided (D-29z24): untestable by C (CDP keys never reach the browser accelerator layer, as ALT-CHROME-MENU); CZABA binds plain Digit1/Digit2; Ctrl/Cmd+digit left to the browser / Live 6.10 narrow/widen are Ctrl+1/Ctrl+2; in Chrome Ctrl+1..8 may switch tabs before the page can prevent it; B must check (gstack/PW, real 
+- R52-T-TECH-LEAD / info / open / R52-T: real-mouse feel of the clip-edge magnet (incl. 5-10 s divisions); should the magnet also work with Snap off (Live unconfirmed)
+- ROOT-COMMIT-ROUND51 / info / open / rounds 50 + 51 (11 paths, StudioWorkspace shared) C PASS and commit-ready on 038ed5a; suggested single commit 'feat(studio): snap seeks, lib
+- ENV-VITE-ENOMEM-R53 / info / open / probable cause of ENV-DEV-SERVER-DOWN: the dev server process died with an unhandled FSWatcher error 'ENOMEM: not enough memory, scandir C:\
+- R57-T-TECH-LEAD / info / open / right-click on a lane in the Tech Lead Chrome shows the CZABA grid menu (not Chrome), choosing a division feels immediate
+- A-R57-REVIEW-PAGE-TRANSITION / info / open (browser probe) / position: fixed menu during the PageTransition enter transform could be offset
+- R58-T-TECH-LEAD / info / open / with the grid menu open, a click on Snap, Play or Export only closes the menu; during playback with Follow on the menu stays open while the 
+- A-R58-REVIEW-ANDROID-TAP-CLICK / low / open (needs a real device) / on Chrome Android the tap click can arrive after the pointerup + macrotask release, so a dismissing tap may still activate the control under
+- R59-T-TECH-LEAD / info / open / in a real Chrome on /studio-lab: 1/2 narrow/widen the grid; typing 1 in the library search stays text; observe what Ctrl+1/Ctrl+2 do (expect
+- ROOT-PRE-PUSH-REVIEW-MTIME / info / corrected / the B round-59 task said root-pre-push-review.md was unchanged since 2026-10-07; root appended a note at 2026-10-18 12:46:34
+- R60-T-TECH-LEAD / info / open / real Chrome: choose a division in the open select popup with the mouse, then 1/2 step the grid (no jump to 10 s); note what 1 does with the 
+- INFO-R60-SHIFT1-SYNTH / info / open (Tech Lead R61-T) / synthetic key 1 + Shift on the focused select type-aheads to 10 s; layout-faithful Shift+Digit1 (key !) does nothing; real US keyboard confi
+- R60-COMMIT-RULING / info / ruled (B, round 61 planning) / round 60 is committable as its own interim unit: in-scope behaviour C-verified; C-R60-01 pre-existing, C-R60-02 conforms to the rule as writ
+- MENU-ONLY-BOUNDARY-R61 / info / ruled (B, D-29z26) / round 61 is the last menu-only round; later Low/info grid-menu findings are batched with the Lows; only Medium+ or a regression of C-verifie
+- R61-T-TECH-LEAD / info / open / real Chrome: click the open grid menu border/divider - arrows and Escape still work; hold Shift ~1 s then click Play outside the open menu -
+- R62-T-TECH-LEAD / info / open / real Chrome: a selected group snaps onto another track clip start/end with Snap on and moves by one delta; Alt keeps it free; a group blocke
+- R63-T-TECH-LEAD / info / open / real Chrome: a selected group dragged next to a clip whose edge it cannot reach without overlapping a neighbour stops on a grid line, and th
+- C-R63-NPX-CACHE / info / root_note / C round 63 reproduction ran npx tsx and fetched tsx@4.23.15 into the user npm cache; project, package.json and lockfile unchanged
+- R64-T-TECH-LEAD / info / open / real Chrome: a library sound dropped near a clip edge butts that edge (Snap on, or Snap off + Alt); Snap on + Alt drops free
+- INFO-R64-TYPE-IMPORT / info / acknowledged (B, round 65 planning): type-only import required by the signature / extra type LibraryDragSource import in ArrangementLane.tsx beyond the section 0.3 wording
+- B-R64-SPEC-LDPLAY / info / acknowledged: future LD-PLAY-type rows use an empty lane or the scheduled-start check / LD-PLAY meter criterion not applicable after LD-EDGE (the previous clip on the lane sounds until the drop start)
+- INFO-R64-BLOCKED-NO-STATUS / info / acknowledged: real-browser dropEffect none -> no drop event -> no status; DE4 covers jsdom only / a blocked library drop writes no status in a real browser
+- ROOT-R64-M1-EDGE-RADIUS / medium (product, reviewer) / open_tech_lead_decision - already ruled in D-29z18 option (a) (nearest-wins without a pixel radius, user 2.srt 07:00); R52-T(1) feel check; not scheduled / edge snapping has no pixel threshold; any clip edge nearer than the grid line wins (up to 5 s on the 10 s grid)
+- ROOT-R64-L2 / low / scheduled in round 67 (D-29z32 rule 7: end messages computed from the family list ends); closes on C evidence / hardcoded GRID_DIVISIONS_SECONDS[6]/[0] in the narrowest/widest messages (StudioWorkspace.tsx l.99-100)
+- ROOT-R64-L3 / low / open - Lows batch / Alt on dragover/drop may be unreliable across browsers (headless PASS round 64; real Chrome = R64-T)
+- ROOT-R64-L4 / low / open - Lows batch / grid menu cannot be opened from the keyboard (Shift+F10 / ContextMenu key)
+- ROOT-R64-L5 / low / open - Lows batch / macOS Ctrl+click on an empty lane seeks instead of opening the grid menu
+- ROOT-R64-L6 / low / open - Lows batch / uniform 15 s describe timeouts may hide render-cost regressions; profile the slowest suites
+- R65-T-TECH-LEAD / info / open / real Chrome: type a tempo (90) - bars 1, 2, 3 appear under the seconds; the music sounds exactly as before; the row place and size feel righ
+- INFO-C65-SPEC-999.5 / info / adopted (B, D-29z31): 999.5 is part of the T3/U5 spec lists / mutation (a) (999 bound removed) is killed only by the 999.5 value A added to T3/U5
+- INFO-C65-RU-DBLCLICK-MISS / info / watch / 1 of 9 ruler double-click Fit misses (1440 attempt 2); not reproduced 8/8
+- INFO-C65-RB-FLAKE / info / watch / render-budget start-hold test failed once in C scratch under load (0.005 vs 0); clean runs green
+- INFO-C65-SELECT-FOCUS / low / open - Lows batch / focused grid select stays focused on its own click (intended, 0.1(10)); no unit test for the select path
+- INFO-C65-LS-SESSION / info / root_note / anonymous /studio-lab localStorage holds czaba_session_id (root cart), no auth keys
+- INFO-C65-ONSET-EDGE / info / watch (shapes round 66 meter rows: slow BPM) / no-BPM meter onset 4.131 s near the +0.15 edge (meter sampling); export first audible exactly 4.000 s
+- INFO-C65-HARNESS-R2-REGEX / info / applied to the round 66 harness rules (r2-proxy|workers.dev) / PW forbidden-host regex missed the czaba-r2-proxy workers.dev host
+- ROOT-R65-L2 / low / open - Lows batch / R65-T / BPM input 16 px tall (WCAG 2.5.8 24 px), ring-1 vs the select ring-2
+- ROOT-R65-L4 / low / open - Lows batch / window blur (Alt-Tab) commits a half-typed tempo
+- ROOT-R65-L5 / low / open - Lows batch / tempo Enter does not check nativeEvent.isComposing (IME)
+- ROOT-R65-L6 / low / partly closed: doc 058 status line done round 70 (C R70-S, published 2be45df); U12-before-U11 ordering stays in the Lows batch / doc 058 status line still says awaiting C; U12 defined before U11 (cosmetic)
+- A-R65-TEMPO-HINT-ANCHOR / low / open - Lows batch / the empty-strip hint is anchored at left-2 and scrolls off-screen when the view is scrolled right
+- ROOT-R65-ARCH-SIGNAL3-FOCUS-PREDICATE / info / signal - merged into ARCH-CHECKPOINT-SRW14-PREFS (e) / releaseEditFocusOnTimelinePointerDown has 6 clauses; a pure predicate with a unit test could be extracted
+- R66-T-TECH-LEAD / info / open / real Chrome with headphones: BPM 90, metronome on, play - a click on every beat, louder on each bar number; judge level/sound against the mu
+- INFO-C66-UI9-NO-PLAY / low (test gap) / open - Lows batch / mutation o3 (export map gets the cached click buffer) survives: UI9 exports without playing first; add a Play before the on export
+- INFO-C66-RU-DBLCLICK-MISS-2 / info / watch (one more miss in round 70, inside the TB script; dedicated RU script 18/18 in rounds 67 and 70; ruler frozen) / ruler double-click Fit missed once in the TB script; dedicated script 18/18
+- INFO-C66-METER-120BPM / info / applied as a harness rule (timing rows at slow tempi or a single onset) / the meter rise detector cannot resolve beats 0.5 s apart (20 dB/s release vs 10 dB threshold)
+- INFO-C66-BD-COST / info / evidence on ROOT-R65-M1-BEAT-DENSITY / 999 BPM, max zoom, 133 s timeline: 2215 marks, 69-107 ms per zoom step; 30 s empty: 500 marks, 21-46 ms
+- ROOT-R66-M1-METRONOME-HORIZON / medium (reviewer, perf) / scheduled round 71 (D-29z36): METRONOME_SCHEDULE_HORIZON_SECONDS=2, planMetronomeClicks optional soundUntil, pure nextMetronomeChunk with late-drop rule, metronomeHorizonRef + fillMetronomeHorizon from pumpPlaybackAudio; grant to metronome-ui UI2/UI4/UI5/UI10 (UI10 also pins PROJECT_END); closes on C evidence (MT-BEATS*, MH-LONG, MH-END, MH-SCRUB, MH-NODES*, MH-SCRUB-PERF); createMetronomeBuffers extraction stays ARCH (f) / non-loop metronome clicks are planned to projectEnd and re-created on every resync (scrub every 100 ms, ~3 live graphs); fix: horizon-based 
+- ROOT-R66-L2 / low / open_tech_lead_decision (R66-T): deliberate D-29z31 R5 routing through the master tap for C-verifiability / the metronome click enters the master tap/peak and can latch Peak while the export has no click
+- ROOT-R66-L3 / low / open - Lows batch (merged with A-R66 review #7 and ROOT-R65-L2) / metronome toggle 16 px (WCAG 2.5.8 24 px); the disabled reason only in title
+- A-R66-REVIEW-RESIDUALS / low / open - Lows batch (#3 UI7 mid-loop start, #6 AudioBuffer constructor guard, #7 16 px button); #5 -> ROOT-R66-M1; #8 info (provider and workspace share one lifetime) / A round-66 code-review residuals
+- DOC-059-STATUS-LINE / low / scheduled round 71 (doc 059 status line -> C PASS (round 66), b5fb12b + one superseding sentence after item 7) / doc 059 status line still says C-ის შემოწმებას ელოდება
+- R67-T-TECH-LEAD / info / open / real Chrome: BPM 90, Snap on, 1/4 from the lane menu, drag a clip onto the beats; 1/2 step within the musical list; clearing the BPM returns
+- A-R67-REVIEW-RESIDUALS / low / open - Lows batch (L2 no tests for the two guards; N2 adjacentGridDivision used only by a frozen test; N4 menu activeIndex if the list shrinks while open - not reachable today); L3 covered in browser by C GM-MENU; N1 kept by spec; N3 info / A round-67 code-review residuals
+- INFO-C67-MUT-P / low (test gap) / open - Lows batch (round 68 removed the constant; re-check p in the Lows batch) / mutation p (snapGroupDelta in-bounds checks widened to 0.000501) survives; round 68 removes the constant, re-check after
+- INFO-C67-DROP-GHOST-ATTR / info / open - Lows batch / the library drop ghost has no data-ghost-start attribute (only the lane-move ghost has it); C reads the ghost time label
+- GROUP-OFFSET-MS-DELIBERATE / info / ruled deliberate (D-29z33) / with non-whole-ms steps a moved clip end and the other clips of a group keep their exact ms offsets (clip duration is media time, D-10; stag
+- R68-T-TECH-LEAD / info / open / real Chrome at 90 BPM 1/4 Snap on: move a loop with the mouse and the arrows - does it keep its musical length and stay on the beats?
+- ROOT-R68-L2-MENU-GROUP-NAME / low / open - Lows batch (a role=group wrapper breaks the frozen GU9 sibling checks; needs a test amendment in that task) / lane grid menu musical group has no accessible name (only an hr); the select has an optgroup label
+- ROOT-R68-L4-OPTIONS-MEMO / low / open - Lows batch / gridDivisionOptions(tempoBpm) rebuilt on every workspace render; optional useMemo
+- ROOT-R68-L5-SILENT-PATHS / low / open - Lows batch / grid-divisions ?? Number.NaN fallback (Record lookup suggested); changeGridDivision returns silently for a musical id without tempo
+- ROOT-R68-L6-DATA-GRID-SECONDS / info / acknowledged (test hook only) / data-grid-seconds shows the unrounded float
+- ROOT-R68-ARCH-GRID-PREFS / info / signal - merged into ARCH-CHECKPOINT-SRW14-PREFS (a); reviewer: keep for now / four state-mirroring refs added in rounds 64-68 for grid/tempo; proposal useGridPreferences {gridSeconds, gridDivisionId, refs, change*}; lo
+- INFO-C68-MUT-K / low (test gap) / open - Lows batch / mutation k (moveLoop on-line tolerance 1e-3) survives
+- INFO-C68-RANGE-READOUT / info / signal - ARCH-CHECKPOINT (b) / range readout shows 1.334 s for 1.333-2.667 (difference of ms-rounded edges)
+- INFO-B68-SNAP-WHOLE-MS-TIES / info / acknowledged (pre-existing whole-ms tie behaviour; not changed) / 130 of 400040 triplet-oracle snapTimeToGrid results differ from floor(t/step+0.5) only on whole-ms steps (e.g. 100 BPM 1/32T = 0.05 s), the 
+- R69-T-TECH-LEAD / info / open / real Chrome at 90 BPM 1/4: press 3 and drag onto triplet lines - does 3 feel right; is the refused bar triplet acceptable?
+- ROOT-R69-L1-TRIPLET-ITEM-REFUSE / low / open - Lows batch / product question with R69-T (status line is aria-live=polite, so the refusal is announced) / lane-menu triplet item stays active when it can only refuse (bar/seconds division); option aria-disabled + reason title
+- ROOT-R69-L2-SELECT-TITLE-3 / low / open - Lows batch (test-locked string TR6/TU3 needs a test amendment there) / the select title lists only 1 and 2 while aria-keyshortcuts says 1 2 3
+- ROOT-R69-L3-TRIPLET-PROPS / low / open - Lows batch / ArrangementGridMenu tripletChecked + onToggleTriplet allow an invalid pair; one optional object prop suggested
+- ROOT-R69-L4-NARROW-TYPES / low / open - Lows batch / toggledTripletGridDivisionId could return MusicalGridDivisionId | null; isTripletGridDivisionId could be a type guard
+- ROOT-R69-ARCH-GRID-PREFS-HARNESS / info / signal - merged into ARCH-CHECKPOINT-SRW14-PREFS (a) and (c); reviewer: keep for now / grid preferences gained two callbacks and a third digit key (no new state); 4th copy of the workspace test harness; proposals useGridPrefere
+- INFO-C69-TAB-ORDER / info / acknowledged (pre-existing; harness note: the division select precedes the BPM field, Shift+Tab x2 from BPM) / division select comes before the BPM field in tab order
+- INFO-C69-METER-POST-ACCENT / info / applied as a harness rule from round 70 / a >=10 dB rise detector misses the beat after each accented click at 90 BPM; use >=3 dB to >=-15 dB with 0.25 s refractory or a single onset
+- R70-T-TECH-LEAD / info / open / real Chrome at 999 BPM, maximum zoom: scroll and zoom the bars ruler - smooth, and never a missing mark at the edges while scrolling fast?
+- ROOT-R70-L1-FIRST-MOUNT-FULL / low / open - Lows batch (matters once a tempo is restored from a saved project) / bars ruler renders the whole mark list on the first mount while the scroller is unmeasured; fallback window e.g. [0, 3*innerWidth] + BU1 upd
+- ROOT-R70-L2-LAYOUT-READ / low / open - Lows batch (StudioWorkspace task: getTimelineViewportPx from viewportWidthRef) / ArrangementTempoRow getSnapshot reads scroller.clientWidth on every (non-memo) row render; not on position frames (BU8)
+- ROOT-R70-L3-FIBER-PROBE / low / open - Lows batch / ARCH (c) shared harness / tempo-window-ui counts renders through the __REACT_DEVTOOLS_GLOBAL_HOOK__ fiber walk (React-internal; copied from render-budget); move to on
+- ROOT-R70-L4-BW5-WALLCLOCK / low / open - Lows batch (C measured 4-6 ms over 3 runs, stable) / BW5 elapsed < 100 ms wall-clock assertion may flake on a loaded CI runner; the 180-240 count bound already proves no full build
+- ROOT-R70-L5-MUT-GAPS / low / open - Lows batch (merged with INFO-C70-MUT-M-UNSUB, INFO-C70-MUT-N-NEGSCROLL, INFO-C70-MUT-O-BREAK) / tempo-window test gaps: unsubscribe no-op (unmount + scroll), negative scrollLeft -> page 0, early break past toPx (window at start/middle o
+- ROOT-R70-L6-DOC062 / low / scheduled round 71 (doc 062 status line only) / doc 062 status line still says awaiting C
+- ROOT-R70-ARCH-TIMELINE-TRIO / info / signal - merged into ARCH-CHECKPOINT-SRW14-PREFS (seventh request); both reviewers: keep until a fourth consumer / getTimelineView/getTimelineViewportPx/subscribeTimelineScroll passed by hand to three consumers; proposal useTimelinePageKey or one Timeline
+- INFO-C70-DOC058-PLACEMENT / info / acknowledged (one line, two hunks; no action) / doc 058 sentence sits one sub-bullet below the exports line
+- INFO-C70-SCROLL-END / low / open (pre-existing, not filed as a bug by C; Lows batch triage: scroller max scrollLeft is 10 px short because of the vertical scrollbar gutter) / the last ~10 px of a long timeline never come into view (offsetWidth-clientWidth = 10 px vertical scrollbar)
+- R71-T-TECH-LEAD / info / open / real Chrome, metronome on at a fast tempo, long project, play and scrub: clicks steady, never missing or doubled?
+
+## Other open items
+- SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
+- SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
+- SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
+- SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
+- SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
+- SRW-16 [todo] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next
+- SRW-17 [todo] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
+- SRW-18 [todo] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
+- SRW-19 [todo] Simple video opacity fade (from/to black) on single video lane, preview only
+- SRW-20 [todo] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
+- SRW-21 [blocked-partial] Purchased-library mount readiness + final regression
+- SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

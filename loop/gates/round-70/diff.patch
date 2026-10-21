@@ -1,0 +1,261 @@
+diff --git a/app/components/arrangement/ArrangementTempoRow.tsx b/app/components/arrangement/ArrangementTempoRow.tsx
+index c653366..51c36c3 100644
+--- a/app/components/arrangement/ArrangementTempoRow.tsx
++++ b/app/components/arrangement/ArrangementTempoRow.tsx
+@@ -3,8 +3,10 @@ import {
+   type FocusEvent,
+   type KeyboardEvent,
+   memo,
++  useCallback,
+   useRef,
+   useState,
++  useSyncExternalStore,
+ } from 'react';
+ import { METRONOME_NEEDS_TEMPO_TITLE, METRONOME_TITLE } from '~/lib/arrangement/metronome';
+ import {
+@@ -14,6 +16,7 @@ import {
+   TEMPO_BEATS_PER_BAR,
+   TEMPO_EMPTY_HINT,
+ } from '~/lib/arrangement/tempo';
++import type { TimelineView } from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+ import { ARRANGEMENT_HEADER_WIDTH_PX } from './ArrangementLane';
+ 
+@@ -25,15 +28,61 @@ interface ArrangementTempoRowProps {
+   onTempoInvalid: () => void;
+   metronomeOn: boolean;
+   onMetronomeToggle: () => void;
++  getTimelineView: () => TimelineView;
++  getTimelineViewportPx: () => number;
++  subscribeTimelineScroll: (listener: () => void) => () => void;
+ }
+ 
+ interface ArrangementBarsRulerProps {
+   seconds: number;
+   pxPerSecond: number;
+   bpm: number | null;
++  fromPx: number | null;
++  toPx: number | null;
+ }
+ 
+-function ArrangementBarsRulerInner({ seconds, pxPerSecond, bpm }: ArrangementBarsRulerProps) {
++interface BarsRulerPage {
++  page: number;
++  viewportPx: number;
++}
++
++function readBarsRulerPage(
++  getTimelineView: () => TimelineView,
++  getTimelineViewportPx: () => number,
++): BarsRulerPage | null {
++  const viewportPx = getTimelineViewportPx();
++  if (!(viewportPx > 0)) {
++    return null;
++  }
++  return {
++    page: Math.floor(Math.max(0, getTimelineView().scrollLeft) / viewportPx),
++    viewportPx,
++  };
++}
++
++function barsRulerPageKey(rulerPage: BarsRulerPage | null): string {
++  return rulerPage === null ? '' : `${rulerPage.page}:${rulerPage.viewportPx}`;
++}
++
++function parseBarsRulerPageKey(key: string): BarsRulerPage | null {
++  const [pageText, viewportText] = key.split(':');
++  if (viewportText === undefined) {
++    return null;
++  }
++  return { page: Number(pageText), viewportPx: Number(viewportText) };
++}
++
++function getServerBarsRulerPageKey(): string {
++  return '';
++}
++
++function ArrangementBarsRulerInner({
++  seconds,
++  pxPerSecond,
++  bpm,
++  fromPx,
++  toPx,
++}: ArrangementBarsRulerProps) {
+   return (
+     <div
+       className="relative h-5 shrink-0 overflow-hidden border-b border-outline bg-surface"
+@@ -47,7 +96,12 @@ function ArrangementBarsRulerInner({ seconds, pxPerSecond, bpm }: ArrangementBar
+           {TEMPO_EMPTY_HINT}
+         </span>
+       ) : (
+-        barsRulerMarks(seconds, pxPerSecond, bpm).map((mark) => (
++        barsRulerMarks(
++          seconds,
++          pxPerSecond,
++          bpm,
++          fromPx === null || toPx === null ? undefined : { fromPx, toPx },
++        ).map((mark) => (
+           <div
+             key={mark.time}
+             className={cn(
+@@ -86,10 +140,22 @@ export function ArrangementTempoRow({
+   onTempoInvalid,
+   metronomeOn,
+   onMetronomeToggle,
++  getTimelineView,
++  getTimelineViewportPx,
++  subscribeTimelineScroll,
+ }: ArrangementTempoRowProps) {
+   const [draft, setDraft] = useState<string | null>(null);
+   const skipCommitRef = useRef(false);
+   const committedText = tempoBpm === null ? '' : formatTempoBpm(tempoBpm);
++  const hasTempo = tempoBpm !== null;
++  const getBarsRulerPageKey = useCallback(
++    () =>
++      hasTempo ? barsRulerPageKey(readBarsRulerPage(getTimelineView, getTimelineViewportPx)) : '',
++    [hasTempo, getTimelineView, getTimelineViewportPx],
++  );
++  const rulerPage = parseBarsRulerPageKey(
++    useSyncExternalStore(subscribeTimelineScroll, getBarsRulerPageKey, getServerBarsRulerPageKey),
++  );
+ 
+   const commitTempoDraft = (text: string) => {
+     setDraft(null);
+@@ -179,7 +245,13 @@ export function ArrangementTempoRow({
+           მეტრონომი
+         </button>
+       </div>
+-      <ArrangementBarsRuler seconds={seconds} pxPerSecond={pxPerSecond} bpm={tempoBpm} />
++      <ArrangementBarsRuler
++        seconds={seconds}
++        pxPerSecond={pxPerSecond}
++        bpm={tempoBpm}
++        fromPx={rulerPage === null ? null : (rulerPage.page - 1) * rulerPage.viewportPx}
++        toPx={rulerPage === null ? null : (rulerPage.page + 2) * rulerPage.viewportPx}
++      />
+     </div>
+   );
+ }
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 16aafee..3753103 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -1810,6 +1810,9 @@ export function StudioWorkspace() {
+                   onTempoInvalid={rejectTempo}
+                   metronomeOn={metronomeOn}
+                   onMetronomeToggle={toggleMetronome}
++                  getTimelineView={getTimelineView}
++                  getTimelineViewportPx={getTimelineViewportPx}
++                  subscribeTimelineScroll={subscribeTimelineScroll}
+                 />
+                 <div className="flex">
+                   <div
+diff --git a/app/lib/arrangement/tempo.ts b/app/lib/arrangement/tempo.ts
+index 6dd7e1b..ec47def 100644
+--- a/app/lib/arrangement/tempo.ts
++++ b/app/lib/arrangement/tempo.ts
+@@ -20,6 +20,11 @@ export interface BarsRulerMark {
+   label: string | null;
+ }
+ 
++export interface BarsRulerWindow {
++  fromPx: number;
++  toPx: number;
++}
++
+ export function parseTempoBpm(text: string): number | null {
+   const normalized = text.trim().replace(/,/g, '.');
+   if (!TEMPO_TEXT_PATTERN.test(normalized)) {
+@@ -40,7 +45,12 @@ export function tempoStatusMessage(bpm: number | null): string {
+   return `ტემპი ${formatTempoBpm(bpm)} BPM · ${TEMPO_BEATS_PER_BAR}/4 — ტაქტების სახაზავი განახლდა. მხოლოდ ბადეა: აუდიო არ იწელება.`;
+ }
+ 
+-export function barsRulerMarks(seconds: number, pxPerSecond: number, bpm: number): BarsRulerMark[] {
++export function barsRulerMarks(
++  seconds: number,
++  pxPerSecond: number,
++  bpm: number,
++  rulerWindow?: BarsRulerWindow,
++): BarsRulerMark[] {
+   if (
+     !Number.isFinite(seconds) ||
+     !Number.isFinite(pxPerSecond) ||
+@@ -51,6 +61,14 @@ export function barsRulerMarks(seconds: number, pxPerSecond: number, bpm: number
+   ) {
+     return [];
+   }
++  if (
++    rulerWindow !== undefined &&
++    (!Number.isFinite(rulerWindow.fromPx) ||
++      !Number.isFinite(rulerWindow.toPx) ||
++      rulerWindow.toPx < rulerWindow.fromPx)
++  ) {
++    return [];
++  }
+   const barSecondsAtOneBpm = TEMPO_BEATS_PER_BAR * SECONDS_PER_MINUTE;
+   const barSeconds = barSecondsAtOneBpm / bpm;
+   let barStep = 1;
+@@ -62,7 +80,10 @@ export function barsRulerMarks(seconds: number, pxPerSecond: number, bpm: number
+   const marks: BarsRulerMark[] = [];
+   const pushMark = (time: number, kind: BarsRulerMark['kind'], label: string | null) => {
+     const leftPx = time * pxPerSecond;
+-    if (leftPx + RULER_TICK_LINE_PX > rulerWidthPx) {
++    if (
++      leftPx + RULER_TICK_LINE_PX > rulerWidthPx ||
++      (rulerWindow !== undefined && (leftPx < rulerWindow.fromPx || leftPx > rulerWindow.toPx))
++    ) {
+       return;
+     }
+     const fits =
+@@ -71,8 +92,15 @@ export function barsRulerMarks(seconds: number, pxPerSecond: number, bpm: number
+     marks.push({ time, kind, label: fits ? label : null });
+   };
+   const lastBar = Math.floor((seconds * bpm) / barSecondsAtOneBpm);
+-  for (let bar = 0; bar <= lastBar; bar += barStep) {
+-    pushMark((bar * barSecondsAtOneBpm) / bpm, 'bar', String(bar + 1));
++  const windowBar =
++    rulerWindow === undefined ? 0 : Math.floor(rulerWindow.fromPx / (barSeconds * pxPerSecond));
++  const firstBar = Math.max(0, (Math.floor(windowBar / barStep) - 1) * barStep);
++  for (let bar = firstBar; bar <= lastBar; bar += barStep) {
++    const barTime = (bar * barSecondsAtOneBpm) / bpm;
++    if (rulerWindow !== undefined && barTime * pxPerSecond > rulerWindow.toPx) {
++      break;
++    }
++    pushMark(barTime, 'bar', String(bar + 1));
+     if (barStep === 1) {
+       for (let beat = 1; beat < TEMPO_BEATS_PER_BAR; beat++) {
+         pushMark(
+diff --git a/docs/implementation/2026/quarter-IV/058-studio-lab-tempo-bars-ruler.md b/docs/implementation/2026/quarter-IV/058-studio-lab-tempo-bars-ruler.md
+index 861ed00..8d8f1e7 100644
+--- a/docs/implementation/2026/quarter-IV/058-studio-lab-tempo-bars-ruler.md
++++ b/docs/implementation/2026/quarter-IV/058-studio-lab-tempo-bars-ruler.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — პროექტის ტემპი (BPM) და ტაქტების სახაზავი (SRW-15, ეტაპი 1)
+ 
+ **თარიღი:** 2026-10-19
+-**სტატუსი:** Round 65 — D-29z30; C-ის შემოწმებას ელოდება
++**სტატუსი:** Round 65 — D-29z30; C PASS (round 65), გამოქვეყნდა 3e55c5c
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -72,6 +72,7 @@ flowchart LR
+ - `app/lib/arrangement/tempo.ts` (ახალი) — pure ფუნქციები:
+   - `parseTempoBpm`, `formatTempoBpm`, `tempoStatusMessage`, `barsRulerMarks`;
+   - მუდმივები და UI-ის ტექსტები.
++  - Round 70-დან ზოლი მთელ სახაზავს აღარ ხატავს: მხოლოდ ხილვადი ნაწილის გარშემო სამი viewport-ის ფანჯარას (`barsRulerMarks`-ის არჩევითი მეოთხე პარამეტრი, doc 062).
+ - `app/components/arrangement/ArrangementTempoRow.tsx` (ახალი) — უჯრა ველით (ლოკალური draft) და `memo` ზოლი.
+ - `app/components/arrangement/StudioWorkspace.tsx` — ოთხი ჩამოთვლილი ცვლილება:
+   - focus-ის პირობა;
+diff --git a/docs/implementation/2026/quarter-IV/061-studio-lab-grid-triplets.md b/docs/implementation/2026/quarter-IV/061-studio-lab-grid-triplets.md
+index 538dd7b..ac2a139 100644
+--- a/docs/implementation/2026/quarter-IV/061-studio-lab-grid-triplets.md
++++ b/docs/implementation/2026/quarter-IV/061-studio-lab-grid-triplets.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — ბადის ტრიოლების რეჟიმი (SRW-14, ეტაპი 5b)
+ 
+ **თარიღი:** 2026-10-21
+-**სტატუსი:** Round 69 — D-29z34; C-ის შემოწმებას ელოდება
++**სტატუსი:** Round 69 — D-29z34; C PASS (round 69), გამოქვეყნდა ae4fc39
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი

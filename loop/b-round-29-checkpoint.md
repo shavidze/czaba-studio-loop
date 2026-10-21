@@ -1,0 +1,4 @@
+# B round 29 -> 30 checkpoint (2026-10-12)
+Done (durable): tasks/round-29.md (cmp = dispatched r29 task); backups backlog.json.bak-before-b-round-29, feature-status.before-b-round-29.md, b-scripts/b-next.before-r30.json, b-scripts/plan.before-r30.md; Ableton capture b-round-29/; probe b-round-29-probe.txt (+ b-scratch-r30/, junction removed); baseline b-round-29-git-status.txt (67), b-round-29-tree-sha256.txt (69 OK), b-round-29-snapshots/ (8); backlog v31 (b-scripts/b-round-29-backlog.cjs); plan.md D-29u (b-scripts/b-round-29-plan.cjs, CRLF ok, 4 hits); current-task.md round 30 (SRW-13 stage 3 clip gain).
+Remaining: feature-status.md, b-round-29.md, b-next.json, second advisor call.
+Status: COMPLETE for B round 29 -> 30. feature-status.md, b-round-29.md (with addendum), b-next.json written; advisor called twice; b-scratch-r30 removed.

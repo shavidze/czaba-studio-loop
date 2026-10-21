@@ -1,0 +1,85 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R51-01",
+      "severity": "low",
+      "steps": [
+        "Fresh /studio-lab at 1440x900, layout L51 (Soft impact on SFX 4-6)",
+        "Snap on (g), grid division 5",
+        "REAL-mouse (PW): drag library option 'Soft impact' onto the SFX lane at raw 6.2 s (snapped 5 s overlaps 4-6) and release",
+        "Contrast LD-BLOCK-OFF: Snap off, drag 'Soft impact' onto SFX at 4.6 s (overlaps) and release"
+      ],
+      "expected": "Drop refused and status exactly 'აქ ადგილი არ არის — ერთ ხაზზე კლიპები ერთმანეთს არ ფარავს.' (LIBRARY_DROP_BLOCKED_MESSAGE), as in current-task §4.3 LD-BLOCK and unit SD6",
+      "actual": "Ghost '00:05.000 · აქ ადგილი არ არის' data-blocked=true and no clip is added (correct), but the status line never changes: handleLibraryDragOver sets dropEffect='none', so Chromium fires no drop event (dragover 4, drop 0, dragend 1) and handleDrop never runs. Identical with Snap off, so this predates round 51; jsdom SD6 dispatches drop directly and does not catch it. This also invalidates the status half of B's Q1 (D-29z16) in real browsers; B should re-evaluate Q1 (show the refusal on dragleave/dragend, or let the ghost text alone carry it and update Q1/SD6).",
+      "evidence": "tmp/studio-real-loop/c-round-51/runs/r51-1440x900-LD-ALT_LD-ALT-ON_LD-BLOCK_LD-VIDEO.txt (LD-BLOCK), runs/r51-1440x900-LD-BLOCK-OFF_LD-ALT-ON.txt (LD-BLOCK-OFF); c-round-51.md §6.1"
+    },
+    {
+      "id": "C-R51-02",
+      "severity": "low",
+      "steps": [
+        "Fresh /studio-lab 1440x900, LF loop 11.3-14.1, Snap on (REAL g)",
+        "REAL click the loop brace (focus on the brace)",
+        "REAL click the 'Soft impact' clip header (selection = 1)",
+        "REAL press ArrowRight"
+      ],
+      "expected": "After clicking a clip, the arrows nudge that clip (as NU-1 does when focus is not on the brace)",
+      "actual": "document.activeElement stays the brace after the clip click; ArrowRight moves the brace 12-14.8 -> 13-15.8 and the clip stays at 5. Predates round 51 (the brace handled arrows before at ±0.1 s); round 51 only makes the steps whole grid lines. isLoopBraceTarget makes a focused brace own the arrows on purpose, so B may rule this design rather than defect.",
+      "evidence": "tmp/studio-real-loop/c-round-51/runs/g51-nudge-1440x900.txt (OBS section); c-round-51.md §8.1"
+    },
+    {
+      "id": "C-R51-T1",
+      "severity": "low",
+      "steps": [
+        "Scratch copy of app/ outside store; in ArrangementLoopBrace.finishLoopGesture re-run handleLoopPointerMove(event) on pointerup before commitLoopRange (re-snap from the release clientX/Alt)",
+        "npx vitest run app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx"
+      ],
+      "expected": "A committed test fails (§4.2 C extra (n))",
+      "actual": "23/23 pass: mutation (n) survives. No committed test releases at a different clientX or with a different Alt than the last pointermove. Test gap only: R51-S shows finishLoopGesture is byte-identical to the snapshot and commits the last preview; the browser runs are consistent with that but do not discriminate (release x = last move x).",
+      "evidence": "tmp/studio-real-loop/c-round-51/runs/mutations.txt '(n)'; tools/run-mut.sh"
+    }
+  ],
+  "passed": [
+    "G51-1",
+    "G51-2",
+    "G51-3",
+    "R51-S",
+    "R51-U",
+    "LD-OFF",
+    "LD-1",
+    "LD-ALT",
+    "LD-ALT-ON",
+    "LD-VIDEO",
+    "LD-1280",
+    "LB-OFF",
+    "LB-MOVE",
+    "LB-ALT",
+    "LB-ALT-ON",
+    "LB-END",
+    "LB-CLAMP",
+    "LB-SAME",
+    "LB-1280",
+    "LK-OFF",
+    "LK-1",
+    "LK-SHIFT",
+    "LK-ZERO",
+    "LK-025",
+    "LK-CLIP",
+    "LP-LOOP",
+    "LP-LOOP-ALT",
+    "LP-DROP",
+    "LP-DROP-OFF",
+    "REG-HYD",
+    "RU-1",
+    "LA-1",
+    "CL-RANGE",
+    "NU-1",
+    "G-TEXT",
+    "R51-REG"
+  ],
+  "blocked": [
+    "LD-BLOCK status sub-criterion not met in a real browser (C-R51-01, predates round 51); its ghost and no-clip parts passed, so LD-BLOCK is not in passed",
+    "Not run this round per current-task §4.8: video sync and C-R27-01 (RF3-1, RF3-2, R5-L6), the full find -> add -> fit video -> export flow (no export WAV check), the FB-01..FB-16 stage regression, npm run test:e2e:smoke (root only), browser file drops on the video lane",
+    "Harness: LD/LB/LP cases ran as REAL-mouse (PW) under the pending GSTACK-NO-MOUSE deviation; PW delivers native HTML5 drag events and altKey in this Chromium, but it is not an OS drag (R51-ALT-NATIVE-DRAG stays with the Tech Lead)"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "taskStatus": "BLOCKED",
+  "bugs": [
+    {
+      "id": "C-R34-01",
+      "severity": "medium",
+      "steps": [
+        "Open http://127.0.0.1:5173/studio-lab anonymously at 1440x900 with layout L35: video at 0, 'სრული მიქსი' on music at 7, 'Soft impact' on SFX at 4. The detail panel is expanded.",
+        "Make a real click on the SFX clip header, then a real click into Clip Gain. Press Ctrl+A and type 3 without pressing Enter.",
+        "Make a real click on the music Volume range. Repeat the case with music Pan, Master Volume and video Volume, and once at 1280x720 with Master Volume."
+      ],
+      "expected": "SFX gainDb is 3, and the history tail is [Clip Gain, <fader entry>]. The Clip Gain commit shows no gesture-blocked status.",
+      "actual": "The typed 3 is lost on all four ranges: SFX gainDb stays unset and the field shows 0.0. The status reads 'რედაქტირება drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.' Volume, Master and video Volume each write +1 fader entry. Zoom is the only range that commits the value (+1 Clip Gain). No fix landed: A stopped at the §1.4 frozen-test conflict.",
+      "evidence": "tmp/studio-real-loop/c-round-35/runs/cr-baseline-1440.txt, cr-baseline-1280.txt"
+    },
+    {
+      "id": "C-R34-02",
+      "severity": "low",
+      "steps": [
+        "Read doc 036 l.355."
+      ],
+      "expected": "The doc says headless Chrome keeps a 10 px vertical gutter and that the horizontal scrollbar is 0 px.",
+      "actual": "The doc still says 'headless-ში scrollbar 0 px-ია'. Doc 036 is unchanged (sha e86072b8).",
+      "evidence": "c-round-34/runs/sb-geometry.txt; doc sha unchanged"
+    }
+  ],
+  "passed": [
+    "G35-2",
+    "G35-3"
+  ],
+  "blocked": [
+    "A stopped at task §1.4. C confirmed this in its own scratch copy: after applying A's proposed handler, app/lib/arrangement has 1 failed | 776 passed. The only failure is frozen fader-guards.test.tsx:1265 (search keeps focus on a Pan pointerdown), which contradicts the D-29z row 'search -> range -> focus leaves'. B must rule on l.1265/l.1272. Real-browser evidence: a real click on Pan or Master already moves focus off the search natively.",
+    "R35-CR fails at baseline: C-R34-01 still reproduces.",
+    "R35-OT, R35-CL, R35-R34, R35-K, R35-S, R35-U and R35-Doc were not run, because no change landed in store/.",
+    "G35-1: the baseline is green (tsc 0, full vitest 1247/1247, frozen 307/307, build ok, Biome 2 baseline CRLF errors / 218 warnings / 1 info), but the criterion needs at least 10 new tests and none landed.",
+    "Note for B: the Pan centre is 0, so a real centre click on Pan writes no Pan entry. The R35-CR Pan tail [Clip Gain, Pan] needs an off-centre (synthetic) press, or B must accept 0 Pan entries for that row."
+  ]
+}

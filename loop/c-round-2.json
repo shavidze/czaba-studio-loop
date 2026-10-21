@@ -1,0 +1,43 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R2-01",
+      "severity": "high",
+      "steps": [
+        "Fresh /studio-lab (gstack headless Chromium 145, 1440x900). Picker-import beeps-6s-vp9-opus.webm (0-6.008), drop clip-4s-vp9-opus.webm, header-drag it to 8.000 (gap 6-8), add Middle East on music at 0.",
+        "Press ↤, then Play. Every 250 ms, inside one rAF callback, read video.currentTime, video.seeking and AudioContext.currentTime. Get the timeline position from the audio clock (ctx.currentTime - start.when of the first scheduled source). Also log requestVideoFrameCallback mediaTime and every currentTime assignment.",
+        "Repeat 10 times in one page load (the dock's seekLeadRef/startLeadRef adaptive lead persists across Play cycles; a reload-per-run variant is a separate experiment). Also run the R2-V3 layout: trim 0.5, Ctrl+E at 3, Delete Time 1-2 with Slow rise on SFX; 3 runs."
+      ],
+      "expected": "R3-V1, excluding 300 ms after a start or boundary: median |drift| <= 0.05 s and max <= 0.1 s. The same tolerance applies to R2-V3 playback.",
+      "actual": "R3-V1 failed in 5 of 10 runs (runs 1, 4, 6, 7, 9): max 0.146/0.127/0.145/0.137/0.149 s; median also over 0.05 in runs 1 (0.065) and 7 (0.076). Passing runs: 2, 3, 5, 8, 10. Run 10 exceeds 0.1 only on presented-frame drift (0.108), not on the criterion metric. R2-V3 playback failed in 2 of 3 runs: median 0.081/0.066, max 0.154. Mechanism: the dock issues a new hard seek every ~250 ms while the previous seek is still pending (setsWhileSeeking 4/11 in run 7, 4/7 in run 9). Each seek adds the learned lead (~0.17-0.27 s ahead of the current time). The video stays in seeking=true for up to 1.3 s, and currentTime reports the seek target. Presented frames freeze: max frame gap 800 ms in run 7. Presented-frame drift median 0.079, max 0.161 s. In R2-V3, a seek -> waiting -> seek loop repeats every 260-300 ms with 5-6 'waiting' stalls per 5 s run.",
+      "evidence": "tmp/studio-real-loop/c-round-2/r3v1_1..10.json, r3v1_7..10_vfc.json, v3play_1..3(.json/_vfc.json); scripts r3v1.js, vfc.js, vfcan.js. Code: ArrangementVideoDock.tsx lines 103-111 do not check video.seeking before 'drifted' fires a new seek, and the lead from nextVideoSeekLead overshoots. Environment note: headless software VP9 decoding may exaggerate seek latency. The seek-while-seeking behaviour is code-level. The Tech Lead should confirm drift in real Chrome after the fix."
+    },
+    {
+      "id": "C-R2-02",
+      "severity": "low",
+      "steps": [
+        "Fresh load. Import a webm and add music. Press Play for the first time (the AudioContext is created on this click).",
+        "Sample video.currentTime against the audio clock in the first 300 ms."
+      ],
+      "expected": "The video holds at the start frame until audio startAt (the transport holds position until startAt, C-R1-01 rule).",
+      "actual": "The dock calls video.play() as soon as isPlaying=true, before audio starts. On the first Play after AudioContext creation, the video was 0.222 s ahead of the audio clock at +266 ms (r3v1_1 row 2). The drift correction then seeks it back. This is inside the 300 ms window that is excluded from R3-V1, so it is not an acceptance failure, but the first frame visibly runs ahead of the sound.",
+      "evidence": "c-round-2/r3v1_1.json rows[1] = [266, 0, 0.222, 0.2218, ...]"
+    }
+  ],
+  "passed": [
+    "R2-F1", "R2-F2", "R2-F3", "R2-F4",
+    "R2-V0", "R2-V1", "R2-V2", "R2-V4",
+    "R3-V2", "R3-V3", "R3-V4",
+    "R4-P1", "R4-P2", "R4-P3",
+    "R2-U1", "R2-U2", "R2-U3", "R2-G1", "R2-S1", "R2-S2", "R2-R1", "R2-V-shots"
+  ],
+  "failed": ["R3-V1", "R2-V3"],
+  "blocked": [],
+  "notes": {
+    "R2-V3": "Offset maths is correct in the browser: 0.5-1 off 0.5; 1-2 off 2.0; 2-5.008 off 3. SFX 0-1 + 1-4. Only the playback-drift part fails, under C-R2-01.",
+    "mp4mov": "This gstack Chromium reports canPlayType mp4/avc1+mp4a = 'probably'. MP4, MOV (including empty-MIME .mov) and no-audio MP4 were accepted here, so these paths are verified, not env-limited. The AAC export equals the same-decode oracle (5.96e-8), with onsets at 0,1,2,3,4,5 and no priming offset.",
+    "authNotBypassed": "Fresh context: cookies '', auth_user null. Anonymous /api/studio-token -> 401 'Please sign in to access Studio.'; fake bearer -> 500, no token. /studio/middle-east -> 'Sign in required'; no token, stem or R2 requests. /studio-lab media = /middle-east.mp3 + /videos/hero/hero-music.mp3 + blob: only.",
+    "outOfScope": "FB-01..FB-14 beyond what SRW-01..04 cover are not passed here. FB-15 import: passed. FB-16 unified transport: functionally present, but the sync tolerance fails (C-R2-01)."
+  }
+}

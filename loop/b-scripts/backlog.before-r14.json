@@ -1,0 +1,3165 @@
+{
+  "version": 14,
+  "updated": "2026-10-10",
+  "owner": "B",
+  "plan": "docs/technical/studio-real-workspace/plan.md",
+  "current_task": "current-task.md (round 13: SRW-11B stage 3, floating expanded video VID-06)",
+  "advisor_used_by_B": "round 1: used; round 2: called, returned overloaded; round 3 (this update): available, called once before writing, advice received and applied (two tracks, rewritten one-<video> contract, continuity bug, M2 measure-first, Chrome 121 scrollbar pitfall, SRW-11 split); round 4 (this update, 2026-10-08): available, called before writing (advice applied: C-evidenced status changes, C-R3-01/02 superseded by C-R4-01, D-23 ignore re-entry, D-24 split app/measurement halves, outcome-based tree criterion, Ctrl+D without transport button, modifier read during pointermove) and again after writing; round 5 (this update, 2026-10-08): available, called after orientation and before writing (advice applied: C-evidenced status changes, RF5-1b non-vacuous forced criterion + interval amendment, D-27 position-preserving Play, workspace-wide guard incl. volume slider, zoom floor for Fit, ruler seek on release, overview in dock strip without height, R4-M2 render regression, synthetic WheelEvent) and again after writing; round 6 (this update, 2026-10-09): available, called after orientation and before writing (advice applied: SRW-10 not done while R10-N5 fails, SRW-03 regression status, measure-first C-R6-02 with a render budget and a per-run CPU column but an unchanged verdict rule, separate dock grants for S1 and SRW-11B, height budget/lane auto-fit decided up front, floating video as a CSS reposition of the same nodes, volume drag claims the registry, D-24a release wording, the not-rerun list is mandatory) and again after writing; round 6 -> 7 bounded re-plan (2026-10-09, fresh session after restart): available, called before writing; advice applied (three bugs only, run budget, regression debt instead of 21-ID rerun, SRW-11B staged to round 8); round 7 -> 8 (2026-10-09): available, called after orientation and before writing; advice applied (sync-budget rule routes round 8 to SRW-11B stage 1, concrete C-R7-01 instrumentation spec, read the old §7 draft, resolve the 1280x720 height budget from C n8 measurements as D-29a, A invokes design-philosopher, stage-1 grants exclude dock/lane/clip/library, detail playhead = position writer + 0-render test + R4-M2 and 3 R3-V1 light runs as adjacent, SRW-05 reflects the wrap regression); round 8 -> 9 (2026-10-09): available, called after orientation and before writing; advice applied (R9 = C-R8-01 + C-R6-02 because they share the fix mechanism and the R3-V1 layout; C-R7-01 + C-R7-02 after stage 2 and before stage 3; probe first; same-session attribution as the verdict reference with the 0.2 ms tolerance unchanged; verifiable raw writer series; SRW-11B = bug, not done; stale root M1/L2/L3/L4/L7 carry corrected; N1/N2/N3 contract decisions; untracked .claude/agents/frontend-architect.md flagged to root); and again after writing (R9-L2 hold-release timing + second guard proof); round 9 -> 10 (2026-10-10): available, called after orientation and before writing; advice applied (C-R7-01 + C-R7-02 move forward to round 10 because R9-D1/D2 failed and now wait on the Tech Lead; stage 2 -> round 11; VIDEO_POSITIONED_SECONDS 0.04 named as hypothesis (d), not as the fix; diagnosis-only wrapper with raw per-wrap JSON; full closed root-carry list; H1/H2 harness rules for future rounds only); round 10 -> 11 (2026-10-10): available, called after orientation and before writing; advice applied (C-R7-01 is a B-owned spec interaction between the D-19 deadband 0.02 and the round-7 B window +-0.01, resolved in the stricter direction as D-19a post-swap settle for round 12, not a tolerance change and not parked on the Tech Lead; H3 same-row wrap rule; round 11 = stage 2 with D-29b panel yield; detail panel edit limited to a cap prop; polish items to a named round) Round 11 planning: available, called before writing and after writing. Round 12 -> 13 planning: available, called before writing (advice applied: R12-S rescope as a B mis-scope with the round-12 FAIL kept on record, C-R7-01 closed headless, C-R12-01 to the milestone RF5-3, sourceChanged accepted from the dock trace, library collapse lifted via StudioWorkspace props not ArrangementContext, dock sync effects byte-identical with a diff check, Esc precedence via defaultPrevented/isTypingTarget, placement after the aside transitionend, b-round-12-tree-sha256.txt reference, vitest floor 877, one wrap run as adjacent regression) and after writing.",
+  "baseline": {
+    "tsc_errors": 0,
+    "vitest_files": 32,
+    "vitest_tests": 464,
+    "vitest_failures": 0,
+    "evidence": [
+      "tmp/studio-real-loop/baseline-tsc.txt",
+      "tmp/studio-real-loop/baseline-vitest.txt"
+    ],
+    "protected_hashes": "tmp/studio-real-loop/protected-baseline.json",
+    "vitest_floor_round5": 654,
+    "vitest_floor_round6": 709,
+    "vitest_floor_round10": 809,
+    "vitest_floor_round11": 812
+  },
+  "done_policy": {
+    "all_scoped_acceptance_pass_by_C": true,
+    "no_open_bug_severity": [
+      "Critical",
+      "High",
+      "Medium",
+      "Low"
+    ],
+    "typecheck": "npx tsc --noEmit -> 0 errors",
+    "tests": "npx vitest run -> 0 failures, count >= 464 + added",
+    "build": "npm run build -> success",
+    "lint": "read-only npx biome check ./app -> 0 errors; --write only on A-owned paths; npm.cmd run check only if read-only run shows no format/safe-fix diffs outside A files, then re-verify protected hashes; never npm run format",
+    "meaningful_tests": "new logic covered by behavioural tests, not only render/snapshot",
+    "data_auth_protected": "protected sha256 unchanged; /studio-lab network has no /api/studio-token, /api/recording-*, /api/download, R2 host, Authorization header; git status only A-owned files plus pre-existing others",
+    "honesty": "disabled features state reason; exports produce real decodable files",
+    "optional_items": "SRW-19 is in scope (orchestrator decision); no item may be silently dropped",
+    "blocked": "record narrow reason and split independent progress into its own item",
+    "user_quality_requirement": "2026-10-07: continue A/B/C loop until all agreed functionality passes independent C verification and no reproducible in-scope bugs remain. Do not inflate scores or call untested behavior perfect. Record real-device/listening limitations honestly."
+  },
+  "global_forbidden_files": [
+    "app/lib/__tests__/download-routes.test.ts",
+    "app/routes/account.downloads.tsx",
+    "app/routes/api.studio-token.ts",
+    "app/routes/studio.$productId.tsx",
+    "app/contexts/StudioContext.tsx",
+    "app/contexts/AuthContext.tsx",
+    "app/contexts/AudioContext.tsx",
+    "app/types/studio.ts",
+    "app/components/studio/**",
+    "app/root.tsx",
+    "app/lib/sfx-*",
+    "app/lib/firebase*",
+    "app/lib/r2*",
+    "app/lib/auth*",
+    "app/routes/api.*",
+    "public/**",
+    "package.json",
+    "package-lock.json",
+    ".claude/**",
+    "../backend/**",
+    "app/styles/**",
+    "AGENTS.md",
+    ".agents/**",
+    ".codex/**"
+  ],
+  "global_forbidden_actions": [
+    "git commit",
+    "git push",
+    "deploy",
+    "npm run check",
+    "npm run format",
+    "purchases",
+    "user settings changes",
+    "permission bypass",
+    "premium/protected URLs in tests"
+  ],
+  "items": [
+    {
+      "id": "SRW-01",
+      "round": 1,
+      "title": "Shared arrangement model + scheduler + offline WAV + anonymous /studio-lab central flow",
+      "fb": [
+        "FB-01",
+        "FB-02"
+      ],
+      "fb_scope": "FB-01: dynamic projectEnd + ruler growth; FB-02: Delete Time closes gap on all lanes (Cut/Cut Time remain SRW-09)",
+      "type": "prototype-core",
+      "depends_on": [],
+      "status": "done",
+      "files": [
+        "app/types/arrangement.ts",
+        "app/lib/arrangement/model.ts",
+        "app/lib/arrangement/schedule.ts",
+        "app/lib/arrangement/graph.client.ts",
+        "app/lib/arrangement/peaks.ts",
+        "app/lib/arrangement/demo-synth.ts",
+        "app/lib/arrangement/__tests__/model.test.ts",
+        "app/lib/arrangement/__tests__/schedule.test.ts",
+        "app/lib/arrangement/__tests__/graph.test.ts",
+        "app/lib/arrangement/__tests__/peaks.test.ts",
+        "app/contexts/ArrangementContext.tsx",
+        "app/components/arrangement/StudioWorkspace.tsx",
+        "app/components/arrangement/ArrangementTransport.tsx",
+        "app/components/arrangement/ArrangementRuler.tsx",
+        "app/components/arrangement/ArrangementLane.tsx",
+        "app/components/arrangement/ArrangementClip.tsx",
+        "app/components/arrangement/ArrangementLibrary.tsx",
+        "app/components/arrangement/ArrangementExportDialog.tsx",
+        "app/components/arrangement/index.ts",
+        "app/data/studio-lab-demo.ts",
+        "app/routes/studio-lab.tsx",
+        "docs/implementation/2026/quarter-IV/NNN-studio-lab-arrangement-core.md",
+        "../tmp/studio-real-loop/a-round-1.md",
+        "../tmp/studio-real-loop/a-browse.json"
+      ],
+      "acceptance": [
+        {
+          "id": "R1-U1",
+          "action": "npx vitest run app/lib/arrangement",
+          "expected": "all pass; includes named cases for addClip free placement, moveClip no-overlap, trim left adjusts sourceOffset and stops at source start, trim right stops at source end, split at time (sourceOffset2 = sourceOffset + t - start), split by range -> 3 parts, deleteClip leaves gap, deleteTime shifts later clips on ALL lanes incl. video lane by (b-a) and splits straddlers with correct sourceOffsets, projectEnd dynamic, undo/redo exact snapshots, no-op not recorded, redo cleared by new edit",
+          "verify": "C re-runs command and reads test names"
+        },
+        {
+          "id": "R1-U2",
+          "action": "npx vitest run app/lib/arrangement/__tests__/schedule.test.ts",
+          "expected": "planSchedule from mid-clip: sourceOffset = clip.sourceOffset + (from - clip.start), duration = clip.duration - (from - clip.start); clips ending <= from excluded; until bound; muted tracks still planned (gain 0, so unmute works live); isTrackAudible: solo exclusive, mute overrides; video-lane clips not audio-scheduled in R1",
+          "verify": "C re-runs"
+        },
+        {
+          "id": "R1-U3",
+          "action": "npx vitest run app/lib/arrangement/__tests__/graph.test.ts",
+          "expected": "applySchedule against a minimal structural fake context calls source.start(startAt + (when - from), sourceOffset, duration) and wires source->clipGain->trackGain->pan->master->destination; same function used by live and offline paths (grep shows renderArrangementWav calls applySchedule)",
+          "verify": "C re-runs + grep"
+        },
+        {
+          "id": "R1-G1",
+          "action": "npx tsc --noEmit; npx vitest run; npm run build; npx biome check <SRW-01 files>",
+          "expected": "0 TS errors; >= 464 + new tests, 0 failures; build ok; biome 0 errors",
+          "verify": "C re-runs all four"
+        },
+        {
+          "id": "R1-S1",
+          "action": "sha256 of 4 protected files vs protected-baseline.json; git status --short",
+          "expected": "hashes identical; new/modified files subset of SRW-01 files plus the 4 pre-existing dirty protected files and pre-existing untracked .agents/ .codex/ AGENTS.md .claude/agents/ableton-arrangement-expert.md",
+          "verify": "C"
+        },
+        {
+          "id": "R1-S2",
+          "action": "Open /studio-lab in a fresh anonymous browser (no localStorage auth_user); record network",
+          "expected": "HTTP 200, workspace renders, label 'დემო კოლექცია' visible; no requests to /api/studio-token, /api/recording-*, /api/download, any r2/cloudflarestorage/studio worker host; no Authorization header; only /middle-east.mp3 and /videos/hero/hero-music.mp3 media fetched",
+          "verify": "C gstack browse network log"
+        },
+        {
+          "id": "R1-B1",
+          "action": "Library: select 'Soft impact' (synthetic), press Enter or ＋ დამატება with SFX track active and playhead at 0",
+          "expected": "clip appears on active track at 00:00.000 with peaks drawn; status names track and time; Undo removes it in one step",
+          "verify": "C browse"
+        },
+        {
+          "id": "R1-B2",
+          "action": "Drag clip HEADER right by ~2 s",
+          "expected": "clip.start +2 s (±0.05), sourceOffset unchanged, one undo entry; dragging inside waveform BODY creates a time range instead and does not move the clip",
+          "verify": "C browse, read start in detail/status"
+        },
+        {
+          "id": "R1-B3",
+          "action": "Drag LEFT edge of a music clip right by 3 s; then drag right edge beyond source end",
+          "expected": "start +3, sourceOffset +3, duration -3, waveform content does not slide (same audio at same timeline time); right edge stops at source end; blocked trim shows message and does not add history",
+          "verify": "C browse + export check R1-E2"
+        },
+        {
+          "id": "R1-B4",
+          "action": "Place playhead inside a selected clip and press Ctrl+E (or ✂ button); Undo; select range 4-6 s in clip body and split",
+          "expected": "split at playhead -> 2 clips with continuous audio; Undo -> 1 clip; range split -> 3 clips, middle selected",
+          "verify": "C browse"
+        },
+        {
+          "id": "R1-B5",
+          "action": "Two tracks with clips after 10 s; select range 4-6 s on one clip; press Delete",
+          "expected": "Delete Time: 2 s removed on ALL lanes; clips after 6 s on every track move 2 s left; straddling clips split and joined at 4 s with correct sourceOffsets; button/hint says Delete Time closes gap; one Undo restores everything",
+          "verify": "C browse, compare starts before/after"
+        },
+        {
+          "id": "R1-B6",
+          "action": "Select a clip with no range; press Delete",
+          "expected": "only that clip removed; other clips do not move (gap remains)",
+          "verify": "C browse"
+        },
+        {
+          "id": "R1-B7",
+          "action": "Add/move a clip so it ends at 75 s",
+          "expected": "project end label and ruler extend beyond 75 s; no 60 s cap anywhere; timeline scrollable past the end",
+          "verify": "C browse"
+        },
+        {
+          "id": "R1-B8",
+          "action": "Play (Space and button); after ~2 s move a clip header while playing; then Pause; click ruler at 20 s",
+          "expected": "time display and playhead advance; editing does not stop playback and the moved clip is heard at its new position (reschedule); Pause stops all sources; ruler click seeks to 20.0 without starting playback when stopped",
+          "verify": "C browse; audible check via AnalyserNode optional, else note limitation"
+        },
+        {
+          "id": "R1-B9",
+          "action": "Toggle Mute, Solo, Volume on tracks during playback",
+          "expected": "live gain change without restart (no position jump); solo exclusive on plain click; state reflected in export (R1-E3)",
+          "verify": "C browse + export"
+        },
+        {
+          "id": "R1-B10",
+          "action": "Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y after add, move, trim, split, delete time",
+          "expected": "each undo restores the exact previous arrangement; redo reapplies; history label names the action; shortcuts ignored while typing in an input",
+          "verify": "C browse"
+        },
+        {
+          "id": "R1-B11",
+          "action": "Patch AudioBufferSourceNode start/stop counters before load; press Space 10x rapidly; then mute a track before Play, start Play, unmute while playing; move that track volume while muted",
+          "expected": "after toggles, active sources == clips intersecting the remaining timeline (no doubles, no stale audio); unmute audible within 100 ms (AnalyserNode/RMS on master or export comparison); volume change on a muted track keeps it silent (C P3/P4/P6)",
+          "verify": "C browse with patched prototypes"
+        },
+        {
+          "id": "R1-B12",
+          "action": "Clips on 2 tracks after 10 s; select range 4-6 s; start Play from 7 s; at ~8 s press Delete (Delete Time) while playing",
+          "expected": "playback continues without stopping or a gap from remapTime(p) (about 6 s), playhead jumps left by 2 s consistently, and audio stays aligned with the shifted clips (export after edit matches what was heard); one Undo restores clips",
+          "verify": "C browse; position before/after; source counters"
+        },
+        {
+          "id": "R1-E1",
+          "action": "Arrange: synthetic impact at 2 s on SFX, music clip 5-15 s; Export → WAV; intercept blob (patch URL.createObjectURL) and decode with OfflineAudioContext/decodeAudioData",
+          "expected": "file is RIFF/WAVE 24-bit 48 kHz stereo; duration = projectEnd ±0.02 s; RMS > -50 dBFS inside clip windows, < -80 dBFS in the silent gap 4-5 s (impact 2-4 s decays until 4 s); download filename ends .wav",
+          "verify": "C in-browser decode",
+          "criterion_fix": "C note 2026-10-07: original window 3-5 s contradicted the 2 s impact at 2 s; corrected to 4-5 s. C measured 4-5 s = exact zeros."
+        },
+        {
+          "id": "R1-E2",
+          "action": "Move the impact clip +2 s, export again",
+          "expected": "onset window shifts by 2 s (±10 ms); left-trimmed music clip in export starts with the trimmed offset audio (not from source start)",
+          "verify": "C decode + compare"
+        },
+        {
+          "id": "R1-E3",
+          "action": "Mute the SFX track, export",
+          "expected": "impact window silent (< -80 dBFS); music unaffected",
+          "verify": "C decode"
+        },
+        {
+          "id": "R1-E4",
+          "action": "Empty project → open Export",
+          "expected": "export disabled with explicit reason; MP3 and video options shown as unavailable in this round with reason (no fake file)",
+          "verify": "C browse"
+        },
+        {
+          "id": "R1-V1",
+          "action": "Screenshots at 1440x900 and 1280x720",
+          "expected": "transport, library, 1 video lane + 3 audio lanes, export button visible without overlap; selected clip vs time range vs playhead visually distinct; video lane states honestly that video import arrives in the next round",
+          "verify": "C screenshots"
+        },
+        {
+          "id": "R1-E5",
+          "action": "Synthetic Soft impact (48 kHz source) placed at start=3.0 with left trim so sourceOffset=0.25; export; read samples",
+          "expected": "independent oracle: out[(3.0+k)*48000] equals src[(0.25+k)*48000] for k in first 0.5 s within 24-bit quantisation (|diff| <= 2^-22); out before 3.0 s is exactly 0 for that track region",
+          "verify": "C decode, compare against demo-synth generator output (not against another render of the same graph)"
+        }
+      ],
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-1.md",
+        "json": "tmp/studio-real-loop/c-round-1.json",
+        "passed": [
+          "R1-U1",
+          "R1-U2",
+          "R1-U3",
+          "R1-G1",
+          "R1-S1",
+          "R1-S2",
+          "R1-B1",
+          "R1-B2",
+          "R1-B3",
+          "R1-B4",
+          "R1-B5",
+          "R1-B6",
+          "R1-B7",
+          "R1-B8",
+          "R1-B9",
+          "R1-B10",
+          "R1-B11",
+          "R1-B12",
+          "R1-E1",
+          "R1-E2",
+          "R1-E3",
+          "R1-E4",
+          "R1-E5",
+          "R1-V1"
+        ],
+        "gates": "tsc 0; vitest 36 files 517 passed; build ok; biome ./app 0 errors; protected hashes 4x OK"
+      },
+      "fb_status": {
+        "FB-01": "model+ruler part evidenced (R1-B7); navigation part remains SRW-10",
+        "FB-02": "done (SRW-01 Delete Time + SRW-09 clipboard, C round 5)"
+      },
+      "open_bugs": [
+        {
+          "id": "C-R1-01",
+          "severity": "low",
+          "title": "Play/Pause lookahead moves playhead backwards",
+          "routed_to": "round 2 (R2-F1)",
+          "status": "resolved",
+          "resolved_evidence": "C round 2 R2-F1 PASS (10 Space @20.000 -> 20.000; min frame delta 0; header-drag handoff 0 ms)"
+        },
+        {
+          "id": "C-R1-02",
+          "severity": "low",
+          "title": "root body padding-bottom 90px scrolls /studio-lab",
+          "routed_to": "round 2 (R2-F2) via studio-container marker class, no root/app.css edit",
+          "status": "resolved",
+          "resolved_evidence": "C round 2 R2-F2 PASS (scrollHeight 900/720; scrollTo -> header top 0)"
+        },
+        {
+          "id": "C-R1-03",
+          "severity": "low",
+          "title": "Undo of Delete Time while playing keeps playhead",
+          "routed_to": "decision D-12 (keep, Ableton-like); regression R2-F4",
+          "status": "resolved",
+          "resolved_evidence": "C round 2 R2-F4 PASS (D-12 regression)"
+        },
+        {
+          "id": "C-R1-04",
+          "severity": "low",
+          "title": "footer status truncated at 1440",
+          "routed_to": "round 2 (R2-F3)",
+          "status": "resolved",
+          "resolved_evidence": "C round 2 R2-F3 PASS (sw=cw, sh=ch, own row)"
+        },
+        {
+          "id": "C-R3-05",
+          "severity": "medium",
+          "title": "Ctrl+Z during clip/brace/trim drag: release commits stale before-snapshot, resurrects undone loop, clears redo",
+          "routed_to": "round 4 R4-B1 (D-20 undo guard during gestures)",
+          "status": "resolved",
+          "resolved_evidence": "C round 4 R4-B1 PASS (clip drag, brace drag, left trim: Ctrl+Z/Ctrl+Shift+Z/Ctrl+Y/Undo button blocked with status; one entry on release; loop intact; Redo kept)"
+        },
+        {
+          "id": "C-R4-02",
+          "severity": "medium",
+          "title": "second pointerdown on the same clip (or loop brace) leaks the gesture count; Undo/Redo and edits blocked until reload",
+          "routed_to": "round 5 R5-B1/R5-B1u/R5-B1r (D-23: a different-pointer re-entry is ignored; a same-pointer pointerdown ends the stale gesture without history, then starts anew; one release per gesture)",
+          "status": "resolved",
+          "evidence": "c-round-4/scripts/leak.js, leakmusic.js, leak2.js; runs/leak-scope.txt",
+          "resolved_evidence": "C round 5 R5-B1/R5-B1u/R5-B1r PASS"
+        },
+        {
+          "id": "C-R5-02",
+          "severity": "medium",
+          "title": "second pointer edit (other clip drag, lane Mute) during an active clip gesture is committed then silently reverted by the first gesture commit from gesture.before; history keeps the lost entry; second release clears the first gesture ghost/hint",
+          "routed_to": "round 6 R26-1..3/R26-U (D-26 workspace-wide single edit gesture; stale same-pointer ends old gesture; arrangement commands refused mid-gesture incl. volume slider)",
+          "status": "resolved",
+          "evidence": "c-round-5.md §5 C-R5-02; pre-existing, extended by round-5 cross-lane commit; code-reviewer #7; A known gap",
+          "resolved_evidence": "C round 6 R26-1, R26-2, R26-3, R26-U PASS (D-26)"
+        },
+        {
+          "id": "C-R6-01",
+          "severity": "low",
+          "title": "Volume slider preview begun before a clip gesture commits a Volume entry mid-gesture (= checkpoint-r6-review #10)",
+          "routed_to": "round 7 R30-1/R30-U (D-30: the slider pointer drag claims the D-26 registry)",
+          "status": "open",
+          "evidence": "c-round-6/runs/volpre.json, scripts/volpre.js"
+        }
+      ],
+      "known_limitations_from_A": [
+        "L5 keyboard edit during drag not cancelled",
+        "L11 mono sources -3 dB through StereoPanner (same live/export)",
+        "L12 activeSourceCount counts scheduled-not-started",
+        "L14 no keyboard clip selection; clips <16 px covered by trim edges",
+        "no context-level fake-AudioContext tests"
+      ]
+    },
+    {
+      "id": "SRW-02",
+      "round": 2,
+      "title": "Video lane import: reproduce FB-15 first, then file picker + drag-drop, sequential single lane",
+      "fb": [
+        "FB-15"
+      ],
+      "type": "confirmed-problem-to-reproduce",
+      "depends_on": [
+        "SRW-01"
+      ],
+      "status": "done",
+      "files": [
+        "app/lib/arrangement/video.ts",
+        "app/lib/arrangement/video.client.ts",
+        "app/lib/arrangement/__tests__/video.test.ts",
+        "app/lib/arrangement/model.ts",
+        "app/lib/arrangement/__tests__/model.test.ts",
+        "app/types/arrangement.ts",
+        "app/contexts/ArrangementContext.tsx",
+        "app/components/arrangement/ArrangementLane.tsx",
+        "app/components/arrangement/ArrangementClip.tsx",
+        "app/components/arrangement/StudioWorkspace.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R2-V0",
+          "action": "Before changes: in prototype and SRW-01 build, try adding MP4 (H.264), WebM, MOV via picker and drag to video lane",
+          "expected": "exact result/error per format recorded in a-SRW-02-report.md (reproduction of FB-15)",
+          "verify": "C reviews report and repeats one case"
+        },
+        {
+          "id": "R2-V1",
+          "action": "Pick MP4 via button and drag WebM onto video lane",
+          "expected": "both accepted; placed sequentially (A 0-dA, B dA-dA+dB); no overlap; Undo one step each",
+          "verify": "C browse:  upload beeps-6s-vp9-opus.webm + DataTransfer drop clip-4s-vp9-opus.webm; MP4/MOV positive path env-limited if canPlayType lacks H.264 -> Tech Lead real Chrome"
+        },
+        {
+          "id": "R2-V2",
+          "action": "Drop unsupported file / audio file / video on audio lane",
+          "expected": "clear Georgian error naming format; nothing added; history unchanged",
+          "verify": "C"
+        },
+        {
+          "id": "R2-V3",
+          "action": "Trim/split/Delete Time involving video clip",
+          "expected": "video clip offset updates exactly like audio; video stays aligned with audio after delete time",
+          "verify": "C + unit test"
+        },
+        {
+          "id": "R2-V4",
+          "action": "Network during import",
+          "expected": "video never uploaded (blob URL only)",
+          "verify": "C network log"
+        }
+      ],
+      "note": "C hypothesis for FB-15: prototype lane ondrop only accepts library text/plain, OS file drops rejected and video lane dropEffect=none; real Studio MIME allowlist rejects empty file.type (.mov). Reproduce first.",
+      "dispatched_round": 2,
+      "round2_acceptance_ref": "current-task.md section 10",
+      "test_media": "tmp/studio-real-loop/media/ (SHA256SUMS.txt)",
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-2.md",
+        "json": "tmp/studio-real-loop/c-round-2.json",
+        "passed": [
+          "R2-V0",
+          "R2-V1",
+          "R2-V2",
+          "R2-V4"
+        ],
+        "failed": [
+          "R2-V3"
+        ],
+        "failed_detail": "R2-V3 offset maths PASS in browser (0.5-1 off 0.5; 1-2 off 2.0; 2-5.008 off 3); playback drift FAIL 2/3 runs (median 0.081/0.066, max 0.154) under C-R2-01",
+        "notes": "MP4/MOV/no-audio MP4 verified in gstack Chromium 145 (canPlayType probably) - not env-limited"
+      },
+      "fb_status": {
+        "FB-15": "done: import path (round 2) and R2-V3 playback (round 4 RF4-1 5/5) independently verified by C"
+      },
+      "carry_over": "RF4-1 (round 4) re-measures R2-V3 playback",
+      "evidence_round3": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-3.md",
+        "failed": [
+          "R2-V3 playback part via RF3-1: 3/5 runs (reload_2 median 0.141, max 0.293)"
+        ],
+        "note": "offset maths still exact (0.5-1 off 0.5; 1-2 off 2.0; 2-5.008 off 3); R2-V1/R2-V2 regression PASS"
+      },
+      "evidence_round4": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-4.md",
+        "json": "tmp/studio-real-loop/c-round-4.json",
+        "passed": [
+          "R2-V3 playback via RF4-1: 5/5 (3 same-load + 2 reload), max 0.026, no seek/swap at the continuous 2.0 boundary, 0 hard seeks",
+          "R2-V1",
+          "R2-V2"
+        ]
+      }
+    },
+    {
+      "id": "SRW-03",
+      "round": 2,
+      "title": "Unified transport for video and audio; mute original video sound without stopping video",
+      "fb": [
+        "FB-16"
+      ],
+      "type": "behavior-request",
+      "depends_on": [
+        "SRW-02"
+      ],
+      "status": "regression_open",
+      "files": [
+        "app/lib/arrangement/video.client.ts",
+        "app/lib/arrangement/schedule.ts",
+        "app/lib/arrangement/graph.client.ts",
+        "app/lib/arrangement/__tests__/schedule.test.ts",
+        "app/lib/arrangement/__tests__/graph.test.ts",
+        "app/contexts/ArrangementContext.tsx",
+        "app/components/arrangement/ArrangementVideoDock.tsx",
+        "app/components/arrangement/ArrangementLane.tsx",
+        "app/components/arrangement/ArrangementExportDialog.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R3-V1",
+          "action": "Play from 0 with video at 0-10 s and audio clips",
+          "expected": "video frame time tracks transport within 0.1 s; gap between video clips shows 'ვიდეო არ არის' + time",
+          "verify": "C reads video.currentTime vs transport"
+        },
+        {
+          "id": "R3-V2",
+          "action": "Toggle 'ვიდეოს ორიგინალი ხმა' mute while playing",
+          "expected": "video keeps playing, its sound muted/unmuted, no position jump",
+          "verify": "C"
+        },
+        {
+          "id": "R3-V3",
+          "action": "Export with original video sound on/off",
+          "expected": "if decodeAudioData read the video audio: present/absent in WAV accordingly; otherwise UI states it cannot be included",
+          "verify": "C decode"
+        },
+        {
+          "id": "R3-V4",
+          "action": "10x rapid Space",
+          "expected": "single set of sources; no stale audio; video and audio both paused at end state",
+          "verify": "C"
+        }
+      ],
+      "note": "C T8: |video.currentTime - (pos - clip.start + clip.sourceOffset)| < 80 ms at seeks 5/15/30 s; C T10: video keeps playing (paused=false) while its audio lane RMS=0",
+      "dispatched_round": 2,
+      "round2_acceptance_ref": "current-task.md section 10",
+      "decisions": [
+        "D-13 video element always muted; original sound = decoded AudioBuffer on video lane through same applySchedule; M/S/Volume on video lane; solo rules include video lane",
+        "D-14 skip video audio decode above 20 min with explicit note",
+        "D-16 (round 3): replaces the round-2 hard-seek-only sync rule; see plan.md",
+        "D-19 (round 4): replaces D-16 band/seek rules and the one-<video> contract: sync loop outside React render, continuity flag, rate clamp [0.5, 2.0] for |d| <= 1.0 (video always muted), seek-and-hold with constant lead L in [0, 0.5], standby second <video> for predictable discontinuities, play() at startAt - frameInterval",
+        "D-24 (round 5): stall escalation (seek-and-hold when the commanded rate is at the band edge (|rate-1| >= 0.5) for T in [200,400] ms and |d| > D in [0.08,0.15] does not shrink; in-cycle window reset on every seek/swap/play/pause; max once per 1.0 s from the previous seeked) + C stall-exclusion measurement: only LoAF >= 50 ms with < 10 ms app script, or rAF gap >= 50 ms without app script, to end + 300 ms; app-attributed long tasks count against the app; > 10 % excluded -> run invalid; max 5 invalid re-runs replacing the RF4-1 2-re-run rule; thresholds unchanged; raw series reported",
+        "D-24a (round 6): escalation interval 600 ms from the previous seeked (was 1.0 s); T, D, edge, shrink, hard-seek rules unchanged; forced persistent-lag criterion RF6-1 is a verdict",
+        "D-24a clarification (round 7): after the forcing stops, no escalation whose qualifying T-window began after release; at most one in-flight escalation from a window already qualified at release (issued <= T + 150 ms after release), then |d| <= 0.1 within 1.5 s"
+      ],
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-2.md",
+        "passed": [
+          "R3-V2",
+          "R3-V3",
+          "R3-V4"
+        ],
+        "failed": [
+          "R3-V1"
+        ],
+        "failed_detail": "5/10 runs over tolerance (max 0.127-0.149 s; median 0.065/0.076 in runs 1/7); seek issued while video.seeking; learned lead overshoot; frame freeze up to 800 ms"
+      },
+      "open_bugs": [
+        {
+          "id": "C-R2-01",
+          "severity": "high",
+          "title": "video sync drift + seek storm (seek while seeking, learned lead overshoot)",
+          "routed_to": "round 3 RF3-1 under D-16 (no seek while seeking, constant lead <=0.15, playbackRate soft-sync [0.85,1.15], hard seek only on discontinuity or |d|>0.3)",
+          "status": "superseded",
+          "superseded_by": "C-R3-01",
+          "note": "seek-while-seeking and learned lead eliminated (C round 3: 0 writes while seeking in 20 runs); tolerance still fails"
+        },
+        {
+          "id": "C-R2-02",
+          "severity": "low",
+          "title": "video play() before audio startAt on first Play",
+          "routed_to": "round 3 RF3-2",
+          "status": "resolved",
+          "resolved_evidence": "C round 3 RF3-2: hold passes 3/3, video no longer runs ahead of audio; residual lateness tracked as C-R3-03"
+        },
+        {
+          "id": "C-R3-01",
+          "severity": "high",
+          "title": "RF3-1 tolerance fails: R3-V1 5/15, R2-V3 3/5 (hard-seek cascade, 1.15 soft-sync ceiling, seek at continuous boundary ArrangementVideoDock.tsx:176)",
+          "routed_to": "round 4 RF4-1 under D-19",
+          "status": "superseded",
+          "superseded_by": "C-R4-01",
+          "note": "D-19 mechanisms verified (0 writes while seeking, continuity, standby, rate band); R2-V3 now 5/5; R3-V1 still fails under load"
+        },
+        {
+          "id": "C-R3-03",
+          "severity": "low",
+          "title": "first Play: play() 22-30 ms after startAt; |d| 0.077-0.089 in first 300 ms",
+          "routed_to": "round 4 RF4-3 (criterion refined with rationale: startAt..+100 ms <= 0.1, +100..+300 ms <= 0.06, play() within +-20 ms)",
+          "status": "resolved",
+          "resolved_evidence": "C round 4 RF4-3 PASS 3/3 (play() +0.7/-2.0/-10.0 ms vs startAt; |d| <= 0.050 in 0-300 ms); hold-text conflict corrected in RF5-3"
+        },
+        {
+          "id": "C-R4-01",
+          "severity": "medium",
+          "title": "video drift tolerance fails on a loaded machine: R3-V1 same-load 9/10 (after 2 re-runs), reload 2/5, RF4-2 4/5; all lag; coincident stalls (LoAF script ~0) and first-Play decoder not following rate 2.0 (Lr5)",
+          "routed_to": "round 5 RF5-1/RF5-1b/RF5-2 under D-24 (RF5-1b counts only non-excluded time; 600 ms growth without escalation fails)",
+          "status": "resolved",
+          "resolved_evidence": "C round 5 RF5-1 and RF5-2 PASS under D-24 (invalid re-runs 1/5)"
+        },
+        {
+          "id": "B-R5-01",
+          "severity": "medium",
+          "title": "D-24 escalation interval 1.0 s contradicts RF5-1b under persistent lag (~700 ms counted)",
+          "routed_to": "round 6 RF6-1/RF6-U (D-24a 600 ms)",
+          "status": "resolved",
+          "evidence": "c-round-5.md §2 RF5-1b and §5 notes; c-round-5.json blocked[0]",
+          "resolved_evidence": "C round 6 RF6-1 PASS (22 forced runs, counted max 352 ms, escalation >= 790 ms after seeked) and RF6-U PASS; release wording clarified in D-24a (round 7)"
+        },
+        {
+          "id": "C-R6-02",
+          "severity": "medium",
+          "title": "RF6-2 drift regression: R3-V1 6/28 valid FAIL with app-attributed LoAFs (ArrangementContext rAF 16-33 ms, VideoDock step 22 ms, React render 62 ms after Play); RF5-3 4/9",
+          "routed_to": "Tech Lead quiet real Windows Chrome RF7-2 in the R3-V1 D layout (VP9 + H.264). No further app-side candidate is named; code frozen in round 10. Reopen app work only if the quiet run attributes cost to the app.",
+          "status": "open",
+          "evidence": "c-round-6/runs/rf62-summary*.txt, rf53-summary3.txt, L_*/Lr_*/Lr2_* (+ _raw LoAF), rafcost-1.json",
+          "round7_result": "Round 7 measure+fix done (A: tick+microtask p50 2.0 -> 0.7 ms, direct DOM position writers, memo lists). C: RF7-P1/P2/2 pass on written criteria, but app-attributed rAF LoAFs 49/61 ms recur in INVALID run L_2 and a 16 ms step LoAF in L_3. Forced-layout axis was 0 before and after (non-discriminating). Sync budget for this bug used; per agent-workflow.md it stays open without relaxed tolerances.",
+          "next": "Required evidence: Tech Lead quiet real Windows Chrome RF7-2 (VP9 + H.264). Concrete follow-up (bug round after SRW-11B stage 1, or earlier if quiet Chrome attributes the LoAFs to the app): remove the remaining per-frame React consumer LibraryPlayheadText (ArrangementLibraryPreview.tsx) via the position-writer pattern, and stop the post-hold isTransportRunning flip from re-rendering every useArrangement() consumer; prove with render counts and 3 valid R3-V1 light runs.",
+          "round8_evidence": "c-round-8 N_1 (panel open, no selection) FAIL 0.1329 s without a steady app LoAF; N 2/3 PASS",
+          "round9_result": "Both named candidates fixed and verified (R9-L1: LibraryPlayheadText is a position writer, 0 renders; R9-L2: context value identity stable across the hold release, 0 consumer renders). Drift: N 3/3 PASS, RF5-3 3/3 PASS (raw harness), mode D 2/3 (C-R8-01). Closure needs D too.",
+          "round9_evidence": "c-round-9.md §2, §3 (R9-L1, R9-L2, R9-L3), c-round-9/runs/N_*.json, F_*.json"
+        },
+        {
+          "id": "C-R7-01",
+          "severity": "medium",
+          "title": "RF5-2 loop-wrap landing late: L6_1 wrap 1 vt 2.244 at +300 ms (expected [2.29, 2.31]); setup runs 2.286 / 2.280, A 2.278; round 6 5/5 clean",
+          "status": "closed_headless",
+          "evidence": "c-round-7/runs/rf72-summary.txt, L6_1.json, L6_1_res.txt (swap 3.011 v1->v2, no hard seek, rateMax 1.3), L6_*_raw.json",
+          "analysis": "Valid run (0 stalls, 0 app LoAF, CPU med 15 %). Round 7 did not change video-sync.ts, the dock step or position-store.ts; loop 2-4 sits inside one video clip, so the caption snapshot is not involved. No named app-side hypothesis yet; a re-measure-only round is excluded by agent-workflow.md.",
+          "follow_up_spec": "Instrument the standby hand-off per wrap (temporary harness wrapper, never left in source): standby readyState, currentTime and seeking at the swap instant; time of the pre-seek seeked event relative to the wrap; play() call -> playing event latency; first swap vs later swaps; rate writes in the first 300 ms. Decide from those numbers: (a) standby pre-seek issued too late or not settled before the wrap, (b) first-swap decoder warm-up, (c) environment. Fix only (a)/(b) with a unit test on the swap scheduling; keep D-19/D-24/D-24a. Verdict: RF5-2 rule on 3 valid runs (budget 3 + <= 2 environment replacements).",
+          "routed_to": "round 12 under D-19a (plan.md): after a standby swap the soft-sync controller uses a settle band <= 0.008 s and a settle gain K <= 10 (D-19 K in [2, 5] widens only during settle; K = 4 leaves about -0.02 at +300, about K 8 needed) inside the unchanged rate band [0.5, 2.0] until |d| first falls inside the band, or 1.0 s, or the next seek/swap/pause; then the 0.02 deadband resumes. Pure helper in video-sync.ts, deterministic simulation test (modelled 30 ms post-start freeze reaches |d| <= 0.01 by +300 ms with 0 stall escalations); dock touched only in the swap block and at the rate write; hold, stall/escalation, D-24/D-24a unchanged. Verdict R12-W1 (the R10-W1 rule under H3) with 0 escalations (3 valid L6 runs incl. a fresh load). The Tech Lead quiet-Chrome RF7-3 run remains required evidence. The window is not widened; widening it would need the Tech Lead.",
+          "hypothesis_round10": "(d) isStandbyReady accepts a standby up to VIDEO_POSITIONED_SECONDS = 0.04 s behind mediaTime (ArrangementVideoDock.tsx l.29); with play() start latency the bounded soft-sync ramp (VIDEO_RATE_STEP 0.05/step, band <= 2) may not recover within the 300 ms window. lastSample feeds only mappingJump, not the rate controller, so re-seeding it is not a fix. To be confirmed or refuted from the wrapper numbers, not assumed. Note: round-5 passing RF5-2 evidence was [2.275, 2.311], so the [2.29, 2.31] window is not proven tight; window unchanged.",
+          "round10_result": "A instrumented 18 wraps (6 runs incl. 2 fresh loads): pre-seek issued 0.97-1.00 s before the wrap, seeked 36-54 ms later; swap offset 0.000 in 18/18; readyState 4, seeking false, playPending false; play() -> playing 4.5-7.7 ms with no first-swap outlier. (a), (b), (d) and (m) refuted. C clean-source verdict runs: 9/9 valid wraps d(+300) -0.017..-0.020; post-start currentTime freeze +22..+51 ms; soft sync settles at the D-19 deadband 0.02. Systematic in 27/27 wraps across two sessions. The large late landings (W_1 wrap 3 d -0.075; round-7 L6_1 2.244) occur only in stall-invalid runs.",
+          "round10_evidence": "c-round-10.md §2, §3 (R10-W2), §7; c-round-10/runs/w-summary.txt, w-table.txt, *_wrapdetail.json; a-round-10.md §1.1, a-round-10/runs/*_wraps.json",
+          "spec_finding": "The +-0.01 landing window is B-authored (tasks/round-7.md:159, from C round-6 observed values); the original RF5-2 acceptance (tasks/round-5.md:135) is vt in [2, 4] plus the D-19 drift thresholds. D-19 stops correcting at |d| <= 0.02. The two B rules contradict for any post-swap transient > 0.02. B resolves it in the stricter direction (app behaviour), not by widening the window: D-19a.",
+          "round12_result": "C round 12 (c-round-12.md §2.1): R12-W1 PASS, 3 valid L6 runs incl. fresh load, 9/9 wraps d300 -0.0030..+0.0058 (round 10: -0.017..-0.020), swaps only, 0 hard seeks in the wrap windows, videoSettles 0 -> 3 = swaps, escalations 0, D-24 PASS, settle-window rate <= 1.45 at |d| <= 0.11, multi 0, frames past loop.end 0. R12-U PASS incl. C guard mutations M1-M7. Adjacent R2-V3, RF5-3 (first Play does not arm), R5-L3, R5-E1, RF7-P2, dock quick check PASS; R3-V1 N info .0109/.0196. Round 12 taskStatus stays FAIL on the literal R12-S (5 pre-first-swap writes, C-R12-01).",
+          "closure_basis": "B decision D-19b (plan.md): R12-S was mis-scoped by B. It reached into the pre-first-swap start transient, where settle is unarmed (videoSettles 0) and the steady path is byte-unchanged (C diff: video-sync.ts additions only; unarmed settleRate == videoRateCorrection on the grid; C M4). R12-S applies from the first arm onward; there C measured 0 rate != 1 writes outside settle windows (r12s-split.txt postNe 0: 0/147, 0/147, 0/145, V3_1 0/237). The tolerance is not changed. The start transient belongs to RF5-3 and is tracked as C-R12-01.",
+          "remaining": "Tech Lead quiet real Windows Chrome RF7-3 (VP9 + H.264) remains required evidence for SRW-03/SRW-05; headless closure is not a real-Chrome PASS.",
+          "evidence_round12": [
+            "c-round-12.md §2.1-§2.2, §3",
+            "c-round-12/runs/w-table.txt, w-summary.txt, settlecheck-W.json, r12s-split.txt, r12s-neighbor.txt"
+          ]
+        },
+        {
+          "id": "C-R12-01",
+          "severity": "low",
+          "title": "first Play start transient: the unchanged steady rule writes 1.1 at 0.19-0.33 s after Play while the same-frame harness |d| is 0.0192-0.0196 (<= 0.02); 5 writes in W_1/W_2/W_3, all before the first swap with settle unarmed",
+          "status": "open",
+          "evidence": "c-round-12/runs/r12s-neighbor.txt, r12s-split.txt, settlecheck-W.json; c-round-12.md §2.2, §7",
+          "analysis": "Margin <= 0.8 ms. The harness reference is ctx-based posAt; the dock uses the live position. Not a regression: the path is byte-unchanged since round 4/5 and the code under test in round 12 cannot reach it.",
+          "routed_to": "milestone regression RF5-3: C reports start-transient rate writes with one dock live-position read (getLivePosition via the existing harness, no source instrumentation) next to the harness d; if the dock-side |d| <= 0.02 at a rate != 1 write, it becomes a D-19 bug with its own round. Not a dedicated re-measure round of unchanged code (agent-workflow.md)."
+        }
+      ],
+      "evidence_round3": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-3.md",
+        "json": "tmp/studio-real-loop/c-round-3.json",
+        "passed_regression": [
+          "R3-V2",
+          "R3-V3",
+          "R3-V4"
+        ],
+        "failed": [
+          "R3-V1 via RF3-1: 5/15 runs"
+        ],
+        "hard_rules_held": "0 writes while seeking, rate bounded, rate 1 after pause, muted, 1 <video> in all 20 runs"
+      },
+      "evidence_round4": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-4.md",
+        "json": "tmp/studio-real-loop/c-round-4.json",
+        "passed": [
+          "RF4-3",
+          "RF4-U",
+          "R3-V2",
+          "R3-V3",
+          "R3-V4 (D-19 form: 2 videos paused, rate 1)",
+          "R4-B5",
+          "R4-B6",
+          "R4-M2"
+        ],
+        "failed": [
+          "R3-V1 via RF4-1: same-load 9/10 after 2 starvation re-runs, reload 2/5"
+        ],
+        "hard_rules_held": "all runs: 0 writes while seeking, rate in [0.5,2], rate 1 + paused after Pause, muted, 2 <video> with 1 visible, 0 ms both playing, 0 dock hard seeks",
+        "diagnostic": "H.264 3/3 PASS"
+      },
+      "evidence_round5": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-5.md",
+        "json": "tmp/studio-real-loop/c-round-5.json",
+        "passed": [
+          "R3-V1 via RF5-1 (same-load 9 PASS + 1 invalid re-run PASS; reload 5/5; stall-excluded and raw series)",
+          "RF5-1b (vacuous: 0 natural episodes; forced diag 320 ms)",
+          "RF5-3",
+          "RF5-U",
+          "R3-V2",
+          "R3-V3 (via R5-B1r)",
+          "R3-V4"
+        ],
+        "caveat": "RF5-1b passed vacuously; under persistent lag the 1.0 s escalation interval gives ~700 ms counted time > 600 ms (C note) -> B-R5-01 / D-24a; natural decoder ramp and quiet real Chrome remain Tech Lead checks"
+      },
+      "evidence_round6": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-6.md",
+        "json": "tmp/studio-real-loop/c-round-6.json",
+        "passed": [
+          "RF6-1 (with release note)",
+          "RF6-U",
+          "R3-V3 (= R5-B1r)",
+          "R2-V3 5/5 (inside RF6-2)",
+          "RF5-2 loop 5/5 (inside RF6-2)"
+        ],
+        "failed": [
+          "RF6-2: R3-V1 30 runs 22 PASS / 6 FAIL / 2 INVALID with app-attributed LoAFs in 8 runs (round 5: 0); RF5-3 4/9 clean PASS"
+        ],
+        "not_rerun": [
+          "R3-V2",
+          "R3-V4"
+        ],
+        "note": "Cause (app vs machine preemption at 23-100 % CPU) unconfirmed; D-24 counts app-attributed LoAF against the app; status regression_open until RF7-2 passes"
+      },
+      "evidence_round7": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-7.md",
+        "json": "tmp/studio-real-loop/c-round-7.json",
+        "passed": [
+          "RF7-P1 (written criterion; forced layout 0 before and after, so it did not discriminate)",
+          "RF7-P2 (render test; browser Play-click LoAF vacuous, click+flush median 7.3 ms)",
+          "RF7-2 (R3-V1 L_1/L_3/L_4 + R2-V3 3/3; 1 INVALID replaced)",
+          "RF7-U",
+          "R10-N6",
+          "R4-M2",
+          "R27-1",
+          "e2e play + WAV export (gap -240 dB, bass onset 10.000125 s)"
+        ],
+        "failed": [
+          "RF7-3: RF5-2 regression rule, L6_1 wrap 1 vt 2.244 (valid run) -> C-R7-01"
+        ],
+        "note": "C-R6-02 stays open: INVALID run L_2 still shows ArrangementContext rAF scripts 49/61 ms coinciding with -0.246/-0.175 excursions; L_3 VideoDock step 16 ms. Cause unconfirmed. Fresh Play F_1..3 passes (round-6 plays:[] not reproduced)."
+      },
+      "evidence_round8": "c-round-8.md §4 (R3-V1 D/N/P series), N_1 FAIL as C-R6-02 evidence",
+      "evidence_round9": "c-round-9.md §2-§3: N 3/3, RF5-3 3/3, D 2/3; R9-L1/L2 PASS",
+      "evidence_round10": "c-round-10.md §2 (R10-W1 FAIL 6/9, d(+300) -0.017..-0.020 in 9/9), §4 (N_1, V3_1, F_1 H2, R5-L3, R5-E1 PASS)",
+      "d19a_amendment_round11_planning": {
+        "why": "D-19a as written ends settle when |d| first enters the band; C round-10 W_2 wrap 1 shows the first post-swap row at d = -0.0007 (inside 0.008), so a literal implementation ends settle on frame one and changes nothing. K = 10 at d = -0.05 gives rate 1.50 = VIDEO_STALL_LAG_RATE.",
+        "rule": "settle is armed at a standby swap (wrap, boundary, gap-entry); it ends on the first re-entry into the settle band after |d| has exceeded it, or 1.0 s after the swap, or on the next seek (issueHoldSeek), swap, pause/stop (wasPlaying reset) or hold. During settle: deadband 0.008, K in [8, 9], rate in [0.55, 1.45] (strictly below VIDEO_STALL_LAG_RATE) with the existing 0.05 step. Not applied on the hold-release start or first Play. Steady-state videoRateCorrection unchanged. D-24 priority: while armed, compute the steady videoRateCorrection(d) first; if it is at a stall edge (isVideoRateAtStallEdge: >= 1.5 lagging or <= 0.5 leading) write the steady rate, otherwise the settle rate; so every steady edge sample is an edge sample under settle and escalation timing is identical (steady reaches 1.5 at |d| >= 0.11875; C checks the 1.45 cap at |d| <= 0.11).",
+        "b_simulation": "B first-order model (60 Hz, 1-frame rate latency, 0.05 step, ~30 ms freeze from +22 ms): K 4 -> d(+300) -0.0175 (C measured -0.017..-0.020); K 8 -> -0.006; K 9 -> -0.006; never above 1.35"
+      },
+      "next_round_note": "C-R7-01 closed headless (round 12). SRW-03 stays regression_open while C-R6-02 is open (Tech Lead quiet Chrome, R3-V1 D layout); C-R12-01 at the milestone RF5-3. Round 13 changes only the dock layout (floating box); the sync effects must stay byte-identical and C runs one R12-W1-style wrap run as an adjacent regression.",
+      "d19b_round12": "R12-S scope correction (plan.md D-19b); sourceChanged reviewer Low 1 accepted without a fifth end site (sourceChanged sets seekWanted, so no rate is written before issueHoldSeek, which calls endSettle)."
+    },
+    {
+      "id": "SRW-04",
+      "round": 2,
+      "title": "Draggable playhead, insert marker vs playback, ruler click/seek rules",
+      "fb": [],
+      "type": "prototype-core",
+      "depends_on": [
+        "SRW-01"
+      ],
+      "status": "done",
+      "files": [
+        "app/contexts/ArrangementContext.tsx",
+        "app/components/arrangement/ArrangementRuler.tsx",
+        "app/components/arrangement/StudioWorkspace.tsx",
+        "app/lib/arrangement/__tests__/transport.test.ts",
+        "app/lib/arrangement/transport.ts"
+      ],
+      "acceptance": [
+        {
+          "id": "R4-P1",
+          "action": "Drag playhead handle while stopped and while playing",
+          "expected": "position follows pointer; while playing audio reschedules at most every 100 ms and once on release; video follows",
+          "verify": "C"
+        },
+        {
+          "id": "R4-P2",
+          "action": "While playing, select a time range in a clip body",
+          "expected": "playback position does not jump (TRN-03)",
+          "verify": "C",
+          "note": "already evidenced in round 1 (c-round-1.md S3 row); re-run as regression"
+        },
+        {
+          "id": "R4-P3",
+          "action": "Stop then Play",
+          "expected": "D-15: Pause at 3 s -> Play resumes at 3 s; Home -> 0 stopped and playing; Home in text input ignored",
+          "verify": "C"
+        }
+      ],
+      "dispatched_round": 2,
+      "round2_acceptance_ref": "current-task.md section 10",
+      "decisions": [
+        "D-15 single position model (prototype/TRN-01 ⚖): Play resumes from current position, no separate insert marker; Home and ↤ -> 0",
+        "D-27 (round 6): Play beyond projectEnd + EPS without an active loop does not start and keeps the position with a status; at end (natural stop) restarts from 0"
+      ],
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-2.md",
+        "passed": [
+          "R4-P1",
+          "R4-P2",
+          "R4-P3"
+        ],
+        "detail": "R4-P1 12 reschedules/1338 ms + 1 on release, no history, arrows +-0.1; R4-P2 range drag while playing keeps playhead monotone; R4-P3 Pause/Play resume, Home stopped/playing, Home in text input ignored"
+      },
+      "open_bugs": [
+        {
+          "id": "C-R5-05",
+          "severity": "low",
+          "title": "Play with the playhead beyond projectEnd silently restarts from 0 and loses the insert position",
+          "routed_to": "round 6 R27-1/R27-U (D-27: beyond end -> no start, position kept, status; at end -> 0 as before)",
+          "status": "resolved",
+          "evidence": "c-round-5.md §5 C-R5-05",
+          "resolved_evidence": "C round 6 R27-1, R27-U PASS (D-27)"
+        }
+      ]
+    },
+    {
+      "id": "SRW-05",
+      "round": 3,
+      "title": "Single loop brace: Loop Selection replaces old range, toggle keeps brace, brace move/resize, sample-accurate wrap",
+      "fb": [],
+      "type": "prototype-core",
+      "depends_on": [
+        "SRW-04"
+      ],
+      "status": "verified_except_manual",
+      "files": [
+        "app/types/arrangement.ts",
+        "app/lib/arrangement/loop.ts",
+        "app/lib/arrangement/model.ts",
+        "app/lib/arrangement/schedule.ts",
+        "app/lib/arrangement/transport.ts",
+        "app/lib/arrangement/__tests__/loop.test.ts",
+        "app/contexts/ArrangementContext.tsx",
+        "app/components/arrangement/ArrangementLoopBrace.tsx",
+        "app/components/arrangement/ArrangementTransport.tsx",
+        "app/components/arrangement/StudioWorkspace.tsx",
+        "app/components/arrangement/ArrangementExportDialog.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R5-L1",
+          "action": "Range 2-4 → Ctrl+L; then range 6-8 → Ctrl+L; Undo",
+          "expected": "one brace 2-4, then replaced by 6-8 (status 'Loop ჩანაცვლდა'); Undo → 2-4",
+          "verify": "C"
+        },
+        {
+          "id": "R5-L2",
+          "action": "Toggle loop off/on",
+          "expected": "brace kept (dashed when off), same range when on",
+          "verify": "C"
+        },
+        {
+          "id": "R5-L3",
+          "action": "Play with loop 10-12 from 9 s",
+          "expected": "wraps at 12 → 10 without stale audio; video wraps too",
+          "verify": "C + unit planSchedule loop window"
+        },
+        {
+          "id": "R5-L4",
+          "action": "Drag brace edge / body; keyboard on focused brace",
+          "expected": "edge changes length, body keeps length; arrows nudge; one history entry",
+          "verify": "C"
+        },
+        {
+          "id": "R5-L5",
+          "action": "D-17 rules: play after loop end; toggle off / brace drag / Delete Time while looping; Space x10",
+          "expected": "linear after end; no jump, no doubled sources; brace remapped/removed with status",
+          "verify": "C"
+        },
+        {
+          "id": "R5-L6",
+          "action": "Video 0-6.008 with loop 2-4",
+          "expected": "drift within RF3-1 thresholds after each wrap (300 ms exclusion); no seek while seeking",
+          "verify": "C"
+        },
+        {
+          "id": "R5-E1",
+          "action": "Export with loop on",
+          "expected": "WAV 0..projectEnd equals loop-off export; dialog loop line",
+          "verify": "C decode"
+        },
+        {
+          "id": "R5-U1",
+          "action": "npx vitest run loop.test.ts + transport/schedule",
+          "expected": "named cases in current-task.md section 6 pass",
+          "verify": "C"
+        }
+      ],
+      "note": "C P7/T5: loop wrap must use lookahead scheduling of the next iteration, not rAF stop/restart; <=1 active source per clip, wrap gap < 20 ms",
+      "dispatched_round": 3,
+      "round3_acceptance_ref": "current-task.md section 9",
+      "decisions": [
+        "D-17: loop in Arrangement snapshot (undoable); wrap only when (re)schedule position < loop.end (Ableton LOOP-06; prototype jump-to-start is a recorded difference); lookahead iteration scheduling, truncated sources, no rAF restart; loop does not stop at projectEnd; export ignores loop (range export = SRW-20)"
+      ],
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-3.md",
+        "json": "tmp/studio-real-loop/c-round-3.json",
+        "passed": [
+          "R5-L1",
+          "R5-L2",
+          "R5-L3",
+          "R5-L4",
+          "R5-L5",
+          "R5-E1",
+          "R5-U1"
+        ],
+        "failed": [
+          "R5-L6"
+        ],
+        "detail": "audio wraps sample-continuous (seam 0.000, master tap min -29.5 dBFS, 1 source per clip); loop past projectEnd keeps wrapping; export with loop equals loop-off (maxDiff 0); Ableton LOOP-05 partial (Shift+arrows vs Ctrl/up-down) recorded as a difference, not a bug"
+      },
+      "open_bugs": [
+        {
+          "id": "C-R3-02",
+          "severity": "high",
+          "title": "R5-L6 video across loop wraps 0/5 (wrap seek lands behind; l6_5 shows frames past loop.end for ~0.85 s)",
+          "routed_to": "round 4 RF4-2 (D-19 standby swap at wraps)",
+          "status": "superseded",
+          "superseded_by": "C-R4-01",
+          "note": "C round 4: frames past loop.end gone, 15/15 wraps via standby swap, currentTime in [2.28,2.31] 300 ms after each wrap; tolerance 4/5 (L6_5 max 0.1106) tracked in C-R4-01"
+        },
+        {
+          "id": "C-R3-04",
+          "severity": "medium",
+          "title": "Ctrl+Z mid brace drag unmounts brace, preview-active stays true, next video import waits ~30 s",
+          "routed_to": "round 4 R4-B2 (D-20)",
+          "status": "resolved",
+          "resolved_evidence": "C round 4 R4-B2 PASS (brace drag + Ctrl+Z + release, then import in 81 ms; context tests for aborted gesture / unmount)"
+        },
+        {
+          "id": "C-R3-06",
+          "severity": "low",
+          "title": "Loop button and readout jump between transport rows when the Delete label changes",
+          "routed_to": "round 4 R4-B3",
+          "status": "resolved",
+          "resolved_evidence": "C round 4 R4-B3 PASS (Loop box and loop-times delta 0 px over 4 states x loop on/off/absent at 1280 and 1440; range hint visible)"
+        },
+        {
+          "id": "C-R4-02",
+          "severity": "medium",
+          "title": "brace variant of the gesture-count leak (same overwrite-without-release pattern)",
+          "routed_to": "round 5 R5-B1",
+          "status": "resolved",
+          "resolved_evidence": "C round 5 R5-B1 brace body/start/end + stale brace PASS"
+        }
+      ],
+      "evidence_round4": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-4.md",
+        "json": "tmp/studio-real-loop/c-round-4.json",
+        "passed": [
+          "R5-L1..L5",
+          "R5-E1 (maxDiff 1.19e-7)",
+          "R4-B7 timer refill (wraps survive a queued rAF for 5 s)"
+        ],
+        "failed": [
+          "R5-L6 via RF4-2: 4/5 (L6_5 max 0.1106; swap 3/0 in every run, 0 frames past loop.end)"
+        ]
+      },
+      "evidence_round5": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-5.md",
+        "json": "tmp/studio-real-loop/c-round-5.json",
+        "passed": [
+          "R5-L6 via RF5-2 5/5 (15 wraps all swap, vt +300 ms in [2.275,2.311])",
+          "R5-L1..L5",
+          "R5-E1",
+          "R5-B4 (export dialog loop wording)"
+        ]
+      },
+      "manual_note": "quiet real Windows Chrome drift check stays in tech_lead_manual_checks",
+      "regression_note": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-7.md",
+        "json": "tmp/studio-real-loop/c-round-7.json",
+        "id": "C-R7-01",
+        "detail": "R5-L6 / RF5-2 video landing after loop wrap regressed in round 7 (L6_1 wrap 1 vt 2.244); audio wrap behaviour not implicated (export and e2e unchanged). Owned by SRW-03 open_bugs C-R7-01.",
+        "routed_to": "round 12 (C-R7-01 under D-19a, owned by SRW-03)",
+        "status": "closed_headless_round12",
+        "closed_by": "C round 12 R12-W1 (c-round-12.md §2.1)"
+      },
+      "evidence_round10": "c-round-10.md §4: R5-L3 (seam 0 sample, 1 source per clip per wrap) and R5-E1 (loop-on WAV = loop-off, maxDiff 0) PASS",
+      "evidence_round12": "C round 12 R12-W1 PASS: video landing after loop wraps 9/9 within 0.01 at +300 ms (H3); R5-L3 seam 0 samples, 1 source per clip per wrap; R5-E1 loop-on = loop-off maxDiff 0. Remaining: Tech Lead quiet-Chrome RF7-3."
+    },
+    {
+      "id": "SRW-06",
+      "round": 3,
+      "title": "Multi-select: Ctrl/Cmd toggle, Shift add, marquee on empty area across lanes, select all; group move/trim/delete",
+      "fb": [],
+      "type": "prototype-core",
+      "depends_on": [
+        "SRW-01"
+      ],
+      "status": "done",
+      "files": [
+        "app/lib/arrangement/model.ts",
+        "app/lib/arrangement/selection.ts",
+        "app/lib/arrangement/__tests__/selection.test.ts",
+        "app/contexts/ArrangementContext.tsx",
+        "app/components/arrangement/ArrangementLane.tsx",
+        "app/components/arrangement/ArrangementClip.tsx",
+        "app/components/arrangement/StudioWorkspace.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R6-S1",
+          "action": "Ctrl-click 3 clips on 2 tracks; Shift-click a 4th",
+          "expected": "selection count 4 shown; Ctrl-click again removes",
+          "verify": "C"
+        },
+        {
+          "id": "R6-S2",
+          "action": "Drag a marquee on empty background over parts of clips on 3 lanes",
+          "expected": "intersected clips selected; Ctrl+marquee adds to existing selection",
+          "verify": "C"
+        },
+        {
+          "id": "R6-S3",
+          "action": "Move group by header drag / arrows",
+          "expected": "relative positions and offsets preserved; collision stops whole group with message; one undo",
+          "verify": "C + unit"
+        },
+        {
+          "id": "R6-S4",
+          "action": "Delete with group selected (no range)",
+          "expected": "only selected clips removed, no ripple",
+          "verify": "C"
+        },
+        {
+          "id": "R6-S5",
+          "action": "Ctrl+A; Undo after add; Ctrl+E with group; trim member; Ctrl+A in text input",
+          "expected": "select all; selection filtered; split refused, history unchanged; selection collapses; ignored",
+          "verify": "C"
+        },
+        {
+          "id": "R6-U1",
+          "action": "npx vitest run selection.test.ts",
+          "expected": "named cases in current-task.md section 6 pass",
+          "verify": "C"
+        }
+      ],
+      "dispatched_round": 3,
+      "round3_acceptance_ref": "current-task.md section 9",
+      "decisions": [
+        "D-18: selection outside history (filtered on undo); Ctrl/Cmd toggle, Shift add; marquee only from empty lane background after 4 px (click keeps CLP-06 seek); Ctrl+marquee union; group move clamps at last valid delta; group delete leaves gaps; group split refused until SRW-07; trim collapses selection"
+      ],
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-3.md",
+        "json": "tmp/studio-real-loop/c-round-3.json",
+        "passed": [
+          "R6-S1",
+          "R6-S2",
+          "R6-S3",
+          "R6-S4",
+          "R6-S5",
+          "R6-U1"
+        ],
+        "detail": "incl. marquee while playing (playhead monotone, 0 start/stop) and group move heard at new time; CLP-06/07 and EDT-03 equal to Ableton; CLP-08 Shift+arrow not in R6 scope"
+      }
+    },
+    {
+      "id": "SRW-07",
+      "round": 5,
+      "title": "Duplicate (Ctrl+D) single and group; group split at playhead/range",
+      "fb": [],
+      "type": "prototype-core",
+      "depends_on": [
+        "SRW-06"
+      ],
+      "status": "done",
+      "files": [
+        "app/lib/arrangement/model.ts",
+        "app/lib/arrangement/selection.ts",
+        "app/lib/arrangement/__tests__/model.test.ts",
+        "app/lib/arrangement/__tests__/selection.test.ts",
+        "app/contexts/ArrangementContext.tsx",
+        "app/components/arrangement/StudioWorkspace.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R7-D1",
+          "action": "music 0-8, Ctrl+D",
+          "expected": "copy at 8.000 same lane/offset/duration, selected, one undo, project end 16; export WAV[8..16) == WAV[0..8) within 2^-22 + quantisation",
+          "verify": "C decode"
+        },
+        {
+          "id": "R7-D2",
+          "action": "group of 3 on 2 audio lanes + video, Ctrl+D; occupied target; with range",
+          "expected": "copies shifted by span on own lanes, all selected, one entry duplicate (3); occupied -> nothing changes, message names lane/time; range -> refused",
+          "verify": "C"
+        },
+        {
+          "id": "R7-D3",
+          "action": "Ctrl+D while playing",
+          "expected": "playback not interrupted; copy audible at its time on master tap; <= 1 source per clip",
+          "verify": "C"
+        },
+        {
+          "id": "R7-D4",
+          "action": "3 selected, playhead 3.0 crosses two, Ctrl+E",
+          "expected": "two split at 3.000 with correct offsets, third untouched, one entry split (2), selection = right parts; export unchanged (<= 2^-22); none crossed -> message",
+          "verify": "C decode"
+        },
+        {
+          "id": "R7-D5",
+          "action": "Ctrl+D during a clip drag",
+          "expected": "GESTURE_EDIT_BLOCKED_MESSAGE, nothing duplicated",
+          "verify": "C"
+        },
+        {
+          "id": "R7-U",
+          "action": "npx vitest run model/selection tests",
+          "expected": "duplicate single/group, span, all-or-nothing, video copy, group split edge cases, new ids",
+          "verify": "C"
+        }
+      ],
+      "dispatched_round": 5,
+      "round5_acceptance_ref": "current-task.md section 6",
+      "decisions": [
+        "D-25: duplicate = prototype semantics (copies at start + selection span on the same lanes, all-or-nothing, one entry, copies selected, refused with a range); Ctrl+D + footer hint, no transport button (R4-B3); group split at playhead replaces the refusal"
+      ],
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-5.md",
+        "json": "tmp/studio-real-loop/c-round-5.json",
+        "passed": [
+          "R7-D1",
+          "R7-D2",
+          "R7-D3",
+          "R7-D4",
+          "R7-D5",
+          "R7-U"
+        ]
+      }
+    },
+    {
+      "id": "SRW-08",
+      "round": 5,
+      "title": "Move clips between audio tracks; modifier keeps time position; no copy left behind",
+      "fb": [
+        "FB-03"
+      ],
+      "type": "behavior-request",
+      "depends_on": [
+        "SRW-06"
+      ],
+      "status": "done",
+      "files": [
+        "app/lib/arrangement/model.ts",
+        "app/lib/arrangement/selection.ts",
+        "app/lib/arrangement/__tests__/model.test.ts",
+        "app/lib/arrangement/__tests__/selection.test.ts",
+        "app/components/arrangement/ArrangementClip.tsx",
+        "app/components/arrangement/ArrangementLane.tsx",
+        "app/components/arrangement/StudioWorkspace.tsx",
+        "app/contexts/ArrangementContext.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R8-M1",
+          "action": "drag music header down one lane and +1 s",
+          "expected": "trackId = next audio lane, start +1 (+-1 px), no copy left, one entry, undo exact; audible on new lane (mute source lane -> still audible; mute target -> silent; export with target muted silent in clip window)",
+          "verify": "C + decode"
+        },
+        {
+          "id": "R8-M2",
+          "action": "same with Shift pressed after the drag starts",
+          "expected": "start exactly unchanged, lane changed, Shift hint visible during drag",
+          "verify": "C"
+        },
+        {
+          "id": "R8-M3",
+          "action": "audio over video lane; video clip vertical drag; occupied target",
+          "expected": "amber + message; release at last valid position or unchanged (no history if unchanged); video stays on video lane",
+          "verify": "C"
+        },
+        {
+          "id": "R8-M4",
+          "action": "group of 2 on lanes 1-2 dragged down one lane; group with video; bottom lane + 1",
+          "expected": "both move one lane, relative times kept, one entry; video group -> lane part refused, time move works; out of range -> lane part refused",
+          "verify": "C"
+        },
+        {
+          "id": "R8-M5",
+          "action": "Ctrl+Z and second pointerdown mid cross-lane drag; drag while playing",
+          "expected": "blocked/ignored; gesture count 0 after release; playback monotone; clip sounds on the new lane; <= 1 source per clip",
+          "verify": "C"
+        },
+        {
+          "id": "R8-U",
+          "action": "pure tests",
+          "expected": "lane move free/occupied/video lane/time lock; group lane delta all-or-nothing, video member, out of range",
+          "verify": "C"
+        }
+      ],
+      "dispatched_round": 5,
+      "round5_acceptance_ref": "current-task.md section 7",
+      "decisions": [
+        "D-25: header drag over another audio lane moves the clip (ghost on the target lane, commit on release, no unmount mid-gesture); time lock = Shift held during the drag (read on pointermove; Ctrl/Shift at pointerdown are selection modifiers per D-18); video clips never change lane; audio never onto the video lane; occupied -> amber, release at last valid position; group lane delta all-or-nothing"
+      ],
+      "modifier_change": "backlog v4 said Ctrl; changed to Shift-during-drag because Ctrl at pointerdown toggles selection (D-18); Shift is the common constrain modifier",
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-5.md",
+        "json": "tmp/studio-real-loop/c-round-5.json",
+        "passed": [
+          "R8-M1",
+          "R8-M2",
+          "R8-M3",
+          "R8-M4",
+          "R8-M5",
+          "R8-U"
+        ],
+        "manual": "R8-M1/M2 real mouse -> Tech Lead list"
+      },
+      "open_bugs": [
+        {
+          "id": "C-R5-02",
+          "severity": "medium",
+          "title": "see SRW-01 (cross-lane commit from gesture.before reverts a second pointer edit; ghost cleared)",
+          "routed_to": "round 6 R26-*",
+          "status": "resolved",
+          "resolved_evidence": "C round 6 R26-1, R26-2, R26-3, R26-U PASS (D-26)"
+        },
+        {
+          "id": "C-R5-03",
+          "severity": "low",
+          "title": "amber lane-ghost label (nowrap, overflow-visible) paints over video clip headers; valid ghost title truncates to S.",
+          "routed_to": "round 6 R6-G1 (label inside ghost; refusal reason in footer drag line)",
+          "status": "resolved",
+          "evidence": "c-round-5/ghost-amber-1280x720.png",
+          "resolved_evidence": "C round 6 R6-G1 PASS"
+        },
+        {
+          "id": "C-R5-NOTE-SHIFT",
+          "severity": "low",
+          "title": "Shift hint reads as a state before Shift is pressed",
+          "routed_to": "round 6 R6-H1",
+          "status": "resolved",
+          "evidence": "c-round-5.md §5 notes",
+          "resolved_evidence": "C round 6 R6-H1 PASS"
+        }
+      ],
+      "fb_status": {
+        "FB-03": "done: cross-lane move with Shift time lock verified by C round 5 (real mouse on the Tech Lead list)"
+      },
+      "evidence_round7": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-7.md",
+        "json": "tmp/studio-real-loop/c-round-7.json",
+        "passed": [
+          "R26-1",
+          "R26-2",
+          "R26-3",
+          "R30-1",
+          "R30-2",
+          "R30-U",
+          "keyboard Volume refused during a clip drag (real $B press)"
+        ],
+        "related_pass": "D-30 slider gesture (C-R6-01 tracked in open_findings)"
+      }
+    },
+    {
+      "id": "SRW-09",
+      "round": 5,
+      "title": "Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker",
+      "fb": [
+        "FB-02"
+      ],
+      "type": "behavior-request",
+      "depends_on": [
+        "SRW-07",
+        "SRW-04"
+      ],
+      "status": "done",
+      "files": [
+        "app/lib/arrangement/clipboard.ts",
+        "app/lib/arrangement/__tests__/clipboard.test.ts",
+        "app/contexts/ArrangementContext.tsx",
+        "app/components/arrangement/StudioWorkspace.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R9-C1",
+          "action": "select music 0-8, Ctrl+C, seek 20, Ctrl+V (also while playing)",
+          "expected": "copy at 20.000 on active audio track, same offset/duration, selected, one entry; export WAV[20..28) == source; heard while playing without interruption",
+          "verify": "C decode"
+        },
+        {
+          "id": "R9-C2",
+          "action": "music 0-10 lane A, impact lane B @7; range 4-6, Ctrl+X; seek 20, Ctrl+V",
+          "expected": "lane A 0-4 and 6-10 (offset 6), gap 4-6, lane B unchanged, one entry Cut; paste 2.000 s at 20 with sourceOffset 4.000; export 4-6 silent on lane A",
+          "verify": "C decode"
+        },
+        {
+          "id": "R9-C3",
+          "action": "same + video 0-6.008; range 4-6, Ctrl+Shift+X; seek 30, Ctrl+V",
+          "expected": "arrangement equals Delete Time result; clipboard has music + video parts; paste on original lanes at 30 + offset, video sourceOffset 4.000; one undo per step",
+          "verify": "C"
+        },
+        {
+          "id": "R9-C4",
+          "action": "paste over occupied place; empty clipboard; Ctrl+Shift+X without range",
+          "expected": "refused with lane/time message, history unchanged; messages",
+          "verify": "C"
+        },
+        {
+          "id": "R9-C5",
+          "action": "Delete with range; Ctrl+C/X/V in search input; Ctrl+X/V/D during drag",
+          "expected": "Delete Time unchanged (R1-B5); native text editing only; blocked message",
+          "verify": "C"
+        },
+        {
+          "id": "R9-U",
+          "action": "npx vitest run clipboard.test.ts",
+          "expected": "copy range/clips, cut gap, cut time == deleteTime + material, paste offsets, single-lane -> active track, all-or-nothing, lane-kind refusal",
+          "verify": "C"
+        }
+      ],
+      "dispatched_round": 5,
+      "round5_acceptance_ref": "current-task.md section 8",
+      "decisions": [
+        "D-25: internal clipboard (not navigator.clipboard, not in history); Copy from range (range track window, leading gap kept) or selected clips; Cut keeps gap (range track only / selected clips); Cut Time = deleteTime + all-lane material; Paste at the playhead (D-15), single-audio-lane material onto the active audio track, otherwise original lanes; all-or-nothing on overlap or lane-kind mismatch; Delete with range stays Delete Time"
+      ],
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-5.md",
+        "json": "tmp/studio-real-loop/c-round-5.json",
+        "passed": [
+          "R9-C1",
+          "R9-C2",
+          "R9-C3",
+          "R9-C4",
+          "R9-C5",
+          "R9-U"
+        ]
+      },
+      "open_bugs": [
+        {
+          "id": "C-R5-04",
+          "severity": "low",
+          "title": "lane-kind paste refusal names the lane but not the time",
+          "routed_to": "round 6 R6-P1",
+          "status": "resolved",
+          "evidence": "c-round-5.md §3 R9-C4",
+          "resolved_evidence": "C round 6 R6-P1 PASS"
+        }
+      ],
+      "fb_status": {
+        "FB-02": "done: Delete Time (round 1) + Copy/Cut/Cut Time/Paste (round 5) verified by C"
+      }
+    },
+    {
+      "id": "SRW-10",
+      "round": 6,
+      "title": "Navigation: ruler drag zoom (vertical) anchored + pan (horizontal), Ctrl+wheel, +/-, Z/X history, overview, scrollbars, Follow, Fit",
+      "fb": [
+        "FB-01"
+      ],
+      "type": "prototype-core",
+      "depends_on": [
+        "SRW-04"
+      ],
+      "status": "verified_except_manual",
+      "files": [
+        "app/lib/arrangement/view.ts",
+        "app/lib/arrangement/__tests__/view.test.ts",
+        "app/components/arrangement/ArrangementOverview.tsx",
+        "app/components/arrangement/ArrangementRuler.tsx",
+        "app/components/arrangement/ArrangementTransport.tsx",
+        "app/components/arrangement/ArrangementVideoDock.tsx (strip layout only)",
+        "app/components/arrangement/StudioWorkspace.tsx",
+        "app/contexts/ArrangementContext.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R10-N1",
+          "action": "ruler vertical drag at 30 s; horizontal drag; click <4 px stopped/playing",
+          "expected": "anchored zoom +-1 px; pan with anchor under pointer; click seeks on release only, no play start when stopped; no history",
+          "verify": "C"
+        },
+        {
+          "id": "R10-N2",
+          "action": "Ctrl+wheel (synthetic WheelEvent), +/-, Z with/without range, X with/without history, keys in search input",
+          "expected": "anchored; Z range ~60% centred; X restores zoom+scroll exactly; refusals with status; inputs untouched",
+          "verify": "C"
+        },
+        {
+          "id": "R10-N3",
+          "action": "overview frame, click outside, drags, dblclick, focused arrows",
+          "expected": "at a zoom showing less than the extent: frame = visible/extent +-1 px; at Fit full width; centre; pan; zoom; Fit; 5 s pan; no clip nudge; aria-valuenow",
+          "verify": "C"
+        },
+        {
+          "id": "R10-N4",
+          "action": "Follow during play; manual scroll; Follow button; Pause+Play; Follow off",
+          "expected": "auto-scroll keeps playhead visible; manual -> Follow ‖ paused; button/Play resumes; off -> no auto scroll; position monotone; clip drag while playing with Follow on -> scrollLeft unchanged during the drag",
+          "verify": "C"
+        },
+        {
+          "id": "R10-N5",
+          "action": "Fit on >= 240 s project; extend further; 20-minute extent",
+          "expected": "whole extent visible; ticks >= 40 px non-overlapping; extent grows; ZOOM_MIN 0.5 reaches 20 min at 1280",
+          "verify": "C"
+        },
+        {
+          "id": "R10-N6",
+          "action": "10 navigation steps while playing with video",
+          "expected": "no source start/stop within +-50 ms of a navigation action and counts equal a no-navigation control run; monotone; |d| <= 0.1; same video nodes",
+          "verify": "C"
+        },
+        {
+          "id": "R10-N7",
+          "action": "4-minute project at ZOOM_MAX and Fit",
+          "expected": "no app long task > 200 ms per zoom step; waveforms drawn",
+          "verify": "C LoAF"
+        },
+        {
+          "id": "R10-N8",
+          "action": "screenshots 1440x900 / 1280x720 open+collapsed with video",
+          "expected": "overview in dock strip, no added height; dock >= 160x90; 4 lanes + ruler + loop strip; footer one line; transport one row at 1440",
+          "verify": "C"
+        },
+        {
+          "id": "R10-U",
+          "action": "view.test.ts + navigation component tests",
+          "expected": "clamp, fit, anchor, step anchor, zoom-to-range, history, overview maths, follow decision, tick step; ruler seek on release; no history; inputs ignored; overview no re-render on position",
+          "verify": "C"
+        }
+      ],
+      "dispatched_round": 6,
+      "round6_acceptance_ref": "current-task.md section 7",
+      "decisions": [
+        "D-28 (round 6): view {pxPerSecond, scrollLeft} + zoom history outside edit history; ZOOM 0.5..320 px/s, log slider; extent = max(projectEnd, loop end, 10); ruler click seeks on release (<4 px), drag pans/zooms (exp(-lift/140), 6 px dead zone); Ctrl+wheel x1.15 anchored at mouse; +/- x1.25 around range centre or playhead; Z 60% of viewport, X pops; overview in the dock strip (no added height), position-store driven; Follow pauses on manual navigation while playing, Follow/Play resume; Fit: zoom=(scroller.clientWidth-header-4)/extent, scrollLeft 0, tail scroll allowed; ruler dblclick = two release seeks then Z/Fit (no delay timer); Follow suspended during any active pointer gesture"
+      ],
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-6.md",
+        "json": "tmp/studio-real-loop/c-round-6.json",
+        "passed": [
+          "R10-N1",
+          "R10-N2",
+          "R10-N3",
+          "R10-N4",
+          "R10-N6",
+          "R10-N7",
+          "R10-N8",
+          "R10-U"
+        ],
+        "failed": [
+          "R10-N5 (last ruler label overflows the timeline tail by 19.2 px after Fit; 31.6 px on an empty project)"
+        ],
+        "limits": "synthetic WheelEvent and pointers; real mouse/wheel/pinch on the Tech Lead list"
+      },
+      "open_bugs": [
+        {
+          "id": "C-R6-03",
+          "severity": "low",
+          "title": "Fit: last ruler label hangs past the timeline content and adds horizontal scroll width",
+          "routed_to": "round 7 R10-N5r",
+          "status": "resolved",
+          "evidence": "c-round-6/runs/n5-overflow.json, scripts/n5o.js, n5o2.js",
+          "resolved_evidence": "C round 7 R10-N5r + R10-N5-U PASS"
+        },
+        {
+          "id": "C-R7-02",
+          "severity": "low",
+          "title": "ruler last-label overflow 1.41 px (1280, 206.8 px/s) / 1.47 px (1440, 186.5 px/s) on a zoom sweep (not a named R10-N5r case); empty default exactly 1.0 px; no overlap or cut label",
+          "status": "resolved",
+          "evidence": "c-round-7/runs/n5r-1280x720.json, n5r-1440x900.json (sweep, sweepWorst); A review L3 (step rule gives no label-width guarantee)",
+          "routed_to": "round 10 with C-R7-01 (disclosed exception: unrelated mechanism, no shared files); diagnose the element that sets scrollWidth (last tick border vs last label vs rounding), fix in rulerTickMarks and/or the tick render; acceptance unchanged: overflow <= 1 px at every zoom of the C sweep at both viewports, no lost label that fit, gap >= 40 px",
+          "resolved_evidence": "C round 10 R10-R1 PASS (n5r sweep max overflow 0.5 px at 1280x720 and 0.48 px at 1440x900, empty default 0, 0 overlaps, 0 cut labels, min gap 40.05, nLabels identical to round 7 at 29/29 zooms) and R10-R2 PASS (3 new view.test.ts cases; C independent esbuild guard: round-9 last tick right edge = W + 1.000 fails, round 10 passes; 2877-case sweep 0 label differences). Named exception R10-N5-U: before toHaveLength(31) with at(-1) {30, null}; after toHaveLength(30) with at(-1) {29, 0:29}; meaning kept. Intended visible change: the 1 px line at the content end is gone.",
+          "resolved_evidence_ref": "c-round-10.md §3 (R10-R1, R10-R2), c-round-10/runs/n5r-*.json, n5r-compare.txt, guard-ruler.txt"
+        }
+      ],
+      "remaining": "only the Tech Lead real-mouse/wheel/pinch check (R10-N1/N2); not done until it is recorded",
+      "evidence_round7": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-7.md",
+        "json": "tmp/studio-real-loop/c-round-7.json",
+        "passed": [
+          "R10-N5r (1280: empty 1.0 / Fit 1.0 / Ctrl+D x2 Fit 0.27 px; 1440: 1.0 / 1.0 / -0.02 px; gaps >= 40; 0 overlap; 0 cut; Fit 4 min and 20 min; extent grows)",
+          "R10-N5-U",
+          "R10-N1",
+          "R10-N3",
+          "R10-N6",
+          "R10-N8"
+        ],
+        "failed": []
+      },
+      "evidence_round10": "c-round-10.md §3: R10-R1, R10-R2 PASS; C-R7-02 closed"
+    },
+    {
+      "id": "SRW-11A",
+      "round": 4,
+      "title": "Library panel collapse (40 px rail) and resize separator 288-480 (LIB-01); compact 16:9 video dock moved to the strip above the timeline (D-22)",
+      "fb": [
+        "FB-08"
+      ],
+      "type": "ux-note + user request (publication-checkpoint libraryUserRequest)",
+      "depends_on": [
+        "SRW-01"
+      ],
+      "status": "done",
+      "dispatched_round": 4,
+      "files": [
+        "app/components/arrangement/StudioWorkspace.tsx",
+        "app/components/arrangement/ArrangementLibrary.tsx",
+        "app/components/arrangement/ArrangementVideoDock.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R11A-1",
+          "action": "collapse with the left-arrow button, expand with the right-arrow button, while a video plays",
+          "expected": "library 40 +-1 px, timeline viewport >= 240 px wider, previous width restored, same <video> DOM nodes, sync continues",
+          "verify": "C"
+        },
+        {
+          "id": "R11A-2",
+          "action": "separator arrows and drag",
+          "expected": "+-16 px, aria-valuenow matches, clamped 288/480, no clip nudge, no history",
+          "verify": "C"
+        },
+        {
+          "id": "R11A-3",
+          "action": "screenshots 1280x720 / 1440x900, open and collapsed, with video",
+          "expected": "4 lanes + ruler + loop strip visible, dock >= 160x90 overlapping nothing; brace/range/selection/playhead distinguishable",
+          "verify": "C"
+        }
+      ],
+      "decisions": [
+        "D-22: the dock moves to the prototype position (compact 16:9 box above the timeline, right side); floating/expanded video stays SRW-11B"
+      ],
+      "pre_step": "A invokes design-philosopher (B cannot invoke subagents in its session)",
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-4.md",
+        "json": "tmp/studio-real-loop/c-round-4.json",
+        "passed": [
+          "R11A-1",
+          "R11A-2",
+          "R11A-3"
+        ],
+        "detail": "288->40 px, scroller +248, same <video> nodes, |d|<=0.019 while collapsing during play; separator 16 px steps clamped 288/480, drag exact, no clip nudge; 4 lanes + ruler + loop strip visible at 1280/1440, dock 160x90 without overlap"
+      }
+    },
+    {
+      "id": "SRW-11B",
+      "round": 8,
+      "title": "Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review",
+      "fb": [
+        "FB-08"
+      ],
+      "type": "ux-note",
+      "depends_on": [
+        "SRW-03",
+        "SRW-11A"
+      ],
+      "status": "stage1_bug",
+      "pre_step": "B consults design-philosopher (read-only) for FB-08 placement and records decision in plan.md before dispatch",
+      "files": [
+        "app/components/arrangement/ArrangementDetailPanel.tsx (new)",
+        "app/lib/arrangement/panels.ts + __tests__/panels.test.ts (new, pure clamp/auto-fit/float placement maths)",
+        "app/components/arrangement/StudioWorkspace.tsx",
+        "app/components/arrangement/ArrangementLane.tsx",
+        "app/components/arrangement/ArrangementClip.tsx",
+        "app/components/arrangement/ArrangementVideoDock.tsx (compact/fold/expanded layout of the same box only)",
+        "app/components/arrangement/ArrangementLibrary.tsx (collapse interplay with the expanded video only)"
+      ],
+      "acceptance": [
+        {
+          "id": "R11-P1b",
+          "action": "Collapse/expand the detail panel; resize via the separator with mouse and arrows",
+          "expected": "300 ms motion-safe height transition; 36 px collapsed; 120-280 px, arrows +-16; separator aria-valuenow; the timeline shrinks/grows and is never covered",
+          "verify": "C"
+        },
+        {
+          "id": "R11-P1c",
+          "action": "Select one clip / several / none; set a range with the detail inputs; play across the selected clip",
+          "expected": "name, lane, start, length, offset; group summary; range inputs apply inside the clip or refuse with a reason; detail playhead follows the position store without a context re-render",
+          "verify": "C + unit"
+        },
+        {
+          "id": "R11-P2",
+          "action": "Fold a track; resize track height (drag and arrows); drag clips and marquee across mixed heights",
+          "expected": "folded 36 px with M/S usable; height 60-180 (video 52-180), +-8 px keys; header aligned with lane +-1 px; cross-lane drag and marquee hit the right lane; no history entry",
+          "verify": "C"
+        },
+        {
+          "id": "R11-P3",
+          "action": "Expand the video while playing, drag it (pointer and arrows), Esc; collapse the library while expanded",
+          "expected": "floating window stays inside the viewport; Esc or close returns to the compact dock; library collapse returns to compact; same <video> nodes; |d| <= 0.1",
+          "verify": "C"
+        },
+        {
+          "id": "R11-P4",
+          "action": "1440x900 and 1280x720 screenshots: detail open/collapsed, folded track, expanded video, library open/collapsed",
+          "expected": "no overlap/clipping; 4 lanes + ruler + loop strip visible (auto-fit); footer one line; compact dock >= 160x90",
+          "verify": "C"
+        },
+        {
+          "id": "R11-U",
+          "action": "panels.test.ts + component tests",
+          "expected": "clamps, auto-fit maths, float placement clamp, view state outside history, detail playhead render count",
+          "verify": "C"
+        }
+      ],
+      "former_id": "SRW-11 (remainder after round-4 split)",
+      "next_round_note": "round 13 = stage 3 (floating video, D-29d). Polish 14a (C-R11-01..03) follows in round 14; ArrangementLane.tsx stays frozen in round 13.",
+      "decisions": [
+        "D-29 (round 7): detail panel, track fold/height with lane auto-fit, floating video; see plan.md",
+        "D-29a (round 8): detail panel default open state chosen from the measured lane budget; see plan.md",
+        "D-29b (round 10 planning, for round 11): auto-fit makes the detail panel yield first down to 120 px; the user detail resize wins; see plan.md"
+      ],
+      "acceptance_draft_ref": "tasks/round-7-before-bounded-policy.md section 7",
+      "stages": [
+        {
+          "stage": 1,
+          "round": 8,
+          "scope": "detail panel PNL-01",
+          "acceptance": [
+            "R11-P1b",
+            "R11-P1c",
+            "R11-P4 (detail shots only)",
+            "R11-U (panels detail maths + detail component tests)"
+          ],
+          "status": "acceptance_passed_bug_open"
+        },
+        {
+          "stage": 2,
+          "scope": "track fold/height + lane auto-fit",
+          "acceptance": [
+            "R11-P2",
+            "R11-P2k",
+            "R11-P2a (D-29b form)",
+            "R11-P4 (fold shots)",
+            "R11-U (track/auto-fit/cap)",
+            "R11-Doc"
+          ],
+          "note": "D-29b (plan.md): while auto-fit is on and the user has not resized the detail panel this session, the panel renders at min(stored, cap), cap = largest height in [120, 280] that keeps ruler + loop strip + scrollbar + every lane at its auto-fit minimum visible (120 if none); the first user separator drag/keys turns the cap off. R11-P2a at 1280x720 asserts a rendered panel height in [120, 144] with all 4 lanes visible and no vertical scroll. D-29a mount decision unchanged. A re-measures the budget before code. The cap is computed from the invariant column height (scroller clientHeight + panel rendered height), so opening the panel does not lower it; the detail transition transient must not cause more than one lane render per changed height value.",
+          "round": 11,
+          "status": "dispatched"
+        },
+        {
+          "stage": 3,
+          "scope": "floating expanded video",
+          "acceptance": [
+            "R11-P3 (R13-F1 expand/place, R13-F2 move/clamp, R13-F3 return paths and Esc precedence, R13-F4 library interplay, R13-F5 same nodes + sync)",
+            "R11-P4 (video shots, R13-F6)",
+            "R11-U (R13-U float clamp, placement, same nodes, Esc, registry)",
+            "R13-Doc"
+          ],
+          "round": 13,
+          "note": "depends on SRW-03 (C-R7-01 closes in round 12 under D-19a, or the Tech Lead accepts quiet Chrome)",
+          "status": "dispatched",
+          "dispatch_basis": "C-R7-01 closed headless in round 12 (R12-W1 PASS; R12-S rescoped by D-19b). Tech Lead quiet Chrome still required for SRW-03.",
+          "decision": "D-29d (plan.md): floating video implementation contract"
+        }
+      ],
+      "depends_on_note": "SRW-03 applies to stage 3 only (floating video: same <video> nodes, sync loop unchanged, |d| <= 0.1). Stages 1-2 depend on SRW-11A only, so stage 1 may start while SRW-03 is regression_open.",
+      "evidence_round8": {
+        "passed": [
+          "R11-P1b",
+          "R11-P1c",
+          "R11-P1d",
+          "R11-P1e",
+          "R11-P4d",
+          "R11-U1",
+          "R8-D1"
+        ],
+        "note": "stage 1 acceptance passed on C evidence; stage 1 is not done while C-R8-01 is open (the round failed on its own drift attribution)",
+        "evidence": "c-round-8.md §2, c-round-8.json"
+      },
+      "open_bugs": [
+        {
+          "id": "C-R8-01",
+          "severity": "medium",
+          "title": "Open Clip Detail with a selected playable clip: R3-V1 drift FAIL 3/3 valid (max 0.2559 / 0.1739 / ex 0.132 s), tick+microtasks p95 D-N +0.3..+1.0 ms; collapsed panel 3/3 PASS, no selection 2/3 PASS; no app LoAF >= 10 ms, forced layout 0",
+          "status": "open",
+          "evidence": "c-round-8/runs/drift-summary.txt, runs/{D,N,P}_*.json, *_perf.json, *_raw.json, *_cpu.csv; c-round-8.md §4, §8",
+          "hypothesis": "per-frame left % write on the detail playhead invalidates layout/paint of the waveform box (480-column SVG) and nearby raster; not visible as main-thread script",
+          "follow_up_spec": "Round 9: step 1 probe (panel open, music clip selected, playhead parked outside the clip: line display:none, SVG visible) under the R3-V1 light harness to split static-SVG cost from moving-line cost; then compositor-only playhead (transform translateX on a full-width wrapper or a ResizeObserver-cached px width; no per-frame left/width/height write; no per-frame layout read) and paint containment of the waveform box (contain-strict/contain-paint) as needed. Verdict: mode D 3 valid R3-V1 runs D-24 PASS; same-session D-N and D-P tick+microtasks p50/p95 <= 0.2 ms; writer envelope from raw series C recomputes.",
+          "routed_to": "Tech Lead quiet real Windows Chrome RF7-2 in the R3-V1 D layout; optional DevTools paint/raster/composite trace D vs N in the 8-12 s window. No re-measure of unchanged code by A/C (agent-workflow.md). Stage 2 (round 11) may start with this bug open; stage 2 adds one mode-D info run.",
+          "round9_result": "Compositor-only contract implemented and verified (R9-D3: per-frame transform-only, contain strict, will-change transform, 144 open at 1440, waveform visible). tick+microtasks p95 3.3-3.8 -> 0.6-0.9 ms. Verdict IDs fail: R9-D1 D 2/3 valid (D_3 0.1564 s inside the second video clip, app LoAF 0, forced 0); R9-D2 rule 3 D-N p95 +0.3 ms (A session +0.2). A probe S/L inconclusive (not reproduced in A session).",
+          "round9_evidence": "c-round-9/runs/drift-summary.txt, runs/D_3.json, c-round-9.md §2, §7; a-round-9/runs/probe-summary.txt"
+        },
+        {
+          "id": "C-R11-01",
+          "severity": "low",
+          "summary": "the 6 px height handle overlays the bottom of a 36 px folded row: any pointerdown there unfolds the lane and covers the folded clip trim edge bottom ~2 px; a drag on a folded handle only unfolds",
+          "evidence": "c-round-11/runs/unfold-manual-1440.json",
+          "b_decision": "D-29c (1): on a folded lane the handle has no pointer hit area (pointer-events none, no cursor), stays focusable, and ArrowUp/ArrowDown on it unfold only (as now). Unfold by pointer is the fold button. The folded clip trim edges therefore own the full row height. A drag never continues from a folded state, so the 36 -> 80 jump A described cannot occur.",
+          "route": "polish round 14"
+        },
+        {
+          "id": "C-R11-02",
+          "severity": "low",
+          "summary": "at 1280x720 with auto-fit, selecting/deselecting a clip toggles the footer selected-clip line (20 px) and lanes jump 60<->66, capped panel 142<->144, with no transition",
+          "evidence": "c-round-11/runs/p2a-1280-open-selected.json, p2a-1280-open-noselect.json",
+          "b_decision": "D-29c (2): the footer reserves the selected-clip line height while the workspace is mounted (empty line keeps its height, aria-hidden when empty) so selection does not change the scroller height; lanes and the cap stay constant across select/deselect. Footer text and ids unchanged.",
+          "route": "polish round 14"
+        },
+        {
+          "id": "C-R11-03",
+          "severity": "low",
+          "summary": "at 1280x720 with a capped panel (142), the first manual lane height change turns auto-fit and the cap off and the panel jumps to its stored 144",
+          "evidence": "c-round-11/runs/p2a-1280-afoff-a.json",
+          "b_decision": "D-29c (3): when auto-fit turns off while the cap is engaged, the panel keeps its rendered (capped) height: the stored open height becomes the rendered height (same no-jump rule as the D-29b user resize). The cap stays off afterwards.",
+          "route": "polish round 14"
+        },
+        {
+          "id": "C-R11-04",
+          "severity": "low",
+          "summary": "folded handle aria-valuenow is the stored open height (80/90) while the row is 36; aria-valuetext says დაკეცილია · {h} px",
+          "evidence": "c-round-11/runs/unfold-manual-1440.json",
+          "b_decision": "accepted convention (D-29c (4)): same as the detail separator contract N2: aria-valuenow is the height the lane opens at, aria-valuetext states the folded state. No code change.",
+          "status": "accepted"
+        }
+      ],
+      "recorded_followups": [
+        "design-philosopher (a): footer arrangement-selected-clip repeats the open panel; consider showing it only when collapsed (would change C script ids; decide with stage 2)",
+        "design-philosopher (b): range overlay bg-foreground/60 may hide the waveform in the detail view; check before /30",
+        "design-philosopher (c): clip name in both header and content; review in stage 2",
+        "design-philosopher (d): Latin start/offset vs Georgian labels; settle once for the workspace",
+        "code-reviewer L11 (Low): mouse wheel on a focused number input may change the value; schedule with stage 2 (same panel file)",
+        "N3: abort restore animates over 300 ms; accepted (spec did not forbid it)",
+        "round-9 reviewer M1: transportRunningRef is now only a latch (markTransportRunning writes, nothing branches on it besides pumpPlaybackAudio); rename or remove when ArrangementContext is next in scope",
+        "round-9 reviewer M-R10-1 / M2: LibraryPlayheadText re-renders with the library preview at up to 20 Hz during a library preview (not arrangement playback); memo via LibraryPlayheadTextMemo + one-token usage change, allowed when ArrangementLibraryPreview.tsx is next in scope",
+        "round-9 reviewer L2: the detail playhead writer still runs while the panel is collapsed; stage 2",
+        "round-9 reviewer L3: translateX(100%) at exactly the clip end (same as round-8 left:100%); C outside contract depends on it; review in stage 2",
+        "round-9 reviewer L4-L7 (detail panel input reset on unrelated range, pointer capture, biome-ignore text, 6 px separator hit area) and L8 (useArrangementPositionStore error message names useArrangementPosition); stage 2"
+      ],
+      "contract_decisions_round8": [
+        "N1: \"the footer is one line\" in R11-P1d / R10-N8 means the shortcut hint line is one line (the historical R11A-3 meaning); the footer may hold status / selected-clip / hint lines",
+        "N2: aria-valuenow equals the rendered height while expanded; while collapsed it keeps the stored expanded height with aria-valuetext \"დაკეცილია · {h} px\" (a value below aria-valuemin would be invalid ARIA)"
+      ],
+      "evidence_round9": "c-round-9.md §3-§4: R9-D3 contract PASS; R11-P1c/P1d/P1e PASS; C-R8-01 open",
+      "polish_round": {
+        "round": 14,
+        "items": [
+          "C-R11-01 (D-29c 1: folded handle has no pointer hit area)",
+          "C-R11-02 (D-29c 2: footer reserves the selected-clip line)",
+          "C-R11-03 (D-29c 3: panel keeps its rendered height when the cap turns off)",
+          "code-reviewer L11 (number-input wheel)",
+          "round-9 reviewer M1 (transportRunningRef latch)",
+          "round-9 reviewer M-R10-1 / M2 (LibraryPlayheadText 20 Hz during library preview)",
+          "round-9 reviewer L2-L8",
+          "design-philosopher (a)-(d)",
+          "A round-11 follow-ups: silent fold refusal during a gesture, no aria-controls on the fold button, Home on separators triggers the global seek, ring-inset on the track-name button, panel found through nextElementSibling"
+        ],
+        "split": "more than three items, so per agent-workflow.md it runs as bounded sub-rounds of at most three closely related items: 14a = C-R11-01..03 (track layout / D-29c), 14b = detail panel (L11, L2-L7, design a-d), 14c = context/preview (M1, M-R10-1/M2, L8) once the Tech Lead C-R8-01/C-R6-02 evidence or the round frees those files; remaining A follow-ups ride with the sub-round that owns their file",
+        "note": "recorded, not dropped; files stay frozen in round 12"
+      },
+      "evidence_round11": {
+        "stage": 2,
+        "result": "all stage-2 acceptance IDs PASS on C evidence (c-round-11.md §2-§4)",
+        "passed": [
+          "R11-P2",
+          "R11-P2k",
+          "R11-P2a",
+          "R11-P4",
+          "R11-U",
+          "R11-Doc"
+        ],
+        "key_numbers": "folded row 36 (35/35); SFX drag +60 -> 140, ArrowUp x3 -> 116, clamps 60/180, video 52/180; folded-vs-unfolded export maxDiff 1.192e-7; folded M mutes music to -240 dB; mixed-height cross-lane both ways, marquee and library drop exact; 1280 open panel 142 (selected clip) / 144 (none) = aria-valuenow, lanes 52/60/60/60 or 52/66/66/66, no vertical scroll; 1 lane render per changed height after transitionend; fold give-back 53/36/81/81; user override 142 + 60 = 202; auto-fit off survives resize 800/640; 1440 defaults 80",
+        "evidence": [
+          "c-round-11.md",
+          "c-round-11/runs/",
+          "c-round-11/shots/fold-1440.png",
+          "c-round-11/shots/fold-1280.png",
+          "c-round-11/shots/panels-1280.png"
+        ],
+        "manual_remaining": "R11-P3m real-mouse height-handle drag; real 10 px horizontal scrollbar in the visible-area formula (headless scrollbar is 0 px)"
+      },
+      "stages_status": {
+        "stage1": "all C IDs PASS; C-R8-01 open (Tech Lead quiet Chrome)",
+        "stage2": "all C IDs PASS (round 11); C-R11-01..03 Low -> polish round 14; C-R11-04 accepted convention",
+        "stage3": "dispatched (round 13, D-29d)",
+        "polish": "not started (round 14, split into bounded sub-rounds)"
+      }
+    },
+    {
+      "id": "SRW-12",
+      "round": 8,
+      "title": "Library: collection tree, AND search, keyboard ↑/↓/Enter, preview with scrub/stop, drag to lane with ghost time; only catalog/demo sources",
+      "fb": [],
+      "type": "prototype-core",
+      "depends_on": [
+        "SRW-01"
+      ],
+      "status": "done",
+      "files": [
+        "app/components/arrangement/ArrangementLibrary.tsx",
+        "app/components/arrangement/ArrangementLibraryPreview.tsx",
+        "app/lib/arrangement/library.ts",
+        "app/lib/arrangement/__tests__/library.test.ts",
+        "app/lib/arrangement/preview.client.ts",
+        "app/lib/arrangement/demo-synth.ts",
+        "app/contexts/ArrangementContext.tsx",
+        "app/data/studio-lab-demo.ts",
+        "app/components/arrangement/ArrangementLane.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R12-L1",
+          "action": "Search 'impact soft'",
+          "expected": "AND match regardless of order",
+          "verify": "C + unit"
+        },
+        {
+          "id": "R12-L2",
+          "action": "↓ from search, ↑/↓, Enter",
+          "expected": "focus moves to results; Enter adds to active track at insert marker",
+          "verify": "C"
+        },
+        {
+          "id": "R12-L3",
+          "action": "Preview, click waveform middle, ↓ while previewing",
+          "expected": "preview seeks; next file previews; only one preview source; transport and preview never play simultaneously (documented)",
+          "verify": "C"
+        },
+        {
+          "id": "R12-L4",
+          "action": "Drag source onto lane at 10 s",
+          "expected": "ghost shows 00:10.000 (formatArrangementTime); drop places the clip there; video lane rejects audio; occupied place amber, no change",
+          "verify": "C"
+        },
+        {
+          "id": "R12-L5",
+          "action": "Try to drop a local audio file on the workspace",
+          "expected": "rejected: only catalog/demo audio allowed",
+          "verify": "C"
+        },
+        {
+          "id": "R12-S1",
+          "action": "Load each synthetic stem and the full mix via collection.loadSource; place 3 stems at 0 on the 3 audio lanes and export",
+          "expected": "4 kind:stem sources, 16.000 s, 48 kHz, non-silent, pairwise |rho| < 0.5, labelled synthetic; JS sum of the 4 stem buffers equals the full-mix buffer (max |diff| <= 1e-6); the 3-stem export equals the JS sum of those 3 within 2^-22 + 24-bit quantisation",
+          "verify": "C decode"
+        },
+        {
+          "id": "R12-S2",
+          "action": "find -> open the stems folder -> preview the bass -> drag to a lane -> play -> export",
+          "expected": "audible at the dropped time (master tap) and present in the WAV",
+          "verify": "C"
+        },
+        {
+          "id": "R12-U",
+          "action": "npx vitest run library.test.ts",
+          "expected": "tree, AND search, filter retention, navigation bounds, drop time, overlap refusal",
+          "verify": "C"
+        }
+      ],
+      "dispatched_round": 4,
+      "priority_note": "User 2026-10-07: stems are missing and the left library differs from the agreed experience; prioritise immediately after the critical sync fixes (publication-checkpoint libraryUserRequest)",
+      "decisions": [
+        "D-21: demo stems = separately generated synthetic composition parts (honestly labelled, not CZABA catalogue stems); public MP3s stay kind music without stem children; add keeps the active-track rule (R1-B1); preview and transport never sound together (PRE-03 difference)"
+      ],
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-4.md",
+        "json": "tmp/studio-real-loop/c-round-4.json",
+        "passed": [
+          "R12-L1",
+          "R12-L2",
+          "R12-L3",
+          "R12-L4 (synthetic DnD)",
+          "R12-L5",
+          "R12-S1",
+          "R12-S2",
+          "R12-U"
+        ],
+        "detail": "stems 16.000 s/48 kHz/stereo, pairwise |rho| max 0.0031, sum vs mix 2.98e-8, 3-stem export vs JS sum 8.94e-8; find->stems->preview->drag->play->export at 10.000125 s",
+        "manual": "R12-L4 real-mouse HTML5 drag -> Tech Lead list"
+      },
+      "open_bugs": [
+        {
+          "id": "C-R4-03",
+          "severity": "low",
+          "title": "library tree (w-24) truncates collection/folder labels; synthetic vs public collection not distinguishable",
+          "routed_to": "round 5 R5-B2 (outcome criterion; synthetic label keeps \"სინთეზური დემო\" for R12-L1)",
+          "status": "resolved",
+          "resolved_evidence": "C round 5 R5-B2 PASS as written (tree); caused C-R5-01"
+        },
+        {
+          "id": "C-R4-04",
+          "severity": "low",
+          "title": "synthetic stem preview waveform almost flat (max 7/32 px); peaks not normalised for display",
+          "routed_to": "round 5 R5-B3 (display-only normalisation of the preview; stem export within 2^-22 + quantisation as R12-S1)",
+          "status": "resolved",
+          "resolved_evidence": "C round 5 R5-B3 PASS (32/32 px all 9 sources; stem export 1.006e-7)"
+        },
+        {
+          "id": "A-R4-L9",
+          "severity": "low",
+          "title": "A-self-reported: keyboard activation of the preview waveform restarts at 0; empty-results message inside the listbox",
+          "routed_to": "round 5 R5-B5 (slider keys handled locally; Home/Space must not reach the global transport handlers)",
+          "status": "resolved",
+          "note": "reported by A (a-round-4.md section 6 L9), not yet C-evidenced; routed so that no known in-scope bug stays open",
+          "resolved_evidence": "C round 5 R5-B5 PASS"
+        },
+        {
+          "id": "C-R5-01",
+          "severity": "low",
+          "title": "library list titles truncated (110 px span, list column 144 px): 7/9 truncated, 4 stems + mix look identical",
+          "routed_to": "round 6 R6-L1 (outcome: all titles fully visible, 9/9 distinct, tree R5-B2 still passes)",
+          "status": "resolved",
+          "evidence": "c-round-5/runs/list-trunc-*.json, list-truncation-1440.png",
+          "resolved_evidence": "C round 6 R6-L1 PASS (9/9 distinct, no ellipsis, <= 2 lines at 1280 and 1440)"
+        }
+      ]
+    },
+    {
+      "id": "SRW-13",
+      "round": 9,
+      "title": "Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator",
+      "fb": [
+        "FB-04",
+        "FB-05",
+        "FB-14"
+      ],
+      "type": "feature-request",
+      "depends_on": [
+        "SRW-01"
+      ],
+      "status": "todo",
+      "files": [
+        "app/types/arrangement.ts",
+        "app/lib/arrangement/model.ts",
+        "app/lib/arrangement/graph.client.ts",
+        "app/lib/arrangement/__tests__/graph.test.ts",
+        "app/contexts/ArrangementContext.tsx",
+        "app/components/arrangement/ArrangementLane.tsx",
+        "app/components/arrangement/ArrangementDetailPanel.tsx",
+        "app/components/arrangement/ArrangementMaster.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R13-M1",
+          "action": "Set clip gain +6 dB on one clip; track volume unchanged",
+          "expected": "only that clip louder in playback and export (+6 dB ±0.2)",
+          "verify": "C decode"
+        },
+        {
+          "id": "R13-M2",
+          "action": "Pan track fully left",
+          "expected": "export right channel of that track ≈ silent",
+          "verify": "C decode"
+        },
+        {
+          "id": "R13-M3",
+          "action": "Master -6 dB; master mute",
+          "expected": "export -6 dB; master mute silences playback; export with master mute warns/blocks",
+          "verify": "C"
+        },
+        {
+          "id": "R13-M4",
+          "action": "Drive mix over 0 dBFS",
+          "expected": "master meter shows clip indicator; export dialog warns about overload",
+          "verify": "C"
+        }
+      ],
+      "note": "C P13/T13: clip gain applied in graph (no per-clip clamp before mix) so play and export peaks match; never label clip gain as input sensitivity"
+    },
+    {
+      "id": "SRW-14",
+      "round": 10,
+      "title": "Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges",
+      "fb": [
+        "FB-13"
+      ],
+      "type": "behavior-feature-request",
+      "depends_on": [
+        "SRW-10"
+      ],
+      "note": "SRW-14 and SRW-15 share one tempo/grid model; implement grid model first inside SRW-14 (seconds grid when no tempo), SRW-15 adds bars/beats",
+      "status": "todo",
+      "files": [
+        "app/lib/arrangement/grid.ts",
+        "app/lib/arrangement/__tests__/grid.test.ts",
+        "app/contexts/ArrangementContext.tsx",
+        "app/components/arrangement/ArrangementTransport.tsx",
+        "app/components/arrangement/ArrangementClip.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R14-G1",
+          "action": "Snap on, grid 1/4 at 120 BPM; drag clip",
+          "expected": "start lands on 0.5 s multiples",
+          "verify": "C + unit"
+        },
+        {
+          "id": "R14-G2",
+          "action": "Snap off (button and shortcut shown in tooltip)",
+          "expected": "free placement at pointer resolution",
+          "verify": "C"
+        },
+        {
+          "id": "R14-G3",
+          "action": "Change division via menu/right-click",
+          "expected": "grid lines and snapping update consistently for move, trim, range, playhead",
+          "verify": "C"
+        }
+      ]
+    },
+    {
+      "id": "SRW-15",
+      "round": 10,
+      "title": "Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)",
+      "fb": [
+        "FB-09",
+        "FB-11"
+      ],
+      "type": "feature-request",
+      "depends_on": [
+        "SRW-14"
+      ],
+      "status": "todo",
+      "files": [
+        "app/lib/arrangement/grid.ts",
+        "app/lib/arrangement/graph.client.ts",
+        "app/components/arrangement/ArrangementRuler.tsx",
+        "app/components/arrangement/ArrangementTransport.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R15-T1",
+          "action": "Set BPM 90",
+          "expected": "bars ruler rescales; seconds ruler unchanged; clip audio NOT stretched and UI says so",
+          "verify": "C"
+        },
+        {
+          "id": "R15-T2",
+          "action": "Enable metronome and play",
+          "expected": "click on each beat aligned with bar lines; not present in export",
+          "verify": "C decode"
+        }
+      ],
+      "note": "BPM source (C baseline): no product BPM exists in Studio data; project BPM is user-entered. Bars/beats ruler activates only after the user sets BPM (seconds-only by default); never silently assume 120. Metronome click not exported."
+    },
+    {
+      "id": "SRW-16",
+      "round": 11,
+      "title": "Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next",
+      "fb": [
+        "FB-10"
+      ],
+      "type": "feature-request",
+      "depends_on": [
+        "SRW-04"
+      ],
+      "status": "todo",
+      "files": [
+        "app/lib/arrangement/model.ts",
+        "app/lib/arrangement/__tests__/markers.test.ts",
+        "app/components/arrangement/ArrangementRuler.tsx",
+        "app/contexts/ArrangementContext.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R16-K1",
+          "action": "Add marker at 12 s named 'აქ შედის მუსიკა'",
+          "expected": "visible above lanes with name; undoable",
+          "verify": "C"
+        },
+        {
+          "id": "R16-K2",
+          "action": "Click marker / next-prev shortcut / play from marker",
+          "expected": "insert marker jumps; play starts there",
+          "verify": "C"
+        },
+        {
+          "id": "R16-K3",
+          "action": "Delete Time across a marker",
+          "expected": "marker shifted/removed consistently with time map",
+          "verify": "unit"
+        }
+      ]
+    },
+    {
+      "id": "SRW-17",
+      "round": 12,
+      "title": "Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children",
+      "fb": [
+        "FB-12"
+      ],
+      "type": "feature-request",
+      "depends_on": [
+        "SRW-13"
+      ],
+      "status": "todo",
+      "files": [
+        "app/types/arrangement.ts",
+        "app/lib/arrangement/model.ts",
+        "app/lib/arrangement/graph.client.ts",
+        "app/lib/arrangement/__tests__/groups.test.ts",
+        "app/components/arrangement/ArrangementLane.tsx",
+        "app/contexts/ArrangementContext.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R17-G1",
+          "action": "Select 2 tracks, Ctrl+G, rename 'SFX ქუჩა'",
+          "expected": "group header with children; collapse hides children",
+          "verify": "C"
+        },
+        {
+          "id": "R17-G2",
+          "action": "Group volume to 0 while child at 100%",
+          "expected": "children silent in playback and export",
+          "verify": "C decode"
+        },
+        {
+          "id": "R17-G3",
+          "action": "Nested subgroup inside group; mute outer",
+          "expected": "all nested silent; inner controls remain individually adjustable",
+          "verify": "C"
+        }
+      ]
+    },
+    {
+      "id": "SRW-18",
+      "round": 13,
+      "title": "Clip fade in/out handles and clip volume envelope (breakpoints line on clip)",
+      "fb": [
+        "FB-06"
+      ],
+      "type": "feature-request",
+      "depends_on": [
+        "SRW-13"
+      ],
+      "status": "todo",
+      "files": [
+        "app/types/arrangement.ts",
+        "app/lib/arrangement/envelope.ts",
+        "app/lib/arrangement/__tests__/envelope.test.ts",
+        "app/lib/arrangement/graph.client.ts",
+        "app/components/arrangement/ArrangementClip.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R18-A1",
+          "action": "Drag fade-in 1 s on a clip",
+          "expected": "linear/curved ramp audible and present in export (RMS rising over 1 s)",
+          "verify": "C decode"
+        },
+        {
+          "id": "R18-A2",
+          "action": "Add 3 breakpoints dipping -12 dB in the middle",
+          "expected": "envelope drawn on clip; export level dips at that time; envelope moves with clip and survives split/trim",
+          "verify": "C + unit"
+        }
+      ]
+    },
+    {
+      "id": "SRW-19",
+      "round": 14,
+      "title": "Simple video opacity fade (from/to black) on single video lane, preview only",
+      "fb": [
+        "FB-07"
+      ],
+      "type": "feature-request-optional-explicit",
+      "depends_on": [
+        "SRW-03"
+      ],
+      "status": "todo",
+      "optional": false,
+      "files": [
+        "app/types/arrangement.ts",
+        "app/components/arrangement/ArrangementVideoDock.tsx",
+        "app/components/arrangement/ArrangementClip.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R19-F1",
+          "action": "Set fade-in 1 s on video clip; play",
+          "expected": "video opacity ramps 0→1 over 1 s in preview",
+          "verify": "C"
+        },
+        {
+          "id": "R19-F2",
+          "action": "Open export",
+          "expected": "states video render (incl. fades) not available; no fake video file",
+          "verify": "C"
+        }
+      ],
+      "scope_decision": "In scope per tmp/studio-real-loop/orchestrator-decisions.md (2026-10-07): user requested FB-07; not optional, not deferred."
+    },
+    {
+      "id": "SRW-20",
+      "round": 15,
+      "title": "Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warning, video export honestly disabled",
+      "fb": [],
+      "type": "prototype-core",
+      "depends_on": [
+        "SRW-13"
+      ],
+      "status": "todo",
+      "files": [
+        "app/lib/arrangement/graph.client.ts",
+        "app/lib/arrangement/export.client.ts",
+        "app/lib/arrangement/__tests__/export.test.ts",
+        "app/components/arrangement/ArrangementExportDialog.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R20-X1",
+          "action": "Range 4-9 → Export → range default selected",
+          "expected": "WAV length 5.000 s ±1 frame, content equals that window",
+          "verify": "C decode"
+        },
+        {
+          "id": "R20-X2",
+          "action": "MP3 export",
+          "expected": "valid MP3 decodes with similar duration; on ffmpeg load failure clear error, no file",
+          "verify": "C"
+        },
+        {
+          "id": "R20-X3",
+          "action": "Video export option",
+          "expected": "disabled with reason",
+          "verify": "C"
+        },
+        {
+          "id": "R20-X4",
+          "action": "5-minute project export",
+          "expected": "UI stays responsive (progress updates), cancel works",
+          "verify": "C"
+        }
+      ]
+    },
+    {
+      "id": "SRW-22",
+      "round": 4,
+      "title": "Discoverable Studio Lab entry in the Store header (desktop + mobile, honest Demo badge) + exit link inside the workspace",
+      "fb": [],
+      "type": "user request (publication-checkpoint workspaceDiscoverability)",
+      "depends_on": [
+        "SRW-01"
+      ],
+      "status": "done",
+      "dispatched_round": 4,
+      "files": [
+        "app/components/layout/Header.tsx (narrow grant: two Link additions)",
+        "app/components/arrangement/StudioWorkspace.tsx"
+      ],
+      "acceptance": [
+        {
+          "id": "R22-1",
+          "action": "anonymous / -> header Studio Lab -> exit link",
+          "expected": "client navigation to /studio-lab renders the workspace; the exit returns to /",
+          "verify": "C"
+        },
+        {
+          "id": "R22-2",
+          "action": "git diff Header.tsx",
+          "expected": "only two added Link blocks",
+          "verify": "C"
+        },
+        {
+          "id": "R22-3",
+          "action": "header screenshots 1440x900, 1280x720, mobile 390x844",
+          "expected": "no wrap or overlap; the mobile menu shows the link",
+          "verify": "C"
+        },
+        {
+          "id": "R22-4",
+          "action": "network after navigation",
+          "expected": "G4-3 rules hold",
+          "verify": "C"
+        }
+      ],
+      "note": "git push is not deployment; /studio-lab stays noindex and out of the sitemap",
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-4.md",
+        "json": "tmp/studio-real-loop/c-round-4.json",
+        "passed": [
+          "R22-1",
+          "R22-2",
+          "R22-3",
+          "R22-4"
+        ],
+        "detail": "client navigation / -> /studio-lab and back; Header diff +21/-0 two Link blocks; no wrap at 1280/1440; mobile menu shows Studio Lab DEMO; G4-3 network clean"
+      }
+    },
+    {
+      "id": "SRW-23",
+      "round": 4,
+      "title": "Studio scrollbars: graphite track, slim rounded muted thumb (>= 3:1), mint hover/drag, no arrow buttons or white rail, scrollbar-gutter stable; library + timeline both axes",
+      "fb": [],
+      "type": "user request with screenshot (publication-checkpoint scrollbarUserRequest / scrollbarScreenshotEvidence)",
+      "depends_on": [
+        "SRW-01"
+      ],
+      "status": "verified_except_manual_visual",
+      "dispatched_round": 4,
+      "files": [
+        "app/components/arrangement/studio-scrollbar.ts",
+        "app/components/arrangement/*"
+      ],
+      "acceptance": [
+        {
+          "id": "R23-1",
+          "action": "screenshots + zoomed crops at 1280x720 / 1440x900 with an overflowing library and timeline",
+          "expected": "no arrows, no white rail, graphite track, rounded muted thumb, mint on hover",
+          "verify": "C"
+        },
+        {
+          "id": "R23-2",
+          "action": "wheel / keyboard / thumb drag",
+          "expected": "scrolling preserved (thumb drag is a Tech Lead real-mouse check if the tool cannot do it)",
+          "verify": "C"
+        },
+        {
+          "id": "R23-3",
+          "action": "filter the library",
+          "expected": "panel width stable",
+          "verify": "C"
+        },
+        {
+          "id": "R23-4",
+          "action": "git diff --stat",
+          "expected": "no app/styles change",
+          "verify": "C"
+        }
+      ],
+      "note": "Chrome 121+: do not combine scrollbar-color/scrollbar-width with ::-webkit-scrollbar on the same element",
+      "evidence": {
+        "verifier": "C",
+        "report": "tmp/studio-real-loop/c-round-4.md",
+        "json": "tmp/studio-real-loop/c-round-4.json",
+        "passed": [
+          "R23-3",
+          "R23-4"
+        ],
+        "blocked": [
+          "R23-1: headless Chromium hides native scrollbars; generated rules, 10 px gutter, thumb dim/surface 3.67:1, brand 10.43:1 verified",
+          "R23-2: keyboard scrolling PASS; wheel/trackpad and thumb drag not available in gstack"
+        ]
+      },
+      "remaining": "Tech Lead real Windows Chrome check of R23-1 visuals (incl. mint hover/drag) and R23-2 wheel/thumb drag; not done until then; not a BLOCKED decision because other scope remains"
+    },
+    {
+      "id": "SRW-21",
+      "round": 16,
+      "title": "Purchased-library mount readiness + final regression",
+      "fb": [],
+      "type": "integration",
+      "depends_on": [
+        "SRW-20"
+      ],
+      "status": "blocked-partial",
+      "blocked_reason": "app/routes/studio.$productId.tsx and studio-token flow are owned by the auth agent; mounting the workspace there is forbidden until released by Tech Lead",
+      "independent_progress": "WorkspaceCollection/loadSource adapter contract tests with a fake purchased adapter (no network/auth); docs for the future mount; full regression of SRW-01..SRW-20 by C",
+      "files": [
+        "app/lib/arrangement/collection.ts",
+        "app/lib/arrangement/__tests__/collection.test.ts",
+        "store/docs/technical/arrangement-workspace.md"
+      ],
+      "acceptance": [
+        {
+          "id": "R21-I1",
+          "action": "Unit test mounts StudioWorkspace logic with a fake purchased collection adapter",
+          "expected": "no workspace code change needed; adapter receives AbortSignal; errors surfaced",
+          "verify": "unit"
+        },
+        {
+          "id": "R21-I2",
+          "action": "Full C regression on all prior acceptance IDs",
+          "expected": "all PASS or documented",
+          "verify": "C"
+        }
+      ]
+    }
+  ],
+  "c_baseline": "tmp/studio-real-loop/c-baseline.md (P1-P14 pitfalls, T1-T15 tests incorporated)",
+  "protocol": {
+    "a_report": "tmp/studio-real-loop/a-round-<N>.md",
+    "a_browse_state": "tmp/studio-real-loop/a-browse.json",
+    "c_report": "tmp/studio-real-loop/c-round-<N>.md + c-round-<N>.json",
+    "b_report": "tmp/studio-real-loop/b-round-<N>.md + b-next.json + tasks/round-<N>.md",
+    "dev_server": "http://127.0.0.1:5173 started by loop runner; A/C must not start or stop servers"
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "task": "tasks/round-1.md",
+      "items": [
+        "SRW-01"
+      ],
+      "c_result": "PASS 24/24",
+      "c_evidence": [
+        "c-round-1.md",
+        "c-round-1.json"
+      ],
+      "b_record": "b-round-1.md"
+    },
+    {
+      "round": 2,
+      "task": "tasks/round-2.md",
+      "items": [
+        "C-R1-01",
+        "C-R1-02",
+        "C-R1-03",
+        "C-R1-04",
+        "SRW-02",
+        "SRW-03",
+        "SRW-04"
+      ],
+      "status": "verified",
+      "c_result": "FAIL 22/24 (failed R3-V1, R2-V3; bugs C-R2-01 High, C-R2-02 Low)",
+      "c_evidence": [
+        "c-round-2.md",
+        "c-round-2.json",
+        "c-round-2/"
+      ],
+      "b_record": "b-round-2.md",
+      "gates": "C re-ran: tsc 0; vitest 38 files 557/557; build ok; biome owned 0 diagnostics, ./app 0 errors; protected hashes 4x OK; anonymous /api/studio-token 401"
+    },
+    {
+      "round": 3,
+      "task": "tasks/round-3.md",
+      "items": [
+        "C-R2-01",
+        "C-R2-02",
+        "SRW-05",
+        "SRW-06"
+      ],
+      "status": "verified",
+      "c_result": "FAIL 18/21 (failed RF3-1, RF3-2, R5-L6; bugs C-R3-01 High, C-R3-02 High, C-R3-04 Medium, C-R3-05 Medium, C-R3-03 Low, C-R3-06 Low)",
+      "c_evidence": [
+        "c-round-3.md",
+        "c-round-3.json",
+        "c-round-3/"
+      ],
+      "b_record": "b-round-3.md",
+      "gates": "C re-ran: tsc 0; vitest 40 files 604/604; build ok; biome owned 0 diagnostics, ./app 0 errors (218 pre-existing warnings); protected hashes 4x OK; anonymous /api/studio-token 401",
+      "note": "Root stopped the A run after its report existed (a-round-3-result.json is empty); C verified the committed source 375ee3b (arrangement paths unchanged to cc1e531)"
+    },
+    {
+      "round": 4,
+      "task": "tasks/round-4.md",
+      "items": [
+        "C-R3-01",
+        "C-R3-02",
+        "C-R3-03",
+        "C-R3-04",
+        "C-R3-05",
+        "C-R3-06",
+        "root-L2",
+        "root-L3",
+        "root-L4",
+        "root-L8",
+        "root-M1",
+        "root-M2",
+        "SRW-22",
+        "SRW-23",
+        "SRW-12",
+        "SRW-11A"
+      ],
+      "status": "verified",
+      "c_result": "FAIL (failed RF4-1, RF4-2; blocked R23-1, R23-2 partial; new bugs C-R4-01 Medium, C-R4-02 Medium, C-R4-03 Low, C-R4-04 Low); passed RF4-3, RF4-U, R4-B1..B7, R4-M2, R22-1..4, R23-3/4, R12-L1..L5, R12-S1/S2/U, R11A-1..3, G4-1..3, G4-R, G4-shots",
+      "c_evidence": [
+        "c-round-4.md",
+        "c-round-4.json",
+        "c-round-4/"
+      ],
+      "b_record": "b-round-4.md",
+      "gates": "C re-ran: tsc 0; vitest 45 files 654/654; build ok; biome owned 0 errors (6 pre-existing Header warnings), ./app 0 errors / 218 warnings; protected hashes 4x OK; anonymous /api/studio-token 401, fake Bearer 500 no token, /studio/middle-east Sign in required"
+    },
+    {
+      "round": 5,
+      "task": "tasks/round-5.md",
+      "items": [
+        "C-R4-01",
+        "C-R4-02",
+        "C-R4-03",
+        "C-R4-04",
+        "root-L6",
+        "A-R4-L9",
+        "SRW-07",
+        "SRW-08",
+        "SRW-09"
+      ],
+      "status": "verified",
+      "c_result": "PASS (all round-5 IDs); bugs C-R5-02 Medium, C-R5-01/03/04/05 Low; RF5-1b vacuous (B-R5-01)",
+      "c_evidence": [
+        "c-round-5.md",
+        "c-round-5.json",
+        "c-round-5/"
+      ],
+      "b_record": "b-round-5.md",
+      "gates": "C re-ran: tsc 0; vitest 47 files 709/709; build ok; biome owned 0/0, ./app 0 errors / 218 warnings; protected hashes 4x OK; anon /api/studio-token 401; fake Bearer 500 no token (backend down, limited); /studio/middle-east Sign in required"
+    },
+    {
+      "round": 6,
+      "task": "tasks/round-6.md",
+      "items": [
+        "C-R5-02",
+        "B-R5-01",
+        "C-R5-05",
+        "C-R5-01",
+        "C-R5-03",
+        "C-R5-04",
+        "C-R5-NOTE-SHIFT",
+        "root-M3-check",
+        "SRW-10"
+      ],
+      "status": "verified",
+      "c_result": "FAIL (failed RF6-2, R10-N5); every other round-6 ID PASS (RF6-1 with a release note); new bugs C-R6-02 Medium, C-R6-01 Low, C-R6-03 Low; 21 G6-R IDs not re-run",
+      "c_evidence": [
+        "c-round-6.md",
+        "c-round-6.json",
+        "c-round-6/"
+      ],
+      "b_record": "b-round-6.md",
+      "gates": "C re-ran: tsc 0; vitest 49 files 761/761; build ok; biome owned 0, ./app 0 errors / 218 warnings; protected hashes 4x OK; Header.tsx unchanged; anon /api/studio-token 401; fake Bearer 500 no token (backend down); /studio/middle-east Sign in required",
+      "g6r_not_rerun": [
+        "R1-B5",
+        "R2-V1",
+        "R3-V2",
+        "R3-V4",
+        "R4-B1",
+        "R5-L3",
+        "R5-L4",
+        "R5-L5",
+        "R6-S5",
+        "R7-D2",
+        "R7-D3",
+        "R7-D4",
+        "R7-D5",
+        "R8-M3",
+        "R8-M4",
+        "R9-C5",
+        "R11A-2 (keys half)",
+        "R12-L2",
+        "R12-L4",
+        "R5-B5",
+        "R5-B1u"
+      ]
+    },
+    {
+      "round": 7,
+      "task": "tasks/round-7.md",
+      "items": [
+        "C-R6-02",
+        "C-R6-03",
+        "C-R6-01",
+        "doc-015-016-honesty"
+      ],
+      "status": "verified",
+      "note": "bounded per agent-workflow.md; earlier unbounded draft (bugs + SRW-11B) preserved at tasks/round-7-before-bounded-policy.md, superseded",
+      "c_result": "FAIL (RF7-3 -> C-R7-01 Medium); RF7-P1, RF7-P2, RF7-2, RF7-U, R10-N5r, R10-N5-U, R30-1, R30-2, R30-U, R7-D1, G7-1..3 and adjacent R26-1..3, R4-M2, R10-N1/N3/N6/N8, R27-1 PASS; C-R6-02 stays open; new C-R7-02 Low",
+      "c_evidence": [
+        "c-round-7.md",
+        "c-round-7.json",
+        "c-round-7/"
+      ],
+      "b_record": "b-round-7.md",
+      "gates": "C re-ran: tsc 0; vitest 50 files 779/779; build ok; biome owned 48 files 0, ./app 0 errors / 218 warnings; protected hashes 4x OK; Header.tsx identical to HEAD (+21/-0 vs cc1e531); forbidden imports 0; anon /studio-lab: no studio-token/recording/download/R2; anon studio-token 401; fake Bearer 500 no token (backend down); /studio/middle-east Sign in required"
+    },
+    {
+      "round": 8,
+      "task": "tasks/round-8.md",
+      "items": [
+        "SRW-11B stage 1: detail panel (PNL-01)"
+      ],
+      "status": "verified",
+      "note": "bounded; sync bugs C-R7-01/C-R6-02 and Low C-R7-02 stay open with concrete follow-up specs (agent-workflow.md sync-budget rule; round-7 task section 3 pre-commitment)",
+      "c_result": "FAIL on current-task.md §8.2 attribution: rule 3 breached (same-session D-N tick+microtasks p95 +0.3..+1.0 ms > 0.2), rule 2 not demonstrated (A D_2 writer max 1.3 ms, preemption not shown; C cannot add the wrapper), rule 1 PASS (forced layout 0). New C-R8-01 (Medium): R3-V1 drift FAIL 3/3 valid runs with the panel open and a selected clip; collapsed panel 3/3 PASS, no selection 2/3 PASS. Feature IDs R11-P1b, R11-P1c, R11-P1d, R11-P1e, R11-P4d, R11-U1, R8-D1 PASS; adjacent R4-M2, RF7-P2, R10-N8, R11A-3, R10-N4, R10-N5, R26-1..3 PASS; G8-1..3 PASS. e2e find->add->export identical to round 7.",
+      "c_evidence": [
+        "c-round-8.md",
+        "c-round-8.json",
+        "c-round-8/"
+      ],
+      "b_record": "b-round-8.md",
+      "gates": "C re-ran: tsc 0; vitest 52 files 806/806; arrangement 20/342; build ok; biome owned 52 files 0, ./app 0 errors / 218 warnings; protected hashes 4x OK; Header.tsx identical to HEAD (+21/-0 vs cc1e531); forbidden imports 0; anon /studio-lab: no studio-token/recording/download/R2, no Authorization; anon studio-token 401; fake Bearer 500 no token (backend down); /studio/middle-east Sign in required"
+    },
+    {
+      "round": 9,
+      "task": "tasks/round-9.md",
+      "items": [
+        "C-R8-01",
+        "C-R6-02"
+      ],
+      "status": "verified",
+      "note": "bounded bug round; two closely related drift bugs (same per-frame-consumer fix class, same R3-V1 D-mode layout and run budget). C-R7-01 (wrap hand-off, own RF5-2 layout) and Low C-R7-02 (ruler) moved to round 11 with unchanged specs.",
+      "c_result": "FAIL: R9-D1 (mode D 2/3 valid; D_3 max 0.1564 s, video lag in the second video clip 8-12.008 -> hard seek 11.91 s, app LoAF 0, forced 0, cover 2.7 %), R9-D2 rule 3 (same-session D-N tick+microtasks p95 +0.3 ms > 0.2; p50 +0.1), R9-L3 (N 3/3, RF5-3 3/3 clean, D 2/3). PASS: R9-D3 (MutationObserver 178/178 transform-only, translateX monotone, hidden outside the clip, contain strict, 144 open at 1440), R9-L1, R9-L2, R9-U, R9-Doc; R9-D2 rules 1 and 2 (computation recomputed from A raw JSON). tick+microtasks p95 3.3-3.8 -> 0.6-0.9 ms vs round 8.",
+      "c_passed": [
+        "R9-D3",
+        "R9-L1",
+        "R9-L2",
+        "R9-U",
+        "R9-Doc",
+        "R11-P1c",
+        "R11-P1d",
+        "R11-P1e",
+        "R4-M2",
+        "RF7-P2",
+        "R10-N4",
+        "R26-1",
+        "G9-1",
+        "G9-2",
+        "G9-3",
+        "e2e-find-add-video-export-wav",
+        "premium-auth-not-bypassed"
+      ],
+      "c_failed": [
+        "R9-D1",
+        "R9-D2 (rule 3)",
+        "R9-L3"
+      ],
+      "c_evidence": [
+        "c-round-9.md",
+        "c-round-9.json",
+        "c-round-9/"
+      ],
+      "b_record": "b-round-9.md",
+      "gates": "C re-ran: tsc 0; vitest 52 files 809/809; arrangement 20/345; build ok; biome owned 52 files 0, ./app 0 errors / 218 warnings; protected hashes 4x OK; Header.tsx identical to HEAD (+21/-0 vs cc1e531); probe/wrapper residue in app/ 0; anon /studio-lab: no studio-token/recording/download/R2, no Authorization; anon studio-token 401; fake Bearer 500 no token (backend down); /studio/middle-east Sign in required"
+    },
+    {
+      "round": 10,
+      "task": "tasks/round-10.md",
+      "items": [
+        "C-R7-01",
+        "C-R7-02"
+      ],
+      "status": "verified",
+      "note": "bounded bug round moved forward from round 11: R9-D1/D2 failed and C-R8-01/C-R6-02 now wait on the Tech Lead quiet-Chrome run (no re-measure of unchanged code per agent-workflow.md). Disclosed exception to \"closely related\": C-R7-02 is a one-function Low fix with no shared files or layout; C-R7-01 has priority.",
+      "c_result": "FAIL on R10-W1 only: valid runs W_2/W_4/W_5 (fresh load each; wrap 1 = first swap), 6/9 wraps below [2.29, 2.31] at the harness +300 sample (2.282-2.285); d at +300 is -0.017..-0.020 s in all 9 (vt ~2.280-2.284 at exactly +0.300; W_5 in-window only by sample phase 0.310). Clean-source series: swap offset 0, currentTime freeze +22..+51 ms after play(), peak lag ~0.05, soft sync stops at the D-19 deadband 0.02. All hard rules pass (swaps 3/0, 0 hard seeks in wrap windows, multiPlayingMaxMs 0, 0 frames past loop end, rate 1-1.25, app LoAF 0). 2 invalid runs (stall cover 15-16 %) replaced. R10-W3 not applicable (no source change, cmp).",
+      "c_passed": [
+        "R10-W2",
+        "R10-R1",
+        "R10-R2",
+        "R10-Doc",
+        "G10-1",
+        "G10-2",
+        "G10-3"
+      ],
+      "c_passed_adjacent": [
+        "R3-V1 mode N x1 (information, not a C-R6-02 verdict)",
+        "R2-V3 x1",
+        "RF5-3 x1 (H2)",
+        "R5-L3",
+        "R5-E1 (maxDiff 0)",
+        "R10-N5r",
+        "RF7-P2",
+        "R9-D3 quick",
+        "e2e-find-add-video-export-wav",
+        "premium-auth-not-bypassed"
+      ],
+      "c_failed": [
+        "R10-W1"
+      ],
+      "c_not_applicable": [
+        "R10-W3"
+      ],
+      "c_evidence": [
+        "c-round-10.md",
+        "c-round-10.json",
+        "c-round-10/"
+      ],
+      "b_record": "b-round-10.md",
+      "gates": "C re-ran: tsc 0; vitest 52 files 812/812 (809 + 3); arrangement 20/348; build ok; biome owned 51 files 0, ./app 0 errors / 218 warnings; protected hashes 4x OK start and end; frozen 15/15 sha OK; Header.tsx identical to HEAD (+21/-0 vs cc1e531); probe residue 0; anon /studio-lab: no studio-token/recording/download/R2, no Authorization; anon studio-token 401; fake Bearer 500 no token (backend 5199 down, partial)"
+    },
+    {
+      "round": 11,
+      "task": "tasks/round-11.md",
+      "items": [
+        "SRW-11B stage 2"
+      ],
+      "status": "verified",
+      "note": "one feature: track fold/height + lane auto-fit + D-29b (detail panel yields first under auto-fit). No bug work mixed in: C-R8-01/C-R6-02 wait on the Tech Lead; C-R7-01 gets D-19a in round 12. Panel polish (L11, M1, M-R10-1/M2, L2-L8, design a-d) moved to a named polish round after stage 3; recorded, not dropped.",
+      "c_result": "PASS. Every round-11 acceptance ID, every adjacent regression and G11-1..3 passed on C evidence. 4 Low observations (C-R11-01..04), none breaking an acceptance ID. R3-V1 mode D x1 information only (raw .0131/.0212, cover 5.5 %, app LoAF 0), not a C-R8-01 verdict.",
+      "c_passed": [
+        "R11-P2",
+        "R11-P2k",
+        "R11-P2a",
+        "R11-P4",
+        "R11-U",
+        "R11-Doc",
+        "R11-P1b",
+        "R11-P1c-quick",
+        "R9-D3-quick",
+        "RF7-P2",
+        "R8-M1",
+        "R6-S2",
+        "R12-L3",
+        "R10-N8",
+        "R11A-3",
+        "G11-1",
+        "G11-2",
+        "G11-3"
+      ],
+      "c_bugs": [
+        "C-R11-01 (Low)",
+        "C-R11-02 (Low)",
+        "C-R11-03 (Low)",
+        "C-R11-04 (Low)"
+      ],
+      "c_evidence": [
+        "c-round-11.md",
+        "c-round-11.json",
+        "c-round-11/"
+      ],
+      "b_record": "b-round-11.md",
+      "gates": "C re-ran: tsc 0; vitest 53 files 856/856 (812 + 44); biome owned 52 files 0, ./app 0 errors / 218 warnings; build ok; protected 4/4 OK; Header identical to HEAD (+21/-0 vs cc1e531); frozen: 8 OK vs a-round-10 start hashes, dock/video-sync/ruler/view cmp = round-10 backups, 27/27 OK vs a-round-11 frozen-start; detail playhead-writer region byte-identical; 1 ResizeObserver; anon /studio-lab: no studio-token/recording/download/R2/Authorization; anon studio-token 401; fake Bearer 500 no token (backend 5199 down, partial)"
+    },
+    {
+      "round": 12,
+      "task": "current-task.md",
+      "items": [
+        "C-R7-01"
+      ],
+      "status": "c_fail_literal_r12s",
+      "note": "one bug round: amended D-19a post-swap settle (pure helper in video-sync.ts + dock swap block, rate write and settle-clear sites only). Verdict R12-W1 under H3 with 0 escalations. C-R11-01..03 -> polish 14a; C-R11-04 accepted.",
+      "c_result": "FAIL on the literal R12-S (5 pre-first-swap start-transient writes at harness |d| 0.0192-0.0196, C-R12-01 Low). PASS: R12-W1 (9/9 d300 -0.0030..+0.0058, settles = swaps, escalations 0), R12-U (58/58, C guard M1-M7), R12-Doc, R2-V3, RF5-3 H2, R5-L3, R5-E1, RF7-P2, dock quick check, G12-1..3. R3-V1 N info .0109/.0196.",
+      "c_passed": [
+        "R12-W1",
+        "R12-U",
+        "R12-Doc",
+        "R2-V3",
+        "RF5-3-H2",
+        "R5-L3",
+        "R5-E1",
+        "RF7-P2",
+        "dock-quick-check",
+        "G12-1",
+        "G12-2",
+        "G12-3"
+      ],
+      "c_bugs": [
+        "C-R12-01 (Low)"
+      ],
+      "c_evidence": [
+        "c-round-12.md",
+        "c-round-12.json",
+        "c-round-12/"
+      ],
+      "b_record": "b-round-12.md",
+      "b_decision": "D-19b: R12-S rescoped (B mis-scope, not a tolerance change); C-R7-01 closed headless on R12-W1; C-R12-01 to the milestone RF5-3; sourceChanged Low 1 accepted. Round 12 taskStatus FAIL stays in the record.",
+      "gates": "C re-ran: tsc 0; vitest 53 files 877/877; biome owned 52 files 0, ./app 0 errors / 218 warnings; build ok; protected 4/4 OK; Header identical to HEAD; 33/37 b-round-11 hashes OK, the 4 changed are exactly the owned files; anon /studio-lab clean; studio-token 401; fake Bearer 500 no token (backend 5199 down, partial)"
+    },
+    {
+      "round": 13,
+      "task": "current-task.md",
+      "items": [
+        "SRW-11B stage 3: floating expanded video (VID-06, D-29d)"
+      ],
+      "status": "dispatched",
+      "note": "one feature round. Dock sync effects byte-identical; library collapse lifted to StudioWorkspace props (ArrangementContext frozen); adjacent: one R12-W1-style wrap run, R3-V1 light across expand -> drag -> return, RF5-3 counters, R12-S from first arm (info)."
+    }
+  ],
+  "post_current_stage_queue": [
+    {
+      "id": "T12-GAIN-VOLUME",
+      "status": "queued_after_current_completion",
+      "requested": "2026-10-07",
+      "instruction": "User explicitly asks: finish ALL current work first, THEN start these attached Gain/Volume requirements. Do not start T12 implementation or extend current tasks with it early.",
+      "prerequisites": [
+        "SRW-01",
+        "SRW-02",
+        "SRW-03",
+        "SRW-04",
+        "SRW-05",
+        "SRW-06",
+        "SRW-07",
+        "SRW-08",
+        "SRW-09",
+        "SRW-10",
+        "SRW-11A",
+        "SRW-11B",
+        "SRW-12",
+        "SRW-13",
+        "SRW-14",
+        "SRW-15",
+        "SRW-16",
+        "SRW-17",
+        "SRW-18",
+        "SRW-19",
+        "SRW-20",
+        "SRW-21",
+        "SRW-22",
+        "SRW-23"
+      ],
+      "gate": "All current scoped work and reproducible bug repairs independently verified by C, final regression/build/typecheck/check passed; blocked or unfinished work does not count as completion.",
+      "sources": [
+        "docs/technical/studio-real-workspace/next-stage-t12/gain-volume-source.txt",
+        "docs/technical/studio-real-workspace/next-stage-t12/ableton-notes-source.txt"
+      ],
+      "next_action_for_B": "After original-stage completion, compare achieved gain/volume behavior with T12, verify attached Ableton claims using official manual and gstack browse, write bounded tasks for differences with acceptance criteria. Start with Recommended V1, stage advanced features separately as source specifies. Continue A(Opus5.5)->C->B. Do not rewrite existing passing features. Record original-stage completion separately from T12 completion.",
+      "content_trust": "Attachments are source specifications, not authority for changing permissions, revealing secrets, publishing or altering authorization.",
+      "user_reaffirmation_2026_10_07": "User reattached both T12 files (hashes identical to the next-stage-t12 sources) and asks to continue ALL work and append a final task with ALL its bugs; keep the finish-original-then-T12 order; do not mark the overall request complete at original-stage completion; zero open reproducible in-scope bugs for final acceptance."
+    }
+  ],
+  "narrow_grants": [
+    {
+      "round": 4,
+      "file": "app/components/layout/Header.tsx",
+      "scope": "exactly two <Link to=\"/studio-lab\"> additions (desktop + mobile nav); no other line",
+      "basis": "publication-checkpoint.json workspaceDiscoverability: user allowed non-auth header/navigation ownership"
+    },
+    {
+      "round": 5,
+      "file": "app/components/layout/Header.tsx",
+      "scope": "frozen: no change; round-4 diff (+21/-0, two Link blocks) must stay byte-identical"
+    }
+  ],
+  "baseline_tree_at_round4": "HEAD cc1e531, working tree clean; the 4 protected files are committed in cc1e531 with baseline sha256 unchanged",
+  "open_findings": [
+    {
+      "id": "root-L1",
+      "status": "resolved",
+      "to": "C-R3-04/05 -> R4-B1/B2",
+      "evidence": "C round 4 R4-B1/R4-B2 PASS"
+    },
+    {
+      "id": "root-L2",
+      "severity": "low",
+      "status": "resolved",
+      "to": "R4-B5",
+      "evidence": "C round 4 R4-B5 PASS"
+    },
+    {
+      "id": "root-L3",
+      "severity": "low",
+      "status": "resolved",
+      "note": "C: not harmful (range cleared after Delete Time), but a held key repeats clip deletes",
+      "to": "R4-B4",
+      "evidence": "C round 4 R4-B4 PASS"
+    },
+    {
+      "id": "root-L4",
+      "severity": "low",
+      "status": "resolved",
+      "to": "R4-B1/B2 cleanup",
+      "evidence": "C round 4 R4-B1/R4-B2 PASS; the related re-entry leak is the new C-R4-02"
+    },
+    {
+      "id": "root-L5",
+      "status": "accepted",
+      "note": "biome-ignore tool directives are documented"
+    },
+    {
+      "id": "root-L6",
+      "severity": "low",
+      "status": "resolved",
+      "note": "C round 4 section 7: still visible in the export dialog",
+      "to": "round 5 R5-B4",
+      "evidence": "C round 5 R5-B4 PASS"
+    },
+    {
+      "id": "root-L7",
+      "status": "accepted",
+      "note": "unbounded history acceptable for the demo"
+    },
+    {
+      "id": "root-L8",
+      "severity": "low",
+      "status": "resolved",
+      "to": "R4-B6",
+      "evidence": "C round 4 R4-B6 PASS"
+    },
+    {
+      "id": "root-M1",
+      "severity": "medium",
+      "status": "resolved",
+      "to": "R4-B7",
+      "evidence": "C round 4 R4-B7 PASS (queued rAF 5 s, wraps continue, 0 late start)"
+    },
+    {
+      "id": "root-M2",
+      "severity": "medium",
+      "status": "resolved",
+      "to": "R4-M2 measure-then-decide",
+      "evidence": "C round 4 R4-M2 PASS (position store; DOM mutations only on position consumers; 0 vs 10 renders test)"
+    },
+    {
+      "id": "root-M3",
+      "status": "resolved",
+      "evidence": "C round 6 R6-D1 PASS: doc 012 lines 4 and 126-127 satisfy root M3",
+      "note": "closed by C evidence in round 6"
+    },
+    {
+      "id": "reviewer-r5-7",
+      "severity": "low",
+      "status": "resolved",
+      "note": "mute/solo/volume not blocked mid-gesture (code-reviewer round 5 #7) = C-R5-02",
+      "to": "round 6 R26-2",
+      "evidence": "C round 6 R26-2 PASS"
+    },
+    {
+      "id": "root-L2-L3-recheck",
+      "status": "resolved",
+      "note": "C round 6 section 7 lists root L2/L3/L7 as not re-checked; L2 = R4-B5 and L3 = R4-B4 were re-run PASS in C round 6 G6-R; L7 stays accepted",
+      "evidence": "c-round-6.json passed: R4-B4, R4-B5"
+    },
+    {
+      "id": "checkpoint-r6-6",
+      "severity": "low",
+      "status": "accepted",
+      "note": "a stale playhead scrub keeps its position on abort; C round 6: acceptable"
+    },
+    {
+      "id": "checkpoint-r6-7-marquee",
+      "severity": "low",
+      "status": "accepted",
+      "note": "the marquee has no buttons check; C round 6: not a bug (starts no edit); unchanged to keep the R6-S2 scripts valid"
+    },
+    {
+      "id": "checkpoint-r6-10",
+      "severity": "low",
+      "status": "resolved",
+      "to": "C-R6-01 / round 7 D-30",
+      "evidence": "C round 7 R30-1/R30-2/R30-U PASS (D-30)"
+    },
+    {
+      "id": "lenis-purchased-studio",
+      "severity": "low",
+      "status": "tech_lead",
+      "note": "root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / route owner"
+    },
+    {
+      "id": "C-R6-01",
+      "severity": "low",
+      "status": "resolved",
+      "evidence": "C round 7 R30-1, R30-2, R30-U PASS; synthetic pointers only, real mouse/focus order (D-30 H1) on Tech Lead list"
+    },
+    {
+      "id": "a7-review-pending",
+      "severity": "low",
+      "status": "resolved",
+      "note": "A round 7 ran code-reviewer once; the fix delta was not re-reviewed (C §10). Next A round reviews its full diff including the round-7 fix delta touched files it changes. Round 8: A ran code-reviewer on its full round-8 diff (7.5/10) and on the fix delta (9/10); the last three Low fixes were not re-reviewed. Round 9: A reviews the full cumulative diff of every file it touches (incl. the round-8 Low fixes in ArrangementDetailPanel.tsx) and re-runs it on the fix delta.",
+      "resolved_evidence": "A round 9 ran the code-reviewer subagent twice on the full cumulative diff of ArrangementDetailPanel.tsx (incl. the round-8 Low fixes), ArrangementLibraryPreview.tsx, ArrangementContext.tsx and render-budget.test.tsx: 8.5/10 both, no Critical/High (a-round-9.md §7; C read, did not re-run)"
+    },
+    {
+      "id": "c-r8-stale-carry",
+      "status": "resolved",
+      "note": "c-round-8.md §9 and a-round-8.md §10 list root M1/L2/L3/L4/L7 as open. They are not: M1 = R4-B7 PASS (c-round-4.md line 166, 303), L2 = R4-B5, L3 = R4-B4, L4 = R4-B1/B2 (C rounds 4 and 6), L7 accepted. C should drop them from the carried list."
+    },
+    {
+      "id": "untracked-frontend-architect-agent",
+      "status": "root",
+      "note": "store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden for A/B/C. Root confirms the origin. Excluded from A/C G9-2 accounting; nobody edits or deletes it."
+    },
+    {
+      "id": "untracked-codex-frontend-architect-toml",
+      "status": "root",
+      "detail": "store/.codex/agents/frontend-architect.toml appeared untracked 2026-10-10 15:12 during A round 9; A says it did not create it; .codex/** is forbidden to A/B/C; excluded from G10-2; root to confirm origin (with store/.claude/agents/frontend-architect.md); still present at round-10 end (c-round-10.md §9), untouched by A/B/C",
+      "evidence": "c-round-9.md §1, a-round-9.md §3"
+    },
+    {
+      "id": "c-r9-stale-carry",
+      "status": "resolved",
+      "detail": "A §9 and C §9 of round 9 listed root M1, L6, L8, M3 as open. Closed by C evidence: M1 = R4-B7 (round 4), L8 round 4, L6 round 5 (R5-B4), M3 round 6 (R6-D1); with L1-L4/M2 (round 4) and L7 accepted. Round-10 task §6.5 lists the full closed set."
+    },
+    {
+      "id": "harness-H1-H2",
+      "status": "resolved",
+      "detail": "B decision for future rounds: H1 writer-envelope exclusion is rAF delta >= 2 x run median (doubled 60 Hz frame excluded); does not re-score round 9 (R9-D2 failed on rule 3). H2 RF5-3 hold check accepts a non-paused pre-start row only if it is the active play() row inside the RF5-3 play() window with |vt| <= 1/60 s; C encodes it and reports raw preAllPaused.",
+      "evidence": "c-round-9.md §7 harness notes; current-task.md (round 10) §6.4"
+    },
+    {
+      "id": "harness-H3",
+      "status": "resolved",
+      "detail": "B decision for future rounds (from the round-12 verdict on): the RF5-2 regression rule is evaluated on one row, |vt - expected(ctx)| <= 0.01 at the first rAF with ctx >= wrap + 0.300, expected = loop.start + (ctx - wrapCtx); or vt interpolated to exactly wrap + 0.300 (C wrapdetail d300). Does not re-score round 10 (R10-W1 fails under both).",
+      "evidence": "c-round-10.md §7 H3; a-round-10.md §1.1 harness note"
+    },
+    {
+      "id": "vitest-sfx-library-timeout-flake",
+      "status": "watch",
+      "detail": "A round 10 full run 1 had 1 failed: app/lib/__tests__/sfx-library.test.tsx \"adds three sounds ... save/open\" timed out at 5000 ms; it passed alone (3/3) and in the full re-run; C round 10 did not reproduce it (812/812). File untouched by Studio work. If it recurs, report both runs; not a Studio bug.",
+      "evidence": "a-round-10.md §4, a-round-10/gates/vitest-all-run1-timeout.txt; c-round-10.md §1"
+    },
+    {
+      "id": "c-r10-stale-root-L8",
+      "status": "resolved",
+      "detail": "C round 10 §9 listed root L8 (new AudioContext not wrapped) as carried. It is closed: c-round-4.md §7 line 303, R4-B6 (Web Audio failure shows a status). Round-11 task §6.5 names it in the closed list."
+    },
+    {
+      "id": "C-R11-04",
+      "status": "accepted",
+      "note": "folded height-handle aria-valuenow = stored open height with aria-valuetext დაკეცილია · {h} px (contract N2 convention); B confirms, no code change"
+    },
+    {
+      "id": "export-clip-onset-1lsb",
+      "status": "accepted",
+      "note": "C round 11 determinism control: two unchanged exports of the same scene differ by 1.192e-7 (2^-23, 1 LSB) around a clip onset at 2.000 s (c-round-11/runs/export-determinism-1440.json). Export equality checks stay at maxDiff <= 1.2e-7, not 0; R5-E1 maxDiff 0 in round 10 was a scene without that onset. Not a bug."
+    },
+    {
+      "id": "d29-visible-area-formula",
+      "status": "resolved",
+      "note": "A round-11 deviation 1 accepted: scroller clientHeight already excludes the horizontal scrollbar, so the D-29 visible lane area is clientHeight - ruler - loop strip - row borders; plan.md D-29 text corrected; the Tech Lead real-Chrome check (10 px scrollbar) tests this formula"
+    },
+    {
+      "id": "a-r11-dev-9-fold-during-gesture",
+      "status": "open",
+      "note": "fold is silently ignored during a pointer gesture; B decision for polish 14a: show GESTURE_EDIT_BLOCKED_MESSAGE like Mute (D-26 refusal consistency)"
+    },
+    {
+      "id": "reviewer-r12-low1-sourceChanged",
+      "status": "accepted",
+      "note": "A round-12 code-reviewer Low 1: no endSettle() at sourceChanged. Accepted without code: sourceChanged sets seekWanted (dock l.535-545), so the frame returns before the rate write (l.558) until issueHoldSeek (l.548), which calls endSettle (l.328). Residual: a spontaneous pause -> holdRelease -> play keeps settle armed <= 1.0 s; rate stays <= 1.45. B decision D-19b."
+    },
+    {
+      "id": "dirty-tree-exposure",
+      "status": "root",
+      "note": "No commit since c5ed47b; the Studio work of rounds 6-12 (17 M + 12 untracked) is uncommitted. Policy-correct (final commit/push by root after everything); named so root sees the growing exposure."
+    }
+  ],
+  "tech_lead_notes": [
+    "cc1e531 committed the 4 protected purchase/auth files plus .agents/.codex/AGENTS.md, contrary to root-pre-push-review §3 and publication-checkpoint \"none were staged\"; contents equal the protected baseline sha256; at runtime anonymous gets 401, a fake bearer gets 500, and /studio/middle-east shows Sign in required (C round 3)",
+    "The purchased Studio loader studio.$productId.tsx hardcodes the middle-east stem folder: owners of other products get token 200, then worker 403 (all-files-review High, inherited). Protected file; tracked for SRW-21; do not claim all product stems work",
+    "api.studio-token category match does not trim; Studio and download derive userId differently (all-files-review Medium) - auth agent / Tech Lead",
+    "AGENTS.md and the .codex agent reference non-existent .Codex/* paths (all-files-review Medium) - root instruction-file follow-up, not A scope",
+    "The root cookie banner covers the /studio-lab footer and part of the video dock until accepted - root.tsx owner",
+    "Export clipping observation (104 full-scale samples, music + impact) - no master headroom or overload indicator; tracked in SRW-13 R13-M4",
+    "The B session has no Agent/subagent tool: the design-philosopher consult is delegated to A in round 4",
+    "Round 4 (C): an anonymous fake-Bearer /api/studio-token request returns 500 (likely backend unreachable) and issues no token; protected route unchanged (hashes OK)",
+    "Tech Lead manual check list (real mouse / real Chrome) is in tech_lead_manual_checks; COMPLETE needs those results or an explicit Tech Lead acceptance",
+    "Round 5 (C): RF5-1b escalation verified only by a forced diagnostic; natural decoder-ramp escalation needs real Chrome",
+    "Round 5: export hard-clips at 0 dBFS with no indicator (C note) -> SRW-13 R13-M4",
+    "Round 5: Delete/Cut Time leaves a 0.008 s video sliver (D-09 behaviour) - UX note for Tech Lead",
+    "Round 5: clicking a member of a multi-selection without dragging keeps the multi-selection (D-18); Ableton collapses it - recorded difference",
+    "Round 6 (C): RF6-2 FAIL with app-attributed LoAFs on a 23-100 % CPU machine; round 7 is measure-first (RF7-P1/P2) and keeps the D-24 verdict rule; a quiet real Chrome run is required evidence",
+    "Round 6 (C): fake-Bearer studio-token still 500 with no token (backend down), anonymous 401, /studio/middle-east Sign in required",
+    "Round 7 (C): RF7-3 FAIL on the RF5-2 wrap rule (C-R7-01, valid run, 0 app LoAF); C-R6-02 still shows app-attributed rAF LoAFs in an INVALID run; quiet real Chrome RF7-2 + RF5-2 loop run (VP9 + H.264) is the required next evidence for both"
+  ],
+  "final_commit_push_authorization": {
+    "date": "2026-10-07",
+    "actor": "root (not A/B/C)",
+    "condition": "after EVERYTHING: original scope incl. library/stems/scrollbars/entry, all in-scope bug fixes, T12 V1 + specified advanced phases, root final regression/check/build/typecheck/tests, code and security reviews",
+    "action": "commit all relevant real-project files and push both configured Store remotes; verify remote hashes",
+    "note": "push is not deployment; no premature commit; no standalone prototype/Sites publication"
+  },
+  "tech_lead_manual_checks": [
+    {
+      "id": "R23-1",
+      "what": "studio scrollbar visuals (graphite track, slim rounded dim thumb, no arrows/white rail, corner, mint hover/drag) in real Windows Chrome at 1280x720 and 1440x900",
+      "reason": "headless Chromium hides native scrollbars"
+    },
+    {
+      "id": "R23-2",
+      "what": "wheel/trackpad and thumb drag on library tree, library list, timeline both axes",
+      "reason": "gstack has no wheel/CDP input"
+    },
+    {
+      "id": "R12-L4",
+      "what": "real-mouse HTML5 drag library -> lane (ghost time, amber, refusals)",
+      "reason": "C used synthetic DragEvents"
+    },
+    {
+      "id": "RF4-1/RF4-2 -> RF5-1/RF5-2 -> RF6-1/RF6-2 -> RF7-2/RF7-3",
+      "what": "video drift (R3-V1 13 s) and loop-wrap landing (RF5-2 loop 2-4, 3 wraps) on a quiet real Windows Chrome, VP9 + H.264",
+      "reason": "C-R4-01 environment sensitivity; round 6: now required, because the cause of C-R6-02 (app vs preemption) is unconfirmed on the loaded C machine"
+    },
+    {
+      "id": "R8-M1/R8-M2",
+      "what": "real-mouse cross-lane drag with Shift lock (after round 5)",
+      "reason": "synthetic pointer events"
+    },
+    {
+      "id": "R10-N1/N2",
+      "what": "ruler drag zoom/pan with a real mouse; real Ctrl+wheel and trackpad pinch anchored zoom",
+      "reason": "gstack has no wheel; synthetic pointer/wheel events"
+    },
+    {
+      "id": "R11-P3m",
+      "what": "real-mouse drag of the floating video and track-height/detail separators",
+      "reason": "synthetic pointer events"
+    },
+    {
+      "id": "R30-H1",
+      "what": "real mouse / multi-touch / focus order on the track Volume slider during clip gestures (D-30)",
+      "reason": "synthetic pointers only"
+    },
+    {
+      "id": "R11-SB",
+      "what": "auto-fit visible lane area with a real 10 px horizontal scrollbar (clientHeight - ruler - loop strip - row borders)",
+      "why": "headless scrollbar is 0 px"
+    }
+  ],
+  "baseline_tree_at_round5": "HEAD cc1e531 + uncommitted round-4 work (18 M + 12 ??, listed in current-task.md section 2.1), verified by C round 4; must not be reverted",
+  "baseline_tree_at_round6": "HEAD 354e341 + uncommitted round-5 work (19 M + 4 ??, listed in current-task.md section 2.1), verified by C round 5; if root commits it first, HEAD is the baseline; must not be reverted",
+  "baseline_tree_at_round7": "HEAD c5ed47b + 11 uncommitted round-6 files (session 2, listed in current-task.md section 2.1), verified by C round 6; if root commits them first, HEAD is the baseline; must not be reverted",
+  "workflow_policy": {
+    "source": "docs/technical/studio-real-workspace/agent-workflow.md",
+    "approved": "2026-10-09",
+    "round_size": "one feature or up to three closely related bugs",
+    "sync_budget": "3 valid + max 2 environment-invalid replacements per layout per round; failures stay open bugs; tolerances never relaxed",
+    "regression": "changed criteria + adjacent regressions per round; full regression at milestones, shared-infrastructure changes or concrete regression evidence",
+    "dashboard": "tmp/studio-real-loop/feature-status.md"
+  },
+  "planned_rounds": [
+    {
+      "round": 11,
+      "items": [
+        "SRW-11B stage 2: track fold/height (TRK-04/05) + lane auto-fit (D-29) + D-29b detail-panel yield"
+      ],
+      "note": "C-R8-01 open (Tech Lead evidence pending); one mode-D R3-V1 info run must be no worse than round 9"
+    },
+    {
+      "round": 12,
+      "items": [
+        "C-R7-01 under amended D-19a: settle armed at standby swap, ends on re-entry into 0.008 after exceeding it / 1.0 s / seek / swap / pause / hold; K in [8, 9]; settle rate <= 1.45 (< VIDEO_STALL_LAG_RATE); pure helper in video-sync.ts with a deterministic freeze simulation (0 escalations); verdict R12-W1 = R10-W1 rule under H3"
+      ],
+      "note": "new code, so a fresh run budget is legitimate; the Tech Lead quiet-Chrome RF7-3 run remains required evidence Result: R12-W1 PASS, R12-S literal FAIL rescoped by D-19b; C-R7-01 closed headless."
+    },
+    {
+      "round": 13,
+      "items": [
+        "SRW-11B stage 3: floating expanded video (VID-06)"
+      ],
+      "note": "dispatched: C-R7-01 closed headless in round 12 (D-19b); D-29d contract"
+    },
+    {
+      "round": 14,
+      "items": [
+        "panel polish 14a (C-R11-01..03, D-29c), 14b (detail panel L11/L2-L7/design a-d), 14c (context/preview M1, M-R10-1/M2, L8)"
+      ],
+      "note": "split per agent-workflow.md (max three related items per round)"
+    },
+    {
+      "milestone": "after SRW-11B + polish",
+      "items": [
+        "full regression incl. regression_debt_g6r"
+      ]
+    },
+    {
+      "after_milestone": "SRW-13 onward in dependency order, then SRW-21 adapter contract, then T12"
+    }
+  ],
+  "regression_debt_g6r": {
+    "status": "due_at_milestone",
+    "note": "passed in earlier rounds, not re-run in C round 6 G6-R; not PASS for the current tree",
+    "ids": [
+      "R1-B5",
+      "R2-V1",
+      "R3-V2",
+      "R3-V4",
+      "R4-B1",
+      "R5-L3",
+      "R5-L4",
+      "R5-L5",
+      "R6-S5",
+      "R7-D2",
+      "R7-D3",
+      "R7-D4",
+      "R7-D5",
+      "R8-M3",
+      "R8-M4",
+      "R9-C5",
+      "R11A-2 (keys half)",
+      "R12-L2",
+      "R12-L4",
+      "R5-B5",
+      "R5-B1u"
+    ]
+  },
+  "baseline_tree_at_round8": "HEAD c5ed47b + 14 modified + 2 untracked (round 6 + round 7: render-budget.test.tsx, doc 016), verified by C round 7; must not be reverted; vitest baseline 50 files / 779 tests",
+  "baseline_tree_at_round9": "HEAD c5ed47b + 14 modified + 7 untracked (round 6/7/8: ArrangementDetailPanel.tsx, panels.ts, panels.test.ts, detail-panel.test.tsx, render-budget.test.tsx, docs 016/017), verified by C round 8; plus the untracked .claude/agents/frontend-architect.md of unknown origin (not part of the Studio work; root decides); must not be reverted; vitest baseline 52 files / 806 tests",
+  "baseline_tree_at_round10": "HEAD c5ed47b + 15 modified (round 6-9 incl. ArrangementLibraryPreview.tsx) + 8 Studio untracked (ArrangementDetailPanel.tsx, panels.ts, panels.test.ts, detail-panel.test.tsx, render-budget.test.tsx, docs 016/017/018), verified by C round 9; plus foreign untracked .claude/agents/frontend-architect.md and .codex/agents/frontend-architect.toml (root); must not be reverted; vitest baseline 52 files / 809 tests",
+  "baseline_tree_at_round11": "HEAD c5ed47b + 15 modified (round 6-10) + 9 Studio untracked (ArrangementDetailPanel.tsx, panels.ts, panels.test.ts, detail-panel.test.tsx, render-budget.test.tsx, docs 016/017/018/019), verified by C round 10 (c-round-10/git-status-end.txt); plus foreign untracked .claude/agents/frontend-architect.md and .codex/agents/frontend-architect.toml (root); must not be reverted; vitest baseline 52 files / 812 tests",
+  "baseline_tree_at_round12": "HEAD c5ed47b + 15 modified (round 6-11) + 11 Studio untracked (ArrangementDetailPanel.tsx, panels.ts, panels.test.ts, detail-panel.test.tsx, render-budget.test.tsx, track-layout.test.tsx, docs 016/017/018/019/020), identical to C round-11 end (c-round-11/gates/git-status-end.txt, diffstat-end.txt; B re-checked with diff); sha256 of every Studio file at that point: b-round-11-tree-sha256.txt; plus foreign untracked .claude/agents/frontend-architect.md and .codex/agents/frontend-architect.toml (root); must not be reverted",
+  "vitest_floor_round12": 856,
+  "baseline_tree_at_round13": "HEAD c5ed47b + 17 modified + 12 Studio untracked (round 6-12; adds video-sync.ts M, doc 021 ??), identical to C round-12 end (c-round-12/gates/git-status-end.txt); sha256 of every Studio file: b-round-12-tree-sha256.txt (38 entries, equals A owned-final-sha256 for dock/video-sync/test/doc 020); plus the foreign untracked .claude/agents/frontend-architect.md and .codex/agents/frontend-architect.toml (root); must not be reverted",
+  "vitest_floor_round13": 877
+}

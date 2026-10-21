@@ -1,0 +1,43 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R18-01",
+      "severity": "medium",
+      "steps": [
+        "Open http://127.0.0.1:5173/studio-lab at 1440x900 (anonymous), build lay11 (video 0-6.008, music 0-16, stems 2-18, SFX 4-6), library 288.",
+        "Real $B click on the music clip header; the detail panel (144) shows the info column.",
+        "Read the info column and range labels."
+      ],
+      "expected": "R18-D / design (d): info labels read 'დასაწყისი' (clip and group) and 'წყაროდან'; range labels read 'საიდან, წმ' / 'სადამდე, წმ'; R18-U (d) tests and guard mutation 6 exist.",
+      "actual": "Not implemented. Labels are still 'start', 'offset', 'start, წმ', 'end, წმ'; no (d) tests. A stopped under the task §1.4 stop rule. C re-measured it independently and confirmed the stop: with the new text in page state, the 'დასაწყისი 00:00.000 · სიგრძე 00:16.000' line needs 259.81 px max-content, more than w-64 (256), so it wraps at 224/240/256. In the single state, the title and lane truncate rows shrink from 16 to 10 px (1440) and 9 px (1280). The group at 1440 starts to scroll (110/107). B needs a design decision; this is a carry-over, not an A error.",
+      "evidence": "tmp/studio-real-loop/c-round-18/runs/stop-1440x900.txt, c-round-18/runs/quicks-1280x720.txt (S288/S480/G480), c-round-18.md §3; as-is shots c-round-18/shots/detail-overlay-1440.png, detail-labels-1280-480-asis.png"
+    }
+  ],
+  "passed": [
+    "R18-L4",
+    "R18-W",
+    "R18-B",
+    "R18-L6",
+    "R18-A",
+    "R18-Doc",
+    "R8-detail-quick",
+    "R16-H1-quick",
+    "R16-F1-quick",
+    "R9-D3/RF7-P2",
+    "range-on-lane-quick",
+    "G18-1",
+    "G18-2",
+    "G18-3"
+  ],
+  "blocked": [
+    "R18-U is not PASS as a whole. Its L4, W, (b) and R9-D3 parts are green (13/13), and guard mutations M1-M7 were each caught; the (d) part and guard mutation 6 are not delivered (C-R18-01).",
+    "Not delivered: R18-D (all parts) and the R18-U (d) part, including guard mutation 6 (C-R18-01). A's stop was rule-compliant and C confirmed it.",
+    "Wording note for B: the '1280 panel at cap 142' group condition is unreachable by design. The group and clip+range states add a footer row (69 to 89, the D-29g residual disclosed in round 16), so the 1280 panel is 122 there. At 1280 the group content already scrolls today (106/85).",
+    "Tech Lead: R18-T (real wheel on a focused range input). Synthetic cancelable WheelEvent only: focused gives defaultPrevented true with the value unchanged; blurred, unfocused and waveform give false.",
+    "Note: ArrangementLane.tsx:661 has a different biome-ignore reason for the same rule (frozen file; L6 analogue for its next owner round).",
+    "Known carry, not new: export hard-clips at 0 dBFS (R13-M4/SRW-13). The 18.000 s WAV has 864000 frames and 1802 full-scale samples, identical to round 17.",
+    "Root carry: SRW-21 purchased loader hardcodes middle-east; Lenis on /studio/*; portable instruction-file paths; final commit/push after everything; uncommitted round-6..18 tree; shared Modal.tsx focus gap; root GA scroll with consent denied; two foreign agent files; A round-17 deviation 4 (python kill), not verified by C; fake Bearer returns 500 without a token; publication-checkpoint library/stems/scrollbars and T12; CDP allowlist denies Input.dispatchMouseEvent.",
+    "Not this round and not PASS: C-R6-02, C-R8-01, RF7-3 (Tech Lead quiet Chrome), C-R12-01 (RF5-3), M1/L8, L2/L3, A round-11 follow-ups, the 21 regression-debt IDs, SRW-13..20, SRW-21 adapter, T12, Tech Lead manual checks (R11-P3m, R11-SB, R13-RM, R15-SB, R17-T, R18-T)."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "decision": "CONTINUE",
+  "reason": "C round 67 FAIL with browserVerified=true: 27/28 rows PASS (incl. R14-G1, GM-PLAY onset 4.671, layout at both viewports, verify rc 0 95/1646) but GM-BRACE FAIL (C-R67-02, loop end 1 ms off the musical line after a brace move) and C-R67-01 (Snap-on nudge from 0.187 at 120 BPM 1/32 skips 0.188); both come from B's round-67 precision rule, A followed the spec. Root gate skipped; round 67 is unpublished. SRW-14 stage 5a and FB-13 are marked bug (ბაგია), not done. Not COMPLETE: two open Medium C bugs, stage 5b, the perf Mediums, SRW-16..20, the open SRW-03/05/09/10/11B/13/23/24 items, SRW-21 blocked-partial, the Lows batch, the final regression, root review and T12 remain. Not BLOCKED: no external information, approval or credential is missing.",
+  "nextTask": "Round 68 (D-29z33): fix round for C-R67-01, C-R67-02, A-R67-REVIEW-L1 (three tightly related bugs, one owner). grid.ts: for non-whole-ms steps adjacentGridLine returns the nearest stored line L(m)=round(m*step, ms) strictly beyond t (three-candidate scan; the reviewer two-candidate form is rejected, stuck at 999 BPM 1/4 t=0.3) and snapGroupDelta's clamp uses the stored line at-or-below/at-or-above the bound; the 0.000501 tolerance is removed; the whole-ms path returns to the b5fb12b expressions. loop.ts: moveLoop(arrangement, start, gridStep) keeps the loop length as a line count when both edges and the new start are on lines, otherwise ms as today; ArrangementLoopBrace passes resolveSnapStep (pointer, Alt bypass) and snapSeconds (keys); ArrangementContext stepLoopRange gets an optional gridStep for 'move' only. Clip ends and group offsets stay in ms (deliberate, D-10). Tests GM10-GM12 + GU12-GU14 -> 95/1652; mutations a-i; doc 060 amended. Baseline b5fb12b + the 7 uncommitted round-67 lines, frozen b-round-67-r68-tree-sha256.txt (431). C: FX-M1* (C's exact repro), FX-M1-90, GM-BRACE* (strict), GM-BRACE-ALT, GM-BRACE-KEYS, GM-BRACE-PLAY (real audio across wraps), GM-NUDGE, GM-GROUP, GM-GROUP-CLAMP (best effort), GM-G1, SN/LB/GM-KEYS-REG, REG-HYD, G68-3. Rounds 67+68 publish together after C PASS.",
+  "remaining": [
+    "C-R67-01",
+    "C-R67-02",
+    "A-R67-REVIEW-L1",
+    "SRW-03",
+    "SRW-05",
+    "SRW-09",
+    "SRW-10",
+    "SRW-11B",
+    "SRW-13",
+    "SRW-14",
+    "SRW-16",
+    "SRW-17",
+    "SRW-18",
+    "SRW-19",
+    "SRW-20",
+    "SRW-21",
+    "SRW-23",
+    "SRW-24",
+    "ROOT-R66-M1-METRONOME-HORIZON",
+    "ROOT-R65-M1-BEAT-DENSITY",
+    "LOWS-BATCH",
+    "FINAL-REGRESSION",
+    "T12-GAIN-VOLUME"
+  ]
+}

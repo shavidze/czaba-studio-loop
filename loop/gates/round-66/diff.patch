@@ -1,0 +1,351 @@
+﻿diff --git a/app/components/arrangement/ArrangementTempoRow.tsx b/app/components/arrangement/ArrangementTempoRow.tsx
+index d93708b..c653366 100644
+--- a/app/components/arrangement/ArrangementTempoRow.tsx
++++ b/app/components/arrangement/ArrangementTempoRow.tsx
+@@ -6,6 +6,7 @@ import {
+   useRef,
+   useState,
+ } from 'react';
++import { METRONOME_NEEDS_TEMPO_TITLE, METRONOME_TITLE } from '~/lib/arrangement/metronome';
+ import {
+   barsRulerMarks,
+   formatTempoBpm,
+@@ -22,6 +23,8 @@ interface ArrangementTempoRowProps {
+   tempoBpm: number | null;
+   onTempoChange: (next: number | null) => void;
+   onTempoInvalid: () => void;
++  metronomeOn: boolean;
++  onMetronomeToggle: () => void;
+ }
+ 
+ interface ArrangementBarsRulerProps {
+@@ -81,6 +84,8 @@ export function ArrangementTempoRow({
+   tempoBpm,
+   onTempoChange,
+   onTempoInvalid,
++  metronomeOn,
++  onMetronomeToggle,
+ }: ArrangementTempoRowProps) {
+   const [draft, setDraft] = useState<string | null>(null);
+   const skipCommitRef = useRef(false);
+@@ -159,6 +164,20 @@ export function ArrangementTempoRow({
+           data-testid="arrangement-tempo-input"
+         />
+         <span className="tabular-nums">{`${TEMPO_BEATS_PER_BAR}/4`}</span>
++        <button
++          type="button"
++          onClick={onMetronomeToggle}
++          disabled={tempoBpm === null}
++          aria-pressed={metronomeOn}
++          title={tempoBpm === null ? METRONOME_NEEDS_TEMPO_TITLE : METRONOME_TITLE}
++          className={cn(
++            'h-4 shrink-0 rounded-sm border border-outline px-1 text-xs leading-none text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-muted',
++            metronomeOn && 'border-accent bg-accent/20 text-accent hover:text-accent',
++          )}
++          data-testid="arrangement-metronome-toggle"
++        >
++          მეტრონომი
++        </button>
+       </div>
+       <ArrangementBarsRuler seconds={seconds} pxPerSecond={pxPerSecond} bpm={tempoBpm} />
+     </div>
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 9f0d464..3213868 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -25,6 +25,7 @@ import {
+   gridLinesVisible,
+   resolveGridTime,
+ } from '~/lib/arrangement/grid';
++import { metronomeStatusMessage } from '~/lib/arrangement/metronome';
+ import {
+   clampTrackHeight,
+   detailPanelOpenHeightCap,
+@@ -331,6 +332,7 @@ export function StudioWorkspace() {
+   const [snapEnabled, setSnapEnabled] = useState(false);
+   const [gridSeconds, setGridSeconds] = useState<number>(GRID_DEFAULT_DIVISION_SECONDS);
+   const [tempoBpm, setTempoBpm] = useState<number | null>(null);
++  const [metronomeOn, setMetronomeOn] = useState(false);
+   const snapEnabledRef = useRef(snapEnabled);
+   snapEnabledRef.current = snapEnabled;
+   const gridSecondsRef = useRef(gridSeconds);
+@@ -842,9 +844,25 @@ export function StudioWorkspace() {
+ 
+   const changeTempo = useCallback((next: number | null) => {
+     setTempoBpm(next);
++    if (next === null) {
++      setMetronomeOn(false);
++    }
+     workspaceRef.current.setStatus(tempoStatusMessage(next));
+   }, []);
+ 
++  const toggleMetronome = useCallback(() => {
++    if (tempoBpm === null) {
++      return;
++    }
++    const next = !metronomeOn;
++    setMetronomeOn(next);
++    workspaceRef.current.setStatus(metronomeStatusMessage(next ? tempoBpm : null));
++  }, [metronomeOn, tempoBpm]);
++
++  useEffect(() => {
++    workspaceRef.current.setMetronomeBpm(metronomeOn && tempoBpm !== null ? tempoBpm : null);
++  }, [metronomeOn, tempoBpm]);
++
+   const rejectTempo = useCallback(() => {
+     workspaceRef.current.setStatus(TEMPO_INVALID_MESSAGE);
+   }, []);
+@@ -1681,6 +1699,8 @@ export function StudioWorkspace() {
+                   tempoBpm={tempoBpm}
+                   onTempoChange={changeTempo}
+                   onTempoInvalid={rejectTempo}
++                  metronomeOn={metronomeOn}
++                  onMetronomeToggle={toggleMetronome}
+                 />
+                 <div className="flex">
+                   <div
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index bc6c530..9b63068 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -56,6 +56,7 @@ import {
+   stepMeter,
+   type TrackMeterStore,
+ } from '~/lib/arrangement/meter';
++import { generateMetronomeClickSamples, planMetronomeClicks } from '~/lib/arrangement/metronome';
+ import {
+   ARRANGEMENT_EPS,
+   type ArrangementHistory,
+@@ -289,6 +290,7 @@ interface ArrangementContextValue {
+   resetMasterPeak: () => void;
+   setPxPerSecond: (value: number) => void;
+   setStatus: (message: string) => void;
++  setMetronomeBpm: (next: number | null) => void;
+   exportWav: () => Promise<void>;
+   resetExportState: () => void;
+ }
+@@ -502,6 +504,8 @@ export function ArrangementProvider({
+   const trackMeterStatesRef = useRef(new Map<string, MasterMeterState>());
+   const buffersRef = useRef(new Map<string, AudioBuffer>());
+   const handleRef = useRef<ScheduleHandle | null>(null);
++  const metronomeBpmRef = useRef<number | null>(null);
++  const metronomeBuffersRef = useRef<{ accent: AudioBuffer; beat: AudioBuffer } | null>(null);
+   const retiredRef = useRef<RetiredGraph[]>([]);
+   const anchorRef = useRef<PlaybackAnchor>(createPlaybackAnchor(0, 0));
+   const scrubbingRef = useRef(false);
+@@ -664,6 +668,14 @@ export function ArrangementProvider({
+           timing.from,
+           timing.startAt,
+         );
++        const metronomeBpm = metronomeBpmRef.current;
++        if (metronomeBpm !== null) {
++          handle.appendClicks(
++            planMetronomeClicks(metronomeBpm, timing.from, timing.until),
++            timing.from,
++            timing.startAt,
++          );
++        }
+       },
+     );
+     return result === 'late';
+@@ -707,6 +719,22 @@ export function ArrangementProvider({
+         ? planLoopIteration(arrangement, params, 0)
+         : planSchedule(arrangement, from);
+       const panOverride = panOverrideRef.current;
++      const metronomeBpm = metronomeBpmRef.current;
++      let clickBuffers = metronomeBuffersRef.current;
++      if (metronomeBpm !== null && !clickBuffers) {
++        const createClickBuffer = (accent: boolean): AudioBuffer => {
++          const samples = generateMetronomeClickSamples(ctx.sampleRate, accent);
++          const buffer = new AudioBuffer({
++            length: samples.length,
++            numberOfChannels: 1,
++            sampleRate: ctx.sampleRate,
++          });
++          buffer.copyToChannel(samples, 0);
++          return buffer;
++        };
++        clickBuffers = { accent: createClickBuffer(true), beat: createClickBuffer(false) };
++        metronomeBuffersRef.current = clickBuffers;
++      }
+       const handle = applySchedule(ctx, plan, {
+         buffers: buffersRef.current,
+         tracks: panOverride
+@@ -722,6 +750,17 @@ export function ArrangementProvider({
+         trackTaps: meterTapRef.current
+           ? ensureTrackMeterInputs(ctx, trackMeterTapsRef.current, arrangement.tracks)
+           : undefined,
++        metronome:
++          metronomeBpm !== null && clickBuffers
++            ? {
++                ...clickBuffers,
++                clicks: planMetronomeClicks(
++                  metronomeBpm,
++                  from,
++                  loop ? loop.end : projectEnd(arrangement),
++                ),
++              }
++            : undefined,
+       });
+       const previous = handleRef.current;
+       if (previous) {
+@@ -916,6 +955,20 @@ export function ArrangementProvider({
+ 
+   resyncLoopRef.current = () => syncPlayback(historyRef.current.present, undefined, true);
+ 
++  const setMetronomeBpm = useCallback(
++    (next: number | null) => {
++      const bpm = next !== null && Number.isFinite(next) && next > 0 ? next : null;
++      if (bpm === metronomeBpmRef.current) {
++        return;
++      }
++      metronomeBpmRef.current = bpm;
++      if (isPlayingRef.current) {
++        syncPlayback(historyRef.current.present, undefined, true);
++      }
++    },
++    [syncPlayback],
++  );
++
+   const flushPendingVolume = useCallback(() => {
+     const pending = volumeBeforeRef.current;
+     volumeBeforeRef.current = null;
+@@ -2563,6 +2616,7 @@ export function ArrangementProvider({
+       meterTapRef.current = null;
+       meterBlocksRef.current = [];
+       trackMeterTapsRef.current.clear();
++      metronomeBuffersRef.current = null;
+       if (ctx) {
+         void ctx.close();
+       }
+@@ -2676,6 +2730,7 @@ export function ArrangementProvider({
+       resetMasterPeak,
+       setPxPerSecond,
+       setStatus,
++      setMetronomeBpm,
+       exportWav,
+       resetExportState,
+     }),
+@@ -2764,6 +2819,7 @@ export function ArrangementProvider({
+       blurMasterGain,
+       resetMasterPeak,
+       setPxPerSecond,
++      setMetronomeBpm,
+       exportWav,
+       resetExportState,
+     ],
+diff --git a/app/lib/arrangement/graph.client.ts b/app/lib/arrangement/graph.client.ts
+index 1f8d625..2a47b61 100644
+--- a/app/lib/arrangement/graph.client.ts
++++ b/app/lib/arrangement/graph.client.ts
+@@ -1,6 +1,7 @@
+ import { encodeSfxWav } from '~/lib/sfx-edit';
+ import type { Arrangement, ArrangementTrack, ScheduledClip } from '~/types/arrangement';
+ import { isOverFullScale, MAX_24BIT_SAMPLE } from './meter';
++import type { MetronomeClick } from './metronome';
+ import { clipLinearGains, masterLinearGain, projectEnd } from './model';
+ import { isTrackAudible, planSchedule } from './schedule';
+ 
+@@ -50,10 +51,12 @@ export interface ApplyScheduleOptions<TBuffer> {
+   tap?: ScheduleAudioNode;
+   trackTaps?: ReadonlyMap<string, ScheduleAudioNode>;
+   clipGains?: ReadonlyMap<string, number>;
++  metronome?: { accent: TBuffer; beat: TBuffer; clicks: readonly MetronomeClick[] };
+ }
+ 
+ export interface ScheduleHandle {
+   appendPlan(plan: readonly ScheduledClip[], from: number, startAt: number): void;
++  appendClicks(clicks: readonly MetronomeClick[], from: number, startAt: number): void;
+   stop(when?: number): void;
+   disconnect(): void;
+   setTrackGain(trackId: string, value: number): void;
+@@ -84,6 +87,12 @@ interface ScheduledSourceState<TBuffer> {
+   stopAt: number | null;
+ }
+ 
++interface ScheduledClickState<TBuffer> {
++  source: ScheduleSourceNode<TBuffer>;
++  ended: boolean;
++  stopAt: number | null;
++}
++
+ export function applySchedule<TBuffer>(
+   ctx: ScheduleAudioContext<TBuffer>,
+   plan: readonly ScheduledClip[],
+@@ -149,7 +158,44 @@ export function applySchedule<TBuffer>(
+     }
+   };
+   startPlan(plan, options.from, options.startAt);
++  const metronome = options.metronome;
++  const metronomeGain = metronome ? ctx.createGain() : null;
++  if (metronomeGain) {
++    metronomeGain.gain.value = 1;
++    metronomeGain.connect(master);
++  }
++  let clickSources: ScheduledClickState<TBuffer>[] = [];
++  const startClicks = (clicks: readonly MetronomeClick[], from: number, startAt: number) => {
++    if (!metronome || !metronomeGain) {
++      return;
++    }
++    for (const click of clicks) {
++      const source = ctx.createBufferSource();
++      source.buffer = click.accent ? metronome.accent : metronome.beat;
++      source.connect(metronomeGain);
++      const state: ScheduledClickState<TBuffer> = { source, ended: false, stopAt: null };
++      source.onended = () => {
++        state.ended = true;
++      };
++      source.start(startAt + (click.when - from), click.offset, click.duration);
++      clickSources.push(state);
++    }
++  };
++  startClicks(metronome?.clicks ?? [], options.from, options.startAt);
+   return {
++    appendClicks(clicks, from, startAt) {
++      if (disconnected || !metronome) {
++        return;
++      }
++      clickSources = clickSources.filter((state) => {
++        if (state.ended) {
++          state.source.disconnect();
++          return false;
++        }
++        return true;
++      });
++      startClicks(clicks, from, startAt);
++    },
+     appendPlan(items, from, startAt) {
+       if (disconnected) {
+         return;
+@@ -179,6 +225,20 @@ export function applySchedule<TBuffer>(
+           state.ended = true;
+         }
+       }
++      for (const state of clickSources) {
++        if (state.ended || (state.stopAt !== null && state.stopAt <= ctx.currentTime)) {
++          continue;
++        }
++        state.stopAt = when ?? ctx.currentTime;
++        try {
++          state.source.stop(when);
++        } catch {
++          state.ended = true;
++        }
++        if (when === undefined) {
++          state.ended = true;
++        }
++      }
+     },
+     disconnect() {
+       if (disconnected) {
+@@ -195,6 +255,10 @@ export function applySchedule<TBuffer>(
+       for (const panner of panners.values()) {
+         panner.disconnect();
+       }
++      for (const state of clickSources) {
++        state.source.disconnect();
++      }
++      metronomeGain?.disconnect();
+       master.disconnect();
+     },
+     setTrackGain(trackId, value) {

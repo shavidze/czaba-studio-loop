@@ -1,0 +1,6 @@
+# B round 61 checkpoint (resume aid)
+
+- 2026-10-19 ~11:20 +04. C round 61 = PASS (no bugs). Closes C-R60-01, C-R60-02, ROOT-R50-58-L1, A-R60-REVIEW-BLUR-CAPTURE-TEST.
+- Done: `tasks/round-61.md` (cmp same), `b-round-61-pre-*` (current-task, backlog, feature-status, b-next), `plan.before-b-round-61-r62.md`, `b-round-61/gates.txt` (HEAD 038ed5a, 30 lines, 5173 200, **5199 000**, protected 4/4, r61 frozen 0 non-OK), `b-round-61-r62-tree-sha256.txt` (418), `b-round-61-r62-snapshots/` (grid.ts 46c9b656 LF 184; ArrangementClip 0e711fae LF 694; grid-snap-clip-edges 9e26f133 LF 738, 31 it; grid-edges 61d8615f LF 81, 6 it).
+- Decision D-29z27: round 62 = 4c-1 group-move edge snap (anchor-only, all group ids excluded, lane rule = hoverTrackId, edge delta µs-exact, grid path unchanged, out-of-bounds edge -> today's snapGroupDelta fallback) + C-R52-T1 (CM10 revised + CG1-CG6) + INFO-R55 (CM17 at 30 px/s) + SHIFT-MIDDRAG (CM9f-h) + CE7-CE9 -> 89 / 1569. Round 63 = 4c-2 library-drop edges. C-R51-01 closed by design (2.srt 05:16-07:53 has no post-release status request).
+- COMPLETE (2026-10-19): current-task.md (round 62), b-round-61.md (+§8.1), backlog v64, feature-status, plan D-29z27, b-next.json CONTINUE written; post-advisor fixes applied (b-round-61/fix_final.js).

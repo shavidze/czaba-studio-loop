@@ -1,0 +1,681 @@
+diff --git a/app/components/arrangement/ArrangementDetailPanel.tsx b/app/components/arrangement/ArrangementDetailPanel.tsx
+index c9b66fd..389c6e5 100644
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+@@ -332,7 +332,9 @@ function ArrangementDetailContentInner({
+     }
+     if (isPointerGestureActive()) {
+       setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
+-      setClipGainText(currentText);
++      if (trigger === 'enter') {
++        setClipGainText(currentText);
++      }
+       return;
+     }
+     const value = parseSecondsInput(clipGainText);
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index dcd5f35..a2b8786 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -10,6 +10,7 @@ import {
+ } from 'react';
+ import { formatArrangementTime, useArrangement } from '~/contexts/ArrangementContext';
+ import { canPlaceLibraryClip, LIBRARY_DRAG_MIME, libraryDropTime } from '~/lib/arrangement/library';
++import { formatTrackPan, TRACK_PAN_STEPS, trackPanValue } from '~/lib/arrangement/model';
+ import {
+   stepTrackHeight,
+   TRACK_DEFAULT_HEIGHT_PX,
+@@ -109,6 +110,11 @@ export function ArrangementLane({
+     commitTrackVolume,
+     beginTrackVolumeGesture,
+     blurTrackVolume,
++    setTrackPan,
++    beginTrackPanGesture,
++    previewTrackPan,
++    commitTrackPan,
++    cancelTrackPan,
+     isPointerGestureActive,
+     videoSources,
+     importVideoFiles,
+@@ -121,8 +127,13 @@ export function ArrangementLane({
+   const [isFileDragOver, setIsFileDragOver] = useState(false);
+   const [libraryGhost, setLibraryGhost] = useState<LibraryDropGhost | null>(null);
+   const [isHeightDragging, setIsHeightDragging] = useState(false);
++  const [panDraft, setPanDraft] = useState<number | null>(null);
+   const fileInputRef = useRef<HTMLInputElement>(null);
+   const heightDragCleanupRef = useRef<(() => void) | null>(null);
++  const panDragCleanupRef = useRef<(() => void) | null>(null);
++  const panDragPointerRef = useRef<number | null>(null);
++  const panBlurSuppressionCleanupRef = useRef<(() => void) | null>(null);
++  const panSliderRef = useRef<HTMLInputElement>(null);
+   const laneBodyRef = useRef<HTMLDivElement>(null);
+   const laneBodyId = useId();
+   const trackHeaderRef = useRef<HTMLDivElement>(null);
+@@ -133,6 +144,9 @@ export function ArrangementLane({
+   const isActive = activeTrackId === track.id;
+   const isVideo = track.kind === 'video';
+   const mixLabel = isVideo ? VIDEO_MIX_LABEL : track.name;
++  const storedPan = trackPanValue(track);
++  const displayPan = panDraft ?? storedPan;
++  const panText = formatTrackPan(displayPan);
+   const laneGhosts = clipLaneDrag?.ghosts.filter((ghost) => ghost.trackId === track.id) ?? [];
+   const sourceTitle = (sourceId: string) =>
+     videoSources.get(sourceId)?.name ??
+@@ -234,6 +248,93 @@ export function ArrangementLane({
+ 
+   useEffect(() => () => heightDragCleanupRef.current?.(), []);
+ 
++  useEffect(() => () => panDragCleanupRef.current?.(), []);
++
++  useEffect(() => () => panBlurSuppressionCleanupRef.current?.(), []);
++
++  const suppressPanPointerAfterBlur = (pointerId: number) => {
++    panBlurSuppressionCleanupRef.current?.();
++    const release = (end: globalThis.PointerEvent) => {
++      if (end.pointerId === pointerId) {
++        clear();
++      }
++    };
++    function clear() {
++      window.removeEventListener('pointerup', release);
++      window.removeEventListener('pointercancel', release);
++      if (panBlurSuppressionCleanupRef.current === clear) {
++        panBlurSuppressionCleanupRef.current = null;
++      }
++    }
++    window.addEventListener('pointerup', release);
++    window.addEventListener('pointercancel', release);
++    panBlurSuppressionCleanupRef.current = clear;
++  };
++
++  const handlePanPointerDown = (event: PointerEvent<HTMLInputElement>) => {
++    if (event.button !== 0 || event.buttons === 0) {
++      return;
++    }
++    if (!beginTrackPanGesture(track.id, event.pointerId)) {
++      return;
++    }
++    panDragCleanupRef.current?.();
++    panBlurSuppressionCleanupRef.current?.();
++    const pointerId = event.pointerId;
++    const finish = (end: globalThis.PointerEvent) => {
++      if (end.pointerId === pointerId) {
++        cleanup();
++      }
++    };
++    function cleanup() {
++      window.removeEventListener('pointerup', finish);
++      window.removeEventListener('pointercancel', finish);
++      if (panDragCleanupRef.current === cleanup) {
++        panDragCleanupRef.current = null;
++        panDragPointerRef.current = null;
++      }
++      setPanDraft(null);
++    }
++    window.addEventListener('pointerup', finish);
++    window.addEventListener('pointercancel', finish);
++    panDragCleanupRef.current = cleanup;
++    panDragPointerRef.current = pointerId;
++  };
++
++  const handlePanChange = (event: ChangeEvent<HTMLInputElement>) => {
++    if (panBlurSuppressionCleanupRef.current) {
++      return;
++    }
++    const pan = Number(event.target.value) / TRACK_PAN_STEPS;
++    if (panDragCleanupRef.current && isPointerGestureActive()) {
++      setPanDraft(pan);
++      previewTrackPan(track.id, pan);
++      return;
++    }
++    panDragCleanupRef.current?.();
++    setTrackPan(track.id, pan);
++  };
++
++  const handlePanPointerEnd = (event: PointerEvent<HTMLInputElement>) => {
++    const dragPointer = panDragPointerRef.current;
++    if (dragPointer !== null && event.pointerId !== dragPointer) {
++      return;
++    }
++    commitTrackPan(track.id);
++    panDragCleanupRef.current?.();
++  };
++
++  const handlePanBlur = () => {
++    if (panDragCleanupRef.current) {
++      const cancelledPointer = panDragPointerRef.current;
++      if (cancelledPointer !== null) {
++        suppressPanPointerAfterBlur(cancelledPointer);
++      }
++      cancelTrackPan(track.id);
++      panDragCleanupRef.current();
++    }
++  };
++
+   const isOverLaneBody = (event: DragEvent<HTMLDivElement>) => {
+     const body = laneBodyRef.current;
+     const header = trackHeaderRef.current;
+@@ -474,6 +575,42 @@ export function ArrangementLane({
+               />
+             </>
+           ) : null}
++          {!isVideo && !folded ? (
++            <>
++              <input
++                ref={panSliderRef}
++                type="range"
++                min={-TRACK_PAN_STEPS}
++                max={TRACK_PAN_STEPS}
++                step={1}
++                value={Math.round(displayPan * TRACK_PAN_STEPS)}
++                aria-label={`Pan — ${track.name}`}
++                aria-valuetext={panText}
++                onPointerDown={handlePanPointerDown}
++                onChange={handlePanChange}
++                onPointerUp={handlePanPointerEnd}
++                onLostPointerCapture={handlePanPointerEnd}
++                onBlur={handlePanBlur}
++                className="h-1 w-12 shrink-0 accent-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
++                data-testid="arrangement-track-pan"
++              />
++              <button
++                type="button"
++                onClick={() => {
++                  if (setTrackPan(track.id, 0)) {
++                    panSliderRef.current?.focus();
++                  }
++                }}
++                disabled={storedPan === 0}
++                aria-label={`Pan-ის ცენტრში დაბრუნება — ${track.name}`}
++                title="Pan → C"
++                className="w-7 shrink-0 rounded-sm text-right text-xs tabular-nums text-muted enabled:hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
++                data-testid="arrangement-track-pan-reset"
++              >
++                {panText}
++              </button>
++            </>
++          ) : null}
+           {folded ? (
+             <>
+               {muteButton}
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index e63da7b..e21602e 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -229,6 +229,21 @@ function isSliderTarget(target: EventTarget | null): boolean {
+   );
+ }
+ 
++function isRangeInputTarget(target: EventTarget | null): boolean {
++  return target instanceof HTMLInputElement && target.type === 'range';
++}
++
++function isScrollerGutterPointer(event: ReactPointerEvent<HTMLDivElement>): boolean {
++  const scroller = event.currentTarget;
++  if (event.target !== scroller) {
++    return false;
++  }
++  const rect = scroller.getBoundingClientRect();
++  const x = event.clientX - rect.left - scroller.clientLeft;
++  const y = event.clientY - rect.top - scroller.clientTop;
++  return x >= scroller.clientWidth || y >= scroller.clientHeight;
++}
++
+ function isOverviewTarget(target: EventTarget | null): boolean {
+   return target instanceof HTMLElement && target.dataset.timelineOverview !== undefined;
+ }
+@@ -877,6 +892,37 @@ export function StudioWorkspace() {
+ 
+   useEffect(() => () => marqueeCleanupRef.current?.(), []);
+ 
++  const releaseEditFocusOnTimelinePointerDown = useCallback(
++    (event: ReactPointerEvent<HTMLDivElement>) => {
++      const focused = event.currentTarget.ownerDocument.activeElement;
++      if (
++        focused instanceof HTMLElement &&
++        (isRangeInputTarget(focused) || isTypingTarget(focused)) &&
++        !isRangeInputTarget(event.target) &&
++        !isScrollerGutterPointer(event) &&
++        !workspaceRef.current.isPointerGestureActive()
++      ) {
++        focused.blur();
++      }
++    },
++    [],
++  );
++
++  const releaseTypingFocusBeforeRangePointerDown = useCallback(
++    (event: ReactPointerEvent<HTMLDivElement>) => {
++      const focused = event.currentTarget.ownerDocument.activeElement;
++      if (
++        focused instanceof HTMLElement &&
++        isTypingTarget(focused) &&
++        isRangeInputTarget(event.target) &&
++        !workspaceRef.current.isPointerGestureActive()
++      ) {
++        focused.blur();
++      }
++    },
++    [],
++  );
++
+   const handleLaneBackgroundPointerDown = useCallback(
+     (event: ReactPointerEvent<HTMLDivElement>, trackId: string) => {
+       if (event.button !== 0 || event.target !== event.currentTarget) {
+@@ -1133,6 +1179,9 @@ export function StudioWorkspace() {
+         return;
+       }
+       if (event.key === 'Delete' || event.key === 'Backspace') {
++        if (isRangeInputTarget(event.target)) {
++          return;
++        }
+         event.preventDefault();
+         if (!event.repeat) {
+           current.deleteSelection();
+@@ -1282,6 +1331,7 @@ export function StudioWorkspace() {
+     <div
+       className="studio-container flex h-screen flex-col overflow-hidden bg-background text-foreground"
+       data-lenis-prevent
++      onPointerDownCapture={releaseTypingFocusBeforeRangePointerDown}
+     >
+       <header className="flex items-center justify-between border-b border-outline bg-surface px-3 py-1.5">
+         <div className="flex items-center gap-3">
+@@ -1342,6 +1392,7 @@ export function StudioWorkspace() {
+           <div
+             ref={scrollerRef}
+             onScroll={handleTimelineScroll}
++            onPointerDownCapture={releaseEditFocusOnTimelinePointerDown}
+             className={cn('relative min-h-0 min-w-0 flex-1 overflow-auto', STUDIO_SCROLLBAR_CLASS)}
+             data-testid="arrangement-timeline-scroller"
+           >
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 498b99e..6972f54 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -69,9 +69,11 @@ import {
+   duplicateClips,
+   masterLinearGain,
+   moveClip,
++  normalizeTrackPan,
+   projectEnd,
+   redoHistory,
+   remapTime,
++  setArrangementTrackPan,
+   setClipGainDb,
+   setMasterMix,
+   setTrackMix,
+@@ -79,6 +81,7 @@ import {
+   splitClipsAtTime,
+   splitClipsByRange,
+   toggleSolo,
++  trackPanValue,
+   undoHistory,
+ } from '~/lib/arrangement/model';
+ import { computePeaks, PEAK_BUCKETS_PER_SECOND } from '~/lib/arrangement/peaks';
+@@ -270,6 +273,11 @@ interface ArrangementContextValue {
+   commitTrackVolume: (trackId?: string) => void;
+   beginTrackVolumeGesture: (trackId: string, pointerId: number) => boolean;
+   blurTrackVolume: (trackId: string) => void;
++  setTrackPan: (trackId: string, pan: number) => boolean;
++  beginTrackPanGesture: (trackId: string, pointerId: number) => boolean;
++  previewTrackPan: (trackId: string, pan: number) => void;
++  commitTrackPan: (trackId: string) => void;
++  cancelTrackPan: (trackId: string) => void;
+   master: ArrangementMaster;
+   toggleMasterMute: () => void;
+   setClipGain: (clipId: string, gainDb: number) => boolean;
+@@ -305,6 +313,16 @@ interface MasterGainGesture {
+   release: () => void;
+ }
+ 
++interface TrackPanGesture {
++  trackId: string;
++  release: () => void;
++}
++
++interface TrackPanOverride {
++  trackId: string;
++  value: number;
++}
++
+ interface RetiredGraph {
+   handle: ScheduleHandle;
+   stopAt: number;
+@@ -494,6 +512,8 @@ export function ArrangementProvider({
+   const volumeGestureRef = useRef<TrackVolumeGesture | null>(null);
+   const masterBeforeRef = useRef<Arrangement | null>(null);
+   const masterGestureRef = useRef<MasterGainGesture | null>(null);
++  const panGestureRef = useRef<TrackPanGesture | null>(null);
++  const panOverrideRef = useRef<TrackPanOverride | null>(null);
+   const latestRef = useRef({
+     selectedClipIds,
+     selectedSourceId,
+@@ -684,9 +704,14 @@ export function ArrangementProvider({
+       const plan = params
+         ? planLoopIteration(arrangement, params, 0)
+         : planSchedule(arrangement, from);
++      const panOverride = panOverrideRef.current;
+       const handle = applySchedule(ctx, plan, {
+         buffers: buffersRef.current,
+-        tracks: arrangement.tracks,
++        tracks: panOverride
++          ? arrangement.tracks.map((track) =>
++              track.id === panOverride.trackId ? { ...track, pan: panOverride.value } : track,
++            )
++          : arrangement.tracks,
+         from,
+         startAt,
+         masterGain: masterLinearGain(arrangement.master),
+@@ -877,6 +902,13 @@ export function ArrangementProvider({
+       for (const track of arrangement.tracks) {
+         handle.setTrackGain(track.id, isTrackAudible(track, arrangement.tracks) ? track.volume : 0);
+       }
++      const panOverride = panOverrideRef.current;
++      for (const track of arrangement.tracks) {
++        handle.setTrackPan(
++          track.id,
++          panOverride?.trackId === track.id ? panOverride.value : trackPanValue(track),
++        );
++      }
+       handle.setMasterGain(masterLinearGain(arrangement.master));
+       for (const clip of arrangement.clips) {
+         handle.setClipGain(clip.id, clipLinearGain(clip));
+@@ -2136,6 +2168,119 @@ export function ArrangementProvider({
+     [cancelTrackVolumeGesture, commitTrackVolume],
+   );
+ 
++  const setTrackPan = useCallback(
++    (trackId: string, pan: number): boolean => {
++      if (refuseEditDuringGesture()) {
++        return false;
++      }
++      const arrangement = historyRef.current.present;
++      const track = arrangement.tracks.find((entry) => entry.id === trackId);
++      if (!track) {
++        return false;
++      }
++      return applyEdit(setArrangementTrackPan(arrangement, trackId, pan), `Pan — ${track.name}`);
++    },
++    [applyEdit, refuseEditDuringGesture],
++  );
++
++  const restoreStoredTrackPan = useCallback((trackId: string) => {
++    const track = historyRef.current.present.tracks.find((entry) => entry.id === trackId);
++    if (track) {
++      handleRef.current?.setTrackPan(trackId, trackPanValue(track));
++    }
++  }, []);
++
++  const finishTrackPanGesture = useCallback(
++    (trackId: string): { override: TrackPanOverride | null } | null => {
++      const gesture = panGestureRef.current;
++      if (!gesture || gesture.trackId !== trackId) {
++        return null;
++      }
++      panGestureRef.current = null;
++      const override = panOverrideRef.current;
++      panOverrideRef.current = null;
++      gesture.release();
++      return { override };
++    },
++    [],
++  );
++
++  const commitTrackPan = useCallback(
++    (trackId: string) => {
++      const finished = finishTrackPanGesture(trackId);
++      if (finished?.override) {
++        setTrackPan(trackId, finished.override.value);
++      }
++    },
++    [finishTrackPanGesture, setTrackPan],
++  );
++
++  const cancelTrackPan = useCallback(
++    (trackId: string) => {
++      if (finishTrackPanGesture(trackId)) {
++        restoreStoredTrackPan(trackId);
++      }
++    },
++    [finishTrackPanGesture, restoreStoredTrackPan],
++  );
++
++  const beginTrackPanGesture = useCallback(
++    (trackId: string, pointerId: number): boolean => {
++      const finishOnPointerUp = (event: globalThis.PointerEvent) => {
++        if (event.pointerId === pointerId) {
++          commitTrackPan(trackId);
++        }
++      };
++      const abortOnPointerCancel = (event: globalThis.PointerEvent) => {
++        if (event.pointerId === pointerId) {
++          cancelTrackPan(trackId);
++        }
++      };
++      const detach = () => {
++        window.removeEventListener('pointerup', finishOnPointerUp, true);
++        window.removeEventListener('pointercancel', abortOnPointerCancel, true);
++      };
++      const releaseClaim = claimPointerGesture(pointerId, () => {
++        detach();
++        panGestureRef.current = null;
++        panOverrideRef.current = null;
++        restoreStoredTrackPan(trackId);
++      });
++      if (!releaseClaim) {
++        return false;
++      }
++      flushPendingVolume();
++      flushPendingMaster();
++      panGestureRef.current = {
++        trackId,
++        release: () => {
++          detach();
++          releaseClaim();
++        },
++      };
++      window.addEventListener('pointerup', finishOnPointerUp, true);
++      window.addEventListener('pointercancel', abortOnPointerCancel, true);
++      return true;
++    },
++    [
++      cancelTrackPan,
++      claimPointerGesture,
++      commitTrackPan,
++      flushPendingMaster,
++      flushPendingVolume,
++      restoreStoredTrackPan,
++    ],
++  );
++
++  const previewTrackPan = useCallback((trackId: string, pan: number) => {
++    if (panGestureRef.current?.trackId !== trackId || !Number.isFinite(pan)) {
++      return;
++    }
++    const value = normalizeTrackPan(pan);
++    panOverrideRef.current = { trackId, value };
++    handleRef.current?.setTrackPan(trackId, value);
++  }, []);
++
+   const toggleMasterMute = useCallback(() => {
+     if (refuseEditDuringGesture()) {
+       return;
+@@ -2387,6 +2532,9 @@ export function ArrangementProvider({
+       volumeGestureRef.current = null;
+       masterGestureRef.current?.release();
+       masterGestureRef.current = null;
++      panGestureRef.current?.release();
++      panGestureRef.current = null;
++      panOverrideRef.current = null;
+       activeGestureRef.current?.release();
+       isPlayingRef.current = false;
+       if (frameRef.current !== null) {
+@@ -2503,6 +2651,11 @@ export function ArrangementProvider({
+       commitTrackVolume,
+       beginTrackVolumeGesture,
+       blurTrackVolume,
++      setTrackPan,
++      beginTrackPanGesture,
++      previewTrackPan,
++      commitTrackPan,
++      cancelTrackPan,
+       master: arrangement.master,
+       toggleMasterMute,
+       setClipGain,
+@@ -2588,6 +2741,11 @@ export function ArrangementProvider({
+       commitTrackVolume,
+       beginTrackVolumeGesture,
+       blurTrackVolume,
++      setTrackPan,
++      beginTrackPanGesture,
++      previewTrackPan,
++      commitTrackPan,
++      cancelTrackPan,
+       toggleMasterMute,
+       setClipGain,
+       previewMasterGain,
+diff --git a/app/lib/arrangement/graph.client.ts b/app/lib/arrangement/graph.client.ts
+index 2411613..1f8d625 100644
+--- a/app/lib/arrangement/graph.client.ts
++++ b/app/lib/arrangement/graph.client.ts
+@@ -59,6 +59,7 @@ export interface ScheduleHandle {
+   setTrackGain(trackId: string, value: number): void;
+   setMasterGain(value: number): void;
+   setClipGain(clipId: string, value: number): void;
++  setTrackPan(trackId: string, value: number): void;
+   activeSourceCount(): number;
+ }
+ 
+@@ -71,6 +72,10 @@ export interface ArrangementWavResult extends ExportOverloadReport {
+   blob: Blob;
+ }
+ 
++function clampPan(value: number): number {
++  return Number.isFinite(value) ? Math.min(1, Math.max(-1, value)) : 0;
++}
++
+ interface ScheduledSourceState<TBuffer> {
+   clipId: string;
+   source: ScheduleSourceNode<TBuffer>;
+@@ -93,14 +98,17 @@ export function applySchedule<TBuffer>(
+   }
+   const trackGains = new Map<string, ScheduleGainNode>();
+   const lastGainTargets = new Map<string, number>();
+-  const panners: SchedulePannerNode[] = [];
++  const panners = new Map<string, SchedulePannerNode>();
++  const lastPanTargets = new Map<string, number>();
+   for (const track of options.tracks) {
+     const trackGain = ctx.createGain();
+     const initialGain = isTrackAudible(track, options.tracks) ? track.volume : 0;
+     trackGain.gain.value = initialGain;
+     lastGainTargets.set(track.id, initialGain);
+     const panner = ctx.createStereoPanner();
+-    panner.pan.value = 0;
++    const initialPan = clampPan(track.pan ?? 0);
++    panner.pan.value = initialPan;
++    lastPanTargets.set(track.id, initialPan);
+     trackGain.connect(panner);
+     panner.connect(master);
+     const trackTap = options.trackTaps?.get(track.id);
+@@ -108,7 +116,7 @@ export function applySchedule<TBuffer>(
+       panner.connect(trackTap);
+     }
+     trackGains.set(track.id, trackGain);
+-    panners.push(panner);
++    panners.set(track.id, panner);
+   }
+   const clipGainTargets = new Map<string, number>(options.clipGains ?? []);
+   let sources: ScheduledSourceState<TBuffer>[] = [];
+@@ -184,7 +192,7 @@ export function applySchedule<TBuffer>(
+       for (const trackGain of trackGains.values()) {
+         trackGain.disconnect();
+       }
+-      for (const panner of panners) {
++      for (const panner of panners.values()) {
+         panner.disconnect();
+       }
+       master.disconnect();
+@@ -219,6 +227,14 @@ export function applySchedule<TBuffer>(
+         }
+       }
+     },
++    setTrackPan(trackId, value) {
++      const panner = panners.get(trackId);
++      if (disconnected || !panner || value === lastPanTargets.get(trackId)) {
++        return;
++      }
++      lastPanTargets.set(trackId, value);
++      panner.pan.setTargetAtTime(value, ctx.currentTime, GAIN_TIME_CONSTANT);
++    },
+     activeSourceCount() {
+       return sources.filter(
+         (state) => !state.ended && (state.stopAt === null || state.stopAt > ctx.currentTime),
+diff --git a/app/lib/arrangement/model.ts b/app/lib/arrangement/model.ts
+index b1b0104..cca89b6 100644
+--- a/app/lib/arrangement/model.ts
++++ b/app/lib/arrangement/model.ts
+@@ -18,6 +18,7 @@ export const MASTER_GAIN_MIN_DB = -60;
+ export const MASTER_GAIN_MAX_DB = 6;
+ export const CLIP_GAIN_MIN_DB = -60;
+ export const CLIP_GAIN_MAX_DB = 24;
++export const TRACK_PAN_STEPS = 50;
+ 
+ export type SourceDurations = ReadonlyMap<string, number>;
+ 
+@@ -511,6 +512,44 @@ export function clipLinearGains(arrangement: Arrangement): Map<string, number> {
+   return gains;
+ }
+ 
++export function normalizeTrackPan(pan: number): number {
++  const rounded = Math.round(clamp(pan, -1, 1) * TRACK_PAN_STEPS) / TRACK_PAN_STEPS;
++  return rounded === 0 ? 0 : rounded;
++}
++
++export function trackPanValue(track: ArrangementTrack): number {
++  return track.pan ?? 0;
++}
++
++export function setArrangementTrackPan(
++  arrangement: Arrangement,
++  trackId: string,
++  pan: number,
++): Arrangement {
++  const track = arrangement.tracks.find((entry) => entry.id === trackId);
++  if (!track || track.kind !== 'audio' || !Number.isFinite(pan)) {
++    return arrangement;
++  }
++  const next = normalizeTrackPan(pan);
++  if (next === trackPanValue(track)) {
++    return arrangement;
++  }
++  const { pan: _previousPan, ...rest } = track;
++  const updated: ArrangementTrack = next === 0 ? rest : { ...rest, pan: next };
++  return {
++    ...arrangement,
++    tracks: arrangement.tracks.map((entry) => (entry.id === trackId ? updated : entry)),
++  };
++}
++
++export function formatTrackPan(pan: number): string {
++  const units = Math.round(pan * TRACK_PAN_STEPS);
++  if (units === 0) {
++    return 'C';
++  }
++  return units < 0 ? `${Math.abs(units)}L` : `${units}R`;
++}
++
+ export function formatMasterGainDb(gainDb: number): string {
+   const magnitude = Math.abs(gainDb).toFixed(1);
+   if (magnitude === '0.0') {
+diff --git a/app/types/arrangement.ts b/app/types/arrangement.ts
+index 5ea5e79..5b50ff7 100644
+--- a/app/types/arrangement.ts
++++ b/app/types/arrangement.ts
+@@ -7,6 +7,7 @@ export interface ArrangementTrack {
+   volume: number;
+   mute: boolean;
+   solo: boolean;
++  pan?: number;
+ }
+ 
+ export interface ArrangementClip {

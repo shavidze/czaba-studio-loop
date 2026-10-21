@@ -1,0 +1,38 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R12-01",
+      "severity": "low",
+      "steps": [
+        "cd C:/Apps/czaba-project/tmp/studio-real-loop",
+        "bash c-round-12/batch12.sh W_x (1440x900, fresh setup, r3v1lay, looplay 2-4, drift12 {vclips R3-V1, durMs 8500, from 1, loop 2-4})",
+        "node c-round-12/settlecheck.cjs W_x; node c-round-12/startupsplit.cjs W_x; node c-round-12/neighbor.cjs W_x"
+      ],
+      "expected": "R12-S: outside settle windows (swap -> +1.0 s) a rate != 1 is only written when |d| > 0.02 at that row (steady D-19 rule)",
+      "actual": "5 rate writes of 1.1 at 0.19-0.33 s after Play (before the first swap, settle unarmed, videoSettles 0, byte-unchanged steady path) have same-frame harness |d| 0.0192-0.0196 (W_1 0.190/0.262/0.331, W_2 0.190, W_3 0.302). After the first swap: 0 rate != 1 writes outside settle windows (rows 0/147, 0/147, 0/145; V3_1 0/237), so settle does not leak. Margin <= 0.8 ms, plausibly harness ctx-based reference vs dock live-position reference, but the dock's internal drift > 0.02 is not verified with C's instrument. R12-S therefore fails literally; B to rescope (startup exclusion / reference precision) or add a live-position instrument run.",
+      "evidence": "c-round-12/runs/r12s-neighbor.txt, r12s-split.txt, settlecheck-W.json; c-round-12.md §2.2, §7"
+    }
+  ],
+  "passed": [
+    "R12-W1",
+    "R12-U",
+    "R12-Doc",
+    "R2-V3",
+    "RF5-3-H2",
+    "R5-L3",
+    "R5-E1",
+    "RF7-P2",
+    "dock-quick-check-1440x900-1280x720",
+    "G12-1",
+    "G12-2",
+    "G12-3"
+  ],
+  "blocked": [
+    "R12-S not passed: literal failure on 5 pre-first-swap startup writes; dock internal drift not observable without source instrumentation and the 3-run budget for L6 is used (C-R12-01)",
+    "R3-V1 mode N x1 is information only (.0109/.0196, cover 0, app LoAF 0; no worse than round 10), not a C-R6-02 verdict",
+    "RF7-3 quiet-Chrome (VP9 + H.264) remains required Tech Lead evidence for SRW-03; not verifiable in headless",
+    "fake-Bearer studio-token check partial: backend 5199 down (000), returns 500 without token",
+    "C-R6-02 / C-R8-01 remain open for Tech Lead quiet Chrome"
+  ]
+}

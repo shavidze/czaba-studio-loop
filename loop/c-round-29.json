@@ -1,0 +1,51 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [],
+  "passed": [
+    "G29-1",
+    "G29-2",
+    "G29-3",
+    "R29-PA",
+    "R29-PB",
+    "R29-PC",
+    "R29-PD",
+    "R29-NO-zero-width-stopped",
+    "R29-NO-zero-width-playing",
+    "R29-FT",
+    "R29-UR-PA",
+    "R29-UR-PC",
+    "R29-K",
+    "R29-R",
+    "R29-S",
+    "R29-U",
+    "R29-Doc",
+    "C-R27-02"
+  ],
+  "blocked": [
+    "R29-NE not run in browser: a silent window (no clip inside) cannot be created through the real UI - detail panel rejects ranges outside a clip, the clip range gesture clamps to the clip, and Undo/move/Delete clear the range (runs/ne-try.txt, ne-range-beyond.txt, no-4041*.txt, no-4042-try3.txt). Covered only by provider tests. Info for B, not a bug.",
+    "R29-NO 40-41 (non-zero no-op) sub-case not run in browser for the same reason; covered by provider test and killed mutation (d).",
+    "R29-UR for NE not run (NE unreachable).",
+    "C-R27-01 not re-measured by design (D-29t row 3, Tech Lead quiet Chrome); remains open and does not drive this round's status.",
+    "C-R23-01 information record only: 2 NUL at 28013/28014, unchanged from round 28 (Tech Lead).",
+    "Environment: dev server was down (000) at C start 16:51; root restored it 17:08; all browser items ran after that."
+  ],
+  "notes": {
+    "infoForB": [
+      "Non-zero Cut Time no-op and 'silent window with later clips' are unreachable code paths from the UI; doc 034 describes them without saying so.",
+      "A review finding 1 (pending fader preview makes undoLabel show the fader entry after a no-op Cut Time) not browser-verified; pre-existing.",
+      "Deviation: first mutation attempt invalid (no node_modules); npx fetched vitest@5.0.4 into the npm cache; store untouched."
+    ],
+    "ableton": {
+      "allLanePasteOriginalLanes": "CZABA PASS / Ableton unconfirmed (source does not state plain Paste target track)",
+      "pasteAfterCutTime": "CZABA PASS / conscious difference (Live has Paste Time Ctrl+Shift+V; not requested)",
+      "cutTimeNoOp": "CZABA PASS (zero-width) / unconfirmed (not described)",
+      "ctrlShiftL": "CZABA PASS / conscious difference (Live: Select Material in Loop / Select Loop Brace Contents, §42.8/§42.16)",
+      "ctrlShiftDelete": "CZABA PASS (no-op) / conscious difference (Live Delete Time §42.16)"
+    },
+    "passedQualifiers": {
+      "R29-NO": "only the UI-reachable zero-width cases passed; the 40-41 sub-case was not run (see blocked)",
+      "R29-UR": "PA and PC only; NE not run",
+      "C-R27-02": "closed by B rule: 3/3 green at node.exe 10 (<30)"
+    }
+  }
+}

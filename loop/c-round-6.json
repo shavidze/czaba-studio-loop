@@ -1,0 +1,63 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R6-02",
+      "severity": "medium",
+      "steps": [
+        "Fresh /studio-lab, R3-V1 layout (c-round-6/scripts/r3v1lay.js: video 0-6.008 and 8-12.008, offset 0)",
+        "Run c-round-6/drift.sh with c-round-5/scripts/rf5.js light harness, 13 s play; 10 same-load + 5 reload runs",
+        "Analyse with rf5an.js under D-24 rules (stall-excluded verdict; app-attributed LoAF >= 10 ms counts against app)"
+      ],
+      "expected": "RF6-2 (= RF5-1 regression): every valid run median |d| <= 0.05 s and max |d| <= 0.1 s on the stall-excluded series; round 5 had 15/15 valid R3-V1 PASS with 0 app-attributed LoAFs",
+      "actual": "30 R3-V1 runs: 22 PASS, 6 FAIL (L_7 ex max 0.178, L_8 0.1025, Lr_2 0.1154, Lr_3 0.1135, Lr_5 0.1003, Lr2_2 0.206), 2 INVALID. 8 runs show app-attributed LoAFs (ArrangementContext rAF 16-33 ms, VideoDock step 22 ms, React performWorkUntilDeadline 62 ms after Play). RF5-3: 4/9 clean PASS (F3_1 play +30 ms, F3_3 w2 0.0617, F_1..3 no play() captured). Machine CPU 23-100 % (measured); steady-state rAF tick cost is 0.1-0.2 ms, so the root cause (app vs preemption) is unconfirmed, but D-24 counts it against the app",
+      "evidence": "tmp/studio-real-loop/c-round-6/runs/rf62-summary.txt, rf62-summary2.txt, rf53-summary3.txt, L_*.json, Lr_*.json, Lr2_*.json, *_raw.json (LoAF srcs), rafcost-1.json"
+    },
+    {
+      "id": "C-R6-03",
+      "severity": "low",
+      "steps": [
+        "1280x720 /studio-lab, place 'Middle East' on music at 0, select it, Ctrl+D twice (end 05:04.056)",
+        "Click Fit",
+        "Compare scroller.scrollWidth with the timeline content width (scroller.firstElementChild width)"
+      ],
+      "expected": "R10-N5: after Fit, no horizontal overflow beyond the timeline tail",
+      "actual": "scrollWidth 1074 vs content 1054.7: the last ruler label '5:30' (absolute left-1 whitespace-nowrap) hangs 19.2 px past the content end and adds scroll width beyond the 30 s tail (31.6 px with label '0:30' on an empty project)",
+      "evidence": "tmp/studio-real-loop/c-round-6/runs/n5-overflow.json, runs/n5.json, scripts/n5o.js, scripts/n5o2.js"
+    },
+    {
+      "id": "C-R6-01",
+      "severity": "low",
+      "steps": [
+        "pointerdown on a track Volume slider and move it (preview) before any clip gesture",
+        "Start a clip header drag with pointer 7",
+        "Release the slider (commit) while the clip drag is still active, then release pointer 7"
+      ],
+      "expected": "D-26 rule 3: Volume is refused during a gesture; no history entry is written mid-gesture",
+      "actual": "The preview value is committed and a 'Volume' history entry is written in the middle of the clip gesture (no data loss; the undo chain stays consistent). Same as checkpoint-r6-review #10",
+      "evidence": "tmp/studio-real-loop/c-round-6/runs/volpre.json, scripts/volpre.js"
+    }
+  ],
+  "passed": [
+    "R26-1", "R26-2", "R26-3", "R26-U",
+    "RF6-1", "RF6-U",
+    "R27-1", "R27-U",
+    "R6-L1", "R6-G1", "R6-P1", "R6-H1", "R6-D1",
+    "R10-N1", "R10-N2", "R10-N3", "R10-N4", "R10-N6", "R10-N7", "R10-N8", "R10-U",
+    "G6-1", "G6-2", "G6-3", "G6-shots",
+    "R1-B8", "R1-B10", "R1-B12", "R1-E1", "R1-E5", "R2-V2", "R3-V3", "R5-B1r",
+    "R4-P1", "R4-P3", "R4-M2", "R4-B3", "R4-B4", "R4-B5", "R4-B6", "R4-B7",
+    "R5-L1", "R5-L2", "R5-E1", "R6-S1", "R6-S2", "R6-S3", "R6-S4",
+    "R7-D1", "R8-M1", "R8-M2", "R8-M5", "R9-C1", "R9-C2", "R9-C3", "R9-C4",
+    "R11A-1", "R11A-3", "R12-L1", "R12-L3", "R12-S2", "R22-1"
+  ],
+  "failed": ["RF6-2", "R10-N5"],
+  "notRerun": [
+    "R1-B5", "R2-V1", "R3-V2", "R3-V4", "R4-B1", "R5-L3", "R5-L4", "R5-L5", "R6-S5",
+    "R7-D2", "R7-D3", "R7-D4", "R7-D5", "R8-M3", "R8-M4", "R9-C5", "R11A-2", "R12-L2", "R12-L4", "R5-B5", "R5-B1u"
+  ],
+  "blocked": [
+    "Fake-Bearer studio-token check is qualified: backend localhost:5199 is down, so a 500 (no token issued) is the only observable result",
+    "RF6-1/RF6-2 on a quiet real Windows Chrome (VP9 + H.264) and real-mouse/real-wheel checks remain Tech Lead items; the C machine was at 23-100 % CPU"
+  ]
+}

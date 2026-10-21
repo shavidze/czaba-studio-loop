@@ -1,0 +1,43 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R49-01",
+      "severity": "low",
+      "steps": [
+        "Scratch copy outside store/: in ArrangementClip.tsx trim branch replace the snap-then-clamp request with clamp-then-snap (free request -> trimClipStart/End -> snap the clamped edge -> trim again)",
+        "Run grid-snap-edit.test.tsx: 22/22 still green (SE5 cannot distinguish: both orders end at the re-clamped 7.05)",
+        "Run C supplement C49-N1: clip music 7.7, dur 3, sourceOffset 0.1 (source start 7.6), Snap 1 s, left trim -10 px (request 7.45)"
+      ],
+      "expected": "A committed test fails under the clamp-then-snap mutation (task 4.2 (n))",
+      "actual": "Only C's C49-N1 kills it (real code 7.600 + blocked text; mutant 8.000, not blocked). The browser behaviour is correct (TR-LIMIT2: 4.600 + blocked). Test gap only",
+      "evidence": "c-round-49/runs/mutations.txt (n); c-round-49/tests/c49-supplement.test.tsx; c-round-49/runs/r49-1440x900-TR-OFF_TR-1_TR-L_TR-LIMIT_TR-LIMIT2_TR-025.txt"
+    },
+    {
+      "id": "C-R49-02",
+      "severity": "low",
+      "steps": [
+        "Scratch: change the group refusal condition to `plan.refusal === 'before-start'` only (out-of-range ghosts published again)",
+        "Run grid-snap-edit + C supplement: all green"
+      ],
+      "expected": "A UI test pins 'out-of-range' -> no lane ghosts (task 0.4)",
+      "actual": "Mutation (p) survives; SE16 covers only the pure plan. Real browser GR-OUT is correct (ghosts [], out-of-range text, time-only commit)",
+      "evidence": "c-round-49/runs/mutations.txt (p); c-round-49/runs/r49-1440x900-GR-BEFORE_GR-OK_GR-OVERLAP_GR-OUT_SN-1_SN-GROUP_SN-LANE_SN-SHIFT.txt"
+    }
+  ],
+  "passed": [
+    "G49-1", "G49-2", "G49-3",
+    "R49-S", "R49-U",
+    "TR-OFF", "TR-1", "TR-L", "TR-LIMIT", "TR-025", "TR-1280",
+    "RG-1", "RG-CLAMP", "RG-ZERO", "RG-CLICK", "RG-OFF", "RG-USE",
+    "AL-1", "AL-2", "AL-3", "AL-4", "AL-MID",
+    "GR-BEFORE", "GR-OK", "GR-OVERLAP",
+    "SN-1", "SN-GROUP", "SN-LANE", "NU-1", "UI-1", "UI-5", "LN-1", "AU-1",
+    "REG-HYD"
+  ],
+  "blocked": [
+    "AL-FOCUS recorded only: CDP keys cannot trigger Chrome's app-menu accelerator -> Tech Lead R49-T(2)",
+    "Not run this round (not PASS): video sync / C-R27-01, full find->add->fit video->export flow, FB-01..FB-16 stage regression, test:e2e:smoke (root only)",
+    "Drags use standalone Playwright REAL-mouse (PW) under pending deviation GSTACK-NO-MOUSE; gstack CLI daemon failed once (ENV-BROWSE-DAEMON), server-node fallback used"
+  ]
+}

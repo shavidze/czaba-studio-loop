@@ -1,0 +1,46 @@
+{
+  "taskStatus": "BLOCKED",
+  "bugs": [
+    {
+      "id": "INFO-R55-REFUSAL-STATUS-ON-RELEASE",
+      "severity": "low",
+      "steps": [
+        "jsdom StudioWorkspace probe (c-round-55/scratch/mut/app/lib/arrangement/__tests__/c-probe-r55.test.tsx, PS-BEFORE / PS-BEFORE-WHOLE): m1 music start 6 (or 6.0004) dur 2; st0 stems 5 dur 2; Snap on 1 s",
+        "Shift-drag m1 header +40 px down onto stems (overlap) and release"
+      ],
+      "expected": "Refused cross-lane move keeps the refusal reason visible after release (or B confirms generic text is intended)",
+      "actual": "Final status is the generic 'კლიპის გადატანა: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.'; refusal reason shown during hover is replaced. Pre-existing on round-54 snapshot caller and for whole-ms starts; not caused by round 55. Info for B triage.",
+      "evidence": "tmp/studio-real-loop/c-round-55/runs/probes.txt (PS-BEFORE, PS-BEFORE-WHOLE, PS-GROUP, both trees)"
+    },
+    {
+      "id": "INFO-R55-FREE-ROUND-UNGUARDED",
+      "severity": "low",
+      "steps": [
+        "Scratch copy: snapshot ArrangementClip.tsx with moveStartOnGrid Snap-off branch changed to Math.max(0, start + delta)",
+        "Run selection, grid-snap-clip-edges, grid-edges, grid-snap-ui, grid-snap-loop-drop, grid-snap-position, grid-snap-edit, gesture-guard"
+      ],
+      "expected": "B's rejection rationale (pixel noise in Snap-off starts) is guarded by at least one test",
+      "actual": "All 170 tests green; that alternative also fixes CM9c-CM9e. roundTime in the free branch is untested (jsdom uses integer px at 40 px/s). Info, not a defect of D-29z20.",
+      "evidence": "tmp/studio-real-loop/c-round-55/runs/mutations.txt (d), (d2)"
+    }
+  ],
+  "passed": [
+    "G55-2",
+    "R55-S",
+    "R55-U",
+    "G55-1"
+  ],
+  "blocked": [
+    "Store dev server http://127.0.0.1:5173/studio-lab and backend :5199 returned 000 at 19:55, 20:04 and 20:06 +04 (c-round-55/server-checks.txt; 19:55 from orientation output, not persisted then) (ENV-DEV-SERVER-DOWN-R52 / ENV-VITE-ENOMEM-R53, fourth round); C did not start servers",
+    "Not run (environment): R55-SHIFT (SH-CROSS, SH-SAME, SH-NOTE; V not measured)",
+    "Not run (environment): R52-EDGE (EG-OFF, EG-1, EG-VIDEO, EG-LINE, EG-ALT, EG-ALT-ON, EG-CROSS, EG-GROUP, EG-1280)",
+    "Not run (environment): R54-CROSS (CX-VIDEO, CX-NOTE) — C-R53-01 browser confirmation pending",
+    "Not run (environment): R53-LANE (LN-TOUCH, LN-AFTER, LN-SHORT)",
+    "Not run (environment): R52-TRIM (ET-START, ET-END, ET-ALT, ET-CLAMP)",
+    "Not run (environment): R52-PLAY (EP-VIDEO, EP-OFF, EP-CROSS, EP-SHIFT) — no real audio graph, source timing, meters or video transport measured",
+    "Not run (environment): R52-REG browser spot checks and REG-HYD",
+    "Not run (environment): G55-3 anonymous workspace + premium auth not bypassed — fourth round without browser evidence",
+    "Not in scope / not run: video sync RF3-1, RF3-2, R5-L6, G3-R/G3-3/G3-shots; full find->add->fit video->export flow with WAV data/duration/sample checks; FB-01..FB-16 stage regression; test:e2e:smoke (root)",
+    "Commit readiness: no open C defect on the round 50-55 17-path diff (C-R54-01/02 fixed unit+probe, C-R53-01 unit-only; gates green), but stage-4a browser evidence does not exist; root decides, C does not write PASS"
+  ]
+}

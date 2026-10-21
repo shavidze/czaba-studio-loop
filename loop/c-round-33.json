@@ -1,0 +1,35 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "FOCUS-TEXT-STALE",
+      "severity": "medium",
+      "steps": [
+        "Anonymous /studio-lab at 1440x900, layout L33 (video 0, სრული მიქსი on music at 7, Soft impact on SFX at 4).",
+        "Real click on the library search field and type 'ab'.",
+        "Real click on the Soft impact clip header. The clip becomes selected.",
+        "Press Delete, then Backspace."
+      ],
+      "expected": "After a click in the timeline, the edit context is the timeline: Delete/Backspace delete the selected clip (SRW-24), the same as after a fader (C-R32-01 fix).",
+      "actual": "Focus stays in the search field. Delete does nothing to the clip, and Backspace silently edits the hidden search text ('ab' -> 'a'), so the library filter changes. No status is shown. This is pre-existing behaviour, out of round 33's scope (record only, B observation confirmed). It is not a round-33 failure. Related record: typed Clip Gain '3' without Enter is silently discarded when another clip is clicked (focus goes to BODY, no entry).",
+      "evidence": "tmp/studio-real-loop/c-round-33/runs/rec-text-stale.txt"
+    }
+  ],
+  "passed": [
+    "G33-1",
+    "G33-2",
+    "G33-3",
+    "R33-FT",
+    "R33-KO",
+    "R33-G",
+    "R33-K",
+    "R33-S",
+    "R33-U",
+    "R33-Doc"
+  ],
+  "blocked": [
+    "Not run: the code-review Low residuals (a scrollbar click blurs the fader; a touch scroll commits a pending preview early). The harness has no trusted touch or scrollbar input.",
+    "Not run by design (§4.8): exports, audio graph R31-PE/PV/PL, PUI geometry, R32-BC, video sync, the C-R27-01 table. No audio, export, scheduler or video code changed (R33-S).",
+    "Ableton compliance: unconfirmed for all three round-33 behaviours. Manual §18.1 is silent on focus or edit context after a clip click."
+  ]
+}

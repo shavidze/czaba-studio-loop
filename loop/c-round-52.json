@@ -1,0 +1,58 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R52-01",
+      "severity": "medium",
+      "steps": [
+        "On the round-52 tree run: npx vitest run app/lib/arrangement/__tests__/grid-snap-ui.test.tsx",
+        "Also: npm run verify"
+      ],
+      "expected": "20/20 green, as D-29z17 §0.4 promised ('stage 1-3 tests stay green'); verify exit 0",
+      "actual": "GS3 (l.413) and GS13 (l.620) fail with 'expected 8.5 to be 8'. Full vitest gives 87 files / 1488 tests with 2 failed; npm run verify exits 1. This is a spec conflict, not an A defect: E2 makes m1 (length 4) end on m2's start 12.5. A sub-half 15 px nudge therefore jumps 0.5 s, and GS13's blocked status no longer appears. B/Tech Lead must choose: (a) update GS3/GS13, or (b) amend E2 (radius). Related to R52-T(1).",
+      "evidence": "tmp/studio-real-loop/c-round-52/gates/vitest-full.txt, grid-snap-ui-alone.txt, verify-build.txt, verify-raw.txt"
+    },
+    {
+      "id": "C-R52-02",
+      "severity": "medium",
+      "steps": [
+        "Mounted StudioWorkspace (jsdom), scratch probe c-round-52/scratch/mut/app/lib/arrangement/__tests__/c-probe-r52.test.tsx, P1m",
+        "Music lane: m1 at 2 with length 2.0004; m2 at 10.4 with length 2.6; 40 px/s; Snap on 1 s",
+        "Drag m1's header in samples of +160/+200/+230/+254 px (raw 8.35)"
+      ],
+      "expected": "m1's end touches m2 (start ~8.3996), as the control with length exactly 2 does (P1c lands at 8.4)",
+      "actual": "m1 stays at 8 and the status shows 'გადატანა დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი. კლიპი ბოლო თავისუფალ ადგილას დარჩა.' Edges and lengths are rounded to whole ms and the rounded candidate is returned, so the real end overlaps by up to 0.5 ms and moveClip (EPS 1e-4) refuses it. Start-touch after a neighbour ending at 6.0004 (P1s) is also refused; stage 1 would refuse it too (grid 6 overlaps), but the edge candidate is rounded to 6.0 and does not rescue it. Library drops store the raw buffer.duration, so real decoded or purchased audio is affected; the synthetic demo SFX are whole seconds, which hides this on L52. Trim path not probed at runtime; by code reading the trim clamps to the exact neighbour start and TRIM_BLOCK_TOLERANCE=0.01 exceeds the 0.5 ms difference (unverified).",
+      "evidence": "tmp/studio-real-loop/c-round-52/runs/probe-p1-p2.txt; ArrangementContext.tsx l.1236/1245; grid.ts snapMoveStartToGridOrEdges"
+    },
+    {
+      "id": "C-R52-03",
+      "severity": "low",
+      "steps": [
+        "Probe P2m: music lane m1 at 2 with length 4; m2 at 12 with length 0.5; Snap on 1 s",
+        "Drag m1 in samples of +160/+236/+256 px (raw 8.4)"
+      ],
+      "expected": "m1 lands at 8 with the normal move status, as in stage 1",
+      "actual": "The nearest candidate 8.5 (m1's end on m2's end, which always overlaps) wins and is refused. m1 stays at 8 (the last free sample) and the blocked status is shown. With a single sample (P2), m1 does not move at all.",
+      "evidence": "tmp/studio-real-loop/c-round-52/runs/probe-p1-p2.txt"
+    },
+    {
+      "id": "C-R52-T1",
+      "severity": "low",
+      "steps": [
+        "Scratch mutation (j): the group delta uses snapMoveStartToGridOrEdges with duration 0 (start-touch candidates only)",
+        "Run grid-snap-clip-edges.test.tsx"
+      ],
+      "expected": "CM10 fails",
+      "actual": "50/50 pass. CM10's fixture has only an end-touch candidate near the raw anchor. (j2), which includes end-touch, is killed by CM10. Test gap for the 4c tests.",
+      "evidence": "tmp/studio-real-loop/c-round-52/runs/mutations.txt (j), mutations-2.txt (j2)"
+    }
+  ],
+  "passed": [
+    "G52-2",
+    "R52-S"
+  ],
+  "blocked": [
+    "Dev server http://127.0.0.1:5173 was down for the whole session (curl 000 from 15:41 to 16:03; no listener on :5173 or :5199). C does not start servers. Not run: EG-OFF, EG-1, EG-VIDEO, EG-LINE, EG-ALT, EG-ALT-ON, EG-CROSS, EG-GROUP, EG-1280, ET-START, ET-END, ET-ALT, ET-CLAMP, EP-VIDEO, EP-OFF, the R52-REG browser spot checks (SN-1, NU-1, SE3-like, RU-1, LB-MOVE, LD-1, clip-body click), REG-HYD, G52-3 (anonymous workspace and purchase-protection checks).",
+    "Not in scope this round (§4.7): video sync and C-R27-01 (RF3-1, RF3-2, R5-L6 still FAIL per root-pre-push-review.md); the full find->add->fit video->export flow (WAV not measured); the FB-01..FB-16 regression; a real pointercancel in a browser; test:e2e:smoke (root)."
+  ]
+}

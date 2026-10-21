@@ -1,0 +1,146 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R5-02",
+      "severity": "medium",
+      "steps": [
+        "studio-lab, place a music clip (pulse 2-6) and Soft impact @8 on SFX",
+        "Start a header drag on the music clip with pointer 7 (cross-lane to stems, or same lane) and do not release",
+        "With a second pointer (touch id 21), drag the impact clip header +1 s and release; or click the SFX lane M button",
+        "Move or release pointer 7"
+      ],
+      "expected": "Either the second-pointer edit is blocked while a gesture is active (D-20/D-23 spirit), or it is preserved by the first gesture's commit; the history matches the arrangement",
+      "actual": "The second edit commits first (history 'კლიპის გადატანა' impact->9, or 'Mute — SFX'). The first gesture's preview or commit is rebuilt from gesture.before and silently reverts it (impact back to 8, SFX mute back to false). The history keeps the lost entry. During a cross-lane drag, the second gesture's release also clears the lane ghost and Shift hint.",
+      "evidence": "c-round-5.md §5 C-R5-02. Browser runs: cross-lane {g2: sfx 9 -> after: sfx 8, music 4}, same-lane {mid sfx 9 -> after sfx 8}, mute {mid aria-pressed true -> after false}. Cause: ArrangementClip.tsx commitArrangement(laneTarget.arrangement / getArrangement(), label, gesture.before) with previews built from gesture.before. Existed before round 5 (code-reviewer #7, A known gap). HEAD ArrangementClip.tsx lines 232-275 already build previews from gesture.before; round 5 extends the pattern to the cross-lane commit."
+    },
+    {
+      "id": "C-R5-01",
+      "severity": "low",
+      "steps": [
+        "Open /studio-lab at 1280x720 or 1440x900 with the library at the default 288 px",
+        "Look at the source list under 'ყველა ფაილი'"
+      ],
+      "expected": "Each list row shows the sound's name readably, so the 4 synthetic stems can be told apart",
+      "actual": "Title span is 110 px wide; 7 of 9 titles are truncated. pulse, bass, pad, melody and the mix all read 'ღამის პულსი…'. The stem name appears only in the tooltip, the preview panel or after widening the panel. Regression: the C-R4-03 tree fix (w-36) narrowed the list column from 192 to 144 px.",
+      "evidence": "c-round-5/runs/list-trunc-1280x720.json, list-trunc-1440x900.json, list-truncation-1440.png, after-paste-1440x900.png"
+    },
+    {
+      "id": "C-R5-03",
+      "severity": "low",
+      "steps": [
+        "1280x720, layout beeps video 0-6.008 + clip-4s @8, Soft impact on SFX",
+        "Header-drag the impact clip up onto the video lane near 4 s"
+      ],
+      "expected": "The amber ghost and its refusal text are readable",
+      "actual": "The nowrap, overflow-visible label '00:03.950 · აუდიო ვიდეოხაზზე არ გადადის' paints over the video clip header titles, so both texts collide. The valid ghost title truncates to 'S.' on a 2 s clip.",
+      "evidence": "c-round-5/ghost-amber-1280x720.png"
+    },
+    {
+      "id": "C-R5-04",
+      "severity": "low",
+      "steps": [
+        "Copy a single music clip (Ctrl+C)",
+        "Click the video lane so it becomes the active track, seek 40",
+        "Ctrl+V"
+      ],
+      "expected": "§8: the refusal status names the lane and the time",
+      "actual": "'ჩასმა ვერ შესრულდა: ვიდეო ხაზზე ეს მასალა არ ჯდება (აუდიო და ვიდეო ხაზს არ იცვლის). არაფერი შეცვლილა.' gives no time. Arrangement and history are correctly unchanged.",
+      "evidence": "c-round-5.md §3 R9-C4"
+    },
+    {
+      "id": "C-R5-05",
+      "severity": "low",
+      "steps": [
+        "Fresh studio-lab, place Soft impact at 0 (projectEnd 2)",
+        "Seek the ruler to 5 (readout 00:05.000)",
+        "Press Play"
+      ],
+      "expected": "D-15: the playhead is the insert position. Play starts from 5 (Ableton plays from the insert marker, past the end), or the status explains the jump.",
+      "actual": "Playback silently restarts from 0 and stops at 2. The insert position is lost, for example after seek 20 for a paste.",
+      "evidence": "c-round-5.md §5 C-R5-05 run {p0:5, s:[0,0.081,...], after:2}. Existed before round 5; product decision for B. Pre-existing, intentional: HEAD 354e341 ArrangementContext.tsx ~692 'current >= end - EPS && !loop ? 0 : current'."
+    }
+  ],
+  "passed": [
+    "R5-B1",
+    "R5-B1u",
+    "R5-B1r",
+    "RF5-1",
+    "RF5-1b",
+    "RF5-2",
+    "RF5-3",
+    "RF5-U",
+    "R5-B2",
+    "R5-B3",
+    "R5-B4",
+    "R5-B5",
+    "S4-docs",
+    "R7-D1",
+    "R7-D2",
+    "R7-D3",
+    "R7-D4",
+    "R7-D5",
+    "R7-U",
+    "R8-M1",
+    "R8-M2",
+    "R8-M3",
+    "R8-M4",
+    "R8-M5",
+    "R8-U",
+    "R9-C1",
+    "R9-C2",
+    "R9-C3",
+    "R9-C4",
+    "R9-C5",
+    "R9-U",
+    "G5-1",
+    "G5-2",
+    "G5-3",
+    "G5-shots",
+    "R1-B5",
+    "R1-B10",
+    "R1-B11",
+    "R1-B12",
+    "R1-E1",
+    "R1-E3",
+    "R1-E5",
+    "R2-V1",
+    "R2-V2",
+    "R3-V2",
+    "R3-V3",
+    "R3-V4",
+    "R4-P1",
+    "R4-P3",
+    "R4-B1",
+    "R4-B3",
+    "R4-B4",
+    "R4-B7",
+    "R5-L1",
+    "R5-L2",
+    "R5-L3",
+    "R5-L4",
+    "R5-L5",
+    "R5-E1",
+    "R6-S1",
+    "R6-S2",
+    "R6-S3",
+    "R6-S4",
+    "R6-S5",
+    "R11A-1",
+    "R11A-3",
+    "R12-L1",
+    "R12-L2",
+    "R12-L3",
+    "R12-L4",
+    "R12-S2",
+    "R22-1"
+  ],
+  "blocked": [
+    "RF5-1b passed only on the natural reload series, which had 0 episodes with |d| > 0.12. No natural escalation was observed. The forced diagnostic proved the path (320 ms). B decision: under a persistent lag, the counted time between escalations can reach about 700 ms (seeked + 300 ms exclusion to seeked + 1000 ms limit), which exceeds the 600 ms FAIL threshold. Shorten the limit or redefine the rule. The decoder-ramp scenario needs Tech Lead real Windows Chrome (VP9 + H.264).",
+    "R23-1/R23-2 scrollbar visuals, wheel/trackpad and thumb drag: headless hides scrollbars and wheel is not in the gstack allowlist (Tech Lead).",
+    "R12-L4 and R8-M1/M2 with a real mouse: verified only with synthetic DragEvent/PointerEvent (Tech Lead).",
+    "R6-S5 'group Ctrl+E refused' was intentionally superseded by D-25 group split (verified as R7-D4); the input Ctrl+A part passed.",
+    "Not re-run this round (files untouched): R11A-2, R4-M2, R4-B5, R4-B6.",
+    "G5-3 fake-Bearer check is limited: backend 5199 was down, so the 500 response proves only that no token was issued."
+  ]
+}

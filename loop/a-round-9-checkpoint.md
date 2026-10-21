@@ -1,0 +1,9 @@
+# A round 9 checkpoint
+- [start] Oriented; advisor consulted. Harness in a-round-9/ (own browse state a-browse.json). Next: probes S/L vs D with wrapper, then fix.
+- [15:05] Probes done: W_0..3 PASS, S_2/S_3 PASS (S_1 harness-invalid), L_1..3 PASS; tick+mt p95 2.1-2.7 all; inconclusive (D not reproduced). L verified svg=0. Source restored cmp. Test edits in render-budget written (not run). Next: source fix.
+- [15:09] Fix applied (detail playhead transform wrapper + contain-strict; LibraryPlayheadText writer; isTransportRunning removed). render-budget 7/7. Guard1 fails 2 (lib render), Guard2 fails R9-L2 identity; both restored cmp. fixed backups in a-round-9/bak/*.fixed.tsx. Next: gates, browser contain check, verdict runs, reviewer, docs.
+- [15:19] gates done: vitest 809/809, arr 345, tsc 0, biome 0 err, npm check no-op, build OK, hashes OK. Browser ck9/outside9/libtxt9/play9 OK. Starting verdict9.sh (wrapper on fixed code: bak/probe-W9.tsx; restore from bak/ArrangementDetailPanel.fixed.tsx).
+- [15:22] doc 017 status/TODO updated; doc 018 drafted (Testing section PENDING). code-reviewer #1 running in background. verdict9 batch running (D_1 FAIL hard seek, env busy: msmpeng/backgrounddownload).
+- [15:30] Reviewer#1 8.5/10: M1 declined (spec keeps ref), L1 memo tried+reverted (bundler renames inner fn -> probe breaks), L9 accepted (testid arrangement-library-playhead + layout-read spy). Guards redone + restored cmp. tsc 0, biome 0 err. Reviewer#2 running. verdict batch v1 aborted (only D_1 valid FAIL); rerun pending with resetup guard in verdict9.sh -> runs/verdict2-summary.txt. DO NOT edit store/ files during runs (vite reloads on docs md).
+- [15:48] DONE pending advisor: report a-round-9.md written; doc 018 tests filled; final gates green; verdict v2 done; source fixed (cmp).
+- [15:52] DONE. Advisor items: report §6 pre-fix note corrected, 1280 contain check added (no collapse), own gstack browser stopped. Nothing pending for A round 9.

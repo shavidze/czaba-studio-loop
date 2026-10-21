@@ -1,0 +1,73 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R58-01",
+      "severity": "low",
+      "steps": [
+        "In a scratch copy of store/app, in ArrangementGridMenu handleOutsidePointerDown insert `armGridMenuDismissClickSwallow(window);` before the inside-menu `return;` (c-round-58/scripts/cmut.cjs mutation j)",
+        "Run vitest on grid-snap-menu, grid-snap-ui and gesture-guard"
+      ],
+      "expected": "At least one test fails, because a press inside the menu must arm nothing (D2); otherwise a real mouse choice would have its own click swallowed",
+      "actual": "64/64 pass. Menu choices in GM4/GM6/GM18 use a bare fireEvent.click without pointerdown, so the regression is invisible",
+      "evidence": "tmp/studio-real-loop/c-round-58/mutations.txt (j failed=0), mut-j.json"
+    },
+    {
+      "id": "C-R58-02",
+      "severity": "low",
+      "steps": [
+        "In scratch, change `const releaseClickSwallow = () => {` to `const releaseClickSwallow = (event?: Event) => { event?.preventDefault();` (mutation k), so the next pointerdown after a dismiss is cancelled",
+        "Run vitest on grid-snap-menu, grid-snap-ui and gesture-guard"
+      ],
+      "expected": "GM10 or GM17 fails (task §4.2 expectation): the release on the next pointerdown must not touch that event",
+      "actual": "64/64 pass. No pointerdown handler under components/arrangement reads defaultPrevented, so the clause is unguarded; in a real browser cancelling that pointerdown suppresses compatibility mousedown (unverified, no browser)",
+      "evidence": "tmp/studio-real-loop/c-round-58/mutations.txt (k failed=0), mut-k.json; grep defaultPrevented only at StudioWorkspace l.1155 (keydown) and l.1363 (drop)"
+    },
+    {
+      "id": "C-R58-INFO-M",
+      "severity": "low",
+      "steps": [
+        "In scratch, drop `followModeRef.current === 'on'` from the closeGridMenuOnUserScroll condition (mutation m)",
+        "Run the 3 files"
+      ],
+      "expected": "Info: some test covers Follow paused while playing",
+      "actual": "64/64 pass; Follow-paused + scroll within tolerance of the stale anchor is unguarded (mutation l dropping isPlaying is killed by GM13). Info for the 4b-2 test-gap list",
+      "evidence": "tmp/studio-real-loop/c-round-58/mutations.txt (m failed=0, l failed=1 GM13)"
+    }
+  ],
+  "passed": [
+    "G58-2",
+    "R58-S",
+    "R58-S-AST-EQUIVALENCE-19-IT",
+    "R58-S-SWALLOW-SCOPE",
+    "R58-S-EOL",
+    "R58-S-DOC-051",
+    "R58-U",
+    "R58-U-a",
+    "R58-U-b",
+    "R58-U-c",
+    "R58-U-d",
+    "R58-U-e",
+    "R58-U-f",
+    "R58-U-g",
+    "R58-U-h",
+    "R58-U-R57-a",
+    "R58-U-R57-d1",
+    "R58-U-durations",
+    "GM16-unit",
+    "GM17-unit",
+    "GM18-unit",
+    "GM19-unit",
+    "GM20-unit",
+    "GM21-unit",
+    "C-R57-01-unit-closed",
+    "C-R57-02-unit-closed",
+    "G58-1"
+  ],
+  "blocked": [
+    "§4.6 browser acceptance (MN-DISMISS-BUTTON at 1440x900 and 1280x720, MN-REPOSITION G5, MN-FOLLOW G6, round-57 browser half MN-*, R57-FOCUS C-R51-02, R57-PLAY real audio, R57-LOOK): not run (environment). 127.0.0.1:5173/studio-lab and :5199 returned 000 at 12:04:19, 12:11:37 and 12:13:26 +04, no LISTEN socket. SEVENTH round without a browser. D2 pointerup+macrotask timing assumption is unverified in real Chromium",
+    "§4.7 carried stage-4a browser half (R55-SHIFT, R52-EDGE, R54-CROSS, R53-LANE, R52-TRIM, R52-PLAY EP-*, R52-REG, REG-HYD): not run (environment)",
+    "G58-3 anonymous /studio-lab demo workspace and purchase-protection (premium auth not bypassed, studio-token 401, /studio/middle-east Sign in required, no R2/Authorization traffic): not run (environment); last browser PASS round 51",
+    "Full find -> add -> fit video -> export flow with WAV data/duration/sample-integrity, real audio graph/output, video transport sync, FB-01..FB-16 regression: not run (environment; outside round scope per §4.9)"
+  ]
+}

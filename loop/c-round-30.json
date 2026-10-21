@@ -1,0 +1,71 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R30-01",
+      "severity": "low",
+      "steps": [
+        "Open http://127.0.0.1:5173/studio-lab at 1280x720",
+        "Expand the detail panel (arrangement-detail-toggle)",
+        "Select an audio clip (e.g. library 'სრული მიქსი' on music)"
+      ],
+      "expected": "All five info-column lines (title, ხაზი, დასაწყისი/სიგრძე, წყაროდან, წყარო უცვლელი რჩება) are readable without overlap",
+      "actual": "Content box is 85 px (columns 69 px); the info column needs ~88 px (5 lines + gaps), so the title and 'ხაზი' lines overlap and the title is clipped at the top. scrollTop 0, scrollHeight = clientHeight = 85. PRE-EXISTING: identical in c-round-29/shots/ft-range-1280x720.png, not a round-30 regression; the Clip Gain column (69 px) fits. Relates to the D-29j (round 19) stop condition 'truncate row shrinks below 16 px': content 85 px at 1280 with range footer 89; 5-line info needs ~88 px. Mechanism (truncate <p> shrinking in the flex column) is read from the markup, not measured.",
+      "evidence": "tmp/studio-real-loop/c-round-30/shots/gui-1280x720.png; c-round-29/shots/ft-range-1280x720.png; c-round-30/runs/gui-geo.txt"
+    }
+  ],
+  "passed": [
+    "G30-1",
+    "G30-2",
+    "G30-3",
+    "R30-GE",
+    "R30-GV",
+    "R30-GL",
+    "R30-GH",
+    "R30-GK",
+    "R30-GD",
+    "R30-GN",
+    "R30-GUI",
+    "R30-GC",
+    "R30-K",
+    "R30-R",
+    "R30-S",
+    "R30-U",
+    "R30-Doc"
+  ],
+  "blocked": [],
+  "notes": {
+    "export": "E+6 B[15,23) +6.0000 dB (1.57 LSB vs x1.99526), A 0 LSB; E-6 -6.0000 dB (0.76 LSB), A 0 LSB; unsoloed SFX/video 0 LSB; paste copies +6.0000 dB (1.56-1.57 LSB); reset export = E0 0 LSB",
+    "live": "commit while playing: 0 new starts, 1 setTargetAtTime(1.995262, tau 0.015) on B's GainNode, slope 0.991; Undo: setTargetAtTime(1) no start; meters track/master +6.0 dB, tap RMS +6.02; loop: every later B source starts at 1.995262, A at 1, 2 starts/iteration",
+    "mutations": "10/10 killed (a,b,c,d,e1,e2,f,g,h,i); control 151/151; unmount-blur guard is browser-evidenced only",
+    "abletonCompliance": "per-clip gain in dB: confirmed (8.4.7); slider vs numeric field: conscious difference; separate from track Volume: unconfirmed; multi-clip range: conscious difference; waveform zoom: not applicable; bounds/reset/survives-edits: unconfirmed",
+    "info": [
+      "A deviation 6.1 (optional setClipGain prop) confirmed; product unaffected; B decision",
+      "0 dB with dirty field text: mouse click discards text (1 entry); Tab->reset->Enter blurs first and commits then resets (2 entries) - B contract decision (A 6.2a), not browser-measured by C",
+      "Reset single-entry: browser checked label only; single entry rests on UI test + mutation (d); field commits stepped in browser",
+      "Fader keyboard steps create one history entry per key (Volume and Master), pre-existing, stage-4 fader UX",
+      "ArrowRight nudge left the status line at 'Undo: გაყოფა' (pre-existing, unverified scope)",
+      "Doc 035 scenario status omits 'ღამის პულსი ·' from the title",
+      "Master 0 + B +6 export: +0.4 dBFS, 120 samples clamped (expected info)",
+      "C-R23-01: 2 NUL at 28013/28014, 61609 bytes",
+      "Harness side effect: one stray Enter added Soft impact; undone with Ctrl+Z before measurements"
+    ],
+    "carried": [
+      "C-R27-01",
+      "C-R23-01",
+      "C-R6-02",
+      "C-R8-01",
+      "R26-M1",
+      "Master hold tick",
+      "DEMO-SFX-FULL-SCALE",
+      "L3",
+      "LIB-SEP-REASON",
+      "R27-T",
+      "R9-REVIEWER-M1-L8",
+      "A-R29-REVIEW-1",
+      "DOC034-UNREACHABLE-NOTE",
+      "root items per root-pre-push-review.md/publication-checkpoint.json (69-line uncommitted tree)",
+      "Tech Lead R30-T"
+    ]
+  }
+}

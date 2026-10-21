@@ -1,0 +1,52 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R40-01",
+      "severity": "low",
+      "steps": [
+        "Fresh load http://127.0.0.1:5173/studio-lab at 1440x900 (also 1280x720), layout L40, detail panel expanded at its default height (144 at 1440 / 142 at 1280)",
+        "REAL click the demo video clip header (or REAL ruler click + REAL Ctrl+A for a group selection)",
+        "Measure the arrangement-detail-clip-gain-reason <p> and arrangement-detail-reason <p> against the arrangement-detail-content scroller's visible bottom (top + clientHeight); look at the panel"
+      ],
+      "expected": "The disabled-control reason is fully visible (or has an evident way to reach it) in real states, without hiding it from keyboard/touch users (truncate is rejected per D-29z5 f)",
+      "actual": "The Clip Gain reason wraps to 3 lines (48 px) in the 128 px slot and is clipped below the visible box: video 21 px at 1440 / 23 px at 1280; group 21 px at 1440 / 43 px at 1280 (panel 122, content 85); 45 px at the 120 px minimum. The range reason in the 1280 group state is 2 lines, clipped 21 px. The content scrolls (scrollHeight 128 > clientHeight), but no scrollbar is visible in the headless-Chrome screenshot (a desktop classic gutter was not measured); in the default view the reason's 3rd line ('ხაზის Volume/Mute') is invisible. Pre-existing layout (the reason <p>s are byte-identical to the round-39 snapshot); not a round-40 regression; from the measurement-only item DETAIL-REASON-FIT (R40-RS)",
+      "evidence": "tmp/studio-real-loop/c-round-40/runs/rs-1440.txt, rsinfo-1280.txt, mn6-1440.txt; shots/rs-vid-1440-crop.png, rs-vid-1440.png, rs-grp-1280.png; c-round-40.md section 3"
+    }
+  ],
+  "passed": [
+    "G40-1",
+    "G40-2",
+    "G40-3",
+    "R40-S",
+    "R40-U",
+    "R40-Doc",
+    "R40-PM",
+    "PM-1",
+    "PM-1280",
+    "PM-2",
+    "PM-3",
+    "PM-KEPT-TAB",
+    "PM-RAW",
+    "PM-RESET",
+    "PM-TAB",
+    "PM-R30",
+    "R40-INFO",
+    "R40-MN",
+    "MN-1",
+    "MN-2",
+    "MN-3",
+    "MN-4",
+    "MN-5",
+    "MN-6",
+    "R40-CR",
+    "R40-K"
+  ],
+  "blocked": [],
+  "notes": [
+    "R40-RS is measurement-only by contract (no PASS/FAIL); recorded, and its clipping opened C-R40-01",
+    "Not run by §4.7 (not PASS): exports/WAV integrity, video sync and C-R27-01, the full find sound -> add -> fit video -> export flow, the FB-01..FB-16 stage regression",
+    "The literal 'SFX selected + range shown' INFO state (via Apply on SFX) was not measured; the browse daemon was unresponsive after 18:05; the equivalent music+range state passed",
+    "Environment: the dev server was down 16:55-17:18 (root restarted it); the browse daemon was unstable, so G40-3 direct was re-captured at 18:03; the header-link context's freshness is unverified"
+  ]
+}

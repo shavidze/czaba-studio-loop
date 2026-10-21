@@ -1,0 +1,79 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R27-01",
+      "severity": "medium",
+      "steps": [
+        "Fresh /studio-lab at 1440x900; install c-round-22/scripts/sp22.js and c-round-26/scripts/h26.js before the first Play",
+        "c-round-11/scripts/lay11.js (video beeps 0-6.008, music 0-16, stems 2-18, SFX 4-6); Mute music (round-26 vm-1 layout)",
+        "c-round-28/vm28.sh: c-round-25 vm-start, Master Mute at ~0.5 and ~2.3 s, 12x ArrowDown on Master Volume at ~3.2 s, vm-an28 analysis"
+      ],
+      "expected": "Video drift max <= 30.1 ms (round-26 vm-1 20.1 ms + 10), dock counters 0 -> 0",
+      "actual": "Valid-looking runs vm-3/vm-4/vm-5: 125.4 / 19.0 / 287.6 ms; dock hardSeeks 0 -> 0 in all (vm-1/vm-2 harness-invalid, replaced; budget 3+2 exhausted). Two readings for B: (1) vm-3 counted -> 2/3 over -> row 2 (A bug round); (2) vm-3 environment-invalid because every action was ~2 s off-procedure (issued 2.44/3.64/4.76, landed 3.25/4.10 vs ~0.5/2.3/3.2, browse latency) -> only vm-4 PASS and vm-5 FAIL remain, no replacement left -> effectively row 3 (Tech Lead quiet Chrome). Attribution data: vm-5 excursion starts at 1.33, ~130 ms after the Master Mute click at pos 1.20, with no hardSeek change (row 4 not triggered); vm-3 excursion starts at 0.94 before any click. node.exe 37.",
+      "evidence": "tmp/studio-real-loop/c-round-28/runs/vm-1..5.txt, vm-3-drift-detail.json; c-round-28.md §6"
+    },
+    {
+      "id": "C-R28-01",
+      "severity": "low",
+      "steps": [
+        "/studio-lab: library 'სრული მიქსი' on music at 7 (7-23), Soft impact on SFX at 4, video at 0",
+        "Select the music clip; detail panel range 20-22; Apply",
+        "Ctrl+Shift+L (all lanes), Ctrl+X",
+        "Click the SFX lane name (active lane = SFX), seek to 20, Ctrl+V"
+      ],
+      "expected": "Material cut from an all-lane (vertical) selection is pasted back on its original lane (music)",
+      "actual": "Status 'ჩასმა (1): 00:20.000-ზე · SFX ხაზზე.'; the music audio lands on SFX ([sfx,20,2,off 8]). planClipboardPaste routes a one-lane clipboard to the active lane even when it came from an all-lane range (A code-review finding 2). Doc 034 l.63 does not mention it.",
+      "evidence": "tmp/studio-real-loop/c-round-28/runs/finding2.txt"
+    },
+    {
+      "id": "C-R28-02",
+      "severity": "low",
+      "steps": [
+        "Select a music clip; make a zero-width range with the clip range gesture (drag ~4 px and back to the anchor), giving range 15-15",
+        "Press Ctrl+Shift+X"
+      ],
+      "expected": "No-op with an honest status (as Delete now does: 'მონიშნულ მონაკვეთში წასაშლელი მასალა არ არის — არაფერი შეცვლილა.')",
+      "actual": "Status 'Cut Time 00:15.000 — 00:15.000: მონაკვეთში ხმა არ იყო, ბუფერი არ შეცვლილა; სიცარიელე დაიხურა ყველა ხაზზე.' while nothing changed and no history entry was written. Pre-existing Cut Time path; the round-28 zero-width guard covers only Delete.",
+      "evidence": "tmp/studio-real-loop/c-round-28/runs/zero-width-cx.txt (transcribed session output); runs/zero-width.txt for the Delete no-op"
+    }
+  ],
+  "passed": [
+    "G28-1",
+    "G28-2",
+    "G28-3",
+    "R28-DA",
+    "R28-DB",
+    "R28-DV",
+    "R28-DM",
+    "R28-VL",
+    "R28-VD",
+    "R28-CX",
+    "R28-UR",
+    "R28-PS",
+    "R28-TF",
+    "R28-UI",
+    "R28-K",
+    "R28-E",
+    "R28-R",
+    "R28-S",
+    "R28-U",
+    "R28-Doc",
+    "R27-TL-restated",
+    "R27-K-1440",
+    "R27-L-floating-video",
+    "R27-TO-redo",
+    "R27-E-offline-nodes",
+    "R27-R",
+    "R27-TI-video-floor"
+  ],
+  "blocked": [
+    "C-R27-02 not a pass/fail of this round: frozen 8 batch 3/3 green at node.exe 35-36 (r27: A 40-42, B 34); whether this is the required lower load is for B to decide",
+    "R27-TL SFX run 1 cannot be re-scored frame by frame (round 27 saved no per-frame data for it)",
+    "R9-C4 empty-clipboard refusal not exercised (clipboard already filled in the session)",
+    "Ableton: Backspace=Delete and Split on a multi-track selection remain unconfirmed in the source; Live 12 §42.8/§42.16 show Ctrl+Shift+L = Select Loop Brace Contents and Delete Time = Ctrl+Shift+Delete (B's table to be corrected)",
+    "C-R23-01 record only (2 NUL at 28013/28014; hydrated DOM 0), Tech Lead",
+    "R28-T and other Tech Lead manual checks need real Chrome with real input",
+    "R28-CX while-playing sub-oracle \"export after the edit matches\": method substitution (new source offsets vs live position, exact match), not a tap-vs-export comparison"
+  ]
+}

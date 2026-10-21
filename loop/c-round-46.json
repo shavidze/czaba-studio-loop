@@ -1,0 +1,34 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [],
+  "passed": [
+    "G46-1",
+    "G46-2",
+    "G46-3",
+    "R46-S",
+    "R46-U",
+    "F-ESC",
+    "F-CLOSE",
+    "F-X",
+    "F-WRAP",
+    "F-RENDER",
+    "F-SPACE",
+    "F-1280",
+    "R46-SSR",
+    "REG-HYD",
+    "REG-PLAY",
+    "REG-KEYS",
+    "R46-Doc"
+  ],
+  "blocked": [
+    "F-VIDEO (focus returns to the expanded video's X): unit-only. No REAL path opens Export while focus stays on the video X: a pointer click on Export focuses Export, and the X is covered by the dialog backdrop. The REAL part (the video stays expanded; focus returns to the real opener Export) was observed but is not listed as passed.",
+    "Not run by contract (section 4.6): export WAV integrity beyond the F-RENDER smoke; video sync and C-R27-01; the full find sound -> add -> fit video -> export flow; the FB-01..FB-16 stage regression.",
+    "A's mutation (e) (focus-to-close moved to the layout phase) was not re-run by C; it is A's record only."
+  ],
+  "notes": [
+    "B-EXPECT-R46-F: with FocusThief rendered before the dialog, FR1/FR2 are red on both the snapshot and the fixed code (C runs f1 and f2). B's section 4.2(f) text ('green on the snapshot too') is wrong; tree order only makes the green run meaningful.",
+    "A-R46-RESTORE-SELECTION reproduced in Chrome: REAL open -> SYNTHETIC focus() on toolbar Fit -> REAL Esc leaves focus on Fit; the snapshot would restore to Export. No REAL-input path was found (the backdrop covers the toolbar and the video X; the Tab trap holds). Not filed as a bug; B decides. Only mouse and keyboard were tested; Modal.tsx l.101 declares aria-modal=\"true\", so the assistive-technology path also stays theoretical.",
+    "ENV-BROWSE-DAEMON reproduced: the CLI daemon failed to start within 15s. C used the server-node fallback (PIDs 14304 and 29132, both stopped by C with /T).",
+    "Evidence: c-round-46.md and c-round-46/runs, shots."
+  ]
+}

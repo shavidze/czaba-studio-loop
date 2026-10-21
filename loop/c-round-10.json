@@ -1,0 +1,23 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R7-01",
+      "severity": "medium",
+      "steps": [
+        "cd C:/Apps/czaba-project/tmp/studio-real-loop && bash c-round-10/batch10.sh W_x",
+        "Per run: 1440x900 fresh setup.sh (goto /studio-lab, anonymous) -> r3v1lay.js -> looplay.js (loop 2-4 on) -> drift10.sh {vclips R3-V1, durMs 8500, from 1, loop 2-4}",
+        "Read runs/W_x_res.txt wraps[].vtAfter300 and runs/W_x_wrapdetail.json (d300, ctxRel300, series)"
+      ],
+      "expected": "Every wrap of 3 valid runs lands vt in [2.29, 2.31] at +300 ms (RF5-2 window), as a swap, no hard seek, D-24 pass",
+      "actual": "Valid runs W_2, W_4, W_5: 6/9 wraps below window (2.282-2.285); d at +300 is -0.017..-0.020 s in all 9 wraps (video ~2.280-2.284 at exact +0.300). W_5 reads in-window only because its sample landed at ctxRel 0.310. Clean-source series show a currentTime freeze at +22..+51 ms after play() and soft sync stopping at the D-19 deadband (0.02), which is 2x the RF5-2 half-window (0.01). All hard rules pass (swaps 3/0 fallbacks, 0 hard seeks in wrap windows, multiPlayingMaxMs 0, 0 frames past loop end, rate 1-1.25). Needs Tech Lead quiet-Chrome RF7-3 plus a B/TL decision on RF5-2 window vs D-19 deadband; no allowed fix shape reaches it; stage 3 stays blocked.",
+      "evidence": "tmp/studio-real-loop/c-round-10/runs/w-summary.txt, w-table.txt, W_*_res.txt, W_*_wrapdetail.json, w2-recompute.txt; c-round-10.md section 2"
+    }
+  ],
+  "passed": ["R10-W2", "R10-R1", "R10-R2", "R10-Doc", "G10-1", "G10-2", "G10-3"],
+  "blocked": [
+    "R10-W3 not applicable: no source change (dock, video-sync.ts, video-sync.test.ts cmp-identical to round-start backups)",
+    "C-R8-01 and C-R6-02 remain open pending Tech Lead quiet-Chrome run (not this round); N_1 mode-N run is information only",
+    "fake-Bearer studio-token check only partial: backend 5199 down (500, no token issued)"
+  ]
+}

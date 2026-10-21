@@ -1,0 +1,68 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R41-01",
+      "severity": "low",
+      "steps": [
+        "Fresh load http://127.0.0.1:5173/studio-lab at 1024x768 (outside the mandatory 1440x900 / 1280x720 viewports), layout L41, detail panel expanded at its default height (144)",
+        "REAL click the demo video clip header; measure arrangement-detail-clip-gain-reason and arrangement-detail-video-placeholder against arrangement-detail-waveform (overflow-hidden, 128 px wide)",
+        "REAL ruler click + REAL Ctrl+A (group); measure the reasons in the middle box against the arrangement-detail-content scroller's visible bottom at scrollTop 0"
+      ],
+      "expected": "Low; outside the two mandatory viewports (plan: 1440x900 / 1280x720); B decides whether widths below 1280 are in scope. If they are, the disabled reasons stay fully visible, as D-29z6 achieves at 1440/1280",
+      "actual": "The middle/waveform box shrinks to min-w-32 (128 px, inner 110). Video: the reason wraps to 4 lines (615.5-679.5) and the placeholder to 2; the centred stack overflows the non-scrollable waveform box (584-675) by 4.5 px at the bottom (reason) and 4.5 px at the top (placeholder). Group: the Clip Gain reason is 4 lines (627-691), 28 px below the visible area (it can be scrolled to). Text is still reachable via title/aria-describedby. Not a round-41 FAIL: the plan names 1440 and 1280 as the mandatory viewports and D-29z6 measured only those",
+      "evidence": "tmp/studio-real-loop/c-round-41/runs/narrow-1024.txt; c-round-41/shots/narrow-grp-1024.png; c-round-41.md §9"
+    }
+  ],
+  "passed": [
+    "G41-1",
+    "G41-2",
+    "G41-3",
+    "R41-S",
+    "R41-U",
+    "R41-Doc",
+    "R41-RV",
+    "RV-VID-1440",
+    "RV-VID-1280",
+    "RV-GRP-1440",
+    "RV-GRP-1280",
+    "RV-MIN",
+    "RV-SWITCH",
+    "R41-SB",
+    "SB-1",
+    "SB-2",
+    "SB-3",
+    "R41-NONE",
+    "R41-PM",
+    "PM-1",
+    "PM-2",
+    "R41-MN",
+    "MN-1",
+    "MN-2",
+    "MN-3",
+    "MN-4",
+    "R41-K"
+  ],
+  "blocked": [],
+  "closed": [
+    "C-R40-01"
+  ],
+  "recordedOnly": [
+    "SB-4: in the 1280 group state the content scroller is reached by REAL Shift+Tab (not by forward Tab from a click in the info column); REAL ArrowDown scrolls it 0 -> 9 (max); no PASS/FAIL",
+    "R41-NONE at the 120 px minimum: column reasons clipped 7 px (range) / 13 px (Clip Gain) at 1440 and 1280; the info hint is visible at the top",
+    "MN-4 overlap: the range overlay (pointer-events-none, bg-foreground/30) covers part of the placeholder and of the reason; the text stays readable",
+    "C-R23-01/C-R38-01: curl /studio-lab 64312 bytes, 3 NUL at 11729, 28025, 28026; 1 hydrated U+FFFD aria-label (library collapse)"
+  ],
+  "notRun": [
+    "exports and WAV integrity, video sync and C-R27-01, the full find sound -> add -> fit video -> export flow, and the FB-01..FB-16 stage regression (not in the round-41 scope, by task §4.6; not PASS)"
+  ],
+  "notes": [
+    "HEAD 54922e6 at start and end = root's agentConfigCheckpoint (only the 17 .codex/agents/*.toml files committed); the 6 round-39/40 shas are unchanged, so git status has 3 lines (the .codex lines are now tracked)",
+    "G41-1 first run under load (MsMpEng about 172% CPU): 9 frozen-suite and 62 verify vitest failures, all 5000 ms timeouts or cascades after them, plus 1 worker-start timeout; idle re-run: vitest 73/1325, build 0, npm run verify exit 0, 13 frozen suites 334/334",
+    "ENV-BROWSE-DAEMON recurred (slow starts, a hung promise poll in c-round-34/r.sh, a restart timeout); G41-3 was captured in a confirmed fresh daemon (new PID, about:blank, cookies [])",
+    "REAL Escape did not deselect the group in this run, with focus on the Playhead slider; no deselect handler was found in the arrangement workspace (only in the old StudioContext / studio.$productId); round 40 recorded sel 0 in the same sequence, so the behaviour is focus- or context-dependent; code outside the panel is unchanged (384 OK); not a round-41 item",
+    "Round 41 is checkpoint-ready: panel 61834b2a, doc 038 cf894ea3, new test b919643f",
+    "G41-3 hosts include Google Fonts (fonts.googleapis.com, fonts.gstatic.com): not in the task's known-allowed list, accepted as in round 40 and recorded explicitly",
+    "C's browse daemon is left running (PID 9936); stop was not attempted because it hung in round 40"
+  ]
+}

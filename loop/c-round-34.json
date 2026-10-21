@@ -1,0 +1,46 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R34-01",
+      "severity": "medium",
+      "steps": [
+        "Open http://127.0.0.1:5173/studio-lab at 1440x900 with layout L34 (video at 0, music clip at 7, Soft impact on SFX at 4); expand the detail panel",
+        "Real click on the Soft impact clip header (SFX selected)",
+        "Real click into Clip Gain, Ctrl+A, type 3 (no Enter)",
+        "Real click on the music track Volume slider (or on Master Volume)"
+      ],
+      "expected": "D-29u contract: leaving the field commits the typed value to SFX (+1 Clip Gain), as Tab or any other click does",
+      "actual": "The typed 3 is lost: SFX keeps no gainDb and the field shows 0.0. Status: 'რედაქტირება drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.' The fader jumps to the click point (music Volume 0.5 / Master -27 dB) with +1 Volume/Master Volume entry. Same as A-R34-REVIEW-1 (code reading); now confirmed in a browser. Outside the round-34 contract (range targets excluded by §0 row 3), so it does not fail this round.",
+      "evidence": "tmp/studio-real-loop/c-round-34/runs/rec-a-r34-review-1.txt"
+    },
+    {
+      "id": "C-R34-02",
+      "severity": "low",
+      "steps": [
+        "Read doc 036 §Round 34 'round 33-ის residual სიის შესწორება'",
+        "In headless gstack at 1440x900, measure the timeline scroller: offsetWidth 1152 vs clientWidth 1142"
+      ],
+      "expected": "The doc describes the headless geometry correctly",
+      "actual": "The doc says the headless scrollbar is 0 px. Headless reserves a 10 px vertical gutter (scrollbar-gutter: stable); only the horizontal scrollbar is 0 px. Scrollbars are hidden, so hit-testing in the gutter reaches the content children. Doc-only; the code is unaffected.",
+      "evidence": "tmp/studio-real-loop/c-round-34/runs/sb-geometry.txt, sb-synthetic.txt"
+    }
+  ],
+  "passed": [
+    "G34-1",
+    "G34-2",
+    "G34-3",
+    "R34-TS",
+    "R34-CG",
+    "R34-SB",
+    "R34-R33",
+    "R34-K",
+    "R34-S",
+    "R34-U",
+    "R34-Doc"
+  ],
+  "blocked": [
+    "R34-SB real scrollbar: headless hides the scrollbar, so the gutter rows were checked only with synthetic pointer events dispatched on the scroller (labelled). The real scrollbar drag is the Tech Lead's R34-T(3). The empty area was checked with a real click (lanes folded).",
+    "Not run by task scope §4.7 (not PASS): export WAV, audio graph R31-PE/PV/PL, PUI geometry, R32-BC, video sync, C-R27-01. The full find sound -> add -> fit video -> export flow and FB-01..FB-16 are left for the stage regression."
+  ]
+}

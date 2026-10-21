@@ -1,0 +1,34 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R32-01",
+      "severity": "medium",
+      "steps": [
+        "Anonymous /studio-lab at 1440x900, layout L32: demo video at 0, სრული მიქსი on music at 7, Soft impact on SFX at 4.",
+        "Real click ($B click) on the music Volume fader. The value moves to 0.5 with one Volume entry, and focus is now on the fader. Using element.focus() gives the same result.",
+        "Real click on the Soft impact clip header. The clip is now selected, but document.activeElement is still 'Volume — მუსიკა'.",
+        "Real press Delete, then Backspace.",
+        "Variant: after focusing the fader, real click on the empty SFX lane body, then the clip, then Delete. Focus still stays on the fader.",
+        "Order matters: the dispatched order (real clip click, then focus() the fader, then Delete) passes. The reverse order (fader first, then a real click on a clip or lane, then Delete) fails. This is a spec gap found by real interaction."
+      ],
+      "expected": "Clicking a clip or the lane body moves the edit context to the timeline, so Delete deletes the selected clip and leaves a gap with one entry (SRW-24; task §0 says Delete on a clip or the lane body is unchanged). The fader guard should apply only while the user is actually working the fader.",
+      "actual": "Nothing happens: no deletion, no history entry, no status text. The clip stays selected. Delete keeps doing nothing until the user moves focus to some focusable non-range element. Cause by code reading: ArrangementClip.beginGesture calls event.preventDefault() on pointerdown (l.228), which stops the browser moving focus, and the lane body has tabIndex -1. The new isRangeInputTarget guard then sees the stale focused range. Before round 32 the same sequence deleted the clip (that was the C-R31-02 path). The new guard turns 'fader key edits the timeline' into 'Delete silently dead after any fader use'. Regression scope: for Volume, Master and Zoom the fader→clip→Delete sequence used to delete the clip and is now dead. For Pan it was already dead before round 32 (the stopPropagation of deviation 1), so Pan is unchanged-dead. Pan shows the same focus retention (dk.txt row 6: focus stayed on Pan after a real clip click).",
+      "evidence": "tmp/studio-real-loop/c-round-32/runs/dk-focus-retention.txt (A = body-focus control deletes; B, C, D = fader focus kept, Delete no-op), runs/dk.txt row 'selected clip' (focus Pan after a real click), runs/bc-pid1-realclick.txt (focus stays on Pan after a real lane-body click), shots/dk-volume-after-delete.png"
+    }
+  ],
+  "passed": [
+    "G32-1",
+    "G32-2",
+    "G32-3",
+    "R32-BC",
+    "R32-K",
+    "R32-S",
+    "R32-U",
+    "R32-Doc"
+  ],
+  "blocked": [
+    "Not run: an extra mutation (h) that removes the lane unmount effect (C's script had a quoting error). It was optional and not in the task list.",
+    "Not run: the 1280x720 viewport. §4 fixes the viewport at 1440x900, and no layout code changed."
+  ]
+}

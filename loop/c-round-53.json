@@ -1,0 +1,37 @@
+{
+  "taskStatus": "BLOCKED",
+  "bugs": [
+    {
+      "id": "C-R53-01",
+      "severity": "medium",
+      "steps": [
+        "Mounted StudioWorkspace (jsdom, scratch probe P3x in c-round-53/scratch/mut/app/lib/arrangement/__tests__/c-probe-r52.test.tsx): m1 music start 2 length 2; st0 stems start 0 length 6.0004; Snap on 1 s; 40 px/s",
+        "Drag the m1 header from clientX 80 by +162 px with clientY on the stems lane (raw start 6.05)"
+      ],
+      "expected": "m1 lands on stems at 6.0004 (start touches st0's end), like the same-lane control P3s (6.0004)",
+      "actual": "Move refused: m1 stays on music at 2; status 'კლიპის გადატანა: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.' Cause: planClipLaneMove (selection.ts, frozen) rounds the delta to ms, so 6.0004 → 6.000 overlaps by 0.4 ms. Known gap A-R53-REVIEW-CROSSLANE-SUBMS; not a round-53 regression.",
+      "evidence": "c-round-53/runs/probes.txt (P3x, P3s)"
+    },
+    {
+      "id": "C-R48-01",
+      "severity": "low",
+      "steps": [
+        "Run npm run verify in store with node.exe at 9 (first run; C's scratch copy and junction were set up in parallel during the first minute)"
+      ],
+      "expected": "87 files / 1497, 0 failures",
+      "actual": "2 failures from 'Test timed out in 5000ms': grid-snap-loop-drop SD1 and track-layout 'writes no history for fold…'. Both files pass alone (63/63), and a second quiet verify gives rc 0 (87/1497/0). A recurrence of the load-timeout pattern.",
+      "evidence": "c-round-53/verify.txt, c-round-53/gates/timeouts-alone.txt, c-round-53/gates/verify-2.txt"
+    }
+  ],
+  "passed": ["R53-S", "R53-U", "G53-1", "G53-2"],
+  "blocked": [
+    "Dev server http://127.0.0.1:5173 down (curl 000 at 17:27, 17:41 and 17:47 +04; nothing listening on :5173/:5199). C does not start servers. c-browse.json was never created.",
+    "R52-EDGE (EG-OFF, EG-1, EG-VIDEO, EG-LINE, EG-ALT, EG-ALT-ON, EG-CROSS, EG-GROUP, EG-1280): not run (environment)",
+    "R53-LANE (LN-TOUCH, LN-AFTER, LN-SHORT): not run (environment)",
+    "R52-TRIM (ET-START, ET-END, ET-ALT, ET-CLAMP): not run (environment)",
+    "R52-PLAY (EP-VIDEO, EP-OFF; real audio graph / SFX meter): not run (environment)",
+    "R52-REG browser spot checks and REG-HYD: not run (environment)",
+    "G53-3 anonymous workspace and purchase protection: not run (environment); purchase protection not browser-verified for a second round",
+    "Mutation (g) leaves CT8 surviving: a spec inconsistency with R3 (the CT8 neighbour is same-lane and bypasses clipEdgeTimes); (g2) shows CT8 guards exactness. B to reword the expectation."
+  ]
+}

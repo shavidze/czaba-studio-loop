@@ -1,0 +1,356 @@
+diff --git a/app/components/arrangement/ArrangementGridMenu.tsx b/app/components/arrangement/ArrangementGridMenu.tsx
+index 8f8845c..b92cfe1 100644
+--- a/app/components/arrangement/ArrangementGridMenu.tsx
++++ b/app/components/arrangement/ArrangementGridMenu.tsx
+@@ -1,6 +1,6 @@
+ import { Fragment, type KeyboardEvent, useEffect, useRef, useState } from 'react';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+-import type { GridDivisionOption } from '~/lib/arrangement/grid-divisions';
++import { GRID_TRIPLET_MENU_LABEL, type GridDivisionOption } from '~/lib/arrangement/grid-divisions';
+ 
+ const GRID_MENU_VIEWPORT_MARGIN_PX = 4;
+ const GRID_MENU_LABEL = 'ბადის დანაყოფი';
+@@ -16,6 +16,8 @@ interface ArrangementGridMenuProps {
+   snapEnabled: boolean;
+   onChooseDivision: (id: string) => void;
+   onToggleSnap: () => void;
++  tripletChecked?: boolean | null;
++  onToggleTriplet?: () => void;
+   onClose: () => void;
+ }
+ 
+@@ -69,6 +71,8 @@ export function ArrangementGridMenu({
+   snapEnabled,
+   onChooseDivision,
+   onToggleSnap,
++  tripletChecked = null,
++  onToggleTriplet,
+   onClose,
+ }: ArrangementGridMenuProps) {
+   const menuRef = useRef<HTMLDivElement>(null);
+@@ -82,7 +86,9 @@ export function ArrangementGridMenu({
+   const [position, setPosition] = useState({ left: x, top: y });
+   const onCloseRef = useRef(onClose);
+   onCloseRef.current = onClose;
+-  const itemCount = divisions.length + 1;
++  const tripletIndex =
++    tripletChecked === null || onToggleTriplet === undefined ? null : divisions.length + 1;
++  const itemCount = divisions.length + 1 + (tripletIndex === null ? 0 : 1);
+ 
+   useIsomorphicLayoutEffect(() => {
+     const menu = menuRef.current;
+@@ -121,6 +127,10 @@ export function ArrangementGridMenu({
+   };
+ 
+   const chooseGridMenuItem = (index: number) => {
++    if (index === tripletIndex) {
++      onToggleTriplet?.();
++      return;
++    }
+     const division = divisions[index];
+     if (division === undefined) {
+       onToggleSnap();
+@@ -214,6 +224,25 @@ export function ArrangementGridMenu({
+         </span>
+         {GRID_MENU_SNAP_LABEL}
+       </button>
++      {tripletIndex === null ? null : (
++        <button
++          ref={(element) => {
++            itemRefs.current[tripletIndex] = element;
++          }}
++          type="button"
++          role="menuitemcheckbox"
++          aria-checked={tripletChecked === true}
++          tabIndex={activeIndex === tripletIndex ? 0 : -1}
++          onClick={() => chooseGridMenuItem(tripletIndex)}
++          onFocus={() => setActiveIndex(tripletIndex)}
++          className={GRID_MENU_ITEM_CLASS}
++        >
++          <span aria-hidden="true" className="w-3 text-accent">
++            {tripletChecked === true ? '✓' : ''}
++          </span>
++          {GRID_TRIPLET_MENU_LABEL}
++        </button>
++      )}
+     </div>
+   );
+ }
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 39b7a69..16aafee 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -32,9 +32,13 @@ import {
+   gridDivisionTitle,
+   gridMusicalGroupLabel,
+   gridTempoClearedMessage,
++  gridTripletGroupLabel,
++  gridTripletRefusalMessage,
+   isMusicalGridDivisionId,
++  isTripletGridDivisionId,
+   type MusicalGridDivisionId,
+   musicalGridDivisionSeconds,
++  toggledTripletGridDivisionId,
+ } from '~/lib/arrangement/grid-divisions';
+ import { metronomeStatusMessage } from '~/lib/arrangement/metronome';
+ import {
+@@ -940,6 +944,17 @@ export function StudioWorkspace() {
+     [changeGridDivision],
+   );
+ 
++  const toggleGridTriplet = useCallback(() => {
++    const current = gridDivisionIdRef.current;
++    const tempo = tempoBpmRef.current;
++    const next = toggledTripletGridDivisionId(current);
++    if (next === null || tempo === null) {
++      workspaceRef.current.setStatus(gridTripletRefusalMessage(current, tempo));
++      return;
++    }
++    changeGridDivision(next);
++  }, [changeGridDivision]);
++
+   const closeGridMenu = useCallback(() => {
+     if (!gridMenuOpenRef.current) {
+       return;
+@@ -978,6 +993,11 @@ export function StudioWorkspace() {
+     closeGridMenu();
+   }, [toggleSnap, closeGridMenu]);
+ 
++  const toggleGridMenuTriplet = useCallback(() => {
++    toggleGridTriplet();
++    closeGridMenu();
++  }, [toggleGridTriplet, closeGridMenu]);
++
+   const isGridMenuOpen = gridMenu !== null;
+   useEffect(() => {
+     const scroller = scrollerRef.current;
+@@ -1419,6 +1439,13 @@ export function StudioWorkspace() {
+         stepGridDivision(event.code === 'Digit1' ? 'narrow' : 'widen');
+         return;
+       }
++      if (event.code === 'Digit3' && !event.altKey && !event.shiftKey) {
++        event.preventDefault();
++        if (!event.repeat) {
++          toggleGridTriplet();
++        }
++        return;
++      }
+       if (event.key === 'Home' && !isSliderTarget(event.target)) {
+         event.preventDefault();
+         if (!isSeparatorTarget(event.target)) {
+@@ -1505,7 +1532,7 @@ export function StudioWorkspace() {
+       window.removeEventListener('dragover', handleStrayFileDrag);
+       window.removeEventListener('drop', handleStrayFileDrag);
+     };
+-  }, [returnFloatingVideo, stepGridDivision, toggleSnap]);
++  }, [returnFloatingVideo, stepGridDivision, toggleGridTriplet, toggleSnap]);
+ 
+   const viewportSeconds = Math.max(0, viewportWidth - ARRANGEMENT_HEADER_WIDTH_PX) / pxPerSecond;
+   const timelineSeconds = Math.ceil(Math.max(projectEnd + TIMELINE_TAIL_SECONDS, viewportSeconds));
+@@ -1588,7 +1615,8 @@ export function StudioWorkspace() {
+     };
+   }, []);
+   const gridLinesShown = gridLinesVisible(gridSeconds, pxPerSecond);
+-  const gridOptions = gridDivisionOptions(tempoBpm);
++  const gridTriplet = isTripletGridDivisionId(gridDivisionId);
++  const gridOptions = gridDivisionOptions(tempoBpm, gridTriplet);
+   const loopTimesText = arrangement.loop
+     ? `Loop ${formatArrangementTime(arrangement.loop.start)} — ${formatArrangementTime(arrangement.loop.end)}${arrangement.loop.enabled ? '' : ' · off'}`
+     : null;
+@@ -1707,7 +1735,9 @@ export function StudioWorkspace() {
+                       onKeyDown={(event) => {
+                         if (
+                           exportOpenRef.current ||
+-                          (event.code !== 'Digit1' && event.code !== 'Digit2') ||
++                          (event.code !== 'Digit1' &&
++                            event.code !== 'Digit2' &&
++                            event.code !== 'Digit3') ||
+                           event.ctrlKey ||
+                           event.metaKey ||
+                           event.altKey ||
+@@ -1716,12 +1746,17 @@ export function StudioWorkspace() {
+                           return;
+                         }
+                         event.preventDefault();
+-                        if (!event.repeat) {
++                        if (event.repeat) {
++                          return;
++                        }
++                        if (event.code === 'Digit3') {
++                          toggleGridTriplet();
++                        } else {
+                           stepGridDivision(event.code === 'Digit1' ? 'narrow' : 'widen');
+                         }
+                       }}
+                       aria-label="ბადის დანაყოფი"
+-                      aria-keyshortcuts="1 2"
++                      aria-keyshortcuts={tempoBpm !== null ? '1 2 3' : '1 2'}
+                       title={gridDivisionTitle(gridDivisionId, gridLinesShown)}
+                       className="h-6 shrink-0 rounded-sm border border-outline bg-surface px-1 text-xs leading-none tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                       data-testid="arrangement-grid-division"
+@@ -1734,7 +1769,13 @@ export function StudioWorkspace() {
+                           </option>
+                         ))}
+                       {tempoBpm !== null ? (
+-                        <optgroup label={gridMusicalGroupLabel(tempoBpm)}>
++                        <optgroup
++                          label={
++                            gridTriplet
++                              ? gridTripletGroupLabel(tempoBpm)
++                              : gridMusicalGroupLabel(tempoBpm)
++                          }
++                        >
+                           {gridOptions
+                             .filter((option) => option.family === 'musical')
+                             .map((option) => (
+@@ -1911,6 +1952,8 @@ export function StudioWorkspace() {
+           snapEnabled={snapEnabled}
+           onChooseDivision={chooseGridMenuDivision}
+           onToggleSnap={toggleGridMenuSnap}
++          tripletChecked={tempoBpm !== null ? gridTriplet : null}
++          onToggleTriplet={toggleGridMenuTriplet}
+           onClose={closeGridMenu}
+         />
+       ) : null}
+diff --git a/app/lib/arrangement/grid-divisions.ts b/app/lib/arrangement/grid-divisions.ts
+index faae2a9..661799c 100644
+--- a/app/lib/arrangement/grid-divisions.ts
++++ b/app/lib/arrangement/grid-divisions.ts
+@@ -10,7 +10,19 @@ export const MUSICAL_GRID_DIVISIONS = [
+   { id: '1/32', label: '1/32', beats: 0.125 },
+ ] as const;
+ 
+-export type MusicalGridDivisionId = (typeof MUSICAL_GRID_DIVISIONS)[number]['id'];
++export const MUSICAL_TRIPLET_GRID_DIVISIONS = [
++  { id: '1/2T', label: '1/2T', beats: 4 / 3, straight: '1/2' },
++  { id: '1/4T', label: '1/4T', beats: 2 / 3, straight: '1/4' },
++  { id: '1/8T', label: '1/8T', beats: 1 / 3, straight: '1/8' },
++  { id: '1/16T', label: '1/16T', beats: 1 / 6, straight: '1/16' },
++  { id: '1/32T', label: '1/32T', beats: 1 / 12, straight: '1/32' },
++] as const;
++
++export type MusicalGridDivisionId =
++  | (typeof MUSICAL_GRID_DIVISIONS)[number]['id']
++  | (typeof MUSICAL_TRIPLET_GRID_DIVISIONS)[number]['id'];
++
++export const GRID_TRIPLET_MENU_LABEL = 'ტრიოლები (3)';
+ 
+ export interface GridDivisionOption {
+   id: string;
+@@ -26,12 +38,25 @@ const MUSICAL_GRID_DIVISION_IDS: readonly string[] = MUSICAL_GRID_DIVISIONS.map(
+   (division) => division.id,
+ );
+ 
++const MUSICAL_TRIPLET_GRID_DIVISION_IDS: readonly string[] = MUSICAL_TRIPLET_GRID_DIVISIONS.map(
++  (division) => division.id,
++);
++
+ function findMusicalGridDivision(id: string) {
+   for (const division of MUSICAL_GRID_DIVISIONS) {
+     if (division.id === id) {
+       return division;
+     }
+   }
++  return findTripletGridDivision(id);
++}
++
++function findTripletGridDivision(id: string) {
++  for (const division of MUSICAL_TRIPLET_GRID_DIVISIONS) {
++    if (division.id === id) {
++      return division;
++    }
++  }
+   return null;
+ }
+ 
+@@ -39,12 +64,28 @@ export function isMusicalGridDivisionId(value: string): value is MusicalGridDivi
+   return findMusicalGridDivision(value) !== null;
+ }
+ 
++export function isTripletGridDivisionId(value: string): boolean {
++  return findTripletGridDivision(value) !== null;
++}
++
++export function toggledTripletGridDivisionId(id: string): string | null {
++  for (const division of MUSICAL_TRIPLET_GRID_DIVISIONS) {
++    if (division.id === id) {
++      return division.straight;
++    }
++    if (division.straight === id) {
++      return division.id;
++    }
++  }
++  return null;
++}
++
+ export function musicalGridDivisionSeconds(id: MusicalGridDivisionId, bpm: number): number {
+   const beats = findMusicalGridDivision(id)?.beats ?? Number.NaN;
+   return (beats * 60) / bpm;
+ }
+ 
+-export function gridDivisionOptions(bpm: number | null): GridDivisionOption[] {
++export function gridDivisionOptions(bpm: number | null, triplet = false): GridDivisionOption[] {
+   const seconds: GridDivisionOption[] = GRID_DIVISIONS_SECONDS.map((step) => ({
+     id: String(step),
+     label: formatGridDivision(step),
+@@ -55,7 +96,7 @@ export function gridDivisionOptions(bpm: number | null): GridDivisionOption[] {
+   }
+   return [
+     ...seconds,
+-    ...MUSICAL_GRID_DIVISIONS.map(
++    ...(triplet ? MUSICAL_TRIPLET_GRID_DIVISIONS : MUSICAL_GRID_DIVISIONS).map(
+       (division): GridDivisionOption => ({
+         id: division.id,
+         label: division.label,
+@@ -70,6 +111,9 @@ export function gridDivisionLabel(id: string): string {
+ }
+ 
+ function gridDivisionFamilyIds(id: string): readonly string[] {
++  if (isTripletGridDivisionId(id)) {
++    return MUSICAL_TRIPLET_GRID_DIVISION_IDS;
++  }
+   return isMusicalGridDivisionId(id) ? MUSICAL_GRID_DIVISION_IDS : SECONDS_GRID_DIVISION_IDS;
+ }
+ 
+@@ -111,6 +155,20 @@ export function gridMusicalGroupLabel(bpm: number): string {
+   return `ტაქტები · ${formatTempoBpm(bpm)} BPM`;
+ }
+ 
++export function gridTripletGroupLabel(bpm: number): string {
++  return `ტრიოლები · ${formatTempoBpm(bpm)} BPM`;
++}
++
++export function gridTripletRefusalMessage(id: string, bpm: number | null): string {
++  if (bpm === null) {
++    return 'ტრიოლები მხოლოდ ტემპით — ჯერ ჩაწერე BPM (3)';
++  }
++  if (id === 'bar') {
++    return '1 ტაქტს ტრიოლი არ აქვს — აირჩიე 1/2 ან უფრო მჭიდრო (3)';
++  }
++  return 'ტრიოლები მხოლოდ ტაქტების ბადეზე — აირჩიე 1/2 … 1/32 (3)';
++}
++
+ export function gridDivisionTitle(id: string, linesVisible: boolean): string {
+   const label = gridDivisionLabel(id);
+   return linesVisible
+diff --git a/docs/implementation/2026/quarter-IV/060-studio-lab-musical-grid-divisions.md b/docs/implementation/2026/quarter-IV/060-studio-lab-musical-grid-divisions.md
+index 02c7358..23f5f18 100644
+--- a/docs/implementation/2026/quarter-IV/060-studio-lab-musical-grid-divisions.md
++++ b/docs/implementation/2026/quarter-IV/060-studio-lab-musical-grid-divisions.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — ბადის მუსიკალური დანაყოფები BPM-იდან (SRW-14, ეტაპი 5a)
+ 
+ **თარიღი:** 2026-10-20
+-**სტატუსი:** Round 67–68 — D-29z32, D-29z33; C-ის შემოწმებას ელოდება
++**სტატუსი:** Round 67–68 — D-29z32, D-29z33; C PASS (round 68), გამოქვეყნდა 8bf9db4
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -29,6 +29,7 @@
+ - **ხაზი k** = `k × step`, ყოველთვის ინდექსიდან (დაგროვების გარეშე). დაბრუნებული დრო მრგვალდება **მთელ მილიწამამდე**, როგორც მოდელის დანარჩენი ნაწილი.
+ - **მთელი ms-ის ბიჯები** (ყველა წამის დანაყოფი და, მაგალითად, 120 BPM-ზე 1/4 = 0.5) დღევანდელ არითმეტიკას byte-ით ინარჩუნებს.
+ - **სხვა ბიჯები** (მაგ. 60/90): `snapTimeToGrid` ითვლის `Math.floor(time / step + 0.5)` ინდექსს და `round(k × step × 1000) / 1000`-ს. `adjacentGridLine`-ისა და `snapGroupDelta`-ის floor/ceil ინდექსის გამოსახულებები იყენებს `0.000501` tolerance-ს `1e-6`-ის ნაცვლად, რადგან შენახული ხაზი ზუსტ `k × step`-ს 0.5 ms-მდე შეიძლება ცდებოდეს. `snapGroupDelta`-ის in-bounds შედარებები `1e-6`-ზე რჩება.
++- **ჩანაცვლებულია:** `0.000501` tolerance-ისა და `MUSICAL_GRID_INDEX_TOLERANCE`-ის აღწერა მოძველებულია და მის ნაცვლად მოქმედებს ქვემოთ მოცემული სექცია „Round 68 — სიზუსტის შესწორება (D-29z33)“.
+ - **რატომ:** ძველი ms-ბიჯის არითმეტიკით `snapTimeToGrid(100, 60/90)` = 100.05 (დრეიფი), ხოლო `adjacentGridLine(1.333, 60/90, +1)` = 1.333, ანუ კლავიატურით ჩაჩოჩება საკუთარ ხაზზე იჭედებოდა. ახალი წესით შედეგებია 100 და 2.
+ 
+ ### უარყოფილი ვარიანტები

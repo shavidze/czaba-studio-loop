@@ -1,0 +1,52 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R14-01",
+      "severity": "medium",
+      "steps": [
+        "Fresh /studio-lab at 1280x720, import a video (media/beeps-6s-vp9-opus.webm) on the video lane",
+        "Focus the library separator and press ArrowRight x12 (library 480)",
+        "Real click on the dock expand button (video expands to D-29e placement 8,263 442.66x248.98)",
+        "Real click on the search field, type 'soft'",
+        "Real click on the single result row ([role=option])"
+      ],
+      "expected": "find -> add by pointer remains possible while the video is expanded at its default placement; the result rows and tree are reachable (the C-R13-01 rationale: search and the first list rows are the find -> add entry point)",
+      "actual": "The box covers 263-512 of the 255-520 library body: 9/9 list rows and 9/9 tree nodes are covered at every scroll position; elementFromPoint at the result row centre returns arrangement-video; gstack real click on [role=option] fails 'not interactable', no clip added. Keyboard ArrowDown+Enter still adds. At 1440x900/288 the bottom rows (padi, melodia) stay under the box even at maximum list scroll (186 px) because the list has no bottom padding for the box.",
+      "evidence": "tmp/studio-real-loop/c-round-14/runs/p2-1280-480.txt, p2-1280-480-rows.json, p2-covered-rows-scrolled-1440.json, shots/expanded-1280-480.png, shots/p2-list-scrolled-max-1440.png"
+    },
+    {
+      "id": "C-R14-02",
+      "severity": "low",
+      "steps": [
+        "/studio-lab 1440x900, open Export",
+        "Focus lands on the Modal's own Close (X) button (e.g. mouse-down without release, or click during a WAV render when handleClose is a no-op; C used .focus())",
+        "Real Shift+Tab twice, then real Enter"
+      ],
+      "expected": "Tab/Shift+Tab stay inside [role=dialog]; no workspace control behind the open dialog can be activated",
+      "actual": "Shift+Tab moves focus out of the dialog (to the workspace arrangement-detail-toggle on the second press); Enter then collapses the detail panel behind the open dialog (144 -> 36), next Enter expands it again. Tab from X correctly goes to the radio.",
+      "evidence": "tmp/studio-real-loop/c-round-14/runs/e-modalx-1440.txt"
+    }
+  ],
+  "passed": [
+    "R14-P1",
+    "R14-P2",
+    "R14-S",
+    "R14-E",
+    "R14-U",
+    "R14-Doc",
+    "R13-F2-quick",
+    "R13-F3-quick",
+    "R13-F4-quick",
+    "R11A-1-quick",
+    "dock-quick",
+    "RF7-P2",
+    "G14-1",
+    "G14-2",
+    "G14-3"
+  ],
+  "blocked": [
+    "Real prefers-reduced-motion for the floating-video placement: CDP Emulation.setEmulatedMedia denied by browse allowlist; only the inline transition-property:none simulation was run (Tech Lead)",
+    "Mid-render focus during WAV export could not be sampled in the browser (render finished in <120 ms); covered by component test and A guard G7 only"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "decision": "CONTINUE",
+  "reason": "C round 14 PASSED (c-round-14.md/json): R14-P1 (6 cases, delta <= 0.02, hit-tests on ◀/search/separator/preview return the control), R14-P2 (1440), R14-S, R14-E (keyboard WAV 288384 frames = project end), R14-U (C guards G1-G4), R14-Doc, adjacent R13-F2/F3/F4 quick, R11A-1 quick, dock quick, RF7-P2, G14-1..3 (tsc 0, vitest 945/945, build, Biome, protected 4/4, frozen 35/35, anonymous /studio-lab clean, studio-token 401). C-R13-01..03 are closed on C's evidence. C opened C-R14-01 (Medium: the D-29e box covers the bottom library rows, which cannot scroll out from under it; at 1280x720 with the library at 480, find -> add by mouse is blocked; a gap in B's formula) and C-R14-02 (Low: Shift+Tab from the Modal X leaves the Export dialog, and Enter then toggles the detail panel behind it). B ruled both in plan.md D-29f. Open: C-R6-02, C-R8-01 and C-R14-01 (Medium); C-R14-02, C-R11-01..03 and C-R12-01 (Low). No critical or high bug. Not COMPLETE: FB-04..07 and FB-09..14 are not started, SRW-11B has open bugs and polish, and the milestone regression and Tech Lead checks are pending. Not BLOCKED: round 15 needs no external info, approval or credentials.",
+  "nextTask": "Round 15 (tmp/studio-real-loop/current-task.md), two closely related bugs, D-29f. (1) C-R14-01, two mechanisms. (a) Height cap: width = max(160, min(640, lib.width-16, (body.h-16)*16/9, (body.h/2)*16/9)), with the new constant FLOATING_VIDEO_BODY_SHARE = 0.5; fixes 1280/480. Expected: 1440/288 8,523 272x153 (unchanged); 1440/480 8,450.5 429.33x241.5; 1280/288 8,379.5 207.11x116.5; 1280/480 8,379.5 235.56x132.5. (b) Bottom inset: while the video is expanded, the tree nav and the listbox get inline padding-bottom and scroll-padding-bottom = box height + 16 (pure helper floatingVideoLibraryInsetPx; new optional ArrangementLibrary prop bottomInsetPx; no style attribute when 0); fixes the last rows at 1440/288. (2) C-R14-02: ArrangementExportDialog passes a useRef object as ref to Modal (the content div that holds X and the children). One native Tab-only keydown listener goes there while the dialog is open, and the wrapper's onKeyDown is removed. Effect B uses the same list. Cycle X -> radio -> დახურვა -> WAV. X stays visible; Modal.tsx is read-only. The dock, video-sync, Modal and ArrangementLibraryPreview are frozen, so no sync runs. C checks R15-P1 (cap, hit-tests, real ◀), R15-P2 (the exact 1280/480 real-click repro, the 1440/288 last rows at max scroll, every row and tree node reachable in 4 cases, keyboard ArrowDown), R15-P3 (inset cleanup), R15-E (the exact X repro, 8-step cycles, R14-E quick), R15-U (four-part guard proof) and R15-Doc. Adjacent: R13-F2 quick from 8,450.5, R13-F3/F4 quick, R11A-1 quick, dock quick, RF7-P2. Gates G15-1..3; vitest floor 945; frozen reference b-round-14-tree-sha256.txt. Next: polish 14a/14b/14c in rounds 16-18, the milestone regression (incl. C-R12-01), SRW-13..20, the SRW-21 adapter, T12.",
+  "remaining": [
+    "C-R14-01",
+    "C-R14-02",
+    "C-R6-02",
+    "C-R8-01",
+    "C-R11-01",
+    "C-R11-02",
+    "C-R11-03",
+    "C-R12-01",
+    "SRW-11B",
+    "SRW-03",
+    "SRW-05",
+    "SRW-10",
+    "SRW-13",
+    "SRW-14",
+    "SRW-15",
+    "SRW-16",
+    "SRW-17",
+    "SRW-18",
+    "SRW-19",
+    "SRW-20",
+    "SRW-21",
+    "SRW-23",
+    "REGRESSION-DEBT-G6R",
+    "TECH-LEAD-MANUAL-CHECKS",
+    "T12-GAIN-VOLUME"
+  ]
+}

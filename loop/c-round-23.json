@@ -1,0 +1,31 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R23-01",
+      "severity": "medium",
+      "steps": [
+        "curl -s http://127.0.0.1:5173/studio-lab -o ssr.html (3 runs identical, 55611 B)",
+        "count 0x00 bytes: 4, at offsets 26019-26020 ('Arrangement · \\0\\0მთლიანი პროექტი') and 42403-42404 (aria-label=\"მუსიკა — \\0\\0აქტიური ხაზის არჩევა\")",
+        "open /studio-lab in a fresh tab without harness; read the music name button aria-label code points"
+      ],
+      "expected": "SSR HTML contains no NUL bytes; music name button aria-label is 'მუსიკა — აქტიური ხაზის არჩევა'",
+      "actual": "aria-label contains two U+FFFD ('მუსიკა — ��აქტიური ხაზის არჩევა', length 31) and stays corrupted after hydration for the whole session; the visible-text NULs are patched by hydration; no hydration warning in console. Cause: react-dom@18.3.1 server writeStringChunk flushes the full 2048-byte view (unwritten zero bytes included) when a 3-byte Georgian char does not fit; the same logic is in the production build. Mechanism predates round 23; whether round 23's added bytes moved the second pair onto the music label is unproven (no round-22 SSR capture). Fix needs a dependency or entry.server change (frozen): Tech Lead/root, not A round 24.",
+      "evidence": "tmp/studio-real-loop/c-round-23/runs/ssr-1.html, ssr-2.html, ssr-3.html, runs/hydration-console.txt, c-round-23.md §3"
+    }
+  ],
+  "passed": [
+    "R23-F1",
+    "R23-F2",
+    "R23-N",
+    "R23-R",
+    "R23-S",
+    "R23-U",
+    "R23-Doc",
+    "G23-1",
+    "G23-2",
+    "G23-3",
+    "export-sanity"
+  ],
+  "blocked": []
+}

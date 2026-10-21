@@ -1,0 +1,81 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R7-01",
+      "severity": "medium",
+      "steps": [
+        "Fresh /studio-lab, 1440x900, C harness setup (c-round-7/setup.sh), R3-V1 layout (c-round-6/scripts/r3v1lay.js)",
+        "Create loop 2-4 (c-round-7/scripts/looplay.js)",
+        "Run light drift harness L6_1: c-round-7/drift7.sh L6_1 '{vclips:[{start:0,end:6.008,off:0},{start:8,end:12.008,off:0}],durMs:8500,from:1,loop:{start:2,end:4}}'",
+        "Read wraps[].vtAfter300 of the first 3 wraps"
+      ],
+      "expected": "RF5-2 regression rule (RF7-3): video time 300 ms after each of the first 3 wraps of the first run is in [2.29, 2.31]",
+      "actual": "L6_1 (valid run: 0 stalls, 0 app LoAF, CPU med 15%) wrap 1 vt = 2.244 (56 ms late); wraps 2-3 2.295/2.294. Setup runs also show 2.286 (L6_4 w1) and 2.280 (L6_5 w2); A saw 2.278. Round 6 was 5/5 clean. Fresh-Play part of RF7-3 passes (play -10/+0.7/-10 ms, w1<=0.041, w2<=0.048).",
+      "evidence": "tmp/studio-real-loop/c-round-7/runs/rf72-summary.txt, L6_1.json, L6_1_res.txt, L6_1_raw.json, L6_1_cpu.csv"
+    },
+    {
+      "id": "C-R6-02",
+      "severity": "medium",
+      "steps": [
+        "Fresh /studio-lab, 1440x900, C harness setup, R3-V1 layout",
+        "Run light drift harness 13 s (c-round-7/drift7.sh L_n with R3-V1 vclips) several times",
+        "Inspect LoAF entries with app-attributed scripts in the _raw.json"
+      ],
+      "expected": "No app-attributed LoAF >= 10 ms in steady playback after the round-7 per-frame fixes",
+      "actual": "Still open. RF7-2 passes on its written criterion (R3-V1 L_1/L_3/L_4 PASS, R2-V3 3/3 PASS) and forced layout is 0, but INVALID run L_2 (cover 15.6% from non-app preemption stalls) has ArrangementContext.tsx FrameRequestCallback scripts of 49 ms and 61 ms coinciding with -0.246/-0.175 s excursions (not stall-excluded), and L_3 has a 16 ms VideoDock step LoAF. Cause (app vs preemption) unconfirmed; forced-layout axis was 0 before the fix too, so RF7-P1 does not discriminate. Candidates named by A: LibraryPlayheadText per-frame React consumer, post-hold isTransportRunning re-render. Tech Lead quiet-Chrome RF7-2 (VP9 + H.264) is the required next evidence.",
+      "evidence": "tmp/studio-real-loop/c-round-7/runs/rf72-summary.txt, L_2_raw.json, L_2_res.txt, L_3_raw.json"
+    },
+    {
+      "id": "C-R7-02",
+      "severity": "low",
+      "steps": [
+        "Fresh /studio-lab at 1280x720 and 1440x900, empty project",
+        "Sweep zoom levels from ZOOM_MIN to 320 px/s (c-round-7/scripts/n5r.js)",
+        "Measure scroller.scrollWidth - timeline content width at each zoom"
+      ],
+      "expected": "Last ruler label never adds more than 1 px of scroll width beyond the timeline content",
+      "actual": "Named R10-N5r cases pass (1.0 / 0.27 / -0.02 px), but sweep reaches 1.41 px (1280, 206.8 px/s) and 1.47 px (1440, 186.5 px/s); empty default sits exactly at 1.0 px. No overlap or cut label anywhere.",
+      "evidence": "tmp/studio-real-loop/c-round-7/runs/n5r-1280x720.json, n5r-1440x900.json (sweep, sweepWorst)"
+    }
+  ],
+  "passed": [
+    "RF7-P1",
+    "RF7-P2",
+    "RF7-2",
+    "RF7-U",
+    "R10-N5r",
+    "R10-N5-U",
+    "R30-1",
+    "R30-2",
+    "R30-U",
+    "R7-D1",
+    "G7-1",
+    "G7-2",
+    "G7-3",
+    "R26-1",
+    "R26-2",
+    "R26-3",
+    "R4-M2",
+    "R10-N1",
+    "R10-N3",
+    "R10-N6",
+    "R10-N8",
+    "R27-1"
+  ],
+  "blocked": [
+    "RF6-1 not applicable: VideoDock step and video-sync.ts unchanged this round",
+    "R3-V3/R5-B1r not required: no video or schedule path changed; e2e export re-checked instead (26.000 s 24-bit/48k WAV, gap -240 dB, bass onset 10.000125 s)",
+    "G7-3 fake Bearer path only partially exercised: backend 5199 is down (500, no token issued)",
+    "Real mouse / real multi-touch / real focus order (D-30 H1) and quiet-machine Chrome runs require Tech Lead; only synthetic pointers and headless Chromium were available",
+    "21 G6-R IDs not re-run this round (milestone regression): R1-B5, R2-V1, R3-V2, R3-V4, R4-B1, R5-L3, R5-L4, R5-L5, R6-S5, R7-D2..D5, R8-M3, R8-M4, R9-C5, R11A-2 keys, R12-L2, R12-L4, R5-B5, R5-B1u"
+  ],
+  "failed": [
+    "RF7-3"
+  ],
+  "notes": {
+    "RF7-P2_browser": "0 LoAF across 5 Play clicks, so the LoAF app-script criterion is met only vacuously; click+React flush 6.5/11.2/11.9/7.3/7.2 ms (median 7.3), CPU 7-11 %",
+    "RF7-2": "Passes written criterion; C-R6-02 remains open (see bug)",
+    "sourceStable": "git diff --stat identical at 16:07 and 18:09; round-7 file mtimes <= 16:02"
+  }
+}

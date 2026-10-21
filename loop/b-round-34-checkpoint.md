@@ -1,0 +1,11 @@
+# B round 34 checkpoint
+- 16:21 archived current-task.md -> tasks/round-34.md; backups *.before-b-round-34 / .bak-before-b-round-34 created.
+- next: read a-round-34, c-round-34, feature-status, plan; write next task.
+- snapshots + b-round-34-tree-sha256.txt (copy of r33, 376) created; gates running
+- gates done: HEAD 1cefea1, 9 lines, tree 0 non-OK, protected 4/4, tsc 0, vitest 69/1247, build ok, node 7->7
+- backlog v36 written (b-scripts/b-round-34-backlog.cjs); C IDs R35-CR/CL/OT/R34/K/S/U/Doc, G35-1..3
+- plan D-29z written
+- feature-status written
+- current-task.md round 35 written
+- b-round-34.md + b-next.json written; pending final advisor
+- final advisor fixes applied (R35-U red/green split, case 11 fallback). DONE 2026-10-13T16:36:45+04:00

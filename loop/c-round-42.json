@@ -1,0 +1,68 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "TASK-R42-REGDEL",
+      "severity": "low",
+      "steps": [
+        "Read current-task.md §2.3 PK4 and §4.3 REG-DEL: 'SFX selected, Pan focused, REAL Delete -> the SFX clip is deleted (one entry)'",
+        "Fresh /studio-lab at 1440x900, layout L42; REAL click on the SFX clip header; REAL click on the music Pan slider; REAL Delete; REAL Backspace"
+      ],
+      "expected": "Per the frozen contract (StudioWorkspace.tsx l.1181-1184 range-input early return; fader-guards C-R31-02; track-pan l.822): the clip is kept and there are 0 entries. This is what the app does",
+      "actual": "The task text expects deletion. This is a task-text error, not an app bug. C tested the corrected expectation, and it passed",
+      "evidence": "tmp/studio-real-loop/c-round-42/runs/reg2-1440.txt; a-round-42.md §7"
+    },
+    {
+      "id": "FOREIGN-CI-YML",
+      "severity": "low",
+      "steps": [
+        "git status --short at 18:07 = the 3 contracted paths (gates/g42-2-start.txt)",
+        "git status --short at 18:59 also shows ' M .github/workflows/ci.yml' (mtime 18:46:21)"
+      ],
+      "expected": "The end-of-round status equals §3.2 (3 paths); .github/** is root-owned and frozen for A/C",
+      "actual": "A foreign change, not made by A or C: the pull_request trigger was removed and a concurrency/cancel-in-progress group was added. Not reverted. Root must confirm ownership and keep it out of the round-42 checkpoint or commit it deliberately",
+      "evidence": "tmp/studio-real-loop/c-round-42/gates/ci-yml-foreign-diff.txt, gates/g42-2-end.txt"
+    },
+    {
+      "id": "GSTACK-ACL",
+      "severity": "low",
+      "steps": [
+        "During G42-3, `$B restart` with BROWSE_STATE_FILE=tmp/studio-real-loop/c-browse.json",
+        "gstack printed: Failed to restrict Windows ACL on C:/Apps/czaba-project/tmp/studio-real-loop: Command failed: icacls ... /inheritance:r /grant:r sshav:(OI)(CI)(F)",
+        "Read-only icacls on tmp/studio-real-loop, tmp, c-round-41 and store"
+      ],
+      "expected": "The browse tool causes no ACL changes on project folders (the round forbids settings/security changes)",
+      "actual": "tmp/studio-real-loop and tmp have a single non-inherited owner-only ACE (no SYSTEM/Administrators); children inherit it. This is the state /inheritance:r produces. C cannot tell whether it predates this run. This is a browse-tool/environment item for root, not a CZABA app bug",
+      "evidence": "tmp/studio-real-loop/c-round-42/gates/acl-record.txt; c-round-42/runs/g42-3.txt"
+    }
+  ],
+  "passed": [
+    "G42-1",
+    "G42-2 (3 contracted paths; the foreign .github/workflows/ci.yml is recorded and not touched; the end status is not exactly §3.2 because of it)",
+    "G42-3",
+    "R42-S",
+    "R42-U",
+    "R42-Doc",
+    "R42-PK",
+    "PK-B",
+    "PK-LATE",
+    "PK-NEG",
+    "PK-1280",
+    "R42-RW",
+    "RW-B",
+    "RW-KEY",
+    "RW-GESTURE",
+    "RW-NORMAL",
+    "R42-REG",
+    "REG-KEYS",
+    "REG-RESET",
+    "REG-DEL (corrected to frozen C-R31-02 contract)",
+    "REG-DRAG",
+    "REG-FADERS"
+  ],
+  "blocked": [
+    "Not re-run this round per §4.6, so not passed: exports/WAV integrity, video sync and C-R27-01, the full find sound -> add -> fit video -> export flow, the FB-01..FB-16 stage regression, the detail-panel geometry",
+    "Real Alt+Tab while holding the mouse with release outside the window cannot be reproduced headless; it remains the Tech Lead's R31-T (+ the round-42 step)",
+    "ENV-BROWSE-DAEMON: gstack restart broke the daemon twice during G42-3; the one-retry budget was exceeded (attempt 1 invalid under load, attempt 2 stopped at 10 min, attempt 3 valid for direct/session/premium, the header step in new daemon PID 43760). The data comes from valid runs only. Next time, use a fresh BROWSE_STATE_FILE instead of restart"
+  ]
+}

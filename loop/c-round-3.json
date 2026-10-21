@@ -1,0 +1,93 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R3-01",
+      "severity": "high",
+      "steps": [
+        "Fresh /studio-lab (gstack HeadlessChrome 145, 1440x900, no credentials). Picker-import beeps-6s-vp9-opus.webm (0-6.008), drop clip-4s-vp9-opus.webm and header-drag it to 8.000, add Middle East on music at 0 (R3-V1 layout). Separately: R2-V3 layout (trim 0.5, Ctrl+E at 3, Delete Time 1-2, Slow rise on SFX).",
+        "Press the Home button, then Play. Every 250 ms, in one rAF callback, read video.currentTime, video.seeking and ctx.currentTime; the target is ctx.currentTime - when(first source). Log every currentTime/playbackRate assignment, every requestVideoFrameCallback frame and rAF gaps over 100 ms. Exclude 300 ms after the start and after each clip boundary.",
+        "R3-V1: 10 runs in one page load, plus 5 runs with a reload before each. R2-V3: 3 runs in one load, plus 2 runs with a reload."
+      ],
+      "expected": "RF3-1: every run has median |d| <= 0.05 s and max |d| <= 0.1 s, zero currentTime writes while seeking, no presented-frame gap over 250 ms outside the exclusions, playbackRate within [0.85, 1.15] and exactly 1 after Pause, muted always and exactly one <video>.",
+      "actual": "R3-V1 passed 5/15: same load 3/10 (runs 4, 5, 6), reload 2/5 (reload runs 2 and 5). Failing max |d| values: 0.108, 0.107, 0.349, 0.288, 0.115, 0.313, 0.143 (same load) and 0.290, 0.237, 0.429 (reload). R2-V3 passed 3/5: the 3 same-load runs pass; reload 1 has max 0.103, and reload 2 has median 0.141 and max 0.293 with a 0.375 s frame gap. Rules met in all 20 runs: 0 currentTime writes while seeking, rate within [0.85, 1.15], rate exactly 1 after Pause, muted, 1 <video>. No failing run qualified for the starvation re-run: in each one, at least one failing sample had no sample interval over 400 ms and no rAF gap over 100 ms. There are three mechanisms. (a) Hard-seek cascade: running seeks take 0.3-0.9 s headless, and the lead is capped at 0.15, so each seek lands 0.15-0.5 s behind; |d| > 0.3 then triggers another seek, and frames freeze for up to 0.615 s (r3v1_3, r3v1_reload_1/4, v3play_reload_2). (b) Soft-sync ceiling: at the 1.15 clamp the video regains only 0.15 s per second, so any lag between 0.1 and 0.3 s stays below the hard-seek threshold for 0.3-1.3 s. Runs 7, 8 and 10 fail this way with only the start and boundary seeks. In the passing runs too, the rate sits at 1.1-1.15 most of the time, so the video lags steadily. (c) At a continuous same-source clip boundary, the dock still hard-seeks whenever |d| > 0.08 (ArrangementVideoDock.tsx:176). D-16 rule 4 allows a hard seek only at a non-continuous boundary or for |d| > 0.3. v3play_reload_2 seeks at 2.03, at the continuous boundary 1-2 (offset 2) to 2-5.008 (offset 3), and that starts a cascade. CPU load from other desktop processes was 54-100% during the runs. Headless software VP9 decoding probably exaggerates the problem, but the acceptance metric fails as written. Tech Lead real-Chrome confirmation remains a recorded limitation.",
+      "evidence": "tmp/studio-real-loop/c-round-3/r3v1_*.json + *.summary.json, v3play_*.json; logs r3v1-same-load.log, r3v1-reload.log, v3play.log (CPU per run); scripts c-round-2/scripts/r3v1.js, vfc.js, r3setup.js, v3setup.js, c-round-3/scripts/mon.js, post.js, run1.sh"
+    },
+    {
+      "id": "C-R3-02",
+      "severity": "high",
+      "steps": [
+        "Fresh /studio-lab. Picker-import beeps-6s-vp9-opus.webm (video 0-6.008). Drag a range 2-4 on the video clip body, press Ctrl+L (real key), and click empty stems lane space to clear the range.",
+        "Seek to 1.0 and Play for 8.6 s (3 wraps). Every 250 ms, compare video.currentTime with the loop-mapped audio-clock target. Exclude 300 ms after the start and after each wrap. Log currentTime writes and rVFC frames. 5 runs in one page load."
+      ],
+      "expected": "R5-L6: after every wrap, outside the 300 ms exclusion, drift is within the RF3-1 limits (median <= 0.05, max <= 0.1), with no currentTime write while seeking.",
+      "actual": "0/5 runs pass. Median values: 0.092, 0.036, 0.039, 0.033, 0.075. Max values: 0.719, 0.280, 0.206, 0.111, 1.329. Every wrap seek targets loop.start + 0.15 lead (2.151-2.175), lands 0.1-0.28 s behind, and recovers only at the 1.15 rate ceiling. In l6_5 a wrap seek was blocked by a still-pending seek from 6.518 s, so for about 0.85 s after the wrap at 7.0 the video showed frames from past the loop end: d = +1.33 at 7.34. Frame gaps of up to 1.05 s fall outside the exclusions. Audio wraps are correct (see R5-L3 PASS). Writes while seeking = 0 and muted = true in every run.",
+      "evidence": "tmp/studio-real-loop/c-round-3/l6_1..5.json, r5-l6.log; script c-round-3/scripts/l6.js"
+    },
+    {
+      "id": "C-R3-03",
+      "severity": "low",
+      "steps": [
+        "Fresh /studio-lab, music at 0 and Soft impact at 3. Fresh load, first Play (the AudioContext is created on this click). Sample every rAF for 900 ms: ctx.currentTime, video.currentTime, paused. Spy video.play(). Repeat with 3 reloads (R3-V1 layout)."
+      ],
+      "expected": "RF3-2 and §3.2: the video holds at the start mapping until audio startAt (passes). play() is issued at startAt or no more than one frame after it. |d| <= 0.06 s from Play to +300 ms.",
+      "actual": "Hold: passes in 3/3. Before startAt, vt stays 0.000, paused, no advance (16-41 samples). play() lands 22, 30 and 30 ms of ctx time after startAt, which is more than one 16.7 ms frame. |d| in the first 300 ms after audio startAt reaches 0.077, 0.089 and 0.089 (limit 0.06). Measured from the Play click, the 300 ms window falls almost entirely inside the frozen-ctx hold (max |d| 0.0007), so it passes only trivially. C-R2-02 itself (video running ahead of the audio) is fixed.",
+      "evidence": "tmp/studio-real-loop/c-round-3/rf32_1..3.json; script c-round-3/scripts/rf32.js"
+    },
+    {
+      "id": "C-R3-04",
+      "severity": "medium",
+      "steps": [
+        "Fresh /studio-lab, music at 0 and Soft impact at 3. Range 2-4 on music, then Ctrl+L, so the last history entry is 'Loop შეიქმნა'.",
+        "Start a brace body drag (pointerdown and 5 pointermoves on arrangement-loop-brace), then press Ctrl+Z before releasing. The loop is undone and the brace unmounts mid-gesture. Release the pointer.",
+        "Pick a video with '+ საკუთარი ვიდეო' (clip-4s-vp9-opus.webm)."
+      ],
+      "expected": "Undo during a gesture either is ignored or cancels the gesture cleanly. A later video import takes about as long as on a fresh page (1.6 s).",
+      "actual": "The import waits about 30 s with the status stuck at '„clip-4s-vp9-opus.webm“ იხსნება…'. The clip appears only after 39.8 s; a fresh-page control takes 1.6 s. This matches root review L1: the brace's preview-active state is never cleared when it unmounts mid-drag, so the import waits for its 30 s timeout.",
+      "evidence": "tmp/studio-real-loop/c-round-3/root-findings.log (L1, L1c and the control)"
+    },
+    {
+      "id": "C-R3-05",
+      "severity": "medium",
+      "steps": [
+        "Fresh /studio-lab, music at 0 and Soft impact at 3, range 2-4 + Ctrl+L. The last history entry is 'Loop შეიქმნა'.",
+        "Press the Soft impact header and move 40 px (5 pointermoves). Press Ctrl+Z mid-gesture: the loop disappears and Redo reads 'Loop შეიქმნა'. Continue moving 40 px more, then release.",
+        "Press Ctrl+Z once more."
+      ],
+      "expected": "The undo stays effective (the loop stays removed and Redo is still available), or the gesture is cancelled. The history stays consistent.",
+      "actual": "On release, the gesture commits its stale 'before' snapshot, which still contains the loop. The undone loop silently returns (brace 2-4 enabled), the Redo stack is cleared ('Redo [disabled]'), and the entry reads 'Undo: კლიპის გადატანა'. The next Undo restores the clip but keeps the loop, because the 'Loop შეიქმნა' entry is gone from the history. The same happens if Ctrl+Z arrives during a brace or trim gesture (root review L1).",
+      "evidence": "tmp/studio-real-loop/c-round-3/root-findings.log (L1d)"
+    },
+    {
+      "id": "C-R3-06",
+      "severity": "low",
+      "steps": [
+        "Open /studio-lab at 1440x900 or 1280x720 with a loop brace. Select a clip: the delete button reads '⌫ კლიპის წაშლა — სიცარიელე დარჩება'.",
+        "Create a range: the delete button reads '⌫ დროის წაშლა — სიცარიელე დაიხურება ყველა ხაზზე'."
+      ],
+      "expected": "Transport controls keep their positions when a button label changes.",
+      "actual": "The '↻ Loop' button and the Loop readout wrap to the other transport row depending on the delete-button label. At 1440x900 the readout moves from (1206,51) to (12,91). At 1280x720 the Loop button moves between row 1 and row 2. The layout shifts under the pointer whenever the user switches between a clip selection and a range.",
+      "evidence": "tmp/studio-real-loop/c-round-3/shot-1440x900-selection.png vs shot-1440x900-range.png; shot-1280x720-*.png; shots.log (geometry 'times')"
+    }
+  ],
+  "passed": [
+    "R5-L1", "R5-L2", "R5-L3", "R5-L4", "R5-L5", "R5-E1", "R5-U1",
+    "R6-S1", "R6-S2", "R6-S3", "R6-S4", "R6-S5", "R6-U1",
+    "G3-1", "G3-2", "G3-3", "G3-R", "G3-shots"
+  ],
+  "failed": ["RF3-1", "RF3-2", "R5-L6"],
+  "blocked": [],
+  "notes": {
+    "notReadyByA_butVerifiedByC": "Items A listed as not measured, now verified by C in the browser: R5-L3 (master tap and the brace past projectEnd), R5-L5 (all five sub-checks), R5-E1, R6-S2 (marquee while playing) and R6-S3 (heard at the new times while playing). All pass.",
+    "R5-L3": "Loop 2-4, music at 0 and Soft impact at 3, play from 1.0, 3 wraps. Per clip and iteration there is one source. Iterations >= 1 are created 0.48-1.49 s before their 'when'. The minimum 'ahead' of 0.05 s is iteration 0's normal PLAYBACK_LOOKAHEAD at Play. Seams when(k+1) - end(k) = 0.000. Max concurrent sources per clip = 1. Master tap 5 ms windows within ±50 ms of each wrap: min -29.5 dBFS, never near -60. After the first wrap the readout stays within [2.011, 3.990]. With the brace at 4-7 and projectEnd 5, playback does not stop at 5: it is silent until 7, then wraps to 4.0, twice.",
+    "RF3-1-exclusions": "The harness excludes 300 ms after the start and after each clip boundary only, not after the dock's own hard seeks. Adding those exclusions would not change any verdict: for example, r3v1_3 fails at 0.779, 1.299 and 2.078, which are more than 300 ms after the nearest seek.",
+    "rootReviewFollowUps": "Root review findings: L1 is reproduced as C-R3-04 and C-R3-05. L3 (Delete repeat) is not harmful: the range is cleared after Delete Time. M1 (hidden-tab loop starvation) cannot be reproduced in headless Chromium and stays a code-level risk. M2 (per-frame context re-render) was not measured, but it is a plausible contributor to C-R3-01. L2 and L4 were not tested. L8 was not tested. M3 (doc 012 honesty) is fixed: the TODO now lists RF3-1, R5-L3, R5-L5, R5-E1, R6-S2 and R6-S3.",
+    "processFinding": "During C's session, HEAD moved to cc1e531 'chore(store): add agent instructions and align Studio purchase access'. That commit contains the four protected purchase/auth files plus .agents/.codex/AGENTS.md, contrary to root-pre-push-review §3 and the publication-checkpoint statement that 'none were staged'. Their content still equals the protected baseline sha256. At runtime, anonymous /api/studio-token returns 401, a fake bearer gets 500, and /studio/middle-east shows 'Sign in required'. Arrangement paths have a zero diff between 375ee3b and HEAD, so this verification applies to HEAD. This is for the Tech Lead; it is not an A bug.",
+    "exportClippingObservation": "In the loop-off export of music + Soft impact, 104 samples are at full scale, 74 of them in second 3 where the impact sums with music. There is no master headroom or overload indicator. This relates to FB-14/SRW-13 and is not a round-3 acceptance item.",
+    "cosmetic": "The brace border and the playhead are both the accent colour rgb(249,169,31). The marquee border and the selection ring are both brand teal. Each pair is distinguishable by shape and placement: the brace sits in its own 16 px strip aligned to ruler 0 (dx 0). The root cookie banner covers the footer (status and selection count) at both sizes, and covers the bottom 19 px of the video dock at 1440x900. That is a pre-existing root issue.",
+    "ableton": "Checked against ableton-live-current-workflow.md. LOOP-01 (Ctrl+L creates and enables), LOOP-02 (replace), LOOP-03 (toggle keeps the brace) and LOOP-04 (edges vs body, no 60 s cap) are equal. LOOP-05: ←/→ moves the brace by 0.1, but length uses Shift+←/→ (Ableton: Ctrl+←/→ and ↑/↓), so it is partial. LOOP-06 now matches Ableton: Play outside the loop runs linearly from the insert position, and the wrap is sample-continuous. CLP-06 (a background click under 4 px clears and seeks), CLP-07 (distinct visuals), EDT-03 (group Delete removes only the selected clips) and TRN-03 (a range while playing does not move the playhead) are equal. CLP-08 Shift+arrow is not in this round.",
+    "FB": "FB-16: unified transport, video sound through the graph and mute work, but sync fails tolerance (C-R3-01/02/03). FB-15 holds on regression (R2-V1/V2). FB-01: the brace has no 60 s cap and loops past projectEnd. FB-02 (Delete Time) holds on regression. FB-03..FB-14 are out of scope and not passed. Product flow (find sound -> add -> fit video -> export) works on the demo library: picker/drop import; trim/split/Delete Time with exact offsets; loop a section to audition; multi-select to move SFX with the video; export WAV equal to the oracle (5.96e-8), 24-bit, 48 kHz. Library search and preview do not exist yet (SRW-12).",
+    "gates": "Re-run by C: vitest app/lib/arrangement 8 files 140/140; full vitest 40 files 604/604; tsc exit 0; Biome on owned paths: 32 files, no diagnostics; Biome ./app: 0 errors, 218 pre-existing warnings; build passes; 4 protected hashes OK.",
+    "environment": "gstack HeadlessChrome/145.0.7632.6, Windows 11. CPU load from other desktop processes was 49-100% (logged per run). Media are the owned synthetic fixtures in tmp/studio-real-loop/media; nothing was uploaded externally."
+  }
+}

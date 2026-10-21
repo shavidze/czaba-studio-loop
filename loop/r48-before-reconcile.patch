@@ -1,0 +1,386 @@
+diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index 9367bd6..d0f8c16 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -4,6 +4,7 @@ import {
+   type ClipLaneGhost,
+   formatArrangementTime,
+ } from '~/contexts/ArrangementContext';
++import { snapGroupDelta, snapTimeToGrid } from '~/lib/arrangement/grid';
+ import { moveClip, trimClipEnd, trimClipStart } from '~/lib/arrangement/model';
+ import { PEAK_BUCKETS_PER_SECOND } from '~/lib/arrangement/peaks';
+ import {
+@@ -78,12 +79,38 @@ export interface ArrangementClipViewProps {
+   claimPointerGesture: (pointerId: number, abort: () => void) => (() => void) | null;
+   setClipLaneDrag: (next: ClipLaneDragState | null) => void;
+   folded?: boolean;
++  snapSeconds?: number | null;
+ }
+ 
+ function roundTime(value: number): number {
+   return Math.round(value * 1000) / 1000;
+ }
+ 
++function moveStartOnGrid(start: number, delta: number, snapStep: number | null): number {
++  return snapStep === null
++    ? Math.max(0, roundTime(start + delta))
++    : snapTimeToGrid(start + delta, snapStep);
++}
++
++function groupDeltaOnGrid(
++  anchorStart: number,
++  delta: number,
++  snapStep: number | null,
++  bounds: GroupMoveBounds,
++): { requested: number; allowed: number } {
++  if (snapStep === null) {
++    const requested = roundTime(delta);
++    return {
++      requested,
++      allowed: Math.min(bounds.maxDelta, Math.max(bounds.minDelta, requested)),
++    };
++  }
++  return {
++    requested: roundTime(snapTimeToGrid(anchorStart + delta, snapStep) - anchorStart),
++    allowed: snapGroupDelta(anchorStart, delta, snapStep, bounds.minDelta, bounds.maxDelta),
++  };
++}
++
+ export function watchUncapturedPointerGesture(
+   gesture: { pointerId: number; release: () => void },
+   onLostPointer: () => void,
+@@ -194,6 +221,7 @@ function ArrangementClipViewInner({
+   claimPointerGesture,
+   setClipLaneDrag,
+   folded = false,
++  snapSeconds = null,
+ }: ArrangementClipViewProps) {
+   const rootRef = useRef<HTMLDivElement>(null);
+   const gestureRef = useRef<ClipGesture | null>(null);
+@@ -324,6 +352,7 @@ function ArrangementClipViewInner({
+     const timeLocked = gesture.kind === 'move' && event.shiftKey;
+     gesture.timeLocked = timeLocked;
+     const delta = timeLocked ? 0 : dx / pxPerSecond;
++    const snapStep = timeLocked ? null : snapSeconds;
+     const original = gesture.original;
+     const root = rootRef.current;
+     const hoverTrackId =
+@@ -332,9 +361,12 @@ function ArrangementClipViewInner({
+         : original.trackId;
+     const isCrossLane = hoverTrackId !== original.trackId;
+     if (gesture.group) {
+-      const requested = roundTime(delta);
+-      const { minDelta, maxDelta } = gesture.group.bounds;
+-      const allowed = Math.min(maxDelta, Math.max(minDelta, requested));
++      const { requested, allowed } = groupDeltaOnGrid(
++        original.start,
++        delta,
++        snapStep,
++        gesture.group.bounds,
++      );
+       if (isCrossLane) {
+         const plan = planClipLaneMove(gesture.before, {
+           clipIds: gesture.group.ids,
+@@ -378,7 +410,7 @@ function ArrangementClipViewInner({
+       return;
+     }
+     if (gesture.kind === 'move') {
+-      const requestedStart = Math.max(0, roundTime(original.start + delta));
++      const requestedStart = moveStartOnGrid(original.start, delta, snapStep);
+       const keptGhosts = gesture.laneTarget
+         ? laneGhostsFrom(gesture.laneTarget.placements, false, null)
+         : [];
+@@ -531,6 +563,7 @@ function ArrangementClipViewInner({
+       ref={rootRef}
+       data-clip-id={clip.id}
+       data-clip-kind={isVideo ? 'video' : 'audio'}
++      data-clip-start={clip.start.toFixed(3)}
+       className={cn(
+         'absolute top-1 bottom-1 flex select-none flex-col overflow-hidden rounded-sm border',
+         isVideo ? 'bg-accent/10' : 'bg-elevated',
+@@ -586,7 +619,7 @@ function ArrangementClipViewInner({
+           ) : null}
+           {range ? (
+             <div
+-              className="pointer-events-none absolute inset-y-0 border-x-2 border-foreground bg-foreground/60"
++              className="pointer-events-none absolute inset-y-0 border-x-2 border-foreground bg-foreground/30"
+               style={{ left: rangeLeft, width: Math.max(2, rangeWidth) }}
+             >
+               <span className="absolute top-0 left-0 whitespace-nowrap rounded-br-sm bg-foreground px-1 text-xs font-medium text-background">
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index 84fb548..b68b698 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -14,6 +14,7 @@ import {
+   useArrangement,
+ } from '~/contexts/ArrangementContext';
+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
++import { gridLinesVisible } from '~/lib/arrangement/grid';
+ import { canPlaceLibraryClip, LIBRARY_DRAG_MIME, libraryDropTime } from '~/lib/arrangement/library';
+ import { formatTrackPan, TRACK_PAN_STEPS, trackPanValue } from '~/lib/arrangement/model';
+ import {
+@@ -79,6 +80,8 @@ interface ArrangementLaneProps {
+   onToggleTrackFold?: (trackId: string) => void;
+   onChangeTrackHeight?: (trackId: string, height: number, source: TrackHeightChangeSource) => void;
+   onSnapshotTrackLayout?: (trackId: string) => () => void;
++  gridSeconds?: number;
++  snapSeconds?: number | null;
+ }
+ 
+ export function ArrangementLane({
+@@ -91,6 +94,8 @@ export function ArrangementLane({
+   onToggleTrackFold,
+   onChangeTrackHeight,
+   onSnapshotTrackLayout,
++  gridSeconds,
++  snapSeconds = null,
+ }: ArrangementLaneProps) {
+   const {
+     arrangement,
+@@ -541,6 +546,12 @@ export function ArrangementLane({
+     </button>
+   );
+ 
++  const showGridLines = gridSeconds !== undefined && gridLinesVisible(gridSeconds, pxPerSecond);
++  const gridBackground =
++    showGridLines && gridSeconds !== undefined
++      ? `repeating-linear-gradient(to right, var(--color-outline-light) 0 1px, transparent 1px ${gridSeconds * pxPerSecond}px)`
++      : undefined;
++
+   return (
+     <div
+       className={cn(
+@@ -709,7 +720,11 @@ export function ArrangementLane({
+           isFileDragOver &&
+             (isVideo ? 'ring-2 ring-inset ring-brand' : 'ring-2 ring-inset ring-accent'),
+         )}
+-        style={{ width: timelineWidth }}
++        style={{ width: timelineWidth, backgroundImage: gridBackground }}
++        data-grid-seconds={gridSeconds}
++        data-grid-lines={
++          gridSeconds === undefined ? undefined : showGridLines ? 'visible' : 'hidden'
++        }
+         onPointerDown={(event) => onBackgroundPointerDown(event, track.id)}
+         onDragOver={handleDragOver}
+         onDragEnter={handleDragOver}
+@@ -844,6 +859,7 @@ export function ArrangementLane({
+               claimPointerGesture={claimPointerGesture}
+               setClipLaneDrag={setClipLaneDrag}
+               folded={folded}
++              snapSeconds={snapSeconds}
+             />
+           );
+         })}
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 0bb5b56..756efd1 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -15,6 +15,13 @@ import {
+   useArrangementPositionWriter,
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
++import {
++  adjacentGridLine,
++  formatGridDivision,
++  GRID_DEFAULT_DIVISION_SECONDS,
++  GRID_DIVISIONS_SECONDS,
++  gridLinesVisible,
++} from '~/lib/arrangement/grid';
+ import {
+   clampTrackHeight,
+   detailPanelOpenHeightCap,
+@@ -83,6 +90,8 @@ export const VIDEO_RETURNED_COMPACT_MESSAGE = 'ვიდეო პატარ
+ export const VIDEO_RETURNED_LIBRARY_RECOLLAPSED_MESSAGE =
+   'ვიდეო პატარა ხედს დაუბრუნდა; ბიბლიოთეკა ისევ დაიკეცა.';
+ const LIBRARY_TRANSITION_FALLBACK_MS = 100;
++const SNAP_OFF_MESSAGE = 'Snap გამორთულია — თავისუფალი გადაადგილება (G)';
++const NUDGE_AT_TIME_START_MESSAGE = 'ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.';
+ 
+ function parseTransitionTimesMs(value: string): number[] {
+   return value.split(',').map((entry) => {
+@@ -311,6 +320,12 @@ export function StudioWorkspace() {
+   const positionStore = useArrangementPositionStore();
+   const [isExportOpen, setIsExportOpen] = useState(false);
+   const [followMode, setFollowModeState] = useState<TimelineFollowMode>('on');
++  const [snapEnabled, setSnapEnabled] = useState(false);
++  const [gridSeconds, setGridSeconds] = useState<number>(GRID_DEFAULT_DIVISION_SECONDS);
++  const snapEnabledRef = useRef(snapEnabled);
++  snapEnabledRef.current = snapEnabled;
++  const gridSecondsRef = useRef(gridSeconds);
++  gridSecondsRef.current = gridSeconds;
+   const [canZoomBack, setCanZoomBack] = useState(false);
+   const [viewportWidth, setViewportWidth] = useState(0);
+   const [marquee, setMarquee] = useState<MarqueeRect | null>(null);
+@@ -794,6 +809,25 @@ export function StudioWorkspace() {
+     );
+   }, [setFollowMode]);
+ 
++  const toggleSnap = useCallback(() => {
++    const next = !snapEnabledRef.current;
++    snapEnabledRef.current = next;
++    setSnapEnabled(next);
++    workspaceRef.current.setStatus(
++      next
++        ? `Snap ჩართულია — ბადე ${formatGridDivision(gridSecondsRef.current)} (G)`
++        : SNAP_OFF_MESSAGE,
++    );
++  }, []);
++
++  const changeGridDivision = useCallback((next: number) => {
++    gridSecondsRef.current = next;
++    setGridSeconds(next);
++    workspaceRef.current.setStatus(
++      `ბადე: ${formatGridDivision(next)} (Snap ${snapEnabledRef.current ? 'ჩართულია' : 'გამორთულია'})`,
++    );
++  }, []);
++
+   const handleTimelineScroll = useCallback(() => {
+     const scroller = scrollerRef.current;
+     if (!scroller) {
+@@ -1171,6 +1205,13 @@ export function StudioWorkspace() {
+       if (modifier) {
+         return;
+       }
++      if (key === 'g' && !event.altKey && !event.shiftKey) {
++        event.preventDefault();
++        if (!event.repeat) {
++          toggleSnap();
++        }
++        return;
++      }
+       if (event.key === 'Home' && !isSliderTarget(event.target)) {
+         event.preventDefault();
+         if (!isSeparatorTarget(event.target)) {
+@@ -1196,7 +1237,21 @@ export function StudioWorkspace() {
+         !isSeparatorTarget(event.target)
+       ) {
+         event.preventDefault();
+-        current.nudgeSelectedClip(event.key === 'ArrowLeft' ? -NUDGE_SECONDS : NUDGE_SECONDS);
++        const direction = event.key === 'ArrowLeft' ? -1 : 1;
++        if (!snapEnabledRef.current) {
++          current.nudgeSelectedClip(direction * NUDGE_SECONDS);
++          return;
++        }
++        const anchor = current.arrangement.clips.find((clip) => clip.id === current.selectedClipId);
++        if (!anchor) {
++          return;
++        }
++        const target = adjacentGridLine(anchor.start, gridSecondsRef.current, direction);
++        if (target === null) {
++          current.setStatus(NUDGE_AT_TIME_START_MESSAGE);
++          return;
++        }
++        current.nudgeSelectedClip(target - anchor.start);
+         return;
+       }
+       if (
+@@ -1241,7 +1296,7 @@ export function StudioWorkspace() {
+       window.removeEventListener('dragover', handleStrayFileDrag);
+       window.removeEventListener('drop', handleStrayFileDrag);
+     };
+-  }, [returnFloatingVideo]);
++  }, [returnFloatingVideo, toggleSnap]);
+ 
+   const viewportSeconds = Math.max(0, viewportWidth - ARRANGEMENT_HEADER_WIDTH_PX) / pxPerSecond;
+   const timelineSeconds = Math.ceil(Math.max(projectEnd + TIMELINE_TAIL_SECONDS, viewportSeconds));
+@@ -1323,6 +1378,7 @@ export function StudioWorkspace() {
+       timelineContentHeight: timeline.offsetHeight,
+     };
+   }, []);
++  const gridLinesShown = gridLinesVisible(gridSeconds, pxPerSecond);
+   const loopTimesText = arrangement.loop
+     ? `Loop ${formatArrangementTime(arrangement.loop.start)} — ${formatArrangementTime(arrangement.loop.end)}${arrangement.loop.enabled ? '' : ' · off'}`
+     : null;
+@@ -1404,10 +1460,49 @@ export function StudioWorkspace() {
+               <div ref={timelineChromeRef} className="sticky top-0 z-30 flex flex-col">
+                 <div className="flex">
+                   <div
+-                    className="sticky left-0 z-30 flex shrink-0 items-center border-r border-b border-outline bg-surface px-2 text-xs text-muted"
++                    className="sticky left-0 z-30 flex shrink-0 items-center gap-2 border-r border-b border-outline bg-surface px-2 text-xs text-muted"
+                     style={{ width: ARRANGEMENT_HEADER_WIDTH_PX }}
++                    data-testid="arrangement-grid-control"
++                    data-snap={snapEnabled ? 'on' : 'off'}
++                    data-grid-seconds={gridSeconds}
++                    data-grid-lines={gridLinesShown ? 'visible' : 'hidden'}
+                   >
+-                    ხაზები
++                    <button
++                      type="button"
++                      onClick={toggleSnap}
++                      aria-pressed={snapEnabled}
++                      aria-keyshortcuts="G"
++                      title={
++                        snapEnabled
++                          ? 'Snap ჩართულია — კლიპი ბადეზე ჯდება (G)'
++                          : 'Snap გამორთულია — თავისუფალი გადაადგილება (G)'
++                      }
++                      className={cn(
++                        'h-5 shrink-0 rounded-sm border border-outline px-1.5 text-xs leading-none text-foreground hover:border-outline-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand',
++                        snapEnabled && 'border-accent bg-accent/20 text-accent',
++                      )}
++                      data-testid="arrangement-snap-toggle"
++                    >
++                      Snap
++                    </button>
++                    <select
++                      value={gridSeconds}
++                      onChange={(event) => changeGridDivision(Number(event.target.value))}
++                      aria-label="ბადის დანაყოფი"
++                      title={
++                        gridLinesShown
++                          ? `ბადე ${formatGridDivision(gridSeconds)}`
++                          : `ბადე ${formatGridDivision(gridSeconds)} — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom.`
++                      }
++                      className="h-5 shrink-0 rounded-sm border border-outline bg-surface px-1 text-xs leading-none tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
++                      data-testid="arrangement-grid-division"
++                    >
++                      {GRID_DIVISIONS_SECONDS.map((step) => (
++                        <option key={step} value={step}>
++                          {formatGridDivision(step)}
++                        </option>
++                      ))}
++                    </select>
+                   </div>
+                   <ArrangementRuler
+                     seconds={timelineSeconds}
+@@ -1454,6 +1549,8 @@ export function StudioWorkspace() {
+                   onToggleTrackFold={toggleTrackFold}
+                   onChangeTrackHeight={changeTrackHeight}
+                   onSnapshotTrackLayout={snapshotTrackLaneLayout}
++                  gridSeconds={gridSeconds}
++                  snapSeconds={snapEnabled ? gridSeconds : null}
+                 />
+               ))}
+               {marquee ? (
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index d854de9..c998c13 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -1,4 +1,4 @@
+-import { act, fireEvent, render } from '@testing-library/react';
++import { act, fireEvent, render, within } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ARRANGEMENT_HEADER_WIDTH_PX } from '~/components/arrangement/ArrangementLane';
+@@ -306,7 +306,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     for (const name of WATCHED_LISTS) {
+       expect(mounted[name]).toBeGreaterThan(0);
+     }
+-    expect(view.getAllByRole('option')).toHaveLength(2);
++    expect(within(view.getByRole('listbox')).getAllByRole('option')).toHaveLength(2);
+     renderLog.counts.clear();
+     fireEvent.click(view.getByRole('button', { name: 'Play' }));
+     expect(api.current?.isPlaying).toBe(true);
+diff --git a/docs/implementation/2026/quarter-IV/043-studio-lab-export-dialog-focus-restore.md b/docs/implementation/2026/quarter-IV/043-studio-lab-export-dialog-focus-restore.md
+index 347bd7d..7b1f8e5 100644
+--- a/docs/implementation/2026/quarter-IV/043-studio-lab-export-dialog-focus-restore.md
++++ b/docs/implementation/2026/quarter-IV/043-studio-lab-export-dialog-focus-restore.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — Export dialog opener-ს layout ფაზაში იმახსოვრებს; Tab-ის wrap `[hidden]` კონტროლებს გამოტოვებს
+ 
+ **თარიღი:** 2026-10-15
+-**სტატუსი:** Round 46 — D-29z11; C-ის შემოწმებას ელოდება
++**სტატუსი:** Completed — Round 46 C PASS (`c-round-46.md`), commit `d2f6715`; D-29z11
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი

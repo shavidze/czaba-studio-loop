@@ -1,0 +1,50 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R23-01",
+      "severity": "medium",
+      "steps": [
+        "curl -s http://127.0.0.1:5173/studio-lab (x3)",
+        "scan the bytes for 0x00",
+        "open /studio-lab in a browser and read the music lane aria-label after hydration"
+      ],
+      "expected": "SSR HTML without NUL bytes; all visible text and aria-labels intact before and after hydration",
+      "actual": "Existing open bug, carried, not new. 4 NUL bytes in 57 605 B at 28013/28014 (visible text 'Arrangement · \\0\\0მთლიანი…') and 44397/44398 (music lane aria-label). Offsets moved again: round 25 had 8. The badge and library text are now clean only because the offsets shifted. After hydration the music aria-label still has 2x U+FFFD. All Master labels, including Master Peak, are clean in SSR and in the DOM.",
+      "evidence": "tmp/studio-real-loop/c-round-26/runs/c-r23-01-record.txt, c-r23-01-hydrated.txt, ssr-1..3.html"
+    }
+  ],
+  "passed": [
+    "R26-ML",
+    "R26-MP",
+    "R26-C0",
+    "R26-C6",
+    "R26-CR",
+    "R26-CM",
+    "R26-RB",
+    "R26-X",
+    "R26-E",
+    "R26-K",
+    "R26-L",
+    "R26-R",
+    "R26-S",
+    "R26-U",
+    "R26-Doc",
+    "G26-1",
+    "G26-2",
+    "G26-3"
+  ],
+  "blocked": [
+    "Not run this round by task §4.10: RF5-3, R3-V1, R3-V4, R11-P3 sync (not PASS)",
+    "C-R6-02, C-R8-01, R26-T and the other manual items need the Tech Lead's real Chrome, speakers or quiet machine",
+    "C-R23-01 fix awaits a Tech Lead decision: React 19, or a narrow entry.server.tsx grant"
+  ],
+  "observations": [
+    "R26-T text: on lay11 at 0 dB the live Clip latches at ~2.0 s (stems enter; tap +1.0 dBFS), not only in the 4-6 s overlap. +5.0 is the maximum, reached at 4.0 s.",
+    "R26-CM oracle: the time to the floor is (L0+60)/20 s. It is 3.04 s from +1.0 dBFS and about 3.25 s from +5 dBFS, so '3 s' holds only when L0 <= 0. In B's scenario all 3 runs reached the floor in 2.36-2.57 s.",
+    "The demo SFX 'Soft impact' alone reaches full scale: live Peak shows +0.0 Clip, and the export reports 2 samples clipped (reduce by 0.1 dB). This is consistent by construction. It is a low UX issue; lib/sfx-* is frozen.",
+    "At a level of +6 dBFS or more, only 1 px of the hold tick is visible (translateX 100% under overflow-hidden). Low.",
+    "A's M1 (rAF-only sampling misses overs during stalls over 85 ms or a hidden tab) and M2c (no unmount-unsubscribe test) are for B to schedule. The max rAF gap in C's runs was 28.8 ms.",
+    "Live numbers: fftSize 4096, sampleRate 48000, 2 analysers on a ChannelSplitter(2) fed only by the master. ML meter-tap diff -0.042..+0.029 dB; delta -6.0 dB. C0 '+5.0' vs tap +4.995 (3/3). C6 '−1.0' vs tap −1.005 (3/3). Hold 1500-1513 ms. Renders 0/0 per frame, 1 on the meter at latch and at reset. Drift 20.1 ms. Export FS 1800, RMS −15.481."
+  ]
+}

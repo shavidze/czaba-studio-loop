@@ -1,0 +1,90 @@
+{
+  "projectName": "czaba-studio",
+  "repoDir": "C:/Apps/czaba-project/store",
+  "loopDir": "C:/Apps/czaba-project/tmp/studio-real-loop",
+  "branch": "master",
+  "pushRemotes": [
+    "https://github.com/TCzaba/czaba-store.git",
+    "https://github.com/shavidze/czaba-store.git"
+  ],
+  "verifyCommand": "npm run verify",
+  "servers": [
+    {
+      "name": "backend",
+      "healthUrl": "http://localhost:5199/api/products",
+      "startFile": "dotnet",
+      "startArgs": [
+        "run",
+        "--project",
+        "C:/Apps/czaba-project/backend/Czaba.Api",
+        "--launch-profile",
+        "http"
+      ],
+      "cwd": "C:/Apps/czaba-project/backend"
+    },
+    {
+      "name": "store",
+      "healthUrl": "http://127.0.0.1:5173/studio-lab",
+      "startFile": "cmd.exe",
+      "startArgs": [
+        "/c",
+        "npx",
+        "remix",
+        "vite:dev",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5173"
+      ],
+      "cwd": "C:/Apps/czaba-project/store"
+    }
+  ],
+  "protectedPaths": [
+    "app/routes/studio.$productId.tsx",
+    "app/routes/api.studio-token.ts",
+    "app/routes/account.downloads.tsx",
+    "app/lib/__tests__/download-routes.test.ts"
+  ],
+  "agentsFile": "C:/Apps/czaba-project/tmp/studio-real-loop/agents.json",
+  "roleAgents": {
+    "planner": "studio-task-writer",
+    "implementer": "studio-implementer",
+    "verifier": "studio-product-verifier",
+    "reviewer": "code-reviewer"
+  },
+  "models": {
+    "planner": "",
+    "implementer": "claude-opus-5-5",
+    "verifier": "",
+    "reviewer": ""
+  },
+  "consultAgents": {
+    "planner": [
+      "tech-lead",
+      "product-manager",
+      "design-philosopher",
+      "flow-sage",
+      "first-visit-host",
+      "consequence-tester"
+    ],
+    "implementer": [
+      "code-reviewer"
+    ],
+    "verifier": [
+      "accessibility-auditor",
+      "code-reviewer",
+      "design-auditor",
+      "ableton-arrangement-expert",
+      "studio-specialist",
+      "performance-optimizer"
+    ],
+    "reviewer": []
+  },
+  "commitType": "feat",
+  "commitScope": "studio",
+  "roundLimit": 999,
+  "maxLimitWaitSeconds": 21600,
+  "contextRestartTokens": 650000,
+  "pushTimeoutSeconds": 1800,
+  "cleanupProcessPattern": "czaba-project[\\\\/]store[\\\\/]node_modules[\\\\/].*vitest"
+}
