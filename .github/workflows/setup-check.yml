@@ -1,0 +1,52 @@
+name: Setup check
+
+# Checks the cloud loop's toolchain and secrets without touching the loop. Runs when cloud/CHECK changes.
+on:
+  push:
+    paths: ["cloud/CHECK"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+    steps:
+      - name: Secrets present
+        run: |
+          [ -n "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}" ] && echo "CLAUDE_CODE_OAUTH_TOKEN: set" || echo "::error::CLAUDE_CODE_OAUTH_TOKEN missing"
+          [ -n "${{ secrets.STORE_PUSH_TOKEN }}" ] && echo "STORE_PUSH_TOKEN: set" || echo "::error::STORE_PUSH_TOKEN missing"
+      - name: Store push access (read-only check)
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.STORE_PUSH_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          for r in TCzaba/czaba-store shavidze/czaba-store shavidze/agent-loop-kit; do
+            if git ls-remote "https://github.com/$r.git" HEAD >/dev/null 2>&1; then echo "$r: readable"; else echo "::error::$r: not readable with STORE_PUSH_TOKEN"; fi
+          done
+          for r in TCzaba/czaba-store shavidze/czaba-store; do
+            perm=$(curl -s -H "Authorization: Bearer ${{ secrets.STORE_PUSH_TOKEN }}" "https://api.github.com/repos/$r" | jq -r '.permissions.push // "unknown"')
+            echo "$r push permission: $perm"
+            [ "$perm" = "true" ] || echo "::error::$r: STORE_PUSH_TOKEN cannot push"
+          done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Store install and studio-lab smoke
+        run: |
+          git clone -q --depth 1 https://github.com/shavidze/czaba-store.git store
+          cd store && npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          (npx remix vite:dev --host 127.0.0.1 --port 5173 > ../dev.log 2>&1 &)
+          for i in $(seq 1 60); do c=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/studio-lab || true); [ "$c" = "200" ] && break; sleep 2; done
+          echo "studio-lab HTTP $c"; [ "$c" = "200" ] || { tail -30 ../dev.log; exit 1; }
+      - name: Claude Code login
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude --version
+          pwsh --version
+          out=$(claude -p "Reply with exactly: CLOUD LOOP OK" --output-format json 2>&1 || true)
+          echo "$out" | head -c 600; echo
+          echo "$out" | grep -q 'CLOUD LOOP OK' || { echo "::error::Claude Code could not answer with CLAUDE_CODE_OAUTH_TOKEN"; exit 1; }
