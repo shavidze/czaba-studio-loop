@@ -1,0 +1,83 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-22T13:13:44.5607388Z",
+  "round": 84,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R84-M1",
+   "severity": "medium",
+   "steps": [
+    "/studio-lab anonymous, 1440x900 or 1280x720; Snap off; import media/beeps-6s-vp9-opus.webm, move the video clip to 2 s, drag its fade-in handle to 1.000 s",
+    "also give the stems clip a 1 s fade-in (audio handle)",
+    "hover the clip, then wheel-scroll the timeline horizontally (deltaX ≈ 276 px) until the fade-in handle sits at x≈362, i.e. under the sticky track header (header right edge = 512)",
+    "elementFromPoint at the handle centre; then a real mouse drag +40 px starting at that point"
+   ],
+   "expected": "The sticky track header covers clip content scrolled under it: the header is topmost there and pointer input hits the header controls, never a hidden clip",
+   "actual": "The video fade handle (z-index 40) and the audio fade handle (z-index 30) paint over the sticky header (teal squares visible on the header) and are topmost for elementFromPoint. The drag at the header spot edited the hidden video clip: Video Fade In 1.000 → 2.000 with an Undo entry. For audio the handle is also topmost; the same drag reported status 'Fade In: 1.000 წმ.' while the value and Undo stayed unchanged (observed, unexplained). Envelope points are correctly covered (header topmost). Mute clicks a few px lower still hit the header. The audio part is pre-existing (gate-83 reviewer M1 class); this round's video handles inherit it Note: '\"repro\":false' in r3-*.json covers only the Mute-click sub-probe; the reproduction is the pm1b handle probe.",
+   "evidence": "c-round-84/pm1b-1440x900.json, pm1b-1280x720.json, r3-*.json (P-M1); shots/pm1b-video-*.png, shots/pm1b-audio-*.png; tools/pm1b.cjs"
+  },
+  {
+   "id": "C-R84-L1",
+   "severity": "low",
+   "steps": [
+    "/studio-lab, demo audio + VP9 video at 2 s (video sound on)",
+    "Export WAV twice in a row without any change"
+   ],
+   "expected": "Two exports of an unchanged arrangement are bit-identical (a deterministic offline render)",
+   "actual": "Confirmed: (a) two same-state exports differ by ±1 LSB (24-bit) in ≈6,400-7,700 samples, only in 2-8 s (the video clip's own-sound span); (b) one hash (3b3010fd…) was produced by both a faded and an unfaded export; (c) ≈10 exports gave 6 distinct hashes, not a demonstrated cycle; (d) per-second diff counts in the fade windows are not elevated (n1-f1 2/3/6/7 s: 564/510/547/541 vs the unchanged control n1-n2: 624/582/621/685). Inference: not caused by the video fade, but 'max difference 0' oracles on spans with video sound are flaky",
+   "evidence": "c-round-84/r2-1280x720-a.json, r2-1280x720-b.json (pairs n1-n2, n1-n3, per-second bins); r1-1280x720.json VF-AUDIO"
+  }
+ ],
+ "passed": [
+  "VF-HANDLES",
+  "VF-IN",
+  "VF-PREVIEW",
+  "VF-OUT",
+  "VF-FLOAT",
+  "VF-EDITS",
+  "VF-UNDO",
+  "VF-AUDIO",
+  "VF-EXPORT",
+  "VF-PLAY-EDIT",
+  "VF-SYNC",
+  "X1-ALIGN",
+  "REG-HYD",
+  "G84-3",
+  "T84-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "blocked": [
+  "G84-3 fake-Bearer 403 sub-check: backend unavailable in cloud (/api/studio-token with fake Bearer returns 500 'Unable to prepare Studio access'; without params it returns 400)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "probes": {
+  "P-M1": "REPRODUCED by the pm1b handle probe (both viewports) -> C-R84-M1; r3 'repro:false' covers only the Mute-click sub-probe"
+ },
+ "signals": {
+  "SRW19-RESCHEDULE": "video fade drag during playback: 4 extra createBufferSource calls (12->16) at both viewports; playback continued, position monotonic",
+  "VIDEO-FADE-SOUND": "video own sound present in export (faded minus video-muted export: max 0.507 in 2-3 s) and not faded"
+ },
+ "ableton": {
+  "VF-HANDLES": "confirmed (§28.2.1 video clips edited like audio clips; §6.8 fade handles, linear, in+out<=length): same handles and clamp",
+  "VF-PREVIEW": "not applicable: picture opacity fade is a CZABA addition (FB-07); fade target = the same black as gaps (§28.2.2.1 confirmed)",
+  "VF-EXPORT": "conscious difference D-11 (§28.3 Live renders video; CZABA audio-only, dialog says so)",
+  "VF-AUDIO": "unconfirmed in Live (video-clip fade affecting sound not in the source); CZABA = picture only"
+ },
+ "notes": {
+  "G84-3": "passed with the fake-Bearer sub-check listed under blocked; follows the round-83 handling",
+  "harness": "one parallel r3/g84 run hit a dev-server reload; re-run alone, and the re-runs are the evidence"
+ }
+}

@@ -1,0 +1,8 @@
+- 2026-10-22T12:46:28Z baseline verified: HEAD a68c81d, status 0, frozen 478/478, snapshots match. Starting pre-flight.
+- 2026-10-22T12:54:20Z video-fades.ts + video-fades.test.ts written, 12/12 pass. Next: ArrangementClip V5.
+- 2026-10-22T12:54:54Z ArrangementClip V5, VideoDock V4, ExportDialog V6, Envelope X1 edited. Next: typecheck + existing tests, then video-fades-ui + AL1.
+- 2026-10-22T12:57:14Z video-fades-ui 10/10, AL1 added (envelope 24/24, 0 literal amendments). Next: biome/lint, targeted list, mutations.
+- 2026-10-22T13:00:20Z targeted 51/979 pass; mutations a-h all red; AL1 red pre-change. Next: docs 073/074, Playwright smoke, code-reviewer, report.
+- 2026-10-22T13:07:10Z docs 073/074 done; Playwright smoke 1440 OK (pw/smoke-output.json). code-reviewer running. Next: address review, write a-round-84.md.
+- 2026-10-22T13:11:54Z review 9/10 COMMIT OK; Low1 fixed (AL1 2 cases); mutations a-j red; targeted 51/980; report final.
+- 2026-10-22T13:13:29Z doc 074 testing lines updated; end-hashes regenerated. DONE.

@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-22T12:29:30.796Z)
+# Active loop summary (2026-10-22T13:38:03.394Z)
 
-- backlog.json 752 KB -> active view 146 KB
-- status: G_ROOT_GATE round 83
-- servers: `{"checkedUtc":"2026-10-22T12:00:49.8436104Z","round":83,"attempt":1,"store":200}`
-- last publication: a68c81d91be994ee02eb00e184cbdcc06b5f5a60 (rounds 83-83)
-- last root gate: round 83 published - commit a68c81d91be994ee02eb00e184cbdcc06b5f5a60 pushed
+- backlog.json 761 KB -> active view 176 KB
+- status: G_ROOT_GATE round 84
+- servers: `{"checkedUtc":"2026-10-22T13:13:44.5607388Z","round":84,"attempt":1,"store":200}`
+- last publication: 88b0262bda6bdc928bbc39c4cbca77c8a2ca9504 (rounds 84-84)
+- last root gate: round 84 published - commit 88b0262bda6bdc928bbc39c4cbca77c8a2ca9504 pushed
 
-## Current items: SRW-18, SRW-19, SRW-20, SRW-21
+## Current items: SRW-03, SRW-18, SRW-19, SRW-20, SRW-21
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -232,7 +232,6 @@
 - A-R81-ORPHAN-SOLO-CONSISTENCY / info / acknowledged (unreachable from the UI: no path creates an orphan group); GROUPS-NO-MODEL-SANITIZER signal / orphan-solo rule applies to audibility only; toggleSolo/toggleTrackGroupSolo still count an orphan soloed group
 - C-R81-NB-POINTERCANCEL / info / acknowledged (Playwright cannot raise a real pointercancel; jsdom UM3 only) / group Volume pointercancel revert not browser-verified
 - SRW18-KEYBOARD-FADES / low / open (own backlog entry per gate-82 reviewer #4; covers fade handles and, from round 83, envelope points; accessibility; Lows batch or a dedicated stage, never silently dropped) / fade handles and envelope points are mouse-only: no role, focus or keyboard path
-- GATE82-S1-DBLCLICK-AFTER-FADE-DRAG / medium (unconfirmed in a browser) / scheduled round 83 X1 (D-29z48): 500 ms drag-then-double-click guard on fade handles; C row X1-DBLCLICK records whether Chromium emits dblclick / a quick click right after a fade-handle drag may be counted as a double-click and reset the new fade (second history entry)
 - GATE82-S2-SPLIT-INSIDE-FADE / low (design signal) / doc 072 line in round 83; behaviour is the C-verified F3 rule; later option: keep ramp gain across the cut or split the ramp proportionally (needs B ruling, not scheduled) / split / Delete inside a fade is not sound-neutral: the right part starts at gain 1
 - GATE82-S3-FADE-HANDLE-HIT-AREA / low / doc 072 line in round 83 (mouse case); touch case = A-R82-L2 in Lows batch / hidden (opacity 0) fade handles take the top 10 px of trim strips and body corners; a plain click there starts a no-op fade gesture
 - GATE82-S5-OPTIONAL-RAMP-METHODS / low / Lows batch: upgrade the three frozen FakeParams and make setValueAtTime/linearRampToValueAtTime required / optional ramp methods on ScheduleAudioParam would silently skip fades/envelopes if missing
@@ -243,9 +242,17 @@
 - C-R82-LIVE-ORACLE-PAIRED / info / applied in round 83 (EN-LIVE / EN-MIDSTART are paired same-position comparisons) / reading-at-t1-vs-t2 live oracles are content-dominated; use paired envelope-vs-control comparisons
 - ENVELOPE-SNAP / info / signal (Live snaps breakpoints to grid, confirmed text; CZABA stage 2 free like fades); needs a B ruling before scheduling / envelope breakpoints do not snap to the grid
 - ENVELOPE-CLEAR / info / signal (Live Clear Envelope context command); not requested in FB-06 / no one-step Clear Envelope; points are deleted one by one
+- C-R83-L1 / low / scheduled round 84 X1 (D-29z49): acceptance X1-ALIGN (stored = ruler time, point centre = ruler x, vertex = point, line right end at clip edge) / envelope double-click at ruler T stores T - 1 px/pxPerSecond (5.975 for 6.000 at 40 px/s); point/vertex 1 px apart
+- GATE83-M1-STICKY-HEADER-OVERLAP / medium (reviewer claim, unconfirmed; C round 83 probe negative) / probe P-M1 in round 84; fix candidate (isolate on clip root) only after a browser reproduction / z-30 envelope points / z-40 fade handles of unselected clips may paint over the sticky z-20 track header during horizontal scroll and catch 
+- GATE83-M2-RESCHEDULE-PER-MOVE / info (signal; merges GATE82-S6) / signal: C round 83 EN-PLAY-EDIT 6 source restarts per drag, position monotonic, no glitch measured; candidate fix (exclude preview from scheduleKey until commit, or rAF throttle) needs a measured audible defect or the checkpoint ruling; SRW19-RESCHEDULE adds video-fade drags / envelope/fade/video-fade preview drags during playback rebuild the audio graph on every pointermove
+- GATE83-L1-GUARD-TIME-BASED / low / open - Lows batch / drag-then-double-click guard uses a fixed 500 ms window; OS double-click interval can be longer (up to ~900 ms on Windows)
+- GATE83-L2-POINT-HIT-AREA / low / open - Lows batch (hit area); keyboard path = SRW18-KEYBOARD-FADES / envelope points are 8x8 px with no enlarged hit target
+- GATE83-L3-ENV-ARIA-LABEL / low / open - Lows batch / Env button accessible name is only 'Env' (full text only in title)
+- C-R83-S-1280-RANGE-SHIFT / info (unverified origin) / open - check in the next regression round against the published tree / at 1280x720 a body range selection shifts the stems lane up 9 px (clip y 458 -> 449, h 71 -> 66)
+- SRW19-RESCHEDULE / info / signal (round 84 VF-PLAY-EDIT records the restart count); scheduleKey frozen this round / a picture-only video fade edit during playback still reschedules audio because scheduleKey includes all clip fields
+- VIDEO-FADE-SOUND / info / signal: picture-only by B ruling D-29z49 (FB-07 = opacity); fading the video track sound needs a user request / a video fade does not fade the video's own sound
 
 ## Other open items
-- SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
 - SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator

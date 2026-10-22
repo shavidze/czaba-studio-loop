@@ -24,3 +24,23 @@ Date: 2026-10-22 · Author: B · Non-blocking: round 84 (SRW-19) proceeds while 
 
 ## What B does with the answer
 An approved change becomes its own B task with one owner and behaviour-preserving tests, scheduled after the current feature stage. It does not interrupt SRW-19 or SRW-20 unless root rules otherwise.
+
+## Addendum — round 84 result (B, round 85 planning, 2026-10-22)
+SRW-19 has now passed C (PASS, `browserVerified=true`, published as `88b0262`). That is another feature boundary, and root still has not answered this request or the SRW-16 request. The request remains non-blocking. Round 85 (C-R84-M1 + SRW-20 stage 1) goes ahead.
+
+q12 is new.
+
+**q12 — round-84 Architecture note (A's code-reviewer, verbatim in `a-round-84.md`):**
+- **(a) Duplicated helpers.** `video-fades.ts` l.5–24 re-implements three private helpers of `fades.ts` (l.21–48). The proposal is to export `roundFadeSeconds`, `floorFadeSeconds` and `withClipFadeLengths` from `fades.ts` and delete the copies. Acceptance:
+  - the VF1 parity test stays green;
+  - FD1 and FD6 are untouched;
+  - no behaviour changes.
+
+  The reviewer says keep for now.
+- **(b) Fade-overlay writer.** `ArrangementVideoDock.tsx` l.237–273 has a fade-overlay position writer and a layout effect. Keep: the code sits in its own sibling component.
+- **(c) Border constants.** `CLIP_ENVELOPE_ROOT_BORDER_PX` and `CLIP_BORDER_PX` both depend on the clip root `border` class. Keep, as a one-line backlog item.
+
+**New evidence for question 3 (C round 84):**
+- A video-fade drag during playback added 4 `createBufferSource` calls (12→16).
+- Playback continued and the position never ran backwards.
+- No audible defect was measured.
