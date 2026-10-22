@@ -1,0 +1,11 @@
+const L=require('./lib.cjs');const sleep=L.sleep;
+(async()=>{const s=await L.open(process.argv[2]||'1440x900');const p=s.page;await L.fresh(p);
+const g=()=>p.evaluate(()=>{const s=document.querySelector('[data-testid=arrangement-timeline-scroller]');return{sh:s.scrollHeight,ch:s.clientHeight}});
+const tryDrag=async(lab,idx)=>{const h=p.locator('[data-testid=arrangement-track-height]').nth(idx);const b=await h.boundingBox();const v0=await h.getAttribute('aria-valuenow');
+ const hit=await p.evaluate(([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.getAttribute('data-testid')||e.tagName)},[b.x+b.width/2,b.y+b.height/2]);
+ await p.mouse.move(b.x+b.width/2,b.y+b.height/2);await p.mouse.down();await p.mouse.move(b.x+b.width/2,b.y+40,{steps:6});await p.mouse.up();await sleep(200);
+ console.log(lab,'idx',idx,'box',JSON.stringify(b),'hit',hit,'now',v0,'->',await h.getAttribute('aria-valuenow'),JSON.stringify(await g()));};
+await tryDrag('fresh',3);
+await L.setupME(p,530);await tryDrag('afterME',2);
+await tryDrag('afterME-video',0);
+await s.browser.close();})();

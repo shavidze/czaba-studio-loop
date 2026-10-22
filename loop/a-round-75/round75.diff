@@ -1,0 +1,229 @@
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -77,6 +77,7 @@
+ 
+ export interface ArrangementMarkerRowHandle {
+   beginAddMarker: () => void;
++  closeMenu: () => void;
+   stepMarker: (direction: -1 | 1) => void;
+ }
+ 
+@@ -237,7 +238,28 @@
+     [getArrangement, getLivePosition, projectEnd, seekTo, setStatus],
+   );
+ 
+-  useImperativeHandle(ref, () => ({ beginAddMarker, stepMarker }), [beginAddMarker, stepMarker]);
++  const closeMenu = useCallback(() => {
++    if (!menu) {
++      return;
++    }
++    setMenu(null);
++    focusMarkerTarget(menu.markerId);
++  }, [focusMarkerTarget, menu]);
++
++  const menuPxPerSecondRef = useRef(pxPerSecond);
++  useEffect(() => {
++    if (menuPxPerSecondRef.current === pxPerSecond) {
++      return;
++    }
++    menuPxPerSecondRef.current = pxPerSecond;
++    closeMenu();
++  }, [closeMenu, pxPerSecond]);
++
++  useImperativeHandle(ref, () => ({ beginAddMarker, closeMenu, stepMarker }), [
++    beginAddMarker,
++    closeMenu,
++    stepMarker,
++  ]);
+ 
+   const runUnlessGesture = (action: () => void) => {
+     if (isPointerGestureActive()) {
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -1048,10 +1048,19 @@
+       return;
+     }
+     const left = scroller.scrollLeft;
++    const previousLeft = lastScrollLeftRef.current;
+     lastScrollLeftRef.current = left;
+     const clampedByBrowser =
+       left < autoScrollLeftRef.current &&
+       left >= scroller.scrollWidth - scroller.clientWidth - FOLLOW_SCROLL_TOLERANCE_PX;
++    const followAutoScroll =
++      workspaceRef.current.isPlaying &&
++      followModeRef.current === 'on' &&
++      (clampedByBrowser ||
++        Math.abs(left - autoScrollLeftRef.current) <= FOLLOW_SCROLL_TOLERANCE_PX);
++    if (left !== previousLeft && !followAutoScroll) {
++      markerRowRef.current?.closeMenu();
++    }
+     if (!workspaceRef.current.isPlaying || clampedByBrowser) {
+       autoScrollLeftRef.current = left;
+     } else if (
+--- a/app/lib/arrangement/__tests__/markers-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+@@ -515,7 +515,7 @@
+     expect(statusText(view)).toBe('სახელი ცარიელია — დარჩა «რეკლამა»');
+   });
+ 
+-  it('MU8: Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a marker do not nudge', async () => {
++  it('MU8: Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a focused marker move the marker and never nudge the selected clip', async () => {
+     const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
+     act(() => live(api).selectClip('m1'));
+     const outro = flagAt(view, '40.000');
+@@ -523,7 +523,8 @@
+     fireEvent.keyDown(outro, { key: 'ArrowRight', code: 'ArrowRight' });
+     fireEvent.keyDown(outro, { key: 'ArrowLeft', code: 'ArrowLeft' });
+     expect(live(api).arrangement.clips[0].start).toBe(0);
+-    expect(live(api).undoLabel).toBeNull();
++    expect(live(api).undoLabel).toBe('Move Marker');
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
+     fireEvent.keyDown(outro, { key: 'Delete', code: 'Delete' });
+     expect(markerTimes(view)).toEqual(['12.000', '20.000']);
+     expect(live(api).undoLabel).toBe('Delete Marker');
+@@ -632,12 +633,15 @@
+     const drop = flagAt(view, '20.000');
+     fireEvent.pointerDown(drop, { button: 0, buttons: 1, pointerId: 75 });
+     expect(document.activeElement).toBe(drop);
++    fireEvent.pointerUp(window, { pointerId: 75 });
+     const label = drop.querySelector('[data-marker-label]');
+     if (!(label instanceof HTMLElement)) {
+       throw new Error('marker label missing');
+     }
+     fireEvent.pointerDown(label, { button: 0, buttons: 1, pointerId: 76 });
+     expect(document.activeElement).toBe(drop);
++    fireEvent.pointerUp(window, { pointerId: 76 });
++    expect(live(api).isPointerGestureActive()).toBe(false);
+ 
+     fireEvent.keyDown(intro, { key: 'F2', code: 'F2' });
+     const input = nameInput(view);
+--- a/app/lib/arrangement/__tests__/markers-move-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/markers-move-ui.test.tsx
+@@ -714,3 +714,83 @@
+     expect(live(api).undoLabel).toBe('Move Marker');
+   });
+ });
++
++describe('marker menu vs timeline scroll and zoom (C-R74-02)', { timeout: 15000 }, () => {
++  it('MV15: a vertical-only scroll keeps the menu; a horizontal scroll closes it and returns focus to the flag', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(MOVE_MARKERS));
++    const scroller = view.getByTestId('arrangement-timeline-scroller');
++    const intro = flagById(view, 'k5');
++    intro.focus();
++    scroller.scrollLeft = 40;
++    fireEvent.scroll(scroller);
++    expect(markerMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(intro);
++
++    act(() => live(api).selectClip('m1'));
++    act(() => live(api).seekTo(3));
++    const drop = flagById(view, 'k12');
++    rightClickFlag(drop);
++    expect(markerMenu(view)).not.toBeNull();
++    const selectionBefore = live(api).selectedClipIds;
++    const undoBefore = live(api).undoLabel;
++    scroller.scrollTop = 60;
++    fireEvent.scroll(scroller);
++    expect(markerMenu(view)).not.toBeNull();
++    scroller.scrollLeft = 340;
++    expect(scroller.scrollLeft).toBe(340);
++    fireEvent.scroll(scroller);
++    expect(markerMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(flagById(view, 'k12'));
++    expect(scroller.scrollLeft).toBe(340);
++    expect(markerTimes(view)).toEqual(['5.000', '12.000']);
++    expect(live(api).getLivePosition()).toBe(3);
++    expect(live(api).selectedClipIds).toEqual(selectionBefore);
++    expect(live(api).undoLabel).toBe(undoBefore);
++  });
++
++  it('MV16: playing with Follow on, a scroll within the follow tolerance keeps the menu; a user scroll beyond it closes it', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(MOVE_MARKERS));
++    const scroller = view.getByTestId('arrangement-timeline-scroller');
++    act(() => live(api).togglePlayback());
++    expect(live(api).isPlaying).toBe(true);
++    expect(view.getByTestId('arrangement-follow').dataset.followMode).toBe('on');
++    const anchor = scroller.scrollLeft;
++    rightClickFlag(flagById(view, 'k12'));
++    expect(markerMenu(view)).not.toBeNull();
++    scroller.scrollLeft = anchor + 1;
++    expect(scroller.scrollLeft).toBe(anchor + 1);
++    fireEvent.scroll(scroller);
++    expect(markerMenu(view)).not.toBeNull();
++    expect(view.getByTestId('arrangement-follow').dataset.followMode).toBe('on');
++    scroller.scrollLeft = anchor + 200;
++    fireEvent.scroll(scroller);
++    expect(markerMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(flagById(view, 'k12'));
++    expect(view.getByTestId('arrangement-follow').dataset.followMode).toBe('paused');
++    expect(live(api).isPlaying).toBe(true);
++    act(() => live(api).togglePlayback());
++  });
++
++  it('MV17: a Ctrl+wheel zoom closes the menu and returns focus to the flag without a seek', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(MOVE_MARKERS));
++    const scroller = view.getByTestId('arrangement-timeline-scroller');
++    act(() => live(api).seekTo(2));
++    const ppsBefore = pxPerSecondOf(view);
++    const drop = flagById(view, 'k12');
++    rightClickFlag(drop);
++    expect(markerMenu(view)).not.toBeNull();
++    fireEvent.wheel(scroller, { ctrlKey: true, deltaY: -100, clientX: 400, clientY: 200 });
++    expect(pxPerSecondOf(view)).not.toBe(ppsBefore);
++    expect(markerMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(flagById(view, 'k12'));
++    expect(live(api).getLivePosition()).toBe(2);
++    expect(markerTimes(view)).toEqual(['5.000', '12.000']);
++    expect(live(api).undoLabel).toBeNull();
++
++    const intro = flagById(view, 'k5');
++    intro.focus();
++    fireEvent.wheel(scroller, { ctrlKey: true, deltaY: 100, clientX: 400, clientY: 200 });
++    expect(markerMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(intro);
++  });
++});
+--- a/docs/implementation/2026/quarter-IV/065-studio-lab-marker-move-menu.md
++++ b/docs/implementation/2026/quarter-IV/065-studio-lab-marker-move-menu.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — მარკერის გადატანა და კონტექსტური მენიუ, ეტაპი 2a (SRW-16 / FB-10)
+ 
+ **თარიღი:** 2026-10-21
+-**სტატუსი:** Round 74 — იმპლემენტირებულია; C-ის შემოწმებას ელოდება (D-29z39)
++**სტატუსი:** Round 74 — C FAIL (C-R74-01, C-R74-02); Round 75 — fix-up იმპლემენტირებულია, C-ის შემოწმებას ელოდება (D-29z39, D-29z40)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -58,7 +58,8 @@
+ - `app/components/arrangement/StudioWorkspace.tsx` — მხოლოდ ორი prop `ArrangementMarkerRow`-ზე
+ - `app/lib/arrangement/__tests__/markers.test.ts` — MK-MOVE1–4
+ - `app/lib/arrangement/__tests__/markers-move-ui.test.tsx` — ახალი, MV1–MV14 (+MV11b)
+-- `app/lib/arrangement/__tests__/markers-ui.test.tsx` — მხოლოდ MU8e-ის ორი assertion
++- `app/lib/arrangement/__tests__/markers-ui.test.tsx` — MU8e-ის ორი assertion; round 75: MU8-ის სათაური და assertion-ები, MU8e-ის pointerUp-ები
++- Round 75: `ArrangementMarkerRow.tsx` (`closeMenu`, zoom-ზე დახურვა), `StudioWorkspace.tsx` (მხოლოდ `handleTimelineScroll`), `markers-move-ui.test.tsx` (MV15–MV17)
+ - `docs/implementation/2026/quarter-IV/064-studio-lab-markers.md` — სტატუსის ხაზი
+ 
+ ## პრობლემები და გადაწყვეტები
+@@ -67,16 +68,18 @@
+ - **Problem:** drag-ის შემდეგ ბრაუზერის `click`/`dblclick` playhead-ს გადახტუნებდა ან დაკვრას დაიწყებდა. → **Solution:** `suppressClickRef` ერთი task-ის განმავლობაში.
+ - **Problem:** მეზობელი მარკერის გადაკვეთისას keyed სიის გადალაგება გადაწეულ flag-ს capture-ს/focus-ს დააკარგვინებდა. → **Solution:** drag-ის დროს `dragOrder` DOM-ის რიგს ყინავს; commit-ის შემდეგ `pendingFocusRef`.
+ - **Problem:** Shift+F10 / ContextMenu კლავიშმა შეიძლება native `contextmenu`-ც გამოიწვიოს. → **Solution:** keydown მენიუს flag-ის ქვედა-მარცხენა კუთხეზე ხსნის; იმავე მარკერზე ღია მენიუსას კლავიატურიდან მოსული `contextmenu` (button ≠ 2) იგნორირდება.
+-- **Problem (ღია):** MU8 (`markers-ui.test.tsx` ხაზი 526) ელის, რომ ← → focused flag-ზე history-ს არ ქმნის. B5-ით ეს ახლა `Move Marker`-ია. ხაზი A-ის grant-ის გარეთაა; B-მ უნდა დაუშვას ერთი assertion-ის შეცვლა.
++- **Problem (C-R74-01, round 75):** MU8 (`markers-ui.test.tsx` ხაზი 526) ელოდა, რომ ← → focused flag-ზე history-ს არ ქმნის, B5-ით კი ეს `Move Marker`-ია. ეს B-ის spec-ის წინააღმდეგობა იყო, round 74-ში ხაზი A-ის grant-ის გარეთ რჩებოდა. → **Solution:** B-მ ტესტზე ვიწრო grant გასცა. MU8-ის სათაური ახლა ამბობს, რომ ისრები focused მარკერს წევს და მონიშნულ კლიპს არასდროს წევს. ხაზი 526 `toBe('Move Marker')`-ია, დაემატა `markerTimes` = 12/20/40 (Snap off: 40.100 → 40.000).
++- **Problem (A-R74-MU8E-POINTERUP):** MU8e-ში pointerdown 75/76-ს pointerUp არ მოსდევდა, ამიტომ gesture claim ტესტის ბოლომდე აქტიური რჩებოდა. → **Solution:** თითოეულს `window`-ზე pointerUp მოსდევს (jsdom-ში `watchUncapturedPointerGesture` fallback); `isPointerGestureActive()` = false დამოწმებულია.
++- **Problem (C-R74-02, round 75):** ტაიმლაინის ჰორიზონტალური scroll-ის შემდეგ მენიუ ძველ fixed პოზიციაზე რჩებოდა, flag კი 300 px-ით მარცხნივ გადადიოდა. → **Solution:** `ArrangementMarkerRowHandle.closeMenu()` მენიუს ხურავს და focus-ს flag-ს უბრუნებს (`preventScroll`). `handleTimelineScroll` მას იძახებს, როცა `scrollLeft` შეიცვალა და ეს Follow auto-scroll არ არის (S1). Follow-ის დროს (playing, Follow on, tolerance ან browser clamp) მენიუ რჩება (S2, grid menu-ის იგივე გამონაკლისი). ვერტიკალური scroll მენიუს არ ხურავს (S3). `pxPerSecond`-ის ცვლილება (zoom) row-ში ხურავს (S4). Follow-ის predicate grid menu-ის effect-თან დუბლირებულია; ეს B-სთვის არქიტექტურული სიგნალია, refactor არ გაკეთებულა.
+ 
+ ## ტესტირება
+ 
+ - `npx vitest run` — markers.test.ts (30), markers-ui.test.tsx (22, 1 ჩავარდნა — MU8 ხაზი 526, იხ. ზემოთ), markers-move-ui.test.tsx (15), delete-selection-ui (13), grid-musical-ui (14), grid-snap-menu (39), grid-snap-keys (13), grid-triplet-ui (10).
+ - Mutation proofs: re-sort-ის მოხსნა → MK-MOVE1/MV5 წითელი; click guard-ის მოხსნა → MV4/MV13 წითელი; press focus-ის მოხსნა → MV8/MU8e წითელი; ისრის branch-ის `target === currentTarget`-ის გარეშე → MU8f წითელი; მხოლოდ `stopPropagation`-ის მოხსნა გადარჩა (window `!isMarkerTarget` guard); კოლიზიის შემოწმების მოხსნა → MK-MOVE2/MV5/MV6 წითელი; კლავიატურის ორმაგი გახსნის guard-ის მოხსნა → MV11 წითელი; abort-ზე click suppression-ის მოხსნა → MV14 წითელი.
+ - `npm run typecheck`, `npm run lint` — სუფთა. ბრაუზერის შემოწმება C-ს ეკუთვნის.
++- Round 75: targeted vitest (markers, markers-ui, markers-move-ui, delete-selection-ui, grid-snap-ui, grid-snap-menu, view) — 7 ფაილი, 183 მწვანე. Mutation proofs: `closeMenu`-ის გამოძახების მოხსნა → MV15/MV16 წითელი; Follow-ის გამონაკლისის მოხსნა → MV16 წითელი; zoom-ზე დახურვის მოხსნა → MV17 წითელი; ხაზი 526 `toBeNull()` → MU8 წითელი; MU8e-ის pointerUp-ების მოხსნა → `isPointerGestureActive()` assertion წითელი.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- B: MU8 ხაზი 526-ის grant (`toBe('Move Marker')` ან assertion-ის ამოღება).
+-- Round 75 — ეტაპი 2b: snap მარკერებზე და Ctrl/Option+←/→ კლიპის კიდეებზე.
+-- მენიუ ჰორიზონტალურ scroll-ზე არ იხურება (resize/blur-ზე იხურება); საჭიროების შემთხვევაში B-მ დაგეგმოს.
++- C: MK-MENU-SCROLL/VSCROLL/ZOOM/FOLLOW/DOCK ბრაუზერში.
++- Round 76 — ეტაპი 2b: snap მარკერებზე და Ctrl/Option+←/→ კლიპის კიდეებზე.

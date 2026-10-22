@@ -1,0 +1,75 @@
+{
+ "round": 75,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-21T23:17:15.3730476Z",
+  "round": 75,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "MK-MENU-SCROLL",
+  "MK-MENU-VSCROLL",
+  "MK-MENU-ZOOM",
+  "MK-MENU-FOLLOW",
+  "MK-MENU-DOCK",
+  "MK-74-RECHECK",
+  "T75-TARGETED",
+  "REG-HYD",
+  "G75-3 (non-backend rows)"
+ ],
+ "blocked": [
+  "G75-3 fake-Bearer /api/studio-token?product&file -> 500 'Unable to prepare Studio access': backend unavailable in cloud (expected 403 needs :5199)"
+ ],
+ "notRun": [
+  "A Low 4 probe (leftward user wheel near the clamped right end during Follow): not an acceptance row; the 101 s demo at 162 px/s needs ~95 s of playback to reach the clamp; left for a later Follow regression",
+  "Real keyboard ContextMenu key / Shift+F10 native path (INFO-C74-KEYBOARD-CONTEXTMENU-BUTTON class): CDP keys only",
+  "WebKit/Firefox: Chromium only"
+ ],
+ "gate": [
+  "vitest full suite",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "info": [
+  "INFO-C75-ZOOM-STOPPED-FOLLOW: Ctrl+wheel zoom while stopped leaves Follow 'on' (pauseFollowForNavigation acts during playback only); the task harness note 'zoom pauses Follow' applies to playback. No contract breach.",
+  "INFO-C75-DELETE-LAST-FOCUS: menu Delete of the only marker moves focus to the marker add button (arrangement-marker-add); reasonable, recorded only.",
+  "HARNESS-C75-HEIGHT-HANDLE: with the 101 s Middle East clip the track-height handle is 5504 px wide; drag it near its left end, not at its centre (centre is off-screen). First VSCROLL attempt was a harness miss, not an app defect.",
+  "A architecture note (second copy of the Follow auto-scroll predicate, isFollowAutoScroll proposal) and reviewer Low 2 (same-zoom applyTimelineView scrolls pre-write lastScrollLeftRef) forwarded to B as signals; not reproducible as user bugs today."
+ ],
+ "ableton": {
+  "all rows": "არ ეხება (CZABA UI rule; Live 12 §6.4 says nothing about context-menu dismissal)"
+ },
+ "evidence": {
+  "MK-MENU-SCROLL": "c-round-75/mk75-{1440x900,1280x720}.json; right-click and Shift+F10: scrollLeft 0->300 (stable 400 ms later), flag x moved 300, menu removed, activeElement=flag, pos/undo/clip selection/markers identical; 2nd wheel keeps focus, no reopen",
+  "MK-MENU-VSCROLL": "overflow 112 px (1440) after REAL track-height drags; vertical wheel scrollTop 0->112, scrollLeft 0, menu and flag rect unchanged",
+  "MK-MENU-ZOOM": "Ctrl+wheel 40->46 px/s, menu closed, focus flag, position 0, time under pointer 19.450->19.457 s (1440) / 15.450->15.457 (1280)",
+  "MK-MENU-FOLLOW": "162 px/s, Follow on, playing: auto-scroll 0->589 (1440) / 0->482 (1280) with menu open every 100 ms poll, Follow stays on; Play from here 1.098->1.597 (1440) / 1.101->1.600 (1280); reopened, user wheel 300 -> menu closed, Follow paused, playback continues 2.648->3.049 / 2.631->3.031",
+  "MK-MENU-DOCK": "both viewports: floating video moved under the marker row (box 520,271 272x153 @1440), menu overlaps box by 11520 px2 (1440) / 10536 px2 (1280), portal parent body z-50, elementFromPoint hits each menuitem, Play click 1.362->1.873, Delete click removed the marker; shots/dock-menu-*.png",
+  "MK-74-RECHECK": "full round-74 mk74 script re-run at both viewports (superset of the listed rows): all PASS; MK-MENU-SCROLL info row now menuAfterScroll 0 (was 1 in round 74)",
+  "T75-TARGETED": "c-round-75/vitest-markers.txt: 2 files, 40 passed, 0 failed; c-round-75/vitest-mu8.txt (verbose, -t MU8): MU8 and MU8b-MU8f listed green (6 passed)",
+  "G75-3": "g75-*.json, run-tok.txt: header link -> /studio-lab with demo badge; /studio/middle-east 'Sign in required', no workspace; anon token 401; 0 forbidden page requests, 0 Authorization headers",
+  "REG-HYD": "CONSOLE rows in mk75/mk74r/dock75: no hydration or useLayoutEffect warning, no non-noise errors"
+ },
+ "source": {
+  "head": "6b574e8",
+  "status": "10 baseline lines",
+  "ownedEndHashes": "equal A's report at C start and end (8e0bb133,592bc1a7,753cecba,49a52e34,5c405434,b3490861)",
+  "frozen": "449/449 OK start and end",
+  "protected": "4/4 unchanged",
+  "grants": "markers-ui diff = MU8 title, l.526, one added assertion, two MU8e pointerUps + isPointerGestureActive assertion; MV1-14 prefix byte-identical; ArrangementMarkerMenu untouched; StudioWorkspace diff only inside handleTimelineScroll"
+ },
+ "neighbours": {
+  "NB-GRID-SCROLL": "PASS both viewports (lane grid menu closes on a horizontal user wheel)"
+ },
+ "integrity": {
+  "SOURCE-UNCHANGED": "PASS",
+  "GRANT-SCOPE": "PASS"
+ }
+}

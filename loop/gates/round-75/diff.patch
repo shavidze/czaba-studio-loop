@@ -1,0 +1,781 @@
+diff --git a/app/components/arrangement/ArrangementGridMenu.tsx b/app/components/arrangement/ArrangementGridMenu.tsx
+index b92cfe1..82b44ae 100644
+--- a/app/components/arrangement/ArrangementGridMenu.tsx
++++ b/app/components/arrangement/ArrangementGridMenu.tsx
+@@ -26,7 +26,7 @@ function clampGridMenuAxis(value: number, size: number, viewport: number): numbe
+   return Math.max(GRID_MENU_VIEWPORT_MARGIN_PX, Math.min(value, max));
+ }
+ 
+-function armGridMenuDismissClickSwallow(view: Window) {
++export function armGridMenuDismissClickSwallow(view: Window) {
+   let releaseTimer: number | null = null;
+   const releaseClickSwallow = () => {
+     if (releaseTimer !== null) {
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+index fd726b7..bc56cbc 100644
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -1,32 +1,45 @@
+ import {
+   forwardRef,
+   type KeyboardEvent,
++  type MouseEvent,
++  type PointerEvent,
+   useCallback,
+   useEffect,
+   useImperativeHandle,
+   useRef,
+   useState,
+ } from 'react';
++import { createPortal } from 'react-dom';
+ import {
+   formatArrangementTime,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
+ } from '~/contexts/ArrangementContext';
++import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
++import { adjacentGridLine, resolveGridTime } from '~/lib/arrangement/grid';
+ import {
+   addMarker,
+   adjacentMarkerTarget,
+   arrangementMarkers,
+   deleteMarker,
+   MARKER_NAME_MAX_LENGTH,
++  MARKER_TIME_EPS,
+   markerAtTime,
++  moveMarker,
+   nextDefaultMarkerName,
+   normalizeMarkerName,
+   renameMarker,
+   roundMarkerTime,
+ } from '~/lib/arrangement/markers';
+ import { cn } from '~/lib/utils';
+-import type { ArrangementMarker } from '~/types/arrangement';
++import type { Arrangement, ArrangementMarker } from '~/types/arrangement';
++import { watchUncapturedPointerGesture } from './ArrangementClip';
+ import { ARRANGEMENT_HEADER_WIDTH_PX } from './ArrangementLane';
++import {
++  ArrangementMarkerMenu,
++  type MarkerMenuAction,
++  type MarkerMenuCloseReason,
++} from './ArrangementMarkerMenu';
+ 
+ const MARKER_LABEL_MAX_PX = 160;
+ const MARKER_LABEL_GAP_PX = 4;
+@@ -34,21 +47,46 @@ const MARKER_LABEL_MIN_VISIBLE_PX = 12;
+ const MARKER_ADD_FOCUS = 'add';
+ const MARKER_HEADER_BUTTON_CLASS =
+   'h-4 shrink-0 rounded-sm border border-outline px-1 text-xs leading-none text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
++const MARKER_DRAG_THRESHOLD_PX = 3;
++const MARKER_KEY_STEP_SECONDS = 0.1;
++const MARKER_FLAG_SHORTCUTS = 'F2 Delete ArrowLeft ArrowRight Shift+F10';
+ const MARKER_FLAG_HINT =
+-  'დაწკაპუნება: გადასვლა · ორმაგი დაწკაპუნება: დაკვრა აქედან · F2: სახელის შეცვლა · Delete: წაშლა';
++  'დაწკაპუნება: გადასვლა · ორმაგი დაწკაპუნება: დაკვრა აქედან · გადათრევა ან ← →: გადატანა · F2: სახელის შეცვლა · Delete: წაშლა · მარჯვენა ღილაკი ან Shift+F10: მენიუ';
++const MARKER_AT_TIME_START_MESSAGE = 'მარკერი დროის დასაწყისშია.';
+ 
+ type MarkerEditor =
+   | { kind: 'add'; session: number; time: number; draft: string; fallback: string }
+   | { kind: 'rename'; session: number; id: string; time: number; draft: string };
+ 
++interface MarkerDragGesture {
++  markerId: string;
++  pointerId: number;
++  startX: number;
++  before: Arrangement;
++  original: ArrangementMarker;
++  lastTime: number;
++  moved: boolean;
++  release: () => void;
++}
++
++interface MarkerMenuState {
++  session: number;
++  markerId: string;
++  x: number;
++  y: number;
++}
++
+ export interface ArrangementMarkerRowHandle {
+   beginAddMarker: () => void;
++  closeMenu: () => void;
+   stepMarker: (direction: -1 | 1) => void;
+ }
+ 
+ interface ArrangementMarkerRowProps {
+   timelineWidth: number;
+   pxPerSecond: number;
++  snapSeconds?: number | null;
++  gridSeconds?: number;
+ }
+ 
+ function markerLabelWidth(
+@@ -64,10 +102,28 @@ function markerLabelWidth(
+   return Math.max(0, Math.min(MARKER_LABEL_MAX_PX, gap));
+ }
+ 
++function orderMarkersForDrag(
++  markers: readonly ArrangementMarker[],
++  order: readonly string[] | null,
++): readonly ArrangementMarker[] {
++  if (order === null) {
++    return markers;
++  }
++  const rank = new Map(order.map((id, index) => [id, index]));
++  return [...markers].sort(
++    (left, right) => (rank.get(left.id) ?? order.length) - (rank.get(right.id) ?? order.length),
++  );
++}
++
++function markerFlagMenuAnchor(flag: HTMLElement): { x: number; y: number } {
++  const rect = flag.getBoundingClientRect();
++  return { x: rect.left, y: rect.bottom };
++}
++
+ export const ArrangementMarkerRow = forwardRef<
+   ArrangementMarkerRowHandle,
+   ArrangementMarkerRowProps
+->(({ timelineWidth, pxPerSecond }, ref) => {
++>(({ timelineWidth, pxPerSecond, snapSeconds = null, gridSeconds }, ref) => {
+   const {
+     arrangement,
+     range,
+@@ -75,11 +131,13 @@ export const ArrangementMarkerRow = forwardRef<
+     projectEnd,
+     getArrangement,
+     getLivePosition,
++    previewArrangement,
+     commitArrangement,
+     seekTo,
+     togglePlayback,
+     setStatus,
+     isPointerGestureActive,
++    claimPointerGesture,
+   } = useArrangement();
+   const markers = arrangementMarkers(arrangement);
+   const [editor, setEditor] = useState<MarkerEditor | null>(null);
+@@ -91,6 +149,20 @@ export const ArrangementMarkerRow = forwardRef<
+   const sessionRef = useRef(0);
+   const restoreFocusRef = useRef<HTMLElement | null>(null);
+   const pendingFocusRef = useRef<string | null>(null);
++  const dragRef = useRef<MarkerDragGesture | null>(null);
++  const suppressClickRef = useRef<string | null>(null);
++  const [dragOrder, setDragOrder] = useState<readonly string[] | null>(null);
++  const [menu, setMenu] = useState<MarkerMenuState | null>(null);
++  const menuSessionRef = useRef(0);
++
++  useEffect(
++    () => () => {
++      const gesture = dragRef.current;
++      dragRef.current = null;
++      gesture?.release();
++    },
++    [],
++  );
+ 
+   const focusMarkerTarget = useCallback((target: string) => {
+     const element =
+@@ -167,7 +239,28 @@ export const ArrangementMarkerRow = forwardRef<
+     [getArrangement, getLivePosition, projectEnd, seekTo, setStatus],
+   );
+ 
+-  useImperativeHandle(ref, () => ({ beginAddMarker, stepMarker }), [beginAddMarker, stepMarker]);
++  const closeMenu = useCallback(() => {
++    if (!menu) {
++      return;
++    }
++    setMenu(null);
++    focusMarkerTarget(menu.markerId);
++  }, [focusMarkerTarget, menu]);
++
++  const menuPxPerSecondRef = useRef(pxPerSecond);
++  useIsomorphicLayoutEffect(() => {
++    if (menuPxPerSecondRef.current === pxPerSecond) {
++      return;
++    }
++    menuPxPerSecondRef.current = pxPerSecond;
++    closeMenu();
++  }, [closeMenu, pxPerSecond]);
++
++  useImperativeHandle(ref, () => ({ beginAddMarker, closeMenu, stepMarker }), [
++    beginAddMarker,
++    closeMenu,
++    stepMarker,
++  ]);
+ 
+   const runUnlessGesture = (action: () => void) => {
+     if (isPointerGestureActive()) {
+@@ -262,6 +355,248 @@ export const ArrangementMarkerRow = forwardRef<
+     focusMarkerTarget(neighbour ? neighbour.id : MARKER_ADD_FOCUS);
+   };
+ 
++  const jumpToMarker = (marker: ArrangementMarker) => {
++    seekTo(marker.time);
++    setSelectedMarkerId(marker.id);
++  };
++
++  const commitMarkerMove = (before: Arrangement, markerId: string, time: number): boolean => {
++    const result = moveMarker(before, markerId, time);
++    if (result.kind === 'conflict') {
++      setStatus(`ამ დროზე მარკერი უკვე არის: «${result.other.name}»`);
++      return false;
++    }
++    if (result.kind === 'unchanged') {
++      return false;
++    }
++    pendingFocusRef.current = markerId;
++    commitArrangement(result.arrangement, 'Move Marker', before);
++    setSelectedMarkerId(markerId);
++    setStatus(
++      `მარკერი «${result.marker.name}» გადავიდა: ${formatArrangementTime(result.marker.time)}.`,
++    );
++    return true;
++  };
++
++  const nudgeMarker = (markerId: string, direction: -1 | 1) => {
++    const before = getArrangement();
++    const current = arrangementMarkers(before).find((entry) => entry.id === markerId);
++    if (!current) {
++      return;
++    }
++    setSelectedMarkerId(current.id);
++    if (direction === -1 && current.time < MARKER_TIME_EPS) {
++      setStatus(MARKER_AT_TIME_START_MESSAGE);
++      return;
++    }
++    const target =
++      snapSeconds === null
++        ? current.time + direction * MARKER_KEY_STEP_SECONDS
++        : (adjacentGridLine(current.time, snapSeconds, direction) ?? 0);
++    commitMarkerMove(before, current.id, target);
++  };
++
++  const suppressClickAfterDrag = (markerId: string) => {
++    suppressClickRef.current = markerId;
++    window.setTimeout(() => {
++      if (suppressClickRef.current === markerId) {
++        suppressClickRef.current = null;
++      }
++    }, 0);
++  };
++
++  const endStaleMarkerDrag = (gesture: MarkerDragGesture) => {
++    dragRef.current = null;
++    if (gesture.moved) {
++      previewArrangement(gesture.before);
++      setDragOrder(null);
++      suppressClickAfterDrag(gesture.markerId);
++    }
++    gesture.release();
++  };
++
++  const beginMarkerDrag = (event: PointerEvent<HTMLButtonElement>, marker: ArrangementMarker) => {
++    if (event.button !== 0 || event.buttons === 0) {
++      return;
++    }
++    event.preventDefault();
++    event.stopPropagation();
++    suppressClickRef.current = null;
++    const flag = event.currentTarget;
++    flag.focus({ preventScroll: true });
++    setSelectedMarkerId(marker.id);
++    let claimed: MarkerDragGesture | null = null;
++    const releaseClaim = claimPointerGesture(event.pointerId, () => {
++      const stale = claimed;
++      if (stale && dragRef.current === stale) {
++        endStaleMarkerDrag(stale);
++        return;
++      }
++      stale?.release();
++    });
++    if (!releaseClaim) {
++      setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
++      return;
++    }
++    const leftover = dragRef.current;
++    if (leftover) {
++      endStaleMarkerDrag(leftover);
++    }
++    const before = getArrangement();
++    const original = arrangementMarkers(before).find((entry) => entry.id === marker.id);
++    if (!original) {
++      releaseClaim();
++      return;
++    }
++    claimed = {
++      markerId: original.id,
++      pointerId: event.pointerId,
++      startX: event.clientX,
++      before,
++      original,
++      lastTime: original.time,
++      moved: false,
++      release: releaseClaim,
++    };
++    dragRef.current = claimed;
++    try {
++      flag.setPointerCapture(event.pointerId);
++    } catch {
++      const gesture = claimed;
++      watchUncapturedPointerGesture(gesture, () => {
++        if (dragRef.current === gesture) {
++          endStaleMarkerDrag(gesture);
++          return;
++        }
++        gesture.release();
++      });
++    }
++  };
++
++  const handleMarkerPointerMove = (event: PointerEvent<HTMLButtonElement>) => {
++    const gesture = dragRef.current;
++    if (!gesture || gesture.pointerId !== event.pointerId) {
++      return;
++    }
++    const dx = event.clientX - gesture.startX;
++    if (!gesture.moved && Math.abs(dx) < MARKER_DRAG_THRESHOLD_PX) {
++      return;
++    }
++    if (!gesture.moved) {
++      gesture.moved = true;
++      setDragOrder(arrangementMarkers(gesture.before).map((entry) => entry.id));
++    }
++    const time = resolveGridTime(
++      roundMarkerTime(gesture.original.time + dx / pxPerSecond),
++      snapSeconds,
++      gridSeconds,
++      event.altKey,
++    );
++    const result = moveMarker(gesture.before, gesture.markerId, time);
++    if (result.kind === 'conflict') {
++      return;
++    }
++    gesture.lastTime = result.kind === 'moved' ? result.marker.time : gesture.original.time;
++    previewArrangement(result.arrangement);
++  };
++
++  const finishMarkerDrag = (event: PointerEvent<HTMLButtonElement>) => {
++    const gesture = dragRef.current;
++    if (!gesture || gesture.pointerId !== event.pointerId) {
++      return;
++    }
++    dragRef.current = null;
++    gesture.release();
++    const flag = event.currentTarget;
++    if (flag.hasPointerCapture(event.pointerId)) {
++      flag.releasePointerCapture(event.pointerId);
++    }
++    if (!gesture.moved) {
++      return;
++    }
++    setDragOrder(null);
++    const { markerId } = gesture;
++    suppressClickAfterDrag(markerId);
++    if (Math.abs(gesture.lastTime - gesture.original.time) < MARKER_TIME_EPS) {
++      return;
++    }
++    commitMarkerMove(gesture.before, markerId, gesture.lastTime);
++  };
++
++  const openMarkerMenu = (marker: ArrangementMarker, x: number, y: number) => {
++    setSelectedMarkerId(marker.id);
++    menuSessionRef.current += 1;
++    setMenu({ session: menuSessionRef.current, markerId: marker.id, x, y });
++  };
++
++  const handleFlagContextMenu = (
++    event: MouseEvent<HTMLButtonElement>,
++    marker: ArrangementMarker,
++  ) => {
++    event.preventDefault();
++    event.stopPropagation();
++    const fromKeyboard = event.button !== 2;
++    if (fromKeyboard && menu?.markerId === marker.id) {
++      return;
++    }
++    const flag = event.currentTarget;
++    flag.focus({ preventScroll: true });
++    const anchor = fromKeyboard
++      ? markerFlagMenuAnchor(flag)
++      : { x: event.clientX, y: event.clientY };
++    openMarkerMenu(marker, anchor.x, anchor.y);
++  };
++
++  const closeMarkerMenu = (reason: MarkerMenuCloseReason) => {
++    const current = menu;
++    if (!current) {
++      return;
++    }
++    setMenu(null);
++    if (reason !== 'window') {
++      focusMarkerTarget(current.markerId);
++    }
++  };
++
++  const chooseMarkerMenuAction = (action: MarkerMenuAction) => {
++    const current = menu;
++    if (!current) {
++      return;
++    }
++    setMenu(null);
++    const marker = arrangementMarkers(getArrangement()).find(
++      (entry) => entry.id === current.markerId,
++    );
++    if (!marker) {
++      return;
++    }
++    if (isPointerGestureActive()) {
++      setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
++      focusMarkerTarget(marker.id);
++      return;
++    }
++    if (action === 'rename') {
++      setSelectedMarkerId(marker.id);
++      openEditor({
++        kind: 'rename',
++        session: 0,
++        id: marker.id,
++        time: marker.time,
++        draft: marker.name,
++      });
++      return;
++    }
++    if (action === 'play') {
++      jumpToMarker(marker);
++      if (!isPlaying) {
++        togglePlayback();
++      }
++      focusMarkerTarget(marker.id);
++      return;
++    }
++    removeMarker(marker);
++  };
++
+   const handleFlagKeyDown = (
+     event: KeyboardEvent<HTMLButtonElement>,
+     marker: ArrangementMarker,
+@@ -269,6 +604,21 @@ export const ArrangementMarkerRow = forwardRef<
+     if (event.target !== event.currentTarget || event.ctrlKey || event.metaKey || event.altKey) {
+       return;
+     }
++    if (event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey)) {
++      event.preventDefault();
++      event.stopPropagation();
++      if (!event.repeat) {
++        const anchor = markerFlagMenuAnchor(event.currentTarget);
++        openMarkerMenu(marker, anchor.x, anchor.y);
++      }
++      return;
++    }
++    if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') && !event.shiftKey) {
++      event.preventDefault();
++      event.stopPropagation();
++      runUnlessGesture(() => nudgeMarker(marker.id, event.key === 'ArrowLeft' ? -1 : 1));
++      return;
++    }
+     if (event.key === 'F2') {
+       event.preventDefault();
+       event.stopPropagation();
+@@ -292,10 +642,9 @@ export const ArrangementMarkerRow = forwardRef<
+     }
+   };
+ 
+-  const jumpToMarker = (marker: ArrangementMarker) => {
+-    seekTo(marker.time);
+-    setSelectedMarkerId(marker.id);
+-  };
++  const renderedMarkers = orderMarkersForDrag(markers, dragOrder);
++  const sortedMarkerIndex = new Map(markers.map((marker, index) => [marker.id, index]));
++  const menuMarker = menu ? (markers.find((marker) => marker.id === menu.markerId) ?? null) : null;
+ 
+   return (
+     <div className="flex h-5" data-testid="arrangement-marker-row">
+@@ -344,9 +693,13 @@ export const ArrangementMarkerRow = forwardRef<
+         style={{ width: timelineWidth }}
+         data-testid="arrangement-marker-strip"
+       >
+-        {markers.map((marker, index) => {
++        {renderedMarkers.map((marker) => {
+           const selected = marker.id === selectedMarkerId;
+-          const labelWidth = markerLabelWidth(markers, index, pxPerSecond);
++          const labelWidth = markerLabelWidth(
++            markers,
++            sortedMarkerIndex.get(marker.id) ?? 0,
++            pxPerSecond,
++          );
+           const time = formatArrangementTime(marker.time);
+           return (
+             <button
+@@ -359,8 +712,20 @@ export const ArrangementMarkerRow = forwardRef<
+                 }
+               }}
+               type="button"
+-              onClick={() => jumpToMarker(marker)}
++              onPointerDown={(event) => beginMarkerDrag(event, marker)}
++              onPointerMove={handleMarkerPointerMove}
++              onPointerUp={finishMarkerDrag}
++              onPointerCancel={finishMarkerDrag}
++              onContextMenu={(event) => handleFlagContextMenu(event, marker)}
++              onClick={() => {
++                if (suppressClickRef.current !== marker.id) {
++                  jumpToMarker(marker);
++                }
++              }}
+               onDoubleClick={() => {
++                if (suppressClickRef.current === marker.id) {
++                  return;
++                }
+                 jumpToMarker(marker);
+                 if (!isPlaying) {
+                   togglePlayback();
+@@ -369,8 +734,11 @@ export const ArrangementMarkerRow = forwardRef<
+               onKeyDown={(event) => handleFlagKeyDown(event, marker)}
+               aria-label={`Marker «${marker.name}» — ${time}`}
+               aria-current={selected ? 'true' : undefined}
++              aria-keyshortcuts={MARKER_FLAG_SHORTCUTS}
++              aria-haspopup="menu"
++              aria-expanded={menuMarker?.id === marker.id ? true : undefined}
+               title={`«${marker.name}» — ${time}\n${MARKER_FLAG_HINT}`}
+-              className="group absolute top-0 flex h-5 items-center pl-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-surface"
++              className="group absolute top-0 flex h-5 cursor-grab touch-none items-center pl-1 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-surface"
+               style={{ left: marker.time * pxPerSecond }}
+               data-testid="arrangement-marker"
+               data-marker-id={marker.id}
+@@ -423,6 +791,19 @@ export const ArrangementMarkerRow = forwardRef<
+             data-testid="arrangement-marker-name-input"
+           />
+         ) : null}
++        {menu && menuMarker
++          ? createPortal(
++              <ArrangementMarkerMenu
++                key={menu.session}
++                x={menu.x}
++                y={menu.y}
++                markerName={menuMarker.name}
++                onChooseAction={chooseMarkerMenuAction}
++                onClose={closeMarkerMenu}
++              />,
++              document.body,
++            )
++          : null}
+       </div>
+     </div>
+   );
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index a7ca08e..9a34c90 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -1048,10 +1048,19 @@ export function StudioWorkspace() {
+       return;
+     }
+     const left = scroller.scrollLeft;
++    const previousLeft = lastScrollLeftRef.current;
+     lastScrollLeftRef.current = left;
+     const clampedByBrowser =
+       left < autoScrollLeftRef.current &&
+       left >= scroller.scrollWidth - scroller.clientWidth - FOLLOW_SCROLL_TOLERANCE_PX;
++    const followAutoScroll =
++      workspaceRef.current.isPlaying &&
++      followModeRef.current === 'on' &&
++      (clampedByBrowser ||
++        Math.abs(left - autoScrollLeftRef.current) <= FOLLOW_SCROLL_TOLERANCE_PX);
++    if (left !== previousLeft && !followAutoScroll) {
++      markerRowRef.current?.closeMenu();
++    }
+     if (!workspaceRef.current.isPlaying || clampedByBrowser) {
+       autoScrollLeftRef.current = left;
+     } else if (
+@@ -1857,6 +1866,8 @@ export function StudioWorkspace() {
+                   ref={markerRowRef}
+                   timelineWidth={timelineWidth}
+                   pxPerSecond={pxPerSecond}
++                  snapSeconds={snapEnabled ? gridSeconds : null}
++                  gridSeconds={gridSeconds}
+                 />
+                 <div className="flex">
+                   <div
+diff --git a/app/lib/arrangement/__tests__/markers-ui.test.tsx b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+index 9520050..d9fcaa0 100644
+--- a/app/lib/arrangement/__tests__/markers-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+@@ -515,7 +515,7 @@ describe('marker row: rename and delete', { timeout: 15000 }, () => {
+     expect(statusText(view)).toBe('სახელი ცარიელია — დარჩა «რეკლამა»');
+   });
+ 
+-  it('MU8: Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a marker do not nudge', async () => {
++  it('MU8: Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a focused marker move the marker and never nudge the selected clip', async () => {
+     const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
+     act(() => live(api).selectClip('m1'));
+     const outro = flagAt(view, '40.000');
+@@ -523,7 +523,8 @@ describe('marker row: rename and delete', { timeout: 15000 }, () => {
+     fireEvent.keyDown(outro, { key: 'ArrowRight', code: 'ArrowRight' });
+     fireEvent.keyDown(outro, { key: 'ArrowLeft', code: 'ArrowLeft' });
+     expect(live(api).arrangement.clips[0].start).toBe(0);
+-    expect(live(api).undoLabel).toBeNull();
++    expect(live(api).undoLabel).toBe('Move Marker');
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
+     fireEvent.keyDown(outro, { key: 'Delete', code: 'Delete' });
+     expect(markerTimes(view)).toEqual(['12.000', '20.000']);
+     expect(live(api).undoLabel).toBe('Delete Marker');
+@@ -631,13 +632,16 @@ describe('marker row: rename and delete', { timeout: 15000 }, () => {
+     intro.focus();
+     const drop = flagAt(view, '20.000');
+     fireEvent.pointerDown(drop, { button: 0, buttons: 1, pointerId: 75 });
+-    expect(document.activeElement).toBe(intro);
++    expect(document.activeElement).toBe(drop);
++    fireEvent.pointerUp(window, { pointerId: 75 });
+     const label = drop.querySelector('[data-marker-label]');
+     if (!(label instanceof HTMLElement)) {
+       throw new Error('marker label missing');
+     }
+     fireEvent.pointerDown(label, { button: 0, buttons: 1, pointerId: 76 });
+-    expect(document.activeElement).toBe(intro);
++    expect(document.activeElement).toBe(drop);
++    fireEvent.pointerUp(window, { pointerId: 76 });
++    expect(live(api).isPointerGestureActive()).toBe(false);
+ 
+     fireEvent.keyDown(intro, { key: 'F2', code: 'F2' });
+     const input = nameInput(view);
+diff --git a/app/lib/arrangement/__tests__/markers.test.ts b/app/lib/arrangement/__tests__/markers.test.ts
+index e772790..52896fe 100644
+--- a/app/lib/arrangement/__tests__/markers.test.ts
++++ b/app/lib/arrangement/__tests__/markers.test.ts
+@@ -8,6 +8,7 @@ import {
+   MARKER_DEFAULT_NAME_PREFIX,
+   MARKER_NAME_MAX_LENGTH,
+   markerAtTime,
++  moveMarker,
+   nextDefaultMarkerName,
+   normalizeMarkerName,
+   remapMarkersAfterDeleteTime,
+@@ -299,3 +300,67 @@ describe('history covers markers (MK10)', () => {
+     ).toBe(history);
+   });
+ });
++
++describe('moveMarker (SRW-16 stage 2a)', () => {
++  const placed: ArrangementMarker[] = [
++    { id: 'a', time: 5, name: 'Intro' },
++    { id: 'b', time: 12, name: 'Drop' },
++    { id: 'c', time: 30, name: 'Outro' },
++  ];
++  const withMarkers = (): Arrangement => ({ ...freshArrangement(), markers: placed });
++
++  it('MK-MOVE1: moving past a neighbour re-sorts, keeps id and name, and navigation follows', () => {
++    const before = withMarkers();
++    const result = moveMarker(before, 'a', 20);
++    if (result.kind !== 'moved') {
++      throw new Error(`expected moved, got ${result.kind}`);
++    }
++    expect(result.marker).toEqual({ id: 'a', time: 20, name: 'Intro' });
++    expect(arrangementMarkers(result.arrangement).map((marker) => marker.id)).toEqual([
++      'b',
++      'a',
++      'c',
++    ]);
++    expect(adjacentMarkerTarget(result.arrangement, 12, 1, 60)?.marker?.id).toBe('a');
++    expect(adjacentMarkerTarget(result.arrangement, 20, -1, 60)?.marker?.id).toBe('b');
++    expect(arrangementMarkers(before)).toEqual(placed);
++    expect(result.arrangement.clips).toBe(before.clips);
++  });
++
++  it('MK-MOVE2: a time within EPS of another marker is a conflict naming it, arrangement unchanged', () => {
++    const before = withMarkers();
++    const result = moveMarker(before, 'a', 12.0004);
++    expect(result.kind).toBe('conflict');
++    if (result.kind !== 'conflict') {
++      throw new Error('expected conflict');
++    }
++    expect(result.other).toEqual(placed[1]);
++    expect(result.arrangement).toBe(before);
++    expect(moveMarker(before, 'a', 12.001).kind).toBe('moved');
++  });
++
++  it('MK-MOVE3: clamps at 0 and rounds to whole milliseconds', () => {
++    const negative = moveMarker(withMarkers(), 'b', -3);
++    expect(negative.kind === 'moved' ? negative.marker.time : null).toBe(0);
++    const fractional = moveMarker(withMarkers(), 'b', 7.12345);
++    expect(fractional.kind === 'moved' ? fractional.marker.time : null).toBe(7.123);
++    if (fractional.kind !== 'moved') {
++      throw new Error('expected moved');
++    }
++    expect(arrangementMarkers(fractional.arrangement).map((marker) => marker.time)).toEqual([
++      5, 7.123, 30,
++    ]);
++  });
++
++  it('MK-MOVE4: an unknown id or the same (rounded) time returns the same reference', () => {
++    const before = withMarkers();
++    const unknown = moveMarker(before, 'missing', 3);
++    expect(unknown.kind).toBe('unchanged');
++    expect(unknown.arrangement).toBe(before);
++    const same = moveMarker(before, 'b', 12.0002);
++    expect(same.kind).toBe('unchanged');
++    expect(same.arrangement).toBe(before);
++    const bare = freshArrangement();
++    expect(moveMarker(bare, 'a', 1).arrangement).toBe(bare);
++  });
++});
+diff --git a/app/lib/arrangement/markers.ts b/app/lib/arrangement/markers.ts
+index 2736f98..981420b 100644
+--- a/app/lib/arrangement/markers.ts
++++ b/app/lib/arrangement/markers.ts
+@@ -11,6 +11,11 @@ export type AddMarkerResult =
+   | { arrangement: Arrangement; marker: ArrangementMarker }
+   | { arrangement: null; existing: ArrangementMarker };
+ 
++export type MoveMarkerResult =
++  | { kind: 'moved'; arrangement: Arrangement; marker: ArrangementMarker }
++  | { kind: 'unchanged'; arrangement: Arrangement }
++  | { kind: 'conflict'; arrangement: Arrangement; other: ArrangementMarker };
++
+ export interface AdjacentMarkerTarget {
+   time: number;
+   marker: ArrangementMarker | null;
+@@ -99,6 +104,33 @@ export function renameMarker(arrangement: Arrangement, id: string, name: string)
+   );
+ }
+ 
++export function moveMarker(arrangement: Arrangement, id: string, time: number): MoveMarkerResult {
++  const markers = arrangementMarkers(arrangement);
++  const current = markers.find((marker) => marker.id === id);
++  if (!current) {
++    return { kind: 'unchanged', arrangement };
++  }
++  const at = roundMarkerTime(time);
++  if (Math.abs(at - current.time) < MARKER_TIME_EPS) {
++    return { kind: 'unchanged', arrangement };
++  }
++  const other = markers.find(
++    (marker) => marker.id !== id && Math.abs(marker.time - at) < MARKER_TIME_EPS,
++  );
++  if (other) {
++    return { kind: 'conflict', arrangement, other };
++  }
++  const marker: ArrangementMarker = { ...current, time: at };
++  return {
++    kind: 'moved',
++    arrangement: replaceArrangementMarkers(
++      arrangement,
++      sortMarkersByTime(markers.map((entry) => (entry.id === id ? marker : entry))),
++    ),
++    marker,
++  };
++}
++
+ export function deleteMarker(arrangement: Arrangement, id: string): Arrangement {
+   const markers = arrangementMarkers(arrangement);
+   const remaining = markers.filter((marker) => marker.id !== id);
+diff --git a/docs/implementation/2026/quarter-IV/064-studio-lab-markers.md b/docs/implementation/2026/quarter-IV/064-studio-lab-markers.md
+index 5e06c4f..9ac8e60 100644
+--- a/docs/implementation/2026/quarter-IV/064-studio-lab-markers.md
++++ b/docs/implementation/2026/quarter-IV/064-studio-lab-markers.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — სახელიანი მარკერები, ეტაპი 1 (SRW-16 / FB-10)
+ 
+ **თარიღი:** 2026-10-21
+-**სტატუსი:** Round 73 — C-R72-01-ის გასწორება (D-29z38); C-ის შემოწმებას ელოდება
++**სტატუსი:** ეტაპი 1 დასრულებულია (C round 73 PASS, გამოქვეყნდა `6b574e8`); ეტაპი 2a (მარკერის გადატანა და მენიუ) — [065](065-studio-lab-marker-move-menu.md)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
