@@ -1,0 +1,30 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'networkidle' });
+  const r = await page.evaluate(async () => {
+    const sfx = await import('/app/lib/sfx-edit.ts');
+    const ff = await import('/app/utils/ffmpeg.ts');
+    const sr = 48000, secs = 300, len = sr * secs;
+    const channels = [0, 1].map((c) => { const d = new Float32Array(len); for (let i = 0; i < len; i++) d[i] = Math.sin(i * 0.01 * (c + 1)) * 0.5 * (1 + Math.sin(i / 48000)); return d; });
+    const wav = new Blob([sfx.encodeSfxWav({ sampleRate: sr, channels })], { type: 'audio/wav' });
+    const tl0 = performance.now();
+    const inst = await ff.loadFFmpeg();
+    const loadMs = Math.round(performance.now() - tl0);
+    const prog = [];
+    const t0 = performance.now();
+    const onP = ({ progress, time }) => prog.push([Math.round(performance.now() - t0), Math.round(progress * 1000) / 1000, time]);
+    inst.on('progress', onP);
+    const gaps = []; let last = performance.now(), run = true;
+    const tick = () => { const n = performance.now(); gaps.push(n - last); last = n; if (run) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+    const mp3 = await ff.convertWavToMp3(wav);
+    const convMs = Math.round(performance.now() - t0);
+    run = false; inst.off('progress', onP);
+    gaps.sort((a, b) => b - a);
+    return { loadMs, convMs, mp3Bytes: mp3.size, wavBytes: wav.size, progressEvents: prog.length, progressSample: prog.filter((_, i) => i % Math.max(1, Math.floor(prog.length / 12)) === 0).concat(prog.slice(-2)), topGapsMs: gaps.slice(0, 6).map(Math.round), frames: gaps.length };
+  });
+  console.log(JSON.stringify(r));
+  await browser.close();
+})();

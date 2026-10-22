@@ -1,0 +1,63 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-22T15:46:43.2275533Z",
+  "round": 86,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "X1-PROJECT",
+  "MP-FORMAT",
+  "MP-MP3",
+  "MP-RANGE",
+  "MP-BOTH",
+  "MP-WAV-UNCHANGED",
+  "MP-CDNFAIL",
+  "MP-TIMEOUT",
+  "MP-REUSE",
+  "MP-OVERLOAD",
+  "MP-MUTE",
+  "MP-KEYS",
+  "MP-X3",
+  "MP-NET",
+  "REG-HYD",
+  "G86-3",
+  "T86-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "blocked": [
+  "G86-3 fake-Bearer 403 sub-check: backend unavailable in cloud (got 500 {\"error\":\"Unable to prepare Studio access\"})"
+ ],
+ "notRun": [
+  "Production MP3 (built bundle): no preview server in the cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "notes": {
+  "REG-HYD": "Clean in all non-induced sessions both viewports; CDN-abort sessions show exactly 2 induced console.error 'Failed to load FFmpeg.wasm' from frozen app/utils/ffmpeg.ts (C's route.abort), no hydration warnings; the ok:false entries REG-HYD-CDN-* in c-round-86/fail-*-cdn_x3.json are these induced errors",
+  "MP-TIMEOUT": "1440 only per task; alert at 120394 ms (119837 ms after encoder message), 0 downloads, Close works after",
+  "envInvalid": "1 attempt each of MP-TIMEOUT 1440 and CDN/X3 1280 invalidated by Vite dep re-optimization reload at 16:56 triggered by C's g86 route visits; reruns valid",
+  "ableton": {
+   "PCM+MP3": "confirmed",
+   "MP3 with PCM": "conscious simplification (single radio, both-or-none)",
+   "CBR 320": "conscious difference (VBR avg ~260 kbps)",
+   "leading silence": "raw LAME delay 576/pad 1056; decoded lag 0 via gapless tag",
+   "range all formats": "confirmed",
+   "encoder load error": "not applicable",
+   "X1": "not applicable"
+  },
+  "extra": "EXTRA-FORMAT-SWITCH-DURING-MP3 PASS at 1440",
+  "WAV jitter": "1440 WAV+MP3 WAV vs plain WAV maxLSB 1 (3481 / 3369 nonzero samples), 1280 identical"
+ },
+ "evidence": "tmp/studio-real-loop/c-round-86.md; c-round-86/{mp-*.json,fail-*.json,sw-1440x900.json,g86-*.json,token-api.json,targeted-c.log,shots/,tools/}"
+}

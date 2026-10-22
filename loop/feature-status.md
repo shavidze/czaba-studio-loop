@@ -1,6 +1,6 @@
 # Studio — ფუნქციების სტატუსის დაფა
 
-განახლდა: 2026-10-22 · ავტორი: B (round 85 → round 86 დაგეგმვა) · წესი: `docs/technical/studio-real-workspace/agent-workflow.md`
+განახლდა: 2026-10-22 · ავტორი: B (round 86 → round 87 დაგეგმვა) · წესი: `docs/technical/studio-real-workspace/agent-workflow.md`
 
 სტატუსები: **მზადაა** · **მუშავდება** · **მოწმდება** · **ბაგია** · **არ დაწყებულა** · **დაბლოკილია**.
 
@@ -59,7 +59,11 @@
 - Tracked `frontend-architect.md` Write/Bash-ს იძლევა.
 - Dev server: B-ის round-43 დაგეგმვისას `/studio-lab` 200 (2026-10-15 12:06), `node.exe` 15. ENV-BROWSE-DAEMON: C round 43-ში CLI-ით გაშვებული 7 daemon 60–90 წამში კვდებოდა, `about:blank`-ზე უმოქმედოდაც. მუშა გზა იყო საკუთარი `server-node.mjs` (`BROWSE_PARENT_PID=0`, ახალი state file, log). Round 44-იდან ეს **დამტკიცებული fallback-ია** ერთი წარუმატებელი CLI-მცდელობის შემდეგ. `$B restart` ისევ აკრძალულია; უცხო პროცესს არავინ კლავს.
 
-მიმდინარე რაუნდი: **Round 86** (`current-task.md`, D-29z51) — **ჯერ X1 = C-R85-L2 + GATE85-S2, შემდეგ SRW-20 ეტაპი 2 (MP3 და WAV + MP3).** X1: Export-ში „მთელი პროექტი“ ყოველთვის აქტიურია (რენდერის გარდა), გამორთული „მონიშნული მონაკვეთი“ მიზეზს `aria-describedby`-ით უკავშირდება. ეტაპი 2: ფორმატი WAV (ნაგულისხმევი) / MP3 / WAV + MP3; MP3 გაყინული `app/utils/ffmpeg.ts`-ით (dynamic import, 120 წმ-იანი ჩატვირთვის timeout), ჩავარდნისას ზუსტი შეცდომა და ფაილის გარეშე, WAV + MP3 — ორივე ან არცერთი; `czaba-studio-lab[-range].mp3`; ფანჯრის საერთო helper `render-window.ts`; `vite.config.ts`-ში `optimizeDeps.exclude` ffmpeg-ისთვის (B-ის ექსპერიმენტი: dev-ზე worker სხვაგვარად ვერ იტვირთება). doc 075 l.4, ახალი doc 076. ბაზა: HEAD `51e024a`, სუფთა tree, გაყინული 487.
+მიმდინარე რაუნდი: **Round 87** (`current-task.md`, D-29z52) — **SRW-20 ეტაპი 3a: WAV-ის ჩაწერა მთავარი thread-ის გარეთ, progress ყველა ფაზაზე, Studio Lab-ის საკუთარი MP3 encoder.** WAV-ის clamp, გადატვირთვის გაზომვა და 24-bit ჩაწერა worker-ში გადადის (`export-wav.ts` + `.worker.ts` + `.client.ts`, ბაიტ-იდენტური); რენდერის progress — `OfflineAudioContext.suspend`; Export-ში `<progress>` და ფაზის სახელი (რენდერი / WAV-ის ჩაწერა / MP3 encoder-ის ჩატვირთვა / MP3-ის შექმნა); progress ცალკე store-შია, არა `exportState`-ში; `mp3-encoder.client.ts` — იგივე core და ბრძანება, timeout-ის შემდეგ reset (GATE86-S1), timer import-საც მოიცავს. B-ის ექსპერიმენტი: 5-წუთიანი WAV ექსპორტი დღეს მთავარ thread-ს 445 ms-ით ბლოკავს; ზღვარი ≤ 150 ms. ბაზა: HEAD `971141d`, სუფთა tree, გაყინული 490.
+
+**Round 86-ის შედეგი:** C PASS, `browserVerified=true`, `realVerified=true` (`c-round-86.md`, `c-round-86.json`); root-მა გამოაქვეყნა `971141d` (ორივე remote, review 8.5/10). SRW-20 ეტაპი 2: MP-MP3 (VBR ~260 kbps, lag 0, corr 0.9998), MP-RANGE, MP-BOTH, MP-CDNFAIL, MP-TIMEOUT (1440), MP-REUSE, MP-OVERLOAD, MP-MUTE, MP-KEYS, MP-X3, MP-NET PASS; R20-X2 pass, R20-X3 ხელახლა pass. X1-PROJECT PASS → C-R85-L2 და GATE85-S2 დაიხურა. ბაგი არ არის. fake-Bearer 403 — BLOCKED (backend cloud-ში მიუწვდომელია); production bundle-ის MP3 არ შემოწმებულა (PROD-MP3-UNVERIFIED).
+
+წინა რაუნდი: **Round 86** (`current-task.md`, D-29z51) — **ჯერ X1 = C-R85-L2 + GATE85-S2, შემდეგ SRW-20 ეტაპი 2 (MP3 და WAV + MP3).** X1: Export-ში „მთელი პროექტი“ ყოველთვის აქტიურია (რენდერის გარდა), გამორთული „მონიშნული მონაკვეთი“ მიზეზს `aria-describedby`-ით უკავშირდება. ეტაპი 2: ფორმატი WAV (ნაგულისხმევი) / MP3 / WAV + MP3; MP3 გაყინული `app/utils/ffmpeg.ts`-ით (dynamic import, 120 წმ-იანი ჩატვირთვის timeout), ჩავარდნისას ზუსტი შეცდომა და ფაილის გარეშე, WAV + MP3 — ორივე ან არცერთი; `czaba-studio-lab[-range].mp3`; ფანჯრის საერთო helper `render-window.ts`; `vite.config.ts`-ში `optimizeDeps.exclude` ffmpeg-ისთვის (B-ის ექსპერიმენტი: dev-ზე worker სხვაგვარად ვერ იტვირთება). doc 075 l.4, ახალი doc 076. ბაზა: HEAD `51e024a`, სუფთა tree, გაყინული 487.
 
 **Round 85-ის შედეგი:** C PASS, `browserVerified=true`, `realVerified=true` (`c-round-85.md`, `c-round-85.json`); root-მა გამოაქვეყნა `51e024a` (ორივე remote, review 8.5/10). C-R84-M1 დაიხურა: სათაური ზედაა ვიდეოს/აუდიოს fade handle-ებზე, trim-ის ზოლებსა და envelope-ის წერტილებზე, მონიშნულ და მოუნიშნავ კლიპზე; იქ drag არაფერს ცვლის. SRW-20 ეტაპი 1: XR-WAV (240000 frame, პროექტის ფანჯარასთან 0/1 LSB), XR-MIDSTART, XR-ALLTRACKS (Master), XR-PROJECT, XR-OVERLOAD, XR-KEYS, XR-X3 PASS; XR-PASTEND UI-დან მიუღწევადია (unit XR4). ახალი Low-ები: C-R85-L1 (Escape drag-ს არ აუქმებს — კონტრაქტი არ არის, სიგნალი ESCAPE-CANCEL-GESTURE), C-R85-L2 (→ Round 86 X1). fake-Bearer 403 — BLOCKED (backend cloud-ში მიუწვდომელია).
 
@@ -318,7 +322,7 @@ Round 72-ის აღწერა (გამოქვეყნდა `6b574e8`-
 | SRW-17 | ტრეკების ჯგუფები | **მოწმდება** (ეტაპი 1 — `74eca15`; ეტაპი 2 — `68383fa`; ეტაპი 3 — Mute/Solo/Volume, ჩადგმა, ნახევრად ფერადი Solo, C Round 81 PASS `browserVerified`, `efbed86`; fake-Bearer 403 — BLOCKED, backend) | `c-round-81.md`, `c-round-81.json`, `gates/gate-round-81.json` | Tech Lead R79-T/R80-T/R81-T; C81-1 → Low-ები |
 | SRW-18 | Fades + volume envelope | **მოწმდება** (ეტაპი 1 — `bdc2067`, R18-A1 pass; ეტაპი 2 — `a68c81d`, R18-A2 pass; ორივე C PASS `browserVerified`) | `c-round-82.md`; `c-round-83.md` | Tech Lead R82-T/R83-T; C-R83-L1 → Round 84 X1 |
 | SRW-19 | ვიდეოს opacity fade (preview) | **მოწმდება** (Round 84 C PASS `browserVerified=true`, ორივე viewport, `88b0262`; R19-F1/R19-F2 pass) | `c-round-84.md`; `c-round-84.json` | Tech Lead R84-T; signals SRW19-RESCHEDULE, VIDEO-FADE-SOUND |
-| SRW-20 | Range export, MP3, worker/progress/cancel | **მუშავდება** (ეტაპი 1 — range export: C PASS `browserVerified`, `51e024a`, R20-X1/R20-X3 pass; ეტაპი 2 — MP3 + WAV + MP3, Round 86, D-29z51; ეტაპი 3 — worker/progress/cancel; არაფერი გადადებული) | `c-round-85.md`, `c-round-85.json`; `current-task.md` | Round 86 → C (X1-PROJECT, MP-*) |
+| SRW-20 | Range export, MP3, worker/progress/cancel | **მუშავდება** (ეტაპი 1 — range export: C PASS `browserVerified`, `51e024a`; ეტაპი 2 — MP3 + WAV + MP3: C PASS `browserVerified`, `971141d`; R20-X1/R20-X2/R20-X3 pass; ეტაპი 3a — worker + progress, Round 87, D-29z52; ეტაპი 3b — Cancel; R20-X4 ღიაა; არაფერი გადადებული) | `c-round-86.md`, `c-round-86.json`; `b-round-86/probe/PROBE-SUMMARY.md`; `current-task.md` | Round 87 → C (PX-*) |
 | SRW-21 | შეძენილი ბიბლიოთეკის mount + საბოლოო რეგრესია | **დაბლოკილია** (მხოლოდ route mount) | `backlog.json` SRW-21 | Adapter contract (R21-I1) დამოუკიდებლად სრულდება SRW-20-ის შემდეგ. Route mount-ს Tech Lead-ის ან auth-ის მფლობელის ნებართვა სჭირდება. purchased loader-ში middle-east hardcoded-ია |
 | SRW-22 | Studio Lab-ის შესასვლელი header-ში | **მზადაა** | `c-round-4.md`; `c-round-13.md` §5; `c-round-14.md`–`c-round-18.md`; `c-round-21.md` §1 (G21-3, header-ის ბმული) | — |
 | SRW-23 | Studio-ს scrollbar-ები | **მოწმდება** | `c-round-4.md` (R23-3/R23-4 PASS) | Tech Lead: რეალური Windows Chrome |
@@ -329,8 +333,15 @@ Round 72-ის აღწერა (გამოქვეყნდა `6b574e8`-
 | ID | სიმძიმე | სტატუსი | მტკიცებულება | შემდეგი ნაბიჯი |
 |---|---|---|---|---|
 | C-R85-L1 | Low | **განჩინება (D-29z51): კონტრაქტი არ არის** — Escape კლიპის drag-ს არ აუქმებს; არცერთი gesture არ უქმდება Escape-ით; Live დაუდასტურებელია; მომხმარებელს არ უთხოვია → სიგნალი ESCAPE-CANCEL-GESTURE | `c-round-85/m1-*.json` M1-GHOST | Tech Lead / მომხმარებლის გადაწყვეტილება |
-| C-R85-L2 | Low | **ბაგია** → Round 86 X1 (მონიშვნის გარეშე „მთელი პროექტი“ checked + disabled) | `c-round-85/xr-*.json` XR-PROJECT | C: X1-PROJECT |
-| FFMPEG-DEV-WORKER | Medium | **ბაგია** → Round 86 (`vite.config.ts` exclude; B-ის ექსპერიმენტი: dev-ზე ffmpeg-ის worker ERR_FAILED, `loadFFmpeg` არ სრულდება) | `b-round-85/probe/PROBE-SUMMARY.md` | C: MP-MP3 |
+| C-R85-L2 | Low | **დაიხურა** (Round 86 X1; C X1-PROJECT PASS ორივე viewport-ზე, `971141d`) | `c-round-86.md` X1-PROJECT | — |
+| FFMPEG-DEV-WORKER | Medium | **დაიხურა dev-ზე** (Round 86; C MP-MP3/MP-REUSE: encoder ~3.4 წმ-ში იტვირთება, `971141d`); production bundle — ღია მტკიცებულება PROD-MP3-UNVERIFIED | `c-round-86.md` | root: gate 87 |
+| GATE86-S1-POLLER-RETRY | Medium | **ბაგია** → Round 87 (Lab-ის encoder timeout-ის შემდეგ reset; retry ახლა ჩერდება); შეძენილი Studio-ს გზა — FFMPEG-LOAD-POLLER-HANG (util-ის მფლობელი) | `gates/round-86/review.md` #1 | C: PX-RETRY |
+| GATE86-S2-BOTH-NOTE-DELIVERY | Low | **ბაგია** → ეტაპი 3b (WAV + MP3-ის „ორივე ან არცერთი“ მიწოდებაზე არ ვრცელდება; რეალური Chrome-ი შეიძლება იკითხოს) | `gates/round-86/review.md` #2 | 3b |
+| GATE86-S3-TIMEOUT-COVERAGE | Low | **ნაწილობრივ → Round 87** (timer import-საც მოიცავს); კონვერტაციას ლიმიტი არ აქვს — გამოსავალი 3b-ის Cancel | `gates/round-86/review.md` #3 | C: PU4 / PX-RETRY |
+| GATE86-S4-FORMAT-RADIOS-DURING-RENDER | Info | **უარყოფილია** (D-29z52 R7: გაყინული render-time focus ტესტი; C EXTRA-FORMAT-SWITCH PASS) | `gates/round-86/review.md` #4 | — |
+| PROD-MP3-UNVERIFIED | Low | **ღია მტკიცებულება** (production bundle-ში MP3 და Round 87-დან worker; cloud-ში preview server არ არის) | `c-round-86.json` notRun | root: build + preview + MP3 |
+| A-R86-L2-LATE-DOWNLOAD-UNMOUNT | Low | **ბაგია** → ეტაპი 3b (unmount-ზე abort) | `a-round-86.md` L2 | 3b |
+| A-R86-L7 / A-R86-L8 | Low | **ბაგია** → Low-ების პაკეტი (მიზეზი ორჯერ იკითხება; შენიშვნები MP3-ზეც „WAV შეიქმნება“) | `a-round-86.md` L7, L8 | Low-ები |
 | C-R84-M1 | Medium | **დაიხურა** (Round 85 X1; C M1-HANDLE/M1-SELECTED/M1-GHOST/M1-VISIBLE/M1-ENV PASS ორივე viewport-ზე, `51e024a`) | `c-round-85.md` M1-* | — |
 | C-R84-L1 | Low | **ღიაა** — Low-ების ჯგუფი; C Round 85: 1 LSB-ის jitter ვიდეოს გარეშეც ჩანს (4–9 წმ, 3254 sample); tolerance-ის ფარგლებშია; harness-ის წესი გაფართოვდა (≤ 1 LSB ყველგან jitter-ია) | `c-round-84/r2-*.json`; `c-round-85.json` observations | Low-ები |
 | C-R83-L1 | Low | **დაიხურა** (Round 84 X1-ALIGN PASS ორივე viewport-ზე, 0 px; `88b0262`) | `c-round-84.md` X1-ALIGN | — |
@@ -638,6 +649,8 @@ R3-V2 Round 22-ში ხელახლა შემოწმდა (R22-M1 + R
 | R83-T | რეალურ Chrome-ში ყურსასმენით: `Env` რეჟიმი (ღილაკი და `A`) ადვილად მოიძებნება; envelope-ის წერტილის დამატება/გადატანა/წაშლა ზუსტია ორივე ხაზის სიმაღლეზე; −12 dB ჩაღრმავება მდორედ ჟღერს; რეჟიმის გამორთვის შემდეგ range/seek/fade-ები ძველებურად მუშაობს | Round 83 (D-29z48) |
 | R84-T | რეალურ Chrome-ში საკუთარი ვიდეოთი: 1 წმ fade-in და 2 წმ fade-out შავიდან/შავამდე მდორეა პატარა და მცურავ ვიდეოში; handle-ები ადვილად იჭირება; Export-ის ხაზი გასაგებია |
 | R85-T | რეალურ Chrome-ში: 4–9 წმ-ის მონიშვნის შემდეგ Export ნაგულისხმევად მონაკვეთს ირჩევს და ფაილი მიქსის იმ ნაწილივით ჟღერს; timeline-ის გადახვევისას handle-ები ხაზების სახელებზე აღარ ჩანს |
+| R86-T | რეალურ Chrome-ში: WAV + MP3 — ითხოვს თუ არა ბრაუზერი „multiple downloads“-ის ნებართვას, ორივე ფაილი ჩამოდის თუ არა; MP3 ყურით ემთხვევა WAV-ს | Playwright Chromium prompt-ს არ აჩვენებს |
+| R87-T | რეალურ Chrome-ში 5-წუთიანი პროექტის WAV და MP3 ექსპორტი: progress ზოლი და ფაზის სახელი გასაგებია; ექსპორტისას timeline-ის გადახვევა და მაუსი არ ჭედავს | headless rAF gap ადამიანის აღქმას არ ცვლის |
 | RF7-2 / RF7-3 | ვიდეოს drift (R3-V1, **mode D**-ის ჩათვლით) და loop wrap-ის landing სუფთა Windows Chrome-ზე, VP9 + H.264 | **სავალდებულოა** C-R8-01-ისა და C-R6-02-ისთვის |
 | R8-M1 / R8-M2 | ხაზებს შორის drag Shift-ით რეალური მაუსით | synthetic pointer |
 | R10-N1 / R10-N2 | Ruler drag, რეალური Ctrl+wheel და pinch | gstack-ს wheel არ აქვს |
@@ -721,6 +734,8 @@ Root M1–M3, L1–L4, L6, L7 და L8 დახურულია.
 | VISUAL-A-OBSIDIAN | **არ დაწყებულა** | root-ის შენიშვნა 2026-10-21 (მომხმარებელმა დაამტკიცა): T12-ის შემდეგ, დამატებითი დასტურის გარეშე; მხოლოდ ფერები, ხატულები, ტიპოგრაფია, ღილაკების ზედაპირი + M1–M4 (M2 — Studio UI ინგლისურად ერთი strings მოდულით). სპეციფიკაცია: `docs/technical/studio-real-workspace/visual-direction-a.md`. ფაზა 1-სა და T12-ში არ ერევა |
 
 ფარგლებს გარეთაა მთელი პროექტისთვის: plugins/effects, pitch, ვიდეოს რამდენიმე ფენა და აუდიოს time-stretch. Grid-ის tempo აუდიოს stretch არ არის.
+
+Round 87 (D-29z52): SRW-20 ეტაპი 3a — WAV-ის ჩაწერა worker-ში, progress ყველა ფაზაზე, Lab-ის MP3 encoder reset-ით (R20-X4-ის პირველი ნაწილი). Round 86 → C PASS `browserVerified`, გამოქვეყნდა `971141d`. შემდეგ: რეგრესიის რაუნდი 2026-10-24-დან, თორემ ეტაპი 3b (Cancel) → Low-ები → SRW-21 → სრული რეგრესია → T12 → VISUAL-A-OBSIDIAN.
 
 Round 86 (D-29z51): X1 = C-R85-L2 + GATE85-S2 (მონაკვეთის radio-ები) + SRW-20 ეტაპი 2 — MP3 და WAV + MP3 (გაყინული `ffmpeg.ts`, 120 წმ timeout, ჩავარდნისას ფაილის გარეშე, `vite.config.ts` exclude, `render-window.ts`). Round 85 → C PASS `browserVerified`, გამოქვეყნდა `51e024a`. შემდეგ: რეგრესიის რაუნდი 2026-10-24-დან, თორემ SRW-20 ეტაპი 3 → Low-ები → SRW-21 → სრული რეგრესია → T12 → VISUAL-A-OBSIDIAN.
 

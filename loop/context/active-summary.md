@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-22T14:51:01.258Z)
+# Active loop summary (2026-10-22T17:07:02.128Z)
 
-- backlog.json 771 KB -> active view 203 KB
-- status: G_ROOT_GATE round 85
-- servers: `{"checkedUtc":"2026-10-22T14:14:19.3638748Z","round":85,"attempt":1,"store":200}`
-- last publication: 51e024af0defc5d1774a693c7d003e4dc685299d (rounds 85-85)
-- last root gate: round 85 published - commit 51e024af0defc5d1774a693c7d003e4dc685299d pushed
+- backlog.json 783 KB -> active view 154 KB
+- status: G_ROOT_GATE round 86
+- servers: `{"checkedUtc":"2026-10-22T15:46:43.2275533Z","round":86,"attempt":1,"store":200}`
+- last publication: 971141d67a1dd33da8f1165de1d895bd62b4e022 (rounds 86-86)
+- last root gate: round 86 published - commit 971141d67a1dd33da8f1165de1d895bd62b4e022 pushed
 
-## Current items: SRW-13, SRW-19, SRW-20
+## Current items: SRW-20
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -242,7 +242,6 @@
 - C-R82-LIVE-ORACLE-PAIRED / info / applied in round 83 (EN-LIVE / EN-MIDSTART are paired same-position comparisons) / reading-at-t1-vs-t2 live oracles are content-dominated; use paired envelope-vs-control comparisons
 - ENVELOPE-SNAP / info / signal (Live snaps breakpoints to grid, confirmed text; CZABA stage 2 free like fades); needs a B ruling before scheduling / envelope breakpoints do not snap to the grid
 - ENVELOPE-CLEAR / info / signal (Live Clear Envelope context command); not requested in FB-06 / no one-step Clear Envelope; points are deleted one by one
-- GATE83-M1-STICKY-HEADER-OVERLAP / medium (reviewer claim, unconfirmed; C round 83 probe negative) / reproduced by C round 84 pm1b probe -> C-R84-M1 (scheduled round 85 X1) / z-30 envelope points / z-40 fade handles of unselected clips may paint over the sticky z-20 track header during horizontal scroll and catch 
 - GATE83-M2-RESCHEDULE-PER-MOVE / info (signal; merges GATE82-S6) / signal: C round 83 EN-PLAY-EDIT 6 source restarts per drag, position monotonic, no glitch measured; candidate fix (exclude preview from scheduleKey until commit, or rAF throttle) needs a measured audible defect or the checkpoint ruling; SRW19-RESCHEDULE adds video-fade drags / envelope/fade/video-fade preview drags during playback rebuild the audio graph on every pointermove
 - GATE83-L1-GUARD-TIME-BASED / low / open - Lows batch / drag-then-double-click guard uses a fixed 500 ms window; OS double-click interval can be longer (up to ~900 ms on Windows)
 - GATE83-L2-POINT-HIT-AREA / low / open - Lows batch (hit area); keyboard path = SRW18-KEYBOARD-FADES / envelope points are 8x8 px with no enlarged hit target
@@ -250,22 +249,35 @@
 - C-R83-S-1280-RANGE-SHIFT / info (unverified origin) / open - check in the next regression round against the published tree / at 1280x720 a body range selection shifts the stems lane up 9 px (clip y 458 -> 449, h 71 -> 66)
 - SRW19-RESCHEDULE / info / signal with C evidence: round 84 VF-PLAY-EDIT 4 extra createBufferSource (12->16) per video-fade drag, playback continued, position monotonic; merged with GATE83-M2; candidate fix needs a measured audible defect or the checkpoint ruling / a picture-only video fade edit during playback still reschedules audio because scheduleKey includes all clip fields
 - VIDEO-FADE-SOUND / info / signal with C evidence: round 84 faded minus video-muted export max 0.507 in S..S+1 (sound present, not faded); picture-only by D-29z49; needs a user request to change / a video fade does not fade the video's own sound
-- C-R84-M1 / medium / scheduled round 85 X1 (D-29z50) / fade handles (z-30/40) and trim strips (z-20) of unselected clips escape the sticky z-20 track header: topmost for hit-testing under the hea
-- C-R84-M1-AUDIO-STATUS / info / open - re-checked by C round 85 M1-HANDLE at the same spot (moot if the header is topmost) / audio fade handle under the header: drag wrote status 'Fade In: 1.000 წმ.' with value and Undo unchanged (observed, unexplained)
-- C-R84-L1 / low / open - Lows batch (audio path frozen); harness rule applied from round 85: range/window oracles exclude video-sound spans or mute video; <=1 LSB there is jitter / WAV export not bit-reproducible over the video's own sound span (+-1 LSB 24-bit in ~6.4k-7.7k samples; ~10 exports gave 6 hashes; not caused
+- C-R84-L1 / low / open - Lows batch; C round 85 extended the evidence: the 1-LSB jitter also appears with NO video (two unchanged project exports differed in 3254 samples inside 4-9 s: Soft impact + stems); range files equal one of the two variants bit-for-bit; within the 1e-3 FS tolerance. Harness rule HR-C-R84-L1-EXPORT-JITTER widened: <=1 LSB anywhere is jitter / WAV export not bit-reproducible over the video's own sound span (+-1 LSB 24-bit in ~6.4k-7.7k samples; ~10 exports gave 6 hashes; not caused
 - A-R84-ARCH-FADES-HELPERS / info / signal - appended to checkpoint request (round-84 addendum q12); reviewer: keep (fades.ts frozen; VF1 parity guards drift) / video-fades.ts l.5-24 re-implements three private helpers of fades.ts l.21-48; proposal export roundFadeSeconds/floorFadeSeconds/withClipFad
 - A-R84-ARCH-DOCK-WRITER / info / acknowledged (reviewer: keep; own sibling component, no link to sync effect) / ArrangementVideoDock.tsx l.237-273 adds a position writer and layout effect for the fade overlay
 - A-R84-BORDER-CONSTANTS / info / open - one-line backlog item (reviewer: keep) / CLIP_ENVELOPE_ROOT_BORDER_PX (ArrangementClipEnvelope.tsx:21) and CLIP_BORDER_PX (ArrangementClip.tsx:44) both depend on the root border cla
 - A-R84-REVIEW-LOWS / low / open - Lows batch (#4 unreachable fallback branch, #5 SVG left -1 clipped by overflow-hidden, #7 export note role=note) / A round-84 code-review residuals
+- C-R85-L1 / low / ruled (B, D-29z51): not a CZABA contract - the round-85 M1-GHOST "then Escape" wording was B's assumption; no pointer gesture in the workspace cancels on Escape today (grep); Live behaviour unconfirmed; not requested by the user -> signal ESCAPE-CANCEL-GESTURE, not scheduled / Escape does not cancel a clip drag / lane move; on release the move commits
+- ESCAPE-CANCEL-GESTURE / info / signal (cross-cutting product question: clip move, trim, fade, envelope, marker, loop and range gestures; needs a Live source check and a user decision before any task) / no Escape-to-cancel for pointer gestures
+- C-R85-L2 / low / scheduled round 86 X1 (D-29z51; frozen C-R14-02 and XU5 tab list granted) / with no valid range the project scope radio is checked AND disabled (round-85 E2 disabled only the range radio); A did it to keep frozen C-R
+- GATE85-S1-SILENT-RANGE-NOTE / low / open - Lows batch (merged with A-R85 review L5) / a range covering no audible clip exports a silent -range file with no note; the no-sound note uses project-wide hasSoundingClip
+- GATE85-S2-REASON-DESCRIBEDBY / low / scheduled round 86 X1 (same radio as C-R85-L2) / the disabled range radio reason is not linked (aria-describedby)
+- GATE85-S3-RANGE-VALIDITY-TWICE / low / scheduled round 86 (render-window helper; exportMp3 would otherwise add a third copy) - merges A-R85 review L2 and both Architecture notes / the 0.001 s window rule lives in the dialog constant and a context literal
+- GATE85-S4-RENDERER-NO-GUARD / low / open - Lows batch (graph.client.ts frozen in round 86; only guarded callers) / renderArrangementWav does not validate the window itself (inverted window -> native NotSupportedError)
+- GATE85-S5-SCOPE-RESET-EFFECT / info / open - Lows batch (optional; round 86 format state may reset in the same place) / scope reset runs in an effect after close (one extra render)
+- GATE85-S6-ROW-BOUNDARY-HANDLES / info / open - regression round row (selected clip handles in row N vs row N+1 near the boundary) / isolate per lane body: a fade handle dragged near the row boundary could be covered by the next row
+- A-R85-REVIEW-L1-SHORT-RANGE-TEXT / low / open - Lows batch / a visible range shorter than 1 ms shows the "select a range" reason; a "too short" text may be clearer
+- FFMPEG-DEV-WORKER / medium / scheduled round 86 (vite.config.ts optimizeDeps.exclude grant); B probe evidence; production build behaviour unverified in the cloud (no preview server) / under the Vite dev server the ffmpeg.wasm worker (node_modules/.vite/deps/worker.js) fails with ERR_FAILED and loadFFmpeg() never settles, s
+- FFMPEG-LOAD-POLLER-HANG / low / signal for the owner of app/utils/ffmpeg.ts (shared with the protected purchased Studio via StudioContext; frozen for the loop); round 86 wraps the call in a timeout in ArrangementContext / loadFFmpeg: a concurrent caller polls isLoaded forever if the first load fails; a load whose worker never starts never rejects; no timeout
+- C-R85-OBS-PLAYHEAD-OVER-CLIPS / info / acknowledged (A review L6; intended: playhead z-10 row sibling paints over clips, pointer-events-none) / playhead line paints over clips and the selected clip after the isolate change
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
+- SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
 - SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-16 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 6b574e8, 2a e347b97, 2b-1 db9cc25, 2b-2 60006d4, 2b-3 c062147; Tech Lead R72-T/R74-T/R77-T/R78-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next
 - SRW-17 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 74eca15, stage 2 68383fa, stage 3 efbed86; Tech Lead R79-T/R81-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
+- SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
 - SRW-21 [blocked-partial] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete
