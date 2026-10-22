@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-21T23:37:54.860Z)
+# Active loop summary (2026-10-22T02:45:23.738Z)
 
-- backlog.json 679 KB -> active view 113 KB
-- status: G_ROOT_GATE round 75
-- servers: `{"checkedUtc":"2026-10-21T23:17:15.3730476Z","round":75,"attempt":1,"store":200}`
-- last publication: e347b9735a1d067fea2938da5b2f25f8256fabf1 (rounds 74-75)
-- last root gate: round 75 published - commit e347b9735a1d067fea2938da5b2f25f8256fabf1 pushed
+- backlog.json 685 KB -> active view 147 KB
+- status: G_ROOT_GATE round 76
+- servers: `{"checkedUtc":"2026-10-22T02:24:21.7510751Z","round":76,"attempt":1,"store":200}`
+- last publication: db9cc255e29d8792e2c67a391519515a0ec2230e (rounds 76-76)
+- last root gate: round 76 published - commit db9cc255e29d8792e2c67a391519515a0ec2230e pushed
 
-## Current items: SRW-16
+## Current items: SRW-14, SRW-16
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -148,28 +148,34 @@
 - ROW-RANGE-M / info / signal for stage 2 (not a task) / M adds at range.start even after a later ruler click (spec R6 as written); Live drops the selection on click; consider clearing/documenting 
 - GATE-72-SKIPPED / info / open_root / Round 72 root gate skipped (C FAIL); round-72 code is uncommitted in the tree; rounds 72+73 publish together after C PASS
 - A-R73-SAFARI-FLAG-FOCUS / medium / scheduled (round 74 B1: press explicitly focuses the flag; MV8 test); C verifies Chromium only, WebKit not available as evidence / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
-- ROOT-R73-S1-MAC-CTRL-ARROWS / low / scheduled round 75 (SRW-16 stage 2b): Live 12 6.9 uses Option+arrows on Mac / macOS reserves Ctrl+Left/Right for Spaces; marker prev/next reachable only by buttons
+- ROOT-R73-S1-MAC-CTRL-ARROWS / low / scheduled round 77 (SRW-16 stage 2b-2): Live 12 6.9 uses Option+arrows on Mac / macOS reserves Ctrl+Left/Right for Spaces; marker prev/next reachable only by buttons
 - ROOT-R73-S2-FLAG-A11Y / low / partly scheduled round 74 (aria-keyshortcuts B12); aria-current semantics kept (C harness), Lows batch / F2/Delete only in title; aria-current=true for selection
 - ROOT-R73-S3-MARKER-BUTTON-SIZE / low / open - Lows batch / marker +/◀/▶ buttons 16 px tall, below WCAG 2.2 2.5.8 24 px (matches existing chrome)
 - ROOT-R73-S4-EDITOR-OVERFLOW / low / open - Lows batch / marker name editor w-40 near the timeline end can widen horizontal scroll; markers past project end
 - ROOT-R73-S5-REF-CALLBACK / low / open - Lows batch / flag ref callback recreated every render (correct, cheap; nit)
 - ROOT-R73-S6-PENDING-FOCUS / low / open - Lows batch / pendingFocusRef may stay set if a commit is refused; low risk
 - MARKER-STRIP-CONTEXT-ADD / info / signal (not scheduled; not requested by the user) / Live 6.4: scrub area context menu has Add Locator; CZABA empty marker strip has no custom menu
-- C-R74-01 / medium / scheduled round 75 (D-29z40 grant: MU8 l.526 toBe Move Marker + round-trip times assertion + title) / markers-ui.test.tsx MU8 l.526 expects no undo entry after plain arrows on a focused flag; B5 (round 74) moves the marker by 0.1 s; red test 
-- A-R74-MU8E-POINTERUP / low / scheduled round 75 (test-only) / MU8e pointerdowns 75/76 never get a pointerUp, so a gesture claim stays active for the rest of MU8e (the name-editor half runs with isPointe
-- C-R74-02 / low / scheduled round 75 (D-29z40) / marker menu stays open at its old fixed position after a 300 px wheel scroll of the timeline (the flag moved away); the lane grid menu close
 - GATE-74-SKIPPED / info / open_root / Round 74 root gate skipped (C FAIL); round-74 code is uncommitted in the tree; rounds 74+75 publish together after C PASS
 - INFO-C74-KEYBOARD-CONTEXTMENU-BUTTON / info / open (untestable by C: CDP key presses send no contextmenu event; ALT-CHROME-MENU class); Tech Lead real-keyboard check / native ContextMenu-key / Shift+F10 contextmenu event button value and the A guard (button !== 2) are unverified in a real keyboard path; the
 - INFO-C74-MENU-BOTTOM-UNREACHABLE / info / acknowledged (marker row is in the sticky top chrome; bottom clamp unreachable at 1440x900/1280x720) / marker menu bottom-edge clamp cannot be reached at the two user viewports (menu bottom 343/381)
 - A-R74-MACOS-CTRL-CLICK / low / open - with ROOT-R64-L5 (macOS Ctrl+click) in the Lows batch; needs a real Mac / macOS Ctrl+click (button 0) on a flag starts a drag claim and the contextmenu anchors at the flag
 - R74-T-TECH-LEAD / info / open / real Chrome: drag a marker with Snap on/off/Alt, arrows on a focused flag, right-click and the ContextMenu key on a flag - menu feel, items 
+- GATE75-S1-ZOOM-MID-DRAG / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / zoom (Ctrl+wheel) during a marker drag rescales dx with the new pxPerSecond; the marker jumps (ArrangementMarkerRow l.343-344)
+- GATE75-S2-POINTERCANCEL-COMMITS / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / onPointerCancel=finishMarkerDrag commits lastTime as a Move Marker entry; other abort paths revert (ArrangementMarkerRow l.717-718)
+- GATE75-S3-BLOCKED-PRESS-SELECTS / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / a press refused by claimPointerGesture still moves aria-current selection (setSelectedMarkerId before the claim, l.279-281)
+- GATE75-S4-KEYBOARD-OPEN-DETECT / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / menu 'opened from keyboard' uses event.button !== 2; touch long-press / macOS Ctrl+click anchor at the flag (cosmetic)
+- GATE75-S5-ARIA-EXPANDED / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / flag with aria-haspopup=menu never reports aria-expanded=false; optional aria-controls
+- GATE75-S6-STALE-MENU-STATE / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / if the marker disappears while the menu is open, menu state stays set and focus drops to body (hard to trigger today)
+- GATE75-S7-MENU-PAGE-SCROLL / info / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / marker menu (fixed) does not follow window/ancestor scroll or a Follow page-flip; doc note only per reviewer
+- GATE75-S8-REAL-BROWSER-SMOKE / info / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / needs real-browser smoke: mac/Linux contextmenu-before-pointerup order, Windows Shift+F10 opens exactly one menu, no dblclick play after dra
+- A-R75-LOW2-SAME-ZOOM-VIEW-SCROLL / low / open - signal (Lows batch / Follow regression) / same-zoom applyTimelineView scrolls (fit, zoom-to-range, Zoom Back) pre-write lastScrollLeftRef, so they would not close an open marker menu
+- C-R75-A-LOW4-FOLLOW-LEFT-WHEEL / info / open - signal (Lows batch / Follow regression) / leftward user wheel near the clamped right end during Follow keeps the menu open (clampedByBrowser heuristic, same as grid menu); not run by
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
 - SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
-- SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-17 [todo] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [todo] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)

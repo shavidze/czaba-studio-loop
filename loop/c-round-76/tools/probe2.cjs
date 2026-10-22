@@ -1,0 +1,18 @@
+const L=require('./lib.cjs');const sleep=L.sleep;
+(async()=>{const s=await L.open('1440x900');const p=s.page;await L.fresh(p);
+const lb=t=>p.evaluate(t=>{const l=document.querySelector(`[data-track-id="${t}"]`);const b=l.querySelector('[data-grid-seconds]')||l;const r=b.getBoundingClientRect();return{x:r.left,y:r.top,w:r.width,h:r.height,has:!!l.querySelector('[data-grid-seconds]')}},t);
+const ruler=await p.evaluate(()=>document.querySelector('[data-testid=arrangement-ruler]').getBoundingClientRect().toJSON());
+console.log('ruler',JSON.stringify(ruler),'sfx',JSON.stringify(await lb('sfx')));
+await p.click('[data-testid=arrangement-snap-toggle]');await sleep(200);
+const opt=p.locator('[role=option][data-source-id="demo-soft-impact"]');const ob=await opt.boundingBox();const l=await lb('sfx');
+await p.mouse.move(ob.x+ob.width/2,ob.y+ob.height/2);await p.mouse.down();await p.mouse.move(ob.x+ob.width/2+12,ob.y+ob.height/2,{steps:3});
+await p.mouse.move(ruler.left+3*40+4,l.y+l.h/2,{steps:14});await sleep(300);
+const g=await p.evaluate(()=>[...document.querySelectorAll('*')].filter(e=>[...e.attributes].some(a=>/ghost|drop/.test(a.name)||/ghost|drop/.test(a.value))).map(e=>[...e.attributes].map(a=>a.name+'='+a.value.slice(0,50)).join(' ')+' | '+e.textContent.slice(0,60)).slice(0,10));
+console.log('ghost',JSON.stringify(g,null,1));
+await p.mouse.up();await sleep(800);
+console.log('clips',JSON.stringify(await p.evaluate(()=>[...document.querySelectorAll('[data-clip-id]')].map(e=>[...e.attributes].map(a=>a.name+'='+a.value.slice(0,60)).join(' ')+' rect '+JSON.stringify(e.getBoundingClientRect().toJSON())+' kids '+e.children.length)),null,1));
+console.log('status',await p.textContent('[data-testid=arrangement-status]'));
+const c=await p.locator('[data-clip-id]').first().boundingBox();await p.mouse.click(c.x+c.width/2,c.y+c.height/2);await sleep(300);
+console.log('detail',await p.evaluate(()=>document.querySelector('[data-testid=arrangement-detail-content]')?.innerText),await p.inputValue('[data-testid=arrangement-detail-start]').catch(()=>null),await p.inputValue('[data-testid=arrangement-detail-end]').catch(()=>null));
+console.log('undo',await p.evaluate(()=>[...document.querySelectorAll('button')].filter(x=>/^(Undo|Redo)/.test(x.getAttribute('title')||'')).map(b=>b.getAttribute('title'))));
+await p.screenshot({path:L.OUT+'/shots/probe2.png'});await s.browser.close();})();

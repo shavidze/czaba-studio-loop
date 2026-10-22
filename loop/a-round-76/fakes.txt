@@ -1,0 +1,78 @@
+const fakeClock = { base: 0 };
+
+class FakeParam {
+  value = 0;
+  setTargetAtTime(target: number) {
+    this.value = target;
+  }
+}
+
+class FakeNode {
+  connect(destination: FakeNode) {
+    return destination;
+  }
+  disconnect() {}
+}
+
+class FakeGain extends FakeNode {
+  gain = new FakeParam();
+}
+
+class FakePanner extends FakeNode {
+  pan = new FakeParam();
+}
+
+class FakeSource extends FakeNode {
+  buffer: unknown = null;
+  onended: (() => void) | null = null;
+  start() {}
+  stop() {}
+}
+
+class FakeAudioContext {
+  state = 'running';
+  destination = new FakeNode();
+  sampleRate = 48000;
+  get currentTime() {
+    return Date.now() / 1000 - fakeClock.base;
+  }
+  resume() {
+    return Promise.resolve();
+  }
+  close() {
+    return Promise.resolve();
+  }
+  createGain() {
+    return new FakeGain();
+  }
+  createStereoPanner() {
+    return new FakePanner();
+  }
+  createBufferSource() {
+    return new FakeSource();
+  }
+}
+
+class FakeOfflineAudioContext {}
+
+class FakeAudioBuffer {
+  readonly length: number;
+  readonly numberOfChannels: number;
+  readonly sampleRate: number;
+  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
+    this.length = options.length;
+    this.numberOfChannels = options.numberOfChannels;
+    this.sampleRate = options.sampleRate;
+  }
+  get duration() {
+    return this.length / this.sampleRate;
+  }
+  getChannelData() {
+    return new Float32Array(this.length);
+  }
+}
+
+class FakeResizeObserver {
+  observe() {}
+  disconnect() {}
+}

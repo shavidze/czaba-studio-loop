@@ -1,0 +1,15 @@
+const L=require('./lib.cjs');const sleep=L.sleep;
+(async()=>{const s=await L.open('1440x900');const p=s.page;await L.fresh(p);
+const drop=async(src,lane,t)=>{const o=p.locator(`[role=option][data-source-id="${src}"]`);const ob=await o.boundingBox();const lb=await p.evaluate(t=>{const r=document.querySelector(`[data-track-id="${t}"] [data-grid-seconds]`).getBoundingClientRect();return{y:r.top+r.height/2}},lane);await p.mouse.move(ob.x+ob.width/2,ob.y+ob.height/2);await p.mouse.down();await p.mouse.move(ob.x+ob.width/2+12,ob.y+ob.height/2,{steps:3});await p.mouse.move(512+t*40,lb.y,{steps:14});await sleep(300);await p.mouse.up();await sleep(800);};
+await p.click('[data-testid=arrangement-snap-toggle]');await drop('demo-soft-impact','sfx',1);await drop('demo-slow-rise','sfx',4);
+const sel=()=>p.evaluate(()=>[...document.querySelectorAll('[data-clip-id]')].map(e=>({s:e.getAttribute('data-clip-start'),cls:(e.className.match(/ring-\S+|outline-\S+/g)||[]).join(','),aria:e.getAttribute('aria-selected'),ds:e.getAttribute('data-selected')})));
+const ids=await p.evaluate(()=>[...document.querySelectorAll('[data-clip-id]')].map(e=>e.getAttribute('data-clip-id')));
+console.log('0',JSON.stringify(await sel()),await p.textContent('[data-testid=arrangement-status]'));
+const clickH=async(i,mods)=>{const h=await p.locator(`[data-clip-id="${ids[i]}"] > div`).first().boundingBox();await p.mouse.click(h.x+h.width/2,h.y+h.height/2,{modifiers:mods});await sleep(400);return JSON.stringify((await sel()).map(x=>x.cls.includes('ring-brand')));};
+await p.evaluate(()=>{window.__pd=[];document.addEventListener('pointerdown',e=>window.__pd.push([e.ctrlKey,e.shiftKey,e.metaKey,e.target.tagName]),true);});
+console.log('plain A',await clickH(0,[]));console.log('ctrl B',await clickH(1,['Control']));console.log('pd',JSON.stringify(await p.evaluate(()=>window.__pd)));
+console.log('plain A',await clickH(0,[]));console.log('shift B',await clickH(1,['Shift']));
+await p.keyboard.press('Escape');console.log('plain A',await clickH(0,[]));await p.keyboard.down('Control');console.log('kbctrl B',await clickH(1,[]));await p.keyboard.up('Control');
+console.log('ctrlA again',await clickH(0,['Control']));
+await p.screenshot({path:L.OUT+'/shots/dbg-sel.png'});
+await s.browser.close();})();

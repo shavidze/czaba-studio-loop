@@ -1,125 +1,135 @@
-# CURRENT TASK — Round 76: SRW-16 (FB-10) stage 2b-1 — clips snap to markers (D-29z41)
+# CURRENT TASK — Round 77: SRW-16 (FB-10) stage 2b-2 — Ctrl/Option+←/→ also stop at clip edges of the selected tracks (D-29z42)
 
 Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-22
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md` and the LOOP POLICY / Loop v2 / cloud-runner / speed rules in your prompt (they win over older text).
-- **Previous task:** `tasks/round-75.md` (exact copy). Rationale for this round: `b-round-75.md`. Decision record D-29z41 in `docs/technical/studio-real-workspace/plan.md`.
-- **Round size:** one feature stage, one owner (A). Stage 2b was planned as one stage. B split it into three stages; each one is scheduled and none is deferred:
-  - **2b-1 (this round, 76):** clips snap to markers: move, group move, cross-lane move, trim, library drop. Live 12 §6.7 confirms this.
-  - **2b-2 (round 77):** Ctrl+←/→ also stops at clip edges of the selected tracks (Live 12 §6.9), plus the macOS Option binding (gate-73 reviewer S1).
-  - **2b-3 (round 78):** the range (time selection) and the playhead also snap to markers. This is a CZABA decision; the Live text does not state it.
+- **Previous task:** `tasks/round-76.md` (exact copy). Rationale for this round: `b-round-76.md`. Decision record D-29z42 in `docs/technical/studio-real-workspace/plan.md`.
+- **Round size:** one feature stage (2b-2), one owner (A). Stage 2b stays split in three, none deferred: 2b-1 (round 76) is done; **2b-2 is this round**; 2b-3 (range/playhead snap to markers) follows.
 
 ## Why this round
-C round 75 (`c-round-75.md`, `.json`): **PASS, `browserVerified=true`, `realVerified=true`, no bugs.** Root gate 75 published commit `e347b9735a1d067fea2938da5b2f25f8256fabf1` to both remotes (rounds 74 and 75). SRW-16 stage 2a (moving markers and the marker menu) is now done.
+C round 76 (`c-round-76.md`, `.json`): **PASS, `browserVerified=true`, `realVerified=true`, no bugs.** Root gate 76 published `db9cc255e29d8792e2c67a391519515a0ec2230e` to both remotes. Stage 2b-1 (clips snap to markers) is done. The next dependency-ordered open scope is 2b-2: the Live 12 §6.9 keyboard rule, plus the macOS binding requested by gate-73 reviewer S1 (ROOT-R73-S1-MAC-CTRL-ARROWS: macOS reserves Ctrl+←/→ for Spaces, so on a Mac the shortcut is unreachable today). No Critical/High bug is open. The regression round is due on or after 2026-10-24 (`regression-last.json` = 2026-10-21); not this round.
 
-By dependency order, the next open scope is SRW-16 stage 2b. Clip snapping comes first for two reasons: it is the part the Ableton manual confirms directly, and it only extends the SRW-14 edge-candidate mechanism that already exists. No Critical/High bug is open. The regression round is due on or after 2026-10-24 (`regression-last.json` = 2026-10-21, round 71), so it is not due for this round.
-
-The gate-75 reviewer suggestions are open as backlog signals (GATE75-S1..S8 in `feature-status.md` §3). They are not in this round. S1 is "zoom during a marker drag makes the marker jump" and S2 is "pointercancel commits a marker move". Both are low and are scheduled as a bounded marker-drag fix-up after 2b. **Do not fix them here.** `ArrangementMarkerRow.tsx` is frozen in this round.
+Gate-76 review suggestions (S1 marker list computed 3× per pointermove, S2/MS8c group fallback, S3 video clip onto marker untested, S5 snapshot vs live) are backlog signals (GATE76-*), not in this round, except **S4 (doc 066 status line)**, which is granted below as one line. `ArrangementClip.tsx`, `ArrangementLane.tsx` and `grid.ts` are frozen again.
 
 ## Baseline (measured by B, 2026-10-22)
-- **HEAD `e347b9735a1d067fea2938da5b2f25f8256fabf1`**, clean tree: `git status --short` prints **0 lines**.
-- **Frozen list:** `../tmp/studio-real-loop/b-round-75-r76-tree-sha256.txt`, **451** entries, 451/451 OK (`cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-75-r76-tree-sha256.txt`). It covers every tracked and untracked `app/**` and `docs/implementation/**` file except the 4 owned existing files below. **`grid.ts` is unfrozen for this round** (frozen since round 64). Everything else stays frozen, including `ArrangementMarkerRow.tsx`, `ArrangementMarkerMenu.tsx`, `StudioWorkspace.tsx`, `ArrangementRuler.tsx`, `ArrangementLoopBrace.tsx`, all existing tests, and docs 064/065.
-- **Snapshots:** `../tmp/studio-real-loop/b-round-75-r76-snapshots/` (`SHA256SUMS.txt`). All are LF with CR=0:
+- **HEAD `db9cc255e29d8792e2c67a391519515a0ec2230e`** (gate 76 published commit), clean tree: `git status --short` prints **0 lines**.
+- **Frozen list:** `../tmp/studio-real-loop/b-round-76-r77-tree-sha256.txt`, **453** entries, 453/453 OK (`cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-76-r77-tree-sha256.txt`). It covers every tracked and untracked `app/**` and `docs/implementation/**` file except the 4 owned existing files below. Frozen includes **every existing test file** (`markers-ui.test.tsx`, `markers-move-ui.test.tsx`, `grid-snap-keys.test.tsx`, `marker-snap.test.tsx` …), `ArrangementContext.tsx`, `view.ts`, `grid.ts`, `ArrangementClip.tsx`, `ArrangementLane.tsx`, `ArrangementRuler.tsx`, `ArrangementMarkerMenu.tsx`, docs 064/065.
+- **Snapshots:** `../tmp/studio-real-loop/b-round-76-r77-snapshots/` (`SHA256SUMS.txt`), all LF, CR=0:
 
   | File | sha256 prefix | LF |
   |---|---|---|
-  | `app/lib/arrangement/grid.ts` | `128cba81` | 289 |
-  | `app/lib/arrangement/markers.ts` | `7c8874b0` | 189 |
-  | `app/components/arrangement/ArrangementClip.tsx` | `97a1bf79` | 710 |
-  | `app/components/arrangement/ArrangementLane.tsx` | `9105781c` | 950 |
+  | `app/lib/arrangement/markers.ts` | `168cd442` | 193 |
+  | `app/components/arrangement/ArrangementMarkerRow.tsx` | `8e0bb133` | 812 |
+  | `app/components/arrangement/StudioWorkspace.tsx` | `753cecba` | 2021 |
+  | `docs/implementation/2026/quarter-IV/066-studio-lab-clip-snap-markers.md` | `8576ba44` | 108 |
 - **Protected files:** 4/4 OK (`protected-baseline.json`: `cd68eb6e`, `9f738237`, `13914809`, `fa2cf0bc`). Never touch them.
-- **Servers (B, Linux cloud):** `:5173/studio-lab` returns 200; backend `:5199` is unavailable (expected). A and C re-check at phase start. Never start or stop servers. A row that truly needs the backend is "BLOCKED: backend unavailable in cloud", never PASS.
+- **Servers (B, Linux cloud):** `:5173/studio-lab` 200 per `env-status.json`; backend `:5199` unavailable (expected). A and C re-check at phase start. Never start or stop servers. A row that truly needs the backend is "BLOCKED: backend unavailable in cloud", never PASS.
 - **NEVER** stash, reset, checkout, clean or re-create anything. A mismatch (different HEAD, non-empty status, a changed frozen file) means stop and report. Never run `biome check --write`, `format --write`, `npm run format` or `check:fix`.
 
 ## 1. What changes (A)
 
-### Contract (B decision: the smallest honest behaviour consistent with FB-10 and Live 12 §6.7)
-Marker times become **snap candidates exactly where clip edges are snap candidates today** (SRW-14 stage 4, `clipEdgeTargets` → `nearestGridOrEdge`). Nothing else about snapping changes.
+### Today (read by B in the source)
+- `StudioWorkspace.tsx` ~l.1442–1459: `Ctrl` (no Meta/Alt/Shift) + ←/→ → `markerRowRef.current?.stepMarker(±1)`, unless the target is a slider, separator, loop brace or the overview. Typing targets return earlier (~l.1296). During a pointer gesture the block at ~l.1352 refuses Ctrl+arrows **and** plain arrows (`!modifier` + ArrowLeft/Right) with `GESTURE_EDIT_BLOCKED_MESSAGE`.
+- `ArrangementMarkerRow.tsx` `stepMarker` (~l.222–240) → `adjacentMarkerTarget(arrangement, livePosition, direction, projectEnd)` (`markers.ts` ~l.143): next/previous marker, else project end / 0, else `null` → status `წინ მარკერი აღარ არის` / `უკან მარკერი აღარ არის`. A marker stop sets the selected (`aria-current`) marker. The ◀ ▶ buttons call the same `stepMarker`.
+- The plain-arrow clip nudge (~l.1513–1539) has **no `altKey` exclusion**, so today Alt+←/→ with a selected clip nudges the clip on every platform. The flag key handler (`handleFlagKeyDown` ~l.604) ignores Ctrl/Meta/Alt, so modified arrows on a focused flag bubble to the workspace (MV7).
+- The frozen MU6/MU6b/MU11/MV7 fixtures have one clip `m1` on `music` covering 0–50 (= project end), so their edges coincide with 0/end and those tests stay green under the new rule. B checked this; no test amendment is granted or needed.
 
+### Contract (B decision: smallest honest behaviour consistent with FB-10, Live 12 §6.9 and §6.4)
 | # | Rule |
 |---|---|
-| M1 | With a non-null snap step (Snap on without Alt, or Snap off with Alt, per `resolveSnapStep`), a **clip move** (single, same lane or cross-lane) can land its **start or its end** on any marker time. The nearest candidate wins, and the candidates are the grid line, the existing clip edges and the marker times. A tie with the grid line goes to the grid line, as in CM7 today. There is no pixel threshold, also as today. |
-| M2 | A **group move** anchor (the `snapGroupMoveDelta` path) gets the same marker candidates for its start and end. The existing bounds rule is unchanged: an out-of-bounds candidate falls back to the grid result. |
-| M3 | A **trim** can land the trimmed edge (left trim → start, right trim → end) on a marker time. Existing clamp and blocked text are unchanged. |
-| M4 | A **library drop** onto an audio lane can land the dropped start or end on a marker time. The video lane still refuses library drops (`refused: isVideo`, unchanged), and the `isVideo` / not-ready grid-only branch of `libraryDropStart` stays as it is. |
-| M5 | Markers are **not lane-specific**: they belong to both the start and end candidate lists for every lane. The placement-lane rule for clip edges (CM14: a same-lane clip end is not an end candidate) is unchanged and does not apply to markers. |
-| M6 | Snap off without Alt, Alt with Snap on, and the Shift time lock ignore markers, exactly as they ignore clip edges today. |
-| M7 | Markers are **never changed** by a clip edit: same ids, times and names. A clip move is still one history entry with its existing label; Undo/Redo restores the clip only. The clip move reschedules playback exactly as today; markers add no schedule change of their own, and the moved clip is heard at its new time. |
-| M8 | With **no markers**, every result equals the round-75 result (no behaviour change). |
-| M9 | A marker exactly at the dragged clip's **current** start or end is a valid candidate. It is not the clip's own edge (CM11 excludes only the clip's own edges). So a 1–2 px drag snaps the clip back onto that marker. This is correct under M1, the same as a grid line there, and **not a bug**. |
+| N1 | **Keyboard step stops.** Ctrl+←/→ (and on Apple platforms also Option+←/→, N6) moves the playhead to the nearest stop strictly before/after the live position (existing `MARKER_TIME_EPS`). Stops = **marker times ∪ start and end of every clip on the selected tracks (N2)**. When no stop exists in that direction, the existing fallback applies unchanged: project end (forward) / 0 (backward), else the existing refusal strings. |
+| N2 | **Selected tracks** (B decision; Live: "the selected track or tracks"): the union of (a) `activeTrackId`, (b) the `trackId` of every clip in `selectedClipIds`, (c) the time range: `range.allTracks` → every track, otherwise `range.trackId`. Unknown ids are ignored. Video tracks follow the same rule (a video clip's edges count when its track is selected). |
+| N3 | **Coincidence:** a marker and a clip edge within `MARKER_TIME_EPS` are one stop, and it is the **marker** stop (it selects that marker). |
+| N4 | **Marker selection:** a marker stop selects the marker exactly as today. A clip-edge stop and the end/0 fallback leave the marker selection unchanged (same as today's end/0 fallback). No status text on a successful stop (as today). |
+| N5 | **Buttons stay marker-only.** ◀ ▶ (`arrangement-marker-prev/next`) keep today's behaviour: markers, then project end / 0 (Live 12 §6.4 Previous/Next Locator). Their labels, `title` and `aria-keyshortcuts` are byte-unchanged (frozen MU6 locks `Control+ArrowLeft/Right`; see the Low signal R77-BUTTON-SHORTCUT-SUPERSET in §7). |
+| N6 | **macOS Option binding.** When the platform is Apple (N7), Option(Alt)+←/→ without Ctrl/Meta/Shift does exactly what Ctrl+←/→ does (N1), with the same target guards (slider, separator, loop brace, overview; typing targets already return earlier). Ctrl+←/→ keeps working on Apple platforms too. This branch must run **before** the plain-arrow clip nudge, so Option+arrow on a Mac with a selected clip steps the playhead and does **not** move the clip. During a pointer gesture the existing block (~l.1352, `!modifier` + arrows) already refuses it; keep that. |
+| N7 | **Platform check at key time only.** A pure predicate decides "Apple" from `navigator.platform` / `navigator.userAgent` strings (`Mac`, `iPhone`, `iPad`, `iPod`; `userAgentData` is not required). It is evaluated **inside the keydown handler**, never during render (no hydration difference). No rendered string depends on the platform. |
+| N8 | **Non-Apple Alt+arrows unchanged.** On Windows/Linux, Alt+←/→ behaves byte-for-byte as in round 76 (the nudge branch is not edited). |
+| N9 | **Nothing else changes.** No history entry, no arrangement change, no marker change, playback keeps playing (seek while playing as today). With no clip edge on the selected tracks strictly between the stops of round 76, results equal round 76 (frozen MU6/MU6b/MU11/MV7 stay green unchanged). |
 
 ### Files (exact grants)
-- **`app/lib/arrangement/grid.ts`:** extend the edge-target construction so callers can pass marker times. Preferred: an optional last parameter `markerTimes: readonly number[] = []` on `clipEdgeTargets`, merged (sorted, de-duplicated by the existing `sortedUniqueEdgeTimes`) into **both** `startEdges` and `endEdges`. An equivalent small new export is acceptable if A explains why. Existing exports keep their names, signatures (apart from the optional parameter) and results for existing callers.
-- **`app/lib/arrangement/markers.ts`:** at most **one appended export** that returns the marker times of an arrangement (for example `markerSnapTimes(arrangement): number[]`, built on `arrangementMarkers`). No other byte changes. Leave the file untouched if you don't need it.
-- **`app/components/arrangement/ArrangementClip.tsx`:** pass the marker times of the gesture's `before` arrangement into the three snap-target constructions: single move (~l.451), trim (~l.513–517) and the group path (`groupDeltaOnGrid`, ~l.111–140; add one parameter for the marker times). No other behaviour change. **Untouched:** the `moveStartOnGrid` helper body, the range-inside-clip `onGrid` (~l.539; that is stage 2b-3 scope), the click-seek `resolveGridTime` (~l.567), the Shift time lock and all refusal/status texts.
-- **`app/components/arrangement/ArrangementLane.tsx`:** only `libraryDropStart` (~l.186–202) passes `getArrangement()`'s marker times into `clipEdgeTargets`. The `isVideo` branch is unchanged.
-- **New `app/lib/arrangement/__tests__/marker-snap.test.tsx`:** the tests below. Reuse the harness pattern of `grid-snap-clip-edges.test.tsx` by copying it into the new file. Do not edit the existing file.
-- **New `docs/implementation/2026/quarter-IV/066-studio-lab-clip-snap-markers.md`:** Georgian, LF, per `docs/implementation/TEMPLATE.md`. Cover the contract M1–M9, the 2b split with its rationale, the Ableton table, files, tests and mutations. Status: awaiting C. Docs 064/065 stay frozen.
+- **New `app/lib/arrangement/edge-navigation.ts`:** pure exports, names may differ if A explains: `navigationTrackIds(arrangement, { activeTrackId, selectedClipIds, range }): string[]` (N2), `clipEdgeTimesOnTracks(arrangement, trackIds): number[]` (sorted, unique), `isApplePlatform(platform: string, userAgent: string): boolean` (N7). No React, and no `navigator` access inside the module (the caller passes the strings).
+- **`app/lib/arrangement/markers.ts`:** `adjacentMarkerTarget` gains an optional last parameter `edgeTimes: readonly number[] = []` implementing N1/N3; existing callers and results unchanged when it is omitted. No other byte change.
+- **`app/components/arrangement/ArrangementMarkerRow.tsx`:** only `stepMarker` and `ArrangementMarkerRowHandle.stepMarker` gain an optional `edgeTimes` argument passed through to `adjacentMarkerTarget`. The buttons keep calling `stepMarker(±1)` with no edges (N5). Nothing else (drag code and GATE75 S1–S3 stay as they are).
+- **`app/components/arrangement/StudioWorkspace.tsx`:** only the Ctrl+←/→ branch (~l.1442–1459): compute the edge times from `current.getArrangement()`, `current.activeTrackId`, `current.selectedClipIds`, `current.range` through the new helpers and pass them to `stepMarker`; add the Apple Option condition (N6/N7) in this same branch, which already sits before the `if (modifier) return;` line and therefore before the nudge branch. **Untouched:** the gesture block, the nudge branch, `timelineNavigationKey`, every other key.
+- **`docs/implementation/2026/quarter-IV/066-studio-lab-clip-snap-markers.md`:** only the status line (l.4), replaced by exactly this line (one line, nothing else; GATE76-S4):
 
-If M1–M9 cannot be met inside these grants (for example, some snap path builds its candidates in a frozen file), **stop and report**. Do not edit elsewhere.
+  > **სტატუსი:** Round 76 — C PASS (browserVerified), გამოქვეყნდა `db9cc25` (D-29z41)
 
-### Required tests (meaningful, behavioural; new file only)
-The fixture is Snap on, grid 1 s, 40 px/s unless the test says otherwise. Markers are placed off-grid (for example 12.300 and 20.700) so that a pass can only come from the marker candidate. Clips are placed away from the markers so that no clip edge competes, except in MS12.
-- **MSU1 (unit, `grid.ts`):** with marker times, `clipEdgeTargets` contains them in both `startEdges` and `endEdges`, sorted and unique. Without them, the result is identical to the old call.
-- **MS1:** a single move whose raw start is nearer 12.300 than any grid line lands at `data-clip-start` 12.300.
-- **MS2:** a single move whose raw end is nearer 20.700 lands with start + duration = 20.700.
-- **MS3:** a nearer grid line beats a marker. An exact tie goes to the grid line.
-- **MS4:** Snap off without Alt ignores markers (free ms result). **MS5:** Alt with Snap on ignores markers. **MS6:** Alt with Snap off snaps to the marker.
-- **MS7:** a right trim lands its end on a marker, and a left trim lands its start on a marker (with the source offset lowered/raised as the existing trim math does).
-- **MS8:** a group move lands the anchor start (or end) on a marker. A marker candidate outside the group bounds falls back to the grid result.
-- **MS9:** a cross-lane move lands its start on a marker of the timeline (the target lane has no clip there).
-- **MS10:** a library drop on an audio lane: the ghost/drop start lands on a marker. A drop whose raw end is near a marker lands its end there. The video-lane refusal is unchanged (one assertion).
-- **MS11:** after MS1, Undo restores the clip start; the marker list (`id`, `time`, `name`) is byte-equal before and after the move and the Undo; the undo label is the existing clip-move label.
-- **MS12:** a clip edge nearer than a marker wins. A marker nearer than a clip edge wins.
-- **MS13:** the Shift time lock ignores markers.
-- **Mutation proofs (A runs each and records it; restore and `cmp` after each):** (a) drop the marker times from the single-move targets → MS1 red; (b) from the trim targets → MS7 red; (c) from the group path → MS8 red; (d) from `libraryDropStart` → MS10 red; (e) merge markers only into `startEdges` → MS2 red.
-- **A's checks (speed rules):** `npm run typecheck`, `npm run lint`, and `npx vitest run app/lib/arrangement/__tests__/marker-snap.test.tsx app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx app/lib/arrangement/__tests__/grid-edges.test.ts app/lib/arrangement/__tests__/grid.test.ts app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx app/lib/arrangement/__tests__/grid-snap-edit.test.tsx app/lib/arrangement/__tests__/markers.test.ts app/lib/arrangement/__tests__/markers-move-ui.test.tsx`, plus any other test file that imports `clipEdgeTargets` (`grep -rl clipEdgeTargets app`). All must be green. No full suite and no `npm run verify` (those belong to the root gate). **Code-reviewer is required** (3+ files). Pass its Architecture note to B as a signal.
+- **New tests:** `app/lib/arrangement/__tests__/edge-navigation.test.ts` (unit) and `app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx` (workspace). Copy the harness from `markers-ui.test.tsx` into the new UI file; do not edit any existing test.
+- **New `docs/implementation/2026/quarter-IV/067-studio-lab-marker-edge-navigation.md`:** Georgian, LF, per `docs/implementation/TEMPLATE.md`: N1–N9, the N2/N5 rationale, the Ableton table, files, tests, mutations. Status: awaiting C.
+
+If N1–N9 cannot be met inside these grants (for example, a frozen handler swallows Option+arrow first), **stop and report**. Do not edit elsewhere.
+
+### Required tests (behavioural; new files only)
+UI fixture (B suggestion): tracks video, music (audio, default active), sfx (audio); clips music `2.250–7.750`, sfx `4.100–5.900`, video `1.750–30.000` on the video track (off-grid interior edge 1.750, so the video edge is not the 0/end fallback); markers `6.300` "A" and `12.000` "B"; the project end is then 30.000 (record the value you get). Off-grid values ensure a pass comes only from the new stops.
+- **EU1 `navigationTrackIds`:** active only; active + selected clips' tracks (deduplicated); `range.trackId`; `range.allTracks` → all tracks; unknown ids ignored; nothing selected and `activeTrackId=null` → `[]`.
+- **EU2 `clipEdgeTimesOnTracks`:** start and end of clips on the given tracks only; sorted, unique; other tracks excluded; `[]` tracks → `[]`.
+- **EU3 `adjacentMarkerTarget` with edges:** forward/backward nearest of marker/edge; marker+edge coincident within EPS → marker returned (N3); omitted/empty `edgeTimes` → identical to the old results on a table of ≥6 positions × both directions; end/0 fallback and `null` unchanged.
+- **EU4 `isApplePlatform`:** `MacIntel`, `iPhone`, `iPad` → true; `Win32`, `Linux x86_64` → false; empty platform with a `Macintosh` user agent → true; empty both → false.
+- **EN1:** fresh mount (active = music, no selection), from 0: Ctrl+→ repeatedly → `[2.25, 6.3, 7.75, 12, end]`; sfx edges 4.1/5.9 and the video edge 1.75 skipped.
+- **EN2:** click the sfx clip (active sfx, selected sfx) → from 0: `[4.1, 5.9, 6.3, 12, …]` (music edges skipped); then Ctrl+click the music clip → `[2.25, 4.1, 5.9, 6.3, 7.75, 12, …]`.
+- **EN3:** a time range on the sfx track set through the context API (`setTimeRange`, no clip selected, active track music) → sfx edges are stops; after Ctrl+Shift+L (`allTracks`) → music, sfx and video edges (incl. 1.75) are stops. This is the clean discriminator for N2(c); the browser row EK-RANGE may mix it with the selected-clip rule.
+- **EN4:** backward symmetry down to 0, then the refusal `უკან მარკერი აღარ არის`; forward refusal `წინ მარკერი აღარ არის` at the end.
+- **EN5:** a marker stop sets that flag `aria-current="true"`; a following clip-edge stop leaves the same flag `aria-current` (N4); coincident edge+marker (a clip edge at 12.000 on the active track) selects marker B.
+- **EN6:** the ◀ ▶ buttons skip clip edges (`[6.3, 12, end]` and back) with the EN1 fixture (N5).
+- **EN7 (Apple stub):** with `navigator.platform` stubbed to `MacIntel` (restored after), Option+→ gives the EN1 sequence; with a selected clip, Option+→ steps the playhead and the clip start and `undoLabel` are unchanged; Ctrl+→ still steps.
+- **EN8 (non-Apple):** with `Win32` and `Linux x86_64` stubs, Alt+→ with a selected clip gives exactly the plain-→ result (clip nudged as in round 76) and the playhead does not jump to a stop.
+- **EN9 guards:** Option+→ (Apple) and Ctrl+→ with focus in the BPM input and on a volume fader → position unchanged; during a claimed pointer gesture Option+→ (Apple) → position unchanged and `GESTURE_EDIT_BLOCKED_MESSAGE`.
+- **EN10:** while playing, Ctrl+→ to a clip edge keeps playing; position ≥ edge and < edge + 0.5.
+- **EN11:** focused flag, Option+→ (Apple) → navigates to the next stop, marker times unchanged, `undoLabel` null (as MV7).
+- **Mutation proofs (A runs each, records it, restores and `cmp`s):** (a) the workspace passes `[]` edges → EN1 red; (b) `navigationTrackIds` drops selected-clip tracks → EN2 red; (c) it drops the range → EN3 red; (d) the Apple Option condition removed → EN7 red; (e) the Option condition without the platform check → EN8 red; (f) the buttons also pass edges → EN6 red; (g) coincidence prefers the edge → EU3/EN5 red.
+- **A's checks (speed rules):** `npm run typecheck`, `npm run lint`, and `npx vitest run app/lib/arrangement/__tests__/edge-navigation.test.ts app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx app/lib/arrangement/__tests__/markers.test.ts app/lib/arrangement/__tests__/markers-ui.test.tsx app/lib/arrangement/__tests__/markers-move-ui.test.tsx app/lib/arrangement/__tests__/marker-snap.test.tsx app/lib/arrangement/__tests__/grid-snap-keys.test.tsx app/lib/arrangement/__tests__/grid-snap-ui.test.tsx app/lib/arrangement/__tests__/view.test.ts`, plus every other test file that references `stepMarker` or `adjacentMarkerTarget` (`grep -rl "stepMarker\|adjacentMarkerTarget" app`). All green. No full suite, no `npm run verify` (root gate). **Code-reviewer is required** (3+ files); pass its Architecture note to B as a signal.
 
 ## 2. Pre-flight for A
-Read CLAUDE.md, `.claude/rules/*`, `primitives-map.json`, `AGENT_DISCOVERABLE_CODE`, `FORWARDREF_COMPONENT`, `AUDIO_ARCHITECTURE`, `TESTING_QUALITY_GATES`, `BUG_HUNTING_TESTS`, `GEORGIAN_DOCS` and `prompts/studio-feature.md`. Then verify the baseline: HEAD, 0 status lines, frozen 451/451, snapshots 4/4, protected 4/4, EOL. Process count: `pgrep -c node`.
+Read CLAUDE.md, `.claude/rules/*`, `primitives-map.json`, `AGENT_DISCOVERABLE_CODE`, `FORWARDREF_COMPONENT`, `AUDIO_ARCHITECTURE`, `TESTING_QUALITY_GATES`, `BUG_HUNTING_TESTS`, `GEORGIAN_DOCS`, `prompts/studio-feature.md`. Verify the baseline: HEAD, 0 status lines, frozen 453/453, snapshots 4/4, protected 4/4, EOL. Process count: `pgrep -c node`.
 
 ## 3. File ownership (exact)
-Writable: `app/lib/arrangement/grid.ts`, `app/lib/arrangement/markers.ts` (one appended export only), `app/components/arrangement/ArrangementClip.tsx` (snap-target construction only), `app/components/arrangement/ArrangementLane.tsx` (`libraryDropStart` only), new `app/lib/arrangement/__tests__/marker-snap.test.tsx`, new `docs/implementation/2026/quarter-IV/066-studio-lab-clip-snap-markers.md`. A's report goes to `a-round-76.md` (+ `a-round-76/` scratch in the loop folder). Everything else is read-only, including `.claude/**`, the protected files, `package*.json` and every existing test file.
+Writable: `app/lib/arrangement/edge-navigation.ts` (new), `app/lib/arrangement/markers.ts` (`adjacentMarkerTarget` optional parameter only), `app/components/arrangement/ArrangementMarkerRow.tsx` (`stepMarker` + handle type only), `app/components/arrangement/StudioWorkspace.tsx` (Ctrl+←/→ branch only), doc 066 (status line only), new `edge-navigation.test.ts`, new `marker-edge-nav-ui.test.tsx`, new doc 067. A's report → `a-round-77.md` (+ `a-round-77/` scratch in the loop folder). Everything else read-only, including `.claude/**`, the protected files, `package*.json` and every existing test file.
 
-Expected end `git status --short`: at most 4 `M` lines (the four owned files; `markers.ts` only if used) plus 2 `??` lines (the new test and doc 066). Only root commits.
+Expected end `git status --short`: at most 4 `M` lines (markers.ts, ArrangementMarkerRow.tsx, StudioWorkspace.tsx, doc 066) plus 4 `??` lines (edge-navigation.ts, the two tests, doc 067). Only root commits.
 
 ## 4. Ableton source table
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Clip **move** snaps to locators | Live 12 manual §6.7 "Moving and Resizing Clips", https://www.ableton.com/en/live-manual/12/arrangement-view/ ; B capture 2026-10-21 `b-round-71/ableton-arrangement-view-20261021.txt` | **Confirmed (text):** "Clips snap to the editing grid, as well as various objects in the Arrangement including the edges of other clips, locators and time signature changes." | Markers join the clip-edge candidates (M1, M5) | MS-MOVE, MS-MOVE-END, MS-CROSSLANE |
-| Clip **resize (trim)** snaps to locators | same §6.7 | **Inference:** the snap sentence follows the move and the edge-resize paragraphs and speaks of "clips" in general. The text does not say "resize" explicitly | M3 | MS-TRIM |
-| Group move, library drop to locators | — | **Unconfirmed** (not stated) | CZABA consistency with the SRW-14 edge rule (M2, M4) | MS-GROUP, MS-DROP |
-| Nearest-wins, no pixel threshold, tie → grid | — | **Unconfirmed** | Existing SRW-14 stage 4 rule, unchanged (CM3/CM7) | MS-MOVE (near-grid probe) |
-| Bypass (Alt inverts Snap), Shift time lock | Live 12 §6.10, B capture `b-round-46/ableton-6.7-6.10-20261016.txt` (gstack 2026-10-16), decision records D-29z12 (Alt confirmed) and the stage-4 record (plan.md l.1071, re-read 2026-10-19); not re-fetched this round | Alt bypass: confirmed (§6.10). Shift time lock: CZABA rule | Unchanged (M6) | MS-SNAPOFF-ALT |
-| Snap to time signature changes | §6.7 | Confirmed in Live | **Not applicable** (CZABA has no time signature changes; grid tempo is not audio stretch) | — |
-| Range / playhead snap to markers; Ctrl+←/→ at clip edges | §6.9 (arrows) | Arrows: confirmed (text). Range/playhead: unconfirmed | Stages 2b-3 / 2b-2, rounds 78 / 77 | not this round |
-B did no new web research this round; the stored capture is the source. C judges **CZABA requirement** and **Ableton match** separately (confirmed / deliberate difference / unconfirmed / not applicable).
+| Ctrl (Win) / Option (Mac) + ←/→ snaps to locators **and clip edges of the selected track(s)** | Live 12 manual §6.9 "Selecting Clips and Time", https://www.ableton.com/en/live-manual/12/arrangement-view/ ; B capture 2026-10-21 `b-round-71/ableton-arrangement-view-20261021.txt` (re-read 2026-10-22) | **Confirmed (text):** "Holding Ctrl (Win) / Option (Mac) while pressing the left and right arrow keys snaps the insert marker to locators and the edges of clips in the selected track or tracks." | N1, N6. **Deliberate mapping:** Live moves the *insert marker*; CZABA moves the playhead, as stage 1 already does (D-29z37). CZABA keeps Ctrl on Mac too (harmless) | EK-ACTIVE, EK-SELECT, EK-RANGE, EK-AUDIO |
+| What "selected tracks" means | §6.9 (no definition) | **Unconfirmed** | N2: active track ∪ tracks of selected clips ∪ range track(s) (CZABA decision) | EK-SELECT, EK-RANGE |
+| Previous/Next Locator buttons | §6.4 "Launching the Arrangement with Locators", same capture | **Confirmed (text):** "You can jump to locators … by using the Previous and Next Locator buttons … After jumping to the first or last locator … jump to the Arrangement start or end" | N5: buttons marker-only, unchanged | EK-BUTTONS |
+| Coincident locator + clip edge | — | **Unconfirmed** | N3: one stop, the marker | vitest EN5 only |
+| Windows Alt+←/→ | — | Not a Live shortcut for this | N8: unchanged | EK-ALT-LINUX |
+| Insert marker between tracks (↑/↓) | §6.9 | Confirmed in Live | **Not applicable** (CZABA has no insert marker separate from the playhead; not requested) | — |
+B did no new web research; the stored capture is the source. C judges **CZABA requirement** and **Ableton match** separately.
 
-## 5. C acceptance (real browser, Playwright Chromium, **both 1440x900 and 1280x720**, `/studio-lab` anonymous)
-Setup: Snap on, grid 1 s (or the nearest available division; record it). Add two markers at off-grid times. To place them, set the playhead with Snap off at, for example, 12.3 s and 20.7 s, then press M. Read the times from the marker row. Read clip positions from `data-clip-start` (3 decimals) and lane-move ghosts from `data-ghost-start`. Respect the 8 px trim zones (round 51 rule). For MS-MOVE/MS-PLAY, first place an SFX clip (immediate onset) on an otherwise empty audio track at a start well away from 12.3 s (for example at 30 s); MS-PLAY half (2) is only valid when no other clip on the soloed track covers 12.3 s.
+## 5. C acceptance (real browser, Playwright Chromium on Linux, **both 1440x900 and 1280x720**, `/studio-lab` anonymous)
+The Apple Option path **cannot run here** (Linux Chromium has no Apple platform; spoofing `navigator.platform` is a simulation). It is covered by vitest EN7/EN9/EN11 and Tech Lead check R77-T; it is **not** a C browser row, so it does not affect `browserVerified`.
+
+Setup (record actual values): fresh load; Snap **off**. Note the initial clips and the active track (the `aria-pressed` lane name button). With Snap off, drop a library SFX (immediate onset, e.g. "Soft impact") on the **stems** track at ≈4.700, then a second SFX on the **sfx** track at ≈3.450 (the last drop makes sfx active and selects that clip). Add a marker at ≈6.300 (ruler click with Snap off, M, Enter). Read clip starts/durations from `data-clip-start` / the detail panel, marker times from `data-marker-time`, the position from the playhead (`arrangement-playhead`) or the transport readout as in MK-NAV. In every row, record the active track and the selected clips, and include every clip edge of those tracks (also initial demo clips) in the expected stops.
 
 | ID | Action | Pass evidence |
 |---|---|---|
-| MS-MOVE | REAL-mouse drag a clip body so its raw start ends ~2–4 px from the 12.3 s marker (nearer than any grid line) | `data-clip-start` = marker time (±0.001); a second drag with the raw start nearer a grid line lands on the grid line |
-| MS-MOVE-END | Drag so the raw clip end is near the 20.7 s marker | start + duration = 20.700 (±0.001) |
-| MS-CROSSLANE | Drag a clip to another audio lane with its raw start near a marker | `data-ghost-start` during the drag and `data-clip-start` after the drop = marker time |
-| MS-TRIM | Right trim near a marker, then left trim near a marker | the trimmed edge = marker time; the audio still starts at the right source offset (no blocked text unless clamped) |
-| MS-GROUP | Select two clips (Ctrl+click) and drag the anchor's start near a marker | the anchor start = marker time; the other clip keeps its offset |
-| MS-DROP | Drag a library item onto an audio lane near a marker; then hover the video lane | audio: drop ghost and dropped clip start = marker time; video lane: the existing refusal (unchanged) |
-| MS-SNAPOFF-ALT | Repeat MS-MOVE with Snap off (free), with Alt + Snap on (free), with Alt + Snap off (marker) | free ms value / free / marker time, respectively |
-| MS-UNDO | Ctrl+Z after MS-MOVE, then Ctrl+Shift+Z | the clip goes back and forward; the marker row (names, times, count) is identical throughout; one history step |
-| MS-PLAY (real audio, discriminating) | Run this **right after MS-MOVE's first drag** (the clip start on the 12.3 s marker), before the grid-line drag, or re-drag onto the marker first. Use a clip with an immediate onset (an SFX hit). **Solo** that clip's track and REAL-click video **Mute** on (round-44 rule: the demo video audio otherwise lifts the meter). (1) Double-click the 12.3 s marker (play from it): the master meter rises (≥3 dB to ≥-15 dB detector, round-70 rule) within 0.3 s of play start. (2) Stop, Ctrl+Z (the clip goes back to a start that does not cover 12.3 s), play from the marker again: **no rise for ≥1 s**. Restore Solo/Mute after the row | both halves at both viewports; record levels and timestamps |
-| REG-EDGES | SRW-14: with a marker present, a clip edge nearer than the marker wins; with no markers in a fresh load, CM1-style edge snap unchanged | positions as stated |
-| REG-MARKERS | Short recheck: marker drag with Snap (MK-DRAG-SNAP), right-click menu opens and Play from here works | as in round 74 |
-| T76-TARGETED | Run A's targeted vitest list once (not the full suite) | green; record counts |
+| EK-ACTIVE | REAL-click an empty part of the **sfx** lane (e.g. at 15 s; active sfx, no clip selected), Home, then Ctrl+→ repeatedly up to the marker; then Ctrl+← back to 0 | forward stops = sfx clip start, sfx clip end, marker 6.300 (±0.001), in order; the stems clip start ≈4.700 is **skipped**; backward mirror, ending at 0 |
+| EK-SELECT | REAL-click the sfx clip, Ctrl+click the stems clip; Home; Ctrl+→ repeatedly | stops now include the stems clip start and end, merged in time order with the sfx edges and the marker |
+| EK-RANGE | Click an empty part of the **sfx** lane (clears clip selection and range, sfx active). Then drag a time range **inside the stems clip's body** (an empty-lane drag is the clip marquee, not a range; ranges are made in a clip waveform, INFO-C71-LOOP-FIXTURE). Record whether that drag also selects the stems clip or changes the active track. Home; Ctrl+→ steps; then Ctrl+Shift+L and repeat | range on stems → stems edges are stops (plus the edges of the recorded active track / selected clips); after Ctrl+Shift+L, the edges of every lane's clips in the interval are stops (e.g. an initial demo clip on another lane). The clean N2(c) proof is vitest EN3 + mutation (c) |
+| EK-BUTTONS | Same setup as EK-ACTIVE; REAL-click ▶ from 0, then ◀ | ▶ goes straight to the marker 6.300 (clip edges skipped), then project end; ◀ mirrors |
+| EK-MARKER-SEL | After a Ctrl+→ stop on the marker, then a Ctrl+→ stop on a later clip edge (add one if needed) | the marker flag is `aria-current="true"` after both stops; no status text on success |
+| EK-AUDIO (real audio, discriminating) | From the EK-ACTIVE state (empty sfx lane click first: sfx active, no clip selected). Solo the sfx track, REAL-click video **Mute** on (round-44 rule). (1) Home; Ctrl+→ once (stop = sfx clip start ≈3.450); Space. (2) Stop; Home; REAL-click ▶ once (marker-only, stop = 6.300); Space | (1) position reads the clip start before play; master meter rises (≥3 dB to ≥-15 dB detector, 10 ms sampler, round-70 rule) within **0.3 s** of play start. The round-76 behaviour (markers only) would land on 6.300, where the soloed SFX does not sound → no rise; so (1) can only pass with the new clip-edge stop. (2) **no rise for ≥1 s** (negative control; also audio evidence that the buttons skip clip edges). Both viewports; record levels and timestamps. Restore Solo/Mute |
+| EK-PLAYING | During playback, Ctrl+→ | transport keeps playing; the position continues from the next stop |
+| EK-ALT-LINUX | Select the sfx clip, Snap on, Alt+→ | identical to plain →: the clip moves to the next grid line (round-76 behaviour), the playhead does not jump to a stop |
+| EK-GUARDS | Ctrl+→ with focus in the BPM input and on a volume fader; Ctrl+→ on a focused flag | BPM/fader: no step (they keep their own behaviour); focused flag: steps, the marker does not move (MV7) |
+| REG-NUDGE | Plain ←/→ with a selected clip (Snap on and off) | as round 76 (grid step / 0.1 s nudge), one history entry each |
+| REG-MARKERS | Marker drag with Snap, right-click menu, Play from here | as round 76 REG-MARKERS |
+| T77-TARGETED | Run A's targeted vitest list once (not the full suite) | green; record counts |
 | REG-HYD | Console during the rows | no hydration / `useLayoutEffect` warning, no non-noise error |
-| G76-3 | Header link → `/studio-lab` with the demo badge; `/studio/<id>` anonymous → "Sign in required", no workspace; anonymous `/api/studio-token` 401; page network has no `/api/studio-token`, `/api/recording-*`, `/api/download`, no R2 host, no Authorization header | as stated. fake-Bearer 403 → BLOCKED (backend unavailable in cloud) |
-| SOURCE-UNCHANGED | A's end hashes at C start and end; frozen 451/451; protected 4/4; status per §3 | equal |
+| G77-3 | Header link → `/studio-lab` with the demo badge; `/studio/<id>` anonymous → "Sign in required", no workspace; anonymous `/api/studio-token` 401; page network has no `/api/studio-token`, `/api/recording-*`, `/api/download`, no R2 host, no Authorization header | as stated. fake-Bearer 403 → BLOCKED (backend unavailable in cloud) |
+| SOURCE-UNCHANGED | A's end hashes at C start and end; frozen 453/453; protected 4/4; status per §3 | equal |
 
 Gate rows (C marks them `gate`, never `passed`): full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke.
-Neighbours that can break: SRW-14 edge snap (CM/CT), Shift time lock, group bounds/blocked text, library drop ghost and refusal, clip trim clamps, cross-lane refusal texts, Undo labels.
+Neighbours that can break: plain-arrow clip nudge (grid step / 0.1 s), marker flag arrows (marker nudge), the MU6 sequence, Ctrl+arrow guards (slider, separator, loop brace, overview, typing), Space/playback, the ruler's own arrow keys.
 
-## 6. Mutation-proof table for C (optional, read-only re-check)
-C may re-run A's mutation (a) on a scratch copy outside `store/`, or reason from A's recorded output. C never edits `store/`.
+## 6. Mutation-proof table for C (optional, read-only)
+C may re-run A's mutation (a) or (e) on a scratch copy outside `store/`, or reason from A's recorded output. C never edits `store/`.
 
 ## 7. After this round
-Round 77: 2b-2 (Ctrl/Option+←/→ at the clip edges of the selected tracks; "selected tracks" = the active track plus the tracks of selected clips, a B decision to confirm in that task). Round 78: 2b-3 (range/playhead snap to markers). After that, B asks root for a bounded frontend-architect checkpoint at the SRW-16 boundary (`ArrangementMarkerRow.tsx` owner risk, the `isFollowAutoScroll` duplicate, the GATE75 marker-drag findings). Then comes the GATE75 marker-drag fix-up, then SRW-17. The regression round is due on or after 2026-10-24 and takes precedence when due.
+- **Round 78:** stage 2b-3 (range/time selection and playhead snap to markers; CZABA decision). Round-78 planning may fall on or after 2026-10-24; then the **regression round takes precedence** and 2b-3 moves one round, unchanged.
+- Then B asks root for a bounded frontend-architect checkpoint at the SRW-16 boundary (ArrangementMarkerRow owner risk, `isFollowAutoScroll` duplicate, the `snapTargetsFor` helper proposal from gate 76, the GATE75 marker-drag findings), then the GATE75 S1–S3 fix-up, then SRW-17.
+- New Low signal recorded by B (not this round): **R77-BUTTON-SHORTCUT-SUPERSET** — the ◀ ▶ buttons announce `Control+ArrowLeft/Right` while the key now also stops at clip edges; batched with ROOT-R69-L2 / ROOT-R73-S2 in the Lows batch (the string is locked by frozen MU6).
+- Tech Lead manual check **R77-T**: on a real Mac, Option+←/→ steps markers and clip edges of the selected tracks; Option+→ with a selected clip does not move it; Ctrl+←/→ is taken by Spaces as expected.

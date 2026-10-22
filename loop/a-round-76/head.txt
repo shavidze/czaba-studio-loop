@@ -1,0 +1,30 @@
+import { act, fireEvent, render } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+import {
+  type ArrangementContextValue,
+  ArrangementProvider,
+  useArrangement,
+} from '~/contexts/ArrangementContext';
+import { GROUP_MOVE_BLOCKED_MESSAGE } from '~/lib/arrangement/selection';
+import type {
+  Arrangement,
+  ArrangementClip,
+  ArrangementMarker,
+  WorkspaceCollection,
+  WorkspaceSource,
+} from '~/types/arrangement';
+import { clipEdgeTargets } from '../grid';
+import { LIBRARY_DRAG_MIME } from '../library';
+import { markerSnapTimes } from '../markers';
+import { createArrangement } from '../model';
+
+vi.mock('@remix-run/react', () => ({
+  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+}));
+

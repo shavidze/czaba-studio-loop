@@ -1,9 +1,9 @@
 {
- "version": 75,
- "updated": "2026-10-22 (B round 75 review -> round 76 task, D-29z41)",
+ "version": 76,
+ "updated": "2026-10-22 (B round 76 review -> round 77 task, D-29z42)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 76: D-29z41 - SRW-16 stage 2b-1: clips snap to markers. Marker times join the SRW-14 clip-edge snap candidates (clipEdgeTargets optional markerTimes) for single/cross-lane move, group move, trim and audio-lane library drop; nearest wins, tie to grid; Snap off / Alt with Snap / Shift lock ignore them; markers never change. Baseline HEAD e347b97 clean; frozen b-round-75-r76-tree-sha256.txt 451; owned grid.ts (unfrozen), markers.ts (one appended export), ArrangementClip.tsx (snap targets only), ArrangementLane.tsx (libraryDropStart only), new marker-snap.test.tsx, new doc 066. C rows MS-MOVE, MS-MOVE-END, MS-CROSSLANE, MS-TRIM, MS-GROUP, MS-DROP, MS-SNAPOFF-ALT, MS-UNDO, MS-PLAY, REG-EDGES, REG-MARKERS, T76-TARGETED, REG-HYD, G76-3, SOURCE-UNCHANGED. Next: round 77 2b-2, round 78 2b-3.)",
+ "current_task": "current-task.md (round 77: D-29z42 - SRW-16 stage 2b-2: Ctrl+Left/Right (+ Option on Apple platforms, key-time check) step the playhead to markers and the clip edges of the selected tracks (active + selected clips' tracks + range track(s)); marker wins coincidence; buttons stay marker-only; non-Apple Alt unchanged. Baseline HEAD db9cc25 clean; frozen b-round-76-r77-tree-sha256.txt 453; owned new edge-navigation.ts, markers.ts (optional edgeTimes), ArrangementMarkerRow.tsx (stepMarker only), StudioWorkspace.tsx (Ctrl-arrow branch only), doc 066 status line, new edge-navigation.test.ts + marker-edge-nav-ui.test.tsx, new doc 067. C rows EK-ACTIVE, EK-SELECT, EK-RANGE, EK-BUTTONS, EK-MARKER-SEL, EK-AUDIO, EK-PLAYING, EK-ALT-LINUX, EK-GUARDS, REG-NUDGE, REG-MARKERS, T77-TARGETED, REG-HYD, G77-3, SOURCE-UNCHANGED. Next: round 78 2b-3 unless the regression round (due 2026-10-24) takes precedence.)",
  "advisor_used_by_B": "round 75 planning (round 76 task, attempt 3 after two usage-limit stops): advisor available; consulted after orientation (2b split, Ableton 6.7 confirmed for clips only, reviewer findings as signals, write order for resilience) and after the task draft (MS-PLAY discriminating oracle with Solo + video Mute, bypass source ID, untouched onGrid l.539, M9 note).",
  "baseline": {
   "tsc_errors": 0,
@@ -3482,7 +3482,7 @@
    "depends_on": [
     "SRW-04"
    ],
-   "status": "in_progress (stage 1 C PASS round 73, published 6b574e8; stage 2a + fix-up C PASS round 75 browserVerified=true, published e347b97; stage 2b split into 2b-1 round 76 (clip snap to markers, dispatched D-29z41), 2b-2 round 77 (Ctrl/Option+arrows at clip edges), 2b-3 round 78 (range/playhead snap to markers); none deferred)",
+   "status": "in_progress (stage 1 C PASS round 73, published 6b574e8; stage 2a + fix-up C PASS round 75, published e347b97; stage 2b-1 clip snap to markers C PASS round 76 browserVerified=true, published db9cc25; 2b-2 round 77 (Ctrl/Option+arrows at clip edges, dispatched D-29z42); 2b-3 round 78 (range/playhead snap to markers); none deferred)",
    "files": [
     "app/types/arrangement.ts",
     "app/lib/arrangement/markers.ts",
@@ -3760,6 +3760,62 @@
        "scope": "range (time selection: ruler, lane background, inside-clip range) and playhead (ruler click/drag, lane click-seek) snap to markers with Snap on; CZABA decision (Live text unconfirmed); markers only, not clip edges, unless B records otherwise; plus ROW-RANGE-M UX signal review"
       }
      ]
+    },
+    {
+     "stage": "2b-1",
+     "round": 76,
+     "decision": "D-29z41",
+     "status": "c_pass_published",
+     "commit": "db9cc255e29d8792e2c67a391519515a0ec2230e",
+     "scope": "marker times join clip-edge snap candidates (move, cross-lane, group, trim, audio-lane library drop); nearest wins, tie to grid; Snap off / Alt+Snap / Shift lock ignore them",
+     "c_round76_passed": [
+      "MS-MOVE",
+      "MS-MOVE-END",
+      "MS-CROSSLANE",
+      "MS-TRIM",
+      "MS-GROUP",
+      "MS-DROP",
+      "MS-SNAPOFF-ALT",
+      "MS-UNDO",
+      "MS-PLAY",
+      "REG-EDGES",
+      "REG-MARKERS",
+      "T76-TARGETED",
+      "REG-HYD",
+      "G76-3 (fake-Bearer sub-check blocked: backend unavailable in cloud)",
+      "SOURCE-UNCHANGED"
+     ],
+     "browserVerified": true,
+     "evidence": [
+      "c-round-76.md",
+      "c-round-76.json",
+      "gates/gate-round-76.json"
+     ]
+    },
+    {
+     "stage": "2b-2",
+     "round": 77,
+     "decision": "D-29z42",
+     "status": "dispatched",
+     "scope": "Ctrl+Left/Right (+ Option on Apple, key-time platform check) step to markers + start/end of clips on selected tracks (active + selected clips' tracks + range track/allTracks); marker wins coincidence; end/0 fallback; buttons marker-only (Live 6.4); non-Apple Alt unchanged",
+     "c_ids": [
+      "EK-ACTIVE",
+      "EK-SELECT",
+      "EK-RANGE",
+      "EK-BUTTONS",
+      "EK-MARKER-SEL",
+      "EK-AUDIO",
+      "EK-PLAYING",
+      "EK-ALT-LINUX",
+      "EK-GUARDS",
+      "REG-NUDGE",
+      "REG-MARKERS",
+      "T77-TARGETED",
+      "REG-HYD",
+      "G77-3",
+      "SOURCE-UNCHANGED"
+     ],
+     "tech_lead": "R77-T (real Mac Option path)"
     }
    ],
    "ableton_round72": "Live 12 manual 6.4/6.9/6.11 + shortcuts page, re-fetched by B with gstack 2026-10-21 (b-round-71/ableton-*-20261021.txt): add at insert marker or time-selection start, real time in playback, click jumps, double-click (stopped) plays, prev/next buttons jump to start/end beyond first/last, Delete key, Rename Ctrl+R, Ctrl+arrows to locators and clip edges confirmed; no default key for Set/Prev/Next; locators under Delete Time not stated (unconfirmed)",
@@ -6561,7 +6617,7 @@
    "round": 76,
    "task": "current-task.md",
    "decision": "D-29z41",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "SRW-16 stage 2b-1 (FB-10): clips snap to markers"
    ],
@@ -6589,6 +6645,44 @@
     "T76-TARGETED",
     "REG-HYD",
     "G76-3",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C PASS browserVerified=true realVerified=true, bugs []; gate 76 published db9cc255e29d8792e2c67a391519515a0ec2230e (both remotes)"
+  },
+  {
+   "round": 77,
+   "task": "current-task.md",
+   "decision": "D-29z42",
+   "status": "dispatched",
+   "items": [
+    "SRW-16 stage 2b-2 (FB-10): Ctrl/Option+arrows stop at clip edges of the selected tracks"
+   ],
+   "note": "baseline HEAD db9cc25, clean tree; frozen b-round-76-r77-tree-sha256.txt 453/453; snapshots b-round-76-r77-snapshots (markers.ts 168cd442 193, ArrangementMarkerRow.tsx 8e0bb133 812, StudioWorkspace.tsx 753cecba 2021, doc 066 8576ba44 108); protected 4/4",
+   "owned": [
+    "app/lib/arrangement/edge-navigation.ts (new)",
+    "app/lib/arrangement/markers.ts (adjacentMarkerTarget optional edgeTimes)",
+    "app/components/arrangement/ArrangementMarkerRow.tsx (stepMarker + handle type only)",
+    "app/components/arrangement/StudioWorkspace.tsx (Ctrl-arrow branch only)",
+    "docs/implementation/2026/quarter-IV/066-studio-lab-clip-snap-markers.md (status line only)",
+    "app/lib/arrangement/__tests__/edge-navigation.test.ts (new)",
+    "app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx (new)",
+    "docs/implementation/2026/quarter-IV/067-studio-lab-marker-edge-navigation.md (new)"
+   ],
+   "c_ids": [
+    "EK-ACTIVE",
+    "EK-SELECT",
+    "EK-RANGE",
+    "EK-BUTTONS",
+    "EK-MARKER-SEL",
+    "EK-AUDIO",
+    "EK-PLAYING",
+    "EK-ALT-LINUX",
+    "EK-GUARDS",
+    "REG-NUDGE",
+    "REG-MARKERS",
+    "T77-TARGETED",
+    "REG-HYD",
+    "G77-3",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -10363,7 +10457,7 @@
   {
    "id": "ROOT-R73-S1-MAC-CTRL-ARROWS",
    "severity": "low",
-   "status": "scheduled round 77 (SRW-16 stage 2b-2): Live 12 6.9 uses Option+arrows on Mac",
+   "status": "scheduled round 77 (D-29z42 N6/N7: Option+arrows on Apple platforms, vitest EN7 + Tech Lead R77-T; not browser-verifiable on Linux)",
    "to": "B",
    "title": "macOS reserves Ctrl+Left/Right for Spaces; marker prev/next reachable only by buttons",
    "evidence": "gates/round-73/review.md suggestion 1"
@@ -10559,6 +10653,94 @@
    "to": "B",
    "title": "leftward user wheel near the clamped right end during Follow keeps the menu open (clampedByBrowser heuristic, same as grid menu); not run by C round 75",
    "evidence": "c-round-75.json notRun"
+  },
+  {
+   "id": "GATE76-S1-MARKER-TIMES-3X",
+   "severity": "low",
+   "status": "open - signal (SRW-16 checkpoint / snapTargetsFor proposal)",
+   "to": "B",
+   "title": "markerSnapTimes(gesture.before) computed 3x per pointermove in ArrangementClip handlePointerMove (l.406/459/529)",
+   "evidence": "gates/round-76/review.md S1"
+  },
+  {
+   "id": "GATE76-S2-GROUP-FALLBACK-MS8C",
+   "severity": "low",
+   "status": "ruled deliberate for now (B, D-29z42): existing snapGroupMoveDelta rule (nearest candidate; out of bounds -> grid) kept and documented in doc 066; routed to the SRW-16 architecture checkpoint question 'nearest in-bounds candidate'; not scheduled",
+   "to": "B",
+   "title": "group move with a nearest out-of-bounds marker falls back to the grid and skips a nearer in-bounds clip edge",
+   "evidence": "gates/round-76/review.md S2; a-round-76.md MS8c; c-round-76.json observationsForB[0]"
+  },
+  {
+   "id": "GATE76-S3-VIDEO-CLIP-MARKER-UNTESTED",
+   "severity": "low",
+   "status": "open - Lows batch / regression round row",
+   "to": "B",
+   "title": "video clip move onto a marker goes through the single-move path but has no test",
+   "evidence": "gates/round-76/review.md S3"
+  },
+  {
+   "id": "GATE76-S5-SNAPSHOT-VS-LIVE",
+   "severity": "info",
+   "status": "acknowledged",
+   "to": "B",
+   "title": "clip drags read markers from gesture.before, library drops from the live arrangement; a marker changed mid-drag does not affect a running clip drag",
+   "evidence": "gates/round-76/review.md S5"
+  },
+  {
+   "id": "GATE76-S4-DOC066-STATUS",
+   "severity": "info",
+   "status": "scheduled round 77 (one-line grant)",
+   "to": "B",
+   "title": "doc 066 status line still says awaiting C",
+   "evidence": "gates/round-76/review.md S4"
+  },
+  {
+   "id": "ARCH-R76-SNAP-TARGETS-HELPER",
+   "severity": "info",
+   "status": "signal - merged into the SRW-16 checkpoint request (after 2b-3); reviewers: keep for now",
+   "to": "B",
+   "title": "clipEdgeTargets(..., markerSnapTimes(arr)) repeated at 4 call sites; proposal snapTargetsFor/snapEdgeTargets(arrangement, excludeClipId, laneTrackId) in grid.ts; 38th copy of the FakeAudioContext harness (shared harness = ARCH (c))",
+   "evidence": "a-round-76.md review; gates/round-76/review.md Architecture note"
+  },
+  {
+   "id": "C-R76-OBS-SOLO-MUTE-HISTORY",
+   "severity": "info",
+   "status": "open - product question (Lows batch triage)",
+   "to": "B",
+   "title": "Solo and Mute clicks are undo-history entries; Ctrl+Z after Mute undoes Mute, not an earlier clip move (pre-existing)",
+   "evidence": "c-round-76.json observationsForB[1]"
+  },
+  {
+   "id": "C-R76-OBS-PLAY-PAST-END",
+   "severity": "low",
+   "status": "open - Lows batch",
+   "to": "B",
+   "title": "double-clicking a marker after the project end does not start the transport and shows no status (pre-existing)",
+   "evidence": "c-round-76.json observationsForB[2]"
+  },
+  {
+   "id": "C-R76-HARNESS-BUDGET",
+   "severity": "info",
+   "status": "acknowledged",
+   "to": "B",
+   "title": "MS-PLAY at 1440 needed 3 harness-invalid attempts before the valid one (more than the two-extra-attempt letter; no measurement miss, no tolerance change)",
+   "evidence": "c-round-76.json observationsForB[3]"
+  },
+  {
+   "id": "R77-BUTTON-SHORTCUT-SUPERSET",
+   "severity": "low",
+   "status": "open - Lows batch (with ROOT-R69-L2 / ROOT-R73-S2; string locked by frozen MU6)",
+   "to": "B",
+   "title": "prev/next marker buttons announce Control+ArrowLeft/Right while the key also stops at clip edges from round 77 (buttons stay marker-only per Live 6.4)",
+   "evidence": "current-task.md round 77 N5"
+  },
+  {
+   "id": "R77-T-TECH-LEAD",
+   "severity": "info",
+   "status": "open",
+   "to": "B",
+   "title": "real Mac: Option+Left/Right steps markers and clip edges of the selected tracks; Option+Right with a selected clip does not move it; Ctrl+arrows taken by Spaces",
+   "evidence": "current-task.md round 77 section 7"
   }
  ],
  "tech_lead_notes": [
