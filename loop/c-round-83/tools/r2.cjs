@@ -1,0 +1,52 @@
+const X=require('./lib83.cjs');const{L,sleep,st,blur,key,envInfo,setMode,buildV,undo,redo,clipInfo,dragHandle,exportWav,ratioCheck,silent,diff,meta,parseEnv,envFn}=X;
+const fs=require('fs');
+const vp=process.argv[2]||'1440x900';const rec=X.mkRec(`${L.OUT}/r2-${vp}.json`);const T=X.T(rec);
+const stemsEnvs=p=>p.evaluate(()=>[...document.querySelectorAll('[data-track-id] [data-clip-id]')].map(e=>({lane:e.closest('[data-track-id]').dataset.trackId,start:+e.dataset.clipStart,env:e.getAttribute('data-envelope')})).filter(c=>c.lane!=='music'&&c.lane!=='video').sort((a,b)=>a.lane<b.lane?-1:a.lane>b.lane?1:a.start-b.start));
+const shift=(e,d)=>parseEnv(e).map(q=>(q.t+d).toFixed(3)+':'+q.g.toFixed(4)).join(';');
+async function seekBody(p,t){const c=await envInfo(p,'stems');await p.mouse.click(X.tx(t),X.bodyY(c,0.75));await sleep(350);await blur(p);return X.posOf(p);}
+(async()=>{const s=await L.open(vp);const p=s.page;await L.fresh(p);await sleep(300);const S=await X.freshSetup(p,{video:false});const PPS=X.PPS;
+ await X.lMute(p,'music').click();await sleep(200);await X.lMute(p,'sfx').click();await sleep(200);await blur(p);
+ rec('SETUP',S.clips.length===3,{clips:S.clips.map(c=>[c.lane,c.start,c.dur])});
+ const E={};E.ref=await exportWav(p,vp,'ref',true);rec('REF',E.ref.all.nan===0&&E.ref.win.Ws.rms>0.01,{meta:meta(E.ref),dialog:E.ref.dialogText.slice(0,300)});
+ const B=await buildV(p);const V=B.env;const P=parseEnv(V);const env=envFn(P);const sfxBase=(await stemsEnvs(p)).find(c=>c.lane==='sfx');
+ rec('V',P.length===3&&Math.abs(20*Math.log10(P[1].g)+12)<=0.3,{V,adds:B.adds.map(a=>a.s.status),drag:B.d.s.status});
+ await T('EN-EXPORT',async()=>{const o={V};E.v=await exportWav(p,vp,'V',true);o.meta=meta(E.v);
+  o.mid=ratioCheck(E.v.w,E.ref.w,P[0].t,P[2].t,env,0.01);o.pre=ratioCheck(E.v.w,E.ref.w,2,P[0].t,()=>1,1e-4);o.post=ratioCheck(E.v.w,E.ref.w,P[2].t,18,()=>1,1e-4);
+  o.at=[P[1].t-2,P[1].t,P[1].t+2].map(t=>({t,e:+env(t).toFixed(4)}));o.sil=[silent(E.v.w,0,1.99),silent(E.v.w,18.01,19)];
+  rec('EN-EXPORT',o.mid.ok&&o.pre.ok&&o.post.ok&&E.v.frames===E.ref.frames&&E.v.all.nan===0&&E.v.fmt.sr===E.ref.fmt.sr,o);});
+ await setMode(p,false);
+ const restored=async()=>{const e=(await envInfo(p,'stems')).env;const n=(await stemsEnvs(p)).length;return e===V&&n===2;};
+ await T('EN-EDITS-a',async()=>{const o={};const c=await envInfo(p,'stems');const hx=c.box.x+c.box.w/2,hy=c.box.y+8;await p.mouse.move(hx,hy);await p.mouse.down();await p.mouse.move(hx+PPS/2,hy,{steps:4});await p.mouse.move(hx+PPS,hy,{steps:4});await p.mouse.up();await sleep(400);
+  o.s=(await st(p)).status;o.res=await stemsEnvs(p);await undo(p);o.back=await restored();const r=o.res.find(x=>x.lane==='stems');rec('EN-EDITS-a',r.start===3&&r.env===shift(V,1)&&o.back,o);});
+ await T('EN-EDITS-b',async()=>{const o={};const c=await envInfo(p,'stems');const sf=await X.laneBox(p,'sfx');const hx=X.tx(10),hy=c.box.y+8;await p.mouse.move(hx,hy);await p.mouse.down();await p.mouse.move(hx+10,hy,{steps:3});await p.mouse.move(X.tx(15),sf.y+sf.h/2,{steps:12});await sleep(250);await p.mouse.up();await sleep(500);
+  o.s=(await st(p)).status;o.res=await stemsEnvs(p);await undo(p);o.back=await restored();const r=o.res.find(x=>x.lane==='sfx'&&x.start===7);rec('EN-EDITS-b',!!r&&r.env===shift(V,5)&&!o.res.some(x=>x.lane==='stems')&&o.back,o);});
+ await T('EN-EDITS-c',async()=>{const o={};await X.selectClip(p,'stems');await blur(p);await key(p,'Control+d',500);o.s=await st(p);o.res=(await stemsEnvs(p)).filter(x=>x.lane==='stems');await undo(p);await p.keyboard.press('Escape');o.back=await restored();
+  rec('EN-EDITS-c',o.res.length===2&&o.res.every(x=>x.env===shift(V,x.start-2))&&o.back,o);});
+ await T('EN-EDITS-d',async()=>{const o={};await X.selectClip(p,'stems');await blur(p);await key(p,'Control+c',300);const r=await p.locator('[data-testid=arrangement-ruler]').boundingBox();await p.mouse.click(X.tx(18.5),r.y+r.height-4);await sleep(300);o.pos=await X.posOf(p);await X.clickName(p,'stems');await blur(p);await key(p,'Control+v',500);o.s=await st(p);o.res=(await stemsEnvs(p)).filter(x=>x.lane==='stems');await undo(p);o.back=await restored();
+  rec('EN-EDITS-d',o.res.length===2&&o.res.some(x=>x.start===18.5)&&o.res.every(x=>x.env===shift(V,x.start-2))&&o.back,o);});
+ await T('EN-EDITS-e',async()=>{const o={};await X.selectClip(p,'stems');const tSplit=P[1].t;o.pos=await seekBody(p,tSplit);await key(p,'Control+e',500);o.s=await st(p);o.res=(await stemsEnvs(p)).filter(x=>x.lane==='stems');
+  const exL=V.split(';').slice(0,2).join(';'),exR=V.split(';').slice(1).join(';');o.exp=[exL,exR];
+  E.sp=await exportWav(p,vp,'split',true);o.d=diff(E.sp.w,E.v.w,2,18.2,t=>Math.abs(t-o.pos)<=0.001);o.meta=meta(E.sp);
+  await undo(p);o.back=await restored();
+  rec('EN-EDITS-e',Math.abs(o.pos-tSplit)<1e-6&&o.res.length===2&&o.res[0].env===exL&&o.res[1].env===exR&&o.d.max<=1e-4&&E.sp.frames===E.v.frames&&o.back,o);
+  rec('EN-EDITS-e-ratio',ratioCheck(E.sp.w,E.v.w,2,18,()=>1,1e-4,1e-3,t=>Math.abs(t-o.pos)<=0.001).ok,{note:'split export / pre-split export over [2,18] excluding ±1 ms at split',r:ratioCheck(E.sp.w,E.v.w,2,18,()=>1,1e-4,1e-3,t=>Math.abs(t-o.pos)<=0.001)});});
+ await T('EN-EDITS-f',async()=>{const o={};const c=await envInfo(p,'stems');const y=X.bodyY(c,0.8);await p.mouse.move(c.box.x+3,y);await p.mouse.down();await p.mouse.move(c.box.x+3+PPS*3,y,{steps:6});await p.mouse.move(c.box.x+3+PPS*6,y,{steps:6});await p.mouse.up();await sleep(400);
+  o.s=(await st(p)).status;o.c=await envInfo(p,'stems');o.exp=V.split(';').filter(x=>+x.split(':')[0]>=8).join(';');
+  E.tr=await exportWav(p,vp,'trim8',true);o.d=diff(E.tr.w,E.v.w,8.001,18.2);o.zero=silent(E.tr.w,0,7.999);
+  o.r8=ratioCheck(E.tr.w,E.ref.w,8,8.05,env,0.01);o.rr=ratioCheck(E.tr.w,E.ref.w,8,P[2].t,env,0.01);o.e8=+env(8).toFixed(4);
+  // trim back to 2
+  const c2=await envInfo(p,'stems');const y2=X.bodyY(c2,0.8);await p.mouse.move(c2.box.x+3,y2);await p.mouse.down();await p.mouse.move(c2.box.x+3-PPS*3,y2,{steps:6});await p.mouse.move(c2.box.x+3-PPS*6,y2,{steps:6});await p.mouse.up();await sleep(400);
+  o.back2=await envInfo(p,'stems');o.s2=(await st(p)).status;await undo(p,2);o.back=await restored();
+  rec('EN-EDITS-f',o.c.start===8&&o.c.env===o.exp&&o.d.max<=1e-4&&o.zero===0&&o.r8.ok&&o.rr.ok&&o.back2.start===2&&o.back2.env===V&&o.back2.points.length===0&&o.back,{...o,c:{start:o.c.start,env:o.c.env},back2:{start:o.back2.start,env:o.back2.env}});});
+ await T('EN-EDITS-g',async()=>{const o={};const c=await envInfo(p,'stems');const y=X.bodyY(c,0.75);await p.mouse.move(X.tx(8),y);await p.mouse.down();await p.mouse.move(X.tx(8.5),y,{steps:4});await p.mouse.move(X.tx(9),y,{steps:4});await p.mouse.up();await sleep(300);o.range=(await st(p)).range;await key(p,'Delete',500);o.s=await st(p);o.res=(await stemsEnvs(p)).filter(x=>x.lane==='stems');
+  const exL=V.split(';').filter(x=>+x.split(':')[0]<=8).join(';'),exR=V.split(';').filter(x=>+x.split(':')[0]>=9).join(';');o.exp=[exL,exR];
+  E.dl=await exportWav(p,vp,'del89',true);o.dOut=[diff(E.dl.w,E.v.w,2,7.999),diff(E.dl.w,E.v.w,9.001,18.2)];o.zero=silent(E.dl.w,8.001,8.999);
+  await undo(p);o.back=await restored();
+  rec('EN-EDITS-g',o.res.length===2&&o.res[0].env===exL&&o.res[1].env===exR&&o.dOut.every(d=>d.max<=1e-4)&&o.zero===0&&o.back,o);});
+ await T('EN-MULTIPLY',async()=>{const o={};o.fd=await dragHandle(p,'stems','in',PPS);const v=+o.fd.after.fi;o.v=v;await X.selectClip(p,'stems');const tg=p.locator('[data-testid=arrangement-detail-toggle]');if((await tg.getAttribute('aria-expanded'))==='false'){await tg.click();await sleep(500);}
+  const inp=p.locator('[data-testid=arrangement-detail-clip-gain-input]');await inp.fill('-6');await inp.press('Enter');await sleep(300);await blur(p);o.s=await st(p);o.env=(await envInfo(p,'stems')).env;
+  E.mx=await exportWav(p,vp,'multiply',true);const g=Math.pow(10,-6/20);o.g=g;o.meta=meta(E.mx);
+  o.ramp=ratioCheck(E.mx.w,E.ref.w,2,2+v,t=>g*(t-2)/v*env(t),0.01);o.flat=ratioCheck(E.mx.w,E.ref.w,2+v,P[2].t,t=>g*env(t),0.01);o.tail=ratioCheck(E.mx.w,E.ref.w,P[2].t,18,()=>g,0.01);
+  rec('EN-MULTIPLY',v===1&&o.env===V&&o.ramp.ok&&o.flat.ok&&o.tail.ok&&E.mx.frames===E.ref.frames,o);});
+ for(const k of Object.keys(E)){try{fs.unlinkSync(`${L.OUT}/export-${vp}-${E[k].name}.wav`)}catch{}}
+ await X.finish(s,rec,'R2-'+vp);})().catch(e=>{console.log('SCRIPT ERROR',e);process.exit(1)});

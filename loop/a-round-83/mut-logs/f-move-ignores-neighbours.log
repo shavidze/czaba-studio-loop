@@ -1,0 +1,108 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/envelope.test.ts [2m([22m[2m24 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 39[2mms[22m[39m
+     [32m✓[39m EV1 is 1 without points, holds the edge values, is exact at points and linear between them[32m 2[2mms[22m[39m
+     [32m✓[39m EV1 formats gains in dB with a true minus sign, 0 dB at unity and −∞ at silence[32m 0[2mms[22m[39m
+     [32m✓[39m EV2 a new point takes the current line value, rounds to ms and is inserted in order[32m 1[2mms[22m[39m
+     [32m✓[39m EV2 returns the same arrangement for a missing clip, a video clip, a time outside or a duplicate ms[32m 0[2mms[22m[39m
+     [32m✓[39m EV2 removing the last point leaves no envelope key and a missing point changes nothing[32m 0[2mms[22m[39m
+[31m     [31m×[31m EV3 a point stops 1 ms short of each neighbour and inside the clip window[39m[32m 13[2mms[22m[39m
+     [32m✓[39m EV3 the gain is clamped to [0, 1] and rounded to 4 decimals; no change returns the same arrangement[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 a move keeps the envelope and the timeline points shift with the clip[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 a split gives both parts the full list and the level is continuous at the cut[32m 3[2mms[22m[39m
+     [32m✓[39m EV4 a start trim hides points without deleting them and a trim back shows them again[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 Delete Time keeps the level of every source sample on the right part[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 duplicate, clip copy/paste and range copy keep the whole list[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 a clip without an envelope gives exactly today’s objects (no envelope key)[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 shapes cover audio clips with at least one point only[32m 0[2mms[22m[39m
+     [32m✓[39m EV5a playing from 0 sets the first value at the clip start and ramps through every point[32m 2[2mms[22m[39m
+     [32m✓[39m EV5b a mid-clip start begins at the line value of that position, not at the first point[32m 0[2mms[22m[39m
+     [32m✓[39m EV5c a trimmed window ramps toward a hidden point after it and ends on the line value[32m 0[2mms[22m[39m
+     [32m✓[39m EV5d a clip without points builds no extra node; one with points adds exactly one[32m 2[2mms[22m[39m
+     [32m✓[39m EV5e a loop iteration appended later schedules against its own startAt[32m 1[2mms[22m[39m
+     [32m✓[39m EV5f setClipGain touches only the clip gain; disconnect releases the envelope node[32m 1[2mms[22m[39m
+     [32m✓[39m EV5g a faded clip with an envelope connects source → fade → envelope → clip gain[32m 1[2mms[22m[39m
+     [32m✓[39m EV5h an ended source is released together with its envelope node on the next append[32m 0[2mms[22m[39m
+     [32m✓[39m EV6 renderArrangementWav passes envelopes and fades and still has no pan or live-gain calls[32m 1[2mms[22m[39m
+     [32m✓[39m EV6b an export renders an enveloped clip through its own envelope gain[32m 2[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx [2m([22m[2m20 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2137[2mms[22m[39m
+     [32m✓[39m EU1 the Env button and the A key toggle the mode and write the status[32m 273[2mms[22m[39m
+     [32m✓[39m EU1 A with a modifier, a repeat or in a text field does nothing[32m 113[2mms[22m[39m
+     [32m✓[39m EU1 mode off shows no editor and no points; mode on hides the fade handles[32m 109[2mms[22m[39m
+     [32m✓[39m EU1 a video clip, a narrow clip and a folded lane never render an editor[32m 124[2mms[22m[39m
+     [32m✓[39m EU2 a double-click adds a point at the line value with one entry; undo and redo restore it[32m 118[2mms[22m[39m
+     [32m✓[39m EU2 a point added between two points takes their interpolated value, not the pointer height[32m 73[2mms[22m[39m
+     [32m✓[39m EU3 dragging a point down by a quarter of the body gives 0.75 with one entry[32m 116[2mms[22m[39m
+[31m     [31m×[31m EU3 a horizontal drag past a neighbour stops 1 ms short of it[39m[32m 112[2mms[22m[39m
+     [32m✓[39m EU3 a press without movement writes nothing; pointercancel reverts with no entry[32m 104[2mms[22m[39m
+     [32m✓[39m EU3 a drag that ends at its start value writes the no-change status[32m 89[2mms[22m[39m
+     [32m✓[39m EU3 the editor unmounting mid-drag reverts with no entry and releases the gesture[32m 88[2mms[22m[39m
+     [32m✓[39m EU3 the A key and the Env button are refused mid-drag[32m 91[2mms[22m[39m
+     [32m✓[39m EU3 a lost pointer during an uncaptured drag reverts with no entry[32m 78[2mms[22m[39m
+     [32m✓[39m EU4 a double-click on a point removes it with one entry and adds nothing[32m 72[2mms[22m[39m
+     [32m✓[39m EU4 a double-click within 500 ms after a moved drag of that point is ignored[32m 95[2mms[22m[39m
+     [32m✓[39m EU5 in mode an editor press selects without seeking or a range; header move and trim still work[32m 145[2mms[22m[39m
+     [32m✓[39m EU5 mode off: the body still seeks on click, the line is drawn and there are no points[32m 77[2mms[22m[39m
+     [32m✓[39m EU5 the line passes through every visible point at y = 1 − gain[32m 69[2mms[22m[39m
+     [32m✓[39m EU6 a double-click right after a fade drag keeps the fade; after 600 ms it resets it[32m 103[2mms[22m[39m
+     [32m✓[39m EU6 the guard is per edge and a cancelled drag also arms it[32m 85[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m42 passed[39m[22m[90m (44)[39m
+[2m   Start at [22m 11:43:17
+[2m   Duration [22m 4.37s[2m (transform 1.31s, setup 0ms, import 1.97s, tests 2.18s, environment 1.12s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx,title=app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 drag a point (EU3) > EU3 a horizontal drag past a neighbour stops 1 ms short of it,line=497,column=45::AssertionError: expected '6.000:1.0000;2.000:0.2512;14.000:1.00…' to be '6.000:1.0000;6.001:0.2512;14.000:1.00…' // Object.is equality%0A%0AExpected: "6.000:1.0000;6.001:0.2512;14.000:1.0000"%0AReceived: "6.000:1.0000;2.000:0.2512;14.000:1.0000"%0A%0A ❯ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx:497:45%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 move points (EV3) > EV3 a point stops 1 ms short of each neighbour and inside the clip window,line=179,column=91::AssertionError: expected [ { time: 4, gain: 1 }, …(2) ] to deeply equal [ { time: 4, gain: 1 }, …(2) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -3,11 +3,11 @@%0A      "gain": 1,%0A      "time": 4,%0A    },%0A    {%0A      "gain": 0.2512,%0A-     "time": 4.001,%0A+     "time": 0,%0A    },%0A    {%0A      "gain": 1,%0A      "time": 12,%0A    },%0A%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:179:91%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx[2m > [22mSRW-18 stage 2 drag a point (EU3)[2m > [22mEU3 a horizontal drag past a neighbour stops 1 ms short of it
+[31m[1mAssertionError[22m: expected '6.000:1.0000;2.000:0.2512;14.000:1.00…' to be '6.000:1.0000;6.001:0.2512;14.000:1.00…' // Object.is equality[39m
+
+Expected: [32m"6.000:1.0000;[7m6.[27m00[7m1[27m:0.2512;14.000:1.0000"[39m
+Received: [31m"6.000:1.0000;[7m2.0[27m00:0.2512;14.000:1.0000"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx:[2m497:45[22m[39m
+    [90m495| [39m    expect(clipRoot('s1').dataset.envelope).toBe('6.000:1.0000;13.999:…
+    [90m496| [39m    [34mdragPoint[39m([34mpointOf[39m([32m's1'[39m[33m,[39m [34m1[39m)[33m,[39m [{ dx[33m:[39m [33m-[39m[34m800[39m }][33m,[39m { pointerId[33m:[39m [34m2[39m })[33m;[39m
+    [90m497| [39m    expect(clipRoot('s1').dataset.envelope).toBe('6.000:1.0000;6.001:0…
+    [90m   | [39m                                            [31m^[39m
+    [90m498| [39m    [34mexpect[39m([34mundoAll[39m(api))[33m.[39m[34mtoBe[39m([34m2[39m)[33m;[39m
+    [90m499| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 move points (EV3)[2m > [22mEV3 a point stops 1 ms short of each neighbour and inside the clip window
+[31m[1mAssertionError[22m: expected [ { time: 4, gain: 1 }, …(2) ] to deeply equal [ { time: 4, gain: 1 }, …(2) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -3,11 +3,11 @@[39m
+[2m      "gain": 1,[22m
+[2m      "time": 4,[22m
+[2m    },[22m
+[2m    {[22m
+[2m      "gain": 0.2512,[22m
+[32m-     "time": 4.001,[39m
+[31m+     "time": 0,[39m
+[2m    },[22m
+[2m    {[22m
+[2m      "gain": 1,[22m
+[2m      "time": 12,[22m
+[2m    },[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m179:91[22m[39m
+    [90m177| [39m      [33mV_POINTS[39m[[34m2[39m][33m,[39m
+    [90m178| [39m    ])[33m;[39m
+    [90m179| [39m    expect(clipById(moveClipEnvelopePoint(arrangement, 'c', 8, 0, 0.25…
+    [90m   | [39m                                                                                          [31m^[39m
+    [90m180| [39m      [33mV_POINTS[39m[[34m0[39m][33m,[39m
+    [90m181| [39m      { time[33m:[39m [34m4.001[39m[33m,[39m gain[33m:[39m [34m0.2512[39m }[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+

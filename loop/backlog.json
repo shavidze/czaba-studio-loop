@@ -1,10 +1,10 @@
 {
- "version": 82,
- "updated": "2026-10-22 (B round 82 review -> round 83 task, D-29z48)",
+ "version": 83,
+ "updated": "2026-10-22 (B round 83 review -> round 84 task, D-29z49)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 83: D-29z48 - SRW-18 stage 2 (FB-06, R18-A2): clip volume envelope, source-anchored points {time, gain}, envelope.ts, clipboard carries it, per-source envelope GainNode with linear ramps in live start and export (clipEnvelopes: clipEnvelopeShapes(arrangement),), Env toggle + A key, new ArrangementClipEnvelope.tsx (double-click add at line value, drag, double-click delete, revert on cancel/unmount), fade handles hidden in mode, data-envelope; X1 = GATE82-S1 guard; doc 072 l.4 + 3 lines, new doc 073. Baseline HEAD bdc2067 clean; frozen 471. Next: regression round if round-84 planning falls on/after 2026-10-24, else SRW-19.)",
- "advisor_used_by_B": "round 81 review -> round 82 planning: advisor available and consulted before writing (round shape, O3 discriminator, fade graph traps, dispositions) and after writing (final review).",
+ "current_task": "current-task.md (round 84: D-29z49 - SRW-19 (FB-07, R19-F1/R19-F2) video opacity fade, preview only: video clips reuse fadeIn?/fadeOut? (F3 edit rules already kind-agnostic; no model/clipboard/fades.ts change), new video-fades.ts (setVideoClipFade video-only, videoFadeOpacityAt), video fade handles in ArrangementClip with arrangement-video-fade-* testids (FU1/FD1/FD6 frozen), dock fade overlay bg-background with opacity 1-gain via position writer and data-video-opacity, export dialog extra line when a video fade exists; audio bit-identical (picture only); X1 = C-R83-L1 envelope points aligned with the ruler (+ narrow clip-envelope-ui.test.tsx literal amendments, AL1); doc 073 l.4, new doc 074. Baseline HEAD a68c81d clean; frozen b-round-83-r84-tree-sha256.txt 478. Next: regression round if round-85 planning falls on/after 2026-10-24, else SRW-20.)",
+ "advisor_used_by_B": "round 83 review -> round 84 planning: advisor available and consulted after orientation, before writing (round shape, frozen-test constraints FD1/FD6/FU1, overlay instead of slot opacity, scheduleKey kept frozen, X1 acceptance + EU literal amendment grant, codec-independent oracle, checkpoint trigger).",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -4173,7 +4173,7 @@
    "depends_on": [
     "SRW-13"
    ],
-   "status": "in_progress (stage 1 C PASS browserVerified=true, published bdc2067; stage 2 envelope dispatched round 83, D-29z48; none deferred)",
+   "status": "c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; Low C-R83-L1 scheduled round 84 X1)",
    "files": [
     "app/components/arrangement/ArrangementClip.tsx",
     "app/components/arrangement/ArrangementClipEnvelope.tsx",
@@ -4202,7 +4202,9 @@
      "id": "R18-A2",
      "action": "Add 3 breakpoints dipping -12 dB in the middle",
      "expected": "envelope drawn on clip; export level dips at that time; envelope moves with clip and survives split/trim",
-     "verify": "C + unit"
+     "verify": "C + unit",
+     "status": "pass",
+     "evidence": "C round 83 EN-EXPORT (550,766 samples over [5.975,13.975], max |x/ref-env| 1.1e-4; outside ratio exactly 1), EN-EDITS (split export bit-identical, trim/delete match outside the edit <=1.2e-7, move/duplicate/copy carry points), EN-DRAWN, EN-LIVE/EN-MIDSTART paired (-11.79/-11.85 dB, -12.0 dB), EN-MULTIPLY; both viewports; browserVerified true; published a68c81d"
     }
    ],
    "stages": [
@@ -4266,7 +4268,7 @@
     },
     {
      "stage": "2",
-     "status": "dispatched",
+     "status": "c_pass_published",
      "scope": "clip volume envelope: envelope?: {time (source seconds), gain (linear 0..1)}[] on audio clips (omitted when empty); pure envelope.ts (gain at source time, add at line value, move clamped to neighbours/window, remove, shapes); source-anchored so model.ts edits keep it unchanged (non-destructive, hidden points kept); clipboard carries it; per-source envelope GainNode only for clips with points (source -> fade? -> envelope -> clipGain), linear ramps incl. final ramp to window end, live startGraph + export (clipEnvelopes: clipEnvelopeShapes(arrangement),); Env toggle + A key in StudioWorkspace, lane prop, new ArrangementClipEnvelope.tsx (line always drawn, editor in mode, double-click add, drag move, double-click delete, pointercancel/unmount revert, 500 ms drag-then-dblclick guard); fade handles hidden in mode; data-envelope; X1 = GATE82-S1 guard on fade handles; doc 072 l.4 + 3 lines; new doc 073",
      "acceptance": [
       "R18-A2"
@@ -4292,7 +4294,39 @@
       "T83-TARGETED",
       "SOURCE-UNCHANGED"
      ],
-     "tech_lead": "R83-T"
+     "tech_lead": "R83-T",
+     "c_round83_passed": [
+      "EN-MODE",
+      "EN-ADD",
+      "EN-DRAG",
+      "EN-DRAWN",
+      "EN-EXPORT",
+      "EN-LIVE (paired; one narrow-window measurement invalid, 2 valid)",
+      "EN-MIDSTART",
+      "EN-EDITS",
+      "EN-UNDO",
+      "EN-MULTIPLY",
+      "EN-PLAY-EDIT",
+      "EN-NEIGHBOURS",
+      "X1-DBLCLICK",
+      "REG-HYD",
+      "G83-3 (fake-Bearer 403 sub-check blocked: backend unavailable in cloud)",
+      "T83-TARGETED",
+      "SOURCE-UNCHANGED"
+     ],
+     "c_round83_bugs": [
+      "C-R83-L1 (low)"
+     ],
+     "browserVerified": true,
+     "realVerified": true,
+     "notBrowserVerified": [],
+     "published": "a68c81d91be994ee02eb00e184cbdcc06b5f5a60",
+     "evidence": [
+      "c-round-83.md",
+      "c-round-83.json",
+      "gates/gate-round-83.json",
+      "gates/round-83/review.md"
+     ]
     }
    ],
    "ableton_round82": "Live 12 manual sec. 6.8 captured 2026-10-21 (b-round-71/ableton-arrangement-view-20261021.txt): fades at clip edges, hover handles, drag across clip, no overlap of start/end fades, Fade Curve handle, Delete on handle, crossfades, opt-in 4 ms edge fades, fades are clip properties - all confirmed (text). CZABA differences: linear only, double-click reset, no crossfades (clips never overlap), no automatic edge fades, free (no snap) drag; split/trim behaviour unconfirmed in Live -> CZABA rules F3.",
@@ -4309,12 +4343,15 @@
    "depends_on": [
     "SRW-03"
    ],
-   "status": "todo",
+   "status": "in_progress (dispatched round 84, D-29z49; one stage covers R19-F1 and R19-F2; none deferred)",
    "optional": false,
    "files": [
-    "app/types/arrangement.ts",
+    "app/lib/arrangement/video-fades.ts",
     "app/components/arrangement/ArrangementVideoDock.tsx",
-    "app/components/arrangement/ArrangementClip.tsx"
+    "app/components/arrangement/ArrangementClip.tsx",
+    "app/components/arrangement/ArrangementExportDialog.tsx",
+    "app/lib/arrangement/__tests__/video-fades.test.ts",
+    "app/lib/arrangement/__tests__/video-fades-ui.test.tsx"
    ],
    "acceptance": [
     {
@@ -4330,7 +4367,41 @@
      "verify": "C"
     }
    ],
-   "scope_decision": "In scope per tmp/studio-real-loop/orchestrator-decisions.md (2026-10-07): user requested FB-07; not optional, not deferred."
+   "scope_decision": "In scope per tmp/studio-real-loop/orchestrator-decisions.md (2026-10-07): user requested FB-07; not optional, not deferred.",
+   "stages": [
+    {
+     "stage": "1",
+     "round": 84,
+     "decision": "D-29z49",
+     "status": "dispatched",
+     "scope": "video clips reuse fadeIn?/fadeOut? (F3 rules kind-agnostic, no model change); video-fades.ts setVideoClipFade (video only) + videoFadeOpacityAt; handles/overlay on video clips with arrangement-video-fade-* testids, labels Video Fade In/Out, hidden in Env mode; dock overlay bg-background opacity 1-gain via position writer, data-video-opacity, docked + floating; picture only (audio bit-identical); export dialog extra line when a video fade exists, video option stays disabled; X1 = C-R83-L1",
+     "acceptance": [
+      "R19-F1",
+      "R19-F2"
+     ],
+     "c_ids": [
+      "VF-HANDLES",
+      "VF-IN",
+      "VF-PREVIEW",
+      "VF-OUT",
+      "VF-FLOAT",
+      "VF-EDITS",
+      "VF-UNDO",
+      "VF-AUDIO",
+      "VF-EXPORT",
+      "VF-PLAY-EDIT",
+      "VF-SYNC",
+      "X1-ALIGN",
+      "P-M1",
+      "REG-HYD",
+      "G84-3",
+      "T84-TARGETED",
+      "SOURCE-UNCHANGED"
+     ],
+     "tech_lead": "R84-T"
+    }
+   ],
+   "ableton_round84": "Live 12 manual ch.28 Working with Video (b-round-83/web/working-with-video.txt): video clips treated like audio clips (28.2.1), gaps show black (28.2.2.1), Live renders video on export (28.3); no picture opacity fade in Live -> CZABA addition FB-07, match not applicable; export difference = D-11."
   },
   {
    "id": "SRW-20",
@@ -7305,7 +7376,7 @@
    "round": 83,
    "task": "current-task.md",
    "decision": "D-29z48",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "SRW-18 stage 2 (FB-06): clip volume envelope (R18-A2)",
     "bounded fix X1 = GATE82-S1 drag-then-double-click guard on fade handles",
@@ -7344,6 +7415,50 @@
     "REG-HYD",
     "G83-3",
     "T83-TARGETED",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C PASS browserVerified=true realVerified=true, 17 rows both viewports; one Low bug C-R83-L1; fake-Bearer 403 blocked (backend unavailable in cloud); gate 83 published a68c81d (review 8/10, verify 2008/2008)"
+  },
+  {
+   "round": 84,
+   "task": "current-task.md",
+   "decision": "D-29z49",
+   "status": "dispatched",
+   "items": [
+    "SRW-19 (FB-07): video opacity fade, preview only, honest export line (R19-F1, R19-F2)",
+    "bounded fix X1 = C-R83-L1 envelope points aligned with the ruler",
+    "doc 073 l.4"
+   ],
+   "note": "baseline HEAD a68c81d, clean tree; frozen b-round-83-r84-tree-sha256.txt 478/478; snapshots b-round-83-r84-snapshots (6 files); protected 4/4",
+   "owned": [
+    "app/lib/arrangement/video-fades.ts (new)",
+    "app/components/arrangement/ArrangementVideoDock.tsx (fade overlay + writer)",
+    "app/components/arrangement/ArrangementClip.tsx (video fade handles, labels, setter choice, overlay)",
+    "app/components/arrangement/ArrangementExportDialog.tsx (one conditional line)",
+    "app/components/arrangement/ArrangementClipEnvelope.tsx (X1)",
+    "app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx (X1 literal amendments + AL1)",
+    "app/lib/arrangement/__tests__/video-fades.test.ts (new)",
+    "app/lib/arrangement/__tests__/video-fades-ui.test.tsx (new)",
+    "docs/implementation/2026/quarter-IV/073-studio-lab-clip-volume-envelope-stage-2.md (l.4)",
+    "docs/implementation/2026/quarter-IV/074-studio-lab-video-opacity-fade.md (new)"
+   ],
+   "c_ids": [
+    "VF-HANDLES",
+    "VF-IN",
+    "VF-PREVIEW",
+    "VF-OUT",
+    "VF-FLOAT",
+    "VF-EDITS",
+    "VF-UNDO",
+    "VF-AUDIO",
+    "VF-EXPORT",
+    "VF-PLAY-EDIT",
+    "VF-SYNC",
+    "X1-ALIGN",
+    "P-M1",
+    "REG-HYD",
+    "G84-3",
+    "T84-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -11953,7 +12068,7 @@
   {
    "id": "GATE82-S1-DBLCLICK-AFTER-FADE-DRAG",
    "severity": "medium (unconfirmed in a browser)",
-   "status": "scheduled round 83 X1 (D-29z48): 500 ms drag-then-double-click guard on fade handles; C row X1-DBLCLICK records whether Chromium emits dblclick",
+   "status": "closed (C round 83 X1-DBLCLICK PASS: guard keeps the fade on a dblclick 24 ms after a drag; after 1 s double-click resets; published a68c81d). Time-based threshold residual -> GATE83-L1",
    "to": "round 83",
    "title": "a quick click right after a fade-handle drag may be counted as a double-click and reset the new fade (second history entry)",
    "evidence": "gates/round-82/review-result.json suggestion 1"
@@ -12037,6 +12152,78 @@
    "to": "B",
    "title": "no one-step Clear Envelope; points are deleted one by one",
    "evidence": "round 83 task section 4"
+  },
+  {
+   "id": "C-R83-L1",
+   "severity": "low",
+   "status": "scheduled round 84 X1 (D-29z49): acceptance X1-ALIGN (stored = ruler time, point centre = ruler x, vertex = point, line right end at clip edge)",
+   "to": "round 84",
+   "title": "envelope double-click at ruler T stores T - 1 px/pxPerSecond (5.975 for 6.000 at 40 px/s); point/vertex 1 px apart",
+   "evidence": "c-round-83.json bugs[0]; r1-*.json EN-ADD-OFFSET, EN-DRAWN dx -1 px"
+  },
+  {
+   "id": "GATE83-M1-STICKY-HEADER-OVERLAP",
+   "severity": "medium (reviewer claim, unconfirmed; C round 83 probe negative)",
+   "status": "probe P-M1 in round 84; fix candidate (isolate on clip root) only after a browser reproduction",
+   "to": "C round 84",
+   "title": "z-30 envelope points / z-40 fade handles of unselected clips may paint over the sticky z-20 track header during horizontal scroll and catch header clicks",
+   "evidence": "gates/round-83/review.md M1; c-round-83.json signals (header topmost after 330 px scroll)"
+  },
+  {
+   "id": "GATE83-M2-RESCHEDULE-PER-MOVE",
+   "severity": "info (signal; merges GATE82-S6)",
+   "status": "signal: C round 83 EN-PLAY-EDIT 6 source restarts per drag, position monotonic, no glitch measured; candidate fix (exclude preview from scheduleKey until commit, or rAF throttle) needs a measured audible defect or the checkpoint ruling; SRW19-RESCHEDULE adds video-fade drags",
+   "to": "B / checkpoint",
+   "title": "envelope/fade/video-fade preview drags during playback rebuild the audio graph on every pointermove",
+   "evidence": "gates/round-83/review.md M2; c-round-83.json signals"
+  },
+  {
+   "id": "GATE83-L1-GUARD-TIME-BASED",
+   "severity": "low",
+   "status": "open - Lows batch",
+   "to": "Lows batch",
+   "title": "drag-then-double-click guard uses a fixed 500 ms window; OS double-click interval can be longer (up to ~900 ms on Windows)",
+   "evidence": "gates/round-83/review.md L1"
+  },
+  {
+   "id": "GATE83-L2-POINT-HIT-AREA",
+   "severity": "low",
+   "status": "open - Lows batch (hit area); keyboard path = SRW18-KEYBOARD-FADES",
+   "to": "Lows batch",
+   "title": "envelope points are 8x8 px with no enlarged hit target",
+   "evidence": "gates/round-83/review.md L2"
+  },
+  {
+   "id": "GATE83-L3-ENV-ARIA-LABEL",
+   "severity": "low",
+   "status": "open - Lows batch",
+   "to": "Lows batch",
+   "title": "Env button accessible name is only 'Env' (full text only in title)",
+   "evidence": "gates/round-83/review.md L3"
+  },
+  {
+   "id": "C-R83-S-1280-RANGE-SHIFT",
+   "severity": "info (unverified origin)",
+   "status": "open - check in the next regression round against the published tree",
+   "to": "C regression round",
+   "title": "at 1280x720 a body range selection shifts the stems lane up 9 px (clip y 458 -> 449, h 71 -> 66)",
+   "evidence": "c-round-83.json signals"
+  },
+  {
+   "id": "SRW19-RESCHEDULE",
+   "severity": "info",
+   "status": "signal (round 84 VF-PLAY-EDIT records the restart count); scheduleKey frozen this round",
+   "to": "B",
+   "title": "a picture-only video fade edit during playback still reschedules audio because scheduleKey includes all clip fields",
+   "evidence": "round 84 task section 1"
+  },
+  {
+   "id": "VIDEO-FADE-SOUND",
+   "severity": "info",
+   "status": "signal: picture-only by B ruling D-29z49 (FB-07 = opacity); fading the video track sound needs a user request",
+   "to": "B",
+   "title": "a video fade does not fade the video's own sound",
+   "evidence": "round 84 task V3"
   }
  ],
  "tech_lead_notes": [
@@ -13109,6 +13296,11 @@
    "round": 82,
    "source": "a-round-82.md Architecture note + gates/round-82/review-result.json",
    "note": "ArrangementClip.tsx beginGesture/handlePointerMove/finishGesture handle six gesture kinds with per-kind capture element and a separate fade cancel/commit branch; owner file in rounds 80, 81, 82 (and 83). Both reviewers: keep for now (one claim/capture/release lifecycle protects single Undo entries). Proposal: a per-kind handler table {capture, onMove, onRelease, onCancel} behind the same ClipGesture record; acceptance: grid-snap, lane, selection, clip-fades UI and render-budget tests unchanged; value medium, risk medium. Round 83 puts envelope point gestures in a new child component instead of adding kinds. Checkpoint question 11; not scheduled."
+  },
+  {
+   "round": 83,
+   "source": "a-round-83.md Architecture note + gates/round-83/review.md Architecture note",
+   "note": "Keep ArrangementClipEnvelope as a separate component (both reviewers). Proposal: move watchUncapturedPointerGesture + {pointerId, release} type and the drag-then-double-click guard (constant + check, duplicated in ArrangementClip.tsx and ArrangementClipEnvelope.tsx) into lib/arrangement/pointer-gesture.ts; remove the watchLostPointer prop; invariants: unchanged gesture lifecycle, EU3/EU6 and fade/trim tests green; value low-medium, risk low. Gate-83 reviewer: a third round touching the ArrangementClip gesture region should trigger a frontend-architect checkpoint - round 84 (video fade handles) is that round; request b-round-83-checkpoint-request.md (non-blocking)."
   }
  ],
  "vitest_floor_round46": 1357,
@@ -13226,6 +13418,14 @@
   "frozen_list": "b-round-82-r83-tree-sha256.txt",
   "entries": 471,
   "snapshots": "b-round-82-r83-snapshots",
+  "protected": "4/4"
+ },
+ "baseline_tree_at_round84": {
+  "head": "a68c81d91be994ee02eb00e184cbdcc06b5f5a60",
+  "status_lines": 0,
+  "frozen_list": "b-round-83-r84-tree-sha256.txt",
+  "entries": 478,
+  "snapshots": "b-round-83-r84-snapshots",
   "protected": "4/4"
  }
 }

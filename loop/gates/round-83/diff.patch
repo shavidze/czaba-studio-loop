@@ -1,0 +1,474 @@
+diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index fa7bcd5..be62c62 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -4,6 +4,7 @@ import {
+   type ClipLaneGhost,
+   formatArrangementTime,
+ } from '~/contexts/ArrangementContext';
++import { formatClipEnvelopeData } from '~/lib/arrangement/envelope';
+ import { type ClipFadeEdge, clipFadeIn, clipFadeOut, setClipFade } from '~/lib/arrangement/fades';
+ import {
+   clipEdgeTargets,
+@@ -28,6 +29,10 @@ import {
+ } from '~/lib/arrangement/selection';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementClip, TimeRange } from '~/types/arrangement';
++import {
++  ArrangementClipEnvelope,
++  CLIP_DRAG_DOUBLE_CLICK_GUARD_MS,
++} from './ArrangementClipEnvelope';
+ 
+ const DRAG_THRESHOLD_PX = 3;
+ const TRIM_BLOCK_TOLERANCE = 0.01;
+@@ -101,6 +106,7 @@ export interface ArrangementClipViewProps {
+   folded?: boolean;
+   snapSeconds?: number | null;
+   gridSeconds?: number;
++  envelopeMode?: boolean;
+ }
+ 
+ function roundTime(value: number): number {
+@@ -279,9 +285,11 @@ function ArrangementClipViewInner({
+   folded = false,
+   snapSeconds = null,
+   gridSeconds,
++  envelopeMode = false,
+ }: ArrangementClipViewProps) {
+   const rootRef = useRef<HTMLDivElement>(null);
+   const gestureRef = useRef<ClipGesture | null>(null);
++  const lastFadeDragRef = useRef<{ edge: ClipFadeEdge; at: number } | null>(null);
+   const width = clip.duration * pxPerSecond;
+   const peakColumns = Math.round(Math.min(width, PEAK_SHAPE_MAX_COLUMNS));
+   const peakShape = useMemo(
+@@ -300,6 +308,10 @@ function ArrangementClipViewInner({
+ 
+   const endStaleClipGesture = (gesture: ClipGesture) => {
+     gestureRef.current = null;
++    const fadeEdge = clipFadeGestureEdge(gesture.kind);
++    if (fadeEdge && gesture.moved) {
++      lastFadeDragRef.current = { edge: fadeEdge, at: performance.now() };
++    }
+     if (gesture.moved && gesture.kind !== 'range') {
+       previewArrangement(gesture.before);
+     }
+@@ -627,6 +639,9 @@ function ArrangementClipViewInner({
+       gesture.captureElement.releasePointerCapture(event.pointerId);
+     }
+     if (fadeEdge) {
++      if (gesture.moved) {
++        lastFadeDragRef.current = { edge: fadeEdge, at: performance.now() };
++      }
+       if (!gesture.moved || event.type === 'pointercancel') {
+         return;
+       }
+@@ -716,6 +731,13 @@ function ArrangementClipViewInner({
+ 
+   const resetClipFade = (edge: ClipFadeEdge, event: MouseEvent<HTMLElement>) => {
+     event.stopPropagation();
++    const lastFadeDrag = lastFadeDragRef.current;
++    if (
++      lastFadeDrag?.edge === edge &&
++      performance.now() - lastFadeDrag.at < CLIP_DRAG_DOUBLE_CLICK_GUARD_MS
++    ) {
++      return;
++    }
+     const before = getArrangement();
+     const next = setClipFade(before, clip.id, edge, 0);
+     if (next === before) {
+@@ -733,7 +755,7 @@ function ArrangementClipViewInner({
+   const fadeOutSeconds = clipFadeOut(clip);
+   const fadeInPx = fadeInSeconds * pxPerSecond;
+   const fadeOutPx = fadeOutSeconds * pxPerSecond;
+-  const showFadeHandles = !isVideo && !folded && width >= FADE_HANDLE_MIN_CLIP_PX;
++  const showFadeHandles = !isVideo && !folded && !envelopeMode && width >= FADE_HANDLE_MIN_CLIP_PX;
+   const fadeHandleMaxOffset = Math.max(0, width - CLIP_BORDER_PX - FADE_HANDLE_PX);
+   const fadeHandles: {
+     edge: ClipFadeEdge;
+@@ -763,6 +785,7 @@ function ArrangementClipViewInner({
+       data-clip-start={clip.start.toFixed(3)}
+       data-fade-in={fadeInSeconds.toFixed(3)}
+       data-fade-out={fadeOutSeconds.toFixed(3)}
++      data-envelope={formatClipEnvelopeData(clip)}
+       className={cn(
+         'group absolute top-1 bottom-1 flex select-none flex-col overflow-hidden rounded-sm border',
+         isVideo ? 'bg-accent/10' : 'bg-elevated',
+@@ -841,6 +864,24 @@ function ArrangementClipViewInner({
+               ) : null}
+             </svg>
+           ) : null}
++          {isVideo ? null : (
++            <ArrangementClipEnvelope
++              clip={clip}
++              pxPerSecond={pxPerSecond}
++              width={width}
++              editing={envelopeMode && width >= FADE_HANDLE_MIN_CLIP_PX}
++              getArrangement={getArrangement}
++              previewArrangement={previewArrangement}
++              commitArrangement={commitArrangement}
++              selectClip={selectClip}
++              toggleClipSelection={toggleClipSelection}
++              setActiveTrack={setActiveTrack}
++              setTimeRange={setTimeRange}
++              setStatus={setStatus}
++              claimPointerGesture={claimPointerGesture}
++              watchLostPointer={watchUncapturedPointerGesture}
++            />
++          )}
+           {audioNote ? (
+             <span className="pointer-events-none absolute inset-0 flex items-center truncate px-2 text-xs text-muted">
+               {audioNote}
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index 42cd2dc..0040ae2 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -102,6 +102,7 @@ interface ArrangementLaneProps {
+   selected?: boolean;
+   depth?: number;
+   onSelectTrack?: (trackId: string, modifiers: TrackRowSelectModifiers) => void;
++  envelopeMode?: boolean;
+ }
+ 
+ export function ArrangementLane({
+@@ -120,6 +121,7 @@ export function ArrangementLane({
+   selected = false,
+   depth = 0,
+   onSelectTrack,
++  envelopeMode = false,
+ }: ArrangementLaneProps) {
+   const {
+     arrangement,
+@@ -929,6 +931,7 @@ export function ArrangementLane({
+               folded={folded}
+               snapSeconds={snapSeconds}
+               gridSeconds={gridSeconds}
++              envelopeMode={envelopeMode}
+             />
+           );
+         })}
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 221f16b..c0a5131 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -458,6 +458,9 @@ export function StudioWorkspace() {
+   const [isExportOpen, setIsExportOpen] = useState(false);
+   const [followMode, setFollowModeState] = useState<TimelineFollowMode>('on');
+   const [snapEnabled, setSnapEnabled] = useState(false);
++  const [envelopeMode, setEnvelopeMode] = useState(false);
++  const envelopeModeRef = useRef(envelopeMode);
++  envelopeModeRef.current = envelopeMode;
+   const [secondsGridDivision, setSecondsGridDivision] = useState<number>(
+     GRID_DEFAULT_DIVISION_SECONDS,
+   );
+@@ -1242,6 +1245,18 @@ export function StudioWorkspace() {
+     );
+   }, []);
+ 
++  const toggleEnvelopeMode = useCallback(() => {
++    const current = workspaceRef.current;
++    if (current.isPointerGestureActive() || current.isArrangementPreviewActive()) {
++      current.setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
++      return;
++    }
++    const next = !envelopeModeRef.current;
++    envelopeModeRef.current = next;
++    setEnvelopeMode(next);
++    current.setStatus(next ? 'Envelope რეჟიმი: ჩართულია.' : 'Envelope რეჟიმი: გამორთულია.');
++  }, []);
++
+   const changeGridDivision = useCallback((id: string) => {
+     const tempo = tempoBpmRef.current;
+     if (isMusicalGridDivisionId(id)) {
+@@ -1863,6 +1878,13 @@ export function StudioWorkspace() {
+         }
+         return;
+       }
++      if (key === 'a' && !event.altKey && !event.shiftKey) {
++        event.preventDefault();
++        if (!event.repeat) {
++          toggleEnvelopeMode();
++        }
++        return;
++      }
+       if (key === 'u' && !event.altKey && !event.shiftKey) {
+         event.preventDefault();
+         if (!event.repeat) {
+@@ -1981,6 +2003,7 @@ export function StudioWorkspace() {
+     returnFloatingVideo,
+     stepGridDivision,
+     toggleGridTriplet,
++    toggleEnvelopeMode,
+     toggleSelectedTrackGroupsCollapse,
+     toggleSnap,
+     ungroupSelectedTrackRows,
+@@ -2178,6 +2201,7 @@ export function StudioWorkspace() {
+                     data-grid-seconds={gridSeconds}
+                     data-grid-division={gridDivisionId}
+                     data-grid-lines={gridLinesShown ? 'visible' : 'hidden'}
++                    data-envelope-mode={envelopeMode ? 'on' : 'off'}
+                   >
+                     <button
+                       type="button"
+@@ -2259,6 +2283,24 @@ export function StudioWorkspace() {
+                         </optgroup>
+                       ) : null}
+                     </select>
++                    <button
++                      type="button"
++                      onClick={toggleEnvelopeMode}
++                      aria-pressed={envelopeMode}
++                      aria-keyshortcuts="A"
++                      title={
++                        envelopeMode
++                          ? 'Envelope ჩართულია — კლიპზე double-click = წერტილი (A)'
++                          : 'Envelope გამორთულია — კლიპის volume envelope-ის რედაქტირება (A)'
++                      }
++                      className={cn(
++                        'h-6 shrink-0 rounded-sm border border-outline px-1.5 text-xs leading-none text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
++                        envelopeMode && 'border-accent bg-accent/20 text-accent hover:text-accent',
++                      )}
++                      data-testid="arrangement-envelope-toggle"
++                    >
++                      Env
++                    </button>
+                   </div>
+                   <ArrangementRuler
+                     seconds={timelineSeconds}
+@@ -2358,6 +2400,7 @@ export function StudioWorkspace() {
+                     onSnapshotTrackLayout={snapshotTrackLaneLayout}
+                     gridSeconds={gridSeconds}
+                     snapSeconds={snapEnabled ? gridSeconds : null}
++                    envelopeMode={envelopeMode}
+                   />
+                 ),
+               )}
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 30035ed..fe7664e 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -21,6 +21,7 @@ import {
+   deleteRangeKeepingGap,
+   planClipboardPaste,
+ } from '~/lib/arrangement/clipboard';
++import { clipEnvelopeShapes } from '~/lib/arrangement/envelope';
+ import { clipFadeShapes } from '~/lib/arrangement/fades';
+ import {
+   applySchedule,
+@@ -814,6 +815,7 @@ export function ArrangementProvider({
+         masterGain: masterLinearGain(arrangement.master),
+         clipGains: clipLinearGains(arrangement),
+         clipFades: clipFadeShapes(arrangement),
++        clipEnvelopes: clipEnvelopeShapes(arrangement),
+         trackGains: trackEffectiveGains(arrangement),
+         tap: meterTapRef.current?.input,
+         trackTaps: meterTapRef.current
+diff --git a/app/lib/arrangement/clipboard.ts b/app/lib/arrangement/clipboard.ts
+index 81c2066..f62c75f 100644
+--- a/app/lib/arrangement/clipboard.ts
++++ b/app/lib/arrangement/clipboard.ts
+@@ -1,4 +1,9 @@
+-import type { Arrangement, ArrangementClip, TimeRange } from '~/types/arrangement';
++import type {
++  Arrangement,
++  ArrangementClip,
++  ArrangementClipEnvelopePoint,
++  TimeRange,
++} from '~/types/arrangement';
+ import { withCutEdges } from './fades';
+ import {
+   ARRANGEMENT_EPS,
+@@ -19,6 +24,7 @@ export interface ArrangementClipboardItem {
+   gainDb?: number;
+   fadeIn?: number;
+   fadeOut?: number;
++  envelope?: ArrangementClipEnvelopePoint[];
+ }
+ 
+ export interface ArrangementClipboard {
+@@ -78,6 +84,7 @@ function materialInWindow(
+         ...(clip.gainDb === undefined ? {} : { gainDb: clip.gainDb }),
+         ...(faded.fadeIn === undefined ? {} : { fadeIn: faded.fadeIn }),
+         ...(faded.fadeOut === undefined ? {} : { fadeOut: faded.fadeOut }),
++        ...(clip.envelope === undefined ? {} : { envelope: clip.envelope }),
+       };
+     })
+     .filter((item) => item.duration >= CLIPBOARD_MIN_PART_SECONDS)
+@@ -127,6 +134,7 @@ export function copyClipsToClipboard(
+         ...(clip.gainDb === undefined ? {} : { gainDb: clip.gainDb }),
+         ...(clip.fadeIn === undefined ? {} : { fadeIn: clip.fadeIn }),
+         ...(clip.fadeOut === undefined ? {} : { fadeOut: clip.fadeOut }),
++        ...(clip.envelope === undefined ? {} : { envelope: clip.envelope }),
+       }))
+       .sort((left, right) => left.offset - right.offset),
+   };
+@@ -247,6 +255,7 @@ export function planClipboardPaste(
+       ...(item.gainDb === undefined ? {} : { gainDb: item.gainDb }),
+       ...(item.fadeIn === undefined ? {} : { fadeIn: item.fadeIn }),
+       ...(item.fadeOut === undefined ? {} : { fadeOut: item.fadeOut }),
++      ...(item.envelope === undefined ? {} : { envelope: item.envelope }),
+     });
+   }
+   const conflict = findClipPlacementConflict(arrangement, pasted, new Set());
+diff --git a/app/lib/arrangement/graph.client.ts b/app/lib/arrangement/graph.client.ts
+index 19bbbae..c979b7a 100644
+--- a/app/lib/arrangement/graph.client.ts
++++ b/app/lib/arrangement/graph.client.ts
+@@ -1,5 +1,6 @@
+ import { encodeSfxWav } from '~/lib/sfx-edit';
+ import type { Arrangement, ArrangementTrack, ScheduledClip } from '~/types/arrangement';
++import { type ClipEnvelopeShape, clipEnvelopeGainAtSource, clipEnvelopeShapes } from './envelope';
+ import { type ClipFadeShape, clipFadeGainAt, clipFadeShapes } from './fades';
+ import { isOverFullScale, MAX_24BIT_SAMPLE } from './meter';
+ import type { MetronomeClick } from './metronome';
+@@ -56,6 +57,7 @@ export interface ApplyScheduleOptions<TBuffer> {
+   clipGains?: ReadonlyMap<string, number>;
+   trackGains?: ReadonlyMap<string, number>;
+   clipFades?: ReadonlyMap<string, ClipFadeShape>;
++  clipEnvelopes?: ReadonlyMap<string, ClipEnvelopeShape>;
+   metronome?: { accent: TBuffer; beat: TBuffer; clicks: readonly MetronomeClick[] };
+ }
+ 
+@@ -106,6 +108,33 @@ function scheduleClipFadeGain(
+   fadeGain.gain.linearRampToValueAtTime?.(0, at(end));
+ }
+ 
++function scheduleClipEnvelopeGain(
++  envelopeGain: ScheduleGainNode,
++  shape: ClipEnvelopeShape,
++  item: ScheduledClip,
++  from: number,
++  startAt: number,
++) {
++  const at = (time: number) => startAt + (time - from);
++  const firstSource = item.sourceOffset;
++  const lastSource = item.sourceOffset + item.duration;
++  const initial = clipEnvelopeGainAtSource(shape.points, firstSource);
++  envelopeGain.gain.value = initial;
++  envelopeGain.gain.setValueAtTime?.(initial, at(item.when));
++  for (const point of shape.points) {
++    if (point.time > firstSource && point.time < lastSource) {
++      envelopeGain.gain.linearRampToValueAtTime?.(
++        point.gain,
++        at(item.when + (point.time - firstSource)),
++      );
++    }
++  }
++  envelopeGain.gain.linearRampToValueAtTime?.(
++    clipEnvelopeGainAtSource(shape.points, lastSource),
++    at(item.when + item.duration),
++  );
++}
++
+ function clampPan(value: number): number {
+   return Number.isFinite(value) ? Math.min(1, Math.max(-1, value)) : 0;
+ }
+@@ -115,6 +144,7 @@ interface ScheduledSourceState<TBuffer> {
+   source: ScheduleSourceNode<TBuffer>;
+   clipGain: ScheduleGainNode;
+   fadeGain: ScheduleGainNode | null;
++  envelopeGain: ScheduleGainNode | null;
+   ended: boolean;
+   stopAt: number | null;
+ }
+@@ -177,19 +207,27 @@ export function applySchedule<TBuffer>(
+       clipGain.gain.value = clipGainTargets.get(item.clipId) ?? 1;
+       const fadeShape = options.clipFades?.get(item.clipId);
+       const fadeGain = fadeShape ? ctx.createGain() : null;
++      let head: ScheduleAudioNode = source;
+       if (fadeGain && fadeShape) {
+         scheduleClipFadeGain(fadeGain, fadeShape, item, from, startAt);
+         source.connect(fadeGain);
+-        fadeGain.connect(clipGain);
+-      } else {
+-        source.connect(clipGain);
++        head = fadeGain;
++      }
++      const envelopeShape = options.clipEnvelopes?.get(item.clipId);
++      const envelopeGain = envelopeShape ? ctx.createGain() : null;
++      if (envelopeGain && envelopeShape) {
++        scheduleClipEnvelopeGain(envelopeGain, envelopeShape, item, from, startAt);
++        head.connect(envelopeGain);
++        head = envelopeGain;
+       }
++      head.connect(clipGain);
+       clipGain.connect(trackGain);
+       const state: ScheduledSourceState<TBuffer> = {
+         clipId: item.clipId,
+         source,
+         clipGain,
+         fadeGain,
++        envelopeGain,
+         ended: false,
+         stopAt: null,
+       };
+@@ -247,6 +285,7 @@ export function applySchedule<TBuffer>(
+         if (state.ended) {
+           state.source.disconnect();
+           state.fadeGain?.disconnect();
++          state.envelopeGain?.disconnect();
+           state.clipGain.disconnect();
+           return false;
+         }
+@@ -292,6 +331,7 @@ export function applySchedule<TBuffer>(
+       for (const state of sources) {
+         state.source.disconnect();
+         state.fadeGain?.disconnect();
++        state.envelopeGain?.disconnect();
+         state.clipGain.disconnect();
+       }
+       for (const trackGain of trackGains.values()) {
+@@ -403,6 +443,7 @@ export async function renderArrangementWav(
+     masterGain: masterLinearGain(arrangement.master),
+     clipGains: clipLinearGains(arrangement),
+     clipFades: clipFadeShapes(arrangement),
++    clipEnvelopes: clipEnvelopeShapes(arrangement),
+     trackGains: trackEffectiveGains(arrangement),
+   });
+   const rendered = await ctx.startRendering();
+diff --git a/app/types/arrangement.ts b/app/types/arrangement.ts
+index 3f14235..0db3d23 100644
+--- a/app/types/arrangement.ts
++++ b/app/types/arrangement.ts
+@@ -20,6 +20,11 @@ export interface ArrangementTrackGroup {
+   solo?: boolean;
+ }
+ 
++export interface ArrangementClipEnvelopePoint {
++  time: number;
++  gain: number;
++}
++
+ export interface ArrangementClip {
+   id: string;
+   trackId: string;
+@@ -30,6 +35,7 @@ export interface ArrangementClip {
+   gainDb?: number;
+   fadeIn?: number;
+   fadeOut?: number;
++  envelope?: ArrangementClipEnvelopePoint[];
+ }
+ 
+ export interface ArrangementLoop {
+diff --git a/docs/implementation/2026/quarter-IV/072-studio-lab-clip-fades-stage-1.md b/docs/implementation/2026/quarter-IV/072-studio-lab-clip-fades-stage-1.md
+index 8263866..294bf83 100644
+--- a/docs/implementation/2026/quarter-IV/072-studio-lab-clip-fades-stage-1.md
++++ b/docs/implementation/2026/quarter-IV/072-studio-lab-clip-fades-stage-1.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — კლიპის Fade In / Fade Out, ეტაპი 1 (SRW-18 / FB-06)
+ 
+ **თარიღი:** 2026-10-22
+-**სტატუსი:** Round 82 — იმპლემენტირებულია, C-ის შემოწმებას ელოდება (D-29z47)
++**სტატუსი:** Round 82 — C PASS (`browserVerified`), გამოქვეყნდა `bdc2067`
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -71,6 +71,9 @@ flowchart LR
+ - **პრობლემა (review M1):** როცა `fadeIn + fadeOut = duration`, `start + fadeIn` და `end − fadeOut` float-ში შეიძლება ერთი ulp-ით განსხვავდებოდეს (მაგ. 0.1 / 0.4 / 0.2 / 0.2). მაშინ `setValueAtTime(1)` ramp-ის ბოლოზე ადრე ჯდება და fade-in ჩუმდება, მერე ხტება. **გადაწყვეტა:** fade-out-ის დასაწყისი არასოდეს არის fade-in-ის ბოლოზე ადრე. FD7g ამოწმებს event-ების დროის რიგს.
+ - **პრობლემა (review M2):** fade-out 0-ზე და კიდემდე გაწეულ fade-in-ზე ორი სახელური ერთმანეთს ფარავდა და მოძრავი სახელური მიუწვდომელი იყო. **გადაწყვეტა:** fade > 0 სახელური `z-40`-ზეა. fade-out სახელური ახლა `right`-ით პოზიციონირდება, ამიტომ root-ის border მას აღარ ანაცვლებს (review L1).
+ - **პრობლემა:** მუტაცია (g)-ის პირველი ვარიანტი მწვანე დარჩა, რადგან revert კომიტამდე ხდებოდა და კომიტი no-change იყო. **გადაწყვეტა:** ჩაწერილი (g) ორივე cancel guard-ს შლის; FU3 წითლდება.
++- **პრობლემა (GATE82-S2, signal):** split ან Delete fade-ის შიგნით ხმის მიხედვით ნეიტრალური არ არის: მარჯვენა ნაწილი gain 1-ით იწყება, რადგან ახალ ჭრილზე fade იშლება (F3-ის წესი). **გადაწყვეტა:** ქცევა უცვლელია და signal-ად რჩება.
++- **პრობლემა (GATE82-S3):** დამალული სახელური trim strip-ებისა და body-ის კუთხეების ზედა 10 px-ს იკავებს, ამიტომ იქ ჩვეულებრივი click fade gesture-ს იწყებს, რომელიც არაფერს წერს. **გადაწყვეტა:** ჩანაწერი არ იქმნება; შემდგომი signal-ია.
++- **პრობლემა (GATE82-S1):** fade drag-ის შემდეგ სწრაფი click შეიძლება double-click-ად ჩაითვალოს და ახალი fade 0-ზე დააბრუნოს. **გადაწყვეტა:** Round 83 X1 — იმავე კიდის double-click moved fade gesture-ის დასრულებიდან 500 ms-ში იგნორირდება (doc 073, EU6).
+ 
+ ## ტესტირება
+ 

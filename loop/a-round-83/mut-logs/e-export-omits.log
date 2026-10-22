@@ -1,0 +1,141 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/envelope.test.ts [2m([22m[2m24 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 42[2mms[22m[39m
+     [32m✓[39m EV1 is 1 without points, holds the edge values, is exact at points and linear between them[32m 2[2mms[22m[39m
+     [32m✓[39m EV1 formats gains in dB with a true minus sign, 0 dB at unity and −∞ at silence[32m 0[2mms[22m[39m
+     [32m✓[39m EV2 a new point takes the current line value, rounds to ms and is inserted in order[32m 1[2mms[22m[39m
+     [32m✓[39m EV2 returns the same arrangement for a missing clip, a video clip, a time outside or a duplicate ms[32m 1[2mms[22m[39m
+     [32m✓[39m EV2 removing the last point leaves no envelope key and a missing point changes nothing[32m 1[2mms[22m[39m
+     [32m✓[39m EV3 a point stops 1 ms short of each neighbour and inside the clip window[32m 1[2mms[22m[39m
+     [32m✓[39m EV3 the gain is clamped to [0, 1] and rounded to 4 decimals; no change returns the same arrangement[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 a move keeps the envelope and the timeline points shift with the clip[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 a split gives both parts the full list and the level is continuous at the cut[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 a start trim hides points without deleting them and a trim back shows them again[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 Delete Time keeps the level of every source sample on the right part[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 duplicate, clip copy/paste and range copy keep the whole list[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 a clip without an envelope gives exactly today’s objects (no envelope key)[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 shapes cover audio clips with at least one point only[32m 0[2mms[22m[39m
+     [32m✓[39m EV5a playing from 0 sets the first value at the clip start and ramps through every point[32m 1[2mms[22m[39m
+     [32m✓[39m EV5b a mid-clip start begins at the line value of that position, not at the first point[32m 0[2mms[22m[39m
+     [32m✓[39m EV5c a trimmed window ramps toward a hidden point after it and ends on the line value[32m 0[2mms[22m[39m
+     [32m✓[39m EV5d a clip without points builds no extra node; one with points adds exactly one[32m 1[2mms[22m[39m
+     [32m✓[39m EV5e a loop iteration appended later schedules against its own startAt[32m 1[2mms[22m[39m
+     [32m✓[39m EV5f setClipGain touches only the clip gain; disconnect releases the envelope node[32m 0[2mms[22m[39m
+     [32m✓[39m EV5g a faded clip with an envelope connects source → fade → envelope → clip gain[32m 1[2mms[22m[39m
+     [32m✓[39m EV5h an ended source is released together with its envelope node on the next append[32m 0[2mms[22m[39m
+[31m     [31m×[31m EV6 renderArrangementWav passes envelopes and fades and still has no pan or live-gain calls[39m[32m 17[2mms[22m[39m
+[31m     [31m×[31m EV6b an export renders an enveloped clip through its own envelope gain[39m[32m 5[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m22 passed[39m[22m[90m (24)[39m
+[2m   Start at [22m 11:43:15
+[2m   Duration [22m 952ms[2m (transform 234ms, setup 0ms, import 275ms, tests 42ms, environment 494ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 export source (EV6) > EV6 renderArrangementWav passes envelopes and fades and still has no pan or live-gain calls,line=576,column=20::AssertionError: expected 'export async function renderArrangeme…' to contain 'clipEnvelopes: clipEnvelopeShapes(arr…'%0A%0A- Expected%0A+ Received%0A%0A- clipEnvelopes: clipEnvelopeShapes(arrangement),%0A+ export async function renderArrangementWav(%0A+   arrangement: Arrangement,%0A+   buffers: ReadonlyMap<string, AudioBuffer>,%0A+ ): Promise<ArrangementWavResult> {%0A+   const end = projectEnd(arrangement);%0A+   if (end <= 0) {%0A+     throw new Error('პროექტი ცარიელია — ექსპორტისთვის საჭიროა მინიმუმ ერთი კლიპი.');%0A+   }%0A+   const ctx = new OfflineAudioContext({%0A+     numberOfChannels: 2,%0A+     length: Math.ceil(end * ARRANGEMENT_EXPORT_SAMPLE_RATE),%0A+     sampleRate: ARRANGEMENT_EXPORT_SAMPLE_RATE,%0A+   });%0A+   applySchedule(ctx, planSchedule(arrangement, 0), {%0A+     buffers,%0A+     tracks: arrangement.tracks,%0A+     from: 0,%0A+     startAt: 0,%0A+     masterGain: masterLinearGain(arrangement.master),%0A+     clipGains: clipLinearGains(arrangement),%0A+     clipFades: clipFadeShapes(arrangement),%0A+     trackGains: trackEffectiveGains(arrangement),%0A+   });%0A+   const rendered = await ctx.startRendering();%0A+   const raw = [0, 1].map((index) => rendered.getChannelData(index));%0A+   const report = measureExportOverload(raw);%0A+   const channels = raw.map((data) => {%0A+     const clamped = new Float32Array(data.length);%0A+     for (let i = 0; i < data.length; i++) {%0A+       clamped[i] = Math.min(MAX_24BIT_SAMPLE, Math.max(-1, data[i]));%0A+     }%0A+     return clamped;%0A+   });%0A+   const bytes = encodeSfxWav({ sampleRate: rendered.sampleRate, channels });%0A+   return { blob: new Blob([bytes], { type: 'audio/wav' }), ...report };%0A+ }%0A+%0A%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:576:20%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 export render (EV6b) > EV6b an export renders an enveloped clip through its own envelope gain,line=622,column=65::AssertionError: expected [] to deeply equal [ [ 'set', 1, 2 ], …(4) ]%0A%0A- Expected%0A+ Received%0A%0A- [%0A-   [%0A-     "set",%0A-     1,%0A-     2,%0A-   ],%0A-   [%0A-     "ramp",%0A-     1,%0A-     6,%0A-   ],%0A-   [%0A-     "ramp",%0A-     0.2512,%0A-     10,%0A-   ],%0A-   [%0A-     "ramp",%0A-     1,%0A-     14,%0A-   ],%0A-   [%0A-     "ramp",%0A-     1,%0A-     18,%0A-   ],%0A- ]%0A+ []%0A%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:622:65%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 export source (EV6)[2m > [22mEV6 renderArrangementWav passes envelopes and fades and still has no pan or live-gain calls
+[31m[1mAssertionError[22m: expected 'export async function renderArrangeme…' to contain 'clipEnvelopes: clipEnvelopeShapes(arr…'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [7mclipEnvelopes: clipEn[27mvelo[7mpeShapes(arrangement),[27m[39m
+[31m+ export async function renderArrangementWav([39m
+[31m+   arrangement: Arrangement,[39m
+[31m+   buffers: ReadonlyMap<string, AudioBuffer>,[39m
+[31m+ ): Promise<ArrangementWavResult> {[39m
+[31m+   const end = projectEnd(arrangement);[39m
+[31m+   if (end <= 0) {[39m
+[31m+     throw new Error('პროექტი ცარიელია — ექსპორტისთვის საჭიროა მინიმუმ ერთი კლიპი.');[39m
+[31m+   }[39m
+[31m+   const ctx = new OfflineAudioContext({[39m
+[31m+     numberOfChannels: 2,[39m
+[31m+     length: Math.ceil(end * ARRANGEMENT_EXPORT_SAMPLE_RATE),[39m
+[31m+     sampleRate: ARRANGEMENT_EXPORT_SAMPLE_RATE,[39m
+[31m+   });[39m
+[31m+   applySchedule(ctx, planSchedule(arrangement, 0), {[39m
+[31m+     buffers,[39m
+[31m+     tracks: arrangement.tracks,[39m
+[31m+     from: 0,[39m
+[31m+     startAt: 0,[39m
+[31m+     masterGain: masterLinearGain(arrangement.master),[39m
+[31m+     clipGains: clipLinearGains(arrangement),[39m
+[31m+     clipFades: clipFadeShapes(arrangement),[39m
+[31m+     trackGains: trackEffectiveGains(arrangement),[39m
+[31m+   });[39m
+[31m+   const rendered = await ctx.startRendering();[39m
+[31m+   const raw = [0, 1].map((index) => rendered.getChannelData(index));[39m
+[31m+ [7m  const report = measureExportO[27mve[7mr[27mlo[7mad(raw);[27m[39m
+[31m+   const channels = raw.map((data) => {[39m
+[31m+     const clamped = new Float32Array(data.length);[39m
+[31m+     for (let i = 0; i < data.length; i++) {[39m
+[31m+       clamped[i] = Math.min(MAX_24BIT_SAMPLE, Math.max(-1, data[i]));[39m
+[31m+     }[39m
+[31m+     return clamped;[39m
+[31m+   });[39m
+[31m+   const bytes = encodeSfxWav({ sampleRate: rendered.sampleRate, channels });[39m
+[31m+   return { blob: new Blob([bytes], { type: 'audio/wav' }), ...report };[39m
+[31m+ }[39m
+[31m+[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m576:20[22m[39m
+    [90m574| [39m    const source = readFileSync(resolve(__dirname, '../graph.client.ts…
+    [90m575| [39m    const render = source.slice(source.indexOf('export async function …
+    [90m576| [39m    expect(render).toContain('clipEnvelopes: clipEnvelopeShapes(arrang…
+    [90m   | [39m                   [31m^[39m
+    [90m577| [39m    expect(render).toContain('clipFades: clipFadeShapes(arrangement),'…
+    [90m578| [39m    [34mexpect[39m(render)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'pan'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 export render (EV6b)[2m > [22mEV6b an export renders an enveloped clip through its own envelope gain
+[31m[1mAssertionError[22m: expected [] to deeply equal [ [ 'set', 1, 2 ], …(4) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [[39m
+[32m-   [[39m
+[32m-     "set",[39m
+[32m-     1,[39m
+[32m-     2,[39m
+[32m-   ],[39m
+[32m-   [[39m
+[32m-     "ramp",[39m
+[32m-     1,[39m
+[32m-     6,[39m
+[32m-   ],[39m
+[32m-   [[39m
+[32m-     "ramp",[39m
+[32m-     0.2512,[39m
+[32m-     10,[39m
+[32m-   ],[39m
+[32m-   [[39m
+[32m-     "ramp",[39m
+[32m-     1,[39m
+[32m-     14,[39m
+[32m-   ],[39m
+[32m-   [[39m
+[32m-     "ramp",[39m
+[32m-     1,[39m
+[32m-     18,[39m
+[32m-   ],[39m
+[32m- ][39m
+[31m+ [][39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m622:65[22m[39m
+    [90m620| [39m      [35mconst[39m [ctx] [33m=[39m contexts[33m;[39m
+    [90m621| [39m      [34mexpect[39m(ctx[33m.[39msources)[33m.[39m[34mtoHaveLength[39m([34m2[39m)[33m;[39m
+    [90m622| [39m      expect(roundedCalls(gainAfter(ctx.sources[0], 'source'))).toEqua…
+    [90m   | [39m                                                                [31m^[39m
+    [90m623| [39m        [[32m'set'[39m[33m,[39m [34m1[39m[33m,[39m [34m2[39m][33m,[39m
+    [90m624| [39m        [[32m'ramp'[39m[33m,[39m [34m1[39m[33m,[39m [34m6[39m][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+

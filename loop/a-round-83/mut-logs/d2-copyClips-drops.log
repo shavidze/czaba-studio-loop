@@ -1,0 +1,71 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/envelope.test.ts [2m([22m[2m24 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 29[2mms[22m[39m
+     [32m✓[39m EV1 is 1 without points, holds the edge values, is exact at points and linear between them[32m 2[2mms[22m[39m
+     [32m✓[39m EV1 formats gains in dB with a true minus sign, 0 dB at unity and −∞ at silence[32m 0[2mms[22m[39m
+     [32m✓[39m EV2 a new point takes the current line value, rounds to ms and is inserted in order[32m 1[2mms[22m[39m
+     [32m✓[39m EV2 returns the same arrangement for a missing clip, a video clip, a time outside or a duplicate ms[32m 0[2mms[22m[39m
+     [32m✓[39m EV2 removing the last point leaves no envelope key and a missing point changes nothing[32m 0[2mms[22m[39m
+     [32m✓[39m EV3 a point stops 1 ms short of each neighbour and inside the clip window[32m 1[2mms[22m[39m
+     [32m✓[39m EV3 the gain is clamped to [0, 1] and rounded to 4 decimals; no change returns the same arrangement[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 a move keeps the envelope and the timeline points shift with the clip[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 a split gives both parts the full list and the level is continuous at the cut[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 a start trim hides points without deleting them and a trim back shows them again[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 Delete Time keeps the level of every source sample on the right part[32m 2[2mms[22m[39m
+[31m     [31m×[31m EV4 duplicate, clip copy/paste and range copy keep the whole list[39m[32m 9[2mms[22m[39m
+     [32m✓[39m EV4 a clip without an envelope gives exactly today’s objects (no envelope key)[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 shapes cover audio clips with at least one point only[32m 0[2mms[22m[39m
+     [32m✓[39m EV5a playing from 0 sets the first value at the clip start and ramps through every point[32m 1[2mms[22m[39m
+     [32m✓[39m EV5b a mid-clip start begins at the line value of that position, not at the first point[32m 0[2mms[22m[39m
+     [32m✓[39m EV5c a trimmed window ramps toward a hidden point after it and ends on the line value[32m 0[2mms[22m[39m
+     [32m✓[39m EV5d a clip without points builds no extra node; one with points adds exactly one[32m 1[2mms[22m[39m
+     [32m✓[39m EV5e a loop iteration appended later schedules against its own startAt[32m 1[2mms[22m[39m
+     [32m✓[39m EV5f setClipGain touches only the clip gain; disconnect releases the envelope node[32m 0[2mms[22m[39m
+     [32m✓[39m EV5g a faded clip with an envelope connects source → fade → envelope → clip gain[32m 0[2mms[22m[39m
+     [32m✓[39m EV5h an ended source is released together with its envelope node on the next append[32m 0[2mms[22m[39m
+     [32m✓[39m EV6 renderArrangementWav passes envelopes and fades and still has no pan or live-gain calls[32m 1[2mms[22m[39m
+     [32m✓[39m EV6b an export renders an enveloped clip through its own envelope gain[32m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m23 passed[39m[22m[90m (24)[39m
+[2m   Start at [22m 11:43:12
+[2m   Duration [22m 939ms[2m (transform 236ms, setup 0ms, import 274ms, tests 29ms, environment 500ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope under clip edits (EV4) > EV4 duplicate%2C clip copy/paste and range copy keep the whole list,line=280,column=42::AssertionError: expected undefined to strictly equal [ { time: 4, gain: 1 }, …(2) ]%0A%0A- Expected: %0A[%0A  {%0A    "gain": 1,%0A    "time": 4,%0A  },%0A  {%0A    "gain": 0.2512,%0A    "time": 8,%0A  },%0A  {%0A    "gain": 1,%0A    "time": 12,%0A  },%0A]%0A%0A+ Received: %0Aundefined%0A%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:280:42%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 envelope under clip edits (EV4)[2m > [22mEV4 duplicate, clip copy/paste and range copy keep the whole list
+[31m[1mAssertionError[22m: expected undefined to strictly equal [ { time: 4, gain: 1 }, …(2) ][39m
+
+[32m- Expected:[39m 
+[
+  {
+    "gain": 1,
+    "time": 4,
+  },
+  {
+    "gain": 0.2512,
+    "time": 8,
+  },
+  {
+    "gain": 1,
+    "time": 12,
+  },
+]
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m280:42[22m[39m
+    [90m278| [39m    )[33m;[39m
+    [90m279| [39m    [35mconst[39m clipboard [33m=[39m [34mcopyClipsToClipboard[39m(arrangement[33m,[39m [[32m'c'[39m])[33m;[39m
+    [90m280| [39m    [34mexpect[39m(clipboard[33m?.[39mitems[[34m0[39m][33m.[39menvelope)[33m.[39m[34mtoStrictEqual[39m([33mV_POINTS[39m)[33m;[39m
+    [90m   | [39m                                         [31m^[39m
+    [90m281| [39m    [35mconst[39m pasted [33m=[39m [34mplanClipboardPaste[39m(arrangement[33m,[39m clipboard[33m,[39m {
+    [90m282| [39m      at[33m:[39m [34m20[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

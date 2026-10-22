@@ -1,0 +1,192 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/envelope.test.ts [2m([22m[2m24 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 36[2mms[22m[39m
+     [32m✓[39m EV1 is 1 without points, holds the edge values, is exact at points and linear between them[32m 2[2mms[22m[39m
+     [32m✓[39m EV1 formats gains in dB with a true minus sign, 0 dB at unity and −∞ at silence[32m 0[2mms[22m[39m
+     [32m✓[39m EV2 a new point takes the current line value, rounds to ms and is inserted in order[32m 2[2mms[22m[39m
+     [32m✓[39m EV2 returns the same arrangement for a missing clip, a video clip, a time outside or a duplicate ms[32m 0[2mms[22m[39m
+     [32m✓[39m EV2 removing the last point leaves no envelope key and a missing point changes nothing[32m 0[2mms[22m[39m
+     [32m✓[39m EV3 a point stops 1 ms short of each neighbour and inside the clip window[32m 1[2mms[22m[39m
+     [32m✓[39m EV3 the gain is clamped to [0, 1] and rounded to 4 decimals; no change returns the same arrangement[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 a move keeps the envelope and the timeline points shift with the clip[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 a split gives both parts the full list and the level is continuous at the cut[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 a start trim hides points without deleting them and a trim back shows them again[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 Delete Time keeps the level of every source sample on the right part[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 duplicate, clip copy/paste and range copy keep the whole list[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 a clip without an envelope gives exactly today’s objects (no envelope key)[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 shapes cover audio clips with at least one point only[32m 0[2mms[22m[39m
+[31m     [31m×[31m EV5a playing from 0 sets the first value at the clip start and ramps through every point[39m[32m 12[2mms[22m[39m
+[31m     [31m×[31m EV5b a mid-clip start begins at the line value of that position, not at the first point[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m EV5c a trimmed window ramps toward a hidden point after it and ends on the line value[39m[32m 1[2mms[22m[39m
+     [32m✓[39m EV5d a clip without points builds no extra node; one with points adds exactly one[32m 1[2mms[22m[39m
+[31m     [31m×[31m EV5e a loop iteration appended later schedules against its own startAt[39m[32m 1[2mms[22m[39m
+     [32m✓[39m EV5f setClipGain touches only the clip gain; disconnect releases the envelope node[32m 0[2mms[22m[39m
+     [32m✓[39m EV5g a faded clip with an envelope connects source → fade → envelope → clip gain[32m 0[2mms[22m[39m
+     [32m✓[39m EV5h an ended source is released together with its envelope node on the next append[32m 0[2mms[22m[39m
+     [32m✓[39m EV6 renderArrangementWav passes envelopes and fades and still has no pan or live-gain calls[32m 1[2mms[22m[39m
+[31m     [31m×[31m EV6b an export renders an enveloped clip through its own envelope gain[39m[32m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m19 passed[39m[22m[90m (24)[39m
+[2m   Start at [22m 11:43:09
+[2m   Duration [22m 951ms[2m (transform 235ms, setup 0ms, import 276ms, tests 36ms, environment 501ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5a playing from 0 sets the first value at the clip start and ramps through every point,line=447,column=40::AssertionError: expected [ [ 'set', 1, 2 ], …(3) ] to deeply equal [ [ 'set', 1, 2 ], …(4) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -17,11 +17,6 @@%0A    [%0A      "ramp",%0A      1,%0A      14,%0A    ],%0A-   [%0A-     "ramp",%0A-     1,%0A-     18,%0A-   ],%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:447:40%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5b a mid-clip start begins at the line value of that position%2C not at the first point,line=461,column=40::AssertionError: expected [ [ 'set', 0.6256, 100 ], …(2) ] to deeply equal [ [ 'set', 0.6256, 100 ], …(3) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -12,11 +12,6 @@%0A    [%0A      "ramp",%0A      1,%0A      106,%0A    ],%0A-   [%0A-     "ramp",%0A-     1,%0A-     110,%0A-   ],%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:461:40%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5c a trimmed window ramps toward a hidden point after it and ends on the line value,line=474,column=63::AssertionError: expected [ [ 'set', 0.6256, 8 ], …(1) ] to deeply equal [ [ 'set', 0.6256, 8 ], …(2) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -7,11 +7,6 @@%0A    [%0A      "ramp",%0A      0.2512,%0A      10,%0A    ],%0A-   [%0A-     "ramp",%0A-     0.6256,%0A-     12,%0A-   ],%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:474:63%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5e a loop iteration appended later schedules against its own startAt,line=517,column=69::AssertionError: expected [ [ 'set', 1, 10 ], …(2) ] to deeply equal [ [ 'set', 1, 10 ], …(3) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -12,11 +12,6 @@%0A    [%0A      "ramp",%0A      0.5,%0A      14,%0A    ],%0A-   [%0A-     "ramp",%0A-     0.5,%0A-     18,%0A-   ],%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:517:69%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 export render (EV6b) > EV6b an export renders an enveloped clip through its own envelope gain,line=622,column=65::AssertionError: expected [ [ 'set', 1, 2 ], …(3) ] to deeply equal [ [ 'set', 1, 2 ], …(4) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -17,11 +17,6 @@%0A    [%0A      "ramp",%0A      1,%0A      14,%0A    ],%0A-   [%0A-     "ramp",%0A-     1,%0A-     18,%0A-   ],%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:622:65%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 envelope scheduling in applySchedule (EV5)[2m > [22mEV5a playing from 0 sets the first value at the clip start and ramps through every point
+[31m[1mAssertionError[22m: expected [ [ 'set', 1, 2 ], …(3) ] to deeply equal [ [ 'set', 1, 2 ], …(4) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -17,11 +17,6 @@[39m
+[2m    [[22m
+[2m      "ramp",[22m
+[2m      1,[22m
+[2m      14,[22m
+[2m    ],[22m
+[32m-   [[39m
+[32m-     "ramp",[39m
+[32m-     1,[39m
+[32m-     18,[39m
+[32m-   ],[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m447:40[22m[39m
+    [90m445| [39m    [35mconst[39m envelopeGain [33m=[39m [34mgainAfter[39m(ctx[33m.[39msources[[34m0[39m][33m,[39m [32m'source'[39m)[33m;[39m
+    [90m446| [39m    [34mexpect[39m(envelopeGain[33m.[39mgain[33m.[39mvalue)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m447| [39m    [34mexpect[39m([34mroundedCalls[39m(envelopeGain))[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                                       [31m^[39m
+    [90m448| [39m      [[32m'set'[39m[33m,[39m [34m1[39m[33m,[39m [34m2[39m][33m,[39m
+    [90m449| [39m      [[32m'ramp'[39m[33m,[39m [34m1[39m[33m,[39m [34m6[39m][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 envelope scheduling in applySchedule (EV5)[2m > [22mEV5b a mid-clip start begins at the line value of that position, not at the first point
+[31m[1mAssertionError[22m: expected [ [ 'set', 0.6256, 100 ], …(2) ] to deeply equal [ [ 'set', 0.6256, 100 ], …(3) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -12,11 +12,6 @@[39m
+[2m    [[22m
+[2m      "ramp",[22m
+[2m      1,[22m
+[2m      106,[22m
+[2m    ],[22m
+[32m-   [[39m
+[32m-     "ramp",[39m
+[32m-     1,[39m
+[32m-     110,[39m
+[32m-   ],[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m461:40[22m[39m
+    [90m459| [39m    [35mconst[39m envelopeGain [33m=[39m [34mgainAfter[39m(ctx[33m.[39msources[[34m0[39m][33m,[39m [32m'source'[39m)[33m;[39m
+    [90m460| [39m    [34mexpect[39m(envelopeGain[33m.[39mgain[33m.[39mvalue)[33m.[39m[34mtoBeCloseTo[39m([34m0.6256[39m[33m,[39m [34m10[39m)[33m;[39m
+    [90m461| [39m    [34mexpect[39m([34mroundedCalls[39m(envelopeGain))[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                                       [31m^[39m
+    [90m462| [39m      [[32m'set'[39m[33m,[39m [34m0.6256[39m[33m,[39m [34m100[39m][33m,[39m
+    [90m463| [39m      [[32m'ramp'[39m[33m,[39m [34m0.2512[39m[33m,[39m [34m102[39m][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 envelope scheduling in applySchedule (EV5)[2m > [22mEV5c a trimmed window ramps toward a hidden point after it and ends on the line value
+[31m[1mAssertionError[22m: expected [ [ 'set', 0.6256, 8 ], …(1) ] to deeply equal [ [ 'set', 0.6256, 8 ], …(2) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -7,11 +7,6 @@[39m
+[2m    [[22m
+[2m      "ramp",[22m
+[2m      0.2512,[22m
+[2m      10,[22m
+[2m    ],[22m
+[32m-   [[39m
+[32m-     "ramp",[39m
+[32m-     0.6256,[39m
+[32m-     12,[39m
+[32m-   ],[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m474:63[22m[39m
+    [90m472| [39m    ])[33m;[39m
+    [90m473| [39m    [35mconst[39m { ctx } [33m=[39m [34mscheduleEnvelopes[39m(arrangement[33m,[39m [34m0[39m[33m,[39m [34m0[39m)[33m;[39m
+    [90m474| [39m    [34mexpect[39m([34mroundedCalls[39m([34mgainAfter[39m(ctx[33m.[39msources[[34m0[39m][33m,[39m [32m'source'[39m)))[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                                                              [31m^[39m
+    [90m475| [39m      [[32m'set'[39m[33m,[39m [34m0.6256[39m[33m,[39m [34m8[39m][33m,[39m
+    [90m476| [39m      [[32m'ramp'[39m[33m,[39m [34m0.2512[39m[33m,[39m [34m10[39m][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 envelope scheduling in applySchedule (EV5)[2m > [22mEV5e a loop iteration appended later schedules against its own startAt
+[31m[1mAssertionError[22m: expected [ [ 'set', 1, 10 ], …(2) ] to deeply equal [ [ 'set', 1, 10 ], …(3) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -12,11 +12,6 @@[39m
+[2m    [[22m
+[2m      "ramp",[22m
+[2m      0.5,[22m
+[2m      14,[22m
+[2m    ],[22m
+[32m-   [[39m
+[32m-     "ramp",[39m
+[32m-     0.5,[39m
+[32m-     18,[39m
+[32m-   ],[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m517:69[22m[39m
+    [90m515| [39m    handle.appendPlan(planLoopIteration(arrangement, params, 1), 2, 18…
+    [90m516| [39m    [34mexpect[39m(ctx[33m.[39msources)[33m.[39m[34mtoHaveLength[39m([34m2[39m)[33m;[39m
+    [90m517| [39m    expect(roundedCalls(gainAfter(ctx.sources[0], 'first source'))).to…
+    [90m   | [39m                                                                    [31m^[39m
+    [90m518| [39m      [[32m'set'[39m[33m,[39m [34m1[39m[33m,[39m [34m10[39m][33m,[39m
+    [90m519| [39m      [[32m'ramp'[39m[33m,[39m [34m1[39m[33m,[39m [34m12[39m][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 export render (EV6b)[2m > [22mEV6b an export renders an enveloped clip through its own envelope gain
+[31m[1mAssertionError[22m: expected [ [ 'set', 1, 2 ], …(3) ] to deeply equal [ [ 'set', 1, 2 ], …(4) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -17,11 +17,6 @@[39m
+[2m    [[22m
+[2m      "ramp",[22m
+[2m      1,[22m
+[2m      14,[22m
+[2m    ],[22m
+[32m-   [[39m
+[32m-     "ramp",[39m
+[32m-     1,[39m
+[32m-     18,[39m
+[32m-   ],[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m622:65[22m[39m
+    [90m620| [39m      [35mconst[39m [ctx] [33m=[39m contexts[33m;[39m
+    [90m621| [39m      [34mexpect[39m(ctx[33m.[39msources)[33m.[39m[34mtoHaveLength[39m([34m2[39m)[33m;[39m
+    [90m622| [39m      expect(roundedCalls(gainAfter(ctx.sources[0], 'source'))).toEqua…
+    [90m   | [39m                                                                [31m^[39m
+    [90m623| [39m        [[32m'set'[39m[33m,[39m [34m1[39m[33m,[39m [34m2[39m][33m,[39m
+    [90m624| [39m        [[32m'ramp'[39m[33m,[39m [34m1[39m[33m,[39m [34m6[39m][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+

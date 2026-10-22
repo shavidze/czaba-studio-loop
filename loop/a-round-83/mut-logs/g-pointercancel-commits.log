@@ -1,0 +1,51 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx [2m([22m[2m20 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2098[2mms[22m[39m
+     [32m✓[39m EU1 the Env button and the A key toggle the mode and write the status[32m 260[2mms[22m[39m
+     [32m✓[39m EU1 A with a modifier, a repeat or in a text field does nothing[32m 108[2mms[22m[39m
+     [32m✓[39m EU1 mode off shows no editor and no points; mode on hides the fade handles[32m 109[2mms[22m[39m
+     [32m✓[39m EU1 a video clip, a narrow clip and a folded lane never render an editor[32m 115[2mms[22m[39m
+     [32m✓[39m EU2 a double-click adds a point at the line value with one entry; undo and redo restore it[32m 109[2mms[22m[39m
+     [32m✓[39m EU2 a point added between two points takes their interpolated value, not the pointer height[32m 72[2mms[22m[39m
+     [32m✓[39m EU3 dragging a point down by a quarter of the body gives 0.75 with one entry[32m 116[2mms[22m[39m
+     [32m✓[39m EU3 a horizontal drag past a neighbour stops 1 ms short of it[32m 122[2mms[22m[39m
+[31m     [31m×[31m EU3 a press without movement writes nothing; pointercancel reverts with no entry[39m[32m 104[2mms[22m[39m
+     [32m✓[39m EU3 a drag that ends at its start value writes the no-change status[32m 81[2mms[22m[39m
+     [32m✓[39m EU3 the editor unmounting mid-drag reverts with no entry and releases the gesture[32m 84[2mms[22m[39m
+     [32m✓[39m EU3 the A key and the Env button are refused mid-drag[32m 90[2mms[22m[39m
+     [32m✓[39m EU3 a lost pointer during an uncaptured drag reverts with no entry[32m 74[2mms[22m[39m
+     [32m✓[39m EU4 a double-click on a point removes it with one entry and adds nothing[32m 74[2mms[22m[39m
+     [32m✓[39m EU4 a double-click within 500 ms after a moved drag of that point is ignored[32m 90[2mms[22m[39m
+     [32m✓[39m EU5 in mode an editor press selects without seeking or a range; header move and trim still work[32m 136[2mms[22m[39m
+     [32m✓[39m EU5 mode off: the body still seeks on click, the line is drawn and there are no points[32m 76[2mms[22m[39m
+     [32m✓[39m EU5 the line passes through every visible point at y = 1 − gain[32m 64[2mms[22m[39m
+     [32m✓[39m EU6 a double-click right after a fade drag keeps the fade; after 600 ms it resets it[32m 104[2mms[22m[39m
+     [32m✓[39m EU6 the guard is per edge and a cancelled drag also arms it[32m 107[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m19 passed[39m[22m[90m (20)[39m
+[2m   Start at [22m 11:43:27
+[2m   Duration [22m 4.14s[2m (transform 933ms, setup 0ms, import 1.42s, tests 2.10s, environment 489ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx,title=app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 drag a point (EU3) > EU3 a press without movement writes nothing; pointercancel reverts with no entry,line=513,column=45::AssertionError: expected '6.000:1.0000;10.000:0.0012;14.000:1.0…' to be '6.000:1.0000;10.000:0.2512;14.000:1.0…' // Object.is equality%0A%0AExpected: "6.000:1.0000;10.000:0.2512;14.000:1.0000"%0AReceived: "6.000:1.0000;10.000:0.0012;14.000:1.0000"%0A%0A ❯ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx:513:45%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx[2m > [22mSRW-18 stage 2 drag a point (EU3)[2m > [22mEU3 a press without movement writes nothing; pointercancel reverts with no entry
+[31m[1mAssertionError[22m: expected '6.000:1.0000;10.000:0.0012;14.000:1.0…' to be '6.000:1.0000;10.000:0.2512;14.000:1.0…' // Object.is equality[39m
+
+Expected: [32m"6.000:1.0000;10.000:0.[7m25[27m12;14.000:1.0000"[39m
+Received: [31m"6.000:1.0000;10.000:0.[7m00[27m12;14.000:1.0000"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx:[2m513:45[22m[39m
+    [90m511| [39m    [34mexpect[39m([34mpointOf[39m([32m's1'[39m[33m,[39m [34m1[39m)[33m.[39mdataset[33m.[39mgain)[33m.[39m[34mtoBe[39m([32m'0.0012'[39m)[33m;[39m
+    [90m512| [39m    fireEvent[33m.[39m[34mpointerCancel[39m([34mpointOf[39m([32m's1'[39m[33m,[39m [34m1[39m)[33m,[39m { pointerId[33m:[39m [34m3[39m })[33m;[39m
+    [90m513| [39m    [34mexpect[39m([34mclipRoot[39m([32m's1'[39m)[33m.[39mdataset[33m.[39menvelope)[33m.[39m[34mtoBe[39m([33mV_DATA[39m)[33m;[39m
+    [90m   | [39m                                            [31m^[39m
+    [90m514| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m515| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39m[34misArrangementPreviewActive[39m())[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

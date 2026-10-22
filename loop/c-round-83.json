@@ -1,0 +1,64 @@
+{
+  "round": 83,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-22T12:00:49.8436104Z",
+    "round": 83,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R83-L1",
+      "severity": "low",
+      "steps": [
+        "/studio-lab anonymous, Snap off, zoom 40 px/s; stems clip at 2 s (clip root left = ruler x for 2.000 s)",
+        "Press A (Env mode on)",
+        "Double-click the stems body at the ruler x for 6.000 s (x = 752 at both viewports)"
+      ],
+      "expected": "E7: the point is added at the pointer's timeline time, the same time the ruler shows at that x (6.000)",
+      "actual": "data-envelope = 5.975:1.0000 (status 'Envelope: წერტილი დაემატა — 5.975 წმ · 0.0 dB.'). This happens on every add at both viewports (dt = -0.025 s at 6, 10 and 14). The handler measures x from the clip body, which starts 1 px right of the clip root because of the border. The point is drawn at x = 752, where the ruler reads 6.000, so the drawn point, its label and the audio disagree by 1 px. That is 25 ms at 40 px/s and scales with zoom (100 ms at 10 px/s). A recorded this as the L1 signal. Severity Low (not Medium): the offset is 1 px, smaller than a pointer can place on purpose; it depends on zoom; the point is still placed free, as specified; no data is lost. It does, however, happen on every add.",
+      "evidence": "c-round-83/r1-1440x900.json and r1-1280x720.json, row EN-ADD-OFFSET (dt [-0.025,-0.025,-0.025]); EN-DRAWN dx = -1.0 px between the polyline vertex and the point centre; r2-*.json V = 5.975:1.0000;9.975:0.2512;13.975:1.0000"
+    }
+  ],
+  "passed": [
+    "EN-MODE",
+    "EN-ADD",
+    "EN-DRAG",
+    "EN-DRAWN",
+    "EN-EXPORT",
+    "EN-LIVE",
+    "EN-MIDSTART",
+    "EN-EDITS",
+    "EN-UNDO",
+    "EN-MULTIPLY",
+    "EN-PLAY-EDIT",
+    "EN-NEIGHBOURS",
+    "X1-DBLCLICK",
+    "REG-HYD",
+    "G83-3",
+    "T83-TARGETED",
+    "SOURCE-UNCHANGED"
+  ],
+  "blocked": [
+    "G83-3 fake-Bearer 403 sub-check: backend unavailable in cloud (/api/studio-token with a fake Bearer token returns 500 'Unable to prepare Studio access', not 403). Not counted as PASS."
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "signals": [
+    "EN-LIVE: a narrow ±0.1 s meter window is noisy on the pulse material (control alone ranged -18.6 to -10.6 dB within ±0.1 s). Run 1440-a used that oracle and failed (d10 -5.7, d16 +6.3). Its raw samples were not saved, so its wide-window value cannot be recovered: it counts as one failed measurement. The valid measurements are 1440-b (-11.79 / +0.14 dB) and 1280-a (-11.85 / +0.15 dB), one per viewport. The tolerances (±2 / ±1 dB) were not changed. The windows [9,11] and [15,16.5] come from the plateau geometry (flat between 6.975 and 12.975 and after 13.975), not from the result. The narrow values are kept as EN-LIVE-narrow in r3-*.json.",
+    "EN-PLAY-EDIT: one point drag during playback created 6 new buffer sources (window.__src 10 -> 16), because each preview reschedules. Playback stayed monotonic (position advance 2.319 s vs wall clock 2.32 s), with no console error.",
+    "X1: with no click count, Chromium produced no dblclick after a fade drag (0 events, as A saw). A dblclick with clickCount=2 sent 24 ms after the drag did reach the handle, and the guard kept the fade. Whether a real human click pair after a 5 px drag makes Chromium emit dblclick was not checked here.",
+    "Sticky-header probe (reviewer signal): after scrolling the lane 330 px horizontally in Env mode, the track header (not the z-30 point) is topmost at a point position under the header, at both viewports. The overlap was not reproduced.",
+    "At 1280x720 a body range selection shifts the stems lane up 9 px (clip y 458 -> 449, h 71 -> 66). The range code is not part of round 83, so this is probably older behaviour, but it was not checked against bdc2067. It made one C harness step stale; that step was re-run with fresh coordinates.",
+    "Setup deviation: in r1 the synthetic video was loaded for EN-MODE and stayed loaded (muted) through EN-ADD … X1, which is why u0 = 'Undo: Mute — ვიდეო'. No oracle depends on it. r2 and r3 ran without video."
+  ]
+}

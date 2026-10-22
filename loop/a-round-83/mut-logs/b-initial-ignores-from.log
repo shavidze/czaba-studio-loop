@@ -1,0 +1,81 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/envelope.test.ts [2m([22m[2m24 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 33[2mms[22m[39m
+     [32m✓[39m EV1 is 1 without points, holds the edge values, is exact at points and linear between them[32m 2[2mms[22m[39m
+     [32m✓[39m EV1 formats gains in dB with a true minus sign, 0 dB at unity and −∞ at silence[32m 0[2mms[22m[39m
+     [32m✓[39m EV2 a new point takes the current line value, rounds to ms and is inserted in order[32m 1[2mms[22m[39m
+     [32m✓[39m EV2 returns the same arrangement for a missing clip, a video clip, a time outside or a duplicate ms[32m 1[2mms[22m[39m
+     [32m✓[39m EV2 removing the last point leaves no envelope key and a missing point changes nothing[32m 1[2mms[22m[39m
+     [32m✓[39m EV3 a point stops 1 ms short of each neighbour and inside the clip window[32m 1[2mms[22m[39m
+     [32m✓[39m EV3 the gain is clamped to [0, 1] and rounded to 4 decimals; no change returns the same arrangement[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 a move keeps the envelope and the timeline points shift with the clip[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 a split gives both parts the full list and the level is continuous at the cut[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 a start trim hides points without deleting them and a trim back shows them again[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 Delete Time keeps the level of every source sample on the right part[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 duplicate, clip copy/paste and range copy keep the whole list[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 a clip without an envelope gives exactly today’s objects (no envelope key)[32m 0[2mms[22m[39m
+     [32m✓[39m EV4 shapes cover audio clips with at least one point only[32m 0[2mms[22m[39m
+     [32m✓[39m EV5a playing from 0 sets the first value at the clip start and ramps through every point[32m 1[2mms[22m[39m
+[31m     [31m×[31m EV5b a mid-clip start begins at the line value of that position, not at the first point[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m EV5c a trimmed window ramps toward a hidden point after it and ends on the line value[39m[32m 4[2mms[22m[39m
+     [32m✓[39m EV5d a clip without points builds no extra node; one with points adds exactly one[32m 1[2mms[22m[39m
+     [32m✓[39m EV5e a loop iteration appended later schedules against its own startAt[32m 1[2mms[22m[39m
+     [32m✓[39m EV5f setClipGain touches only the clip gain; disconnect releases the envelope node[32m 0[2mms[22m[39m
+     [32m✓[39m EV5g a faded clip with an envelope connects source → fade → envelope → clip gain[32m 0[2mms[22m[39m
+     [32m✓[39m EV5h an ended source is released together with its envelope node on the next append[32m 0[2mms[22m[39m
+     [32m✓[39m EV6 renderArrangementWav passes envelopes and fades and still has no pan or live-gain calls[32m 1[2mms[22m[39m
+     [32m✓[39m EV6b an export renders an enveloped clip through its own envelope gain[32m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m22 passed[39m[22m[90m (24)[39m
+[2m   Start at [22m 11:43:08
+[2m   Duration [22m 931ms[2m (transform 230ms, setup 0ms, import 270ms, tests 33ms, environment 489ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5b a mid-clip start begins at the line value of that position%2C not at the first point,line=460,column=37::AssertionError: expected 1 to be close to 0.6256, received difference is 0.37439999999999996, but expected 5e-11%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:460:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-83/mut/store/app/lib/arrangement/__tests__/envelope.test.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5c a trimmed window ramps toward a hidden point after it and ends on the line value,line=474,column=63::AssertionError: expected [ [ 'set', 1, 8 ], …(2) ] to deeply equal [ [ 'set', 0.6256, 8 ], …(2) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -1,9 +1,9 @@%0A  [%0A    [%0A      "set",%0A-     0.6256,%0A+     1,%0A      8,%0A    ],%0A    [%0A      "ramp",%0A      0.2512,%0A%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:474:63%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 envelope scheduling in applySchedule (EV5)[2m > [22mEV5b a mid-clip start begins at the line value of that position, not at the first point
+[31m[1mAssertionError[22m: expected 1 to be close to 0.6256, received difference is 0.37439999999999996, but expected 5e-11[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m460:37[22m[39m
+    [90m458| [39m    [35mconst[39m { ctx } [33m=[39m [34mscheduleEnvelopes[39m(arrangement[33m,[39m [34m8[39m[33m,[39m [34m100[39m)[33m;[39m
+    [90m459| [39m    [35mconst[39m envelopeGain [33m=[39m [34mgainAfter[39m(ctx[33m.[39msources[[34m0[39m][33m,[39m [32m'source'[39m)[33m;[39m
+    [90m460| [39m    [34mexpect[39m(envelopeGain[33m.[39mgain[33m.[39mvalue)[33m.[39m[34mtoBeCloseTo[39m([34m0.6256[39m[33m,[39m [34m10[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m461| [39m    [34mexpect[39m([34mroundedCalls[39m(envelopeGain))[33m.[39m[34mtoEqual[39m([
+    [90m462| [39m      [[32m'set'[39m[33m,[39m [34m0.6256[39m[33m,[39m [34m100[39m][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 envelope scheduling in applySchedule (EV5)[2m > [22mEV5c a trimmed window ramps toward a hidden point after it and ends on the line value
+[31m[1mAssertionError[22m: expected [ [ 'set', 1, 8 ], …(2) ] to deeply equal [ [ 'set', 0.6256, 8 ], …(2) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,9 +1,9 @@[39m
+[2m  [[22m
+[2m    [[22m
+[2m      "set",[22m
+[32m-     0.6256,[39m
+[31m+     1,[39m
+[2m      8,[22m
+[2m    ],[22m
+[2m    [[22m
+[2m      "ramp",[22m
+[2m      0.2512,[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m474:63[22m[39m
+    [90m472| [39m    ])[33m;[39m
+    [90m473| [39m    [35mconst[39m { ctx } [33m=[39m [34mscheduleEnvelopes[39m(arrangement[33m,[39m [34m0[39m[33m,[39m [34m0[39m)[33m;[39m
+    [90m474| [39m    [34mexpect[39m([34mroundedCalls[39m([34mgainAfter[39m(ctx[33m.[39msources[[34m0[39m][33m,[39m [32m'source'[39m)))[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                                                              [31m^[39m
+    [90m475| [39m      [[32m'set'[39m[33m,[39m [34m0.6256[39m[33m,[39m [34m8[39m][33m,[39m
+    [90m476| [39m      [[32m'ramp'[39m[33m,[39m [34m0.2512[39m[33m,[39m [34m10[39m][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+

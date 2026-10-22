@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-22T10:00:03.299Z)
+# Active loop summary (2026-10-22T12:29:30.796Z)
 
-- backlog.json 740 KB -> active view 230 KB
-- status: G_ROOT_GATE round 82
-- servers: `{"checkedUtc":"2026-10-22T09:30:35.7232895Z","round":82,"attempt":1,"store":200}`
-- last publication: bdc2067627b8390679caeda1a7e3d25db41452e9 (rounds 82-82)
-- last root gate: round 82 published - commit bdc2067627b8390679caeda1a7e3d25db41452e9 pushed
+- backlog.json 752 KB -> active view 146 KB
+- status: G_ROOT_GATE round 83
+- servers: `{"checkedUtc":"2026-10-22T12:00:49.8436104Z","round":83,"attempt":1,"store":200}`
+- last publication: a68c81d91be994ee02eb00e184cbdcc06b5f5a60 (rounds 83-83)
+- last root gate: round 83 published - commit a68c81d91be994ee02eb00e184cbdcc06b5f5a60 pushed
 
-## Current items: SRW-13, SRW-14, SRW-17, SRW-18, SRW-19, SRW-20, SRW-21
+## Current items: SRW-18, SRW-19, SRW-20, SRW-21
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -207,7 +207,6 @@
 - A-R79-REVIEW-RESIDUALS / low / open - Lows batch (#4 lastHoverTrackId option; #6 lane name button ~20 px; #11 maxLength code units vs code points; #12 repeated trackGroupRows per click; #13 arrangementGroups/rowParentId naming; #14 inline rename status strings, hover:bg-surface) / A round-79 code-review residuals
 - TRACK-FOLD-U / info / signal (Live 12 sec. 42 Fold/Unfold Selected Tracks U or left/right arrows; CZABA arrows nudge clips; not requested) / U on selected plain tracks and arrow-key fold are not bound; U acts on selected groups only (D-29z45)
 - GROUPS-NO-MODEL-SANITIZER / info / signal (frozen model.ts; belongs with the model if project load/save ever arrives) / no normalizeTrackGroups sanitizer for groups in model.ts or the context
-- C-R80-O3-REFUSED-LANE-DRAG-PARTIAL-COMMIT / low / ruled + scheduled round 82 X1 (D-29z47): the committed last valid place is the FB-03 rule (plan l.170, amber + clip stays at its last valid place); defect = release status that never says where the clip ended; fix = honest release status; committed position unchanged / a cross-lane drag refused for overlap (music 101 s onto stems with a clip at 2-18) commits the last same-lane preview (1.025 s) instead of t
 - C-R80-O1-FIT-CAP-81 / info / acknowledged (existing fit cap) / lane fit caps at 81 px; C first used a self-invented fill criterion, re-judged against the written acceptance
 - C-R80-O4-DEMO-FULL-SCALE / info / acknowledged (same as DEMO-SFX-FULL-SCALE) / exports peak 1.0 with 486 full-scale samples in both collapsed and expanded exports
 - GATE80-S3-LABEL-FOCUS-LOOKUP / low / open - Lows batch / row-focus checkpoint (needs a data-testid on the frozen ArrangementLane name button) / trackRowNameButton finds the lane name button by a Georgian label substring; a text change silently breaks focus restore
@@ -232,12 +231,26 @@
 - ARCH-R81-VOLUME-STATE-MACHINE / info / signal - checkpoint request question 10 (b-round-78-checkpoint-request.md); reviewers: keep for now; extract only if a third target kind arrives / ArrangementContext MixVolumeTarget volume preview/commit/cancel state machine (volumeTargetKeyRef, cross-flush, six group members) could mov
 - A-R81-ORPHAN-SOLO-CONSISTENCY / info / acknowledged (unreachable from the UI: no path creates an orphan group); GROUPS-NO-MODEL-SANITIZER signal / orphan-solo rule applies to audibility only; toggleSolo/toggleTrackGroupSolo still count an orphan soloed group
 - C-R81-NB-POINTERCANCEL / info / acknowledged (Playwright cannot raise a real pointercancel; jsdom UM3 only) / group Volume pointercancel revert not browser-verified
-- SRW18-KEYBOARD-FADES / info / signal for SRW-18 stage 2 planning (not scheduled in stage 1; no keyboard path invented) / fade lengths are mouse-only in stage 1
+- SRW18-KEYBOARD-FADES / low / open (own backlog entry per gate-82 reviewer #4; covers fade handles and, from round 83, envelope points; accessibility; Lows batch or a dedicated stage, never silently dropped) / fade handles and envelope points are mouse-only: no role, focus or keyboard path
+- GATE82-S1-DBLCLICK-AFTER-FADE-DRAG / medium (unconfirmed in a browser) / scheduled round 83 X1 (D-29z48): 500 ms drag-then-double-click guard on fade handles; C row X1-DBLCLICK records whether Chromium emits dblclick / a quick click right after a fade-handle drag may be counted as a double-click and reset the new fade (second history entry)
+- GATE82-S2-SPLIT-INSIDE-FADE / low (design signal) / doc 072 line in round 83; behaviour is the C-verified F3 rule; later option: keep ramp gain across the cut or split the ramp proportionally (needs B ruling, not scheduled) / split / Delete inside a fade is not sound-neutral: the right part starts at gain 1
+- GATE82-S3-FADE-HANDLE-HIT-AREA / low / doc 072 line in round 83 (mouse case); touch case = A-R82-L2 in Lows batch / hidden (opacity 0) fade handles take the top 10 px of trim strips and body corners; a plain click there starts a no-op fade gesture
+- GATE82-S5-OPTIONAL-RAMP-METHODS / low / Lows batch: upgrade the three frozen FakeParams and make setValueAtTime/linearRampToValueAtTime required / optional ramp methods on ScheduleAudioParam would silently skip fades/envelopes if missing
+- GATE82-S6-PREVIEW-RESCHEDULE-PER-MOVE / info / signal: throttle preview reschedule only if users notice clicks; envelope drags inherit it / every fade/envelope preview move during playback rebuilds the graph (scheduleKey)
+- GATE82-S7-FADE-HANDLE-UNMOUNT-MID-DRAG / low / Lows batch (ArrangementClip.tsx): keep the handle mounted during a fade gesture or treat lostpointercapture as pointercancel; the round-83 envelope points must revert on unmount (E7) / if the fade handle unmounts mid-drag (zoom < 24 px, fold) the preview stays active until the next gesture
+- A-R82-OVERLAY-2PX / low (cosmetic) / Lows batch / fade ramp overlay viewBox uses width while the body is width - 2 px (about 2 px off near the right edge)
+- A-R82-L2-HIDDEN-HANDLE-TOUCH / low / Lows batch / hidden fade handles still catch presses; no touch-none, so a touch drag can be cancelled
+- C-R82-LIVE-ORACLE-PAIRED / info / applied in round 83 (EN-LIVE / EN-MIDSTART are paired same-position comparisons) / reading-at-t1-vs-t2 live oracles are content-dominated; use paired envelope-vs-control comparisons
+- ENVELOPE-SNAP / info / signal (Live snaps breakpoints to grid, confirmed text; CZABA stage 2 free like fades); needs a B ruling before scheduling / envelope breakpoints do not snap to the grid
+- ENVELOPE-CLEAR / info / signal (Live Clear Envelope context command); not requested in FB-06 / no one-step Clear Envelope; points are deleted one by one
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
+- SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
+- SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-16 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 6b574e8, 2a e347b97, 2b-1 db9cc25, 2b-2 60006d4, 2b-3 c062147; Tech Lead R72-T/R74-T/R77-T/R78-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next
+- SRW-17 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 74eca15, stage 2 68383fa, stage 3 efbed86; Tech Lead R79-T/R81-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete
