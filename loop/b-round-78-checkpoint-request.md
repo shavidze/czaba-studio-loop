@@ -34,3 +34,15 @@
   - Move `ARRANGEMENT_HEADER_WIDTH_PX` and `TRACK_HEADER_PADDING_X_PX` into `lib/arrangement/` only if that extraction happens.
 - **8.** Should this extraction happen at the SRW-17 boundary (after stage 3), and should the stage-2 collapse state (now in `TrackLaneLayout`, beside the track fold) go into the same hook, or into a separate lane-layout hook?
 - **Round 80 does not extract anything.** It keeps the existing pattern: the collapse state sits beside `folded`, and pure helpers go in `groups.ts`.
+
+## Addendum 2 — SRW-17 feature boundary (B round 80 planning, 2026-10-22; still non-blocking, no root result found yet)
+- **Feature boundary:** round 81 is the last SRW-17 stage (group Mute/Solo/Volume). After its C PASS, SRW-17 is feature-complete pending Tech Lead checks, so this is the boundary the round-79 addendum named.
+- **Accumulated risk:**
+  - Round 81 is the first SRW-17 round that opens `ArrangementContext.tsx` (2948 lines). It adds group mix actions and a group volume pipeline beside the track volume pipeline (`volumeGestureRef`, `volumeBeforeRef`, flush/commit/blur/cancel).
+  - `StudioWorkspace.tsx` is now 2471 lines (2044 before SRW-17).
+  - Signal 4 came from both round-80 reviewers: `collapsedGroups`, `pendingRowFocusRef` with a dependency-less layout effect, and three DOM focus helpers.
+- **9.** Answer these together with question 8:
+  - (a) Should the track and group volume pipelines in `ArrangementContext` share one target-kind abstraction, or stay parallel?
+  - (b) Should the row-focus helpers move to `app/lib/arrangement/row-focus.ts`, with a `data-testid` on the lane name button replacing the Georgian label match (gate-80 #3, `ARCH-R80-ROW-FOCUS`)?
+  - (c) Should the collapse state and the track-row selection go into one hook or two?
+- **Round 81 does not extract anything.** Any approved extraction becomes its own B task, with one owner and with the stage-1/2/3 test files as the behaviour lock.

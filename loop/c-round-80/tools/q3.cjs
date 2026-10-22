@@ -1,0 +1,25 @@
+const X=require('./h80.cjs');const{L,sleep,st,blur,key,fold,rowKeys,gstate,clickName,clickGroup}=X;
+const vp=process.argv[2]||'1440x900';const OUT=`${L.OUT}/q3-${vp}.json`;const rec=X.mkRec(OUT);const SH=`${L.OUT}/shots`;
+const measure=p=>p.evaluate(()=>{const sc=document.querySelector('[data-testid=arrangement-timeline-scroller]');const sr=sc.getBoundingClientRect();const first=document.querySelector('[data-track-id],[data-group-id]');const c=first.parentElement;
+ const rs=[...c.children].filter(e=>e.dataset.trackId||e.dataset.groupId).map(e=>({k:e.dataset.trackId||('G@'+e.dataset.groupDepth+(e.dataset.groupCollapsed?'c':'')),h:e.getBoundingClientRect().height,top:e.getBoundingClientRect().top,bottom:e.getBoundingClientRect().bottom}));
+ const chrome=rs[0].top-sr.top+sc.scrollTop;const V=sc.clientHeight-chrome;const visBottom=sr.top+sc.clientHeight;const last=rs[rs.length-1];
+ const fit=document.querySelector('[data-testid=arrangement-fit]');
+ return{V:+V.toFixed(2),visBottom,lastBottom:last.bottom,rows:rs.map(r=>[r.k,+r.h.toFixed(2)]),rowsSum:+rs.reduce((a,r)=>a+r.h,0).toFixed(2),overflow:sc.scrollHeight-sc.clientHeight,fitPressed:fit&&(fit.getAttribute('aria-pressed')||fit.dataset.state||fit.textContent.trim())};});
+const judge=m=>{const lanes=m.rows.filter(r=>!r[0].startsWith('G'));const groups=m.rows.filter(r=>r[0].startsWith('G'));const M=lanes.reduce((a,r)=>a+(r[0]==='video'?53:61),0)+groups.length*28;
+ return{M,branch:M<=m.V+0.5?'M<=V':'M>V',fitsBottom:m.lastBottom<=m.visBottom+1,fillGap:+(m.V-m.rowsSum).toFixed(2),groupRows28:groups.every(r=>r[1]===28),ok:(M<=m.V+0.5?m.lastBottom<=m.visBottom+1&&m.V-m.rowsSum<=4:true)&&groups.every(r=>r[1]===28)};};
+(async()=>{const s=await L.open(vp);const p=s.page;await L.fresh(p);await X.decline(p);await sleep(500);const out={};
+ const M=async lab=>{await sleep(500);out[lab]=await measure(p);out[lab].judge=judge(out[lab]);};
+ await M('noGroup');
+ await X.groupStemsSfx(p);await M('g1Expanded');
+ await fold(p,'ჯგუფი 1');await M('g1Collapsed');await p.screenshot({path:`${SH}/fit-g1c-${vp}.png`});
+ await fold(p,'ჯგუფი 1');await M('g1Reexpanded');
+ await clickName(p,'music');await clickGroup(p,'ჯგუფი 1',['Control']);await blur(p);await key(p,'Control+g',500);await M('nestedExpanded');
+ await fold(p,'ჯგუფი 1');await M('nestedG1c');await fold(p,'ჯგუფი 2');await M('nestedBothC');await p.screenshot({path:`${SH}/fit-g1g2c-${vp}.png`});
+ await fold(p,'ჯგუფი 2');await M('nestedG2e');await fold(p,'ჯგუფი 1');await M('nestedAllE');
+ await blur(p);await key(p,'Control+z',500);await key(p,'Control+z',500);await M('undoToNone');
+ const same=(a,b)=>JSON.stringify(a.rows)===JSON.stringify(b.rows);
+ const lanesOnly=m=>m.rows.filter(r=>!r[0].startsWith('G')).map(r=>r[1]);
+ const res={returnG1:same(out.g1Expanded,out.g1Reexpanded),returnNested:same(out.nestedExpanded,out.nestedAllE),returnNestedG1:same(out.nestedG1c,out.nestedG2e),returnNone:same(out.noGroup,out.undoToNone),
+  allJudge:Object.fromEntries(Object.entries(out).map(([k,v])=>[k,v.judge.ok])),collapsedGrew:lanesOnly(out.g1Collapsed).slice(1).every((h,i)=>h>=lanesOnly(out.g1Expanded)[i+1])};
+ rec('FOLD-FIT',Object.values(res.allJudge).every(Boolean)&&res.returnG1&&res.returnNested&&res.returnNestedG1&&res.returnNone,{res,...out});
+ await X.finish(s,rec,'Q3-'+vp);})().catch(e=>{console.log('SCRIPT ERROR',e);process.exit(1)});

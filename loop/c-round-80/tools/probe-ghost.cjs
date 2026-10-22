@@ -1,0 +1,14 @@
+const X=require('./h80.cjs');const{L,sleep,st,blur,key,fold,rowKeys,gstate}=X;const G='ჯგუფი 1';
+const ghost=p=>p.evaluate(()=>[...document.querySelectorAll('[data-testid=arrangement-lane-move-ghost]')].map(g=>g.closest('[data-track-id]').dataset.trackId));
+(async()=>{const s=await L.open('1440x900');const p=s.page;await L.fresh(p);await X.setup(p);await X.groupStemsSfx(p);const out={};
+ const drag=async(lab,toY,dx)=>{const me=(await X.clips(p)).find(c=>c.lane==='music');const hb=await p.evaluate(id=>document.querySelector(`[data-clip-id="${id}"]`).firstElementChild.getBoundingClientRect().toJSON(),me.id);const x0=620,y0=Math.round(hb.y+hb.height/2);const y1=await toY();
+  await p.mouse.move(x0,y0);await p.mouse.down();for(let i=1;i<=12;i++){await p.mouse.move(x0+Math.round(dx*i/12),Math.round(y0+(y1-y0)*i/12));await sleep(15);}await sleep(300);
+  const g=await ghost(p);const live=await p.evaluate(id=>{const e=document.querySelector(`[data-clip-id="${id}"]`);return{start:e.getAttribute('data-clip-start'),tf:getComputedStyle(e).transform,lane:e.closest('[data-track-id]').dataset.trackId}},me.id);
+  const other=await p.evaluate(()=>[...document.querySelectorAll('[data-testid*=ghost]')].map(e=>e.getAttribute('data-testid')+'@'+(e.closest('[data-track-id]')||{dataset:{}}).dataset.trackId));
+  await p.mouse.up();await sleep(500);const me2=(await X.clips(p)).find(c=>c.id===me.id);out[lab]={ghost:g,anyGhost:other,live,after:[me2.lane,me2.start]};await blur(p);if(Math.abs(me2.start-me.start)>0.001||me2.lane!=='music')await key(p,'Control+z',500);};
+ await drag('expanded-to-stems',async()=>{const b=await X.laneBox(p,'stems');return Math.round(b.y+b.h/2)},40);
+ await drag('expanded-same-lane',async()=>{const b=await X.laneBox(p,'music');return Math.round(b.y+b.h*0.6)},40);
+ await fold(p,G);
+ await drag('collapsed-onto-group',async()=>{const b=await X.grp(p,G).boundingBox();return Math.round(b.y+b.height/2)},40);
+ await drag('collapsed-below-group',async()=>{const b=await X.grp(p,G).boundingBox();return Math.round(b.y+b.height+40)},40);
+ console.log(JSON.stringify(out,null,1));require('fs').writeFileSync(L.OUT+'/probe-ghost.json',JSON.stringify(out,null,1));await s.browser.close();})();

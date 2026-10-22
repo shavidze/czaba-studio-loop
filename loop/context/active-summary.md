@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-22T05:47:32.392Z)
+# Active loop summary (2026-10-22T06:59:51.639Z)
 
-- backlog.json 707 KB -> active view 192 KB
-- status: G_ROOT_GATE round 79
-- servers: `{"checkedUtc":"2026-10-22T05:24:40.8949740Z","round":79,"attempt":1,"store":200}`
-- last publication: 74eca159268bc364cdad9b183c6031a64c8d2b6a (rounds 79-79)
-- last root gate: round 79 published - commit 74eca159268bc364cdad9b183c6031a64c8d2b6a pushed
+- backlog.json 717 KB -> active view 130 KB
+- status: G_ROOT_GATE round 80
+- servers: `{"checkedUtc":"2026-10-22T06:37:07.3135134Z","round":80,"attempt":1,"store":200}`
+- last publication: 68383fa91f0e58f577b5e33f14d21ff63fb1531c (rounds 80-80)
+- last root gate: round 80 published - commit 68383fa91f0e58f577b5e33f14d21ff63fb1531c pushed
 
-## Current items: SRW-13, SRW-16, SRW-17
+## Current items: SRW-17
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -189,7 +189,7 @@
 - C-R77-OBS-RANGE-INTERVAL-WORDING / info / acknowledged (B spec wording, not an A defect): N2 allTracks means every clip edge on every track, not only inside the range interval; matches Live 6.9 text / round-77 task EK-RANGE said edges in the interval after Ctrl+Shift+L
 - C-R77-OBS-RANGE-SELECTS-CLIP / info / acknowledged (harness note): a range drag in a clip waveform also selects that clip and makes its lane active; only vitest isolates range-only track rules / range drag selects the clip
 - R78-T-TECH-LEAD / info / open / real Chrome on the 10 s grid: marker capture of the playhead, ranges and loop edges (no pixel radius) feels right?
-- ARCH-CHECKPOINT-SRW16 / info / requested_from_root (B round 78 planning, 2026-10-22; non-blocking; SRW-16 feature boundary) / bounded frontend-architect checkpoint at the SRW-16 boundary: snap entry points in grid.ts (resolveSnapTime single entry, microsecond helper
+- ARCH-CHECKPOINT-SRW16 / info / requested_from_root (B round 78 planning, 2026-10-22; non-blocking); SRW-17 addendum question 8 (useTrackRowSelection + collapse state) appended in B round 79 planning; no root result yet / bounded frontend-architect checkpoint at the SRW-16 boundary: snap entry points in grid.ts (resolveSnapTime single entry, microsecond helper
 - GATE78-S1-LOOP-MICROSECOND-HELPER / low / signal - in ARCH-CHECKPOINT-SRW16 / ArrangementLoopBrace inline Math.round(x*1e6)/1e6 repeats grid.ts private toWholeMicroseconds; proposal snapLoopMoveStart or roundToMicrosec
 - GATE78-S2-SCRUB-GETTER-PER-MOVE / info / acknowledged (keep for consistency with T7 unless profiling shows a cost); in ARCH-CHECKPOINT-SRW16 / getSnapMarkerTimes() called on every playhead pointermove (new array, filter, sort)
 - GATE78-S3-DOC068-STATUS / low / scheduled round 79 (one status line, D-29z44) / doc 068 status line still says awaiting C
@@ -198,13 +198,29 @@
 - C-R78-HARNESS-NOTES / info / acknowledged (harness): ruler clicks at y = ruler bottom - 4 avoid the playhead handle; a click outside the viewport hits null; a 2 px drag is a click (DRAG_THRESHOLD_PX 3) / round-78 harness notes
 - GROUP-NONADJACENT / info / signal (deliberate CZABA difference, D-29z44 G6; not requested explicitly by the user) / Live 12 sec. 18.3 groups any selected tracks; CZABA refuses a non-contiguous selection because it has no track reorder
 - R79-T-TECH-LEAD / info / open / real Chrome (Windows; Mac Cmd+G): Ctrl+G groups the selected lanes and no find bar opens; group rows and indentation read well at 1440x900 a
+- GATE79-S1-GROUP-BAND-POINTER / low / open - Lows batch (the lane background handler takes a trackId and sets the active lane; a group row has none, so a grant needs a design decision: deselect/seek only, no marquee origin) / group header timeline band ignores the mouse: no deselect, seek or marquee start (gate-79 review #1)
+- GATE79-S2-UNGROUP-FOCUS-BODY / low / scheduled round 80 (F2, D-29z45; C FOCUS rows) / after Ctrl+Shift+G the focused group button unmounts and focus falls to BODY (gate-79 review #2, C O2)
+- GATE79-S3-SHORTCUT-HINT / low / scheduled round 80 (H1, D-29z45) / Ctrl+G / Ctrl+Shift+G / F2 only in the group button title (gate-79 review #3)
+- GATE79-S4-MAC-HINT-TEXT / low / open - Lows batch (refusal string may be locked by the frozen round-79 UI test; amend there) / empty-selection hint says Ctrl+click; on macOS Ctrl+click is the context menu, Cmd+click works (gate-79 review #4)
+- GATE79-S5-MULTI-DRAG-LANE-TARGET / low / signal - pre-existing ArrangementClip behaviour; Lows batch / drag owner / refused multi-clip move clears gesture.laneTarget while the single path keeps it; over a group header a multi-clip drag snaps back to its ow
+- GATE79-S6-ROWCOUNT-PER-RENDER / info / acknowledged (cheap; reviewer: no change now) / trackGroupRowCount runs every render incl. drag preview frames
+- GATE79-S7-DOC069-STATUS / low / scheduled round 80 (one status line, D-29z45) / doc 069 status line still says awaiting C
+- ARCH-R79-TRACK-ROW-SELECTION-HOOK / info / signal - in ARCH-CHECKPOINT-SRW16 addendum question 8; both reviewers: keep for now, extract when stage 2/3 add fold/mixer; round 80 does not extract / StudioWorkspace gained track selection, anchor ref, group-count effect and command callbacks (2044 -> 2225 lines); proposal useTrackRowSelec
+- C-R79-O1-TRACK-SELECTION-NEVER-CLEARED / low / open - Lows batch / product question (Escape or a clip/background click could clear it; unspecified) / track selection is never cleared, so Ctrl+G can group lanes chosen long before (A review #9)
+- C-R79-O2-FOCUS-AFTER-GROUP / low / scheduled round 80 (F1, D-29z45) / after Ctrl+G focus stays on the track name button, so F2 does nothing until the group button is focused (A review #8)
+- C-R79-O4-FIT-M-GT-V-UNREACHED / info / acknowledged (covered by A jsdom TG10 only) / TG-FIT M > V branch not reachable at 1440x900 / 1280x720
+- A-R79-REVIEW-RESIDUALS / low / open - Lows batch (#4 lastHoverTrackId option; #6 lane name button ~20 px; #11 maxLength code units vs code points; #12 repeated trackGroupRows per click; #13 arrangementGroups/rowParentId naming; #14 inline rename status strings, hover:bg-surface) / A round-79 code-review residuals
+- TRACK-FOLD-U / info / signal (Live 12 sec. 42 Fold/Unfold Selected Tracks U or left/right arrows; CZABA arrows nudge clips; not requested) / U on selected plain tracks and arrow-key fold are not bound; U acts on selected groups only (D-29z45)
+- GROUPS-NO-MODEL-SANITIZER / info / signal (frozen model.ts; belongs with the model if project load/save ever arrives) / no normalizeTrackGroups sanitizer for groups in model.ts or the context
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
+- SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
 - SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
+- SRW-16 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 6b574e8, 2a e347b97, 2b-1 db9cc25, 2b-2 60006d4, 2b-3 c062147; Tech Lead R72-T/R74-T/R77-T/R78-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next
 - SRW-18 [todo] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [todo] Simple video opacity fade (from/to black) on single video lane, preview only
 - SRW-20 [todo] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn

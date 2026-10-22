@@ -1,0 +1,97 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-22T06:37:07.3135134Z",
+  "round": 80,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C80-1",
+   "severity": "low",
+   "steps": [
+    "/studio-lab 1440x900, add the 3 demo clips, group stems+sfx (Ctrl+G)",
+    "Click the ჯგუფი 1 name (group selected)",
+    "Focus the stems Volume fader (focus only, no key held, nothing pending)",
+    "Press U"
+   ],
+   "expected": "C3: refusal only during a pointer gesture or a pending arrangement preview; otherwise U collapses the selected group (or, if B keeps the slider guard, a message that names the real reason)",
+   "actual": "Refused with GESTURE_EDIT_BLOCKED_MESSAGE \"რედაქტირება drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.\" although no drag and no preview is pending; group stays expanded. This is A deviation 3 / reviewer #2 (awaiting B decision). The truly pending case (ArrowDown held + U) is refused correctly and the volume commits as one history entry.",
+   "evidence": "c-round-80/q1-1440x900.json and q1-1280x720.json, FOLD-U d.s5c"
+  },
+  {
+   "id": "C80-2",
+   "severity": "low",
+   "steps": [
+    "Group stems+sfx",
+    "Read the aria-label of [data-testid=arrangement-group-fold]"
+   ],
+   "expected": "C2 text: \"ჯგუფი 1 — ჯგუფის დაკეცვა / გახსნა\"",
+   "actual": "\"ჯგუფის დაკეცვა / გახსნა — ჯგუფი 1\" (same words, reordered). A deviation 1: the C2 wording collides with the frozen groupName regex in track-groups-ui.test.tsx l.219. Accessible and unambiguous in the browser; contract wording needs a B decision (accept, or unfreeze the helper).",
+   "evidence": "c-round-80/q1-*.json FOLD-BUTTON d.collapsed.foldLabel"
+  }
+ ],
+ "passed": [
+  "FOLD-BUTTON",
+  "FOLD-U",
+  "FOLD-NESTED",
+  "FOLD-A11Y",
+  "FOLD-OVERVIEW",
+  "FOLD-FIT",
+  "FOLD-SELECTION",
+  "FOLD-ACTIVE",
+  "FOLD-DRAG-OVER",
+  "FOLD-MARQUEE",
+  "FOLD-AUDIO",
+  "FOLD-UNDO",
+  "FOCUS-GROUP",
+  "FOCUS-HIDDEN",
+  "HINT",
+  "REG-TG",
+  "REG-LANE-FOLD",
+  "REG-ZOOM-KEYS",
+  "REG-HYD",
+  "G80-3",
+  "T80-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "blocked": [
+  "G80-3 fake-Bearer 403: backend unavailable in cloud (observed 500 Unable to prepare Studio access)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "notRun": [
+  "Tech Lead R80-T (real Chrome look/feel) - not a C row",
+  "Optional §6 mutation re-run - not run; A mutations.md recorded only"
+ ],
+ "viewports": [
+  "1440x900",
+  "1280x720"
+ ],
+ "abletonMatch": {
+  "FOLD-BUTTON": "confirmed (Live 12 §18.3 text)",
+  "FOLD-OVERVIEW": "confirmed for folded state (§18.3 text); expanded-header overview unconfirmed",
+  "FOLD-U": "confirmed for groups (§42 text); mixed-state rule is a CZABA choice (unconfirmed in Ableton); U on plain tracks not bound (deliberate)",
+  "FOLD-UNDO": "unconfirmed in Ableton; CZABA choice view state",
+  "FOLD-AUDIO": "inferred, not stated",
+  "FOLD-A11Y": "not applicable",
+  "REG-ZOOM-KEYS": "deliberate difference (+/- zoom)"
+ },
+ "observations": [
+  "O1 FOLD-FIT: fitted lane height caps at 81 px; collapse refits 1280x720 from video55/music73 to 81/81 and back exactly; C initially used a self-invented fill<=4px criterion, corrected (q3 FOLD-FIT-REJUDGED)",
+  "O2 lane-move ghost only renders for cross-lane targets (probe-ghost.json); empty ghost over a collapsed row = no lane target",
+  "O3 pre-existing, out of scope, cause unconfirmed: expanded state, music clip dragged +1 s down onto stems shows a stems ghost, but release leaves it on music at 1.025 s instead of 1.35 s (probe-ghost.json expanded-to-stems)",
+  "O4 export peak 1.0 with 486 full-scale samples in both collapsed and expanded exports (same pre-existing mix level, not a collapse effect)",
+  "O5 doc 069 status line edited at line 4 (task said l.3); text is exactly the granted one"
+ ],
+ "evidence": "c-round-80/ (q1..q4-<vp>.json, g80-<vp>.json, token-api.json, probe-ghost.json, aria-collapsed-<vp>.txt, vitest-targeted.txt, shots/, export-*.wav, tools/)"
+}

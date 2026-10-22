@@ -1,0 +1,12 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/@playwright/test/index.mjs';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log('console', m.type(), m.text().slice(0, 300)); });
+page.on('pageerror', (e) => console.log('pageerror', e.message.slice(0, 300)));
+await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'load' });
+await page.waitForTimeout(8000);
+console.log(await page.locator('[data-track-id]').count(), (await page.locator('body').innerText()).slice(0, 400));
+const labels = await page.locator('[data-testid="arrangement-track-header"] button').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+console.log(labels.slice(0, 12));
+await page.screenshot({ path: '/home/runner/czaba-project/tmp/studio-real-loop/a-round-80/probe.png' });
+await browser.close();
