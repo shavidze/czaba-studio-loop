@@ -1,210 +1,306 @@
-# CURRENT TASK — Round 82: SRW-18 (FB-06) stage 1 — clip fade in / fade out (model, live playback, export, handles) + X1 = C-R80-O3 release status (D-29z47)
+# CURRENT TASK — Round 83: SRW-18 (FB-06) stage 2 — clip volume envelope (breakpoints drawn on the clip, playback, export, survives move/split/trim) + X1 = GATE82-S1 (double-click after a fade drag) (D-29z48)
 
 Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-22
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules in your prompt. Those rules win over older text.
-- **Previous task:** `tasks/round-81.md` (an exact `cmp` copy). Rationale: `b-round-81.md`. Decision record: D-29z47 in `docs/technical/studio-real-workspace/plan.md`.
-- **Round size:** one feature stage (SRW-18 stage 1) with one owner (A). It carries one **bounded, explicitly labelled bug fix X1 (C-R80-O3)** because it lives in the same owner file (`ArrangementClip.tsx`, the clip gesture code), plus two one-line doc grants (C81-2, GATE81-S1).
-- **SRW-18 stages.** Nothing is deferred or shrunk:
-  - **stage 1 (this round):** fade in / fade out per audio clip — model, live playback, export, drag handles, undo, behaviour under every existing clip edit (R18-A1);
-  - **stage 2 (next SRW-18 round):** clip volume envelope with breakpoints drawn on the clip, playback + export, moves with the clip and survives split/trim (R18-A2).
+- **Previous task:** `tasks/round-82.md` (an exact `cmp` copy). Rationale: `b-round-82.md`. Decision record: D-29z48 in `docs/technical/studio-real-workspace/plan.md`.
+- **Round size:** one feature stage (SRW-18 stage 2) with one owner (A). It carries one **bounded, labelled fix X1 (GATE82-S1)**, because the same double-click rule is needed by the new envelope points. It also has one doc grant (doc 072).
+- **SRW-18 is complete after this stage** (R18-A1 passed in round 82; R18-A2 is this round). Nothing is deferred or shrunk.
 
 ## Why this round
-- **C round 81: PASS, `browserVerified=true`, `realVerified=true`.** 20 rows passed at both viewports. Bugs: 2 Low.
-  - **C81-1 (Low, UX signal):** nested group names truncate (`ჯგუ…`) at depth ≥ 1. Contract M4 (≥ 40 px) holds. → Lows batch + Tech Lead R81-T. No code this round. B does not rule a nesting-depth cap: that would shrink FB-12 without user authorisation.
-  - **C81-2 (Low, docs):** doc 070 l.72 still describes the round-80 refusal → **fixed in this round** (one-line grant).
-- **Gate 81** published `efbed86f644c4faabbdf2044620d089e7537e5bb` to both remotes (review 8.5/10, COMMIT OK). Reviewer #1 (doc 071 status line stale) → **fixed in this round** (one-line grant).
-- **SRW-17 / FB-12:** all three stages are C PASS with browser evidence and published → c_pass_tech_lead_manual (Tech Lead R79-T/R81-T open), the SRW-14/15/16 pattern.
-- **No Critical, High or Medium bug is open.** Regression round not due: `regression-last.json` = 2026-10-21, due on/after **2026-10-24**.
-- **C-R80-O3 ruling (B, D-29z47).** B read `ArrangementClip.tsx` l.497–504 and l.592–643 and plan.md l.170 (the FB-03 decision, C-verified long ago): *"on an occupied place amber is shown and the clip stays at its last valid place"*. So the committed 1.025 s (the last valid same-lane preview before the pointer crossed into the occupied lane) **is the designed rule**, and the dimmed source clip shows exactly that place during the drag. No frozen test locks a release after a refused single-clip lane hover (B grepped `grid-snap-edit`, `grid-snap-ui`, `marker-snap`, `grid-snap-clip-edges`, `selection`). The real defect is the **release status**: it still says only `აქ ადგილი არ არის` and never says where the clip ended. X1 = an honest release status. Severity stays **Low** (the refusal is shown during the drag, nothing is lost, Undo works). C's `probe-ghost.json` already reproduced it, so no separate repro round is needed.
-- **Next scope in dependency order:** SRW-18 (depends on SRW-13, whose code stages are all done) → SRW-19 → SRW-20 → Lows batch → SRW-21 → full regression → T12.
+- **C round 82: PASS, `browserVerified=true`, `realVerified=true`.** 16 rows at both viewports, no bugs. The only BLOCKED item is the fake-Bearer 403 sub-check (backend unavailable in the cloud).
+  - R18-A1 export evidence: max |x/ref − ramp| = 9.9e-5 (fade-in), 1.0e-4 (fade-out).
+  - C-R80-O3 is closed by X1-STATUS.
+- **Gate 82** published `bdc2067627b8390679caeda1a7e3d25db41452e9` to both remotes (review 8.5/10, COMMIT OK).
+  - Reviewer #1 (Medium, unconfirmed in a browser): a quick click right after a fade drag may count as a double-click and wipe the new fade → **X1 in this round** (cheap guard; envelope points need the same rule).
+  - Reviewer #2 and #3 → one doc-072 line each (this round). #4 → its own backlog entry, SRW18-KEYBOARD-FADES (also covers envelope points). #5–#8 → Lows batch / signals.
+- **No Critical, High or Medium C bug is open.** Regression round not due: `regression-last.json` = 2026-10-21, due on/after **2026-10-24**.
+- **C's signal applied:** live-meter rows here are **paired** (same position, envelope vs Ctrl+Z control). "Reading at t1 vs t2" oracles are not used.
+- **Next scope in dependency order:** SRW-18 stage 2 (this) → SRW-19 → SRW-20 → Lows batch → SRW-21 → full regression → T12.
 
 ## Baseline (measured by B, 2026-10-22)
-- **HEAD `efbed86f644c4faabbdf2044620d089e7537e5bb`** (published by gate 81). `git status --short` prints **0 lines**.
-- **Frozen list:** `../tmp/studio-real-loop/b-round-81-r82-tree-sha256.txt`, **467** entries, **467/467 OK**.
-  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-81-r82-tree-sha256.txt`.
-  - It covers every tracked and untracked `app/**` and `docs/implementation/**` file except the 8 owned existing files below: e.g. `selection.ts`, `schedule.ts`, `grid.ts`, `ArrangementLane.tsx`, `StudioWorkspace.tsx`, `ArrangementDetailPanel.tsx` and every test (`graph.test.ts`, `track-pan.test.tsx`, `clip-gain.test.tsx`, `clipboard.test.ts`, `model.test.ts`, `grid-snap-*.test.tsx`, `track-meter.test.ts`, `metronome.test.ts`, …).
-- **Snapshots:** `../tmp/studio-real-loop/b-round-81-r82-snapshots/` (`SHA256SUMS.txt`). All LF, CR=0:
+- **HEAD `bdc2067627b8390679caeda1a7e3d25db41452e9`** (published by gate 82). `git status --short` prints **0 lines**.
+- **Frozen list:** `../tmp/studio-real-loop/b-round-82-r83-tree-sha256.txt`, **471** entries, **471/471 OK**.
+  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-82-r83-tree-sha256.txt`.
+  - It covers every tracked and untracked `app/**` and `docs/implementation/**` file except the 8 owned existing files below.
+  - Frozen examples: `model.ts`, `fades.ts`, `selection.ts`, `schedule.ts`, `loop.ts`, `grid.ts`, `ArrangementDetailPanel.tsx`, and every test (`clip-fades.test.ts`, `clip-fades-ui.test.tsx`, `graph.test.ts`, `track-pan.test.tsx`, `clip-gain.test.tsx`, `clipboard.test.ts`, `model.test.ts`, `grid-snap-*.test.tsx`, …).
+- **Snapshots:** `../tmp/studio-real-loop/b-round-82-r83-snapshots/` (`SHA256SUMS.txt`). All LF, CR=0:
 
   | File | sha256 prefix | LF |
   |---|---|---|
-  | `app/types/arrangement.ts` | `e8da478e` | 112 |
-  | `app/lib/arrangement/model.ts` | `5ea0cb33` | 646 |
-  | `app/lib/arrangement/clipboard.ts` | `7c50d2bc` | 241 |
-  | `app/lib/arrangement/graph.client.ts` | `3dca2d29` | 377 |
-  | `app/contexts/ArrangementContext.tsx` | `6d0a217c` | 3088 |
-  | `app/components/arrangement/ArrangementClip.tsx` | `1f9554b7` | 737 |
-  | `docs/implementation/2026/quarter-IV/070-studio-lab-track-groups-stage-2-collapse.md` | `3ae28491` | 86 |
-  | `docs/implementation/2026/quarter-IV/071-studio-lab-track-groups-stage-3-mix.md` | `cb62af3f` | 97 |
+  | `app/types/arrangement.ts` | `4272ec08` | 114 |
+  | `app/lib/arrangement/clipboard.ts` | `e361dad9` | 263 |
+  | `app/lib/arrangement/graph.client.ts` | `bb9262b4` | 420 |
+  | `app/contexts/ArrangementContext.tsx` | `153576c5` | 3090 |
+  | `app/components/arrangement/ArrangementClip.tsx` | `2ac97f7b` | 895 |
+  | `app/components/arrangement/ArrangementLane.tsx` | `0740ca55` | 984 |
+  | `app/components/arrangement/StudioWorkspace.tsx` | `1d9608ce` | 2471 |
+  | `docs/implementation/2026/quarter-IV/072-studio-lab-clip-fades-stage-1.md` | `c83c4695` | 89 |
 
-- **Protected files:** 4/4 OK (`protected-baseline.json`: `cd68eb6e`, `9f738237`, `13914809`, `fa2cf0bc`). Never touch them.
-- **Servers:** `:5173/studio-lab` 200 (`env-status.json`). Backend `:5199` unavailable (expected). Re-check at phase start. Never start or stop servers. A row that truly needs the backend is "BLOCKED: backend unavailable in cloud".
-- **Do not change the repository state:** never stash, reset, checkout, clean or re-create anything. A mismatch (another HEAD, non-empty status, a changed frozen file) means stop and report. Never run `biome check --write`, `format --write`, `npm run format` or `check:fix` (format new files through stdin to stdout, as in round 81).
+- **Protected files:** 4/4 OK (`protected-baseline.json`: `cd68eb6e`, `9f738237`, `13914809`, `fa2cf0bc`). The auth files are also never touched.
+- **Servers:** `:5173/studio-lab` 200 (`env-status.json`). Backend `:5199` is unavailable (expected). Re-check at phase start. Never start or stop servers. A row that truly needs the backend is "BLOCKED: backend unavailable in cloud".
+- **Do not change the repository state:**
+  - never stash, reset, checkout, clean or re-create anything;
+  - a mismatch (another HEAD, non-empty status, a changed frozen file) means stop and report;
+  - never run `biome check --write`, `format --write`, `npm run format` or `check:fix`; format new files through stdin to stdout, as in round 82.
+  - Mutation proofs: A ran them in place in round 82 while :5173 served HMR. This time run them **in a scratch copy** (`cp -r` of the needed files into `a-round-83/mut/`, with vitest pointed at the copy). If that is impossible, restore every file byte-identical (`cmp`) and record each window in the report.
 
 ## 1. What changes (A)
 
-### Today (B read the source at `efbed86`)
-- **Clip model** (`types/arrangement.ts` l.23–31): `{ id, trackId, sourceId, start, sourceOffset, duration, gainDb? }`. No fades.
-- **Graph** (`graph.client.ts`): per scheduled item `source → clipGain → trackGain → panner → master` (l.140–147). `clipGain` is driven live by `setClipGain` with `setTargetAtTime` (l.309–319), so a fade ramp on `clipGain` would collide with a live Clip Gain change. `ScheduleAudioParam` (l.12–15) has only `value` and `setTargetAtTime`; **three frozen tests implement it** (`class FakeParam implements ScheduleAudioParam` in `graph.test.ts`, `track-meter.test.ts`, `metronome.test.ts`).
-- **Schedule:** `planSchedule` (`schedule.ts`, frozen) yields `{ clipId, trackId, sourceId, when, sourceOffset, duration }` relative to `from`; `startPlan` starts each source at `startAt + (item.when − from)`. Loop iterations go through `appendPlan` with their own `from`/`startAt`.
-- **Restart rule:** `scheduleKey` (`ArrangementContext.tsx` l.469) = JSON of `[clips, loop]` without `gainDb`. **New clip fields are automatically part of the key**, so a fade change during playback reschedules from the current position (as a clip move does today). No key change is needed.
-- **Live start** (`ArrangementContext.tsx` `startGraph`, l.802–826) and **export** (`renderArrangementWav`, `graph.client.ts` l.346–377) both call `applySchedule`.
-- **Clip edits that change clip edges:** `trimClipStart` / `trimClipEnd` / `splitClipAt` / `deleteTime` (`model.ts`) and `materialInWindow` / `copyClipsToClipboard` / `cutRangeFromArrangement` / `planClipboardPaste` (`clipboard.ts`). They copy clips with `{ ...clip }`, so new fields would be copied **unchanged onto parts whose edge is a new cut** unless handled. `ArrangementClipboardItem` carries `gainDb?` explicitly; fades must travel the same way.
-- **Clip view** (`ArrangementClip.tsx`): header strip `h-5` (move), body (range drag / click seek, waveform SVG), trim strips `w-2` full height at both edges (`z-20`). The body is not rendered on a folded lane.
-- **O3 path:** the single-clip cross-lane refusal (l.497–504) sets `gesture.blocked = true`, the status and the ghosts, and returns **without** changing the preview. Release (l.620–643) commits `getArrangement()` (the last valid preview) and, because `gesture.blocked`, writes no status.
+### Today (B read the source at `bdc2067`)
+- **Clip model** (`types/arrangement.ts` l.23–33): `{ id, trackId, sourceId, start, sourceOffset, duration, gainDb?, fadeIn?, fadeOut? }`. There is no envelope.
+- **Every edit in `model.ts` copies clips with `{ ...clip }`**:
+  - `moveClip` l.191; `trimClipStart` l.216–218 (moves `start` and `sourceOffset` together); `trimClipEnd` l.252; `splitClipAt` l.269–275; duplicate l.360; `deleteTime` l.407–420.
+  - `selection.ts` (l.138, l.205) and `fades.ts` (`withClipFadeLengths` keeps `...rest`) do the same.
+  - So **a new optional clip field is copied unchanged onto every part**.
+- **Clipboard** (`clipboard.ts`) is the exception. `ArrangementClipboardItem` (l.13–22) lists fields explicitly, and three builders copy them one by one: `materialInWindow` (l.~66–80), `copyClipsToClipboard` (l.~120–130) and `planClipboardPaste` (l.~240–250).
+- **Graph** (`graph.client.ts`): per scheduled item `source → fadeGain? → clipGain → trackGain → panner → master`.
+  - `fadeGain` exists only for faded clips (l.178–186). `ScheduleAudioParam` already has optional `setValueAtTime?` / `linearRampToValueAtTime?` (l.16–17), and the three frozen `FakeParam`s implement it.
+  - `ScheduledClip` (types l.107–114) carries `when`, `sourceOffset` and `duration` per item. This holds for a mid-clip start (`schedule.ts` l.85) and for loop iterations (`loop.ts` l.187).
+- **Restart rule:** `scheduleKey` (`ArrangementContext.tsx` l.469–473) = JSON of `[clips, loop]` without `gainDb`. A new clip field is part of the key automatically, so an envelope edit during playback reschedules from the current position, as fades do.
+- **Clip view** (`ArrangementClip.tsx`):
+  - header `h-5` (move); body (range drag / click seek, `beginGesture('range')`); trim strips `w-2 z-20`;
+  - fade handles `z-30/z-40`, which capture the pointer on the handle (round-82 H1). The root captures for other kinds, so **a `dblclick` lands on the capture element**, not on a child under the pointer.
+  - The body is not rendered on a folded lane.
+  - `beginGesture`/`handlePointerMove`/`finishGesture` handle six gesture kinds (l.309–715).
+- **Mode plumbing:** the Snap toggle lives in `StudioWorkspace.tsx` (state l.460, `toggleSnap` l.1234, the `g` key at l.1859, the button at l.2181–2197 inside `arrangement-grid-control`, 224 px wide). It reaches clips as a prop through `ArrangementLane` (l.930 → `ArrangementClipView`). A plain `a` key is unused in the workspace (only `Ctrl/Cmd+A`, l.1770). `StudioContext.tsx` l.1605 is the purchased Studio, not `/studio-lab`.
 
 ### Constraints found by B in the frozen tests (do not rediscover them)
-- **Source-text locks on `renderArrangementWav`** (`track-pan.test.tsx` l.444–460, `graph.test.ts` l.387–389, `clip-gain.test.tsx` l.498–501): the body must keep `applySchedule(ctx, planSchedule(arrangement, 0)`, `tracks: arrangement.tracks,`, `clipGains: clipLinearGains(arrangement)` and the `return { blob: … ...report };` line, and must **not** contain the substrings `pan`, `setTrackGain`, `setClipGain`. ⚠ A name like `clipFadeSpans` contains `pan`. **Use exactly the new line `clipFades: clipFadeShapes(arrangement),`.**
-- **`ScheduleAudioParam` must stay implementable by the three frozen fakes.** Add the ramp methods as **optional** members (`setValueAtTime?(value: number, startTime: number): unknown`, `linearRampToValueAtTime?(value: number, endTime: number): unknown`) and call them with optional chaining. No type assertion, no `any`. A real `AudioParam` always has both.
-- **Node counts:** create the per-source fade `GainNode` **only for a clip with a non-zero effective fade**. Clips without fades build exactly today's graph (frozen tests that count nodes or inspect `ctx.gains` stay green).
-- **Normal form:** `fadeIn?` / `fadeOut?` are **omitted when 0** (the `gainDb` / group-mix precedent). Omitted means **the key is absent**, never `fadeIn: undefined` (build objects with conditional spreads, as `materialInWindow` does for `gainDb`). B found no frozen `toStrictEqual` on clips today; the new tests use `toStrictEqual` so a stray `undefined` key fails here. Frozen `toEqual` checks on clips and clipboard items stay green; `isSameArrangement` (JSON) is unchanged for clips without fades.
+- **Source-text locks on `renderArrangementWav`:**
+  - `track-pan.test.tsx` l.444–460, `graph.test.ts` l.387–389, `clip-gain.test.tsx` l.498–501;
+  - **and now `clip-fades.test.ts` FD8**, which requires `clipFades: clipFadeShapes(arrangement),`.
+  - The body must keep those lines and must not contain `pan`, `setTrackGain` or `setClipGain`. **The new line is exactly `clipEnvelopes: clipEnvelopeShapes(arrangement),`.** No identifier containing `pan` / `span` / `expand` / `panel` may appear in that function.
+- **Node counts:** create the per-source envelope `GainNode` **only for a clip with ≥ 1 envelope point**. Other clips build exactly today's graph (frozen node-count tests and FD7d stay green).
+- **Normal form:** `envelope?` is **omitted when empty**: the key is absent, never `envelope: undefined` or `[]`. Build objects with conditional spreads, as `materialInWindow` does for `gainDb`. New tests use `toStrictEqual`.
+- **Do not edit `model.ts` or `fades.ts`** (frozen). If a grep shows a clip builder that drops the new field outside the §Files grants, **stop and report**.
 
-### Contract (B decision: the smallest honest behaviour consistent with FB-06, R18-A1 and Live 12 §6.8)
-- **F1 — Model.** `ArrangementClip` gains `fadeIn?: number` and `fadeOut?: number` (seconds of timeline time, whole ms, `> 0` when present). `ArrangementClipboardItem` gains the same two optional fields. **Invariant:** `fadeIn + fadeOut ≤ duration` (Live §6.8: "A clip's start and end fades cannot overlap each other"). Clips on a video track never carry fades in stage 1 (the picture fade is SRW-19).
-- **F2 — Pure module `app/lib/arrangement/fades.ts`** (new). Exports (names may differ only if they stay grep-discoverable; whatever is used inside `renderArrangementWav` must not contain `pan`):
-  - `clipFadeIn(clip)`, `clipFadeOut(clip)`: **effective** values clamped by the invariant (read-time safety net: `out = min(fadeOut, duration)`, `in = min(fadeIn, duration − out)`).
-  - `setClipFade(arrangement, clipId, edge: 'in' | 'out', seconds)`: a new arrangement, or the **same reference** when the value does not change, the clip is missing, or it is on a video track. Clamps to `[0, duration − other fade]`, rounds to ms, omits 0.
-  - `withCutEdges(clip, { start: boolean; end: boolean })`: drops `fadeIn` when the start edge is a new cut, drops `fadeOut` when the end edge is a new cut, then re-applies the invariant (zeros omitted).
-  - `clampClipFadesAfterTrim(clip, edge: 'start' | 'end')`: keeps both lengths; if they no longer fit, shrinks **the fade at the trimmed edge first**, then the other.
-  - `clipFadeGainAt(shapeOrClip, time)`: the 0…1 linear gain at timeline `time` (1 outside the fades; product of the in and out ramps if they meet).
-  - `clipFadeShapes(arrangement)`: `Map<clipId, ClipFadeShape>` with `{ start, duration, fadeIn, fadeOut }`, for audio-track clips with a non-zero effective fade only.
-- **F3 — Edits** (each existing function keeps its signature and its exact result for clips without fades):
-  - move / cross-lane move / group move / duplicate / copy-paste of whole clips (`copyClipsToClipboard` + `planClipboardPaste`): fades travel unchanged;
-  - `trimClipStart` / `trimClipEnd`: `clampClipFadesAfterTrim`;
-  - `splitClipAt` (and so Ctrl+E, `splitClipsByRange`, `splitClipsAtTime`): left = `withCutEdges(…, { start: false, end: true })`, right = `withCutEdges(…, { start: true, end: false })`;
-  - `deleteTime` (Ctrl+Shift+X) and `cutRangeFromArrangement` / `deleteRangeKeepingGap` (Delete/Backspace on a range, Cut): a remaining part loses the fade at each **new cut** edge; untouched or merely shifted clips keep theirs;
-  - `materialInWindow` (range copy, Cut Time clipboard): an item keeps `fadeIn` only if the window contains the clip's original start, `fadeOut` only if it contains the original end, then the invariant;
-  - Live's behaviour under split/trim/delete-time is not in the capture: these are CZABA choices; record them in doc 072.
-- **F4 — Audio (live and export, one code path).** `ApplyScheduleOptions` gains `clipFades?: ReadonlyMap<string, ClipFadeShape>`. In `startPlan`, for an item whose clip has a shape, the chain is `source → fadeGain → clipGain`. With `T(t) = startAt + (t − from)`:
-  - initial `fadeGain.gain.value = clipFadeGainAt(shape, item.when)` and `setValueAtTime(that, T(item.when))`;
-  - fade-in still ahead (`item.when < start + fadeIn`): `linearRampToValueAtTime(1, T(start + fadeIn))`;
-  - fade-out: if `item.when < end − fadeOut`: `setValueAtTime(1, T(end − fadeOut))`; then `linearRampToValueAtTime(0, T(end))` (already inside the fade-out: the ramp starts from the initial value);
-  - when `fadeIn + fadeOut = duration` the two ramps meet at `clipFadeGainAt`'s value;
-  - `fadeGain` is disconnected wherever `clipGain` is today (the `appendPlan` cleanup and `disconnect`);
-  - `startGraph` passes `clipFades: clipFadeShapes(arrangement),`; `renderArrangementWav` passes exactly `clipFades: clipFadeShapes(arrangement),`. No other context change;
-  - Clip Gain, track volume, group gains, pan, master and meters multiply as before; the track meter reads post-fade;
-  - linear ramps only. R18-A1 says "linear/curved"; linear satisfies it. Live's Fade Curve handle is a recorded conscious difference.
-- **F5 — Handles** (`ArrangementClip.tsx`; audio clips only; not on a folded lane; not when the clip is narrower than 24 px):
-  - two 10×10 px handles at the **top of the body** (just under the header): the fade-in handle with its left edge at `fadeIn · pxPerSecond`, the fade-out handle with its right edge at `width − fadeOut · pxPerSecond`, both clamped inside the clip. They sit above the trim strips (`z-30`); the trim strips stay usable over the rest of the clip height;
-  - testids `arrangement-clip-fade-in-handle` / `arrangement-clip-fade-out-handle`; `title` `Fade In — drag · double-click = 0` / `Fade Out — drag · double-click = 0`; `cursor-ew-resize`. Visible when the clip is hovered or selected or the fade is > 0 (Live §6.8: handles appear on hover as small squares). Tailwind token classes only, no hardcoded colour;
-  - a ramp overlay in the body (`pointer-events-none`; an SVG line/area from the body's bottom-left up to the fade-in end, mirrored for the fade-out; `currentColor` + token class);
-  - the clip root exposes `data-fade-in` and `data-fade-out` (`toFixed(3)`, `"0.000"` when absent).
-- **F6 — Gesture.** New gesture kinds `fadeIn` / `fadeOut` through the existing `beginGesture` (same pointer claim; same selection behaviour as the trim strips; `stopPropagation` so the body range/seek never starts).
-  - Pointer move: `seconds = clamp(roundTime(original ± dx / pxPerSecond), 0, duration − otherFade)` (fade-in grows to the right, fade-out to the left). Free: no grid snap, Alt irrelevant (CZABA choice; Live's fade snapping is not in the capture). Preview through `previewArrangement(setClipFade(…))`; status during the drag `Fade In: 1.000 წმ` / `Fade Out: 2.000 წმ`.
-  - **Release:** one history entry `Fade In` / `Fade Out` through `commitArrangement`; status `Fade In: 1.000 წმ.`. A press without movement writes nothing. A drag that ends at the start value writes the existing no-change status form (`Fade In: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.`).
-  - **`pointercancel` and a lost pointer revert** to `gesture.before` with no entry (the `endStaleClipGesture` path).
-  - **Double-click** on a handle sets that fade to 0: one entry `Fade In` / `Fade Out`, status `Fade In: 0.000 წმ.`; an already-zero fade → no entry. `stopPropagation`, so no lane or clip double-click action runs. Live deletes a fade by selecting its handle and pressing Delete; CZABA's Delete always acts on clips/ranges (SRW-24), so the reset is a double-click (recorded difference).
-  - Keyboard editing of fades is not part of stage 1. Record it in doc 072 as an open accessibility signal for the stage-2 planning; do not invent a keyboard path here.
-- **X1 — C-R80-O3 release status (bounded).** In the single-clip `move` gesture, remember the refusal text of the **last** hover (`laneRefusal: string | null` on the gesture; set in the refused cross-lane branch l.497–504, cleared in every other move branch). On release, when there is no `laneTarget`, the gesture is `blocked` and `laneRefusal` is set:
-  - if the commit changed the arrangement: status `<refusal> — კლიპი ბოლო თავისუფალ ადგილას დარჩა: <lane name>, start <formatArrangementTime(start)>.` (e.g. `აქ ადგილი არ არის — კლიპი ბოლო თავისუფალ ადგილას დარჩა: მუსიკა, start 00:01.025.`); undo label `კლიპის გადატანა` unchanged;
-  - if nothing changed (e.g. the first above-threshold move already lands in the refused lane, so there was no same-lane preview): the existing no-change status `კლიპის გადატანა: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.` (unchanged), and no entry;
-  - the committed position, the ghosts, the group path and the same-lane neighbour block are **unchanged**.
-- **Docs (one-line grants):**
-  - doc 070 l.72 → describes X1 of round 81: the focused row is read first, `blur()` commits a pending preview as one `Volume` entry, then the group collapses and focus moves to the group name; pointer gestures are still refused; the round-80 refusal no longer applies;
-  - doc 071 l.4 → exactly this line:
+### Contract (B decision: the smallest honest behaviour consistent with FB-06 / R18-A2; rationale in `b-round-82.md` §4)
+- **E1 — Model.**
+  - `types/arrangement.ts` gains `export interface ArrangementClipEnvelopePoint { time: number; gain: number }` and `envelope?: ArrangementClipEnvelopePoint[]` on `ArrangementClip`.
+  - **`time` is in source seconds** (the same axis as `sourceOffset`), whole ms. **`gain` is linear 0…1**, 4 decimals, so 0 dB is the maximum. Clip Gain (−60…+24 dB) still provides boost.
+  - Points are sorted, with strictly increasing times. Clips on a video track never carry an envelope.
+  - **Why source time:** the envelope is anchored to the audio material. A move changes only `start`, a trim changes `start` and `sourceOffset` together, and split/Delete Time/duplicate copy `{ ...clip }`. So the envelope moves with the clip and survives every edit **with no change to `model.ts`**, and the level at every source sample is the same before and after a split.
+  - **Points outside the visible window are kept** (non-destructive). They still shape the level at the window edge, and a trim back out shows them again.
+- **E2 — Pure module `app/lib/arrangement/envelope.ts`** (new; names may differ only if they stay grep-discoverable; whatever is used in `renderArrangementWav` must not contain `pan`):
+  - `clipEnvelopeGainAtSource(points, sourceTime)`: 1 for no points; holds the first value before the first point and the last value after the last; linear interpolation (in linear gain) between points.
+  - `clipEnvelopeGainAt(clip, time)`: timeline time → source time `clip.sourceOffset + (time − clip.start)`.
+  - `visibleClipEnvelopePoints(clip)`: points with `sourceOffset − 1e-6 ≤ time ≤ sourceOffset + duration + 1e-6`.
+  - `addClipEnvelopePoint(arrangement, clipId, timelineTime)`: inserts a point at that time (ms), with **the current line value** at that time (4 dp). Returns the **same reference** for a missing clip, a video-track clip, a time outside the clip, or an existing point at the same ms.
+  - `moveClipEnvelopePoint(arrangement, clipId, pointSourceTime, nextTimelineTime, nextGain)`:
+    - time clamped to `[prev + 0.001, next − 0.001]` and to the visible window;
+    - gain clamped to `[0, 1]` and rounded to 4 dp;
+    - same reference when nothing changes or the point is missing.
+  - `removeClipEnvelopePoint(arrangement, clipId, pointSourceTime)`: drops the point and omits `envelope` when it becomes empty. Same reference when the point is missing.
+  - `clipEnvelopeShapes(arrangement)`: `Map<clipId, ClipEnvelopeShape>` (`{ points }`), for audio-track clips with ≥ 1 point only.
+  - `formatClipEnvelopeGain(gain)`: `"0.0 dB"`, `"−12.0 dB"` (U+2212), `"−∞ dB"` at 0.
+- **E3 — Edits.**
+  - `model.ts` stays untouched (see E1).
+  - `clipboard.ts`: `ArrangementClipboardItem` gains `envelope?`. `materialInWindow`, `copyClipsToClipboard` and `planClipboardPaste` carry it with a conditional spread, unchanged: points stay in source time, and `sourceOffset` already moves with the window.
+  - `cutRangeFromArrangement` keeps it through `{ ...clip }`; A confirms this with a grep.
+  - Range copy keeps the whole point list (the window decides what is visible).
+- **E4 — Audio (live and export, one code path).** `ApplyScheduleOptions` gains `clipEnvelopes?: ReadonlyMap<string, ClipEnvelopeShape>`. In `startPlan`, for an item whose clip has a shape, the chain is `source → fadeGain? → envelopeGain → clipGain`. With `T(t) = startAt + (t − from)`, `s0 = item.sourceOffset`, `s1 = s0 + item.duration`, `src(t) = s0 + (t − item.when)`:
+  - initial `envelopeGain.gain.value = clipEnvelopeGainAtSource(points, s0)` and `setValueAtTime(that, T(item.when))`;
+  - for each point with `s0 < p.time < s1`, in order: `linearRampToValueAtTime(p.gain, T(item.when + p.time − s0))`;
+  - then **always** `linearRampToValueAtTime(clipEnvelopeGainAtSource(points, s1), T(item.when + item.duration))`. This continues correctly toward a hidden point after the window, and it is a flat ramp when the last value is held;
+  - `envelopeGain` is disconnected wherever `fadeGain` is (the `appendPlan` cleanup and `disconnect`), and is stored on `ScheduledSourceState`;
+  - `startGraph` passes `clipEnvelopes: clipEnvelopeShapes(arrangement),` (one line + its import). `renderArrangementWav` passes exactly the same line. No other context change;
+  - `setClipGain` touches only `clipGain`; fades, Clip Gain, track/group gains, pan, master and meters multiply as before; the track meter reads post-envelope.
+- **E5 — Mode (`StudioWorkspace.tsx`, `ArrangementLane.tsx`).**
+  - `envelopeMode` is view state, like Snap: no history, not saved.
+  - **Button:** `Env`, placed after the grid-division select in `arrangement-grid-control`. Same classes as the Snap button: `h-6 shrink-0`, accent when on. Attributes:
+    - `data-testid="arrangement-envelope-toggle"`, `aria-pressed`, `aria-keyshortcuts="A"`;
+    - `title` on: `Envelope ჩართულია — კლიპზე double-click = წერტილი (A)`;
+    - `title` off: `Envelope გამორთულია — კლიპის volume envelope-ის რედაქტირება (A)`.
+    - The grid-control div gains `data-envelope-mode="on|off"`. The row must not overflow (`scrollWidth ≤ clientWidth`) at 1280 and 1440 with any division selected.
+  - **Key:** plain `a` (no Ctrl/Meta/Alt/Shift, not `repeat`) toggles the mode, with the same guards as the `g` branch. The status is `Envelope რეჟიმი: ჩართულია.` / `Envelope რეჟიმი: გამორთულია.`
+  - **No toggle mid-gesture:** the button and the key refuse while `isPointerGestureActive() || isArrangementPreviewActive()`, with `GESTURE_EDIT_BLOCKED_MESSAGE`, exactly like `setTrackGroupsCollapsed` (l.933). So the keyboard cannot unmount the editor mid-drag (the GATE82-S7 class).
+  - **Not in the transport toolbar:** frozen GS14 (`grid-snap-ui.test.tsx` l.363–372) locks that toolbar at 12 buttons. B grepped the frozen tests: those touching `arrangement-grid-control` read only `dataset` and the Snap toggle's own attributes, and no frozen test presses a plain `a`.
+  - **Plumbing:** `ArrangementLane` gains one optional prop, `envelopeMode?: boolean`, passed to `ArrangementClipView`. Nothing else changes in the lane.
+- **E6 — View (new `app/components/arrangement/ArrangementClipEnvelope.tsx`, rendered by `ArrangementClip.tsx` inside the body for audio clips only, never on a folded lane).**
+  - **Why a child component:** this is the fourth round on the clip gesture code. The reviewers' Architecture note (rounds 81–82) proposes a per-kind table later. Point gestures in their own component avoid adding kinds 7–9 to the six-way switch, and they use the same `claimPointerGesture` / `previewArrangement` / `commitArrangement` props. Checkpoint question 11 goes to root (non-blocking).
+  - **Line:**
+    - an SVG polyline through `(0, g(window start))`, every visible point, and `(width, g(window end))`, with `y = (1 − gain) · bodyHeight`;
+    - `pointer-events-none`, `currentColor` with a token class, `data-testid="arrangement-clip-envelope-line"`;
+    - drawn whenever the clip has ≥ 1 point (mode on **or off**, so the envelope is visible on the clip), and in mode as a flat top line when it has none.
+  - **Editor (mode on, clip ≥ 24 px wide):**
+    - an overlay `absolute inset-y-0 inset-x-2 z-10` with `data-testid="arrangement-clip-envelope-editor"` and `cursor-crosshair`. **Stacking matters:** the clip root is not a stacking context, so a `z-30` overlay would cover the full-height trim strips (`z-20`, `w-2`) and break EU5 / EN-NEIGHBOURS. `inset-x-2 z-10` keeps both 8 px trim strips clear and under nothing; a double-click inside those strips does not add a point;
+    - points as 8×8 px squares centred on the line, `z-30` (above the overlay and the trim strips, like the fade handles), **React-keyed by index** (stable during a drag, so the drag-then-double-click guard keeps its target), with:
+      - `data-testid="arrangement-clip-envelope-point"`;
+      - `data-time` (timeline seconds, `toFixed(3)`) and `data-gain` (`toFixed(4)`);
+      - `title` `Envelope: 10.000 წმ · −12.0 dB — drag · double-click = წაშლა`.
+    - **In mode the fade handles are not rendered** (Live hides fade controls in Automation Mode); the fade ramp overlay stays.
+  - **The clip root exposes `data-envelope`:** the visible points as `t:g` joined by `;`, with timeline seconds `toFixed(3)` and gain `toFixed(4)` (e.g. `6.000:1.0000;10.000:0.2512;14.000:1.0000`), `""` when none.
+- **E7 — Gestures (`ArrangementClipEnvelope.tsx`).**
+  - **Editor background press** (button 0):
+    - `stopPropagation`, so no range, seek or move starts;
+    - a plain press selects the clip and the active track;
+    - Ctrl/Cmd or Shift → `toggleClipSelection` as the body does;
+    - no history entry.
+  - **Editor background double-click** → `addClipEnvelopePoint` at the pointer's timeline time (free, no snap): one entry `Envelope: წერტილის დამატება`, status `Envelope: წერტილი დაემატა — 10.000 წმ · 0.0 dB.`. A point already at that ms → no entry.
+  - **Point press** (button 0):
+    - `claimPointerGesture`, then `setPointerCapture` **on the point** (fallback `watchUncapturedPointerGesture`), `stopPropagation`; 3 px threshold.
+    - **Drag:** `time = original + dx / pxPerSecond` (free), `gain = original − dy / bodyHeight`, both through `moveClipEnvelopePoint` from `before`.
+      - Preview through `previewArrangement`; status during the drag `Envelope: 10.000 წმ · −12.0 dB`.
+    - **Release:** one entry `Envelope: წერტილის გადატანა`, status with a final period. A drag that ends at the start value → `Envelope: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.`. A press without movement writes nothing.
+    - **`pointercancel`, a lost pointer, or the component unmounting mid-drag** (e.g. zoom makes the clip narrower than 24 px; the mode key itself is refused mid-gesture, E5) → revert to `before`, with no entry, and release the claim.
+  - **Point double-click** → `removeClipEnvelopePoint`: one entry `Envelope: წერტილის წაშლა`, status `Envelope: წერტილი წაიშალა — 10.000 წმ.`. `stopPropagation`, so no point is added.
+  - **Drag-then-click guard (same rule as X1):** a point double-click within 500 ms after that point's moved gesture is ignored.
+  - **No keyboard path** for points in this stage: SRW18-KEYBOARD-FADES (backlog) now covers fades and envelope points as one accessibility item. Do not invent one here.
+- **X1 — GATE82-S1 (bounded, `ArrangementClip.tsx`).**
+  - Remember `{ edge, at }` (`performance.now()`) when a fade gesture that **moved** ends, whether committed or not.
+  - `resetClipFade` returns without an entry or status when the same edge's double-click comes within 500 ms of that.
+  - After 500 ms a double-click resets as in round 82 (FD-UNDO unchanged).
+- **Docs:**
+  - **doc 072 l.4** → exactly:
 
     ```text
-    **სტატუსი:** Round 81 — C PASS (`browserVerified`), გამოქვეყნდა `efbed86`
+    **სტატუსი:** Round 82 — C PASS (`browserVerified`), გამოქვეყნდა `bdc2067`
     ```
+
+  - **doc 072:** at most three added lines in "პრობლემები და გადაწყვეტები" or "TODO":
+    - (a) GATE82-S2: a split or Delete inside a fade is not sound-neutral. The right part starts at gain 1. This is the F3 rule, and it is a signal;
+    - (b) GATE82-S3: the hidden handles take the top 10 px of the trim strips and body corners, so a plain mouse click there starts a fade gesture that writes nothing;
+    - (c) round-83 X1.
+  - **New doc 073** `docs/implementation/2026/quarter-IV/073-studio-lab-clip-volume-envelope-stage-2.md`, in Georgian with the TEMPLATE sections. Status: `Round 83 — იმპლემენტირებულია, C-ის შემოწმებას ელოდება (D-29z48)`. Record the E1 time-base choice, the linear-gain law and every Live difference in §4.
 
 ### Files (exact grants)
 | File | Grant |
 |---|---|
-| `app/types/arrangement.ts` | `fadeIn?` / `fadeOut?` on `ArrangementClip` only |
-| `app/lib/arrangement/fades.ts` | **new** (F2) |
-| `app/lib/arrangement/model.ts` | bodies of `trimClipStart`, `trimClipEnd`, `splitClipAt`, `deleteTime` only (F3) + import |
-| `app/lib/arrangement/clipboard.ts` | `ArrangementClipboardItem` (2 optional fields), `materialInWindow`, `copyClipsToClipboard`, `cutRangeFromArrangement`, `planClipboardPaste` (F3) + import |
-| `app/lib/arrangement/graph.client.ts` | `ScheduleAudioParam` (2 optional methods), `ApplyScheduleOptions.clipFades?`, `ScheduledSourceState` (fade node), `startPlan`, the two cleanup sites, one line in `renderArrangementWav` + import |
-| `app/contexts/ArrangementContext.tsx` | **one line** in the `startGraph` `applySchedule` options (`clipFades: clipFadeShapes(arrangement),`) + its import. Nothing else |
-| `app/components/arrangement/ArrangementClip.tsx` | F5, F6, X1 |
-| `app/lib/arrangement/__tests__/clip-fades.test.ts` | **new** (pure + graph) |
-| `app/lib/arrangement/__tests__/clip-fades-ui.test.tsx` | **new** (workspace UI) |
-| `docs/implementation/2026/quarter-IV/070-studio-lab-track-groups-stage-2-collapse.md` | l.72 only (C81-2) |
-| `docs/implementation/2026/quarter-IV/071-studio-lab-track-groups-stage-3-mix.md` | l.4 only (GATE81-S1) |
-| `docs/implementation/2026/quarter-IV/072-studio-lab-clip-fades-stage-1.md` | **new**, Georgian, TEMPLATE sections; status "Round 82 — იმპლემენტირებულია, C-ის შემოწმებას ელოდება (D-29z47)" |
+| `app/types/arrangement.ts` | `ArrangementClipEnvelopePoint` + `envelope?` on `ArrangementClip` only |
+| `app/lib/arrangement/envelope.ts` | **new** (E2) |
+| `app/lib/arrangement/clipboard.ts` | `ArrangementClipboardItem.envelope?`, `materialInWindow`, `copyClipsToClipboard`, `planClipboardPaste` (E3) + import if needed |
+| `app/lib/arrangement/graph.client.ts` | `ApplyScheduleOptions.clipEnvelopes?`, `ScheduledSourceState.envelopeGain`, a private scheduling helper, `startPlan`, the two cleanup sites, one line in `renderArrangementWav` + import |
+| `app/contexts/ArrangementContext.tsx` | **one line** in the `startGraph` `applySchedule` options (`clipEnvelopes: clipEnvelopeShapes(arrangement),`) + its import. Nothing else |
+| `app/components/arrangement/ArrangementClip.tsx` | `envelopeMode?` prop, render `ArrangementClipEnvelope`, hide fade handles in mode, `data-envelope`, X1 |
+| `app/components/arrangement/ArrangementClipEnvelope.tsx` | **new** (E6, E7) |
+| `app/components/arrangement/ArrangementLane.tsx` | one optional prop `envelopeMode?` passed to `ArrangementClipView` |
+| `app/components/arrangement/StudioWorkspace.tsx` | `envelopeMode` state + toggle callback, the `Env` button and `data-envelope-mode`, the `a` key branch beside `g`, `envelopeMode` on `<ArrangementLane>` |
+| `app/lib/arrangement/__tests__/envelope.test.ts` | **new** (pure + graph) |
+| `app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx` | **new** (workspace UI) |
+| `docs/implementation/2026/quarter-IV/072-studio-lab-clip-fades-stage-1.md` | l.4 + at most 3 added lines |
+| `docs/implementation/2026/quarter-IV/073-studio-lab-clip-volume-envelope-stage-2.md` | **new** |
 
-Expected end state: **8 M + 4 ??**. Everything else is frozen (the 467-entry list). If a frozen test turns red, **stop and report**; do not edit it.
+Expected end state: **8 M + 5 ??**. Everything else is frozen (the 471-entry list). If a frozen test turns red, **stop and report**; do not edit it.
 
 ### Required tests (behavioural; the IDs are for C to cite)
-`clip-fades.test.ts`:
-- **FD1** `setClipFade` clamps to `[0, duration − other]`, rounds to ms, omits 0, and returns the same reference for no change, a missing clip and a video-track clip.
-- **FD2** `clipFadeGainAt`: 0 at the clip start with a fade-in, 0.5 at half the fade-in, 1 in the middle, 0 at the end with a fade-out, and the exact meeting value when `in + out = duration`.
-- **FD3** trim: a 10 s clip with in 2 / out 3 trimmed at the start to 4 s keeps out 3 and shrinks in to 1; trimmed at the end to 4 s keeps in 2 and shrinks out to 2; a clip without fades gives exactly today's object (`toStrictEqual`, no fade keys).
-- **FD4** split at 5 s of that clip (start 0): left has `fadeIn: 2` and no `fadeOut` key; right has `fadeOut: 3` and no `fadeIn` key.
-- **FD5** `deleteTime` 4–6 on that clip: the left part keeps in 2 only, the right part keeps out 3 only; a clip entirely after the cut keeps both and only shifts.
-- **FD6** clipboard: `copyClipsToClipboard` + `planClipboardPaste` keep both fades; `materialInWindow` (through `copyRangeToClipboard`) over 3–12 of a clip at 2–12 keeps only `fadeOut`; `cutRangeFromArrangement` follows FD5's rule.
-- **FD7** graph, with a fake context whose params record `setValueAtTime` / `linearRampToValueAtTime`: (a) play from 0, clip at 2 with in 1 → initial 0 at T(2), ramp to 1 at T(3); (b) play from 2.5 → initial 0.5 at T(2.5), ramp to 1 at T(3); (c) out 2 on a clip ending at 18 → set 1 at T(16), ramp to 0 at T(18); (d) a clip without fades creates no extra gain node; (e) a loop iteration through `appendPlan` schedules the same ramps relative to its own `startAt`; (f) `setClipGain` during a fade touches only `clipGain`, never `fadeGain`.
-- **FD8** the `renderArrangementWav` source contains `clipFades: clipFadeShapes(arrangement),` and still no `pan` / `setTrackGain` / `setClipGain` (mirrors the frozen locks so a rename fails here first).
+`envelope.test.ts`:
+- **EV1** `clipEnvelopeGainAtSource`: 1 with no points; holds before the first and after the last point; exact at points; linear midway (e.g. 1 → 0.2512 over 4 s gives 0.6256 at 2 s).
+- **EV2** add: value = the line value, not a parameter; ms rounding; sorted insert. Same reference for a missing clip, a video clip, a time outside the clip, or a duplicate ms. Remove of the last point leaves no `envelope` key (`toStrictEqual`).
+- **EV3** move: clamped 1 ms from both neighbours and to the window; gain clamped to [0, 1], 4 dp; same reference when unchanged.
+- **EV4** edits on a clip at 2 (offset 0, 16 s) with points src 4:1, 8:0.2512, 12:1:
+  - `moveClip` to 3 keeps `envelope` `toStrictEqual`;
+  - `splitClipAt` 10 → both parts carry the full list, and `clipEnvelopeGainAt` is 0.2512 on both sides of 10;
+  - `trimClipStart` to 8 keeps all points, visible = src 8 and 12, gain at 8 = 0.6256; trimming back to 2 shows 3 points again;
+  - `deleteTime` 4–5: the right part's gain at each source time equals the original;
+  - duplicate, `copyClipsToClipboard` + `planClipboardPaste`, and `copyRangeToClipboard` keep the list;
+  - a clip without an envelope gives exactly today's object (no `envelope` key).
+- **EV5** graph with a recording fake context:
+  - (a) play from 0, points at timeline 6/10/14 → `setValueAtTime(1, T(2))`, ramps 1@T(6), 0.2512@T(10), 1@T(14), final 1@T(18);
+  - (b) play from 8 → initial 0.6256 at T(8);
+  - (c) the same clip trimmed to source [6, 10] (the src-12 point is hidden after the window) → initial 0.6256, ramp 0.2512 at src 8, final ramp to `g(10)` = 0.6256 at the clip end;
+  - (d) a clip without points creates no extra node;
+  - (e) a loop iteration via `appendPlan` schedules relative to its own `startAt`;
+  - (f) `setClipGain` touches only `clipGain`, never `envelopeGain`;
+  - (g) fade + envelope → connect order `source → fadeGain → envelopeGain → clipGain`.
+- **EV6** the `renderArrangementWav` source contains `clipEnvelopes: clipEnvelopeShapes(arrangement),` and `clipFades: clipFadeShapes(arrangement),`, and no `pan` / `setTrackGain` / `setClipGain`. Plus a render-level check (stubbed `OfflineAudioContext`, as FD8b) that export creates the envelope node.
 
-`clip-fades-ui.test.tsx` (workspace render, same harness style as the frozen grid/lane UI tests):
-- **FU1** an audio clip renders both handles and `data-fade-in="0.000"`; a video clip and a clip on a folded lane render none.
-- **FU2** dragging the fade-in handle +40 px at 40 px/s → `data-fade-in="1.000"`, undo label `Fade In`, status `Fade In: 1.000 წმ.`; Ctrl+Z → `0.000`; Ctrl+Y → `1.000`. The same for fade-out (`Fade Out`).
-- **FU3** dragging past the other fade clamps to `duration − other`; a press without movement writes no entry; `pointercancel` mid-drag reverts with no entry.
-- **FU4** double-click on a handle with a fade → 0 and one entry; on a zero fade → no entry; a handle press never starts the body range/seek.
-- **FU5** X1: a single clip dragged right, then onto an occupied lane and released there → the clip stays on its own lane at the last valid preview start, the status is exactly the X1 text, the undo label is `კლიპის გადატანა`; a refused hover followed by a return to its own lane and release → the normal move status (no refusal text); a drag whose first move lands in the refused lane and is released there → no entry and the no-change status.
+`clip-envelope-ui.test.tsx` (workspace render, same harness style as `clip-fades-ui.test.tsx`):
+- **EU1** mode:
+  - the button and the `a` key toggle `aria-pressed` / `data-envelope-mode` and write the status;
+  - `a` with Ctrl/Meta/Alt/Shift, with `repeat`, or in a text input does nothing;
+  - mode off → no editor and no points; mode on → no fade handles;
+  - a video clip and a folded lane never render an editor.
+- **EU2** add: in mode, a double-click at x = 4 s into the clip (40 px/s) gives `data-envelope` `"<start+4>.000:1.0000"`, undo label `Envelope: წერტილის დამატება`, and the status. Ctrl+Z → `""`; Ctrl+Y → back.
+- **EU3** drag:
+  - a point dragged down by ¼ of the body height → gain 0.75 (± 1 px), one entry, the status;
+  - a horizontal drag past a neighbour stops 1 ms short;
+  - a press without movement writes nothing;
+  - `pointercancel` mid-drag reverts with no entry;
+  - unmounting the editor mid-drag (the test may unmount or re-render the view) reverts with no entry; `a` and the `Env` button mid-drag are refused with `GESTURE_EDIT_BLOCKED_MESSAGE`.
+- **EU4** delete: a double-click on a point removes it (one entry) and adds nothing. A double-click within 500 ms after a moved drag of that point is ignored.
+- **EU5** neighbours:
+  - in mode, an editor press neither seeks nor starts a range, while header move and trim strips still work;
+  - mode off: body range and click-seek are unchanged, the line is still drawn, and there are no points.
+- **EU6** X1: a fade-handle drag followed at once by a double-click on the handle keeps the fade (one `Fade In` entry). After 600 ms (fake timers or a mocked `performance.now`) the double-click resets it.
 
-### Mutation proofs (A runs them; logs in `a-round-82/mut/`; each must turn at least one listed test red)
-(a) ramps put on `clipGain` instead of a separate node (FD7f); (b) the initial value ignores a mid-fade `from` (FD7b); (c) split keeps both fades on both parts (FD4); (d) `deleteTime` keeps the fade at the new cut edge (FD5); (e) export omits `clipFades` (FD8 plus a render-level check); (f) the invariant is not applied in `setClipFade` (FD1, FU3); (g) `pointercancel` commits (FU3); (h) the X1 status is removed (FU5).
+### Mutation proofs (A runs them in a scratch copy; logs in `a-round-83/mut/`; each must turn at least one listed test red)
+(a) envelope ramps on `clipGain` (EV5f); (b) initial value ignores a mid-clip `from` (EV5b); (c) no final ramp to the window end (EV5c); (d) a clipboard builder drops `envelope` (EV4); (e) export omits `clipEnvelopes` (EV6); (f) move ignores neighbours (EV3, EU3); (g) `pointercancel` commits (EU3); (h) the X1 guard removed (EU6); (i) add uses the pointer y instead of the line value (EU2); (j) unmount mid-drag leaves the preview (EU3).
 
 ## 2. Pre-flight for A
-- Read the applicable primitives: `AGENT_DISCOVERABLE_CODE.md`, `AUDIO_ARCHITECTURE.md`, `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, and `.claude/prompts/studio-feature.md`, `new-test.md`.
-- Verify the baseline (HEAD, 0-line status, 467/467, snapshots, protected 4/4, LF/CR) before the first edit.
-- Grep before coding: every production caller of `applySchedule` (expect exactly `startGraph` and `renderArrangementWav`); every place that builds an `ArrangementClip` from another with a changed edge (expect the F3 list). If another one exists (e.g. in `selection.ts` or `ArrangementContext.tsx`), **stop and report**: it is frozen or out of grant.
-- Checks A runs (speed rules): `npm run typecheck`, `npm run lint`, scoped `biome check` on the owned files (no `--write`), and targeted vitest: the two new files plus every test that imports `graph.client`, `model`, `clipboard` or `ArrangementClip`, or renders the workspace with clips (list in `a-round-82/targeted-list.txt`). Not the full suite.
+- Read the applicable primitives: `AGENT_DISCOVERABLE_CODE.md`, `AUDIO_ARCHITECTURE.md`, `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, and `.claude/prompts/studio-feature.md`, `new-component.md`, `new-test.md`.
+- Verify the baseline (HEAD, 0-line status, 471/471, snapshots, protected 4/4, LF/CR) before the first edit.
+- Grep before coding:
+  - every production caller of `applySchedule` (expect `startGraph` and `renderArrangementWav`);
+  - every place that builds an `ArrangementClip` or clipboard item field by field (expect the three clipboard builders and the two model creators of new clips). Anything else that would drop `envelope` → **stop and report**.
+- Checks A runs (speed rules):
+  - `npm run typecheck`, `npm run lint`, and scoped `biome check` on the owned files (no `--write`);
+  - targeted vitest: the two new files plus every test that imports `graph.client`, `clipboard`, `ArrangementClip`, `ArrangementLane` or `StudioWorkspace`, or renders the workspace with clips. List them in `a-round-83/targeted-list.txt`. Not the full suite.
+- A's own Playwright smoke at 1440×900 is welcome (not C evidence); do one warm-up load first (round-82 lesson).
 - Run the code-reviewer (3+ files changed) and pass its Architecture note verbatim to B.
 
 ## 3. File ownership (exact)
-- **A** owns only the §1 Files table. **C** owns `c-round-82*`. **B** owns the planning artifacts. Root owns gates, commits and pushes.
+- **A** owns only the §1 Files table. **C** owns `c-round-83*`. **B** owns the planning artifacts. Root owns gates, commits and pushes.
 - Protected (never edited): `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/lib/__tests__/download-routes.test.ts`, and the auth files (`app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/lib/firebase.client.ts`).
-- `/studio-lab` stays the public **demo-only** workspace (demo collection badge, no purchased audio, no token/R2 requests).
+- `/studio-lab` stays the public **demo-only** workspace: demo collection badge, no purchased audio, no token/R2 requests.
 
 ## 4. Ableton source table
-Source: Live 12 Reference Manual §6.8 "Audio Clip Fades and Crossfades", `https://www.ableton.com/en/live-manual/12/arrangement-view/`, captured 2026-10-21 (`b-round-71/ableton-arrangement-view-20261021.txt`; untrusted data, read as text only).
+**Sources:** Live 12 Reference Manual, fetched by B on 2026-10-22 with curl and stored as untrusted text in `b-round-82/web/`:
+- "Automation and Editing Envelopes", `https://www.ableton.com/en/live-manual/12/automation-and-editing-envelopes/`. Sections: "Drawing and Editing Automation", "Editing Breakpoints", "Locking Envelopes", "Edit Menu Commands". The page numbers this chapter 25; the older TOC capture says 26, so cite by title.
+- "Clip Envelopes", `https://www.ableton.com/en/live-manual/12/clip-envelopes/`. Sections: "The Clip Envelope Editor", "Mixer and Device Clip Envelopes", "Modulating Mixer Volumes and Sends".
+- Shortcuts §42.7 "Commands for Breakpoint Envelopes" (`b-round-71/ableton-shortcuts-20261021.txt`).
+- §6.8 fades (`b-round-71/ableton-arrangement-view-20261021.txt`).
 
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Fades at clip start/end | §6.8 ¶1 | "The beginning and end of audio clips … have adjustable volume fades" | Same (audio clips) | FD-IN, FD-OUT |
-| Handles appear on hover as small squares at the clip edges; the track must be tall enough | §6.8 ¶2–3 | Confirmed (text) | Same; hidden on a folded lane / narrow clip | FD-HANDLES |
-| Drag a handle across the clip to change the length | §6.8 ¶4 | Confirmed (text) | Same; free (no snap): CZABA choice, Live snapping unconfirmed | FD-IN, FD-LIMITS |
-| Start and end fades cannot overlap | §6.8 limits | Confirmed (text) | Same (`in + out ≤ duration`) | FD-LIMITS |
-| Fade Curve handle | §6.8 ¶4 | Confirmed (text) | **Conscious difference:** linear only in stage 1 | — |
-| Select a handle + Delete deletes the fade | §6.8 | Confirmed (text) | **Difference:** double-click resets (Delete stays clip/range, SRW-24) | FD-UNDO |
-| Crossfades between adjacent clips | §6.8 | Confirmed (text) | **Not applicable:** CZABA clips never overlap; a handle cannot cross the clip edge | FD-LIMITS |
-| Automatic 4 ms edge fades (option "Create Fades on Clip Edges") | §6.8 | Confirmed (text; an opt-in setting) | **Conscious difference:** not added. This closes the routing of C-R28-INFO-NO-EDGE-FADES as a recorded difference | — |
-| Fades are a clip property, independent of automation | §6.8 last ¶ | Confirmed (text) | Same (fades move/copy with the clip; the envelope is stage 2) | FD-EDITS |
-| Fades under split / trim / delete time | — | **Not in the capture (unconfirmed)** | CZABA rules F3 | FD-EDITS |
-| X1: occupied target refused, clip stays at its last valid place | — (Live overwrites on overlap) | Not applicable | CZABA FB-03 decision (plan l.170); only the release status changes | X1-STATUS |
+| Envelopes shown over the waveform in Automation Mode; `A` toggles it | Drawing and Editing Automation; §42.7 | Confirmed (text) | Same key `A` + an `Env` button. **Difference:** an existing envelope line stays visible with the mode off (FB-06: "envelope drawn on clip") | EN-MODE, EN-DRAWN |
+| Arrangement volume automation is absolute and lives on the track's automation lane; Arrangement clips only get modulation envelopes | Clip Envelopes → Mixer and Device Clip Envelopes | Confirmed (text) | **Conscious difference (user request FB-06):** a volume envelope owned by the clip, absolute attenuation ≤ 0 dB, multiplied with Clip Gain | — |
+| Click on a segment adds a breakpoint; double-click off a segment adds one at that position | Editing Breakpoints | Confirmed (text) | **Difference:** a double-click anywhere in the editor adds a point **at the line's value** (no single-click add, no value from pointer y) | EN-ADD |
+| Click on a breakpoint deletes it | Editing Breakpoints | Confirmed (text) | **Difference:** double-click deletes (no click/drag ambiguity; GATE82-S1 lesson) | EN-UNDO |
+| Drag a breakpoint to move it; the value is shown while hovering or dragging | Editing Breakpoints | Confirmed (text) | Same (status + `title`) | EN-DRAG |
+| Breakpoints snap to the grid; Alt bypasses | Editing Breakpoints | Confirmed (text) | **Difference:** free in stage 2, as fades are (signal ENVELOPE-SNAP) | — |
+| Breakpoints snap to neighbour times; dragging over a neighbour removes it | Editing Breakpoints | Confirmed (text) | **Difference:** clamped 1 ms from the neighbours, never removed | EN-DRAG |
+| Shift = axis lock / finer resolution; Alt-drag = curved segment | Editing Breakpoints; §42.7 | Confirmed (text) | Not requested in FB-06; not included; linear segments only | — |
+| Envelopes move with their clips unless Lock Envelopes is on | Locking Envelopes | Confirmed (text) | Same (source-anchored; no lock option) | EN-EDITS a–d |
+| Edit commands on the clip track apply to clip + envelopes | Edit Menu Commands | Confirmed (text) | Same for split, copy, duplicate, Delete range, Cut Time | EN-EDITS e, g |
+| Envelope under trim | — | Not in the capture (unconfirmed) | CZABA: non-destructive, source-anchored (E1) | EN-EDITS f |
+| Interpolation law of a volume envelope | — | Not in the capture (unconfirmed) | CZABA: linear in amplitude between points | EN-EXPORT |
+| Clear Envelope from a context menu | Clip Envelope Editor | Confirmed (text) | Not included; points are deleted one by one (signal) | — |
+| Fade controls hidden in Automation Mode (F shows them momentarily) | §6.8; §42.7 | Confirmed (text) | Same: hidden in Env mode; no F key | EN-MODE |
 
 ## 5. C acceptance (real browser, Playwright Chromium on Linux, **both 1440x900 and 1280x720**, `/studio-lab` anonymous, real `page.mouse` and keyboard)
-Setup per session: Snap off; Middle East on music @0.35 s, `ღამის პულსი · პულსი` on stems @2 s (16 s, ends 18 s), Soft impact on sfx @4 s; load the video only where a row says so. For audio oracles **mute music** (and the video sound if loaded) so the stems clip is alone in the window, and use the same session's no-fade export as the reference `ref`.
+**Setup per session** (one warm-up load first):
+- Snap off; Middle East on music @0.35 s; `ღამის პულსი · პულსი` on stems @2 s (16 s, ends 18 s); Soft impact on sfx @4 s.
+- Load the video only where a row says so.
+- For audio oracles, **mute music and sfx**, so the stems clip is alone, and use the same session's no-envelope export as the reference `ref`.
+- **"V"** = stems points added by double-click at ≈ 6, 10 and 14 s, then the middle one dragged down to `data-gain` ≈ 0.2512 (−12.0 ± 0.3 dB). Use the **actual** `data-envelope` values in every oracle.
 
 | ID | Action | Pass evidence |
 |---|---|---|
-| FD-HANDLES | Hover the stems clip; inspect a video clip (`media/beeps-6s-h264-aac.mp4`) and a folded lane | Two 10×10 handles inside the top of the hovered audio clip's body; none on the video clip, none on the folded lane; `data-fade-in/out="0.000"`; screenshots |
-| FD-IN (R18-A1) | Real mouse drag of the fade-in handle until `data-fade-in` = v ≈ 1.000 (± 1/pxPerSecond); export | Status `Fade In: <v> წმ.`, undo `Fade In`. Export vs `ref`: for samples in [2.0, 2.0 + v] with \|ref\| > 1e-3, \|x/ref − (t − 2)/v\| ≤ 0.01; over [2.0 + v, 3.5] ratio 1 ± 1e-4; before 2.0 both 0 |
-| FD-OUT | Drag the fade-out handle to v ≈ 2 s; export | Over [18 − v, 18] the ratio follows (18 − t)/v within 0.01; over [12, 18 − v] ratio 1 ± 1e-4 |
-| FD-LIVE | Fade-in ≈ 1 s; play from 1.5 s | The stems meter at ≈ 2.15 s is ≥ 12 dB below its reading at ≈ 2.95 s; without the fade (Ctrl+Z, replay) the same two readings differ by ≤ 3 dB (discriminates) |
-| FD-MIDSTART | Fade-in ≈ 1 s; seek 2.5 s, play | The stems meter at ≈ 2.6 s is 2–12 dB below its reading at ≈ 3.3 s (playback started mid-fade: neither from silence nor at full gain) |
-| FD-LIMITS | Fade-out 2 s; drag the fade-in far right past the fade-out start; try to drag it left of the clip start | `data-fade-in` = duration − 2 = 14.000; never < 0; both handles stay inside the clip |
-| FD-UNDO | Drag in, drag out, double-click in, double-click a zero fade, press without moving | Exactly one entry per drag / double-click with the right label; Ctrl+Z / Ctrl+Y restore exact values; the zero-fade double-click and the still press add nothing |
-| FD-EDITS | Each edit on a **fresh** stems clip 2–18 with in 1 / out 2 (Ctrl+Z back between edits): (a) move on the same lane; (b) move to a free place on the sfx lane; (c) Ctrl+D; (d) Ctrl+C / Ctrl+V; (e) Ctrl+E split at 10 s; (f) trim start to 5 s; (g) Delete on a range 8–9 | Expected `data-fade-in / data-fade-out`: (a)–(d) every resulting clip 1.000 / 2.000; (e) left 2–10 1.000 / 0.000, right 10–18 0.000 / 2.000; (f) 5–18 1.000 / 2.000; (g) left 2–8 1.000 / 0.000, right 9–18 0.000 / 2.000. After (e): export [16, 18] still follows the fade-out ratio and [10, 10.1] has ratio 1 (no fade at the cut) |
-| FD-PLAY-EDIT | During playback past 5 s, drag the fade-out handle | Playback continues, the position is monotonic, no console error; the change is one entry |
-| FD-NEIGHBOURS | Body drag away from the handles; trim strip below a handle; header move; click-seek in the body | Range, trim, move and seek behave exactly as before (status and values) |
-| FD-CLIPGAIN | Clip Gain −6 dB on the faded clip; export | The fade-in ratio = 0.5012 · (t − 2)/v within 0.01 (gains multiply) |
-| X1-STATUS | Reproduce C-R80-O3: the music clip @0.35 dragged ≈ 1 s right and down onto the occupied stems lane, released there | The clip stays on music at the start shown by `data-clip-start`; the status is exactly `აქ ადგილი არ არის — კლიპი ბოლო თავისუფალ ადგილას დარჩა: მუსიკა, start 00:0X.XXX.` with that start; undo `კლიპის გადატანა`; a drag onto a free lane still writes `გადატანა ხაზზე — …` |
+| EN-MODE | Toggle with the button, then with `A` | `aria-pressed` / `data-envelope-mode` / status flip each time. Grid row `scrollWidth ≤ clientWidth`. In mode: editor present on audio clips, fade handles absent; none on a video clip (`media/beeps-6s-h264-aac.mp4`) or a folded lane; screenshots |
+| EN-ADD (R18-A2) | In mode, double-click the stems body at ≈ 6, 10, 14 s | 3 points at gain 1.0000; `data-envelope` lists them; 3 entries `Envelope: წერტილის დამატება`; the double-clicks did not seek or start a range |
+| EN-DRAG | Drag the middle point down to ≈ −12 dB; then try past a neighbour, above the top, below the bottom | One `Envelope: წერტილის გადატანა` entry per drag; status shows the dB. Limits: 1 ms short of the neighbour, 1.0000 at the top, 0.0000 (`−∞ dB`) at the bottom |
+| EN-DRAWN | Screenshot with the mode on and off | The line passes the middle point at y ≈ (1 − 0.2512)·bodyHeight ± 2 px. With the mode off the line is still drawn and there are no points |
+| EN-EXPORT (R18-A2, primary) | V; export | Over [6, 14], for samples with \|ref\| > 1e-3, \|x/ref − env(t)\| ≤ 0.01, with env linear between the `data-envelope` points. Over [2, 6] and [14, 18] the ratio is 1 ± 1e-4 |
+| EN-LIVE (paired) | Fresh stems clip; points at ≈ 6 (0 dB), 7 (−12), 13 (−12), 14 (0); play from 5 s; repeat after Ctrl+Z until `data-envelope` is `""` (6 entries: 4 adds + 2 drags) as the control | Stems meter, envelope minus control at the same position: ≈ 10 s → −12 ± 2 dB; ≈ 16 s → 0 ± 1 dB |
+| EN-MIDSTART (paired) | Same plateau; seek 10 s, play; control the same | At ≈ 10.3 s the paired difference is −12 ± 2 dB (playback did not start at 0 dB) |
+| EN-EDITS | Each edit on a **fresh** V (Ctrl+Z back between edits; verify each restore): (a) move on the same lane +1 s; (b) move to a free place on sfx; (c) Ctrl+D; (d) Ctrl+C / Ctrl+V; (e) Ctrl+E split at 10 s; (f) trim start to 8 s, then back to 2 s; (g) Delete on a range 8–9 | (a)–(d) every resulting clip shows the same gains with times shifted by its move. (e) left `6.000:1.0000;10.000:0.2512`, right `10.000:0.2512;14.000:1.0000`; the export equals the pre-split export (ratio 1 ± 1e-4 over [2, 18], excluding ± 1 ms at 10). (f) `10.000:0.2512;14.000:1.0000`; the export at 8 s starts at ratio 0.6256 ± 0.01 and follows the ramp; trim back → 3 points. (g) left `6.000:1.0000`, right `10.000:0.2512;14.000:1.0000`; the export equals the pre-edit one outside [8, 9] |
+| EN-UNDO | Add, drag, double-click a point, still press on a point | One entry per add / drag / delete with the right label; Ctrl+Z / Ctrl+Y restore exact `data-envelope`; deleting adds no point; a still press adds nothing |
+| EN-MULTIPLY | V + fade-in 1 s + Clip Gain −6 dB; export | Ratio = (t − 2)/1 · 0.5012 · env(t) within 0.01 over [2, 3]; 0.5012 · env(t) over [3, 14] |
+| EN-PLAY-EDIT | During playback past 5 s, drag a point | Playback continues, the position is monotonic, no console error; one entry |
+| EN-NEIGHBOURS | Mode off: body range, click-seek, trim strip, header move, fade handles. Mode on: header move, trim strip | All behave exactly as before (status and values). In mode an editor press does not seek |
+| X1-DBLCLICK | Drag the stems fade-in handle +5 px, release, then within 300 ms click the handle once more | `data-fade-in` stays at the dragged value, with one `Fade In` entry. Record whether the page saw a `dblclick` event. After 1 s, a real double-click resets it to 0.000 (FD-UNDO regression) |
 | REG-HYD | All sessions | No hydration / `useLayoutEffect` warning, no non-noise console error |
-| G82-3 | Purchase protection | `/studio/middle-east` anonymous → sign-in required, no workspace; `/api/studio-token?…` anonymous 401; no token/R2/download request from `/studio-lab`; the header link opens `/studio-lab` with the demo badge. Fake-Bearer 403 → BLOCKED if the backend is unavailable |
-| T82-TARGETED | A's `a-round-82/targeted-list.txt` | All pass |
-| SOURCE-UNCHANGED | Start = end | HEAD, 8 M + 4 ??, frozen 467/467, A's end hashes, protected 4/4 |
+| G83-3 | Purchase protection | `/studio/middle-east` anonymous → sign-in required, no workspace; `/api/studio-token?…` anonymous → 401; no token/R2/download request from `/studio-lab`; the header link opens `/studio-lab` with the demo badge. Fake-Bearer 403 → BLOCKED if the backend is unavailable |
+| T83-TARGETED | A's `a-round-83/targeted-list.txt` | All pass |
+| SOURCE-UNCHANGED | Start = end | HEAD, 8 M + 5 ??, frozen 471/471, A's end hashes, protected 4/4 |
 
-**Signal choice for the live rows.** `ღამის პულსი · პულსი` is rhythmic. C runs the FD-LIVE control (no fade) first; if its two readings already differ by more than 3 dB, C moves FD-LIVE and FD-MIDSTART to the sustained Middle East clip (fade at its start 0.35 s, stems muted, the same instants relative to the clip start) and records why. **The export rows FD-IN / FD-OUT are the primary R18-A1 evidence**; a live row that stays noisy after that switch is reported honestly as FAIL/inconclusive with its measurements, not retried beyond the budget, and B decides it.
-
-Gate rows (`gate`, not claimed by C): full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke.
-Ableton match: C reports it separately (confirmed / conscious difference / unconfirmed / not applicable) using §4.
+- **Live rows:** the paired difference is the oracle. If the control run is unstable, C repeats it at most twice within the budget and reports the measurements honestly. **The export rows are the primary R18-A2 evidence.**
+- **Gate rows** (`gate`, not claimed by C): full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke.
+- **Ableton match:** C reports it separately (confirmed / conscious difference / unconfirmed / not applicable), using §4.
 
 ## 6. Mutation-proof table for C (optional, read-only)
-C may re-run A's mutations (a)–(h) in a scratch copy, never in `store/`.
+C may re-run A's mutations (a)–(j) in a scratch copy, never in `store/`.
 
 ## 7. After this round
-- **Round 83:** a **regression round** if round-83 planning falls on or after 2026-10-24 (one short browser check per done / c_pass item at both viewports + `npm run test:e2e:smoke`); otherwise SRW-18 stage 2 (clip volume envelope, R18-A2).
-- Then SRW-19 (video opacity fade, preview only, honest "video render unavailable" in export) → SRW-20 (range export, MP3, off-main-thread encoding) → Lows batch → SRW-21 → full regression → T12.
-- The architecture checkpoint (the SRW-16/17 boundary request, now with question 10) stays with root; non-blocking.
+- **Round 84:** a **regression round** if round-84 planning falls on or after 2026-10-24. That means one short browser check per done / c_pass item at both viewports, plus `npm run test:e2e:smoke`. Otherwise SRW-19 (video opacity fade, preview only, honest "video render unavailable" in export).
+- Then SRW-20 (range export, MP3, off-main-thread encoding) → Lows batch → SRW-21 → full regression → T12.
+- The architecture checkpoint request (questions 1–11) stays with root and does not block.

@@ -1,0 +1,63 @@
+{
+  "round": 82,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-22T09:30:35.7232895Z",
+    "round": 82,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "FD-HANDLES",
+    "FD-IN",
+    "FD-OUT",
+    "FD-LIVE",
+    "FD-MIDSTART",
+    "FD-LIMITS",
+    "FD-UNDO",
+    "FD-EDITS",
+    "FD-PLAY-EDIT",
+    "FD-NEIGHBOURS",
+    "FD-CLIPGAIN",
+    "X1-STATUS",
+    "REG-HYD",
+    "G82-3",
+    "T82-TARGETED",
+    "SOURCE-UNCHANGED"
+  ],
+  "blocked": [
+    "G82-3 fake-Bearer 403 sub-check: GET /api/studio-token?product=middle-east&file=stem1.wav with 'Bearer fake.fake.fake' returns 500 'Unable to prepare Studio access' (backend unavailable in cloud). This is not a PASS and not a fault in A's work. The anonymous case returns 401 'Please sign in to access Studio.'"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "npm run test:e2e:smoke"
+  ],
+  "notes": [
+    "FD-LIVE / FD-MIDSTART were measured on Middle East (music, fade at 0.35 s; stems and sfx muted). This follows task §5's signal-choice rule: on the stems clip the no-fade control readings differed by 6.0 dB at both viewports (more than 3 dB), so the stems live runs are kept only as rejected-signal evidence (r3-*-stems.json).",
+    "FD-MIDSTART: the task's oracle passes on music (9.8 / 10.4 dB, inside 2–12 dB). But the music content alone moves 5.2–5.5 dB between those two positions, so the oracle cannot tell a working fade from no fade on this signal. The discriminating evidence is a paired comparison at the same position (faded run minus control run): −4.6 dB at 0.6 s into the fade (theory 20·log10(0.6) = −4.44 dB) and 0.0 / +0.3 dB after the fade ends. Both viewports agree.",
+    "FD-LIVE on music: control Δ −1.7 dB, faded Δ 16.9 dB (≥ 12 dB). The paired difference at 0.15 s into the fade is −20.9 dB (theory −16.5 dB). The extra attenuation fits the meter's release-limited fall (meter.ts l.73–74: level = max(block peak, previous − release·elapsed)). The export rows are the primary R18-A1 evidence and match per sample.",
+    "Test-script corrections made by C (not app bugs): the trim status regex, a boolean coercion, expanding the collapsed detail panel at 1280x720 before typing Clip Gain, avoiding a negative seek (ruler click), and moving the 1280 paste target from 20 s (off-screen) to 18.5 s. Each affected row was re-run in full."
+  ],
+  "abletonMatch": {
+    "fades at start/end": "confirmed",
+    "hover handles": "confirmed",
+    "drag length (free, no snap)": "confirmed; snap is a CZABA choice",
+    "no overlap": "confirmed",
+    "fade curve": "conscious difference",
+    "delete via handle+Delete": "conscious difference (double-click)",
+    "crossfades": "not applicable",
+    "auto 4 ms edge fades": "conscious difference",
+    "clip property": "confirmed",
+    "split/trim/delete-time": "unconfirmed in Live; CZABA F3 verified",
+    "X1": "not applicable"
+  },
+  "evidence": "c-round-82.md; c-round-82/{r1,r2,r3,r4,g82}-*.json; c-round-82/shots/; c-round-82/vitest-targeted.txt",
+  "notBrowserVerified": []
+}
