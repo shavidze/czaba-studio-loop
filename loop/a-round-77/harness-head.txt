@@ -1,0 +1,106 @@
+import { act, fireEvent, render } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+import {
+  type ArrangementContextValue,
+  ArrangementProvider,
+  GESTURE_EDIT_BLOCKED_MESSAGE,
+  useArrangement,
+} from '~/contexts/ArrangementContext';
+import type { Arrangement, ArrangementMarker, WorkspaceCollection } from '~/types/arrangement';
+import { createArrangement } from '../model';
+
+vi.mock('@remix-run/react', () => ({
+  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
+const fakeClock = { base: 0 };
+const sourceCounter = { created: 0 };
+
+function fakeNow(): number {
+  return Date.now() / 1000 - fakeClock.base;
+}
+
+class FakeParam {
+  value = 0;
+  setTargetAtTime(target: number) {
+    this.value = target;
+  }
+}
+
+class FakeNode {
+  connect(destination: FakeNode) {
+    return destination;
+  }
+  disconnect() {}
+}
+
+class FakeGain extends FakeNode {
+  gain = new FakeParam();
+}
+
+class FakePanner extends FakeNode {
+  pan = new FakeParam();
+}
+
+class FakeSource extends FakeNode {
+  buffer: unknown = null;
+  onended: (() => void) | null = null;
+  start() {}
+  stop() {}
+}
+
+class FakeAudioContext {
+  state = 'running';
+  destination = new FakeNode();
+  sampleRate = 48000;
+  get currentTime() {
+    return fakeNow();
+  }
+  resume() {
+    return Promise.resolve();
+  }
+  close() {
+    return Promise.resolve();
+  }
+  createGain() {
+    return new FakeGain();
+  }
+  createStereoPanner() {
+    return new FakePanner();
+  }
+  createBufferSource() {
+    sourceCounter.created += 1;
+    return new FakeSource();
+  }
+}
+
+class FakeOfflineAudioContext {}
+
+class FakeAudioBuffer {
+  readonly length: number;
+  readonly numberOfChannels: number;
+  readonly sampleRate: number;
+  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
+    this.length = options.length;
+    this.numberOfChannels = options.numberOfChannels;
+    this.sampleRate = options.sampleRate;
+  }
+  get duration() {
+    return this.length / this.sampleRate;
+  }
+  getChannelData() {
+    return new Float32Array(this.length);
+  }
+}
+
+class FakeResizeObserver {
+  observe() {}
+  disconnect() {}
+}
+

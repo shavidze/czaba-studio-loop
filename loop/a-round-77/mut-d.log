@@ -1,0 +1,98 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx [2m([22m[2m12 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 1066[2mms[22m[39m
+     [32m✓[39m EN1: with the active track only, Ctrl+Right stops at its clip edges and the markers[32m 210[2mms[22m[39m
+     [32m✓[39m EN2: a selected clip adds its track; a Ctrl-click adds a second track[32m 147[2mms[22m[39m
+     [32m✓[39m EN3: a time range adds its track and Ctrl+Shift+L adds every track[32m 113[2mms[22m[39m
+     [32m✓[39m EN4: Ctrl+Left mirrors the stops down to 0, then both directions refuse at the ends[32m 88[2mms[22m[39m
+     [32m✓[39m EN5: a clip-edge stop keeps the selected marker; an edge on a marker selects that marker[32m 67[2mms[22m[39m
+     [32m✓[39m EN6: the previous/next buttons stay marker-only[32m 64[2mms[22m[39m
+     [32m✓[39m EN10: Ctrl+Right to a clip edge while playing keeps playing[32m 62[2mms[22m[39m
+[31m     [31m×[31m EN7: on MacIntel Option+Right steps like Ctrl+Right and does not move a selected clip[39m[32m 49[2mms[22m[39m
+     [32m✓[39m EN8: on Win32 Alt+Right with a selected clip nudges the clip like plain Right[32m 81[2mms[22m[39m
+     [32m✓[39m EN8: on Linux x86_64 Alt+Right with a selected clip nudges the clip like plain Right[32m 76[2mms[22m[39m
+[31m     [31m×[31m EN9: BPM input, fader and a pointer gesture block Option+Right and Ctrl+Right[39m[32m 62[2mms[22m[39m
+[31m     [31m×[31m EN11: Option+Right on a focused flag navigates and moves no marker[39m[32m 46[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mOption+arrows on Apple platforms (N6/N7)[2m > [22mEN7: on MacIntel Option+Right steps like Ctrl+Right and does not move a selected clip
+[31m[1mAssertionError[22m: expected [ +0, +0, +0, +0, +0 ] to deeply equal [ 2.25, 6.3, 7.75, 12, 30 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   2.25,[39m
+[32m-   6.3,[39m
+[32m-   7.75,[39m
+[32m-   12,[39m
+[32m-   30,[39m
+[31m+   0,[39m
+[31m+   0,[39m
+[31m+   0,[39m
+[31m+   0,[39m
+[31m+   0,[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m440:55[22m[39m
+    [90m438| [39m    [35mconst[39m { api[33m,[39m view } [33m=[39m [35mawait[39m [34mmountEdgeWorkspace[39m()[33m;[39m
+    [90m439| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mseekTo[39m([34m0[39m))[33m;[39m
+    [90m440| [39m    expect(stepSequence(api, 'ArrowRight', 5, 'alt')).toEqual([2.25, 6…
+    [90m   | [39m                                                      [31m^[39m
+    [90m441| [39m    [34mclickClipBody[39m(view[33m,[39m [32m's1'[39m[33m,[39m [34m31[39m)[33m;[39m
+    [90m442| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mselectedClipIds)[33m.[39m[34mtoEqual[39m([[32m's1'[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mOption+arrows on Apple platforms (N6/N7)[2m > [22mEN9: BPM input, fader and a pointer gesture block Option+Right and Ctrl+Right
+[31m[1mAssertionError[22m: expected +0 to be 2.25 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2.25[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m524:41[22m[39m
+    [90m522| [39m    })[33m;[39m
+    [90m523| [39m    [34mpressStep[39m([32m'ArrowRight'[39m[33m,[39m [32m'alt'[39m)[33m;[39m
+    [90m524| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39m[34mgetLivePosition[39m())[33m.[39m[34mtoBe[39m([34m2.25[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m525| [39m  })[33m;[39m
+    [90m526| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mOption+arrows on Apple platforms (N6/N7)[2m > [22mEN11: Option+Right on a focused flag navigates and moves no marker
+[31m[1mAssertionError[22m: expected 6.3 to be 7.75 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 7.75[39m
+[31m+ 6.3[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m534:41[22m[39m
+    [90m532| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mseekTo[39m([34m6.3[39m))[33m;[39m
+    [90m533| [39m    [34mpressStep[39m([32m'ArrowRight'[39m[33m,[39m [32m'alt'[39m[33m,[39m flag)[33m;[39m
+    [90m534| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39m[34mgetLivePosition[39m())[33m.[39m[34mtoBe[39m([34m7.75[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m535| [39m    [34mexpect[39m([34mmarkerTimes[39m(view))[33m.[39m[34mtoEqual[39m([[32m'6.300'[39m[33m,[39m [32m'12.000'[39m])[33m;[39m
+    [90m536| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 03:19:26
+[2m   Duration [22m 3.05s[2m (transform 835ms, setup 0ms, import 1.32s, tests 1.07s, environment 497ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Option+arrows on Apple platforms (N6/N7) > EN7%3A on MacIntel Option+Right steps like Ctrl+Right and does not move a selected clip,line=440,column=55::AssertionError: expected [ +0, +0, +0, +0, +0 ] to deeply equal [ 2.25, 6.3, 7.75, 12, 30 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   2.25,%0A-   6.3,%0A-   7.75,%0A-   12,%0A-   30,%0A+   0,%0A+   0,%0A+   0,%0A+   0,%0A+   0,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:440:55%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Option+arrows on Apple platforms (N6/N7) > EN9%3A BPM input%2C fader and a pointer gesture block Option+Right and Ctrl+Right,line=524,column=41::AssertionError: expected +0 to be 2.25 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 2.25%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:524:41%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Option+arrows on Apple platforms (N6/N7) > EN11%3A Option+Right on a focused flag navigates and moves no marker,line=534,column=41::AssertionError: expected 6.3 to be 7.75 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 7.75%0A+ 6.3%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:534:41%0A%0A

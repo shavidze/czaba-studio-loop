@@ -1,0 +1,249 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx [2m([22m[2m12 tests[22m[2m | [22m[31m9 failed[39m[2m)[22m[33m 1037[2mms[22m[39m
+[31m     [31m×[31m EN1: with the active track only, Ctrl+Right stops at its clip edges and the markers[39m[32m 223[2mms[22m[39m
+[31m     [31m×[31m EN2: a selected clip adds its track; a Ctrl-click adds a second track[39m[32m 139[2mms[22m[39m
+[31m     [31m×[31m EN3: a time range adds its track and Ctrl+Shift+L adds every track[39m[32m 94[2mms[22m[39m
+[31m     [31m×[31m EN4: Ctrl+Left mirrors the stops down to 0, then both directions refuse at the ends[39m[32m 76[2mms[22m[39m
+[31m     [31m×[31m EN5: a clip-edge stop keeps the selected marker; an edge on a marker selects that marker[39m[32m 56[2mms[22m[39m
+     [32m✓[39m EN6: the previous/next buttons stay marker-only[32m 78[2mms[22m[39m
+[31m     [31m×[31m EN10: Ctrl+Right to a clip edge while playing keeps playing[39m[32m 52[2mms[22m[39m
+[31m     [31m×[31m EN7: on MacIntel Option+Right steps like Ctrl+Right and does not move a selected clip[39m[32m 47[2mms[22m[39m
+     [32m✓[39m EN8: on Win32 Alt+Right with a selected clip nudges the clip like plain Right[32m 86[2mms[22m[39m
+     [32m✓[39m EN8: on Linux x86_64 Alt+Right with a selected clip nudges the clip like plain Right[32m 72[2mms[22m[39m
+[31m     [31m×[31m EN9: BPM input, fader and a pointer gesture block Option+Right and Ctrl+Right[39m[32m 62[2mms[22m[39m
+[31m     [31m×[31m EN11: Option+Right on a focused flag navigates and moves no marker[39m[32m 50[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 9 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mCtrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2)[2m > [22mEN1: with the active track only, Ctrl+Right stops at its clip edges and the markers
+[31m[1mAssertionError[22m: expected [ 6.3, 12, 30, 30, 30 ] to deeply equal [ 2.25, 6.3, 7.75, 12, 30 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   2.25,[39m
+[2m    6.3,[22m
+[32m-   7.75,[39m
+[2m    12,[22m
+[31m+   30,[39m
+[31m+   30,[39m
+[2m    30,[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m311:50[22m[39m
+    [90m309| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mselectedClipIds)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m310| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mseekTo[39m([34m0[39m))[33m;[39m
+    [90m311| [39m      expect(stepSequence(api, 'ArrowRight', 5)).toEqual([2.25, 6.3, 7…
+    [90m   | [39m                                                 [31m^[39m
+    [90m312| [39m    })[33m;[39m
+    [90m313| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mCtrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2)[2m > [22mEN2: a selected clip adds its track; a Ctrl-click adds a second track
+[31m[1mAssertionError[22m: expected [ 6.3, 12, 30, 30, 30 ] to deeply equal [ 4.1, 5.9, 6.3, 12, 30 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   4.1,[39m
+[32m-   5.9,[39m
+[2m    6.3,[22m
+[2m    12,[22m
+[31m+   30,[39m
+[31m+   30,[39m
+[2m    30,[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m320:50[22m[39m
+    [90m318| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mselectedClipIds)[33m.[39m[34mtoEqual[39m([[32m's1'[39m])[33m;[39m
+    [90m319| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mseekTo[39m([34m0[39m))[33m;[39m
+    [90m320| [39m      expect(stepSequence(api, 'ArrowRight', 5)).toEqual([4.1, 5.9, 6.…
+    [90m   | [39m                                                 [31m^[39m
+    [90m321| [39m      [34mclickClipBody[39m(view[33m,[39m [32m'm1'[39m[33m,[39m [34m22[39m[33m,[39m [35mtrue[39m)[33m;[39m
+    [90m322| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mactiveTrackId)[33m.[39m[34mtoBe[39m([32m'sfx'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mCtrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2)[2m > [22mEN3: a time range adds its track and Ctrl+Shift+L adds every track
+[31m[1mAssertionError[22m: expected [ 6.3, 12, 30, 30, 30, 30, 30 ] to deeply equal [ 2.25, 4.1, 5.9, 6.3, 7.75, 12, 30 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   2.25,[39m
+[32m-   4.1,[39m
+[32m-   5.9,[39m
+[2m    6.3,[22m
+[32m-   7.75,[39m
+[2m    12,[22m
+[31m+   30,[39m
+[31m+   30,[39m
+[31m+   30,[39m
+[31m+   30,[39m
+[2m    30,[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m342:50[22m[39m
+    [90m340| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mselectedClipIds)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m341| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mseekTo[39m([34m0[39m))[33m;[39m
+    [90m342| [39m      [34mexpect[39m([34mstepSequence[39m(api[33m,[39m [32m'ArrowRight'[39m[33m,[39m [34m7[39m))[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                                                 [31m^[39m
+    [90m343| [39m        [34m2.25[39m[33m,[39m
+    [90m344| [39m        [34m4.1[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mCtrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2)[2m > [22mEN4: Ctrl+Left mirrors the stops down to 0, then both directions refuse at the ends
+[31m[1mAssertionError[22m: expected [ 12, 6.3, +0, +0, +0 ] to deeply equal [ 12, 7.75, 6.3, 2.25, +0 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    12,[22m
+[32m-   7.75,[39m
+[2m    6.3,[22m
+[32m-   2.25,[39m
+[31m+   0,[39m
+[31m+   0,[39m
+[2m    0,[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m372:49[22m[39m
+    [90m370| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39m[34mgetLivePosition[39m())[33m.[39m[34mtoBe[39m([33mPROJECT_END[39m)[33m;[39m
+    [90m371| [39m      [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m([32m'წინ მარკერი აღარ არის'[39m)[33m;[39m
+    [90m372| [39m      expect(stepSequence(api, 'ArrowLeft', 5)).toEqual([12, 7.75, 6.3…
+    [90m   | [39m                                                [31m^[39m
+    [90m373| [39m      [34mpressStep[39m([32m'ArrowLeft'[39m)[33m;[39m
+    [90m374| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39m[34mgetLivePosition[39m())[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mCtrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2)[2m > [22mEN5: a clip-edge stop keeps the selected marker; an edge on a marker selects that marker
+[31m[1mAssertionError[22m: expected [ 6.3, 12 ] to deeply equal [ 2.25, 6.3 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   2.25,[39m
+[2m    6.3,[22m
+[31m+   12,[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m385:50[22m[39m
+    [90m383| [39m      )[33m;[39m
+    [90m384| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mseekTo[39m([34m0[39m))[33m;[39m
+    [90m385| [39m      [34mexpect[39m([34mstepSequence[39m(api[33m,[39m [32m'ArrowRight'[39m[33m,[39m [34m2[39m))[33m.[39m[34mtoEqual[39m([[34m2.25[39m[33m,[39m [34m6.3[39m])[33m;[39m
+    [90m   | [39m                                                 [31m^[39m
+    [90m386| [39m      expect(flagAt(view, '6.300').getAttribute('aria-current')).toBe(…
+    [90m387| [39m      [34mpressStep[39m([32m'ArrowRight'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mCtrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2)[2m > [22mEN10: Ctrl+Right to a clip edge while playing keeps playing
+[31m[1mAssertionError[22m: expected 6.3 to be less than 2.75[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m429:43[22m[39m
+    [90m427| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39misPlaying)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m428| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39m[34mgetLivePosition[39m())[33m.[39m[34mtoBeGreaterThanOrEqual[39m([34m2.25[39m)[33m;[39m
+    [90m429| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39m[34mgetLivePosition[39m())[33m.[39m[34mtoBeLessThan[39m([34m2.75[39m)[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m430| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mtogglePlayback[39m())[33m;[39m
+    [90m431| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mOption+arrows on Apple platforms (N6/N7)[2m > [22mEN7: on MacIntel Option+Right steps like Ctrl+Right and does not move a selected clip
+[31m[1mAssertionError[22m: expected [ 6.3, 12, 30, 30, 30 ] to deeply equal [ 2.25, 6.3, 7.75, 12, 30 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   2.25,[39m
+[2m    6.3,[22m
+[32m-   7.75,[39m
+[2m    12,[22m
+[31m+   30,[39m
+[31m+   30,[39m
+[2m    30,[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m440:55[22m[39m
+    [90m438| [39m    [35mconst[39m { api[33m,[39m view } [33m=[39m [35mawait[39m [34mmountEdgeWorkspace[39m()[33m;[39m
+    [90m439| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mseekTo[39m([34m0[39m))[33m;[39m
+    [90m440| [39m    expect(stepSequence(api, 'ArrowRight', 5, 'alt')).toEqual([2.25, 6…
+    [90m   | [39m                                                      [31m^[39m
+    [90m441| [39m    [34mclickClipBody[39m(view[33m,[39m [32m's1'[39m[33m,[39m [34m31[39m)[33m;[39m
+    [90m442| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mselectedClipIds)[33m.[39m[34mtoEqual[39m([[32m's1'[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mOption+arrows on Apple platforms (N6/N7)[2m > [22mEN9: BPM input, fader and a pointer gesture block Option+Right and Ctrl+Right
+[31m[1mAssertionError[22m: expected 6.3 to be 2.25 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2.25[39m
+[31m+ 6.3[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m524:41[22m[39m
+    [90m522| [39m    })[33m;[39m
+    [90m523| [39m    [34mpressStep[39m([32m'ArrowRight'[39m[33m,[39m [32m'alt'[39m)[33m;[39m
+    [90m524| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39m[34mgetLivePosition[39m())[33m.[39m[34mtoBe[39m([34m2.25[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m525| [39m  })[33m;[39m
+    [90m526| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mOption+arrows on Apple platforms (N6/N7)[2m > [22mEN11: Option+Right on a focused flag navigates and moves no marker
+[31m[1mAssertionError[22m: expected 12 to be 7.75 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 7.75[39m
+[31m+ 12[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m534:41[22m[39m
+    [90m532| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mseekTo[39m([34m6.3[39m))[33m;[39m
+    [90m533| [39m    [34mpressStep[39m([32m'ArrowRight'[39m[33m,[39m [32m'alt'[39m[33m,[39m flag)[33m;[39m
+    [90m534| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39m[34mgetLivePosition[39m())[33m.[39m[34mtoBe[39m([34m7.75[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m535| [39m    [34mexpect[39m([34mmarkerTimes[39m(view))[33m.[39m[34mtoEqual[39m([[32m'6.300'[39m[33m,[39m [32m'12.000'[39m])[33m;[39m
+    [90m536| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m9 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 03:19:14
+[2m   Duration [22m 3.06s[2m (transform 849ms, setup 0ms, import 1.36s, tests 1.04s, environment 490ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Ctrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2) > EN1%3A with the active track only%2C Ctrl+Right stops at its clip edges and the markers,line=311,column=50::AssertionError: expected [ 6.3, 12, 30, 30, 30 ] to deeply equal [ 2.25, 6.3, 7.75, 12, 30 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   2.25,%0A    6.3,%0A-   7.75,%0A    12,%0A+   30,%0A+   30,%0A    30,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:311:50%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Ctrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2) > EN2%3A a selected clip adds its track; a Ctrl-click adds a second track,line=320,column=50::AssertionError: expected [ 6.3, 12, 30, 30, 30 ] to deeply equal [ 4.1, 5.9, 6.3, 12, 30 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   4.1,%0A-   5.9,%0A    6.3,%0A    12,%0A+   30,%0A+   30,%0A    30,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:320:50%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Ctrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2) > EN3%3A a time range adds its track and Ctrl+Shift+L adds every track,line=342,column=50::AssertionError: expected [ 6.3, 12, 30, 30, 30, 30, 30 ] to deeply equal [ 2.25, 4.1, 5.9, 6.3, 7.75, 12, 30 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   2.25,%0A-   4.1,%0A-   5.9,%0A    6.3,%0A-   7.75,%0A    12,%0A+   30,%0A+   30,%0A+   30,%0A+   30,%0A    30,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:342:50%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Ctrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2) > EN4%3A Ctrl+Left mirrors the stops down to 0%2C then both directions refuse at the ends,line=372,column=49::AssertionError: expected [ 12, 6.3, +0, +0, +0 ] to deeply equal [ 12, 7.75, 6.3, 2.25, +0 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    12,%0A-   7.75,%0A    6.3,%0A-   2.25,%0A+   0,%0A+   0,%0A    0,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:372:49%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Ctrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2) > EN5%3A a clip-edge stop keeps the selected marker; an edge on a marker selects that marker,line=385,column=50::AssertionError: expected [ 6.3, 12 ] to deeply equal [ 2.25, 6.3 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   2.25,%0A    6.3,%0A+   12,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:385:50%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Ctrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2) > EN10%3A Ctrl+Right to a clip edge while playing keeps playing,line=429,column=43::AssertionError: expected 6.3 to be less than 2.75%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:429:43%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Option+arrows on Apple platforms (N6/N7) > EN7%3A on MacIntel Option+Right steps like Ctrl+Right and does not move a selected clip,line=440,column=55::AssertionError: expected [ 6.3, 12, 30, 30, 30 ] to deeply equal [ 2.25, 6.3, 7.75, 12, 30 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   2.25,%0A    6.3,%0A-   7.75,%0A    12,%0A+   30,%0A+   30,%0A    30,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:440:55%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Option+arrows on Apple platforms (N6/N7) > EN9%3A BPM input%2C fader and a pointer gesture block Option+Right and Ctrl+Right,line=524,column=41::AssertionError: expected 6.3 to be 2.25 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 2.25%0A+ 6.3%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:524:41%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Option+arrows on Apple platforms (N6/N7) > EN11%3A Option+Right on a focused flag navigates and moves no marker,line=534,column=41::AssertionError: expected 12 to be 7.75 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 7.75%0A+ 12%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:534:41%0A%0A

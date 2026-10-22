@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-22T02:45:23.738Z)
+# Active loop summary (2026-10-22T03:38:39.043Z)
 
-- backlog.json 685 KB -> active view 147 KB
-- status: G_ROOT_GATE round 76
-- servers: `{"checkedUtc":"2026-10-22T02:24:21.7510751Z","round":76,"attempt":1,"store":200}`
-- last publication: db9cc255e29d8792e2c67a391519515a0ec2230e (rounds 76-76)
-- last root gate: round 76 published - commit db9cc255e29d8792e2c67a391519515a0ec2230e pushed
+- backlog.json 692 KB -> active view 126 KB
+- status: G_ROOT_GATE round 77
+- servers: `{"checkedUtc":"2026-10-22T03:22:58.1803407Z","round":77,"attempt":1,"store":200}`
+- last publication: 60006d4305c4ef316f5459e6fa29a48e7931b36c (rounds 77-77)
+- last root gate: round 77 published - commit 60006d4305c4ef316f5459e6fa29a48e7931b36c pushed
 
-## Current items: SRW-14, SRW-16
+## Current items: SRW-16
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -148,7 +148,7 @@
 - ROW-RANGE-M / info / signal for stage 2 (not a task) / M adds at range.start even after a later ruler click (spec R6 as written); Live drops the selection on click; consider clearing/documenting 
 - GATE-72-SKIPPED / info / open_root / Round 72 root gate skipped (C FAIL); round-72 code is uncommitted in the tree; rounds 72+73 publish together after C PASS
 - A-R73-SAFARI-FLAG-FOCUS / medium / scheduled (round 74 B1: press explicitly focuses the flag; MV8 test); C verifies Chromium only, WebKit not available as evidence / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
-- ROOT-R73-S1-MAC-CTRL-ARROWS / low / scheduled round 77 (SRW-16 stage 2b-2): Live 12 6.9 uses Option+arrows on Mac / macOS reserves Ctrl+Left/Right for Spaces; marker prev/next reachable only by buttons
+- ROOT-R73-S1-MAC-CTRL-ARROWS / low / scheduled round 77 (D-29z42 N6/N7: Option+arrows on Apple platforms, vitest EN7 + Tech Lead R77-T; not browser-verifiable on Linux) / macOS reserves Ctrl+Left/Right for Spaces; marker prev/next reachable only by buttons
 - ROOT-R73-S2-FLAG-A11Y / low / partly scheduled round 74 (aria-keyshortcuts B12); aria-current semantics kept (C harness), Lows batch / F2/Delete only in title; aria-current=true for selection
 - ROOT-R73-S3-MARKER-BUTTON-SIZE / low / open - Lows batch / marker +/◀/▶ buttons 16 px tall, below WCAG 2.2 2.5.8 24 px (matches existing chrome)
 - ROOT-R73-S4-EDITOR-OVERFLOW / low / open - Lows batch / marker name editor w-40 near the timeline end can widen horizontal scroll; markers past project end
@@ -170,12 +170,24 @@
 - GATE75-S8-REAL-BROWSER-SMOKE / info / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / needs real-browser smoke: mac/Linux contextmenu-before-pointerup order, Windows Shift+F10 opens exactly one menu, no dblclick play after dra
 - A-R75-LOW2-SAME-ZOOM-VIEW-SCROLL / low / open - signal (Lows batch / Follow regression) / same-zoom applyTimelineView scrolls (fit, zoom-to-range, Zoom Back) pre-write lastScrollLeftRef, so they would not close an open marker menu
 - C-R75-A-LOW4-FOLLOW-LEFT-WHEEL / info / open - signal (Lows batch / Follow regression) / leftward user wheel near the clamped right end during Follow keeps the menu open (clampedByBrowser heuristic, same as grid menu); not run by
+- GATE76-S1-MARKER-TIMES-3X / low / open - signal (SRW-16 checkpoint / snapTargetsFor proposal) / markerSnapTimes(gesture.before) computed 3x per pointermove in ArrangementClip handlePointerMove (l.406/459/529)
+- GATE76-S2-GROUP-FALLBACK-MS8C / low / ruled deliberate for now (B, D-29z42): existing snapGroupMoveDelta rule (nearest candidate; out of bounds -> grid) kept and documented in doc 066; routed to the SRW-16 architecture checkpoint question 'nearest in-bounds candidate'; not scheduled / group move with a nearest out-of-bounds marker falls back to the grid and skips a nearer in-bounds clip edge
+- GATE76-S3-VIDEO-CLIP-MARKER-UNTESTED / low / open - Lows batch / regression round row / video clip move onto a marker goes through the single-move path but has no test
+- GATE76-S5-SNAPSHOT-VS-LIVE / info / acknowledged / clip drags read markers from gesture.before, library drops from the live arrangement; a marker changed mid-drag does not affect a running cl
+- GATE76-S4-DOC066-STATUS / info / scheduled round 77 (one-line grant) / doc 066 status line still says awaiting C
+- ARCH-R76-SNAP-TARGETS-HELPER / info / signal - merged into the SRW-16 checkpoint request (after 2b-3); reviewers: keep for now / clipEdgeTargets(..., markerSnapTimes(arr)) repeated at 4 call sites; proposal snapTargetsFor/snapEdgeTargets(arrangement, excludeClipId, lan
+- C-R76-OBS-SOLO-MUTE-HISTORY / info / open - product question (Lows batch triage) / Solo and Mute clicks are undo-history entries; Ctrl+Z after Mute undoes Mute, not an earlier clip move (pre-existing)
+- C-R76-OBS-PLAY-PAST-END / low / open - Lows batch / double-clicking a marker after the project end does not start the transport and shows no status (pre-existing)
+- C-R76-HARNESS-BUDGET / info / acknowledged / MS-PLAY at 1440 needed 3 harness-invalid attempts before the valid one (more than the two-extra-attempt letter; no measurement miss, no tole
+- R77-BUTTON-SHORTCUT-SUPERSET / low / open - Lows batch (with ROOT-R69-L2 / ROOT-R73-S2; string locked by frozen MU6) / prev/next marker buttons announce Control+ArrowLeft/Right while the key also stops at clip edges from round 77 (buttons stay marker-only per
+- R77-T-TECH-LEAD / info / open / real Mac: Option+Left/Right steps markers and clip edges of the selected tracks; Option+Right with a selected clip does not move it; Ctrl+ar
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
 - SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
+- SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-17 [todo] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [todo] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)

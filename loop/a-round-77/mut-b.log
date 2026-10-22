@@ -1,0 +1,100 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/edge-navigation.test.ts [2m([22m[2m21 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 23[2mms[22m[39m
+     [32m✓[39m returns the active track only when nothing else is selected[32m 2[2mms[22m[39m
+[31m     [31m×[31m adds the tracks of selected clips once, in track order[39m[32m 10[2mms[22m[39m
+     [32m✓[39m adds the range track, and every track for an all-tracks range[32m 1[2mms[22m[39m
+     [32m✓[39m ignores unknown track and clip ids and returns [] when nothing is selected[32m 0[2mms[22m[39m
+     [32m✓[39m returns sorted unique starts and ends of clips on the given tracks only[32m 1[2mms[22m[39m
+     [32m✓[39m returns [] for no tracks or a track without clips[32m 0[2mms[22m[39m
+     [32m✓[39m gives the round-76 results when edges are omitted or empty[32m 2[2mms[22m[39m
+     [32m✓[39m stops at the nearest of marker and edge in both directions[32m 1[2mms[22m[39m
+     [32m✓[39m treats an edge within MARKER_TIME_EPS of a marker as that marker (N3)[32m 1[2mms[22m[39m
+     [32m✓[39m skips an edge within MARKER_TIME_EPS of the position and accepts unsorted edges[32m 1[2mms[22m[39m
+     [32m✓[39m never stops past the project end when a rounded edge exceeds it[32m 0[2mms[22m[39m
+     [32m✓[39m keeps the end/0 fallback and the refusal with edges[32m 0[2mms[22m[39m
+     [32m✓[39m platform "MacIntel" with user agent "" → true[32m 0[2mms[22m[39m
+     [32m✓[39m platform "iPhone" with user agent "" → true[32m 0[2mms[22m[39m
+     [32m✓[39m platform "iPad" with user agent "" → true[32m 0[2mms[22m[39m
+     [32m✓[39m platform "Win32" with user agent "" → false[32m 0[2mms[22m[39m
+     [32m✓[39m platform "Linux x86_64" with user agent "" → false[32m 0[2mms[22m[39m
+     [32m✓[39m platform "" with user agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15" → true[32m 0[2mms[22m[39m
+     [32m✓[39m platform "" with user agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130.0" → false[32m 0[2mms[22m[39m
+     [32m✓[39m platform "Win32" with user agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" → false[32m 0[2mms[22m[39m
+     [32m✓[39m platform "" with user agent "" → false[32m 0[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx [2m([22m[2m12 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1098[2mms[22m[39m
+     [32m✓[39m EN1: with the active track only, Ctrl+Right stops at its clip edges and the markers[32m 205[2mms[22m[39m
+[31m     [31m×[31m EN2: a selected clip adds its track; a Ctrl-click adds a second track[39m[32m 177[2mms[22m[39m
+     [32m✓[39m EN3: a time range adds its track and Ctrl+Shift+L adds every track[32m 87[2mms[22m[39m
+     [32m✓[39m EN4: Ctrl+Left mirrors the stops down to 0, then both directions refuse at the ends[32m 80[2mms[22m[39m
+     [32m✓[39m EN5: a clip-edge stop keeps the selected marker; an edge on a marker selects that marker[32m 65[2mms[22m[39m
+     [32m✓[39m EN6: the previous/next buttons stay marker-only[32m 70[2mms[22m[39m
+     [32m✓[39m EN10: Ctrl+Right to a clip edge while playing keeps playing[32m 58[2mms[22m[39m
+     [32m✓[39m EN7: on MacIntel Option+Right steps like Ctrl+Right and does not move a selected clip[32m 68[2mms[22m[39m
+     [32m✓[39m EN8: on Win32 Alt+Right with a selected clip nudges the clip like plain Right[32m 89[2mms[22m[39m
+     [32m✓[39m EN8: on Linux x86_64 Alt+Right with a selected clip nudges the clip like plain Right[32m 79[2mms[22m[39m
+     [32m✓[39m EN9: BPM input, fader and a pointer gesture block Option+Right and Ctrl+Right[32m 69[2mms[22m[39m
+     [32m✓[39m EN11: Option+Right on a focused flag navigates and moves no marker[32m 48[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/edge-navigation.test.ts[2m > [22medgeNavigationTrackIds (EU1)[2m > [22madds the tracks of selected clips once, in track order
+[31m[1mAssertionError[22m: expected [ 'sfx' ] to deeply equal [ 'music', 'sfx' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "music",[39m
+[2m    "sfx",[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/edge-navigation.test.ts:[2m53:7[22m[39m
+    [90m 51| [39m        selectedClipIds[33m:[39m [[32m's1'[39m[33m,[39m [32m's2'[39m[33m,[39m [32m'm1'[39m][33m,[39m
+    [90m 52| [39m      })[33m,[39m
+    [90m 53| [39m    )[33m.[39m[34mtoEqual[39m([[32m'music'[39m[33m,[39m [32m'sfx'[39m])[33m;[39m
+    [90m   | [39m      [31m^[39m
+    [90m 54| [39m  })[33m;[39m
+    [90m 55| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx[2m > [22mCtrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2)[2m > [22mEN2: a selected clip adds its track; a Ctrl-click adds a second track
+[31m[1mAssertionError[22m: expected [ 4.1, 5.9, 6.3, 12, 30, 30, 30 ] to deeply equal [ 2.25, 4.1, 5.9, 6.3, 7.75, 12, 30 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   2.25,[39m
+[2m    4.1,[22m
+[2m    5.9,[22m
+[2m    6.3,[22m
+[32m-   7.75,[39m
+[2m    12,[22m
+[31m+   30,[39m
+[31m+   30,[39m
+[2m    30,[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:[2m325:50[22m[39m
+    [90m323| [39m      expect([...live(api).selectedClipIds].sort()).toEqual(['m1', 's1…
+    [90m324| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mseekTo[39m([34m0[39m))[33m;[39m
+    [90m325| [39m      [34mexpect[39m([34mstepSequence[39m(api[33m,[39m [32m'ArrowRight'[39m[33m,[39m [34m7[39m))[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                                                 [31m^[39m
+    [90m326| [39m        [34m2.25[39m[33m,[39m
+    [90m327| [39m        [34m4.1[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m31 passed[39m[22m[90m (33)[39m
+[2m   Start at [22m 03:19:18
+[2m   Duration [22m 3.18s[2m (transform 958ms, setup 0ms, import 1.61s, tests 1.12s, environment 1.11s)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/edge-navigation.test.ts,title=app/lib/arrangement/__tests__/edge-navigation.test.ts > edgeNavigationTrackIds (EU1) > adds the tracks of selected clips once%2C in track order,line=53,column=7::AssertionError: expected [ 'sfx' ] to deeply equal [ 'music', 'sfx' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "music",%0A    "sfx",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/edge-navigation.test.ts:53:7%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx,title=app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx > Ctrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2) > EN2%3A a selected clip adds its track; a Ctrl-click adds a second track,line=325,column=50::AssertionError: expected [ 4.1, 5.9, 6.3, 12, 30, 30, 30 ] to deeply equal [ 2.25, 4.1, 5.9, 6.3, 7.75, 12, 30 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   2.25,%0A    4.1,%0A    5.9,%0A    6.3,%0A-   7.75,%0A    12,%0A+   30,%0A+   30,%0A    30,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:325:50%0A%0A
