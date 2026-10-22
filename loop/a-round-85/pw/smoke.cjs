@@ -1,0 +1,133 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+const { parse } = require('/home/runner/czaba-project/tmp/studio-real-loop/c-round-84/tools/wav.cjs');
+const fs = require('fs');
+const out = '/home/runner/czaba-project/tmp/studio-real-loop/a-round-85/pw/';
+const URL = 'http://127.0.0.1:5173/studio-lab';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function download(page, action, name) {
+  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 60000 }), action()]);
+  const path = out + name;
+  await dl.saveAs(path);
+  return { suggested: dl.suggestedFilename(), path };
+}
+(async () => {
+  const browser = await chromium.launch();
+  const warm = await browser.newContext();
+  const wp = await warm.newPage();
+  await wp.goto(URL, { waitUntil: 'networkidle' });
+  await sleep(2000);
+  await warm.close();
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('console', (m) => { if (m.type() === 'error' && !/cart|ERR_CONNECTION|ERR_TUNNEL|Failed to load resource/.test(m.text())) errors.push(m.text().slice(0, 200)); if (/hydrat|useLayoutEffect/i.test(m.text())) errors.push('WARN ' + m.text().slice(0, 200)); });
+  page.on('pageerror', (e) => errors.push('pageerror ' + String(e).slice(0, 200)));
+  await page.goto(URL, { waitUntil: 'networkidle' });
+  await sleep(3000);
+  const r = {};
+  r.tracks = await page.$$eval('[data-track-id]', (els) => els.map((e) => e.dataset.trackId));
+  r.clips = await page.$$eval('[data-clip-id]', (els) => els.map((e) => ({ id: e.dataset.clipId, kind: e.dataset.clipKind, start: e.dataset.clipStart, track: e.closest('[data-track-id]')?.dataset.trackId, w: e.getBoundingClientRect().width })));
+  const option = page.locator('[role="option"][data-source-id]').first();
+  await option.waitFor();
+  await sleep(2500);
+  await option.dblclick();
+  const audio = page.locator('[data-clip-kind="audio"]').first();
+  await audio.waitFor({ timeout: 20000 });
+  await sleep(1500);
+  const lane = await audio.evaluate((e) => e.closest('[data-track-id]').dataset.trackId);
+  r.lane = lane;
+  const projectEndText = await page.getByTestId('arrangement-position').textContent().catch(() => null);
+  r.positionText = projectEndText;
+  // px per second from the ruler: use clip width / duration attribute if present
+  const info = await audio.evaluate((e) => ({ ...e.dataset, left: e.getBoundingClientRect().left, width: e.getBoundingClientRect().width, top: e.getBoundingClientRect().top, height: e.getBoundingClientRect().height }));
+  r.info = info;
+  const body = audio.locator('[title="drag = დროის მონიშვნა · click = playhead"]');
+  const bb = await body.boundingBox();
+  const start = Number(info.clipStart);
+  const durText = (await option.textContent()).match(/(\d+):(\d+\.\d+)\s*$/);
+  const duration = Number(durText[1]) * 60 + Number(durText[2]);
+  r.duration = duration;
+  const pps = info.width / duration;
+  r.pps = pps;
+  const xAt = (t) => Math.round(info.left + (t - start) * pps);
+  const y = Math.round(bb.y + bb.height / 2);
+  await page.keyboard.press('g');
+  await sleep(200);
+  r.snapStatus = await page.getByTestId('arrangement-status').textContent();
+  await page.mouse.move(xAt(4), y);
+  await page.mouse.down();
+  await page.mouse.move(xAt(6), y, { steps: 5 });
+  await page.mouse.move(xAt(9), y, { steps: 5 });
+  await page.mouse.up();
+  await sleep(300);
+  r.rangeStatus = await page.getByTestId('arrangement-status').textContent();
+  await page.getByRole('button', { name: 'Export' }).click();
+  await sleep(400);
+  const scope = async () => ({
+    project: await page.getByTestId('arrangement-export-scope-project').evaluate((e) => ({ checked: e.checked, disabled: e.disabled, label: e.closest('label').textContent })),
+    range: await page.getByTestId('arrangement-export-scope-range').evaluate((e) => ({ checked: e.checked, disabled: e.disabled, label: e.closest('label').textContent })),
+    description: await page.locator('#arrangement-export-title').evaluate((e) => e.nextElementSibling?.textContent),
+  });
+  r.scopeWithRange = await scope();
+  await page.screenshot({ path: out + 'a-r85-dialog-range-1440.png' });
+  const rangeDl = await download(page, () => page.getByRole('button', { name: 'WAV-ის ექსპორტი' }).click(), 'range.wav');
+  await sleep(500);
+  r.rangeDone = await page.locator('[role="status"]').allTextContents();
+  await page.getByTestId('arrangement-export-scope-project').check();
+  const projectDl = await download(page, () => page.getByRole('button', { name: 'WAV-ის ექსპორტი' }).click(), 'project.wav');
+  await sleep(500);
+  r.projectDone = await page.locator('[role="status"]').allTextContents();
+  r.downloads = [rangeDl.suggested, projectDl.suggested];
+  const rw = parse(fs.readFileSync(rangeDl.path));
+  const pw = parse(fs.readFileSync(projectDl.path));
+  r.rangeWav = { fmt: rw.fmt, frames: rw.frames };
+  r.projectWav = { fmt: pw.fmt, frames: pw.frames };
+  const m = r.rangeStatus.match(/(\d+):(\d+\.\d+)\s*[—–-]\s*(\d+):(\d+\.\d+)/);
+  const a = m ? Number(m[1]) * 60 + Number(m[2]) : 4;
+  r.rangeStartFromStatus = a;
+  const first = Math.round(a * 48000) * 2;
+  let maxDiff = 0; let nan = 0; let nonZero = 0;
+  for (let i = 0; i < rw.n; i++) { const v = rw.read(i); if (!Number.isFinite(v)) nan++; if (v !== 0) nonZero++; const d = Math.abs(v - pw.read(first + i)); if (d > maxDiff) maxDiff = d; }
+  r.compare = { maxDiffLSB: maxDiff, maxDiffFS: maxDiff / 8388608, nan, nonZero };
+  await page.getByRole('button', { name: 'დახურვა' }).click();
+  await sleep(300);
+  await page.getByRole('button', { name: 'Export' }).click();
+  await sleep(300);
+  r.scopeReopen = await scope();
+  await page.getByRole('button', { name: 'დახურვა' }).click();
+  await page.keyboard.press('Escape');
+  await sleep(300);
+  // X1: scroll the clip's left edge under the header and probe elementFromPoint
+  const hdr = await page.evaluate((l) => document.querySelector(`[data-track-id=${l}] [data-testid=arrangement-track-header]`)?.getBoundingClientRect().toJSON() ?? document.querySelector(`[data-track-id=${l}]`).firstElementChild.getBoundingClientRect().toJSON(), lane);
+  r.header = hdr;
+  await audio.hover();
+  await sleep(200);
+  const fadeSel = '[data-testid="arrangement-clip-fade-in-handle"]';
+  const el0 = await audio.locator(fadeSel).first().boundingBox();
+  r.fadeHandleBefore = el0;
+  if (el0) {
+    const target = Math.round(hdr.right - 120);
+    const dx = Math.round(el0.x - target);
+    await page.mouse.move(Math.round(hdr.right + 300), Math.round(el0.y + 4));
+    await page.mouse.wheel(dx, 0);
+    await sleep(600);
+    const el = await audio.locator(fadeSel).first().boundingBox();
+    r.fadeHandleAfter = el;
+    const probe = async (x, yy) => page.evaluate(([px, py]) => { const t = document.elementFromPoint(px, py); return { tag: t?.tagName, tid: t?.getAttribute('data-testid'), inHeader: !!t?.closest('[data-testid=arrangement-track-header]') || !!t?.closest('[data-track-id] > :first-child.sticky'), inClip: !!t?.closest('[data-clip-id]') }; }, [px = x, yy]);
+    r.topAtHandle = await page.evaluate(([px, py]) => { const t = document.elementFromPoint(px, py); const row = t?.closest('[data-track-id]'); return { tag: t?.tagName, tid: t?.getAttribute('data-testid'), inHeader: !!(row && row.firstElementChild.contains(t)), inClip: !!t?.closest('[data-clip-id]') }; }, [Math.round(el.x + el.width / 2), Math.round(el.y + el.height / 2)]);
+    const clipLeft = await audio.evaluate((e) => e.getBoundingClientRect().left);
+    r.clipLeftAfter = clipLeft;
+    r.topAtTrimStrip = await page.evaluate(([px, py]) => { const t = document.elementFromPoint(px, py); const row = t?.closest('[data-track-id]'); return { tag: t?.tagName, title: t?.getAttribute('title'), inHeader: !!(row && row.firstElementChild.contains(t)), inClip: !!t?.closest('[data-clip-id]') }; }, [Math.round(clipLeft + 3), y]);
+    const fadeBefore = await audio.getAttribute('data-fade-in');
+    const undoBefore = await page.evaluate(() => document.querySelector('[aria-label^="Undo"]')?.getAttribute('aria-label') ?? document.querySelector('[title^="Undo"]')?.getAttribute('title'));
+    const hx = Math.round(el.x + el.width / 2); const hy = Math.round(el.y + el.height / 2);
+    await page.mouse.move(hx, hy); await page.mouse.down(); await page.mouse.move(hx + 20, hy, { steps: 4 }); await page.mouse.move(hx + 40, hy, { steps: 4 }); await page.mouse.up(); await sleep(400);
+    r.dragUnderHeader = { fadeBefore, fadeAfter: await audio.getAttribute('data-fade-in'), undoBefore, undoAfter: await page.evaluate(() => document.querySelector('[aria-label^="Undo"]')?.getAttribute('aria-label') ?? document.querySelector('[title^="Undo"]')?.getAttribute('title')), status: await page.getByTestId('arrangement-status').textContent() };
+    await page.screenshot({ path: out + 'a-r85-header-1440.png', clip: { x: 0, y: Math.max(0, Math.round(hdr.top) - 10), width: 700, height: Math.round(hdr.height) + 20 } });
+  }
+  r.errors = errors;
+  await context.storageState({ path: '/home/runner/czaba-project/tmp/studio-real-loop/a-browse.json' });
+  fs.writeFileSync(out + 'smoke-output.json', JSON.stringify(r, null, 1));
+  console.log(JSON.stringify(r, null, 1));
+  await browser.close();
+})().catch((e) => { console.error(e); process.exit(1); });

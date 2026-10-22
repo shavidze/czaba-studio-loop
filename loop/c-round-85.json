@@ -1,0 +1,87 @@
+{
+  "round": 85,
+  "verifier": "C",
+  "date": "2026-10-22",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-22T14:14:19.3638748Z",
+    "round": 85,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R85-L1",
+      "severity": "low",
+      "steps": [
+        "/studio-lab, 1440x900 or 1280x720, demo setup (video at 2 s, Middle East on music, pulse on stems at 2 s, Soft impact on sfx at 4 s), snap off",
+        "Press on the stems clip's move strip and drag down into the sfx lane and 40 px left, so the dashed lane-move ghost shows",
+        "Press Escape while the mouse button is still held, then release"
+      ],
+      "expected": "The task's M1-GHOST row says 'then Escape', which implies Escape cancels the drag and leaves the clip unchanged. Not specified anywhere as a CZABA contract, and Ableton behaviour is unconfirmed.",
+      "actual": "Escape has no effect on a clip drag. On release the move commits: the lane change is refused, the clip moves to start 1.750 (from 2.000), the Undo entry 'კლიპის გადატანა' is added, and the status reads 'აქ ადგილი არ არის — კლიპი ბოლო თავისუფალ ადგილას დარჩა: სტემები, start 00:01.750.' No Escape handler for clip gestures exists in ArrangementClip/ArrangementLane (grep). This predates round 85 and is not a regression.",
+      "evidence": "c-round-85/m1-1440x900.json and m1-1280x720.json, M1-GHOST: escapeCancelsMove=false, undo, status; restored with Ctrl+Z (restoredStart=2)"
+    },
+    {
+      "id": "C-R85-L2",
+      "severity": "low",
+      "steps": [
+        "/studio-lab with demo clips and no time range",
+        "Open Export"
+      ],
+      "expected": "B's E2 says only the range radio is disabled (with the reason line) when there is no valid range.",
+      "actual": "The project radio is also disabled (checked + disabled). A chose this so the frozen C-R14-02 test (exactly 4 enabled tabbable controls) stays green, and documented it. Export still works, Tab wraps inside the dialog, and the scope radios are skipped. This is a spec deviation for B to accept, or to re-plan with a frozen-test grant. It does not affect function.",
+      "evidence": "c-round-85/xr-*.json XR-PROJECT-norange / XR-PROJECT-cleared (project {checked:true,disabled:true}); XR-KEYS norange Tab cycle"
+    }
+  ],
+  "passed": [
+    "M1-HANDLE",
+    "M1-SELECTED",
+    "M1-GHOST",
+    "M1-VISIBLE",
+    "M1-ENV",
+    "XR-DEFAULT",
+    "XR-WAV",
+    "XR-MIDSTART",
+    "XR-ALLTRACKS",
+    "XR-PROJECT",
+    "XR-OVERLOAD",
+    "XR-KEYS",
+    "XR-X3",
+    "REG-HYD",
+    "G85-3",
+    "T85-TARGETED",
+    "SOURCE-UNCHANGED"
+  ],
+  "notReachable": [
+    "XR-PASTEND: the UI cannot create a range past the project end. A clip-body range is clamped to the clip end (= project end 101.702 at both viewports); a drag that starts past the end is a marquee and clears the range; the detail-panel range inputs are clamped to the clip (clampDetailRangeToClip). By the task's own rule this is not a FAIL. Renderer coverage: A's unit XR4. Extra browser evidence: the range 95.000-101.702 (to the project end) exports 321696 frames = round(6.702*48000) and equals the project-export window with 0 LSB difference."
+  ],
+  "blocked": [
+    "G85-3 fake-Bearer 403 sub-check: backend unavailable in cloud (GET /api/studio-token?product=middle-east&file=stem1.wav with 'Bearer fake.fake.fake' -> 500 'Unable to prepare Studio access')"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "npm run test:e2e:smoke"
+  ],
+  "observations": [
+    "C-R84-L1 extended (no new ID): 1-LSB export jitter also appears with NO video loaded. Unchanged-state project exports P0 and P1 differed by 1 LSB in 3254 samples (1440, run 1); window comparisons R2/R4/R5 show 1-LSB differences in 2149-4358 samples, all inside 4-9 s (Soft impact 4-6 s plus stems). Range results are bit-identical to one of the two variants (XR-ALLTRACKS all-lanes sha == XR-WAV sha). Within the 1e-3 FS tolerance; maximum |diff| is 1 LSB = 1.19e-7 FS in every window comparison.",
+    "Reviewer L6 (group rows) checked: with the group folded and its overview block scrolled under the group header, elementFromPoint is arrangement-group-header at both viewports (M1-GROUP).",
+    "Playhead line (z-10, sibling of the rows) paints over clips and over the selected clip: the pixel at the playhead x equals bg-accent rgb(249,169,31) on the clip and on the selected clip."
+  ],
+  "abletonMatch": {
+    "XR-DEFAULT (time selection sets render range)": "confirmed (Live 12 manual §5.1.3.1 text, via B's stored copy; CZABA behaviour observed)",
+    "XR-PROJECT (whole Set by default)": "confirmed",
+    "XR-ALLTRACKS (Rendered Track = Main)": "confirmed (Master mix whichever lane holds the range)",
+    "typed Render Start/Length": "conscious difference",
+    "individual/selected track render": "not in CZABA scope",
+    "Render as Loop / MP3 / progress": "conscious difference / stage 2 / stage 3",
+    "M1-* header stacking": "not applicable (generic UI layering)",
+    "Escape cancel during clip drag (C-R85-L1)": "unconfirmed (no source consulted)"
+  }
+}

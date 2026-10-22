@@ -44,3 +44,12 @@ q12 is new.
 - A video-fade drag during playback added 4 `createBufferSource` calls (12→16).
 - Playback continued and the position never ran backwards.
 - No audible defect was measured.
+
+## Addendum — round 85 result (B, round 86 planning, 2026-10-22)
+SRW-20 stage 1 passed C (PASS, `browserVerified=true`, published as `51e024a`). Root has still not answered this request. It stays non-blocking; round 86 (SRW-20 stage 2, MP3) goes ahead.
+
+**q13 — Export dialog axes (round-85 Architecture notes, A's reviewer and the gate-85 reviewer):**
+- `ArrangementExportDialog.tsx` was changed by rounds 84 (074), 85 (075) and now 86 (076). Round 85 added five scope-dependent text sites (all byte-locked by tests); round 86 adds a format axis (WAV / MP3 / WAV + MP3), so the texts become format × scope.
+- Round 86 already moves the window-validity rule into one pure helper (`app/lib/arrangement/render-window.ts`), because `exportMp3` would otherwise add a third copy. That is the only structural change B schedules.
+- Question: after round 86, keep the dialog as one component, or extract a pure `exportDialogTexts(format, scope, …)` table and/or an `ArrangementExportScope` sub-component? Acceptance for any approved change: every byte-locked dialog test unchanged and green; no change to the `useArrangement()` shape.
+- Related signal for the owner of `app/utils/ffmpeg.ts` (shared with the protected purchased Studio): FFMPEG-LOAD-POLLER-HANG (a concurrent `loadFFmpeg` caller polls forever if the first load fails; a load whose worker never starts never rejects). The loop keeps that file frozen and wraps the call in a timeout.
