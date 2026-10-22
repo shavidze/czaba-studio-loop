@@ -1,0 +1,513 @@
+diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index 5113b89..dcc30d5 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -185,9 +185,13 @@ function laneTrackIdAtPointer(root: HTMLElement, clientY: number): string | null
+       return row.dataset.trackId ?? null;
+     }
+   }
+-  return clientY < first.getBoundingClientRect().top
+-    ? (first.dataset.trackId ?? null)
+-    : (last.dataset.trackId ?? null);
++  if (clientY < first.getBoundingClientRect().top) {
++    return first.dataset.trackId ?? null;
++  }
++  if (clientY >= last.getBoundingClientRect().bottom) {
++    return last.dataset.trackId ?? null;
++  }
++  return null;
+ }
+ 
+ function laneGhostsFrom(
+@@ -391,7 +395,9 @@ function ArrangementClipViewInner({
+     const root = rootRef.current;
+     const hoverTrackId =
+       gesture.kind === 'move' && !isVideo && root
+-        ? (laneTrackIdAtPointer(root, event.clientY) ?? original.trackId)
++        ? (laneTrackIdAtPointer(root, event.clientY) ??
++          gesture.laneTarget?.trackId ??
++          original.trackId)
+         : original.trackId;
+     const isCrossLane = hoverTrackId !== original.trackId;
+     if (gesture.group) {
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index 4822fa4..42cd2dc 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -23,6 +23,7 @@ import {
+   snapMoveStartToGridOrEdges,
+   snapTimeToGrid,
+ } from '~/lib/arrangement/grid';
++import { TRACK_GROUP_INDENT_PX } from '~/lib/arrangement/groups';
+ import { canPlaceLibraryClip, LIBRARY_DRAG_MIME, libraryDropTime } from '~/lib/arrangement/library';
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
+ import { formatTrackPan, TRACK_PAN_STEPS, trackPanValue } from '~/lib/arrangement/model';
+@@ -40,6 +41,7 @@ import { ArrangementClipView } from './ArrangementClip';
+ import { ArrangementTrackMeter } from './ArrangementTrackMeter';
+ 
+ export const ARRANGEMENT_HEADER_WIDTH_PX = 224;
++export const TRACK_HEADER_PADDING_X_PX = 8;
+ 
+ const VIDEO_MIX_LABEL = 'ვიდეოს ორიგინალი ხმა';
+ const VIDEO_IMPORT_LABEL = '＋ საკუთარი ვიდეო';
+@@ -51,6 +53,11 @@ const TRACK_VOLUME_DEFAULT = 1;
+ 
+ export type TrackHeightChangeSource = 'drag' | 'key';
+ 
++export interface TrackRowSelectModifiers {
++  toggle: boolean;
++  range: boolean;
++}
++
+ type TrackHeaderDensity = 'folded' | 'tight' | 'regular' | 'full';
+ 
+ function trackHeaderDensity(height: number, folded: boolean): TrackHeaderDensity {
+@@ -92,6 +99,9 @@ interface ArrangementLaneProps {
+   gridSeconds?: number;
+   snapSeconds?: number | null;
+   onGridMenuRequest?: (event: MouseEvent<HTMLDivElement>, trackId: string) => void;
++  selected?: boolean;
++  depth?: number;
++  onSelectTrack?: (trackId: string, modifiers: TrackRowSelectModifiers) => void;
+ }
+ 
+ export function ArrangementLane({
+@@ -107,6 +117,9 @@ export function ArrangementLane({
+   gridSeconds,
+   snapSeconds = null,
+   onGridMenuRequest,
++  selected = false,
++  depth = 0,
++  onSelectTrack,
+ }: ArrangementLaneProps) {
+   const {
+     arrangement,
+@@ -595,6 +608,7 @@ export function ArrangementLane({
+       style={{ height: trackRowHeight(height, folded) }}
+       data-track-id={track.id}
+       data-track-folded={folded ? 'true' : 'false'}
++      data-track-selected={selected ? 'true' : undefined}
+     >
+       <div
+         className={cn(
+@@ -603,7 +617,11 @@ export function ArrangementLane({
+           isActive ? 'border-l-brand' : 'border-l-transparent',
+         )}
+         ref={trackHeaderRef}
+-        style={{ width: ARRANGEMENT_HEADER_WIDTH_PX }}
++        style={{
++          width: ARRANGEMENT_HEADER_WIDTH_PX,
++          paddingLeft:
++            depth > 0 ? TRACK_HEADER_PADDING_X_PX + depth * TRACK_GROUP_INDENT_PX : undefined,
++        }}
+         data-testid="arrangement-track-header"
+       >
+         <div className="flex min-w-0 items-center gap-1">
+@@ -623,10 +641,19 @@ export function ArrangementLane({
+           </button>
+           <button
+             type="button"
+-            className="min-w-0 flex-1 truncate rounded-sm text-left text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
+-            onClick={() => setActiveTrack(track.id)}
++            className={cn(
++              'min-w-0 flex-1 select-none truncate rounded-sm text-left text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand',
++              selected && 'bg-brand/20',
++            )}
++            onClick={(event) => {
++              setActiveTrack(track.id);
++              onSelectTrack?.(track.id, {
++                toggle: event.ctrlKey || event.metaKey,
++                range: event.shiftKey,
++              });
++            }}
+             aria-pressed={isActive}
+-            aria-label={`${track.name} — აქტიური ხაზის არჩევა`}
++            aria-label={`${track.name} — აქტიური ხაზის არჩევა${selected ? ', მონიშნული' : ''}`}
+           >
+             {track.name}
+             {isActive && !folded ? (
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index af5b66c..0b3572e 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -45,6 +45,21 @@ import {
+   musicalGridDivisionSeconds,
+   toggledTripletGridDivisionId,
+ } from '~/lib/arrangement/grid-divisions';
++import {
++  arrangementGroups,
++  expandShiftSelection,
++  groupSelectedRows,
++  liveTrackSelection,
++  normalizeTrackGroupName,
++  renameTrackGroup,
++  rowParentId,
++  trackGroupCreatedMessage,
++  trackGroupDissolvedMessage,
++  trackGroupRefusalMessage,
++  trackGroupRowCount,
++  trackGroupRows,
++  ungroupSelectedRows,
++} from '~/lib/arrangement/groups';
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
+ import { metronomeStatusMessage } from '~/lib/arrangement/metronome';
+ import {
+@@ -76,7 +91,7 @@ import {
+   zoomToRangeView,
+ } from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+-import type { ArrangementTrack } from '~/types/arrangement';
++import type { Arrangement, ArrangementTrack } from '~/types/arrangement';
+ import {
+   type ArrangementDetailGroup,
+   ArrangementDetailPanel,
+@@ -84,10 +99,12 @@ import {
+ } from './ArrangementDetailPanel';
+ import { ArrangementExportDialog } from './ArrangementExportDialog';
+ import { ArrangementGridMenu } from './ArrangementGridMenu';
++import { ArrangementGroupHeader, TRACK_GROUP_ROW_HEIGHT_PX } from './ArrangementGroupHeader';
+ import {
+   ARRANGEMENT_HEADER_WIDTH_PX,
+   ArrangementLane,
+   type TrackHeightChangeSource,
++  type TrackRowSelectModifiers,
+ } from './ArrangementLane';
+ import { ArrangementLibrary } from './ArrangementLibrary';
+ import { ArrangementLoopBrace } from './ArrangementLoopBrace';
+@@ -211,11 +228,23 @@ function trackLaneFitEntries(
+   return tracks.map((track) => ({ kind: track.kind, folded: folded[track.id] ?? false }));
+ }
+ 
++function withTrackGroupRows(
++  metrics: TrackLaneMetrics | null,
++  arrangement: Arrangement,
++): TrackLaneMetrics | null {
++  const groupRowsHeight = trackGroupRowCount(arrangement) * TRACK_GROUP_ROW_HEIGHT_PX;
++  return metrics && groupRowsHeight > 0
++    ? { ...metrics, timelineChromeHeight: metrics.timelineChromeHeight + groupRowsHeight }
++    : metrics;
++}
++
+ function resolveTrackLaneLayout(
+   previous: TrackLaneLayout,
+-  tracks: readonly ArrangementTrack[],
+-  metrics: TrackLaneMetrics | null,
++  arrangement: Arrangement,
++  measured: TrackLaneMetrics | null,
+ ): TrackLaneLayout {
++  const tracks = arrangement.tracks;
++  const metrics = withTrackGroupRows(measured, arrangement);
+   const lanes = trackLaneFitEntries(tracks, previous.folded);
+   let heights = previous.heights;
+   if (previous.autoFit && metrics) {
+@@ -418,6 +447,12 @@ export function StudioWorkspace() {
+   const trackLaneLayoutRef = useRef(trackLaneLayout);
+   trackLaneLayoutRef.current = trackLaneLayout;
+   const trackLaneMetricsRef = useRef<TrackLaneMetrics | null>(null);
++  const [trackSelection, setTrackSelection] = useState<readonly string[]>([]);
++  const trackSelectionRef = useRef(trackSelection);
++  trackSelectionRef.current = trackSelection;
++  const trackSelectionAnchorRef = useRef<string | null>(null);
++  const trackGroupCount = trackGroupRowCount(arrangement);
++  const trackGroupCountRef = useRef(trackGroupCount);
+   const [isLibraryCollapsed, setIsLibraryCollapsed] = useState(false);
+   const [isVideoExpanded, setIsVideoExpanded] = useState(false);
+   const [libraryOpenedForVideo, setLibraryOpenedForVideo] = useState(false);
+@@ -556,9 +591,9 @@ export function StudioWorkspace() {
+     if (isPanelAnimating) {
+       return;
+     }
+-    const tracks = workspaceRef.current.arrangement.tracks;
++    const arrangementNow = workspaceRef.current.arrangement;
+     setTrackLaneLayout((previous) => {
+-      const next = resolveTrackLaneLayout(previous, tracks, metrics);
++      const next = resolveTrackLaneLayout(previous, arrangementNow, metrics);
+       return next.heights !== previous.heights && next.isMotionArmed
+         ? { ...next, isMotionArmed: false }
+         : next;
+@@ -580,7 +615,7 @@ export function StudioWorkspace() {
+       current.setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
+       return;
+     }
+-    const tracks = current.arrangement.tracks;
++    const arrangementNow = current.arrangement;
+     setTrackLaneLayout((previous) =>
+       resolveTrackLaneLayout(
+         {
+@@ -588,7 +623,7 @@ export function StudioWorkspace() {
+           folded: { ...previous.folded, [trackId]: !(previous.folded[trackId] ?? false) },
+           isMotionArmed: true,
+         },
+-        tracks,
++        arrangementNow,
+         trackLaneMetricsRef.current,
+       ),
+     );
+@@ -649,7 +684,7 @@ export function StudioWorkspace() {
+             detailCap: snapshot.detailCap,
+             isMotionArmed: false,
+           },
+-          workspaceRef.current.arrangement.tracks,
++          workspaceRef.current.arrangement,
+           trackLaneMetricsRef.current,
+         ),
+       );
+@@ -670,13 +705,121 @@ export function StudioWorkspace() {
+       setTrackLaneLayout((previous) =>
+         resolveTrackLaneLayout(
+           { ...previous, detailUserResized: false },
+-          workspaceRef.current.arrangement.tracks,
++          workspaceRef.current.arrangement,
+           trackLaneMetricsRef.current,
+         ),
+       );
+     };
+   }, []);
+ 
++  useIsomorphicLayoutEffect(() => {
++    if (trackGroupCountRef.current === trackGroupCount) {
++      return;
++    }
++    trackGroupCountRef.current = trackGroupCount;
++    refreshTrackLaneLayout();
++  }, [trackGroupCount, refreshTrackLaneLayout]);
++
++  const replaceTrackSelection = useCallback((rowIds: readonly string[], anchor: string | null) => {
++    trackSelectionRef.current = rowIds;
++    trackSelectionAnchorRef.current = anchor;
++    setTrackSelection(rowIds);
++  }, []);
++
++  const selectTrackRow = useCallback(
++    (rowId: string, modifiers: TrackRowSelectModifiers) => {
++      const arrangementNow = workspaceRef.current.getArrangement();
++      const live = liveTrackSelection(arrangementNow, trackSelectionRef.current);
++      if (modifiers.toggle) {
++        replaceTrackSelection(
++          live.includes(rowId) ? live.filter((id) => id !== rowId) : [...live, rowId],
++          rowId,
++        );
++        return;
++      }
++      const anchor = trackSelectionAnchorRef.current;
++      const anchorParent = anchor === null ? undefined : rowParentId(arrangementNow, anchor);
++      if (
++        modifiers.range &&
++        anchor !== null &&
++        anchorParent !== undefined &&
++        anchorParent === rowParentId(arrangementNow, rowId)
++      ) {
++        replaceTrackSelection(expandShiftSelection(arrangementNow, anchor, rowId), anchor);
++        return;
++      }
++      replaceTrackSelection([rowId], rowId);
++    },
++    [replaceTrackSelection],
++  );
++
++  const groupSelectedTrackRows = useCallback(() => {
++    const current = workspaceRef.current;
++    if (current.isPointerGestureActive()) {
++      current.setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
++      return;
++    }
++    const before = current.getArrangement();
++    const result = groupSelectedRows(before, liveTrackSelection(before, trackSelectionRef.current));
++    if (result.kind === 'refused') {
++      current.setStatus(trackGroupRefusalMessage(result.reason));
++      return;
++    }
++    if (!current.commitArrangement(result.arrangement, 'Group Tracks', before)) {
++      return;
++    }
++    replaceTrackSelection([result.group.id], result.group.id);
++    current.setStatus(trackGroupCreatedMessage(result.group.name, result.memberNames));
++  }, [replaceTrackSelection]);
++
++  const ungroupSelectedTrackRows = useCallback(() => {
++    const current = workspaceRef.current;
++    if (current.isPointerGestureActive()) {
++      current.setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
++      return;
++    }
++    const before = current.getArrangement();
++    const result = ungroupSelectedRows(
++      before,
++      liveTrackSelection(before, trackSelectionRef.current),
++    );
++    if (result.kind === 'refused') {
++      current.setStatus(trackGroupRefusalMessage(result.reason));
++      return;
++    }
++    if (!current.commitArrangement(result.arrangement, 'Ungroup Tracks', before)) {
++      return;
++    }
++    replaceTrackSelection(result.childIds, result.childIds[0] ?? null);
++    current.setStatus(trackGroupDissolvedMessage(result.dissolved));
++  }, [replaceTrackSelection]);
++
++  const renameTrackGroupRow = useCallback((groupId: string, draft: string) => {
++    const current = workspaceRef.current;
++    if (current.isPointerGestureActive()) {
++      current.setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
++      return;
++    }
++    const before = current.getArrangement();
++    const group = arrangementGroups(before).find((entry) => entry.id === groupId);
++    if (!group) {
++      return;
++    }
++    const name = normalizeTrackGroupName(draft);
++    if (name.length === 0) {
++      current.setStatus(`სახელი ცარიელია — დარჩა «${group.name}»`);
++      return;
++    }
++    const next = renameTrackGroup(before, groupId, name);
++    if (next === before) {
++      return;
++    }
++    if (!current.commitArrangement(next, 'Rename Group', before)) {
++      return;
++    }
++    current.setStatus(`ჯგუფის სახელი: «${name}».`);
++  }, []);
++
+   const notifyTimelineScroll = useCallback(() => {
+     for (const listener of scrollListenersRef.current) {
+       listener();
+@@ -1479,6 +1622,17 @@ export function StudioWorkspace() {
+         markerRowRef.current?.stepMarker(event.key === 'ArrowLeft' ? -1 : 1, edgeTimes);
+         return;
+       }
++      if (modifier && key === 'g' && !event.altKey) {
++        event.preventDefault();
++        if (!event.repeat) {
++          if (event.shiftKey) {
++            ungroupSelectedTrackRows();
++          } else {
++            groupSelectedTrackRows();
++          }
++        }
++        return;
++      }
+       if (modifier) {
+         return;
+       }
+@@ -1602,8 +1756,20 @@ export function StudioWorkspace() {
+       window.removeEventListener('dragover', handleStrayFileDrag);
+       window.removeEventListener('drop', handleStrayFileDrag);
+     };
+-  }, [returnFloatingVideo, stepGridDivision, toggleGridTriplet, toggleSnap]);
+-
++  }, [
++    groupSelectedTrackRows,
++    returnFloatingVideo,
++    stepGridDivision,
++    toggleGridTriplet,
++    toggleSnap,
++    ungroupSelectedTrackRows,
++  ]);
++
++  const trackRows = useMemo(() => trackGroupRows(arrangement), [arrangement]);
++  const selectedTrackRowIds = useMemo(
++    () => new Set(liveTrackSelection(arrangement, trackSelection)),
++    [arrangement, trackSelection],
++  );
+   const viewportSeconds = Math.max(0, viewportWidth - ARRANGEMENT_HEADER_WIDTH_PX) / pxPerSecond;
+   const timelineSeconds = Math.ceil(Math.max(projectEnd + TIMELINE_TAIL_SECONDS, viewportSeconds));
+   const timelineWidth = timelineSeconds * pxPerSecond;
+@@ -1917,23 +2083,38 @@ export function StudioWorkspace() {
+                   />
+                 </div>
+               </div>
+-              {arrangement.tracks.map((track) => (
+-                <ArrangementLane
+-                  key={track.id}
+-                  track={track}
+-                  timelineWidth={timelineWidth}
+-                  onBackgroundPointerDown={handleLaneBackgroundPointerDown}
+-                  onGridMenuRequest={handleGridMenuRequest}
+-                  height={trackLaneLayout.heights[track.id] ?? TRACK_DEFAULT_HEIGHT_PX}
+-                  folded={trackLaneLayout.folded[track.id] ?? false}
+-                  isMotionArmed={trackLaneLayout.isMotionArmed}
+-                  onToggleTrackFold={toggleTrackFold}
+-                  onChangeTrackHeight={changeTrackHeight}
+-                  onSnapshotTrackLayout={snapshotTrackLaneLayout}
+-                  gridSeconds={gridSeconds}
+-                  snapSeconds={snapEnabled ? gridSeconds : null}
+-                />
+-              ))}
++              {trackRows.map((row) =>
++                row.kind === 'group' ? (
++                  <ArrangementGroupHeader
++                    key={`group:${row.id}`}
++                    group={row.group}
++                    depth={row.depth}
++                    selected={selectedTrackRowIds.has(row.id)}
++                    timelineWidth={timelineWidth}
++                    onSelectGroup={selectTrackRow}
++                    onRenameGroup={renameTrackGroupRow}
++                  />
++                ) : (
++                  <ArrangementLane
++                    key={row.id}
++                    track={row.track}
++                    selected={selectedTrackRowIds.has(row.id)}
++                    depth={row.depth}
++                    onSelectTrack={selectTrackRow}
++                    timelineWidth={timelineWidth}
++                    onBackgroundPointerDown={handleLaneBackgroundPointerDown}
++                    onGridMenuRequest={handleGridMenuRequest}
++                    height={trackLaneLayout.heights[row.id] ?? TRACK_DEFAULT_HEIGHT_PX}
++                    folded={trackLaneLayout.folded[row.id] ?? false}
++                    isMotionArmed={trackLaneLayout.isMotionArmed}
++                    onToggleTrackFold={toggleTrackFold}
++                    onChangeTrackHeight={changeTrackHeight}
++                    onSnapshotTrackLayout={snapshotTrackLaneLayout}
++                    gridSeconds={gridSeconds}
++                    snapSeconds={snapEnabled ? gridSeconds : null}
++                  />
++                ),
++              )}
+               {marquee ? (
+                 <div
+                   className="pointer-events-none absolute z-20 border border-brand bg-brand/10"
+diff --git a/app/types/arrangement.ts b/app/types/arrangement.ts
+index f85be20..db6b9b3 100644
+--- a/app/types/arrangement.ts
++++ b/app/types/arrangement.ts
+@@ -8,6 +8,13 @@ export interface ArrangementTrack {
+   mute: boolean;
+   solo: boolean;
+   pan?: number;
++  groupId?: string;
++}
++
++export interface ArrangementTrackGroup {
++  id: string;
++  name: string;
++  parentId: string | null;
+ }
+ 
+ export interface ArrangementClip {
+@@ -43,6 +50,7 @@ export interface Arrangement {
+   loop: ArrangementLoop | null;
+   master: ArrangementMaster;
+   markers?: ArrangementMarker[];
++  groups?: ArrangementTrackGroup[];
+ }
+ 
+ export interface TimeRange {
+diff --git a/docs/implementation/2026/quarter-IV/068-studio-lab-marker-time-snap.md b/docs/implementation/2026/quarter-IV/068-studio-lab-marker-time-snap.md
+index 7b55387..05668d9 100644
+--- a/docs/implementation/2026/quarter-IV/068-studio-lab-marker-time-snap.md
++++ b/docs/implementation/2026/quarter-IV/068-studio-lab-marker-time-snap.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — playhead, დროის მონაკვეთი და Loop მარკერებზეც ეწებება, ეტაპი 2b-3 (SRW-16 / FB-10)
+ 
+ **თარიღი:** 2026-10-22
+-**სტატუსი:** Round 78 — იმპლემენტირებულია, C-ის შემოწმებას ელოდება (D-29z43)
++**სტატუსი:** Round 78 — C PASS (browserVerified), გამოქვეყნდა `c062147` (D-29z43)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი

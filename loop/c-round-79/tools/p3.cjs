@@ -1,0 +1,22 @@
+const H=require('./h.cjs');const{L,sleep,st,blur,rows,groupDom,clickName,clickGroup}=H;
+const vp=process.argv[2]||'1440x900';const OUT=`${L.OUT}/p3-${vp}.json`;const rec=H.mkRec(OUT);const T=H.T(rec);
+const key=async(p,k)=>{await p.keyboard.press(k);await sleep(500);};
+const measure=p=>p.evaluate(()=>{const sc=document.querySelector('[data-testid=arrangement-timeline-scroller]');const sr=sc.getBoundingClientRect();const first=document.querySelector('[data-track-id]');const c=first.parentElement;
+ const rs=[...c.children].filter(e=>e.dataset.trackId||e.dataset.groupId).map(e=>({k:e.dataset.trackId||('G@'+e.dataset.groupDepth),kind:e.dataset.trackId==='video'?'video':e.dataset.trackId?'audio':'group',h:e.getBoundingClientRect().height,top:e.getBoundingClientRect().top,bottom:e.getBoundingClientRect().bottom}));
+ const chrome=rs[0].top-sr.top+sc.scrollTop;const V=sc.clientHeight-chrome;const visBottom=sr.top+sc.clientHeight;const last=rs[rs.length-1];
+ const panel=document.querySelector('[data-testid=arrangement-detail-panel]');
+ return{scroller:{top:sr.top,clientHeight:sc.clientHeight,scrollHeight:sc.scrollHeight,scrollTop:sc.scrollTop},chrome,V,visBottom,lastBottom:last.bottom,rows:rs.map(r=>[r.k,r.h]),overflow:sc.scrollHeight-sc.clientHeight,rowsSum:rs.reduce((a,r)=>a+r.h,0),panel:panel?panel.getBoundingClientRect().height:null};});
+function judge(m){const g=m.rows.filter(r=>r[0].startsWith('G')).length;const M=53+3*61+g*28;const lanes=m.rows.filter(r=>!r[0].startsWith('G'));
+ if(M<=m.V+0.5)return{g,M,branch:'M<=V',ok:m.lastBottom<=m.visBottom+1,detail:{lastBottom:m.lastBottom,visBottom:m.visBottom}};
+ const atMin=lanes.every(r=>r[0]==='video'?Math.abs(r[1]-53)<=1:Math.abs(r[1]-61)<=1);const rowsOverflow=m.rowsSum-m.V;return{g,M,branch:'M>V',ok:atMin&&Math.abs(rowsOverflow-(M-m.V))<=1,detail:{atMin,rowsOverflow,expected:M-m.V}};}
+(async()=>{const s=await L.open(vp);const p=s.page;await L.fresh(p);await H.decline(p);await sleep(500);
+ const out={};out.g0=await measure(p);
+ await clickName(p,'music');await clickName(p,'stems',['Shift']);await blur(p);await key(p,'Control+g');out.g1=await measure(p);await p.screenshot({path:`${L.OUT}/shots/fit-g1-${vp}.png`});
+ await blur(p);await key(p,'Control+z');out.g0b=await measure(p);
+ await clickName(p,'stems');await clickName(p,'sfx',['Shift']);await blur(p);await key(p,'Control+g');await clickName(p,'music');await clickGroup(p,'ჯგუფი 1',['Control']);await blur(p);await key(p,'Control+g');out.g2=await measure(p);await p.screenshot({path:`${L.OUT}/shots/fit-g2-${vp}.png`});
+ out.groupsDom=await groupDom(p);
+ await blur(p);await key(p,'Control+z');await key(p,'Control+z');out.g0c=await measure(p);
+ const j={g0:judge(out.g0),g1:judge(out.g1),g2:judge(out.g2)};
+ const same=(a,b)=>JSON.stringify(a.rows)===JSON.stringify(b.rows);
+ rec('TG-FIT',j.g0.ok&&j.g1.ok&&j.g2.ok&&same(out.g0,out.g0b)&&same(out.g0,out.g0c)&&out.g2.rows.filter(r=>r[0].startsWith('G')).every(r=>r[1]===28),{judge:j,...out,returnsToBaseline:[same(out.g0,out.g0b),same(out.g0,out.g0c)]});
+ await H.finish(s,rec,'P3-'+vp);})().catch(e=>{console.log('SCRIPT ERROR',e);process.exit(1)});

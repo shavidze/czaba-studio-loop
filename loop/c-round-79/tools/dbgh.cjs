@@ -1,0 +1,10 @@
+const H=require('./h.cjs');const{L,sleep,rows,clickName,blur}=H;const vp=process.argv[2]||'1440x900';
+(async()=>{const s=await L.open(vp);const p=s.page;await L.fresh(p);await H.decline(p);const out={};
+const drag=async(lane,dy)=>{const hb=await p.locator(`[data-track-id="${lane}"] [data-testid=arrangement-track-height]`).boundingBox();const h0=(await rows(p)).find(r=>r.k==='T:'+lane).h;
+ const hit=await p.evaluate(([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.getAttribute('data-testid')||e.tagName)},[hb.x+hb.width/2,hb.y+hb.height/2]);
+ await p.mouse.move(hb.x+hb.width/2,hb.y+hb.height/2);await p.mouse.down();await p.mouse.move(hb.x+hb.width/2,hb.y+hb.height/2+dy,{steps:8});await p.mouse.up();await sleep(300);return{hb,hit,h0,h1:(await rows(p)).find(r=>r.k==='T:'+lane).h};};
+const kb=async lane=>{const h=p.locator(`[data-track-id="${lane}"] [data-testid=arrangement-track-height]`);await h.focus();const v0=await h.getAttribute('aria-valuenow');await p.keyboard.press('ArrowDown');await sleep(300);const v1=await h.getAttribute('aria-valuenow');await p.keyboard.press('ArrowUp');await sleep(300);return[v0,v1,await h.getAttribute('aria-valuenow')];};
+out.pre={music:await drag('music',30),musicKb:await kb('music')};
+await clickName(p,'stems');await clickName(p,'sfx',['Shift']);await blur(p);await p.keyboard.press('Control+g');await sleep(400);
+out.grouped={stems:await drag('stems',30),stemsKb:await kb('stems'),music:await drag('music',30)};
+console.log(JSON.stringify(out,null,1));await s.browser.close();})();

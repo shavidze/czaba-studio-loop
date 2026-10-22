@@ -1,0 +1,37 @@
+const H=require('./h.cjs');const{L,sleep,st,blur,rows,groupDom,clickName,clickGroup}=H;const fs=require('fs');const W=require('./wav.cjs');const crypto=require('crypto');
+const vp=process.argv[2]||'1440x900';const doExport=process.argv[3]!=='noexport';const OUT=`${L.OUT}/p4-${vp}.json`;const rec=H.mkRec(OUT);const T=H.T(rec);
+const key=async(p,k)=>{await p.keyboard.press(k);await sleep(250);};
+async function exportWav(p,name){await blur(p);await p.getByRole('button',{name:'Export',exact:true}).click();await p.waitForSelector('#arrangement-export-title',{timeout:10000});
+ const dlP=p.waitForEvent('download',{timeout:300000});const t0=Date.now();await p.getByRole('button',{name:'WAV-ის ექსპორტი'}).click();const dl=await dlP;
+ const out=`${L.OUT}/export-${vp}-${name}.wav`;await dl.saveAs(out);await sleep(500);await p.keyboard.press('Escape');await sleep(300);
+ const buf=fs.readFileSync(out);return {file:out,ms:Date.now()-t0,buf,w:W.parse(buf),sha:crypto.createHash('sha256').update(buf).digest('hex')};}
+(async()=>{const s=await L.open(vp);const p=s.page;await L.fresh(p);const S=await H.setup(p);rec('SETUP',S.clips.length===3,{clips:S.clips.map(c=>[c.lane,c.start,c.dur])});
+ await T('TG-AUDIO-LIVE',async()=>{const out={};const vm=p.locator('[data-track-id=video] button[title=Mute]').first();await vm.click();await sleep(200);out.videoMute=await vm.getAttribute('aria-pressed');
+  out.solo=await p.evaluate(()=>[...document.querySelectorAll('button[title^=Solo]')].map(b=>b.getAttribute('aria-pressed')));
+  await blur(p);await p.keyboard.press('Home');await sleep(200);
+  await p.evaluate(()=>{window.__m=[];window.__mi=setInterval(()=>{const e=document.querySelector('[data-testid=arrangement-master-meter]');const pos=document.querySelector('[data-testid=arrangement-position]');window.__m.push([Math.round(performance.now()),e&&e.getAttribute('data-level-db'),pos&&pos.textContent,window.__src.length])},50)});
+  await p.keyboard.press('Space');await sleep(1200);const src0=await p.evaluate(()=>window.__src.length);const pos0=await H.posOf(p);
+  const t0=await p.evaluate(()=>performance.now());
+  await clickName(p,'music');await clickName(p,'stems',['Shift']);await blur(p);await key(p,'Control+g');out.afterGroup={status:(await st(p)).status,undo:(await st(p)).undo,pos:await H.posOf(p),groups:(await groupDom(p)).count};
+  await sleep(500);await clickGroup(p,'ჯგუფი 1');await blur(p);await key(p,'Control+Shift+g');out.afterUngroup={status:(await st(p)).status,undo:(await st(p)).undo,pos:await H.posOf(p),groups:(await groupDom(p)).count};
+  await sleep(600);const src1=await p.evaluate(()=>window.__src.length);const pos1=await H.posOf(p);const t1=await p.evaluate(()=>performance.now());
+  await blur(p);await p.keyboard.press('Space');await sleep(300);const m=await p.evaluate(()=>{clearInterval(window.__mi);return window.__m});
+  const during=m.filter(x=>x[0]>=t0&&x[0]<=t1);const db=v=>(!v||v==='-inf')?-120:+v;
+  out.src=[src0,src1];out.pos=[pos0,out.afterGroup.pos,out.afterUngroup.pos,pos1];out.wallMs=Math.round(t1-t0);
+  out.meterDuring={n:during.length,min:Math.min(...during.map(x=>db(x[1]))),max:Math.max(...during.map(x=>db(x[1]))),silent:during.filter(x=>db(x[1])<=-60).length};
+  const posSeries=during.map(x=>H.secs(x[2]));out.posMonotonic=posSeries.every((v,i)=>i===0||v>=posSeries[i-1]);out.srcSeries=[...new Set(during.map(x=>x[3]))];
+  const adv=pos1-pos0;out.advance=+adv.toFixed(3);
+  const ok=src0>0&&src1===src0&&out.afterGroup.groups===1&&out.afterUngroup.groups===0&&out.posMonotonic&&Math.abs(adv-out.wallMs/1000)<0.35&&out.meterDuring.silent===0&&out.meterDuring.max>-40&&out.videoMute==='true'&&out.solo.every(x=>x==='false');
+  rec('TG-AUDIO-LIVE',ok,out);});
+ if(doExport)await T('TG-AUDIO-EXPORT',async()=>{const out={};
+  await blur(p);await key(p,'Home');
+  const e1=await exportWav(p,'nogroups');out.e1={ms:e1.ms,sha:e1.sha.slice(0,16),fmt:e1.w.fmt,frames:e1.w.frames,seconds:e1.w.seconds,riff:e1.w.riff,stats:W.stats(e1.w)};
+  // nested groups: stems+sfx -> G1 ; music+G1 -> G2
+  await clickName(p,'stems');await clickName(p,'sfx',['Shift']);await blur(p);await key(p,'Control+g');await clickName(p,'music');await clickGroup(p,'ჯგუფი 1',['Control']);await blur(p);await key(p,'Control+g');out.rows=(await rows(p)).map(r=>r.k);
+  const e2=await exportWav(p,'nested');out.e2={ms:e2.ms,sha:e2.sha.slice(0,16),fmt:e2.w.fmt,frames:e2.w.frames,seconds:e2.w.seconds,riff:e2.w.riff,stats:W.stats(e2.w)};
+  out.maxDelta=W.cmp(e1.w,e2.w);out.byteIdentical=e1.sha===e2.sha;
+  const lsb=e1.w.fmt.tag===3?Math.pow(2,-23):1;out.lsbUnit=e1.w.fmt.tag===3?'float32: 2^-23':'1 integer LSB';
+  const s1=out.e1.stats,s2=out.e2.stats;
+  const ok=out.rows.filter(k=>k.startsWith('G:')).length===2&&e1.w.riff==='RIFF'&&JSON.stringify(e1.w.fmt)===JSON.stringify(e2.w.fmt)&&e1.w.frames===e2.w.frames&&s1.nan===0&&s2.nan===0&&s1.full===s2.full&&Math.abs(s1.rms-s2.rms)<1e-6&&out.maxDelta<=lsb&&s1.rms>0.001;
+  rec('TG-AUDIO-EXPORT',ok,out);});
+ await H.finish(s,rec,'P4-'+vp);})().catch(e=>{console.log('SCRIPT ERROR',e);process.exit(1)});

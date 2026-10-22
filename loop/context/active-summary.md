@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-22T04:30:33.758Z)
+# Active loop summary (2026-10-22T05:47:32.392Z)
 
-- backlog.json 698 KB -> active view 132 KB
-- status: G_ROOT_GATE round 78
-- servers: `{"checkedUtc":"2026-10-22T04:11:42.9961390Z","round":78,"attempt":1,"store":200}`
-- last publication: c062147fc29f105454de7728cc4bbbe762f5cb6d (rounds 78-78)
-- last root gate: round 78 published - commit c062147fc29f105454de7728cc4bbbe762f5cb6d pushed
+- backlog.json 707 KB -> active view 192 KB
+- status: G_ROOT_GATE round 79
+- servers: `{"checkedUtc":"2026-10-22T05:24:40.8949740Z","round":79,"attempt":1,"store":200}`
+- last publication: 74eca159268bc364cdad9b183c6031a64c8d2b6a (rounds 79-79)
+- last root gate: round 79 published - commit 74eca159268bc364cdad9b183c6031a64c8d2b6a pushed
 
-## Current items: SRW-16
+## Current items: SRW-13, SRW-16, SRW-17
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -160,9 +160,9 @@
 - INFO-C74-MENU-BOTTOM-UNREACHABLE / info / acknowledged (marker row is in the sticky top chrome; bottom clamp unreachable at 1440x900/1280x720) / marker menu bottom-edge clamp cannot be reached at the two user viewports (menu bottom 343/381)
 - A-R74-MACOS-CTRL-CLICK / low / open - with ROOT-R64-L5 (macOS Ctrl+click) in the Lows batch; needs a real Mac / macOS Ctrl+click (button 0) on a flag starts a drag claim and the contextmenu anchors at the flag
 - R74-T-TECH-LEAD / info / open / real Chrome: drag a marker with Snap on/off/Alt, arrows on a focused flag, right-click and the ContextMenu key on a flag - menu feel, items 
-- GATE75-S1-ZOOM-MID-DRAG / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / zoom (Ctrl+wheel) during a marker drag rescales dx with the new pxPerSecond; the marker jumps (ArrangementMarkerRow l.343-344)
-- GATE75-S2-POINTERCANCEL-COMMITS / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / onPointerCancel=finishMarkerDrag commits lastTime as a Move Marker entry; other abort paths revert (ArrangementMarkerRow l.717-718)
-- GATE75-S3-BLOCKED-PRESS-SELECTS / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / a press refused by claimPointerGesture still moves aria-current selection (setSelectedMarkerId before the claim, l.279-281)
+- GATE75-S1-ZOOM-MID-DRAG / low / open - Lows batch (regression-lock test only): B round 78 source read at c062147 shows it unreachable - every pxPerSecond write goes through applyTimelineView; workspace callers return on isPointerGestureActive (wheel l.1136, fit/zoom-range/zoom-back/step l.774-826); ruler navigation and overview drag need onGestureClaim, refused while the marker drag holds the claim / zoom (Ctrl+wheel) during a marker drag rescales dx with the new pxPerSecond; the marker jumps (ArrangementMarkerRow l.343-344)
+- GATE75-S2-POINTERCANCEL-COMMITS / low / open - Lows batch (with GATE75-S4..S6; cosmetic Low on ArrangementMarkerRow; revert on pointercancel, project precedent ArrangementLane l.522) / onPointerCancel=finishMarkerDrag commits lastTime as a Move Marker entry; other abort paths revert (ArrangementMarkerRow l.717-718)
+- GATE75-S3-BLOCKED-PRESS-SELECTS / low / open - Lows batch (with GATE75-S4..S6; move setSelectedMarkerId after claimPointerGesture; focus stays before the claim because settleEditor on blur refuses during a gesture, l.281) / a press refused by claimPointerGesture still moves aria-current selection (setSelectedMarkerId before the claim, l.279-281)
 - GATE75-S4-KEYBOARD-OPEN-DETECT / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / menu 'opened from keyboard' uses event.button !== 2; touch long-press / macOS Ctrl+click anchor at the flag (cosmetic)
 - GATE75-S5-ARIA-EXPANDED / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / flag with aria-haspopup=menu never reports aria-expanded=false; optional aria-controls
 - GATE75-S6-STALE-MENU-STATE / low / open - signal; S1-S3 bounded marker-drag fix-up round after SRW-16 2b (not this round); S4-S6 Lows batch; S7 doc note; S8 C neighbour/regression rows / if the marker disappears while the menu is open, menu state stays set and focus drops to body (hard to trigger today)
@@ -175,30 +175,36 @@
 - GATE76-S3-VIDEO-CLIP-MARKER-UNTESTED / low / open - Lows batch / regression round row / video clip move onto a marker goes through the single-move path but has no test
 - GATE76-S5-SNAPSHOT-VS-LIVE / info / acknowledged / clip drags read markers from gesture.before, library drops from the live arrangement; a marker changed mid-drag does not affect a running cl
 - GATE76-S4-DOC066-STATUS / info / scheduled round 77 (one-line grant) / doc 066 status line still says awaiting C
-- ARCH-R76-SNAP-TARGETS-HELPER / info / signal - merged into the SRW-16 checkpoint request (after 2b-3); reviewers: keep for now / clipEdgeTargets(..., markerSnapTimes(arr)) repeated at 4 call sites; proposal snapTargetsFor/snapEdgeTargets(arrangement, excludeClipId, lan
+- ARCH-R76-SNAP-TARGETS-HELPER / info / signal - in the SRW-16 boundary checkpoint request b-round-78-checkpoint-request.md (requested from root 2026-10-22); reviewers: keep for now / clipEdgeTargets(..., markerSnapTimes(arr)) repeated at 4 call sites; proposal snapTargetsFor/snapEdgeTargets(arrangement, excludeClipId, lan
 - C-R76-OBS-SOLO-MUTE-HISTORY / info / open - product question (Lows batch triage) / Solo and Mute clicks are undo-history entries; Ctrl+Z after Mute undoes Mute, not an earlier clip move (pre-existing)
 - C-R76-OBS-PLAY-PAST-END / low / open - Lows batch / double-clicking a marker after the project end does not start the transport and shows no status (pre-existing)
 - C-R76-HARNESS-BUDGET / info / acknowledged / MS-PLAY at 1440 needed 3 harness-invalid attempts before the valid one (more than the two-extra-attempt letter; no measurement miss, no tole
 - R77-BUTTON-SHORTCUT-SUPERSET / low / open - Lows batch (with ROOT-R69-L2 / ROOT-R73-S2; string locked by frozen MU6) / prev/next marker buttons announce Control+ArrowLeft/Right while the key also stops at clip edges from round 77 (buttons stay marker-only per
 - R77-T-TECH-LEAD / info / open / real Mac: Option+Left/Right steps markers and clip edges of the selected tracks; Option+Right with a selected clip does not move it; Ctrl+ar
 - GATE77-S1-MAC-OPTION-NOT-ADVERTISED / low / open - Lows batch (merged with R77-BUTTON-SHORTCUT-SUPERSET / ROOT-R69-L2 / ROOT-R73-S2; no platform-dependent render string) / gate-77 reviewer S1: buttons declare aria-keyshortcuts Control+ArrowLeft/Right; macOS Option binding is not advertised and the key does more
-- GATE77-S2-DOC067-STATUS / low / scheduled round 78 (one status line, D-29z43) / doc 067 status line still says awaiting C
 - GATE77-S3-EDGE-SET / info / open - Lows batch (optional) / clipEdgeTimesOnTracks uses trackIds.includes inside filter (O(clips x tracks) per keydown); a Set would be linear
 - GATE77-S4-EN10-CLOCK / info / watch (fix with fakeClock.base if it ever flakes) / marker-edge-nav-ui EN10 checks the position against the real clock (< 2.75, 0.5 s window)
-- ARCH-R77-RESOLVE-ARROW-SHORTCUT / info / signal - part of the SRW-16 boundary checkpoint request (after round 78); reviewer verdict keep for now / handleKeyDown arrow/modifier precedence changed in rounds 73/76/77; proposal: pure resolveArrowShortcut(...) -> step|nudge|block|browser|nul
+- ARCH-R77-RESOLVE-ARROW-SHORTCUT / info / signal - in the SRW-16 boundary checkpoint request b-round-78-checkpoint-request.md (requested from root 2026-10-22); reviewer verdict keep for now / handleKeyDown arrow/modifier precedence changed in rounds 73/76/77; proposal: pure resolveArrowShortcut(...) -> step|nudge|block|browser|nul
 - A-R77-CARRIED-POINTS / low / open - Lows batch / EN7 locks Mac Option+Shift+Right = clip nudge (unspecified by B); adjacentMarkerTarget/stepMarker names now cover non-marker stops; Ctrl+Lef
 - C-R77-OBS-RANGE-INTERVAL-WORDING / info / acknowledged (B spec wording, not an A defect): N2 allTracks means every clip edge on every track, not only inside the range interval; matches Live 6.9 text / round-77 task EK-RANGE said edges in the interval after Ctrl+Shift+L
 - C-R77-OBS-RANGE-SELECTS-CLIP / info / acknowledged (harness note): a range drag in a clip waveform also selects that clip and makes its lane active; only vitest isolates range-only track rules / range drag selects the clip
 - R78-T-TECH-LEAD / info / open / real Chrome on the 10 s grid: marker capture of the playhead, ranges and loop edges (no pixel radius) feels right?
+- ARCH-CHECKPOINT-SRW16 / info / requested_from_root (B round 78 planning, 2026-10-22; non-blocking; SRW-16 feature boundary) / bounded frontend-architect checkpoint at the SRW-16 boundary: snap entry points in grid.ts (resolveSnapTime single entry, microsecond helper
+- GATE78-S1-LOOP-MICROSECOND-HELPER / low / signal - in ARCH-CHECKPOINT-SRW16 / ArrangementLoopBrace inline Math.round(x*1e6)/1e6 repeats grid.ts private toWholeMicroseconds; proposal snapLoopMoveStart or roundToMicrosec
+- GATE78-S2-SCRUB-GETTER-PER-MOVE / info / acknowledged (keep for consistency with T7 unless profiling shows a cost); in ARCH-CHECKPOINT-SRW16 / getSnapMarkerTimes() called on every playhead pointermove (new array, filter, sort)
+- GATE78-S3-DOC068-STATUS / low / scheduled round 79 (one status line, D-29z44) / doc 068 status line still says awaiting C
+- ARCH-R78-RESOLVE-SNAP-TIME / info / signal - in ARCH-CHECKPOINT-SRW16; reviewer: keep for now, low value low risk / grid.ts snap helpers grew in rounds 76-78 (four call sites each time); proposal one resolveSnapTime(time, {snapSeconds, gridSeconds, bypass,
+- A-R78-REVIEW-NAMING / low / open - Lows batch / checkpoint / targets vs edges vs markerTimes name the same concept; 5 positional params on resolveGridTimeWithTargets
+- C-R78-HARNESS-NOTES / info / acknowledged (harness): ruler clicks at y = ruler bottom - 4 avoid the playhead handle; a click outside the viewport hits null; a 2 px drag is a click (DRAG_THRESHOLD_PX 3) / round-78 harness notes
+- GROUP-NONADJACENT / info / signal (deliberate CZABA difference, D-29z44 G6; not requested explicitly by the user) / Live 12 sec. 18.3 groups any selected tracks; CZABA refuses a non-contiguous selection because it has no track reorder
+- R79-T-TECH-LEAD / info / open / real Chrome (Windows; Mac Cmd+G): Ctrl+G groups the selected lanes and no find bar opens; group rows and indentation read well at 1440x900 a
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
-- SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
 - SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
-- SRW-17 [todo] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [todo] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [todo] Simple video opacity fade (from/to black) on single video lane, preview only
 - SRW-20 [todo] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn

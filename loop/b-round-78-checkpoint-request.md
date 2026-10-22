@@ -23,3 +23,14 @@
 ## Not requested
 - No refactor in round 79.
 - The line count alone is not a reason to split anything.
+
+## Addendum — SRW-17 (B round 79 planning, 2026-10-22; still non-blocking, no root result found yet)
+- **Accumulated risk:** `StudioWorkspace.tsx` went from 2044 to 2225 lines in round 79, and round 80 (stage 2, collapse) adds `collapsedGroups` to `TrackLaneLayout`, a `u` key block and focus restore. Signals 2 and 4 come from two independent reviewers: A's code-reviewer and the gate-79 reviewer.
+- **Proposal from both reviewers (verbatim summary):** extract the track-row selection, its anchor ref, live filtering and the group commands into one bounded `useTrackRowSelection` hook. Acceptance criteria:
+  - `useArrangement()` keeps its shape;
+  - TG1–TG11, TG8b and GU1–GU6 stay green and unedited;
+  - no new window listeners;
+  - Undo/Redo stays one entry per command.
+  - Move `ARRANGEMENT_HEADER_WIDTH_PX` and `TRACK_HEADER_PADDING_X_PX` into `lib/arrangement/` only if that extraction happens.
+- **8.** Should this extraction happen at the SRW-17 boundary (after stage 3), and should the stage-2 collapse state (now in `TrackLaneLayout`, beside the track fold) go into the same hook, or into a separate lane-layout hook?
+- **Round 80 does not extract anything.** It keeps the existing pattern: the collapse state sits beside `folded`, and pure helpers go in `groups.ts`.

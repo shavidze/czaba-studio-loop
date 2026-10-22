@@ -1,0 +1,4 @@
+const L=require('./lib.cjs');
+(async()=>{const s=await L.open('1440x900');const p=s.page;await L.fresh(p);
+const o=await p.evaluate(()=>({tracks:[...document.querySelectorAll('[data-track-id]')].map(e=>({id:e.dataset.trackId,h:e.getBoundingClientRect().height,parent:e.parentElement.className.slice(0,60)})),opts:[...document.querySelectorAll('[role=option][data-source-id]')].map(e=>e.dataset.sourceId+' | '+e.textContent.trim().slice(0,50)),undo:[...document.querySelectorAll('button')].filter(b=>/^(Undo|Redo)/.test(b.getAttribute('title')||'')).map(b=>b.getAttribute('title')),names:[...document.querySelectorAll('button[aria-label$="აქტიური ხაზის არჩევა"]')].map(b=>b.getAttribute('aria-label')+' '+b.getAttribute('aria-pressed'))}));
+console.log(JSON.stringify(o,null,1));await s.browser.close();})();

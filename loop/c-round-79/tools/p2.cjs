@@ -1,0 +1,71 @@
+const H=require('./h.cjs');const{L,sleep,st,blur,rows,groupDom,selected,active,clickName,clickGroup}=H;
+const vp=process.argv[2]||'1440x900';const OUT=`${L.OUT}/p2-${vp}.json`;const rec=H.mkRec(OUT);const T=H.T(rec);
+const key=async(p,k)=>{await p.keyboard.press(k);await sleep(300);};
+const ghost=p=>p.evaluate(()=>[...document.querySelectorAll('[data-testid=arrangement-lane-move-ghost]')].map(g=>({gs:g.getAttribute('data-ghost-start'),blocked:g.getAttribute('data-blocked'),lane:g.closest('[data-track-id]')&&g.closest('[data-track-id]').getAttribute('data-track-id')})));
+const hdrBox=(p,id)=>p.evaluate(id=>{const c=document.querySelector(`[data-clip-id="${id}"]`);const h=c.firstElementChild;return h.getBoundingClientRect().toJSON();},id);
+const groupRowBox=p=>p.evaluate(()=>document.querySelector('[data-group-id]').getBoundingClientRect().toJSON());
+(async()=>{const s=await L.open(vp);const p=s.page;await L.fresh(p);const S=await H.setup(p);rec('SETUP',S.clips.length===3,{clips:S.clips.map(c=>[c.lane,c.start,c.dur]),rows:S.rows.map(r=>[r.k,r.h])});
+ const byLane=async l=>(await H.clips(p)).filter(c=>c.lane===l);
+ // group stems+sfx
+ await clickName(p,'stems');await clickName(p,'sfx',['Shift']);await blur(p);await key(p,'Control+g');
+ const r0=await rows(p);rec('DRAG-SETUP',JSON.stringify(r0.map(x=>x.k))===JSON.stringify(['T:video','T:music','G:ჯგუფი 1@0','T:stems','T:sfx']),{rows:r0.map(x=>[x.k,x.top,x.h])});
+ await p.screenshot({path:`${L.OUT}/shots/drag-setup-${vp}.png`});
+ await T('TG-DRAG-OVER-GROUP',async()=>{const out={};const me=(await byLane('music'))[0];const u0=(await st(p)).undo;
+  const hb=await hdrBox(p,me.id);const gr=await groupRowBox(p);const x0=Math.round(Math.max(hb.x+60,600)),y0=Math.round(hb.y+hb.height/2);const x1=x0+Math.round(H.PPS*1),y1=Math.round(gr.y+gr.height/2);
+  out.geom={hdr:hb,group:gr,from:[x0,y0],to:[x1,y1],hitAtTarget:await p.evaluate(([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.closest('[data-group-id]')?'group-row':e.closest('[data-track-id]')?'lane:'+e.closest('[data-track-id]').dataset.trackId:e.tagName)},[x1,y1])};
+  await p.mouse.move(x0,y0);await p.mouse.down();
+  // pass straight down onto group row
+  for(let i=1;i<=12;i++){await p.mouse.move(Math.round(x0+(x1-x0)*i/12),Math.round(y0+(y1-y0)*i/12));await sleep(15);}
+  await sleep(300);out.ghostOnGroup=await ghost(p);out.statusDuring=(await st(p)).status;out.clipDuring=(await H.clips(p)).find(c=>c.id===me.id);
+  await p.screenshot({path:`${L.OUT}/shots/drag-music-on-group-${vp}.png`});
+  await p.mouse.up();await sleep(500);const a=await st(p);const me2=(await H.clips(p)).find(c=>c.id===me.id);out.after={lane:me2.lane,start:me2.start,status:a.status,undo:a.undo,undoBefore:u0};
+  await blur(p);await key(p,'Control+z');const me3=(await H.clips(p)).find(c=>c.id===me.id);out.afterUndo={lane:me3.lane,start:me3.start,undo:(await st(p)).undo};
+  {const hb2=await hdrBox(p,me.id);const st2=await H.laneBox(p,'stems');const mu=await H.laneBox(p,'music');const gx=x0,gy=Math.round(hb2.y+hb2.height/2);await p.mouse.move(gx,gy);await p.mouse.down();
+   for(let i=1;i<=12;i++){await p.mouse.move(gx+Math.round(H.PPS*20*i/12),Math.round(gy+(st2.y+st2.h/2-gy)*i/12));await sleep(15);}await sleep(300);out.sanityGhostOnStems=await ghost(p);
+   for(let i=1;i<=6;i++){await p.mouse.move(gx+Math.round(H.PPS*20),Math.round(st2.y+st2.h/2+(y1-(st2.y+st2.h/2))*i/6));await sleep(15);}await sleep(300);out.sanityGhostStemsThenGroup=await ghost(p);
+   for(let i=1;i<=8;i++){await p.mouse.move(Math.round(gx+H.PPS*20*(1-i/8)),Math.round(y1+(gy-y1)*i/8));await sleep(15);}await sleep(200);await p.mouse.up();await sleep(400);
+   const me4=(await H.clips(p)).find(c=>c.id===me.id);out.sanityAfter={lane:me4.lane,start:me4.start,undo:(await st(p)).undo};}
+  const ok1=out.geom.hitAtTarget==='group-row'&&out.ghostOnGroup.every(g=>g.lane==='music')&&out.clipDuring.lane==='music'&&out.sanityGhostOnStems.length===1&&out.sanityGhostOnStems[0].lane==='stems'&&out.sanityAfter.lane==='music'&&me2.lane==='music'&&!/ხაზზე გადა|lane/i.test(a.status)&&me3.lane==='music'&&Math.abs(me3.start-me.start)<0.002&&out.afterUndo.undo===u0;
+  // neighbour sfx up onto group row, then back to sfx
+  const sf=(await byLane('sfx'))[0];const u1=(await st(p)).undo;const sh=await hdrBox(p,sf.id);const sx0=Math.round(sh.x+sh.width/2),sy0=Math.round(sh.y+sh.height/2);
+  await p.mouse.move(sx0,sy0);await p.mouse.down();for(let i=1;i<=12;i++){await p.mouse.move(sx0,Math.round(sy0+(y1-sy0)*i/12));await sleep(15);}await sleep(300);const ng=await ghost(p);
+  for(let i=1;i<=8;i++){await p.mouse.move(sx0,Math.round(y1+(sy0-y1)*i/8));await sleep(15);}await sleep(200);const ngBack=await ghost(p);await p.mouse.up();await sleep(500);
+  const sf2=(await H.clips(p)).find(c=>c.id===sf.id);out.neighbour={ghostOnGroup:ng,ghostBack:ngBack,lane:sf2.lane,start:sf2.start,status:(await st(p)).status,undo:(await st(p)).undo,undoBefore:u1};
+  out.dom=await groupDom(p);
+  const ok2=sf2.lane==='sfx'&&ng.every(g=>g.lane!=='stems'&&g.lane!=='music')&&out.dom.withTrackId===0&&out.dom.sameParent;
+  rec('TG-DRAG-OVER-GROUP',ok1&&ok2,out);});
+ await T('TG-MARQUEE',async()=>{await blur(p);await p.keyboard.press('Escape');await sleep(200);
+  // verify selection indicator: click sfx clip
+  const sf=(await byLane('sfx'))[0];const sb=await p.locator(`[data-clip-id="${sf.id}"]`).boundingBox();await p.mouse.click(sb.x+sb.width/2,sb.y+sb.height*0.3);await sleep(250);const ind=(await H.clips(p)).filter(c=>c.sel).map(c=>c.lane);
+  await p.keyboard.press('Escape');await sleep(200);await blur(p);
+  const sfxL=await H.laneBox(p,'sfx');const musL=await H.laneBox(p,'music');const gr=await groupRowBox(p);
+  const x0=H.tx(7.2),y0=Math.round(sfxL.y+sfxL.h*0.6),x1=H.tx(1),y1=Math.round(musL.y+musL.h*0.5);
+  const hit0=await p.evaluate(([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.closest('[data-clip-id]')?'clip':e.closest('[data-track-id]')?'lane:'+e.closest('[data-track-id]').dataset.trackId:e.tagName)},[x0,y0]);
+  await p.mouse.move(x0,y0);await p.mouse.down();await p.mouse.move(x0-20,y0-20,{steps:4});await p.mouse.move(x1,y1,{steps:12});await sleep(150);
+  await p.screenshot({path:`${L.OUT}/shots/marquee-${vp}.png`});await p.mouse.up();await sleep(300);
+  const sel=(await H.clips(p)).filter(c=>c.sel).map(c=>c.lane).sort();
+  rec('TG-MARQUEE',JSON.stringify(ind)===JSON.stringify(['sfx'])&&JSON.stringify(sel)===JSON.stringify(['music','sfx','stems'])&&hit0==='lane:sfx'&&y1<gr.y&&y0>gr.y+gr.height,{indicatorCheck:ind,start:[x0,y0,hit0],end:[x1,y1],groupRow:[gr.y,gr.height],selected:sel,status:(await st(p)).status});
+  await p.keyboard.press('Escape');await sleep(200);});
+ await T('REG-LANE-CONTROLS',async()=>{const out={};const lane='stems';const q=sel=>p.locator(`[data-track-id="${lane}"] ${sel}`).first();
+  const pressed=async sel=>q(sel).getAttribute('aria-pressed');
+  out.padL=(await rows(p)).find(r=>r.k==='T:stems').padL;
+  await q('button[title=Mute]').click();out.mute=[await pressed('button[title=Mute]')];await q('button[title=Mute]').click();out.mute.push(await pressed('button[title=Mute]'));
+  await q('button[title^=Solo]').click();out.solo=[await pressed('button[title^=Solo]')];await q('button[title^=Solo]').click();out.solo.push(await pressed('button[title^=Solo]'));
+  const vol=q('input[aria-label^="Volume"]');await vol.focus();const v0=await vol.inputValue();await key(p,'ArrowLeft');const v1=await vol.inputValue();await key(p,'ArrowRight');const v2=await vol.inputValue();out.vol=[v0,v1,v2];
+  const pan=q('[data-testid=arrangement-track-pan]');await pan.focus();const p0=await pan.inputValue();await key(p,'ArrowRight');const p1=await pan.inputValue();await q('[data-testid=arrangement-track-pan-reset]').click();await sleep(200);const p2=await pan.inputValue();out.pan=[p0,p1,p2];
+  const hgt=q('[data-testid=arrangement-track-height]');await hgt.scrollIntoViewIfNeeded();const hb=await hgt.boundingBox();const h0=(await rows(p)).find(r=>r.k==='T:stems').h;
+  out.heightHit=await p.evaluate(([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.getAttribute('data-testid')||e.tagName)},[hb.x+40,hb.y+hb.height/2]);
+  await p.mouse.move(hb.x+40,hb.y+hb.height/2);await p.mouse.down();await p.mouse.move(hb.x+40,hb.y+hb.height/2+30,{steps:8});await p.mouse.up();await sleep(300);const h1=(await rows(p)).find(r=>r.k==='T:stems').h;out.height=[h0,h1];
+  await q('[data-testid=arrangement-track-fold]').click();await sleep(300);const f1=await p.locator('[data-track-id=stems]').getAttribute('data-track-folded');const hf=(await rows(p)).find(r=>r.k==='T:stems').h;await q('[data-testid=arrangement-track-fold]').click();await sleep(300);const f2=await p.locator('[data-track-id=stems]').getAttribute('data-track-folded');out.fold=[f1,hf,f2];
+  out.groupRowsStill=(await groupDom(p)).count;
+  const ok=out.padL==='20px'&&out.mute[0]==='true'&&out.mute[1]==='false'&&out.solo[0]==='true'&&out.solo[1]==='false'&&out.vol[1]!==out.vol[0]&&out.vol[2]===out.vol[0]&&out.pan[1]!==out.pan[0]&&out.pan[2]==='0'&&out.height[1]>out.height[0]&&f1==='true'&&f2==='false'&&out.groupRowsStill===1;
+  rec('REG-LANE-CONTROLS',ok,out);});
+ await T('REG-ACTIVE-TRACK',async()=>{const out=[];const opt=p.locator('[role=option][data-source-id="demo-soft-impact"]');
+  const addVia=async(lab,clicks)=>{for(const [t,m] of clicks)await clickName(p,t,m);const act=await active(p);const n0=(await H.clips(p)).length;await opt.focus();await key(p,'Enter');await sleep(400);const c=await H.clips(p);const added=c.length>n0?c.filter(x=>/Soft impact/.test(x.title)).map(x=>x.lane):[];out.push({lab,active:act,n:[n0,c.length],status:(await st(p)).status,lanes:added});await blur(p);};
+  await addVia('plain music',[['music',[]]]);
+  await addVia('ctrl stems',[['sfx',[]],['stems',['Control']]]);
+  await addVia('shift sfx (in group)',[['stems',[]],['sfx',['Shift']]]);
+  const ok=out[0].active[0]==='music'&&out[1].active[0]==='stems'&&out[2].active[0]==='sfx'&&out.every(o=>o.n[1]===o.n[0]+1)&&/მუსიკა/.test(out[0].status)&&/სტემები/.test(out[1].status)&&/SFX/.test(out[2].status);
+  rec('REG-ACTIVE-TRACK',ok,{out,note:'group name click must not change active lane'});
+  const a0=await active(p);await clickGroup(p,'ჯგუფი 1');const a1=await active(p);rec('G4-GROUP-CLICK-NO-ACTIVE',JSON.stringify(a0)===JSON.stringify(a1),{a0,a1,sel:await selected(p)});});
+ await H.finish(s,rec,'P2-'+vp);})().catch(e=>{console.log('SCRIPT ERROR',e);process.exit(1)});

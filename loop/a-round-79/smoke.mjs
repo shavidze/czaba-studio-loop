@@ -1,0 +1,35 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+const out = '/home/runner/czaba-project/tmp/studio-real-loop/a-round-79';
+const browser = await chromium.launch();
+const result = {};
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const page = await browser.newPage({ viewport: { width: w, height: h } });
+  const errors = [];
+  page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(m.text()); });
+  await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'load', timeout: 60000 });
+  await page.waitForSelector('[data-track-id="music"]', { timeout: 60000 });
+  const name = (n) => page.getByRole('button', { name: new RegExp(`^${n} — აქტიური ხაზის არჩევა`) });
+  await name('მუსიკა').click();
+  await name('სტემები').click({ modifiers: ['Shift'] });
+  const sel = await page.$$eval('[data-track-selected="true"]', (els) => els.map((e) => e.dataset.trackId));
+  await page.keyboard.press('Control+g');
+  await page.waitForSelector('[data-group-id]');
+  const rows = await page.$$eval('[data-group-id], [data-track-id]', (els) => els.map((e) => ({ id: e.dataset.trackId ?? 'G:' + e.textContent.trim(), h: Math.round(e.getBoundingClientRect().height), track: e.hasAttribute('data-track-id') && e.hasAttribute('data-group-id') })));
+  const status = await page.getByTestId('arrangement-status').textContent();
+  await page.screenshot({ path: `${out}/smoke-${w}.png` });
+  const grp = page.getByRole('button', { name: /^ჯგუფი 1 — ჯგუფი/ });
+  await grp.focus();
+  await page.keyboard.press('F2');
+  await page.keyboard.press('Control+a');
+  await page.keyboard.type('SFX ქუჩა g m ');
+  await page.keyboard.press('Enter');
+  const renamed = await page.$$eval('[data-group-id]', (els) => els.map((e) => e.textContent.trim()));
+  const focusedLabel = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
+  await page.keyboard.press('Control+Shift+g');
+  const groupSelectedAttr = await page.$$eval('[data-group-id]', (els) => els.map((e) => e.dataset.groupSelected ?? null));
+  const after = await page.$$eval('[data-group-id]', (els) => els.length);
+  result[w] = { sel, rows, status, renamed, focusedLabel, after, groupSelectedAttr, errors: errors.filter((e) => !/cart|ERR_CONNECTION|ERR_TUNNEL|Failed to load resource/i.test(e)) };
+  await page.close();
+}
+await browser.close();
+console.log(JSON.stringify(result, null, 1));
