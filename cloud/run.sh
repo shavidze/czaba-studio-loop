@@ -33,11 +33,19 @@ save_state() {
   [ -n "${WATCH_PID:-}" ] && kill "$WATCH_PID" 2>/dev/null
   log "saving state (loop exit $rc)"
   mkdir -p "$STATE/worktree"
+  local plain="${RUNNER_TEMP:-/tmp}/loop-worktree.patch"
   git -C "$STORE" add -A
-  git -C "$STORE" diff --cached --binary HEAD > "$STATE/worktree/patch"
+  git -C "$STORE" diff --cached --binary HEAD > "$plain"
   git -C "$STORE" reset -q
   git -C "$STORE" rev-parse HEAD > "$STATE/worktree/base"
-  log "uncommitted store work saved: $(wc -c < "$STATE/worktree/patch") bytes on $(cat "$STATE/worktree/base" | cut -c1-8)"
+  # The state repository is public: the store's unpublished code is kept only encrypted (secret LOOP_PATCH_KEY).
+  if [ -n "${LOOP_PATCH_KEY:-}" ]; then
+    openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass env:LOOP_PATCH_KEY -in "$plain" -out "$STATE/worktree/patch.enc" && rm -f "$STATE/worktree/patch"
+  else
+    log "WARNING: LOOP_PATCH_KEY is not set; saved work stays unencrypted"; cp "$plain" "$STATE/worktree/patch"
+  fi
+  log "uncommitted store work saved: $(wc -c < "$plain") bytes on $(cut -c1-8 "$STATE/worktree/base")"
+  rm -f "$plain"
   cd "$STATE"
   # A finished round (or a job stopped by its time limit) starts the next job at once; the push is made with the PAT,
   # so it triggers the workflow. Paused or failed states do not, so the loop stops there.
@@ -83,12 +91,18 @@ esac
 log "status $PHASE round $ROUND -> start round $START_ROUND phase $START_PHASE"
 
 # ---------- restore uncommitted work from the previous job ----------
-if [ -s "$STATE/worktree/patch" ]; then
+PATCH="$STATE/worktree/patch"
+if [ -f "$STATE/worktree/patch.enc" ]; then
+  [ -n "${LOOP_PATCH_KEY:-}" ] || { notify "Studio loop: LOOP_PATCH_KEY missing" "worktree/patch.enc exists but the LOOP_PATCH_KEY secret is not set, so the saved unpublished work cannot be restored. Add the same secret again."; exit 3; }
+  PATCH="${RUNNER_TEMP:-/tmp}/loop-restore.patch"
+  openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:LOOP_PATCH_KEY -in "$STATE/worktree/patch.enc" -out "$PATCH" || { notify "Studio loop: saved work cannot be decrypted" "worktree/patch.enc does not decrypt with the current LOOP_PATCH_KEY. Was the secret changed?"; exit 3; }
+fi
+if [ -s "$PATCH" ]; then
   BASE="$(cat "$STATE/worktree/base" 2>/dev/null || true)"
   HEAD_NOW="$(git -C "$STORE" rev-parse HEAD)"
   [ "$BASE" = "$HEAD_NOW" ] || log "store moved from ${BASE:0:8} to ${HEAD_NOW:0:8}; applying saved work with 3-way merge"
-  if ! git -C "$STORE" apply --3way --whitespace=nowarn "$STATE/worktree/patch"; then
-    notify "Studio loop: saved work does not apply" "The uncommitted work saved by the previous job (worktree/patch, base ${BASE:0:8}) does not apply to store master ${HEAD_NOW:0:8}. Someone probably pushed conflicting changes. The loop is paused until this is resolved."
+  if ! git -C "$STORE" apply --3way --whitespace=nowarn "$PATCH"; then
+    notify "Studio loop: saved work does not apply" "The uncommitted work saved by the previous job (worktree, base ${BASE:0:8}) does not apply to store master ${HEAD_NOW:0:8}. Someone probably pushed conflicting changes. The loop is paused until this is resolved."
     exit 3
   fi
   git -C "$STORE" reset -q
