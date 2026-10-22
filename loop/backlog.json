@@ -1,10 +1,10 @@
 {
- "version": 89,
- "updated": "2026-10-22 (B round 89 review -> round 90 task, D-29z55)",
+ "version": 90,
+ "updated": "2026-10-22 (B round 90 review -> round 91 task, D-29z56)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 90: D-29z55 - SRW-20 stage 3b-1: Cancel in every export phase (render suspend not resumed, worker terminate, encoder reset; cancelled state + exact messages; run token so cancelled wins), abort on provider unmount (A-R86-L2), encoder reset after a failed conversion (A-R87-L5), rejected resume fails the render (GATE89-S1); new export-cancel.ts + export-cancel.test.ts (EC1-EC4) + export-cancel-ui.test.tsx (CU1-CU9), TR1-TR5 amended, doc 078; baseline HEAD eb1d0c0 clean, frozen b-round-89-r90-tree-sha256.txt 505; expected 5 M + 4 ??)",
- "advisor_used_by_B": "round 89 review (2026-10-22): advisor consulted before writing; advice followed (grant TR1-TR5 amendments, Cancel as an extra button only while rendering, run token so cancelled wins, cancelled phase with role=status, HR-PHASE harness rule, encoder re-fetch noted in PX-NET, offline Cancel unconfirmed in Ableton row)",
+ "current_task": "current-task.md (round 91: D-29z56 - SRW-20 stage 3b-2: WAV + MP3 note says the browser may ask permission for the second download (GATE86-S2), 120 s timeout text without \"reload the page\" (R87-L-TIMEOUT-RELOAD-TEXT), worker clamps its owned transferred copy in place via new encodeArrangementWavInPlace (GATE89-S2), doc 078 status line (GATE90-S6), new doc 079; new export-wav-in-place.test.ts IP1-IP5; C MEM-WAV10 (dHWM <= 639 MB vs B baseline 739/748/748) and MEM-CANCEL GATE90-S1 evidence row; baseline HEAD 35c8403 clean, frozen b-round-90-r91-tree-sha256.txt 506; expected 8 M + 2 ??)",
+ "advisor_used_by_B": "round 90 review (2026-10-22): advisor consulted before writing; advice followed (EW1 non-mutating trap -> separate in-place export used only by the worker; string-lock grants incl. export-range-ui l.455; keep \"120 wamshi\" in the timeout text; GATE90-S1 as a C-only RSS measurement with a written decision rule, not performance.memory; GATE90-S3 to Lows; R20-X4 pass; GATE89-S1/L5 closed on unit evidence, stated as not browser-reachable)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -4447,7 +4447,7 @@
    "depends_on": [
     "SRW-13"
    ],
-   "status": "in_progress (stage 1 C PASS r85 published 51e024a; stage 2 C PASS r86 published 971141d; stage 3a C PASS rounds 87+88+89 browserVerified=true realVerified=true, published eb1d0c0 (gate 89); stage 3b-1 Cancel dispatched round 90 (D-29z55); stage 3b-2 planned round 91 (GATE86-S2, R87-L-TIMEOUT-RELOAD-TEXT, GATE89-S2); R20-X4 cancel part open; none deferred)",
+   "status": "in_progress (stage 1 C PASS r85 published 51e024a; stage 2 C PASS r86 published 971141d; stage 3a C PASS rounds 87-89 published eb1d0c0; stage 3b-1 Cancel C PASS round 90 browserVerified=true realVerified=true, published 35c8403 (gate 90); stage 3b-2 dispatched round 91 (D-29z56: GATE86-S2, R87-L-TIMEOUT-RELOAD-TEXT, GATE89-S2); R20-X1..X4 all pass; none deferred)",
    "files": [
     "app/components/arrangement/ArrangementExportDialog.tsx",
     "app/contexts/ArrangementContext.tsx",
@@ -4508,8 +4508,9 @@
      "action": "5-minute project export",
      "expected": "UI stays responsive (progress updates), cancel works",
      "verify": "C",
-     "status": "open (responsiveness + progress part pass: C rounds 87-88 rAF and VIS rows, keyboard trap during render fixed C round 89 (0 escapes in 76 valid presses), published eb1d0c0; cancel part = stage 3b-1 round 90)",
-     "baseline": "B probe b-round-86/probe: 5-minute project (music clip + Ctrl+D x2 = 05:04.406) WAV export max rAF gap 445 ms at 971141d (normal 45-57 ms); MP3 conversion already in the ffmpeg worker (44 ms max gap)"
+     "status": "pass",
+     "baseline": "B probe b-round-86/probe: 5-minute project (music clip + Ctrl+D x2 = 05:04.406) WAV export max rAF gap 445 ms at 971141d (normal 45-57 ms); MP3 conversion already in the ffmpeg worker (44 ms max gap)",
+     "evidence": "C rounds 87-88 (rAF/progress/VIS), C round 89 TRAP-* (0 escapes in 76 presses), C round 90 CX-RENDER/CX-WAVPHASE/CX-LOAD/CX-MP3/CX-BOTH/CX-MP3-RENDER/CX-KEYS/TRAP-CANCEL/CX-ESC/CX-UNMOUNT/CX-DONE-REG both viewports (0 downloads after every cancel, exact messages 53/53), browserVerified=true realVerified=true; published eb1d0c0 (87-89) and 35c8403 (90)"
     }
    ],
    "stages": [
@@ -4731,7 +4732,7 @@
      "stage": "3b-1",
      "round": 90,
      "decision": "D-29z55",
-     "status": "dispatched",
+     "status": "c_pass_published",
      "scope": "Cancel in every phase (render: suspend point not resumed + startRendering raced; WAV: worker terminate; load/MP3: resetArrangementMp3Encoder exactly once); cancelled phase with exact messages (plain / encoder reload); run token: cancelled wins, no download after abort, finally clears progress only for the current run; abort on provider unmount (A-R86-L2); encoder reset after a failed conversion (A-R87-L5); rejected resume rejects the render (GATE89-S1); Cancel button only while rendering, before Close; Escape does not cancel",
      "acceptance": [
       "R20-X4 (cancel part)"
@@ -4754,16 +4755,72 @@
       "T90-TARGETED",
       "SOURCE-UNCHANGED"
      ],
-     "tech_lead": "R90-T"
+     "tech_lead": "R90-T",
+     "browserVerified": true,
+     "realVerified": true,
+     "c_round90_passed": [
+      "SOURCE-UNCHANGED",
+      "CX-RENDER",
+      "CX-WAVPHASE",
+      "CX-LOAD",
+      "CX-MP3",
+      "CX-BOTH",
+      "CX-MP3-RENDER",
+      "CX-KEYS",
+      "TRAP-CANCEL",
+      "CX-ESC",
+      "CX-UNMOUNT",
+      "CX-DONE-REG",
+      "PX-NET",
+      "REG-HYD",
+      "VIS-RENDER-1280",
+      "G90-3 (fake-Bearer 403 sub-check blocked: backend unavailable in cloud)",
+      "T90-TARGETED",
+      "NEIGHBOUR-CDN-FAIL-1280"
+     ],
+     "c_round90_unit_only": [
+      "GATE89-S1 (EC3, mutation j)",
+      "A-R87-L5 (CU8, mutation i)",
+      "no-suspend fallback"
+     ],
+     "c_round90_bugs": [],
+     "notBrowserVerified": [
+      "production-bundle worker / MP3 (gate row PROD-MP3-UNVERIFIED)"
+     ],
+     "published": "35c84036577591b62b528a271337de565033bc28",
+     "evidence": [
+      "c-round-90.md",
+      "c-round-90.json",
+      "a-round-90.md",
+      "gates/gate-round-90.json",
+      "gates/round-90/review.md"
+     ],
+     "ableton": "Cancel leaves no partial file: confirmed (Live 12 5.1.3.5, real-time rendering only); offline Cancel unconfirmed; Escape does not cancel = CZABA contract, no source"
     },
     {
      "stage": "3b-2",
      "round": 91,
-     "status": "planned",
-     "scope": "WAV + MP3 delivery note honesty (GATE86-S2, string locked in frozen export-mp3.test.tsx l.53 -> test grant), 120 s timeout text without 'reload the page' (R87-L-TIMEOUT-RELOAD-TEXT, export-mp3 l.64 + export-progress-ui l.67), in-place clamp of the owned channel copy to drop one float copy (GATE89-S2)",
+     "status": "dispatched",
+     "scope": "N1 BOTH_FORMAT_NOTE adds the browser-permission caveat (GATE86-S2); T1 timeout literal without reload (R87-L-TIMEOUT-RELOAD-TEXT); G1/G2 new encodeArrangementWavInPlace used only by the worker (encodeArrangementWav stays non-mutating for frozen EW1) (GATE89-S2); doc 078 l.4 (GATE90-S6); doc 079; IP1-IP5; mutations a-f",
      "acceptance": [
-      "SRW-20 honesty / memory"
-     ]
+      "SRW-20 honesty / memory (GATE86-S2, R87-L-TIMEOUT-RELOAD-TEXT, GATE89-S2)"
+     ],
+     "decision": "D-29z56",
+     "c_ids": [
+      "MEM-WAV10",
+      "WAV5-REG",
+      "CX-WAVPHASE-R",
+      "NOTE-BOTH",
+      "TIMEOUT-TEXT",
+      "MEM-CANCEL (GATE90-S1 evidence, never a FAIL of round 91)",
+      "PX-NET",
+      "REG-HYD",
+      "G91-3",
+      "T91-TARGETED",
+      "SOURCE-UNCHANGED"
+     ],
+     "b_baseline": "b-round-90/probe/PROBE-SUMMARY.md: 10M WAV renderer dHWM 739/748/748 MB at 35c8403; limit <= 639 MB",
+     "tech_lead": "R91-T"
     }
    ],
    "ableton_round85": "Live 12 manual 5.1.3.1 Selection Options (b-round-84/web/managing-files.txt l.120-221, fetched 2026-10-22): a time selection sets Render Start/Length; default whole Set; Rendered Track Main = post-fader main output. CZABA same for range default and Master mix; conscious simplification: no typed start/length fields; individual-track render not in scope; MP3 leading silence noted for stage 2.",
@@ -7999,7 +8056,7 @@
    "round": 90,
    "task": "current-task.md",
    "decision": "D-29z55",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "SRW-20 stage 3b-1: Cancel in every phase",
     "A-R86-L2 abort on unmount",
@@ -8034,6 +8091,46 @@
     "REG-HYD",
     "G90-3",
     "T90-TARGETED",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C PASS browserVerified=true realVerified=true, 0 bugs; gate 90 published 35c8403 (verify 134 files / 2152 tests; reviewer 8.5/10)"
+  },
+  {
+   "round": 91,
+   "task": "current-task.md",
+   "decision": "D-29z56",
+   "status": "dispatched",
+   "items": [
+    "SRW-20 stage 3b-2: GATE86-S2 note",
+    "R87-L-TIMEOUT-RELOAD-TEXT",
+    "GATE89-S2 in-place clamp in the worker",
+    "GATE90-S6 doc 078 status line",
+    "GATE90-S1 C measurement row (MEM-CANCEL)"
+   ],
+   "note": "baseline HEAD 35c8403 clean; frozen b-round-90-r91-tree-sha256.txt 506/506; snapshots b-round-90-r91-snapshots; expected 8 M + 2 ??",
+   "owned": [
+    "app/lib/arrangement/export-wav.ts (G1)",
+    "app/lib/arrangement/export-wav.worker.ts (G2)",
+    "app/components/arrangement/ArrangementExportDialog.tsx (N1: BOTH_FORMAT_NOTE only)",
+    "app/contexts/ArrangementContext.tsx (T1: timeout literal only)",
+    "app/lib/arrangement/__tests__/export-mp3.test.tsx (BOTH_NOTE + LOAD_TIMEOUT_MESSAGE declarations)",
+    "app/lib/arrangement/__tests__/export-progress-ui.test.tsx (LOAD_TIMEOUT_MESSAGE declaration)",
+    "app/lib/arrangement/__tests__/export-range-ui.test.tsx (l.455 literal)",
+    "app/lib/arrangement/__tests__/export-wav-in-place.test.ts (new)",
+    "docs/implementation/2026/quarter-IV/078-studio-lab-export-cancel.md (l.4)",
+    "docs/implementation/2026/quarter-IV/079-studio-lab-export-notes-and-memory.md (new)"
+   ],
+   "c_ids": [
+    "MEM-WAV10",
+    "WAV5-REG",
+    "CX-WAVPHASE-R",
+    "NOTE-BOTH",
+    "TIMEOUT-TEXT",
+    "MEM-CANCEL",
+    "PX-NET",
+    "REG-HYD",
+    "G91-3",
+    "T91-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -12971,7 +13068,7 @@
   {
    "id": "GATE86-S2-BOTH-NOTE-DELIVERY",
    "severity": "low",
-   "status": "scheduled stage 3b-2 round 91 (string locked in frozen export-mp3.test.tsx l.53 -> test grant there)",
+   "status": "dispatched round 91 (D-29z56 N1; C NOTE-BOTH)",
    "to": "A (3b)",
    "title": "the WAV + MP3 note promises both-or-none, true for encoding but not for browser delivery (real Chrome may prompt; Safari may drop)",
    "evidence": "gates/round-86/review.md #2; Tech Lead R86-T"
@@ -12995,7 +13092,7 @@
   {
    "id": "PROD-MP3-UNVERIFIED",
    "severity": "low",
-   "status": "open evidence: gate 89 verify built the export-wav worker chunk (verify.log) but no preview-server MP3/worker run is recorded; re-requested for gate 90 (build + preview + one WAV and one MP3 export, incl. a cancel)",
+   "status": "open evidence: gate 90 verify.log again shows only the build (worker chunk + mp3-encoder chunk) and no preview-server WAV/MP3/cancel run; re-requested from root for gate 91",
    "to": "root",
    "title": "MP3 export (and from round 87 the export-wav worker) not verified in the production bundle",
    "evidence": "c-round-86.json notRun; gates/round-86/review.md #5"
@@ -13003,7 +13100,7 @@
   {
    "id": "A-R86-L2-LATE-DOWNLOAD-UNMOUNT",
    "severity": "low",
-   "status": "scheduled round 90 (stage 3b-1 C4 unmount abort; CU7, CX-UNMOUNT)",
+   "status": "closed (C round 90 CX-UNMOUNT both viewports: client navigation, 0 downloads in 15 s in mp3 and render phases; CU7; published 35c8403)",
    "to": "A (3b)",
    "title": "unmount during encoder load/convert can still download later (exportWav same pattern)",
    "evidence": "a-round-86.md Code review L2"
@@ -13067,7 +13164,7 @@
   {
    "id": "R87-L-TIMEOUT-RELOAD-TEXT",
    "severity": "low",
-   "status": "scheduled stage 3b-2 round 91 (with GATE86-S2; test grants export-mp3 l.64 + export-progress-ui l.67)",
+   "status": "dispatched round 91 (D-29z56 T1; C TIMEOUT-TEXT incl. same-page retry)",
    "to": "Lows batch",
    "title": "the 120 s MP3 timeout text still says \"გადატვირთე გვერდი\" (reload the page), but since round 87 a retry works in the same page (C PX-RETRY) - copy no longer accurate; change needs ArrangementContext.tsx + export-mp3 l.64 + export-progress-ui l.67 constants",
    "evidence": "c-round-87.md Observations; c-round-87.json observations[1]"
@@ -13083,7 +13180,7 @@
   {
    "id": "A-R87-L5-CACHED-ENCODER-AFTER-FAILED-CONVERSION",
    "severity": "low",
-   "status": "scheduled round 90 (stage 3b-1 C4 L5 reset; CU8; not browser-reachable)",
+   "status": "closed on unit evidence (not browser-reachable): CU8 + mutation i (A round 90), C T90-TARGETED green; published 35c8403",
    "to": "A (3b)",
    "title": "a failed conversion leaves the cached lab encoder in place (same as the frozen util)",
    "evidence": "a-round-87.md code-reviewer L5"
@@ -13107,7 +13204,7 @@
   {
    "id": "ARCH-EXPORT-MP3-ORCHESTRATION",
    "severity": "info",
-   "status": "signal (not scheduled); gate-89 reviewer repeated the proposal (lib/arrangement/export-orchestration.ts) - merged here; input to checkpoint q14 at the SRW-20 boundary after 3b-2",
+   "status": "signal (not scheduled); repeated by the A round-90 reviewer and the gate-90 reviewer (useArrangementExport hook or lib/arrangement/export-orchestrator.ts; acceptance CU1-CU9, EC1-EC4, TR1-TR6 unchanged, useArrangement() surface identical) - merged here; checkpoint q14 at the SRW-20 boundary (after round 91 C PASS), addendum appended to b-round-83-checkpoint-request.md",
    "to": "B/root",
    "title": "round-87 code-reviewer Architecture note: exportMp3 (ArrangementContext.tsx:2726-2881) changed in rounds 85-87 and 3b again; proposal after 3b: move timer/import/reset/abort orchestration into a lib/arrangement/ module, useArrangement() shape and PU/MX tests unchanged",
    "evidence": "a-round-87.md Architecture note (verbatim)"
@@ -13155,7 +13252,7 @@
   {
    "id": "GATE89-S1-RESUME-REJECT-HANG",
    "severity": "medium",
-   "status": "scheduled round 90 (D-29z55 C2; unit EC3; not browser-reachable)",
+   "status": "closed on unit evidence (not browser-reachable): EC3 + mutation j (A round 90), C re-ran T90-TARGETED green and lists it unit-only; published 35c8403",
    "to": "A",
    "title": "scheduleArrangementRenderProgress swallows a rejected ctx.resume(); the offline render stays suspended, startRendering never settles and the dialog is stuck rendering with Close disabled",
    "evidence": "gates/round-89/review.md #1"
@@ -13163,7 +13260,7 @@
   {
    "id": "GATE89-S2-EXPORT-EXTRA-FLOAT-COPY",
    "severity": "medium",
-   "status": "scheduled stage 3b-2 round 91 (in-place clamp of the owned copy; check export-wav.test for input-unchanged assertions)",
+   "status": "dispatched round 91 (D-29z56 G1/G2: encodeArrangementWavInPlace in the worker; C MEM-WAV10 dHWM <= 639 MB vs B baseline 739/748/748 MB)",
    "to": "A (3b-2)",
    "title": "rendered AudioBuffer + slice() copy + worker clamp copy: one extra stereo float copy at peak (~230 MB for 10 min)",
    "evidence": "gates/round-89/review.md #2"
@@ -13171,7 +13268,7 @@
   {
    "id": "GATE89-S3-WORKER-NO-WATCHDOG",
    "severity": "low",
-   "status": "open - Lows batch (Cancel in round 90 gives the user a way out of a silently stalled worker)",
+   "status": "open - Lows batch (Cancel since round 90 gives the user a way out of a stalled worker; C round 90 CX-WAVPHASE)",
    "to": "Lows batch",
    "title": "export-wav worker has no watchdog; fail() drops the worker error text",
    "evidence": "gates/round-89/review.md #3"
@@ -13231,6 +13328,94 @@
    "to": "C",
    "title": "5M WAV render ~0.9 s; a 10-press sequence needs <=70 ms per press",
    "evidence": "c-round-89.md Notes"
+  },
+  {
+   "id": "GATE90-S1-CANCELLED-CONTEXT-MEMORY",
+   "severity": "medium",
+   "status": "open - evidence row MEM-CANCEL in round 91 (C, RSS method, decision rule in the task); fix (disconnect sources + resume, reviewer Alternative) only if confirmed",
+   "to": "C (measure) / A (fix if confirmed)",
+   "title": "after a render-phase cancel resume() is never called, so the suspended OfflineAudioContext and its render buffer (~117 MB for 5M) may stay alive until page unload; unverified (doc 078 hypothesis)",
+   "evidence": "gates/round-90/review.md #1; c-round-90.md N3 (not measured)"
+  },
+  {
+   "id": "GATE90-S2-TAB-CONTRACT-CHANGED",
+   "severity": "info",
+   "status": "acknowledged (deliberate D-29z55 R4 change: during a render the stops are X, format group, Cancel; TR1-TR5 amended by grant); radio-group-as-last-stop wrap is no longer exercised during a render",
+   "to": "root",
+   "title": "frozen TR1-TR5 meaning rewritten on purpose in round 90",
+   "evidence": "gates/round-90/review.md #2"
+  },
+  {
+   "id": "GATE90-S3-HOLD-ENTER-CLOSES",
+   "severity": "low",
+   "status": "open - Lows batch (ignore event.repeat on Close after a cancel, or accept; real-keyboard timing, CDP cannot hold a key)",
+   "to": "Lows batch",
+   "title": "holding Enter on Cancel: the repeat keydown activates Close after focus moves there, closing the dialog and losing the cancelled status",
+   "evidence": "gates/round-90/review.md #3"
+  },
+  {
+   "id": "GATE90-S4-CANCEL-DISABLED-CLASS",
+   "severity": "low",
+   "status": "open - Lows batch (class copied from Close on purpose, doc 078)",
+   "to": "Lows batch",
+   "title": "Cancel carries disabled:opacity-40 but is never disabled",
+   "evidence": "gates/round-90/review.md #4"
+  },
+  {
+   "id": "GATE90-S5-UNUSED-PREDICATE",
+   "severity": "info",
+   "status": "open - Lows batch (optional: drop isArrangementExportCancelledError or keep for tests)",
+   "to": "Lows batch",
+   "title": "isArrangementExportCancelledError is used only by tests; the app checks signal.aborted",
+   "evidence": "gates/round-90/review.md #5"
+  },
+  {
+   "id": "GATE90-S6-DOC078-STATUS",
+   "severity": "low",
+   "status": "dispatched round 91 (doc 078 l.4 one-line grant)",
+   "to": "A",
+   "title": "doc 078 status line still says awaiting C",
+   "evidence": "gates/round-90/review.md #6"
+  },
+  {
+   "id": "GATE90-S7-LINT-OWNED-UNCONFIRMED",
+   "severity": "info",
+   "status": "dispatched round 91 (A saves npx biome lint output for owned files in a-round-91/biome-lint-owned.txt)",
+   "to": "A",
+   "title": "verify.log hides 199 of 218 lint warnings, so owned-file lint cleanliness was not visible to the gate reviewer",
+   "evidence": "gates/round-90/review.md #7"
+  },
+  {
+   "id": "C-R90-MUT-B-CU4-GAP",
+   "severity": "low",
+   "status": "open - Lows batch (test gap: add a dedicated pre-download aborted-check test on the mp3 path; behaviour proven by C CX-BOTH 0 files)",
+   "to": "Lows batch",
+   "title": "mutation b (no aborted check before downloads) does not turn CU4 red because encode is also raced against the abort",
+   "evidence": "a-round-90.md mutation table; c-round-90.md Return to B"
+  },
+  {
+   "id": "C-R90-N2-UNMOUNT-DELAY",
+   "severity": "info",
+   "status": "watch (hypothesis: Remix route commit timing in a fresh dev context; 0 downloads proven)",
+   "to": "watch",
+   "title": "ffmpeg worker terminated 2.2-2.6 s after the exit click, not at once",
+   "evidence": "c-round-90.md N2"
+  },
+  {
+   "id": "R91-T-TECH-LEAD",
+   "severity": "info",
+   "status": "open",
+   "to": "Tech Lead",
+   "title": "real Chrome/Safari: WAV + MP3 export - does the browser ask permission for the second file, and does the new note read right; Escape-does-not-cancel and the Cancel button feel (R90-T) still open",
+   "evidence": "current-task.md round 91"
+  },
+  {
+   "id": "ARCH-CHECKPOINT-SRW20",
+   "severity": "info",
+   "status": "to be requested from root after round 91 C PASS (SRW-20 boundary; non-blocking); inputs q14 in b-round-83-checkpoint-request.md (round-86..90 addenda)",
+   "to": "root",
+   "title": "bounded frontend-architect checkpoint at the SRW-20 boundary: export orchestration (useArrangementExport hook vs lib/arrangement/export-orchestrator.ts), useExportDialogFocus, dialog-tab-stops placement",
+   "evidence": "gates/round-90/review.md Architecture note; a-round-90.md Architecture note"
   }
  ],
  "tech_lead_notes": [

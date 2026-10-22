@@ -1,0 +1,95 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/c[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/export-cancel.test.ts [2m([22m[2m19 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 108[2mms[22m[39m
+     [32m✓[39m exports the exact Georgian messages and a named cancel error[32m 3[2mms[22m[39m
+     [32m✓[39m without a signal returns the same promise and its result[32m 1[2mms[22m[39m
+     [32m✓[39m with a pre-aborted signal rejects with the cancel error[32m 1[2mms[22m[39m
+     [32m✓[39m an abort mid-flight rejects with the cancel error even though the work resolves later[32m 1[2mms[22m[39m
+     [32m✓[39m a work rejection before any abort passes that error through[32m 0[2mms[22m[39m
+     [32m✓[39m removes its abort listener once the work settles[32m 2[2mms[22m[39m
+     [32m✓[39m a pre-aborted signal with a work that rejects later raises no unhandled rejection[32m 13[2mms[22m[39m
+     [32m✓[39m a late work rejection after an abort raises no unhandled rejection[32m 14[2mms[22m[39m
+     [32m✓[39m EC2 a pre-aborted signal rejects cancelled and never constructs an OfflineAudioContext[32m 1[2mms[22m[39m
+[31m     [31m×[31m EC2 a signal alone schedules suspend points, and an abort before the first suspend resolves never resumes[39m[32m 27[2mms[22m[39m
+[31m     [31m×[31m EC2 an abort after one resumed suspend stops resuming at the next suspend point[39m[32m 26[2mms[22m[39m
+     [32m✓[39m EC2 an abort after startRendering resolved but before the worker constructs no Worker[32m 4[2mms[22m[39m
+     [32m✓[39m EC3 GATE89-S1 a rejected resume() rejects the render with that error instead of hanging[32m 1[2mms[22m[39m
+     [32m✓[39m EC3 a rejected suspend() alone still renders[32m 3[2mms[22m[39m
+     [32m✓[39m a pre-aborted signal rejects cancelled and constructs no Worker[32m 1[2mms[22m[39m
+     [32m✓[39m the no-Worker fallback checks the signal before it encodes[32m 0[2mms[22m[39m
+     [32m✓[39m an abort mid-encode terminates once, rejects cancelled, and a later complete changes nothing[32m 2[2mms[22m[39m
+     [32m✓[39m removes the abort listener on complete and on a worker failure[32m 5[2mms[22m[39m
+     [32m✓[39m a 3-argument call behaves as before: posts transferred channels, forwards progress, resolves on complete[32m 1[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 1297[2mms[22m[39m
+     [33m[2m✓[22m[39m CU3 load-phase cancel before the import resolves (runs first in this file, while the import gate is still closed): the import resets exactly once, never loads, and the next MP3 export succeeds [33m 413[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 1597[2mms[22m[39m
+     [33m[2m✓[22m[39m TR1 WAV checked: Tab from the checked and from the unchecked format radio stays native; Tab from Cancel wraps to X [33m 641[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC2–EC3 renderArrangementWav honours the signal and a resume error[2m > [22mEC2 a signal alone schedules suspend points, and an abort before the first suspend resolves never resumes
+[31m[1mAssertionError[22m: expected 19 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 19[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m345:31[22m[39m
+    [90m343| [39m    [35mawait[39m [34msettleMicrotasks[39m()[33m;[39m
+    [90m344| [39m    expect(isArrangementExportCancelledError(await outcome)).toBe(true…
+    [90m345| [39m    [34mexpect[39m(renderLog[33m.[39mresumes)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m346| [39m    [34mexpect[39m(renderLog[33m.[39mevents)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'resume'[39m)[33m;[39m
+    [90m347| [39m    [34mexpect[39m([33mFakeWorker[39m[33m.[39minstances)[33m.[39m[34mtoHaveLength[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC2–EC3 renderArrangementWav honours the signal and a resume error[2m > [22mEC2 an abort after one resumed suspend stops resuming at the next suspend point
+[31m[1mAssertionError[22m: expected 2 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 2[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m368:31[22m[39m
+    [90m366| [39m    renderLog[33m.[39msuspends[[34m1[39m][33m?.[39m[34mresolve[39m()[33m;[39m
+    [90m367| [39m    [35mawait[39m [34msettleMicrotasks[39m()[33m;[39m
+    [90m368| [39m    [34mexpect[39m(renderLog[33m.[39mresumes)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m369| [39m    [34mexpect[39m(progress)[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m370| [39m    expect(isArrangementExportCancelledError(await outcome)).toBe(true…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m42 passed[39m[22m[90m (44)[39m
+[2m   Start at [22m 21:06:07
+[2m   Duration [22m 4.05s[2m (transform 1.75s, setup 0ms, import 3.38s, tests 3.00s, environment 2.17s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/c/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC2–EC3 renderArrangementWav honours the signal and a resume error > EC2 a signal alone schedules suspend points%2C and an abort before the first suspend resolves never resumes,line=345,column=31::AssertionError: expected 19 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 19%0A%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:345:31%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/c/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC2–EC3 renderArrangementWav honours the signal and a resume error > EC2 an abort after one resumed suspend stops resuming at the next suspend point,line=368,column=31::AssertionError: expected 2 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 2%0A%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:368:31%0A%0A

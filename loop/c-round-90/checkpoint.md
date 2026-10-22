@@ -1,0 +1,9 @@
+- start hashes OK; CX-RENDER + CX-WAVPHASE + re-export WAV PASS both VPs (out/render-*.json)
+- MP3 rows 1440 (non-hung) + 1280 (hung CDN) all valid PASS; out/mp3-*.json
+- keys rows 1440 PASS (out/keys-1440x900.json)
+- keys rows 1280 PASS
+- unmount/G/VIS 1280 PASS (out/unmount-1280x720.json)
+- unmount/G/VIS 1440 PASS; next targeted vitest
+- DONE: report + json written (PASS)
+- downloaded .wav/.mp3 files (C's own, 727 MB) removed after parsing; their metadata is in out/*.json
+- added CDN-fail neighbour + exact-string check; final

@@ -1,0 +1,177 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/a[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/export-cancel.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 94[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx [2m([22m[2m11 tests[22m[2m | [22m[31m7 failed[39m[2m)[22m[33m 1143[2mms[22m[39m
+[31m     [31m×[31m CU3 load-phase cancel before the import resolves (runs first in this file, while the import gate is still closed): the import resets exactly once, never loads, and the next MP3 export succeeds[39m[33m 331[2mms[22m[39m
+[31m     [31m×[31m CU1 render-phase WAV cancel: Cancel only while rendering, cancelled status, no progress, Close enabled and focused, signal aborted, and a late render downloads nothing[39m[32m 80[2mms[22m[39m
+[31m     [31m×[31m CU2 cancelled wins over a later render error[39m[32m 64[2mms[22m[39m
+[31m     [31m×[31m CU3 load-phase cancel with a hanging load: the encoder message, one reset, and a late load adds no reset, encode or download; the next MP3 export loads again[39m[32m 53[2mms[22m[39m
+[31m     [31m×[31m CU4 mp3-phase cancel of WAV + MP3: the encoder message, one reset, and a late encode delivers neither file[39m[32m 87[2mms[22m[39m
+[31m     [31m×[31m CU5 render-phase cancel of an MP3 export: the plain message, no reset, and no load after the late render[39m[32m 105[2mms[22m[39m
+[31m     [31m×[31m CU6 a new export right after a cancel keeps its progress when the old render settles, and completes normally[39m[32m 80[2mms[22m[39m
+     [32m✓[39m CU7 unmount during the mp3 phase aborts, resets once, and a late encode downloads nothing and logs no console error[32m 93[2mms[22m[39m
+     [32m✓[39m CU7 unmount during the render phase aborts and a late render downloads nothing[32m 81[2mms[22m[39m
+     [32m✓[39m CU8 L5 a failed conversion resets the encoder once, keeps the failure message, and the next MP3 export loads again[32m 108[2mms[22m[39m
+     [32m✓[39m CU9 keyboard: during a render the stops are X, the format radios and Cancel; a click on the focused Cancel moves focus to Close; Escape does not cancel[32m 58[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 1547[2mms[22m[39m
+     [33m[2m✓[22m[39m TR1 WAV checked: Tab from the checked and from the unchecked format radio stays native; Tab from Cancel wraps to X [33m 624[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 7 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx[2m > [22mSRW-20 stage 3b-1 cancel while the encoder module is still importing (D-29z55)[2m > [22mCU3 load-phase cancel before the import resolves (runs first in this file, while the import gate is still closed): the import resets exactly once, never loads, and the next MP3 export succeeds
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:[2m368:30[22m[39m
+    [90m366| [39m    cancelEncoderGate[33m.[39m[34mrelease[39m()[33m;[39m
+    [90m367| [39m    [35mawait[39m [34mflushAsync[39m()[33m;[39m
+    [90m368| [39m    [34mexpect[39m(resetEncoderMock)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m369| [39m    [34mexpect[39m(loadEncoderMock)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m370| [39m    [34mexpect[39m(encodeMock)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx[2m > [22mSRW-20 stage 3b-1 export Cancel in every phase (D-29z55)[2m > [22mCU1 render-phase WAV cancel: Cancel only while rendering, cancelled status, no progress, Close enabled and focused, signal aborted, and a late render downloads nothing
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:[2m411:39[22m[39m
+    [90m409| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m(close)[33m;[39m
+    [90m410| [39m    [34mexpect[39m([34mdialogButton[39m(view[33m,[39m [33mWAV_BUTTON[39m)[33m.[39mdisabled)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m411| [39m    [34mexpect[39m([34msignalOf[39m(control)[33m.[39maborted)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m412| [39m    [34mreportProgress[39m(control[33m,[39m [32m'render'[39m[33m,[39m [34m0.9[39m)[33m;[39m
+    [90m413| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportProgress[33m.[39m[34mgetProgress[39m())[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx[2m > [22mSRW-20 stage 3b-1 export Cancel in every phase (D-29z55)[2m > [22mCU2 cancelled wins over a later render error
+[31m[1mAssertionError[22m: expected { phase: 'error', …(1) } to deeply equal { phase: 'cancelled', …(1) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "message": "ექსპორტი გაუქმდა — ფაილი არ შეიქმნა.",[39m
+[32m-   "phase": "cancelled",[39m
+[31m+   "message": "ექსპორტი ვერ მოხერხდა — ფაილი არ შეიქმნა. render broke after cancel",[39m
+[31m+   "phase": "error",[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:[2m433:35[22m[39m
+    [90m431| [39m    })[33m;[39m
+    [90m432| [39m    [35mawait[39m [34mflushAsync[39m([34m5[39m)[33m;[39m
+    [90m433| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportState)[33m.[39m[34mtoEqual[39m([33mCANCELLED_PLAIN[39m)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m434| [39m    [34mexpect[39m([34mstatusText[39m(view)[33m.[39malert)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m435| [39m    [34mexpect[39m(downloads)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx[2m > [22mSRW-20 stage 3b-1 export Cancel in every phase (D-29z55)[2m > [22mCU3 load-phase cancel with a hanging load: the encoder message, one reset, and a late load adds no reset, encode or download; the next MP3 export loads again
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:[2m454:30[22m[39m
+    [90m452| [39m    [35mawait[39m [34mclickCancel[39m(view)[33m;[39m
+    [90m453| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportState)[33m.[39m[34mtoEqual[39m([33mCANCELLED_ENCODER[39m)[33m;[39m
+    [90m454| [39m    [34mexpect[39m(resetEncoderMock)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m455| [39m    [35mawait[39m [34mact[39m([35masync[39m () [33m=>[39m {
+    [90m456| [39m      [34mfinishLoad[39m({ encode[33m:[39m encodeMock })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx[2m > [22mSRW-20 stage 3b-1 export Cancel in every phase (D-29z55)[2m > [22mCU4 mp3-phase cancel of WAV + MP3: the encoder message, one reset, and a late encode delivers neither file
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:[2m482:30[22m[39m
+    [90m480| [39m    [35mawait[39m [34mclickCancel[39m(view)[33m;[39m
+    [90m481| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportState)[33m.[39m[34mtoEqual[39m([33mCANCELLED_ENCODER[39m)[33m;[39m
+    [90m482| [39m    [34mexpect[39m(resetEncoderMock)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m483| [39m    [35mawait[39m [34mact[39m([35masync[39m () [33m=>[39m {
+    [90m484| [39m      encode[33m.[39m[34mfinish[39m(mp3Blob)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx[2m > [22mSRW-20 stage 3b-1 export Cancel in every phase (D-29z55)[2m > [22mCU5 render-phase cancel of an MP3 export: the plain message, no reset, and no load after the late render
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array []
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:[2m509:33[22m[39m
+    [90m507| [39m    [35mawait[39m [34mflushAsync[39m()[33m;[39m
+    [90m508| [39m    [34mexpect[39m(resetEncoderMock)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m509| [39m    [34mexpect[39m(loadEncoderMock)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m510| [39m    [34mexpect[39m(downloads)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m511| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportState)[33m.[39m[34mtoEqual[39m([33mCANCELLED_PLAIN[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx[2m > [22mSRW-20 stage 3b-1 export Cancel in every phase (D-29z55)[2m > [22mCU6 a new export right after a cancel keeps its progress when the old render settles, and completes normally
+[31m[1mAssertionError[22m: expected null to be 'რენდერი · 60%' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"რენდერი · 60%"
+
+[31m+ Received:[39m 
+null
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:[2m529:33[22m[39m
+    [90m527| [39m    })[33m;[39m
+    [90m528| [39m    [35mawait[39m [34mflushAsync[39m([34m5[39m)[33m;[39m
+    [90m529| [39m    [34mexpect[39m([34mprogressLabel[39m(view))[33m.[39m[34mtoBe[39m([32m'რენდერი · 60%'[39m)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m530| [39m    expect(live(api).exportProgress.getProgress()).toEqual({ phase: 'r…
+    [90m531| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportState[33m.[39mphase)[33m.[39m[34mtoBe[39m([32m'rendering'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m7 failed[39m[22m[2m | [22m[1m[32m37 passed[39m[22m[90m (44)[39m
+[2m   Start at [22m 21:05:57
+[2m   Duration [22m 4.01s[2m (transform 1.67s, setup 0ms, import 3.36s, tests 2.78s, environment 2.24s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/a/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx,title=app/lib/arrangement/__tests__/export-cancel-ui.test.tsx > SRW-20 stage 3b-1 cancel while the encoder module is still importing (D-29z55) > CU3 load-phase cancel before the import resolves (runs first in this file%2C while the import gate is still closed)%3A the import resets exactly once%2C never loads%2C and the next MP3 export succeeds,line=368,column=30::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:368:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/a/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx,title=app/lib/arrangement/__tests__/export-cancel-ui.test.tsx > SRW-20 stage 3b-1 export Cancel in every phase (D-29z55) > CU1 render-phase WAV cancel%3A Cancel only while rendering%2C cancelled status%2C no progress%2C Close enabled and focused%2C signal aborted%2C and a late render downloads nothing,line=411,column=39::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:411:39%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/a/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx,title=app/lib/arrangement/__tests__/export-cancel-ui.test.tsx > SRW-20 stage 3b-1 export Cancel in every phase (D-29z55) > CU2 cancelled wins over a later render error,line=433,column=35::AssertionError: expected { phase: 'error', …(1) } to deeply equal { phase: 'cancelled', …(1) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "message": "ექსპორტი გაუქმდა — ფაილი არ შეიქმნა.",%0A-   "phase": "cancelled",%0A+   "message": "ექსპორტი ვერ მოხერხდა — ფაილი არ შეიქმნა. render broke after cancel",%0A+   "phase": "error",%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:433:35%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/a/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx,title=app/lib/arrangement/__tests__/export-cancel-ui.test.tsx > SRW-20 stage 3b-1 export Cancel in every phase (D-29z55) > CU3 load-phase cancel with a hanging load%3A the encoder message%2C one reset%2C and a late load adds no reset%2C encode or download; the next MP3 export loads again,line=454,column=30::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:454:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/a/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx,title=app/lib/arrangement/__tests__/export-cancel-ui.test.tsx > SRW-20 stage 3b-1 export Cancel in every phase (D-29z55) > CU4 mp3-phase cancel of WAV + MP3%3A the encoder message%2C one reset%2C and a late encode delivers neither file,line=482,column=30::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:482:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/a/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx,title=app/lib/arrangement/__tests__/export-cancel-ui.test.tsx > SRW-20 stage 3b-1 export Cancel in every phase (D-29z55) > CU5 render-phase cancel of an MP3 export%3A the plain message%2C no reset%2C and no load after the late render,line=509,column=33::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array []%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:509:33%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-90/mut/a/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx,title=app/lib/arrangement/__tests__/export-cancel-ui.test.tsx > SRW-20 stage 3b-1 export Cancel in every phase (D-29z55) > CU6 a new export right after a cancel keeps its progress when the old render settles%2C and completes normally,line=529,column=33::AssertionError: expected null to be 'რენდერი · 60%25' // Object.is equality%0A%0A- Expected: %0A"რენდერი · 60%25"%0A%0A+ Received: %0Anull%0A%0A ❯ app/lib/arrangement/__tests__/export-cancel-ui.test.tsx:529:33%0A%0A
