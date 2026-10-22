@@ -1,154 +1,171 @@
-# CURRENT TASK — Round 88: fix R87-PROGRESS-BELOW-FOLD-1280 — the Export dialog's status, progress and buttons stay visible (sticky footer) (D-29z53)
+# CURRENT TASK — Round 89: fix R88-FOCUS-ESCAPE-RENDER — the Export dialog's Tab trap counts radio groups as one Tab stop (D-29z54)
 
 Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-22
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules in your prompt. Those rules win over older text.
-- **Previous task:** `tasks/round-87.md` (exact copy, sha256 `ffdb2a42…`). Rationale: `b-round-87.md`. Decision record: D-29z53 in `docs/technical/studio-real-workspace/plan.md`.
-- **Round size:** one C bug (medium), one owner (A), one source file plus one new test file and one doc. It is a fix round, not a feature stage.
+- **Previous task:** `tasks/round-88.md` (exact copy, sha256 `7c1e0560…`). Rationale: `b-round-88.md`. Decision record: D-29z54 in `docs/technical/studio-real-workspace/plan.md`.
+- **Round size:** one C bug (medium), one owner (A). One changed source file, one new pure module, one new test file and one doc. This is a fix round, not a feature stage.
 
 ## Why this round
-- **C round 87: FAIL**, `browserVerified=true`, `realVerified=true`.
-  - All 18 B rows PASS at both viewports. The 5-minute WAV max rAF gap fell from 445 ms to 105–107 ms; MP3 97–111 ms. PX-RETRY proves that a retry now works in the same page.
-  - **One medium bug, R87-PROGRESS-BELOW-FOLD-1280.** At 1280×720 the dialog panel (`max-h-[90vh] overflow-auto`, 36–684 px, clientHeight 646, scrollHeight 758) shows the progress label cut off (677–693 px). The `<progress>` bar (709–717) and the busy button (740–778) are fully below the fold. The user has to scroll and nothing tells them to. At 1440×900 everything is visible.
-  - Even before any export, the 1280 panel already overflowed by 12 px at `971141d` (658 vs 646), so the export button's bottom edge is cut too.
-- **Gate 87 was skipped** (`gates/gate-round-87.json`: "C taskStatus FAIL"). Nothing from round 87 is published. HEAD is still `971141d`, and the round-87 work sits uncommitted in the tree. It is the baseline below.
+- **C round 88: FAIL**, `browserVerified=true`, `realVerified=true`.
+  - **The sticky footer and the focus guard work.** VIS-IDLE, VIS-RENDER (every phase), VIS-SCROLL (1280), VIS-DONE, VIS-ERROR, VIS-VIDEO, PX-PHASES-R, PX-WAV5-R (max rAF gap 55.2 ms), PX-NET, REG-HYD, G88-3, T88-TARGETED and SOURCE-UNCHANGED all PASS. R87-PROGRESS-BELOW-FOLD-1280 is fixed by C evidence (c_pass, not yet published).
+  - **One medium bug, R88-FOCUS-ESCAPE-RENDER.** It is old: the trap code is byte-identical to round 87 and to the published `971141d`.
+    - Steps: during a render, press Tab three times. The 3rd Tab leaves the dialog. Focus goes to `BODY`, then `arrangement-exit` (a link behind the modal), then Master Mute and Master Volume.
+    - When it happens: at both viewports, whenever the checked format is WAV (the default) or MP3. With WAV + MP3 checked, focus wraps to X correctly.
+    - Failing rows: PX-KEYS-R, and the "focus never leaves the dialog" part of FOCUS-NOT-OBSCURED.
+- **Gate 88 was skipped** (`gates/gate-round-88.json`: "C taskStatus FAIL"). Nothing from rounds 87–88 is published. HEAD is still `971141d`, and the round-87 and round-88 work sits uncommitted in the tree. That tree is the baseline below.
 - **Regression round:** due on or after 2026-10-24 (`regression-last.json` = 2026-10-21). Not today.
 
+## Root cause (B read `ArrangementExportDialog.tsx` l.161–192 in the current tree)
+- `handleDialogTabKey` wraps forward only when `active === last`, and backward only when `active === first`. `last` is the **last focusable element** in DOM order.
+- During a render, the scope radios, Close and Export are disabled, and the format radios stay enabled (D-29z52, GATE86-S4). So the focusable list is [X, wav, mp3, both] and `last` is the `both` radio.
+- **Native Tab treats a radio group as one Tab stop.** Tab from the checked `wav` or `mp3` radio leaves the group, and with it the dialog. The trap never fires, because `active !== both`.
+  - This matches C's observations: V1/V4/V5 escape, and V3 (`both` checked) wraps.
+- In the idle state, the last element is the Export button and the first is X. Neither is a radio, which is why the bug only shows during a render.
+- `grep "active === last"` over `app/` finds only this dialog, so no other dialog shares this trap pattern.
+
 ## Baseline (measured by B, 2026-10-22)
-- **HEAD `971141d67a1dd33da8f1165de1d895bd62b4e022`**. `git status --short` = **7 M + 10 ??**, exactly the round-87 end state. `a-round-87/end-hashes.txt` matches, and `b-round-86-r87-tree-sha256.txt` is 490/490 OK.
-- **Frozen list:** `../tmp/studio-real-loop/b-round-87-r88-tree-sha256.txt`, **505** entries, **505/505 OK**. It covers every tracked and untracked `app/**` and `docs/implementation/**` file plus `vite.config.ts`, **except** the two owned existing files below. That includes the 9 other round-87 files at their round-87 content. Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-87-r88-tree-sha256.txt`.
-- **Snapshots:** `../tmp/studio-real-loop/b-round-87-r88-snapshots/` (`SHA256SUMS.txt`). LF, CR=0:
+- **HEAD `971141d67a1dd33da8f1165de1d895bd62b4e022`**. `git status --short` = **7 M + 11 ??** (18 lines), exactly the round-88 end state. A's `a-round-88/end-hashes.txt` and C's SOURCE-UNCHANGED both match it.
+- **Frozen list:** `../tmp/studio-real-loop/b-round-88-r89-tree-sha256.txt`, **506** entries, **506/506 OK**. It covers every tracked and untracked `app/**` and `docs/implementation/**` file plus `vite.config.ts`, **except** the two owned existing files below.
+  - It includes `export-dialog-footer.test.tsx` (`5d6d30e4`), which is now frozen.
+  - It includes the protected auth and route files.
+  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-88-r89-tree-sha256.txt`.
+- **Snapshots:** `../tmp/studio-real-loop/b-round-88-r89-snapshots/` (`SHA256SUMS.txt`). LF, CR=0:
 
   | File | sha256 prefix | lines | role |
   |---|---|---|---|
-  | `app/components/arrangement/ArrangementExportDialog.tsx` | `2082951a` | 483 | owned |
-  | `docs/implementation/2026/quarter-IV/077-studio-lab-export-progress-and-worker.md` | `eeeb7327` | 118 | owned (listed lines) |
+  | `app/components/arrangement/ArrangementExportDialog.tsx` | `24e53071` | 517 | owned |
+  | `docs/implementation/2026/quarter-IV/077-studio-lab-export-progress-and-worker.md` | `605915b0` | 121 | owned (listed lines) |
   | `app/components/ui/Modal.tsx` | `741c2341` | — | frozen, reference |
-  | `app/lib/arrangement/__tests__/export-dialog-focus.test.tsx` | `ac53f685` | — | frozen, reference |
+  | `app/lib/arrangement/__tests__/export-dialog-focus.test.tsx` | `ac53f685` | — | frozen, reference (harness to copy) |
   | `app/lib/arrangement/__tests__/export-dialog-focus-restore.test.tsx` | `e4ad8336` | — | frozen, reference |
+  | `app/lib/arrangement/__tests__/export-dialog-footer.test.tsx` | `5d6d30e4` | — | frozen, reference |
 
-- **Protected files:** 4/4 OK. Never touch the auth files, `app/contexts/StudioContext.tsx` (`caa388e7`) or `app/utils/ffmpeg.ts` (`0995ae78`).
+- **Protected:** never touch the auth files, `app/contexts/StudioContext.tsx` (`caa388e7`), `app/utils/ffmpeg.ts` (`0995ae78`) or `Modal.tsx`.
 - **Servers:** `:5173/studio-lab` returns 200 (`env-status.json`). Backend `:5199` is unavailable, as expected. Never start or stop servers.
 - **Do not change the repository state:**
-  - Never stash, reset, checkout, clean or re-create anything. Do not revert any round-87 file.
+  - Never stash, reset, checkout, clean or re-create anything. Do not revert any round-87 or round-88 file.
   - A mismatch (another HEAD, another status, a changed frozen file) means stop and report.
   - Never run `biome check --write`, `format --write`, `npm run format` or `check:fix`. Format through stdin to stdout.
-  - Run mutation proofs in a scratch copy (`a-round-88/mut/`), never in `store/`.
+  - Run mutation proofs in a scratch copy (`a-round-89/mut/`), never in `store/`.
 
 ## 1. What changes (A)
 
-### Today (B read the source of the round-87 tree)
-- `ArrangementExportDialog.tsx` renders `<Modal ref={dialogContentRef} size="lg">` → focus-trap `<div>` → `ModalHeader` → `<ModalBody className="space-y-4">`. ModalBody contains, in order:
-  1. the format fieldset;
-  2. the scope fieldset;
-  3. the notes (loop, video sound, master mute, master gain, empty project);
-  4. the status `<p>` (l.~413–425);
-  5. the progress label and `<progress>` (l.426–439);
-  6. the overload warning (l.440–448);
-  7. the button row `div.flex.justify-end.gap-2` with Close and Export (l.449–478).
-- The scroll container is the **shared Modal panel** (`Modal.tsx` l.105–111: `bg-surface … max-h-[90vh] overflow-auto overscroll-contain`). Its element is `dialogContentRef.current`, because the dialog passes `ref={dialogContentRef}` to `Modal`, which forwards it to that panel. `ModalBody` is `px-8 py-4`. `Modal.tsx` is **frozen**.
-- The frozen focus tests use `modalClose.parentElement` (= the panel) and `exportDialogFocusableElements(content)`. The Tab order must stay exactly as it is: X → format radios → scope radios → Close → Export.
+### G1 — new pure module `app/lib/arrangement/dialog-tab-stops.ts`
+Export exactly these two functions. Use no type assertions; narrow with `instanceof HTMLInputElement` and `.type === 'radio'`.
+- `groupDialogTabStops(focusable: readonly HTMLElement[]): HTMLElement[][]`
+  - Each element of `focusable` lands in exactly one stop, keeping input order.
+  - A radio input with a **non-empty `name`** joins the stop of the first earlier radio with the same `name` in the list.
+  - Every other element, including a radio with an empty name, is its own stop.
+  - Stops are ordered by the position of their first member.
+  - An empty input gives an empty array.
+- `dialogTabStopFocusTarget(stop: readonly HTMLElement[]): HTMLElement | null`
+  - Returns the member that is a radio with `checked === true`, if there is one.
+  - Otherwise returns `stop[0]`, and `null` for an empty stop.
+- The input is already filtered for disabled and hidden elements by the caller (`exportDialogFocusableElements`). The module does no DOM queries.
 
-### F1 — sticky footer (the fix)
-- Wrap items 4–7 (status `<p>`, progress label + bar, overload warning, button row) in **one** element:
+### G2 — `ArrangementExportDialog.tsx`: the Tab handler works on stops
+In `handleDialogTabKey` only:
+- After `const focusable = exportDialogFocusableElements(content);`, compute `const stops = groupDialogTabStops(focusable);`. Take `firstStop = stops[0]` and `lastStop = stops[stops.length - 1]`. If either is missing, return, as today.
+- When `active` is **not** in `focusable`: `preventDefault`, then focus `dialogTabStopFocusTarget(event.shiftKey ? lastStop : firstStop)`. This is today's branch, made stop-aware.
+- **Shift+Tab** with `active` in `firstStop` (`firstStop.includes(active)`): `preventDefault`, then focus `dialogTabStopFocusTarget(lastStop)`.
+- **Tab** with `active` in `lastStop`: `preventDefault`, then focus `dialogTabStopFocusTarget(firstStop)`.
+- If `dialogTabStopFocusTarget` returns `null` (unreachable with a non-empty stop), return without `preventDefault`.
+- Every other Tab: do **not** call `preventDefault`; native order stays. The frozen tests depend on this: "intercepts Tab only at the ends".
+- Nothing else changes: the selector, `exportDialogFocusableElements` (stays module-private), the opener-restore, initial-focus and footer-guard effects, the radios, the disabled rules, texts and layout. **The format radios stay enabled during a render** (D-29z52; frozen test l.458–478).
 
-  ```tsx
-  <div ref={footerRef} data-testid="arrangement-export-footer" className="sticky bottom-0 -mx-8 space-y-4 border-t border-outline bg-surface px-8 pt-4 pb-4">
-  ```
+**Resulting behaviour (the contract C checks):**
+- During a render the stops are [X] and [format group].
+  - Tab from the checked format radio → X.
+  - Tab from X → the checked radio (native).
+  - Shift+Tab from X → the **checked** format radio, not `both`. That is where native Shift+Tab into a radio group lands.
+  - Shift+Tab from the checked radio → X (native).
+  - Tab or Shift+Tab from the focus-trap wrapper → X / the checked radio.
+- Idle stays as today: X → checked format → checked enabled scope → Close → Export → (wrap) X; reverse with Shift+Tab.
 
-  - Token classes only (`bg-surface` is the panel's own background, `border-outline` the panel's border). No custom CSS, no inline style.
-  - The children keep their elements, classes, attributes, texts and **relative order**. No child is added or removed.
-  - The footer has no `tabIndex`, no role and no `aria-*`. It is a layout element only.
-- The footer is ModalBody's last child, so the DOM order, and with it the Tab order, does not change.
-- Nothing else in the dialog changes: radios, texts, the Close rule, the button rules, the focus-trap effects and the progress rendering condition stay as they are.
-
-### F2 — focus is never hidden behind the footer
-A sticky footer can cover a focused control above it. The browser does not scroll an element that is already inside the scrollport, even when the footer covers it. So:
-- Add one `useEffect` (deps `[isOpen]`) with a `focusin` listener on `dialogContentRef.current`.
-- When the target is an `HTMLElement` outside the footer and `target.getBoundingClientRect().bottom > footer.getBoundingClientRect().top`, set `content.scrollTop += overlap + 8`, where `overlap` is that difference. Use exported constant `ARRANGEMENT_EXPORT_FOOTER_FOCUS_MARGIN_PX = 8`.
-- Do nothing when the footer or content is missing, when the target is inside the footer, or when the target **contains** the footer. The last case is the focus-trap `<div ref={focusTrapRef} tabIndex={-1}>`, which wraps the whole body: the existing effect (l.140–156) calls `trap.focus()` the moment a render starts, because Close becomes disabled. Its rect always overlaps the stuck footer, so without this check every export click would scroll the panel on its own. Act only on targets that sit strictly above the footer in flow.
-- Remove the listener on cleanup.
-- Use no `scrollIntoView`. jsdom lacks it, and setting `scrollTop` works in jsdom and in the browser.
+**Rejected alternatives (recorded in D-29z54):**
+- **Disable the format radios during a render.** This contradicts D-29z52/GATE86-S4, would turn the frozen test l.458–478 red (it keeps focus on a format radio through a render start), and leaves the bug for any future dialog layout.
+- **A `focusout`/`relatedTarget` guard.** `relatedTarget` is also `null` on a window blur (Alt-Tab), so it would pull focus back wrongly.
+- **Handle every Tab in JS.** It breaks the frozen "only at the ends" tests, and it re-implements browser order.
+- **Extract a `useExportDialogFocus` hook now.** That is an architecture checkpoint question (see §6), not part of a bug fix.
 
 ### Docs
 - **Doc 077:**
   - Change l.4 to exactly:
 
     ```text
-    **სტატუსი:** Round 88 — C round 87: 18/18 PASS, ერთი medium ბაგი (R87-PROGRESS-BELOW-FOLD-1280) — გასწორდა sticky footer-ით, C-ის შემოწმებას ელოდება (D-29z53)
+    **სტატუსი:** Round 89 — C round 88: sticky footer PASS (R87-PROGRESS-BELOW-FOLD-1280); ძველი Tab-trap ბაგი R88-FOCUS-ESCAPE-RENDER გასწორდა radio-ჯგუფის Tab stop-ებით, C-ის შემოწმებას ელოდება (D-29z54)
     ```
 
-  - Add one Problem → Solution entry under `## პრობლემები და გადაწყვეტები`: the 1280 measurement, why sticky and not `scrollIntoView`, and the focus guard F2.
-  - Add one line under `## შეცვლილი ფაილები` and one under `## ტესტირება`.
+  - Add one Problem → Solution entry under `## პრობლემები და გადაწყვეტები`: native radio groups are one Tab stop, so the element-based trap missed them during a render; it is now stop-based.
+  - Add one line under `## შეცვლილი ფაილები` (the dialog + the new module) and one under `## ტესტირება` (the new test file).
   - No other change.
-- No new implementation doc. The fix completes stage 3a, which doc 077 already documents.
+- No new implementation doc. The fix completes stage 3a, which doc 077 documents.
 
 ### Files (exact grants)
 | File | Grant |
 |---|---|
-| `app/components/arrangement/ArrangementExportDialog.tsx` | F1 + F2 only (`footerRef`, the wrapper, the `focusin` effect, the exported constant) |
-| `app/lib/arrangement/__tests__/export-dialog-footer.test.tsx` | **new** |
+| `app/lib/arrangement/dialog-tab-stops.ts` | **new** (G1) |
+| `app/components/arrangement/ArrangementExportDialog.tsx` | G2 only: one import and the body of `handleDialogTabKey` |
+| `app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx` | **new** |
 | `docs/implementation/2026/quarter-IV/077-studio-lab-export-progress-and-worker.md` | l.4 + the three additions above |
 
-**Expected end state: 7 M + 11 ??.** The status adds exactly one line: `?? app/lib/arrangement/__tests__/export-dialog-footer.test.tsx`. All 505 frozen entries stay unchanged (both owned existing files are outside the list).
-- If any frozen test turns red (especially `export-dialog-focus*.test.tsx`, `export-range-ui`, `export-mp3`, `export-progress-ui`, `master-ui`, `video-fades-ui`), **stop and report**; do not edit it.
+**Expected end state: 7 M + 13 ??.** The status gains exactly two lines: `?? app/lib/arrangement/dialog-tab-stops.ts` and `?? app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx`. All 506 frozen entries stay unchanged.
+- If any frozen test turns red, **stop and report**; do not edit it. Watch especially:
+  - `export-dialog-focus.test.tsx`, `export-dialog-focus-restore.test.tsx` (HD1–HD3), `export-dialog-footer.test.tsx` (FT3);
+  - `export-range-ui`, `export-mp3`, `export-progress-ui`, `master-ui`, `video-fades-ui`.
+- B walked the frozen focus tests against G2:
+  - l.266: the last stop is Export;
+  - l.292: the empty project's last stop is Close;
+  - l.428: Tab from the trap during a render goes to X;
+  - l.480: Shift+Tab from the trap in idle goes to Export;
+  - l.531: per control, only the ends are prevented, and the format group is stop 2 of 5;
+  - HD1–HD3: the filter is unchanged.
 
-### Required tests (`export-dialog-footer.test.tsx`; IDs for C to cite)
-jsdom has **no layout**. These tests prove structure, order and the F2 arithmetic, not visual visibility; visibility is C's browser measurement. Write that limitation in the file's describe name or A's report.
-- **FT1** idle dialog:
-  - `arrangement-export-footer` exists and its `className` contains `sticky`, `bottom-0` and `bg-surface`;
-  - it contains Close and Export;
-  - it does not contain the format or scope fieldsets or the notes;
-  - it is the last element child of ModalBody.
-- **FT2** during a render (renderer mocked as in `export-progress-ui.test.tsx`, calling `onProgress('render', 0.5)`):
-  - the status `<p>`, the progress label and the `<progress>` are inside the footer;
-  - their DOM order is status → label → bar → button row.
-  - After a done render with an overload warning, the done message and `arrangement-export-overload` are inside the footer, before the button row.
-- **FT3** focus order unchanged:
-  - the focusable sequence from the same selector the frozen focus tests use (`exportDialogFocusableElements` is module-private; do not export it) gives the same element sequence as before the change: X, the enabled format radios, the enabled scope radios, Close, Export;
-  - the footer has no `tabindex` attribute.
-- **FT4** focus guard, with mocked `getBoundingClientRect`:
-  - a scope radio with bottom 600 and a footer with top 560 → after `focus()`, `panel.scrollTop` is `0 + 40 + 8`;
-  - a radio fully above the footer → `scrollTop` unchanged;
-  - focusing Close (inside the footer) → unchanged;
-  - focusing the focus-trap wrapper (which contains the footer, with a mocked bottom far below the footer top) → `scrollTop` unchanged; also through a real render start, when the existing effect focuses the trap;
-  - after the dialog unmounts, a `focusin` dispatched on the old panel does nothing and throws nothing.
+  B expects all of them to stay green.
+
+### Required tests (`export-dialog-tab-stops.test.tsx`; IDs for C to cite)
+Copy the mount harness and `ControlledOfflineAudioContext` from `export-dialog-focus.test.tsx`. Do not import from a test file. Starting an MP3 export in jsdom (TR2/TR4): the controlled `OfflineAudioContext` blocks in the render phase, before the encoder import. If the MP3 button needs extra globals, use the mount pattern from `export-progress-ui.test.tsx`. jsdom does not move focus on Tab, so the UI tests dispatch `keydown` Tab and assert `defaultPrevented` and `document.activeElement`. Write that limitation in the describe name.
+- **TS1** `groupDialogTabStops`:
+  - [button, radio a/x, radio a/y, radio b/z, button] → 4 stops, with a/x and a/y together;
+  - two radios with an empty name → two stops;
+  - same-name radios separated by a button → still one stop, at the first radio's position;
+  - an empty list → `[]`.
+- **TS2** `dialogTabStopFocusTarget`:
+  - the checked radio wins even when it is not first;
+  - no checked radio → the first member;
+  - a single button → that button;
+  - an empty stop → `null`.
+- **TR1** render, WAV checked (the default): start a WAV export with the controlled renderer.
+  - Focus `format-wav` and press Tab: prevented, focus goes to X.
+  - Then focus `format-mp3` (unchecked, same group) and press Tab: prevented, focus goes to X.
+- **TR2** render, MP3 checked: select MP3, start, focus `format-mp3`, press Tab: prevented, focus goes to X.
+- **TR3** render, WAV + MP3 checked: Tab from `format-both`: prevented, focus goes to X. This is the regression guard for C's V3.
+- **TR4** render, MP3 checked: Shift+Tab from X: prevented, focus goes to `format-mp3`, the checked radio, **not** `both`. Shift+Tab from the trap wrapper also goes to `format-mp3`.
+- **TR5** render: Shift+Tab from `format-wav` (checked) is **not** prevented. Tab from X is **not** prevented. Both are native middle moves.
+- **TR6** idle (no render): Tab from the checked format radio and from the checked scope radio is **not** prevented. Tab from Export is prevented and goes to X. Shift+Tab from X is prevented and goes to Export. This guards against over-trapping.
 
 **Mutation proofs** (scratch copy; each must turn at least one listed test red):
-- (a) remove `sticky` → FT1;
-- (b) move the progress block out of the footer → FT2;
-- (c) footer gets `tabIndex={0}` → FT3;
-- (d) remove the focusin effect → FT4;
-- (e) drop the `+ 8` margin → FT4;
-- (f) handler ignores the inside-footer check → FT4;
-- (g) handler does not skip a target that contains the footer (the trap wrapper) → FT4.
+- (a) the dialog goes back to element-based `last` (`active === last`) → TR1/TR2;
+- (b) the helper groups radios by type only, ignoring `name` → TS1;
+- (c) the target is always `stop[0]` → TS2/TR4;
+- (d) the Shift path stays element-based → TR4;
+- (e) every Tab is prevented and moved to the next stop (over-trap) → TR5/TR6;
+- (f) the not-in-focusable branch ignores stops (focuses `last` element) → TR4 (trap wrapper part).
 
 ## 2. Pre-flight for A
-- **Primitives:**
-  - `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `AGENT_DISCOVERABLE_CODE.md` (new export name);
-  - `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`;
-  - `SKELETON_LOADING.md` (progress visibility).
-- **Prompts:** `studio-feature.md`, `new-test.md`.
-- **Verify the baseline before the first edit:**
-  - HEAD;
-  - the 7 M + 10 ?? status;
-  - the frozen list 505/505;
-  - the snapshots;
-  - protected 4/4;
-  - LF/CR.
+- **Primitives:** `AGENT_DISCOVERABLE_CODE.md` (two new exports), `FORWARDREF_COMPONENT.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`.
+- **Prompts:** `new-test.md`, `studio-feature.md`.
+- **Verify the baseline before the first edit:** HEAD; 7 M + 11 ??; frozen 506/506; the snapshots; LF/CR.
 - **Checks (speed rules):**
-  - `npm run typecheck`, `npm run lint`, and a scoped `npx biome check` on the two owned code files (no `--write`).
-  - Targeted vitest: the new test; `export-dialog-focus.test.tsx`, `export-dialog-focus-restore.test.tsx`, `export-range-ui.test.tsx`, `export-mp3.test.tsx`, `export-progress-ui.test.tsx`, `master-ui.test.tsx`, `video-fades-ui.test.tsx`; and every test that imports `ArrangementExportDialog` or `StudioWorkspace`.
-  - List the files in `a-round-88/targeted-list.txt`. Do not run the full suite.
-- **A's own Playwright smoke at 1280×720 and 1440×900** (not C evidence). Use the 5M recipe: drop music 0.35, stems 2 and sfx 4, click the music clip, press Ctrl+D ×2. During a WAV export and an MP3 export, log:
-  - the panel rect;
-  - the footer, label, bar and busy-button rects;
-  - `elementFromPoint` at the bar's centre.
-  Then Tab through the idle dialog and the done-with-warning dialog (101.702 s project) and log whether any focused element intersects the footer.
-- **Code-reviewer: required.** You change exactly 3 files, and `read-primitives.md` asks for it at 3 or more. Pass its Architecture note to B verbatim. The root gate's reviewer does not replace yours.
+  - `npm run typecheck`, `npm run lint`, and a scoped `npx biome check` on the three owned code files (no `--write`).
+  - Targeted vitest: the new test, plus every file in `a-round-88/targeted-list.txt` (it already holds the three dialog focus/footer tests, the export tests, and every importer of `ArrangementExportDialog` or `StudioWorkspace`).
+  - Write the list to `a-round-89/targeted-list.txt`. Do not run the full suite.
+- **A's own Playwright smoke at 1280×720 and 1440×900** (not C evidence). On a fresh page with the 5M recipe and a WAV export, log `document.activeElement` after each of 6 Tabs and 4 Shift+Tabs pressed while the busy button reads `მიმდინარეობს…`.
+- **Code-reviewer: required.** You change 4 files. Pass its Architecture note to B verbatim. The root gate's reviewer does not replace yours.
 
 ## 3. File ownership (exact)
 - **A** owns only the §1 Files table.
-- **C** owns `c-round-88*`.
+- **C** owns `c-round-89*`.
 - **B** owns the planning artifacts.
 - **Root** owns gates, commits and pushes.
 - **Protected (never edited):**
@@ -162,71 +179,64 @@ jsdom has **no layout**. These tests prove structure, order and the F2 arithmeti
   - user video stays local.
 
 ## 4. Ableton source table
-This is a layout defect in CZABA's own dialog. **Not applicable:** B did not research the layout of Live's Export dialog, and it gives no basis for any claim here. The round-87 §4 rows are carried unchanged (`tasks/round-87.md` §4):
-- progress bar in the dialog: confirmed for real-time and video rendering, unconfirmed for offline audio;
-- the bar resets per pass: conscious adaptation;
-- Cancel: stage 3b;
-- UI does not freeze: CZABA requirement;
-- VBR vs CBR 320: conscious difference.
+**Not applicable.** This is keyboard accessibility of CZABA's own modal. B makes no claim about Live's Export dialog.
+- The "a radio group is one Tab stop" behaviour is **Chromium's own behaviour, observed by C** in round 88 (`keys88-*.json`), not an Ableton fact.
+- The round-87 §4 rows are carried unchanged (`tasks/round-87.md` §4).
 
-## 5. C acceptance (real browser, Playwright Chromium, **both 1440×900 and 1280×720** unless the row says otherwise, `/studio-lab` anonymous, real `page.mouse` and keyboard)
+## 5. C acceptance (real browser, Playwright Chromium, **both 1440×900 and 1280×720** unless the row says otherwise, `/studio-lab` anonymous, real keyboard)
 
 **Setup:**
 - Check `env-status.json` and that `:5173` returns 200. Do one warm-up load.
-- Use the demo setup from round 87: music 0.35 s, stem 2 s, sfx 4 s, snap off. **5M** = click the music clip, then press Ctrl+D twice (`05:04.406`). The **101.702 s project** is the same setup without Ctrl+D (it shows the overload warning).
-- Run route probes in a separate session.
-
-**Visibility definition (HR-VISIBLE):**
-- The element's `getBoundingClientRect()` lies fully inside the panel's visible box: top ≥ panel top + `clientTop`, bottom ≤ panel top + `clientTop` + `clientHeight`.
-- `document.elementFromPoint` at the element's centre returns the element or a descendant of it.
-- No scroll by C unless the row says so. Record the panel `scrollTop`.
-
-**Rects:** report every rect, plus a screenshot per state.
+- Use the round-88 demo setup: music 0.35 s, stem 2 s, sfx 4 s, snap off. **5M** = click the music clip, then press Ctrl+D twice. Each TRAP session starts on a **fresh page**, which is the condition under which round 88 escaped.
+- **HR-RENDERING:** a keypress counts only if the busy button reads `მიმდინარეობს…` just before **and** just after it. Record that per press. A sequence cut short by render end is harness-invalid; repeat it within the run budget, and do not count it as PASS.
 
 | ID | Action | Pass evidence |
 |---|---|---|
-| VIS-IDLE | Open Export on the 101.702 s project and on 5M; no export | Close and the export button are HR-VISIBLE at `scrollTop` 0 at both viewports. This also closes the old 12 px cut at 1280. Report `scrollHeight` and `clientHeight`. Opening the dialog does not change `scrollTop` |
-| VIS-RENDER (primary) | 5M: WAV, MP3 (fresh page, so the load phase appears), WAV + MP3 (1440 only) | In **every phase** that appears (render, wav, load, mp3), sampled at least once each with HR-PROGRESS, the progress label, the `<progress>` and the busy button `მიმდინარეობს…` are HR-VISIBLE. The status `<p>` is HR-VISIBLE. **No self-scroll:** the panel `scrollTop` right after the export click (and through the render) equals its value before the click. Only the keyboard focus guard (FOCUS-NOT-OBSCURED) may change it |
-| VIS-SCROLL | During a 5M WAV render: wheel the panel to the bottom, then back to the top | At every position (≥ 3 samples) the footer, label and bar are HR-VISIBLE. At three points across the footer, `elementFromPoint` returns a footer descendant (no content shows through). At the bottom, the last non-footer element's bottom ≤ the footer top (nothing is covered). Screenshots |
-| VIS-DONE | 101.702 s WAV export | After done: the done message and the overload warning are HR-VISIBLE at the current `scrollTop`. Their texts are exact as in round 87 |
-| VIS-ERROR | `page.route('**/unpkg.com/**', abort)`, then MP3 | The exact load-failure alert (`role=alert`) and an enabled Close are HR-VISIBLE; progress is cleared; 0 downloads. Unroute |
-| VIS-VIDEO (1280) | Add a video clip (the longest dialog content); WAV export | The video option is disabled with the unchanged reason. During the render the label, bar and busy button are HR-VISIBLE. `.wav` downloads |
-| FOCUS-NOT-OBSCURED | Keyboard only, in three states: (1) idle; (2) during a 5M render; (3) done with the overload warning. Tab through every focusable once around | Each focused element outside the footer has `rect.bottom ≤ footer.top` after focus, i.e. it is not covered. Focus never leaves the dialog. The Tab order is X → format radios → enabled scope radios → Close → Export, the same as round 87 |
-| PX-PHASES-R | One MP3 5M export per viewport (fresh page) | Same evidence as round-87 PX-PHASES: render → wav → load (no `value`) → mp3, non-decreasing values, label = floor(value × 100), absent before the click and after done |
-| PX-KEYS-R | As round-87 PX-KEYS | Enter opens Export, ArrowDown → MP3, Tab → button, Enter; 3 Tabs during the render stay inside the dialog; the `<progress>` never takes focus; `.mp3` downloads; Escape after done returns focus to Export |
-| PX-WAV5-R (1280) | One 5M WAV export with HR-RAF | Report the max and top-5 rAF gaps. ≤ 150 ms passes; 150–250 is reported for B's triage; above 250 is a FAIL (the sticky repaint must not bring the freeze back). Frames 14 611 488 |
-| PX-NET | All sessions | No unpkg request before the first MP3 click; then only `ffmpeg-core.js`/`.wasm`; the worker is same-origin; 0 studio-token / R2 / download requests; 0 auth headers |
-| REG-HYD | All sessions | No hydration / `useLayoutEffect` warning and no non-noise console error. Induced aborts are reported as induced |
-| G88-3 | Purchase protection | `/studio/middle-east` anonymous → sign-in required, no workspace. `/api/studio-token?…` anonymous → 401. The header link opens `/studio-lab` with the demo badge. Fake-Bearer 403 → BLOCKED if the backend is unavailable |
-| T88-TARGETED | A's `a-round-88/targeted-list.txt` | All pass |
-| SOURCE-UNCHANGED | Start = end | HEAD `971141d`; 7 M + 11 ??; frozen 505/505; A's end hashes; protected 4/4; `Modal.tsx` = `741c2341`; `ffmpeg.ts` = `0995ae78` |
+| TRAP-WAV (primary) | Fresh page, 5M, WAV (default): keyboard opens Export, Tab to the export button, Enter. During the render press Tab ×6, then Shift+Tab ×4 | After every press `document.activeElement` is inside the dialog: never `BODY`, `arrangement-exit`, Master Mute or Master Volume. Tab sequence: X, `format-wav`, X, `format-wav`, X, `format-wav` (the first press may start from the trap wrapper → X). Shift+Tab from X goes to `format-wav`, the checked radio. URL unchanged, transport stopped, Master Volume value unchanged. `.wav` downloads |
+| TRAP-MP3 | Fresh page, 5M, ArrowDown to MP3, export; during the render (including the load phase) Tab ×6, Shift+Tab ×4 | Same as TRAP-WAV with `format-mp3`. `.mp3` downloads |
+| TRAP-BOTH (1440) | Fresh page, 5M, WAV + MP3 | Tab ×6 stays inside, X ↔ `format-both` (C's V3 still passes). Shift+Tab from X goes to `format-both` |
+| PX-KEYS-R2 | C's round-88 V1 exactly: range 4–9 s, **first** MP3 of the session, Enter / ArrowDown / Tab / Enter, then 3 Tabs | All 3 Tabs stay in the dialog. The `<progress>` never takes focus. `.mp3` downloads. Escape after done returns focus to toolbar Export |
+| IDLE-ORDER | No render: Tab around once, Shift+Tab around once | X → checked format → checked enabled scope → Close → Export → X, and the exact reverse. Same as rounds 87/88 |
+| FOCUS-NOT-OBSCURED-R | Three states: idle, during a 5M render, done with the overload warning (101.702 s) | Each focused element outside the footer has `rect.bottom ≤ footer.top`, and focus never leaves the dialog in **any** state |
+| VIS-RENDER-S (1280) | One 5M MP3 export | Label, `<progress>` and busy button are HR-VISIBLE (round-88 definition) in each phase. `scrollTop` is unchanged by the click (sanity only: the layout code is unchanged) |
+| PX-NET | All sessions | No unpkg request before the first MP3 click; then only `ffmpeg-core.js`/`.wasm`; workers same-origin; 0 studio-token / R2 / download requests; 0 auth headers |
+| REG-HYD | All sessions | No hydration / `useLayoutEffect` warning and no non-noise console error |
+| G89-3 | Purchase protection | `/studio/middle-east` anonymous → sign-in required, no workspace. `/api/studio-token?…` anonymous → 401. The header link opens `/studio-lab` with the demo badge. Fake-Bearer 403 → BLOCKED if the backend is unavailable |
+| T89-TARGETED | A's `a-round-89/targeted-list.txt` | All pass |
+| SOURCE-UNCHANGED | Start = end | HEAD `971141d`; 7 M + 13 ??; frozen 506/506; A's end hashes; `Modal.tsx` = `741c2341`; `ffmpeg.ts` = `0995ae78`; StudioContext `caa388e7` |
 
-- **Why the regression is reduced:** the change is one file, layout and focus scrolling only. The other 17 round-87 rows passed on the identical tree, with the dialog file being the only one that differs. PX-PHASES, PX-KEYS and a 1280 rAF run re-check the paths the footer touches. Round 87's other PASS rows stand as evidence for that tree.
+- **Why the regression scope is reduced:** only the Tab handler changes, and the layout is untouched. Round 88's VIS-IDLE, VIS-SCROLL, VIS-DONE, VIS-ERROR, VIS-VIDEO, PX-PHASES-R and PX-WAV5-R stand as evidence for the footer. VIS-RENDER-S is one sanity sample.
 - **Gate rows** (`gate`, not claimed by C): full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke.
-- **Production bundle** (worker + MP3): still cannot run in the cloud. B asks root to try it at gate 88 (PROD-MP3-UNVERIFIED).
-- **Ableton match:** not applicable this round (§4).
+- **Production bundle** (worker + MP3): B asks root to try it again at gate 89 (PROD-MP3-UNVERIFIED).
+- **Ableton match:** not applicable (§4).
 - **Neighbour behaviour that could break:**
-  - the focus trap and its order;
-  - focus return after Escape;
-  - the round-86 scope and format defaults;
-  - the overload warning text;
-  - the 1440 layout;
-  - the export-button disabled rules.
+  - Escape still closes, and focus returns to the opener;
+  - initial focus on Close when the dialog opens;
+  - focus moves to Close when a render ends (frozen l.428);
+  - a focused format radio keeps focus through render start and end (frozen l.458);
+  - the footer guard (FT4);
+  - the hidden-wrapper wraps (HD1–HD3);
+  - ArrowDown/Up inside a radio group (native; unchanged).
 - **Known and intended (not new bugs):**
   - Close stays disabled while rendering;
   - Cancel arrives in stage 3b;
-  - the timeout text still says "reload the page" (Low R87-L-TIMEOUT-RELOAD-TEXT, Lows batch);
-  - the headless fill colour of `<progress>` (Tech Lead check R87-T).
+  - changing the format mid-render does not affect the running export (GATE86-S4, rejected);
+  - the timeout text (Low R87-L-TIMEOUT-RELOAD-TEXT);
+  - the headless `<progress>` fill colour (R87-T);
+  - the 45 px idle overflow at 1280 behind the sticky footer (info, round 88).
 
 ## 6. After this round
-- **If C PASS**, SRW-20 stage 3a is C-verified at both viewports. Root can publish rounds 87 and 88 together.
-- **Round 89:**
-  - If its planning falls on or after **2026-10-24**: a **regression round** (one short browser check per done or c_pass item at both viewports, plus `npm run test:e2e:smoke`; GATE85-S6 is one of its rows).
+- **If C PASS:** SRW-20 stage 3a is fully C-verified at both viewports (round 87 rows + round 88 footer + round 89 trap). Root can publish rounds 87, 88 and 89 together.
+- **Round 90:**
+  - If its planning falls on or after **2026-10-24**: a **regression round** (one short browser check per done or c_pass item at both viewports, plus `npm run test:e2e:smoke`; GATE85-S6 and C-R83-S-1280-RANGE-SHIFT are rows).
   - Otherwise: **SRW-20 stage 3b**:
-    - Cancel in every phase, with no file, an exact cancelled message and a working next export;
+    - Cancel in every phase, with no file, an exact cancelled message and a working next export (Cancel adds an enabled control during a render; the round-89 stop-based trap must keep it in order);
     - abort on unmount (A-R86-L2);
     - the WAV + MP3 delivery note (GATE86-S2);
     - reviewer L5 (a failed conversion leaves the cached encoder).
   - 3b completes R20-X4.
-- **Then:** the Lows batch (incl. R87-L-TIMEOUT-RELOAD-TEXT) → SRW-21 → full regression → T12 → VISUAL-A-OBSIDIAN.
-- **Architecture:** the round-87 reviewer note (move the MP3 export orchestration into `lib/arrangement/` after 3b) is recorded as signal ARCH-EXPORT-MP3-ORCHESTRATION under ARCH-EXPORT-PIPELINE. Checkpoint request q14 (`b-round-83-checkpoint-request.md`) asks root for the bounded frontend-architect checkpoint at the SRW-20 boundary, after 3b. Neither blocks this round.
+- **Then:** the Lows batch (incl. R87-L-TIMEOUT-RELOAD-TEXT and the round-88 reviewer edge cases A-R88-EDGE-1..4) → SRW-21 → full regression → T12 → VISUAL-A-OBSIDIAN.
+- **Architecture:**
+  - The round-88 reviewer proposed a `useExportDialogFocus` hook "if another focus or scroll concern lands here". Round 89 is that trigger.
+  - It is recorded as signal ARCH-R88-EXPORT-DIALOG-FOCUS-HOOK and added to checkpoint request q14 (`b-round-83-checkpoint-request.md`). That request asks root for the bounded frontend-architect checkpoint at the SRW-20 boundary, after 3b.
+  - No extraction in this round.

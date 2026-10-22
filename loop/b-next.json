@@ -1,7 +1,7 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 87 FAIL (browserVerified=true, realVerified=true): all 18 SRW-20 stage-3a rows PASS at both viewports (5M WAV max rAF 105-107 ms vs 445 baseline, MP3 97-111 ms, PX-RETRY same-page retry works), but medium bug R87-PROGRESS-BELOW-FOLD-1280 (progress bar and busy button below the Export panel fold at 1280x720). Gate 87 skipped, nothing published; HEAD 971141d with the round-87 tree uncommitted. Regression round due on/after 2026-10-24, not today. Not COMPLETE: stage 3a has an open medium bug; 3b (Cancel, R20-X4), SRW-21, Lows batch, regression, final regression, T12, VISUAL-A remain. Not BLOCKED: the fix needs only in-tree code and the running /studio-lab.",
- "nextTask": "Round 88 (D-29z53): fix R87-PROGRESS-BELOW-FOLD-1280 in ArrangementExportDialog.tsx only - wrap status <p>, progress label + <progress>, overload warning and button row in one sticky bottom-0 -mx-8 bg-surface footer (DOM/Tab order unchanged, no tabIndex/role) plus a focusin guard (scrollTop += overlap + 8) so focused controls are never hidden behind it (skips the trap wrapper that contains the footer: no self-scroll at export start); code-reviewer required; new export-dialog-footer.test.tsx FT1-FT4 + mutations (a)-(f); doc 077 l.4 + 3 additions; Modal.tsx frozen. Baseline HEAD 971141d + round-87 tree 7 M + 10 ??, frozen b-round-87-r88-tree-sha256.txt 505; expected 7 M + 11 ??. C rows VIS-IDLE, VIS-RENDER, VIS-SCROLL, VIS-DONE, VIS-ERROR, VIS-VIDEO (1280), FOCUS-NOT-OBSCURED (HR-VISIBLE: rect inside panel client box + elementFromPoint), PX-PHASES-R, PX-KEYS-R, PX-WAV5-R (1280), PX-NET, REG-HYD, G88-3, T88-TARGETED, SOURCE-UNCHANGED. Next: regression round if round-89 planning is on/after 2026-10-24, else SRW-20 stage 3b (Cancel).",
+ "reason": "C round 88 FAIL (browserVerified=true, realVerified=true): the sticky Export footer passes every VIS row at both viewports (R87-PROGRESS-BELOW-FOLD-1280 c_pass, unpublished), but PX-KEYS-R and FOCUS-NOT-OBSCURED fail on the pre-existing medium bug R88-FOCUS-ESCAPE-RENDER (during a render with WAV or MP3 checked the 3rd Tab leaves the modal for arrangement-exit and Master controls; the trap wraps only on the last element while native Tab treats the radio group as one stop). Gate 88 skipped; HEAD 971141d with rounds 87-88 uncommitted. Regression round due on/after 2026-10-24, not today. Not COMPLETE: SRW-20 stage 3a has an open medium bug; 3b (Cancel, R20-X4), SRW-21, Lows batch, regression, final regression, T12 and VISUAL-A remain. Not BLOCKED: the fix needs only in-tree code and the running /studio-lab.",
+ "nextTask": "Round 89 (D-29z54): fix R88-FOCUS-ESCAPE-RENDER - new pure app/lib/arrangement/dialog-tab-stops.ts (groupDialogTabStops: same-name radios = one stop; dialogTabStopFocusTarget: checked radio else first); ArrangementExportDialog handleDialogTabKey wraps on first/last stop (Tab from last stop -> X, Shift+Tab from X -> checked radio), middle Tabs native, format radios stay enabled; new export-dialog-tab-stops.test.tsx TS1-TS2 TR1-TR6 + mutations a-f; doc 077 l.4 + 3 additions; code-reviewer required. Baseline HEAD 971141d + 7 M + 11 ??, frozen b-round-88-r89-tree-sha256.txt 506; expected 7 M + 13 ??. C rows TRAP-WAV, TRAP-MP3, TRAP-BOTH (1440), PX-KEYS-R2, IDLE-ORDER, FOCUS-NOT-OBSCURED-R, VIS-RENDER-S (1280), PX-NET, REG-HYD, G89-3, T89-TARGETED, SOURCE-UNCHANGED. Next: regression round if round-90 planning is on/after 2026-10-24, else SRW-20 stage 3b (Cancel).",
  "remaining": [
   "SRW-03",
   "SRW-05",
@@ -16,6 +16,7 @@
   "SRW-18",
   "SRW-19",
   "SRW-20",
+  "R88-FOCUS-ESCAPE-RENDER",
   "R87-PROGRESS-BELOW-FOLD-1280",
   "SRW-21",
   "SRW-23",
@@ -29,6 +30,7 @@
   "GATE83-M2-RESCHEDULE-PER-MOVE",
   "SRW18-KEYBOARD-FADES",
   "R87-L-TIMEOUT-RELOAD-TEXT",
+  "A-R88-REVIEW-EDGES",
   "LOWS-BATCH",
   "REGRESSION-ROUND",
   "FINAL-REGRESSION",

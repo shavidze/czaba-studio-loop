@@ -1,10 +1,10 @@
 {
- "version": 87,
- "updated": "2026-10-22 (B round 87 review -> round 88 task, D-29z53)",
+ "version": 88,
+ "updated": "2026-10-22 (B round 88 review -> round 89 task, D-29z54)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 88: D-29z53 - fix R87-PROGRESS-BELOW-FOLD-1280: Export dialog status + progress + overload warning + buttons wrapped in one sticky bottom-0 bg-surface footer (DOM/Tab order unchanged) + focusin guard so a focused control is never hidden behind the footer (skips targets inside or containing the footer, i.e. the focus-trap wrapper, so no self-scroll at export start; code-reviewer required, 3 files); new export-dialog-footer.test.tsx FT1-FT4; doc 077 l.4 + 3 additions. Baseline HEAD 971141d + uncommitted round-87 tree (7 M + 10 ??), frozen b-round-87-r88-tree-sha256.txt 505)",
- "advisor_used_by_B": "round 87 review (2026-10-22): advisor consulted before writing; advice followed (bug-only round, sticky footer, timeout copy -> Lows)",
+ "current_task": "current-task.md (round 89: D-29z54 - fix R88-FOCUS-ESCAPE-RENDER: Export dialog Tab trap wraps on radio-group Tab stops (new pure app/lib/arrangement/dialog-tab-stops.ts groupDialogTabStops/dialogTabStopFocusTarget; handleDialogTabKey uses first/last stop, checked radio as target; middle Tabs stay native); new export-dialog-tab-stops.test.tsx TS1-TS2, TR1-TR6, mutations a-f; doc 077 l.4 + 3 additions; code-reviewer required (4 files). Baseline HEAD 971141d + uncommitted rounds 87-88 tree (7 M + 11 ??), frozen b-round-88-r89-tree-sha256.txt 506; expected 7 M + 13 ??)",
+ "advisor_used_by_B": "round 88 review (2026-10-22): advisor consulted before writing; advice followed (bug-only round, stop-based Tab trap in a pure helper module, rejected disabling format radios / focusout guard, focus-hook extraction -> checkpoint q14)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -4447,7 +4447,7 @@
    "depends_on": [
     "SRW-13"
    ],
-   "status": "in_progress (stage 1 C PASS r85, published 51e024a; stage 2 C PASS r86, published 971141d; stage 3a C round 87 FAIL: 18/18 rows PASS both viewports browserVerified=true realVerified=true, one medium bug R87-PROGRESS-BELOW-FOLD-1280 -> fix round 88 D-29z53; stage 3b cancel planned; R20-X4 open; none deferred)",
+   "status": "in_progress (stage 1 C PASS r85, published 51e024a; stage 2 C PASS r86, published 971141d; stage 3a: C round 87 18/18 rows PASS + C round 88 sticky footer PASS (R87-PROGRESS-BELOW-FOLD-1280 c_pass), both browserVerified=true realVerified=true, unpublished (gates 87/88 skipped); open medium R88-FOCUS-ESCAPE-RENDER (pre-existing keyboard trap escape during render) -> fix round 89 D-29z54; stage 3b cancel planned; R20-X4 open; none deferred)",
    "files": [
     "app/components/arrangement/ArrangementExportDialog.tsx",
     "app/contexts/ArrangementContext.tsx",
@@ -4471,7 +4471,9 @@
     "app/lib/arrangement/graph.client.ts",
     "app/lib/arrangement/mp3-encoder.client.ts",
     "app/lib/arrangement/render-window.ts",
-    "vite.config.ts"
+    "vite.config.ts",
+    "app/lib/arrangement/dialog-tab-stops.ts",
+    "app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx"
    ],
    "acceptance": [
     {
@@ -4503,7 +4505,7 @@
      "action": "5-minute project export",
      "expected": "UI stays responsive (progress updates), cancel works",
      "verify": "C",
-     "status": "open (responsiveness part measured C round 87: 5M WAV max rAF 105-107 ms, MP3 97-111 ms vs 445 ms baseline; progress visible at 1440 but below the fold at 1280 -> round 88; cancel part = stage 3b)",
+     "status": "open (responsiveness part measured C round 87: 5M WAV max rAF 105-107 ms, MP3 97-111 ms; C round 88 1280 5M WAV max rAF 55.2 ms with sticky footer; progress HR-VISIBLE in every phase at both viewports (C round 88 VIS-RENDER); keyboard trap during render -> round 89; cancel part = stage 3b)",
      "baseline": "B probe b-round-86/probe: 5-minute project (music clip + Ctrl+D x2 = 05:04.406) WAV export max rAF gap 445 ms at 971141d (normal 45-57 ms); MP3 conversion already in the ffmpeg worker (44 ms max gap)"
     }
    ],
@@ -7890,7 +7892,7 @@
    "round": 88,
    "task": "current-task.md",
    "decision": "D-29z53",
-   "status": "dispatched",
+   "status": "c_fail (footer VIS rows PASS both viewports, browserVerified=true; PX-KEYS-R + FOCUS-NOT-OBSCURED fail on pre-existing R88-FOCUS-ESCAPE-RENDER medium); gate 88 skipped",
    "items": [
     "R87-PROGRESS-BELOW-FOLD-1280: sticky Export footer (status, progress, warning, buttons) + focusin guard"
    ],
@@ -7915,6 +7917,37 @@
     "REG-HYD",
     "G88-3",
     "T88-TARGETED",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C round 88 FAIL browserVerified=true realVerified=true: footer rows VIS-IDLE, VIS-RENDER, VIS-SCROLL (1280; n/a 1440), VIS-DONE, VIS-ERROR, VIS-VIDEO, PX-PHASES-R, PX-WAV5-R (max rAF 55.2 ms), PX-NET, REG-HYD, G88-3 (fake-Bearer BLOCKED: backend unavailable in cloud), T88-TARGETED (51/919), SOURCE-UNCHANGED PASS; PX-KEYS-R and FOCUS-NOT-OBSCURED (state 2) FAIL on pre-existing R88-FOCUS-ESCAPE-RENDER (medium; trap code identical to 971141d). Gate 88 skipped (C FAIL). R87-PROGRESS-BELOW-FOLD-1280 c_pass."
+  },
+  {
+   "round": 89,
+   "task": "current-task.md",
+   "decision": "D-29z54",
+   "status": "dispatched",
+   "items": [
+    "R88-FOCUS-ESCAPE-RENDER: Export dialog Tab trap on radio-group Tab stops"
+   ],
+   "note": "baseline HEAD 971141d + uncommitted rounds 87-88 tree 7 M + 11 ??; frozen b-round-88-r89-tree-sha256.txt 506/506; snapshots b-round-88-r89-snapshots; expected 7 M + 13 ??",
+   "owned": [
+    "app/lib/arrangement/dialog-tab-stops.ts (new, G1)",
+    "app/components/arrangement/ArrangementExportDialog.tsx (G2: import + handleDialogTabKey body)",
+    "app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx (new)",
+    "docs/implementation/2026/quarter-IV/077-studio-lab-export-progress-and-worker.md (l.4 + 3 additions)"
+   ],
+   "c_ids": [
+    "TRAP-WAV",
+    "TRAP-MP3",
+    "TRAP-BOTH",
+    "PX-KEYS-R2",
+    "IDLE-ORDER",
+    "FOCUS-NOT-OBSCURED-R",
+    "VIS-RENDER-S",
+    "PX-NET",
+    "REG-HYD",
+    "G89-3",
+    "T89-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -12844,7 +12877,7 @@
   {
    "id": "GATE86-S1-POLLER-RETRY",
    "severity": "medium",
-   "status": "c_pass for /studio-lab (C round 87 PX-RETRY 1440: timeout alert at exactly 120 000 ms, no late load, second MP3 completed in 7.5 s in the same page); awaiting publication with round 88; purchased path stays FFMPEG-LOAD-POLLER-HANG",
+   "status": "c_pass for /studio-lab (C round 87 PX-RETRY 1440: timeout alert at exactly 120 000 ms, no late load, second MP3 completed in 7.5 s in the same page); awaiting publication with rounds 87-89 (gates 87/88 skipped); purchased path stays FFMPEG-LOAD-POLLER-HANG",
    "to": "A",
    "title": "a retry after the 120 s timeout hits the frozen util poller leak and hangs again",
    "evidence": "gates/round-86/review.md #1"
@@ -12876,7 +12909,7 @@
   {
    "id": "PROD-MP3-UNVERIFIED",
    "severity": "low",
-   "status": "open evidence (gate 87 skipped, so not tried; re-requested for gate 88: build + preview + one MP3 export, now also the export-wav worker)",
+   "status": "open evidence (gates 87 and 88 skipped, so not tried; re-requested for gate 89: build + preview + one MP3 export and the export-wav worker)",
    "to": "root",
    "title": "MP3 export (and from round 87 the export-wav worker) not verified in the production bundle",
    "evidence": "c-round-86.json notRun; gates/round-86/review.md #5"
@@ -12940,10 +12973,10 @@
   {
    "id": "R87-PROGRESS-BELOW-FOLD-1280",
    "severity": "medium",
-   "status": "scheduled round 88 (D-29z53: sticky footer + focus guard)",
+   "status": "c_pass (C round 88 VIS-IDLE/VIS-RENDER/VIS-SCROLL/VIS-DONE/VIS-ERROR/VIS-VIDEO PASS both viewports, browserVerified=true realVerified=true; gate 88 skipped -> awaiting publication with rounds 87-89)",
    "to": "A",
    "title": "at 1280x720 the Export progress label is cut off and the <progress> bar and busy button sit below the dialog panel fold during an export (panel clientHeight 646, scrollHeight 758); pre-existing 12 px overflow at 971141d",
-   "evidence": "c-round-87.md, c-round-87.json bugs[0], c-round-87/vis-1280x720.json, wheel-1280x720.json, shots/progress-1280x720-*.png"
+   "evidence": "c-round-87.md, c-round-87.json bugs[0], c-round-87/vis-1280x720.json, wheel-1280x720.json, shots/progress-1280x720-*.png; c-round-88.md, c-round-88.json, c-round-88/v88-*.json"
   },
   {
    "id": "R87-L-TIMEOUT-RELOAD-TEXT",
@@ -12972,7 +13005,7 @@
   {
    "id": "A-R87-L7-PROGRESS-MONOTONIC",
    "severity": "low",
-   "status": "watch: store does not enforce non-decreasing values; C round 87 PX-PHASES observed 0 decreases at both viewports; re-checked round 88 PX-PHASES-R",
+   "status": "watch: C round 87 and round 88 PX-PHASES(-R) observed 0 decreases at both viewports",
    "to": "watch",
    "title": "progress store does not enforce non-decreasing fractions within a phase",
    "evidence": "a-round-87.md L7; c-round-87.json PX-PHASES"
@@ -12992,6 +13025,46 @@
    "to": "B/root",
    "title": "round-87 code-reviewer Architecture note: exportMp3 (ArrangementContext.tsx:2726-2881) changed in rounds 85-87 and 3b again; proposal after 3b: move timer/import/reset/abort orchestration into a lib/arrangement/ module, useArrangement() shape and PU/MX tests unchanged",
    "evidence": "a-round-87.md Architecture note (verbatim)"
+  },
+  {
+   "id": "R88-FOCUS-ESCAPE-RENDER",
+   "severity": "medium",
+   "status": "scheduled round 89 (D-29z54: stop-based Tab trap, new dialog-tab-stops.ts)",
+   "to": "A",
+   "title": "during an Export render with WAV (default) or MP3 checked, the 3rd Tab leaves the dialog (BODY, then arrangement-exit and Master Mute/Volume behind the modal); trap wraps only when active === last element (the both radio) while native Tab treats the radio group as one stop; pre-existing (trap code identical at 971141d)",
+   "evidence": "c-round-88.md, c-round-88.json bugs[0], c-round-88/keys88-*.json, shots/keys-*.png, shots/focus-render-*.png"
+  },
+  {
+   "id": "GATE-88-SKIPPED",
+   "severity": "info",
+   "status": "open_root",
+   "to": "root",
+   "title": "Round 88 root gate skipped (C FAIL); rounds 87-88 code is uncommitted in the tree; rounds 87+88+89 publish together after C PASS",
+   "evidence": "gates/gate-round-88.json"
+  },
+  {
+   "id": "A-R88-REVIEW-EDGES",
+   "severity": "low",
+   "status": "open - Lows batch",
+   "to": "A",
+   "title": "round-88 code-reviewer edge cases: (1) footer guard measures the radio rect, its label description can still sit under the footer (target.closest(label) option); (2) guard also fires on mouse focus, a click near the footer edge can jump the panel (:focus-visible gating optional); (3) footer growth after focus fires no new focusin; (4) 16 px strip under the footer at max scroll (ModalBody py-4); also pt-4 pb-4 -> py-4 nit",
+   "evidence": "a-round-88.md code-reviewer section; c-round-88.md observations (edge 4 matched)"
+  },
+  {
+   "id": "C-R88-O1-IDLE-OVERFLOW-1280",
+   "severity": "info",
+   "status": "acknowledged (sticky footer keeps buttons HR-VISIBLE; no action)",
+   "to": "B",
+   "title": "at 1280x720 the idle 5M Export body still overflows by 45 px (691 vs 646); the footer hides it",
+   "evidence": "c-round-88.md observations"
+  },
+  {
+   "id": "ARCH-R88-EXPORT-DIALOG-FOCUS-HOOK",
+   "severity": "info",
+   "status": "signal - trigger met in round 89 (another focus concern in the dialog); added to checkpoint request q14 (b-round-83-checkpoint-request.md, SRW-20 boundary after 3b); not scheduled",
+   "to": "root",
+   "title": "round-88 code-reviewer Architecture note: ArrangementExportDialog has four effects on the same content element (opener restore, initial focus, Tab trap, footer guard); proposal one bounded task extracting useExportDialogFocus with FT1-FT4 + focus-trap tests as acceptance",
+   "evidence": "a-round-88.md Architecture note (verbatim)"
   }
  ],
  "tech_lead_notes": [
@@ -13297,6 +13370,11 @@
   {
    "id": "R87-T",
    "what": "real Chrome: export a 5-minute project as WAV and MP3; does the progress bar and phase label feel right, is the UI responsive (scroll the timeline, move the mouse) during the export; R86-T multiple-downloads prompt still open",
+   "status": "open"
+  },
+  {
+   "id": "R88-T",
+   "what": "real Chrome keyboard: during a WAV and an MP3 export, Tab and Shift+Tab cycle only between X and the checked format radio and never reach the page behind; the sticky Export footer at 1280x720 feels right (R87-T progress colour still open)",
    "status": "open"
   }
  ],
@@ -13909,6 +13987,11 @@
    "id": "HR-MP3-ORACLE",
    "added": "round 86 planning",
    "rule": "MP3 checks decode with the page AudioContext; duration within 0.1 s of the WAV; align by best lag (search +-4096 frames at 48 kHz) before comparing; record the lag (encoder delay/leading silence) and the correlation; never compare MP3 sample-exact"
+  },
+  {
+   "id": "HR-RENDERING",
+   "added": "round 89 planning",
+   "rule": "a keypress during an export counts only if the busy button reads მიმდინარეობს… just before and just after it (record per press); a sequence cut short by render end is harness-invalid and is repeated within the run budget, never counted as PASS; TRAP sessions start on a fresh page"
   }
  ],
  "vitest_floor_round26": 1072,
@@ -14120,6 +14203,11 @@
    "round": 86,
    "source": "a-round-86.md Architecture note + gates/round-86/review.md Architecture note",
    "note": "Both reviewers: export region changed in rounds 84-86 (Signal 3), exportMp3 repeats the exportWav guards/render/download (duplication), timer lifecycle in the context (Signal 4, keep). Proposals: pure export-pipeline.ts or prepareArrangementRender(...) before stage 3; alternative loadArrangementEncoderWithTimeout helper. B: recorded as signal ARCH-EXPORT-PIPELINE, not scheduled as a refactor; round 87 puts new logic in new modules (export-wav trio, export-progress, mp3-encoder) so the context only wires them; checkpoint request q14 asks root for the bounded frontend-architect checkpoint at the SRW-20 boundary (after stage 3b). Non-blocking."
+  },
+  {
+   "round": 88,
+   "source": "a-round-88.md Architecture note",
+   "note": "Signal 4 (new listener and cleanup in an existing owner): ArrangementExportDialog.tsx:194-217, fourth effect on the same content element. Keep now; if another focus or scroll concern lands, extract useExportDialogFocus (opener restore, initial focus, Tab trap, footer guard). B: round 89 is that trigger, but a bug-fix round does not refactor; recorded as ARCH-R88-EXPORT-DIALOG-FOCUS-HOOK and added to checkpoint q14 (SRW-20 boundary after 3b). Non-blocking."
   }
  ],
  "vitest_floor_round46": 1357,

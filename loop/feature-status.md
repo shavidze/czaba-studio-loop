@@ -1,6 +1,6 @@
 # Studio — ფუნქციების სტატუსის დაფა
 
-განახლდა: 2026-10-22 · ავტორი: B (round 86 → round 87 დაგეგმვა) · წესი: `docs/technical/studio-real-workspace/agent-workflow.md`
+განახლდა: 2026-10-22 · ავტორი: B (round 88 → round 89 დაგეგმვა) · წესი: `docs/technical/studio-real-workspace/agent-workflow.md`
 
 სტატუსები: **მზადაა** · **მუშავდება** · **მოწმდება** · **ბაგია** · **არ დაწყებულა** · **დაბლოკილია**.
 
@@ -59,7 +59,11 @@
 - Tracked `frontend-architect.md` Write/Bash-ს იძლევა.
 - Dev server: B-ის round-43 დაგეგმვისას `/studio-lab` 200 (2026-10-15 12:06), `node.exe` 15. ENV-BROWSE-DAEMON: C round 43-ში CLI-ით გაშვებული 7 daemon 60–90 წამში კვდებოდა, `about:blank`-ზე უმოქმედოდაც. მუშა გზა იყო საკუთარი `server-node.mjs` (`BROWSE_PARENT_PID=0`, ახალი state file, log). Round 44-იდან ეს **დამტკიცებული fallback-ია** ერთი წარუმატებელი CLI-მცდელობის შემდეგ. `$B restart` ისევ აკრძალულია; უცხო პროცესს არავინ კლავს.
 
-მიმდინარე რაუნდი: **Round 88** (`current-task.md`, D-29z53) — **R87-PROGRESS-BELOW-FOLD-1280-ის გასწორება.** Export-ის სტატუსი, progress, გადატვირთვის გაფრთხილება და ღილაკები ერთ `sticky bottom-0 bg-surface` footer-შია (DOM-ისა და Tab-ის რიგი უცვლელია); `focusin`-ის guard footer-ის ქვეშ მოხვედრილ focused კონტროლს ზემოთ ასქროლავს. ერთი ფაილი + ახალი `export-dialog-footer.test.tsx` (FT1–FT4) + doc 077. C: VIS-* ორივე viewport-ზე (ელემენტის rect პანელის ხილულ ნაწილშია და `elementFromPoint` მას აბრუნებს), FOCUS-NOT-OBSCURED, შემცირებული რეგრესია. ბაზა: HEAD `971141d` + Round 87-ის გამოუქვეყნებელი ცვლილებები (7 M + 10 ??), გაყინული 505.
+მიმდინარე რაუნდი: **Round 89** (`current-task.md`, D-29z54) — **R88-FOCUS-ESCAPE-RENDER-ის გასწორება.** Export-ის Tab-trap radio-ჯგუფს ერთ Tab stop-ად თვლის (ახალი სუფთა მოდული `dialog-tab-stops.ts`: `groupDialogTabStops`, `dialogTabStopFocusTarget`); Tab ბოლო stop-იდან → X, Shift+Tab X-იდან → მონიშნული radio; შუა Tab-ები native რჩება. ახალი `export-dialog-tab-stops.test.tsx` (TS1–TS2, TR1–TR6) + doc 077. C: TRAP-WAV / TRAP-MP3 / TRAP-BOTH ახალ გვერდზე რენდერის დროს, PX-KEYS-R2 (round 88-ის V1), IDLE-ORDER, FOCUS-NOT-OBSCURED-R, ორივე viewport-ზე. ბაზა: HEAD `971141d` + Round 87–88-ის გამოუქვეყნებელი ცვლილებები (7 M + 11 ??), გაყინული 506.
+
+**Round 88-ის შედეგი:** C FAIL, `browserVerified=true`, `realVerified=true` (`c-round-88.md`, `c-round-88.json`). Sticky footer მუშაობს: VIS-IDLE, VIS-RENDER (ყველა ფაზა), VIS-SCROLL (1280), VIS-DONE, VIS-ERROR, VIS-VIDEO, PX-PHASES-R, PX-WAV5-R (max rAF 55.2 ms), PX-NET, REG-HYD, G88-3 PASS → **R87-PROGRESS-BELOW-FOLD-1280 c_pass** (გამოუქვეყნებელი). **ბაგი (Medium, ძველი):** R88-FOCUS-ESCAPE-RENDER — რენდერის დროს WAV-ით ან MP3-ით მე-3 Tab დიალოგიდან გადის (`BODY` → `arrangement-exit` → Master); trap-ის კოდი `971141d`-შიც იგივეა. Gate 88 გამოტოვდა. fake-Bearer 403 — BLOCKED (backend cloud-ში მიუწვდომელია).
+
+წინა რაუნდი: **Round 88** (`current-task.md`, D-29z53) — **R87-PROGRESS-BELOW-FOLD-1280-ის გასწორება.** Export-ის სტატუსი, progress, გადატვირთვის გაფრთხილება და ღილაკები ერთ `sticky bottom-0 bg-surface` footer-შია (DOM-ისა და Tab-ის რიგი უცვლელია); `focusin`-ის guard footer-ის ქვეშ მოხვედრილ focused კონტროლს ზემოთ ასქროლავს. ერთი ფაილი + ახალი `export-dialog-footer.test.tsx` (FT1–FT4) + doc 077. C: VIS-* ორივე viewport-ზე (ელემენტის rect პანელის ხილულ ნაწილშია და `elementFromPoint` მას აბრუნებს), FOCUS-NOT-OBSCURED, შემცირებული რეგრესია. ბაზა: HEAD `971141d` + Round 87-ის გამოუქვეყნებელი ცვლილებები (7 M + 10 ??), გაყინული 505.
 
 **Round 87-ის შედეგი:** C FAIL, `browserVerified=true`, `realVerified=true` (`c-round-87.md`, `c-round-87.json`); 18/18 რიგი PASS ორივე viewport-ზე: 5-წუთიანი WAV-ის max rAF gap 105–107 ms (ადრე 445), MP3 97–111 ms; PX-RETRY — retry იმავე გვერდზე მუშაობს (GATE86-S1 Lab-ის გზაზე c_pass); worker-ის ჩავარდნისას ზუსტი შეცდომა, ჩუმი fallback არ არის. **ბაგი (Medium):** R87-PROGRESS-BELOW-FOLD-1280 — 1280×720-ზე progress-ის ზოლი და ღილაკი პანელის ხილული ნაწილის ქვემოთაა. Gate 87 გამოტოვდა, არაფერი გამოქვეყნებულა. fake-Bearer 403 — BLOCKED (backend cloud-ში მიუწვდომელია); production bundle — არ შემოწმებულა.
 
@@ -326,7 +330,7 @@ Round 72-ის აღწერა (გამოქვეყნდა `6b574e8`-
 | SRW-17 | ტრეკების ჯგუფები | **მოწმდება** (ეტაპი 1 — `74eca15`; ეტაპი 2 — `68383fa`; ეტაპი 3 — Mute/Solo/Volume, ჩადგმა, ნახევრად ფერადი Solo, C Round 81 PASS `browserVerified`, `efbed86`; fake-Bearer 403 — BLOCKED, backend) | `c-round-81.md`, `c-round-81.json`, `gates/gate-round-81.json` | Tech Lead R79-T/R80-T/R81-T; C81-1 → Low-ები |
 | SRW-18 | Fades + volume envelope | **მოწმდება** (ეტაპი 1 — `bdc2067`, R18-A1 pass; ეტაპი 2 — `a68c81d`, R18-A2 pass; ორივე C PASS `browserVerified`) | `c-round-82.md`; `c-round-83.md` | Tech Lead R82-T/R83-T; C-R83-L1 → Round 84 X1 |
 | SRW-19 | ვიდეოს opacity fade (preview) | **მოწმდება** (Round 84 C PASS `browserVerified=true`, ორივე viewport, `88b0262`; R19-F1/R19-F2 pass) | `c-round-84.md`; `c-round-84.json` | Tech Lead R84-T; signals SRW19-RESCHEDULE, VIDEO-FADE-SOUND |
-| SRW-20 | Range export, MP3, worker/progress/cancel | **ბაგია** (ეტაპი 1: C PASS `51e024a`; ეტაპი 2: C PASS `971141d`; ეტაპი 3a: C round 87 — 18/18 PASS `browserVerified`, მაგრამ R87-PROGRESS-BELOW-FOLD-1280 (Medium) → Round 88; ეტაპი 3b — Cancel; R20-X4 ღიაა; არაფერი გადადებული) | `c-round-87.md`, `c-round-87.json` | Round 88 → C (VIS-*) |
+| SRW-20 | Range export, MP3, worker/progress/cancel | **ბაგია** (ეტაპი 1: C PASS `51e024a`; ეტაპი 2: C PASS `971141d`; ეტაპი 3a: C round 87 — 18/18 PASS, C round 88 — sticky footer PASS (`browserVerified`), გამოუქვეყნებელი; ღიაა ძველი R88-FOCUS-ESCAPE-RENDER (Medium) → Round 89; ეტაპი 3b — Cancel; R20-X4 ღიაა; არაფერი გადადებული) | `c-round-87.md`, `c-round-88.md`, `c-round-88.json` | Round 89 → C (TRAP-*) |
 | SRW-21 | შეძენილი ბიბლიოთეკის mount + საბოლოო რეგრესია | **დაბლოკილია** (მხოლოდ route mount) | `backlog.json` SRW-21 | Adapter contract (R21-I1) დამოუკიდებლად სრულდება SRW-20-ის შემდეგ. Route mount-ს Tech Lead-ის ან auth-ის მფლობელის ნებართვა სჭირდება. purchased loader-ში middle-east hardcoded-ია |
 | SRW-22 | Studio Lab-ის შესასვლელი header-ში | **მზადაა** | `c-round-4.md`; `c-round-13.md` §5; `c-round-14.md`–`c-round-18.md`; `c-round-21.md` §1 (G21-3, header-ის ბმული) | — |
 | SRW-23 | Studio-ს scrollbar-ები | **მოწმდება** | `c-round-4.md` (R23-3/R23-4 PASS) | Tech Lead: რეალური Windows Chrome |
@@ -336,7 +340,9 @@ Round 72-ის აღწერა (გამოქვეყნდა `6b574e8`-
 
 | ID | სიმძიმე | სტატუსი | მტკიცებულება | შემდეგი ნაბიჯი |
 |---|---|---|---|---|
-| R87-PROGRESS-BELOW-FOLD-1280 | Medium | **ბაგია** → Round 88 (sticky footer + focus guard, D-29z53) | `c-round-87.md`, `c-round-87/vis-1280x720.json` | C: VIS-*, FOCUS-NOT-OBSCURED |
+| R87-PROGRESS-BELOW-FOLD-1280 | Medium | **მოწმდება** — C round 88: VIS-* PASS ორივე viewport-ზე (`browserVerified`); გამოქვეყნებას ელოდება (gate 88 გამოტოვდა) | `c-round-88.md`, `c-round-88/v88-*.json` | root: გამოქვეყნება Round 87–89-თან ერთად |
+| R88-FOCUS-ESCAPE-RENDER | Medium | **ბაგია** → Round 89 (radio-ჯგუფის Tab stop-ები, D-29z54); ძველია, `971141d`-შიც | `c-round-88.md`, `c-round-88/keys88-*.json` | C: TRAP-*, PX-KEYS-R2 |
+| A-R88-REVIEW-EDGES | Low | **ბაგია** → Low-ების პაკეტი (guard radio-ს rect-ს ზომავს და არა label-ს; მაუსის focus-ზეც მუშაობს; footer-ის ზრდა focus-ის შემდეგ; 16 px ზოლი footer-ის ქვეშ) | `a-round-88.md` | Low-ები |
 | R87-L-TIMEOUT-RELOAD-TEXT | Low | **ბაგია** → Low-ების პაკეტი (timeout-ის ტექსტი „გადატვირთე გვერდი“ ამბობს, retry კი იმავე გვერდზე მუშაობს) | `c-round-87.md` Observations | Low-ები |
 | R87-O-PROGRESS-FILL-COLOUR | Info | **მოწმდება** (headless-ში fill `#008000`; computed accent-color ბრენდის token-ია) | `c-round-87.json` observations | Tech Lead R87-T |
 | A-R87-L5 / A-R87-LOW-PU-ORDER | Low | **ბაგია** → L5 ეტაპი 3b; PU-ს რიგზე დამოკიდებულება → Low-ები | `a-round-87.md` | 3b / Low-ები |
@@ -659,6 +665,7 @@ R3-V2 Round 22-ში ხელახლა შემოწმდა (R22-M1 + R
 | R85-T | რეალურ Chrome-ში: 4–9 წმ-ის მონიშვნის შემდეგ Export ნაგულისხმევად მონაკვეთს ირჩევს და ფაილი მიქსის იმ ნაწილივით ჟღერს; timeline-ის გადახვევისას handle-ები ხაზების სახელებზე აღარ ჩანს |
 | R86-T | რეალურ Chrome-ში: WAV + MP3 — ითხოვს თუ არა ბრაუზერი „multiple downloads“-ის ნებართვას, ორივე ფაილი ჩამოდის თუ არა; MP3 ყურით ემთხვევა WAV-ს | Playwright Chromium prompt-ს არ აჩვენებს |
 | R87-T | რეალურ Chrome-ში 5-წუთიანი პროექტის WAV და MP3 ექსპორტი: progress ზოლი და ფაზის სახელი გასაგებია; ექსპორტისას timeline-ის გადახვევა და მაუსი არ ჭედავს | headless rAF gap ადამიანის აღქმას არ ცვლის |
+| R88-T | რეალურ Chrome-ში კლავიატურით: WAV და MP3 ექსპორტის დროს Tab/Shift+Tab მხოლოდ X-სა და მონიშნულ ფორმატს შორის მოძრაობს, გვერდზე არ გადის; 1280×720-ზე sticky footer ბუნებრივია | headless keyboard ≠ რეალური კლავიატურა |
 | RF7-2 / RF7-3 | ვიდეოს drift (R3-V1, **mode D**-ის ჩათვლით) და loop wrap-ის landing სუფთა Windows Chrome-ზე, VP9 + H.264 | **სავალდებულოა** C-R8-01-ისა და C-R6-02-ისთვის |
 | R8-M1 / R8-M2 | ხაზებს შორის drag Shift-ით რეალური მაუსით | synthetic pointer |
 | R10-N1 / R10-N2 | Ruler drag, რეალური Ctrl+wheel და pinch | gstack-ს wheel არ აქვს |
@@ -742,6 +749,8 @@ Root M1–M3, L1–L4, L6, L7 და L8 დახურულია.
 | VISUAL-A-OBSIDIAN | **არ დაწყებულა** | root-ის შენიშვნა 2026-10-21 (მომხმარებელმა დაამტკიცა): T12-ის შემდეგ, დამატებითი დასტურის გარეშე; მხოლოდ ფერები, ხატულები, ტიპოგრაფია, ღილაკების ზედაპირი + M1–M4 (M2 — Studio UI ინგლისურად ერთი strings მოდულით). სპეციფიკაცია: `docs/technical/studio-real-workspace/visual-direction-a.md`. ფაზა 1-სა და T12-ში არ ერევა |
 
 ფარგლებს გარეთაა მთელი პროექტისთვის: plugins/effects, pitch, ვიდეოს რამდენიმე ფენა და აუდიოს time-stretch. Grid-ის tempo აუდიოს stretch არ არის.
+
+Round 89 (D-29z54): R88-FOCUS-ESCAPE-RENDER — Export-ის Tab-trap radio-ჯგუფის Tab stop-ებზე (`dialog-tab-stops.ts`). Round 88 → C FAIL (sticky footer PASS, ძველი Medium Tab-trap ბაგი), gate 88 გამოტოვდა. შემდეგ: რეგრესიის რაუნდი 2026-10-24-დან, თორემ ეტაპი 3b (Cancel) → Low-ები → SRW-21 → სრული რეგრესია → T12 → VISUAL-A-OBSIDIAN. ფარგლები არ მცირდება.
 
 Round 88 (D-29z53): R87-PROGRESS-BELOW-FOLD-1280 — Export-ის sticky footer (სტატუსი, progress, გაფრთხილება, ღილაკები) + focus guard. Round 87 → C FAIL (18/18 PASS, ერთი Medium), gate 87 გამოტოვდა. შემდეგ: რეგრესიის რაუნდი 2026-10-24-დან, თორემ ეტაპი 3b (Cancel) → Low-ები → SRW-21 → სრული რეგრესია → T12 → VISUAL-A-OBSIDIAN. ფარგლები არ მცირდება.
 

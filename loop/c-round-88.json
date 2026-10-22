@@ -1,0 +1,65 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-22T19:28:01.9475288Z",
+  "round": 88,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "R88-FOCUS-ESCAPE-RENDER",
+   "severity": "medium",
+   "steps": [
+    "Open /studio-lab anonymously (1440x900 or 1280x720)",
+    "Drop demo music at 0.35 s, stem at 2 s, sfx at 4 s (5M: also click music clip, Ctrl+D x2)",
+    "Focus toolbar Export, press Enter",
+    "Tab to the format radio; keep WAV or ArrowDown to MP3",
+    "Tab to the export button, press Enter",
+    "During the render press Tab three times"
+   ],
+   "expected": "Focus stays inside the Export dialog during the render (PX-KEYS-R, FOCUS-NOT-OBSCURED)",
+   "actual": "Tab1 -> X, Tab2 -> checked format radio, Tab3 -> BODY, Tab4 -> arrangement-exit (page link behind modal), then Master Mute/Volume. Happens with WAV (default) and MP3 checked, at both viewports, incl. the round-87 range recipe; with WAV+MP3 checked the trap wraps to X. Pre-existing: trap code byte-identical to round-87 snapshot; not caused by F1/F2. Inferred cause: during render only X + format radios are enabled, trap wraps only when active===last (format-both), native Tab treats the radio group as one stop. Round-87 PX-KEYS passed because it ran after earlier MP3 exports in the same session (encoder cached), so the short range render had finished by Tab 3 (scope-range focusable only when isRendering is false); C's V1 reruns the same recipe as the first MP3 of the session, the load phase keeps the render alive and Tab 3 escapes. Consequence: with default settings a keyboard user reaches arrangement-exit (navigation away) and Master Mute/Volume behind a busy modal mid-export; Space/Enter there acts on the workspace.",
+   "evidence": "c-round-88/keys88-1440x900.json, keys88-1440x900V5.json, keys88-1280x720.json; v88-*-A.json PX-KEYS-R during[2]; v88-* FOCUS-render; shots/keys-*.png, shots/focus-render-*.png"
+  }
+ ],
+ "passed": [
+  "VIS-IDLE",
+  "VIS-RENDER",
+  "VIS-SCROLL",
+  "VIS-DONE",
+  "VIS-ERROR",
+  "VIS-VIDEO",
+  "PX-PHASES-R",
+  "PX-WAV5-R",
+  "PX-NET",
+  "REG-HYD",
+  "G88-3",
+  "T88-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "failed": [
+  "PX-KEYS-R",
+  "FOCUS-NOT-OBSCURED"
+ ],
+ "blocked": [
+  "G88-3 fake-Bearer 403 sub-check: backend unavailable in cloud (got 500 'Unable to prepare Studio access')"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED production bundle"
+ ],
+ "ableton": "not applicable this round",
+ "notes": {
+  "VIS-SCROLL": "PASS at 1280 (scrollTop 0..145 max); not applicable at 1440: panel does not overflow during render (791=791), all samples visible",
+  "G88-3": "fake-Bearer sub-check BLOCKED (backend unavailable in cloud); other sub-checks PASS",
+  "FOCUS-NOT-OBSCURED": "not-obscured part PASS in idle/render/done; focus leaves the dialog in render state (R88-FOCUS-ESCAPE-RENDER)"
+ }
+}

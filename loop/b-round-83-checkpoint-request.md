@@ -63,3 +63,12 @@ SRW-20 stage 2 passed C (PASS, `browserVerified=true`, published as `971141d`). 
 - What B does without approval: round 87 puts the new logic in new modules (`export-wav.ts` / `.worker.ts` / `.client.ts`, `export-progress.ts`, `mp3-encoder.client.ts`), so the context only wires them. No refactor of the existing guards is scheduled.
 - **Request:** please run the bounded frontend-architect checkpoint (`store/.claude/references/architecture-checkpoint.md`) on q1–q14 at the SRW-20 boundary, after stage 3b passes C. The result is keep/extract with value, risk and at most three sentences. An approved extraction would become one separate B task with one owner and behaviour-preserving tests, scheduled before the Lows batch.
 - **Signal:** FFMPEG-UTIL-UNIFY. `/studio-lab` now has its own resettable encoder (same core + command) because the frozen `app/utils/ffmpeg.ts` cannot reset or remove listeners. Unify the two when the purchased Studio can be verified (SRW-21).
+
+## Addendum — round 88 result (B, round 89 planning, 2026-10-22)
+The sticky footer passed C. C found an old Tab-trap escape during a render (R88-FOCUS-ESCAPE-RENDER), and round 89 fixes it with a pure `dialog-tab-stops.ts` helper. Root has still not answered this request. It stays non-blocking.
+
+**q14 addition — Export dialog focus effects (round-88 A code-reviewer Architecture note, verbatim in `a-round-88.md`):**
+- `ArrangementExportDialog.tsx` now has four effects on the same content element: opener restore, initial focus, the Tab trap and the footer focus guard.
+- The reviewer proposed one bounded task to extract `useExportDialogFocus` "if another focus or scroll concern lands here". Round 89 is that trigger.
+- B did not schedule the extraction inside a bug-fix round.
+- **Question:** keep, or extract `useExportDialogFocus` (with FT1–FT4, TR1–TR6 and the frozen focus-trap tests as acceptance) before or after stage 3b adds Cancel? Answer as keep/extract with value, risk and at most three sentences.
