@@ -1,176 +1,201 @@
-# CURRENT TASK — Round 91: SRW-20 stage 3b-2 — honest WAV + MP3 note, honest MP3 timeout text, and one less float copy in the WAV worker (D-29z56)
+# CURRENT TASK — Round 92: SRW-21 stage 1 — purchased-collection adapter and origin-aware workspace copy (D-29z57)
 
 Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-22
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules in your prompt. Those rules win over older text.
-- **Previous task:** `tasks/round-90.md` (exact copy, sha256 `a53a0ec5…`). Rationale: `b-round-90.md`. Decision record: D-29z56 in `docs/technical/studio-real-workspace/plan.md`.
-- **Round size:** the last SRW-20 stage (3b-2) = three tightly related export items, one owner (A):
-  1. GATE86-S2 — the WAV + MP3 note promises delivery the browser does not guarantee (Low);
-  2. R87-L-TIMEOUT-RELOAD-TEXT — the 120 s timeout text says "reload the page", but a retry works in the same page since round 87 (Low);
-  3. GATE89-S2 — the WAV worker allocates one extra stereo float copy for the clamp (Medium, memory).
-  Plus one doc status line (GATE90-S6) and one C-only measurement row for the gate-90 Medium GATE90-S1 (no A work).
+- **Previous task:** `tasks/round-91.md` (exact copy, sha256 `441f07fa…`). Rationale: `b-round-91.md`. Decision record: D-29z57 in `docs/technical/studio-real-workspace/plan.md`.
+- **Round size:** one feature stage, one owner (A). This is SRW-21 stage 1, the part that does not need the protected purchased route:
+  1. a purchased `WorkspaceCollection` adapter (`createPurchasedWorkspaceCollection`), with contract tests and no network or auth;
+  2. origin-aware workspace copy: the header, the badge, the three load-status messages and the export file names come from `collection.origin`. `/studio-lab` (origin `demo`) stays **byte-identical**.
+  Plus one doc status line (gate-91 S2).
 
 ## Why this round
-- **C round 90: PASS**, `browserVerified=true`, `realVerified=true`, both viewports, 0 bugs. Cancel works in the render, wav, load and mp3 phases and for WAV + MP3; unmount aborts; Escape does not cancel (contract).
-- **Gate 90: published.** Commit `35c84036577591b62b528a271337de565033bc28` is on both remotes. Root verify: 134 files, 2152 tests, `tsc` clean, build OK. Reviewer 8.5/10, no blocker.
-- **R20-X4 is now complete** (responsiveness + progress + trap + cancel, all C-verified and published).
-- **What is still open in SRW-20:** exactly the three 3b-2 items above. After this round SRW-20 can close.
+- **C round 91: PASS**, `browserVerified=true`, `realVerified=true`, 0 bugs. **Gate 91: published**, commit `77cd5b668bb55a44afe358dac5b7a716db428260` on both remotes (verify 135/135 files, `tsc` clean, build OK, reviewer 9/10). **SRW-20 is complete.**
+- **C has no open bug.** The remaining open items on SRW-03 / SRW-05 / SRW-10 / SRW-11B / SRW-13 / SRW-23 are Tech Lead real-Chrome checks, not A work.
+- **Next scope in dependency order:** SRW-21 (it depends on SRW-20). Its route mount stays **blocked**: `app/routes/studio.$productId.tsx` and the studio-token flow belong to the auth owner. The independent half (adapter contract, honest copy, mount guide) can be built now. Under the loop policy, core scope goes before the low-priority Lows batch.
+- **B read the source and found that the backlog's R21-I1 expectation "no workspace code change needed" is false.** The workspace hardcodes demo copy:
+  - `StudioWorkspace.tsx` l.2136 `CZABA Studio Lab` and l.2141–2143 badge `დემო კოლექცია — ავტორიზაცია არ სჭირდება`;
+  - `ArrangementContext.tsx` l.532 `დემო კოლექცია იტვირთება…` and l.3013–3014 (ready / failed);
+  - the download names `czaba-studio-lab*.wav/.mp3` (l.2722, l.2910, l.2916).
+  A purchased mount would print "demo — no sign-in needed" over purchased stems. Mount readiness that leaves this copy is not readiness, so this round makes the copy collection-driven (D-29z57 R2).
 - **Regression round:** due on or after 2026-10-24 (`regression-last.json` = 2026-10-21). Today is 2026-10-22, so not yet.
 
 ## Baseline (measured by B, 2026-10-22)
-- **HEAD `35c84036577591b62b528a271337de565033bc28`** (gate 90 published). `git status --short` is **empty** (clean tree).
-- **Frozen list:** `../tmp/studio-real-loop/b-round-90-r91-tree-sha256.txt`, **506** entries, **506/506 OK**.
-  - It covers every tracked `app/**` and `docs/implementation/**` file plus `vite.config.ts`, **except** the eight owned existing files below.
-  - It includes the protected auth and route files, `Modal.tsx`, `ffmpeg.ts`, `StudioContext.tsx`, `mp3-encoder.client.ts`, `export-wav.client.ts`, `graph.client.ts`, `export-cancel.ts` and **`export-wav.test.ts`** (EW1–EW7 must stay byte-identical and green).
-  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-90-r91-tree-sha256.txt`.
-- **Snapshots:** `../tmp/studio-real-loop/b-round-90-r91-snapshots/` (`SHA256SUMS.txt`). All are LF with CR=0.
+- **HEAD `77cd5b668bb55a44afe358dac5b7a716db428260`** (gate 91 published). `git status --short` is **empty**.
+- **Frozen list:** `../tmp/studio-real-loop/b-round-91-r92-tree-sha256.txt`, **513** entries, **513/513 OK**.
+  - It covers every tracked `app/**` and `docs/implementation/**` file plus `vite.config.ts`, **except** the three owned existing files below.
+  - It includes `app/types/arrangement.ts` (`74b3f1c4`), `app/data/studio-lab-demo.ts` (`69ac90f7`), `app/routes/studio-lab.tsx` (`2ee0d5f5`), every export test (`export-dialog-footer.test.tsx` locks `czaba-studio-lab.wav`), and all protected files.
+  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-91-r92-tree-sha256.txt`.
+- **Snapshots:** `../tmp/studio-real-loop/b-round-91-r92-snapshots/` (`SHA256SUMS.txt`). All are LF with CR=0.
 
   | File | sha256 prefix | lines | role |
   |---|---|---|---|
-  | `app/lib/arrangement/export-wav.ts` | `5fa36348` | 58 | owned (G1) |
-  | `app/lib/arrangement/export-wav.worker.ts` | `cddff503` | 29 | owned (G2) |
-  | `app/components/arrangement/ArrangementExportDialog.tsx` | `0c28ea0b` | 532 | owned (N1: `BOTH_FORMAT_NOTE` declaration only, l.32) |
-  | `app/contexts/ArrangementContext.tsx` | `c487b71b` | 3380 | owned (T1: the timeout literal only, l.2856) |
-  | `app/lib/arrangement/__tests__/export-mp3.test.tsx` | `86d5ddee` | 673 | owned (`BOTH_NOTE` l.53 and `LOAD_TIMEOUT_MESSAGE` l.63–64 declarations only) |
-  | `app/lib/arrangement/__tests__/export-progress-ui.test.tsx` | `0705cc16` | 539 | owned (`LOAD_TIMEOUT_MESSAGE` l.66–67 declaration only) |
-  | `app/lib/arrangement/__tests__/export-range-ui.test.tsx` | `490233a5` | 499 | owned (the one string literal at l.455 only) |
-  | `docs/implementation/2026/quarter-IV/078-studio-lab-export-cancel.md` | `126569d7` | 131 | owned (status line l.4 only) |
-  | `export-wav.test.ts` / `export-wav.client.ts` / `graph.client.ts` / `export-cancel-ui.test.tsx` | `e8d93132` / `b56ca58e` / `de385544` / see SHA256SUMS | — | frozen, reference (`ref_*` copies) |
+  | `app/components/arrangement/StudioWorkspace.tsx` | `d90699d8` | 2514 | owned (W1 only) |
+  | `app/contexts/ArrangementContext.tsx` | `2b8b8639` | 3380 | owned (X1–X3 only) |
+  | `docs/implementation/2026/quarter-IV/079-studio-lab-export-notes-and-memory.md` | `bd76912d` | 83 | owned (l.4 only) |
 
-- **Protected:** never touch the auth files, `app/contexts/StudioContext.tsx` (`caa388e7`), `app/utils/ffmpeg.ts` (`0995ae78`), `Modal.tsx` (`741c2341`) or `mp3-encoder.client.ts` (`ddb70919`).
+- **Protected (frozen, never edited):** `app/routes/studio.$productId.tsx` (`fa2cf0bc`), `app/routes/api.studio-token.ts` (`13914809`), `app/contexts/StudioContext.tsx` (`caa388e7`), `app/utils/ffmpeg.ts` (`0995ae78`), `app/components/ui/Modal.tsx` (`741c2341`), `app/lib/arrangement/mp3-encoder.client.ts` (`ddb70919`), and the auth files `app/lib/auth.ts` (`56f5b76f`), `app/contexts/AuthContext.tsx` (`bf9ee257`), `app/lib/firebase.client.ts` (`23468664`), `app/types/auth.ts` (`280fe7f2`).
 - **Servers:** `:5173/studio-lab` returns 200 (`env-status.json`). Backend `:5199` is unavailable, as expected. Never start or stop servers.
 - **Do not change the repository state.**
   - Never stash, reset, checkout, clean or re-create anything.
   - Never run `biome check --write`, `format --write`, `npm run format` or `check:fix`. Format through stdin to stdout.
-  - Run mutation proofs in a scratch copy (`a-round-91/mut/`), never in `store/`. Set the Vite/Vitest `cacheDir` to the scratch folder (round-89/90 housekeeping note); never write into `store/node_modules/.vite`.
+  - Run mutation proofs in a scratch copy (`a-round-92/mut/`), never in `store/`. Set the Vite/Vitest `cacheDir` to the scratch folder; never write into `store/node_modules/.vite`.
   - A mismatch (another HEAD, a dirty tree at start, a changed frozen file) means stop and report.
 
 ## 1. What changes (A)
 
-### G1 — `export-wav.ts`: a new in-place encoder for owned channel copies (GATE89-S2)
-- **Today's peak (B read the code):** `renderArrangementWav` keeps the rendered `AudioBuffer`, `.slice()`s both channels and transfers the copies to the worker. In the worker, `encodeArrangementWav` allocates a **second** clamped `Float32Array` per channel and then the 24-bit bytes. So at the worker peak: rendered buffer + transferred copy + clamped copy + bytes.
-- **Add exactly one new export:**
-  `export function encodeArrangementWavInPlace(channels: Float32Array[], sampleRate: number, onProgress?: (fraction: number) => void): ArrangementWavEncoding`
-  1. `const report = measureExportOverload(channels);` — **first**, on the unclamped samples (the overload warning depends on it);
-  2. clamp every sample **in the given arrays** with exactly the same expression as today: `Math.min(MAX_24BIT_SAMPLE, Math.max(-1, x))` (NaN stays NaN, the same as today);
-  3. `const bytes = encodeSfxWav({ sampleRate, channels }, onProgress);` — the same arrays, no new `Float32Array`;
-  4. `return { bytes, ...report };`
-- **`encodeArrangementWav` stays byte-identical and non-mutating.** Frozen EW1 calls `measureExportOverload(raw)` **after** `encodeArrangementWav(raw)` and expects peak 1.5; an in-place `encodeArrangementWav` would turn it red. Do not change its body, signature or callers. A small private helper shared by both is allowed only if `encodeArrangementWav` keeps allocating its own copies and its output stays byte-identical (EW1/EW4/EW7).
-- **Contract (doc 079 + a JSDoc-free name):** the in-place variant is only for arrays the caller owns and will not read again. Today that is only the worker, which receives transferred copies.
+### P1 — new `app/lib/arrangement/collection.ts`
+Two exports, both pure. No import from `~/lib/r2.config`, auth, routes or contexts. Type-only imports from `~/types/arrangement` and `~/types/audio` are fine.
 
-### G2 — `export-wav.worker.ts`: use the in-place encoder
-- Replace the `encodeArrangementWav` call with `encodeArrangementWavInPlace(event.data.channels, event.data.sampleRate, …)`. Nothing else changes: the progress throttle, the `complete` message, the transfer list `[result.bytes]` and the error path stay identical (frozen EW7 pins them).
-- **Not changed:** `export-wav.client.ts` (frozen; the no-Worker fallback keeps the non-mutating `encodeArrangementWav`) and `graph.client.ts` (frozen; the `.slice()` copy is needed because an `AudioBuffer` channel cannot be transferred).
+**(a) `workspaceCollectionCopy(origin: WorkspaceOrigin): WorkspaceCollectionCopy`**, where `WorkspaceCollectionCopy` is `{ heading: string; badge: string; loading: string; ready: string; failed: (count: number) => string; fileStem: string }`. Exact values:
 
-### N1 — `ArrangementExportDialog.tsx`: the WAV + MP3 note (GATE86-S2)
-Change only the `BOTH_FORMAT_NOTE` declaration (l.32) to exactly:
-`იგივე მიქსი ორ ფაილად — ან ორივე შეიქმნება, ან არცერთი. ბრაუზერმა მეორე ფაილის ჩამოტვირთვაზე შეიძლება ნებართვა მოითხოვოს.`
-- Rationale (smallest honest change): "both or none" is true for **creation** (C round 90 CX-BOTH: no file before the last phase), but the browser may ask permission for, or block, the second automatic download (gate-86 reviewer #2, Tech Lead R86-T). The note now says so without promising delivery.
-- Same element, same classes (`block text-xs text-muted`); the label text `WAV + MP3 · ორი ფაილი` is unchanged.
+| field | `demo` (must equal today's text byte for byte) | `purchased` (new) |
+|---|---|---|
+| heading | `CZABA Studio Lab` | `CZABA Studio` |
+| badge | `დემო კოლექცია — ავტორიზაცია არ სჭირდება` | `შეძენილი კოლექცია` |
+| loading | `დემო კოლექცია იტვირთება…` | `შეძენილი კოლექცია იტვირთება…` |
+| ready | `დემო კოლექცია მზადაა. აირჩიე ხაზი და დაამატე ხმა (Enter ან ＋ დამატება).` | `შეძენილი კოლექცია მზადაა. აირჩიე ხაზი და დაამატე ხმა (Enter ან ＋ დამატება).` |
+| failed(n) | `` `დემო კოლექციიდან ${n} წყარო ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.` `` | `` `შეძენილი კოლექციიდან ${n} წყარო ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.` `` |
+| fileStem | `czaba-studio-lab` | `czaba-studio` |
 
-### T1 — `ArrangementContext.tsx`: the 120 s timeout text (R87-L-TIMEOUT-RELOAD-TEXT)
-Change only the timeout literal in `exportMp3` (l.2856) to exactly:
-`MP3 encoder 120 წამში ვერ ჩაიტვირთა — ფაილი არ შეიქმნა. შეამოწმე ინტერნეტი და სცადე თავიდან, ან აირჩიე WAV.`
-- Rationale: since round 87 the lab encoder resets on timeout and a retry works in the same page (C round 87 PX-RETRY, C round 90 CX-LOAD). "Reload the page" is no longer needed. "120 წამში" stays (C MP-TIMEOUT measured 120.394 s). The second sentence now matches the load-failure message.
-- **Nothing else in the context changes** (no other message, timer, guard, reset or state order).
+Copy the demo strings from the current source; do not retype them (`…` is U+2026, `＋` is U+FF0B).
 
-### Test grants (string locks; B grep-checked every literal)
-- `export-mp3.test.tsx`: the `BOTH_NOTE` declaration (l.53) → the new N1 text; the `LOAD_TIMEOUT_MESSAGE` declaration (l.63–64) → the new T1 text. No other line.
-- `export-progress-ui.test.tsx`: the `LOAD_TIMEOUT_MESSAGE` declaration (l.66–67) → the new T1 text. No other line.
-- `export-range-ui.test.tsx`: the literal at l.455 → `'WAV + MP3 · ორი ფაილი' + <new N1 text>` written as one string (the label and note concatenated, as today). No other line.
-- If Biome's formatter needs a declaration to wrap differently, that is allowed **inside the granted declaration only**.
+**(b) `createPurchasedWorkspaceCollection(input: PurchasedWorkspaceCollectionInput): WorkspaceCollection`**
+- Input: `{ productId: string; productTitle: string; stems: readonly AudioStem[]; fetchAudio?: (url: string, init: RequestInit) => Promise<Response> }`. `AudioStem` is the existing type from `~/types/audio` (`id`, `name`, `audioUrl`, `order`). The route already gives each `audioUrl` its `?token=` query, so the adapter adds nothing.
+- **Validation (throws an `Error` when the factory is called):** an empty `productId`, an empty `stems` array, or a duplicate stem `id`. An empty collection would leave the provider status on "loading" forever (see §6, signal COLLECTION-EMPTY-STATUS), so the factory refuses it.
+- **Result:**
+  - `id` = `purchased-${productId}`;
+  - `label` = `${productTitle} · შეძენილი სტემები`;
+  - `origin` = `'purchased'`;
+  - no `notice`;
+  - `sources`: sorted by `order` (stable for equal values). Each source is `{ id: stem.id, title: \`${productTitle} · ${stem.name}\`, shortTitle: stem.name, collectionLabel: label, kind: 'stem', origin: 'purchased' }`.
+  - The URLs are copied into a private `Map` when the factory runs, so later changes to the input do not affect the collection.
+- **`loadSource(source, ctx, signal)`:**
+  - An unknown `source.id` rejects with `Error('უცნობი წყარო')` and does **not** call `fetchAudio`.
+  - Otherwise it calls `fetchAudio(url, { credentials: 'omit', signal })` exactly once. The init object has exactly these two keys: no `headers`, no `Authorization`, no `method`. The default `fetchAudio` calls the global `fetch` lazily, at call time, not when the module loads (SSR).
+  - If `fetch` rejects: when `signal.aborted`, rethrow the original error unchanged; otherwise reject with `Error('ფაილი ვერ ჩაიტვირთა (ქსელი)')`.
+  - A response with `!response.ok` rejects with `` Error(`ფაილი ვერ ჩაიტვირთა (${response.status})`) ``.
+  - Otherwise it returns `ctx.decodeAudioData(await response.arrayBuffer())`. A decode rejection becomes `Error('ფაილი ვერ გაიშიფრა')`.
+  - **No error message may contain the URL, the query string or the token** (the library shows `შეცდომა: {message}`).
 
-### New test file `app/lib/arrangement/__tests__/export-wav-in-place.test.ts`
-Copy the helpers you need (`wavOracle`, `seededChannel`, `testChannels`, `bytesOf`) from frozen `export-wav.test.ts`; never import from a test file. Compute every oracle on a **copy** (`raw.map((c) => c.slice())`) taken **before** the call under test.
-- **IP1 in-place bytes and report:** for `testChannels()`, `encodeArrangementWavInPlace(raw, 48000)` returns `bytes` byte-equal to the oracle and `peak`/`clippedSamples` equal to `measureExportOverload(copy)` (peak 1.5, `clippedSamples > 0`).
-- **IP2 the input is clamped in place:** after the call the **same** array objects (`toBe` identity on the array passed in) hold clamped values: `raw[0][0] === MAX_24BIT_SAMPLE` (was 1.5), `raw[0][1] === -1` (was -1.5), `Number.isNaN(raw[0][4])`, `raw[0][6] === -1` (was -1.0001), and every sample equals the oracle's clamped value.
-- **IP3 progress:** non-decreasing, more than 2 values, last = 1.
-- **IP4 the worker uses the in-place encoder:** EW7-style (spy on `window.postMessage`, `await import('../export-wav.worker')`, call `window.onmessage`): the `complete` message has `peak` 1.5 and bytes equal to the oracle, transfer = `[bytes]`, **and** the posted `raw` arrays are clamped afterwards (`raw[0][0] === MAX_24BIT_SAMPLE`). Reset `window.onmessage = null` at the end.
-- **IP5 the shared path stays non-mutating:** after `encodeArrangementWav(raw, 48000)` every sample of `raw` equals the copy (`Object.is` per sample, so NaN counts), and the result equals IP1's result.
+### W1 — `StudioWorkspace.tsx`: the header only (l.2135–2143)
+- `const collectionCopy = workspaceCollectionCopy(workspace.collection.origin);`, or the same value read where `workspace` is in scope. `collection` is already in the `useArrangement()` value.
+- The `<h1>` text node `CZABA Studio Lab ` becomes `{collectionCopy.heading}` followed by the same space and the same `<span>` (`· სამუშაო სივრცე`). The h1 `textContent` for demo must stay exactly `CZABA Studio Lab · სამუშაო სივრცე`.
+- The badge `<span>` text becomes `{collectionCopy.badge}`. Same element, same classes.
+- Keep the space between the heading and the `<span>` (use `{' '}` if Biome wraps the line). One import line. Nothing else in the file changes: no class, no element, no other text.
+
+### X1–X3 — `ArrangementContext.tsx`
+- **X1 status:** l.532 `useState('დემო კოლექცია იტვირთება…')` → `useState(() => workspaceCollectionCopy(collection.origin).loading)`. In the load effect (l.3011–3015), the two literals → `copy.ready` / `copy.failed(failed)` from `workspaceCollectionCopy(collection.origin)`. The effect already depends on `collection`.
+- **X2 file names:** l.2722, l.2910 and l.2916 build the names from `fileStem` as `${fileStem}${renderWindow ? '-range' : ''}.wav` / `.mp3`. Read `fileStem` from `workspaceCollectionCopy(collection.origin)` inside `exportWav` / `exportMp3`, and add `collection.origin` to their dependency arrays (l.2748 and l.2953). The demo result is unchanged: `czaba-studio-lab.wav`, `czaba-studio-lab-range.wav`, `czaba-studio-lab.mp3`, `czaba-studio-lab-range.mp3`.
+- **X3:** one import line.
+- **Nothing else in the context changes:** no guard, timer, message, abort, progress, state order or value shape. In particular `GESTURE_*` statuses, export messages and the `useArrangement()` surface stay identical.
+
+### New tests
+- **`app/lib/arrangement/__tests__/collection.test.ts`** (pure; fake `fetchAudio`, fake `ctx` with `decodeAudioData`):
+  - **PC1 shape:** `id`, `label`, `origin`, no `notice`; sources sorted by `order` with the exact titles, `kind: 'stem'` and `origin: 'purchased'`. Changing the input array or a stem URL after creation changes nothing.
+  - **PC2 validation:** an empty `stems`, a duplicate `id` and an empty `productId` each throw.
+  - **PC3 request:** `fetchAudio` is called once with the stem URL and an init that `toStrictEqual({ credentials: 'omit', signal })`, with `init.signal` being the same object (`toBe`).
+  - **PC4 decode:** resolves to the fake `decodeAudioData` result, called with the response's `ArrayBuffer`.
+  - **PC5 HTTP error:** 401, 403, 404 and 500 each reject with exactly `ფაილი ვერ ჩაიტვირთა ({status})`. The message contains neither the URL nor `token`. Use a URL with `?token=SECRET`.
+  - **PC6 network:** a non-aborted rejection gives exactly `ფაილი ვერ ჩაიტვირთა (ქსელი)`. With an aborted signal, the original error object is rethrown (`toBe`).
+  - **PC7 decode error:** exactly `ფაილი ვერ გაიშიფრა`.
+  - **PC8 unknown id:** `უცნობი წყარო`, and `fetchAudio` is not called.
+  - **PC9 copy:** `workspaceCollectionCopy('demo')` equals the six demo values (failed(2)), and `workspaceCollectionCopy('purchased')` equals the six purchased values.
+- **`app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx`**: mount `ArrangementProvider` + `StudioWorkspace`. Copy the stubs (`OfflineAudioContext`, `AudioContext`, `ResizeObserver`, …) from an existing workspace UI test such as `grid-snap-ui.test.tsx` or `export-dialog-footer.test.tsx`; never import from a test file. The collection comes from `createPurchasedWorkspaceCollection` with a fake `fetchAudio` and a fake decode (stub the decode context's `decodeAudioData`).
+  - **PW1 header:** the h1 `textContent` is exactly `CZABA Studio · სამუშაო სივრცე`, and the badge is exactly `შეძენილი კოლექცია`. The header contains no `დემო` and no `ავტორიზაცია არ სჭირდება`.
+  - **PW2 status:** `შეძენილი კოლექცია იტვირთება…` while `fetchAudio` is pending (deferred promises), then exactly the purchased `ready` text once all stems resolve.
+  - **PW3 failure:** one stem answers 403. The status is exactly `შეძენილი კოლექციიდან 1 წყარო ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.`, that library row shows `შეცდომა: ფაილი ვერ ჩაიტვირთა (403)`, and no rendered text contains `SECRET`.
+  - **PW4 abort on unmount:** unmount while `fetchAudio` is pending. Every `init.signal` is `aborted`. Resolving the deferred promises afterwards causes no `console.error` (spy) and no thrown error.
+  - **PW5 file names:** a purchased WAV export downloads `czaba-studio.wav`, and a range export `czaba-studio-range.wav`. Use the same download-capture technique as `export-dialog-footer.test.tsx` l.344.
+  - **PW6 demo lock:** the same harness with a minimal `origin: 'demo'` collection shows `CZABA Studio Lab · სამუშაო სივრცე`, the demo badge and the demo ready text exactly.
 
 **Mutation proofs** (scratch copy; each must turn at least one listed test red):
 
 | ID | Mutation | Expected red |
 |---|---|---|
-| a | the in-place variant clamps into a new `Float32Array` (copy re-added) | IP2, IP4 |
-| b | measure **after** the clamp in the in-place variant | IP1, IP4 |
-| c | the worker keeps calling `encodeArrangementWav` | IP4 |
-| d | `encodeArrangementWav` delegates to the in-place variant without copying | IP5 (and frozen EW1) |
-| e | the N1 constant reverted | `export-mp3` MX1 radio-label check (l.339) and `export-range-ui` l.452–457 |
-| f | the T1 literal reverted | `export-mp3` l.485 and `export-progress-ui` l.309/320/341 |
+| a | `fetchAudio` called without `signal` | PC3, PW4 |
+| b | init gains `headers: { Authorization: 'Bearer x' }` | PC3 |
+| c | the HTTP error message includes the URL | PC5, PW3 |
+| d | `workspaceCollectionCopy('purchased').badge` returns the demo badge | PC9, PW1 |
+| e | the X1 ready literal hardcoded to the demo text again | PW2 (and PW6 stays green) |
+| f | X2 `fileStem` hardcoded `czaba-studio-lab` | PW5 |
+| g | the factory accepts an empty `stems` | PC2 |
+| h | sources not sorted by `order` | PC1 |
 
 ### Docs
-- `078-studio-lab-export-cancel.md` **l.4 only** → `**სტატუსი:** C PASS (Round 90), გამოქვეყნდა 35c8403 (D-29z55)` (GATE90-S6).
-- New `docs/implementation/2026/quarter-IV/079-studio-lab-export-notes-and-memory.md` per `docs/implementation/TEMPLATE.md` (Georgian; every section). Status line: `**სტატუსი:** Round 91 — C-ის შემოწმებას ელოდება (D-29z56)`. It records: the two text changes and why; the peak-memory reasoning for G1 with B's baseline numbers (below); the in-place contract (owned arrays only); that `encodeArrangementWav` and the no-Worker fallback stay non-mutating; GATE90-S1 as an open measurement (C row MEM-CANCEL); SRW-20 boundary → checkpoint q14 next.
+- `079-studio-lab-export-notes-and-memory.md` **l.4 only** → `**სტატუსი:** C PASS (Round 91), გამოქვეყნდა 77cd5b6 (D-29z56)` (gate-91 S2).
+- New `docs/implementation/2026/quarter-IV/080-studio-workspace-purchased-collection-readiness.md`, written per `docs/implementation/TEMPLATE.md` (Georgian, every section). Status line: `**სტატუსი:** Round 92 — C-ის შემოწმებას ელოდება (D-29z57)`. It records:
+  - why the copy was demo-hardcoded and what is now origin-driven;
+  - the adapter contract (signal, `credentials: 'omit'`, no headers, error texts without URL or token);
+  - what is **not** done: the route mount stays blocked by the auth owner, and the purchased Studio still uses StudioContext;
+  - signal COLLECTION-EMPTY-STATUS;
+  - that VISUAL-A V-0 will later move Studio copy to one English strings module, and that this module is compatible with that.
+- New `docs/technical/arrangement-workspace.md` (Georgian, short; the SRW-21 backlog file). It is a mount guide for the future purchased route:
+  - build the collection with `createPurchasedWorkspaceCollection` from the loader stems plus the existing token query;
+  - wrap the workspace in `ArrangementProvider`;
+  - list what must stay as it is: `RequireAuth`, the `/api/studio-token` Bearer request (route-owned, not the adapter), and the purchase check;
+  - list the open prerequisites: release by the auth owner, and the hardcoded `middle-east` loader.
 
 ### Files (exact grants)
 | File | Grant |
 |---|---|
-| `app/lib/arrangement/export-wav.ts` | G1 only |
-| `app/lib/arrangement/export-wav.worker.ts` | G2 only |
-| `app/components/arrangement/ArrangementExportDialog.tsx` | N1 only |
-| `app/contexts/ArrangementContext.tsx` | T1 only |
-| `app/lib/arrangement/__tests__/export-mp3.test.tsx` | the two declarations above only |
-| `app/lib/arrangement/__tests__/export-progress-ui.test.tsx` | the one declaration above only |
-| `app/lib/arrangement/__tests__/export-range-ui.test.tsx` | the l.455 literal only |
-| `app/lib/arrangement/__tests__/export-wav-in-place.test.ts` | **new** (IP1–IP5) |
-| `docs/implementation/2026/quarter-IV/078-studio-lab-export-cancel.md` | l.4 only |
-| `docs/implementation/2026/quarter-IV/079-studio-lab-export-notes-and-memory.md` | **new** |
+| `app/lib/arrangement/collection.ts` | **new** (P1) |
+| `app/components/arrangement/StudioWorkspace.tsx` | W1 only (header h1 text node + badge text + one import) |
+| `app/contexts/ArrangementContext.tsx` | X1–X3 only (l.532, l.3011–3015, l.2722, l.2910, l.2916, deps l.2748/l.2953, one import) |
+| `app/lib/arrangement/__tests__/collection.test.ts` | **new** (PC1–PC9) |
+| `app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx` | **new** (PW1–PW6) |
+| `docs/implementation/2026/quarter-IV/079-studio-lab-export-notes-and-memory.md` | l.4 only |
+| `docs/implementation/2026/quarter-IV/080-studio-workspace-purchased-collection-readiness.md` | **new** |
+| `docs/technical/arrangement-workspace.md` | **new** |
 
-**Expected end state: 8 M + 2 ??**, and all 506 frozen entries unchanged. `git diff` of the six line-granted files (dialog, context, the three test files, doc 078) must touch only the granted lines (C checks the hunks).
-- If any frozen test turns red, **stop and report**; do not edit it. B expects every frozen export test to stay green: EW1–EW7 (the worker output is byte-identical; the client and fallback are unchanged), PU1–PU5, MX1–MX7 / MP-* (only the two constants change, and their declarations are granted), CU1–CU9, EC1–EC4, TR1–TR6, focus and footer tests.
+**Expected end state: 3 M + 5 ??**, and all 513 frozen entries unchanged.
+- `git diff -U0` of the three modified files may touch only the granted lines. Biome may re-wrap inside a granted statement.
+- **No route imports `collection.ts`** (`grep -rn "lib/arrangement/collection" app/routes` is empty). The context and the workspace import only `workspaceCollectionCopy`. `/studio-lab` never calls `createPurchasedWorkspaceCollection`, and importing the module makes no request.
+- If any frozen test turns red, **stop and report**; do not edit it. B expects every frozen test to stay green, because the demo output is byte-identical.
 
 ## 2. Pre-flight for A
-- **Primitives:** `AGENT_DISCOVERABLE_CODE.md` (one new export), `AUDIO_ARCHITECTURE.md`, `FORWARDREF_COMPONENT.md` (a constant in a component file), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`. **Prompts:** `new-test.md`.
-- **Verify the baseline before the first edit:** HEAD `35c8403`; clean status; frozen 506/506; the eight owned hashes; LF/CR.
+- **Primitives:** `AGENT_DISCOVERABLE_CODE.md` (new exports), `API_ERROR_HANDLING.md` (fetch errors), `SECURITY_AUDIT.md` (token in URL, no header, no URL in messages), `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md`, `FORWARDREF_COMPONENT.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`. **Prompts:** `new-service.md`, `new-test.md`, `studio-feature.md`.
+- **Verify the baseline before the first edit:** HEAD `77cd5b6`; clean status; frozen 513/513; the three owned hashes; LF/CR.
 - **Checks (speed rules):**
-  - `npm run typecheck`, `npm run lint`, and a scoped `npx biome check` on the owned code and test files (no `--write`).
-  - **GATE90-S7:** save `npx biome lint <the 7 owned code/test files>` output to `a-round-91/biome-lint-owned.txt` (the gate log hides most warnings).
-  - **Targeted vitest:** every file in `a-round-90/targeted-list.txt`, plus the new file, plus every test that imports `export-wav`, `export-wav.worker` or `export-wav.client` (grep). Write the list to `a-round-91/targeted-list.txt`. Do not run the full suite.
-- **A's own smoke (not C evidence), 1440×900:** one 10M WAV export with B's probe (`../tmp/studio-real-loop/b-round-90/probe/mem-probe.cjs`; copy it into `a-round-91/`, change its `OUT`), recording before/after `VmHWM`; and the WAV + MP3 note text at 1280.
-- **Code-reviewer: required** (10 files). Pass its Architecture note to B verbatim.
+  - `npm run typecheck`, `npm run lint`, and a scoped `npx biome check` on the owned code and test files (no `--write`). Save `npx biome lint <owned code/test files>` to `a-round-92/biome-lint-owned.txt`.
+  - **Targeted vitest:** the two new files; every test that mounts `StudioWorkspace` or `ArrangementProvider` (grep `StudioWorkspace\|ArrangementProvider` in `app/lib/arrangement/__tests__`); all `export-*.test.*` files; `library.test.ts`. Write the list to `a-round-92/targeted-list.txt`. Do not run the full suite.
+- **A's own smoke (not C evidence), 1440×900:** `/studio-lab` header h1/badge text and the ready status exact; one WAV export with download name `czaba-studio-lab.wav`.
+- **Code-reviewer: required** (8 files). Ask it explicitly to check the token/URL leak paths and SSR hydration of the status initializer. Pass its Architecture note to B verbatim.
 
 ## 3. File ownership (exact)
-- **A** owns only the §1 Files table. **C** owns `c-round-91*`. **B** owns the planning artifacts. **Root** owns gates, commits and pushes.
-- **Protected (never edited):**
-  - `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/lib/__tests__/download-routes.test.ts`;
-  - the auth files: `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/lib/firebase.client.ts`, `app/types/auth.ts`;
-  - for this loop: `app/contexts/StudioContext.tsx`, `app/utils/ffmpeg.ts`, `app/components/ui/Modal.tsx`, `app/lib/arrangement/mp3-encoder.client.ts`.
+- **A** owns only the §1 Files table. **C** owns `c-round-92*`. **B** owns the planning artifacts. **Root** owns gates, commits and pushes.
+- **Protected (never edited):** see Baseline. In particular, the purchased route is **not** mounted in this round, and `RequireAuth` / studio-token behaviour is untouched.
 - **`/studio-lab`** stays the public **demo-only** workspace: demo badge; no purchased audio; no token/R2 requests; the only third-party requests are the unpkg ffmpeg core after an MP3 click (plus the known Google Fonts and the failing root cart call); user video stays local.
 
 ## 4. Ableton source table
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| WAV + MP3 delivery note | none (browser download behaviour, CZABA copy) | — | **არ ეხება.** CZABA copy about browser downloads; no Ableton claim | NOTE-BOTH: match status "არ ეხება" |
-| Encoder timeout text | none (CZABA's ffmpeg.wasm) | — | **არ ეხება** | TIMEOUT-TEXT: "არ ეხება" |
-| Export peak memory | none | — | **არ ეხება** (internal pipeline; no Ableton claim) | MEM-WAV10, MEM-CANCEL: "არ ეხება" |
-| Cancel leaves no partial file (carried) | Live 12 manual §5.1.3.5 (`b-round-84/web/managing-files.txt` l.281) | confirmed for real-time rendering only | carried from round 90; offline Cancel unconfirmed | CX-WAVPHASE-R: not re-judged |
+| Collection adapter (purchased stems load) | none (CZABA store plumbing) | — | **არ ეხება** | PW/PC unit only; C reviews them |
+| Workspace heading / badge / status copy | none (CZABA copy) | — | **არ ეხება** | DEMO-COPY, DEMO-LOAD |
+| Export file names | none (CZABA download names) | — | **არ ეხება** | EXPORT-NAMES |
 
-## 5. C acceptance (real browser, Playwright Chromium, `/studio-lab` anonymous; viewport per row)
+## 5. C acceptance (real browser, Playwright Chromium, `/studio-lab` anonymous)
 
-**Setup:** check `env-status.json` and that `:5173` returns 200; one warm-up load. Demo setup as in round 90 (`c-round-90/tools/lib90.cjs` `setup`): **5M** = 3 demo sources + music clip Ctrl+D ×2 (`05:04.406`); **10M** = Ctrl+D ×5 (`10:08.462`). HR-PHASE and the 15 s download window from round 90 apply to every cancel.
-
-**Memory method (MEM rows; B pre-checked it in `b-round-90/probe/`):** the page's renderer is the `--type=renderer` Chromium process with the largest `VmRSS` (`/proc/<pid>/status`); dedicated workers run in it. One fresh `chromium.launch()` per run, so `VmHWM` starts fresh. Call CDP `HeapProfiler.collectGarbage` before every reading. Do not use `performance.memory` (OfflineAudioContext buffers are not in the V8 heap). Three valid runs per row, plus at most two extra runs for environment-invalid ones.
+**Setup:** check `env-status.json` and that `:5173` returns 200; one warm-up load (ENV-VITE-REOPTIMIZE-RELOAD: visit `/` alone first, never in parallel with other sessions). Use a fresh incognito context per session. Demo setup is the same as in rounds 90–91 (`c-round-91/tools/lib91.cjs` `setup`).
 
 | ID | Viewport | Action | Pass evidence |
 |---|---|---|---|
-| MEM-WAV10 (primary, GATE89-S2) | 1440 | Fresh browser, 10M, WAV, read the renderer `VmHWM` after setup (GC + 2 s), Export to done, read `VmHWM` again | In each of 3 valid runs, the export increase **ΔHWM = after − before ≤ 639 MB**. B's baseline on the published tree `35c8403` (same probe, same runner type): ΔHWM **739 / 748 / 748 MB** (before 450/447/441, after 1189/1195/1189), so the limit is ≥ 100 MB below the smallest baseline; the expected drop is one 10M stereo float copy (29 206 176 × 2 × 4 B ≈ 234 MB). The file is one `.wav`, RIFF, PCM 24-bit/48 kHz/2 ch, **29 206 176 frames**, NaN 0, RMS within 1e-5 of B's 0.17243646, the exact done message `WAV შეიქმნა: 10:08.462, 24-bit · 48 kHz · stereo.`. A run is **environment-invalid** (not judged; replace it within the two extra runs) if its before-export `VmHWM` is outside 381–510 MB (B anchor 441–450 ± 60) or a non-noise console error occurs. If the limit is missed in a valid run, record all numbers: GATE89-S2 stays open (FAIL of this row), not a harness question |
-| WAV5-REG | 1280 and 1440 | 5M WAV to done | One `.wav`, 14 611 488 frames, 24-bit/48k/2ch, exact WAV done message, **and the overload warning `გადატვირთვა: პიკი +1.7 dBFS — 498 sample…` (exact text as in round 90)** — proves the measure-before-clamp order in the worker |
-| CX-WAVPHASE-R | 1280 | 5M WAV, Cancel in the **wav** phase | The round-90 plain cancelled message, 0 downloads in 15 s, the WAV worker closes at the cancel; the next WAV export succeeds |
-| NOTE-BOTH | 1280 and 1440 | Open Export, idle | The `both` radio label text is exactly `WAV + MP3 · ორი ფაილი` + the N1 note; the note is HR-VISIBLE after scrolling it into view (inside the dialog scroller, `elementFromPoint` hits it), not clipped horizontally; the sticky footer still shows status/buttons (round-88 VIS-IDLE check, one sample). Then a 5M **WAV + MP3** export: both `.wav` and `.mp3` download, exact both-done message |
-| TIMEOUT-TEXT | 1440 | Fresh page, 5M, MP3; `page.route(unpkg)` never responds; wait for the timeout | At 120 s (± 2 s) the exact `role="alert"` text `MP3 encoder 120 წამში ვერ ჩაიტვირთა — ფაილი არ შეიქმნა. შეამოწმე ინტერნეტი და სცადე თავიდან, ან აირჩიე WAV.`, 0 downloads, Close enabled. Then unroute and export MP3 again **in the same page, without a reload**: one `.mp3` decoding to 304.406 ± 0.1 s and the exact MP3 done message. This is what makes the new text honest |
-| MEM-CANCEL (GATE90-S1 evidence; **never a FAIL of round 91**) | 1440 | **Cancel series** (fresh browser): 5M WAV, one completed export (warm-up), GC → R0; 3 render-phase cancels (HR-PHASE: `რენდერი · N%`); GC; idle 15 s; GC → R1. **Control series** (another fresh browser): the same, but 3 completed WAV exports instead of the cancels → R0c, R1c. Use `VmRSS` | Report retained = (R1 − R0) − (R1c − R0c) per pair; 3 valid pairs. **Decision rule (B):** retained ≥ 117 MB (one 5M render buffer, 304.406 × 48000 × 2 × 4 B) in ≥ 2 of 3 pairs → GATE90-S1 **confirmed** (B schedules the reviewer's "disconnect + resume" fix in a later round); retained < 58 MB in all pairs → **not reproduced at this resolution**; anything else → **inconclusive**, numbers kept. Cancel code is unchanged this round |
-| PX-NET | all sessions | — | No unpkg request before the first MP3 click; then only `ffmpeg-core.js`/`.wasm`; workers same-origin; 0 studio-token / R2 / download requests; 0 `Authorization` headers |
-| REG-HYD | all sessions | — | No hydration / `useLayoutEffect` warning, no non-noise console error |
-| G91-3 | 1440 | Purchase protection | `/studio/middle-east` anonymous → sign-in required, no workspace. `/api/studio-token?…` anonymous → 401. The header link opens `/studio-lab` with the demo badge. Fake-Bearer 403 → BLOCKED if the backend is unavailable |
-| T91-TARGETED | — | A's `a-round-91/targeted-list.txt` | All pass |
-| SOURCE-UNCHANGED | — | Start = end | HEAD `35c8403`; 8 M + 2 ??; frozen 506/506; A's end hashes; the diff hunks of the six line-granted files (dialog, context, `export-mp3`, `export-progress-ui`, `export-range-ui`, doc 078) touch only the granted lines; `Modal.tsx` `741c2341`, `ffmpeg.ts` `0995ae78`, StudioContext `caa388e7`, `mp3-encoder.client.ts` `ddb70919` |
+| DEMO-COPY (primary) | 1280 and 1440 | Load `/studio-lab`, wait for the library to be ready | h1 `textContent` exactly `CZABA Studio Lab · სამუშაო სივრცე`; badge exactly `დემო კოლექცია — ავტორიზაცია არ სჭირდება`; status exactly `დემო კოლექცია მზადაა. აირჩიე ხაზი და დაამატე ხმა (Enter ან ＋ დამატება).`; `document.title` unchanged from the published tree (expected `Studio Lab — დემო სამუშაო სივრცე \| CZABA`; the route is frozen, so a mismatch is a harness fact, not a FAIL); the library notice unchanged (`სტემები სინთეზური დემოა — …` exact, from `studio-lab-demo.ts`). Each of h1/badge is one line, inside the header, not overlapping the Master control (rects). Screenshot each viewport |
+| DEMO-LOAD | 1440 | (a) `page.route('**/middle-east.mp3')` holds the response; read the status, then release. (b) A new page with `page.route('**/videos/hero/hero-music.mp3', r => r.abort())` | (a) While held, status exactly `დემო კოლექცია იტვირთება…`; after release, the exact ready text. (b) Status exactly `დემო კოლექციიდან 1 წყარო ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.`; that library row shows `შეცდომა: …`; the other sources are ready. Together these run all three X1 strings in a real browser |
+| EXPORT-NAMES | 1280: WAV project + WAV range; 1440: MP3 project + WAV + MP3 range | Base demo setup (no Ctrl+D needed); range as in the round-85/86 harness | `download.suggestedFilename()` exactly `czaba-studio-lab.wav`, `czaba-studio-lab-range.wav`, `czaba-studio-lab.mp3`, and `czaba-studio-lab-range.wav` + `czaba-studio-lab-range.mp3`. Each file parses (RIFF PCM 24-bit/48k/2ch; MP3 decodes), and the done messages match the round-91 texts |
+| PX-NET | all sessions | — | No request to any R2/workers.dev host, `/api/studio-token`, `/api/recording-*` or `/api/download`; 0 `Authorization` headers; no unpkg request before the first MP3 click; no audio request other than the demo files (`/middle-east.mp3`, `/videos/hero/hero-music.mp3`). `collection.ts` is in the graph (the context imports the copy helper), but its adapter only runs when a purchased collection is built, and `/studio-lab` never builds one |
+| REG-HYD | all sessions | — | No hydration / `useLayoutEffect` warning (the status initializer runs on SSR and client), no non-noise console error |
+| G92-3 | 1440 | Purchase protection | `/studio/middle-east` anonymous → sign-in required, no workspace; `/api/studio-token?…` anonymous → 401; the header link opens `/studio-lab` with the demo badge; fake-Bearer 403 → BLOCKED if the backend is unavailable |
+| PC-REVIEW | — | Read `collection.test.ts` and `purchased-collection-ui.test.tsx`; in a scratch copy, re-run A's mutations **b** and **f** | Both turn red as A's table says. Every PC/PW row asserts behaviour (exact values, call arguments, abort state), not only rendering. Say so explicitly: the purchased path is **unit-only, not browser-reachable** (route mount blocked) |
+| T92-TARGETED | — | A's `a-round-92/targeted-list.txt` | All pass |
+| SOURCE-UNCHANGED | — | Start = end | HEAD `77cd5b6`; 3 M + 5 ??; frozen 513/513; A's end hashes; the `git diff -U0` hunks of the three modified files touch only the granted lines; `grep -rn "lib/arrangement/collection" app/routes` empty; protected hashes as in Baseline |
 
 - **Gate rows** (`gate`, not claimed by C): full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke, and the production bundle (PROD-MP3-UNVERIFIED).
-- **Not browser-reachable** (unit only; say so): the no-Worker fallback (unchanged), the worker's in-place identity (IP4; the browser proof is MEM-WAV10).
-- **Neighbour behaviour that could break:** the overload warning (WAV5-REG), the worker terminate on cancel (CX-WAVPHASE-R), the MP3 path that reads the WAV blob (NOTE-BOTH both-export, TIMEOUT-TEXT retry), the dialog layout at 1280 with a longer note (NOTE-BOTH VIS sample).
-- **Known and intended (not new bugs):** Escape does not cancel; the encoder reloads after a load/mp3 cancel; the headless `<progress>` colour (R87-T); `disabled:opacity-40` on Cancel (GATE90-S4, Lows); holding Enter on Cancel can then close the dialog (GATE90-S3, Lows — do not file it again).
+- **Not browser-reachable** (unit only; say so): the whole purchased path (P1(b), the purchased copy, the purchased file names). The browser proves only that the demo path through the new code is byte-identical.
+- **Neighbour behaviour that could break:** SSR/hydration of the status, export download names (frozen `export-dialog-footer` l.344), the library error row text, and the header layout at 1280.
+- **Known and intended (not new bugs):** everything listed in round 91 §5; the 1-LSB WAV jitter (C-R84-L1, harness rule HR-C-R84-L1-EXPORT-JITTER).
 
 ## 6. After this round
-- **If C PASS:** SRW-20 is complete (all of R20-X1..X4 and 3b-2 C-verified). B then writes the formal SRW-20 boundary request for the bounded frontend-architect checkpoint q14 to root (inputs already appended to `b-round-83-checkpoint-request.md`). It is non-blocking.
-- **Round 92:** the regression round if planned on or after 2026-10-24; otherwise the MEM-CANCEL follow-up if GATE90-S1 is confirmed, else the Lows batch. Then SRW-21 → full regression → T12 → VISUAL-A-OBSIDIAN. Scope is not reduced.
-- **Architecture:** the gate-90 reviewer's `useArrangementExport` proposal is merged into q14. Do not extract anything in this round.
+- **If C PASS:** SRW-21 stage 1 is done, R21-I1 passes as amended (adapter + origin-aware copy), and SRW-21 stays `blocked-partial` only for the route mount (auth owner) and R21-I2 (full regression).
+- **Round 93:** if planned on or after 2026-10-24, it is the **regression round**. Otherwise it is the Lows batch, part 1, chosen by B from the open Lows list (export dialog first: gate-91 S1 note → `aria-describedby`, A-R86-L7/L8, GATE90-S3/S4). Then the full regression (R21-I2) → T12 → VISUAL-A-OBSIDIAN. Scope is not reduced.
+- **Signal COLLECTION-EMPTY-STATUS (Low, not scheduled):** with `collection.sources.length === 0` the provider's `settle` never runs, so the status stays "loading". The factory refuses empty input; any fix in the provider goes to the Lows batch.
+- **Architecture:** the formal SRW-20 boundary checkpoint request (q14) is in `b-round-91-checkpoint-request.md` for root. It is non-blocking. Nothing is extracted in this round.

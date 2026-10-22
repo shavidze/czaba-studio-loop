@@ -84,3 +84,6 @@ SRW-20 stage 3b-1 (Cancel) passed C (PASS, `browserVerified=true`, 0 bugs) and i
 - **A round-90 code-reviewer Architecture note (verbatim in `a-round-90.md`):** the same region (`ArrangementContext.tsx:2751-2954`) holds a run token, an abort listener, an encoder slot, a timeout and the download step; proposal `lib/arrangement/export-orchestration.ts` taking a `signal` and returning `done | error | cancelled`.
 - **Round 91 adds nothing to the context** except one string literal; the memory fix goes into `export-wav.ts` / the worker.
 - **Formal request:** B will send it at the SRW-20 boundary, as soon as round 91 passes C. The question for q14 stays: keep, or extract the export orchestration (hook vs pure module) and `useExportDialogFocus`, as one bounded task before the Lows batch.
+
+## Addendum — round 91 result (B, round 92 planning, 2026-10-22)
+SRW-20 is complete: C round 91 PASS, `browserVerified=true`, published as `77cd5b6`. The formal boundary request, with q14 (a)–(e), is now in `b-round-91-checkpoint-request.md`. It stays non-blocking.

@@ -1,0 +1,11 @@
+# A round 91 checkpoint
+- baseline verified (HEAD 35c8403, clean, frozen 506/506, 8 owned hashes). Pre-flight done. Next: edits G1 G2 N1 T1 + test decls
+- edits applied + formatted. Next: new test file
+- new test IP1-5 written+formatted, 17/17 with EW. Next: mutations a-f
+- mutations orig+a-f done, all killed (mut-*.txt). Next: targeted, typecheck, lint
+- doc 079 written; code-reviewer running bg. Next: smoke (mem-probe)
+- smoke mem 10M: dHWM 527 MB (1 run; first attempt env-failed: ruler null on cold load). Next: note smoke 1280, then wait reviewer
+- note smoke OK 1280 (note-1280.png). Next: end-state + report; reviewer pending
+- report draft written; waiting for reviewer
+- review 9/10 addressed (doc 079 SAB clause); report final
+- final frozen 506/506 OK after last edit; DONE

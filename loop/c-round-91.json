@@ -1,0 +1,104 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-22T22:15:05.7796058Z",
+  "round": 91,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SOURCE-UNCHANGED",
+  "MEM-WAV10",
+  "WAV5-REG",
+  "CX-WAVPHASE-R",
+  "NOTE-BOTH",
+  "TIMEOUT-TEXT",
+  "PX-NET",
+  "REG-HYD",
+  "G91-3",
+  "T91-TARGETED"
+ ],
+ "blocked": [
+  "G91-3 fake-Bearer 403 sub-check: backend unavailable in cloud (got 500 Unable to prepare Studio access)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "biome",
+  "npm run verify",
+  "e2e smoke",
+  "production bundle (PROD-MP3-UNVERIFIED)"
+ ],
+ "measurements": {
+  "MEM-WAV10": {
+   "dHWM_MB": [
+    529,
+    543,
+    531
+   ],
+   "beforeHWM_MB": [
+    454,
+    439,
+    446
+   ],
+   "afterHWM_MB": [
+    983,
+    982,
+    977
+   ],
+   "limit_MB": 639,
+   "baseline_MB": [
+    739,
+    748,
+    748
+   ]
+  },
+  "MEM-CANCEL": {
+   "verdict": "not reproduced at this resolution",
+   "retained_MB": [
+    29,
+    26,
+    26
+   ],
+   "cancelDeltaRSS_MB": [
+    21,
+    20,
+    20
+   ],
+   "controlDeltaRSS_MB": [
+    -8,
+    -6,
+    -6
+   ],
+   "cancelLabel": "რენდერი · 4% (all 9)",
+   "caveat": "render-buffer allocation at 4% unconfirmed (hypothesis)"
+  },
+  "TIMEOUT-TEXT": {
+   "msFromClick": 121230,
+   "msFromLoadLabel": 120013
+  },
+  "CX-WAVPHASE-R": {
+   "workerClosedMsAfterClick": 496
+  }
+ },
+ "unitOnlyNotBrowserReachable": [
+  "no-Worker fallback (unchanged)",
+  "worker in-place array identity (IP4)"
+ ],
+ "ableton": {
+  "NOTE-BOTH": "არ ეხება",
+  "TIMEOUT-TEXT": "არ ეხება",
+  "MEM-WAV10": "არ ეხება",
+  "MEM-CANCEL": "არ ეხება",
+  "CX-WAVPHASE-R": "carried, not re-judged"
+ },
+ "notes": [
+  "ENV-1 Vite reoptimize reload after first / visit killed one parallel batch; all re-run clean (out/env-invalid)",
+  "N1 5M WAV bytes differ across sessions at ~1e-13 RMS (pre-existing render nondeterminism, data only)"
+ ],
+ "evidence": "c-round-91.md, c-round-91/out, c-round-91/shots, c-round-91/targeted-c.log, c-round-91/{start,end}-hashes.txt"
+}

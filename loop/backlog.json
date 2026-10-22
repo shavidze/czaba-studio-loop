@@ -1,10 +1,10 @@
 {
- "version": 90,
- "updated": "2026-10-22 (B round 90 review -> round 91 task, D-29z56)",
+ "version": 91,
+ "updated": "2026-10-22 (B round 91 review -> round 92 task, D-29z57)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 91: D-29z56 - SRW-20 stage 3b-2: WAV + MP3 note says the browser may ask permission for the second download (GATE86-S2), 120 s timeout text without \"reload the page\" (R87-L-TIMEOUT-RELOAD-TEXT), worker clamps its owned transferred copy in place via new encodeArrangementWavInPlace (GATE89-S2), doc 078 status line (GATE90-S6), new doc 079; new export-wav-in-place.test.ts IP1-IP5; C MEM-WAV10 (dHWM <= 639 MB vs B baseline 739/748/748) and MEM-CANCEL GATE90-S1 evidence row; baseline HEAD 35c8403 clean, frozen b-round-90-r91-tree-sha256.txt 506; expected 8 M + 2 ??)",
- "advisor_used_by_B": "round 90 review (2026-10-22): advisor consulted before writing; advice followed (EW1 non-mutating trap -> separate in-place export used only by the worker; string-lock grants incl. export-range-ui l.455; keep \"120 wamshi\" in the timeout text; GATE90-S1 as a C-only RSS measurement with a written decision rule, not performance.memory; GATE90-S3 to Lows; R20-X4 pass; GATE89-S1/L5 closed on unit evidence, stated as not browser-reachable)",
+ "current_task": "current-task.md (round 92: D-29z57 - SRW-21 stage 1: purchased WorkspaceCollection adapter createPurchasedWorkspaceCollection (signal, credentials omit, no headers, errors without URL/token) + workspace heading/badge/status/export names from collection.origin via workspaceCollectionCopy; /studio-lab byte-identical; doc 079 l.4; docs 080 + arrangement-workspace.md; baseline 77cd5b6, frozen 513, expected 3 M + 5 ??)",
+ "advisor_used_by_B": "round 92 planning: advisor available and consulted (2026-10-22)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -4447,7 +4447,7 @@
    "depends_on": [
     "SRW-13"
    ],
-   "status": "in_progress (stage 1 C PASS r85 published 51e024a; stage 2 C PASS r86 published 971141d; stage 3a C PASS rounds 87-89 published eb1d0c0; stage 3b-1 Cancel C PASS round 90 browserVerified=true realVerified=true, published 35c8403 (gate 90); stage 3b-2 dispatched round 91 (D-29z56: GATE86-S2, R87-L-TIMEOUT-RELOAD-TEXT, GATE89-S2); R20-X1..X4 all pass; none deferred)",
+   "status": "c_pass_tech_lead_manual (all stages C PASS browserVerified=true: 1 51e024a, 2 971141d, 3a eb1d0c0, 3b-1 35c8403, 3b-2 77cd5b6 (C round 91, gate 91); R20-X1..X4 pass; Tech Lead R86-T..R91-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; PROD-MP3-UNVERIFIED gate row open)",
    "files": [
     "app/components/arrangement/ArrangementExportDialog.tsx",
     "app/contexts/ArrangementContext.tsx",
@@ -4800,7 +4800,7 @@
     {
      "stage": "3b-2",
      "round": 91,
-     "status": "dispatched",
+     "status": "c_pass_published",
      "scope": "N1 BOTH_FORMAT_NOTE adds the browser-permission caveat (GATE86-S2); T1 timeout literal without reload (R87-L-TIMEOUT-RELOAD-TEXT); G1/G2 new encodeArrangementWavInPlace used only by the worker (encodeArrangementWav stays non-mutating for frozen EW1) (GATE89-S2); doc 078 l.4 (GATE90-S6); doc 079; IP1-IP5; mutations a-f",
      "acceptance": [
       "SRW-20 honesty / memory (GATE86-S2, R87-L-TIMEOUT-RELOAD-TEXT, GATE89-S2)"
@@ -4820,7 +4820,36 @@
       "SOURCE-UNCHANGED"
      ],
      "b_baseline": "b-round-90/probe/PROBE-SUMMARY.md: 10M WAV renderer dHWM 739/748/748 MB at 35c8403; limit <= 639 MB",
-     "tech_lead": "R91-T"
+     "tech_lead": "R91-T",
+     "c_round91_passed": [
+      "SOURCE-UNCHANGED",
+      "MEM-WAV10 (dHWM 529/543/531 MB <= 639; baseline 739/748/748)",
+      "WAV5-REG (both viewports, overload 498 samples)",
+      "CX-WAVPHASE-R",
+      "NOTE-BOTH (both viewports + WAV+MP3 export)",
+      "TIMEOUT-TEXT (121.23 s from click; same-page retry OK)",
+      "PX-NET",
+      "REG-HYD",
+      "G91-3",
+      "T91-TARGETED (66 files / 1134 tests)"
+     ],
+     "c_round91_blocked": [
+      "G91-3 fake-Bearer 403: backend unavailable in cloud"
+     ],
+     "c_round91_unit_only": [
+      "no-Worker fallback (unchanged)",
+      "worker in-place identity (IP4)"
+     ],
+     "c_round91_bugs": [],
+     "browserVerified": true,
+     "published": "77cd5b668bb55a44afe358dac5b7a716db428260",
+     "evidence": [
+      "c-round-91.md",
+      "c-round-91.json",
+      "a-round-91.md",
+      "gates/gate-round-91.json",
+      "gates/round-91/review.md"
+     ]
     }
    ],
    "ableton_round85": "Live 12 manual 5.1.3.1 Selection Options (b-round-84/web/managing-files.txt l.120-221, fetched 2026-10-22): a time selection sets Render Start/Length; default whole Set; Rendered Track Main = post-fader main output. CZABA same for range default and Master mix; conscious simplification: no typed start/length fields; individual-track render not in scope; MP3 leading silence noted for stage 2.",
@@ -4948,26 +4977,52 @@
    "depends_on": [
     "SRW-20"
    ],
-   "status": "blocked-partial",
+   "status": "blocked-partial (route mount: auth owner; stage 1 independent half dispatched round 92, D-29z57)",
    "blocked_reason": "app/routes/studio.$productId.tsx and studio-token flow are owned by the auth agent; mounting the workspace there is forbidden until released by Tech Lead",
    "independent_progress": "WorkspaceCollection/loadSource adapter contract tests with a fake purchased adapter (no network/auth); docs for the future mount; full regression of SRW-01..SRW-20 by C",
    "files": [
     "app/lib/arrangement/collection.ts",
     "app/lib/arrangement/__tests__/collection.test.ts",
-    "store/docs/technical/arrangement-workspace.md"
+    "app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx",
+    "app/components/arrangement/StudioWorkspace.tsx (header only)",
+    "app/contexts/ArrangementContext.tsx (status + file names only)",
+    "docs/technical/arrangement-workspace.md",
+    "docs/implementation/2026/quarter-IV/080-studio-workspace-purchased-collection-readiness.md"
    ],
    "acceptance": [
     {
      "id": "R21-I1",
      "action": "Unit test mounts StudioWorkspace logic with a fake purchased collection adapter",
      "expected": "no workspace code change needed; adapter receives AbortSignal; errors surfaced",
-     "verify": "unit"
+     "verify": "unit",
+     "expected_amended_D-29z57": "createPurchasedWorkspaceCollection contract (signal, credentials omit, no headers, errors without URL/token, validation) + workspace heading/badge/status/file names driven by collection.origin; /studio-lab demo output byte-identical (C DEMO-COPY, DEMO-LOAD, EXPORT-NAMES); purchased path unit-only until the route mount is released"
     },
     {
      "id": "R21-I2",
      "action": "Full C regression on all prior acceptance IDs",
      "expected": "all PASS or documented",
      "verify": "C"
+    }
+   ],
+   "b_finding_round92": "B source read 2026-10-22: R21-I1 expectation 'no workspace code change needed' is FALSE - StudioWorkspace.tsx l.2136/l.2141-2143 and ArrangementContext.tsx l.532/l.3013-3014/l.2722/l.2910/l.2916 hardcode demo copy and file names; a purchased mount would print 'demo - no sign-in needed'. R21-I1 amended by D-29z57: adapter + origin-aware copy, demo byte-identical.",
+   "stages": [
+    {
+     "stage": "1",
+     "round": 92,
+     "status": "dispatched",
+     "decision": "D-29z57",
+     "scope": "P1 collection.ts (workspaceCollectionCopy + createPurchasedWorkspaceCollection), W1 header, X1-X3 status/file names, PC1-PC9, PW1-PW6, mutations a-h, doc 079 l.4, doc 080, docs/technical/arrangement-workspace.md",
+     "c_ids": [
+      "DEMO-COPY",
+      "DEMO-LOAD",
+      "EXPORT-NAMES",
+      "PX-NET",
+      "REG-HYD",
+      "G92-3",
+      "PC-REVIEW",
+      "T92-TARGETED",
+      "SOURCE-UNCHANGED"
+     ]
     }
    ]
   },
@@ -8099,7 +8154,7 @@
    "round": 91,
    "task": "current-task.md",
    "decision": "D-29z56",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "SRW-20 stage 3b-2: GATE86-S2 note",
     "R87-L-TIMEOUT-RELOAD-TEXT",
@@ -8131,6 +8186,39 @@
     "REG-HYD",
     "G91-3",
     "T91-TARGETED",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C PASS browserVerified=true realVerified=true, 0 bugs; gate 91 published 77cd5b668bb55a44afe358dac5b7a716db428260"
+  },
+  {
+   "round": 92,
+   "task": "current-task.md",
+   "decision": "D-29z57",
+   "status": "dispatched",
+   "items": [
+    "SRW-21 stage 1: purchased collection adapter (createPurchasedWorkspaceCollection) + origin-aware workspace copy (workspaceCollectionCopy)",
+    "GATE91-S2 doc 079 status line"
+   ],
+   "note": "baseline HEAD 77cd5b6 clean; frozen b-round-91-r92-tree-sha256.txt 513/513; snapshots b-round-91-r92-snapshots; expected 3 M + 5 ??",
+   "owned": [
+    "app/lib/arrangement/collection.ts (new)",
+    "app/components/arrangement/StudioWorkspace.tsx (W1 header only)",
+    "app/contexts/ArrangementContext.tsx (X1-X3: status l.532/l.3011-3015, names l.2722/l.2910/l.2916, deps l.2748/l.2953, import)",
+    "app/lib/arrangement/__tests__/collection.test.ts (new)",
+    "app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx (new)",
+    "docs/implementation/2026/quarter-IV/079-studio-lab-export-notes-and-memory.md (l.4)",
+    "docs/implementation/2026/quarter-IV/080-studio-workspace-purchased-collection-readiness.md (new)",
+    "docs/technical/arrangement-workspace.md (new)"
+   ],
+   "c_ids": [
+    "DEMO-COPY",
+    "DEMO-LOAD",
+    "EXPORT-NAMES",
+    "PX-NET",
+    "REG-HYD",
+    "G92-3",
+    "PC-REVIEW",
+    "T92-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -13068,10 +13156,11 @@
   {
    "id": "GATE86-S2-BOTH-NOTE-DELIVERY",
    "severity": "low",
-   "status": "dispatched round 91 (D-29z56 N1; C NOTE-BOTH)",
+   "status": "closed (C round 91 NOTE-BOTH both viewports; published 77cd5b6); real-browser permission prompt behaviour stays with Tech Lead R91-T",
    "to": "A (3b)",
    "title": "the WAV + MP3 note promises both-or-none, true for encoding but not for browser delivery (real Chrome may prompt; Safari may drop)",
-   "evidence": "gates/round-86/review.md #2; Tech Lead R86-T"
+   "evidence": "gates/round-86/review.md #2; Tech Lead R86-T",
+   "closed_evidence": "c-round-91.md NOTE-BOTH"
   },
   {
    "id": "GATE86-S3-TIMEOUT-COVERAGE",
@@ -13092,7 +13181,7 @@
   {
    "id": "PROD-MP3-UNVERIFIED",
    "severity": "low",
-   "status": "open evidence: gate 90 verify.log again shows only the build (worker chunk + mp3-encoder chunk) and no preview-server WAV/MP3/cancel run; re-requested from root for gate 91",
+   "status": "open evidence: gate 91 verify.log (grep preview/e2e/mp3) again shows only unit tests and the build, no preview-server WAV/MP3/cancel run; re-requested from root for gate 92",
    "to": "root",
    "title": "MP3 export (and from round 87 the export-wav worker) not verified in the production bundle",
    "evidence": "c-round-86.json notRun; gates/round-86/review.md #5"
@@ -13164,10 +13253,11 @@
   {
    "id": "R87-L-TIMEOUT-RELOAD-TEXT",
    "severity": "low",
-   "status": "dispatched round 91 (D-29z56 T1; C TIMEOUT-TEXT incl. same-page retry)",
+   "status": "closed (C round 91 TIMEOUT-TEXT: exact text at 121.23 s, same-page retry succeeded; published 77cd5b6)",
    "to": "Lows batch",
    "title": "the 120 s MP3 timeout text still says \"გადატვირთე გვერდი\" (reload the page), but since round 87 a retry works in the same page (C PX-RETRY) - copy no longer accurate; change needs ArrangementContext.tsx + export-mp3 l.64 + export-progress-ui l.67 constants",
-   "evidence": "c-round-87.md Observations; c-round-87.json observations[1]"
+   "evidence": "c-round-87.md Observations; c-round-87.json observations[1]",
+   "closed_evidence": "c-round-91.md TIMEOUT-TEXT"
   },
   {
    "id": "R87-O-PROGRESS-FILL-COLOUR",
@@ -13204,7 +13294,7 @@
   {
    "id": "ARCH-EXPORT-MP3-ORCHESTRATION",
    "severity": "info",
-   "status": "signal (not scheduled); repeated by the A round-90 reviewer and the gate-90 reviewer (useArrangementExport hook or lib/arrangement/export-orchestrator.ts; acceptance CU1-CU9, EC1-EC4, TR1-TR6 unchanged, useArrangement() surface identical) - merged here; checkpoint q14 at the SRW-20 boundary (after round 91 C PASS), addendum appended to b-round-83-checkpoint-request.md",
+   "status": "signal (not scheduled); repeated by the A round-90 reviewer and the gate-90 reviewer (useArrangementExport hook or lib/arrangement/export-orchestrator.ts; acceptance CU1-CU9, EC1-EC4, TR1-TR6 unchanged, useArrangement() surface identical) - merged here; checkpoint q14 at the SRW-20 boundary (after round 91 C PASS), addendum appended to b-round-83-checkpoint-request.md; round 91: gate-91 reviewer (message constants module) and A round-91 reviewer (4 coordinated string edits) merged as q14 (d)",
    "to": "B/root",
    "title": "round-87 code-reviewer Architecture note: exportMp3 (ArrangementContext.tsx:2726-2881) changed in rounds 85-87 and 3b again; proposal after 3b: move timer/import/reset/abort orchestration into a lib/arrangement/ module, useArrangement() shape and PU/MX tests unchanged",
    "evidence": "a-round-87.md Architecture note (verbatim)"
@@ -13260,10 +13350,11 @@
   {
    "id": "GATE89-S2-EXPORT-EXTRA-FLOAT-COPY",
    "severity": "medium",
-   "status": "dispatched round 91 (D-29z56 G1/G2: encodeArrangementWavInPlace in the worker; C MEM-WAV10 dHWM <= 639 MB vs B baseline 739/748/748 MB)",
+   "status": "closed (C round 91 MEM-WAV10 PASS 3/3: dHWM 529/543/531 MB <= 639 vs baseline 739/748/748; published 77cd5b6)",
    "to": "A (3b-2)",
    "title": "rendered AudioBuffer + slice() copy + worker clamp copy: one extra stereo float copy at peak (~230 MB for 10 min)",
-   "evidence": "gates/round-89/review.md #2"
+   "evidence": "gates/round-89/review.md #2",
+   "closed_evidence": "c-round-91.md MEM-WAV10; c-round-91/out/mem10-run{1,2,3}.json"
   },
   {
    "id": "GATE89-S3-WORKER-NO-WATCHDOG",
@@ -13332,10 +13423,11 @@
   {
    "id": "GATE90-S1-CANCELLED-CONTEXT-MEMORY",
    "severity": "medium",
-   "status": "open - evidence row MEM-CANCEL in round 91 (C, RSS method, decision rule in the task); fix (disconnect sources + resume, reviewer Alternative) only if confirmed",
+   "status": "not reproduced at this resolution (C round 91 MEM-CANCEL: retained 29/26/26 MB < 58 MB in all 3 pairs; B decision rule -> no fix scheduled). Caveat (C, hypothesis): every cancel landed at render 4%, render-buffer allocation at that point unconfirmed; optional later-percentage/10M evidence row in the regression round, not its own round",
    "to": "C (measure) / A (fix if confirmed)",
    "title": "after a render-phase cancel resume() is never called, so the suspended OfflineAudioContext and its render buffer (~117 MB for 5M) may stay alive until page unload; unverified (doc 078 hypothesis)",
-   "evidence": "gates/round-90/review.md #1; c-round-90.md N3 (not measured)"
+   "evidence": "gates/round-90/review.md #1; c-round-90.md N3 (not measured)",
+   "closed_evidence": "c-round-91.md MEM-CANCEL; c-round-91/out/memc-*.json"
   },
   {
    "id": "GATE90-S2-TAB-CONTRACT-CHANGED",
@@ -13372,7 +13464,7 @@
   {
    "id": "GATE90-S6-DOC078-STATUS",
    "severity": "low",
-   "status": "dispatched round 91 (doc 078 l.4 one-line grant)",
+   "status": "closed (C round 91 SOURCE-UNCHANGED hunk doc 078 -4 +4; published 77cd5b6)",
    "to": "A",
    "title": "doc 078 status line still says awaiting C",
    "evidence": "gates/round-90/review.md #6"
@@ -13380,7 +13472,7 @@
   {
    "id": "GATE90-S7-LINT-OWNED-UNCONFIRMED",
    "severity": "info",
-   "status": "dispatched round 91 (A saves npx biome lint output for owned files in a-round-91/biome-lint-owned.txt)",
+   "status": "closed (a-round-91/biome-lint-owned.txt: no diagnostics; repeated as a standing A step in round 92)",
    "to": "A",
    "title": "verify.log hides 199 of 218 lint warnings, so owned-file lint cleanliness was not visible to the gate reviewer",
    "evidence": "gates/round-90/review.md #7"
@@ -13412,10 +13504,58 @@
   {
    "id": "ARCH-CHECKPOINT-SRW20",
    "severity": "info",
-   "status": "to be requested from root after round 91 C PASS (SRW-20 boundary; non-blocking); inputs q14 in b-round-83-checkpoint-request.md (round-86..90 addenda)",
+   "status": "requested_from_root 2026-10-22 (b-round-91-checkpoint-request.md, q14 (a)-(e); non-blocking)",
    "to": "root",
    "title": "bounded frontend-architect checkpoint at the SRW-20 boundary: export orchestration (useArrangementExport hook vs lib/arrangement/export-orchestrator.ts), useExportDialogFocus, dialog-tab-stops placement",
    "evidence": "gates/round-90/review.md Architecture note; a-round-90.md Architecture note"
+  },
+  {
+   "id": "GATE91-S1-NOTE-IN-LABEL",
+   "severity": "low",
+   "status": "open - Lows batch (export dialog part; changes the export-range-ui l.455 name lock, needs a test grant)",
+   "to": "B/Lows batch",
+   "title": "WAV + MP3 note span sits inside the <label>, so the radio's accessible name includes the whole note; give it an id + aria-describedby",
+   "evidence": "gates/round-91/review.md #1"
+  },
+  {
+   "id": "GATE91-S2-DOC079-STATUS",
+   "severity": "low",
+   "status": "dispatched round 92 (doc 079 l.4 one-line grant)",
+   "to": "A",
+   "title": "doc 079 status line still says awaiting C",
+   "evidence": "gates/round-91/review.md #2"
+  },
+  {
+   "id": "GATE91-S3-INPLACE-NAMING",
+   "severity": "info",
+   "status": "acknowledged (reviewer: nothing to do now; revisit if a second caller of encodeArrangementWavInPlace appears)",
+   "to": "B",
+   "title": "only the parameter type marks the owned-arrays contract of encodeArrangementWavInPlace",
+   "evidence": "gates/round-91/review.md #3"
+  },
+  {
+   "id": "C-R91-N1-RENDER-NONDETERMINISM",
+   "severity": "info",
+   "status": "data (related to C-R84-L1; RMS agrees to ~1e-13; not caused by round 91)",
+   "to": "B",
+   "title": "5M WAV bytes differ across sessions (3 sha prefixes) while RMS agrees",
+   "evidence": "c-round-91.md N1; c-round-91/out/media-manifest.txt"
+  },
+  {
+   "id": "COLLECTION-EMPTY-STATUS",
+   "severity": "low",
+   "status": "open - Lows batch (signal from B source read, round 92 planning; the round-92 factory refuses empty input)",
+   "to": "B/Lows batch",
+   "title": "ArrangementProvider load effect: with collection.sources.length === 0 settle never runs and the status stays 'loading' forever",
+   "evidence": "ArrangementContext.tsx l.2997-3046 at 77cd5b6"
+  },
+  {
+   "id": "R92-T-TECH-LEAD",
+   "severity": "info",
+   "status": "open",
+   "to": "Tech Lead",
+   "title": "when the auth owner releases the purchased route: mount the workspace with createPurchasedWorkspaceCollection and check heading/badge/status copy and the czaba-studio*.wav names with real purchased stems",
+   "evidence": "current-task.md round 92"
   }
  ],
  "tech_lead_notes": [
@@ -13736,6 +13876,11 @@
   {
    "id": "R90-T",
    "what": "real Chrome: Cancel during a long WAV render and during MP3 conversion feels immediate, the fan/CPU settles (render stops at the next suspend point), no file appears, next export works; is 'Escape does not cancel' acceptable?",
+   "status": "open"
+  },
+  {
+   "id": "R92-T",
+   "what": "after the purchased route mount is released: real purchased stems load through createPurchasedWorkspaceCollection; header 'CZABA Studio', badge 'შეძენილი კოლექცია', status and czaba-studio*.wav/.mp3 names read right",
    "status": "open"
   }
  ],
@@ -14574,6 +14719,11 @@
    "round": 89,
    "source": "gates/round-89/review.md Architecture note + a-round-89.md",
    "note": "Gate-89 reviewer: signal 4 exportMp3 ~150 lines (keep; proposal export-orchestration.ts) -> merged into ARCH-EXPORT-MP3-ORCHESTRATION/q14; signal 3 export region changed rounds 85/86/89 with heavy fakes -> shared harness ARCH (c); signal 2 measureExportOverload re-export shim in graph.client (keep, remove when importers move). A round-89 reviewer: focus region changed 6 times -> useExportDialogFocusTrap proposal, dialog-tab-stops placement under lib/arrangement (move to shared lib if a second dialog needs it), inert/<dialog> alternative is Modal-wide -> ARCH-R88-EXPORT-DIALOG-FOCUS-HOOK/q14. Non-blocking; checkpoint q14 requested at the SRW-20 boundary after 3b-2."
+  },
+  {
+   "round": 91,
+   "source": "gates/round-91/review.md Architecture note + a-round-91.md",
+   "note": "Signal 3: export region of ArrangementContext changed in rounds 87/90/91; each wording change = up to 4 coordinated edits. Keep now; proposal: export user-facing message constants from one module (q14 (d)); merged into ARCH-EXPORT-MP3-ORCHESTRATION. Formal SRW-20 boundary request sent (b-round-91-checkpoint-request.md)."
   }
  ],
  "vitest_floor_round46": 1357,

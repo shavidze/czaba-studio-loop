@@ -1,0 +1,11 @@
+# C round 91 checkpoint
+- SOURCE-UNCHANGED start: HEAD 35c8403, 8 M + 2 ??, frozen 506/506, hashes = A end-hashes, hunks only granted lines. start-hashes.txt.
+- Warm-up load OK.
+- MEM-WAV10 DONE (3 valid runs, alone): dHWM 529 / 543 / 531 MB (before HWM 454/439/446). All files OK. out/mem10-run{1,2,3}.json
+- Next: WAV5-REG + CX-WAVPHASE-R, NOTE-BOTH, TIMEOUT-TEXT, G91-3 (parallel), then targeted vitest, then MEM-CANCEL (alone), end check.
+- WAV5-REG DONE both (exact WAV done + exact overload warning 498 sample, 14 611 488 frames). CX-WAVPHASE-R DONE 1280 x2 (label WAV 0%, plain cancel, 0 dl, worker closed 496 ms after click; next WAV OK).
+- TIMEOUT-TEXT DONE: alert exact at 121.23 s from click / 120.01 s from load label; 0 dl; Close enabled; same-page retry MP3 304.406 s exact; 0 navigations.
+- NOTE-BOTH DONE both (label+note textContent exact, note 2 lines, 3 hit points, inside scroller, footer buttons visible; WAV+MP3 export both files, exact message).
+- G91-3 DONE (sign-in required, token 401, header -> /studio-lab demo badge; fake Bearer 500 -> BLOCKED). env-invalid: first parallel batch killed by Vite reoptimize reload after first '/' visit (out/env-invalid/).
+- Next: T91-TARGETED vitest, then MEM-CANCEL alone, end check, report.
+- DONE: report c-round-91.md + c-round-91.json written (PASS).
