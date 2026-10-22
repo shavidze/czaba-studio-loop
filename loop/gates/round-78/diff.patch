@@ -1,0 +1,293 @@
+diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index d3896bb..5113b89 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -6,11 +6,10 @@ import {
+ } from '~/contexts/ArrangementContext';
+ import {
+   clipEdgeTargets,
+-  resolveGridTime,
++  resolveGridTimeWithTargets,
+   resolveSnapStep,
+   snapGroupMoveDelta,
+   snapMoveStartToGridOrEdges,
+-  snapTimeToGrid,
+   snapTimeToGridOrEdges,
+ } from '~/lib/arrangement/grid';
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
+@@ -548,7 +547,9 @@ function ArrangementClipViewInner({
+       return;
+     }
+     const clipEnd = original.start + original.duration;
+-    const onGrid = (time: number) => (step === null ? time : snapTimeToGrid(time, step));
++    const markers = markerSnapTimes(gesture.before);
++    const onGrid = (time: number) =>
++      step === null ? time : snapTimeToGridOrEdges(time, step, markers);
+     const current = Math.min(clipEnd, Math.max(original.start, onGrid(gesture.anchorTime + delta)));
+     const anchor = Math.min(clipEnd, Math.max(original.start, onGrid(gesture.anchorTime)));
+     if (step !== null && Math.abs(current - anchor) < 1e-9) {
+@@ -576,7 +577,15 @@ function ArrangementClipViewInner({
+       if (!gesture.moved) {
+         setTimeRange(null);
+         if (event.type !== 'pointercancel') {
+-          seekTo(resolveGridTime(gesture.anchorTime, snapSeconds, gridSeconds, event.altKey));
++          seekTo(
++            resolveGridTimeWithTargets(
++              gesture.anchorTime,
++              snapSeconds,
++              gridSeconds,
++              event.altKey,
++              markerSnapTimes(gesture.before),
++            ),
++          );
+         }
+       }
+       return;
+diff --git a/app/components/arrangement/ArrangementLoopBrace.tsx b/app/components/arrangement/ArrangementLoopBrace.tsx
+index 969287c..cd3c034 100644
+--- a/app/components/arrangement/ArrangementLoopBrace.tsx
++++ b/app/components/arrangement/ArrangementLoopBrace.tsx
+@@ -1,7 +1,13 @@
+ import { type KeyboardEvent, type PointerEvent, useEffect, useRef } from 'react';
+ import { formatArrangementTime, useArrangement } from '~/contexts/ArrangementContext';
+-import { adjacentGridLine, resolveGridTime, resolveSnapStep } from '~/lib/arrangement/grid';
++import {
++  adjacentGridLine,
++  resolveGridTimeWithTargets,
++  resolveSnapStep,
++  snapMoveStartToGridOrEdges,
++} from '~/lib/arrangement/grid';
+ import { type LoopEdge, moveLoop, resizeLoop } from '~/lib/arrangement/loop';
++import { markerSnapTimes } from '~/lib/arrangement/markers';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementLoop } from '~/types/arrangement';
+ import { watchUncapturedPointerGesture } from './ArrangementClip';
+@@ -135,26 +141,35 @@ export function ArrangementLoopBrace({
+     gesture.moved = true;
+     const delta = dx / pxPerSecond;
+     const { original, before, kind } = gesture;
++    const step = resolveSnapStep(snapSeconds, gridSeconds, event.altKey);
++    const markers = markerSnapTimes(before);
++    const rawStart = roundLoopTime(original.start + delta);
+     const next =
+       kind === 'move'
+         ? moveLoop(
+             before,
+-            resolveGridTime(
+-              roundLoopTime(original.start + delta),
+-              snapSeconds,
+-              gridSeconds,
+-              event.altKey,
+-            ),
+-            resolveSnapStep(snapSeconds, gridSeconds, event.altKey),
++            step === null
++              ? rawStart
++              : Math.round(
++                  snapMoveStartToGridOrEdges(
++                    rawStart,
++                    original.end - original.start,
++                    step,
++                    markers,
++                    markers,
++                  ) * 1e6,
++                ) / 1e6,
++            step,
+           )
+         : resizeLoop(
+             before,
+             kind,
+-            resolveGridTime(
++            resolveGridTimeWithTargets(
+               roundLoopTime(original[kind] + delta),
+               snapSeconds,
+               gridSeconds,
+               event.altKey,
++              markers,
+             ),
+           );
+     previewLoopArrangement(next);
+diff --git a/app/components/arrangement/ArrangementRuler.tsx b/app/components/arrangement/ArrangementRuler.tsx
+index c05e283..6d99dbc 100644
+--- a/app/components/arrangement/ArrangementRuler.tsx
++++ b/app/components/arrangement/ArrangementRuler.tsx
+@@ -12,7 +12,7 @@ import {
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+ } from '~/contexts/ArrangementContext';
+-import { resolveGridTime } from '~/lib/arrangement/grid';
++import { resolveGridTimeWithTargets } from '~/lib/arrangement/grid';
+ import {
+   RULER_TICK_STEPS_SECONDS,
+   rulerDragView,
+@@ -25,6 +25,11 @@ import { watchUncapturedPointerGesture } from './ArrangementClip';
+ 
+ const PLAYHEAD_KEY_STEP_SECONDS = 0.1;
+ const RULER_DOUBLE_CLICK_AFTER_DRAG_MS = 300;
++const NO_SNAP_MARKER_TIMES: readonly number[] = [];
++
++function noSnapMarkerTimes(): readonly number[] {
++  return NO_SNAP_MARKER_TIMES;
++}
+ 
+ interface ArrangementRulerProps {
+   seconds: number;
+@@ -39,6 +44,7 @@ interface ArrangementRulerProps {
+   onRulerDoubleClick: () => void;
+   snapSeconds?: number | null;
+   gridSeconds?: number;
++  getSnapMarkerTimes?: () => readonly number[];
+ }
+ 
+ interface ArrangementRulerPlayheadProps extends ArrangementRulerProps {
+@@ -76,6 +82,7 @@ function ArrangementRulerPlayhead({
+   onGestureClaim,
+   snapSeconds = null,
+   gridSeconds,
++  getSnapMarkerTimes = noSnapMarkerTimes,
+ }: ArrangementRulerPlayheadProps) {
+   const positionStore = useArrangementPositionStore();
+   const dragRef = useRef<PlayheadDrag | null>(null);
+@@ -163,7 +170,13 @@ function ArrangementRulerPlayhead({
+       return;
+     }
+     drag.moved = true;
+-    drag.time = resolveGridTime(pointerTime(event.clientX), snapSeconds, gridSeconds, event.altKey);
++    drag.time = resolveGridTimeWithTargets(
++      pointerTime(event.clientX),
++      snapSeconds,
++      gridSeconds,
++      event.altKey,
++      getSnapMarkerTimes(),
++    );
+     onScrub(drag.time);
+   };
+ 
+@@ -180,7 +193,13 @@ function ArrangementRulerPlayhead({
+     if (drag.moved) {
+       onScrubEnd(
+         event.type === 'pointerup'
+-          ? resolveGridTime(pointerTime(event.clientX), snapSeconds, gridSeconds, event.altKey)
++          ? resolveGridTimeWithTargets(
++              pointerTime(event.clientX),
++              snapSeconds,
++              gridSeconds,
++              event.altKey,
++              getSnapMarkerTimes(),
++            )
+           : drag.time,
+       );
+     }
+@@ -263,6 +282,7 @@ export function ArrangementRuler(props: ArrangementRulerProps) {
+     onRulerDoubleClick,
+     snapSeconds = null,
+     gridSeconds,
++    getSnapMarkerTimes = noSnapMarkerTimes,
+   } = props;
+   const rulerRef = useRef<HTMLDivElement>(null);
+   const navigationRef = useRef<RulerNavigation | null>(null);
+@@ -311,7 +331,15 @@ export function ArrangementRuler(props: ArrangementRulerProps) {
+       return;
+     }
+     if (seek) {
+-      onSeek(resolveGridTime(navigation.anchorTime, snapSeconds, gridSeconds, bypass));
++      onSeek(
++        resolveGridTimeWithTargets(
++          navigation.anchorTime,
++          snapSeconds,
++          gridSeconds,
++          bypass,
++          getSnapMarkerTimes(),
++        ),
++      );
+     }
+   };
+ 
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index a45e3fa..af5b66c 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -26,7 +26,7 @@ import {
+   GRID_DEFAULT_DIVISION_SECONDS,
+   GRID_DIVISIONS_SECONDS,
+   gridLinesVisible,
+-  resolveGridTime,
++  resolveGridTimeWithTargets,
+ } from '~/lib/arrangement/grid';
+ import {
+   adjacentGridDivisionId,
+@@ -45,6 +45,7 @@ import {
+   musicalGridDivisionSeconds,
+   toggledTripletGridDivisionId,
+ } from '~/lib/arrangement/grid-divisions';
++import { markerSnapTimes } from '~/lib/arrangement/markers';
+ import { metronomeStatusMessage } from '~/lib/arrangement/metronome';
+ import {
+   clampTrackHeight,
+@@ -396,6 +397,10 @@ export function StudioWorkspace() {
+   const marqueeCleanupRef = useRef<(() => void) | null>(null);
+   const workspaceRef = useRef(workspace);
+   workspaceRef.current = workspace;
++  const getRulerSnapMarkerTimes = useCallback(
++    () => markerSnapTimes(workspaceRef.current.getArrangement()),
++    [],
++  );
+   const exportOpenRef = useRef(isExportOpen);
+   exportOpenRef.current = isExportOpen;
+   const exportKeyEventRef = useRef<KeyboardEvent | null>(null);
+@@ -1280,11 +1285,12 @@ export function StudioWorkspace() {
+         latest.selectClip(null);
+         latest.setTimeRange(null);
+         latest.seekTo(
+-          resolveGridTime(
++          resolveGridTimeWithTargets(
+             gesture.clickTime,
+             snapEnabledRef.current ? gridSecondsRef.current : null,
+             gridSecondsRef.current,
+             end.altKey,
++            markerSnapTimes(latest.getArrangement()),
+           ),
+         );
+       };
+@@ -1864,6 +1870,7 @@ export function StudioWorkspace() {
+                     onRulerDoubleClick={handleRulerDoubleClick}
+                     snapSeconds={snapEnabled ? gridSeconds : null}
+                     gridSeconds={gridSeconds}
++                    getSnapMarkerTimes={getRulerSnapMarkerTimes}
+                   />
+                 </div>
+                 <ArrangementTempoRow
+diff --git a/app/lib/arrangement/grid.ts b/app/lib/arrangement/grid.ts
+index f63a3ac..e64dd2a 100644
+--- a/app/lib/arrangement/grid.ts
++++ b/app/lib/arrangement/grid.ts
+@@ -84,6 +84,17 @@ export function resolveGridTime(
+   return step === null ? time : snapTimeToGrid(time, step);
+ }
+ 
++export function resolveGridTimeWithTargets(
++  time: number,
++  snapSeconds: number | null,
++  gridSeconds: number | undefined,
++  bypass: boolean,
++  targets: readonly number[],
++): number {
++  const step = resolveSnapStep(snapSeconds, gridSeconds, bypass);
++  return step === null ? time : snapTimeToGridOrEdges(time, step, targets);
++}
++
+ function adjacentStoredGridLine(time: number, step: number, direction: -1 | 1): number | null {
+   if (direction === 1) {
+     const base = Math.floor(time / step);
+diff --git a/docs/implementation/2026/quarter-IV/067-studio-lab-marker-edge-navigation.md b/docs/implementation/2026/quarter-IV/067-studio-lab-marker-edge-navigation.md
+index 7e3bf50..3499f8c 100644
+--- a/docs/implementation/2026/quarter-IV/067-studio-lab-marker-edge-navigation.md
++++ b/docs/implementation/2026/quarter-IV/067-studio-lab-marker-edge-navigation.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — Ctrl/Option+←/→ კლიპების კიდეებზეც ჩერდება, ეტაპი 2b-2 (SRW-16 / FB-10)
+ 
+ **თარიღი:** 2026-10-22
+-**სტატუსი:** Round 77 — იმპლემენტირებულია, C-ის შემოწმებას ელოდება (D-29z42)
++**სტატუსი:** Round 77 — C PASS (browserVerified), გამოქვეყნდა `60006d4` (D-29z42)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი

@@ -1,0 +1,10 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'networkidle' });
+await page.waitForTimeout(3000);
+await page.screenshot({ path: 'peek.png' });
+console.log(await page.evaluate(() => [...document.querySelectorAll('[data-testid]')].map((e) => e.dataset.testid).slice(0, 40).join(' ')));
+await browser.close();

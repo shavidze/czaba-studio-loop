@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-22T03:38:39.043Z)
+# Active loop summary (2026-10-22T04:30:33.758Z)
 
-- backlog.json 692 KB -> active view 126 KB
-- status: G_ROOT_GATE round 77
-- servers: `{"checkedUtc":"2026-10-22T03:22:58.1803407Z","round":77,"attempt":1,"store":200}`
-- last publication: 60006d4305c4ef316f5459e6fa29a48e7931b36c (rounds 77-77)
-- last root gate: round 77 published - commit 60006d4305c4ef316f5459e6fa29a48e7931b36c pushed
+- backlog.json 698 KB -> active view 132 KB
+- status: G_ROOT_GATE round 78
+- servers: `{"checkedUtc":"2026-10-22T04:11:42.9961390Z","round":78,"attempt":1,"store":200}`
+- last publication: c062147fc29f105454de7728cc4bbbe762f5cb6d (rounds 78-78)
+- last root gate: round 78 published - commit c062147fc29f105454de7728cc4bbbe762f5cb6d pushed
 
 ## Current items: SRW-16
 
@@ -181,6 +181,15 @@
 - C-R76-HARNESS-BUDGET / info / acknowledged / MS-PLAY at 1440 needed 3 harness-invalid attempts before the valid one (more than the two-extra-attempt letter; no measurement miss, no tole
 - R77-BUTTON-SHORTCUT-SUPERSET / low / open - Lows batch (with ROOT-R69-L2 / ROOT-R73-S2; string locked by frozen MU6) / prev/next marker buttons announce Control+ArrowLeft/Right while the key also stops at clip edges from round 77 (buttons stay marker-only per
 - R77-T-TECH-LEAD / info / open / real Mac: Option+Left/Right steps markers and clip edges of the selected tracks; Option+Right with a selected clip does not move it; Ctrl+ar
+- GATE77-S1-MAC-OPTION-NOT-ADVERTISED / low / open - Lows batch (merged with R77-BUTTON-SHORTCUT-SUPERSET / ROOT-R69-L2 / ROOT-R73-S2; no platform-dependent render string) / gate-77 reviewer S1: buttons declare aria-keyshortcuts Control+ArrowLeft/Right; macOS Option binding is not advertised and the key does more
+- GATE77-S2-DOC067-STATUS / low / scheduled round 78 (one status line, D-29z43) / doc 067 status line still says awaiting C
+- GATE77-S3-EDGE-SET / info / open - Lows batch (optional) / clipEdgeTimesOnTracks uses trackIds.includes inside filter (O(clips x tracks) per keydown); a Set would be linear
+- GATE77-S4-EN10-CLOCK / info / watch (fix with fakeClock.base if it ever flakes) / marker-edge-nav-ui EN10 checks the position against the real clock (< 2.75, 0.5 s window)
+- ARCH-R77-RESOLVE-ARROW-SHORTCUT / info / signal - part of the SRW-16 boundary checkpoint request (after round 78); reviewer verdict keep for now / handleKeyDown arrow/modifier precedence changed in rounds 73/76/77; proposal: pure resolveArrowShortcut(...) -> step|nudge|block|browser|nul
+- A-R77-CARRIED-POINTS / low / open - Lows batch / EN7 locks Mac Option+Shift+Right = clip nudge (unspecified by B); adjacentMarkerTarget/stepMarker names now cover non-marker stops; Ctrl+Lef
+- C-R77-OBS-RANGE-INTERVAL-WORDING / info / acknowledged (B spec wording, not an A defect): N2 allTracks means every clip edge on every track, not only inside the range interval; matches Live 6.9 text / round-77 task EK-RANGE said edges in the interval after Ctrl+Shift+L
+- C-R77-OBS-RANGE-SELECTS-CLIP / info / acknowledged (harness note): a range drag in a clip waveform also selects that clip and makes its lane active; only vitest isolates range-only track rules / range drag selects the clip
+- R78-T-TECH-LEAD / info / open / real Chrome on the 10 s grid: marker capture of the playhead, ranges and loop edges (no pixel radius) feels right?
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video

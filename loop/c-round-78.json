@@ -1,0 +1,58 @@
+{
+ "taskStatus": "PASS",
+ "round": 78,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-22T04:11:42.9961390Z",
+  "round": 78,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "MT-RULER",
+  "MT-SCRUB",
+  "MT-LANE",
+  "MT-CLIPCLICK",
+  "MT-RANGE",
+  "MT-LOOP-RESIZE",
+  "MT-LOOP-MOVE",
+  "MT-AUDIO",
+  "REG-SNAP-SEEK",
+  "REG-LOOP-KEYS",
+  "REG-CLIP-SNAP",
+  "REG-MARKERS",
+  "RU-DBLCLICK",
+  "T78-TARGETED",
+  "REG-HYD",
+  "G78-3",
+  "SOURCE-UNCHANGED"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [
+  "G78-3 fake-Bearer 403 sub-check only: /api/studio-token with a fake Bearer returns 500 \"Unable to prepare Studio access\" (backend unavailable in cloud). Not PASS, not a FAIL of A. The rest of G78-3 (anonymous 401, Sign in required, header entry, clean network) is PASS."
+ ],
+ "abletonMatch": {
+  "MT-* (cursor/time selection/loop brace snap to locators)": "unconfirmed: CZABA decision (FB-10, D-29z43), Live 12 §6.4/§6.7/§6.10 do not state it",
+  "Alt bypass of grid": "confirmed (§6.10 text, B capture)",
+  "cursor snaps to grid (REG-SNAP-SEEK)": "confirmed (§6.10 text)",
+  "clips snap to locators (REG-CLIP-SNAP)": "confirmed (§6.7 text)"
+ },
+ "harnessNotes": [
+  "REG-CLIP-SNAP 1280x720 first run: C clicked the video lane at x=1312, outside the 1280 px viewport (elementFromPoint null), so sfx stayed selected and Ctrl+Right stopped at the sfx clip end 8.375 (correct 2b-2 behaviour). Click moved to 15 s (x=1112); re-run PASS at both viewports. Not an app fault.",
+  "MT-RANGE second drag 6.40->6.45 is 2 px, under DRAG_THRESHOLD_PX 3, so it is a click (seek 6.375, no range). C added a 10 px drag 6.20->6.45 (both edges resolve to 6.375): no range, which exercises T4.",
+  "The first 1280x720 group-C output (REG-CLIP-SNAP FAIL from the harness) was overwritten by the re-run file mt78-1280x720-C.json; the failed run is described in c-round-78.md (Harness fixes)."
+ ],
+ "evidence": "c-round-78.md, c-round-78/",
+ "notes": [
+  "Doc 068 Ableton table marks the cursor/time selection/loop brace snapping to locators as unconfirmed and a CZABA decision; it makes no Live claim. Doc 068 CR=0."
+ ]
+}
