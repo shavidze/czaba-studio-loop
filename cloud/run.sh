@@ -30,6 +30,7 @@ notify() {
 save_state() {
   local rc=$?
   set +e
+  [ -n "${WATCH_PID:-}" ] && kill "$WATCH_PID" 2>/dev/null
   log "saving state (loop exit $rc)"
   mkdir -p "$STATE/worktree"
   git -C "$STORE" add -A
@@ -98,6 +99,11 @@ fi
 sed "s#__CZ__#$CZ#g" "$STATE/cloud/config.template.json" > "$CFG"
 
 trap save_state EXIT
+# Context watchdog: when an agent's context nears contextRestartTokens or gets compacted, it stops only that agent and
+# the runner continues the same phase in a fresh session (checkpoint in loop/context-restart-*.md).
+python3 "$KIT/tools/watch-context.py" "$CFG" > "$LOOP/watch.out.log" 2> "$LOOP/watch.err.log" &
+WATCH_PID=$!
+log "context watchdog started (pid $WATCH_PID)"
 log "running agent-loop-kit (timeout ${TIMEOUT_MIN} min)"
 set +e
 timeout --signal=TERM "${TIMEOUT_MIN}m" pwsh -NoLogo -NoProfile -File "$KIT/run-loop.ps1" -Config "$CFG" -StartRound "$START_ROUND" -StartPhase "$START_PHASE" -RoundLimit 1
