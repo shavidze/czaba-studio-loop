@@ -1,0 +1,12 @@
+const X=require('./lib81.cjs');const{L,sleep,st,blur,key,rowKeys,clickGroup,G1,G2,mix,exportWav}=X;
+const vp=process.argv[2]||'1440x900';const rec=X.mkRec(`${L.OUT}/p5-${vp}.json`);const T=X.T(rec);
+(async()=>{const s=await L.open(vp);const p=s.page;await X.freshSetup(p);await X.lMute(p,'video').click();await sleep(200);await X.makeG1(p);
+ await T('P-SOLO-TRACK-GROUP',async()=>{await X.lSolo(p,'music').click();await sleep(200);await X.gSolo(p,G1).click({modifiers:['Control']});await sleep(200);const a=await mix(p);await X.lSolo(p,'music').click();await sleep(200);const b=await mix(p);
+  rec('P-SOLO-TRACK-GROUP',a.tracks.music.s==='true'&&a.groups[G1].ds==='on'&&b.tracks.music.s==='true'&&b.groups[G1].ds==='off',{a,b});await X.lSolo(p,'music').click();await sleep(200);});
+ await T('P-NEST-KEEPS-MIX',async()=>{await X.gMute(p,G1).click();await sleep(200);await X.makeG2(p);const m=await mix(p);await X.lMute(p,'music').click();await sleep(200);const e=await exportWav(p,vp,'p-nest-muted');
+  rec('P-NEST-KEEPS-MIX',m.groups[G1]&&m.groups[G1].m==='true'&&m.groups[G1].depth===1&&e.win.Ws.maxAbsLsb<=1&&e.win.Wx.maxAbsLsb<=1,{m,Ws:e.win.Ws,Wx:e.win.Wx});});
+ await T('P-UNGROUP-INNER',async()=>{await clickGroup(p,G1);await blur(p);await key(p,'Control+Shift+g',300);const rk=await rowKeys(p);const m=await mix(p);const e=await exportWav(p,vp,'p-ungroup-inner');
+  await key(p,'Control+z',300);const rz=await rowKeys(p);const mz=await mix(p);
+  rec('P-UNGROUP-INNER',JSON.stringify(rk)===JSON.stringify(['T:video','G:'+G2+'@0','T:music','T:stems','T:sfx'])&&e.win.Ws.rms>0.01&&rz.includes('G:'+G1+'@1')&&mz.groups[G1].m==='true',{rk,rz,Ws:e.win.Ws.rms,mz:mz.groups});});
+ await T('P-TAB-ORDER',async()=>{await X.gName(p,G2).focus();const seq=[];for(let i=0;i<4;i++){await p.keyboard.press('Tab');seq.push((await X.focus(p)).testid);}rec('P-TAB-ORDER',JSON.stringify(seq)===JSON.stringify(['arrangement-group-mute','arrangement-group-solo','arrangement-group-volume',seq[3]]),{seq});});
+ await X.finish(s,rec,'P5-'+vp);})().catch(e=>{console.log('SCRIPT ERROR',e);process.exit(1)});

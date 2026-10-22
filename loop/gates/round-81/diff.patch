@@ -1,0 +1,910 @@
+diff --git a/app/components/arrangement/ArrangementExportDialog.tsx b/app/components/arrangement/ArrangementExportDialog.tsx
+index 9893e35..5600e70 100644
+--- a/app/components/arrangement/ArrangementExportDialog.tsx
++++ b/app/components/arrangement/ArrangementExportDialog.tsx
+@@ -3,7 +3,7 @@ import { Modal, ModalBody, ModalDescription, ModalHeader, ModalTitle } from '~/c
+ import { formatArrangementTime, useArrangement } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import { formatMasterGainDb } from '~/lib/arrangement/model';
+-import { isTrackAudible } from '~/lib/arrangement/schedule';
++import { isTrackAudibleWithGroups } from '~/lib/arrangement/schedule';
+ import { cn } from '~/lib/utils';
+ import type { WorkspaceVideoSource } from '~/types/arrangement';
+ 
+@@ -60,7 +60,7 @@ export function ArrangementExportDialog({ isOpen, onClose }: ArrangementExportDi
+   const isEmpty = arrangement.clips.length === 0;
+   const isRendering = exportState.phase === 'rendering';
+   const videoTrack = arrangement.tracks.find((track) => track.kind === 'video');
+-  const isVideoAudible = videoTrack ? isTrackAudible(videoTrack, arrangement.tracks) : false;
++  const isVideoAudible = videoTrack ? isTrackAudibleWithGroups(videoTrack, arrangement) : false;
+   const usedVideoSources = [
+     ...new Set(
+       arrangement.clips
+diff --git a/app/components/arrangement/ArrangementGroupHeader.tsx b/app/components/arrangement/ArrangementGroupHeader.tsx
+index 40a30e1..4fe20d9 100644
+--- a/app/components/arrangement/ArrangementGroupHeader.tsx
++++ b/app/components/arrangement/ArrangementGroupHeader.tsx
+@@ -1,8 +1,13 @@
+ import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
++import { GESTURE_EDIT_BLOCKED_MESSAGE, useArrangement } from '~/contexts/ArrangementContext';
++import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
+ import {
++  arrangementGroups,
+   TRACK_GROUP_INDENT_PX,
+   TRACK_GROUP_NAME_MAX_LENGTH,
+   type TrackGroupOverviewClip,
++  trackGroupSoloState,
++  trackGroupVolume,
+ } from '~/lib/arrangement/groups';
+ import { cn } from '~/lib/utils';
+ import type { ArrangementTrackGroup } from '~/types/arrangement';
+@@ -16,6 +21,10 @@ export const TRACK_GROUP_ROW_HEIGHT_PX = 28;
+ 
+ const TRACK_GROUP_NAME_TITLE = 'F2: სახელის შეცვლა · Ctrl+G: დაჯგუფება · Ctrl+Shift+G: დაშლა';
+ const TRACK_GROUP_FOLD_TITLE = 'დაკეცვა / გახსნა (U)';
++const TRACK_GROUP_VOLUME_STEP = 0.01;
++const TRACK_GROUP_VOLUME_DEFAULT = 1;
++const TRACK_GROUP_MIX_BUTTON_CLASS =
++  'flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border text-xs font-bold leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+ 
+ export interface TrackGroupOverviewBlock extends TrackGroupOverviewClip {
+   selected: boolean;
+@@ -64,6 +73,36 @@ export function ArrangementGroupHeader({
+   const settledRef = useRef(false);
+   const restoreFocusRef = useRef(false);
+   const isEditing = draft !== null;
++  const {
++    arrangement,
++    getArrangement,
++    isPointerGestureActive,
++    setStatus,
++    toggleGroupMute,
++    toggleGroupSolo,
++    previewGroupVolume,
++    commitGroupVolume,
++    beginGroupVolumeGesture,
++    blurGroupVolume,
++  } = useArrangement();
++  const soloState = trackGroupSoloState(arrangement, group.id);
++  const volume = trackGroupVolume(group);
++  const volumePercent = Math.round(volume * 100);
++  const muted = group.mute === true;
++
++  const handleVolumePointerDown = useRelativeFaderDrag({
++    min: 0,
++    max: 1,
++    step: TRACK_GROUP_VOLUME_STEP,
++    readStoredValue: () => {
++      const stored = arrangementGroups(getArrangement()).find((entry) => entry.id === group.id);
++      return stored ? trackGroupVolume(stored) : volume;
++    },
++    isPointerGestureActive,
++    beginGesture: (pointerId) => beginGroupVolumeGesture(group.id, pointerId),
++    previewValue: (next) => previewGroupVolume(group.id, next),
++    refuseGesture: () => setStatus(GESTURE_EDIT_BLOCKED_MESSAGE),
++  });
+ 
+   useEffect(() => {
+     if (isEditing) {
+@@ -200,6 +239,65 @@ export function ArrangementGroupHeader({
+             <span className="truncate">{group.name}</span>
+           </button>
+         )}
++        <button
++          type="button"
++          aria-pressed={muted}
++          aria-label={`Mute — ${group.name} (ჯგუფი)`}
++          title="Mute"
++          onClick={() => toggleGroupMute(group.id)}
++          className={cn(
++            TRACK_GROUP_MIX_BUTTON_CLASS,
++            "before:content-['M']",
++            muted
++              ? 'border-accent bg-accent text-background'
++              : 'border-outline text-muted hover:text-foreground',
++          )}
++          data-mute={muted ? 'on' : 'off'}
++          data-testid="arrangement-group-mute"
++        />
++        <button
++          type="button"
++          aria-pressed={soloState === 'on' ? true : soloState === 'mixed' ? 'mixed' : false}
++          aria-label={`Solo — ${group.name} (ჯგუფი, Ctrl/Cmd+click ამატებს)`}
++          title="Solo (Ctrl/Cmd+click ამატებს)"
++          onClick={(event) => toggleGroupSolo(group.id, event.ctrlKey || event.metaKey)}
++          className={cn(
++            TRACK_GROUP_MIX_BUTTON_CLASS,
++            "before:content-['S']",
++            soloState === 'on' && 'border-brand bg-brand text-brand-foreground',
++            soloState === 'mixed' &&
++              'border-brand bg-gradient-to-r from-brand from-50% to-transparent to-50% text-foreground',
++            soloState === 'off' && 'border-outline text-muted hover:text-foreground',
++          )}
++          data-solo={soloState}
++          data-testid="arrangement-group-solo"
++        />
++        <input
++          type="range"
++          min={0}
++          max={1}
++          step={TRACK_GROUP_VOLUME_STEP}
++          value={volume}
++          aria-label={`Volume — ${group.name} (ჯგუფი)`}
++          aria-valuetext={`${volumePercent}%`}
++          title={`Volume ${volumePercent}%`}
++          onChange={(event) => previewGroupVolume(group.id, Number(event.target.value))}
++          onPointerDown={handleVolumePointerDown}
++          onDoubleClick={() => {
++            previewGroupVolume(group.id, TRACK_GROUP_VOLUME_DEFAULT);
++            commitGroupVolume(group.id);
++          }}
++          onPointerUp={() => commitGroupVolume(group.id)}
++          onLostPointerCapture={() => commitGroupVolume(group.id)}
++          onKeyUp={() => {
++            if (!isPointerGestureActive()) {
++              commitGroupVolume(group.id);
++            }
++          }}
++          onBlur={() => blurGroupVolume(group.id)}
++          className="h-1 w-12 min-w-12 shrink-0 touch-none accent-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
++          data-testid="arrangement-group-volume"
++        />
+       </div>
+       {collapsed ? (
+         <div
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 6e0e568..221f16b 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -948,9 +948,9 @@ export function StudioWorkspace() {
+       );
+       const focusedId = focusedTrackRowId();
+       const focusHidden = typeof focusedId === 'string' && hiddenIds.has(focusedId);
+-      if (focusHidden && isSliderTarget(document.activeElement)) {
+-        current.setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
+-        return;
++      const focusedElement = document.activeElement;
++      if (focusHidden && focusedElement instanceof HTMLElement) {
++        focusedElement.blur();
+       }
+       setTrackLaneLayout((latest) =>
+         resolveTrackLaneLayout(
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 58b24be..e5c0a2b 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -27,6 +27,12 @@ import {
+   renderArrangementWav,
+   type ScheduleHandle,
+ } from '~/lib/arrangement/graph.client';
++import {
++  arrangementGroups,
++  setTrackGroupMix,
++  toggleTrackGroupSolo,
++  trackGroupVolume,
++} from '~/lib/arrangement/groups';
+ import { canPlaceLibraryClip } from '~/lib/arrangement/library';
+ import {
+   type LoopEdge,
+@@ -101,7 +107,7 @@ import {
+   createLibraryPreviewPlayer,
+   type LibraryPreviewPlayer,
+ } from '~/lib/arrangement/preview.client';
+-import { isTrackAudible, planSchedule } from '~/lib/arrangement/schedule';
++import { planSchedule, trackEffectiveGains } from '~/lib/arrangement/schedule';
+ import {
+   deleteClips,
+   GROUP_MOVE_BLOCKED_MESSAGE,
+@@ -281,6 +287,12 @@ interface ArrangementContextValue {
+   commitTrackVolume: (trackId?: string) => void;
+   beginTrackVolumeGesture: (trackId: string, pointerId: number) => boolean;
+   blurTrackVolume: (trackId: string) => void;
++  toggleGroupMute: (groupId: string) => void;
++  toggleGroupSolo: (groupId: string, additive: boolean) => void;
++  previewGroupVolume: (groupId: string, volume: number) => void;
++  commitGroupVolume: (groupId: string) => void;
++  beginGroupVolumeGesture: (groupId: string, pointerId: number) => boolean;
++  blurGroupVolume: (groupId: string) => void;
+   setTrackPan: (trackId: string, pan: number) => boolean;
+   beginTrackPanGesture: (trackId: string, pointerId: number) => boolean;
+   previewTrackPan: (trackId: string, pan: number) => void;
+@@ -313,11 +325,28 @@ interface ActivePointerGesture {
+   release: () => void;
+ }
+ 
+-interface TrackVolumeGesture {
+-  trackId: string;
++interface MixVolumeGesture {
++  targetKey: string;
+   release: () => void;
+ }
+ 
++type MixVolumeTarget = { kind: 'track' | 'group'; id: string };
++
++function mixVolumeTargetKey(target: MixVolumeTarget): string {
++  return `${target.kind}:${target.id}`;
++}
++
++function mixVolumeTargetValue(
++  arrangement: Arrangement,
++  target: MixVolumeTarget,
++): number | undefined {
++  if (target.kind === 'track') {
++    return arrangement.tracks.find((entry) => entry.id === target.id)?.volume;
++  }
++  const group = arrangementGroups(arrangement).find((entry) => entry.id === target.id);
++  return group ? trackGroupVolume(group) : undefined;
++}
++
+ interface MasterGainGesture {
+   release: () => void;
+ }
+@@ -527,7 +556,8 @@ export function ArrangementProvider({
+   const scheduledKeyRef = useRef('');
+   const frameRef = useRef<number | null>(null);
+   const volumeBeforeRef = useRef<Arrangement | null>(null);
+-  const volumeGestureRef = useRef<TrackVolumeGesture | null>(null);
++  const volumeGestureRef = useRef<MixVolumeGesture | null>(null);
++  const volumeTargetKeyRef = useRef<string | null>(null);
+   const masterBeforeRef = useRef<Arrangement | null>(null);
+   const masterGestureRef = useRef<MasterGainGesture | null>(null);
+   const panGestureRef = useRef<TrackPanGesture | null>(null);
+@@ -782,6 +812,7 @@ export function ArrangementProvider({
+         startAt,
+         masterGain: masterLinearGain(arrangement.master),
+         clipGains: clipLinearGains(arrangement),
++        trackGains: trackEffectiveGains(arrangement),
+         tap: meterTapRef.current?.input,
+         trackTaps: meterTapRef.current
+           ? ensureTrackMeterInputs(ctx, trackMeterTapsRef.current, arrangement.tracks)
+@@ -975,8 +1006,9 @@ export function ArrangementProvider({
+       if (!handle) {
+         return;
+       }
++      const trackGains = trackEffectiveGains(arrangement);
+       for (const track of arrangement.tracks) {
+-        handle.setTrackGain(track.id, isTrackAudible(track, arrangement.tracks) ? track.volume : 0);
++        handle.setTrackGain(track.id, trackGains.get(track.id) ?? 0);
+       }
+       const panOverride = panOverrideRef.current;
+       for (const track of arrangement.tracks) {
+@@ -1012,6 +1044,7 @@ export function ArrangementProvider({
+   const flushPendingVolume = useCallback(() => {
+     const pending = volumeBeforeRef.current;
+     volumeBeforeRef.current = null;
++    volumeTargetKeyRef.current = null;
+     if (!pending) {
+       return;
+     }
+@@ -2149,51 +2182,68 @@ export function ArrangementProvider({
+     [applyEdit, refuseEditDuringGesture],
+   );
+ 
+-  const previewTrackVolume = useCallback(
+-    (trackId: string, volume: number) => {
+-      if (volumeGestureRef.current?.trackId !== trackId && refuseEditDuringGesture()) {
++  const previewVolumeTarget = useCallback(
++    (target: MixVolumeTarget, volume: number) => {
++      const key = mixVolumeTargetKey(target);
++      if (volumeGestureRef.current?.targetKey !== key && refuseEditDuringGesture()) {
+         return;
+       }
++      const pendingKey = volumeTargetKeyRef.current;
++      if (
++        volumeBeforeRef.current &&
++        pendingKey !== key &&
++        (target.kind === 'group' || pendingKey?.startsWith('group:') === true)
++      ) {
++        flushPendingVolume();
++      }
+       if (!volumeBeforeRef.current) {
+         flushPendingMaster();
+       }
+       const current = historyRef.current;
+-      const stored = current.present.tracks.find((entry) => entry.id === trackId);
+-      if (!stored) {
++      const storedVolume = mixVolumeTargetValue(current.present, target);
++      if (storedVolume === undefined) {
+         return;
+       }
+-      const next = setTrackMix(current.present, trackId, { volume });
+-      if (next.tracks.find((entry) => entry.id === trackId)?.volume === stored.volume) {
++      const next =
++        target.kind === 'track'
++          ? setTrackMix(current.present, target.id, { volume })
++          : setTrackGroupMix(current.present, target.id, { volume });
++      if (mixVolumeTargetValue(next, target) === storedVolume) {
+         return;
+       }
+       if (!volumeBeforeRef.current) {
+         volumeBeforeRef.current = current.present;
+       }
++      volumeTargetKeyRef.current = key;
+       updateHistory({ ...current, present: next });
+       syncPlayback(next);
+     },
+-    [flushPendingMaster, refuseEditDuringGesture, syncPlayback, updateHistory],
++    [flushPendingMaster, flushPendingVolume, refuseEditDuringGesture, syncPlayback, updateHistory],
+   );
+ 
+-  const revertTrackVolumePreview = useCallback(() => {
++  const revertVolumeTargetPreview = useCallback(() => {
+     const before = volumeBeforeRef.current;
+     volumeBeforeRef.current = null;
++    volumeTargetKeyRef.current = null;
+     if (before) {
+       updateHistory({ ...historyRef.current, present: before });
+       syncPlayback(before);
+     }
+   }, [syncPlayback, updateHistory]);
+ 
+-  const commitTrackVolume = useCallback(
+-    (trackId?: string) => {
++  const commitVolumeTarget = useCallback(
++    (target?: MixVolumeTarget) => {
+       const gesture = volumeGestureRef.current;
+       if (
+-        gesture ? trackId !== undefined && gesture.trackId !== trackId : gestureCountRef.current > 0
++        gesture
++          ? target !== undefined && gesture.targetKey !== mixVolumeTargetKey(target)
++          : gestureCountRef.current > 0
+       ) {
+         return;
+       }
+       const before = volumeBeforeRef.current;
+       volumeBeforeRef.current = null;
++      volumeTargetKeyRef.current = null;
+       if (before) {
+         applyEdit(historyRef.current.present, 'Volume', before);
+       }
+@@ -2205,25 +2255,25 @@ export function ArrangementProvider({
+     [applyEdit],
+   );
+ 
+-  const cancelTrackVolumeGesture = useCallback(() => {
++  const cancelVolumeTargetGesture = useCallback(() => {
+     const gesture = volumeGestureRef.current;
+     if (gesture) {
+       volumeGestureRef.current = null;
+-      revertTrackVolumePreview();
++      revertVolumeTargetPreview();
+       gesture.release();
+     }
+-  }, [revertTrackVolumePreview]);
++  }, [revertVolumeTargetPreview]);
+ 
+-  const beginTrackVolumeGesture = useCallback(
+-    (trackId: string, pointerId: number): boolean => {
++  const beginVolumeTargetGesture = useCallback(
++    (target: MixVolumeTarget, pointerId: number): boolean => {
+       const finishOnPointerUp = (event: globalThis.PointerEvent) => {
+         if (event.pointerId === pointerId) {
+-          commitTrackVolume(trackId);
++          commitVolumeTarget(target);
+         }
+       };
+       const abortOnPointerCancel = (event: globalThis.PointerEvent) => {
+         if (event.pointerId === pointerId) {
+-          cancelTrackVolumeGesture();
++          cancelVolumeTargetGesture();
+         }
+       };
+       const detach = () => {
+@@ -2233,7 +2283,7 @@ export function ArrangementProvider({
+       const releaseClaim = claimPointerGesture(pointerId, () => {
+         detach();
+         volumeGestureRef.current = null;
+-        revertTrackVolumePreview();
++        revertVolumeTargetPreview();
+       });
+       if (!releaseClaim) {
+         return false;
+@@ -2241,7 +2291,7 @@ export function ArrangementProvider({
+       flushPendingVolume();
+       flushPendingMaster();
+       volumeGestureRef.current = {
+-        trackId,
++        targetKey: mixVolumeTargetKey(target),
+         release: () => {
+           detach();
+           releaseClaim();
+@@ -2252,25 +2302,103 @@ export function ArrangementProvider({
+       return true;
+     },
+     [
+-      cancelTrackVolumeGesture,
++      cancelVolumeTargetGesture,
+       claimPointerGesture,
+-      commitTrackVolume,
++      commitVolumeTarget,
+       flushPendingMaster,
+       flushPendingVolume,
+-      revertTrackVolumePreview,
++      revertVolumeTargetPreview,
+     ],
+   );
+ 
+-  const blurTrackVolume = useCallback(
+-    (trackId: string) => {
++  const blurVolumeTarget = useCallback(
++    (target: MixVolumeTarget) => {
+       const gesture = volumeGestureRef.current;
+       if (!gesture) {
+-        commitTrackVolume(trackId);
+-      } else if (gesture.trackId === trackId) {
+-        cancelTrackVolumeGesture();
++        commitVolumeTarget(target);
++      } else if (gesture.targetKey === mixVolumeTargetKey(target)) {
++        cancelVolumeTargetGesture();
++      }
++    },
++    [cancelVolumeTargetGesture, commitVolumeTarget],
++  );
++
++  const previewTrackVolume = useCallback(
++    (trackId: string, volume: number) =>
++      previewVolumeTarget({ kind: 'track', id: trackId }, volume),
++    [previewVolumeTarget],
++  );
++
++  const commitTrackVolume = useCallback(
++    (trackId?: string) =>
++      commitVolumeTarget(trackId === undefined ? undefined : { kind: 'track', id: trackId }),
++    [commitVolumeTarget],
++  );
++
++  const beginTrackVolumeGesture = useCallback(
++    (trackId: string, pointerId: number) =>
++      beginVolumeTargetGesture({ kind: 'track', id: trackId }, pointerId),
++    [beginVolumeTargetGesture],
++  );
++
++  const blurTrackVolume = useCallback(
++    (trackId: string) => blurVolumeTarget({ kind: 'track', id: trackId }),
++    [blurVolumeTarget],
++  );
++
++  const previewGroupVolume = useCallback(
++    (groupId: string, volume: number) =>
++      previewVolumeTarget({ kind: 'group', id: groupId }, volume),
++    [previewVolumeTarget],
++  );
++
++  const commitGroupVolume = useCallback(
++    (groupId: string) => commitVolumeTarget({ kind: 'group', id: groupId }),
++    [commitVolumeTarget],
++  );
++
++  const beginGroupVolumeGesture = useCallback(
++    (groupId: string, pointerId: number) =>
++      beginVolumeTargetGesture({ kind: 'group', id: groupId }, pointerId),
++    [beginVolumeTargetGesture],
++  );
++
++  const blurGroupVolume = useCallback(
++    (groupId: string) => blurVolumeTarget({ kind: 'group', id: groupId }),
++    [blurVolumeTarget],
++  );
++
++  const toggleGroupMute = useCallback(
++    (groupId: string) => {
++      if (refuseEditDuringGesture()) {
++        return;
+       }
++      const arrangement = historyRef.current.present;
++      const group = arrangementGroups(arrangement).find((entry) => entry.id === groupId);
++      if (!group) {
++        return;
++      }
++      applyEdit(
++        setTrackGroupMix(arrangement, groupId, { mute: group.mute !== true }),
++        `Mute — ${group.name}`,
++      );
+     },
+-    [cancelTrackVolumeGesture, commitTrackVolume],
++    [applyEdit, refuseEditDuringGesture],
++  );
++
++  const toggleGroupSolo = useCallback(
++    (groupId: string, additive: boolean) => {
++      if (refuseEditDuringGesture()) {
++        return;
++      }
++      const arrangement = historyRef.current.present;
++      const group = arrangementGroups(arrangement).find((entry) => entry.id === groupId);
++      if (!group) {
++        return;
++      }
++      applyEdit(toggleTrackGroupSolo(arrangement, groupId, additive), `Solo — ${group.name}`);
++    },
++    [applyEdit, refuseEditDuringGesture],
+   );
+ 
+   const setTrackPan = useCallback(
+@@ -2757,6 +2885,12 @@ export function ArrangementProvider({
+       commitTrackVolume,
+       beginTrackVolumeGesture,
+       blurTrackVolume,
++      toggleGroupMute,
++      toggleGroupSolo,
++      previewGroupVolume,
++      commitGroupVolume,
++      beginGroupVolumeGesture,
++      blurGroupVolume,
+       setTrackPan,
+       beginTrackPanGesture,
+       previewTrackPan,
+@@ -2848,6 +2982,12 @@ export function ArrangementProvider({
+       commitTrackVolume,
+       beginTrackVolumeGesture,
+       blurTrackVolume,
++      toggleGroupMute,
++      toggleGroupSolo,
++      previewGroupVolume,
++      commitGroupVolume,
++      beginGroupVolumeGesture,
++      blurGroupVolume,
+       setTrackPan,
+       beginTrackPanGesture,
+       previewTrackPan,
+diff --git a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+index c845a52..2ac714d 100644
+--- a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+@@ -578,20 +578,32 @@ describe('SRW-17 stage 2 track group collapse in the workspace', { timeout: 20_0
+     expect(live(api).undoLabel).toBe(undoBefore);
+     act(() => live(api).setStatus(''));
+     pressU(fader);
+-    expect(status(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+-    act(() => live(api).setStatus(''));
+-    fireEvent.click(foldButton(view, 'ჯგუფი 1'));
+-    expect(status(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+-    expect(renderedLaneIds(view)).toEqual(['video', 'music', 'stems', 'sfx']);
+-    fireEvent.keyUp(fader, { key: 'u', code: 'KeyU' });
++    expect(status(view)).not.toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    expect(renderedLaneIds(view)).toEqual(['video', 'music']);
+     expect(live(api).isArrangementPreviewActive()).toBe(false);
+-    expect(live(api).undoLabel).not.toBe(undoBefore);
+     expect(live(api).undoLabel).toBe('Volume');
+     expect(
+       live(api)
+         .getArrangement()
+         .tracks.find((track) => track.id === 'stems')?.volume,
+     ).toBe(0.9);
++    expect(document.activeElement).toBe(groupName(view, 'ჯგუფი 1'));
++    act(() => live(api).undo());
++    expect(live(api).undoLabel).toBe(undoBefore);
++    act(() => live(api).redo());
++    expect(live(api).undoLabel).toBe('Volume');
++    fireEvent.click(foldButton(view, 'ჯგუფი 1'));
++    expect(renderedLaneIds(view)).toEqual(['video', 'music', 'stems', 'sfx']);
++    const undoAfterCommit = live(api).undoLabel;
++    const idleFader = view.getByRole('slider', { name: /^Volume — სტემები/ });
++    idleFader.focus();
++    fireEvent.click(foldButton(view, 'ჯგუფი 1'));
++    expect(status(view)).not.toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    expect(renderedLaneIds(view)).toEqual(['video', 'music']);
++    expect(live(api).undoLabel).toBe(undoAfterCommit);
++    expect(document.activeElement).toBe(groupName(view, 'ჯგუფი 1'));
++    fireEvent.click(foldButton(view, 'ჯგუფი 1'));
++    expect(renderedLaneIds(view)).toEqual(['video', 'music', 'stems', 'sfx']);
+     const musicFader = view.getByRole('slider', { name: /^Volume — მუსიკა/ });
+     musicFader.focus();
+     pressU(musicFader);
+diff --git a/app/lib/arrangement/graph.client.ts b/app/lib/arrangement/graph.client.ts
+index 2a47b61..77bd815 100644
+--- a/app/lib/arrangement/graph.client.ts
++++ b/app/lib/arrangement/graph.client.ts
+@@ -3,7 +3,7 @@ import type { Arrangement, ArrangementTrack, ScheduledClip } from '~/types/arran
+ import { isOverFullScale, MAX_24BIT_SAMPLE } from './meter';
+ import type { MetronomeClick } from './metronome';
+ import { clipLinearGains, masterLinearGain, projectEnd } from './model';
+-import { isTrackAudible, planSchedule } from './schedule';
++import { isTrackAudible, planSchedule, trackEffectiveGains } from './schedule';
+ 
+ export const ARRANGEMENT_EXPORT_SAMPLE_RATE = 48000;
+ const GAIN_TIME_CONSTANT = 0.015;
+@@ -51,6 +51,7 @@ export interface ApplyScheduleOptions<TBuffer> {
+   tap?: ScheduleAudioNode;
+   trackTaps?: ReadonlyMap<string, ScheduleAudioNode>;
+   clipGains?: ReadonlyMap<string, number>;
++  trackGains?: ReadonlyMap<string, number>;
+   metronome?: { accent: TBuffer; beat: TBuffer; clicks: readonly MetronomeClick[] };
+ }
+ 
+@@ -111,7 +112,9 @@ export function applySchedule<TBuffer>(
+   const lastPanTargets = new Map<string, number>();
+   for (const track of options.tracks) {
+     const trackGain = ctx.createGain();
+-    const initialGain = isTrackAudible(track, options.tracks) ? track.volume : 0;
++    const initialGain =
++      options.trackGains?.get(track.id) ??
++      (isTrackAudible(track, options.tracks) ? track.volume : 0);
+     trackGain.gain.value = initialGain;
+     lastGainTargets.set(track.id, initialGain);
+     const panner = ctx.createStereoPanner();
+@@ -357,6 +360,7 @@ export async function renderArrangementWav(
+     startAt: 0,
+     masterGain: masterLinearGain(arrangement.master),
+     clipGains: clipLinearGains(arrangement),
++    trackGains: trackEffectiveGains(arrangement),
+   });
+   const rendered = await ctx.startRendering();
+   const raw = [0, 1].map((index) => rendered.getChannelData(index));
+diff --git a/app/lib/arrangement/groups.ts b/app/lib/arrangement/groups.ts
+index 99d9bd3..6c4d356 100644
+--- a/app/lib/arrangement/groups.ts
++++ b/app/lib/arrangement/groups.ts
+@@ -71,6 +71,121 @@ function ancestorChain(
+   return chain;
+ }
+ 
++export function trackGroupAncestors(
++  arrangement: Arrangement,
++  groupId: string | null | undefined,
++): ArrangementTrackGroup[] {
++  return ancestorChain(groupMap(arrangement), groupId);
++}
++
++export function trackGroupAncestorIds(
++  arrangement: Arrangement,
++  groupId: string | null | undefined,
++): string[] {
++  return trackGroupAncestors(arrangement, groupId).map((group) => group.id);
++}
++
++export type TrackGroupMixPatch = Partial<Pick<ArrangementTrackGroup, 'volume' | 'mute' | 'solo'>>;
++
++export type TrackGroupSoloState = 'on' | 'mixed' | 'off';
++
++export function trackGroupVolume(group: ArrangementTrackGroup): number {
++  return group.volume ?? 1;
++}
++
++function trackGroupWithMix(
++  group: ArrangementTrackGroup,
++  volume: number,
++  mute: boolean,
++  solo: boolean,
++): ArrangementTrackGroup {
++  const { volume: _volume, mute: _mute, solo: _solo, ...rest } = group;
++  return {
++    ...rest,
++    ...(volume === 1 ? {} : { volume }),
++    ...(mute ? { mute } : {}),
++    ...(solo ? { solo } : {}),
++  };
++}
++
++export function setTrackGroupMix(
++  arrangement: Arrangement,
++  groupId: string,
++  patch: TrackGroupMixPatch,
++): Arrangement {
++  const groups = arrangementGroups(arrangement);
++  const current = groups.find((group) => group.id === groupId);
++  if (!current) {
++    return arrangement;
++  }
++  const volume =
++    patch.volume === undefined || !Number.isFinite(patch.volume)
++      ? trackGroupVolume(current)
++      : Math.min(1, Math.max(0, patch.volume));
++  const mute = patch.mute ?? current.mute === true;
++  const solo = patch.solo ?? current.solo === true;
++  const next = trackGroupWithMix(current, volume, mute, solo);
++  if (JSON.stringify(next) === JSON.stringify(current)) {
++    return arrangement;
++  }
++  return {
++    ...arrangement,
++    groups: groups.map((group) => (group.id === groupId ? next : group)),
++  };
++}
++
++export function toggleTrackGroupSolo(
++  arrangement: Arrangement,
++  groupId: string,
++  additive: boolean,
++): Arrangement {
++  const groups = arrangementGroups(arrangement);
++  const target = groups.find((group) => group.id === groupId);
++  if (!target) {
++    return arrangement;
++  }
++  if (additive) {
++    return setTrackGroupMix(arrangement, groupId, { solo: target.solo !== true });
++  }
++  const onlySolo =
++    target.solo === true &&
++    arrangement.tracks.every((track) => !track.solo) &&
++    groups.every((group) => group.id === groupId || group.solo !== true);
++  return {
++    ...arrangement,
++    tracks: arrangement.tracks.map((track) => (track.solo ? { ...track, solo: false } : track)),
++    groups: groups.map((group) =>
++      trackGroupWithMix(
++        group,
++        trackGroupVolume(group),
++        group.mute === true,
++        onlySolo ? false : group.id === groupId,
++      ),
++    ),
++  };
++}
++
++export function trackGroupSoloState(
++  arrangement: Arrangement,
++  groupId: string,
++): TrackGroupSoloState {
++  const groups = groupMap(arrangement);
++  const target = groups.get(groupId);
++  if (!target) {
++    return 'off';
++  }
++  if (target.solo === true) {
++    return 'on';
++  }
++  const inside = (parentId: string | null | undefined) =>
++    ancestorChain(groups, parentId).some((group) => group.id === groupId);
++  const soloedTrack = arrangement.tracks.some((track) => track.solo && inside(track.groupId));
++  const soloedGroup = arrangementGroups(arrangement).some(
++    (group) => group.id !== groupId && group.solo === true && inside(group.parentId),
++  );
++  return soloedTrack || soloedGroup ? 'mixed' : 'off';
++}
++
+ export function trackGroupRows(arrangement: Arrangement): TrackGroupRow[] {
+   const groups = groupMap(arrangement);
+   const emitted = new Set<string>();
+diff --git a/app/lib/arrangement/model.ts b/app/lib/arrangement/model.ts
+index 2914ab0..e2cfa5e 100644
+--- a/app/lib/arrangement/model.ts
++++ b/app/lib/arrangement/model.ts
+@@ -579,14 +579,21 @@ export function toggleSolo(
+       ),
+     };
+   }
++  const groups = arrangement.groups;
++  const groupSoloed = groups?.some((group) => group.solo === true) === true;
+   const onlySolo =
+-    target.solo && arrangement.tracks.every((track) => track.id === trackId || !track.solo);
++    target.solo &&
++    !groupSoloed &&
++    arrangement.tracks.every((track) => track.id === trackId || !track.solo);
+   return {
+     ...arrangement,
+     tracks: arrangement.tracks.map((track) => ({
+       ...track,
+       solo: onlySolo ? false : track.id === trackId,
+     })),
++    ...(groups && groupSoloed
++      ? { groups: groups.map(({ solo: _previousSolo, ...group }) => group) }
++      : {}),
+   };
+ }
+ 
+diff --git a/app/lib/arrangement/schedule.ts b/app/lib/arrangement/schedule.ts
+index fa010bc..a5049a9 100644
+--- a/app/lib/arrangement/schedule.ts
++++ b/app/lib/arrangement/schedule.ts
+@@ -1,4 +1,10 @@
+-import type { Arrangement, ArrangementTrack, ScheduledClip } from '~/types/arrangement';
++import type {
++  Arrangement,
++  ArrangementTrack,
++  ArrangementTrackGroup,
++  ScheduledClip,
++} from '~/types/arrangement';
++import { arrangementGroups, trackGroupAncestors, trackGroupVolume } from './groups';
+ import { ARRANGEMENT_EPS } from './model';
+ 
+ export function isTrackAudible(
+@@ -12,6 +18,53 @@ export function isTrackAudible(
+   return !anySolo || track.solo;
+ }
+ 
++function isAnySoloInArrangement(arrangement: Arrangement): boolean {
++  if (arrangement.tracks.some((entry) => entry.solo)) {
++    return true;
++  }
++  if (!arrangementGroups(arrangement).some((group) => group.solo === true)) {
++    return false;
++  }
++  return arrangement.tracks.some((track) =>
++    trackGroupAncestors(arrangement, track.groupId).some((group) => group.solo === true),
++  );
++}
++
++function isTrackChainAudible(
++  track: ArrangementTrack,
++  chain: readonly ArrangementTrackGroup[],
++  anySolo: boolean,
++): boolean {
++  if (track.mute || chain.some((group) => group.mute === true)) {
++    return false;
++  }
++  return !anySolo || track.solo || chain.some((group) => group.solo === true);
++}
++
++export function isTrackAudibleWithGroups(
++  track: ArrangementTrack,
++  arrangement: Arrangement,
++): boolean {
++  return isTrackChainAudible(
++    track,
++    trackGroupAncestors(arrangement, track.groupId),
++    isAnySoloInArrangement(arrangement),
++  );
++}
++
++export function trackEffectiveGains(arrangement: Arrangement): Map<string, number> {
++  const anySolo = isAnySoloInArrangement(arrangement);
++  return new Map(
++    arrangement.tracks.map((track) => {
++      const chain = trackGroupAncestors(arrangement, track.groupId);
++      const gain = isTrackChainAudible(track, chain, anySolo)
++        ? chain.reduce((product, group) => product * trackGroupVolume(group), track.volume)
++        : 0;
++      return [track.id, gain];
++    }),
++  );
++}
++
+ export function planSchedule(
+   arrangement: Arrangement,
+   from: number,
+diff --git a/app/types/arrangement.ts b/app/types/arrangement.ts
+index db6b9b3..45894b0 100644
+--- a/app/types/arrangement.ts
++++ b/app/types/arrangement.ts
+@@ -15,6 +15,9 @@ export interface ArrangementTrackGroup {
+   id: string;
+   name: string;
+   parentId: string | null;
++  volume?: number;
++  mute?: boolean;
++  solo?: boolean;
+ }
+ 
+ export interface ArrangementClip {
+diff --git a/docs/implementation/2026/quarter-IV/070-studio-lab-track-groups-stage-2-collapse.md b/docs/implementation/2026/quarter-IV/070-studio-lab-track-groups-stage-2-collapse.md
+index edfadd9..b1e7bfb 100644
+--- a/docs/implementation/2026/quarter-IV/070-studio-lab-track-groups-stage-2-collapse.md
++++ b/docs/implementation/2026/quarter-IV/070-studio-lab-track-groups-stage-2-collapse.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — ხაზების ჯგუფები, ეტაპი 2: დაკეცვა / გახსნა (SRW-17 / FB-12)
+ 
+ **თარიღი:** 2026-10-22
+-**სტატუსი:** Round 80 — იმპლემენტირებულია, C-ის შემოწმებას ელოდება (D-29z45)
++**სტატუსი:** Round 80 — C PASS (browserVerified), გამოქვეყნდა `68383fa` (D-29z45)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -15,7 +15,7 @@
+ | C1 | დაკეცვა **view state**-ია, ხაზის fold-ის მსგავსად: `TrackLaneLayout.collapsedGroups` (საწყისი `{}`). ის არ არის arrangement-ის ველი და history-ში არ იწერება. ჯგუფის გაქრობისას id არ იშლება: stale id-ები გამოყენებისას იფილტრება. ამიტომ Group Tracks-ის Undo შვილებს აჩენს, Redo კი ჯგუფს იმავე დაკეცილ მდგომარეობაში აბრუნებს |
+ | C2 | ღილაკი ჯგუფის header-ში, სახელის მარცხნივ: `▾` (გახსნილი) / `▸` (დაკეცილი), `aria-expanded`, `title="დაკეცვა / გახსნა (U)"`, 24×24 px, `data-testid="arrangement-group-fold"`. Space-ს ღილაკი თავად ამუშავებს (როგორც track fold), ამიტომ playback არ იწყება. glyph-ი იწერება `before:` pseudo-element-ით და დამატებით `data-fold-glyph`-ში (იხ. „პრობლემები“) |
+ | C3 | ჩვეულებრივი `U` (Ctrl/Cmd/Alt/Shift-ის და repeat-ის გარეშე, ტექსტურ ველებში იგნორირდება) მოქმედებს მონიშნულ **ხილულ** ჯგუფებზე. თუ ერთი მაინც გახსნილია, ყველა იკეცება, თუ არა, ყველა იხსნება. ჯგუფის გარეშე მონიშვნაზე ჩნდება სტატუსი `დასაკეცად მონიშნე ჯგუფი — დააწკაპუნე ჯგუფის სახელზე.` |
+-| C2/C3 უარი | pointer gesture-ის, `isArrangementPreviewActive()`-ის ან იმ fader-ზე (slider) focus-ის დროს, რომელსაც დაკეცვა დამალავდა, ჩნდება `GESTURE_EDIT_BLOCKED_MESSAGE` და არაფერი იცვლება |
++| C2/C3 უარი | pointer gesture-ის ან `isArrangementPreviewActive()`-ის დროს ჩნდება `GESTURE_EDIT_BLOCKED_MESSAGE` და არაფერი იცვლება. თუ focus იმ row-შია, რომელსაც დაკეცვა დამალავდა, focus-ის row ჯერ ფიქსირდება, focused ელემენტი იღებს `blur()`-ს (fader-ის `onBlur` pending Volume preview-ს ერთ `Volume` ჩანაწერად აკომიტებს), მერე ჯგუფი იკეცება და focus დამკეცავი ჯგუფის სახელზე გადადის (Round 81, D-29z46) |
+ | C4 | დამალული ხაზები **არ რენდერდება**: ისინი DOM-იდან და accessibility tree-დან ქრება. nested შემთხვევაში გარე ჯგუფი შიდა header-საც მალავს, შიდა ჯგუფის მდგომარეობა კი ინახება. აუდიო, export და `scheduleKey` არ იცვლება: დაკეცვა mute არ არის |
+ | C5 | დაკეცილ header-ზე timeline-ის ზოლი იქცევა `aria-hidden`, `pointer-events-none` ზოლად (`arrangement-group-overview`). თითო კლიპი ერთი ბლოკია `ArrangementClip`-ის geometry-ით: `left = start × pxPerSecond`, `width = max(1, duration × pxPerSecond)`. ბლოკს აქვს `data-overview-start/end` (3 ათწილადით), მონიშნულ კლიპს კი `data-overview-selected="true"`. რიგის სიმაღლე ორივე მდგომარეობაში 28 px-ია |
+ | C6 | დაკეცილი სახელის label: `<name> — ჯგუფი, დაკეცილი, <n> კლიპი` (`, მონიშნული` მონიშვნისას). თუ აქტიური ხაზი დაკეცილ ჯგუფშია, header-ს აქვს `border-l-brand` და `data-contains-active="true"`. ბიბლიოთეკიდან დამატება კვლავ აქტიურ ხაზზე ხდება და overview-ში ახალი ბლოკი ჩნდება |
+@@ -49,7 +49,7 @@
+ flowchart LR
+   Btn[fold ღილაკი] --> Set[setTrackGroupsCollapsed]
+   Key[U] --> Targets[trackGroupCollapseTargets] --> Set
+-  Set -->|gesture / preview / hidden slider focus| Refuse[GESTURE status]
++  Set -->|gesture / preview| Refuse[GESTURE status]
+   Set --> Layout[TrackLaneLayout.collapsedGroups + resolveTrackLaneLayout]
+   Set -->|collapse| Prune[C7: rows, clips, lane range]
+   Set -->|focus hidden| Focus[pendingRowFocusRef → layout effect]
+@@ -67,7 +67,7 @@ flowchart LR
+ 
+ ## პრობლემები და გადაწყვეტები
+ 
+-- **პრობლემა:** B-ის C2 label `<name> — ჯგუფის დაკეცვა / გახსნა` ემთხვევა გაყინული `track-groups-ui.test.tsx`-ის `groupName` regex-ს (`^<name> — ჯგუფი`, l.219), რის გამოც ხუთი გაყინული ტესტი „multiple elements“ შეცდომით წითლდებოდა. **გადაწყვეტა:** იგივე სიტყვები, სხვა რიგით: `ჯგუფის დაკეცვა / გახსნა — <name>`. საბოლოო ფორმულირებაზე გადაწყვეტილებას B იღებს: დატოვოს ეს ტექსტი ან helper-ი შემდეგ რაუნდში გაალღოს.
++- **პრობლემა:** B-ის C2 label `<name> — ჯგუფის დაკეცვა / გახსნა` ემთხვევა გაყინული `track-groups-ui.test.tsx`-ის `groupName` regex-ს (`^<name> — ჯგუფი`, l.219), რის გამოც ხუთი გაყინული ტესტი „multiple elements“ შეცდომით წითლდებოდა. **გადაწყვეტა:** იგივე სიტყვები, სხვა რიგით: `ჯგუფის დაკეცვა / გახსნა — <name>`. B-მ (D-29z46) ეს ფორმულირება C2-ის კონტრაქტად მიიღო.
+ - **პრობლემა:** გაყინული `rowOrder`/`selectedRows` group row-ის `textContent`-ს კითხულობს. glyph-ის ტექსტად ჩასმა მათ დაარღვევდა. **გადაწყვეტა:** glyph (▸ / ▾) Tailwind-ის `before:` pseudo-element-ის content-ით ჩნდება და დამატებით `data-fold-glyph`-შიც იწერება. რეალურ Chromium-ში `::before` content შემოწმდა.
+ - **პრობლემა:** ხაზის Volume-ის კლავიატურული preview `isArrangementPreviewActive()`-ს **არ** რთავს: context მას მხოლოდ შიდა `volumeBeforeRef`-ში ინახავს, და context გაყინულია. **გადაწყვეტა:** დაკეცვა უარს ამბობს მაშინაც, როცა focus იმ slider-ზეა, რომელსაც დაკეცვა დამალავდა. ასე focused fader blur-ის გარეშე არ ქრება. ბრაუზერში preview მხოლოდ ArrowUp-ის keydown-სა და keyup-ს შორის არსებობს.
+ - **ცნობილი შეზღუდვა (C7):** Redo-ით დამალულ row-ებზე pruning არ ხდება. მონიშნული კლიპი მონიშნული რჩება და overview-ში მონიშნულ ბლოკად ჩანს. ამ გზით შეიძლება დარჩეს lane range დამალულ ხაზზე. ეს signal-ია და არა დამალული ბაგი.

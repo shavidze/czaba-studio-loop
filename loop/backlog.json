@@ -1,10 +1,10 @@
 {
- "version": 80,
- "updated": "2026-10-22 (B round 80 review -> round 81 task, D-29z46)",
+ "version": 81,
+ "updated": "2026-10-22 (B round 81 review -> round 82 task, D-29z47)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 81: D-29z46 - SRW-17 stage 3: group Mute/Solo/Volume in playback and export via trackEffectiveGains, nesting, half-solo, header controls, ungroup drops mix state, export-dialog video line; bounded fix X1 = C80-1 blur-then-collapse with narrow UC2 test amendment. Baseline HEAD 68383fa clean; frozen b-round-80-r81-tree-sha256.txt 461; 11 owned existing files (types, schedule, graph.client, model toggleSolo, groups, ArrangementContext, ArrangementGroupHeader, StudioWorkspace X1, ArrangementExportDialog one expression, track-group-collapse-ui UC2 segment, doc 070 four lines) + new track-group-mix.test.ts, track-group-mix-ui.test.tsx, doc 071. Next: regression round if round-82 planning falls on/after 2026-10-24 (includes C-R80-O3 repro row), else C-R80-O3 repro + decision, then SRW-18..20, Lows batch.)",
- "advisor_used_by_B": "round 75 planning (round 76 task, attempt 3 after two usage-limit stops): advisor available; consulted after orientation (2b split, Ableton 6.7 confirmed for clips only, reviewer findings as signals, write order for resilience) and after the task draft (MS-PLAY discriminating oracle with Solo + video Mute, bypass source ID, untouched onGrid l.539, M9 note).",
+ "current_task": "current-task.md (round 82: D-29z47 - SRW-18 stage 1 (FB-06): clip fade in/out - fadeIn?/fadeOut? on audio clips, pure fades.ts, edit rules F3, per-source fade GainNode with linear ramps in live start and export, handles + overlay + data-fade-*, one entry per drag, double-click = 0, pointercancel reverts; bounded fix X1 = C-R80-O3 release status; doc 070 l.72, doc 071 l.4, new doc 072. Baseline HEAD efbed86 clean; frozen b-round-81-r82-tree-sha256.txt 467; 8 owned existing files + fades.ts, clip-fades.test.ts, clip-fades-ui.test.tsx, doc 072. Next: regression round if round-83 planning falls on/after 2026-10-24, else SRW-18 stage 2 (envelope).)",
+ "advisor_used_by_B": "round 81 review -> round 82 planning: advisor available and consulted before writing (round shape, O3 discriminator, fade graph traps, dispositions) and after writing (final review).",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -3923,7 +3923,7 @@
    "depends_on": [
     "SRW-13"
    ],
-   "status": "in_progress (stage 1 C PASS published 74eca15; stage 2 C PASS browserVerified published 68383fa; stage 3 dispatched round 81, D-29z46; none deferred)",
+   "status": "c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 74eca15, stage 2 68383fa, stage 3 efbed86; Tech Lead R79-T/R81-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)",
    "files": [
     "app/types/arrangement.ts",
     "app/lib/arrangement/model.ts",
@@ -3937,19 +3937,25 @@
      "id": "R17-G1",
      "action": "Select 2 tracks, Ctrl+G, rename 'SFX ქუჩა'",
      "expected": "group header with children; collapse hides children",
-     "verify": "C"
+     "verify": "C",
+     "status": "pass",
+     "evidence": "C rounds 79/80 (TG rows, FOLD rows)"
     },
     {
      "id": "R17-G2",
      "action": "Group volume to 0 while child at 100%",
      "expected": "children silent in playback and export",
-     "verify": "C decode"
+     "verify": "C decode",
+     "status": "pass",
+     "evidence": "C round 81 GX-VOL export ratio 0.50000001, 0% -> 0 LSB, live floor"
     },
     {
      "id": "R17-G3",
      "action": "Nested subgroup inside group; mute outer",
      "expected": "all nested silent; inner controls remain individually adjustable",
-     "verify": "C"
+     "verify": "C",
+     "status": "pass",
+     "evidence": "C round 81 GX-NESTED G2 muted -> live -inf + export peak 0; inner controls adjustable; ratio 0.24999999"
     }
    ],
    "stages": [
@@ -4079,7 +4085,7 @@
     },
     {
      "stage": "3",
-     "status": "dispatched",
+     "status": "c_pass_published",
      "scope": "group Mute/Solo/Volume (model fields optional, omitted at defaults); one pure trackEffectiveGains(arrangement) used by live start, live non-restart sync and export (effective gain per child, no bus nodes, 0 restarts); mute beats solo at every level; exclusive/Ctrl-additive group solo, track exclusive solo clears group solos; half-solo aria-pressed=mixed; group header M/S/Volume (row stays 28 px, no text nodes); group volume gesture = track volume semantics; ungroup drops group mix state; export dialog video line group-aware; X1 = C80-1 blur-then-collapse; narrow UC2 test amendment; doc 070 four lines; doc 071",
      "round": 81,
      "decision": "D-29z46",
@@ -4110,7 +4116,46 @@
       "T81-TARGETED",
       "SOURCE-UNCHANGED"
      ],
-     "tech_lead": "R81-T (half-solo readability, group -6 dB by ear, child meter falling under a muted group)"
+     "tech_lead": "R81-T (half-solo readability, group -6 dB by ear, child meter falling under a muted group)",
+     "c_round81_passed": [
+      "GX-CONTROLS",
+      "GX-VOL",
+      "GX-MUTE",
+      "GX-NESTED",
+      "GX-SOLO",
+      "GX-HALF",
+      "GX-METER",
+      "GX-UNDO",
+      "GX-UNGROUP",
+      "GX-COLLAPSED",
+      "GX-NO-RESTART",
+      "GX-EXPORT-DIALOG",
+      "X1-FOCUS",
+      "REG-FOLD",
+      "REG-TG",
+      "REG-TRACK-MIX",
+      "REG-HYD",
+      "G81-3 (fake-Bearer 403 sub-check blocked: backend unavailable in cloud)",
+      "T81-TARGETED",
+      "SOURCE-UNCHANGED"
+     ],
+     "c_round81_bugs": [
+      "C81-1 (low, UX signal: nested group names truncate) -> Lows batch + Tech Lead R81-T",
+      "C81-2 (low, doc 070 l.72) -> round 82 one-line grant"
+     ],
+     "browserVerified": true,
+     "realVerified": true,
+     "notBrowserVerified": [
+      "M5 group-Volume pointercancel revert (jsdom UM3 only; not a section-5 row)",
+      "GX-COLLAPSED audio measured for Mute only; Solo/Volume by attributes and history"
+     ],
+     "published": "efbed86f644c4faabbdf2044620d089e7537e5bb",
+     "evidence": [
+      "c-round-81.md",
+      "c-round-81.json",
+      "gates/gate-round-81.json",
+      "gates/round-81/review.md"
+     ]
     }
    ],
    "ableton_round79": "Live 12 manual sec. 18.2/18.3 captured 2026-10-22 (b-round-78/ableton-mixing-20261022.txt, sha256 792522f0...): Group Tracks command + nesting confirmed; Shift/Ctrl-click multi-select confirmed; ungroup confirmed; folded overview + mixer + half solo confirmed (stages 2/3). sec. 42 (b-round-71 capture): Ctrl+G / Ctrl+Shift+G / U / Ctrl+R confirmed. Deliberate differences: F2 rename, non-adjacent grouping refused (no track reorder in CZABA), video not groupable; empty selection refusal = CZABA decision",
@@ -4128,13 +4173,17 @@
    "depends_on": [
     "SRW-13"
    ],
-   "status": "todo",
+   "status": "in_progress (stage 1 dispatched round 82, D-29z47; stage 2 envelope next SRW-18 round; none deferred)",
    "files": [
-    "app/types/arrangement.ts",
-    "app/lib/arrangement/envelope.ts",
+    "app/components/arrangement/ArrangementClip.tsx",
+    "app/contexts/ArrangementContext.tsx",
     "app/lib/arrangement/__tests__/envelope.test.ts",
+    "app/lib/arrangement/clipboard.ts",
+    "app/lib/arrangement/envelope.ts",
+    "app/lib/arrangement/fades.ts",
     "app/lib/arrangement/graph.client.ts",
-    "app/components/arrangement/ArrangementClip.tsx"
+    "app/lib/arrangement/model.ts",
+    "app/types/arrangement.ts"
    ],
    "acceptance": [
     {
@@ -4149,7 +4198,47 @@
      "expected": "envelope drawn on clip; export level dips at that time; envelope moves with clip and survives split/trim",
      "verify": "C + unit"
     }
-   ]
+   ],
+   "stages": [
+    {
+     "stage": "1",
+     "status": "dispatched",
+     "round": 82,
+     "decision": "D-29z47",
+     "scope": "fadeIn?/fadeOut? on audio clips (omitted at 0, in+out<=duration); pure fades.ts; edits F3 (move/copy keep, trim clamps trimmed edge first, split/delete-time/cut drop the fade at new cut edges, range copy keeps only contained edges); per-source fade GainNode only for faded clips with linear ramps (live start + export, mid-start initial value, loop appendPlan); handles 10x10 at body top (hover/selected/fade>0), ramp overlay, data-fade-in/out; one entry per drag, double-click = 0, pointercancel reverts; X1 = C-R80-O3 release status; doc 070 l.72, doc 071 l.4, new doc 072",
+     "acceptance": [
+      "R18-A1"
+     ],
+     "c_ids": [
+      "FD-HANDLES",
+      "FD-IN",
+      "FD-OUT",
+      "FD-LIVE",
+      "FD-MIDSTART",
+      "FD-LIMITS",
+      "FD-UNDO",
+      "FD-EDITS",
+      "FD-PLAY-EDIT",
+      "FD-NEIGHBOURS",
+      "FD-CLIPGAIN",
+      "X1-STATUS",
+      "REG-HYD",
+      "G82-3",
+      "T82-TARGETED",
+      "SOURCE-UNCHANGED"
+     ],
+     "tech_lead": "R82-T"
+    },
+    {
+     "stage": "2",
+     "status": "todo",
+     "scope": "clip volume envelope (breakpoints drawn on the clip), playback + export, moves with the clip, survives split/trim",
+     "acceptance": [
+      "R18-A2"
+     ]
+    }
+   ],
+   "ableton_round82": "Live 12 manual sec. 6.8 captured 2026-10-21 (b-round-71/ableton-arrangement-view-20261021.txt): fades at clip edges, hover handles, drag across clip, no overlap of start/end fades, Fade Curve handle, Delete on handle, crossfades, opt-in 4 ms edge fades, fades are clip properties - all confirmed (text). CZABA differences: linear only, double-click reset, no crossfades (clips never overlap), no automatic edge fades, free (no snap) drag; split/trim behaviour unconfirmed in Live -> CZABA rules F3."
   },
   {
    "id": "SRW-19",
@@ -7063,7 +7152,7 @@
    "round": 81,
    "task": "current-task.md",
    "decision": "D-29z46",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "SRW-17 stage 3 (FB-12): group Mute/Solo/Volume in playback and export, nesting, half-solo (R17-G2, R17-G3)",
     "bounded fix X1 = C80-1"
@@ -7105,6 +7194,51 @@
     "REG-HYD",
     "G81-3",
     "T81-TARGETED",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C PASS browserVerified=true realVerified=true; 20 rows at both viewports; 2 Low bugs (C81-1 nested group name truncation -> Lows batch + R81-T; C81-2 doc 070 l.72 -> round 82); gate 81 published efbed86 to both remotes (review 8.5/10 COMMIT OK)"
+  },
+  {
+   "round": 82,
+   "task": "current-task.md",
+   "decision": "D-29z47",
+   "status": "dispatched",
+   "items": [
+    "SRW-18 stage 1 (FB-06): clip fade in/out - model, live playback, export, handles (R18-A1)",
+    "bounded fix X1 = C-R80-O3 release status",
+    "doc grants C81-2 (doc 070 l.72), GATE81-S1 (doc 071 l.4)"
+   ],
+   "note": "baseline HEAD efbed86, clean tree; frozen b-round-81-r82-tree-sha256.txt 467/467; snapshots b-round-81-r82-snapshots (8 files); protected 4/4",
+   "owned": [
+    "app/types/arrangement.ts (fadeIn?/fadeOut? on ArrangementClip)",
+    "app/lib/arrangement/fades.ts (new)",
+    "app/lib/arrangement/model.ts (trimClipStart, trimClipEnd, splitClipAt, deleteTime bodies)",
+    "app/lib/arrangement/clipboard.ts (item fields, materialInWindow, copyClipsToClipboard, cutRangeFromArrangement, planClipboardPaste)",
+    "app/lib/arrangement/graph.client.ts (optional ramp methods, clipFades option, fade node, export line clipFades: clipFadeShapes(arrangement),)",
+    "app/contexts/ArrangementContext.tsx (one startGraph option line + import)",
+    "app/components/arrangement/ArrangementClip.tsx (handles, overlay, fade gestures, X1)",
+    "app/lib/arrangement/__tests__/clip-fades.test.ts (new)",
+    "app/lib/arrangement/__tests__/clip-fades-ui.test.tsx (new)",
+    "docs/implementation/2026/quarter-IV/070-studio-lab-track-groups-stage-2-collapse.md (l.72)",
+    "docs/implementation/2026/quarter-IV/071-studio-lab-track-groups-stage-3-mix.md (l.4)",
+    "docs/implementation/2026/quarter-IV/072-studio-lab-clip-fades-stage-1.md (new)"
+   ],
+   "c_ids": [
+    "FD-HANDLES",
+    "FD-IN",
+    "FD-OUT",
+    "FD-LIVE",
+    "FD-MIDSTART",
+    "FD-LIMITS",
+    "FD-UNDO",
+    "FD-EDITS",
+    "FD-PLAY-EDIT",
+    "FD-NEIGHBOURS",
+    "FD-CLIPGAIN",
+    "X1-STATUS",
+    "REG-HYD",
+    "G82-3",
+    "T82-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -7593,6 +7727,24 @@
    "file": "app/lib/arrangement/__tests__/grid-snap-ui.test.tsx",
    "scope": "only the bodies and titles of the GS3 and GS13 `it` blocks (current-task.md round 53 section 2.2); DEFAULT_CLIPS, helpers and every other `it` byte-identical",
    "basis": "C-R52-01: D-29z17 E2 (user-requested edge magnet) changes two stage-1 expectations; B decision D-29z18 option (a) documents FB-13 there instead of weakening the magnet"
+  },
+  {
+   "round": 82,
+   "file": "docs/implementation/2026/quarter-IV/070-studio-lab-track-groups-stage-2-collapse.md",
+   "scope": "l.72 only (C81-2)",
+   "basis": "C81-2 / A round-81 review L9"
+  },
+  {
+   "round": 82,
+   "file": "docs/implementation/2026/quarter-IV/071-studio-lab-track-groups-stage-3-mix.md",
+   "scope": "l.4 status line only",
+   "basis": "gates/round-81/review.md #1"
+  },
+  {
+   "round": 82,
+   "file": "app/contexts/ArrangementContext.tsx",
+   "scope": "one startGraph applySchedule option line clipFades: clipFadeShapes(arrangement), + its import",
+   "basis": "D-29z47 F4"
   }
  ],
  "baseline_tree_at_round4": "HEAD cc1e531, working tree clean; the 4 protected files are committed in cc1e531 with baseline sha256 unchanged",
@@ -7972,7 +8124,7 @@
   {
    "id": "C-R28-INFO-NO-EDGE-FADES",
    "severity": "info",
-   "status": "routed",
+   "status": "closed as recorded conscious difference (D-29z47): Live 12 sec. 6.8 automatic 4 ms edge fades are an opt-in setting; CZABA adds no automatic fades; user-drawn fades arrive in SRW-18 stage 1 (round 82)",
    "to": "SRW-18 (FB-06 fades)",
    "note": "cuts at range edges are hard (no automatic fade); Ableton applies short automatic fades. CZABA has no fade feature yet; SRW-18 covers fades. Not a round-28 defect.",
    "evidence": "c-round-28.md section 11"
@@ -11239,7 +11391,7 @@
   {
    "id": "ARCH-CHECKPOINT-SRW16",
    "severity": "info",
-   "status": "requested_from_root (B round 78 planning, 2026-10-22; non-blocking); addendum question 8 (round 79) and question 9 (round 80 planning: group volume pipeline in ArrangementContext, row-focus.ts proposal; SRW-17 feature boundary reached with round 81) appended; no root result yet",
+   "status": "requested_from_root (B round 78 planning, 2026-10-22; non-blocking); addenda q8 (round 79), q9 (round 80), q10 (round 82 planning: MixVolumeTarget volume state machine -> pure lib/arrangement module, gate-81 Architecture note); SRW-16 and SRW-17 boundaries both reached without a root result",
    "to": "root",
    "title": "bounded frontend-architect checkpoint at the SRW-16 boundary: snap entry points in grid.ts (resolveSnapTime single entry, microsecond helper), snapTargetsFor, handleKeyDown arrow resolver, timeline-stops, ArrangementMarkerRow owner risk, isFollowAutoScroll duplicate, GATE76-S2 nearest in-bounds candidate; StudioWorkspace grows again in SRW-17",
    "evidence": "b-round-78-checkpoint-request.md"
@@ -11431,7 +11583,7 @@
   {
    "id": "C80-1",
    "severity": "low",
-   "status": "scheduled round 81 (X1, D-29z46: blur-then-collapse, capture the focused row first; narrow UC2 amendment)",
+   "status": "closed (C round 81 X1-FOCUS PASS at both viewports; published efbed86)",
    "to": "A",
    "title": "U / fold refused with the drag message when a fader in a to-be-hidden row is merely focused and nothing is pending",
    "evidence": "c-round-80.md C80-1; c-round-80/q1-*.json FOLD-U s5c; gates/round-80/review.md #1"
@@ -11446,8 +11598,8 @@
   },
   {
    "id": "C-R80-O3-REFUSED-LANE-DRAG-PARTIAL-COMMIT",
-   "severity": "low (provisional; medium if the refusal is silent)",
-   "status": "open - one discriminating repro row scheduled in round 82 (regression round if due, else its own repro round); fix, if any, goes to the ArrangementClip owner in its own round",
+   "severity": "low",
+   "status": "ruled + scheduled round 82 X1 (D-29z47): the committed last valid place is the FB-03 rule (plan l.170, amber + clip stays at its last valid place); defect = release status that never says where the clip ended; fix = honest release status; committed position unchanged",
    "to": "B",
    "title": "a cross-lane drag refused for overlap (music 101 s onto stems with a clip at 2-18) commits the last same-lane preview (1.025 s) instead of the original 0.35 s or the requested 1.35 s",
    "evidence": "c-round-80.md O3; c-round-80/probe-ghost.json (blocked ghost label present at stems); ArrangementClip.tsx l.497-504 + l.620-627 (blocked path commits getArrangement())"
@@ -11511,7 +11663,7 @@
   {
    "id": "GATE80-S8-DOC070-STATUS",
    "severity": "low",
-   "status": "scheduled round 81 (doc 070 l.4, D-29z46)",
+   "status": "closed (doc 070 l.4 updated round 81, published efbed86)",
    "to": "A",
    "title": "doc 070 status line still says awaiting C",
    "evidence": "gates/round-80/review.md #8"
@@ -11543,7 +11695,7 @@
   {
    "id": "A-R80-PREVIEW-FLAG-SIGNAL",
    "severity": "info",
-   "status": "resolved by design (D-29z46 X1: blur-then-collapse commits a pending fader preview; no context flag needed)",
+   "status": "closed (resolved by round 81 X1, C X1-FOCUS PASS)",
    "to": "B",
    "title": "reviewer proposal: a volume/pan preview-pending flag in ArrangementContext",
    "evidence": "a-round-80.md Deviation 3 and Architecture note"
@@ -11563,6 +11715,110 @@
    "to": "B",
    "title": "group rows have no pan control",
    "evidence": "current-task.md round 81 section 4"
+  },
+  {
+   "id": "C81-1",
+   "severity": "low",
+   "status": "open - Lows batch + Tech Lead R81-T (UX signal; contract M4 >= 40 px holds; no nesting-depth cap ruled: would shrink FB-12 without user authorisation)",
+   "to": "B",
+   "title": "nested group names truncate to \"ჯგუ…\" at depth >= 1 (name button 67 px depth 1, 55 px depth 2), nested groups hard to tell apart; name button title is a constant shortcut hint, not the name",
+   "evidence": "c-round-81.md C81-1; c-round-81/shots/controls-nested-*.png; gates/round-81/review.md #7 (about 43 px at depth 3, < 20 px at depth 5)"
+  },
+  {
+   "id": "C81-2",
+   "severity": "low",
+   "status": "scheduled round 82 (doc 070 l.72 one-line grant)",
+   "to": "A",
+   "title": "doc 070 l.72 problems section still describes the round-80 slider-focus refusal; X1 now blurs then collapses",
+   "evidence": "c-round-81.md C81-2; a-round-81.md review L9"
+  },
+  {
+   "id": "GATE81-S1-DOC071-STATUS",
+   "severity": "low",
+   "status": "scheduled round 82 (doc 071 l.4)",
+   "to": "A",
+   "title": "doc 071 status line still says awaiting C",
+   "evidence": "gates/round-81/review.md #1"
+  },
+  {
+   "id": "GATE81-S2-UM8-SOURCE-TEXT",
+   "severity": "low",
+   "status": "open - Lows batch (test file track-group-mix-ui.test.tsx; replace source-text assertion with a rendered dialog check)",
+   "to": "B",
+   "title": "UM8 asserts dialog source text (isTrackAudibleWithGroups) instead of behaviour",
+   "evidence": "gates/round-81/review.md #2; C GX-EXPORT-DIALOG covers the rendered line"
+  },
+  {
+   "id": "GATE81-S3-TRACKGAINS-FALLBACK",
+   "severity": "low",
+   "status": "open - Lows batch (doc 071 M3 says the fallback is deliberate)",
+   "to": "B",
+   "title": "applySchedule falls back to group-unaware isTrackAudible when trackGains is omitted",
+   "evidence": "gates/round-81/review.md #3 (graph.client.ts l.115-117)"
+  },
+  {
+   "id": "GATE81-S4-HEADER-RENDER-COST",
+   "severity": "low",
+   "status": "open - Lows batch (only if profiling shows a cost)",
+   "to": "B",
+   "title": "ArrangementGroupHeader reads the whole useArrangement value; trackEffectiveGains rebuilds the group map per track per volume-drag frame",
+   "evidence": "gates/round-81/review.md #4"
+  },
+  {
+   "id": "GATE81-S5-SOLO-COPY",
+   "severity": "low",
+   "status": "open - Lows batch",
+   "to": "B",
+   "title": "toggleTrackGroupSolo exclusive branch recreates every group object",
+   "evidence": "gates/round-81/review.md #5 (groups.ts l.156-163)"
+  },
+  {
+   "id": "GATE81-S6-BG-LINEAR",
+   "severity": "low",
+   "status": "open - Lows batch",
+   "to": "B",
+   "title": "bg-gradient-to-r is the Tailwind v3 name; v4 is bg-linear-to-r",
+   "evidence": "gates/round-81/review.md #6 (ArrangementGroupHeader.tsx l.269)"
+  },
+  {
+   "id": "GATE81-S8-CHILD-GROUP-SOLO-DISPLAY",
+   "severity": "info",
+   "status": "ruled (B, D-29z47): a child group (or lane) audible only because an ancestor is soloed shows its own state (off), the same rule as lane M/S under a muted group; Live display unconfirmed in the capture; Tech Lead R81-T may comment",
+   "to": "B",
+   "title": "trackGroupSoloState returns off for a group whose parent is soloed",
+   "evidence": "gates/round-81/review.md #8"
+  },
+  {
+   "id": "ARCH-R81-VOLUME-STATE-MACHINE",
+   "severity": "info",
+   "status": "signal - checkpoint request question 10 (b-round-78-checkpoint-request.md); reviewers: keep for now; extract only if a third target kind arrives",
+   "to": "root",
+   "title": "ArrangementContext MixVolumeTarget volume preview/commit/cancel state machine (volumeTargetKeyRef, cross-flush, six group members) could move to a pure lib/arrangement module; acceptance UM3, UM9, fader-guards, UC2",
+   "evidence": "a-round-81.md Architecture note; gates/round-81/review.md Architecture note"
+  },
+  {
+   "id": "A-R81-ORPHAN-SOLO-CONSISTENCY",
+   "severity": "info",
+   "status": "acknowledged (unreachable from the UI: no path creates an orphan group); GROUPS-NO-MODEL-SANITIZER signal",
+   "to": "B",
+   "title": "orphan-solo rule applies to audibility only; toggleSolo/toggleTrackGroupSolo still count an orphan soloed group",
+   "evidence": "a-round-81.md known gap 7"
+  },
+  {
+   "id": "C-R81-NB-POINTERCANCEL",
+   "severity": "info",
+   "status": "acknowledged (Playwright cannot raise a real pointercancel; jsdom UM3 only)",
+   "to": "B",
+   "title": "group Volume pointercancel revert not browser-verified",
+   "evidence": "c-round-81.json notBrowserVerified"
+  },
+  {
+   "id": "SRW18-KEYBOARD-FADES",
+   "severity": "info",
+   "status": "signal for SRW-18 stage 2 planning (not scheduled in stage 1; no keyboard path invented)",
+   "to": "B",
+   "title": "fade lengths are mouse-only in stage 1",
+   "evidence": "current-task.md round 82 F6"
   }
  ],
  "tech_lead_notes": [
@@ -11829,6 +12085,13 @@
    "why": "feel of SRW-17 stage 3 (D-29z46)",
    "status": "open",
    "added": "round 80 planning"
+  },
+  {
+   "id": "R82-T",
+   "what": "real Chrome with headphones on /studio-lab: fade handles easy to find and grab at both lane heights; a 1 s fade-in and 2 s fade-out sound smooth; handles do not get in the way of trim and range drags",
+   "why": "feel of SRW-18 stage 1 (D-29z47)",
+   "status": "open",
+   "added": "round 82 planning"
   }
  ],
  "baseline_tree_at_round5": "HEAD cc1e531 + uncommitted round-4 work (18 M + 12 ??, listed in current-task.md section 2.1), verified by C round 4; must not be reverted",
@@ -12611,6 +12874,11 @@
    "round": 75,
    "source": "a-round-75.md section 5 Architecture note + gates/round-75/review.md",
    "note": "second copy of the Follow auto-scroll predicate (grid-menu effect and handleTimelineScroll); keep for now; proposal isFollowAutoScroll(scroller, autoLeft, isPlaying, followMode) in lib/arrangement/view.ts with MV16 + GM21 as acceptance; anchor-drift close as later alternative. Signal only; part of the SRW-16 boundary checkpoint request (after 2b-3), not scheduled on its own."
+  },
+  {
+   "round": 81,
+   "source": "a-round-81.md Architecture note + gates/round-81/review.md",
+   "note": "ArrangementContext volume pipeline generalised by MixVolumeTarget (volumeTargetKeyRef, cross-flush, six group members). Both reviewers: keep for now. Proposal: one bounded task to move the pending-volume state machine into a pure lib/arrangement module (useArrangement shape unchanged; acceptance UM3, UM9, fader-guards.test.tsx, UC2), only if a third target kind arrives or root approves. Checkpoint question 10; not scheduled."
   }
  ],
  "vitest_floor_round46": 1357,

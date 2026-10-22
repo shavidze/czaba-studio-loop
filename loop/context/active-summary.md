@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-22T06:59:51.639Z)
+# Active loop summary (2026-10-22T08:34:48.460Z)
 
-- backlog.json 717 KB -> active view 130 KB
-- status: G_ROOT_GATE round 80
-- servers: `{"checkedUtc":"2026-10-22T06:37:07.3135134Z","round":80,"attempt":1,"store":200}`
-- last publication: 68383fa91f0e58f577b5e33f14d21ff63fb1531c (rounds 80-80)
-- last root gate: round 80 published - commit 68383fa91f0e58f577b5e33f14d21ff63fb1531c pushed
+- backlog.json 728 KB -> active view 138 KB
+- status: G_ROOT_GATE round 81
+- servers: `{"checkedUtc":"2026-10-22T07:57:18.5775086Z","round":81,"attempt":1,"store":200}`
+- last publication: efbed86f644c4faabbdf2044620d089e7537e5bb (rounds 81-81)
+- last root gate: round 81 published - commit efbed86f644c4faabbdf2044620d089e7537e5bb pushed
 
 ## Current items: SRW-17
 
@@ -189,7 +189,7 @@
 - C-R77-OBS-RANGE-INTERVAL-WORDING / info / acknowledged (B spec wording, not an A defect): N2 allTracks means every clip edge on every track, not only inside the range interval; matches Live 6.9 text / round-77 task EK-RANGE said edges in the interval after Ctrl+Shift+L
 - C-R77-OBS-RANGE-SELECTS-CLIP / info / acknowledged (harness note): a range drag in a clip waveform also selects that clip and makes its lane active; only vitest isolates range-only track rules / range drag selects the clip
 - R78-T-TECH-LEAD / info / open / real Chrome on the 10 s grid: marker capture of the playhead, ranges and loop edges (no pixel radius) feels right?
-- ARCH-CHECKPOINT-SRW16 / info / requested_from_root (B round 78 planning, 2026-10-22; non-blocking); SRW-17 addendum question 8 (useTrackRowSelection + collapse state) appended in B round 79 planning; no root result yet / bounded frontend-architect checkpoint at the SRW-16 boundary: snap entry points in grid.ts (resolveSnapTime single entry, microsecond helper
+- ARCH-CHECKPOINT-SRW16 / info / requested_from_root (B round 78 planning, 2026-10-22; non-blocking); addendum question 8 (round 79) and question 9 (round 80 planning: group volume pipeline in ArrangementContext, row-focus.ts proposal; SRW-17 feature boundary reached with round 81) appended; no root result yet / bounded frontend-architect checkpoint at the SRW-16 boundary: snap entry points in grid.ts (resolveSnapTime single entry, microsecond helper
 - GATE78-S1-LOOP-MICROSECOND-HELPER / low / signal - in ARCH-CHECKPOINT-SRW16 / ArrangementLoopBrace inline Math.round(x*1e6)/1e6 repeats grid.ts private toWholeMicroseconds; proposal snapLoopMoveStart or roundToMicrosec
 - GATE78-S2-SCRUB-GETTER-PER-MOVE / info / acknowledged (keep for consistency with T7 unless profiling shows a cost); in ARCH-CHECKPOINT-SRW16 / getSnapMarkerTimes() called on every playhead pointermove (new array, filter, sort)
 - GATE78-S3-DOC068-STATUS / low / scheduled round 79 (one status line, D-29z44) / doc 068 status line still says awaiting C
@@ -199,19 +199,30 @@
 - GROUP-NONADJACENT / info / signal (deliberate CZABA difference, D-29z44 G6; not requested explicitly by the user) / Live 12 sec. 18.3 groups any selected tracks; CZABA refuses a non-contiguous selection because it has no track reorder
 - R79-T-TECH-LEAD / info / open / real Chrome (Windows; Mac Cmd+G): Ctrl+G groups the selected lanes and no find bar opens; group rows and indentation read well at 1440x900 a
 - GATE79-S1-GROUP-BAND-POINTER / low / open - Lows batch (the lane background handler takes a trackId and sets the active lane; a group row has none, so a grant needs a design decision: deselect/seek only, no marquee origin) / group header timeline band ignores the mouse: no deselect, seek or marquee start (gate-79 review #1)
-- GATE79-S2-UNGROUP-FOCUS-BODY / low / scheduled round 80 (F2, D-29z45; C FOCUS rows) / after Ctrl+Shift+G the focused group button unmounts and focus falls to BODY (gate-79 review #2, C O2)
-- GATE79-S3-SHORTCUT-HINT / low / scheduled round 80 (H1, D-29z45) / Ctrl+G / Ctrl+Shift+G / F2 only in the group button title (gate-79 review #3)
 - GATE79-S4-MAC-HINT-TEXT / low / open - Lows batch (refusal string may be locked by the frozen round-79 UI test; amend there) / empty-selection hint says Ctrl+click; on macOS Ctrl+click is the context menu, Cmd+click works (gate-79 review #4)
 - GATE79-S5-MULTI-DRAG-LANE-TARGET / low / signal - pre-existing ArrangementClip behaviour; Lows batch / drag owner / refused multi-clip move clears gesture.laneTarget while the single path keeps it; over a group header a multi-clip drag snaps back to its ow
 - GATE79-S6-ROWCOUNT-PER-RENDER / info / acknowledged (cheap; reviewer: no change now) / trackGroupRowCount runs every render incl. drag preview frames
-- GATE79-S7-DOC069-STATUS / low / scheduled round 80 (one status line, D-29z45) / doc 069 status line still says awaiting C
 - ARCH-R79-TRACK-ROW-SELECTION-HOOK / info / signal - in ARCH-CHECKPOINT-SRW16 addendum question 8; both reviewers: keep for now, extract when stage 2/3 add fold/mixer; round 80 does not extract / StudioWorkspace gained track selection, anchor ref, group-count effect and command callbacks (2044 -> 2225 lines); proposal useTrackRowSelec
 - C-R79-O1-TRACK-SELECTION-NEVER-CLEARED / low / open - Lows batch / product question (Escape or a clip/background click could clear it; unspecified) / track selection is never cleared, so Ctrl+G can group lanes chosen long before (A review #9)
-- C-R79-O2-FOCUS-AFTER-GROUP / low / scheduled round 80 (F1, D-29z45) / after Ctrl+G focus stays on the track name button, so F2 does nothing until the group button is focused (A review #8)
 - C-R79-O4-FIT-M-GT-V-UNREACHED / info / acknowledged (covered by A jsdom TG10 only) / TG-FIT M > V branch not reachable at 1440x900 / 1280x720
 - A-R79-REVIEW-RESIDUALS / low / open - Lows batch (#4 lastHoverTrackId option; #6 lane name button ~20 px; #11 maxLength code units vs code points; #12 repeated trackGroupRows per click; #13 arrangementGroups/rowParentId naming; #14 inline rename status strings, hover:bg-surface) / A round-79 code-review residuals
 - TRACK-FOLD-U / info / signal (Live 12 sec. 42 Fold/Unfold Selected Tracks U or left/right arrows; CZABA arrows nudge clips; not requested) / U on selected plain tracks and arrow-key fold are not bound; U acts on selected groups only (D-29z45)
 - GROUPS-NO-MODEL-SANITIZER / info / signal (frozen model.ts; belongs with the model if project load/save ever arrives) / no normalizeTrackGroups sanitizer for groups in model.ts or the context
+- C80-1 / low / scheduled round 81 (X1, D-29z46: blur-then-collapse, capture the focused row first; narrow UC2 amendment) / U / fold refused with the drag message when a fader in a to-be-hidden row is merely focused and nothing is pending
+- C-R80-O3-REFUSED-LANE-DRAG-PARTIAL-COMMIT / low (provisional; medium if the refusal is silent) / open - one discriminating repro row scheduled in round 82 (regression round if due, else its own repro round); fix, if any, goes to the ArrangementClip owner in its own round / a cross-lane drag refused for overlap (music 101 s onto stems with a clip at 2-18) commits the last same-lane preview (1.025 s) instead of t
+- C-R80-O1-FIT-CAP-81 / info / acknowledged (existing fit cap) / lane fit caps at 81 px; C first used a self-invented fill criterion, re-judged against the written acceptance
+- C-R80-O4-DEMO-FULL-SCALE / info / acknowledged (same as DEMO-SFX-FULL-SCALE) / exports peak 1.0 with 486 full-scale samples in both collapsed and expanded exports
+- GATE80-S3-LABEL-FOCUS-LOOKUP / low / open - Lows batch / row-focus checkpoint (needs a data-testid on the frozen ArrangementLane name button) / trackRowNameButton finds the lane name button by a Georgian label substring; a text change silently breaks focus restore
+- GATE80-S4-REPEATED-RENDER-WORK / low / open - Lows batch / trackGroupDescendantTrackIds per collapsed group per render; trackRowsLayoutKey not memoised
+- GATE80-S5-DOUBLE-LAYOUT / low / open - Lows batch (optional) / collapse recalculates the lane layout twice and builds the collapsed map twice
+- GATE80-S6-STALE-COLLAPSE-IDS / info / acknowledged (deliberate C1: Redo restores the collapsed state; ids are random UUIDs) / collapsedGroups keeps entries of dissolved groups
+- GATE80-S7-TRACKGROUPROWCOUNT-LEFTOVER / low / open - Lows batch (export used only by the frozen groups.test.ts) / trackGroupRowCount is now only used by a test
+- GATE80-S8-DOC070-STATUS / low / scheduled round 81 (doc 070 l.4, D-29z46) / doc 070 status line still says awaiting C
+- GATE80-S9-CONST-ASSERTION-TEST / low / open - Lows batch (test file now partly owned in round 81 only for the UC2 segment) / 'video' as const in track-group-collapse-ui.test.tsx l.451
+- GATE80-S10-REDO-HIDDEN-SELECTION / info / acknowledged (documented C7 limitation in doc 070; overview marks the selection) / Redo can restore a clip selection inside a collapsed group; Delete would remove a clip only visible as a selected overview block
+- ARCH-R80-ROW-FOCUS / info / signal - in ARCH-CHECKPOINT-SRW16 addendum question 9; reviewers: keep for now, consider row-focus.ts after stage 3 / StudioWorkspace gained collapsedGroups, pendingRowFocusRef + dependency-less layout effect and three DOM focus helpers; proposal app/lib/arr
+- A-R80-REVIEW-RESIDUALS / low / open - Lows batch (#8 small repeated work; #9 TrackGroupOverviewBlock placement) / A round-80 code-review residuals
+- GROUP-PAN-NOT-IN-SCOPE / info / signal (Live group tracks have full mixer controls; FB-12/SRW-17 name Mute/Solo/Volume only; not requested) / group rows have no pan control
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video

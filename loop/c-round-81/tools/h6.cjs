@@ -1,0 +1,11 @@
+const X=require('./lib81.cjs');const{L,sleep,st,blur,key,G1,G2,mix,exportWav,W,dbv,mStart,mStop}=X;
+const vp=process.argv[2]||'1440x900';const rec=X.mkRec(`${L.OUT}/h6-${vp}.json`);const T=X.T(rec);
+(async()=>{const s=await L.open(vp);const p=s.page;await X.freshSetup(p);await X.lMute(p,'video').click();await sleep(200);await X.makeG1(p);await X.makeG2(p);
+ await T('GX-HALF-AUDIO',async()=>{const o={};await X.lSolo(p,'stems').click();await sleep(250);o.m=await mix(p);const es=await exportWav(p,vp,'half-stems-solo');
+  await blur(p);await key(p,'Home',200);await mStart(p);await p.keyboard.press('Space');await sleep(5200);await p.keyboard.press('Space');await sleep(200);const m=await mStop(p);
+  const w=(a,b,k)=>Math.max(...m.filter(x=>{const t=X.secs(x.pos);return t>=a&&t<b}).map(x=>dbv(x[k])));o.live={sfxWx:w(4.2,5.0,'sfx'),musicWx:w(4.2,5.0,'music'),musicPre:w(0.5,1.9,'music'),stemsWx:w(4.2,5.0,'stems'),stemsWs:w(2.4,3.9,'stems')};
+  await X.lSolo(p,'stems').click();await sleep(250);o.mClear=await mix(p);
+  await X.lMute(p,'sfx').click();await sleep(150);await X.lMute(p,'music').click();await sleep(150);o.mRef=await mix(p);const er=await exportWav(p,vp,'half-ref-stems-only');
+  o.d=W.cmp(es.w,er.w);o.WsS=es.win.Ws.rms;o.WxS=es.win.Wx.rms;o.WxR=er.win.Wx.rms;o.pre=es.win.pre.maxAbsLsb;
+  rec('GX-HALF-AUDIO',o.m.groups[G1].ds==='mixed'&&o.m.groups[G2].ds==='mixed'&&o.d<=1&&o.WsS>0.01&&o.pre<=1&&o.live.sfxWx<=-60&&o.live.musicWx<=-60&&o.live.musicPre<=-60&&o.live.stemsWx>-60&&o.mClear.groups[G1].ds==='off',o);});
+ await X.finish(s,rec,'H6-'+vp);})().catch(e=>{console.log('SCRIPT ERROR',e);process.exit(1)});

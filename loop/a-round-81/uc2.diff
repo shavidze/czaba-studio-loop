@@ -1,0 +1,44 @@
+diff --git a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+index c845a52..2ac714d 100644
+--- a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+@@ -578,20 +578,32 @@ describe('SRW-17 stage 2 track group collapse in the workspace', { timeout: 20_0
+     expect(live(api).undoLabel).toBe(undoBefore);
+     act(() => live(api).setStatus(''));
+     pressU(fader);
+-    expect(status(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+-    act(() => live(api).setStatus(''));
+-    fireEvent.click(foldButton(view, 'ჯგუფი 1'));
+-    expect(status(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+-    expect(renderedLaneIds(view)).toEqual(['video', 'music', 'stems', 'sfx']);
+-    fireEvent.keyUp(fader, { key: 'u', code: 'KeyU' });
++    expect(status(view)).not.toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    expect(renderedLaneIds(view)).toEqual(['video', 'music']);
+     expect(live(api).isArrangementPreviewActive()).toBe(false);
+-    expect(live(api).undoLabel).not.toBe(undoBefore);
+     expect(live(api).undoLabel).toBe('Volume');
+     expect(
+       live(api)
+         .getArrangement()
+         .tracks.find((track) => track.id === 'stems')?.volume,
+     ).toBe(0.9);
++    expect(document.activeElement).toBe(groupName(view, 'ჯგუფი 1'));
++    act(() => live(api).undo());
++    expect(live(api).undoLabel).toBe(undoBefore);
++    act(() => live(api).redo());
++    expect(live(api).undoLabel).toBe('Volume');
++    fireEvent.click(foldButton(view, 'ჯგუფი 1'));
++    expect(renderedLaneIds(view)).toEqual(['video', 'music', 'stems', 'sfx']);
++    const undoAfterCommit = live(api).undoLabel;
++    const idleFader = view.getByRole('slider', { name: /^Volume — სტემები/ });
++    idleFader.focus();
++    fireEvent.click(foldButton(view, 'ჯგუფი 1'));
++    expect(status(view)).not.toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    expect(renderedLaneIds(view)).toEqual(['video', 'music']);
++    expect(live(api).undoLabel).toBe(undoAfterCommit);
++    expect(document.activeElement).toBe(groupName(view, 'ჯგუფი 1'));
++    fireEvent.click(foldButton(view, 'ჯგუფი 1'));
++    expect(renderedLaneIds(view)).toEqual(['video', 'music', 'stems', 'sfx']);
+     const musicFader = view.getByRole('slider', { name: /^Volume — მუსიკა/ });
+     musicFader.focus();
+     pressU(musicFader);
