@@ -1,0 +1,13 @@
+# A round 87 checkpoint
+- Baseline verified: HEAD 971141d, status 0, frozen 490/490 OK, snapshots match.
+- Next: read primitives, code, frozen tests; implement.
+- Step 2 done: export-progress.ts, export-wav.ts, export-wav.worker.ts, export-wav.client.ts, mp3-encoder.client.ts written; graph.client renderer edited; context exportWav/exportMp3 + store; dialog progress. tsc clean.
+- Next: granted test edits (export-mp3, export-range-ui, metronome-ui), 4 new tests, docs 076/077, checks, smoke, mutations, reviewer, report.
+- Step 3 done: granted test edits + 4 new tests all green (export-wav 9, export-progress 3, mp3-encoder 9, export-progress-ui 8).
+- Next: docs 076 l.4 + 077, lint/biome, full targeted list, smoke, mutations, reviewer.
+- Step 4 done: docs 076/077; biome scoped clean; typecheck clean; lint 0 errors (218 warnings repo-wide, 0 in owned); targeted 70 files pass.
+- Next: Playwright smoke on :5173, mutations, code-reviewer, report.
+- Step 5 done: smoke run1 (smoke-output.json) WAV gap 126 / MP3 177; run2 (smoke-output-2.json) WAV 131 / MP3 132. Worker same-origin, one per export. 
+- Next: mutations in a-round-87/mut, code-reviewer, report.
+- Step 6: mutations a-k all red (f needed PU4 store assertion; added).
+- Step 7: reviewer fixes, smoke run 4 (mono check), report a-round-87.md written. DONE.

@@ -1,0 +1,46 @@
+const X=require('./lib87.cjs');const{L,sleep,blur,fmtT}=X;const fs=require('fs');
+const vp=process.argv[2]||'1440x900';const rec=X.mkRec(`${L.OUT}/std-${vp}.json`);const T=X.T(rec);const SH=`${L.OUT}/shots`;const SR=48000;
+const lenR=(a,b)=>`მონაკვეთი ${fmtT(a)} — ${fmtT(b)} (${(b-a).toFixed(3)} წმ)`;
+const wavMsg=l=>`WAV შეიქმნა: ${l}, 24-bit · 48 kHz · stereo.`;const mp3Msg=l=>`MP3 შეიქმნა: ${l}, 48 kHz · stereo.`;const bothMsg=l=>`WAV და MP3 შეიქმნა: ${l}, WAV 24-bit · 48 kHz · stereo, MP3 48 kHz · stereo.`;
+const ok24=r=>r.fmt.sr===48000&&r.fmt.bits===24&&r.fmt.ch===2&&r.fmt.tag===1&&r.stats.nan===0;
+const R86={projSha:'6061a245703eb685',projWarnPeak:'+1.7 dBFS',rangeMp3Size:157965};
+const peakOf=w=>(/პიკი (\S+ dBFS)/.exec(w||'')||[])[1]||null;const cntOf=w=>+((/— (\d+) sample/.exec(w||'')||[])[1]||NaN);
+const progOk=(an,order)=>an.order.join()===order&&!an.reentered&&an.issues.length===0&&an.absentAtStart&&an.absentAtEnd&&!an.focusProg&&Object.entries(an.phases).every(([k,v])=>k==='load'||(v.decreases===0&&v.pctMismatch===0));
+const progSum=an=>({order:an.order,phases:an.phases,issues:an.issues,absentAtStart:an.absentAtStart,absentAtEnd:an.absentAtEnd,focusProg:an.focusProg,maxGap:an.maxGap,top5:an.top5,statuses:an.statuses});
+const inDlg=p=>p.evaluate(()=>{const a=document.activeElement;const d=document.querySelector('#arrangement-export-title')?.closest('[role=dialog]');return{inside:!!(d&&a&&d.contains(a)),tag:a&&a.tagName,tid:a&&(a.dataset.testid||a.getAttribute('aria-label')||a.textContent.trim().slice(0,24)||a.tagName),name:a&&a.name||null}});
+(async()=>{const s=await L.open(vp);const p=s.page;p.on('crash',()=>console.log('APP PAGE CRASH'));X.attachDl(p);await X.attachFiles(p);X.attachWorkers(p);await L.fresh(p);await sleep(300);
+ const S=await X.setup(p);await X.setSnap(p,true);await blur(p);const ME=S.clips.find(c=>c.lane==='music');const END=+(ME.start+ME.dur).toFixed(3);const PFR=Math.ceil(END*SR);
+ rec('SETUP',null,{clips:S.clips.map(c=>[c.lane,c.start,c.dur]),END,PFR});const F={};const NET={};let mp3ClickReq=null;const so=await X.oraclePage(vp);
+ await T('PX-WAV-SAME-project',async()=>{await X.openDlg(p);F.P0=await X.exportInst(p,vp,'P0',{format:'wav'});F.P0w=X.wavInfo(F.P0.files[0].out);NET.afterWav=X.unpkg(s).length;
+  const o={names:F.P0.names,frames:F.P0w.frames,PFR,fmt:F.P0w.fmt,sha:F.P0w.sha,eqR86:F.P0w.sha===R86.projSha,msg:F.P0.after.msg,warning:F.P0.after.warning,peak:peakOf(F.P0.after.warning),clipped:cntOf(F.P0.after.warning),prog:progSum(F.P0.an),workers:F.P0.workers,unpkgSoFar:NET.afterWav};
+  rec('PX-WAV-SAME-project',o.names.join()==='czaba-studio-lab.wav'&&o.frames===4881696&&ok24(F.P0w)&&o.msg===wavMsg(fmtT(END))&&o.peak===R86.projWarnPeak&&progOk(F.P0.an,'render,wav'),o);});
+ await T('PX-MP3-SAME',async()=>{mp3ClickReq=s.reqs.length;NET.beforeMp3=X.unpkg(s).length;F.M1=await X.exportInst(p,vp,'M1',{format:'mp3'});const mf=F.M1.files[0];
+  const o={names:F.M1.names,msg:F.M1.after.msg,warning:F.M1.after.warning,size:mf&&mf.size,sha:mf&&mf.sha,hdr:X.mp3Header(mf.out),prog:progSum(F.M1.an),tEnd:F.M1.tEnd};
+  o.or=await X.oracle(so.page,X.rel(mf),X.rel(F.P0.files[0]),{w0:3,w1:4.5});o.or2=await X.oracle(so.page,X.rel(mf),X.rel(F.P0.files[0]),{w0:60,w1:61.5});delete o.or2.mp3;delete o.or2.wav;
+  rec('PX-MP3-SAME',o.names.join()==='czaba-studio-lab.mp3'&&o.hdr.version==='MPEG-1'&&o.hdr.layer==='III'&&o.hdr.tag==='Xing'&&o.hdr.vbr===true&&o.hdr.sampleRate===48000&&o.hdr.channels===2&&Math.abs(o.or.mp3.dur-END)<=0.1&&Math.min(...o.or.corr)>=0.99&&o.or2.windowCorr>=0.99&&o.msg===mp3Msg(fmtT(END))&&o.warning===F.P0.after.warning&&progOk(F.M1.an,'render,wav,load,mp3'),o);X.rmF(F.M1);});
+ await T('PX-BOTH',async()=>{F.B1=await X.exportInst(p,vp,'B1',{format:'both'});const wf=F.B1.files.find(f=>f.ext==='wav'),mf=F.B1.files.find(f=>f.ext==='mp3');const w=X.wavInfo(wf.out);const dd=X.diffAt(w.w,F.P0w.w,0);
+  const o={names:F.B1.names,order:F.B1.files.map(f=>f.tAfterClick),msg:F.B1.after.msg,warning:F.B1.after.warning,warnEqWavOnly:F.B1.after.warning===F.P0.after.warning,wav:{frames:w.frames,sha:w.sha,eqP0:w.sha===F.P0w.sha,maxLSB:dd.maxLSB,nonzero:dd.nonzero},hdr:X.mp3Header(mf.out),prog:progSum(F.B1.an)};
+  o.or=await X.oracle(so.page,X.rel(mf),X.rel(wf),{w0:3,w1:4.5});
+  rec('PX-BOTH',o.names.join()==='czaba-studio-lab.wav,czaba-studio-lab.mp3'&&o.order[0]<=o.order[1]&&w.frames===4881696&&ok24(w)&&dd.maxLSB<=1&&o.hdr.sampleRate===48000&&o.hdr.channels===2&&Math.min(...o.or.corr)>=0.99&&o.msg===bothMsg(fmtT(END))&&o.warnEqWavOnly&&['render,wav,load,mp3','render,wav,mp3'].includes(F.B1.an.order.join())&&progOk(F.B1.an,F.B1.an.order.join()),o);
+  rec('PX-WAV-SAME-same-session-warning',o.warnEqWavOnly,{wavOnly:F.P0.after.warning,ofBoth:F.B1.after.warning});X.rmF(F.B1);});
+ await T('PX-RANGE-SHORT',async()=>{const pe0=s.con.filter(l=>/pageerror|Unhandled/i.test(l)).length;await X.closeDlg(p).catch(()=>{});await blur(p);const r=await X.rangeDrag(p,'stems',4,9);const d=await X.openDlg(p);
+  F.R0=await X.exportInst(p,vp,'R0',{format:'wav'});F.R0w=X.wavInfo(F.R0.files[0].out);const dd=X.diffAt(F.R0w.w,F.P0w.w,192000);
+  F.RM=await X.exportInst(p,vp,'RM',{format:'mp3'});const mf=F.RM.files[0];const o={readout:r.range,rangeChecked:d.range.checked,wav:{names:F.R0.names,frames:F.R0w.frames,sha:F.R0w.sha,msg:F.R0.after.msg,vsProjectLSB:dd.maxLSB,prog:progSum(F.R0.an)},mp3:{names:F.RM.names,msg:F.RM.after.msg,size:mf.size,hdr:X.mp3Header(mf.out),prog:progSum(F.RM.an)}};
+  o.mp3.or=await X.oracle(so.page,X.rel(mf),X.rel(F.R0.files[0]),{w0:0.2,w1:1.7});o.pageerrors=s.con.filter(l=>/pageerror|Unhandled/i.test(l)).length-pe0;
+  rec('PX-WAV-SAME-range',o.wav.names.join()==='czaba-studio-lab-range.wav'&&o.wav.frames===240000&&o.wav.msg===wavMsg(lenR(4,9))&&dd.maxLSB<=1,o.wav);
+  rec('PX-RANGE-SHORT',/00:04\.000 — 00:09\.000/.test(o.readout)&&o.rangeChecked&&o.mp3.names.join()==='czaba-studio-lab-range.mp3'&&Math.abs(o.mp3.or.mp3.dur-5)<=0.1&&Math.min(...o.mp3.or.corr)>=0.99&&o.mp3.msg===mp3Msg(lenR(4,9))&&o.wav.msg===wavMsg(lenR(4,9))&&progOk(F.R0.an,'render,wav')&&['render,wav,load,mp3','render,wav,mp3'].includes(F.RM.an.order.join())&&progOk(F.RM.an,F.RM.an.order.join())&&o.pageerrors===0,o);X.rmF(F.RM);});
+ await T('PX-KEYS',async()=>{const o={steps:[],during:[]};await X.closeDlg(p).catch(()=>{});await blur(p);await p.getByRole('button',{name:'Export',exact:true}).focus();await p.keyboard.press('Enter');await p.waitForSelector('#arrangement-export-title');await sleep(400);o.open=await inDlg(p);
+  let g=0;while(g<12&&(await inDlg(p)).name!=='arrangement-export-format'){await p.keyboard.press('Tab');await sleep(120);o.steps.push(await inDlg(p));g++;}o.atFmt=await inDlg(p);
+  // ensure WAV is the focused radio then ArrowDown to MP3
+  await p.keyboard.press('ArrowDown');await sleep(200);o.afterDown=await inDlg(p);if(o.afterDown.tid!=='arrangement-export-format-mp3'){await p.keyboard.press('ArrowUp');await sleep(150);o.afterUp=await inDlg(p);}
+  g=0;while(g<10&&!/ექსპორტი/.test((await inDlg(p)).tid||'')){await p.keyboard.press('Tab');await sleep(120);o.steps.push(await inDlg(p));g++;}o.atBtn=await inDlg(p);
+  await X.instrument(p);const n0=p.__dls.length;await p.keyboard.press('Enter');await sleep(150);for(let i=0;i<3;i++){await p.keyboard.press('Tab');await sleep(120);o.during.push(await inDlg(p));}
+  const t0=Date.now();while(Date.now()-t0<120000&&p.__dls.length===n0)await sleep(200);await sleep(1500);const raw=await X.collect(p);o.prog=progSum(X.analyze(raw));o.files=p.__dls.slice(n0).map(d=>d.fn);o.msg=(await X.msgState(p)).msg;o.afterExport=await inDlg(p);
+  await p.keyboard.press('Escape');await sleep(500);o.focusAfterClose=await p.evaluate(()=>document.activeElement&&(document.activeElement.textContent||'').trim().slice(0,20));
+  rec('PX-KEYS',[o.open,...o.steps,o.atBtn,o.afterExport,...o.during].every(x=>x.inside)&&o.during.every(x=>x.tag!=='PROGRESS')&&!raw.focusProg&&o.atBtn.tid==='MP3-ის ექსპორტი'&&o.files.join()==='czaba-studio-lab-range.mp3'&&o.focusAfterClose==='Export',o);
+  for(const d of p.__dls.slice(n0)){const f=await d.d.path().catch(()=>null);if(f)try{fs.unlinkSync(f)}catch{}}});
+ const un=X.unpkg(s);const after=s.reqs.slice(mp3ClickReq||0).filter(r=>/unpkg\.com/.test(r.url)).map(r=>r.url);
+ const wk=p.__workers.map(w=>w.url);
+ rec('PX-NET',NET.afterWav===0&&NET.beforeMp3===0&&un.length>0&&un.every(u=>/\/@ffmpeg\/core@0\.12\.6\/dist\/esm\/ffmpeg-core\.(js|wasm)$/.test(u))&&after.length===un.length&&wk.every(u=>X.sameOrigin(u)),{unpkgBeforeFirstMp3:NET.beforeMp3,afterWav:NET.afterWav,unpkg:un,workers:wk,thirdParty:[...new Set(s.reqs.map(r=>{try{return new URL(r.url).host}catch{return r.url.slice(0,30)}}))]});
+ for(const k of ['P0','R0'])X.rmF(F[k]);await so.browser.close();
+ await X.finish(s,rec,'STD-'+vp);process.exit(0);})().catch(e=>{console.log('SCRIPT ERROR',e);process.exit(1)});

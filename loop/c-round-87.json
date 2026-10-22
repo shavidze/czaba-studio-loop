@@ -1,0 +1,134 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-22T18:14:58.0714099Z",
+  "round": 87,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "R87-PROGRESS-BELOW-FOLD-1280",
+   "severity": "medium",
+   "steps": [
+    "Fresh anonymous Chromium context, viewport 1280x720, open http://127.0.0.1:5173/studio-lab",
+    "Drop demo music at 0.35 s, stem at 2 s, sfx at 4 s (snap off); click the music clip, press Ctrl+D twice (5M project)",
+    "Open Export, choose WAV or MP3, click the export button",
+    "While exportState is rendering, measure the dialog panel (.max-h-[90vh].overflow-auto) and [data-testid=arrangement-export-progress] / -progress-label"
+   ],
+   "expected": "The stage's new progress label and <progress> bar are visible inside the Export dialog during every export, without the user having to scroll, at both required viewports (1440x900 and 1280x720).",
+   "actual": "At 1280x720 the panel is 36-684 px (clientHeight 646, scrollHeight 758 during render, scrollTop 0). The label sits at 677-693 px (cut off), the bar at 709-717 px (fully below the panel fold) and the busy 'მიმდინარეობს…' button at 740-778 px (hidden). Wheel-scrolling the panel by 200 px (scrollTop 112) brings the bar into view (597-605 px), so it can be reached, but nothing scrolls it into view by default. At 1440x900 the label, bar and button are all visible (bar 743-751 inside panel 70-830). Context: at 971141d the 1280 panel already overflowed by 12 px before any export (658 vs 646); the new label and bar add about 100 px. Severity is medium: progress is the stage's main user-visible deliverable, and 1280 is a required viewport. Data and export are unaffected. Measured on the 5M project only; the layout is not expected to depend on project length (not separately measured).",
+   "evidence": "tmp/studio-real-loop/c-round-87/vis-1280x720.json, vis-1440x900.json, wheel-1280x720.json; shots/progress-1280x720-{0,1,2}.png, shots/vis-1280x720.png, shots/wheel-1280x720.png vs shots/progress-1440x900-2.png; tools/vis.cjs, tools/wheel.cjs"
+  }
+ ],
+ "passed": [
+  "PX-WAV5",
+  "PX-MP35",
+  "PX-PHASES",
+  "PX-WORKER",
+  "PX-WAV-SAME",
+  "PX-MP3-SAME",
+  "PX-BOTH",
+  "PX-REUSE",
+  "PX-CDNFAIL",
+  "PX-RETRY",
+  "PX-RANGE-SHORT",
+  "PX-KEYS",
+  "PX-X3",
+  "PX-NET",
+  "REG-HYD",
+  "G87-3",
+  "T87-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "passedNote": "Every passed row passes on its written evidence (DOM, file and network measurements). PX-PHASES passes on MutationObserver evidence at both viewports. Bug R87-PROGRESS-BELOW-FOLD-1280 is about user visibility at 1280x720, which no B row measured, so it is a separate in-scope defect and makes the task FAIL.",
+ "blocked": [
+  "G87-3 fake-Bearer 403 sub-check: backend unavailable in cloud (GET /api/studio-token?product=middle-east&file=stem1.wav with a fake Bearer -> 500 {\"error\":\"Unable to prepare Studio access\"})"
+ ],
+ "notRun": [
+  "Production-bundle worker / MP3 (built bundle): no preview server in the cloud. The dev-server worker was verified only"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "extra": {
+  "EXTRA-WORKER-FAIL (1440)": "PASS: with the export-wav.worker script aborted (2 requests blocked), both WAV and MP3 show the exact message 'ექსპორტი ვერ მოხერხდა — ფაილი არ შეიქმნა. WAV-ის ჩაწერა ვერ მოხერხდა (worker).' (role=alert). 0 downloads, no unpkg request, progress cleared, no main-thread fallback. After unroute the next WAV works (4 881 696 frames)"
+ },
+ "measurements": {
+  "PX-WAV5 maxRaf ms": {
+   "1280": 105,
+   "1440": 106.6,
+   "baseline971141d": 445,
+   "top5_1440": [
+    106.6,
+    79.3,
+    70,
+    68.6,
+    65.8
+   ],
+   "top5_1280": [
+    105,
+    93.8,
+    73.2,
+    53.5,
+    52.1
+   ]
+  },
+  "PX-MP35 maxRaf ms": {
+   "1280": 111.4,
+   "1440": 97.2,
+   "top5_1440": [
+    97.2,
+    95.7,
+    81.8,
+    78.5,
+    77.8
+   ],
+   "top5_1280": [
+    111.4,
+    96.4,
+    78.6,
+    60.4,
+    57.4
+   ]
+  },
+  "5M": "scope 'მთელი პროექტი · 00:00.000 — 05:04.406'; WAV 14 611 488 frames, 87 668 972 B, 24-bit/48k/2ch; MP3 9 903 165 B, decoded 304.406 s, Xing VBR avg 260.2 kbps; oracle lag 0, corr window 3-4.5 s 0.99998 and 250-251.5 s 0.99984 (L 0.99971, R 0.99978)",
+  "PX-PHASES": "WAV: render 20 values -> wav 101 values. MP3: render 20 -> wav 101 -> load (2 records, no value attribute) -> mp3 12-13 values. 0 decreases, label% = floor(value*100) in every record, absent before click and after done, <progress> tabIndex -1 never focused, status sequence identical to round 86",
+  "PX-WORKER": "exactly one same-origin export-wav.worker.ts?worker_file&type=module per export, starting ~0.86-0.9 s after the click (right after the render reaches 100% at ~0.85 s) and closed ~0.7 s later. 0 workers before the click. The MP3 export also starts the @ffmpeg worker (same-origin node_modules)",
+  "PX-REUSE": "first MP3 10.3-10.5 s, second 6.8-6.9 s; ffmpeg-core.wasm requests 1 -> 1; load phase 10-11 ms",
+  "PX-RETRY": "core.js request hung at 543 ms. Alert exactly 120 000 ms after the encoder-loading message, exact timeout text, 0 downloads, progress cleared, Close works. Hung unpkg requests: 1 at the alert, 1 three seconds later (no late load). After unroute the 2nd MP3 in the same page succeeded in 7.5 s (fresh load phase, VBR, 101.702 s)",
+  "PX-CDNFAIL": "both vps: exact load-failure alert for MP3 and WAV+MP3, 0 files, Close enabled, progress cleared; WAV 4 881 696 frames; after unroute MP3 succeeds (corr 0.99984/0.99987, lag 0)",
+  "PX-WAV-SAME": "101.702 s WAV 4 881 696 frames, warning peak +1.7 dBFS (= round 86), clipped 470. sha 33fea9e8 (1440) / 882cd6db (1280) vs round 86 6061a245/33fea9e8: known <=1 LSB render jitter. No LSB diff against the round-86 file is possible because that file was deleted. Within a session, WAV-only vs the WAV of WAV+MP3: maxLSB 1, 3254 nonzero samples (both vps), identical warning text. Range 4-9: 240 000 frames, vs project maxLSB 1 / 0",
+  "PX-MP3-SAME": "Xing VBR, MPEG-1 L3, 48 kHz stereo, 3 311 037 B (= round 86 size), avg 260.4 kbps, decoded 101.702 s, corr 0.99984/0.99987, lag 0",
+  "PX-KEYS": "both vps: Enter opens Export, ArrowDown -> format-mp3, Tab to 'MP3-ის ექსპორტი', Enter; 3 Tabs during render -> X close, format-mp3, scope-range (all inside the dialog, never the progress element); czaba-studio-lab-range.mp3; Escape returns focus to Export",
+  "G87-3": "/studio/middle-east anonymous -> 'Sign in required', 0 workspace; /api/studio-token?product=middle-east&file=stem1.wav anonymous -> 401; header link 'Studio Lab Demo' -> /studio-lab with the demo badge (both vps)",
+  "T87-TARGETED": "C ran a-round-87/targeted-list.txt: 70 files / 1195 tests passed (c-round-87/targeted-c.log)",
+  "SOURCE-UNCHANGED": "HEAD 971141d; 7 M + 10 ??; frozen 490/490 OK at start and end; 17 owned + protected + ffmpeg.ts (0995ae78) hashes identical start = end = A end-hashes"
+ },
+ "observations": [
+  "Progress fill colour: computed accent-color rgb(18,217,200) (brand token, correct), but headless Linux Chromium paints the fill #008000 on a #808080 track. Unconfirmed on headed Windows Chromium. Same classes as the published SfxSceneExport precedent. Not filed as a bug",
+  "The timeout message still says 'გადატვირთე გვერდი და სცადე თავიდან' (reload the page), but PX-RETRY proves a retry now works in the same page. The message is unchanged by spec; candidate for B's Lows batch",
+  "Two MP3s of the same 5M project in one page had identical sha in the final runs and different sha in attempt 1 (follows the WAV <=1 LSB jitter)",
+  "The progress label stays at 'რენდერი · 100%' for ~0.27 s on the 5M project (850 -> 1127 ms after the click) while the copy, worker start-up and measure/clamp run (reviewer L6, spec-conformant)"
+ ],
+ "harnessInvalid": [
+  "m5 attempt 1 (both vps): the in-page oracle decoding a 304 s MP3 plus an 87 MB WAV crashed the page/browser (C harness OOM); the exports themselves had completed. Replaced by an oracle that cuts WAV windows in Node: m5-*.attempt1.json",
+  "std attempt 1 (both vps): C left the dialog open before the range drag (harness bug), so the range/keys rows were invalid: std-*.attempt1-harness.json",
+  "'APP PAGE CRASH' never fired in any run after the handler was attached"
+ ],
+ "ableton": {
+  "progress bar in export dialog": "confirmed for real-time and video rendering (Live 12 manual §5.1.3.5/§5.1.3.4, B's capture); unconfirmed for ordinary offline audio export",
+  "bar resets per pass": "conscious adaptation (CZABA phases render/wav/load/mp3; label names the phase)",
+  "UI does not freeze": "not applicable to Ableton (not stated); CZABA requirement R20-X4, measured",
+  "MP3 CBR 320": "conscious difference (VBR avg ~260 kbps, unchanged from round 86)",
+  "cancel": "not applicable this round (stage 3b)"
+ },
+ "evidence": "tmp/studio-real-loop/c-round-87.md; c-round-87/{m5-*.json,std-*.json,fail-*.json,wfail-1440x900.json,g87-*.json,token-api.json,vis-*.json,wheel-1280x720.json,*-progress.json,targeted-c.log,start-hashes.txt,shots/,tools/}"
+}

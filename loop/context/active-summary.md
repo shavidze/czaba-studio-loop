@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-22T17:07:02.128Z)
+# Active loop summary (2026-10-22T19:01:43.463Z)
 
-- backlog.json 783 KB -> active view 154 KB
-- status: G_ROOT_GATE round 86
-- servers: `{"checkedUtc":"2026-10-22T15:46:43.2275533Z","round":86,"attempt":1,"store":200}`
+- backlog.json 795 KB -> active view 163 KB
+- status: G_ROOT_GATE round 87
+- servers: `{"checkedUtc":"2026-10-22T18:14:58.0714099Z","round":87,"attempt":1,"store":200}`
 - last publication: 971141d67a1dd33da8f1165de1d895bd62b4e022 (rounds 86-86)
-- last root gate: round 86 published - commit 971141d67a1dd33da8f1165de1d895bd62b4e022 pushed
+- last root gate: round 87 skipped - C taskStatus FAIL
 
-## Current items: SRW-20
+## Current items: SRW-20, SRW-21
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -256,17 +256,25 @@
 - A-R84-REVIEW-LOWS / low / open - Lows batch (#4 unreachable fallback branch, #5 SVG left -1 clipped by overflow-hidden, #7 export note role=note) / A round-84 code-review residuals
 - C-R85-L1 / low / ruled (B, D-29z51): not a CZABA contract - the round-85 M1-GHOST "then Escape" wording was B's assumption; no pointer gesture in the workspace cancels on Escape today (grep); Live behaviour unconfirmed; not requested by the user -> signal ESCAPE-CANCEL-GESTURE, not scheduled / Escape does not cancel a clip drag / lane move; on release the move commits
 - ESCAPE-CANCEL-GESTURE / info / signal (cross-cutting product question: clip move, trim, fade, envelope, marker, loop and range gestures; needs a Live source check and a user decision before any task) / no Escape-to-cancel for pointer gestures
-- C-R85-L2 / low / scheduled round 86 X1 (D-29z51; frozen C-R14-02 and XU5 tab list granted) / with no valid range the project scope radio is checked AND disabled (round-85 E2 disabled only the range radio); A did it to keep frozen C-R
 - GATE85-S1-SILENT-RANGE-NOTE / low / open - Lows batch (merged with A-R85 review L5) / a range covering no audible clip exports a silent -range file with no note; the no-sound note uses project-wide hasSoundingClip
-- GATE85-S2-REASON-DESCRIBEDBY / low / scheduled round 86 X1 (same radio as C-R85-L2) / the disabled range radio reason is not linked (aria-describedby)
-- GATE85-S3-RANGE-VALIDITY-TWICE / low / scheduled round 86 (render-window helper; exportMp3 would otherwise add a third copy) - merges A-R85 review L2 and both Architecture notes / the 0.001 s window rule lives in the dialog constant and a context literal
 - GATE85-S4-RENDERER-NO-GUARD / low / open - Lows batch (graph.client.ts frozen in round 86; only guarded callers) / renderArrangementWav does not validate the window itself (inverted window -> native NotSupportedError)
 - GATE85-S5-SCOPE-RESET-EFFECT / info / open - Lows batch (optional; round 86 format state may reset in the same place) / scope reset runs in an effect after close (one extra render)
 - GATE85-S6-ROW-BOUNDARY-HANDLES / info / open - regression round row (selected clip handles in row N vs row N+1 near the boundary) / isolate per lane body: a fade handle dragged near the row boundary could be covered by the next row
 - A-R85-REVIEW-L1-SHORT-RANGE-TEXT / low / open - Lows batch / a visible range shorter than 1 ms shows the "select a range" reason; a "too short" text may be clearer
-- FFMPEG-DEV-WORKER / medium / scheduled round 86 (vite.config.ts optimizeDeps.exclude grant); B probe evidence; production build behaviour unverified in the cloud (no preview server) / under the Vite dev server the ffmpeg.wasm worker (node_modules/.vite/deps/worker.js) fails with ERR_FAILED and loadFFmpeg() never settles, s
-- FFMPEG-LOAD-POLLER-HANG / low / signal for the owner of app/utils/ffmpeg.ts (shared with the protected purchased Studio via StudioContext; frozen for the loop); round 86 wraps the call in a timeout in ArrangementContext / loadFFmpeg: a concurrent caller polls isLoaded forever if the first load fails; a load whose worker never starts never rejects; no timeout
+- FFMPEG-LOAD-POLLER-HANG / low / open for the purchased path (frozen app/utils/ffmpeg.ts, owner root/Tech Lead); the /studio-lab path gets its own resettable encoder in round 87 (D-29z52 R3, PX-RETRY) / loadFFmpeg: a concurrent caller polls isLoaded forever if the first load fails; a load whose worker never starts never rejects; no timeout
 - C-R85-OBS-PLAYHEAD-OVER-CLIPS / info / acknowledged (A review L6; intended: playhead z-10 row sibling paints over clips, pointer-events-none) / playhead line paints over clips and the selected clip after the isolate change
+- GATE86-S1-POLLER-RETRY / medium / scheduled round 87 for /studio-lab (lab encoder resets on timeout; C PX-RETRY); purchased path stays FFMPEG-LOAD-POLLER-HANG / a retry after the 120 s timeout hits the frozen util poller leak and hangs again
+- GATE86-S2-BOTH-NOTE-DELIVERY / low / scheduled stage 3b (same dialog; copy and/or done-message honesty about a multiple-downloads prompt) / the WAV + MP3 note promises both-or-none, true for encoding but not for browser delivery (real Chrome may prompt; Safari may drop)
+- GATE86-S3-TIMEOUT-COVERAGE / low / partly scheduled round 87 (timer covers the dynamic import); conversion has no fixed limit by decision (duration scales with length) - Cancel in stage 3b is the escape / the 120 s timeout does not cover the import or the conversion
+- GATE86-S4-FORMAT-RADIOS-DURING-RENDER / info / rejected (B, D-29z52): format radios stay enabled during a render by the round-86 spec - frozen render-time focus test export-dialog-focus.test.tsx l.454-472 keeps focus on an enabled format radio; C EXTRA-FORMAT-SWITCH-DURING-MP3 shows the running export is unaffected / format radios enabled while scope radios are disabled during a render
+- PROD-MP3-UNVERIFIED / low / open evidence (needs root: build + preview server + one MP3 export; requested for gate 87) / MP3 export (and from round 87 the export-wav worker) not verified in the production bundle
+- A-R86-L2-LATE-DOWNLOAD-UNMOUNT / low / scheduled stage 3b (abort on unmount) / unmount during encoder load/convert can still download later (exportWav same pattern)
+- A-R86-L7-REASON-READ-TWICE / low / open - Lows batch / range reason inside the <label> and also aria-describedby: may be read twice
+- A-R86-L8-NOTES-SAY-WAV / low / open - Lows batch (copy debt) / no-sound and master-mute notes say "WAV შეიქმნება" for MP3 formats
+- A-R86-L4-OPTIMIZEDEPS-PURCHASED-DEV / info / open evidence (purchased Studio MP3 in dev not checked; backend unavailable) / optimizeDeps.exclude also changes the dev module graph of the purchased Studio
+- FFMPEG-UTIL-UNIFY / info / signal for SRW-21 (not scheduled) / round 87 gives /studio-lab its own resettable MP3 encoder (same core + command) because the frozen util cannot reset or remove listeners; un
+- C-R86-OBS-DEFAULT-OVERLOAD / info / acknowledged (same as DEMO-SFX-FULL-SCALE; pre-existing) / the default demo project peaks +1.7 dBFS at Master 0 dB, so every default export shows the overload warning
+- ENV-VITE-REOPTIMIZE-RELOAD / info / harness rule (round 87 task setup: route probes not in parallel with exports) / the first dev-server visit of a non-lab route re-optimizes deps and reloads every open tab
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
@@ -279,5 +287,4 @@
 - SRW-17 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 74eca15, stage 2 68383fa, stage 3 efbed86; Tech Lead R79-T/R81-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
-- SRW-21 [blocked-partial] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

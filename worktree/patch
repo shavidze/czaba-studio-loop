@@ -1,0 +1,2766 @@
+diff --git a/app/components/arrangement/ArrangementExportDialog.tsx b/app/components/arrangement/ArrangementExportDialog.tsx
+index 3b7daeb..7a6836e 100644
+--- a/app/components/arrangement/ArrangementExportDialog.tsx
++++ b/app/components/arrangement/ArrangementExportDialog.tsx
+@@ -1,7 +1,8 @@
+-import { useEffect, useId, useRef, useState } from 'react';
++import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
+ import { Modal, ModalBody, ModalDescription, ModalHeader, ModalTitle } from '~/components/ui';
+ import { formatArrangementTime, useArrangement } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
++import { formatArrangementExportProgress } from '~/lib/arrangement/export-progress';
+ import { formatMasterGainDb } from '~/lib/arrangement/model';
+ import { arrangementRangeRenderWindow } from '~/lib/arrangement/render-window';
+ import { isTrackAudibleWithGroups } from '~/lib/arrangement/schedule';
+@@ -68,6 +69,7 @@ export function ArrangementExportDialog({ isOpen, onClose }: ArrangementExportDi
+     arrangement,
+     projectEnd,
+     exportState,
++    exportProgress,
+     exportWav,
+     exportMp3,
+     resetExportState,
+@@ -77,6 +79,11 @@ export function ArrangementExportDialog({ isOpen, onClose }: ArrangementExportDi
+   } = useArrangement();
+   const isEmpty = arrangement.clips.length === 0;
+   const isRendering = exportState.phase === 'rendering';
++  const progress = useSyncExternalStore(
++    exportProgress.subscribeProgress,
++    exportProgress.getProgress,
++    () => null,
++  );
+   const rangeWindow = arrangementRangeRenderWindow(range);
+   const rangeStart = rangeWindow?.start ?? 0;
+   const rangeEnd = rangeWindow?.end ?? 0;
+@@ -416,6 +423,20 @@ export function ArrangementExportDialog({ isOpen, onClose }: ArrangementExportDi
+               {exportState.message}
+             </p>
+           ) : null}
++          {isRendering && progress ? (
++            <>
++              <p className="text-xs text-muted" data-testid="arrangement-export-progress-label">
++                {formatArrangementExportProgress(progress)}
++              </p>
++              <progress
++                data-testid="arrangement-export-progress"
++                aria-label="ექსპორტის პროგრესი"
++                max={1}
++                value={progress.fraction ?? undefined}
++                className="h-2 w-full accent-brand"
++              />
++            </>
++          ) : null}
+           {exportState.warning ? (
+             <p
+               role="alert"
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index e748808..843e1c6 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -22,8 +22,13 @@ import {
+   planClipboardPaste,
+ } from '~/lib/arrangement/clipboard';
+ import { clipEnvelopeShapes } from '~/lib/arrangement/envelope';
++import {
++  type ArrangementExportProgressStore,
++  createArrangementExportProgressStore,
++} from '~/lib/arrangement/export-progress';
+ import { clipFadeShapes } from '~/lib/arrangement/fades';
+ import {
++  type ArrangementRenderOptions,
+   type ArrangementRenderWindow,
+   applySchedule,
+   formatExportOverloadWarning,
+@@ -237,6 +242,7 @@ interface ArrangementContextValue {
+   sourceDurations: ReadonlyMap<string, number>;
+   videoSources: ReadonlyMap<string, WorkspaceVideoSource>;
+   exportState: ArrangementExportState;
++  exportProgress: ArrangementExportProgressStore;
+   clipLaneDrag: ClipLaneDragState | null;
+   setClipLaneDrag: (next: ClipLaneDragState | null) => void;
+   togglePlayback: () => void;
+@@ -533,6 +539,7 @@ export function ArrangementProvider({
+     phase: 'idle',
+     message: null,
+   });
++  const [exportProgress] = useState(() => createArrangementExportProgressStore());
+   const [clipLaneDrag, setClipLaneDrag] = useState<ClipLaneDragState | null>(null);
+   const clipboardRef = useRef<ArrangementClipboard | null>(null);
+ 
+@@ -2657,59 +2664,8 @@ export function ArrangementProvider({
+     setPxPerSecondState(clampTimelineZoom(value));
+   }, []);
+ 
+-  const exportWav = useCallback(async (renderWindow?: ArrangementRenderWindow) => {
+-    const arrangement = historyRef.current.present;
+-    if (webAudioUnavailableRef.current || typeof OfflineAudioContext === 'undefined') {
+-      setExportState({ phase: 'error', message: WEB_AUDIO_UNAVAILABLE_MESSAGE });
+-      return;
+-    }
+-    if (arrangement.clips.length === 0) {
+-      setExportState({ phase: 'error', message: 'პროექტი ცარიელია — ფაილი არ შეიქმნა.' });
+-      return;
+-    }
+-    const decoding = arrangement.clips.some(
+-      (clip) => videoSourcesRef.current.get(clip.sourceId)?.audio === 'decoding',
+-    );
+-    if (decoding) {
+-      setExportState({
+-        phase: 'error',
+-        message: 'ვიდეოს ხმა ჯერ იშიფრება — დაელოდე და სცადე თავიდან. ფაილი არ შეიქმნა.',
+-      });
+-      return;
+-    }
+-    if (renderWindow && !isValidArrangementRenderWindow(renderWindow)) {
+-      setExportState({ phase: 'error', message: 'მონაკვეთი არასწორია — ფაილი არ შეიქმნა.' });
+-      return;
+-    }
+-    setExportState({ phase: 'rendering', message: 'რენდერი და 24-bit WAV-ის შექმნა…' });
+-    try {
+-      const { blob, peak, clippedSamples } = renderWindow
+-        ? await renderArrangementWav(arrangement, buffersRef.current, renderWindow)
+-        : await renderArrangementWav(arrangement, buffersRef.current);
+-      const url = URL.createObjectURL(blob);
+-      const anchor = document.createElement('a');
+-      anchor.href = url;
+-      anchor.download = renderWindow ? 'czaba-studio-lab-range.wav' : 'czaba-studio-lab.wav';
+-      document.body.appendChild(anchor);
+-      anchor.click();
+-      anchor.remove();
+-      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+-      const exportedLength = renderWindow
+-        ? `მონაკვეთი ${formatArrangementTime(renderWindow.start)} — ${formatArrangementTime(renderWindow.end)} (${(renderWindow.end - renderWindow.start).toFixed(3)} წმ)`
+-        : formatArrangementTime(projectEnd(arrangement));
+-      const message = `WAV შეიქმნა: ${exportedLength}, 24-bit · 48 kHz · stereo.${arrangement.master.mute ? MASTER_MUTED_EXPORT_SUFFIX : ''}`;
+-      const warning = formatExportOverloadWarning(peak, clippedSamples);
+-      setExportState(warning ? { phase: 'done', message, warning } : { phase: 'done', message });
+-    } catch (error) {
+-      setExportState({
+-        phase: 'error',
+-        message: `ექსპორტი ვერ მოხერხდა — ფაილი არ შეიქმნა. ${error instanceof Error ? error.message : ''}`,
+-      });
+-    }
+-  }, []);
+-
+-  const exportMp3 = useCallback(
+-    async (renderWindow?: ArrangementRenderWindow, options?: { includeWav?: boolean }) => {
++  const exportWav = useCallback(
++    async (renderWindow?: ArrangementRenderWindow) => {
+       const arrangement = historyRef.current.present;
+       if (webAudioUnavailableRef.current || typeof OfflineAudioContext === 'undefined') {
+         setExportState({ phase: 'error', message: WEB_AUDIO_UNAVAILABLE_MESSAGE });
+@@ -2734,105 +2690,194 @@ export function ArrangementProvider({
+         return;
+       }
+       setExportState({ phase: 'rendering', message: 'რენდერი და 24-bit WAV-ის შექმნა…' });
+-      let rendered: Awaited<ReturnType<typeof renderArrangementWav>>;
++      const renderOptions: ArrangementRenderOptions = {
++        onProgress: (phase, fraction) => exportProgress.setProgress({ phase, fraction }),
++      };
+       try {
+-        rendered = renderWindow
+-          ? await renderArrangementWav(arrangement, buffersRef.current, renderWindow)
+-          : await renderArrangementWav(arrangement, buffersRef.current);
++        const { blob, peak, clippedSamples } = renderWindow
++          ? await renderArrangementWav(arrangement, buffersRef.current, renderWindow, renderOptions)
++          : await renderArrangementWav(arrangement, buffersRef.current, undefined, renderOptions);
++        const url = URL.createObjectURL(blob);
++        const anchor = document.createElement('a');
++        anchor.href = url;
++        anchor.download = renderWindow ? 'czaba-studio-lab-range.wav' : 'czaba-studio-lab.wav';
++        document.body.appendChild(anchor);
++        anchor.click();
++        anchor.remove();
++        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
++        const exportedLength = renderWindow
++          ? `მონაკვეთი ${formatArrangementTime(renderWindow.start)} — ${formatArrangementTime(renderWindow.end)} (${(renderWindow.end - renderWindow.start).toFixed(3)} წმ)`
++          : formatArrangementTime(projectEnd(arrangement));
++        const message = `WAV შეიქმნა: ${exportedLength}, 24-bit · 48 kHz · stereo.${arrangement.master.mute ? MASTER_MUTED_EXPORT_SUFFIX : ''}`;
++        const warning = formatExportOverloadWarning(peak, clippedSamples);
++        setExportState(warning ? { phase: 'done', message, warning } : { phase: 'done', message });
+       } catch (error) {
+         setExportState({
+           phase: 'error',
+           message: `ექსპორტი ვერ მოხერხდა — ფაილი არ შეიქმნა. ${error instanceof Error ? error.message : ''}`,
+         });
++      } finally {
++        exportProgress.setProgress(null);
++      }
++    },
++    [exportProgress],
++  );
++
++  const exportMp3 = useCallback(
++    async (renderWindow?: ArrangementRenderWindow, options?: { includeWav?: boolean }) => {
++      const arrangement = historyRef.current.present;
++      if (webAudioUnavailableRef.current || typeof OfflineAudioContext === 'undefined') {
++        setExportState({ phase: 'error', message: WEB_AUDIO_UNAVAILABLE_MESSAGE });
+         return;
+       }
+-      setExportState({
+-        phase: 'rendering',
+-        message: 'MP3 encoder იტვირთება (ffmpeg.wasm, პირველად ~31 MB)…',
+-      });
+-      let encoder: typeof import('~/utils/ffmpeg');
+-      let loadTimer: number | undefined;
+-      try {
+-        encoder = await import('~/utils/ffmpeg');
+-        const isEncoderLoaded = await Promise.race([
+-          encoder.loadFFmpeg().then(() => true),
+-          new Promise<false>((resolve) => {
+-            loadTimer = window.setTimeout(
+-              () => resolve(false),
+-              ARRANGEMENT_MP3_ENCODER_LOAD_TIMEOUT_MS,
+-            );
+-          }),
+-        ]);
+-        if (!isEncoderLoaded) {
+-          setExportState({
+-            phase: 'error',
+-            message:
+-              'MP3 encoder 120 წამში ვერ ჩაიტვირთა — ფაილი არ შეიქმნა. გადატვირთე გვერდი და სცადე თავიდან, ან აირჩიე WAV.',
+-          });
+-          return;
+-        }
+-      } catch {
+-        setExportState({
+-          phase: 'error',
+-          message:
+-            'MP3 encoder ვერ ჩაიტვირთა (ffmpeg.wasm, unpkg CDN) — ფაილი არ შეიქმნა. შეამოწმე ინტერნეტი და სცადე თავიდან, ან აირჩიე WAV.',
+-        });
++      if (arrangement.clips.length === 0) {
++        setExportState({ phase: 'error', message: 'პროექტი ცარიელია — ფაილი არ შეიქმნა.' });
+         return;
+-      } finally {
+-        window.clearTimeout(loadTimer);
+       }
+-      setExportState({ phase: 'rendering', message: 'MP3-ის შექმნა…' });
+-      let mp3Blob: Blob;
+-      try {
+-        mp3Blob = await encoder.convertWavToMp3(rendered.blob);
+-      } catch (error) {
++      const decoding = arrangement.clips.some(
++        (clip) => videoSourcesRef.current.get(clip.sourceId)?.audio === 'decoding',
++      );
++      if (decoding) {
+         setExportState({
+           phase: 'error',
+-          message: `MP3-ის შექმნა ვერ მოხერხდა — ფაილი არ შეიქმნა. ${error instanceof Error ? error.message : ''}`,
++          message: 'ვიდეოს ხმა ჯერ იშიფრება — დაელოდე და სცადე თავიდან. ფაილი არ შეიქმნა.',
+         });
+         return;
+       }
++      if (renderWindow && !isValidArrangementRenderWindow(renderWindow)) {
++        setExportState({ phase: 'error', message: 'მონაკვეთი არასწორია — ფაილი არ შეიქმნა.' });
++        return;
++      }
++      setExportState({ phase: 'rendering', message: 'რენდერი და 24-bit WAV-ის შექმნა…' });
++      const renderOptions: ArrangementRenderOptions = {
++        onProgress: (phase, fraction) => exportProgress.setProgress({ phase, fraction }),
++      };
+       try {
+-        const files = [
+-          ...(options?.includeWav
+-            ? [
+-                {
+-                  blob: rendered.blob,
+-                  name: renderWindow ? 'czaba-studio-lab-range.wav' : 'czaba-studio-lab.wav',
+-                },
+-              ]
+-            : []),
+-          {
+-            blob: mp3Blob,
+-            name: renderWindow ? 'czaba-studio-lab-range.mp3' : 'czaba-studio-lab.mp3',
+-          },
+-        ].map((file) => ({ name: file.name, url: URL.createObjectURL(file.blob) }));
+-        for (const file of files) {
+-          const anchor = document.createElement('a');
+-          anchor.href = file.url;
+-          anchor.download = file.name;
+-          document.body.appendChild(anchor);
+-          anchor.click();
+-          anchor.remove();
+-          window.setTimeout(() => URL.revokeObjectURL(file.url), 1000);
++        let rendered: Awaited<ReturnType<typeof renderArrangementWav>>;
++        try {
++          rendered = renderWindow
++            ? await renderArrangementWav(
++                arrangement,
++                buffersRef.current,
++                renderWindow,
++                renderOptions,
++              )
++            : await renderArrangementWav(arrangement, buffersRef.current, undefined, renderOptions);
++        } catch (error) {
++          setExportState({
++            phase: 'error',
++            message: `ექსპორტი ვერ მოხერხდა — ფაილი არ შეიქმნა. ${error instanceof Error ? error.message : ''}`,
++          });
++          return;
+         }
+-        const exportedLength = renderWindow
+-          ? `მონაკვეთი ${formatArrangementTime(renderWindow.start)} — ${formatArrangementTime(renderWindow.end)} (${(renderWindow.end - renderWindow.start).toFixed(3)} წმ)`
+-          : formatArrangementTime(projectEnd(arrangement));
+-        const suffix = arrangement.master.mute ? MASTER_MUTED_EXPORT_SUFFIX : '';
+-        const message = options?.includeWav
+-          ? `WAV და MP3 შეიქმნა: ${exportedLength}, WAV 24-bit · 48 kHz · stereo, MP3 48 kHz · stereo.${suffix}`
+-          : `MP3 შეიქმნა: ${exportedLength}, 48 kHz · stereo.${suffix}`;
+-        const warning = formatExportOverloadWarning(rendered.peak, rendered.clippedSamples);
+-        setExportState(warning ? { phase: 'done', message, warning } : { phase: 'done', message });
+-      } catch (error) {
+         setExportState({
+-          phase: 'error',
+-          message: `ექსპორტი ვერ მოხერხდა — ფაილი არ შეიქმნა. ${error instanceof Error ? error.message : ''}`,
++          phase: 'rendering',
++          message: 'MP3 encoder იტვირთება (ffmpeg.wasm, პირველად ~31 MB)…',
+         });
++        exportProgress.setProgress({ phase: 'load', fraction: null });
++        type ArrangementMp3EncoderModule = typeof import('~/lib/arrangement/mp3-encoder.client');
++        const encoderSlot: { module: ArrangementMp3EncoderModule | null } = { module: null };
++        let isLoadTimedOut = false;
++        let encoder: Awaited<ReturnType<ArrangementMp3EncoderModule['loadArrangementMp3Encoder']>>;
++        let loadTimer: number | undefined;
++        try {
++          const loadTimeout = new Promise<null>((resolve) => {
++            loadTimer = window.setTimeout(() => {
++              isLoadTimedOut = true;
++              resolve(null);
++            }, ARRANGEMENT_MP3_ENCODER_LOAD_TIMEOUT_MS);
++          });
++          const encoderLoad = import('~/lib/arrangement/mp3-encoder.client').then((module) => {
++            encoderSlot.module = module;
++            if (isLoadTimedOut) {
++              module.resetArrangementMp3Encoder();
++              return null;
++            }
++            return module.loadArrangementMp3Encoder();
++          });
++          encoderLoad.catch(() => undefined);
++          const loadedEncoder = await Promise.race([encoderLoad, loadTimeout]);
++          if (!loadedEncoder) {
++            encoderSlot.module?.resetArrangementMp3Encoder();
++            setExportState({
++              phase: 'error',
++              message:
++                'MP3 encoder 120 წამში ვერ ჩაიტვირთა — ფაილი არ შეიქმნა. გადატვირთე გვერდი და სცადე თავიდან, ან აირჩიე WAV.',
++            });
++            return;
++          }
++          encoder = loadedEncoder;
++        } catch {
++          encoderSlot.module?.resetArrangementMp3Encoder();
++          setExportState({
++            phase: 'error',
++            message:
++              'MP3 encoder ვერ ჩაიტვირთა (ffmpeg.wasm, unpkg CDN) — ფაილი არ შეიქმნა. შეამოწმე ინტერნეტი და სცადე თავიდან, ან აირჩიე WAV.',
++          });
++          return;
++        } finally {
++          window.clearTimeout(loadTimer);
++        }
++        setExportState({ phase: 'rendering', message: 'MP3-ის შექმნა…' });
++        exportProgress.setProgress({ phase: 'mp3', fraction: 0 });
++        let mp3Blob: Blob;
++        try {
++          mp3Blob = await encoder.encode(rendered.blob, (fraction) =>
++            exportProgress.setProgress({ phase: 'mp3', fraction }),
++          );
++        } catch (error) {
++          setExportState({
++            phase: 'error',
++            message: `MP3-ის შექმნა ვერ მოხერხდა — ფაილი არ შეიქმნა. ${error instanceof Error ? error.message : ''}`,
++          });
++          return;
++        }
++        try {
++          const files = [
++            ...(options?.includeWav
++              ? [
++                  {
++                    blob: rendered.blob,
++                    name: renderWindow ? 'czaba-studio-lab-range.wav' : 'czaba-studio-lab.wav',
++                  },
++                ]
++              : []),
++            {
++              blob: mp3Blob,
++              name: renderWindow ? 'czaba-studio-lab-range.mp3' : 'czaba-studio-lab.mp3',
++            },
++          ].map((file) => ({ name: file.name, url: URL.createObjectURL(file.blob) }));
++          for (const file of files) {
++            const anchor = document.createElement('a');
++            anchor.href = file.url;
++            anchor.download = file.name;
++            document.body.appendChild(anchor);
++            anchor.click();
++            anchor.remove();
++            window.setTimeout(() => URL.revokeObjectURL(file.url), 1000);
++          }
++          const exportedLength = renderWindow
++            ? `მონაკვეთი ${formatArrangementTime(renderWindow.start)} — ${formatArrangementTime(renderWindow.end)} (${(renderWindow.end - renderWindow.start).toFixed(3)} წმ)`
++            : formatArrangementTime(projectEnd(arrangement));
++          const suffix = arrangement.master.mute ? MASTER_MUTED_EXPORT_SUFFIX : '';
++          const message = options?.includeWav
++            ? `WAV და MP3 შეიქმნა: ${exportedLength}, WAV 24-bit · 48 kHz · stereo, MP3 48 kHz · stereo.${suffix}`
++            : `MP3 შეიქმნა: ${exportedLength}, 48 kHz · stereo.${suffix}`;
++          const warning = formatExportOverloadWarning(rendered.peak, rendered.clippedSamples);
++          setExportState(
++            warning ? { phase: 'done', message, warning } : { phase: 'done', message },
++          );
++        } catch (error) {
++          setExportState({
++            phase: 'error',
++            message: `ექსპორტი ვერ მოხერხდა — ფაილი არ შეიქმნა. ${error instanceof Error ? error.message : ''}`,
++          });
++        }
++      } finally {
++        exportProgress.setProgress(null);
+       }
+     },
+-    [],
++    [exportProgress],
+   );
+ 
+   const resetExportState = useCallback(() => {
+@@ -2974,6 +3019,7 @@ export function ArrangementProvider({
+       sourceDurations,
+       videoSources,
+       exportState,
++      exportProgress,
+       clipLaneDrag,
+       setClipLaneDrag,
+       togglePlayback,
+@@ -3073,6 +3119,7 @@ export function ArrangementProvider({
+       sourceDurations,
+       videoSources,
+       exportState,
++      exportProgress,
+       clipLaneDrag,
+       togglePlayback,
+       pausePlaybackWithStatus,
+diff --git a/app/lib/arrangement/__tests__/export-mp3.test.tsx b/app/lib/arrangement/__tests__/export-mp3.test.tsx
+index 06a9f47..9488cd7 100644
+--- a/app/lib/arrangement/__tests__/export-mp3.test.tsx
++++ b/app/lib/arrangement/__tests__/export-mp3.test.tsx
+@@ -1,4 +1,3 @@
+-import { FFmpeg } from '@ffmpeg/ffmpeg';
+ import { act, fireEvent, render } from '@testing-library/react';
+ import { type ReactNode, useState } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+@@ -12,9 +11,13 @@ import {
+   WEB_AUDIO_UNAVAILABLE_MESSAGE,
+ } from '~/contexts/ArrangementContext';
+ import { formatExportOverloadWarning, renderArrangementWav } from '~/lib/arrangement/graph.client';
++import {
++  type ArrangementMp3Encoder,
++  loadArrangementMp3Encoder,
++  resetArrangementMp3Encoder,
++} from '~/lib/arrangement/mp3-encoder.client';
+ import { decodeVideoAudio, probeVideoFile } from '~/lib/arrangement/video.client';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+-import { convertWavToMp3, loadFFmpeg } from '~/utils/ffmpeg';
+ import { createArrangement } from '../model';
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -31,20 +34,15 @@ vi.mock('~/lib/arrangement/video.client', async (importOriginal) => {
+   return { ...actual, probeVideoFile: vi.fn(), decodeVideoAudio: vi.fn() };
+ });
+ 
+-vi.mock('@ffmpeg/ffmpeg', () => ({
+-  FFmpeg: class {
+-    loaded = true;
+-  },
+-}));
+-
+-vi.mock('~/utils/ffmpeg', () => ({
+-  loadFFmpeg: vi.fn(),
+-  convertWavToMp3: vi.fn(),
++vi.mock('~/lib/arrangement/mp3-encoder.client', () => ({
++  loadArrangementMp3Encoder: vi.fn(),
++  resetArrangementMp3Encoder: vi.fn(),
+ }));
+ 
+ const renderWavMock = vi.mocked(renderArrangementWav);
+-const loadFFmpegMock = vi.mocked(loadFFmpeg);
+-const convertWavToMp3Mock = vi.mocked(convertWavToMp3);
++const loadEncoderMock = vi.mocked(loadArrangementMp3Encoder);
++const resetEncoderMock = vi.mocked(resetArrangementMp3Encoder);
++const encodeMock = vi.fn<ArrangementMp3Encoder['encode']>();
+ const probeVideoMock = vi.mocked(probeVideoFile);
+ const decodeVideoMock = vi.mocked(decodeVideoAudio);
+ 
+@@ -287,10 +285,11 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+     objectUrlBlobs.length = 0;
+     renderWavMock.mockReset();
+     renderWavMock.mockResolvedValue({ blob: renderedBlob, peak: 0.5, clippedSamples: 0 });
+-    loadFFmpegMock.mockReset();
+-    loadFFmpegMock.mockResolvedValue(new FFmpeg());
+-    convertWavToMp3Mock.mockReset();
+-    convertWavToMp3Mock.mockResolvedValue(mp3Blob);
++    loadEncoderMock.mockReset();
++    loadEncoderMock.mockResolvedValue({ encode: encodeMock });
++    resetEncoderMock.mockReset();
++    encodeMock.mockReset();
++    encodeMock.mockResolvedValue(mp3Blob);
+     probeVideoMock.mockReset();
+     probeVideoMock.mockResolvedValue({ url: 'blob:film', duration: 4, width: 640, height: 360 });
+     decodeVideoMock.mockReset();
+@@ -380,10 +379,12 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+     const timeoutId = setTimeoutSpy.mock.results[timeoutCallIndex]?.value;
+     expect(clearTimeoutSpy.mock.calls.map((call) => call[0])).toContain(timeoutId);
+     expect(renderWavMock).toHaveBeenCalledTimes(1);
+-    expect(renderWavMock.mock.calls[0]).toHaveLength(2);
+-    expect(loadFFmpegMock).toHaveBeenCalledTimes(1);
+-    expect(convertWavToMp3Mock).toHaveBeenCalledTimes(1);
+-    expect(convertWavToMp3Mock.mock.calls[0]).toEqual([renderedBlob]);
++    expect(renderWavMock.mock.calls[0]?.[2]).toBeUndefined();
++    expect(typeof renderWavMock.mock.calls[0]?.[3]?.onProgress).toBe('function');
++    expect(loadEncoderMock).toHaveBeenCalledTimes(1);
++    expect(encodeMock).toHaveBeenCalledTimes(1);
++    expect(encodeMock.mock.calls[0]?.[0]).toBe(renderedBlob);
++    expect(typeof encodeMock.mock.calls[0]?.[1]).toBe('function');
+     expect(downloads).toEqual(['czaba-studio-lab.mp3']);
+     const expectedWarning = formatExportOverloadWarning(1.1, 3);
+     expect(expectedWarning).toBeTruthy();
+@@ -400,8 +401,8 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+     expect(scopeRadio(view, 'range').checked).toBe(true);
+     fireEvent.click(formatRadio(view, 'mp3'));
+     await clickExportButton(view, api, MP3_BUTTON);
+-    expect(renderWavMock.mock.calls[0]).toHaveLength(3);
+     expect(renderWavMock.mock.calls[0]?.[2]).toStrictEqual({ start: 4, end: 9 });
++    expect(typeof renderWavMock.mock.calls[0]?.[3]?.onProgress).toBe('function');
+     expect(downloads).toEqual(['czaba-studio-lab-range.mp3']);
+     expect(live(api).exportState).toEqual({ phase: 'done', message: MP3_RANGE_DONE_MESSAGE });
+   });
+@@ -411,8 +412,10 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+     fireEvent.click(formatRadio(project.view, 'both'));
+     await clickExportButton(project.view, project.api, BOTH_BUTTON);
+     expect(renderWavMock).toHaveBeenCalledTimes(1);
+-    expect(renderWavMock.mock.calls[0]).toHaveLength(2);
+-    expect(convertWavToMp3Mock.mock.calls[0]).toEqual([renderedBlob]);
++    expect(renderWavMock.mock.calls[0]?.[2]).toBeUndefined();
++    expect(typeof renderWavMock.mock.calls[0]?.[3]?.onProgress).toBe('function');
++    expect(encodeMock.mock.calls[0]?.[0]).toBe(renderedBlob);
++    expect(typeof encodeMock.mock.calls[0]?.[1]).toBe('function');
+     expect(downloads).toEqual(['czaba-studio-lab.wav', 'czaba-studio-lab.mp3']);
+     expect(objectUrlBlobs).toEqual([renderedBlob, mp3Blob]);
+     expect(objectUrlBlobs[0]).toBe(renderedBlob);
+@@ -434,21 +437,21 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+   });
+ 
+   it('MX5 a rejected encoder load writes the exact error, downloads nothing, and a retry with a working load succeeds', async () => {
+-    loadFFmpegMock.mockRejectedValue(new Error('cdn blocked'));
++    loadEncoderMock.mockRejectedValue(new Error('cdn blocked'));
+     const { api, view } = await mountMp3Dialog();
+     fireEvent.click(formatRadio(view, 'mp3'));
+     await clickExportButton(view, api, MP3_BUTTON);
+     expect(live(api).exportState).toEqual({ phase: 'error', message: LOAD_FAILED_MESSAGE });
+     expect(view.getByRole('alert').textContent).toBe(LOAD_FAILED_MESSAGE);
+     expect(downloads).toEqual([]);
+-    expect(convertWavToMp3Mock).not.toHaveBeenCalled();
++    expect(encodeMock).not.toHaveBeenCalled();
+     expect(view.getByRole('button', { name: 'დახურვა' })).toHaveProperty('disabled', false);
+     fireEvent.click(formatRadio(view, 'both'));
+     await clickExportButton(view, api, BOTH_BUTTON);
+     expect(live(api).exportState).toEqual({ phase: 'error', message: LOAD_FAILED_MESSAGE });
+     expect(downloads).toEqual([]);
+-    expect(convertWavToMp3Mock).not.toHaveBeenCalled();
+-    loadFFmpegMock.mockResolvedValue(new FFmpeg());
++    expect(encodeMock).not.toHaveBeenCalled();
++    loadEncoderMock.mockResolvedValue({ encode: encodeMock });
+     fireEvent.click(formatRadio(view, 'mp3'));
+     await clickExportButton(view, api, MP3_BUTTON);
+     expect(live(api).exportState).toEqual({ phase: 'done', message: MP3_DONE_MESSAGE });
+@@ -456,7 +459,7 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+   });
+ 
+   it('MX6 an encoder load that never settles times out at exactly 120 s with no file', async () => {
+-    loadFFmpegMock.mockImplementation(() => new Promise(() => undefined));
++    loadEncoderMock.mockImplementation(() => new Promise(() => undefined));
+     const { api, view } = await mountMp3Dialog();
+     fireEvent.click(formatRadio(view, 'both'));
+     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+@@ -464,12 +467,12 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+       fireEvent.click(view.getByRole('button', { name: BOTH_BUTTON }));
+       await Promise.resolve();
+     });
+-    for (let attempt = 0; attempt < 50 && loadFFmpegMock.mock.calls.length === 0; attempt += 1) {
++    for (let attempt = 0; attempt < 50 && loadEncoderMock.mock.calls.length === 0; attempt += 1) {
+       await act(async () => {
+         await vi.advanceTimersByTimeAsync(0);
+       });
+     }
+-    expect(loadFFmpegMock).toHaveBeenCalledTimes(1);
++    expect(loadEncoderMock).toHaveBeenCalledTimes(1);
+     expect(ARRANGEMENT_MP3_ENCODER_LOAD_TIMEOUT_MS).toBe(120_000);
+     await act(async () => {
+       await vi.advanceTimersByTimeAsync(ARRANGEMENT_MP3_ENCODER_LOAD_TIMEOUT_MS - 1);
+@@ -481,12 +484,13 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+     });
+     expect(live(api).exportState).toEqual({ phase: 'error', message: LOAD_TIMEOUT_MESSAGE });
+     expect(downloads).toEqual([]);
+-    expect(convertWavToMp3Mock).not.toHaveBeenCalled();
++    expect(encodeMock).not.toHaveBeenCalled();
++    expect(resetEncoderMock).toHaveBeenCalledTimes(1);
+     expect(view.getByRole('button', { name: 'დახურვა' })).toHaveProperty('disabled', false);
+   });
+ 
+   it('MX7 a rejected conversion writes the exact error with its text and downloads nothing', async () => {
+-    convertWavToMp3Mock.mockRejectedValue(new Error('lame exploded'));
++    encodeMock.mockRejectedValue(new Error('lame exploded'));
+     const { api, view } = await mountMp3Dialog();
+     fireEvent.click(formatRadio(view, 'mp3'));
+     await clickExportButton(view, api, MP3_BUTTON);
+@@ -578,8 +582,8 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+       message: WEB_AUDIO_UNAVAILABLE_MESSAGE,
+     });
+     expect(renderWavMock).not.toHaveBeenCalled();
+-    expect(loadFFmpegMock).not.toHaveBeenCalled();
+-    expect(convertWavToMp3Mock).not.toHaveBeenCalled();
++    expect(loadEncoderMock).not.toHaveBeenCalled();
++    expect(encodeMock).not.toHaveBeenCalled();
+     expect(downloads).toEqual([]);
+   });
+ 
+@@ -609,15 +613,15 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+       </ArrangementProvider>,
+     );
+     await flushLoads();
+-    expect(loadFFmpegMock).not.toHaveBeenCalled();
++    expect(loadEncoderMock).not.toHaveBeenCalled();
+     fireEvent.click(view.getByRole('button', { name: 'Export' }));
+     expect(view.getByRole('dialog')).toBeTruthy();
+-    expect(loadFFmpegMock).not.toHaveBeenCalled();
++    expect(loadEncoderMock).not.toHaveBeenCalled();
+     await clickExportButton(view, api, WAV_BUTTON);
+     expect(downloads).toEqual(['czaba-studio-lab.wav']);
+     expect(live(api).exportState.phase).toBe('done');
+-    expect(loadFFmpegMock).not.toHaveBeenCalled();
+-    expect(convertWavToMp3Mock).not.toHaveBeenCalled();
++    expect(loadEncoderMock).not.toHaveBeenCalled();
++    expect(encodeMock).not.toHaveBeenCalled();
+   });
+ 
+   it('MX11 X1: the project scope radio stays enabled without a range and the disabled range radio names its reason', async () => {
+@@ -663,7 +667,7 @@ describe('SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2)', { timeout:
+     });
+     await settleExport(withRange.api);
+     expect(downloads).toEqual(['czaba-studio-lab-range.wav']);
+-    expect(loadFFmpegMock).not.toHaveBeenCalled();
++    expect(loadEncoderMock).not.toHaveBeenCalled();
+     expect(live(withRange.api).exportState.phase).toBe('done');
+   });
+ });
+diff --git a/app/lib/arrangement/__tests__/export-progress-ui.test.tsx b/app/lib/arrangement/__tests__/export-progress-ui.test.tsx
+new file mode 100644
+index 0000000..12a236d
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/export-progress-ui.test.tsx
+@@ -0,0 +1,539 @@
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { act, fireEvent, render } from '@testing-library/react';
++import { type ReactNode, useState } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { ArrangementExportDialog } from '~/components/arrangement/ArrangementExportDialog';
++import {
++  ARRANGEMENT_MP3_ENCODER_LOAD_TIMEOUT_MS,
++  type ArrangementContextValue,
++  ArrangementProvider,
++  useArrangement,
++} from '~/contexts/ArrangementContext';
++import {
++  type ArrangementRenderOptions,
++  type ArrangementWavResult,
++  renderArrangementWav,
++} from '~/lib/arrangement/graph.client';
++import type { ArrangementMp3Encoder } from '~/lib/arrangement/mp3-encoder.client';
++import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
++import { convertWavToMp3, loadFFmpeg } from '~/utils/ffmpeg';
++import { createArrangement } from '../model';
++
++const encoderImportGate = vi.hoisted(() => {
++  let release: () => void = () => undefined;
++  const opened = new Promise<void>((resolve) => {
++    release = resolve;
++  });
++  return {
++    opened,
++    release: () => release(),
++    loadArrangementMp3Encoder: vi.fn<() => Promise<ArrangementMp3Encoder>>(),
++    resetArrangementMp3Encoder: vi.fn<() => void>(),
++  };
++});
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
++}));
++
++vi.mock('~/lib/arrangement/graph.client', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('~/lib/arrangement/graph.client')>();
++  return { ...actual, renderArrangementWav: vi.fn() };
++});
++
++vi.mock('~/lib/arrangement/mp3-encoder.client', async () => {
++  await encoderImportGate.opened;
++  return {
++    loadArrangementMp3Encoder: encoderImportGate.loadArrangementMp3Encoder,
++    resetArrangementMp3Encoder: encoderImportGate.resetArrangementMp3Encoder,
++  };
++});
++
++vi.mock('~/utils/ffmpeg', () => ({ loadFFmpeg: vi.fn(), convertWavToMp3: vi.fn() }));
++
++const renderWavMock = vi.mocked(renderArrangementWav);
++const loadEncoderMock = encoderImportGate.loadArrangementMp3Encoder;
++const resetEncoderMock = encoderImportGate.resetArrangementMp3Encoder;
++const encodeMock = vi.fn<ArrangementMp3Encoder['encode']>();
++const loadFFmpegMock = vi.mocked(loadFFmpeg);
++const convertWavToMp3Mock = vi.mocked(convertWavToMp3);
++
++const WAV_BUTTON = 'WAV-ის ექსპორტი';
++const MP3_BUTTON = 'MP3-ის ექსპორტი';
++const WAV_DONE_MESSAGE = 'WAV შეიქმნა: 00:20.000, 24-bit · 48 kHz · stereo.';
++const MP3_DONE_MESSAGE = 'MP3 შეიქმნა: 00:20.000, 48 kHz · stereo.';
++const LOAD_TIMEOUT_MESSAGE =
++  'MP3 encoder 120 წამში ვერ ჩაიტვირთა — ფაილი არ შეიქმნა. გადატვირთე გვერდი და სცადე თავიდან, ან აირჩიე WAV.';
++const LOAD_FAILED_MESSAGE =
++  'MP3 encoder ვერ ჩაიტვირთა (ffmpeg.wasm, unpkg CDN) — ფაილი არ შეიქმნა. შეამოწმე ინტერნეტი და სცადე თავიდან, ან აირჩიე WAV.';
++const ENCODER_LOADING_MESSAGE = 'MP3 encoder იტვირთება (ffmpeg.wasm, პირველად ~31 MB)…';
++
++class FakeNode {
++  connect(destination: FakeNode) {
++    return destination;
++  }
++  disconnect() {}
++}
++
++class FakeAudioContext {
++  state = 'running';
++  destination = new FakeNode();
++  sampleRate = 48000;
++  currentTime = 0;
++  resume() {
++    return Promise.resolve();
++  }
++  close() {
++    return Promise.resolve();
++  }
++}
++
++class FakeOfflineAudioContext {}
++
++class FakeAudioBuffer {
++  readonly length: number;
++  readonly numberOfChannels: number;
++  readonly sampleRate: number;
++  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
++    this.length = options.length;
++    this.numberOfChannels = options.numberOfChannels;
++    this.sampleRate = options.sampleRate;
++  }
++  get duration() {
++    return this.length / this.sampleRate;
++  }
++  getChannelData() {
++    return new Float32Array(this.length);
++  }
++}
++
++const progressCollection: WorkspaceCollection = {
++  id: 'progress',
++  label: 'progress',
++  origin: 'demo',
++  sources: [
++    { id: 'song', title: 'Song', collectionLabel: 'progress', kind: 'music', origin: 'demo' },
++  ],
++  loadSource: async () => new AudioBuffer({ length: 2000, numberOfChannels: 1, sampleRate: 100 }),
++};
++
++function progressArrangement(): Arrangement {
++  return {
++    ...createArrangement([
++      { id: 'video', kind: 'video', name: 'ვიდეო' },
++      { id: 'music', kind: 'audio', name: 'მუსიკა' },
++    ]),
++    clips: [
++      {
++        id: 'music-1',
++        trackId: 'music',
++        sourceId: 'song',
++        start: 0,
++        sourceOffset: 0,
++        duration: 20,
++      },
++    ],
++  };
++}
++
++interface ProgressApiRef {
++  current: ArrangementContextValue | null;
++  renders: number;
++}
++
++function ProgressProbe({ api }: { api: ProgressApiRef }) {
++  api.current = useArrangement();
++  api.renders += 1;
++  return null;
++}
++
++function live(api: ProgressApiRef): ArrangementContextValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++function ProgressDialogHost({ api }: { api: ProgressApiRef }) {
++  const [isOpen, setIsOpen] = useState(false);
++  return (
++    <>
++      <button type="button" onClick={() => setIsOpen(true)}>
++        open-export
++      </button>
++      <ArrangementExportDialog isOpen={isOpen} onClose={() => setIsOpen(false)} />
++      <ProgressProbe api={api} />
++    </>
++  );
++}
++
++async function mountProgressDialog() {
++  const api: ProgressApiRef = { current: null, renders: 0 };
++  const view = render(
++    <ArrangementProvider collection={progressCollection} initialArrangement={progressArrangement()}>
++      <ProgressDialogHost api={api} />
++    </ArrangementProvider>,
++  );
++  await act(async () => {
++    await Promise.resolve();
++    await Promise.resolve();
++  });
++  fireEvent.click(view.getByRole('button', { name: 'open-export' }));
++  return { api, view };
++}
++
++function progressLabel(view: ReturnType<typeof render>) {
++  return view.queryByTestId('arrangement-export-progress-label')?.textContent ?? null;
++}
++
++function progressBar(view: ReturnType<typeof render>): HTMLProgressElement | null {
++  const element = view.queryByTestId('arrangement-export-progress');
++  if (element === null) {
++    return null;
++  }
++  if (!(element instanceof HTMLProgressElement)) {
++    throw new Error('progress element is not <progress>');
++  }
++  return element;
++}
++
++function chooseMp3(view: ReturnType<typeof render>) {
++  const radio = view.getByTestId('arrangement-export-format-mp3');
++  fireEvent.click(radio);
++}
++
++async function flushAsync(rounds = 20) {
++  for (let i = 0; i < rounds; i++) {
++    await act(async () => {
++      await new Promise((resolve) => setTimeout(resolve, 0));
++    });
++  }
++}
++
++interface RenderControl {
++  options: ArrangementRenderOptions | undefined;
++  finish: (result: ArrangementWavResult) => void;
++  fail: (error: Error) => void;
++}
++
++function controlledRender(): { current: RenderControl | null } {
++  const control: { current: RenderControl | null } = { current: null };
++  renderWavMock.mockImplementation(
++    (_arrangement, _buffers, _window, options) =>
++      new Promise<ArrangementWavResult>((resolve, reject) => {
++        control.current = { options, finish: resolve, fail: reject };
++      }),
++  );
++  return control;
++}
++
++function reportProgress(
++  control: { current: RenderControl | null },
++  phase: 'render' | 'wav',
++  fraction: number,
++) {
++  const onProgress = control.current?.options?.onProgress;
++  if (!onProgress) {
++    throw new Error('renderer got no onProgress');
++  }
++  act(() => onProgress(phase, fraction));
++}
++
++describe('SRW-20 stage 3a export progress in the dialog (D-29z52)', { timeout: 15_000 }, () => {
++  const downloads: string[] = [];
++  const renderedBlob = new Blob(['rendered-wav']);
++  const mp3Blob = new Blob(['encoded-mp3']);
++
++  beforeEach(() => {
++    downloads.length = 0;
++    renderWavMock.mockReset();
++    renderWavMock.mockResolvedValue({ blob: renderedBlob, peak: 0.5, clippedSamples: 0 });
++    loadEncoderMock.mockReset();
++    loadEncoderMock.mockResolvedValue({ encode: encodeMock });
++    resetEncoderMock.mockReset();
++    encodeMock.mockReset();
++    encodeMock.mockResolvedValue(mp3Blob);
++    loadFFmpegMock.mockReset();
++    convertWavToMp3Mock.mockReset();
++    vi.stubGlobal('AudioContext', FakeAudioContext);
++    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++    vi.stubGlobal('requestAnimationFrame', () => 1);
++    vi.stubGlobal('cancelAnimationFrame', () => undefined);
++    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
++      this: HTMLAnchorElement,
++    ) {
++      downloads.push(this.download);
++    });
++    Object.defineProperty(URL, 'createObjectURL', {
++      configurable: true,
++      writable: true,
++      value: () => 'blob:progress-test',
++    });
++    Object.defineProperty(URL, 'revokeObjectURL', {
++      configurable: true,
++      writable: true,
++      value: () => undefined,
++    });
++  });
++
++  afterEach(() => {
++    vi.useRealTimers();
++    vi.unstubAllGlobals();
++    vi.restoreAllMocks();
++  });
++
++  it('PU4 the 120 s timer covers the encoder import, the timeout clears the progress, and a module that arrives later never starts a load and resets', async () => {
++    const { api, view } = await mountProgressDialog();
++    chooseMp3(view);
++    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
++    await act(async () => {
++      fireEvent.click(view.getByRole('button', { name: MP3_BUTTON }));
++      await Promise.resolve();
++    });
++    for (let i = 0; i < 20 && live(api).exportState.message !== ENCODER_LOADING_MESSAGE; i++) {
++      await act(async () => {
++        await vi.advanceTimersByTimeAsync(0);
++      });
++    }
++    expect(live(api).exportState).toEqual({ phase: 'rendering', message: ENCODER_LOADING_MESSAGE });
++    expect(progressLabel(view)).toBe('MP3 encoder-ის ჩატვირთვა…');
++    await act(async () => {
++      await vi.advanceTimersByTimeAsync(ARRANGEMENT_MP3_ENCODER_LOAD_TIMEOUT_MS - 1);
++    });
++    expect(live(api).exportState).toEqual({ phase: 'rendering', message: ENCODER_LOADING_MESSAGE });
++    await act(async () => {
++      await vi.advanceTimersByTimeAsync(1);
++    });
++    expect(live(api).exportState).toEqual({ phase: 'error', message: LOAD_TIMEOUT_MESSAGE });
++    expect(progressBar(view)).toBeNull();
++    expect(progressLabel(view)).toBeNull();
++    expect(live(api).exportProgress.getProgress()).toBeNull();
++    expect(downloads).toEqual([]);
++    expect(resetEncoderMock).not.toHaveBeenCalled();
++    vi.useRealTimers();
++    encoderImportGate.release();
++    await flushAsync();
++    expect(loadEncoderMock).not.toHaveBeenCalled();
++    expect(resetEncoderMock).toHaveBeenCalledTimes(1);
++    expect(live(api).exportState).toEqual({ phase: 'error', message: LOAD_TIMEOUT_MESSAGE });
++  });
++
++  it('PU4 with the module loaded, a never-settling load resets once at the timeout and the next export loads again and succeeds', async () => {
++    loadEncoderMock.mockImplementationOnce(() => new Promise(() => undefined));
++    const { api, view } = await mountProgressDialog();
++    chooseMp3(view);
++    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
++    await act(async () => {
++      fireEvent.click(view.getByRole('button', { name: MP3_BUTTON }));
++      await Promise.resolve();
++    });
++    for (let i = 0; i < 50 && loadEncoderMock.mock.calls.length === 0; i++) {
++      await act(async () => {
++        await vi.advanceTimersByTimeAsync(0);
++      });
++    }
++    expect(loadEncoderMock).toHaveBeenCalledTimes(1);
++    await act(async () => {
++      await vi.advanceTimersByTimeAsync(ARRANGEMENT_MP3_ENCODER_LOAD_TIMEOUT_MS);
++    });
++    expect(live(api).exportState).toEqual({ phase: 'error', message: LOAD_TIMEOUT_MESSAGE });
++    expect(resetEncoderMock).toHaveBeenCalledTimes(1);
++    expect(progressBar(view)).toBeNull();
++    expect(live(api).exportProgress.getProgress()).toBeNull();
++    vi.useRealTimers();
++    await act(async () => {
++      fireEvent.click(view.getByRole('button', { name: MP3_BUTTON }));
++      await Promise.resolve();
++    });
++    await flushAsync();
++    expect(loadEncoderMock).toHaveBeenCalledTimes(2);
++    expect(resetEncoderMock).toHaveBeenCalledTimes(1);
++    expect(live(api).exportState).toEqual({ phase: 'done', message: MP3_DONE_MESSAGE });
++    expect(downloads).toEqual(['czaba-studio-lab.mp3']);
++  });
++
++  it('PU1 WAV export shows render then wav progress during the render and nothing before or after; exportState has no progress field', async () => {
++    const control = controlledRender();
++    const { api, view } = await mountProgressDialog();
++    expect(progressBar(view)).toBeNull();
++    expect(progressLabel(view)).toBeNull();
++    await act(async () => {
++      fireEvent.click(view.getByRole('button', { name: WAV_BUTTON }));
++      await Promise.resolve();
++    });
++    expect(control.current?.options?.onProgress).toBeTypeOf('function');
++    expect(progressBar(view)).toBeNull();
++    reportProgress(control, 'render', 0.5);
++    expect(progressLabel(view)).toBe('რენდერი · 50%');
++    expect(progressBar(view)?.getAttribute('value')).toBe('0.5');
++    expect(progressBar(view)?.getAttribute('max')).toBe('1');
++    expect(progressBar(view)?.getAttribute('aria-label')).toBe('ექსპორტის პროგრესი');
++    expect(progressBar(view)?.tabIndex).toBe(-1);
++    reportProgress(control, 'render', 1);
++    reportProgress(control, 'wav', 0.25);
++    expect(progressLabel(view)).toBe('WAV-ის ჩაწერა · 25%');
++    expect(progressBar(view)?.getAttribute('value')).toBe('0.25');
++    expect(live(api).exportState).toEqual({
++      phase: 'rendering',
++      message: 'რენდერი და 24-bit WAV-ის შექმნა…',
++    });
++    await act(async () => {
++      control.current?.finish({ blob: renderedBlob, peak: 0.5, clippedSamples: 0 });
++      await Promise.resolve();
++    });
++    await flushAsync(2);
++    expect(live(api).exportState).toEqual({ phase: 'done', message: WAV_DONE_MESSAGE });
++    expect(progressBar(view)).toBeNull();
++    expect(progressLabel(view)).toBeNull();
++    expect(live(api).exportProgress.getProgress()).toBeNull();
++    expect(downloads).toEqual(['czaba-studio-lab.wav']);
++  });
++
++  it('PU1 a failed WAV render clears the progress', async () => {
++    const control = controlledRender();
++    const { api, view } = await mountProgressDialog();
++    await act(async () => {
++      fireEvent.click(view.getByRole('button', { name: WAV_BUTTON }));
++      await Promise.resolve();
++    });
++    reportProgress(control, 'render', 0.3);
++    expect(progressLabel(view)).toBe('რენდერი · 30%');
++    await act(async () => {
++      control.current?.fail(new Error('render broke'));
++      await Promise.resolve();
++    });
++    await flushAsync(2);
++    expect(live(api).exportState.phase).toBe('error');
++    expect(progressBar(view)).toBeNull();
++    expect(live(api).exportProgress.getProgress()).toBeNull();
++  });
++
++  it('PU2 MP3 shows an indeterminate load bar without a value attribute, then the mp3 percent; done clears it', async () => {
++    renderWavMock.mockImplementation(async (_arrangement, _buffers, _window, options) => {
++      options?.onProgress?.('render', 1);
++      options?.onProgress?.('wav', 1);
++      return { blob: renderedBlob, peak: 0.5, clippedSamples: 0 };
++    });
++    let finishLoad: (encoder: ArrangementMp3Encoder) => void = () => undefined;
++    loadEncoderMock.mockImplementation(
++      () =>
++        new Promise<ArrangementMp3Encoder>((resolve) => {
++          finishLoad = resolve;
++        }),
++    );
++    let encodeProgress: ((fraction: number) => void) | undefined;
++    let finishEncode: (blob: Blob) => void = () => undefined;
++    encodeMock.mockImplementation(
++      (_wav, onProgress) =>
++        new Promise<Blob>((resolve) => {
++          encodeProgress = onProgress;
++          finishEncode = resolve;
++        }),
++    );
++    const { api, view } = await mountProgressDialog();
++    chooseMp3(view);
++    await act(async () => {
++      fireEvent.click(view.getByRole('button', { name: MP3_BUTTON }));
++      await Promise.resolve();
++    });
++    await flushAsync(5);
++    expect(loadEncoderMock).toHaveBeenCalledTimes(1);
++    expect(progressLabel(view)).toBe('MP3 encoder-ის ჩატვირთვა…');
++    expect(progressBar(view)?.hasAttribute('value')).toBe(false);
++    await act(async () => {
++      finishLoad({ encode: encodeMock });
++      await Promise.resolve();
++    });
++    await flushAsync(2);
++    expect(progressLabel(view)).toBe('MP3-ის შექმნა · 0%');
++    expect(progressBar(view)?.getAttribute('value')).toBe('0');
++    act(() => encodeProgress?.(0.426));
++    expect(progressLabel(view)).toBe('MP3-ის შექმნა · 42%');
++    expect(progressBar(view)?.getAttribute('value')).toBe('0.426');
++    await act(async () => {
++      finishEncode(mp3Blob);
++      await Promise.resolve();
++    });
++    await flushAsync(2);
++    expect(live(api).exportState).toEqual({ phase: 'done', message: MP3_DONE_MESSAGE });
++    expect(progressBar(view)).toBeNull();
++    expect(progressLabel(view)).toBeNull();
++    expect(live(api).exportProgress.getProgress()).toBeNull();
++  });
++
++  it('PU2 a load failure and a conversion failure each clear the progress and reset after the load failure', async () => {
++    loadEncoderMock.mockRejectedValueOnce(new Error('cdn blocked'));
++    const { api, view } = await mountProgressDialog();
++    chooseMp3(view);
++    await act(async () => {
++      fireEvent.click(view.getByRole('button', { name: MP3_BUTTON }));
++      await Promise.resolve();
++    });
++    await flushAsync();
++    expect(live(api).exportState).toEqual({ phase: 'error', message: LOAD_FAILED_MESSAGE });
++    expect(resetEncoderMock).toHaveBeenCalledTimes(1);
++    expect(progressBar(view)).toBeNull();
++    expect(live(api).exportProgress.getProgress()).toBeNull();
++    encodeMock.mockRejectedValueOnce(new Error('lame exploded'));
++    await act(async () => {
++      fireEvent.click(view.getByRole('button', { name: MP3_BUTTON }));
++      await Promise.resolve();
++    });
++    await flushAsync();
++    expect(live(api).exportState).toEqual({
++      phase: 'error',
++      message: 'MP3-ის შექმნა ვერ მოხერხდა — ფაილი არ შეიქმნა. lame exploded',
++    });
++    expect(progressBar(view)).toBeNull();
++    expect(live(api).exportProgress.getProgress()).toBeNull();
++    expect(downloads).toEqual([]);
++  });
++
++  it('PU3 progress updates do not re-render the provider or useArrangement consumers', async () => {
++    const control = controlledRender();
++    const { api, view } = await mountProgressDialog();
++    await act(async () => {
++      fireEvent.click(view.getByRole('button', { name: WAV_BUTTON }));
++      await Promise.resolve();
++    });
++    reportProgress(control, 'render', 0.01);
++    const valueBefore = live(api);
++    const rendersBefore = api.renders;
++    for (let i = 2; i <= 11; i++) {
++      reportProgress(control, 'render', i / 20);
++    }
++    expect(progressLabel(view)).toBe('რენდერი · 55%');
++    expect(api.renders).toBe(rendersBefore);
++    expect(live(api)).toBe(valueBefore);
++    expect(live(api).exportProgress).toBe(valueBefore.exportProgress);
++    await act(async () => {
++      control.current?.finish({ blob: renderedBlob, peak: 0.5, clippedSamples: 0 });
++      await Promise.resolve();
++    });
++    await flushAsync(2);
++  });
++
++  it('PU5 the context never touches ~/utils/ffmpeg and imports the lab encoder only dynamically', async () => {
++    const { api, view } = await mountProgressDialog();
++    chooseMp3(view);
++    await act(async () => {
++      fireEvent.click(view.getByRole('button', { name: MP3_BUTTON }));
++      await Promise.resolve();
++    });
++    await flushAsync();
++    expect(live(api).exportState).toEqual({ phase: 'done', message: MP3_DONE_MESSAGE });
++    expect(loadEncoderMock).toHaveBeenCalledTimes(1);
++    expect(loadFFmpegMock).not.toHaveBeenCalled();
++    expect(convertWavToMp3Mock).not.toHaveBeenCalled();
++    const source = readFileSync(
++      resolve(__dirname, '../../../contexts/ArrangementContext.tsx'),
++      'utf8',
++    );
++    expect(source).not.toContain('utils/ffmpeg');
++    expect(source).not.toContain('@ffmpeg/');
++    expect(source).not.toMatch(/from '~\/lib\/arrangement\/mp3-encoder\.client'/);
++    expect(source).toContain("import('~/lib/arrangement/mp3-encoder.client').then(");
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/export-progress.test.ts b/app/lib/arrangement/__tests__/export-progress.test.ts
+new file mode 100644
+index 0000000..3773fae
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/export-progress.test.ts
+@@ -0,0 +1,86 @@
++import { describe, expect, it, vi } from 'vitest';
++import {
++  arrangementRenderSuspendFrames,
++  createArrangementExportProgressStore,
++  formatArrangementExportProgress,
++} from '../export-progress';
++
++describe('SRW-20 stage 3a export progress model (D-29z52)', () => {
++  it('PR1 suspend frames are render-quantum multiples, unique, ascending and inside the render', () => {
++    for (const length of [14_611_488, 240_000, 4_881_696, 240, 129, 1000]) {
++      const frames = arrangementRenderSuspendFrames(length);
++      for (const frame of frames) {
++        expect(frame % 128).toBe(0);
++        expect(frame).toBeGreaterThan(0);
++        expect(frame).toBeLessThan(length);
++      }
++      expect([...new Set(frames)].sort((a, b) => a - b)).toEqual(frames);
++    }
++    expect(arrangementRenderSuspendFrames(14_611_488)).toHaveLength(19);
++    expect(arrangementRenderSuspendFrames(240_000)).toHaveLength(19);
++    expect(arrangementRenderSuspendFrames(240_000)[0]).toBe(11_904);
++    expect(arrangementRenderSuspendFrames(240)).toEqual([128]);
++    expect(arrangementRenderSuspendFrames(0)).toEqual([]);
++    expect(arrangementRenderSuspendFrames(Number.NaN)).toEqual([]);
++    expect(arrangementRenderSuspendFrames(-5)).toEqual([]);
++    expect(arrangementRenderSuspendFrames(Number.POSITIVE_INFINITY)).toEqual([]);
++  });
++
++  it('PR2 the store notifies only on a phase, null-ness or whole-percent change, clamps and ignores non-finite fractions', () => {
++    const store = createArrangementExportProgressStore();
++    const listener = vi.fn();
++    const unsubscribe = store.subscribeProgress(listener);
++    expect(store.getProgress()).toBeNull();
++    store.setProgress({ phase: 'render', fraction: 0.1 });
++    expect(listener).toHaveBeenCalledTimes(1);
++    const snapshot = store.getProgress();
++    store.setProgress({ phase: 'render', fraction: 0.105 });
++    expect(listener).toHaveBeenCalledTimes(1);
++    expect(store.getProgress()).toBe(snapshot);
++    store.setProgress({ phase: 'render', fraction: 0.11 });
++    expect(listener).toHaveBeenCalledTimes(2);
++    store.setProgress({ phase: 'wav', fraction: 0.11 });
++    expect(listener).toHaveBeenCalledTimes(3);
++    store.setProgress({ phase: 'wav', fraction: 7 });
++    expect(store.getProgress()).toEqual({ phase: 'wav', fraction: 1 });
++    expect(listener).toHaveBeenCalledTimes(4);
++    store.setProgress({ phase: 'mp3', fraction: -3 });
++    expect(store.getProgress()).toEqual({ phase: 'mp3', fraction: 0 });
++    expect(listener).toHaveBeenCalledTimes(5);
++    store.setProgress({ phase: 'mp3', fraction: Number.NaN });
++    store.setProgress({ phase: 'mp3', fraction: Number.POSITIVE_INFINITY });
++    expect(store.getProgress()).toEqual({ phase: 'mp3', fraction: 0 });
++    expect(listener).toHaveBeenCalledTimes(5);
++    store.setProgress({ phase: 'load', fraction: null });
++    expect(store.getProgress()).toEqual({ phase: 'load', fraction: null });
++    expect(listener).toHaveBeenCalledTimes(6);
++    store.setProgress({ phase: 'load', fraction: null });
++    expect(listener).toHaveBeenCalledTimes(6);
++    store.setProgress(null);
++    expect(store.getProgress()).toBeNull();
++    expect(listener).toHaveBeenCalledTimes(7);
++    store.setProgress(null);
++    expect(listener).toHaveBeenCalledTimes(7);
++    unsubscribe();
++    store.setProgress({ phase: 'render', fraction: 0.5 });
++    expect(listener).toHaveBeenCalledTimes(7);
++  });
++
++  it('PR3 labels name the phase and the floored percent exactly', () => {
++    expect(formatArrangementExportProgress({ phase: 'render', fraction: 0.509 })).toBe(
++      'რენდერი · 50%',
++    );
++    expect(formatArrangementExportProgress({ phase: 'wav', fraction: 0.999 })).toBe(
++      'WAV-ის ჩაწერა · 99%',
++    );
++    expect(formatArrangementExportProgress({ phase: 'wav', fraction: 1 })).toBe(
++      'WAV-ის ჩაწერა · 100%',
++    );
++    expect(formatArrangementExportProgress({ phase: 'load', fraction: null })).toBe(
++      'MP3 encoder-ის ჩატვირთვა…',
++    );
++    expect(formatArrangementExportProgress({ phase: 'mp3', fraction: 0.07 })).toBe(
++      'MP3-ის შექმნა · 7%',
++    );
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/export-range-ui.test.tsx b/app/lib/arrangement/__tests__/export-range-ui.test.tsx
+index b7ab728..6ffdbc4 100644
+--- a/app/lib/arrangement/__tests__/export-range-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/export-range-ui.test.tsx
+@@ -275,7 +275,7 @@ describe('SRW-20 stage 1 range export dialog (D-29z50, R20-X1/R20-X3)', { timeou
+     expect(descriptionText(view)).toBe(PROJECT_DESCRIPTION);
+     await clickExport(view);
+     expect(renderWavMock).toHaveBeenCalledTimes(1);
+-    expect(renderWavMock.mock.calls[0]).toHaveLength(2);
++    expect(renderWavMock.mock.calls[0]?.[2]).toBeUndefined();
+     expect(live(api).exportState).toEqual({ phase: 'done', message: DONE_MESSAGE });
+     expect(downloads).toEqual(['czaba-studio-lab.wav']);
+   });
+@@ -351,7 +351,7 @@ describe('SRW-20 stage 1 range export dialog (D-29z50, R20-X1/R20-X3)', { timeou
+     );
+     await clickExport(view);
+     expect(renderWavMock).toHaveBeenCalledTimes(1);
+-    expect(renderWavMock.mock.calls[0]).toHaveLength(2);
++    expect(renderWavMock.mock.calls[0]?.[2]).toBeUndefined();
+     expect(live(api).exportState.message).toBe(
+       `${DONE_MESSAGE} Master დადუმებულია — ფაილი სიჩუმეა.`,
+     );
+@@ -394,7 +394,7 @@ describe('SRW-20 stage 1 range export dialog (D-29z50, R20-X1/R20-X3)', { timeou
+     expect(scopeRadio(view, 'range').disabled).toBe(true);
+     expect(descriptionText(view)).toBe(PROJECT_DESCRIPTION);
+     await clickExport(view);
+-    expect(renderWavMock.mock.calls[0]).toHaveLength(2);
++    expect(renderWavMock.mock.calls[0]?.[2]).toBeUndefined();
+     expect(live(api).exportState.message).toBe(DONE_MESSAGE);
+     expect(downloads).toEqual(['czaba-studio-lab.wav']);
+   });
+@@ -407,7 +407,7 @@ describe('SRW-20 stage 1 range export dialog (D-29z50, R20-X1/R20-X3)', { timeou
+       RANGE_MISSING_REASON,
+     );
+     await clickExport(view);
+-    expect(renderWavMock.mock.calls[0]).toHaveLength(2);
++    expect(renderWavMock.mock.calls[0]?.[2]).toBeUndefined();
+   });
+ 
+   it('XU4 exportWav with an invalid window writes the exact error and never renders', async () => {
+diff --git a/app/lib/arrangement/__tests__/export-wav.test.ts b/app/lib/arrangement/__tests__/export-wav.test.ts
+new file mode 100644
+index 0000000..509e431
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/export-wav.test.ts
+@@ -0,0 +1,456 @@
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import type { Arrangement } from '~/types/arrangement';
++import { encodeSfxWav } from '../../sfx-edit';
++import { arrangementRenderSuspendFrames } from '../export-progress';
++import { encodeArrangementWav, measureExportOverload } from '../export-wav';
++import {
++  ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE,
++  encodeArrangementWavOffMainThread,
++} from '../export-wav.client';
++import {
++  measureExportOverload as graphMeasureExportOverload,
++  renderArrangementWav,
++} from '../graph.client';
++import { MAX_24BIT_SAMPLE } from '../meter';
++import { createArrangement } from '../model';
++
++function wavOracle(raw: readonly Float32Array[], sampleRate: number) {
++  const report = measureExportOverload(raw);
++  const channels = raw.map((data) => {
++    const clamped = new Float32Array(data.length);
++    for (let i = 0; i < data.length; i++) {
++      clamped[i] = Math.min(MAX_24BIT_SAMPLE, Math.max(-1, data[i]));
++    }
++    return clamped;
++  });
++  const bytes = encodeSfxWav({ sampleRate, channels });
++  return { bytes, ...report };
++}
++
++function seededChannel(length: number, seed: number): Float32Array {
++  const channel = new Float32Array(length);
++  let state = seed;
++  for (let i = 0; i < length; i++) {
++    state = (state * 1_103_515_245 + 12_345) % 2_147_483_648;
++    channel[i] = (state / 2_147_483_648) * 3 - 1.5;
++  }
++  channel.set([1.5, -1.5, MAX_24BIT_SAMPLE, -1, Number.NaN, 1, -1.0001, 0], 0);
++  return channel;
++}
++
++function testChannels(length = 70_000): Float32Array[] {
++  return [seededChannel(length, 7), seededChannel(length, 11)];
++}
++
++function bytesOf(buffer: ArrayBuffer): number[] {
++  return Array.from(new Uint8Array(buffer));
++}
++
++class FakeWorker {
++  static instances: FakeWorker[] = [];
++  readonly url: URL;
++  readonly options: WorkerOptions | undefined;
++  posted: unknown = null;
++  transfer: Transferable[] = [];
++  terminated = 0;
++  onmessage: ((event: MessageEvent) => void) | null = null;
++  onerror: ((event: Event) => void) | null = null;
++  onmessageerror: ((event: MessageEvent) => void) | null = null;
++  constructor(url: URL, options?: WorkerOptions) {
++    this.url = url;
++    this.options = options;
++    FakeWorker.instances.push(this);
++  }
++  postMessage(message: unknown, transfer: Transferable[] = []) {
++    this.posted = message;
++    this.transfer = transfer;
++  }
++  terminate() {
++    this.terminated += 1;
++  }
++  emit(data: unknown) {
++    this.onmessage?.(new MessageEvent('message', { data }));
++  }
++}
++
++function lastWorker(): FakeWorker {
++  const worker = FakeWorker.instances.at(-1);
++  if (!worker) {
++    throw new Error('worker not created');
++  }
++  return worker;
++}
++
++describe('SRW-20 stage 3a WAV encoding off the main thread (D-29z52)', () => {
++  afterEach(() => {
++    FakeWorker.instances = [];
++    vi.unstubAllGlobals();
++  });
++
++  it('EW1 encodeArrangementWav bytes and report equal the previous inline path (measure, clamp, encode)', () => {
++    const raw = testChannels();
++    const expected = wavOracle(raw, 48000);
++    const actual = encodeArrangementWav(raw, 48000);
++    expect(actual.peak).toBe(expected.peak);
++    expect(actual.clippedSamples).toBe(expected.clippedSamples);
++    expect({ peak: actual.peak, clippedSamples: actual.clippedSamples }).toEqual(
++      measureExportOverload(raw),
++    );
++    expect(actual.clippedSamples).toBeGreaterThan(0);
++    expect(actual.bytes.byteLength).toBe(expected.bytes.byteLength);
++    expect(bytesOf(actual.bytes)).toEqual(bytesOf(expected.bytes));
++  });
++
++  it('EW2 graph.client re-exports the same measureExportOverload', () => {
++    expect(graphMeasureExportOverload).toBe(measureExportOverload);
++  });
++
++  it('EW3 encoding progress never decreases and ends at 1', () => {
++    const fractions: number[] = [];
++    encodeArrangementWav(testChannels(), 48000, (fraction) => fractions.push(fraction));
++    expect(fractions.length).toBeGreaterThan(2);
++    for (let i = 1; i < fractions.length; i++) {
++      expect(fractions[i]).toBeGreaterThanOrEqual(fractions[i - 1]);
++    }
++    expect(fractions.at(-1)).toBe(1);
++  });
++
++  it('EW4 without a Worker global the client encodes on the calling thread with identical bytes', async () => {
++    expect(typeof Worker).toBe('undefined');
++    const raw = testChannels();
++    const expected = wavOracle(raw, 48000);
++    const fractions: number[] = [];
++    const actual = await encodeArrangementWavOffMainThread(raw, 48000, (fraction) =>
++      fractions.push(fraction),
++    );
++    expect(bytesOf(actual.bytes)).toEqual(bytesOf(expected.bytes));
++    expect(actual.peak).toBe(expected.peak);
++    expect(actual.clippedSamples).toBe(expected.clippedSamples);
++    expect(fractions.at(-1)).toBe(1);
++  });
++
++  it('EW5 the worker path posts transferred channels, forwards progress, resolves on complete and terminates', async () => {
++    vi.stubGlobal('Worker', FakeWorker);
++    const channels = [new Float32Array(4), new Float32Array(4)];
++    const fractions: number[] = [];
++    const pending = encodeArrangementWavOffMainThread(channels, 48000, (fraction) =>
++      fractions.push(fraction),
++    );
++    const worker = lastWorker();
++    expect(FakeWorker.instances).toHaveLength(1);
++    expect(worker.url.pathname.endsWith('/export-wav.worker.ts')).toBe(true);
++    expect(worker.options?.type).toBe('module');
++    expect(worker.posted).toEqual({ channels, sampleRate: 48000 });
++    expect(worker.transfer).toHaveLength(2);
++    expect(worker.transfer).toContain(channels[0]?.buffer);
++    expect(worker.transfer).toContain(channels[1]?.buffer);
++    worker.emit({ type: 'progress', fraction: 0.25 });
++    worker.emit({ type: 'progress', fraction: 0.75 });
++    expect(fractions).toEqual([0.25, 0.75]);
++    expect(worker.terminated).toBe(0);
++    const bytes = new ArrayBuffer(8);
++    worker.emit({ type: 'complete', bytes, peak: 1.2, clippedSamples: 3 });
++    await expect(pending).resolves.toEqual({ bytes, peak: 1.2, clippedSamples: 3 });
++    expect(worker.terminated).toBe(1);
++  });
++
++  it('EW5 worker error, onerror and onmessageerror each reject with the exact message and terminate', async () => {
++    vi.stubGlobal('Worker', FakeWorker);
++    const failures: Array<(worker: FakeWorker) => void> = [
++      (worker) => worker.emit({ type: 'error', message: 'boom' }),
++      (worker) => worker.onerror?.(new Event('error')),
++      (worker) => worker.onmessageerror?.(new MessageEvent('messageerror')),
++    ];
++    for (const fail of failures) {
++      const pending = encodeArrangementWavOffMainThread([new Float32Array(2)], 48000);
++      const worker = lastWorker();
++      fail(worker);
++      await expect(pending).rejects.toThrow(ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE);
++      expect(ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE).toBe('WAV-ის ჩაწერა ვერ მოხერხდა (worker).');
++      expect(worker.terminated).toBeGreaterThanOrEqual(1);
++    }
++    expect(FakeWorker.instances).toHaveLength(3);
++  });
++
++  it('EW5 a Worker constructor that throws rejects with the exact message', async () => {
++    vi.stubGlobal(
++      'Worker',
++      class {
++        constructor() {
++          throw new Error("Failed to construct 'Worker'");
++        }
++      },
++    );
++    await expect(encodeArrangementWavOffMainThread([new Float32Array(2)], 48000)).rejects.toThrow(
++      new Error(ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE),
++    );
++  });
++
++  it('EW7 the worker module posts whole-percent progress, transfers the bytes on complete and reports errors', async () => {
++    const posted: Array<{ message: unknown; transfer: Transferable[] }> = [];
++    vi.spyOn(window, 'postMessage').mockImplementation(
++      (message: unknown, options?: WindowPostMessageOptions) => {
++        posted.push({ message, transfer: options?.transfer ?? [] });
++      },
++    );
++    await import('../export-wav.worker');
++    const handler = window.onmessage;
++    if (!handler) {
++      throw new Error('worker onmessage not installed');
++    }
++    const raw = testChannels(200_000);
++    const expected = wavOracle(raw, 48000);
++    handler.call(
++      window,
++      new MessageEvent('message', { data: { channels: raw, sampleRate: 48000 } }),
++    );
++    const progress = posted.slice(0, -1).map((entry) => entry.message);
++    const percents = progress.map((message) =>
++      typeof message === 'object' && message !== null && 'fraction' in message
++        ? Math.floor(Number(message.fraction) * 100)
++        : Number.NaN,
++    );
++    expect(percents.length).toBeGreaterThan(2);
++    expect(new Set(percents).size).toBe(percents.length);
++    expect(percents.at(-1)).toBe(100);
++    for (const entry of posted.slice(0, -1)) {
++      expect(entry.transfer).toEqual([]);
++    }
++    const last = posted.at(-1);
++    expect(last?.message).toMatchObject({
++      type: 'complete',
++      peak: expected.peak,
++      clippedSamples: expected.clippedSamples,
++    });
++    const bytes =
++      typeof last?.message === 'object' && last.message !== null && 'bytes' in last.message
++        ? last.message.bytes
++        : null;
++    expect(bytes instanceof ArrayBuffer).toBe(true);
++    expect(last?.transfer).toEqual([bytes]);
++    expect(bytes instanceof ArrayBuffer ? bytesOf(bytes) : []).toEqual(bytesOf(expected.bytes));
++    posted.length = 0;
++    handler.call(
++      window,
++      new MessageEvent('message', { data: { channels: [], sampleRate: 48000 } }),
++    );
++    expect(posted).toHaveLength(1);
++    expect(posted[0]?.message).toMatchObject({ type: 'error' });
++    expect(posted[0]?.transfer).toEqual([]);
++    window.onmessage = null;
++  });
++});
++
++interface SuspendCall {
++  time: number;
++  resolve: () => void;
++  reject: (reason: Error) => void;
++}
++
++const renderLog: { events: string[]; suspends: SuspendCall[]; resumes: number } = {
++  events: [],
++  suspends: [],
++  resumes: 0,
++};
++
++class FakeRenderNode {
++  connect(destination: FakeRenderNode) {
++    return destination;
++  }
++  disconnect() {}
++}
++
++class FakeRenderGain extends FakeRenderNode {
++  gain = {
++    value: 1,
++    setTargetAtTime(target: number) {
++      this.value = target;
++    },
++  };
++}
++
++class FakeRenderPanner extends FakeRenderNode {
++  pan = {
++    value: 0,
++    setTargetAtTime(target: number) {
++      this.value = target;
++    },
++  };
++}
++
++class FakeRenderSource extends FakeRenderNode {
++  buffer: unknown = null;
++  onended: (() => void) | null = null;
++  start() {}
++  stop() {}
++}
++
++class PlainOfflineContext {
++  currentTime = 0;
++  destination = new FakeRenderNode();
++  createGain() {
++    return new FakeRenderGain();
++  }
++  createStereoPanner() {
++    return new FakeRenderPanner();
++  }
++  createBufferSource() {
++    return new FakeRenderSource();
++  }
++  startRendering() {
++    renderLog.events.push('startRendering');
++    return this.renderedChannels();
++  }
++  renderedChannels() {
++    const channels = [Float32Array.of(1.25, 0.5, -0.25), Float32Array.of(-1.5, 0, 0.75)];
++    return Promise.resolve({
++      sampleRate: 48000,
++      getChannelData: (index: number) => channels[index] ?? new Float32Array(3),
++    });
++  }
++}
++
++class SuspendingOfflineContext extends PlainOfflineContext {
++  suspend(time: number) {
++    renderLog.events.push(`suspend:${time}`);
++    return new Promise<void>((resolve, reject) => {
++      renderLog.suspends.push({ time, resolve, reject });
++    });
++  }
++  resume() {
++    renderLog.resumes += 1;
++    return Promise.resolve();
++  }
++  async startRendering() {
++    renderLog.events.push('startRendering');
++    for (const call of [...renderLog.suspends].sort((a, b) => a.time - b.time)) {
++      call.resolve();
++      await new Promise((resolve) => setTimeout(resolve, 0));
++    }
++    return this.renderedChannels();
++  }
++}
++
++class RejectingSuspendContext extends PlainOfflineContext {
++  suspend() {
++    renderLog.events.push('suspend');
++    return Promise.reject(new Error('suspend refused'));
++  }
++  resume() {
++    renderLog.resumes += 1;
++    return Promise.resolve();
++  }
++}
++
++function renderTestArrangement(): Arrangement {
++  return {
++    ...createArrangement([
++      { id: 'video', kind: 'video', name: 'ვიდეო' },
++      { id: 'music', kind: 'audio', name: 'მუსიკა' },
++    ]),
++    clips: [
++      { id: 'm1', trackId: 'music', sourceId: 'song', start: 0, sourceOffset: 0, duration: 10 },
++    ],
++  };
++}
++
++async function blobBytes(blob: Blob): Promise<number[]> {
++  const buffer = await new Promise<ArrayBuffer>((resolve, reject) => {
++    const reader = new FileReader();
++    reader.onload = () =>
++      reader.result instanceof ArrayBuffer
++        ? resolve(reader.result)
++        : reject(new Error('WAV bytes missing'));
++    reader.onerror = () => reject(new Error('WAV read failed'));
++    reader.readAsArrayBuffer(blob);
++  });
++  return bytesOf(buffer);
++}
++
++describe('SRW-20 stage 3a render progress through OfflineAudioContext.suspend (EW6)', () => {
++  afterEach(() => {
++    renderLog.events = [];
++    renderLog.suspends = [];
++    renderLog.resumes = 0;
++    vi.unstubAllGlobals();
++  });
++
++  const expectedRaw = [Float32Array.of(1.25, 0.5, -0.25), Float32Array.of(-1.5, 0, 0.75)];
++
++  it('EW6 with onProgress, suspends are scheduled before startRendering at the quantum frames and progress runs render then wav', async () => {
++    vi.stubGlobal('OfflineAudioContext', SuspendingOfflineContext);
++    const progress: Array<[string, number]> = [];
++    const result = await renderArrangementWav(renderTestArrangement(), new Map(), undefined, {
++      onProgress: (phase, fraction) => progress.push([phase, fraction]),
++    });
++    const frames = arrangementRenderSuspendFrames(480_000);
++    expect(frames).toHaveLength(19);
++    const startIndex = renderLog.events.indexOf('startRendering');
++    expect(renderLog.events.slice(0, startIndex)).toEqual(
++      frames.map((frame) => `suspend:${frame / 48000}`),
++    );
++    expect(renderLog.resumes).toBe(frames.length);
++    const renderFractions = progress.filter(([phase]) => phase === 'render').map(([, f]) => f);
++    expect(renderFractions).toEqual([...frames.map((frame) => frame / 480_000), 1]);
++    const firstWav = progress.findIndex(([phase]) => phase === 'wav');
++    expect(firstWav).toBe(renderFractions.length);
++    const wavFractions = progress.slice(firstWav).map(([phase, f]) => {
++      expect(phase).toBe('wav');
++      return f;
++    });
++    expect(wavFractions.at(-1)).toBe(1);
++    expect(await blobBytes(result.blob)).toEqual(bytesOf(wavOracle(expectedRaw, 48000).bytes));
++    expect({ peak: result.peak, clippedSamples: result.clippedSamples }).toEqual(
++      measureExportOverload(expectedRaw),
++    );
++  });
++
++  it('EW6 without onProgress no suspend is called, and a context without suspend still renders', async () => {
++    vi.stubGlobal('OfflineAudioContext', SuspendingOfflineContext);
++    const quiet = await renderArrangementWav(renderTestArrangement(), new Map());
++    expect(renderLog.events).toEqual(['startRendering']);
++    expect(renderLog.suspends).toEqual([]);
++    expect(await blobBytes(quiet.blob)).toEqual(bytesOf(wavOracle(expectedRaw, 48000).bytes));
++    renderLog.events = [];
++    vi.stubGlobal('OfflineAudioContext', PlainOfflineContext);
++    const progress: string[] = [];
++    const plain = await renderArrangementWav(renderTestArrangement(), new Map(), undefined, {
++      onProgress: (phase) => progress.push(phase),
++    });
++    expect(renderLog.events).toEqual(['startRendering']);
++    expect(progress[0]).toBe('render');
++    expect(progress.at(-1)).toBe('wav');
++    expect(await blobBytes(plain.blob)).toEqual(bytesOf(wavOracle(expectedRaw, 48000).bytes));
++  });
++
++  it('EW6 a throwing progress callback still resumes every suspend, so the render settles instead of hanging', async () => {
++    vi.stubGlobal('OfflineAudioContext', SuspendingOfflineContext);
++    const result = await renderArrangementWav(renderTestArrangement(), new Map(), undefined, {
++      onProgress: (phase) => {
++        if (phase === 'render') {
++          throw new Error('progress listener broke');
++        }
++      },
++    }).catch((error: unknown) => error);
++    expect(renderLog.resumes).toBe(19);
++    expect(result instanceof Error ? result.message : 'completed').toBe('progress listener broke');
++  });
++
++  it('EW6 a rejecting suspend does not fail the render', async () => {
++    vi.stubGlobal('OfflineAudioContext', RejectingSuspendContext);
++    const unhandled = vi.fn();
++    process.on('unhandledRejection', unhandled);
++    try {
++      const result = await renderArrangementWav(renderTestArrangement(), new Map(), undefined, {
++        onProgress: () => undefined,
++      });
++      await new Promise((resolve) => setTimeout(resolve, 0));
++      expect(renderLog.events.filter((event) => event === 'suspend')).toHaveLength(19);
++      expect(renderLog.resumes).toBe(0);
++      expect(await blobBytes(result.blob)).toEqual(bytesOf(wavOracle(expectedRaw, 48000).bytes));
++      expect(unhandled).not.toHaveBeenCalled();
++    } finally {
++      process.off('unhandledRejection', unhandled);
++    }
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/metronome-ui.test.tsx b/app/lib/arrangement/__tests__/metronome-ui.test.tsx
+index 9def865..018d2e4 100644
+--- a/app/lib/arrangement/__tests__/metronome-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/metronome-ui.test.tsx
+@@ -461,7 +461,7 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+     expect(renderWavMock).toHaveBeenCalledTimes(2);
+     const offCall = renderWavMock.mock.calls[0];
+     const onCall = renderWavMock.mock.calls[1];
+-    expect(onCall).toHaveLength(2);
++    expect(onCall?.[2]).toBeUndefined();
+     expect(onCall[0]).toEqual(live(api).arrangement);
+     expect([...onCall[1].keys()]).toEqual([...offCall[1].keys()]);
+     for (const buffer of onCall[1].values()) {
+diff --git a/app/lib/arrangement/__tests__/mp3-encoder.test.ts b/app/lib/arrangement/__tests__/mp3-encoder.test.ts
+new file mode 100644
+index 0000000..3c1ea7a
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/mp3-encoder.test.ts
+@@ -0,0 +1,292 @@
++import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
++import {
++  ARRANGEMENT_MP3_CORE_BASE_URL,
++  loadArrangementMp3Encoder,
++  resetArrangementMp3Encoder,
++} from '../mp3-encoder.client';
++
++type ProgressHandler = (event: { progress: number; time: number }) => void;
++
++const ffmpegFake = vi.hoisted(() => {
++  interface Deferred {
++    resolve: () => void;
++    reject: (reason: Error) => void;
++  }
++  class ControlledFFmpeg {
++    static instances: ControlledFFmpeg[] = [];
++    static loadMode: 'resolve' | 'reject' | 'manual' = 'resolve';
++    static exitCode = 0;
++    static output: Uint8Array | string = Uint8Array.of(1, 2, 3);
++    loadCalls: Array<{ coreURL?: string; wasmURL?: string }> = [];
++    pendingLoad: Deferred | null = null;
++    terminated = 0;
++    written: Array<{ path: string; data: unknown }> = [];
++    execArgs: string[][] = [];
++    deleted: string[] = [];
++    onCalls: Array<[string, ProgressHandler]> = [];
++    offCalls: Array<[string, ProgressHandler]> = [];
++    listeners = new Set<ProgressHandler>();
++    progressDuringExec: number[] = [];
++    constructor() {
++      ControlledFFmpeg.instances.push(this);
++    }
++    load(config: { coreURL?: string; wasmURL?: string }) {
++      this.loadCalls.push(config);
++      if (ControlledFFmpeg.loadMode === 'reject') {
++        return Promise.reject(new Error('core fetch failed'));
++      }
++      if (ControlledFFmpeg.loadMode === 'manual') {
++        return new Promise<boolean>((resolve, reject) => {
++          this.pendingLoad = { resolve: () => resolve(true), reject };
++        });
++      }
++      return Promise.resolve(true);
++    }
++    terminate() {
++      this.terminated += 1;
++    }
++    on(event: string, handler: ProgressHandler) {
++      this.onCalls.push([event, handler]);
++      this.listeners.add(handler);
++    }
++    off(event: string, handler: ProgressHandler) {
++      this.offCalls.push([event, handler]);
++      this.listeners.delete(handler);
++    }
++    writeFile(path: string, data: unknown) {
++      this.written.push({ path, data });
++      return Promise.resolve(true);
++    }
++    exec(args: string[]) {
++      this.execArgs.push(args);
++      for (const progress of this.progressDuringExec) {
++        for (const listener of this.listeners) {
++          listener({ progress, time: 0 });
++        }
++      }
++      return Promise.resolve(ControlledFFmpeg.exitCode);
++    }
++    readFile() {
++      return Promise.resolve(ControlledFFmpeg.output);
++    }
++    deleteFile(path: string) {
++      this.deleted.push(path);
++      return path === 'output.mp3' ? Promise.reject(new Error('missing')) : Promise.resolve(true);
++    }
++  }
++  return { ControlledFFmpeg, toBlobURL: vi.fn() };
++});
++
++vi.mock('@ffmpeg/ffmpeg', () => ({ FFmpeg: ffmpegFake.ControlledFFmpeg }));
++vi.mock('@ffmpeg/util', () => ({ toBlobURL: ffmpegFake.toBlobURL }));
++
++const { ControlledFFmpeg } = ffmpegFake;
++
++function instanceAt(index: number) {
++  const instance = ControlledFFmpeg.instances[index];
++  if (!instance) {
++    throw new Error(`FFmpeg instance ${index} missing`);
++  }
++  return instance;
++}
++
++function readBlobBuffer(blob: Blob): Promise<ArrayBuffer> {
++  return new Promise<ArrayBuffer>((resolve, reject) => {
++    const reader = new FileReader();
++    reader.onload = () =>
++      reader.result instanceof ArrayBuffer
++        ? resolve(reader.result)
++        : reject(new Error('blob bytes missing'));
++    reader.onerror = () => reject(new Error('blob read failed'));
++    reader.readAsArrayBuffer(blob);
++  });
++}
++
++async function flushMicrotasks() {
++  for (let i = 0; i < 10; i++) {
++    await Promise.resolve();
++  }
++}
++
++describe('SRW-20 stage 3a lab-owned MP3 encoder (D-29z52 R3)', () => {
++  const hadArrayBuffer = 'arrayBuffer' in Blob.prototype;
++
++  beforeAll(() => {
++    if (!hadArrayBuffer) {
++      Object.defineProperty(Blob.prototype, 'arrayBuffer', {
++        configurable: true,
++        value(this: Blob) {
++          return readBlobBuffer(this);
++        },
++      });
++    }
++  });
++
++  afterAll(() => {
++    if (!hadArrayBuffer) {
++      Reflect.deleteProperty(Blob.prototype, 'arrayBuffer');
++    }
++  });
++
++  beforeEach(() => {
++    ControlledFFmpeg.instances = [];
++    ControlledFFmpeg.loadMode = 'resolve';
++    ControlledFFmpeg.exitCode = 0;
++    ControlledFFmpeg.output = Uint8Array.of(1, 2, 3);
++    ffmpegFake.toBlobURL.mockReset();
++    ffmpegFake.toBlobURL.mockImplementation((url: string) => Promise.resolve(`blob:${url}`));
++  });
++
++  afterEach(() => {
++    resetArrangementMp3Encoder();
++  });
++
++  it('ME1 loads the unpkg core through toBlobURL once for concurrent callers and reuses the cached instance', async () => {
++    const [first, second] = await Promise.all([
++      loadArrangementMp3Encoder(),
++      loadArrangementMp3Encoder(),
++    ]);
++    expect(ARRANGEMENT_MP3_CORE_BASE_URL).toBe('https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm');
++    expect(ffmpegFake.toBlobURL.mock.calls).toEqual([
++      ['https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js', 'text/javascript'],
++      ['https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm', 'application/wasm'],
++    ]);
++    expect(ControlledFFmpeg.instances).toHaveLength(1);
++    expect(instanceAt(0).loadCalls).toEqual([
++      {
++        coreURL: 'blob:https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
++        wasmURL: 'blob:https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
++      },
++    ]);
++    expect(typeof first.encode).toBe('function');
++    expect(typeof second.encode).toBe('function');
++    await loadArrangementMp3Encoder();
++    expect(ControlledFFmpeg.instances).toHaveLength(1);
++    expect(instanceAt(0).loadCalls).toHaveLength(1);
++  });
++
++  it('ME2 a rejected load terminates the instance and the next call builds a new FFmpeg', async () => {
++    ControlledFFmpeg.loadMode = 'reject';
++    await expect(loadArrangementMp3Encoder()).rejects.toThrow('core fetch failed');
++    expect(instanceAt(0).terminated).toBe(1);
++    ControlledFFmpeg.loadMode = 'resolve';
++    await loadArrangementMp3Encoder();
++    expect(ControlledFFmpeg.instances).toHaveLength(2);
++    expect(instanceAt(1).loadCalls).toHaveLength(1);
++    expect(instanceAt(1).terminated).toBe(0);
++  });
++
++  it('ME2 a rejected core download also terminates and clears the in-flight load', async () => {
++    ffmpegFake.toBlobURL.mockRejectedValueOnce(new Error('unpkg aborted'));
++    await expect(loadArrangementMp3Encoder()).rejects.toThrow('unpkg aborted');
++    expect(instanceAt(0).terminated).toBe(1);
++    expect(instanceAt(0).loadCalls).toHaveLength(0);
++    await loadArrangementMp3Encoder();
++    expect(ControlledFFmpeg.instances).toHaveLength(2);
++  });
++
++  it('ME3 reset during a pending load terminates it, the late resolution does not repopulate the cache, and the next call loads fresh', async () => {
++    ControlledFFmpeg.loadMode = 'manual';
++    const stale = loadArrangementMp3Encoder();
++    const staleSettled = stale.then(
++      () => 'resolved',
++      () => 'rejected',
++    );
++    await flushMicrotasks();
++    const pending = instanceAt(0).pendingLoad;
++    expect(pending).not.toBeNull();
++    resetArrangementMp3Encoder();
++    expect(instanceAt(0).terminated).toBe(1);
++    pending?.resolve();
++    expect(await staleSettled).toBe('rejected');
++    ControlledFFmpeg.loadMode = 'resolve';
++    await loadArrangementMp3Encoder();
++    expect(ControlledFFmpeg.instances).toHaveLength(2);
++    expect(instanceAt(1).loadCalls).toHaveLength(1);
++    await loadArrangementMp3Encoder();
++    expect(ControlledFFmpeg.instances).toHaveLength(2);
++  });
++
++  it('ME3 reset while the core is still downloading never calls load on the stale instance', async () => {
++    let finishDownload: (url: string) => void = () => undefined;
++    ffmpegFake.toBlobURL.mockImplementationOnce(
++      () =>
++        new Promise<string>((resolve) => {
++          finishDownload = resolve;
++        }),
++    );
++    const stale = loadArrangementMp3Encoder().catch(() => 'rejected');
++    resetArrangementMp3Encoder();
++    finishDownload('blob:core');
++    expect(await stale).toBe('rejected');
++    expect(instanceAt(0).loadCalls).toHaveLength(0);
++    expect(instanceAt(0).terminated).toBe(1);
++    expect(ffmpegFake.toBlobURL).toHaveBeenCalledTimes(1);
++  });
++
++  it('ME1 revokes both core blob URLs once the load settles', async () => {
++    const revoke = vi.fn();
++    vi.stubGlobal('URL', Object.assign(Object.create(URL), { revokeObjectURL: revoke }));
++    try {
++      await loadArrangementMp3Encoder();
++    } finally {
++      vi.unstubAllGlobals();
++    }
++    expect(revoke.mock.calls).toEqual([
++      ['blob:https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js'],
++      ['blob:https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm'],
++    ]);
++  });
++
++  it('ME3 reset of a loaded encoder terminates it and the next call builds a new instance', async () => {
++    await loadArrangementMp3Encoder();
++    resetArrangementMp3Encoder();
++    expect(instanceAt(0).terminated).toBe(1);
++    await loadArrangementMp3Encoder();
++    expect(ControlledFFmpeg.instances).toHaveLength(2);
++  });
++
++  it('ME4 encode runs the exact 9-argument command, returns an audio/mpeg Blob and deletes both files', async () => {
++    const encoder = await loadArrangementMp3Encoder();
++    const wav = new Blob([Uint8Array.of(82, 73, 70, 70)], { type: 'audio/wav' });
++    const mp3 = await encoder.encode(wav);
++    const ffmpeg = instanceAt(0);
++    expect(ffmpeg.execArgs).toEqual([
++      ['-i', 'input.wav', '-codec:a', 'libmp3lame', '-b:a', '320k', '-q:a', '0', 'output.mp3'],
++    ]);
++    expect(ffmpeg.written).toHaveLength(1);
++    expect(ffmpeg.written[0]?.path).toBe('input.wav');
++    expect(Array.from(new Uint8Array(await readBlobBuffer(wav)))).toEqual(
++      Array.from(ffmpeg.written[0]?.data instanceof Uint8Array ? ffmpeg.written[0].data : []),
++    );
++    expect(mp3.type).toBe('audio/mpeg');
++    expect(Array.from(new Uint8Array(await readBlobBuffer(mp3)))).toEqual([1, 2, 3]);
++    expect(ffmpeg.deleted).toEqual(['input.wav', 'output.mp3']);
++  });
++
++  it('ME5 progress is forwarded clamped, non-finite values are ignored, and off removes the same handler on success and failure', async () => {
++    const encoder = await loadArrangementMp3Encoder();
++    const ffmpeg = instanceAt(0);
++    ffmpeg.progressDuringExec = [0.25, Number.NaN, 1.5, -0.2, Number.POSITIVE_INFINITY, 0.5];
++    const fractions: number[] = [];
++    await encoder.encode(new Blob(['wav']), (fraction) => fractions.push(fraction));
++    expect(fractions).toEqual([0.25, 1, 0, 0.5]);
++    expect(ffmpeg.onCalls).toHaveLength(1);
++    expect(ffmpeg.offCalls).toEqual([ffmpeg.onCalls[0]]);
++    expect(ffmpeg.onCalls[0]?.[0]).toBe('progress');
++    expect(ffmpeg.listeners.size).toBe(0);
++    ControlledFFmpeg.exitCode = 1;
++    await expect(encoder.encode(new Blob(['wav']), () => undefined)).rejects.toThrow();
++    expect(ffmpeg.onCalls).toHaveLength(2);
++    expect(ffmpeg.offCalls).toHaveLength(2);
++    expect(ffmpeg.offCalls[1]).toEqual(ffmpeg.onCalls[1]);
++    expect(ffmpeg.listeners.size).toBe(0);
++  });
++
++  it('ME6 a non-zero exit code rejects with the exit code and still cleans up', async () => {
++    const encoder = await loadArrangementMp3Encoder();
++    ControlledFFmpeg.exitCode = 3;
++    await expect(encoder.encode(new Blob(['wav']))).rejects.toThrow('ffmpeg exit code 3');
++    expect(instanceAt(0).deleted).toEqual(['input.wav', 'output.mp3']);
++  });
++});
+diff --git a/app/lib/arrangement/export-progress.ts b/app/lib/arrangement/export-progress.ts
+new file mode 100644
+index 0000000..97ef1c0
+--- /dev/null
++++ b/app/lib/arrangement/export-progress.ts
+@@ -0,0 +1,84 @@
++export type ArrangementExportProgressPhase = 'render' | 'wav' | 'load' | 'mp3';
++
++export interface ArrangementExportProgress {
++  phase: ArrangementExportProgressPhase;
++  fraction: number | null;
++}
++
++export interface ArrangementExportProgressStore {
++  getProgress: () => ArrangementExportProgress | null;
++  setProgress: (next: ArrangementExportProgress | null) => void;
++  subscribeProgress: (listener: () => void) => () => void;
++}
++
++const RENDER_QUANTUM_FRAMES = 128;
++
++export function arrangementRenderSuspendFrames(length: number, steps = 20): number[] {
++  if (!Number.isFinite(length) || length <= 0) {
++    return [];
++  }
++  const frames = new Set<number>();
++  for (let k = 1; k < steps; k++) {
++    const frame = Math.floor((length * k) / steps / RENDER_QUANTUM_FRAMES) * RENDER_QUANTUM_FRAMES;
++    if (frame > 0 && frame < length) {
++      frames.add(frame);
++    }
++  }
++  return [...frames].sort((a, b) => a - b);
++}
++
++function progressPercent(progress: ArrangementExportProgress): number | null {
++  return progress.fraction === null ? null : Math.floor(progress.fraction * 100);
++}
++
++export function createArrangementExportProgressStore(): ArrangementExportProgressStore {
++  let current: ArrangementExportProgress | null = null;
++  const listeners = new Set<() => void>();
++  return {
++    getProgress: () => current,
++    setProgress: (next) => {
++      let normalized: ArrangementExportProgress | null = null;
++      if (next) {
++        if (next.fraction !== null && !Number.isFinite(next.fraction)) {
++          return;
++        }
++        normalized = {
++          phase: next.phase,
++          fraction: next.fraction === null ? null : Math.min(1, Math.max(0, next.fraction)),
++        };
++      }
++      const isSame =
++        normalized === null || current === null
++          ? normalized === current
++          : normalized.phase === current.phase &&
++            progressPercent(normalized) === progressPercent(current);
++      if (isSame) {
++        return;
++      }
++      current = normalized;
++      for (const listener of [...listeners]) {
++        listener();
++      }
++    },
++    subscribeProgress: (listener) => {
++      listeners.add(listener);
++      return () => {
++        listeners.delete(listener);
++      };
++    },
++  };
++}
++
++export function formatArrangementExportProgress(progress: ArrangementExportProgress): string {
++  const percent = progressPercent(progress) ?? 0;
++  switch (progress.phase) {
++    case 'render':
++      return `რენდერი · ${percent}%`;
++    case 'wav':
++      return `WAV-ის ჩაწერა · ${percent}%`;
++    case 'load':
++      return 'MP3 encoder-ის ჩატვირთვა…';
++    case 'mp3':
++      return `MP3-ის შექმნა · ${percent}%`;
++  }
++}
+diff --git a/app/lib/arrangement/export-wav.client.ts b/app/lib/arrangement/export-wav.client.ts
+new file mode 100644
+index 0000000..3f80594
+--- /dev/null
++++ b/app/lib/arrangement/export-wav.client.ts
+@@ -0,0 +1,59 @@
++import {
++  type ArrangementWavEncodeResponse,
++  type ArrangementWavEncoding,
++  encodeArrangementWav,
++} from './export-wav';
++
++export const ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE = 'WAV-ის ჩაწერა ვერ მოხერხდა (worker).';
++
++export function encodeArrangementWavOffMainThread(
++  channels: Float32Array[],
++  sampleRate: number,
++  onProgress?: (fraction: number) => void,
++): Promise<ArrangementWavEncoding> {
++  if (typeof Worker === 'undefined') {
++    return Promise.resolve(encodeArrangementWav(channels, sampleRate, onProgress));
++  }
++  return new Promise<ArrangementWavEncoding>((resolve, reject) => {
++    let worker: Worker;
++    try {
++      worker = new Worker(new URL('./export-wav.worker.ts', import.meta.url), {
++        type: 'module',
++      });
++    } catch {
++      reject(new Error(ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE));
++      return;
++    }
++    const fail = () => {
++      worker.terminate();
++      reject(new Error(ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE));
++    };
++    worker.onmessage = (event: MessageEvent<ArrangementWavEncodeResponse>) => {
++      const message = event.data;
++      if (message.type === 'progress') {
++        onProgress?.(message.fraction);
++        return;
++      }
++      if (message.type === 'complete') {
++        worker.terminate();
++        resolve({
++          bytes: message.bytes,
++          peak: message.peak,
++          clippedSamples: message.clippedSamples,
++        });
++        return;
++      }
++      fail();
++    };
++    worker.onerror = fail;
++    worker.onmessageerror = fail;
++    try {
++      worker.postMessage(
++        { channels, sampleRate },
++        channels.map((channel) => channel.buffer).filter((buffer) => buffer instanceof ArrayBuffer),
++      );
++    } catch {
++      fail();
++    }
++  });
++}
+diff --git a/app/lib/arrangement/export-wav.ts b/app/lib/arrangement/export-wav.ts
+new file mode 100644
+index 0000000..01fb5bb
+--- /dev/null
++++ b/app/lib/arrangement/export-wav.ts
+@@ -0,0 +1,58 @@
++import { encodeSfxWav } from '../sfx-edit';
++import { isOverFullScale, MAX_24BIT_SAMPLE } from './meter';
++
++export interface ExportOverloadReport {
++  peak: number;
++  clippedSamples: number;
++}
++
++export interface ArrangementWavEncoding extends ExportOverloadReport {
++  bytes: ArrayBuffer;
++}
++
++export interface ArrangementWavEncodeRequest {
++  channels: Float32Array[];
++  sampleRate: number;
++}
++
++export type ArrangementWavEncodeResponse =
++  | { type: 'progress'; fraction: number }
++  | ({ type: 'complete' } & ArrangementWavEncoding)
++  | { type: 'error'; message: string };
++
++export function measureExportOverload(
++  channels: readonly ArrayLike<number>[],
++): ExportOverloadReport {
++  let peak = 0;
++  let clippedSamples = 0;
++  for (const channel of channels) {
++    for (let i = 0; i < channel.length; i++) {
++      const sample = channel[i];
++      const magnitude = Math.abs(sample);
++      if (magnitude > peak) {
++        peak = magnitude;
++      }
++      if (isOverFullScale(sample)) {
++        clippedSamples += 1;
++      }
++    }
++  }
++  return { peak, clippedSamples };
++}
++
++export function encodeArrangementWav(
++  channels: readonly Float32Array[],
++  sampleRate: number,
++  onProgress?: (fraction: number) => void,
++): ArrangementWavEncoding {
++  const report = measureExportOverload(channels);
++  const clampedChannels = channels.map((data) => {
++    const clamped = new Float32Array(data.length);
++    for (let i = 0; i < data.length; i++) {
++      clamped[i] = Math.min(MAX_24BIT_SAMPLE, Math.max(-1, data[i]));
++    }
++    return clamped;
++  });
++  const bytes = encodeSfxWav({ sampleRate, channels: clampedChannels }, onProgress);
++  return { bytes, ...report };
++}
+diff --git a/app/lib/arrangement/export-wav.worker.ts b/app/lib/arrangement/export-wav.worker.ts
+new file mode 100644
+index 0000000..587ffa7
+--- /dev/null
++++ b/app/lib/arrangement/export-wav.worker.ts
+@@ -0,0 +1,29 @@
++import {
++  type ArrangementWavEncodeRequest,
++  type ArrangementWavEncodeResponse,
++  encodeArrangementWav,
++} from './export-wav';
++
++const sendWavEncodeMessage = (
++  message: ArrangementWavEncodeResponse,
++  transfer: Transferable[] = [],
++) => self.postMessage(message, { transfer });
++
++self.onmessage = (event: MessageEvent<ArrangementWavEncodeRequest>) => {
++  try {
++    let lastPercent = -1;
++    const result = encodeArrangementWav(event.data.channels, event.data.sampleRate, (fraction) => {
++      const percent = Math.floor(fraction * 100);
++      if (percent !== lastPercent) {
++        lastPercent = percent;
++        sendWavEncodeMessage({ type: 'progress', fraction });
++      }
++    });
++    sendWavEncodeMessage({ type: 'complete', ...result }, [result.bytes]);
++  } catch (reason) {
++    sendWavEncodeMessage({
++      type: 'error',
++      message: reason instanceof Error ? reason.message : 'WAV encoding failed',
++    });
++  }
++};
+diff --git a/app/lib/arrangement/graph.client.ts b/app/lib/arrangement/graph.client.ts
+index 2048b57..b53f1c6 100644
+--- a/app/lib/arrangement/graph.client.ts
++++ b/app/lib/arrangement/graph.client.ts
+@@ -1,8 +1,9 @@
+-import { encodeSfxWav } from '~/lib/sfx-edit';
+ import type { Arrangement, ArrangementTrack, ScheduledClip } from '~/types/arrangement';
+ import { type ClipEnvelopeShape, clipEnvelopeGainAtSource, clipEnvelopeShapes } from './envelope';
++import { arrangementRenderSuspendFrames } from './export-progress';
++import { type ExportOverloadReport, measureExportOverload } from './export-wav';
++import { encodeArrangementWavOffMainThread } from './export-wav.client';
+ import { type ClipFadeShape, clipFadeGainAt, clipFadeShapes } from './fades';
+-import { isOverFullScale, MAX_24BIT_SAMPLE } from './meter';
+ import type { MetronomeClick } from './metronome';
+ import { clipLinearGains, masterLinearGain, projectEnd } from './model';
+ import { isTrackAudible, planSchedule, trackEffectiveGains } from './schedule';
+@@ -73,10 +74,8 @@ export interface ScheduleHandle {
+   activeSourceCount(): number;
+ }
+ 
+-export interface ExportOverloadReport {
+-  peak: number;
+-  clippedSamples: number;
+-}
++export type { ExportOverloadReport };
++export { measureExportOverload };
+ 
+ export interface ArrangementWavResult extends ExportOverloadReport {
+   blob: Blob;
+@@ -87,6 +86,10 @@ export interface ArrangementRenderWindow {
+   end: number;
+ }
+ 
++export interface ArrangementRenderOptions {
++  onProgress?: (phase: 'render' | 'wav', fraction: number) => void;
++}
++
+ function scheduleClipFadeGain(
+   fadeGain: ScheduleGainNode,
+   shape: ClipFadeShape,
+@@ -397,26 +400,6 @@ export function applySchedule<TBuffer>(
+   };
+ }
+ 
+-export function measureExportOverload(
+-  channels: readonly ArrayLike<number>[],
+-): ExportOverloadReport {
+-  let peak = 0;
+-  let clippedSamples = 0;
+-  for (const channel of channels) {
+-    for (let i = 0; i < channel.length; i++) {
+-      const sample = channel[i];
+-      const magnitude = Math.abs(sample);
+-      if (magnitude > peak) {
+-        peak = magnitude;
+-      }
+-      if (isOverFullScale(sample)) {
+-        clippedSamples += 1;
+-      }
+-    }
+-  }
+-  return { peak, clippedSamples };
+-}
+-
+ export function formatExportOverloadWarning(peak: number, clippedSamples: number): string | null {
+   if (clippedSamples <= 0) {
+     return null;
+@@ -427,20 +410,44 @@ export function formatExportOverloadWarning(peak: number, clippedSamples: number
+   return `გადატვირთვა: პიკი +${shownPeak} dBFS — ${clippedSamples} sample შეიზღუდა 0 dBFS-ზე. შეამცირე Master მინიმუმ ${reduction} dB-ით და გაიმეორე ექსპორტი.`;
+ }
+ 
++function scheduleArrangementRenderProgress(
++  ctx: OfflineAudioContext,
++  length: number,
++  onRenderProgress: (fraction: number) => void,
++): boolean {
++  if (typeof ctx.suspend !== 'function') {
++    return false;
++  }
++  for (const frame of arrangementRenderSuspendFrames(length)) {
++    Promise.resolve()
++      .then(() => ctx.suspend(frame / ARRANGEMENT_EXPORT_SAMPLE_RATE))
++      .then(() => {
++        Promise.resolve()
++          .then(() => onRenderProgress(frame / length))
++          .catch(() => undefined);
++        return ctx.resume();
++      })
++      .catch(() => undefined);
++  }
++  return true;
++}
++
+ export async function renderArrangementWav(
+   arrangement: Arrangement,
+   buffers: ReadonlyMap<string, AudioBuffer>,
+   renderWindow?: ArrangementRenderWindow,
++  renderOptions?: ArrangementRenderOptions,
+ ): Promise<ArrangementWavResult> {
+   const end = projectEnd(arrangement);
+   if (end <= 0) {
+     throw new Error('პროექტი ცარიელია — ექსპორტისთვის საჭიროა მინიმუმ ერთი კლიპი.');
+   }
++  const length = renderWindow
++    ? Math.round((renderWindow.end - renderWindow.start) * ARRANGEMENT_EXPORT_SAMPLE_RATE)
++    : Math.ceil(end * ARRANGEMENT_EXPORT_SAMPLE_RATE);
+   const ctx = new OfflineAudioContext({
+     numberOfChannels: 2,
+-    length: renderWindow
+-      ? Math.round((renderWindow.end - renderWindow.start) * ARRANGEMENT_EXPORT_SAMPLE_RATE)
+-      : Math.ceil(end * ARRANGEMENT_EXPORT_SAMPLE_RATE),
++    length,
+     sampleRate: ARRANGEMENT_EXPORT_SAMPLE_RATE,
+   });
+   const options: ApplyScheduleOptions<AudioBuffer> = {
+@@ -462,16 +469,20 @@ export async function renderArrangementWav(
+   } else {
+     applySchedule(ctx, planSchedule(arrangement, 0), options);
+   }
++  const onProgress = renderOptions?.onProgress;
++  if (
++    onProgress &&
++    scheduleArrangementRenderProgress(ctx, length, (fraction) => onProgress('render', fraction))
++  ) {
++    await Promise.resolve();
++  }
+   const rendered = await ctx.startRendering();
+-  const raw = [0, 1].map((index) => rendered.getChannelData(index));
+-  const report = measureExportOverload(raw);
+-  const channels = raw.map((data) => {
+-    const clamped = new Float32Array(data.length);
+-    for (let i = 0; i < data.length; i++) {
+-      clamped[i] = Math.min(MAX_24BIT_SAMPLE, Math.max(-1, data[i]));
+-    }
+-    return clamped;
+-  });
+-  const bytes = encodeSfxWav({ sampleRate: rendered.sampleRate, channels });
++  onProgress?.('render', 1);
++  const copies = [0, 1].map((index) => rendered.getChannelData(index).slice());
++  const { bytes, ...report } = await encodeArrangementWavOffMainThread(
++    copies,
++    rendered.sampleRate,
++    (fraction) => onProgress?.('wav', fraction),
++  );
+   return { blob: new Blob([bytes], { type: 'audio/wav' }), ...report };
+ }
+diff --git a/app/lib/arrangement/mp3-encoder.client.ts b/app/lib/arrangement/mp3-encoder.client.ts
+new file mode 100644
+index 0000000..d2b615b
+--- /dev/null
++++ b/app/lib/arrangement/mp3-encoder.client.ts
+@@ -0,0 +1,120 @@
++import { FFmpeg } from '@ffmpeg/ffmpeg';
++import { toBlobURL } from '@ffmpeg/util';
++
++export const ARRANGEMENT_MP3_CORE_BASE_URL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
++
++export interface ArrangementMp3Encoder {
++  encode(wav: Blob, onProgress?: (fraction: number) => void): Promise<Blob>;
++}
++
++const MP3_INPUT_FILE = 'input.wav';
++const MP3_OUTPUT_FILE = 'output.mp3';
++
++let mp3EncoderGeneration = 0;
++let mp3EncoderInstance: FFmpeg | null = null;
++let mp3EncoderLoading: { ffmpeg: FFmpeg; promise: Promise<FFmpeg> } | null = null;
++
++function arrangementMp3EncoderFor(ffmpeg: FFmpeg): ArrangementMp3Encoder {
++  return {
++    async encode(wav, onProgress) {
++      const handleProgress = ({ progress }: { progress: number }) => {
++        if (Number.isFinite(progress)) {
++          onProgress?.(Math.min(1, Math.max(0, progress)));
++        }
++      };
++      ffmpeg.on('progress', handleProgress);
++      try {
++        await ffmpeg.writeFile(MP3_INPUT_FILE, new Uint8Array(await wav.arrayBuffer()));
++        const code = await ffmpeg.exec([
++          '-i',
++          MP3_INPUT_FILE,
++          '-codec:a',
++          'libmp3lame',
++          '-b:a',
++          '320k',
++          '-q:a',
++          '0',
++          MP3_OUTPUT_FILE,
++        ]);
++        if (code !== 0) {
++          throw new Error(`ffmpeg exit code ${code}`);
++        }
++        const data = await ffmpeg.readFile(MP3_OUTPUT_FILE);
++        return new Blob([typeof data === 'string' ? data : new Uint8Array(data)], {
++          type: 'audio/mpeg',
++        });
++      } finally {
++        ffmpeg.off('progress', handleProgress);
++        for (const path of [MP3_INPUT_FILE, MP3_OUTPUT_FILE]) {
++          await ffmpeg.deleteFile(path).catch(() => undefined);
++        }
++      }
++    },
++  };
++}
++
++function assertArrangementMp3Generation(generation: number) {
++  if (generation !== mp3EncoderGeneration) {
++    throw new Error('MP3 encoder reset during load');
++  }
++}
++
++async function loadArrangementMp3Core(ffmpeg: FFmpeg, generation: number): Promise<FFmpeg> {
++  const blobUrls: string[] = [];
++  try {
++    const coreURL = await toBlobURL(
++      `${ARRANGEMENT_MP3_CORE_BASE_URL}/ffmpeg-core.js`,
++      'text/javascript',
++    );
++    blobUrls.push(coreURL);
++    assertArrangementMp3Generation(generation);
++    const wasmURL = await toBlobURL(
++      `${ARRANGEMENT_MP3_CORE_BASE_URL}/ffmpeg-core.wasm`,
++      'application/wasm',
++    );
++    blobUrls.push(wasmURL);
++    assertArrangementMp3Generation(generation);
++    await ffmpeg.load({ coreURL, wasmURL });
++    return ffmpeg;
++  } finally {
++    for (const url of blobUrls) {
++      URL.revokeObjectURL(url);
++    }
++  }
++}
++
++export function loadArrangementMp3Encoder(): Promise<ArrangementMp3Encoder> {
++  if (mp3EncoderInstance) {
++    return Promise.resolve(arrangementMp3EncoderFor(mp3EncoderInstance));
++  }
++  if (!mp3EncoderLoading) {
++    const generation = mp3EncoderGeneration;
++    const ffmpeg = new FFmpeg();
++    const promise = loadArrangementMp3Core(ffmpeg, generation).then(
++      (loaded) => {
++        assertArrangementMp3Generation(generation);
++        mp3EncoderLoading = null;
++        mp3EncoderInstance = loaded;
++        return loaded;
++      },
++      (reason: unknown) => {
++        if (generation === mp3EncoderGeneration) {
++          mp3EncoderLoading = null;
++          ffmpeg.terminate();
++        }
++        throw reason;
++      },
++    );
++    promise.catch(() => undefined);
++    mp3EncoderLoading = { ffmpeg, promise };
++  }
++  return mp3EncoderLoading.promise.then(arrangementMp3EncoderFor);
++}
++
++export function resetArrangementMp3Encoder(): void {
++  mp3EncoderGeneration += 1;
++  const current = mp3EncoderLoading?.ffmpeg ?? mp3EncoderInstance;
++  mp3EncoderLoading = null;
++  mp3EncoderInstance = null;
++  current?.terminate();
++}
+diff --git a/docs/implementation/2026/quarter-IV/076-studio-lab-mp3-export.md b/docs/implementation/2026/quarter-IV/076-studio-lab-mp3-export.md
+index 96b7d8e..b4a8ae6 100644
+--- a/docs/implementation/2026/quarter-IV/076-studio-lab-mp3-export.md
++++ b/docs/implementation/2026/quarter-IV/076-studio-lab-mp3-export.md
+@@ -1,7 +1,7 @@
+ # Studio Lab — MP3 და WAV + MP3 ექსპორტი (SRW-20 ეტაპი 2) და scope radio-ების ხელმისაწვდომობა (C-R85-L2, GATE85-S2)
+ 
+ **თარიღი:** 2026-10-22
+-**სტატუსი:** Round 86 — იმპლემენტირებულია, C-ის შემოწმებას ელოდება (D-29z51)
++**სტატუსი:** Round 86 — C PASS (`browserVerified`), გამოქვეყნდა `971141d`
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+diff --git a/docs/implementation/2026/quarter-IV/077-studio-lab-export-progress-and-worker.md b/docs/implementation/2026/quarter-IV/077-studio-lab-export-progress-and-worker.md
+new file mode 100644
+index 0000000..a7ee28d
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/077-studio-lab-export-progress-and-worker.md
+@@ -0,0 +1,118 @@
++# Studio Lab — WAV-ის ჩაწერა worker-ში, ექსპორტის პროგრესი და lab-ის საკუთარი MP3 encoder (SRW-20 ეტაპი 3a)
++
++**თარიღი:** 2026-10-22
++**სტატუსი:** Round 87 — იმპლემენტირებულია, C-ის შემოწმებას ელოდება (D-29z52)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++SRW-20-ის მეორე ეტაპმა (Round 86, `971141d`) დაამატა MP3 და WAV + MP3 ექსპორტი. R20-X4 მოითხოვს, რომ 5 წუთიანი პროექტის ექსპორტისას UI არ გაიყინოს, პროგრესი ჩანდეს და Cancel მუშაობდეს.
++
++B-ის probe-მა (`b-round-86/probe/PROBE-SUMMARY.md`, `971141d`-ზე) აჩვენა:
++
++- 5 წუთიანი პროექტი (`00:00.000 — 05:04.406`, მუსიკის კლიპი + Ctrl+D ორჯერ) WAV ექსპორტისას main thread-ს ერთხელ **445 ms**-ით ბლოკავს. ჩვეულებრივი frame gap 45–57 ms-ია. 101.702 წმ პროექტზე gap 201 ms-ია.
++- ბლოკს იწვევს `startRendering()`-ის შემდეგი სამი ნაბიჯი: overload-ის გაზომვა, clamp loop და `encodeSfxWav`. თვითონ `OfflineAudioContext`-ის რენდერი UI-ს არ ბლოკავს.
++- MP3 conversion უკვე ffmpeg.wasm-ის საკუთარ worker-შია: 300 წმ 1.8 წამში, max gap 44 ms. FFmpeg instance `progress` event-ს დაახლოებით ყოველ 500 ms-ში აგზავნის.
++- გაყინული `app/utils/ffmpeg.ts` 120 წამიანი timeout-ის შემდეგ არ reset-დება (`isLoading` true რჩება, poller გაჟონავს), ამიტომ ხელახალი ცდაც ჩამოეკიდება (GATE86-S1).
++
++ეტაპი 3a ამ სამ პრობლემას აგვარებს. Cancel, unmount-ზე abort და WAV + MP3-ის მიწოდების შენიშვნა (GATE86-S2) ეტაპ 3b-შია. R20-X4 მხოლოდ 3b-ის შემდეგ ჩაითვლება დასრულებულად.
++
++## მიდგომა
++
++**WAV-ის ჩაწერა worker-ში.** ახალი pure მოდული `export-wav.ts` შეიცავს `measureExportOverload`-ს (უცვლელად გადმოტანილს) და `encodeArrangementWav`-ს. ეს უკანასკნელი ზუსტად იმავე სამ ნაბიჯს აკეთებს, რასაც ადრე renderer აკეთებდა: ჯერ ზომავს clamp-მდე, შემდეგ clamp-ავს `[−1, MAX_24BIT_SAMPLE]` დიაპაზონში და ბოლოს იძახებს `encodeSfxWav`-ს. ბაიტები ძველი გზის იდენტურია. `graph.client.ts` `measureExportOverload`-ს იმავე სახელით რეექსპორტს უკეთებს, ამიტომ არსებული import-ები და ტესტები უცვლელია.
++
++worker-ის trio იმეორებს `sfx-export`-ის გამოქვეყნებულ pattern-ს:
++
++- `export-wav.ts` — pure ლოგიკა, მხოლოდ relative import-ები (`./meter`, `../sfx-edit`). ასე worker bundle-ში `~` alias-ის resolution არ ხვდება.
++- `export-wav.worker.ts` — იღებს `{ channels, sampleRate }`-ს, პროგრესს აგზავნის მაქსიმუმ ერთხელ ყოველ მთელ პროცენტზე და ბაიტებს transfer-ით აბრუნებს.
++- `export-wav.client.ts` — ყოველ ექსპორტზე ერთ worker-ს ქმნის, არხების buffer-ებს transfer-ით გადასცემს და complete-ის, error-ის, `onerror`-ისა და `onmessageerror`-ის შემდეგ worker-ს `terminate()`-ს უკეთებს. ნებისმიერი ჩავარდნა იძლევა შეცდომას `WAV-ის ჩაწერა ვერ მოხერხდა (worker).`, რომელსაც context-ის არსებული catch აჩვენებს.
++
++**Fallback-ის წესი.** main thread-ზე ჩაწერა ხდება **მხოლოდ** მაშინ, როცა `Worker` საერთოდ არ არსებობს (vitest/jsdom/node). ასე გაყინული direct-render ტესტები ბაიტებით უცვლელი რჩება. worker-ის ჩავარდნის შემდეგ main thread-ზე ჩუმი გადართვა არ ხდება.
++
++**რენდერის პროგრესი.** როცა `onProgress` გადაცემულია და context-ს `suspend` აქვს, renderer `startRendering()`-მდე 19 წერტილს გეგმავს (`arrangementRenderSuspendFrames`: 20 ნაწილი, 128 frame-ის render quantum-ის ჯერადი). ყოველ წერტილზე იძახებს `onProgress('render', frame / length)`-ს, შემდეგ `resume()`-ს. `suspend`/`resume`-ის rejection იყლაპება. ყოველი გამოძახება microtask-შია, რომ fake ან უჩვეულო context-ის სინქრონულმა შეცდომამ რენდერი არ ჩააგდოს. `onProgress`-ის გარეშე `suspend` საერთოდ არ გამოიძახება.
++
++**პროგრესის store და არა `exportState`.** პროგრესი ცალკე external store-შია (`export-progress.ts`, `position-store`-ის pattern-ით). ამის ორი მიზეზი არსებობს:
++
++1. გაყინული ტესტები `exportState`-ს `toEqual({ phase, message[, warning] })`-ით ამოწმებენ.
++2. პროცენტის ყოველი ცვლილება provider-ის და `useArrangement()`-ის ყველა consumer-ის ხელახალ render-ს გამოიწვევდა.
++
++store ატყობინებს მხოლოდ phase-ის, null-ობის ან მთელი პროცენტის ცვლილებას. dialog მას `useSyncExternalStore`-ით კითხულობს.
++
++**Dialog.** რენდერის დროს სტატუსის შემდეგ ჩანს label (`რენდერი · N%`, `WAV-ის ჩაწერა · N%`, `MP3 encoder-ის ჩატვირთვა…`, `MP3-ის შექმნა · N%`) და `<progress>`. encoder-ის ჩატვირთვისას `value` ატრიბუტი არ არსებობს, ანუ bar indeterminate-ია. `<progress>` focus-ს არ იღებს, ამიტომ focus trap-ის წესები არ იცვლება.
++
++**lab-ის საკუთარი MP3 encoder (`mp3-encoder.client.ts`).** გაყინულ util-ს protected purchased Studio (`StudioContext.tsx`) იყენებს. ის Studio cloud-ში ვერ მოწმდება (backend მიუწვდომელია), ამიტომ util არ შეცვლილა. lab-ის მოდული იყენებს იმავე `@ffmpeg/*` პაკეტებს, იმავე unpkg core-ს (`@ffmpeg/core@0.12.6/dist/esm`) და ბაიტით იმავე ბრძანებას: `-i input.wav -codec:a libmp3lame -b:a 320k -q:a 0 output.mp3`. util-ისგან განსხვავებით:
++
++- ერთდროული გამოძახებები ერთ in-flight promise-ს იზიარებს და polling არ არსებობს.
++- ჩავარდნისას instance `terminate()`-დება და cache სუფთავდება.
++- `resetArrangementMp3Encoder()` ჩატვირთულ ან ჩატვირთვის პროცესში მყოფ instance-ს წყვეტს. generation counter-ის გამო reset-ის შემდეგ დასრულებული ჩატვირთვა cache-ს ვეღარ ავსებს. generation მოწმდება ყოველი ჩამოტვირთვის შემდეგ: თუ reset `ffmpeg-core.js`-ის ჩამოტვირთვის დროს მოხდა, `ffmpeg-core.wasm`-ის მოთხოვნა აღარ იწყება და ძველ instance-ზე `load()` არ გამოიძახება. უკვე დაწყებულ ჩამოტვირთვას `toBlobURL` ვერ წყვეტს (signal არ აქვს).
++- core-ის blob URL-ები ჩატვირთვის დასრულების შემდეგ (წარმატებით თუ არა) `revokeObjectURL`-ით თავისუფლდება.
++- `encode`-ის შემდეგ `progress` listener-ი ყოველთვის იხსნება და ორივე ფაილი იშლება.
++- არანულოვანი exit code იძლევა შეცდომას `ffmpeg exit code N`.
++
++**Timeout ფარავს import-საც (GATE86-S3, პირველი ნახევარი).** context-ში 120 წამიანი timer encoder-ის ჩატვირთვის შეტყობინებისთანავე იწყება, dynamic import-მდე. timeout-ზე context reset-ს აკეთებს და შეტყობინება უცვლელია. თუ მოდული timeout-ის შემდეგ ჩამოვა, continuation load-ს აღარ იწყებს: reset-ს აკეთებს და ჩერდება. ასე timeout-ის შემდეგ ჩამოსულ მოდულზე 31 MB-იანი მოთხოვნა აღარ იწყება. თუ timeout core-ის ჩამოტვირთვის დროს მოხდა, reset ახალ მოთხოვნას აჩერებს, მაგრამ უკვე დაწყებული fetch ბოლომდე მიდის. იმავე გვერდზე შემდეგი MP3 ხელახლა ჩაიტვირთება. context-ში `~/utils/ffmpeg` ან `@ffmpeg/*`-ის სტატიკური import აღარ არის.
++
++**Conversion-ს ფიქსირებული დროის ლიმიტი არ აქვს.** მისი ხანგრძლივობა პროექტის სიგრძეს მიჰყვება. Cancel ეტაპ 3b-ში დაემატება.
++
++**VBR.** ბრძანება Round 86-ის იდენტურია (`-b:a 320k -q:a 0`). Round 86-ის smoke-მა ამ ბრძანებით Xing (VBR) header აჩვენა. Live-ის manual-ი CBR 320-ს აღწერს. ეს შეგნებული განსხვავება Round 86-დან უცვლელია.
++
++## არქიტექტურა
++
++```mermaid
++sequenceDiagram
++  participant D as ArrangementExportDialog
++  participant C as ArrangementContext
++  participant S as Progress store
++  participant R as renderArrangementWav
++  participant W as export-wav.worker
++  participant E as mp3-encoder.client
++  D->>C: exportMp3()
++  C->>R: (arrangement, buffers, window, { onProgress })
++  R->>R: suspend × 19 → startRendering()
++  R-->>S: render 5% … 100%
++  R->>W: channels (transfer)
++  W-->>S: wav 0% … 100%
++  W-->>R: bytes (transfer), peak, clippedSamples
++  C->>S: load (null)
++  C->>C: 120 s timer → import(mp3-encoder.client)
++  C->>E: loadArrangementMp3Encoder()
++  C->>E: encode(wav, onProgress)
++  E-->>S: mp3 0% … 100%
++  C->>S: null (ყველა გასასვლელზე)
++  S-->>D: useSyncExternalStore
++```
++
++## შეცვლილი ფაილები
++
++- `app/lib/arrangement/export-wav.ts` (ახალი) — `measureExportOverload`, `encodeArrangementWav` და worker-ის message ტიპები.
++- `app/lib/arrangement/export-wav.worker.ts` (ახალი) — WAV-ის ჩაწერა worker-ში, პროგრესი მთელ პროცენტებზე.
++- `app/lib/arrangement/export-wav.client.ts` (ახალი) — worker-ის lifecycle და fallback მხოლოდ `Worker`-ის არარსებობისას.
++- `app/lib/arrangement/export-progress.ts` (ახალი) — phase-ები, suspend frame-ები, store და label-ები.
++- `app/lib/arrangement/mp3-encoder.client.ts` (ახალი) — lab-ის MP3 encoder, reset-ითა და generation counter-ით.
++- `app/lib/arrangement/graph.client.ts` — `renderArrangementWav`-ის მე-4 არგუმენტი (`onProgress`), suspend პროგრესი და worker-ში ჩაწერა. `measureExportOverload` გადატანილია და რეექსპორტირებულია.
++- `app/contexts/ArrangementContext.tsx` — progress store (`exportProgress`), renderer-ის მე-4 არგუმენტი, encoder-ის მოდული, timer import-მდე, `setProgress(null)` ყველა გასასვლელზე.
++- `app/components/arrangement/ArrangementExportDialog.tsx` — პროგრესის label და `<progress>`.
++- ტესტები: `export-wav.test.ts`, `export-progress.test.ts`, `mp3-encoder.test.ts` და `export-progress-ui.test.tsx` ახალია. `export-mp3.test.tsx`-ში encoder-ის mock-ები lab-ის მოდულზე გადავიდა. `export-range-ui.test.tsx`-ში და `metronome-ui.test.tsx`-ში call-shape-ის ხაზები შეიცვალა.
++- `docs/implementation/2026/quarter-IV/076-studio-lab-mp3-export.md` — მხოლოდ სტატუსის ხაზი.
++
++## პრობლემები და გადაწყვეტები
++
++- **პრობლემა:** source-text ტესტები `graph.client.ts`-ს `renderArrangementWav`-იდან ფაილის ბოლომდე ჭრიან და ამოწმებენ, რომ იქ `pan` არ ჩანს. → **გადაწყვეტა:** renderer ფაილის ბოლო ფუნქციად დარჩა. ახალი helper (`scheduleArrangementRenderProgress`) მის ზემოთაა და მის სახელებში `pan` არ ჩანს.
++- **პრობლემა:** `suspend` microtask-ში უნდა გამოიძახებოდეს, მაგრამ `startRendering()`-მდე. → **გადაწყვეტა:** დაგეგმვის შემდეგ renderer ერთხელ ელოდება microtask-ს (`await Promise.resolve()`) და მხოლოდ შემდეგ იწყებს რენდერს.
++- **პრობლემა:** worker-იდან ბაიტების transfer-ით დაბრუნება `Window.postMessage`-ის ტიპებს type assertion-ის გარეშე არ ერგება. → **გადაწყვეტა:** გამოყენებულია `postMessage(message, { transfer })` ფორმა.
++- **პრობლემა:** timeout-ით წაგებული import/load promise-ის rejection შეიძლება unhandled დარჩეს. → **გადაწყვეტა:** context-ში და encoder-ის მოდულში ასეთ promise-ს noop `.catch` აქვს.
++- **პრობლემა (code-reviewer):** `new Worker(...)`-ის სინქრონული შეცდომა (CSP, module worker-ის მხარდაჭერის არქონა) ბრაუზერის ტექსტით ჩანდა და არა ზუსტი შეტყობინებით. → **გადაწყვეტა:** constructor-იც `try`-შია და იგივე `WAV-ის ჩაწერა ვერ მოხერხდა (worker).` შეცდომას იძლევა (EW5).
++- **პრობლემა (code-reviewer):** თუ პროგრესის callback შეცდომას ისვრის, `resume()` აღარ გამოიძახებოდა და რენდერი ჩამოეკიდებოდა. → **გადაწყვეტა:** წარმატებული `suspend`-ის შემდეგ `resume()` ყოველთვის გამოიძახება, callback კი ცალკე microtask-შია (EW6).
++- **პრობლემა (code-reviewer):** generation მოწმდებოდა მხოლოდ ორივე ჩამოტვირთვის შემდეგ, ამიტომ reset-ის შემდეგაც იწყებოდა `ffmpeg-core.wasm`-ის მოთხოვნა. ამასთან core-ის blob URL-ები არ თავისუფლდებოდა. → **გადაწყვეტა:** generation მოწმდება ყოველი ჩამოტვირთვის შემდეგ და URL-ები `finally`-ში revoke-დება (ME1, ME3).
++- **პრობლემა:** UI ტესტში encoder-ის import-ის ჩამოგვიანება async `vi.mock` factory-ით ხდება. ტესტის ფაილის სტატიკურმა import-მა იგივე gate დაბლოკა. → **გადაწყვეტა:** mock ფუნქციები `vi.hoisted`-შია და ტესტი მოდულს სტატიკურად აღარ აიმპორტებს.
++
++## ტესტირება
++
++- Unit/UI ტესტები: EW1–EW7 (EW7 თვითონ worker მოდულს ამოწმებს), PR1–PR3, ME1–ME6 (blob URL-ების revoke-ისა და ჩამოტვირთვის დროს reset-ის ჩათვლით) და PU1–PU5. ბაიტების იდენტურობა მოწმდება oracle-ით, რომელიც ძველ inline ხაზებს იმეორებს.
++- jsdom-ში `typeof Worker === 'undefined'` (EW4), ამიტომ გაყინული direct-render ტესტები main thread-ის გზით გადის.
++- A-ს Playwright smoke 1440×900-ზე, 5 წუთიან პროექტზე: შედეგები `tmp/studio-real-loop/a-round-87.md`-შია. ეს C-ის მტკიცებულება არ არის.
++- Production build-ში worker-ი და MP3 cloud-ში არ შემოწმებულა, რადგან preview server არ არის. ეს root-ის gate-ის საკითხია.
++
++## TODO / შემდეგი ნაბიჯები
++
++- **ეტაპი 3b:** Cancel ყველა phase-ში. რენდერზე: suspended context აღარ resume-დება. WAV-ზე: worker-ის terminate. load და MP3-ზე: `resetArrangementMp3Encoder()`. ფაილი არ იქმნება, ჩანს ზუსტი cancelled შეტყობინება, შემდეგი ექსპორტი კი მუშაობს. ასევე unmount-ზე abort (A-R86 L2) და WAV + MP3-ის მიწოდების შენიშვნა (GATE86-S2). ამის შემდეგ R20-X4 დასრულებულად ჩაითვლება.
++- **FFMPEG-UTIL-UNIFY (SRW-21):** lab-ისა და purchased Studio-ს encoder-ების გაერთიანება. გაყინული util-ის poller-ის გაჟონვა (FFMPEG-LOAD-POLLER-HANG / GATE86-S1, purchased path) მისი მფლობელის ღია საკითხად რჩება.
