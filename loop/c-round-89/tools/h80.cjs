@@ -1,0 +1,16 @@
+const H=require('./h.cjs');const{sleep}=H;
+const key=async(p,k,ms=350)=>{await p.keyboard.press(k);await sleep(ms);};
+const focus=p=>p.evaluate(()=>{const a=document.activeElement;if(!a)return null;const row=a.closest('[data-track-id],[data-group-id]');return{tag:a.tagName,testid:a.getAttribute('data-testid'),label:a.getAttribute('aria-label'),row:row?(row.dataset.trackId?'T:'+row.dataset.trackId:'G:'+row.dataset.groupId):null}});
+const grp=(p,name)=>p.locator('[data-testid=arrangement-group-row]',{has:p.locator('[data-testid=arrangement-group-name]',{hasText:name})}).first();
+const foldBtn=(p,name)=>grp(p,name).locator('[data-testid=arrangement-group-fold]');
+const gstate=(p,name)=>p.evaluate(name=>{const r=[...document.querySelectorAll('[data-testid=arrangement-group-row]')].find(e=>e.querySelector('[data-testid=arrangement-group-name]').textContent.replace('▣','').trim()===name);if(!r)return null;const f=r.querySelector('[data-testid=arrangement-group-fold]');const n=r.querySelector('[data-testid=arrangement-group-name]');const ov=r.querySelector('[data-testid=arrangement-group-overview]');const hdr=r.querySelector('[data-testid=arrangement-group-header]');
+ return{id:r.dataset.groupId,collapsed:r.dataset.groupCollapsed==='true',containsActive:r.dataset.containsActive==='true',hdrBorderL:getComputedStyle(hdr).borderLeftColor,hdrClass:hdr.className.includes('border-l-brand'),ariaExpanded:f.getAttribute('aria-expanded'),glyph:getComputedStyle(f,'::before').content,dataGlyph:f.dataset.foldGlyph,foldLabel:f.getAttribute('aria-label'),foldTitle:f.getAttribute('title'),foldBox:[f.getBoundingClientRect().width,f.getBoundingClientRect().height],nameLabel:n.getAttribute('aria-label'),rowH:r.getBoundingClientRect().height,
+  overview:ov?{aria:ov.getAttribute('aria-hidden'),pe:getComputedStyle(ov).pointerEvents,left:ov.getBoundingClientRect().left,blocks:[...ov.querySelectorAll('[data-overview-clip-id]')].map(b=>{const bb=b.getBoundingClientRect();return{id:b.dataset.overviewClipId,start:+b.dataset.overviewStart,end:+b.dataset.overviewEnd,sel:b.dataset.overviewSelected==='true',left:+(bb.left-ov.getBoundingClientRect().left).toFixed(2),width:+bb.width.toFixed(2),top:+(bb.top-r.getBoundingClientRect().top).toFixed(1),h:+bb.height.toFixed(1),bg:getComputedStyle(b).backgroundColor}})}:null}},name);
+const rowKeys=async p=>(await H.rows(p)).map(r=>r.k);
+const laneIds=p=>p.evaluate(()=>[...document.querySelectorAll('[data-track-id]')].map(e=>e.dataset.trackId));
+const laneH=p=>p.evaluate(()=>Object.fromEntries([...document.querySelectorAll('[data-track-id]')].map(e=>[e.dataset.trackId,+e.getBoundingClientRect().height.toFixed(2)])));
+const selClips=p=>p.evaluate(()=>[...document.querySelectorAll('[data-clip-id]')].filter(e=>/ring-brand/.test(e.className)).map(e=>e.closest('[data-track-id]').dataset.trackId));
+const nClips=p=>p.evaluate(()=>document.querySelectorAll('[data-clip-id]').length);
+async function groupStemsSfx(p,blur=true){await H.clickName(p,'stems');await H.clickName(p,'sfx',['Shift']);if(blur)await H.blur(p);await key(p,'Control+g');}
+async function fold(p,name){await foldBtn(p,name).click();await sleep(450);}
+module.exports={...H,H,key,focus,grp,foldBtn,gstate,rowKeys,laneIds,laneH,selClips,nClips,groupStemsSfx,fold};

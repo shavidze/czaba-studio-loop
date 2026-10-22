@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-22T19:44:13.309Z)
+# Active loop summary (2026-10-22T20:31:15.984Z)
 
-- backlog.json 801 KB -> active view 153 KB
-- status: G_ROOT_GATE round 88
-- servers: `{"checkedUtc":"2026-10-22T19:28:01.9475288Z","round":88,"attempt":1,"store":200}`
-- last publication: 971141d67a1dd33da8f1165de1d895bd62b4e022 (rounds 86-86)
-- last root gate: round 88 skipped - C taskStatus FAIL
+- backlog.json 807 KB -> active view 155 KB
+- status: G_ROOT_GATE round 89
+- servers: `{"checkedUtc":"2026-10-22T20:10:55.8949514Z","round":89,"attempt":1,"store":200}`
+- last publication: eb1d0c0319b209a18751067348dcaf8dc5516fbf (rounds 87-89)
+- last root gate: round 89 published - commit eb1d0c0319b209a18751067348dcaf8dc5516fbf pushed
 
 ## Current items: -
 
@@ -263,11 +263,11 @@
 - A-R85-REVIEW-L1-SHORT-RANGE-TEXT / low / open - Lows batch / a visible range shorter than 1 ms shows the "select a range" reason; a "too short" text may be clearer
 - FFMPEG-LOAD-POLLER-HANG / low / open for the purchased path (frozen app/utils/ffmpeg.ts, owner root/Tech Lead); the /studio-lab path gets its own resettable encoder in round 87 (D-29z52 R3, PX-RETRY) / loadFFmpeg: a concurrent caller polls isLoaded forever if the first load fails; a load whose worker never starts never rejects; no timeout
 - C-R85-OBS-PLAYHEAD-OVER-CLIPS / info / acknowledged (A review L6; intended: playhead z-10 row sibling paints over clips, pointer-events-none) / playhead line paints over clips and the selected clip after the isolate change
-- GATE86-S1-POLLER-RETRY / medium / c_pass for /studio-lab (C round 87 PX-RETRY 1440: timeout alert at exactly 120 000 ms, no late load, second MP3 completed in 7.5 s in the same page); awaiting publication with round 88; purchased path stays FFMPEG-LOAD-POLLER-HANG / a retry after the 120 s timeout hits the frozen util poller leak and hangs again
+- GATE86-S1-POLLER-RETRY / medium / c_pass for /studio-lab (C round 87 PX-RETRY 1440: timeout alert at exactly 120 000 ms, no late load, second MP3 completed in 7.5 s in the same page); awaiting publication with rounds 87-89 (gates 87/88 skipped); purchased path stays FFMPEG-LOAD-POLLER-HANG / a retry after the 120 s timeout hits the frozen util poller leak and hangs again
 - GATE86-S2-BOTH-NOTE-DELIVERY / low / scheduled stage 3b (same dialog; copy and/or done-message honesty about a multiple-downloads prompt) / the WAV + MP3 note promises both-or-none, true for encoding but not for browser delivery (real Chrome may prompt; Safari may drop)
 - GATE86-S3-TIMEOUT-COVERAGE / low / import part c_pass (C round 87 PX-RETRY, timer from the encoder-loading message); conversion has no fixed limit by decision - Cancel in stage 3b; awaiting publication / the 120 s timeout does not cover the import or the conversion
 - GATE86-S4-FORMAT-RADIOS-DURING-RENDER / info / rejected (B, D-29z52): format radios stay enabled during a render by the round-86 spec - frozen render-time focus test export-dialog-focus.test.tsx l.454-472 keeps focus on an enabled format radio; C EXTRA-FORMAT-SWITCH-DURING-MP3 shows the running export is unaffected / format radios enabled while scope radios are disabled during a render
-- PROD-MP3-UNVERIFIED / low / open evidence (gate 87 skipped, so not tried; re-requested for gate 88: build + preview + one MP3 export, now also the export-wav worker) / MP3 export (and from round 87 the export-wav worker) not verified in the production bundle
+- PROD-MP3-UNVERIFIED / low / open evidence (gates 87 and 88 skipped, so not tried; re-requested for gate 89: build + preview + one MP3 export and the export-wav worker) / MP3 export (and from round 87 the export-wav worker) not verified in the production bundle
 - A-R86-L2-LATE-DOWNLOAD-UNMOUNT / low / scheduled stage 3b (abort on unmount) / unmount during encoder load/convert can still download later (exportWav same pattern)
 - A-R86-L7-REASON-READ-TWICE / low / open - Lows batch / range reason inside the <label> and also aria-describedby: may be read twice
 - A-R86-L8-NOTES-SAY-WAV / low / open - Lows batch (copy debt) / no-sound and master-mute notes say "WAV შეიქმნება" for MP3 formats
@@ -275,13 +275,18 @@
 - FFMPEG-UTIL-UNIFY / info / signal for SRW-21 (not scheduled) / round 87 gives /studio-lab its own resettable MP3 encoder (same core + command) because the frozen util cannot reset or remove listeners; un
 - C-R86-OBS-DEFAULT-OVERLOAD / info / acknowledged (same as DEMO-SFX-FULL-SCALE; pre-existing) / the default demo project peaks +1.7 dBFS at Master 0 dB, so every default export shows the overload warning
 - ENV-VITE-REOPTIMIZE-RELOAD / info / harness rule (round 87 task setup: route probes not in parallel with exports) / the first dev-server visit of a non-lab route re-optimizes deps and reloads every open tab
-- R87-PROGRESS-BELOW-FOLD-1280 / medium / scheduled round 88 (D-29z53: sticky footer + focus guard) / at 1280x720 the Export progress label is cut off and the <progress> bar and busy button sit below the dialog panel fold during an export (pa
+- R87-PROGRESS-BELOW-FOLD-1280 / medium / c_pass (C round 88 VIS-IDLE/VIS-RENDER/VIS-SCROLL/VIS-DONE/VIS-ERROR/VIS-VIDEO PASS both viewports, browserVerified=true realVerified=true; gate 88 skipped -> awaiting publication with rounds 87-89) / at 1280x720 the Export progress label is cut off and the <progress> bar and busy button sit below the dialog panel fold during an export (pa
 - R87-L-TIMEOUT-RELOAD-TEXT / low / open - Lows batch / the 120 s MP3 timeout text still says "გადატვირთე გვერდი" (reload the page), but since round 87 a retry works in the same page (C PX-RETRY) 
 - R87-O-PROGRESS-FILL-COLOUR / info / Tech Lead headed-Chrome check (R87-T) / headless Linux Chromium paints the <progress> fill #008000 on #808080 although computed accent-color is the brand token rgb(18,217,200); sam
 - A-R87-L5-CACHED-ENCODER-AFTER-FAILED-CONVERSION / low / scheduled stage 3b (with Cancel) / a failed conversion leaves the cached lab encoder in place (same as the frozen util)
-- A-R87-L7-PROGRESS-MONOTONIC / low / watch: store does not enforce non-decreasing values; C round 87 PX-PHASES observed 0 decreases at both viewports; re-checked round 88 PX-PHASES-R / progress store does not enforce non-decreasing fractions within a phase
+- A-R87-L7-PROGRESS-MONOTONIC / low / watch: C round 87 and round 88 PX-PHASES(-R) observed 0 decreases at both viewports / progress store does not enforce non-decreasing fractions within a phase
 - A-R87-LOW-PU-ORDER / low / open - Lows batch / export-progress-ui PU tests depend on order (only the first PU4 opens the delayed-import gate)
 - ARCH-EXPORT-MP3-ORCHESTRATION / info / signal (not scheduled) under ARCH-EXPORT-PIPELINE; input to checkpoint q14 at the SRW-20 boundary after 3b / round-87 code-reviewer Architecture note: exportMp3 (ArrangementContext.tsx:2726-2881) changed in rounds 85-87 and 3b again; proposal after 
+- R88-FOCUS-ESCAPE-RENDER / medium / scheduled round 89 (D-29z54: stop-based Tab trap, new dialog-tab-stops.ts) / during an Export render with WAV (default) or MP3 checked, the 3rd Tab leaves the dialog (BODY, then arrangement-exit and Master Mute/Volume
+- GATE-88-SKIPPED / info / open_root / Round 88 root gate skipped (C FAIL); rounds 87-88 code is uncommitted in the tree; rounds 87+88+89 publish together after C PASS
+- A-R88-REVIEW-EDGES / low / open - Lows batch / round-88 code-reviewer edge cases: (1) footer guard measures the radio rect, its label description can still sit under the footer (target.cl
+- C-R88-O1-IDLE-OVERFLOW-1280 / info / acknowledged (sticky footer keeps buttons HR-VISIBLE; no action) / at 1280x720 the idle 5M Export body still overflows by 45 px (691 vs 646); the footer hides it
+- ARCH-R88-EXPORT-DIALOG-FOCUS-HOOK / info / signal - trigger met in round 89 (another focus concern in the dialog); added to checkpoint request q14 (b-round-83-checkpoint-request.md, SRW-20 boundary after 3b); not scheduled / round-88 code-reviewer Architecture note: ArrangementExportDialog has four effects on the same content element (opener restore, initial focu
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
@@ -294,6 +299,6 @@
 - SRW-17 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 74eca15, stage 2 68383fa, stage 3 efbed86; Tech Lead R79-T/R81-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
-- SRW-20 [in_progress (stage 1 C PASS r85, published 51e024a; stage 2 C PASS r86, published 971141d; stage 3a C round 87 FAIL: 18/18 rows PASS both viewports browserVerified=true realVerified=true, one medium bug R87-PROGRESS-BELOW-FOLD-1280 -> fix round 88 D-29z53; stage 3b cancel planned; R20-X4 open; none deferred)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
+- SRW-20 [in_progress (stage 1 C PASS r85, published 51e024a; stage 2 C PASS r86, published 971141d; stage 3a: C round 87 18/18 rows PASS + C round 88 sticky footer PASS (R87-PROGRESS-BELOW-FOLD-1280 c_pass), both browserVerified=true realVerified=true, unpublished (gates 87/88 skipped); open medium R88-FOCUS-ESCAPE-RENDER (pre-existing keyboard trap escape during render) -> fix round 89 D-29z54; stage 3b cancel planned; R20-X4 open; none deferred)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
 - SRW-21 [blocked-partial] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

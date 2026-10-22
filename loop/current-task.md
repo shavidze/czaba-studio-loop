@@ -1,177 +1,236 @@
-# CURRENT TASK — Round 89: fix R88-FOCUS-ESCAPE-RENDER — the Export dialog's Tab trap counts radio groups as one Tab stop (D-29z54)
+# CURRENT TASK — Round 90: SRW-20 stage 3b-1 — Cancel the Export in every phase, abort on unmount, reset the encoder after a failed conversion, and fail on a resume error (D-29z55)
 
 Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-22
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules in your prompt. Those rules win over older text.
-- **Previous task:** `tasks/round-88.md` (exact copy, sha256 `7c1e0560…`). Rationale: `b-round-88.md`. Decision record: D-29z54 in `docs/technical/studio-real-workspace/plan.md`.
-- **Round size:** one C bug (medium), one owner (A). One changed source file, one new pure module, one new test file and one doc. This is a fix round, not a feature stage.
+- **Previous task:** `tasks/round-89.md` (exact copy, sha256 `23ef2b89…`). Rationale: `b-round-89.md`. Decision record: D-29z55 in `docs/technical/studio-real-workspace/plan.md`.
+- **Round size:** one feature stage (SRW-20 stage 3b-1: Cancel) and one tightly related Medium from the gate-89 reviewer (GATE89-S1, in the same render function). One owner (A).
 
 ## Why this round
-- **C round 88: FAIL**, `browserVerified=true`, `realVerified=true`.
-  - **The sticky footer and the focus guard work.** VIS-IDLE, VIS-RENDER (every phase), VIS-SCROLL (1280), VIS-DONE, VIS-ERROR, VIS-VIDEO, PX-PHASES-R, PX-WAV5-R (max rAF gap 55.2 ms), PX-NET, REG-HYD, G88-3, T88-TARGETED and SOURCE-UNCHANGED all PASS. R87-PROGRESS-BELOW-FOLD-1280 is fixed by C evidence (c_pass, not yet published).
-  - **One medium bug, R88-FOCUS-ESCAPE-RENDER.** It is old: the trap code is byte-identical to round 87 and to the published `971141d`.
-    - Steps: during a render, press Tab three times. The 3rd Tab leaves the dialog. Focus goes to `BODY`, then `arrangement-exit` (a link behind the modal), then Master Mute and Master Volume.
-    - When it happens: at both viewports, whenever the checked format is WAV (the default) or MP3. With WAV + MP3 checked, focus wraps to X correctly.
-    - Failing rows: PX-KEYS-R, and the "focus never leaves the dialog" part of FOCUS-NOT-OBSCURED.
-- **Gate 88 was skipped** (`gates/gate-round-88.json`: "C taskStatus FAIL"). Nothing from rounds 87–88 is published. HEAD is still `971141d`, and the round-87 and round-88 work sits uncommitted in the tree. That tree is the baseline below.
-- **Regression round:** due on or after 2026-10-24 (`regression-last.json` = 2026-10-21). Not today.
-
-## Root cause (B read `ArrangementExportDialog.tsx` l.161–192 in the current tree)
-- `handleDialogTabKey` wraps forward only when `active === last`, and backward only when `active === first`. `last` is the **last focusable element** in DOM order.
-- During a render, the scope radios, Close and Export are disabled, and the format radios stay enabled (D-29z52, GATE86-S4). So the focusable list is [X, wav, mp3, both] and `last` is the `both` radio.
-- **Native Tab treats a radio group as one Tab stop.** Tab from the checked `wav` or `mp3` radio leaves the group, and with it the dialog. The trap never fires, because `active !== both`.
-  - This matches C's observations: V1/V4/V5 escape, and V3 (`both` checked) wraps.
-- In the idle state, the last element is the Export button and the first is X. Neither is a radio, which is why the bug only shows during a render.
-- `grep "active === last"` over `app/` finds only this dialog, so no other dialog shares this trap pattern.
+- **C round 89: PASS**, `browserVerified=true`, `realVerified=true`, at both viewports. R88-FOCUS-ESCAPE-RENDER is fixed: 9 valid trap runs, 76 valid presses, 0 escapes. No new bugs.
+- **Gate 89: published.** Commit `eb1d0c0319b209a18751067348dcaf8dc5516fbf` is on both remotes. It holds rounds 87–89. Root verify: 132 files and 2122 tests pass; the build emits the worker chunk.
+- **Stage 3a is done.** The round-87 rows, the round-88 footer and the round-89 trap all have C evidence and are published.
+- **What is still open in SRW-20:** the Cancel part of R20-X4. Stage 3b brings it. The work is split into two parts, and nothing is dropped:
+  - **3b-1 (this round):** Cancel in every phase, abort on unmount (A-R86-L2), reset the encoder after a failed conversion (A-R87-L5), and the gate-89 Medium GATE89-S1 (a rejected `resume()` leaves the render hanging).
+  - **3b-2 (round 91):** the WAV + MP3 delivery note (GATE86-S2), the timeout "reload the page" text (R87-L-TIMEOUT-RELOAD-TEXT), and the gate-89 memory Medium GATE89-S2 (in-place clamp). The two strings are locked in frozen `export-mp3.test.tsx` l.53/l.64, so they need their own test grant.
+- **Regression round:** due on or after 2026-10-24 (`regression-last.json` = 2026-10-21). Today is 2026-10-22, so not yet.
 
 ## Baseline (measured by B, 2026-10-22)
-- **HEAD `971141d67a1dd33da8f1165de1d895bd62b4e022`**. `git status --short` = **7 M + 11 ??** (18 lines), exactly the round-88 end state. A's `a-round-88/end-hashes.txt` and C's SOURCE-UNCHANGED both match it.
-- **Frozen list:** `../tmp/studio-real-loop/b-round-88-r89-tree-sha256.txt`, **506** entries, **506/506 OK**. It covers every tracked and untracked `app/**` and `docs/implementation/**` file plus `vite.config.ts`, **except** the two owned existing files below.
-  - It includes `export-dialog-footer.test.tsx` (`5d6d30e4`), which is now frozen.
-  - It includes the protected auth and route files.
-  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-88-r89-tree-sha256.txt`.
-- **Snapshots:** `../tmp/studio-real-loop/b-round-88-r89-snapshots/` (`SHA256SUMS.txt`). LF, CR=0:
+- **HEAD `eb1d0c0319b209a18751067348dcaf8dc5516fbf`.** `git status --short` is **empty** (clean tree).
+- **Frozen list:** `../tmp/studio-real-loop/b-round-89-r90-tree-sha256.txt`, **505** entries, **505/505 OK**.
+  - It covers every tracked `app/**` and `docs/implementation/**` file plus `vite.config.ts`, **except** the five owned existing files below.
+  - It includes the protected auth and route files, `Modal.tsx`, `ffmpeg.ts`, `StudioContext.tsx`, `mp3-encoder.client.ts` and every other export test.
+  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-89-r90-tree-sha256.txt`.
+- **Snapshots:** `../tmp/studio-real-loop/b-round-89-r90-snapshots/` (`SHA256SUMS.txt`). All are LF with CR=0.
 
   | File | sha256 prefix | lines | role |
   |---|---|---|---|
-  | `app/components/arrangement/ArrangementExportDialog.tsx` | `24e53071` | 517 | owned |
-  | `docs/implementation/2026/quarter-IV/077-studio-lab-export-progress-and-worker.md` | `605915b0` | 121 | owned (listed lines) |
-  | `app/components/ui/Modal.tsx` | `741c2341` | — | frozen, reference |
-  | `app/lib/arrangement/__tests__/export-dialog-focus.test.tsx` | `ac53f685` | — | frozen, reference (harness to copy) |
-  | `app/lib/arrangement/__tests__/export-dialog-focus-restore.test.tsx` | `e4ad8336` | — | frozen, reference |
-  | `app/lib/arrangement/__tests__/export-dialog-footer.test.tsx` | `5d6d30e4` | — | frozen, reference |
+  | `app/contexts/ArrangementContext.tsx` | `b83b5693` | 3281 | owned |
+  | `app/components/arrangement/ArrangementExportDialog.tsx` | `41e4b11d` | 520 | owned |
+  | `app/lib/arrangement/graph.client.ts` | `ba33aeeb` | 488 | owned |
+  | `app/lib/arrangement/export-wav.client.ts` | `39975c69` | 59 | owned |
+  | `app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx` | `0c224abd` | 457 | owned (TR1–TR5 only) |
+  | `app/lib/arrangement/mp3-encoder.client.ts` | `ddb70919` | — | frozen, reference |
+  | `export-dialog-focus.test.tsx` / `export-dialog-footer.test.tsx` / `export-progress-ui.test.tsx` / `export-mp3.test.tsx` / `export-wav.test.ts` | `ac53f685` / `5d6d30e4` / `0705cc16` / `86d5ddee` / `e8d93132` | — | frozen, reference (harnesses to copy) |
 
-- **Protected:** never touch the auth files, `app/contexts/StudioContext.tsx` (`caa388e7`), `app/utils/ffmpeg.ts` (`0995ae78`) or `Modal.tsx`.
+- **Protected:** never touch the auth files, `app/contexts/StudioContext.tsx` (`caa388e7`), `app/utils/ffmpeg.ts` (`0995ae78`), `Modal.tsx` (`741c2341`) or `mp3-encoder.client.ts` (`ddb70919`; it already has `resetArrangementMp3Encoder`, which is all this round needs).
 - **Servers:** `:5173/studio-lab` returns 200 (`env-status.json`). Backend `:5199` is unavailable, as expected. Never start or stop servers.
-- **Do not change the repository state:**
-  - Never stash, reset, checkout, clean or re-create anything. Do not revert any round-87 or round-88 file.
-  - A mismatch (another HEAD, another status, a changed frozen file) means stop and report.
+- **Do not change the repository state.**
+  - Never stash, reset, checkout, clean or re-create anything.
   - Never run `biome check --write`, `format --write`, `npm run format` or `check:fix`. Format through stdin to stdout.
-  - Run mutation proofs in a scratch copy (`a-round-89/mut/`), never in `store/`.
+  - Run mutation proofs in a scratch copy (`a-round-90/mut/`), never in `store/`. Do not symlink a scratch `node_modules` in a way that writes into `store/node_modules/.vite` (round-89 housekeeping note). Set `cacheDir` to the scratch folder or use `--no-cache`.
+  - A mismatch (another HEAD, a dirty tree at start, a changed frozen file) means stop and report.
 
 ## 1. What changes (A)
 
-### G1 — new pure module `app/lib/arrangement/dialog-tab-stops.ts`
-Export exactly these two functions. Use no type assertions; narrow with `instanceof HTMLInputElement` and `.type === 'radio'`.
-- `groupDialogTabStops(focusable: readonly HTMLElement[]): HTMLElement[][]`
-  - Each element of `focusable` lands in exactly one stop, keeping input order.
-  - A radio input with a **non-empty `name`** joins the stop of the first earlier radio with the same `name` in the list.
-  - Every other element, including a radio with an empty name, is its own stop.
-  - Stops are ordered by the position of their first member.
-  - An empty input gives an empty array.
-- `dialogTabStopFocusTarget(stop: readonly HTMLElement[]): HTMLElement | null`
-  - Returns the member that is a radio with `checked === true`, if there is one.
-  - Otherwise returns `stop[0]`, and `null` for an empty stop.
-- The input is already filtered for disabled and hidden elements by the caller (`exportDialogFocusableElements`). The module does no DOM queries.
+### C1 — new module `app/lib/arrangement/export-cancel.ts`
+Export exactly these names. No `any`, no assertions.
+- `ARRANGEMENT_EXPORT_CANCELLED_MESSAGE` = `ექსპორტი გაუქმდა — ფაილი არ შეიქმნა.`
+- `ARRANGEMENT_EXPORT_CANCELLED_ENCODER_MESSAGE` = `ექსპორტი გაუქმდა — ფაილი არ შეიქმნა. MP3 encoder შემდეგ MP3 ექსპორტზე თავიდან ჩაიტვირთება.`
+- `class ArrangementExportCancelledError extends Error`: `name = 'ArrangementExportCancelledError'`, default message `Export cancelled`.
+- `isArrangementExportCancelledError(error: unknown): error is ArrangementExportCancelledError`
+- `raceArrangementExportAbort<T>(work: Promise<T>, signal?: AbortSignal): Promise<T>` behaves as follows:
+  - With no signal, it returns `work` unchanged.
+  - With an already-aborted signal, it rejects with `ArrangementExportCancelledError`.
+  - Otherwise it settles like `work`, or rejects with `ArrangementExportCancelledError` as soon as the signal aborts, whichever comes first.
+  - It removes its abort listener once it settles.
+  - It attaches a no-op catch to `work`, so a late rejection is not an unhandled rejection.
 
-### G2 — `ArrangementExportDialog.tsx`: the Tab handler works on stops
-In `handleDialogTabKey` only:
-- After `const focusable = exportDialogFocusableElements(content);`, compute `const stops = groupDialogTabStops(focusable);`. Take `firstStop = stops[0]` and `lastStop = stops[stops.length - 1]`. If either is missing, return, as today.
-- When `active` is **not** in `focusable`: `preventDefault`, then focus `dialogTabStopFocusTarget(event.shiftKey ? lastStop : firstStop)`. This is today's branch, made stop-aware.
-- **Shift+Tab** with `active` in `firstStop` (`firstStop.includes(active)`): `preventDefault`, then focus `dialogTabStopFocusTarget(lastStop)`.
-- **Tab** with `active` in `lastStop`: `preventDefault`, then focus `dialogTabStopFocusTarget(firstStop)`.
-- If `dialogTabStopFocusTarget` returns `null` (unreachable with a non-empty stop), return without `preventDefault`.
-- Every other Tab: do **not** call `preventDefault`; native order stays. The frozen tests depend on this: "intercepts Tab only at the ends".
-- Nothing else changes: the selector, `exportDialogFocusableElements` (stays module-private), the opener-restore, initial-focus and footer-guard effects, the radios, the disabled rules, texts and layout. **The format radios stay enabled during a render** (D-29z52; frozen test l.458–478).
+### C2 — `graph.client.ts`: the render honours a signal, and a resume error fails the render
+- `ArrangementRenderOptions` gains an optional `signal?: AbortSignal`. Every existing caller keeps compiling and behaving the same.
+- In `renderArrangementWav`:
+  - If `signal?.aborted` at entry, reject with `ArrangementExportCancelledError` **before** constructing an `OfflineAudioContext`.
+  - Schedule suspend points when `onProgress` **or** `signal` is given.
+  - At a suspend point with `signal.aborted`, do **not** call `ctx.resume()`. The context stays suspended and is dropped.
+  - `startRendering()` is raced against the abort (`raceArrangementExportAbort`).
+  - **GATE89-S1:** a rejected `ctx.resume()` must reject `renderArrangementWav` with that error. Today `.catch(() => undefined)` swallows it and the dialog stays stuck in a render with Close disabled. A rejected `suspend()` stays ignored, as today.
+  - Pass the signal to `encodeArrangementWavOffMainThread`.
+- **Honest limitation (write it in doc 078):**
+  - Cancel takes effect at the next suspend point, at most 1/20 of the render length.
+  - Where `suspend` is missing (Firefox) the render runs to its end in the background and the result is discarded.
+  - In both cases the UI state is immediate and no file is created.
+  - Whether Chromium frees a suspended-and-dropped `OfflineAudioContext` render buffer before page unload is **unverified**. Record it as a hypothesis, not a fact.
 
-**Resulting behaviour (the contract C checks):**
-- During a render the stops are [X] and [format group].
-  - Tab from the checked format radio → X.
-  - Tab from X → the checked radio (native).
-  - Shift+Tab from X → the **checked** format radio, not `both`. That is where native Shift+Tab into a radio group lands.
-  - Shift+Tab from the checked radio → X (native).
-  - Tab or Shift+Tab from the focus-trap wrapper → X / the checked radio.
-- Idle stays as today: X → checked format → checked enabled scope → Close → Export → (wrap) X; reverse with Shift+Tab.
+### C3 — `export-wav.client.ts`: the worker honours a signal
+`encodeArrangementWavOffMainThread(channels, sampleRate, onProgress?, signal?)`:
+- If the signal is already aborted, reject with `ArrangementExportCancelledError` and construct **no** Worker.
+- If the signal aborts while the worker runs, call `worker.terminate()` and reject with `ArrangementExportCancelledError`. A later worker message is ignored.
+- Remove the abort listener on every terminal path (complete, fail, abort).
+- The no-Worker fallback checks the signal before it encodes.
+- Every existing path, message and the transfer list stay byte-identical.
 
-**Rejected alternatives (recorded in D-29z54):**
-- **Disable the format radios during a render.** This contradicts D-29z52/GATE86-S4, would turn the frozen test l.458–478 red (it keeps focus on a format radio through a render start), and leaves the bug for any future dialog layout.
-- **A `focusout`/`relatedTarget` guard.** `relatedTarget` is also `null` on a window blur (Alt-Tab), so it would pull focus back wrongly.
-- **Handle every Tab in JS.** It breaks the frozen "only at the ends" tests, and it re-implements browser order.
-- **Extract a `useExportDialogFocus` hook now.** That is an architecture checkpoint question (see §6), not part of a bug fix.
+### C4 — `ArrangementContext.tsx`: `cancelExport`, a run token, abort on unmount, and the L5 reset
+- **Types and value:**
+  - `ArrangementExportPhase` gains `'cancelled'`.
+  - The context value and interface gain `cancelExport: () => void`.
+- **Run token:** add `exportAbortRef = useRef<AbortController | null>(null)`. `exportWav` and `exportMp3`, right where they set the `rendering` state:
+  - abort any previous controller;
+  - create a new controller, store it in the ref, and pass `signal` in `renderOptions`.
+- **After every `await`** in both exports:
+  - if `signal.aborted`, return without `setExportState` and without any download;
+  - this includes the `catch` blocks, so **cancelled always wins over a later error**;
+  - the abort check sits immediately before the anchor/download loop, so a WAV + MP3 export never delivers one file of two.
+- **`finally`:** clear the progress and the ref **only** if `exportAbortRef.current === controller`. A cancelled run must not clear the progress of a newer export.
+- **`cancelExport()`:**
+  - If there is no controller or it is already aborted, do nothing.
+  - Otherwise, read `exportProgress.getProgress()?.phase` first. Then abort, set the ref to `null` and clear the progress.
+  - Then `setExportState({ phase: 'cancelled', message })`. `message` is `ARRANGEMENT_EXPORT_CANCELLED_ENCODER_MESSAGE` when the phase read was `'load'` or `'mp3'`, and `ARRANGEMENT_EXPORT_CANCELLED_MESSAGE` otherwise.
+- **Encoder on abort, in `exportMp3`:** from the moment it enters the load phase until `encode` settles, an abort calls `resetArrangementMp3Encoder()` **exactly once**.
+  - If the module is already imported, reset at the moment of the abort.
+  - If the import resolves after the abort, the import's `.then` resets it and returns `null` (the same as the timeout path).
+  - The load-failure `catch` must not reset a second time after a cancel.
+  - A cancel during the **render** phase of an MP3 export does not reset the encoder. A cached encoder from an earlier export stays.
+- **Load race:** race the load against the abort as well, so a cancel during a hanging import or load ends the export at once.
+- **Unmount (A-R86-L2):** the provider's unmount cleanup calls `exportAbortRef.current?.abort()`. That stops the render, the worker or the encoder (through the listener above). It downloads nothing and writes no state.
+- **L5 (A-R87-L5):** when `encoder.encode` rejects (not a cancel), call `encoderSlot.module?.resetArrangementMp3Encoder()` before writing the existing conversion-failure message. B checked: frozen PU2 and MX7 assert nothing about the reset count after a conversion failure.
+- **Nothing else changes.** All existing messages, the 120 s timeout, file names, guards and the order of state writes in the successful paths stay exactly the same.
+
+### C5 — `ArrangementExportDialog.tsx`: the Cancel button
+- **When rendering:** render one more button in the footer button row, **before** დახურვა:
+  - `type="button"`, `data-testid="arrangement-export-cancel"`, text `გაუქმება`, `onClick={cancelExport}`;
+  - the same classes as დახურვა (no new colours).
+  - It exists **only** while `isRendering`.
+- **Status message:** in the `cancelled` phase it keeps `role="status"` (not `alert`) and gets `text-muted`.
+- **Unchanged:**
+  - Escape and დახურვა do nothing during a render (`handleClose` early return). That is the chosen contract: Escape does not cancel, and the explicit button does.
+  - The initial-focus effect stays as it is. During a render, focus goes to the trap wrapper and does **not** jump to Cancel; frozen focus l.428 pins this.
+  - After a cancel, the Cancel button disappears and the existing effect moves focus to დახურვა.
+  - Format radios stay enabled during a render (D-29z52).
+  - The Tab handler, selector, footer guard, texts and layout stay the same.
+- **Resulting Tab contract during a render:** the stops are [X], [format group], [Cancel].
+  - Tab from X → checked radio (native).
+  - Tab from the checked radio → Cancel (native, not prevented).
+  - Tab from Cancel → X (prevented, wrap).
+  - Shift+Tab from X or from the trap wrapper → Cancel (prevented).
+  - Shift+Tab from Cancel → checked radio (native).
 
 ### Docs
-- **Doc 077:**
-  - Change l.4 to exactly:
-
-    ```text
-    **სტატუსი:** Round 89 — C round 88: sticky footer PASS (R87-PROGRESS-BELOW-FOLD-1280); ძველი Tab-trap ბაგი R88-FOCUS-ESCAPE-RENDER გასწორდა radio-ჯგუფის Tab stop-ებით, C-ის შემოწმებას ელოდება (D-29z54)
-    ```
-
-  - Add one Problem → Solution entry under `## პრობლემები და გადაწყვეტები`: native radio groups are one Tab stop, so the element-based trap missed them during a render; it is now stop-based.
-  - Add one line under `## შეცვლილი ფაილები` (the dialog + the new module) and one under `## ტესტირება` (the new test file).
-  - No other change.
-- No new implementation doc. The fix completes stage 3a, which doc 077 documents.
+- New `docs/implementation/2026/quarter-IV/078-studio-lab-export-cancel.md`, written per `docs/implementation/TEMPLATE.md` (Georgian; every section).
+  - Status line: `**სტატუსი:** Round 90 — C-ის შემოწმებას ელოდება (D-29z55)`.
+  - It records:
+    - the phase mechanics: render suspend, worker terminate, encoder reset;
+    - the limitation in C2;
+    - Escape does not cancel;
+    - GATE89-S1 and L5;
+    - 3b-2 as the next step.
 
 ### Files (exact grants)
 | File | Grant |
 |---|---|
-| `app/lib/arrangement/dialog-tab-stops.ts` | **new** (G1) |
-| `app/components/arrangement/ArrangementExportDialog.tsx` | G2 only: one import and the body of `handleDialogTabKey` |
-| `app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx` | **new** |
-| `docs/implementation/2026/quarter-IV/077-studio-lab-export-progress-and-worker.md` | l.4 + the three additions above |
+| `app/lib/arrangement/export-cancel.ts` | **new** (C1) |
+| `app/lib/arrangement/graph.client.ts` | C2 only: `ArrangementRenderOptions`, `scheduleArrangementRenderProgress`, `renderArrangementWav` |
+| `app/lib/arrangement/export-wav.client.ts` | C3 only |
+| `app/contexts/ArrangementContext.tsx` | C4 only: export types, `exportAbortRef`, `exportWav`, `exportMp3`, `cancelExport`, the unmount cleanup, the value object and interface |
+| `app/components/arrangement/ArrangementExportDialog.tsx` | C5 only |
+| `app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx` | **TR1–TR5** titles and bodies, amended as in §1 Tests below, plus any small helper they need (e.g. `cancelButton(dialog)`). The TS1, TS2 and TR6 test bodies stay byte-identical |
+| `app/lib/arrangement/__tests__/export-cancel.test.ts` | **new** |
+| `app/lib/arrangement/__tests__/export-cancel-ui.test.tsx` | **new** |
+| `docs/implementation/2026/quarter-IV/078-studio-lab-export-cancel.md` | **new** |
 
-**Expected end state: 7 M + 13 ??.** The status gains exactly two lines: `?? app/lib/arrangement/dialog-tab-stops.ts` and `?? app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx`. All 506 frozen entries stay unchanged.
-- If any frozen test turns red, **stop and report**; do not edit it. Watch especially:
-  - `export-dialog-focus.test.tsx`, `export-dialog-focus-restore.test.tsx` (HD1–HD3), `export-dialog-footer.test.tsx` (FT3);
-  - `export-range-ui`, `export-mp3`, `export-progress-ui`, `master-ui`, `video-fades-ui`.
-- B walked the frozen focus tests against G2:
-  - l.266: the last stop is Export;
-  - l.292: the empty project's last stop is Close;
-  - l.428: Tab from the trap during a render goes to X;
-  - l.480: Shift+Tab from the trap in idle goes to Export;
-  - l.531: per control, only the ends are prevented, and the format group is stop 2 of 5;
-  - HD1–HD3: the filter is unchanged.
+**Expected end state: 5 M + 4 ??**, and all 505 frozen entries unchanged.
+- If any frozen test turns red, **stop and report**; do not edit it.
+- B walked the frozen tests against C1–C5 and expects all of them to stay green:
+  - **focus l.428:** focus stays on the trap during a render; Tab from the trap goes to X (first stop).
+  - **focus l.458:** a focused format radio keeps focus.
+  - **focus l.480 and l.531:** these are idle tests, and nothing changes in idle.
+  - **footer FT2:** the busy button's parent is still the button row.
+  - **PU1–PU5:** the options object only gains `signal`; reset counts are unchanged without a cancel.
+  - **MX1–MX7 and MP-***: messages are unchanged.
+  - **export-wav tests:** a 3-argument call is unchanged.
 
-  B expects all of them to stay green.
-
-### Required tests (`export-dialog-tab-stops.test.tsx`; IDs for C to cite)
-Copy the mount harness and `ControlledOfflineAudioContext` from `export-dialog-focus.test.tsx`. Do not import from a test file. Starting an MP3 export in jsdom (TR2/TR4): the controlled `OfflineAudioContext` blocks in the render phase, before the encoder import. If the MP3 button needs extra globals, use the mount pattern from `export-progress-ui.test.tsx`. jsdom does not move focus on Tab, so the UI tests dispatch `keydown` Tab and assert `defaultPrevented` and `document.activeElement`. Write that limitation in the describe name.
-- **TS1** `groupDialogTabStops`:
-  - [button, radio a/x, radio a/y, radio b/z, button] → 4 stops, with a/x and a/y together;
-  - two radios with an empty name → two stops;
-  - same-name radios separated by a button → still one stop, at the first radio's position;
-  - an empty list → `[]`.
-- **TS2** `dialogTabStopFocusTarget`:
-  - the checked radio wins even when it is not first;
-  - no checked radio → the first member;
-  - a single button → that button;
-  - an empty stop → `null`.
-- **TR1** render, WAV checked (the default): start a WAV export with the controlled renderer.
-  - Focus `format-wav` and press Tab: prevented, focus goes to X.
-  - Then focus `format-mp3` (unchecked, same group) and press Tab: prevented, focus goes to X.
-- **TR2** render, MP3 checked: select MP3, start, focus `format-mp3`, press Tab: prevented, focus goes to X.
-- **TR3** render, WAV + MP3 checked: Tab from `format-both`: prevented, focus goes to X. This is the regression guard for C's V3.
-- **TR4** render, MP3 checked: Shift+Tab from X: prevented, focus goes to `format-mp3`, the checked radio, **not** `both`. Shift+Tab from the trap wrapper also goes to `format-mp3`.
-- **TR5** render: Shift+Tab from `format-wav` (checked) is **not** prevented. Tab from X is **not** prevented. Both are native middle moves.
-- **TR6** idle (no render): Tab from the checked format radio and from the checked scope radio is **not** prevented. Tab from Export is prevented and goes to X. Shift+Tab from X is prevented and goes to Export. This guards against over-trapping.
+### Required tests (IDs for C to cite)
+- **`export-cancel.test.ts`** (unit; fakes copied from `export-wav.test.ts`, never imported from a test file):
+  - **EC1 `raceArrangementExportAbort`:** no signal → the same promise result; pre-aborted → cancelled error; abort mid-flight → cancelled error even though `work` resolves later; `work` rejects first → that error; the listener is removed after settle (spy on `removeEventListener`); a late `work` rejection after an abort raises no unhandled rejection.
+  - **EC2 render abort:**
+    - pre-aborted signal → rejects cancelled, and the `OfflineAudioContext` constructor is not called;
+    - abort before the first suspend resolves → `resume` is never called after that point, and the promise rejects cancelled;
+    - abort after `startRendering` resolved but before the worker → no Worker is constructed.
+  - **EC3 GATE89-S1:** a fake context whose `resume()` rejects with `Error('resume failed')` → `renderArrangementWav` rejects with that message, within the test (no hang). A rejected `suspend()` alone still renders.
+  - **EC4 worker abort:**
+    - pre-aborted → no Worker constructed;
+    - abort mid-encode → `terminate` called once, rejects cancelled, and a later `complete` message changes nothing;
+    - the listener is removed on complete;
+    - a 3-argument call behaves exactly as before.
+- **`export-cancel-ui.test.tsx`** (provider + dialog; mount and mocks copied from `export-progress-ui.test.tsx`, with `renderArrangementWav` and `mp3-encoder.client` mocked and the mock capturing `options.signal`):
+  - **CU1 render-phase cancel, WAV:**
+    - The Cancel button exists only while rendering.
+    - Click → state `{ phase: 'cancelled', message: ARRANGEMENT_EXPORT_CANCELLED_MESSAGE }`, `role="status"`, progress `null`, Cancel gone, დახურვა enabled and focused, and the captured signal is aborted.
+    - Then resolve the mock render late → 0 downloads and the state is still cancelled.
+  - **CU2 cancelled wins over a late error:** cancel, then reject the mock render → the state is still cancelled, not an error.
+  - **CU3 load-phase cancel, MP3:**
+    - Use the import gate or a hanging `loadArrangementMp3Encoder`. Cancel → the encoder message and `resetEncoderMock` called **exactly once**.
+    - Releasing the gate or load later adds no reset, no `encode` and no download.
+    - The next MP3 export loads again and downloads `czaba-studio-lab.mp3` with the exact MP3 done message.
+  - **CU4 mp3-phase cancel, WAV + MP3:** `encode` pending → Cancel → the encoder message and reset once. Resolving `encode` later → **0 downloads** (no `.wav` either).
+  - **CU5 render-phase cancel of an MP3 export:** the plain message, and `resetEncoderMock` **not** called.
+  - **CU6 new export after a cancel:** cancel, start a new WAV export at once, then settle the **old** mock render → the new export's progress is not cleared and the old run writes nothing. The new export completes normally.
+  - **CU7 unmount:** unmount the provider during the mp3 phase → the signal is aborted, reset once, and resolving `encode` later gives 0 downloads and no React warning. Repeat during the render phase (signal aborted, 0 downloads).
+  - **CU8 L5:** `encode` rejects → `resetEncoderMock` once, plus the unchanged conversion-failure message. The next MP3 export loads again.
+  - **CU9 keyboard:** jsdom does not move focus on Tab, so dispatch `keydown`. During a render the focusable list is [X, wav, mp3, both, Cancel]. Enter or click on the focused Cancel → focus on დახურვა. Escape during a render leaves the export running (no cancel).
+- **`export-dialog-tab-stops.test.tsx` amendments (TR1–TR5 only):**
+  - **TR1** (WAV checked): Tab from `format-wav` and from the unchecked `format-mp3` is **not** prevented. Tab from Cancel is prevented and goes to X.
+  - **TR2** (MP3 checked): Tab from `format-mp3` is not prevented. Tab from Cancel → X.
+  - **TR3** (WAV + MP3 checked): Tab from `format-both` is not prevented. Tab from Cancel → X.
+  - **TR4:** Shift+Tab from X and from the trap wrapper → Cancel (prevented).
+  - **TR5:** keep the existing checks, and add "Shift+Tab from Cancel is not prevented".
+  - Update the test titles to match. TS1, TS2 and TR6 stay byte-identical.
 
 **Mutation proofs** (scratch copy; each must turn at least one listed test red):
-- (a) the dialog goes back to element-based `last` (`active === last`) → TR1/TR2;
-- (b) the helper groups radios by type only, ignoring `name` → TS1;
-- (c) the target is always `stop[0]` → TS2/TR4;
-- (d) the Shift path stays element-based → TR4;
-- (e) every Tab is prevented and moved to the next stop (over-trap) → TR5/TR6;
-- (f) the not-in-focusable branch ignores stops (focuses `last` element) → TR4 (trap wrapper part).
+
+| ID | Mutation | Expected red |
+|---|---|---|
+| a | `cancelExport` sets the state but does not abort | CU1, CU3 |
+| b | no `signal.aborted` check before downloads | CU1, CU4 |
+| c | the suspend point always resumes | EC2 |
+| d | the worker ignores the signal | EC4 |
+| e | no encoder reset on abort | CU3, CU4 |
+| f | the load `catch` writes its error after a cancel | CU2 or CU3 |
+| g | `finally` clears the progress unconditionally | CU6 |
+| h | no unmount abort | CU7 |
+| i | L5 reset removed | CU8 |
+| j | resume rejection swallowed again | EC3 |
+| k | Cancel rendered outside a render | CU1 |
+| l | Tab trap reverted to the round-89 two-stop expectation | TR1, TR4 |
 
 ## 2. Pre-flight for A
-- **Primitives:** `AGENT_DISCOVERABLE_CODE.md` (two new exports), `FORWARDREF_COMPONENT.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`.
-- **Prompts:** `new-test.md`, `studio-feature.md`.
-- **Verify the baseline before the first edit:** HEAD; 7 M + 11 ??; frozen 506/506; the snapshots; LF/CR.
+- **Primitives:** `AGENT_DISCOVERABLE_CODE.md` (new exports), `AUDIO_ARCHITECTURE.md`, `REACT_CONTEXT.md`, `FORWARDREF_COMPONENT.md`, `DESIGN_TOKENS.md` + `TAILWIND_FIRST.md` (a button), `ERROR_TAXONOMY.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`.
+- **Prompts:** `studio-feature.md`, `new-test.md`.
+- **Verify the baseline before the first edit:** HEAD; clean status; frozen 505/505; the snapshots; LF/CR.
 - **Checks (speed rules):**
-  - `npm run typecheck`, `npm run lint`, and a scoped `npx biome check` on the three owned code files (no `--write`).
-  - Targeted vitest: the new test, plus every file in `a-round-88/targeted-list.txt` (it already holds the three dialog focus/footer tests, the export tests, and every importer of `ArrangementExportDialog` or `StudioWorkspace`).
-  - Write the list to `a-round-89/targeted-list.txt`. Do not run the full suite.
-- **A's own Playwright smoke at 1280×720 and 1440×900** (not C evidence). On a fresh page with the 5M recipe and a WAV export, log `document.activeElement` after each of 6 Tabs and 4 Shift+Tabs pressed while the busy button reads `მიმდინარეობს…`.
-- **Code-reviewer: required.** You change 4 files. Pass its Architecture note to B verbatim. The root gate's reviewer does not replace yours.
+  - Run `npm run typecheck`, `npm run lint`, and a scoped `npx biome check` on the owned code files (no `--write`).
+  - **Targeted vitest:** every file in `a-round-89/targeted-list.txt`, plus the two new files, plus every test that imports `graph.client`, `export-wav.client` or `export-cancel` (grep).
+  - Write the list to `a-round-90/targeted-list.txt`. Do not run the full suite.
+- **A's own Playwright smoke at 1280×720 and 1440×900** (not C evidence): 5M WAV, cancel in the render phase; 5M MP3, cancel in the mp3 phase; record the message, downloads and focus.
+- **Code-reviewer: required** (9 files). Pass its Architecture note to B verbatim.
 
 ## 3. File ownership (exact)
 - **A** owns only the §1 Files table.
-- **C** owns `c-round-89*`.
+- **C** owns `c-round-90*`.
 - **B** owns the planning artifacts.
 - **Root** owns gates, commits and pushes.
 - **Protected (never edited):**
   - `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/lib/__tests__/download-routes.test.ts`;
-  - the auth files (`app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/lib/firebase.client.ts`);
-  - for this loop, `app/contexts/StudioContext.tsx`, `app/utils/ffmpeg.ts` and the shared `app/components/ui/Modal.tsx`.
+  - the auth files: `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/lib/firebase.client.ts`, `app/types/auth.ts`;
+  - for this loop: `app/contexts/StudioContext.tsx`, `app/utils/ffmpeg.ts`, `app/components/ui/Modal.tsx` and `app/lib/arrangement/mp3-encoder.client.ts`.
 - **`/studio-lab`** stays the public **demo-only** workspace:
   - it shows the demo badge;
   - it has no purchased audio and makes no token/R2 requests;
@@ -179,64 +238,70 @@ Copy the mount harness and `ControlledOfflineAudioContext` from `export-dialog-f
   - user video stays local.
 
 ## 4. Ableton source table
-**Not applicable.** This is keyboard accessibility of CZABA's own modal. B makes no claim about Live's Export dialog.
-- The "a radio group is one Tab stop" behaviour is **Chromium's own behaviour, observed by C** in round 88 (`keys88-*.json`), not an Ableton fact.
-- The round-87 §4 rows are carried unchanged (`tasks/round-87.md` §4).
+| Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
+|---|---|---|---|---|
+| Cancel during an export | Live 12 Reference Manual, "Managing Files and Sets" §5.1.3.5 Real-Time Rendering, `https://www.ableton.com/en/live-manual/12/managing-files-and-sets/`. B fetched it on 2026-10-22 and stored it as untrusted text: `b-round-84/web/managing-files.txt` l.281 | The Cancel button "stop[s] the process completely and delete[s] any partially rendered file". **Confirmed for real-time rendering only.** | CZABA offers Cancel in every offline phase and never writes a partial file: no download happens before the last phase. Whether Live's **offline** render has a Cancel is **unconfirmed** (not stated in §5.1.3.4/5.1.3.5), so B makes no claim that "Live cancels offline exports the same way" | CX-RENDER, CX-LOAD, CX-MP3, CX-BOTH: match status = **unconfirmed** for offline; **confirmed** only for "Cancel deletes partial output" |
+| Progress bar while exporting | same manual, §5.1.3.4 l.248 and §5.1.3.5 | A progress bar in the dialog for video and real-time rendering | Carried from round 87 (`tasks/round-87.md` §4) | not re-checked |
+| Escape during an export | none found | — | **CZABA contract:** Escape does nothing during a render; only the button cancels. This prevents an accidental cancel. It is not an Ableton claim | CX-ESC |
+| Encoder reload after a cancel | not applicable (CZABA's ffmpeg.wasm) | — | A cancel in the load or mp3 phase terminates the encoder, so the next MP3 fetches the core again. The message says so | CX-LOAD, CX-MP3, PX-NET |
 
-## 5. C acceptance (real browser, Playwright Chromium, **both 1440×900 and 1280×720** unless the row says otherwise, `/studio-lab` anonymous, real keyboard)
+## 5. C acceptance (real browser, Playwright Chromium, **both 1440×900 and 1280×720** unless the row says otherwise, `/studio-lab` anonymous)
 
 **Setup:**
 - Check `env-status.json` and that `:5173` returns 200. Do one warm-up load.
-- Use the round-88 demo setup: music 0.35 s, stem 2 s, sfx 4 s, snap off. **5M** = click the music clip, then press Ctrl+D twice. Each TRAP session starts on a **fresh page**, which is the condition under which round 88 escaped.
-- **HR-RENDERING:** a keypress counts only if the busy button reads `მიმდინარეობს…` just before **and** just after it. Record that per press. A sequence cut short by render end is harness-invalid; repeat it within the run budget, and do not count it as PASS.
+- Use the round-88/89 demo setup.
+  - **5M** = click the music clip, then press Ctrl+D twice (`05:04.406`).
+  - **10M** = click the music clip, then press Ctrl+D five times (≈ 10:08). Use it only if a render-phase click cannot land on 5M. If the 10M tab runs out of memory, record it as GATE89-S2 evidence (extra float copy, 3b-2), not a round-90 FAIL.
+- **HR-PHASE:** a Cancel click counts only if the progress label just before the click shows the named phase:
+
+  | Phase | Label |
+  |---|---|
+  | render | `რენდერი · N%` with N < 100 |
+  | wav | `WAV-ის ჩაწერა · N%` |
+  | load | `MP3 encoder-ის ჩატვირთვა…` |
+  | mp3 | `MP3-ის შექმნა · N%` |
+
+  Record the label per click. A click that lands in another phase is harness-invalid, not a FAIL. The budget per row is three valid attempts plus two extra.
+- **Downloads:** listen for downloads for **15 s** after every cancel (longer than the 7.5 s conversion).
 
 | ID | Action | Pass evidence |
 |---|---|---|
-| TRAP-WAV (primary) | Fresh page, 5M, WAV (default): keyboard opens Export, Tab to the export button, Enter. During the render press Tab ×6, then Shift+Tab ×4 | After every press `document.activeElement` is inside the dialog: never `BODY`, `arrangement-exit`, Master Mute or Master Volume. Tab sequence: X, `format-wav`, X, `format-wav`, X, `format-wav` (the first press may start from the trap wrapper → X). Shift+Tab from X goes to `format-wav`, the checked radio. URL unchanged, transport stopped, Master Volume value unchanged. `.wav` downloads |
-| TRAP-MP3 | Fresh page, 5M, ArrowDown to MP3, export; during the render (including the load phase) Tab ×6, Shift+Tab ×4 | Same as TRAP-WAV with `format-mp3`. `.mp3` downloads |
-| TRAP-BOTH (1440) | Fresh page, 5M, WAV + MP3 | Tab ×6 stays inside, X ↔ `format-both` (C's V3 still passes). Shift+Tab from X goes to `format-both` |
-| PX-KEYS-R2 | C's round-88 V1 exactly: range 4–9 s, **first** MP3 of the session, Enter / ArrowDown / Tab / Enter, then 3 Tabs | All 3 Tabs stay in the dialog. The `<progress>` never takes focus. `.mp3` downloads. Escape after done returns focus to toolbar Export |
-| IDLE-ORDER | No render: Tab around once, Shift+Tab around once | X → checked format → checked enabled scope → Close → Export → X, and the exact reverse. Same as rounds 87/88 |
-| FOCUS-NOT-OBSCURED-R | Three states: idle, during a 5M render, done with the overload warning (101.702 s) | Each focused element outside the footer has `rect.bottom ≤ footer.top`, and focus never leaves the dialog in **any** state |
-| VIS-RENDER-S (1280) | One 5M MP3 export | Label, `<progress>` and busy button are HR-VISIBLE (round-88 definition) in each phase. `scrollTop` is unchanged by the click (sanity only: the layout code is unchanged) |
-| PX-NET | All sessions | No unpkg request before the first MP3 click; then only `ffmpeg-core.js`/`.wasm`; workers same-origin; 0 studio-token / R2 / download requests; 0 auth headers |
+| CX-RENDER (primary) | 5M (or 10M), WAV, Export; Cancel in the **render** phase | Within 500 ms the footer status reads exactly `ექსპორტი გაუქმდა — ფაილი არ შეიქმნა.` (`role="status"`, not `alert`). `<progress>` and label are gone, Cancel is gone, დახურვა is enabled, and the Export button reads `WAV-ის ექსპორტი` and is enabled. **0 downloads** in 15 s. Then Export again → one `.wav`: RIFF, 24-bit/48k/2ch, frames `ceil(304.406 × 48000)` for 5M, and the exact WAV done message |
+| CX-WAVPHASE | Same, with Cancel in the **wav** phase | Same evidence as CX-RENDER. If no valid click lands in 5 attempts on 5M or 10M, report **not reachable** with the label timeline. That is not a FAIL; unit EC4 covers the worker |
+| CX-LOAD | Fresh page, 5M, MP3. Route `unpkg.com` so that it **never responds**, Export, Cancel in the **load** phase | Exact status `ექსპორტი გაუქმდა — ფაილი არ შეიქმნა. MP3 encoder შემდეგ MP3 ექსპორტზე თავიდან ჩაიტვირთება.` 0 downloads in 15 s, no `alert`. Then remove the route and export MP3 again → one `.mp3` that decodes to 304.406 ± 0.1 s, with the exact MP3 done message. The core is fetched again from unpkg (expected) |
+| CX-MP3 | 5M, MP3 (encoder loaded or loading), Cancel in the **mp3** phase | The encoder message, 0 downloads in 15 s, and the next MP3 export succeeds (`.mp3`, exact message). Record the cancel's `MP3-ის შექმნა · N%` |
+| CX-BOTH (1440) | 5M, WAV + MP3, Cancel in the **mp3** phase | The encoder message, and **neither** `.wav` **nor** `.mp3` in 15 s |
+| CX-MP3-RENDER (1440) | MP3 after a completed MP3 in the same page (encoder cached), Cancel in the **render** phase | The **plain** message (no encoder sentence). The next MP3 makes **no** new unpkg request (the cached encoder is kept) and succeeds |
+| CX-KEYS | Keyboard only: open Export, Tab to the export button, Enter, during the render Tab to Cancel, Enter (HR-RENDERING per press; use 10M if 5M ends first) | The cancelled message; `document.activeElement` is დახურვა; then Escape closes the dialog and focus returns to the toolbar Export |
+| TRAP-CANCEL | Fresh page, 5M, WAV, keyboard start; during the render Tab ×6, then Shift+Tab ×4 (HR-RENDERING from round 89: the busy button reads `მიმდინარეობს…` before and after each press) | Never outside the dialog. Tab sequence: (trap wrapper →) X → `format-wav` → Cancel → X → `format-wav` → Cancel. Shift+Tab from X → Cancel; from Cancel → `format-wav`. Do not press Enter on Cancel here; the export completes and `.wav` downloads |
+| CX-ESC | 5M WAV; during the render press Escape twice | The dialog stays open and the export completes with the normal done message and one `.wav` (Escape does not cancel) |
+| CX-UNMOUNT | Warm up `/` once in a separate context first (ENV-VITE-REOPTIMIZE-RELOAD: a first visit of a non-lab route can reload every tab). 5M MP3; in the **mp3** phase set `window.__cx = 1`, then DOM-click `[data-testid="arrangement-exit"]` with `element.click()` (a client navigation; it sits behind the modal) | The URL leaves `/studio-lab` **and `window.__cx === 1` afterwards** (no full reload; otherwise the attempt is harness-invalid). **0 downloads** in 15 s. No non-noise console error. Repeat once in the **render** phase of a WAV export: 0 downloads |
+| CX-DONE-REG | One complete 5M WAV and one complete MP3 without a cancel | The done messages and files are as in rounds 87/89. No Cancel button after done. Focus stays inside |
+| PX-NET | All sessions | No unpkg request before the first MP3 click. Then only `ffmpeg-core.js`/`.wasm`, **including the expected re-fetch after a load/mp3 cancel**. Workers are same-origin. 0 studio-token / R2 / download requests and 0 auth headers |
 | REG-HYD | All sessions | No hydration / `useLayoutEffect` warning and no non-noise console error |
-| G89-3 | Purchase protection | `/studio/middle-east` anonymous → sign-in required, no workspace. `/api/studio-token?…` anonymous → 401. The header link opens `/studio-lab` with the demo badge. Fake-Bearer 403 → BLOCKED if the backend is unavailable |
-| T89-TARGETED | A's `a-round-89/targeted-list.txt` | All pass |
-| SOURCE-UNCHANGED | Start = end | HEAD `971141d`; 7 M + 13 ??; frozen 506/506; A's end hashes; `Modal.tsx` = `741c2341`; `ffmpeg.ts` = `0995ae78`; StudioContext `caa388e7` |
+| G90-3 | Purchase protection | `/studio/middle-east` anonymous → sign-in required, no workspace. `/api/studio-token?…` anonymous → 401. The header link opens `/studio-lab` with the demo badge. Fake-Bearer 403 → BLOCKED if the backend is unavailable |
+| T90-TARGETED | A's `a-round-90/targeted-list.txt` | All pass |
+| SOURCE-UNCHANGED | Start = end | HEAD `eb1d0c0`; 5 M + 4 ??; frozen 505/505; A's end hashes; `Modal.tsx` = `741c2341`; `ffmpeg.ts` = `0995ae78`; StudioContext `caa388e7`; `mp3-encoder.client.ts` `ddb70919` |
 
-- **Why the regression scope is reduced:** only the Tab handler changes, and the layout is untouched. Round 88's VIS-IDLE, VIS-SCROLL, VIS-DONE, VIS-ERROR, VIS-VIDEO, PX-PHASES-R and PX-WAV5-R stand as evidence for the footer. VIS-RENDER-S is one sanity sample.
-- **Gate rows** (`gate`, not claimed by C): full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke.
-- **Production bundle** (worker + MP3): B asks root to try it again at gate 89 (PROD-MP3-UNVERIFIED).
-- **Ableton match:** not applicable (§4).
+- **Gate rows** (`gate`, not claimed by C): full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke, and the production bundle (PROD-MP3-UNVERIFIED).
+- **Not browser-reachable** (unit only; say so, not PASS): GATE89-S1 (a rejected `resume()`), L5 (a failed conversion), and the no-`suspend` fallback.
+- **Ableton match:** report per §4, with offline Cancel as **unconfirmed**.
 - **Neighbour behaviour that could break:**
-  - Escape still closes, and focus returns to the opener;
-  - initial focus on Close when the dialog opens;
-  - focus moves to Close when a render ends (frozen l.428);
-  - a focused format radio keeps focus through render start and end (frozen l.458);
-  - the footer guard (FT4);
-  - the hidden-wrapper wraps (HD1–HD3);
-  - ArrowDown/Up inside a radio group (native; unchanged).
+  - the frozen focus rules (initial Close, focus to Close at render end, a radio keeps focus);
+  - the sticky footer (VIS rows of round 88: one VIS-RENDER sample at 1280 is enough, with Cancel in the row);
+  - the 120 s timeout message;
+  - CDN failure;
+  - range export file names;
+  - the overload warning after done.
 - **Known and intended (not new bugs):**
-  - Close stays disabled while rendering;
-  - Cancel arrives in stage 3b;
-  - changing the format mid-render does not affect the running export (GATE86-S4, rejected);
-  - the timeout text (Low R87-L-TIMEOUT-RELOAD-TEXT);
-  - the headless `<progress>` fill colour (R87-T);
-  - the 45 px idle overflow at 1280 behind the sticky footer (info, round 88).
+  - Escape does not cancel;
+  - the encoder reloads after a load/mp3 cancel;
+  - a render-phase cancel stops the CPU at the next suspend point;
+  - the WAV + MP3 note and the timeout text change in 3b-2;
+  - the headless `<progress>` colour (R87-T).
 
 ## 6. After this round
-- **If C PASS:** SRW-20 stage 3a is fully C-verified at both viewports (round 87 rows + round 88 footer + round 89 trap). Root can publish rounds 87, 88 and 89 together.
-- **Round 90:**
-  - If its planning falls on or after **2026-10-24**: a **regression round** (one short browser check per done or c_pass item at both viewports, plus `npm run test:e2e:smoke`; GATE85-S6 and C-R83-S-1280-RANGE-SHIFT are rows).
-  - Otherwise: **SRW-20 stage 3b**:
-    - Cancel in every phase, with no file, an exact cancelled message and a working next export (Cancel adds an enabled control during a render; the round-89 stop-based trap must keep it in order);
-    - abort on unmount (A-R86-L2);
-    - the WAV + MP3 delivery note (GATE86-S2);
-    - reviewer L5 (a failed conversion leaves the cached encoder).
-  - 3b completes R20-X4.
-- **Then:** the Lows batch (incl. R87-L-TIMEOUT-RELOAD-TEXT and the round-88 reviewer edge cases A-R88-EDGE-1..4) → SRW-21 → full regression → T12 → VISUAL-A-OBSIDIAN.
-- **Architecture:**
-  - The round-88 reviewer proposed a `useExportDialogFocus` hook "if another focus or scroll concern lands here". Round 89 is that trigger.
-  - It is recorded as signal ARCH-R88-EXPORT-DIALOG-FOCUS-HOOK and added to checkpoint request q14 (`b-round-83-checkpoint-request.md`). That request asks root for the bounded frontend-architect checkpoint at the SRW-20 boundary, after 3b.
-  - No extraction in this round.
+- **If C PASS:** the Cancel part of R20-X4 is C-verified. Round 91 is 3b-2, unless planning falls on or after **2026-10-24**; then round 91 is the regression round and 3b-2 follows it.
+- **SRW-20 boundary:** after 3b-2, B asks root for the bounded frontend-architect checkpoint q14 (export orchestration, dialog focus hook, export-cancel placement). It is non-blocking.
+- **Then:** the Lows batch → SRW-21 → full regression → T12 → VISUAL-A-OBSIDIAN.
+- **Architecture:** the gate-89 reviewer note (move export orchestration into `lib/arrangement/export-orchestration.ts`) is merged into ARCH-EXPORT-MP3-ORCHESTRATION / q14. Do not extract it in this round; C4 adds the abort to the existing functions.

@@ -72,3 +72,8 @@ The sticky footer passed C. C found an old Tab-trap escape during a render (R88-
 - The reviewer proposed one bounded task to extract `useExportDialogFocus` "if another focus or scroll concern lands here". Round 89 is that trigger.
 - B did not schedule the extraction inside a bug-fix round.
 - **Question:** keep, or extract `useExportDialogFocus` (with FT1–FT4, TR1–TR6 and the frozen focus-trap tests as acceptance) before or after stage 3b adds Cancel? Answer as keep/extract with value, risk and at most three sentences.
+
+## Addendum (B round 89 review, 2026-10-22) — q14 inputs
+- Gate-89 reviewer (gates/round-89/review.md Architecture note): exportMp3 ~150 lines; proposal `lib/arrangement/export-orchestration.ts` ({ getArrangement, buffers, videoSources, setExportState, progress }; invariants: exact messages, 120 s timeout, hook shape, export tests unchanged). Round 90 (3b-1) adds abort/run-token logic to the same functions without extracting.
+- A round-89 reviewer: dialog focus region changed six times; proposal `useExportDialogFocusTrap(contentRef, trapRef, closeRef, footerRef, { isOpen, isRendering })` with a DOM-only harness; `dialog-tab-stops.ts` placement under lib/arrangement (move to shared lib if a second dialog uses it); `inert`/native `<dialog>` alternative is Modal-wide.
+- Timing: requested at the SRW-20 boundary after stage 3b-2 (round 91). Non-blocking.

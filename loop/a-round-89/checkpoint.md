@@ -1,0 +1,11 @@
+# A round 89 checkpoint
+- [x] baseline verified (HEAD 971141d, 7M+11??, frozen 506/506, snapshots, CR=0)
+- [x] G1 dialog-tab-stops.ts written
+- [x] G2 handler edited
+- [x] new test 14/14; frozen focus/restore/footer green (47 total)
+- [x] mutations orig,a-f all killed (mut-*.txt)
+- [x] doc 077
+- [x] typecheck 0, lint 0, scoped biome clean, targeted 52 files / 933 tests pass
+- [x] Playwright smoke 1280/1440 WAV+MP3: 0 escapes, 40/40 valid presses (pw/smoke-output.json)
+- [x] code-reviewer (8/10, Lows addressed or reported)
+- [x] a-round-89.md written

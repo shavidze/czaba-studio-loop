@@ -1,6 +1,6 @@
 # Studio — ფუნქციების სტატუსის დაფა
 
-განახლდა: 2026-10-22 · ავტორი: B (round 88 → round 89 დაგეგმვა) · წესი: `docs/technical/studio-real-workspace/agent-workflow.md`
+განახლდა: 2026-10-22 · ავტორი: B (round 89 → round 90 დაგეგმვა) · წესი: `docs/technical/studio-real-workspace/agent-workflow.md`
 
 სტატუსები: **მზადაა** · **მუშავდება** · **მოწმდება** · **ბაგია** · **არ დაწყებულა** · **დაბლოკილია**.
 
@@ -59,7 +59,11 @@
 - Tracked `frontend-architect.md` Write/Bash-ს იძლევა.
 - Dev server: B-ის round-43 დაგეგმვისას `/studio-lab` 200 (2026-10-15 12:06), `node.exe` 15. ENV-BROWSE-DAEMON: C round 43-ში CLI-ით გაშვებული 7 daemon 60–90 წამში კვდებოდა, `about:blank`-ზე უმოქმედოდაც. მუშა გზა იყო საკუთარი `server-node.mjs` (`BROWSE_PARENT_PID=0`, ახალი state file, log). Round 44-იდან ეს **დამტკიცებული fallback-ია** ერთი წარუმატებელი CLI-მცდელობის შემდეგ. `$B restart` ისევ აკრძალულია; უცხო პროცესს არავინ კლავს.
 
-მიმდინარე რაუნდი: **Round 89** (`current-task.md`, D-29z54) — **R88-FOCUS-ESCAPE-RENDER-ის გასწორება.** Export-ის Tab-trap radio-ჯგუფს ერთ Tab stop-ად თვლის (ახალი სუფთა მოდული `dialog-tab-stops.ts`: `groupDialogTabStops`, `dialogTabStopFocusTarget`); Tab ბოლო stop-იდან → X, Shift+Tab X-იდან → მონიშნული radio; შუა Tab-ები native რჩება. ახალი `export-dialog-tab-stops.test.tsx` (TS1–TS2, TR1–TR6) + doc 077. C: TRAP-WAV / TRAP-MP3 / TRAP-BOTH ახალ გვერდზე რენდერის დროს, PX-KEYS-R2 (round 88-ის V1), IDLE-ORDER, FOCUS-NOT-OBSCURED-R, ორივე viewport-ზე. ბაზა: HEAD `971141d` + Round 87–88-ის გამოუქვეყნებელი ცვლილებები (7 M + 11 ??), გაყინული 506.
+მიმდინარე რაუნდი: **Round 90** (`current-task.md`, D-29z55) — **SRW-20 ეტაპი 3b-1: Export-ის გაუქმება ყველა ფაზაში.** Footer-ში რენდერისას ჩნდება ღილაკი „გაუქმება“: რენდერი შემდეგ suspend-წერტილზე ჩერდება, WAV worker წყდება (`terminate`), MP3 encoder-ი ერთხელ reset-დება. სტატუსი ზუსტია: „ექსპორტი გაუქმდა — ფაილი არ შეიქმნა.“ (load/mp3 ფაზაში + encoder-ის თავიდან ჩატვირთვის წინადადება). გაუქმება ყოველთვის იმარჯვებს გვიან შეცდომაზე ან ფაილზე. Provider-ის unmount-ზე abort (A-R86-L2), conversion-ის ჩავარდნისას encoder-ის reset (A-R87-L5), უარყოფილი `resume()` რენდერს შეცდომით ამთავრებს (GATE89-S1). Escape რენდერს არ აუქმებს. ახალი `export-cancel.ts`, `export-cancel.test.ts` (EC1–EC4), `export-cancel-ui.test.tsx` (CU1–CU9), TR1–TR5-ის შესწორება, doc 078. C: CX-RENDER / CX-WAVPHASE / CX-LOAD / CX-MP3 / CX-BOTH / CX-MP3-RENDER / CX-KEYS / TRAP-CANCEL / CX-ESC / CX-UNMOUNT ორივე viewport-ზე. ბაზა: HEAD `eb1d0c0`, სუფთა tree, გაყინული 505.
+
+**Round 89-ის შედეგი:** C PASS, `browserVerified=true`, `realVerified=true` (`c-round-89.md`, `c-round-89.json`). R88-FOCUS-ESCAPE-RENDER დაიხურა: 9 ვალიდური trap-გაშვება, 76 ვალიდური დაჭერა, დიალოგიდან 0 გასვლა ორივე viewport-ზე; IDLE-ORDER, FOCUS-NOT-OBSCURED-R, VIS-RENDER-S, PX-NET, REG-HYD, G89-3 PASS. **Gate 89 გამოქვეყნდა:** `eb1d0c0` (Round 87–89, ორივე remote; verify 132 ფაილი / 2122 ტესტი; review 8/10). ეტაპი 3a **მზადაა**. Gate-89 reviewer-ის ახალი Medium-ები: GATE89-S1 (უარყოფილი `resume()` რენდერს ჭედავს) → Round 90; GATE89-S2 (ზედმეტი float-ასლი) → 3b-2. fake-Bearer 403 — BLOCKED (backend cloud-ში მიუწვდომელია); production bundle — ღია (PROD-MP3-UNVERIFIED).
+
+წინა რაუნდი: **Round 89** (D-29z54) — R88-FOCUS-ESCAPE-RENDER-ის გასწორება: Tab-trap radio-ჯგუფს ერთ Tab stop-ად თვლის (`dialog-tab-stops.ts`).
 
 **Round 88-ის შედეგი:** C FAIL, `browserVerified=true`, `realVerified=true` (`c-round-88.md`, `c-round-88.json`). Sticky footer მუშაობს: VIS-IDLE, VIS-RENDER (ყველა ფაზა), VIS-SCROLL (1280), VIS-DONE, VIS-ERROR, VIS-VIDEO, PX-PHASES-R, PX-WAV5-R (max rAF 55.2 ms), PX-NET, REG-HYD, G88-3 PASS → **R87-PROGRESS-BELOW-FOLD-1280 c_pass** (გამოუქვეყნებელი). **ბაგი (Medium, ძველი):** R88-FOCUS-ESCAPE-RENDER — რენდერის დროს WAV-ით ან MP3-ით მე-3 Tab დიალოგიდან გადის (`BODY` → `arrangement-exit` → Master); trap-ის კოდი `971141d`-შიც იგივეა. Gate 88 გამოტოვდა. fake-Bearer 403 — BLOCKED (backend cloud-ში მიუწვდომელია).
 
@@ -330,7 +334,7 @@ Round 72-ის აღწერა (გამოქვეყნდა `6b574e8`-
 | SRW-17 | ტრეკების ჯგუფები | **მოწმდება** (ეტაპი 1 — `74eca15`; ეტაპი 2 — `68383fa`; ეტაპი 3 — Mute/Solo/Volume, ჩადგმა, ნახევრად ფერადი Solo, C Round 81 PASS `browserVerified`, `efbed86`; fake-Bearer 403 — BLOCKED, backend) | `c-round-81.md`, `c-round-81.json`, `gates/gate-round-81.json` | Tech Lead R79-T/R80-T/R81-T; C81-1 → Low-ები |
 | SRW-18 | Fades + volume envelope | **მოწმდება** (ეტაპი 1 — `bdc2067`, R18-A1 pass; ეტაპი 2 — `a68c81d`, R18-A2 pass; ორივე C PASS `browserVerified`) | `c-round-82.md`; `c-round-83.md` | Tech Lead R82-T/R83-T; C-R83-L1 → Round 84 X1 |
 | SRW-19 | ვიდეოს opacity fade (preview) | **მოწმდება** (Round 84 C PASS `browserVerified=true`, ორივე viewport, `88b0262`; R19-F1/R19-F2 pass) | `c-round-84.md`; `c-round-84.json` | Tech Lead R84-T; signals SRW19-RESCHEDULE, VIDEO-FADE-SOUND |
-| SRW-20 | Range export, MP3, worker/progress/cancel | **ბაგია** (ეტაპი 1: C PASS `51e024a`; ეტაპი 2: C PASS `971141d`; ეტაპი 3a: C round 87 — 18/18 PASS, C round 88 — sticky footer PASS (`browserVerified`), გამოუქვეყნებელი; ღიაა ძველი R88-FOCUS-ESCAPE-RENDER (Medium) → Round 89; ეტაპი 3b — Cancel; R20-X4 ღიაა; არაფერი გადადებული) | `c-round-87.md`, `c-round-88.md`, `c-round-88.json` | Round 89 → C (TRAP-*) |
+| SRW-20 | Range export, MP3, worker/progress/cancel | **მუშავდება** (ეტაპი 1: C PASS `51e024a`; ეტაპი 2: C PASS `971141d`; ეტაპი 3a: C rounds 87–89 PASS (`browserVerified`), გამოქვეყნდა `eb1d0c0` — **მზადაა**; ეტაპი 3b-1 Cancel → Round 90; ეტაპი 3b-2 (GATE86-S2, timeout-ის ტექსტი, GATE89-S2) → Round 91; R20-X4-ის Cancel-ის ნაწილი ღიაა; არაფერი გადადებული) | `c-round-87.md`, `c-round-88.md`, `c-round-89.md`, `gates/gate-round-89.json` | Round 90 → C (CX-*) |
 | SRW-21 | შეძენილი ბიბლიოთეკის mount + საბოლოო რეგრესია | **დაბლოკილია** (მხოლოდ route mount) | `backlog.json` SRW-21 | Adapter contract (R21-I1) დამოუკიდებლად სრულდება SRW-20-ის შემდეგ. Route mount-ს Tech Lead-ის ან auth-ის მფლობელის ნებართვა სჭირდება. purchased loader-ში middle-east hardcoded-ია |
 | SRW-22 | Studio Lab-ის შესასვლელი header-ში | **მზადაა** | `c-round-4.md`; `c-round-13.md` §5; `c-round-14.md`–`c-round-18.md`; `c-round-21.md` §1 (G21-3, header-ის ბმული) | — |
 | SRW-23 | Studio-ს scrollbar-ები | **მოწმდება** | `c-round-4.md` (R23-3/R23-4 PASS) | Tech Lead: რეალური Windows Chrome |
@@ -340,21 +344,24 @@ Round 72-ის აღწერა (გამოქვეყნდა `6b574e8`-
 
 | ID | სიმძიმე | სტატუსი | მტკიცებულება | შემდეგი ნაბიჯი |
 |---|---|---|---|---|
-| R87-PROGRESS-BELOW-FOLD-1280 | Medium | **მოწმდება** — C round 88: VIS-* PASS ორივე viewport-ზე (`browserVerified`); გამოქვეყნებას ელოდება (gate 88 გამოტოვდა) | `c-round-88.md`, `c-round-88/v88-*.json` | root: გამოქვეყნება Round 87–89-თან ერთად |
-| R88-FOCUS-ESCAPE-RENDER | Medium | **ბაგია** → Round 89 (radio-ჯგუფის Tab stop-ები, D-29z54); ძველია, `971141d`-შიც | `c-round-88.md`, `c-round-88/keys88-*.json` | C: TRAP-*, PX-KEYS-R2 |
+| R87-PROGRESS-BELOW-FOLD-1280 | Medium | **დაიხურა** — C round 88 VIS-* PASS ორივე viewport-ზე, გამოქვეყნდა `eb1d0c0` | `c-round-88.md`, `gates/gate-round-89.json` | — |
+| R88-FOCUS-ESCAPE-RENDER | Medium | **დაიხურა** — C round 89: 0 გასვლა 76 ვალიდურ დაჭერაში, ორივე viewport, გამოქვეყნდა `eb1d0c0` | `c-round-89.md`, `c-round-89/trap89-*.json` | — |
+| GATE89-S1-RESUME-REJECT-HANG | Medium | **ბაგია** → Round 90 (D-29z55 C2; unit EC3, ბრაუზერში მიუღწევადი) | `gates/round-89/review.md` #1 | A → C (T90-TARGETED) |
+| GATE89-S2-EXPORT-EXTRA-FLOAT-COPY | Medium | **ბაგია** → ეტაპი 3b-2, Round 91 (in-place clamp) | `gates/round-89/review.md` #2 | 3b-2 |
+| GATE89-S3/S4/S6 | Low | **ბაგია** → Low-ების პაკეტი (worker watchdog; footer `-mx-8` / 16 px ზოლი; `aria-valuetext`) | `gates/round-89/review.md` | Low-ები |
 | A-R88-REVIEW-EDGES | Low | **ბაგია** → Low-ების პაკეტი (guard radio-ს rect-ს ზომავს და არა label-ს; მაუსის focus-ზეც მუშაობს; footer-ის ზრდა focus-ის შემდეგ; 16 px ზოლი footer-ის ქვეშ) | `a-round-88.md` | Low-ები |
-| R87-L-TIMEOUT-RELOAD-TEXT | Low | **ბაგია** → Low-ების პაკეტი (timeout-ის ტექსტი „გადატვირთე გვერდი“ ამბობს, retry კი იმავე გვერდზე მუშაობს) | `c-round-87.md` Observations | Low-ები |
+| R87-L-TIMEOUT-RELOAD-TEXT | Low | **ბაგია** → ეტაპი 3b-2, Round 91 (GATE86-S2-თან ერთად; ტექსტი `export-mp3.test.tsx` l.64-ში და `export-progress-ui` l.67-ში ჩაკეტილია) | `c-round-87.md` Observations | 3b-2 |
 | R87-O-PROGRESS-FILL-COLOUR | Info | **მოწმდება** (headless-ში fill `#008000`; computed accent-color ბრენდის token-ია) | `c-round-87.json` observations | Tech Lead R87-T |
-| A-R87-L5 / A-R87-LOW-PU-ORDER | Low | **ბაგია** → L5 ეტაპი 3b; PU-ს რიგზე დამოკიდებულება → Low-ები | `a-round-87.md` | 3b / Low-ები |
+| A-R87-L5 / A-R87-LOW-PU-ORDER | Low | **ბაგია** → L5 Round 90 (CU8); PU-ს რიგზე დამოკიდებულება → Low-ები | `a-round-87.md` | Round 90 / Low-ები |
 | C-R85-L1 | Low | **განჩინება (D-29z51): კონტრაქტი არ არის** — Escape კლიპის drag-ს არ აუქმებს; არცერთი gesture არ უქმდება Escape-ით; Live დაუდასტურებელია; მომხმარებელს არ უთხოვია → სიგნალი ESCAPE-CANCEL-GESTURE | `c-round-85/m1-*.json` M1-GHOST | Tech Lead / მომხმარებლის გადაწყვეტილება |
 | C-R85-L2 | Low | **დაიხურა** (Round 86 X1; C X1-PROJECT PASS ორივე viewport-ზე, `971141d`) | `c-round-86.md` X1-PROJECT | — |
 | FFMPEG-DEV-WORKER | Medium | **დაიხურა dev-ზე** (Round 86; C MP-MP3/MP-REUSE: encoder ~3.4 წმ-ში იტვირთება, `971141d`); production bundle — ღია მტკიცებულება PROD-MP3-UNVERIFIED | `c-round-86.md` | root: gate 87 |
-| GATE86-S1-POLLER-RETRY | Medium | **მოწმდება** (Lab-ის გზა: C round 87 PX-RETRY PASS — timeout ზუსტად 120 000 ms, მეორე MP3 იმავე გვერდზე 7.5 წმ-ში; გამოქვეყნებას ელოდება); შეძენილი Studio — FFMPEG-LOAD-POLLER-HANG | `c-round-87.md` PX-RETRY | root: Round 88-თან ერთად |
-| GATE86-S2-BOTH-NOTE-DELIVERY | Low | **ბაგია** → ეტაპი 3b (WAV + MP3-ის „ორივე ან არცერთი“ მიწოდებაზე არ ვრცელდება; რეალური Chrome-ი შეიძლება იკითხოს) | `gates/round-86/review.md` #2 | 3b |
+| GATE86-S1-POLLER-RETRY | Medium | **დაიხურა** Lab-ის გზაზე (C round 87 PX-RETRY, გამოქვეყნდა `eb1d0c0`); შეძენილი Studio — FFMPEG-LOAD-POLLER-HANG | `c-round-87.md` PX-RETRY | — |
+| GATE86-S2-BOTH-NOTE-DELIVERY | Low | **ბაგია** → ეტაპი 3b-2, Round 91 (WAV + MP3-ის „ორივე ან არცერთი“ მიწოდებაზე არ ვრცელდება; რეალური Chrome-ი შეიძლება იკითხოს) | `gates/round-86/review.md` #2 | 3b-2 |
 | GATE86-S3-TIMEOUT-COVERAGE | Low | **ნაწილობრივ → Round 87** (timer import-საც მოიცავს); კონვერტაციას ლიმიტი არ აქვს — გამოსავალი 3b-ის Cancel | `gates/round-86/review.md` #3 | C: PU4 / PX-RETRY |
 | GATE86-S4-FORMAT-RADIOS-DURING-RENDER | Info | **უარყოფილია** (D-29z52 R7: გაყინული render-time focus ტესტი; C EXTRA-FORMAT-SWITCH PASS) | `gates/round-86/review.md` #4 | — |
 | PROD-MP3-UNVERIFIED | Low | **ღია მტკიცებულება** (gate 87 გამოტოვდა; production bundle-ში MP3 და worker; cloud-ში preview server არ არის) | `c-round-87.json` notRun | root: gate 88 |
-| A-R86-L2-LATE-DOWNLOAD-UNMOUNT | Low | **ბაგია** → ეტაპი 3b (unmount-ზე abort) | `a-round-86.md` L2 | 3b |
+| A-R86-L2-LATE-DOWNLOAD-UNMOUNT | Low | **ბაგია** → Round 90 (ეტაპი 3b-1: unmount-ზე abort; CU7, CX-UNMOUNT) | `a-round-86.md` L2 | Round 90 → C |
 | A-R86-L7 / A-R86-L8 | Low | **ბაგია** → Low-ების პაკეტი (მიზეზი ორჯერ იკითხება; შენიშვნები MP3-ზეც „WAV შეიქმნება“) | `a-round-86.md` L7, L8 | Low-ები |
 | C-R84-M1 | Medium | **დაიხურა** (Round 85 X1; C M1-HANDLE/M1-SELECTED/M1-GHOST/M1-VISIBLE/M1-ENV PASS ორივე viewport-ზე, `51e024a`) | `c-round-85.md` M1-* | — |
 | C-R84-L1 | Low | **ღიაა** — Low-ების ჯგუფი; C Round 85: 1 LSB-ის jitter ვიდეოს გარეშეც ჩანს (4–9 წმ, 3254 sample); tolerance-ის ფარგლებშია; harness-ის წესი გაფართოვდა (≤ 1 LSB ყველგან jitter-ია) | `c-round-84/r2-*.json`; `c-round-85.json` observations | Low-ები |
@@ -665,6 +672,8 @@ R3-V2 Round 22-ში ხელახლა შემოწმდა (R22-M1 + R
 | R85-T | რეალურ Chrome-ში: 4–9 წმ-ის მონიშვნის შემდეგ Export ნაგულისხმევად მონაკვეთს ირჩევს და ფაილი მიქსის იმ ნაწილივით ჟღერს; timeline-ის გადახვევისას handle-ები ხაზების სახელებზე აღარ ჩანს |
 | R86-T | რეალურ Chrome-ში: WAV + MP3 — ითხოვს თუ არა ბრაუზერი „multiple downloads“-ის ნებართვას, ორივე ფაილი ჩამოდის თუ არა; MP3 ყურით ემთხვევა WAV-ს | Playwright Chromium prompt-ს არ აჩვენებს |
 | R87-T | რეალურ Chrome-ში 5-წუთიანი პროექტის WAV და MP3 ექსპორტი: progress ზოლი და ფაზის სახელი გასაგებია; ექსპორტისას timeline-ის გადახვევა და მაუსი არ ჭედავს | headless rAF gap ადამიანის აღქმას არ ცვლის |
+| R90-T | რეალურ Chrome-ში: გრძელი WAV-ის რენდერისას და MP3-ის შექმნისას „გაუქმება“ მყისიერია, CPU წყნარდება, ფაილი არ ჩნდება, შემდეგი ექსპორტი მუშაობს; მისაღებია თუ არა, რომ Escape არ აუქმებს | headless-ში CPU/ვენტილატორის შეგრძნება და რეალური click არ მოწმდება |
+| R89-T | რეალურ Chrome-ში კლავიატურით WAV / MP3 / WAV + MP3 ექსპორტისას Tab/Shift+Tab დიალოგს არ ტოვებს (C round 89 — headless) | headless keyboard ≠ რეალური კლავიატურა |
 | R88-T | რეალურ Chrome-ში კლავიატურით: WAV და MP3 ექსპორტის დროს Tab/Shift+Tab მხოლოდ X-სა და მონიშნულ ფორმატს შორის მოძრაობს, გვერდზე არ გადის; 1280×720-ზე sticky footer ბუნებრივია | headless keyboard ≠ რეალური კლავიატურა |
 | RF7-2 / RF7-3 | ვიდეოს drift (R3-V1, **mode D**-ის ჩათვლით) და loop wrap-ის landing სუფთა Windows Chrome-ზე, VP9 + H.264 | **სავალდებულოა** C-R8-01-ისა და C-R6-02-ისთვის |
 | R8-M1 / R8-M2 | ხაზებს შორის drag Shift-ით რეალური მაუსით | synthetic pointer |
