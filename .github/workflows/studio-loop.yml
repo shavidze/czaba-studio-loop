@@ -87,6 +87,14 @@ jobs:
           HUSKY: "0"
         run: bash cloud/run.sh
 
+      - name: Tell Saba when the job itself fails
+        if: failure()
+        run: |
+          if [ -z "$(gh issue list -R "$GITHUB_REPOSITORY" --state open --label loop-attention --json number --jq '.[0].number')" ]; then
+            gh label create loop-attention -R "$GITHUB_REPOSITORY" --color D93F0B --description "The Studio loop needs Saba" >/dev/null 2>&1 || true
+            gh issue create -R "$GITHUB_REPOSITORY" --label loop-attention --title "Studio loop: job failed before or during the round" --body "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. The scheduled job retries every 30 minutes; if it keeps failing, the setup step needs a fix."
+          fi
+
       - name: Upload loop logs
         if: always() && steps.enabled.outputs.on == 'true'
         uses: actions/upload-artifact@v4
