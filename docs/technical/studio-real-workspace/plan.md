@@ -1217,6 +1217,29 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z58 — Round 92-ის შედეგი; Round 93: Low-ების პაკეტი, ნაწილი 1 (Export-ის დიალოგი: radio-ს სახელი, აღწერა და ფორმატზე დამოკიდებული შენიშვნები).**
+
+C round 92 (`tmp/studio-real-loop/c-round-92.md`, `c-round-92.json`) — **PASS, `browserVerified: true`, `realVerified: true`, 0 ბაგი**: SOURCE-UNCHANGED, DEMO-COPY (1280 და 1440), DEMO-LOAD (სამივე სტატუსი რეალურ ბრაუზერში), EXPORT-NAMES (ოთხივე დემოს სახელი, ფაილები იკითხება), PX-NET, REG-HYD, G92-3 (fake-Bearer 403 — BLOCKED, backend cloud-ში მიუწვდომელია), PC-REVIEW (mutation b და f წითელია), T92-TARGETED (68 ფაილი / 1126 ტესტი). Gate 92 გამოქვეყნდა: `64e12d8`, ორივე remote-ზე (verify 137/137, build OK, reviewer 9/10). SRW-21 ეტაპი 1 დასრულდა; R21-I1 გავიდა შესწორებული ფორმით. შეძენილი გზა მხოლოდ unit-ით მოწმდება, სანამ route mount დაბლოკილია.
+
+- **R1 — რიგი:** C-ის ღია ბაგი არ არის. რეგრესიის რაუნდი 2026-10-24-დან იწყება (დღეს 2026-10-22). Phase 1-ის ერთადერთი დარჩენილი ძირითადი ნაწილი, SRW-21 mount, auth-ის მფლობელს ელოდება. დამტკიცებული რიგი ასეთია: phase 1 → T12 → VISUAL-A-OBSIDIAN; D-29z24-ის მიხედვით: Low-ები → SRW-21 → სრული რეგრესია → T12. ამიტომ ახლა Low-ების პაკეტი იწყება. პირველია Export-ის დიალოგი, რადგან მისი შედეგი რეალურ ბრაუზერში მოწმდება და ის ერთ ფაილშია.
+- **R2 — სამი მჭიდროდ დაკავშირებული Low:**
+  - GATE91-S1: შენიშვნა `<label>`-ის შიგნითაა და radio-ს სახელში ხვდება. ეს ოთხივე ფორმატის radio-ს ეხება, ამიტომ ჯგუფი მთლიანად სწორდება;
+  - A-R86-L7: disabled range-ის მიზეზი სახელშიც არის და description-შიც;
+  - A-R86-L8: სიჩუმის და Master-mute-ის შენიშვნა MP3-ზეც `WAV შეიქმნება`-ს ამბობს.
+- **R3 — ყველაზე მცირე პატიოსანი გადაწყვეტა:**
+  - მთავარი ტექსტი ცალკე `<span id>`-შია, შენიშვნა მისი sibling span-ია. Input იღებს `aria-labelledby` და `aria-describedby` ატრიბუტებს;
+  - DOM-ის ტექსტი, კლასები და testid-ები უცვლელია. ასე frozen `radioLabelText`-ის ჩაკეტვა (export-range-ui l.454–455, export-mp3 l.352) მწვანე რჩება და არცერთ არსებულ ტესტს ნებართვა არ სჭირდება. gate-91-ის შენიშვნა („l.455 იცვლება“) ამ მიდგომით აღარ ეხება;
+  - შენიშვნის ზმნა: `WAV შეიქმნება` / `MP3 შეიქმნება` / `WAV და MP3 შეიქმნება`. ეს იმეორებს context-ის არსებულ done შეტყობინებებს. WAV-ის ტექსტი ბაიტამდე უცვლელია;
+  - უარყოფილი ვარიანტი: შენიშვნის `<label>`-იდან გატანა. ის DOM-ს და frozen ჩაკეტვებს შეცვლიდა, უპირატესობას კი არ მოიტანდა.
+- **R4 — ნებართვები:** `ArrangementExportDialog.tsx` (მხოლოდ D1 და D2), ახალი `export-dialog-a11y-copy.test.tsx` (AN1–AN6, NC1–NC3, mutation a–h), doc 080 l.4 და ახალი doc 081. Baseline: `64e12d8`, frozen 518. მოსალოდნელია 2 M + 2 ??.
+- **R5 — C:** AX-NAMES (Chrome-ის ნამდვილი AX tree, ორივე viewport, სამი მდგომარეობა), AX-SELECT, NOTE-FORMAT (ორივე viewport), NOTE-NOSOUND (თუ ბრაუზერში მიუღწევადია, ცხადად აღინიშნება როგორც unit-only), VIS-LAYOUT, EXPORT-REG, KEYS-REG, PX-NET, REG-HYD, G93-3, AN-REVIEW, T93-TARGETED, SOURCE-UNCHANGED. Ableton: არ ეხება.
+- **სიგნალები:** round 92-ის reviewer-ის შენიშვნები:
+  - S1 (collection-ის შეცვლისას სტატუსი არ ბრუნდება) და S2 (შეძენილი MP3-ის სახელს ტესტი არ აქვს) → Low-ების ნაწილი 2, COLLECTION-EMPTY-STATUS-თან ერთად;
+  - S3 → არასავალდებულო nit;
+  - S4 (token-იანი URL devtools-ში) → SRW-21 mount-ის წინაპირობა.
+  C-ის შენიშვნა (დემოში `Failed to fetch`) → Low-ები. Architecture note (`workspaceCollectionCopy` V-0-ის strings მოდულში) → q14 (f). q14-ზე root-ის პასუხი ჯერ არ არის; ის არაბლოკირებადია და თავიდან არ ითხოვება. PROD-MP3-UNVERIFIED: gate 92-ის `verify.log`-ში preview-run ისევ არ არის, ამიტომ gate 93-ისთვის თავიდან ითხოვება.
+- **შემდეგ:** Round 94 რეგრესიის რაუნდია, თუ დაგეგმვა 2026-10-24-ზე ან შემდეგ მოდის. თორემ Low-ების ნაწილი 2 (COLLECTION-EMPTY-STATUS + GATE92-S1 + GATE92-S2). შემდეგ დანარჩენი Low-ები → R21-I2 → T12 → VISUAL-A-OBSIDIAN. არასავალდებულო და info-დონის Low-ები T12-ს არ აჩერებს. ფარგლები არ მცირდება.
+
 **D-29z57 — Round 91-ის შედეგი; Round 92: SRW-21 ეტაპი 1 (შეძენილი კოლექციის adapter და workspace-ის origin-ზე დამოკიდებული ტექსტი).**
 
 C round 91 (`tmp/studio-real-loop/c-round-91.md`, `c-round-91.json`) — **PASS, `browserVerified: true`, `realVerified: true`, 0 ბაგი**: MEM-WAV10 (ΔHWM 529/543/531 MB ≤ 639; საწყისი 739/748/748), WAV5-REG, CX-WAVPHASE-R, NOTE-BOTH, TIMEOUT-TEXT, PX-NET, REG-HYD, G91-3 (fake-Bearer 403 — BLOCKED, backend cloud-ში მიუწვდომელია), T91-TARGETED, SOURCE-UNCHANGED. MEM-CANCEL: retained 29/26/26 MB → GATE90-S1 ამ გარჩევადობით არ დადასტურდა. Gate 91 გამოქვეყნდა `77cd5b6` (verify 135/135, reviewer 9/10). SRW-20 დასრულდა.

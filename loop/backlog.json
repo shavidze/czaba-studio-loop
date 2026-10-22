@@ -1,9 +1,9 @@
 {
- "version": 91,
- "updated": "2026-10-22 (B round 91 review -> round 92 task, D-29z57)",
+ "version": 92,
+ "updated": "2026-10-22 (B round 92 review -> round 93 task, D-29z58)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 92: D-29z57 - SRW-21 stage 1: purchased WorkspaceCollection adapter createPurchasedWorkspaceCollection (signal, credentials omit, no headers, errors without URL/token) + workspace heading/badge/status/export names from collection.origin via workspaceCollectionCopy; /studio-lab byte-identical; doc 079 l.4; docs 080 + arrangement-workspace.md; baseline 77cd5b6, frozen 513, expected 3 M + 5 ??)",
+ "current_task": "current-task.md (round 93: D-29z58 - Lows batch part 1, export dialog: GATE91-S1 + A-R86-L7 (radio accessible name = main text via aria-labelledby, note/reason via aria-describedby, label textContent byte-identical) + A-R86-L8 (no-sound and master-mute notes follow the selected format: WAV/MP3/WAV და MP3 შეიქმნება); new export-dialog-a11y-copy.test.tsx AN1-AN6 NC1-NC3; doc 080 l.4; doc 081; baseline 64e12d8, frozen 518, expected 2 M + 2 ??)",
  "advisor_used_by_B": "round 92 planning: advisor available and consulted (2026-10-22)",
  "baseline": {
   "tsc_errors": 0,
@@ -4977,7 +4977,7 @@
    "depends_on": [
     "SRW-20"
    ],
-   "status": "blocked-partial (route mount: auth owner; stage 1 independent half dispatched round 92, D-29z57)",
+   "status": "blocked-partial (route mount: auth owner; stage 1 C PASS round 92 browserVerified=true, published 64e12d8 - demo path browser-verified, purchased path unit-only until the mount is released; R21-I2 full regression open)",
    "blocked_reason": "app/routes/studio.$productId.tsx and studio-token flow are owned by the auth agent; mounting the workspace there is forbidden until released by Tech Lead",
    "independent_progress": "WorkspaceCollection/loadSource adapter contract tests with a fake purchased adapter (no network/auth); docs for the future mount; full regression of SRW-01..SRW-20 by C",
    "files": [
@@ -4995,13 +4995,15 @@
      "action": "Unit test mounts StudioWorkspace logic with a fake purchased collection adapter",
      "expected": "no workspace code change needed; adapter receives AbortSignal; errors surfaced",
      "verify": "unit",
-     "expected_amended_D-29z57": "createPurchasedWorkspaceCollection contract (signal, credentials omit, no headers, errors without URL/token, validation) + workspace heading/badge/status/file names driven by collection.origin; /studio-lab demo output byte-identical (C DEMO-COPY, DEMO-LOAD, EXPORT-NAMES); purchased path unit-only until the route mount is released"
+     "expected_amended_D-29z57": "createPurchasedWorkspaceCollection contract (signal, credentials omit, no headers, errors without URL/token, validation) + workspace heading/badge/status/file names driven by collection.origin; /studio-lab demo output byte-identical (C DEMO-COPY, DEMO-LOAD, EXPORT-NAMES); purchased path unit-only until the route mount is released",
+     "status": "pass_as_amended (D-29z57): C round 92 DEMO-COPY/DEMO-LOAD/EXPORT-NAMES browser PASS both viewports; PC1-PC10/PW1-PW6 + C mutations b/f red; purchased path unit-only"
     },
     {
      "id": "R21-I2",
      "action": "Full C regression on all prior acceptance IDs",
      "expected": "all PASS or documented",
-     "verify": "C"
+     "verify": "C",
+     "status": "todo (after the Lows that touch shipped behaviour; regression round 2026-10-24+ covers part)"
     }
    ],
    "b_finding_round92": "B source read 2026-10-22: R21-I1 expectation 'no workspace code change needed' is FALSE - StudioWorkspace.tsx l.2136/l.2141-2143 and ArrangementContext.tsx l.532/l.3013-3014/l.2722/l.2910/l.2916 hardcode demo copy and file names; a purchased mount would print 'demo - no sign-in needed'. R21-I1 amended by D-29z57: adapter + origin-aware copy, demo byte-identical.",
@@ -5009,7 +5011,7 @@
     {
      "stage": "1",
      "round": 92,
-     "status": "dispatched",
+     "status": "c_pass_published",
      "decision": "D-29z57",
      "scope": "P1 collection.ts (workspaceCollectionCopy + createPurchasedWorkspaceCollection), W1 header, X1-X3 status/file names, PC1-PC9, PW1-PW6, mutations a-h, doc 079 l.4, doc 080, docs/technical/arrangement-workspace.md",
      "c_ids": [
@@ -5022,7 +5024,12 @@
       "PC-REVIEW",
       "T92-TARGETED",
       "SOURCE-UNCHANGED"
-     ]
+     ],
+     "evidence": "c-round-92.md, c-round-92.json (PASS, browserVerified=true, realVerified=true, 0 bugs); gates/gate-round-92.json published 64e12d8 (verify 137/137, build OK, reviewer 9/10)",
+     "blocked": [
+      "G92-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
+     ],
+     "not_browser_reachable": "purchased path (createPurchasedWorkspaceCollection, purchased copy, purchased file names): unit-only while the route mount is blocked"
     }
    ]
   },
@@ -8194,7 +8201,7 @@
    "round": 92,
    "task": "current-task.md",
    "decision": "D-29z57",
-   "status": "dispatched",
+   "status": "c_pass_published (C round 92 PASS browserVerified=true realVerified=true 0 bugs; gate 92 published 64e12d8)",
    "items": [
     "SRW-21 stage 1: purchased collection adapter (createPurchasedWorkspaceCollection) + origin-aware workspace copy (workspaceCollectionCopy)",
     "GATE91-S2 doc 079 status line"
@@ -8219,6 +8226,40 @@
     "G92-3",
     "PC-REVIEW",
     "T92-TARGETED",
+    "SOURCE-UNCHANGED"
+   ]
+  },
+  {
+   "round": 93,
+   "task": "current-task.md",
+   "decision": "D-29z58",
+   "status": "dispatched",
+   "items": [
+    "GATE91-S1-NOTE-IN-LABEL",
+    "A-R86-L7-REASON-READ-TWICE",
+    "A-R86-L8-NOTES-SAY-WAV",
+    "doc 080 l.4 status line"
+   ],
+   "note": "Lows batch part 1 (export dialog). baseline HEAD 64e12d8 clean; frozen b-round-92-r93-tree-sha256.txt 518/518; snapshots b-round-92-r93-snapshots; expected 2 M + 2 ??; no existing test granted",
+   "owned": [
+    "app/components/arrangement/ArrangementExportDialog.tsx (D1 names/descriptions, D2 notes)",
+    "app/lib/arrangement/__tests__/export-dialog-a11y-copy.test.tsx (new)",
+    "docs/implementation/2026/quarter-IV/080-studio-workspace-purchased-collection-readiness.md (l.4)",
+    "docs/implementation/2026/quarter-IV/081-studio-lab-export-dialog-names-and-notes.md (new)"
+   ],
+   "c_ids": [
+    "AX-NAMES",
+    "AX-SELECT",
+    "NOTE-FORMAT",
+    "NOTE-NOSOUND",
+    "VIS-LAYOUT",
+    "EXPORT-REG",
+    "KEYS-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G93-3",
+    "AN-REVIEW",
+    "T93-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -13181,7 +13222,7 @@
   {
    "id": "PROD-MP3-UNVERIFIED",
    "severity": "low",
-   "status": "open evidence: gate 91 verify.log (grep preview/e2e/mp3) again shows only unit tests and the build, no preview-server WAV/MP3/cancel run; re-requested from root for gate 92",
+   "status": "open evidence: gate 92 verify.log (grep preview/e2e/mp3) again shows only unit tests and the build, no preview-server WAV/MP3/cancel run; re-requested from root for gate 93 (root-owned gate row, not A work)",
    "to": "root",
    "title": "MP3 export (and from round 87 the export-wav worker) not verified in the production bundle",
    "evidence": "c-round-86.json notRun; gates/round-86/review.md #5"
@@ -13197,7 +13238,7 @@
   {
    "id": "A-R86-L7-REASON-READ-TWICE",
    "severity": "low",
-   "status": "open - Lows batch",
+   "status": "dispatched round 93 (D-29z58 D1: disabled range radio gets aria-labelledby; describedby unchanged)",
    "to": "Lows batch",
    "title": "range reason inside the <label> and also aria-describedby: may be read twice",
    "evidence": "a-round-86.md Code review L7"
@@ -13205,7 +13246,7 @@
   {
    "id": "A-R86-L8-NOTES-SAY-WAV",
    "severity": "low",
-   "status": "open - Lows batch (copy debt)",
+   "status": "dispatched round 93 (D-29z58 D2: EXPORT_FORMAT_CREATES per selected format; WAV text byte-identical)",
    "to": "Lows batch",
    "title": "no-sound and master-mute notes say \"WAV შეიქმნება\" for MP3 formats",
    "evidence": "a-round-86.md Code review L8"
@@ -13504,7 +13545,7 @@
   {
    "id": "ARCH-CHECKPOINT-SRW20",
    "severity": "info",
-   "status": "requested_from_root 2026-10-22 (b-round-91-checkpoint-request.md, q14 (a)-(e); non-blocking)",
+   "status": "requested_from_root 2026-10-22 (b-round-91-checkpoint-request.md, q14 (a)-(e)); still unanswered at round 93 planning; non-blocking; not re-requested. q14 (f) added from the round-92 reviewer notes",
    "to": "root",
    "title": "bounded frontend-architect checkpoint at the SRW-20 boundary: export orchestration (useArrangementExport hook vs lib/arrangement/export-orchestrator.ts), useExportDialogFocus, dialog-tab-stops placement",
    "evidence": "gates/round-90/review.md Architecture note; a-round-90.md Architecture note"
@@ -13512,7 +13553,7 @@
   {
    "id": "GATE91-S1-NOTE-IN-LABEL",
    "severity": "low",
-   "status": "open - Lows batch (export dialog part; changes the export-range-ui l.455 name lock, needs a test grant)",
+   "status": "dispatched round 93 (D-29z58 D1: aria-labelledby name span + aria-describedby note for all four format radios; label textContent unchanged, so no frozen-test grant needed)",
    "to": "B/Lows batch",
    "title": "WAV + MP3 note span sits inside the <label>, so the radio's accessible name includes the whole note; give it an id + aria-describedby",
    "evidence": "gates/round-91/review.md #1"
@@ -13520,7 +13561,7 @@
   {
    "id": "GATE91-S2-DOC079-STATUS",
    "severity": "low",
-   "status": "dispatched round 92 (doc 079 l.4 one-line grant)",
+   "status": "closed (C round 92 docs read: doc 079 l.4 has the gate-91 status; published 64e12d8)",
    "to": "A",
    "title": "doc 079 status line still says awaiting C",
    "evidence": "gates/round-91/review.md #2"
@@ -13544,7 +13585,7 @@
   {
    "id": "COLLECTION-EMPTY-STATUS",
    "severity": "low",
-   "status": "open - Lows batch (signal from B source read, round 92 planning; the round-92 factory refuses empty input)",
+   "status": "open - Lows batch part 2 (round 94 unless the regression round is due), paired with GATE92-S1 in the same load effect",
    "to": "B/Lows batch",
    "title": "ArrangementProvider load effect: with collection.sources.length === 0 settle never runs and the status stays 'loading' forever",
    "evidence": "ArrangementContext.tsx l.2997-3046 at 77cd5b6"
@@ -13556,6 +13597,54 @@
    "to": "Tech Lead",
    "title": "when the auth owner releases the purchased route: mount the workspace with createPurchasedWorkspaceCollection and check heading/badge/status copy and the czaba-studio*.wav names with real purchased stems",
    "evidence": "current-task.md round 92"
+  },
+  {
+   "id": "GATE92-S1-STATUS-NOT-RESET-ON-SWAP",
+   "severity": "low",
+   "status": "open - Lows batch part 2 (with COLLECTION-EMPTY-STATUS; fix: setStatus(copy.loading) at the start of the load effect)",
+   "to": "Lows batch",
+   "title": "ArrangementProvider load effect resets source states but not the status when the collection prop changes; a stale 'ready' text stays until the new settle",
+   "evidence": "gates/round-92/review.md suggestion 1; a-round-92.md reviewer Info; c-round-92.md Notes for B"
+  },
+  {
+   "id": "GATE92-S2-PURCHASED-MP3-NAMES-TEST",
+   "severity": "low (test gap)",
+   "status": "open - Lows batch part 2 (one exportMp3 assertion for czaba-studio.mp3 / czaba-studio-range.mp3 in PW5)",
+   "to": "Lows batch",
+   "title": "purchased MP3 download names are covered by code reading only (A Low 2)",
+   "evidence": "gates/round-92/review.md suggestion 2; a-round-92.md Low 2; c-round-92.json signals"
+  },
+  {
+   "id": "GATE92-S3-COPY-COMPUTED-TWICE",
+   "severity": "info",
+   "status": "open - Lows batch (optional nit)",
+   "to": "Lows batch",
+   "title": "StudioWorkspace header calls workspaceCollectionCopy(collection.origin) twice per render; one const reads better",
+   "evidence": "gates/round-92/review.md suggestion 3"
+  },
+  {
+   "id": "GATE92-S4-TOKEN-URL-IN-CONSOLE",
+   "severity": "low",
+   "status": "open - SRW-21 mount stage prerequisite (doc note in docs/technical/arrangement-workspace.md open prerequisites; short token lifetime); not round 93",
+   "to": "SRW-21 mount stage",
+   "title": "a failed stem fetch is logged by the browser console/Network tab with the full ?token= URL; the adapter keeps it out of UI text but cannot hide it from devtools",
+   "evidence": "gates/round-92/review.md suggestion 4"
+  },
+  {
+   "id": "C-R92-N1-DEMO-FAILED-TO-FETCH",
+   "severity": "low",
+   "status": "open - Lows batch (copy: map a demo network failure to a Georgian message like the purchased adapter's ფაილი ვერ ჩაიტვირთა (ქსელი))",
+   "to": "Lows batch",
+   "title": "demo loader error row shows the raw English browser text 'Failed to fetch' on a network failure (pre-existing)",
+   "evidence": "c-round-92.md DEMO-LOAD (b) observation"
+  },
+  {
+   "id": "R93-T-TECH-LEAD",
+   "severity": "info",
+   "status": "open",
+   "to": "Tech Lead",
+   "title": "screen reader (VoiceOver/NVDA) pass on the export dialog: each format radio is announced once by its short name with its note as description; the disabled range reason is read once",
+   "evidence": "current-task.md round 93"
   }
  ],
  "tech_lead_notes": [
@@ -14724,6 +14813,11 @@
    "round": 91,
    "source": "gates/round-91/review.md Architecture note + a-round-91.md",
    "note": "Signal 3: export region of ArrangementContext changed in rounds 87/90/91; each wording change = up to 4 coordinated edits. Keep now; proposal: export user-facing message constants from one module (q14 (d)); merged into ARCH-EXPORT-MP3-ORCHESTRATION. Formal SRW-20 boundary request sent (b-round-91-checkpoint-request.md)."
+  },
+  {
+   "round": 92,
+   "source": "gates/round-92/review.md Architecture note + a-round-92.md reviewer note",
+   "note": "Signal 2 coupling ArrangementContext/StudioWorkspace -> lib/arrangement/collection.ts: keep (one-way, pure). Mild signal 1: copy table and network adapter share collection.ts; proposal: when VISUAL-A V-0 lands, move workspaceCollectionCopy/WorkspaceCollectionCopy into the V-0 strings module (or collection-copy.ts), keep createPurchasedWorkspaceCollection; accept only if PC9, PW1, PW2, PW6 and the frozen export-* name tests pass unchanged. Recorded as q14 (f). Alternative (copy field on WorkspaceCollection) rejected by the reviewer for now. Not scheduled; non-blocking."
   }
  ],
  "vitest_floor_round46": 1357,

@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-22T22:42:37.273Z)
+# Active loop summary (2026-10-22T23:36:41.804Z)
 
-- backlog.json 823 KB -> active view 178 KB
-- status: G_ROOT_GATE round 91
-- servers: `{"checkedUtc":"2026-10-22T22:15:05.7796058Z","round":91,"attempt":1,"store":200}`
-- last publication: 77cd5b668bb55a44afe358dac5b7a716db428260 (rounds 91-91)
-- last root gate: round 91 published - commit 77cd5b668bb55a44afe358dac5b7a716db428260 pushed
+- backlog.json 830 KB -> active view 329 KB
+- status: G_ROOT_GATE round 92
+- servers: `{"checkedUtc":"2026-10-22T23:22:06.5903211Z","round":92,"attempt":1,"store":200}`
+- last publication: 64e12d823cc35efa4e69b975dab34c6ab7d46802 (rounds 92-92)
+- last root gate: round 92 published - commit 64e12d823cc35efa4e69b975dab34c6ab7d46802 pushed
 
-## Current items: SRW-20
+## Current items: SRW-03, SRW-05, SRW-10, SRW-11B, SRW-13, SRW-20, SRW-23, SRW-21
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -263,25 +263,22 @@
 - A-R85-REVIEW-L1-SHORT-RANGE-TEXT / low / open - Lows batch / a visible range shorter than 1 ms shows the "select a range" reason; a "too short" text may be clearer
 - FFMPEG-LOAD-POLLER-HANG / low / open for the purchased path (frozen app/utils/ffmpeg.ts, owner root/Tech Lead); the /studio-lab path gets its own resettable encoder in round 87 (D-29z52 R3, PX-RETRY) / loadFFmpeg: a concurrent caller polls isLoaded forever if the first load fails; a load whose worker never starts never rejects; no timeout
 - C-R85-OBS-PLAYHEAD-OVER-CLIPS / info / acknowledged (A review L6; intended: playhead z-10 row sibling paints over clips, pointer-events-none) / playhead line paints over clips and the selected clip after the isolate change
-- GATE86-S2-BOTH-NOTE-DELIVERY / low / dispatched round 91 (D-29z56 N1; C NOTE-BOTH) / the WAV + MP3 note promises both-or-none, true for encoding but not for browser delivery (real Chrome may prompt; Safari may drop)
 - GATE86-S3-TIMEOUT-COVERAGE / low / import part closed (C round 87 PX-RETRY, published eb1d0c0); conversion has no fixed limit by decision - Cancel in stage 3b-1 round 90 (CX-MP3) / the 120 s timeout does not cover the import or the conversion
 - GATE86-S4-FORMAT-RADIOS-DURING-RENDER / info / rejected (B, D-29z52): format radios stay enabled during a render by the round-86 spec - frozen render-time focus test export-dialog-focus.test.tsx l.454-472 keeps focus on an enabled format radio; C EXTRA-FORMAT-SWITCH-DURING-MP3 shows the running export is unaffected / format radios enabled while scope radios are disabled during a render
-- PROD-MP3-UNVERIFIED / low / open evidence: gate 90 verify.log again shows only the build (worker chunk + mp3-encoder chunk) and no preview-server WAV/MP3/cancel run; re-requested from root for gate 91 / MP3 export (and from round 87 the export-wav worker) not verified in the production bundle
+- PROD-MP3-UNVERIFIED / low / open evidence: gate 91 verify.log (grep preview/e2e/mp3) again shows only unit tests and the build, no preview-server WAV/MP3/cancel run; re-requested from root for gate 92 / MP3 export (and from round 87 the export-wav worker) not verified in the production bundle
 - A-R86-L7-REASON-READ-TWICE / low / open - Lows batch / range reason inside the <label> and also aria-describedby: may be read twice
 - A-R86-L8-NOTES-SAY-WAV / low / open - Lows batch (copy debt) / no-sound and master-mute notes say "WAV შეიქმნება" for MP3 formats
 - A-R86-L4-OPTIMIZEDEPS-PURCHASED-DEV / info / open evidence (purchased Studio MP3 in dev not checked; backend unavailable) / optimizeDeps.exclude also changes the dev module graph of the purchased Studio
 - FFMPEG-UTIL-UNIFY / info / signal for SRW-21 (not scheduled) / round 87 gives /studio-lab its own resettable MP3 encoder (same core + command) because the frozen util cannot reset or remove listeners; un
 - C-R86-OBS-DEFAULT-OVERLOAD / info / acknowledged (same as DEMO-SFX-FULL-SCALE; pre-existing) / the default demo project peaks +1.7 dBFS at Master 0 dB, so every default export shows the overload warning
 - ENV-VITE-REOPTIMIZE-RELOAD / info / harness rule (round 87 task setup: route probes not in parallel with exports) / the first dev-server visit of a non-lab route re-optimizes deps and reloads every open tab
-- R87-L-TIMEOUT-RELOAD-TEXT / low / dispatched round 91 (D-29z56 T1; C TIMEOUT-TEXT incl. same-page retry) / the 120 s MP3 timeout text still says "გადატვირთე გვერდი" (reload the page), but since round 87 a retry works in the same page (C PX-RETRY) 
 - R87-O-PROGRESS-FILL-COLOUR / info / Tech Lead headed-Chrome check (R87-T) / headless Linux Chromium paints the <progress> fill #008000 on #808080 although computed accent-color is the brand token rgb(18,217,200); sam
 - A-R87-L7-PROGRESS-MONOTONIC / low / watch: C round 87 and round 88 PX-PHASES(-R) observed 0 decreases at both viewports / progress store does not enforce non-decreasing fractions within a phase
 - A-R87-LOW-PU-ORDER / low / open - Lows batch / export-progress-ui PU tests depend on order (only the first PU4 opens the delayed-import gate)
-- ARCH-EXPORT-MP3-ORCHESTRATION / info / signal (not scheduled); repeated by the A round-90 reviewer and the gate-90 reviewer (useArrangementExport hook or lib/arrangement/export-orchestrator.ts; acceptance CU1-CU9, EC1-EC4, TR1-TR6 unchanged, useArrangement() surface identical) - merged here; checkpoint q14 at the SRW-20 boundary (after round 91 C PASS), addendum appended to b-round-83-checkpoint-request.md / round-87 code-reviewer Architecture note: exportMp3 (ArrangementContext.tsx:2726-2881) changed in rounds 85-87 and 3b again; proposal after 
+- ARCH-EXPORT-MP3-ORCHESTRATION / info / signal (not scheduled); repeated by the A round-90 reviewer and the gate-90 reviewer (useArrangementExport hook or lib/arrangement/export-orchestrator.ts; acceptance CU1-CU9, EC1-EC4, TR1-TR6 unchanged, useArrangement() surface identical) - merged here; checkpoint q14 at the SRW-20 boundary (after round 91 C PASS), addendum appended to b-round-83-checkpoint-request.md; round 91: gate-91 reviewer (message constants module) and A round-91 reviewer (4 coordinated string edits) merged as q14 (d) / round-87 code-reviewer Architecture note: exportMp3 (ArrangementContext.tsx:2726-2881) changed in rounds 85-87 and 3b again; proposal after 
 - A-R88-REVIEW-EDGES / low / open - Lows batch / round-88 code-reviewer edge cases: (1) footer guard measures the radio rect, its label description can still sit under the footer (target.cl
 - C-R88-O1-IDLE-OVERFLOW-1280 / info / acknowledged (sticky footer keeps buttons HR-VISIBLE; no action) / at 1280x720 the idle 5M Export body still overflows by 45 px (691 vs 646); the footer hides it
 - ARCH-R88-EXPORT-DIALOG-FOCUS-HOOK / info / signal - trigger met in round 89 (another focus concern in the dialog); added to checkpoint request q14 (b-round-83-checkpoint-request.md, SRW-20 boundary after 3b); not scheduled / round-88 code-reviewer Architecture note: ArrangementExportDialog has four effects on the same content element (opener restore, initial focu
-- GATE89-S2-EXPORT-EXTRA-FLOAT-COPY / medium / dispatched round 91 (D-29z56 G1/G2: encodeArrangementWavInPlace in the worker; C MEM-WAV10 dHWM <= 639 MB vs B baseline 739/748/748 MB) / rendered AudioBuffer + slice() copy + worker clamp copy: one extra stereo float copy at peak (~230 MB for 10 min)
 - GATE89-S3-WORKER-NO-WATCHDOG / low / open - Lows batch (Cancel since round 90 gives the user a way out of a stalled worker; C round 90 CX-WAVPHASE) / export-wav worker has no watchdog; fail() drops the worker error text
 - GATE89-S4-FOOTER-MX8-COUPLING / low / open - Lows batch (merged with A-R88-REVIEW-EDGES #4, 16 px strip) / footer -mx-8 coupled to ModalBody px-8; 16 px bg-surface strip under the footer at scroll end
 - GATE89-S5-FOCUSIN-MOUSE-SCROLL / info / acknowledged (reviewer: JS justified; cosmetic) / focusin footer guard also scrolls on a mouse click on a partly covered control
@@ -290,28 +287,28 @@
 - R89-REV-L1-L5 / low / open - Lows batch / info (unreachable in this dialog today: L1 unchecked group Shift+Tab lands on stop[0], L2 grouping by name only, L3 disabled checked radio, L4 split-group position; L5 duplicated harness -> ARCH (c) shared harness) / round-89 code-reviewer residuals on dialog-tab-stops
 - A-R89-MUT-VITE-CACHE / info / root_note (a-round-89/mut/* symlinked node_modules; vitest cache may be in store/node_modules/.vite; round-90 task forbids writing there) / scratch mutation copies may have written a vitest cache into store/node_modules/.vite
 - C-R89-HARNESS-5M-SHORT / info / applied as harness rule in round 90 (HR-PHASE, 10M recipe fallback) / 5M WAV render ~0.9 s; a 10-press sequence needs <=70 ms per press
-- GATE90-S1-CANCELLED-CONTEXT-MEMORY / medium / open - evidence row MEM-CANCEL in round 91 (C, RSS method, decision rule in the task); fix (disconnect sources + resume, reviewer Alternative) only if confirmed / after a render-phase cancel resume() is never called, so the suspended OfflineAudioContext and its render buffer (~117 MB for 5M) may stay a
+- GATE90-S1-CANCELLED-CONTEXT-MEMORY / medium / not reproduced at this resolution (C round 91 MEM-CANCEL: retained 29/26/26 MB < 58 MB in all 3 pairs; B decision rule -> no fix scheduled). Caveat (C, hypothesis): every cancel landed at render 4%, render-buffer allocation at that point unconfirmed; optional later-percentage/10M evidence row in the regression round, not its own round / after a render-phase cancel resume() is never called, so the suspended OfflineAudioContext and its render buffer (~117 MB for 5M) may stay a
 - GATE90-S2-TAB-CONTRACT-CHANGED / info / acknowledged (deliberate D-29z55 R4 change: during a render the stops are X, format group, Cancel; TR1-TR5 amended by grant); radio-group-as-last-stop wrap is no longer exercised during a render / frozen TR1-TR5 meaning rewritten on purpose in round 90
 - GATE90-S3-HOLD-ENTER-CLOSES / low / open - Lows batch (ignore event.repeat on Close after a cancel, or accept; real-keyboard timing, CDP cannot hold a key) / holding Enter on Cancel: the repeat keydown activates Close after focus moves there, closing the dialog and losing the cancelled status
 - GATE90-S4-CANCEL-DISABLED-CLASS / low / open - Lows batch (class copied from Close on purpose, doc 078) / Cancel carries disabled:opacity-40 but is never disabled
 - GATE90-S5-UNUSED-PREDICATE / info / open - Lows batch (optional: drop isArrangementExportCancelledError or keep for tests) / isArrangementExportCancelledError is used only by tests; the app checks signal.aborted
-- GATE90-S6-DOC078-STATUS / low / dispatched round 91 (doc 078 l.4 one-line grant) / doc 078 status line still says awaiting C
-- GATE90-S7-LINT-OWNED-UNCONFIRMED / info / dispatched round 91 (A saves npx biome lint output for owned files in a-round-91/biome-lint-owned.txt) / verify.log hides 199 of 218 lint warnings, so owned-file lint cleanliness was not visible to the gate reviewer
 - C-R90-MUT-B-CU4-GAP / low / open - Lows batch (test gap: add a dedicated pre-download aborted-check test on the mp3 path; behaviour proven by C CX-BOTH 0 files) / mutation b (no aborted check before downloads) does not turn CU4 red because encode is also raced against the abort
 - C-R90-N2-UNMOUNT-DELAY / info / watch (hypothesis: Remix route commit timing in a fresh dev context; 0 downloads proven) / ffmpeg worker terminated 2.2-2.6 s after the exit click, not at once
 - R91-T-TECH-LEAD / info / open / real Chrome/Safari: WAV + MP3 export - does the browser ask permission for the second file, and does the new note read right; Escape-does-no
-- ARCH-CHECKPOINT-SRW20 / info / to be requested from root after round 91 C PASS (SRW-20 boundary; non-blocking); inputs q14 in b-round-83-checkpoint-request.md (round-86..90 addenda) / bounded frontend-architect checkpoint at the SRW-20 boundary: export orchestration (useArrangementExport hook vs lib/arrangement/export-orch
+- ARCH-CHECKPOINT-SRW20 / info / requested_from_root 2026-10-22 (b-round-91-checkpoint-request.md, q14 (a)-(e); non-blocking) / bounded frontend-architect checkpoint at the SRW-20 boundary: export orchestration (useArrangementExport hook vs lib/arrangement/export-orch
+- GATE91-S1-NOTE-IN-LABEL / low / open - Lows batch (export dialog part; changes the export-range-ui l.455 name lock, needs a test grant) / WAV + MP3 note span sits inside the <label>, so the radio's accessible name includes the whole note; give it an id + aria-describedby
+- GATE91-S2-DOC079-STATUS / low / dispatched round 92 (doc 079 l.4 one-line grant) / doc 079 status line still says awaiting C
+- GATE91-S3-INPLACE-NAMING / info / acknowledged (reviewer: nothing to do now; revisit if a second caller of encodeArrangementWavInPlace appears) / only the parameter type marks the owned-arrays contract of encodeArrangementWavInPlace
+- C-R91-N1-RENDER-NONDETERMINISM / info / data (related to C-R84-L1; RMS agrees to ~1e-13; not caused by round 91) / 5M WAV bytes differ across sessions (3 sha prefixes) while RMS agrees
+- COLLECTION-EMPTY-STATUS / low / open - Lows batch (signal from B source read, round 92 planning; the round-92 factory refuses empty input) / ArrangementProvider load effect: with collection.sources.length === 0 settle never runs and the status stays 'loading' forever
+- R92-T-TECH-LEAD / info / open / when the auth owner releases the purchased route: mount the workspace with createPurchasedWorkspaceCollection and check heading/badge/status
 
 ## Other open items
-- SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
-- SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
-- SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
 - SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-16 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 6b574e8, 2a e347b97, 2b-1 db9cc25, 2b-2 60006d4, 2b-3 c062147; Tech Lead R72-T/R74-T/R77-T/R78-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next
 - SRW-17 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 74eca15, stage 2 68383fa, stage 3 efbed86; Tech Lead R79-T/R81-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
-- SRW-21 [blocked-partial] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete
