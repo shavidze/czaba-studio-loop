@@ -185,3 +185,10 @@ B schedules no extraction. Any approved change becomes one separate B task with 
 - **Question:** before stage 3b (group dB plus Shift fine on track, group and Master), should the hook tell `previewValue` that the value is back at the start (for example `previewValue(value, { atStart })`, or expose the start), so that the group and Master dB faders do not each copy the capture? Or should the lane-local capture be kept and copied for the group?
 - **Acceptance if changed:** TV1–TV11, CF11, MG13, fader-click, fader-guards, fader-touch and track-group-mix-ui stay green and unchanged, and the m2 mutation (press without change rewrites the rounded value) is still caught.
 - **Non-blocking.** Round 117 is test-only, and the next planning is the regression round. An answer before stage 3b is useful.
+
+## Addendum (ac) — B round 118 planning (2026-10-23)
+- **Trigger:** the gate-117 code-reviewer Architecture note (`gates/round-117/review.md`, Signal 4). The proposal: give `useRelativeFaderDrag` an optional stored ↔ slider mapping, so that the hook itself restores the anchor exactly and each owner needs no ref of its own. It must not change the public shape for Pan and Master, the gesture lifecycle, or F2/F8/TV4.
+- **What round 118 does:** it copies the lane's `volumeGestureStartRef` pattern into `ArrangementGroupHeader.tsx`. This is the second copy. Addendum (ab) is still unanswered, and B does not delay stage 3b for it.
+- **Question:** after round 118, should the two copies (lane, group) be folded into the hook (the mapping, or `previewValue(value, { atStart })`)? Or keep them until a third dB fader arrives?
+- **Acceptance if changed:** TV1–TV11, GV1–GV9, CF11, MG13, fader-click, fader-guards and fader-touch stay green and unchanged, and the m2 mutations (lane TV, group GV4) are still caught.
+- **Non-blocking.**

@@ -1,155 +1,273 @@
-# CURRENT TASK — Round 117: fix C-R116-01 (lane-slider test scope in track-group-mix-ui), then publish rounds 116 and 117 together
+# CURRENT TASK — Round 118: T12 stage 3b — group Volume in dB, and Shift fine drag on the track, group and Master Volume faders
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-23 (B planned ~20:37–21:15 UTC, `date -u`)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-23 (B planned ~21:05–21:50 UTC, `date -u`)
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules, the 2026-10-23 bug-gate decision and the root clarification. These rules take precedence over older text.
-- **Previous task:** `tasks/round-116.md` (an exact copy). Rationale: `b-round-116.md`. Decision record: **D-29z82** in `docs/technical/studio-real-workspace/plan.md`.
-- **Round type:** a bug fix-up round with one Medium bug, test scope only. No app code changes.
-- **Baseline (not a clean commit):** HEAD is `d5de68fe27c165b00b5578f016703af90730500b`, the last published commit. Gate 116 is `skipped` because C FAILed. On top of that commit sits the round-116 working tree that C verified (11 ` M` + 3 `??`). `git status --porcelain | md5sum` = `49a4b7cd717023e3a2c52dd5912658c1`. That is the same value C recorded at its round-116 start and end, which is the chain of custody. **Keep this work. Do not revert it, stash it or redo it.**
+- **Previous task:** `tasks/round-117.md` (exact copy, `cmp` OK). Rationale: `b-round-117.md`. Decision record: **D-29z83** in `docs/technical/studio-real-workspace/plan.md`.
+- **Round type:** one feature stage (T12 stage 3b), plus one doc fix-up that the gate-117 reviewer asked for (GATE117-S1).
+- **Baseline: clean commit `9cb820b6f7e5f9f44d1c651954d30ebf4f83be9f`** (gate 117 `published`, rounds 116 + 117, both remotes). `git status --porcelain` is empty.
+  - Frozen list: `tmp/studio-real-loop/b-round-117-r118-tree-sha256.txt`, 922 entries. That is every tracked file except the 8 granted tracked files in §2.
+  - `sha256sum -c` gave OK at planning.
 
 ## 0. Why this round
-- **C round 116 = FAIL only on T116-TARGETED (367/370).** Every real-browser row passed at 1440×900 and 1280×720 with `browserVerified: true`, including:
-  - G-T3 0.501187;
-  - G-T4 1.412537;
-  - G-INF: 0 non-zero samples;
-  - G-VIDEO 0.501187;
-  - TV-PLAY: 10.78 dB drop, 0 new sources.
-- **C-R116-01 (Medium):** `track-group-mix-ui.test.tsx` UM3, UM5 and UM9 still write **linear** values into the **lane** Volume slider. The slider is now in dB, so these tests are red, and the gate's full vitest would be red too.
-  - Root cause: in round-115 planning B built the grant list from a grep that was too narrow. This is B's defect, not A's. A stopped correctly and did not edit the file.
-- **B's grep at this planning:** read-only, over the whole `app` and `e2e` test tree, for lane slider queries (`Volume — `, `laneFader(`, `trackVolume(`), linear `fireEvent.change` values and `%` readouts.
-  - Lane-driven writes exist only in the 11 round-116 grant files, in `track-volume-db.test.tsx` and in this file. `pan-release-recovery`, `pending-status` and `track-layout` match only as selectors or context-driven lines; they ran green.
-  - The other slider tests (`detail-panel`, `export-dialog-footer`, `grid-snap-position`, `library-preview`, `marker-edge-nav-ui`, `marker-time-snap-ui`, `markers-ui`) have no `Volume` or `.volume` match.
-  - `e2e` has no match.
-  - Remaining linear `fireEvent.change` values: `clip-gain-fader:567` (Clip Gain fader), `fader-focus-order:331` (pan), `grid-snap-keys:446` (grid select), and `track-group-mix-ui:477/492/671` (group faders). None of them is a lane Volume write.
-- **Regression round:** `regression-last.json` is 2026-10-21. B planned at 2026-10-23 20:37 UTC, so 2 days have passed and it is not due yet. **The next B planning on or after 2026-10-24 is the REGRESSION round. T12 stage 3b comes after it.**
-- **Not in this round:** any app source change. That includes OBS-2 `aria-hidden`, any readout tweak, the group dB fader and Shift fine (3b).
+- Round 117 C PASS + gate 117 published, so **T12 stage 3a is `c_pass_published`**. C-R116-01 and GATE-116-SKIPPED are closed.
+- **The regression round is not due at this planning.** `regression-last.json` = 2026-10-21. B planned at 2026-10-23 ~21:05 UTC, which is 2 days; the rule needs 3 or more. The round-116 b-next said "the next planning on or after 2026-10-24 is the regression round", and that still holds. **The round 119 planning (on or after 2026-10-24) is the REGRESSION round.** Stage 4 follows it.
+- No Critical, High or Medium finding is open and reproducible in the cloud. C-R6-02, C-R8-01 and A-R73-SAFARI-FLAG-FOCUS are Tech-Lead-only by the root clarification. The next scope in dependency order is therefore T12 V1 stage 3b.
+- **Why one round, not two:** B's whole-tree grep (§2.1) shows that the pins this change inverts sit only in:
+  - `track-group-mix-ui` (group lines);
+  - `track-volume-db` TV11;
+  - `clip-gain-fader` CF11.
+  Every one of them is listed below. The Shift code change is one option per fader.
 
-## 1. B rulings (D-29z82)
-- **R1 — the grant (scale-only, exact).** A adds `import { trackVolumeFromDb } from '../track-volume-db';` and changes exactly these lines. The line numbers are from the current file, which is unchanged since `d5de68f`.
-
-| Line | Test | Now | New | Formula |
-|---|---|---|---|---|
-| l.480 | UM3 | `dragFader(stemsFader, 12, -50)` | **unchanged** | — |
-| l.482 | UM3 | `expect(trackVolume(api, 'stems')).toBe(0.5)` | `.toBe(trackVolumeFromDb(-30))` | start 0 dB (stored 1); −50/100 × 60 = −30 dB |
-| l.522 | UM3 | `expect(trackVolume(api, 'stems')).toBe(0.5)` | `.toBe(trackVolumeFromDb(-30))` | the same lane drag value after two Undos; the `0.6` at l.518/l.521 is context-driven and stays |
-| l.569 | UM5 | `keyboardFader(laneFader(view, 'სტემები'), '0.5')` | value `'-6'` | 0.5 → 20·log10 0.5 = −6.02 → −6 dB |
-| l.571 | UM5 | `expect(trackVolume(api, 'stems')).toBe(0.5)` | `.toBe(trackVolumeFromDb(-6))` | — |
-| l.575 | UM5 | `toEqual({ video: 1, music: 1, stems: 0.25, sfx: 0.5 })` | `stems: trackVolumeFromDb(-6) * 0.5`, all else unchanged | see R2 |
-| l.657 | UM9 | `fireEvent.change(pending, { target: { value: '0.7' } })` | value `'-3.1'` | 0.7 → −3.10 → −3.1 dB |
-| l.660 | UM9 | `expect(trackVolume(api, 'stems')).toBe(0.7)` | `.toBe(trackVolumeFromDb(-3.1))` | — |
-
-- **R2 — the UM5 l.575 matcher.**
-  - `trackEffectiveGains` (`schedule.ts`) computes `chain.reduce((p, g) => p * trackGroupVolume(g), track.volume)`.
-  - The stems chain is G1 = `0.5`, then G2 = `trackGroupVolume` default `1` (`groups.ts:93`, `group.volume ?? 1`).
-  - Both factors are exact binary fractions, so `trackVolumeFromDb(-6) * 0.5` is bitwise equal to the reduced product.
-  - The matcher stays an exact `toEqual`. Line l.576 `toEqual(storedGains(api))` stays unchanged.
-  - **STOP:** if the exact match still fails (for example because the fake `gain.value` is stored as float32), A stops and reports the received value. A does not loosen the matcher.
-- **R3 — must stay unchanged.**
-  - Every group-fader line in this file: l.472–478, l.487–517, l.570, l.572, l.671 and the rest.
-  - Every context-driven line (l.510–521: `previewTrackVolume('stems', 0.6)` / `previewGroupVolume` and their expectations) and l.523.
-  - Every line in every other test.
-  - The steps, pixel deltas, pointer ids, test titles, and the counts of `expect(` and `it(`.
-  - No `toBeCloseTo`, no looser matcher.
-- **R4 — doc 100.** Doc 100 is A's round-116 untracked file. A appends one bullet to its **ტესტირება** section: „Round 117 (D-29z82): `track-group-mix-ui.test.tsx` UM3/UM5/UM9 — ხაზის slider-ის სკალაზე დამოკიდებული ხაზები dB-ზე გადავიდა (C-R116-01).“ Line l.4 stays „Round 116 — C-ის შემოწმებას ელოდება …“. Root or B updates it after the gate.
-- **R5 — round-116 observations.** These are ruled now. A changes nothing for them in this round.
-  - **OBS-1 (`+0.0` on the lane vs `0.0 dB` on the Master):** A's deviation 1 is accepted. R7 named both `formatMasterGainDb` and the `+0.0` examples, so the spec contradicted itself. That is B's defect.
-    - The lane keeps `+0.0`. The mismatch with the Master is the Low **LANE-MASTER-ZERO-SIGN**, now in `deferred_low_polish`.
-    - Stage 3b's group fader must use `formatTrackVolumeDb`, so the lane and the group agree.
-  - **OBS-2 (readout read twice by a screen reader):** Low **LANE-READOUT-DOUBLE-READ**, now in `deferred_low_polish`.
-  - **OBS-3 (`as const`):** accepted. It is a const assertion and an existing repo pattern. The project's no-type-assertion rule targets `as T` casts.
+## 1. What changes (user-visible)
+| # | Behaviour now | Behaviour after round 118 |
+|---|---|---|
+| 1 | The group row Volume fader is linear 0…1 (step 0.01), and its title/valuetext are `%` | It is in **dB**, the same scale as the lane fader: `min -60`, `max 0`, `step 0.1`. The slider minimum stores exactly `0` (`−∞ dB`). The title is `Volume <formatTrackVolumeDb>` (e.g. `Volume −15.0 dB`), and valuetext is `formatTrackVolumeDb` (e.g. `+0.0 dB`, `−∞ dB`). |
+| 2 | Shift + drag on a lane, video lane, group or Master Volume fader gives the same value as a plain drag (pinned by CF11 / TV11) | Shift + drag is **10× finer** on those faders, the same as Clip Gain (stage 1, `fineDivisor 10`). Pressing or releasing Shift mid-drag re-anchors at the current value with no jump (existing hook behaviour). |
+| 3 | Pan: Shift = plain | **Unchanged** (R5) |
 
 ## 2. A — files you own (everything else is frozen)
 | File | Change |
 |---|---|
-| `app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx` | R1/R2 only, plus the import |
-| `docs/implementation/2026/quarter-IV/100-studio-track-volume-db.md` | R4: one bullet |
+| `app/components/arrangement/ArrangementGroupHeader.tsx` | R1–R4: group fader in dB, exact-return start capture, fine divisor |
+| `app/components/arrangement/ArrangementLane.tsx` | R4 **only**: add the fine divisor option to `volumeFaderDrag` (one option line + import). Pan, readout and everything else unchanged |
+| `app/components/arrangement/ArrangementMaster.tsx` | R4 **only**: add the fine divisor option to `masterFaderDrag` (one option line + import) |
+| `app/lib/arrangement/fader.ts` | R4: add `export const FADER_SHIFT_FINE_DIVISOR = 10;`. `relativeFaderValue` unchanged |
+| `app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx` | §2.1 table only (the `trackVolumeFromDb` import already exists) |
+| `app/lib/arrangement/__tests__/track-volume-db.test.tsx` | §2.1 table only (TV11) |
+| `app/lib/arrangement/__tests__/clip-gain-fader.test.tsx` | §2.1 table only (CF11) |
+| `app/lib/arrangement/__tests__/group-volume-db.test.tsx` | **new**: §3.2 tests GV1–GV9 |
+| `docs/implementation/2026/quarter-IV/100-studio-track-volume-db.md` | GATE117-S1 only: l.4 status → „Round 117 — C PASS (`c-round-117.json`), გამოქვეყნდა `9cb820b`“; l.56 problem → mark it solved by C-R116-01 (round 117); l.70 → drop the `track-group-mix-ui` part and keep the `+0.0`/`0.0 dB` part (now the deferred Low LANE-MASTER-ZERO-SIGN) |
+| `docs/implementation/2026/quarter-IV/101-studio-group-volume-db-shift-fine.md` | **new** implementation doc (TEMPLATE.md sections, Georgian) |
 
-- **Frozen:** `tmp/studio-real-loop/b-round-116-r117-tree-sha256.txt`, 928 entries. These are every tracked file plus the two round-116 untracked code files (`track-volume-db.ts`, `track-volume-db.test.tsx`), at their C-verified content. The only exclusions are the two files above.
-  - A runs `sha256sum -c --quiet` at the start and the end and reports OK/FAIL.
-  - `ArrangementLane.tsx`, `track-volume-db.ts`, `track-volume-db.test.tsx`, doc 099 and the 9 round-116 granted tests are frozen. Round-116 browser evidence carries over only because they do not change.
+- `ArrangementDetailPanel.tsx` keeps its local `DETAIL_CLIP_GAIN_FINE_DIVISOR` and is frozen. Moving it to the shared constant is a nit for a later owner (GATE118-NIT-FINE-CONST). Do not edit it.
 - **Expected end state:**
-  - the round-116 set unchanged: ` M` for `ArrangementLane.tsx`, `clip-gain-fader`, `clip-gain-multi`, `context-hygiene`, `fader-click`, `fader-focus-order`, `fader-guards`, `fader-touch`, `gesture-guard`, `track-group-collapse-ui` and doc 099; `??` for `track-volume-db.ts`, `track-volume-db.test.tsx` and doc 100;
-  - **plus** ` M app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx`.
-  - No other path.
-- **A stops and reports (file, line, assertion; no edit; B rules) if:**
-  - a needed change is outside R1;
-  - the R2 exact match fails;
-  - any other targeted test is red.
+  - ` M` for the tracked files above that A actually changes, and `??` for the 2 new files. Nothing else.
+  - `sha256sum -c --quiet b-round-117-r118-tree-sha256.txt` OK at the start and at the end.
+- **Protected (unchanged; `git diff 9cb820b` on them empty):**
+  - `app/routes/studio.$productId.tsx` `fa2cf0bc`
+  - `app/routes/api.studio-token.ts` `13914809`
+  - `app/lib/auth.ts` `56f5b76f`
+  - `app/contexts/AuthContext.tsx` `bf9ee257`
+  - everything in `global_forbidden_files` / `global_forbidden_actions` of `backlog.json`.
+- **Unchanged and still linear:** context, model, groups, schedule, graph and export.
+  - `previewGroupVolume` stores the raw float, and `setTrackGroupMix` only clamps it to [0, 1] (`groups.ts` l.121–124, B read).
+  - So `trackVolumeFromDb(x)` is stored bitwise, and the slider minimum stores exactly `0`.
+- **Forbidden actions:** commit, push, stash, checkout, reset, deploy, dev-server restart, `npm install`, `npm run check` (`--write`), `npm run format`.
+- **Use the Edit tool for edits,** so the primitives hook fires.
 - **Before editing, read:**
-  - `.claude/primitives-map.json`
-  - `TESTING_QUALITY_GATES.md`
-  - `BUG_HUNTING_TESTS.md`
-  - `GEORGIAN_DOCS.md`
-  - `AGENT_DISCOVERABLE_CODE.md` (import naming)
-- **Use the Edit tool for the edits, not shell replacements,** so the project's primitives hook fires. This answers round-116 deviation 3.
-- **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, no type assertions, semicolons, no code comments.
-- **Forbidden:**
-  - Everything in `global_forbidden_files` / `global_forbidden_actions` of `backlog.json`, including the protected files:
-    - `app/routes/studio.$productId.tsx` `fa2cf0bc`
-    - `app/routes/api.studio-token.ts` `13914809`
-    - `app/lib/auth.ts` `56f5b76f`
-    - `app/contexts/AuthContext.tsx` `bf9ee257`
-  - All app source and every other test.
-  - These actions: commit, push, stash, checkout, reset, deploy, dev-server restart, `npm run check` (`--write`), `npm run format`.
+  - `.claude/primitives-map.json` and `.claude/prompts/studio-feature.md`;
+  - `AUDIO_ARCHITECTURE.md`, `FORWARDREF_COMPONENT.md`, `AGENT_DISCOVERABLE_CODE.md`, `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`;
+  - `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`;
+  - `docs/implementation/TEMPLATE.md`.
+- **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, no `as T` casts, semicolons, no code comments, Tailwind tokens only.
 
-## 3. A — checks (speed rules)
-- `npm run typecheck`, `npm run lint`, and a read-only `npx biome check` on the changed test file.
-- `npx vitest run` on the same 19 files as round 116:
-  - `track-volume-db`;
-  - the 11 round-116 grant files: `fader-click`, `fader-guards`, `fader-touch`, `fader-focus-order`, `pan-release-recovery`, `gesture-guard`, `context-hygiene`, `pending-status`, `track-group-collapse-ui`, `clip-gain-fader`, `clip-gain-multi`;
-  - `track-group-mix-ui`, `master-ui`, `track-layout`, `clip-gain`, `status-announcement-ui`, `self-disabling-focus`, `render-budget`.
-  - Also run `meter-ui` and `track-pan`.
-  - **Expected:** 19 files, **370/370**. `meter-ui` + `track-pan` green (38 in round 116).
-- **Mutation proof:**
-  - (k1) Put back l.569 `'0.5'`. UM5 must turn red.
-  - (k2) At l.575, use `stems: 0.25`. UM5 must turn red, which shows the matcher is exact.
-  - Restore after each mutation and verify with sha256.
-- No full suite, no `npm run verify` (the gate runs those). No code-reviewer is needed: fewer than 3 files change.
-- **A's report (`a-round-117.md`):**
-  - start HEAD, status md5 and frozen OK;
-  - every changed line as `old → new`;
-  - `expect(` and `it(` counts before and after;
-  - test counts;
-  - k1/k2 results;
+### 2.1 Granted test edits (exact, scale-only; line numbers are from `9cb820b`)
+- `F(x)` means `trackVolumeFromDb(x)`.
+- Everything not listed stays unchanged: every other line, title, step, pixel delta and pointer id, and the `expect(` / `it(` counts (except where a row says otherwise).
+- Matchers stay exact (`toBe` / `toEqual`). No `toBeCloseTo`.
+
+**`track-group-mix-ui.test.tsx`** (group-fader lines only; the lane and context lines are already dB or context-driven and stay):
+| Line | Test | Now | New | Why |
+|---|---|---|---|---|
+| 410 | UM1 | `toEqual(['0', '1', '0.01'])` | `toEqual(['-60', '0', '0.1'])` | dB range |
+| 412 | UM1 | `toBe('100%')` | `toBe('+0.0 dB')` | `formatTrackVolumeDb(1)` |
+| 413 | UM1 | `toBe('Volume 100%')` | `toBe('Volume +0.0 dB')` | title |
+| 463 | UM3 | `toBe(0.75)` | `toBe(F(-15))` | 0 dB − 25/100 × 60 |
+| 469 | UM3 | `'0.74'` | `'-2.6'` | 20·log10 0.74 = −2.62 |
+| 470 | UM3 | `toBe(0.74)` | `toBe(F(-2.6))` | — |
+| 471 | UM3 | `toBe('74%')` | `toBe('−2.6 dB')` (U+2212) | — |
+| 472 | UM3 | `toBe('Volume 74%')` | `toBe('Volume −2.6 dB')` | — |
+| 474 | UM3 | `toBe(0.75)` | `toBe(F(-15))` | Undo back to the drag value |
+| 478 | UM3 | `'0.6'` | `'-4.4'` | 0.6 → −4.44 |
+| 482, 486 | UM3 | `toBe(0.6)` (group) | `toBe(F(-4.4))` | — |
+| 488 | UM3 | `toBe(0.74)` | `toBe(F(-2.6))` | — |
+| 493 | UM3 | `'0.4'` | `'-8'` | 0.4 → −7.96 |
+| 495, 504, 510, 521, 524 | UM3 | `toBe(0.4)` (group) | `toBe(F(-8))` | cancel and Undo restore the exact stored value |
+| 497 | UM3 | `toBe(0.6)` (group) | `toBe(F(-4.4))` | — |
+| 502 | UM3 | `toBe(0.2)` | `toBe(F(-20))` | −8 dB − 20/100 × 60 |
+| 571 | UM5 | `keyboardFader(groupFader(…), '0.5')` | `'-6'` | — |
+| 573 | UM5 | `toBe(0.5)` (group) | `toBe(F(-6))` | — |
+| 579 | UM5 | `stems: trackVolumeFromDb(-6) * 0.5,` | `stems: trackVolumeFromDb(-6) * trackVolumeFromDb(-6),` | same `reduce` order: `track.volume × G1 × G2 (= 1)` |
+| 580 | UM5 | `sfx: 0.5,` | `sfx: trackVolumeFromDb(-6),` | `1 × G1 × 1` |
+| 677 | UM9 | `'0.3'` | `'-10.5'` | 0.3 → −10.46 |
+| 684 | UM9 | `toBe(0.3)` (group) | `toBe(F(-10.5))` | — |
+
+- **Unchanged on purpose:**
+  - l.513–518 and l.520 (`previewTrackVolume('stems', 0.6)`, `previewGroupVolume(groupId, 0.7)` and their `0.6`/`0.7` expectations): these are context-driven.
+  - l.414 `min-w-12` and l.415–417 (the row adds no text, 28 px): R2 adds no visible text.
+  - UM6 l.594 and UM9 l.692: they assert no group value.
+- **STOP (exact match):** if UM5 l.579/l.580 do not match exactly (for example because a fake stores float32), A stops and reports the received value. A does not loosen the matcher.
+
+**`track-volume-db.test.tsx` — TV11** (l.512–545):
+| Line | Now | New |
+|---|---|---|
+| 512 | title `'TV11 must-not: group fader keeps %, Master keeps its drag, context previews stay linear, Shift equals plain'` | `'TV11: group fader in dB, Master keeps its drag, context previews stay linear, Shift is ten times finer'` |
+| 528 | `expect(storedVolume(api, 'music')).toBe(plain);` | `expect(storedVolume(api, 'music')).toBe(F(S));`, where `S` is a literal: the plain drag's anchor dB − 1.2 (−20 px × 60 dB / 1000 px). Also add `expect(storedVolume(api, 'music')).not.toBe(plain);` (+1 `expect(`) |
+| 535 | `toBe(0.75)` | `toBe(F(-15))` |
+| 536 | `toBe('75%')` | `toBe('−15.0 dB')` |
+| 537 | `toBe('Volume 75%')` | `toBe('Volume −15.0 dB')` |
+
+- **TV11 pre-check, before editing (record, then continue):**
+  - **The puzzle:** l.517–519 show the stored 0.72, slider `-2.9`, readout `−2.9`. But l.527 pins the plain −20 px result at `F(-16.4)`, which is −12 dB from **−4.4** (the fixture's 0.6). l.538 asserts the music readout `−4.4` after both drags are undone. Both suggest the drags saw 0.6, not the committed 0.72. The only action in between is the Master drag (l.520).
+  - **A triangulates three values,** with a temporary local log that A removes and verifies by sha:
+    1. `storedVolume(api, 'music')` right after the Master drag (after l.522);
+    2. the lane slider `value` and readout at that moment;
+    3. the anchor the plain drag uses (`readStoredValue()` at press).
+  - **(a)** All three are −2.9 / 0.72, so B misread something. A writes `S` from that anchor and explains why l.527/l.538 hold.
+  - **(b)** They differ, for example the Master gesture reverts a preceding committed lane volume, or the anchor is stale against the display. A does **not** stop and changes no app code for it:
+    - A writes l.528 as `F(observed anchor − 1.2)` (still a valid Shift-fine pin) and keeps the `not.toBe(plain)` line;
+    - A files the finding **A-R118-TV11-ANCHOR** in `a-round-118.md`, with the three observed values, the file and line, and a suggested severity (Medium if a committed value is lost);
+    - A completes stage 3b. B schedules the fix in the next planning.
+  - C repeats the triangulation in the browser as row **TV-ANCHOR** (§5).
+
+**`clip-gain-fader.test.tsx` — CF11** (l.485–503; the fixture music volume 0.6 = −4.4 dB):
+| Line | Now | New |
+|---|---|---|
+| 485 | title `'CF11 must-not: music Volume and Master give the same value with Shift as without'` | `'CF11: Shift makes music Volume and Master ten times finer'` |
+| 498–500 | fine music `toBe(coarseVolume)` | `toBe(F(-5.9))` (−4.4 − 25 × 60 / 1000) |
+| 501 | fine master `toBe(coarseMaster)` | `toBe(-1.2)` (−24 × 66 / 1320) |
+
+- l.494–497, l.502 (undo chain) and the coarse half stay unchanged.
+- **STOP:** if the received fine values differ from the formula, A reports the received values. A does not edit the expectations to match them.
+
+## 3. A — behaviour rules and tests
+
+### 3.1 Rules (D-29z83)
+- **R1 — group fader scale.**
+  - `value={trackVolumeSliderDb(volume)}`, with `min`/`max`/`step` = `TRACK_VOLUME_DB_MIN`/`MAX`/`STEP`.
+  - `onChange` → `previewGroupVolume(group.id, trackVolumeFromDb(Number(value)))`.
+  - Double-click → `previewGroupVolume(group.id, trackVolumeFromDb(TRACK_VOLUME_DB_DEFAULT))`, then commit. `F(0) === 1`, so the stored field is removed, as it is today.
+  - The hook gets `min`/`max`/`step` in dB, and `readStoredValue` returns `trackVolumeSliderDb(stored)`.
+  - The unused `TRACK_GROUP_VOLUME_STEP` / `TRACK_GROUP_VOLUME_DEFAULT` constants are removed.
+- **R2 — group texts.**
+  - `aria-valuetext={formatTrackVolumeDb(volume)}` and ``title={`Volume ${formatTrackVolumeDb(volume)}`}``.
+  - **No visible readout is added** to the group row. B's rationale:
+    - The SRW-17 contract (UM1) is that the group row adds no text and stays 28 px tall.
+    - In the 224 px header the name has about 82 px at depth 0 today. A `w-10` readout would cut that to about 40 px at depth 0 and about 16 px at depth 2.
+    - The group row never had a visible `%` readout. The dB value takes exactly the places the `%` had: the title and valuetext.
+    - A visible group readout is a layout change. It is recorded as the signal **GROUP-VOLUME-VISIBLE-READOUT** for DESIGN-UX-REVIEW, not dropped.
+- **R3 — exact return (the second copy of the lane pattern).**
+  - Copy the lane's `volumeGestureStartRef` pattern (`ArrangementLane.tsx` l.395–415) into the group header.
+  - At `beginGesture`, capture `{ volume, sliderDb }`. In `previewValue`, use `start.volume` when `start.sliderDb === sliderDb`; otherwise use `trackVolumeFromDb(sliderDb)`.
+  - Result: a press without movement, or a move back to the start, keeps a non-grid stored value (for example a context-set 0.72) bitwise and writes no entry.
+  - **Not implemented in this round:** the unanswered checkpoint addendum (ab) and the gate-117 Architecture note (a stored ↔ slider mapping in the hook). Do not change the hook's public shape.
+- **R4 — Shift fine.**
+  - Add `fineDivisor: FADER_SHIFT_FINE_DIVISOR` to `volumeFaderDrag` (lane; this covers the video lane too), `groupVolumeFaderDrag` and `masterFaderDrag`.
+  - `useRelativeFaderDrag` already re-anchors when Shift changes mid-drag (l.80–85). It is frozen, because it is not in the table.
+  - Keyboard steps stay 0.1 dB (lane, group) and the Master step is unchanged. Shift + Arrow is native browser behaviour and is not changed.
+- **R5 — Pan stays without fine (must-not).**
+  - Live §42.6 applies Shift to any dragged control, but T12 stage 3b is scoped to Volume faders.
+  - Pan's ±50 integer steps make ×10 a different design question.
+  - Recorded as the signal **PAN-SHIFT-FINE**.
+- **R6 — audio path unchanged.** A group dB change previews live through the existing `previewVolumeTarget` path, with no new `createBufferSource`. Export follows the stored linear value.
+
+### 3.2 New test file `group-volume-db.test.tsx` (meaningful, exact)
+| ID | Asserts |
+|---|---|
+| GV1 | At mount, after Ctrl+G on stems + SFX: group fader `min -60`, `max 0`, `step 0.1`, `value '0'`, valuetext `+0.0 dB`, title `Volume +0.0 dB`. The row's text is the name only. |
+| GV2 | Drag −25 px (w 100): stored `F(-15)` exactly, one `Volume` entry. Undo → field `undefined`. Redo → `F(-15)`. |
+| GV3 | Drag past the left end: stored exactly `0`, valuetext `−∞ dB`, live member gains `stems 0`, `sfx 0`, `music 1`. Undo restores the previous value. |
+| GV4 | Context-set group 0.72. Then (i) a press with no move, and separately (ii) a move away and back to the start px: stored stays `0.72` bitwise and `undoLabel` is unchanged. |
+| GV5 | Keyboard: focus, ArrowDown + change `'-0.1'` + keyUp → `F(-0.1)`, one entry per key-up. Double-click → `undefined`, one entry. |
+| GV6 | Shift drag −25 px on the group → `F(-1.5)`. Mid-drag Shift toggle, one pointer: a plain −10 px move gives `F(-6)`; then a **zero-delta** move at the same X with Shift held leaves `F(-6)` (no jump, no new preview); then, with Shift still held, a further −10 px gives `F(-6.6)`. |
+| GV7 | Shift −20 px on the **video** lane Volume → `F(-1.2)` from 0 dB. Master Shift is covered by CF11. |
+| GV8 | During playback, a group drag adds 0 `createBufferSource` calls, and the live gains equal `storedGains` (product rule). |
+| GV9 | Must-not: a Pan Shift drag gives the same value as a plain drag. A Clip Gain Shift drag is still /10 (one assertion each). |
+
+### 3.3 Mutations
+A runs each one; each must turn the named test red. Restore after each and verify by sha256.
+- **m1:** remove `fineDivisor` from the group hook call → GV6 red.
+- **m2:** drop the R3 start capture (always `F(sliderDb)`) → GV4 red.
+- **m3:** the group `onChange` writes `Number(value)` without the conversion → GV5 red.
+- **m4:** remove `fineDivisor` from the lane → GV7 and TV11 red.
+
+## 4. A — checks (speed rules)
+- `npm run typecheck`, `npm run lint`, and a read-only `npx biome check` on every changed or new file.
+- `npx vitest run` on these files: `group-volume-db`, `track-volume-db`, `track-group-mix-ui`, `clip-gain-fader`, `clip-gain-multi`, `fader-touch`, `fader-click`, `fader-guards`, `fader-focus-order`, `pan-release-recovery`, `gesture-guard`, `context-hygiene`, `pending-status`, `track-group-collapse-ui`, `track-groups-ui`, `track-group-mix`, `groups`, `master-ui`, `meter-ui`, `track-pan`, `track-layout`, `clip-gain`, `status-announcement-ui`, `self-disabling-focus`, `render-budget`, `fader`.
+  - Every file in the list that exists must be green.
+  - Report the counts, the TV11 pre-check outcome (a or b) and the m1–m4 results.
+- No full suite and no `npm run verify` (the gate runs them).
+- **The code-reviewer is required** (3+ files). Pass its Architecture note to B.
+- **A's report `a-round-118.md`:**
+  - start HEAD and frozen OK;
+  - every changed test line as `old → new`;
+  - `expect(`/`it(` counts before and after, per granted file;
+  - the new test count;
+  - the mutation results;
   - typecheck and lint results;
-  - frozen OK at the end;
-  - end status and its md5;
-  - deviations.
+  - the reviewer verdict and Architecture note;
+  - frozen OK at the end, and the end `git status`;
+  - deviations;
+  - the TV11 pre-check outcome.
+- **A stops and reports (no edit; B rules) if:**
+  - a needed test edit is outside §2.1;
+  - an exact match fails;
+  - another targeted test is red;
 
-## 4. C — rows
-Use real Playwright Chromium with a fresh context per session, at 1440×900 and 1280×720. Setup is the same as round 116: music `demo-middle-east` @0 s, stems `demo-stem-pulse` @2 s and SFX `demo-soft-impact` @4 s, all from the library at the insert marker; Snap off; Stop state.
+## 5. C — rows
+Use real Playwright Chromium with a fresh context per session, at 1440×900 and 1280×720.
+- **Setup** (the same as round 117): `demo-middle-east` on music @0, `demo-stem-pulse` on stems @2 s and `demo-soft-impact` on SFX @4 s, all from the library at the insert marker; Snap off; Stop state.
+- **Group:** select the stems and SFX lanes, then Ctrl+G (`ჯგუფი 1`).
+- **Shift drags:** a real mouse with `keyboard.down('Shift')` (the round-114 CG method).
 
 | ID | Action | Expected (PASS) |
 |---|---|---|
-| **T117-TARGETED** | Re-run A's 19-file vitest list (+ `meter-ui`, `track-pan`). Targeted only. | 370/370 and green. Same counts as A. |
-| **LANE-WRITE-GREP** | Read-only: grep `app` + `e2e` tests for lane Volume slider writes (`laneFader(`, `name: /^Volume — `, `aria-label^="Volume"`, `keyboardFader(` on a lane, `fireEvent.change` on a lane fader) | Every file with a lane write is in the T117 list. List any other file found as a finding. |
-| **AN-REVIEW** | `git diff` of `track-group-mix-ui.test.tsx` and doc 100 | Only R1 lines and the import. `expect(`/`it(` counts unchanged. Group and context lines untouched. Exact matchers only. Doc 100 has the R4 bullet only. |
-| **SOURCE-SCOPE** | `git status`, frozen list, protected hashes | The §2 end state exactly. `sha256sum -c` of `b-round-116-r117-tree-sha256.txt` OK. Protected hashes unchanged; `git diff d5de68f` on them is empty. |
-| **TV-PRESENT** (both viewports, 1 run each) | load | Every lane slider: `min -60`, `max 0`, `value "0"`, `aria-valuetext` `+0.0 dB`, readout `+0.0`. |
-| **TV-DRAG** (both, 1 run each) | music lane −20 px | Δ = `20/w × 60` ± (0.1 + `60/w`) dB. Readout and valuetext agree. One `Volume` entry (sentinel method). Ctrl+Z → `+0.0`. |
-| **NB-GROUP** (both, 1 run each) | Ctrl+G stems+SFX, group fader −20 px, Undo | Group shows `%`, one entry. The lanes inside keep `+0.0`. |
-| **G117-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `/api/studio-token?product=middle-east&file=stem1.wav` | Demo badge „დემო კოლექცია — ავტორიზაცია არ სჭირდება“. The product route shows "Sign in required", no workspace, 0 `audio[src]`. The token API returns **401**. Fake-Bearer 403: **BLOCKED (backend unavailable in cloud)**. |
-| **PX-NET / REG-HYD** | every session | 0 forbidden-host requests, 0 `Authorization` headers, 0 hydration errors, 0 `pageerror`, no console errors beyond the known cloud noise. |
-| **DOC-100** | read | R4 bullet present; l.4 unchanged. |
+| **T118-TARGETED** | A's vitest list (§4) | Green, with the same counts as A |
+| **AN-REVIEW** | `git diff 9cb820b` on the 3 granted tests and doc 100; read `group-volume-db.test.tsx` and doc 101 | Only §2.1 lines change: TV11 gains one `expect(`, the other counts are unchanged. Exact matchers only. GV1–GV9 exist and assert §3.2. Doc 100 changed only at l.4, l.56 and l.70 |
+| **SOURCE-SCOPE** | `git status`, `sha256sum -c b-round-117-r118-tree-sha256.txt`, protected hashes | The §2 end state exactly. Frozen list OK. Protected hashes unchanged and `git diff 9cb820b` on them empty. The Lane and Master diffs are only the fine option + import |
+| **GV-PRESENT** (both viewports) | load, then group | Group fader `-60/0/0.1`, value `0`, valuetext `+0.0 dB`, title `Volume +0.0 dB`. Row height 28 px, no new visible text, fader 48 px wide. The name button is not under 40 px wide at depth 0 |
+| **GV-DRAG** (both) | group fader −20 px, then Ctrl+Z | Δ = `20/w × 60` ± (0.1 + `60/w`) dB, read from valuetext. One `Volume` entry (sentinel method). Ctrl+Z → `+0.0 dB`. The member lane readouts stay `+0.0` |
+| **GV-INF** (both) | drag the group fader far left | valuetext `−∞ dB`. The stems/SFX meters stay silent during play |
+| **SH-LANE / SH-GROUP / SH-MASTER** (both) | the same −40 px drag: plain, then Undo, then with Shift held from the press | Shift Δ = plain Δ / 10 ± one step (0.1 dB for lane and group; the Master step for Master). One entry each. Measure the music lane, the group and the Master |
+| **SH-MID** (1440) | lane: plain −20 px, press Shift, −20 px more, release | No jump at the Shift press: at most one step between the last plain value and the first Shift value. The second half moves about 1/10 as far |
+| **NB-PAN / NB-CLIP** (1440) | Pan with Shift vs plain; Clip Gain with Shift | Pan: equal. Clip Gain: still /10 |
+| **G-GROUP-T3** (1440) | The round-116 G-T3 method, applied to the group. **Mute the music lane** (lane M) so only the group members sound. Export WAV with the group at 0 dB, then at −6.0 dB (ArrowLeft ×60 from `+0.0 dB` on the focused group fader; read `−6.0 dB`). **Control pair:** unmute music, press group **Mute** (UM2), export at group 0 dB and at −6.0 dB | Members: peak and RMS ratio (−6 vs 0) = `10^(−6/20)` = **0.501187 ± 0.5 %**. Control (music alone, group muted): ratio **1.000 ± 0.5 %** |
+| **G-GROUP-INF** (1440) | Music lane muted, group at `−∞` (far left; read `−∞ dB`), export | Every sample exactly 0 (0 LSB). A residual with peak ≤ −120 dBFS is an observation for B (candidate Low). Above −120 dBFS = FAIL (Medium). The round-116 G-INF rule |
+| **GV-PLAY** (1440) | play, and drag the group fader during play | The live drop shows on the meter. 0 new `createBufferSource` (the round-116 TV-PLAY method). The position keeps advancing |
+| **G118-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `/api/studio-token?product=middle-east&file=stem1.wav` | Demo badge „დემო კოლექცია — ავტორიზაცია არ სჭირდება“. The product route shows "Sign in required", no workspace and 0 `audio[src]`. The token API returns **401**. Fake-Bearer 403: **BLOCKED (backend unavailable in cloud)** |
+| **PX-NET / REG-HYD** | every session | 0 forbidden-host requests, 0 `Authorization` headers, 0 hydration errors, 0 `pageerror`, no console errors beyond the known cloud noise |
+| **TV-ANCHOR** (1440) | Music lane: ArrowLeft ×29 on the focused lane fader from `+0.0` (read `−2.9 dB`), Tab away (commit). Drag the Master −24 px and release. Read the music readout. Then a plain −20 px drag on the music lane, read the new value | After the Master drag the music readout is still `−2.9`. The lane drag Δ is measured from `−2.9` (Δ formula of TV-DRAG). A revert or a stale anchor = finding (Medium if a committed value is lost). Compare with A-R118-TV11-ANCHOR. The UI path cannot reproduce TV11 exactly (context commit), so a PASS here does not close A-R118-TV11-ANCHOR by itself |
+| **DOC-100/101** | read | Doc 100 l.4, l.56 and l.70 are fixed per §2. Doc 101 has the TEMPLATE sections |
 
-- **Carried from `c-round-116.json`, not re-measured:** TV-LAYOUT, TV-EXACT-UNDO, TV-INF, TV-KEY, TV-DBL, TV-PLAY, G-T3, G-T4, G-INF, G-VIDEO, NB-TRACK-SHIFT, NB-MASTER, NB-CLIP, NB-PAN-MS.
-  - These carry over because SOURCE-SCOPE proves the app code is byte-identical to the round-116 tree (policy: no re-measuring unchanged code).
-  - If SOURCE-SCOPE fails, the carry-over is void and C reports that.
+- **Neighbours that could break:**
+  - the lane Volume readout and exact Undo (TV rows from round 116): C re-touches TV-DRAG once at 1440;
+  - group Mute/Solo: one click each, `aria-pressed` toggles;
+  - the collapse/U focus rescue on the group fader: one U press with the group fader focused → focus moves to the group name, as in UM9.
 - **Gate rows (C does not claim them):** full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
-- **Neighbours that could break:** group-fader and context lines in the same file (AN-REVIEW, T117-TARGETED). App behaviour cannot change, because the app source is frozen (SOURCE-SCOPE).
-
-## 5. Outcome
-- **C PASS:** C-R116-01 is done, and T12 stage 3a is `c_pass`. Root then gates rounds 116 + 117 together; publication makes it `c_pass_published`.
-- **Next planning:** the REGRESSION round (on or after 2026-10-24), then stage 3b.
-- **C FAIL:** findings with severity. A failed exact match is Medium (gate-blocking).
+- **Severity guide:** a wrong stored value, a wrong export ratio or an extra history entry = Medium. A text or format mismatch = Low.
 
 ## 6. Ableton source
-No new behaviour in this round: test scope only. The round-116 table (`tasks/round-116.md` §6) and C's round-116 correspondence ratings stand unchanged. Ableton correspondence: **not applicable**.
+| Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
+|---|---|---|---|---|
+| Group tracks have mixer controls (Volume) | Live 12 Reference Manual §18.3 "Group Tracks", https://www.ableton.com/en/live-manual/12/mixing/ (B capture `b-round-78/ableton-mixing-20261022.txt` l.92, 2026-10-22) | Confirmed: "they have mixer controls" | The group has a Volume fader (SRW-17) | GV-PRESENT |
+| A group's Volume shows dB like a track's | not stated in the captures | **დაუდასტურებელი** (inferred from "similar to audio tracks") | The same dB scale and formatter as the lane (D-29z82 consistency) | GV-PRESENT, GV-DRAG |
+| Range −∞…+6 dB | not in the saved captures | **დაუდასტურებელი** | −∞…0 dB, as for the lanes in 3a; signal TRACK-VOLUME-BOOST | GV-INF |
+| Shift = finer resolution when dragging | §42.6 "Finer Resolution When Dragging: Shift" (capture `b-round-71/ableton-shortcuts-20261021.txt`, 2026-10-21; also §42.7 for envelopes) | Confirmed | ×10 on the lane, video lane, group and Master Volume faders | SH-* |
+| The fine factor (how much finer) | not stated | **დაუდასტურებელი** | 10, the same as Clip Gain stage 1 | SH-* |
+| Shift pressed mid-drag | not stated | **დაუდასტურებელი** | Re-anchor without a jump (existing hook) | SH-MID |
+| Shift on Pan | §42.6 is generic to controls | Confirmed (generic) | **შეგნებული განსხვავება**: Pan is unchanged in 3b (R5); signal PAN-SHIFT-FINE | NB-PAN |
+| Visible numeric volume | §18.1 extended mixer numeric field (capture l.48) | Confirmed (in the mixer, not the arrangement header) | The group shows dB in title/valuetext only (R2): **შეგნებული განსხვავება**; signal GROUP-VOLUME-VISIBLE-READOUT | GV-PRESENT |
+
+- `ableton-notes-source.txt` stays **დაუდასტურებელი**. ABLETON-EXPERT-REVIEW covers it after T12 V1.
+- C rates "CZABA requirement met" and "Ableton correspondence" separately.
 
 ## 7. Evidence and reporting
-- **C writes** `c-round-117.md` and `c-round-117.json`, with the fields `taskStatus`, `passed`, `failed`, `blocked`, `gate`, `carried`, `bugs`, `browserVerified`, `realVerified` and `envStatus`. Evidence goes under `c-round-117/{tools,out,shots}/`. Write as you go.
+- **C writes** `c-round-118.md` and `c-round-118.json`, with the fields `taskStatus`, `passed`, `failed`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified` and `envStatus`. Evidence goes under `c-round-118/{tools,out,shots}/`. Write as you go.
 - `browserVerified` is false only if a browser row that **can** run here was not run.
+- Inconclusive rows are listed as inconclusive, never under `passed`.
 - Consult only the read-only agents in your list. C makes no `store/` writes.
 
-## 8. Root / architecture (not A's work)
-- **Rounds 116 + 117 publish together** after C PASS, a full verify and an independent review (GATE-72/74 precedent; `GATE-116-SKIPPED` in `open_findings`).
-- **Checkpoint request:** addendum (ab) was appended to `b-round-91-checkpoint-request.md`. It covers the round-116 reviewer's Signal 4: the hook should expose the gesture start / `atStart` before stage 3b. It is non-blocking.
+## 8. Outcome
+- **C PASS:** T12 stage 3b → `c_pass`. Publication makes it `c_pass_published`.
+- **Next planning (on or after 2026-10-24):** the **REGRESSION round**, then T12 stage 4 (the waveform shows clip gain + a view-only vertical zoom), then ABLETON-EXPERT-REVIEW.
+- **C FAIL:** findings with severity. B plans the fix-up first (Medium and above).
+
+## 9. Root / architecture (not A's work)
+- **Checkpoint request:** addendum **(ac)** was appended to `b-round-91-checkpoint-request.md`. It covers:
+  - the gate-117 reviewer's Architecture note (an optional stored ↔ slider mapping in `useRelativeFaderDrag`);
+  - round 118's second copy of the start capture (the group).
+  - It is non-blocking; round 118 copies the pattern instead of waiting.
+- **Other gate-117 findings:**
+  - S2 (non-linear taper feel) → signal TRACK-VOLUME-TAPER;
+  - S3 (`volumeGestureStartRef` is never cleared) → deferred Low;
+  - S5 (text below the slider floor) → acknowledged info.

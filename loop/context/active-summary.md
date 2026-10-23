@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T20:36:34.972Z)
+# Active loop summary (2026-10-23T21:04:24.518Z)
 
-- backlog.json 1039 KB -> active view 129 KB
-- status: G_ROOT_GATE round 116
-- servers: `{"checkedUtc":"2026-10-23T20:19:06.5730635Z","round":116,"attempt":1,"store":200}`
-- last publication: d5de68fe27c165b00b5578f016703af90730500b (rounds 115-115)
-- last root gate: round 116 skipped - C taskStatus FAIL
+- backlog.json 1046 KB -> active view 131 KB
+- status: G_ROOT_GATE round 117
+- servers: `{"checkedUtc":"2026-10-23T20:52:01.5006844Z","round":117,"attempt":1,"store":200}`
+- last publication: 9cb820b6f7e5f9f44d1c651954d30ebf4f83be9f (rounds 116-117)
+- last root gate: round 117 published - commit 9cb820b6f7e5f9f44d1c651954d30ebf4f83be9f pushed
 
 ## Current items: -
 
@@ -192,7 +192,7 @@
 - B-R107-ENTER-ON-BODY / info / open question for the user (not deferred, not scheduled as a change): the workspace-wide Enter (target not a button/slider/separator, incl. BODY) adds the active library item; SRW-12 R12-L2 only specifies Enter from the results list. Kept unchanged in round 108; focus retention closes C-R107-01 regardless / should Enter with focus on BODY add the active library item?
 - GATE107-S3-NZ-DELTA-NIT / info / open nit - optional defensive delta < 0 in the R4 condition (doc 092 F3) / target === clip.start with a non-negative delta would announce the time-start text (no current caller)
 - A-R108-CTRLZ-EXHAUST-FOCUS / info / open - signal (not in rule F1); Ctrl+Z exhausting history while Undo is focused leaves focus on the disabled Undo/BODY because the shortcut path never arms / 
-- DEFERRED-LOW-POLISH / info / open - pointer: 144 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
+- DEFERRED-LOW-POLISH / info / open - pointer: 159 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
 - PROD-SSR-NUL / info / open - gate/Tech Lead row (production build served, NUL 0 on /studio-lab, both UAs, chunked); not run by C (dev server only) or by gate 109 (build green, HTML not measured) / production SSR HTML NUL count not measured after the round-109 filter
 - GATE109-F4-SN5-TRIPWIRE / info / acknowledged - SN5 turns red on purpose when react-dom fixes writeStringChunk; the extra typeof assertion may go with the removal task / SN5 is a deliberate upstream tripwire
 - GATE109-F5-ABORT-TIMER / info / signal - pre-existing setTimeout(abort, ABORT_DELAY) never cleared and responseStatusCode=500 after resolve has no effect (A reviewer + gate F5); entry.server.tsx frozen; not scheduled / entry.server.tsx abort timer not cleared
@@ -223,6 +223,10 @@
 - TRACK-VOLUME-BOOST / info / signal (not requested by the user; Live 12 track range -inf..+6 dB unconfirmed in saved captures) - round 116 top is 0 dB / track/group Volume has no positive boost (Master has +6 dB)
 - TRACK-VOLUME-NUMERIC-FIELD / info / signal (Live 12 section 18.1 extended mixer has a numeric volume field; CZABA lane header shows a readout only; deliberate difference, narrow header) / no typed numeric entry for track Volume
 - MIXER-MULTI-TRACK / info / signal (Live 12 section 18.1: adjusting one selected track's mixer control adjusts the others, keeping differences; not in T12 (T12.7 is multi-clip) and not requested) / multi-track mixer adjustment
+- C-R116-01 / medium / dispatched round 117 (D-29z82): scale-only exact grant in track-group-mix-ui.test.tsx / track-group-mix-ui UM3/UM5/UM9 still write linear values into the lane Volume slider after stage 3a; targeted vitest 367/370 (gate full vite
+- GATE-116-SKIPPED / info / open_root / Round 116 root gate skipped (C FAIL on T116-TARGETED only); round-116 code is uncommitted in the tree; rounds 116+117 publish together after
+- C-R116-OBS-TV-PLAY-CONTENT / info / acknowledged (C-R82-LIVE-ORACLE-PAIRED class; the synthetic beep lane showed the exact -17.5 dB live) / TV-PLAY live drop with music is content-dominated (10.78 dB for a 17.5 dB drag)
+- C-R116-OBS-AS-CONST / info / ruled accepted (B, D-29z82) / track-volume-db.test.tsx:42 uses 'as const' (const assertion; existing repo pattern)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

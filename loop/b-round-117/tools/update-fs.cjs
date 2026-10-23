@@ -1,0 +1,13 @@
+const fs = require('fs');
+const p = '/home/runner/czaba-project/tmp/studio-real-loop/feature-status.md';
+let s = fs.readFileSync(p, 'utf8');
+const rep = (a, b) => { if (!s.includes(a)) { console.error('missing', a.slice(0, 60)); process.exit(1); } s = s.replace(a, b); };
+rep('განახლდა: 2026-10-23 · ავტორი: B (round 116 → round 117 დაგეგმვა)', 'განახლდა: 2026-10-23 · ავტორი: B (round 117 → round 118 დაგეგმვა)');
+const l18start = '- **Round 116 (T12 ეტაპი 3a) — C FAIL მხოლოდ ტესტის ფარგლებზე:**';
+const i = s.indexOf(l18start); const j = s.indexOf('\n', i);
+const newLine = '- **T12 ეტაპი 3a (ხაზის Volume dB-ში, −∞) — მზადაა (Round 116 ბრაუზერი + Round 117 C PASS `browserVerified`, გამოქვეყნდა `9cb820b`).** G-T3 0.501187, G-T4 1.412537, G-INF — 0 არანულოვანი sample; C-R116-01 დაიხურა (T117-TARGETED 370/370). **Round 118 (D-29z83) — T12 ეტაპი 3b:** ჯგუფის Volume dB-ში (−60…0, −∞ ქვედა ბოლოში, ტექსტი title/valuetext-ში, ხილული readout-ის გარეშე — სიგნალი GROUP-VOLUME-VISIBLE-READOUT) და Shift-ით 10× ზუსტი drag ხაზის, ვიდეოს, ჯგუფისა და Master-ის Volume-ზე; Pan უცვლელია (სიგნალი PAN-SHIFT-FINE). C ზომავს export-ზე ჯგუფის −6 dB-ს (0.5012) და −∞-ს. რეგრესიის რაუნდი — round 119-ის დაგეგმვისას (2026-10-24-ზე ან შემდეგ), მერე ეტაპი 4. ახალი Low GATE117-S3 → `deferred_low_polish` (სულ 160). **R118-T (Tech Lead, გამოქვეყნების შემდეგ):** რეალური მაუსით Shift+drag Volume-ზე, ჯგუფის dB tooltip-ში.';
+s = s.slice(0, i) + newLine + s.slice(j);
+rep('ეტაპი 3a — **ბაგია** (Round 116: ბრაუზერის ყველა row PASS, მაგრამ C-R116-01 ტესტის ფარგლებზე → Round 117, D-29z82; გამოუქვეყნებელი); 3b, 4, 5+ — **არ დაწყებულა**', 'ეტაპი 3a **მზადაა** (Round 116–117 C PASS `browserVerified`, `9cb820b`); ეტაპი 3b — **მუშავდება** (Round 118, D-29z83: ჯგუფის Volume dB + Shift fine; მტკიცებულება `c-round-118.json`-ს ელოდება); 4, 5+ — **არ დაწყებულა**');
+rep('სიგნალები: TRACK-VOLUME-BOOST, TRACK-VOLUME-NUMERIC-FIELD, MIXER-MULTI-TRACK.', 'სიგნალები: TRACK-VOLUME-BOOST, TRACK-VOLUME-NUMERIC-FIELD, MIXER-MULTI-TRACK, TRACK-VOLUME-TAPER, GROUP-VOLUME-VISIBLE-READOUT, PAN-SHIFT-FINE.');
+fs.writeFileSync(p, s);
+console.log('ok');
