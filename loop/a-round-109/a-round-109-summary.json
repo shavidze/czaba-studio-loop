@@ -1,0 +1,101 @@
+{
+  "round": 109,
+  "role": "A",
+  "status": "implemented_awaiting_C",
+  "baseHead": "32a6b08",
+  "changed": {
+    "modified": [
+      "app/entry.server.tsx",
+      "docs/implementation/2026/quarter-IV/093-studio-self-disabling-button-focus.md"
+    ],
+    "untracked": [
+      "app/lib/ssr/strip-nul-bytes.server.ts",
+      "app/lib/ssr/__tests__/strip-nul-bytes.server.test.ts",
+      "docs/implementation/2026/quarter-IV/094-studio-ssr-nul-bytes.md"
+    ]
+  },
+  "checks": {
+    "typecheck": "exit 0",
+    "lintOwnedDiagnostics": 0,
+    "biomeOwned": "exit 0, 0 diagnostics",
+    "targetedVitest": {
+      "files": 3,
+      "tests": 20,
+      "passed": 20
+    }
+  },
+  "failBefore": {
+    "red": [
+      "SN2a",
+      "SN2b",
+      "SN3",
+      "SN4",
+      "SN6",
+      "SN7"
+    ],
+    "green": [
+      "SN1",
+      "SN5"
+    ]
+  },
+  "mutations": {
+    "m1": [
+      "SN2a",
+      "SN2b",
+      "SN3",
+      "SN4",
+      "SN6",
+      "SN7"
+    ],
+    "m2": [
+      "SN3"
+    ],
+    "m3": [
+      "SN2a",
+      "SN2b",
+      "SN3",
+      "SN6",
+      "SN7"
+    ],
+    "m4": [
+      "SN7"
+    ],
+    "controlBeforeAfter": "8/8 green"
+  },
+  "selfCheck": {
+    "responses": 20,
+    "nulTotal": 0,
+    "studioLabBytes": 69303,
+    "sha256EqualsBStripped": "20/20",
+    "studioLabEvents": 36
+  },
+  "frozen": "542/542",
+  "protectedUnchanged": true,
+  "browserRunByA": false,
+  "codeReviewer": {
+    "ran": true,
+    "score": "8.5/10",
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "mediumFixed": true,
+    "lowFixed": [
+      "L1",
+      "L2",
+      "L3",
+      "L4",
+      "L7"
+    ],
+    "lowKept": [
+      "L5"
+    ],
+    "lowDeclinedOwnership": [
+      "L6"
+    ],
+    "architectureNote": "none \u2014 a stateless `.server.ts` helper in `app/lib/ssr/`, wired in by `entry.server.tsx` (which still owns the pipeline), shows none of the four risk signals. Keep it where it is."
+  },
+  "deviations": [
+    "biome-ignore useButtonType on the fixture line to keep B's fixture byte-identical",
+    "\u00a71 string-conversion branch removed per reviewer M1 (unreachable under decodeStrings: true); SN4 renamed"
+  ]
+}

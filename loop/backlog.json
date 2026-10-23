@@ -1,10 +1,10 @@
 {
- "version": 107,
- "updated": "2026-10-23 (B round 108 -> round 109 planning)",
+ "version": 108,
+ "updated": "2026-10-23 (B round 109 -> round 110 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 109: D-29z74 - the server-rendered HTML carries no NUL bytes: byte Transform in app/entry.server.tsx (C-R23-01 + C-R38-01), doc 093 l.4; baseline 32a6b08 clean; frozen b-round-108-r109-tree-sha256.txt 542; expected 2 M + 3 ??)",
- "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23)",
+ "current_task": "current-task.md (round 110: D-29z75 - the library collapse/expand/search-clear buttons keep keyboard focus (B-R108-LIB-FOCUS-LOSS, Medium) + Enter-repeat guard; doc 094 l.4; baseline 1fe3ba2 clean; frozen b-round-109-r110-tree-sha256.txt 544; expected 2 M + 2 ??)",
+ "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -380,7 +380,8 @@
     "L14 no keyboard clip selection; clips <16 px covered by trim edges",
     "no context-level fake-AudioContext tests"
    ],
-   "status_note_round23": "Board shows SRW-01 as bug while C-R23-01 is open; core features remain C-evidenced (rounds 1, 10, 13-23)."
+   "status_note_round23": "Board shows SRW-01 as bug while C-R23-01 is open; core features remain C-evidenced (rounds 1, 10, 13-23).",
+   "status_note_round110": "C-R23-01 (the last open SRW-01 bug) done: C round 109 PASS browserVerified=true, gate 109 published 1fe3ba2; PROD-SSR-NUL remains a gate row"
   },
   {
    "id": "SRW-02",
@@ -8785,7 +8786,7 @@
    "round": 109,
    "task": "current-task.md",
    "decision": "D-29z74",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "C-R23-01",
     "C-R38-01",
@@ -8798,6 +8799,24 @@
     "app/lib/ssr/__tests__/strip-nul-bytes.server.test.ts (new)",
     "docs/implementation/2026/quarter-IV/094-studio-ssr-nul-bytes.md (new)",
     "docs/implementation/2026/quarter-IV/093-studio-self-disabling-button-focus.md (l.4 only)"
+   ],
+   "result": "C PASS browserVerified=true realVerified=true (c-round-109.json, 15 rows passed; fake-Bearer BLOCKED backend); gate 109 published 1fe3ba2 (reviewer 9/10); C-R109-OBS-01 Low -> deferred_low_polish; PROD-SSR-NUL gate row open"
+  },
+  {
+   "round": 110,
+   "task": "current-task.md",
+   "decision": "D-29z75",
+   "status": "dispatched",
+   "items": [
+    "B-R108-LIB-FOCUS-LOSS",
+    "GATE109-F6-DOC094-STATUS"
+   ],
+   "note": "Library collapse/expand/search-clear focus handoff (F1: collapse<->expand after mount via an armed ref + one dependency-less layout effect; clear -> search input synchronously; only when the button had focus and focus is on body/null) + F2 Enter-repeat guard on the three buttons. New library-focus-handoff.test.tsx (LF1-LF9 + LF5b, m1-m5), doc 095, doc 094 l.4. Baseline HEAD 1fe3ba2 clean; frozen b-round-109-r110-tree-sha256.txt 544; snapshot b-round-109-r110-snapshots/ArrangementLibrary.tsx 32613fe1; expected 2 M + 2 ??. Regression round due at the next B planning on/after 2026-10-24.",
+   "owned": [
+    "app/components/arrangement/ArrangementLibrary.tsx (narrow: imports, new refs/effect/guard, the three buttons, search input ref)",
+    "app/lib/arrangement/__tests__/library-focus-handoff.test.tsx (new)",
+    "docs/implementation/2026/quarter-IV/095-studio-library-toggle-focus.md (new)",
+    "docs/implementation/2026/quarter-IV/094-studio-ssr-nul-bytes.md (l.4 only)"
    ]
   }
  ],
@@ -9329,6 +9348,12 @@
    "file": "docs/implementation/2026/quarter-IV/072-studio-lab-clip-fades-stage-1.md",
    "scope": "l.4 status line + at most 3 added lines (GATE82-S2, GATE82-S3, round-83 X1)",
    "basis": "D-29z48 docs"
+  },
+  {
+   "round": 110,
+   "file": "docs/implementation/2026/quarter-IV/094-studio-ssr-nul-bytes.md",
+   "scope": "l.4 status line only (gate-109 F6)",
+   "basis": "D-29z75 docs"
   }
  ],
  "baseline_tree_at_round4": "HEAD cc1e531, working tree clean; the 4 protected files are committed in cc1e531 with baseline sha256 unchanged",
@@ -9537,7 +9562,7 @@
   {
    "id": "C-R23-01",
    "severity": "medium",
-   "status": "dispatched round 109 (D-29z74): NUL-stripping Transform in app/entry.server.tsx (narrow grant on B reading of the user 2026-10-23 decision; root may refuse). B measured 32a6b08: /studio-lab 4 NUL (6142/6143 Delete aria-label, 26810/26811 heading)",
+   "status": "done (C round 109 PASS browserVerified=true realVerified=true (c-round-109.json: NUL-HTTP 20/20 NUL 0, NUL-EQUIV 20/20 sha256 = B sha256Stripped, STREAM-KEPT 36 events, AX-NOJS/AX-HYDRATED 1280/1440 0 U+FFFD); gate 109 published 1fe3ba2 (reviewer 9/10)); PROD-SSR-NUL (production HTML) stays an open gate/Tech Lead row (gate-109 F2); ownership of entry.server.tsx + app/lib/ssr/ ratified by root publication (gate-109 F1), frozen again after 1fe3ba2 (D-29z75)",
    "note": "SSR stream contains NUL bytes: react-dom@18.3.1 server writeStringChunk flushes the whole 2048-byte view (unwritten zero bytes) when a 3-byte Georgian char does not fit (dev l.129 writeToDestination(destination, currentView); same in prod). /studio-lab: 4 NUL (visible text patched by hydration; the music name button aria-label keeps 2x U+FFFD all session). Other sampled pages 0 today but any Georgian SSR page is exposed. Fix needs app/entry.server.tsx (not in A ownership, plan section 6) or package.json (React 19). Not assigned to A; not deferred.",
    "ask": "Tech Lead: choose (a) React 19 upgrade, or (b) narrow grant of app/entry.server.tsx to A for a NUL-stripping Transform module with tests (oracle: NUL 0 on Georgian SSR pages, no U+FFFD in DOM attributes, real renderToPipeableStream repro test, bot + browser streaming, broad SSR page regression, purchase protection unchanged). B schedules it before the next feature round once answered.",
    "evidence": "c-round-23.md section 3; c-round-23/runs/ssr-1..3.html; B: live curl 2026-10-11 NUL 4 on /studio-lab, 0 on /, /products, /about, /studio/middle-east",
@@ -10053,7 +10078,7 @@
   {
    "id": "C-R38-01",
    "severity": "low",
-   "status": "dispatched round 109 with C-R23-01 (D-29z74; AX-NOJS / AX-HYDRATED rows)",
+   "status": "done (C round 109 AX-HYDRATED 1280/1440: 0 attributes/text nodes with U+FFFD, the Delete aria-label exact; gate 109 published 1fe3ba2)",
    "to": "with C-R23-01 (Tech Lead)",
    "title": "C-R23-01 NUL bytes now fall inside two aria-label attributes (library collapse button, detail range start input); hydration does not repair attributes, so the live DOM keeps U+FFFD",
    "evidence": "c-round-38/runs/studio-lab.html, sl1-3.html, c-r23-01-dom.txt; c-round-38.json bugs[0]",
@@ -13975,7 +14000,7 @@
   {
    "id": "B-R108-LIB-FOCUS-LOSS",
    "severity": "medium",
-   "status": "open - B probe, same class as C-R107-01 (C rated Medium); schedule after the regression round; must close before T12",
+   "status": "dispatched round 110 (D-29z75): F1 focus handoff (collapse<->expand after mount, clear -> search input) + F2 Enter-repeat guard on the three buttons; B re-probe at 1fe3ba2 reproduced all three (b-round-109/probe/lib-focus-probe-result.json); regression round not due until 2026-10-24",
    "to": "B (next bug round) / A",
    "title": "Library collapse (◀), expand (▶) and search clear (×) unmount themselves on Enter; focus falls to BODY and the next Enter adds the active library item as a clip",
    "evidence": "b-round-108/probe/lib-focus-probe-result.json (1280x720, 32a6b08: collapse/expand/clear -> active BODY after Enter 1, clips 0 -> 1 after Enter 2 ('CZABA hero' added)); A round-108 reviewer sweep ArrangementLibrary.tsx:376-385, 391-400, 414-424",
@@ -13988,7 +14013,7 @@
   {
    "id": "GATE108-S4-DOC093-STATUS",
    "severity": "low",
-   "status": "dispatched round 109 (doc 093 l.4 one-line grant)",
+   "status": "done (C round 109 DOC-093-L4 PASS; published 1fe3ba2)",
    "title": "doc 093 status line still says awaiting C",
    "evidence": "gates/round-108/review.md suggestion 4"
   },
@@ -14001,9 +14026,73 @@
   {
    "id": "DEFERRED-LOW-POLISH",
    "severity": "info",
-   "status": "open - pointer: 139 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped",
+   "status": "open - pointer: 141 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped",
    "title": "deferred Low findings (not lost)",
-   "evidence": "backlog.json deferred_low_polish"
+   "evidence": "backlog.json deferred_low_polish",
+   "round110_note": "B round 109 -> 110 planning: +C-R109-OBS-01, +GATE109-F3-BIOME-IGNORE-FIXTURE (141 entries)"
+  },
+  {
+   "id": "PROD-SSR-NUL",
+   "severity": "info",
+   "status": "open - gate/Tech Lead row (production build served, NUL 0 on /studio-lab, both UAs, chunked); not run by C (dev server only) or by gate 109 (build green, HTML not measured)",
+   "title": "production SSR HTML NUL count not measured after the round-109 filter",
+   "evidence": "gates/round-109/review.md F2; c-round-109.json gate"
+  },
+  {
+   "id": "GATE109-F1-OWNERSHIP",
+   "severity": "info",
+   "status": "closed by root publication (gate 109 published 1fe3ba2 with entry.server.tsx + app/lib/ssr/); plan section 6 now names both frozen again after round 109 (D-29z75)",
+   "title": "entry.server.tsx narrow grant rested on B's reading of the 2026-10-23 decision",
+   "evidence": "gates/round-109/review.md F1"
+  },
+  {
+   "id": "GATE109-F4-SN5-TRIPWIRE",
+   "severity": "info",
+   "status": "acknowledged - SN5 turns red on purpose when react-dom fixes writeStringChunk; the extra typeof assertion may go with the removal task",
+   "title": "SN5 is a deliberate upstream tripwire",
+   "evidence": "gates/round-109/review.md F4"
+  },
+  {
+   "id": "GATE109-F5-ABORT-TIMER",
+   "severity": "info",
+   "status": "signal - pre-existing setTimeout(abort, ABORT_DELAY) never cleared and responseStatusCode=500 after resolve has no effect (A reviewer + gate F5); entry.server.tsx frozen; not scheduled",
+   "title": "entry.server.tsx abort timer not cleared",
+   "evidence": "a-round-109.md code-reviewer; gates/round-109/review.md F5"
+  },
+  {
+   "id": "GATE109-F6-DOC094-STATUS",
+   "severity": "low",
+   "status": "dispatched round 110 (doc 094 l.4 one-line grant)",
+   "title": "doc 094 status line still says awaiting C",
+   "evidence": "gates/round-109/review.md F6"
+  },
+  {
+   "id": "ARCH-R109-NUL-FILTER-REMOVAL",
+   "severity": "info",
+   "status": "signal - not scheduled; when react-dom is upgraded remove createNulByteStripStream + SN5 and return entry.server.tsx to PassThrough (acceptance: SN6/SN7 equivalents green without the filter); reviewer verdict keep",
+   "title": "remove the SSR NUL filter after a react-dom upgrade",
+   "evidence": "gates/round-109/review.md Architecture note; a-round-109.md Architecture note"
+  },
+  {
+   "id": "C-R109-OBS-PRODUCTS-404-200",
+   "severity": "info",
+   "status": "open - backend-dependent observation; recheck when a backend is available",
+   "title": "/products returns HTTP 200 with a '404 - Page Not Found' title (bytes identical to the 32a6b08 baseline)",
+   "evidence": "c-round-109.json observations[0]"
+  },
+  {
+   "id": "C-R109-OBS-CLIP-COUNT",
+   "severity": "info",
+   "status": "open - observation, not investigated; signal for the export overload count",
+   "title": "export alert said 14 clipped samples while C's WAV scan counted 30 samples at |x|>=0.9999 (threshold or per-channel counting may differ)",
+   "evidence": "c-round-109.json observations[1]"
+  },
+  {
+   "id": "ARCH-R110-FOCUS-HANDOFF-THIRD-FILE",
+   "severity": "info",
+   "status": "signal - addendum (u) to the pending checkpoint request b-round-91-checkpoint-request.md; non-blocking; no extraction scheduled",
+   "title": "arm-ref + layout-effect focus handoff now in a third component (Transport, DetailPanel, Library)",
+   "evidence": "current-task.md round 110 F1; doc 093"
   }
  ],
  "tech_lead_notes": [
@@ -16866,7 +16955,7 @@
   {
    "id": "A-R108-SWEEP-HITS",
    "severity": "low",
-   "status": "open - reviewer sweep (round 108); Library hits promoted to B-R108-LIB-FOCUS-LOSS (B probe); video-dock placeholder 'დაბრუნება' (ArrangementVideoDock.tsx:902-910, possible) and track pan reset focusing its slider unconditionally (ArrangementLane.tsx:718-732) unverified - check in the B-R108-LIB-FOCUS-LOSS round probe",
+   "status": "open - Library hits promoted to B-R108-LIB-FOCUS-LOSS (round 110). B probe at 1fe3ba2 (b-round-109/probe/video-focus-probe-result.json, 1280+1440): video placeholder 'დაბრუნება', float close and expand all leave focus on the expand button, Enter 2 adds no clip -> NOT reproduced (C LF-SWEEP-NEG row in round 110 confirms); pan reset focuses the Pan slider on success, also after a mouse click (cosmetic, focus never on BODY) -> remains this deferred Low",
    "evidence": "a-round-108.md self-disabling sweep",
    "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
    "deferred_round": "B round 108 -> 109 planning (2026-10-23)"
@@ -16898,6 +16987,26 @@
    "repro": "one clip, Fit, = then +, focus Zoom back, hold Enter (1 down + 10 repeats)",
    "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
    "deferred_round": "B round 108 -> 109 planning (2026-10-23)"
+  },
+  {
+   "id": "C-R109-OBS-01",
+   "severity": "low",
+   "status": "open - deferred (pre-existing)",
+   "title": "with JS disabled /studio-lab renders fully black: .page-transition-wrapper (PageTransition.tsx, app.css:279) has opacity 0 until client JS runs; DOM and labels correct",
+   "evidence": "c-round-109.json bugs[0]; c-round-109/shots/axnojs-1280x720.png; c-round-109/tools/nojsvis.cjs",
+   "repro": "fresh Chromium context javaScriptEnabled:false, 1280x720, open /studio-lab, screenshot",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 109 -> 110 planning (2026-10-23)"
+  },
+  {
+   "id": "GATE109-F3-BIOME-IGNORE-FIXTURE",
+   "severity": "low",
+   "status": "open - deferred; try type:'button' on the SN fixture; drop the biome-ignore only if SN5 still shows NUL > 0",
+   "title": "new biome-ignore lint/a11y/useButtonType in strip-nul-bytes.server.test.ts",
+   "evidence": "gates/round-109/review.md F3",
+   "repro": "strip-nul-bytes.server.test.ts:22",
+   "deferred_reason": "user decision 2026-10-23 (Lows deferred); the test file is frozen in round 110",
+   "deferred_round": "B round 109 -> 110 planning (2026-10-23)"
   }
  ],
  "baseline_tree_at_round108": {

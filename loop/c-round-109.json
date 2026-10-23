@@ -1,0 +1,85 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T12:47:30.1534578Z",
+  "round": 109,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R109-OBS-01",
+   "severity": "low",
+   "preExisting": true,
+   "steps": [
+    "Fresh Chromium context with javaScriptEnabled:false, 1280x720",
+    "Open http://127.0.0.1:5173/studio-lab (waitUntil load)",
+    "Screenshot"
+   ],
+   "expected": "The server-rendered Studio markup is visible without JS (or a deliberate no-JS notice).",
+   "actual": "The page is fully black: .page-transition-wrapper (app/components/animations/PageTransition.tsx, app/styles/app.css:279) has computed opacity 0 until client JS runs. The DOM is correct (exact ⌫ aria-label, heading, 0 U+FFFD). The same wrapper is in B's 32a6b08 baseline body, so this was not caused by round 109. Low -> deferred_low_polish per the 2026-10-23 bug gate.",
+   "evidence": "c-round-109/shots/axnojs-1280x720.png, c-round-109/tools/nojsvis.cjs output in c-round-109.md"
+  }
+ ],
+ "passed": [
+  "NUL-HTTP",
+  "NUL-EQUIV",
+  "STREAM-KEPT",
+  "AX-NOJS",
+  "AX-HYDRATED",
+  "REG-FLOW",
+  "REG-PAGES",
+  "PX-NET",
+  "REG-HYD",
+  "G109-3",
+  "AN-REVIEW",
+  "T109-TARGETED",
+  "DOC-094",
+  "DOC-093-L4",
+  "SOURCE-UNCHANGED"
+ ],
+ "blocked": [
+  "G109-3 fake-Bearer sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "infraNotes": [
+  "AX-HYDRATED 1280 attempt 1: page.evaluate threw 'createTreeWalker parameter 1 is not of type Node' (document momentarily without documentElement, consistent with a dev-server reload). Retried twice: both PASS. Both attempts kept (out/axhyd-1280x720-attempt1.json, log-axhyd-1280x720.txt)."
+ ],
+ "ableton": {
+  "SSR byte integrity": "not applicable (web delivery, not a DAW behaviour)"
+ },
+ "viewportsCovered": {
+  "AX-NOJS": [
+   "1280x720",
+   "1440x900"
+  ],
+  "AX-HYDRATED": [
+   "1280x720",
+   "1440x900"
+  ],
+  "REG-FLOW": [
+   "1280x720"
+  ],
+  "REG-PAGES": [
+   "1280x720"
+  ],
+  "G109-3": [
+   "1440x900"
+  ]
+ },
+ "observations": [
+  "/products returns HTTP 200 with title '404 - Page Not Found' (bytes identical to B's 32a6b08 baseline; backend unavailable in cloud). Pre-existing and backend-dependent; recheck when a backend is available. Not a round-109 bug.",
+  "Export alert '14 sample შეიზღუდა' vs C WAV scan 30 samples |x|>=0.9999 (possibly a different threshold or per-channel counting); outside scope, not investigated."
+ ]
+}

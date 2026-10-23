@@ -1217,6 +1217,24 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z75 — Round 109-ის შედეგი; Round 110: ბიბლიოთეკის `◀` / `▶` / `×` keyboard focus-ს ინარჩუნებს (B-R108-LIB-FOCUS-LOSS, Medium).**
+
+C round 109 (`tmp/studio-real-loop/c-round-109.md`, `c-round-109.json`) — **PASS, `browserVerified: true`, `realVerified: true`**: NUL-HTTP (20/20, NUL 0), NUL-EQUIV (20/20 sha256 = B-ის `sha256Stripped`), STREAM-KEPT (36 event), AX-NOJS და AX-HYDRATED (1280/1440), REG-FLOW, REG-PAGES, PX-NET, REG-HYD, G109-3 (fake-Bearer — BLOCKED, backend), AN-REVIEW, T109-TARGETED (3 / 20), DOC-094, DOC-093-L4, SOURCE-UNCHANGED. ერთი Low (ძველი): C-R109-OBS-01.
+
+**Gate 109 — გამოქვეყნდა `1fe3ba2`** (reviewer 9/10, „COMMIT: OK“).
+
+- **R1 — backlog (მხოლოდ მტკიცებულებით):** C-R23-01, C-R38-01, GATE108-S4 → **მზადაა**. PROD-SSR-NUL (production HTML) gate/Tech Lead-ის ღია სტრიქონად რჩება (gate-109 F2). C-R109-OBS-01 (JS-ის გარეშე გვერდი შავია, `.page-transition-wrapper` opacity 0) და GATE109-F3 → `deferred_low_polish`. GATE109-F4/F5, `/products`-ის 200 + 404 სათაური და export-ის clipped sample-ების 14 vs 30 → info.
+- **R2 — ownership:** root-მა round 109 გამოაქვეყნა, ანუ `entry.server.tsx`-ის ვიწრო grant პრაქტიკულად დადასტურდა (gate-109 F1). §6-ში ახლა წერია, რომ `app/entry.server.tsx` და `app/lib/ssr/` round 109-ის შემდეგ ისევ გაყინულია.
+- **R3 — რეგრესია:** `regression-last.json` 2026-10-21; დღეს 2026-10-23 — 2 დღე, ჯერ არ არის ვადა. **B-ის შემდეგი დაგეგმვა 2026-10-24-ზე ან შემდეგ — რეგრესიის რაუნდი**, რაც არ უნდა იყოს ღია. ამიტომ Round 110 B-R108-LIB-FOCUS-LOSS-ია.
+- **R4 — დიაგნოზი (B probe, `1fe3ba2`, `tmp/studio-real-loop/b-round-109/probe/`):** `◀`, `▶` და `×` Enter-ზე საკუთარ state-ს ცვლის და თავად ქრება (unmount); focus `<body>`-ზე ვარდება, შემდეგი Enter ბიბლიოთეკის კლიპს ამატებს (0 → 1). ვიდეოს „დაბრუნება“, ✕ და ⤢ — **არ განმეორდა** (focus ⤢-ზე რჩება). Pan reset — focus slider-ზე, Low რჩება.
+- **R5 — F1:** `◀` → `▶`, `▶` → `◀` (partner შემდეგ render-ზე ჩნდება: arm ref + deps-free layout effect), `×` → ძიების ველი (სინქრონულად). Focus გადადის მხოლოდ მაშინ, თუ ღილაკს focus ჰქონდა და focus `body`/`null`-ზეა. ვიდეოს მიერ ბიბლიოთეკის გახსნა/დაკეცვა focus-ს არ ამოძრავებს.
+- **R6 — F2:** სამივე ღილაკზე `Enter && repeat` → `preventDefault` (doc 093-ის კონვენცია). სავალდებულოა: მის გარეშე დაჭერილი Enter `◀`/`▶`-ს შორის ping-pong-ს გამოიწვევდა.
+- **R7 — უარყოფილი:** ორივე ღილაკის mount-ში დატოვება CSS-ით (layout/floating-video-ს რისკი), Enter-on-body კონტრაქტის შეცვლა (მომხმარებლის კითხვა B-R107-ENTER-ON-BODY), document-ის დონის listener.
+- **R8 — ნებართვები:** `ArrangementLibrary.tsx` (ვიწროდ: import-ები, ახალი ref/effect/guard, სამი ღილაკი, ძიების ველის ref); ახალი `library-focus-handoff.test.tsx`; ახალი doc 095; doc 094-ის მხოლოდ l.4. მოსალოდნელი: 2 M + 2 ??. Frozen list 544.
+- **R9 — არქიტექტურა:** იგივე მექანიზმი მესამე კომპონენტშია → addendum (u) `b-round-91-checkpoint-request.md`-ში; არ ბლოკავს, extraction არ იგეგმება.
+- **R10 — რიგი:** რეგრესიის რაუნდი (2026-10-24-დან) → C-ის გაზომვის რაუნდი cloud-ში (C-R27-01, C-R6-02, C-R8-01, A-R38-REVIEW-TOUCH) → T12 (ღია Medium-ის გარეშე) → ABLETON-EXPERT-REVIEW → VISUAL-A-OBSIDIAN → Low-ების polish → R21-I2 და საბოლოო რეგრესია.
+- **Ableton:** არ ეხება — CZABA-ს a11y/keyboard წესი; Live-ზე მტკიცება არ კეთდება.
+
 **D-29z74 — Round 108-ის შედეგი; Round 109: SSR HTML-ში NUL byte-ები აღარ არის (C-R23-01 + C-R38-01); 2026-10-23-ის bug gate-ის აღრიცხვა.**
 
 C round 108 (`tmp/studio-real-loop/c-round-108.md`, `c-round-108.json`) — **PASS, `browserVerified: true`, `realVerified: true`**: FL-GAIN-KEYBOARD (1280/1440), FL-GAIN-HOLD, FL-GAIN-MOUSE, FL-UNDO (1280/1440), FL-UNDO-HOLD, FL-REDO, FL-DELETE (1280/1440), FL-ZOOMBACK, FL-UNDO-MOUSE, HK-UNDO-STILL-REPEATS, R12-L2-ENTER-ADD, HE-MARKER-ADD, SR-TEXT-REG, PX-NET, REG-HYD, G108-3 (fake-Bearer — BLOCKED, backend), AN-REVIEW, T108-TARGETED (66 / 1126), DOC-092-L4, DOC-093, SOURCE-UNCHANGED. notPassed: F2-FIT (TH5), m9. ერთი Low: C-R108-01.
@@ -1931,6 +1949,7 @@ flowchart TD
 | 62 | SRW-14, ეტაპი 4c-1 | ჯგუფის anchor სხვა კლიპების კიდეებზე (D-29z27-G; C-R52-T1: CM10 + CG1–CG6), INFO-R55 (CM17), SHIFT-MIDDRAG (CM9f–CM9h); C-R51-01 დიზაინით დაიხურა |
 | 63 | SRW-14, ეტაპი 4c-2 | ბიბლიოთეკის drop-ის ghost და დასაწყისი კლიპების კიდეებზე (იგივე წესი, ხაზის წესი drop-ის ხაზზე); LD-BLOCK რეგრესია |
 | 109 | C-R23-01 + C-R38-01 | SSR NUL byte-ები: byte-ფილტრის `Transform` `entry.server.tsx`-ში (D-29z74; ვიწრო grant B-ის წაკითხვით მომხმარებლის 2026-10-23-ის გადაწყვეტილებისა, root-ს უარის თქმა შეუძლია) |
+| 110 | B-R108-LIB-FOCUS-LOSS | ბიბლიოთეკის `◀`/`▶`/`×` focus-ის გადაცემა partner-ზე + Enter-repeat guard (D-29z75) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -1953,6 +1972,8 @@ flowchart TD
 **/check წესი:** `npm run check` = `biome check --write ./app` და მთელ app-ს ეხება. 2026-10-07-ის მდგომარეობით ის არაფერს შეცვლიდა: 0 error, მხოლოდ unsafe fix-ები, format-ის სხვაობა არ არის. თუმცა auth agent-ის დაუსრულებელი ფაილები შეიძლება გადაწეროს. ამიტომ /check gate ასე სრულდება: ჯერ read-only `npx biome check ./app`, შემდეგ `--write` მხოლოდ საკუთარ path-ებზე. `npm.cmd run check` დაშვებულია მხოლოდ მაშინ, თუ read-only შედეგი სხვის ფაილებში format/safe-fix სხვაობას არ აჩვენებს. გაშვების შემდეგ დაცული hash-ები აუცილებლად მოწმდება. `npm run format` აკრძალულია. Git commit/push/deploy, შესყიდვა და permission bypass აკრძალულია.
 
 **ვიწრო გამონაკლისი (D-29z74, Round 109):** `app/entry.server.tsx` (import-ები და `body`-ის ერთი ხაზი) და ახალი `app/lib/ssr/` მხოლოდ C-R23-01-ის NUL-ის ფილტრისთვის. საფუძველი B-ის წაკითხვაა მომხმარებლის 2026-10-23-ის გადაწყვეტილებისა და არა აშკარა grant; root-ს უარის თქმა შეუძლია.
+
+**D-29z75:** round 109 გამოქვეყნდა `1fe3ba2`-ში; `app/entry.server.tsx` და `app/lib/ssr/**` ამის შემდეგ ისევ გაყინულია. ახალი ცვლილება მხოლოდ ცალკე, ცხადი ნებართვით.
 
 ## 7. Done Policy
 

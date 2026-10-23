@@ -1,0 +1,5 @@
+const { createRequire } = require('module'); const { chromium } = createRequire('/home/runner/czaba-project/store/package.json')('playwright');
+(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1280, height: 720 }, javaScriptEnabled: false }); const p = await ctx.newPage();
+ await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'load' });
+ const r = await p.evaluate(() => { const out = []; let e = [...document.querySelectorAll('[aria-label]')].find((x) => x.getAttribute('aria-label').startsWith('⌫')); while (e) { const s = getComputedStyle(e); if (s.opacity !== '1' || s.visibility !== 'visible' || s.display === 'none') out.push({ tag: e.tagName, cls: (e.className || '').toString().slice(0, 100), op: s.opacity, vis: s.visibility, disp: s.display }); e = e.parentElement; } return { out, css: document.querySelectorAll('link[rel=stylesheet]').length, styles: document.querySelectorAll('style').length, bodyCls: document.body.className.slice(0,200) }; });
+ console.log(JSON.stringify(r, null, 1)); await b.close(); })();
