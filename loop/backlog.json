@@ -1,9 +1,9 @@
 {
- "version": 96,
- "updated": "2026-10-23 (B round 97 review -> round 98 task, D-29z63)",
+ "version": 97,
+ "updated": "2026-10-23 (B round 98 review -> round 99 task, D-29z64)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 98: D-29z63 - GATE97-S1 toolbar Export button ignores repeated Enter keydown (no re-open after held Enter closes the dialog); GATE97-S3 doc 085 l.4; new export-toolbar-hold-enter.test.tsx TH1-TH5; new doc 086; baseline 11d042c, frozen 528, expected 2 M + 2 ??)",
+ "current_task": "current-task.md (round 99: D-29z64 - B-R98-HELD-ENTER-MULTI-ADD: a held Enter adds one clip, not one per auto-repeat, on the library row (ArrangementLibrary.tsx l.242-247), the global Enter (StudioWorkspace.tsx l.1960-1968) and the + add button (ArrangementLibraryPreview.tsx l.304-311); GATE98-S5 doc 086 l.4; new held-enter-add.test.tsx HA1-HA8; new doc 087; baseline 736db33, frozen 528, expected 4 M + 2 ??)",
  "advisor_used_by_B": "round 95 planning: advisor available and consulted (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
@@ -2367,7 +2367,8 @@
     }
    ],
    "round34_note": "FOCUS-TEXT-STALE (Medium, C round 33): after search typing, a timeline click leaves focus in the search and Backspace edits the hidden filter -> round 34; feature-status shows SRW-12 as bug until C passes R34-TS",
-   "round35_note": "FOCUS-TEXT-STALE closed by C round 34 (R34-TS); functions C-verified; remaining manual: Tech Lead R12-L4, R17-T, R34-T(1)/(3)"
+   "round35_note": "FOCUS-TEXT-STALE closed by C round 34 (R34-TS); functions C-verified; remaining manual: Tech Lead R12-L4, R17-T, R34-T(1)/(3)",
+   "open_bug": "B-R98-HELD-ENTER-MULTI-ADD (Low, round 99): held Enter adds one clip per auto-repeat (B probe, Chromium); R12-L2 one press = one add"
   },
   {
    "id": "SRW-13",
@@ -8406,7 +8407,7 @@
    "round": 98,
    "task": "current-task.md",
    "decision": "D-29z63",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "GATE97-S1-TOOLBAR-EXPORT-HOLD-REOPEN",
     "GATE97-S3-DOC085-STATUS"
@@ -8430,6 +8431,45 @@
     "G98-3",
     "AN-REVIEW",
     "T98-TARGETED",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C PASS browserVerified=true realVerified=true (CLOSE-HOLD, CANCEL-CLOSE-HOLD, OPEN-HOLD, ENTER-ADD-REG, EXPORT-REG real WAV 101.702 s, PX-NET, REG-HYD, G98-3, AN-REVIEW, T98-TARGETED 14/210, SOURCE-UNCHANGED); FRESH-OPEN Space sub-check failed on a false B premise (C-R98-B1, closed by decision); gate 98 published 736db33 (reviewer 9/10)"
+  },
+  {
+   "round": 99,
+   "task": "current-task.md",
+   "decision": "D-29z64",
+   "status": "dispatched",
+   "items": [
+    "B-R98-HELD-ENTER-MULTI-ADD",
+    "GATE98-S5-DOC086-STATUS"
+   ],
+   "closed_by_decision": [
+    "C-R98-B1-SPACE-ON-TOOLBAR-EXPORT"
+   ],
+   "note": "held Enter adds one clip (three entry points to the same add). baseline HEAD 736db33 clean; frozen b-round-98-r99-tree-sha256.txt 528/528; snapshots b-round-98-r99-snapshots; expected 4 M + 2 ??; no existing test granted; ArrangementContext/ArrangementExportDialog/ArrangementTransport frozen. Regression round not due (2026-10-21 -> 2026-10-23 = 2 days); next B planning on/after 2026-10-24 is the regression round.",
+   "owned": [
+    "app/components/arrangement/ArrangementLibrary.tsx (handleOptionKeyDown Enter branch l.242-247 only)",
+    "app/components/arrangement/StudioWorkspace.tsx (global Enter branch l.1960-1968 only)",
+    "app/components/arrangement/ArrangementLibraryPreview.tsx (+ add button l.304-311 only: onKeyDown Enter && repeat -> preventDefault)",
+    "app/lib/arrangement/__tests__/held-enter-add.test.tsx (new HA1-HA8)",
+    "docs/implementation/2026/quarter-IV/086-studio-toolbar-export-hold-enter.md (l.4)",
+    "docs/implementation/2026/quarter-IV/087-studio-held-enter-single-add.md (new)"
+   ],
+   "c_rows": [
+    "HOLD-ROW",
+    "HOLD-BODY",
+    "HOLD-PLUS",
+    "FRESH-ADD",
+    "HELD-ARROW-REG",
+    "SPACE-REG",
+    "CLOSE-HOLD-REG",
+    "EXPORT-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G99-3",
+    "AN-REVIEW",
+    "T99-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -14001,15 +14041,16 @@
   {
    "id": "GATE97-S1-TOOLBAR-EXPORT-HOLD-REOPEN",
    "severity": "low",
-   "status": "dispatched round 98 (D-29z63): toolbar Export button onKeyDown Enter && repeat -> preventDefault only; new export-toolbar-hold-enter.test.tsx TH1-TH5",
+   "status": "closed - C round 98 PASS browserVerified (CLOSE-HOLD both viewports, CANCEL-CLOSE-HOLD 1440, OPEN-HOLD), gate 98 published 736db33",
    "to": "A round 98",
    "title": "held Enter on Close closes the dialog, focus restore moves focus to toolbar Export, the next repeat keydown re-opens the dialog",
-   "evidence": "gates/round-97/review.md suggestion 1; mechanism b-round-96-probe/probe-result.json"
+   "evidence": "gates/round-97/review.md suggestion 1; mechanism b-round-96-probe/probe-result.json",
+   "closed_evidence": "c-round-98.md, c-round-98.json, gates/gate-round-98.json"
   },
   {
    "id": "GATE97-S2-CHROMIUM-ONLY-HOLD-ENTER",
    "severity": "low",
-   "status": "open - environment: only Chromium is installed on the cloud runner and agents may not install browsers; not schedulable in the cloud; Tech Lead manual check (Firefox/WebKit held Enter on Close and toolbar Export) or a later environment with those browsers",
+   "status": "open - environment: only Chromium is installed on the cloud runner and agents may not install browsers; not schedulable in the cloud; Tech Lead manual check (Firefox/WebKit held Enter on Close and toolbar Export) or a later environment with those browsers; gate 98 suggestion 4 / A round 98 reviewer Low #1 (Safari/macOS Firefox mouse-open leaves focus on body) merged here; its global-Enter consequence is fixed for every browser by round 99 T2 (repeat ignored regardless of focus)",
    "to": "Tech Lead / root environment",
    "title": "held-Enter guards verified only in Chromium (Firefox activates buttons via keypress; keydown preventDefault should suppress it, unverified)",
    "evidence": "gates/round-97/review.md suggestion 2; c-round-97.json C-R97-N1-CHROMIUM-ONLY"
@@ -14017,15 +14058,16 @@
   {
    "id": "GATE97-S3-DOC085-STATUS",
    "severity": "low",
-   "status": "dispatched round 98 (doc 085 l.4)",
+   "status": "closed - C round 98 SOURCE-UNCHANGED (doc 085 @@ -4 +4 @@ only), gate 98 published 736db33",
    "to": "A round 98",
    "title": "doc 085 l.4 still says awaiting C although C round 97 passed",
-   "evidence": "gates/round-97/review.md suggestion 3"
+   "evidence": "gates/round-97/review.md suggestion 3",
+   "closed_evidence": "c-round-98.md"
   },
   {
    "id": "GATE97-S4-REPEAT-EQ-TRUE-NIT",
    "severity": "info",
-   "status": "open - routed with GATE89-S4 (same ArrangementExportDialog.tsx footer region, next Export Lows round); round 98 keeps the dialog frozen",
+   "status": "open - routed with GATE89-S4 (same ArrangementExportDialog.tsx footer region, next Export Lows round); round 98 keeps the dialog frozen; gate 98 review suggestion 1 repeats it (style mismatch with ArrangementTransport.tsx l.250)",
    "to": "Lows batch",
    "title": "event.repeat === true at ArrangementExportDialog.tsx l.542 is redundant (repeat is boolean)",
    "evidence": "gates/round-97/review.md nit 4"
@@ -14044,7 +14086,84 @@
    "status": "open - architecture signal, not scheduled; gate 97 reviewer Signal 3 (keep); proposal: after the Export Lows, one frontend-architect checkpoint on gathering export dialog keyboard/focus rules (initial focus, restore, Tab groups, repeat guard) and a shared test harness; 'refactor not worth it now' is a valid outcome; added as addendum (j) to b-round-91-checkpoint-request.md",
    "to": "root/B",
    "title": "ArrangementExportDialog.tsx footer l.484-571 changed in docs 078, 085 and planned GATE89-S4/S6",
-   "evidence": "gates/round-97/review.md Architecture note"
+   "evidence": "gates/round-97/review.md Architecture note",
+   "data_points": [
+    "round 98 gate + A reviewers: repeat-Enter guard at 2 sites, keep; round 99 adds 3 more (row, global, + button) -> isRepeatedEnter helper question in addendum (k); checkpoint after the Export Lows"
+   ]
+  },
+  {
+   "id": "C-R98-B1-SPACE-ON-TOOLBAR-EXPORT",
+   "severity": "low",
+   "status": "closed by B decision D-29z64 (no code change): global Space is the play/stop shortcut (shortcut footer 'Space · Home · …'; StudioWorkspace.tsx l.1699-1704 keydown and l.1970-1978 keyup prevent it on every non-typing target while Export is closed); it wins over a focused workspace button outside the export dialog. Keyboard activation of Export remains via Enter (C FRESH-OPEN Enter PASS) and mouse click. B's round-98 'Space also opens it, as now' premise was false; future rows list only activation methods with prior C evidence.",
+   "to": "-",
+   "title": "Space on a focused toolbar Export toggles playback instead of opening the dialog",
+   "evidence": "c-round-98.json bugs[0]; c-round-98/out/space98-1280x720.json",
+   "ableton": "დაუდასტურებელი (no source consulted)"
+  },
+  {
+   "id": "C-R98-N1-CHROMIUM-ONLY",
+   "severity": "info",
+   "status": "recorded - merged with GATE97-S2",
+   "to": "-",
+   "title": "round 98 browser evidence Chromium only",
+   "evidence": "c-round-98.json notes"
+  },
+  {
+   "id": "C-R98-N2-EXPORT-OVERLOAD",
+   "severity": "info",
+   "status": "recorded - existing overload feature (DEMO-SFX-FULL-SCALE family)",
+   "to": "-",
+   "title": "EXPORT-REG test mix clips (+1.7 dBFS, 470 samples limited)",
+   "evidence": "c-round-98.json notes"
+  },
+  {
+   "id": "C-R98-N3-LIBRARY-ENTER-NO-BUBBLE",
+   "severity": "info",
+   "status": "recorded - by design (row stops Enter propagation)",
+   "to": "-",
+   "title": "library row Enter does not reach window bubble listener",
+   "evidence": "c-round-98.json notes"
+  },
+  {
+   "id": "C-R98-N4-RECORDER-ORDER",
+   "severity": "info",
+   "status": "recorded - C tooling note: read defaultPrevented for app-global keys with a late listener",
+   "to": "C",
+   "title": "addInitScript bubble listener runs before app window handler",
+   "evidence": "c-round-98.json notes"
+  },
+  {
+   "id": "GATE98-S2-TH1-HELPER-DUP",
+   "severity": "low",
+   "status": "open - Lows batch (test hygiene; with ARCH-R93-TEST-HARNESS fixture task)",
+   "to": "Lows batch",
+   "title": "export-toolbar-hold-enter.test.tsx TH1 copies closeAfterClick body to also check the spy count",
+   "evidence": "gates/round-98/review.md suggestion 2"
+  },
+  {
+   "id": "B-R98-HELD-ENTER-MULTI-ADD",
+   "severity": "low",
+   "status": "dispatched round 99 (D-29z64)",
+   "to": "A round 99",
+   "title": "a held Enter adds one clip per auto-repeat keydown on the library row, the global Enter (focus on body) and the + add button",
+   "evidence": "b-round-98-probe/probe-result.json (row 0->3, statusClick body 0->3, jsBlur 0->3), probe-result-plus.json (+ button 0->3); gate 98 review suggestion 4 and A round 98 reviewer Low #1 (inferred Safari path); SRW-12 R12-L2 contract",
+   "item": "SRW-12"
+  },
+  {
+   "id": "GATE98-S5-DOC086-STATUS",
+   "severity": "low",
+   "status": "dispatched round 99 (doc 086 l.4)",
+   "to": "A round 99",
+   "title": "doc 086 l.4 still says awaiting C although C round 98 passed and gate 98 published 736db33",
+   "evidence": "docs/implementation/2026/quarter-IV/086-studio-toolbar-export-hold-enter.md l.4 at 736db33"
+  },
+  {
+   "id": "B-R98-H1-PREVIEW-TOGGLE-HOLD",
+   "severity": "low",
+   "status": "hypothesis - not probed; schedule a probe with a later library round",
+   "to": "B",
+   "title": "held Enter on the preview toggle button (▶ მოუსმინე) may toggle the preview once per repeat (the waveform handler already ignores repeats, l.202-204)",
+   "evidence": "ArrangementLibraryPreview.tsx at 736db33 (code reading only)"
   }
  ],
  "tech_lead_notes": [
@@ -15243,6 +15362,11 @@
    "round": 97,
    "source": "a-round-97.md + gates/round-97/review.md Architecture notes (verbatim there)",
    "note": "A reviewer: keep component; Signal 3 in tests (fake AudioContext/encoder/URL setup copied into 9 files) -> ARCH-R93-TEST-HARNESS data point. Gate reviewer: Signal 3 on export dialog footer l.484-571 (docs 078, 085, GATE89-S4/S6), keep; proposal one checkpoint after Export Lows -> ARCH-R97-EXPORT-FOOTER-KEYBOARD. Added as addendum (j) to the standing checkpoint request; non-blocking; not scheduled."
+  },
+  {
+   "round": 98,
+   "source": "gates/round-98/review.md Architecture note + a-round-98.md reviewer Architecture note",
+   "note": "Signal 3 keep: repeat-Enter guard in the export flow (dialog l.541-545, transport l.249-253); proposal: shared non-test jsdom fixture module for audio/DOM fakes + ArrangementProvider mount (ARCH-R93-TEST-HARNESS), optional repeat-Enter helper; recorded as addendum (k) to b-round-91-checkpoint-request.md, not scheduled"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -15418,6 +15542,17 @@
   "excluded": [
    "app/components/arrangement/ArrangementTransport.tsx",
    "docs/implementation/2026/quarter-IV/085-studio-export-dialog-hold-enter.md"
+  ]
+ },
+ "baseline_tree_at_round99": {
+  "head": "736db33c339bcef4757535d60524c2f92d7e6587",
+  "list": "tmp/studio-real-loop/b-round-98-r99-tree-sha256.txt",
+  "count": 528,
+  "excluded": [
+   "app/components/arrangement/ArrangementLibrary.tsx",
+   "app/components/arrangement/StudioWorkspace.tsx",
+   "app/components/arrangement/ArrangementLibraryPreview.tsx",
+   "docs/implementation/2026/quarter-IV/086-studio-toolbar-export-hold-enter.md"
   ]
  }
 }

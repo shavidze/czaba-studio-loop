@@ -1,0 +1,84 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T03:20:51.2967828Z",
+  "round": 98,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R98-B1-SPACE-ON-TOOLBAR-EXPORT",
+   "severity": "low",
+   "owner": "B (contract premise / product decision)",
+   "regression": false,
+   "steps": [
+    "Fresh incognito context, /studio-lab, 1280x720 and 1440x900, decline consent",
+    "(optional) add one clip: click library row demo-middle-east, press Enter",
+    "locator Export (getByRole button name 'Export' exact) .focus()",
+    "page.keyboard.press('Space')"
+   ],
+   "expected": "current-task.md FRESH-OPEN: 'Space also opens it, as now' — dialog opens and focus goes to დახურვა",
+   "actual": "The dialog does not open and there is no click on Export. A window bubble listener added after mount sees keydown ' ' defaultPrevented=true and keyup defaultPrevented=true. Empty project: Play stays Play. With 1 clip: Play -> Pause, and a second Space -> Play. Focus stays on Export. Cause: the global Space play/stop shortcut, StudioWorkspace.tsx l.1699-1704 (keydown preventDefault + togglePlayback) and l.1970-1978 (keyup preventDefault while export is closed). That file is frozen with an unchanged hash. The round 98 diff touches Enter only, so this predates round 98. B's 'as now' premise is false.",
+   "evidence": "c-round-98/out/space98-1280x720.json; c-round-98/out/run98-{1280x720,1440x900}-closehold.json freshopen.space; shots/space-export-playing-1280x720.png, shots/fresh-space-*.png",
+   "decisionForB": "Either the shortcut footer ('Space · Home · …') makes global play intended and the FRESH-OPEN contract should drop Space, or a focused button should win over global Space. Ableton correspondence: დაუდასტურებელი (no source consulted)."
+  }
+ ],
+ "passed": [
+  "CLOSE-HOLD",
+  "CANCEL-CLOSE-HOLD",
+  "OPEN-HOLD",
+  "ENTER-ADD-REG",
+  "EXPORT-REG",
+  "PX-NET",
+  "REG-HYD",
+  "G98-3",
+  "AN-REVIEW",
+  "T98-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "failedRows": [
+  "FRESH-OPEN: Enter and click sub-checks PASS at 1280 and 1440; Space sub-check FAIL (pre-existing, not a round-98 regression, see C-R98-B1), so the row is not in passed"
+ ],
+ "blocked": [
+  "G98-3 fake-Bearer sub-check: backend unavailable in cloud (not run, not judged)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "ableton": {
+  "held Enter that closes the export dialog does not re-open it from toolbar Export": "არ ეხება (no Ableton claim)",
+  "Space on a focused toolbar button vs global play": "დაუდასტურებელი (no source consulted)"
+ },
+ "invalidAttempts": [],
+ "notes": [
+  {
+   "id": "C-R98-N1-CHROMIUM-ONLY",
+   "severity": "none",
+   "actual": "All browser evidence is headless Chromium. The code-reviewer's Low #1 (Safari / macOS Firefox mouse-open leaves focus on body, so repeated Enters reach the StudioWorkspace global Enter shortcut, which has no repeat check) is untested and stays for B. It is not a bug and not a pass."
+  },
+  {
+   "id": "C-R98-N2-EXPORT-OVERLOAD",
+   "severity": "none",
+   "actual": "EXPORT-REG WAV is clipped by design of the test mix (3 demo sources). The app alert reads +1.7 dBFS, 470 samples limited. C's wav.cjs counts 486 samples >= 0.9999, a different threshold. This is the existing overload feature, not a regression."
+  },
+  {
+   "id": "C-R98-N3-LIBRARY-ENTER-NO-BUBBLE",
+   "severity": "none",
+   "actual": "In ENTER-ADD-REG the Enter keydown on the library row did not reach the window bubble listener: the row stops propagation. This existed before round 98 and matches round 96. The clip add and Undo work."
+  },
+  {
+   "id": "C-R98-N4-RECORDER-ORDER",
+   "severity": "none",
+   "actual": "The run98 recorder (addInitScript) bubble listener runs before the app's window keydown handler, so its defaultPrevented for app-global keys (Space) is read too early. For the Export guard (a React onKeyDown) it is valid: true on the repeats. The Space evidence uses a late listener (space98)."
+  }
+ ]
+}

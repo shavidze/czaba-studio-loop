@@ -1,10 +1,11 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 97 PASS (browserVerified=true, realVerified=true, 0 bugs) and gate 97 published 11d042c: GATE90-S3, GATE90-S4, GATE96-S1 closed. No open C bug; gate 97 review #1 is the remaining path of the same held-Enter bug (Close -> focus restore to toolbar Export -> repeat keydown re-opens), so it goes first with doc 085 l.4. Regression round not due (2026-10-21 -> 2026-10-23 = 2 days, planned today); the next B planning on/after 2026-10-24 is the regression round. Scoped work remains (Export Lows, GATE96-S2, grid/tempo Lows, R21-I2, SRW-21-PREMOUNT + mount, T12, VISUAL-A-OBSIDIAN, Tech Lead checks incl. GATE97-S2 Chromium-only, PROD-MP3-UNVERIFIED); only the SRW-21 mount needs the auth owner's release, so not BLOCKED. Architecture addendum (j) sent to root, non-blocking. Advisor available and used.",
- "nextTask": "Round 98 (D-29z63): GATE97-S1 - ArrangementTransport.tsx toolbar Export button onKeyDown: key==='Enter' && event.repeat -> preventDefault only (no stopPropagation; other buttons, props, classes unchanged; ArrangementExportDialog.tsx frozen); new app/lib/arrangement/__tests__/export-toolbar-hold-enter.test.tsx TH1-TH5 (fail-before only TH1 red), mutations a-e; GATE97-S3 doc 085 l.4; new doc 086. Baseline 11d042c clean, frozen 528, expected 2 M + 2 ??. C rows CLOSE-HOLD (both viewports, primary), CANCEL-CLOSE-HOLD, FRESH-OPEN, OPEN-HOLD, ENTER-ADD-REG, EXPORT-REG, PX-NET, REG-HYD, G98-3, AN-REVIEW, T98-TARGETED, SOURCE-UNCHANGED.",
+ "reason": "C round 98 PASS (browserVerified=true, realVerified=true) and gate 98 published 736db33: GATE97-S1 and GATE97-S3 closed. C's only finding C-R98-B1 (Space on focused toolbar Export plays instead of opening) is a false B premise; closed by decision D-29z64 (global Space = play/stop, Enter and click open Export). B's read-only Chromium probe reproduced gate 98 review #4 more widely: a held Enter adds one clip per auto-repeat on the library row, on body (global Enter) and on the + add button (0 -> 3 each), so round 99 fixes that before the footer Lows. Regression round not due (2026-10-21 -> 2026-10-23 = 2 days); the next B planning on/after 2026-10-24 is the regression round. Scoped work remains (Export Lows, GATE96-S2, grid/tempo Lows, R21-I2, SRW-21-PREMOUNT + mount, T12, VISUAL-A-OBSIDIAN, Tech Lead checks, PROD-MP3-UNVERIFIED); only the SRW-21 mount needs the auth owner's release, so not BLOCKED. Architecture addendum (k) recorded, non-blocking. Advisor available and used.",
+ "nextTask": "Round 99 (D-29z64): B-R98-HELD-ENTER-MULTI-ADD - skip only repeated Enter keydowns at the three add paths: ArrangementLibrary.tsx handleOptionKeyDown Enter branch l.242-247 (prevent/stop kept, add only when !event.repeat), StudioWorkspace.tsx global Enter l.1960-1968 (add only when !event.repeat), ArrangementLibraryPreview.tsx + add button l.304-311 (onKeyDown Enter && repeat -> preventDefault, no stopPropagation); new app/lib/arrangement/__tests__/held-enter-add.test.tsx HA1-HA8 (fail-before HA1/HA3/HA5/HA8 red), mutations a-h; GATE98-S5 doc 086 l.4; new doc 087. Baseline 736db33 clean, frozen 528, expected 4 M + 2 ??. C rows HOLD-ROW/HOLD-BODY/HOLD-PLUS both viewports (0 -> 1 clip), FRESH-ADD, HELD-ARROW-REG, SPACE-REG, CLOSE-HOLD-REG, EXPORT-REG, PX-NET, REG-HYD, G99-3, AN-REVIEW, T99-TARGETED, SOURCE-UNCHANGED.",
  "remaining": [
-  "GATE97-S1-TOOLBAR-EXPORT-HOLD-REOPEN",
-  "GATE97-S3-DOC085-STATUS",
+  "B-R98-HELD-ENTER-MULTI-ADD",
+  "GATE98-S5-DOC086-STATUS",
+  "SRW-12",
   "GATE92-S1-STATUS-NOT-RESET-ON-SWAP",
   "COLLECTION-EMPTY-STATUS",
   "GATE92-S4-TOKEN-URL-IN-CONSOLE",
@@ -40,6 +41,8 @@
   "ARCH-R96-REFUSAL-MAPPING",
   "GATE97-S2-CHROMIUM-ONLY-HOLD-ENTER",
   "GATE97-S4-REPEAT-EQ-TRUE-NIT",
-  "ARCH-R97-EXPORT-FOOTER-KEYBOARD"
+  "ARCH-R97-EXPORT-FOOTER-KEYBOARD",
+  "GATE98-S2-TH1-HELPER-DUP",
+  "B-R98-H1-PREVIEW-TOGGLE-HOLD"
  ]
 }
