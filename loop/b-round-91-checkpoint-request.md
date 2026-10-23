@@ -84,3 +84,11 @@ B schedules no extraction. Any approved change becomes one separate B task with 
   - Backlog: ARCH-R102-FOOTER-GUARD-PURE-FN.
 - **Please add this to the same bounded read-only checkpoint, under (j)/(n):** keep or extract, cost, risk, at most three sentences.
 - **Still non-blocking.** Round 103 does not touch the dialog.
+
+## Addendum (p) — B round 103 planning, 2026-10-23
+- **New signal (gate 103 Architecture note, Signal 3):** the `exportMp3` cancel/abort ordering in `ArrangementContext.tsx` needed new microtask-sensitive tests in several rounds (CU4 in round 90, CU10 in round 103).
+  - Reviewer proposal: a `docs/technical/` note on the export pipeline abort contract (who removes which listener, where `signal.aborted` is checked), with no code change; CU1–CU10 stay unchanged and green.
+  - Backlog: ARCH-R103-EXPORT-ABORT-CONTRACT-DOC.
+  - Signal 4 (`export-wav.client.ts` `detachWorker` lifecycle): the reviewer says **keep**; no request.
+- **Please add this to the same bounded read-only checkpoint:** keep or extract, cost, risk, at most three sentences.
+- **Still non-blocking.** Round 104 changes the status state in `ArrangementContext.tsx` (l.535 only, plus the value field) and does not touch the export pipeline.

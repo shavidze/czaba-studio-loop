@@ -1,13 +1,12 @@
-# Loop metrics (2026-10-23T06:29:41.856Z)
+# Loop metrics (2026-10-23T07:33:15.443Z)
 
-- rounds: 102; cost $2878.97 total, last 10 avg $15.76/round; agent time 167.3 h
-- C: PASS 73, FAIL 25, BLOCKED 4; bugs c/h/m/l 0/3/37/82
+- rounds: 103; cost $2902.33 total, last 10 avg $16.58/round; agent time 168.2 h
+- C: PASS 74, FAIL 25, BLOCKED 4; bugs c/h/m/l 0/3/37/82
 - rounds without a real check: 63, 72; agent errors 25
-- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published, 98:published, 99:published, 100:published, 101:published, 102:published
+- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published, 98:published, 99:published, 100:published, 101:published, 102:published, 103:published
 
 | round | C | bugs c/h/m/l | real | $ | h | err | gate |
 |---|---|---|---|---|---|---|---|
-| 88 | FAIL | 0/0/1/0 | yes | 20.68 | 0.69 | 0 | skipped |
 | 89 | PASS | 0/0/0/0 | yes | 20.02 | 0.69 | 0 | published |
 | 90 | PASS | 0/0/0/0 | yes | 26.21 | 0.84 | 0 | published |
 | 91 | PASS | 0/0/0/0 | yes | 19.60 | 0.62 | 0 | published |
@@ -22,3 +21,4 @@
 | 100 | PASS | 0/0/0/0 | yes | 16.23 | 0.54 | 0 | published |
 | 101 | PASS | 0/0/0/0 | yes | 14.66 | 0.51 | 0 | published |
 | 102 | PASS | 0/0/0/0 | yes | 17.09 | 0.57 | 0 | published |
+| 103 | PASS | 0/0/0/0 | yes | 23.35 | 0.96 | 0 | published |

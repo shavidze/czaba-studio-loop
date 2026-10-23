@@ -1,0 +1,27 @@
+
+describe('SRW-20 stage 3b-1 cancel between the settled encode and the downloads (C-R90-MUT-B-CU4-GAP)', () => {
+  beforeEach(() => {
+    cancelEncoderGate.release();
+    setUpCancelEnvironment();
+  });
+  afterEach(tearDownCancelEnvironment);
+
+  it('CU10 a cancel after the MP3 encode settled but before the downloads: neither file downloads, the encoder message, and one reset', async () => {
+    const encode = pendingEncode();
+    const { api, view } = await mountCancelDialog();
+    chooseFormat(view, 'both');
+    await clickExport(view, BOTH_BUTTON);
+    await flushAsync();
+    expect(live(api).exportState).toEqual({ phase: 'rendering', message: MP3_ENCODING_MESSAGE });
+    expect(resetEncoderMock).not.toHaveBeenCalled();
+    await act(async () => {
+      encode.finish(mp3Blob);
+      await Promise.resolve();
+      live(api).cancelExport();
+    });
+    await flushAsync();
+    expect(downloads).toEqual([]);
+    expect(live(api).exportState).toEqual(CANCELLED_ENCODER);
+    expect(resetEncoderMock).toHaveBeenCalledTimes(1);
+  });
+});

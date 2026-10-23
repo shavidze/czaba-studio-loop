@@ -1,0 +1,134 @@
+
+const {
+  ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS: STALL_TIMEOUT_MS,
+  ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE: STALLED_MESSAGE,
+} = await import('../export-wav.client');
+
+interface StallOutcome {
+  state: 'pending' | 'resolved' | 'rejected';
+  error: unknown;
+}
+
+function startStallEncode(signal?: AbortSignal) {
+  vi.stubGlobal('Worker', FakeWorker);
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  const fractions: number[] = [];
+  const pending = encodeArrangementWavOffMainThread(
+    [new Float32Array(2)],
+    48000,
+    (fraction) => fractions.push(fraction),
+    signal,
+  );
+  const outcome: StallOutcome = { state: 'pending', error: null };
+  pending.then(
+    () => {
+      outcome.state = 'resolved';
+    },
+    (error: unknown) => {
+      outcome.state = 'rejected';
+      outcome.error = error;
+    },
+  );
+  return { pending, outcome, fractions, worker: lastWorker() };
+}
+
+describe('EW8 stall watchdog and worker error text (GATE89-S3)', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    FakeWorker.instances = [];
+    vi.unstubAllGlobals();
+  });
+
+  it('EW8a a silent worker times out once with the stalled message, terminates once, and a later complete changes nothing', async () => {
+    const { pending, outcome, worker } = startStallEncode();
+    await vi.advanceTimersByTimeAsync(STALL_TIMEOUT_MS - 1);
+    expect(outcome.state).toBe('pending');
+    expect(worker.terminated).toBe(0);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(outcome.state).toBe('rejected');
+    await expect(pending).rejects.toThrow(new Error(STALLED_MESSAGE));
+    expect(worker.terminated).toBe(1);
+    expect(worker.onmessage).toBeNull();
+    expect(worker.onerror).toBeNull();
+    expect(worker.onmessageerror).toBeNull();
+    worker.emit({ type: 'complete', bytes: new ArrayBuffer(8), peak: 0.5, clippedSamples: 0 });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(outcome.state).toBe('rejected');
+    expect(worker.terminated).toBe(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('EW8b a progress message restarts the stall timer and is still forwarded', async () => {
+    const { pending, outcome, fractions } = startStallEncode();
+    await vi.advanceTimersByTimeAsync(20_000);
+    lastWorker().emit({ type: 'progress', fraction: 0.5 });
+    expect(fractions).toEqual([0.5]);
+    await vi.advanceTimersByTimeAsync(STALL_TIMEOUT_MS - 1);
+    expect(outcome.state).toBe('pending');
+    await vi.advanceTimersByTimeAsync(1);
+    expect(outcome.state).toBe('rejected');
+    await expect(pending).rejects.toThrow(new Error(STALLED_MESSAGE));
+    expect(lastWorker().terminated).toBe(1);
+  });
+
+  it('EW8c complete before the timeout resolves and clears the timer', async () => {
+    const { pending, outcome, worker } = startStallEncode();
+    await vi.advanceTimersByTimeAsync(10_000);
+    const bytes = new ArrayBuffer(8);
+    worker.emit({ type: 'complete', bytes, peak: 0.5, clippedSamples: 0 });
+    await expect(pending).resolves.toEqual({ bytes, peak: 0.5, clippedSamples: 0 });
+    expect(vi.getTimerCount()).toBe(0);
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(outcome.state).toBe('resolved');
+    expect(worker.terminated).toBe(1);
+  });
+
+  it('EW8d an abort mid-encode rejects cancelled and clears the timer', async () => {
+    const controller = new AbortController();
+    const { outcome, worker } = startStallEncode(controller.signal);
+    await vi.advanceTimersByTimeAsync(10_000);
+    controller.abort();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(outcome.state).toBe('rejected');
+    expect(outcome.error instanceof Error ? outcome.error.name : null).toBe(
+      'ArrangementExportCancelledError',
+    );
+    expect(vi.getTimerCount()).toBe(0);
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(worker.terminated).toBe(1);
+    expect(outcome.error instanceof Error ? outcome.error.name : null).toBe(
+      'ArrangementExportCancelledError',
+    );
+  });
+
+  it('EW8e a worker error message is appended trimmed, a blank one and onerror keep the exact constant, and each clears the timer', async () => {
+    const cases: Array<{ fail: (worker: FakeWorker) => void; expected: string }> = [
+      {
+        fail: (worker) => worker.emit({ type: 'error', message: '  boom  ' }),
+        expected: 'WAV-ის ჩაწერა ვერ მოხერხდა (worker). boom',
+      },
+      {
+        fail: (worker) => worker.emit({ type: 'error', message: '   ' }),
+        expected: ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE,
+      },
+      {
+        fail: (worker) => worker.onerror?.(new Event('error')),
+        expected: ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE,
+      },
+    ];
+    for (const { fail, expected } of cases) {
+      const { pending, worker } = startStallEncode();
+      await vi.advanceTimersByTimeAsync(1_000);
+      fail(worker);
+      await expect(pending).rejects.toThrow(new Error(expected));
+      expect(worker.terminated).toBe(1);
+      expect(vi.getTimerCount()).toBe(0);
+    }
+    expect(FakeWorker.instances).toHaveLength(3);
+  });
+
+  it('EW8f the stall timeout is exactly 30 s and the stalled message is exact', () => {
+    expect(STALL_TIMEOUT_MS).toBe(30000);
+    expect(STALLED_MESSAGE).toBe('WAV-ის ჩაწერა შეჩერდა — worker 30 წამი არ პასუხობს.');
+  });
+});

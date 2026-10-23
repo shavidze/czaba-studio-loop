@@ -1,0 +1,106 @@
+{
+ "taskStatus": "PASS",
+ "round": 103,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T06:57:54.5135117Z",
+  "round": 103,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "WD-STALL",
+  "WD-CANCEL",
+  "WD-ERRTEXT",
+  "WD-MP3",
+  "WD-SLOW",
+  "EXPORT-REG",
+  "CANCEL-REG",
+  "PX-NET",
+  "REG-HYD",
+  "G103-3",
+  "PU-ALONE",
+  "AN-REVIEW",
+  "T103-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "blocked": [
+  "G103-3 fake-Bearer sub-check: backend unavailable in cloud (:5199 not running)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "measurements": {
+  "WD-STALL": {
+   "1280": {
+    "ctorToAlertMs": 30008.7,
+    "postToAlertMs": 30008.6,
+    "terminate": 1,
+    "terminateAfter+6s": 1,
+    "downloads": 0
+   },
+   "1440": {
+    "ctorToAlertMs": 30009.4,
+    "terminate": 1,
+    "downloads": 0,
+    "postToAlertMs": 30009.3
+   }
+  },
+  "WD-MP3": {
+   "ctorToAlertMs": 30009.9,
+   "unpkgRequests": 0,
+   "loadLabelSeen": false,
+   "downloads": 0,
+   "postToAlertMs": 30009.7
+  },
+  "WD-CANCEL": {
+   "cancelSinceCtorMs": 5054,
+   "terminateAt+35s": 1,
+   "alertsEver": 0,
+   "downloads": 0
+  },
+  "WD-ERRTEXT": {
+   "ctorToAlertMs": 34.4,
+   "terminate": 1,
+   "downloads": 0
+  },
+  "WD-SLOW": {
+   "cpuRate": 6,
+   "ctorToFirstProgressMs": 145,
+   "maxMessageGapMs": 145,
+   "wavPhaseMs": 767,
+   "unthrottledWavPhaseMs": [
+    271,
+    314,
+    262
+   ],
+   "messages": 102,
+   "workerThreadThrottleConfirmed": false
+  },
+  "EXPORT-REG": {
+   "wavBytes": 29189420,
+   "wav": "RIFF/WAVE PCM 2ch 48000Hz 24-bit 101.352s nan 0",
+   "mp3Bytes": 3291117,
+   "mp3Decode": {
+    "sr": 48000,
+    "ch": 2,
+    "dur": 101.352
+   }
+  }
+ },
+ "notes": [
+  "Fault injection: only the WAV worker's answer was simulated (Blob stub via an init-script Worker subclass); the app timer, terminate, reject, state and UI ran for real.",
+  "WD-SLOW: CDP Emulation.setCPUThrottlingRate was applied to the page session; the wav phase took 2.4-2.9x longer than unthrottled, but throttling of the dedicated worker thread itself is not confirmed.",
+  "PU-ALONE: baseline -t PU2 fails by assertion (loadEncoderMock called 0 times) in about 0.3 s, not by the 15 s timeout; PU1 and PU3 are green on the baseline, as A reported.",
+  "Fail-before differs from B's prediction (EW8d green, EW8c red on baseline); confirmed independently, A's explanation holds.",
+  "The code-reviewer saw only the pre-detachWorker version; the post-review delta is for the root gate review."
+ ]
+}

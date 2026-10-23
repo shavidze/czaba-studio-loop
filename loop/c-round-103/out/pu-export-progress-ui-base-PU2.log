@@ -1,0 +1,51 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-103/mut[39m
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx [2m([22m[2m8 tests[22m[2m | [22m[31m2 failed[39m[2m | [22m[33m6 skipped[39m[2m)[22m[33m 338[2mms[22m[39m
+     [2m[90m↓[39m[22m PU4 the 120 s timer covers the encoder import, the timeout clears the progress, and a module that arrives later never starts a load and resets
+     [2m[90m↓[39m[22m PU4 with the module loaded, a never-settling load resets once at the timeout and the next export loads again and succeeds
+     [2m[90m↓[39m[22m PU1 WAV export shows render then wav progress during the render and nothing before or after; exportState has no progress field
+     [2m[90m↓[39m[22m PU1 a failed WAV render clears the progress
+[31m     [31m×[31m PU2 MP3 shows an indeterminate load bar without a value attribute, then the mp3 percent; done clears it[39m[32m 250[2mms[22m[39m
+[31m     [31m×[31m PU2 a load failure and a conversion failure each clear the progress and reset after the load failure[39m[32m 86[2mms[22m[39m
+     [2m[90m↓[39m[22m PU3 progress updates do not re-render the provider or useArrangement consumers
+     [2m[90m↓[39m[22m PU5 the context never touches ~/utils/ffmpeg and imports the lab encoder only dynamically
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx[2m > [22mSRW-20 stage 3a export progress in the dialog (D-29z52)[2m > [22mPU2 MP3 shows an indeterminate load bar without a value attribute, then the mp3 percent; done clears it
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx:[2m442:29[22m[39m
+    [90m440| [39m    })[33m;[39m
+    [90m441| [39m    [35mawait[39m [34mflushAsync[39m([34m5[39m)[33m;[39m
+    [90m442| [39m    [34mexpect[39m(loadEncoderMock)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m443| [39m    [34mexpect[39m([34mprogressLabel[39m(view))[33m.[39m[34mtoBe[39m([32m'MP3 encoder-ის ჩატვირთვა…'[39m)[33m;[39m
+    [90m444| [39m    [34mexpect[39m([34mprogressBar[39m(view)[33m?.[39m[34mhasAttribute[39m([32m'value'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx[2m > [22mSRW-20 stage 3a export progress in the dialog (D-29z52)[2m > [22mPU2 a load failure and a conversion failure each clear the progress and reset after the load failure
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx:[2m476:30[22m[39m
+    [90m474| [39m    [35mawait[39m [34mflushAsync[39m()[33m;[39m
+    [90m475| [39m    expect(live(api).exportState).toEqual({ phase: 'error', message: L…
+    [90m476| [39m    [34mexpect[39m(resetEncoderMock)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m477| [39m    [34mexpect[39m([34mprogressBar[39m(view))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m478| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportProgress[33m.[39m[34mgetProgress[39m())[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[33m6 skipped[39m[90m (8)[39m
+[2m   Start at [22m 07:08:10
+[2m   Duration [22m 2.10s[2m (transform 680ms, setup 0ms, import 1.13s, tests 338ms, environment 500ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-103/mut/app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx,title=app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx > SRW-20 stage 3a export progress in the dialog (D-29z52) > PU2 MP3 shows an indeterminate load bar without a value attribute%2C then the mp3 percent; done clears it,line=442,column=29::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx:442:29%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-103/mut/app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx,title=app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx > SRW-20 stage 3a export progress in the dialog (D-29z52) > PU2 a load failure and a conversion failure each clear the progress and reset after the load failure,line=476,column=30::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ app/lib/arrangement/__tests__/export-progress-ui-base.test.tsx:476:30%0A%0A
