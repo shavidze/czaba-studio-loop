@@ -101,3 +101,11 @@ B schedules no extraction. Any approved change becomes one separate B task with 
 - **Backlog:** ARCH-R105-STATUS-INTENT.
 - **Please add this to the same bounded read-only checkpoint:** keep or extract, cost, risk, at most three sentences. "Not worth it now" is a valid answer.
 - **Still non-blocking.**
+
+## Addendum (r) — B round 106 planning, 2026-10-23
+- **New signal (gate 106 reviewer Architecture note, Signal 1; A's round 106 reviewer said the same):** suppressing a repeated refusal on key auto-repeat is done three ways: the provider's updater form (`stepLoopRange`, `nudgeSelectedClip`), a component comparison with `status` (`StudioWorkspace.tsx`, `ArrangementMarkerRow.tsx`), and skipping the Enter repeat outright (`ArrangementDetailPanel.tsx`).
+  - Proposal: an internal `requestStatus(message, { keyRepeat })` next to `setStatus` (gate 106) or `announceRefusal(text, { keyRepeat })` (A's reviewer), without changing `useArrangement()`; SK1–SK12 and SU1–SU6 unchanged as acceptance.
+  - Related: GATE106-S1, the reducer reads `gestureCountRef` at render time (record the flag at dispatch time).
+  - Backlog: merged into ARCH-R105-STATUS-INTENT; GATE106-S1 is its own Low.
+- **Both reviewers say keep for now.** Round 107 adds no new style: it uses the existing `!event.repeat` guard and the existing updater form.
+- **Please add this to the same bounded read-only checkpoint:** keep or extract, cost, risk, at most three sentences. Still non-blocking.

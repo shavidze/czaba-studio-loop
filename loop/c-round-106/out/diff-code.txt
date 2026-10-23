@@ -1,0 +1,150 @@
+=== StudioWorkspace.tsx
+1852c1852,1854
+<         markerRowRef.current?.stepMarker(event.key === 'ArrowLeft' ? -1 : 1, edgeTimes);
+---
+>         markerRowRef.current?.stepMarker(event.key === 'ArrowLeft' ? -1 : 1, edgeTimes, {
+>           keyRepeat: event.repeat,
+>         });
+1944c1946
+<           current.nudgeSelectedClip(direction * NUDGE_SECONDS);
+---
+>           current.nudgeSelectedClip(direction * NUDGE_SECONDS, { keyRepeat: event.repeat });
+1955c1957,1959
+<           current.setStatus(NUDGE_AT_TIME_START_MESSAGE);
+---
+>           if (!event.repeat || current.status !== NUDGE_AT_TIME_START_MESSAGE) {
+>             current.setStatus(NUDGE_AT_TIME_START_MESSAGE);
+>           }
+1958c1962
+<         current.nudgeSelectedClip(target - anchor.start);
+---
+>         current.nudgeSelectedClip(target - anchor.start, { keyRepeat: event.repeat });
+=== ArrangementContext.tsx
+295c295,300
+<   stepLoopRange: (kind: 'move' | LoopEdge, delta: number, gridStep?: number | null) => void;
+---
+>   stepLoopRange: (
+>     kind: 'move' | LoopEdge,
+>     delta: number,
+>     gridStep?: number | null,
+>     options?: { readonly keyRepeat?: boolean },
+>   ) => void;
+301c306
+<   nudgeSelectedClip: (delta: number) => void;
+---
+>   nudgeSelectedClip: (delta: number, options?: { readonly keyRepeat?: boolean }) => void;
+1651c1656,1661
+<     (kind: 'move' | LoopEdge, delta: number, gridStep: number | null = null) => {
+---
+>     (
+>       kind: 'move' | LoopEdge,
+>       delta: number,
+>       gridStep: number | null = null,
+>       options?: { readonly keyRepeat?: boolean },
+>     ) => {
+1662c1672,1674
+<         setStatus(LOOP_STEP_BLOCKED_MESSAGE);
+---
+>         setStatus(
+>           options?.keyRepeat === true ? () => LOOP_STEP_BLOCKED_MESSAGE : LOOP_STEP_BLOCKED_MESSAGE,
+>         );
+1674c1686,1687
+<     (delta: number) => {
+---
+>     (delta: number, options?: { readonly keyRepeat?: boolean }) => {
+>       const keyRepeat = options?.keyRepeat === true;
+1680c1693
+<           setStatus(GROUP_MOVE_BLOCKED_MESSAGE);
+---
+>           setStatus(keyRepeat ? () => GROUP_MOVE_BLOCKED_MESSAGE : GROUP_MOVE_BLOCKED_MESSAGE);
+1698c1711,1712
+<         setStatus('ჩაჩოჩება დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი.');
+---
+>         const message = 'ჩაჩოჩება დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი.';
+>         setStatus(keyRepeat ? () => message : message);
+=== ArrangementLoopBrace.tsx
+203c203
+<       stepLoopRange(kind, delta);
+---
+>       stepLoopRange(kind, delta, null, { keyRepeat: event.repeat });
+211a212
+>       { keyRepeat: event.repeat },
+=== ArrangementMarkerRow.tsx
+82c82,86
+<   stepMarker: (direction: -1 | 1, edgeTimes?: readonly number[]) => void;
+---
+>   stepMarker: (
+>     direction: -1 | 1,
+>     edgeTimes?: readonly number[],
+>     options?: { readonly keyRepeat?: boolean },
+>   ) => void;
+137a142
+>     status,
+223c228,232
+<     (direction: -1 | 1, edgeTimes?: readonly number[]) => {
+---
+>     (
+>       direction: -1 | 1,
+>       edgeTimes?: readonly number[],
+>       options?: { readonly keyRepeat?: boolean },
+>     ) => {
+232c241,244
+<         setStatus(direction === 1 ? 'წინ მარკერი აღარ არის' : 'უკან მარკერი აღარ არის');
+---
+>         const message = direction === 1 ? 'წინ მარკერი აღარ არის' : 'უკან მარკერი აღარ არის';
+>         if (options?.keyRepeat !== true || status !== message) {
+>           setStatus(message);
+>         }
+240c252
+<     [getArrangement, getLivePosition, projectEnd, seekTo, setStatus],
+---
+>     [getArrangement, getLivePosition, projectEnd, seekTo, setStatus, status],
+364c376,381
+<   const commitMarkerMove = (before: Arrangement, markerId: string, time: number): boolean => {
+---
+>   const commitMarkerMove = (
+>     before: Arrangement,
+>     markerId: string,
+>     time: number,
+>     keyRepeat = false,
+>   ): boolean => {
+367c384,387
+<       setStatus(`ამ დროზე მარკერი უკვე არის: «${result.other.name}»`);
+---
+>       const message = `ამ დროზე მარკერი უკვე არის: «${result.other.name}»`;
+>       if (!keyRepeat || status !== message) {
+>         setStatus(message);
+>       }
+382c402
+<   const nudgeMarker = (markerId: string, direction: -1 | 1) => {
+---
+>   const nudgeMarker = (markerId: string, direction: -1 | 1, keyRepeat: boolean) => {
+390c410,412
+<       setStatus(MARKER_AT_TIME_START_MESSAGE);
+---
+>       if (!keyRepeat || status !== MARKER_AT_TIME_START_MESSAGE) {
+>         setStatus(MARKER_AT_TIME_START_MESSAGE);
+>       }
+397c419
+<     commitMarkerMove(before, current.id, target);
+---
+>     commitMarkerMove(before, current.id, target, keyRepeat);
+620c642,644
+<       runUnlessGesture(() => nudgeMarker(marker.id, event.key === 'ArrowLeft' ? -1 : 1));
+---
+>       runUnlessGesture(() =>
+>         nudgeMarker(marker.id, event.key === 'ArrowLeft' ? -1 : 1, event.repeat),
+>       );
+=== ArrangementDetailPanel.tsx
+323c323,325
+<       applyDetailRange();
+---
+>       if (!event.repeat) {
+>         applyDetailRange();
+>       }
+373c375,377
+<       commitClipGain('enter');
+---
+>       if (!event.repeat) {
+>         commitClipGain('enter');
+>       }

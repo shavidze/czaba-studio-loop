@@ -1,9 +1,9 @@
 {
- "version": 104,
- "updated": "2026-10-23 (B round 105 -> round 106 planning)",
+ "version": 105,
+ "updated": "2026-10-23 (B round 106 -> round 107 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 106: D-29z71 - a held key no longer re-announces the same refusal (GATE105-S1): five key paths (clip nudge Snap off/on incl. group, loop brace step, marker flag nudge, Ctrl/Option+Arrow marker step) take a keyRepeat flag; on event.repeat the refusal is dispatched only if its text differs from the current status (provider: updater form; components: status comparison); Enter repeat skipped in the detail panel inputs; doc 092 drift (C-R105-01, GATE105-S2); baseline 3b6178b + 3 M + 4 ??; frozen b-round-105-r106-tree-sha256.txt 535; expected 6 M + 4 ??)",
+ "current_task": "current-task.md (round 107: D-29z72 - held shortcuts Ctrl+E/L/Shift+L/C ignore auto-repeat (C-R106-02); repeated Enter prevented on marker +/prev/next and detail apply/0 dB, and does not settle the marker name editor (F5); a single clip at time 0 announces the time-start refusal (C-R106-01); doc 092 l.94 (C-R106-03); baseline 35112cd clean; frozen b-round-106-r107-tree-sha256.txt 536; expected 6 M + 0 ??)",
  "advisor_used_by_B": "round 95 planning: advisor available and consulted (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
@@ -8695,7 +8695,7 @@
    "round": 106,
    "task": "current-task.md",
    "decision": "D-29z71",
-   "status": "dispatched",
+   "status": "C PASS (browserVerified=true, realVerified=true; c-round-106.json, 3 Low pre-existing findings); gate 106 PUBLISHED 35112cd (rounds 104-106, reviewer 8/10)",
    "items": [
     "GATE105-S1-HELD-KEY-REPEAT",
     "C-R105-01-DOC092-L16",
@@ -8734,6 +8734,27 @@
     "T106-TARGETED",
     "DOC-092",
     "SOURCE-UNCHANGED"
+   ]
+  },
+  {
+   "round": 107,
+   "task": "current-task.md",
+   "decision": "D-29z72",
+   "status": "dispatched",
+   "items": [
+    "C-R106-02-HELD-SHORTCUTS",
+    "A-R106-REVIEW-F5-HELD-ENTER-BUTTONS",
+    "C-R106-01-TIME0-SILENT-NUDGE",
+    "C-R106-03-DOC092-L94"
+   ],
+   "note": "One-shot shortcuts ignore event.repeat (Ctrl+E/L/Shift+L/C); repeated Enter prevented on marker +/prev/next and detail apply/0 dB; repeated Enter does not settle the marker name editor; single clip at time 0 announces the time-start refusal (one exported constant). Baseline HEAD 35112cd clean; frozen b-round-106-r107-tree-sha256.txt 536; snapshots b-round-106-r107-snapshots; expected 6 M + 0 ??. Regression round due at the next B planning on/after 2026-10-24.",
+   "owned": [
+    "app/components/arrangement/StudioWorkspace.tsx (context import l.11-17, delete local const l.150, Ctrl+E l.1759-1763, Ctrl+L l.1778-1786, Ctrl+C l.1799-1806)",
+    "app/contexts/ArrangementContext.tsx (export NUDGE_AT_TIME_START_MESSAGE near l.169-170; nudgeSelectedClip single-clip part l.1700-1716)",
+    "app/components/arrangement/ArrangementMarkerRow.tsx (+/prev/next buttons l.681-714; name editor onKeyDown l.805-811)",
+    "app/components/arrangement/ArrangementDetailPanel.tsx (apply button l.516-525; 0 dB button l.557-568)",
+    "app/lib/arrangement/__tests__/status-announcement-ui.test.tsx (append-only after l.705)",
+    "docs/implementation/2026/quarter-IV/092-studio-status-repeat-announcement.md (whole)"
    ]
   }
  ],
@@ -14277,10 +14298,12 @@
   {
    "id": "GATE96-S2-REPEATED-STATUS-NOT-ANNOUNCED",
    "severity": "low",
-   "status": "c_pass round 104, NOT published (gate 104 blocked) - carried into round 105 with A-R104-REPEAT-DRAG; C SR-REPEAT-SPACE 1280/1440 (exact text twice, second press adds a span, <output> same node, AX count 2/2, nothing plays), SR-REPEAT-FAILED-ROW (exact failed text twice, 0 clips), SR-TEXT-REG, AN-REVIEW m1-m4 red; C round 104 PASS browserVerified=true realVerified=true (c-round-104.json); gate 104 BLOCKED (reviewer 7/10: A-R104-REPEAT-DRAG), not published | round 105: C SR-REPEAT-SPACE / SR-REPEAT-FAILED-ROW PASS again (c-round-105.json); gate 105 blocked; still unpublished, carried into round 106.",
+   "status": "closed: C rounds 104/105/106 SR-REPEAT-SPACE PASS browserVerified=true (exact text twice, second press adds a span, same <output>); published 35112cd (gate 106)",
    "to": "Lows batch",
    "title": "an identical status text set twice (e.g. Enter twice on a failed row) causes no re-render, so the aria-live=polite region does not announce it again",
-   "evidence": "gates/round-96/review.md finding 2; ArrangementContext.tsx l.535 useState status; StudioWorkspace.tsx l.2440 aria-live"
+   "evidence": "gates/round-96/review.md finding 2; ArrangementContext.tsx l.535 useState status; StudioWorkspace.tsx l.2440 aria-live",
+   "closed_round": 106,
+   "published": "35112cd"
   },
   {
    "id": "GATE96-S3-DOUBLE-STATE-READ",
@@ -14673,10 +14696,12 @@
   {
    "id": "GATE103-S5-DOC091-STATUS",
    "severity": "low",
-   "status": "c_pass round 104 (SOURCE-UNCHANGED doc 091 only l.4), NOT published (gate 104 blocked); doc 091 frozen at its round 104 state in round 105; closes at publication | round 105: C SR-REPEAT-SPACE / SR-REPEAT-FAILED-ROW PASS again (c-round-105.json); gate 105 blocked; still unpublished, carried into round 106.",
+   "status": "closed: C round 104 SOURCE-UNCHANGED (doc 091 l.4) PASS; published 35112cd (gate 106)",
    "to": "A round 104",
    "title": "doc 091 l.4 still says awaiting C although C round 103 passed and gate 103 published 3b6178b",
-   "evidence": "gates/round-103/review.md #5"
+   "evidence": "gates/round-103/review.md #5",
+   "closed_round": 106,
+   "published": "35112cd"
   },
   {
    "id": "A-R103-EW5-TITLE-NIT",
@@ -14713,10 +14738,12 @@
   {
    "id": "A-R104-REPEAT-DRAG",
    "severity": "medium",
-   "status": "c_pass round 105, NOT published: C round 105 PASS browserVerified=true realVerified=true (c-round-105.json): HD-BLOCKED-HOLD 1280/1440 (89 moves in window -> blocked sentence 1, 2 added elements, <output> same node), HD-FADE-CLAMP (clamp window 1 element / 30 moves; round 104 had 21), HD-READOUT-CHANGING (30 distinct readouts, 0 duplicates), AN-REVIEW m6/m7 red. Gate 105 BLOCKED (reviewer 6/10: GATE105-S1 held-key repeat), still NOT published; carried into round 106 and publishes with it.",
+   "status": "closed: C round 105 PASS browserVerified=true (HD-BLOCKED-HOLD, HD-FADE-CLAMP, HD-READOUT-CHANGING) and C round 106 HD-BLOCKED-HOLD regression PASS; published 35112cd (gate 106)",
    "to": "root (publish with round 106)",
    "title": "round 104 made every identical setStatus(string) during a drag replace the keyed span: a blocked drag announced the same sentence on every pointermove and re-rendered the provider",
-   "evidence": "c-round-104.json bugs[0]; c-round-104/out/blocked-1280x720.json (81 moves -> 81 spans, 80 identical), drag-1280x720.json (21 identical Fade In spans); gates/round-104/review.md #1"
+   "evidence": "c-round-104.json bugs[0]; c-round-104/out/blocked-1280x720.json (81 moves -> 81 spans, 80 identical), drag-1280x720.json (21 identical Fade In spans); gates/round-104/review.md #1",
+   "closed_round": 106,
+   "published": "35112cd"
   },
   {
    "id": "GATE104-S2-LOADING-ANNOUNCED-AT-MOUNT",
@@ -14729,10 +14756,12 @@
   {
    "id": "GATE104-S3-DOC092-STATUS",
    "severity": "low",
-   "status": "c_pass round 105 (C GATE104-S3 row: doc 092 l.4 + l.60/61), NOT published; doc 092 owned again in round 106 for C-R105-01/GATE105-S2. Gate 105 BLOCKED (reviewer 6/10: GATE105-S1 held-key repeat), still NOT published; carried into round 106 and publishes with it.",
+   "status": "closed: C round 105 GATE104-S3 row PASS; published 35112cd (gate 106). Residual stale sub-status at doc 092 l.94 filed as C-R106-03",
    "to": "root (publish with round 106)",
    "title": "doc 092 l.4 still says waiting for C and l.60 hands the drag repeat to B",
-   "evidence": "gates/round-104/review.md #3; c-round-104.md"
+   "evidence": "gates/round-104/review.md #3; c-round-104.md",
+   "closed_round": 106,
+   "published": "35112cd"
   },
   {
    "id": "GATE104-S4-STATUSSEQUENCE-PUBLIC",
@@ -14769,31 +14798,37 @@
   {
    "id": "GATE105-S1-HELD-KEY-REPEAT",
    "severity": "medium",
-   "status": "dispatched round 106 (D-29z71): keyRepeat flag at five key paths + Enter repeat skip in the detail panel; on event.repeat a refusal is dispatched only if its text differs from the current status; B sweep of every keydown handler in app/components/arrangement",
+   "status": "closed: C round 106 PASS browserVerified=true realVerified=true (c-round-106.json: KR-NUDGE-SNAPOFF/SNAPON/MOVES (neighbour recipe), KR-GROUP, KR-LOOP, KR-MARKER-FLAG, KR-MARKER-STEP, KR-DETAIL-ENTER 1280/1440; AN-REVIEW k1/k4/k8/k9 red); gate 106 published 35112cd (reviewer 8/10)",
    "to": "A round 106",
    "title": "holding an arrow key at a boundary re-announces the same refusal on every OS auto-repeat (~30/s) and commits the provider each time; round 104 regression (at 3b6178b useState dropped the identical text); round 105 covers pointer gestures only",
-   "evidence": "gates/round-105/review.md #1 (score 6/10, COMMIT: BLOCK); B source read StudioWorkspace.tsx l.1852/l.1933-1960, ArrangementContext.tsx l.1662/l.1680/l.1698, ArrangementLoopBrace.tsx l.193-212, ArrangementMarkerRow.tsx l.232/l.367/l.390, ArrangementDetailPanel.tsx l.320-378; B probe b-round-105/probe (Playwright keyboard.down repeat=true confirmed)"
+   "evidence": "gates/round-105/review.md #1 (score 6/10, COMMIT: BLOCK); B source read StudioWorkspace.tsx l.1852/l.1933-1960, ArrangementContext.tsx l.1662/l.1680/l.1698, ArrangementLoopBrace.tsx l.193-212, ArrangementMarkerRow.tsx l.232/l.367/l.390, ArrangementDetailPanel.tsx l.320-378; B probe b-round-105/probe (Playwright keyboard.down repeat=true confirmed)",
+   "closed_round": 106,
+   "published": "35112cd"
   },
   {
    "id": "C-R105-01-DOC092-L16",
    "severity": "low",
-   "status": "dispatched round 106 (doc 092 owned whole)",
+   "status": "closed: C round 106 DOC-092 PASS; published 35112cd (gate 106)",
    "to": "A round 106",
    "title": "doc 092 Approach l.16 still says the string branch ALWAYS bumps sequence; Mermaid (l.32-44) shows only the Space path",
-   "evidence": "c-round-105.json bugs[0]; a-round-105.md review #3"
+   "evidence": "c-round-105.json bugs[0]; a-round-105.md review #3",
+   "closed_round": 106,
+   "published": "35112cd"
   },
   {
    "id": "GATE105-S2-DOC092-FILELIST",
    "severity": "low",
-   "status": "dispatched round 106",
+   "status": "closed: C round 106 DOC-092 PASS (SA1-SA7, SU1-SU6, SK1-SK12 listed); published 35112cd (gate 106)",
    "to": "A round 106",
    "title": "doc 092 changed-files list (l.49-55) names only SA1-SA5 / SU1-SU4; semantics lack the keyboard-repeat case",
-   "evidence": "gates/round-105/review.md #2"
+   "evidence": "gates/round-105/review.md #2",
+   "closed_round": 106,
+   "published": "35112cd"
   },
   {
    "id": "A-R105-REVIEW-2-RELEASE-BATCH-TEST",
    "severity": "low",
-   "status": "open - Lows batch (optional test: dispatch during a gesture, render after release pins +1)",
+   "status": "open - Lows batch; merged with GATE106-S1 (same render-time gesture-ref concern); optional test",
    "to": "Lows batch",
    "title": "no test pins the render-time flag semantics when a same-text dispatch during a gesture renders after the release",
    "evidence": "a-round-105.md code-review #2; c-round-105.md carried items"
@@ -14801,10 +14836,81 @@
   {
    "id": "ARCH-R105-STATUS-INTENT",
    "severity": "info",
-   "status": "signal - not scheduled; appended to the pending checkpoint request as addendum (q) (b-round-91-checkpoint-request.md); two independent reviewers (A round 105 reviewer: record the gesture flag at dispatch time; gate 105 reviewer: {text, repeat} / announceStatus vs setStatus intent); both verdict keep for now",
+   "status": "signal - not scheduled; appended to the pending checkpoint request as addendum (q) (b-round-91-checkpoint-request.md); two independent reviewers (A round 105 reviewer: record the gesture flag at dispatch time; gate 105 reviewer: {text, repeat} / announceStatus vs setStatus intent); both verdict keep for now | round 106: gate-106 reviewer Architecture note (Signal 1: refusal suppression done three ways - provider updater, component status comparison, detail-panel Enter skip; proposal internal requestStatus(message, {keyRepeat}) next to setStatus; keep for now) appended as addendum (r) to b-round-91-checkpoint-request.md; A round-106 reviewer note (announceRefusal) merged; not scheduled",
    "to": "root checkpoint",
    "title": "status repeat policy is inferred from refs (gesture) and call-site event.repeat checks; proposal: one status action that carries the intent so the reducer is pure",
    "evidence": "a-round-105.md Architecture note; gates/round-105/review.md Architecture note"
+  },
+  {
+   "id": "C-R106-01-TIME0-SILENT-NUDGE",
+   "severity": "low",
+   "status": "dispatched round 107 (D-29z72 R4): single-clip nudge whose clamped target equals clip.start announces NUDGE_AT_TIME_START_MESSAGE (exported from ArrangementContext, imported by the workspace); keyRepeat -> updater form",
+   "to": "A round 107",
+   "title": "ArrowLeft on a single clip at 00:00.000 with Snap off gives no status and no history (Snap on announces the time-start refusal); refusal text names the time start but never fires there",
+   "evidence": "c-round-106.json bugs[0] (kr-snapoff-asis / kr-moves-asis 1280); a-round-106.md section 3 (A-R106-TIME0-SILENT, merged here)",
+   "merged": [
+    "A-R106-TIME0-SILENT"
+   ]
+  },
+  {
+   "id": "C-R106-02-HELD-SHORTCUTS",
+   "severity": "low",
+   "status": "dispatched round 107 (D-29z72 R1): Ctrl/Cmd+E, Ctrl/Cmd+L, Ctrl/Cmd+Shift+L, Ctrl/Cmd+C ignore event.repeat (preventDefault still runs); Ctrl+Z/Y keep repeating; Ctrl+L range-replace semantics unchanged (SRW-05 contract)",
+   "to": "A round 107",
+   "title": "a held Ctrl+L toggles the loop on every auto-repeat (aria-pressed alternated over 10 keydowns; end state depends on hold length; a history entry each); held Ctrl+E/Ctrl+Shift+L/Ctrl+C re-run or re-announce",
+   "evidence": "c-round-106.json bugs[1] (kr-loop-1280x720.json ctrlL); a-round-106.md review F6; gates/round-106/review.md suggestion #5",
+   "merged": [
+    "A-R106-REVIEW-F6",
+    "GATE106-S5-REMAINING-SHORTCUTS"
+   ]
+  },
+  {
+   "id": "C-R106-03-DOC092-L94",
+   "severity": "low",
+   "status": "dispatched round 107 (doc 092 owned whole)",
+   "to": "A round 107",
+   "title": "doc 092 l.94 A-R104-REPEAT-DRAG entry still says round 105 awaits C",
+   "evidence": "c-round-106.json bugs[2]; gates/round-106/review.md #6"
+  },
+  {
+   "id": "A-R106-REVIEW-F5-HELD-ENTER-BUTTONS",
+   "severity": "low",
+   "status": "dispatched round 107 (D-29z72 R2+R3): repeated Enter prevented on marker +, prev, next and detail apply / 0 dB buttons (convention ArrangementExportDialog.tsx:554); repeated Enter in the marker name editor does not settle it",
+   "to": "A round 107",
+   "title": "Chromium clicks a focused button on every Enter auto-repeat: held Enter on the prev-marker button announced 6/6 times; held Enter on + committed the default name Marker 1 through the newly opened editor before the user could type",
+   "evidence": "a-round-106.md review F5; B probe b-round-106/probe/probe-out.txt (real Chromium 1280x720, 1 down + 5 repeats); gates/round-106/review.md #5"
+  },
+  {
+   "id": "GATE106-S1-RENDER-TIME-GESTURE-FLAG",
+   "severity": "low",
+   "status": "open - signal/Low, not scheduled; merged with A-R105-REVIEW-2 and ARCH-R105-STATUS-INTENT (record the gesture flag at dispatch time: dispatch({update, gestureActive})); documented in doc 092 semantics 1; C browser bound <= 2 added spans covers it",
+   "to": "root checkpoint / Lows batch",
+   "title": "status reducer reads gestureCountRef at render time; a pointermove update rendered after pointerup can announce once more at the end of a drag",
+   "evidence": "gates/round-106/review.md suggestion #1"
+  },
+  {
+   "id": "GATE106-S2-STEPMARKER-STATUS-DEP",
+   "severity": "low",
+   "status": "open - Lows batch (nit: statusRef mirror keeps the imperative handle stable)",
+   "to": "Lows batch",
+   "title": "stepMarker depends on status, so useImperativeHandle rebuilds the marker-row handle on every status change",
+   "evidence": "gates/round-106/review.md suggestion #2; a-round-106.md F4"
+  },
+  {
+   "id": "GATE106-S4-KEYREPEAT-OPTIONS-TYPE",
+   "severity": "info",
+   "status": "open - Lows batch nit (export one KeyRepeatOptions type; low value)",
+   "to": "Lows batch",
+   "title": "{ readonly keyRepeat?: boolean } literal repeated four times",
+   "evidence": "gates/round-106/review.md suggestion #4"
+  },
+  {
+   "id": "B-R106-KR-SPEC-PREMISE",
+   "severity": "info",
+   "status": "closed - B correction recorded: round 106 KR-NUDGE-SNAPOFF / KR-NUDGE-MOVES assumed a single clip at 0 (Snap off) announces the refusal; it never did (pre-existing). C passed both on A's neighbour recipe; not a finding against A or C. Round 107 R4 makes the premise true by contract and tests it (NZ rows)",
+   "to": "B record",
+   "title": "round 106 KR nudge rows were written on a wrong premise",
+   "evidence": "c-round-106.json passedWithDeviation; a-round-106.md section 3"
   }
  ],
  "tech_lead_notes": [
@@ -16023,6 +16129,11 @@
    "round": 102,
    "source": "gates/round-102/review.md + a-round-102.md Architecture notes",
    "note": "Signal 3 keep: focus guard l.217-246 changed rounds 83/88/89/102; proposals ARCH-R102-FOOTER-GUARD-PURE-FN (pure fn) and dialog-local focus hook; added as addendum (o) to the pending bounded frontend-architect checkpoint request; not scheduled"
+  },
+  {
+   "round": 106,
+   "source": "gates/round-106/review.md + a-round-106.md Architecture notes",
+   "note": "Signal 1 keep: repeated-refusal suppression in three styles (provider updater form, component status comparison, detail-panel Enter skip); proposals: internal requestStatus(message, {keyRepeat}) next to setStatus (gate 106) / announceRefusal (A reviewer); appended as addendum (r) to the pending bounded checkpoint request; merged into ARCH-R105-STATUS-INTENT; not scheduled"
   }
  ],
  "vitest_floor_round46": 1357,

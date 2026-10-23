@@ -1,274 +1,174 @@
-# CURRENT TASK — Round 106: a held key no longer repeats the same refusal (GATE105-S1) + doc 092 drift (C-R105-01, GATE105-S2)
+# CURRENT TASK — Round 107: held shortcuts and held Enter act once (C-R106-02, GATE106-S5/F6, F5) + a single clip at time 0 gives its refusal (C-R106-01) + doc 092 (C-R106-03)
 
-Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-23 (B planned at ~09:05 UTC, `date -u`)
+Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-23 (B planned at ~10:00 UTC, `date -u`)
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules in your prompt. Those rules take precedence over older text.
-- **Previous task:** `tasks/round-105.md` (exact copy of the round 105 task). Rationale: `b-round-105.md`. Decision record: D-29z71 in `docs/technical/studio-real-workspace/plan.md`.
-- **Round size:** one bug class (a held key re-announces the same refusal), found at five call paths, plus the doc drift of the same change set. That is two tightly related items with one owner (A). Rounds 104, 105 and 106 are one change set, and root publishes them together after C passes and the gate reviewer approves.
-  1. **GATE105-S1 (Medium: a11y and render cost; a regression of round 104).**
-     - **The problem:** a key held at a boundary now re-announces the same refusal on every OS auto-repeat (about 30 per second), and each repeat commits the provider. At `3b6178b`, `useState` skipped the identical update, so the refusal was announced once.
-     - **Why round 105 did not catch it:** its gesture-aware reducer covers pointer gestures only, and a key press is not a claimed gesture.
-     - **Evidence:** `gates/round-105/review.md` #1. Gate 105 was **blocked** on this (score 6/10). B confirmed it by reading the source; it has not been measured in a browser yet.
-  2. **C-R105-01 + GATE105-S2 (Low, doc 092).**
-     - l.16 (Approach) still says the string branch "always" bumps `sequence`.
-     - The Mermaid diagram (l.32–44) shows only the Space path.
-     - The changed-files list (l.49–55) still names only SA1–SA5 and SU1–SU4.
-     - The "recorded semantics" have no keyboard rule.
+- **Previous task:** `tasks/round-106.md` (exact copy). Rationale: `b-round-106.md`. Decision record: **D-29z72** in `docs/technical/studio-real-workspace/plan.md`.
+- **Round size:** three tightly related keyboard bugs with one owner (A). All three are about "one key press, one effect, one announcement". The doc line rides along.
+  1. **HK: held shortcuts (C-R106-02 + gate-106 suggestion #5 / A's reviewer F6; Low, one has a behaviour impact).**
+     - A held Ctrl/Cmd+L toggles the loop on **every** OS auto-repeat. C measured `aria-pressed` alternating true/false over 10 keydowns; the end state depends on how long the key was held, and each toggle is a history entry (`c-round-106/out/kr-loop-1280x720.json`, key `ctrlL`).
+     - A held Ctrl/Cmd+E, Ctrl/Cmd+Shift+L and Ctrl/Cmd+C have no repeat guard either. Ctrl+E can split again at the playhead after a range split; the others re-announce the same text about 30 times a second.
+     - Every sibling shortcut (Space, Ctrl+D/X/V/G, M, G, A, U, 1/2/3, Delete, Enter) already ignores `event.repeat`. These four were missed.
+  2. **HE: held Enter on buttons and on the marker name editor (A's reviewer F5; Low, one has a behaviour impact).** Chromium fires `click` on every Enter keydown, including the auto-repeats.
+     - **B probe** (`b-round-106/probe/probe-out.txt`, real Chromium, 1280×720, 1 down + 5 repeats):
+       - Enter held on ◀: `უკან მარკერი აღარ არის` was added **6 times**.
+       - Enter held on `+`: the first repeat landed on the newly opened name editor and **committed the default name `Marker 1`**. The user never got to type a name. The later repeats landed on the new flag.
+     - The same convention already exists: `ArrangementExportDialog.tsx:554`, `ArrangementTransport.tsx:250` and `ArrangementLibraryPreview.tsx:294/313` prevent a repeated Enter on their buttons.
+  3. **NZ: single clip at 00:00.000, Snap off, ←: no feedback at all (C-R106-01 = A-R106-TIME0-SILENT; Low, a11y).**
+     - `nudgeSelectedClip` clamps to 0 with `Math.max(0, …)`. `moveClip` then succeeds without changing anything, and `applyEdit` writes nothing. So there is no status and no history entry, for a hold and for a deliberate press.
+     - With Snap on, the same place announces `ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.` The two modes disagree.
+  4. **C-R106-03 (Low, doc):** doc 092 l.94 (the A-R104-REPEAT-DRAG entry) still says round 105 is waiting for C.
 - **Not in this round (still open, not deferred):**
-  - GATE104-S2 (the loading text announced at mount);
-  - A-R105-REVIEW-2 (an optional "dispatch during a gesture, render after release" test);
-  - ARCH-R105-STATUS-INTENT (architecture signal);
-  - GATE103-S1/S2/S3, A-R103-EW5-TITLE-NIT, GATE102-S3/S4, GATE98-S2;
-  - the grid/tempo/marker Lows;
-  - SRW-21-PREMOUNT and the SRW-21 mount (waiting for the auth owner's release), T12, VISUAL-A-OBSIDIAN.
-- **Regression round:** `regression-last.json` is 2026-10-21. B planned this round on 2026-10-23, which is 2 days. **The next B planning on or after 2026-10-24 is the regression round.**
+  - GATE106-S1 (the reducer reads the gesture ref at render time), together with ARCH-R105-STATUS-INTENT and A-R105-REVIEW-2;
+  - GATE106-S2 (the `statusRef` nit in `stepMarker`) and GATE106-S4 (one `KeyRepeatOptions` type);
+  - GATE104-S2, GATE103-S1/S2/S3, A-R103-EW5-TITLE-NIT, GATE102-S3/S4, GATE98-S2 and the grid/tempo/marker Lows;
+  - SRW-21-PREMOUNT and the SRW-21 mount (waiting for the auth owner), T12, VISUAL-A-OBSIDIAN.
+- **Regression round:** `regression-last.json` is 2026-10-21; B planned this round on 2026-10-23 (2 days). **The next B planning on or after 2026-10-24 is the regression round.**
 
 ## Why this round
-- **C round 105: PASS** (`browserVerified=true`, `realVerified=true`). The only finding was C-R105-01 (Low, doc).
-- **Gate 105: BLOCKED** at head `3b6178b` (`gates/gate-round-105.json`, `gates/round-105/review.md`). Nothing from rounds 104–105 is published.
-- The gate bug is in the same class as gate 104's: a repeated identical status. Gate 104 blocked the pointer version, and gate 105 blocked the keyboard version.
-- **The gate reviewer's sweep was partial** ("not a full sweep"), so B swept every `onKeyDown` handler in `app/components/arrangement` and the workspace `handleKeyDown`. The five paths are listed in §1. Fixing only the reviewer's one site would leave four siblings for the next gate to block.
+- **C round 106: PASS** (`browserVerified=true`, `realVerified=true`). Gate 106 **published** `35112cd` (rounds 104–106; reviewer 8/10, "nothing blocks").
+- C filed three Lows, all of them pre-existing. The gate reviewer's suggestion #5 and A's code-reviewer (F5/F6) independently named the same remaining held-key paths.
+- C's KR-NUDGE-SNAPOFF and KR-NUDGE-MOVES rows in round 106 were B spec errors: they assumed a single clip at 0 announced a refusal, and it never did. This round makes B's original assumption true, by a deliberate contract decision (below), and then tests it.
 
-## Baseline (measured by B, 2026-10-23 ~09:05 UTC)
-- **HEAD `3b6178b758253d5098cea19f07c43e4799cb9299`** (the last publication; gates 104 and 105 blocked).
-- `git status --short` = **3 M + 4 ??** (the round 104 + 105 work):
-  - ` M app/components/arrangement/StudioWorkspace.tsx`
-  - ` M app/contexts/ArrangementContext.tsx`
-  - ` M docs/implementation/2026/quarter-IV/091-studio-export-worker-watchdog.md`
-  - `?? app/lib/arrangement/__tests__/status-announcement-ui.test.tsx`
-  - `?? app/lib/arrangement/__tests__/status-announcement.test.ts`
-  - `?? app/lib/arrangement/status-announcement.ts`
-  - `?? docs/implementation/2026/quarter-IV/092-studio-status-repeat-announcement.md`
-- **Never revert, stash or re-create the round 104/105 work.** It is the baseline.
-- **Frozen list:** `../tmp/studio-real-loop/b-round-105-r106-tree-sha256.txt`, **535** entries. It is the round 105 list (537) plus `status-announcement.ts` and `status-announcement.test.ts` at their round 105 hashes, minus the four component files owned below.
-  - Check it with: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-105-r106-tree-sha256.txt`.
-- **Snapshots** of the round 105 state: `../tmp/studio-real-loop/b-round-105-r106-snapshots/` (`SHA256SUMS.txt`, 7 files). All are LF with CR=0, and they match A's round 105 end hashes. Fail-before runs against these snapshots, **not** against `3b6178b`.
+## Baseline (measured by B, 2026-10-23 ~10:00 UTC)
+- **HEAD `35112cd5b112ac007169cf48771805fd70c211c2`** (published, gate 106). `git status --short` is **empty** (0 M + 0 ??).
+- **Frozen list:** `../tmp/studio-real-loop/b-round-106-r107-tree-sha256.txt`, **536** entries (the round 106 list, plus `ArrangementLoopBrace.tsx`, minus the six owned paths below). Check it with `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-106-r107-tree-sha256.txt`.
+- **Snapshots** of the owned files at `35112cd`: `../tmp/studio-real-loop/b-round-106-r107-snapshots/` (`SHA256SUMS.txt`; LF, CR=0; they equal A's round 106 end hashes). Fail-before runs against these.
 
   | File | sha256 prefix | lines | permission |
   |---|---|---|---|
-  | `app/components/arrangement/StudioWorkspace.tsx` | `bfe53dcb` | 2519 | **owned, narrow:** the arrow-nudge branch (l.1933–1960) and the Ctrl/Option+Arrow `stepMarker` call (l.1852). Nothing else. |
-  | `app/contexts/ArrangementContext.tsx` | `939e720c` | 3414 | **owned, narrow:** `nudgeSelectedClip` (l.1673–1702) and `stepLoopRange` (l.1650–1670) get an optional options argument; the two interface lines (l.295, l.301). Nothing else: the reducer, `gestureCountRef` and every other `setStatus(` line stay byte-identical. |
-  | `app/components/arrangement/ArrangementLoopBrace.tsx` | `e8bbab9a` | 280 | **owned, narrow:** `handleLoopKeyDown` (l.193–212) only. |
-  | `app/components/arrangement/ArrangementMarkerRow.tsx` | `e9b38eee` | 813 | **owned, narrow:** the `useArrangement()` destructure (add `status`), `stepMarker` (l.222–239, including its deps array: Biome will require `status` there, so `stepMarker` and the `useImperativeHandle` re-create on each status change; that is expected and harmless, so do not use a ref) and its handle type (l.82), `commitMarkerMove` (l.364–381), `nudgeMarker` (l.382–398), and the arrow branch of `handleFlagKeyDown` (l.615–620). |
-  | `app/components/arrangement/ArrangementDetailPanel.tsx` | `00dc8d66` | 851 | **owned, narrow:** the Enter branches of `handleRangeInputKeyDown` (l.320–325) and `handleClipGainKeyDown` (l.370–378). |
-  | `app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | `b6b54dc7` | 391 | **owned:** append one new `describe` with SK1–SK8. Lines 1–390 (helpers and SU1–SU6) stay byte-identical, apart from the relocated closing `});` (see Tests). You may add new helpers inside the new `describe`, or after line 210 as new top-level functions, without changing existing lines. |
-  | `docs/implementation/2026/quarter-IV/092-studio-status-repeat-announcement.md` | `651428dd` | 106 | **owned (whole doc):** see §1 Docs. |
-  | `app/lib/arrangement/status-announcement.ts`, `…/__tests__/status-announcement.test.ts`, doc 091 | — | — | **frozen** (in the list) |
+  | `app/components/arrangement/StudioWorkspace.tsx` | `ce70fcb5` | 2523 | **owned, narrow:** (a) the `~/contexts/ArrangementContext` import (l.11–17): add `NUDGE_AT_TIME_START_MESSAGE`; (b) delete the local `NUDGE_AT_TIME_START_MESSAGE` (l.150); (c) the Ctrl+E (l.1759–1763), Ctrl+L (l.1778–1786) and Ctrl+C (l.1799–1806) branches of `handleKeyDown`. Nothing else. |
+  | `app/contexts/ArrangementContext.tsx` | `65a81c6d` | 3428 | **owned, narrow:** (a) one new `export const NUDGE_AT_TIME_START_MESSAGE` next to `GESTURE_EDIT_BLOCKED_MESSAGE` (l.169–170); (b) the single-clip part of `nudgeSelectedClip` (l.1700–1716). The reducer, `gestureCountRef`, `toggleLoopSelection`, `splitSelection`, `extendRangeToAllTracks`, `copySelection` and every other line stay byte-identical. |
+  | `app/components/arrangement/ArrangementMarkerRow.tsx` | `58d9b313` | 837 | **owned, narrow:** the three header buttons `+`, ◀ and ▶ (l.681–714) and the name editor's `onKeyDown` (l.805–811). Nothing else. |
+  | `app/components/arrangement/ArrangementDetailPanel.tsx` | `900350a5` | 855 | **owned, narrow:** the `მონიშვნა` apply button (l.516–525) and the `0 dB` Clip Gain reset button (l.557–568). Nothing else. |
+  | `app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | `581db1e7` | 705 | **owned, append-only:** lines 1–705 stay byte-identical. Append one new top-level `describe` after l.705 (new helpers go inside it or directly before it). |
+  | `docs/implementation/2026/quarter-IV/092-studio-status-repeat-announcement.md` | `4e2ed121` | 185 | **owned (whole doc):** see §1 Docs. |
 
-- **Expected end state:** `git status --short` = **6 M + 4 ??**: the 7 baseline paths, plus ` M` for `ArrangementLoopBrace.tsx`, `ArrangementMarkerRow.tsx` and `ArrangementDetailPanel.tsx`. No other new path.
-- **Protected (frozen, never edited; B re-checked the hashes in this tree):**
+- **Expected end state:** `git status --short` = **6 M + 0 ??** (exactly the six paths above).
+- **Protected (frozen, never edited; B re-checked them in this tree):**
   - `app/routes/studio.$productId.tsx` (`fa2cf0bc`), `app/routes/api.studio-token.ts` (`13914809`), `app/contexts/StudioContext.tsx` (`caa388e7`), `app/utils/ffmpeg.ts` (`0995ae78`), `app/components/ui/Modal.tsx` (`741c2341`), `app/lib/arrangement/mp3-encoder.client.ts` (`ddb70919`);
   - the auth files: `app/lib/auth.ts` (`56f5b76f`), `app/contexts/AuthContext.tsx` (`bf9ee257`), `app/lib/firebase.client.ts` (`23468664`), `app/types/auth.ts` (`280fe7f2`).
-- **Servers:** `:5173/studio-lab` returns 200 (`env-status.json`). The backend at `:5199` is unavailable, as expected. Never start or stop servers.
+- **Servers:** `:5173/studio-lab` returns 200 (B checked at ~10:00 UTC). The backend at `:5199` is unavailable, as expected. Never start or stop servers.
 - **Do not change the repository state:**
-  - Never stash, reset, checkout, clean or re-create anything.
+  - Never stash, reset, checkout, clean, commit or re-create anything.
   - Never run `biome check --write`, `format --write`, `npm run format` or `check:fix`. Format through stdin to stdout.
-  - Run fail-before and mutations in a scratch copy (`a-round-106/mut/`, with a `node_modules` symlink and the Vitest `cacheDir` inside scratch), never in `store/`.
-  - Stop and report if, at the start, HEAD differs, the status differs from the 3 M + 4 ?? above, or a frozen file changed.
+  - Run fail-before and mutations in a scratch copy (`a-round-107/mut/`, with a `node_modules` symlink and the Vitest `cacheDir` inside scratch), never in `store/`.
+  - Stop and report if, at the start, HEAD differs, the status is not empty, or a frozen file changed.
 
 ## 1. What changes (A)
 
-Read first: `AGENT_DISCOVERABLE_CODE.md`, `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `FORWARDREF_COMPONENT.md` (you touch components), and `.claude/prompts/new-test.md`. There are no styling changes.
+Read first: `AGENT_DISCOVERABLE_CODE.md`, `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md`, `FORWARDREF_COMPONENT.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, and `.claude/prompts/new-test.md`. There are no styling changes.
 
-### The rule (B decision, D-29z71)
-**A keyboard auto-repeat (`event.repeat === true`) never re-announces a refusal that is already the current status text.**
-- **On a repeat,** the refusal is dispatched only if its text differs from the current `status`. For held keys this is exactly what `3b6178b` did, because `useState` dropped an identical text.
-  - Example: a held ArrowLeft that moves a clip 0.3 → 0 and then hits time 0. The refusal is announced **once**, at the first refused repeat, because the text is new there. Later repeats stay silent.
-- **The action still runs on every repeat,** so a held arrow keeps nudging or stepping while there is room. Only the repeated identical refusal is silent.
-- **A separate, deliberate press** (`repeat === false`) always announces, even the same text again. That is GATE96-S2 for keys.
+### The rules (B decisions, D-29z72)
+- **R1, one-shot shortcuts:** Ctrl/Cmd+E, Ctrl/Cmd+L, Ctrl/Cmd+Shift+L and Ctrl/Cmd+C ignore `event.repeat`, exactly like Ctrl+D/X/V. `preventDefault()` still runs on every repeat, so the browser never sees them.
+  - **Ctrl+C:** keep the `window.getSelection()?.isCollapsed === false` early return **before** `preventDefault`, unchanged, so copying selected page text still works. Only the `copySelection()` call is guarded.
+  - **Not changed:** Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z keep repeating (each repeat is one real undo or redo step); Ctrl+A stays as it is (it is idempotent and sets no status); the gesture-refusal branch (l.1736–1758) stays as it is (the reducer already coalesces it during a gesture).
+  - **Ctrl+L semantics are unchanged.** When a selected range differs from the brace, the first press replaces the loop with that range. That is the SRW-05 contract ("Loop Selection replaces old range"), and C saw exactly this in round 106. Do not touch `toggleLoopSelection`.
+- **R2, held Enter on a button:** a repeated Enter keydown on these buttons is prevented: `onKeyDown={(event) => { if (event.key === 'Enter' && event.repeat) { event.preventDefault(); } }}`, which is the existing project convention (`ArrangementExportDialog.tsx:554`). No `stopPropagation`; Space and other keys are untouched. Buttons: marker `+`, ◀, ▶ (`ArrangementMarkerRow.tsx`); detail `მონიშვნა` and `0 dB` (`ArrangementDetailPanel.tsx`).
+  - In Chromium, preventing the default of the Enter keydown stops the synthetic click. A fresh Enter (`repeat === false`) still clicks as before.
+- **R3, the marker name editor:** a repeated Enter in the name input does nothing: `preventDefault()` and `stopPropagation()` as today, but **no** `settleEditor`. A fresh Enter commits as today. Escape is unchanged (a repeated Escape cancels once; the editor is gone after the first).
+  - Reason: with R2 alone, holding Enter on `+` would still commit the default name, because the first repeat lands on the editor that the first keydown opened (B probe).
+- **R4, single clip at time 0 (contract decision):** when the clamped target start equals the clip's current start (with a non-zero delta this happens only at 00:00.000 with a negative delta), `nudgeSelectedClip` announces `ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.` and writes nothing else.
+  - This is the Snap-on text, so both modes say the same thing in the same place. One constant, `NUDGE_AT_TIME_START_MESSAGE`, now exported from `ArrangementContext.tsx` (like `GESTURE_EDIT_BLOCKED_MESSAGE`) and imported by the workspace, so the text cannot drift.
+  - With `keyRepeat === true` it is dispatched in updater form, `setStatus(() => NUDGE_AT_TIME_START_MESSAGE)`, exactly as the other two nudge refusals already are. So a hold announces it once, and a deliberate press always announces it (D-29z71).
+  - The neighbour text (`… მეზობელი კლიპი ან დროის დასაწყისი.`) stays for `moveClip` returning `null`. The group path is unchanged (it already refuses at 0).
+  - Compare the clamped target with `clip.start` directly. Do not rely on `moveClip` or `replaceClip` returning the same object.
+  - **Why this and not silence:** the user's rule for this Studio is that a refused action states its reason (done-policy "disabled features state reason"). The refusal already names the time start. A silent arrow key is indistinguishable from a broken one for a screen-reader user. This is the smallest honest behaviour; nothing moves and no history entry is written.
 
-**Forbidden fix:** do not coalesce identical texts in the reducer or provider for non-repeat input outside a gesture. Text merging silences Space twice and Enter twice again (SU1/SU2) and breaks GATE96-S2. The gate must sit at the key handler, which knows `event.repeat`, as the gate reviewer recommended.
+**Forbidden:** guarding the nudge **action** with `!event.repeat` (a held arrow must keep moving a clip while there is room); coalescing identical status texts in the reducer (D-29z71 k8); any change to the public `setStatus` type or the `useArrangement()` shape.
 
-**Mechanism:** inside the provider, a refusal on a repeat is dispatched in updater form, `setStatus(() => MESSAGE)`. The reducer's function branch already returns `previous` when the text is unchanged (round 104 SA/SU4), and bumps otherwise. Components cannot use the updater, because the public `setStatus` type stays `(message: string) => void`; widening it would break frozen test fakes under `strictFunctionTypes`. So a component call site uses `if (!event.repeat || status !== MESSAGE) { setStatus(MESSAGE); }`, where `status` is the `useArrangement()` text of the latest render. Each keydown is a discrete event that React flushes before the next one, so that render is current.
+### Tests (owned UI test file, append-only)
+**Rules:** exact assertions (`toBe`, `toEqual`, `toBeNull`); no `as` (including `as const`), no `@ts-` and no `any`; reuse `mountKeyRepeatWorkspace`, `keyRepeatClip`, `keyRepeatArrangement`, `pressKey`, `observeRegion`, `addedTexts` and the other helpers in l.1–705 without editing them. jsdom sends no click for a button keydown, so the button tests assert the return value of `fireEvent.keyDown` (false = prevented), as `export-toolbar-hold-enter.test.tsx` TH1/TH2 do, and click explicitly where a click is part of the scenario.
 
-**Rejected:** skipping the refusal on every repeat. B's first draft of this task did that, and it would announce nothing when the boundary is first reached during a hold, which `3b6178b` announced once.
+- **HK1 (Ctrl+L):** an enabled loop and no range. Ctrl+L once (`repeat: false`), then three repeats. The loop is disabled exactly once (`arrangement.loop.enabled === false` after the first press and after every repeat), one span with `Loop გამორთულია; დიაპაზონი შენარჩუნებულია.` is added, the Undo label is `Undo: Loop გამორთვა`, and one Undo restores `enabled === true`. A later separate Ctrl+L enables it again.
+- **HK2 (Ctrl+E):** one selected clip with the playhead inside it. Ctrl+E once, then three repeats. The clip count goes up by exactly one, one span `კლიპი გაიყო …-ზე.` is added, and nothing else is added (in particular not `Playhead არჩეული კლიპის შიგნით უნდა იყოს.`).
+- **HK3 (Ctrl+Shift+L):** a range on one lane. One press, then three repeats: one span `მონიშვნა ყველა ხაზზე: …` is added.
+- **HK4 (Ctrl+C):** one selected clip. One press, then three repeats: one span `Copy: 1 კლიპი ბუფერშია.`. A later separate press adds one more span with the same text. Every one of these keydowns returns `false` (prevented).
+- **HK5 (not over-guarded):** with two undoable edits, Ctrl+Z once and then one repeat undoes **two** steps.
+- **HE1 (◀ / ▶):** `fireEvent.keyDown(prev, { key: 'Enter', repeat: true })` and the same on next return `false`; with `repeat: false` they return `true`; a repeated Space on ◀ returns `true`.
+- **HE2 (`+`):** a repeated Enter on `+` returns `false`, a fresh one returns `true`.
+- **HE3 (name editor):** open the editor with a click on `+`. A repeated Enter in the name input leaves the editor open and adds no marker; then a fresh Enter commits exactly one marker with the default name.
+- **HE4 (detail buttons):** a repeated Enter on `მონიშვნა` and on `0 dB` returns `false`; a fresh one returns `true`.
+- **NZ1 (deliberate press):** Snap off, a single selected clip at 0. ArrowLeft (`repeat: false`) adds one span with exactly `ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.`; the clip start stays 0 and the Undo label is unchanged.
+- **NZ2 (hold):** the same setup. One press, then three repeats: one span in total; the same `<output>` and span node. A later separate press adds one new span with the same text.
+- **NZ3 (the action still repeats):** Snap off, a single clip at 0.3 with no neighbour. ArrowLeft once, then four repeats: the start goes 0.2 → 0.1 → 0, then the time-start text is added **once** and no other text is added. This is B's original round-106 SK7 premise, now true.
+- **NZ4 (Snap on, same text):** Snap on, a single clip at 0, ArrowLeft once: the added text equals NZ1's text (one string compared with `toBe`).
+- **SU1–SU6 and SK1–SK12 stay byte-identical and green.** SK1/SK7 keep their neighbour setups.
 
-### The five paths (B swept them; A confirms the sweep in the report)
-| # | Key and focus | Where the refusal is set | Text (exact, from source) |
-|---|---|---|---|
-| P1 | ←/→ with a clip selected, **Snap off** | `nudgeSelectedClip` → `ArrangementContext.tsx` l.1698 (single clip) and l.1680 (≥ 2 clips) | `ჩაჩოჩება დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი.` / `ჯგუფის გადატანა შეჩერდა — მეზობელი კლიპი ან დროის დასაწყისი.` |
-| P2 | ←/→ with a clip selected, **Snap on**, no grid line to the left | `StudioWorkspace.tsx` l.1955 (and P1's provider texts when the step is blocked by a neighbour) | `ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.` |
-| P3 | ←/→ (Shift = end) on the focused loop brace | `stepLoopRange` → `ArrangementContext.tsx` l.1662 | `Loop ვეღარ გადაიწევს: დროის დასაწყისი ან მინიმალური სიგრძე.` |
-| P4 | ←/→ on a focused marker flag | `nudgeMarker` l.390 / `commitMarkerMove` l.367 | `მარკერი დროის დასაწყისშია.` / `ამ დროზე მარკერი უკვე არის: «…»` |
-| P5 | Ctrl+←/→ (Option on Apple) past the last or first stop | `stepMarker` l.232, called from `StudioWorkspace.tsx` l.1852 | `წინ მარკერი აღარ არის` / `უკან მარკერი აღარ არის` |
-| P6 | Enter held in the detail panel's range inputs or Clip Gain input | `applyDetailRange` / `commitClipGain('enter')` | e.g. `Clip Gain უცვლელია: 0.0 dB.` |
+**Fail-before** (scratch, the four code files = the snapshots, the new test file). B expects: HK1–HK4, HE1–HE4 and NZ1–NZ3 red; HK5 and NZ4 green; SU and SK green. Report the exact list and explain any difference.
 
-P6 is a sixth path of the same class (a held Enter in an input). Gate it by skipping the repeated Enter entirely. Repeating the apply is idempotent and only produces the no-change text, and the workspace Enter (l.1968) already follows this convention.
-
-**Paths B checked and found already safe** (A re-confirms them, no edit): the Digit1/2/3 grid keys (guarded); the library option Enter (guarded); the group-header rename Enter (guarded); the lane fold key (guarded); the playhead, overview, separator, float-handle and preview-wave arrows (no `setStatus`); the workspace gesture refusal at l.1756 (it is inside a claimed gesture, so the round 105 reducer already coalesces it).
-
-If A finds another path where `repeat: true` sets the same text and the file is not owned here, **stop editing that path and report it to B**. Do not touch frozen files.
-
-### Changes
-**One option name everywhere: `keyRepeat`** (default `false`), so the rule can be found with grep.
-- **P1, P2: `ArrangementContext.tsx` + `StudioWorkspace.tsx`**
-  - `nudgeSelectedClip(delta: number, options?: { readonly keyRepeat?: boolean }): void`.
-    - With `keyRepeat === true`, both refusals (l.1680, l.1698) are dispatched as `setStatus(() => MESSAGE)`. Otherwise they stay `setStatus(MESSAGE)`.
-    - The move logic is unchanged.
-    - Update the interface line l.301.
-    - The frozen tests that call `nudgeSelectedClip(0.5)` stay valid.
-  - In the workspace nudge branch:
-    - Both `nudgeSelectedClip` calls pass `{ keyRepeat: event.repeat }`.
-    - Snap on: `if (target === null) { if (!event.repeat || current.status !== NUDGE_AT_TIME_START_MESSAGE) { current.setStatus(NUDGE_AT_TIME_START_MESSAGE); } return; }`.
-- **P3: `ArrangementContext.tsx` + `ArrangementLoopBrace.tsx`**
-  - `stepLoopRange(kind, delta, gridStep?: number | null, options?: { readonly keyRepeat?: boolean })`.
-    - With `keyRepeat`, `LOOP_STEP_BLOCKED_MESSAGE` is dispatched in updater form.
-    - Update the interface line l.295.
-  - Both calls in `handleLoopKeyDown` pass `{ keyRepeat: event.repeat }`. Give `gridStep` explicitly in the first call as `null`, which is the current default.
-- **P4: `ArrangementMarkerRow.tsx`**
-  - Add `status` to the existing `useArrangement()` destructure (around l.120–150).
-  - `nudgeMarker(markerId, direction, keyRepeat: boolean)`. The parameter is required, because the function is private and has one caller.
-    - On `keyRepeat`, `MARKER_AT_TIME_START_MESSAGE` is set only if it differs from `status`.
-  - `commitMarkerMove(before, markerId, time, keyRepeat = false)`.
-    - On `keyRepeat`, only the conflict text is set, and only if it differs from `status`.
-    - The success text `მარკერი «…» გადავიდა: …` is unchanged and is set on every successful step, because the time changes each step.
-    - The drag commit path keeps calling it with 3 arguments.
-  - The flag arrow branch passes `event.repeat`.
-- **P5: `ArrangementMarkerRow.tsx` + `StudioWorkspace.tsx`**
-  - `stepMarker(direction, edgeTimes?, options?: { readonly keyRepeat?: boolean })`.
-    - On `keyRepeat`, the end text (`წინ/უკან მარკერი აღარ არის`) is set only if it differs from `status`.
-    - Update the handle type at l.82.
-  - The ◀/▶ buttons (l.671/682) are unchanged; a click is never a repeat.
-  - The workspace Ctrl/Option+Arrow call passes `{ keyRepeat: event.repeat }`.
-- **P6: `ArrangementDetailPanel.tsx`**
-  - In both Enter branches: `event.preventDefault(); if (!event.repeat) { … }`. The repeated apply is idempotent and only produces the no-change text, and the workspace Enter at l.1968 already follows this convention.
-  - Escape is unchanged.
-- **No new state, refs, listeners or timers.**
-- `setStatus`'s public type, `useArrangement()` and the reducer keep their shape. Any added parameters are optional, except the private `nudgeMarker` one.
-
-### Tests (owned UI test file only; SK = "status, key repeat")
-**Rules for all tests:**
-- Assert exact values (`toBe`, `toEqual`, `toBeNull`).
-- No type assertions (no `as`, including `as const`), no `@ts-` directives and no `any`.
-- Reuse `mountAnnouncementWorkspace`, `observeRegion`, `stopWatching` and `addedTexts`.
-- A repeat is `fireEvent.keyDown(target, { key, repeat: true })` after one `repeat: false` press.
-- **Each SK test (except SK7) checks the following:**
-  1. The first press adds the exact refusal text in a new span.
-  2. Three repeats keep **the same span node**, and `statusSequence` does not change.
-  3. A later separate press (`repeat: false`) adds a **new** span with the same text, and the sequence grows by 1.
-
-- **SK1 (P1, single clip):** a clip at 0 is selected, Snap is off, and the key is ArrowLeft.
-- **SK2 (P2):** Snap on. Toggle it through the workspace control or the key the workspace uses (A's choice; record which). ArrowLeft at 0.
-- **SK3 (P1, group):** two clips are selected, and the left one is at 0.
-- **SK4 (P3):** a loop starts at 0, and ArrowLeft is pressed on the focused `[data-testid=arrangement-loop-brace]`.
-- **SK5 (P4):** a marker at 0, and ArrowLeft is pressed on its focused flag.
-- **SK6 (P5):** Ctrl+ArrowRight with the playhead at or after the last stop.
-- **SK7 (the action still repeats):**
-  - Setup: Snap off, a clip at 0.3 s is selected, and no clip lies to its left.
-  - Steps: ArrowLeft once, then four repeats.
-  - Expected: the clip start goes 0.2 → 0.1 → 0 (the exact values after `roundToMs`), and then the refusal is announced **once** (at the first refused repeat, because the earlier steps set no status and the text is new) and stays silent on the later repeats.
-  - Record the exact span count. This pins down that the guard gates the announcement, not the move.
-- **SK8 (P6):** a clip is selected. Enter is pressed in the Clip Gain input with the value unchanged, which gives the exact `Clip Gain უცვლელია: 0.0 dB.` once. A repeat Enter adds nothing, and a separate Enter adds a new span.
-- **SU1–SU6** stay byte-identical. The file's last line, the closing `});` of the existing describe, may move only if A puts the new describe inside it. B prefers a **separate top-level `describe`** after it, so that `diff` against the snapshot is one pure addition.
-
-**Fail-before** (scratch, against the round 105 snapshots of the five owned code files). B expects:
-- SK1–SK6 and SK8 **red at the repeat step** (each repeat adds a span);
-- SK7 red at the "once" count;
-- SU1–SU6 green.
-
-Report the exact list and explain any difference. `tsc` rejects the new options argument against the snapshot. Vitest does not typecheck, so that is expected.
-
-**Mutations** (scratch only; record the red tests for each one, plus an unmutated control):
-- **k1:** the workspace passes `keyRepeat: false` to `nudgeSelectedClip` → SK1, SK3 red.
-- **k2:** the workspace drops the repeat/status check around `NUDGE_AT_TIME_START_MESSAGE` → SK2 red.
-- **k3:** the guard is put around the action instead (a repeat skips `nudgeSelectedClip`) → SK7 red.
-- **k4:** the loop brace passes `keyRepeat: false` → SK4 red.
-- **k5:** the flag branch passes `false` → SK5 red.
-- **k6:** the Ctrl+Arrow call passes `keyRepeat: false` → SK6 red.
-- **k7:** the Clip Gain Enter is not repeat-guarded → SK8 red.
-- **k8 (the forbidden fix):**
-  - Mutation: revert all the call-site changes, and make the reducer coalesce an identical string regardless of the gesture.
-  - Expected: SU1/SU2 red, plus step 3 of the SK tests.
-  - This proves the text-merge route breaks GATE96-S2.
-- **k9 (the rejected rule):** on a repeat, the provider skips the refusal entirely, instead of using updater form → SK7 red (the refusal is never announced).
+**Mutations** (scratch only; one unmutated control; record the red tests):
+- **h1:** remove the repeat guard from Ctrl+L → HK1 red.
+- **h2:** remove it from Ctrl+E → HK2 red.
+- **h3:** remove it from Ctrl+Shift+L → HK3 red.
+- **h4:** remove it from Ctrl+C → HK4 red.
+- **h5:** guard Ctrl+Z with `!event.repeat` as well → HK5 red (shows the test catches over-guarding).
+- **h6:** drop the ◀ `onKeyDown` → HE1 red; **h7:** drop the `+` one → HE2 red; **h8:** let a repeated Enter settle the editor → HE3 red; **h9:** drop the `0 dB` one → HE4 red.
+- **h10:** remove the R4 branch → NZ1–NZ3 red.
+- **h11:** dispatch the R4 refusal as a plain string even on `keyRepeat` → NZ2 red.
+- **h12:** guard the nudge action with `!event.repeat` → NZ3 and SK7 red.
 
 ### Docs (doc 092, owned whole)
-- **l.4 status:**
-  - Round 106 is waiting for C (D-29z71).
-  - Round 105: C PASS; gate 105 blocked it (GATE105-S1).
-- **l.16, Approach:** qualify "always". Outside a gesture, the string branch bumps even for the same text. During a claimed pointer gesture the same text keeps `previous`. A held key is handled at the key handler: on `event.repeat`, a refusal is dispatched only if its text differs from the current status (the provider uses the updater form, a component compares with `status`). Enter in the detail inputs skips the repeat, by the existing convention.
-- **Mermaid (l.32–44):**
-  - keep the Space path;
-  - add a gesture branch (same text → `previous`, no commit);
-  - add a key-repeat branch (`event.repeat` → the refusal is dispatched only if its text differs from the current status; otherwise nothing changes).
-  - Keep it valid Mermaid.
-- **Changed files (l.49–55):** list every file of rounds 104–106, with SA1–SA7, SU1–SU6 and SK1–SK8.
-- **Recorded semantics:** add the keyboard rule (§1 "The rule"), the forbidden text-merge fix with the k8 evidence, and the rejected skip-every-repeat rule with the k9 evidence.
-- **Problems and solutions:** add a GATE105-S1 entry: the five paths plus P6, the `keyRepeat` option (updater form in the provider, a status comparison in components), and why it is at the key handler rather than in the reducer.
-- **Testing:** the SK tests, fail-before, k1–k8, and the targeted count.
-- **TODO:** the C rows of round 106, and the Tech Lead check R104-T extended with a held arrow at a boundary using a real screen reader.
+- **l.4 status:** round 107 waits for C (D-29z72); rounds 104–106 are C PASS and published in `35112cd` (gate 106).
+- **C-R106-03:** the A-R104-REPEAT-DRAG entry's status line (l.94) says round 105 passed C (C round 105) and was published in `35112cd`.
+- **Problems and solutions:** one entry for HK (R1), one for HE (R2 + R3, with B's probe), and one for NZ (R4: why a refusal rather than silence; one exported constant).
+- **Changed files:** add round 107 (HK1–HK5, HE1–HE4, NZ1–NZ4).
+- **Testing:** fail-before, h1–h12, the targeted count.
+- **TODO:** the C rows of round 107; GATE106-S1/S2/S4 and ARCH-R105-STATUS-INTENT (signals, not scheduled).
 
 ### Checks A runs (speed rules)
 - `npm run typecheck`.
-- `npm run lint`, with 0 diagnostics in the owned files (use `--max-diagnostics` and grep, as in round 105).
-- `npx biome check <owned code and test files>`, without `--write`.
-- **Targeted vitest:**
-  - write the list: `grep -rlE "ArrangementProvider|StudioWorkspace|useArrangement\b|status-announcement|ArrangementLoopBrace|ArrangementMarkerRow|ArrangementDetailPanel|nudgeSelectedClip|stepLoopRange|stepMarker" app --include=*.test.ts --include=*.test.tsx | sort > ../tmp/studio-real-loop/a-round-106/targeted-list.txt`;
-  - run it: `npx vitest run $(cat ../tmp/studio-real-loop/a-round-106/targeted-list.txt)`.
-  - Report the file count and the test count. B expects ≥ 69 files. The round 105 subset of 69 files gives 1126 + 8 = 1134 tests, and any extra files the wider grep finds add their own tests. List the extra files.
+- `npm run lint`, with 0 diagnostics in the owned files (use `--max-diagnostics` and grep, as in round 106).
+- `npx biome check <the 5 owned code and test files>`, without `--write`.
+- **Targeted vitest:** the list is `grep -rlE "ArrangementProvider|StudioWorkspace|useArrangement\b|status-announcement|ArrangementMarkerRow|ArrangementDetailPanel|nudgeSelectedClip|stepMarker|NUDGE_AT_TIME_START" app --include=*.test.ts --include=*.test.tsx | sort > ../tmp/studio-real-loop/a-round-107/targeted-list.txt`, run with `npx vitest run $(cat ../tmp/studio-real-loop/a-round-107/targeted-list.txt)`. Report the file and test counts. B expects ≥ 69 files and 1138 + the new tests; list any extra files.
+- **If a frozen test fails because it pinned the old silent time-0 nudge:** do not edit it. Stop the R4 part, keep R1–R3, and report the test and its line to B.
 - Do **not** run the full suite or `npm run verify`; the root gate runs them.
-- **Code-reviewer:** run it, because 7 files change. Pass its Architecture note through verbatim, and ask it explicitly to sweep every keydown path for a `repeat: true` identical status.
+- **Code-reviewer:** run it (6 files change). Pass its Architecture note through verbatim, and ask it to sweep every button with an `onClick` that sets a status in `app/components/arrangement` for the held-Enter class, and every `handleKeyDown` modifier branch for a missing repeat guard.
 
 ## 2. Acceptance — what C checks (real Chromium)
-**Setup for every browser row unless stated:**
-- a fresh incognito context on `/studio-lab` at the stated viewport;
-- Decline consent, then wait for the library to settle;
-- a `MutationObserver` on `[data-testid=arrangement-status]` (`childList`, `subtree`, `characterData`), logging the type, a timestamp and the added nodes' text;
-- a kept JS reference to the `<output>` node;
-- a capture-phase `keydown` listener on `window` that counts `repeat === true` events.
+**Setup for every browser row unless stated:** a fresh incognito context on `/studio-lab` at the stated viewport; Decline; wait for the library to settle; a `MutationObserver` on `[data-testid=arrangement-status]` logging added element nodes and their text; a kept reference to the `<output>`; a capture-phase `keydown` counter for `repeat === true`. A hold is `keyboard.down` ×(N+1) at ~33 ms, then `up`. A separate press is `keyboard.press`. C's round-106 helpers (`c-round-106/tools/kr106.cjs`) may be reused.
 
-**Held key:** call `page.keyboard.down(key)` repeatedly without `up`. B's probe (`b-round-105/probe/probe-out.txt`) confirmed that the second and later calls arrive as `repeat: true` in the page. Separate presses use `keyboard.press`. In-page `repeat` counts must be ≥ the stated number; record them.
-
-**Clip setup** (C's round 104/105 recipe):
-- One clip: focus the Middle East row and press Enter once. The clip lands at 00:00.000.
-- Two clips: press Enter twice. They are back to back.
-- Then Fit.
-- Select the clip by clicking its title strip. Snap's state is shown in the toolbar; record it before each row.
+**Clip setup:** focus the Middle East row and press Enter once (one clip at 00:00.000; twice for two back-to-back clips), Fit, then select a clip by clicking its title strip.
 
 | ID | Steps | PASS when |
 |---|---|---|
-| **KR-NUDGE-SNAPOFF** (primary; 1280 and 1440) | One clip at 0, selected, Snap off. Hold ArrowLeft: 1 down + ≥ 30 repeats, then up. Wait 500 ms, then one separate `press('ArrowLeft')`. | <ul><li>During the hold, `ჩაჩოჩება დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი.` is added **exactly once**, and the total number of added element nodes is ≤ 1, while the in-page repeats are ≥ 30.</li><li>The separate press adds exactly one more span with the same text.</li><li>The clip start stays 00:00.000, and the Undo label is unchanged.</li><li>The `<output>` is the same node with one element child at every sample.</li><li>Take a screenshot.</li></ul> |
-| **KR-NUDGE-SNAPON** (1280) | As above with Snap on (record the grid division). | `ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.` is added exactly once during ≥ 30 repeats. The separate press adds one more. |
-| **KR-NUDGE-MOVES** (1280) | One clip, Snap off. Move the clip to start at 0.300 s with three separate `press('ArrowRight')`, and verify 00:00.300. Then hold ArrowLeft: 1 down + ≥ 10 repeats. | <ul><li>The clip reaches 00:00.000; record its start after the hold.</li><li>The single-clip refusal text is added **once**, and no other text is added during the hold.</li><li>Record the history entries. B expects three Undo steps back to 0.300; use Ctrl+Z ×3 and record the start after each.</li></ul> |
-| **KR-GROUP** (1280) | Two clips. Select both: click the first, Ctrl+click the second. Snap off. Hold ArrowLeft: 1 down + ≥ 30 repeats. | `ჯგუფის გადატანა შეჩერდა — მეზობელი კლიპი ან დროის დასაწყისი.` is added once. Both clips are unchanged. |
-| **KR-LOOP** (1280) | Create a loop that starts at 0, using C's earlier loop recipe (record it). Focus `[data-testid=arrangement-loop-brace]` and hold ArrowLeft: 1 down + ≥ 30 repeats. | <ul><li>`Loop ვეღარ გადაიწევს: დროის დასაწყისი ან მინიმალური სიგრძე.` is added once, and the loop start stays 0.</li><li>A separate press adds one more.</li></ul> |
-| **KR-MARKER-FLAG** (1280) | Playhead at 0. Add a marker with M, then Enter to accept the default name (C's round 72 recipe). Focus its flag and hold ArrowLeft: 1 down + ≥ 30 repeats. | `მარკერი დროის დასაწყისშია.` is added once, and the separate press adds one more. Also record that holding ArrowRight on the flag moves it by 0.1 s per keydown, with one changing `მარკერი «…» გადავიდა: …` text per step (not coalesced). |
-| **KR-MARKER-STEP** (1280) | One marker. Click the ruler after the marker and every clip edge, then hold Ctrl+ArrowRight: 1 down + ≥ 30 repeats. | `წინ მარკერი აღარ არის` is added once, and a separate Ctrl+ArrowRight adds one more. |
-| **KR-DETAIL-ENTER** (1280) | One clip, selected. Focus the detail panel's Clip Gain input without changing it. Hold Enter: 1 down + ≥ 20 repeats. | `Clip Gain უცვლელია: 0.0 dB.` is added once, and a separate Enter adds one more. |
-| **HD-BLOCKED-HOLD** (regression; 1280) | Round 105's row as written (≥ 40 steps, ≥ 20 wiggles). | The blocked sentence appears ≤ 2 times and there are ≤ 3 added elements in the window, with the same release text as round 105. |
-| **SR-REPEAT-SPACE** (regression; 1280) | As in round 105. | The exact text both times, and the second press adds a span. |
-| **SR-TEXT-REG** (regression; 1280) | As in round 105. | The same texts as in round 105, the same `<output>`, and one line high. |
-| **PX-NET** | all sessions | 0 page-originated requests to `/api/studio-token`, R2, `/api/recording-*` or `/api/download`, and 0 `Authorization` headers. |
-| **REG-HYD** | all sessions | No hydration warning, no pageerror and no non-noise console error. The cart/connection noise is expected. |
-| **G106-3** | anonymous, run alone, after all rows | <ul><li>The header link opens `/studio-lab` with the workspace and the demo badge.</li><li>`/studio/middle-east` shows sign-in and no workspace.</li><li>`/api/studio-token` returns 401.</li><li>The fake-Bearer sub-check is BLOCKED (backend unavailable in cloud); list it under `blocked`.</li></ul> |
-| **AN-REVIEW** (offline) | Review A's tests. | <ul><li>The fail-before list matches §1, or A explains the difference.</li><li>C re-runs k1, k4, k8 and k9 in its own scratch, with its own mutation strings, and gets the same red tests.</li><li>SU1–SU6 are byte-identical to the snapshot.</li><li>Assertions are exact, and the added lines contain no `as`, `@ts-` or `any`.</li></ul> |
-| **T106-TARGETED** | `npx vitest run $(cat a-round-106/targeted-list.txt)` | All pass. C re-runs the grep from §1 and reports any missing file. |
-| **DOC-092** (offline) | Read doc 092. | <ul><li>l.4 carries the round 106 status.</li><li>The Approach no longer says "always" without the gesture/key qualifier.</li><li>The Mermaid diagram has the gesture and key-repeat branches.</li><li>The changed-files list names SA1–SA7, SU1–SU6 and SK1–SK8.</li><li>The semantics contain the keyboard rule.</li></ul> |
-| **SOURCE-UNCHANGED** | start and end | <ul><li>HEAD is `3b6178b`.</li><li>The start state is 3 M + 4 ??, and the end state is the expected **6 M + 4 ??**.</li><li>The frozen list is 535/535, and A's end hashes match.</li><li>Against the snapshots: `ArrangementContext.tsx` changes only in the two helpers and the two interface lines.</li><li>The reducer block (the `gestureCountRef` line through the `useReducer` call) is unchanged.</li><li>Every other changed hunk lies inside the narrow ranges in the Baseline table.</li></ul> |
+| **HK-CTRL-L** (primary; 1280 and 1440) | One clip. Snap on. Drag a range on the clip from t≈3 s to t≈12 s, blur, Ctrl+L (loop created). Then hold Ctrl+L: 1 down + ≥ 10 repeats. Then one separate Ctrl+L. | <ul><li>Over the hold, the loop button's `aria-pressed` changes **once** (true → false) and stays false.</li><li>Exactly one added span, `Loop გამორთულია; დიაპაზონი შენარჩუნებულია.`</li><li>Undo label `Undo: Loop გამორთვა`.</li><li>Then exactly this sequence: one Ctrl+Z → `aria-pressed` true; one separate Ctrl+L → `aria-pressed` false and exactly one more added span `Loop გამორთულია; დიაპაზონი შენარჩუნებულია.`</li><li>Screenshot.</li></ul> |
+| **HK-CTRL-E** (1280) | One clip, Snap off. Click the ruler at t≈10 s (inside the clip), select the clip, hold Ctrl+E: 1 down + ≥ 10 repeats. | Clip count 1 → 2 exactly once; exactly one added span `კლიპი გაიყო …-ზე.`; no other text added. One Ctrl+Z → 1 clip. |
+| **HK-CTRL-SHIFT-L** (1280) | One clip, a range dragged on it. Hold Ctrl+Shift+L: 1 down + ≥ 10 repeats. | Exactly one added span `მონიშვნა ყველა ხაზზე: …`. |
+| **HK-CTRL-C** (1280) | One clip, selected. Hold Ctrl+C: 1 down + ≥ 10 repeats, then one separate Ctrl+C. | One span `Copy: 1 კლიპი ბუფერშია.` during the hold; the separate press adds one more. |
+| **HK-UNDO-STILL-REPEATS** (1280) | One clip, three separate ArrowRight presses (Snap off; 0.300). Hold Ctrl+Z: 1 down + 2 repeats. | The clip is back at 00:00.000 (three undo steps). |
+| **HE-MARKER-PREV** (1280 and 1440) | No markers, playhead at 0. Focus ◀ and hold Enter: 1 down + ≥ 10 repeats. Then one separate Enter. | `უკან მარკერი აღარ არის` added **once** during the hold (B probe before the fix: 6 of 6); the separate Enter adds one more. |
+| **HE-MARKER-NEXT** (1280) | One marker at ≈5 s (ruler click with Snap off, M, Enter), then Home. Focus ▶ and hold Enter: 1 down + ≥ 10 repeats. | The playhead moves to the marker time (record the position readout) and stays there. A successful step sets no status (`stepMarker` l.247–250 only seeks and selects), so **0 spans are added** during the hold; in particular `წინ მარკერი აღარ არის` is never added (before the fix the second keydown would add it). |
+| **HE-MARKER-ADD** (1280 and 1440) | Playhead at 0. Focus `+` and hold Enter: 1 down + ≥ 5 repeats, then up. Then type `Intro` and press Enter. | After the hold: the name editor is open and focused, there are 0 markers and the Undo label is unchanged (B probe before the fix: `Marker 1` committed by the repeat). After typing: exactly one marker, named `Intro`. |
+| **HE-CLIPGAIN-RESET** (1280) | One clip, selected (gain 0.0). Focus `0 dB` and hold Enter: 1 down + ≥ 10 repeats; then one separate Enter. | `Clip Gain უცვლელია: 0.0 dB.` once during the hold; the separate Enter adds one more. |
+| **HE-DETAIL-APPLY** (1280) | One clip, selected; detail panel open; type start 2 and end 4 in the range inputs (Tab between them, no Enter). Focus `მონიშვნა` and hold Enter: 1 down + ≥ 10 repeats. | Exactly one added span (record the exact text); the range is 2–4. |
+| **NZ-TIME0** (primary; 1280 and 1440) | One clip at 0, selected, Snap off. One separate ArrowLeft. Then hold ArrowLeft: 1 down + ≥ 30 repeats. Wait 500 ms, then one separate ArrowLeft. | <ul><li>The first press adds `ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.`</li><li>The hold adds exactly one more (its first, non-repeat keydown); the repeats add none.</li><li>The last press adds one more.</li><li>The clip stays 00:00.000; the Undo label never changes; the `<output>` is the same node with one child at every sample.</li></ul> |
+| **NZ-MOVES** (1280) | B's round-106 KR-NUDGE-MOVES as written: one clip moved to 0.300 with three separate ArrowRight, then hold ArrowLeft: 1 down + ≥ 10 repeats. | The clip reaches 00:00.000; the time-start text is added exactly once and nothing else; Ctrl+Z ×3 → 0.100, 0.200, 0.300. |
+| **NZ-SNAPON-SAME** (1280) | One clip at 0, Snap on, ArrowLeft once. | The added text is byte-identical to NZ-TIME0's. |
+| **KR-NUDGE-NEIGHBOUR** (regression; 1280) | Round 106 KR-NUDGE-SNAPOFF with the neighbour recipe (two clips, second selected). | The neighbour text is added once during the hold, as in round 106. |
+| **SR-REPEAT-SPACE**, **HD-BLOCKED-HOLD**, **SR-TEXT-REG** (regression; 1280) | As in round 106 (`c-round-106/tools/sr106.cjs`). | Same results as round 106. |
+| **PX-NET** | all sessions | 0 page-originated requests to `/api/studio-token`, R2, `/api/recording-*` or `/api/download`; 0 `Authorization` headers. |
+| **REG-HYD** | all sessions | No hydration warning, no pageerror, no non-noise console error. |
+| **G107-3** | anonymous, run alone, after all rows | The header link opens `/studio-lab` with the workspace and the demo badge; `/studio/middle-east` shows sign-in and no workspace; `/api/studio-token` returns 401; the fake-Bearer sub-check is BLOCKED (backend unavailable in cloud) under `blocked`. |
+| **AN-REVIEW** (offline) | Review A's tests. | The fail-before list matches §1 or A explains the difference; C re-runs h1, h5, h8, h10 and h12 with its own mutation strings and gets the same red tests; l.1–705 are byte-identical to the snapshot; exact assertions; no `as`, `@ts-` or `any` in the added lines. |
+| **T107-TARGETED** | `npx vitest run $(cat a-round-107/targeted-list.txt)` | All pass. C re-runs the grep and reports any missing file. |
+| **DOC-092** (offline) | Read doc 092. | l.4 carries the round 107 status and `35112cd`; l.94 no longer says waiting for C; HK, HE and NZ entries exist with their rules; the changed-files list names HK1–HK5, HE1–HE4, NZ1–NZ4. |
+| **SOURCE-UNCHANGED** | start and end | HEAD `35112cd`; start status empty, end **6 M + 0 ??**; the frozen list 536/536; A's end hashes match; against the snapshots, every hunk lies inside the narrow ranges of the Baseline table; `toggleLoopSelection`, `splitSelection`, `extendRangeToAllTracks`, `copySelection` and the reducer are unchanged. |
 
 Gate rows (C does not claim them; list them under `gate`): full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED.
 
 **Neighbouring behaviour that could break:**
-- **A held arrow stops moving the clip, loop or marker:** a guard around the action instead of the announcement. KR-NUDGE-MOVES, KR-MARKER-FLAG's ArrowRight check, SK7 and k3 cover this.
-- **A deliberate second press goes silent** (the GATE96-S2 regression): the "separate press" step of every KR row, SR-REPEAT-SPACE, SU1/SU2 and k8 cover this.
-- **The boundary is reached during a hold and nothing is announced** (the rejected rule): KR-NUDGE-MOVES, SK7 and k9 cover this.
-- **The pointer coalescing from round 105 regresses:** HD-BLOCKED-HOLD covers this.
-- **The ◀/▶ marker buttons, a loop brace drag, a marker drag commit, and the detail panel's Escape** must behave as before. SK tests, KR-MARKER-STEP's separate press, and A's targeted run cover these.
+- **A held arrow stops moving a clip:** a guard on the action. NZ3, NZ-MOVES, SK7 and h12 cover it.
+- **Undo/Redo stops repeating:** HK5, HK-UNDO-STILL-REPEATS and h5.
+- **A fresh Enter on a button stops working:** HE1–HE4 (`repeat: false` returns `true`), HE-MARKER-PREV's separate Enter, HE-MARKER-ADD's typed commit.
+- **Copying page text with Ctrl+C:** the `getSelection` early return is unchanged (SOURCE-UNCHANGED).
+- **A deliberate second press goes silent:** the separate-press steps, SR-REPEAT-SPACE.
 
 ## 3. Ableton correspondence
 | Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
 |---|---|---|---|---|
-| A refusal repeated by a held key is announced once to assistive tech | None consulted. Live's status bar (manual §3.2, captured in `b-round-37/ableton-live-concepts-20261013.txt`) says nothing about screen readers or key repeat. | — | CZABA's own accessibility rule for its browser status line: one held key, one refusal; a deliberate press is announced again. No Ableton claim. | არ ეხება |
-| A held arrow keeps nudging while there is room | Not re-checked this round. The nudge behaviour itself is unchanged from the C-verified SRW-14 rounds. | — | Unchanged | არ ეხება (regression only) |
+| A held shortcut (Loop, Split, Copy) acts once | None consulted; no Live claim is made about key auto-repeat. | — | CZABA's keyboard convention since Space/Ctrl+D/X/V: one-shot commands ignore auto-repeat; Undo/Redo repeat. | არ ეხება |
+| A held Enter on a button acts once; a held Enter does not commit a name the user has not typed | None consulted. | — | CZABA's own rule (precedent: export dialog, transport, library preview). | არ ეხება |
+| ← on a clip at time 0 says why nothing moved | Live 12 manual §3.2 Status Bar "displays useful information like error messages" (captured in `b-round-37/ableton-live-concepts-20261013.txt`); it says nothing about this case. | Not confirmed for this case | CZABA rule: a refused action states its reason; the same text with Snap on and off. | არ ეხება (CZABA requirement) |
 
 ## 4. Report (A)
-Write `a-round-106.md` and `a-round-106/a-round-106-summary.json` as you go (the harness writes `a-round-106-result.json`). Include:
-- the changed files with their end sha256 (`a-round-106/end-hashes.txt`);
-- the sweep table: every keydown handler, whether a repeat can set the same text, and the fix or the reason it is safe;
-- the exact commands you ran and their results;
-- the fail-before list and the mutation table (k1–k8);
-- the code-reviewer findings with your disposition, and its Architecture note verbatim;
-- the exact next C checks.
-
-A may run its own browser self-check of KR-NUDGE-SNAPOFF in `a-round-106/`. It is A's own check, not C's acceptance.
-
-If you stop early, write a checkpoint with the next step.
+Write `a-round-107.md` and `a-round-107/a-round-107-summary.json` as you go (the harness writes `a-round-107-result.json`). Include the changed files with end sha256 (`a-round-107/end-hashes.txt`), the exact commands and results, the fail-before list, the mutation table h1–h12, the code-reviewer findings with your disposition and its Architecture note verbatim, the sweep result for buttons and modifier branches, and the exact next C checks. A may run its own browser self-check (e.g. HE-MARKER-ADD, HK-CTRL-L) in `a-round-107/`; it is evidence, not C acceptance. If you stop early, write a checkpoint with the next step.

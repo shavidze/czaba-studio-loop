@@ -1,0 +1,95 @@
+{
+  "round": 106,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-23T09:37:43.2549910Z",
+    "round": 106,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R106-01",
+      "severity": "low",
+      "steps": [
+        "Fresh incognito context, /studio-lab 1280x720, Decline.",
+        "Focus the Middle East library row and press Enter once (clip at 00:00.000), click Fit.",
+        "Snap off. Select the clip by clicking its title strip.",
+        "Hold ArrowLeft (1 down + 31 repeats), release, wait 500 ms, then press ArrowLeft once."
+      ],
+      "expected": "B's KR-NUDGE-SNAPOFF wording: the refusal 'ჩაჩოჩება დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი.' (which names the time start) is announced once during the hold and once more on the separate press.",
+      "actual": "Nothing is announced: 0 added nodes during the hold and 0 on the separate press. The clip stays at 0.000 and the Undo label does not change. Same in KR-NUDGE-MOVES as written: a single clip moved to 0.300 and then held left reaches 0.000 with no refusal. Pre-existing, not a regression: nudgeSelectedClip clamps with Math.max(0, ...) and moveClip returns the same arrangement, so no status is set. The whole nudgeSelectedClip callback (33 lines) is byte-identical between HEAD 3b6178b and the round 105 snapshot (diff, not a browser run on old code). Selection proof: the identical click in KR-NUDGE-MOVES as-written made three ArrowRight presses move the clip 0 -> 0.300. Same item as A-R106-TIME0-SILENT.",
+      "evidence": "c-round-106/out/kr-snapoff-asis-1280x720.json, c-round-106/out/kr-moves-asis-1280x720.json, c-round-106/shots/kr-snapoff-asis-1280x720.png, c-round-106/shots/kr-moves-asis-1280x720.png"
+    },
+    {
+      "id": "C-R106-02",
+      "severity": "low",
+      "steps": [
+        "Fresh incognito context, /studio-lab 1280x720, Decline. Add one Middle East clip with Enter, Fit, Snap on.",
+        "Drag on the clip at 75% of its height from t=3 s to t=12 s to make a range, blur, press Ctrl+L (loop 00:03-00:12 on). Move the loop to 00:00-00:09 with the focused brace and ArrowLeft.",
+        "Blur, hold Control, then send keyboard.down('l') 10 times (1 press + 9 auto-repeats)."
+      ],
+      "expected": "A held Ctrl+L acts once, like the guarded Ctrl+D/Space, or at least leaves a predictable state.",
+      "actual": "The loop toggles on every auto-repeat. The loop button's aria-pressed per keydown was true,false,true,false,true,false,true,false,true,false. The final state depends on how long the key was held (here: loop off, 'Loop 00:03.000 — 00:12.000 · off'). The first press also re-applied the still-selected range (3-12) over the moved loop (0-9). The Undo label ended at 'Undo: Loop გამორთვა'; C did not count how many history entries were added. Pre-existing, outside this round's scope. This confirms code-reviewer F6 in a real browser.",
+      "evidence": "c-round-106/out/kr-loop-1280x720.json (key ctrlL)"
+    },
+    {
+      "id": "C-R106-03",
+      "severity": "low",
+      "steps": [
+        "Read docs/implementation/2026/quarter-IV/092-studio-status-repeat-announcement.md, section 'პრობლემები და გადაწყვეტები', the A-R104-REPEAT-DRAG entry."
+      ],
+      "expected": "Its status line reflects that round 105 passed C (as l.4 already says).",
+      "actual": "Its status line still reads 'გამოსწორებულია round 105-ში, C-ის ბრაუზერის შემოწმებას ელოდება (HD-BLOCKED-HOLD, HD-FADE-CLAMP, HD-READOUT-CHANGING)'. Stale doc text only; the round 106 DOC-092 bullets are all met.",
+      "evidence": "doc 092, the A-R104-REPEAT-DRAG problem entry (l.94)"
+    }
+  ],
+  "passed": [
+    "KR-NUDGE-SNAPOFF",
+    "KR-NUDGE-SNAPON",
+    "KR-NUDGE-MOVES",
+    "KR-GROUP",
+    "KR-LOOP",
+    "KR-MARKER-FLAG",
+    "KR-MARKER-STEP",
+    "KR-DETAIL-ENTER",
+    "HD-BLOCKED-HOLD",
+    "SR-REPEAT-SPACE",
+    "SR-TEXT-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G106-3",
+    "AN-REVIEW",
+    "T106-TARGETED",
+    "DOC-092",
+    "SOURCE-UNCHANGED"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "npm run test:e2e:smoke",
+    "PROD-MP3-UNVERIFIED"
+  ],
+  "blocked": [
+    "G106-3 fake-Bearer sub-check: backend unavailable in cloud"
+  ],
+  "abletonCorrespondence": {
+    "held-key refusal announced once": "არ ეხება (CZABA's own a11y rule; no Ableton source consulted or claimed)",
+    "held arrow keeps nudging": "არ ეხება (regression only; behaviour unchanged)"
+  },
+  "passedWithDeviation": [
+    {
+      "id": "KR-NUDGE-SNAPOFF",
+      "note": "verified with A's neighbour-blocked recipe (2 clips, 2nd selected) at 1280 and 1440; B's single-clip-at-0 setup gives 0 announcements, pre-existing, see C-R106-01"
+    },
+    {
+      "id": "KR-NUDGE-MOVES",
+      "note": "verified with the neighbour recipe; B's single-clip setup reaches 0.000 silently, see C-R106-01"
+    }
+  ]
+}
