@@ -1,0 +1,33 @@
+name: Admin - disable store CI
+
+# One-shot: disables the redundant CI workflow (ci.yml) in both store repositories. Runs when cloud/ADMIN changes.
+on:
+  push:
+    paths: ["cloud/ADMIN"]
+
+permissions:
+  contents: write
+
+jobs:
+  disable:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.STORE_PUSH_TOKEN }}
+      - name: Disable ci.yml
+        env:
+          GH_TOKEN: ${{ secrets.STORE_PUSH_TOKEN }}
+        run: |
+          out=cloud/admin-result.txt; : > "$out"
+          for r in shavidze/czaba-store TCzaba/czaba-store; do
+            id=$(gh api "repos/$r/actions/workflows" --jq '.workflows[] | select(.path==".github/workflows/ci.yml") | .id' 2>>"$out")
+            if [ -z "$id" ]; then echo "$r: ci.yml not found" >> "$out"; continue; fi
+            gh api -X PUT "repos/$r/actions/workflows/$id/disable" >>"$out" 2>&1 || echo "$r: disable call failed" >> "$out"
+            echo "$r: $(gh api "repos/$r/actions/workflows/$id" --jq '.name + " = " + .state')" >> "$out"
+          done
+          cat "$out"
+          git config user.name "Saba Shavidze"; git config user.email "sabashavidze@gmail.com"
+          git add "$out"; git commit -qm "admin: store CI disable result"
+          for i in 1 2 3; do git push -q origin HEAD:main && break; git pull -q --rebase origin main; done
