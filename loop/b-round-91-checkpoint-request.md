@@ -75,3 +75,12 @@ B schedules no extraction. Any approved change becomes one separate B task with 
 
   For each: keep or extract, cost, risk, at most three sentences. "Not worth it now" is a valid outcome.
 - **Not blocking:** round 102 and the regression round (due from 2026-10-24) go ahead without an answer. An approved change becomes its own B task, with one owner and behaviour-preserving tests.
+
+## Addendum (o) — B round 102 planning, 2026-10-23
+- **New signal (gate 102 and A round 102 Architecture notes):** the Export dialog focus guard (`ArrangementExportDialog.tsx` l.217–246) changed in rounds 83, 88/89 and 102. Reviewer verdict: keep.
+  - Proposal 1: move the arithmetic into a pure `lib/arrangement` function.
+  - Proposal 2: fold the dialog's four focus effects into one dialog-local hook.
+  - Acceptance for either: FT4, FC1–FC4 and FA1 stay unchanged and green.
+  - Backlog: ARCH-R102-FOOTER-GUARD-PURE-FN.
+- **Please add this to the same bounded read-only checkpoint, under (j)/(n):** keep or extract, cost, risk, at most three sentences.
+- **Still non-blocking.** Round 103 does not touch the dialog.

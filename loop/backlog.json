@@ -1,9 +1,9 @@
 {
- "version": 100,
- "updated": "2026-10-23 (B round 101 -> round 102 planning)",
+ "version": 101,
+ "updated": "2026-10-23 (B round 102 -> round 103 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 102: D-29z67 - Export dialog: focus guard covers the option label card (A-R88 #1), progress label aria-hidden + one progressText (GATE101-S1/S2), doc 089 l.4 (GATE101-S4), new doc 090; A-R88 #2/#3 closed by decision; baseline 56231c0, frozen 533, expected 3 M + 1 ??)",
+ "current_task": "current-task.md (round 103: D-29z68 - export pipeline Lows: WAV worker stall watchdog 30 s + worker error text (GATE89-S3), CU10 mp3 pre-download cancel test (C-R90-MUT-B-CU4-GAP, conditional on m6 red), PU tests runnable alone (A-R87-LOW-PU-ORDER), doc 090 l.4 (GATE102-S5), new doc 091; baseline b6c9716, frozen 532, expected 5 M + 1 ??)",
  "advisor_used_by_B": "round 95 planning: advisor available and consulted (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
@@ -8550,7 +8550,7 @@
    "round": 102,
    "task": "current-task.md",
    "decision": "D-29z67",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "A-R88-REVIEW-EDGES#1",
     "GATE101-S1-PROGRESS-READ-TWICE",
@@ -8581,6 +8581,44 @@
     "G102-3",
     "AN-REVIEW",
     "T102-TARGETED",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C PASS browserVerified=true realVerified=true (CARD-1280 card -8 scrollTop 59; CARD-IDLE-REG; AX-ONCE WAV+MP3 text once; VALUETEXT-REG 0 mismatches; FOCUS-REG; STRIP-REG gap 0; EXPORT-REG real WAV 101.352 s + MP3 decodes; PX-NET; REG-HYD; G102-3 (fake-Bearer BLOCKED backend); AN-REVIEW fail-before FC1+FA1, mutations a/b/d red, e equivalence; T102-TARGETED 13/143; SOURCE-UNCHANGED); 0 bugs; gate 102 published b6c9716 (reviewer 8.5/10)"
+  },
+  {
+   "round": 103,
+   "task": "current-task.md",
+   "decision": "D-29z68",
+   "status": "dispatched",
+   "items": [
+    "GATE89-S3-WORKER-NO-WATCHDOG",
+    "C-R90-MUT-B-CU4-GAP",
+    "A-R87-LOW-PU-ORDER",
+    "GATE102-S5-DOC090-STATUS"
+   ],
+   "note": "Export pipeline Lows: WAV worker stall watchdog 30 s + worker error text (export-wav.client.ts); CU10 cancel between settled encode and downloads (kept only if m6 red 3/3); PU tests runnable alone (first PU4 own describe, gate release in main beforeEach); doc 090 l.4; new doc 091. baseline HEAD b6c9716 clean; frozen b-round-102-r103-tree-sha256.txt 532/532; snapshots b-round-102-r103-snapshots; expected 5 M + 1 ?? (4 M + 1 ?? if CU10 dropped). Regression round not due (2026-10-21 -> 2026-10-23 = 2 days); next B planning on/after 2026-10-24 is the regression round.",
+   "owned": [
+    "app/lib/arrangement/export-wav.client.ts (T1; signature, pre-abort, no-Worker fallback, constructor-catch message kept)",
+    "app/lib/arrangement/__tests__/export-wav.test.ts (append-only after l.456: EW8a-f)",
+    "app/lib/arrangement/__tests__/export-cancel-ui.test.tsx (append-only after l.658: CU10, conditional)",
+    "app/lib/arrangement/__tests__/export-progress-ui.test.tsx (structural l.243-321; it bodies byte-identical; 8 tests)",
+    "docs/implementation/2026/quarter-IV/090-studio-export-focus-card-progress-once.md (l.4)",
+    "docs/implementation/2026/quarter-IV/091-studio-export-worker-watchdog.md (new)"
+   ],
+   "c_ids": [
+    "WD-STALL",
+    "WD-CANCEL",
+    "WD-ERRTEXT",
+    "WD-MP3",
+    "WD-SLOW",
+    "EXPORT-REG",
+    "CANCEL-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G103-3",
+    "PU-ALONE",
+    "AN-REVIEW",
+    "T103-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -9395,7 +9433,8 @@
    "ask": "Tech Lead: (a) a narrow lib/sfx-* / demo-synth grant to normalise demo peaks to <= MAX_24BIT_SAMPLE, or (b) accept. Not blocking; round 27 uses it as an R27-TO fixture.",
    "evidence": "c-round-26.md section 17.3",
    "data_points": [
-    "C round 101 INFO-C101-WAV-FULLSCALE: Middle East alone exports 30 samples at |v| >= 0.9999 (both channels; app reports 14 clamped); identical to C round 100; pre-existing"
+    "C round 101 INFO-C101-WAV-FULLSCALE: Middle East alone exports 30 samples at |v| >= 0.9999 (both channels; app reports 14 clamped); identical to C round 100; pre-existing",
+    "C round 102 note: 1-clip WAV peak 1.0 with 30 full-scale samples, identical to rounds 100/101; pre-existing"
    ]
   },
   {
@@ -13651,8 +13690,8 @@
   {
    "id": "A-R87-LOW-PU-ORDER",
    "severity": "low",
-   "status": "open - Lows batch",
-   "to": "Lows batch",
+   "status": "dispatched round 103 (D-29z68): first PU4 in its own first describe; main describe beforeEach releases encoderImportGate (export-cancel-ui l.348-386 pattern); acceptance -t PU2 / PU1 / PU3 pass alone, 8 tests, bodies byte-identical",
+   "to": "A round 103",
    "title": "export-progress-ui PU tests depend on order (only the first PU4 opens the delayed-import gate)",
    "evidence": "a-round-87.md code-reviewer Low"
   },
@@ -13683,13 +13722,14 @@
   {
    "id": "A-R88-REVIEW-EDGES",
    "severity": "low",
-   "status": "#4 + py-4 nit closed (C round 101 STRIP rows, gate 101 published 56231c0); #1 dispatched round 102 (D-29z67; B probe: scope-project label card 8 px under the footer at 1280 done after the guard scroll 43); #2 closed by decision D-29z67 (= GATE89-S5 acknowledged, reviewer: JS justified, cosmetic); #3 closed unreachable D-29z67 (B probe: footer height changes only at render start/done; scope radios disabled during render; format radios >= 289 px above the footer; reopen if a focusable body control can sit near a growing footer)",
-   "to": "A round 102 (#1)",
+   "status": "closed - #1 C round 102 CARD-1280 PASS browserVerified=true (1280 done: Tab -> scope-project scrollTop 0 -> 59 <= 137, card bottom -8 vs footer top, radio -24.5, elementFromPoint card, card top 466 > panel 36); CARD-IDLE-REG no scroll at 1280 idle / 1440 idle+done; gate 102 published b6c9716 (both remotes). #2 closed by decision D-29z67 (= GATE89-S5; reviewer gate 102 #2 notes it now triggers ~16 px more often on a mouse click -> GATE102-S2); #3 closed unreachable D-29z67; #4 closed round 101",
+   "to": "-",
    "title": "round-88 code-reviewer edge cases: (1) footer guard measures the radio rect, its label description can still sit under the footer (target.closest(label) option); (2) guard also fires on mouse focus, a click near the footer edge can jump the panel (:focus-visible gating optional); (3) footer growth after focus fires no new focusin; (4) 16 px strip under the footer at max scroll (ModalBody py-4); also pt-4 pb-4 -> py-4 nit",
    "evidence": "a-round-88.md code-reviewer section; c-round-88.md observations (edge 4 matched)",
    "data_points": [
     "B probe 2026-10-23 b-round-101-probe/probe-focus-result.json: 1280 done (footer top 520, h 163): Tab -> scope-project scrollTop 0 -> 43, radio bottom -8.5, label card bottom +8 under footer; 1280 idle card -41; 1440 idle/done card -86, no scroll; render-time Tab reaches X, format-wav (card -289), Cancel; footer heights 71 -> 107 -> 171 -> 163"
-   ]
+   ],
+   "closed_evidence": "c-round-102.md CARD-1280, CARD-IDLE-REG; c-round-102/out/run102-*.json"
   },
   {
    "id": "C-R88-O1-IDLE-OVERFLOW-1280",
@@ -13727,8 +13767,8 @@
   {
    "id": "GATE89-S3-WORKER-NO-WATCHDOG",
    "severity": "low",
-   "status": "open - Lows batch (Cancel since round 90 gives the user a way out of a stalled worker; C round 90 CX-WAVPHASE)",
-   "to": "Lows batch",
+   "status": "dispatched round 103 (D-29z68): stall timer 30 s (restart on every worker message; clear on complete/error/onerror/onmessageerror/abort/postMessage throw; terminate once + reject ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE) + worker error text appended to the constant",
+   "to": "A round 103",
    "title": "export-wav worker has no watchdog; fail() drops the worker error text",
    "evidence": "gates/round-89/review.md #3"
   },
@@ -13853,8 +13893,8 @@
   {
    "id": "C-R90-MUT-B-CU4-GAP",
    "severity": "low",
-   "status": "open - Lows batch (test gap: add a dedicated pre-download aborted-check test on the mp3 path; behaviour proven by C CX-BOTH 0 files)",
-   "to": "Lows batch",
+   "status": "dispatched round 103 (D-29z68): CU10 appended to export-cancel-ui.test.tsx (finish encode, one microtask, cancelExport -> 0 downloads); kept only if mutation m6 (ArrangementContext l.2915-2917 removed, scratch) is red 3/3; otherwise closed by decision as UI-unreachable (a click is a separate task)",
+   "to": "A round 103",
    "title": "mutation b (no aborted check before downloads) does not turn CU4 red because encode is also raced against the abort",
    "evidence": "a-round-90.md mutation table; c-round-90.md Return to B"
   },
@@ -14178,7 +14218,8 @@
    "evidence": "gates/round-97/review.md suggestion 2; c-round-97.json C-R97-N1-CHROMIUM-ONLY",
    "data_points": [
     "gate 99 review: Firefox keypress suppression after a cancelled keydown is reasoned from the spec, not tested; doc 087 records it",
-    "gate 101 Low 3 (GATE101-S3): the pb-0 over py-4 win was measured only in Chromium; same environment limit"
+    "gate 101 Low 3 (GATE101-S3): the pb-0 over py-4 win was measured only in Chromium; same environment limit",
+    "gate 102 #1 (GATE102-S1): phase text now reaches AT only via aria-valuetext on native <progress>; Firefox/WebKit AX trees unchecked (only Chromium installed)"
    ]
   },
   {
@@ -14218,7 +14259,8 @@
     "round 98 gate + A reviewers: repeat-Enter guard at 2 sites, keep; round 99 adds 3 more (row, global, + button) -> isRepeatedEnter helper question in addendum (k); checkpoint after the Export Lows",
     "gate 99 reviewer Signal 3 (keep): repeat-Enter guard at 5 sites after round 99 (3 inline button guards ArrangementTransport l.250, ArrangementLibraryPreview l.308, ArrangementExportDialog l.542; !event.repeat in StudioWorkspace l.1967, ArrangementLibrary l.245); round 100 adds a 6th (preview toggle). Proposal: one bounded shared-helper task in app/lib/arrangement with one unit test, value low, risk low. Not scheduled; addendum (l) to b-round-91-checkpoint-request.md; request the root checkpoint at the SRW-12 held-Enter family boundary (after round 100) or after the Export Lows",
     "gate 100 reviewer Signal 3 (keep): held-Enter guard inline at 6 places in 4 files (ArrangementLibraryPreview l.293/l.312, ArrangementTransport l.249, ArrangementExportDialog l.541, ArrangementLibrary l.242, StudioWorkspace l.1961); proposal after the root checkpoint: preventRepeatedEnterClick(event) in app/lib/arrangement for the 4 native <button> sites only; HT1-3, HA6, TH4 unchanged green; C reruns HOLD-* and EXPORT-REG. Round 101 GATE97-S4 makes the 4 button guards textually identical. Addendum (m) to b-round-91-checkpoint-request.md",
-    "gate 101 reviewer Signal 3: footer region touched in rounds 87/88, 97, 101 (and 102 planned); each change small; candidate for the repeat-Enter helper checkpoint. Addendum (n) to b-round-91-checkpoint-request.md"
+    "gate 101 reviewer Signal 3: footer region touched in rounds 87/88, 97, 101 (and 102 planned); each change small; candidate for the repeat-Enter helper checkpoint. Addendum (n) to b-round-91-checkpoint-request.md",
+    "gate 102 Architecture note Signal 3: focus guard l.217-246 changed in rounds 83, 88/89, 102; keep; proposal exportFooterFocusScrollDelta pure fn (ARCH-R102-FOOTER-GUARD-PURE-FN) only if the guard changes again. A round 102 reviewer: fold the four dialog focus effects into one dialog-local hook if touched again"
    ]
   },
   {
@@ -14377,18 +14419,20 @@
   {
    "id": "GATE101-S1-PROGRESS-READ-TWICE",
    "severity": "low",
-   "status": "dispatched round 102 (D-29z67): aria-hidden=\"true\" on the visible label <p>; B AX probe b-round-101-probe/probe-ax-result.json: baseline text twice (StaticText + valuetext), aria-hidden once, aria-labelledby three times",
+   "status": "closed - C round 102 AX-ONCE PASS: WAV render 0 StaticText hits, 1 progressbar \"ექსპორტის პროგრესი\", aggregated dialog text holds the progress string once; MP3 mp3-phase sample same; VALUETEXT-REG 121/121/126 samples 0 mismatches, label aria-hidden with non-zero rect; gate 102 published b6c9716 (both remotes). Cross-browser follow-up -> GATE102-S1",
    "to": "A round 102",
    "title": "visible progress label and bar aria-valuetext carry the same text; screen reader hears it twice",
-   "evidence": "gates/round-101/review.md #1; B AX probe"
+   "evidence": "gates/round-101/review.md #1; B AX probe",
+   "closed_evidence": "c-round-102.md AX-ONCE, VALUETEXT-REG"
   },
   {
    "id": "GATE101-S2-PROGRESS-TEXT-COMPUTED-TWICE",
    "severity": "info",
-   "status": "dispatched round 102 with GATE101-S1 (one progressText const)",
+   "status": "closed - C round 102 AN-REVIEW mutation e (second format call) = equivalence, 0 red; one progressText const; gate 102 published b6c9716 (both remotes)",
    "to": "A round 102",
    "title": "formatArrangementExportProgress(progress) called twice per render",
-   "evidence": "gates/round-101/review.md #2"
+   "evidence": "gates/round-101/review.md #2",
+   "closed_evidence": "c-round-102.md AN-REVIEW"
   },
   {
    "id": "GATE101-S3-NON-CHROMIUM-STRIP",
@@ -14401,10 +14445,11 @@
   {
    "id": "GATE101-S4-DOC089-STATUS",
    "severity": "low",
-   "status": "dispatched round 102 (doc 089 l.4)",
+   "status": "closed - C round 102 SOURCE-UNCHANGED (doc 089 @@ -4 +4 only); gate 102 published b6c9716 (both remotes)",
    "to": "A round 102",
    "title": "doc 089 l.4 still says awaiting C although C round 101 passed and gate 101 published 56231c0",
-   "evidence": "gates/round-101/review.md #4"
+   "evidence": "gates/round-101/review.md #4",
+   "closed_evidence": "c-round-102.md SOURCE-UNCHANGED"
   },
   {
    "id": "ARCH-R101-MODALBODY-PADDING-SLOT",
@@ -14425,10 +14470,59 @@
   {
    "id": "INFO-B101-VALUETEXT-CDP",
    "severity": "info",
-   "status": "open - observation: CDP Accessibility.getFullAXTree shows the progressbar valuetext property as mojibake (UTF-8 read as Latin-1) while names and the aggregated dialog text show correct Georgian; inferred CDP serialization artifact, unverified with a real screen reader (Tech Lead)",
+   "status": "closed - C round 102 confirmed CDP serialization artifact: Latin-1 -> UTF-8 re-decode of the CDP valuetext equals the Georgian label (3 phases); DOM attribute correct. Real screen reader reading stays with GATE102-S1 (Tech Lead)",
    "to": "Tech Lead",
    "title": "Georgian aria-valuetext in CDP AX dump looks garbled",
-   "evidence": "b-round-101-probe/probe-ax-result.json"
+   "evidence": "b-round-101-probe/probe-ax-result.json",
+   "closed_evidence": "c-round-102.json notes[0]"
+  },
+  {
+   "id": "GATE102-S1-VALUETEXT-NON-CHROMIUM",
+   "severity": "low",
+   "status": "open - environment (only Chromium on the cloud runner); filed with GATE97-S2/GATE101-S3; Tech Lead Firefox/WebKit AX + real screen reader (VoiceOver/NVDA) check of aria-valuetext on native <progress>; if dropped: role=progressbar div with explicit aria-valuenow/min/max/valuetext, never the duplicate text",
+   "to": "Tech Lead",
+   "title": "phase text reaches screen readers only through aria-valuetext on native <progress>; non-Chromium support unverified",
+   "evidence": "gates/round-102/review.md #1; a-round-102.md reviewer Low; c-round-102.json notes[2]"
+  },
+  {
+   "id": "GATE102-S2-GUARD-MOUSE-SCROLL-MORE-OFTEN",
+   "severity": "low",
+   "status": "acknowledged (= GATE89-S5 / A-R88 #2 ruling: cosmetic, click still lands in the same card per reviewer trace); optional :focus-visible gating only if UX objects; signal, not scheduled",
+   "to": "-",
+   "title": "measuring the card bottom makes a plain mouse click on scope-project at 1280 done scroll ~16 px (before: no scroll)",
+   "evidence": "gates/round-102/review.md #2"
+  },
+  {
+   "id": "GATE102-S3-TALL-CARD-NO-CAP",
+   "severity": "low",
+   "status": "open - unreachable today (p-3 cards one-two lines; C CARD-1280 card top 466 > panel top 36); apply fallback to target.bottom when card height > footer.top - content.top in the round that adds tall cards",
+   "to": "Lows batch (conditional)",
+   "title": "coveredBottom has no upper limit; a card taller than the visible space would push the focused control off the top",
+   "evidence": "gates/round-102/review.md #3; a-round-102.md reviewer info"
+  },
+  {
+   "id": "GATE102-S4-PROGRESSTEXT-UNDEFINED-NIT",
+   "severity": "info",
+   "status": "open - Lows batch (dialog nit: type progressText as string | undefined and drop ?? undefined); schedule with the next dialog-owning round",
+   "to": "Lows batch",
+   "title": "progressText repeats the isRendering && progress condition only to narrow string | null",
+   "evidence": "gates/round-102/review.md #4"
+  },
+  {
+   "id": "GATE102-S5-DOC090-STATUS",
+   "severity": "low",
+   "status": "dispatched round 103 (doc 090 l.4)",
+   "to": "A round 103",
+   "title": "doc 090 l.4 still says awaiting C although C round 102 passed and gate 102 published b6c9716",
+   "evidence": "gates/round-102/review.md #5"
+  },
+  {
+   "id": "ARCH-R102-FOOTER-GUARD-PURE-FN",
+   "severity": "info",
+   "status": "open - architecture signal, not scheduled; under the pending checkpoint request (addendum (o) to b-round-91-checkpoint-request.md); value low-medium, only if the guard changes again",
+   "to": "-",
+   "title": "extract the focus-guard arithmetic to a pure lib/arrangement function (exportFooterFocusScrollDelta) or fold the four dialog focus effects into one dialog-local hook; acceptance FT4, FC1-FC4, FA1 unchanged green",
+   "evidence": "gates/round-102/review.md Architecture note; a-round-102.md Architecture note"
   }
  ],
  "tech_lead_notes": [
@@ -15637,6 +15731,11 @@
    "round": 101,
    "source": "gates/round-101/review.md Architecture note",
    "note": "Signal 2 keep: pb-0 is a second dependency on ModalBody padding (ARCH-R101-MODALBODY-PADDING-SLOT, after Modal.tsx unfreezes). Signal 3: footer region changed rounds 87/88/97/101 (102 planned); addendum (n) to b-round-91-checkpoint-request.md asks root for the bounded frontend-architect checkpoint now that the trigger (j) is met; not scheduled"
+  },
+  {
+   "round": 102,
+   "source": "gates/round-102/review.md + a-round-102.md Architecture notes",
+   "note": "Signal 3 keep: focus guard l.217-246 changed rounds 83/88/89/102; proposals ARCH-R102-FOOTER-GUARD-PURE-FN (pure fn) and dialog-local focus hook; added as addendum (o) to the pending bounded frontend-architect checkpoint request; not scheduled"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -15853,6 +15952,18 @@
    "app/components/arrangement/ArrangementExportDialog.tsx",
    "app/lib/arrangement/__tests__/export-dialog-footer.test.tsx",
    "docs/implementation/2026/quarter-IV/089-studio-export-footer-strip-valuetext.md"
+  ]
+ },
+ "baseline_tree_at_round103": {
+  "head": "b6c97166b74b48414c35b06314f85135d676f7ff",
+  "list": "tmp/studio-real-loop/b-round-102-r103-tree-sha256.txt",
+  "count": 532,
+  "excluded": [
+   "app/lib/arrangement/export-wav.client.ts",
+   "app/lib/arrangement/__tests__/export-wav.test.ts",
+   "app/lib/arrangement/__tests__/export-cancel-ui.test.tsx",
+   "app/lib/arrangement/__tests__/export-progress-ui.test.tsx",
+   "docs/implementation/2026/quarter-IV/090-studio-export-focus-card-progress-once.md"
   ]
  }
 }

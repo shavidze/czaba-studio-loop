@@ -1,0 +1,127 @@
+{
+  "round": 102,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-23T06:04:13.0052175Z",
+    "round": 102,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "SOURCE-UNCHANGED",
+    "CARD-1280",
+    "CARD-IDLE-REG",
+    "AX-ONCE",
+    "VALUETEXT-REG",
+    "FOCUS-REG",
+    "STRIP-REG",
+    "EXPORT-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G102-3",
+    "AN-REVIEW",
+    "T102-TARGETED"
+  ],
+  "gate": [
+    "full-vitest",
+    "typecheck",
+    "build",
+    "biome",
+    "npm-run-verify",
+    "test:e2e:smoke",
+    "PROD-MP3-UNVERIFIED"
+  ],
+  "blocked": [
+    "G102-3 fake-Bearer sub-check: backend unavailable in cloud"
+  ],
+  "measurements": {
+    "CARD-1280": {
+      "scrollTop": 59,
+      "maxScroll": 137,
+      "footerTop": 520,
+      "footerH": 163,
+      "radioUnderFooterPx": -24.5,
+      "cardUnderFooterPx": -8,
+      "cardTop": 466,
+      "panelTop": 36,
+      "elementFromPointCardBottomMinus2": "card"
+    },
+    "CARD-IDLE-REG": {
+      "idle1280CardPx": -41,
+      "idle1440CardPx": -86,
+      "done1440CardPx": -86,
+      "scrollTop": 0
+    },
+    "AX-ONCE": {
+      "wavRender": {
+        "staticHits": 0,
+        "progressbars": 1,
+        "name": "ექსპორტის პროგრესი",
+        "aggregatedCount": 1
+      },
+      "mp3Phase": {
+        "staticHits": 0,
+        "progressbars": 1,
+        "aggregatedCount": 1
+      }
+    },
+    "VALUETEXT-REG": {
+      "samples": {
+        "wav1280": 121,
+        "wav1440": 121,
+        "mp3": 126
+      },
+      "mismatches": 0
+    },
+    "EXPORT-REG": {
+      "wav": {
+        "ch": 2,
+        "sr": 48000,
+        "bits": 24,
+        "seconds": 101.352,
+        "nan": 0
+      },
+      "mp3": {
+        "bytes": 3291117,
+        "decodeSeconds": 101.352,
+        "sr": 48000,
+        "ch": 2
+      }
+    },
+    "AN-REVIEW": {
+      "failBefore": [
+        "FC1",
+        "FA1"
+      ],
+      "a": [
+        "FC1"
+      ],
+      "b": [
+        "FT4 scrolls by overlap + margin",
+        "FC2",
+        "FC4"
+      ],
+      "d": [
+        "FA1"
+      ],
+      "e": [],
+      "control": "15/15"
+    },
+    "T102-TARGETED": {
+      "files": 13,
+      "tests": 143,
+      "passed": 143
+    }
+  },
+  "notes": [
+    "INFO-B101-VALUETEXT-CDP confirmed as CDP serialization artifact: Latin-1->UTF-8 re-decode of the CDP valuetext equals the Georgian label; DOM attribute correct.",
+    "MP3 load-phase AX snapshot not cleanly captured (AX tree lagged DOM, showed WAV 59%); the mp3-phase AX sample is valid and shows the text once. DOM samples in load phase: valuetext = label, label aria-hidden.",
+    "Reviewer Low (VoiceOver may ignore aria-valuetext on native progress) unverified here; Tech Lead screen-reader item.",
+    "Architecture note proposal: fold the four focus effects into one dialog-local hook if the region changes again.",
+    "Doc 090 holds all TEMPLATE sections and the five §1 items; CR=0 in doc 090 and test file.",
+    "Footer visibility during render (elementFromPoint) not re-measured this round; r101 evidence stands, no footer layout change in the diff."
+  ]
+}

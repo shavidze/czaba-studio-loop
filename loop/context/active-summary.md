@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T05:38:01.197Z)
+# Active loop summary (2026-10-23T06:14:38.316Z)
 
-- backlog.json 877 KB -> active view 173 KB
-- status: G_ROOT_GATE round 101
-- servers: `{"checkedUtc":"2026-10-23T05:26:59.6548446Z","round":101,"attempt":1,"store":200}`
-- last publication: 56231c030d0cf85c13b818b481eec2886ebf1a04 (rounds 101-101)
-- last root gate: round 101 published - commit 56231c030d0cf85c13b818b481eec2886ebf1a04 pushed
+- backlog.json 885 KB -> active view 175 KB
+- status: G_ROOT_GATE round 102
+- servers: `{"checkedUtc":"2026-10-23T06:04:13.0052175Z","round":102,"attempt":1,"store":200}`
+- last publication: b6c97166b74b48414c35b06314f85135d676f7ff (rounds 102-102)
+- last root gate: round 102 published - commit b6c97166b74b48414c35b06314f85135d676f7ff pushed
 
 ## Current items: -
 
@@ -274,13 +274,11 @@
 - A-R87-L7-PROGRESS-MONOTONIC / low / watch: C round 87 and round 88 PX-PHASES(-R) observed 0 decreases at both viewports / progress store does not enforce non-decreasing fractions within a phase
 - A-R87-LOW-PU-ORDER / low / open - Lows batch / export-progress-ui PU tests depend on order (only the first PU4 opens the delayed-import gate)
 - ARCH-EXPORT-MP3-ORCHESTRATION / info / signal (not scheduled); repeated by the A round-90 reviewer and the gate-90 reviewer (useArrangementExport hook or lib/arrangement/export-orchestrator.ts; acceptance CU1-CU9, EC1-EC4, TR1-TR6 unchanged, useArrangement() surface identical) - merged here; checkpoint q14 at the SRW-20 boundary (after round 91 C PASS), addendum appended to b-round-83-checkpoint-request.md; round 91: gate-91 reviewer (message constants module) and A round-91 reviewer (4 coordinated string edits) merged as q14 (d) / round-87 code-reviewer Architecture note: exportMp3 (ArrangementContext.tsx:2726-2881) changed in rounds 85-87 and 3b again; proposal after 
-- A-R88-REVIEW-EDGES / low / open - #4 (16 px strip) + py-4 nit dispatched round 101 with GATE89-S4; #1 (guard measures radio not label card), #2 (mouse focus scroll), #3 (footer growth after focus) stay open for a later focus-scroll round / round-88 code-reviewer edge cases: (1) footer guard measures the radio rect, its label description can still sit under the footer (target.cl
+- A-R88-REVIEW-EDGES / low / #4 + py-4 nit closed (C round 101 STRIP rows, gate 101 published 56231c0); #1 dispatched round 102 (D-29z67; B probe: scope-project label card 8 px under the footer at 1280 done after the guard scroll 43); #2 closed by decision D-29z67 (= GATE89-S5 acknowledged, reviewer: JS justified, cosmetic); #3 closed unreachable D-29z67 (B probe: footer height changes only at render start/done; scope radios disabled during render; format radios >= 289 px above the footer; reopen if a focusable body control can sit near a growing footer) / round-88 code-reviewer edge cases: (1) footer guard measures the radio rect, its label description can still sit under the footer (target.cl
 - C-R88-O1-IDLE-OVERFLOW-1280 / info / acknowledged (sticky footer keeps buttons HR-VISIBLE; no action) / at 1280x720 the idle 5M Export body still overflows by 45 px (691 vs 646); the footer hides it
 - ARCH-R88-EXPORT-DIALOG-FOCUS-HOOK / info / signal - trigger met in round 89 (another focus concern in the dialog); added to checkpoint request q14 (b-round-83-checkpoint-request.md, SRW-20 boundary after 3b); not scheduled / round-88 code-reviewer Architecture note: ArrangementExportDialog has four effects on the same content element (opener restore, initial focu
 - GATE89-S3-WORKER-NO-WATCHDOG / low / open - Lows batch (Cancel since round 90 gives the user a way out of a stalled worker; C round 90 CX-WAVPHASE) / export-wav worker has no watchdog; fail() drops the worker error text
-- GATE89-S4-FOOTER-MX8-COUPLING / low / dispatched round 101 (D-29z66) / footer -mx-8 coupled to ModalBody px-8; 16 px bg-surface strip under the footer at scroll end
 - GATE89-S5-FOCUSIN-MOUSE-SCROLL / info / acknowledged (reviewer: JS justified; cosmetic) / focusin footer guard also scrolls on a mouse click on a partly covered control
-- GATE89-S6-PROGRESS-VALUETEXT / low / dispatched round 101 (D-29z66) / <progress> has no aria-valuetext; phase announced only by the status message
 - GATE89-S7-TWO-FFMPEG-SINGLETONS / low / signal - with FFMPEG-UTIL-UNIFY (SRW-21) / StudioContext ~/utils/ffmpeg and the lab mp3-encoder are two FFmpeg singletons; wasm may load twice in one session
 - R89-REV-L1-L5 / low / open - Lows batch / info (unreachable in this dialog today: L1 unchecked group Shift+Tab lands on stop[0], L2 grouping by name only, L3 disabled checked radio, L4 split-group position; L5 duplicated harness -> ARCH (c) shared harness) / round-89 code-reviewer residuals on dialog-tab-stops
 - A-R89-MUT-VITE-CACHE / info / root_note (a-round-89/mut/* symlinked node_modules; vitest cache may be in store/node_modules/.vite; round-90 task forbids writing there) / scratch mutation copies may have written a vitest cache into store/node_modules/.vite
@@ -312,11 +310,15 @@
 - GATE96-S3-DOUBLE-STATE-READ / info / open - nit, not scheduled (fold into the refusal-mapping proposal if that is approved) / startLibraryPreview reads latestRef.current.sourceStates[sourceId] twice while the add path uses one local state
 - ARCH-R96-REFUSAL-MAPPING / info / open - architecture signal, not scheduled; both A's reviewer and the gate 96 reviewer (independently) flag Signal 3; added to the q14 checkpoint request addendum (b-round-91-checkpoint-request.md) / library refusal texts in ArrangementContext.tsx (l.1204-1208, l.1317-1325, l.1391) changed in rounds 95-96, each needing a full provider mou
 - GATE97-S2-CHROMIUM-ONLY-HOLD-ENTER / low / open - environment: only Chromium is installed on the cloud runner and agents may not install browsers; not schedulable in the cloud; Tech Lead manual check (Firefox/WebKit held Enter on Close and toolbar Export) or a later environment with those browsers; gate 98 suggestion 4 / A round 98 reviewer Low #1 (Safari/macOS Firefox mouse-open leaves focus on body) merged here; its global-Enter consequence is fixed for every browser by round 99 T2 (repeat ignored regardless of focus) / held-Enter guards verified only in Chromium (Firefox activates buttons via keypress; keydown preventDefault should suppress it, unverified)
-- GATE97-S4-REPEAT-EQ-TRUE-NIT / info / dispatched round 101 (D-29z66) / event.repeat === true at ArrangementExportDialog.tsx l.542 is redundant (repeat is boolean)
 - ARCH-R97-EXPORT-FOOTER-KEYBOARD / info / open - architecture signal, not scheduled; gate 97 reviewer Signal 3 (keep); proposal: after the Export Lows, one frontend-architect checkpoint on gathering export dialog keyboard/focus rules (initial focus, restore, Tab groups, repeat guard) and a shared test harness; 'refactor not worth it now' is a valid outcome; added as addendum (j) to b-round-91-checkpoint-request.md / ArrangementExportDialog.tsx footer l.484-571 changed in docs 078, 085 and planned GATE89-S4/S6
 - GATE98-S2-TH1-HELPER-DUP / low / open - Lows batch (test hygiene; with ARCH-R93-TEST-HARNESS fixture task) / export-toolbar-hold-enter.test.tsx TH1 copies closeAfterClick body to also check the spy count
-- GATE100-S1-SPACE-ON-FOCUSED-TOGGLE / low / B-observed 2026-10-23 (b-round-100-probe/probe-space-hold-result.json, probe-space-result.json): Space press or hold on the focused ▶ მოუსმინე -> 0 clicks on the toggle, label unchanged, transport Play -> Pause once (global Space = transport, D-29z64 R2); C to confirm in round 101 SPACE-TOGGLE-OBS; not closed until C confirms / held Space on the focused preview toggle unobserved (gate 100 review Low #1)
-- GATE100-S4-DOC088-STATUS / low / dispatched round 101 (doc 088 l.4) / doc 088 l.4 still says awaiting C although C round 100 passed and gate 100 published 17d944d
+- GATE101-S1-PROGRESS-READ-TWICE / low / dispatched round 102 (D-29z67): aria-hidden="true" on the visible label <p>; B AX probe b-round-101-probe/probe-ax-result.json: baseline text twice (StaticText + valuetext), aria-hidden once, aria-labelledby three times / visible progress label and bar aria-valuetext carry the same text; screen reader hears it twice
+- GATE101-S2-PROGRESS-TEXT-COMPUTED-TWICE / info / dispatched round 102 with GATE101-S1 (one progressText const) / formatArrangementExportProgress(progress) called twice per render
+- GATE101-S3-NON-CHROMIUM-STRIP / low / open - environment (only Chromium on the cloud runner; agents may not install browsers); filed with GATE97-S2; Tech Lead Firefox/Safari spot check / pb-0 over ModalBody py-4 (0 px strip) measured only in Chromium
+- GATE101-S4-DOC089-STATUS / low / dispatched round 102 (doc 089 l.4) / doc 089 l.4 still says awaiting C although C round 101 passed and gate 101 published 56231c0
+- ARCH-R101-MODALBODY-PADDING-SLOT / info / open - architecture signal, not scheduled (Modal.tsx protected); reviewer verdict keep, cost low / footer -mx-8/px-8 and the new pb-0 depend on ModalBody internal padding; once Modal.tsx is unfrozen add a className/padding override or a Mo
+- INFO-C101-SPACE-A-VS-C / info / watch - undiagnosed, not a bug: A probe-strip.cjs run saw no transport change on Space while C (locator.focus) and B probes saw Play -> Pause once / A vs C Space-hold observation difference
+- INFO-B101-VALUETEXT-CDP / info / open - observation: CDP Accessibility.getFullAXTree shows the progressbar valuetext property as mojibake (UTF-8 read as Latin-1) while names and the aggregated dialog text show correct Georgian; inferred CDP serialization artifact, unverified with a real screen reader (Tech Lead) / Georgian aria-valuetext in CDP AX dump looks garbled
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
