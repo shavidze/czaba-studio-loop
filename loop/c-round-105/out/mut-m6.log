@@ -1,0 +1,53 @@
+
+ RUN  v4.0.16 /home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-105/mut
+
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA1 creates the initial entry with sequence 0 2ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA2 a different string gives a new entry with the exact text and sequence + 1 1ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA3 the same string gives a new entry with the same text and sequence + 1, twice gives + 2 1ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA4 an updater that returns the current text gives the same entry object 1ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA5 an updater that returns a different text gives a new entry with sequence + 1 2ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA6 the same string during a gesture gives the same entry object 0ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA7 outside a gesture the same string still bumps, and during a gesture a different string bumps 1ms
+ ✓ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU1 Space twice on an empty arrangement replaces the inner span inside the same live region 225ms
+ ✓ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU2 activating a failed library row twice announces the failed text both times 111ms
+ ✓ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU3 the live region node stays the same with exactly one element child across distinct texts 93ms
+ ✓ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU4 the post-gesture restore brings back the old text and an unchanged restore keeps the same span 86ms
+ × app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU5 the same text during a claimed gesture keeps the span until the gesture ends 83ms
+   → expected <span></span> to be <span></span> // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: <span></span>
+Received: serializes to the same string
+
+ ✓ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU6 a changing readout during a claimed gesture is announced at every change 80ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 12 passed (13)
+   Start at  08:38:46
+   Duration  3.11s (transform 1.22s, setup 0ms, import 1.84s, tests 689ms, environment 1.18s)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU5 the same text during a claimed gesture keeps the span until the gesture ends
+AssertionError: expected <span></span> to be <span></span> // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: <span></span>
+Received: serializes to the same string
+
+
+Compared values have no visual difference.
+
+ ❯ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx:333:38
+    331|     act(() => live(api).setStatus(held));
+    332|     act(() => live(api).setStatus(held));
+    333|     expect(region.firstElementChild).toBe(heldSpan);
+       |                                      ^
+    334|     expect(region.textContent).toBe(held);
+    335|     expect(live(api).statusSequence).toBe(sequenceHeld);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

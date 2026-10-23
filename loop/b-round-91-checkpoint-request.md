@@ -92,3 +92,12 @@ B schedules no extraction. Any approved change becomes one separate B task with 
   - Signal 4 (`export-wav.client.ts` `detachWorker` lifecycle): the reviewer says **keep**; no request.
 - **Please add this to the same bounded read-only checkpoint:** keep or extract, cost, risk, at most three sentences.
 - **Still non-blocking.** Round 104 changes the status state in `ArrangementContext.tsx` (l.535 only, plus the value field) and does not touch the export pipeline.
+
+## Addendum (q) — B round 105 planning, 2026-10-23
+- **New signal (two independent reviewers, the same owner `ArrangementContext.tsx`):**
+  - **A's round 105 reviewer:** the status reducer now reads the gesture ref at render time. The proposal is a status action that records the gesture flag at dispatch time.
+  - **The gate 105 reviewer:** let each `setStatus` call carry its repeat intent, for example `announceStatus` vs `setStatus`, or a `{ text, repeat }` action. Then one rule covers the pointer drag, the held key and deliberate double presses.
+- **Both verdicts are keep for now.** Round 106 fixes the held-key case at the key handlers (the `keyRepeat` option) without changing the public `setStatus` type.
+- **Backlog:** ARCH-R105-STATUS-INTENT.
+- **Please add this to the same bounded read-only checkpoint:** keep or extract, cost, risk, at most three sentences. "Not worth it now" is a valid answer.
+- **Still non-blocking.**

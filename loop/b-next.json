@@ -1,8 +1,11 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 104 PASS (browserVerified=true, realVerified=true) with one Medium bug A-R104-REPEAT-DRAG (blocked drag: 81 pointermoves -> 81 status spans, 80 identical; fade clamp 21 identical readouts); gate 104 BLOCKED publication for that bug (reviewer 7/10), so GATE96-S2 and GATE103-S5 stay open (c_pass, unpublished). C bug first: round 105 fixes it in the provider (gesture-aware reducer). B probe: the reviewer snippet needs gestureCountRef moved above useReducer (TDZ ReferenceError reproduced); with the move tsc 0, biome 0, 69 files 1123/1123. Regression round not due (2026-10-21 -> 2026-10-23 = 2 days); the next B planning on/after 2026-10-24 is the regression round. Scoped work remains, nothing external blocks this fix. Advisor available and used.",
- "nextTask": "Round 105 (D-29z70): A-R104-REPEAT-DRAG + GATE104-S3. reduceArrangementStatus(previous, next, gestureActive) - same string while a pointer gesture is claimed returns previous; ArrangementContext: move const gestureCountRef = useRef(0) above useReducer and pass an inline reducer with gestureCountRef.current > 0; no call-site change; tests SA6/SA7 + SU5/SU6 (SU1-SU4 byte-identical), mutations m6-m9; doc 092 l.4/l.60. Baseline 3b6178b + round 104 3 M + 4 ?? (frozen 537/537, snapshots b-round-104-r105-snapshots), expected the same paths. C rows HD-BLOCKED-HOLD (1280/1440, >= 40 held moves: blocked sentence <= 2, all added spans <= 3 incl. release text), HD-FADE-CLAMP, HD-READOUT-CHANGING, SR-REPEAT-SPACE, SR-REPEAT-FAILED-ROW, SR-TEXT-REG, PX-NET, REG-HYD, G105-3, AN-REVIEW, T105-TARGETED, SOURCE-UNCHANGED.",
+ "reason": "C round 105 PASS (browserVerified=true, realVerified=true; A-R104-REPEAT-DRAG and GATE104-S3 c_pass) but gate 105 BLOCKED publication (reviewer 6/10): a held arrow key at a boundary re-announces the same refusal on every auto-repeat (GATE105-S1, Medium, round 104 regression). Rounds 104-106 publish together; nothing reached done. B swept all keydown handlers: 5 key paths + detail-panel held Enter. Scoped work remains across FB items, SRW-21 mount, T12 and regression; nothing external blocks this fix. Regression round due at the next B planning on/after 2026-10-24. Advisor available and used.",
+ "nextTask": "Round 106 (D-29z71): GATE105-S1 + C-R105-01 + GATE105-S2. keyRepeat flag: nudgeSelectedClip/stepLoopRange optional {keyRepeat} (provider dispatches the refusal in updater form on repeat), StudioWorkspace nudge + Ctrl/Option+Arrow pass event.repeat, LoopBrace, MarkerRow (status destructure, nudgeMarker/commitMarkerMove/stepMarker), DetailPanel Enter repeat skip; on repeat a refusal is announced only if its text differs from the current status; deliberate presses always announce; text-merge in the reducer forbidden (k8). Tests SK1-SK8 in the owned UI test file; mutations k1-k9; doc 092 whole. Baseline 3b6178b + 3 M + 4 ??, frozen 535 (b-round-105-r106-tree-sha256.txt), expected 6 M + 4 ??. C rows KR-NUDGE-SNAPOFF (1280/1440), KR-NUDGE-SNAPON, KR-NUDGE-MOVES, KR-GROUP, KR-LOOP, KR-MARKER-FLAG, KR-MARKER-STEP, KR-DETAIL-ENTER, HD-BLOCKED-HOLD, SR-REPEAT-SPACE, SR-TEXT-REG, PX-NET, REG-HYD, G106-3, AN-REVIEW, T106-TARGETED, DOC-092, SOURCE-UNCHANGED.",
  "remaining": [
+  "GATE105-S1-HELD-KEY-REPEAT",
+  "C-R105-01-DOC092-L16",
+  "GATE105-S2-DOC092-FILELIST",
   "A-R104-REPEAT-DRAG",
   "GATE104-S3-DOC092-STATUS",
   "GATE96-S2-REPEATED-STATUS-NOT-ANNOUNCED",
@@ -48,6 +51,8 @@
   "GATE103-S2-STALL-SECONDS-DUPLICATED",
   "GATE103-S3-ENGINE-TEXT-UNCAPPED",
   "A-R103-EW5-TITLE-NIT",
-  "ARCH-R103-EXPORT-ABORT-CONTRACT-DOC"
+  "ARCH-R103-EXPORT-ABORT-CONTRACT-DOC",
+  "A-R105-REVIEW-2-RELEASE-BATCH-TEST",
+  "ARCH-R105-STATUS-INTENT"
  ]
 }

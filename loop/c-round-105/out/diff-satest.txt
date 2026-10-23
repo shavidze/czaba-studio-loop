@@ -1,0 +1,38 @@
+15c15
+<     const next = reduceArrangementStatus(previous, 'b');
+---
+>     const next = reduceArrangementStatus(previous, 'b', false);
+23c23
+<     const once = reduceArrangementStatus(previous, 'same');
+---
+>     const once = reduceArrangementStatus(previous, 'same', false);
+26c26
+<     const twice = reduceArrangementStatus(once, 'same');
+---
+>     const twice = reduceArrangementStatus(once, 'same', false);
+33c33
+<     const next = reduceArrangementStatus(previous, (current) => current);
+---
+>     const next = reduceArrangementStatus(previous, (current) => current, false);
+41c41
+<     const next = reduceArrangementStatus(previous, updater);
+---
+>     const next = reduceArrangementStatus(previous, updater, false);
+45a46,62
+>   });
+> 
+>   it('SA6 the same string during a gesture gives the same entry object', () => {
+>     const previous: ArrangementStatusEntry = { text: 'blocked', sequence: 9 };
+>     const next = reduceArrangementStatus(previous, 'blocked', true);
+>     expect(next).toBe(previous);
+>     expect(next).toEqual({ text: 'blocked', sequence: 9 });
+>   });
+> 
+>   it('SA7 outside a gesture the same string still bumps, and during a gesture a different string bumps', () => {
+>     const previous: ArrangementStatusEntry = { text: 'blocked', sequence: 9 };
+>     const outside = reduceArrangementStatus(previous, 'blocked', false);
+>     expect(outside).not.toBe(previous);
+>     expect(outside).toEqual({ text: 'blocked', sequence: 10 });
+>     const changed = reduceArrangementStatus(previous, 'Fade In: 1.000 წმ', true);
+>     expect(changed).not.toBe(previous);
+>     expect(changed).toEqual({ text: 'Fade In: 1.000 წმ', sequence: 10 });

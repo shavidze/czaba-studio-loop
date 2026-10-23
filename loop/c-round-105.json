@@ -1,0 +1,59 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T08:38:01.1342483Z",
+  "round": 105,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R105-01-DOC092-L16",
+   "severity": "low",
+   "steps": [
+    "Open docs/implementation/2026/quarter-IV/092-studio-status-repeat-announcement.md",
+    "Read the Approach section, l.16"
+   ],
+   "expected": "The Approach section describes the round 105 rule: the same string during a pointer gesture keeps the previous entry, and only other strings bump sequence.",
+   "actual": "l.16 still says the string branch ALWAYS creates a new object and bumps sequence, even for identical text. That contradicts l.59-61 of the same doc and the shipped reducer. The Mermaid sequence diagram (l.32-44, checked by C) shows only the keyboard Space path, with no gesture case. A did not edit it because it is outside the doc sections B listed; the code-reviewer flagged the same point as finding 3.",
+   "evidence": "doc 092 l.16 and l.32-44 (read by C); a-round-105.md code-review table #3"
+  }
+ ],
+ "passed": [
+  "HD-BLOCKED-HOLD",
+  "HD-FADE-CLAMP",
+  "HD-READOUT-CHANGING",
+  "SR-REPEAT-SPACE",
+  "SR-REPEAT-FAILED-ROW",
+  "SR-TEXT-REG",
+  "PX-NET",
+  "REG-HYD",
+  "G105-3",
+  "AN-REVIEW",
+  "T105-TARGETED",
+  "SOURCE-UNCHANGED",
+  "GATE104-S3"
+ ],
+ "blocked": [
+  "G105-3 fake-Bearer sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "notVerified": [
+  "R104-T real screen reader (not an acceptance row this round)",
+  "late-bump-after-release semantics: inferred only, 0 late bumps observed in 4 drags",
+  "residual provider render cost during coalesced updates: not measured"
+ ],
+ "ableton": {
+  "status-repeat-during-drag": "არ ეხება"
+ }
+}

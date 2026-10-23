@@ -1217,6 +1217,57 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z71 — Round 105-ის შედეგი; Round 106: დაჭერილი კლავიში საზღვარზე იმავე უარს აღარ იმეორებს (GATE105-S1) + doc 092-ის შეუსაბამობა (C-R105-01, GATE105-S2).**
+
+C round 105 (`tmp/studio-real-loop/c-round-105.md`, `c-round-105.json`) — **PASS, `browserVerified: true`, `realVerified: true`**:
+- HD-BLOCKED-HOLD 1280/1440: ფანჯარაში 89 pointermove → დაბლოკილი წინადადება 1, დამატებული element 2.
+- HD-FADE-CLAMP: 1 element (Round 104-ში 21).
+- HD-READOUT-CHANGING: 30/30.
+- SR-REPEAT-SPACE, SR-REPEAT-FAILED-ROW, SR-TEXT-REG, PX-NET, REG-HYD.
+- G105-3: fake-Bearer — BLOCKED (backend).
+- AN-REVIEW (m6/m7), T105-TARGETED: 69 ფაილი, 1126/1126.
+- SOURCE-UNCHANGED.
+- ერთი Low: C-R105-01 (doc 092 l.16).
+
+**Gate 105 — BLOCKED** (reviewer 6/10). დაჭერილი ArrowLeft/ArrowRight საზღვარზე ყოველ auto-repeat-ზე იმავე უარს ხელახლა აცხადებს.
+
+- **R1 — backlog (მხოლოდ მტკიცებულებით):**
+  - A-R104-REPEAT-DRAG და GATE104-S3 — C PASS. **არ დაიხურა**, გამოქვეყნებული არ არის.
+  - GATE96-S2 და GATE103-S5 — იგივე მდგომარეობა.
+  - ოთხივე Round 106-თან ერთად ქვეყნდება.
+  - ახალი: GATE105-S1 (Medium), C-R105-01 (Low), GATE105-S2 (Low), A-R105-REVIEW-2 (Low, Low-ები), ARCH-R105-STATUS-INTENT (სიგნალი, checkpoint-ის დამატება (q)).
+  - „მზადაა“-ზე არაფერი გადავიდა.
+- **R2 — რიგი:** gate-ის ბაგი იმავე კლასისაა, რაც gate 104-ისა: Round 104-ის რეგრესია არსებულ flow-ში, რომელიც გამოქვეყნებას ბლოკავს.
+  - reviewer-ის შემოწმება ნაწილობრივი იყო, ამიტომ B-მ ყველა keydown handler გადაამოწმა.
+  - ხუთი გზა: კლიპის ჩაჩოჩება (Snap off/on, ჯგუფი), loop brace, მარკერის flag, Ctrl/Option+Arrow მარკერზე.
+  - მეექვსე: detail panel-ის ველებში დაჭერილი Enter.
+  - რეგრესიის რაუნდი ჯერ არ დამდგარა (2026-10-21 → 2026-10-23, 2 დღე). **შემდეგი B-ის დაგეგმვა 2026-10-24-ზე ან მის შემდეგ რეგრესიის რაუნდია.**
+- **R3 — წესი (B-ის გადაწყვეტილება):** `event.repeat`-ზე უარი ცხადდება მხოლოდ მაშინ, როცა მისი ტექსტი მიმდინარე სტატუსისგან განსხვავდება. ეს `3b6178b`-ის ქცევაა დაჭერილი კლავიშისთვის.
+  - მოქმედება ყოველ repeat-ზე სრულდება.
+  - ცალკე დაჭერა (`repeat === false`) ყოველთვის ცხადდება.
+  - provider-ში updater-ის ფორმაა: `setStatus(() => MESSAGE)`. ის იყენებს reducer-ის არსებულ function შტოს.
+  - კომპონენტში: `!event.repeat || status !== MESSAGE`. `setStatus`-ის საჯარო ტიპი უცვლელია, რადგან მისი გაფართოება frozen test fake-ებს `strictFunctionTypes`-ით დაარღვევდა.
+  - ერთი სახელი ყველგან: `keyRepeat`.
+- **R4 — უარყოფილი:**
+  - (a) reducer-ში იდენტური ტექსტის გაერთიანება — არღვევს GATE96-S2-ს (SU1/SU2; მუტაცია k8).
+  - (b) B-ის პირველი ვარიანტი, ყოველ repeat-ზე უარის გამოტოვება — hold-ის დროს საზღვრამდე მისვლისას არაფერს აცხადებს (მუტაცია k9; SK7, KR-NUDGE-MOVES).
+  - (c) გლობალური keydown listener provider-ში — დამალული ref-ის კიდევ ერთი წაკითხვა render-ში, reviewer-ის შენიშვნა #3-ის საწინააღმდეგოდ.
+- **R5 — B-ის probe:** `b-round-105/probe/`. Playwright-ის `keyboard.down`-ის განმეორებითი გამოძახება გვერდში `repeat: true`-ს იძლევა; ცალკე `press` — `false`-ს.
+- **R6 — ნებართვები (ვიწრო):**
+  - `StudioWorkspace.tsx`: ჩაჩოჩების შტო და `stepMarker`-ის გამოძახება.
+  - `ArrangementContext.tsx`: `nudgeSelectedClip`, `stepLoopRange` და interface-ის ორი ხაზი.
+  - `ArrangementLoopBrace.tsx`: `handleLoopKeyDown`.
+  - `ArrangementMarkerRow.tsx`: `status`-ის destructure, `stepMarker`, `commitMarkerMove`, `nudgeMarker` და flag-ის ისრის შტო.
+  - `ArrangementDetailPanel.tsx`: Enter-ის ორი შტო.
+  - `status-announcement-ui.test.tsx`: ახალი describe SK1–SK8; SU1–SU6 უცვლელი.
+  - doc 092: მთლიანად.
+  - frozen სია: 535 ფაილი. მოსალოდნელი მდგომარეობა: 6 M + 4 ??.
+- **R7 — C:**
+  - KR-NUDGE-SNAPOFF (1280/1440), KR-NUDGE-SNAPON, KR-NUDGE-MOVES, KR-GROUP, KR-LOOP, KR-MARKER-FLAG, KR-MARKER-STEP, KR-DETAIL-ENTER.
+  - რეგრესია: HD-BLOCKED-HOLD, SR-REPEAT-SPACE, SR-TEXT-REG.
+  - PX-NET, REG-HYD, G106-3, AN-REVIEW (k1/k4/k8/k9), T106-TARGETED, DOC-092, SOURCE-UNCHANGED.
+- **Ableton:** არ ეხება (CZABA-ს სტატუსის ზოლის ხელმისაწვდომობა).
+
 **D-29z70 — Round 104-ის შედეგი; Round 105: drag-ის დროს ერთი და იგივე სტატუსი აღარ მეორდება (A-R104-REPEAT-DRAG) + doc 092-ის სტატუსი (GATE104-S3).**
 
 C round 104 (`tmp/studio-real-loop/c-round-104.md`, `c-round-104.json`) — **PASS, `browserVerified: true`, `realVerified: true`**: SR-REPEAT-SPACE (1280/1440), SR-REPEAT-FAILED-ROW, SR-DRAG-STREAM (3/3), SR-TEXT-REG, PX-NET, REG-HYD, G104-3 (fake-Bearer — BLOCKED, backend), AN-REVIEW, T104-TARGETED (69 ფაილი, 1122/1122), SOURCE-UNCHANGED. 1 ბაგი: **A-R104-REPEAT-DRAG (Medium)** — დაბლოკილ drag-ზე 81 pointermove → 81 span, 80 იდენტური წინადადებით; fade-ის clamp-ზე 21 იდენტური readout. Gate 104 (`tmp/studio-real-loop/gates/gate-round-104.json`) — **blocked**: reviewer-მა `COMMIT: BLOCK` დააბრუნა ამავე ბაგის გამო (7/10); verify მწვანეა (146 ფაილი, 2263 ტესტი, build). HEAD რჩება `3b6178b`, Round 104-ის 3 M + 4 ?? ხეშია.

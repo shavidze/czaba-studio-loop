@@ -1,0 +1,77 @@
+314a315,390
+> 
+>   it('SU5 the same text during a claimed gesture keeps the span until the gesture ends', async () => {
+>     const { api, region } = await mountAnnouncementWorkspace();
+>     const held = 'Fade In: 2.000 წმ';
+>     const gesture: { release: (() => void) | null } = { release: null };
+>     act(() => {
+>       gesture.release = live(api).claimPointerGesture(5, () => undefined);
+>     });
+>     expect(gesture.release).not.toBeNull();
+>     expect(live(api).isPointerGestureActive()).toBe(true);
+> 
+>     act(() => live(api).setStatus(held));
+>     expect(region.textContent).toBe(held);
+>     const heldSpan = region.firstElementChild;
+>     const sequenceHeld = live(api).statusSequence;
+> 
+>     act(() => live(api).setStatus(held));
+>     act(() => live(api).setStatus(held));
+>     expect(region.firstElementChild).toBe(heldSpan);
+>     expect(region.textContent).toBe(held);
+>     expect(live(api).statusSequence).toBe(sequenceHeld);
+> 
+>     act(() => live(api).addSourceToActiveTrack('ok'));
+>     expect(region.textContent).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+>     const refusalSpan = region.firstElementChild;
+>     expect(refusalSpan).not.toBe(heldSpan);
+>     expect(live(api).statusSequence).toBe(sequenceHeld + 1);
+>     act(() => live(api).addSourceToActiveTrack('ok'));
+>     expect(region.firstElementChild).toBe(refusalSpan);
+>     expect(region.textContent).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+>     expect(live(api).statusSequence).toBe(sequenceHeld + 1);
+>     expect(live(api).arrangement.clips.length).toBe(0);
+> 
+>     act(() => gesture.release?.());
+>     expect(live(api).isPointerGestureActive()).toBe(false);
+>     expect(region.textContent).toBe(held);
+>     expect(region.firstElementChild).not.toBe(refusalSpan);
+>     expect(live(api).statusSequence).toBe(sequenceHeld + 2);
+>     const restoredSpan = region.firstElementChild;
+> 
+>     act(() => live(api).setStatus(held));
+>     expect(region.textContent).toBe(held);
+>     expect(region.firstElementChild).not.toBe(restoredSpan);
+>     expect(region.childElementCount).toBe(1);
+>     expect(live(api).statusSequence).toBe(sequenceHeld + 3);
+>   });
+> 
+>   it('SU6 a changing readout during a claimed gesture is announced at every change', async () => {
+>     const { api, region } = await mountAnnouncementWorkspace();
+>     const gesture: { release: (() => void) | null } = { release: null };
+>     act(() => {
+>       gesture.release = live(api).claimPointerGesture(6, () => undefined);
+>     });
+>     expect(gesture.release).not.toBeNull();
+>     const watch = observeRegion(region);
+>     const spans: (Element | null)[] = [];
+> 
+>     act(() => live(api).setStatus('A'));
+>     spans.push(region.firstElementChild);
+>     expect(region.textContent).toBe('A');
+>     act(() => live(api).setStatus('B'));
+>     spans.push(region.firstElementChild);
+>     expect(region.textContent).toBe('B');
+>     act(() => live(api).setStatus('A'));
+>     spans.push(region.firstElementChild);
+>     expect(region.textContent).toBe('A');
+>     const records = stopWatching(watch);
+> 
+>     expect(spans[1]).not.toBe(spans[0]);
+>     expect(spans[2]).not.toBe(spans[1]);
+>     expect(spans[2]).not.toBe(spans[0]);
+>     expect(addedTexts(records)).toEqual(['A', 'B', 'A']);
+>     expect(region.childElementCount).toBe(1);
+>     act(() => gesture.release?.());
+>     expect(live(api).isPointerGestureActive()).toBe(false);
+>   });
