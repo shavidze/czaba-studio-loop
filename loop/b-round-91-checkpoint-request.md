@@ -48,3 +48,16 @@ B schedules no extraction. Any approved change becomes one separate B task with 
 - **(g) gets another data point:** A's round 99 reviewer counts the ~60th copy of the audio/DOM fake harness, and the rAF behaviour already differs between files. Round 100 deliberately appends to `library-preview.test.tsx` instead of adding a new copy.
 - **Request to root:** round 100 closes the held-Enter family on the SRW-12 library panel, which is a feature boundary. B asks for one bounded, read-only frontend-architect checkpoint (`store/.claude/references/architecture-checkpoint.md`) on (g) and (k)/(l) together: keep or extract, cost, risk, at most three sentences each. "Not worth it now" is a valid outcome.
 - **Not blocking.** Round 100, the regression round due from 2026-10-24 and the Export Lows go ahead without an answer. An approved change becomes its own B task with one owner and behaviour-preserving tests.
+
+## Addendum — B round 100 (2026-10-23)
+- **(m) Gate 100 reviewer, Signal 3 (verdict keep):** the held-Enter guard is inline at 6 places in 4 files:
+  - `ArrangementLibraryPreview.tsx` l.293 and l.312;
+  - `ArrangementTransport.tsx` l.249;
+  - `ArrangementExportDialog.tsx` l.541;
+  - `ArrangementLibrary.tsx` l.242;
+  - `StudioWorkspace.tsx` l.1961.
+- **Reviewer proposal:** one `preventRepeatedEnterClick(event)` in `app/lib/arrangement/`, used only by the 4 native `<button>` sites. The library row and the global Enter keep their `!event.repeat` pattern, because they have a different contract. Acceptance: HT1–3, HA6 and TH4 unchanged and green, and C reruns HOLD-* and EXPORT-REG. Cost low.
+- **Round 101** (GATE97-S4) makes the 4 button guards textually identical, so the extraction would be a pure move.
+- **(g) another data point:** rounds 100 and 101 append to existing test files instead of adding harness copies.
+- **Request to root:** after round 101 closes the Export footer Lows, which is the trigger (j) named, B asks for **one bounded, read-only frontend-architect checkpoint** (`store/.claude/references/architecture-checkpoint.md`) on (g), (j), (k)/(l)/(m) together: keep or extract, cost, risk, at most three sentences each. "Not worth it now" is a valid outcome.
+- **Not blocking:** the regression round (due from 2026-10-24) and the remaining Lows go ahead without an answer. An approved change becomes its own B task with one owner and behaviour-preserving tests.

@@ -1,0 +1,5 @@
+- HOLD-TOGGLE 1280+1440 PASS (out/run100-*-holdtoggle.json). Next: 1280 regs, G100-3, mutations, targeted, end check.
+- 1280 regs PASS (out/run100-1280x720-freshtoggle_...json). Next: G100-3, mutations, targeted, end check.
+- G100-3 done, mutations done (out/mut100.json). Next: targeted, end check, report.
+- DONE: c-round-100.md/.json, c-browse.json written; end source check SAME.
+- Advisor follow-ups done: tight FRESH-TOGGLE, G100-3 at 1280, passed IDs normalized, PX-NET note. Final.

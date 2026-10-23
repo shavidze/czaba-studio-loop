@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-23T04:24:08.074Z)
+# Active loop summary (2026-10-23T05:01:51.426Z)
 
-- backlog.json 866 KB -> active view 171 KB
-- status: G_ROOT_GATE round 99
-- servers: `{"checkedUtc":"2026-10-23T04:09:33.6870630Z","round":99,"attempt":1,"store":200}`
-- last publication: e2412db337e9015def8dc6855358437b900ff51e (rounds 99-99)
-- last root gate: round 99 published - commit e2412db337e9015def8dc6855358437b900ff51e pushed
+- backlog.json 871 KB -> active view 178 KB
+- status: G_ROOT_GATE round 100
+- servers: `{"checkedUtc":"2026-10-23T04:49:40.6967098Z","round":100,"attempt":1,"store":200}`
+- last publication: 17d944da5255248d87a4c35aa9169b25b7b3d812 (rounds 100-100)
+- last root gate: round 100 published - commit 17d944da5255248d87a4c35aa9169b25b7b3d812 pushed
 
-## Current items: -
+## Current items: SRW-12
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -315,9 +315,8 @@
 - GATE97-S4-REPEAT-EQ-TRUE-NIT / info / open - routed with GATE89-S4 (same ArrangementExportDialog.tsx footer region, next Export Lows round); round 98 keeps the dialog frozen; gate 98 review suggestion 1 repeats it (style mismatch with ArrangementTransport.tsx l.250) / event.repeat === true at ArrangementExportDialog.tsx l.542 is redundant (repeat is boolean)
 - ARCH-R97-EXPORT-FOOTER-KEYBOARD / info / open - architecture signal, not scheduled; gate 97 reviewer Signal 3 (keep); proposal: after the Export Lows, one frontend-architect checkpoint on gathering export dialog keyboard/focus rules (initial focus, restore, Tab groups, repeat guard) and a shared test harness; 'refactor not worth it now' is a valid outcome; added as addendum (j) to b-round-91-checkpoint-request.md / ArrangementExportDialog.tsx footer l.484-571 changed in docs 078, 085 and planned GATE89-S4/S6
 - GATE98-S2-TH1-HELPER-DUP / low / open - Lows batch (test hygiene; with ARCH-R93-TEST-HARNESS fixture task) / export-toolbar-hold-enter.test.tsx TH1 copies closeAfterClick body to also check the spy count
-- B-R98-HELD-ENTER-MULTI-ADD / low / dispatched round 99 (D-29z64) / a held Enter adds one clip per auto-repeat keydown on the library row, the global Enter (focus on body) and the + add button
-- GATE98-S5-DOC086-STATUS / low / dispatched round 99 (doc 086 l.4) / doc 086 l.4 still says awaiting C although C round 98 passed and gate 98 published 736db33
-- B-R98-H1-PREVIEW-TOGGLE-HOLD / low / hypothesis - not probed; schedule a probe with a later library round / held Enter on the preview toggle button (▶ მოუსმინე) may toggle the preview once per repeat (the waveform handler already ignores repeats, l
+- B-R98-H1-PREVIEW-TOGGLE-HOLD / low / confirmed by B browser probe (2026-10-23) - dispatched round 100 (D-29z65) / held Enter on the preview toggle button (▶ მოუსმინე) may toggle the preview once per repeat (the waveform handler already ignores repeats, l
+- GATE99-S1-DOC087-STATUS / low / dispatched round 100 (doc 087 l.4) / doc 087 l.4 still says awaiting C although C round 99 passed and gate 99 published e2412db
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
