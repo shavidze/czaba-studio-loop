@@ -1,0 +1,46 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T00:55:57.9015040Z",
+  "round": 94,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "DEMO-LOAD-REG",
+  "STATUS-PERSIST",
+  "EXPORT-REG",
+  "PX-NET",
+  "REG-HYD",
+  "G94-3",
+  "AN-REVIEW",
+  "T94-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "unitOnly": [
+  {
+   "id": "EMPTY-SWAP-REACH",
+   "reason": "app/routes/studio-lab.tsx passes the module constant studioLabDemoCollection (app/data/studio-lab-demo.ts l.128) to ArrangementProvider, so an empty collection or a collection swap cannot be produced on /studio-lab; the purchased route is not mounted (SRW-21 blocked). COLLECTION-EMPTY-STATUS and GATE92-S1 are proven by unit tests LS1-LS5 and LS3b only (fail-before 7 red, mutations a/b re-run red by C). Not a FAIL and not a browser PASS."
+  }
+ ],
+ "blocked": [
+  "G94-3 fake-Bearer 403 sub-check: backend unavailable in cloud (/api/studio-token with a fake Bearer returns 500 Unable to prepare Studio access, same as round 93; no token issued, no workspace)"
+ ],
+ "gate": [
+  "full vitest suite",
+  "npm run typecheck",
+  "npm run build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "production bundle (PROD-MP3-UNVERIFIED)"
+ ],
+ "notes": [
+  "Workspace doc l.45 still links to doc 080, not 082 (outside A grant; for B)",
+  "Old sourceStates/buffers/peaks/selectedSourceId are not cleared on a collection swap (predates round 94; reviewer note; relevant before the SRW-21 mount)",
+  "Known/intended: the demo-mix clipping alert appeared on both exports (+1.7 dBFS, 456/470 samples); C-R92-N1 demo row text on an aborted load"
+ ]
+}

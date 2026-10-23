@@ -1,9 +1,9 @@
 {
- "version": 93,
- "updated": "2026-10-23 (B round 93 review -> round 94 task, D-29z59)",
+ "version": 94,
+ "updated": "2026-10-23 (B round 94 review -> round 95 task, D-29z60)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 94: D-29z59 - Lows batch part 2, collection load status: COLLECTION-EMPTY-STATUS (new copy.empty per origin, no loadSource on empty) + GATE92-S1 (setStatus(copy.loading) at the start of the load effect, stale settles stay ignored) + GATE92-S2 (purchased MP3 names PM1); new collection-load-status.test.tsx LS1-LS7 PM1; collection.test.ts PC9 empty keys; doc 081 l.4; arrangement-workspace.md l.44; new doc 082; baseline 85fcb05, frozen 518, expected 5 M + 2 ??)",
+ "current_task": "current-task.md (round 95: D-29z60 - Lows batch part 3a: C-R92-N1 demo loader network/body/decode errors mapped to the purchased Georgian texts in app/data/studio-lab-demo.ts loadDemoSource; new app/data/__tests__/studio-lab-demo.test.ts DL1-DL8; doc 082 l.4; arrangement-workspace.md l.44-45; new doc 083; baseline 0513439, frozen 522, expected 3 M + 2 ??)",
  "advisor_used_by_B": "round 92 planning: advisor available and consulted (2026-10-22)",
  "baseline": {
   "tsc_errors": 0,
@@ -4977,7 +4977,7 @@
    "depends_on": [
     "SRW-20"
    ],
-   "status": "blocked-partial (route mount: auth owner; stage 1 C PASS round 92 browserVerified=true, published 64e12d8 - demo path browser-verified, purchased path unit-only until the mount is released; load-status hardening for the mount dispatched round 94; R21-I2 full regression open)",
+   "status": "blocked-partial (route mount: auth owner; stage 1 C PASS round 92 published 64e12d8; load-status hardening C PASS round 94 unit-proven, published 0513439, browser half at the mount; SRW-21-PREMOUNT bundle open; R21-I2 full regression open)",
    "blocked_reason": "app/routes/studio.$productId.tsx and studio-token flow are owned by the auth agent; mounting the workspace there is forbidden until released by Tech Lead",
    "independent_progress": "WorkspaceCollection/loadSource adapter contract tests with a fake purchased adapter (no network/auth); docs for the future mount; full regression of SRW-01..SRW-20 by C",
    "files": [
@@ -8268,7 +8268,7 @@
    "round": 94,
    "task": "current-task.md",
    "decision": "D-29z59",
-   "status": "dispatched",
+   "status": "C PASS (browserVerified=true realVerified=true, 0 bugs), gate 94 published 0513439",
    "items": [
     "COLLECTION-EMPTY-STATUS",
     "GATE92-S1-STATUS-NOT-RESET-ON-SWAP",
@@ -8295,6 +8295,39 @@
     "G94-3",
     "AN-REVIEW",
     "T94-TARGETED",
+    "SOURCE-UNCHANGED"
+   ]
+  },
+  {
+   "round": 95,
+   "task": "current-task.md",
+   "decision": "D-29z60",
+   "status": "dispatched",
+   "items": [
+    "C-R92-N1-DEMO-FAILED-TO-FETCH",
+    "GATE94-S4-STALE-DOC-LINES"
+   ],
+   "note": "Lows batch part 3a (browser-reachable; ArrangementContext frozen). baseline HEAD 0513439 clean; frozen b-round-94-r95-tree-sha256.txt 522/522; snapshots b-round-94-r95-snapshots; expected 3 M + 2 ??; no existing test granted",
+   "owned": [
+    "app/data/studio-lab-demo.ts (E1: loadDemoSource l.99-126)",
+    "app/data/__tests__/studio-lab-demo.test.ts (new DL1-DL8)",
+    "docs/implementation/2026/quarter-IV/082-studio-workspace-collection-load-status.md (l.4)",
+    "docs/technical/arrangement-workspace.md (l.44-45 + one appended bullet)",
+    "docs/implementation/2026/quarter-IV/083-studio-lab-demo-loader-error-text.md (new)"
+   ],
+   "c_ids": [
+    "ERR-NET",
+    "ERR-DECODE",
+    "ERR-HTTP",
+    "ERR-BOTH",
+    "ERR-ADD-REFUSED",
+    "DEMO-LOAD-REG",
+    "AUDIO-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G95-3",
+    "AN-REVIEW",
+    "T95-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -13620,7 +13653,7 @@
   {
    "id": "COLLECTION-EMPTY-STATUS",
    "severity": "low",
-   "status": "dispatched round 94 (D-29z59 L1/L2: empty collection -> new copy.empty text per origin; browser-unreachable on /studio-lab, unit-proven LS1/LS2/LS5)",
+   "status": "unit-proven round 94 (C round 94 PASS browserVerified=true realVerified=true (c-round-94.json); gate 94 published 0513439; LS1-LS5/LS3b, C fail-before 7 red, mutations a/b red); browser half OPEN until the SRW-21 purchased mount (EMPTY-SWAP-REACH unit-only) -> SRW-21-PREMOUNT acceptance; not done",
    "to": "B/Lows batch",
    "title": "ArrangementProvider load effect: with collection.sources.length === 0 settle never runs and the status stays 'loading' forever",
    "evidence": "ArrangementContext.tsx l.2997-3046 at 77cd5b6"
@@ -13636,7 +13669,7 @@
   {
    "id": "GATE92-S1-STATUS-NOT-RESET-ON-SWAP",
    "severity": "low",
-   "status": "dispatched round 94 (D-29z59 L1: setStatus(copy.loading) at the start of the load effect; unit LS3/LS4; browser-unreachable until the SRW-21 mount)",
+   "status": "unit-proven round 94 (C round 94 PASS browserVerified=true realVerified=true (c-round-94.json); gate 94 published 0513439; LS1-LS5/LS3b, C fail-before 7 red, mutations a/b red); browser half OPEN until the SRW-21 purchased mount (EMPTY-SWAP-REACH unit-only) -> SRW-21-PREMOUNT acceptance; not done",
    "to": "Lows batch",
    "title": "ArrangementProvider load effect resets source states but not the status when the collection prop changes; a stale 'ready' text stays until the new settle",
    "evidence": "gates/round-92/review.md suggestion 1; a-round-92.md reviewer Info; c-round-92.md Notes for B"
@@ -13644,7 +13677,7 @@
   {
    "id": "GATE92-S2-PURCHASED-MP3-NAMES-TEST",
    "severity": "low (test gap)",
-   "status": "dispatched round 94 (D-29z59 PM1 in new collection-load-status.test.tsx; purchased-collection-ui.test.tsx stays frozen)",
+   "status": "closed round 94 (C round 94 PASS browserVerified=true realVerified=true (c-round-94.json); gate 94 published 0513439; PM1 + C mutation f red; demo names browser EXPORT-REG)",
    "to": "Lows batch",
    "title": "purchased MP3 download names are covered by code reading only (A Low 2)",
    "evidence": "gates/round-92/review.md suggestion 2; a-round-92.md Low 2; c-round-92.json signals"
@@ -13668,7 +13701,7 @@
   {
    "id": "C-R92-N1-DEMO-FAILED-TO-FETCH",
    "severity": "low",
-   "status": "open - Lows batch part 3 (after the round-95 regression round; app/data/studio-lab-demo.ts)",
+   "status": "dispatched round 95 (D-29z60 E1: loadDemoSource maps network/body/decode failures to the purchased adapter texts; browser ERR-NET/ERR-DECODE both viewports); supersedes the earlier \"after the round-95 regression round\" placement",
    "to": "Lows batch",
    "title": "demo loader error row shows the raw English browser text 'Failed to fetch' on a network failure (pre-existing)",
    "evidence": "c-round-92.md DEMO-LOAD (b) observation"
@@ -13684,7 +13717,7 @@
   {
    "id": "GATE93-S1-DOC081-STATUS",
    "severity": "low",
-   "status": "dispatched round 94 (doc 081 l.4 -> C PASS (Round 93), გამოქვეყნდა 85fcb05)",
+   "status": "closed round 94 (C round 94 PASS browserVerified=true realVerified=true (c-round-94.json); gate 94 published 0513439; doc 081 hunk @4)",
    "to": "A round 94",
    "title": "doc 081 status line still says awaiting C after C PASS",
    "evidence": "gates/round-93/review.md suggestion 1"
@@ -13712,6 +13745,68 @@
    "to": "Lows batch / future export dialog rounds",
    "title": "aria-labelledby and aria-describedby must be added and removed together: with labelledby and no resolvable describedby Chrome falls back to the full label text as description",
    "evidence": "a-round-93.md Code review Q1; c-round-93.md Notes for B"
+  },
+  {
+   "id": "GATE94-S1-COLLECTION-STABLE-ACROSS-REFRESH",
+   "severity": "low",
+   "status": "open - SRW-21-PREMOUNT (needs the protected route; not schedulable before the auth owner releases it)",
+   "to": "SRW-21",
+   "title": "a new collection object always resets the status to loading and re-decodes every source; a token refresh that builds a new purchased collection would flash loading and reload all stems",
+   "evidence": "gates/round-94/review.md suggestion 1"
+  },
+  {
+   "id": "GATE94-S2-SWAP-LEAVES-PER-COLLECTION-STATE",
+   "severity": "low",
+   "status": "open - SRW-21-PREMOUNT (browser-unreachable on /studio-lab). B source read 0513439: buffersRef and sourcePeaks are shared with video-lane audio (ArrangementContext l.2038/l.2043), so a cleanup must delete only ids of the previous collection that are absent from the next one, never video ids; selectedSourceId -> next collection first source or null; clips referencing removed ids stay (graph.client.ts l.209 skips a missing buffer)",
+   "to": "SRW-21",
+   "title": "switching collections leaves sourceStates/sourcePeaks/buffersRef/selectedSourceId entries of the previous collection",
+   "evidence": "gates/round-94/review.md suggestion 2; a-round-94.md Known gaps; c-round-94.json notes"
+  },
+  {
+   "id": "GATE94-S3-EMPTY-BRANCH-UNUSED-CONTROLLER",
+   "severity": "info",
+   "status": "open - optional nit, bundle with SRW-21-PREMOUNT",
+   "to": "SRW-21",
+   "title": "empty-collection branch returns () => controller.abort() for a controller nothing listens to",
+   "evidence": "gates/round-94/review.md suggestion 3"
+  },
+  {
+   "id": "GATE94-S4-STALE-DOC-LINES",
+   "severity": "low",
+   "status": "dispatched round 95 (doc 082 l.4; arrangement-workspace.md l.44-45 incl. the 080->082 link from c-round-94 notes)",
+   "to": "A round 95",
+   "title": "doc 082 status line and workspace doc l.44 still say awaiting C; l.45 links only doc 080",
+   "evidence": "gates/round-94/review.md suggestion 4; c-round-94.json notes; a-round-94.md Known gaps"
+  },
+  {
+   "id": "GATE94-S5-AS-CONST-IN-TEST",
+   "severity": "low",
+   "status": "open - SRW-21-PREMOUNT (collection-load-status.test.tsx l.428; fix when that file is next touched; B reading: CLAUDE.md 'no type assertions' has no exception, so new tests must annotate instead - written into the round 95 task)",
+   "to": "SRW-21",
+   "title": "['resolve','reject'] as const in collection-load-status.test.tsx",
+   "evidence": "gates/round-94/review.md suggestion 5"
+  },
+  {
+   "id": "GATE95-DUP-ERROR-MAP",
+   "severity": "info",
+   "status": "open - optional nit, not scheduled (candidate for the V-0 strings module or a shared fetch helper)",
+   "to": "B",
+   "title": "round 95 duplicates the purchased adapter's network/decode error texts in studio-lab-demo.ts instead of sharing a helper (collection.ts frozen this round)",
+   "evidence": "current-task.md round 95 E1 (B decision)"
+  },
+  {
+   "id": "SRW-21-PREMOUNT",
+   "severity": "low",
+   "status": "open - bundle, schedule when the auth owner releases the purchased mount (or earlier only if a browser-reachable path appears)",
+   "to": "SRW-21",
+   "title": "pre-mount bundle: GATE94-S1 stable collection across token refresh, GATE94-S2 swap cleanup, GATE94-S3, GATE94-S5, plus the browser halves of COLLECTION-EMPTY-STATUS and GATE92-S1 and GATE92-S4 token URL note",
+   "acceptance_draft": [
+    "LS6-style purchased test: a token refresh does not reload and does not overwrite the status",
+    "empty-swap test: no stale ids of the previous collection in sourceStates/peaks/buffers, video ids untouched",
+    "LS1-LS7 and PM1 unchanged",
+    "browser: empty and swap status on the mounted purchased route"
+   ],
+   "evidence": "gates/round-94/review.md Architecture note proposal; a-round-94.md"
   }
  ],
  "tech_lead_notes": [
@@ -14890,6 +14985,11 @@
    "round": 93,
    "source": "gates/round-93/review.md Architecture note + a-round-93.md reviewer note + c-round-93.md Notes for B",
    "note": "Signal 3 (repeated expensive change): every new arrangement UI test copies the fake AudioContext/OfflineAudioContext/AudioBuffer stubs and the provider/dialog mount harness (~80 lines; class FakeAudioBuffer in 61 files under app/lib/arrangement/__tests__). Keep ArrangementExportDialog.tsx as is. Proposal ARCH-R93-TEST-HARNESS: one shared non-test support module (e.g. app/lib/arrangement/test-support/ or a non-*.test file under __tests__) for the audio fakes, provider mount and live(api) helper; test files only; existing tests migrate only when their region is next touched; acceptance = migrated tests pass unchanged. Not scheduled; added to the pending q14 checkpoint request (b-round-93.md)."
+  },
+  {
+   "round": 94,
+   "source": "gates/round-94/review.md Architecture note + a-round-94.md reviewer note (verbatim there)",
+   "note": "Signal 4 (status/lifecycle on an existing owner) at ArrangementContext.tsx l.3000-3051: keep (one abort lifecycle). Signal 3 (repeated costly change): the load effect was changed in rounds 92-94 and each change copied a ~300-line provider harness; proposal: if SRW-21 adds more load/swap rules, extract per-run load bookkeeping (pending/failed count, status choice) into a pure lib/arrangement helper with unit tests, effect/refs/abort/useArrangement() unchanged. Related to ARCH-R93-TEST-HARNESS. Added to q14 as (h); accumulated-risk trigger on one owner -> root re-asked in b-round-94.md (non-blocking)."
   }
  ],
  "vitest_floor_round46": 1357,

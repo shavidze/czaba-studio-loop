@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T00:22:52.714Z)
+# Active loop summary (2026-10-23T01:08:08.785Z)
 
-- backlog.json 835 KB -> active view 167 KB
-- status: G_ROOT_GATE round 93
-- servers: `{"checkedUtc":"2026-10-23T00:07:16.0151536Z","round":93,"attempt":1,"store":200}`
-- last publication: 85fcb059b8d35ce854559610178b42c5894e1f69 (rounds 93-93)
-- last root gate: round 93 published - commit 85fcb059b8d35ce854559610178b42c5894e1f69 pushed
+- backlog.json 840 KB -> active view 166 KB
+- status: G_ROOT_GATE round 94
+- servers: `{"checkedUtc":"2026-10-23T00:55:57.9015040Z","round":94,"attempt":1,"store":200}`
+- last publication: 051343983bedf6ff7ec21625a35e94710a895732 (rounds 94-94)
+- last root gate: round 94 published - commit 051343983bedf6ff7ec21625a35e94710a895732 pushed
 
 ## Current items: SRW-21
 
@@ -265,9 +265,7 @@
 - C-R85-OBS-PLAYHEAD-OVER-CLIPS / info / acknowledged (A review L6; intended: playhead z-10 row sibling paints over clips, pointer-events-none) / playhead line paints over clips and the selected clip after the isolate change
 - GATE86-S3-TIMEOUT-COVERAGE / low / import part closed (C round 87 PX-RETRY, published eb1d0c0); conversion has no fixed limit by decision - Cancel in stage 3b-1 round 90 (CX-MP3) / the 120 s timeout does not cover the import or the conversion
 - GATE86-S4-FORMAT-RADIOS-DURING-RENDER / info / rejected (B, D-29z52): format radios stay enabled during a render by the round-86 spec - frozen render-time focus test export-dialog-focus.test.tsx l.454-472 keeps focus on an enabled format radio; C EXTRA-FORMAT-SWITCH-DURING-MP3 shows the running export is unaffected / format radios enabled while scope radios are disabled during a render
-- PROD-MP3-UNVERIFIED / low / open evidence: gate 92 verify.log (grep preview/e2e/mp3) again shows only unit tests and the build, no preview-server WAV/MP3/cancel run; re-requested from root for gate 93 (root-owned gate row, not A work) / MP3 export (and from round 87 the export-wav worker) not verified in the production bundle
-- A-R86-L7-REASON-READ-TWICE / low / dispatched round 93 (D-29z58 D1: disabled range radio gets aria-labelledby; describedby unchanged) / range reason inside the <label> and also aria-describedby: may be read twice
-- A-R86-L8-NOTES-SAY-WAV / low / dispatched round 93 (D-29z58 D2: EXPORT_FORMAT_CREATES per selected format; WAV text byte-identical) / no-sound and master-mute notes say "WAV შეიქმნება" for MP3 formats
+- PROD-MP3-UNVERIFIED / low / open evidence: gate 93 verify.log (grep preview/PROD-MP3) again shows no preview-server WAV/MP3 run; re-requested from root for gate 94 (root-owned gate row, not A work) / MP3 export (and from round 87 the export-wav worker) not verified in the production bundle
 - A-R86-L4-OPTIMIZEDEPS-PURCHASED-DEV / info / open evidence (purchased Studio MP3 in dev not checked; backend unavailable) / optimizeDeps.exclude also changes the dev module graph of the purchased Studio
 - FFMPEG-UTIL-UNIFY / info / signal for SRW-21 (not scheduled) / round 87 gives /studio-lab its own resettable MP3 encoder (same core + command) because the frozen util cannot reset or remove listeners; un
 - C-R86-OBS-DEFAULT-OVERLOAD / info / acknowledged (same as DEMO-SFX-FULL-SCALE; pre-existing) / the default demo project peaks +1.7 dBFS at Master 0 dB, so every default export shows the overload warning
@@ -296,17 +294,18 @@
 - C-R90-N2-UNMOUNT-DELAY / info / watch (hypothesis: Remix route commit timing in a fresh dev context; 0 downloads proven) / ffmpeg worker terminated 2.2-2.6 s after the exit click, not at once
 - R91-T-TECH-LEAD / info / open / real Chrome/Safari: WAV + MP3 export - does the browser ask permission for the second file, and does the new note read right; Escape-does-no
 - ARCH-CHECKPOINT-SRW20 / info / requested_from_root 2026-10-22 (b-round-91-checkpoint-request.md, q14 (a)-(e)); still unanswered at round 93 planning; non-blocking; not re-requested. q14 (f) added from the round-92 reviewer notes / bounded frontend-architect checkpoint at the SRW-20 boundary: export orchestration (useArrangementExport hook vs lib/arrangement/export-orch
-- GATE91-S1-NOTE-IN-LABEL / low / dispatched round 93 (D-29z58 D1: aria-labelledby name span + aria-describedby note for all four format radios; label textContent unchanged, so no frozen-test grant needed) / WAV + MP3 note span sits inside the <label>, so the radio's accessible name includes the whole note; give it an id + aria-describedby
 - GATE91-S3-INPLACE-NAMING / info / acknowledged (reviewer: nothing to do now; revisit if a second caller of encodeArrangementWavInPlace appears) / only the parameter type marks the owned-arrays contract of encodeArrangementWavInPlace
 - C-R91-N1-RENDER-NONDETERMINISM / info / data (related to C-R84-L1; RMS agrees to ~1e-13; not caused by round 91) / 5M WAV bytes differ across sessions (3 sha prefixes) while RMS agrees
-- COLLECTION-EMPTY-STATUS / low / open - Lows batch part 2 (round 94 unless the regression round is due), paired with GATE92-S1 in the same load effect / ArrangementProvider load effect: with collection.sources.length === 0 settle never runs and the status stays 'loading' forever
+- COLLECTION-EMPTY-STATUS / low / dispatched round 94 (D-29z59 L1/L2: empty collection -> new copy.empty text per origin; browser-unreachable on /studio-lab, unit-proven LS1/LS2/LS5) / ArrangementProvider load effect: with collection.sources.length === 0 settle never runs and the status stays 'loading' forever
 - R92-T-TECH-LEAD / info / open / when the auth owner releases the purchased route: mount the workspace with createPurchasedWorkspaceCollection and check heading/badge/status
-- GATE92-S1-STATUS-NOT-RESET-ON-SWAP / low / open - Lows batch part 2 (with COLLECTION-EMPTY-STATUS; fix: setStatus(copy.loading) at the start of the load effect) / ArrangementProvider load effect resets source states but not the status when the collection prop changes; a stale 'ready' text stays until t
-- GATE92-S2-PURCHASED-MP3-NAMES-TEST / low (test gap) / open - Lows batch part 2 (one exportMp3 assertion for czaba-studio.mp3 / czaba-studio-range.mp3 in PW5) / purchased MP3 download names are covered by code reading only (A Low 2)
+- GATE92-S1-STATUS-NOT-RESET-ON-SWAP / low / dispatched round 94 (D-29z59 L1: setStatus(copy.loading) at the start of the load effect; unit LS3/LS4; browser-unreachable until the SRW-21 mount) / ArrangementProvider load effect resets source states but not the status when the collection prop changes; a stale 'ready' text stays until t
+- GATE92-S2-PURCHASED-MP3-NAMES-TEST / low (test gap) / dispatched round 94 (D-29z59 PM1 in new collection-load-status.test.tsx; purchased-collection-ui.test.tsx stays frozen) / purchased MP3 download names are covered by code reading only (A Low 2)
 - GATE92-S3-COPY-COMPUTED-TWICE / info / open - Lows batch (optional nit) / StudioWorkspace header calls workspaceCollectionCopy(collection.origin) twice per render; one const reads better
 - GATE92-S4-TOKEN-URL-IN-CONSOLE / low / open - SRW-21 mount stage prerequisite (doc note in docs/technical/arrangement-workspace.md open prerequisites; short token lifetime); not round 93 / a failed stem fetch is logged by the browser console/Network tab with the full ?token= URL; the adapter keeps it out of UI text but cannot h
-- C-R92-N1-DEMO-FAILED-TO-FETCH / low / open - Lows batch (copy: map a demo network failure to a Georgian message like the purchased adapter's ფაილი ვერ ჩაიტვირთა (ქსელი)) / demo loader error row shows the raw English browser text 'Failed to fetch' on a network failure (pre-existing)
+- C-R92-N1-DEMO-FAILED-TO-FETCH / low / open - Lows batch part 3 (after the round-95 regression round; app/data/studio-lab-demo.ts) / demo loader error row shows the raw English browser text 'Failed to fetch' on a network failure (pre-existing)
 - R93-T-TECH-LEAD / info / open / screen reader (VoiceOver/NVDA) pass on the export dialog: each format radio is announced once by its short name with its note as description
+- GATE93-S1-DOC081-STATUS / low / dispatched round 94 (doc 081 l.4 -> C PASS (Round 93), გამოქვეყნდა 85fcb05) / doc 081 status line still says awaiting C after C PASS
+- GATE93-S2-OPTIONIDS-REBUILT / info / open - optional nit, not scheduled / ArrangementExportDialog optionIds object rebuilt each render; suffixes could be module-level
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
