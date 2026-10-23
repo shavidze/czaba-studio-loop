@@ -1,0 +1,97 @@
+{
+  "round": 118,
+  "taskStatus": "FAIL",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-23T21:56:43.0143618Z",
+    "round": 118,
+    "attempt": 1,
+    "store": 200
+  },
+  "passed": [
+    "AN-REVIEW",
+    "SOURCE-SCOPE",
+    "GV-PRESENT",
+    "GV-DRAG",
+    "GV-INF",
+    "SH-LANE",
+    "SH-GROUP",
+    "SH-MASTER",
+    "SH-MID",
+    "NB-PAN",
+    "NB-CLIP",
+    "G-GROUP-T3",
+    "G-GROUP-INF",
+    "GV-PLAY",
+    "G118-3",
+    "PX-NET",
+    "REG-HYD",
+    "TV-ANCHOR",
+    "DOC-100/101",
+    "NB-TV-DRAG",
+    "NB-GROUP-MUTE-SOLO",
+    "NB-U-FOCUS-RESCUE",
+    "GV-DBL"
+  ],
+  "failed": [
+    "T118-TARGETED"
+  ],
+  "blocked": [
+    "G118-3 fake-Bearer 403: backend unavailable in cloud"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "npm run test:e2e:smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "bugs": [
+    {
+      "id": "C-R118-01",
+      "severity": "low",
+      "steps": [
+        "cd store; npx vitest run app/lib/arrangement/__tests__/clip-gain-fader.test.tsx",
+        "CF11 l.501: expect(live(fine.api).arrangement.master.gainDb).toBe(-1.2)"
+      ],
+      "expected": "T118-TARGETED green (B §4: every listed file green); CF11 Master fine value matches the pin",
+      "actual": "1 failed / 451 passed (452). 'expected -1 to be -1.2'. The app is right and the pin is wrong: Master range -60..+6 (66 dB), step MASTER_GAIN_STEP_DB=0.5 (ArrangementMaster.tsx l.25), relativeFaderValue rounds to the step: -24 px x 66 / (132 x 10) = -1.2 -> nearest 0.5 grid = -1.0. B's §2.1 formula left out the Master step; R4 says the Master step is unchanged. In the browser, SH-MASTER shows Shift -2.5 dB vs plain -27.5 dB (theory -2.75, within one 0.5 step). A did not edit the pin and reported a STOP. Fix = B's one-line ruling: CF11 l.501 -> toBe(-1). The root gate's full vitest fails until then.",
+      "evidence": "c-round-118/out/vitest-targeted.log; c-round-118/out/ui-1440-2.json rows.SH-MASTER; store/app/lib/arrangement/fader.ts relativeFaderValue",
+      "blocksPublish": true,
+      "gateImpact": "Low for the app, but the red test blocks the root gate's full vitest: do NOT move it to deferred_low_polish. Needs B's one-line ruling (CF11 l.501 -> toBe(-1)) before publication."
+    }
+  ],
+  "observations": [
+    "OBS-R118-DEMO-OVER (not a round-118 bug; existing gain staging, for B): with Master at its default 0 dB and the music lane muted, stems + SFX at about 4.0-4.6 s give a live output peak of +1.48 dBFS, and the SFX meter's data-level-db reads 0. The same content exported at Master -12 peaks at -10.52 dBFS, which is consistent. Evidence: c-round-118/out/gplay-1440-3.json GV-INF-METER.preOutDb/preSfxMax. Not caused by this round (unity group/lane gains).",
+    "B's neighbour row 'U with the group fader focused -> focus to the group name, as in UM9' does not describe UM9. UM9 rescues a focused fader that the collapse HIDES (a member lane, or an inner group). The group's own fader stays visible and keeps focus, which is correct. C tested both cases: group fader focused + U -> collapsed, fader still visible and focused; stems lane fader focused + U -> stems hidden, focus on arrangement-group-name. PASS.",
+    "GV-INF meters: during play, after the group goes to -inf the stems/SFX meters do not drop at once. They fall at the meter release METER_RELEASE_DB_PER_SECOND = 20 (measured -20.02 / -19.95 dB/s, never rising over 78 frames) and read -inf after 1964 ms (stems) and 2498 ms (SFX). The tapped output peak is exactly 0 (-200 dB sentinel) from +150 ms. C reads 'meters stay silent' as no signal, not 'jump to -inf'; this is meter ballistics, not signal. Run 1 (short window) is kept as out/gplay-1440-1-shortwindow.*, and run 2 as out/gplay-1440-2-parsebug.* (C's '-inf' parse bug in the tool); the valid run is gplay-1440-3.",
+    "First /studio-lab load of the job crashed in setup again (grid control null), as in round 117: out/ui-1440-1-envfail.log. Run 2 is valid. Root cause not proven (likely the first Vite load).",
+    "C did not re-run A's m1-m5 mutations (C makes no store writes). A's mutation claims are taken as A's report only.",
+    "A's TV11 pre-check outcome (a) is confirmed by reading the test: undoChainLabels (clip-gain-fader/track-volume-db helpers) undoes until undoLabel is null, so it undoes both the Master drag and the context Volume commit; the anchor is then 0.6 = -4.4 dB and S = -5.6 holds. In the browser, TV-ANCHOR (UI commit path) keeps -2.9 after the Master drag, and the lane drag is anchored at -2.9 (press value -2.9, delta -11.7 vs expected -11.65 +/- 0.683) at both viewports. A-R118-TV11-ANCHOR is not needed.",
+    "Ableton correspondence (separate from the CZABA requirement): Shift = finer drag = confirmed (Live 12 §42.6, B capture). Group dB display, the factor 10, mid-drag re-anchor and the -inf..0 range = unconfirmed. Pan without fine = deliberate difference (R5, PAN-SHIFT-FINE). The dB only in title/valuetext on the group = deliberate difference (GROUP-VOLUME-VISIBLE-READOUT)."
+  ],
+  "measurements": {
+    "T118-TARGETED": "25 files, 452 tests: 451 passed, 1 failed (CF11 l.501), same as A",
+    "AN-REVIEW counts": "track-group-mix-ui expect 131->131 it 10->10 (27 changed lines = §2.1 list); track-volume-db 99->100 / 11; clip-gain-fader 92->92 / 14; group-volume-db new 39 expect / 9 it; no new toBeCloseTo",
+    "GV-PRESENT": "1440 and 1280: -60/0/0.1, value 0, '+0.0 dB', 'Volume +0.0 dB', row 28 px, fader 48 px, name 79 px, no visible dB/% text",
+    "GV-DRAG": "both: w 48, -20 px -> -25.0 dB (expected -25 +/- 1.35), one Volume entry (sentinel Pan — SFX), Ctrl+Z -> +0.0 dB and the sentinel; member readouts +0.0",
+    "GV-INF": "both viewports: value -60, '−∞ dB' (U+2212 U+221E), title matches, Undo -> 0. During play (both): output exactly 0 from +150 ms; the stems/SFX meters do not drop at once. They fall at the documented 20 dB/s release (1440: -20.02/-19.95; 1280: -20.03/-20.03 dB/s, never rising) and reach −∞ at +1.96/+2.50 s (1440) and +1.97/+2.51 s (1280). Interpretation: no signal; meter ballistics.",
+    "SH-LANE": "both: w 103, plain -23.3, Shift -2.3 (theory -2.33), same Undo label, selection unchanged",
+    "SH-GROUP": "both: w 48, plain -50.0, Shift -5.0 (theory -5.0)",
+    "SH-MASTER": "both: w 96, plain -27.5, Shift -2.5 (theory -2.75, step 0.5)",
+    "SH-MID": "both: last plain -11.7, first Shift -11.8 (one step), Shift half -1.2 (expected -1.165), ratio 0.103",
+    "NB-PAN": "plain -42 = Shift -42 (42L)",
+    "NB-CLIP": "plain +17.5, Shift +1.8",
+    "G-GROUP-T3": "WAV 48 kHz 24-bit stereo, 4864896 frames (101.352 s); members first non-zero at 2.000 s; ratio peak 0.501187, RMS 0.501187 (0.000 % error), max sample error 0.85 LSB, 0 clipped",
+    "G-GROUP-INF": "'−∞ dB', 0 non-zero samples, same frames",
+    "control": "music alone + group muted, group 0 vs -6.0 dB: identical (0 LSB), ratio 1.000000",
+    "GV-PLAY": "seek 8 s (stems only), group drag -30 px -> -37.5 dB during play: output drop 37.50 dB, 0 createBufferSource during the drag, playhead 8.000 -> 10.571 monotonic, still playing; 1280 run identical (drop 37.50 dB, 0 sources)",
+    "G118-3": "/studio-lab demo badge true; /studio/middle-east 'Sign in required', no workspace, 0 audio[src]; token API 401"
+  },
+  "evidence": "c-round-118/out, c-round-118/shots, c-round-118/tools",
+  "notes_valid_runs": "ui-1440-2, ui-1440-3 (NB-GMS), ui-1280-1, gexp-1440-1, gplay-1440-3, gplay-1280-1, g118-3"
+}

@@ -1217,6 +1217,17 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z84 — Round 118-ის შედეგი; Round 119: C-R118-01-ის გასწორება (CF11-ის Master pin).**
+
+C round 118 (`tmp/studio-real-loop/c-round-118.md`, `c-round-118.json`) — **FAIL**, `browserVerified: true`, `realVerified: true`. ბრაუზერის ყველა სტრიქონი PASS-ია ორივე viewport-ზე: GV-PRESENT/DRAG/INF/DBL, SH-LANE/GROUP/MASTER/MID, NB-PAN/CLIP, G-GROUP-T3 (0.501187, 0.000 %), G-GROUP-INF (0 არანულოვანი sample), GV-PLAY (37.50 dB, 0 ახალი source), TV-ANCHOR. ჩავარდა მხოლოდ T118-TARGETED (451/452, CF11 l.501). Gate 118 გამოტოვდა.
+- **R1 — C-R118-01 B-ის დეფექტია:** round 118-ის §2.1-ის ფორმულამ (−24 × 66 / 1320 = −1.2) Master-ის ნაბიჯი `MASTER_GAIN_STEP_DB = 0.5` გამოტოვა; `relativeFaderValue` −1.2-ს −1.0-ზე ამრგვალებს, R4-მა კი ნაბიჯი უცვლელი დატოვა. გადაწყვეტილება: CF11 l.501 → `toBe(-1)`. მტკიცებულება: A-ს m5 (`fineDivisor`-ის გარეშე −12), C-ის SH-MASTER (Shift −2.5 vs plain −27.5).
+- **R2 — ბლოკავს გამოქვეყნებას:** წითელი ტესტი gate-ის სრულ vitest-ს აგდებს, ამიტომ `deferred_low_polish`-ში არ გადადის.
+- **R3 — ბაზა:** `9cb820b` + round 118-ის სამუშაო tree (8 M + 2 ??). გაყინულია 929 ფაილი, მათ შორის untracked `group-volume-db.test.tsx` და round 118-ის ყველა app ფაილი. 118 და 119 ერთად ქვეყნდება C PASS-ის შემდეგ.
+- **R4 — doc-ები:** doc 101 l.4/50/66/70 (სტატუსი, გადაწყვეტა, C-ის შემოწმება, TODO), doc 100 l.69 (reviewer-ის Low). doc 100 l.13 ისტორიად რჩება.
+- **R5 — დაკვირვებები:** OBS-R118-DEMO-OVER → C-R86-OBS-DEFAULT-OVERLOAD-ს შეუერთდა (სიგნალი); GV-INF მრიცხველების 20 dB/s release — მისაღებია (სიგნალი არ არის); UM9-ის მეზობელი სტრიქონის ტექსტი B-ის უზუსტობა იყო; TV11-ის შედეგი (a) — finding არ არის. ახალი სიგნალები: MASTER-FINE-STEP (ABLETON-EXPERT-REVIEW), SHIFT-FINE-DISCOVERABILITY (DESIGN-UX-REVIEW).
+- **R6 — არქიტექტურა:** A-ს reviewer-ის Architecture note addendum (ac)-ს იმეორებს; ახალი addendum არ არის.
+- **R7 — რიგი:** round 119 → რეგრესიის რაუნდი (პირველი დაგეგმვა 2026-10-24 UTC-ზე ან შემდეგ) → T12 ეტაპი 4 → ABLETON-EXPERT-REVIEW.
+
 **D-29z83 — Round 117-ის შედეგი; Round 118: T12 ეტაპი 3b — ჯგუფის Volume dB-ში და Shift-ით ზუსტი drag.**
 
 C round 117 (`tmp/studio-real-loop/c-round-117.md`, `c-round-117.json`) — **PASS**, `browserVerified: true`, `realVerified: true`; gate 117 გამოქვეყნდა `9cb820b` (rounds 116 + 117, ორივე remote). T12 ეტაპი 3a → `c_pass_published`; C-R116-01, GATE-116-SKIPPED, GATE115-S4 დაიხურა.
@@ -2081,6 +2092,8 @@ flowchart TD
 | 116 → | (შედეგი) | **C FAIL** მხოლოდ T116-TARGETED-ზე (C-R116-01); ბრაუზერის ყველა row PASS (`browserVerified`); gate გამოტოვდა |
 | 117 | C-R116-01 | `track-group-mix-ui`-ის scale-only ზუსტი ხაზები; round 116-ის ფაილები გაყინულია; 116+117 ერთად ქვეყნდება (D-29z82) |
 | 118 | T12 ეტაპი 3b | ჯგუფის Volume dB + Shift fine (ხაზი/ვიდეო/ჯგუფი/Master); GATE117-S1; შემდეგ რეგრესიის რაუნდი (D-29z83) |
+| 118 → | (შედეგი) | **C FAIL** მხოლოდ T118-TARGETED-ზე (C-R118-01, B-ის pin); ბრაუზერის ყველა row PASS (`browserVerified`); gate გამოტოვდა |
+| 119 | C-R118-01 | CF11 l.501 → `toBe(-1)`; doc 101/100-ის სტატუსის ხაზები; 118+119 ერთად ქვეყნდება (D-29z84) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2119,6 +2132,7 @@ flowchart TD
 **D-29z82:** round 117-ში A-ს ეკუთვნის მხოლოდ `app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx` (UM3 l.482/l.522, UM5 l.569/l.571/l.575, UM9 l.657/l.660 და `trackVolumeFromDb`-ის import) და `docs/implementation/2026/quarter-IV/100-studio-track-volume-db.md` (ტესტის შენიშვნა). დანარჩენი გაყინულია (`b-round-116-r117-tree-sha256.txt`, 928).
 
 **D-29z83:** round 118-ში A-ს ეკუთვნის `ArrangementGroupHeader.tsx`, `ArrangementLane.tsx` და `ArrangementMaster.tsx` (მხოლოდ fine option), `fader.ts` (კონსტანტა), `track-group-mix-ui.test.tsx` / `track-volume-db.test.tsx` (TV11) / `clip-gain-fader.test.tsx` (CF11) — მხოლოდ §2.1-ის ხაზები, ახალი `group-volume-db.test.tsx`, doc 100 (l.4/56/70) და ახალი doc 101. დანარჩენი გაყინულია (`b-round-117-r118-tree-sha256.txt`, 922).
+**D-29z84:** round 119-ში A-ს ეკუთვნის მხოლოდ `app/lib/arrangement/__tests__/clip-gain-fader.test.tsx` (l.501), `docs/implementation/2026/quarter-IV/101-studio-group-volume-db-shift-fine.md` (l.4/50/66/70) და `docs/implementation/2026/quarter-IV/100-studio-track-volume-db.md` (l.69). დანარჩენი, round 118-ის ცვლილებების ჩათვლით, გაყინულია (`b-round-118-r119-tree-sha256.txt`, 929).
 
 ## 7. Done Policy
 

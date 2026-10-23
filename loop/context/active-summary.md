@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T21:04:24.518Z)
+# Active loop summary (2026-10-23T22:11:37.474Z)
 
-- backlog.json 1046 KB -> active view 131 KB
-- status: G_ROOT_GATE round 117
-- servers: `{"checkedUtc":"2026-10-23T20:52:01.5006844Z","round":117,"attempt":1,"store":200}`
+- backlog.json 1053 KB -> active view 132 KB
+- status: G_ROOT_GATE round 118
+- servers: `{"checkedUtc":"2026-10-23T21:56:43.0143618Z","round":118,"attempt":1,"store":200}`
 - last publication: 9cb820b6f7e5f9f44d1c651954d30ebf4f83be9f (rounds 116-117)
-- last root gate: round 117 published - commit 9cb820b6f7e5f9f44d1c651954d30ebf4f83be9f pushed
+- last root gate: round 118 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -192,7 +192,7 @@
 - B-R107-ENTER-ON-BODY / info / open question for the user (not deferred, not scheduled as a change): the workspace-wide Enter (target not a button/slider/separator, incl. BODY) adds the active library item; SRW-12 R12-L2 only specifies Enter from the results list. Kept unchanged in round 108; focus retention closes C-R107-01 regardless / should Enter with focus on BODY add the active library item?
 - GATE107-S3-NZ-DELTA-NIT / info / open nit - optional defensive delta < 0 in the R4 condition (doc 092 F3) / target === clip.start with a non-negative delta would announce the time-start text (no current caller)
 - A-R108-CTRLZ-EXHAUST-FOCUS / info / open - signal (not in rule F1); Ctrl+Z exhausting history while Undo is focused leaves focus on the disabled Undo/BODY because the shortcut path never arms / 
-- DEFERRED-LOW-POLISH / info / open - pointer: 159 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
+- DEFERRED-LOW-POLISH / info / open - pointer: 160 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
 - PROD-SSR-NUL / info / open - gate/Tech Lead row (production build served, NUL 0 on /studio-lab, both UAs, chunked); not run by C (dev server only) or by gate 109 (build green, HTML not measured) / production SSR HTML NUL count not measured after the round-109 filter
 - GATE109-F4-SN5-TRIPWIRE / info / acknowledged - SN5 turns red on purpose when react-dom fixes writeStringChunk; the extra typeof assertion may go with the removal task / SN5 is a deliberate upstream tripwire
 - GATE109-F5-ABORT-TIMER / info / signal - pre-existing setTimeout(abort, ABORT_DELAY) never cleared and responseStatusCode=500 after resolve has no effect (A reviewer + gate F5); entry.server.tsx frozen; not scheduled / entry.server.tsx abort timer not cleared
@@ -207,7 +207,7 @@
 - TOUCH-DOUBLE-TAP-RESET / info / signal - deliberate for round 113 (D-29z78 R4), not scheduled / after the touchstart preventDefault, a touch double-tap no longer generates dblclick, so it does not reset a fader; keyboard, mouse double-c
 - TOUCH-LONGPRESS-CONTEXTMENU / info / signal - not tested; candidate row for the regression round (CDP long touch on a fader: contextmenu fires or not; no app menu exists on faders) / the touchstart preventDefault on the relative faders probably also suppresses the long-press contextmenu (same mechanism as R4)
 - R38-T-SR-SWIPE / info / open - Tech Lead R38-T checklist addition / real-device screen reader (VoiceOver/TalkBack) swipe up/down still adjusts the faders after the touchstart guard (reasoning only, untested)
-- ARCH-CHECKPOINT-PHASE1-BOUNDARY / info / requested_from_root (B round 113 planning, 2026-10-23; non-blocking) - addenda (x), (y), (z); focused request (aa) sent with the round 116 plan (stage 2 closed, before stage 3 touches the Volume machine; round 116 is UI-only and does not touch it) / phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b
+- ARCH-CHECKPOINT-PHASE1-BOUNDARY / info / requested_from_root (B round 113 planning, 2026-10-23; non-blocking) - addenda (x), (y), (z); focused request (aa) sent with the round 116 plan (stage 2 closed, before stage 3 touches the Volume machine; round 116 is UI-only and does not touch it) | addendum (ac) appended with the round 118 plan: gate-117 reviewer Architecture note (hook stored <-> slider mapping) + the group start capture is the second copy; still unanswered; non-blocking / phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b
 - GATE114-S3-BLUR-ON-DISABLE / low / deferred_low_polish (C round 115 MC-BLUR-DISABLED observed: no value lost, the Clip Gain entry is written late at the next edit's flush; Undo restores in one step) / Chromium fires no blur when the focused Clip Gain fader becomes disabled (selection -> video/group during a keyboard preview); the pending p
 - GATE114-S4-SHIFT-REANCHOR-CLAMPED / info / acknowledged (reviewer: acceptable) / Shift re-anchor starts from the rounded and clamped previewed value; after an overshoot past a bound, a Shift toggle makes the value move ba
 - A-R114-REVIEW-FINEDIVISOR-VALIDATION / info / acknowledged (only the constant 10 is passed) / useRelativeFaderDrag fineDivisor is not validated
@@ -215,7 +215,6 @@
 - GATE115-S1-DRAGIDS-LAZY-CLEAR / low / deferred_low_polish / clipGainDragIdsRef keeps the previous drag's ids and is checked against the global isPointerGestureActive(); context refuses the mismatched 
 - GATE115-S2-GROUP-RESET-TEXT / low / deferred_low_polish / 0 dB button on a group always writes '0' into the field even when resetClipGainMembers refuses; mixed group then shows a pending marker
 - GATE115-S3-FLOOR-DEAD-ZONE / low / deferred_low_polish / multi-clip Clip Gain drag: after the block stops at -60/+24 the hook anchor keeps moving; on the way back about (max-min) dB of travel does 
-- GATE115-S4-DOC099-STATUS / low / dispatched round 116 (D-29z81 R9) / doc 099 l.4 still says awaiting C after C round 115 PASS
 - GATE115-S5-MIXED-PLACEHOLDER / info / open - optional (VISUAL-A / polish candidate) / mixed Clip Gain field is empty; placeholder '—' would show it is empty on purpose
 - A-R115-REVIEW-FIELD-CARRYOVER / low / deferred_low_polish / text typed in the Clip Gain field can carry over between two different mixed groups (content key stays 'group'); needs a group change withou
 - A-R115-REVIEW-APPLY-TARGETS-UNFILTERED / low / deferred_low_polish / applyClipGainTargets is exported without the audio-only filter (today only receives filtered targets)
@@ -223,10 +222,14 @@
 - TRACK-VOLUME-BOOST / info / signal (not requested by the user; Live 12 track range -inf..+6 dB unconfirmed in saved captures) - round 116 top is 0 dB / track/group Volume has no positive boost (Master has +6 dB)
 - TRACK-VOLUME-NUMERIC-FIELD / info / signal (Live 12 section 18.1 extended mixer has a numeric volume field; CZABA lane header shows a readout only; deliberate difference, narrow header) / no typed numeric entry for track Volume
 - MIXER-MULTI-TRACK / info / signal (Live 12 section 18.1: adjusting one selected track's mixer control adjusts the others, keeping differences; not in T12 (T12.7 is multi-clip) and not requested) / multi-track mixer adjustment
-- C-R116-01 / medium / dispatched round 117 (D-29z82): scale-only exact grant in track-group-mix-ui.test.tsx / track-group-mix-ui UM3/UM5/UM9 still write linear values into the lane Volume slider after stage 3a; targeted vitest 367/370 (gate full vite
-- GATE-116-SKIPPED / info / open_root / Round 116 root gate skipped (C FAIL on T116-TARGETED only); round-116 code is uncommitted in the tree; rounds 116+117 publish together after
 - C-R116-OBS-TV-PLAY-CONTENT / info / acknowledged (C-R82-LIVE-ORACLE-PAIRED class; the synthetic beep lane showed the exact -17.5 dB live) / TV-PLAY live drop with music is content-dominated (10.78 dB for a 17.5 dB drag)
 - C-R116-OBS-AS-CONST / info / ruled accepted (B, D-29z82) / track-volume-db.test.tsx:42 uses 'as const' (const assertion; existing repo pattern)
+- GATE117-S1-DOC100-STALE / low / dispatched round 118 (D-29z83; doc 100 l.4/l.56/l.70 grant) / doc 100 l.4 still says awaiting C, l.56 says track-group-mix-ui was not changed, l.70 lists the B decision as an open TODO
+- TRACK-VOLUME-TAPER / info / signal (not requested by the user; Live taper unconfirmed in saved captures); Shift fine in round 118 addresses precision / lane/group Volume faders are linear in dB (100 px = 60 dB); a non-linear taper would give more resolution near 0 dB
+- GATE117-S5-TEXT-BELOW-FLOOR / info / acknowledged (reviewer: acceptable as designed; screen readers use the text) / a stored value below the -59.9 floor (e.g. 1e-4) reads -80.0 dB while the slider sits at -59.9
+- GROUP-VOLUME-VISIBLE-READOUT / info / signal for DESIGN-UX-REVIEW (layout change; not requested explicitly; D-29z83 R2) / the group row shows its dB only in title/aria-valuetext, no visible readout (lane has one)
+- PAN-SHIFT-FINE / info / signal (Live 12 section 42.6 Shift finer resolution is generic to controls; T12 3b scoped to Volume faders; D-29z83 R5) / Pan fader has no Shift fine drag
+- GATE118-NIT-FINE-CONST / info / open nit - for the next owner of ArrangementDetailPanel.tsx / DETAIL_CLIP_GAIN_FINE_DIVISOR stays local while round 118 adds FADER_SHIFT_FINE_DIVISOR in fader.ts
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
