@@ -1,0 +1,87 @@
+diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index a0f1cde..6b41d00 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -15,7 +15,7 @@ import {
+   snapTimeToGridOrEdges,
+ } from '~/lib/arrangement/grid';
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
+-import { moveClip, trimClipEnd, trimClipStart } from '~/lib/arrangement/model';
++import { clipLinearGain, moveClip, trimClipEnd, trimClipStart } from '~/lib/arrangement/model';
+ import { PEAK_BUCKETS_PER_SECOND } from '~/lib/arrangement/peaks';
+ import {
+   CLIP_LANE_REFUSAL_MESSAGES,
+@@ -242,6 +242,7 @@ export function buildPeakShape(
+   sourceOffset: number,
+   duration: number,
+   columns: number,
++  scale: number,
+ ): PeakShape | null {
+   if (!peaks || peaks.length === 0 || columns <= 0) {
+     return null;
+@@ -254,6 +255,7 @@ export function buildPeakShape(
+   }
+   const count = Math.max(1, Math.min(span, Math.round(columns)));
+   const perColumn = span / count;
++  const s = Number.isFinite(scale) && scale >= 0 ? scale : 1;
+   const parts: string[] = [];
+   for (let column = 0; column < count; column++) {
+     const start = from + Math.floor(column * perColumn);
+@@ -262,7 +264,7 @@ export function buildPeakShape(
+     for (let i = start; i < end && i < to; i++) {
+       max = Math.max(max, peaks[i]);
+     }
+-    const height = Math.max(0.02, Math.min(1, max));
++    const height = Math.max(0.02, Math.min(1, max * s));
+     parts.push(`M${column} ${(1 - height).toFixed(3)}h1V${(1 + height).toFixed(3)}h-1Z`);
+   }
+   return { columns: count, path: parts.join('') };
+@@ -303,9 +305,10 @@ function ArrangementClipViewInner({
+   const fadeLabels = isVideo ? VIDEO_FADE_LABELS : CLIP_FADE_LABELS;
+   const width = clip.duration * pxPerSecond;
+   const peakColumns = Math.round(Math.min(width, PEAK_SHAPE_MAX_COLUMNS));
++  const gainScale = clipLinearGain(clip);
+   const peakShape = useMemo(
+-    () => buildPeakShape(peaks, clip.sourceOffset, clip.duration, peakColumns),
+-    [peaks, clip.sourceOffset, clip.duration, peakColumns],
++    () => buildPeakShape(peaks, clip.sourceOffset, clip.duration, peakColumns, gainScale),
++    [peaks, clip.sourceOffset, clip.duration, peakColumns, gainScale],
+   );
+ 
+   useEffect(
+@@ -843,6 +846,7 @@ function ArrangementClipViewInner({
+               viewBox={`0 0 ${peakShape.columns} 2`}
+               preserveAspectRatio="none"
+               aria-hidden="true"
++              data-testid="arrangement-clip-waveform"
+             >
+               <path d={peakShape.path} fill="currentColor" />
+             </svg>
+diff --git a/app/components/arrangement/ArrangementDetailPanel.tsx b/app/components/arrangement/ArrangementDetailPanel.tsx
+index 6b3b0c6..d40d3fe 100644
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+@@ -26,6 +26,7 @@ import {
+ import {
+   CLIP_GAIN_MAX_DB,
+   CLIP_GAIN_MIN_DB,
++  clipLinearGain,
+   formatMasterGainDb,
+   normalizeClipGainDb,
+ } from '~/lib/arrangement/model';
+@@ -188,12 +189,13 @@ function ArrangementDetailWaveform({
+   videoClipGainReason?: ReactNode;
+ }) {
+   const { clip } = selection;
++  const gainScale = clipLinearGain(clip);
+   const peakShape = useMemo(
+     () =>
+       selection.isVideo
+         ? null
+-        : buildPeakShape(peaks, clip.sourceOffset, clip.duration, DETAIL_PEAK_COLUMNS),
+-    [selection.isVideo, peaks, clip.sourceOffset, clip.duration],
++        : buildPeakShape(peaks, clip.sourceOffset, clip.duration, DETAIL_PEAK_COLUMNS, gainScale),
++    [selection.isVideo, peaks, clip.sourceOffset, clip.duration, gainScale],
+   );
+   const clipEnd = clip.start + clip.duration;
+   const overlay =

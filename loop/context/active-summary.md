@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T22:38:17.866Z)
+# Active loop summary (2026-10-23T23:26:05.553Z)
 
-- backlog.json 1060 KB -> active view 135 KB
-- status: G_ROOT_GATE round 119
-- servers: `{"checkedUtc":"2026-10-23T22:25:29.1493420Z","round":119,"attempt":1,"store":200}`
-- last publication: 4090f6ea78317ebc331cd6add9c63d318ca4ab41 (rounds 118-119)
-- last root gate: round 119 published - commit 4090f6ea78317ebc331cd6add9c63d318ca4ab41 pushed
+- backlog.json 1064 KB -> active view 134 KB
+- status: G_ROOT_GATE round 120
+- servers: `{"checkedUtc":"2026-10-23T23:07:24.1069680Z","round":120,"attempt":1,"store":200}`
+- last publication: 0a75ba8757617695d19e0b2a4aaad713bc30c01c (rounds 120-120)
+- last root gate: round 120 published - commit 0a75ba8757617695d19e0b2a4aaad713bc30c01c pushed
 
 ## Current items: -
 
@@ -229,14 +229,13 @@
 - GROUP-VOLUME-VISIBLE-READOUT / info / signal for DESIGN-UX-REVIEW (layout change; not requested explicitly; D-29z83 R2) / the group row shows its dB only in title/aria-valuetext, no visible readout (lane has one)
 - PAN-SHIFT-FINE / info / signal (Live 12 section 42.6 Shift finer resolution is generic to controls; T12 3b scoped to Volume faders; D-29z83 R5) / Pan fader has no Shift fine drag
 - GATE118-NIT-FINE-CONST / info / open nit - for the next owner of ArrangementDetailPanel.tsx / DETAIL_CLIP_GAIN_FINE_DIVISOR stays local while round 118 adds FADER_SHIFT_FINE_DIVISOR in fader.ts
-- C-R118-01 / low / dispatched round 119 (D-29z84) - blocks publication (red test fails the gate's full vitest); NOT deferred_low_polish / CF11 l.501 pins the fine Master value at -1.2 while the app gives -1 (Master step 0.5); targeted vitest 451/452
-- A-R118-REVIEW-DOC100-L69 / low / dispatched round 119 (doc 100 l.69 grant); l.13 kept as round-117 history (acknowledged) / doc 100 l.69 TODO still lists 3b as future work; l.13 describes the round-117 state
 - MASTER-FINE-STEP / info / signal for ABLETON-EXPERT-REVIEW (not scheduled; not requested) / Shift fine on Master still snaps to the 0.5 dB Master step (fine = 10x travel per step, not 0.05 dB resolution); Live behaviour unconfirmed
 - SHIFT-FINE-DISCOVERABILITY / info / signal for DESIGN-UX-REVIEW (shortcut discoverability is in its scope; not scheduled) / Shift fine drag on Volume faders has no tooltip or hint
 - A-R118-REVIEW-GV-HALVES / info / acknowledged (the move-and-return half of GV4 and the -inf text of GV3 discriminate; m2 turns GV4 red) / the first half of GV4 and GV3's stored 0 also pass on the pre-round code
 - C-R118-OBS-GV-INF-METER-BALLISTICS / info / acknowledged (B accepts C's reading: 'meters stay silent' = no signal; meters fall at METER_RELEASE_DB_PER_SECOND 20, output exactly 0 from +150 ms) / after the group goes to -inf during play the member meters fall at the 20 dB/s release instead of jumping to -inf
 - B-R118-UM9-ROW-WORDING / info / acknowledged (B spec imprecision; C tested both cases: group fader stays visible and focused; member lane fader -> focus to arrangement-group-name; PASS) / round-118 neighbour row 'U with the group fader focused -> focus to the group name, as in UM9' misdescribed UM9
-- ENV-FIRST-LOAD-GRID-NULL / info / watch (second occurrence: rounds 117 and 118; likely first Vite load; harness: discard the first setup run if it crashes before the grid control exists) / first /studio-lab load of a job crashes the C setup (grid control null); run 2 valid
+- ENV-FIRST-LOAD-GRID-NULL / info / watch (third occurrence in round 119; harness rule: discard a crashed first setup run and replace it once) / first /studio-lab load of a job crashes the C setup (grid control null); run 2 valid
+- C-R119-01 / info / applied as a process rule from round 120 (current-task.md section 2: before touching an untracked granted file, A stores a pre-edit copy with sha256 under a-round-N/; B stores one under b-round-N/ when it grants such a file); not an app defect; not deferred_low_polish / no pre-edit copy of the untracked doc 101 existed, so C could verify its round-119 edit by content only, not by reverse hash
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

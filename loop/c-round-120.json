@@ -1,0 +1,67 @@
+{
+  "round": 120,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-23T23:07:24.1069680Z",
+    "round": 120,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "T120-TARGETED",
+    "AN-REVIEW",
+    "SOURCE-SCOPE",
+    "WG-SCALE-1440",
+    "WG-SCALE-1280",
+    "WG-CLAMP-FLOOR",
+    "WG-LIVE-1440",
+    "WG-LIVE-1280",
+    "WG-DETAIL",
+    "WG-MULTI",
+    "WG-MUSTNOT",
+    "WG-PLAY",
+    "WG-AUDIO",
+    "WG-VIDEO-disabled-state",
+    "NB-MOVE-RANGE-ZOOM",
+    "NB-FADE-ENVELOPE-OVERLAY",
+    "G120-3",
+    "PX-NET",
+    "REG-HYD"
+  ],
+  "failed": [],
+  "inconclusive": [
+    "WG-VIDEO drawing vs pre-round: the video clip's lane drawing exists and did not change when C tried the disabled field, but there is no pre-round browser byte baseline. 'Unchanged vs round 119' rests on code (video clips carry no gainDb, so the scale is 1) and on WG2 (scale 1 is byte-identical to the pre-round output)"
+  ],
+  "blocked": [
+    "G120-3 fake-Bearer 403: backend unavailable in cloud"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "npm run test:e2e:smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "invalidRuns": [
+    "wg-1440-1: setSnapOff read a null grid control on the job's first page load (ENV-FIRST-LOAD-GRID-NULL), before any measurement. Replaced once by wg-1440-2. No console log was saved for it"
+  ],
+  "observations": [
+    "Harness-only re-run: in wg-1440-2, WG-MULTI read empty fields because both clips were still selected (mixed state), and NB's waveform-area drag made a time selection instead of a move, so C's Ctrl+Z undid the −6 set. Both were C script errors, not app defects. Fixed in wg-1440-3 (fresh sessions): both PASS",
+    "A deviation 1 (gainScale computed outside the memo and listed in deps, instead of clip.gainDb in deps) is behaviour-equivalent. WG-LIVE and WG-PLAY show the drawing follows a drag frame by frame",
+    "C-R120-01 (process): A deviation 2 made one lasting formatting edit to the A-owned new test file with a Python replace, bypassing the Edit-tool primitives hook (§2). Biome re-checked it clean. Not an app defect",
+    "WG2 pin independently grounded: the HEAD 4090f6e buildPeakShape on A's fixture gives sha256 cc617f0c..., equal to the pinned value (out/wg2-head-check.txt)"
+  ],
+  "ableton": {
+    "clipGainChangesDrawing": "inference (Live 12 §6.1 Vertical Zoom sentence), not confirmed",
+    "linearScaleAndClamp": "unconfirmed",
+    "trackVolumeDoesNotChangeDrawing": "unconfirmed",
+    "verticalZoom": "stage 4b, not in this round"
+  },
+  "evidence": "tmp/studio-real-loop/c-round-120/{tools,out,shots}; report c-round-120.md"
+}

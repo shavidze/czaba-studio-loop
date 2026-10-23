@@ -192,3 +192,9 @@ B schedules no extraction. Any approved change becomes one separate B task with 
 - **Question:** after round 118, should the two copies (lane, group) be folded into the hook (the mapping, or `previewValue(value, { atStart })`)? Or keep them until a third dB fader arrives?
 - **Acceptance if changed:** TV1–TV11, GV1–GV9, CF11, MG13, fader-click, fader-guards and fader-touch stay green and unchanged, and the m2 mutations (lane TV, group GV4) are still caught.
 - **Non-blocking.**
+
+## Addendum (ad) — B round 121 planning (2026-10-23)
+- **Trigger:** the round-120 code-reviewer Architecture note (`a-round-120.md`, Code review). `buildPeakShape` and `PeakShape` are pure geometry, but they are exported from the component file `ArrangementClip.tsx`. The detail panel and the tests import them from there. Stage 4b (round 121) uses them again, through the new pure `clipWaveformScale` in `waveform-zoom.ts`.
+- **Question:** should `buildPeakShape`/`PeakShape` move to `app/lib/arrangement/peaks.ts` with the same signatures, as a single-owner task? Or should they stay where they are?
+- **Acceptance if moved:** WG1–WG8 and WZ1–WZ9 stay green, with the WG2 sha256 pin `cc617f0c…` unchanged. Lane and detail drawings are byte-identical.
+- **Feature boundary:** T12 V1 closes with round 121, so this checkpoint is now due under the workflow. StudioWorkspace also gains one more view state (`waveformZoom`), the same signal as ARCH-CHECKPOINT-SRW14-PREFS (a). The reviewer's verdict is "keep" (low value). **Non-blocking:** the next planning is the regression round, then ABLETON-EXPERT-REVIEW.

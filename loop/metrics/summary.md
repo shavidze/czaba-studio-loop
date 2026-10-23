@@ -1,13 +1,12 @@
-# Loop metrics (2026-10-23T22:53:17.714Z)
+# Loop metrics (2026-10-23T23:40:23.971Z)
 
-- rounds: 119; cost $3263.86 total, last 10 avg $22.31/round; agent time 179.4 h
-- C: PASS 88, FAIL 27, BLOCKED 4; bugs c/h/m/l 0/3/44/91
+- rounds: 120; cost $3283.32 total, last 10 avg $22.17/round; agent time 180.1 h
+- C: PASS 89, FAIL 27, BLOCKED 4; bugs c/h/m/l 0/3/44/91
 - rounds without a real check: 63, 72; agent errors 25
-- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published, 98:published, 99:published, 100:published, 101:published, 102:published, 103:published, 104:blocked, 105:blocked, 106:published, 107:published, 108:published, 109:published, 110:published, 111:published, 112:published, 113:published, 114:published, 115:published, 116:skipped, 117:published, 118:skipped, 119:published
+- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published, 98:published, 99:published, 100:published, 101:published, 102:published, 103:published, 104:blocked, 105:blocked, 106:published, 107:published, 108:published, 109:published, 110:published, 111:published, 112:published, 113:published, 114:published, 115:published, 116:skipped, 117:published, 118:skipped, 119:published, 120:published
 
 | round | C | bugs c/h/m/l | real | $ | h | err | gate |
 |---|---|---|---|---|---|---|---|
-| 105 | PASS | 0/0/0/1 | yes | 17.21 | 0.67 | 0 | blocked |
 | 106 | PASS | 0/0/0/3 | yes | 27.33 | 0.59 | 0 | published |
 | 107 | PASS | 0/0/1/0 | yes | 26.91 | 0.68 | 0 | published |
 | 108 | PASS | 0/0/0/1 | yes | 29.25 | 0.99 | 0 | published |
@@ -22,3 +21,4 @@
 | 117 | PASS | 0/0/0/0 | yes | 15.02 | 0.53 | 0 | published |
 | 118 | FAIL | 0/0/0/1 | yes | 23.49 | 0.71 | 0 | skipped |
 | 119 | PASS | 0/0/0/0 | yes | 14.31 | 0.46 | 0 | published |
+| 120 | PASS | 0/0/0/0 | yes | 19.46 | 0.69 | 0 | published |

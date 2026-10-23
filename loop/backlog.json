@@ -1,10 +1,10 @@
 {
- "version": 118,
- "updated": "2026-10-23 (B round 119 result / round 120 plan, D-29z85)",
+ "version": 119,
+ "updated": "2026-10-23 (B round 120 result / round 121 plan, D-29z86)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 120: D-29z85 - T12 stage 4a: the waveform drawing shows the clip Clip Gain (display only): buildPeakShape scale parameter applied before the clamp, lane + detail call sites pass clipLinearGain(clip), clip.gainDb in memo deps, data-testid arrangement-clip-waveform; new clip-gain-waveform.test.tsx WG1-WG8 (B-derived Float32 path literals), m1-m4, new doc 102; baseline clean 4090f6e; frozen b-round-119-r120-tree-sha256.txt (930))",
- "advisor_used_by_B": "round 119 result / round 120 plan: advisor available and consulted before writing",
+ "current_task": "current-task.md (round 121: D-29z86 - T12 stage 4b: Waveform Vertical Zoom, view only (T12.18 + Test 7): new waveform-zoom.ts (levels 0.5/1/2/4/8, parse, label, percent, status, clipWaveformScale), optional waveformZoom prop (default 1) on ArrangementLane + ArrangementClipView, one session view state + appearance-none select (last child of arrangement-grid-control, data-waveform-zoom) in StudioWorkspace; audio clips on lanes only (video and detail panel unchanged); not history, not arrangement, not engine/export; new waveform-zoom.test.tsx WZ1-WZ9 (B-derived Float32 literals), m1-m5, new doc 103; baseline clean 0a75ba8; frozen b-round-120-r121-tree-sha256.txt (931); browser baseline b-round-120/probe/baseline-r121.json)",
+ "advisor_used_by_B": "round 120 result / round 121 plan: advisor available and consulted before writing",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -8951,17 +8951,27 @@
    "round": 120,
    "task": "current-task.md",
    "decision": "D-29z85",
-   "status": "dispatched",
+   "status": "c_pass (c-round-120.json: T120-TARGETED 331/331, AN-REVIEW (WG2 pin re-derived by C from HEAD 4090f6e: cc617f0c), SOURCE-SCOPE, WG-SCALE + WG-LIVE at 1440 and 1280, WG-CLAMP-FLOOR, WG-DETAIL, WG-MULTI, WG-MUSTNOT, WG-PLAY (0 createBufferSource), WG-AUDIO (peak/RMS ratio 0.501187), WG-VIDEO disabled state, NB rows, G120-3 (401), PX-NET/REG-HYD; browserVerified=true realVerified=true; inconclusive: WG-VIDEO pre-round drawing baseline; blocked: fake-Bearer 403 backend unavailable in cloud); gate 120 published 0a75ba8",
    "items": [
     "T12-GAIN-VOLUME stage 4a (T12.19)"
    ],
-   "note": "A owns ArrangementClip.tsx (buildPeakShape scale param, call site, memo deps, import, data-testid), ArrangementDetailPanel.tsx (call site + deps + import only), new clip-gain-waveform.test.tsx (WG1-WG8, m1-m4), new doc 102. No existing test granted (B grep: no peak path pins). C: WG-SCALE/WG-LIVE at both viewports, WG-CLAMP-FLOOR, WG-DETAIL, WG-MULTI, WG-MUSTNOT, WG-PLAY, WG-AUDIO (neighbour, 0.501187), WG-VIDEO, T120-TARGETED, AN-REVIEW, SOURCE-SCOPE, G120-3, PX-NET/REG-HYD. Baseline 4090f6e clean; frozen b-round-119-r120-tree-sha256.txt (930). Sequencing: if C passes round 120, round 121 (planning on/after 2026-10-24 UTC) is the REGRESSION round; if C fails it, the bounded fix-up comes first (116->117 / 118->119 pattern) and the regression round runs at the next planning on the published tree."
+   "note": "A owns ArrangementClip.tsx (buildPeakShape scale param, call site, memo deps, import, data-testid), ArrangementDetailPanel.tsx (call site + deps + import only), new clip-gain-waveform.test.tsx (WG1-WG8, m1-m4), new doc 102. No existing test granted (B grep: no peak path pins). C: WG-SCALE/WG-LIVE at both viewports, WG-CLAMP-FLOOR, WG-DETAIL, WG-MULTI, WG-MUSTNOT, WG-PLAY, WG-AUDIO (neighbour, 0.501187), WG-VIDEO, T120-TARGETED, AN-REVIEW, SOURCE-SCOPE, G120-3, PX-NET/REG-HYD. Baseline 4090f6e clean; frozen b-round-119-r120-tree-sha256.txt (930). Sequencing: if C passes round 120, round 121 (planning on/after 2026-10-24 UTC) is the REGRESSION round; if C fails it, the bounded fix-up comes first (116->117 / 118->119 pattern) and the regression round runs at the next planning on the published tree. | B round-121 planning (D-29z86): planning happened at 2026-10-23 23:26:24 UTC (2 days since regression-last), so the regression round was not due; round 121 = stage 4b, round 122 = REGRESSION."
+  },
+  {
+   "round": 121,
+   "task": "current-task.md",
+   "decision": "D-29z86",
+   "status": "dispatched",
+   "items": [
+    "T12-GAIN-VOLUME stage 4b (T12.18 + Test 7)"
+   ],
+   "note": "A owns new waveform-zoom.ts, ArrangementClip.tsx (optional waveformZoom prop default 1 + scale source clipWaveformScale), ArrangementLane.tsx (optional prop pass-through only), StudioWorkspace.tsx (one view state, handler + status, appearance-none select last in arrangement-grid-control, data-waveform-zoom, lane prop), new waveform-zoom.test.tsx (WZ1-WZ9, m1-m5), new doc 103. DetailPanel, Context, model, peaks, graph, schedule, export and every existing test frozen. C: WZ-PRESENT + WZ-T7 at both viewports, WZ-LEVELS, WZ-GAIN, WZ-HISTORY, WZ-AUDIO (1 LSB, ratio 1.0000), WZ-METER (paired per-iteration tap peaks), WZ-NEWCLIP, WZ-KEYS, WZ-RELOAD, T121-TARGETED, AN-REVIEW, SOURCE-SCOPE, G121-3, PX-NET/REG-HYD, NB rows; against B browser baseline b-round-120/probe/baseline-r121.json. Baseline 0a75ba8 clean; frozen b-round-120-r121-tree-sha256.txt (931). Round 122 planning (on/after 2026-10-24 UTC) is the REGRESSION round; after a C FAIL the bounded fix-up comes first."
   }
  ],
  "post_current_stage_queue": [
   {
    "id": "T12-GAIN-VOLUME",
-   "status": "in_progress (stages 1, 2, 3a, 3b c_pass_published: 38c0e21, d5de68f, 9cb820b, 4090f6e; stage 4a dispatched round 120 (D-29z85); stage 4b after the regression round; V1 complete only after 4b C PASS)",
+   "status": "in_progress (stages 1, 2, 3a, 3b, 4a c_pass_published: 38c0e21, d5de68f, 9cb820b, 4090f6e, 0a75ba8; stage 4b dispatched round 121 (D-29z86); V1 complete only after 4b C PASS; REGRESSION round at round 122 planning)",
    "requested": "2026-10-07",
    "instruction": "User explicitly asks: finish ALL current work first, THEN start these attached Gain/Volume requirements. Do not start T12 implementation or extend current tasks with it early.",
    "prerequisites": [
@@ -9067,14 +9077,18 @@
      "stage": "4a",
      "round": 120,
      "decision": "D-29z85",
-     "status": "dispatched",
+     "status": "c_pass_published",
      "scope": "T12.19: the lane and detail waveform drawings scale by the clip linear Clip Gain (10^(dB/20)) applied before the clamp (0.02 floor and 1.0 clamp kept); live during single and multi Clip Gain drags; Undo restores the exact drawing; must-not: track/group Volume, Master, Pan, mute/solo, fades, envelope do not change the drawing; audio path untouched",
-     "rulings": "one scale parameter in buildPeakShape (4b multiplies the zoom into the same factor, spec formula source x clipGainDisplayScale x waveformZoomScale); clipLinearGain reused, model.ts not edited; detail panel agrees with the lane (one clip, one picture; B choice); raw peaks, no normalization; Ableton: waveform reflects clip gain is an inference from Live 12 section 6.1, scale/clamp unconfirmed"
+     "rulings": "one scale parameter in buildPeakShape (4b multiplies the zoom into the same factor, spec formula source x clipGainDisplayScale x waveformZoomScale); clipLinearGain reused, model.ts not edited; detail panel agrees with the lane (one clip, one picture; B choice); raw peaks, no normalization; Ableton: waveform reflects clip gain is an inference from Live 12 section 6.1, scale/clamp unconfirmed",
+     "evidence": "c-round-120.json PASS browserVerified=true realVerified=true, 0 bugs: WG-SCALE 1440/1280 (-6: 224 judged 0 violations; +3: 288 judged 0 violations), WG-CLAMP-FLOOR (+12 32 clamped, -60 all floor), WG-LIVE both viewports (mid-drag ratio, one entry, exact Undo), WG-DETAIL (480 columns), WG-MULTI, WG-MUSTNOT, WG-PLAY (0 createBufferSource), WG-AUDIO peak/RMS ratio 0.501187; gate 120 published 0a75ba8"
     },
     {
      "stage": "4b",
-     "status": "not_started (after the REGRESSION round)",
-     "scope": "T12.18 Waveform Vertical Zoom: a view-only control (Live 12 section 6.1: a slider applied to all audio tracks), never in history, never in the engine or export; drawing = peak x clipGain x zoom; T12.26 Test 7 (100% -> 200%: drawing larger, audio samples and meter output unchanged). Required half of T12.27 item 8"
+     "status": "dispatched (round 121, D-29z86)",
+     "scope": "T12.18 Waveform Vertical Zoom: a view-only control (Live 12 section 6.1: a slider applied to all audio tracks), never in history, never in the engine or export; drawing = peak x clipGain x zoom; T12.26 Test 7 (100% -> 200%: drawing larger, audio samples and meter output unchanged). Required half of T12.27 item 8",
+     "round": 121,
+     "decision": "D-29z86",
+     "rulings": "stepped select 0.5/1/2/4/8 (appearance-none, last in the 224 px grid row; B measured 28 px ending at 210 <= 216; transport/tempo/marker/loop rows have no room without changing heights) = deliberate CZABA difference from the Live slider; 1/2x exists because T12.18 says increase or decrease (Live text: enlarge only); audio clips on lanes only (Live 12 6.1: audio clips, all audio tracks in the Arrangement, new clips too); video drawing and detail panel unchanged; session-only view state (not history, not arrangement, not localStorage) so it can never reach scheduleKey/graph/meters/export; scale = clipLinearGain x zoom through the existing pre-clamp buildPeakShape parameter (byte-identical at 1x); optional props default 1 so no existing test is granted"
     },
     {
      "stage": "5+",
@@ -9087,7 +9101,8 @@
    "t12_rulings_round117_planning": "D-29z82: OBS-1 lane '+0.0' at 0 dB kept (R7 named formatMasterGainDb and '+0.0' examples together: B spec defect, A deviation 1 accepted); Master '0.0 dB' mismatch -> deferred Low LANE-MASTER-ZERO-SIGN; stage 3b group fader must use formatTrackVolumeDb so lane and group agree. OBS-2 -> deferred Low LANE-READOUT-DOUBLE-READ. OBS-3 'as const' accepted (const assertion, existing repo pattern; the no-type-assertion rule targets 'as T' casts). C-R116-01 root cause: B round-115 planning enumerated the grant from a narrower grep and missed track-group-mix-ui (lane-driven lines next to group lines).",
    "t12_rulings_round118_planning": "D-29z83: regression round not due (2 days at 2026-10-23 21:05 UTC); round 119 planning (on/after 2026-10-24) is the REGRESSION round; stage 4 after it. Stage 3b kept in one round because the inverted pins are enumerable (B grep). R2 no visible group readout (rationale in current-task.md section 3.1 R2).",
    "t12_rulings_round119_planning": "D-29z84: C-R118-01 is a B spec defect (round-118 section 2.1 formula omitted MASTER_GAIN_STEP_DB 0.5; relativeFaderValue rounds -1.2 to -1); ruling CF11 l.501 toBe(-1); A's m5 (-12 without fineDivisor) and C SH-MASTER (-2.5 vs -27.5) prove the fine path. Regression round not due (2026-10-23 22:12 UTC, 2 days); first planning on/after 2026-10-24 UTC is the REGRESSION round, then stage 4. A TV11 pre-check outcome (a): no A-R118-TV11-ANCHOR finding (C TV-ANCHOR PASS confirms).",
-   "t12_rulings_round120_planning": "D-29z85: round 119 C PASS + gate 119 published 4090f6e -> stage 3b c_pass_published, C-R118-01 and A-R118-REVIEW-DOC100-L69 closed. Regression round not due (date -u 2026-10-23 22:38:46, 2 days since 2026-10-21); if C passes round 120, round 121 (planning on/after 2026-10-24 UTC) is the REGRESSION round; if C fails it, the bounded fix-up comes first (116->117 / 118->119 pattern) and the regression round runs at the next planning on the published tree. Stage 4 split into 4a (T12.19, round 120) and 4b (T12.18 vertical zoom + Test 7, after the regression round); scope unchanged, nothing deferred; 4b is the half T12.27 item 8 requires. B derived the WG1 path literals in node with Float32Array input (C-R118-01 lesson)."
+   "t12_rulings_round120_planning": "D-29z85: round 119 C PASS + gate 119 published 4090f6e -> stage 3b c_pass_published, C-R118-01 and A-R118-REVIEW-DOC100-L69 closed. Regression round not due (date -u 2026-10-23 22:38:46, 2 days since 2026-10-21); if C passes round 120, round 121 (planning on/after 2026-10-24 UTC) is the REGRESSION round; if C fails it, the bounded fix-up comes first (116->117 / 118->119 pattern) and the regression round runs at the next planning on the published tree. Stage 4 split into 4a (T12.19, round 120) and 4b (T12.18 vertical zoom + Test 7, after the regression round); scope unchanged, nothing deferred; 4b is the half T12.27 item 8 requires. B derived the WG1 path literals in node with Float32Array input (C-R118-01 lesson).",
+   "t12_rulings_round121_planning": "D-29z86: round 120 C PASS (browserVerified, 0 bugs) + gate 120 published 0a75ba8 -> stage 4a c_pass_published. date -u 2026-10-23 23:26:24 = 2 days since regression-last 2026-10-21, so the regression round is not due by the rule; the round-120 forecast (regression at round 121) assumed planning on/after 2026-10-24 and is superseded. Round 121 = stage 4b (closes V1); round 122 planning (>= 3 days) = REGRESSION round covering V1; after a C FAIL the bounded fix-up comes first. B captured a browser baseline on the clean published tree (b-round-120/probe/baseline-r121.json) so C has exact 1x drawing hashes (closes the round-120 WG-VIDEO inconclusive gap for this round) and a layout must-not."
   },
   {
    "id": "ABLETON-EXPERT-REVIEW",
@@ -14461,7 +14476,7 @@
   {
    "id": "ARCH-CHECKPOINT-PHASE1-BOUNDARY",
    "severity": "info",
-   "status": "requested_from_root (B round 113 planning, 2026-10-23; non-blocking) - addenda (x), (y), (z); focused request (aa) sent with the round 116 plan (stage 2 closed, before stage 3 touches the Volume machine; round 116 is UI-only and does not touch it) | addendum (ac) appended with the round 118 plan: gate-117 reviewer Architecture note (hook stored <-> slider mapping) + the group start capture is the second copy; still unanswered; non-blocking | round 119 planning: A round-118 reviewer Architecture note repeats addendum (ac) (start capture + stored<->slider mapping copied in ArrangementLane.tsx and ArrangementGroupHeader.tsx; keep; one bounded hook task later); no new addendum; still unanswered",
+   "status": "requested_from_root (B round 113 planning, 2026-10-23; non-blocking) - addenda (x), (y), (z); focused request (aa) sent with the round 116 plan (stage 2 closed, before stage 3 touches the Volume machine; round 116 is UI-only and does not touch it) | addendum (ac) appended with the round 118 plan: gate-117 reviewer Architecture note (hook stored <-> slider mapping) + the group start capture is the second copy; still unanswered; non-blocking | round 119 planning: A round-118 reviewer Architecture note repeats addendum (ac) (start capture + stored<->slider mapping copied in ArrangementLane.tsx and ArrangementGroupHeader.tsx; keep; one bounded hook task later); no new addendum; still unanswered | round 121 planning: addendum (ad) appended (round-120 reviewer: move buildPeakShape/PeakShape to peaks.ts; keep); T12 V1 closes with round 121 (feature boundary) - the request stays pending and non-blocking, not re-sent",
    "title": "phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b-round-83 / b-round-91 requests, addenda up to (w)) is re-requested once, with (x) useTrackPanFader and (y) the third MixVolumeTarget kind that T12 stage 1 may add",
    "evidence": "b-round-113.md section 7"
   },
@@ -14723,7 +14738,7 @@
   {
    "id": "ENV-FIRST-LOAD-GRID-NULL",
    "severity": "info",
-   "status": "watch (third occurrence in round 119; harness rule: discard a crashed first setup run and replace it once)",
+   "status": "watch (fourth occurrence in C round 120 wg-1440-1; harness rule: discard a crashed first setup run and replace it once)",
    "title": "first /studio-lab load of a job crashes the C setup (grid control null); run 2 valid",
    "evidence": "c-round-118/out/ui-1440-1-envfail.log"
   },
@@ -14741,6 +14756,42 @@
    "status": "merged into ENV-FIRST-LOAD-GRID-NULL (third occurrence: C round 119 ui-1440-1 crashed in setup on the first load; replaced within budget); harness rule repeated in round 120 section 5",
    "title": "first /studio-lab load of the job crashed the C setup again (grid control null)",
    "evidence": "c-round-119.json notes_valid_runs"
+  },
+  {
+   "id": "C-R120-01",
+   "severity": "info",
+   "status": "applied as a process rule from round 121 (current-task.md section 2: every lasting edit via Edit/Write incl. formatting of new files; shell replaces only for temporary mutations, restored and sha-verified; A lists every shell write); not an app defect; not deferred_low_polish",
+   "to": "B",
+   "title": "A made one lasting formatting edit to its new test file with a Python replace, bypassing the Edit-tool primitives hook",
+   "evidence": "c-round-120.json observations C-R120-01; a-round-120.md deviation 2"
+  },
+  {
+   "id": "C-R120-WGVIDEO-NO-BASELINE",
+   "severity": "info",
+   "status": "acknowledged; B captured a pre-round browser baseline for round 121 (b-round-120/probe/baseline-r121.json: video waveform d sha be86af38 at 1x on 0a75ba8); the round-120 equivalence rests on code + WG2 (scale 1 byte-identical)",
+   "title": "WG-VIDEO unchanged-vs-pre-round had no browser byte baseline (inconclusive row in C round 120)",
+   "evidence": "c-round-120.json inconclusive"
+  },
+  {
+   "id": "ARCH-R120-PEAKSHAPE-TO-PEAKS",
+   "severity": "info",
+   "status": "signal - addendum (ad) to the pending checkpoint request b-round-91-checkpoint-request.md (ARCH-CHECKPOINT-PHASE1-BOUNDARY); reviewer verdict keep; round 121 does not move it; not scheduled",
+   "title": "buildPeakShape/PeakShape are pure geometry exported from the ArrangementClip component file; the detail panel and tests import them from there; proposal: move to app/lib/arrangement/peaks.ts with the same signatures as a single-owner task covered by WG1/WG2",
+   "evidence": "a-round-120.md Code review Architecture note"
+  },
+  {
+   "id": "WAVEFORM-ZOOM-DISCOVERABILITY",
+   "severity": "info",
+   "status": "signal for DESIGN-UX-REVIEW (round 121 ruling: appearance-none select without a dropdown arrow to fit the 224 px grid row; title + aria-label carry the meaning); not scheduled",
+   "title": "the Waveform Zoom select has no visible dropdown affordance",
+   "evidence": "b-round-120/probe/baseline-r121.json probe widths (native 48 px overflows, appearance-none 28 px fits)"
+  },
+  {
+   "id": "WAVEFORM-ZOOM-LIVE-PARITY",
+   "severity": "info",
+   "status": "signal for ABLETON-EXPERT-REVIEW (not scheduled): Live 12 6.1 confirms a slider for all audio tracks incl. new clips; range, location, undo behaviour and Clip View behaviour unconfirmed; CZABA uses a stepped select 0.5x-8x, lanes only, not in history",
+   "title": "Waveform Vertical Zoom: stepped select vs Live continuous slider; detail panel not zoomed",
+   "evidence": "b-round-71/ableton-arrangement-view-20261021.txt section 6.1; current-task.md round 121 section 6"
   }
  ],
  "tech_lead_notes": [
@@ -18087,6 +18138,29 @@
    "app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx",
    "docs/implementation/2026/quarter-IV/102-studio-waveform-clip-gain.md"
   ],
+  "protected": {
+   "app/routes/studio.$productId.tsx": "fa2cf0bc",
+   "app/routes/api.studio-token.ts": "13914809",
+   "app/lib/auth.ts": "56f5b76f",
+   "app/contexts/AuthContext.tsx": "bf9ee257"
+  }
+ },
+ "baseline_tree_at_round121": {
+  "head": "0a75ba8757617695d19e0b2a4aaad713bc30c01c",
+  "working_tree": "clean (git status --porcelain empty); gate 120 published 0a75ba8 (both remotes)",
+  "frozen_list": "tmp/studio-real-loop/b-round-120-r121-tree-sha256.txt",
+  "entries": 931,
+  "excluded": [
+   "app/components/arrangement/StudioWorkspace.tsx (pre 1463926afc8b...)",
+   "app/components/arrangement/ArrangementLane.tsx (pre 5d823cd41c38...)",
+   "app/components/arrangement/ArrangementClip.tsx (pre a5c0b7bef568...)"
+  ],
+  "new_files_granted": [
+   "app/lib/arrangement/waveform-zoom.ts",
+   "app/lib/arrangement/__tests__/waveform-zoom.test.tsx",
+   "docs/implementation/2026/quarter-IV/103-studio-waveform-vertical-zoom.md"
+  ],
+  "browser_baseline": "tmp/studio-real-loop/b-round-120/probe/baseline-r121.json (1440 + 1280: chrome rows 28/20/20/16, lane y, waveform d sha256 video be86af38 / music 43e96d8a / stems 9fa65c46 / sfx e1890358 at 1x, 40 px/s; C setup + beeps-6s-vp9-opus.webm)",
   "protected": {
    "app/routes/studio.$productId.tsx": "fa2cf0bc",
    "app/routes/api.studio-token.ts": "13914809",

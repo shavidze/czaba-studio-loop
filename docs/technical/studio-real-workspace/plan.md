@@ -1217,6 +1217,19 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z86 — Round 120-ის შედეგი; Round 121: T12 ეტაპი 4b — Waveform Vertical Zoom (მხოლოდ ხედი; T12.18 + Test 7).**
+
+C round 120 (`tmp/studio-real-loop/c-round-120.md`, `c-round-120.json`) — **PASS**, `browserVerified: true`, `realVerified: true`, 0 ბაგი: T120-TARGETED 331/331, WG-SCALE და WG-LIVE ორივე viewport-ზე, WG-CLAMP-FLOOR, WG-DETAIL, WG-MULTI, WG-MUSTNOT, WG-PLAY (0 `createBufferSource`), WG-AUDIO (peak/RMS 0.501187), G120-3 (401). Gate 120 გამოქვეყნდა `0a75ba8` (ორივე remote). T12 ეტაპი 4a → `c_pass_published`.
+- **R1 — რეგრესიის რაუნდი ჯერ არ დამდგარა:** `date -u` 2026-10-23 23:26:24, `regression-last.json` 2026-10-21 (2 დღე). D-29z85-ის პროგნოზი (round 121 = რეგრესია) 2026-10-24-ზე ან შემდეგ დაგეგმვას გულისხმობდა და ჩანაცვლდა. Round 121 = ეტაპი 4b (V1-ს ხურავს); round 122-ის დაგეგმვა (≥ 3 დღე) რეგრესიის რაუნდია და V1-საც მოიცავს. C FAIL-ისას ჯერ შეზღუდული გასწორებაა.
+- **R2 — კონტროლი:** `<select data-testid="arrangement-waveform-zoom">`, საფეხურები `½× 1× 2× 4× 8×`, ნაგულისხმევი `1×`, `appearance-none`, 224 px-იანი grid row-ის ბოლო ელემენტი (B-მ გაზომა: 28 px, მთავრდება x = 210 ≤ 216). Transport/tempo/marker/loop row-ებში ადგილი სიმაღლის შეცვლის გარეშე არ არის. Live-ის უწყვეტი slider-ისგან შეგნებული განსხვავებაა; `½×` T12.18-ის „ზრდის ან ამცირებს“-ის გამოა (Live-ის ტექსტი მხოლოდ „enlarge“-ს ამბობს).
+- **R3 — ფარგლები:** მხოლოდ ხაზებზე მდებარე აუდიო კლიპები, მათ შორის მოგვიანებით დამატებულიც (Live 12 §6.1: „audio clips“, „all audio tracks in the Arrangement, as well as new clips“). ვიდეოს ნახატი და detail panel უცვლელია (panel კლიპის რეალურ დონეს აჩვენებს).
+- **R4 — მხოლოდ ხედი:** სესიის view state `StudioWorkspace`-ში; არც history, არც arrangement, არც `localStorage` — ამიტომ `scheduleKey`-ში, graph-ში, meter-ებსა და export-ში ვერ მოხვდება. Status: `Waveform Zoom 200% — მხოლოდ ხედი, ხმა არ იცვლება.`
+- **R5 — ერთი ფაქტორი:** `clipWaveformScale(clip, isVideo, zoom)` = `clipLinearGain(clip) × zoom` (ვიდეოზე zoom არა) არსებულ clamp-მდე `scale` პარამეტრში; `1×`-ზე ნახატი round 120-ის ბაიტობრივად იდენტურია. ახალი prop-ები არჩევითია (ნაგულისხმევი 1), ამიტომ არსებული ტესტი grant-ს არ საჭიროებს.
+- **R6 — B-ის literal-ები და baseline:** WZ1-ის path-ები node-ში `Float32Array`-ით (`b-round-120/literals.txt`); ბრაუზერის baseline გამოქვეყნებულ სუფთა tree-ზე (`b-round-120/probe/baseline-r121.json`: chrome row-ები, ხაზების y, ოთხივე ნახატის sha256 `1×`-ზე).
+- **R7 — Test 7:** C — WZ-AUDIO (WAV `1×` vs `2×`: ≤ 1 LSB, ratio 1.0000) და WZ-METER (წყვილური per-iteration output peak ±0.1 dB, loop-ზე).
+- **R8 — Ableton:** §6.1 — ცალკე slider, ყველა აუდიო ტრეკზე და ახალ კლიპებზე (დადასტურებული); დიაპაზონი, ადგილი, Undo და Clip View — დაუდასტურებელი (ABLETON-EXPERT-REVIEW). სიგნალები: WAVEFORM-ZOOM-DISCOVERABILITY (DESIGN-UX-REVIEW), WAVEFORM-ZOOM-LIVE-PARITY.
+- **R9 — პროცესი (C-R120-01):** ყველა მუდმივი ცვლილება Edit/Write-ით; shell replace — მხოლოდ დროებითი მუტაციისთვის, sha256-ით აღდგენილი; A ყველა shell write-ს ჩამოთვლის. Architecture: addendum (ad) `b-round-91-checkpoint-request.md`-ში (`buildPeakShape` → `peaks.ts`, keep).
+
 **D-29z85 — Round 119-ის შედეგი; Round 120: T12 ეტაპი 4a — waveform-ის ნახატი Clip Gain-ს აჩვენებს (მხოლოდ ჩვენება).**
 
 C round 119 (`tmp/studio-real-loop/c-round-119.md`, `c-round-119.json`) — **PASS**, `browserVerified: true`, `realVerified: true`: T119-TARGETED 452/452, SH-MASTER (Shift −2.5 vs plain −27.5) და GV-DRAG (−25.0 dB) ორივე viewport-ზე, SOURCE-SCOPE (app round 118-ის შემოწმებულის იდენტურია), G119-3. Gate 119 გამოქვეყნდა `4090f6e` (rounds 118 + 119, ორივე remote). T12 ეტაპი 3b → `c_pass_published`; C-R118-01 და A-R118-REVIEW-DOC100-L69 დაიხურა.
@@ -2108,6 +2121,8 @@ flowchart TD
 | 119 | C-R118-01 | CF11 l.501 → `toBe(-1)`; doc 101/100-ის სტატუსის ხაზები; 118+119 ერთად ქვეყნდება (D-29z84) |
 | 119 → | (შედეგი) | **C PASS** (`browserVerified`), gate 119 გამოქვეყნდა `4090f6e`: T12 ეტაპი 3b მზადაა |
 | 120 | T12 ეტაპი 4a | waveform-ის ნახატი Clip Gain-ს აჩვენებს (ხაზი + detail panel, ცოცხლად, აუდიო უცვლელი); შემდეგ რეგრესიის რაუნდი, მერე 4b (D-29z85) |
+| 120 → | (შედეგი) | **C PASS** (`browserVerified`), gate 120 გამოქვეყნდა `0a75ba8`: T12 ეტაპი 4a მზადაა; რეგრესია ჯერ არ დამდგარა (2 დღე) |
+| 121 | T12 ეტაპი 4b | Waveform Vertical Zoom (`½×–8×`, მხოლოდ ხედი, აუდიო კლიპები ხაზებზე); V1-ს ხურავს; შემდეგ რეგრესიის რაუნდი, მერე ABLETON-EXPERT-REVIEW (D-29z86) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2148,6 +2163,7 @@ flowchart TD
 **D-29z83:** round 118-ში A-ს ეკუთვნის `ArrangementGroupHeader.tsx`, `ArrangementLane.tsx` და `ArrangementMaster.tsx` (მხოლოდ fine option), `fader.ts` (კონსტანტა), `track-group-mix-ui.test.tsx` / `track-volume-db.test.tsx` (TV11) / `clip-gain-fader.test.tsx` (CF11) — მხოლოდ §2.1-ის ხაზები, ახალი `group-volume-db.test.tsx`, doc 100 (l.4/56/70) და ახალი doc 101. დანარჩენი გაყინულია (`b-round-117-r118-tree-sha256.txt`, 922).
 **D-29z84:** round 119-ში A-ს ეკუთვნის მხოლოდ `app/lib/arrangement/__tests__/clip-gain-fader.test.tsx` (l.501), `docs/implementation/2026/quarter-IV/101-studio-group-volume-db-shift-fine.md` (l.4/50/66/70) და `docs/implementation/2026/quarter-IV/100-studio-track-volume-db.md` (l.69). დანარჩენი, round 118-ის ცვლილებების ჩათვლით, გაყინულია (`b-round-118-r119-tree-sha256.txt`, 929).
 **D-29z85:** round 120-ში A-ს ეკუთვნის `app/components/arrangement/ArrangementClip.tsx` (`buildPeakShape`-ის `scale`, call site, memo deps, import, `data-testid`), `ArrangementDetailPanel.tsx` (მხოლოდ call site + deps + import), ახალი `clip-gain-waveform.test.tsx` და ახალი doc 102. დანარჩენი გაყინულია (`b-round-119-r120-tree-sha256.txt`, 930).
+**D-29z86:** round 121-ში A-ს ეკუთვნის ახალი `app/lib/arrangement/waveform-zoom.ts`, `ArrangementClip.tsx` (არჩევითი `waveformZoom` prop + scale-ის წყარო), `ArrangementLane.tsx` (მხოლოდ prop-ის გადაცემა), `StudioWorkspace.tsx` (view state, handler, select, `data-waveform-zoom`, lane prop), ახალი `waveform-zoom.test.tsx` და ახალი doc 103. დანარჩენი გაყინულია (`b-round-120-r121-tree-sha256.txt`, 931).
 
 ## 7. Done Policy
 

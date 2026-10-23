@@ -1,0 +1,460 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1947[2mms[22m[39m
+     [33m[2m✓[22m[39m WG3: a −6 dB clip draws the −6 dB shape (not the scale-1 one); a clip without gainDb draws scale 1 [33m 416[2mms[22m[39m
+     [33m[2m✓[22m[39m WG4: during a single Clip Gain drag the lane follows before release; one entry; Undo restores the exact drawing [33m 545[2mms[22m[39m
+     [33m[2m✓[22m[39m WG7 must-not: track Volume, group Volume, Master, Pan, Mute/Solo, a fade-in and an envelope point leave the lane byte-identical [33m 364[2mms[22m[39m
+[90mstderr[2m | app/lib/arrangement/__tests__/track-layout.test.tsx[2m > [22m[2mtrack fold, height and lane auto-fit (SRW-11B stage 2, D-29, R11-U)[2m > [22m[2mignores a height-handle pointerdown while another gesture is active
+[22m[39mWarning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+
+[90mstderr[2m | app/lib/arrangement/__tests__/track-layout.test.tsx[2m > [22m[2mtrack fold, height and lane auto-fit (SRW-11B stage 2, D-29, R11-U)[2m > [22m[2mignores a fold click while another pointer gesture is active
+[22m[39mWarning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+
+ [32m✓[39m app/lib/arrangement/__tests__/render-budget.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 6667[2mms[22m[39m
+     [33m[2m✓[22m[39m does not re-render clips, overview bars, library rows or ruler ticks over Play → Pause → Play [33m 2493[2mms[22m[39m
+     [33m[2m✓[22m[39m moves the playhead, ruler handle and transport time on playback frames without React renders [33m 990[2mms[22m[39m
+     [33m[2m✓[22m[39m does not re-render the detail panel content over 60 position frames or Play → Pause → Play (R11-P1e) [33m 1603[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02) [33m 1059[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx [2m([22m[2m44 tests[22m[2m)[22m[33m 8016[2mms[22m[39m
+     [33m[2m✓[22m[39m CM1 the moved end touches the next clip start on the same lane [33m 638[2mms[22m[39m
+     [33m[2m✓[22m[39m CM2 the moved start touches the start of a clip on another lane [33m 356[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-layout.test.tsx [2m([22m[2m36 tests[22m[2m)[22m[33m 9697[2mms[22m[39m
+     [33m[2m✓[22m[39m folds a lane to a 36 px row with compact M/S that keep their aria-pressed and click behaviour [33m 1522[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the video lane picker reachable as a compact ＋ when folded and hides the original-sound line [33m 681[2mms[22m[39m
+     [33m[2m✓[22m[39m writes no history for fold, height or auto-fit, and Undo leaves every height alone [33m 340[2mms[22m[39m
+     [33m[2m✓[22m[39m claims the gesture registry while dragging a height handle and restores the start height on pointercancel [33m 515[2mms[22m[39m
+     [33m[2m✓[22m[39m steps ↓ +8 / ↑ −8 on the focused handle, clamps per kind and never nudges the selected clip [33m 519[2mms[22m[39m
+     [33m[2m✓[22m[39m auto-fit shrinks the lanes, gives a folded lane’s height back, and the first manual change turns it off [33m 314[2mms[22m[39m
+     [33m[2m✓[22m[39m restores the start height and auto-fit when the registry aborts a height drag (window blur) [33m 317[2mms[22m[39m
+     [33m[2m✓[22m[39m lands cross-lane header drags by real row rectangles on mixed heights (music folded, SFX 140) [33m 308[2mms[22m[39m
+     [33m[2m✓[22m[39m points every fold button’s aria-controls at its own lane body, outside the header, through fold and unfold (R23-F1) [33m 311[2mms[22m[39m
+     [33m[2m✓[22m[39m draws the track-name button’s focus ring inset on folded and unfolded lanes (R23-N) [33m 764[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx [2m([22m[2m25 tests[22m[2m)[22m[33m 5640[2mms[22m[39m
+     [33m[2m✓[22m[39m EU1 the Env button and the A key toggle the mode and write the status [33m 493[2mms[22m[39m
+     [33m[2m✓[22m[39m EU1 a video clip, a narrow clip and a folded lane never render an editor [33m 423[2mms[22m[39m
+     [33m[2m✓[22m[39m EU5 in mode an editor press selects without seeking or a range; header move and trim still work [33m 303[2mms[22m[39m
+[90mstderr[2m | app/lib/arrangement/__tests__/detail-panel.test.tsx[2m > [22m[2mClip Detail panel (SRW-11B stage 1, D-29, D-29a, R11-U1)[2m > [22m[2mignores a separator pointerdown while another gesture is active
+[22m[39mWarning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+
+ [32m✓[39m app/lib/arrangement/__tests__/clip-fades-ui.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 4366[2mms[22m[39m
+     [33m[2m✓[22m[39m FU1 an audio clip renders both handles; a video, a narrow and a folded-lane clip none [33m 695[2mms[22m[39m
+     [33m[2m✓[22m[39m FU2 dragging the fade-in handle +40 px writes one Fade In entry, undo and redo restore it [33m 508[2mms[22m[39m
+     [33m[2m✓[22m[39m FU5 a refused lane release keeps the last free place and says where the clip stayed [33m 311[2mms[22m[39m
+[90mstderr[2m | app/lib/arrangement/__tests__/detail-panel.test.tsx[2m > [22m[2mClip Detail panel (SRW-11B stage 1, D-29, D-29a, R11-U1)[2m > [22m[2mrefuses a range during an active pointer gesture
+[22m[39mWarning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+
+[90mstderr[2m | app/lib/arrangement/__tests__/detail-panel.test.tsx[2m > [22m[2mC-R11-03 cap release keeps the rendered height only when lane auto-fit turns off (D-29c 3)[2m > [22m[2mstores the capped height when auto-fit turns off and keeps it afterwards
+[22m[39mWarning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+
+[90mstderr[2m | app/lib/arrangement/__tests__/detail-panel.test.tsx[2m > [22m[2mC-R11-03 cap release keeps the rendered height only when lane auto-fit turns off (D-29c 3)[2m > [22m[2mrestores the stored height when the cap is released with auto-fit still on
+[22m[39mWarning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+
+[90mstderr[2m | app/lib/arrangement/__tests__/detail-panel.test.tsx[2m > [22m[2mC-R11-03 cap release keeps the rendered height only when lane auto-fit turns off (D-29c 3)[2m > [22m[2mgives the pre-clamp height back when auto-fit returns with the cap (cancelled lane drag)
+[22m[39mWarning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+
+[90mstderr[2m | app/lib/arrangement/__tests__/detail-panel.test.tsx[2m > [22m[2mC-R11-03 cap release keeps the rendered height only when lane auto-fit turns off (D-29c 3)[2m > [22m[2mstores the capped open height also while collapsed, so it reopens at the height its separator announced
+[22m[39mWarning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+
+[90mstderr[2m | app/lib/arrangement/__tests__/detail-panel.test.tsx[2m > [22m[2mC-R11-03 cap release keeps the rendered height only when lane auto-fit turns off (D-29c 3)[2m > [22m[2mkeeps the stored height when auto-fit turns off with a cap that was not limiting it
+[22m[39mWarning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+Warning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:201:3)
+    at CapHarness (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/detail-panel.test.tsx:575:25)
+
+ [32m✓[39m app/lib/arrangement/__tests__/detail-panel.test.tsx [2m([22m[2m24 tests[22m[2m)[22m[33m 4038[2mms[22m[39m
+     [33m[2m✓[22m[39m collapses and expands to the previous height without a history entry [33m 456[2mms[22m[39m
+     [33m[2m✓[22m[39m steps the separator ±16 px, clamps at 120 and 280, opens first when collapsed and never nudges the clip [33m 314[2mms[22m[39m
+     [33m[2m✓[22m[39m claims the gesture registry while dragging the separator: a second pointer on a clip and Mute are refused [33m 839[2mms[22m[39m
+     [33m[2m✓[22m[39m applies a range inside the clip with the button and with Enter, without a history entry [33m 307[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses out-of-clip values, end ≤ start and empty input with the exact status [33m 320[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/group-volume-db.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 7527[2mms[22m[39m
+     [33m[2m✓[22m[39m GV1: the group fader uses the lane dB range and texts; the row text stays the name only [33m 1503[2mms[22m[39m
+     [33m[2m✓[22m[39m GV2: a −25 px drag stores F(−15) exactly with one entry; Undo clears, Redo restores [33m 946[2mms[22m[39m
+     [33m[2m✓[22m[39m GV3: a drag past the left end stores exactly 0, shows −∞ dB and silences only the members [33m 665[2mms[22m[39m
+     [33m[2m✓[22m[39m GV4: a press without a move, or a move back to the start, keeps a context-set 0.72 and writes no entry [33m 704[2mms[22m[39m
+     [33m[2m✓[22m[39m GV5: a keyboard change plus key-up writes F(dB) with one entry; a double-click resets with one entry [33m 771[2mms[22m[39m
+     [33m[2m✓[22m[39m GV6: Shift makes the group fader ten times finer and a mid-drag Shift press re-anchors without a jump [33m 903[2mms[22m[39m
+     [33m[2m✓[22m[39m GV7: Shift −20 px on the video lane Volume gives F(−1.2) from 0 dB [33m 723[2mms[22m[39m
+     [33m[2m✓[22m[39m GV8: a group drag during playback starts no new source and the live gains follow the stored mix [33m 593[2mms[22m[39m
+     [33m[2m✓[22m[39m GV9 must-not: Pan ignores Shift, while Clip Gain keeps its ten times finer drag [33m 716[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain-multi.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 3936[2mms[22m[39m
+     [33m[2m✓[22m[39m MG3: mixed members show an empty field, the range text, the max anchor and a linked description; equal members show the value [33m 807[2mms[22m[39m
+     [33m[2m✓[22m[39m MG4: a +25 px drag over 100 px shifts both by +21.0 with one entry; Undo and Redo move both; two moves are not cumulative [33m 417[2mms[22m[39m
+     [33m[2m✓[22m[39m MG7: each keyboard step moves every member by 0.1 with one entry per press [33m 310[2mms[22m[39m
+     [33m[2m✓[22m[39m MG8: a double-click and the 0 dB button reset every member with one entry and none at 0.0 [33m 345[2mms[22m[39m
+     [33m[2m✓[22m[39m MG11: the clip ids captured at the press stay the target when the selection changes mid-drag (group→group proves the capture; the remounting cases guard the outcome) [33m 518[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain-fader.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 3937[2mms[22m[39m
+     [33m[2m✓[22m[39m CF1: the fader has range −60…+24, step 0.1, the clip value, its label and a dB value text [33m 634[2mms[22m[39m
+     [33m[2m✓[22m[39m CF2: a +25 px drag over 100 px gives +21.0 dB with one Clip Gain entry; the field follows; Undo restores [33m 369[2mms[22m[39m
+     [33m[2m✓[22m[39m CF11: Shift makes music Volume and Master ten times finer [33m 395[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/detail-panel-polish.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 2981[2mms[22m[39m
+       [33m[2m✓[22m[39m keeps typed start text when a range on another lane appears and when it is cleared [33m 569[2mms[22m[39m
+       [33m[2m✓[22m[39m keeps typed start text when the same range is set again as a new object [33m 342[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/track-volume-db.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 3402[2mms[22m[39m
+       [33m[2m✓[22m[39m TV3: the lane slider, aria-valuetext and readout show dB for 0.6, 1 and 0; the video lane uses the same mapping [33m 468[2mms[22m[39m
+       [33m[2m✓[22m[39m TV4: a −25 px drag from 0.6 stores trackVolumeFromDb(−19.4) with one entry; Undo/Redo are exact; no-move and move-back write nothing [33m 414[2mms[22m[39m
+       [33m[2m✓[22m[39m TV5: a far-left drag stores exactly 0 (−∞); ArrowRight gives −59.9 dB and ArrowLeft returns to 0 [33m 323[2mms[22m[39m
+       [33m[2m✓[22m[39m TV11: group fader in dB, Master keeps its drag, context previews stay linear, Shift is ten times finer [33m 1219[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/video-fades-ui.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 3798[2mms[22m[39m
+     [33m[2m✓[22m[39m VU1 a video clip gets its own fade handles and no audio-fade testids; audio is unchanged [33m 380[2mms[22m[39m
+     [33m[2m✓[22m[39m VU1 Env mode, a narrow video clip and a folded video lane show no video handles [33m 401[2mms[22m[39m
+     [33m[2m✓[22m[39m VU2 a drag sets the fade with one Video Fade In entry; undo and redo restore it [33m 408[2mms[22m[39m
+     [33m[2m✓[22m[39m VU2 the fade-out drag, the guarded double-click reset and a cancelled drag [33m 368[2mms[22m[39m
+     [33m[2m✓[22m[39m VU4 the note appears only with an effective video fade; the video option stays disabled [33m 1535[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain.test.tsx [2m([22m[2m28 tests[22m[2m)[22m[33m 2775[2mms[22m[39m
+       [33m[2m✓[22m[39m type 6 + Enter commits one entry, shows the status and the stored text [33m 597[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/detail-panel-fit.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 1582[2mms[22m[39m
+     [33m[2m✓[22m[39m F1: the pending marker shows one truncating label and keeps the full hint for screen readers and hover [33m 454[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/gesture-guard.test.tsx [2m([22m[2m19 tests[22m[2m)[22m[33m 2256[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses Mute, Solo and Volume during a gesture without a history entry [33m 570[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/master-ui.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[33m 2403[2mms[22m[39m
+       [33m[2m✓[22m[39m renders the Master group with Mute, the fader and a readout that follows the value [33m 386[2mms[22m[39m
+       [33m[2m✓[22m[39m sits in the workspace header before the transport and renders 0 times per Play frame [33m 1523[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/peaks.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/gesture-reentry.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[32m 191[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/detail-panel-reason.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 643[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m20 passed[39m[22m[90m (20)[39m
+[2m      Tests [22m [1m[32m331 passed[39m[22m[90m (331)[39m
+[2m   Start at [22m 23:08:08
+[2m   Duration [22m 32.43s[2m (transform 5.50s, setup 0ms, import 26.03s, tests 75.82s, environment 18.96s)[22m
+
+exit 0
