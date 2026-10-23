@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T01:08:08.785Z)
+# Active loop summary (2026-10-23T01:46:34.677Z)
 
-- backlog.json 840 KB -> active view 166 KB
-- status: G_ROOT_GATE round 94
-- servers: `{"checkedUtc":"2026-10-23T00:55:57.9015040Z","round":94,"attempt":1,"store":200}`
-- last publication: 051343983bedf6ff7ec21625a35e94710a895732 (rounds 94-94)
-- last root gate: round 94 published - commit 051343983bedf6ff7ec21625a35e94710a895732 pushed
+- backlog.json 846 KB -> active view 169 KB
+- status: G_ROOT_GATE round 95
+- servers: `{"checkedUtc":"2026-10-23T01:33:59.7205274Z","round":95,"attempt":1,"store":200}`
+- last publication: e3e528821292705a8298e4fcc2f90986375496e4 (rounds 95-95)
+- last root gate: round 95 published - commit e3e528821292705a8298e4fcc2f90986375496e4 pushed
 
 ## Current items: SRW-21
 
@@ -296,16 +296,21 @@
 - ARCH-CHECKPOINT-SRW20 / info / requested_from_root 2026-10-22 (b-round-91-checkpoint-request.md, q14 (a)-(e)); still unanswered at round 93 planning; non-blocking; not re-requested. q14 (f) added from the round-92 reviewer notes / bounded frontend-architect checkpoint at the SRW-20 boundary: export orchestration (useArrangementExport hook vs lib/arrangement/export-orch
 - GATE91-S3-INPLACE-NAMING / info / acknowledged (reviewer: nothing to do now; revisit if a second caller of encodeArrangementWavInPlace appears) / only the parameter type marks the owned-arrays contract of encodeArrangementWavInPlace
 - C-R91-N1-RENDER-NONDETERMINISM / info / data (related to C-R84-L1; RMS agrees to ~1e-13; not caused by round 91) / 5M WAV bytes differ across sessions (3 sha prefixes) while RMS agrees
-- COLLECTION-EMPTY-STATUS / low / dispatched round 94 (D-29z59 L1/L2: empty collection -> new copy.empty text per origin; browser-unreachable on /studio-lab, unit-proven LS1/LS2/LS5) / ArrangementProvider load effect: with collection.sources.length === 0 settle never runs and the status stays 'loading' forever
+- COLLECTION-EMPTY-STATUS / low / unit-proven round 94 (C round 94 PASS browserVerified=true realVerified=true (c-round-94.json); gate 94 published 0513439; LS1-LS5/LS3b, C fail-before 7 red, mutations a/b red); browser half OPEN until the SRW-21 purchased mount (EMPTY-SWAP-REACH unit-only) -> SRW-21-PREMOUNT acceptance; not done / ArrangementProvider load effect: with collection.sources.length === 0 settle never runs and the status stays 'loading' forever
 - R92-T-TECH-LEAD / info / open / when the auth owner releases the purchased route: mount the workspace with createPurchasedWorkspaceCollection and check heading/badge/status
-- GATE92-S1-STATUS-NOT-RESET-ON-SWAP / low / dispatched round 94 (D-29z59 L1: setStatus(copy.loading) at the start of the load effect; unit LS3/LS4; browser-unreachable until the SRW-21 mount) / ArrangementProvider load effect resets source states but not the status when the collection prop changes; a stale 'ready' text stays until t
-- GATE92-S2-PURCHASED-MP3-NAMES-TEST / low (test gap) / dispatched round 94 (D-29z59 PM1 in new collection-load-status.test.tsx; purchased-collection-ui.test.tsx stays frozen) / purchased MP3 download names are covered by code reading only (A Low 2)
+- GATE92-S1-STATUS-NOT-RESET-ON-SWAP / low / unit-proven round 94 (C round 94 PASS browserVerified=true realVerified=true (c-round-94.json); gate 94 published 0513439; LS1-LS5/LS3b, C fail-before 7 red, mutations a/b red); browser half OPEN until the SRW-21 purchased mount (EMPTY-SWAP-REACH unit-only) -> SRW-21-PREMOUNT acceptance; not done / ArrangementProvider load effect resets source states but not the status when the collection prop changes; a stale 'ready' text stays until t
 - GATE92-S3-COPY-COMPUTED-TWICE / info / open - Lows batch (optional nit) / StudioWorkspace header calls workspaceCollectionCopy(collection.origin) twice per render; one const reads better
 - GATE92-S4-TOKEN-URL-IN-CONSOLE / low / open - SRW-21 mount stage prerequisite (doc note in docs/technical/arrangement-workspace.md open prerequisites; short token lifetime); not round 93 / a failed stem fetch is logged by the browser console/Network tab with the full ?token= URL; the adapter keeps it out of UI text but cannot h
-- C-R92-N1-DEMO-FAILED-TO-FETCH / low / open - Lows batch part 3 (after the round-95 regression round; app/data/studio-lab-demo.ts) / demo loader error row shows the raw English browser text 'Failed to fetch' on a network failure (pre-existing)
+- C-R92-N1-DEMO-FAILED-TO-FETCH / low / dispatched round 95 (D-29z60 E1: loadDemoSource maps network/body/decode failures to the purchased adapter texts; browser ERR-NET/ERR-DECODE both viewports); supersedes the earlier "after the round-95 regression round" placement / demo loader error row shows the raw English browser text 'Failed to fetch' on a network failure (pre-existing)
 - R93-T-TECH-LEAD / info / open / screen reader (VoiceOver/NVDA) pass on the export dialog: each format radio is announced once by its short name with its note as description
-- GATE93-S1-DOC081-STATUS / low / dispatched round 94 (doc 081 l.4 -> C PASS (Round 93), გამოქვეყნდა 85fcb05) / doc 081 status line still says awaiting C after C PASS
 - GATE93-S2-OPTIONIDS-REBUILT / info / open - optional nit, not scheduled / ArrangementExportDialog optionIds object rebuilt each render; suffixes could be module-level
+- GATE94-S1-COLLECTION-STABLE-ACROSS-REFRESH / low / open - SRW-21-PREMOUNT (needs the protected route; not schedulable before the auth owner releases it) / a new collection object always resets the status to loading and re-decodes every source; a token refresh that builds a new purchased collect
+- GATE94-S2-SWAP-LEAVES-PER-COLLECTION-STATE / low / open - SRW-21-PREMOUNT (browser-unreachable on /studio-lab). B source read 0513439: buffersRef and sourcePeaks are shared with video-lane audio (ArrangementContext l.2038/l.2043), so a cleanup must delete only ids of the previous collection that are absent from the next one, never video ids; selectedSourceId -> next collection first source or null; clips referencing removed ids stay (graph.client.ts l.209 skips a missing buffer) / switching collections leaves sourceStates/sourcePeaks/buffersRef/selectedSourceId entries of the previous collection
+- GATE94-S3-EMPTY-BRANCH-UNUSED-CONTROLLER / info / open - optional nit, bundle with SRW-21-PREMOUNT / empty-collection branch returns () => controller.abort() for a controller nothing listens to
+- GATE94-S4-STALE-DOC-LINES / low / dispatched round 95 (doc 082 l.4; arrangement-workspace.md l.44-45 incl. the 080->082 link from c-round-94 notes) / doc 082 status line and workspace doc l.44 still say awaiting C; l.45 links only doc 080
+- GATE94-S5-AS-CONST-IN-TEST / low / open - SRW-21-PREMOUNT (collection-load-status.test.tsx l.428; fix when that file is next touched; B reading: CLAUDE.md 'no type assertions' has no exception, so new tests must annotate instead - written into the round 95 task) / ['resolve','reject'] as const in collection-load-status.test.tsx
+- GATE95-DUP-ERROR-MAP / info / open - optional nit, not scheduled (candidate for the V-0 strings module or a shared fetch helper) / round 95 duplicates the purchased adapter's network/decode error texts in studio-lab-demo.ts instead of sharing a helper (collection.ts froz
+- SRW-21-PREMOUNT / low / open - bundle, schedule when the auth owner releases the purchased mount (or earlier only if a browser-reachable path appears) / pre-mount bundle: GATE94-S1 stable collection across token refresh, GATE94-S2 swap cleanup, GATE94-S3, GATE94-S5, plus the browser halves of
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video

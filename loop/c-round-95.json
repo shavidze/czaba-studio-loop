@@ -1,0 +1,61 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T01:33:59.7205274Z",
+  "round": 95,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "ERR-NET",
+  "ERR-DECODE",
+  "ERR-HTTP",
+  "ERR-BOTH",
+  "ERR-ADD-REFUSED",
+  "DEMO-LOAD-REG",
+  "AUDIO-REG",
+  "PX-NET",
+  "REG-HYD",
+  "G95-3",
+  "AN-REVIEW",
+  "T95-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "blocked": [
+  "G95-3 fake-Bearer sub-check: backend unavailable in cloud (/api/studio-token with fake Bearer returned 500 \"Unable to prepare Studio access\", no audio/token; not judged)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "notes": [
+  {
+   "id": "C-R95-N1-FAILED-SOURCE-ADD-TEXT",
+   "severity": "low",
+   "type": "observation, existing behaviour, not a round-95 failure",
+   "steps": [
+    "abort **/middle-east.mp3",
+    "load /studio-lab at 1280x720",
+    "click the Middle East row (row shows შეცდომა: ფაილი ვერ ჩაიტვირთა (ქსელი))",
+    "press Enter, then drag the row onto the music lane"
+   ],
+   "expected": "refusal text that says the file failed to load (it will not load by waiting)",
+   "actual": "clips 0->0 (correctly refused) but status says „Middle East — საჯარო preview“ ჯერ არ ჩატვირთულა. (\"not loaded yet\"), implying it is still pending; + დამატება is disabled",
+   "evidence": "c-round-95/out/err-net-1280x720.json (add), c-round-95/shots/add-refused-1280x720.png; text source ArrangementContext.tsx l.1201/l.1314"
+  },
+  {
+   "id": "C-R95-N2-CLIP-ALERT",
+   "severity": "none",
+   "type": "info",
+   "actual": "AUDIO-REG WAV export of Middle East at unity shows the existing overload alert (14 samples limited at 0 dBFS); WAV equals the decoded source (xcorr 1.0, lag 0), so the alert is truthful"
+  }
+ ]
+}

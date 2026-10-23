@@ -1,10 +1,10 @@
 {
  "version": 94,
- "updated": "2026-10-23 (B round 94 review -> round 95 task, D-29z60)",
+ "updated": "2026-10-23 (B round 95 review -> round 96 task, D-29z61)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 95: D-29z60 - Lows batch part 3a: C-R92-N1 demo loader network/body/decode errors mapped to the purchased Georgian texts in app/data/studio-lab-demo.ts loadDemoSource; new app/data/__tests__/studio-lab-demo.test.ts DL1-DL8; doc 082 l.4; arrangement-workspace.md l.44-45; new doc 083; baseline 0513439, frozen 522, expected 3 M + 2 ??)",
- "advisor_used_by_B": "round 92 planning: advisor available and consulted (2026-10-22)",
+ "current_task": "current-task.md (round 96: D-29z61 - Lows batch part 3b: C-R95-N1 failed library source refusal text in ArrangementContext.tsx startLibraryPreview/addSourceToActiveTrack ('„<title>“ ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.'), loading text unchanged; new failed-source-refusal.test.tsx FS1-FS8; doc 083 l.4; new doc 084; baseline e3e5288, frozen 524, expected 2 M + 2 ??)",
+ "advisor_used_by_B": "round 95 planning: advisor available and consulted (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -8302,7 +8302,7 @@
    "round": 95,
    "task": "current-task.md",
    "decision": "D-29z60",
-   "status": "dispatched",
+   "status": "C PASS (browserVerified=true, realVerified=true, 0 bugs); gate 95 published e3e5288",
    "items": [
     "C-R92-N1-DEMO-FAILED-TO-FETCH",
     "GATE94-S4-STALE-DOC-LINES"
@@ -8328,6 +8328,38 @@
     "G95-3",
     "AN-REVIEW",
     "T95-TARGETED",
+    "SOURCE-UNCHANGED"
+   ]
+  },
+  {
+   "round": 96,
+   "task": "current-task.md",
+   "decision": "D-29z61",
+   "status": "dispatched",
+   "items": [
+    "C-R95-N1-FAILED-SOURCE-ADD-TEXT",
+    "GATE95-S1-DOC083-STATUS"
+   ],
+   "note": "Lows batch part 3b (browser-reachable C finding). baseline HEAD e3e5288 clean; frozen b-round-95-r96-tree-sha256.txt 524/524; snapshots b-round-95-r96-snapshots; expected 2 M + 2 ??; no existing test granted",
+   "owned": [
+    "app/contexts/ArrangementContext.tsx (only startLibraryPreview refusal l.1199-1203 and addSourceToActiveTrack refusal l.1312-1316, plus at most one new module-level const near l.186)",
+    "app/lib/arrangement/__tests__/failed-source-refusal.test.tsx (new FS1-FS8)",
+    "docs/implementation/2026/quarter-IV/083-studio-lab-demo-loader-error-text.md (l.4)",
+    "docs/implementation/2026/quarter-IV/084-studio-failed-source-refusal-text.md (new)"
+   ],
+   "c_ids": [
+    "FAIL-ADD",
+    "FAIL-DBL",
+    "FAIL-PREVIEW",
+    "FAIL-BOTH",
+    "LOADING-REG",
+    "READY-REG",
+    "DEMO-LOAD-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G96-3",
+    "AN-REVIEW",
+    "T96-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -13701,7 +13733,7 @@
   {
    "id": "C-R92-N1-DEMO-FAILED-TO-FETCH",
    "severity": "low",
-   "status": "dispatched round 95 (D-29z60 E1: loadDemoSource maps network/body/decode failures to the purchased adapter texts; browser ERR-NET/ERR-DECODE both viewports); supersedes the earlier \"after the round-95 regression round\" placement",
+   "status": "closed round 95 - c-round-95.json PASS browserVerified=true realVerified=true (ERR-NET/ERR-DECODE both viewports, ERR-HTTP, ERR-BOTH, DEMO-LOAD-REG, AUDIO-REG xcorr 1.0); gate 95 published e3e5288 (reviewer 9/10)",
    "to": "Lows batch",
    "title": "demo loader error row shows the raw English browser text 'Failed to fetch' on a network failure (pre-existing)",
    "evidence": "c-round-92.md DEMO-LOAD (b) observation"
@@ -13773,7 +13805,7 @@
   {
    "id": "GATE94-S4-STALE-DOC-LINES",
    "severity": "low",
-   "status": "dispatched round 95 (doc 082 l.4; arrangement-workspace.md l.44-45 incl. the 080->082 link from c-round-94 notes)",
+   "status": "closed round 95 - C SOURCE-UNCHANGED hunks doc 082 l.4 + arrangement-workspace.md l.44-46; gate 95 published e3e5288",
    "to": "A round 95",
    "title": "doc 082 status line and workspace doc l.44 still say awaiting C; l.45 links only doc 080",
    "evidence": "gates/round-94/review.md suggestion 4; c-round-94.json notes; a-round-94.md Known gaps"
@@ -13789,7 +13821,7 @@
   {
    "id": "GATE95-DUP-ERROR-MAP",
    "severity": "info",
-   "status": "open - optional nit, not scheduled (candidate for the V-0 strings module or a shared fetch helper)",
+   "status": "open - info/architecture signal, not scheduled; reviewer proposal (gate 95 + A round 95): shared fetchAndDecodeAudio helper in lib/arrangement once collection.ts is back in scope; DL8 + collection.test.ts as regression gate; keep with SRW-21-PREMOUNT",
    "to": "B",
    "title": "round 95 duplicates the purchased adapter's network/decode error texts in studio-lab-demo.ts instead of sharing a helper (collection.ts frozen this round)",
    "evidence": "current-task.md round 95 E1 (B decision)"
@@ -13807,6 +13839,46 @@
     "browser: empty and swap status on the mounted purchased route"
    ],
    "evidence": "gates/round-94/review.md Architecture note proposal; a-round-94.md"
+  },
+  {
+   "id": "C-R95-N1-FAILED-SOURCE-ADD-TEXT",
+   "severity": "low",
+   "status": "dispatched round 96 (D-29z61)",
+   "to": "A round 96",
+   "title": "Enter/double-click/preview on a library source whose load FAILED says '„<title>“ ჯერ არ ჩატვირთულა.' (not loaded yet), implying it is still pending",
+   "evidence": "c-round-95.json notes C-R95-N1; c-round-95/shots/add-refused-1280x720.png; ArrangementContext.tsx l.1201 (preview) and l.1314 (add) at e3e5288"
+  },
+  {
+   "id": "GATE95-S1-DOC083-STATUS",
+   "severity": "low",
+   "status": "dispatched round 96 (doc 083 l.4)",
+   "to": "A round 96",
+   "title": "doc 083 l.4 still says awaiting C although C round 95 passed",
+   "evidence": "gates/round-95/review.md suggestion 1"
+  },
+  {
+   "id": "GATE95-S3-DECODE-NOT-CANCELLABLE",
+   "severity": "info",
+   "status": "open - nothing to do (provider drops the result; DL5 documents it)",
+   "to": "B",
+   "title": "decodeAudioData in loadDemoSource cannot be cancelled; unmount/swap mid-decode wastes CPU briefly",
+   "evidence": "gates/round-95/review.md suggestion 3"
+  },
+  {
+   "id": "GATE95-S4-AUDIOPLAYER-BUTTON-TYPE",
+   "severity": "low",
+   "status": "open_root - outside Studio ownership, not scheduled by B",
+   "to": "root",
+   "title": "Biome useButtonType in app/components/audio/AudioPlayer.tsx:48 (pre-existing, non-blocking)",
+   "evidence": "gates/round-95/review.md suggestion 4; gates/round-95/verify.log l.90"
+  },
+  {
+   "id": "C-R95-N2-CLIP-ALERT-INFO",
+   "severity": "info",
+   "status": "closed - info, truthful overload alert (WAV equals decoded source, xcorr 1.0)",
+   "to": "B",
+   "title": "Middle East at unity triggers the existing overload alert (14 samples limited)",
+   "evidence": "c-round-95.json notes C-R95-N2"
   }
  ],
  "tech_lead_notes": [
@@ -14990,6 +15062,11 @@
    "round": 94,
    "source": "gates/round-94/review.md Architecture note + a-round-94.md reviewer note (verbatim there)",
    "note": "Signal 4 (status/lifecycle on an existing owner) at ArrangementContext.tsx l.3000-3051: keep (one abort lifecycle). Signal 3 (repeated costly change): the load effect was changed in rounds 92-94 and each change copied a ~300-line provider harness; proposal: if SRW-21 adds more load/swap rules, extract per-run load bookkeeping (pending/failed count, status choice) into a pure lib/arrangement helper with unit tests, effect/refs/abort/useArrangement() unchanged. Related to ARCH-R93-TEST-HARNESS. Added to q14 as (h); accumulated-risk trigger on one owner -> root re-asked in b-round-94.md (non-blocking)."
+  },
+  {
+   "round": 95,
+   "source": "a-round-95.md + gates/round-95/review.md Architecture notes (verbatim there)",
+   "note": "Signal 2 (ownership/coupling, weak): error-to-Georgian mapping duplicated in studio-lab-demo.ts l.106-131 and collection.ts l.86-111 (GATE95-DUP-ERROR-MAP). Keep; DL8 guards parity. Proposal: shared fetchAndDecodeAudio(fetchFn,url,ctx,signal) in lib/arrangement when collection.ts returns to scope; value low. Recorded, not scheduled."
   }
  ],
  "vitest_floor_round46": 1357,
