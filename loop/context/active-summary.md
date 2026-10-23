@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T02:17:40.385Z)
+# Active loop summary (2026-10-23T02:55:15.496Z)
 
-- backlog.json 849 KB -> active view 166 KB
-- status: G_ROOT_GATE round 96
-- servers: `{"checkedUtc":"2026-10-23T02:03:15.1472705Z","round":96,"attempt":1,"store":200}`
-- last publication: ce440360062f16ee3db2e9795bf33b42c63abc23 (rounds 96-96)
-- last root gate: round 96 published - commit ce440360062f16ee3db2e9795bf33b42c63abc23 pushed
+- backlog.json 854 KB -> active view 167 KB
+- status: G_ROOT_GATE round 97
+- servers: `{"checkedUtc":"2026-10-23T02:42:44.0533954Z","round":97,"attempt":1,"store":200}`
+- last publication: 11d042c242a31f2350215ef30c2398079c1cf715 (rounds 97-97)
+- last root gate: round 97 published - commit 11d042c242a31f2350215ef30c2398079c1cf715 pushed
 
 ## Current items: -
 
@@ -287,9 +287,8 @@
 - C-R89-HARNESS-5M-SHORT / info / applied as harness rule in round 90 (HR-PHASE, 10M recipe fallback) / 5M WAV render ~0.9 s; a 10-press sequence needs <=70 ms per press
 - GATE90-S1-CANCELLED-CONTEXT-MEMORY / medium / not reproduced at this resolution (C round 91 MEM-CANCEL: retained 29/26/26 MB < 58 MB in all 3 pairs; B decision rule -> no fix scheduled). Caveat (C, hypothesis): every cancel landed at render 4%, render-buffer allocation at that point unconfirmed; optional later-percentage/10M evidence row in the regression round, not its own round / after a render-phase cancel resume() is never called, so the suspended OfflineAudioContext and its render buffer (~117 MB for 5M) may stay a
 - GATE90-S2-TAB-CONTRACT-CHANGED / info / acknowledged (deliberate D-29z55 R4 change: during a render the stops are X, format group, Cancel; TR1-TR5 amended by grant); radio-group-as-last-stop wrap is no longer exercised during a render / frozen TR1-TR5 meaning rewritten on purpose in round 90
-- GATE90-S3-HOLD-ENTER-CLOSES / low / open - Lows batch (ignore event.repeat on Close after a cancel, or accept; real-keyboard timing, CDP cannot hold a key) / holding Enter on Cancel: the repeat keydown activates Close after focus moves there, closing the dialog and losing the cancelled status
-- GATE90-S4-CANCEL-DISABLED-CLASS / low / open - Lows batch (class copied from Close on purpose, doc 078) / Cancel carries disabled:opacity-40 but is never disabled
-- GATE90-S5-UNUSED-PREDICATE / info / open - Lows batch (optional: drop isArrangementExportCancelledError or keep for tests) / isArrangementExportCancelledError is used only by tests; the app checks signal.aborted
+- GATE90-S3-HOLD-ENTER-CLOSES / low / dispatched round 97 (D-29z62): Close ignores a repeated Enter keydown (preventDefault when event.repeat); browser-reachable: B probe b-round-96-probe/probe-result.json shows Playwright keyboard.down twice delivers repeat=true and clicks the newly focused button / holding Enter on Cancel: the repeat keydown activates Close after focus moves there, closing the dialog and losing the cancelled status
+- GATE90-S4-CANCEL-DISABLED-CLASS / low / dispatched round 97 (D-29z62): remove disabled:opacity-40 from the never-disabled Cancel button; doc 078 intentional-copy note superseded in doc 085 / Cancel carries disabled:opacity-40 but is never disabled
 - C-R90-MUT-B-CU4-GAP / low / open - Lows batch (test gap: add a dedicated pre-download aborted-check test on the mp3 path; behaviour proven by C CX-BOTH 0 files) / mutation b (no aborted check before downloads) does not turn CU4 red because encode is also raced against the abort
 - C-R90-N2-UNMOUNT-DELAY / info / watch (hypothesis: Remix route commit timing in a fresh dev context; 0 downloads proven) / ffmpeg worker terminated 2.2-2.6 s after the exit click, not at once
 - R91-T-TECH-LEAD / info / open / real Chrome/Safari: WAV + MP3 export - does the browser ask permission for the second file, and does the new note read right; Escape-does-no
@@ -309,10 +308,12 @@
 - GATE94-S5-AS-CONST-IN-TEST / low / open - SRW-21-PREMOUNT (collection-load-status.test.tsx l.428; fix when that file is next touched; B reading: CLAUDE.md 'no type assertions' has no exception, so new tests must annotate instead - written into the round 95 task) / ['resolve','reject'] as const in collection-load-status.test.tsx
 - GATE95-DUP-ERROR-MAP / info / open - info/architecture signal, not scheduled; reviewer proposal (gate 95 + A round 95): shared fetchAndDecodeAudio helper in lib/arrangement once collection.ts is back in scope; DL8 + collection.test.ts as regression gate; keep with SRW-21-PREMOUNT / round 95 duplicates the purchased adapter's network/decode error texts in studio-lab-demo.ts instead of sharing a helper (collection.ts froz
 - SRW-21-PREMOUNT / low / open - bundle, schedule when the auth owner releases the purchased mount (or earlier only if a browser-reachable path appears) / pre-mount bundle: GATE94-S1 stable collection across token refresh, GATE94-S2 swap cleanup, GATE94-S3, GATE94-S5, plus the browser halves of
-- C-R95-N1-FAILED-SOURCE-ADD-TEXT / low / dispatched round 96 (D-29z61) / Enter/double-click/preview on a library source whose load FAILED says '„<title>“ ჯერ არ ჩატვირთულა.' (not loaded yet), implying it is still 
-- GATE95-S1-DOC083-STATUS / low / dispatched round 96 (doc 083 l.4) / doc 083 l.4 still says awaiting C although C round 95 passed
 - GATE95-S3-DECODE-NOT-CANCELLABLE / info / open - nothing to do (provider drops the result; DL5 documents it) / decodeAudioData in loadDemoSource cannot be cancelled; unmount/swap mid-decode wastes CPU briefly
 - GATE95-S4-AUDIOPLAYER-BUTTON-TYPE / low / open_root - outside Studio ownership, not scheduled by B / Biome useButtonType in app/components/audio/AudioPlayer.tsx:48 (pre-existing, non-blocking)
+- GATE96-S1-DOC084-STATUS / low / dispatched round 97 (doc 084 l.4) / doc 084 l.4 still says awaiting C although C round 96 passed
+- GATE96-S2-REPEATED-STATUS-NOT-ANNOUNCED / low / open - Lows batch (a11y, pre-existing, not a regression; needs a design choice: counter vs clear-and-set; owner StudioWorkspace/ArrangementContext status) / an identical status text set twice (e.g. Enter twice on a failed row) causes no re-render, so the aria-live=polite region does not announce 
+- GATE96-S3-DOUBLE-STATE-READ / info / open - nit, not scheduled (fold into the refusal-mapping proposal if that is approved) / startLibraryPreview reads latestRef.current.sourceStates[sourceId] twice while the add path uses one local state
+- ARCH-R96-REFUSAL-MAPPING / info / open - architecture signal, not scheduled; both A's reviewer and the gate 96 reviewer (independently) flag Signal 3; added to the q14 checkpoint request addendum (b-round-91-checkpoint-request.md) / library refusal texts in ArrangementContext.tsx (l.1204-1208, l.1317-1325, l.1391) changed in rounds 95-96, each needing a full provider mou
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video

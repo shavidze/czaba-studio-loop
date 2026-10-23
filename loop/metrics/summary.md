@@ -1,13 +1,12 @@
-# Loop metrics (2026-10-23T02:29:00.336Z)
+# Loop metrics (2026-10-23T03:04:50.809Z)
 
-- rounds: 96; cost $2780.37 total, last 10 avg $20.11/round; agent time 164.0 h
-- C: PASS 67, FAIL 25, BLOCKED 4; bugs c/h/m/l 0/3/37/81
+- rounds: 97; cost $2795.18 total, last 10 avg $18.16/round; agent time 164.3 h
+- C: PASS 68, FAIL 25, BLOCKED 4; bugs c/h/m/l 0/3/37/81
 - rounds without a real check: 63, 72; agent errors 25
-- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published
+- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published
 
 | round | C | bugs c/h/m/l | real | $ | h | err | gate |
 |---|---|---|---|---|---|---|---|
-| 82 | PASS | 0/0/0/0 | yes | 32.55 | 0.83 | 0 | published |
 | 83 | PASS | 0/0/0/1 | yes | 35.42 | 0.78 | 0 | published |
 | 84 | PASS | 0/0/1/1 | yes | 31.09 | 1.01 | 0 | published |
 | 85 | PASS | 0/0/0/2 | yes | 31.42 | 0.98 | 0 | published |
@@ -22,3 +21,4 @@
 | 94 | PASS | 0/0/0/0 | yes | 18.44 | 0.65 | 0 | published |
 | 95 | PASS | 0/0/0/0 | yes | 14.23 | 0.51 | 0 | published |
 | 96 | PASS | 0/0/0/0 | yes | 11.20 | 0.48 | 0 | published |
+| 97 | PASS | 0/0/0/0 | yes | 14.81 | 0.35 | 0 | published |

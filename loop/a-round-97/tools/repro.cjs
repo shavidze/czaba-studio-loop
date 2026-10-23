@@ -1,0 +1,27 @@
+const X = require('./lib90.cjs');
+const { sleep, blur } = X;
+const fs = require('fs');
+const outFile = process.argv[2];
+(async () => {
+  const b = await X.launch(); const R = { vp: '1280x720', when: new Date().toISOString() };
+  const { ctx, page: p, S } = await X.newCtx(b, { width: 1280, height: 720 }, 'repro');
+  await p.addInitScript(() => { window.__kd = []; document.addEventListener('keydown', (e) => { if (e.key === 'Enter') window.__kd.push({ key: e.key, repeat: e.repeat, active: (document.activeElement?.textContent || '').trim().slice(0, 30), dp: false }); }, true); });
+  await X.setup(p, 3); await X.selectFormat(p, 'wav');
+  const n0 = S.downloads.length;
+  const eb = await X.exportBtnBox(p); await p.mouse.click(eb.x, eb.y);
+  const t0 = Date.now(); while (Date.now() - t0 < 30000 && !(await p.$('[data-testid=arrangement-export-cancel]'))) await sleep(5);
+  await p.focus('[data-testid=arrangement-export-cancel]');
+  R.labelAtEnter = await X.label(p);
+  await p.keyboard.down('Enter');
+  const t1 = Date.now(); while (Date.now() - t1 < 2000 && !(await p.evaluate(() => document.activeElement?.textContent?.trim() === 'დახურვა'))) await sleep(5);
+  R.afterFirst = await X.probe(p);
+  await p.keyboard.down('Enter'); await sleep(50);
+  await p.keyboard.up('Enter'); await sleep(300);
+  R.afterRepeat = await X.probe(p);
+  R.keydowns = await p.evaluate(() => window.__kd.slice());
+  R.dialogClosed = !R.afterRepeat.open;
+  await p.screenshot({ path: `${X.SHOTS}/repro.png` });
+  await sleep(10000); R.downloads10s = S.downloads.slice(n0).map((d) => d.name); R.errors = S.errors; R.forbidden = S.forbidden; R.auth = S.authHeaders;
+  fs.writeFileSync(outFile, JSON.stringify(R, null, 1)); console.log(JSON.stringify(R, null, 1));
+  await ctx.close(); await b.close();
+})().catch((e) => { console.error(e); process.exit(1); });

@@ -1,0 +1,77 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T02:42:44.0533954Z",
+  "round": 97,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "HOLD-ENTER",
+  "HOLD-ENTER-MP3",
+  "FRESH-ENTER-CLOSES",
+  "OPEN-HOLD",
+  "SPACE-REG",
+  "CANCEL-CLASS",
+  "CX-REG",
+  "DONE-REG",
+  "ESC-REG",
+  "PX-NET",
+  "REG-HYD",
+  "G97-3",
+  "AN-REVIEW",
+  "T97-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "blocked": [
+  "G97-3 fake-Bearer sub-check: backend unavailable in cloud (not run, not judged)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "ableton": {
+  "held Enter after Cancel does not close export dialog": "არ ეხება (no Ableton claim)",
+  "disabled styling only on disableable buttons": "არ ეხება (Tailwind hygiene)"
+ },
+ "invalidAttempts": [
+  {
+   "run": "cx 1280/1440 classDuring (run97.cjs)",
+   "reason": "Close opacity read 4 ms after export start, during the 0.25 s CSS opacity transition (1 / 0.893); replaced by settled read in run-class.cjs (0.4 at both viewports); not a bug"
+  }
+ ],
+ "notes": [
+  {
+   "id": "C-R97-N1-CHROMIUM-ONLY",
+   "severity": "none",
+   "type": "info",
+   "actual": "All browser evidence is headless Chromium (only installed browser). Held-Enter repeat semantics in Firefox/WebKit and in environments that send auto-repeat as repeat=false are unverified (doc 085 records the latter as a deliberate boundary)."
+  },
+  {
+   "id": "C-R97-N2-HOLD-ENTER-MP3-PHASE",
+   "severity": "none",
+   "type": "info",
+   "actual": "HOLD-ENTER-MP3 at 1440: Enter landed at რენდერი · 9% (render phase, encoder not yet loaded, 0 unpkg requests), so the cancel text was CANCELLED, not CANCELLED_ENC. The MP3 load-phase variant is covered only by jsdom HE7."
+  },
+  {
+   "id": "C-R97-N3-WAV-FULLSCALE",
+   "severity": "none",
+   "type": "info",
+   "actual": "Exported 6:45.758 WAV has 576 full-scale samples (peak 1.0), nan 0. Same pattern pre-exists in C round 90 (546 full-scale samples on the 5:04 project); demo content, unchanged by this round, outside scope."
+  },
+  {
+   "id": "C-R97-N4-TOKEN-PROBE",
+   "severity": "none",
+   "type": "info",
+   "actual": "The only /api/studio-token request is C's own anonymous ctx.request probe for G97-3 (401); page-originated forbidden requests and Authorization headers were 0 in every session."
+  }
+ ]
+}

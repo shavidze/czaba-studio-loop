@@ -1,9 +1,9 @@
 {
- "version": 95,
- "updated": "2026-10-23 (B round 96 review -> round 97 task, D-29z62)",
+ "version": 96,
+ "updated": "2026-10-23 (B round 97 review -> round 98 task, D-29z63)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 97: D-29z62 - Export Lows part 1: GATE90-S3 Close ignores repeated Enter keydown after Cancel; GATE90-S4 drop disabled:opacity-40 from Cancel; GATE96-S1 doc 084 l.4; GATE90-S5 closed by decision (keep); new export-dialog-hold-enter.test.tsx HE1-HE7; new doc 085; baseline ce44036, frozen 526, expected 2 M + 2 ??)",
+ "current_task": "current-task.md (round 98: D-29z63 - GATE97-S1 toolbar Export button ignores repeated Enter keydown (no re-open after held Enter closes the dialog); GATE97-S3 doc 085 l.4; new export-toolbar-hold-enter.test.tsx TH1-TH5; new doc 086; baseline 11d042c, frozen 528, expected 2 M + 2 ??)",
  "advisor_used_by_B": "round 95 planning: advisor available and consulted (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
@@ -8367,7 +8367,7 @@
    "round": 97,
    "task": "current-task.md",
    "decision": "D-29z62",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "GATE90-S3-HOLD-ENTER-CLOSES",
     "GATE90-S4-CANCEL-DISABLED-CLASS",
@@ -8398,6 +8398,38 @@
     "G97-3",
     "AN-REVIEW",
     "T97-TARGETED",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C PASS browserVerified=true realVerified=true 0 bugs; gate 97 published 11d042c"
+  },
+  {
+   "round": 98,
+   "task": "current-task.md",
+   "decision": "D-29z63",
+   "status": "dispatched",
+   "items": [
+    "GATE97-S1-TOOLBAR-EXPORT-HOLD-REOPEN",
+    "GATE97-S3-DOC085-STATUS"
+   ],
+   "note": "held-Enter closure at the toolbar Export opener. baseline HEAD 11d042c clean; frozen b-round-97-r98-tree-sha256.txt 528/528; snapshots b-round-97-r98-snapshots; expected 2 M + 2 ??; no existing test granted; ArrangementExportDialog.tsx frozen (GATE97-S4 routed with GATE89-S4). Regression round not due (2026-10-21 -> 2026-10-23 = 2 days); next B planning on/after 2026-10-24 is the regression round.",
+   "owned": [
+    "app/components/arrangement/ArrangementTransport.tsx (Export button onKeyDown only, baseline l.246-252, + at most one non-exported module function)",
+    "app/lib/arrangement/__tests__/export-toolbar-hold-enter.test.tsx (new TH1-TH5)",
+    "docs/implementation/2026/quarter-IV/085-studio-export-dialog-hold-enter.md (l.4)",
+    "docs/implementation/2026/quarter-IV/086-studio-toolbar-export-hold-enter.md (new)"
+   ],
+   "c_ids": [
+    "CLOSE-HOLD",
+    "CANCEL-CLOSE-HOLD",
+    "FRESH-OPEN",
+    "OPEN-HOLD",
+    "ENTER-ADD-REG",
+    "EXPORT-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G98-3",
+    "AN-REVIEW",
+    "T98-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -13619,7 +13651,7 @@
   {
    "id": "GATE90-S3-HOLD-ENTER-CLOSES",
    "severity": "low",
-   "status": "dispatched round 97 (D-29z62): Close ignores a repeated Enter keydown (preventDefault when event.repeat); browser-reachable: B probe b-round-96-probe/probe-result.json shows Playwright keyboard.down twice delivers repeat=true and clicks the newly focused button",
+   "status": "closed round 97 (C round 97 PASS browserVerified=true realVerified=true (c-round-97.md/json); gate 97 published 11d042c on both remotes; HOLD-ENTER both viewports, HOLD-ENTER-MP3, OPEN-HOLD, FRESH-ENTER-CLOSES); residual toolbar re-open path -> GATE97-S1",
    "to": "Lows batch",
    "title": "holding Enter on Cancel: the repeat keydown activates Close after focus moves there, closing the dialog and losing the cancelled status",
    "evidence": "gates/round-90/review.md #3"
@@ -13627,7 +13659,7 @@
   {
    "id": "GATE90-S4-CANCEL-DISABLED-CLASS",
    "severity": "low",
-   "status": "dispatched round 97 (D-29z62): remove disabled:opacity-40 from the never-disabled Cancel button; doc 078 intentional-copy note superseded in doc 085",
+   "status": "closed round 97 (C round 97 PASS browserVerified=true realVerified=true (c-round-97.md/json); gate 97 published 11d042c on both remotes; CANCEL-CLASS both viewports: Cancel no disabled: token, Close opacity 0.4 -> 1)",
    "to": "Lows batch",
    "title": "Cancel carries disabled:opacity-40 but is never disabled",
    "evidence": "gates/round-90/review.md #4"
@@ -13921,7 +13953,7 @@
   {
    "id": "GATE96-S1-DOC084-STATUS",
    "severity": "low",
-   "status": "dispatched round 97 (doc 084 l.4)",
+   "status": "closed round 97 (C SOURCE-UNCHANGED: doc 084 l.4 only; gate 97 published 11d042c)",
    "to": "A round 97",
    "title": "doc 084 l.4 still says awaiting C although C round 96 passed",
    "evidence": "gates/round-96/review.md finding 1"
@@ -13965,6 +13997,54 @@
    "to": "root/B",
    "title": "library refusal texts in ArrangementContext.tsx (l.1204-1208, l.1317-1325, l.1391) changed in rounds 95-96, each needing a full provider mount; proposal: pure librarySourceRefusalText(source,state,mode) in lib/arrangement with unit tests; FS1-FS8 and grid-snap-loop-drop l.541-547 unchanged; useArrangement() shape unchanged; value low-medium",
    "evidence": "a-round-96.md Architecture note; gates/round-96/review.md Architecture note"
+  },
+  {
+   "id": "GATE97-S1-TOOLBAR-EXPORT-HOLD-REOPEN",
+   "severity": "low",
+   "status": "dispatched round 98 (D-29z63): toolbar Export button onKeyDown Enter && repeat -> preventDefault only; new export-toolbar-hold-enter.test.tsx TH1-TH5",
+   "to": "A round 98",
+   "title": "held Enter on Close closes the dialog, focus restore moves focus to toolbar Export, the next repeat keydown re-opens the dialog",
+   "evidence": "gates/round-97/review.md suggestion 1; mechanism b-round-96-probe/probe-result.json"
+  },
+  {
+   "id": "GATE97-S2-CHROMIUM-ONLY-HOLD-ENTER",
+   "severity": "low",
+   "status": "open - environment: only Chromium is installed on the cloud runner and agents may not install browsers; not schedulable in the cloud; Tech Lead manual check (Firefox/WebKit held Enter on Close and toolbar Export) or a later environment with those browsers",
+   "to": "Tech Lead / root environment",
+   "title": "held-Enter guards verified only in Chromium (Firefox activates buttons via keypress; keydown preventDefault should suppress it, unverified)",
+   "evidence": "gates/round-97/review.md suggestion 2; c-round-97.json C-R97-N1-CHROMIUM-ONLY"
+  },
+  {
+   "id": "GATE97-S3-DOC085-STATUS",
+   "severity": "low",
+   "status": "dispatched round 98 (doc 085 l.4)",
+   "to": "A round 98",
+   "title": "doc 085 l.4 still says awaiting C although C round 97 passed",
+   "evidence": "gates/round-97/review.md suggestion 3"
+  },
+  {
+   "id": "GATE97-S4-REPEAT-EQ-TRUE-NIT",
+   "severity": "info",
+   "status": "open - routed with GATE89-S4 (same ArrangementExportDialog.tsx footer region, next Export Lows round); round 98 keeps the dialog frozen",
+   "to": "Lows batch",
+   "title": "event.repeat === true at ArrangementExportDialog.tsx l.542 is redundant (repeat is boolean)",
+   "evidence": "gates/round-97/review.md nit 4"
+  },
+  {
+   "id": "C-R97-N1..N4",
+   "severity": "info",
+   "status": "recorded round 97 (N1 -> GATE97-S2; N2 MP3 load-phase hold covered only by jsdom HE7, accepted; N3 demo WAV full-scale samples pre-existing, see DEMO-SFX-FULL-SCALE; N4 token probe was C's own)",
+   "to": "B",
+   "title": "C round 97 notes",
+   "evidence": "c-round-97.json notes"
+  },
+  {
+   "id": "ARCH-R97-EXPORT-FOOTER-KEYBOARD",
+   "severity": "info",
+   "status": "open - architecture signal, not scheduled; gate 97 reviewer Signal 3 (keep); proposal: after the Export Lows, one frontend-architect checkpoint on gathering export dialog keyboard/focus rules (initial focus, restore, Tab groups, repeat guard) and a shared test harness; 'refactor not worth it now' is a valid outcome; added as addendum (j) to b-round-91-checkpoint-request.md",
+   "to": "root/B",
+   "title": "ArrangementExportDialog.tsx footer l.484-571 changed in docs 078, 085 and planned GATE89-S4/S6",
+   "evidence": "gates/round-97/review.md Architecture note"
   }
  ],
  "tech_lead_notes": [
@@ -15158,6 +15238,11 @@
    "round": 96,
    "source": "a-round-96.md + gates/round-96/review.md Architecture notes (verbatim there)",
    "note": "Signal 3 (one region changed repeatedly at high cost) on ArrangementContext.tsx library refusal texts, flagged independently by both reviewers: keep for now; proposal ARCH-R96-REFUSAL-MAPPING. Test fixtures: shared FakeAudioContext/FakeAudioBuffer helpers -> ARCH-R93-TEST-HARNESS. Added as q14 (i) to the standing checkpoint request; non-blocking; not scheduled."
+  },
+  {
+   "round": 97,
+   "source": "a-round-97.md + gates/round-97/review.md Architecture notes (verbatim there)",
+   "note": "A reviewer: keep component; Signal 3 in tests (fake AudioContext/encoder/URL setup copied into 9 files) -> ARCH-R93-TEST-HARNESS data point. Gate reviewer: Signal 3 on export dialog footer l.484-571 (docs 078, 085, GATE89-S4/S6), keep; proposal one checkpoint after Export Lows -> ARCH-R97-EXPORT-FOOTER-KEYBOARD. Added as addendum (j) to the standing checkpoint request; non-blocking; not scheduled."
   }
  ],
  "vitest_floor_round46": 1357,
@@ -15325,5 +15410,14 @@
   "entries": 505,
   "snapshots": "b-round-89-r90-snapshots",
   "protected": "auth/route files in frozen list; Modal 741c2341, ffmpeg 0995ae78, StudioContext caa388e7, mp3-encoder.client ddb70919"
+ },
+ "baseline_tree_at_round98": {
+  "head": "11d042c242a31f2350215ef30c2398079c1cf715",
+  "list": "tmp/studio-real-loop/b-round-97-r98-tree-sha256.txt",
+  "count": 528,
+  "excluded": [
+   "app/components/arrangement/ArrangementTransport.tsx",
+   "docs/implementation/2026/quarter-IV/085-studio-export-dialog-hold-enter.md"
+  ]
  }
 }
