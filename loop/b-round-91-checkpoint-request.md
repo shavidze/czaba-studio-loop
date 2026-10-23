@@ -148,3 +148,9 @@ B schedules no extraction. Any approved change becomes one separate B task with 
   - Transport hands off only after `source.disabled`; Library checks nothing. That difference must be settled before any extraction.
   - Gate-110 Signal 3: the recurring root cause is the workspace's Enter-on-BODY contract, which is the user's question B-R107-ENTER-ON-BODY.
 - **Question (narrowed):** keep the four inline sites, or extract one hook with an explicit "took effect" predicate? Usual form: keep/extract, cost, risk, at most three sentences. **Non-blocking:** the cloud measurement round and T12 do not wait for it.
+
+## Addendum (w) — B round 112 planning, 2026-10-23 (round 111 reviewers)
+- **Signal:** ARCH-R111-FOCUS-OWNERSHIP. The library/video focus handoff changed in rounds 107, 108, 110 and 111. The armed-ref + deps-free layout-effect pattern now lives in `StudioWorkspace.tsx` (twice: `pendingRowFocusRef`, `pendingLibraryRailFocusRef`), `ArrangementLibrary.tsx` and `ArrangementTransport.tsx`.
+- **Reviewers:** both say keep inline. Value of extraction now: low. Risk to the commit-order invariants that rounds 110/111 confirmed in Chromium: medium.
+- **Two proposals:** a `useArmedFocusRescue` hook (A's reviewer), or one checkpoint on who owns focus handoff across Library, VideoDock and Workspace, covering docs 093/095/096 (gate-111 reviewer). Acceptance for either: the VR tests and the round-110 handoff tests stay unchanged and green, and the `useArrangement()` shape is unchanged.
+- **Question:** same as (v), widened to ownership: keep, extract a hook, or move ownership. Usual form. **Non-blocking:** the round-112 measurement round and T12 do not wait for it.

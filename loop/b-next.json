@@ -1,13 +1,12 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 110 PASS (browserVerified=true, realVerified=true) and gate 110 published 832fee2: B-R108-LIB-FOCUS-LOSS and GATE109-F6 are done; the video part of A-R108-SWEEP-HITS is closed by LF-SWEEP-NEG. C found a new Medium, C-R110-01: Escape from a video-opened library drops focus to BODY and the next Enter adds a clip (reproduced at 1280 and 1440). With the cloud measurement set (C-R27-01, C-R6-02, C-R8-01, A-R38-REVIEW-TOUCH) it still blocks T12. The regression round is not due today (regression-last is 2026-10-21; today is 2026-10-23); the next B planning on or after 2026-10-24 is the regression round. Nothing external blocks round 111. ABLETON-EXPERT-REVIEW is now in the queue (user decision 2026-10-23). The advisor was available and was used.",
- "nextTask": "Round 111 (D-29z76): Escape that returns the floating video keeps keyboard focus in the library (C-R110-01, Medium).\n- StudioWorkspace.tsx (narrow): in returnFloatingVideo's libraryOpenedForVideo branch, arm a ref only when activeElement is inside libraryAsideRef. One deps-free layout effect then focuses the rail ▶ with preventScroll, only if focus fell to body/null. Plus a helper next to trackRowNameButton.\n- New library-video-return-focus.test.tsx: VR0-VR7, fail-before, m1-m5. New doc 096; doc 095 l.4.\n- Baseline 832fee2 clean; frozen list b-round-110-r111-tree-sha256.txt (545); expected end state 2 M + 2 ??.\n- C rows: VR-HAZARD, VR-ESC-BUTTON and VR-ESC-OPTION (1280/1440), VR-SCROLL, VR-OUTSIDE, VR-SEARCH, VR-NOT-FOR-VIDEO, FV-710, LF-QUICK, R12-L2-ENTER-ADD, PX-NET, REG-HYD, G111-3 (401 with params), AN-REVIEW, T111-TARGETED, DOC-096/DOC-095-L4, SOURCE-UNCHANGED.",
+ "reason": "C round 111 PASS (browserVerified=true, realVerified=true, 0 bugs) and gate 111 published 6abd3f3: C-R110-01 and GATE110-S4 are done. No Critical/High and no reproducible Medium is open. The four remaining Mediums (C-R6-02, C-R8-01, C-R27-01, A-R38-REVIEW-TOUCH) were never measured in the cloud browser; under the root clarification of 2026-10-23 their T12-blocking status depends on that, so round 112 is the planned C-only cloud measurement round with unchanged D-24 tolerances and a pre-committed outcome table. The regression round is not due (regression-last 2026-10-21, today 2026-10-23); the first planning on or after 2026-10-24 is the regression round. Nothing external blocks the round. The advisor was available and was used.",
+ "nextTask": "Round 112 (D-29z77): C-only cloud measurement round.\n- A: doc 096 l.4 status line only (GATE111-S3); expected end state 1 M; frozen b-round-111-r112-tree-sha256.txt (919 tracked files except doc 096); baseline 6abd3f3 clean.\n- C: page-only Playwright harness (rAF sampler over arrangement-playhead-handle aria-valuenow and the active video, LoAF attribution, play/pause/currentTime spy, dock data-video-* counters) at 1440x900: drift layouts D/N/P (R3-V1 cloud adaptation, VP9 beeps-6s + Ctrl+D second clip), RF5-3, VM lay11-cloud (music muted, max <= 30.1 ms, hardSeeks 0->0), H.264 diagnostic, TOUCH via CDP with Zoom as positive control; 3 valid + 2 replacements per layout; tolerances unchanged; plus SOURCE-UNCHANGED, DOC-096-L4, PX-NET, REG-HYD, G112-3.\n- Outcome table (section 5): PASS closes; valid FAIL with app attribution -> bounded A bug round; FAIL without attribution or environment -> open_tech_lead_* with evidence, does not block T12.",
  "remaining": [
-  "C-R110-01",
-  "GATE110-S4-DOC095-STATUS",
+  "MEASUREMENT-ROUND-CLOUD",
+  "GATE111-S3-DOC096-STATUS",
   "REGRESSION-ROUND-2026-10-24",
   "A-R108-SWEEP-HITS",
-  "MEASUREMENT-ROUND-CLOUD",
   "C-R27-01",
   "C-R6-02",
   "C-R8-01",
@@ -76,6 +75,8 @@
   "A-R110-S3-STALE-ARM",
   "GATE110-S1-NONCHROMIUM-MOUSE-CLICK",
   "GATE110-S3-TOGGLE-ARIA-EXPANDED",
-  "ARCH-R110-FOCUS-HANDOFF-HOOK"
+  "ARCH-R110-FOCUS-HANDOFF-HOOK",
+  "GATE111-S1-TESTID-SELECTOR",
+  "ARCH-R111-FOCUS-OWNERSHIP"
  ]
 }

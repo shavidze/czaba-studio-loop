@@ -1217,6 +1217,19 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z77 — Round 111-ის შედეგი; Round 112: C-ის გაზომვის რაუნდი cloud-ში (C-R6-02, C-R8-01, C-R27-01, A-R38-REVIEW-TOUCH).**
+
+C round 111 (`tmp/studio-real-loop/c-round-111.md`, `c-round-111.json`) — **PASS, `browserVerified: true`, `realVerified: true`**, ბაგების გარეშე; gate 111 გამოქვეყნდა `6abd3f3`-ში (review 9/10). C-R110-01 და GATE110-S4 — **მზადაა**.
+
+- **R1 — რატომ ახლა:** Critical/High ღია არ არის; რეპროდუცირებადი Medium არ არის. დარჩენილი ოთხი Medium მხოლოდ ძველ დატვირთულ Windows host-ზე გაიზომა (ან საერთოდ არა). root-ის 2026-10-23-ის დაზუსტებით, Medium, რომელსაც cloud ბრაუზერში რეპროდუცირებადი ჩავარდნა არ აქვს, T12-ს არ ბლოკავს — ეს რაუნდი ამას მტკიცებულებით აქცევს. რეგრესიის რაუნდი ჯერ არ დამდგარა (2026-10-21 → 2026-10-23).
+- **R2 — ფორმა:** A ცვლის მხოლოდ doc 096-ის l.4-ს (GATE111-S3). C აღადგენს harness-ს Playwright-ით (`page.addInitScript`, store-ში ჩაწერის გარეშე): rAF sampler (`arrangement-playhead-handle`-ის `aria-valuenow` და აქტიური `<video>`-ის `currentTime`), LoAF attribution, play/pause/currentTime spy, dock-ის `data-video-*` მთვლელები.
+- **R3 — layout-ები (R3-V1-ის cloud ადაპტაცია, 1440×900):** VP9 `beeps-6s` + Ctrl+D-ით მეორე ვიდეოკლიპი, მუსიკა/სტემი/SFX; რეჟიმები D (მუსიკა მონიშნულია, პანელი ღიაა), N (პანელი ღიაა, მონიშვნა არ არის), P (კონტროლი); RF5-3 (პირველი Play-ის hold); VM `lay11-cloud` (მუსიკა muted; oracle max ≤ 30.1 ms, hardSeeks 0 → 0); H.264 — დიაგნოსტიკა, თუ build-ი უკრავს; TOUCH — CDP touch, Zoom დადებითი კონტროლია.
+- **R4 — ზღვრები უცვლელია:** D-24/D-24a (median ≤ 0.05 წმ, max ≤ 0.1 წმ), stall-ისა და hard-seek-ის exclusion, > 10 % stall = არავალიდური; 3 ვალიდური + 2 ჩანაცვლება თითო layout-ზე. B-ის ახალი harness-ის წესი cloud-ისთვის: dropped/total > 20 % = decoder-starved, არავალიდური (ტოლერანსი არ იცვლება — მხოლოდ გარემოს ვალიდურობა).
+- **R5 — შედეგის ცხრილი წინასწარ:** PASS → იხურება; ვალიდური FAIL app-ის attribution-ით → შეზღუდული A-ს ბაგის რაუნდი (TOUCH-ზე — წინასწარ განსაზღვრული non-passive `touchstart` preventDefault Volume/Pan/Master-ზე); FAIL attribution-ის გარეშე ან გარემო → `open_tech_lead_*` მტკიცებულებით, T12-ს არ ბლოკავს. C-R6-02 და C-R8-01-ის სტატუსი ნორმალიზდა `open_tech_lead_quiet_chrome`-ად (rounds 7–9-ის app-ის სამუშაო შესრულებულია). SRW ერთეულები: PASS, attribution-ის გარეშე FAIL და გარემოს შემთხვევაში SRW-03 / SRW-11B / SRW-13 გადადის `c_pass_tech_lead_manual`-ზე (ღია finding-ის სახელით), თუ სხვა C-ის ბაგი მათზე ღია არ არის; app-ის attribution-ის შემთხვევაში სტატუსი რჩება ბაგის რაუნდის C PASS-მდე. Decoder-starved წესი delta-ზე ითვლება (`getVideoPlaybackQuality()` Play-სა და ბოლოს) და არ ვრცელდება, თუ drop-ები app-ის rate correction-ს ემთხვევა.
+- **R6 — Ableton:** არ ეხება (CZABA-ს საკუთარი sync-ის ტოლერანსი და browser range input).
+- **R7 — სიგნალები:** ARCH-R111-FOCUS-OWNERSHIP → addendum (w) `b-round-91-checkpoint-request.md`-ში, არ აჩერებს. GATE111-S1 (testid selector) → `deferred_low_polish`. B-R107-ENTER-ON-BODY — მომხმარებლის ღია კითხვა.
+- **R8 — რიგი:** რეგრესიის რაუნდი (2026-10-24-დან) → T12-GAIN-VOLUME (თუ R5-ის „app attribution“ არ დადგა) → ABLETON-EXPERT-REVIEW → VISUAL-A-OBSIDIAN → Low-ების polish → R21-I2 და საბოლოო რეგრესია. ფაზა 2 მომხმარებლის დასტურს ელოდება.
+
 **D-29z76 — Round 110-ის შედეგი; Round 111: Escape ვიდეოს აბრუნებს და ბიბლიოთეკაში მყოფ focus-ს `▶`-ზე გადაარჩენს (C-R110-01, Medium).**
 
 C round 110 (`tmp/studio-real-loop/c-round-110.md`, `c-round-110.json`) — **PASS, `browserVerified: true`, `realVerified: true`**: LF-COLLAPSE / LF-EXPAND / LF-CLEAR (1280/1440), LF-MOUSE, LF-HOLD (CDP autoRepeat: 10 repeat → 1 click), LF-VIDEO-NEUTRAL, FV-710, LF-SWEEP-NEG, R12-L2-ENTER-ADD, REG-LIB, PX-NET, REG-HYD, G110-3 (fake-Bearer — BLOCKED, backend), AN-REVIEW, T110-TARGETED (13 / 309), DOC-095, DOC-094-L4, SOURCE-UNCHANGED. ერთი ახალი Medium: **C-R110-01** (A-ს reviewer-ის S5, C-მ დამოუკიდებლად გაიმეორა).
@@ -1969,6 +1982,7 @@ flowchart TD
 | 109 | C-R23-01 + C-R38-01 | SSR NUL byte-ები: byte-ფილტრის `Transform` `entry.server.tsx`-ში (D-29z74; ვიწრო grant B-ის წაკითხვით მომხმარებლის 2026-10-23-ის გადაწყვეტილებისა, root-ს უარის თქმა შეუძლია) |
 | 110 | B-R108-LIB-FOCUS-LOSS | ბიბლიოთეკის `◀`/`▶`/`×` focus-ის გადაცემა partner-ზე + Enter-repeat guard (D-29z75) |
 | 111 | C-R110-01 | Escape ვიდეოს აბრუნებს, ბიბლიოთეკაში მყოფი focus `▶`-ზე გადარჩება (D-29z76; `StudioWorkspace.tsx` ვიწროდ) |
+| 112 | C-R6-02, C-R8-01, C-R27-01, A-R38-REVIEW-TOUCH | C-ის გაზომვის რაუნდი cloud-ში, ზღვრები უცვლელია; A — მხოლოდ doc 096 l.4 (D-29z77) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -1995,6 +2009,8 @@ flowchart TD
 **D-29z75:** round 109 გამოქვეყნდა `1fe3ba2`-ში; `app/entry.server.tsx` და `app/lib/ssr/**` ამის შემდეგ ისევ გაყინულია. ახალი ცვლილება მხოლოდ ცალკე, ცხადი ნებართვით.
 
 **D-29z76:** `StudioWorkspace.tsx` round 111-ში ვიწროდ (`returnFloatingVideo`-ის arm, ერთი ref, ერთი layout effect, ერთი helper); round 110-ის `ArrangementLibrary.tsx` და `library-focus-handoff.test.tsx` ისევ გაყინულია.
+
+**D-29z77:** round 112-ში app-ის კოდი არ იცვლება; A-ს ეკუთვნის მხოლოდ doc 096-ის l.4. გაყინულია ყველა tracked ფაილი doc 096-ის გარდა (`tmp/studio-real-loop/b-round-111-r112-tree-sha256.txt`, 919).
 
 ## 7. Done Policy
 

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T13:54:55.986Z)
+# Active loop summary (2026-10-23T14:34:45.368Z)
 
-- backlog.json 980 KB -> active view 123 KB
-- status: G_ROOT_GATE round 110
-- servers: `{"checkedUtc":"2026-10-23T13:37:52.5905069Z","round":110,"attempt":1,"store":200}`
-- last publication: 832fee24858746c4411b1299440406c06d8baefa (rounds 110-110)
-- last root gate: round 110 published - commit 832fee24858746c4411b1299440406c06d8baefa pushed
+- backlog.json 989 KB -> active view 123 KB
+- status: G_ROOT_GATE round 111
+- servers: `{"checkedUtc":"2026-10-23T14:20:37.1022224Z","round":111,"attempt":1,"store":200}`
+- last publication: 6abd3f39cb24f0334076081d4624da7feb6bb57c (rounds 111-111)
+- last root gate: round 111 published - commit 6abd3f39cb24f0334076081d4624da7feb6bb57c pushed
 
 ## Current items: -
 
@@ -193,17 +193,17 @@
 - GATE106-S4-KEYREPEAT-OPTIONS-TYPE / info / open - Lows batch nit (export one KeyRepeatOptions type; low value) / { readonly keyRepeat?: boolean } literal repeated four times
 - B-R107-ENTER-ON-BODY / info / open question for the user (not deferred, not scheduled as a change): the workspace-wide Enter (target not a button/slider/separator, incl. BODY) adds the active library item; SRW-12 R12-L2 only specifies Enter from the results list. Kept unchanged in round 108; focus retention closes C-R107-01 regardless / should Enter with focus on BODY add the active library item?
 - GATE107-S3-NZ-DELTA-NIT / info / open nit - optional defensive delta < 0 in the R4 condition (doc 092 F3) / target === clip.start with a non-negative delta would announce the time-start text (no current caller)
-- B-R108-LIB-FOCUS-LOSS / medium / dispatched round 110 (D-29z75): F1 focus handoff (collapse<->expand after mount, clear -> search input) + F2 Enter-repeat guard on the three buttons; B re-probe at 1fe3ba2 reproduced all three (b-round-109/probe/lib-focus-probe-result.json); regression round not due until 2026-10-24 / Library collapse (◀), expand (▶) and search clear (×) unmount themselves on Enter; focus falls to BODY and the next Enter adds the active li
 - A-R108-CTRLZ-EXHAUST-FOCUS / info / open - signal (not in rule F1); Ctrl+Z exhausting history while Undo is focused leaves focus on the disabled Undo/BODY because the shortcut path never arms / 
-- DEFERRED-LOW-POLISH / info / open - pointer: 141 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
+- DEFERRED-LOW-POLISH / info / open - pointer: 144 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
 - PROD-SSR-NUL / info / open - gate/Tech Lead row (production build served, NUL 0 on /studio-lab, both UAs, chunked); not run by C (dev server only) or by gate 109 (build green, HTML not measured) / production SSR HTML NUL count not measured after the round-109 filter
 - GATE109-F4-SN5-TRIPWIRE / info / acknowledged - SN5 turns red on purpose when react-dom fixes writeStringChunk; the extra typeof assertion may go with the removal task / SN5 is a deliberate upstream tripwire
 - GATE109-F5-ABORT-TIMER / info / signal - pre-existing setTimeout(abort, ABORT_DELAY) never cleared and responseStatusCode=500 after resolve has no effect (A reviewer + gate F5); entry.server.tsx frozen; not scheduled / entry.server.tsx abort timer not cleared
-- GATE109-F6-DOC094-STATUS / low / dispatched round 110 (doc 094 l.4 one-line grant) / doc 094 status line still says awaiting C
 - ARCH-R109-NUL-FILTER-REMOVAL / info / signal - not scheduled; when react-dom is upgraded remove createNulByteStripStream + SN5 and return entry.server.tsx to PassThrough (acceptance: SN6/SN7 equivalents green without the filter); reviewer verdict keep / remove the SSR NUL filter after a react-dom upgrade
 - C-R109-OBS-PRODUCTS-404-200 / info / open - backend-dependent observation; recheck when a backend is available / /products returns HTTP 200 with a '404 - Page Not Found' title (bytes identical to the 32a6b08 baseline)
 - C-R109-OBS-CLIP-COUNT / info / open - observation, not investigated; signal for the export overload count / export alert said 14 clipped samples while C's WAV scan counted 30 samples at |x|>=0.9999 (threshold or per-channel counting may differ)
 - ARCH-R110-FOCUS-HANDOFF-THIRD-FILE / info / signal - addendum (u) to the pending checkpoint request b-round-91-checkpoint-request.md; non-blocking; no extraction scheduled / arm-ref + layout-effect focus handoff now in a third component (Transport, DetailPanel, Library)
+- C-R110-01 / medium / dispatched round 111 (D-29z76): workspace-side rescue - returnFloatingVideo arms only when focus is inside the library aside and the library was opened for the video; a deps-free layout effect focuses the rail expand button (preventScroll) only if focus fell to body/null / Escape from a video-opened library re-collapses it while focus is inside; focus drops to BODY and the next Enter adds the active library ite
+- GATE110-S4-DOC095-STATUS / low / dispatched round 111 (doc 095 l.4 one-line grant) / doc 095 status line still says awaiting C
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video

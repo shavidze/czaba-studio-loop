@@ -1,10 +1,10 @@
 {
- "version": 109,
- "updated": "2026-10-23 (B round 110 -> round 111 planning)",
+ "version": 110,
+ "updated": "2026-10-23 (B round 111 -> round 112 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 111: D-29z76 - Escape returning the floating video re-collapses a video-opened library; focus inside the library is rescued to the rail expand button instead of BODY (C-R110-01, Medium); doc 095 l.4; baseline 832fee2 clean; frozen b-round-110-r111-tree-sha256.txt 545; expected 2 M + 2 ??)",
- "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23) | round 111 planning: advisor available and consulted before writing (2026-10-23)",
+ "current_task": "current-task.md (round 112: D-29z77 - C-only cloud measurement round for C-R6-02, C-R8-01, C-R27-01 and A-R38-REVIEW-TOUCH with the unchanged D-24/D-24a tolerances, 3+2 budget per layout and a pre-committed outcome table; A edits only doc 096 l.4 (GATE111-S3); baseline 6abd3f3 clean; frozen b-round-111-r112-tree-sha256.txt 919; expected 1 M)",
+ "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23) | round 111 planning: advisor available and consulted before writing (2026-10-23) | round 112 planning: advisor available and consulted before writing (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -621,13 +621,14 @@
      "severity": "medium",
      "title": "RF6-2 drift regression: R3-V1 6/28 valid FAIL with app-attributed LoAFs (ArrangementContext rAF 16-33 ms, VideoDock step 22 ms, React render 62 ms after Play); RF5-3 4/9",
      "routed_to": "Tech Lead quiet real Windows Chrome RF7-2 in the R3-V1 D layout (VP9 + H.264). No further app-side candidate is named; code frozen in round 10. Reopen app work only if the quiet run attributes cost to the app.",
-     "status": "open",
+     "status": "open_tech_lead_quiet_chrome (normalized B round 112 planning: the app work named by rounds 7-9 is done; only measurement remains) - dispatched to the round-112 cloud measurement",
      "evidence": "c-round-6/runs/rf62-summary*.txt, rf53-summary3.txt, L_*/Lr_*/Lr2_* (+ _raw LoAF), rafcost-1.json",
      "round7_result": "Round 7 measure+fix done (A: tick+microtask p50 2.0 -> 0.7 ms, direct DOM position writers, memo lists). C: RF7-P1/P2/2 pass on written criteria, but app-attributed rAF LoAFs 49/61 ms recur in INVALID run L_2 and a 16 ms step LoAF in L_3. Forced-layout axis was 0 before and after (non-discriminating). Sync budget for this bug used; per agent-workflow.md it stays open without relaxed tolerances.",
      "next": "Required evidence: Tech Lead quiet real Windows Chrome RF7-2 (VP9 + H.264). Concrete follow-up (bug round after SRW-11B stage 1, or earlier if quiet Chrome attributes the LoAFs to the app): remove the remaining per-frame React consumer LibraryPlayheadText (ArrangementLibraryPreview.tsx) via the position-writer pattern, and stop the post-hold isTransportRunning flip from re-rendering every useArrangement() consumer; prove with render counts and 3 valid R3-V1 light runs.",
      "round8_evidence": "c-round-8 N_1 (panel open, no selection) FAIL 0.1329 s without a steady app LoAF; N 2/3 PASS",
      "round9_result": "Both named candidates fixed and verified (R9-L1: LibraryPlayheadText is a position writer, 0 renders; R9-L2: context value identity stable across the hold release, 0 consumer renders). Drift: N 3/3 PASS, RF5-3 3/3 PASS (raw harness), mode D 2/3 (C-R8-01). Closure needs D too.",
-     "round9_evidence": "c-round-9.md §2, §3 (R9-L1, R9-L2, R9-L3), c-round-9/runs/N_*.json, F_*.json"
+     "round9_evidence": "c-round-9.md §2, §3 (R9-L1, R9-L2, R9-L3), c-round-9/runs/N_*.json, F_*.json",
+     "round112": "round 112 measurement (D-29z77): cloud Playwright Chromium, 3 valid + 2 replacements per layout, tolerances unchanged; outcome per current-task.md section 5"
     },
     {
      "id": "C-R7-01",
@@ -1964,13 +1965,14 @@
      "id": "C-R8-01",
      "severity": "medium",
      "title": "Open Clip Detail with a selected playable clip: R3-V1 drift FAIL 3/3 valid (max 0.2559 / 0.1739 / ex 0.132 s), tick+microtasks p95 D-N +0.3..+1.0 ms; collapsed panel 3/3 PASS, no selection 2/3 PASS; no app LoAF >= 10 ms, forced layout 0",
-     "status": "open",
+     "status": "open_tech_lead_quiet_chrome (normalized B round 112 planning: the app work named by rounds 7-9 is done; only measurement remains) - dispatched to the round-112 cloud measurement",
      "evidence": "c-round-8/runs/drift-summary.txt, runs/{D,N,P}_*.json, *_perf.json, *_raw.json, *_cpu.csv; c-round-8.md §4, §8",
      "hypothesis": "per-frame left % write on the detail playhead invalidates layout/paint of the waveform box (480-column SVG) and nearby raster; not visible as main-thread script",
      "follow_up_spec": "Round 9: step 1 probe (panel open, music clip selected, playhead parked outside the clip: line display:none, SVG visible) under the R3-V1 light harness to split static-SVG cost from moving-line cost; then compositor-only playhead (transform translateX on a full-width wrapper or a ResizeObserver-cached px width; no per-frame left/width/height write; no per-frame layout read) and paint containment of the waveform box (contain-strict/contain-paint) as needed. Verdict: mode D 3 valid R3-V1 runs D-24 PASS; same-session D-N and D-P tick+microtasks p50/p95 <= 0.2 ms; writer envelope from raw series C recomputes.",
      "routed_to": "Tech Lead quiet real Windows Chrome RF7-2 in the R3-V1 D layout; optional DevTools paint/raster/composite trace D vs N in the 8-12 s window. No re-measure of unchanged code by A/C (agent-workflow.md). Stage 2 (round 11) may start with this bug open; stage 2 adds one mode-D info run.",
      "round9_result": "Compositor-only contract implemented and verified (R9-D3: per-frame transform-only, contain strict, will-change transform, 144 open at 1440, waveform visible). tick+microtasks p95 3.3-3.8 -> 0.6-0.9 ms. Verdict IDs fail: R9-D1 D 2/3 valid (D_3 0.1564 s inside the second video clip, app LoAF 0, forced 0); R9-D2 rule 3 D-N p95 +0.3 ms (A session +0.2). A probe S/L inconclusive (not reproduced in A session).",
-     "round9_evidence": "c-round-9/runs/drift-summary.txt, runs/D_3.json, c-round-9.md §2, §7; a-round-9/runs/probe-summary.txt"
+     "round9_evidence": "c-round-9/runs/drift-summary.txt, runs/D_3.json, c-round-9.md §2, §7; a-round-9/runs/probe-summary.txt",
+     "round112": "round 112 measurement (D-29z77): cloud Playwright Chromium, 3 valid + 2 replacements per layout, tolerances unchanged; outcome per current-task.md section 5"
     },
     {
      "id": "C-R11-01",
@@ -8824,7 +8826,7 @@
    "round": 111,
    "task": "current-task.md",
    "decision": "D-29z76",
-   "status": "dispatched",
+   "status": "done",
    "items": [
     "C-R110-01",
     "GATE110-S4-DOC095-STATUS"
@@ -8835,7 +8837,22 @@
     "app/lib/arrangement/__tests__/library-video-return-focus.test.tsx (new)",
     "docs/implementation/2026/quarter-IV/096-studio-video-return-library-focus.md (new)",
     "docs/implementation/2026/quarter-IV/095-studio-library-toggle-focus.md (l.4 only)"
-   ]
+   ],
+   "result": "C PASS browserVerified=true realVerified=true, 0 bugs; gate 111 published 6abd3f39cb24f0334076081d4624da7feb6bb57c (review 9/10, COMMIT OK)"
+  },
+  {
+   "round": 112,
+   "task": "current-task.md",
+   "decision": "D-29z77",
+   "status": "dispatched",
+   "items": [
+    "C-R6-02",
+    "C-R8-01",
+    "C-R27-01",
+    "A-R38-REVIEW-TOUCH",
+    "GATE111-S3-DOC096-STATUS"
+   ],
+   "note": "C-only cloud measurement round: drift layouts D/N/P (R3-V1 cloud adaptation, 1440, VP9 beeps-6s + Ctrl+D second video clip, music/stems/SFX), RF5-3 first-play hold, VM lay11-cloud with music muted (oracle 30.1 ms, hardSeeks 0->0), H.264 diagnostic if the build plays it, TOUCH via CDP with Zoom as positive control. Tolerances D-24/D-24a unchanged; LoAF stall exclusion; B harness rule: dropped/total > 20 % = decoder-starved invalid. Pre-committed outcome table (section 5): PASS closes; FAIL with app attribution -> bounded A bug round; FAIL without attribution / environment -> open_tech_lead_* with evidence, does not block T12 (root clarification 2026-10-23). A edits doc 096 l.4 only. Baseline 6abd3f3 clean; frozen b-round-111-r112-tree-sha256.txt (919 tracked files except doc 096); expected end state 1 M."
   }
  ],
  "post_current_stage_queue": [
@@ -9651,7 +9668,8 @@
    "round28_record": "C round 28 section 6 on the round-26 vm-1 layout (music muted, 1440): vm-1/vm-2 harness-invalid (replaced); vm-3 125.4 ms (every action landed ~2 s off-procedure: issued 2.44/3.64/4.76, landed 3.25/4.10; excursion 0.94-2.80 s began before any click); vm-4 19.0 ms; vm-5 287.6 ms (excursion from 1.33 s, ~130 ms after the Master Mute click at 1.20, no hardSeek). Dock hardSeeks 0 -> 0 in every run; row 4 did not fire. node.exe 37.",
    "b_decision_round28": "D-29t: row 3. The table compares like with like only on the same procedure; vm-3 is environment-invalid in the same category as vm-1/vm-2 (off-procedure action timing from browse latency), which leaves 2 valid runs (1 PASS, 1 FAIL) with the 3+2 budget exhausted -> mixed -> Tech Lead quiet Chrome. The table did not anticipate \"2 valid of 3+2\"; recorded as a B table gap. No A bug round: there is no mechanism hypothesis (track reads ruled out in round 27, no hardSeek, vm-3 drift before any click), so an A round would be the open-ended sync investigation the workflow forbids. Key datum for the Tech Lead: vm-5 287.6 ms within procedure. Standing confound: 35-41 node.exe.",
    "note_round53": "still open (RF3-1, RF3-2, R5-L6 from root-pre-push-review.md); not re-measured in round 52 (section 4.7)",
-   "round108_planning": "planned: C-only cloud measurement round after the regression round (D-29z74 what-follows); the cloud runner is a different environment than the loaded Windows host; 3+2 budget per layout; touch via Playwright hasTouch + CDP touch dispatch; outcome decides fix/close"
+   "round108_planning": "planned: C-only cloud measurement round after the regression round (D-29z74 what-follows); the cloud runner is a different environment than the loaded Windows host; 3+2 budget per layout; touch via Playwright hasTouch + CDP touch dispatch; outcome decides fix/close",
+   "round112": "round 112 measurement (D-29z77): cloud Playwright Chromium, 3 valid + 2 replacements per layout, tolerances unchanged; outcome per current-task.md section 5"
   },
   {
    "status": "resolved",
@@ -10135,7 +10153,8 @@
    "title": "possible native touch slide on the range faders: pointerdown.preventDefault does not stop touch events, so a touch press might still jump through native input (reviewer memory, unverified)",
    "evidence": "checkpoint-r38-review.md Medium; a-round-38.md section 4",
    "note": "pre-specified contract amendment if the device confirms: a native non-passive touchstart listener with preventDefault on the three fader kinds (Volume, Pan, Master), Zoom excluded; not implemented blind",
-   "round108_planning": "planned: C-only cloud measurement round after the regression round (D-29z74 what-follows); the cloud runner is a different environment than the loaded Windows host; 3+2 budget per layout; touch via Playwright hasTouch + CDP touch dispatch; outcome decides fix/close"
+   "round108_planning": "planned: C-only cloud measurement round after the regression round (D-29z74 what-follows); the cloud runner is a different environment than the loaded Windows host; 3+2 budget per layout; touch via Playwright hasTouch + CDP touch dispatch; outcome decides fix/close",
+   "round112": "round 112 measurement (D-29z77): cloud Playwright Chromium, 3 valid + 2 replacements per layout, tolerances unchanged; outcome per current-task.md section 5; TOUCH row with the Zoom slider as positive control (Zoom jumps -> harness valid)"
   },
   {
    "id": "PENDING-COMMIT-ORDER",
@@ -14131,12 +14150,13 @@
   {
    "id": "C-R110-01",
    "severity": "medium",
-   "status": "dispatched round 111 (D-29z76): workspace-side rescue - returnFloatingVideo arms only when focus is inside the library aside and the library was opened for the video; a deps-free layout effect focuses the rail expand button (preventScroll) only if focus fell to body/null",
+   "status": "done",
    "to": "A round 111",
    "title": "Escape from a video-opened library re-collapses it while focus is inside; focus drops to BODY and the next Enter adds the active library item as a clip",
    "evidence": "c-round-110/out/lf-video.json (s5-collapse-button, s5-option), c-round-110/out/reg.json (s5_1280), c-round-110/shots/s5-*.png; a-round-110/probe/s5-probe-result.json (A reviewer S5)",
    "repro": "fresh /studio-lab, Decline, focus Middle East option, ArrowDown, mouse collapse, mouse video expand, focus collapse button or the selected option, Escape, Enter -> clips 0 -> 1",
-   "preExisting": "argued by code path (frozen returnFloatingVideo), not browser-confirmed against a snapshot"
+   "preExisting": "argued by code path (frozen returnFloatingVideo), not browser-confirmed against a snapshot",
+   "closed_by": "C round 111 PASS browserVerified=true realVerified=true (VR-HAZARD, VR-ESC-BUTTON, VR-ESC-OPTION at 1280+1440, VR-SCROLL, VR-OUTSIDE, VR-SEARCH, VR-NOT-FOR-VIDEO, FV-710, LF-QUICK; c-round-111.md, c-round-111/out/vr.json); published 6abd3f3 (gate 111)"
   },
   {
    "id": "GATE110-INFO",
@@ -14149,9 +14169,31 @@
   {
    "id": "GATE110-S4-DOC095-STATUS",
    "severity": "low",
-   "status": "dispatched round 111 (doc 095 l.4 one-line grant)",
+   "status": "done",
    "title": "doc 095 status line still says awaiting C",
-   "evidence": "gates/round-110/review.md suggestion 4"
+   "evidence": "gates/round-110/review.md suggestion 4",
+   "closed_by": "C round 111 DOC-095-L4 PASS; published 6abd3f3"
+  },
+  {
+   "id": "GATE111-S3-DOC096-STATUS",
+   "severity": "low",
+   "status": "dispatched round 112 (doc 096 l.4 one-line)",
+   "title": "doc 096 status line still says awaiting C",
+   "evidence": "gates/round-111/review.md finding 3"
+  },
+  {
+   "id": "GATE111-S2-DEPSFREE-EFFECT",
+   "severity": "info",
+   "status": "acknowledged (reviewer: no change; render-budget unchanged); part of ARCH-R111-FOCUS-OWNERSHIP",
+   "title": "the rescue layout effect has no deps array and runs every render (one ref read)",
+   "evidence": "gates/round-111/review.md finding 2"
+  },
+  {
+   "id": "GATE111-SUGG-E2E-S5",
+   "severity": "info",
+   "status": "signal - not scheduled; candidate row for the next focus-owning round or the regression round (Chromium smoke e2e: collapse -> float -> focus collapse -> Escape -> Enter = 0 clips)",
+   "title": "no automated real-browser test for the s5 Escape-return scenario",
+   "evidence": "gates/round-111/review.md Suggestions"
   }
  ],
  "tech_lead_notes": [
@@ -15390,6 +15432,12 @@
    "round": 110,
    "source": "a-round-110.md code-reviewer Architecture note + gates/round-110/review.md Architecture note",
    "note": "ARCH-R110-FOCUS-HANDOFF-HOOK: the arm-ref + layout-effect focus handoff with a repeated-Enter guard now lives in ArrangementTransport (checks source.disabled, i.e. 'action took effect') and ArrangementLibrary (checks nothing); round 111 adds a workspace-side rescue (fourth site). Both reviewers: keep inline for now; proposal useFocusHandoffAfterCommit / useFocusHandoff(partnerRefs) in app/hooks/ plus a shared preventRepeatedEnterKeyDown, with a required 'action took effect' check, migrating callers with existing tests unchanged. Signal 3: the root cause is the workspace Enter-on-BODY contract (user question B-R107-ENTER-ON-BODY). Recorded as signal and as addendum to the pending checkpoint request; not scheduled.",
+   "status": "signal"
+  },
+  {
+   "round": 111,
+   "source": "a-round-111.md code-reviewer Architecture note + gates/round-111/review.md Architecture note",
+   "note": "ARCH-R111-FOCUS-OWNERSHIP: library/video focus handoff touched in rounds 107, 108, 110, 111; armed-ref + deps-free layout-effect pattern now at StudioWorkspace (pendingRowFocusRef, pendingLibraryRailFocusRef), ArrangementLibrary and ArrangementTransport. Both reviewers: keep inline (value low, risk to the commit-order invariants medium). Proposals: useArmedFocusRescue hook (A reviewer) or one frontend-architect checkpoint on focus-handoff ownership across ArrangementLibrary/ArrangementVideoDock/StudioWorkspace covering docs 093/095/096 (gate reviewer); acceptance VR + round-110 handoff tests unchanged and green, useArrangement() shape unchanged. Added as addendum (w) to b-round-91-checkpoint-request.md; merges ARCH-R110-FOCUS-HANDOFF-HOOK; not scheduled; non-blocking.",
    "status": "signal"
   }
  ],
@@ -17109,6 +17157,16 @@
    "repro": "inspect arrangement-library-collapse / -expand: no aria-expanded",
    "deferred_reason": "user decision 2026-10-23 (Lows deferred)",
    "deferred_round": "B round 110 -> 111 planning (2026-10-23)"
+  },
+  {
+   "id": "GATE111-S1-TESTID-SELECTOR",
+   "severity": "low",
+   "status": "open",
+   "title": "production focus rescue finds the rail expand button by data-testid (libraryRailExpandButton, as trackRowNameButton); a testid rename silently disables the rescue (VR1/VR2/VR7 would catch it)",
+   "evidence": "gates/round-111/review.md finding 1",
+   "repro": "rename data-testid arrangement-library-expand -> VR1/VR2/VR7 red, no type error",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 111 -> 112 planning (2026-10-23)"
   }
  ],
  "baseline_tree_at_round108": {
