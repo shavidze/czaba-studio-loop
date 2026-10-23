@@ -1,40 +1,41 @@
-# CURRENT TASK — Round 99: one held Enter adds exactly one clip (library row, global Enter, ＋ დამატება) + doc 086 status line
+# CURRENT TASK — Round 100: one held Enter on ▶ მოუსმინე toggles the preview once + doc 087 status line
 
 Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-23
-- **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules in your prompt. Those rules win over older text.
-- **Previous task:** `tasks/round-98.md` (exact copy, sha256 `6942f610…`). Rationale: `b-round-98.md`. Decision record: D-29z64 in `docs/technical/studio-real-workspace/plan.md`.
-- **Round size:** one bug with three entry points to the same action, plus one doc status line. One owner (A).
-  1. **B-R98-HELD-ENTER-MULTI-ADD (Low, browser-reproduced by B).** In real Chromium, holding Enter adds **one clip per auto-repeat keydown**. B's probe (`b-round-98-probe/probe-result.json`, `probe-result-plus.json`; 1280×720, `keyboard.down('Enter')` ×3 at 50 ms) gave 0 → **3** clips on each of these paths:
-     - **P1 library row:** focus on a ready library option (`[role=option]`, a `<button>`). Its own `handleOptionKeyDown` adds on every Enter (`ArrangementLibrary.tsx` l.242–247).
-     - **P2 global Enter:** a source is selected and focus is on `body` (for example after a click on the status text). The window handler adds on every Enter (`StudioWorkspace.tsx` l.1960–1968). This is gate 98 review Low #1 / doc 086's second boundary; B found that it is reachable in Chromium too.
-     - **P3 ＋ დამატება:** focus on the preview panel's add button. Chromium turns every Enter keydown, repeats included, into a click (`ArrangementLibraryPreview.tsx` l.304–311).
-  2. **GATE98-S5-DOC086-STATUS:** doc 086 l.4 still says the round is waiting for C. C round 98 passed, and gate 98 published it at `736db33`.
-- **Not in this round:** the export dialog footer Lows (GATE89-S4 + A-R88 #4 + GATE97-S4, GATE89-S6). They are next. **`ArrangementExportDialog.tsx`, `ArrangementTransport.tsx` and `ArrangementContext.tsx` are frozen this round.**
+- **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules in your prompt. Those rules take precedence over older text.
+- **Previous task:** `tasks/round-99.md` (exact copy, sha256 `b8315fe9…`). Rationale: `b-round-99.md`. Decision record: D-29z65 in `docs/technical/studio-real-workspace/plan.md`.
+- **Round size:** one bug on one button, plus one doc status line. One owner (A).
+  1. **B-R98-H1-PREVIEW-TOGGLE-HOLD (Low, now browser-reproduced by B).** In real Chromium, holding Enter on the focused ▶ მოუსმინე button toggles the preview **once per auto-repeat keydown**.
+     - **Evidence:** B's probe `b-round-99-probe/probe-toggle-result.json`, 1280×720, `keyboard.down('Enter')` ×3 at 50 ms.
+     - **held3:** 3 keydowns (`repeat` false/true/true) gave **3 clicks** on the toggle. The label went ▶ მოუსმინე → ■ შეჩერება → ▶ მოუსმინე → ■ შეჩერება (start, stop, start).
+     - **fresh1:** one `press('Enter')` gave 1 click (▶ → ■).
+     - **Cause:** the button (`ArrangementLibraryPreview.tsx` l.281–303) has no `onKeyDown`, so Chromium turns every Enter keydown, repeats included, into a click. The ＋ დამატება button next to it got that guard in round 99, and the waveform's own handler already ignores repeats (l.202–204).
+  2. **GATE99-S1-DOC087-STATUS:** doc 087 l.4 still says the round is waiting for C. C round 99 passed, and gate 99 published it at `e2412db`.
+- **Not in this round:** the Export dialog footer Lows (GATE89-S4 + A-R88 #4 + GATE97-S4, GATE89-S6) and a shared "repeated Enter" helper (an architecture signal; the root checkpoint comes first). **`ArrangementExportDialog.tsx`, `ArrangementTransport.tsx`, `ArrangementLibrary.tsx`, `StudioWorkspace.tsx` and `ArrangementContext.tsx` are frozen this round.**
 
 ## Why this round
-- **C round 98: PASS**, `browserVerified=true`, `realVerified=true`. **Gate 98: published**, commit `736db33c339bcef4757535d60524c2f92d7e6587` on both remotes (reviewer 9/10, no Critical or High).
-- C's one finding, **C-R98-B1** (Space on a focused toolbar Export does not open the dialog), is closed by a B decision with no code change: global Space is the play/stop shortcut, as the shortcut footer says, and it already wins over focused workspace buttons outside the dialog. See `b-round-98.md` and D-29z64. Enter and a mouse click still open Export.
-- The held-Enter add is a real arrangement mutation from a held key. It is the same mechanism as rounds 97–98, and B reproduced it in Chromium. That puts it ahead of the footer's 16 px strip.
-- **The regression round is not due yet.** `regression-last.json` is 2026-10-21 and B plans this on 2026-10-23 (2 days; the rule needs 3). **The next B planning on or after 2026-10-24 is the regression round.**
+- **C round 99: PASS**, `browserVerified=true`, `realVerified=true`, 0 bugs. **Gate 99: published**, commit `e2412db337e9015def8dc6855358437b900ff51e` on both remotes (reviewer 9/10, no Critical or High).
+- The gate 99 reviewer's Low #2 asked for this exact guard "once B has reproduced it in a browser". B reproduced it (above). It is the last open member of the held-Enter family on the SRW-12 library panel, and it changes what the user hears. That puts it ahead of the footer's cosmetic 16 px strip.
+- **The regression round is not due yet.** `regression-last.json` is 2026-10-21 and B plans this on 2026-10-23 (2 days; the rule needs 3). **The next B planning on or after 2026-10-24 is the regression round, whatever this round leaves open.**
 
 ## Baseline (measured by B, 2026-10-23)
-- **HEAD `736db33c339bcef4757535d60524c2f92d7e6587`** (gate 98 published). `git status --short` is **empty**.
-- **Frozen list:** `../tmp/studio-real-loop/b-round-98-r99-tree-sha256.txt`, **528** entries, **528/528 OK**.
-  - It covers every tracked `app/**` and `docs/implementation/**` file plus `vite.config.ts`, **except** the four owned existing files below.
+- **HEAD `e2412db337e9015def8dc6855358437b900ff51e`** (gate 99 published). `git status --short` is **empty**.
+- **Frozen list:** `../tmp/studio-real-loop/b-round-99-r100-tree-sha256.txt`, **531** entries, **531/531 OK**.
+  - It covers every tracked `app/**` and `docs/implementation/**` file plus `vite.config.ts` (534), **except** the three owned files below.
   - Frozen and relevant here:
-    - `ArrangementContext.tsx` (`db7a477d`), with `addSourceToActiveTrack` at l.1308;
+    - `held-enter-add.test.tsx` (`b1d6ff96`), with round 99's HA1–HA8;
+    - `ArrangementLibrary.tsx`, `StudioWorkspace.tsx`, `ArrangementContext.tsx` (`db7a477d`);
     - `ArrangementExportDialog.tsx` (`cbee8cc6`) and `ArrangementTransport.tsx` (`899c7c52`);
-    - every `__tests__` file. **No existing test file is granted.**
-  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-98-r99-tree-sha256.txt`.
-- **Snapshots:** `../tmp/studio-real-loop/b-round-98-r99-snapshots/` (`SHA256SUMS.txt`). All four are LF with CR=0.
+    - every other `__tests__` file.
+  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-99-r100-tree-sha256.txt`.
+- **Snapshots:** `../tmp/studio-real-loop/b-round-99-r100-snapshots/` (`SHA256SUMS.txt`). All three are LF with CR=0.
 
   | File | sha256 prefix | lines | role |
   |---|---|---|---|
-  | `app/components/arrangement/ArrangementLibrary.tsx` | `a2b6f78d` | 566 | owned (T1: the Enter branch of `handleOptionKeyDown`, l.242–247 only) |
-  | `app/components/arrangement/StudioWorkspace.tsx` | `1270f6c5` | 2516 | owned (T2: the global Enter branch, l.1960–1968 only) |
-  | `app/components/arrangement/ArrangementLibraryPreview.tsx` | `c6efc0ef` | 315 | owned (T3: the ＋ დამატება button, l.304–311 only) |
-  | `docs/implementation/2026/quarter-IV/086-studio-toolbar-export-hold-enter.md` | `524d9b22` | 74 | owned (l.4 only) |
+  | `app/components/arrangement/ArrangementLibraryPreview.tsx` | `f074a9bb` | 320 | owned (T1: the ▶ მოუსმინე `<button>` element, l.281–303 only) |
+  | `app/lib/arrangement/__tests__/library-preview.test.tsx` | `b42334fc` | 287 | owned **append-only** (new `it` blocks after the last existing `it`, which ends at l.285; see "Tests") |
+  | `docs/implementation/2026/quarter-IV/087-studio-held-enter-single-add.md` | `38cbeb22` | 81 | owned (l.4 only) |
 
+  New file: `docs/implementation/2026/quarter-IV/088-studio-preview-toggle-hold-enter.md`.
 - **Protected (frozen, never edited; hashes unchanged since earlier rounds):**
   - `app/routes/studio.$productId.tsx` (`fa2cf0bc`)
   - `app/routes/api.studio-token.ts` (`13914809`)
@@ -47,149 +48,133 @@ Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-1
 - **Do not change the repository state.**
   - Never stash, reset, checkout, clean or re-create anything.
   - Never run `biome check --write`, `format --write`, `npm run format` or `check:fix`. Format through stdin to stdout.
-  - Run mutation proofs and fail-before in a scratch copy (`a-round-99/mut/`), never in `store/`. Set the Vitest `cacheDir` to the scratch folder. You may reuse `a-round-98/` scratch scripts as a model; do not edit A round 98 files.
+  - Run mutation proofs and the fail-before in a scratch copy (`a-round-100/mut/`), never in `store/`. Set the Vitest `cacheDir` to the scratch folder. You may reuse `a-round-99/` scratch scripts as a model; do not edit A round 99 files.
   - Stop and report if anything does not match: a different HEAD, a dirty tree at the start, or a changed frozen file.
 
 ## 1. What changes (A)
 
-Read the primitives first: `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `AGENT_DISCOVERABLE_CODE.md`, `AUDIO_ARCHITECTURE.md` (Studio files), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`.
+Read the primitives first: `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `AGENT_DISCOVERABLE_CODE.md`, `AUDIO_ARCHITECTURE.md` (Studio file), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`.
 
-**Pre-edit browser reproduction (recommended).** The dev server serves `store/` live, so do this **before** your first edit. You may run B's `b-round-98-probe/probe.cjs` and `probe-plus.cjs` as they are (read-only), or your own copy in `a-round-99/`. Record the result in `a-round-99/repro-before.json`. Repeat after the edit into `repro-after.json`. This is A's own check, not C's acceptance.
+**Pre-edit browser reproduction (recommended).** Before your first edit, **copy** B's `b-round-99-probe/probe-toggle.cjs` to `a-round-100/` and run the copy there. Never run it inside `b-round-99-probe/`: the script writes its JSON and PNGs next to itself and would overwrite B's cited evidence. Record the result in `a-round-100/repro-before.json`, and repeat after the edit into `repro-after.json`. Prefer 4 keydowns: with 3 the end label is ■ with or without the fix. This is A's own check, not C's acceptance.
 
-**The rule for all three paths:** one Enter press adds one clip. The first, non-repeated keydown (`event.repeat === false`) adds, exactly as now. A repeated keydown (`event.repeat` true) adds nothing. Write the check as `event.repeat` or `!event.repeat`, not `=== true`.
-
-### T1 — library row (`ArrangementLibrary.tsx`, the `if (event.key === 'Enter')` branch at l.242–247 only)
-- Keep `event.preventDefault()` and `event.stopPropagation()` for **every** Enter, repeated or not, as now.
-- Call `selectSource(sourceId)` and `addSourceToActiveTrack(sourceId)` only when `!event.repeat`.
-- The ArrowUp/ArrowDown/ArrowLeft/ArrowRight branches do not change. A held ArrowDown still moves the selection one row per repeat (B probe `probe-result-arrow.json`: 3 downs moved Middle East → Slow Rise).
-- No change to `onDoubleClick`, `handleOptionAdd`, the option markup or any other function.
-
-### T2 — global Enter (`StudioWorkspace.tsx`, l.1960–1968 only)
-- The condition (Enter, not a button, not a slider, not a separator) and `event.preventDefault()` stay as they are.
-- Call `current.addSourceToActiveTrack()` only when `!event.repeat`. This is the same pattern as the Space branch at l.1699–1704.
-- No other line in this file changes. No new import, ref, state, effect or listener.
-
-### T3 — ＋ დამატება (`ArrangementLibraryPreview.tsx`, the button at l.304–311 only)
-- Add an `onKeyDown`: if `event.key === 'Enter'` and `event.repeat`, call `event.preventDefault()`. Nothing else happens. This is the round 98 Export-button rule.
-- No `stopPropagation`. Leave every other key and a non-repeated Enter alone.
-- `onClick`, `disabled`, `className` and the label stay the same. The ▶ მოუსმინე toggle does not change this round (see "Not decided" below).
+### T1 — ▶ მოუსმინე (`ArrangementLibraryPreview.tsx`, the toggle `<button>` at l.281–303 only)
+- Add an `onKeyDown` with exactly the ＋ დამატება rule from l.307–311: if `event.key === 'Enter'` and `event.repeat`, call `event.preventDefault()`. Nothing else happens.
+- Write the check as `event.repeat`, not `=== true`.
+- No `stopPropagation`. Leave every other key and a non-repeated Enter alone. Space is not touched this round: in the workspace, global Space is the transport shortcut (D-29z64 R2, C-R98-B1). B makes no claim about Space on the focused toggle; nobody has observed it.
+- `onClick`, `disabled`, `className`, `data-testid` and both labels stay the same. No other line in the file changes: no new import, state, ref, effect, helper or listener.
 
 **Why this is the smallest honest choice (B decision):**
-- The user contract is SRW-12 R12-L2: "Enter adds to the active track at the insert marker". One press means one add. A held key that silently adds a clip per auto-repeat is not part of that contract; each repeat is also a separate Undo step.
-- The guard sits at each of the three places that turn Enter into an add, and it only skips the repeats.
+- One press means one toggle, the same rule as SRW-12 R12-L2 (round 99) and the waveform handler (l.202–204). After a held Enter the preview starts and keeps playing; the repeats do not stop it.
 - Rejected alternatives:
-  - a de-duplication or time window inside `addSourceToActiveTrack`: it would also block a fast, deliberate second press, and it changes the frozen `ArrangementContext.tsx`;
-  - a "key is down" flag or keyup listener: it adds state and lifecycle;
-  - a guard on every button in the library or the workspace: no other button has a reported repeat bug, so that changes behaviour with no evidence;
-  - `stopPropagation` on ＋: other listeners must still see the key.
-- **Not decided this round:** a held Enter on ▶ მოუსმინე may toggle the preview on every repeat. B has not probed it. It is recorded as hypothesis `B-R98-H1-PREVIEW-TOGGLE-HOLD` for a later round. The waveform's own handler already ignores repeats (`ArrangementLibraryPreview.tsx` l.202–204).
+  - a repeat guard inside `startLibraryPreview` / `stopLibraryPreview`: it changes the frozen `ArrangementContext.tsx`, and the context cannot tell a key repeat from a mouse click;
+  - a time window or debounce: it would also block a deliberate fast second press;
+  - a shared helper for all six repeat-Enter sites: it touches frozen files and needs the root checkpoint first (`ARCH-R97-EXPORT-FOOTER-KEYBOARD`, addendum (l));
+  - `stopPropagation`: other listeners must still see the key.
 
-### New test — `app/lib/arrangement/__tests__/held-enter-add.test.tsx`
-Mount the real `StudioWorkspace` under `ArrangementProvider` with at least one **ready** library source. Use `grid-snap-ui.test.tsx` (`mountGridWorkspace`) and `library-preview.test.tsx` / `collection-load-status.test.tsx` as models. Copy what you need, and never import from a test file. Keep the copied audio fakes to the minimum the provider needs (ARCH-R93-TEST-HARNESS).
+### Tests — append to `app/lib/arrangement/__tests__/library-preview.test.tsx` (no new test file)
+This file already mounts `ArrangementLibraryPreview` under `ArrangementProvider` with a ready source. It also proves that a click on the toggle changes the label to `■ შეჩერება` (l.271–272). Reusing it avoids another copy of the audio fake harness (ARCH-R93-TEST-HARNESS).
+- **Append-only:** add new `it` blocks inside the existing `describe`, after the last existing `it` (which ends at l.285) and before the closing `});` at l.286. You may use its existing `mountPreview`, fakes, `beforeEach` and `afterEach`.
+- **No existing line changes.** `git diff -U0` must show one pure-addition hunk in this file.
+- If an extra cleanup is needed (for example a `document` listener), remove it inside the test with `try/finally`. The existing `afterEach` stays unchanged.
 
-Rules for the tests:
-- Count clips by their rendered `[data-clip-id]` elements. Record the count before each step.
-- Find the row by `role="option"` and its source id, and find ＋ დამატება by role and accessible name.
-- Dispatch every keydown to `document.activeElement` at that moment (real-keyboard semantics), unless a test names another target. After an add, focus is expected to stay on the row (B's probe: the active element stayed `demo-middle-east`); assert it.
+Rules:
+- Find the toggle by `data-testid="arrangement-library-preview-toggle"`. Read the label with `textContent` and assert exact values with `toBe`.
 - Use the return value of `fireEvent.keyDown(...)`: `false` means the default was prevented.
-- Assert exact values with `toBe`.
-- Use no type assertions, including `as const`, and no `@ts-` directives.
-- Restore all stubs and remove every added listener in `afterEach`.
+- Use no type assertions (including `as const`) and no `@ts-` directives.
 
 Tests:
-- **HA1 row, held:** on a focused ready row, `keyDown Enter repeat=false` adds exactly 1 clip. Two more `keyDown Enter repeat=true` each return `false` and add nothing. The total is +1.
-- **HA2 row, fresh presses:** two `keyDown Enter repeat=false` on the row add 2 clips.
-- **HA3 global, held:** select a ready source (click its row), then move focus to `document.body`. `keyDown Enter repeat=false` on `document.body` adds 1 and returns `false`. Two `repeat=true` keydowns return `false` and add nothing.
-- **HA4 global, fresh presses:** a second `repeat=false` keydown on `document.body` adds 1 more (2 in total).
-- **HA5 ＋, held:** on ＋ დამატება, `keyDown Enter repeat=true` returns `false` and `keyDown Enter repeat=false` returns `true`. No keydown changes the clip count (jsdom sends no click). Then `fireEvent.click` adds exactly 1.
-- **HA6 ＋, only Enter and no stopPropagation:** a repeated `'q'` keydown on ＋ returns `true` (`'q'` has no workspace shortcut at baseline; A confirms by reading the handler and records it). A bubble-phase `document` `keydown` listener receives the repeated Enter that ＋ prevented.
-- **HA7 held arrows still work:** on a focused row, two `keyDown ArrowDown repeat=true`, each sent to `document.activeElement` (the row handler moves focus between them), move `aria-selected` and focus two rows down.
-- **HA8 one Undo step:** after the HA1 sequence, one Ctrl+Z (the workspace shortcut) brings the clip count back to the count before HA1.
+- **HT1 held Enter:** on the toggle (`▶ მოუსმინე`):
+  - `keyDown Enter repeat=false` returns `true`;
+  - then two `keyDown Enter repeat=true` each return `false`;
+  - no keydown changes the label (jsdom sends no click);
+  - then one `fireEvent.click` gives `■ შეჩერება`.
+- **HT2 fresh presses:** two `keyDown Enter repeat=false` on the toggle each return `true`.
+- **HT3 only Enter, no stopPropagation:**
+  - a repeated `'q'` keydown on the toggle returns `true`;
+  - a bubble-phase `document` `keydown` listener receives the repeated Enter that the toggle prevented.
 
-**Fail-before:** in scratch, run the new file against the four baseline snapshots. B expects **HA1, HA3, HA5 and HA8 red**, and HA2, HA4, HA6 and HA7 green. Report the exact list and explain any difference. HA2, HA4, HA6 and HA7 are locks, not detectors: they pass on the baseline and only the mutations make them discriminate (HA6 only through mutations f and g).
+**Fail-before:** in scratch, run the extended file against the three baseline snapshots. B expects **HT1 red**, and HT2, HT3 and the four existing tests green. Report the exact list and explain any difference. HT2 and HT3 are locks; only mutations make them discriminate.
 
 **Mutations (scratch only; each must turn at least one named test red):**
-- a: remove the row guard (T1) → HA1
-- b: remove the global guard (T2) → HA3
-- c: remove the ＋ guard (T3) → HA5
-- d: the global branch never adds (drop the `repeat` check, skip every add) → HA4
-- e: the row branch never adds → HA2
-- f: the ＋ guard drops the `key` check (prevents every repeated key) → HA6
-- g: add `event.stopPropagation()` to the ＋ guard → HA6
-- h: the row skips every repeated key, arrows included → HA7
+- a: remove the toggle guard → HT1
+- b: the guard drops the `key` check (prevents every repeated key) → HT3
+- c: add `event.stopPropagation()` to the guard → HT3
+- d: the guard prevents every Enter, repeated or not → HT2
 
 Record the red tests for each mutation and for an unmutated control run.
 
 ### Docs
-- **Doc 086 l.4:** `**სტატუსი:** C PASS (Round 98), გამოქვეყნდა 736db33 (D-29z63)`, or the same meaning in the doc's style. Only l.4 changes.
-- **New doc** `docs/implementation/2026/quarter-IV/087-studio-held-enter-single-add.md`, in Georgian, following `docs/implementation/TEMPLATE.md`. Its status line says the round is waiting for C (D-29z64). Record:
-  - the three paths and B's Chromium reproduction (0 → 3 clips);
-  - why only the repeats are skipped, and the rejected alternatives;
-  - that this closes the global-Enter path from doc 086's second boundary for every browser, because the guard no longer depends on where focus lands;
-  - that the ▶ მოუსმინე toggle is a separate, unprobed hypothesis;
+- **Doc 087 l.4:** `**სტატუსი:** C PASS (Round 99), გამოქვეყნდა e2412db (D-29z64)`, or the same meaning in the doc's style. Only l.4 changes.
+- **New doc** `docs/implementation/2026/quarter-IV/088-studio-preview-toggle-hold-enter.md`, in Georgian, following `docs/implementation/TEMPLATE.md`. Its status line says the round is waiting for C (D-29z65). Record:
+  - B's Chromium reproduction (3 clicks, start/stop/start);
+  - the rule (one press = one toggle) and the rejected alternatives;
+  - that this closes `B-R98-H1-PREVIEW-TOGGLE-HOLD`, which doc 087 left as a hypothesis;
+  - that the repeat-Enter guard now lives in six places, and a shared helper waits for the root architecture checkpoint;
   - that environments which send auto-repeat as `repeat=false` remain the boundary from doc 085.
-- `docs/technical/arrangement-workspace.md` is **not** owned this round (frozen).
 
 ## 2. Checks A runs (speed rules)
 - `npm run typecheck`, `npm run lint`.
-- `npx vitest run` on these files, all under `app/lib/arrangement/__tests__/` unless a path says otherwise:
-  - the new file;
-  - `render-budget.test.tsx` (it counts library option and workspace renders; the edits must not change the counts);
-  - `library-preview.test.tsx`, `collection-load-status.test.tsx`, `purchased-collection-ui.test.tsx`, `failed-source-refusal.test.tsx`, `pending-status.test.tsx`;
-  - every other existing test file that greps for the touched names: `grep -rlE "ArrangementLibrary|ArrangementLibraryPreview|<StudioWorkspace|addSourceToActiveTrack|＋ დამატება|role: 'option'" app/ --include=*.test.ts --include=*.test.tsx`.
+- `npx vitest run` on these files:
+  - `app/lib/arrangement/__tests__/library-preview.test.tsx`;
+  - `app/lib/arrangement/__tests__/held-enter-add.test.tsx` (the sibling ＋ guard, unchanged);
+  - `app/lib/arrangement/__tests__/render-budget.test.tsx`;
+  - every other existing test file that greps for the touched names: `grep -rlE "ArrangementLibraryPreview|preview-toggle|მოუსმინე|startLibraryPreview|stopLibraryPreview" app/ --include=*.test.ts --include=*.test.tsx`.
 
-  Write the final list to `a-round-99/targeted-list.txt`.
-- Read-only Biome on the four code files (`npx biome check <files>`).
-- **code-reviewer** is required (5 changed or new code/doc files). Hand its Architecture note to B verbatim.
+  Write the final list to `a-round-100/targeted-list.txt`.
+- Read-only Biome on the component and the test file (`npx biome check <files>`).
+- **code-reviewer** is required (4 changed or new code/doc files). Hand its Architecture note to B verbatim.
 - No full suite and no `npm run verify`; those belong to the gate.
-- **Expected end state:** `git status --short` shows exactly **4 M** (`ArrangementLibrary.tsx`, `StudioWorkspace.tsx`, `ArrangementLibraryPreview.tsx`, doc 086) and **2 ??** (the new test file and doc 087). The frozen list stays 528/528. Write `a-round-99/end-hashes.txt` with the 6 files.
+- **Expected end state:** `git status --short` shows exactly **3 M** (`ArrangementLibraryPreview.tsx`, `library-preview.test.tsx`, doc 087) and **1 ??** (doc 088). The frozen list stays 531/531. Write `a-round-100/end-hashes.txt` with the 4 files.
 
-## 3. What C verifies (browser first, Playwright Chromium, fresh incognito context, no credentials)
+## 3. What C verifies (browser first, Playwright Chromium, fresh incognito context per scenario, no credentials)
 Every row runs at **1280×720 and 1440×900** unless noted. Use real keyboard and mouse input (`page.keyboard`, `page.mouse` or `locator.click`). Record the exact texts.
 
 Setup:
 - Decline consent. Wait until the `demo-middle-east` option is `draggable="true"` (ready).
-- Install a capture-phase `keydown` recorder once per context through `addInitScript`. It logs `key`, `repeat` and the active element (tag plus `data-source-id` or text). Log `click` events with their target text. C may reuse `c-round-98/tools/lib98.cjs` and B's `b-round-98-probe/*.cjs`.
-- Count clips with `[data-clip-id]`. Read the status from `[data-testid=arrangement-status]`.
-- "Held Enter" means: `keyboard.down('Enter')`, then 2 more `keyboard.down('Enter')` 50 ms apart, then `keyboard.up('Enter')`, then wait 1.2 s.
+- Install a capture-phase recorder through `addInitScript`. It logs:
+  - every `keydown` (`key`, `repeat`, active element);
+  - every `click` with its target;
+  - every change of the toggle label, with a timestamp (a MutationObserver, as in `b-round-99-probe/probe-toggle.cjs`).
+- Read `defaultPrevented` with a bubble listener installed late (C-R98-N4).
+- **Preview audio:** measure the output RMS with the same method as C round 96 FAIL-PREVIEW (`c-round-96/tools/r96.cjs`: output RMS 0.031 while playing, 0 after stop). Cite the method; do not invent a new one.
+- **"Held Enter" here is four keydowns:** `keyboard.down('Enter')`, then **3** more `keyboard.down('Enter')` 50 ms apart, then `keyboard.up('Enter')`, then wait 1.2 s.
+  - Use four keydowns so that the final state discriminates. Without the fix, four toggles end **stopped** (▶ მოუსმინე). With the fix, the preview ends **playing** (■ შეჩერება).
+  - The three-keydown probe ends in ■ either way, so it does not discriminate.
+- **Do not run G100-3 or any other route-loading row at the same time as a held-key measurement** (C-R99-N1: a Vite reload destroyed the page context).
 
 | ID | Action | PASS evidence |
 |---|---|---|
-| **HOLD-ROW** (primary) | Click the Middle East row. Held Enter. Then blur and press Ctrl+Z once (the same method as C round 98 ENTER-ADD-REG). | The recorder shows 1 keydown `repeat=false` and 2 `repeat=true`, all on the row. Clips go 0 → **1** (not 3). Record the status text. After one Ctrl+Z, clips are 0. Screenshot. |
-| **HOLD-BODY** (primary) | Click the Middle East row, then click the status text (focus moves to `body`; confirm `document.activeElement` is BODY). Held Enter. | The keydowns are on BODY. Clips go 0 → **1**. |
-| **HOLD-PLUS** (primary) | Click the Middle East row, then focus ＋ დამატება with `locator.focus()` (as in C round 98's Space probe) or by Tab from ▶ მოუსმინე; record which. Do not click ＋ (a click adds). Held Enter. | Clips go 0 → **1**. The 2 repeats on ＋ have `defaultPrevented=true` (read with a late bubble listener, see C-R98-N4), and there is exactly 1 click on ＋. |
-| **FRESH-ADD** (1280 only) | On the row, `keyboard.press('Enter')` twice, 300 ms apart. Then click ＋ twice. Then focus ＋ and `keyboard.press('Enter')` once. | Use a fresh context, or record the count before each step. Clips change by **+2**, then **+2**, then **+1**. Each `press('Enter')` keydown has `repeat=false`. Double-clicking a row still adds 1 clip (record before and after). |
-| **HELD-ARROW-REG** (1280 only) | Focus the Middle East row. `keyboard.down('ArrowDown')` 3 times 50 ms apart, then up. | The selection moves 3 rows to `demo-slow-rise`, as in B's probe. No clip is added. |
-| **SPACE-REG** (1280 only) | Add one clip with one Enter, click the status text, press Space, wait 1 s, press Space. | Play → Pause → Play, as seen in C round 98 (C-R98-B1 evidence). |
-| **CLOSE-HOLD-REG** (1280 only) | The round 98 CLOSE-HOLD row: click toolbar Export, focus on „დახურვა“, held Enter. | The dialog closes once and does not re-open, and focus is on Export. 0 clips added. |
-| **EXPORT-REG** (1280 only) | After HOLD-ROW (1 clip, re-added if undone), open Export with a click and run a WAV export to the end. | One download, which decodes as a real WAV (record sample rate, channels and duration > 0). |
+| **HOLD-TOGGLE** (primary) | Click the Middle East row. Focus ▶ მოუსმინე with `locator.focus()` (record it). Do not click the toggle. Held Enter (4 keydowns). | <ul><li>The recorder shows 4 keydowns on the toggle: `repeat` false/true/true/true.</li><li>There is **exactly 1 click** on the toggle.</li><li>The 3 repeats have `defaultPrevented=true`.</li><li>The label changes **once** (▶ მოუსმინე → ■ შეჩერება) and is still ■ შეჩერება 1.2 s after keyup.</li><li>The output RMS is > 0 at 1.2 s.</li><li>0 clips are added.</li><li>Then one `keyboard.press('Enter')` gives ▶ მოუსმინე, and RMS is 0 within 400 ms.</li><li>Screenshot.</li></ul> |
+| **FRESH-TOGGLE** (1280 only) | On the focused toggle, `keyboard.press('Enter')` twice, 300 ms apart. Then click the toggle twice with the mouse, 300 ms apart. | Each step makes exactly 1 click and 1 label change: ▶ → ■ → ▶, then ▶ → ■ → ▶. Every `press` keydown has `repeat=false`. RMS > 0 while ■ and 0 after ▶. |
+| **WAVE-REG** (1280 only) | Focus the preview waveform and hold Enter (4 keydowns). | The preview toggles once (its own handler, l.202–204, unchanged). Record the label and RMS. |
+| **HOLD-PLUS-REG** (1280 only) | Round 99 HOLD-PLUS: focus ＋ დამატება, held Enter (4 keydowns). | Clips 0 → **1**, exactly 1 click on ＋. |
+| **HOLD-ROW-REG** (1280 only) | Round 99 HOLD-ROW: focus the Middle East row, held Enter (4 keydowns). | Clips 0 → **1**. |
+| **EXPORT-REG** (1280 only) | After HOLD-ROW-REG (1 clip), open Export with a click and run a WAV export to the end. | One download that decodes as a real WAV (record sample rate, channels and duration > 0). |
 | **PX-NET** | all sessions | 0 requests to `/api/studio-token`, R2, `/api/recording-*` or `/api/download`, and 0 `Authorization` headers. |
 | **REG-HYD** | all sessions | No hydration warning, no non-noise console error, no pageerror. |
-| **G99-3** | anonymous | The header link opens `/studio-lab` with the workspace and the demo badge. `/studio/middle-east` shows sign-in and no workspace. `/api/studio-token` returns 401. The fake-Bearer sub-check is BLOCKED (backend unavailable in cloud); list it under `blocked`. |
-| **AN-REVIEW** | Review A's tests. | The fail-before list matches §1, or A explains the difference. C re-runs mutations a, b, c and g in its own scratch and gets the same red tests. Assertions are exact, and the new file has no `as` and no `@ts-`. |
-| **T99-TARGETED** | `npx vitest run $(cat a-round-99/targeted-list.txt)` | All pass. Record the files and test counts. C re-runs the grep from §2 and reports any missing file. |
-| **SOURCE-UNCHANGED** | start and end | HEAD `736db33`; 4 M + 2 ??; frozen 528/528; A's end hashes match. The `git diff -U0` hunks lie only in: `ArrangementLibrary.tsx` l.242–247, `StudioWorkspace.tsx` l.1960–1968, `ArrangementLibraryPreview.tsx` l.304–311, and doc 086 l.4. |
+| **G100-3** | anonymous, run alone | <ul><li>The header link opens `/studio-lab` with the workspace and the demo badge.</li><li>`/studio/middle-east` shows sign-in and no workspace.</li><li>`/api/studio-token` returns 401.</li><li>The fake-Bearer sub-check is BLOCKED (backend unavailable in cloud); list it under `blocked`.</li></ul> |
+| **AN-REVIEW** | Review A's tests. | <ul><li>The fail-before list matches §1, or A explains the difference.</li><li>C re-runs mutations a, b and c in its own scratch and gets the same red tests.</li><li>Assertions are exact, and the added lines have no `as` and no `@ts-`.</li><li>The test hunk is a pure addition after the last existing `it`.</li></ul> |
+| **T100-TARGETED** | `npx vitest run $(cat a-round-100/targeted-list.txt)` | All pass. Record the files and test counts. C re-runs the grep from §2 and reports any missing file. |
+| **SOURCE-UNCHANGED** | start and end | <ul><li>HEAD is `e2412db`, with 3 M + 1 ??.</li><li>The frozen list is 531/531, and A's end hashes match.</li><li>The `git diff -U0` hunks lie only in `ArrangementLibraryPreview.tsx` l.281–303 (the toggle element), one pure addition in `library-preview.test.tsx` after l.285, and doc 087 l.4.</li></ul> |
 
 Gate rows (C does not claim them; list them under `gate`): full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED.
 
 **Neighbouring behaviour that could break:**
-- A single Enter on a row, on `body` with a selected source, or on ＋ still adds one clip at the insert marker, with the same status text.
-- Double-click on a row and a mouse click on ＋ still add.
-- Held arrow keys in the library still move the selection.
-- The global Space play/stop and the round 97–98 Export held-Enter guards.
-- The render counts in `render-budget.test.tsx`.
+- A single Enter or a mouse click on the toggle still starts and stops the preview, and the preview is really audible.
+- The waveform keyboard handler (Space/Enter toggle, arrows, Home/End).
+- Round 99's ＋ and row guards.
+- Global Space play/stop. The transport and the preview never play together (R12-L3).
 - The export still produces a real decodable file.
 
 ## 4. Ableton correspondence
 | Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
 |---|---|---|---|---|
-| One held Enter adds one clip from the library | none consulted | — | CZABA's own rule from SRW-12 R12-L2 (one press = one add). B makes no claim about Live's browser and key repeat. | დაუდასტურებელი |
-| Space on a focused workspace button plays/stops instead of activating it (C-R98-B1) | none consulted | — | CZABA's existing global transport shortcut, kept by B decision. | დაუდასტურებელი |
+| One held Enter on the preview button toggles the preview once | none consulted | — | CZABA's own rule (one press = one action; SRW-12 R12-L2, round 99). B makes no claim about Live's browser preview and key repeat. | დაუდასტურებელი |
 
 No Ableton claim is made.
 
 ## 5. Report (A)
-Write `a-round-99.md` and `a-round-99-result.json` as you go. Include:
+Write `a-round-100.md` and `a-round-100-result.json` as you go. Include:
 - the changed files with their end sha256;
 - the exact commands you ran and their results;
 - the pre-edit and post-edit browser reproduction;

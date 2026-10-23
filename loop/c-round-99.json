@@ -1,0 +1,53 @@
+{
+ "taskStatus": "PASS",
+ "round": 99,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T04:09:33.6870630Z",
+  "round": 99,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "HOLD-ROW",
+  "HOLD-BODY",
+  "HOLD-PLUS",
+  "FRESH-ADD",
+  "HELD-ARROW-REG",
+  "SPACE-REG",
+  "CLOSE-HOLD-REG",
+  "EXPORT-REG",
+  "PX-NET",
+  "REG-HYD",
+  "G99-3",
+  "AN-REVIEW",
+  "T99-TARGETED",
+  "SOURCE-UNCHANGED"
+ ],
+ "blocked": [
+  "G99-3 fake-Bearer sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "ableton": {
+  "held-enter-single-add": "დაუდასტურებელი (no Ableton source; CZABA rule SRW-12 R12-L2)",
+  "space-on-focused-button": "დაუდასტურებელი (no Ableton source)"
+ },
+ "notes": [
+  "N1: 1440 HOLD-BODY first attempt invalid (page navigation during setup, 'Execution context was destroyed' before any action); replaced by one re-run that passed (budget: 1 of 2 extra attempts). Probable cause: G99-3 (run-g993.cjs) ran concurrently against the same dev server and loaded / and /studio/middle-east first in this job; Vite dep re-optimization reloads all connected clients. Environment artifact, not app behaviour; do not run G-rows concurrently with held-key measurements.",
+  "N2: EXPORT-REG WAV has 30 full-scale samples (peak 1.0); pre-existing demo-content pattern (C r97 N3, C r98 486), not this round.",
+  "N3: HOLD-ROW repeats show defaultPrevented NOT-REACHED at window because the row handler stops propagation (expected).",
+  "N4: root-pre-push-review.md and publication-checkpoint.json are from round 3 (2026-10-07) and stale; no new remaining findings for this round.",
+  "N5: B-R98-H1-PREVIEW-TOGGLE-HOLD (held Enter on ▶ მოუსმინე) not probed by C this round; remains a hypothesis for B."
+ ],
+ "evidence": "tmp/studio-real-loop/c-round-99/ (out/run99-*.json, out/g993.json, out/mut99.json, out/targeted-c.log, out/px-net-agg.json, shots/*.png, start-hashes.txt)"
+}

@@ -1,9 +1,9 @@
 {
- "version": 97,
- "updated": "2026-10-23 (B round 98 review -> round 99 task, D-29z64)",
+ "version": 98,
+ "updated": "2026-10-23 (B round 99 -> round 100 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 99: D-29z64 - B-R98-HELD-ENTER-MULTI-ADD: a held Enter adds one clip, not one per auto-repeat, on the library row (ArrangementLibrary.tsx l.242-247), the global Enter (StudioWorkspace.tsx l.1960-1968) and the + add button (ArrangementLibraryPreview.tsx l.304-311); GATE98-S5 doc 086 l.4; new held-enter-add.test.tsx HA1-HA8; new doc 087; baseline 736db33, frozen 528, expected 4 M + 2 ??)",
+ "current_task": "current-task.md (round 100: D-29z65 - B-R98-H1-PREVIEW-TOGGLE-HOLD: held Enter on ▶ მოუსმინე toggles the preview once (ArrangementLibraryPreview.tsx l.281-303, onKeyDown Enter && repeat -> preventDefault); HT1-HT3 appended to library-preview.test.tsx; GATE99-S1 doc 087 l.4; new doc 088; baseline e2412db, frozen 531, expected 3 M + 1 ??)",
  "advisor_used_by_B": "round 95 planning: advisor available and consulted (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
@@ -2327,7 +2327,8 @@
     "detail": "stems 16.000 s/48 kHz/stereo, pairwise |rho| max 0.0031, sum vs mix 2.98e-8, 3-stem export vs JS sum 8.94e-8; find->stems->preview->drag->play->export at 10.000125 s",
     "manual": "R12-L4 real-mouse HTML5 drag -> Tech Lead list",
     "later_rounds": [
-     "c-round-20.md §2.13, §2.16, §2.17 milestone regression R5-B5, R12-L2 (both viewports), R12-L4 synthetic half PASS; real HTML5 drag stays Tech Lead"
+     "c-round-20.md §2.13, §2.16, §2.17 milestone regression R5-B5, R12-L2 (both viewports), R12-L4 synthetic half PASS; real HTML5 drag stays Tech Lead",
+     "c-round-99.md HOLD-ROW/HOLD-BODY/HOLD-PLUS both viewports, FRESH-ADD, HELD-ARROW-REG (held Enter adds one clip)"
     ]
    },
    "open_bugs": [
@@ -2368,7 +2369,7 @@
    ],
    "round34_note": "FOCUS-TEXT-STALE (Medium, C round 33): after search typing, a timeline click leaves focus in the search and Backspace edits the hidden filter -> round 34; feature-status shows SRW-12 as bug until C passes R34-TS",
    "round35_note": "FOCUS-TEXT-STALE closed by C round 34 (R34-TS); functions C-verified; remaining manual: Tech Lead R12-L4, R17-T, R34-T(1)/(3)",
-   "open_bug": "B-R98-HELD-ENTER-MULTI-ADD (Low, round 99): held Enter adds one clip per auto-repeat (B probe, Chromium); R12-L2 one press = one add"
+   "open_bug": "B-R98-H1-PREVIEW-TOGGLE-HOLD (Low, round 100): held Enter on ▶ მოუსმინე toggles the preview once per auto-repeat (B Chromium probe). B-R98-HELD-ENTER-MULTI-ADD closed by C round 99. When round 100 closes with C PASS, feature-status returns to მოწმდება (Tech Lead R12-L4/R17-T/R34-T remain), the status before round 99."
   },
   {
    "id": "SRW-13",
@@ -8439,7 +8440,7 @@
    "round": 99,
    "task": "current-task.md",
    "decision": "D-29z64",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "B-R98-HELD-ENTER-MULTI-ADD",
     "GATE98-S5-DOC086-STATUS"
@@ -8470,6 +8471,38 @@
     "G99-3",
     "AN-REVIEW",
     "T99-TARGETED",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C PASS browserVerified=true realVerified=true (HOLD-ROW, HOLD-BODY, HOLD-PLUS both viewports 0 -> 1; FRESH-ADD; HELD-ARROW-REG; SPACE-REG; CLOSE-HOLD-REG; EXPORT-REG real WAV 101.352 s; PX-NET; REG-HYD; G99-3 (fake-Bearer BLOCKED backend); AN-REVIEW; T99-TARGETED 55/969; SOURCE-UNCHANGED); 0 bugs; gate 99 published e2412db (reviewer 9/10)"
+  },
+  {
+   "round": 100,
+   "task": "current-task.md",
+   "decision": "D-29z65",
+   "status": "dispatched",
+   "items": [
+    "B-R98-H1-PREVIEW-TOGGLE-HOLD",
+    "GATE99-S1-DOC087-STATUS"
+   ],
+   "note": "held Enter on the preview toggle toggles once (last held-Enter site on the SRW-12 library panel). baseline HEAD e2412db clean; frozen b-round-99-r100-tree-sha256.txt 531/531; snapshots b-round-99-r100-snapshots; expected 3 M + 1 ??; library-preview.test.tsx granted append-only (no new harness copy); ArrangementLibrary/StudioWorkspace/ArrangementContext/ArrangementExportDialog/ArrangementTransport frozen. Regression round not due (2026-10-21 -> 2026-10-23 = 2 days); next B planning on/after 2026-10-24 is the regression round.",
+   "owned": [
+    "app/components/arrangement/ArrangementLibraryPreview.tsx (▶ მოუსმინე <button> l.281-303 only: onKeyDown Enter && repeat -> preventDefault)",
+    "app/lib/arrangement/__tests__/library-preview.test.tsx (append-only: HT1-HT3 after l.285)",
+    "docs/implementation/2026/quarter-IV/087-studio-held-enter-single-add.md (l.4)",
+    "docs/implementation/2026/quarter-IV/088-studio-preview-toggle-hold-enter.md (new)"
+   ],
+   "c_ids": [
+    "HOLD-TOGGLE",
+    "FRESH-TOGGLE",
+    "WAVE-REG",
+    "HOLD-PLUS-REG",
+    "HOLD-ROW-REG",
+    "EXPORT-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G100-3",
+    "AN-REVIEW",
+    "T100-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -14053,7 +14086,10 @@
    "status": "open - environment: only Chromium is installed on the cloud runner and agents may not install browsers; not schedulable in the cloud; Tech Lead manual check (Firefox/WebKit held Enter on Close and toolbar Export) or a later environment with those browsers; gate 98 suggestion 4 / A round 98 reviewer Low #1 (Safari/macOS Firefox mouse-open leaves focus on body) merged here; its global-Enter consequence is fixed for every browser by round 99 T2 (repeat ignored regardless of focus)",
    "to": "Tech Lead / root environment",
    "title": "held-Enter guards verified only in Chromium (Firefox activates buttons via keypress; keydown preventDefault should suppress it, unverified)",
-   "evidence": "gates/round-97/review.md suggestion 2; c-round-97.json C-R97-N1-CHROMIUM-ONLY"
+   "evidence": "gates/round-97/review.md suggestion 2; c-round-97.json C-R97-N1-CHROMIUM-ONLY",
+   "data_points": [
+    "gate 99 review: Firefox keypress suppression after a cancelled keydown is reasoned from the spec, not tested; doc 087 records it"
+   ]
   },
   {
    "id": "GATE97-S3-DOC085-STATUS",
@@ -14088,7 +14124,8 @@
    "title": "ArrangementExportDialog.tsx footer l.484-571 changed in docs 078, 085 and planned GATE89-S4/S6",
    "evidence": "gates/round-97/review.md Architecture note",
    "data_points": [
-    "round 98 gate + A reviewers: repeat-Enter guard at 2 sites, keep; round 99 adds 3 more (row, global, + button) -> isRepeatedEnter helper question in addendum (k); checkpoint after the Export Lows"
+    "round 98 gate + A reviewers: repeat-Enter guard at 2 sites, keep; round 99 adds 3 more (row, global, + button) -> isRepeatedEnter helper question in addendum (k); checkpoint after the Export Lows",
+    "gate 99 reviewer Signal 3 (keep): repeat-Enter guard at 5 sites after round 99 (3 inline button guards ArrangementTransport l.250, ArrangementLibraryPreview l.308, ArrangementExportDialog l.542; !event.repeat in StudioWorkspace l.1967, ArrangementLibrary l.245); round 100 adds a 6th (preview toggle). Proposal: one bounded shared-helper task in app/lib/arrangement with one unit test, value low, risk low. Not scheduled; addendum (l) to b-round-91-checkpoint-request.md; request the root checkpoint at the SRW-12 held-Enter family boundary (after round 100) or after the Export Lows"
    ]
   },
   {
@@ -14143,27 +14180,62 @@
   {
    "id": "B-R98-HELD-ENTER-MULTI-ADD",
    "severity": "low",
-   "status": "dispatched round 99 (D-29z64)",
+   "status": "closed - C round 99 PASS (HOLD-ROW, HOLD-BODY, HOLD-PLUS both viewports 0 -> 1; FRESH-ADD +2/+2/+1; HELD-ARROW-REG; HA1-HA8 fail-before HA1/HA3/HA5/HA8, mutations a,b,c,g re-run by C); gate 99 published e2412db",
    "to": "A round 99",
    "title": "a held Enter adds one clip per auto-repeat keydown on the library row, the global Enter (focus on body) and the + add button",
    "evidence": "b-round-98-probe/probe-result.json (row 0->3, statusClick body 0->3, jsBlur 0->3), probe-result-plus.json (+ button 0->3); gate 98 review suggestion 4 and A round 98 reviewer Low #1 (inferred Safari path); SRW-12 R12-L2 contract",
-   "item": "SRW-12"
+   "item": "SRW-12",
+   "closed_evidence": "c-round-99.md, c-round-99.json, gates/gate-round-99.json"
   },
   {
    "id": "GATE98-S5-DOC086-STATUS",
    "severity": "low",
-   "status": "dispatched round 99 (doc 086 l.4)",
+   "status": "closed - C round 99 SOURCE-UNCHANGED (doc 086 l.4 hunk) + gate 99 published e2412db",
    "to": "A round 99",
    "title": "doc 086 l.4 still says awaiting C although C round 98 passed and gate 98 published 736db33",
-   "evidence": "docs/implementation/2026/quarter-IV/086-studio-toolbar-export-hold-enter.md l.4 at 736db33"
+   "evidence": "docs/implementation/2026/quarter-IV/086-studio-toolbar-export-hold-enter.md l.4 at 736db33",
+   "closed_evidence": "c-round-99.md; gates/gate-round-99.json"
   },
   {
    "id": "B-R98-H1-PREVIEW-TOGGLE-HOLD",
    "severity": "low",
-   "status": "hypothesis - not probed; schedule a probe with a later library round",
-   "to": "B",
+   "status": "confirmed by B browser probe (2026-10-23) - dispatched round 100 (D-29z65)",
+   "to": "A round 100",
    "title": "held Enter on the preview toggle button (▶ მოუსმინე) may toggle the preview once per repeat (the waveform handler already ignores repeats, l.202-204)",
-   "evidence": "ArrangementLibraryPreview.tsx at 736db33 (code reading only)"
+   "evidence": "b-round-99-probe/probe-toggle-result.json: held3 = 3 keydowns (repeat false/true/true) on the focused toggle -> 3 clicks, label ▶ მოუსმინე -> ■ შეჩერება -> ▶ მოუსმინე -> ■ შეჩერება; fresh1 = 1 click; gate 99 review Low #2 (fix once reproduced)",
+   "item": "SRW-12"
+  },
+  {
+   "id": "GATE99-S1-DOC087-STATUS",
+   "severity": "low",
+   "status": "dispatched round 100 (doc 087 l.4)",
+   "to": "A round 100",
+   "title": "doc 087 l.4 still says awaiting C although C round 99 passed and gate 99 published e2412db",
+   "evidence": "gates/round-99/review.md finding 1; doc 087 l.4 at e2412db"
+  },
+  {
+   "id": "GATE99-S3-INLINE-ARROW-KEYDOWN",
+   "severity": "info",
+   "status": "recorded - keep (reviewer: trivial cost, existing pattern); part of ARCH-R97-EXPORT-FOOTER-KEYBOARD signal",
+   "to": "-",
+   "title": "inline onKeyDown arrow on + დამატება recreated per render",
+   "evidence": "gates/round-99/review.md finding 3"
+  },
+  {
+   "id": "C-R99-N1-CONCURRENT-ROUTE-LOAD",
+   "severity": "info",
+   "status": "recorded - C/B method note: do not run route-loading G rows concurrently with held-key measurements (Vite dep re-optimization reloads clients); written into round 100 setup",
+   "to": "C",
+   "title": "1440 HOLD-BODY first attempt invalid: page context destroyed during setup",
+   "evidence": "c-round-99.json notes N1"
+  },
+  {
+   "id": "C-R99-N2-N5-INFO",
+   "severity": "info",
+   "status": "recorded - N2 WAV full-scale samples = DEMO-SFX-FULL-SCALE pattern; N3 row stops propagation by design; N4 root-pre-push-review/publication-checkpoint stale (round 3), no remaining findings; N5 superseded by B probe (B-R98-H1 confirmed)",
+   "to": "-",
+   "title": "C round 99 notes N2-N5",
+   "evidence": "c-round-99.json notes"
   }
  ],
  "tech_lead_notes": [
@@ -15553,6 +15625,16 @@
    "app/components/arrangement/StudioWorkspace.tsx",
    "app/components/arrangement/ArrangementLibraryPreview.tsx",
    "docs/implementation/2026/quarter-IV/086-studio-toolbar-export-hold-enter.md"
+  ]
+ },
+ "baseline_tree_at_round100": {
+  "head": "e2412db337e9015def8dc6855358437b900ff51e",
+  "list": "tmp/studio-real-loop/b-round-99-r100-tree-sha256.txt",
+  "count": 531,
+  "excluded": [
+   "app/components/arrangement/ArrangementLibraryPreview.tsx",
+   "app/lib/arrangement/__tests__/library-preview.test.tsx",
+   "docs/implementation/2026/quarter-IV/087-studio-held-enter-single-add.md"
   ]
  }
 }

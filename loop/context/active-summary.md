@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T03:36:47.432Z)
+# Active loop summary (2026-10-23T04:24:08.074Z)
 
-- backlog.json 859 KB -> active view 169 KB
-- status: G_ROOT_GATE round 98
-- servers: `{"checkedUtc":"2026-10-23T03:20:51.2967828Z","round":98,"attempt":1,"store":200}`
-- last publication: 736db33c339bcef4757535d60524c2f92d7e6587 (rounds 98-98)
-- last root gate: round 98 published - commit 736db33c339bcef4757535d60524c2f92d7e6587 pushed
+- backlog.json 866 KB -> active view 171 KB
+- status: G_ROOT_GATE round 99
+- servers: `{"checkedUtc":"2026-10-23T04:09:33.6870630Z","round":99,"attempt":1,"store":200}`
+- last publication: e2412db337e9015def8dc6855358437b900ff51e (rounds 99-99)
+- last root gate: round 99 published - commit e2412db337e9015def8dc6855358437b900ff51e pushed
 
 ## Current items: -
 
@@ -311,11 +311,13 @@
 - GATE96-S2-REPEATED-STATUS-NOT-ANNOUNCED / low / open - Lows batch (a11y, pre-existing, not a regression; needs a design choice: counter vs clear-and-set; owner StudioWorkspace/ArrangementContext status) / an identical status text set twice (e.g. Enter twice on a failed row) causes no re-render, so the aria-live=polite region does not announce 
 - GATE96-S3-DOUBLE-STATE-READ / info / open - nit, not scheduled (fold into the refusal-mapping proposal if that is approved) / startLibraryPreview reads latestRef.current.sourceStates[sourceId] twice while the add path uses one local state
 - ARCH-R96-REFUSAL-MAPPING / info / open - architecture signal, not scheduled; both A's reviewer and the gate 96 reviewer (independently) flag Signal 3; added to the q14 checkpoint request addendum (b-round-91-checkpoint-request.md) / library refusal texts in ArrangementContext.tsx (l.1204-1208, l.1317-1325, l.1391) changed in rounds 95-96, each needing a full provider mou
-- GATE97-S1-TOOLBAR-EXPORT-HOLD-REOPEN / low / dispatched round 98 (D-29z63): toolbar Export button onKeyDown Enter && repeat -> preventDefault only; new export-toolbar-hold-enter.test.tsx TH1-TH5 / held Enter on Close closes the dialog, focus restore moves focus to toolbar Export, the next repeat keydown re-opens the dialog
-- GATE97-S2-CHROMIUM-ONLY-HOLD-ENTER / low / open - environment: only Chromium is installed on the cloud runner and agents may not install browsers; not schedulable in the cloud; Tech Lead manual check (Firefox/WebKit held Enter on Close and toolbar Export) or a later environment with those browsers / held-Enter guards verified only in Chromium (Firefox activates buttons via keypress; keydown preventDefault should suppress it, unverified)
-- GATE97-S3-DOC085-STATUS / low / dispatched round 98 (doc 085 l.4) / doc 085 l.4 still says awaiting C although C round 97 passed
-- GATE97-S4-REPEAT-EQ-TRUE-NIT / info / open - routed with GATE89-S4 (same ArrangementExportDialog.tsx footer region, next Export Lows round); round 98 keeps the dialog frozen / event.repeat === true at ArrangementExportDialog.tsx l.542 is redundant (repeat is boolean)
+- GATE97-S2-CHROMIUM-ONLY-HOLD-ENTER / low / open - environment: only Chromium is installed on the cloud runner and agents may not install browsers; not schedulable in the cloud; Tech Lead manual check (Firefox/WebKit held Enter on Close and toolbar Export) or a later environment with those browsers; gate 98 suggestion 4 / A round 98 reviewer Low #1 (Safari/macOS Firefox mouse-open leaves focus on body) merged here; its global-Enter consequence is fixed for every browser by round 99 T2 (repeat ignored regardless of focus) / held-Enter guards verified only in Chromium (Firefox activates buttons via keypress; keydown preventDefault should suppress it, unverified)
+- GATE97-S4-REPEAT-EQ-TRUE-NIT / info / open - routed with GATE89-S4 (same ArrangementExportDialog.tsx footer region, next Export Lows round); round 98 keeps the dialog frozen; gate 98 review suggestion 1 repeats it (style mismatch with ArrangementTransport.tsx l.250) / event.repeat === true at ArrangementExportDialog.tsx l.542 is redundant (repeat is boolean)
 - ARCH-R97-EXPORT-FOOTER-KEYBOARD / info / open - architecture signal, not scheduled; gate 97 reviewer Signal 3 (keep); proposal: after the Export Lows, one frontend-architect checkpoint on gathering export dialog keyboard/focus rules (initial focus, restore, Tab groups, repeat guard) and a shared test harness; 'refactor not worth it now' is a valid outcome; added as addendum (j) to b-round-91-checkpoint-request.md / ArrangementExportDialog.tsx footer l.484-571 changed in docs 078, 085 and planned GATE89-S4/S6
+- GATE98-S2-TH1-HELPER-DUP / low / open - Lows batch (test hygiene; with ARCH-R93-TEST-HARNESS fixture task) / export-toolbar-hold-enter.test.tsx TH1 copies closeAfterClick body to also check the spy count
+- B-R98-HELD-ENTER-MULTI-ADD / low / dispatched round 99 (D-29z64) / a held Enter adds one clip per auto-repeat keydown on the library row, the global Enter (focus on body) and the + add button
+- GATE98-S5-DOC086-STATUS / low / dispatched round 99 (doc 086 l.4) / doc 086 l.4 still says awaiting C although C round 98 passed and gate 98 published 736db33
+- B-R98-H1-PREVIEW-TOGGLE-HOLD / low / hypothesis - not probed; schedule a probe with a later library round / held Enter on the preview toggle button (▶ მოუსმინე) may toggle the preview once per repeat (the waveform handler already ignores repeats, l
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video

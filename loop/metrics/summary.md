@@ -1,13 +1,12 @@
-# Loop metrics (2026-10-23T03:49:55.803Z)
+# Loop metrics (2026-10-23T04:35:31.525Z)
 
-- rounds: 98; cost $2814.83 total, last 10 avg $18.05/round; agent time 165.0 h
-- C: PASS 69, FAIL 25, BLOCKED 4; bugs c/h/m/l 0/3/37/82
+- rounds: 99; cost $2830.99 total, last 10 avg $17.67/round; agent time 165.7 h
+- C: PASS 70, FAIL 25, BLOCKED 4; bugs c/h/m/l 0/3/37/82
 - rounds without a real check: 63, 72; agent errors 25
-- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published, 98:published
+- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published, 98:published, 99:published
 
 | round | C | bugs c/h/m/l | real | $ | h | err | gate |
 |---|---|---|---|---|---|---|---|
-| 84 | PASS | 0/0/1/1 | yes | 31.09 | 1.01 | 0 | published |
 | 85 | PASS | 0/0/0/2 | yes | 31.42 | 0.98 | 0 | published |
 | 86 | PASS | 0/0/0/0 | yes | 31.26 | 1.13 | 1 | published |
 | 87 | FAIL | 0/0/1/0 | yes | 34.35 | 1.65 | 0 | skipped |
@@ -22,3 +21,4 @@
 | 96 | PASS | 0/0/0/0 | yes | 11.20 | 0.48 | 0 | published |
 | 97 | PASS | 0/0/0/0 | yes | 14.81 | 0.35 | 0 | published |
 | 98 | PASS | 0/0/0/1 | yes | 19.65 | 0.67 | 0 | published |
+| 99 | PASS | 0/0/0/0 | yes | 16.15 | 0.66 | 0 | published |
