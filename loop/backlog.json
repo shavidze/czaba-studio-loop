@@ -1,9 +1,9 @@
 {
- "version": 92,
- "updated": "2026-10-22 (B round 92 review -> round 93 task, D-29z58)",
+ "version": 93,
+ "updated": "2026-10-23 (B round 93 review -> round 94 task, D-29z59)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 93: D-29z58 - Lows batch part 1, export dialog: GATE91-S1 + A-R86-L7 (radio accessible name = main text via aria-labelledby, note/reason via aria-describedby, label textContent byte-identical) + A-R86-L8 (no-sound and master-mute notes follow the selected format: WAV/MP3/WAV და MP3 შეიქმნება); new export-dialog-a11y-copy.test.tsx AN1-AN6 NC1-NC3; doc 080 l.4; doc 081; baseline 64e12d8, frozen 518, expected 2 M + 2 ??)",
+ "current_task": "current-task.md (round 94: D-29z59 - Lows batch part 2, collection load status: COLLECTION-EMPTY-STATUS (new copy.empty per origin, no loadSource on empty) + GATE92-S1 (setStatus(copy.loading) at the start of the load effect, stale settles stay ignored) + GATE92-S2 (purchased MP3 names PM1); new collection-load-status.test.tsx LS1-LS7 PM1; collection.test.ts PC9 empty keys; doc 081 l.4; arrangement-workspace.md l.44; new doc 082; baseline 85fcb05, frozen 518, expected 5 M + 2 ??)",
  "advisor_used_by_B": "round 92 planning: advisor available and consulted (2026-10-22)",
  "baseline": {
   "tsc_errors": 0,
@@ -4977,7 +4977,7 @@
    "depends_on": [
     "SRW-20"
    ],
-   "status": "blocked-partial (route mount: auth owner; stage 1 C PASS round 92 browserVerified=true, published 64e12d8 - demo path browser-verified, purchased path unit-only until the mount is released; R21-I2 full regression open)",
+   "status": "blocked-partial (route mount: auth owner; stage 1 C PASS round 92 browserVerified=true, published 64e12d8 - demo path browser-verified, purchased path unit-only until the mount is released; load-status hardening for the mount dispatched round 94; R21-I2 full regression open)",
    "blocked_reason": "app/routes/studio.$productId.tsx and studio-token flow are owned by the auth agent; mounting the workspace there is forbidden until released by Tech Lead",
    "independent_progress": "WorkspaceCollection/loadSource adapter contract tests with a fake purchased adapter (no network/auth); docs for the future mount; full regression of SRW-01..SRW-20 by C",
    "files": [
@@ -8233,7 +8233,7 @@
    "round": 93,
    "task": "current-task.md",
    "decision": "D-29z58",
-   "status": "dispatched",
+   "status": "c_pass_published (C round 93 PASS browserVerified=true realVerified=true 0 bugs; gate 93 published 85fcb059b8d35ce854559610178b42c5894e1f69)",
    "items": [
     "GATE91-S1-NOTE-IN-LABEL",
     "A-R86-L7-REASON-READ-TWICE",
@@ -8260,6 +8260,41 @@
     "G93-3",
     "AN-REVIEW",
     "T93-TARGETED",
+    "SOURCE-UNCHANGED"
+   ],
+   "result": "C PASS 13 rows; blocked only fake-Bearer 403 (backend unavailable in cloud); closes GATE91-S1, A-R86-L7, A-R86-L8"
+  },
+  {
+   "round": 94,
+   "task": "current-task.md",
+   "decision": "D-29z59",
+   "status": "dispatched",
+   "items": [
+    "COLLECTION-EMPTY-STATUS",
+    "GATE92-S1-STATUS-NOT-RESET-ON-SWAP",
+    "GATE92-S2-PURCHASED-MP3-NAMES-TEST",
+    "GATE93-S1-DOC081-STATUS"
+   ],
+   "note": "Lows batch part 2 (collection load status). baseline HEAD 85fcb05 clean; frozen b-round-93-r94-tree-sha256.txt 518/518; snapshots b-round-93-r94-snapshots; expected 5 M + 2 ??; only collection.test.ts PC9 granted among existing tests",
+   "owned": [
+    "app/contexts/ArrangementContext.tsx (L1: load effect l.3000-3016)",
+    "app/lib/arrangement/collection.ts (L2: copy interface + objects l.4-29, new empty field)",
+    "app/lib/arrangement/__tests__/collection.test.ts (PC9 l.371-392 empty keys only)",
+    "app/lib/arrangement/__tests__/collection-load-status.test.tsx (new LS1-LS7, PM1)",
+    "docs/implementation/2026/quarter-IV/081-studio-lab-export-dialog-names-and-notes.md (l.4)",
+    "docs/technical/arrangement-workspace.md (l.44)",
+    "docs/implementation/2026/quarter-IV/082-studio-workspace-collection-load-status.md (new)"
+   ],
+   "c_ids": [
+    "DEMO-LOAD-REG",
+    "STATUS-PERSIST",
+    "EMPTY-SWAP-REACH",
+    "EXPORT-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G94-3",
+    "AN-REVIEW",
+    "T94-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -13222,7 +13257,7 @@
   {
    "id": "PROD-MP3-UNVERIFIED",
    "severity": "low",
-   "status": "open evidence: gate 92 verify.log (grep preview/e2e/mp3) again shows only unit tests and the build, no preview-server WAV/MP3/cancel run; re-requested from root for gate 93 (root-owned gate row, not A work)",
+   "status": "open evidence: gate 93 verify.log (grep preview/PROD-MP3) again shows no preview-server WAV/MP3 run; re-requested from root for gate 94 (root-owned gate row, not A work)",
    "to": "root",
    "title": "MP3 export (and from round 87 the export-wav worker) not verified in the production bundle",
    "evidence": "c-round-86.json notRun; gates/round-86/review.md #5"
@@ -13238,7 +13273,7 @@
   {
    "id": "A-R86-L7-REASON-READ-TWICE",
    "severity": "low",
-   "status": "dispatched round 93 (D-29z58 D1: disabled range radio gets aria-labelledby; describedby unchanged)",
+   "status": "closed round 93 (C round 93 PASS browserVerified=true realVerified=true: AX-NAMES real Chrome AX tree both viewports, AX-SELECT, NOTE-FORMAT, NOTE-NOSOUND real browser; gate 93 published 85fcb05)",
    "to": "Lows batch",
    "title": "range reason inside the <label> and also aria-describedby: may be read twice",
    "evidence": "a-round-86.md Code review L7"
@@ -13246,7 +13281,7 @@
   {
    "id": "A-R86-L8-NOTES-SAY-WAV",
    "severity": "low",
-   "status": "dispatched round 93 (D-29z58 D2: EXPORT_FORMAT_CREATES per selected format; WAV text byte-identical)",
+   "status": "closed round 93 (C round 93 PASS browserVerified=true realVerified=true: AX-NAMES real Chrome AX tree both viewports, AX-SELECT, NOTE-FORMAT, NOTE-NOSOUND real browser; gate 93 published 85fcb05)",
    "to": "Lows batch",
    "title": "no-sound and master-mute notes say \"WAV შეიქმნება\" for MP3 formats",
    "evidence": "a-round-86.md Code review L8"
@@ -13553,7 +13588,7 @@
   {
    "id": "GATE91-S1-NOTE-IN-LABEL",
    "severity": "low",
-   "status": "dispatched round 93 (D-29z58 D1: aria-labelledby name span + aria-describedby note for all four format radios; label textContent unchanged, so no frozen-test grant needed)",
+   "status": "closed round 93 (C round 93 PASS browserVerified=true realVerified=true: AX-NAMES real Chrome AX tree both viewports, AX-SELECT, NOTE-FORMAT, NOTE-NOSOUND real browser; gate 93 published 85fcb05)",
    "to": "B/Lows batch",
    "title": "WAV + MP3 note span sits inside the <label>, so the radio's accessible name includes the whole note; give it an id + aria-describedby",
    "evidence": "gates/round-91/review.md #1"
@@ -13585,7 +13620,7 @@
   {
    "id": "COLLECTION-EMPTY-STATUS",
    "severity": "low",
-   "status": "open - Lows batch part 2 (round 94 unless the regression round is due), paired with GATE92-S1 in the same load effect",
+   "status": "dispatched round 94 (D-29z59 L1/L2: empty collection -> new copy.empty text per origin; browser-unreachable on /studio-lab, unit-proven LS1/LS2/LS5)",
    "to": "B/Lows batch",
    "title": "ArrangementProvider load effect: with collection.sources.length === 0 settle never runs and the status stays 'loading' forever",
    "evidence": "ArrangementContext.tsx l.2997-3046 at 77cd5b6"
@@ -13601,7 +13636,7 @@
   {
    "id": "GATE92-S1-STATUS-NOT-RESET-ON-SWAP",
    "severity": "low",
-   "status": "open - Lows batch part 2 (with COLLECTION-EMPTY-STATUS; fix: setStatus(copy.loading) at the start of the load effect)",
+   "status": "dispatched round 94 (D-29z59 L1: setStatus(copy.loading) at the start of the load effect; unit LS3/LS4; browser-unreachable until the SRW-21 mount)",
    "to": "Lows batch",
    "title": "ArrangementProvider load effect resets source states but not the status when the collection prop changes; a stale 'ready' text stays until the new settle",
    "evidence": "gates/round-92/review.md suggestion 1; a-round-92.md reviewer Info; c-round-92.md Notes for B"
@@ -13609,7 +13644,7 @@
   {
    "id": "GATE92-S2-PURCHASED-MP3-NAMES-TEST",
    "severity": "low (test gap)",
-   "status": "open - Lows batch part 2 (one exportMp3 assertion for czaba-studio.mp3 / czaba-studio-range.mp3 in PW5)",
+   "status": "dispatched round 94 (D-29z59 PM1 in new collection-load-status.test.tsx; purchased-collection-ui.test.tsx stays frozen)",
    "to": "Lows batch",
    "title": "purchased MP3 download names are covered by code reading only (A Low 2)",
    "evidence": "gates/round-92/review.md suggestion 2; a-round-92.md Low 2; c-round-92.json signals"
@@ -13633,7 +13668,7 @@
   {
    "id": "C-R92-N1-DEMO-FAILED-TO-FETCH",
    "severity": "low",
-   "status": "open - Lows batch (copy: map a demo network failure to a Georgian message like the purchased adapter's ფაილი ვერ ჩაიტვირთა (ქსელი))",
+   "status": "open - Lows batch part 3 (after the round-95 regression round; app/data/studio-lab-demo.ts)",
    "to": "Lows batch",
    "title": "demo loader error row shows the raw English browser text 'Failed to fetch' on a network failure (pre-existing)",
    "evidence": "c-round-92.md DEMO-LOAD (b) observation"
@@ -13645,6 +13680,38 @@
    "to": "Tech Lead",
    "title": "screen reader (VoiceOver/NVDA) pass on the export dialog: each format radio is announced once by its short name with its note as description; the disabled range reason is read once",
    "evidence": "current-task.md round 93"
+  },
+  {
+   "id": "GATE93-S1-DOC081-STATUS",
+   "severity": "low",
+   "status": "dispatched round 94 (doc 081 l.4 -> C PASS (Round 93), გამოქვეყნდა 85fcb05)",
+   "to": "A round 94",
+   "title": "doc 081 status line still says awaiting C after C PASS",
+   "evidence": "gates/round-93/review.md suggestion 1"
+  },
+  {
+   "id": "GATE93-S2-OPTIONIDS-REBUILT",
+   "severity": "info",
+   "status": "open - optional nit, not scheduled",
+   "to": "Lows batch (optional)",
+   "title": "ArrangementExportDialog optionIds object rebuilt each render; suffixes could be module-level",
+   "evidence": "gates/round-93/review.md suggestion 2"
+  },
+  {
+   "id": "GATE93-S3-DISABLED-VIDEO-DESC-BROWSE-ONLY",
+   "severity": "info",
+   "status": "recorded - expected behaviour, not a regression",
+   "to": "none",
+   "title": "disabled video radio aria-describedby is only heard in screen-reader browse mode (disabled input cannot take focus); same as the range reason pattern",
+   "evidence": "gates/round-93/review.md suggestion 3"
+  },
+  {
+   "id": "A-R93-LABELLEDBY-DESCRIBEDBY-PAIR",
+   "severity": "info",
+   "status": "recorded rule for future dialog edits",
+   "to": "Lows batch / future export dialog rounds",
+   "title": "aria-labelledby and aria-describedby must be added and removed together: with labelledby and no resolvable describedby Chrome falls back to the full label text as description",
+   "evidence": "a-round-93.md Code review Q1; c-round-93.md Notes for B"
   }
  ],
  "tech_lead_notes": [
@@ -14818,6 +14885,11 @@
    "round": 92,
    "source": "gates/round-92/review.md Architecture note + a-round-92.md reviewer note",
    "note": "Signal 2 coupling ArrangementContext/StudioWorkspace -> lib/arrangement/collection.ts: keep (one-way, pure). Mild signal 1: copy table and network adapter share collection.ts; proposal: when VISUAL-A V-0 lands, move workspaceCollectionCopy/WorkspaceCollectionCopy into the V-0 strings module (or collection-copy.ts), keep createPurchasedWorkspaceCollection; accept only if PC9, PW1, PW2, PW6 and the frozen export-* name tests pass unchanged. Recorded as q14 (f). Alternative (copy field on WorkspaceCollection) rejected by the reviewer for now. Not scheduled; non-blocking."
+  },
+  {
+   "round": 93,
+   "source": "gates/round-93/review.md Architecture note + a-round-93.md reviewer note + c-round-93.md Notes for B",
+   "note": "Signal 3 (repeated expensive change): every new arrangement UI test copies the fake AudioContext/OfflineAudioContext/AudioBuffer stubs and the provider/dialog mount harness (~80 lines; class FakeAudioBuffer in 61 files under app/lib/arrangement/__tests__). Keep ArrangementExportDialog.tsx as is. Proposal ARCH-R93-TEST-HARNESS: one shared non-test support module (e.g. app/lib/arrangement/test-support/ or a non-*.test file under __tests__) for the audio fakes, provider mount and live(api) helper; test files only; existing tests migrate only when their region is next touched; acceptance = migrated tests pass unchanged. Not scheduled; added to the pending q14 checkpoint request (b-round-93.md)."
   }
  ],
  "vitest_floor_round46": 1357,

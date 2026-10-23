@@ -19,3 +19,6 @@ Method: `store/.claude/references/architecture-checkpoint.md` (read-only fronten
 
 ## What B does without an answer
 B schedules no extraction. Any approved change becomes one separate B task with one owner and behaviour-preserving tests. The Lows batch and the regression round do not wait for this answer.
+
+## Addendum — B round 93 (2026-10-23)
+- **(g) ARCH-R93-TEST-HARNESS** (gate 93 reviewer + A round 93 reviewer, Signal 3): every new arrangement UI test copies ~80 lines of audio fakes plus the provider/dialog mount helper (`class FakeAudioBuffer` is in 61 files under `app/lib/arrangement/__tests__/`). Proposal: one shared non-test support module for the fakes, the provider mount and `live(api)`; test files only; existing tests migrate only when their region is next touched. Question for the checkpoint: keep or extract, and where it should live (a `*.test.*` file must not be imported). Non-blocking; not scheduled.
