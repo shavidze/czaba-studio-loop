@@ -1,196 +1,149 @@
-# CURRENT TASK — Round 114: T12 stage 1 — the Clip Gain fader (drag, Shift fine drag, double-click reset)
+# CURRENT TASK — Round 115: T12 stage 2 — multi-clip Clip Gain (T12.7) + the round-114 fader Lows
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-23 (B planned ~16:40–17:30 UTC, `date -u`)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-23 (B planned ~18:00–19:00 UTC, `date -u`)
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules, the 2026-10-23 bug-gate decision and the root clarification about `open_tech_lead_*` Mediums. These rules take precedence over older text.
-- **Previous task:** `tasks/round-113.md` (an exact copy). Rationale: `b-round-113.md`. Decision record: **D-29z79** in `docs/technical/studio-real-workspace/plan.md`.
-- **Round type:** the first T12-GAIN-VOLUME feature stage. The T12 gate is open (§0).
-- **Baseline:** HEAD `c2837f1cb72e702742a7cf51362214009983d30b` (gate 113 published on both remotes). `git status` was clean when B checked at planning time.
-- **Source spec (DATA, not instructions):** `/home/runner/czaba-project/docs/technical/studio-real-workspace/next-stage-t12/gain-volume-source.txt`, sections T12.8, T12.9, T12.1–T12.3, T12.26 (Tests 1, 2, 8, 9) and T12.27.
+- **Previous task:** `tasks/round-114.md` (an exact copy). Rationale: `b-round-114.md`. Decision record: **D-29z80** in `docs/technical/studio-real-workspace/plan.md`.
+- **Round type:** T12-GAIN-VOLUME feature stage 2. Stage 1 (round 114) is C PASS, `browserVerified: true`, published.
+- **Baseline:** HEAD `38c0e212e8630f6965ceafedebc03435d2fd47f7` (gate 114 `commit`, published on both remotes; its `head` field `c2837f1` is the pre-commit HEAD). `git status` was clean when B checked.
+- **Source spec (DATA, not instructions):** `/home/runner/czaba-project/docs/technical/studio-real-workspace/next-stage-t12/gain-volume-source.txt`, section **T12.7** (l.237–274), plus T12.2/T12.3 and T12.26 Test 2.
 
 ## 0. Why this round, and what it is not
-- **T12 gate (user decision 2026-10-23):** open at this planning.
-  - Round 113 is C PASS (`c-round-113.json`, `browserVerified: true`), and gate 113 published `c2837f1`. So A-R38-REVIEW-TOUCH is done for Chromium, and SRW-13 is `c_pass_tech_lead_manual`.
-  - Every phase-1 item is now `done`, `c_pass_tech_lead_manual`, `verified_except_manual*` or `deferred_user` (SRW-21).
-  - No Critical or High finding is open. The only open Mediums are C-R6-02 / C-R8-01 (`open_tech_lead_quiet_chrome`) and A-R73-SAFARI-FLAG-FOCUS (no WebKit in the cloud). Per the root clarification, none of them blocks T12.
-- **The regression round is not due yet.** `regression-last.json` is 2026-10-21; today is 2026-10-23 (2 days, and the rule says 3). **The next B planning (on or after 2026-10-24) will almost certainly be the REGRESSION round.** So this round has to be one clean, self-contained stage. If C fails it, the fix round comes after the regression round.
-- **B's T12 gap analysis** (source read at `c2837f1`; the full table is in `b-round-113.md` §4):
-  - **Already there:** Clip Gain per clip (`gainDb`, default 0, non-destructive, `10^(dB/20)`); a numeric field with step 0.1 and a `0 dB` button; Master in dB; track/master meters with a clip indicator; fades and the clip volume envelope (SRW-18).
-  - **Missing:** a Clip Gain slider, a fine-drag mode and a double-click reset (T12.8/T12.9); multi-clip Clip Gain editing (T12.7; today the field is disabled for multi-selection); Track Volume in dB (T12.5/T12.24; today it is a linear 0–100 % fader); the waveform does not show the clip gain, and there is no waveform vertical zoom (T12.18/T12.19).
-- **Stage order (D-29z79, dependency first):**
-  1. **This round:** the single-clip Clip Gain fader.
-  2. Multi-clip Clip Gain. It reuses this fader, and it needs that fader to exist first.
-  3. Track Volume in dB, with Shift fine drag on the mixer faders.
-  4. The waveform shows the clip gain, plus a view-only waveform vertical zoom.
-  5. Later stages, in the T12.27 order.
-- **Not in this round:** multi-clip, Track Volume dB, the waveform, Shift fine on the track/group/Master faders, envelopes, automation, crossfades, Utility. None of these is deferred; each has its own stage (`backlog.json` T12 `stages`).
+- **No open C bug from round 114 above Low.** C-R114-01 (Low, pre-existing info-column clip at 1280) goes to `deferred_low_polish` (2026-10-23 bug gate). Gate-114 reviewer Lows #1, #2 and doc #5 sit in exactly the code this stage rewrites, so they are folded in (R8–R10). Gate #3 is a C observation row (MC-BLUR-DISABLED), no code.
+- **Regression round:** `regression-last.json` is 2026-10-21; today is 2026-10-23 (2 days; the rule says 3). Not due. **The next B planning (on or after 2026-10-24) will almost certainly be the REGRESSION round**, so this round must again be one self-contained stage; its neighbour rows are inside it (NB-*, CG-*).
+- **Dependency:** stage 2 reuses the stage-1 fader, field and `0 dB` button. Stage 3 (Track Volume in dB) and stage 4 (waveform shows gain + vertical zoom) are next; none is deferred.
+- **Not in this round:** Track Volume dB, Shift fine on mixer faders, waveform display/zoom, envelopes, automation, crossfades, Utility (`awaiting_user`), the ARCH-R81 pending-preview merge (a root checkpoint question, §8).
 
-## 1. B rulings for this round (D-29z79)
-- **R1 — the control.** Add a `<input type="range">` Clip Gain fader inside the existing Clip Gain block of the detail panel (`data-testid="arrangement-detail-clip-gain-fader"`).
-  - **Range:** `min = CLIP_GAIN_MIN_DB` (−60) and `max = CLIP_GAIN_MAX_DB` (+24). **Step 0.1:** that equals the storage precision of `normalizeClipGainDb`, so a typed value always lies on a step.
-  - **Value:** `clip.gainDb ?? 0`. **aria-label:** `Clip Gain — fader`. **aria-valuetext:** the existing `formatMasterGainDb(value)`, so it reads `0.0 dB`, `+3.0 dB` or `−6.0 dB`.
-  - **Tab order:** the number field, then the fader, then the `0 dB` button.
-  - The numeric field and the `0 dB` button stay as they are.
-- **R2 — drag.** Use the existing relative drag `useRelativeFaderDrag`. That gives the round-38 no-jump-on-press contract and the round-113 touch guard for free.
-  - **Normal drag:** the full fader width covers 84 dB (`relativeFaderValue`, unchanged).
-  - **Shift fine drag:** while `shiftKey` is held on a pointermove, the value per pixel is **10× smaller**.
-  - **Pressing or releasing Shift mid-drag re-anchors** the drag at the current pointer x and the current previewed value. So the value does not jump at the toggle.
-  - **Implementation:** an **opt-in** option on the hook (for example `fineDivisor?: number`). When the option is absent, every computed value stays the same (the `onPointerDown` body may be restructured, for example to make `startX`/`startValue` re-anchorable). Only the Clip Gain fader opts in this round, so the track, group and Master faders do not change.
-- **R3 — history and audio.**
-  - **During a drag:** the value previews live, both in the arrangement and in the audio. `gainDb` is excluded from `scheduleKey` (`ArrangementContext.tsx` l.507–510), so no audio source restarts.
-  - **On pointerup / lost capture:** exactly **one** `Clip Gain` history entry.
-  - **A press with no move** writes no entry.
-  - **While another pointer gesture is active,** the press is refused with the existing gesture refusal text (same as the other faders).
-  - **Keyboard** (native ArrowLeft/Right ±0.1 dB) follows the track Volume keyboard path exactly: preview on change, commit on keyup when no pointer gesture is active. A reports the resulting entry count per key press.
-  - **Blur mid-drag** ends the drag the way track Volume does.
-- **R4 — reset.**
-  - **Double-click on the fader:** sets 0.0 dB with one entry. If the value is already 0.0, there is **no** entry.
-  - The `0 dB` button keeps its behaviour, including its round-108 focus handoff.
-  - No context menu. T12.8 says "double-click **or** Context Menu", and double-click alone meets it.
-- **R5 — sync with the numeric field.**
-  - **The field follows the fader.** It already re-reads `gainDb` (l.268–270).
-  - **Typed but uncommitted text is committed first:** pressing the fader focuses it, the field blurs, and `commitClipGain('blur')` commits the text as its own entry. The drag then starts from the committed value. So *type −3 → drag* writes **two** entries. That is the intended order. Do not change `commitClipGain`.
-  - **`readStoredValue` must read the live arrangement** (`getArrangement()` / the history ref), exactly as the track, Pan and Master faders already do (`ArrangementLane.tsx` l.368–371, `ArrangementMaster.tsx` l.136). It must **not** read render props. The blur commit happens synchronously inside `onPointerDown`, before any re-render; reading props would start the drag from the stale 0.0 and overwrite the −3.0.
-- **R6 — disabled states.** The fader is disabled exactly when the field is: a video clip, a multi-selection, or no selection. It carries the same reason node (`title` + `aria-describedby`).
-  - Multi-selection editing is **stage 2**. Do **not** enable it now.
-- **R7 — context API.** Add preview, commit, begin-gesture and blur functions for clip gain, and pass them through `StudioWorkspace.tsx` to the panel. A picks **one** mechanism:
-  - (a) a third `MixVolumeTarget` kind `'clip'` in the existing volume-target machine; or
-  - (b) a small Master-style preview/commit pair.
-  - **Hard constraint:** track, group and Master behaviour does not change, and their existing tests stay unchanged and green.
-  - A states the choice and why. (The reviewer's ARCH-R81 trigger, "extract when a third target kind arrives", is a B/root checkpoint question, not a refactor in this round.)
-- **R8 — layout.** At 1440×900 and 1280×720, with the detail panel open at its default height:
-  - the fader and the `0 dB` button are fully visible;
-  - there is no horizontal overflow in the Clip Gain block.
-  - If the panel needs height, A uses the existing panel layout rules. No CSS file, Tailwind classes only, no hardcoded colours.
-- **R9 — GATE113-S1 (Low, one-line grant).** In doc 097, change l.4 to „Round 113 — C PASS (`c-round-113.json`, gate 113 `c2837f1`).“. In the TODO, mark the TC rows done, and keep R38-T and TOUCH-DOUBLE-TAP-RESET open.
+## 1. B rulings (D-29z80)
+Smallest honest behaviour for every open UI contract; rationale in `b-round-114.md` §4.
+
+- **R1 — who is a member.** A multi-selection (≥ 2 selected clips) enables Clip Gain **only when every selected clip is on an audio track**. If any selected clip is a video clip, the field, the fader and `0 dB` stay **disabled** with the new group reason (exact text):
+  `Clip Gain მხოლოდ აუდიო კლიპებზე ისმება — ამოიღე ვიდეო მონიშვნიდან`
+  (replaces the value of `DETAIL_CLIP_GAIN_GROUP_REASON`; the constant name may stay). No silent partial edit of audio members only. Single video / none keep their reasons unchanged.
+- **R2 — the relative edit (pure, in a new module).** New file `app/lib/arrangement/clip-gain-multi.ts` (A names exports per `AGENT_DISCOVERABLE_CODE.md`; `model.ts` stays frozen and is only imported). Required behaviour:
+  - span of the members: `minDb`, `maxDb` from `gainDb ?? 0`;
+  - **shift:** `effectiveDelta = clamp(delta, CLIP_GAIN_MIN_DB − minDb, CLIP_GAIN_MAX_DB − maxDb)`; each member gets `normalizeClipGainDb(before + effectiveDelta)`. Because stored gains and the delta are on the 0.1 grid, **pairwise differences stay exact** (−6/−2/+1 shifted by +2 → −4/0/+3; by +30 → +17/+21/+24; by −70 → −60/−56/−53);
+  - **set absolute:** every member gets `normalizeClipGainDb(value)`;
+  - non-audio or unknown ids are ignored; an effective no-op returns the **same** arrangement object (no history entry downstream).
+- **R3 — what the fader shows.** All members equal → exactly the stage-1 display (value, `aria-valuetext` `formatMasterGainDb`). Mixed → the thumb sits at **`maxDb`** (the anchor), and `aria-valuetext` is the range text. **Range text** (exact): `{formatMasterGainDb(minDb) without " dB"} … {formatMasterGainDb(maxDb)}`, e.g. `−6.0 … +1.0 dB`, `−60.0 … +24.0 dB`. It is rendered visibly in a node `data-testid="arrangement-detail-clip-gain-range"` **only** when mixed. No painted min/max indicator on the slider (would need custom CSS; the spec accepts the text form).
+- **R4 — drag/keyboard in multi.** Same hook, same gesture contract as stage 1 (no jump on press, touch guard, Shift ×10 fine with re-anchor, one `Clip Gain` entry per drag, press-without-move = no entry, refusal during another gesture). `readStoredValue` = live `maxDb` of the members. **Every preview is computed from the gains at the start of the pending preview** (the "before" arrangement): `delta = value − beforeMax`, then R2 shift — never re-applied cumulatively to the live state. The hook stays unchanged (A may pass a computed `min`, e.g. `CLIP_GAIN_MIN_DB + (maxDb − minDb)`, so the hook's clamp equals R2's; R2 stays authoritative). Keyboard ArrowLeft/Right = ±0.1 delta for all members, committed as in stage 1 (one entry per key press, round-114 CG-KEY: 3 presses → 3 entries).
+- **R5 — the numeric field in multi.** Equal values → shows the common value. Mixed → `value=""`, `aria-describedby` points at the range node (and `title` = range text). Typing a number and Enter/blur **sets every member to that absolute value** (one entry, R2 set). Escape restores the displayed text (`""` when mixed). The pending marker works as in stage 1 (any typed text ≠ displayed text). Typed-but-uncommitted text, then a fader press → the text commits first as its own entry, then the drag (two entries), exactly as stage 1 R5.
+- **R6 — reset in multi.** Fader double-click and the `0 dB` button set **all** members to 0.0 with one entry; no entry when all are already 0.0. `0 dB` is disabled when all members are 0.0 (mirrors stage 1's `gainDb === undefined`). The round-108 focus handoff to the field stays.
+- **R7 — status and audio.** After a multi commit the status names the count, e.g. `Clip Gain: 2 კლიპი — −4.0 … +3.0 dB.` (must contain `{N} კლიპი`; equal values show the single value). Live preview for every member during a drag; `gainDb` is outside `scheduleKey`, so **no source restart** (C counts `createBufferSource`). Undo/Redo restore all members at once.
+- **R8 — GATE114-S1 (Low).** Clip ids are **captured at `beginGesture`** (single and multi): previews, commit and blur during an active gesture target the captured ids, even if the selection changes mid-drag. No repeated refusal status per move. When no gesture is active the current selection is used.
+- **R9 — GATE114-S2 (Low).** The number field uses `DETAIL_CLIP_GAIN_STEP_DB` instead of the literal `0.1`.
+- **R10 — GATE114-S5 (doc).** Doc 098: l.4 → „Round 114 — C PASS (`c-round-114.json`, gate 114 `38c0e21`).“; the file table says CF1–CF14.
+- **R11 — context API.** Keep the stage-1 functions and their signatures (`setClipGain`, `previewClipGainFader`, `commitClipGainFader`, `beginClipGainFaderGesture`, `blurClipGainFader`) and their behaviour for one clip. Add the multi path by **one** mechanism of A's choice (new set-based functions, or the existing pending slot generalised to a member-set key). **Hard constraint:** track, group and Master volume behaviour and the stage-1 single-clip behaviour do not change; `clip-gain-fader.test.tsx` CF1–CF14 stay green with only the R1 grant edit (§2). A states the choice and why. Do not merge the Volume/Master/Clip Gain pending machines in this round (ARCH-R81 is a checkpoint question).
+- **R12 — layout.** At 1440×900 and 1280×720, detail panel open at its default height, worst case `−60.0 … +24.0 dB`: the range text, the field, the fader and `0 dB` are fully inside the panel's visible box; **no new row** in the Clip Gain block (block height equal to the single-clip state ±1 px); block `scrollWidth ≤ clientWidth`. The range node may sit beside the label text or beside the field. The block may widen to at most `w-56` if needed (report it). Tailwind only, tokens only, no CSS file. If it cannot fit under these rules, A stops and reports with measurements; A does not add a row.
 
 ## 2. A — files you own (everything else is frozen)
 | File | Change |
 |---|---|
-| `app/hooks/useRelativeFaderDrag.ts` | Opt-in fine mode (R2). The default path stays unchanged. |
-| `app/contexts/ArrangementContext.tsx` | Clip-gain preview/commit/begin/blur (R3, R7), exposed on the context value. No other behaviour change. |
-| `app/components/arrangement/ArrangementDetailPanel.tsx` | The fader (R1, R4–R6, R8). |
-| `app/components/arrangement/StudioWorkspace.tsx` | Pass the new props to `ArrangementDetailPanel` only. |
-| `app/lib/arrangement/__tests__/clip-gain-fader.test.tsx` (**new**) | §3 |
-| `docs/implementation/2026/quarter-IV/098-studio-clip-gain-fader.md` (**new**) | Implementation doc in Georgian, per `docs/implementation/TEMPLATE.md`. Status line on l.4: „Round 114 — C-ის შემოწმებას ელოდება (D-29z79; T12 ეტაპი 1).“ |
-| `docs/implementation/2026/quarter-IV/097-studio-fader-touch-no-jump.md` | R9 only (the l.4 line and the TODO). |
-| **Conditional:** `app/lib/arrangement/__tests__/{fader-focus-order,detail-panel-fit,detail-panel-reason,detail-panel-polish,self-disabling-focus,clip-gain}.test.tsx` | **Only** assertions that enumerate the Clip Gain block's controls, the detail panel's tab stops, or the block's measured layout, and only where the new fader truly changes them. List every changed line and the reason in the report. No other edits, and no weakening (no deleted assertion without a replacement of the same strength). If none needs a change, leave them untouched. |
+| `app/lib/arrangement/clip-gain-multi.ts` (**new**) | R2 pure helpers. |
+| `app/contexts/ArrangementContext.tsx` | Multi preview/commit/begin/blur/set (R4–R7, R11); R8 capture. No other behaviour change. |
+| `app/components/arrangement/ArrangementDetailPanel.tsx` | R1, R3–R6, R8, R9, R12; `ArrangementDetailGroup` grows (member ids, `hasVideo`, `minDb`, `maxDb` — names A's). |
+| `app/components/arrangement/StudioWorkspace.tsx` | The `detailGroup` memo computes the new fields; pass new props to `ArrangementDetailPanel`. Nothing else. |
+| `app/lib/arrangement/__tests__/clip-gain-multi.test.tsx` (**new**) | §3 |
+| `docs/implementation/2026/quarter-IV/099-studio-multi-clip-gain.md` (**new**) | Georgian, per `docs/implementation/TEMPLATE.md`. l.4: „Round 115 — C-ის შემოწმებას ელოდება (D-29z80; T12 ეტაპი 2).“ |
+| `docs/implementation/2026/quarter-IV/098-studio-clip-gain-fader.md` | R10 only. |
+| **Granted test edits (only these lines' intent):** | Each of these asserts "two **audio** clips → disabled with the old group reason". Replace the audio pair with a selection containing a video clip (same strength: disabled + exact new reason + linked `aria-describedby`/title), and update the reason constant to the R1 text. List every changed line in the report. |
+| `app/lib/arrangement/__tests__/clip-gain-fader.test.tsx` | CF8 case l.429 `['m1','s1']` → e.g. `['m1','v1']`; l.34 constant text. |
+| `app/lib/arrangement/__tests__/clip-gain.test.tsx` | l.782–783 `['a','c']` → e.g. `['a','v']`; l.59 constant text. |
+| `app/lib/arrangement/__tests__/detail-panel-reason.test.tsx` | l.249 and l.336 `['m1','s1']` → a selection with `v1`; l.23 constant text. The middle-column placement assertions stay as they are for that selection. (l.328 only asserts the content node's scrollbar classes; no change needed.) |
+| `app/lib/arrangement/__tests__/detail-panel-fit.test.tsx` | l.306 (F5) → a selection with `v1`; l.26 constant text. (l.329 asserts the group info column's lane names, not Clip Gain — not granted, must stay green as is.) |
+| `app/lib/arrangement/__tests__/pending-status.test.tsx` | PM5 l.507 → a selection with `v1`. |
 
-- **A frozen test fails only because the new fader exists** (for example, a test that counts `input[type="range"]`, sliders or tab stops; B's grep found `querySelector('input[type="range"]')` first-match uses in `markers-ui` / `marker-edge-nav-ui`, and lane-scoped selectors in `fader-guards` / `track-layout`, which should be unaffected because the detail panel comes later in the DOM): **A stops and reports** the file, the line and the assertion. A does **not** edit it. B issues a grant or a ruling. The same applies if `npm run test:e2e:smoke` would change (A does not run it; the gate does).
-- **Frozen:** `tmp/studio-real-loop/b-round-113-r114-tree-sha256.txt` holds 911 tracked files: every tracked file except the 11 paths above. A checks it at the start and at the end (`sha256sum -c --quiet`) and reports OK/FAIL. The two new files are the only allowed untracked files.
-- **Expected end state:** `git status --short --untracked-files=all` shows the 4 app files and doc 097 as ` M`, any conditional test files A had to touch as ` M`, and the 2 new files as `??`.
-- **Before editing, read:** `.claude/primitives-map.json`, then `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md`, `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`; also `.claude/prompts/studio-feature.md`.
+- **The enabled two-audio case** is asserted in the new test file (MG3+), not by weakening the granted files.
+- **B checked the other tests** that touch the Clip Gain controls or multi-selection (`self-disabling-focus`, `fader-guards`, `fader-click`, `fader-focus-order`, `status-announcement-ui` SK3, `detail-panel-polish` l.394): none asserts "two audio clips → Clip Gain disabled"; `detail-panel-polish` l.394 selects two clips at 0 dB (equal → no range node). They are not granted and must stay green unchanged.
+- **Any other frozen test fails** (for example a test that counts nodes in the detail panel and now sees the range node, or `status-announcement-ui`): **A stops and reports** file, line, assertion. A does not edit it; B rules. Same if `npm run test:e2e:smoke` would change (the gate runs it).
+- **Frozen:** `tmp/studio-real-loop/b-round-114-r115-tree-sha256.txt`, 915 tracked files (every tracked file except the 9 tracked paths above). A runs `sha256sum -c --quiet` at the start and the end and reports OK/FAIL. The 3 new files are the only allowed untracked files.
+- **Expected end state:** ` M` for the 3 app files, doc 098 and the granted tests A actually touched; `??` for the 3 new files.
+- **Before editing, read:** `.claude/primitives-map.json`, `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md`, `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `.claude/prompts/studio-feature.md`.
 - **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, **no type assertions**, semicolons, Tailwind-first, no code comments.
-- **Forbidden:** everything in `global_forbidden_files` / `global_forbidden_actions` of `backlog.json`, including the protected auth/purchase files. B checked their hashes at `c2837f1`:
-  - `app/routes/studio.$productId.tsx` `fa2cf0bc`;
-  - `app/routes/api.studio-token.ts` `13914809`;
-  - `app/lib/auth.ts` `56f5b76f`;
-  - `app/contexts/AuthContext.tsx` `bf9ee257`.
-- **Also forbidden:** `model.ts`, `fader.ts`, `ArrangementLane.tsx`, `ArrangementMaster.tsx`, `ArrangementGroupHeader.tsx`, `ArrangementTransport.tsx`, and every existing test outside the conditional list. No commit, push, stash, checkout or deploy. No dev-server restarts. No `npm run check` (`--write`), and no `npm run format`.
+- **Forbidden:** everything in `global_forbidden_files` / `global_forbidden_actions` of `backlog.json`, including the protected auth/purchase files (B checked at `38c0e21`): `app/routes/studio.$productId.tsx` `fa2cf0bc`, `app/routes/api.studio-token.ts` `13914809`, `app/lib/auth.ts` `56f5b76f`, `app/contexts/AuthContext.tsx` `bf9ee257`.
+- **Also forbidden:** `model.ts`, `fader.ts`, `useRelativeFaderDrag.ts`, `ArrangementLane.tsx`, `ArrangementMaster.tsx`, `ArrangementGroupHeader.tsx`, `ArrangementTransport.tsx`, every other test. No commit, push, stash, checkout, deploy, dev-server restart, `npm run check` (`--write`) or `npm run format`.
 
 ## 3. A — tests and checks
-**New `clip-gain-fader.test.tsx`.** Use the workspace harness pattern of `clip-gain.test.tsx` / `fader-click.test.tsx`, and mock `getBoundingClientRect` for the fader width.
-- **CF1:** with a selected audio clip, the fader has min −60, max 24, step 0.1, value = `gainDb ?? 0`, aria-label `Clip Gain — fader` and aria-valuetext `0.0 dB`. At −6 it reads `−6.0 dB`, and at +3 `+3.0 dB`.
-- **CF2:** a pointer drag of +25 px over 100 px moves the value by +21.0 dB (84 × 0.25), with **one** `Clip Gain` entry. Undo restores it. The field shows the same value.
-- **CF3:** the same drag with `shiftKey: true` on every move gives +2.1 dB, with one entry.
-- **CF4 (re-anchor):** +10 px without Shift (+8.4), then +10 px with Shift. The total is +9.2 ±0.1, and the move at the toggle changes the value by ≤ 0.9.
-- **CF5:** a press with no move: the value is unchanged and there is no entry.
-- **CF6:** a double-click from −6.0 gives 0.0 with one entry. A double-click at 0.0 writes no entry.
-- **CF7:** ArrowRight on the focused fader (change + keyup) gives +0.1. Assert the entry count that R3 implies.
-- **CF8:** the fader is disabled, with the matching reason id, for a video clip, a two-clip selection and no selection.
-- **CF9:** type `-3` in the field without Enter, then a fader drag of +25 px. The result is two entries: `-3.0` committed first, then −3.0 + 21.0 = 18.0. The first Undo gives −3.0, the second gives 0.0.
-- **CF10:** a press while another pointer gesture is active is refused: the refusal status shows, and there is no value change and no entry.
-- **CF11 (must-not):** the music track **Volume** and **Master** drag with `shiftKey: true` gives the **same** value as without Shift. Only Clip Gain opts in.
-- **CF12:** a drag during playback calls the graph's clip-gain setter and does **not** restart sources. Assert on the mocked graph handle or the existing schedule spy, following the existing playback tests.
-- **Mutation proof** (in a scratch copy under `tmp/studio-real-loop/a-round-114/`, or a temporary local edit that you revert and report). Each of these must turn its test red:
-  - (m1) ignoring Shift → CF3;
-  - (m2) no re-anchor → CF4;
-  - (m3) committing on every move → CF2 (entry count);
-  - (m4) fine mode applied by default → CF11;
-  - (m5) double-click at 0 writes an entry → CF6.
-- **Honest limit:** jsdom has no native thumb. The real drag, Shift and layout are C's rows.
+**New `clip-gain-multi.test.tsx`** (pure tests + the workspace harness of `clip-gain-fader.test.tsx`; mock `getBoundingClientRect` for the fader width):
+- **MG1 (pure shift):** −6/−2/+1 by +2 → −4/0/+3; by +30 → +17/+21/+24; by −70 → −60/−56/−53; differences exact; a video id and an unknown id are ignored; effective delta 0 (e.g. +5 when max is +24) returns the same object.
+- **MG2 (pure set):** set −3 → all −3.0; set 0 → `gainDb` removed for all (stored only when ≠ 0, as `setClipGainDb`); all already at the value → same object.
+- **MG3 (display):** two audio clips at −6/+1 selected → field `""`, range node text `−6.0 … +1.0 dB`, fader enabled, value `1` (max), `aria-valuetext` `−6.0 … +1.0 dB`, field `aria-describedby` = range node id. Both at −3 → field `-3.0`, no range node, `aria-valuetext` `−3.0 dB`.
+- **MG4 (drag):** +25 px of 100 from −6/+1 → −6+21 / +1+21 → 15.0 / 22.0; **one** `Clip Gain` entry; one Undo restores −6.0/+1.0; Redo re-applies both. A two-move drag (+10 then +25 total) ends at the same values (no cumulative re-application).
+- **MG5 (clamp):** drag far right (+200 px) → 17.0 / 24.0; far left → −60.0 / −53.0; difference 7.0 both times; then back to the start x in the same drag → −6.0 / +1.0.
+- **MG6 (fine):** Shift drag +25 px → +2.1 each, one entry.
+- **MG7 (keyboard):** ArrowRight (change + keyup) → +0.1 each, one entry per press.
+- **MG8 (reset):** double-click from −6/+1 → 0/0, one entry; again → no entry. `0 dB` button: same, disabled when all 0; focus moves to the field when it held focus.
+- **MG9 (field):** mixed, type `-3` + Enter → both −3.0, one entry. Escape after typing restores `""`. Type `-3` without Enter then drag +25 px → two entries (−3.0/−3.0, then 18.0/18.0); first Undo → −3.0/−3.0, second → −6.0/+1.0.
+- **MG10 (video in selection):** `['m1','v1']` → field, fader and `0 dB` disabled with the exact R1 text, linked `aria-describedby` and `title`; a pointer drag and a double-click change nothing and write no entry.
+- **MG11 (R8):** single clip: press on the fader, move, then `selectClip(other)` while held, move again, release → only the original clip changed; one entry; the status is not re-set to the refusal text on each move. Same for a two-clip member set switched to a single selection mid-drag.
+- **MG12 (playback):** a multi drag during playback calls the graph's clip-gain setter for **both** ids and does not restart sources (existing schedule spy pattern, as CF12).
+- **MG13 (must-not):** track Volume and Master drags give the same values as at baseline (reuse CF11's pattern); a single-clip selection still shows the stage-1 display and status.
+- **Mutation proof** (scratch copy under `tmp/studio-real-loop/a-round-115/`, or a temporary local edit you revert and report). Each must turn its test red:
+  - (m1) clamp each member independently instead of clamping the shared delta → MG1/MG5;
+  - (m2) apply the delta to the live state on every preview (cumulative) → MG4 two-move case;
+  - (m3) include video members → MG1/MG10;
+  - (m4) commit on every move → MG4 entry count;
+  - (m5) read the clip ids from the latest render during a gesture (revert R8) → MG11;
+  - (m6) anchor at `minDb` instead of `maxDb` → MG3 (and MG5).
+- **Honest limit:** jsdom has no native thumb, no layout. Real drag, Shift, layout and audio are C's rows.
 
-**Checks A runs (speed rules):**
-- `npm run typecheck` and `npm run lint`.
-- `npx vitest run` on `clip-gain-fader.test.tsx` **and** on `clip-gain`, `fader-click`, `fader-guards`, `fader-touch`, `fader-focus-order`, `pan-release-recovery`, `master-ui`, `track-group-mix-ui`, `self-disabling-focus`, `detail-panel-fit`, `detail-panel-reason`, `detail-panel-polish`, `pending-status`, `context-hygiene`, `gesture-guard`. All must be green. Report the counts.
-- No full suite and no `npm run verify` (the gate runs them).
-- **Code-reviewer:** 3+ files change, so ask the code-reviewer and pass its Architecture note to B in the report.
+**Checks A runs (speed rules):** `npm run typecheck`, `npm run lint`, and `npx vitest run` on `clip-gain-multi`, `clip-gain-fader`, `clip-gain`, `detail-panel-reason`, `detail-panel-fit`, `pending-status`, `fader-click`, `fader-guards`, `fader-touch`, `fader-focus-order`, `self-disabling-focus`, `status-announcement-ui`, `detail-panel-polish`, `master-ui`, `track-group-mix-ui`, `pan-release-recovery`, `context-hygiene`, `gesture-guard`. All green; report counts. No full suite, no `npm run verify` (gate). **Code-reviewer:** 3+ files change → ask it; pass its Architecture note to B.
 
-**A's report** (`a-round-114.md`):
-- the start HEAD and status, and the R7 mechanism with the reason;
-- the diff summary per file, and every conditional test line changed with its reason;
-- the test names and counts, and the mutation results;
-- typecheck/lint, and the frozen list at the start and at the end;
-- the end status, the reviewer's score and notes, and any deviation.
+**A's report** (`a-round-115.md`): start HEAD/status; the R11 mechanism and why; where the range node sits and the measured block width/height at both viewports (A's own Playwright probe is a sanity check, not C acceptance); diff summary per file; every granted test line changed and why; test names/counts and mutation results; typecheck/lint; frozen list start/end; end status; reviewer score, notes and Architecture note; deviations.
 
-## 4. C — rows (real browser, Playwright Chromium, a fresh context per session, 1440×900 and 1280×720)
-**Layout:** music `demo-middle-east` @0 s, stems `demo-stem-pulse` @2 s and SFX `demo-soft-impact` @4 s, all added from the library at the insert marker. Snap off, Stop state, and the detail panel open at its default height. Select a clip by clicking its body.
-- Read the value from the fader's `value` / `aria-valuetext` and from the field.
-- Read the history from the Undo button's title and disabled state, and check it with Ctrl+Z as in round 113.
-- Drag rows run 3 times at 1440 and once at 1280, unless the row says otherwise.
+## 4. C — rows (real browser, Playwright Chromium, fresh context per session, 1440×900 and 1280×720)
+**Layout:** music `demo-middle-east` @0 s, stems `demo-stem-pulse` @2 s, SFX `demo-soft-impact` @4 s, added from the library at the insert marker. Snap off, Stop state, detail panel open at default height. Set per-clip gains via the single-clip field (Enter), then multi-select stems + SFX by clicking the stems body and Shift/Ctrl-clicking the SFX body (record which modifier the app uses). Read values from each clip by selecting it alone (field) and from the multi display (range node, fader `value`, `aria-valuetext`). History from the Undo button title/disabled state and Ctrl+Z. Drag rows 3× at 1440 and 1× at 1280 unless stated. `w` = the fader's measured width.
 
 | ID | Action | Expected (PASS) |
 |---|---|---|
-| **CG-PRESENT** | Select the stems clip | The fader is visible, enabled, value 0, aria-valuetext `0.0 dB`. Tab order: field → fader → `0 dB`. |
-| **CG-LAYOUT** (both viewports) | Measure the Clip Gain block | The fader and `0 dB` are fully inside the panel's visible box. The block's `scrollWidth ≤ clientWidth`. Screenshot. |
-| **CG-NOJUMP** | A mouse press at 15 % from the far end, held 100 ms, released | The value is unchanged and the history is unchanged. |
-| **CG-DRAG** | A mouse drag of +20 px | Δ = `20/w × 84` ± (0.1 + `84/w`). The field shows the same value. Exactly one new `Clip Gain` entry, and Ctrl+Z restores 0.0. |
-| **CG-FINE** | The same drag with Shift held from before the press to after the release | Δ = `20/w × 8.4` ± (0.1 + `8.4/w`), and `Δ_fine ≤ Δ_drag / 5`. One entry. |
-| **CG-FINE-TOGGLE** (1440 ×3) | +10 px, then Shift down, then +10 px, release | The total is `10/w × 84 + 10/w × 8.4` ± (0.2 + `84/w`). The value change across the toggle move is ≤ `84/w` + 0.1. |
-| **CG-KEY** | Focus the fader and press ArrowRight ×3 | +0.3 dB. Report the entry count, which must equal A's CF7 rule. |
-| **CG-DBL** | From −6.0 (set via the field), double-click the fader; then double-click again at 0.0 | 0.0 with one entry; the second double-click adds no entry. |
-| **CG-SYNC** | Type `-3.5` in the field and press Enter | The fader value is −3.5 and aria-valuetext `−3.5 dB`. |
-| **CG-PENDING-DRAG** (1440 ×1, 1280 ×1) | Type `-3` without Enter, then drag the fader +20 px | The final value is **−3.0 + Δ** (Δ as in CG-DRAG), not 0 + Δ. Two entries: the first Ctrl+Z returns to −3.0, the second to 0.0. |
-| **CG-DISABLED** | A video clip (`beeps-6s-vp9-opus.webm`); stems + SFX multi-selected; nothing selected | The fader is disabled each time with the same reason text as the field. Multi-select stays disabled (stage 2). |
-| **CG-TOUCH** (1440 ×1) | The round-113 CDP touch recipe on the Clip Gain fader | No change on touchStart; a relative change on moves; one entry. The Zoom positive control still jumps. |
-| **CG-PLAY** (1440 ×3) | Play; drag the stems clip fader −40 px while it sounds; keep playing 1 s | The level drops audibly (track or master meter peak falls during the clip). **0** new `createBufferSource` calls between press and release (instrument `AudioContext.prototype.createBufferSource` before load). The playhead position is monotonic. |
-| **G-T1** (T12.26 Test 1) | Export WAV of the stems clip alone (others muted), at Clip Gain 0.0 | Baseline file. Its peak and RMS are recorded. **Validity:** the baseline must have 0 samples at or over full scale (the export alert shows none and C's WAV scan agrees). Otherwise C uses the music clip instead. If no demo clip qualifies, C compares RMS over a non-clipping window and marks the peak ratio inconclusive (not PASS). This applies to G-T2/G-T8/G-NONDESTRUCT too. |
-| **G-T2** (Test 2) | Set −6.0 dB with the fader or keyboard, then export again | Peak ratio and RMS ratio vs G-T1 = 0.5012 ±0.5 %. If the source peak is ≤ −4 dBFS, also run +3.0: ratio 1.4125 ±0.5 %, with no clipped samples. |
-| **G-T8** (Test 8) | Stems at −6.0, music untouched; export both | The music clip's region (outside the stems span) matches its baseline within 1 LSB. |
-| **G-T9** (Test 9) | Clip Gain 0.0 and a fade-out of 2 s on the stems clip; export | The last 10 ms of the clip are ≤ −60 dBFS RMS. The field and the fader still read 0.0. |
-| **G-NONDESTRUCT** (T12.2) | Set −8.0, then reset with a fader double-click; export | Matches G-T1 within 1 LSB. |
-| **NB-TRACK-SHIFT** | Music track Volume: drag −20 px with Shift held | The same Δ as round 113's MC-DRAG without Shift (Δ −0.19 ± 1 step at w 107). Track faders do not opt in. |
-| **NB-MASTER** | Master drag −20 px | As round 113 MC-DRAG (Δ −13.5 dB ± 1 step), one entry. |
-| **NB-RESET-BTN** | Focus `0 dB` from −6.0 and press Enter | 0.0, and focus moves to the field (round-108 contract). |
-| **SOURCE-SCOPE** | `git status`, `git diff --stat c2837f1`, the frozen list | Only the §2 paths. Frozen list OK at start and end. Protected hashes unchanged. |
-| **T114-TARGETED** | Re-run A's vitest file list (targeted files only, not the full suite) | Green, with the same counts as A's report. |
-| **AN-REVIEW** | Read A's diff | Fine mode is opt-in. With the option undefined, the computed values are identical (CF11, NB-TRACK-SHIFT, NB-MASTER); the `onPointerDown` body may be restructured for the re-anchoring. `readStoredValue` reads the live arrangement; the R7 constraint holds; no type assertion; no CSS file; conditional test edits match A's list and do not weaken anything. |
-| **PX-NET** | Every session | 0 requests to forbidden hosts (R2/r2-proxy/workers.dev, Shopify, Firebase auth, Brevo, studio-token), and 0 `Authorization` headers. |
-| **REG-HYD** | Every session | 0 hydration errors, 0 `pageerror`, and no console errors besides the known cloud noise. |
-| **G114-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `/api/studio-token?product=middle-east&file=stem1.wav` | The demo badge „დემო კოლექცია — ავტორიზაცია არ სჭირდება“. The product route shows "Sign in required", no workspace and 0 `audio[src]`. The token API returns **401**. The fake-Bearer 403 sub-check is **BLOCKED (backend unavailable in cloud)**. |
-| **DOC-098 / DOC-097-L4** | Read both docs | Doc 098 follows the template, and its l.4 says the round is awaiting C, naming D-29z79. Doc 097 l.4 reads as in R9. |
+| **MC-PRESENT** | stems −6.0, SFX +1.0; multi-select both | Field, fader, `0 dB` enabled. Field empty; range node `−6.0 … +1.0 dB`; fader value 1, `aria-valuetext` `−6.0 … +1.0 dB`. Equal values (both −3.0) → field `-3.0`, no range node. |
+| **MC-LAYOUT** (both viewports) | stems −60.0, SFX +24.0, multi-select | Range node, field, fader, `0 dB` fully inside the panel's visible box; block `scrollWidth ≤ clientWidth`; block height = single-clip state ±1 px. Screenshots. |
+| **MC-DRAG** | from −6/+1, mouse drag +20 px | Each Δ = `20/w × 84` ± (0.1 + `84/w`), **same Δ for both**, difference exactly 7.0; exactly one `Clip Gain` entry; one Ctrl+Z restores −6.0/+1.0. |
+| **MC-CLAMP** (1440 ×1, 1280 ×1) | from −6/+1 drag far right past the fader end; Ctrl+Z; drag far left | Right: SFX +24.0, stems +17.0. Left: stems −60.0, SFX −53.0. Difference 7.0 each time; one entry per drag. |
+| **MC-FINE** | Shift held from before press to after release, +20 px | Each Δ = `20/w × 8.4` ± (0.1 + `8.4/w`), same for both, one entry. |
+| **MC-KEY** | focus fader, ArrowRight ×3 | +0.3 each; 3 entries (round-114 rule). |
+| **MC-DBL** | from −6/+1 double-click the fader; double-click again | 0.0/0.0, one entry; second adds none. |
+| **MC-RESET-BTN** | from −6/+1 focus `0 dB`, Enter | 0.0/0.0, one entry, focus → field; `0 dB` then disabled. |
+| **MC-FIELD** | mixed; type `-3` + Enter; then Escape test | Both −3.0, one entry. Typing then Escape restores the empty field, no entry. |
+| **MC-PENDING-DRAG** (1440 ×1, 1280 ×1) | mixed; type `-3` without Enter; drag +20 px | Final each −3.0 + Δ; two entries; Ctrl+Z → −3.0/−3.0; Ctrl+Z → −6.0/+1.0. |
+| **MC-VIDEO-MIX** | select stems + the video clip `beeps-6s-vp9-opus.webm` | Field, fader, `0 dB` disabled; reason text exactly R1; a drag and a double-click change nothing, no entry. |
+| **MC-STATUS** | after MC-DRAG | Status contains `2 კლიპი`. |
+| **MC-PLAY** (1440 ×3) | play; multi-drag stems+SFX −40 px while the stems clip sounds; keep playing 1 s | Level drops (track or master meter peak falls); **0** new `createBufferSource` between press and release (instrumented before load); playhead monotonic. |
+| **MC-SELECT-MIDDRAG** (1440 ×1) | single stems clip: mouse down on fader, move +10 px, press Ctrl+A while held, move +10 px, release | Only the stems clip changed (SFX/music unchanged); one entry; status not flickering the refusal text. If Ctrl+A does not change the selection while the fader is focused, record it and mark the row **inconclusive** (MG11 covers it in jsdom), never PASS. |
+| **MC-BLUR-DISABLED** (observe, GATE114-S3) | video clip present (as MC-VIDEO-MIX); single stems clip selected; focus the fader; hold ArrowRight (key repeat, no keyup) ~0.5 s; while still focused press **Ctrl+A** (all clips incl. video → the fader becomes disabled by R1 without a mouse blur); release; then make one unrelated edit and press Ctrl+Z | No value lost: the stems gain keeps the previewed value and Undo restores it in one step. Record when the `Clip Gain` entry appears. A lost value or missing entry is a finding (Medium); a late entry alone is the known Low. If Ctrl+A does not change the selection while the fader is focused, mark the row **inconclusive** (a mouse click blurs first and would pass trivially; do not substitute it). |
+| **G-T2-MULTI** | baselines: export stems alone and SFX alone at 0.0 (others muted; G-T1 validity rule of round 114: no full-scale samples, else use music instead). Set stems −6.0, SFX −2.0; multi-select; drag **left** ~−20 px (no headroom dependency); read each stored value `g` alone; export each alone | Peak and RMS ratio vs its own baseline = `10^(g/20)` ±0.5 %; stored difference exactly 4.0; no clipped samples. (A positive case is optional and only if `baseline peak + g ≤ −1 dBFS`.) |
+| **NB-SINGLE** | single stems clip: drag +20 px; double-click | Stage-1 behaviour unchanged (CG-DRAG / CG-DBL formulas of round 114). |
+| **NB-TRACK-SHIFT / NB-MASTER** | as round 114 | Same values as round 114. |
+| **SOURCE-SCOPE** | `git status`, `git diff --stat 38c0e21`, frozen list | Only §2 paths; frozen OK; protected hashes unchanged. |
+| **T115-TARGETED** | re-run A's vitest list (targeted only) | Green, same counts as A. |
+| **AN-REVIEW** | read A's diff | R2 in the new module (no `model.ts` change); previews computed from the before state; R8 capture; hook untouched; single-clip and track/Master paths unchanged; granted test edits match §2 and keep strength; no type assertion; no CSS file. |
+| **PX-NET** | every session | 0 forbidden-host requests (R2/r2-proxy/workers.dev, Shopify, Firebase auth, Brevo, studio-token) and 0 `Authorization` headers. |
+| **REG-HYD** | every session | 0 hydration errors, 0 `pageerror`, no console errors beyond the known cloud noise. |
+| **G115-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `/api/studio-token?product=middle-east&file=stem1.wav` | Demo badge „დემო კოლექცია — ავტორიზაცია არ სჭირდება“; product route "Sign in required", no workspace, 0 `audio[src]`; token API **401**. Fake-Bearer 403 sub-check **BLOCKED (backend unavailable in cloud)**. |
+| **DOC-099 / DOC-098** | read both | 099 follows the template, l.4 as §2; 098 l.4 and CF1–CF14 as R10. |
 
 - **Gate rows (not claimed by C):** full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
-- **Tolerances are fixed now:** no change after seeing a number. Harness validity: if the Zoom control does not jump in CG-TOUCH, that row is inconclusive, not PASS.
-- **Neighbours that could break, and where they are checked:**
-  - track and Master faders: NB-*, CF11;
-  - the `0 dB` focus handoff: NB-RESET-BTN;
-  - pending text: CG-PENDING-DRAG;
-  - the detail panel layout: CG-LAYOUT;
-  - audio scheduling: CG-PLAY.
+- **Tolerances are fixed now.** Harness validity: a G-T2-MULTI baseline with clipped samples is replaced per the rule or marked inconclusive.
+- **Neighbours that could break and where they are checked:** single-clip fader (NB-SINGLE, MG13), track/Master (NB-*), detail layout (MC-LAYOUT), pending text (MC-PENDING-DRAG), scheduling (MC-PLAY), selection changes (MC-SELECT-MIDDRAG, MC-BLUR-DISABLED).
 
 ## 5. Outcome
-- **C PASS** → T12 stage 1 is `c_pass`. Next comes the REGRESSION round (if the next planning is on or after 2026-10-24); after that, T12 stage 2 (multi-clip Clip Gain, T12.7).
-- **Any CG-DRAG / CG-FINE / CG-PLAY / G-T2 / G-NONDESTRUCT FAIL** → a new finding with C's severity. Data or audio-level errors are at least Medium. B writes the fix round after the regression round.
-- **Layout-only FAIL** (CG-LAYOUT) → a finding rated by impact: hidden controls are Medium, cosmetic issues are Low.
+- **C PASS** → T12 stage 2 `c_pass`. Next planning: the REGRESSION round (on or after 2026-10-24), then the bounded architecture checkpoint request (§8) and T12 stage 3.
+- **MC-DRAG / MC-CLAMP / MC-PLAY / G-T2-MULTI / MC-VIDEO-MIX FAIL** → finding, at least Medium (data or audio level). **MC-LAYOUT:** hidden control = Medium, cosmetic = Low.
 
 ## 6. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
 |---|---|---|---|---|
-| A Gain slider in dB changes the clip gain | Live 12 Reference Manual §8.4.7 (saved by B on 2026-10-12, plan.md l.636; not re-opened this round, no web tool on this runner) | Confirmed (2026-10-12 capture) | A fader −60…+24 dB beside the existing field | CG-DRAG, G-T2 |
-| Shift + drag gives finer resolution | Live 12 keyboard shortcuts §42.6 (https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/, saved 2026-10-13, plan.md l.775) | Confirmed (2026-10-13 capture) for controls generally | 10× finer while Shift is held; re-anchored at the toggle (the toggle behaviour is a CZABA decision) | CG-FINE, CG-FINE-TOGGLE |
-| Reset a parameter value: double-click or Delete | Live 12 §42.4 (same capture) | Confirmed for parameters; the Clip Gain slider is not named explicitly | Double-click → 0.0 dB. Delete on a focused range input stays a browser no-op (the existing deliberate difference, plan.md l.775) | CG-DBL |
-| Multi-clip range display | §8.4.7 + §8.13 (2026-10-12) | Confirmed | Stage 2. This round keeps multi-select disabled | CG-DISABLED |
-| No jump on press; touch guard | no Live source (D-29z3 is a CZABA decision; browser touch is not applicable) | not applicable | Inherited from rounds 38/113 | CG-NOJUMP, CG-TOUCH |
+| Multi-clip selection shows the range of differing values | Live 12 Reference Manual §8.4.7 + §8.13 (B capture 2026-10-12, recorded in plan.md l.636; capture folder not on this runner; not re-opened, no web tool) | Confirmed (2026-10-12 record) | Range text `−6.0 … +1.0 dB` + `aria-valuetext`; no painted slider indicator | MC-PRESENT, MC-LAYOUT |
+| Moving Gain keeps relative differences | User requirement T12.7 | Live behaviour **დაუდასტურებელი** | Shared delta, clamped so differences stay exact | MC-DRAG, MC-CLAMP |
+| Typing a value with a multi-selection sets all | none found | **დაუდასტურებელი** | CZABA decision: absolute set for all members | MC-FIELD |
+| Video in selection | none (CZABA single-video lane rule) | არ ეხება | Disabled with reason (no partial edit) | MC-VIDEO-MIX |
+| Shift fine / double-click reset | §42.6 / §42.4 (2026-10-13 capture, plan.md l.775) | Confirmed for controls generally | Inherited from stage 1 | MC-FINE, MC-DBL |
 
-The T12 attachment's Ableton notes (`ableton-notes-source.txt`) were **not re-verified** in this round, so their status is **დაუდასტურებელი**. ABLETON-EXPERT-REVIEW covers them after T12.
-
-C rates each row separately for "CZABA requirement met" and "Ableton correspondence" (დადასტურებული / შეგნებული განსხვავება / დაუდასტურებელი / არ ეხება).
+`ableton-notes-source.txt` stays **დაუდასტურებელი**; ABLETON-EXPERT-REVIEW covers it after T12. C rates "CZABA requirement met" and "Ableton correspondence" separately.
 
 ## 7. Evidence and reporting
-- **C writes:** `c-round-114.md` and `c-round-114.json`, with `taskStatus`, `passed`, `failed`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified` and `envStatus`. The evidence goes under `c-round-114/{tools,out,shots}/`.
-- **Write the reports as you go.** A job can be stopped at its time limit.
-- **Reporting rules:**
-  - Report a new finding with a new ID and a severity.
-  - `browserVerified` is false only if a browser row that **can** run here was not run.
-  - The fake-Bearer 403 sub-check goes under `blocked` with "backend unavailable in cloud".
+- **C writes:** `c-round-115.md` and `c-round-115.json` (`taskStatus`, `passed`, `failed`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`), evidence under `c-round-115/{tools,out,shots}/`. Write as you go.
+- New findings get a new ID and a severity. `browserVerified` is false only if a browser row that **can** run here was not run. Inconclusive rows are listed as such, never under `passed`.
 - Consult only the read-only agents in your list. No `store/` writes by C.
+
+## 8. Root / architecture (not A's work)
+Both round-114 reviewers name the post-stage-2 point for a bounded checkpoint: merge the three pending-preview machines (Volume / Master / Clip Gain) into one tagged `pendingPreviewRef` + one `flushPendingPreviews()` in `ArrangementContext` (ARCH-R81 trigger). Recorded as addendum (z) of `b-round-91-checkpoint-request.md`; the request goes to root at the next planning after this stage closes. It does not change this round's ownership.

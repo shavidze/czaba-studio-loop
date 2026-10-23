@@ -1,0 +1,111 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain-fader.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 4144[2mms[22m[39m
+     [33m[2m✓[22m[39m CF1: the fader has range −60…+24, step 0.1, the clip value, its label and a dB value text [33m 608[2mms[22m[39m
+     [33m[2m✓[22m[39m CF2: a +25 px drag over 100 px gives +21.0 dB with one Clip Gain entry; the field follows; Undo restores [33m 431[2mms[22m[39m
+     [33m[2m✓[22m[39m CF6: a double-click from −6.0 resets to 0.0 with one entry; a double-click at 0.0 writes none [33m 374[2mms[22m[39m
+     [33m[2m✓[22m[39m CF7: each keyboard step (change + keyup) moves 0.1 dB and writes one entry per press [33m 343[2mms[22m[39m
+     [33m[2m✓[22m[39m CF11 must-not: music Volume and Master give the same value with Shift as without [33m 402[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/fader-touch.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 6872[2mms[22m[39m
+     [33m[2m✓[22m[39m FT1: a cancelable touchstart is default-prevented on music Volume, Pan, Master, group Volume and video Volume [33m 1834[2mms[22m[39m
+     [33m[2m✓[22m[39m FT2 must-not: a touchstart on the Zoom slider is not default-prevented [33m 893[2mms[22m[39m
+     [33m[2m✓[22m[39m FT3: each fader registers exactly one non-passive native touchstart listener [33m 797[2mms[22m[39m
+     [33m[2m✓[22m[39m FT4: re-renders do not re-register; after unmount the same input is no longer prevented and a remount registers once [33m 1346[2mms[22m[39m
+     [33m[2m✓[22m[39m FT7: folding the music lane detaches the old Volume and Pan inputs; unfolding attaches the new ones once [33m 702[2mms[22m[39m
+     [33m[2m✓[22m[39m FT5: a touch press with no move keeps every fader value and writes no history entry [33m 663[2mms[22m[39m
+     [33m[2m✓[22m[39m FT6: a touch relative drag of −25 px over 100 px moves the music Volume 0.6 → 0.35 with one Volume entry [33m 635[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/fader-click.test.tsx [2m([22m[2m26 tests[22m[2m)[22m[33m 3631[2mms[22m[39m
+     [33m[2m✓[22m[39m F1: a press with no movement keeps the music Volume at 0.6, writes no entry and focuses the fader [33m 409[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/detail-panel-polish.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 2840[2mms[22m[39m
+       [33m[2m✓[22m[39m keeps typed start text when a range on another lane appears and when it is cleared [33m 519[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/fader-guards.test.tsx [2m([22m[2m71 tests[22m[2m)[22m[33m 13091[2mms[22m[39m
+       [33m[2m✓[22m[39m Delete and Backspace on the focused musicVolume slider keep the selected clip, history, status and value [33m 442[2mms[22m[39m
+       [33m[2m✓[22m[39m Delete and Backspace on the focused sfxVolume slider keep the selected clip, history, status and value [33m 301[2mms[22m[39m
+       [33m[2m✓[22m[39m narrow guard: Delete on the focused playhead handle (role="slider") still deletes the selected clip [33m 603[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain.test.tsx [2m([22m[2m28 tests[22m[2m)[22m[33m 2639[2mms[22m[39m
+       [33m[2m✓[22m[39m type 6 + Enter commits one entry, shows the status and the stored text [33m 482[2mms[22m[39m
+       [33m[2m✓[22m[39m Escape reverts the text and the following blur commits nothing; blur with changed text commits [33m 302[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/master-ui.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[33m 2270[2mms[22m[39m
+       [33m[2m✓[22m[39m renders the Master group with Mute, the fader and a readout that follows the value [33m 331[2mms[22m[39m
+       [33m[2m✓[22m[39m sits in the workspace header before the transport and renders 0 times per Play frame [33m 1471[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/pending-status.test.tsx [2m([22m[2m22 tests[22m[2m)[22m[33m 1789[2mms[22m[39m
+       [33m[2m✓[22m[39m S7: a refused music Volume press during the separator drag shows blocked, then the prior status after pointerup [33m 515[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/pan-release-recovery.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 2489[2mms[22m[39m
+       [33m[2m✓[22m[39m PK1: ArrowRight on the Pan slider after a lost release writes the next change once [33m 726[2mms[22m[39m
+       [33m[2m✓[22m[39m PK3: after the keyboard entry a late pointerup and pointercancel of the old pointer write nothing [33m 435[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/gesture-guard.test.tsx [2m([22m[2m19 tests[22m[2m)[22m[33m 1955[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses Mute, Solo and Volume during a gesture without a history entry [33m 474[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/detail-panel-fit.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 1655[2mms[22m[39m
+     [33m[2m✓[22m[39m F1: the pending marker shows one truncating label and keeps the full hint for screen readers and hover [33m 447[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 21828[2mms[22m[39m
+     [33m[2m✓[22m[39m UM1 controls render expanded and collapsed, add no text and keep the 28 px row [33m 3379[2mms[22m[39m
+     [33m[2m✓[22m[39m UM2 group Mute silences the members live with one history entry and no restart [33m 1447[2mms[22m[39m
+     [33m[2m✓[22m[39m UM3 group Volume: drag, keyboard, blur and double-click each write one entry; cancel reverts [33m 2701[2mms[22m[39m
+     [33m[2m✓[22m[39m UM4 group Solo: exclusive, cleared by a lane solo, Ctrl additive, half-solo on the parent [33m 3370[2mms[22m[39m
+     [33m[2m✓[22m[39m UM5 R17-G3: inner controls stay adjustable under a muted outer group [33m 1949[2mms[22m[39m
+     [33m[2m✓[22m[39m UM6 Ctrl+G, group M/S/Volume and Ctrl+Shift+G while playing restart no sources [33m 1844[2mms[22m[39m
+     [33m[2m✓[22m[39m UM7 ungrouping a muted group makes its members audible; Undo mutes them again [33m 1254[2mms[22m[39m
+     [33m[2m✓[22m[39m UM8 the export dialog video-sound line uses the group-aware rule [33m 881[2mms[22m[39m
+     [33m[2m✓[22m[39m UM9 X1: collapsing blurs a hidden focused fader, commits a pending preview and focuses the group [33m 3439[2mms[22m[39m
+     [33m[2m✓[22m[39m UM10 Space, m and u on a focused group M/S behave as on a lane M/S [33m 1562[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/fader-focus-order.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 1404[2mms[22m[39m
+     [33m[2m✓[22m[39m S1 must-not: Clip Gain "3" typed on SFX → music Volume press commits Clip Gain once before the gesture; focus on the Volume; no blocked status [33m 547[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 852[2mms[22m[39m
+     [33m[2m✓[22m[39m FL1: a keyboard 0 dB reset moves focus to the Clip Gain input, and a fresh Enter there adds no clip [33m 492[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/detail-panel-reason.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 1183[2mms[22m[39m
+     [33m[2m✓[22m[39m RF1: a group shows the range reason and then the Clip Gain reason in the middle box, still linked [33m 447[2mms[22m[39m
+Error: useArrangementPositionStore must be used within an ArrangementProvider
+    at Module.useArrangementPositionStore (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:3570:11)
+    at PositionStoreOutsideProvider (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:311:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangementPositionStore must be used within an ArrangementProvider
+    at Module.useArrangementPositionStore (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:3570:11)
+    at PositionStoreOutsideProvider (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:311:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangement must be used within an ArrangementProvider
+    at Module.useArrangement (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:3562:11)
+    at ArrangementOutsideProvider (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:316:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangement must be used within an ArrangementProvider
+    at Module.useArrangement (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:3562:11)
+    at ArrangementOutsideProvider (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:316:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+ [32m✓[39m app/lib/arrangement/__tests__/context-hygiene.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 481[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m16 passed[39m[22m[90m (16)[39m
+[2m      Tests [22m [1m[32m277 passed[39m[22m[90m (277)[39m
+[2m   Start at [22m 17:33:44
+[2m   Duration [22m 28.41s[2m (transform 6.11s, setup 0ms, import 23.21s, tests 69.12s, environment 15.54s)[22m
+

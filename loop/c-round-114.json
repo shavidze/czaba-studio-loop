@@ -1,0 +1,115 @@
+{
+ "round": 114,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T17:28:27.6731142Z",
+  "round": 114,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "CG-PRESENT",
+  "CG-LAYOUT",
+  "CG-NOJUMP",
+  "CG-DRAG",
+  "CG-FINE",
+  "CG-FINE-TOGGLE",
+  "CG-KEY",
+  "CG-DBL",
+  "CG-SYNC",
+  "CG-PENDING-DRAG",
+  "CG-DISABLED",
+  "CG-TOUCH",
+  "CG-PLAY",
+  "G-T1",
+  "G-T2",
+  "G-T8",
+  "G-T9",
+  "G-NONDESTRUCT",
+  "NB-TRACK-SHIFT",
+  "NB-MASTER",
+  "NB-RESET-BTN",
+  "SOURCE-SCOPE",
+  "T114-TARGETED",
+  "AN-REVIEW",
+  "PX-NET",
+  "REG-HYD",
+  "G114-3",
+  "DOC-098",
+  "DOC-097-L4"
+ ],
+ "failed": [],
+ "blocked": [
+  "G114-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "C-R114-01",
+   "severity": "low",
+   "preExisting": true,
+   "steps": [
+    "Open /studio-lab at 1280x720",
+    "Add demo-middle-east @0 s (music), demo-stem-pulse @2 s (stems), demo-soft-impact @4 s (sfx)",
+    "Select the stems clip; detail panel open at default height (120 px)",
+    "Measure arrangement-detail-content and the info column line 'წყარო უცვლელი რჩება'"
+   ],
+   "expected": "All detail info lines visible without scrolling at the default panel height",
+   "actual": "Content scrollHeight 98 > clientHeight 83; the info column (w-72 shrink-0, unchanged since c2837f1) 5th line spans y 650-666 while the visible box ends at 651. Not caused by round 114 (the Clip Gain block's width change does not affect the fixed-width info column).",
+   "evidence": "c-round-114/out/ui-1280-1.json rows.CG-LAYOUT.sourceLine; c-round-114/shots/layout-1280-1-panel.png"
+  }
+ ],
+ "measurements": {
+  "faderWidthPx": 96,
+  "dragDelta": 17.5,
+  "fineDelta": 1.8,
+  "toggleTotal": 9.7,
+  "toggleStep": 0.1,
+  "keyEntries": 3,
+  "playDropDb": 33.4,
+  "playCreateBufferSourceDuringDrag": 0,
+  "gT2PeakRatio": 0.50119,
+  "gT2RmsRatio": 0.50119,
+  "gT2Plus3Ratio": 1.41254,
+  "gT8OutsideMaxLsb": 0,
+  "gT9Last10msRmsDbfs": -124.43,
+  "gNondestructMaxLsb": 0,
+  "tokenStatus": 401,
+  "vitest": "16 files / 277 pass"
+ },
+ "ableton": {
+  "confirmed": [
+   "dB gain slider §8.4.7 (2026-10-12 capture)",
+   "multi-clip deferred §8.13"
+  ],
+  "confirmedGeneralNotNamedForClipGain": [
+   "Shift fine drag §42.6",
+   "double-click reset §42.4"
+  ],
+  "deliberateDifference": [
+   "re-anchor at Shift toggle",
+   "Delete on focused range input is a no-op"
+  ],
+  "unverified": [
+   "ableton-notes-source.txt not re-verified"
+  ],
+  "notApplicable": [
+   "touch / no-jump"
+  ]
+ },
+ "notes": [
+  "CG-PRESENT third Tab stop (0 dB) is disabled on a fresh clip (gainDb undefined; unchanged round-108 code); order field→fader→0 dB verified at −6.0",
+  "Export rows run once (viewport independent)"
+ ]
+}

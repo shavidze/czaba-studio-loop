@@ -1,9 +1,9 @@
 {
- "version": 112,
- "updated": "2026-10-23 (B round 113 result / round 114 plan, D-29z79)",
+ "version": 113,
+ "updated": "2026-10-23 (B round 114 result / round 115 plan, D-29z80)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 114: D-29z79 - T12 stage 1, the single-clip Clip Gain fader: relative drag, opt-in Shift fine drag, double-click reset, keyboard, one history entry per drag, live preview without source restart; + GATE113-S1 doc 097 status; baseline c2837f1 clean; frozen b-round-113-r114-tree-sha256.txt 911; new clip-gain-fader.test.tsx + doc 098)",
+ "current_task": "current-task.md (round 115: D-29z80 - T12 stage 2, multi-clip Clip Gain (T12.7): audio-only member set, shared delta clamped so differences stay exact, range text when mixed, absolute set from the field, reset all, one entry; + GATE114-S1 ids captured at gesture begin, GATE114-S2 step constant, GATE114-S5 doc 098; baseline 38c0e21 clean; frozen b-round-114-r115-tree-sha256.txt 915; new clip-gain-multi.ts, clip-gain-multi.test.tsx, doc 099)",
  "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23) | round 111 planning: advisor available and consulted before writing (2026-10-23) | round 112 planning: advisor available and consulted before writing (2026-10-23) | round 113 planning: advisor available and consulted before writing (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
@@ -8878,18 +8878,32 @@
    "round": 114,
    "task": "current-task.md",
    "decision": "D-29z79",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "T12-GAIN-VOLUME stage 1",
     "GATE113-S1-DOC097-STATUS"
    ],
-   "note": "T12 stage 1: single-clip Clip Gain fader (relative drag, opt-in Shift fine, double-click reset, keyboard, one entry per drag, live preview). A owns useRelativeFaderDrag.ts, ArrangementContext.tsx, ArrangementDetailPanel.tsx, StudioWorkspace.tsx (props only), new clip-gain-fader.test.tsx (CF1-CF12 + m1-m5), new doc 098, doc 097 (R9), conditional existing detail/fader tests (enumerations only). C: CG-*, G-T1/T2/T8/T9, G-NONDESTRUCT, NB-*, CG-PLAY, CG-TOUCH, PX-NET, REG-HYD, G114-3 at 1440+1280. Baseline c2837f1 clean; frozen b-round-113-r114-tree-sha256.txt (911)."
+   "note": "T12 stage 1: single-clip Clip Gain fader (relative drag, opt-in Shift fine, double-click reset, keyboard, one entry per drag, live preview). A owns useRelativeFaderDrag.ts, ArrangementContext.tsx, ArrangementDetailPanel.tsx, StudioWorkspace.tsx (props only), new clip-gain-fader.test.tsx (CF1-CF12 + m1-m5), new doc 098, doc 097 (R9), conditional existing detail/fader tests (enumerations only). C: CG-*, G-T1/T2/T8/T9, G-NONDESTRUCT, NB-*, CG-PLAY, CG-TOUCH, PX-NET, REG-HYD, G114-3 at 1440+1280. Baseline c2837f1 clean; frozen b-round-113-r114-tree-sha256.txt (911).",
+   "result": "C PASS browserVerified=true realVerified=true (c-round-114.json; 29 rows passed, 0 failed; fake-Bearer 403 sub-check blocked: backend unavailable in cloud; 1 new Low C-R114-01 pre-existing); gate 114 published 38c0e21 (reviewer 8.5/10 COMMIT OK; verify 152 files / 2355 tests, build OK)"
+  },
+  {
+   "round": 115,
+   "task": "current-task.md",
+   "decision": "D-29z80",
+   "status": "dispatched",
+   "items": [
+    "T12-GAIN-VOLUME stage 2",
+    "GATE114-S1-CLIPID-AT-BEGIN",
+    "GATE114-S2-FIELD-STEP-CONST",
+    "GATE114-S5-DOC098-STATUS"
+   ],
+   "note": "T12 stage 2 (T12.7): multi-clip Clip Gain for an all-audio selection (video in selection -> disabled with the new reason, no partial edit); pure helpers in new clip-gain-multi.ts (shared delta clamped to [MIN-minDb, MAX-maxDb], normalize per clip; absolute set); fader anchor = maxDb, range text node when mixed, aria-valuetext range; field empty when mixed, typed value sets all; reset all; previews from the before state; one entry per drag/key/commit; ids captured at gesture begin. A owns ArrangementContext.tsx, ArrangementDetailPanel.tsx, StudioWorkspace.tsx (detailGroup + props), new clip-gain-multi.ts + clip-gain-multi.test.tsx (MG1-MG13 + m1-m6), new doc 099, doc 098 (R10), granted lines in 5 existing tests (two-audio disabled case -> selection with video). Hook and model.ts frozen. C: MC-*, G-T2-MULTI, NB-SINGLE/TRACK-SHIFT/MASTER, MC-BLUR-DISABLED (GATE114-S3 observe), PX-NET, REG-HYD, G115-3. Baseline 38c0e21 clean; frozen 915."
   }
  ],
  "post_current_stage_queue": [
   {
    "id": "T12-GAIN-VOLUME",
-   "status": "in_progress (stage 1 dispatched round 114, D-29z79)",
+   "status": "in_progress (stage 1 c_pass_published round 114, 38c0e21; stage 2 dispatched round 115, D-29z80)",
    "requested": "2026-10-07",
    "instruction": "User explicitly asks: finish ALL current work first, THEN start these attached Gain/Volume requirements. Do not start T12 implementation or extend current tasks with it early.",
    "prerequisites": [
@@ -8960,13 +8974,17 @@
      "stage": 1,
      "round": 114,
      "decision": "D-29z79",
-     "status": "dispatched",
-     "scope": "single-clip Clip Gain fader: relative drag (84 dB over the width), opt-in Shift fine drag (10x, re-anchored), double-click reset to 0.0, keyboard +-0.1, one history entry per drag, live preview without source restart; field/fader sync; disabled for video/multi/none; T12.26 Tests 1/2/8/9 + T12.2 measured by C on exports"
+     "status": "c_pass_published",
+     "scope": "single-clip Clip Gain fader: relative drag (84 dB over the width), opt-in Shift fine drag (10x, re-anchored), double-click reset to 0.0, keyboard +-0.1, one history entry per drag, live preview without source restart; field/fader sync; disabled for video/multi/none; T12.26 Tests 1/2/8/9 + T12.2 measured by C on exports",
+     "evidence": "c-round-114.json PASS browserVerified=true realVerified=true; gate 114 published 38c0e21; T12.26 Tests 1/2/8/9 + T12.2 measured on WAV exports (G-T2 peak/RMS ratio 0.50119, +3 dB 1.41254, G-T8 0 LSB, G-T9 -124.4 dBFS, G-NONDESTRUCT 0 LSB)"
     },
     {
      "stage": 2,
-     "status": "not_started",
-     "scope": "T12.7 multi-clip Clip Gain: the field/fader enabled for an audio multi-selection, relative differences preserved (delta limited at the -60/+24 bounds so differences stay exact), mixed values shown as a range (e.g. -6.0 ... +1.0 dB), one history entry"
+     "status": "dispatched",
+     "scope": "T12.7 multi-clip Clip Gain: the field/fader enabled for an audio multi-selection, relative differences preserved (delta limited at the -60/+24 bounds so differences stay exact), mixed values shown as a range (e.g. -6.0 ... +1.0 dB), one history entry",
+     "round": 115,
+     "decision": "D-29z80",
+     "rulings": "all-audio selection only (video -> disabled, reason text changed); shared clamped delta; anchor maxDb; range text when mixed; field absolute set; reset all; one entry; ids captured at gesture begin"
     },
     {
      "stage": 3,
@@ -14311,7 +14329,7 @@
   {
    "id": "GATE113-S1-DOC097-STATUS",
    "severity": "low",
-   "status": "dispatched round 114 (D-29z79 R9, one-line grant; A owns doc 097 l.4 + TODO only)",
+   "status": "done (C round 114 DOC-097-L4 PASS; gate 114 published 38c0e21)",
    "title": "doc 097 l.4 still says awaiting C and the TODO l.97 lists the C rows as open after C round 113 PASS",
    "evidence": "gates/round-113/review-result.json finding 1 (review 9/10, COMMIT: OK)",
    "repro": "read store/docs/implementation/2026/quarter-IV/097-studio-fader-touch-no-jump.md l.4 and l.97"
@@ -14336,6 +14354,52 @@
    "status": "requested_from_root (B round 113 planning, 2026-10-23; non-blocking; T12 stage 1 proceeds) - addenda (x) and (y) in b-round-91-checkpoint-request.md",
    "title": "phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b-round-83 / b-round-91 requests, addenda up to (w)) is re-requested once, with (x) useTrackPanFader and (y) the third MixVolumeTarget kind that T12 stage 1 may add",
    "evidence": "b-round-113.md section 7"
+  },
+  {
+   "id": "GATE114-S1-CLIPID-AT-BEGIN",
+   "severity": "low",
+   "status": "dispatched round 115 (D-29z80 R8; A owns the code in stage 2)",
+   "title": "Clip Gain fader hook reads the clip id from the latest render, not from drag start; a mid-drag selection change re-sets the refusal status per move and passes the wrong id on pointerup/blur (window pointerup still commits the original clip; history safe)",
+   "evidence": "gates/round-114/review.md Suggestion 1",
+   "repro": "ArrangementDetailPanel.tsx l.407-418, 429-433, 652-656 at 38c0e21"
+  },
+  {
+   "id": "GATE114-S2-FIELD-STEP-CONST",
+   "severity": "low",
+   "status": "dispatched round 115 (D-29z80 R9)",
+   "title": "Clip Gain number field uses literal step={0.1} while the fader uses DETAIL_CLIP_GAIN_STEP_DB",
+   "evidence": "gates/round-114/review.md Suggestion 2",
+   "repro": "ArrangementDetailPanel.tsx l.607 at 38c0e21"
+  },
+  {
+   "id": "GATE114-S3-BLUR-ON-DISABLE",
+   "severity": "low",
+   "status": "scheduled as C observation row MC-BLUR-DISABLED round 115 (no code); a lost value would be a new Medium",
+   "title": "Chromium fires no blur when the focused Clip Gain fader becomes disabled (selection -> video/group during a keyboard preview); the pending preview commits later on the next edit/Undo, nothing lost",
+   "evidence": "gates/round-114/review.md Suggestion 3",
+   "repro": "focus fader, hold ArrowRight, click a video clip"
+  },
+  {
+   "id": "GATE114-S4-SHIFT-REANCHOR-CLAMPED",
+   "severity": "info",
+   "status": "acknowledged (reviewer: acceptable)",
+   "title": "Shift re-anchor starts from the rounded and clamped previewed value; after an overshoot past a bound, a Shift toggle makes the value move back immediately",
+   "evidence": "gates/round-114/review.md Suggestion 4"
+  },
+  {
+   "id": "GATE114-S5-DOC098-STATUS",
+   "severity": "low",
+   "status": "dispatched round 115 (D-29z80 R10)",
+   "title": "doc 098 l.4 still says awaiting C after C round 114 PASS; file table says CF1-CF12 but there are 14 tests",
+   "evidence": "gates/round-114/review.md Suggestion 5",
+   "repro": "read docs/implementation/2026/quarter-IV/098-studio-clip-gain-fader.md l.4, l.49"
+  },
+  {
+   "id": "A-R114-REVIEW-FINEDIVISOR-VALIDATION",
+   "severity": "info",
+   "status": "acknowledged (only the constant 10 is passed)",
+   "title": "useRelativeFaderDrag fineDivisor is not validated",
+   "evidence": "a-round-114.md code review Low 6"
   }
  ],
  "tech_lead_notes": [
@@ -15587,6 +15651,13 @@
    "round": 113,
    "source": "a-round-113.md code-reviewer Architecture note + gates/round-113/review-result.json Architecture note",
    "note": "Signal 4 at useRelativeFaderDrag.ts:41-45 (listener lifecycle in the hook): both reviewers keep. Signal 3 (gate reviewer): the Pan gesture region ArrangementLane.tsx:314-401 (blur suppression, drag cleanup, draft state, merged ref) changed repeatedly; proposal useTrackPanFader(track) -> {binding, panDraft, sliderRef}; acceptance pan-release-recovery, fader-click, fader-guards, fader-focus-order, fader-touch unchanged and green; value medium, risk gesture timing; only if Pan is touched again (T12 stage 3 may). Added as addendum (x) to b-round-91-checkpoint-request.md; not scheduled."
+  },
+  {
+   "round": 114,
+   "source": "a-round-114.md code-reviewer Architecture note + gates/round-114/review.md Architecture note",
+   "note": "ArrangementContext now has three volume-like pending-preview machines (Volume, Master, Clip Gain); flush wiring at ~10 sites, n^2 growth per new preview kind; useRelativeFaderDrag changed in rounds 113 and 114. Both reviewers: keep for now; proposal after T12 stage 2: one tagged pendingPreviewRef {kind,key,before,label} + one flushPendingPreviews() in ArrangementContext only; acceptance master-ui, volume, pan, clip-gain-fader (+clip-gain-multi) unchanged and green, m6-style mutation covered, useArrangement() shape unchanged. Recorded as addendum (z) to b-round-91-checkpoint-request.md; bounded request to root at the planning after stage 2 closes (feature boundary named by both reviewers). Not scheduled as an A task.",
+   "status": "signal",
+   "id": "ARCH-R114-PENDING-PREVIEW-MERGE"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -17325,6 +17396,47 @@
    "repro": "read store/docs/implementation/2026/quarter-IV/096-studio-video-return-library-focus.md l.100",
    "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
    "deferred_round": "B round 112 -> 113 planning (2026-10-23)"
+  },
+  {
+   "id": "C-R114-01",
+   "severity": "low",
+   "status": "open",
+   "preExisting": true,
+   "title": "at 1280x720 with the detail panel at its default height, the info column's 5th line 'წყარო უცვლელი რჩება' is cut off (content scrollHeight 98 > clientHeight 83); not caused by round 114",
+   "evidence": "c-round-114/out/ui-1280-1.json rows.CG-LAYOUT.sourceLine; c-round-114/shots/layout-1280-1-panel.png; a-round-114.md R8 deviation",
+   "repro": "1280x720; add demo-middle-east @0, demo-stem-pulse @2, demo-soft-impact @4; select the stems clip; measure arrangement-detail-content",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 114 -> 115 planning (2026-10-23)"
+  },
+  {
+   "id": "A-R114-REVIEW-DBL-1PX",
+   "severity": "low",
+   "status": "open",
+   "title": "a 1 px move between the two clicks of a double-click on the Clip Gain fader can write an extra Clip Gain entry before the reset (Master and group faders behave the same)",
+   "evidence": "a-round-114.md code review Low 5",
+   "repro": "double-click the fader with a 1 px pointer move between clicks; count Undo entries",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 114 -> 115 planning (2026-10-23)"
+  },
+  {
+   "id": "A-R114-REVIEW-PREVIEWARR-FLUSH",
+   "severity": "low",
+   "status": "open",
+   "title": "previewArrangement does not flush pending Volume/Master/Clip Gain previews (existing exposure)",
+   "evidence": "a-round-114.md code review Low 8",
+   "repro": "start a keyboard Clip Gain preview, then trigger a previewArrangement path before keyup",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 114 -> 115 planning (2026-10-23)"
+  },
+  {
+   "id": "A-R114-REVIEW-DISABLED-STYLE",
+   "severity": "low",
+   "status": "open",
+   "title": "disabled Clip Gain fader uses disabled:opacity-50 while the field uses disabled:text-dim (cosmetic inconsistency)",
+   "evidence": "a-round-114.md code review Low 7",
+   "repro": "select a video clip; compare the disabled field and fader",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 114 -> 115 planning (2026-10-23)"
   }
  ],
  "baseline_tree_at_round108": {
@@ -17371,5 +17483,34 @@
    "auth.ts": "56f5b76f",
    "AuthContext.tsx": "bf9ee257"
   }
+ },
+ "baseline_tree_at_round115": {
+  "head": "38c0e212e8630f6965ceafedebc03435d2fd47f7",
+  "frozen_list": "tmp/studio-real-loop/b-round-114-r115-tree-sha256.txt",
+  "entries": 915,
+  "tracked_total": 924,
+  "excluded": [
+   "app/contexts/ArrangementContext.tsx",
+   "app/components/arrangement/ArrangementDetailPanel.tsx",
+   "app/components/arrangement/StudioWorkspace.tsx",
+   "docs/implementation/2026/quarter-IV/098-studio-clip-gain-fader.md",
+   "app/lib/arrangement/__tests__/clip-gain-fader.test.tsx (grant: CF8 case + constant)",
+   "app/lib/arrangement/__tests__/clip-gain.test.tsx (grant l.59, l.782-783)",
+   "app/lib/arrangement/__tests__/detail-panel-reason.test.tsx (grant l.23, l.249, l.336)",
+   "app/lib/arrangement/__tests__/detail-panel-fit.test.tsx (grant l.26, l.306)",
+   "app/lib/arrangement/__tests__/pending-status.test.tsx (grant l.507)"
+  ],
+  "new_allowed": [
+   "app/lib/arrangement/clip-gain-multi.ts",
+   "app/lib/arrangement/__tests__/clip-gain-multi.test.tsx",
+   "docs/implementation/2026/quarter-IV/099-studio-multi-clip-gain.md"
+  ],
+  "protected": {
+   "app/routes/studio.$productId.tsx": "fa2cf0bc",
+   "app/routes/api.studio-token.ts": "13914809",
+   "app/lib/auth.ts": "56f5b76f",
+   "app/contexts/AuthContext.tsx": "bf9ee257"
+  },
+  "checked": "B round 114 planning 2026-10-23 ~18:10 UTC: HEAD 38c0e21, git status clean, frozen list OK"
  }
 }

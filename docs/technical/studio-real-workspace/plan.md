@@ -1217,6 +1217,18 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z80 — Round 114-ის შედეგი; Round 115: T12 ეტაპი 2 — რამდენიმე კლიპის Clip Gain (T12.7).**
+
+C round 114 (`tmp/studio-real-loop/c-round-114.md`, `c-round-114.json`) — **PASS, `browserVerified: true`, `realVerified: true`**; gate 114 გამოქვეყნდა `38c0e21`-ში (review 8.5/10, verify 152 ფაილი / 2355 ტესტი). T12 ეტაპი 1 → `c_pass_published`; GATE113-S1 → დასრულდა. ახალი Low C-R114-01 (ძველი) და A-ს reviewer-ის Low-ები 5/7/8 → `deferred_low_polish`. რეგრესიის რაუნდი ჯერ არ დამდგარა (2026-10-21 → 2026-10-23, 2 დღე).
+
+- **R1 — წევრები:** ≥ 2 მონიშნული კლიპი, ყველა აუდიო ხაზზე. ვიდეო მონიშვნაში → ველი, fader და `0 dB` გამორთულია მიზეზით „Clip Gain მხოლოდ აუდიო კლიპებზე ისმება — ამოიღე ვიდეო მონიშვნიდან“; ნაწილობრივი ცვლილება არ ხდება (უმცირესი გულწრფელი ქცევა).
+- **R2 — relative ცვლილება:** ახალი სუფთა მოდული `clip-gain-multi.ts`; `effectiveDelta = clamp(delta, MIN − minDb, MAX − maxDb)`, თითო კლიპზე `normalizeClipGainDb` — სხვაობები ზუსტად რჩება; აბსოლუტური მნიშვნელობა ველიდან ყველას ენიჭება. `model.ts` და fader-ის hook გაყინულია.
+- **R3 — ჩვენება:** ტოლი მნიშვნელობები → ეტაპი 1-ის ჩვენება; განსხვავებული → ტექსტი `−6.0 … +1.0 dB` (ცალკე node + aria-valuetext), fader-ის anchor — maxDb, ველი ცარიელი. slider-ზე დახატული range indicator არ კეთდება (custom CSS აკრძალულია; სპეციფიკაცია ტექსტურ ფორმასაც იღებს).
+- **R4 — gesture:** ეტაპი 1-ის კონტრაქტი (no-jump, touch guard, Shift ×10, ერთი ჩანაწერი); preview ყოველთვის „before“ მდგომარეობიდან ითვლება; ისრები ±0.1 ყველას. reset — ყველა 0.0-ზე, ერთი ჩანაწერი.
+- **R5 — GATE114-S1/S2/S5:** clip id-ები gesture-ის დაწყებისას ფიქსირდება; ველის step — კონსტანტა; doc 098 l.4 + CF1–CF14.
+- **R6 — Ableton:** §8.4.7 + §8.13 (დიაპაზონის ჩვენება, 2026-10-12, l.636) — ადრე დადასტურებული, ამ რაუნდში არ გახსნილა; relative სხვაობის შენარჩუნება — მომხმარებლის მოთხოვნა (T12.7), Live-ში დაუდასტურებელი; ველით ყველაზე აბსოლუტური მნიშვნელობა — CZABA-ს გადაწყვეტილება.
+- **R7 — არქიტექტურა:** ორივე reviewer-ის შენიშვნა (სამი pending-preview მანქანა → ერთი `pendingPreviewRef` + `flushPendingPreviews()`) — სიგნალი, addendum (z); root-ისთვის შეზღუდული checkpoint-ის მოთხოვნა ეტაპი 2-ის დახურვის შემდეგ. ამ რაუნდის ownership-ს არ ცვლის.
+
 **D-29z79 — Round 113-ის შედეგი; T12 იწყება. Round 114: T12 ეტაპი 1 — Clip Gain-ის fader.**
 
 C round 113 (`tmp/studio-real-loop/c-round-113.md`, `c-round-113.json`) — **PASS, `browserVerified: true`, `realVerified: true`**, ბაგების გარეშე; gate 113 გამოქვეყნდა `c2837f1`-ში (review 9/10, verify 151 ფაილი / 2341 ტესტი).
@@ -2021,6 +2033,8 @@ flowchart TD
 | 113 | A-R38-REVIEW-TOUCH | native non-passive `touchstart` preventDefault ოთხ relative fader-ზე, Zoom-ის გარეშე (D-29z78) |
 | 113 → | (შედეგი) | **C PASS** (`browserVerified`), `c2837f1`: A-R38-REVIEW-TOUCH დაიხურა (Chromium); SRW-13 → მოწმდება; T12-ის gate გაიხსნა |
 | 114 | T12-GAIN-VOLUME ეტაპი 1, GATE113-S1 | Clip Gain-ის fader: relative drag, Shift-ით ზუსტი drag, double-click reset, ისრები, ერთი ჩანაწერი drag-ზე (D-29z79) |
+| 114 → | (შედეგი) | **C PASS** (`browserVerified`), `38c0e21`: T12 ეტაპი 1 მზადაა; C-R114-01 (Low) → deferred |
+| 115 | T12-GAIN-VOLUME ეტაპი 2, GATE114-S1/S2/S5 | რამდენიმე აუდიო კლიპის Clip Gain: საერთო clamp-ული delta, დიაპაზონის ტექსტი, ველით ყველაზე, reset ყველაზე, ერთი ჩანაწერი (D-29z80) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2053,6 +2067,8 @@ flowchart TD
 **D-29z78:** round 113-ში A-ს ეკუთვნის `app/hooks/useRelativeFaderDrag.ts`, `ArrangementLane.tsx`, `ArrangementMaster.tsx`, `ArrangementGroupHeader.tsx` (მხოლოდ fader-ის input-ების wiring), ახალი `app/lib/arrangement/__tests__/fader-touch.test.tsx` და doc 097; დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-112-r113-tree-sha256.txt`, 916).
 
 **D-29z79:** round 114-ში A-ს ეკუთვნის `app/hooks/useRelativeFaderDrag.ts` (opt-in fine mode), `app/contexts/ArrangementContext.tsx` (clip gain preview/commit/begin/blur), `ArrangementDetailPanel.tsx` (fader), `StudioWorkspace.tsx` (მხოლოდ props), ახალი `clip-gain-fader.test.tsx` და doc 098, doc 097 (l.4 + TODO) და პირობითად detail/fader-ის ექვსი არსებული ტესტი (მხოლოდ Clip Gain-ის ბლოკის/tab stop-ების/layout-ის ჩამონათვალი). დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-113-r114-tree-sha256.txt`, 911).
+
+**D-29z80:** round 115-ში A-ს ეკუთვნის `ArrangementContext.tsx`, `ArrangementDetailPanel.tsx`, `StudioWorkspace.tsx` (`detailGroup` + props), ახალი `app/lib/arrangement/clip-gain-multi.ts`, ახალი `clip-gain-multi.test.tsx`, ახალი doc 099, doc 098 (l.4 + CF1–CF14) და ხუთი არსებული ტესტის მითითებული ხაზები (ორი აუდიო კლიპის „გამორთულია“ შემთხვევა → ვიდეოიანი მონიშვნა, იგივე სიმკაცრით). დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-114-r115-tree-sha256.txt`, 915).
 
 ## 7. Done Policy
 
