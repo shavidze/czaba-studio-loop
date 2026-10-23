@@ -1,13 +1,12 @@
-# Loop metrics (2026-10-23T05:15:26.097Z)
+# Loop metrics (2026-10-23T05:51:03.730Z)
 
-- rounds: 100; cost $2847.21 total, last 10 avg $16.67/round; agent time 166.2 h
-- C: PASS 71, FAIL 25, BLOCKED 4; bugs c/h/m/l 0/3/37/82
+- rounds: 101; cost $2861.88 total, last 10 avg $16.18/round; agent time 166.7 h
+- C: PASS 72, FAIL 25, BLOCKED 4; bugs c/h/m/l 0/3/37/82
 - rounds without a real check: 63, 72; agent errors 25
-- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published, 98:published, 99:published, 100:published
+- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published, 98:published, 99:published, 100:published, 101:published
 
 | round | C | bugs c/h/m/l | real | $ | h | err | gate |
 |---|---|---|---|---|---|---|---|
-| 86 | PASS | 0/0/0/0 | yes | 31.26 | 1.13 | 1 | published |
 | 87 | FAIL | 0/0/1/0 | yes | 34.35 | 1.65 | 0 | skipped |
 | 88 | FAIL | 0/0/1/0 | yes | 20.68 | 0.69 | 0 | skipped |
 | 89 | PASS | 0/0/0/0 | yes | 20.02 | 0.69 | 0 | published |
@@ -22,3 +21,4 @@
 | 98 | PASS | 0/0/0/1 | yes | 19.65 | 0.67 | 0 | published |
 | 99 | PASS | 0/0/0/0 | yes | 16.15 | 0.66 | 0 | published |
 | 100 | PASS | 0/0/0/0 | yes | 16.23 | 0.54 | 0 | published |
+| 101 | PASS | 0/0/0/0 | yes | 14.66 | 0.51 | 0 | published |

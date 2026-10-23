@@ -61,3 +61,17 @@ B schedules no extraction. Any approved change becomes one separate B task with 
 - **(g) another data point:** rounds 100 and 101 append to existing test files instead of adding harness copies.
 - **Request to root:** after round 101 closes the Export footer Lows, which is the trigger (j) named, B asks for **one bounded, read-only frontend-architect checkpoint** (`store/.claude/references/architecture-checkpoint.md`) on (g), (j), (k)/(l)/(m) together: keep or extract, cost, risk, at most three sentences each. "Not worth it now" is a valid outcome.
 - **Not blocking:** the regression round (due from 2026-10-24) and the remaining Lows go ahead without an answer. An approved change becomes its own B task with one owner and behaviour-preserving tests.
+
+## Addendum — B round 101 (2026-10-23): trigger (j) met, checkpoint requested now
+- **(n) Gate 101 reviewer, Architecture note:**
+  - **Signal 2 (keep, cost low):** `ArrangementExportDialog.tsx` l.267 `pb-0` is a second dependency on `ModalBody`'s internal padding, next to the footer's `-mx-8`/`px-8`. Proposal for when `Modal.tsx` is unfrozen: a `className`/padding override on `ModalBody` or a `ModalStickyFooter` slot. Acceptance: FS1, FT1 and the focusin tests stay green, and STRIP-1280/1440 stay at 0 px. Backlog: ARCH-R101-MODALBODY-PADDING-SLOT.
+  - **Signal 3:** the footer region changed in rounds 87/88, 97 and 101. Round 102 (D-29z67) touches it again: the focusin guard and the progress label. Each change is small.
+- **Trigger:** (j) said "after the Export Lows". Round 101 closed the footer Lows (C PASS, published `56231c0`).
+- **Request to root:** **one bounded, read-only frontend-architect checkpoint** (`store/.claude/references/architecture-checkpoint.md`) on these items together:
+  - (g)/ARCH-R93-TEST-HARNESS: the shared jsdom audio/DOM fixture;
+  - (j)/ARCH-R97 + ARCH-R88: the Export dialog keyboard/focus rules (initial focus, restore, Tab groups, repeat guard, focusin guard);
+  - (k)/(l)/(m): the `preventRepeatedEnterClick` helper for the 4 button sites;
+  - (n): the `ModalBody` padding coupling.
+
+  For each: keep or extract, cost, risk, at most three sentences. "Not worth it now" is a valid outcome.
+- **Not blocking:** round 102 and the regression round (due from 2026-10-24) go ahead without an answer. An approved change becomes its own B task, with one owner and behaviour-preserving tests.

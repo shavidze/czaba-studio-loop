@@ -1,0 +1,48 @@
+{
+ "round": 101,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T05:26:59.6548446Z",
+  "round": 101,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SOURCE-UNCHANGED",
+  "STRIP-1280",
+  "STRIP-1440",
+  "VIS-RENDER-REG",
+  "VALUETEXT",
+  "FOCUS-REG",
+  "CLOSE-HOLD-REG",
+  "SPACE-TOGGLE-OBS",
+  "EXPORT-REG",
+  "PX-NET",
+  "REG-HYD",
+  "G101-3",
+  "AN-REVIEW",
+  "T101-TARGETED"
+ ],
+ "blocked": [
+  "G101-3 fake-Bearer sub-check: backend unavailable in cloud (:5199)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "notes": [
+  "INFO-C101-WAV-FULLSCALE: Middle East alone exports 30 samples at |v|>=0.9999 (app warns 14 samples clamped); identical to C round 100 baseline, pre-existing (DEMO-SFX-FULL-SCALE family), not a round-101 regression.",
+  "INFO-C101-SPACE: SPACE-TOGGLE-OBS reproduces B probe-space-hold (transport Play->Pause once, 0 toggle clicks, preview not started). probe-strip.cjs also clicks the row and focuses the toggle; C did not diagnose why A's run of it saw no transport change (undiagnosed, not a bug).",
+  "Ableton: export dialog layout/valuetext = not applicable (არ ეხება); Space on library button = unconfirmed (დაუდასტურებელი).",
+  "CLOSE-HOLD-REG scope: Enter repeats land on the toolbar Export button after the close, so defaultPrevented=true comes from the toolbar guard (frozen file); the T3 change (l.543) is covered by its equivalence + HE1-HE7, not by a browser row."
+ ],
+ "evidence": "tmp/studio-real-loop/c-round-101/ (out/*.json, shots/*.png, tools/*.cjs)"
+}
