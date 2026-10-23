@@ -1,16 +1,13 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 111 PASS (browserVerified=true, realVerified=true, 0 bugs) and gate 111 published 6abd3f3: C-R110-01 and GATE110-S4 are done. No Critical/High and no reproducible Medium is open. The four remaining Mediums (C-R6-02, C-R8-01, C-R27-01, A-R38-REVIEW-TOUCH) were never measured in the cloud browser; under the root clarification of 2026-10-23 their T12-blocking status depends on that, so round 112 is the planned C-only cloud measurement round with unchanged D-24 tolerances and a pre-committed outcome table. The regression round is not due (regression-last 2026-10-21, today 2026-10-23); the first planning on or after 2026-10-24 is the regression round. Nothing external blocks the round. The advisor was available and was used.",
- "nextTask": "Round 112 (D-29z77): C-only cloud measurement round.\n- A: doc 096 l.4 status line only (GATE111-S3); expected end state 1 M; frozen b-round-111-r112-tree-sha256.txt (919 tracked files except doc 096); baseline 6abd3f3 clean.\n- C: page-only Playwright harness (rAF sampler over arrangement-playhead-handle aria-valuenow and the active video, LoAF attribution, play/pause/currentTime spy, dock data-video-* counters) at 1440x900: drift layouts D/N/P (R3-V1 cloud adaptation, VP9 beeps-6s + Ctrl+D second clip), RF5-3, VM lay11-cloud (music muted, max <= 30.1 ms, hardSeeks 0->0), H.264 diagnostic, TOUCH via CDP with Zoom as positive control; 3 valid + 2 replacements per layout; tolerances unchanged; plus SOURCE-UNCHANGED, DOC-096-L4, PX-NET, REG-HYD, G112-3.\n- Outcome table (section 5): PASS closes; valid FAIL with app attribution -> bounded A bug round; FAIL without attribution or environment -> open_tech_lead_* with evidence, does not block T12.",
+ "reason": "C round 112 PASS (browserVerified=true, realVerified=true) and gate 112 published ad58b5e. Applying the pre-committed section 5 table as written: C-R27-01 closed (VM 3/3); C-R6-02 and C-R8-01 FAIL without app attribution -> open_tech_lead_quiet_chrome, non-blocking for T12 (C's post-hoc boundary correction not accepted; panel split recorded as an unverified hypothesis); A-R38-REVIEW-TOUCH confirmed in cloud Chromium (touchStart jumps Volume/Pan/Master and commits an undo step) -> bounded A bug round 113 with the round-38 pre-specified amendment. SRW-03 and SRW-11B move to c_pass_tech_lead_manual; SRW-13 waits for round 113 C PASS. The regression round is not due today (regression-last 2026-10-21, now 2026-10-23); it is due at the first B planning on or after 2026-10-24, then T12. Nothing external blocks round 113. The advisor was available and was used.",
+ "nextTask": "Round 113 (D-29z78): A-R38-REVIEW-TOUCH (Medium).\n- A: native addEventListener('touchstart', preventDefault, {passive:false}) attached at mount in app/hooks/useRelativeFaderDrag.ts, wired into track Volume (incl. video) and Pan (ArrangementLane.tsx), Master (ArrangementMaster.tsx) and group Volume (ArrangementGroupHeader.tsx); Zoom untouched; new fader-touch.test.tsx FT1-FT6 + mutations m1-m3; doc 097; typecheck, lint, targeted fader/mixer vitest, code-reviewer. Baseline ad58b5e clean; frozen b-round-112-r113-tree-sha256.txt (916); expected 4 M + 2 ??.\n- C: round-112 CDP touch recipe at 1440 + 1280: TC-ZOOM (harness validity), TC-START (no change on touchStart), TC-REL (relative move, no jump), TC-UNDO, TC-TAP (no history entry), TC-DTAP (info), MC-PRESS/DRAG/DBL, KB-ARROW, TC-VIDEO-VOL, SOURCE-SCOPE, AN-REVIEW, T113-TARGETED, PX-NET, REG-HYD, G113-3, DOC-097.",
  "remaining": [
-  "MEASUREMENT-ROUND-CLOUD",
-  "GATE111-S3-DOC096-STATUS",
+  "A-R38-REVIEW-TOUCH",
   "REGRESSION-ROUND-2026-10-24",
   "A-R108-SWEEP-HITS",
-  "C-R27-01",
   "C-R6-02",
   "C-R8-01",
-  "A-R38-REVIEW-TOUCH",
   "A-R73-SAFARI-FLAG-FOCUS",
   "C-R108-01",
   "A-R108-STALE-ARM-GESTURE",
@@ -77,6 +74,9 @@
   "GATE110-S3-TOGGLE-ARIA-EXPANDED",
   "ARCH-R110-FOCUS-HANDOFF-HOOK",
   "GATE111-S1-TESTID-SELECTOR",
-  "ARCH-R111-FOCUS-OWNERSHIP"
+  "ARCH-R111-FOCUS-OWNERSHIP",
+  "C-R112-HARNESS-BOUNDARY",
+  "C-R112-RF53-PANEL-SPLIT",
+  "TOUCH-DOUBLE-TAP-RESET"
  ]
 }

@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-23T14:34:45.368Z)
+# Active loop summary (2026-10-23T15:26:29.245Z)
 
-- backlog.json 989 KB -> active view 123 KB
-- status: G_ROOT_GATE round 111
-- servers: `{"checkedUtc":"2026-10-23T14:20:37.1022224Z","round":111,"attempt":1,"store":200}`
-- last publication: 6abd3f39cb24f0334076081d4624da7feb6bb57c (rounds 111-111)
-- last root gate: round 111 published - commit 6abd3f39cb24f0334076081d4624da7feb6bb57c pushed
+- backlog.json 994 KB -> active view 254 KB
+- status: G_ROOT_GATE round 112
+- servers: `{"checkedUtc":"2026-10-23T14:50:51.9667100Z","round":112,"attempt":1,"store":200}`
+- last publication: ad58b5e88b8f6c6c8b3c6766f59e8c0a14622aa3 (rounds 112-112)
+- last root gate: round 112 published - commit ad58b5e88b8f6c6c8b3c6766f59e8c0a14622aa3 pushed
 
-## Current items: -
+## Current items: SRW-03, SRW-11B, SRW-13
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -202,14 +202,12 @@
 - C-R109-OBS-PRODUCTS-404-200 / info / open - backend-dependent observation; recheck when a backend is available / /products returns HTTP 200 with a '404 - Page Not Found' title (bytes identical to the 32a6b08 baseline)
 - C-R109-OBS-CLIP-COUNT / info / open - observation, not investigated; signal for the export overload count / export alert said 14 clipped samples while C's WAV scan counted 30 samples at |x|>=0.9999 (threshold or per-channel counting may differ)
 - ARCH-R110-FOCUS-HANDOFF-THIRD-FILE / info / signal - addendum (u) to the pending checkpoint request b-round-91-checkpoint-request.md; non-blocking; no extraction scheduled / arm-ref + layout-effect focus handoff now in a third component (Transport, DetailPanel, Library)
-- C-R110-01 / medium / dispatched round 111 (D-29z76): workspace-side rescue - returnFloatingVideo arms only when focus is inside the library aside and the library was opened for the video; a deps-free layout effect focuses the rail expand button (preventScroll) only if focus fell to body/null / Escape from a video-opened library re-collapses it while focus is inside; focus drops to BODY and the next Enter adds the active library ite
-- GATE110-S4-DOC095-STATUS / low / dispatched round 111 (doc 095 l.4 one-line grant) / doc 095 status line still says awaiting C
+- GATE111-S3-DOC096-STATUS / low / dispatched round 112 (doc 096 l.4 one-line) / doc 096 status line still says awaiting C
+- GATE111-S2-DEPSFREE-EFFECT / info / acknowledged (reviewer: no change; render-budget unchanged); part of ARCH-R111-FOCUS-OWNERSHIP / the rescue layout effect has no deps array and runs every render (one ref read)
+- GATE111-SUGG-E2E-S5 / info / signal - not scheduled; candidate row for the next focus-owning round or the regression round (Chromium smoke e2e: collapse -> float -> focus collapse -> Escape -> Enter = 0 clips) / no automated real-browser test for the s5 Escape-return scenario
 
 ## Other open items
-- SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
-- SRW-11B [stage3_passed_bugs_open] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
-- SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
 - SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-16 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 6b574e8, 2a e347b97, 2b-1 db9cc25, 2b-2 60006d4, 2b-3 c062147; Tech Lead R72-T/R74-T/R77-T/R78-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next

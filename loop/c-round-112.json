@@ -1,0 +1,170 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T14:50:51.9667100Z",
+  "round": 112,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "ENV-RECORD",
+  "SOURCE-UNCHANGED",
+  "DOC-096-L4",
+  "PX-NET",
+  "REG-HYD",
+  "G112-3",
+  "VM-C-R27-01 (3/3)",
+  "TOUCH-HARNESS-VALID (Zoom control jumps 3/3)",
+  "TOUCH-MOUSE-CONTROL (no jump on press, Volume/Pan/Master)"
+ ],
+ "failed": [
+  "C-R8-01 drift mode D literal 0/3 (FAIL, no app attribution)",
+  "C-R6-02 drift mode D 0/3, mode N 1/3 literal; RF5-3 1/3 (FAIL, no app attribution)",
+  "A-R38-REVIEW-TOUCH (Volume/Pan/Master jump on touchStart 3/3)"
+ ],
+ "blocked": [
+  "G112-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "diagnostic": {
+  "H264": "plays (ct 0->1.959 s, frames 4->63); D x3 valid, literal max 5.980/5.980/5.989 (boundary sample), median 0.0143/0.0129/0.0114; not a verdict",
+  "audioClock": "AudioContext.currentTime advances in 8.7-31.9 ms jumps (2.9025 ms quanta); ruler pos steps 8-21 ms per frame"
+ },
+ "bugs": [
+  {
+   "id": "C-R8-01",
+   "severity": "medium",
+   "section5Row": "FAIL, no app attribution",
+   "steps": [
+    "/studio-lab 1440x900 fresh context, Decline cookies, wait for library",
+    "Load beeps-6s-vp9-opus.webm, select video clip, Ctrl+D (second clip 6.008-12.016)",
+    "Enter-add Middle East music@0, demo-stem-pulse stems@2, Soft impact SFX@4; snap off",
+    "Select music clip, detail panel open 144 px, Home, blur, Space, 13 s, Space"
+   ],
+   "expected": "stall-excluded median |d| <= 0.05 s and max |d| <= 0.1 s per run (D-24)",
+   "actual": "D1-D3 valid (0 stalls, 0 LoAF, 0 drops); median 0.0099-0.0100; literal max 5.989 at pos 5.990: one sample per run where the dock has already cut to clip 2 (vt 0.001) while the ruler still reads 5.990 (next frame 6.010). Every other sample <= 0.0278. With the one-frame skew applied (frame dt + 1 ms), D 3/3 PASS, max 0.026-0.028. No app script in the window.",
+   "evidence": "tmp/studio-real-loop/c-round-112/runs/D1..D3.json, out/dnp.json, tools/ana.cjs, c-round-112.md 4.1"
+  },
+  {
+   "id": "C-R6-02",
+   "severity": "medium",
+   "section5Row": "FAIL, no app attribution",
+   "steps": [
+    "Same setup; layout N = panel open, nothing selected (clicked empty SFX lane at 12 s), Play 13 s",
+    "RF5-3 = first Play of N1-N3 (fresh context, 0 prior play())"
+   ],
+   "expected": "N: median <= 0.05, max <= 0.1; RF5-3: play() within [startAt - min(frame,20ms), startAt + min(frame,34ms)], paused until play, pre-start advance <= 1 frame, drift <= 0.1 / 0.06",
+   "actual": "N literal: N1 FAIL (6.001 @6.002), N2 PASS (0.0365), N3 FAIL (5.989 @5.990); with the skew applied, 3/3 PASS (max 0.028-0.037). D (mode D for C-R6-02) literal 0/3, with the skew 3/3. RF5-3: N1 PASS (-15.3 ms), N2 FAIL play() -22.6 ms, N3 FAIL -22.4 ms before startAt (window -16.7). Paused-until-play, pre-start advance (0.0005-0.0169 s, 30 fps) and drift windows all OK. 0 LoAF. Cloud audio clock jumps 8.7-31.9 ms, larger than the window. Unverified hypothesis: panel open 5/6 fail vs collapsed 0/4 fail (D/P first plays).",
+   "evidence": "c-round-112/runs/N1..N3.json, D1..D3, P1..P3, diagD1/diagP1.json, out/dnp.json, c-round-112.md 4.1-4.2"
+  },
+  {
+   "id": "A-R38-REVIEW-TOUCH",
+   "severity": "medium",
+   "section5Row": "FAIL -> bounded A round: native non-passive touchstart + preventDefault on Volume, Pan, Master only (Zoom excluded)",
+   "steps": [
+    "Context hasTouch:true isMobile:false 1440x900, /studio-lab, add music/stems/SFX, Stop",
+    "CDP Input.dispatchTouchEvent touchStart at 15% from the end opposite the thumb on the music Volume / music Pan / Master Volume range input",
+    "Read value after 100 ms, then 5 touchMove +4 px, touchEnd"
+   ],
+   "expected": "Value does not change on touchStart and does not jump toward the touch point; change over 20 px <= the 20 px equivalent",
+   "actual": "Volume 1.00 -> 0.09 on touchStart (touch point 0.15); Pan 0 -> 50 (touch point 35), then 8,17,25,50,42; Master 0.0 -> -54.5 dB (touch point -50.1). 3/3 runs each, identical. Each jump commits an undo step (Undo: Volume / Pan — მუსიკა / Master Volume). Positive control Zoom 678 -> 63 (harness valid). Mouse press at the same point: no jump.",
+   "evidence": "c-round-112/out/touch.json, shots/touch-*-1440.png, tools/touch.cjs"
+  }
+ ],
+ "measurement": {
+  "C-R6-02": {
+   "row": "FAIL, no app attribution",
+   "runs": {
+    "D": [
+     "D1",
+     "D2",
+     "D3"
+    ],
+    "N": [
+     "N1",
+     "N2",
+     "N3"
+    ],
+    "RF5-3": [
+     "N1",
+     "N2",
+     "N3"
+    ]
+   },
+   "literal": {
+    "D": "0/3",
+    "N": "1/3",
+    "RF5-3": "1/3"
+   },
+   "skewCorrected_forB": {
+    "D": "3/3",
+    "N": "3/3",
+    "RF5-3": "1/3 (no correction applies)"
+   },
+   "srw": "SRW-03 -> c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome) per section 5, unless B accepts the skew correction (drift PASS) - RF5-3 still 1/3"
+  },
+  "C-R8-01": {
+   "row": "FAIL, no app attribution",
+   "runs": [
+    "D1",
+    "D2",
+    "D3"
+   ],
+   "literal": "0/3",
+   "skewCorrected_forB": "3/3",
+   "attributionControl": {
+    "P": [
+     "P1",
+     "P2",
+     "P3"
+    ],
+    "literal": "0/3 (no verdict)",
+    "skewCorrected": "3/3"
+   },
+   "srw": "SRW-11B -> c_pass_tech_lead_manual (C-R8-01 open_tech_lead_quiet_chrome) per section 5"
+  },
+  "C-R27-01": {
+   "row": "PASS",
+   "runs": [
+    "VM1",
+    "VM2",
+    "VM3"
+   ],
+   "maxAbsD_ms": [
+    15.6,
+    16.0,
+    15.6
+   ],
+   "oracle_ms": 30.1,
+   "hardSeeks": "0->0 in all",
+   "meterCheck": "runs/METER.json; Master+video meters live from 0 s; stems meter from 2.00 s (clip starts at 2 s; cannot move in first second by layout)"
+  },
+  "A-R38-REVIEW-TOUCH": {
+   "row": "FAIL -> bounded A round (pre-specified amendment)",
+   "runs": "touch-zoom-touch-1..3, touch-volume-touch-1..3, touch-pan-touch-1..3, touch-master-touch-1..3, touch-*-mouse-1",
+   "srw": "SRW-13 keeps status until bounded round C PASS"
+  },
+  "invalidOrSetAside": {
+   "runs/invalid-N-selected/N1..N3": "harness error: SFX clip still selected (deselect click off-screen); not counted, not replacements",
+   "runs/trial/*": "harness shakedown",
+   "runs/diag*": "diagnostic with added ctx.currentTime sampling"
+  },
+  "harnessRules": {
+   "appScript": "LoAF script sourceURL starts with http://127.0.0.1:5173/app/",
+   "hardSeekWindow": "app currentTime write on element i -> next seeked on i +300 ms, applied to samples whose active element is i",
+   "driftWindow": "first sample pos>p0 .. Pause keydown",
+   "fps": 30
+  }
+ }
+}

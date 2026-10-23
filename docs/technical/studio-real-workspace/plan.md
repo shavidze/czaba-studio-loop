@@ -1217,6 +1217,23 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z78 — Round 112-ის შედეგი; Round 113: touch-ის დაჭერა fader-ს აღარ ახტუნებს (A-R38-REVIEW-TOUCH, Medium).**
+
+C round 112 (`tmp/studio-real-loop/c-round-112.md`, `c-round-112.json`) — **PASS, `browserVerified: true`, `realVerified: true`**; gate 112 გამოქვეყნდა `ad58b5e`-ში (review 10/10). §5-ის ცხრილი გამოყენებულია ისე, როგორც დაიწერა:
+- **C-R27-01 — დაიხურა:** VM 3/3, max |d| 15.6 / 16.0 / 15.6 ms ≤ 30.1, hardSeeks 0 → 0, LoAF 0.
+- **C-R6-02, C-R8-01 — „FAIL, app-ის attribution-ის გარეშე“:** სიტყვასიტყვით D 0/3, N 1/3, RF5-3 1/3. ყოველი ჩავარდნა ერთი sample-ია ვიდეოს ჭრაზე (6.008 წმ): dock უკვე მეორე კლიპს აჩვენებს, ruler ჯერ 5.990/6.002-ს კითხულობს; დანარჩენი ≤ 0.037 წმ; LoAF და app script 0. სტატუსი `open_tech_lead_quiet_chrome`, T12-ს არ ბლოკავს (root-ის 2026-10-23-ის დაზუსტება).
+- **A-R38-REVIEW-TOUCH — დადასტურდა:** CDP touch-ით touchStart Volume-ს 1.00 → 0.09, Pan-ს C → 50R, Master-ს 0.0 → −54.5 dB-ზე ახტუნებს (3/3); ყოველი ნახტომი undo-ს ჩანაწერია; Zoom-ის კონტროლი ვალიდურია; მაუსი არ ხტება.
+- SRW-03 და SRW-11B → `c_pass_tech_lead_manual` (ღია finding-ის სახელით); SRW-13 რჩება Round 113-ის C PASS-მდე.
+
+- **R1 — C-ის boundary correction არ მიიღება PASS-ად:** C-მ ის რიცხვების ნახვის შემდეგ დაამატა, §3 კი ასეთ ცვლილებას კრძალავდა. RF5-3-ის panel ღია/დაკეცილის სხვაობა (5/6 vs 0/4) — დაუდასტურებელი ჰიპოთეზა (C-R112-RF53-PANEL-SPLIT): §5-ის attribution D − N-ის სხვაობაა (≈ 0), P მხოლოდ კონტროლია, `startAt`-ის შეფასების ცდომილება (cloud-ის აუდიო საათი 8.7–31.9 ms-ით ხტება) ±16.7 ms ფანჯარაზე დიდია. ტოლერანსები უცვლელია. Tech Lead-ის გაზომვისთვის შენიშვნა C-R112-HARNESS-BOUNDARY: drift dock-ის აქტიური კლიპით ან `requestVideoFrameCallback`-ის mediaTime-ით.
+- **R2 — Round 113-ის მოცულობა:** round 38-ის წინასწარ დაწერილი შესწორება — native non-passive `touchstart` + `preventDefault()` — საერთო `useRelativeFaderDrag`-ში, ოთხივე relative fader-ზე: ტრეკის Volume (ვიდეოსიც), Pan, Master და ჯგუფის Volume (round 38-ში ჯგუფი არ არსებობდა; იგივე hook, იგივე დეფექტი). Zoom არ იცვლება და C-ის დადებითი კონტროლია. React-ის `onTouchStart` passive-ია, `touch-none` უკვე არის და არ შველის — ამიტომ მხოლოდ `addEventListener(..., { passive: false })` mount-ზე, unmount-ზე მოხსნით.
+- **R3 — touch-ის relative drag:** pointer event-ები cancel-ილი `touchstart`-ის შემდეგაც მოდის, ამიტომ relative drag touch-ზეც უნდა იმუშაოს — C-ის TC-REL. თუ არ იმუშავებს, ცალკე finding-ია, ახალი B-ის გადაწყვეტილებით.
+- **R4 — შეგნებული განსხვავება:** touch-ის ორმაგი შეხება fader-ს აღარ აბრუნებს (compatibility `dblclick` აღარ მოდის). რჩება კლავიატურა, მაუსის double-click და reset ღილაკები. სიგნალი TOUCH-DOUBLE-TAP-RESET, არ იგეგმება.
+- **R5 — ფაილები:** `app/hooks/useRelativeFaderDrag.ts`, `ArrangementLane.tsx`, `ArrangementMaster.tsx`, `ArrangementGroupHeader.tsx`; ახალი `fader-touch.test.tsx` (FT1–FT6 + mutation-ები) და doc 097. გაყინულია დანარჩენი 916 tracked ფაილი (`tmp/studio-real-loop/b-round-112-r113-tree-sha256.txt`), მათ შორის `ArrangementTransport.tsx`, `ArrangementContext.tsx`, `fader.ts` და ყველა არსებული ტესტი.
+- **R6 — C:** round-112-ის CDP touch-ის რეცეპტი უცვლელად, 1440 + 1280: TC-ZOOM (ვალიდურობა), TC-START, TC-REL, TC-UNDO, TC-TAP, TC-DTAP (ინფო), MC-PRESS/DRAG/DBL, KB-ARROW, TC-VIDEO-VOL; PX-NET, REG-HYD, G113-3.
+- **R7 — Ableton:** არ ეხება (browser range input-ზე touch); D-29z3-ის relative drag-ის კონტრაქტი touch-ზე ვრცელდება.
+- **R8 — რიგი:** Round 113 → რეგრესიის რაუნდი (B-ის პირველი დაგეგმვა 2026-10-24-ზე ან შემდეგ) → T12-GAIN-VOLUME → ABLETON-EXPERT-REVIEW → VISUAL-A-OBSIDIAN → Low-ების polish (146) → R21-I2 და საბოლოო რეგრესია. Gate 112-ის Low (doc 096 l.100) → `deferred_low_polish`.
+
 **D-29z77 — Round 111-ის შედეგი; Round 112: C-ის გაზომვის რაუნდი cloud-ში (C-R6-02, C-R8-01, C-R27-01, A-R38-REVIEW-TOUCH).**
 
 C round 111 (`tmp/studio-real-loop/c-round-111.md`, `c-round-111.json`) — **PASS, `browserVerified: true`, `realVerified: true`**, ბაგების გარეშე; gate 111 გამოქვეყნდა `6abd3f3`-ში (review 9/10). C-R110-01 და GATE110-S4 — **მზადაა**.
@@ -1983,6 +2000,8 @@ flowchart TD
 | 110 | B-R108-LIB-FOCUS-LOSS | ბიბლიოთეკის `◀`/`▶`/`×` focus-ის გადაცემა partner-ზე + Enter-repeat guard (D-29z75) |
 | 111 | C-R110-01 | Escape ვიდეოს აბრუნებს, ბიბლიოთეკაში მყოფი focus `▶`-ზე გადარჩება (D-29z76; `StudioWorkspace.tsx` ვიწროდ) |
 | 112 | C-R6-02, C-R8-01, C-R27-01, A-R38-REVIEW-TOUCH | C-ის გაზომვის რაუნდი cloud-ში, ზღვრები უცვლელია; A — მხოლოდ doc 096 l.4 (D-29z77) |
+| 112 → | (შედეგი) | **C PASS** (`browserVerified`), `ad58b5e`: C-R27-01 დაიხურა; C-R6-02/C-R8-01 → Tech Lead quiet Chrome (attribution-ის გარეშე); A-R38-REVIEW-TOUCH დადასტურდა |
+| 113 | A-R38-REVIEW-TOUCH | native non-passive `touchstart` preventDefault ოთხ relative fader-ზე, Zoom-ის გარეშე (D-29z78) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2011,6 +2030,8 @@ flowchart TD
 **D-29z76:** `StudioWorkspace.tsx` round 111-ში ვიწროდ (`returnFloatingVideo`-ის arm, ერთი ref, ერთი layout effect, ერთი helper); round 110-ის `ArrangementLibrary.tsx` და `library-focus-handoff.test.tsx` ისევ გაყინულია.
 
 **D-29z77:** round 112-ში app-ის კოდი არ იცვლება; A-ს ეკუთვნის მხოლოდ doc 096-ის l.4. გაყინულია ყველა tracked ფაილი doc 096-ის გარდა (`tmp/studio-real-loop/b-round-111-r112-tree-sha256.txt`, 919).
+
+**D-29z78:** round 113-ში A-ს ეკუთვნის `app/hooks/useRelativeFaderDrag.ts`, `ArrangementLane.tsx`, `ArrangementMaster.tsx`, `ArrangementGroupHeader.tsx` (მხოლოდ fader-ის input-ების wiring), ახალი `app/lib/arrangement/__tests__/fader-touch.test.tsx` და doc 097; დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-112-r113-tree-sha256.txt`, 916).
 
 ## 7. Done Policy
 
