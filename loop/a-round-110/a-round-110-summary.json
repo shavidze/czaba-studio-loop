@@ -1,0 +1,94 @@
+{
+ "round": 110,
+ "role": "A",
+ "task": "B-R108-LIB-FOCUS-LOSS (D-29z75)",
+ "status": "implemented_awaiting_C",
+ "codeReviewer": {
+  "ran": true,
+  "score": "8/10",
+  "fixed": [
+   "S1 preventScroll (Chromium-confirmed scrollLeft 243->0)",
+   "S2 LF10 test"
+  ],
+  "open": [
+   "S3 Low stale arm (not reachable today)",
+   "S5 Medium out-of-scope: Escape re-collapse of video-opened library drops focus to BODY, Enter adds clip; REPRODUCED by A in Chromium 1440 (probe/s5-probe-result.json); not fixed"
+  ]
+ },
+ "changedFiles": {
+  "M": [
+   "app/components/arrangement/ArrangementLibrary.tsx",
+   "docs/implementation/2026/quarter-IV/094-studio-ssr-nul-bytes.md"
+  ],
+  "??": [
+   "app/lib/arrangement/__tests__/library-focus-handoff.test.tsx",
+   "docs/implementation/2026/quarter-IV/095-studio-library-toggle-focus.md"
+  ]
+ },
+ "frozenList": "544/544 OK",
+ "failBefore": {
+  "red": [
+   "LF1",
+   "LF2",
+   "LF3",
+   "LF4",
+   "LF8",
+   "LF9",
+   "LF10",
+   "LF11"
+  ],
+  "green": [
+   "LF0",
+   "LF5",
+   "LF5b",
+   "LF6",
+   "LF7"
+  ]
+ },
+ "mutations": {
+  "m1": [
+   "LF1",
+   "LF2",
+   "LF3",
+   "LF4",
+   "LF9",
+   "LF10",
+   "LF11"
+  ],
+  "m2": [
+   "LF5b"
+  ],
+  "m3": [
+   "LF7"
+  ],
+  "m4": [
+   "LF8",
+   "LF9"
+  ],
+  "m5": [
+   "LF1",
+   "LF4",
+   "LF9",
+   "LF10",
+   "LF11"
+  ],
+  "controlBefore": "13/13",
+  "controlAfter": "13/13",
+  "m6": [
+   "LF11"
+  ]
+ },
+ "checks": {
+  "typecheck": "pass",
+  "lintOwnedDiagnostics": 0,
+  "biomeOwned": "clean",
+  "targetedVitest": "13 files, 309 tests, pass",
+  "fullSuite": "not run (gate)"
+ },
+ "browserSelfCheck": {
+  "attempt1": "timeout waiting for option (dev reload)",
+  "attempt2": "pass: partner focus after Enter 1, clips 0->0 for collapse/expand/clear, 0 errors, 0 forbidden",
+  "attempt3": "pass after preventScroll; scroll probe scrollLeft 0 (was 243->1)"
+ },
+ "deviation": "partner.focus({ preventScroll: true }) instead of partner.focus() (S1 Chromium evidence)"
+}

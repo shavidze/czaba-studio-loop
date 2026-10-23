@@ -1217,6 +1217,24 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z76 — Round 110-ის შედეგი; Round 111: Escape ვიდეოს აბრუნებს და ბიბლიოთეკაში მყოფ focus-ს `▶`-ზე გადაარჩენს (C-R110-01, Medium).**
+
+C round 110 (`tmp/studio-real-loop/c-round-110.md`, `c-round-110.json`) — **PASS, `browserVerified: true`, `realVerified: true`**: LF-COLLAPSE / LF-EXPAND / LF-CLEAR (1280/1440), LF-MOUSE, LF-HOLD (CDP autoRepeat: 10 repeat → 1 click), LF-VIDEO-NEUTRAL, FV-710, LF-SWEEP-NEG, R12-L2-ENTER-ADD, REG-LIB, PX-NET, REG-HYD, G110-3 (fake-Bearer — BLOCKED, backend), AN-REVIEW, T110-TARGETED (13 / 309), DOC-095, DOC-094-L4, SOURCE-UNCHANGED. ერთი ახალი Medium: **C-R110-01** (A-ს reviewer-ის S5, C-მ დამოუკიდებლად გაიმეორა).
+
+**Gate 110 — გამოქვეყნდა `832fee2`** (reviewer 9/10, „COMMIT: OK“).
+
+- **R1 — backlog (მხოლოდ მტკიცებულებით):** B-R108-LIB-FOCUS-LOSS და GATE109-F6 → **მზადაა**. A-R108-SWEEP-HITS-ის ვიდეოს ნაწილი → მზადაა (LF-SWEEP-NEG); pan reset გადადებული Low რჩება. A-R110-S3 (stale arm), GATE110-S1 (Safari/Firefox-ში მაუსის click — cloud-ში მხოლოდ Chromium-ია) და GATE110-S3 (`aria-expanded`) → `deferred_low_polish`. GATE110-S2/S5 → info. GATE110-S4 → doc 095 l.4 Round 111-ში.
+- **R2 — დიაგნოზი:** window-ის Escape (`StudioWorkspace.tsx` l.1687–1695) → `returnFloatingVideo` → `libraryOpenedForVideo`-ის დროს `setIsLibraryCollapsed(true)`; ბიბლიოთეკის პანელში მყოფი focus-იანი `◀` ან ჩანაწერი ქრება, focus `<body>`-ზე ვარდება, Enter კლიპს ამატებს (0 → 1, 1280/1440).
+- **R3 — წესი (D-29z75 F1-ის შესწორება):** workspace ბიბლიოთეკის გარეთ მყოფ focus-ს **არასოდეს წაართმევს**; ის მხოლოდ **გადაარჩენს** ბიბლიოთეკის შიგნით მყოფ focus-ს, რომელიც ხელახლა დაკეცვისას `body`-ზე დავარდებოდა. სამიზნე — `▶` (rail-ის ერთადერთი ღილაკი; D-29z75-ის მსგავსად). Play/⤢/✕/body/ძიების ველი და „არა ვიდეოსთვის გახსნილი“ ბიბლიოთეკა — ქცევა უცვლელია.
+- **R4 — მექანიზმი:** `returnFloatingVideo`-ში, მხოლოდ `libraryOpenedForVideo`-ის branch-ში, setter-ებამდე: `libraryAsideRef.current.contains(document.activeElement)` → arm ref. ერთი deps-free `useIsomorphicLayoutEffect` (`pendingRowFocusRef`-ის ნიმუშით): თუ armed და focus `body`/`null`-ზეა → `▶.focus({ preventScroll: true })`. Layout effect dock-ის passive cleanup-ზე ადრე სრულდება, ამიტომ dock focus-ს აღარ ამოძრავებს. მხოლოდ ref-ები — render-ების რაოდენობა უცვლელია.
+- **R5 — რატომ workspace და არა ბიბლიოთეკა:** B-ის probe (`tmp/studio-real-loop/b-round-110/probe/blur-on-remove-result.json`, Chromium 143): focus-იანი ელემენტის წაშლისას `blur`/`focusout` სინქრონულად ისვრის (`relatedTarget: null`). ბიბლიოთეკის focus-within flag-ი React-ის შიდა ქცევაზე იქნებოდა დამოკიდებული; snapshot `returnFloatingVideo`-ში DOM-ის ცვლილებამდე ხდება და deterministic-ია.
+- **R6 — უარყოფილი:** focus ⤢-ზე (ხელახლა გაშლის ვიდეოს და ბიბლიოთეკას — უფრო დიდი მოქმედება), Enter-on-body-ის შეცვლა (B-R107-ENTER-ON-BODY), Escape-ზე ბიბლიოთეკის გახსნილად დატოვება (float/return-ის კონტრაქტი), document-ის დონის listener (D-29z73).
+- **R7 — ნებართვები:** `StudioWorkspace.tsx` (ვიწროდ: helper `trackRowNameButton`-ის გვერდით, ერთი ref, arm `returnFloatingVideo`-ში, ერთი layout effect); ახალი `library-video-return-focus.test.tsx`; ახალი doc 096; doc 095-ის მხოლოდ l.4. მოსალოდნელი: 2 M + 2 ??. Frozen list 545 (`b-round-110-r111-tree-sha256.txt`).
+- **R8 — არქიტექტურა:** ორივე reviewer: keep inline; `useFocusHandoffAfterCommit`-ის წინადადება → `architecture_signals` (ARCH-R110-FOCUS-HANDOFF-HOOK) და addendum (v) `b-round-91-checkpoint-request.md`-ში. არ ბლოკავს, არ იგეგმება.
+- **R9 — დამატებით (მომხმარებლის 2026-10-23-ის გადაწყვეტილება):** ABLETON-EXPERT-REVIEW `backlog.json`-ის `post_current_stage_queue`-ში T12-ის შემდეგ ჩაჯდა და VISUAL-A-OBSIDIAN-ის წინაპირობად დაემატა.
+- **R10 — რიგი:** რეგრესიის რაუნდი (B-ის შემდეგი დაგეგმვა 2026-10-24-ზე ან შემდეგ) → C-ის გაზომვის რაუნდი cloud-ში (C-R27-01, C-R6-02, C-R8-01, A-R38-REVIEW-TOUCH) → T12 (ღია Medium-ის გარეშე) → ABLETON-EXPERT-REVIEW → VISUAL-A-OBSIDIAN → Low-ების polish → R21-I2 და საბოლოო რეგრესია.
+- **Ableton:** არ ეხება — CZABA-ს a11y/keyboard წესი; Live-ზე მტკიცება არ კეთდება.
+
 **D-29z75 — Round 109-ის შედეგი; Round 110: ბიბლიოთეკის `◀` / `▶` / `×` keyboard focus-ს ინარჩუნებს (B-R108-LIB-FOCUS-LOSS, Medium).**
 
 C round 109 (`tmp/studio-real-loop/c-round-109.md`, `c-round-109.json`) — **PASS, `browserVerified: true`, `realVerified: true`**: NUL-HTTP (20/20, NUL 0), NUL-EQUIV (20/20 sha256 = B-ის `sha256Stripped`), STREAM-KEPT (36 event), AX-NOJS და AX-HYDRATED (1280/1440), REG-FLOW, REG-PAGES, PX-NET, REG-HYD, G109-3 (fake-Bearer — BLOCKED, backend), AN-REVIEW, T109-TARGETED (3 / 20), DOC-094, DOC-093-L4, SOURCE-UNCHANGED. ერთი Low (ძველი): C-R109-OBS-01.
@@ -1950,6 +1968,7 @@ flowchart TD
 | 63 | SRW-14, ეტაპი 4c-2 | ბიბლიოთეკის drop-ის ghost და დასაწყისი კლიპების კიდეებზე (იგივე წესი, ხაზის წესი drop-ის ხაზზე); LD-BLOCK რეგრესია |
 | 109 | C-R23-01 + C-R38-01 | SSR NUL byte-ები: byte-ფილტრის `Transform` `entry.server.tsx`-ში (D-29z74; ვიწრო grant B-ის წაკითხვით მომხმარებლის 2026-10-23-ის გადაწყვეტილებისა, root-ს უარის თქმა შეუძლია) |
 | 110 | B-R108-LIB-FOCUS-LOSS | ბიბლიოთეკის `◀`/`▶`/`×` focus-ის გადაცემა partner-ზე + Enter-repeat guard (D-29z75) |
+| 111 | C-R110-01 | Escape ვიდეოს აბრუნებს, ბიბლიოთეკაში მყოფი focus `▶`-ზე გადარჩება (D-29z76; `StudioWorkspace.tsx` ვიწროდ) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -1974,6 +1993,8 @@ flowchart TD
 **ვიწრო გამონაკლისი (D-29z74, Round 109):** `app/entry.server.tsx` (import-ები და `body`-ის ერთი ხაზი) და ახალი `app/lib/ssr/` მხოლოდ C-R23-01-ის NUL-ის ფილტრისთვის. საფუძველი B-ის წაკითხვაა მომხმარებლის 2026-10-23-ის გადაწყვეტილებისა და არა აშკარა grant; root-ს უარის თქმა შეუძლია.
 
 **D-29z75:** round 109 გამოქვეყნდა `1fe3ba2`-ში; `app/entry.server.tsx` და `app/lib/ssr/**` ამის შემდეგ ისევ გაყინულია. ახალი ცვლილება მხოლოდ ცალკე, ცხადი ნებართვით.
+
+**D-29z76:** `StudioWorkspace.tsx` round 111-ში ვიწროდ (`returnFloatingVideo`-ის arm, ერთი ref, ერთი layout effect, ერთი helper); round 110-ის `ArrangementLibrary.tsx` და `library-focus-handoff.test.tsx` ისევ გაყინულია.
 
 ## 7. Done Policy
 

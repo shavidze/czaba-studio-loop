@@ -140,3 +140,11 @@ B schedules no extraction. Any approved change becomes one separate B task with 
 - **What it adds:** the arm-ref + layout-effect mechanism now exists in a third component (Transport, DetailPanel, Library); the repeat guard gains three more inline call sites (◀, ▶, ×).
 - **Gate 109 Architecture note (Signal 2, verdict keep):** the new `app/lib/ssr/` NUL filter is stateless; remove it when react-dom is upgraded (ARCH-R109-NUL-FILTER-REMOVAL). No question for the architect.
 - **Question unchanged from (t):** keep inline, or extract a shared `preventRepeatedEnter` util plus a small local "self-disabling or self-unmounting focus handoff" convention? Usual form: keep/extract, cost, risk, at most three sentences. Non-blocking.
+
+## Addendum (v) — round 110 result, round 111 plan (B, round 111 planning, 2026-10-23)
+- **Status:** still no checkpoint result from root for (s)/(t)/(u). Round 111 (C-R110-01) uses the same inline convention, this time on the workspace side: one arm ref in `returnFloatingVideo` and one deps-free layout effect in `StudioWorkspace.tsx`, next to the existing `pendingRowFocusRef` effect.
+- **What it adds:** a fourth focus-rescue site. Both round-110 reviewers (A's `code-reviewer` and the gate-110 reviewer) said **keep inline**.
+  - They proposed `useFocusHandoffAfterCommit` / `useFocusHandoff(partnerRefs)` in `app/hooks/` plus a shared `preventRepeatedEnterKeyDown`, with a required "the action took effect" check. It would migrate Transport and Library with their existing tests unchanged.
+  - Transport hands off only after `source.disabled`; Library checks nothing. That difference must be settled before any extraction.
+  - Gate-110 Signal 3: the recurring root cause is the workspace's Enter-on-BODY contract, which is the user's question B-R107-ENTER-ON-BODY.
+- **Question (narrowed):** keep the four inline sites, or extract one hook with an explicit "took effect" predicate? Usual form: keep/extract, cost, risk, at most three sentences. **Non-blocking:** the cloud measurement round and T12 do not wait for it.

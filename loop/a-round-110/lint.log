@@ -1,0 +1,4312 @@
+
+> music-store@1.0.0 lint
+> biome lint ./app --max-diagnostics=500
+
+app/contexts/__tests__/cart-helpers.test.ts:219:13 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    218 │   it('returns existing session ID from localStorage', () => {
+  > 219 │     storage['czaba_session_id'] = 'sess_existing_123';
+        │             ^^^^^^^^^^^^^^^^^^
+    220 │     const id = getSessionId();
+    221 │     expect(id).toBe('sess_existing_123');
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    217 217 │   
+    218 218 │     it('returns existing session ID from localStorage', () => {
+    219     │ - ····storage['czaba_session_id']·=·'sess_existing_123';
+        219 │ + ····storage.czaba_session_id·=·'sess_existing_123';
+    220 220 │       const id = getSessionId();
+    221 221 │       expect(id).toBe('sess_existing_123');
+  
+
+app/components/animations/ScrollReveal.tsx:285:31 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+    284 │           {word.split('').map((char, charIndex) => (
+  > 285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+        │                               ^^^^^^^^^
+    286 │               {char}
+    287 │             </motion.span>
+  
+  i This is the source of the key value.
+  
+    282 │       {words.map((word, wordIndex) => (
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+  > 284 │           {word.split('').map((char, charIndex) => (
+        │                                      ^^^^^^^^^
+    285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+    286 │               {char}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/animations/ScrollReveal.tsx:283:20 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    281 │     >
+    282 │       {words.map((word, wordIndex) => (
+  > 283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+        │                    ^^^^^^^^^
+    284 │           {word.split('').map((char, charIndex) => (
+    285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+  
+  i This is the source of the key value.
+  
+    280 │       aria-label={text}
+    281 │     >
+  > 282 │       {words.map((word, wordIndex) => (
+        │                         ^^^^^^^^^
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+    284 │           {word.split('').map((char, charIndex) => (
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/audio/AudioPlayer.tsx:61:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    59 │         <div className="flex flex-col items-center gap-4">
+    60 │           <div className="flex items-center gap-6">
+  > 61 │             <button
+       │             ^^^^^^^
+  > 62 │               onClick={skipPrevious}
+  > 63 │               className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+  > 64 │               aria-label="Previous track"
+  > 65 │             >
+       │             ^
+    66 │               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    67 │                 <path
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPlayer.tsx:76:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    74 │             </button>
+    75 │ 
+  > 76 │             <button
+       │             ^^^^^^^
+  > 77 │               onClick={togglePlayPause}
+  > 78 │               className="audio-player-button-play flex items-center justify-center rounded-full cursor-pointer"
+  > 79 │               aria-busy={isLoading}
+  > 80 │               aria-label={isLoading ? 'Cancel loading preview' : isPlaying ? 'Pause' : 'Play'}
+  > 81 │             >
+       │             ^
+    82 │               {isLoading ? (
+    83 │                 <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPlayer.tsx:95:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+     93 │             </button>
+     94 │ 
+   > 95 │             <button
+        │             ^^^^^^^
+   > 96 │               onClick={skipNext}
+   > 97 │               className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+   > 98 │               aria-label="Next track"
+   > 99 │             >
+        │             ^
+    100 │               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    101 │                 <path
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPlayer.tsx:139:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    137 │         {/* Volume Control */}
+    138 │         <div className="flex items-center gap-4 justify-end">
+  > 139 │           <button
+        │           ^^^^^^^
+  > 140 │             onClick={() => setVolume(volume === 0 ? 0.7 : 0)}
+  > 141 │             className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+  > 142 │             aria-label={volume === 0 ? 'Unmute' : 'Mute'}
+  > 143 │           >
+        │           ^
+    144 │             {volume === 0 ? (
+    145 │               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPlayer.tsx:48:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    46 │           </div>
+    47 │           {/* Close Button */}
+  > 48 │           <button
+       │           ^^^^^^^
+  > 49 │             onClick={closePlayer}
+  > 50 │             className="absolute top-1/2 right-0 -translate-y-1/2 bg-transparent border-none text-muted p-2 flex items-center justify-center rounded-full transition-all duration-200 opacity-60 hover:bg-white/10 hover:text-error hover:opacity-100 hover:scale-110 cursor-pointer"
+  > 51 │             aria-label="Close player"
+  > 52 │             title="Close player"
+  > 53 │           >
+       │           ^
+    54 │             <X size={18} />
+    55 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPreviewButton.tsx:28:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    26 │     if (variant === 'overlay') {
+    27 │       return (
+  > 28 │         <button className="audio-preview-overlay-button cursor-pointer" aria-label="Play preview">
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │           <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+    30 │             <path d="M8 5v14l11-7z" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPreviewButton.tsx:38:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    37 │     return (
+  > 38 │       <button className="audio-preview-inline-button cursor-pointer" aria-label="Play preview">
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    40 │           <path d="M8 5v14l11-7z" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPreviewButton.tsx:72:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    70 │   if (variant === 'overlay') {
+    71 │     return (
+  > 72 │       <button
+       │       ^^^^^^^
+  > 73 │         onClick={handleClick}
+        ...
+  > 78 │         }
+  > 79 │       >
+       │       ^
+    80 │         {isLoading ? (
+    81 │           <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPreviewButton.tsx:96:5 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+     95 │   return (
+   > 96 │     <button
+        │     ^^^^^^^
+   > 97 │       onClick={handleClick}
+         ...
+  > 102 │       }
+  > 103 │     >
+        │     ^
+    104 │       {isLoading ? (
+    105 │         <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/StemControl.tsx:19:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    18 │       {/* Solo Button */}
+  > 19 │       <button
+       │       ^^^^^^^
+  > 20 │         onClick={() => toggleSolo(stemId)}
+        ...
+  > 27 │         title={isSoloed ? 'Unsolo' : 'Solo'}
+  > 28 │       >
+       │       ^
+    29 │         S
+    30 │       </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/StemControl.tsx:33:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    32 │       {/* Mute Button */}
+  > 33 │       <button
+       │       ^^^^^^^
+  > 34 │         onClick={() => toggleMute(stemId)}
+        ...
+  > 41 │         title={isMuted ? 'Unmute' : 'Mute'}
+  > 42 │       >
+       │       ^
+    43 │         M
+    44 │       </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/StemsPlayerModal.tsx:43:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    42 │   return (
+  > 43 │     <div
+       │     ^^^^
+  > 44 │       className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-md"
+  > 45 │       onClick={closeStemsPlayer}
+  > 46 │     >
+       │     ^
+    47 │       <div
+    48 │         className="relative w-full max-w-4xl max-h-[85vh] overflow-y-auto bg-surface rounded-2xl shadow-2xl m-4"
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/components/audio/StemsPlayerModal.tsx:47:7 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    45 │       onClick={closeStemsPlayer}
+    46 │     >
+  > 47 │       <div
+       │       ^^^^
+  > 48 │         className="relative w-full max-w-4xl max-h-[85vh] overflow-y-auto bg-surface rounded-2xl shadow-2xl m-4"
+  > 49 │         onClick={(e) => e.stopPropagation()}
+  > 50 │       >
+       │       ^
+    51 │         {/* Header */}
+    52 │         <div className="sticky top-0 z-10 flex items-center justify-between px-8 py-6 bg-surface border-b border-outline">
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/components/audio/StemsPlayerModal.tsx:7:66 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━
+
+  ! This variable seek is unused.
+  
+    6 │ export function StemsPlayerModal() {
+  > 7 │   const { state, isModalOpen, closeStemsPlayer, togglePlayPause, seek } = useStems();
+      │                                                                  ^^^^
+    8 │ 
+    9 │   // Handle ESC key
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+app/components/audio/StemsPlayerModal.tsx:54:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    52 │         <div className="sticky top-0 z-10 flex items-center justify-between px-8 py-6 bg-surface border-b border-outline">
+    53 │           <h2 className="text-3xl font-bold text-foreground">Stems</h2>
+  > 54 │           <button
+       │           ^^^^^^^
+  > 55 │             onClick={closeStemsPlayer}
+  > 56 │             className="p-2 text-muted hover:text-foreground hover:bg-elevated rounded-lg transition-colors cursor-pointer"
+  > 57 │             aria-label="Close"
+  > 58 │           >
+       │           ^
+    59 │             <X size={24} />
+    60 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/StemsPlayerModal.tsx:92:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    91 │               {/* Play/Pause Button */}
+  > 92 │               <button
+       │               ^^^^^^^
+  > 93 │                 onClick={togglePlayPause}
+  > 94 │                 className="flex items-center justify-center w-12 h-12 bg-white text-black rounded-full hover:bg-neutral-100 transition-colors shadow-md cursor-pointer flex-shrink-0"
+  > 95 │                 aria-label={state.isPlaying ? 'Pause' : 'Play'}
+  > 96 │               >
+       │               ^
+    97 │                 {state.isPlaying ? (
+    98 │                   <Pause size={20} fill="currentColor" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/StemsPlayerModal.tsx:153:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    151 │           <div className="p-8 text-center">
+    152 │             <p className="text-destructive mb-4">Failed to load stems. Please try again.</p>
+  > 153 │             <button
+        │             ^^^^^^^
+  > 154 │               onClick={closeStemsPlayer}
+  > 155 │               className="px-6 py-2 bg-elevated text-foreground rounded-lg hover:bg-muted-bg transition-colors cursor-pointer"
+  > 156 │             >
+        │             ^
+    157 │               Close
+    158 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/Timeline.tsx:67:19 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━
+
+  ! handleMouseMove changes on every re-render and should not be used as a hook dependency.
+  
+    65 │       };
+    66 │     }
+  > 67 │   }, [isDragging, handleMouseMove, handleMouseUp]);
+       │                   ^^^^^^^^^^^^^^^
+    68 │ 
+    69 │   // Calculate playhead position
+  
+  i To fix this, wrap the definition of handleMouseMove in its own useCallback() hook.
+  
+
+app/components/audio/Timeline.tsx:67:36 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━
+
+  ! handleMouseUp changes on every re-render and should not be used as a hook dependency.
+  
+    65 │       };
+    66 │     }
+  > 67 │   }, [isDragging, handleMouseMove, handleMouseUp]);
+       │                                    ^^^^^^^^^^^^^
+    68 │ 
+    69 │   // Calculate playhead position
+  
+  i To fix this, wrap the definition of handleMouseUp in its own useCallback() hook.
+  
+
+app/components/audio/Timeline.tsx:108:20 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    106 │           return (
+    107 │             <div
+  > 108 │               key={i}
+        │                    ^
+    109 │               className="absolute top-0 h-full w-px bg-outline"
+    110 │               style={{ left: `${position}%` }}
+  
+  i This is the source of the key value.
+  
+    101 │         {/* Time Markers (every 5 seconds for demo) */}
+  > 102 │         {Array.from({ length: Math.floor(duration / 5) + 1 }).map((_, i) => {
+        │                                                                       ^
+    103 │           const time = i * 5;
+    104 │           const position = (time / duration) * 100;
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/audio/WaveForm.tsx:48:18 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    46 │         return (
+    47 │           <div
+  > 48 │             key={i}
+       │                  ^
+    49 │             className={`waveform-bar ${isActive ? 'active' : ''} ${isPlaying ? 'playing' : ''}`}
+    50 │             style={{
+  
+  i This is the source of the key value.
+  
+    41 │   return (
+    42 │     <div className="waveform-container" key={waveIndex}>
+  > 43 │       {barsData.map((finalHeight, i) => {
+       │                                   ^
+    44 │         const isActive = (i / bars) * 100 <= progress && isPlaying;
+    45 │ 
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/auth/AuthModal.tsx:47:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    46 │   return (
+  > 47 │     <div
+       │     ^^^^
+  > 48 │       className="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-[1000] animate-fade-in font-heading cursor-pointer"
+  > 49 │       onClick={handleBackdropClick}
+  > 50 │     >
+       │     ^
+    51 │       <div
+    52 │         ref={modalRef}
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/components/auth/AuthModal.tsx:56:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    54 │       >
+    55 │         {/* Close Button */}
+  > 56 │         <button
+       │         ^^^^^^^
+  > 57 │           onClick={closeModal}
+  > 58 │           className="absolute top-4 right-4 text-dim hover:text-foreground transition-colors z-10 cursor-pointer"
+  > 59 │           aria-label="Close"
+  > 60 │         >
+       │         ^
+    61 │           <svg
+    62 │             width="24"
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/auth/UserDropdown.tsx:57:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    55 │               My Account
+    56 │             </a>
+  > 57 │             <button className="w-full flex items-center justify-between px-4 py-2 text-text-muted hover:text-text hover:bg-brand-surface transition cursor-pointer">
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │               Help
+    59 │               <svg
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/auth/UserDropdown.tsx:24:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    22 │     <div className="relative" ref={dropdownRef}>
+    23 │       {/* Avatar Button */}
+  > 24 │       <button
+       │       ^^^^^^^
+  > 25 │         onClick={() => setIsOpen(!isOpen)}
+  > 26 │         className="w-9 h-9 rounded-full bg-brand-surface-elevated border border-brand-border flex items-center justify-center text-sm font-medium text-text hover:border-brand-border-hover transition cursor-pointer"
+  > 27 │         aria-label="User menu"
+  > 28 │       >
+       │       ^
+    29 │         {user.profileImageUrl ? (
+    30 │           <img
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/auth/UserDropdown.tsx:70:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    68 │               </svg>
+    69 │             </button>
+  > 70 │             <button
+       │             ^^^^^^^
+  > 71 │               onClick={() => {
+        ...
+  > 75 │               className="w-full text-left px-4 py-2 text-text-muted hover:text-text hover:bg-brand-surface transition cursor-pointer"
+  > 76 │             >
+       │             ^
+    77 │               Sign Out
+    78 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/common/Carousel.tsx:50:7 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━
+
+  ! checkScrollability changes on every re-render and should not be used as a hook dependency.
+  
+    48 │       };
+    49 │     }
+  > 50 │   }, [checkScrollability]);
+       │       ^^^^^^^^^^^^^^^^^^
+    51 │ 
+    52 │   const scroll = (direction: 'left' | 'right') => {
+  
+  i To fix this, wrap the definition of checkScrollability in its own useCallback() hook.
+  
+
+app/components/common/Carousel.tsx:66:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    64 │       {/* Left Arrow */}
+    65 │       {canScrollLeft && (
+  > 66 │         <button
+       │         ^^^^^^^
+  > 67 │           onClick={() => scroll('left')}
+        ...
+  > 80 │           aria-label="Scroll left"
+  > 81 │         >
+       │         ^
+    82 │           <ChevronLeftIcon size={18} />
+    83 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/common/Carousel.tsx:103:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    101 │       >
+    102 │         {children.map((child, index) => (
+  > 103 │           <div key={index} className="flex-none snap-start" style={{ width: `${itemWidth}px` }}>
+        │                     ^^^^^
+    104 │             <div className="h-full">{child}</div>
+    105 │           </div>
+  
+  i This is the source of the key value.
+  
+    100 │         "
+    101 │       >
+  > 102 │         {children.map((child, index) => (
+        │                               ^^^^^
+    103 │           <div key={index} className="flex-none snap-start" style={{ width: `${itemWidth}px` }}>
+    104 │             <div className="h-full">{child}</div>
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/common/Carousel.tsx:111:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    109 │       {/* Right Arrow */}
+    110 │       {canScrollRight && (
+  > 111 │         <button
+        │         ^^^^^^^
+  > 112 │           onClick={() => scroll('right')}
+         ...
+  > 125 │           aria-label="Scroll right"
+  > 126 │         >
+        │         ^
+    127 │           <ChevronRightIcon size={18} />
+    128 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/common/CookieConsent.tsx:76:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    74 │             Decline
+    75 │           </button>
+  > 76 │           <button
+       │           ^^^^^^^
+  > 77 │             onClick={handleAccept}
+  > 78 │             className="px-5 py-2 text-sm font-medium bg-white text-black rounded-full hover:bg-neutral-100 transition-colors"
+  > 79 │           >
+       │           ^
+    80 │             Accept
+    81 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/common/CookieConsent.tsx:85:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    84 │         {/* Close button (acts as decline) */}
+  > 85 │         <button
+       │         ^^^^^^^
+  > 86 │           onClick={handleDecline}
+  > 87 │           className="absolute top-2 right-2 sm:hidden p-2 text-dim hover:text-foreground transition-colors"
+  > 88 │           aria-label="Close"
+  > 89 │         >
+       │         ^
+    90 │           <X size={18} />
+    91 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/common/CookieConsent.tsx:70:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    68 │         {/* Buttons */}
+    69 │         <div className="flex items-center gap-3">
+  > 70 │           <button
+       │           ^^^^^^^
+  > 71 │             onClick={handleDecline}
+  > 72 │             className="px-4 py-2 text-sm text-muted hover:text-foreground transition-colors"
+  > 73 │           >
+       │           ^
+    74 │             Decline
+    75 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/filters/ActiveFilters.tsx:19:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    17 │       {Object.entries(activeFilters).map(([type, values]) =>
+    18 │         values.map((value: string) => (
+  > 19 │           <button
+       │           ^^^^^^^
+  > 20 │             key={`${type}-${value}`}
+  > 21 │             className="active-filter-pill cursor-pointer"
+  > 22 │             onClick={() => onRemove(type as FilterType, value)}
+  > 23 │           >
+       │           ^
+    24 │             {value}
+    25 │             <X size={12} />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/filters/ActiveFilters.tsx:29:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    27 │         )),
+    28 │       )}
+  > 29 │       <button className="clear-all-btn cursor-pointer" onClick={onClearAll}>
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │         Clear all
+    31 │       </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/filters/FilterBar.tsx:113:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    112 │           {/* Filters Button */}
+  > 113 │           <button className="filters-button">
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    114 │             <SlidersHorizontal size={16} />
+    115 │             Filters
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/filters/FilterDropdown.tsx:29:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    27 │   return (
+    28 │     <div className="filter-dropdown-wrapper">
+  > 29 │       <button
+       │       ^^^^^^^
+  > 30 │         className={`filter-dropdown-trigger cursor-pointer ${isOpen ? 'active' : ''} ${activeFilters.length > 0 ? 'has-selection' : ''}`}
+  > 31 │         onClick={onToggle}
+  > 32 │       >
+       │       ^
+    33 │         <span>{label}</span>
+    34 │         {activeFilters.length > 0 && <span className="filter-count">{activeFilters.length}</span>}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/filters/FilterDropdown.tsx:43:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    41 │             <span>{label}</span>
+    42 │             {activeFilters.length > 0 && (
+  > 43 │               <button className="filter-clear-btn cursor-pointer" onClick={onClear}>
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │                 Clear
+    45 │               </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/filters/FilterDropdown.tsx:50:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    48 │           <div className="filter-chips-grid">
+    49 │             {items.map((item) => (
+  > 50 │               <button
+       │               ^^^^^^^
+  > 51 │                 key={item}
+  > 52 │                 className={`filter-chip cursor-pointer ${activeFilters.includes(item) ? 'active' : ''}`}
+  > 53 │                 onClick={() => onFilterToggle(item)}
+  > 54 │               >
+       │               ^
+    55 │                 {item}
+    56 │                 {activeFilters.includes(item) && (
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/filters/FilterDropdown.tsx:64:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    62 │             ))}
+    63 │           </div>
+  > 64 │           <button className="filter-close-btn cursor-pointer" onClick={onClose}>
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │             Close
+    66 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/home/HeroSection.tsx:137:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    136 │       {/* Sound Toggle Button - Top right, visible on load */}
+  > 137 │       <button
+        │       ^^^^^^^
+  > 138 │         onClick={toggleMute}
+  > 139 │         className="absolute top-24 right-6 z-20 flex items-center gap-2 rounded-full bg-surface-glass px-4 py-2 text-sm text-foreground/80 backdrop-blur-sm transition-all hover:bg-muted-bg hover:text-foreground"
+  > 140 │         aria-label={isMuted ? 'Turn sound on' : 'Turn sound off'}
+  > 141 │       >
+        │       ^
+    142 │         {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+    143 │         <span className="hidden sm:inline">{isMuted ? 'Sound On' : 'Sound Off'}</span>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/home/ProductSection.tsx:54:43 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    52 │           {isLoading
+    53 │             ? Array.from({ length: skeletonCount }).map((_, index) => (
+  > 54 │                 <ProductCardSkeleton key={index} />
+       │                                           ^^^^^
+    55 │               ))
+    56 │             : displayProducts.map((product) => <ProductCard key={product.id} product={product} />)}
+  
+  i This is the source of the key value.
+  
+    51 │         <Carousel itemWidth={320}>
+    52 │           {isLoading
+  > 53 │             ? Array.from({ length: skeletonCount }).map((_, index) => (
+       │                                                             ^^^^^
+    54 │                 <ProductCardSkeleton key={index} />
+    55 │               ))
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/home/VideoShowcase.tsx:97:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+     95 │             {!isPlaying && (
+     96 │               <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center">
+   > 97 │                 <button
+        │                 ^^^^^^^
+   > 98 │                   onClick={togglePlay}
+   > 99 │                   className="w-20 h-20 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition-transform shadow-glow"
+  > 100 │                 >
+        │                 ^
+    101 │                   <Play className="h-10 w-10 ml-1" />
+    102 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/home/VideoShowcase.tsx:131:19 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    129 │                 <div className="flex items-center gap-2">
+    130 │                   {/* Play/Pause */}
+  > 131 │                   <button
+        │                   ^^^^^^^
+  > 132 │                     onClick={togglePlay}
+  > 133 │                     className="w-10 h-10 rounded-full bg-foreground/10 hover:bg-foreground/20 flex items-center justify-center transition-colors"
+  > 134 │                   >
+        │                   ^
+    135 │                     {isPlaying ? (
+    136 │                       <Pause className="h-5 w-5 text-foreground" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/home/VideoShowcase.tsx:144:21 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    142 │                   {/* Volume */}
+    143 │                   <div className="flex items-center gap-2">
+  > 144 │                     <button
+        │                     ^^^^^^^
+  > 145 │                       onClick={toggleMute}
+  > 146 │                       className="w-10 h-10 rounded-full bg-foreground/10 hover:bg-foreground/20 flex items-center justify-center transition-colors"
+  > 147 │                     >
+        │                     ^
+    148 │                       {isMuted || volume === 0 ? (
+    149 │                         <VolumeX className="h-5 w-5 text-foreground" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/layout/Header.tsx:115:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    113 │           ) : isAuthenticated ? (
+    114 │             <div className="relative group hidden lg:block">
+  > 115 │               <button aria-label="User menu" className="btn-icon text-muted cursor-pointer">
+        │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    116 │                 <User size={20} />
+    117 │               </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/layout/Header.tsx:142:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    140 │                 </Link>
+    141 │                 <hr className="border-outline/50 my-4" />
+  > 142 │                 <button
+        │                 ^^^^^^^
+  > 143 │                   onClick={() => signOut()}
+  > 144 │                   className="cursor-pointer block w-full text-left p-4 text-foreground hover:bg-elevated hover:text-brand rounded-md transition-colors"
+  > 145 │                 >
+        │                 ^
+    146 │                   Logout
+    147 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/layout/Header.tsx:151:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    149 │             </div>
+    150 │           ) : (
+  > 151 │             <button
+        │             ^^^^^^^
+  > 152 │               onClick={() => openModal('signin')}
+  > 153 │               className="btn-primary cursor-pointer !rounded-sm !hidden lg:!inline-block"
+  > 154 │             >
+        │             ^
+    155 │               Sign In
+    156 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/layout/Header.tsx:159:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    157 │           )}
+    158 │ 
+  > 159 │           <button
+        │           ^^^^^^^
+  > 160 │             aria-label="Toggle menu"
+  > 161 │             className="lg:hidden p-3 text-muted cursor-pointer ml-auto"
+  > 162 │             onClick={() => setIsOpen((s) => !s)}
+  > 163 │           >
+        │           ^
+    164 │             {isOpen ? <X size={24} /> : <Menu size={24} />}
+    165 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/layout/Header.tsx:230:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    228 │               <div className="h-[44px] bg-elevated rounded-md animate-pulse" />
+    229 │             ) : !isAuthenticated ? (
+  > 230 │               <button
+        │               ^^^^^^^
+  > 231 │                 onClick={() => {
+         ...
+  > 235 │                 className="btn-primary w-full cursor-pointer"
+  > 236 │               >
+        │               ^
+    237 │                 Sign In
+    238 │               </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/layout/Header.tsx:255:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    253 │                   Downloads
+    254 │                 </Link>
+  > 255 │                 <button
+        │                 ^^^^^^^
+  > 256 │                   onClick={() => {
+         ...
+  > 260 │                   className="block w-full text-left px-4 py-3 rounded-md transition-colors font-medium text-foreground hover:text-brand cursor-pointer"
+  > 261 │                 >
+        │                 ^
+    262 │                   Logout
+    263 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/loading/CinemaCurtainLoader.tsx:119:22 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    117 │             {[...Array(8)].map((_, i) => (
+    118 │               <div
+  > 119 │                 key={i}
+        │                      ^
+    120 │                 className="absolute top-0 bottom-0 w-[2px]"
+    121 │                 style={{
+  
+  i This is the source of the key value.
+  
+    115 │           {/* Curtain folds */}
+    116 │           <div className="absolute inset-0 opacity-30">
+  > 117 │             {[...Array(8)].map((_, i) => (
+        │                                    ^
+    118 │               <div
+    119 │                 key={i}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/loading/CinemaCurtainLoader.tsx:158:22 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    156 │             {[...Array(8)].map((_, i) => (
+    157 │               <div
+  > 158 │                 key={i}
+        │                      ^
+    159 │                 className="absolute top-0 bottom-0 w-[2px]"
+    160 │                 style={{
+  
+  i This is the source of the key value.
+  
+    154 │           {/* Curtain folds */}
+    155 │           <div className="absolute inset-0 opacity-30">
+  > 156 │             {[...Array(8)].map((_, i) => (
+        │                                    ^
+    157 │               <div
+    158 │                 key={i}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/loading/PianoCurtainLoader.tsx:169:34 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    168 │             return (
+  > 169 │               <div key={`white-${keyIndex}`} className="flex-1 relative overflow-visible">
+        │                                  ^^^^^^^^
+    170 │                 {isFalling ? (
+    171 │                   // მსხვრევის ნატეხები - clipPath-ით
+  
+  i This is the source of the key value.
+  
+    163 │         {/* თეთრი კლავიშები - განიერი, პრემიუმ */}
+    164 │         <div className="relative flex w-full h-full">
+  > 165 │           {whiteKeys.map((_, keyIndex) => {
+        │                              ^^^^^^^^
+    166 │             const pieces = whiteKeyPieces[keyIndex];
+    167 │ 
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/loading/PianoCurtainLoader.tsx:174:55 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    172 │                   pieces.map((piece, pieceIndex) => (
+    173 │                     <motion.div
+  > 174 │                       key={`white-${keyIndex}-piece-${pieceIndex}`}
+        │                                                       ^^^^^^^^^^
+    175 │                       initial={{ x: 0, y: 0, rotate: 0, opacity: 1, scale: 1 }}
+    176 │                       animate={{
+  
+  i This is the source of the key value.
+  
+    170 │                 {isFalling ? (
+    171 │                   // მსხვრევის ნატეხები - clipPath-ით
+  > 172 │                   pieces.map((piece, pieceIndex) => (
+        │                                      ^^^^^^^^^^
+    173 │                     <motion.div
+    174 │                       key={`white-${keyIndex}-piece-${pieceIndex}`}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/loading/PianoCurtainLoader.tsx:261:31 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    259 │             return (
+    260 │               <div
+  > 261 │                 key={`black-${keyIndex}`}
+        │                               ^^^^^^^^
+    262 │                 className="absolute overflow-visible"
+    263 │                 style={{
+  
+  i This is the source of the key value.
+  
+    252 │         {/* შავი კლავიშები */}
+    253 │         <div className="absolute inset-0 pointer-events-none">
+  > 254 │           {blackKeyPositions.map((position, keyIndex) => {
+        │                                             ^^^^^^^^
+    255 │             // 9 თეთრ კლავიშზე გაანგარიშება
+    256 │             const leftPosition = ((position + 0.65) / whiteKeyCount) * 100;
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/loading/PianoCurtainLoader.tsx:273:55 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    271 │                   pieces.map((piece, pieceIndex) => (
+    272 │                     <motion.div
+  > 273 │                       key={`black-${keyIndex}-piece-${pieceIndex}`}
+        │                                                       ^^^^^^^^^^
+    274 │                       initial={{ x: 0, y: 0, rotate: 0, opacity: 1, scale: 1 }}
+    275 │                       animate={{
+  
+  i This is the source of the key value.
+  
+    269 │               >
+    270 │                 {isFalling ? (
+  > 271 │                   pieces.map((piece, pieceIndex) => (
+        │                                      ^^^^^^^^^^
+    272 │                     <motion.div
+    273 │                       key={`black-${keyIndex}-piece-${pieceIndex}`}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/loading/PianoCurtainLoader.tsx:365:30 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    363 │             {[...Array(20)].map((_, i) => (
+    364 │               <motion.div
+  > 365 │                 key={`dust-${i}`}
+        │                              ^
+    366 │                 initial={{
+    367 │                   opacity: 0.6,
+  
+  i This is the source of the key value.
+  
+    361 │         {isFalling && (
+    362 │           <div className="absolute inset-0 pointer-events-none z-30">
+  > 363 │             {[...Array(20)].map((_, i) => (
+        │                                     ^
+    364 │               <motion.div
+    365 │                 key={`dust-${i}`}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/loading/PianoLoadingAnimation.tsx:38:27 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    36 │         {blackKeyPositions.map((position, index) => (
+    37 │           <div
+  > 38 │             key={`black-${index}`}
+       │                           ^^^^^
+    39 │             className="piano-key black-key"
+    40 │             style={{
+  
+  i This is the source of the key value.
+  
+    35 │         {/* Black Keys */}
+  > 36 │         {blackKeyPositions.map((position, index) => (
+       │                                           ^^^^^
+    37 │           <div
+    38 │             key={`black-${index}`}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/loading/PianoLoadingAnimation.tsx:27:27 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    25 │         {Array.from({ length: whiteKeys }).map((_, index) => (
+    26 │           <div
+  > 27 │             key={`white-${index}`}
+       │                           ^^^^^
+    28 │             className="piano-key white-key"
+    29 │             style={{
+  
+  i This is the source of the key value.
+  
+    23 │       <div className="piano-keys-container">
+    24 │         {/* White Keys */}
+  > 25 │         {Array.from({ length: whiteKeys }).map((_, index) => (
+       │                                                    ^^^^^
+    26 │           <div
+    27 │             key={`white-${index}`}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/loading/SpotlightLoader.tsx:242:22 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    240 │             {[...Array(15)].map((_, i) => (
+    241 │               <motion.div
+  > 242 │                 key={i}
+        │                      ^
+    243 │                 initial={{
+    244 │                   opacity: 0,
+  
+  i This is the source of the key value.
+  
+    238 │         {showSpotlight && (
+    239 │           <div className="absolute inset-0 pointer-events-none overflow-hidden">
+  > 240 │             {[...Array(15)].map((_, i) => (
+        │                                     ^
+    241 │               <motion.div
+    242 │                 key={i}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/loading/TrackListSkeleton.tsx:11:50 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+     9 │     <div className="space-y-2">
+    10 │       {Array.from({ length: count }).map((_, index) => (
+  > 11 │         <TrackRowSkeleton key={`track-skeleton-${index}`} />
+       │                                                  ^^^^^
+    12 │       ))}
+    13 │     </div>
+  
+  i This is the source of the key value.
+  
+     8 │   return (
+     9 │     <div className="space-y-2">
+  > 10 │       {Array.from({ length: count }).map((_, index) => (
+       │                                              ^^^^^
+    11 │         <TrackRowSkeleton key={`track-skeleton-${index}`} />
+    12 │       ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/marketing/LeadMagnetPopup.tsx:56:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    54 │     <div className="fixed inset-0 bg-background z-[9999] flex items-center justify-center animate-fade-in">
+    55 │       {/* Close Button */}
+  > 56 │       <button
+       │       ^^^^^^^
+  > 57 │         onClick={close}
+  > 58 │         className="absolute top-6 right-6 text-foreground/60 hover:text-foreground transition-colors cursor-pointer"
+  > 59 │         aria-label="Close"
+  > 60 │       >
+       │       ^
+    61 │         <X size={32} />
+    62 │       </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/marketing/LeadMagnetPopup.tsx:81:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    79 │             </h2>
+    80 │ 
+  > 81 │             <button
+       │             ^^^^^^^
+  > 82 │               onClick={handleContinueToEmail}
+        ...
+  > 91 │               "
+  > 92 │             >
+       │             ^
+    93 │               FREE DOWNLOAD
+    94 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/marketing/LeadMagnetPopup.tsx:162:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    160 │             </h2>
+    161 │ 
+  > 162 │             <button
+        │             ^^^^^^^
+  > 163 │               onClick={handleBackToSite}
+         ...
+  > 172 │               "
+  > 173 │             >
+        │             ^
+    174 │               BACK TO SITE
+    175 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/AssetListingPage.tsx:27:26 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━
+
+  ! This variable hasActiveFilters is unused.
+  
+    25 │   pageTitle,
+    26 │ }: AssetListingPageProps) {
+  > 27 │   const { activeFilters, hasActiveFilters, clearAllFilters } = useFilters();
+       │                          ^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │   const durationSeconds = (duration?: string) =>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+app/components/product/AssetListingPage.tsx:121:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    119 │             </svg>
+    120 │             <p>No {pageTitle.toLowerCase()} found matching your filters</p>
+  > 121 │             <button onClick={clearAllFilters} className="button button-primary">
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    122 │               Clear Filters
+    123 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/AssetRow.tsx:84:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    82 │         <img src={asset.image} alt={asset.title} className="track-artwork" />
+    83 │         {hasAudioPreview && (
+  > 84 │           <button onClick={handlePlayClick} className="track-play-button cursor-pointer">
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │             {isPlaying ? (
+    86 │               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/AssetRow.tsx:124:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    123 │       {/* Similar Button */}
+  > 124 │       <button className="track-similar-button cursor-pointer" title="Find similar">
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    125 │         <svg
+    126 │           width="16"
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/AssetRow.tsx:172:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    170 │       {/* Actions */}
+    171 │       <div className="track-actions">
+  > 172 │         <button className="track-action-button cursor-pointer" title="Download">
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    173 │           <svg
+    174 │             width="18"
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/AssetRow.tsx:186:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    184 │           </svg>
+    185 │         </button>
+  > 186 │         <button className="track-action-button cursor-pointer" title="Add to collection">
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    187 │           <svg
+    188 │             width="18"
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/AssetRow.tsx:200:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    198 │           </svg>
+    199 │         </button>
+  > 200 │         <button className="track-action-button cursor-pointer" title="Add to favorites">
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    201 │           <svg
+    202 │             width="18"
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/AssetRow.tsx:212:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    210 │           </svg>
+    211 │         </button>
+  > 212 │         <button className="track-action-button cursor-pointer" title="More options">
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    213 │           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    214 │             <circle cx="12" cy="12" r="1.5" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/PlayStemsButton.tsx:18:5 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    17 │   return (
+  > 18 │     <button
+       │     ^^^^^^^
+  > 19 │       onClick={() => openStemsPlayer(track)}
+  > 20 │       className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-elevated border border-outline text-foreground font-semibold hover:bg-elevated/80 hover:border-brand transition-colors cursor-pointer"
+  > 21 │     >
+       │     ^
+    22 │       <Layers size={20} />
+    23 │       <span>Play Stems ({track.stems.length} tracks)</span>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/ProductFeatures.tsx:84:22 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    82 │           {/* Dynamic features */}
+    83 │           {features.map((feature, index) => (
+  > 84 │             <li key={index} className="flex items-center gap-3 text-sm text-foreground">
+       │                      ^^^^^
+    85 │               <span className="text-brand">{feature.icon}</span>
+    86 │               <span>{feature.text}</span>
+  
+  i This is the source of the key value.
+  
+    81 │         <ul className="space-y-3">
+    82 │           {/* Dynamic features */}
+  > 83 │           {features.map((feature, index) => (
+       │                                   ^^^^^
+    84 │             <li key={index} className="flex items-center gap-3 text-sm text-foreground">
+    85 │               <span className="text-brand">{feature.icon}</span>
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/product/ProductFeatures.tsx:92:29 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    90 │           {/* Standard features */}
+    91 │           {standardFeatures.map((feature, index) => (
+  > 92 │             <li key={`std-${index}`} className="flex items-center gap-3 text-sm text-foreground">
+       │                             ^^^^^
+    93 │               <span className="text-brand">
+    94 │                 <Infinity size={16} />
+  
+  i This is the source of the key value.
+  
+    90 │           {/* Standard features */}
+  > 91 │           {standardFeatures.map((feature, index) => (
+       │                                           ^^^^^
+    92 │             <li key={`std-${index}`} className="flex items-center gap-3 text-sm text-foreground">
+    93 │               <span className="text-brand">
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/product/ProductSidebar.tsx:63:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    62 │       {isFree && (
+  > 63 │         <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-foreground text-background rounded-lg font-semibold transition-all hover:bg-foreground/90">
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │           <Download size={18} />
+    65 │           <span>Complimentary Download</span>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/RelatedTracksCarousel.tsx:48:7 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! checkScrollability changes on every re-render and should not be used as a hook dependency.
+  
+    46 │       };
+    47 │     }
+  > 48 │   }, [checkScrollability]);
+       │       ^^^^^^^^^^^^^^^^^^
+    49 │ 
+    50 │   const scroll = (direction: 'left' | 'right') => {
+  
+  i To fix this, wrap the definition of checkScrollability in its own useCallback() hook.
+  
+
+app/components/product/RelatedTracksCarousel.tsx:66:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    65 │         <div className="flex items-center gap-2">
+  > 66 │           <button
+       │           ^^^^^^^
+  > 67 │             onClick={() => scroll('left')}
+  > 68 │             disabled={!canScrollLeft}
+  > 69 │             className="w-10 h-10 rounded-full bg-elevated hover:bg-muted-bg text-foreground disabled:bg-surface disabled:cursor-not-allowed transition-all flex items-center justify-center"
+  > 70 │             aria-label="Previous"
+  > 71 │           >
+       │           ^
+    72 │             <ChevronLeftIcon size={20} />
+    73 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/RelatedTracksCarousel.tsx:74:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    72 │             <ChevronLeftIcon size={20} />
+    73 │           </button>
+  > 74 │           <button
+       │           ^^^^^^^
+  > 75 │             onClick={() => scroll('right')}
+  > 76 │             disabled={!canScrollRight}
+  > 77 │             className="w-10 h-10 rounded-full bg-elevated hover:bg-muted-bg text-foreground disabled:bg-surface disabled:cursor-not-allowed transition-all flex items-center justify-center"
+  > 78 │             aria-label="Next"
+  > 79 │           >
+       │           ^
+    80 │             <ChevronRightIcon size={20} />
+    81 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/SuggestedAlbums.tsx:44:7 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! checkScrollPosition changes on every re-render and should not be used as a hook dependency.
+  
+    42 │       window.removeEventListener('resize', checkScrollPosition);
+    43 │     };
+  > 44 │   }, [checkScrollPosition]);
+       │       ^^^^^^^^^^^^^^^^^^^
+    45 │ 
+    46 │   const scroll = (direction: 'left' | 'right') => {
+  
+  i To fix this, wrap the definition of checkScrollPosition in its own useCallback() hook.
+  
+
+app/components/product/SuggestedAlbums.tsx:76:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    74 │         {/* Left Arrow */}
+    75 │         {canScrollLeft && (
+  > 76 │           <button
+       │           ^^^^^^^
+  > 77 │             className="carousel-nav-button carousel-nav-left cursor-pointer"
+  > 78 │             onClick={() => scroll('left')}
+  > 79 │             aria-label="Scroll left"
+  > 80 │           >
+       │           ^
+    81 │             <svg
+    82 │               width="24"
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/SuggestedAlbums.tsx:107:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    105 │                 {album.isOriginal && <div className="album-badge-original">CZABA ORIGINAL</div>}
+    106 │ 
+  > 107 │                 <button
+        │                 ^^^^^^^
+  > 108 │                   className="album-play-button cursor-pointer"
+  > 109 │                   onClick={handlePlayClick}
+  > 110 │                   aria-label={`Play ${album.title}`}
+  > 111 │                 >
+        │                 ^
+    112 │                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    113 │                     <path d="M8 5v14l11-7z" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/SuggestedAlbums.tsx:136:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    134 │         {/* Right Arrow */}
+    135 │         {canScrollRight && (
+  > 136 │           <button
+        │           ^^^^^^^
+  > 137 │             className="carousel-nav-button carousel-nav-right cursor-pointer"
+  > 138 │             onClick={() => scroll('right')}
+  > 139 │             aria-label="Scroll right"
+  > 140 │           >
+        │           ^
+    141 │             <svg
+    142 │               width="24"
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/TrackRow.tsx:46:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    44 │             {!track.isPack && track.audioPreviewUrl && (
+    45 │               <div className={`track-row-play-overlay ${isHovered ? 'visible' : ''}`}>
+  > 46 │                 <button
+       │                 ^^^^^^^
+  > 47 │                   className="track-row-play-button cursor-pointer"
+  > 48 │                   onClick={handlePlayClick}
+  > 49 │                   aria-label={isPlaying ? 'Pause' : 'Play'}
+  > 50 │                 >
+       │                 ^
+    51 │                   {isPlaying ? (
+    52 │                     // Pause Icon
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/TrackRow.tsx:82:24 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    80 │         <div className="track-row-tags-wrapper">
+    81 │           {track.tags.slice(0, 2).map((tag, index) => (
+  > 82 │             <span key={index} className="track-row-tag">
+       │                        ^^^^^
+    83 │               {tag}
+    84 │             </span>
+  
+  i This is the source of the key value.
+  
+    79 │       <div className="track-row-tags" style={{ order: 4 }}>
+    80 │         <div className="track-row-tags-wrapper">
+  > 81 │           {track.tags.slice(0, 2).map((tag, index) => (
+       │                                             ^^^^^
+    82 │             <span key={index} className="track-row-tag">
+    83 │               {tag}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/product/TrackRow.tsx:101:24 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+     99 │               {[...Array(40)].map((_, i) => (
+    100 │                 <div
+  > 101 │                   key={i}
+        │                        ^
+    102 │                   className="waveform-bar"
+    103 │                   style={{
+  
+  i This is the source of the key value.
+  
+     97 │             <div className="track-row-waveform-placeholder">
+     98 │               {/* Visual bars to simulate waveform */}
+   > 99 │               {[...Array(40)].map((_, i) => (
+        │                                       ^
+    100 │                 <div
+    101 │                   key={i}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/product/TrackRow.tsx:118:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    116 │         <div className="track-row-actions-wrapper">
+    117 │           {/* Download Button */}
+  > 118 │           <button
+        │           ^^^^^^^
+  > 119 │             className="track-row-action-btn cursor-pointer"
+  > 120 │             aria-label="Download"
+  > 121 │             title="Download"
+  > 122 │           >
+        │           ^
+    123 │             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    124 │               <path
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/TrackRow.tsx:134:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    133 │           {/* Add to Cart Button */}
+  > 134 │           <button
+        │           ^^^^^^^
+  > 135 │             className="track-row-action-btn track-row-cart-btn cursor-pointer"
+  > 136 │             aria-label="Add to Cart"
+  > 137 │             title="Add to Cart"
+  > 138 │           >
+        │           ^
+    139 │             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    140 │               <circle cx="9" cy="21" r="1" strokeWidth="2" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/UsageTerms.tsx:34:25 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    32 │           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    33 │             {allowedUses.map((use, index) => (
+  > 34 │               <div key={index} className="flex items-center gap-2.5 text-sm text-foreground">
+       │                         ^^^^^
+    35 │                 <span className="text-brand">{use.icon}</span>
+    36 │                 <span>{use.text}</span>
+  
+  i This is the source of the key value.
+  
+    31 │           <h3 className="text-xs text-dim uppercase tracking-wider mb-3">Use it for</h3>
+    32 │           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+  > 33 │             {allowedUses.map((use, index) => (
+       │                                    ^^^^^
+    34 │               <div key={index} className="flex items-center gap-2.5 text-sm text-foreground">
+    35 │                 <span className="text-brand">{use.icon}</span>
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/product/UsageTerms.tsx:50:24 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    48 │           <ul className="space-y-2">
+    49 │             {keyTerms.map((term, index) => (
+  > 50 │               <li key={index} className="flex items-center gap-2.5 text-sm text-foreground">
+       │                        ^^^^^
+    51 │                 <Check size={14} className="text-brand shrink-0" />
+    52 │                 <span>{term}</span>
+  
+  i This is the source of the key value.
+  
+    47 │           <h3 className="text-xs text-dim uppercase tracking-wider mb-3">Key terms</h3>
+    48 │           <ul className="space-y-2">
+  > 49 │             {keyTerms.map((term, index) => (
+       │                                  ^^^^^
+    50 │               <li key={index} className="flex items-center gap-2.5 text-sm text-foreground">
+    51 │                 <Check size={14} className="text-brand shrink-0" />
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/product/UsageTerms.tsx:66:24 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    64 │           <ul className="space-y-2">
+    65 │             {restrictions.map((restriction, index) => (
+  > 66 │               <li key={index} className="flex items-center gap-2.5 text-sm text-muted">
+       │                        ^^^^^
+    67 │                 <X size={14} className="text-destructive/70 shrink-0" />
+    68 │                 <span>{restriction}</span>
+  
+  i This is the source of the key value.
+  
+    63 │           <h3 className="text-xs text-dim uppercase tracking-wider mb-3">Restrictions</h3>
+    64 │           <ul className="space-y-2">
+  > 65 │             {restrictions.map((restriction, index) => (
+       │                                             ^^^^^
+    66 │               <li key={index} className="flex items-center gap-2.5 text-sm text-muted">
+    67 │                 <X size={14} className="text-destructive/70 shrink-0" />
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/product/fx/FXPackFeatures.tsx:38:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    36 │       <div className="grid grid-cols-3 gap-4">
+    37 │         {features.map((feature, index) => (
+  > 38 │           <div key={index} className="text-center">
+       │                     ^^^^^
+    39 │             <div className="text-3xl md:text-4xl font-bold text-brand mb-1">{feature.value}</div>
+    40 │             <div className="text-sm text-muted tracking-wide">{feature.label}</div>
+  
+  i This is the source of the key value.
+  
+    35 │     <div className="bg-black/50 border border-outline rounded-xl p-6">
+    36 │       <div className="grid grid-cols-3 gap-4">
+  > 37 │         {features.map((feature, index) => (
+       │                                 ^^^^^
+    38 │           <div key={index} className="text-center">
+    39 │             <div className="text-3xl md:text-4xl font-bold text-brand mb-1">{feature.value}</div>
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/product/fx/FXSoundPreviewGrid.tsx:70:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    68 │           const isPlaying = playingId === sound.id;
+    69 │           return (
+  > 70 │             <button
+       │             ^^^^^^^
+  > 71 │               key={sound.id}
+        ...
+  > 77 │               }`}
+  > 78 │             >
+       │             ^
+    79 │               {/* Play/Pause Icon */}
+    80 │               <div
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/product/fx/FXWhatsIncluded.tsx:64:25 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    62 │           <div className="space-y-2">
+    63 │             {compatibility.map((software, index) => (
+  > 64 │               <div key={index} className="flex items-center gap-2 text-sm">
+       │                         ^^^^^
+    65 │                 <Check size={14} className="text-brand" />
+    66 │                 <span className="text-secondary">{software}</span>
+  
+  i This is the source of the key value.
+  
+    62 │           <div className="space-y-2">
+  > 63 │             {compatibility.map((software, index) => (
+       │                                           ^^^^^
+    64 │               <div key={index} className="flex items-center gap-2 text-sm">
+    65 │                 <Check size={14} className="text-brand" />
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/product/fx/FXWhatsIncluded.tsx:80:22 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    78 │             {categories.map((category, index) => (
+    79 │               <span
+  > 80 │                 key={index}
+       │                      ^^^^^
+    81 │                 className="px-3 py-1.5 text-sm bg-elevated text-secondary rounded-full"
+    82 │               >
+  
+  i This is the source of the key value.
+  
+    76 │           <div className="text-foreground font-medium">Sound Categories</div>
+    77 │           <div className="flex flex-wrap gap-2">
+  > 78 │             {categories.map((category, index) => (
+       │                                        ^^^^^
+    79 │               <span
+    80 │                 key={index}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/search/CommandPalette.tsx:109:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    107 │     <>
+    108 │       {/* Trigger button for header */}
+  > 109 │       <button
+        │       ^^^^^^^
+  > 110 │         onClick={() => setIsOpen(true)}
+  > 111 │         className="command-palette-trigger"
+  > 112 │         aria-label="Search (⌘K)"
+  > 113 │       >
+        │       ^
+    114 │         <Search size={18} />
+    115 │         <span className="command-palette-hint">
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/search/CommandPalette.tsx:156:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    154 │                   className="command-palette-input"
+    155 │                 />
+  > 156 │                 <button onClick={() => setIsOpen(false)} className="command-palette-close">
+        │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    157 │                   <X size={18} />
+    158 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/search/CommandPalette.tsx:169:23 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    167 │                     </div>
+    168 │                     {results.map((result, index) => (
+  > 169 │                       <button
+        │                       ^^^^^^^
+  > 170 │                         key={result.id}
+  > 171 │                         className={`command-palette-item ${index === selectedIndex ? 'selected' : ''}`}
+  > 172 │                         onClick={() => handleSelect(result)}
+  > 173 │                         onMouseEnter={() => setSelectedIndex(index)}
+  > 174 │                       >
+        │                       ^
+    175 │                         <span className="command-palette-item-icon">{result.icon}</span>
+    176 │                         <span className="command-palette-item-title">{result.title}</span>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/DownloadDialog.tsx:104:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    102 │             Download Files
+    103 │           </h2>
+  > 104 │           <button onClick={onClose} className="text-muted hover:text-foreground transition-colors">
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    105 │             <X size={24} />
+    106 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/DownloadDialog.tsx:140:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    138 │             {/* Premium Download */}
+    139 │             {(userLicense === 'premium' || userLicense === 'universal') && (
+  > 140 │               <button
+        │               ^^^^^^^
+  > 141 │                 onClick={() =>
+         ...
+  > 148 │                 className="w-full flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-brand/20 to-brand/10 border-2 border-brand/50 hover:border-brand transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+  > 149 │               >
+        │               ^
+    150 │                 <div className="flex items-center gap-3">
+    151 │                   <div className="w-12 h-12 rounded-lg bg-brand/20 flex items-center justify-center">
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/DownloadDialog.tsx:177:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    176 │             {userLicense !== 'universal' && (
+  > 177 │               <button
+        │               ^^^^^^^
+  > 178 │                 onClick={() =>
+         ...
+  > 182 │                 className="w-full flex items-center justify-between p-4 rounded-lg bg-elevated border-2 border-outline hover:border-outline-hover transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+  > 183 │               >
+        │               ^
+    184 │                 <div className="flex items-center gap-3">
+    185 │                   <div className="w-12 h-12 rounded-lg bg-muted-bg flex items-center justify-center">
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/ExportDialog.tsx:172:15 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    170 │             {/* Format Selection */}
+    171 │             <div>
+  > 172 │               <label className="text-sm font-medium text-foreground mb-3 block">Format</label>
+        │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    173 │               <div className="flex gap-3">
+    174 │                 {(['wav', 'mp3'] as const).map((f) => (
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+app/components/studio/ExportDialog.tsx:198:15 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    196 │             {/* Quality Selection */}
+    197 │             <div>
+  > 198 │               <label className="text-sm font-medium text-foreground mb-3 block">Quality</label>
+        │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    199 │               <div className="flex gap-3">
+    200 │                 {(['low', 'medium', 'high'] as const).map((q) => (
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+app/components/studio/ExportDialog.tsx:219:17 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    217 │             <div className="flex items-center justify-between py-3 px-4 bg-elevated rounded-lg border border-outline">
+    218 │               <div>
+  > 219 │                 <label className="text-sm font-medium text-foreground">Normalize Audio</label>
+        │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    220 │                 <p className="text-xs text-muted mt-0.5">Optimize volume levels</p>
+    221 │               </div>
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+app/components/studio/ExportDialog.tsx:263:13 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    261 │         <div>
+    262 │           <div className="flex items-center justify-between mb-3">
+  > 263 │             <label className="text-sm font-medium text-foreground">
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 264 │               {isAudioTab ? 'Include Stems' : 'Include Tracks'}
+  > 265 │             </label>
+        │             ^^^^^^^^
+    266 │             <button
+    267 │               onClick={toggleAll}
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+app/components/studio/ExportDialog.tsx:141:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    139 │       <div className="px-8 pt-6">
+    140 │         <div className="flex gap-2 p-1 bg-elevated rounded-lg">
+  > 141 │           <button
+        │           ^^^^^^^
+  > 142 │             onClick={() => setExportType('audio')}
+         ...
+  > 147 │             }`}
+  > 148 │           >
+        │           ^
+    149 │             <Download size={16} className="inline mr-2 -mt-0.5" />
+    150 │             Audio Export
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/ExportDialog.tsx:152:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    150 │             Audio Export
+    151 │           </button>
+  > 152 │           <button
+        │           ^^^^^^^
+  > 153 │             onClick={() => setExportType('ableton')}
+         ...
+  > 158 │             }`}
+  > 159 │           >
+        │           ^
+    160 │             <Music size={16} className="inline mr-2 -mt-0.5" />
+    161 │             Ableton Live
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/ExportDialog.tsx:175:19 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    173 │               <div className="flex gap-3">
+    174 │                 {(['wav', 'mp3'] as const).map((f) => (
+  > 175 │                   <button
+        │                   ^^^^^^^
+  > 176 │                     key={f}
+         ...
+  > 182 │                     }`}
+  > 183 │                   >
+        │                   ^
+    184 │                     {f.toUpperCase()}
+    185 │                     {f === 'wav' && (
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/ExportDialog.tsx:201:19 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    199 │               <div className="flex gap-3">
+    200 │                 {(['low', 'medium', 'high'] as const).map((q) => (
+  > 201 │                   <button
+        │                   ^^^^^^^
+  > 202 │                     key={q}
+         ...
+  > 208 │                     }`}
+  > 209 │                   >
+        │                   ^
+    210 │                     {q.charAt(0).toUpperCase() + q.slice(1)}
+    211 │                   </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/ExportDialog.tsx:222:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    220 │                 <p className="text-xs text-muted mt-0.5">Optimize volume levels</p>
+    221 │               </div>
+  > 222 │               <button
+        │               ^^^^^^^
+  > 223 │                 onClick={() => setNormalize(!normalize)}
+  > 224 │                 className={`w-11 h-6 rounded-full transition-all relative ${
+  > 225 │                   normalize ? 'bg-brand' : 'bg-dim'
+  > 226 │                 }`}
+  > 227 │               >
+        │               ^
+    228 │                 <div
+    229 │                   className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/ExportDialog.tsx:266:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    264 │               {isAudioTab ? 'Include Stems' : 'Include Tracks'}
+    265 │             </label>
+  > 266 │             <button
+        │             ^^^^^^^
+  > 267 │               onClick={toggleAll}
+  > 268 │               className={`text-xs font-medium ${isAudioTab ? 'text-brand hover:text-brand-hover' : 'text-accent hover:brightness-110'}`}
+  > 269 │             >
+        │             ^
+    270 │               {selectedStems.size === state.stems.length ? 'Deselect All' : 'Select All'}
+    271 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/PlaybackControls.tsx:18:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    16 │     <div className="flex items-center gap-4">
+    17 │       {/* Stop Button */}
+  > 18 │       <button
+       │       ^^^^^^^
+  > 19 │         onClick={stop}
+        ...
+  > 27 │         title="Stop"
+  > 28 │       >
+       │       ^
+    29 │         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    30 │           <rect x="6" y="6" width="12" height="12" rx="1" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/PlaybackControls.tsx:35:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    34 │       {/* Play/Pause Button (Main - Styled like AudioPlayer) */}
+  > 35 │       <button
+       │       ^^^^^^^
+  > 36 │         onClick={togglePlayPause}
+        ...
+  > 44 │         title={state.isPlaying ? 'Pause' : 'Play'}
+  > 45 │       >
+       │       ^
+    46 │         {state.isPlaying ? (
+    47 │           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/ScrubZone.tsx:57:25 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━
+
+  ! getTimeFromMouseX changes on every re-render and should not be used as a hook dependency.
+  
+    55 │       window.removeEventListener('mouseup', handleMouseUp);
+    56 │     };
+  > 57 │   }, [isDragging, seek, getTimeFromMouseX]);
+       │                         ^^^^^^^^^^^^^^^^^
+    58 │ 
+    59 │   if (!state.allLoaded) return null;
+  
+  i To fix this, wrap the definition of getTimeFromMouseX in its own useCallback() hook.
+  
+
+app/components/studio/ScrubZone.tsx:83:20 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    81 │           {Array.from({ length: 10 }).map((_, i) => (
+    82 │             <div
+  > 83 │               key={i}
+       │                    ^
+    84 │               className="absolute top-0 bottom-0 w-px bg-outline"
+    85 │               style={{ left: `${(i + 1) * 10}%` }}
+  
+  i This is the source of the key value.
+  
+    79 │         {/* Subtle grid lines */}
+    80 │         <div className="absolute inset-0 opacity-20">
+  > 81 │           {Array.from({ length: 10 }).map((_, i) => (
+       │                                               ^
+    82 │             <div
+    83 │               key={i}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/studio/StemsLoadingAnimation.tsx:130:20 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    128 │           return (
+    129 │             <motion.div
+  > 130 │               key={i}
+        │                    ^
+    131 │               initial={{ height: 4, opacity: 0.15 }}
+    132 │               animate={
+  
+  i This is the source of the key value.
+  
+    122 │       {/* Waveform with pulse effect */}
+    123 │       <div className="flex-1 h-10 flex items-end justify-center gap-[2px] overflow-hidden rounded bg-white/[0.03] px-2">
+  > 124 │         {peaks.map((peak, i) => {
+        │                           ^
+    125 │           const isRevealed = stem.isLoaded;
+    126 │           const barHeight = Math.round(peak * 32); // max 32px
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/studio/StudioTrack.tsx:237:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    235 │             </p>
+    236 │           </div>
+  > 237 │           <button
+        │           ^^^^^^^
+  > 238 │             onClick={handleDownloadStem}
+  > 239 │             disabled={!state.allLoaded || state.isExporting}
+  > 240 │             className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded bg-elevated hover:bg-brand hover:text-brand-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+  > 241 │             title={`Download ${stem.name} (${stem.trimStart.toFixed(1)}s - ${stem.trimEnd.toFixed(1)}s)`}
+  > 242 │           >
+        │           ^
+    243 │             <Download size={14} />
+    244 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/StudioTrack.tsx:98:64 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━
+
+  ! getTimeFromMouseX changes on every re-render and should not be used as a hook dependency.
+  
+     96 │       window.removeEventListener('mouseup', handleMouseUp);
+     97 │     };
+   > 98 │   }, [isSelecting, setTimeSelection, clearTimeSelection, seek, getTimeFromMouseX]);
+        │                                                                ^^^^^^^^^^^^^^^^^
+     99 │ 
+    100 │   // Check if track is implicitly muted due to solo mode
+  
+  i To fix this, wrap the definition of getTimeFromMouseX in its own useCallback() hook.
+  
+
+app/components/studio/StudioTrack.tsx:211:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    210 │   return (
+  > 211 │     <div
+        │     ^^^^
+  > 212 │       className={`flex items-stretch border-b transition-all cursor-pointer ${
+         ...
+  > 217 │       onClick={handleTrackClick}
+  > 218 │     >
+        │     ^
+    219 │       {/* Track Controls - Fixed Left Panel */}
+    220 │       <div
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/components/studio/StudioTrack.tsx:249:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    247 │         {/* Solo & Mute Buttons */}
+    248 │         <div className="flex gap-1.5">
+  > 249 │           <button
+        │           ^^^^^^^
+  > 250 │             onClick={(e) => {
+         ...
+  > 260 │             } ${!state.allLoaded ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+  > 261 │           >
+        │           ^
+    262 │             S
+    263 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/StudioTrack.tsx:264:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    262 │             S
+    263 │           </button>
+  > 264 │           <button
+        │           ^^^^^^^
+  > 265 │             onClick={() => toggleMute(stem.id)}
+         ...
+  > 272 │             } ${!state.allLoaded ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+  > 273 │           >
+        │           ^
+    274 │             M
+    275 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/TransportBar.tsx:440:11 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    438 │               Ableton-style: drag down = zoom in, drag up = zoom out
+    439 │               ========================================== */}
+  > 440 │           <div
+        │           ^^^^
+  > 441 │             className={`absolute top-3 left-0 right-0 bottom-0 ${
+         ...
+  > 453 │             title="Click to seek, Drag up/down to zoom"
+  > 454 │           >
+        │           ^
+    455 │             {/* Time Markers */}
+    456 │             {state.allLoaded && (
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/components/studio/TransportBar.tsx:143:27 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━
+
+  ! handleLoopZoneMouseMove changes on every re-render and should not be used as a hook dependency.
+  
+    141 │       };
+    142 │     }
+  > 143 │   }, [isLoopZoneDragging, handleLoopZoneMouseMove, handleLoopZoneMouseUp]);
+        │                           ^^^^^^^^^^^^^^^^^^^^^^^
+    144 │ 
+    145 │   // ==========================================
+  
+  i To fix this, wrap the definition of handleLoopZoneMouseMove in its own useCallback() hook.
+  
+
+app/components/studio/TransportBar.tsx:143:52 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━
+
+  ! handleLoopZoneMouseUp changes on every re-render and should not be used as a hook dependency.
+  
+    141 │       };
+    142 │     }
+  > 143 │   }, [isLoopZoneDragging, handleLoopZoneMouseMove, handleLoopZoneMouseUp]);
+        │                                                    ^^^^^^^^^^^^^^^^^^^^^
+    144 │ 
+    145 │   // ==========================================
+  
+  i To fix this, wrap the definition of handleLoopZoneMouseUp in its own useCallback() hook.
+  
+
+app/components/studio/TransportBar.tsx:219:70 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━
+
+  ! getTimeFromMouseEvent changes on every re-render and should not be used as a hook dependency.
+  
+    217 │       window.removeEventListener('mouseup', handleLoopMouseUp);
+    218 │     };
+  > 219 │   }, [loopDragType, loopRegion, state.masterDuration, setLoopRegion, getTimeFromMouseEvent]);
+        │                                                                      ^^^^^^^^^^^^^^^^^^^^^
+    220 │ 
+    221 │   const handleZoomIn = () => {
+  
+  i To fix this, wrap the definition of getTimeFromMouseEvent in its own useCallback() hook.
+  
+
+app/components/studio/TransportBar.tsx:322:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    320 │             {Math.round((zoomLevel || 1) * 100)}%
+    321 │           </span>
+  > 322 │           <button
+        │           ^^^^^^^
+  > 323 │             onClick={handleZoomOut}
+  > 324 │             disabled={(zoomLevel || 1) <= 0.5}
+  > 325 │             className="w-6 h-6 flex items-center justify-center rounded bg-elevated hover:bg-muted-bg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+  > 326 │             title="Zoom Out (-)"
+  > 327 │           >
+        │           ^
+    328 │             <ZoomOut size={12} className="text-secondary" />
+    329 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/TransportBar.tsx:330:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    328 │             <ZoomOut size={12} className="text-secondary" />
+    329 │           </button>
+  > 330 │           <button
+        │           ^^^^^^^
+  > 331 │             onClick={handleZoomIn}
+  > 332 │             disabled={(zoomLevel || 1) >= 4}
+  > 333 │             className="w-6 h-6 flex items-center justify-center rounded bg-elevated hover:bg-muted-bg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+  > 334 │             title="Zoom In (+)"
+  > 335 │           >
+        │           ^
+    336 │             <ZoomIn size={12} className="text-secondary" />
+    337 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/TransportBar.tsx:343:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    342 │           {/* Loop Switch (Ableton-style) */}
+  > 343 │           <button
+        │           ^^^^^^^
+  > 344 │             onClick={toggleLoopEnabled}
+         ...
+  > 351 │             title={`Loop ${loopEnabled ? 'ON' : 'OFF'} (L)`}
+  > 352 │           >
+        │           ^
+    353 │             <Repeat size={12} />
+    354 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/TransportBar.tsx:475:30 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    473 │                     return (
+    474 │                       <div
+  > 475 │                         key={i}
+        │                              ^
+    476 │                         className={`absolute bottom-0 flex flex-col pointer-events-none ${
+    477 │                           isFirst ? 'items-start' : isLast ? 'items-end' : 'items-center'
+  
+  i This is the source of the key value.
+  
+    457 │               <div className="absolute inset-0 flex items-end pb-1 overflow-hidden">
+    458 │                 {Array.from({ length: Math.floor(state.masterDuration / timeInterval) + 1 }).map(
+  > 459 │                   (_, i, arr) => {
+        │                       ^
+    460 │                     const time = i * timeInterval;
+    461 │                     const position = (time / state.masterDuration) * 100;
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/studio/VideoPlayer.tsx:162:7 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    160 │     <div className="w-full bg-background rounded-lg overflow-hidden border border-outline">
+    161 │       {/* Video Player */}
+  > 162 │       <div
+        │       ^^^^
+  > 163 │         className="relative aspect-video bg-black cursor-pointer group"
+  > 164 │         onClick={isYouTubeEmbed ? undefined : handleVideoClick}
+  > 165 │       >
+        │       ^
+    166 │         {isYouTubeEmbed ? (
+    167 │           <iframe
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/components/studio/VideoPlayer.tsx:219:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    217 │             <div className="flex items-center gap-3">
+    218 │               {/* Play/Pause Button - Controls only video */}
+  > 219 │               <button
+        │               ^^^^^^^
+  > 220 │                 onClick={() => {
+         ...
+  > 230 │                 title={isVideoPlaying ? 'Pause video' : 'Play video'}
+  > 231 │               >
+        │               ^
+    232 │                 {isVideoPlaying ? (
+    233 │                   <Pause size={18} className="text-foreground fill-foreground" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/VideoPlayer.tsx:276:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    275 │               {/* Volume Control */}
+  > 276 │               <button
+        │               ^^^^^^^
+  > 277 │                 onClick={() => {
+         ...
+  > 286 │                 title={isVideoMuted ? 'Unmute' : 'Mute'}
+  > 287 │               >
+        │               ^
+    288 │                 {isVideoMuted ? (
+    289 │                   <VolumeX size={18} className="text-muted" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/VideoPlayer.tsx:313:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    312 │               {/* Picture-in-Picture Button */}
+  > 313 │               <button
+        │               ^^^^^^^
+  > 314 │                 onClick={togglePictureInPicture}
+  > 315 │                 className="p-1.5 rounded hover:bg-muted-bg transition-colors"
+  > 316 │                 title="Picture-in-Picture"
+  > 317 │               >
+        │               ^
+    318 │                 <PictureInPicture
+    319 │                   size={18}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/VideoPlayer.tsx:325:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    324 │               {/* Fullscreen Button */}
+  > 325 │               <button
+        │               ^^^^^^^
+  > 326 │                 onClick={toggleFullscreen}
+  > 327 │                 className="p-1.5 rounded hover:bg-muted-bg transition-colors"
+  > 328 │                 title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+  > 329 │               >
+        │               ^
+    330 │                 {isFullscreen ? (
+    331 │                   <Minimize size={18} className="text-foreground" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/VideoPlayer.tsx:372:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    370 │         </div>
+    371 │ 
+  > 372 │         <button
+        │         ^^^^^^^
+  > 373 │           onClick={onRemove}
+  > 374 │           className="flex items-center gap-2 px-3 py-1.5 rounded bg-elevated text-red-500 hover:bg-red-500 hover:text-foreground transition-colors text-sm font-medium"
+  > 375 │           title="Remove video"
+  > 376 │         >
+        │         ^
+    377 │           <X size={16} />
+    378 │           <span>Remove</span>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/studio/VideoUploadZone.tsx:98:7 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+     96 │       />
+     97 │ 
+   > 98 │       <div
+        │       ^^^^
+   > 99 │         onClick={handleClick}
+         ...
+  > 111 │         `}
+  > 112 │       >
+        │       ^
+    113 │         {isUploading ? (
+    114 │           <div className="space-y-4">
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/components/studio/VideoUploadZone.tsx:198:31 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    197 │               // Store embed URL in a custom property
+  > 198 │               (youtubeFile as any).embedUrl = embedUrl;
+        │                               ^^^
+    199 │               (youtubeFile as any).isYouTube = true;
+    200 │               (youtubeFile as any).youtubeId = videoId;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/components/studio/VideoUploadZone.tsx:199:31 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    197 │               // Store embed URL in a custom property
+    198 │               (youtubeFile as any).embedUrl = embedUrl;
+  > 199 │               (youtubeFile as any).isYouTube = true;
+        │                               ^^^
+    200 │               (youtubeFile as any).youtubeId = videoId;
+    201 │ 
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/components/studio/VideoUploadZone.tsx:200:31 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    198 │               (youtubeFile as any).embedUrl = embedUrl;
+    199 │               (youtubeFile as any).isYouTube = true;
+  > 200 │               (youtubeFile as any).youtubeId = videoId;
+        │                               ^^^
+    201 │ 
+    202 │               setError(null);
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/components/studio/VideoUploadZone.tsx:174:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    173 │           {/* Load from YouTube Button */}
+  > 174 │           <button
+        │           ^^^^^^^
+  > 175 │             onClick={() => {
+         ...
+  > 205 │             className="w-full px-4 py-2.5 bg-brand hover:bg-brand-hover text-brand-foreground rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+  > 206 │           >
+        │           ^
+    207 │             <LinkIcon size={16} />
+    208 │             <span>Load YouTube Video</span>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/ui/EmptyState.tsx:68:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    66 │             </Link>
+    67 │           ) : (
+  > 68 │             <button
+       │             ^^^^^^^
+  > 69 │               onClick={onAction}
+  > 70 │               className="inline-flex items-center justify-center px-6 py-3 bg-brand text-background rounded-lg font-medium hover:bg-brand/90 transition-colors cursor-pointer"
+  > 71 │             >
+       │             ^
+    72 │               {actionLabel}
+    73 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/ui/EmptyState.tsx:86:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    84 │             </Link>
+    85 │           ) : (
+  > 86 │             <button
+       │             ^^^^^^^
+  > 87 │               onClick={onSecondaryAction}
+  > 88 │               className="inline-flex items-center justify-center px-6 py-3 bg-elevated text-foreground rounded-lg font-medium hover:bg-outline transition-colors border border-outline cursor-pointer"
+  > 89 │             >
+       │             ^
+    90 │               {secondaryActionLabel}
+    91 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/ui/MobileWarning.tsx:54:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    52 │           {/* Close button */}
+    53 │           {dismissible && (
+  > 54 │             <button
+       │             ^^^^^^^
+  > 55 │               onClick={handleDismiss}
+  > 56 │               className="absolute top-3 right-3 p-2 text-dim hover:text-foreground transition-colors cursor-pointer"
+  > 57 │               aria-label="Dismiss"
+  > 58 │             >
+       │             ^
+    59 │               <X size={18} />
+    60 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/ui/Modal.tsx:96:7 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+     95 │     const modalContent = (
+   > 96 │       <div
+        │       ^^^^
+   > 97 │         data-lenis-prevent
+         ...
+  > 103 │         aria-labelledby={ariaLabelledby}
+  > 104 │       >
+        │       ^
+    105 │         <div
+    106 │           ref={modalRef}
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/components/ui/Modal.tsx:105:9 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    103 │         aria-labelledby={ariaLabelledby}
+    104 │       >
+  > 105 │         <div
+        │         ^^^^
+  > 106 │           ref={modalRef}
+         ...
+  > 117 │           onClick={(e) => e.stopPropagation()}
+  > 118 │         >
+        │         ^
+    119 │           {showCloseButton && (
+    120 │             <button
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/components/ui/Modal.tsx:120:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    118 │         >
+    119 │           {showCloseButton && (
+  > 120 │             <button
+        │             ^^^^^^^
+  > 121 │               onClick={onClose}
+  > 122 │               className="absolute top-4 right-4 text-muted hover:text-foreground transition-colors z-10 cursor-pointer"
+  > 123 │               aria-label="Close"
+  > 124 │             >
+        │             ^
+    125 │               <X size={24} />
+    126 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/ui/Modal.tsx:294:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    293 │         <div className="flex gap-3">
+  > 294 │           <button
+        │           ^^^^^^^
+  > 295 │             onClick={onCancel}
+  > 296 │             disabled={isLoading}
+  > 297 │             className="flex-1 px-5 py-3 bg-transparent border border-outline text-muted font-medium rounded-lg hover:border-outline-hover hover:text-foreground transition-all cursor-pointer disabled:opacity-50"
+  > 298 │           >
+        │           ^
+    299 │             {cancelText}
+    300 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/ui/Modal.tsx:301:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    299 │             {cancelText}
+    300 │           </button>
+  > 301 │           <button
+        │           ^^^^^^^
+  > 302 │             onClick={onConfirm}
+         ...
+  > 309 │             ].join(' ')}
+  > 310 │           >
+        │           ^
+    311 │             {isLoading ? (
+    312 │               <>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/ui/Toast.tsx:86:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    85 │       {/* Close button */}
+  > 86 │       <button
+       │       ^^^^^^^
+  > 87 │         onClick={() => onRemove(toast.id)}
+  > 88 │         className="flex-shrink-0 p-1.5 hover:bg-muted-bg rounded-lg transition-colors cursor-pointer text-muted hover:text-foreground"
+  > 89 │         aria-label="Dismiss"
+  > 90 │       >
+       │       ^
+    91 │         <X size={16} />
+    92 │       </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/contexts/StemsContext.tsx:255:32 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback passed to forEach() iterable method should not return a value.
+  
+    253 │     // Pause if playing
+    254 │     if (wasPlaying) {
+  > 255 │       audioElementsRef.current.forEach((audio) => audio.pause());
+        │                                ^^^^^^^
+    256 │     }
+    257 │ 
+  
+  i Either remove this return or remove the returned value.
+  
+    253 │     // Pause if playing
+    254 │     if (wasPlaying) {
+  > 255 │       audioElementsRef.current.forEach((audio) => audio.pause());
+        │                                                   ^^^^^^^^^^^^^
+    256 │     }
+    257 │ 
+  
+
+app/contexts/StemsContext.tsx:173:32 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback passed to forEach() iterable method should not return a value.
+  
+    171 │     if (state.isPlaying) {
+    172 │       // Pause all
+  > 173 │       audioElementsRef.current.forEach((audio) => audio.pause());
+        │                                ^^^^^^^
+    174 │       setState((prev) => ({ ...prev, isPlaying: false }));
+    175 │     } else {
+  
+  i Either remove this return or remove the returned value.
+  
+    171 │     if (state.isPlaying) {
+    172 │       // Pause all
+  > 173 │       audioElementsRef.current.forEach((audio) => audio.pause());
+        │                                                   ^^^^^^^^^^^^^
+    174 │       setState((prev) => ({ ...prev, isPlaying: false }));
+    175 │     } else {
+  
+
+app/contexts/StudioContext.tsx:468:35 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    466 │       if (isYouTube) {
+    467 │         // Handle YouTube embed - no heavy processing needed
+  > 468 │         const embedUrl = (file as any).embedUrl;
+        │                                   ^^^
+    469 │         const youtubeId = (file as any).youtubeId;
+    470 │ 
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:1009:7 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    1007 │       return { ...prev, stems: newStems, hasUnsavedChanges: true };
+    1008 │     });
+  > 1009 │   }, [shouldStemBeAudible]);
+         │       ^^^^^^^^^^^^^^^^^^^
+    1010 │ 
+    1011 │   // ==========================================
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/contexts/StudioContext.tsx:260:67 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    258 │     try {
+    259 │       debug.log('🎛� Creating AudioContext...');
+  > 260 │       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        │                                                                   ^^^
+    261 │       const ctx = new AudioContextClass();
+    262 │       audioContextRef.current = ctx;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:432:32 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    430 │   const loadVideo = useCallback(async (file: File) => {
+    431 │     // Check if it's a YouTube embed
+  > 432 │     const isYouTube = (file as any).isYouTube;
+        │                                ^^^
+    433 │ 
+    434 │     if (!isYouTube) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:448:35 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    447 │     // Use requestIdleCallback for non-critical state update if available
+  > 448 │     const updateState = (updater: any) => {
+        │                                   ^^^
+    449 │       if ('requestIdleCallback' in window) {
+    450 │         requestIdleCallback(() => setState(updater), { timeout: 100 });
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:456:24 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    454 │     };
+    455 │ 
+  > 456 │     updateState((prev: any) => ({
+        │                        ^^^
+    457 │       ...prev,
+    458 │       video: {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:469:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    467 │         // Handle YouTube embed - no heavy processing needed
+    468 │         const embedUrl = (file as any).embedUrl;
+  > 469 │         const youtubeId = (file as any).youtubeId;
+        │                                    ^^^
+    470 │ 
+    471 │         setState((prev) => ({
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:1624:35 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━
+
+  ! This callback passed to forEach() iterable method should not return a value.
+  
+    1622 │           if (!modKey && state.selectedStemIds.size > 0) {
+    1623 │             e.preventDefault();
+  > 1624 │             state.selectedStemIds.forEach((stemId) => toggleMute(stemId));
+         │                                   ^^^^^^^
+    1625 │           }
+    1626 │           break;
+  
+  i Either remove this return or remove the returned value.
+  
+    1622 │           if (!modKey && state.selectedStemIds.size > 0) {
+    1623 │             e.preventDefault();
+  > 1624 │             state.selectedStemIds.forEach((stemId) => toggleMute(stemId));
+         │                                                       ^^^^^^^^^^^^^^^^^^
+    1625 │           }
+    1626 │           break;
+  
+
+app/contexts/StudioContext.tsx:742:26 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    740 │       }
+    741 │     });
+  > 742 │   }, [startTimeTracking, shouldStemBeAudible]);
+        │                          ^^^^^^^^^^^^^^^^^^^
+    743 │ 
+    744 │   // Restart audio at a specific position (used for loop restart)
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/contexts/StudioContext.tsx:799:6 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    797 │       });
+    798 │     },
+  > 799 │     [shouldStemBeAudible],
+        │      ^^^^^^^^^^^^^^^^^^^
+    800 │   );
+    801 │ 
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/contexts/StudioContext.tsx:902:6 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    900 │       });
+    901 │     },
+  > 902 │     [shouldStemBeAudible],
+        │      ^^^^^^^^^^^^^^^^^^^
+    903 │   );
+    904 │ 
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/contexts/StudioContext.tsx:968:6 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    966 │       });
+    967 │     },
+  > 968 │     [shouldStemBeAudible],
+        │      ^^^^^^^^^^^^^^^^^^^
+    969 │   );
+    970 │ 
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/contexts/StudioContext.tsx:1206:19 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    1204 │       }
+    1205 │     },
+  > 1206 │     [state.stems, shouldStemBeAudible],
+         │                   ^^^^^^^^^^^^^^^^^^^
+    1207 │   );
+    1208 │ 
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/root.tsx:54:15 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    52 │           <>
+    53 │             <script
+  > 54 │               dangerouslySetInnerHTML={{
+       │               ^^^^^^^^^^^^^^^^^^^^^^^
+    55 │                 __html: `
+    56 │                   window.dataLayer = window.dataLayer || [];
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/root.tsx:81:15 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    79 │             />
+    80 │             <script
+  > 81 │               dangerouslySetInnerHTML={{
+       │               ^^^^^^^^^^^^^^^^^^^^^^^
+    82 │                 __html: `
+    83 │                   gtag('js', new Date());
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/root.tsx:95:13 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    93 │         {FB_PIXEL_ID && (
+    94 │           <script
+  > 95 │             dangerouslySetInnerHTML={{
+       │             ^^^^^^^^^^^^^^^^^^^^^^^
+    96 │               __html: `
+    97 │                 !function(f,b,e,v,n,t,s)
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/routes/$.tsx:80:18 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    78 │         {[...Array(5)].map((_, i) => (
+    79 │           <motion.div
+  > 80 │             key={i}
+       │                  ^
+    81 │             className="wave-bar"
+    82 │             animate={{
+  
+  i This is the source of the key value.
+  
+    76 │       {/* Floating sound wave decoration */}
+    77 │       <div className="not-found-waves">
+  > 78 │         {[...Array(5)].map((_, i) => (
+       │                                ^
+    79 │           <motion.div
+    80 │             key={i}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/account.downloads.tsx:204:42 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    202 │           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    203 │             {Array.from({ length: 6 }).map((_, i) => (
+  > 204 │               <DownloadCardSkeleton key={i} />
+        │                                          ^
+    205 │             ))}
+    206 │           </div>
+  
+  i This is the source of the key value.
+  
+    201 │           </div>
+    202 │           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+  > 203 │             {Array.from({ length: 6 }).map((_, i) => (
+        │                                                ^
+    204 │               <DownloadCardSkeleton key={i} />
+    205 │             ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/account.downloads.tsx:256:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    254 │         <div className="flex items-center gap-2 mb-8 border-b border-outline pb-4 overflow-x-auto">
+    255 │           {tabs.map((tab) => (
+  > 256 │             <button
+        │             ^^^^^^^
+  > 257 │               key={tab.id}
+         ...
+  > 263 │               }`}
+  > 264 │             >
+        │             ^
+    265 │               {tab.label} ({tab.count})
+    266 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/account.orders.tsx:59:7 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    57 │   return (
+    58 │     <div className="bg-elevated border border-outline rounded-lg overflow-hidden">
+  > 59 │       <div
+       │       ^^^^
+  > 60 │         onClick={() => setIsExpanded(!isExpanded)}
+  > 61 │         className="p-4 md:p-6 cursor-pointer hover:bg-surface/50 transition-colors"
+  > 62 │       >
+       │       ^
+    63 │         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    64 │           <div className="flex items-start gap-4">
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/routes/account.orders.tsx:188:25 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    186 │           <div className="space-y-4">
+    187 │             {Array.from({ length: 3 }).map((_, i) => (
+  > 188 │               <div key={i} className="skeleton-shimmer h-32 rounded-lg" />
+        │                         ^
+    189 │             ))}
+    190 │           </div>
+  
+  i This is the source of the key value.
+  
+    185 │           </div>
+    186 │           <div className="space-y-4">
+  > 187 │             {Array.from({ length: 3 }).map((_, i) => (
+        │                                                ^
+    188 │               <div key={i} className="skeleton-shimmer h-32 rounded-lg" />
+    189 │             ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/account.reset.$id.$token.tsx:12:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━
+
+  ! This variable signIn is unused.
+  
+    10 │   const { id, token } = useParams();
+    11 │   const navigate = useNavigate();
+  > 12 │   const { signIn, openModal } = useAuth();
+       │           ^^^^^^
+    13 │ 
+    14 │   const [password, setPassword] = useState('');
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+app/routes/account.reset.$id.$token.tsx:99:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+     97 │               <p className="text-error-light text-sm leading-relaxed mb-3">{errors.general}</p>
+     98 │               {errors.general.includes('invalid') || errors.general.includes('expired') ? (
+   > 99 │                 <button
+        │                 ^^^^^^^
+  > 100 │                   onClick={handleRequestNewLink}
+  > 101 │                   className="text-foreground text-sm font-semibold hover:underline"
+  > 102 │                 >
+        │                 ^
+    103 │                   Request a new reset link →
+    104 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/account.tsx:228:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    226 │       {/* Change Password Link */}
+    227 │       {canChangePassword && (
+  > 228 │         <button
+        │         ^^^^^^^
+  > 229 │           onClick={() => setIsPasswordModalOpen(true)}
+  > 230 │           className="text-brand/80 hover:text-brand underline underline-offset-4 text-sm transition-colors"
+  > 231 │         >
+        │         ^
+    232 │           Click to change password
+    233 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/account.tsx:211:11 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    209 │           </div>
+    210 │         ) : (
+  > 211 │           <p
+        │           ^^
+  > 212 │             onClick={handleNameClick}
+  > 213 │             className="text-foreground text-lg cursor-pointer hover:text-brand transition-colors"
+  > 214 │           >
+        │           ^
+    215 │             {user?.name || 'Click to add name'}
+    216 │           </p>
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/routes/account.tsx:324:13 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    322 │           {/* Current Password */}
+    323 │           <div>
+  > 324 │             <label className="block text-sm text-muted mb-2">Current Password</label>
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    325 │             <div className="relative">
+    326 │               <input
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+app/routes/account.tsx:344:13 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    342 │           {/* New Password */}
+    343 │           <div>
+  > 344 │             <label className="block text-sm text-muted mb-2">New Password</label>
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    345 │             <div className="relative">
+    346 │               <input
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+app/routes/account.tsx:365:13 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    363 │           {/* Confirm Password */}
+    364 │           <div>
+  > 365 │             <label className="block text-sm text-muted mb-2">Confirm New Password</label>
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    366 │             <div className="relative">
+    367 │               <input
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+app/routes/account.tsx:195:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    193 │               className="bg-transparent text-foreground text-lg border-b border-brand/50 focus:border-brand outline-none py-1 w-40"
+    194 │             />
+  > 195 │             <button
+        │             ^^^^^^^
+  > 196 │               onClick={handleNameSave}
+  > 197 │               disabled={nameSaving}
+  > 198 │               className="p-1.5 text-brand hover:bg-brand/10 rounded transition-colors"
+  > 199 │             >
+        │             ^
+    200 │               <Check className="w-5 h-5" />
+    201 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/account.tsx:202:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    200 │               <Check className="w-5 h-5" />
+    201 │             </button>
+  > 202 │             <button
+        │             ^^^^^^^
+  > 203 │               onClick={handleNameCancel}
+  > 204 │               disabled={nameSaving}
+  > 205 │               className="p-1.5 text-muted hover:bg-elevated rounded transition-colors"
+  > 206 │             >
+        │             ^
+    207 │               <X className="w-5 h-5" />
+    208 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/cart.tsx:74:49 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    72 │     >
+    73 │       <div className="flex gap-6">
+  > 74 │         <ImageWrapper {...(imageWrapperProps as any)}>
+       │                                                 ^^^
+    75 │           {imageUrl ? (
+    76 │             <img src={imageUrl} alt={productTitle} className="w-full h-full object-cover" />
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/routes/cart.tsx:111:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    109 │             {canChangeQuantity && (
+    110 │               <div className="flex items-center gap-2">
+  > 111 │                 <button
+        │                 ^^^^^^^
+  > 112 │                   onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+  > 113 │                   disabled={isUpdating || item.quantity <= 1}
+  > 114 │                   className="p-1.5 rounded-md bg-elevated border border-outline hover:border-brand hover:text-brand transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+  > 115 │                   aria-label="Decrease quantity"
+  > 116 │                 >
+        │                 ^
+    117 │                   <Minus className="w-4 h-4" />
+    118 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/cart.tsx:120:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    118 │                 </button>
+    119 │                 <span className="w-8 text-center text-foreground font-medium">{item.quantity}</span>
+  > 120 │                 <button
+        │                 ^^^^^^^
+  > 121 │                   onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+  > 122 │                   disabled={isUpdating}
+  > 123 │                   className="p-1.5 rounded-md bg-elevated border border-outline hover:border-brand hover:text-brand transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+  > 124 │                   aria-label="Increase quantity"
+  > 125 │                 >
+        │                 ^
+    126 │                   <Plus className="w-4 h-4" />
+    127 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/cart.tsx:133:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    131 │         </div>
+    132 │ 
+  > 133 │         <button
+        │         ^^^^^^^
+  > 134 │           onClick={() => onRemove(item.id)}
+  > 135 │           disabled={isRemoving}
+  > 136 │           className="shrink-0 p-2 h-fit text-muted hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+  > 137 │           aria-label="Remove item"
+  > 138 │         >
+        │         ^
+    139 │           {isRemoving ? (
+    140 │             <Loader2 className="w-5 h-5 animate-spin" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/cart.tsx:260:9 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    258 │       <div className="flex items-center gap-2">
+    259 │         <span className="text-sm font-medium text-brand">{value}</span>
+  > 260 │         <button
+        │         ^^^^^^^
+  > 261 │           onClick={onRemove}
+  > 262 │           disabled={isLoading}
+  > 263 │           className="p-1 text-muted hover:text-foreground transition-colors disabled:opacity-50"
+  > 264 │         >
+        │         ^
+    265 │           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+    266 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/checkout.success.tsx:125:40 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    123 │               <SuccessRing />
+    124 │               {PARTICLES.map((p, i) => (
+  > 125 │                 <FloatingParticle key={i} {...p} />
+        │                                        ^
+    126 │               ))}
+    127 │             </div>
+  
+  i This is the source of the key value.
+  
+    122 │             <div className="relative mb-10 flex justify-center">
+    123 │               <SuccessRing />
+  > 124 │               {PARTICLES.map((p, i) => (
+        │                                  ^
+    125 │                 <FloatingParticle key={i} {...p} />
+    126 │               ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/checkout.success.tsx:160:32 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    158 │                       {STEPS.map((step, index) => (
+    159 │                         <motion.li
+  > 160 │                           key={index}
+        │                                ^^^^^
+    161 │                           className="flex items-start gap-3"
+    162 │                           initial={{ opacity: 0, x: -10 }}
+  
+  i This is the source of the key value.
+  
+    156 │                     <h2 className="font-medium text-foreground mb-4">What happens next</h2>
+    157 │                     <ul className="text-muted space-y-3 text-sm">
+  > 158 │                       {STEPS.map((step, index) => (
+        │                                         ^^^^^
+    159 │                         <motion.li
+    160 │                           key={index}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/cookies.tsx:257:22 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    255 │         <tbody className="divide-y divide-outline">
+    256 │           {cookies.map((cookie, i) => (
+  > 257 │             <tr key={i} className="bg-surface">
+        │                      ^
+    258 │               <td className="px-4 py-3 text-muted font-mono text-xs">{cookie.name}</td>
+    259 │               <td className="px-4 py-3 text-muted">{cookie.provider}</td>
+  
+  i This is the source of the key value.
+  
+    254 │         </thead>
+    255 │         <tbody className="divide-y divide-outline">
+  > 256 │           {cookies.map((cookie, i) => (
+        │                                 ^
+    257 │             <tr key={i} className="bg-surface">
+    258 │               <td className="px-4 py-3 text-muted font-mono text-xs">{cookie.name}</td>
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/faq.tsx:199:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    197 │   return (
+    198 │     <div className="border border-outline rounded-lg overflow-hidden">
+  > 199 │       <button
+        │       ^^^^^^^
+  > 200 │         onClick={() => setIsOpen(!isOpen)}
+  > 201 │         className="w-full flex items-center justify-between p-5 text-left bg-surface hover:bg-elevated transition-colors cursor-pointer"
+  > 202 │       >
+        │       ^
+    203 │         <span className="font-medium text-foreground pr-4">{item.question}</span>
+    204 │         <ChevronDown
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/faq.tsx:187:30 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    185 │       <div className="space-y-3">
+    186 │         {category.items.map((item, index) => (
+  > 187 │           <FAQAccordion key={index} item={item} />
+        │                              ^^^^^
+    188 │         ))}
+    189 │       </div>
+  
+  i This is the source of the key value.
+  
+    184 │       </h2>
+    185 │       <div className="space-y-3">
+  > 186 │         {category.items.map((item, index) => (
+        │                                    ^^^^^
+    187 │           <FAQAccordion key={index} item={item} />
+    188 │         ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/free-downloads.tsx:282:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    280 │               </div>
+    281 │             ) : (
+  > 282 │               <button
+        │               ^^^^^^^
+  > 283 │                 onClick={() => setIsExpanded(!isExpanded)}
+  > 284 │                 className="px-6 py-3 bg-brand hover:bg-brand/90 text-background font-medium rounded-full transition-colors flex items-center gap-2 cursor-pointer"
+  > 285 │               >
+        │               ^
+    286 │                 <Download size={18} />
+    287 │                 <span>Download</span>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/gift-cards.tsx:74:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    72 │   return (
+    73 │     <div className="border-b border-outline">
+  > 74 │       <button
+       │       ^^^^^^^
+  > 75 │         onClick={() => setIsOpen(!isOpen)}
+  > 76 │         className="flex w-full items-center justify-between py-5 text-left cursor-pointer"
+  > 77 │       >
+       │       ^
+    78 │         <span className="font-medium text-foreground">{question}</span>
+    79 │         <ChevronDown
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/gift-cards.tsx:285:19 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    283 │               <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+    284 │                 {variants.map((variant, index) => (
+  > 285 │                   <button
+        │                   ^^^^^^^
+  > 286 │                     key={variant.id || index}
+         ...
+  > 293 │                     }`}
+  > 294 │                   >
+        │                   ^
+    295 │                     <div className="text-2xl font-bold text-foreground mb-1">${variant.amount}</div>
+    296 │                     <div className="text-xs text-muted">{variant.description}</div>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/gift-cards.tsx:420:33 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    418 │               <div className="border-t border-outline">
+    419 │                 {FAQ_ITEMS.map((item, index) => (
+  > 420 │                   <FAQItem key={index} question={item.question} answer={item.answer} />
+        │                                 ^^^^^
+    421 │                 ))}
+    422 │               </div>
+  
+  i This is the source of the key value.
+  
+    418 │               <div className="border-t border-outline">
+  > 419 │                 {FAQ_ITEMS.map((item, index) => (
+        │                                       ^^^^^
+    420 │                   <FAQItem key={index} question={item.question} answer={item.answer} />
+    421 │                 ))}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/routes/hire-us.tsx:194:15 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    192 │             {/* Project Type Selection */}
+    193 │             <div>
+  > 194 │               <label className="block text-foreground font-medium mb-4">
+        │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 195 │                 What type of project?
+  > 196 │               </label>
+        │               ^^^^^^^^
+    197 │               <div className="grid grid-cols-2 gap-3">
+    198 │                 {PROJECT_TYPES.map((type) => {
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+app/routes/recordings.$productId.tsx:60:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: reloadKey.
+  
+    58 │   const [reloadKey, setReloadKey] = useState(0);
+    59 │ 
+  > 60 │   useEffect(() => {
+       │   ^^^^^^^^^
+    61 │     if (!productId) {
+    62 │       setLoadState({ kind: 'not-found' });
+  
+  i This dependency can be removed from the list.
+  
+    82 │       cancelled = true;
+    83 │     };
+  > 84 │   }, [productId, user?.accessToken, reloadKey]);
+       │                                     ^^^^^^^^^
+    85 │ 
+    86 │   const requestStreamGrant = useCallback(
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    84 │ ··},·[productId,·user?.accessToken,·reloadKey]);
+       │                                   -----------   
+
+app/routes/scenes.$productId.tsx:40:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: retry.
+  
+    38 │     if (user?.accessToken) apiClient.setAccessToken(user.accessToken);
+    39 │   }, [user?.accessToken]);
+  > 40 │   useEffect(() => {
+       │   ^^^^^^^^^
+    41 │     let cancelled = false;
+    42 │     setCatalog(null);
+  
+  i This dependency can be removed from the list.
+  
+    72 │       cancelled = true;
+    73 │     };
+  > 74 │   }, [rawId, userId, retry]);
+       │                      ^^^^^
+    75 │   return (
+    76 │     <main className="min-h-screen bg-background">
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    74 │ ··},·[rawId,·userId,·retry]);
+       │                    -------   
+
+app/routes/store.tsx:264:23 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    263 │                     return (
+  > 264 │                       <button
+        │                       ^^^^^^^
+  > 265 │                         key={cat.value}
+         ...
+  > 271 │                         }`}
+  > 272 │                       >
+        │                       ^
+    273 │                         <span>{cat.label}</span>
+    274 │                         {isSelected && <Check size={16} />}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/store.tsx:223:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    221 │           <div className="md:hidden">
+    222 │             <div className="relative">
+  > 223 │               <button
+        │               ^^^^^^^
+  > 224 │                 onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+  > 225 │                 className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-foreground/5 border border-outline text-foreground cursor-pointer"
+  > 226 │               >
+        │               ^
+    227 │                 <span className="text-sm font-medium">
+    228 │                   {selectedCategories.length === 0
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/store.tsx:242:19 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    240 │                 <div className="absolute top-full left-0 right-0 mt-2 p-2 rounded-xl bg-surface border border-outline shadow-xl z-50">
+    241 │                   {/* All option */}
+  > 242 │                   <button
+        │                   ^^^^^^^
+  > 243 │                     onClick={() => {
+         ...
+  > 251 │                     }`}
+  > 252 │                   >
+        │                   ^
+    253 │                     <span>All Categories</span>
+    254 │                     {selectedCategories.length === 0 && <Check size={16} />}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/store.tsx:280:21 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    279 │                   <div className="mt-2 pt-2 border-t border-outline/50">
+  > 280 │                     <button
+        │                     ^^^^^^^
+  > 281 │                       onClick={() => setIsMobileFilterOpen(false)}
+  > 282 │                       className="w-full py-2 text-sm text-muted cursor-pointer"
+  > 283 │                     >
+        │                     ^
+    284 │                       Done
+    285 │                     </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/store.tsx:303:15 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    301 │             <div className="flex flex-wrap items-center justify-center gap-3">
+    302 │               {/* "All" button */}
+  > 303 │               <button
+        │               ^^^^^^^
+  > 304 │                 onClick={clearAllFilters}
+         ...
+  > 309 │                 }`}
+  > 310 │               >
+        │               ^
+    311 │                 All
+    312 │               </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/store.tsx:319:19 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    318 │                 return (
+  > 319 │                   <button
+        │                   ^^^^^^^
+  > 320 │                     key={cat.value}
+         ...
+  > 326 │                     }`}
+  > 327 │                   >
+        │                   ^
+    328 │                     {cat.label}
+    329 │                   </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:116:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    114 │             Keyboard Shortcuts
+    115 │           </h2>
+  > 116 │           <button onClick={onClose} className="text-muted hover:text-foreground transition-colors">
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    117 │             <X size={20} />
+    118 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:348:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    346 │             )}
+    347 │             <span className="text-muted text-xs truncate max-w-[120px]">{product.title}</span>
+  > 348 │             <button
+        │             ^^^^^^^
+  > 349 │               onClick={() => setIsExportOpen(true)}
+  > 350 │               disabled={!state.allLoaded}
+  > 351 │               className="p-1.5 rounded hover:bg-elevated text-muted hover:text-brand transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+  > 352 │               title="Export Mix"
+  > 353 │             >
+        │             ^
+    354 │               <Download size={14} />
+    355 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:356:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    354 │               <Download size={14} />
+    355 │             </button>
+  > 356 │             <button
+        │             ^^^^^^^
+  > 357 │               onClick={() => setIsShortcutsOpen(true)}
+  > 358 │               className="p-1.5 rounded hover:bg-elevated text-muted hover:text-foreground transition-colors"
+  > 359 │               title="Keyboard shortcuts (?)"
+  > 360 │             >
+        │             ^
+    361 │               <Keyboard size={14} />
+    362 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:103:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    102 │   return (
+  > 103 │     <div
+        │     ^^^^
+  > 104 │       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+  > 105 │       onClick={onClose}
+  > 106 │     >
+        │     ^
+    107 │       <div
+    108 │         className="bg-surface rounded-lg border border-outline shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/routes/studio.$productId.tsx:107:7 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    105 │       onClick={onClose}
+    106 │     >
+  > 107 │       <div
+        │       ^^^^
+  > 108 │         className="bg-surface rounded-lg border border-outline shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+  > 109 │         onClick={(e) => e.stopPropagation()}
+  > 110 │       >
+        │       ^
+    111 │         <div className="sticky top-0 bg-surface border-b border-outline px-6 py-4 flex items-center justify-between">
+    112 │           <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/routes/studio.$productId.tsx:374:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    372 │         {/* Video Sync Section - Collapsible */}
+    373 │         <div className="bg-surface border-b border-outline">
+  > 374 │           <button
+        │           ^^^^^^^
+  > 375 │             onClick={() => setVideoPanelExpanded(!state.videoPanelExpanded)}
+  > 376 │             className="w-full px-4 py-2 flex items-center justify-between hover:bg-background/50 transition-colors"
+  > 377 │           >
+        │           ^
+    378 │             <div className="flex items-center gap-2">
+    379 │               {state.videoPanelExpanded ? (
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:438:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    436 │                 <h2 className="text-2xl font-bold text-foreground mb-4">Access Error</h2>
+    437 │                 <p className="text-muted mb-6">{tokenError}</p>
+  > 438 │                 <button
+        │                 ^^^^^^^
+  > 439 │                   onClick={() => window.location.reload()}
+  > 440 │                   className="px-6 py-3 bg-brand text-foreground rounded-lg hover:bg-brand/90 transition-colors cursor-pointer"
+  > 441 │                 >
+        │                 ^
+    442 │                   Retry
+    443 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:469:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    467 │                   We couldn't load the audio stems for this track. Please try refreshing the page.
+    468 │                 </p>
+  > 469 │                 <button
+        │                 ^^^^^^^
+  > 470 │                   onClick={() => window.location.reload()}
+  > 471 │                   className="px-6 py-3 bg-brand text-foreground rounded-lg hover:bg-brand/90 transition-colors cursor-pointer"
+  > 472 │                 >
+        │                 ^
+    473 │                   Retry
+    474 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/support.tsx:84:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    82 │               />
+    83 │             </div>
+  > 84 │             <button
+       │             ^^^^^^^
+  > 85 │               onClick={handleCloseChat}
+  > 86 │               className="mt-6 w-full text-center text-muted hover:text-foreground transition-colors"
+  > 87 │             >
+       │             ^
+    88 │               Back to support options
+    89 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/support.tsx:93:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    91 │         ) : (
+    92 │           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  > 93 │             <button
+       │             ^^^^^^^
+  > 94 │               onClick={handleOpenChat}
+  > 95 │               className="group p-8 bg-surface border border-outline rounded-2xl text-left hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 transition-all"
+  > 96 │             >
+       │             ^
+    97 │               <div className="w-12 h-12 bg-brand/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand/20 transition-colors">
+    98 │                 <MessageCircle className="w-6 h-6 text-brand" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/utils/ableton-export.ts:36:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable projectName is unused.
+  
+    34 │  */
+    35 │ function generateALSXml(options: ExportOptions): string {
+  > 36 │   const { projectName, bpm, stems } = options;
+       │           ^^^^^^^^^^^
+    37 │ 
+    38 │   // Ableton uses a specific volume curve
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+Checked 448 files in 938ms. No fixes applied.
+Found 218 warnings.
+Found 1 info.

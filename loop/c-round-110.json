@@ -1,0 +1,133 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T13:37:52.5905069Z",
+  "round": 110,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R110-01",
+   "severity": "medium",
+   "preExisting": true,
+   "preExistingBasis": "argued by code path (frozen returnFloatingVideo never arms the round-110 ref); not browser-confirmed against the snapshot",
+   "steps": [
+    "Fresh incognito /studio-lab at 1440x900 (also 1280x720) -> Decline",
+    "Focus the Middle East option, ArrowDown (CZABA hero selected)",
+    "Mouse click library collapse (◀)",
+    "Mouse click video ⤢ (the library opens temporarily for the floating video)",
+    "Focus ◀ or the selected option",
+    "Press Escape",
+    "Press Enter"
+   ],
+   "expected": "Escape returns the video and re-collapses the library without leaving focus on BODY; the next Enter adds no clip.",
+   "actual": "After Escape the library is collapsed and activeElement is BODY; Enter adds a clip (0 -> 1, 'CZABA hero — საჯარო preview დაემატა მუსიკა ხაზზე 00:00.000-ზე'). Reproduced for ◀ and the option at 1440 and for ◀ at 1280. Same class as B-R108-LIB-FOCUS-LOSS (A's reviewer S5); outside D-29z75 scope.",
+   "evidence": "c-round-110/out/lf-video.json (s5-collapse-button, s5-option), c-round-110/out/reg.json (s5_1280), c-round-110/shots/s5-*.png"
+  }
+ ],
+ "passed": [
+  "LF-COLLAPSE",
+  "LF-EXPAND",
+  "LF-CLEAR",
+  "LF-MOUSE",
+  "LF-HOLD",
+  "LF-VIDEO-NEUTRAL",
+  "LF-SWEEP-NEG",
+  "R12-L2-ENTER-ADD",
+  "REG-LIB",
+  "FV-710",
+  "PX-NET",
+  "REG-HYD",
+  "G110-3",
+  "AN-REVIEW",
+  "T110-TARGETED",
+  "DOC-095",
+  "DOC-094-L4",
+  "SOURCE-UNCHANGED"
+ ],
+ "blocked": [
+  "G110-3 fake-Bearer sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "viewportsCovered": {
+  "HAZARD-CONTROL": [
+   "1280x720",
+   "1440x900"
+  ],
+  "LF-COLLAPSE": [
+   "1280x720",
+   "1440x900"
+  ],
+  "LF-EXPAND": [
+   "1280x720",
+   "1440x900"
+  ],
+  "LF-CLEAR": [
+   "1280x720",
+   "1440x900"
+  ],
+  "LF-MOUSE": [
+   "1280x720"
+  ],
+  "LF-HOLD": [
+   "1280x720"
+  ],
+  "LF-VIDEO-NEUTRAL": [
+   "1440x900"
+  ],
+  "FV-710": [
+   "1440x900"
+  ],
+  "LF-SWEEP-NEG": [
+   "1280x720",
+   "1440x900"
+  ],
+  "R12-L2-ENTER-ADD": [
+   "1280x720"
+  ],
+  "REG-LIB": [
+   "1280x720",
+   "1440x900"
+  ],
+  "G110-3": [
+   "1440x900"
+  ],
+  "C-R110-01": [
+   "1280x720",
+   "1440x900"
+  ]
+ },
+ "measurements": {
+  "hazardControl": "blur + Enter on BODY adds 1 clip at both viewports",
+  "lfHold": "Playwright keyboard.down emits 0 repeat keydowns; CDP autoRepeat: 10 repeats, 10 prevented, 1 click, 1 data-collapsed change for ◀ and ▶; control tree toggle: 11 clicks",
+  "regLib": "width 288->40->288 with 19 distinct per-frame widths; aside scrollLeft 0 in all frames; separator 288->304->288",
+  "tokenAnon": "401 with product/file params; 400 without params (validation)",
+  "mutations": "fail-before LF1,2,3,4,8,9,10,11 red; m1 LF1,2,3,4,9,10,11; m2 LF5b only; m4 LF8,LF9; controls 13/13",
+  "targeted": "13 files, 309 tests pass (scratch)"
+ },
+ "infraNotes": [
+  "G110-3 attempt 1: C's script threw 'Execution context was destroyed' during the home load (domcontentloaded); retried with a load wait: PASS. Both logs kept.",
+  "B's video-focus-probe.cjs listens to pageerror only; its 8 sessions are not counted in the 20-session PX-NET/REG-HYD totals.",
+  "Scratch c-round-110/mut/ (store copy + .vite-cache) is git-ignored by the loop .gitignore (loop/**/mut/); left in place."
+ ],
+ "ableton": {
+  "Library keyboard focus after toggle/search clear": "არ ეხება (no Ableton claim; CZABA a11y rule)"
+ },
+ "observations": [
+  "Reviewer S3 (Low, stale arm if the parent refuses without re-render) is not reachable with the current parent; no browser repro; left with B.",
+  "Pan reset mouse click keeps focus on the pan slider (deferred Low A-R108-SWEEP-HITS, recorded only).",
+  "For B acceptance text: anonymous /api/studio-token without product/file returns 400 (parameter validation precedes auth); the 401 criterion holds only with valid parameters (e.g. ?product=middle-east&file=stem1.wav, as in round 109)."
+ ]
+}

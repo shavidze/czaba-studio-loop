@@ -1,10 +1,10 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 109 PASS (browserVerified=true, realVerified=true) and gate 109 published 1fe3ba2: C-R23-01, C-R38-01 and GATE108-S4 are done (PROD-SSR-NUL stays a gate row). Open Mediums still block T12: B-R108-LIB-FOCUS-LOSS (B re-probed in real Chromium at 1fe3ba2: reproduced on all three buttons) and the cloud measurement set (C-R27-01, C-R6-02, C-R8-01, A-R38-REVIEW-TOUCH). The regression round is not due today (regression-last 2026-10-21, today 2026-10-23); the next B planning on/after 2026-10-24 is the regression round. Nothing external blocks round 110. Video-dock sweep hit not reproduced (B probe; C confirms in LF-SWEEP-NEG). Advisor available and used.",
- "nextTask": "Round 110 (D-29z75): library collapse/expand/search-clear keep keyboard focus (B-R108-LIB-FOCUS-LOSS, Medium). ArrangementLibrary.tsx (narrow): F1 collapse<->expand handoff after mount (armed ref + one deps-free layout effect, only if the button had focus and focus is on body/null; video-driven collapse/expand never moves focus), clear -> search input synchronously; F2 Enter-repeat preventDefault on the three buttons (prevents held-Enter ping-pong). New library-focus-handoff.test.tsx (LF1-LF9 + LF5b, fail-before, m1-m5), new doc 095, doc 094 l.4. Baseline 1fe3ba2 clean; frozen b-round-109-r110-tree-sha256.txt 544; expected 2 M + 2 ??. C rows: LF-COLLAPSE/LF-EXPAND/LF-CLEAR 1280/1440, LF-MOUSE, LF-HOLD, LF-VIDEO-NEUTRAL, LF-SWEEP-NEG, R12-L2-ENTER-ADD, REG-LIB, FV-710, PX-NET, REG-HYD, G110-3, AN-REVIEW, T110-TARGETED, DOC-095/DOC-094-L4, SOURCE-UNCHANGED.",
+ "reason": "C round 110 PASS (browserVerified=true, realVerified=true) and gate 110 published 832fee2: B-R108-LIB-FOCUS-LOSS and GATE109-F6 are done; the video part of A-R108-SWEEP-HITS is closed by LF-SWEEP-NEG. C found a new Medium, C-R110-01: Escape from a video-opened library drops focus to BODY and the next Enter adds a clip (reproduced at 1280 and 1440). With the cloud measurement set (C-R27-01, C-R6-02, C-R8-01, A-R38-REVIEW-TOUCH) it still blocks T12. The regression round is not due today (regression-last is 2026-10-21; today is 2026-10-23); the next B planning on or after 2026-10-24 is the regression round. Nothing external blocks round 111. ABLETON-EXPERT-REVIEW is now in the queue (user decision 2026-10-23). The advisor was available and was used.",
+ "nextTask": "Round 111 (D-29z76): Escape that returns the floating video keeps keyboard focus in the library (C-R110-01, Medium).\n- StudioWorkspace.tsx (narrow): in returnFloatingVideo's libraryOpenedForVideo branch, arm a ref only when activeElement is inside libraryAsideRef. One deps-free layout effect then focuses the rail ▶ with preventScroll, only if focus fell to body/null. Plus a helper next to trackRowNameButton.\n- New library-video-return-focus.test.tsx: VR0-VR7, fail-before, m1-m5. New doc 096; doc 095 l.4.\n- Baseline 832fee2 clean; frozen list b-round-110-r111-tree-sha256.txt (545); expected end state 2 M + 2 ??.\n- C rows: VR-HAZARD, VR-ESC-BUTTON and VR-ESC-OPTION (1280/1440), VR-SCROLL, VR-OUTSIDE, VR-SEARCH, VR-NOT-FOR-VIDEO, FV-710, LF-QUICK, R12-L2-ENTER-ADD, PX-NET, REG-HYD, G111-3 (401 with params), AN-REVIEW, T111-TARGETED, DOC-096/DOC-095-L4, SOURCE-UNCHANGED.",
  "remaining": [
-  "B-R108-LIB-FOCUS-LOSS",
-  "GATE109-F6-DOC094-STATUS",
+  "C-R110-01",
+  "GATE110-S4-DOC095-STATUS",
   "REGRESSION-ROUND-2026-10-24",
   "A-R108-SWEEP-HITS",
   "MEASUREMENT-ROUND-CLOUD",
@@ -72,6 +72,10 @@
   "B-R107-ENTER-ON-BODY",
   "C-R109-OBS-01",
   "GATE109-F3-BIOME-IGNORE-FIXTURE",
-  "ABLETON-EXPERT-REVIEW"
+  "ABLETON-EXPERT-REVIEW",
+  "A-R110-S3-STALE-ARM",
+  "GATE110-S1-NONCHROMIUM-MOUSE-CLICK",
+  "GATE110-S3-TOGGLE-ARIA-EXPANDED",
+  "ARCH-R110-FOCUS-HANDOFF-HOOK"
  ]
 }

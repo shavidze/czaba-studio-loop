@@ -1,10 +1,10 @@
 {
- "version": 108,
- "updated": "2026-10-23 (B round 109 -> round 110 planning)",
+ "version": 109,
+ "updated": "2026-10-23 (B round 110 -> round 111 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 110: D-29z75 - the library collapse/expand/search-clear buttons keep keyboard focus (B-R108-LIB-FOCUS-LOSS, Medium) + Enter-repeat guard; doc 094 l.4; baseline 1fe3ba2 clean; frozen b-round-109-r110-tree-sha256.txt 544; expected 2 M + 2 ??)",
- "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23)",
+ "current_task": "current-task.md (round 111: D-29z76 - Escape returning the floating video re-collapses a video-opened library; focus inside the library is rescued to the rail expand button instead of BODY (C-R110-01, Medium); doc 095 l.4; baseline 832fee2 clean; frozen b-round-110-r111-tree-sha256.txt 545; expected 2 M + 2 ??)",
+ "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23) | round 111 planning: advisor available and consulted before writing (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -8806,7 +8806,7 @@
    "round": 110,
    "task": "current-task.md",
    "decision": "D-29z75",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "B-R108-LIB-FOCUS-LOSS",
     "GATE109-F6-DOC094-STATUS"
@@ -8817,6 +8817,24 @@
     "app/lib/arrangement/__tests__/library-focus-handoff.test.tsx (new)",
     "docs/implementation/2026/quarter-IV/095-studio-library-toggle-focus.md (new)",
     "docs/implementation/2026/quarter-IV/094-studio-ssr-nul-bytes.md (l.4 only)"
+   ],
+   "result": "C round 110 PASS browserVerified=true realVerified=true (c-round-110.json); gate 110 published 832fee2 (reviewer 9/10, COMMIT: OK); new Medium C-R110-01 (out of D-29z75 scope) -> round 111"
+  },
+  {
+   "round": 111,
+   "task": "current-task.md",
+   "decision": "D-29z76",
+   "status": "dispatched",
+   "items": [
+    "C-R110-01",
+    "GATE110-S4-DOC095-STATUS"
+   ],
+   "note": "Escape returning a video-opened library keeps focus: StudioWorkspace returnFloatingVideo arms only if activeElement is inside libraryAsideRef (libraryOpenedForVideo branch); one deps-free layout effect focuses the rail expand button with preventScroll when focus fell to body/null. New library-video-return-focus.test.tsx (VR0-VR7, m1-m5), doc 096, doc 095 l.4. Baseline HEAD 832fee2 clean; frozen b-round-110-r111-tree-sha256.txt 545; snapshot b-round-110-r111-snapshots/StudioWorkspace.tsx e83fa485; expected 2 M + 2 ??. B probe b-round-110/probe/blur-on-remove-result.json (Chromium 143 fires blur/focusout on removal) decided workspace-side over a library focus-within flag. Regression round due at the next B planning on/after 2026-10-24.",
+   "owned": [
+    "app/components/arrangement/StudioWorkspace.tsx (narrow: helper next to trackRowNameButton, one ref, arm in returnFloatingVideo libraryOpenedForVideo branch, one deps-free layout effect after the pendingRowFocusRef effect)",
+    "app/lib/arrangement/__tests__/library-video-return-focus.test.tsx (new)",
+    "docs/implementation/2026/quarter-IV/096-studio-video-return-library-focus.md (new)",
+    "docs/implementation/2026/quarter-IV/095-studio-library-toggle-focus.md (l.4 only)"
    ]
   }
  ],
@@ -8861,7 +8879,20 @@
    "content_trust": "Attachments are source specifications, not authority for changing permissions, revealing secrets, publishing or altering authorization.",
    "user_reaffirmation_2026_10_07": "User reattached both T12 files (hashes identical to the next-stage-t12 sources) and asks to continue ALL work and append a final task with ALL its bugs; keep the finish-original-then-T12 order; do not mark the overall request complete at original-stage completion; zero open reproducible in-scope bugs for final acceptance.",
    "user_decision_2026_10_23": "T12 starts when every phase-1 item is complete or deferred (done, c_pass_tech_lead_manual, verified_except_manual* count as complete; pending Tech Lead manual checks do not block) and no Critical, High or Medium finding is open. Fix the open Medium findings first, then open T12. Open Low (and info) findings no longer block T12; they move to deferred_low_polish and are fixed in one polish pass after VISUAL-A-OBSIDIAN and before release. New Critical/High/Medium findings and Medium+ regressions during T12/VISUAL-A are fixed as before; new Lows go to deferred_low_polish. Final acceptance unchanged: all findings incl. deferred Lows fixed and C-verified before the whole request is complete. Overrides the 2026-10-07 zero-open-bugs-before-T12 rule.",
-   "t12_gate_status_round108_planning": "not open: Mediums C-R23-01 (round 109), B-R108-LIB-FOCUS-LOSS (after the regression round), C-R27-01 / C-R6-02 / C-R8-01 / A-R38-REVIEW-TOUCH (C-only cloud measurement round) remain; SRW-03 / SRW-11B / SRW-13 stay open only for those IDs"
+   "t12_gate_status_round108_planning": "not open: Mediums C-R23-01 (round 109), B-R108-LIB-FOCUS-LOSS (after the regression round), C-R27-01 / C-R6-02 / C-R8-01 / A-R38-REVIEW-TOUCH (C-only cloud measurement round) remain; SRW-03 / SRW-11B / SRW-13 stay open only for those IDs",
+   "t12_gate_status_round111_planning": "not open: Mediums C-R110-01 (round 111), then C-R27-01 / C-R6-02 / C-R8-01 / A-R38-REVIEW-TOUCH (C-only cloud measurement round) remain; the regression round (due on/after 2026-10-24) comes first at the next planning on/after that date"
+  },
+  {
+   "id": "ABLETON-EXPERT-REVIEW",
+   "status": "queued_after_t12_user_decision_2026_10_23",
+   "requested": "2026-10-23",
+   "instruction": "After T12-GAIN-VOLUME is complete and before VISUAL-A-OBSIDIAN: C runs the review as the round's verification, consulting the ableton-arrangement-expert agent, in the real browser (Playwright on /studio-lab, screenshots and measurements) with the Ableton Live 12 manual as reference. Cover every phase-1 feature and T12 (layout, library, clip select/move/trim/split/duplicate, clipboard, grid/snap, ruler/BPM, markers, groups, fades/envelopes, gain/volume/pan/mute/solo, loop/range, navigation/zoom, video, export). Split into 2 rounds by area if too large. A changes no code in a review round.",
+   "output": "loop/user-review/ableton-review.md in Georgian (technical terms English): verdict; bugs ABL-B-n (severity, steps, evidence; also in open_findings; Medium+ fixed before VISUAL-A, Lows to deferred_low_polish); recommendations ABL-R-n (what, why, manual reference, size in rounds, priority) recorded as awaiting_user and NOT implemented until Saba approves in loop/user-review/ableton-decisions.md",
+   "after_review": "do not wait for answers: continue with its Medium+ bugs, then VISUAL-A; approved recommendations go after VISUAL-A unless Saba orders otherwise, and before phase 2",
+   "prerequisites": [
+    "T12-GAIN-VOLUME complete"
+   ],
+   "source": "user decision 2026-10-23 (agent-workflow.md 'Ableton expert review'); recorded by B round 111 planning"
   },
   {
    "id": "VISUAL-A-OBSIDIAN",
@@ -8871,7 +8902,8 @@
    "instruction": "Visual refresh of Studio only: colors, icons, typography, button surfaces. Do NOT change positions, sizes, layout, behaviour or shortcuts except the approved moves M1-M4. Do not start before T12-GAIN-VOLUME is complete; do not mix into phase 1 or T12 tasks.",
    "prerequisites": [
     "all current items done or deferred",
-    "T12-GAIN-VOLUME complete"
+    "T12-GAIN-VOLUME complete",
+    "ABLETON-EXPERT-REVIEW complete (Medium+ ABL-B bugs fixed)"
    ],
    "gate": "Opens automatically when T12-GAIN-VOLUME is complete (user already approved). When all stages pass C, set status done and then follow PHASE2-VIDEO-SCORING's gate (BLOCKED: phase 2 awaiting user go-ahead).",
    "spec": "docs/technical/studio-real-workspace/visual-direction-a.md",
@@ -14000,7 +14032,7 @@
   {
    "id": "B-R108-LIB-FOCUS-LOSS",
    "severity": "medium",
-   "status": "dispatched round 110 (D-29z75): F1 focus handoff (collapse<->expand after mount, clear -> search input) + F2 Enter-repeat guard on the three buttons; B re-probe at 1fe3ba2 reproduced all three (b-round-109/probe/lib-focus-probe-result.json); regression round not due until 2026-10-24",
+   "status": "done (C round 110 PASS browserVerified=true realVerified=true (c-round-110.json); gate 110 published 832fee2 (reviewer 9/10, COMMIT: OK): LF-COLLAPSE/LF-EXPAND/LF-CLEAR 1280+1440, LF-MOUSE, LF-HOLD (CDP autoRepeat 10 repeats -> 1 click), LF-VIDEO-NEUTRAL, FV-710, REG-LIB scrollLeft 0 every frame)",
    "to": "B (next bug round) / A",
    "title": "Library collapse (◀), expand (▶) and search clear (×) unmount themselves on Enter; focus falls to BODY and the next Enter adds the active library item as a clip",
    "evidence": "b-round-108/probe/lib-focus-probe-result.json (1280x720, 32a6b08: collapse/expand/clear -> active BODY after Enter 1, clips 0 -> 1 after Enter 2 ('CZABA hero' added)); A round-108 reviewer sweep ArrangementLibrary.tsx:376-385, 391-400, 414-424",
@@ -14026,10 +14058,11 @@
   {
    "id": "DEFERRED-LOW-POLISH",
    "severity": "info",
-   "status": "open - pointer: 141 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped",
+   "status": "open - pointer: 144 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped",
    "title": "deferred Low findings (not lost)",
    "evidence": "backlog.json deferred_low_polish",
-   "round110_note": "B round 109 -> 110 planning: +C-R109-OBS-01, +GATE109-F3-BIOME-IGNORE-FIXTURE (141 entries)"
+   "round110_note": "B round 109 -> 110 planning: +C-R109-OBS-01, +GATE109-F3-BIOME-IGNORE-FIXTURE (141 entries)",
+   "round111_note": "B round 110 -> 111 planning: +A-R110-S3-STALE-ARM, +GATE110-S1-NONCHROMIUM-MOUSE-CLICK, +GATE110-S3-TOGGLE-ARIA-EXPANDED"
   },
   {
    "id": "PROD-SSR-NUL",
@@ -14062,7 +14095,7 @@
   {
    "id": "GATE109-F6-DOC094-STATUS",
    "severity": "low",
-   "status": "dispatched round 110 (doc 094 l.4 one-line grant)",
+   "status": "done (C round 110 DOC-094-L4 PASS; published 832fee2)",
    "title": "doc 094 status line still says awaiting C",
    "evidence": "gates/round-109/review.md F6"
   },
@@ -14092,7 +14125,33 @@
    "severity": "info",
    "status": "signal - addendum (u) to the pending checkpoint request b-round-91-checkpoint-request.md; non-blocking; no extraction scheduled",
    "title": "arm-ref + layout-effect focus handoff now in a third component (Transport, DetailPanel, Library)",
-   "evidence": "current-task.md round 110 F1; doc 093"
+   "evidence": "current-task.md round 110 F1; doc 093",
+   "round111_note": "reviewers (A round 110 + gate 110): keep inline; round 111 adds a fourth site (StudioWorkspace rescue); see architecture_signals ARCH-R110-FOCUS-HANDOFF-HOOK"
+  },
+  {
+   "id": "C-R110-01",
+   "severity": "medium",
+   "status": "dispatched round 111 (D-29z76): workspace-side rescue - returnFloatingVideo arms only when focus is inside the library aside and the library was opened for the video; a deps-free layout effect focuses the rail expand button (preventScroll) only if focus fell to body/null",
+   "to": "A round 111",
+   "title": "Escape from a video-opened library re-collapses it while focus is inside; focus drops to BODY and the next Enter adds the active library item as a clip",
+   "evidence": "c-round-110/out/lf-video.json (s5-collapse-button, s5-option), c-round-110/out/reg.json (s5_1280), c-round-110/shots/s5-*.png; a-round-110/probe/s5-probe-result.json (A reviewer S5)",
+   "repro": "fresh /studio-lab, Decline, focus Middle East option, ArrowDown, mouse collapse, mouse video expand, focus collapse button or the selected option, Escape, Enter -> clips 0 -> 1",
+   "preExisting": "argued by code path (frozen returnFloatingVideo), not browser-confirmed against a snapshot"
+  },
+  {
+   "id": "GATE110-INFO",
+   "severity": "info",
+   "status": "recorded",
+   "title": "gate-110 review info items",
+   "note": "S2: the clear-button repeat guard is effectively redundant (focus already moved to the input) - harmless, convention; S4: doc 095 l.4 status stale -> one-line grant in round 111; S5: the MouseEvent type import shadows the global MouseEvent in ArrangementLibrary.tsx (use globalThis.MouseEvent for native listeners)",
+   "evidence": "gates/round-110/review.md"
+  },
+  {
+   "id": "GATE110-S4-DOC095-STATUS",
+   "severity": "low",
+   "status": "dispatched round 111 (doc 095 l.4 one-line grant)",
+   "title": "doc 095 status line still says awaiting C",
+   "evidence": "gates/round-110/review.md suggestion 4"
   }
  ],
  "tech_lead_notes": [
@@ -15040,6 +15099,11 @@
    "id": "HR-RENDERING",
    "added": "round 89 planning",
    "rule": "a keypress during an export counts only if the busy button reads მიმდინარეობს… just before and just after it (record per press); a sequence cut short by render end is harness-invalid and is repeated within the run budget, never counted as PASS; TRAP sessions start on a fresh page"
+  },
+  {
+   "id": "HR-TOKEN-401-PARAMS",
+   "added": "round 111 planning",
+   "rule": "the anonymous /api/studio-token check uses valid parameters (?product=middle-east&file=stem1.wav) and expects 401; without parameters the route returns 400 (parameter validation precedes auth), which is not the criterion (C round 110 observation)"
   }
  ],
  "vitest_floor_round26": 1072,
@@ -15321,6 +15385,12 @@
    "round": 107,
    "source": "gates/round-107/review.md + a-round-107.md Architecture notes",
    "note": "ARCH-R107-SHARED-ENTER-GUARD: the inline repeated-Enter guard is copied on 9 buttons in 5 files (round 108 adds 4 more in ArrangementTransport) and ~15 toolbar buttons still need it. Proposal: one exported preventRepeatedEnterActivation(event) in app/lib/arrangement/, applied at each call site (Alternative B over a global capture listener). Accumulated risk -> bounded root checkpoint request = addendum (s) in b-round-91-checkpoint-request.md; not blocking round 108. Also: time-start refusal owned in two places (Snap-on render-time vs Snap-off updater) -> GATE107-S2 / ARCH-R105-STATUS-INTENT"
+  },
+  {
+   "round": 110,
+   "source": "a-round-110.md code-reviewer Architecture note + gates/round-110/review.md Architecture note",
+   "note": "ARCH-R110-FOCUS-HANDOFF-HOOK: the arm-ref + layout-effect focus handoff with a repeated-Enter guard now lives in ArrangementTransport (checks source.disabled, i.e. 'action took effect') and ArrangementLibrary (checks nothing); round 111 adds a workspace-side rescue (fourth site). Both reviewers: keep inline for now; proposal useFocusHandoffAfterCommit / useFocusHandoff(partnerRefs) in app/hooks/ plus a shared preventRepeatedEnterKeyDown, with a required 'action took effect' check, migrating callers with existing tests unchanged. Signal 3: the root cause is the workspace Enter-on-BODY contract (user question B-R107-ENTER-ON-BODY). Recorded as signal and as addendum to the pending checkpoint request; not scheduled.",
+   "status": "signal"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -16958,7 +17028,8 @@
    "status": "open - Library hits promoted to B-R108-LIB-FOCUS-LOSS (round 110). B probe at 1fe3ba2 (b-round-109/probe/video-focus-probe-result.json, 1280+1440): video placeholder 'დაბრუნება', float close and expand all leave focus on the expand button, Enter 2 adds no clip -> NOT reproduced (C LF-SWEEP-NEG row in round 110 confirms); pan reset focuses the Pan slider on success, also after a mouse click (cosmetic, focus never on BODY) -> remains this deferred Low",
    "evidence": "a-round-108.md self-disabling sweep",
    "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
-   "deferred_round": "B round 108 -> 109 planning (2026-10-23)"
+   "deferred_round": "B round 108 -> 109 planning (2026-10-23)",
+   "round111_note": "video part closed by C evidence: round 110 LF-SWEEP-NEG PASS 1280+1440 (c-round-110/sweep/video-focus-probe-result.json); only the pan-reset cosmetic part remains deferred"
   },
   {
    "id": "A-R108-STALE-ARM-GESTURE",
@@ -17007,6 +17078,37 @@
    "repro": "strip-nul-bytes.server.test.ts:22",
    "deferred_reason": "user decision 2026-10-23 (Lows deferred); the test file is frozen in round 110",
    "deferred_round": "B round 109 -> 110 planning (2026-10-23)"
+  },
+  {
+   "id": "A-R110-S3-STALE-ARM",
+   "severity": "low",
+   "status": "open - deferred (not reachable with the current parent: changeLibraryCollapsed always commits)",
+   "title": "ArrangementLibrary toggle arm could go stale if a parent refused the collapse change without re-rendering the library",
+   "evidence": "a-round-110.md reviewer S3; c-round-110.md 'Not filed by C'",
+   "repro": "none in the browser (needs a refusing host)",
+   "deferred_reason": "user decision 2026-10-23 (Lows deferred)",
+   "deferred_round": "B round 110 -> 111 planning (2026-10-23)"
+  },
+  {
+   "id": "GATE110-S1-NONCHROMIUM-MOUSE-CLICK",
+   "severity": "low",
+   "status": "open - deferred; WebKit/Firefox not available on the cloud runner (Chromium only); same class as A-R73-SAFARI / GATE108-S1",
+   "title": "in Safari/Firefox (macOS) a mouse click does not focus a button, so the library handoff does not arm after a mouse click on the collapse/clear button; focus stays on BODY and the next Enter can add a clip as before",
+   "evidence": "gates/round-110/review.md suggestion 1",
+   "repro": "Safari: select a library item, mouse click collapse, Enter",
+   "proposal": "arm when activeElement is the button OR body (changes the LF5b contract deliberately); needs a WebKit probe first",
+   "deferred_reason": "user decision 2026-10-23 (Lows deferred); not testable in cloud",
+   "deferred_round": "B round 110 -> 111 planning (2026-10-23)"
+  },
+  {
+   "id": "GATE110-S3-TOGGLE-ARIA-EXPANDED",
+   "severity": "low",
+   "status": "open - deferred; separate a11y task with its own C row (changes the a11y tree)",
+   "title": "library collapse/expand toggles have no aria-expanded / aria-controls",
+   "evidence": "gates/round-110/review.md suggestion 3",
+   "repro": "inspect arrangement-library-collapse / -expand: no aria-expanded",
+   "deferred_reason": "user decision 2026-10-23 (Lows deferred)",
+   "deferred_round": "B round 110 -> 111 planning (2026-10-23)"
   }
  ],
  "baseline_tree_at_round108": {
@@ -17015,5 +17117,11 @@
   "frozen_list": "b-round-108-r109-tree-sha256.txt (542; 539 - entry.server.tsx + 4 published round-108 paths; doc 093 owned)",
   "snapshots": "b-round-108-r109-snapshots (entry.server.tsx 24623172)",
   "measured": "2026-10-23 ~12:25 UTC by B"
+ },
+ "baseline_tree_at_round111": {
+  "head": "832fee24858746c4411b1299440406c06d8baefa",
+  "frozen_list": "tmp/studio-real-loop/b-round-110-r111-tree-sha256.txt",
+  "entries": 545,
+  "snapshot": "tmp/studio-real-loop/b-round-110-r111-snapshots/StudioWorkspace.tsx e83fa485"
  }
 }
