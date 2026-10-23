@@ -1,0 +1,159 @@
+--- ../tmp/studio-real-loop/b-round-106-r107-snapshots/StudioWorkspace.tsx	2026-10-23 10:11:22.002473422 +0000
++++ app/components/arrangement/StudioWorkspace.tsx	2026-10-23 10:29:55.034105061 +0000
+@@ -11,6 +11,7 @@
+ import {
+   formatArrangementTime,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
++  NUDGE_AT_TIME_START_MESSAGE,
+   useArrangement,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+@@ -147,7 +148,6 @@
+   'ვიდეო პატარა ხედს დაუბრუნდა; ბიბლიოთეკა ისევ დაიკეცა.';
+ const LIBRARY_TRANSITION_FALLBACK_MS = 100;
+ const SNAP_OFF_MESSAGE = 'Snap გამორთულია — თავისუფალი გადაადგილება (G)';
+-const NUDGE_AT_TIME_START_MESSAGE = 'ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.';
+ 
+ function parseTransitionTimesMs(value: string): number[] {
+   return value.split(',').map((entry) => {
+@@ -1758,7 +1758,9 @@
+       }
+       if (modifier && key === 'e') {
+         event.preventDefault();
+-        current.splitSelection();
++        if (!event.repeat) {
++          current.splitSelection();
++        }
+         return;
+       }
+       if (modifier && key === 'z') {
+@@ -1777,10 +1779,12 @@
+       }
+       if (modifier && key === 'l') {
+         event.preventDefault();
+-        if (event.shiftKey) {
+-          current.extendRangeToAllTracks();
+-        } else {
+-          current.toggleLoopSelection();
++        if (!event.repeat) {
++          if (event.shiftKey) {
++            current.extendRangeToAllTracks();
++          } else {
++            current.toggleLoopSelection();
++          }
+         }
+         return;
+       }
+@@ -1801,7 +1805,9 @@
+           return;
+         }
+         event.preventDefault();
+-        current.copySelection();
++        if (!event.repeat) {
++          current.copySelection();
++        }
+         return;
+       }
+       if (modifier && key === 'x') {
+--- ../tmp/studio-real-loop/b-round-106-r107-snapshots/ArrangementContext.tsx	2026-10-23 10:11:22.002473422 +0000
++++ app/contexts/ArrangementContext.tsx	2026-10-23 10:29:55.034814623 +0000
+@@ -168,6 +168,7 @@
+ const AUDIO_PUMP_INTERVAL_MS = 200;
+ export const GESTURE_UNDO_BLOCKED_MESSAGE = 'Undo/Redo drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.';
+ export const GESTURE_EDIT_BLOCKED_MESSAGE = 'რედაქტირება drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.';
++export const NUDGE_AT_TIME_START_MESSAGE = 'ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.';
+ const AUDIO_ON_VIDEO_LANE_MESSAGE =
+   'აირჩიე აუდიო ხაზი (მუსიკა, სტემები ან SFX) — ვიდეოხაზზე აუდიო არ ემატება.';
+ const LIBRARY_DROP_BLOCKED_MESSAGE = 'აქ ადგილი არ არის — ერთ ხაზზე კლიპები ერთმანეთს არ ფარავს.';
+@@ -1702,11 +1703,12 @@
+       if (!clip) {
+         return;
+       }
+-      const next = moveClip(
+-        arrangement,
+-        clip.id,
+-        Math.max(0, Math.round((clip.start + delta) * 1000) / 1000),
+-      );
++      const target = Math.max(0, Math.round((clip.start + delta) * 1000) / 1000);
++      if (target === clip.start) {
++        setStatus(keyRepeat ? () => NUDGE_AT_TIME_START_MESSAGE : NUDGE_AT_TIME_START_MESSAGE);
++        return;
++      }
++      const next = moveClip(arrangement, clip.id, target);
+       if (!next) {
+         const message = 'ჩაჩოჩება დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი.';
+         setStatus(keyRepeat ? () => message : message);
+--- ../tmp/studio-real-loop/b-round-106-r107-snapshots/ArrangementMarkerRow.tsx	2026-10-23 10:11:22.002473422 +0000
++++ app/components/arrangement/ArrangementMarkerRow.tsx	2026-10-23 10:29:55.035195953 +0000
+@@ -682,6 +682,11 @@
+           ref={addButtonRef}
+           type="button"
+           onClick={() => runUnlessGesture(beginAddMarker)}
++          onKeyDown={(event) => {
++            if (event.key === 'Enter' && event.repeat) {
++              event.preventDefault();
++            }
++          }}
+           aria-label="Add marker (M)"
+           aria-keyshortcuts="M"
+           title="მარკერის დამატება playhead-ზე ან მონიშვნის დასაწყისში (M)"
+@@ -693,6 +698,11 @@
+         <button
+           type="button"
+           onClick={() => runUnlessGesture(() => stepMarker(-1))}
++          onKeyDown={(event) => {
++            if (event.key === 'Enter' && event.repeat) {
++              event.preventDefault();
++            }
++          }}
+           aria-label="Previous marker (Ctrl+←)"
+           aria-keyshortcuts="Control+ArrowLeft"
+           title="წინა მარკერზე გადასვლა (Ctrl+←)"
+@@ -704,6 +714,11 @@
+         <button
+           type="button"
+           onClick={() => runUnlessGesture(() => stepMarker(1))}
++          onKeyDown={(event) => {
++            if (event.key === 'Enter' && event.repeat) {
++              event.preventDefault();
++            }
++          }}
+           aria-label="Next marker (Ctrl+→)"
+           aria-keyshortcuts="Control+ArrowRight"
+           title="შემდეგ მარკერზე გადასვლა (Ctrl+→)"
+@@ -806,6 +821,9 @@
+               if (event.key === 'Enter' || event.key === 'Escape') {
+                 event.preventDefault();
+                 event.stopPropagation();
++                if (event.key === 'Enter' && event.repeat) {
++                  return;
++                }
+                 settleEditor(event.key === 'Enter' ? 'enter' : 'escape');
+               }
+             }}
+--- ../tmp/studio-real-loop/b-round-106-r107-snapshots/ArrangementDetailPanel.tsx	2026-10-23 10:11:22.002473422 +0000
++++ app/components/arrangement/ArrangementDetailPanel.tsx	2026-10-23 10:29:55.035449242 +0000
+@@ -516,6 +516,11 @@
+         <button
+           type="button"
+           onClick={applyDetailRange}
++          onKeyDown={(event) => {
++            if (event.key === 'Enter' && event.repeat) {
++              event.preventDefault();
++            }
++          }}
+           disabled={!clip}
+           title={inputsReason ?? undefined}
+           className="h-6 w-fit rounded-sm border border-outline px-2 text-foreground hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:text-dim"
+@@ -558,6 +563,11 @@
+             type="button"
+             onMouseDown={(event) => event.preventDefault()}
+             onClick={resetClipGain}
++            onKeyDown={(event) => {
++              if (event.key === 'Enter' && event.repeat) {
++                event.preventDefault();
++              }
++            }}
+             disabled={clipGainReason !== null || clipGainDb === undefined}
+             title={clipGainReason ?? undefined}
+             aria-label="Clip Gain-ის განულება (0 dB)"

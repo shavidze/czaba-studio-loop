@@ -109,3 +109,18 @@ B schedules no extraction. Any approved change becomes one separate B task with 
   - Backlog: merged into ARCH-R105-STATUS-INTENT; GATE106-S1 is its own Low.
 - **Both reviewers say keep for now.** Round 107 adds no new style: it uses the existing `!event.repeat` guard and the existing updater form.
 - **Please add this to the same bounded read-only checkpoint:** keep or extract, cost, risk, at most three sentences. Still non-blocking.
+
+## Addendum (s) — B round 108 planning, 2026-10-23: bounded request for one shared guard (ARCH-R107-SHARED-ENTER-GUARD)
+- **Trigger:** accumulated risk on one class. Gate 107's reviewer (Signal 3) and A's round-107 reviewer both flag the inline `if (event.key === 'Enter' && event.repeat) event.preventDefault();`.
+  - It is now copied on 9 buttons in 5 files: MarkerRow ×3, DetailPanel ×2, Transport ×1, LibraryPreview ×2, ExportDialog ×1.
+  - Round 108 adds 5 more in `ArrangementTransport.tsx` (Undo, Redo, ⌫, ↩ Zoom, Fit), because the focus-handoff fix needs them.
+  - About 15 toolbar buttons still lack it. The strongest is the transport Loop, which has the same toggle+history bug Ctrl+L had.
+- **Question for the read-only frontend-architect:**
+  - Keep the guard inline, or extract one exported `preventRepeatedEnterActivation(event)` in `app/lib/arrangement/`, applied explicitly at each call site? The reviewer prefers this over a global capture listener.
+  - Answer in the usual form: keep/extract, cost, risk, at most three sentences.
+- **Invariants for any extraction:**
+  - no `stopPropagation`; Space untouched;
+  - gesture lifecycle, Undo/Redo and the `useArrangement()` shape unchanged;
+  - the shortcuts Ctrl/Cmd+Z/Y and +/− keep repeating.
+  - **Tests:** the HE pattern per button, plus one Chromium probe asserting click count 1 for 1 keydown + 5 repeats.
+- **Scheduling:** round 108 is not blocked. The held-Enter toolbar sweep (A-R107-SWEEP-HELD-ENTER-TOOLBAR, GATE107-S1) is planned after root records the checkpoint result. If no result arrives by the time that sweep is next in order, B plans it with the inline convention and records that.

@@ -1,10 +1,10 @@
 {
- "version": 105,
- "updated": "2026-10-23 (B round 106 -> round 107 planning)",
+ "version": 106,
+ "updated": "2026-10-23 (B round 107 -> round 108 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 107: D-29z72 - held shortcuts Ctrl+E/L/Shift+L/C ignore auto-repeat (C-R106-02); repeated Enter prevented on marker +/prev/next and detail apply/0 dB, and does not settle the marker name editor (F5); a single clip at time 0 announces the time-start refusal (C-R106-01); doc 092 l.94 (C-R106-03); baseline 35112cd clean; frozen b-round-106-r107-tree-sha256.txt 536; expected 6 M + 0 ??)",
- "advisor_used_by_B": "round 95 planning: advisor available and consulted (2026-10-23)",
+ "current_task": "current-task.md (round 108: D-29z73 - a self-disabling button keeps keyboard focus in its group: 0 dB -> Clip Gain input (C-R107-01), Undo->Redo, Redo->Undo, Delete->Undo, Zoom back->Fit (B probe), only when it held focus and only on exhaustion; Undo/Redo/Delete/Zoom back/Fit ignore a repeated Enter; baseline fc08617 clean; frozen b-round-107-r108-tree-sha256.txt 539; expected 3 M + 2 ?? (doc 092 l.4 owned))",
+ "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -8740,7 +8740,7 @@
    "round": 107,
    "task": "current-task.md",
    "decision": "D-29z72",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "C-R106-02-HELD-SHORTCUTS",
     "A-R106-REVIEW-F5-HELD-ENTER-BUTTONS",
@@ -8755,6 +8755,26 @@
     "app/components/arrangement/ArrangementDetailPanel.tsx (apply button l.516-525; 0 dB button l.557-568)",
     "app/lib/arrangement/__tests__/status-announcement-ui.test.tsx (append-only after l.705)",
     "docs/implementation/2026/quarter-IV/092-studio-status-repeat-announcement.md (whole)"
+   ],
+   "result": "C round 107 PASS (c-round-107.json, browserVerified=true, realVerified=true) + gate 107 published fc08617 (gates/gate-round-107.json); new: C-R107-01 (Medium, pre-existing)"
+  },
+  {
+   "round": 108,
+   "task": "current-task.md",
+   "decision": "D-29z73",
+   "status": "dispatched",
+   "items": [
+    "C-R107-01-GAIN-RESET-FOCUS-LOSS",
+    "B-R107-FL-HISTORY-FOCUS-LOSS",
+    "B-R107-FL-ZOOM-FOCUS-LOSS"
+   ],
+   "note": "Focus handoff when a focused button disables itself: 0 dB -> Clip Gain input; Undo->Redo; Redo->Undo; Delete->Undo; Zoom back->Fit; only if it held focus and only on exhaustion. Undo/Redo/Delete/Zoom back/Fit ignore a repeated Enter (buttons once per press; Ctrl+Z/Y shortcuts still repeat). Baseline HEAD fc08617 clean; frozen b-round-107-r108-tree-sha256.txt 539; snapshots b-round-107-r108-snapshots; expected 3 M + 2 ?? (doc 092 l.4 owned to avoid a repeat of C-R106-03). Regression round due at the next B planning on/after 2026-10-24.",
+   "owned": [
+    "app/components/arrangement/ArrangementDetailPanel.tsx (Clip Gain input ref l.536-559, resetClipGain l.384-398, 0 dB button l.562-578)",
+    "app/components/arrangement/ArrangementTransport.tsx (react import l.1; optional useIsomorphicLayoutEffect import; new refs/handlers/layout effect after l.73; Undo l.106-115, Redo l.116-125, Delete l.140-149, Zoom back l.221-235, Fit l.236-244)",
+    "app/lib/arrangement/__tests__/self-disabling-focus.test.tsx (new)",
+    "docs/implementation/2026/quarter-IV/093-studio-self-disabling-button-focus.md (new)",
+    "docs/implementation/2026/quarter-IV/092-studio-status-repeat-announcement.md (l.4 status line only)"
    ]
   }
  ],
@@ -14844,41 +14864,49 @@
   {
    "id": "C-R106-01-TIME0-SILENT-NUDGE",
    "severity": "low",
-   "status": "dispatched round 107 (D-29z72 R4): single-clip nudge whose clamped target equals clip.start announces NUDGE_AT_TIME_START_MESSAGE (exported from ArrangementContext, imported by the workspace); keyRepeat -> updater form",
+   "status": "done - C round 107 PASS (c-round-107.json, browserVerified=true, realVerified=true) + gate 107 published fc08617 (gates/gate-round-107.json); NZ-TIME0 (1280/1440), NZ-MOVES, NZ-SNAPON-SAME PASS; C mutations h10/h12 red as expected",
    "to": "A round 107",
    "title": "ArrowLeft on a single clip at 00:00.000 with Snap off gives no status and no history (Snap on announces the time-start refusal); refusal text names the time start but never fires there",
    "evidence": "c-round-106.json bugs[0] (kr-snapoff-asis / kr-moves-asis 1280); a-round-106.md section 3 (A-R106-TIME0-SILENT, merged here)",
    "merged": [
     "A-R106-TIME0-SILENT"
-   ]
+   ],
+   "closed_round": 107,
+   "closed_evidence": "c-round-107.json; gates/gate-round-107.json"
   },
   {
    "id": "C-R106-02-HELD-SHORTCUTS",
    "severity": "low",
-   "status": "dispatched round 107 (D-29z72 R1): Ctrl/Cmd+E, Ctrl/Cmd+L, Ctrl/Cmd+Shift+L, Ctrl/Cmd+C ignore event.repeat (preventDefault still runs); Ctrl+Z/Y keep repeating; Ctrl+L range-replace semantics unchanged (SRW-05 contract)",
+   "status": "done - C round 107 PASS (c-round-107.json, browserVerified=true, realVerified=true) + gate 107 published fc08617 (gates/gate-round-107.json); HK-CTRL-L (1280/1440), HK-CTRL-E, HK-CTRL-SHIFT-L, HK-CTRL-C, HK-UNDO-STILL-REPEATS PASS",
    "to": "A round 107",
    "title": "a held Ctrl+L toggles the loop on every auto-repeat (aria-pressed alternated over 10 keydowns; end state depends on hold length; a history entry each); held Ctrl+E/Ctrl+Shift+L/Ctrl+C re-run or re-announce",
    "evidence": "c-round-106.json bugs[1] (kr-loop-1280x720.json ctrlL); a-round-106.md review F6; gates/round-106/review.md suggestion #5",
    "merged": [
     "A-R106-REVIEW-F6",
     "GATE106-S5-REMAINING-SHORTCUTS"
-   ]
+   ],
+   "closed_round": 107,
+   "closed_evidence": "c-round-107.json; gates/gate-round-107.json"
   },
   {
    "id": "C-R106-03-DOC092-L94",
    "severity": "low",
-   "status": "dispatched round 107 (doc 092 owned whole)",
+   "status": "done - C round 107 PASS (c-round-107.json, browserVerified=true, realVerified=true) + gate 107 published fc08617 (gates/gate-round-107.json); DOC-092 PASS",
    "to": "A round 107",
    "title": "doc 092 l.94 A-R104-REPEAT-DRAG entry still says round 105 awaits C",
-   "evidence": "c-round-106.json bugs[2]; gates/round-106/review.md #6"
+   "evidence": "c-round-106.json bugs[2]; gates/round-106/review.md #6",
+   "closed_round": 107,
+   "closed_evidence": "c-round-107.json; gates/gate-round-107.json"
   },
   {
    "id": "A-R106-REVIEW-F5-HELD-ENTER-BUTTONS",
    "severity": "low",
-   "status": "dispatched round 107 (D-29z72 R2+R3): repeated Enter prevented on marker +, prev, next and detail apply / 0 dB buttons (convention ArrangementExportDialog.tsx:554); repeated Enter in the marker name editor does not settle it",
+   "status": "done - C round 107 PASS (c-round-107.json, browserVerified=true, realVerified=true) + gate 107 published fc08617 (gates/gate-round-107.json); HE-MARKER-PREV (1280/1440), HE-MARKER-NEXT, HE-MARKER-ADD (1280/1440), HE-DETAIL-APPLY PASS; HE-CLIPGAIN-RESET passedWithDeviation (B setup unreachable: 0 dB disables itself; R2 on 0 dB is jsdom-proven only (HE4 + h9) and stays browser-unisolable by design)",
    "to": "A round 107",
    "title": "Chromium clicks a focused button on every Enter auto-repeat: held Enter on the prev-marker button announced 6/6 times; held Enter on + committed the default name Marker 1 through the newly opened editor before the user could type",
-   "evidence": "a-round-106.md review F5; B probe b-round-106/probe/probe-out.txt (real Chromium 1280x720, 1 down + 5 repeats); gates/round-106/review.md #5"
+   "evidence": "a-round-106.md review F5; B probe b-round-106/probe/probe-out.txt (real Chromium 1280x720, 1 down + 5 repeats); gates/round-106/review.md #5",
+   "closed_round": 107,
+   "closed_evidence": "c-round-107.json; gates/gate-round-107.json"
   },
   {
    "id": "GATE106-S1-RENDER-TIME-GESTURE-FLAG",
@@ -14911,6 +14939,102 @@
    "to": "B record",
    "title": "round 106 KR nudge rows were written on a wrong premise",
    "evidence": "c-round-106.json passedWithDeviation; a-round-106.md section 3"
+  },
+  {
+   "id": "C-R107-01-GAIN-RESET-FOCUS-LOSS",
+   "severity": "medium",
+   "status": "dispatched round 108 (D-29z73 F1): after a keyboard 0 dB reset focus moves to the Clip Gain input",
+   "to": "A round 108",
+   "title": "keyboard 0 dB Clip Gain reset disables the focused button, focus falls to BODY, the next Enter adds a library clip (pre-existing)",
+   "evidence": "c-round-107.json bugs[0]; c-round-107/out/gain-focus-1280x720.json"
+  },
+  {
+   "id": "B-R107-FL-HISTORY-FOCUS-LOSS",
+   "severity": "medium",
+   "status": "dispatched round 108 (D-29z73 F1+F2): Undo->Redo, Redo->Undo, Delete->Undo focus handoff on exhaustion; repeated Enter guarded on these buttons",
+   "to": "A round 108",
+   "title": "transport Undo / Redo / Delete buttons disable themselves after their last step, focus falls to BODY, the next Enter adds a library clip (Undo case also wipes the new redo entry)",
+   "evidence": "B probe (real Chromium 1280x720) b-round-107/probe/out/focus-loss-1280x720.json, delete-focus-1280x720.json"
+  },
+  {
+   "id": "B-R107-FL-ZOOM-FOCUS-LOSS",
+   "severity": "low",
+   "status": "dispatched round 108 (D-29z73 F1+F2): Zoom back -> Fit focus handoff; Zoom back and Fit ignore a repeated Enter",
+   "to": "A round 108",
+   "title": "transport zoom back button disables itself after its last history step, focus falls to BODY, the next Enter adds a clip",
+   "evidence": "b-round-107/probe/out/focus-loss-1280x720.json (afterZoomBack, afterZoomBackEnter2)"
+  },
+  {
+   "id": "B-R107-ENTER-ON-BODY",
+   "severity": "info",
+   "status": "open question for the user (not deferred, not scheduled as a change): the workspace-wide Enter (target not a button/slider/separator, incl. BODY) adds the active library item; SRW-12 R12-L2 only specifies Enter from the results list. Kept unchanged in round 108; focus retention closes C-R107-01 regardless",
+   "to": "user via root",
+   "title": "should Enter with focus on BODY add the active library item?",
+   "evidence": "c-round-107/out/gain-focus-1280x720.json afterBodyEnter; StudioWorkspace.tsx Enter branch; backlog SRW-12 R12-L2"
+  },
+  {
+   "id": "GATE107-S1-MARKER-FLAG-HELD-ENTER",
+   "severity": "low",
+   "status": "open - waits for ARCH-R107-SHARED-ENTER-GUARD checkpoint, then the held-Enter toolbar sweep round",
+   "to": "held-Enter sweep",
+   "title": "held Enter on a marker flag runs jumpToMarker on every auto-repeat (handleFlagKeyDown has no repeat guard)",
+   "evidence": "gates/round-107/review.md suggestion 1"
+  },
+  {
+   "id": "GATE107-S2-SNAPON-RENDER-TIME-STATUS",
+   "severity": "low",
+   "status": "open - Lows batch (with GATE106-S1/S2)",
+   "to": "Lows batch",
+   "title": "Snap-on time-start refusal still compares current.status at render time; Snap-off uses the updater form",
+   "evidence": "gates/round-107/review.md suggestion 2; a-round-107.md Architecture note"
+  },
+  {
+   "id": "GATE107-S3-NZ-DELTA-NIT",
+   "severity": "info",
+   "status": "open nit - optional defensive delta < 0 in the R4 condition (doc 092 F3)",
+   "to": "Lows batch",
+   "title": "target === clip.start with a non-negative delta would announce the time-start text (no current caller)",
+   "evidence": "gates/round-107/review.md suggestion 3; a-round-107.md F3"
+  },
+  {
+   "id": "GATE107-S4-HE-JSDOM-NIT",
+   "severity": "info",
+   "status": "closed - accepted: HE tests assert defaultPrevented; the no-click half is browser-proven by C round 107",
+   "to": "B record",
+   "title": "HE tests check defaultPrevented, not click",
+   "evidence": "gates/round-107/review.md suggestion 4; c-round-107.json"
+  },
+  {
+   "id": "A-R107-SWEEP-HELD-ENTER-TOOLBAR",
+   "severity": "low",
+   "status": "open - one held-Enter sweep round after the ARCH-R107-SHARED-ENTER-GUARD checkpoint; strongest: transport Loop (same toggle+history bug as Ctrl+L); Undo/Redo/Delete/Zoom back/Fit are taken in round 108",
+   "to": "held-Enter sweep",
+   "title": "held Enter repeats on toolbar buttons without a guard: Loop, Play, Split, Follow, Zoom to range, Snap, Env, Metronome, video expand/return, track/group Mute/Solo, master mute, folds, detail toggle; Low: Home and marker flags restart the graph during playback; group name editor settles on a repeated Enter; held Escape on the marker editor",
+   "evidence": "a-round-107.md Sweep 1 and Sweep 2"
+  },
+  {
+   "id": "A-R107-F2-RANGE-KEPT-ON-TIME0",
+   "severity": "info",
+   "status": "closed - B decision D-29z73: keeping the time range on a time-0 refusal is the contract (consistent with the neighbour refusal; a refusal writes nothing). No scheduled test",
+   "to": "B record",
+   "title": "a time range stays after a time-0 nudge refusal",
+   "evidence": "a-round-107.md F2; c-round-107/out/time0-range-1280x720.json"
+  },
+  {
+   "id": "A-R107-F4-SUBMS-START",
+   "severity": "low",
+   "status": "open signal - only if the model allows non-millisecond clip starts",
+   "to": "Lows batch",
+   "title": "a clip start that is not a whole millisecond takes an invisible sub-ms move before the time-0 refusal",
+   "evidence": "a-round-107.md F4"
+  },
+  {
+   "id": "B-R107-SPEC-ERRATA",
+   "severity": "info",
+   "status": "closed - B correction recorded (tasks/round-107.md stays an exact copy): HE-CLIPGAIN-RESET literal setup unreachable (0 dB disabled at gain 0; use gain 1 dB first); HE1 \"repeated Space on prev returns true\" impossible with the workspace Space branch (A asserts preventedBeforeWindow instead)",
+   "to": "B record",
+   "title": "round 107 spec wording errors",
+   "evidence": "c-round-107.json passedWithDeviation; a-round-107.md differences 1 and 3"
   }
  ],
  "tech_lead_notes": [
@@ -16134,6 +16258,11 @@
    "round": 106,
    "source": "gates/round-106/review.md + a-round-106.md Architecture notes",
    "note": "Signal 1 keep: repeated-refusal suppression in three styles (provider updater form, component status comparison, detail-panel Enter skip); proposals: internal requestStatus(message, {keyRepeat}) next to setStatus (gate 106) / announceRefusal (A reviewer); appended as addendum (r) to the pending bounded checkpoint request; merged into ARCH-R105-STATUS-INTENT; not scheduled"
+  },
+  {
+   "round": 107,
+   "source": "gates/round-107/review.md + a-round-107.md Architecture notes",
+   "note": "ARCH-R107-SHARED-ENTER-GUARD: the inline repeated-Enter guard is copied on 9 buttons in 5 files (round 108 adds 4 more in ArrangementTransport) and ~15 toolbar buttons still need it. Proposal: one exported preventRepeatedEnterActivation(event) in app/lib/arrangement/, applied at each call site (Alternative B over a global capture listener). Accumulated risk -> bounded root checkpoint request = addendum (s) in b-round-91-checkpoint-request.md; not blocking round 108. Also: time-start refusal owned in two places (Snap-on render-time vs Snap-off updater) -> GATE107-S2 / ARCH-R105-STATUS-INTENT"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -16394,5 +16523,12 @@
   "frozen_list": "b-round-105-r106-tree-sha256.txt (535)",
   "snapshots": "b-round-105-r106-snapshots (7 files)",
   "measured": "2026-10-23 ~09:05 UTC by B"
+ },
+ "baseline_tree_at_round107": {
+  "head": "fc086179b6f16d6ca6a523c79d333a5e6248c599",
+  "status": "clean (gate 107 published)",
+  "frozen_list": "b-round-107-r108-tree-sha256.txt (539)",
+  "snapshots": "b-round-107-r108-snapshots (3 files: DetailPanel 02583893, Transport 899c7c52, doc 092 8e4fd333)",
+  "measured": "2026-10-23 ~11:12 UTC by B"
  }
 }

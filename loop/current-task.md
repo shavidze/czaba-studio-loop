@@ -1,174 +1,195 @@
-# CURRENT TASK — Round 107: held shortcuts and held Enter act once (C-R106-02, GATE106-S5/F6, F5) + a single clip at time 0 gives its refusal (C-R106-01) + doc 092 (C-R106-03)
+# CURRENT TASK — Round 108: a button that disables itself keeps keyboard focus in its group (C-R107-01 + B probe: Undo, Redo, ⌫, ↩ Zoom), and these buttons act once per Enter press
 
-Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-23 (B planned at ~10:00 UTC, `date -u`)
+Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-23 (B planned at ~11:15 UTC, `date -u`)
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules in your prompt. Those rules take precedence over older text.
-- **Previous task:** `tasks/round-106.md` (exact copy). Rationale: `b-round-106.md`. Decision record: **D-29z72** in `docs/technical/studio-real-workspace/plan.md`.
-- **Round size:** three tightly related keyboard bugs with one owner (A). All three are about "one key press, one effect, one announcement". The doc line rides along.
-  1. **HK: held shortcuts (C-R106-02 + gate-106 suggestion #5 / A's reviewer F6; Low, one has a behaviour impact).**
-     - A held Ctrl/Cmd+L toggles the loop on **every** OS auto-repeat. C measured `aria-pressed` alternating true/false over 10 keydowns; the end state depends on how long the key was held, and each toggle is a history entry (`c-round-106/out/kr-loop-1280x720.json`, key `ctrlL`).
-     - A held Ctrl/Cmd+E, Ctrl/Cmd+Shift+L and Ctrl/Cmd+C have no repeat guard either. Ctrl+E can split again at the playhead after a range split; the others re-announce the same text about 30 times a second.
-     - Every sibling shortcut (Space, Ctrl+D/X/V/G, M, G, A, U, 1/2/3, Delete, Enter) already ignores `event.repeat`. These four were missed.
-  2. **HE: held Enter on buttons and on the marker name editor (A's reviewer F5; Low, one has a behaviour impact).** Chromium fires `click` on every Enter keydown, including the auto-repeats.
-     - **B probe** (`b-round-106/probe/probe-out.txt`, real Chromium, 1280×720, 1 down + 5 repeats):
-       - Enter held on ◀: `უკან მარკერი აღარ არის` was added **6 times**.
-       - Enter held on `+`: the first repeat landed on the newly opened name editor and **committed the default name `Marker 1`**. The user never got to type a name. The later repeats landed on the new flag.
-     - The same convention already exists: `ArrangementExportDialog.tsx:554`, `ArrangementTransport.tsx:250` and `ArrangementLibraryPreview.tsx:294/313` prevent a repeated Enter on their buttons.
-  3. **NZ: single clip at 00:00.000, Snap off, ←: no feedback at all (C-R106-01 = A-R106-TIME0-SILENT; Low, a11y).**
-     - `nudgeSelectedClip` clamps to 0 with `Math.max(0, …)`. `moveClip` then succeeds without changing anything, and `applyEdit` writes nothing. So there is no status and no history entry, for a hold and for a deliberate press.
-     - With Snap on, the same place announces `ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.` The two modes disagree.
-  4. **C-R106-03 (Low, doc):** doc 092 l.94 (the A-R104-REPEAT-DRAG entry) still says round 105 is waiting for C.
+- **Previous task:** `tasks/round-107.md` (exact copy). Rationale: `b-round-107.md`. Decision record: **D-29z73** in `docs/technical/studio-real-workspace/plan.md`.
+- **Round size:** one bug class in two code files, one implementer (A): "a focused button disables itself, focus falls to `<body>`, and the next Enter makes an edit the user did not ask for".
+  1. **FL-GAIN (C-R107-01, Medium):** the detail panel's `0 dB` Clip Gain reset.
+     - C's recipe: gain 1 dB, Tab to `0 dB`, Enter. The reset applies, the button disables itself (0 dB is stored as no `gainDb`), and `document.activeElement` becomes BODY.
+     - The next Enter reaches the workspace Enter handler and adds the last library item as a new clip (`… დაემატა მუსიკა ხაზზე 01:41.352-ზე …`, clips 1 → 2, `Undo: დამატება …`). Evidence: `c-round-107/out/gain-focus-1280x720.json`.
+  2. **FL-HISTORY (B probe, same class, Medium):** the transport `Undo`, `Redo` and `⌫ წაშლა` buttons.
+     - **B probe** (real Chromium, 1280×720, `b-round-107/probe/out/focus-loss-1280x720.json`, `delete-focus-1280x720.json`). Each button was focused and activated with one Enter:
+       - Undo of the last entry: Undo disables, focus goes to BODY, and the next Enter adds a library clip. That add also clears the redo entry the user just created.
+       - Redo of the last entry: the same; clips 1 → 2.
+       - ⌫ on the selected clip: the button disables (no selection), focus goes to BODY, and the next Enter adds a library clip at 00:02.688 instead of doing anything with the deleted clip.
+  3. **FL-ZOOM (B probe, same class, Low):** the transport `↩ Zoom` (zoom back) button. Activating the last history step disables it, focus goes to BODY, and the next Enter adds a clip (2 → 3).
 - **Not in this round (still open, not deferred):**
-  - GATE106-S1 (the reducer reads the gesture ref at render time), together with ARCH-R105-STATUS-INTENT and A-R105-REVIEW-2;
-  - GATE106-S2 (the `statusRef` nit in `stepMarker`) and GATE106-S4 (one `KeyRepeatOptions` type);
-  - GATE104-S2, GATE103-S1/S2/S3, A-R103-EW5-TITLE-NIT, GATE102-S3/S4, GATE98-S2 and the grid/tempo/marker Lows;
+  - the held-Enter toolbar sweep (transport Loop, Play, Split, Follow, ⇔, Snap, Env, Metronome, video expand, Mute/Solo, folds) and GATE107-S1 (marker flags). These wait for the root architecture checkpoint on one shared guard (ARCH-R107-SHARED-ENTER-GUARD, addendum (s));
+  - GATE107-S2/S3/S4, GATE106-S1/S2/S4, ARCH-R105-STATUS-INTENT, GATE104-S2, GATE103-S1/S2/S3, GATE102-S3/S4, GATE98-S2 and the grid/tempo/marker Lows;
+  - B-R107-ENTER-ON-BODY (an open question for the user; see `b-round-107.md`). The workspace-wide Enter → "add the active library item" contract is **not** changed here;
   - SRW-21-PREMOUNT and the SRW-21 mount (waiting for the auth owner), T12, VISUAL-A-OBSIDIAN.
-- **Regression round:** `regression-last.json` is 2026-10-21; B planned this round on 2026-10-23 (2 days). **The next B planning on or after 2026-10-24 is the regression round.**
+- **Regression round:** `regression-last.json` is 2026-10-21, and B planned this round on 2026-10-23 (2 days). **The next B planning on or after 2026-10-24 is the regression round.**
 
 ## Why this round
-- **C round 106: PASS** (`browserVerified=true`, `realVerified=true`). Gate 106 **published** `35112cd` (rounds 104–106; reviewer 8/10, "nothing blocks").
-- C filed three Lows, all of them pre-existing. The gate reviewer's suggestion #5 and A's code-reviewer (F5/F6) independently named the same remaining held-key paths.
-- C's KR-NUDGE-SNAPOFF and KR-NUDGE-MOVES rows in round 106 were B spec errors: they assumed a single clip at 0 announced a refusal, and it never did. This round makes B's original assumption true, by a deliberate contract decision (below), and then tests it.
+- **C round 107: PASS** (`browserVerified=true`, `realVerified=true`). Gate 107 **published** `fc08617` (reviewer 8.5/10, "COMMIT: OK").
+- C filed one Medium, **C-R107-01**. C bugs come first.
+- B's probe shows the same mechanism on four more buttons. Fixing only `0 dB` would leave the identical footgun one Tab away, so the round takes the whole class. The instances share one rule and one test style. All of them are in two files.
 
-## Baseline (measured by B, 2026-10-23 ~10:00 UTC)
-- **HEAD `35112cd5b112ac007169cf48771805fd70c211c2`** (published, gate 106). `git status --short` is **empty** (0 M + 0 ??).
-- **Frozen list:** `../tmp/studio-real-loop/b-round-106-r107-tree-sha256.txt`, **536** entries (the round 106 list, plus `ArrangementLoopBrace.tsx`, minus the six owned paths below). Check it with `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-106-r107-tree-sha256.txt`.
-- **Snapshots** of the owned files at `35112cd`: `../tmp/studio-real-loop/b-round-106-r107-snapshots/` (`SHA256SUMS.txt`; LF, CR=0; they equal A's round 106 end hashes). Fail-before runs against these.
+## Baseline (measured by B, 2026-10-23 ~11:12 UTC)
+- **HEAD `fc086179b6f16d6ca6a523c79d333a5e6248c599`** (published, gate 107). `git status --short` is **empty**.
+- **Frozen list:** `../tmp/studio-real-loop/b-round-107-r108-tree-sha256.txt`, **539** entries. It is the round 107 list, plus the four round-107 paths that are not owned again, minus `ArrangementTransport.tsx`. Check it with `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-107-r108-tree-sha256.txt`. B checked it: OK.
+- **Snapshots** of the two owned code files and doc 092 at `fc08617`: `../tmp/studio-real-loop/b-round-107-r108-snapshots/` (`SHA256SUMS.txt`; LF, CR=0). Fail-before runs against these.
 
   | File | sha256 prefix | lines | permission |
   |---|---|---|---|
-  | `app/components/arrangement/StudioWorkspace.tsx` | `ce70fcb5` | 2523 | **owned, narrow:** (a) the `~/contexts/ArrangementContext` import (l.11–17): add `NUDGE_AT_TIME_START_MESSAGE`; (b) delete the local `NUDGE_AT_TIME_START_MESSAGE` (l.150); (c) the Ctrl+E (l.1759–1763), Ctrl+L (l.1778–1786) and Ctrl+C (l.1799–1806) branches of `handleKeyDown`. Nothing else. |
-  | `app/contexts/ArrangementContext.tsx` | `65a81c6d` | 3428 | **owned, narrow:** (a) one new `export const NUDGE_AT_TIME_START_MESSAGE` next to `GESTURE_EDIT_BLOCKED_MESSAGE` (l.169–170); (b) the single-clip part of `nudgeSelectedClip` (l.1700–1716). The reducer, `gestureCountRef`, `toggleLoopSelection`, `splitSelection`, `extendRangeToAllTracks`, `copySelection` and every other line stay byte-identical. |
-  | `app/components/arrangement/ArrangementMarkerRow.tsx` | `58d9b313` | 837 | **owned, narrow:** the three header buttons `+`, ◀ and ▶ (l.681–714) and the name editor's `onKeyDown` (l.805–811). Nothing else. |
-  | `app/components/arrangement/ArrangementDetailPanel.tsx` | `900350a5` | 855 | **owned, narrow:** the `მონიშვნა` apply button (l.516–525) and the `0 dB` Clip Gain reset button (l.557–568). Nothing else. |
-  | `app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | `581db1e7` | 705 | **owned, append-only:** lines 1–705 stay byte-identical. Append one new top-level `describe` after l.705 (new helpers go inside it or directly before it). |
-  | `docs/implementation/2026/quarter-IV/092-studio-status-repeat-announcement.md` | `4e2ed121` | 185 | **owned (whole doc):** see §1 Docs. |
+  | `app/components/arrangement/ArrangementDetailPanel.tsx` | `02583893` | 865 | **owned, narrow:** inside `ArrangementDetailContent` only: a ref for the Clip Gain input (l.536–559 gets `ref`), `resetClipGain` (l.384–398), and the `0 dB` button (l.562–578). Add a React import name only if needed (l.1–20). The range inputs, `applyDetailRange`, `commitClipGain`, `handleClipGainKeyDown`, the resize/collapse shell (l.600+) and every other line stay byte-identical. |
+  | `app/components/arrangement/ArrangementTransport.tsx` | `899c7c52` | 261 | **owned, narrow:** the `react` import (l.1); one new import line `import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';` if a layout effect is used (raw `useLayoutEffect` warns under SSR); new refs, handlers and one layout effect inside `ArrangementTransport` (after l.73); the `Undo` (l.106–115), `Redo` (l.116–125), `⌫ წაშლა` (l.140–149), `↩ Zoom` (l.221–235) and `Fit` (l.236–244) buttons. **Byte-identical:** Play, ↤, the position block, Split, Loop, Follow, the Zoom slider, ⇔ and Export (l.77–104, 127–139, 151–220, 245–261), and `ArrangementTransportNavigation` / props types. |
+  | `app/lib/arrangement/__tests__/self-disabling-focus.test.tsx` | — | new | **owned (new file).** |
+  | `docs/implementation/2026/quarter-IV/093-studio-self-disabling-button-focus.md` | — | new | **owned (new doc, whole).** |
 
-- **Expected end state:** `git status --short` = **6 M + 0 ??** (exactly the six paths above).
-- **Protected (frozen, never edited; B re-checked them in this tree):**
+  | `docs/implementation/2026/quarter-IV/092-studio-status-repeat-announcement.md` | `8e4fd333` | — | **owned, one line:** l.4 (the status line) only. It must say that round 107 is C PASS and published in `fc08617` (gate 107). Every other line stays byte-identical. This stops a repeat of C-R106-03. |
+
+- **Expected end state:** `git status --short` = **3 M + 2 ??** (exactly the five paths above).
+- **Protected (frozen, never edited; B re-checked them at `fc08617`):**
   - `app/routes/studio.$productId.tsx` (`fa2cf0bc`), `app/routes/api.studio-token.ts` (`13914809`), `app/contexts/StudioContext.tsx` (`caa388e7`), `app/utils/ffmpeg.ts` (`0995ae78`), `app/components/ui/Modal.tsx` (`741c2341`), `app/lib/arrangement/mp3-encoder.client.ts` (`ddb70919`);
   - the auth files: `app/lib/auth.ts` (`56f5b76f`), `app/contexts/AuthContext.tsx` (`bf9ee257`), `app/lib/firebase.client.ts` (`23468664`), `app/types/auth.ts` (`280fe7f2`).
-- **Servers:** `:5173/studio-lab` returns 200 (B checked at ~10:00 UTC). The backend at `:5199` is unavailable, as expected. Never start or stop servers.
+  - `StudioWorkspace.tsx`, `ArrangementContext.tsx` and the window key handler are frozen. **Do not** change the Enter-on-body contract.
+- **Servers:** `:5173/studio-lab` returns 200 (B checked at ~11:10 UTC; B's probes ran against it). The backend at `:5199` is unavailable, as expected. Never start or stop servers.
 - **Do not change the repository state:**
   - Never stash, reset, checkout, clean, commit or re-create anything.
   - Never run `biome check --write`, `format --write`, `npm run format` or `check:fix`. Format through stdin to stdout.
-  - Run fail-before and mutations in a scratch copy (`a-round-107/mut/`, with a `node_modules` symlink and the Vitest `cacheDir` inside scratch), never in `store/`.
+  - Run fail-before and mutations in a scratch copy (`a-round-108/mut/`, with a `node_modules` symlink and the Vitest `cacheDir` inside scratch), never in `store/`.
   - Stop and report if, at the start, HEAD differs, the status is not empty, or a frozen file changed.
 
 ## 1. What changes (A)
 
-Read first: `AGENT_DISCOVERABLE_CODE.md`, `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md`, `FORWARDREF_COMPONENT.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, and `.claude/prompts/new-test.md`. There are no styling changes.
+Read first: `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `.claude/prompts/new-test.md`, and `docs/implementation/TEMPLATE.md`. There are no styling changes: no class strings change.
 
-### The rules (B decisions, D-29z72)
-- **R1, one-shot shortcuts:** Ctrl/Cmd+E, Ctrl/Cmd+L, Ctrl/Cmd+Shift+L and Ctrl/Cmd+C ignore `event.repeat`, exactly like Ctrl+D/X/V. `preventDefault()` still runs on every repeat, so the browser never sees them.
-  - **Ctrl+C:** keep the `window.getSelection()?.isCollapsed === false` early return **before** `preventDefault`, unchanged, so copying selected page text still works. Only the `copySelection()` call is guarded.
-  - **Not changed:** Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z keep repeating (each repeat is one real undo or redo step); Ctrl+A stays as it is (it is idempotent and sets no status); the gesture-refusal branch (l.1736–1758) stays as it is (the reducer already coalesces it during a gesture).
-  - **Ctrl+L semantics are unchanged.** When a selected range differs from the brace, the first press replaces the loop with that range. That is the SRW-05 contract ("Loop Selection replaces old range"), and C saw exactly this in round 106. Do not touch `toggleLoopSelection`.
-- **R2, held Enter on a button:** a repeated Enter keydown on these buttons is prevented: `onKeyDown={(event) => { if (event.key === 'Enter' && event.repeat) { event.preventDefault(); } }}`, which is the existing project convention (`ArrangementExportDialog.tsx:554`). No `stopPropagation`; Space and other keys are untouched. Buttons: marker `+`, ◀, ▶ (`ArrangementMarkerRow.tsx`); detail `მონიშვნა` and `0 dB` (`ArrangementDetailPanel.tsx`).
-  - In Chromium, preventing the default of the Enter keydown stops the synthetic click. A fresh Enter (`repeat === false`) still clicks as before.
-- **R3, the marker name editor:** a repeated Enter in the name input does nothing: `preventDefault()` and `stopPropagation()` as today, but **no** `settleEditor`. A fresh Enter commits as today. Escape is unchanged (a repeated Escape cancels once; the editor is gone after the first).
-  - Reason: with R2 alone, holding Enter on `+` would still commit the default name, because the first repeat lands on the editor that the first keydown opened (B probe).
-- **R4, single clip at time 0 (contract decision):** when the clamped target start equals the clip's current start (with a non-zero delta this happens only at 00:00.000 with a negative delta), `nudgeSelectedClip` announces `ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.` and writes nothing else.
-  - This is the Snap-on text, so both modes say the same thing in the same place. One constant, `NUDGE_AT_TIME_START_MESSAGE`, now exported from `ArrangementContext.tsx` (like `GESTURE_EDIT_BLOCKED_MESSAGE`) and imported by the workspace, so the text cannot drift.
-  - With `keyRepeat === true` it is dispatched in updater form, `setStatus(() => NUDGE_AT_TIME_START_MESSAGE)`, exactly as the other two nudge refusals already are. So a hold announces it once, and a deliberate press always announces it (D-29z71).
-  - The neighbour text (`… მეზობელი კლიპი ან დროის დასაწყისი.`) stays for `moveClip` returning `null`. The group path is unchanged (it already refuses at 0).
-  - Compare the clamped target with `clip.start` directly. Do not rely on `moveClip` or `replaceClip` returning the same object.
-  - **Why this and not silence:** the user's rule for this Studio is that a refused action states its reason (done-policy "disabled features state reason"). The refusal already names the time start. A silent arrow key is indistinguishable from a broken one for a screen-reader user. This is the smallest honest behaviour; nothing moves and no history entry is written.
+### The rules (B decisions, D-29z73)
+- **F1, focus handoff (the invariant):** when one of the buttons below is activated **while it holds focus** and, as a result of that activation, it is **disabled** after the next render, focus moves to its partner:
 
-**Forbidden:** guarding the nudge **action** with `!event.repeat` (a held arrow must keep moving a clip while there is room); coalescing identical status texts in the reducer (D-29z71 k8); any change to the public `setStatus` type or the `useArrangement()` shape.
+  | Button | Partner | Why the partner is valid |
+  |---|---|---|
+  | `0 dB` (detail) | the Clip Gain input | Always enabled for a single audio clip. Its own `onKeyDown` already ignores a repeated Enter and commits only on a fresh one. |
+  | `Undo` | `Redo` | A successful undo always creates a redo entry. |
+  | `Redo` | `Undo` | A successful redo always creates an undo entry. |
+  | `⌫ წაშლა` | `Undo` | A successful delete always writes `Undo: …წაშლა…`. A fresh Enter there undoes the delete, which the user can see on the focused label. |
+  | `↩ Zoom` | `Fit` | Fit is never disabled. |
 
-### Tests (owned UI test file, append-only)
-**Rules:** exact assertions (`toBe`, `toEqual`, `toBeNull`); no `as` (including `as const`), no `@ts-` and no `any`; reuse `mountKeyRepeatWorkspace`, `keyRepeatClip`, `keyRepeatArrangement`, `pressKey`, `observeRegion`, `addedTexts` and the other helpers in l.1–705 without editing them. jsdom sends no click for a button keydown, so the button tests assert the return value of `fireEvent.keyDown` (false = prevented), as `export-toolbar-hold-enter.test.tsx` TH1/TH2 do, and click explicitly where a click is part of the scenario.
+  - **"Holds focus"** = `document.activeElement === event.currentTarget` at click time. This covers a keyboard Enter/Space and a mouse click that focused the button (Chromium focuses a clicked button).
+    - `0 dB` keeps its `onMouseDown` `preventDefault`. A mouse click therefore never focuses it, and focus is **not** moved. Focus stays where it was, for example in the Clip Gain input.
+  - **Only on exhaustion:** if the button is still enabled after the action (more undo steps, more zoom history, a refused action such as a gesture block), focus is **not** moved. N presses with N history entries = N undos, and focus stays on Undo until the last one.
+  - **Only if focus has not gone elsewhere:** move focus only while `document.activeElement` is the disabled button itself, `document.body` or `null`. jsdom keeps focus on a disabled button; Chromium drops it to BODY. Both must be handled.
+  - The partner is focused with `focus()` and no options. No `preventScroll`: these elements are already on screen.
+  - **Mechanism (A decides; keep it local and explicit):** for example, a ref holding "the button that was focused when clicked", plus a layout effect on `undoLabel` / `redoLabel` / `selectedClipId`+`range` / `navigation.canZoomBack` that focuses the partner when the button is now disabled, and clears the ref after each render. For `0 dB`, the reset to 0 always disables the button on success, so focusing the input right after a successful `setClipGain` is enough. It must still check that the button held focus.
+  - **Forbidden:** a document-level or capture-phase focus listener; any change to `StudioWorkspace.tsx`, `ArrangementContext.tsx` or the window Enter handler; switching these buttons from `disabled` to `aria-disabled`. Tests and C tools read `.disabled`, and the Undo/Redo titles stay as they are.
+- **F2, these buttons act once per Enter press:** `Undo`, `Redo`, `⌫ წაშლა`, `↩ Zoom` and `Fit` prevent a repeated Enter keydown with the existing convention: `onKeyDown={(event) => { if (event.key === 'Enter' && event.repeat) { event.preventDefault(); } }}`. No `stopPropagation`; Space and other keys are untouched.
+  - **Why:** without it, a held Enter on Undo would undo every step, then land on Redo (F1) and redo them all back. A held Enter on `↩ Zoom` would land on Fit and push a Fit on every repeat.
+  - **The contract this sets:** a **button** acts once per Enter press; the **shortcuts** Ctrl/Cmd+Z, Ctrl/Cmd+Y / Ctrl/Cmd+Shift+Z and +/− keep repeating (HK5, unchanged). B searched the backlog: no accepted contract says a held Enter on the Undo button repeats. A's round-107 reviewer listed it as "intended", but that was an inference.
+  - `0 dB` already has this guard (round 107). The Clip Gain input already ignores a repeated Enter.
 
-- **HK1 (Ctrl+L):** an enabled loop and no range. Ctrl+L once (`repeat: false`), then three repeats. The loop is disabled exactly once (`arrangement.loop.enabled === false` after the first press and after every repeat), one span with `Loop გამორთულია; დიაპაზონი შენარჩუნებულია.` is added, the Undo label is `Undo: Loop გამორთვა`, and one Undo restores `enabled === true`. A later separate Ctrl+L enables it again.
-- **HK2 (Ctrl+E):** one selected clip with the playhead inside it. Ctrl+E once, then three repeats. The clip count goes up by exactly one, one span `კლიპი გაიყო …-ზე.` is added, and nothing else is added (in particular not `Playhead არჩეული კლიპის შიგნით უნდა იყოს.`).
-- **HK3 (Ctrl+Shift+L):** a range on one lane. One press, then three repeats: one span `მონიშვნა ყველა ხაზზე: …` is added.
-- **HK4 (Ctrl+C):** one selected clip. One press, then three repeats: one span `Copy: 1 კლიპი ბუფერშია.`. A later separate press adds one more span with the same text. Every one of these keydowns returns `false` (prevented).
-- **HK5 (not over-guarded):** with two undoable edits, Ctrl+Z once and then one repeat undoes **two** steps.
-- **HE1 (◀ / ▶):** `fireEvent.keyDown(prev, { key: 'Enter', repeat: true })` and the same on next return `false`; with `repeat: false` they return `true`; a repeated Space on ◀ returns `true`.
-- **HE2 (`+`):** a repeated Enter on `+` returns `false`, a fresh one returns `true`.
-- **HE3 (name editor):** open the editor with a click on `+`. A repeated Enter in the name input leaves the editor open and adds no marker; then a fresh Enter commits exactly one marker with the default name.
-- **HE4 (detail buttons):** a repeated Enter on `მონიშვნა` and on `0 dB` returns `false`; a fresh one returns `true`.
-- **NZ1 (deliberate press):** Snap off, a single selected clip at 0. ArrowLeft (`repeat: false`) adds one span with exactly `ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.`; the clip start stays 0 and the Undo label is unchanged.
-- **NZ2 (hold):** the same setup. One press, then three repeats: one span in total; the same `<output>` and span node. A later separate press adds one new span with the same text.
-- **NZ3 (the action still repeats):** Snap off, a single clip at 0.3 with no neighbour. ArrowLeft once, then four repeats: the start goes 0.2 → 0.1 → 0, then the time-start text is added **once** and no other text is added. This is B's original round-106 SK7 premise, now true.
-- **NZ4 (Snap on, same text):** Snap on, a single clip at 0, ArrowLeft once: the added text equals NZ1's text (one string compared with `toBe`).
-- **SU1–SU6 and SK1–SK12 stay byte-identical and green.** SK1/SK7 keep their neighbour setups.
+### Tests (new file `app/lib/arrangement/__tests__/self-disabling-focus.test.tsx`)
+**Rules:**
+- Exact assertions only (`toBe`, `toEqual`, `toBeNull`). No `as` (including `as const`), no `@ts-` and no `any`.
+- **jsdom does not blur a focused element that becomes disabled.** So every handoff assertion is `expect(document.activeElement).toBe(<partner element>)`, which is red before the fix because focus stays on the disabled button. An assertion like "activeElement is not BODY" is forbidden: it is green before the fix.
+- jsdom sends no click for a button keydown. Focus the button with `.focus()`, then `fireEvent.click` (a "keyboard" activation in this harness). For F2, assert the return value of `fireEvent.keyDown` (false = prevented), as `export-toolbar-hold-enter.test.tsx` TH1/TH2 do.
+- **Harness:** reuse the pattern of `export-toolbar-hold-enter.test.tsx`: `ArrangementProvider` + `ArrangementTransport` with a `navigation` prop, and the fake AudioContext. Copying its fakes into the new file is allowed; do not edit that file. For zoom back, use a small stateful wrapper whose `onZoomBack` sets `canZoomBack` to false. For the detail panel, mount the panel the way `clip-gain.test.tsx` does.
 
-**Fail-before** (scratch, the four code files = the snapshots, the new test file). B expects: HK1–HK4, HE1–HE4 and NZ1–NZ3 red; HK5 and NZ4 green; SU and SK green. Report the exact list and explain any difference.
+**Cases:**
+- **FL1 (0 dB, keyboard):** a selected audio clip with `gainDb: 1`, the panel open. Focus `0 dB`, then click.
+  - The gain is cleared (`undefined`) and `0 dB` is disabled.
+  - `document.activeElement` is the Clip Gain input.
+  - A fresh Enter keydown on the input adds exactly `Clip Gain უცვლელია: 0.0 dB.` and leaves the clip count unchanged.
+- **FL2 (0 dB, mouse):** the same setup, focus on `document.body`. `fireEvent.mouseDown` on `0 dB` returns `false`, then `fireEvent.click`. The gain is cleared and `document.activeElement` is still `document.body`. Focus is not stolen, because the button never held focus.
+- **FL3 (Undo, only on exhaustion):** two undoable edits. Focus Undo.
+  - First click: one step undone, Undo still enabled, `document.activeElement` is the Undo button.
+  - Second click: Undo disabled, `document.activeElement` is the Redo button.
+- **FL4 (Redo):** two undone edits. Focus Redo. First click: focus stays on Redo. Second click: Redo disabled, focus on Undo.
+- **FL5 (⌫):** one selected clip, no range. Focus ⌫, click. The clip is removed, ⌫ is disabled, and `document.activeElement` is the Undo button, whose title is `Undo: ` + the delete label (assert the exact title).
+- **FL6 (↩ Zoom):** stateful wrapper with `canZoomBack` true. Focus ↩ Zoom, click. It becomes disabled and `document.activeElement` is the Fit button.
+- **FL7 (no focus, no move):** two undoable edits, focus on `document.body`. Click Undo twice without focusing it. `document.activeElement` is `document.body` after each click.
+- **FL8 (refused action keeps focus):** with the pointer gesture active, or another refusal the provider exposes (A picks one and names it), focus Undo and click. Undo stays enabled and focus stays on Undo. If no refusal is reachable from this harness, say so and skip FL8; FL3's first click already covers "enabled → no move".
+- **FL9 (F2):**
+  - A repeated Enter keydown on Undo, Redo, ⌫, ↩ Zoom and Fit returns `false`; a fresh one returns `true`.
+  - A repeated Space keydown on Undo returns `true` (this harness has no window handler).
+  - The Ctrl+Z **shortcut** is not part of this file. HK5 covers it and stays frozen.
 
-**Mutations** (scratch only; one unmutated control; record the red tests):
-- **h1:** remove the repeat guard from Ctrl+L → HK1 red.
-- **h2:** remove it from Ctrl+E → HK2 red.
-- **h3:** remove it from Ctrl+Shift+L → HK3 red.
-- **h4:** remove it from Ctrl+C → HK4 red.
-- **h5:** guard Ctrl+Z with `!event.repeat` as well → HK5 red (shows the test catches over-guarding).
-- **h6:** drop the ◀ `onKeyDown` → HE1 red; **h7:** drop the `+` one → HE2 red; **h8:** let a repeated Enter settle the editor → HE3 red; **h9:** drop the `0 dB` one → HE4 red.
-- **h10:** remove the R4 branch → NZ1–NZ3 red.
-- **h11:** dispatch the R4 refusal as a plain string even on `keyRepeat` → NZ2 red.
-- **h12:** guard the nudge action with `!event.repeat` → NZ3 and SK7 red.
+**Fail-before** (scratch: the two code files = the snapshots, the new test file). B expects FL1, FL3, FL4, FL5, FL6 and FL9 red (FL3 and FL4 on the second click), and FL2, FL7 and FL8 green. Report the exact list and explain any difference.
 
-### Docs (doc 092, owned whole)
-- **l.4 status:** round 107 waits for C (D-29z72); rounds 104–106 are C PASS and published in `35112cd` (gate 106).
-- **C-R106-03:** the A-R104-REPEAT-DRAG entry's status line (l.94) says round 105 passed C (C round 105) and was published in `35112cd`.
-- **Problems and solutions:** one entry for HK (R1), one for HE (R2 + R3, with B's probe), and one for NZ (R4: why a refusal rather than silence; one exported constant).
-- **Changed files:** add round 107 (HK1–HK5, HE1–HE4, NZ1–NZ4).
-- **Testing:** fail-before, h1–h12, the targeted count.
-- **TODO:** the C rows of round 107; GATE106-S1/S2/S4 and ARCH-R105-STATUS-INTENT (signals, not scheduled).
+**Mutations** (scratch only; one unmutated control before and after; record the red tests):
+- **m1:** drop the 0 dB handoff → FL1 red.
+- **m2:** 0 dB hands off even when it did not hold focus → FL2 red.
+- **m3:** Undo hands off after every undo, not only on exhaustion → FL3 red (first click).
+- **m4:** drop the Redo → Undo handoff → FL4 red.
+- **m5:** drop the ⌫ handoff → FL5 red.
+- **m6:** drop the ↩ Zoom handoff → FL6 red.
+- **m7:** hand off without the "held focus" check → FL7 red.
+- **m8:** drop the repeated-Enter guard from Undo → FL9 red.
+- **m9:** drop it from Fit → FL9 red.
+
+### Docs (new doc 093, owned whole; doc 092 l.4 only)
+- **Doc 092 l.4:** the status reads that round 107 is C PASS and published in `fc08617` (gate 107). No other line in doc 092 changes.
+Follow `docs/implementation/TEMPLATE.md`, in Georgian with English technical terms.
+- **Status:** round 108 waits for C (D-29z73).
+- **Context:** C-R107-01 and B's probe (Undo, Redo, ⌫, ↩ Zoom), with the evidence paths.
+- **Approach:** F1 (partner table, "held focus", "only on exhaustion") and F2 (buttons once per press, shortcuts repeat). Name the rejected alternatives and why: `aria-disabled`; a global focus listener; changing the Enter-on-body contract.
+- **Changed files**, **Problems and solutions**, **Testing:** fail-before, m1–m9 and the targeted count.
+- **TODO:** the C rows of round 108; B-R107-ENTER-ON-BODY (a user question); the held-Enter toolbar sweep pending ARCH-R107-SHARED-ENTER-GUARD; GATE107-S1..S4.
 
 ### Checks A runs (speed rules)
 - `npm run typecheck`.
-- `npm run lint`, with 0 diagnostics in the owned files (use `--max-diagnostics` and grep, as in round 106).
-- `npx biome check <the 5 owned code and test files>`, without `--write`.
-- **Targeted vitest:** the list is `grep -rlE "ArrangementProvider|StudioWorkspace|useArrangement\b|status-announcement|ArrangementMarkerRow|ArrangementDetailPanel|nudgeSelectedClip|stepMarker|NUDGE_AT_TIME_START" app --include=*.test.ts --include=*.test.tsx | sort > ../tmp/studio-real-loop/a-round-107/targeted-list.txt`, run with `npx vitest run $(cat ../tmp/studio-real-loop/a-round-107/targeted-list.txt)`. Report the file and test counts. B expects ≥ 69 files and 1138 + the new tests; list any extra files.
-- **If a frozen test fails because it pinned the old silent time-0 nudge:** do not edit it. Stop the R4 part, keep R1–R3, and report the test and its line to B.
+- `npm run lint`, with 0 diagnostics in the owned files (use `--max-diagnostics` and grep, as in round 107).
+- `npx biome check <the 3 owned code and test files>`, without `--write`.
+- **Targeted vitest:** build the list with `grep -rlE "StudioWorkspace|useArrangement\b|ArrangementTransport|ArrangementDetailPanel|clip-gain-reset|arrangement-zoom-back|arrangement-fit|self-disabling-focus" app --include=*.test.ts --include=*.test.tsx | sort > ../tmp/studio-real-loop/a-round-108/targeted-list.txt` and run it with `npx vitest run $(cat ../tmp/studio-real-loop/a-round-108/targeted-list.txt)`. Report the file and test counts, and list every file. Round 107's similar list had 69 files; expect about that many plus the new file. Tests that mount `StudioWorkspace` and click Undo, ⌫ or `0 dB` cover the changed code.
+- **If a frozen test fails** because it pinned focus staying on a disabled button, or a held Enter on a toolbar button repeating, do not edit it. Stop that part and report the test and its line to B.
 - Do **not** run the full suite or `npm run verify`; the root gate runs them.
-- **Code-reviewer:** run it (6 files change). Pass its Architecture note through verbatim, and ask it to sweep every button with an `onClick` that sets a status in `app/components/arrangement` for the held-Enter class, and every `handleKeyDown` modifier branch for a missing repeat guard.
+- **Code-reviewer:** run it if 3 or more files change (4 change). Pass its Architecture note through verbatim. Ask it to sweep for other self-disabling buttons in `app/components/arrangement` whose activation can leave focus on BODY. Examples: the marker ⌫, the export dialog, the group/track folds. List them for B, with no fix.
+- **Optional browser self-check** in `a-round-108/` (evidence, not C acceptance), e.g. FL-GAIN-KEYBOARD and FL-UNDO.
 
 ## 2. Acceptance — what C checks (real Chromium)
-**Setup for every browser row unless stated:** a fresh incognito context on `/studio-lab` at the stated viewport; Decline; wait for the library to settle; a `MutationObserver` on `[data-testid=arrangement-status]` logging added element nodes and their text; a kept reference to the `<output>`; a capture-phase `keydown` counter for `repeat === true`. A hold is `keyboard.down` ×(N+1) at ~33 ms, then `up`. A separate press is `keyboard.press`. C's round-106 helpers (`c-round-106/tools/kr106.cjs`) may be reused.
+**Setup for every browser row unless stated:**
+- A fresh incognito context on `/studio-lab` at the stated viewport; Decline; wait for the library to settle.
+- A `MutationObserver` on `[data-testid=arrangement-status]` logging added nodes and their text.
+- Record `document.activeElement` after every step: its `data-testid`, else its `title`, else its tag. Record the clip count (`[data-clip-id]`).
+- A hold is `keyboard.down` ×(N+1) at ~33 ms, then `up`. A separate press is `keyboard.press`.
+- C's helpers `c-round-107/tools/gainfocus.cjs` and `lib107.cjs` and B's `b-round-107/probe/*.cjs` may be reused.
 
-**Clip setup:** focus the Middle East row and press Enter once (one clip at 00:00.000; twice for two back-to-back clips), Fit, then select a clip by clicking its title strip.
+**Clip setup:** focus the Middle East row and press Enter once per clip, then Fit and blur.
 
 | ID | Steps | PASS when |
 |---|---|---|
-| **HK-CTRL-L** (primary; 1280 and 1440) | One clip. Snap on. Drag a range on the clip from t≈3 s to t≈12 s, blur, Ctrl+L (loop created). Then hold Ctrl+L: 1 down + ≥ 10 repeats. Then one separate Ctrl+L. | <ul><li>Over the hold, the loop button's `aria-pressed` changes **once** (true → false) and stays false.</li><li>Exactly one added span, `Loop გამორთულია; დიაპაზონი შენარჩუნებულია.`</li><li>Undo label `Undo: Loop გამორთვა`.</li><li>Then exactly this sequence: one Ctrl+Z → `aria-pressed` true; one separate Ctrl+L → `aria-pressed` false and exactly one more added span `Loop გამორთულია; დიაპაზონი შენარჩუნებულია.`</li><li>Screenshot.</li></ul> |
-| **HK-CTRL-E** (1280) | One clip, Snap off. Click the ruler at t≈10 s (inside the clip), select the clip, hold Ctrl+E: 1 down + ≥ 10 repeats. | Clip count 1 → 2 exactly once; exactly one added span `კლიპი გაიყო …-ზე.`; no other text added. One Ctrl+Z → 1 clip. |
-| **HK-CTRL-SHIFT-L** (1280) | One clip, a range dragged on it. Hold Ctrl+Shift+L: 1 down + ≥ 10 repeats. | Exactly one added span `მონიშვნა ყველა ხაზზე: …`. |
-| **HK-CTRL-C** (1280) | One clip, selected. Hold Ctrl+C: 1 down + ≥ 10 repeats, then one separate Ctrl+C. | One span `Copy: 1 კლიპი ბუფერშია.` during the hold; the separate press adds one more. |
-| **HK-UNDO-STILL-REPEATS** (1280) | One clip, three separate ArrowRight presses (Snap off; 0.300). Hold Ctrl+Z: 1 down + 2 repeats. | The clip is back at 00:00.000 (three undo steps). |
-| **HE-MARKER-PREV** (1280 and 1440) | No markers, playhead at 0. Focus ◀ and hold Enter: 1 down + ≥ 10 repeats. Then one separate Enter. | `უკან მარკერი აღარ არის` added **once** during the hold (B probe before the fix: 6 of 6); the separate Enter adds one more. |
-| **HE-MARKER-NEXT** (1280) | One marker at ≈5 s (ruler click with Snap off, M, Enter), then Home. Focus ▶ and hold Enter: 1 down + ≥ 10 repeats. | The playhead moves to the marker time (record the position readout) and stays there. A successful step sets no status (`stepMarker` l.247–250 only seeks and selects), so **0 spans are added** during the hold; in particular `წინ მარკერი აღარ არის` is never added (before the fix the second keydown would add it). |
-| **HE-MARKER-ADD** (1280 and 1440) | Playhead at 0. Focus `+` and hold Enter: 1 down + ≥ 5 repeats, then up. Then type `Intro` and press Enter. | After the hold: the name editor is open and focused, there are 0 markers and the Undo label is unchanged (B probe before the fix: `Marker 1` committed by the repeat). After typing: exactly one marker, named `Intro`. |
-| **HE-CLIPGAIN-RESET** (1280) | One clip, selected (gain 0.0). Focus `0 dB` and hold Enter: 1 down + ≥ 10 repeats; then one separate Enter. | `Clip Gain უცვლელია: 0.0 dB.` once during the hold; the separate Enter adds one more. |
-| **HE-DETAIL-APPLY** (1280) | One clip, selected; detail panel open; type start 2 and end 4 in the range inputs (Tab between them, no Enter). Focus `მონიშვნა` and hold Enter: 1 down + ≥ 10 repeats. | Exactly one added span (record the exact text); the range is 2–4. |
-| **NZ-TIME0** (primary; 1280 and 1440) | One clip at 0, selected, Snap off. One separate ArrowLeft. Then hold ArrowLeft: 1 down + ≥ 30 repeats. Wait 500 ms, then one separate ArrowLeft. | <ul><li>The first press adds `ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.`</li><li>The hold adds exactly one more (its first, non-repeat keydown); the repeats add none.</li><li>The last press adds one more.</li><li>The clip stays 00:00.000; the Undo label never changes; the `<output>` is the same node with one child at every sample.</li></ul> |
-| **NZ-MOVES** (1280) | B's round-106 KR-NUDGE-MOVES as written: one clip moved to 0.300 with three separate ArrowRight, then hold ArrowLeft: 1 down + ≥ 10 repeats. | The clip reaches 00:00.000; the time-start text is added exactly once and nothing else; Ctrl+Z ×3 → 0.100, 0.200, 0.300. |
-| **NZ-SNAPON-SAME** (1280) | One clip at 0, Snap on, ArrowLeft once. | The added text is byte-identical to NZ-TIME0's. |
-| **KR-NUDGE-NEIGHBOUR** (regression; 1280) | Round 106 KR-NUDGE-SNAPOFF with the neighbour recipe (two clips, second selected). | The neighbour text is added once during the hold, as in round 106. |
-| **SR-REPEAT-SPACE**, **HD-BLOCKED-HOLD**, **SR-TEXT-REG** (regression; 1280) | As in round 106 (`c-round-106/tools/sr106.cjs`). | Same results as round 106. |
+| **FL-GAIN-KEYBOARD** (primary; 1280 and 1440) | C-R107-01's exact recipe: one clip, select it by its title strip, open the detail panel, type 1 in Clip Gain + Enter, Tab to `0 dB`, Enter. Then Enter once more. | <ul><li>After the reset: `Clip Gain: Middle East — საჯარო preview — 0.0 dB.` added once, `0 dB` disabled, the active element is `arrangement-detail-clip-gain-input`, value `0.0`.</li><li>After the second Enter: exactly one added span `Clip Gain უცვლელია: 0.0 dB.`; the clip count stays **1**; no `დაემატა` text; the Undo label stays `Undo: Clip Gain`.</li><li>Screenshot.</li></ul> |
+| **FL-GAIN-HOLD** (1280) | The same up to Tab to `0 dB`. Hold Enter: 1 down + ≥ 10 repeats. | Exactly one added span (`… — 0.0 dB.`); focus on the Clip Gain input at the end; clip count 1; no `უცვლელია` and no `დაემატა` during the hold. |
+| **FL-GAIN-MOUSE** (regression; 1280) | Gain 1 dB committed. Click into the Clip Gain input, then mouse-click `0 dB`. | Gain `0.0`; the active element is still the Clip Gain input; one `… — 0.0 dB.` span; clip count 1. |
+| **FL-UNDO** (primary; 1280 and 1440) | Two clips (two `დამატება` entries). Focus Undo, Enter; Enter; Enter. | <ul><li>1st Enter: 1 clip, focus on Undo.</li><li>2nd Enter: 0 clips, Undo disabled, focus on the button whose title starts `Redo:`.</li><li>3rd Enter: 1 clip, and the button whose title starts `Redo:` is **still enabled** (a library add would clear the redo stack). The clip starts at `00:00.000`. Record the exact status text; it is expected to start with `Redo: `.</li><li>Screenshot.</li></ul> |
+| **FL-UNDO-HOLD** (1280) | Three clips. Focus Undo, hold Enter: 1 down + ≥ 10 repeats. Then one separate Enter. | Exactly one undo during the hold (3 → 2 clips; focus stays on Undo); the separate Enter → 1 clip. |
+| **FL-REDO** (1280) | One clip, then Ctrl+Z (0 clips, one redo entry). Focus Redo, Enter; Enter. | 1st: 1 clip, Redo disabled, focus on Undo. 2nd: 0 clips and Redo enabled again (an undo, not a library add). Record the status text. |
+| **FL-DELETE** (primary; 1280 and 1440) | One clip, selected by its title strip, no range. Focus `⌫ წაშლა`, Enter; Enter. | 1st: 0 clips, focus on Undo with title `Undo: კლიპის წაშლა`. 2nd: 1 clip back at `00:00.000` (the probe's library add landed at `00:02.688`), and Redo is enabled with title `Redo: კლიპის წაშლა` (an undo of the delete). Record the status text. |
+| **FL-ZOOMBACK** (1280) | One clip. Blur, press `=` then `+` (B's probe recipe; ↩ Zoom becomes enabled). Focus ↩ Zoom, Enter; Enter. | 1st: ↩ Zoom disabled, focus on `arrangement-fit`. 2nd: a Fit (record the zoom readout); clip count unchanged. If ↩ Zoom is still enabled after the 1st Enter (more zoom history than the recipe expected), press it until it disables, and report the recipe difference. That is not a FAIL of A. |
+| **FL-UNDO-MOUSE** (regression; 1280) | Two clips. Mouse-click Undo twice. | Two undos (0 clips). Record the active element; it is the Redo button or BODY, never an unexpected element. Then one Enter: if focus is on Redo, it redoes (1 clip, the status starts `Redo: `); if focus is BODY, report it as a finding, not a FAIL of this row. |
+| **HK-UNDO-STILL-REPEATS** (regression; 1280) | As in round 107. | The clip is back at 00:00.000 (the Ctrl+Z shortcut still repeats). |
+| **R12-L2-ENTER-ADD** (regression; 1280) | Focus the Middle East row, Enter. | One clip is added (the library Enter contract is unchanged). |
+| **HE-MARKER-ADD**, **SR-TEXT-REG** (regression; 1280) | As in round 107 (`c-round-107/tools`). | Same results as round 107. |
 | **PX-NET** | all sessions | 0 page-originated requests to `/api/studio-token`, R2, `/api/recording-*` or `/api/download`; 0 `Authorization` headers. |
 | **REG-HYD** | all sessions | No hydration warning, no pageerror, no non-noise console error. |
-| **G107-3** | anonymous, run alone, after all rows | The header link opens `/studio-lab` with the workspace and the demo badge; `/studio/middle-east` shows sign-in and no workspace; `/api/studio-token` returns 401; the fake-Bearer sub-check is BLOCKED (backend unavailable in cloud) under `blocked`. |
-| **AN-REVIEW** (offline) | Review A's tests. | The fail-before list matches §1 or A explains the difference; C re-runs h1, h5, h8, h10 and h12 with its own mutation strings and gets the same red tests; l.1–705 are byte-identical to the snapshot; exact assertions; no `as`, `@ts-` or `any` in the added lines. |
-| **T107-TARGETED** | `npx vitest run $(cat a-round-107/targeted-list.txt)` | All pass. C re-runs the grep and reports any missing file. |
-| **DOC-092** (offline) | Read doc 092. | l.4 carries the round 107 status and `35112cd`; l.94 no longer says waiting for C; HK, HE and NZ entries exist with their rules; the changed-files list names HK1–HK5, HE1–HE4, NZ1–NZ4. |
-| **SOURCE-UNCHANGED** | start and end | HEAD `35112cd`; start status empty, end **6 M + 0 ??**; the frozen list 536/536; A's end hashes match; against the snapshots, every hunk lies inside the narrow ranges of the Baseline table; `toggleLoopSelection`, `splitSelection`, `extendRangeToAllTracks`, `copySelection` and the reducer are unchanged. |
+| **G108-3** | anonymous, run alone, after all rows | The header link opens `/studio-lab` with the workspace and the demo badge; `/studio/middle-east` shows sign-in and no workspace; `/api/studio-token` returns 401. The fake-Bearer sub-check is BLOCKED (backend unavailable in cloud) and goes under `blocked`. |
+| **AN-REVIEW** (offline) | Review A's tests. | <ul><li>The fail-before list matches §1, or A explains the difference.</li><li>C re-runs m1, m3, m5, m7 and m8 with its own mutation strings and gets the same red tests.</li><li>Handoff assertions use `toBe(<partner>)`, not "not BODY".</li><li>Exact assertions only; no `as`, `@ts-` or `any`.</li></ul> |
+| **T108-TARGETED** | `npx vitest run $(cat a-round-108/targeted-list.txt)` | All pass. C re-runs the grep and reports any missing file. |
+| **DOC-092-L4** (offline) | Diff doc 092 against the snapshot. | Only l.4 changed, and it names round 107 as C PASS and published in `fc08617`. |
+| **DOC-093** (offline) | Read doc 093. | The TEMPLATE sections exist; F1 (partner table, held focus, exhaustion) and F2 are stated; the rejected alternatives are named; testing has fail-before and m1–m9. |
+| **SOURCE-UNCHANGED** | start and end | <ul><li>HEAD `fc08617`; the start status is empty and the end status is **3 M + 2 ??**.</li><li>The frozen list checks 539/539, and A's end hashes match.</li><li>Against the snapshots, every hunk lies inside the narrow ranges of the Baseline table.</li><li>Play, ↤, Split, Loop, Follow, the slider, ⇔ and Export are byte-identical, and so are `commitClipGain` and `handleClipGainKeyDown`.</li></ul> |
 
 Gate rows (C does not claim them; list them under `gate`): full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED.
 
 **Neighbouring behaviour that could break:**
-- **A held arrow stops moving a clip:** a guard on the action. NZ3, NZ-MOVES, SK7 and h12 cover it.
-- **Undo/Redo stops repeating:** HK5, HK-UNDO-STILL-REPEATS and h5.
-- **A fresh Enter on a button stops working:** HE1–HE4 (`repeat: false` returns `true`), HE-MARKER-PREV's separate Enter, HE-MARKER-ADD's typed commit.
-- **Copying page text with Ctrl+C:** the `getSelection` early return is unchanged (SOURCE-UNCHANGED).
-- **A deliberate second press goes silent:** the separate-press steps, SR-REPEAT-SPACE.
+- **Several undos in a row stop working:** focus is moved too early. FL3 (first click), FL-UNDO (1st Enter) and m3 cover it.
+- **Mouse users lose their place:** FL2, FL7, FL-GAIN-MOUSE and FL-UNDO-MOUSE.
+- **The Ctrl+Z shortcut stops repeating:** HK5 (frozen) and HK-UNDO-STILL-REPEATS.
+- **The library's Enter stops adding:** R12-L2-ENTER-ADD.
+- **The pending-gain flow:** `commitClipGain` is unchanged, and FL-GAIN-MOUSE covers it.
 
 ## 3. Ableton correspondence
 | Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
 |---|---|---|---|---|
-| A held shortcut (Loop, Split, Copy) acts once | None consulted; no Live claim is made about key auto-repeat. | — | CZABA's keyboard convention since Space/Ctrl+D/X/V: one-shot commands ignore auto-repeat; Undo/Redo repeat. | არ ეხება |
-| A held Enter on a button acts once; a held Enter does not commit a name the user has not typed | None consulted. | — | CZABA's own rule (precedent: export dialog, transport, library preview). | არ ეხება |
-| ← on a clip at time 0 says why nothing moved | Live 12 manual §3.2 Status Bar "displays useful information like error messages" (captured in `b-round-37/ableton-live-concepts-20261013.txt`); it says nothing about this case. | Not confirmed for this case | CZABA rule: a refused action states its reason; the same text with Snap on and off. | არ ეხება (CZABA requirement) |
+| Keyboard focus stays in the group when the activated button disables itself | None consulted. Live's own UI is not a keyboard-focus reference, and no Live claim is made. | — | CZABA accessibility rule: a refused or finished action never leaves keyboard focus on `<body>`, where the next Enter would edit silently. | არ ეხება (CZABA requirement) |
+| A toolbar button acts once per Enter press; Ctrl+Z repeats | None consulted. | — | CZABA convention (rounds 97–107: Export, marker, detail buttons). | არ ეხება |
 
 ## 4. Report (A)
-Write `a-round-107.md` and `a-round-107/a-round-107-summary.json` as you go (the harness writes `a-round-107-result.json`). Include the changed files with end sha256 (`a-round-107/end-hashes.txt`), the exact commands and results, the fail-before list, the mutation table h1–h12, the code-reviewer findings with your disposition and its Architecture note verbatim, the sweep result for buttons and modifier branches, and the exact next C checks. A may run its own browser self-check (e.g. HE-MARKER-ADD, HK-CTRL-L) in `a-round-107/`; it is evidence, not C acceptance. If you stop early, write a checkpoint with the next step.
+Write `a-round-108.md` and `a-round-108/a-round-108-summary.json` as you go (the harness writes `a-round-108-result.json`). Include:
+- the changed files with end sha256 (`a-round-108/end-hashes.txt`);
+- the exact commands and their results;
+- the fail-before list and the mutation table m1–m9;
+- the code-reviewer findings with your disposition, its Architecture note verbatim, and the self-disabling sweep;
+- the exact next C checks.
+
+If you stop early, write a checkpoint with the next step.
