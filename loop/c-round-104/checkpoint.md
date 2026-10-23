@@ -1,0 +1,12 @@
+# C round 104 checkpoint
+- start: HEAD 3b6178b, 3M+4??, frozen 535/535 OK, A end hashes 7/7 OK, diff scope OK (only import, l.535, interface, 2 value sites, destructure, span, doc091 l.4). server 200.
+- SR-REPEAT-SPACE 1280x720 PASS, 1440x900 see out/space-1440x900.json
+- SR-REGION-STABLE ran: region stable, children 1, transport advances 00:00.362->00:01.062, but play/pause set NO status (baseline togglePlayback also sets none) => only 2 distinct texts; row's '3 distinct texts' not met as written (spec mismatch)
+- SR-TEXT-REG PASS (add/Fit button/Delete/Undo strings match 3b6178b templates; h16=lineHeight16)
+- SR-REPEAT-FAILED-ROW PASS (title 'CZABA hero — საჯარო preview')
+- SR-DRAG-STREAM PASS 3/3: pm 81, added el 81, clamp fade 101.352 (=clip dur), 21 identical clamped spans, undo 'Fade In' -> Ctrl+Z fi 0.000, longtask none
+- BLOCKED-MOVE probe: 81 pm -> 81 added spans, 80x identical blocked sentence (A-R104-REPEAT-DRAG confirmed)
+- G104-3 PASS both vps (header->studio-lab workspace+badge, /studio/middle-east sign-in 0 workspace, token 401); fake-Bearer BLOCKED
+- T104-TARGETED PASS 69/69 files 1122/1122 (list identical to A's)
+- AN-REVIEW: C mutations control 9/9, m1 SA3 SU1 SU2, m2 SU1 SU2, m3 SU1-4 (identity toBe), m4 SA4 SU4; no as/@ts-/any. End: 3M+4??, frozen OK, end hashes OK. NEXT: write report
+- DONE: c-round-104.md + c-round-104.json written (PASS, 1 Medium bug A-R104-REPEAT-DRAG, SR-REGION-STABLE spec mismatch). Final source recheck OK.

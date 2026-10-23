@@ -1,0 +1,116 @@
+
+ RUN  v4.0.16 /home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-104/mut
+
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA1 creates the initial entry with sequence 0 1ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA2 a different string gives a new entry with the exact text and sequence + 1 1ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA3 the same string gives a new entry with the same text and sequence + 1, twice gives + 2 0ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA4 an updater that returns the current text gives the same entry object 0ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA5 an updater that returns a different text gives a new entry with sequence + 1 1ms
+ × app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU1 Space twice on an empty arrangement replaces the inner span inside the same live region 124ms
+   → expected <output …(3)></output> to be <output …(3)></output> // Object.is equality
+ × app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU2 activating a failed library row twice announces the failed text both times 61ms
+   → expected <output …(3)></output> to be <output …(3)></output> // Object.is equality
+ × app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU3 the live region node stays the same with exactly one element child across distinct texts 56ms
+   → expected <output …(3)></output> to be <output …(3)></output> // Object.is equality
+ × app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU4 the post-gesture restore brings back the old text and an unchanged restore keeps the same span 46ms
+   → expected 'დემო კოლექციიდან 1 წყარო ვერ ჩაიტვირთ…' to be 'დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდა…' // Object.is equality
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 5 passed (9)
+   Start at  08:05:26
+   Duration  1.75s (transform 734ms, setup 0ms, import 1.14s, tests 294ms, environment 634ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU1 Space twice on an empty arrangement replaces the inner span inside the same live region
+AssertionError: expected <output …(3)></output> to be <output …(3)></output> // Object.is equality
+
+- Expected
++ Received
+
+  <output
+    aria-live="polite"
+    class="block w-full basis-full break-words text-foreground"
+    data-testid="arrangement-status"
+  >
+-   დემო კოლექციიდან 1 წყარო ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.
++   დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდან დაამატე კლიპი.
+  </output>
+
+ ❯ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx:232:52
+    230|     const { api, view, region } = await mountAnnouncementWorkspace();
+    231|     pressSpace();
+    232|     expect(view.getByTestId('arrangement-status')).toBe(region);
+       |                                                    ^
+    233|     expect(region.textContent).toBe(NOTHING_TO_PLAY);
+    234|     expect(live(api).isPlaying).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU2 activating a failed library row twice announces the failed text both times
+AssertionError: expected <output …(3)></output> to be <output …(3)></output> // Object.is equality
+
+- Expected
++ Received
+
+  <output
+    aria-live="polite"
+    class="block w-full basis-full break-words text-foreground"
+    data-testid="arrangement-status"
+  >
+-   დემო კოლექციიდან 1 წყარო ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.
++   „Broken Song“ ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.
+  </output>
+
+ ❯ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx:255:52
+    253|     const { api, view, region } = await mountAnnouncementWorkspace();
+    254|     act(() => live(api).addSourceToActiveTrack('bad'));
+    255|     expect(view.getByTestId('arrangement-status')).toBe(region);
+       |                                                    ^
+    256|     expect(region.textContent).toBe(FAILED_TEXT);
+    257|     const first = region.firstElementChild;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU3 the live region node stays the same with exactly one element child across distinct texts
+AssertionError: expected <output …(3)></output> to be <output …(3)></output> // Object.is equality
+
+- Expected
++ Received
+
+  <output
+    aria-live="polite"
+    class="block w-full basis-full break-words text-foreground"
+    data-testid="arrangement-status"
+  >
+-   დემო კოლექციიდან 1 წყარო ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.
++   დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდან დაამატე კლიპი.
+  </output>
+
+ ❯ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx:273:52
+    271|     const { api, view, region } = await mountAnnouncementWorkspace();
+    272|     pressSpace();
+    273|     expect(view.getByTestId('arrangement-status')).toBe(region);
+       |                                                    ^
+    274|     expect(region.textContent).toBe(NOTHING_TO_PLAY);
+    275|     expect(region.childElementCount).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU4 the post-gesture restore brings back the old text and an unchanged restore keeps the same span
+AssertionError: expected 'დემო კოლექციიდან 1 წყარო ვერ ჩაიტვირთ…' to be 'დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდა…' // Object.is equality
+
+Expected: "დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდან დაამატე კლიპი."
+Received: "დემო კოლექციიდან 1 წყარო ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია."
+
+ ❯ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx:289:32
+    287|     const { api, region } = await mountAnnouncementWorkspace();
+    288|     pressSpace();
+    289|     expect(region.textContent).toBe(NOTHING_TO_PLAY);
+       |                                ^
+    290| 
+    291|     const gesture: { release: (() => void) | null } = { release: null …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+

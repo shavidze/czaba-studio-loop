@@ -1,0 +1,50 @@
+const { createRequire } = require('module');
+const req = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = req('playwright');
+const fs = require('fs');
+const OUT = '/home/runner/czaba-project/tmp/studio-real-loop/a-round-104/browser';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const W = Number(process.argv[2] || 1280);
+const TEXT = 'დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდან დაამატე კლიპი.';
+const NOISE = /cart|ERR_CONNECTION|ERR_TUNNEL|Failed to load resource|fetch failed|net::ERR|localhost:5199|firebase|Download the React DevTools/i;
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const ctx = await browser.newContext({ viewport: { width: W, height: 800 } });
+  const page = await ctx.newPage();
+  const S = { width: W, errors: [], forbidden: [] };
+  page.on('console', (x) => { if ((x.type() === 'error' || x.type() === 'warning') && !NOISE.test(x.text())) S.errors.push(x.text().slice(0, 300)); });
+  page.on('pageerror', (e) => S.errors.push('pageerror ' + String(e).slice(0, 300)));
+  page.on('request', (q) => { if (/studio-token|recording-|\/api\/download|r2\./.test(q.url()) || q.headers().authorization) S.forbidden.push(q.url()); });
+  await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('[data-testid=arrangement-grid-control]', { timeout: 90000 }); await sleep(4000);
+  await page.evaluate(() => { const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === 'Decline'); if (b) b.click(); }); await sleep(300);
+  const opt = page.locator('[role=option][data-source-id="demo-middle-east"]');
+  await opt.waitFor({ state: 'attached', timeout: 90000 });
+  { const t = Date.now(); while (Date.now() - t < 90000 && (await opt.getAttribute('draggable')) !== 'true') await sleep(200); }
+  await sleep(1000);
+  S.clips = await page.$$eval('[data-clip-id]', (e) => e.length);
+  await page.evaluate(() => {
+    const region = document.querySelector('[data-testid=arrangement-status]');
+    window.__sr = { region, records: [] };
+    new MutationObserver((rs) => { for (const r of rs) window.__sr.records.push({ type: r.type, t: performance.now(), added: [...r.addedNodes].map((n) => n.textContent) }); })
+      .observe(region, { childList: true, subtree: true, characterData: true });
+    document.activeElement && document.activeElement.blur();
+  });
+  S.activeElement = await page.evaluate(() => document.activeElement && document.activeElement.tagName);
+  const cdp = await ctx.newCDPSession(page);
+  const axCount = async () => { const { nodes } = await cdp.send('Accessibility.getFullAXTree'); return nodes.filter((n) => n.name?.value === TEXT || n.value?.value === TEXT).length; };
+  const read = () => page.evaluate(() => ({ text: document.querySelector('[data-testid=arrangement-status]').textContent, same: document.querySelector('[data-testid=arrangement-status]') === window.__sr.region, live: window.__sr.region.getAttribute('aria-live'), children: window.__sr.region.childElementCount, pos: document.querySelector('[data-testid=arrangement-position]')?.textContent, records: window.__sr.records.length }));
+  await page.keyboard.press('Space'); await sleep(500);
+  S.after1 = await read(); S.ax1 = await axCount();
+  const n1 = S.after1.records;
+  await page.keyboard.press('Space'); await sleep(500);
+  S.after2 = await read(); S.ax2 = await axCount();
+  S.press2Records = await page.evaluate((n) => window.__sr.records.slice(n), n1);
+  await sleep(1000);
+  S.after3 = await read();
+  S.pass = S.after1.text === TEXT && S.after2.text === TEXT && S.after2.same && S.after2.live === 'polite' && S.press2Records.some((r) => r.type === 'childList' && r.added.includes(TEXT)) && S.after1.pos === S.after3.pos && S.ax1 === S.ax2 && S.clips === 0;
+  await page.screenshot({ path: `${OUT}/repeat-space-${W}.png` });
+  fs.writeFileSync(`${OUT}/repeat-space-${W}.json`, JSON.stringify(S, null, 1));
+  console.log(JSON.stringify(S, null, 1));
+  await browser.close();
+})().catch((e) => { console.error(e); process.exit(1); });

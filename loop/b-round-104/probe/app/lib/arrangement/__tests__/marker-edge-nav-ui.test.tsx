@@ -1,0 +1,538 @@
+import { act, fireEvent, render } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+import {
+  type ArrangementContextValue,
+  ArrangementProvider,
+  GESTURE_EDIT_BLOCKED_MESSAGE,
+  useArrangement,
+} from '~/contexts/ArrangementContext';
+import type { Arrangement, ArrangementMarker, WorkspaceCollection } from '~/types/arrangement';
+import { createArrangement } from '../model';
+
+vi.mock('@remix-run/react', () => ({
+  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
+const fakeClock = { base: 0 };
+const sourceCounter = { created: 0 };
+
+function fakeNow(): number {
+  return Date.now() / 1000 - fakeClock.base;
+}
+
+class FakeParam {
+  value = 0;
+  setTargetAtTime(target: number) {
+    this.value = target;
+  }
+}
+
+class FakeNode {
+  connect(destination: FakeNode) {
+    return destination;
+  }
+  disconnect() {}
+}
+
+class FakeGain extends FakeNode {
+  gain = new FakeParam();
+}
+
+class FakePanner extends FakeNode {
+  pan = new FakeParam();
+}
+
+class FakeSource extends FakeNode {
+  buffer: unknown = null;
+  onended: (() => void) | null = null;
+  start() {}
+  stop() {}
+}
+
+class FakeAudioContext {
+  state = 'running';
+  destination = new FakeNode();
+  sampleRate = 48000;
+  get currentTime() {
+    return fakeNow();
+  }
+  resume() {
+    return Promise.resolve();
+  }
+  close() {
+    return Promise.resolve();
+  }
+  createGain() {
+    return new FakeGain();
+  }
+  createStereoPanner() {
+    return new FakePanner();
+  }
+  createBufferSource() {
+    sourceCounter.created += 1;
+    return new FakeSource();
+  }
+}
+
+class FakeOfflineAudioContext {}
+
+class FakeAudioBuffer {
+  readonly length: number;
+  readonly numberOfChannels: number;
+  readonly sampleRate: number;
+  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
+    this.length = options.length;
+    this.numberOfChannels = options.numberOfChannels;
+    this.sampleRate = options.sampleRate;
+  }
+  get duration() {
+    return this.length / this.sampleRate;
+  }
+  getChannelData() {
+    return new Float32Array(this.length);
+  }
+}
+
+class FakeResizeObserver {
+  observe() {}
+  disconnect() {}
+}
+
+const edgeCollection: WorkspaceCollection = {
+  id: 'edges',
+  label: 'edges',
+  origin: 'demo',
+  sources: [
+    { id: 'song', title: 'Song', collectionLabel: 'edges', kind: 'music', origin: 'demo' },
+    { id: 'hit', title: 'Hit', collectionLabel: 'edges', kind: 'sfx', origin: 'demo' },
+  ],
+  loadSource: async () => new AudioBuffer({ length: 6000, numberOfChannels: 1, sampleRate: 100 }),
+};
+
+const PROJECT_END = 30;
+
+const EDGE_MARKERS: ArrangementMarker[] = [
+  { id: 'kA', time: 6.3, name: 'A' },
+  { id: 'kB', time: 12, name: 'B' },
+];
+
+function edgeArrangement(extraClips: Arrangement['clips'] = []): Arrangement {
+  const base = createArrangement([
+    { id: 'video', kind: 'video', name: 'ვიდეო' },
+    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+    { id: 'sfx', kind: 'audio', name: 'SFX' },
+  ]);
+  return {
+    ...base,
+    clips: [
+      {
+        id: 'v1',
+        trackId: 'video',
+        sourceId: 'film',
+        start: 1.75,
+        sourceOffset: 0,
+        duration: 28.25,
+      },
+      { id: 'm1', trackId: 'music', sourceId: 'song', start: 2.25, sourceOffset: 0, duration: 5.5 },
+      { id: 's1', trackId: 'sfx', sourceId: 'hit', start: 4.1, sourceOffset: 0, duration: 1.8 },
+      ...extraClips,
+    ],
+    markers: EDGE_MARKERS,
+  };
+}
+
+interface EdgeApiRef {
+  current: ArrangementContextValue | null;
+}
+
+function EdgeProbe({ api }: { api: EdgeApiRef }) {
+  api.current = useArrangement();
+  return null;
+}
+
+function live(api: EdgeApiRef): ArrangementContextValue {
+  if (!api.current) {
+    throw new Error('provider not mounted');
+  }
+  return api.current;
+}
+
+async function flushLoads() {
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+}
+
+async function mountEdgeWorkspace(initial: Arrangement = edgeArrangement()) {
+  const api: EdgeApiRef = { current: null };
+  const view = render(
+    <ArrangementProvider collection={edgeCollection} initialArrangement={initial}>
+      <StudioWorkspace />
+      <EdgeProbe api={api} />
+    </ArrangementProvider>,
+  );
+  await flushLoads();
+  return { api, view };
+}
+
+type EdgeView = ReturnType<typeof render>;
+
+function flagAt(view: EdgeView, time: string): HTMLElement {
+  const flag = view
+    .queryAllByTestId('arrangement-marker')
+    .find((entry) => entry.dataset.markerTime === time);
+  if (!flag) {
+    throw new Error(`no marker at ${time}`);
+  }
+  return flag;
+}
+
+function markerTimes(view: EdgeView): string[] {
+  return view.queryAllByTestId('arrangement-marker').map((flag) => flag.dataset.markerTime ?? '');
+}
+
+function statusText(view: EdgeView): string {
+  return view.getByTestId('arrangement-status').textContent ?? '';
+}
+
+function stubPointerCapture(element: HTMLElement) {
+  Object.defineProperty(element, 'setPointerCapture', { configurable: true, value: () => {} });
+  Object.defineProperty(element, 'hasPointerCapture', { configurable: true, value: () => false });
+  Object.defineProperty(element, 'releasePointerCapture', { configurable: true, value: () => {} });
+}
+
+function clickClipBody(view: EdgeView, clipId: string, pointerId: number, ctrlKey = false) {
+  const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
+  const body = root?.querySelector<HTMLElement>('[title^="drag = დროის მონიშვნა"]');
+  if (!root || !body) {
+    throw new Error(`clip ${clipId} not rendered`);
+  }
+  stubPointerCapture(root);
+  stubPointerCapture(body);
+  fireEvent.pointerDown(body, {
+    button: 0,
+    buttons: 1,
+    pointerId,
+    clientX: 120,
+    clientY: 10,
+    ctrlKey,
+  });
+  fireEvent.pointerUp(body, {
+    button: 0,
+    buttons: 0,
+    pointerId,
+    clientX: 120,
+    clientY: 10,
+    ctrlKey,
+  });
+}
+
+type StepKey = 'ctrl' | 'alt';
+
+function pressStep(
+  direction: 'ArrowLeft' | 'ArrowRight',
+  modifierKey: StepKey = 'ctrl',
+  target: Element = document.body,
+) {
+  fireEvent.keyDown(target, {
+    key: direction,
+    code: direction,
+    ctrlKey: modifierKey === 'ctrl',
+    altKey: modifierKey === 'alt',
+  });
+}
+
+function stepSequence(
+  api: EdgeApiRef,
+  direction: 'ArrowLeft' | 'ArrowRight',
+  count: number,
+  modifierKey: StepKey = 'ctrl',
+): number[] {
+  const positions: number[] = [];
+  for (let step = 0; step < count; step += 1) {
+    pressStep(direction, modifierKey);
+    positions.push(live(api).getLivePosition());
+  }
+  return positions;
+}
+
+function clipStart(api: EdgeApiRef, clipId: string): number {
+  const clip = live(api).arrangement.clips.find((entry) => entry.id === clipId);
+  if (!clip) {
+    throw new Error(`clip ${clipId} missing`);
+  }
+  return clip.start;
+}
+
+function stubPlatform(platform: string) {
+  Object.defineProperty(navigator, 'platform', { configurable: true, value: platform });
+}
+
+beforeEach(() => {
+  fakeClock.base = Date.now() / 1000;
+  sourceCounter.created = 0;
+  vi.stubGlobal('AudioContext', FakeAudioContext);
+  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+  vi.stubGlobal('requestAnimationFrame', () => 1);
+  vi.stubGlobal('cancelAnimationFrame', () => undefined);
+  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  Reflect.deleteProperty(navigator, 'platform');
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe(
+  'Ctrl+arrows stop at clip edges of the selected tracks (SRW-16 stage 2b-2)',
+  {
+    timeout: 15000,
+  },
+  () => {
+    it('EN1: with the active track only, Ctrl+Right stops at its clip edges and the markers', async () => {
+      const { api } = await mountEdgeWorkspace();
+      expect(live(api).projectEnd).toBe(PROJECT_END);
+      expect(live(api).activeTrackId).toBe('music');
+      expect(live(api).selectedClipIds).toEqual([]);
+      act(() => live(api).seekTo(0));
+      expect(stepSequence(api, 'ArrowRight', 5)).toEqual([2.25, 6.3, 7.75, 12, PROJECT_END]);
+    });
+
+    it('EN2: a selected clip adds its track; a Ctrl-click adds a second track', async () => {
+      const { api, view } = await mountEdgeWorkspace();
+      clickClipBody(view, 's1', 21);
+      expect(live(api).activeTrackId).toBe('sfx');
+      expect(live(api).selectedClipIds).toEqual(['s1']);
+      act(() => live(api).seekTo(0));
+      expect(stepSequence(api, 'ArrowRight', 5)).toEqual([4.1, 5.9, 6.3, 12, PROJECT_END]);
+      clickClipBody(view, 'm1', 22, true);
+      expect(live(api).activeTrackId).toBe('sfx');
+      expect([...live(api).selectedClipIds].sort()).toEqual(['m1', 's1']);
+      act(() => live(api).seekTo(0));
+      expect(stepSequence(api, 'ArrowRight', 7)).toEqual([
+        2.25,
+        4.1,
+        5.9,
+        6.3,
+        7.75,
+        12,
+        PROJECT_END,
+      ]);
+    });
+
+    it('EN3: a time range adds its track and Ctrl+Shift+L adds every track', async () => {
+      const { api } = await mountEdgeWorkspace();
+      act(() => live(api).setTimeRange({ start: 4.5, end: 5.5, trackId: 'sfx' }));
+      expect(live(api).activeTrackId).toBe('music');
+      expect(live(api).selectedClipIds).toEqual([]);
+      act(() => live(api).seekTo(0));
+      expect(stepSequence(api, 'ArrowRight', 7)).toEqual([
+        2.25,
+        4.1,
+        5.9,
+        6.3,
+        7.75,
+        12,
+        PROJECT_END,
+      ]);
+      fireEvent.keyDown(document.body, { key: 'L', code: 'KeyL', ctrlKey: true, shiftKey: true });
+      expect(live(api).range?.allTracks).toBe(true);
+      act(() => live(api).seekTo(0));
+      expect(stepSequence(api, 'ArrowRight', 8)).toEqual([
+        1.75,
+        2.25,
+        4.1,
+        5.9,
+        6.3,
+        7.75,
+        12,
+        PROJECT_END,
+      ]);
+    });
+
+    it('EN4: Ctrl+Left mirrors the stops down to 0, then both directions refuse at the ends', async () => {
+      const { api, view } = await mountEdgeWorkspace();
+      act(() => live(api).seekTo(PROJECT_END));
+      pressStep('ArrowRight');
+      expect(live(api).getLivePosition()).toBe(PROJECT_END);
+      expect(statusText(view)).toBe('წინ მარკერი აღარ არის');
+      expect(stepSequence(api, 'ArrowLeft', 5)).toEqual([12, 7.75, 6.3, 2.25, 0]);
+      pressStep('ArrowLeft');
+      expect(live(api).getLivePosition()).toBe(0);
+      expect(statusText(view)).toBe('უკან მარკერი აღარ არის');
+    });
+
+    it('EN5: a clip-edge stop keeps the selected marker; an edge on a marker selects that marker', async () => {
+      const { api, view } = await mountEdgeWorkspace(
+        edgeArrangement([
+          { id: 'm2', trackId: 'music', sourceId: 'song', start: 12, sourceOffset: 0, duration: 2 },
+        ]),
+      );
+      act(() => live(api).seekTo(0));
+      expect(stepSequence(api, 'ArrowRight', 2)).toEqual([2.25, 6.3]);
+      expect(flagAt(view, '6.300').getAttribute('aria-current')).toBe('true');
+      pressStep('ArrowRight');
+      expect(live(api).getLivePosition()).toBe(7.75);
+      expect(flagAt(view, '6.300').getAttribute('aria-current')).toBe('true');
+      expect(flagAt(view, '12.000').getAttribute('aria-current')).toBeNull();
+      pressStep('ArrowRight');
+      expect(live(api).getLivePosition()).toBe(12);
+      expect(flagAt(view, '12.000').getAttribute('aria-current')).toBe('true');
+      expect(flagAt(view, '6.300').getAttribute('aria-current')).toBeNull();
+      pressStep('ArrowRight');
+      expect(live(api).getLivePosition()).toBe(14);
+      expect(flagAt(view, '12.000').getAttribute('aria-current')).toBe('true');
+      expect(statusText(view)).not.toContain('მარკერი აღარ არის');
+      expect(live(api).undoLabel).toBeNull();
+    });
+
+    it('EN6: the previous/next buttons stay marker-only', async () => {
+      const { api, view } = await mountEdgeWorkspace();
+      act(() => live(api).seekTo(0));
+      const next = view.getByTestId('arrangement-marker-next');
+      const prev = view.getByTestId('arrangement-marker-prev');
+      const visited: number[] = [];
+      for (let step = 0; step < 3; step += 1) {
+        fireEvent.click(next);
+        visited.push(live(api).getLivePosition());
+      }
+      for (let step = 0; step < 3; step += 1) {
+        fireEvent.click(prev);
+        visited.push(live(api).getLivePosition());
+      }
+      expect(visited).toEqual([6.3, 12, PROJECT_END, 12, 6.3, 0]);
+      expect(next.getAttribute('aria-keyshortcuts')).toBe('Control+ArrowRight');
+      expect(prev.getAttribute('aria-keyshortcuts')).toBe('Control+ArrowLeft');
+    });
+
+    it('EN10: Ctrl+Right to a clip edge while playing keeps playing', async () => {
+      const { api } = await mountEdgeWorkspace();
+      act(() => live(api).seekTo(0));
+      act(() => live(api).togglePlayback());
+      expect(live(api).isPlaying).toBe(true);
+      pressStep('ArrowRight');
+      expect(live(api).isPlaying).toBe(true);
+      expect(live(api).getLivePosition()).toBeGreaterThanOrEqual(2.25);
+      expect(live(api).getLivePosition()).toBeLessThan(2.75);
+      act(() => live(api).togglePlayback());
+    });
+  },
+);
+
+describe('Option+arrows on Apple platforms (N6/N7)', { timeout: 15000 }, () => {
+  it('EN7: on MacIntel Option+Right steps like Ctrl+Right and does not move a selected clip', async () => {
+    stubPlatform('MacIntel');
+    const { api, view } = await mountEdgeWorkspace();
+    act(() => live(api).seekTo(0));
+    expect(stepSequence(api, 'ArrowRight', 5, 'alt')).toEqual([2.25, 6.3, 7.75, 12, PROJECT_END]);
+    clickClipBody(view, 's1', 31);
+    expect(live(api).selectedClipIds).toEqual(['s1']);
+    const undoBefore = live(api).undoLabel;
+    act(() => live(api).seekTo(0));
+    pressStep('ArrowRight', 'alt');
+    expect(live(api).getLivePosition()).toBe(4.1);
+    expect(clipStart(api, 's1')).toBe(4.1);
+    expect(live(api).undoLabel).toBe(undoBefore);
+    pressStep('ArrowRight', 'ctrl');
+    expect(live(api).getLivePosition()).toBe(5.9);
+    expect(clipStart(api, 's1')).toBe(4.1);
+    expect(live(api).undoLabel).toBe(undoBefore);
+    fireEvent.keyDown(document.body, {
+      key: 'ArrowRight',
+      code: 'ArrowRight',
+      altKey: true,
+      metaKey: true,
+    });
+    expect(live(api).getLivePosition()).toBe(5.9);
+    expect(clipStart(api, 's1')).toBe(4.1);
+    fireEvent.keyDown(document.body, {
+      key: 'ArrowRight',
+      code: 'ArrowRight',
+      altKey: true,
+      shiftKey: true,
+    });
+    expect(live(api).getLivePosition()).toBe(5.9);
+    expect(clipStart(api, 's1')).not.toBe(4.1);
+  });
+
+  it.each([
+    'Win32',
+    'Linux x86_64',
+  ])('EN8: on %s Alt+Right with a selected clip nudges the clip like plain Right', async (platform) => {
+    stubPlatform(platform);
+    const { api, view } = await mountEdgeWorkspace();
+    clickClipBody(view, 's1', 41);
+    act(() => live(api).seekTo(0));
+    pressStep('ArrowRight', 'alt');
+    const altStart = clipStart(api, 's1');
+    const altUndo = live(api).undoLabel;
+    expect(altStart).not.toBe(4.1);
+    expect(altUndo).not.toBeNull();
+    expect(live(api).getLivePosition()).toBe(0);
+    act(() => live(api).undo());
+    expect(clipStart(api, 's1')).toBe(4.1);
+    fireEvent.keyDown(document.body, { key: 'ArrowRight', code: 'ArrowRight' });
+    expect(clipStart(api, 's1')).toBe(altStart);
+    expect(live(api).undoLabel).toBe(altUndo);
+    expect(live(api).getLivePosition()).toBe(0);
+  });
+
+  it('EN9: BPM input, fader and a pointer gesture block Option+Right and Ctrl+Right', async () => {
+    stubPlatform('MacIntel');
+    const { api, view } = await mountEdgeWorkspace();
+    act(() => live(api).seekTo(0));
+    const tempo = view.getByTestId('arrangement-tempo-input');
+    tempo.focus();
+    pressStep('ArrowRight', 'alt', tempo);
+    pressStep('ArrowRight', 'ctrl', tempo);
+    expect(live(api).getLivePosition()).toBe(0);
+    tempo.blur();
+    const fader = view.container.querySelector('input[type="range"]');
+    if (!(fader instanceof HTMLInputElement)) {
+      throw new Error('fader missing');
+    }
+    fader.focus();
+    pressStep('ArrowRight', 'alt', fader);
+    pressStep('ArrowRight', 'ctrl', fader);
+    expect(live(api).getLivePosition()).toBe(0);
+    fader.blur();
+    let release: (() => void) | null = null;
+    act(() => {
+      release = live(api).claimPointerGesture(4, () => undefined);
+    });
+    pressStep('ArrowRight', 'alt');
+    expect(live(api).getLivePosition()).toBe(0);
+    expect(statusText(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+    act(() => {
+      const releaseGesture: (() => void) | null = release;
+      releaseGesture?.();
+    });
+    pressStep('ArrowRight', 'alt');
+    expect(live(api).getLivePosition()).toBe(2.25);
+  });
+
+  it('EN11: Option+Right on a focused flag navigates and moves no marker', async () => {
+    stubPlatform('MacIntel');
+    const { api, view } = await mountEdgeWorkspace();
+    const flag = flagAt(view, '6.300');
+    flag.focus();
+    act(() => live(api).seekTo(6.3));
+    pressStep('ArrowRight', 'alt', flag);
+    expect(live(api).getLivePosition()).toBe(7.75);
+    expect(markerTimes(view)).toEqual(['6.300', '12.000']);
+    expect(live(api).undoLabel).toBeNull();
+  });
+});

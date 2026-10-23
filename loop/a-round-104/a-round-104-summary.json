@@ -1,0 +1,88 @@
+{
+ "round": 104,
+ "role": "A",
+ "items": [
+  "GATE96-S2",
+  "GATE103-S5"
+ ],
+ "head": "3b6178b758253d5098cea19f07c43e4799cb9299",
+ "gitStatus": "3 M + 4 ??",
+ "frozen": "535/535 OK",
+ "checks": {
+  "typecheck": "pass",
+  "lint": "pass (0 diagnostics in owned/new files)",
+  "biomeScoped": "pass (5 files)",
+  "targetedVitest": {
+   "files": 69,
+   "tests": 1122,
+   "failed": 0
+  }
+ },
+ "failBefore": {
+  "SA": "file import failure (module missing)",
+  "SU1": "red",
+  "SU2": "red",
+  "SU3": "red",
+  "SU4": "green",
+  "matchesB": true
+ },
+ "mutations": {
+  "m1": [
+   "SA3",
+   "SU1",
+   "SU2"
+  ],
+  "m2": [
+   "SU1",
+   "SU2"
+  ],
+  "m3": [
+   "SU1",
+   "SU2",
+   "SU3",
+   "SU4"
+  ],
+  "m4": [
+   "SA4",
+   "SU4"
+  ],
+  "m5": [
+   "SU1",
+   "SU2"
+  ],
+  "control": "9/9 green"
+ },
+ "codeReviewer": {
+  "outputs": 2,
+  "first": {
+   "score": "9/10",
+   "medium": 0
+  },
+  "second": {
+   "score": "8/10",
+   "medium": 1,
+   "low": 4
+  },
+  "architectureNote": "Keep — moving the pure reducer into `lib/` is a harmless ownership shift and is unit-tested, while the ref, layout effect and restore closure correctly stay with the gesture lifecycle in the context. The only signal is a weak one: the status region was touched in round 94 and again now in 104. Extracting further has low value and would add risk to the gesture/restore invariant.",
+  "openOutsideOwnership": [
+   "A-R104-REPEAT-DRAG: blocked-drag identical setStatus per pointermove now re-renders and re-announces; fix = setStatus(() => message) in ArrangementClip.tsx (frozen)"
+  ],
+  "appliedInOwnership": [
+   "doc 092 corrections (Medium1 claim, Low2 mount bump, Low3 bail-out)",
+   "test: collected MutationObserver records, statusSequence assertions, toContain"
+  ]
+ },
+ "aOwnBrowser": {
+  "SR-REPEAT-SPACE-1280": "pass",
+  "SR-REPEAT-SPACE-1440": "pass",
+  "note": "A's own probe, not C acceptance"
+ },
+ "notRunByA": [
+  "full suite",
+  "verify",
+  "build",
+  "e2e smoke",
+  "C browser rows"
+ ],
+ "committed": false
+}

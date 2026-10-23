@@ -1,0 +1,47 @@
+
+ RUN  v4.0.16 /home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-104/mut
+
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA1 creates the initial entry with sequence 0 1ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA2 a different string gives a new entry with the exact text and sequence + 1 4ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA3 the same string gives a new entry with the same text and sequence + 1, twice gives + 2 0ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA4 an updater that returns the current text gives the same entry object 4ms
+ ✓ app/lib/arrangement/__tests__/status-announcement.test.ts > reduceArrangementStatus (GATE96-S2) > SA5 an updater that returns a different text gives a new entry with sequence + 1 1ms
+ × app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU1 Space twice on an empty arrangement replaces the inner span inside the same live region 125ms
+   → expected <span data-seq="4"></span> not to be <span data-seq="4"></span> // Object.is equality
+ × app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU2 activating a failed library row twice announces the failed text both times 62ms
+   → expected <span data-seq="4"></span> not to be <span data-seq="4"></span> // Object.is equality
+ ✓ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU3 the live region node stays the same with exactly one element child across distinct texts 50ms
+ ✓ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU4 the post-gesture restore brings back the old text and an unchanged restore keeps the same span 50ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 7 passed (9)
+   Start at  08:05:22
+   Duration  1.63s (transform 704ms, setup 0ms, import 1.03s, tests 300ms, environment 627ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU1 Space twice on an empty arrangement replaces the inner span inside the same live region
+AssertionError: expected <span data-seq="4"></span> not to be <span data-seq="4"></span> // Object.is equality
+ ❯ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx:245:42
+    243|     expect(view.getByTestId('arrangement-status')).toBe(region);
+    244|     expect(region.getAttribute('aria-live')).toBe('polite');
+    245|     expect(region.firstElementChild).not.toBe(first);
+       |                                          ^
+    246|     expect(region.firstElementChild?.textContent).toBe(NOTHING_TO_PLAY…
+    247|     expect(addedTexts(records)).toContain(NOTHING_TO_PLAY);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a repeated status sentence is announced again (GATE96-S2, D-29z69) > SU2 activating a failed library row twice announces the failed text both times
+AssertionError: expected <span data-seq="4"></span> not to be <span data-seq="4"></span> // Object.is equality
+ ❯ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx:265:42
+    263|     expect(region.textContent).toBe(FAILED_TEXT);
+    264|     expect(view.getByTestId('arrangement-status')).toBe(region);
+    265|     expect(region.firstElementChild).not.toBe(first);
+       |                                          ^
+    266|     expect(addedTexts(records)).toContain(FAILED_TEXT);
+    267|     expect(live(api).arrangement.clips.length).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
