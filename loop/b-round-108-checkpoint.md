@@ -1,0 +1,12 @@
+# B round 108 → 109 checkpoint (2026-10-23 ~12:20 UTC)
+- Done: read inputs (current-task r108, a/c-round-108 md+json, gate-round-108 published 32a6b08, active summary/backlog); archived tasks/round-108.md (exact copy); backups b-round-108-*-before.*.
+- Advisor: available, called once before writing (plan: round 109 = C-R23-01 + C-R38-01 SSR NUL Transform; Lows -> deferred_low_polish; SRW-21 deferred_user; T12 user_decision_2026_10_23).
+- B measured: GET /studio-lab at 32a6b08 -> 69307 bytes, NUL 4 at 6142/6143 (⌫ aria-label) and 26810/26811 (Arrangement heading).
+- Next: frozen list + snapshot of entry.server.tsx; current-task r109; backlog v107; feature-status; plan D-29z74; addendum; b-round-108.md; b-next.json.
+- 12:28 backlog v107 written (open_findings 677->546, deferred_low_polish 139 + pointer DEFERRED-LOW-POLISH; SRW-21 deferred_user; T12 user_decision_2026_10_23; new B-R108-LIB-FOCUS-LOSS Medium from B probe lib-focus-probe-result.json; C-R108-01 ruled). Next: feature-status, plan D-29z74, addendum, b-round-108.md, b-next.json.
+- 12:28 feature-status updated.
+- 12:29 plan.md D-29z74 + §5 row + §6 note written.
+- 12:29 addendum (t) appended.
+- 12:30 b-round-108.md + b-next.json written. Pending: final advisor review.
+- 12:32 advisor fix: frozen list rebuilt without doc 093 -> 542 (OK); references updated in current-task, b-round-108, backlog, b-next; NUL-HTTP size wording softened; LOWS-BATCH dropped from remaining (superseded by DEFERRED-LOW-POLISH). B phase complete.
+- 12:32 (correction) the previous line was appended after a failed script; the backlog/b-next 542 update completed now and was verified.

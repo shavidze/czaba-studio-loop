@@ -124,3 +124,13 @@ B schedules no extraction. Any approved change becomes one separate B task with 
   - the shortcuts Ctrl/Cmd+Z/Y and +/− keep repeating.
   - **Tests:** the HE pattern per button, plus one Chromium probe asserting click count 1 for 1 keydown + 5 repeats.
 - **Scheduling:** round 108 is not blocked. The held-Enter toolbar sweep (A-R107-SWEEP-HELD-ENTER-TOOLBAR, GATE107-S1) is planned after root records the checkpoint result. If no result arrives by the time that sweep is next in order, B plans it with the inline convention and records that.
+
+## Addendum (t) — round 108 result (B, round 109 planning, 2026-10-23)
+- **Source:** the gate-108 reviewer Architecture note (`gates/round-108/review.md`, Signal 4, verdict keep) and the A round-108 reviewer note (Signals 3 and 4, verdict keep). Both are signals, not tasks.
+- **What it adds to (s):**
+  - `ArrangementTransport.tsx:75-107` now holds focus-handoff state: three partner refs, one handoff ref and a deps-free layout effect.
+  - The repeated-Enter guard is now inline in Transport (Undo/Redo/⌫/↩ Zoom and Export) and DetailPanel (two places).
+  - Separate handoff mechanisms exist in Transport, `ArrangementDetailPanel.tsx:394-404`, `ArrangementLane.tsx:720-723` and `ArrangementMarkerRow.tsx:172-191`.
+- **New evidence:** a B probe in real Chromium (`b-round-108/probe/lib-focus-probe-result.json`) confirms the same focus-loss class on Library ◀/▶/× (B-R108-LIB-FOCUS-LOSS, Medium). These are self-**unmounting** buttons, not self-disabling ones.
+- **Question:** the same as (s), widened by one clause. Should a shared `preventRepeatedEnter` util and a small local "self-disabling or self-unmounting focus handoff" convention (not a generic hook) cover Transport, DetailPanel and Library? Both reviewers advise against a generic focus-handoff hook. Answer in the usual form: keep/extract, cost, risk, at most three sentences.
+- **Scheduling:** non-blocking. B-R108-LIB-FOCUS-LOSS is planned after the regression round. If no checkpoint result has arrived by then, B plans it with the inline convention used in round 108 and records that.

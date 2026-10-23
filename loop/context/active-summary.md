@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T11:09:37.023Z)
+# Active loop summary (2026-10-23T12:14:03.149Z)
 
-- backlog.json 919 KB -> active view 187 KB
-- status: G_ROOT_GATE round 107
-- servers: `{"checkedUtc":"2026-10-23T10:49:33.8066719Z","round":107,"attempt":1,"store":200}`
-- last publication: fc086179b6f16d6ca6a523c79d333a5e6248c599 (rounds 107-107)
-- last root gate: round 107 published - commit fc086179b6f16d6ca6a523c79d333a5e6248c599 pushed
+- backlog.json 927 KB -> active view 189 KB
+- status: G_ROOT_GATE round 108
+- servers: `{"checkedUtc":"2026-10-23T11:54:17.6456053Z","round":108,"attempt":1,"store":200}`
+- last publication: 32a6b0827bc061a4fc06e64ea6e0740b8a85f239 (rounds 108-108)
+- last root gate: round 108 published - commit 32a6b0827bc061a4fc06e64ea6e0740b8a85f239 pushed
 
 ## Current items: SRW-21
 
@@ -324,13 +324,18 @@
 - ARCH-R104-STATUS-COALESCING / info / consumed by round 105: the reviewer Architecture note (Signal 4, verdict keep) proposed exactly the gesture-aware coalescing next to gestureCountRef that round 105 implements; no separate checkpoint item / the rule for coalescing repeats during a gesture belongs in the provider, not at 60+ call sites
 - A-R105-REVIEW-2-RELEASE-BATCH-TEST / low / open - Lows batch; merged with GATE106-S1 (same render-time gesture-ref concern); optional test / no test pins the render-time flag semantics when a same-text dispatch during a gesture renders after the release
 - ARCH-R105-STATUS-INTENT / info / signal - not scheduled; appended to the pending checkpoint request as addendum (q) (b-round-91-checkpoint-request.md); two independent reviewers (A round 105 reviewer: record the gesture flag at dispatch time; gate 105 reviewer: {text, repeat} / announceStatus vs setStatus intent); both verdict keep for now | round 106: gate-106 reviewer Architecture note (Signal 1: refusal suppression done three ways - provider updater, component status comparison, detail-panel Enter skip; proposal internal requestStatus(message, {keyRepeat}) next to setStatus; keep for now) appended as addendum (r) to b-roun ... [clipped; see backlog.json] / status repeat policy is inferred from refs (gesture) and call-site event.repeat checks; proposal: one status action that carries the intent 
-- C-R106-01-TIME0-SILENT-NUDGE / low / dispatched round 107 (D-29z72 R4): single-clip nudge whose clamped target equals clip.start announces NUDGE_AT_TIME_START_MESSAGE (exported from ArrangementContext, imported by the workspace); keyRepeat -> updater form / ArrowLeft on a single clip at 00:00.000 with Snap off gives no status and no history (Snap on announces the time-start refusal); refusal tex
-- C-R106-02-HELD-SHORTCUTS / low / dispatched round 107 (D-29z72 R1): Ctrl/Cmd+E, Ctrl/Cmd+L, Ctrl/Cmd+Shift+L, Ctrl/Cmd+C ignore event.repeat (preventDefault still runs); Ctrl+Z/Y keep repeating; Ctrl+L range-replace semantics unchanged (SRW-05 contract) / a held Ctrl+L toggles the loop on every auto-repeat (aria-pressed alternated over 10 keydowns; end state depends on hold length; a history e
-- C-R106-03-DOC092-L94 / low / dispatched round 107 (doc 092 owned whole) / doc 092 l.94 A-R104-REPEAT-DRAG entry still says round 105 awaits C
-- A-R106-REVIEW-F5-HELD-ENTER-BUTTONS / low / dispatched round 107 (D-29z72 R2+R3): repeated Enter prevented on marker +, prev, next and detail apply / 0 dB buttons (convention ArrangementExportDialog.tsx:554); repeated Enter in the marker name editor does not settle it / Chromium clicks a focused button on every Enter auto-repeat: held Enter on the prev-marker button announced 6/6 times; held Enter on + commi
 - GATE106-S1-RENDER-TIME-GESTURE-FLAG / low / open - signal/Low, not scheduled; merged with A-R105-REVIEW-2 and ARCH-R105-STATUS-INTENT (record the gesture flag at dispatch time: dispatch({update, gestureActive})); documented in doc 092 semantics 1; C browser bound <= 2 added spans covers it / status reducer reads gestureCountRef at render time; a pointermove update rendered after pointerup can announce once more at the end of a dr
 - GATE106-S2-STEPMARKER-STATUS-DEP / low / open - Lows batch (nit: statusRef mirror keeps the imperative handle stable) / stepMarker depends on status, so useImperativeHandle rebuilds the marker-row handle on every status change
 - GATE106-S4-KEYREPEAT-OPTIONS-TYPE / info / open - Lows batch nit (export one KeyRepeatOptions type; low value) / { readonly keyRepeat?: boolean } literal repeated four times
+- C-R107-01-GAIN-RESET-FOCUS-LOSS / medium / dispatched round 108 (D-29z73 F1): after a keyboard 0 dB reset focus moves to the Clip Gain input / keyboard 0 dB Clip Gain reset disables the focused button, focus falls to BODY, the next Enter adds a library clip (pre-existing)
+- B-R107-FL-HISTORY-FOCUS-LOSS / medium / dispatched round 108 (D-29z73 F1+F2): Undo->Redo, Redo->Undo, Delete->Undo focus handoff on exhaustion; repeated Enter guarded on these buttons / transport Undo / Redo / Delete buttons disable themselves after their last step, focus falls to BODY, the next Enter adds a library clip (Un
+- B-R107-FL-ZOOM-FOCUS-LOSS / low / dispatched round 108 (D-29z73 F1+F2): Zoom back -> Fit focus handoff; Zoom back and Fit ignore a repeated Enter / transport zoom back button disables itself after its last history step, focus falls to BODY, the next Enter adds a clip
+- B-R107-ENTER-ON-BODY / info / open question for the user (not deferred, not scheduled as a change): the workspace-wide Enter (target not a button/slider/separator, incl. BODY) adds the active library item; SRW-12 R12-L2 only specifies Enter from the results list. Kept unchanged in round 108; focus retention closes C-R107-01 regardless / should Enter with focus on BODY add the active library item?
+- GATE107-S1-MARKER-FLAG-HELD-ENTER / low / open - waits for ARCH-R107-SHARED-ENTER-GUARD checkpoint, then the held-Enter toolbar sweep round / held Enter on a marker flag runs jumpToMarker on every auto-repeat (handleFlagKeyDown has no repeat guard)
+- GATE107-S2-SNAPON-RENDER-TIME-STATUS / low / open - Lows batch (with GATE106-S1/S2) / Snap-on time-start refusal still compares current.status at render time; Snap-off uses the updater form
+- GATE107-S3-NZ-DELTA-NIT / info / open nit - optional defensive delta < 0 in the R4 condition (doc 092 F3) / target === clip.start with a non-negative delta would announce the time-start text (no current caller)
+- A-R107-SWEEP-HELD-ENTER-TOOLBAR / low / open - one held-Enter sweep round after the ARCH-R107-SHARED-ENTER-GUARD checkpoint; strongest: transport Loop (same toggle+history bug as Ctrl+L); Undo/Redo/Delete/Zoom back/Fit are taken in round 108 / held Enter repeats on toolbar buttons without a guard: Loop, Play, Split, Follow, Zoom to range, Snap, Env, Metronome, video expand/return, 
+- A-R107-F4-SUBMS-START / low / open signal - only if the model allows non-millisecond clip starts / a clip start that is not a whole millisecond takes an invisible sub-ms move before the time-0 refusal
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video

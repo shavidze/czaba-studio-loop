@@ -1,0 +1,79 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T11:54:17.6456053Z",
+  "round": 108,
+  "attempt": 1,
+  "store": 200
+ },
+ "round": 108,
+ "verifiedUtc": "2026-10-23T12:05:07.906Z",
+ "bugs": [
+  {
+   "id": "C-R108-01",
+   "severity": "low",
+   "title": "Held Enter on ↩ Zoom: focus hands off to Fit, then every repeat runs Fit and pushes a duplicate zoom-history entry (F2-on-Fit from D-29z73 not implemented; blocked by frozen TH5)",
+   "steps": [
+    "Fresh incognito /studio-lab 1280x720, Decline, wait for library",
+    "Focus Middle East row, Enter (1 clip), click Fit, blur",
+    "Press = then + (↩ Zoom enabled)",
+    "Focus ↩ Zoom, hold Enter: 1 keydown + 10 repeats at ~33 ms, release",
+    "Click ↩ Zoom repeatedly until it disables"
+   ],
+   "expected": "D-29z73 F2: Fit ignores a repeated Enter, so a hold does one zoom-back and focus rests on Fit with no extra Fit actions or history entries",
+   "actual": "One zoom-back (\"წინა ხედი აღდგა.\"), focus moves to arrangement-fit, then 10 Fit activations (10 \"Fit: მთლიანი პროექტი ჩანს…\" spans). Afterwards ↩ Zoom takes 10 presses to get back to the pre-hold 40 px/s view: the first 9 restore an identical 7.4 px/s Fit view. Arrangement data unchanged, 0 errors.",
+   "evidence": "c-round-108/out/zoomback-hold-1280x720.json (fitClicksDuringHold=11 incl. 1 setup click, zbHistory); A report \"NOT DONE — the Fit F2 guard\"; store app/lib/arrangement/__tests__/export-toolbar-hold-enter.test.tsx:269-272 (TH5) pins a repeated Enter on Fit as NOT prevented. B must decide: amend TH5 or drop Fit from F2. Not an A failure (A stopped per task l.134)."
+  }
+ ],
+ "passed": [
+  "FL-GAIN-KEYBOARD",
+  "FL-GAIN-HOLD",
+  "FL-GAIN-MOUSE",
+  "FL-UNDO",
+  "FL-UNDO-HOLD",
+  "FL-REDO",
+  "FL-DELETE",
+  "FL-ZOOMBACK",
+  "FL-UNDO-MOUSE",
+  "HK-UNDO-STILL-REPEATS",
+  "R12-L2-ENTER-ADD",
+  "HE-MARKER-ADD",
+  "SR-TEXT-REG",
+  "PX-NET",
+  "REG-HYD",
+  "G108-3",
+  "AN-REVIEW",
+  "T108-TARGETED",
+  "DOC-092-L4",
+  "DOC-093",
+  "SOURCE-UNCHANGED"
+ ],
+ "notPassed": [
+  "F2-FIT (D-29z73 F2 on Fit not implemented; TH5 conflict) — see C-R108-01",
+  "m9 (not runnable: guard absent)"
+ ],
+ "blocked": [
+  "G108-3 fake-Bearer sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "carriedForB": [
+  "A-reported Low (not browser-reproduced by C): stale focus-handoff arm after a 2nd identical refused Undo/Redo during a pointer gesture",
+  "A-reported info: exhausting history with Ctrl+Z while Undo is focused still drops focus to BODY (not in F1)",
+  "Reviewer sweep hits (not C-verified): Library ◀/▶ collapse/expand and × search-clear unmount without refocus; video-dock placeholder \"დაბრუნება\" possible; track pan reset focuses slider unconditionally",
+  "Infra observation: store/node_modules/.vite/deps/_metadata.json mtime changed to 12:01 UTC during C phase (dev server dep re-optimization); all C sessions had 0 pageerrors/hydration warnings"
+ ],
+ "ableton": {
+  "focus handoff": "არ ეხება (CZABA requirement; no Live claim)",
+  "button once per Enter press": "არ ეხება"
+ }
+}
