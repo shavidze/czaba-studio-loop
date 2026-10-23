@@ -53,6 +53,16 @@ save_state() {
     ROUND_LIMIT_REACHED|A_IMPLEMENTING|C_VERIFYING|G_ROOT_GATE|B_PLANNING_NEXT)
       [ "$rc" -eq 0 ] && date -u +%FT%TZ > "$STATE/cloud/KICK" ;;
   esac
+  # Reports the loop wrote for Saba (loop/user-review/*.md) open one issue each, without stopping the loop.
+  for f in "$LOOP"/user-review/*.md; do
+    [ -f "$f" ] || continue
+    case "$f" in *-decisions.md) continue ;; esac
+    [ -f "$f.notified" ] && continue
+    if [ -n "${GH_TOKEN:-}" ] && [ -z "${DRY_RUN:-}" ]; then
+      gh label create loop-review --color 0E8A16 --description "A report from the Studio loop for Saba" >/dev/null 2>&1 || true
+      gh issue create --label loop-review --title "Studio loop: $(basename "$f" .md) ready for you" --body "The loop wrote loop/user-review/$(basename "$f"): $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/main/loop/user-review/$(basename "$f"). The loop keeps running. Your answers go to loop/user-review/$(basename "$f" .md | sed 's/-review$//')-decisions.md." >/dev/null && date -u +%FT%TZ > "$f.notified"
+    fi
+  done
   git add -A loop docs worktree cloud/KICK
   if ! git diff --cached --quiet; then
     local ph rd

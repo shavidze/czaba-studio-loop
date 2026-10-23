@@ -119,3 +119,13 @@ B ყოველი დაგეგმვისას აახლებს `tm
 - **SRW-21 deferred by the user.** Set SRW-21 to `deferred_user` with the reason "route mount on the protected studio.$productId.tsx waits for the auth work; not testable in the cloud (no backend)". Its finished stage 1 stays. It counts as deferred for every gate. Do not touch the protected files.
 - **Final acceptance is unchanged.** Before the whole request is called complete, all findings, including the deferred Lows, must be fixed and verified by C.
 - B records this decision in `backlog.json` (T12 entry `user_decision_2026_10_23`, SRW-21 status) the next time it plans.
+
+## Ableton expert review (user decision, 2026-10-23)
+
+- **When.** Insert the queue step `ABLETON-EXPERT-REVIEW` after T12-GAIN-VOLUME is complete and before VISUAL-A-OBSIDIAN. Add it to `post_current_stage_queue` in `backlog.json` and add it to VISUAL-A's prerequisites.
+- **Who and how.** C runs it as the round's verification, consulting the `ableton-arrangement-expert` agent, which is already in C's consult list. Use the real browser (Playwright on `/studio-lab`, with screenshots and measurements) and the Ableton Live 12 manual as the reference. Cover every phase-1 feature and T12: layout, library, clip select/move/trim/split/duplicate, clipboard, grid and snap, ruler and BPM, markers, groups, fades and envelopes, gain/volume/pan/mute/solo, loop and range, navigation and zoom, video, and export. Split it into 2 rounds by area if one round is too large. A changes no code in a review round.
+- **Output.** Write `loop/user-review/ableton-review.md` in Georgian for Saba, with technical terms in English. It has three parts:
+  1. A short verdict: what already feels like Ableton and what does not.
+  2. **Bugs**: id `ABL-B-n`, severity, steps, evidence path. Record these in `open_findings` too. The 2026-10-23 bug gate applies: Medium and above are fixed before VISUAL-A, and Lows go to `deferred_low_polish`.
+  3. **Recommendations** (new features or behaviour changes, not bugs): id `ABL-R-n`, what to change, why, the Ableton manual reference, rough size in rounds, and priority. **Do not implement any recommendation** until Saba approves it. His answers will arrive in `loop/user-review/ableton-decisions.md`; until then, record them in `backlog.json` as `awaiting_user`.
+- **Do not wait for the answers.** After the review, continue with its Medium+ bugs and then VISUAL-A. When `ableton-decisions.md` appears, B schedules the approved recommendations as bounded tasks. They go after VISUAL-A unless Saba orders otherwise, and always before phase 2 unless he says otherwise.
