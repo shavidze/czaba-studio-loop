@@ -1,0 +1,126 @@
+{
+ "round": 119,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T22:25:29.1493420Z",
+  "round": 119,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T119-TARGETED",
+  "AN-REVIEW-TEST",
+  "AN-REVIEW-DOC100",
+  "AN-REVIEW-DOC101-CONTENT (four edited lines match B texts; no-other-line-changed not provable, see partial)",
+  "SOURCE-SCOPE",
+  "SH-MASTER",
+  "GV-DRAG",
+  "G119-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G119-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "carried": {
+  "reference": "c-round-118.json (taskStatus FAIL only for T118-TARGETED; all browser rows PASS). Carried because SOURCE-SCOPE proves every app file is byte-identical to B's round-118 end snapshot b-round-118-r119-tree-sha256.txt (taken after C-118 closed; C-118 recorded no per-file hashes, so the link to the exact tree C-118 tested rests on that snapshot plus the unchanged porcelain path set) (frozen 929 OK, porcelain md5 554bfcc8 unchanged).",
+  "rows": [
+   "GV-PRESENT",
+   "GV-INF",
+   "GV-DBL",
+   "SH-LANE",
+   "SH-GROUP",
+   "SH-MID",
+   "NB-PAN",
+   "NB-CLIP",
+   "G-GROUP-T3",
+   "G-GROUP-INF",
+   "GV-PLAY",
+   "TV-ANCHOR",
+   "NB-TV-DRAG",
+   "NB-GROUP-MUTE-SOLO",
+   "NB-U-FOCUS-RESCUE"
+  ],
+  "note": "GV-PRESENT was also re-run this round as setup for GV-DRAG (PASS at both viewports); it is still listed as carried, not passed."
+ },
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "partial": {
+  "AN-REVIEW-DOC101": "Doc 101 is untracked and no pre-edit copy (f910ed7b…) exists anywhere, so the reverse-hash check B asked for cannot be reproduced. Content inspection: l.4, l.50 and l.66 carry the B texts; the line 'B-ის გადაწყვეტილება CF11 …' is gone with no blank line left; the file now has 71 lines. A kept the bold **გადაწყვეტა:** label on l.50, an acceptable reading of B's wording. The test file and doc 100 reverse hashes are exact. The byte-level negative (no other line changed) is not verified; recorded as observation C-R119-01 (process)."
+ },
+ "bugs": [],
+ "measurements": {
+  "SH-MASTER": {
+   "1440x900": {
+    "w": 96,
+    "step": 0.5,
+    "dPlain": -27.5,
+    "dShift": -2.5,
+    "theoryShift": -2.75,
+    "undoTitles": "Undo: Master Volume ×2",
+    "oneEntryEach": true
+   },
+   "1280x720": {
+    "w": 96,
+    "step": 0.5,
+    "dPlain": -27.5,
+    "dShift": -2.5,
+    "theoryShift": -2.75,
+    "undoTitles": "Undo: Master Volume ×2",
+    "oneEntryEach": true
+   }
+  },
+  "GV-DRAG": {
+   "1440x900": {
+    "w": 48,
+    "delta": -25,
+    "expected": -25,
+    "tol": 1.35,
+    "undo": "Undo: Volume",
+    "afterCtrlZ": "+0.0 dB"
+   },
+   "1280x720": {
+    "w": 48,
+    "delta": -25,
+    "expected": -25,
+    "tol": 1.35,
+    "undo": "Undo: Volume",
+    "afterCtrlZ": "+0.0 dB"
+   }
+  },
+  "T119-TARGETED": "25/25 files, 452/452 tests",
+  "G119-3": {
+   "demoBadge": true,
+   "protectedRoute": "Sign in required, workspace false, audio[src] 0",
+   "tokenApi": 401
+  }
+ },
+ "evidence": "c-round-119.md; c-round-119/out/{source-scope.txt,t119-targeted.log,ui-1440-2.json,ui-1280-1.json,g119-3.json,an/}; c-round-119/shots/",
+ "notes_valid_runs": "ui-1440-1 aborted during setup (setSnapOff read a null grid control right after the job's first page load; likely a cold dev-server reload or remount, not observed directly). It produced no measurement, and its console and network log was not persisted because the crash came before save(), so REG-HYD for that session is unrecorded. PX-NET/REG-HYD cover the 5 measured sessions. It was replaced by ui-1440-2, one extra attempt within budget.",
+ "observations": [
+  {
+   "id": "C-R119-01",
+   "severity": "low",
+   "steps": [
+    "Round 119 AN-REVIEW asks C to prove that only l.4/50/66/70 of doc 101 differ from sha f910ed7b…",
+    "Doc 101 is untracked (no git blob) and neither B nor A stored a pre-edit copy",
+    "Search the loop folder for a file with sha f910ed7b…"
+   ],
+   "expected": "A pre-edit copy of each untracked granted file exists, so C can reverse-check it byte for byte",
+   "actual": "No copy exists, so the doc-101 byte diff cannot be verified; only content inspection was possible. This is a process and evidence gap, not an app defect, and A's work is not wrong",
+   "evidence": "c-round-119/out/an/ (cgf-reverted.tsx → 261472d6, doc100-reverted.md → 5912f18f, doc101.md current copy); c-round-119.md §AN-REVIEW",
+   "kind": "process note for B (not an app defect; not for deferred_low_polish)"
+  }
+ ]
+}

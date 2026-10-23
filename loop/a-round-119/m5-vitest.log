@@ -1,0 +1,48 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/clip-gain-fader.test.tsx [2m([22m[2m14 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m13 skipped[39m[2m)[22m[33m 408[2mms[22m[39m
+     [2m[90m↓[39m[22m CF1: the fader has range −60…+24, step 0.1, the clip value, its label and a dB value text
+     [2m[90m↓[39m[22m CF2: a +25 px drag over 100 px gives +21.0 dB with one Clip Gain entry; the field follows; Undo restores
+     [2m[90m↓[39m[22m CF3: the same drag with Shift held gives +2.1 dB with one entry
+     [2m[90m↓[39m[22m CF4: pressing Shift mid-drag re-anchors: +10 px coarse then +10 px fine totals +9.2 dB without a jump
+     [2m[90m↓[39m[22m CF5: a press with no move keeps the value and writes no entry
+     [2m[90m↓[39m[22m CF6: a double-click from −6.0 resets to 0.0 with one entry; a double-click at 0.0 writes none
+     [2m[90m↓[39m[22m CF7: each keyboard step (change + keyup) moves 0.1 dB and writes one entry per press
+     [2m[90m↓[39m[22m CF8: the fader is disabled with the field reason for a video clip, two clips and no selection
+     [2m[90m↓[39m[22m CF9: typed −3 then a +25 px drag commits −3.0 first, then 18.0; Undo walks back −3.0 then 0.0
+     [2m[90m↓[39m[22m CF10: a press during another pointer gesture is refused with the gesture status and no entry
+[31m     [31m×[31m CF11: Shift makes music Volume and Master ten times finer[39m[33m 405[2mms[22m[39m
+     [2m[90m↓[39m[22m CF12: a drag while playing ramps the clip gain node without a new schedule or new sources
+     [2m[90m↓[39m[22m CF13: a blur or a pointercancel mid-drag reverts the preview, writes no entry and releases the gesture
+     [2m[90m↓[39m[22m CF14: a pending keyboard Clip Gain preview is committed under its own label before a Master preview or an Undo
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/clip-gain-fader.test.tsx[2m > [22mClip Gain fader in the detail panel (D-29z79, T12 stage 1)[2m > [22mCF11: Shift makes music Volume and Master ten times finer
+[31m[1mAssertionError[22m: expected -12 to be -1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- -1[39m
+[31m+ -12[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/clip-gain-fader.test.tsx:[2m501:54[22m[39m
+    [90m499| [39m      [34mtrackVolumeFromDb[39m([33m-[39m[34m5.9[39m)[33m,[39m
+    [90m500| [39m    )[33m;[39m
+    [90m501| [39m    [34mexpect[39m([34mlive[39m(fine[33m.[39mapi)[33m.[39marrangement[33m.[39mmaster[33m.[39mgainDb)[33m.[39m[34mtoBe[39m([33m-[39m[34m1[39m)[33m;[39m
+    [90m   | [39m                                                     [31m^[39m
+    [90m502| [39m    expect(undoChainLabels(fine.api)).toEqual([MASTER_VOLUME_LABEL, VO…
+    [90m503| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m13 skipped[39m[90m (14)[39m
+[2m   Start at [22m 22:22:28
+[2m   Duration [22m 2.69s[2m (transform 1.09s, setup 0ms, import 1.62s, tests 408ms, environment 507ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/clip-gain-fader.test.tsx,title=app/lib/arrangement/__tests__/clip-gain-fader.test.tsx > Clip Gain fader in the detail panel (D-29z79%2C T12 stage 1) > CF11%3A Shift makes music Volume and Master ten times finer,line=501,column=54::AssertionError: expected -12 to be -1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- -1%0A+ -12%0A%0A ❯ app/lib/arrangement/__tests__/clip-gain-fader.test.tsx:501:54%0A%0A

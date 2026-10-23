@@ -1,0 +1,11 @@
+const fs = require('fs');
+const f = process.argv[2];
+const o = JSON.parse(fs.readFileSync(f, 'utf8'));
+o.passed = o.passed.flatMap((x) => (x === 'AN-REVIEW' ? ['AN-REVIEW-TEST', 'AN-REVIEW-DOC100', 'AN-REVIEW-DOC101-CONTENT (four edited lines match B texts; no-other-line-changed not provable, see partial)'] : [x]));
+o.partial['AN-REVIEW-DOC101'] = o.partial['AN-REVIEW-DOC101'].replace("AN-REVIEW is in 'passed' on that basis; this gap is recorded as C-R119-01 (low, process).", 'The byte-level negative (no other line changed) is not verified; recorded as observation C-R119-01 (process).');
+o.observations = o.bugs.map((b) => ({ ...b, kind: 'process note for B (not an app defect; not for deferred_low_polish)' }));
+o.bugs = [];
+o.carried.reference = o.carried.reference.replace('SOURCE-SCOPE proves every app file is byte-identical to the round-118 tree', "SOURCE-SCOPE proves every app file is byte-identical to B's round-118 end snapshot b-round-118-r119-tree-sha256.txt (taken after C-118 closed; C-118 recorded no per-file hashes, so the link to the exact tree C-118 tested rests on that snapshot plus the unchanged porcelain path set)");
+o.notes_valid_runs = "ui-1440-1 aborted during setup (setSnapOff read a null grid control right after the job's first page load; likely a cold dev-server reload or remount, not observed directly). It produced no measurement, and its console and network log was not persisted because the crash came before save(), so REG-HYD for that session is unrecorded. PX-NET/REG-HYD cover the 5 measured sessions. It was replaced by ui-1440-2, one extra attempt within budget.";
+fs.writeFileSync(f, JSON.stringify(o, null, 1));
+console.log(o.passed, o.bugs.length, o.observations.length, o.carried.reference.slice(0, 120));

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T22:11:37.474Z)
+# Active loop summary (2026-10-23T22:38:17.866Z)
 
-- backlog.json 1053 KB -> active view 132 KB
-- status: G_ROOT_GATE round 118
-- servers: `{"checkedUtc":"2026-10-23T21:56:43.0143618Z","round":118,"attempt":1,"store":200}`
-- last publication: 9cb820b6f7e5f9f44d1c651954d30ebf4f83be9f (rounds 116-117)
-- last root gate: round 118 skipped - C taskStatus FAIL
+- backlog.json 1060 KB -> active view 135 KB
+- status: G_ROOT_GATE round 119
+- servers: `{"checkedUtc":"2026-10-23T22:25:29.1493420Z","round":119,"attempt":1,"store":200}`
+- last publication: 4090f6ea78317ebc331cd6add9c63d318ca4ab41 (rounds 118-119)
+- last root gate: round 119 published - commit 4090f6ea78317ebc331cd6add9c63d318ca4ab41 pushed
 
 ## Current items: -
 
@@ -207,7 +207,7 @@
 - TOUCH-DOUBLE-TAP-RESET / info / signal - deliberate for round 113 (D-29z78 R4), not scheduled / after the touchstart preventDefault, a touch double-tap no longer generates dblclick, so it does not reset a fader; keyboard, mouse double-c
 - TOUCH-LONGPRESS-CONTEXTMENU / info / signal - not tested; candidate row for the regression round (CDP long touch on a fader: contextmenu fires or not; no app menu exists on faders) / the touchstart preventDefault on the relative faders probably also suppresses the long-press contextmenu (same mechanism as R4)
 - R38-T-SR-SWIPE / info / open - Tech Lead R38-T checklist addition / real-device screen reader (VoiceOver/TalkBack) swipe up/down still adjusts the faders after the touchstart guard (reasoning only, untested)
-- ARCH-CHECKPOINT-PHASE1-BOUNDARY / info / requested_from_root (B round 113 planning, 2026-10-23; non-blocking) - addenda (x), (y), (z); focused request (aa) sent with the round 116 plan (stage 2 closed, before stage 3 touches the Volume machine; round 116 is UI-only and does not touch it) | addendum (ac) appended with the round 118 plan: gate-117 reviewer Architecture note (hook stored <-> slider mapping) + the group start capture is the second copy; still unanswered; non-blocking / phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b
+- ARCH-CHECKPOINT-PHASE1-BOUNDARY / info / requested_from_root (B round 113 planning, 2026-10-23; non-blocking) - addenda (x), (y), (z); focused request (aa) sent with the round 116 plan (stage 2 closed, before stage 3 touches the Volume machine; round 116 is UI-only and does not touch it) | addendum (ac) appended with the round 118 plan: gate-117 reviewer Architecture note (hook stored <-> slider mapping) + the group start capture is the second copy; still unanswered; non-blocking | round 119 planning: A round-118 reviewer Architecture note repeats addendum (ac) (start capture + stored<->slider mapping copied in ArrangementLane.tsx an ... [clipped; see backlog.json] / phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b
 - GATE114-S3-BLUR-ON-DISABLE / low / deferred_low_polish (C round 115 MC-BLUR-DISABLED observed: no value lost, the Clip Gain entry is written late at the next edit's flush; Undo restores in one step) / Chromium fires no blur when the focused Clip Gain fader becomes disabled (selection -> video/group during a keyboard preview); the pending p
 - GATE114-S4-SHIFT-REANCHOR-CLAMPED / info / acknowledged (reviewer: acceptable) / Shift re-anchor starts from the rounded and clamped previewed value; after an overshoot past a bound, a Shift toggle makes the value move ba
 - A-R114-REVIEW-FINEDIVISOR-VALIDATION / info / acknowledged (only the constant 10 is passed) / useRelativeFaderDrag fineDivisor is not validated
@@ -224,12 +224,19 @@
 - MIXER-MULTI-TRACK / info / signal (Live 12 section 18.1: adjusting one selected track's mixer control adjusts the others, keeping differences; not in T12 (T12.7 is multi-clip) and not requested) / multi-track mixer adjustment
 - C-R116-OBS-TV-PLAY-CONTENT / info / acknowledged (C-R82-LIVE-ORACLE-PAIRED class; the synthetic beep lane showed the exact -17.5 dB live) / TV-PLAY live drop with music is content-dominated (10.78 dB for a 17.5 dB drag)
 - C-R116-OBS-AS-CONST / info / ruled accepted (B, D-29z82) / track-volume-db.test.tsx:42 uses 'as const' (const assertion; existing repo pattern)
-- GATE117-S1-DOC100-STALE / low / dispatched round 118 (D-29z83; doc 100 l.4/l.56/l.70 grant) / doc 100 l.4 still says awaiting C, l.56 says track-group-mix-ui was not changed, l.70 lists the B decision as an open TODO
 - TRACK-VOLUME-TAPER / info / signal (not requested by the user; Live taper unconfirmed in saved captures); Shift fine in round 118 addresses precision / lane/group Volume faders are linear in dB (100 px = 60 dB); a non-linear taper would give more resolution near 0 dB
 - GATE117-S5-TEXT-BELOW-FLOOR / info / acknowledged (reviewer: acceptable as designed; screen readers use the text) / a stored value below the -59.9 floor (e.g. 1e-4) reads -80.0 dB while the slider sits at -59.9
 - GROUP-VOLUME-VISIBLE-READOUT / info / signal for DESIGN-UX-REVIEW (layout change; not requested explicitly; D-29z83 R2) / the group row shows its dB only in title/aria-valuetext, no visible readout (lane has one)
 - PAN-SHIFT-FINE / info / signal (Live 12 section 42.6 Shift finer resolution is generic to controls; T12 3b scoped to Volume faders; D-29z83 R5) / Pan fader has no Shift fine drag
 - GATE118-NIT-FINE-CONST / info / open nit - for the next owner of ArrangementDetailPanel.tsx / DETAIL_CLIP_GAIN_FINE_DIVISOR stays local while round 118 adds FADER_SHIFT_FINE_DIVISOR in fader.ts
+- C-R118-01 / low / dispatched round 119 (D-29z84) - blocks publication (red test fails the gate's full vitest); NOT deferred_low_polish / CF11 l.501 pins the fine Master value at -1.2 while the app gives -1 (Master step 0.5); targeted vitest 451/452
+- A-R118-REVIEW-DOC100-L69 / low / dispatched round 119 (doc 100 l.69 grant); l.13 kept as round-117 history (acknowledged) / doc 100 l.69 TODO still lists 3b as future work; l.13 describes the round-117 state
+- MASTER-FINE-STEP / info / signal for ABLETON-EXPERT-REVIEW (not scheduled; not requested) / Shift fine on Master still snaps to the 0.5 dB Master step (fine = 10x travel per step, not 0.05 dB resolution); Live behaviour unconfirmed
+- SHIFT-FINE-DISCOVERABILITY / info / signal for DESIGN-UX-REVIEW (shortcut discoverability is in its scope; not scheduled) / Shift fine drag on Volume faders has no tooltip or hint
+- A-R118-REVIEW-GV-HALVES / info / acknowledged (the move-and-return half of GV4 and the -inf text of GV3 discriminate; m2 turns GV4 red) / the first half of GV4 and GV3's stored 0 also pass on the pre-round code
+- C-R118-OBS-GV-INF-METER-BALLISTICS / info / acknowledged (B accepts C's reading: 'meters stay silent' = no signal; meters fall at METER_RELEASE_DB_PER_SECOND 20, output exactly 0 from +150 ms) / after the group goes to -inf during play the member meters fall at the 20 dB/s release instead of jumping to -inf
+- B-R118-UM9-ROW-WORDING / info / acknowledged (B spec imprecision; C tested both cases: group fader stays visible and focused; member lane fader -> focus to arrangement-group-name; PASS) / round-118 neighbour row 'U with the group fader focused -> focus to the group name, as in UM9' misdescribed UM9
+- ENV-FIRST-LOAD-GRID-NULL / info / watch (second occurrence: rounds 117 and 118; likely first Vite load; harness: discard the first setup run if it crashes before the grid control exists) / first /studio-lab load of a job crashes the C setup (grid control null); run 2 valid
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
