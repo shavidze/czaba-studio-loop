@@ -1,0 +1,89 @@
+{
+ "round": 116,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T20:19:06.5730635Z",
+  "round": 116,
+  "attempt": 1,
+  "store": 200
+ },
+ "summary": "Every REAL-browser row passes at 1440x900 and 1280x720: lane dB fader, -inf, keyboard, reset, exact Undo, layout at full/regular/tight and nested, live playback level, and export ratios on WAV sample data. Video, group, Master, Clip Gain and pan/mute/solo are unchanged. The round FAILS only on T116-TARGETED: C re-ran A's targeted vitest list and got 367/370. UM3/UM5/UM9 in track-group-mix-ui.test.tsx are red because they still write linear values into the lane slider. That file is outside A's grant, so a B ruling is needed (C-R116-01).",
+ "bugs": [
+  {
+   "id": "C-R116-01",
+   "severity": "medium",
+   "steps": [
+    "cd store; npx vitest run app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx (or A's 19-file targeted list)",
+    "Observe UM3 l.482, UM5 l.571, UM9 l.660 fail"
+   ],
+   "expected": "T116-TARGETED green (task section 4), same counts as A",
+   "actual": "19 files: 18 pass, 1 fail; tests 367/370. UM3: dragFader(lane stems, -50px) stores 10^(-30/20)=0.0316 vs expected 0.5. UM5: keyboardFader(lane, '0.5') clamps to 0 dB, stores 1 vs 0.5; l.575 liveTrackGains derived product also depends on it. UM9: fireEvent.change(lane, '0.7') clamps to 0 dB, stores 1 vs 0.7. All three are lane-slider-driven, scale-only expectations (C read l.470-524, 564-577, 650-662). They are not a lane defect, but the gate's full vitest will be red until B grants the file and rules on the l.575 matcher.",
+   "evidence": "tmp/studio-real-loop/c-round-116/out/vitest-targeted.log; a-round-116.md STOP section"
+  }
+ ],
+ "passed": [
+  "TV-PRESENT",
+  "TV-LAYOUT",
+  "TV-DRAG",
+  "TV-EXACT-UNDO",
+  "TV-INF",
+  "TV-KEY",
+  "TV-DBL",
+  "TV-PLAY",
+  "G-T3",
+  "G-T4",
+  "G-INF",
+  "G-VIDEO",
+  "NB-GROUP",
+  "NB-TRACK-SHIFT",
+  "NB-MASTER",
+  "NB-CLIP",
+  "NB-PAN-MS",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "PX-NET",
+  "REG-HYD",
+  "G116-3",
+  "DOC-100",
+  "DOC-099"
+ ],
+ "failed": [
+  "T116-TARGETED (367/370; C-R116-01)"
+ ],
+ "blocked": [
+  "G116-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
+ ],
+ "inconclusive": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome (repo)",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "observations_for_B": [
+  "OBS-1 (A deviation 1): at 0 dB the lane shows '+0.0' / '+0.0 dB' (as the rows require), while the Master shows '0.0 dB' (screenshot c-round-116/shots/layout-worst-music-min-1280-1.png). B rules on the formatter wording.",
+  "OBS-2: the visible readout is not aria-hidden, so a screen reader in browse mode reads the value twice (inherited from the % readout). A proposed this for deferred_low_polish. C did not test it with a screen reader.",
+  "OBS-3: the new test file uses 'as const' (l.42). This is a const assertion, an existing repository pattern (32 app files at d5de68f). C does not count it as a type-assertion violation, but B may rule.",
+  "OBS-4: the live TV-PLAY drop is content-dominated with music (10.78 dB for a 17.5 dB drag, threshold 9.5). With the synthetic beeps video lane, the live beep peak went from -5.9 to -23.5 dBFS for the same -17.5 dB drag, an exact match.",
+  "OBS-5: the dock video element is muted=true before and after the drag; the source sets it muted (ArrangementVideoDock.tsx l.662 'slot.element.muted = true', l.934/944 'muted' attribute), and video sound plays through Web Audio (live tap shows the beeps). The fader does not pause it; currentTime advances monotonically through the drag."
+ ],
+ "ableton": {
+  "Volume adjusts track output (Live 12 manual 18.1)": "confirmed: G-T3, G-T4 and G-VIDEO ratios are exact",
+  "Range -inf..+6 dB": "unconfirmed (no source); CZABA -inf..0 dB is a recorded decision, TRACK-VOLUME-BOOST signal",
+  "Numeric volume field": "deliberate difference (readout only)",
+  "Shift fine": "not applicable in 3a (plain = Shift, verified)",
+  "Double-click reset on mixer faders": "unconfirmed for Live; the CZABA behaviour is kept and verified"
+ },
+ "evidence": "tmp/studio-real-loop/c-round-116/{tools,out,shots}; c-round-116.md",
+ "notes": [
+  "PX-NET/REG-HYD: 27 sessions total (incl. g116-3), 0 forbidden, 0 Authorization, 0 errors, 0 hydration.",
+  "Exported WAVs deleted after analysis (round-115 precedent); sha256 and sizes are in c-round-116/out/wav-sha256.txt, all measurements in the out/*.json files.",
+  "No c-browse.json state file: every session ran in a fresh stateless Playwright context with no credentials, by design."
+ ]
+}

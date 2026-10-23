@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T19:32:21.302Z)
+# Active loop summary (2026-10-23T20:36:34.972Z)
 
-- backlog.json 1023 KB -> active view 126 KB
-- status: G_ROOT_GATE round 115
-- servers: `{"checkedUtc":"2026-10-23T18:52:42.4499772Z","round":115,"attempt":1,"store":200}`
+- backlog.json 1039 KB -> active view 129 KB
+- status: G_ROOT_GATE round 116
+- servers: `{"checkedUtc":"2026-10-23T20:19:06.5730635Z","round":116,"attempt":1,"store":200}`
 - last publication: d5de68fe27c165b00b5578f016703af90730500b (rounds 115-115)
-- last root gate: round 115 published - commit d5de68fe27c165b00b5578f016703af90730500b pushed
+- last root gate: round 116 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -207,13 +207,22 @@
 - TOUCH-DOUBLE-TAP-RESET / info / signal - deliberate for round 113 (D-29z78 R4), not scheduled / after the touchstart preventDefault, a touch double-tap no longer generates dblclick, so it does not reset a fader; keyboard, mouse double-c
 - TOUCH-LONGPRESS-CONTEXTMENU / info / signal - not tested; candidate row for the regression round (CDP long touch on a fader: contextmenu fires or not; no app menu exists on faders) / the touchstart preventDefault on the relative faders probably also suppresses the long-press contextmenu (same mechanism as R4)
 - R38-T-SR-SWIPE / info / open - Tech Lead R38-T checklist addition / real-device screen reader (VoiceOver/TalkBack) swipe up/down still adjusts the faders after the touchstart guard (reasoning only, untested)
-- ARCH-CHECKPOINT-PHASE1-BOUNDARY / info / requested_from_root (B round 113 planning, 2026-10-23; non-blocking; T12 stage 1 proceeds) - addenda (x) and (y) in b-round-91-checkpoint-request.md / phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b
-- GATE114-S1-CLIPID-AT-BEGIN / low / dispatched round 115 (D-29z80 R8; A owns the code in stage 2) / Clip Gain fader hook reads the clip id from the latest render, not from drag start; a mid-drag selection change re-sets the refusal status p
-- GATE114-S2-FIELD-STEP-CONST / low / dispatched round 115 (D-29z80 R9) / Clip Gain number field uses literal step={0.1} while the fader uses DETAIL_CLIP_GAIN_STEP_DB
-- GATE114-S3-BLUR-ON-DISABLE / low / scheduled as C observation row MC-BLUR-DISABLED round 115 (no code); a lost value would be a new Medium / Chromium fires no blur when the focused Clip Gain fader becomes disabled (selection -> video/group during a keyboard preview); the pending p
+- ARCH-CHECKPOINT-PHASE1-BOUNDARY / info / requested_from_root (B round 113 planning, 2026-10-23; non-blocking) - addenda (x), (y), (z); focused request (aa) sent with the round 116 plan (stage 2 closed, before stage 3 touches the Volume machine; round 116 is UI-only and does not touch it) / phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b
+- GATE114-S3-BLUR-ON-DISABLE / low / deferred_low_polish (C round 115 MC-BLUR-DISABLED observed: no value lost, the Clip Gain entry is written late at the next edit's flush; Undo restores in one step) / Chromium fires no blur when the focused Clip Gain fader becomes disabled (selection -> video/group during a keyboard preview); the pending p
 - GATE114-S4-SHIFT-REANCHOR-CLAMPED / info / acknowledged (reviewer: acceptable) / Shift re-anchor starts from the rounded and clamped previewed value; after an overshoot past a bound, a Shift toggle makes the value move ba
-- GATE114-S5-DOC098-STATUS / low / dispatched round 115 (D-29z80 R10) / doc 098 l.4 still says awaiting C after C round 114 PASS; file table says CF1-CF12 but there are 14 tests
 - A-R114-REVIEW-FINEDIVISOR-VALIDATION / info / acknowledged (only the constant 10 is passed) / useRelativeFaderDrag fineDivisor is not validated
+- C-R115-01 / low / deferred_low_polish / a disabled multi-selection that contains video shows Clip Gain field 0.0 and fader 0.0 dB while its audio member is at -6.0 dB (inherited st
+- GATE115-S1-DRAGIDS-LAZY-CLEAR / low / deferred_low_polish / clipGainDragIdsRef keeps the previous drag's ids and is checked against the global isPointerGestureActive(); context refuses the mismatched 
+- GATE115-S2-GROUP-RESET-TEXT / low / deferred_low_polish / 0 dB button on a group always writes '0' into the field even when resetClipGainMembers refuses; mixed group then shows a pending marker
+- GATE115-S3-FLOOR-DEAD-ZONE / low / deferred_low_polish / multi-clip Clip Gain drag: after the block stops at -60/+24 the hook anchor keeps moving; on the way back about (max-min) dB of travel does 
+- GATE115-S4-DOC099-STATUS / low / dispatched round 116 (D-29z81 R9) / doc 099 l.4 still says awaiting C after C round 115 PASS
+- GATE115-S5-MIXED-PLACEHOLDER / info / open - optional (VISUAL-A / polish candidate) / mixed Clip Gain field is empty; placeholder '—' would show it is empty on purpose
+- A-R115-REVIEW-FIELD-CARRYOVER / low / deferred_low_polish / text typed in the Clip Gain field can carry over between two different mixed groups (content key stays 'group'); needs a group change withou
+- A-R115-REVIEW-APPLY-TARGETS-UNFILTERED / low / deferred_low_polish / applyClipGainTargets is exported without the audio-only filter (today only receives filtered targets)
+- C-R115-OBS-SINGLE-TO-GROUP-DRAG-END / info / acknowledged (B, D-29z81): a selection change that remounts the panel content ends the drag; the captured ids still receive the one entry; matches R8 intent (no wrong-target edit) / single->group selection change during a Clip Gain drag ends the drag; later pointer movement is ignored
+- TRACK-VOLUME-BOOST / info / signal (not requested by the user; Live 12 track range -inf..+6 dB unconfirmed in saved captures) - round 116 top is 0 dB / track/group Volume has no positive boost (Master has +6 dB)
+- TRACK-VOLUME-NUMERIC-FIELD / info / signal (Live 12 section 18.1 extended mixer has a numeric volume field; CZABA lane header shows a readout only; deliberate difference, narrow header) / no typed numeric entry for track Volume
+- MIXER-MULTI-TRACK / info / signal (Live 12 section 18.1: adjusting one selected track's mixer control adjusts the others, keeping differences; not in T12 (T12.7 is multi-clip) and not requested) / multi-track mixer adjustment
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

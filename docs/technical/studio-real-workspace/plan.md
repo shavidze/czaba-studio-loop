@@ -1217,6 +1217,20 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z82 — Round 116-ის შედეგი; Round 117: C-R116-01-ის გასწორება (ტესტის ფარგლები).**
+
+C round 116 (`tmp/studio-real-loop/c-round-116.md`, `c-round-116.json`) — **FAIL**, `browserVerified: true`, `realVerified: true`. ბრაუზერის ყველა სტრიქონი PASS-ია ორივე viewport-ზე: G-T3 0.501187, G-T4 1.412537, G-INF — 0 არანულოვანი sample, G-VIDEO 0.501187, TV-PLAY 10.78 dB / 0 ახალი source. ჩავარდა მხოლოდ T116-TARGETED (367/370). Gate 116 გამოტოვდა.
+- **R1 — C-R116-01 (Medium):** `track-group-mix-ui.test.tsx`-ის UM3/UM5/UM9 ხაზის slider-ში წრფივ მნიშვნელობებს წერს. მიზეზი: round 115-ის დაგეგმვისას B-მ grant-ის ჩამონათვალი ვიწრო grep-ით შეადგინა. ეს B-ის დეფექტია და არა A-სი. Round 117-ში A-ს ეკუთვნის მხოლოდ ეს ფაილი (scale-only, ზუსტი `toBe`) და doc 100-ის შენიშვნა.
+- **R2 — UM5 l.575:** `stems: trackVolumeFromDb(-6) * 0.5` არსებულ `toEqual`-ში. `trackEffectiveGains` ამრავლებს `track.volume`-ზე ჯგუფის 0.5-სა და 1-ზე; ორივე ზუსტი ორობითი წილადია, ამიტომ ნამრავლი bitwise ტოლია. l.576 უცვლელია.
+- **R3 — grep-ის მტკიცებულება:** B-მ მთელ `app` და `e2e` ტესტებში მოძებნა ხაზის slider-ის ჩაწერები. ჩაწერა, რომელიც სამიზნე სიაში არ შედის, მხოლოდ ამ ფაილშია.
+- **R4 — ბაზა:** `d5de68f` + round 116-ის C-ის მიერ შემოწმებული ცვლილებები (`git status` md5 `49a4b7cd`). გაყინულია 928 ფაილი, მათ შორის `ArrangementLane.tsx` და `track-volume-db.ts`. 116 და 117 ერთად ქვეყნდება C PASS-ის შემდეგ.
+- **R5 — დაკვირვებები:**
+  - OBS-1: ხაზზე `+0.0` რჩება. R7 ერთდროულად ასახელებდა `formatMasterGainDb`-სა და `+0.0`-ს, ანუ სპეციფიკაცია ეწინააღმდეგებოდა თავის თავს; A-ს გადახვევა მიღებულია. Master-თან შეუსაბამობა Low-ია: LANE-MASTER-ZERO-SIGN → deferred. 3b-ში ჯგუფის fader იყენებს `formatTrackVolumeDb`-ს.
+  - OBS-2: LANE-READOUT-DOUBLE-READ → deferred Low.
+  - OBS-3: `as const` მისაღებია.
+- **R6 — არქიტექტურა:** reviewer-ის Signal 4 (`previewValue(value, {atStart})`) checkpoint-ის მოთხოვნას დაემატა addendum (ab)-ად. 3b-ის დაგეგმვისას განიხილება; არ ბლოკავს.
+- **R7 — რიგი:** round 117 → რეგრესიის რაუნდი (2026-10-24-ის ან შემდეგი დაგეგმვა) → T12 ეტაპი 3b.
+
 **D-29z81 — Round 115-ის შედეგი; Round 116: T12 ეტაპი 3a — ხაზის Volume dB-ში, ქვედა ბოლოში −∞.**
 
 C round 115 (`tmp/studio-real-loop/c-round-115.md`, `c-round-115.json`) — **PASS, `browserVerified: true`, `realVerified: true`** (27 სტრიქონი; fake-Bearer 403 BLOCKED — backend cloud-ში არ არის); gate 115 გამოქვეყნდა `d5de68f`-ში (review 8.5/10, COMMIT OK; verify 153 ფაილი / 2369 ტესტი).
@@ -2053,6 +2067,8 @@ flowchart TD
 | 114 → | (შედეგი) | **C PASS** (`browserVerified`), `38c0e21`: T12 ეტაპი 1 მზადაა; C-R114-01 (Low) → deferred |
 | 115 | T12-GAIN-VOLUME ეტაპი 2, GATE114-S1/S2/S5 | რამდენიმე აუდიო კლიპის Clip Gain: საერთო clamp-ული delta, დიაპაზონის ტექსტი, ველით ყველაზე, reset ყველაზე, ერთი ჩანაწერი (D-29z80) |
 | 116 | T12-GAIN-VOLUME ეტაპი 3a, GATE115-S4 | ხაზის Volume dB-ში, ქვედა ბოლოში −∞, readout dB-ში; შენახვა წრფივი (D-29z81) |
+| 116 → | (შედეგი) | **C FAIL** მხოლოდ T116-TARGETED-ზე (C-R116-01); ბრაუზერის ყველა row PASS (`browserVerified`); gate გამოტოვდა |
+| 117 | C-R116-01 | `track-group-mix-ui`-ის scale-only ზუსტი ხაზები; round 116-ის ფაილები გაყინულია; 116+117 ერთად ქვეყნდება (D-29z82) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2088,6 +2104,7 @@ flowchart TD
 
 **D-29z80:** round 115-ში A-ს ეკუთვნის `ArrangementContext.tsx`, `ArrangementDetailPanel.tsx`, `StudioWorkspace.tsx` (`detailGroup` + props), ახალი `app/lib/arrangement/clip-gain-multi.ts`, ახალი `clip-gain-multi.test.tsx`, ახალი doc 099, doc 098 (l.4 + CF1–CF14) და ხუთი არსებული ტესტის მითითებული ხაზები (ორი აუდიო კლიპის „გამორთულია“ შემთხვევა → ვიდეოიანი მონიშვნა, იგივე სიმკაცრით). დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-114-r115-tree-sha256.txt`, 915).
 **D-29z81:** round 116-ში A-ს ეკუთვნის `ArrangementLane.tsx` (Volume fader), ახალი `app/lib/arrangement/track-volume-db.ts`, ახალი `track-volume-db.test.tsx`, ახალი doc 100, doc 099 (l.4) და 11 არსებული ტესტის სკალაზე დამოკიდებული ხაზები. დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-115-r116-tree-sha256.txt`, 914).
+**D-29z82:** round 117-ში A-ს ეკუთვნის მხოლოდ `app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx` (UM3 l.482/l.522, UM5 l.569/l.571/l.575, UM9 l.657/l.660 და `trackVolumeFromDb`-ის import) და `docs/implementation/2026/quarter-IV/100-studio-track-volume-db.md` (ტესტის შენიშვნა). დანარჩენი გაყინულია (`b-round-116-r117-tree-sha256.txt`, 928).
 
 ## 7. Done Policy
 

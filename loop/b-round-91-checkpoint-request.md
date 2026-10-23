@@ -179,3 +179,9 @@ B schedules no extraction. Any approved change becomes one separate B task with 
   3. **(x) `useTrackPanFader`** in `ArrangementLane.tsx`: round 116 (stage 3a) edits only the Lane Volume fader, not Pan; stage 3b adds Shift fine to the Lane/Group/Master faders. Extract the Pan region before 3b, or keep?
 - **Round 116 does not touch the pending machines.** The dB conversion is UI-only (`track-volume-db.ts` + `ArrangementLane.tsx`); `ArrangementContext.tsx` is frozen in that round. So no answer is needed before round 116; an answer before stage 3b or stage 4 is useful.
 - **Usual form:** for each question keep/extract, value, risk, at most three sentences. **Non-blocking**; the next planning is the regression round anyway.
+
+## Addendum (ab) — B round 116 → 117 planning (2026-10-23)
+- **Trigger:** the round-116 code-reviewer Architecture note, Signal 4 (`a-round-116.md`, Code review). The lane Volume fader keeps its own capture of the exact linear start value (`volumeGestureStartRef` in `ArrangementLane.tsx`). It does this because `useRelativeFaderDrag` holds the gesture start but does not expose it. The capture keeps a press without movement, or a move back to the start, from rewriting the stored value with the rounded dB.
+- **Question:** before stage 3b (group dB plus Shift fine on track, group and Master), should the hook tell `previewValue` that the value is back at the start (for example `previewValue(value, { atStart })`, or expose the start), so that the group and Master dB faders do not each copy the capture? Or should the lane-local capture be kept and copied for the group?
+- **Acceptance if changed:** TV1–TV11, CF11, MG13, fader-click, fader-guards, fader-touch and track-group-mix-ui stay green and unchanged, and the m2 mutation (press without change rewrites the rounded value) is still caught.
+- **Non-blocking.** Round 117 is test-only, and the next planning is the regression round. An answer before stage 3b is useful.

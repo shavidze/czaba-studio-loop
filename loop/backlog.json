@@ -1,10 +1,10 @@
 {
- "version": 114,
- "updated": "2026-10-23 (B round 115 result / round 116 plan, D-29z81)",
+ "version": 115,
+ "updated": "2026-10-23 (B round 116 result / round 117 plan, D-29z82)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 116: D-29z81 - T12 stage 3a, track lane Volume in dB with -inf at the slider minimum (audio + video lanes): new pure track-volume-db.ts, UI-only conversion (storage/context/model/engine stay linear), range -inf..0 dB step 0.1, dB readout + aria-valuetext, exact Undo, no rewrite on press without change; granted scale-only edits in 11 tests; + doc 099 l.4 (gate-115 #4); baseline d5de68f clean; frozen b-round-115-r116-tree-sha256.txt 914; new track-volume-db.ts, track-volume-db.test.tsx, doc 100)",
- "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23) | round 111 planning: advisor available and consulted before writing (2026-10-23) | round 112 planning: advisor available and consulted before writing (2026-10-23) | round 113 planning: advisor available and consulted before writing (2026-10-23) | round 115 planning (round 116 task): advisor available and consulted before writing and before finishing (2026-10-23)",
+ "current_task": "current-task.md (round 117: D-29z82 - C-R116-01 fix-up: scale-only exact edits in track-group-mix-ui.test.tsx UM3/UM5/UM9 lane-slider lines (+ UM5 l.575 exact product trackVolumeFromDb(-6) * 0.5) and doc 100 note; every round-116 file frozen at its C-verified content; baseline d5de68f + dirty C-116 tree (git status md5 49a4b7cd); frozen b-round-116-r117-tree-sha256.txt 928; rounds 116+117 publish together after C PASS)",
+ "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23) | round 111 planning: advisor available and consulted before writing (2026-10-23) | round 112 planning: advisor available and consulted before writing (2026-10-23) | round 113 planning: advisor available and consulted before writing (2026-10-23) | round 115 planning (round 116 task): advisor available and consulted before writing and before finishing (2026-10-23) | round 116 planning (round 117 task): advisor available and consulted before writing and before finishing (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -8904,18 +8904,30 @@
    "round": 116,
    "task": "current-task.md",
    "decision": "D-29z81",
-   "status": "dispatched",
+   "status": "c_fail_test_scope",
    "items": [
     "T12-GAIN-VOLUME stage 3a",
     "GATE115-S4-DOC099-STATUS"
    ],
-   "note": "T12 stage 3a: lane Volume fader (audio + video) in dB with -inf at the slider minimum; UI-only conversion in new track-volume-db.ts; storage/context/model/engine/export linear and frozen. A owns ArrangementLane.tsx, new track-volume-db.ts + track-volume-db.test.tsx (TV1-TV11 + m1-m6), new doc 100, doc 099 l.4, granted scale-only lines in 11 tests. C: TV-PRESENT/LAYOUT/DRAG/INF/KEY/DBL/PLAY, G-T3, G-T4, G-INF, G-VIDEO, NB-GROUP/TRACK-SHIFT/MASTER/CLIP/PAN-MS, SOURCE-SCOPE, T116-TARGETED, AN-REVIEW, PX-NET, REG-HYD, G116-3, DOC-100/099 at 1440+1280; exports at Master -12 pre-authorised. Baseline d5de68f clean; frozen b-round-115-r116-tree-sha256.txt (914)."
+   "note": "T12 stage 3a: lane Volume fader (audio + video) in dB with -inf at the slider minimum; UI-only conversion in new track-volume-db.ts; storage/context/model/engine/export linear and frozen. A owns ArrangementLane.tsx, new track-volume-db.ts + track-volume-db.test.tsx (TV1-TV11 + m1-m6), new doc 100, doc 099 l.4, granted scale-only lines in 11 tests. C: TV-PRESENT/LAYOUT/DRAG/INF/KEY/DBL/PLAY, G-T3, G-T4, G-INF, G-VIDEO, NB-GROUP/TRACK-SHIFT/MASTER/CLIP/PAN-MS, SOURCE-SCOPE, T116-TARGETED, AN-REVIEW, PX-NET, REG-HYD, G116-3, DOC-100/099 at 1440+1280; exports at Master -12 pre-authorised. Baseline d5de68f clean; frozen b-round-115-r116-tree-sha256.txt (914).",
+   "result": "C FAIL only on T116-TARGETED 367/370 (C-R116-01: track-group-mix-ui lane lines outside the grant); every REAL-browser row PASS at 1440+1280 (24 rows), browserVerified=true realVerified=true; fake-Bearer 403 sub-check blocked: backend unavailable in cloud; gate 116 skipped"
+  },
+  {
+   "round": 117,
+   "task": "current-task.md",
+   "decision": "D-29z82",
+   "status": "dispatched",
+   "items": [
+    "C-R116-01",
+    "T12-GAIN-VOLUME stage 3a (gate unblock)"
+   ],
+   "note": "Fix-up: A owns only track-group-mix-ui.test.tsx (scale-only exact: import trackVolumeFromDb; l.482/l.522 toBe(trackVolumeFromDb(-30)); l.569 '0.5'->'-6', l.571 toBe(trackVolumeFromDb(-6)); l.575 stems: trackVolumeFromDb(-6) * 0.5 inside the existing toEqual; l.657 '0.7'->'-3.1', l.660 toBe(trackVolumeFromDb(-3.1))) and doc 100 (test note). All round-116 files frozen at their C-verified content. C: T117-TARGETED (19 files, 370/370), LANE-WRITE-GREP, AN-REVIEW, SOURCE-SCOPE, short browser re-touch TV-PRESENT/TV-DRAG/NB-GROUP at 1440+1280, G117-3, PX-NET, REG-HYD; G-*/TV-PLAY carried from c-round-116 (unchanged code). Baseline d5de68f + dirty C-116 tree; frozen b-round-116-r117-tree-sha256.txt (928)."
   }
  ],
  "post_current_stage_queue": [
   {
    "id": "T12-GAIN-VOLUME",
-   "status": "in_progress (stages 1-2 c_pass_published: 38c0e21, d5de68f; stage 3a dispatched round 116, D-29z81)",
+   "status": "in_progress (stages 1-2 c_pass_published: 38c0e21, d5de68f; stage 3a: every C round-116 browser row PASS (browserVerified=true) but round FAIL on T116-TARGETED (C-R116-01, test scope) and unpublished (gate 116 skipped) -> fix-up round 117, D-29z82; stage 3b not_started)",
    "requested": "2026-10-07",
    "instruction": "User explicitly asks: finish ALL current work first, THEN start these attached Gain/Volume requirements. Do not start T12 implementation or extend current tasks with it early.",
    "prerequisites": [
@@ -9003,9 +9015,10 @@
      "stage": "3a",
      "round": 116,
      "decision": "D-29z81",
-     "status": "dispatched",
+     "status": "c_browser_pass_gate_blocked",
      "scope": "T12.5/T12.3 track lane Volume fader (audio + video tracks) in dB: -inf at the slider minimum (stored exactly 0), finite floor -59.9, top 0 dB, step 0.1, dB readout (visible without ' dB', title + aria-valuetext full), exact Undo, no rewrite on press without change; T12.26 Tests 3/4 + -inf 0 LSB + video sound ratio measured by C on exports",
-     "rulings": "UI-only conversion in new track-volume-db.ts; ArrangementTrack.volume, context API, model/groups/schedule/graph/export unchanged (linear); no +6 boost (Live range unconfirmed; signal TRACK-VOLUME-BOOST); readout w-9 -> max w-10; slider >= 24 px; granted scale-only edits in 11 tests (exact toBe via the module); group faders stay % for one round (interim)"
+     "rulings": "UI-only conversion in new track-volume-db.ts; ArrangementTrack.volume, context API, model/groups/schedule/graph/export unchanged (linear); no +6 boost (Live range unconfirmed; signal TRACK-VOLUME-BOOST); readout w-9 -> max w-10; slider >= 24 px; granted scale-only edits in 11 tests (exact toBe via the module); group faders stay % for one round (interim)",
+     "evidence": "c-round-116.json FAIL only on T116-TARGETED 367/370 (C-R116-01); 24 rows passed incl. G-T3 0.501187, G-T4 1.412537, G-INF 0 non-zero samples, G-VIDEO 0.501187, TV-PLAY 10.78 dB / 0 sources; browserVerified=true realVerified=true; fix-up round 117 (D-29z82)"
     },
     {
      "stage": "3b",
@@ -9024,7 +9037,8 @@
     }
    ],
    "t12_rulings_round116_planning": "Stage 3 split into 3a (lane faders dB) and 3b (group dB + Shift fine on track/group/Master) to keep each round's granted test edits enumerable; scope unchanged, nothing deferred. Range top 0 dB is a CZABA decision (Live -inf..+6 not in saved captures, no web tool); +6 dB boost recorded as signal TRACK-VOLUME-BOOST, not deferred scope (not requested by the user).",
-   "v1_gate_round116_planning": "V1 = stages 1, 2, 3a, 3b, 4 (T12.27 items 1-8); stage 5+ is the T12-ADVANCED queue entry"
+   "v1_gate_round116_planning": "V1 = stages 1, 2, 3a, 3b, 4 (T12.27 items 1-8); stage 5+ is the T12-ADVANCED queue entry",
+   "t12_rulings_round117_planning": "D-29z82: OBS-1 lane '+0.0' at 0 dB kept (R7 named formatMasterGainDb and '+0.0' examples together: B spec defect, A deviation 1 accepted); Master '0.0 dB' mismatch -> deferred Low LANE-MASTER-ZERO-SIGN; stage 3b group fader must use formatTrackVolumeDb so lane and group agree. OBS-2 -> deferred Low LANE-READOUT-DOUBLE-READ. OBS-3 'as const' accepted (const assertion, existing repo pattern; the no-type-assertion rule targets 'as T' casts). C-R116-01 root cause: B round-115 planning enumerated the grant from a narrower grep and missed track-group-mix-ui (lane-driven lines next to group lines)."
   },
   {
    "id": "ABLETON-EXPERT-REVIEW",
@@ -14230,7 +14244,7 @@
   {
    "id": "DEFERRED-LOW-POLISH",
    "severity": "info",
-   "status": "open - pointer: 144 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped",
+   "status": "open - pointer: 159 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped",
    "title": "deferred Low findings (not lost)",
    "evidence": "backlog.json deferred_low_polish",
    "round110_note": "B round 109 -> 110 planning: +C-R109-OBS-01, +GATE109-F3-BIOME-IGNORE-FIXTURE (141 entries)",
@@ -14530,6 +14544,36 @@
    "status": "signal (Live 12 section 18.1: adjusting one selected track's mixer control adjusts the others, keeping differences; not in T12 (T12.7 is multi-clip) and not requested)",
    "title": "multi-track mixer adjustment",
    "evidence": "b-round-78/ableton-mixing-20261022.txt l.40, l.82"
+  },
+  {
+   "id": "C-R116-01",
+   "severity": "medium",
+   "status": "dispatched round 117 (D-29z82): scale-only exact grant in track-group-mix-ui.test.tsx",
+   "title": "track-group-mix-ui UM3/UM5/UM9 still write linear values into the lane Volume slider after stage 3a; targeted vitest 367/370 (gate full vitest would be red)",
+   "evidence": "c-round-116.json bug; c-round-116/out/vitest-targeted.log; a-round-116.md STOP",
+   "repro": "npx vitest run app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx",
+   "root_cause": "incomplete grant enumeration in B round-115 planning (B defect, not A's)"
+  },
+  {
+   "id": "GATE-116-SKIPPED",
+   "severity": "info",
+   "status": "open_root",
+   "title": "Round 116 root gate skipped (C FAIL on T116-TARGETED only); round-116 code is uncommitted in the tree; rounds 116+117 publish together after C PASS (GATE-72/74 precedent)",
+   "evidence": "gates/gate-round-116.json"
+  },
+  {
+   "id": "C-R116-OBS-TV-PLAY-CONTENT",
+   "severity": "info",
+   "status": "acknowledged (C-R82-LIVE-ORACLE-PAIRED class; the synthetic beep lane showed the exact -17.5 dB live)",
+   "title": "TV-PLAY live drop with music is content-dominated (10.78 dB for a 17.5 dB drag)",
+   "evidence": "c-round-116.md OBS-4"
+  },
+  {
+   "id": "C-R116-OBS-AS-CONST",
+   "severity": "info",
+   "status": "ruled accepted (B, D-29z82)",
+   "title": "track-volume-db.test.tsx:42 uses 'as const' (const assertion; existing repo pattern)",
+   "evidence": "c-round-116.md OBS-3"
   }
  ],
  "tech_lead_notes": [
@@ -15794,6 +15838,13 @@
    "source": "gates/round-115/review.md Architecture note + a-round-115.md code-reviewer Architecture note",
    "note": "(1) Clip Gain pending/gesture region in ArrangementContext changed in rounds 114 and 115 (clipGainMemberIdsRef, memberKey, multi status); keep; proposal = ARCH-R81/addendum (z): one usePendingPreview controller for Volume/Master/Clip Gain, useArrangement() shape unchanged, CF/MG/pending-status tests green. (2) ArrangementDetailPanel Clip Gain block has single/multi branches in 8 handlers; keep now; proposal after T12 stage 4: ArrangementDetailClipGain / ClipGainControls sub-component + useClipGainTargets hook (captured ids, anchor, routing), CF1-CF14 and MG1-MG14 unchanged. Both reviewers: not a round-116 task.",
    "status": "in checkpoint request addendum (aa) (b-round-91-checkpoint-request.md); not scheduled"
+  },
+  {
+   "id": "ARCH-R116-FADER-START-CAPTURE",
+   "round": 116,
+   "source": "a-round-116.md code-reviewer Architecture note (Signal 4)",
+   "note": "lane keeps its own capture of the exact linear start (volumeGestureStartRef) because useRelativeFaderDrag holds the start but does not expose it; keep this round; proposal for 3b: hook tells previewValue it is back at the start (previewValue(value, {atStart})) so group and Master dB faders do not duplicate the capture",
+   "status": "appended to checkpoint request addendum (ab) (b-round-91-checkpoint-request.md); consider when 3b is planned; not scheduled"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -17644,6 +17695,26 @@
    "repro": "static (clip-gain-multi.ts)",
    "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
    "deferred_round": "B round 115 -> 116 planning (2026-10-23)"
+  },
+  {
+   "id": "LANE-MASTER-ZERO-SIGN",
+   "severity": "low",
+   "status": "open",
+   "title": "at 0 dB the lane Volume shows '+0.0' / '+0.0 dB' while the Master shows '0.0 dB' (formatMasterGainDb zero case)",
+   "evidence": "c-round-116.md OBS-1; shots/layout-worst-music-min-1280-1.png; a-round-116.md deviation 1",
+   "repro": "/studio-lab: compare lane readout and Master readout at 0 dB",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 116 -> 117 planning (2026-10-23)"
+  },
+  {
+   "id": "LANE-READOUT-DOUBLE-READ",
+   "severity": "low",
+   "status": "open",
+   "title": "visible lane Volume readout is not aria-hidden, so a screen reader in browse mode reads the value twice (inherited from the % readout)",
+   "evidence": "a-round-116.md review Low; c-round-116.md OBS-2 (not tested with a screen reader)",
+   "repro": "static (ArrangementLane.tsx readout span next to the slider with aria-valuetext)",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 116 -> 117 planning (2026-10-23)"
   }
  ],
  "baseline_tree_at_round108": {
@@ -17752,5 +17823,22 @@
    "app/contexts/AuthContext.tsx": "bf9ee257"
   },
   "checked": "B round 115 planning 2026-10-23 ~19:50 UTC: HEAD d5de68f, git status clean, frozen list OK"
+ },
+ "baseline_tree_at_round117": {
+  "head": "d5de68fe27c165b00b5578f016703af90730500b",
+  "working_tree": "d5de68f + round-116 changes (11 M + 3 ??), C-verified; git status --porcelain md5 49a4b7cd717023e3a2c52dd5912658c1 = C round-116 start/end",
+  "frozen_list": "tmp/studio-real-loop/b-round-116-r117-tree-sha256.txt",
+  "entries": 928,
+  "tracked_total": 927,
+  "excluded": [
+   "app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx (C-R116-01 scale-only grant)",
+   "docs/implementation/2026/quarter-IV/100-studio-track-volume-db.md (round-117 test note)"
+  ],
+  "protected": {
+   "app/routes/studio.$productId.tsx": "fa2cf0bc",
+   "app/routes/api.studio-token.ts": "13914809",
+   "app/lib/auth.ts": "56f5b76f",
+   "app/contexts/AuthContext.tsx": "bf9ee257"
+  }
  }
 }
