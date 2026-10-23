@@ -154,3 +154,14 @@ B schedules no extraction. Any approved change becomes one separate B task with 
 - **Reviewers:** both say keep inline. Value of extraction now: low. Risk to the commit-order invariants that rounds 110/111 confirmed in Chromium: medium.
 - **Two proposals:** a `useArmedFocusRescue` hook (A's reviewer), or one checkpoint on who owns focus handoff across Library, VideoDock and Workspace, covering docs 093/095/096 (gate-111 reviewer). Acceptance for either: the VR tests and the round-110 handoff tests stay unchanged and green, and the `useArrangement()` shape is unchanged.
 - **Question:** same as (v), widened to ownership: keep, extract a hook, or move ownership. Usual form. **Non-blocking:** the round-112 measurement round and T12 do not wait for it.
+
+## Addendum (x) — B round 113 planning, 2026-10-23 (round 113 reviewers; phase-1 boundary re-request)
+- **Signal:** the gate-113 reviewer's Signal 3. The Pan gesture region in `ArrangementLane.tsx` l.314–401 (blur suppression, drag cleanup, draft state, and since round 113 a merged ref) has changed in several rounds.
+- **Proposal:** `useTrackPanFader(track)` → `{ binding, panDraft, sliderRef }`, owned by `ArrangementLane` plus the new hook. Acceptance: `pan-release-recovery`, `fader-click`, `fader-guards`, `fader-focus-order` and `fader-touch` stay unchanged and green.
+- **Reviewers' view:** value medium; risk in the gesture timing. Worth doing only if Pan is touched again, which T12 stage 3 (Track Volume in dB, Shift fine on the mixer faders) may do. Both reviewers keep Signal 4 (the touch listener in `useRelativeFaderDrag`).
+- **Question:** keep, or extract before stage 3? Usual form: keep/extract, cost, risk, at most three sentences.
+
+## Addendum (y) — B round 113 planning, 2026-10-23 (T12 stage 1)
+- **Signal:** ARCH-R81-VOLUME-STATE-MACHINE said "extract only if a third target kind arrives". Round 114 (T12 stage 1) lets A add clip gain either as a third `MixVolumeTarget` kind `'clip'` or as a Master-style pair (D-29z79 R4). T12 stages 2–3 add multi-clip gain and dB track/group volume on the same machine.
+- **Question:** after round 114's C PASS, should the volume preview/commit/cancel machine move to a pure `lib/arrangement` module before stages 2–3, or stay in `ArrangementContext`? Usual form.
+- **Phase boundary:** phase 1 is complete-for-gate at this planning, which is the feature boundary the workflow names. This is the **one re-request** of the pending checkpoint: `b-round-78`, `b-round-83` and this file, addenda (a)–(y). **Non-blocking:** T12 stage 1 proceeds now.

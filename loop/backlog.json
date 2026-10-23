@@ -1,9 +1,9 @@
 {
- "version": 111,
- "updated": "2026-10-23 (B round 112 -> round 113 planning)",
+ "version": 112,
+ "updated": "2026-10-23 (B round 113 result / round 114 plan, D-29z79)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 113: D-29z78 - A-R38-REVIEW-TOUCH Medium bug round: native non-passive touchstart preventDefault on every relative-drag fader input (track Volume incl. video, track Pan, Master, group Volume) via useRelativeFaderDrag; Zoom excluded and kept as C's positive control; baseline ad58b5e clean; frozen b-round-112-r113-tree-sha256.txt 916; expected 4 M + 2 ?? (fader-touch.test.tsx, doc 097))",
+ "current_task": "current-task.md (round 114: D-29z79 - T12 stage 1, the single-clip Clip Gain fader: relative drag, opt-in Shift fine drag, double-click reset, keyboard, one history entry per drag, live preview without source restart; + GATE113-S1 doc 097 status; baseline c2837f1 clean; frozen b-round-113-r114-tree-sha256.txt 911; new clip-gain-fader.test.tsx + doc 098)",
  "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23) | round 111 planning: advisor available and consulted before writing (2026-10-23) | round 112 planning: advisor available and consulted before writing (2026-10-23) | round 113 planning: advisor available and consulted before writing (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
@@ -2394,7 +2394,7 @@
    "depends_on": [
     "SRW-01"
    ],
-   "status": "in_progress_bug_open",
+   "status": "c_pass_tech_lead_manual (round 113 C PASS browserVerified=true, published c2837f1: A-R38-REVIEW-TOUCH done for Chromium; C-R27-01 closed round 112; open Low C-R41-01 (Tech Lead viewport question) does not hold it back; Tech Lead R38-T real touch device)",
    "files": [
     "app/types/arrangement.ts",
     "app/lib/arrangement/model.ts",
@@ -2964,7 +2964,8 @@
      "result": "C PASS round 46; commit d2f6715"
     }
    ],
-   "round112": "C-R27-01 closed (VM 3/3); A-R38-REVIEW-TOUCH confirmed -> round 113 bug round; status stays in_progress_bug_open until round 113 C PASS (section 5), then c_pass_tech_lead_manual (C-R41-01 Low does not hold it back)"
+   "round112": "C-R27-01 closed (VM 3/3); A-R38-REVIEW-TOUCH confirmed -> round 113 bug round; status stays in_progress_bug_open until round 113 C PASS (section 5), then c_pass_tech_lead_manual (C-R41-01 Low does not hold it back)",
+   "round113": "C PASS (c-round-113.json): touch no-jump on track Volume (incl. video), Pan, Master, group Volume; gate 113 published c2837f1"
   },
   {
    "id": "SRW-14",
@@ -8866,17 +8867,29 @@
    "round": 113,
    "task": "current-task.md",
    "decision": "D-29z78",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "A-R38-REVIEW-TOUCH"
    ],
-   "note": "Medium bug round: native non-passive touchstart preventDefault via useRelativeFaderDrag on track Volume (incl. video), track Pan, Master, group Volume; Zoom excluded (positive control). A owns useRelativeFaderDrag.ts, ArrangementLane.tsx, ArrangementMaster.tsx, ArrangementGroupHeader.tsx, new fader-touch.test.tsx (FT1-FT6 + mutations), new doc 097. C: TC-ZOOM/START/REL/UNDO/TAP/DTAP, MC-PRESS/DRAG/DBL, KB-ARROW, TC-VIDEO-VOL at 1440+1280 with the round-112 CDP touch recipe; PX-NET, REG-HYD, G113-3. Baseline ad58b5e clean; frozen b-round-112-r113-tree-sha256.txt (916); expected 4 M + 2 ??."
+   "note": "Medium bug round: native non-passive touchstart preventDefault via useRelativeFaderDrag on track Volume (incl. video), track Pan, Master, group Volume; Zoom excluded (positive control). A owns useRelativeFaderDrag.ts, ArrangementLane.tsx, ArrangementMaster.tsx, ArrangementGroupHeader.tsx, new fader-touch.test.tsx (FT1-FT6 + mutations), new doc 097. C: TC-ZOOM/START/REL/UNDO/TAP/DTAP, MC-PRESS/DRAG/DBL, KB-ARROW, TC-VIDEO-VOL at 1440+1280 with the round-112 CDP touch recipe; PX-NET, REG-HYD, G113-3. Baseline ad58b5e clean; frozen b-round-112-r113-tree-sha256.txt (916); expected 4 M + 2 ??.",
+   "result": "C PASS browserVerified=true realVerified=true (c-round-113.json, 0 bugs); gate 113 published c2837f1 (reviewer 9/10 COMMIT OK; verify 151 files / 2341 tests)"
+  },
+  {
+   "round": 114,
+   "task": "current-task.md",
+   "decision": "D-29z79",
+   "status": "dispatched",
+   "items": [
+    "T12-GAIN-VOLUME stage 1",
+    "GATE113-S1-DOC097-STATUS"
+   ],
+   "note": "T12 stage 1: single-clip Clip Gain fader (relative drag, opt-in Shift fine, double-click reset, keyboard, one entry per drag, live preview). A owns useRelativeFaderDrag.ts, ArrangementContext.tsx, ArrangementDetailPanel.tsx, StudioWorkspace.tsx (props only), new clip-gain-fader.test.tsx (CF1-CF12 + m1-m5), new doc 098, doc 097 (R9), conditional existing detail/fader tests (enumerations only). C: CG-*, G-T1/T2/T8/T9, G-NONDESTRUCT, NB-*, CG-PLAY, CG-TOUCH, PX-NET, REG-HYD, G114-3 at 1440+1280. Baseline c2837f1 clean; frozen b-round-113-r114-tree-sha256.txt (911)."
   }
  ],
  "post_current_stage_queue": [
   {
    "id": "T12-GAIN-VOLUME",
-   "status": "queued_after_current_completion",
+   "status": "in_progress (stage 1 dispatched round 114, D-29z79)",
    "requested": "2026-10-07",
    "instruction": "User explicitly asks: finish ALL current work first, THEN start these attached Gain/Volume requirements. Do not start T12 implementation or extend current tasks with it early.",
    "prerequisites": [
@@ -8916,7 +8929,61 @@
    "user_decision_2026_10_23": "T12 starts when every phase-1 item is complete or deferred (done, c_pass_tech_lead_manual, verified_except_manual* count as complete; pending Tech Lead manual checks do not block) and no Critical, High or Medium finding is open. Fix the open Medium findings first, then open T12. Open Low (and info) findings no longer block T12; they move to deferred_low_polish and are fixed in one polish pass after VISUAL-A-OBSIDIAN and before release. New Critical/High/Medium findings and Medium+ regressions during T12/VISUAL-A are fixed as before; new Lows go to deferred_low_polish. Final acceptance unchanged: all findings incl. deferred Lows fixed and C-verified before the whole request is complete. Overrides the 2026-10-07 zero-open-bugs-before-T12 rule.",
    "t12_gate_status_round108_planning": "not open: Mediums C-R23-01 (round 109), B-R108-LIB-FOCUS-LOSS (after the regression round), C-R27-01 / C-R6-02 / C-R8-01 / A-R38-REVIEW-TOUCH (C-only cloud measurement round) remain; SRW-03 / SRW-11B / SRW-13 stay open only for those IDs",
    "t12_gate_status_round111_planning": "not open: Mediums C-R110-01 (round 111), then C-R27-01 / C-R6-02 / C-R8-01 / A-R38-REVIEW-TOUCH (C-only cloud measurement round) remain; the regression round (due on/after 2026-10-24) comes first at the next planning on/after that date",
-   "t12_gate_status_round112_planning": "not open: Medium A-R38-REVIEW-TOUCH confirmed reproducible in cloud Chromium -> round 113 bug round. C-R27-01 closed; C-R6-02 / C-R8-01 open_tech_lead_quiet_chrome with no app attribution (non-blocking per the root clarification); A-R73-SAFARI-FLAG-FOCUS environment_webkit_unavailable (non-blocking). Phase-1 items: SRW-03 and SRW-11B now c_pass_tech_lead_manual; SRW-13 after round 113 C PASS; SRW-21 deferred_user. The regression round (regression-last 2026-10-21) comes first at the first planning on/after 2026-10-24, then T12."
+   "t12_gate_status_round112_planning": "not open: Medium A-R38-REVIEW-TOUCH confirmed reproducible in cloud Chromium -> round 113 bug round. C-R27-01 closed; C-R6-02 / C-R8-01 open_tech_lead_quiet_chrome with no app attribution (non-blocking per the root clarification); A-R73-SAFARI-FLAG-FOCUS environment_webkit_unavailable (non-blocking). Phase-1 items: SRW-03 and SRW-11B now c_pass_tech_lead_manual; SRW-13 after round 113 C PASS; SRW-21 deferred_user. The regression round (regression-last 2026-10-21) comes first at the first planning on/after 2026-10-24, then T12.",
+   "t12_gate_status_round114_planning": "OPEN: round 113 C PASS + gate 113 published c2837f1 -> A-R38-REVIEW-TOUCH done (Chromium), SRW-13 c_pass_tech_lead_manual; every phase-1 item done / c_pass_tech_lead_manual / verified_except_manual* / deferred_user (SRW-21); open Mediums only C-R6-02, C-R8-01 (open_tech_lead_quiet_chrome) and A-R73-SAFARI-FLAG-FOCUS (environment_webkit_unavailable), non-blocking per the root clarification 2026-10-23; 0 Critical/High open. Original-stage completion recorded separately from T12 completion: phase 1 is complete-for-gate, not finally accepted (deferred Lows, Tech Lead checks, SRW-21, final regression remain).",
+   "gap_analysis_round114": {
+    "source_read_at": "c2837f1",
+    "exists": [
+     "T12.1/T12.2/T12.3 clip gainDb (default 0, non-destructive, 10^(dB/20)), model.ts l.500-534; range -60..+24 (no -inf; -60 dB floor)",
+     "T12.8 partial: numeric field step 0.1 + 0 dB button (ArrangementDetailPanel.tsx l.540-590); no slider, no double-click reset",
+     "Master in dB -60..+6 (T12.20-23 master meter, over latch)",
+     "T12.20/T12.23 per-track and master peak meters with clip indicator (SRW-13 stage 2b)",
+     "T12.11 fades and T12.10-like clip volume envelope (SRW-18); relative-modulation semantics to be checked in a later stage",
+     "scheduleKey excludes gainDb (ArrangementContext.tsx l.507-510) -> live gain without source restart"
+    ],
+    "missing": [
+     "T12.8 slider + T12.9 Shift fine drag + double-click reset (stage 1, round 114)",
+     "T12.7 multi-clip gain editing with preserved differences and a range display (field disabled for multi-selection today: DETAIL_CLIP_GAIN_GROUP_REASON) (stage 2)",
+     "T12.5/T12.24 Track Volume in dB (linear 0..1 shown as %, ArrangementLane.tsx l.756-780) incl. group Volume, -inf at the bottom per T12.3 (stage 3)",
+     "T12.18/T12.19 waveform reflects clip gain + view-only waveform vertical zoom (stage 4)",
+     "T12.13 micro fades preference, T12.14/T12.15 track volume automation + override, T12.12 crossfades, T12.20 RMS/LUFS (later stages, T12.27 order)"
+    ],
+    "not_applicable_now": [
+     "T12.4, T12.26 Tests 5/6 and the Track FX step of T12.25: no effects chain exists and effects/plugins are out of scope; the processing order without FX (clip gain -> envelope/fades -> track volume -> pan -> group -> master) is still asserted"
+    ],
+    "awaiting_user": [
+     "T12.16/T12.17 Utility gain device: README orders it as a later stage, but professional plugins/effects are out of scope; kept in the stage list as awaiting_user (not dropped, not deferred)"
+    ]
+   },
+   "stages": [
+    {
+     "stage": 1,
+     "round": 114,
+     "decision": "D-29z79",
+     "status": "dispatched",
+     "scope": "single-clip Clip Gain fader: relative drag (84 dB over the width), opt-in Shift fine drag (10x, re-anchored), double-click reset to 0.0, keyboard +-0.1, one history entry per drag, live preview without source restart; field/fader sync; disabled for video/multi/none; T12.26 Tests 1/2/8/9 + T12.2 measured by C on exports"
+    },
+    {
+     "stage": 2,
+     "status": "not_started",
+     "scope": "T12.7 multi-clip Clip Gain: the field/fader enabled for an audio multi-selection, relative differences preserved (delta limited at the -60/+24 bounds so differences stay exact), mixed values shown as a range (e.g. -6.0 ... +1.0 dB), one history entry"
+    },
+    {
+     "stage": 3,
+     "status": "not_started",
+     "scope": "T12.5/T12.24 Track Volume in dB for track (incl. video) and group faders, -inf at the bottom (T12.3), dB readout; Shift fine drag on mixer faders (Live 12 section 42.6); range/boost ruling at planning"
+    },
+    {
+     "stage": 4,
+     "status": "not_started",
+     "scope": "T12.19 waveform shows clip gain (display only) + T12.18 view-only waveform vertical zoom (never reaches the engine; Test 7)"
+    },
+    {
+     "stage": "5+",
+     "status": "not_started",
+     "scope": "T12.10 envelope relative-modulation check vs SRW-18, T12.13 micro fades preference, T12.14/T12.15 volume automation + override, T12.12 crossfades, T12.20 RMS/LUFS; T12.16/17 Utility awaiting_user"
+    }
+   ]
   },
   {
    "id": "ABLETON-EXPERT-REVIEW",
@@ -10168,7 +10235,7 @@
   {
    "id": "A-R38-REVIEW-TOUCH",
    "severity": "medium",
-   "status": "confirmed in cloud Chromium (C round 112 TOUCH FAIL, harness valid) - dispatched round 113 (D-29z78)",
+   "status": "done for Chromium (C round 113 PASS browserVerified=true realVerified=true; gate 113 published c2837f1, reviewer 9/10, verify 151 files / 2341 tests); real touch device stays Tech Lead R38-T",
    "to": "Tech Lead R38-T on a real touch device; fix only on evidence",
    "title": "possible native touch slide on the range faders: pointerdown.preventDefault does not stop touch events, so a touch press might still jump through native input (reviewer memory, unverified)",
    "evidence": "checkpoint-r38-review.md Medium; a-round-38.md section 4",
@@ -10176,7 +10243,8 @@
    "round108_planning": "planned: C-only cloud measurement round after the regression round (D-29z74 what-follows); the cloud runner is a different environment than the loaded Windows host; 3+2 budget per layout; touch via Playwright hasTouch + CDP touch dispatch; outcome decides fix/close",
    "round112": "round 112 measurement (D-29z77): cloud Playwright Chromium, 3 valid + 2 replacements per layout, tolerances unchanged; outcome per current-task.md section 5; TOUCH row with the Zoom slider as positive control (Zoom jumps -> harness valid)",
    "round112_result": "C round 112 (c-round-112.md, c-round-112.json): taskStatus PASS, browserVerified true, realVerified true; gate 112 published ad58b5e. CDP touch, hasTouch true: Volume 1.00->0.09, Pan C->50R, Master 0.0->-54.5 dB on touchStart, 3/3 each; Zoom positive control jumps 678->63; mouse press no jump. C note 3: each touch jump commits an undo step (Undo: Volume / Pan — მუსიკა / Master Volume) - user-visible mix and history change. Evidence c-round-112/out/touch.json, tools/touch.cjs, shots/touch-*-1440.png.",
-   "round113": "D-29z78: shared-hook fix in useRelativeFaderDrag (native addEventListener touchstart {passive:false} preventDefault, attached at mount, removed on unmount) wired into track Volume (incl. video), track Pan, Master and group Volume (R1: group Volume shares the hook and the defect by construction); Zoom excluded. C rows TC-ZOOM/START/REL/UNDO/TAP/DTAP, MC-*, KB-ARROW, TC-VIDEO-VOL at 1440 + 1280."
+   "round113": "D-29z78: shared-hook fix in useRelativeFaderDrag (native addEventListener touchstart {passive:false} preventDefault, attached at mount, removed on unmount) wired into track Volume (incl. video), track Pan, Master and group Volume (R1: group Volume shares the hook and the defect by construction); Zoom excluded. C rows TC-ZOOM/START/REL/UNDO/TAP/DTAP, MC-*, KB-ARROW, TC-VIDEO-VOL at 1440 + 1280.",
+   "round113_result": "c-round-113.json PASS: TC-ZOOM valid (Zoom 678->63 4/4), TC-START 0/42 jumps (r112: Volume 1.00->0.09, Pan C->50R, Master -54.5), TC-REL relative within 20 px + 1 step, TC-UNDO one entry, TC-TAP no entry, MC-PRESS/DRAG/DBL, KB-ARROW, TC-VIDEO-VOL at 1440 and 1280; T113-TARGETED 9 files / 167 tests; SOURCE-SCOPE 4 M + 2 ??"
   },
   {
    "id": "PENDING-COMMIT-ORDER",
@@ -14236,7 +14304,38 @@
    "severity": "info",
    "status": "signal - deliberate for round 113 (D-29z78 R4), not scheduled",
    "title": "after the touchstart preventDefault, a touch double-tap no longer generates dblclick, so it does not reset a fader; keyboard, mouse double-click and the reset buttons remain; before the fix a tap jumped the fader anyway",
-   "evidence": "current-task.md round 113 section 1 R4; C row TC-DTAP (info)"
+   "evidence": "current-task.md round 113 section 1 R4; C row TC-DTAP (info)",
+   "round113_c": "C round 113 TC-DTAP (info): no reset on a touch double-tap for Volume/Pan/Master/group at 1440 and 1280; history unchanged",
+   "gate113_reviewer_proposal": "gate 113 reviewer finding 2 (Low, accepted UX change): a future fix could detect two pointerType touch presses on the same fader within ~300 ms in onPointerDown and call a reset callback; not scheduled (R4 stands); candidate for the T12 stage-3 mixer-fader round if the user asks"
+  },
+  {
+   "id": "GATE113-S1-DOC097-STATUS",
+   "severity": "low",
+   "status": "dispatched round 114 (D-29z79 R9, one-line grant; A owns doc 097 l.4 + TODO only)",
+   "title": "doc 097 l.4 still says awaiting C and the TODO l.97 lists the C rows as open after C round 113 PASS",
+   "evidence": "gates/round-113/review-result.json finding 1 (review 9/10, COMMIT: OK)",
+   "repro": "read store/docs/implementation/2026/quarter-IV/097-studio-fader-touch-no-jump.md l.4 and l.97"
+  },
+  {
+   "id": "TOUCH-LONGPRESS-CONTEXTMENU",
+   "severity": "info",
+   "status": "signal - not tested; candidate row for the regression round (CDP long touch on a fader: contextmenu fires or not; no app menu exists on faders)",
+   "title": "the touchstart preventDefault on the relative faders probably also suppresses the long-press contextmenu (same mechanism as R4)",
+   "evidence": "a-round-113.md known gaps (A reviewer); c-round-113.md section 7 (not a task row)"
+  },
+  {
+   "id": "R38-T-SR-SWIPE",
+   "severity": "info",
+   "status": "open - Tech Lead R38-T checklist addition",
+   "title": "real-device screen reader (VoiceOver/TalkBack) swipe up/down still adjusts the faders after the touchstart guard (reasoning only, untested)",
+   "evidence": "gates/round-113/review-result.json finding 3"
+  },
+  {
+   "id": "ARCH-CHECKPOINT-PHASE1-BOUNDARY",
+   "severity": "info",
+   "status": "requested_from_root (B round 113 planning, 2026-10-23; non-blocking; T12 stage 1 proceeds) - addenda (x) and (y) in b-round-91-checkpoint-request.md",
+   "title": "phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b-round-83 / b-round-91 requests, addenda up to (w)) is re-requested once, with (x) useTrackPanFader and (y) the third MixVolumeTarget kind that T12 stage 1 may add",
+   "evidence": "b-round-113.md section 7"
   }
  ],
  "tech_lead_notes": [
@@ -15483,6 +15582,11 @@
    "source": "a-round-111.md code-reviewer Architecture note + gates/round-111/review.md Architecture note",
    "note": "ARCH-R111-FOCUS-OWNERSHIP: library/video focus handoff touched in rounds 107, 108, 110, 111; armed-ref + deps-free layout-effect pattern now at StudioWorkspace (pendingRowFocusRef, pendingLibraryRailFocusRef), ArrangementLibrary and ArrangementTransport. Both reviewers: keep inline (value low, risk to the commit-order invariants medium). Proposals: useArmedFocusRescue hook (A reviewer) or one frontend-architect checkpoint on focus-handoff ownership across ArrangementLibrary/ArrangementVideoDock/StudioWorkspace covering docs 093/095/096 (gate reviewer); acceptance VR + round-110 handoff tests unchanged and green, useArrangement() shape unchanged. Added as addendum (w) to b-round-91-checkpoint-request.md; merges ARCH-R110-FOCUS-HANDOFF-HOOK; not scheduled; non-blocking.",
    "status": "signal"
+  },
+  {
+   "round": 113,
+   "source": "a-round-113.md code-reviewer Architecture note + gates/round-113/review-result.json Architecture note",
+   "note": "Signal 4 at useRelativeFaderDrag.ts:41-45 (listener lifecycle in the hook): both reviewers keep. Signal 3 (gate reviewer): the Pan gesture region ArrangementLane.tsx:314-401 (blur suppression, drag cleanup, draft state, merged ref) changed repeatedly; proposal useTrackPanFader(track) -> {binding, panDraft, sliderRef}; acceptance pan-release-recovery, fader-click, fader-guards, fader-focus-order, fader-touch unchanged and green; value medium, risk gesture timing; only if Pan is touched again (T12 stage 3 may). Added as addendum (x) to b-round-91-checkpoint-request.md; not scheduled."
   }
  ],
  "vitest_floor_round46": 1357,
@@ -17241,6 +17345,26 @@
   "frozen_list": "tmp/studio-real-loop/b-round-112-r113-tree-sha256.txt",
   "entries": 916,
   "tracked_total": 920,
+  "protected": {
+   "studio.$productId.tsx": "fa2cf0bc",
+   "api.studio-token.ts": "13914809",
+   "auth.ts": "56f5b76f",
+   "AuthContext.tsx": "bf9ee257"
+  }
+ },
+ "baseline_tree_at_round114": {
+  "head": "c2837f1cb72e702742a7cf51362214009983d30b",
+  "frozen_list": "tmp/studio-real-loop/b-round-113-r114-tree-sha256.txt",
+  "entries": 911,
+  "tracked_total": 922,
+  "excluded": [
+   "app/hooks/useRelativeFaderDrag.ts",
+   "app/contexts/ArrangementContext.tsx",
+   "app/components/arrangement/ArrangementDetailPanel.tsx",
+   "app/components/arrangement/StudioWorkspace.tsx",
+   "docs/implementation/2026/quarter-IV/097-studio-fader-touch-no-jump.md",
+   "app/lib/arrangement/__tests__/{fader-focus-order,detail-panel-fit,detail-panel-reason,detail-panel-polish,self-disabling-focus,clip-gain}.test.tsx (conditional)"
+  ],
   "protected": {
    "studio.$productId.tsx": "fa2cf0bc",
    "api.studio-token.ts": "13914809",

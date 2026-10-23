@@ -1,0 +1,76 @@
+{
+ "round": 113,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T15:53:21.2525240Z",
+  "round": 113,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "TC-ZOOM",
+  "TC-START",
+  "TC-REL",
+  "TC-UNDO",
+  "TC-TAP",
+  "MC-PRESS",
+  "MC-DRAG",
+  "MC-DBL",
+  "KB-ARROW",
+  "TC-VIDEO-VOL",
+  "SOURCE-SCOPE",
+  "T113-TARGETED",
+  "AN-REVIEW",
+  "PX-NET",
+  "REG-HYD",
+  "G113-3",
+  "DOC-097"
+ ],
+ "failed": [],
+ "info": {
+  "TC-DTAP": "no reset on touch double-tap for Volume/Pan/Master/group at 1440 and 1280; history unchanged (R4 deliberate, TOUCH-DOUBLE-TAP-RESET); title equality cannot exclude a zero-delta entry (nudge label == fader label)",
+  "long-press-contextmenu": "not tested (not a task row)",
+  "real-touch-device": "Tech Lead R38-T, not testable in cloud",
+  "MC-DBL-stack": "second Ctrl+Z after reset-undo returns 0.91 / -4.5 (last keyboard nudge): exactly one reset entry, 1440 and 1280"
+ },
+ "blocked": [
+  "G113-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "evidence": {
+  "report": "c-round-113.md",
+  "touch1440": "c-round-113/out/touch-1440-series.json",
+  "touch1280": "c-round-113/out/touch-1280.json",
+  "video": "c-round-113/out/touch-1440-video.json",
+  "g113_3": "c-round-113/out/g113-3.json",
+  "vitest": "c-round-113/out/vitest-targeted.txt",
+  "shots": "c-round-113/shots/",
+  "tools": "c-round-113/tools/",
+  "mdbl2": "c-round-113/out/touch-1440-mdbl2.json, touch-1280-mdbl2.json"
+ },
+ "ableton": "არ ეხება for all rows",
+ "sessions": {
+  "1440": 40,
+  "1280": 22,
+  "video1440": 2,
+  "retriesUsed": 0,
+  "mdbl2": 4
+ },
+ "harnessDeviationsFromR112": [
+  "moves -4 px (task TC-REL)",
+  "task tolerance: start==v0, final within 20px+1step, >=1 step, negative",
+  "one CDP session per run"
+ ]
+}

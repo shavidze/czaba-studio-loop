@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-23T15:26:29.245Z)
+# Active loop summary (2026-10-23T16:38:48.629Z)
 
-- backlog.json 994 KB -> active view 254 KB
-- status: G_ROOT_GATE round 112
-- servers: `{"checkedUtc":"2026-10-23T14:50:51.9667100Z","round":112,"attempt":1,"store":200}`
-- last publication: ad58b5e88b8f6c6c8b3c6766f59e8c0a14622aa3 (rounds 112-112)
-- last root gate: round 112 published - commit ad58b5e88b8f6c6c8b3c6766f59e8c0a14622aa3 pushed
+- backlog.json 1003 KB -> active view 124 KB
+- status: G_ROOT_GATE round 113
+- servers: `{"checkedUtc":"2026-10-23T15:53:21.2525240Z","round":113,"attempt":1,"store":200}`
+- last publication: c2837f1cb72e702742a7cf51362214009983d30b (rounds 113-113)
+- last root gate: round 113 published - commit c2837f1cb72e702742a7cf51362214009983d30b pushed
 
-## Current items: SRW-03, SRW-11B, SRW-13
+## Current items: -
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -14,13 +14,12 @@
 - vitest-sfx-library-timeout-flake / - / watch / 
 - dirty-tree-exposure / - / root / No commit since c5ed47b; the Studio work of rounds 6-19 (18 M + 22 untracked) is uncommitted. Policy-correct (final commit/push by root afte
 - a-r17-dev-4-python-kill / - / root / A round 17 killed two python.exe processes (one unknown PID); recorded orchestrator PIDs still ran. Root confirms no needed helper was kille
-- C-R27-01 / medium / open_tech_lead_quiet_chrome / 
 - machine-load-node-processes / info / open_root / 
 - C-R29-NPX-CACHE / info / root_note / C round 29 first mutation attempt (invalid, no node_modules) made npx fetch vitest@5.0.4 into the npm cache; project, lockfile and store unc
 - ROOT-CRLF-AUTH / info / root_note / after the 1cefea1 merge, app/lib/auth.ts and auth-bugs.test.ts working copies are CRLF (core.autocrlf=true, index LF): Biome ./app reports 2
 - ROOT-AGENT-WRITE-GRANT / info / root_note / tracked .claude/agents/frontend-architect.md grants Write/Bash while its text says app code is read-only
 - CHECKPOINT-OCT13-REVIEW-TRIAGE / info / triaged / checkpoint-oct13-review.md suggestions 1-10 triaged
-- A-R38-REVIEW-TOUCH / medium / open_tech_lead_check / possible native touch slide on the range faders: pointerdown.preventDefault does not stop touch events, so a touch press might still jump th
+- A-R38-REVIEW-TOUCH / medium / confirmed in cloud Chromium (C round 112 TOUCH FAIL, harness valid) - dispatched round 113 (D-29z78) / possible native touch slide on the range faders: pointerdown.preventDefault does not stop touch events, so a touch press might still jump th
 - DETAIL-REASON-FIT / low / converted / the disabled Clip Gain reason (video 345.5 px, group 320.6 px nowrap) wraps to 3 lines in the w-32 slot and the range group reason (w-44) to
 - MARKER-LIVE-REGION / info / rejected / the unsaved marker is not a live region (a-round-39.md review #8)
 - DETAIL-RESET-SHRINK / info / open (B option, no measured defect) / the 0 dB button in the marker row has no shrink-0 (a-round-40 reviewer Low #4); C measured 44.2 px stable at both viewports with the 69.8 px
@@ -202,12 +201,17 @@
 - C-R109-OBS-PRODUCTS-404-200 / info / open - backend-dependent observation; recheck when a backend is available / /products returns HTTP 200 with a '404 - Page Not Found' title (bytes identical to the 32a6b08 baseline)
 - C-R109-OBS-CLIP-COUNT / info / open - observation, not investigated; signal for the export overload count / export alert said 14 clipped samples while C's WAV scan counted 30 samples at |x|>=0.9999 (threshold or per-channel counting may differ)
 - ARCH-R110-FOCUS-HANDOFF-THIRD-FILE / info / signal - addendum (u) to the pending checkpoint request b-round-91-checkpoint-request.md; non-blocking; no extraction scheduled / arm-ref + layout-effect focus handoff now in a third component (Transport, DetailPanel, Library)
-- GATE111-S3-DOC096-STATUS / low / dispatched round 112 (doc 096 l.4 one-line) / doc 096 status line still says awaiting C
 - GATE111-S2-DEPSFREE-EFFECT / info / acknowledged (reviewer: no change; render-budget unchanged); part of ARCH-R111-FOCUS-OWNERSHIP / the rescue layout effect has no deps array and runs every render (one ref read)
 - GATE111-SUGG-E2E-S5 / info / signal - not scheduled; candidate row for the next focus-owning round or the regression round (Chromium smoke e2e: collapse -> float -> focus collapse -> Escape -> Enter = 0 clips) / no automated real-browser test for the s5 Escape-return scenario
+- C-R112-HARNESS-BOUNDARY / info / open - harness note for the Tech Lead quiet-Chrome run and any later drift measurement (not a task; no re-measure of unchanged code) / the literal drift rule attributes the one sample at a video clip cut to the clip covering the ruler pos while the dock already shows the nex
+- C-R112-RF53-PANEL-SPLIT / info / unverified hypothesis (B ruling D-29z78: not app attribution under section 5) / RF5-3 first-Play play() lands ~22.5 ms before startAt with the detail panel open (5/6) vs ~15.2 ms with it collapsed (0/4 fail); the cloud a
+- TOUCH-DOUBLE-TAP-RESET / info / signal - deliberate for round 113 (D-29z78 R4), not scheduled / after the touchstart preventDefault, a touch double-tap no longer generates dblclick, so it does not reset a fader; keyboard, mouse double-c
 
 ## Other open items
+- SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
+- SRW-11B [c_pass_tech_lead_manual (C-R8-01 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; accepted Lows C-R11-04 / C-R15-01 do not hold it back; D-29z78)] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
+- SRW-13 [in_progress_bug_open] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
 - SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-16 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 6b574e8, 2a e347b97, 2b-1 db9cc25, 2b-2 60006d4, 2b-3 c062147; Tech Lead R72-T/R74-T/R77-T/R78-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next

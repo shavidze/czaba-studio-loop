@@ -1217,6 +1217,23 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z79 — Round 113-ის შედეგი; T12 იწყება. Round 114: T12 ეტაპი 1 — Clip Gain-ის fader.**
+
+C round 113 (`tmp/studio-real-loop/c-round-113.md`, `c-round-113.json`) — **PASS, `browserVerified: true`, `realVerified: true`**, ბაგების გარეშე; gate 113 გამოქვეყნდა `c2837f1`-ში (review 9/10, verify 151 ფაილი / 2341 ტესტი).
+- **A-R38-REVIEW-TOUCH — დაიხურა Chromium-ში:** touchStart-ზე ნახტომი 0/42 (round 112: 3/3); relative drag, ერთი undo-ს ჩანაწერი და tap-ის no-op მუშაობს; Zoom-ის კონტროლი ვალიდურია. რეალური touch მოწყობილობა — Tech Lead R38-T.
+- **SRW-13 → `c_pass_tech_lead_manual`.** FB-05 და FB-14 → მოწმდება.
+- **T12-ის gate გაიხსნა** (მომხმარებლის 2026-10-23-ის წესი): phase-1-ის ყველა ერთეული დასრულებული ან გადადებულია (SRW-21 — `deferred_user`), ღია Critical/High არ არის, C-R6-02 / C-R8-01 / A-R73-SAFARI-FLAG-FOCUS root-ის დაზუსტებით არ ბლოკავს. Phase 1 gate-ისთვის დასრულებულია, საბოლოოდ მიღებული — არა (deferred Low-ები, Tech Lead-ის შემოწმებები, SRW-21, საბოლოო რეგრესია).
+- **რეგრესიის რაუნდი ჯერ არ დამდგარა** (2026-10-21 → 2026-10-23, 2 დღე); B-ის შემდეგი დაგეგმვა 2026-10-24-ზე ან შემდეგ — რეგრესიის რაუნდი.
+
+- **R1 — T12-ის ეტაპები (დამოკიდებულების რიგით):** 1 — ერთი კლიპის Clip Gain fader (T12.8/T12.9); 2 — რამდენიმე კლიპის Clip Gain (T12.7, იყენებს ეტაპი 1-ის fader-ს); 3 — Track Volume dB-ში (T12.5/T12.24, ჯგუფის Volume-იც, ქვედა ბოლოში −∞ T12.3-ის მიხედვით) + Shift-ით ზუსტი drag mixer-ის fader-ებზე; 4 — waveform-ზე clip gain-ის ჩვენება + მხოლოდ ვიზუალური vertical zoom (T12.18/T12.19); 5+ — T12.27-ის რიგით (envelope-ის relative modulation, micro fades, volume automation + override, crossfade, RMS/LUFS). არცერთი არ არის გადადებული.
+- **R2 — არ ეხება / მომხმარებლის კითხვა:** T12.4, T12.26 Tests 5–6 და T12.25-ის Track FX ნაბიჯი — FX chain არ არსებობს და plugin-ები/ეფექტები ფარგლებს გარეთაა; დამუშავების რიგი FX-ის გარეშე მაინც მოწმდება. T12.16/T12.17 Utility — `awaiting_user` (README-ში შემდგომი ეტაპია, მაგრამ ეფექტები ფარგლებს გარეთაა); სიიდან არ ამოღებულა.
+- **R3 — fader:** `<input type="range">` −60…+24 dB, step 0.1, aria-valuetext `formatMasterGainDb`; `useRelativeFaderDrag`-ით (no-jump და touch-ის guard). Shift — 10-ჯერ ზუსტი, Shift-ის ცვლილებისას ხელახალი anchor; opt-in option, დანარჩენი fader-ები ბაიტამდე უცვლელი. double-click → 0.0 (0.0-ზე ჩანაწერი არ იწერება). ერთი `Clip Gain` ჩანაწერი drag-ზე, ცოცხალი preview (`gainDb` `scheduleKey`-ში არ შედის). ველში ჩაწერილი, შეუნახავი ტექსტი fader-ზე დაჭერისას blur-ით ჯერ ინახება (ორი ჩანაწერი). ვიდეო / რამდენიმე კლიპი / არაფერი — გამორთულია, ველის მიზეზით.
+- **R4 — context:** `MixVolumeTarget`-ის მესამე kind `'clip'` ან Master-ის მსგავსი წყვილი — A ირჩევს; track/group/Master უცვლელი. ARCH-R81-ის trigger („მესამე kind“) root-ის checkpoint-ის კითხვაა (addendum (y)), არა ამ რაუნდის refactor.
+- **R5 — GATE113-S1 (Low):** doc 097 l.4 + TODO, ერთხაზიანი grant.
+- **R6 — C:** CG-PRESENT/LAYOUT/NOJUMP/DRAG/FINE/FINE-TOGGLE/KEY/DBL/SYNC/PENDING-DRAG/DISABLED/TOUCH/PLAY, G-T1/T2/T8/T9 (export-ის დონეები, T12.26), G-NONDESTRUCT (T12.2), NB-TRACK-SHIFT/MASTER/RESET-BTN, PX-NET, REG-HYD, G114-3; 1440 + 1280; ზღვრები წინასწარ ფიქსირებულია.
+- **R7 — Ableton:** §8.4.7 Gain slider dB-ში (2026-10-12), §42.6 Shift-ით ზუსტი drag და §42.4 double-click reset (2026-10-13) — ადრე დადასტურებული, ამ რაუნდში ხელახლა არ გახსნილა (runner-ზე web tool არ არის). T12-ის თანდართული Ableton-ის ჩანაწერები — დაუდასტურებელი; ABLETON-EXPERT-REVIEW.
+- **R8 — checkpoint:** phase 1-ის დასრულება feature-ის საზღვარია; root-ს ერთხელ ხელახლა ეთხოვა ღია checkpoint-ი addenda (x) `useTrackPanFader` და (y) მესამე volume kind-ით. არ აჩერებს.
+
 **D-29z78 — Round 112-ის შედეგი; Round 113: touch-ის დაჭერა fader-ს აღარ ახტუნებს (A-R38-REVIEW-TOUCH, Medium).**
 
 C round 112 (`tmp/studio-real-loop/c-round-112.md`, `c-round-112.json`) — **PASS, `browserVerified: true`, `realVerified: true`**; gate 112 გამოქვეყნდა `ad58b5e`-ში (review 10/10). §5-ის ცხრილი გამოყენებულია ისე, როგორც დაიწერა:
@@ -2002,6 +2019,8 @@ flowchart TD
 | 112 | C-R6-02, C-R8-01, C-R27-01, A-R38-REVIEW-TOUCH | C-ის გაზომვის რაუნდი cloud-ში, ზღვრები უცვლელია; A — მხოლოდ doc 096 l.4 (D-29z77) |
 | 112 → | (შედეგი) | **C PASS** (`browserVerified`), `ad58b5e`: C-R27-01 დაიხურა; C-R6-02/C-R8-01 → Tech Lead quiet Chrome (attribution-ის გარეშე); A-R38-REVIEW-TOUCH დადასტურდა |
 | 113 | A-R38-REVIEW-TOUCH | native non-passive `touchstart` preventDefault ოთხ relative fader-ზე, Zoom-ის გარეშე (D-29z78) |
+| 113 → | (შედეგი) | **C PASS** (`browserVerified`), `c2837f1`: A-R38-REVIEW-TOUCH დაიხურა (Chromium); SRW-13 → მოწმდება; T12-ის gate გაიხსნა |
+| 114 | T12-GAIN-VOLUME ეტაპი 1, GATE113-S1 | Clip Gain-ის fader: relative drag, Shift-ით ზუსტი drag, double-click reset, ისრები, ერთი ჩანაწერი drag-ზე (D-29z79) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2032,6 +2051,8 @@ flowchart TD
 **D-29z77:** round 112-ში app-ის კოდი არ იცვლება; A-ს ეკუთვნის მხოლოდ doc 096-ის l.4. გაყინულია ყველა tracked ფაილი doc 096-ის გარდა (`tmp/studio-real-loop/b-round-111-r112-tree-sha256.txt`, 919).
 
 **D-29z78:** round 113-ში A-ს ეკუთვნის `app/hooks/useRelativeFaderDrag.ts`, `ArrangementLane.tsx`, `ArrangementMaster.tsx`, `ArrangementGroupHeader.tsx` (მხოლოდ fader-ის input-ების wiring), ახალი `app/lib/arrangement/__tests__/fader-touch.test.tsx` და doc 097; დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-112-r113-tree-sha256.txt`, 916).
+
+**D-29z79:** round 114-ში A-ს ეკუთვნის `app/hooks/useRelativeFaderDrag.ts` (opt-in fine mode), `app/contexts/ArrangementContext.tsx` (clip gain preview/commit/begin/blur), `ArrangementDetailPanel.tsx` (fader), `StudioWorkspace.tsx` (მხოლოდ props), ახალი `clip-gain-fader.test.tsx` და doc 098, doc 097 (l.4 + TODO) და პირობითად detail/fader-ის ექვსი არსებული ტესტი (მხოლოდ Clip Gain-ის ბლოკის/tab stop-ების/layout-ის ჩამონათვალი). დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-113-r114-tree-sha256.txt`, 911).
 
 ## 7. Done Policy
 
