@@ -1,31 +1,38 @@
-# CURRENT TASK — Round 96: Lows batch part 3b — refusal text for a failed library source (C-R95-N1) + doc 083 status line (GATE95-S1)
+# CURRENT TASK — Round 97: Export Lows part 1 — held Enter after Cancel closes the dialog (GATE90-S3) + dead disabled class on Cancel (GATE90-S4) + doc 084 status line (GATE96-S1)
 
 Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-10-23
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules in your prompt. Those rules win over older text.
-- **Previous task:** `tasks/round-95.md` (exact copy, sha256 `cbd38d1a…`). Rationale: `b-round-95.md`. Decision record: D-29z61 in `docs/technical/studio-real-workspace/plan.md`.
-- **Round size:** one Low that C saw in the browser, plus one doc status line. One owner (A).
-  1. **C-R95-N1-FAILED-SOURCE-ADD-TEXT:** C round 95 aborted `/middle-east.mp3`. The library row then correctly shows `შეცდომა: ფაილი ვერ ჩაიტვირთა (ქსელი)`, but pressing Enter on that row sets the status to `„Middle East — საჯარო preview“ ჯერ არ ჩატვირთულა.` ("not loaded yet"). That wording suggests the file is still loading and will arrive if the user waits. It never will. The same text is used by the preview refusal (`ArrangementContext.tsx` l.1201) and the add refusal (l.1314).
-  2. **GATE95-S1-DOC083-STATUS:** doc 083 l.4 still says the round is waiting for C. C round 95 passed and gate 95 published it.
+- **Previous task:** `tasks/round-96.md` (exact copy, sha256 `5d25d47d…`). Rationale: `b-round-96.md`. Decision record: D-29z62 in `docs/technical/studio-real-workspace/plan.md`.
+- **Round size:** two related Lows in one component (the export dialog footer) plus one doc status line. One owner (A).
+  1. **GATE90-S3-HOLD-ENTER-CLOSES:** during an export, Enter on „გაუქმება“ cancels. Cancel then unmounts and focus moves to „დახურვა“. If the user is still holding Enter, the browser's repeated keydown activates „დახურვა“. The dialog closes and the cancelled status is lost.
+  2. **GATE90-S4-CANCEL-DISABLED-CLASS:** the Cancel button carries `disabled:opacity-40`, but it is never disabled, so the class can never apply.
+  3. **GATE96-S1-DOC084-STATUS:** doc 084 l.4 still says the round is waiting for C. C round 96 passed and gate 96 published it.
+- **GATE90-S5-UNUSED-PREDICATE is closed by B decision, with no code change.** `isArrangementExportCancelledError` stays as the type guard of the exported `ArrangementExportCancelledError` class, and `export-cancel.test.ts` uses it. The app correctly checks `signal.aborted`, which also hides late errors that are not cancel errors. A records this decision in doc 085. **Do not edit `export-cancel.ts` or `export-cancel.test.ts`.**
 
 ## Why this round
-- **C round 95: PASS**, `browserVerified=true`, `realVerified=true`, 0 bugs. **Gate 95: published**, commit `e3e528821292705a8298e4fcc2f90986375496e4` on both remotes (reviewer 9/10, no Critical or High).
-- C's only new finding is C-R95-N1 (Low, browser-reachable). C findings come first.
+- **C round 96: PASS**, `browserVerified=true`, `realVerified=true`, 0 bugs. **Gate 96: published**, commit `ce440360062f16ee3db2e9795bf33b42c63abc23` on both remotes (reviewer 9/10, no Critical or High).
+- C has no open bug. The next items in the planned order (b-round-95.md §Next 3) are the Export Lows, starting with GATE90-S3/S4/S5.
+- **The held-Enter bug can be reached in a real browser.** B ran a read-only probe (`b-round-96-probe/probe.cjs`; result in `probe-result.json`) on a plain page, not on the app:
+  - In Chromium, Playwright's `keyboard.down('Enter')` sent twice without `up` delivers the second keydown with `repeat=true`.
+  - When the first button removes itself and focus moves to a second button, that repeat keydown **clicks the second button**.
+  - A `preventDefault()` on a repeated Enter keydown stops the click, and a fresh Enter still clicks.
 - `regression-last.json` is 2026-10-21 and today is 2026-10-23 (2 days), so the regression round is not due yet. **The first round planned on or after 2026-10-24 is the regression round.**
 
 ## Baseline (measured by B, 2026-10-23)
-- **HEAD `e3e528821292705a8298e4fcc2f90986375496e4`** (gate 95 published). `git status --short` is **empty**.
-- **Frozen list:** `../tmp/studio-real-loop/b-round-95-r96-tree-sha256.txt`, **524** entries, **524/524 OK**.
-  - It covers every tracked `app/**` and `docs/implementation/**` file plus `vite.config.ts`, **except** the two owned existing files (`app/contexts/ArrangementContext.tsx`, doc 083).
+- **HEAD `ce440360062f16ee3db2e9795bf33b42c63abc23`** (gate 96 published). `git status --short` is **empty**.
+- **Frozen list:** `../tmp/studio-real-loop/b-round-96-r97-tree-sha256.txt`, **526** entries, **526/526 OK**.
+  - It covers every tracked `app/**` and `docs/implementation/**` file plus `vite.config.ts`, **except** the two owned existing files (`ArrangementExportDialog.tsx`, doc 084).
   - Frozen and relevant here:
-    - `ArrangementLibrary.tsx` (`a2b6f78d`), `ArrangementLibraryPreview.tsx` (`c6efc0ef`), `ArrangementLane.tsx` (`00632dcd`), `app/data/studio-lab-demo.ts` (`0d53059f`);
-    - `collection-load-status.test.tsx` (`215e6113`), `grid-snap-loop-drop.test.tsx` (`fe3e8702`) and every other `__tests__` file. **No existing test file is granted.**
-  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-95-r96-tree-sha256.txt`.
-- **Snapshots:** `../tmp/studio-real-loop/b-round-95-r96-snapshots/` (`SHA256SUMS.txt`). Both are LF with CR=0.
+    - `app/lib/arrangement/export-cancel.ts` (`07826749`) and `app/contexts/ArrangementContext.tsx`;
+    - `export-cancel-ui.test.tsx` (`e850f4eb`), `export-cancel.test.ts` (`b15ef366`), `export-dialog-focus.test.tsx` (`ac53f685`), `export-dialog-focus-restore.test.tsx` (`e4ad8336`), `export-dialog-footer.test.tsx` (`5d6d30e4`), `export-dialog-tab-stops.test.tsx` (`8fd007ba`), `export-dialog-a11y-copy.test.tsx` (`b54abec3`), and every other `__tests__` file. **No existing test file is granted.**
+    - doc 078 (`ce84a27d`). It says the Cancel classes were copied from Close on purpose. Do not edit it; doc 085 records that this note is superseded.
+  - Check: `cd store && sha256sum -c --quiet ../tmp/studio-real-loop/b-round-96-r97-tree-sha256.txt`.
+- **Snapshots:** `../tmp/studio-real-loop/b-round-96-r97-snapshots/` (`SHA256SUMS.txt`). Both are LF with CR=0.
 
   | File | sha256 prefix | lines | role |
   |---|---|---|---|
-  | `app/contexts/ArrangementContext.tsx` | `c98fc743` | 3385 | owned (E1 only; see §1) |
-  | `docs/implementation/2026/quarter-IV/083-studio-lab-demo-loader-error-text.md` | `923dc48b` | 78 | owned (l.4 only) |
+  | `app/components/arrangement/ArrangementExportDialog.tsx` | `0040e050` | 571 | owned (E1 and E2 only) |
+  | `docs/implementation/2026/quarter-IV/084-studio-failed-source-refusal-text.md` | `869f9238` | 62 | owned (l.4 only) |
 
 - **Protected (frozen, never edited):**
   - `app/routes/studio.$productId.tsx` (`fa2cf0bc`)
@@ -39,115 +46,148 @@ Dispatcher: B · Implementer: A (Claude Opus 5.5) · Verifier: C · Date: 2026-1
 - **Do not change the repository state.**
   - Never stash, reset, checkout, clean or re-create anything.
   - Never run `biome check --write`, `format --write`, `npm run format` or `check:fix`. Format through stdin to stdout.
-  - Run mutation proofs and fail-before in a scratch copy (`a-round-96/mut/`), never in `store/`. Set the Vitest `cacheDir` to the scratch folder. You may reuse `a-round-95/` scratch scripts as a model; do not edit A round 95 files.
+  - Run mutation proofs and fail-before in a scratch copy (`a-round-97/mut/`), never in `store/`. Set the Vitest `cacheDir` to the scratch folder. You may reuse `a-round-96/` scratch scripts as a model; do not edit A round 96 files.
   - A mismatch (another HEAD, a dirty tree at start, a changed frozen file) means stop and report.
 
 ## 1. What changes (A)
 
-### E1 — refusal text for a failed source (`app/contexts/ArrangementContext.tsx`, two blocks only)
-Allowed hunks:
-- (a) the `startLibraryPreview` refusal block, baseline l.1199–1203;
-- (b) the `addSourceToActiveTrack` refusal block, baseline l.1312–1316;
-- (c) optionally, one new module-level `const` or non-exported function for the text, placed with the other module-level message constants (baseline l.158–186). Nothing else in this file changes. The load effect (l.3000–3051) in particular stays as it is.
+Read the primitives first: `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `AGENT_DISCOVERABLE_CODE.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`.
 
-Behaviour:
-1. If the source exists and `sourceStates[source.id]?.status === 'error'`, the status is exactly `„${source.title}“ ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.`. Use the same `„“` quotes and the same em dash (U+2014) as the existing texts.
-2. If the source exists and is still loading (the state is missing or `status === 'loading'`, or the preview path has no buffer yet), the status stays exactly `„${source.title}“ ჯერ არ ჩატვირთულა.`. This is unchanged.
-3. An unknown id or no selection keeps `ჯერ ბიბლიოთეკაში აირჩიე ხმა.`. This is unchanged.
-4. Preview path: `stopLibraryPreview()` is still called before the status is set, exactly as now, so an earlier preview stops.
-5. No clip is added and the history does not change. No loader error text, URL or stack is copied into the status; the row already shows the detail.
+**Optional pre-edit browser reproduction (recommended):** the dev server serves `store/` live, so do this **before** your first edit.
+1. Open `/studio-lab` and open Export.
+2. Start a WAV export and Tab to Cancel.
+3. Call `page.keyboard.down('Enter')` twice.
+4. Record whether the dialog closes and what `event.repeat` was, in `a-round-97/repro-before.json`.
 
-**What must not change:**
-- `dropLibrarySource` (l.1379, `ეს ხმა ჯერ არ ჩატვირთულა — დაელოდე და სცადე თავიდან.`) and the drop-ghost label in `ArrangementLane.tsx` (frozen). Their tests in `grid-snap-loop-drop.test.tsx` l.541/547 must stay green.
-- The ready path of preview and add, `refuseEditDuringGesture`, and `AUDIO_ON_VIDEO_LANE_MESSAGE`.
-- `useArrangement()` keeps the same shape: no new field and no new export.
+This only reads the repository. If it does not reproduce, say so and continue; do not change the contract.
 
-**Why this is the smallest honest choice (B decision):** the status must not promise that a failed file will still arrive. The new text names the source and reuses the vocabulary of the collection `failed` status the user has already seen (`… ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.`). A retry button would be a new feature, so it is not added. The drop and ghost texts are left alone for two reasons. An error row is `draggable=false` (C round 95), so a real user cannot reach them on a failed source. They also guard the race in which a drag starts before loading finishes.
+### E1 — „დახურვა“ ignores a repeated Enter (`ArrangementExportDialog.tsx`, the Close button at baseline l.537–545 only)
+Add an `onKeyDown` to the „დახურვა“ button (the one with `ref={closeButtonRef}`):
+- If `event.key === 'Enter'` and `event.repeat === true`, call `event.preventDefault()`. Nothing else happens.
+- Every other key, and a non-repeated Enter, is untouched: no `preventDefault` and no `stopPropagation`.
+- The handler may be inline or a module-level non-exported function in this file. Add no new export, hook, state, ref or effect.
 
-### New test — `app/lib/arrangement/__tests__/failed-source-refusal.test.tsx`
-Mount `ArrangementProvider` with your own `WorkspaceCollection`, the same way `collection-load-status.test.tsx` does. Copy what you need; never import from a test file. The collection has three sources:
-- `ok` resolves to a buffer;
-- `bad` has a `loadSource` that rejects with `new Error('ფაილი ვერ ჩაიტვირთა (ქსელი)')`;
-- `slow` stays pending until the test settles it.
+The result, in every phase (not only after Cancel):
+1. A held Enter that started on Cancel no longer closes the dialog. The cancelled status stays, and focus stays on Close.
+2. A fresh Enter press on Close (after the key was released) still closes the dialog, as now.
+3. A mouse click and Space on Close still close the dialog, as now. Space activates on keyup, so a held Space is not part of this bug.
+4. The focus rules are unchanged: initial focus on Close, focus on Close after Cancel and at render end, and focus restore to the opener. The Tab trap is unchanged.
 
-Read the state through `useArrangement()`. Assert exact strings with `toBe`. Use no type assertions, including `as const`. Restore all stubs in `afterEach`.
+**Why this is the smallest honest choice (B decision):** the bug is that a key press meant for Cancel lands on the next button. Ignoring only the repeated Enter on the button that receives focus after Cancel fixes exactly that.
+- Delaying focus, adding a timer, or blocking Enter for a time window would change the frozen focus rules or add state.
+- Applying the guard in every phase is simpler than tying it to the cancel moment. A held Enter on Close is never a deliberate second action.
+- The same mechanism has a second entry point: opening the dialog by holding Enter on the toolbar Export button puts the initial focus on Close, and the repeat keydown would close the dialog at once. The every-phase guard covers it too (C row OPEN-HOLD).
+- The primary export button and the radios are not touched. After Cancel, focus goes to Close, not to them.
 
-- **FS1 add on failed:** after `bad` reaches `error`, `addSourceToActiveTrack('bad')` sets the status to exactly `„<bad title>“ ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.`. The total clip count does not change, and the status does not contain `(ქსელი)`.
-- **FS2 add via selection:** `selectSource('bad')` followed by `addSourceToActiveTrack()` with no argument gives the same text.
-- **FS3 add while loading:** while `slow` is pending, `addSourceToActiveTrack('slow')` gives exactly `„<slow title>“ ჯერ არ ჩატვირთულა.` (unchanged).
-- **FS4 preview on failed:** start a preview of `ok`; `libraryPreviewSourceId` is `'ok'`. Harness model: `app/lib/arrangement/__tests__/library-preview.test.tsx` (frozen) already starts a real preview in jsdom, and its toggle shows `■ შეჩერება`. Copy its fake AudioContext and clock setup; do not import it. If the preview cannot be started, stop and report; do not weaken FS4. Then call `startLibraryPreview('bad', 0)`: `libraryPreviewSourceId` becomes `null` and the status is exactly the failed text for `bad`.
-- **FS5 preview while loading:** `startLibraryPreview('slow', 0)` gives the unchanged loading text.
-- **FS6 unknown id:** `addSourceToActiveTrack('nope')` gives exactly `ჯერ ბიბლიოთეკაში აირჩიე ხმა.`.
-- **FS7 ready add:** `addSourceToActiveTrack('ok')` adds exactly one clip. The status is neither the failed text nor the loading text.
-- **FS8 late failure:** `slow` first refuses with the loading text. The test then rejects it with an error, and the next `addSourceToActiveTrack('slow')` gives the failed text. This proves the text follows the current state, not a cached one.
+### E2 — Cancel loses the dead `disabled:` variant (`ArrangementExportDialog.tsx`, the Cancel button at baseline l.528–535 only)
+- Remove only the `disabled:opacity-40` token from the Cancel button's `className`. Every other token stays, in the same order.
+- The Close and primary export buttons keep their classes unchanged. Close is disabled while rendering, so its `disabled:opacity-40` is live.
+- Cancel never gets a `disabled` attribute.
 
-**Fail-before:** in scratch, run the new file against the baseline snapshot of `ArrangementContext.tsx`. B expects **FS1, FS2, FS4 and FS8 red**. FS3, FS5, FS6 and FS7 lock existing behaviour and pass on both versions. Report the exact list and explain any difference.
+**Nothing else in this file changes.** This includes the four focus effects (baseline l.145–240), `handleClose`, the footer markup and classes (GATE89-S4 is a later round), the progress element (GATE89-S6 is a later round), the status paragraph and the primary button.
+
+### New test — `app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx`
+Mount the provider and the dialog with a render that stays pending until the test settles it, the way `export-cancel-ui.test.tsx` does (CU1, CU3, CU9). Copy what you need; never import from a test file.
+- Find the buttons by role and accessible name (`გაუქმება`, `დახურვა`).
+- Use the return value of `fireEvent.keyDown(...)`: `false` means the default was prevented.
+- Assert exact strings with `toBe`.
+- Use no type assertions, including `as const`.
+- Restore all stubs in `afterEach`.
+
+Tests:
+- **HE1 repeat after Cancel (WAV, render phase):** start a WAV export and click Cancel. Focus is on Close and the status is exactly `ექსპორტი გაუქმდა — ფაილი არ შეიქმნა.`. `fireEvent.keyDown(close, { key: 'Enter', repeat: true })` returns `false`. The dialog's `onClose` mock has 0 calls, the status text is unchanged, and focus is still on Close.
+- **HE2 fresh Enter is not blocked:** in the same state, `fireEvent.keyDown(close, { key: 'Enter', repeat: false })` returns `true`. Then `fireEvent.click(close)` calls `onClose` exactly once. jsdom does not turn a keydown into a click, so the click is explicit.
+- **HE3 only Enter is guarded:** in the same state, a repeated `' '` (Space) keydown and a repeated `'a'` keydown on Close both return `true`.
+- **HE4 idle dialog:** open the dialog with no export running. Focus is on Close. A repeated Enter keydown returns `false`; a non-repeated Enter keydown returns `true`.
+- **HE5 classes:** while rendering, the Cancel button has no `disabled` attribute and its `className` contains no `disabled:` token. Close is disabled and its `className` still contains `disabled:opacity-40`. After Cancel, Close is enabled.
+- **HE6 no propagation change:** a `keydown` listener on `document` still receives the repeated Enter that Close prevented. The guard does not call `stopPropagation`.
+- **HE7 MP3 load phase:** start an MP3 export and cancel it in the `load` phase (hanging encoder load, as CU3 does). The status is exactly `ექსპორტი გაუქმდა — ფაილი არ შეიქმნა. MP3 encoder შემდეგ MP3 ექსპორტზე თავიდან ჩაიტვირთება.`. A repeated Enter keydown on Close returns `false`, `onClose` has 0 calls, and the text is unchanged.
+
+**Fail-before:** in scratch, run the new file against the baseline snapshot of `ArrangementExportDialog.tsx`. B expects **HE1, HE4, HE5 and HE7 red**. HE2, HE3 and HE6 lock behaviour that must not change, so they pass on both versions. Report the exact list and explain any difference.
 
 **Mutations (scratch only; each must turn at least one named test red):**
-- a: remove the error branch in the add block → FS1/FS2/FS8
-- b: remove the error branch in the preview block → FS4
-- c: invert the branch so that loading gets the failed text → FS3/FS5
-- d: drop the `stopLibraryPreview()` call before the failed-text status in the preview block → FS4 (`libraryPreviewSourceId` stays `'ok'`)
-- e: change one character of the failed text → FS1
-- f: append `state.error` to the status → FS1 (`(ქსელი)` must not appear)
+- a: remove the guard → HE1/HE4/HE7
+- b: prevent every Enter (drop the `repeat` check) → HE2/HE4
+- c: prevent every repeated key (drop the `key` check) → HE3
+- d: add `event.stopPropagation()` to the guard → HE6
+- e: put `disabled:opacity-40` back on Cancel → HE5
+- f: remove `disabled:opacity-40` from Close → HE5
 
-Record the red tests for each mutation and an unmutated control run.
+Record the red tests for each mutation and for an unmutated control run.
 
 ### Docs
-- **Doc 083 l.4:** `**სტატუსი:** C PASS (Round 95), გამოქვეყნდა e3e5288 (D-29z60)`, or the same meaning in the doc's style. Only l.4 changes.
-- **New doc** `docs/implementation/2026/quarter-IV/084-studio-failed-source-refusal-text.md`, in Georgian, following `docs/implementation/TEMPLATE.md`. Its status line says the round is waiting for C (D-29z61). Record why the drop and ghost texts were not changed.
+- **Doc 084 l.4:** `**სტატუსი:** C PASS (Round 96), გამოქვეყნდა ce44036 (D-29z61)`, or the same meaning in the doc's style. Only l.4 changes.
+- **New doc** `docs/implementation/2026/quarter-IV/085-studio-export-dialog-hold-enter.md`, in Georgian, following `docs/implementation/TEMPLATE.md`. Its status line says the round is waiting for C (D-29z62). Record:
+  - why only a repeated Enter on Close is ignored, and the alternatives that were rejected;
+  - that doc 078's note about copying the Close classes onto Cancel is superseded for the `disabled:` token;
+  - the GATE90-S5 decision to keep `isArrangementExportCancelledError`.
 - `docs/technical/arrangement-workspace.md` is **not** owned this round (frozen).
 
 ## 2. Checks A runs (speed rules)
-- `npm run typecheck`, `npm run lint`
-- `npx vitest run app/lib/arrangement/__tests__/failed-source-refusal.test.tsx app/lib/arrangement/__tests__/collection-load-status.test.tsx app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx app/lib/arrangement/__tests__/library-preview.test.tsx`. Add any other existing test file that greps for `ჯერ არ ჩატვირთულა`, `addSourceToActiveTrack` or `startLibraryPreview` (`grep -rl` under `app/`). Write the final list to `a-round-96/targeted-list.txt`.
+- `npm run typecheck`, `npm run lint`.
+- `npx vitest run` on these files, all under `app/lib/arrangement/__tests__/`:
+  - the new file;
+  - `export-cancel-ui.test.tsx`, `export-dialog-focus.test.tsx`, `export-dialog-focus-restore.test.tsx`, `export-dialog-footer.test.tsx`, `export-dialog-tab-stops.test.tsx`, `export-dialog-a11y-copy.test.tsx`;
+  - `export-progress-ui.test.tsx`, `export-range-ui.test.tsx`, `export-mp3.test.tsx`;
+  - any other existing test file that greps for `ArrangementExportDialog`, `arrangement-export-cancel` or `დახურვა` (`grep -rl` under `app/`).
+
+  Write the final list to `a-round-97/targeted-list.txt`.
 - Read-only Biome on the two code files (`npx biome check <files>`).
 - **code-reviewer** is required (4 changed or new files). Hand its Architecture note to B verbatim.
-- No full suite and no `npm run verify`: those belong to the gate.
-- **Expected end state:** `git status --short` shows exactly **2 M** (`app/contexts/ArrangementContext.tsx`, doc 083) and **2 ??** (the new test file and doc 084). The frozen list stays 524/524. Write `a-round-96/end-hashes.txt` with the 4 files.
+- No full suite and no `npm run verify`; those belong to the gate.
+- **Expected end state:** `git status --short` shows exactly **2 M** (`ArrangementExportDialog.tsx`, doc 084) and **2 ??** (the new test file and doc 085). The frozen list stays 526/526. Write `a-round-97/end-hashes.txt` with the 4 files.
 
 ## 3. What C verifies (browser first, Playwright Chromium, fresh incognito context, no credentials)
-Every row runs at **1280×720 and 1440×900** unless noted. Record the exact texts.
-- `F(t)` = `„t“ ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.`
-- `ME` = `Middle East — საჯარო preview`
-- `HERO` = `CZABA hero — საჯარო preview`
+Every row runs at **1280×720 and 1440×900** unless noted. Use real keyboard and mouse input (`page.keyboard`, `page.mouse` or `locator.click`). Record the exact texts.
+
+Notation:
+- `CANCELLED` = `ექსპორტი გაუქმდა — ფაილი არ შეიქმნა.`
+- `CANCELLED_ENC` = `ექსპორტი გაუქმდა — ფაილი არ შეიქმნა. MP3 encoder შემდეგ MP3 ექსპორტზე თავიდან ჩაიტვირთება.`
+
+Setup:
+- Install a capture-phase `keydown` recorder through an init script. It logs `key`, `repeat` and the text of `document.activeElement` for each event. Install it once (C round 90 N1: a double install logs every event twice).
+- To get a render long enough to cancel, add enough clips (for example Middle East, HERO and synthetic rows), as C round 90 CX-KEYS did (Enter landed at `რენდერი · 4%` and `9%`). C may reuse its round 90 tools.
 
 | ID | Action | PASS evidence |
 |---|---|---|
-| **FAIL-ADD** (primary) | `page.route('**/middle-east.mp3', r => r.abort())`, load `/studio-lab`, wait for `failed(1)`, click the ME row, press Enter | The status is exactly `F(ME)`. The clip count is 0 before and 0 after. `ჯერ არ ჩატვირთულა` does not appear in the status. The row still shows `შეცდომა: ფაილი ვერ ჩაიტვირთა (ქსელი)`. Screenshot. |
-| **FAIL-PREVIEW** (primary) | Same abort. Select a ready synthetic row and start its preview (`arrangement-library-preview-toggle`); confirm `▶ ისმის`. Then use ArrowUp/ArrowDown or a click until the ME row is selected. | The preview stops: no row shows `▶ ისმის`, and the preview toggle is disabled for ME. The status is exactly `F(ME)`. Optional: a meter or analyser reading shows that the preview sound stopped. |
-| **FAIL-DBL** (1280 only) | Same abort. Double-click the ME row. | The status is exactly `F(ME)`. The clip count is unchanged. |
-| **FAIL-BOTH** (1440 only) | Abort both demo URLs. Press Enter on each failed row. | ME gives `F(ME)` and the hero row gives `F(HERO)`. The `failed(2)` status still appears first, as before. |
-| **LOADING-REG** | Hold `/middle-east.mp3` pending (a route that delays its fulfil by at least 5 s). Press Enter on the row while it shows `იტვირთება…`. Then let the request complete. | While it is loading, the status is exactly `„ME“ ჯერ არ ჩატვირთულა.` (unchanged). After the load completes, Enter adds one clip. |
-| **READY-REG** | Normal load. Press Enter on ME. Preview a synthetic row. | ME adds 1 clip on `music`, and the preview shows `▶ ისმის`. Ready behaviour is unchanged. |
-| **DEMO-LOAD-REG** | Normal load | The status reaches exactly the demo `ready` text. All 9 rows show durations. Each demo URL is requested exactly once. |
-| **PX-NET** | all sessions | 0 requests to `/api/studio-token`, R2, `/api/recording-*` or `/api/download`; 0 `Authorization` headers. |
+| **HOLD-ENTER** (primary) | Open Export, choose WAV and start the export. During `რენდერი`, Tab to „გაუქმება“ and call `keyboard.down('Enter')` once. Wait until focus is on „დახურვა“. Then call `keyboard.down('Enter')` 3 more times, 50 ms apart, then `keyboard.up('Enter')`. | The recorder shows the first keydown with `repeat=false` on გაუქმება and the next three with `repeat=true` on დახურვა. After the up, the dialog is still open, the status is exactly `CANCELLED`, focus is on „დახურვა“, and there are 0 downloads in 10 s. Screenshot. |
+| **HOLD-ENTER-MP3** (1440 only) | The same, with MP3 chosen. | The dialog stays open after the repeats. The status is whichever cancel text appeared (`CANCELLED` or `CANCELLED_ENC`, recorded) and does not change after the repeats. 0 downloads. |
+| **FRESH-ENTER-CLOSES** | Continue from HOLD-ENTER after `keyboard.up`, and press Enter once (`keyboard.press`). | The dialog closes and focus returns to the toolbar Export button (the existing focus restore). In a second run, a mouse click on „დახურვა“ after a cancel also closes the dialog. |
+| **OPEN-HOLD** (1280 only) | Focus the toolbar Export button. `keyboard.down('Enter')` once, wait for the dialog and for focus on „დახურვა“, then `keyboard.down('Enter')` 2 more times and `keyboard.up('Enter')`. | The recorder shows `repeat=true` on დახურვა. The dialog is still open and focus is on „დახურვა“. |
+| **SPACE-REG** (1280 only) | During a render, focus Cancel and press Space. Then press Space on „დახურვა“. | Space on Cancel gives `CANCELLED`. Space on Close closes the dialog. |
+| **CANCEL-CLASS** | During a render, read both buttons. | Cancel has no `disabled` attribute and its `class` contains no `disabled:`. Close has the `disabled` attribute and a computed `opacity` of `0.4`. After Cancel, Close has no `disabled` attribute and an opacity of `1`. Screenshot of the footer during the render. |
+| **CX-REG** | Mouse-click Cancel during a render. Then run a new WAV export to the end. | `CANCELLED`, and 0 downloads in 10 s. The second export downloads one WAV that decodes (record sample rate, channels, and a duration > 0). |
+| **DONE-REG** | A full WAV export without cancel. | The done status appears, focus is on „დახურვა“, and one fresh Enter closes the dialog. |
+| **ESC-REG** | During a render, press Escape. Then cancel and press Escape. | The same as C round 90 CX-KEYS: Escape during a render does not cancel. After a cancel, Escape closes the dialog and focus is on the toolbar Export button. Record both observations. |
+| **PX-NET** | all sessions | 0 requests to `/api/studio-token`, R2, `/api/recording-*` or `/api/download`, and 0 `Authorization` headers. |
 | **REG-HYD** | all sessions | No hydration warning, no non-noise console error, no pageerror. |
-| **G96-3** | anonymous | The header link opens `/studio-lab` with the workspace and the demo badge. `/studio/middle-east` shows sign-in and no workspace. `/api/studio-token` returns 401. The fake-Bearer sub-check is BLOCKED (backend unavailable in cloud); list it under `blocked`. |
-| **AN-REVIEW** | review A's tests | The fail-before list matches §1, or the difference is explained. C re-runs mutations a, b and d in its own scratch and gets the same red tests. Assertions are exact `toBe`, and the new file has no `as`. |
-| **T96-TARGETED** | `npx vitest run $(cat a-round-96/targeted-list.txt)` | All pass. Record the files and test counts. |
-| **SOURCE-UNCHANGED** | start and end | HEAD `e3e5288`; 2 M + 2 ??; frozen 524/524; A's end hashes match. The `git diff -U0` hunks in `ArrangementContext.tsx` lie only inside baseline l.1199–1203, l.1312–1316 and at most one module-level constant block in l.158–186. Doc 083 changes only at l.4. |
+| **G97-3** | anonymous | The header link opens `/studio-lab` with the workspace and the demo badge. `/studio/middle-east` shows sign-in and no workspace. `/api/studio-token` returns 401. The fake-Bearer sub-check is BLOCKED (backend unavailable in cloud); list it under `blocked`. |
+| **AN-REVIEW** | Review A's tests. | The fail-before list matches §1, or the difference is explained. C re-runs mutations a, b and e in its own scratch and gets the same red tests. Assertions are exact, and the new file has no `as`. |
+| **T97-TARGETED** | `npx vitest run $(cat a-round-97/targeted-list.txt)` | All pass. Record the files and test counts. |
+| **SOURCE-UNCHANGED** | start and end | HEAD `ce44036`; 2 M + 2 ??; frozen 526/526; A's end hashes match. The `git diff -U0` hunks in `ArrangementExportDialog.tsx` lie only inside the Cancel button (baseline l.528–535), the Close button (l.537–545) and at most one module-level non-exported function. Doc 084 changes only at l.4. |
 
 Gate rows (C does not claim them; list them under `gate`): full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED.
 
 **Neighbouring behaviour that could break:**
-- the ready add and preview paths;
-- the loading refusal text, which must stay the old text;
-- the preview stopping when the selection moves to a row that is not ready;
-- the drop refusal text and the ghost label, which are untouched and covered by `grid-snap-loop-drop.test.tsx`;
-- clip count and history: a refusal never adds a clip or an Undo entry.
+- A fresh Enter, a click and Space on „დახურვა“ must still close the dialog.
+- The focus rules (initial Close, Close after Cancel and at render end, restore to the opener) and the Tab trap.
+- Cancel itself: Enter, Space and a click still cancel in every phase.
+- The export result: a later export still produces a real decodable file.
+- Escape behaviour, which belongs to the protected `Modal.tsx`.
 
 ## 4. Ableton correspondence
 | Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
 |---|---|---|---|---|
-| Refusal text when a failed library file is added | none | — | CZABA's own web loader status text. Live's browser has no comparable network-loaded file that fails to fetch. | არ ეხება |
+| A held Enter after Cancel does not also close the export dialog | none | — | Browser key-repeat behaviour on CZABA's own web dialog. B makes no claim about Live's export dialog. | არ ეხება |
+| Disabled styling only on buttons that can be disabled | none | — | CZABA Tailwind hygiene | არ ეხება |
 
 No Ableton claim is made.
 
 ## 5. Report (A)
-Write `a-round-96.md` and `a-round-96-result.json` as you go. Include:
+Write `a-round-97.md` and `a-round-97-result.json` as you go. Include:
 - the changed files with their end sha256;
 - the exact commands you ran and their results;
+- the optional pre-edit browser reproduction result;
 - the fail-before list and the mutation table;
 - the code-reviewer findings with your disposition, and its Architecture note verbatim;
 - the exact next C checks.

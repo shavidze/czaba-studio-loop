@@ -1,9 +1,9 @@
 {
- "version": 94,
- "updated": "2026-10-23 (B round 95 review -> round 96 task, D-29z61)",
+ "version": 95,
+ "updated": "2026-10-23 (B round 96 review -> round 97 task, D-29z62)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 96: D-29z61 - Lows batch part 3b: C-R95-N1 failed library source refusal text in ArrangementContext.tsx startLibraryPreview/addSourceToActiveTrack ('„<title>“ ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.'), loading text unchanged; new failed-source-refusal.test.tsx FS1-FS8; doc 083 l.4; new doc 084; baseline e3e5288, frozen 524, expected 2 M + 2 ??)",
+ "current_task": "current-task.md (round 97: D-29z62 - Export Lows part 1: GATE90-S3 Close ignores repeated Enter keydown after Cancel; GATE90-S4 drop disabled:opacity-40 from Cancel; GATE96-S1 doc 084 l.4; GATE90-S5 closed by decision (keep); new export-dialog-hold-enter.test.tsx HE1-HE7; new doc 085; baseline ce44036, frozen 526, expected 2 M + 2 ??)",
  "advisor_used_by_B": "round 95 planning: advisor available and consulted (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
@@ -8335,7 +8335,7 @@
    "round": 96,
    "task": "current-task.md",
    "decision": "D-29z61",
-   "status": "dispatched",
+   "status": "C PASS browserVerified; gate 96 published ce44036",
    "items": [
     "C-R95-N1-FAILED-SOURCE-ADD-TEXT",
     "GATE95-S1-DOC083-STATUS"
@@ -8360,6 +8360,44 @@
     "G96-3",
     "AN-REVIEW",
     "T96-TARGETED",
+    "SOURCE-UNCHANGED"
+   ]
+  },
+  {
+   "round": 97,
+   "task": "current-task.md",
+   "decision": "D-29z62",
+   "status": "dispatched",
+   "items": [
+    "GATE90-S3-HOLD-ENTER-CLOSES",
+    "GATE90-S4-CANCEL-DISABLED-CLASS",
+    "GATE96-S1-DOC084-STATUS"
+   ],
+   "closed_by_decision": [
+    "GATE90-S5-UNUSED-PREDICATE"
+   ],
+   "note": "Export Lows part 1 (dialog footer). baseline HEAD ce44036 clean; frozen b-round-96-r97-tree-sha256.txt 526/526; snapshots b-round-96-r97-snapshots; expected 2 M + 2 ??; no existing test granted",
+   "owned": [
+    "app/components/arrangement/ArrangementExportDialog.tsx (Close button onKeyDown + Cancel className only)",
+    "app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx (new HE1-HE7)",
+    "docs/implementation/2026/quarter-IV/084-studio-failed-source-refusal-text.md (l.4)",
+    "docs/implementation/2026/quarter-IV/085-studio-export-dialog-hold-enter.md (new)"
+   ],
+   "c_ids": [
+    "HOLD-ENTER",
+    "HOLD-ENTER-MP3",
+    "FRESH-ENTER-CLOSES",
+    "OPEN-HOLD",
+    "SPACE-REG",
+    "CANCEL-CLASS",
+    "CX-REG",
+    "DONE-REG",
+    "ESC-REG",
+    "PX-NET",
+    "REG-HYD",
+    "G97-3",
+    "AN-REVIEW",
+    "T97-TARGETED",
     "SOURCE-UNCHANGED"
    ]
   }
@@ -13581,7 +13619,7 @@
   {
    "id": "GATE90-S3-HOLD-ENTER-CLOSES",
    "severity": "low",
-   "status": "open - Lows batch (ignore event.repeat on Close after a cancel, or accept; real-keyboard timing, CDP cannot hold a key)",
+   "status": "dispatched round 97 (D-29z62): Close ignores a repeated Enter keydown (preventDefault when event.repeat); browser-reachable: B probe b-round-96-probe/probe-result.json shows Playwright keyboard.down twice delivers repeat=true and clicks the newly focused button",
    "to": "Lows batch",
    "title": "holding Enter on Cancel: the repeat keydown activates Close after focus moves there, closing the dialog and losing the cancelled status",
    "evidence": "gates/round-90/review.md #3"
@@ -13589,7 +13627,7 @@
   {
    "id": "GATE90-S4-CANCEL-DISABLED-CLASS",
    "severity": "low",
-   "status": "open - Lows batch (class copied from Close on purpose, doc 078)",
+   "status": "dispatched round 97 (D-29z62): remove disabled:opacity-40 from the never-disabled Cancel button; doc 078 intentional-copy note superseded in doc 085",
    "to": "Lows batch",
    "title": "Cancel carries disabled:opacity-40 but is never disabled",
    "evidence": "gates/round-90/review.md #4"
@@ -13597,7 +13635,7 @@
   {
    "id": "GATE90-S5-UNUSED-PREDICATE",
    "severity": "info",
-   "status": "open - Lows batch (optional: drop isArrangementExportCancelledError or keep for tests)",
+   "status": "closed by B decision round 97 (D-29z62): keep isArrangementExportCancelledError as the type guard of the exported error class, used by export-cancel.test.ts; app correctly checks signal.aborted; no code change; recorded in doc 085",
    "to": "Lows batch",
    "title": "isArrangementExportCancelledError is used only by tests; the app checks signal.aborted",
    "evidence": "gates/round-90/review.md #5"
@@ -13843,7 +13881,7 @@
   {
    "id": "C-R95-N1-FAILED-SOURCE-ADD-TEXT",
    "severity": "low",
-   "status": "dispatched round 96 (D-29z61)",
+   "status": "closed round 96 (c-round-96.json PASS browserVerified=true realVerified=true (FAIL-ADD/FAIL-PREVIEW both viewports, FAIL-DBL, FAIL-BOTH, LOADING-REG, HISTORY-REG); gate 96 published ce44036 both remotes)",
    "to": "A round 96",
    "title": "Enter/double-click/preview on a library source whose load FAILED says '„<title>“ ჯერ არ ჩატვირთულა.' (not loaded yet), implying it is still pending",
    "evidence": "c-round-95.json notes C-R95-N1; c-round-95/shots/add-refused-1280x720.png; ArrangementContext.tsx l.1201 (preview) and l.1314 (add) at e3e5288"
@@ -13851,7 +13889,7 @@
   {
    "id": "GATE95-S1-DOC083-STATUS",
    "severity": "low",
-   "status": "dispatched round 96 (doc 083 l.4)",
+   "status": "closed round 96 (C SOURCE-UNCHANGED: doc 083 l.4 only; gate 96 published ce44036)",
    "to": "A round 96",
    "title": "doc 083 l.4 still says awaiting C although C round 95 passed",
    "evidence": "gates/round-95/review.md suggestion 1"
@@ -13879,6 +13917,54 @@
    "to": "B",
    "title": "Middle East at unity triggers the existing overload alert (14 samples limited)",
    "evidence": "c-round-95.json notes C-R95-N2"
+  },
+  {
+   "id": "GATE96-S1-DOC084-STATUS",
+   "severity": "low",
+   "status": "dispatched round 97 (doc 084 l.4)",
+   "to": "A round 97",
+   "title": "doc 084 l.4 still says awaiting C although C round 96 passed",
+   "evidence": "gates/round-96/review.md finding 1"
+  },
+  {
+   "id": "GATE96-S2-REPEATED-STATUS-NOT-ANNOUNCED",
+   "severity": "low",
+   "status": "open - Lows batch (a11y, pre-existing, not a regression; needs a design choice: counter vs clear-and-set; owner StudioWorkspace/ArrangementContext status)",
+   "to": "Lows batch",
+   "title": "an identical status text set twice (e.g. Enter twice on a failed row) causes no re-render, so the aria-live=polite region does not announce it again",
+   "evidence": "gates/round-96/review.md finding 2; ArrangementContext.tsx l.535 useState status; StudioWorkspace.tsx l.2440 aria-live"
+  },
+  {
+   "id": "GATE96-S3-DOUBLE-STATE-READ",
+   "severity": "info",
+   "status": "open - nit, not scheduled (fold into the refusal-mapping proposal if that is approved)",
+   "to": "B",
+   "title": "startLibraryPreview reads latestRef.current.sourceStates[sourceId] twice while the add path uses one local state",
+   "evidence": "gates/round-96/review.md finding 3; a-round-96.md reviewer nit"
+  },
+  {
+   "id": "C-R96-N1-MEASUREMENT",
+   "severity": "info",
+   "status": "closed - info (preview RMS 0.031 -> 0 after ArrowUp onto failed ME)",
+   "to": "B",
+   "title": "C measurement method: AnalyserNode tap on nodes connected to destination",
+   "evidence": "c-round-96.json notes"
+  },
+  {
+   "id": "C-R96-N2-FAIL-PREVIEW-ROW",
+   "severity": "info",
+   "status": "closed - accepted departure (HERO adjacent to ME; synthetic preview covered by READY-REG)",
+   "to": "B",
+   "title": "FAIL-PREVIEW used the ready HERO row instead of a synthetic row",
+   "evidence": "c-round-96.json notes"
+  },
+  {
+   "id": "ARCH-R96-REFUSAL-MAPPING",
+   "severity": "info",
+   "status": "open - architecture signal, not scheduled; both A's reviewer and the gate 96 reviewer (independently) flag Signal 3; added to the q14 checkpoint request addendum (b-round-91-checkpoint-request.md)",
+   "to": "root/B",
+   "title": "library refusal texts in ArrangementContext.tsx (l.1204-1208, l.1317-1325, l.1391) changed in rounds 95-96, each needing a full provider mount; proposal: pure librarySourceRefusalText(source,state,mode) in lib/arrangement with unit tests; FS1-FS8 and grid-snap-loop-drop l.541-547 unchanged; useArrangement() shape unchanged; value low-medium",
+   "evidence": "a-round-96.md Architecture note; gates/round-96/review.md Architecture note"
   }
  ],
  "tech_lead_notes": [
@@ -15067,6 +15153,11 @@
    "round": 95,
    "source": "a-round-95.md + gates/round-95/review.md Architecture notes (verbatim there)",
    "note": "Signal 2 (ownership/coupling, weak): error-to-Georgian mapping duplicated in studio-lab-demo.ts l.106-131 and collection.ts l.86-111 (GATE95-DUP-ERROR-MAP). Keep; DL8 guards parity. Proposal: shared fetchAndDecodeAudio(fetchFn,url,ctx,signal) in lib/arrangement when collection.ts returns to scope; value low. Recorded, not scheduled."
+  },
+  {
+   "round": 96,
+   "source": "a-round-96.md + gates/round-96/review.md Architecture notes (verbatim there)",
+   "note": "Signal 3 (one region changed repeatedly at high cost) on ArrangementContext.tsx library refusal texts, flagged independently by both reviewers: keep for now; proposal ARCH-R96-REFUSAL-MAPPING. Test fixtures: shared FakeAudioContext/FakeAudioBuffer helpers -> ARCH-R93-TEST-HARNESS. Added as q14 (i) to the standing checkpoint request; non-blocking; not scheduled."
   }
  ],
  "vitest_floor_round46": 1357,

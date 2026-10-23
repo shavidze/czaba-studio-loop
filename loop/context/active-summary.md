@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-23T01:46:34.677Z)
+# Active loop summary (2026-10-23T02:17:40.385Z)
 
-- backlog.json 846 KB -> active view 169 KB
-- status: G_ROOT_GATE round 95
-- servers: `{"checkedUtc":"2026-10-23T01:33:59.7205274Z","round":95,"attempt":1,"store":200}`
-- last publication: e3e528821292705a8298e4fcc2f90986375496e4 (rounds 95-95)
-- last root gate: round 95 published - commit e3e528821292705a8298e4fcc2f90986375496e4 pushed
+- backlog.json 849 KB -> active view 166 KB
+- status: G_ROOT_GATE round 96
+- servers: `{"checkedUtc":"2026-10-23T02:03:15.1472705Z","round":96,"attempt":1,"store":200}`
+- last publication: ce440360062f16ee3db2e9795bf33b42c63abc23 (rounds 96-96)
+- last root gate: round 96 published - commit ce440360062f16ee3db2e9795bf33b42c63abc23 pushed
 
-## Current items: SRW-21
+## Current items: -
 
 ## Open findings
 - lenis-purchased-studio / low / tech_lead / root.tsx Lenis calls preventDefault on wheel; /studio-lab uses data-lenis-prevent; purchased /studio/* (protected) not checked; Tech Lead / 
@@ -301,16 +301,18 @@
 - GATE92-S1-STATUS-NOT-RESET-ON-SWAP / low / unit-proven round 94 (C round 94 PASS browserVerified=true realVerified=true (c-round-94.json); gate 94 published 0513439; LS1-LS5/LS3b, C fail-before 7 red, mutations a/b red); browser half OPEN until the SRW-21 purchased mount (EMPTY-SWAP-REACH unit-only) -> SRW-21-PREMOUNT acceptance; not done / ArrangementProvider load effect resets source states but not the status when the collection prop changes; a stale 'ready' text stays until t
 - GATE92-S3-COPY-COMPUTED-TWICE / info / open - Lows batch (optional nit) / StudioWorkspace header calls workspaceCollectionCopy(collection.origin) twice per render; one const reads better
 - GATE92-S4-TOKEN-URL-IN-CONSOLE / low / open - SRW-21 mount stage prerequisite (doc note in docs/technical/arrangement-workspace.md open prerequisites; short token lifetime); not round 93 / a failed stem fetch is logged by the browser console/Network tab with the full ?token= URL; the adapter keeps it out of UI text but cannot h
-- C-R92-N1-DEMO-FAILED-TO-FETCH / low / dispatched round 95 (D-29z60 E1: loadDemoSource maps network/body/decode failures to the purchased adapter texts; browser ERR-NET/ERR-DECODE both viewports); supersedes the earlier "after the round-95 regression round" placement / demo loader error row shows the raw English browser text 'Failed to fetch' on a network failure (pre-existing)
 - R93-T-TECH-LEAD / info / open / screen reader (VoiceOver/NVDA) pass on the export dialog: each format radio is announced once by its short name with its note as description
 - GATE93-S2-OPTIONIDS-REBUILT / info / open - optional nit, not scheduled / ArrangementExportDialog optionIds object rebuilt each render; suffixes could be module-level
 - GATE94-S1-COLLECTION-STABLE-ACROSS-REFRESH / low / open - SRW-21-PREMOUNT (needs the protected route; not schedulable before the auth owner releases it) / a new collection object always resets the status to loading and re-decodes every source; a token refresh that builds a new purchased collect
 - GATE94-S2-SWAP-LEAVES-PER-COLLECTION-STATE / low / open - SRW-21-PREMOUNT (browser-unreachable on /studio-lab). B source read 0513439: buffersRef and sourcePeaks are shared with video-lane audio (ArrangementContext l.2038/l.2043), so a cleanup must delete only ids of the previous collection that are absent from the next one, never video ids; selectedSourceId -> next collection first source or null; clips referencing removed ids stay (graph.client.ts l.209 skips a missing buffer) / switching collections leaves sourceStates/sourcePeaks/buffersRef/selectedSourceId entries of the previous collection
 - GATE94-S3-EMPTY-BRANCH-UNUSED-CONTROLLER / info / open - optional nit, bundle with SRW-21-PREMOUNT / empty-collection branch returns () => controller.abort() for a controller nothing listens to
-- GATE94-S4-STALE-DOC-LINES / low / dispatched round 95 (doc 082 l.4; arrangement-workspace.md l.44-45 incl. the 080->082 link from c-round-94 notes) / doc 082 status line and workspace doc l.44 still say awaiting C; l.45 links only doc 080
 - GATE94-S5-AS-CONST-IN-TEST / low / open - SRW-21-PREMOUNT (collection-load-status.test.tsx l.428; fix when that file is next touched; B reading: CLAUDE.md 'no type assertions' has no exception, so new tests must annotate instead - written into the round 95 task) / ['resolve','reject'] as const in collection-load-status.test.tsx
-- GATE95-DUP-ERROR-MAP / info / open - optional nit, not scheduled (candidate for the V-0 strings module or a shared fetch helper) / round 95 duplicates the purchased adapter's network/decode error texts in studio-lab-demo.ts instead of sharing a helper (collection.ts froz
+- GATE95-DUP-ERROR-MAP / info / open - info/architecture signal, not scheduled; reviewer proposal (gate 95 + A round 95): shared fetchAndDecodeAudio helper in lib/arrangement once collection.ts is back in scope; DL8 + collection.test.ts as regression gate; keep with SRW-21-PREMOUNT / round 95 duplicates the purchased adapter's network/decode error texts in studio-lab-demo.ts instead of sharing a helper (collection.ts froz
 - SRW-21-PREMOUNT / low / open - bundle, schedule when the auth owner releases the purchased mount (or earlier only if a browser-reachable path appears) / pre-mount bundle: GATE94-S1 stable collection across token refresh, GATE94-S2 swap cleanup, GATE94-S3, GATE94-S5, plus the browser halves of
+- C-R95-N1-FAILED-SOURCE-ADD-TEXT / low / dispatched round 96 (D-29z61) / Enter/double-click/preview on a library source whose load FAILED says '„<title>“ ჯერ არ ჩატვირთულა.' (not loaded yet), implying it is still 
+- GATE95-S1-DOC083-STATUS / low / dispatched round 96 (doc 083 l.4) / doc 083 l.4 still says awaiting C although C round 95 passed
+- GATE95-S3-DECODE-NOT-CANCELLABLE / info / open - nothing to do (provider drops the result; DL5 documents it) / decodeAudioData in loadDemoSource cannot be cancelled; unmount/swap mid-decode wastes CPU briefly
+- GATE95-S4-AUDIOPLAYER-BUTTON-TYPE / low / open_root - outside Studio ownership, not scheduled by B / Biome useButtonType in app/components/audio/AudioPlayer.tsx:48 (pre-existing, non-blocking)
 
 ## Other open items
 - SRW-03 [regression_open] Unified transport for video and audio; mute original video sound without stopping video
@@ -324,4 +326,5 @@
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
 - SRW-20 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: 1 51e024a, 2 971141d, 3a eb1d0c0, 3b-1 35c8403, 3b-2 77cd5b6 (C round 91, gate 91); R20-X1..X4 pass; Tech Lead R86-T..R91-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; PROD-MP3-UNVERIFIED gate row open)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
+- SRW-21 [blocked-partial (route mount: auth owner; stage 1 C PASS round 92 published 64e12d8; load-status hardening C PASS round 94 unit-proven, published 0513439, browser half at the mount; SRW-21-PREMOUNT bundle open; R21-I2 full regression open)] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

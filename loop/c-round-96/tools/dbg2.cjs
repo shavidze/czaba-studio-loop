@@ -1,0 +1,10 @@
+const X = require('./ext.cjs');
+const TAP = () => { const orig = AudioNode.prototype.connect; window.__taps = []; AudioNode.prototype.connect = function (dest, ...rest) { const r = orig.call(this, dest, ...rest); try { if (dest instanceof AudioDestinationNode) { const c = dest.context; if (!c.__tap) { c.__tap = c.createAnalyser(); window.__taps.push(c.__tap); } orig.call(this, c.__tap); } } catch (e) {} return r; }; };
+(async () => { const b = await X.launch(); const { ctx, page: p, S } = await X.newCtx(b, { width: 1280, height: 720 }, 'dbg');
+if (process.argv[2]==='tap') await ctx.addInitScript(TAP);
+if (process.argv[3]==='abort') await p.route(/middle-east\.mp3/, r => r.abort());
+await p.goto(X.URL, { waitUntil: 'domcontentloaded' }); await p.waitForSelector('[data-testid=arrangement-grid-control]', { timeout: 120000 });
+await X.sleep(8000); console.log(await X.status(p));
+console.log((await p.$$eval('[role=option]', os => os.map(o => o.dataset.sourceId))).length);
+await X.decline(p); console.log((await p.$$eval('[role=option]', os => os.map(o => o.dataset.sourceId))).length, p.url());
+await p.screenshot({ path: X.SHOTS + '/dbg2.png' }); console.log(S.errors); await b.close(); })();
