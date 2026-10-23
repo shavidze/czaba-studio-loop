@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-23T18:00:23.431Z)
+# Active loop summary (2026-10-23T19:32:21.302Z)
 
-- backlog.json 1013 KB -> active view 188 KB
-- status: G_ROOT_GATE round 114
-- servers: `{"checkedUtc":"2026-10-23T17:28:27.6731142Z","round":114,"attempt":1,"store":200}`
-- last publication: 38c0e212e8630f6965ceafedebc03435d2fd47f7 (rounds 114-114)
-- last root gate: round 114 published - commit 38c0e212e8630f6965ceafedebc03435d2fd47f7 pushed
+- backlog.json 1023 KB -> active view 126 KB
+- status: G_ROOT_GATE round 115
+- servers: `{"checkedUtc":"2026-10-23T18:52:42.4499772Z","round":115,"attempt":1,"store":200}`
+- last publication: d5de68fe27c165b00b5578f016703af90730500b (rounds 115-115)
+- last root gate: round 115 published - commit d5de68fe27c165b00b5578f016703af90730500b pushed
 
-## Current items: SRW-13, SRW-18, SRW-21
+## Current items: -
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -205,19 +205,27 @@
 - C-R112-HARNESS-BOUNDARY / info / open - harness note for the Tech Lead quiet-Chrome run and any later drift measurement (not a task; no re-measure of unchanged code) / the literal drift rule attributes the one sample at a video clip cut to the clip covering the ruler pos while the dock already shows the nex
 - C-R112-RF53-PANEL-SPLIT / info / unverified hypothesis (B ruling D-29z78: not app attribution under section 5) / RF5-3 first-Play play() lands ~22.5 ms before startAt with the detail panel open (5/6) vs ~15.2 ms with it collapsed (0/4 fail); the cloud a
 - TOUCH-DOUBLE-TAP-RESET / info / signal - deliberate for round 113 (D-29z78 R4), not scheduled / after the touchstart preventDefault, a touch double-tap no longer generates dblclick, so it does not reset a fader; keyboard, mouse double-c
-- GATE113-S1-DOC097-STATUS / low / dispatched round 114 (D-29z79 R9, one-line grant; A owns doc 097 l.4 + TODO only) / doc 097 l.4 still says awaiting C and the TODO l.97 lists the C rows as open after C round 113 PASS
 - TOUCH-LONGPRESS-CONTEXTMENU / info / signal - not tested; candidate row for the regression round (CDP long touch on a fader: contextmenu fires or not; no app menu exists on faders) / the touchstart preventDefault on the relative faders probably also suppresses the long-press contextmenu (same mechanism as R4)
 - R38-T-SR-SWIPE / info / open - Tech Lead R38-T checklist addition / real-device screen reader (VoiceOver/TalkBack) swipe up/down still adjusts the faders after the touchstart guard (reasoning only, untested)
 - ARCH-CHECKPOINT-PHASE1-BOUNDARY / info / requested_from_root (B round 113 planning, 2026-10-23; non-blocking; T12 stage 1 proceeds) - addenda (x) and (y) in b-round-91-checkpoint-request.md / phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b
+- GATE114-S1-CLIPID-AT-BEGIN / low / dispatched round 115 (D-29z80 R8; A owns the code in stage 2) / Clip Gain fader hook reads the clip id from the latest render, not from drag start; a mid-drag selection change re-sets the refusal status p
+- GATE114-S2-FIELD-STEP-CONST / low / dispatched round 115 (D-29z80 R9) / Clip Gain number field uses literal step={0.1} while the fader uses DETAIL_CLIP_GAIN_STEP_DB
+- GATE114-S3-BLUR-ON-DISABLE / low / scheduled as C observation row MC-BLUR-DISABLED round 115 (no code); a lost value would be a new Medium / Chromium fires no blur when the focused Clip Gain fader becomes disabled (selection -> video/group during a keyboard preview); the pending p
+- GATE114-S4-SHIFT-REANCHOR-CLAMPED / info / acknowledged (reviewer: acceptable) / Shift re-anchor starts from the rounded and clamped previewed value; after an overshoot past a bound, a Shift toggle makes the value move ba
+- GATE114-S5-DOC098-STATUS / low / dispatched round 115 (D-29z80 R10) / doc 098 l.4 still says awaiting C after C round 114 PASS; file table says CF1-CF12 but there are 14 tests
+- A-R114-REVIEW-FINEDIVISOR-VALIDATION / info / acknowledged (only the constant 10 is passed) / useRelativeFaderDrag fineDivisor is not validated
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [c_pass_tech_lead_manual (C-R8-01 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; accepted Lows C-R11-04 / C-R15-01 do not hold it back; D-29z78)] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
+- SRW-13 [c_pass_tech_lead_manual (round 113 C PASS browserVerified=true, published c2837f1: A-R38-REVIEW-TOUCH done for Chromium; C-R27-01 closed round 112; open Low C-R41-01 (Tech Lead viewport question) does not hold it back; Tech Lead R38-T real touch device)] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
 - SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-16 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 6b574e8, 2a e347b97, 2b-1 db9cc25, 2b-2 60006d4, 2b-3 c062147; Tech Lead R72-T/R74-T/R77-T/R78-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next
 - SRW-17 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 74eca15, stage 2 68383fa, stage 3 efbed86; Tech Lead R79-T/R81-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
+- SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
 - SRW-20 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: 1 51e024a, 2 971141d, 3a eb1d0c0, 3b-1 35c8403, 3b-2 77cd5b6 (C round 91, gate 91); R20-X1..X4 pass; Tech Lead R86-T..R91-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; PROD-MP3-UNVERIFIED gate row open)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
+- SRW-21 [deferred_user] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

@@ -1,0 +1,21 @@
+const L = require('./lib.cjs');
+(async () => {
+  const browser = await L.launch(); const net = [];
+  const o = await L.openStudio(browser, { width: 1440, height: 900 }, 'dbg', net);
+  const p = o.page;
+  await L.setSnapOff(p);
+  for (const [s, ln, t] of [['demo-middle-east', 'music', 0], ['demo-stem-pulse', 'stems', 2], ['demo-soft-impact', 'sfx', 4]]) await L.addAt(p, s, ln, t);
+  const clips = await L.clipsDom(p);
+  const id = (l) => clips.find((c) => c.lane === l).id;
+  const sel = async (tag) => console.log(tag, (await L.clipsDom(p)).filter((c) => c.sel).map((c) => c.lane).join(','), '|', await L.status(p));
+  await L.selectClip(p, id('stems')); await sel('stems');
+  const F='[data-testid=arrangement-detail-clip-gain-fader]';
+  const b = await p.locator(F).boundingBox();
+  await p.mouse.dblclick(b.x + b.width*0.71, b.y + b.height/2); await L.sleep(400); await sel('after dbl fader');
+  await L.blur(p); await sel('after blur');
+  await L.selectClip(p, id('music')); await sel('music click');
+  await L.selectClip(p, id('stems')); await sel('stems click');
+  await p.keyboard.press('Control+z'); await L.sleep(300); await sel('ctrl+z');
+  await L.selectClip(p, id('music')); await sel('music click');
+  await browser.close();
+})();

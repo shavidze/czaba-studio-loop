@@ -1,10 +1,10 @@
 {
- "version": 113,
- "updated": "2026-10-23 (B round 114 result / round 115 plan, D-29z80)",
+ "version": 114,
+ "updated": "2026-10-23 (B round 115 result / round 116 plan, D-29z81)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 115: D-29z80 - T12 stage 2, multi-clip Clip Gain (T12.7): audio-only member set, shared delta clamped so differences stay exact, range text when mixed, absolute set from the field, reset all, one entry; + GATE114-S1 ids captured at gesture begin, GATE114-S2 step constant, GATE114-S5 doc 098; baseline 38c0e21 clean; frozen b-round-114-r115-tree-sha256.txt 915; new clip-gain-multi.ts, clip-gain-multi.test.tsx, doc 099)",
- "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23) | round 111 planning: advisor available and consulted before writing (2026-10-23) | round 112 planning: advisor available and consulted before writing (2026-10-23) | round 113 planning: advisor available and consulted before writing (2026-10-23)",
+ "current_task": "current-task.md (round 116: D-29z81 - T12 stage 3a, track lane Volume in dB with -inf at the slider minimum (audio + video lanes): new pure track-volume-db.ts, UI-only conversion (storage/context/model/engine stay linear), range -inf..0 dB step 0.1, dB readout + aria-valuetext, exact Undo, no rewrite on press without change; granted scale-only edits in 11 tests; + doc 099 l.4 (gate-115 #4); baseline d5de68f clean; frozen b-round-115-r116-tree-sha256.txt 914; new track-volume-db.ts, track-volume-db.test.tsx, doc 100)",
+ "advisor_used_by_B": "round 108 planning: advisor available and consulted (2026-10-23) | round 109 planning: advisor available and consulted twice before writing the backlog (2026-10-23) | round 110 planning: advisor available and consulted before writing (2026-10-23) | round 111 planning: advisor available and consulted before writing (2026-10-23) | round 112 planning: advisor available and consulted before writing (2026-10-23) | round 113 planning: advisor available and consulted before writing (2026-10-23) | round 115 planning (round 116 task): advisor available and consulted before writing and before finishing (2026-10-23)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -8890,20 +8890,32 @@
    "round": 115,
    "task": "current-task.md",
    "decision": "D-29z80",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "T12-GAIN-VOLUME stage 2",
     "GATE114-S1-CLIPID-AT-BEGIN",
     "GATE114-S2-FIELD-STEP-CONST",
     "GATE114-S5-DOC098-STATUS"
    ],
-   "note": "T12 stage 2 (T12.7): multi-clip Clip Gain for an all-audio selection (video in selection -> disabled with the new reason, no partial edit); pure helpers in new clip-gain-multi.ts (shared delta clamped to [MIN-minDb, MAX-maxDb], normalize per clip; absolute set); fader anchor = maxDb, range text node when mixed, aria-valuetext range; field empty when mixed, typed value sets all; reset all; previews from the before state; one entry per drag/key/commit; ids captured at gesture begin. A owns ArrangementContext.tsx, ArrangementDetailPanel.tsx, StudioWorkspace.tsx (detailGroup + props), new clip-gain-multi.ts + clip-gain-multi.test.tsx (MG1-MG13 + m1-m6), new doc 099, doc 098 (R10), granted lines in 5 existing tests (two-audio disabled case -> selection with video). Hook and model.ts frozen. C: MC-*, G-T2-MULTI, NB-SINGLE/TRACK-SHIFT/MASTER, MC-BLUR-DISABLED (GATE114-S3 observe), PX-NET, REG-HYD, G115-3. Baseline 38c0e21 clean; frozen 915."
+   "note": "T12 stage 2 (T12.7): multi-clip Clip Gain for an all-audio selection (video in selection -> disabled with the new reason, no partial edit); pure helpers in new clip-gain-multi.ts (shared delta clamped to [MIN-minDb, MAX-maxDb], normalize per clip; absolute set); fader anchor = maxDb, range text node when mixed, aria-valuetext range; field empty when mixed, typed value sets all; reset all; previews from the before state; one entry per drag/key/commit; ids captured at gesture begin. A owns ArrangementContext.tsx, ArrangementDetailPanel.tsx, StudioWorkspace.tsx (detailGroup + props), new clip-gain-multi.ts + clip-gain-multi.test.tsx (MG1-MG13 + m1-m6), new doc 099, doc 098 (R10), granted lines in 5 existing tests (two-audio disabled case -> selection with video). Hook and model.ts frozen. C: MC-*, G-T2-MULTI, NB-SINGLE/TRACK-SHIFT/MASTER, MC-BLUR-DISABLED (GATE114-S3 observe), PX-NET, REG-HYD, G115-3. Baseline 38c0e21 clean; frozen 915.",
+   "result": "C PASS browserVerified=true realVerified=true (c-round-115.json; 27 rows passed, 0 failed; fake-Bearer 403 sub-check blocked: backend unavailable in cloud; 1 new Low C-R115-01 inherited display pattern); gate 115 published d5de68f (reviewer 8.5/10 COMMIT OK; verify 153 files / 2369 tests, build OK)"
+  },
+  {
+   "round": 116,
+   "task": "current-task.md",
+   "decision": "D-29z81",
+   "status": "dispatched",
+   "items": [
+    "T12-GAIN-VOLUME stage 3a",
+    "GATE115-S4-DOC099-STATUS"
+   ],
+   "note": "T12 stage 3a: lane Volume fader (audio + video) in dB with -inf at the slider minimum; UI-only conversion in new track-volume-db.ts; storage/context/model/engine/export linear and frozen. A owns ArrangementLane.tsx, new track-volume-db.ts + track-volume-db.test.tsx (TV1-TV11 + m1-m6), new doc 100, doc 099 l.4, granted scale-only lines in 11 tests. C: TV-PRESENT/LAYOUT/DRAG/INF/KEY/DBL/PLAY, G-T3, G-T4, G-INF, G-VIDEO, NB-GROUP/TRACK-SHIFT/MASTER/CLIP/PAN-MS, SOURCE-SCOPE, T116-TARGETED, AN-REVIEW, PX-NET, REG-HYD, G116-3, DOC-100/099 at 1440+1280; exports at Master -12 pre-authorised. Baseline d5de68f clean; frozen b-round-115-r116-tree-sha256.txt (914)."
   }
  ],
  "post_current_stage_queue": [
   {
    "id": "T12-GAIN-VOLUME",
-   "status": "in_progress (stage 1 c_pass_published round 114, 38c0e21; stage 2 dispatched round 115, D-29z80)",
+   "status": "in_progress (stages 1-2 c_pass_published: 38c0e21, d5de68f; stage 3a dispatched round 116, D-29z81)",
    "requested": "2026-10-07",
    "instruction": "User explicitly asks: finish ALL current work first, THEN start these attached Gain/Volume requirements. Do not start T12 implementation or extend current tasks with it early.",
    "prerequisites": [
@@ -8980,16 +8992,25 @@
     },
     {
      "stage": 2,
-     "status": "dispatched",
+     "status": "c_pass_published",
      "scope": "T12.7 multi-clip Clip Gain: the field/fader enabled for an audio multi-selection, relative differences preserved (delta limited at the -60/+24 bounds so differences stay exact), mixed values shown as a range (e.g. -6.0 ... +1.0 dB), one history entry",
      "round": 115,
      "decision": "D-29z80",
-     "rulings": "all-audio selection only (video -> disabled, reason text changed); shared clamped delta; anchor maxDb; range text when mixed; field absolute set; reset all; one entry; ids captured at gesture begin"
+     "rulings": "all-audio selection only (video -> disabled, reason text changed); shared clamped delta; anchor maxDb; range text when mixed; field absolute set; reset all; one entry; ids captured at gesture begin",
+     "evidence": "c-round-115.json PASS browserVerified=true realVerified=true (27 rows; fake-Bearer 403 sub-check blocked: backend unavailable in cloud); G-T2-MULTI peak/RMS ratios exact (stems 0.066834, SFX 0.105925, stored difference 4.0) at Master -12; MC-PLAY 28.6 dB drop, 0 createBufferSource; gate 115 published d5de68f (reviewer 8.5/10 COMMIT OK; verify 153 files / 2369 tests, build OK)"
     },
     {
-     "stage": 3,
+     "stage": "3a",
+     "round": 116,
+     "decision": "D-29z81",
+     "status": "dispatched",
+     "scope": "T12.5/T12.3 track lane Volume fader (audio + video tracks) in dB: -inf at the slider minimum (stored exactly 0), finite floor -59.9, top 0 dB, step 0.1, dB readout (visible without ' dB', title + aria-valuetext full), exact Undo, no rewrite on press without change; T12.26 Tests 3/4 + -inf 0 LSB + video sound ratio measured by C on exports",
+     "rulings": "UI-only conversion in new track-volume-db.ts; ArrangementTrack.volume, context API, model/groups/schedule/graph/export unchanged (linear); no +6 boost (Live range unconfirmed; signal TRACK-VOLUME-BOOST); readout w-9 -> max w-10; slider >= 24 px; granted scale-only edits in 11 tests (exact toBe via the module); group faders stay % for one round (interim)"
+    },
+    {
+     "stage": "3b",
      "status": "not_started",
-     "scope": "T12.5/T12.24 Track Volume in dB for track (incl. video) and group faders, -inf at the bottom (T12.3), dB readout; Shift fine drag on mixer faders (Live 12 section 42.6); range/boost ruling at planning"
+     "scope": "group Volume fader in dB (same module, -inf bottom, readout) + Shift fine drag (Live 12 section 42.6, fineDivisor 10) on track, group and Master faders; CF11/MG13 'Shift equals plain' inverted on purpose; NB rows for stage 3a"
     },
     {
      "stage": 4,
@@ -8998,10 +9019,12 @@
     },
     {
      "stage": "5+",
-     "status": "not_started",
+     "status": "moved_to_T12-ADVANCED (root 2026-10-23; after VISUAL-A-OBSIDIAN, before phase 2)",
      "scope": "T12.10 envelope relative-modulation check vs SRW-18, T12.13 micro fades preference, T12.14/T12.15 volume automation + override, T12.12 crossfades, T12.20 RMS/LUFS; T12.16/17 Utility awaiting_user"
     }
-   ]
+   ],
+   "t12_rulings_round116_planning": "Stage 3 split into 3a (lane faders dB) and 3b (group dB + Shift fine on track/group/Master) to keep each round's granted test edits enumerable; scope unchanged, nothing deferred. Range top 0 dB is a CZABA decision (Live -inf..+6 not in saved captures, no web tool); +6 dB boost recorded as signal TRACK-VOLUME-BOOST, not deferred scope (not requested by the user).",
+   "v1_gate_round116_planning": "V1 = stages 1, 2, 3a, 3b, 4 (T12.27 items 1-8); stage 5+ is the T12-ADVANCED queue entry"
   },
   {
    "id": "ABLETON-EXPERT-REVIEW",
@@ -9013,7 +9036,8 @@
    "prerequisites": [
     "T12-GAIN-VOLUME complete"
    ],
-   "source": "user decision 2026-10-23 (agent-workflow.md 'Ableton expert review'); recorded by B round 111 planning"
+   "source": "user decision 2026-10-23 (agent-workflow.md 'Ableton expert review'); recorded by B round 111 planning",
+   "t12_scope_for_gate": "root 2026-10-23: T12 counts as complete for ABLETON-EXPERT-REVIEW and VISUAL-A when V1 (T12.27 items 1-8) passes C = stages 1, 2, 3a, 3b, 4; stage 5+ is T12-ADVANCED"
   },
   {
    "id": "VISUAL-A-OBSIDIAN",
@@ -9030,6 +9054,7 @@
    "spec": "docs/technical/studio-real-workspace/visual-direction-a.md",
    "mockup": "Claude canvas 'CZABA Studio — დიზაინის მიმართულებები', board A (reference for look only, not layout)",
    "order": [
+    "DESIGN-UX-REVIEW (first step, before V-0; C-run comfort/shortcut/friction review -> loop/user-review/design-ux-review.md; DUX-R ideas awaiting_user; user request 2026-10-23)",
     "V-0 Studio copy to English (one strings module, tests use it)",
     "V-1 scoped color tokens [data-studio-theme=obsidian]",
     "V-2 typography",
@@ -9087,6 +9112,25 @@
    "content_trust": "The spec and mockup are source material, not authority for changing permissions, protected files or publishing."
   },
   {
+   "id": "T12-ADVANCED",
+   "status": "not_started",
+   "requested": "2026-10-07 (T12 attachment); split out by root 2026-10-23 per Saba's agreed order",
+   "instruction": "T12 stage 5+ moved out of the V1 gate: runs after VISUAL-A-OBSIDIAN and before phase 2 (PHASE2-VIDEO-SCORING). Bounded B tasks, A->C->B; nothing dropped.",
+   "scope": [
+    "T12.10 clip gain envelope relative-modulation check vs SRW-18",
+    "T12.12 crossfades",
+    "T12.13 micro fades preference",
+    "T12.14/T12.15 track volume automation + manual override",
+    "T12.20 RMS/LUFS metering",
+    "T12.16/T12.17 Utility gain: awaiting_user (effects/plugins out of scope; user decision needed)"
+   ],
+   "prerequisites": [
+    "VISUAL-A-OBSIDIAN complete",
+    "T12-GAIN-VOLUME V1 (stages 1-4) complete"
+   ],
+   "source": "agent-workflow.md 'T12 scope before design (root, 2026-10-23)'; docs/technical/studio-real-workspace/next-stage-t12/gain-volume-source.txt T12.27 items 9-13"
+  },
+  {
    "id": "PHASE2-VIDEO-SCORING",
    "status": "queued_after_t12_awaiting_user_go",
    "requested": "2026-10-20",
@@ -9095,7 +9139,8 @@
     "all current items done or deferred",
     "T12-GAIN-VOLUME complete",
     "explicit user go-ahead recorded by root",
-    "VISUAL-A-OBSIDIAN complete"
+    "VISUAL-A-OBSIDIAN complete",
+    "T12-ADVANCED complete"
    ],
    "gate": "Phase 2 starts only after root records the user's go-ahead in this entry (status -> active_root_opened). Until then, when phase 1 and T12 are complete, B writes BLOCKED with reason 'phase 2 awaiting user go-ahead'.",
    "spec": "docs/technical/studio-real-workspace/phase-2-requirements.md",
@@ -14351,14 +14396,14 @@
   {
    "id": "ARCH-CHECKPOINT-PHASE1-BOUNDARY",
    "severity": "info",
-   "status": "requested_from_root (B round 113 planning, 2026-10-23; non-blocking; T12 stage 1 proceeds) - addenda (x) and (y) in b-round-91-checkpoint-request.md",
+   "status": "requested_from_root (B round 113 planning, 2026-10-23; non-blocking) - addenda (x), (y), (z); focused request (aa) sent with the round 116 plan (stage 2 closed, before stage 3 touches the Volume machine; round 116 is UI-only and does not touch it)",
    "title": "phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b-round-83 / b-round-91 requests, addenda up to (w)) is re-requested once, with (x) useTrackPanFader and (y) the third MixVolumeTarget kind that T12 stage 1 may add",
    "evidence": "b-round-113.md section 7"
   },
   {
    "id": "GATE114-S1-CLIPID-AT-BEGIN",
    "severity": "low",
-   "status": "dispatched round 115 (D-29z80 R8; A owns the code in stage 2)",
+   "status": "done (C round 115 MC-SELECT-MIDDRAG + group->group extra row PASS; MG11; gate 115 published d5de68f)",
    "title": "Clip Gain fader hook reads the clip id from the latest render, not from drag start; a mid-drag selection change re-sets the refusal status per move and passes the wrong id on pointerup/blur (window pointerup still commits the original clip; history safe)",
    "evidence": "gates/round-114/review.md Suggestion 1",
    "repro": "ArrangementDetailPanel.tsx l.407-418, 429-433, 652-656 at 38c0e21"
@@ -14366,7 +14411,7 @@
   {
    "id": "GATE114-S2-FIELD-STEP-CONST",
    "severity": "low",
-   "status": "dispatched round 115 (D-29z80 R9)",
+   "status": "done (C round 115 AN-REVIEW: step={DETAIL_CLIP_GAIN_STEP_DB}; gate 115 published d5de68f)",
    "title": "Clip Gain number field uses literal step={0.1} while the fader uses DETAIL_CLIP_GAIN_STEP_DB",
    "evidence": "gates/round-114/review.md Suggestion 2",
    "repro": "ArrangementDetailPanel.tsx l.607 at 38c0e21"
@@ -14374,7 +14419,7 @@
   {
    "id": "GATE114-S3-BLUR-ON-DISABLE",
    "severity": "low",
-   "status": "scheduled as C observation row MC-BLUR-DISABLED round 115 (no code); a lost value would be a new Medium",
+   "status": "deferred_low_polish (C round 115 MC-BLUR-DISABLED observed: no value lost, the Clip Gain entry is written late at the next edit's flush; Undo restores in one step)",
    "title": "Chromium fires no blur when the focused Clip Gain fader becomes disabled (selection -> video/group during a keyboard preview); the pending preview commits later on the next edit/Undo, nothing lost",
    "evidence": "gates/round-114/review.md Suggestion 3",
    "repro": "focus fader, hold ArrowRight, click a video clip"
@@ -14389,7 +14434,7 @@
   {
    "id": "GATE114-S5-DOC098-STATUS",
    "severity": "low",
-   "status": "dispatched round 115 (D-29z80 R10)",
+   "status": "done (C round 115 DOC-098 PASS; gate 115 published d5de68f)",
    "title": "doc 098 l.4 still says awaiting C after C round 114 PASS; file table says CF1-CF12 but there are 14 tests",
    "evidence": "gates/round-114/review.md Suggestion 5",
    "repro": "read docs/implementation/2026/quarter-IV/098-studio-clip-gain-fader.md l.4, l.49"
@@ -14400,6 +14445,91 @@
    "status": "acknowledged (only the constant 10 is passed)",
    "title": "useRelativeFaderDrag fineDivisor is not validated",
    "evidence": "a-round-114.md code review Low 6"
+  },
+  {
+   "id": "C-R115-01",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "a disabled multi-selection that contains video shows Clip Gain field 0.0 and fader 0.0 dB while its audio member is at -6.0 dB (inherited stage-1 disabled look)",
+   "evidence": "c-round-115.json bugs[0]; c-round-115/shots/video-mix-1440-1-panel.png"
+  },
+  {
+   "id": "GATE115-S1-DRAGIDS-LAZY-CLEAR",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "clipGainDragIdsRef keeps the previous drag's ids and is checked against the global isPointerGestureActive(); context refuses the mismatched memberKey today (no visible harm)",
+   "evidence": "gates/round-115/review.md Suggestion 1; a-round-115.md review #4"
+  },
+  {
+   "id": "GATE115-S2-GROUP-RESET-TEXT",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "0 dB button on a group always writes '0' into the field even when resetClipGainMembers refuses; mixed group then shows a pending marker",
+   "evidence": "gates/round-115/review.md Suggestion 2 (ArrangementDetailPanel.tsx:599 at d5de68f)"
+  },
+  {
+   "id": "GATE115-S3-FLOOR-DEAD-ZONE",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "multi-clip Clip Gain drag: after the block stops at -60/+24 the hook anchor keeps moving; on the way back about (max-min) dB of travel does nothing (10x with Shift); single faders do not inherit it",
+   "evidence": "gates/round-115/review.md Suggestion 3; a-round-115.md review #1; doc 099 known limitation",
+   "fix_proposal": "previewValue returns the applied (clamped) value and the hook re-anchors to it (needs useRelativeFaderDrag ownership)"
+  },
+  {
+   "id": "GATE115-S4-DOC099-STATUS",
+   "severity": "low",
+   "status": "dispatched round 116 (D-29z81 R9)",
+   "title": "doc 099 l.4 still says awaiting C after C round 115 PASS",
+   "evidence": "gates/round-115/review.md Suggestion 4"
+  },
+  {
+   "id": "GATE115-S5-MIXED-PLACEHOLDER",
+   "severity": "info",
+   "status": "open - optional (VISUAL-A / polish candidate)",
+   "title": "mixed Clip Gain field is empty; placeholder '—' would show it is empty on purpose",
+   "evidence": "gates/round-115/review.md Suggestion 5"
+  },
+  {
+   "id": "A-R115-REVIEW-FIELD-CARRYOVER",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "text typed in the Clip Gain field can carry over between two different mixed groups (content key stays 'group'); needs a group change without a field blur (not reached via the normal UI)",
+   "evidence": "a-round-115.md review #3"
+  },
+  {
+   "id": "A-R115-REVIEW-APPLY-TARGETS-UNFILTERED",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "applyClipGainTargets is exported without the audio-only filter (today only receives filtered targets)",
+   "evidence": "a-round-115.md review #6"
+  },
+  {
+   "id": "C-R115-OBS-SINGLE-TO-GROUP-DRAG-END",
+   "severity": "info",
+   "status": "acknowledged (B, D-29z81): a selection change that remounts the panel content ends the drag; the captured ids still receive the one entry; matches R8 intent (no wrong-target edit)",
+   "title": "single->group selection change during a Clip Gain drag ends the drag; later pointer movement is ignored",
+   "evidence": "c-round-115.md section 4 observation"
+  },
+  {
+   "id": "TRACK-VOLUME-BOOST",
+   "severity": "info",
+   "status": "signal (not requested by the user; Live 12 track range -inf..+6 dB unconfirmed in saved captures) - round 116 top is 0 dB",
+   "title": "track/group Volume has no positive boost (Master has +6 dB)",
+   "evidence": "b-round-115.md section 4"
+  },
+  {
+   "id": "TRACK-VOLUME-NUMERIC-FIELD",
+   "severity": "info",
+   "status": "signal (Live 12 section 18.1 extended mixer has a numeric volume field; CZABA lane header shows a readout only; deliberate difference, narrow header)",
+   "title": "no typed numeric entry for track Volume",
+   "evidence": "b-round-78/ableton-mixing-20261022.txt l.48"
+  },
+  {
+   "id": "MIXER-MULTI-TRACK",
+   "severity": "info",
+   "status": "signal (Live 12 section 18.1: adjusting one selected track's mixer control adjusts the others, keeping differences; not in T12 (T12.7 is multi-clip) and not requested)",
+   "title": "multi-track mixer adjustment",
+   "evidence": "b-round-78/ableton-mixing-20261022.txt l.40, l.82"
   }
  ],
  "tech_lead_notes": [
@@ -15658,6 +15788,12 @@
    "note": "ArrangementContext now has three volume-like pending-preview machines (Volume, Master, Clip Gain); flush wiring at ~10 sites, n^2 growth per new preview kind; useRelativeFaderDrag changed in rounds 113 and 114. Both reviewers: keep for now; proposal after T12 stage 2: one tagged pendingPreviewRef {kind,key,before,label} + one flushPendingPreviews() in ArrangementContext only; acceptance master-ui, volume, pan, clip-gain-fader (+clip-gain-multi) unchanged and green, m6-style mutation covered, useArrangement() shape unchanged. Recorded as addendum (z) to b-round-91-checkpoint-request.md; bounded request to root at the planning after stage 2 closes (feature boundary named by both reviewers). Not scheduled as an A task.",
    "status": "signal",
    "id": "ARCH-R114-PENDING-PREVIEW-MERGE"
+  },
+  {
+   "round": 115,
+   "source": "gates/round-115/review.md Architecture note + a-round-115.md code-reviewer Architecture note",
+   "note": "(1) Clip Gain pending/gesture region in ArrangementContext changed in rounds 114 and 115 (clipGainMemberIdsRef, memberKey, multi status); keep; proposal = ARCH-R81/addendum (z): one usePendingPreview controller for Volume/Master/Clip Gain, useArrangement() shape unchanged, CF/MG/pending-status tests green. (2) ArrangementDetailPanel Clip Gain block has single/multi branches in 8 handlers; keep now; proposal after T12 stage 4: ArrangementDetailClipGain / ClipGainControls sub-component + useClipGainTargets hook (captured ids, anchor, routing), CF1-CF14 and MG1-MG14 unchanged. Both reviewers: not a round-116 task.",
+   "status": "in checkpoint request addendum (aa) (b-round-91-checkpoint-request.md); not scheduled"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -17437,6 +17573,77 @@
    "repro": "select a video clip; compare the disabled field and fader",
    "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
    "deferred_round": "B round 114 -> 115 planning (2026-10-23)"
+  },
+  {
+   "id": "C-R115-01",
+   "severity": "low",
+   "status": "open",
+   "preExisting": true,
+   "title": "a disabled multi-selection that contains video shows Clip Gain field 0.0 and fader 0.0 dB while its audio member is at -6.0 dB (inherited stage-1 disabled look)",
+   "evidence": "c-round-115.json bugs[0]; c-round-115/shots/video-mix-1440-1-panel.png",
+   "repro": "1440x900: add demo-middle-east @0, demo-stem-pulse @2 (stems), demo-soft-impact @4, load beeps-6s-vp9-opus.webm; stems Clip Gain -6 + Enter; click stems, Shift+click the video clip",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 115 -> 116 planning (2026-10-23)"
+  },
+  {
+   "id": "GATE114-S3-BLUR-ON-DISABLE",
+   "severity": "low",
+   "status": "open",
+   "title": "focused Clip Gain fader becoming disabled fires no blur; the pending preview is committed only at the next edit's flush (late entry, no value lost)",
+   "evidence": "gates/round-114/review.md Suggestion 3; c-round-115.json extraObservations.MC-BLUR-DISABLED",
+   "repro": "video present; single stems clip; focus fader; hold ArrowRight; Ctrl+A; observe history",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 115 -> 116 planning (2026-10-23)"
+  },
+  {
+   "id": "GATE115-S1-DRAGIDS-LAZY-CLEAR",
+   "severity": "low",
+   "status": "open",
+   "title": "clipGainDragIdsRef keeps the previous drag's ids and is checked against the global isPointerGestureActive(); context refuses the mismatched memberKey today (no visible harm)",
+   "evidence": "gates/round-115/review.md Suggestion 1; a-round-115.md review #4",
+   "repro": "static (ArrangementDetailPanel.tsx l.470-477 at d5de68f); fix: clear the ref at commit/blur end or compare memberKey with clipGainGestureRef",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 115 -> 116 planning (2026-10-23)"
+  },
+  {
+   "id": "GATE115-S2-GROUP-RESET-TEXT",
+   "severity": "low",
+   "status": "open",
+   "title": "0 dB button on a group always writes '0' into the field even when resetClipGainMembers refuses; mixed group then shows a pending marker",
+   "evidence": "gates/round-115/review.md Suggestion 2 (ArrangementDetailPanel.tsx:599 at d5de68f)",
+   "repro": "static; fix: setClipGainText(isGroupReset ? clipGainInputText(0) : displayedClipGainText)",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 115 -> 116 planning (2026-10-23)"
+  },
+  {
+   "id": "GATE115-S3-FLOOR-DEAD-ZONE",
+   "severity": "low",
+   "status": "open",
+   "title": "multi-clip Clip Gain drag: after the block stops at -60/+24 the hook anchor keeps moving; on the way back about (max-min) dB of travel does nothing (10x with Shift); single faders do not inherit it",
+   "evidence": "gates/round-115/review.md Suggestion 3; a-round-115.md review #1; doc 099 known limitation",
+   "repro": "multi-select stems -6 / SFX +1; drag far left past the end, then back right: first ~7 dB of travel no change",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 115 -> 116 planning (2026-10-23)"
+  },
+  {
+   "id": "A-R115-REVIEW-FIELD-CARRYOVER",
+   "severity": "low",
+   "status": "open",
+   "title": "text typed in the Clip Gain field can carry over between two different mixed groups (content key stays 'group'); needs a group change without a field blur (not reached via the normal UI)",
+   "evidence": "a-round-115.md review #3",
+   "repro": "not reached through the normal UI (needs a group change without blur)",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 115 -> 116 planning (2026-10-23)"
+  },
+  {
+   "id": "A-R115-REVIEW-APPLY-TARGETS-UNFILTERED",
+   "severity": "low",
+   "status": "open",
+   "title": "applyClipGainTargets is exported without the audio-only filter (today only receives filtered targets)",
+   "evidence": "a-round-115.md review #6",
+   "repro": "static (clip-gain-multi.ts)",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 115 -> 116 planning (2026-10-23)"
   }
  ],
  "baseline_tree_at_round108": {
@@ -17512,5 +17719,38 @@
    "app/contexts/AuthContext.tsx": "bf9ee257"
   },
   "checked": "B round 114 planning 2026-10-23 ~18:10 UTC: HEAD 38c0e21, git status clean, frozen list OK"
+ },
+ "baseline_tree_at_round116": {
+  "head": "d5de68fe27c165b00b5578f016703af90730500b",
+  "frozen_list": "tmp/studio-real-loop/b-round-115-r116-tree-sha256.txt",
+  "entries": 914,
+  "tracked_total": 927,
+  "excluded": [
+   "app/components/arrangement/ArrangementLane.tsx",
+   "docs/implementation/2026/quarter-IV/099-studio-multi-clip-gain.md (R9 l.4)",
+   "app/lib/arrangement/__tests__/fader-click.test.tsx (scale-only grant)",
+   "app/lib/arrangement/__tests__/fader-guards.test.tsx (scale-only grant)",
+   "app/lib/arrangement/__tests__/fader-touch.test.tsx (scale-only grant)",
+   "app/lib/arrangement/__tests__/fader-focus-order.test.tsx (scale-only grant)",
+   "app/lib/arrangement/__tests__/pan-release-recovery.test.tsx (scale-only grant)",
+   "app/lib/arrangement/__tests__/gesture-guard.test.tsx (scale-only grant)",
+   "app/lib/arrangement/__tests__/context-hygiene.test.tsx (scale-only grant)",
+   "app/lib/arrangement/__tests__/pending-status.test.tsx (scale-only grant)",
+   "app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx (scale-only grant)",
+   "app/lib/arrangement/__tests__/clip-gain-fader.test.tsx (scale-only grant)",
+   "app/lib/arrangement/__tests__/clip-gain-multi.test.tsx (scale-only grant)"
+  ],
+  "new_allowed": [
+   "app/lib/arrangement/track-volume-db.ts",
+   "app/lib/arrangement/__tests__/track-volume-db.test.tsx",
+   "docs/implementation/2026/quarter-IV/100-studio-track-volume-db.md"
+  ],
+  "protected": {
+   "app/routes/studio.$productId.tsx": "fa2cf0bc",
+   "app/routes/api.studio-token.ts": "13914809",
+   "app/lib/auth.ts": "56f5b76f",
+   "app/contexts/AuthContext.tsx": "bf9ee257"
+  },
+  "checked": "B round 115 planning 2026-10-23 ~19:50 UTC: HEAD d5de68f, git status clean, frozen list OK"
  }
 }

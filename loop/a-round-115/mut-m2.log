@@ -1,0 +1,103 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/clip-gain-multi.test.tsx [2m([22m[2m14 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 1363[2mms[22m[39m
+     [32m✓[39m MG1: a shared delta keeps the differences exact, clamps as one block and ignores video and unknown ids[32m 2[2mms[22m[39m
+     [32m✓[39m MG2: an absolute set writes every member, 0 removes the key, and an equal set returns the same object[32m 0[2mms[22m[39m
+     [32m✓[39m MG3: mixed members show an empty field, the range text, the max anchor and a linked description; equal members show the value[32m 286[2mms[22m[39m
+[31m     [31m×[31m MG4: a +25 px drag over 100 px shifts both by +21.0 with one entry; Undo and Redo move both; two moves are not cumulative[39m[32m 141[2mms[22m[39m
+[31m     [31m×[31m MG5: the block clamps at +24 and −60 with the difference kept at 7.0, and returning to the start restores the start values[39m[32m 82[2mms[22m[39m
+     [32m✓[39m MG6: a Shift drag of +25 px moves both by +2.1 with one entry[32m 59[2mms[22m[39m
+     [32m✓[39m MG7: each keyboard step moves every member by 0.1 with one entry per press[32m 100[2mms[22m[39m
+     [32m✓[39m MG8: a double-click and the 0 dB button reset every member with one entry and none at 0.0[32m 89[2mms[22m[39m
+     [32m✓[39m MG9: a typed value sets every member; Escape restores the empty text; typed text before a drag commits first[32m 104[2mms[22m[39m
+     [32m✓[39m MG10: a selection with a video clip disables field, fader and 0 dB with the linked reason and changes nothing[32m 55[2mms[22m[39m
+[31m     [31m×[31m MG11: the clip ids captured at the press stay the target when the selection changes mid-drag (group→group proves the capture; the remounting cases guard the outcome)[39m[32m 187[2mms[22m[39m
+     [32m✓[39m MG14: a blur or a pointercancel mid multi-drag reverts every member, writes no entry and releases the gesture[32m 74[2mms[22m[39m
+     [32m✓[39m MG12: a multi drag while playing ramps both clip gain nodes without a new schedule or new sources[32m 64[2mms[22m[39m
+     [32m✓[39m MG13 must-not: track Volume and Master keep their values, and one clip keeps the stage-1 display and no count status[32m 117[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/clip-gain-multi.test.tsx[2m > [22mmulti-clip Clip Gain in the detail panel (D-29z80, T12 stage 2)[2m > [22mMG4: a +25 px drag over 100 px shifts both by +21.0 with one entry; Undo and Redo move both; two moves are not cumulative
+[31m[1mAssertionError[22m: expected [ 17, 24 ] to deeply equal [ 15, 22 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   15,[39m
+[32m-   22,[39m
+[31m+   17,[39m
+[31m+   24,[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/clip-gain-multi.test.tsx:[2m432:35[22m[39m
+    [90m430| [39m    [34mwindowPointer[39m([32m'pointermove'[39m[33m,[39m [34m82[39m[33m,[39m [34m75[39m)[33m;[39m
+    [90m431| [39m    [34mwindowPointer[39m([32m'pointerup'[39m[33m,[39m [34m82[39m[33m,[39m [34m75[39m)[33m;[39m
+    [90m432| [39m    [34mexpect[39m([34mgainsOf[39m(api[33m,[39m [33mMEMBERS[39m))[33m.[39m[34mtoEqual[39m([[34m15[39m[33m,[39m [34m22[39m])[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m433| [39m    [34mexpect[39m([34mundoChainLabels[39m(api))[33m.[39m[34mtoEqual[39m([[33mCLIP_GAIN_LABEL[39m])[33m;[39m
+    [90m434| [39m    [34mexpect[39m([34mgainsOf[39m(api[33m,[39m [33mMEMBERS[39m))[33m.[39m[34mtoEqual[39m([[33m-[39m[34m6[39m[33m,[39m [34m1[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/clip-gain-multi.test.tsx[2m > [22mmulti-clip Clip Gain in the detail panel (D-29z80, T12 stage 2)[2m > [22mMG5: the block clamps at +24 and −60 with the difference kept at 7.0, and returning to the start restores the start values
+[31m[1mAssertionError[22m: expected [ -60, -53 ] to deeply equal [ -6, 1 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   -6,[39m
+[32m-   1,[39m
+[31m+   -60,[39m
+[31m+   -53,[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/clip-gain-multi.test.tsx:[2m449:35[22m[39m
+    [90m447| [39m    [34mexpect[39m([34mgainsOf[39m(api[33m,[39m [33mMEMBERS[39m))[33m.[39m[34mtoEqual[39m([[33m-[39m[34m60[39m[33m,[39m [33m-[39m[34m53[39m])[33m;[39m
+    [90m448| [39m    [34mwindowPointer[39m([32m'pointermove'[39m[33m,[39m [34m84[39m[33m,[39m [34m50[39m)[33m;[39m
+    [90m449| [39m    [34mexpect[39m([34mgainsOf[39m(api[33m,[39m [33mMEMBERS[39m))[33m.[39m[34mtoEqual[39m([[33m-[39m[34m6[39m[33m,[39m [34m1[39m])[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m450| [39m    [34mwindowPointer[39m([32m'pointermove'[39m[33m,[39m [34m84[39m[33m,[39m [33m-[39m[34m150[39m)[33m;[39m
+    [90m451| [39m    [34mwindowPointer[39m([32m'pointerup'[39m[33m,[39m [34m84[39m[33m,[39m [33m-[39m[34m150[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/clip-gain-multi.test.tsx[2m > [22mmulti-clip Clip Gain in the detail panel (D-29z80, T12 stage 2)[2m > [22mMG11: the clip ids captured at the press stay the target when the selection changes mid-drag (group→group proves the capture; the remounting cases guard the outcome)
+[31m[1mAssertionError[22m: expected [ 17, 24, +0 ] to deeply equal [ 15, 22, +0 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   15,[39m
+[32m-   22,[39m
+[31m+   17,[39m
+[31m+   24,[39m
+[2m    0,[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/clip-gain-multi.test.tsx:[2m593:54[22m[39m
+    [90m591| [39m    [34mwindowPointer[39m([32m'pointermove'[39m[33m,[39m [34m90[39m[33m,[39m [34m75[39m)[33m;[39m
+    [90m592| [39m    expect(live(toGroup.api).status).not.toBe(GESTURE_EDIT_BLOCKED_MES…
+    [90m593| [39m    expect(gainsOf(toGroup.api, ['m1', 's1', 'x1'])).toEqual([15, 22, …
+    [90m   | [39m                                                     [31m^[39m
+    [90m594| [39m    [34mwindowPointer[39m([32m'pointerup'[39m[33m,[39m [34m90[39m[33m,[39m [34m75[39m)[33m;[39m
+    [90m595| [39m    expect(gainsOf(toGroup.api, ['m1', 's1', 'x1'])).toEqual([15, 22, …
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 18:46:35
+[2m   Duration [22m 3.16s[2m (transform 935ms, setup 0ms, import 1.34s, tests 1.36s, environment 338ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/clip-gain-multi.test.tsx,title=app/lib/arrangement/__tests__/clip-gain-multi.test.tsx > multi-clip Clip Gain in the detail panel (D-29z80%2C T12 stage 2) > MG4%3A a +25 px drag over 100 px shifts both by +21.0 with one entry; Undo and Redo move both; two moves are not cumulative,line=432,column=35::AssertionError: expected [ 17, 24 ] to deeply equal [ 15, 22 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   15,%0A-   22,%0A+   17,%0A+   24,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/clip-gain-multi.test.tsx:432:35%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/clip-gain-multi.test.tsx,title=app/lib/arrangement/__tests__/clip-gain-multi.test.tsx > multi-clip Clip Gain in the detail panel (D-29z80%2C T12 stage 2) > MG5%3A the block clamps at +24 and −60 with the difference kept at 7.0%2C and returning to the start restores the start values,line=449,column=35::AssertionError: expected [ -60, -53 ] to deeply equal [ -6, 1 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   -6,%0A-   1,%0A+   -60,%0A+   -53,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/clip-gain-multi.test.tsx:449:35%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/clip-gain-multi.test.tsx,title=app/lib/arrangement/__tests__/clip-gain-multi.test.tsx > multi-clip Clip Gain in the detail panel (D-29z80%2C T12 stage 2) > MG11%3A the clip ids captured at the press stay the target when the selection changes mid-drag (group→group proves the capture; the remounting cases guard the outcome),line=593,column=54::AssertionError: expected [ 17, 24, +0 ] to deeply equal [ 15, 22, +0 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   15,%0A-   22,%0A+   17,%0A+   24,%0A    0,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/clip-gain-multi.test.tsx:593:54%0A%0A

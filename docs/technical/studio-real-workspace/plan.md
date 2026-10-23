@@ -1217,6 +1217,23 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z81 — Round 115-ის შედეგი; Round 116: T12 ეტაპი 3a — ხაზის Volume dB-ში, ქვედა ბოლოში −∞.**
+
+C round 115 (`tmp/studio-real-loop/c-round-115.md`, `c-round-115.json`) — **PASS, `browserVerified: true`, `realVerified: true`** (27 სტრიქონი; fake-Bearer 403 BLOCKED — backend cloud-ში არ არის); gate 115 გამოქვეყნდა `d5de68f`-ში (review 8.5/10, COMMIT OK; verify 153 ფაილი / 2369 ტესტი).
+- **T12 ეტაპი 2 → `c_pass_published`.** G-T2-MULTI: stems 0.066834, SFX 0.105925 — ზუსტი, სხვაობა 4.0 (Master −12). GATE114-S1/S2/S5 → done.
+- **ახალი Low-ები → `deferred_low_polish`:** C-R115-01 (ვიდეოიანი მონიშვნა 0.0-ს აჩვენებს), GATE114-S3 (გვიანი ჩანაწერი, მნიშვნელობა არ იკარგება), gate-115 #1–#3, A-ს review #3 და #6. Gate #4 (doc 099 l.4) — round 116-ის ერთხაზიანი grant.
+- **რეგრესიის რაუნდი ჯერ არ დამდგარა** (2026-10-21 → 2026-10-23, 2 დღე); 2026-10-24-ის ან შემდეგი დაგეგმვა რეგრესიის რაუნდია.
+
+- **R1 — ეტაპი 3 იყოფა:** 3a — ხაზის (აუდიო + ვიდეო) Volume dB-ში; 3b — ჯგუფის Volume dB-ში + Shift-ით ზუსტი drag track/group/Master fader-ებზე. მოცულობა არ მცირდება, არაფერი გადადებულა; ჯგუფი ერთი რაუნდით `%`-ს აჩვენებს.
+- **R2 — dB მხოლოდ UI-ის კონტრაქტია:** `ArrangementTrack.volume` წრფივი რჩება; context-ის API, `model.ts`, `groups.ts`, `schedule.ts`, `graph.client.ts`, export — უცვლელი. გარდაქმნა ახალ სუფთა მოდულშია `track-volume-db.ts`. T12.24-ის `trackVolumeDb` — წარმოდგენის შემოთავაზება, არა ხილული ქცევა.
+- **R3 — დიაპაზონი:** slider −60…0 dB, step 0.1; მინიმუმი (−60) = −∞ (შენახული ზუსტად 0), სასრული ქვედა ზღვარი −59.9; ზედა 0 dB. +6 dB boost — სიგნალი TRACK-VOLUME-BOOST (Live-ის დიაპაზონი შენახულ ჩანაწერებში არ არის; მომხმარებელს არ მოუთხოვია).
+- **R4 — ჩვენება:** `formatMasterGainDb` / `−∞ dB` — `aria-valuetext` და `title`; ხილული readout ` dB`-ის გარეშე; readout ≤ `w-10`, slider ≥ 24 px.
+- **R5 — ცვლილების გარეშე დაჭერა** შენახულ წრფივ მნიშვნელობას არ გადაწერს; Undo ზუსტ წინა მნიშვნელობას აბრუნებს.
+- **R6 — ტესტები:** 11 არსებულ ტესტში მხოლოდ სკალაზე დამოკიდებული ხაზები (slider-ის მნიშვნელობა, slider-ით მიღებული `.volume`, readout), ზუსტი `toBe`; context-ის პირდაპირი ხაზები უცვლელი.
+- **R7 — C:** TV-*, G-T3 (T12.26 Test 3), G-T4 (Test 4), G-INF (0 LSB), G-VIDEO, NB-*; export-ები Master −12 dB-ზე, წინასწარ ნებადართული.
+- **R8 — Ableton:** §18.1 Volume — დადასტურებული (`b-round-78/ableton-mixing-20261022.txt`, 2026-10-22); §42.6 Shift — დადასტურებული (`b-round-71/ableton-shortcuts-20261021.txt`); დიაპაზონი −∞…+6 — დაუდასტურებელი; რიცხვითი ველი — შეგნებული განსხვავება; რამდენიმე ხაზის ერთად ცვლილება — სიგნალი MIXER-MULTI-TRACK.
+- **R9 — checkpoint:** ეტაპი 2 დაიხურა; root-ს გაეგზავნა შეზღუდული მოთხოვნა (addendum (aa), `b-round-91-checkpoint-request.md`). Round 116 pending-preview მანქანებს არ ეხება. არ ბლოკავს.
+
 **D-29z80 — Round 114-ის შედეგი; Round 115: T12 ეტაპი 2 — რამდენიმე კლიპის Clip Gain (T12.7).**
 
 C round 114 (`tmp/studio-real-loop/c-round-114.md`, `c-round-114.json`) — **PASS, `browserVerified: true`, `realVerified: true`**; gate 114 გამოქვეყნდა `38c0e21`-ში (review 8.5/10, verify 152 ფაილი / 2355 ტესტი). T12 ეტაპი 1 → `c_pass_published`; GATE113-S1 → დასრულდა. ახალი Low C-R114-01 (ძველი) და A-ს reviewer-ის Low-ები 5/7/8 → `deferred_low_polish`. რეგრესიის რაუნდი ჯერ არ დამდგარა (2026-10-21 → 2026-10-23, 2 დღე).
@@ -2035,6 +2052,7 @@ flowchart TD
 | 114 | T12-GAIN-VOLUME ეტაპი 1, GATE113-S1 | Clip Gain-ის fader: relative drag, Shift-ით ზუსტი drag, double-click reset, ისრები, ერთი ჩანაწერი drag-ზე (D-29z79) |
 | 114 → | (შედეგი) | **C PASS** (`browserVerified`), `38c0e21`: T12 ეტაპი 1 მზადაა; C-R114-01 (Low) → deferred |
 | 115 | T12-GAIN-VOLUME ეტაპი 2, GATE114-S1/S2/S5 | რამდენიმე აუდიო კლიპის Clip Gain: საერთო clamp-ული delta, დიაპაზონის ტექსტი, ველით ყველაზე, reset ყველაზე, ერთი ჩანაწერი (D-29z80) |
+| 116 | T12-GAIN-VOLUME ეტაპი 3a, GATE115-S4 | ხაზის Volume dB-ში, ქვედა ბოლოში −∞, readout dB-ში; შენახვა წრფივი (D-29z81) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2069,6 +2087,7 @@ flowchart TD
 **D-29z79:** round 114-ში A-ს ეკუთვნის `app/hooks/useRelativeFaderDrag.ts` (opt-in fine mode), `app/contexts/ArrangementContext.tsx` (clip gain preview/commit/begin/blur), `ArrangementDetailPanel.tsx` (fader), `StudioWorkspace.tsx` (მხოლოდ props), ახალი `clip-gain-fader.test.tsx` და doc 098, doc 097 (l.4 + TODO) და პირობითად detail/fader-ის ექვსი არსებული ტესტი (მხოლოდ Clip Gain-ის ბლოკის/tab stop-ების/layout-ის ჩამონათვალი). დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-113-r114-tree-sha256.txt`, 911).
 
 **D-29z80:** round 115-ში A-ს ეკუთვნის `ArrangementContext.tsx`, `ArrangementDetailPanel.tsx`, `StudioWorkspace.tsx` (`detailGroup` + props), ახალი `app/lib/arrangement/clip-gain-multi.ts`, ახალი `clip-gain-multi.test.tsx`, ახალი doc 099, doc 098 (l.4 + CF1–CF14) და ხუთი არსებული ტესტის მითითებული ხაზები (ორი აუდიო კლიპის „გამორთულია“ შემთხვევა → ვიდეოიანი მონიშვნა, იგივე სიმკაცრით). დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-114-r115-tree-sha256.txt`, 915).
+**D-29z81:** round 116-ში A-ს ეკუთვნის `ArrangementLane.tsx` (Volume fader), ახალი `app/lib/arrangement/track-volume-db.ts`, ახალი `track-volume-db.test.tsx`, ახალი doc 100, doc 099 (l.4) და 11 არსებული ტესტის სკალაზე დამოკიდებული ხაზები. დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-115-r116-tree-sha256.txt`, 914).
 
 ## 7. Done Policy
 

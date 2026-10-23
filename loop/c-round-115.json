@@ -1,0 +1,143 @@
+{
+ "round": 115,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-23T18:52:42.4499772Z",
+  "round": 115,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "MC-PRESENT",
+  "MC-LAYOUT",
+  "MC-DRAG",
+  "MC-CLAMP",
+  "MC-FINE",
+  "MC-KEY",
+  "MC-DBL",
+  "MC-RESET-BTN",
+  "MC-FIELD",
+  "MC-PENDING-DRAG",
+  "MC-VIDEO-MIX",
+  "MC-STATUS",
+  "MC-PLAY",
+  "MC-SELECT-MIDDRAG",
+  "MC-BLUR-DISABLED",
+  "G-T2-MULTI",
+  "NB-SINGLE",
+  "NB-TRACK-SHIFT",
+  "NB-MASTER",
+  "SOURCE-SCOPE",
+  "T115-TARGETED",
+  "AN-REVIEW",
+  "PX-NET",
+  "REG-HYD",
+  "G115-3",
+  "DOC-099",
+  "DOC-098"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G115-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "extraObservations": {
+  "MC-SELECT-MIDDRAG-GROUP": "PASS at 1440 and 1280: stems+SFX group, +10 px, Ctrl+A (3 clips), +10 px: drag continued on the captured 2 ids (Δ 17.5 each), music unchanged, one entry. Proves R8 in the real browser (group→group, same content key).",
+  "MC-SELECT-MIDDRAG single→group": "Ctrl+A ends the drag (content remount, disclosed by A); the second +10 px is ignored; only stems changed; one entry.",
+  "MC-BLUR-DISABLED": "No value lost; the Clip Gain entry is not written at Ctrl+A or keyup but only when the next edit flushes the pending preview (known GATE114-S3 Low, late entry). Undo restores in one step. Re-run with a track Volume edit as the later edit (1440 r6, video loaded): stems Clip Gain entry is flushed before the Volume entry; Undo×2 restores -6.0. Without video (1440 r5) Ctrl+A turns single into a 3-audio group (fader stays enabled, focus to BODY by remount) and the entry is likewise written late; same known Low.",
+  "G-T2-MULTI harness": "Recipe at Master 0 dB: SFX baseline has 2 full-scale samples (invalid); the music substitute also has 30 (invalid). Accepted run uses Master -12 dB for all four exports (round-29 R13-M1 precedent). Ratios at Master 0 were also exact (0.000 %) but are not counted."
+ },
+ "measurements": {
+  "faderWidthPx": 96,
+  "dragDelta": 17.5,
+  "fineDelta": 1.8,
+  "clampRight": [
+   17,
+   24
+  ],
+  "clampLeft": [
+   -60,
+   -53
+  ],
+  "keyEntries": 3,
+  "blockW": 208,
+  "blockH1440": 91,
+  "blockH1280": 67,
+  "rangeNodeW": 115.2,
+  "playDropDb": 28.61,
+  "playCbsDuring": 0,
+  "gT2": {
+   "stems": {
+    "g": -23.5,
+    "peakErrPct": -0.001,
+    "rmsErrPct": 0
+   },
+   "sfx": {
+    "g": -19.5,
+    "peakErrPct": 0,
+    "rmsErrPct": 0
+   },
+   "storedDiff": 4
+  },
+  "modifier": "Shift"
+ },
+ "bugs": [
+  {
+   "id": "C-R115-01",
+   "severity": "low",
+   "steps": [
+    "Open /studio-lab at 1440x900, add demo-middle-east @0, demo-stem-pulse @2 (stems), demo-soft-impact @4 (sfx), load beeps-6s-vp9-opus.webm",
+    "Select the stems clip alone, type -6 in Clip Gain and Enter",
+    "Click stems, Shift+click the video clip"
+   ],
+   "expected": "Disabled controls do not suggest a value the audio member does not have (e.g. empty field or the member value/range shown as disabled)",
+   "actual": "Field, fader and 0 dB are disabled with the exact R1 reason, but the field shows 0.0 and the fader aria-valuetext 0.0 dB while the stems member is at -6.0 dB (A post-review choice: video-containing group shows the stage-1 disabled look). Misleading displayed value; no data impact.",
+   "evidence": "c-round-115/out/multi-1440-1.json rows.MC-VIDEO-MIX.displayed; c-round-115/shots/video-mix-1440-1-panel.png",
+   "preExisting": "inherited display pattern: stage 1 already rendered a disabled group as field 0.0 / value 0 (clipGainInputText(undefined), value={clipGainDb ?? 0}); R1 makes the video-containing group the only disabled group state left. Not a regression of round 115 code intent; Low -> deferred_low_polish."
+  }
+ ],
+ "knownLowsObserved": [
+  "GATE114-S3 late Clip Gain entry after a key preview whose fader becomes disabled (see extraObservations.MC-BLUR-DISABLED)",
+  "A reviewer #1 floor dead zone: not exercised (no return leg in B rows)"
+ ],
+ "source": {
+  "head": "38c0e212e8630f6965ceafedebc03435d2fd47f7",
+  "frozen": "OK start and end",
+  "protected": [
+   "fa2cf0bc",
+   "13914809",
+   "56f5b76f",
+   "bf9ee257"
+  ],
+  "diffHashStartEqualsEnd": true
+ },
+ "harnessDeviations": [
+  {
+   "row": "G-T2-MULTI",
+   "deviation": "Accepted exports use Master -12 dB for all four exports (baselines and gained).",
+   "reason": "At Master 0 dB the SFX baseline has 2 full-scale samples and the rule substitute (music) has 30; both invalid under the round-114 G-T1 validity rule. Round-29 R13-M1 precedent; Master is post-sum and linear, so the per-clip ratio is unchanged. At Master -12 the SFX baseline peaks at exactly -12.000 dBFS, so the Master-0 full-scale samples were the source file own 0 dBFS peaks, not summing overload.",
+   "authorizedByB": false,
+   "evidence": "c-round-115/out/exp-1440-sfx-m12.json; invalid attempts: out/exp-1440-sfx-invalid.json, out/export-1440-music-attempt*.log"
+  },
+  {
+   "row": "MC-BLUR-DISABLED",
+   "deviation": "Two triggers for the later edit: music Clip Gain -1 (runs 1440 r1-r3, 1280 r1) and music track Volume ArrowLeft (1440 r6, with video loaded).",
+   "reason": "Advisor: a non-Clip-Gain edit proves the flush outside the Clip Gain path. Both: no value lost, entry appears only at the next edit, one Undo restores.",
+   "authorizedByB": true,
+   "evidence": "c-round-115/out/multi-1440-6.json, multi-1440-6-blur-volume.log"
+  }
+ ],
+ "backlogCheck": "context/active-backlog.json grep: round-115 task, GATE114-S1/S2/S5 (this round, verified), GATE114-S3 (observed, known Low), GATE114-S4 (not in this round scope). No other listed open finding needed a check in this round."
+}
