@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T21:09:44.933Z)
+# Active loop summary (2026-10-24T21:47:33.778Z)
 
-- backlog.json 1324 KB -> active view 172 KB
-- status: G_ROOT_GATE round 145
-- servers: `{"checkedUtc":"2026-10-24T20:59:49.9877462Z","round":145,"attempt":1,"store":200}`
-- last publication: 9a67abd78b41162262c0882544dbdd4544afef1b (rounds 142-144)
-- last root gate: round 145 skipped - C taskStatus FAIL
+- backlog.json 1330 KB -> active view 175 KB
+- status: G_ROOT_GATE round 146
+- servers: `{"checkedUtc":"2026-10-24T21:35:23.4209411Z","round":146,"attempt":1,"store":200}`
+- last publication: 3328e753db68c2eb84c291e0b711f933e498ced7 (rounds 145-146)
+- last root gate: round 146 published - commit 3328e753db68c2eb84c291e0b711f933e498ced7 pushed
 
 ## Current items: -
 
@@ -243,7 +243,7 @@
 - GATE121-S7-HEADER-WIDTH / info / converted -> C-R122-02 (deferred_low_polish) / 224 px grid header with BPM set, widest triplet division and zoom not browser-checked
 - C-R122-01 / low / deferred_low_polish / at 1280x720 a body range drag shrinks the workspace by 20 px mid-drag; lane auto-fit trims lanes 80->75 px and the selected stems clip moves
 - C-R122-02 / low / deferred_low_polish / with a BPM set the straight musical division list widens the select to 85 px; the 224 px grid control overflows (scrollWidth 225 > clientWid
-- ABL-B-1 / low / deferred_low_polish / the badge row overflows the option: scrollWidth 139-152 px > clientWidth 126 px; '▶' sits past the card edge and 'ისმის' wraps to a second l
+- ABL-B-1 / low / scheduled round 146 with C-R145-01 (D-29z111; round owns ArrangementLibrary.tsx, cheap; 2026-10-23 early-fix rule); closes on C PASS / the badge row overflows the option: scrollWidth 139-152 px > clientWidth 126 px; '▶' sits past the card edge and 'ისმის' wraps to a second l
 - ABL-B-2 / low / deferred_low_polish / the second Z pushes a duplicate entry: the first X leaves the view at 137.7 px/s while the status says 'წინა ხედი აღდგა. X კიდევ ერთი ნაბიჯი
 - C-R123-OBS-SFX-HEADER-SELECTION / info / watch (unreproduced; not a bug) / native text-selection highlight on the SFX header in two first-run P3 screenshots (harness drag started off-screen); 4 targeted probes found
 - C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / info / judged round 126 F-2: acceptable (active range card 13 px under the footer, ArrowDown/wheel reveal it; disabled hint card belongs to ARCH-R101-MODALBODY-PADDING-SLOT / GATE102-S3-TALL-CARD-NO-CAP) / at 1280x720 the Export dialog's 'მონიშნული მონაკვეთი' option sits partly under the dialog footer until the body is scrolled
@@ -304,7 +304,7 @@
 - G141-3-FAKE-BEARER-403 / - / blocked: backend unavailable in cloud (open backend evidence) / 
 - G142-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
 - A-R142-DEVIATIONS-D1-D7 / info / ratified (B, D-29z108 R5): D1 57th pin line PENDING_HIDDEN_HINT; D2 flipped guards (leftovers fixed round 143); D3 LB-SEARCH 'stem'; D4 Biome rewraps; D5 shared helper; D6 l.702 block is the formatter map (reviewer: A right); D7 helper rename / 
-- ARCH-R142-LIBRARY-SEARCH-KEYWORDS / info / scheduled: round 145 V-0.5a KW1 (D-29z110 R2) / library.ts matchesLibraryQuery uses the display label LIBRARY_KIND_LABELS as search text, so copy edits change search results (m86 proves it
+- ARCH-R142-LIBRARY-SEARCH-KEYWORDS / info / implemented round 145 KW1; C LIB-SEARCH PASS round 145 (browser); closes on publication with round 146 / library.ts matchesLibraryQuery uses the display label LIBRARY_KIND_LABELS as search text, so copy edits change search results (m86 proves it
 - A-R143-DEVIATIONS-D1-D3 / info / ratified (B, D-29z109 R4): D1 DPS2/DPS4 stayed green under m89/m90 (toContain sees the suffixed text; B prediction wrong); D2 Biome join -1 line shift; D3 probe (b) delta, ruled by R1 / 
 - G143-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
 - G144-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
@@ -313,6 +313,12 @@
 - GATE144-S6-DESIGN-D-WEAKER / info / acknowledged (exact toEqual label checks still cover content) / 
 - ARCH-R144-STRINGS-IMPORTS / info / signal, reviewer verdict keep (one-way imports into the leaf strings.ts) / 
 - LIB-SEARCH-GEORGIAN-SYNONYMS / info / signal for Saba, not scheduled (D-29z110 R2): Georgian query words (მუსიკა/სტემი/სტემები) no longer match by kind after V-0; adding them would need a Georgian allowance in an English-only source / 
+- C-R145-01 / low / scheduled round 146 (D-29z111 R1/R2); closes on C PASS / library preview row marker '▶ Playing' overflows the 126 px option by 12 px more than baseline and is clipped to '▶ Play' while audio plays 
+- A-R145-REVIEW-DM-VALUES / low / scheduled round 146 (DL-VAL) / no unit assertion pins the exact DM1-DM4 values (label, notice, both collectionLabels); ST47 only proves they are not Georgian
+- A-R145-REVIEW-GUARD-TEXTS / low / scheduled round 146 (PC2 exact) / collection.test PC2 l.143/153/156 check the purchased guard errors only with toThrow(Error)
+- B-R145-M91-SPEC / info / ruled (D-29z111 R3): spec error, no task / round-145 m91 expected failed-source-refusal / status-announcement-ui red; their fixtures reject with hand-written LOADER_ERROR
+- GATE-145-SKIPPED / info / open: round-145 changes uncommitted; publish together with round 146 after C PASS / 
+- G145-3-FAKE-BEARER-403 / info / open backend-only evidence (backend unavailable in cloud) / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

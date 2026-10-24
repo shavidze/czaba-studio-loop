@@ -1,0 +1,834 @@
+{
+ "round": 146,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T21:35:23.4209411Z",
+  "round": 146,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T146-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "PLAY-MARKER",
+  "LAYOUT-LIB",
+  "LAYOUT-REST",
+  "LIB-ROW-TEXT-SMOKE",
+  "G146-3",
+  "PX-NET",
+  "REG-HYD",
+  "NEIGHBOUR (section 4: click the marker itself, aria-selected stays true)"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "PURCHASED-LABEL — backend unavailable in cloud (unit evidence only: collection.test l.84 + PC2, green in T146-TARGETED)",
+  "G146-3 fake-Bearer 403 — backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "C-R146-01",
+   "severity": "low",
+   "steps": [
+    "Fresh /studio-lab context at 1280x720, Snap off, library loaded",
+    "Scroll the library list so that the Slow rise option sits at the bottom edge of the list viewport (list y 271-484); in the run Slow rise was at y 436.25-483.5 after a 19 px scroll",
+    "Click Slow rise, then press the preview play button (arrangement-library-preview-toggle)"
+   ],
+   "expected": "The ▶ Playing marker of the row being previewed is visible to the user (on screen inside the list viewport)",
+   "actual": "The option grows by 16 px and the marker line lands at y 477.5-493.5, below the list bottom (484); elementFromPoint at its centre hits arrangement-library-preview; the list does not auto-scroll. Visible only after scrolling the list (scrollTop 19 -> 29)",
+   "evidence": "c-round-146/out/c146-1280.json m.slowRise.gBeforeScroll / listScroll (final run); first 1280 run recorded under invalidRuns. Pre-existing, not caused by round 146: previewing option height 63.5 px = b-round-144 libbase. Route to deferred_low_polish per the 2026-10-23 bug gate and task section 7."
+  }
+ ],
+ "abletonCorrespondence": {
+  "PLAY-MARKER": "unconfirmed / not applicable — CZABA-only row marker; no Live parity claimed (task §5)"
+ },
+ "measurements": {
+  "1440": {
+   "markerSoft": {
+    "option": [
+     148,
+     370,
+     126,
+     63.25
+    ],
+    "marker": [
+     156,
+     411.25,
+     110,
+     16
+    ],
+    "glyph": [
+     156,
+     411.25,
+     54,
+     15
+    ],
+    "glyphRight": 210,
+    "metaBox": [
+     156,
+     395.25,
+     110,
+     16
+    ],
+    "hitCentre": {
+     "same": true,
+     "tag": "SPAN",
+     "tid": "arrangement-library-option-previewing",
+     "text": "▶ Playing"
+    },
+    "hitRightEnd": {
+     "same": true,
+     "tag": "SPAN",
+     "tid": "arrangement-library-option-previewing",
+     "text": "▶ Playing"
+    },
+    "color": "rgb(18, 217, 200)"
+   },
+   "layoutLibII": {
+    "option": {
+     "cur": [
+      148,
+      370,
+      126,
+      63.5
+     ],
+     "base": [
+      148,
+      370,
+      126,
+      63.5
+     ],
+     "d": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "meta": {
+     "cur": [
+      156,
+      395.5,
+      110,
+      16
+     ],
+     "baseReady": [
+      156,
+      395.5,
+      110,
+      16
+     ],
+     "d": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "lines": 1
+    },
+    "meta0": {
+     "cur": [
+      156,
+      395.5,
+      23,
+      16
+     ],
+     "baseReady": [
+      156,
+      395.5,
+      23,
+      16
+     ],
+     "d": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "meta1": {
+     "cur": [
+      187,
+      395.5,
+      62,
+      16
+     ],
+     "baseReady": [
+      187,
+      395.5,
+      62,
+      16
+     ],
+     "d": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "meta2Present": false,
+    "marker": {
+     "box": [
+      156,
+      411.5,
+      110,
+      16
+     ],
+     "lines": 1,
+     "text": "▶ Playing"
+    },
+    "markerChecks": {
+     "x": 156,
+     "xOk": true,
+     "yRel": 16,
+     "yOk": true,
+     "h": 16,
+     "hOk": true,
+     "right": 266,
+     "rightOk": true,
+     "lines": 1,
+     "glyph": [
+      156,
+      411.25,
+      54,
+      15
+     ],
+     "glyphRight": 210
+    },
+    "ok": true
+   },
+   "scrollWidths": {
+    "ready": {
+     "scrollers": [
+      [
+       "arrangement-library-tree",
+       133,
+       133
+      ],
+      [
+       "arrangement-library-list",
+       134,
+       134
+      ]
+     ],
+     "badOptions": [],
+     "nOptions": 9
+    },
+    "previewing": {
+     "scrollers": [
+      [
+       "arrangement-library-tree",
+       133,
+       133
+      ],
+      [
+       "arrangement-library-list",
+       134,
+       134
+      ]
+     ],
+     "badOptions": [],
+     "nOptions": 9
+    },
+    "error": {
+     "scrollers": [
+      [
+       "arrangement-library-tree",
+       133,
+       133
+      ],
+      [
+       "arrangement-library-list",
+       134,
+       134
+      ]
+     ],
+     "badOptions": [],
+     "nOptions": 9
+    },
+    "ok": true
+   },
+   "layoutRest": {
+    "previewing": {
+     "compared": 102,
+     "deltas": []
+    },
+    "error": {
+     "compared": 102,
+     "deltas": []
+    }
+   },
+   "libRootVsBase": {
+    "ready": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "previewing": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "error": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "preview": {
+    "samples": [
+     {
+      "t": 3163.1999999999534,
+      "now": 0,
+      "cbs": 0,
+      "toggle": "▶ მოუსმინე"
+     },
+     {
+      "t": 3711.899999999907,
+      "now": 0,
+      "cbs": 1,
+      "toggle": "■ შეჩერება"
+     },
+     {
+      "t": 3863.6999999999534,
+      "now": 1,
+      "cbs": 1,
+      "toggle": "■ შეჩერება"
+     },
+     {
+      "t": 4015,
+      "now": 1,
+      "cbs": 1,
+      "toggle": "■ შეჩერება"
+     },
+     {
+      "t": 4166.300000000047,
+      "now": 1,
+      "cbs": 1,
+      "toggle": "■ შეჩერება"
+     }
+    ],
+    "audio": [
+     {
+      "state": "running",
+      "t": 0.9607256235827665,
+      "sr": 44100
+     }
+    ]
+   },
+   "afterStop": {
+    "markers": [],
+    "opt": [
+     148,
+     370,
+     126,
+     47.5
+    ],
+    "toggle": "▶ მოუსმინე",
+    "readyOpt": [
+     148,
+     370,
+     126,
+     47.5
+    ],
+    "playingBeforeStop": {
+     "markers": [
+      "demo-soft-impact"
+     ],
+     "toggle": "■ შეჩერება",
+     "ms": 936
+    }
+   },
+   "slowRise": {
+    "rows": [
+     "demo-slow-rise"
+    ],
+    "listScroll": [
+     0,
+     0
+    ],
+    "markerBeforeScroll": [
+     156,
+     458.5,
+     110,
+     16
+    ],
+    "hitBeforeScroll": "arrangement-library-option-previewing",
+    "markerAfterScroll": [
+     156,
+     458.5,
+     110,
+     16
+    ]
+   },
+   "markerClick": {
+    "before": {
+     "markers": [
+      "demo-slow-rise"
+     ],
+     "wave": {
+      "t": 6719.699999999953,
+      "now": 2,
+      "cbs": 2,
+      "toggle": "■ შეჩერება"
+     }
+    },
+    "afterClick": {
+     "sel": "true",
+     "markers": [
+      "demo-slow-rise"
+     ],
+     "clips": 0,
+     "toggle": "■ შეჩერება",
+     "wave": 2
+    },
+    "control_titleClick": {
+     "ctlBefore": [
+      "demo-slow-rise"
+     ],
+     "ctlAfter": {
+      "sel": "true",
+      "markers": [
+       "demo-slow-rise"
+      ]
+     }
+    }
+   },
+   "afterSelectOther": [
+    "demo-soft-impact"
+   ],
+   "snap": [
+    "off",
+    "off"
+   ]
+  },
+  "1280": {
+   "markerSoft": {
+    "option": [
+     148,
+     408,
+     126,
+     63.25
+    ],
+    "marker": [
+     156,
+     449.25,
+     110,
+     16
+    ],
+    "glyph": [
+     156,
+     449.25,
+     54,
+     15
+    ],
+    "glyphRight": 210,
+    "metaBox": [
+     156,
+     433.25,
+     110,
+     16
+    ],
+    "hitCentre": {
+     "same": true,
+     "tag": "SPAN",
+     "tid": "arrangement-library-option-previewing",
+     "text": "▶ Playing"
+    },
+    "hitRightEnd": {
+     "same": true,
+     "tag": "SPAN",
+     "tid": "arrangement-library-option-previewing",
+     "text": "▶ Playing"
+    },
+    "color": "rgb(18, 217, 200)"
+   },
+   "layoutLibII": {
+    "option": {
+     "cur": [
+      148,
+      408,
+      126,
+      63.5
+     ],
+     "base": [
+      148,
+      408,
+      126,
+      63.5
+     ],
+     "d": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "meta": {
+     "cur": [
+      156,
+      433.5,
+      110,
+      16
+     ],
+     "baseReady": [
+      156,
+      433.5,
+      110,
+      16
+     ],
+     "d": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "lines": 1
+    },
+    "meta0": {
+     "cur": [
+      156,
+      433.5,
+      23,
+      16
+     ],
+     "baseReady": [
+      156,
+      433.5,
+      23,
+      16
+     ],
+     "d": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "meta1": {
+     "cur": [
+      187,
+      433.5,
+      62,
+      16
+     ],
+     "baseReady": [
+      187,
+      433.5,
+      62,
+      16
+     ],
+     "d": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "meta2Present": false,
+    "marker": {
+     "box": [
+      156,
+      449.5,
+      110,
+      16
+     ],
+     "lines": 1,
+     "text": "▶ Playing"
+    },
+    "markerChecks": {
+     "x": 156,
+     "xOk": true,
+     "yRel": 16,
+     "yOk": true,
+     "h": 16,
+     "hOk": true,
+     "right": 266,
+     "rightOk": true,
+     "lines": 1,
+     "glyph": [
+      156,
+      449.25,
+      54,
+      15
+     ],
+     "glyphRight": 210
+    },
+    "ok": true
+   },
+   "scrollWidths": {
+    "ready": {
+     "scrollers": [
+      [
+       "arrangement-library-tree",
+       133,
+       133
+      ],
+      [
+       "arrangement-library-list",
+       134,
+       134
+      ]
+     ],
+     "badOptions": [],
+     "nOptions": 9
+    },
+    "previewing": {
+     "scrollers": [
+      [
+       "arrangement-library-tree",
+       133,
+       133
+      ],
+      [
+       "arrangement-library-list",
+       134,
+       134
+      ]
+     ],
+     "badOptions": [],
+     "nOptions": 9
+    },
+    "error": {
+     "scrollers": [
+      [
+       "arrangement-library-tree",
+       133,
+       133
+      ],
+      [
+       "arrangement-library-list",
+       134,
+       134
+      ]
+     ],
+     "badOptions": [],
+     "nOptions": 9
+    },
+    "ok": true
+   },
+   "layoutRest": {
+    "previewing": {
+     "compared": 91,
+     "deltas": []
+    },
+    "error": {
+     "compared": 91,
+     "deltas": []
+    }
+   },
+   "libRootVsBase": {
+    "ready": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "previewing": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "error": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "preview": {
+    "samples": [
+     {
+      "t": 3179.6999999999534,
+      "now": 0,
+      "cbs": 0,
+      "toggle": "▶ მოუსმინე"
+     },
+     {
+      "t": 3724.8000000000466,
+      "now": 0,
+      "cbs": 1,
+      "toggle": "■ შეჩერება"
+     },
+     {
+      "t": 3876.5999999998603,
+      "now": 1,
+      "cbs": 1,
+      "toggle": "■ შეჩერება"
+     },
+     {
+      "t": 4028.5999999998603,
+      "now": 1,
+      "cbs": 1,
+      "toggle": "■ შეჩერება"
+     },
+     {
+      "t": 4180.399999999907,
+      "now": 1,
+      "cbs": 1,
+      "toggle": "■ შეჩერება"
+     }
+    ],
+    "audio": [
+     {
+      "state": "running",
+      "t": 0.9607256235827665,
+      "sr": 44100
+     }
+    ]
+   },
+   "afterStop": {
+    "markers": [],
+    "opt": [
+     148,
+     408,
+     126,
+     47.5
+    ],
+    "toggle": "▶ მოუსმინე",
+    "readyOpt": [
+     148,
+     408,
+     126,
+     47.5
+    ],
+    "playingBeforeStop": {
+     "markers": [
+      "demo-soft-impact"
+     ],
+     "toggle": "■ შეჩერება",
+     "ms": 935
+    }
+   },
+   "slowRise": {
+    "rows": [
+     "demo-slow-rise"
+    ],
+    "listScroll": [
+     19,
+     29
+    ],
+    "markerBeforeScroll": [
+     156,
+     477.5,
+     110,
+     16
+    ],
+    "hitBeforeScroll": "arrangement-library-preview",
+    "markerAfterScroll": [
+     156,
+     467.5,
+     110,
+     16
+    ]
+   },
+   "markerClick": {
+    "before": {
+     "markers": [
+      "demo-slow-rise"
+     ],
+     "wave": {
+      "t": 6719.199999999953,
+      "now": 2,
+      "cbs": 2,
+      "toggle": "■ შეჩერება"
+     }
+    },
+    "afterClick": {
+     "sel": "true",
+     "markers": [
+      "demo-slow-rise"
+     ],
+     "clips": 0,
+     "toggle": "■ შეჩერება",
+     "wave": 2
+    },
+    "control_titleClick": {
+     "ctlBefore": [
+      "demo-slow-rise"
+     ],
+     "ctlAfter": {
+      "sel": "true",
+      "markers": [
+       "demo-slow-rise"
+      ]
+     }
+    }
+   },
+   "afterSelectOther": [
+    "demo-soft-impact"
+   ],
+   "snap": [
+    "off",
+    "off"
+   ]
+  }
+ },
+ "g146_3": {
+  "utc": "2026-10-24T21:40:29.894Z",
+  "lab": {
+   "url": "/studio-lab",
+   "workspace": true,
+   "demoBadge": true
+  },
+  "protected": {
+   "url": "/studio/middle-east",
+   "workspace": false,
+   "audioSrc": 0,
+   "signInRequired": true,
+   "text": "Sign in required You need to sign in to access this page. Create an account or sign in to continue. Sign In"
+  },
+  "token": {
+   "status": 401,
+   "body": "{\"error\":\"Please sign in to access Studio.\"}"
+  },
+  "fakeBearer403": "BLOCKED: backend unavailable in cloud",
+  "protected1280": {
+   "workspace": false,
+   "audioSrc": 0,
+   "signInRequired": true
+  },
+  "pageForbidden": [],
+  "pageAuth": [],
+  "errors": [],
+  "hydration": []
+ },
+ "invalidRuns": [
+  {
+   "run": "c146.cjs 1440 #1",
+   "reason": "harness: marker click and stop were done ~2.5 s after preview start; Soft impact is a 2.000 s source, so the preview had already ended by itself (marker gone before the click). Script reordered: measure at +250 ms, stop at ~0.93 s, marker click done on Slow rise (5 s). Not an app defect."
+  },
+  {
+   "run": "c146.cjs 1280 #1",
+   "reason": "harness: Slow rise row partly below the 1280 list viewport (list 271-484, Playwright click scrolled only 19 px); marker 477.5-493.5 was under the list bottom edge so elementFromPoint hit the preview section. Re-run with scrollIntoViewIfNeeded on the marker: full glyph visible and hit. Not caused by round 146 (option height in previewing = libbase 63.5). See notesForB."
+  },
+  {
+   "note": "out/c146-1440.json and out/c146-1280.json on disk are the last (third valid) run at each viewport, with the scrollIntoView instrumentation; the earlier valid runs had the same check results (all ok) and were overwritten."
+  }
+ ],
+ "notesForB": [
+  "Harness relocation (task §4 note 2): the marker is located as [data-testid=arrangement-library-option-previewing], a direct child of the option after the meta row; measure() picks the meta row as the last option span that is not the marker. round-145 key opt:<id>:meta2 is absent in round 146 (expected).",
+  "C-R146-01 (Low, pre-existing, not caused by round 146): see bugs; marker of a bottom-edge row lands below the 1280 list viewport without auto-scroll.",
+  "Observed (info, pre-existing behaviour, not a requirement of this round): selecting another option while a preview plays moves the preview (and the marker) to that option without pressing play.",
+  "Observed (info): marker glyph extent is 54 px (A noted the same; task text said 42 px). The span box spans 110 px (flex-col stretch), as the task allowed.",
+  "Pre-existing truncate: the preview header title P (Middle East — საჯარო preview, 204 vs 194 px) uses truncate+ellipsis in ready state; deliberate, identical to round 145.",
+  "Per task §7: C PASS -> root may publish rounds 145+146 together; C-R145-01, ABL-B-1, C-R142-02 and the two A-R145 review Lows can close."
+ ]
+}

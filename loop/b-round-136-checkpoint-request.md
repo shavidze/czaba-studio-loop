@@ -67,3 +67,12 @@
 - Still no root result (ninth planning without it). Non-blocking: round 146 (V-0.5a fix-up) proceeds.
 - **New signal ARCH-R145-STRINGS-22ND-OBJECT** (A round-145 code-reviewer Architecture note): `strings.ts` now holds its 22nd `studio*Strings` object (~680 lines). Reviewer verdict: keep, because the leaf rule is test-enforced and nothing couples in a new direction. Same question as (a) of this request: split before V-0.5c or after V-0.
 - Round 146 adds no strings and no module. It is one JSX move in `ArrangementLibrary.tsx` plus test pins.
+
+## Round-146 addendum (B, round 147 planning, 2026-10-24; D-29z112)
+- Still no root result (tenth planning without it). Non-blocking: round 147 (V-0.5b) proceeds.
+- **Round 147 adds the 23rd object `studioLibraryPanelStrings`** (22 plain keys, about 25 lines). `collection.ts` interpolates its `add` key into the `ready` status, so the Add button and the sentence that names it stay in sync. The import is one-way into the leaf.
+- **Gate-146 Architecture notes:** signal 2 (one-way imports into `strings.ts`, verdict keep); signal 3 (the library option row layout changed in rounds 142, 145 and 146; a bounded "row layout contract" task is proposed only if V-0.5b breaks the row again).
+- **Timing request:** B asks root to run the bounded frontend-architect checkpoint **when V-0.5c closes (round 148 at the earliest)**. That is the V-0 feature boundary, before V-1 colour work starts. Questions:
+  - (a) split `strings.ts` / `strings.test.ts`, or keep them;
+  - (b) the shared Georgian-scan helper;
+  - (c) extracting `ArrangementLibraryOption` (gate-146 signal 3).
