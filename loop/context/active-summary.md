@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T04:15:34.863Z)
+# Active loop summary (2026-10-24T05:00:14.546Z)
 
-- backlog.json 1127 KB -> active view 146 KB
-- status: G_ROOT_GATE round 125
-- servers: `{"checkedUtc":"2026-10-24T03:30:01.6904302Z","round":125,"attempt":1,"store":200}`
+- backlog.json 1137 KB -> active view 149 KB
+- status: G_ROOT_GATE round 126
+- servers: `{"checkedUtc":"2026-10-24T04:26:49.4113922Z","round":126,"attempt":1,"store":200}`
 - last publication: 608187fdf279d9b579c279f3c536b27be74c0eea (rounds 122-122)
-- last root gate: round 125 skipped - no real changes
+- last root gate: round 126 skipped - no real changes
 
 ## Current items: -
 
@@ -220,7 +220,7 @@
 - A-R115-REVIEW-APPLY-TARGETS-UNFILTERED / low / deferred_low_polish / applyClipGainTargets is exported without the audio-only filter (today only receives filtered targets)
 - C-R115-OBS-SINGLE-TO-GROUP-DRAG-END / info / acknowledged (B, D-29z81): a selection change that remounts the panel content ends the drag; the captured ids still receive the one entry; matches R8 intent (no wrong-target edit) / single->group selection change during a Clip Gain drag ends the drag; later pointer movement is ignored
 - TRACK-VOLUME-BOOST / info / signal (not requested by the user; Live 12 track range -inf..+6 dB unconfirmed in saved captures) - round 116 top is 0 dB / track/group Volume has no positive boost (Master has +6 dB)
-- TRACK-VOLUME-NUMERIC-FIELD / info / signal (Live 12 section 18.1 extended mixer has a numeric volume field; CZABA lane header shows a readout only; deliberate difference, narrow header) / no typed numeric entry for track Volume
+- TRACK-VOLUME-NUMERIC-FIELD / info / scored in DESIGN-UX-REVIEW part 1 (C round 125 D1 T8: -3 dB on a lane = 30 x Down or ~45 px Shift-drag; Live 42.6 F types a value) -> DUX-R-1 awaiting_user; the deliberate-difference ruling stands until Saba decides / no typed numeric entry for track Volume
 - MIXER-MULTI-TRACK / info / signal (Live 12 section 18.1: adjusting one selected track's mixer control adjusts the others, keeping differences; not in T12 (T12.7 is multi-clip) and not requested) / multi-track mixer adjustment
 - C-R116-OBS-TV-PLAY-CONTENT / info / acknowledged (C-R82-LIVE-ORACLE-PAIRED class; the synthetic beep lane showed the exact -17.5 dB live) / TV-PLAY live drop with music is content-dominated (10.78 dB for a 17.5 dB drag)
 - C-R116-OBS-AS-CONST / info / ruled accepted (B, D-29z82) / track-volume-db.test.tsx:42 uses 'as const' (const assertion; existing repo pattern)
@@ -230,7 +230,7 @@
 - PAN-SHIFT-FINE / info / signal (Live 12 section 42.6 Shift finer resolution is generic to controls; T12 3b scoped to Volume faders; D-29z83 R5) / Pan fader has no Shift fine drag
 - GATE118-NIT-FINE-CONST / info / open nit - for the next owner of ArrangementDetailPanel.tsx / DETAIL_CLIP_GAIN_FINE_DIVISOR stays local while round 118 adds FADER_SHIFT_FINE_DIVISOR in fader.ts
 - MASTER-FINE-STEP / info / scored in ABLETON-EXPERT-REVIEW part 2 (C round 124 Q5: Shift still 0.5 dB steps) -> recommendation ABL-R-15 awaiting_user; not a bug / Shift fine on Master still snaps to the 0.5 dB Master step (fine = 10x travel per step, not 0.05 dB resolution); Live behaviour unconfirmed
-- SHIFT-FINE-DISCOVERABILITY / info / signal for DESIGN-UX-REVIEW (shortcut discoverability is in its scope; not scheduled) / Shift fine drag on Volume faders has no tooltip or hint
+- SHIFT-FINE-DISCOVERABILITY / info / scored in DESIGN-UX-REVIEW part 1 (C round 125 D2 undiscoverable list) -> DUX-R-2 awaiting_user / Shift fine drag on Volume faders has no tooltip or hint
 - A-R118-REVIEW-GV-HALVES / info / acknowledged (the move-and-return half of GV4 and the -inf text of GV3 discriminate; m2 turns GV4 red) / the first half of GV4 and GV3's stored 0 also pass on the pre-round code
 - C-R118-OBS-GV-INF-METER-BALLISTICS / info / acknowledged (B accepts C's reading: 'meters stay silent' = no signal; meters fall at METER_RELEASE_DB_PER_SECOND 20, output exactly 0 from +150 ms) / after the group goes to -inf during play the member meters fall at the 20 dB/s release instead of jumping to -inf
 - B-R118-UM9-ROW-WORDING / info / acknowledged (B spec imprecision; C tested both cases: group fader stays visible and focused; member lane fader -> focus to arrangement-group-name; PASS) / round-118 neighbour row 'U with the group fader focused -> focus to the group name, as in UM9' misdescribed UM9
@@ -239,7 +239,7 @@
 - C-R120-01 / info / applied as a process rule from round 121 (current-task.md section 2: every lasting edit via Edit/Write incl. formatting of new files; shell replaces only for temporary mutations, restored and sha-verified; A lists every shell write); not an app defect; not deferred_low_polish / A made one lasting formatting edit to its new test file with a Python replace, bypassing the Edit-tool primitives hook
 - C-R120-WGVIDEO-NO-BASELINE / info / acknowledged; B captured a pre-round browser baseline for round 121 (b-round-120/probe/baseline-r121.json: video waveform d sha be86af38 at 1x on 0a75ba8); the round-120 equivalence rests on code + WG2 (scale 1 byte-identical) / WG-VIDEO unchanged-vs-pre-round had no browser byte baseline (inconclusive row in C round 120)
 - ARCH-R120-PEAKSHAPE-TO-PEAKS / info / signal - addendum (ad) to the pending checkpoint request b-round-91-checkpoint-request.md (ARCH-CHECKPOINT-PHASE1-BOUNDARY); reviewer verdict keep; round 121 does not move it; not scheduled / buildPeakShape/PeakShape are pure geometry exported from the ArrangementClip component file; the detail panel and tests import them from the
-- WAVEFORM-ZOOM-DISCOVERABILITY / info / signal for DESIGN-UX-REVIEW (round 121 ruling: appearance-none select without a dropdown arrow to fit the 224 px grid row; title + aria-label carry the meaning); not scheduled / the Waveform Zoom select has no visible dropdown affordance
+- WAVEFORM-ZOOM-DISCOVERABILITY / info / signal for DESIGN-UX-REVIEW part 2 (D3); related DUX-R-2 (awaiting_user); not scheduled / the Waveform Zoom select has no visible dropdown affordance
 - WAVEFORM-ZOOM-LIVE-PARITY / info / signal for ABLETON-EXPERT-REVIEW (not scheduled): Live 12 6.1 confirms a slider for all audio tracks incl. new clips; range, location, undo behaviour and Clip View behaviour unconfirmed; CZABA uses a stepped select 0.5x-8x, lanes only, not in history / Waveform Vertical Zoom: stepped select vs Live continuous slider; detail panel not zoomed
 - GATE121-S4-RENDER-COST / info / acknowledged (reviewer: same cost class as horizontal zoom; discrete choice; throttle or useDeferredValue only if a continuous slider is added) / one Waveform Zoom change rebuilds buildPeakShape for every audio clip (up to 4096 columns)
 - GATE121-S5-ARIA-LANGUAGE / info / signal for DESIGN-UX-REVIEW (not scheduled) / Waveform Zoom aria-label mixes English 'Waveform Zoom' (Live term) and Georgian while the neighbouring grid select is Georgian only
@@ -251,6 +251,11 @@
 - C-R123-OBS-SFX-HEADER-SELECTION / info / watch (unreproduced; not a bug) / native text-selection highlight on the SFX header in two first-run P3 screenshots (harness drag started off-screen); 4 targeted probes found
 - C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / info / signal for DESIGN-UX-REVIEW (not a bug yet; C may score it as DUX-B or DUX-R) / at 1280x720 the Export dialog's 'მონიშნული მონაკვეთი' option sits partly under the dialog footer until the body is scrolled
 - C-R124-ENV-FIRST-LOAD / info / known environment (ENV-FIRST-LOAD rule) / first /studio-lab load after dev-server warm-up showed a hydration error + 'Invalid hook call' and an empty DOM; replaced once; all later se
+- C-R125-OBS-CTRL-ALT-PASTE-SPLIT / info / observation (no CZABA contract); judged in round 126 D3-B with a layout-faithful AltGr event (key = produced character, code = KeyE/KeyV; precedent INFO-R60-SHIFT1-SYNTH): key-based handler and no effect -> info 'not reachable by AltGr'; an arrangement edit while typing in a field -> DUX-B (at most Low if Undo restores it in one step) / Ctrl+Alt+V pastes and Ctrl+Alt+E splits: the Ctrl-letter branches do not exclude Alt; on Windows AltGr = Ctrl+Alt, so an AltGr character cou
+- C-R125-OBS-1280-SFX-LANE-UNDER-PANEL / info / round 126 D3-A must apply the pre-ruled D-29b test (current-task.md section 3 D3-A): panel > 120 px with a lane hidden (auto-fit on, no user resize) -> Medium DUX-B; panel = 120 and SFX reachable by wheel/scrollbar -> friction; reachable only by collapse/separator -> Low DUX-B; unreachable -> Medium DUX-B. Medium -> bounded fix-up before V-0 / at 1280x720 with the detail panel expanded the SFX lane (with the selected clip) sits behind the detail panel; right-clicks there hit the pa
+- C-R125-OBS-VOLUME-DEADZONE-6PX / info / data for DESIGN-UX-REVIEW part 2 (D3 feedback/precision); not a bug / Volume fader: a 6 px drag does nothing (dead zone); 30 px = -19.8 dB (0.66 dB/px on a 91 px fader); Shift gives 1/10
+- C-R125-OBS-S1-FULL-SCALE / info / data (C-R86-OBS-DEFAULT-OVERLOAD class); relevant to T12-ADVANCED meters/RMS; not a bug / the S1 fixture export has 159 full-scale samples in the 4 s range (hero + pulse summed at 0 dB)
+- C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

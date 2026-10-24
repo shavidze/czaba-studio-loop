@@ -1217,6 +1217,19 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z92 — Round 126-ის შედეგი; DESIGN-UX-REVIEW დასრულდა; Round 127: VISUAL-A V-0, ეტაპი 1 (Export-ის ტექსტები ინგლისურად).**
+
+C round 126 (`tmp/studio-real-loop/c-round-126.md`, `c-round-126.json`) — **PASS**, `browserVerified`, `realVerified`, `allRowsRan`, `reviewComplete` — true: D3, D4, D5 შესრულდა, გადატანილი არცერთი; SOURCE-SCOPE (`608187f`, 937) OK; G126-3 (401, „Sign in required“, 0 `audio[src]`; fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 126 — `skipped`; baseline რჩება `608187f`.
+- **R1 — B-ის შემოწმება:** WAV header-ები (`d3cfirst-bc-1440` 4864896 frame = 101.352 წმ, `d3cfb-1280` 7217877 frame; 48 kHz / 24-bit / 2 ch); `D3A-S1-withGroup-real-…0431.png` — 1280-ზე SFX ხაზის მხოლოდ ზედა ზოლი ჩანს 120 px-იანი detail panel-ის ზემოთ, როგორც C წერს; `d3a-summary.json` panelPx 120.
+- **R2 — D3-A:** panel = 120 (D-29b fallback), SFX wheel-ით/scrollbar-ით ერთ ქმედებაში მისაწვდომია → ხახუნი, არა ბაგი → DUX-R-3. **DESIGN-UX-REVIEW → done.**
+- **R3 — DUX-B-2/3/4 (Low) → `deferred_low_polish`** (170). DUX-B-3 V-1-ის წინაპირობაა: დაგეგმილი outline #24211E ველის საზღვარს 1.51:1-ზე ქვემოთ დასწევს — V-1-ს სჭირდება ≥ 3:1 საზღვარი ან სხვა ხილული ნიშანი.
+- **R4 — DUX-R-3…9 → `design_ux_recommendations`, `awaiting_user`;** DUX-R-1 გაფართოვდა ჯგუფის Volume-ის ხილულ readout-ზე. WCAG 2.1.1 (კლიპების კლავიატურით არჩევა) B ახალ კონტრაქტად არ იღებს — DUX-R-6 რეკომენდაციად რჩება, გადაწყვეტა Saba-სია. C-R125-OBS-VOLUME-DEADZONE-6PX დაიხურა (harness artifact); AltGr → სიგნალი ALTGR-SHORTCUT-GUARD, არ იგეგმება.
+- **R5 — V-0-ის მოდული (root-ის პასუხი Q1-ზე არ არის → fallback):** `app/lib/arrangement/strings.ts`; თითო სფეროზე ერთი ობიექტი (`studioExportStrings`, შემდეგ `studioStatusStrings`, …); თვისებები — ინგლისური სტრიქონები ან პატარა სუფთა formatter-ები; locale-ის გადართვა, React node-ები და type assertion-ები — არა. ტესტები მოდულს მიმართავენ; ლიტერალები მხოლოდ `strings.test.ts`-შია; ST4 წყაროს სკანირებით იცავს გადატანილ ფაილებს.
+- **R6 — V-0 ხუთ ეტაპად** (spec-ის 2–3 რაუნდის შეფასება ინვენტარს არ ფარავს; მოცულობა არ მცირდება): V-0.1 Export (round 127); V-0.2 `ArrangementContext`-ის დანარჩენი სტატუსები და helper-ები; V-0.3 workspace chrome; V-0.4 ხაზები და detail panel; V-0.5 ბიბლიოთეკა, ვიდეო, route, `lang="en"`, საბოლოო RV-4 და RV-1 baseline-ის ხელახლა აღება. მომხმარებლის კონტენტი (ხმების სათაურები, ფაილის სახელები, მომხმარებლის მარკერები/ჯგუფები) არ ითარგმნება; Store-ის სხვა ფაილები და დაცული ფაილები V-0-ში არ შედის.
+- **R7 — RV-1 V-0-ში:** ელემენტის ზომის ცვლილება, რომელსაც მხოლოდ საკუთარი ტექსტის სიგრძე იწვევს (ან მისი კონტეინერის wrap/სიმაღლე), V-0-ის გამონაკლისია; C ყოველ > 1 px სხვაობას შეცვლილ ტექსტს მიაწერს, სხვა შემთხვევა — finding.
+- **R8 — V-1-ის წინაპირობა:** token-ები `app/styles/app.css`-შია, რომელიც `global_forbidden_files`-ის `app/styles/**`-ში შედის — V-1-ს B-ის ვიწრო ნებართვა დასჭირდება (მხოლოდ `[data-studio-theme="obsidian"]` ბლოკი), მომხმარებლის დამტკიცებული spec-ის საფუძველზე.
+- **R9 — შედეგი წინასწარ (round 128):** 2026-10-27-ზე ან შემდეგ — ჯერ რეგრესია; C FAIL Medium+ — V-0.1-ის გასწორება; C PASS — V-0.2. Architecture note ამ რაუნდამდე არ ყოფილა; ARCH-CHECKPOINT-PHASE1-BOUNDARY უპასუხოა და არ ბლოკავს.
+
 **D-29z91 — Round 125-ის შედეგი; DESIGN-UX-REVIEW ნაწილი 1 დასრულდა; Round 126: DESIGN-UX-REVIEW, ნაწილი 2.**
 
 C round 125 (`tmp/studio-real-loop/c-round-125.md`, `c-round-125.json`) — **PASS**, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`, `partComplete: true`: D6, D1, D2 შესრულდა, გადატანილი არცერთი; SOURCE-SCOPE (`608187f`, 937) დასაწყისშიც და ბოლოსაც OK; G125-3 (401, „Sign in required“, 0 `audio[src]`; fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 125 — `skipped`; baseline რჩება `608187f`.
@@ -2188,7 +2201,9 @@ flowchart TD
 | 125 | DESIGN-UX-REVIEW 1 | D1 კომფორტის ცხრილი, D2 shortcut-ები, D6 RV-1/RV-2 baseline; A — არაფერი (D-29z90) |
 | 125 → | (შედეგი) | **C PASS** (`browserVerified`, `partComplete`, D6/D1/D2); DUX-B-1 (Low) → deferred; DUX-R-1/2 → `awaiting_user`; RV-1/RV-2 baseline; gate 125 skipped |
 | 126 | DESIGN-UX-REVIEW 2 | D3 ხახუნის წერტილები (D3-A: 1280 SFX ხაზი / D-29b), D4 DUX-R-3+, D5 საბოლოო ვერდიქტი და ინდექსი; A — არაფერი (D-29z91) |
-| 127 | (წინასწარ) | 2026-10-27-დან რეგრესია; Medium+ DUX-B-ის გასწორებები; სხვაგვარად VISUAL-A V-0, ეტაპი 1 |
+| 126 → | (შედეგი) | **C PASS** (`browserVerified`, `reviewComplete`, D3/D4/D5); D3-A ხახუნი → DUX-R-3; DUX-B-2/3/4 (Low) → deferred; DUX-R-3…9 → `awaiting_user`; DESIGN-UX-REVIEW → done; gate 126 skipped |
+| 127 | VISUAL-A V-0.1 | Export-ის ტექსტები ინგლისურად ახალი `strings.ts`-ით (`studioExportStrings`); 18 ტესტი — ლიტერალი → მოდული; ახალი `strings.test.ts` (ST1–ST5) და doc 104 (D-29z92) |
+| 128 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.1-ის Medium+ გასწორება; სხვაგვარად V-0.2 |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2235,6 +2250,7 @@ flowchart TD
 **D-29z89:** round 124-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-124.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/`, `c-round-124*`). ყველაფერი გაყინულია (`b-round-123-r124-tree-sha256.txt`, 937).
 **D-29z90:** round 125-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-125.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/design-ux-review.md`, `c-round-125*`). ყველაფერი გაყინულია (`b-round-124-r125-tree-sha256.txt`, 937).
 **D-29z91:** round 126-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-126.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/design-ux-review.md` — ნაწილი 1-ის გადაწერის გარეშე, `c-round-126*`). ყველაფერი გაყინულია (`b-round-125-r126-tree-sha256.txt`, 937).
+**D-29z92:** round 127-ში A-ს ეკუთვნის ახალი `app/lib/arrangement/strings.ts`, `ArrangementExportDialog.tsx`, `export-progress.ts`, `export-cancel.ts`, `export-wav.client.ts`, `graph.client.ts` (მხოლოდ `formatExportOverloadWarning`-ის ტექსტი l.405–413, l.460-ის `Error` და import), `ArrangementContext.tsx` (მხოლოდ l.204 და `exportWav`/`exportMp3`-ის სხეულების ლიტერალები, import), 18 ტესტი (მხოლოდ ლიტერალი → მოდული), ახალი `strings.test.ts` და ახალი doc 104. დანარჩენი გაყინულია (`b-round-126-r127-tree-sha256.txt`, 913).
 
 ## 7. Done Policy
 

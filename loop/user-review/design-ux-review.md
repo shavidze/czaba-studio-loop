@@ -1,12 +1,28 @@
-# Design & UX Review — ნაწილი 1 (D1, D2, D6)
+# Design & UX Review — ნაწილი 1 (D1, D2, D6) და ნაწილი 2 (D3, D4, D5)
 
-რაუნდი 125 · შემმოწმებელი C · თარიღი 2026-10-24 · baseline `608187f` · ბრაუზერი: Playwright Chromium (headless), `http://127.0.0.1:5173/studio-lab`, 1440×900 და 1280×720, ყოველი სესია ახალ context-ში, credentials-ის გარეშე.
+რაუნდი 125 (ნაწილი 1) და 126 (ნაწილი 2) · შემმოწმებელი C · თარიღი 2026-10-24 · baseline `608187f` · ბრაუზერი: Playwright Chromium (headless), `http://127.0.0.1:5173/studio-lab`, 1440×900 და 1280×720, ყოველი სესია ახალ context-ში, credentials-ის გარეშე.
 
 **კითხვა:** CZABA Studio ისეთივე კომფორტულია, როგორც Ableton Live 12 (დიზაინი, ფუნქციონალი, shortcut-ები)? და რა გახდის მას Ableton-ზე უკეთესს? ნაწილი 1 პასუხობს კომფორტისა და shortcut-ების ნახევარს რიცხვებით. ნაწილი 2 (რაუნდი 126) — ხახუნის წერტილები, „Ableton-ზე უკეთესი“ იდეები და შეჯამებული ვერდიქტი.
 
 **Live-ის მტკიცებულების დონე:** **F** = Live 12 manual-ის ტექსტი (სექციით); **?** = manual-ში არ არის ან ორაზროვანია. Live-ის აპლიკაცია runner-ზე არ არის; მეხსიერებიდან რიცხვი არ იწერება. როცა Live = ?, „რომელია უფრო მარტივი“ არ ფასდება (**შეუდარებელი**).
 
-## 1. ვერდიქტი — წინასწარი, ნაწილი 1
+## 1. ვერდიქტი
+
+### საბოლოო ვერდიქტი (ნაწილი 2)
+
+**1. არის თუ არა CZABA ისეთივე კომფორტული, როგორც Live 12?**
+- **ფუნქციონალი — ძირითად მონტაჟში კი.** ჩასმა, გადატანა, trim, split, duplicate, zoom, loop, mute/solo და export იმავე რაოდენობის მოქმედებით სრულდება (T1–T6, T9, T11 „equal“). მარკერში CZABA უკეთესია (T10). Live უკეთესია ხაზის Volume-ის ზუსტ აკრეფაში (T8 → DUX-R-1).
+- **Shortcut-ები — ნაწილობრივ.** 81-დან same 31, different 15, missing 27. Missing-ის უმეტესობა ABL-R-ებსა და DUX-R-7/8-შია. 10 მომუშავე ქცევა არსად ჩანს (DUX-R-2). AltGr-ით Split/Paste timeline-ზე info-ა (F-5).
+- **დიზაინი — სუფთა და სწრაფი, მაგრამ იერარქია ბრტყელია.** ყოველი მოქმედების feedback < 100 ms-ია (F-12). Focus ring ყველა stop-ზე ჩანს (9.48–11.13:1, F-11). 12 px-ზე პატარა ტექსტი არ არის (F-10). მინუსები: ერთ ფირუზისფერს იზიარებს content, მონიშვნა და ღილაკები (F-9 → DUX-R-5); ველების საზღვარი 1.51:1-ია (DUX-B-3); არჩეული ბიბლიოთეკის სტრიქონის `muted` 4.38:1-ია (DUX-B-4); resize separator-ები 4–6 px-ია (DUX-B-2); `dim` ტექსტი 3.67:1-ია (DUX-B-1).
+- **1280×720 (ლეპტოპი) — ყველაზე სუსტი ადგილი.** Detail panel არჩეულ SFX კლიპს ფარავს (5 px ჩანს). D-29b-ის კონტრაქტი სრულდება და ერთი wheel კლიპს აჩენს, ამიტომ ეს ხახუნია, არა ბაგი (D3-A → DUX-R-3).
+- **პირველი ვიზიტი — Live-ზე მოკლე გზა.** ხმა 1 click-ით ისმის, კლიპი ხაზზე 1 click-ით ჯდება, export 2 click-ით იწყება (F-14). ცარიელ აუდიო ხაზში მინიშნება არ არის (DUX-R-4).
+- **კლავიატურა.** Export მე-10 Tab stop-ია, მაგრამ კლიპი Tab-ით მიუწვდომელია: 82 stop-იდან 0 (F-13 → DUX-R-6).
+
+**2. რა გახდის CZABA-ს Live-ზე უკეთესს?** Top 5 (§5): **DUX-R-5** (ფერის ერთი წესი, VISUAL-A-სთან ერთად), **DUX-R-3** (არჩეული კლიპი ყოველთვის ჩანს), **DUX-R-1** (აკრეფადი Volume, ჯგუფიც), **DUX-R-4** (პირველი ვიზიტის მინიშნებები), **DUX-R-6** (კლიპი კლავიატურით). შემდეგ: DUX-R-2 (ქართული, ძებნადი shortcut-ების ცნობარი), DUX-R-7…9.
+
+**მტკიცებულების საზღვრები:** Live-ის აპლიკაცია runner-ზე არ არის; Live-ის ყოველი შედარება manual-ის ციტატაა (F) ან „Live ?“. ბრაუზერი მხოლოდ headless Chromium-ია (Playwright); რეალური touch, AltGr-ით ველში ტექსტის ჩაწერა, Ctrl+digit და browser-reserved კლავიშები — blocked: CDP. Subagent tool არ იყო: ექვსივე როლი (`design-philosopher`, `design-auditor`, `flow-sage`, `first-visit-host`, `ableton-arrangement-expert`, `accessibility-auditor`) checklist-ად წავიკითხე (§8). Backend-ის fake-Bearer 403 — blocked: backend unavailable in cloud.
+
+### წინასწარი ვერდიქტი — ნაწილი 1
 
 - **ძირითადი მონტაჟი Live-ის ტოლია:** ჩასმა drag-ით, გადატანა, trim, split, duplicate, zoom (Z/X, +/−, Ctrl+wheel), loop (Ctrl+L), mute/solo და export იმავე რაოდენობის მოქმედებით სრულდება, რასაც Live-ის manual აღწერს (T1–T6, T9, T11 — „equal“).
 - **CZABA უკეთესია მარკერის დამატება-დასახელებაში:** M მაშინვე ხსნის სახელის ველს. Live-ში locator-ის დამატების შემდეგ ცალკე საჭიროა მონიშვნა და Ctrl+R (T10).
@@ -159,9 +175,55 @@
 - **ბრაუზერის კლავიშები (blocked: CDP / browser-reserved, არ გაიგზავნა):** Ctrl+R (rename), Ctrl+F (search, ABL-R-4), Ctrl+Shift+R (export), Ctrl+1…5 (ბადე).
 - **Space focus-ზეა დამოკიდებული:** პრევიუს ტალღაზე Space ბიბლიოთეკის preview-ს რთავს (▶ → ■), სხვაგან timeline-ს (INFO-C101-SPACE-A-VS-C, ცნობილი).
 
-## 4. ხახუნის წერტილები
+## 4. ხახუნის წერტილები (D3, ნაწილი 2)
 
-ნაწილი 2 (Round 126).
+რაუნდი 126 · baseline `608187f` · Playwright Chromium headless, ახალი context ყოველ სესიაში, credentials-ის გარეშე. Scrollbar-ის რიგებში `--hide-scrollbars` მოხსნილია (HR-REAL-SCROLLBARS), ამიტომ 10 px-იანი scrollbar ჩანს, როგორც ჩვეულებრივ Chrome-ში. Script-ები: `c-round-126/tools/`; შედეგები: `c-round-126/out/`; screenshot-ები: `c-round-126/shots/`. ყველა screenshot გავხსენი და აღვწერე (`c-round-126.md`).
+
+### D3-A — SFX ხაზი detail panel-ის ქვეშ, 1280×720 (C-R125-OBS-1280-SFX-LANE-UNDER-PANEL)
+
+**კონტრაქტი:** D-29b (`plan.md` l.255). სანამ auto-fit ჩართულია და მომხმარებელს panel-ის ზომა არ შეუცვლია, panel = min(შენახული, cap). Cap [120, 280]-ში ყველაზე დიდი სიმაღლეა, რომლითაც ყველა ხაზი auto-fit-ის მინიმუმით ჩანს. თუ ასეთი სიმაღლე არ არსებობს, panel 120 px-ია.
+
+**Auto-fit ჩართული იყო:** ცალკე UI toggle არ აქვს (`StudioWorkspace.tsx` l.235 `autoFit: true`; ითიშება მხოლოდ ხაზის ხელით resize-ზე, l.760). გაზომვით: panel-ის გაშლისას ხაზები 80 → 61 px-მდე შემცირდა, დაკეცვისას — 70 px-მდე.
+
+| გაზომვა (S1, 1280×720, რეალური scrollbar) | ჯგუფით (§7 S1) | ჯგუფის გარეშე (ნაბიჯი 9 გამოტოვებული) |
+|---|---|---|
+| detail panel rendered / `aria-valuenow` | **120 / 120** | **120 / 120** |
+| scroller `clientHeight` / `scrollHeight` | 292 / 348 | 292 / 320 |
+| ხაზები (top–bottom, სიმაღლე) | ვიდეო 313–366 (53) · ჯგუფის row 366–394 (28) · მუსიკა 394–455 (61) · სტემები 455–516 (61) · **SFX 516–577 (61)** | ვიდეო 313–366 · მუსიკა 366–427 · სტემები 427–488 · **SFX 488–549** |
+| SFX-ის ხილული ნაწილი (scroller-ის ქვედა კიდე 521) | **5 px**; კლიპი არ ჩანს, click detail-ის header-ს ხვდება | **33 px**; კლიპის თავი ჩანს და click-ს იღებს |
+| (1) wheel ხაზებზე | ✓ 1 მოქმედება: scrollTop 0 → 56 (max), SFX 460–521 სრულად ჩანს, click კლიპს ირჩევს | ✓ scrollTop → 28 (max) |
+| (2) ვერტიკალური scrollbar | ✓ 1 drag: scrollTop → 56 | ✓ |
+| (3) დაკეცვის ღილაკი | ✓ 1 click: panel 36, ხაზები 70 px, SFX 534–604 ჩანს | ✓ |
+| (4) separator-ის drag | ✗ ქვემოთ +60 px — panel 120-ზე რჩება (120 მინიმუმია; ზემოთ drag მხოლოდ ზრდის) | ✗ |
+
+Wheel-ის შემდეგ ვიდეოს ხაზი sticky ruler/marker/loop ზოლის ქვეშ გადადის (ჩვეულებრივი scroll), ანუ ერთდროულად ოთხივე ხაზი არ ჩანს. Headless-ში დამალული scrollbar-ით (HR-REAL-SCROLLBARS) `clientHeight` 302-ია და SFX-იდან 15 px ჩანს. Tech Lead-ის Chrome 10 px-იან scrollbar-ს აჩვენებს, ამიტომ ძირითად შედეგად რეალური scrollbar-ის 5 px-ს ვიღებ.
+
+**ვერდიქტი (წინასწარ დაწერილი წესით, task §3 D3-A, მეორე ხაზი):** panel = 120 px (D-29b-ის fallback; 120-ზეც კი ხაზების მინიმუმები არ ეტევა) და SFX კლიპამდე wheel-ით ან scrollbar-ით 1 მოქმედებით მივდივართ → **ხახუნი, არა ბაგი**. → **DUX-R-3**.
+
+ვინ ზარალდება: 1280-ზე მომუშავე ყველა მომხმარებელი. პარადოქსი: მომხმარებელი SFX კლიპს ირჩევს, panel-ს შლის, რომ მისი დეტალები ნახოს, და panel სწორედ ამ კლიპს ფარავს. Screenshot-ები: `D3A-S1-withGroup-real-…0431.png` (ქვემოთ მხოლოდ 5 px-იანი ფირუზისფერი ზოლი ჩანს, panel-ში კი „Soft impact · SFX“ წერია); `D3A-P1wheel-…` (SFX ხაზი და მონიშნული კლიპი ჩანს, ვიდეო ruler-ის ქვეშაა); `D3A-P3collapse-…` (ოთხივე ხაზი და ჯგუფი ჩანს).
+
+### D3-B — გადმოტანილი საკითხები
+
+| # | რა | სად / გაზომვა | ვინ ზარალდება | ვერდიქტი |
+|---|---|---|---|---|
+| F-2 | Export dialog-ის range card footer-ის ქვეშ (C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER) | 1280, S2. **Range-ის გარეშე:** disabled card 62 px-დან 45 px footer-ის ქვეშაა; card-ის შუაში click footer-ს ხვდება; ჩანს მხოლოდ 3 px (`D3B-export-1280-…0436.png`). Disabled radio Tab-ს არ იღებს. **აქტიური range-ით (6–10 წმ):** 13 px ქვეშაა, card-ის შუა click-ს იღებს; „მთელი პროექტი“-დან ↓ card-ს სრულად აჩენს (scrollTop 16, overlap 0); dialog-ის ქვესათაურშიც წერია „მონიშნული მონაკვეთი · 00:06.000 — 00:10.000“ (`…0437.png`). Wheel → scrollTop 121–153, overlap 0 | პირველად შემოსული მომხმარებელი (range-ის გარეშე ვერ ხედავს, რომ მონაკვეთის export არსებობს და როგორ ჩაირთვება) | **acceptable / ციტირება:** მთავარ შემთხვევაში (range არჩეულია) card ჩანს და მუშაობს. დამალული disabled მინიშნება ARCH-R101-MODALBODY-PADDING-SLOT / GATE102-S3-TALL-CARD-NO-CAP-ს ეკუთვნის; ახალი id არ იწერება |
+| F-3 | ჯგუფის Volume-ის მნიშვნელობა ეკრანზე არ ჩანს (GROUP-VOLUME-VISIBLE-READOUT) | 1280/1440 S1: ჯგუფის row-ის ტექსტი „▣ ჯგუფი 1“; 30 × ↓-ის შემდეგ `title` „Volume −3.0 dB“, ეკრანზე კი არაფერი და status-იც უცვლელია (`D3B-group-…png`: ჯგუფის fader-ს readout არ აქვს, ხაზებს კი „+0.0“ აქვთ) | ხშირი მომხმარებელი (mix) | **DUX-R-1-ში გაერთიანდა** (ხილული და აკრეფადი readout ჯგუფზეც) |
+| F-4 | 24 px-ზე პატარა სამიზნეები (`under24px.json`, 50/48) | რეალური hit area `elementFromPoint`-ით (`out/d3c/d3c-hit-*.json`): **Volume/Pan/Master fader-ები** box 4 px, მაგრამ hit 16 px (−8…+6); 2.5.8-ის spacing გამონაკლისი სრულდება. **Resize separator-ები:** ბიბლიოთეკის 4 px სიგანე, detail-ის და ხაზის სიმაღლის 6 px, hit area = box, გაზრდილი ზონა არ აქვს, მეზობელ სამიზნეებთან 12 px-ში → spacing გამონაკლისი არ სრულდება (`out/d3c/wcag258-spacing.json`: 1440 S0 6, S1 5; 1280 S0 8, S1 8 შემთხვევა). ბიბლიოთეკის საქაღალდის ▾: box 16×58, hit-ის სიგანე 16 px (`d3c-hit2-*.json`), ფილტრის ღილაკის გვერდით. 1280 S1-ის 8 შემთხვევაში შედის SFX-ის კონტროლებიც, რომლებიც panel-ის ქვეშაა (baseline-ის `vis()` scroller-ის clipping-ს არ ითვალისწინებს); ვერდიქტი პირდაპირ გაზომილ separator-ებსა და ▾-ს ეყრდნობა. **Playhead handle:** 12×20, hit მხოლოდ 7 px სიგანის, მაგრამ იგივეს ruler-ზე click აკეთებს (Equivalent). **Export radio-ები** 13×13 დიდ label-ში (Equivalent). BPM/მარკერის ღილაკები — ROOT-R65-L2, ROOT-R73-S3-MARKER-BUTTON-SIZE; envelope point — GATE83-L2-POINT-HIT-AREA (ციტირება) | მაუსით/trackpad-ით მომუშავე, მოტორიკის სირთულის მქონე მომხმარებელი; კლავიატურით ↑/↓/←/→ separator-ებზე მუშაობს, ამიტომ გამოყენებას არ ბლოკავს | **DUX-B-2 (Low)** — separator-ები და საქაღალდის ▾. დანარჩენი: acceptable (გამონაკლისი/Equivalent) ან ციტირება |
+| F-5 | Ctrl+Alt+V / Ctrl+Alt+E და AltGr (C-R125-OBS-CTRL-ALT-PASTE-SPLIT) | კოდი: `shortcutLetter()` (`StudioWorkspace.tsx` l.421) ადარებს **`event.code`**-ს (KeyE → e), არა `event.key`-ს. Ctrl-ასოს ფილიალები (l.1790 Split, l.1855 Paste) `altKey`-ს არ გამორიცხავს; `isTypingTarget` (l.361) ტექსტის ველში ადრე აბრუნებს. Trusted CDP event (Ctrl+Alt, key „€“ / code KeyE; key „@“ / code KeyV): ძებნის, BPM-ის, Clip Gain-ისა და მარკერის სახელის ველში — arrangement უცვლელია (8/8; `TEXT_INPUT_TYPES` l.359 მოიცავს text/search/number-ს). **Timeline-ზე: playhead 5 მონიშნული SFX კლიპის შიგნით → კლიპი გაიყო 5.000-ზე; playhead 10 → ჩასმა 10.000-ზე.** თითოეულს 1 Undo აბრუნებს (`out/d3b/d3b-altgr2-*.json`) | AltGr-იანი განლაგების (DE/PL/HU…) მომხმარებელი, რომლის focus timeline-ზეა და „€“-ს ან „@“-ს კრეფს | **info, არა ბაგი** (task-ის წესი 3/4: ველში აკრეფისას ცვლილება არ ხდება, Undo 1 ნაბიჯია). `code`-ზე შედარება ქართული განლაგებისთვის საჭიროა. შენიშვნა B-სთვის. „€“-ის ველში ჩაწერა Ctrl-modifier-იანი CDP-ით ვერ შემოწმდა → blocked: CDP |
+| F-6 | Volume fader-ის „6 px dead zone“ (C-R125-OBS-VOLUME-DEADZONE-6PX) | **Harness-ის არტეფაქტი.** ნაწილ 1-ში press გამოთვლილ thumb-ის ცენტრზე იყო. მნიშვნელობა max (0 dB) იყო, ამიტომ წერტილი input-ის მარჯვენა საზღვარზე, x = 459-ზე მოხვდა, `elementFromPoint` კი იქ მშობელ DIV-ს აბრუნებს. Input-ის შიგნით ნებისმიერი press (კიდიდან 1, 3, 6, 8 px; ტრეკის 50%, 80%) **პირველივე px-იდან** ცვლის მნიშვნელობას: −0.6, −1.2 … −3.5 dB 6 px-ზე (1440, 103 px, 0.58 dB/px); 1280-ზე −3 px = −2.0 dB (0.66 dB/px). ვერტიკალური 6 px drag არაფერს ცვლის (fader ჰორიზონტალურია) | — | **acceptable** — dead zone არ არსებობს. ნაწილ 1-ის T8-ის ფრაზა „6 px drag არაფერს ცვლის“ ამ შესწორებით იკითხება (ნაწილ 1-ის ტექსტი უცვლელია) |
+| F-7 | Waveform Zoom-ის აღმოჩენადობა (WAVEFORM-ZOOM-DISCOVERABILITY) | ღილაკზე მხოლოდ „1×“ წერია, 28×24; ახსნა მხოლოდ `title`/`aria-label`-შია („Waveform Zoom 100% — მხოლოდ ხედი, ხმა არ იცვლება“) | პირველად შემოსული | **DUX-R-2-ში** (ცნობარი); ახალი id არა |
+| F-8 | Shift+click (`different`, ნაწილ 1-ის D2) და Esc detail range-ის draft-ზე | Shift+click მხოლოდ დაწკაპუნებულ კლიპს ამატებს (d2d). Live 42.5 (F) „Select Multiple Items by First and Last Item“. Esc detail range-ის ველში draft-ს არ აბრუნებს (ველი 8, მონიშვნა 7–9), Clip Gain-ის ველში კი აბრუნებს (CZABA-only ცხრილი) | ხშირი მომხმარებელი | Shift+click → **DUX-R-8**; Esc → **DUX-R-9** (კონტრაქტი არ არის, ბაგი არა) |
+
+### D3-C — ხახუნი კატეგორიების მიხედვით (S0, S1, S2; 1440 და 1280)
+
+| # | კატეგორია | რა ვნახე / გაზომე | ვერდიქტი |
+|---|---|---|---|
+| F-9 | **ვიზუალური იერარქია** (`design-auditor`, `design-philosopher`) | S0 (`D3C-S0-1440-…png`, `…1280-…png`): თვალი ჯერ შევსებულ ფირუზისფერ **Export**-ზე (ზედა მარჯვენა კუთხე) გადადის, შემდეგ ფირუზისფერი ჩარჩოს **Play**-სა და „＋ დამატება“-ზე, მერე ქარვისფერ დემო badge-ზე. S1 (`D3C-S1-1440-…png`): ყველაზე ძლიერი ფირუზისფერი waveform-ებია, შემდეგ ვიდეოს thumbnail, შემდეგ მონიშნული კლიპი. **ერთი და იგივე ფირუზისფერი (rgb 18,217,200) აქვს waveform-ებს, მონიშნული კლიპის ჩარჩოს, Export-ს, Play-ს ჩარჩოს, fader-ის thumb-ებს და focus ring-ს.** მონიშვნა content-ისგან ფერით არ გამოირჩევა. Play (outline) Export-ზე (fill) სუსტია; M1 უკვე დამტკიცებულია | **DUX-R-5** (ფერი; `fitsVisualA: true`) |
+| F-10 | **სიმჭიდროვე** | 12 px-ზე პატარა ტექსტი: **0** ორივე viewport-ზე (S0, S1). მოჭრილი ტექსტი: S0 — 1 (ბიბლიოთეკის სახელი 204 > 194 px, `title`-ით), S1 — 2 (Undo-ს label „Undo: Gr…“ 131 > 74 px, „Soft impact“ კლიპზე, ორივე `title`-ით). Toolbar: 1440 — ერთი ხაზი 49 px, 1280 — ორი ხაზი 87 px (baseline, ცნობილი) | acceptable |
+| F-11 | **კონტრასტი, არატექსტური (1.4.11)** | **Focus ring:** ყველა Tab stop-ზე 2 px ფირუზისფერი outline: S0 67 stop, S1 82 stop, ორივე viewport-ზე. ფონთან კონტრასტი 9.48–11.13; ring არცერთ stop-ზე არ აკლია; `:focus-visible` ყველგან true. ღილაკი (Play) 10.43, slider (Volume) 10.43; lane clip-ზე ring-ის გაზომვა შეუძლებელია, რადგან კლიპი Tab stop არ არის (F-13). **ველების საზღვარი:** `border-outline` rgb(48,53,65) ფონზე rgb(17,19,24) = **1.51:1** (pixel-ით); ველის შიდა ფონი rgb(8,10,12) vs ფონი = 1.07:1, ამიტომ ცარიელ BPM ველს (placeholder-ის გარეშე) სხვა საზღვარი არ აქვს. იგივე ჩანს ძებნაზე, detail-ის ველებზე, Snap-სა და grid select-ზე. **Slider-ის შეუვსებელი ტრეკი:** 2.34:1, მაგრამ thumb და შევსებული ნაწილი 10.43-ია, ამიტომ მნიშვნელობა ჩანს | **`muted` ტექსტი (`dim`-ის გარდა):** ბიბლიოთეკის არჩეულ სტრიქონზე ტიპი და ხანგრძლივობა (12 px) rgb(129,136,152) ფონზე rgb(17,39,42) = **4.38:1**, ორივე viewport-ზე (`c-round-125/out/contrast-baseline.json`). ჯგუფის „▣“ 3.10 — icon, ≥ 3 → pass. ველების საზღვარი → **DUX-B-3 (Low)**; არჩეული სტრიქონის `muted` → **DUX-B-4 (Low)**; ღილაკების ჩარჩო acceptable (ღილაკს ტექსტი ასახელებს); slider-ის ტრეკი acceptable |
+| F-12 | **Feedback** (`flow-sage`) | MutationObserver + input timestamp (`out/d3c/d3c-feedback-*.json`), ორივე viewport-ზე: **add** — კლიპი და status 6–8 ms-ში; **move** — კლიპი პირველი pointer move-იდან 21–23 ms-ში მოძრაობს, pointerup-იდან status 4 ms-ში; **trim** — იგივე (21 / 4 ms); **Undo** — 4 ms (კლიპი + status); **mute** — ღილაკის `aria-pressed`/ფერი 3.6 ms-ში, status **არ** იცვლება; **export start** — footer 0.5–2 ms-ში, WAV 2 წმ-ში და შედეგის ხაზი dialog-ში. Status ერთადერთი feedback არცერთ შემთხვევაში არ არის | acceptable |
+| F-13 | **კლავიატურა და focus** (`accessibility-auditor`) | Tab გვერდის ჩატვირთვიდან (S0): **Export — მე-10 stop**; პირველი ხაზის კონტროლი — 38-ე stop; 67 stop-ის შემდეგ focus BODY-ზე ბრუნდება. S1-ში (ზედა მარცხენა წერტილიდან): 82 stop, Export მე-14-ე; **lane clip არცერთი stop არ არის** (ArrangementClip-ს `tabIndex`/role არ აქვს). კლიპი კლავიატურით მხოლოდ Ctrl+A-ით (ყველა) ან Enter-ით (ახლის დამატება) ირჩევა | კონტრაქტი ან მიღებული WCAG წესი (§4-ის სია) არ ირღვევა → **DUX-R-6**. Ring-ის ნაკლებობა არ არის, Medium არ იწერება |
+| F-14 | **პირველი ვიზიტის სიცხადე** (`first-visit-host`) | ახალი S0, წინასწარი ცოდნის გარეშე (`out/d3c/d3c-first-*.json`, ორივე viewport): (a) **ხმა ისმის: 1 click** „▶ მოუსმინე“ (რეალურ output-ზე peak 0.374); Play ცარიელ პროექტზე ჩუმია და მკაფიოდ ხსნის: „დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდან დაამატე კლიპი.“ (b) **კლიპი ხაზზე: 1 click** „＋ დამატება“ (მუსიკის ხაზი და ბიბლიოთეკის ჩანაწერი წინასწარ არჩეულია) → „Middle East“ 0-ზე. (c) **Export: 2 click** → WAV 101.352 წმ, 48 kHz / 24-bit / stereo, 4 864 896 frame, NaN 0; dialog-ში შედეგი ჩნდება: „გადატვირთვა: პიკი +0.0 dBFS — 14 sample შეიზღუდა“ — ერთი დემო კლიპი default-ზეც ამ გაფრთხილებას იწვევს. **სად შეიძლება გაჭედოს:** მუსიკის, სტემებისა და SFX-ის ცარიელ ხაზებში მინიშნება არ არის, ვიდეოს ხაზში კი არის („ვიდეო არ არის — „＋ საკუთარი ვიდეო“ ან ჩააგდე ფაილი აქ“); drag არსად წერია. Undo/Redo/Split/წაშლა/Loop disabled-ია და `title` მხოლოდ ქმედებას ასახელებს, მიზეზს არა (Split: „გაყოფა playhead-ზე (Ctrl/Cmd+E)“); Zoom-ის, მეტრონომისა და detail ველების `title` მიზეზს ამბობს. Demo badge („დემო კოლექცია — ავტორიზაცია არ სჭირდება“) მკაფიოა | **DUX-R-4** (ცარიელი ხაზის მინიშნება + disabled-ის მიზეზი); export-ის გაფრთხილება acceptable (სიმართლეა და გამოსწორების გზას ამბობს) |
 
 ## 5. „Ableton-ზე უკეთესი“
 
@@ -172,11 +234,54 @@
 | DUX-R-1 | ხაზის Volume-ის (და Master-ის) ციფრით აკრეფა readout-ზე click-ით, Clip Gain-ის ველივით: −3, Enter | Live 42.6 (F) მნიშვნელობის აკრეფას იღებს. CZABA-ში −3 dB = 30 × ↓ ან ~45 px Shift-drag (T8). Live-ს გაუთანაბრდება ყველაზე ნელ ნაბიჯში | 1 | Medium | არა — ქცევის ცვლილება |
 | DUX-R-2 | Shortcut-ების ცნობარი (მაგ. `?` ან ღილაკი hint line-თან), სადაც ყველა კლავიში ჩანს, მათ შორის ის 10, რაც დღეს არსად წერია | Live-ს Info View და მენიუები აქვს. Hint line 19 ჩანაწერს აჩვენებს, 10 მომუშავე ქცევა კი არცერთ ეკრანზე არ ჩანს. Live-ზე უკეთესი იქნება, თუ ქართულად და ძებნადი იქნება | 1 | Low | არა — ახალი UI |
 
+### ნაწილი 2 — ახალი იდეები (D4, რაუნდი 126)
+
+**წესები:** თითო იდეა ეყრდნობა D3-ის ან ნაწილ 1-ის ბრაუზერის მტკიცებულებას. Live-ის ქცევა მითითებულია მხოლოდ manual-ის ციტატით (**F**); სადაც ციტატა არ არის, წერია **Live ?** (მეხსიერებიდან არაფერი იწერება). `fitsVisualA` = true მხოლოდ მაშინ, როცა იდეა მხოლოდ ფერს, icon-ს ან typography-ს ცვლის. **არცერთი იდეა Saba-ს დასტურამდე არ ხორციელდება** (`user-review/design-ux-decisions.md`).
+
+| ID | რა | რატომ (Live-თან) | დღეს CZABA-ში (მტკიცებულება) | ზომა (რაუნდი) | პრიორიტეტი | VISUAL-A-ს ფარგლებში? |
+|---|---|---|---|---|---|---|
+| DUX-R-3 | **არჩეული კლიპი ყოველთვის ჩანდეს.** როცა კლიპს ვირჩევთ, detail panel-ს ვშლით ან ხაზს ვააქტიურებთ, მისი ხაზი არ ჩანს, timeline თავისით უნდა გადაიწიოს ისე, რომ ხაზი გამოჩნდეს (ან 1280-ზე panel თავად დაიკეცოს) | Live ? — manual-ის შენახულ ტექსტში ასეთი ქცევა არ არის. Live-ზე უკეთესი იქნება, რადგან CZABA-ს detail panel და timeline ერთ სვეტს იყოფს და მცირე ეკრანზე სწორედ ეს ფარავს კლიპს | D3-A: 1280-ზე SFX კლიპის არჩევა + panel-ის გაშლა → SFX ხაზიდან 5 px ჩანს; ერთი wheel აჩენს (`D3A-S1-withGroup-real-…png`). D-29b სწორად მუშაობს — ეს მისი ფარგლების შემდეგი ნაბიჯია | 1 | **Medium** | არა — ქცევა |
+| DUX-R-4 | **პირველი ვიზიტის მინიშნებები:** (a) ცარიელ აუდიო ხაზში მკრთალი ტექსტი, მაგ. „ჩააგდე ხმა ბიბლიოთეკიდან ან ＋ დამატება“ (ვიდეოს ხაზს ასეთი უკვე აქვს); (b) disabled ღილაკების `title` მიზეზს ამბობდეს (Split: „ჯერ აირჩიე კლიპი და playhead მის შიგნით“; Undo: „ჯერ არაფერი შეცვლილა“), როგორც ეს Zoom-სა და მეტრონომს უკვე აქვს | Live ? (ცარიელი track-ის ტექსტი შენახულ capture-ში არ არის). CZABA-ს მომხმარებელი ფილმის მემონტაჟეა და DAW შეიძლება პირველად ხედავდეს; drag დღეს არსად წერია (ნაწილი 1, T1) | D3-C F-14: სამ აუდიო ხაზში ტექსტი 0 სიმბოლოა, ვიდეოში — მინიშნება; Split/Undo/Redo/Loop/წაშლის `title` მიზეზს არ ამბობს (`out/d3c/d3c-disabled-*.json`) | 0.5 | **Medium** | არა — ახალი ტექსტი |
+| DUX-R-5 | **content-ისა და აქცენტის ფერის გაყოფა:** waveform-ები ნეიტრალური / ხაზის content-ის ფერით; `brand` მხოლოდ მონიშვნისთვის, playhead-ის, ძირითადი ქმედებისა და focus-ისთვის. Waveform-ის ფერი VISUAL-A-ში ჯერ განსაზღვრული არ არის (`visual-direction-a.md` l.46: brand = „ერთადერთი აქცენტი: playhead, არჩეული კლიპი, ძირითადი ქმედება, focus“) | Live ? (Live-ის კლიპის ფერის წესი შენახულ capture-ში არ არის). M5 (ხაზების ფერები) **არ** არის — ეს იდეა მხოლოდ waveform-ს ნეიტრალურს ხდის. `design-philosopher`: „ერთი გააზრებული აქცენტი“ | F-9: ერთი ფირუზისფერი (rgb 18,217,200) აქვს waveform-ებს, მონიშნულ კლიპს, Export-ს, Play-ს, fader-ებს და focus-ს (`D3C-S1-1440-…png`) | 0.5 (V-1-ში) | **High** | **დიახ** — მხოლოდ ფერი |
+| DUX-R-6 | **კლიპების არჩევა კლავიატურით:** კლიპი Tab-ით ან ისრით მისაწვდომი იყოს (მაგ. აქტიური ხაზის კლიპებზე სვლა), ხილული ring-ით; არჩევის შემდეგ ←/→ nudge, Ctrl+E, Delete და სხვა კლავიშები ისე მუშაობს, როგორც დღეს | Live 42.2 (F): „Move Focus to the Arrangement View Alt 2“; „Move to Next Focusable Control Tab“ (Tab-ით გადაადგილება Settings-იდან ირთვება). კლიპიდან კლიპზე სვლის კლავიში შენახულ ტექსტში არ არის → ამ ნაწილში Live ? | F-13: S1-ში 82 Tab stop-დან კლიპი 0-ია; კლიპი კლავიატურით მხოლოდ Ctrl+A-ით (ყველა) ირჩევა. `accessibility-auditor`-ის checklist-ში WCAG 2.1.1 წერია, მაგრამ task §4-ის მიღებულ წესებში არ არის | 1–2 | **Medium** | არა — ქცევა |
+| DUX-R-7 | **Live-ის მარტივი კლავიშები:** S — მონიშნული ხაზის Solo; W — Fit (ზომის ოპტიმიზაცია სიგანეზე); H — ხაზების სიმაღლე auto-fit-ზე; Alt+U — ყველა ჯგუფის/ხაზის გაშლა; Alt+Shift+F — Follow | 42.19 (F) „Solo Selected Tracks S“; 42.16 (F) „Optimize Arrangement Width W“, „Optimize Arrangement Height H“, „Unfold All Tracks Alt U“; 42.9 (F) „Scroll Display to Follow Playback Alt Shift F“ | ნაწილი 1 D2: S, W, H, Alt+U, Alt+Shift+F — ყველა `{}` (არაფერს აკეთებს). **კოლიზია:** CZABA-ში არცერთი არ არის მიბმული (CZABA-only: M, U, G, A, Z/X, 1/2/3, Enter); Chrome-ის ცნობილ accelerator-ს არცერთი არ ემთხვევა; ასოები ტექსტის ველში ისედაც იგნორირდება (`isTypingTarget`) | 1 | Low | არა — ქცევა |
+| DUX-R-8 | **Shift+click პირველიდან ბოლომდე:** ერთ ხაზზე Shift+click მონიშნავს ყველა კლიპს ბოლოს არჩეულიდან დაწკაპუნებულამდე (Ctrl+click ცალკეს რჩება) | 42.5 (F) „Select Multiple Items by First and Last Item: Shift click“ | ნაწილი 1 D2 `different`: Shift+click მხოლოდ დაწკაპუნებულს ამატებს (d2d: sfx@2 → Shift sfx@13 = 2, sfx@6 არა) | 0.5 | Low | არა — ქცევა |
+| DUX-R-9 | **Esc ყველა ველში draft-ს აბრუნებს:** detail range-ის ველებიც Clip Gain-ის ველივით | Live ? | ნაწილი 1 CZABA-only: range ველზე Esc → ველი 8 რჩება, მონიშვნა 7–9; Clip Gain-ის ველზე Esc აბრუნებს | 0.5 | Low | არა — ქცევა |
+
+**გათვალისწინებული და უარყოფილი / გაერთიანებული (task §3 D4 სია):**
+- **ჯგუფის ხილული readout (F-3)** → DUX-R-1-ს ემატება: ხაზის, Master-ისა და ჯგუფის Volume ერთნაირად ჩანდეს და იკრიფებოდეს.
+- **Export range card footer-ის ქვეშ (F-2)** → ARCH-R101-MODALBODY-PADDING-SLOT / GATE102-S3-TALL-CARD-NO-CAP; ახალი id არა.
+- **Waveform Zoom „1×“ (F-7), Shift-drag fine (SHIFT-FINE-DISCOVERABILITY)** → DUX-R-2 (ცნობარი).
+- **Export-ის გადატვირთვის გაფრთხილება default-ზე (F-14)** → ABL-R-18 (Normalize); ახალი id არა.
+- **AltGr (F-5)** → შენიშვნა B-სთვის. Ctrl+Alt კლავიშები ახალ იდეებში არ შემოდის.
+- **F / Ctrl+Alt+F (fade)** → T12-ADVANCED-ში (crossfade/micro fade დაგეგმილია); Ctrl+Alt+F-ს AltGr-ის რისკიც აქვს (F-5).
+- **0 (Deactivate)** → უარყოფილია: კლიპის ცალკე „გამორთული“ მდგომარეობა ახალი მოდელია; ფილმის მონტაჟში ხაზის Mute ფარავს.
+- **Ctrl+J (Consolidate)** → უარყოფილია: Chrome-ში Ctrl+J Downloads-ს ხსნის (browser-reserved), და ახალი აუდიოს render-ს მოითხოვს, რაც მარტივი მონტაჟის ფარგლებს სცდება.
+- **Ctrl+Space** → უარყოფილია: macOS-ში ენის გადართვაა (პლატფორმის კონვენცია, აქ არ შემოწმებულა); Space უკვე Play/Stop-ია.
+- **Demo badge** → acceptable (მკაფიოა, F-14).
+- **Mute/export feedback (F-12)** → acceptable; ახალი იდეა არ სჭირდება.
+- **ცალკე არ შემოთავაზებულა:** M5 (ხაზების ფერები, `not_approved_yet`) — მხოლოდ ციტირება; ABL-R-1…18, T12-ADVANCED.
+
+### Top 5 Saba-სთვის (ღირებულება ფილმის მემონტაჟისთვის ÷ ღირებულება რაუნდებში)
+
+| # | ID | რატომ ახლა | ზომა | VISUAL-A-სთან ერთად? |
+|---|---|---|---|---|
+| 1 | DUX-R-5 | ფერის ერთი წესი: მონიშვნა content-ისგან გამოირჩევა; V-1-ში თითქმის უფასოა | 0.5 | **დიახ** (`fitsVisualA: true`) |
+| 2 | DUX-R-3 | 1280-ზე (ლეპტოპი) არჩეული კლიპი panel-ის ქვეშ იმალება | 1 | არა |
+| 3 | DUX-R-1 (+ ჯგუფი) | −3 dB დღეს 30 დაჭერაა; ჯგუფის მნიშვნელობა საერთოდ არ ჩანს | 1 | არა |
+| 4 | DUX-R-4 | პირველი წუთი: ცარიელ ხაზში არაფერი წერია, drag-ს ვერ ხვდები | 0.5 | არა |
+| 5 | DUX-R-6 | კლავიატურით მომუშავე მემონტაჟე დღეს კლიპს ცალკე ვერ ირჩევს | 1–2 | არა |
+
+შემდეგი რიგით: DUX-R-2 (ცნობარი), DUX-R-7, DUX-R-8, DUX-R-9.
+
 ## 6. ბაგები
 
 | ID | severity | section | steps | expected (contract) | actual | evidence |
 |---|---|---|---|---|---|---|
 | DUX-B-1 | Low | D6b | ახალი context `/studio-lab` (1440×900 ან 1280×720) → S1 (SFX კლიპი მონიშნულია) → hint line, detail panel-ის label-ები (ხაზი, დასაწყისი, სიგრძე, წყაროდან, საიდან/სადამდე, „Clip Gain, dB“), ბიბლიოთეკის საქაღალდეების რიცხვები, ვიდეოს caption | ჩვეულებრივი ზომის ინფორმაციული ტექსტი ≥ 4.5:1 (WCAG 2.2 AA 1.4.3; `visual-direction-a.md` l.113, `dim` l.45 „≥ 4.5:1 (შესამოწმებელი)“) | `text-dim` rgb(103,111,126) ფონზე rgb(17,19,24) = **3.67:1** (pixel-ით იგივე); არჩეულ ბიბლიოთეკის სტრიქონზე rgb(17,39,42) = 3.08:1. 53/53 `dim` ელემენტი 4.5-ზე დაბალია, არცერთი disabled. არჩეულ სტრიქონზე `muted` = 4.38:1. ძირითადი ტექსტი არ არის → Low. გამოსწორება: VISUAL-A-ს `dim` (#8A8276) | `c-round-125/out/contrast-baseline.json` (`byToken.text-dim`, `pixelSamples`), `shots/D6-S1-1440.png` |
+| DUX-B-2 | Low | D3-B/F-4 | ახალი context `/studio-lab`, 1440×900 ან 1280×720 → S0/S1 → ბიბლიოთეკის separator (4 px სიგანე), detail panel-ის separator და ხაზის სიმაღლის სახელური (6 px სიმაღლე), ბიბლიოთეკის საქაღალდის ▾ (16 px სიგანე) → `elementFromPoint` box-ის გარეთ | ≥ 24×24 px სამიზნე ან spacing გამონაკლისი (WCAG 2.2 2.5.8; პროექტში Low, თუ გამოყენებას არ ბლოკავს) | hit area box-ის ტოლია (separator-ები 4–6 px, ▾ 16 px სიგანე), გაზრდილი ზონა არ აქვს; 24 px-იანი წრე მეზობელ სამიზნეს კვეთს (1440 S0 6, S1 5; 1280 S0 8, S1 8). კლავიატურით (↑/↓, ←/→) მუშაობს → არ ბლოკავს. Baseline-იდან (608187f) არსებობს, რეგრესია არ არის | `c-round-126/out/d3c/d3c-hit-*.json`, `d3c-hit2-*.json`, `out/d3c/wcag258-spacing.json` (1280 S1-ის რიცხვი panel-ის ქვეშ დამალულ კონტროლებსაც შეიცავს), `c-round-125/out/under24px.json` |
+| DUX-B-3 | Low | D3-C/F-11 | ახალი context → S0 → BPM ველი (ცარიელი, placeholder-ის გარეშე), ბიბლიოთეკის ძებნა, detail-ის ველები → ველის საზღვრის pixel-ი vs გარე ფონი | UI კომპონენტის საზღვარი ≥ 3:1 მეზობელ ფერთან (WCAG 2.2 1.4.11, task §3 D3-C წესი) | `border-outline` rgb(48,53,65) ფონზე rgb(17,19,24) = **1.51:1**, შიდა ფონთან 1.62:1; ველის შიდა ფონი vs გარე = 1.07:1, ამიტომ საზღვარი ერთადერთი მინიშნებაა. VISUAL-A-ს `outline` #24211E (`visual-direction-a.md` l.40) მას კიდევ შეამცირებს. რეგრესია არ არის (baseline) | `c-round-126/out/d3c/d3c-first-*.json` (`boundaries`), `shots/D3C-S0-1440-*.png` |
+| DUX-B-4 | Low | D3-C/F-11 | ახალი context `/studio-lab`, 1440×900 ან 1280×720 → S0 (ან S1-ში SFX ელემენტი) → ბიბლიოთეკის არჩეული სტრიქონის მეტა (ტიპი, ხანგრძლივობა) | ჩვეულებრივი ტექსტი ≥ 4.5:1 (WCAG 2.2 1.4.3) | `text-muted` rgb(129,136,152) არჩეული სტრიქონის ფონზე rgb(17,39,42) = **4.38:1** (12 px); ძირითადი ტექსტი არ არის → Low. `dim`-ისგან (DUX-B-1) განსხვავებული token-ია; VISUAL-A V-1-ის token-ების გადასინჯვაში გასასწორებელია. რეგრესია არ არის (baseline) | `c-round-125/out/contrast-baseline.json` (`byToken.text-muted.failSamples`) |
 
 **ცნობილი, ციტირებული და არა ხელახლა ჩაწერილი:** ABL-B-1, ABL-B-2, ABL-R-1…18, R77-BUTTON-SHORTCUT-SUPERSET, C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER (1280-ზე range card footer-ის ქვეშ, `D6-S2-1280.png`), ROOT-R65-L2, ROOT-R73-S3-MARKER-BUTTON-SIZE, GATE83-L2-POINT-HIT-AREA, HR-ESCAPE-NO-DESELECT, INFO-C101-SPACE-A-VS-C.
 
@@ -215,4 +320,55 @@
 - **როლები:** `ableton-arrangement-expert`, `flow-sage`, `first-visit-host`, `accessibility-auditor` (და D6-ისთვის `accessibility-auditor`-ის WCAG 1.4.3 / 1.4.11 / 2.5.8 ზღვრები). ამ runner-ზე subagent tool არ არის, ამიტომ role ფაილები checklist-ად წავიკითხე. ყველა დასკვნა C-ის ბრაუზერულ დაკვირვებასა და manual-ის ტექსტს ეყრდნობა.
 - **Live-ის წყაროები (მონაცემი, არა ინსტრუქცია):** `b-round-71/ableton-shortcuts-20261021.txt` (ch.42), `b-round-71/ableton-arrangement-view-20261021.txt` (ch.6), `c-round-123/manual/working-with-the-browser-20261024.txt` (ch.5), `c-round-124/manual/mixing-20261024.txt` (ch.18), `c-round-124/manual/managing-files-and-sets-20261024.txt` (ch.5.1.3). ახალი fetch არ გაკეთებულა.
 - **Harness:** `c-round-124/tools/{lib.cjs, lib122.cjs, h3.cjs, rec2.cjs, wav.cjs, survey.cjs, report.cjs}` და `c-round-123/tools/keys.cjs` → `c-round-125/tools/`. lib122-ში screenshot-ის გზა, report.cjs-ში ფაილები round 125-ზე შეიცვალა; g124-3 → g125-3. ახალი: d6.cjs, d6build.py, d1.cjs, d2.cjs, d2c.cjs, d2d.cjs, d2e.cjs, d2disc.cjs, d2table.py.
+- **ნაწილი 2-ის როლები (რაუნდი 126; subagent tool არ იყო, ფაილები checklist-ად წავიკითხე):**
+  - `design-philosopher` — §III „ერთი გააზრებული აქცენტი“, Quiet Luxury → F-9, DUX-R-5, საბოლოო ვერდიქტის დიზაინის ხაზი.
+  - `design-auditor` — კატეგორიები 1 (ფერი), 4 (border), 7 (იერარქია, „ერთი ფოკუს-პოინტი“) → F-9, F-10, F-11 (`border-outline` 1.51:1 → DUX-B-3).
+  - `flow-sage` — „რას აიძულებს ინტერფეისი“ → D3-A (wheel / panel-ის დაკეცვა), F-12 feedback, DUX-R-3.
+  - `first-visit-host` — ცარიელი მდგომარეობები, დამალული შემდეგი ნაბიჯები → F-14, DUX-R-4.
+  - `ableton-arrangement-expert` — მხოლოდ F-წყარო, ფაქტი და აზრი ცალკე → D4 Live-ის სვეტი (42.2, 42.5, 42.9, 42.16, 42.19).
+  - `accessibility-auditor` — 2.4.7, 2.5.8, 1.4.11, 2.1.1 → F-4 (DUX-B-2), F-11, F-13 (DUX-R-6).
+  - როლის აზრი მხოლოდ input-ია; ყოველი დასკვნა C-ის ბრაუზერულ გაზომვასა და manual-ის ტექსტს ეყრდნობა.
+- **ნაწილი 2-ის harness:** `c-round-125/tools/*.cjs` → `c-round-126/tools/` (lib122, d1, d6 — screenshot-ის გზა; report.cjs — round 126; g125-3 → g126-3). ახალი: d3a.cjs, d3b-altgr.cjs, d3b-altgr2.cjs, d3b2.cjs, d3b3.cjs, d3b-dead.cjs, d3b-dead2.cjs, d3c-focus.cjs, d3c-hit.cjs, d3c-feedback.cjs, d3c-first.cjs, d3c-disabled.cjs. ყოველი გაშვება უნიკალური სახელის ფაილს წერს (run id / UTC). D6-ის baseline ფაილები არ შეცვლილა. Invalid run: 1 (ENV-FIRST-LOAD, hydration — გაუქმდა და გამეორდა).
+- **ქსელი/console ნაწილ 2-ის ყველა სესიაში:** 0 მოთხოვნა `/api/studio-token`-ზე (G126-3-ის პირდაპირი 401-ის შემოწმების გარდა), recording, download ან R2-ზე; 0 Authorization header; 0 hydration; 0 pageerror (ENV-FIRST-LOAD გარდა).
 - **ქსელი/console ყველა სესიაში:** 0 მოთხოვნა `/api/studio-token`-ზე, recording, download ან R2-ზე; 0 Authorization header; 0 hydration; 0 pageerror (პირველი ჩატვირთვის ENV-FIRST-LOAD გარდა, რომელიც გაუქმდა).
+
+## 9. ინდექსი
+
+**ბაგები (DUX-B):**
+
+| ID | severity | სტატუსი |
+|---|---|---|
+| DUX-B-1 | Low | `deferred_low_polish`; VISUAL-A V-1-ის `dim` (#8A8276) ასწორებს (RV-2) |
+| DUX-B-2 | Low | `deferred_low_polish` (resize separator-ები 4–6 px, საქაღალდის ▾ 16 px; WCAG 2.5.8) |
+| DUX-B-3 | Low | `deferred_low_polish`; V-1-ში `outline` token-ის შეცვლისას ველის საზღვარი ≥ 3:1 უნდა დარჩეს |
+| DUX-B-4 | Low | `deferred_low_polish`; V-1-ის token-ების გადასინჯვისას `muted` არჩეულ სტრიქონზე ≥ 4.5:1 |
+
+Critical, High ან Medium DUX-B არ არის, ამიტომ V-0-მდე fix-up არ არის საჭირო.
+
+**იდეები (DUX-R), ყველა `awaiting_user`:**
+
+| ID | პრიორიტეტი | `fitsVisualA` |
+|---|---|---|
+| DUX-R-1 | Medium | false |
+| DUX-R-2 | Low | false |
+| DUX-R-3 | Medium | false |
+| DUX-R-4 | Medium | false |
+| DUX-R-5 | High | **true** |
+| DUX-R-6 | Medium | false |
+| DUX-R-7 | Low | false |
+| DUX-R-8 | Low | false |
+| DUX-R-9 | Low | false |
+
+## კითხვები Saba-სთვის
+
+პასუხი ჩაწერე `user-review/design-ux-decisions.md`-ში: approve / reject / change.
+
+- **DUX-R-1:** ხაზის, Master-ისა და ჯგუფის Volume ციფრით იკრიფებოდეს და ჯგუფის dB ეკრანზე ჩანდეს? (approve / reject / change)
+- **DUX-R-2:** shortcut-ების ცნობარი (`?` ან ღილაკი hint line-თან), ძებნადი? (approve / reject / change)
+- **DUX-R-3:** არჩეული კლიპის ხაზი ავტომატურად გამოჩნდეს, ან 1280-ზე panel თავად დაიკეცოს? რომელი ვარიანტი? (approve / reject / change)
+- **DUX-R-4:** ცარიელ აუდიო ხაზში მინიშნება და disabled ღილაკებზე მიზეზი? (approve / reject / change)
+- **DUX-R-5:** waveform-ები ნეიტრალური ფერით, ფირუზისფერი (VISUAL-A-ში სპილენძი) მხოლოდ მონიშვნის, playhead-ის, ძირითადი ღილაკისა და focus-ისთვის — VISUAL-A V-1-ში? (approve / reject / change)
+- **DUX-R-6:** კლიპის არჩევა კლავიატურით (Tab/ისრები, ხილული ring)? (approve / reject / change)
+- **DUX-R-7:** Live-ის კლავიშები S, W, H, Alt+U, Alt+Shift+F? (approve / reject / change)
+- **DUX-R-8:** Shift+click პირველიდან ბოლომდე მონიშვნა, როგორც Live-ში? (approve / reject / change)
+- **DUX-R-9:** Esc detail range-ის ველშიც აბრუნებდეს draft-ს? (approve / reject / change)

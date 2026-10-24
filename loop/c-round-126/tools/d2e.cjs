@@ -1,0 +1,9 @@
+// C round 125 — marker menu keys (d2d step redone: M + Enter keeps the marker). node d2e.cjs
+const X = require('./lib122.cjs'); const { L, sleep } = X; const fs = require('fs'); const path = require('path');
+const net = []; const menu = (p) => p.evaluate(() => { const m = document.querySelector('[role=menu]'); return m ? { items: [...m.querySelectorAll('[role^=menuitem]')].map((i) => i.textContent.replace(/\s+/g, ' ').trim()), focused: document.activeElement && document.activeElement.textContent.replace(/\s+/g, ' ').trim() } : null; });
+(async () => { const b = await L.launch(); const { page: p, ctx } = await L.openStudio(b, X.VPS[1440], 'd2e-1440', net); const r = {};
+  await L.setSnapOff(p); await L.addAt(p, 'demo-hero-music', 'music', 0); await L.seekTo(p, 9); await L.blur(p); await p.keyboard.press('m'); await sleep(300); await p.keyboard.press('Enter'); await sleep(300); await L.seekTo(p, 2); await L.blur(p);
+  const mk = p.locator('[data-testid=arrangement-marker]').first(); r.marker = await mk.getAttribute('aria-label');
+  await mk.click({ button: 'right' }); await sleep(400); r.m0 = await menu(p); await p.screenshot({ path: path.join(L.SHOTS, 'D2-marker-menu-1440.png') }); await p.keyboard.press('ArrowDown'); await sleep(150); r.f1 = (await menu(p) || {}).focused; await p.keyboard.press('Enter'); await sleep(900); r.afterEnter = { pos: await L.posNow(p), status: await L.status(p), menu: await menu(p) }; await sleep(500); r.posLater = await L.posNow(p); await L.blur(p); await p.keyboard.press('Space'); await sleep(300);
+  await mk.focus(); await p.keyboard.press('Shift+F10'); await sleep(300); r.viaShiftF10 = await menu(p); await p.keyboard.press('Tab'); await sleep(300); r.afterTab = await menu(p);
+  r.net = X.netOk(net); fs.writeFileSync(path.join(L.ROOT, 'out', 'd2', 'd2e.json'), JSON.stringify(r, null, 1)); console.log(JSON.stringify(r, null, 1)); await b.close(); })();

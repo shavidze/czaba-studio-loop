@@ -1,0 +1,394 @@
+{
+ "round": 126,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "allRowsRan": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T04:26:49.4113922Z",
+  "round": 126,
+  "attempt": 1,
+  "store": 200
+ },
+ "sectionsDone": [
+  "D3",
+  "D4",
+  "D5"
+ ],
+ "sectionsSpilled": [],
+ "reviewComplete": true,
+ "passed": [
+  "SOURCE-SCOPE-start",
+  "D3-A",
+  "D3-friction",
+  "D4-ideas",
+  "D5-verdict",
+  "G126-3",
+  "PART1-INTEGRITY",
+  "SOURCE-SCOPE-end"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G126-3 fake-Bearer 403 sub-check: backend unavailable in cloud",
+  "F-5 AltGr character insertion into a text field: blocked: CDP (Ctrl-modified CDP key events insert no text)",
+  "real touch / Ctrl+digit / browser-reserved accelerators (Ctrl+J, Ctrl+R, Ctrl+F, Ctrl+Shift+R): blocked: CDP (not needed for a row this round)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "d3a": {
+  "viewport": "1280x720",
+  "scrollbars": "real (HR-REAL-SCROLLBARS); hidden-scrollbar run kept for comparison",
+  "withGroup": {
+   "panelPx": 120,
+   "scrollerClient": 292,
+   "scrollerScroll": 348,
+   "sfxVisiblePx": 5,
+   "sfxVisible": false,
+   "pathsWorking": [
+    "1 wheel",
+    "2 scrollbar",
+    "3 collapse toggle"
+   ],
+   "pathsNotWorking": [
+    "4 separator (min 120)"
+   ]
+  },
+  "withoutGroup": {
+   "panelPx": 120,
+   "scrollerClient": 292,
+   "scrollerScroll": 320,
+   "sfxVisiblePx": 33,
+   "sfxVisible": false,
+   "pathsWorking": [
+    "1 wheel",
+    "2 scrollbar",
+    "3 collapse toggle"
+   ],
+   "pathsNotWorking": [
+    "4 separator (min 120)"
+   ]
+  },
+  "ruling": "panel = 120 (D-29b fallback) and SFX reachable by wheel/scrollbar in 1 action -> friction, not a bug; DUX-R candidate",
+  "evidence": "c-round-126/out/d3a-summary.json"
+ },
+ "friction": [
+  {
+   "id": "F-1",
+   "what": "SFX lane hidden under the detail panel at 1280 (S1)",
+   "where": "S1, 1280x720, arrangement-detail-panel / lane sfx",
+   "measure": "panel 120 (= D-29b fallback); with group SFX 5/61 px visible, without group 33 px; wheel or scrollbar reaches it in 1 action",
+   "shot": "c-round-126/shots/D3A-S1-withGroup-real-2026-10-24T0431.png",
+   "verdict": "DUX-R-3",
+   "why": "panel = 120 fallback and reachable by wheel/scrollbar (task ruling line 2)"
+  },
+  {
+   "id": "F-2",
+   "what": "Export range card under the dialog footer at 1280",
+   "where": "S2 1280",
+   "measure": "no range: disabled card 45/62 px under footer, mid-click hits footer; active range: 13 px, mid clickable, ArrowDown scrolls it fully visible; wheel -> overlap 0",
+   "shot": "c-round-126/shots/D3B-export-1280-2026-10-24T0436.png, …0437.png",
+   "verdict": "acceptable",
+   "why": "main case (range set) visible and usable; hidden disabled hint belongs to ARCH-R101-MODALBODY-PADDING-SLOT / GATE102-S3-TALL-CARD-NO-CAP (cited, no new id)"
+  },
+  {
+   "id": "F-3",
+   "what": "group Volume value not visible",
+   "where": "S1 group row, both viewports",
+   "measure": "row text '▣ ჯგუფი 1'; after 30x ArrowDown title 'Volume −3.0 dB', nothing on screen, status unchanged",
+   "shot": "c-round-126/shots/D3B-group-1280-2026-10-24T0436.png",
+   "verdict": "DUX-R-1",
+   "why": "merged into DUX-R-1 (visible, typeable readout incl. group)"
+  },
+  {
+   "id": "F-4",
+   "what": "under-24 px targets",
+   "where": "S0/S1 both viewports",
+   "measure": "faders box 4 px but hit 16 px (spacing ok); separators 4-6 px hit = box, spacing fails (1440 S0 6/S1 5, 1280 S0 8/S1 8); folder fold 16 px wide; playhead handle hit 7 px (ruler equivalent); export radios in labels (equivalent)",
+   "shot": "non-visual measurement, no screenshot: c-round-126/out/d3c/wcag258-spacing.json, d3c-hit2-*.json",
+   "verdict": "DUX-B-2",
+   "why": "2.5.8 miss on separators/folder fold, keyboard works -> Low; rest acceptable or cited (ROOT-R65-L2, ROOT-R73-S3-MARKER-BUTTON-SIZE, GATE83-L2-POINT-HIT-AREA)"
+  },
+  {
+   "id": "F-5",
+   "what": "AltGr (Ctrl+Alt) characters trigger Split/Paste on the timeline",
+   "where": "1440, timeline focus",
+   "measure": "shortcutLetter() matches event.code; trusted CDP Ctrl+Alt key '€' code KeyE split at 5.000, key '@' code KeyV pasted at 10.000; in 4 text fields (search, BPM, Clip Gain, marker name) no change, 8/8; Undo 1 step each",
+   "shot": "non-visual measurement, no screenshot: c-round-126/out/d3b/d3b-altgr2-2026-10-24T0435.json, d3b-altgr-2026-10-24T0458.json",
+   "verdict": "acceptable",
+   "why": "info: no edit while typing, 1-step Undo (task D3-B steps 3/4); note for B"
+  },
+  {
+   "id": "F-6",
+   "what": "Volume '6 px dead zone'",
+   "where": "lane Volume fader",
+   "measure": "harness artifact: part-1 press at x=459 = input right border (elementFromPoint DIV); any press inside moves from the first px (0.58 dB/px at 103 px, 0.66 at 91 px)",
+   "shot": "non-visual measurement, no screenshot: c-round-126/out/d3b/d3b-dead2-*.json",
+   "verdict": "acceptable",
+   "why": "no dead zone exists; C-R125-OBS-VOLUME-DEADZONE-6PX can close as harness artifact"
+  },
+  {
+   "id": "F-7",
+   "what": "Waveform Zoom shows only '1×'",
+   "where": "grid row",
+   "measure": "28x24, explanation only in title/aria-label",
+   "shot": "c-round-126/shots/D3C-S0-1440-2026-10-24T0440.png ('1×' button in the grid row)",
+   "verdict": "DUX-R-2",
+   "why": "covered by the shortcut/feature reference"
+  },
+  {
+   "id": "F-8",
+   "what": "Shift+click adds one clip (Live: first-to-last); Esc does not revert the detail range draft",
+   "where": "timeline / detail panel",
+   "measure": "part-1 d2d evidence",
+   "shot": "non-visual measurement, no screenshot: c-round-125/out/d2/d2d.json",
+   "verdict": "DUX-R-8",
+   "why": "Shift+click -> DUX-R-8, Esc -> DUX-R-9; no contract"
+  },
+  {
+   "id": "F-9",
+   "what": "one teal for waveforms, selection, primary buttons, fader thumbs and focus",
+   "where": "S0/S1 both viewports",
+   "measure": "rgb(18,217,200) on all; selection ring indistinguishable in hue from waveform content",
+   "shot": "c-round-126/shots/D3C-S1-1440-2026-10-24T0440.png",
+   "verdict": "DUX-R-5",
+   "why": "colour-only idea, fits VISUAL-A"
+  },
+  {
+   "id": "F-10",
+   "what": "density",
+   "where": "S0/S1 both viewports",
+   "measure": "0 texts < 12 px; truncations 1 (S0) / 2 (S1) all with title; toolbar 49 px (1440) / 87 px two rows (1280)",
+   "shot": "c-round-126/shots/D3C-S0-1280-2026-10-24T0441.png",
+   "verdict": "acceptable",
+   "why": "no unreadable text; truncations have title"
+  },
+  {
+   "id": "F-11",
+   "what": "non-text contrast",
+   "where": "S0/S1 both viewports",
+   "measure": "focus ring 2 px teal 9.48–11.13 on every stop (0 missing); input boundaries 1.51:1; slider unfilled track 2.34 (thumb 10.43); muted text on the selected library row 4.38:1 (12 px)",
+   "shot": "c-round-126/out/d3c/d3c-first-*.json",
+   "verdict": "DUX-B-3",
+   "why": "input boundaries < 3:1 -> DUX-B-3 Low; selected-row muted 4.38 -> DUX-B-4 Low; button borders and slider track acceptable"
+  },
+  {
+   "id": "F-12",
+   "what": "feedback latency (6 actions)",
+   "where": "1440 + 1280",
+   "measure": "add 6–8 ms; move/trim first visual 21–23 ms after first move, status 4 ms after up; Undo 4 ms; mute button 3.6 ms (no status); export footer 0.5–2 ms",
+   "shot": "c-round-126/shots/D3C-fb-move-1440-2026-10-24T0444.png",
+   "verdict": "acceptable",
+   "why": "all < 100 ms and status never the only feedback"
+  },
+  {
+   "id": "F-13",
+   "what": "lane clips are not Tab stops",
+   "where": "S1 both viewports",
+   "measure": "S0 Export at Tab stop 10, first lane control 38; S1 82 stops, 0 clips",
+   "shot": "non-visual measurement, no screenshot: c-round-126/out/d3c/d3c-focus-1440-2026-10-24T0440.json",
+   "verdict": "DUX-R-6",
+   "why": "no contract / adopted rule broken; rings present everywhere"
+  },
+  {
+   "id": "F-14",
+   "what": "first visit",
+   "where": "fresh S0 both viewports",
+   "measure": "sound 1 click (peak 0.374), clip 1 click, export 2 clicks (WAV 101.352 s, 4864896 frames, NaN 0); empty audio lanes without hint; disabled Split/Undo/Loop titles give no reason",
+   "shot": "c-round-126/shots/D3C-S0-1440-2026-10-24T0440.png",
+   "verdict": "DUX-R-4",
+   "why": "first-visit hints"
+  }
+ ],
+ "bugs": [
+  {
+   "id": "DUX-B-2",
+   "severity": "low",
+   "section": "D3-B/F-4",
+   "steps": [
+    "fresh context /studio-lab at 1440x900 or 1280x720, S0 or S1",
+    "probe elementFromPoint around the library separator (4 px wide), detail separator and lane height handles (6 px tall), library folder fold (16 px wide)",
+    "apply the WCAG 2.5.8 spacing test (24 px circle)"
+   ],
+   "expected": "targets >= 24x24 or meeting the spacing exception (WCAG 2.2 2.5.8, adopted; Low unless it blocks use)",
+   "contract": "WCAG 2.2 AA 2.5.8 (project: Low)",
+   "actual": "hit area equals the box: separators 4-6 px, folder fold 16 px wide (box 16x58); no enlarged zone; 24 px circles intersect neighbouring targets (1440 S0 6/S1 5, 1280 S0 8/S1 8; the 1280-S1 count includes SFX controls hidden under the detail panel because the baseline visibility test ignores scroller clipping); keyboard arrows work, so not blocking",
+   "evidence": "c-round-126/out/d3c/d3c-hit-2026-10-24T0443.json, d3c-hit2-*.json, c-round-126/out/d3c/wcag258-spacing.json",
+   "regression": "no (baseline 608187f)"
+  },
+  {
+   "id": "DUX-B-3",
+   "severity": "low",
+   "section": "D3-C/F-11",
+   "steps": [
+    "fresh context /studio-lab, S0",
+    "screenshot; sample the border pixel of the BPM field (empty, no placeholder), library search, detail fields vs the surface outside"
+   ],
+   "expected": "UI component boundary >= 3:1 against adjacent colour (WCAG 2.2 1.4.11; task D3-C rule)",
+   "contract": "WCAG 2.2 AA 1.4.11 (project-adopted non-text contrast 3:1)",
+   "actual": "border-outline rgb(48,53,65) on rgb(17,19,24) = 1.51:1 (1.62 vs field fill); field fill vs surface 1.07:1 so the border is the only boundary cue; VISUAL-A outline #24211E would lower it further",
+   "evidence": "c-round-126/out/d3c/d3c-first-1440-*.json boundaries; shots/D3C-S0-1440-2026-10-24T0440.png",
+   "regression": "no (baseline 608187f)"
+  },
+  {
+   "id": "DUX-B-4",
+   "severity": "low",
+   "section": "D3-C/F-11",
+   "steps": [
+    "fresh context /studio-lab at 1440x900 or 1280x720, S0",
+    "read the selected library row meta text (type, duration) colour and background"
+   ],
+   "expected": "normal text >= 4.5:1 (WCAG 2.2 1.4.3)",
+   "contract": "WCAG 2.2 AA 1.4.3 (project-adopted)",
+   "actual": "text-muted rgb(129,136,152) on the selected row rgb(17,39,42) = 4.38:1 at 12 px, both viewports; secondary meta text -> Low; separate from DUX-B-1 (dim)",
+   "evidence": "c-round-125/out/contrast-baseline.json byToken.text-muted.failSamples (same commit 608187f)",
+   "regression": "no (baseline 608187f)"
+  }
+ ],
+ "recommendations": [
+  {
+   "id": "DUX-R-1",
+   "what": "(part 1) typeable lane/Master Volume readout; part 2 extends it to a visible, typeable group Volume readout (F-3)",
+   "why": "Live 42.6 type-in value; group dB visible nowhere today",
+   "today": "group row text '▣ ჯგუფი 1', −3 dB only in title (d3b2)",
+   "sizeRounds": 1,
+   "priority": "Medium",
+   "fitsVisualA": false,
+   "liveSource": "F 42.6 'Type In Value'"
+  },
+  {
+   "id": "DUX-R-3",
+   "what": "keep the selected clip's lane visible: on selection / detail expand / lane activation scroll the timeline to reveal it (or collapse the panel at 1280)",
+   "why": "at 1280 the panel hides the clip it describes",
+   "today": "D3-A: SFX 5/61 px visible after selecting the SFX clip and expanding the panel; one wheel reveals it",
+   "sizeRounds": 1,
+   "priority": "Medium",
+   "fitsVisualA": false,
+   "liveSource": "Live ?"
+  },
+  {
+   "id": "DUX-R-4",
+   "what": "first-visit hints: faint drop/add hint in empty audio lanes; disabled toolbar titles give the reason",
+   "why": "drag is written nowhere; video lane already has a hint",
+   "today": "F-14: audio lane bodies have 0 characters; Split/Undo/Redo/Loop/Delete titles name the action only",
+   "sizeRounds": 0.5,
+   "priority": "Medium",
+   "fitsVisualA": false,
+   "liveSource": "Live ?"
+  },
+  {
+   "id": "DUX-R-5",
+   "what": "separate content and accent colour: neutral/content waveform colour, brand only for selection, playhead, primary action and focus",
+   "why": "selection does not stand out from teal waveforms; design-philosopher 'one deliberate accent'",
+   "today": "F-9: rgb(18,217,200) on waveforms, selected clip ring, Export, Play, fader thumbs, focus",
+   "sizeRounds": 0.5,
+   "priority": "High",
+   "fitsVisualA": true,
+   "liveSource": "Live ?"
+  },
+  {
+   "id": "DUX-R-6",
+   "what": "keyboard clip selection: clips reachable by Tab/arrows with a visible ring; existing clip keys then apply",
+   "why": "keyboard-only editors cannot select one clip; accessibility-auditor lists WCAG 2.1.1",
+   "today": "F-13: 0 of 82 Tab stops in S1 are clips",
+   "sizeRounds": 1.5,
+   "priority": "Medium",
+   "fitsVisualA": false,
+   "liveSource": "F 42.2 'Move Focus to the Arrangement View Alt 2', 'Move to Next Focusable Control Tab'; clip-to-clip key Live ?"
+  },
+  {
+   "id": "DUX-R-7",
+   "what": "Live single keys: S solo selected lane, W Fit, H lane heights to auto-fit, Alt+U unfold all, Alt+Shift+F Follow",
+   "why": "missing rows in part-1 D2, no collision with CZABA bindings or known Chrome accelerators",
+   "today": "part 1 D2: all {}",
+   "sizeRounds": 1,
+   "priority": "Low",
+   "fitsVisualA": false,
+   "liveSource": "F 42.19 'Solo Selected Tracks S'; 42.16 'Optimize Arrangement Width W/Height H', 'Unfold All Tracks Alt U'; 42.9 'Scroll Display to Follow Playback Alt Shift F'"
+  },
+  {
+   "id": "DUX-R-8",
+   "what": "Shift+click selects first-to-last on a lane",
+   "why": "Live parity",
+   "today": "part 1 d2d: Shift adds only the clicked clip",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "fitsVisualA": false,
+   "liveSource": "F 42.5 'Select Multiple Items by First and Last Item Shift click'"
+  },
+  {
+   "id": "DUX-R-9",
+   "what": "Esc reverts the detail range field draft like the Clip Gain field",
+   "why": "consistency",
+   "today": "part 1: range field keeps 8 while selection is 7–9",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "fitsVisualA": false,
+   "liveSource": "Live ?"
+  }
+ ],
+ "top5": [
+  "DUX-R-5 (fitsVisualA)",
+  "DUX-R-3",
+  "DUX-R-1 (+group)",
+  "DUX-R-4",
+  "DUX-R-6"
+ ],
+ "rolesConsulted": [
+  "design-philosopher (file read as checklist; §III 'one deliberate accent' -> F-9, DUX-R-5, verdict)",
+  "design-auditor (checklist; categories 1/4/7 -> F-9, F-10, F-11/DUX-B-3)",
+  "flow-sage (checklist; forced steps -> D3-A paths, F-12, DUX-R-3)",
+  "first-visit-host (checklist; empty states, hidden next steps -> F-14, DUX-R-4)",
+  "ableton-arrangement-expert (checklist; F-only Live claims -> D4 Live column)",
+  "accessibility-auditor (checklist; 2.4.7, 2.5.8, 1.4.11, 2.1.1 -> F-4/DUX-B-2, F-11, F-13/DUX-R-6)"
+ ],
+ "part1RowsChecked": 126,
+ "invalidRuns": [
+  {
+   "run": "d3a-withGroup-hidden-2026-10-24T0428",
+   "reason": "ENV-FIRST-LOAD: hydration error + Invalid hook call on the job's first /studio-lab load; discarded once, rerun clean"
+  }
+ ],
+ "notesForB": [
+  "C-R125-OBS-VOLUME-DEADZONE-6PX is a harness artifact (press on the input's right border); close it",
+  "AltGr: shortcutLetter() matches event.code and Ctrl-letter branches do not exclude altKey; with timeline focus AltGr+E (€) splits and AltGr+V (@, HU) pastes; 1-step Undo; info only. Possible low-cost guard: ignore Ctrl+Alt when event.key is a non-ASCII-letter character",
+  "VISUAL-A V-1: the planned outline token #24211E lowers the text-input boundary below today's 1.51:1 (DUX-B-3); V-1 needs a >=3:1 field boundary or another visible field cue",
+  "D3-A: D-29b cap behaves as written (120 fallback); the SFX lane is still hidden at 1280 after selecting an SFX clip and expanding the panel (DUX-R-3)",
+  "Lane clips are not Tab stops (0/82 in S1); no adopted rule covers it, so it stays a recommendation (DUX-R-6)",
+  "D4 rejected/merged: 0 (Deactivate) rejected, Ctrl+J rejected (Chrome Downloads + bounce), Ctrl+Space rejected (macOS input switch, untested), F/Ctrl+Alt+F -> T12-ADVANCED, export default overload notice -> ABL-R-18",
+  "WCAG 2.1.1 (keyboard) is in the accessibility-auditor checklist but not in task §4's adopted list; B/root decide whether clip keyboard access is a contract (then DUX-R-6 would become a bug)",
+  "g126-3.json / g126-3-*.png have no run stamp (adapted from g125-3 naming); one run only, nothing overwritten"
+ ],
+ "g126_3": {
+  "lab": "workspace + demo badge (1440)",
+  "protected": "/studio/middle-east 'Sign in required' at 1440 and 1280, workspace false, audio[src] 0",
+  "token": "GET /api/studio-token?product=middle-east&file=stem1.wav -> 401",
+  "forbidden": 0,
+  "authHeaders": 0,
+  "evidence": "c-round-126/out/g126-3.json, shots/g126-3-*.png"
+ },
+ "part1Integrity": {
+  "tableRows": 126,
+  "missing": 0,
+  "verdictBullets": 8,
+  "missingBullets": 0,
+  "changedLines": [
+   "title",
+   "header line",
+   "§1 heading (part-1 bullets kept under '### წინასწარი ვერდიქტი — ნაწილი 1')",
+   "§4 placeholder (2 lines)",
+   "one blank line between DUX-B-1 and the new §6 rows removed so the table stays one table (no row text changed)"
+  ],
+  "evidence": "c-round-126/out/part1-integrity.json"
+ },
+ "sourceScope": {
+  "start": "HEAD 608187f, status empty, sha256 -c OK (04:27 UTC)",
+  "end": "HEAD 608187f, status empty, sha256 -c OK (04:59 UTC, after the BPM/hit2 reruns)"
+ },
+ "abletonParityNote": "Ableton conformance per row: confirmed only where an F quote is given (42.2, 42.5, 42.6, 42.9, 42.16, 42.19); every other Live comparison is unconfirmed (Live ?)."
+}
