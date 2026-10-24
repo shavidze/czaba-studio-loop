@@ -1,10 +1,10 @@
 {
- "version": 121,
- "updated": "2026-10-24 (B round 126 -> 127 planning, D-29z92)",
+ "version": 122,
+ "updated": "2026-10-24 B round 127 -> 128 planning (D-29z93)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 127: D-29z92 - VISUAL-A V-0 stage 1, Export strings to English via the new app/lib/arrangement/strings.ts; A owns 6 source files (graph.client.ts and ArrangementContext.tsx narrow), 18 test files (literal -> module reference only), new strings.test.ts and doc 104; C verifies the Export dialog in every reachable state at both viewports; baseline clean 608187f; frozen b-round-126-r127-tree-sha256.txt (913))",
- "advisor_used_by_B": "round 121 -> 122 planning: advisor available and used before writing (and before finishing)",
+ "current_task": "current-task.md (round 128: D-29z93 - VISUAL-A V-0.1 fix-up: C-R127-01 footer button Close -> Done (one accessible name per dialog button; Modal.tsx frozen) + C-R127-L1 wording W1-W4 in strings.ts; A owns strings.ts (W0-W4 values only), strings.test.ts (literals), export-dialog-hold-enter (+1 it HE8 + titles), 6 title-only test files, doc 104; baseline 608187f + C-verified round-127 tree; frozen b-round-127-r128-tree-sha256.txt (930, tracked+untracked))",
+ "advisor_used_by_B": "round 127 -> 128 planning: advisor available and used before writing (and before finishing)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -9026,11 +9026,22 @@
    "round": 127,
    "task": "current-task.md",
    "decision": "D-29z92",
-   "status": "dispatched",
+   "status": "c_fail",
    "items": [
     "VISUAL-A-OBSIDIAN / V-0.1 Export strings"
    ],
-   "note": "V-0 stage 1: new app/lib/arrangement/strings.ts (studioExportStrings) + English copy for the Export feature (dialog, progress, cancel, WAV worker, overload warning, export status messages); 6 granted source files (two narrow), 18 granted test files (literal -> module reference only), new strings.test.ts and doc 104; baseline 608187f; frozen b-round-126-r127-tree-sha256.txt (913)"
+   "note": "V-0 stage 1: new app/lib/arrangement/strings.ts (studioExportStrings) + English copy for the Export feature (dialog, progress, cancel, WAV worker, overload warning, export status messages); 6 granted source files (two narrow), 18 granted test files (literal -> module reference only), new strings.test.ts and doc 104; baseline 608187f; frozen b-round-126-r127-tree-sha256.txt (913)",
+   "result": "C round 127 FAIL (browserVerified=true, realVerified=true): only C-R127-01 (Medium, duplicate accessible name Close: Modal X aria-label + footer text), 15 granted tests red; all copy/browser rows PASS (Georgian 0 except V-0.2 audioNote; WAV 7217877 frames, range 192000, muted peak 0, MP3/BOTH via CDN; layout attributable; G127-3 OK, fake-Bearer 403 blocked: backend unavailable in cloud). Gate 127 skipped (C FAIL). Tree kept for round 128."
+  },
+  {
+   "round": 128,
+   "task": "current-task.md",
+   "decision": "D-29z93",
+   "status": "dispatched",
+   "items": [
+    "VISUAL-A-OBSIDIAN / V-0.1 fix-up: C-R127-01 + C-R127-L1 (W1-W4)"
+   ],
+   "note": "footer closeButton 'Close' -> 'Done' (B ruling option 1 of A's P1 list; options 2-4 rejected with reasons in current-task.md 0.1); wording W1 in this cycle -> in this version, W2 is created -> is exported, W3 '- No file' -> '- no file' (8 keys), W4 exportedRange 'range' -> 'time selection'; new HE8 uniqueness test in export-dialog-hold-enter (render-phase harness; export-dialog-a11y-copy has none and stays frozen); mutations m5-m7; 10 grants; frozen b-round-127-r128-tree-sha256.txt (930); start copies b-round-127/r128-granted-start/"
   }
  ],
  "post_current_stage_queue": [
@@ -9441,9 +9452,13 @@
     "stages": [
      {
       "stage": "V-0.1",
-      "round": 127,
+      "round": [
+       127,
+       128
+      ],
       "area": "Export (dialog, progress, cancel, WAV worker messages, overload warning, export status messages in ArrangementContext exportWav/exportMp3)",
-      "status": "dispatched"
+      "status": "c_fail_round127_fixup_round128",
+      "round127_result": "C FAIL only C-R127-01 (Medium); copy, export output, layout and keys otherwise verified in the browser (c-round-127.json); not done until C PASS on round 128 and the gate"
      },
      {
       "stage": "V-0.2",
@@ -9502,6 +9517,14 @@
      "unchanged": "time formats, ·, —, WAV, MP3, LAME (ffmpeg.wasm), 24-bit · 48 kHz · stereo, dBFS, M/Solo, Loop, Master, CDN",
      "rule": "later stages reuse these terms; a new term is added to the stage doc map and here"
     }
+   },
+   "v0_glossary_amendment_d29z93": {
+    "footer dismiss button": "Done (was Close in round 127; the Modal X keeps aria-label Close)",
+    "no file was created": "lowercase 'no file was created.' after an em dash inside a sentence; capital only at a sentence start",
+    "exportedRange": "'time selection <start> - <end> (<s>)' (same term as the scope card)",
+    "videoRenderReason": "'in this version' (was 'in this cycle')",
+    "loop notes": "'is exported' (was 'is created')",
+    "rationale": "smallest honest label distinct from Close/Cancel/Export; frozen shared Modal.tsx untouched; WCAG 2.5.3 label-in-name kept (no aria-label override); key name closeButton kept (names the action; rename = 35 refs in 13 files)"
    }
   },
   {
@@ -14328,7 +14351,7 @@
   {
    "id": "GATE103-S2-STALL-SECONDS-DUPLICATED",
    "severity": "info",
-   "status": "scheduled round 127 (owned line in V-0.1: export-wav.client.ts calls studioExportStrings.wavWorkerStalled(timeout / 1000); ST5 pins it); closes on C PASS",
+   "status": "fixed in the round-127 tree (export-wav.client.ts calls studioExportStrings.wavWorkerStalled(timeout / 1000); ST5 pins it; C AN-REVIEW round 127 saw it); not done until V-0.1 C PASS (round 128) and the gate publishes",
    "to": "Lows batch",
    "title": "\"30\" is written in ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS and again in the stalled message",
    "evidence": "gates/round-103/review.md #2; a-round-103.md reviewer #8"
@@ -15261,6 +15284,23 @@
    "title": "Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or pastes (V); Undo restores it in one step; text fields are unaffected",
    "proposal": "low-cost guard: ignore Ctrl+Alt when event.key is not an ASCII letter (C notesForB); needs a B task with tests if ever scheduled",
    "evidence": "c-round-126/out/d3b/d3b-altgr2-2026-10-24T0435.json, d3b-altgr-2026-10-24T0458.json"
+  },
+  {
+   "id": "C-R127-01",
+   "severity": "medium",
+   "status": "scheduled round 128 (D-29z93: footer closeButton -> 'Done'; HE8 pins unique names idle + during render)",
+   "title": "Export dialog has two buttons named 'Close' (frozen Modal X aria-label='Close' + footer text 'Close' after V-0.1); during a render the footer one is disabled and the X enabled",
+   "source": "C round 127 (c-round-127.json bugs) = A round 127 P1",
+   "regression": "yes, caused by round 127 (not published)",
+   "evidence": "c-round-127/out/vitest-targeted.log (15 failed); out/main-1440-r2.json S2.roleCloseCount=2, RUN_project_wav.duringRender.closeBtns; out/main-1280-r1.json; out/s2-range-*-r1.json",
+   "repro": "/studio-lab, add a clip, Export, getByRole('dialog').getByRole('button',{name:'Close',exact:true}).count() == 2; start a WAV export and repeat"
+  },
+  {
+   "id": "C-R127-L1",
+   "severity": "low",
+   "status": "parts a-d scheduled round 128 (owned strings.ts, costs little; 2026-10-23 rule exception); parts e-f -> deferred_low_polish",
+   "title": "Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in the done message vs 'Time selection' (e) busyButton 'Rendering...' during encoder load / MP3 encode (f) self-comparison tests + stale titles",
+   "evidence": "c-round-127.json C-R127-L1; shots/RANGE-done-1440-r1.png, shots/CANCEL-mp3-1440-r2.png; doc 104 map"
   }
  ],
  "tech_lead_notes": [
@@ -16586,6 +16626,20 @@
    "source": "gates/round-121/review.md Architecture note (Signal 4) + a-round-121.md code-reviewer note",
    "note": "fifth view-preference prop threaded Workspace -> Lane -> ClipView; proposal one memoized LaneViewOptions prop (stable identity, ClipView is memo) or a workspace view-preferences hook; acceptance: 1x drawings byte-identical, Undo/Redo and useArrangement() shape unchanged, existing tests unchanged, plus a render-count test",
    "status": "addendum to ARCH-CHECKPOINT-SRW14-PREFS in b-round-121-checkpoint-request.md; verdict keep; not scheduled"
+  },
+  {
+   "id": "ARCH-R127-STRINGS-MODULE-GROWTH",
+   "round": 127,
+   "source": "a-round-127.md section 8 code-reviewer Architecture note",
+   "note": "audio/render modules (graph.client.ts, export-wav.client.ts) import UI copy - acceptable because strings.ts is a leaf; keep, check dependency direction when V-0.2 adds sibling objects. ~60 keys now, ~300 by V-0.5; the sample/samples branch is the first logic in the module: before V-0.3 decide whether conditional copy may live in formatters and whether to split by file. exportWav/exportMp3 hotspot touched only for literals: keep",
+   "status": "signal (not scheduled); B rules before V-0.3 (current-task.md round 128 section 8); candidate topic for the next bounded frontend-architect checkpoint at the V-0 boundary"
+  },
+  {
+   "id": "ARCH-R127-MODAL-CLOSE-LABEL",
+   "round": 127,
+   "source": "B ruling D-29z93 on A round 127 P1 option 3",
+   "note": "Modal.tsx (frozen, shared) hard-codes the X aria-label 'Close'; any dialog whose footer says Close duplicates it. A closeLabel prop or 'Close dialog' would need its own task/owner and e2e updates (auth-modal.spec.ts:65, accessibility.spec.ts:60)",
+   "status": "signal (not scheduled)"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -18618,6 +18672,28 @@
    "source": "C round 126 DESIGN-UX-REVIEW part 2 (c-round-126.json bugs)",
    "regression": "no (baseline 608187f)",
    "added": "2026-10-24 B round 126->127 planning (2026-10-23 bug gate: Lows deferred to the polish pass after VISUAL-A)"
+  },
+  {
+   "id": "C-R127-L1e-BUSY-LABEL",
+   "title": "Export footer busy button reads 'Rendering…' also during 'Loading MP3 encoder…' and 'Creating MP3'",
+   "severity": "low",
+   "status": "open",
+   "source": "C round 127 C-R127-L1 (also A round 127 reviewer copy nit)",
+   "evidence": "c-round-127/out/main-1440-r2.json MP3 obs; shots/MP3-done-*",
+   "repro": "Export -> Export MP3 -> watch the footer primary button during encoder load and encode",
+   "note": "needs phase-dependent label logic in ArrangementExportDialog.tsx; not copy-only",
+   "added": "2026-10-24 B round 127 -> 128 planning (D-29z93)"
+  },
+  {
+   "id": "C-R127-L1f-SELF-COMPARE-TESTS",
+   "title": "export-cancel.test l.211-215 and export-wav.test l.170/594 compare a constant with its module source; EW8f title 'stalled message is exact' overstates what that test alone checks (ST1/ST5 pin the literals)",
+   "severity": "low",
+   "status": "open",
+   "source": "C round 127 notesForB + A round 127 code-reviewer",
+   "evidence": "a-round-127.md section 8; c-round-127.md Notes for B",
+   "repro": "read the named lines",
+   "note": "the export-cancel.test 'exact Georgian messages' title is fixed in round 128 (title-only grant)",
+   "added": "2026-10-24 B round 127 -> 128 planning (D-29z93)"
   }
  ],
  "baseline_tree_at_round108": {
@@ -19417,5 +19493,33 @@
    "app/lib/arrangement/__tests__/strings.test.ts",
    "docs/implementation/2026/quarter-IV/104-studio-v0-export-strings.md"
   ]
+ },
+ "baseline_tree_at_round128": {
+  "head": "608187fdf279d9b579c279f3c536b27be74c0eea",
+  "working_tree": "dirty by design: the C-verified round-127 tree (24 M + 3 ??), kept; gate 127 skipped (C FAIL); gate 122 published 608187f",
+  "frozen_list": "tmp/studio-real-loop/b-round-127-r128-tree-sha256.txt",
+  "entries": 930,
+  "frozen_scope": "git ls-files -co --exclude-standard minus the 10 grants (tracked and untracked; closes the round-127 gap where the untracked strings.ts was outside the frozen list)",
+  "granted_start_hashes": "tmp/studio-real-loop/b-round-127-r128-granted-start-sha256.txt",
+  "granted_start_copies": "tmp/studio-real-loop/b-round-127/r128-granted-start/",
+  "excluded": [
+   "app/lib/arrangement/strings.ts",
+   "app/lib/arrangement/__tests__/strings.test.ts",
+   "app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx",
+   "app/lib/arrangement/__tests__/export-dialog-focus.test.tsx",
+   "app/lib/arrangement/__tests__/export-dialog-focus-restore.test.tsx",
+   "app/lib/arrangement/__tests__/export-toolbar-hold-enter.test.tsx",
+   "app/lib/arrangement/__tests__/export-dialog-footer.test.tsx",
+   "app/lib/arrangement/__tests__/export-cancel-ui.test.tsx",
+   "app/lib/arrangement/__tests__/export-cancel.test.ts",
+   "docs/implementation/2026/quarter-IV/104-studio-v0-export-strings.md"
+  ],
+  "protected": {
+   "app/routes/studio.$productId.tsx": "fa2cf0bc",
+   "app/routes/api.studio-token.ts": "13914809",
+   "app/lib/auth.ts": "56f5b76f",
+   "app/contexts/AuthContext.tsx": "bf9ee257",
+   "app/components/ui/Modal.tsx (frozen, shared)": "741c2341"
+  }
  }
 }

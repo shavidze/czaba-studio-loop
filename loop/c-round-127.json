@@ -1,0 +1,152 @@
+{
+ "round": 127,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T05:55:01.5304737Z",
+  "round": 127,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "EX-EN-IDLE",
+  "EX-EN-RUN",
+  "EX-EN-RANGE",
+  "EX-EN-MP3",
+  "EX-EN-CANCEL",
+  "EX-EN-MUTE",
+  "EX-EN-EMPTY",
+  "EX-EN-VIDEO",
+  "EX-LAYOUT",
+  "G127-3",
+  "PX-NET/REG-HYD"
+ ],
+ "failed": [
+  "T127-TARGETED",
+  "EX-KEYS"
+ ],
+ "inconclusive": [
+  "EX-EN-VIDEO sub-state 'Decoding — please wait': not reachable in the browser (beeps-6s decoded before the first dialog read, 548 ms); covered only by jsdom; recorded, not claimed"
+ ],
+ "blocked": [
+  "G127-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "C-R127-01",
+   "severity": "medium",
+   "steps": [
+    "Open http://127.0.0.1:5173/studio-lab (fresh context), add any clip (e.g. Enter on a library sound)",
+    "Click toolbar Export",
+    "In the dialog query buttons by accessible name: getByRole('dialog').getByRole('button',{name:'Close',exact:true}).count()",
+    "Start a WAV export (Export WAV) and repeat the query while the progress bar shows"
+   ],
+   "expected": "One button per accessible name in the dialog (before this round the footer was 'დახურვა' and the Modal ✕ 'Close'); R2 'copy only, no behaviour change'; the 18 granted tests and the §4 neighbour list green",
+   "actual": "2 buttons named 'Close' (Modal ✕ aria-label='Close' from frozen Modal.tsx, footer text 'Close'); during a render the footer one is disabled while the ✕ is enabled, so a screen-reader user hears two 'Close' buttons with different states. 15 granted tests fail with 'Found multiple elements with the role \"button\" and name \"Close\"' (export-dialog-a11y-copy NC3, export-dialog-hold-enter HE1–HE7, export-mp3 MX1/MX5/MX6, export-range-ui XU3/XU5, master-ui overload alert, video-fades-ui VU4). Same as A's P1; A stopped for a B ruling.",
+   "evidence": "c-round-127/out/vitest-targeted.log (28 files, 353 tests, 15 failed / 338 passed); out/main-1440-r2.json rows.S2.roleCloseCount=2, rows.RUN_project_wav.duringRender.closeBtns; out/main-1280-r1.json same; out/s2-range-*-r1.json dialog.roleClose=2; shots/S2-idle-range-1440-r2.png"
+  },
+  {
+   "id": "C-R127-L1",
+   "severity": "low",
+   "steps": [
+    "Open the Export dialog / run exports; read doc 104 rows videoRenderReason, loopRangeNote/loopProjectNote, exportCancelled*, busyButton, exportedRange"
+   ],
+   "expected": "Plain, natural English in sentence case (§1.1)",
+   "actual": "Wording nits, no fact dropped or added: 'in this cycle' (dev-cycle sense; 'in this version' reads better); 'the time selection is created' / 'the entire project is created' (→ 'is exported'); capital 'No' mid-sentence in '— No file was created.' (follows §1.1 literally); busy button 'Rendering…' also shows during 'Loading MP3 encoder…' and 'Creating MP3'; done message says lowercase 'range 00:02.000 — …' while the dialog calls it 'Time selection'",
+   "evidence": "shots/RANGE-done-1440-r1.png, shots/CANCEL-mp3-1440-r2.png, docs/implementation/2026/quarter-IV/104-studio-v0-export-strings.md map rows; out/main-1440-r2.json MP3 obs"
+  }
+ ],
+ "georgianCounts": {
+  "EX-EN-IDLE S fixture no selection 1440": {
+   "total": 0,
+   "subtracted": 0,
+   "net": 0
+  },
+  "EX-EN-IDLE S fixture no selection 1280": {
+   "total": 0,
+   "subtracted": 0,
+   "net": 0
+  },
+  "EX-EN-IDLE time selection 1440": {
+   "total": 0,
+   "subtracted": 0,
+   "net": 0
+  },
+  "EX-EN-IDLE time selection 1280": {
+   "total": 0,
+   "subtracted": 0,
+   "net": 0
+  },
+  "EX-EN-RUN render+done 1440": {
+   "net": 0
+  },
+  "EX-EN-RUN render+done 1280": {
+   "net": 0
+  },
+  "EX-EN-RANGE done 1440": {
+   "net": 0
+  },
+  "EX-EN-RANGE done 1280": {
+   "net": 0
+  },
+  "EX-EN-MP3 / BOTH done 1440": {
+   "net": 0
+  },
+  "EX-EN-CANCEL wav 1440/1280, mp3 1440": {
+   "net": 0
+  },
+  "EX-EN-MUTE dialog+done 1440": {
+   "net": 0
+  },
+  "EX-EN-EMPTY 1280": {
+   "net": 0
+  },
+  "EX-EN-VIDEO included/off/fade 1440": {
+   "net": 0
+  },
+  "EX-EN-VIDEO noaudio source 1440": {
+   "total": 15,
+   "subtracted": 15,
+   "net": 0,
+   "subtractedList": [
+    "ვიდეოს ხმა არ აქვს (source.audioNote from video.client.ts, V-0.2)"
+   ]
+  }
+ },
+ "invalidRuns": [
+  "main-1440-r1: first load hydration error + invalid hook call (ENV-FIRST-LOAD) → out/invalid-main-1440-r1.json, replaced by r2"
+ ],
+ "notesForB": [
+  "Verdict FAIL is solely C-R127-01 (= A's P1). Every browser copy row is clean: Georgian count 0 everywhere except the subtracted V-0.2 audioNote; exports unchanged (project 7217877 frames 48k/24/2ch czaba-studio-lab.wav at both viewports; range 4.000 s = 192000 frames czaba-studio-lab-range.wav at both viewports; muted WAV peak 0; MP3 and WAV+MP3 via real CDN). Round 128 can be a bounded P1 fix-up plus re-run of T127-TARGETED and EX-KEYS only.",
+  "P1 options (A's list): relabel the footer button (e.g. 'Done') removes the duplicate name without any test-query change; relabelling Modal ✕ touches a frozen shared file and e2e selectors; matcher relaxation leaves the duplicate in the product. C recommends a ruling that removes the duplicate name in the product, not only in tests.",
+  "EX-KEYS otherwise matches the round 101/102 baseline: idle Close → Export WAV → ✕ → format-wav → scope radio → Close…, Shift+Tab back, Escape closes with focus on toolbar Export, hold-Enter on footer Close closes once and repeats are prevented, hold-Enter on toolbar Export opens once with no render/download. EX-KEYS is failed only because of the duplicate 'Close' accessible name.",
+  "EX-LAYOUT: S0/S1 outside the dialog 0 deltas >1 px at both viewports (111/122 and 103/121 elements). S2: only the two footer buttons changed (Close 91→70 px, Export WAV 155→113 px, same y/h, right-aligned), attributable to their text. Footer stays one row, no new scrollWidth>clientWidth (the sr-only Format legend is clipped by design). 1280 range-card/footer overlap: 45 px (S fixture) and 13 px (time-selection state) = F-2 13/45.",
+  "Low wording nits (C-R127-L1) → deferred_low_polish. Also: export-cancel.test title still says 'exports the exact Georgian messages' (R3 forbade renaming); export-cancel.test l.211–215 and export-wav.test now compare constants with their module source (ST1/ST5 pin the literals).",
+  "audioNote 'ვიდეოს ხმა არ აქვს' (video.client.ts) is app copy shown inside the Export dialog; V-0.2 must translate it (task subtracts it this round).",
+  "Code-reviewer Architecture note from A (keep; strings.ts leaf; first conditional logic sample/samples; decide on conditional copy and file split before V-0.3) passed on as a signal.",
+  "A's a-round-127/diff.patch (05:39) is older than the final tree (hash differs); C reviewed the live git diff 608187f.",
+  "Ableton: 'Export' / 'Time selection' are terminology matches only (Live 12 manual ch. 42 / ch. 6 per B capture); export behaviour not applicable (copy only).",
+  "RUN_range_wav in main-*.json is a second project export (S fixture has no time selection); real range evidence = s2-range-*-r1.json (192000 frames). T127 file count: C ran B's §4 list literally (28 files); A's 29th is outside the list. MP3 byte sizes differ between MP3-only and WAV+MP3 runs (pre-existing, not R2)."
+ ],
+ "ableton": {
+  "requirementMet": "no (P1)",
+  "correspondence": {
+   "export command name": "confirmed term (toolbar Export; dialog 'Export WAV/MP3' is a CZABA naming choice)",
+   "Time selection": "confirmed term",
+   "export behaviour": "not applicable"
+  }
+ }
+}

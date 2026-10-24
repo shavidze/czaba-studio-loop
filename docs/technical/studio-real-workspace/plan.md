@@ -1230,6 +1230,16 @@ C round 126 (`tmp/studio-real-loop/c-round-126.md`, `c-round-126.json`) — **PA
 - **R8 — V-1-ის წინაპირობა:** token-ები `app/styles/app.css`-შია, რომელიც `global_forbidden_files`-ის `app/styles/**`-ში შედის — V-1-ს B-ის ვიწრო ნებართვა დასჭირდება (მხოლოდ `[data-studio-theme="obsidian"]` ბლოკი), მომხმარებლის დამტკიცებული spec-ის საფუძველზე.
 - **R9 — შედეგი წინასწარ (round 128):** 2026-10-27-ზე ან შემდეგ — ჯერ რეგრესია; C FAIL Medium+ — V-0.1-ის გასწორება; C PASS — V-0.2. Architecture note ამ რაუნდამდე არ ყოფილა; ARCH-CHECKPOINT-PHASE1-BOUNDARY უპასუხოა და არ ბლოკავს.
 
+**D-29z93 — Round 127-ის შედეგი; Round 128: V-0.1-ის გასწორება (C-R127-01 + C-R127-L1).**
+
+C round 127 (`tmp/studio-real-loop/c-round-127.md`, `c-round-127.json`) — **FAIL**, `browserVerified`/`realVerified` — true. ერთადერთი მიზეზი C-R127-01 (Medium) = A-ს P1: დიალოგში ორი ღილაკი ერთი სახელით „Close“ (გაყინული `Modal.tsx`-ის ✕ `aria-label="Close"` და footer-ის ტექსტი `Close`); render-ის დროს footer-ის ღილაკი disabled-ია, ✕ — არა; 15 ტესტი წითელია. დანარჩენი ყველა row ბრაუზერში PASS-ია (ქართული 0, გარდა V-0.2-ის `audioNote`-ისა; WAV 7217877 frame, range 192000, MP3/WAV + MP3, layout, keys). Gate 127 — skipped; ხე ინახება.
+- **R1 — P1-ის განჩინება:** footer-ის ღილაკი → `Done` (A-ს ვარიანტი 1). `aria-label` (2) WCAG 2.5.3-ს არღვევს, `Modal.tsx`-ის შეცვლა (3) გაყინულ საერთო ფაილს და e2e selector-ებს ეხება (signal `ARCH-R127-MODAL-CLOSE-LABEL`), matcher-ის შესუსტება (4) დუბლიკატს პროდუქტში ტოვებს. key `closeButton` რჩება (35 მითითება 13 ფაილში).
+- **R2 — Low-ები იმავე მოდულში (2026-10-23-ის წესის გამონაკლისი: ფაილი უკვე ჩვენია, ღირებულება მცირე):** W1 `in this cycle` → `in this version`; W2 `is created` → `is exported`; W3 em dash-ის შემდეგ `no file was created` (8 key); W4 `range` → `time selection`. `busyButton`-ის ფაზური label და self-comparison ტესტები → `deferred_low_polish`.
+- **R3 — ახალი ტესტი HE8** (`export-dialog-hold-enter.test.tsx`, რომელსაც render-ის harness აქვს; `export-dialog-a11y-copy` გაყინულია): ყოველ ღილაკს დიალოგში ერთი სახელი აქვს — idle და render-ის დროს; m5 (`Close`) და m6 (`Export WAV`) მას წითლად აქცევს.
+- **R4 — გაყინვა:** `b-round-127-r128-tree-sha256.txt` (930) tracked და untracked ფაილებს ფარავს — round 127-ში untracked `strings.ts` სიის გარეთ იყო და mutation-ის ნარჩენი ვერ დაიჭირა.
+- **R5 — შედეგი წინასწარ (round 129):** 2026-10-27-ზე ან შემდეგ — ჯერ რეგრესია; C FAIL Medium+ — კიდევ ერთი შეზღუდული გასწორება; C PASS — V-0.2. V-0.3-მდე B წყვეტს reviewer-ის შენიშვნას (conditional copy და ფაილის გაყოფა).
+
+
 **D-29z91 — Round 125-ის შედეგი; DESIGN-UX-REVIEW ნაწილი 1 დასრულდა; Round 126: DESIGN-UX-REVIEW, ნაწილი 2.**
 
 C round 125 (`tmp/studio-real-loop/c-round-125.md`, `c-round-125.json`) — **PASS**, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`, `partComplete: true`: D6, D1, D2 შესრულდა, გადატანილი არცერთი; SOURCE-SCOPE (`608187f`, 937) დასაწყისშიც და ბოლოსაც OK; G125-3 (401, „Sign in required“, 0 `audio[src]`; fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 125 — `skipped`; baseline რჩება `608187f`.
@@ -2203,6 +2213,7 @@ flowchart TD
 | 126 | DESIGN-UX-REVIEW 2 | D3 ხახუნის წერტილები (D3-A: 1280 SFX ხაზი / D-29b), D4 DUX-R-3+, D5 საბოლოო ვერდიქტი და ინდექსი; A — არაფერი (D-29z91) |
 | 126 → | (შედეგი) | **C PASS** (`browserVerified`, `reviewComplete`, D3/D4/D5); D3-A ხახუნი → DUX-R-3; DUX-B-2/3/4 (Low) → deferred; DUX-R-3…9 → `awaiting_user`; DESIGN-UX-REVIEW → done; gate 126 skipped |
 | 127 | VISUAL-A V-0.1 | Export-ის ტექსტები ინგლისურად ახალი `strings.ts`-ით (`studioExportStrings`); 18 ტესტი — ლიტერალი → მოდული; ახალი `strings.test.ts` (ST1–ST5) და doc 104 (D-29z92) |
+| 128 | VISUAL-A V-0.1 გასწორება | C-R127-01: footer-ის ღილაკი `Close` → `Done` (ერთი სახელი თითო ღილაკზე); C-R127-L1-ის W1–W4 ტექსტი `strings.ts`-ში; ახალი HE8 (D-29z93) |
 | 128 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.1-ის Medium+ გასწორება; სხვაგვარად V-0.2 |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
@@ -2251,6 +2262,8 @@ flowchart TD
 **D-29z90:** round 125-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-125.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/design-ux-review.md`, `c-round-125*`). ყველაფერი გაყინულია (`b-round-124-r125-tree-sha256.txt`, 937).
 **D-29z91:** round 126-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-126.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/design-ux-review.md` — ნაწილი 1-ის გადაწერის გარეშე, `c-round-126*`). ყველაფერი გაყინულია (`b-round-125-r126-tree-sha256.txt`, 937).
 **D-29z92:** round 127-ში A-ს ეკუთვნის ახალი `app/lib/arrangement/strings.ts`, `ArrangementExportDialog.tsx`, `export-progress.ts`, `export-cancel.ts`, `export-wav.client.ts`, `graph.client.ts` (მხოლოდ `formatExportOverloadWarning`-ის ტექსტი l.405–413, l.460-ის `Error` და import), `ArrangementContext.tsx` (მხოლოდ l.204 და `exportWav`/`exportMp3`-ის სხეულების ლიტერალები, import), 18 ტესტი (მხოლოდ ლიტერალი → მოდული), ახალი `strings.test.ts` და ახალი doc 104. დანარჩენი გაყინულია (`b-round-126-r127-tree-sha256.txt`, 913).
+
+**D-29z93:** round 128-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (მხოლოდ W0–W4 მნიშვნელობები), `strings.test.ts` (მათი literal-ები), `export-dialog-hold-enter.test.tsx` (+1 `it`, HE8, და სათაურები), კიდევ 6 ტესტის მხოლოდ სათაურები (`export-dialog-focus`, `export-dialog-focus-restore`, `export-toolbar-hold-enter`, `export-dialog-footer`, `export-cancel-ui`, `export-cancel`) და doc 104. დანარჩენი გაყინულია (`b-round-127-r128-tree-sha256.txt`, 930).
 
 ## 7. Done Policy
 

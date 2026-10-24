@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T05:00:14.546Z)
+# Active loop summary (2026-10-24T06:13:12.598Z)
 
-- backlog.json 1137 KB -> active view 149 KB
-- status: G_ROOT_GATE round 126
-- servers: `{"checkedUtc":"2026-10-24T04:26:49.4113922Z","round":126,"attempt":1,"store":200}`
+- backlog.json 1159 KB -> active view 148 KB
+- status: G_ROOT_GATE round 127
+- servers: `{"checkedUtc":"2026-10-24T05:55:01.5304737Z","round":127,"attempt":1,"store":200}`
 - last publication: 608187fdf279d9b579c279f3c536b27be74c0eea (rounds 122-122)
-- last root gate: round 126 skipped - no real changes
+- last root gate: round 127 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -183,7 +183,7 @@
 - GATE102-S2-GUARD-MOUSE-SCROLL-MORE-OFTEN / low / acknowledged (= GATE89-S5 / A-R88 #2 ruling: cosmetic, click still lands in the same card per reviewer trace); optional :focus-visible gating only if UX objects; signal, not scheduled / measuring the card bottom makes a plain mouse click on scope-project at 1280 done scroll ~16 px (before: no scroll)
 - GATE102-S4-PROGRESSTEXT-UNDEFINED-NIT / info / open - Lows batch (dialog nit: type progressText as string | undefined and drop ?? undefined); schedule with the next dialog-owning round / progressText repeats the isRendering && progress condition only to narrow string | null
 - ARCH-R102-FOOTER-GUARD-PURE-FN / info / open - architecture signal, not scheduled; under the pending checkpoint request (addendum (o) to b-round-91-checkpoint-request.md); value low-medium, only if the guard changes again / extract the focus-guard arithmetic to a pure lib/arrangement function (exportFooterFocusScrollDelta) or fold the four dialog focus effects i
-- GATE103-S2-STALL-SECONDS-DUPLICATED / info / open - Lows batch nit (EW8f pins both the constant and the text, so drift is caught); build the message from the constant when export-wav.client.ts is next owned / "30" is written in ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS and again in the stalled message
+- GATE103-S2-STALL-SECONDS-DUPLICATED / info / scheduled round 127 (owned line in V-0.1: export-wav.client.ts calls studioExportStrings.wavWorkerStalled(timeout / 1000); ST5 pins it); closes on C PASS / "30" is written in ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS and again in the stalled message
 - A-R103-EW5-TITLE-NIT / info / open - Lows batch (test title nit; EW5 title "exact message" is a prefix match now); with the next export-wav.test.ts owner / EW5 title says exact message while the worker text is now appended
 - ARCH-R103-EXPORT-ABORT-CONTRACT-DOC / info / open - architecture signal, not scheduled; addendum (p) to the pending checkpoint request (b-round-91-checkpoint-request.md); proposal: docs/technical/ note on the export pipeline abort contract (who removes which listener, where signal.aborted is checked), CU1-CU10 unchanged, no code / exportMp3 cancel/abort ordering in ArrangementContext.tsx has needed microtask-sensitive tests over several rounds (CU4, CU10)
 - ARCH-R104-STATUS-COALESCING / info / consumed by round 105: the reviewer Architecture note (Signal 4, verdict keep) proposed exactly the gesture-aware coalescing next to gestureCountRef that round 105 implements; no separate checkpoint item / the rule for coalescing repeats during a gesture belongs in the provider, not at 60+ call sites
@@ -226,7 +226,6 @@
 - C-R116-OBS-AS-CONST / info / ruled accepted (B, D-29z82) / track-volume-db.test.tsx:42 uses 'as const' (const assertion; existing repo pattern)
 - TRACK-VOLUME-TAPER / info / signal (not requested by the user; Live taper unconfirmed in saved captures); Shift fine in round 118 addresses precision / lane/group Volume faders are linear in dB (100 px = 60 dB); a non-linear taper would give more resolution near 0 dB
 - GATE117-S5-TEXT-BELOW-FLOOR / info / acknowledged (reviewer: acceptable as designed; screen readers use the text) / a stored value below the -59.9 floor (e.g. 1e-4) reads -80.0 dB while the slider sits at -59.9
-- GROUP-VOLUME-VISIBLE-READOUT / info / signal for DESIGN-UX-REVIEW (re-confirmed C round 124 Q3/notesForB: group Volume has no visible value; layout change needs Saba) / the group row shows its dB only in title/aria-valuetext, no visible readout (lane has one)
 - PAN-SHIFT-FINE / info / signal (Live 12 section 42.6 Shift finer resolution is generic to controls; T12 3b scoped to Volume faders; D-29z83 R5) / Pan fader has no Shift fine drag
 - GATE118-NIT-FINE-CONST / info / open nit - for the next owner of ArrangementDetailPanel.tsx / DETAIL_CLIP_GAIN_FINE_DIVISOR stays local while round 118 adds FADER_SHIFT_FINE_DIVISOR in fader.ts
 - MASTER-FINE-STEP / info / scored in ABLETON-EXPERT-REVIEW part 2 (C round 124 Q5: Shift still 0.5 dB steps) -> recommendation ABL-R-15 awaiting_user; not a bug / Shift fine on Master still snaps to the 0.5 dB Master step (fine = 10x travel per step, not 0.05 dB resolution); Live behaviour unconfirmed
@@ -239,7 +238,6 @@
 - C-R120-01 / info / applied as a process rule from round 121 (current-task.md section 2: every lasting edit via Edit/Write incl. formatting of new files; shell replaces only for temporary mutations, restored and sha-verified; A lists every shell write); not an app defect; not deferred_low_polish / A made one lasting formatting edit to its new test file with a Python replace, bypassing the Edit-tool primitives hook
 - C-R120-WGVIDEO-NO-BASELINE / info / acknowledged; B captured a pre-round browser baseline for round 121 (b-round-120/probe/baseline-r121.json: video waveform d sha be86af38 at 1x on 0a75ba8); the round-120 equivalence rests on code + WG2 (scale 1 byte-identical) / WG-VIDEO unchanged-vs-pre-round had no browser byte baseline (inconclusive row in C round 120)
 - ARCH-R120-PEAKSHAPE-TO-PEAKS / info / signal - addendum (ad) to the pending checkpoint request b-round-91-checkpoint-request.md (ARCH-CHECKPOINT-PHASE1-BOUNDARY); reviewer verdict keep; round 121 does not move it; not scheduled / buildPeakShape/PeakShape are pure geometry exported from the ArrangementClip component file; the detail panel and tests import them from the
-- WAVEFORM-ZOOM-DISCOVERABILITY / info / signal for DESIGN-UX-REVIEW part 2 (D3); related DUX-R-2 (awaiting_user); not scheduled / the Waveform Zoom select has no visible dropdown affordance
 - WAVEFORM-ZOOM-LIVE-PARITY / info / signal for ABLETON-EXPERT-REVIEW (not scheduled): Live 12 6.1 confirms a slider for all audio tracks incl. new clips; range, location, undo behaviour and Clip View behaviour unconfirmed; CZABA uses a stepped select 0.5x-8x, lanes only, not in history / Waveform Vertical Zoom: stepped select vs Live continuous slider; detail panel not zoomed
 - GATE121-S4-RENDER-COST / info / acknowledged (reviewer: same cost class as horizontal zoom; discrete choice; throttle or useDeferredValue only if a continuous slider is added) / one Waveform Zoom change rebuilds buildPeakShape for every audio clip (up to 4096 columns)
 - GATE121-S5-ARIA-LANGUAGE / info / signal for DESIGN-UX-REVIEW (not scheduled) / Waveform Zoom aria-label mixes English 'Waveform Zoom' (Live term) and Georgian while the neighbouring grid select is Georgian only
@@ -249,13 +247,13 @@
 - ABL-B-1 / low / deferred_low_polish / the badge row overflows the option: scrollWidth 139-152 px > clientWidth 126 px; '▶' sits past the card edge and 'ისმის' wraps to a second l
 - ABL-B-2 / low / deferred_low_polish / the second Z pushes a duplicate entry: the first X leaves the view at 137.7 px/s while the status says 'წინა ხედი აღდგა. X კიდევ ერთი ნაბიჯი
 - C-R123-OBS-SFX-HEADER-SELECTION / info / watch (unreproduced; not a bug) / native text-selection highlight on the SFX header in two first-run P3 screenshots (harness drag started off-screen); 4 targeted probes found
-- C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / info / signal for DESIGN-UX-REVIEW (not a bug yet; C may score it as DUX-B or DUX-R) / at 1280x720 the Export dialog's 'მონიშნული მონაკვეთი' option sits partly under the dialog footer until the body is scrolled
+- C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / info / judged round 126 F-2: acceptable (active range card 13 px under the footer, ArrowDown/wheel reveal it; disabled hint card belongs to ARCH-R101-MODALBODY-PADDING-SLOT / GATE102-S3-TALL-CARD-NO-CAP) / at 1280x720 the Export dialog's 'მონიშნული მონაკვეთი' option sits partly under the dialog footer until the body is scrolled
 - C-R124-ENV-FIRST-LOAD / info / known environment (ENV-FIRST-LOAD rule) / first /studio-lab load after dev-server warm-up showed a hydration error + 'Invalid hook call' and an empty DOM; replaced once; all later se
-- C-R125-OBS-CTRL-ALT-PASTE-SPLIT / info / observation (no CZABA contract); judged in round 126 D3-B with a layout-faithful AltGr event (key = produced character, code = KeyE/KeyV; precedent INFO-R60-SHIFT1-SYNTH): key-based handler and no effect -> info 'not reachable by AltGr'; an arrangement edit while typing in a field -> DUX-B (at most Low if Undo restores it in one step) / Ctrl+Alt+V pastes and Ctrl+Alt+E splits: the Ctrl-letter branches do not exclude Alt; on Windows AltGr = Ctrl+Alt, so an AltGr character cou
-- C-R125-OBS-1280-SFX-LANE-UNDER-PANEL / info / round 126 D3-A must apply the pre-ruled D-29b test (current-task.md section 3 D3-A): panel > 120 px with a lane hidden (auto-fit on, no user resize) -> Medium DUX-B; panel = 120 and SFX reachable by wheel/scrollbar -> friction; reachable only by collapse/separator -> Low DUX-B; unreachable -> Medium DUX-B. Medium -> bounded fix-up before V-0 / at 1280x720 with the detail panel expanded the SFX lane (with the selected clip) sits behind the detail panel; right-clicks there hit the pa
-- C-R125-OBS-VOLUME-DEADZONE-6PX / info / data for DESIGN-UX-REVIEW part 2 (D3 feedback/precision); not a bug / Volume fader: a 6 px drag does nothing (dead zone); 30 px = -19.8 dB (0.66 dB/px on a 91 px fader); Shift gives 1/10
+- C-R125-OBS-CTRL-ALT-PASTE-SPLIT / info / judged round 126 F-5: shortcutLetter() matches event.code; a layout-faithful AltGr event (key €/@, code KeyE/KeyV) splits/pastes with timeline focus, does nothing in 4 text fields (8/8), 1-step Undo -> acceptable (info). Signal ALTGR-SHORTCUT-GUARD recorded, not scheduled / Ctrl+Alt+V pastes and Ctrl+Alt+E splits: the Ctrl-letter branches do not exclude Alt; on Windows AltGr = Ctrl+Alt, so an AltGr character cou
+- C-R125-OBS-1280-SFX-LANE-UNDER-PANEL / info / ruled round 126 D3-A: panel 120 = D-29b fallback, reachable by wheel/scrollbar in 1 action -> friction, not a bug -> DUX-R-3 (awaiting_user) / at 1280x720 with the detail panel expanded the SFX lane (with the selected clip) sits behind the detail panel; right-clicks there hit the pa
 - C-R125-OBS-S1-FULL-SCALE / info / data (C-R86-OBS-DEFAULT-OVERLOAD class); relevant to T12-ADVANCED meters/RMS; not a bug / the S1 fixture export has 159 full-scale samples in the 4 s range (hero + pulse summed at 0 dB)
 - C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
+- ALTGR-SHORTCUT-GUARD / info / signal (not scheduled; no CZABA contract; C round 126 F-5) / Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
