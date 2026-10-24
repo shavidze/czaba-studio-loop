@@ -1,0 +1,49 @@
+--- ../tmp/studio-real-loop/b-round-140/r141-granted-start/app/lib/arrangement/strings.ts	2026-10-24 17:56:51.874407689 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 18:02:41.268250129 +0000
+@@ -398,6 +398,7 @@
+   ungroupedMany: (names: string): string => `Groups ${names} ungrouped.`,
+   renameEmpty: (name: string): string => `The name is empty — “${name}” is kept`,
+   renamed: (name: string): string => `Group name: “${name}”.`,
++  defaultNamePrefix: 'Group',
+ };
+ 
+ export const studioGridStrings = {
+--- ../tmp/studio-real-loop/b-round-140/r141-granted-start/app/lib/arrangement/groups.ts	2026-10-24 17:56:51.874407689 +0000
++++ app/lib/arrangement/groups.ts	2026-10-24 18:05:14.363642920 +0000
+@@ -1,7 +1,7 @@
+ import type { Arrangement, ArrangementTrack, ArrangementTrackGroup } from '~/types/arrangement';
+ import { studioTrackGroupStrings } from './strings';
+ 
+-export const TRACK_GROUP_NAME_PREFIX = 'ჯგუფი';
++export const TRACK_GROUP_NAME_PREFIX = studioTrackGroupStrings.defaultNamePrefix;
+ export const TRACK_GROUP_NAME_MAX_LENGTH = 64;
+ export const TRACK_GROUP_INDENT_PX = 12;
+ 
+--- ../tmp/studio-real-loop/b-round-140/r141-granted-start/app/contexts/ArrangementContext.tsx	2026-10-24 17:56:51.874050872 +0000
++++ app/contexts/ArrangementContext.tsx	2026-10-24 18:04:05.263851893 +0000
+@@ -545,8 +545,8 @@
+ 
+ function fallbackArrangement(): Arrangement {
+   return createArrangement([
+-    { id: 'video', kind: 'video', name: 'ვიდეო' },
+-    { id: 'audio', kind: 'audio', name: 'აუდიო' },
++    { id: 'video', kind: 'video', name: 'Video' },
++    { id: 'audio', kind: 'audio', name: 'Audio' },
+   ]);
+ }
+ 
+--- ../tmp/studio-real-loop/b-round-140/r141-granted-start/app/routes/studio-lab.tsx	2026-10-24 17:56:51.874407689 +0000
++++ app/routes/studio-lab.tsx	2026-10-24 18:03:39.680003440 +0000
+@@ -10,9 +10,9 @@
+ ];
+ 
+ const studioLabInitialArrangement = createArrangement([
+-  { id: 'video', kind: 'video', name: 'ვიდეო' },
+-  { id: 'music', kind: 'audio', name: 'მუსიკა' },
+-  { id: 'stems', kind: 'audio', name: 'სტემები' },
++  { id: 'video', kind: 'video', name: 'Video' },
++  { id: 'music', kind: 'audio', name: 'Music' },
++  { id: 'stems', kind: 'audio', name: 'Stems' },
+   { id: 'sfx', kind: 'audio', name: 'SFX' },
+ ]);
+ 

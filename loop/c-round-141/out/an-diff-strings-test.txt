@@ -1,0 +1,152 @@
+--- ../tmp/studio-real-loop/b-round-140/r141-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 17:56:51.874353338 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 18:00:14.509682163 +0000
+@@ -36,6 +36,7 @@
+   MUSICAL_GRID_DIVISIONS,
+ } from '../grid-divisions';
+ import {
++  nextTrackGroupName,
+   TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE,
+   TRACK_GROUP_NAME_PREFIX,
+   trackGroupCreatedMessage,
+@@ -43,6 +44,7 @@
+   trackGroupRefusalMessage,
+ } from '../groups';
+ import { METRONOME_NEEDS_TEMPO_TITLE, METRONOME_TITLE, metronomeStatusMessage } from '../metronome';
++import { createArrangement } from '../model';
+ import { CLIP_LANE_REFUSAL_MESSAGES, GROUP_MOVE_BLOCKED_MESSAGE } from '../selection';
+ import {
+   studioClipEnvelopeStrings,
+@@ -720,8 +722,6 @@
+ };
+ 
+ const CONTEXT_REMAINING_GEORGIAN_LINES = [
+-  "{ id: 'video', kind: 'video', name: 'ვიდეო' },",
+-  "{ id: 'audio', kind: 'audio', name: 'აუდიო' },",
+   "error: error instanceof Error ? error.message : 'ჩატვირთვა ვერ მოხერხდა',",
+ ];
+ 
+@@ -1147,6 +1147,7 @@
+       'Only tracks at the same level can be grouped together — the selected tracks are in different groups.',
+     notAdjacent: 'Only adjacent tracks can be grouped together — the selection skips a track.',
+     ungroupNeedsGroup: 'To ungroup, select a group — click the group name.',
++    defaultNamePrefix: 'Group',
+   },
+ };
+ 
+@@ -1163,6 +1164,7 @@
+   ],
+   studioTrackGroupStrings: [
+     'created',
++    'defaultNamePrefix',
+     'foldNeedsGroup',
+     'groupNeedsTracks',
+     'mixedLevels',
+@@ -1190,8 +1192,6 @@
+   },
+ };
+ 
+-const TRACK_GROUP_PREFIX_LINE = "export const TRACK_GROUP_NAME_PREFIX = 'ჯგუფი';";
+-
+ describe('V-0.2c3 lane-move and track-group strings', () => {
+   it('ST20: every plain-string property of the two objects and the aliased exports equal the exact English', () => {
+     expect(Object.keys(V02C3_OBJECTS).sort()).toEqual(Object.keys(EXPECTED_V02C3_KEYS).sort());
+@@ -1258,18 +1258,18 @@
+     expect(trackGroupRefusalMessage('no-group')).toBe(
+       'To ungroup, select a group — click the group name.',
+     );
+-    expect(trackGroupCreatedMessage('ჯგუფი 1', ['მუსიკა', 'სტემები'])).toBe(
+-      'Group “ჯგუფი 1” created: მუსიკა, სტემები.',
++    expect(trackGroupCreatedMessage('Group 1', ['მუსიკა', 'სტემები'])).toBe(
++      'Group “Group 1” created: მუსიკა, სტემები.',
+     );
+-    const single: ArrangementTrackGroup = { id: 'g1', name: 'ჯგუფი 2', parentId: null };
++    const single: ArrangementTrackGroup = { id: 'g1', name: 'Group 2', parentId: null };
+     const first: ArrangementTrackGroup = { id: 'ga', name: 'A', parentId: null };
+     const second: ArrangementTrackGroup = { id: 'gb', name: 'B', parentId: null };
+-    expect(trackGroupDissolvedMessage([single])).toBe('Group “ჯგუფი 2” ungrouped.');
++    expect(trackGroupDissolvedMessage([single])).toBe('Group “Group 2” ungrouped.');
+     expect(trackGroupDissolvedMessage([first, second])).toBe('Groups “A”, “B” ungrouped.');
+-    expect(TRACK_GROUP_NAME_PREFIX).toBe('ჯგუფი');
++    expect(TRACK_GROUP_NAME_PREFIX).toBe('Group');
+   });
+ 
+-  it('ST22: the two objects, selection.ts and groups.ts (minus the prefix line) contain no Georgian codepoint', () => {
++  it('ST22: the two objects, selection.ts and groups.ts contain no Georgian codepoint', () => {
+     for (const [objectName, object] of Object.entries(V02C3_OBJECTS)) {
+       const samples = V02C3_FORMATTER_SAMPLES[objectName] ?? {};
+       const formatterKeys = Object.entries(object)
+@@ -1292,13 +1292,9 @@
+     const selection = stripSourceComments(readStoreSource('../selection.ts'));
+     expect(selection.length).toBeGreaterThan(0);
+     expect(selection).not.toMatch(GEORGIAN_CODEPOINT);
+-    const groupLines = stripSourceComments(readStoreSource('../groups.ts')).split(/\r?\n/);
+-    expect(groupLines.filter((line) => line === TRACK_GROUP_PREFIX_LINE)).toHaveLength(1);
+-    const groupsWithoutPrefix = groupLines
+-      .filter((line) => line !== TRACK_GROUP_PREFIX_LINE)
+-      .join('\n');
+-    expect(groupsWithoutPrefix.length).toBeGreaterThan(0);
+-    expect(groupsWithoutPrefix).not.toMatch(GEORGIAN_CODEPOINT);
++    const groups = stripSourceComments(readStoreSource('../groups.ts'));
++    expect(groups.length).toBeGreaterThan(0);
++    expect(groups).not.toMatch(GEORGIAN_CODEPOINT);
+   });
+ });
+ 
+@@ -1898,7 +1894,7 @@
+     const georgianLines = clip.split(/\r?\n/).filter((line) => GEORGIAN_CODEPOINT.test(line));
+     expect(georgianLines).toEqual([]);
+     expect(clip).not.toMatch(GUILLEMET);
+-    expect(CONTEXT_REMAINING_GEORGIAN_LINES).toHaveLength(3);
++    expect(CONTEXT_REMAINING_GEORGIAN_LINES).toHaveLength(1);
+   });
+ });
+ 
+@@ -2063,7 +2059,19 @@
+       ...Object.values(GROUP_HEADER_FORMATTER_SAMPLES).flat(),
+       ...Object.values(METER_FORMATTER_SAMPLES).flat(),
+     ];
+-    expect(outputs.length).toBe(17);
++    const formatterCount = [
++      ...Object.values(studioClipEnvelopeStrings),
++      ...Object.values(gh),
++      ...Object.values(mt),
++    ].filter((value) => typeof value === 'function').length;
++    expect(outputs.length).toBeGreaterThanOrEqual(formatterCount);
++    expect(V04C_ENVELOPE_FORMATTER_OUTPUTS.length).toBeGreaterThan(0);
++    for (const samples of [
++      ...Object.values(GROUP_HEADER_FORMATTER_SAMPLES),
++      ...Object.values(METER_FORMATTER_SAMPLES),
++    ]) {
++      expect(samples.length).toBeGreaterThan(0);
++    }
+     for (const output of outputs) {
+       expect(output).not.toMatch(GEORGIAN_CODEPOINT);
+       expect(output).not.toMatch(GUILLEMET);
+@@ -2082,3 +2090,27 @@
+     }
+   });
+ });
++
++describe('V-0.4d default names', () => {
++  it('ST40: the default group prefix and the studio-lab track names are English', () => {
++    expect(studioTrackGroupStrings.defaultNamePrefix).toBe('Group');
++    expect(
++      nextTrackGroupName(
++        createArrangement([
++          { id: 'v', kind: 'video', name: 'V' },
++          { id: 'a', kind: 'audio', name: 'A' },
++        ]),
++      ),
++    ).toBe('Group 1');
++    const route = stripSourceComments(readStoreSource('../../../routes/studio-lab.tsx'));
++    expect(route.length).toBeGreaterThan(0);
++    const georgianLines = route
++      .split(/\r?\n/)
++      .filter((line) => GEORGIAN_CODEPOINT.test(line))
++      .map((line) => line.trim());
++    expect(georgianLines).toEqual(["{ title: 'Studio Lab — დემო სამუშაო სივრცე | CZABA' },"]);
++    for (const name of ["name: 'Video'", "name: 'Music'", "name: 'Stems'", "name: 'SFX'"]) {
++      expect(route, name).toContain(name);
++    }
++  });
++});

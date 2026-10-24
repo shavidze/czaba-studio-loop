@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T17:42:25.374Z)
+# Active loop summary (2026-10-24T18:30:49.313Z)
 
-- backlog.json 1286 KB -> active view 167 KB
-- status: G_ROOT_GATE round 140
-- servers: `{"checkedUtc":"2026-10-24T17:22:04.1637550Z","round":140,"attempt":1,"store":200}`
-- last publication: 6ebbf3ec1c7954e5a33f15e4ac1d20aa2b313414 (rounds 140-140)
-- last root gate: round 140 published - commit 6ebbf3ec1c7954e5a33f15e4ac1d20aa2b313414 pushed
+- backlog.json 1295 KB -> active view 169 KB
+- status: G_ROOT_GATE round 141
+- servers: `{"checkedUtc":"2026-10-24T18:14:20.2573144Z","round":141,"attempt":1,"store":200}`
+- last publication: 6e9f9b1e97d67703ba34e8b2a260a0a5215c3506 (rounds 141-141)
+- last root gate: round 141 published - commit 6e9f9b1e97d67703ba34e8b2a260a0a5215c3506 pushed
 
 ## Current items: -
 
@@ -254,7 +254,7 @@
 - C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
 - ALTGR-SHORTCUT-GUARD / info / signal (not scheduled; no CZABA contract; C round 126 F-5) / Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or 
 - C-R127-L1 / low / parts a-d closed round 128 (C EX-COPY exact text in the browser, c-round-128.json); parts e-f in deferred_low_polish (C-R127-L1e/L1f) / Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in t
-- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2 complete (r129-r133); V-0.3 complete (r134-r137, 7e6202b); V-0.4a round 138, then V-0.4b..e, V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions per D-29z103 R5 | round 139: V-0.4b done (3f2c187); V-0.4c round 140 (D-29z105) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
+- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2 complete (r129-r133); V-0.3 complete (r134-r137, 7e6202b); V-0.4a round 138, then V-0.4b..e, V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions per D-29z103 R5 | round 139: V-0.4b done (3f2c187); V-0.4c round 140 (D-29z105) | round 140: V-0.4c done (6ebbf3e); V-0.4d round 141 (D-29z106) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
 - C-R129-REDO-PASTE-SELECTION / info / observation (pre-existing; product question, not scheduled) / Redo after Paste does not restore the pasted clip selection
 - C-R129-EMPTY-RANGE-UNREACHABLE / info / acknowledged (harness): a drag on empty lane background creates no time selection, so E12/E27/E31 are unit-only / empty-range edit messages not reachable in the browser
 - GATE130-S2-TRACKNAME-IN-SENTENCE / info / closes with V-0.4 default track names; not a new finding later / clipAdded interpolates Georgian track names into English sentences
@@ -264,7 +264,7 @@
 - GATE131-S3-VI-NOT-LIVE-REGION / info / acknowledged (status-announcement-ui covers the live-region mechanism; C VID-ADD saw the Opening -> added sequence in the browser) / VI1-VI4 read the context status, not the live region announcement order
 - GATE131-S5-RAW-ERROR-TEXT / info / signal (pre-existing; React escapes it; a generic importFailed text could replace raw error.message in a later stage; not scheduled) / importFailed shows raw error.message
 - C-R131-OBS-EXPORT-VIDEO-SOUND-BELOW-FOLD-1280 / info / acknowledged (pre-existing layout; same class as C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / ARCH-R101-MODALBODY-PADDING-SLOT) / at 1280x720 the Export dialog video-sound list needs a scroll
-- GATE133-GROUP-PREFIX / low / ruled D-29z98 R1: V-0.4 with the default track names; tracked under GATE128-S1 / default group name 'ჯგუფი N' stays Georgian inside English created/ungrouped statuses
+- GATE133-GROUP-PREFIX / low / dispatched round 141 (D-29z106 DN1/DN2 + R3 sweep of 191 lines in 10 files); closes on C round 141 PASS / default group name 'ჯგუფი N' stays Georgian inside English created/ungrouped statuses
 - GATE133-LANE-HINT-MIXED / low / ruled D-29z98 R3: temporary tracked exception under GATE128-S1; closes in V-0.3d with the StudioWorkspace Shift hints (D-29z99 split); dispatched round 137 (D-29z102 WS1/WS2) / lane-drag hint paragraph shows the English refusal followed by the Georgian Shift hint
 - GATE132-S4-MODULE-AGAINST-MODULE-UNIT-PINS / info / signal: ST18 and the UI literals are the text guards; if ST18 is ever trimmed, put a hand-written literal back into T10/M8 / tempo/metronome/view unit tests compare the formatter with itself
 - GATE132-S5-DOC108-STATUS / low / folded into round 133 (doc 108 l.4) / doc 108 status still says the browser check is pending
@@ -291,10 +291,11 @@
 - A-R138-M60-EXPECTATION / info / harness note: m60 does not turn gesture-reentry red (it only uses the left-edge title to find a handle); m60 is still killed by grid-snap-edit and track-layout. Mutation expectations must name tests that assert the edge, not tests that merely locate it / round-138 §3.5 m60 expectation was off
 - C-R138-FOLDED-TITLE-ROW / info / applied in round 139 task text (track fold, not group fold); a folded group renders 0 clips / round-138 FOLDED-TITLE row wording could not show the title via group fold
 - G138-3-FAKE-BEARER-403 / info / open backend evidence: BLOCKED (backend unavailable in cloud); re-check in a backend-enabled run / fake-Bearer 403 sub-check of the purchase-protection row
-- GATE139-DOC113-L21 / low / folded into round 140 (doc 113 l.21 suffix) / doc 113 l.21 still says StudioWorkspace keeps exactly one Georgian line pinned by ST33 (false after round 139)
-- GATE139-DOC115-STATUS / low / folded into round 140 (doc 115 l.4/72/76) / doc 115 status still waits for C round 139
 - G139-3-FAKE-BEARER-403 / info / open backend evidence: BLOCKED (backend unavailable in cloud); re-check in a backend-enabled run / fake-Bearer 403 sub-check of the purchase-protection row
 - C-R139-NOTES-HARNESS / info / applied as harness notes in round 140 task section 5 / track fold keeps clips visible at 27 px (not hidden); group fold renders 0 clips; video Original sound line needs a row >= 80 px; a plain cl
+- GATE140-S1-DOC116-STATUS / low / folded into round 141 (doc 116 l.4/76/80) / doc 116 status still says the browser check is pending
+- GATE140-S3-ST39-HARDCODED-COUNT / low / folded into round 141 (strings.test ST39 derived count) / ST39 expect(outputs.length).toBe(17) breaks on every new formatter without adding detection
+- GATE140-S4-PLURAL-BRANCH / info / acknowledged: tested (HM4 + C browser '1 clip'); 0 clips reads '0 clips' (correct); no action / one-clip vs many-clips choice in ArrangementGroupHeader is a new caller branch
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

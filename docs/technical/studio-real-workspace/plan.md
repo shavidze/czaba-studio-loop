@@ -1261,6 +1261,22 @@ C round 129 (`tmp/studio-real-loop/c-round-129.md`, `c-round-129.json`) — **PA
 - **R6 — ჩართული ორი იაფი საკითხი, რაუნდის ფაილებში:** SA-DEL (+1 `it` `status-announcement-ui`-ში, ხურავს m4-ის ხარვეზს) და GATE129-S2 (ST9 ამოწმებს, რომ 6 constant აღარ არსებობს). ST13 — Context-ის დარჩენილი ქართული ხაზების ზუსტი სია (ratchet).
 - **R7 — შედეგი წინასწარ (round 131):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.2b-ს შეზღუდული გასწორება; C PASS — V-0.2c (B ჯერ ზომავს, საჭიროებისას ყოფს).
 
+**D-29z107 — Round 141-ის შედეგი; V-0.4d დასრულდა; Round 142: V-0.4e (Clip Detail panel-ის, range/Clip Gain-ის შეტყობინებებისა და ბიბლიოთეკის kind/folder ლეიბლების ტექსტები ინგლისურად).**
+
+C round 141 (`tmp/studio-real-loop/c-round-141.md`, `c-round-141.json`) — **PASS**, `browserVerified`/`realVerified` — true, ყველა ბრაუზერის რიგი 1440-ზე და 1280-ზე, GEO-COUNT net 0, LAYOUT 0 px; რეალური ხმა: ჯგუფის Mute −179 dB, unmute ≤0.03 dB. Gate 141 გამოქვეყნდა `6e9f9b1` (verify 166 ფაილი / 2481 ტესტი, review 8/10).
+- **R0 — V-0.4d → მზადაა** (`c_pass_published`). C-R141-01 (Low, ჩადგმული `Drums` → `Dru…` 1280-ზე) → `deferred_low_polish`. A-ის გადახრები 1–4 დამტკიცდა (DS2-ის codepoint-ით აგებული regex რჩება). C-ის demo badge-ის გამოკლება დადასტურდა (collection copy, V-0.5). Gate-141 #1 (ST39 ზუსტი რაოდენობა) და #5 (doc 117) → round 142; #2 (SSR console.error) და #3 (ST40 meta title) → V-0.5-ის forward constraints.
+- **R1 — ერთი რაუნდი:** `ArrangementDetailPanel.tsx` (38), `panels.ts` l.8, `clip-gain-multi.ts` l.113, `library.ts` l.8–9/14–15 — 44 ხაზი 4 ფაილში; 56 pin 13 ტესტ-ფაილში (`e2e/` — 0). ბიბლიოთეკის ლეიბლები ცალკე სექციაა, რადგან ძიებაზე მოქმედებს.
+- **R2 — სად ცხოვრობს:** ახალი `studioDetailStrings` (ბოლო export); ბიბლიოთეკის 4 key ემატება `studioLibraryStrings`-ს; `LIBRARY_KIND_LABELS`/`LIBRARY_FOLDER_LABELS`/`DETAIL_RANGE_INVALID_MESSAGE` სახელს ინარჩუნებს, მნიშვნელობა მოდულიდან.
+- **R3 — l.53:** რამდენიმე კლიპის მონიშვნა „The selected clips …“ და არა „group“ (Group Track-თან აღრევის თავიდან ასაცილებლად; round-141 §8-ის მინიშნებიდან შეგნებული გადახვევა).
+- **R4 — ტერმინები:** პანელი — collapse/expand, ხაზი — fold; apply ღილაკი — `Set selection`.
+- **R5–R7:** `clipGainUnchanged(value)` ერთი formatter-ია (5 ადგილი); `clipCount` მრავლობითს სწორად აბრუნებს; pending-ის სრული ტექსტი ზუსტად label-ით იწყება (`slice` invariant).
+- **R8 — ბიბლიოთეკის ძიება:** kind label haystack-შია; ინგლისური query (`music`/`stem`) ემთხვევა, ქართული kind-სიტყვა აღარ. სათაურები და კოლექციის ლეიბლი მონაცემია, უცვლელი.
+- **R9 — შერეული მდგომარეობა ერთი რაუნდით:** ბიბლიოთეკის საკუთარი ტექსტები, preview, dock, collection, დემოს სათაურები, route meta title, context l.3468 — V-0.5.
+- **R10 — LAYOUT-ის baseline:** B-ის read-only Playwright probe `6e9f9b1`-ზე (`tmp/studio-real-loop/b-round-141/out/detail-baseline-6e9f9b1.json`); გადატანის სტრიქონების ზრდა — FAIL.
+- **R11 — Ableton:** Clip View და Browser შენახულ წყაროში არ არის — დაუდასტურებელი, Live-ზე მტკიცება არ კეთდება.
+- **R12 — checkpoint:** root-ის პასუხი ჯერ არ არის (მეექვსე დაგეგმვა); არ ბლოკავს. დანართი: default-name seed-ების ადგილი (strings vs data).
+- **R13 — შედეგი წინასწარ (round 143):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.4e-ს გასწორება; C PASS — V-0.4 დასრულებულია, შემდეგ V-0.5 (ჯერ გაზომვა, სავარაუდოდ 2–3 რაუნდად).
+
 **D-29z106 — Round 140-ის შედეგი; V-0.4c დასრულდა; Round 141: V-0.4d (ნაგულისხმევი ჯგუფისა და ხაზების სახელები ინგლისურად — `Group N`, Video / Music / Stems / Audio).**
 
 C round 140 (`tmp/studio-real-loop/c-round-140.md`, `c-round-140.json`) — **PASS**, `browserVerified`/`realVerified` — true, ყველა ბრაუზერის რიგი 1440-ზე და 1280-ზე, GEO-COUNT net 0; რეალური ხმა: Envelope-ის წერტილი −14 dB-ზე ≈ 14 dB-ით ჩუმია (წყვილური), ჯგუფის Mute/Solo ≈ 179/180 dB; Master over მხოლოდ Master +6 dB-ზე, ხაზის over — +12 dB Clip Gain-ით. Gate 140 გამოქვეყნდა `6ebbf3e` (165 ფაილი / 2478 ტესტი, build OK, review 9/10).
@@ -2456,6 +2472,7 @@ flowchart TD
 **D-29z105:** round 140-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (EV-გასაღებები `studioClipEnvelopeStrings`-ში, ახალი `studioGroupHeaderStrings` და `studioMeterStrings`), `ArrangementClipEnvelope.tsx`, `ArrangementGroupHeader.tsx`, `ArrangementTrackMeter.tsx`, `ArrangementMaster.tsx` (import და §1.1-ის ხაზები), `strings.test.ts` (ST31-ის envelope გასაღებები, ST38–ST39), 6 pin ფაილი (მხოლოდ ჩამოთვლილი ხაზები), doc 113 (l.21), doc 115 (l.4/72/76), ახალი `header-meter-envelope-strings-ui.test.tsx` და ახალი doc 116. სხვა ყველაფერი გაყინულია (`tmp/studio-real-loop/b-round-139-r140-tree-sha256.txt`, 943).
 
 **D-29z106:** round 141-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (`studioTrackGroupStrings.defaultNamePrefix`), `groups.ts` (l.4), `ArrangementContext.tsx` (l.548–549), `routes/studio-lab.tsx` (l.13–15), `strings.test.ts` (§3.1), 9 sweep ტესტ-ფაილი (მხოლოდ `ჯგუფი` token), doc 116 (სტატუსი), ახალი `default-track-names-ssr.test.tsx` და ახალი doc 117. სხვა ყველაფერი გაყინულია (`tmp/studio-real-loop/b-round-140-r141-tree-sha256.txt`, 944).
+**D-29z107:** round 142-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (`studioDetailStrings` + `studioLibraryStrings`-ის 4 key), `ArrangementDetailPanel.tsx` (38 ხაზი), `panels.ts` (l.7–8), `clip-gain-multi.ts` (l.113), `library.ts` (l.8–9/14–15), `strings.test.ts` (§3.1), 13 pin ტესტ-ფაილი (მხოლოდ ჩამოთვლილი ხაზები + LB-SEARCH), doc 117 (სტატუსი), ახალი `detail-panel-strings-ui.test.tsx` და ახალი doc 118. სხვა ყველაფერი გაყინულია (`tmp/studio-real-loop/b-round-141-r142-tree-sha256.txt`, 941).
 
 **D-29z103:** round 138-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (1 ახალი ობიექტი `studioClipStrings`), `ArrangementClip.tsx` (import და §1.1-ის 25 ხაზი), `ArrangementContext.tsx` (მხოლოდ import და l.1761), `strings.test.ts` (ST13-ის ერთი ჩანაწერის წაშლა, ST33-ის სათაური, ST34–ST35), 17 pin ფაილი (მხოლოდ ჩამოთვლილი ხაზები, title selector-ების ჩათვლით), doc 113 (l.4/21/70/74/75), ახალი `clip-strings-ui.test.tsx` და ახალი doc 114. სხვა ყველაფერი გაყინულია (`tmp/studio-real-loop/b-round-137-r138-tree-sha256.txt`, 931).
 

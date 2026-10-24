@@ -1,247 +1,341 @@
-# CURRENT TASK — Round 141: VISUAL-A V-0.4d — default group and track names in English (`Group N`, Video / Music / Stems / Audio)
+# CURRENT TASK — Round 142: VISUAL-A V-0.4e — Clip Detail panel, range/Clip Gain messages and library kind/folder labels in English
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 140)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 141)
 - **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
 - **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` (M2, V-0). Module contract: `backlog.json` → VISUAL-A-OBSIDIAN `v0_plan_d29z92.module_contract` + the R6 clarification of round 133 (leaf module, one object per area, plain strings + small pure formatters, branches stay in the caller, existing exported constants keep their names and take their values from the module).
-- **Previous task:** `tasks/round-140.md` (exact copy of the round-140 `current-task.md`, sha256 `dc06b7ec…`). Rationale: `b-round-140.md`. Decision record: **D-29z106** in `docs/technical/studio-real-workspace/plan.md`.
-- **Baseline: commit `6ebbf3ec1c7954e5a33f15e4ac1d20aa2b313414`** (gate 140 published on both remotes; HEAD). Tree **clean** at planning (`git status --short` empty).
-- **Frozen list:** `tmp/studio-real-loop/b-round-140-r141-tree-sha256.txt`, **944 entries** = `git ls-files -co --exclude-standard` (959) minus the 15 existing grants. Grants: `b-round-140-r141-grants.txt` (17 lines; the last 2 are new files). `sha256sum -c --quiet` OK at planning, run from `store/`.
-- **Start hashes of the 15 existing grants:** `b-round-140-r141-granted-start-sha256.txt`. **Start copies:** `b-round-140/r141-granted-start/` (paths relative to `store/`; `sha256sum -c` OK there). A checks both first; any difference → A stops and reports.
-- **Measured sweep lines:** `b-round-140-r141-prefix-lines.txt` (191 lines = every `ჯგუფი` in `app/lib/arrangement/__tests__` and `e2e/` at `6ebbf3e`; `e2e/` has 0).
+- **Previous task:** `tasks/round-141.md` (exact copy of the round-141 `current-task.md`, sha256 `c45b533e…`). Rationale: `b-round-141.md`. Decision record: **D-29z107** in `docs/technical/studio-real-workspace/plan.md`.
+- **Baseline: commit `6e9f9b1e97d67703ba34e8b2a260a0a5215c3506`** (gate 141 published on both remotes; HEAD). Tree **clean** at planning (`git status --short` empty).
+- **Frozen list:** `tmp/studio-real-loop/b-round-141-r142-tree-sha256.txt`, **941 entries** = `git ls-files -co --exclude-standard` (961) minus the 20 existing grants. Grants: `b-round-141-r142-grants.txt` (22 lines; the last 2 are new files). `sha256sum -c --quiet` OK at planning, run from `store/`.
+- **Start hashes of the 20 existing grants:** `b-round-141-r142-granted-start-sha256.txt`. **Start copies:** `b-round-141/r142-granted-start/` (paths relative to `store/`; `sha256sum -c` OK there). A checks both first; any difference → A stops and reports.
+- **Measured pin lines:** `b-round-141-r142-pin-lines.txt` (**56 lines in 13 test files**, listed in §0).
+- **Browser baseline (B probe at `6e9f9b1`, read-only, real Chromium):** `b-round-141/out/detail-baseline-6e9f9b1.json` + `b-round-141/shots/{none,single,multi,video,videomulti}-{1440,1280}.png`. Tool: `b-round-141/tools/detail-probe.cjs`. C uses it as the LAYOUT baseline (§5).
 
-## 0. Why this round (D-29z106)
-- **Round 140: C PASS**, `browserVerified` = `realVerified` = true. Every browser row passed at 1440 and 1280 and GEO-COUNT was net 0. Real audio confirmed the envelope (≈14 dB paired drop), group Mute/Solo (≈179/180 dB) and the real Master and track over states. Gate 140 published `6ebbf3e` (165 test files / 2478 tests, build OK, review 9/10). **V-0.4c is done.**
-- `tasks/round-140.md` §8 set this step: C PASS → **V-0.4d**, re-measured first. Other checks at planning:
+## 0. Why this round (D-29z107)
+- **Round 141: C PASS**, `browserVerified` = `realVerified` = true. All rows passed at 1440 and 1280. Group Mute dropped real audio by 179 dB and unmute restored it within 0.03 dB. GEO-COUNT was net 0 and LAYOUT showed 0 px movement. Gate 141 published `6e9f9b1` (verify 166 files / 2481 tests, build OK, review 8/10). **V-0.4d is done.** One new Low, C-R141-01 (nested `Drums` truncated to `Dru…` at 1280), went to `deferred_low_polish`.
+- `tasks/round-141.md` §8 set this step: C PASS → **V-0.4e**, re-measured first. Checks at planning:
   - The regression is due on/after 2026-10-27; today is 2026-10-24, so not yet.
-  - No Critical/High/Medium finding is open.
+  - No Critical, High or Medium finding is open.
   - `user-review/ableton-decisions.md` and `design-ux-decisions.md` do not exist.
-  - There is no strings-split checkpoint result yet (fifth planning without it; it does not block).
-- **B's measurement at `6ebbf3e`** (non-comment lines with Georgian, V-0.4d area):
-  - `app/lib/arrangement/groups.ts` l.4 `export const TRACK_GROUP_NAME_PREFIX = 'ჯგუფი';` (used only in `nextTrackGroupName`, l.313/316).
-  - `app/contexts/ArrangementContext.tsx` l.548 `name: 'ვიდეო'`, l.549 `name: 'აუდიო'` (`fallbackArrangement`). It is used when no `initialArrangement` is passed. No test mounts the provider without one, so these lines only show up in ST13. l.3468 (load-error fallback) is **V-0.5** (`area_addition_d29z96`), not this round.
-  - `app/routes/studio-lab.tsx` l.13 `'ვიდეო'`, l.14 `'მუსიკა'`, l.15 `'სტემები'` (l.16 `'SFX'` is already Latin). l.8 (the meta title) is **V-0.5** (`forward_constraints_d29z103`). The route exports only `meta` and the default component, not its arrangement.
-  - The arrangement has **no persistence** (no localStorage or IndexedDB in `app/lib/arrangement` or the context), so old `ჯგუფი N` names need no migration.
-- **Re-measurement moves the route names in (R1).** The backlog said "studio-lab.tsx names stay with V-0.5 unless re-measurement moves them". The route's l.13–15 are the **only default track names a user sees**, because `/studio-lab` always passes `initialArrangement`. If only the context fallback changed, C would have nothing to see in the browser. So they move into V-0.4d.
-- **Sweep (forward constraint d29z105: "the default group name prefix changes the Undo labels and all GROUP_NAME fixtures together"):** 191 lines in 10 test files. Counts:
-  - track-group-mix-ui 86
-  - track-group-collapse-ui 59
-  - track-groups-ui 21
-  - groups.test 7
-  - strings.test 6
-  - header-meter-envelope-strings-ui 5
-  - track-group-mix.test 4
-  - clip-gain-waveform 1
-  - fader-touch 1
-  - group-volume-db 1
+  - There is no strings-split checkpoint result yet; it does not block.
+- **B's measurement at `6e9f9b1`** (non-comment lines containing Georgian):
+  - `ArrangementDetailPanel.tsx`: **38**. Lines 50–57 and 62–66 are constants; l.125 is the range-applied status; l.386/410/449/566/611 are `Clip Gain უცვლელია: …`; l.648–676 are info labels; l.703/712/719/728/748 are range labels and the apply button; l.853 is the reset aria-label; l.1081 is the header count; l.1104/1108/1130/1134 are the separator and toggle.
+  - `panels.ts` l.8: `DETAIL_RANGE_INVALID_MESSAGE` (exported; used by the detail panel l.353).
+  - `clip-gain-multi.ts` l.113: `formatClipGainMembersStatus`.
+  - `library.ts` l.8–9 (`LIBRARY_KIND_LABELS`) and l.14–15 (`LIBRARY_FOLDER_LABELS`).
+  - Total **44 lines in 4 files**. After this round, the only Georgian source left in the Studio is the V-0.5 area: `collection.ts` 19, `ArrangementLibrary.tsx` 19, `studio-lab-demo.ts` 18, `ArrangementVideoDock.tsx` 18, `ArrangementLibraryPreview.tsx` 8, the `studio-lab.tsx` meta title 1, and context l.3468 1.
+- **Pins (56 lines in 13 files):**
+  - detail-panel.test 12
+  - detail-panel-fit 7 (incl. l.327 `ხაზი SFX` and l.331 `ხაზები მუსიკა, SFX`, where only the label word changes; `მუსიკა`/`SFX` are fixture track names and stay)
+  - clip-gain 6
+  - detail-panel-polish 6
+  - clip-gain-multi 5
+  - detail-panel-reason 5
+  - library.test 4 (l.44/48/49 folder labels, l.71 kind query)
+  - clip-gain-fader 3
+  - fader-guards 3
+  - status-announcement-ui 2
+  - panels.test 1
+  - pending-status 1
+  - self-disabling-focus 1
 
-  `e2e/` has 0 hits. B's grep found no case-insensitive `/group/i` or `name: /…Group…/` matcher in the tests, so `Group 1 — group` cannot match twice by accident. A re-greps (§4).
-- **Not swept (data, D-29z103 R4):**
-  - The ≈200 test-fixture lines with `მუსიკა` / `სტემები` / `ვიდეო` / `აუდიო`. Each test builds its own arrangement, so these are test data, not pins of the default names.
-  - The `GROUP_REASON` constants with `აუდიო` (Clip Gain reason). They are **V-0.4e** detail-panel pins.
-  - `library-preview.test` l.248, which is library copy (**V-0.5**).
+  `e2e/` has 0. **Not pins (excluded on purpose):** `collection.test` l.379/389, `collection-load-status` l.53 and `purchased-collection-ui` l.36 match `დეტალები` only inside the V-0.5 load-error message, so they stay. Every other `მუსიკა` / `სტემები` in tests is fixture track data (D-29z103 R4).
+- **`group.count` is always ≥ 2.** `StudioWorkspace.tsx` l.2138 returns `null` below 2. The plural-safe formatter still handles 1 (R6).
+- **`library.ts` is not pure copy.** `LIBRARY_KIND_LABELS` is part of the search haystack (`matchesLibraryQuery` l.113). English labels change which queries match (R8, §1.3).
 
-  A does **not** touch them.
-- **Layout pre-check:** the group name button is `min-w-0 flex-1 truncate` inside the 224 px header, and so is the track name button (Lane l.692). The boxes do not depend on the text width, so the visible name change must not move the M/S/fader boxes (§5 LAYOUT).
+### Rulings D-29z107
+- **R1 — one round, one owner.** The detail panel, panels.ts and clip-gain-multi.ts are one surface (the detail panel shows all three messages). The library labels get their own section (§1.3), mutation and C row because they carry the only behaviour change. The size (44 source lines, 56 pins in 13 files, 1 new test file) is comparable to round 138 (25 + ~100 lines in 17 files) and round 140 (16 files).
+- **R2 — where the texts live.**
+  - A new object **`studioDetailStrings`** is appended as the **last** export of `strings.ts`.
+  - The library labels are appended as the last 4 keys of the existing **`studioLibraryStrings`**: `kindMusic`, `kindStem`, `folderMusic` and `folderStems`. `sfx: 'SFX'` stays the Latin literal it already is.
+  - Existing names keep their export, name and type:
+    - `LIBRARY_KIND_LABELS` and `LIBRARY_FOLDER_LABELS` (`Record<WorkspaceSourceKind, string>`) take their values from the module;
+    - `DETAIL_RANGE_INVALID_MESSAGE` becomes `studioDetailStrings.rangeInvalid`;
+    - the module-local `DETAIL_*` constants in the detail panel keep their names and are defined from the module (smallest diff).
+  - `panels.ts`, `library.ts` and `clip-gain-multi.ts` may import `strings.ts`. It is a leaf and imports nothing, so there is no cycle.
+- **R3 — the multi-clip note is not a "group".** l.53 describes a selection of several clips. Since round 141, `Group N` is a Group Track, so calling the selection a "group" would collide. The text says **"The selected clips …"**. This deliberately departs from the round-141 §8 hint ("role word → group"). `data-testid="arrangement-detail-group"` stays.
+- **R4 — vocabulary.**
+  - Panel = **collapse/expand**, the library/dock wording in `studioVideoStrings`. A track is **fold** (`studioLaneStrings`).
+  - Per the glossary: `ხაზი` → Track, `კლიპი` → clip, `მონიშვნა` → time selection.
+  - The apply button reads **`Set selection`** (a bare "Select" would be ambiguous next to "Select a clip first").
+- **R5 — `Clip Gain უცვლელია: X.`** (5 sites) becomes one formatter, `clipGainUnchanged(value)` → `Clip Gain unchanged: +3.0 dB.`. `studioClipStrings.historyUnchanged` is **not** reused: it drops the value and is a different sentence.
+- **R6 — plural-safe counts.** `clipCount(count)` → `1 clip` / `2 clips`, following the `studioEditStrings` `count === 1` pattern. It is used for the header label (l.1081) and the group block (l.669). `clipGainMembers(count, range)` → `Clip Gain: 2 clips — +15.0 … +22.0 dB.`.
+- **R7 — pending invariant.** `DETAIL_CLIP_GAIN_PENDING_HINT = FULL_TEXT.slice(LABEL.length)` stays. The English full text **starts with** the exact English label (`Unsaved` / `Unsaved — Enter saves, Esc reverts`), so the sr-only hint is ` — Enter saves, Esc reverts`. This is pinned (DPS3, ST42).
+- **R8 — library search follows the labels.**
+  - After the change, the queries `music` / `stem` / `stems` match by kind (case-insensitive).
+  - The Georgian kind words `მუსიკა` / `სტემი` no longer match **by kind**. Titles and collection labels are unchanged data, so a Georgian title word still matches.
+  - This is accepted because the UI is English (VISUAL-A M2). `library.test` l.71 `'სტემი პადი'` → `'stem პადი'`; `პადი` is the demo title, which is data.
+- **R9 — accepted mixed state for one round, named:**
+  - the library panel's own copy and aria-labels (`ArrangementLibrary.tsx` 19, `ArrangementLibraryPreview.tsx` 8; for example `ბიბლიოთეკა`, `აქტიური ხაზი: …`);
+  - the collection label `Middle East · შეძენილი სტემები`, the demo badge, the load statuses and the demo source titles (`collection.ts`, `studio-lab-demo.ts`);
+  - the video dock;
+  - the route meta title and context l.3468.
 
-### Rulings D-29z106
-- **R1 — scope:** `TRACK_GROUP_NAME_PREFIX` → `Group`; route l.13–15 → `Video`, `Music`, `Stems` (l.16 `SFX` unchanged); context fallback l.548–549 → `Video`, `Audio`. Route l.8 meta title and context l.3468 stay in V-0.5.
-- **R2 — where the texts live:**
-  - The group prefix becomes the key **`defaultNamePrefix: 'Group'`**, appended to the existing `studioTrackGroupStrings` (`groups.ts` already imports it).
-  - `TRACK_GROUP_NAME_PREFIX` keeps its name and export and is defined as `studioTrackGroupStrings.defaultNamePrefix` (the `existing_exports` rule).
-  - The **track names stay data literals** in the route and the context, as `'SFX'` already is. They are user-renameable track data, not UI copy. ST13 and the new ST40 pin them.
-- **R3 — sweep rule:** in the 10 test files, **every** `ჯგუფი` token becomes `Group`. Nothing else on those lines changes. Examples:
-  - `'ჯგუფი 1'` → `'Group 1'`
-  - `group:ჯგუფი 1:…` → `group:Group 1:…`
-  - `▣ჯგუფი 1` → `▣Group 1`
-  - the bare fixture `'ჯგუფი'` in clip-gain-waveform l.183 → `'Group'`
-
-  The ST22 special case and its constant are removed (§3.1). The allowed tool is Edit with `replace_all` on the exact token `ჯგუფი`, one file at a time. Before that, A checks each file's count against §0.
-- **R4 — terminology:** the default group name is `Group` + space + number. The numbering rule is unchanged: the lowest free index is used, and a renamed group frees its number. The default track names are `Video`, `Music`, `Stems`, `Audio`, with `SFX` kept. Live 12's default Group Track name is **unconfirmed** (B's capture has the §18.3 title only). CZABA makes no Live claim.
-- **R5 — accepted mixed state for one round, named:**
-  - detail panel (V-0.4e), including the l.53 `ჯგუფი …` role-word note and the Clip Gain reason;
-  - library, dock, route meta title, collection messages, context l.3468 and the demo source titles (V-0.5).
-- **R6 — no split:** one round, one owner, because:
-  - the sweep is a mechanical token replace in 10 files (similar in size to round 140's 16 files);
-  - the source change is 6 lines;
-  - the new names are one feature.
-- **Folded in (owned, low cost):** gate-140 #1 (doc 116 status still says the browser check is pending) and gate-140 #3 (ST39's hard-coded `toBe(17)`).
-- **Ratified:** A's round-140 deviations 1–3: the `track-group-mix-ui` l.405 Solo title pin, the ST33 `typeof` guard, and the Biome one-line wrap in collapse-ui. C and the gate reviewer both checked them.
+  All of these are **V-0.5**. The detail panel's selected-clip **title** is source-title data (for example `Middle East — საჯარო preview`), so it also stays until V-0.5.
+- **R10 — fold-ins and ratifications.**
+  - Doc 117 status (gate-141 #5).
+  - ST39 back to an exact count (gate-141 #1; B's round-141 `>=` spec weakened it).
+  - A's round-141 deviations 1–4 are ratified, including the DS2 codepoint-built regex: C verified it equals the literal, the reviewer endorsed it, and it keeps the `ჯგუფი` grep empty.
+  - Gate-141 #2 (SSR `console.error` spy) and #3 (ST40 meta-title pin) become **V-0.5 forward constraints**. V-0.5 owns that route and those tests; this round does not.
 
 ## 1. What changes (user-visible)
-On `/studio-lab` the track headers read **Video, Music, Stems, SFX**. A new group is named **Group 1** (then Group 2, …). Every sentence that already interpolates these names now shows them in English. Examples:
-- status `Group “Group 1” created: Music, Stems.`
-- Undo label `Mute — Group 1`
-- meter title `Music · Peak …`
-- aria-label `Group 1 — group, selected`
+The Clip Detail panel at the bottom of `/studio-lab` reads entirely in English, apart from the selected clip's own source title (data, R9). Its status messages (range applied, range invalid, Clip Gain invalid/unchanged/multi-clip) are English. The library rows show the kind chip `Music` / `Stem` / `SFX`, and the folder tree shows `Music` / `Stems` / `SFX`. Typing `music` or `stem` in the library search filters by kind.
 
-Nothing else changes: no handler, condition, numbering rule, key binding, gesture, history behaviour, mix or meter logic, `data-testid`, class or glyph.
+Nothing else changes: no handler, condition, numbering rule, key binding, gesture, history behaviour, Clip Gain math, panel size or step, `data-testid`, class or glyph. The `▸`/`▾` glyphs stay.
 
-### 1.1 Exact source edits
+### 1.1 `studioDetailStrings` (new, appended last in `strings.ts`; exact values)
+| Key | Value (exact) | Replaces |
+|---|---|---|
+| `panelTitle` | `Clip details` | l.50 |
+| `nothingSelected` | `Nothing selected` | l.51 |
+| `noSelectionHint` | `Select a clip to see its details` | l.52 |
+| `multiClipNote` | `The selected clips move together · Delete deletes them · Ctrl+D duplicates them` | l.53 (R3) |
+| `videoPlaceholder` | `Video clip · no waveform` | l.54 |
+| `rangeMultiReason` | `A time selection is set on one clip — select only one` | l.55 |
+| `noneReason` | `Select a clip first` | l.56 |
+| `sourceUnchanged` | `The source file stays unchanged` | l.57 |
+| `clipGainMultiReason` | `Clip Gain works on audio clips only — remove the video from the selection` | l.62 |
+| `clipGainVideoReason` | `A video clip has no Clip Gain — for its sound use the track Volume/Mute` | l.63 |
+| `clipGainInvalid` | `Clip Gain: enter a number in dB (−60…+24).` | l.64 (keep the `−` U+2212 and `…` U+2026 exactly as at baseline) |
+| `pendingFull` | `Unsaved — Enter saves, Esc reverts` | l.65 |
+| `pendingLabel` | `Unsaved` | l.66 (R7) |
+| `rangeApplied` | `({ start, end, track }) => \`Time selection: ${start} — ${end} · ${track}.\`` (named object: 3 strings) | l.125 |
+| `clipGainUnchanged` | `(value: string) => \`Clip Gain unchanged: ${value}.\`` | l.386/410/449/566/611 (R5) |
+| `clipCount` | `(count: number) => count === 1 ? '1 clip' : \`${count} clips\`` | l.669, l.1081 (R6) |
+| `clipGainMembers` | `(count: number, range: string) => \`Clip Gain: ${count === 1 ? '1 clip' : \`${count} clips\`} — ${range}.\`` | clip-gain-multi l.113 |
+| `trackLabel` | `Track` | l.648 |
+| `tracksLabel` | `Tracks` | l.671 |
+| `startLabel` | `Start` | l.652, l.674 |
+| `lengthLabel` | `Length` | l.654, l.676 |
+| `sourceOffsetLabel` | `Source offset` | l.660 |
+| `rangeFromLabel` | `From, s` | l.703 |
+| `rangeToLabel` | `To, s` | l.719 |
+| `rangeStartLabel` | `Time selection start (seconds)` | l.712 aria-label |
+| `rangeEndLabel` | `Time selection end (seconds)` | l.728 aria-label |
+| `applyRange` | `Set selection` | l.748 (R4) |
+| `clipGainResetLabel` | `Reset Clip Gain (0 dB)` | l.853 aria-label |
+| `heightLabel` | `Details height` | l.1104 aria-label |
+| `collapsedValueText` | `(height: number) => \`collapsed · ${height} px\`` | l.1108 (the open branch `${openHeight} px` stays in the caller; R4) |
+| `expandLabel` | `Expand details` | l.1130 (collapsed branch) |
+| `collapseLabel` | `Collapse details` | l.1130 (open branch) |
+| `expandText` | `Expand ▸` | l.1134 |
+| `collapseText` | `Collapse ▾` | l.1134 |
+| `rangeInvalid` | `The time selection must stay inside the clip, and its end must be after its start.` | panels.ts l.8 (`DETAIL_RANGE_INVALID_MESSAGE = studioDetailStrings.rangeInvalid`) |
+
+Key order in the object follows this table. The ternaries for `isCollapsed` and the `selection ? … : group ? … : …` branches stay in the caller (R3 of D-29z103). In JSX, the label spans keep their exact markup and classes; only the text child becomes `{studioDetailStrings.…}`, and the trailing `{' '}` separators stay.
+
+**Exact rendered examples (for pins and C):**
+- header `Nothing selected` / `2 clips`
+- status `Time selection: 00:03.500 — 00:07.250 · Music.`
+- status `Clip Gain unchanged: 0.0 dB.`
+- status `Clip Gain: 2 clips — +15.0 … +22.0 dB.`
+- the separator `aria-valuetext` reads `collapsed · 130 px` when collapsed and `130 px` when open
+- toggle aria-label `Collapse details`, toggle text `Collapse ▾`
+- pending: `<p title="Unsaved — Enter saves, Esc reverts">Unsaved<span class="sr-only"> — Enter saves, Esc reverts</span></p>`
+
+### 1.2 Source edits outside `studioDetailStrings`
 | ID | File / line | Before | After |
 |---|---|---|---|
-| DN1 | `strings.ts`, appended as the **last key** of `studioTrackGroupStrings` | — | `defaultNamePrefix: 'Group',` |
-| DN2 | `groups.ts` l.4 | `export const TRACK_GROUP_NAME_PREFIX = 'ჯგუფი';` | `export const TRACK_GROUP_NAME_PREFIX = studioTrackGroupStrings.defaultNamePrefix;` (the import already exists) |
-| DN3 | `ArrangementContext.tsx` l.548 / l.549 | `name: 'ვიდეო'` / `name: 'აუდიო'` | `name: 'Video'` / `name: 'Audio'` |
-| DN4 | `studio-lab.tsx` l.13 / l.14 / l.15 | `'ვიდეო'` / `'მუსიკა'` / `'სტემები'` | `'Video'` / `'Music'` / `'Stems'` |
+| DD1 | `ArrangementDetailPanel.tsx` (all 38 lines) | Georgian literals | values and calls from `studioDetailStrings` per §1.1. One new import line from `~/lib/arrangement/strings` |
+| DD2 | `panels.ts` l.7–8 | Georgian literal | `export const DETAIL_RANGE_INVALID_MESSAGE = studioDetailStrings.rangeInvalid;` + the import |
+| DD3 | `clip-gain-multi.ts` l.113 | `` `Clip Gain: ${span.clipIds.length} კლიპი — …` `` | `studioDetailStrings.clipGainMembers(span.clipIds.length, formatClipGainRange(span.minDb, span.maxDb))` + the import |
 
-**Exact rendered text (examples for pins and C rows):**
-- `Group 1 — group, selected`
-- `Group 1 — group, folded, 2 clips`
-- `Fold or unfold group — Group 1`
-- `Mute — Group 1 (group)`
-- `Group name — Group 1`
-- status `Group “Group 1” created: Music, Stems.`
-- status `Group “Group 1” ungrouped.`
-- Undo title `Undo: Mute — Group 1`
-- track header aria-label `Music — set as the active track` (+ `, selected` when selected)
+### 1.3 Library labels (behaviour-adjacent, R8)
+| ID | File / line | Before | After |
+|---|---|---|---|
+| LB1 | `strings.ts` `studioLibraryStrings`, 4 keys appended last | — | `kindMusic: 'Music'`, `kindStem: 'Stem'`, `folderMusic: 'Music'`, `folderStems: 'Stems'` |
+| LB2 | `library.ts` l.8–9 | `'მუსიკა'`, `'სტემი'` | `studioLibraryStrings.kindMusic`, `studioLibraryStrings.kindStem` (`sfx: 'SFX'` unchanged) + the import |
+| LB3 | `library.ts` l.14–15 | `'მუსიკა'`, `'სტემები'` | `studioLibraryStrings.folderMusic`, `studioLibraryStrings.folderStems` |
 
-**Glossary additions (d29z106):** `ჯგუფი N` (default name) → `Group N`; `ვიდეო` / `მუსიკა` / `სტემები` / `აუდიო` (default track names) → `Video` / `Music` / `Stems` / `Audio`.
+`ArrangementLibrary.tsx` stays **frozen**. It renders `LIBRARY_KIND_LABELS[source.kind]` and the folder `label`, so the English appears without editing it. Its other copy is V-0.5 (R9).
+
+**Glossary additions (d29z107):**
+- `კლიპის დეტალები` → Clip details
+- `დასაწყისი / სიგრძე / წყაროდან` → Start / Length / Source offset
+- `საიდან, წმ / სადამდე, წმ` → From, s / To, s
+- `მონიშვნა` (apply button) → Set selection
+- `შეუნახავია` → Unsaved
+- `უცვლელია` → unchanged
+- `გაშლა / დაკეცვა` (panel) → Expand / Collapse, `დაკეცილია` (panel) → collapsed (track fold stays "fold")
+- library kind `მუსიკა / სტემი` → Music / Stem; folder `მუსიკა / სტემები` → Music / Stems
+- the multi-clip note says "selected clips" (R3)
 
 ## 2. A — files you own (everything else is frozen)
 | Path | Allowed change |
 |---|---|
-| `app/lib/arrangement/strings.ts` | DN1 only. Every other object, key and value stays byte-identical. No import. |
-| `app/lib/arrangement/groups.ts` | DN2 only. |
-| `app/contexts/ArrangementContext.tsx` | DN3 only (2 lines). |
-| `app/routes/studio-lab.tsx` | DN4 only (3 lines). l.8 unchanged. |
-| `app/lib/arrangement/__tests__/strings.test.ts` | Import specifiers (for example `nextTrackGroupName`, `createArrangement`), plus §3.1 only: the `ჯგუფი` lines, the `studioTrackGroupStrings` plain-string and key lists, the ST13 list and length, ST22, the ST39 count, and the new ST40. |
-| The other 9 sweep files (`clip-gain-waveform`, `fader-touch`, `group-volume-db`, `groups.test`, `header-meter-envelope-strings-ui`, `track-group-collapse-ui`, `track-group-mix-ui`, `track-group-mix.test`, `track-groups-ui`) | R3 token replace only. No other edit, no new `it`, and `it` counts stay the same. A Biome-forced rewrap of a changed line is allowed and must be reported. |
-| `docs/.../116-studio-v0-header-meter-envelope-strings.md` | l.4 → `Completed (A-ის შემოწმებები მწვანეა რაუნდ 140-ში; C round 140 — PASS, browserVerified; gate 140 — 6ebbf3e)`. In l.76, the sentence about waiting for C round 140 → `C round 140 — PASS (browserVerified).`. Delete the C round 140 TODO line (l.80). Locate the lines by content (`grep -n "C round 140"`). Nothing else changes. |
-| **new** `app/lib/arrangement/__tests__/default-track-names-ssr.test.tsx` | DS1–DS2 (§3.3) |
-| **new** `docs/implementation/2026/quarter-IV/117-studio-v0-default-names.md` | Georgian, with the `docs/implementation/TEMPLATE.md` sections; the status says C round 141 has not run yet. |
+| `app/lib/arrangement/strings.ts` | LB1 (4 keys appended last in `studioLibraryStrings`) and the new `studioDetailStrings` appended as the last export. Every other object, key and value stays byte-identical. No import. |
+| `app/components/arrangement/ArrangementDetailPanel.tsx` | DD1 only (the 38 lines + 1 import). No class, testid, handler or structure change. |
+| `app/lib/arrangement/panels.ts` | DD2 only. |
+| `app/lib/arrangement/clip-gain-multi.ts` | DD3 only. |
+| `app/lib/arrangement/library.ts` | LB2, LB3 + 1 import only. |
+| `app/lib/arrangement/__tests__/strings.test.ts` | Import specifiers. The `studioLibraryStrings` plain-string list (l.648 block) and key list (l.702 block) gain the 4 LB1 entries. ST39 exact count (§3.1). The new `describe('V-0.4e detail and library strings')` with ST41–ST44. |
+| The 13 pin files of §0 | Replace each pinned Georgian literal on the lines in `b-round-141-r142-pin-lines.txt` with its exact English from §1.1/§1.3. Nothing else on those lines changes. The only extra edit is LB-SEARCH in `library.test.ts` (§3.2). No new `it`, and `it` counts stay the same. A Biome-forced rewrap of a changed line is allowed and must be reported. |
+| `docs/.../117-studio-v0-default-names.md` | l.4 → `Completed (A-ის შემოწმებები მწვანეა რაუნდ 141-ში; C round 141 — PASS, browserVerified; gate 141 — 6e9f9b1)`. Replace the sentence about C round 141 not having run with `C round 141 — PASS (browserVerified).`. Delete a C round 141 TODO line if one exists. Locate the lines by content (`grep -n "141"`). Nothing else changes. |
+| **new** `app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx` | DPS1–DPS4 (§3.3) |
+| **new** `docs/implementation/2026/quarter-IV/118-studio-v0-detail-library-strings.md` | Georgian, with the `docs/implementation/TEMPLATE.md` sections, including the per-string map (glossary rule); the status says C round 142 has not run yet. |
 
-- **Protected (never touch):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/components/ui/Modal.tsx`, `app/routes/account.downloads.tsx`, `download-routes.test.ts`, and everything in `backlog.json` `global_forbidden_files`.
-- **Pin rule:** replaced pins are hand-written English literals with the same matcher. No pin imports the module value it checks. In particular, the swept tests write `'Group 1'` literally and do not use `TRACK_GROUP_NAME_PREFIX`.
+- **Protected (never touch):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/components/ui/Modal.tsx`, `app/routes/account.downloads.tsx`, `download-routes.test.ts`, and everything in `backlog.json` `global_forbidden_files`. **Frozen and relevant:** `ArrangementLibrary.tsx`, `ArrangementLibraryPreview.tsx`, `StudioWorkspace.tsx`, `ArrangementContext.tsx`, `collection.ts`.
+- **Pin rule:** replaced pins are hand-written English literals with the same matcher. No pin imports the module value it checks. Test files that already import a constant keep importing it.
 - **Stop rule:** A stops and reports, without widening scope, if any of these happens:
-  - a sweep file's `ჯგუფი` count differs from §0;
-  - a non-granted file (outside the R5 list) contains `ჯგუფი` or one of the DN4 names in a way that would fail;
-  - a non-granted test fails because of the new names.
-- **Edit rule (C-R120-01):** every lasting edit goes through Edit/Write (`replace_all` is allowed for R3). Shell writes are only for temporary mutations, which are restored and sha-verified. A lists every shell write.
+  - a pin file's Georgian count on the listed lines differs from §0;
+  - a non-granted test fails because of the new texts or labels (for example a library UI test that matches `მუსიკა` as a folder or kind label rather than as a track name);
+  - an English text in a width-limited slot needs a class change to fit.
+- **Edit rule (C-R120-01):** every lasting edit goes through Edit/Write. Shell writes are only for temporary mutations, which are restored and sha-verified. A lists every shell write.
 
 ## 3. A — tests and mutations
-### 3.1 `strings.test.ts` (39 → 40 `it`s)
-- **Sweep lines** (l.1261–1269 at `6ebbf3e`):
-  - the sample names become `'Group 1'` and `'Group 2'`;
-  - expected `Group “Group 1” created: მუსიკა, სტემები.` (the member fixture names stay data) and `Group “Group 2” ungrouped.`;
-  - l.1269 → `expect(TRACK_GROUP_NAME_PREFIX).toBe('Group');`.
-- **`studioTrackGroupStrings` lists:** add `defaultNamePrefix: 'Group'` to its expected plain strings (l.1140 block) and `'defaultNamePrefix'` to its sorted key list (l.1164 block).
-- **ST13:** `CONTEXT_REMAINING_GEORGIAN_LINES` keeps **only** the l.3468 error line. The length check at l.1901 becomes `toHaveLength(1)`.
-- **ST22:** remove `TRACK_GROUP_PREFIX_LINE` (l.1193) and the prefix exception. `groups.ts` (comments stripped) must have **no** Georgian line at all. Update the `it` title to match (for example `… selection.ts and groups.ts contain no Georgian codepoint`).
-- **ST39 (gate-140 #3):** replace `expect(outputs.length).toBe(17)` with a check derived from the objects:
-  - the number of outputs is `>=` the number of function-valued keys in `studioClipEnvelopeStrings`, `gh` and `mt` together;
-  - every sample list is non-empty.
+### 3.1 `strings.test.ts` (40 → 44 `it`s)
+- **ST39 (gate-141 #1):** restore `expect(outputs.length).toBe(17)`. Keep the `>= formatterCount` and non-empty checks next to it.
+- **ST41:** every plain-string property of `studioDetailStrings` equals its exact §1.1 literal (hand-written list), and the sorted key list is exact.
+- **ST42:** formatter outputs, all hand-written:
+  - `rangeApplied({start:'00:03.500', end:'00:07.250', track:'Music'})` → `Time selection: 00:03.500 — 00:07.250 · Music.`
+  - `clipGainUnchanged('+3.0 dB')` → `Clip Gain unchanged: +3.0 dB.`
+  - `clipCount(1)` → `1 clip`; `clipCount(2)` → `2 clips`
+  - `clipGainMembers(2, '0.0 dB')` → `Clip Gain: 2 clips — 0.0 dB.`
+  - `collapsedValueText(130)` → `collapsed · 130 px`
+  - `pendingFull.startsWith(pendingLabel)` is true, and `pendingFull.slice(pendingLabel.length)` is ` — Enter saves, Esc reverts` (R7)
+  - `DETAIL_RANGE_INVALID_MESSAGE` equals the §1.1 `rangeInvalid` literal
+  - `formatClipGainMembersStatus({clipIds:['a','b'], minDb:15, maxDb:22})` → `Clip Gain: 2 clips — +15.0 … +22.0 dB.`
+- **ST43:** `LIBRARY_KIND_LABELS` equals `{ music: 'Music', stem: 'Stem', sfx: 'SFX' }` and `LIBRARY_FOLDER_LABELS` equals `{ music: 'Music', stem: 'Stems', sfx: 'SFX' }` (hand-written).
+- **ST44:** with comments stripped, `ArrangementDetailPanel.tsx`, `panels.ts`, `clip-gain-multi.ts` and `library.ts` have **no** Georgian line and no `«»`. No `studioDetailStrings` string or formatter sample has Georgian or `«»`.
 
-  The hand-written exact outputs elsewhere stay as they are.
-- **ST40 (new, in a new `describe('V-0.4d default names')`):** all expectations are hand-written.
-  - `studioTrackGroupStrings.defaultNamePrefix` is `'Group'`.
-  - `nextTrackGroupName(createArrangement([{ id: 'a', kind: 'audio', name: 'A' }]))` is `'Group 1'`.
-  - In `routes/studio-lab.tsx` with comments stripped, the trimmed Georgian lines are exactly `[` the l.8 meta-title line `]`.
-  - The same source contains `name: 'Video'`, `name: 'Music'`, `name: 'Stems'` and `name: 'SFX'`.
+### 3.2 Pin replacements and `library.test.ts`
+The 56 lines of `b-round-141-r142-pin-lines.txt` change only their Georgian literal, to the exact English. Examples:
+- `'2 კლიპი'` → `'2 clips'`
+- `'დაკეცილია · 130 px'` → `'collapsed · 130 px'`
+- `'ხაზები მუსიკა, SFX'` → `'Tracks მუსიკა, SFX'` (the fixture track name stays)
+- `'მონიშვნა: 00:03.500 — 00:07.250 · მუსიკა.'` → `'Time selection: 00:03.500 — 00:07.250 · მუსიკა.'`
+- `library.test` l.44/48 `['მუსიკა', 1]` → `['Music', 1]`, l.49 `['სტემები', 4]` → `['Stems', 4]`, l.71 `'სტემი პადი'` → `'stem პადი'` (R8)
 
-### 3.2 Sweep (R3)
-The 191 lines of `b-round-140-r141-prefix-lines.txt` change only the token. After the sweep, `grep -rnF 'ჯგუფი' app/lib/arrangement/__tests__ e2e` must print **nothing**. A saves the before and after grep in `a-round-141/`.
+After the edits, `grep -nP '[\x{10A0}-\x{10FF}]'` on the 56 listed lines prints only Georgian that is **fixture data** (track names, source titles). A saves the before and after grep in `a-round-142/`.
 
-### 3.3 New `default-track-names-ssr.test.tsx`
-The file starts with `// @vitest-environment node`. Copy the `@remix-run/react` mock and the `renderToString` harness of `ssr-layout-effect.test.tsx`; do not import that file.
-- **DS1:** `renderToString(<StudioLabRoute />)` contains four track-name buttons whose `aria-label` starts with `Video — set as the active track`, `Music — set as the active track`, `Stems — set as the active track` and `SFX — set as the active track`. The expectations are hand-written. An optional `, selected` suffix is allowed only if the server HTML really has one.
-- **DS2:** the same HTML has no match for `/ჯგუფი \d/`, and no `aria-label` that contains `— set as the active track` also contains `ვიდეო`, `მუსიკა`, `სტემები` or `აუდიო`. A whole-HTML Georgian scan is **not** part of DS2: the detail panel, library and dock still render Georgian on the server (R5; for example the library-preview title `აქტიური ხაზი: ვიდეო …`). That scan belongs to V-0.5 RV-4. The video lane uses the same name button and `activeTrackLabel` format as the audio lanes (Lane l.689–703), so all four labels share one shape.
+The one allowed new assertion in `library.test.ts` is **LB-SEARCH**, added inside the existing `it` at l.68 as extra `expect` lines (no new `it`). It checks that:
+- `'music'` and `'MUSIC'` match the music source by kind;
+- `'stems'` matches the stem sources by kind;
+- `'მუსიკა'` alone no longer matches a source whose title and collection lack it.
+
+A picks fixture ids from the file and lists them in the report.
+
+### 3.3 New `detail-panel-strings-ui.test.tsx` (jsdom)
+Copy the render harness of `detail-panel.test.tsx` (do not import that file). All expectations are hand-written.
+- **DPS1:** with nothing selected. The start state depends on the harness fit metrics (`detailPanelStartsOpen`; see `stubTimelineMetrics` in `detail-panel.test.tsx`), so assert both sets by toggling once, whichever state the harness starts in:
+  - the panel's `aria-label` and the `h2` text are `Clip details`;
+  - the header label is `Nothing selected`;
+  - the hint is `Select a clip to see its details`;
+  - the separator `aria-label` is `Details height` and its open `aria-valuetext` is `{h} px`;
+  - open state: the toggle reads `Collapse details` / `Collapse ▾`;
+  - collapsed state: the toggle reads `Expand details` / `Expand ▸`, and the `aria-valuetext` is `collapsed · {h} px`.
+- **DPS2:** with one audio clip selected:
+  - the info labels are exactly `['Track', 'Start', 'Length', 'Source offset']` in DOM order;
+  - `The source file stays unchanged` is present;
+  - the range labels are `From, s` / `To, s`, and their inputs' aria-labels are `Time selection start (seconds)` / `Time selection end (seconds)`;
+  - the apply button text is `Set selection`;
+  - the reset aria-label is `Reset Clip Gain (0 dB)`.
+- **DPS3:** after typing a new Clip Gain without committing, `arrangement-detail-clip-gain-pending` has these values:
+  - `title` = `Unsaved — Enter saves, Esc reverts`;
+  - its first text node = `Unsaved`;
+  - the `.sr-only` span text = ` — Enter saves, Esc reverts`;
+  - full `textContent` = `Unsaved — Enter saves, Esc reverts`.
+- **DPS4:** with two clips selected:
+  - the header and the group block read `2 clips`;
+  - the label `Tracks` is present;
+  - the note is `The selected clips move together · Delete deletes them · Ctrl+D duplicates them`;
+  - the range inputs' title is `A time selection is set on one clip — select only one`.
 
 ### 3.4 Forward rule (GATE130-S3)
-Each of DN1–DN4 has at least one hand-written literal test:
-- DN1/DN2: ST40 and the swept UI tests;
-- DN3: ST13;
-- DN4: ST40 and DS1/DS2.
-
-A lists the mapping in its report.
+Every §1.1 key and LB1 key has at least one hand-written literal test (ST41–ST43, DPS1–DPS4 or a replaced pin). A lists the key → test mapping in its report.
 
 ### 3.5 Mutations (each turns the named tests red; restore and check by sha256)
 | ID | Mutation | Must turn red |
 |---|---|---|
-| m77 | `defaultNamePrefix: 'Group'` → `'Grp'` | ST40, the `studioTrackGroupStrings` plain-string check, `track-groups-ui`, `track-group-collapse-ui`, `track-group-mix-ui`, `groups.test` |
-| m78 | `groups.ts` l.4 back to the literal `'ჯგუფი'` | ST22, `groups.test`, the swept UI files |
-| m79 | `studio-lab.tsx` l.14 `'Music'` → `'მუსიკა'` | ST40, DS1, DS2 |
-| m80 | context l.549 `'Audio'` → `'აუდიო'` | ST13 |
-| m81 | `nextTrackGroupName` builds `` `${TRACK_GROUP_NAME_PREFIX}${index}` `` (no space) | `groups.test` (l.224/226), ST40 |
+| m82 | `studioDetailStrings.noneReason` → `'Select a clip'` | ST41, detail-panel.test, clip-gain, detail-panel-reason |
+| m83 | `clipCount` always returns `` `${count} clip` `` | ST42, DPS4, detail-panel.test l.407/409 |
+| m84 | `pendingFull` → `'Not saved — Enter saves, Esc reverts'` (breaks R7) | ST42, DPS3, pending-status, detail-panel-fit |
+| m85 | `clip-gain-multi.ts` back to a Georgian `კლიპი` literal | ST44, clip-gain-multi.test |
+| m86 | `kindStem: 'Stem'` → `'Stem sound'`, which still contains `stem`, so only the exact pins catch it; then a second run with `'სტემი'` | run 1: ST43; run 2: ST43, library.test l.71 + LB-SEARCH |
+| m87 | `collapsedValueText` → `` `folded · ${height} px` `` | ST42, DPS1, detail-panel.test l.551/684/686 |
 
 ## 4. A — checks (speed rules)
-- At the start: the frozen list, the 15 start hashes and the start copies are all OK, and `git status --short` is empty.
-- Pre-edit greps go to `a-round-141/pre-grep.txt`:
-  - `ჯგუფი` in `app/**` and `e2e/**`;
-  - `'ვიდეო'|'მუსიკა'|'სტემები'|'აუდიო'` in `app/**` (non-test) and `e2e/**`;
-  - any `/group/i`-style or regex-name matcher in the tests.
+- At the start: the frozen list, the 20 start hashes and the start copies are all OK, and `git status --short` is empty.
+- Pre-edit greps go to `a-round-142/pre-grep.txt`:
+  - Georgian in the 4 source files;
+  - the 56 pin lines;
+  - every test or e2e file that imports `library.ts`, `panels.ts`, `clip-gain-multi.ts` or `ArrangementDetailPanel`, or renders the library (A greps and lists them);
+  - any test that matches `მუსიკა` / `სტემები` / `სტემი` as a **library folder or kind label** (B found none outside library.test).
 - `npm run typecheck` and `npm run lint` exit 0. A read-only `npx biome check` on the changed files gives 0 diagnostics.
-- `npx vitest run` on these files, saved to `a-round-141/vitest.json`:
-  - the 10 sweep files and the new `default-track-names-ssr`;
-  - the neighbours `ssr-layout-effect`, `track-volume-db`, `gesture-guard`, `lane-strings-ui`, `clip-strings-ui`, `status-announcement-ui`, `render-budget`, `clip-envelope-ui`, `track-meter-ui`, `meter-ui` and `collection`;
-  - every other test file that imports `groups.ts` or `studio-lab` (A greps and lists them).
-- Mutations m77–m81 per §3.5.
+- `npx vitest run` on these files, saved to `a-round-142/vitest.json`:
+  - the 13 pin files, `strings.test` and the new `detail-panel-strings-ui`;
+  - the neighbours `library-preview`, `library-focus-handoff`, `render-budget`, `collection`, `collection-load-status`, `purchased-collection-ui`, `clip-gain-waveform`, `fader-touch`, `track-volume-db`, `ssr-layout-effect` and `default-track-names-ssr`;
+  - every other test file found by the import grep.
+- Mutations m82–m87 per §3.5.
 - The code-reviewer runs, because more than 3 files change. Its Architecture note goes to B.
 - **Not run:** the full suite, `npm run verify`, build or e2e (the gate does these).
 - At the end:
-  - `git status --short` shows exactly the 15 ` M` + 2 `??` granted paths;
+  - `git status --short` shows exactly the 20 ` M` + 2 `??` granted paths;
   - the frozen list is OK;
-  - the protected `git diff 6ebbf3e` is empty;
-  - the end sha256 of the changed paths is in `a-round-141/end-sha256.txt`.
+  - the protected `git diff 6e9f9b1` is empty;
+  - the end sha256 of the changed paths is in `a-round-142/end-sha256.txt`.
 - No commit, stash, checkout, install, `--write` or `check:fix`.
 
 ## 5. C — rows
-Real Playwright Chromium at **1440×900 and 1280×720** on `http://127.0.0.1:5173/studio-lab`, with a fresh context per session. Use `data-testid`s and the new English names. State Snap at the start of each session (default off). Harness notes:
-- a **group** fold renders 0 member clips;
-- the default demo starts **empty**, and the Master latch trips only at Master +6 dB or with a Clip Gain boost (C round 140; replaces C-R86-OBS);
-- the group name button text includes the `▣` glyph.
+Real Playwright Chromium at **1440×900 and 1280×720** on `http://127.0.0.1:5173/studio-lab`, with a fresh context per session. State Snap at the start of each session (default off). Harness notes:
+- at 1280×720 the detail panel **starts collapsed** (36 px); expand it with the toggle before the content rows;
+- the default demo starts empty;
+- video media lives in `tmp/studio-real-loop/media/` (`clip-4s-vp9-opus.webm` was used by the B probe);
+- B's probe `b-round-141/tools/detail-probe.cjs` shows the state setup (none, single, multi of 2 audio clips, video, video+audio).
 
 | Row | Start state → action → expected |
 |---|---|
-| T141-TARGETED | Run A's named vitest list; the counts equal A's |
-| SOURCE-SCOPE | Only granted paths changed. Frozen list OK at start and end. End hashes equal `a-round-141/end-sha256.txt`. Protected diff vs `6ebbf3e` is empty. No source changes during C's phase |
-| AN-REVIEW | `diff -u` against `b-round-140/r141-granted-start/`. Expected: the 4 source files change only DN1–DN4; the 9 sweep files change only the `ჯგუფი` token (report any Biome rewrap); strings.test changes only §3.1; doc 116 changes only the named lines; `grep -rnF 'ჯგუფი' app/lib/arrangement/__tests__ e2e` is empty |
-| TRACK-NAMES | Fresh load. The track headers show `Video`, `Music`, `Stems` and `SFX`, as visible text and as aria-label `{name} — set as the active track`. Click `Music` → its aria-label gains `, selected`. Add a library sound to Music → the status names `Music` (`… added to the Music track at …`). The Music meter `title` starts `Music · Peak`. No `ვიდეო`/`მუსიკა`/`სტემები` appears anywhere in the workspace outside the R5 surfaces |
-| GROUP-DEFAULT | 1. Select Music + Stems, Ctrl+G → status `Group “Group 1” created: Music, Stems.`, name button aria-label `Group 1 — group, selected`, text `Group 1`.<br>2. Select Group 1 + SFX (adjacent), Ctrl+G → `Group 2`; the created status names both members in timeline order (C reports the exact text).<br>3. Ctrl+Shift+G on Group 2 → `Group “Group 2” ungrouped.`.<br>4. Rename Group 1 to `Drums` (F2, Enter) and **keep it**. Select `Drums` + `SFX`, Ctrl+G → the new outer group is **`Group 1`**, not `Group 2`: a renamed group frees its number while it still exists (groups.test l.232).<br>5. Ctrl+Z steps back through these steps, with Undo/Redo titles in English |
-| GROUP-MIX-REG | With `Group 1` (Music + Stems, clips placed): Mute aria-label `Mute — Group 1 (group)`; after the click the Undo title is `Undo: Mute — Group 1`. **Real audio (paired, same position, a region where only members sound):** group Mute → output RMS ≥ 20 dB lower; unmute restores it (within 1 dB) |
-| GEO-COUNT | At every step, count Georgian in the track headers (text and attributes), group rows, status line, Undo/Redo titles, meters, Master, envelope titles and transport. Expect **0** after these named subtractions (R5): the demo source titles (data, V-0.5), the demo-ready load status (V-0.5), and the detail panel, library, dock and `document.title` (V-0.4e/V-0.5). Track names and `ჯგუფი N` are **no longer** subtractions. List every subtraction |
-| LAYOUT | S0/S1/S2 (round-130 harness) against round 140. The track and group name **button boxes** and the M/S/fader boxes must not move, because the names are `flex-1 truncate`; a move >1 px = FAIL. Only text-sized nodes (status line, inner name text spans) may change. The group row is compared against the round-140 stored boxes, which are the same at both viewports: row h 28; fold/name/M/S 24×24 at x 296/322/403/429; name w 79; fader 48×4 at x 455 |
-| REG-140 | One sample each: an envelope point add status `Envelope: point added — {t} s · 0.0 dB.`, and the Master Peak label after a reset `Master Peak −∞ dBFS — click to clear` |
-| G141-3 (alone, last) | `/studio-lab` shows the workspace and the demo badge. `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`. `GET /api/studio-token?…` → 401. The fake-Bearer 403 check is BLOCKED (backend unavailable in cloud) |
+| T142-TARGETED | Run A's named vitest list; the counts equal A's |
+| SOURCE-SCOPE | Only granted paths changed. Frozen list OK at start and end. End hashes equal `a-round-142/end-sha256.txt`. Protected diff vs `6e9f9b1` is empty. No source changes during C's phase |
+| AN-REVIEW | `diff -u` against `b-round-141/r142-granted-start/`. Expected:<br>- `strings.ts` adds only LB1 and `studioDetailStrings`, exactly as in §1.1;<br>- the 4 other source files change only DD1–DD3 and LB2–LB3, with no class, testid or handler change;<br>- each pin file changes only the listed lines plus LB-SEARCH (report any Biome rewrap);<br>- strings.test changes only §3.1;<br>- doc 117 changes only the named lines;<br>- ST44's grep over the 4 sources is empty |
+| DETAIL-TEXT | In each state (none, single audio, multi of 2 audio clips, video, video+audio), compare every visible text and aria-label/title/aria-valuetext in `[data-testid=arrangement-detail-panel]` with §1.1:<br>- the panel name, header label, hint, info labels, range labels, input aria-labels, apply text, reset label, both reasons, video placeholder, multi-clip note and `2 clips`;<br>- the toggle text and label, open and collapsed;<br>- the separator label and valuetext.<br>Georgian in the panel = only the selected clip's source title (R9) |
+| DETAIL-STATUS | 1. Single clip: set From/To to valid values, then Set selection → status `Time selection: {start} — {end} · Music.`, and the time selection is drawn on the clip.<br>2. Invalid From > To → status = the §1.1 `rangeInvalid` text, and nothing changes.<br>3. Clip Gain input `abc` + Enter → `Clip Gain: enter a number in dB (−60…+24).`.<br>4. Enter without a change → `Clip Gain unchanged: 0.0 dB.`.<br>5. Type `-3` and do not press Enter → the pending label `Unsaved` is visible with the full `title`. Esc → the value reverts.<br>6. Two audio clips selected: Clip Gain `-3` + Enter → `Clip Gain: 2 clips — −3.0 dB.`; Reset → `Clip Gain: 2 clips — 0.0 dB.`.<br>7. Undo/Redo titles of these edits are unchanged from round 141 (C reports the exact text) |
+| CLIP-GAIN-AUDIO | **Real audio**, paired and at the same position. One Music clip, playing a window where only that clip sounds. Detail Clip Gain `-20` + Enter → output RMS drops by 20 dB ± 1 dB. Reset (0 dB) → it comes back to within 1 dB of the base. Three valid measurements at most, per the sync budget |
+| LIBRARY-LABELS | Fresh load:<br>- the folder tree shows `Music`, `Stems` and `SFX` under the demo collection (counts unchanged from baseline);<br>- a library row's kind chip reads `Music`, `Stem` or `SFX`.<br>Search:<br>- `music` → only music sources; `stem` → only stems; `MUSIC` → the same as `music`;<br>- `მუსიკა` → no source matches by kind (C reports the count and which sources, if any, match by title or collection);<br>- clearing the search restores the full list.<br>Adding a sound with Enter still works (status `… added to the Music track at …`).<br>**Mixed attribute (R9):** the frozen `ArrangementLibrary.tsx` l.518 renders the folder toggle aria-label as `${label} — დაკეცვა/გაშლა`, so after LB3 it reads, for example, `Music — გაშლა`. The folder label word must be English; the `— დაკეცვა/გაშლა` suffix is a V-0.5 subtraction. C reports the exact attribute text |
+| GEO-COUNT | Count Georgian in the detail panel (text and attributes), the status line, Undo/Redo titles, the library kind chips and folder labels, and the round-141 surfaces. Expect **0** after these named subtractions (R9):<br>- source titles (data);<br>- the collection label `… შეძენილი სტემები` / demo collection name;<br>- the demo badge;<br>- the demo-ready load status;<br>- the library panel's own copy (aria-labels, headings, preview row), including the `— დაკეცვა/გაშლა` suffix of the folder toggle aria-label (the folder label word before it is counted);<br>- the dock;<br>- `document.title`.<br>The detail panel and the library labels are **no longer** excluded. List every subtraction |
+| LAYOUT | Compare with `b-round-141/out/detail-baseline-6e9f9b1.json` (same states, both viewports; at 1280 compare after expanding, and record the 1280 open boxes as the new baseline because the B probe stored only the collapsed panel there):<br>- the boxes of `arrangement-detail-start`, the clip-gain input, reset, fader and panel, and the x/w of every column, must not move or resize by more than 1 px;<br>- the apply button and toggle are `w-fit`, so their width may change; report it, and the x of other nodes must not move;<br>- reason line counts must not exceed the baseline (range reason 1, Clip Gain multi reason 2 at 1440, video reason 1, none reasons 1), and the group block height must not exceed 87 px;<br>- `contentScroll` must show no overflow, `clippedBelowPanel` must be empty, and no node may overflow horizontally.<br>Any breach = FAIL (not a Low) |
+| REG-141 | One sample each: Ctrl+G on Music + Stems → `Group “Group 1” created: Music, Stems.`; the track header aria-label `Music — set as the active track` |
+| G142-3 (alone, last) | `/studio-lab` shows the workspace and the demo badge. `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`. `GET /api/studio-token?…` → 401. The fake-Bearer 403 check is BLOCKED (backend unavailable in cloud) |
 | PX-NET / REG-HYD | 0 forbidden requests, 0 Authorization headers, 0 hydration errors and 0 pageerror (the known cart noise is expected) |
 
 Gate rows (C does not claim them): full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
 
 ## 6. Ableton source
-Live 12 Reference Manual, B's saved capture `b-round-133/live/arrangement-view.txt`. It is a minified page with the TOC and the Arrangement View chapter; B checked it on 2026-10-24.
+Live 12 Reference Manual, B's saved capture `b-round-133/live/arrangement-view.txt` (TOC + the Arrangement View chapter; B checked it on 2026-10-24). The Clip View chapter and the Browser chapter are **not** in the capture, and no new capture was taken.
 
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Default group name | §18.3 "Group Tracks" | **section title only**; Live's default Group Track name is **not** in the capture | `Group N` with the lowest free number is CZABA's existing rule, now in English; no Live claim | GROUP-DEFAULT |
-| Default track names | none captured | **unconfirmed** | Video/Music/Stems/SFX are CZABA's demo-route names (data), not Live defaults | TRACK-NAMES |
+| Detail panel labels (Start, Length, Clip Gain) | Live Clip View chapter — not captured | **unconfirmed** | CZABA wording per the glossary. CZABA's detail panel is its own simplified panel, not Live's Clip View. No Live claim | DETAIL-TEXT |
+| Library kind/folder labels and search | Live Browser chapter — not captured | **unconfirmed** | CZABA library labels Music/Stem(s)/SFX; search is AND over title + kind + collection (SRW-12) | LIBRARY-LABELS |
 
 C rates "CZABA requirement met" and "Ableton correspondence" separately.
 
 ## 7. Evidence and reporting
-- C writes `c-round-141.md` and `c-round-141.json` as it goes, with these fields: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` with subtractions, `measurements`, `invalidRuns`, `notesForB`.
-- Evidence goes under `c-round-141/{tools,out,shots}/`. Every run writes a uniquely named output (C-R125-HARNESS-OVERWRITE). C makes no writes under `store/`.
+- C writes `c-round-142.md` and `c-round-142.json` as it goes, with these fields: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` with subtractions, `measurements` (incl. the LAYOUT deltas and the CLIP-GAIN-AUDIO values), `invalidRuns`, `notesForB`.
+- Evidence goes under `c-round-142/{tools,out,shots}/`. Every run writes a uniquely named output (C-R125-HARNESS-OVERWRITE). C makes no writes under `store/`.
 - `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`. A state that honestly cannot be observed is `inconclusive`, with the reason.
-- A writes `a-round-141.md` as it goes. It covers:
+- A writes `a-round-142.md` as it goes. It covers:
   - start checks and the pre-grep;
   - changed files and `it` counts before/after;
+  - the key → test map;
   - test results and mutations;
   - the reviewer verdict and Architecture note;
   - shell writes and the end state;
   - deviations and known gaps.
 
-## 8. Outcome, fixed in advance (B at round 142 planning)
-| Condition | Round 142 |
+## 8. Outcome, fixed in advance (B at round 143 planning)
+| Condition | Round 143 |
 |---|---|
-| B plans on or after **2026-10-27** | The **REGRESSION round** first, then the row below |
-| C FAIL with Critical / High / Medium | A bounded V-0.4d fix-up (at most three related bugs) |
-| C PASS (new Lows → `deferred_low_polish`) | V-0.4d → `c_pass`, then `c_pass_published` after the gate. Round 142 = **V-0.4e**, re-measured first; B decides whether it splits. Its scope: `ArrangementDetailPanel.tsx` (38 lines, incl. the l.53 role word → `group`), `panels.ts` l.8, `clip-gain-multi.ts` l.113 + the `GROUP_REASON` pins, and the `library.ts` kind/folder labels (4). If root's strings-split checkpoint result arrives first, B applies it as its own bounded round before V-0.4e |
+| B plans on or after **2026-10-27** | The **REGRESSION round** first (every done / c_pass item, both viewports, `test:e2e:smoke`), then the row below |
+| C FAIL with Critical / High / Medium | A bounded V-0.4e fix-up (at most three related bugs) |
+| C PASS (new Lows → `deferred_low_polish`) | V-0.4e → `c_pass`, then `c_pass_published` after the gate; **V-0.4 complete**. Round 143 = **V-0.5**, re-measured first. Its area: library, preview, dock, route, `studio-lab-demo.ts` UI labels, `collection.ts`, context l.3468, `lang="en"`, and the final RV-4 grep. B decides the split, since ≈84 source lines is likely 2–3 rounds. Forward constraints: gate-141 #2 (SSR `console.error` assertion in `default-track-names-ssr`) and #3 (ST40 meta-title pin update). If root's strings-split checkpoint result arrives first, B applies it as its own bounded round before V-0.5 |
 
 At every planning B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
 
 ## 9. Neighbour risk and root notes
-- **Name lookups:** the 3 role-regex files find group buttons by `^{name} — group`, and many tests call `groupName(view, 'ჯგუფი 1')`. If the sweep misses one, that lookup fails. m77/m78 prove the coupling.
-- **Numbering:** only the prefix changes. The lowest-free-index rule (`nextTrackGroupName`) is unchanged; m81 and GROUP-DEFAULT check it.
-- **Undo labels:** `Mute — {group}`, `Solo — {group}` and `Volume — {group}` come from the context with the group name. They become `… — Group 1` without any context edit.
-- **Text change at a data seam:** track names are arrangement data, so any code that compared names to Georgian literals would break. B's grep found none in `app/` outside the route and the context; A's pre-grep confirms.
-- **Server rendering:** the route renders on the server. `ssr-layout-effect` is in the neighbour list, and DS1–DS2 also render on the server.
-- **Architecture:** the strings-split checkpoint request is still open and does not block. Round-140 addendum: split `strings.test.ts` by feature after V-0.5, and add a shared scan helper.
-- **Commit readiness:** after C PASS, root may publish V-0.4d as an interim unit.
+- **Library search:** the kind label is in the haystack, so English labels change matches (R8). LIBRARY-LABELS and LB-SEARCH check it, and m86 proves the coupling. Library UI tests that use Georgian *track* names are unaffected.
+- **Width-limited slots:** the reasons sit in fixed columns (`w-44`, `w-52`, middle column w 392 at 1440), and the panel is 144 px. English must not add wrap lines. The LAYOUT baseline is B's real-browser probe, so a worse wrap is a FAIL, not a Low. DETAIL-REASON-FIT stays as it was.
+- **Pending hint:** derived by `slice`. R7 + DPS3 + m84 guard it.
+- **Text in status consumers:** `status-announcement-ui` and `self-disabling-focus` pin the Clip Gain unchanged text; both are swept.
+- **Server rendering:** the detail panel renders on the server inside `/studio-lab`. `ssr-layout-effect` and `default-track-names-ssr` are in the neighbour list.
+- **Architecture:** the strings-split checkpoint request is still open and does not block. Added this round: the gate-141 Architecture note (default-name seeds in strings vs data) is appended to `b-round-136-checkpoint-request.md`; A's SSR-helper note (extract when a third SSR test appears) is a signal.
+- **Commit readiness:** after C PASS, root may publish V-0.4e as an interim unit (it completes V-0.4).
