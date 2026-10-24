@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T13:05:04.332Z)
+# Active loop summary (2026-10-24T13:52:37.116Z)
 
-- backlog.json 1234 KB -> active view 160 KB
-- status: G_ROOT_GATE round 135
-- servers: `{"checkedUtc":"2026-10-24T12:26:10.9263274Z","round":135,"attempt":1,"store":200}`
-- last publication: 70f1e4270028a8b46a734ae9647bbc0db7982244 (rounds 135-135)
-- last root gate: round 135 published - commit 70f1e4270028a8b46a734ae9647bbc0db7982244 pushed
+- backlog.json 1241 KB -> active view 161 KB
+- status: G_ROOT_GATE round 136
+- servers: `{"checkedUtc":"2026-10-24T13:33:40.5770657Z","round":136,"attempt":1,"store":200}`
+- last publication: 7d9fed0f434b506b42e0d3bc86346202a28273f2 (rounds 136-136)
+- last root gate: round 136 published - commit 7d9fed0f434b506b42e0d3bc86346202a28273f2 pushed
 
 ## Current items: -
 
@@ -276,11 +276,13 @@
 - C-R133-HINT-NO-REFUSAL-SPAN-GROUP / info / acknowledged (pre-existing; planClipLaneMove and ghost logic unchanged) / during a refused GROUP lane drag (out-of-range, before-start) the lane hint shows no refusal span; only the status line carries the refusal
 - ARCH-R133-STRINGS-IMPORT-COUPLING / info / acknowledged (gate-133 reviewer verdict keep: one-way dependency into an import-free module); no task / selection.ts and groups.ts now import the strings module
 - INVENTORY-V0-UNASSIGNED / info / corrected (D-29z99): ArrangementGridMenu.tsx -> V-0.3a; panels.ts, clip-gain-multi.ts -> V-0.4 / three Studio files with Georgian UI text were in no V-0 stage area
-- GATE134-DOC110-STATUS / low / folded into round 135 (doc 110 l.4, l.132, l.136) / doc 110 status and testing lines still say the browser check waits for C round 134
-- GATE134-TEMPOROW-TITLE-MIXED / low / scheduled round 135 (V-0.3b TR19); closes on C PASS of round 135 / ArrangementTempoRow l.228 title still Georgian next to the English grid select
 - GATE134-ST25-FRAGILE / info / signal (architecture_signals ARCH-R134-RATCHET-SHAPE); accepted as a temporary guard until V-0.3d replaces it with a per-file scan / ST25 compares 33 hand-copied StudioWorkspace lines; a reformat breaks it without a translation
 - GATE134-COMMENT-WORDING / info / noted; no code change needed / strings.test.ts l.716 comment wording about the widened pattern
 - C-R134-SNAP-DEFAULT-OFF-NOTE / info / applied in round 135 C rows (state the Snap state; default off) / round-134 task examples assumed Snap on; real default is off
+- GATE135-DOC111-STATUS / low / folded into round 136 (doc 111 l.4, l.146, delete l.150) / doc 111 status and testing lines still say the browser check waits for C round 135
+- GATE135-DELETE-LABEL-IN-NAME / info / noted, pre-existing (same shape as the Georgian version); optional polish: start both range hints with '⌫ Delete' / Delete button aria-label with a range starts 'Delete time selection…' while the visible text is '⌫ Delete' (WCAG 2.5.3 still met by the word
+- C-R135-NV17-SAME-TICK / info / noted; unchanged code, no bug filed / Fit/X during playback pauses Follow but the status region only shows the Fit/X status; NV17 is never rendered (same-tick replacement, infere
+- C-R135-Z-MARGINS / info / noted; unchanged code / Z frames a 4 s range at ~48% of the viewport, centred (range fully visible)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

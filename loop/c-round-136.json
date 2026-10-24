@@ -1,0 +1,136 @@
+{
+  "round": 136,
+  "task": "VISUAL-A V-0.3c — marker row and marker menu in English",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-24T13:33:40.5770657Z",
+    "round": 136,
+    "attempt": 1,
+    "store": 200
+  },
+  "passed": [
+    "T136-TARGETED",
+    "SOURCE-SCOPE",
+    "AN-REVIEW",
+    "MARKER-HEADER-1440",
+    "MARKER-HEADER-1280",
+    "MARKER-ADD-1440",
+    "MARKER-ADD-1280",
+    "MARKER-EDIT-1440",
+    "MARKER-EDIT-1280",
+    "MARKER-MOVE-1440",
+    "MARKER-MOVE-1280",
+    "MARKER-NAV-1440",
+    "MARKER-NAV-1280",
+    "MARKER-MENU-1440",
+    "MARKER-MENU-1280",
+    "GEO-COUNT-1440",
+    "GEO-COUNT-1280",
+    "LAYOUT-1440",
+    "LAYOUT-1280",
+    "REG-135",
+    "G136-3 (partial: lab badge + workspace, protected route Sign in required at 1440/1280, token API 401)",
+    "PX-NET",
+    "REG-HYD"
+  ],
+  "failed": [],
+  "inconclusive": [],
+  "blocked": [
+    "G136-3 fake-Bearer 403: backend unavailable in cloud"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "npm run test:e2e:smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "bugs": [],
+  "georgianCounts": {
+    "1440": {
+      "steps": 39,
+      "markerSurfaceGeorgian": 0,
+      "markerSurfaceGuillemets": 0,
+      "statusNet": 0,
+      "observerNet": 0
+    },
+    "1280": {
+      "steps": 39,
+      "markerSurfaceGeorgian": 0,
+      "markerSurfaceGuillemets": 0,
+      "statusNet": 0,
+      "observerNet": 0
+    },
+    "subtracted": [
+      "demo-ready load-time status (frozen)",
+      "clip-added status: demo source title “ღამის პულსი · პულსი” + track name სტემები (V-0.4/V-0.5 data)"
+    ],
+    "note": "The raw count on the marker surface (header titles and aria-labels, flag aria-label and title, name field, menu label and items) was 0 before any subtraction. Marker names were Latin user data.",
+    "otherFoundOutsideMarkerSurface": [
+      "the range readout line under the status (`მონიშვნა: … Delete = წაშლა, სიცარიელე რჩება …`, StudioWorkspace, V-0.3d) seen in add-d shots",
+      "header `· სამუშაო სივრცე`, the demo badge, library, video dock and detail panel (V-0.4/V-0.5), as in round 135"
+    ]
+  },
+  "invalidRuns": [],
+  "evidence": {
+    "vitest": "c-round-136/out/vitest-16.json (274/274, 16 files, same as A)",
+    "rows": [
+      "c-round-136/out/c136-1440-r2-all.json",
+      "c-round-136/out/c136-1280-r1-all.json"
+    ],
+    "playTap": [
+      "c-round-136/out/playtap-1440.json",
+      "c-round-136/out/playtap-1280.json"
+    ],
+    "layout": [
+      "c-round-136/out/layout130-1440-r1.json",
+      "c-round-136/out/layout130-1280-r1.json",
+      "c-round-136/out/layout-compare.json"
+    ],
+    "auth": "c-round-136/out/g136-3.json",
+    "tools": "c-round-136/tools/c136.cjs, playtap.cjs, g136-3.cjs, layout130.*"
+  },
+  "notesForB": [
+    "1 (task-text mismatch, not a bug): MARKER-NAV says 'playhead before the first flag: previous → No more markers before the playhead'. The current code (adjacentMarkerTarget, unchanged since before this round) sends previous from 1 s to 0 s, the timeline start. MK9 appears only at 0. The same goes for next: it goes to the project end when end > playhead, so MK8 appears only at or after the end. C tested MK9 at 0 s and MK8 with project end 0 (no clips).",
+    "2 (task-text mismatch, pre-existing design MV5): MARKER-MOVE expected a drag onto 3 s to show MK7 with the flag back in its place. In the real browser, one pointer move straight onto the occupied time leaves the flag where it was and shows no status. A stepped drag keeps the last free time: 00:02.794 at both sizes, one Move Marker entry that Undo reverts. MK7 appears for the arrow-key conflict, announced once while the key is held. This is unchanged by V-0.3c. A refused drag with no announcement could be a future polish or a11y item if B wants one; C records it as info only.",
+    "3 (info, pre-existing): after a successful previous/next jump between flags, the status line keeps the last status (for example 'No more markers after the playhead' from the step before). No new edge status is announced (MutationObserver empty). Not caused by this round.",
+    "4: menu box 160×94 (min-w-40) at both sizes, items 150 px with scrollWidth == clientWidth, right edge 767/832 px, inside 1280 and 1440. The marker row had no overflow in any of the 39 steps per viewport.",
+    "5: 'Play from here' moved the playhead from 0 to 6.22 s and it advanced about 1 s/s. Real output tap peak 0.297, with 119 of 125 frames non-silent. Pause and Play toggled correctly.",
+    "6 (action for B): correct the two V-0.3c expectations in backlog/feature-status and in any regression checklist, so the regression round does not hit the same wall. (a) Previous/next first go to the timeline start / project end (and clip edges on the edge-navigation tracks); MK9 appears only at 0, MK8 only at or after the project end. (b) A direct drag onto an occupied time is refused silently; a stepped drag keeps the last free time (MV5); MK7 comes from the arrow-key conflict."
+  ],
+  "supersededHarnessRuns": [
+    {
+      "run": "c136 1440 r1",
+      "reason": "harness/expectation mistakes, not environment failures; the app behaved correctly. Range start read as mm:ss but the detail field holds plain seconds; NAV/MOVE-drag expectations followed the task text, which conflicts with the designed behaviour (notesForB 1-2); Play-from-here was tried with project end 0. Replaced by r2 (all green). No replacement budget used.",
+      "evidence": "c-round-136/out/c136-1440-r1-all.json"
+    },
+    {
+      "run": "probe136 first attempt",
+      "reason": "orientation probe, not a row run; read arrangement-status before it existed"
+    }
+  ],
+  "screenshotsOpened": [
+    "probe2.png",
+    "add-a-1440-r2.png",
+    "menu-rc-1440-r2.png",
+    "menu-sf10-1280-r1.png",
+    "move-at0-1280-r1.png",
+    "g136-3-protected-1440.png",
+    "hdr-1280-r1.png",
+    "add-a-field-1280-r1.png",
+    "add-d-1280-r1.png",
+    "edit-empty-1280-r1.png",
+    "edit-delete-1280-r1.png",
+    "move-drag-direct-1280-r1.png",
+    "nav-edge-1280-r1.png",
+    "menu-play-1280-r1.png",
+    "S1-1280-r1.png",
+    "g136-3-lab-1440.png"
+  ],
+  "screenshotsNotOpened": "the remaining 1440 r2 counterparts (hdr, add-a-field, add-d, edit-*, move-*, nav-edge, menu-sf10, menu-play), every 1440 r1 shot (superseded run), S0/S2 at both sizes, S1-1440 and g136-3-protected-1280. Their rows are verified by DOM measurements in the out JSON."
+}

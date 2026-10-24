@@ -1,0 +1,1019 @@
+--- ../tmp/studio-real-loop/b-round-135/r136-granted-start/app/lib/arrangement/strings.ts	2026-10-24 13:18:53.396972839 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 13:27:04.433202413 +0000
+@@ -418,3 +418,33 @@
+   snapOnTitle: 'Snap on — clips land on the grid (G)',
+   snapOff: 'Snap off — free movement (G)',
+ };
++
++interface StudioMarkerTimeText {
++  name: string;
++  time: string;
++}
++
++export const studioMarkerStrings = {
++  menuRename: 'Rename (F2)',
++  menuPlay: 'Play from here',
++  menuDelete: 'Delete (Delete)',
++  flagHint:
++    'Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu',
++  atTimeStart: 'The marker is at the start of the timeline.',
++  noneAfter: 'No more markers after the playhead',
++  noneBefore: 'No more markers before the playhead',
++  notAdded: 'Marker not added',
++  addTitle: 'Add a marker at the playhead or at the start of the time selection (M)',
++  previousTitle: 'Jump to the previous marker (Ctrl+←)',
++  nextTitle: 'Jump to the next marker (Ctrl+→)',
++  nameFieldLabel: 'Marker name',
++  menuLabel: (name: string): string => `Marker “${name}”`,
++  existsAtTime: (name: string): string => `A marker already exists at this time: “${name}”`,
++  added: ({ name, time }: StudioMarkerTimeText): string => `Marker “${name}” added at ${time}.`,
++  renameEmpty: (name: string): string => `The name is empty — “${name}” is kept`,
++  renamed: (name: string): string => `Marker name: “${name}”.`,
++  deleted: (name: string): string => `Marker “${name}” deleted.`,
++  moved: ({ name, time }: StudioMarkerTimeText): string => `Marker “${name}” moved to ${time}.`,
++  flagLabel: ({ name, time }: StudioMarkerTimeText): string => `Marker “${name}” — ${time}`,
++  flagHeading: ({ name, time }: StudioMarkerTimeText): string => `“${name}” — ${time}`,
++};
+--- ../tmp/studio-real-loop/b-round-135/r136-granted-start/app/components/arrangement/ArrangementMarkerRow.tsx	2026-10-24 13:18:53.396737438 +0000
++++ app/components/arrangement/ArrangementMarkerRow.tsx	2026-10-24 13:27:23.324366972 +0000
+@@ -31,6 +31,7 @@
+   renameMarker,
+   roundMarkerTime,
+ } from '~/lib/arrangement/markers';
++import { studioMarkerStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementMarker } from '~/types/arrangement';
+ import { watchUncapturedPointerGesture } from './ArrangementClip';
+@@ -50,9 +51,8 @@
+ const MARKER_DRAG_THRESHOLD_PX = 3;
+ const MARKER_KEY_STEP_SECONDS = 0.1;
+ const MARKER_FLAG_SHORTCUTS = 'F2 Delete ArrowLeft ArrowRight Shift+F10';
+-const MARKER_FLAG_HINT =
+-  'დაწკაპუნება: გადასვლა · ორმაგი დაწკაპუნება: დაკვრა აქედან · გადათრევა ან ← →: გადატანა · F2: სახელის შეცვლა · Delete: წაშლა · მარჯვენა ღილაკი ან Shift+F10: მენიუ';
+-const MARKER_AT_TIME_START_MESSAGE = 'მარკერი დროის დასაწყისშია.';
++const MARKER_FLAG_HINT = studioMarkerStrings.flagHint;
++const MARKER_AT_TIME_START_MESSAGE = studioMarkerStrings.atTimeStart;
+ 
+ type MarkerEditor =
+   | { kind: 'add'; session: number; time: number; draft: string; fallback: string }
+@@ -216,7 +216,7 @@
+     const existing = markerAtTime(current, time);
+     if (existing) {
+       setSelectedMarkerId(existing.id);
+-      setStatus(`ამ დროზე მარკერი უკვე არის: «${existing.name}»`);
++      setStatus(studioMarkerStrings.existsAtTime(existing.name));
+       focusMarkerTarget(existing.id);
+       return;
+     }
+@@ -238,7 +238,8 @@
+         edgeTimes,
+       );
+       if (!target) {
+-        const message = direction === 1 ? 'წინ მარკერი აღარ არის' : 'უკან მარკერი აღარ არის';
++        const message =
++          direction === 1 ? studioMarkerStrings.noneAfter : studioMarkerStrings.noneBefore;
+         if (options?.keyRepeat !== true || status !== message) {
+           setStatus(message);
+         }
+@@ -296,7 +297,7 @@
+     }
+     if (editor.kind === 'add') {
+       if (reason === 'escape') {
+-        setStatus('მარკერი არ დაემატა');
++        setStatus(studioMarkerStrings.notAdded);
+         const restore = restoreFocusRef.current;
+         if (restore?.isConnected) {
+           restore.focus({ preventScroll: true });
+@@ -311,7 +312,7 @@
+       );
+       if (result.arrangement === null) {
+         setSelectedMarkerId(result.existing.id);
+-        setStatus(`ამ დროზე მარკერი უკვე არის: «${result.existing.name}»`);
++        setStatus(studioMarkerStrings.existsAtTime(result.existing.name));
+         if (moveFocus) {
+           focusMarkerTarget(result.existing.id);
+         }
+@@ -320,7 +321,10 @@
+       commitArrangement(result.arrangement, 'Add Marker', before);
+       setSelectedMarkerId(result.marker.id);
+       setStatus(
+-        `მარკერი «${result.marker.name}» დაემატა: ${formatArrangementTime(result.marker.time)}.`,
++        studioMarkerStrings.added({
++          name: result.marker.name,
++          time: formatArrangementTime(result.marker.time),
++        }),
+       );
+       if (moveFocus) {
+         focusMarkerTarget(result.marker.id);
+@@ -339,7 +343,7 @@
+       return;
+     }
+     if (editor.draft.trim().length === 0) {
+-      setStatus(`სახელი ცარიელია — დარჩა «${marker.name}»`);
++      setStatus(studioMarkerStrings.renameEmpty(marker.name));
+       return;
+     }
+     const next = renameMarker(before, editor.id, editor.draft);
+@@ -349,7 +353,7 @@
+     }
+     commitArrangement(next, 'Rename Marker', before);
+     const renamed = arrangementMarkers(next).find((entry) => entry.id === editor.id);
+-    setStatus(`მარკერის სახელი: «${renamed?.name ?? marker.name}».`);
++    setStatus(studioMarkerStrings.renamed(renamed?.name ?? marker.name));
+   };
+ 
+   const removeMarker = (marker: ArrangementMarker) => {
+@@ -364,7 +368,7 @@
+     if (selectedMarkerId === marker.id) {
+       setSelectedMarkerId(null);
+     }
+-    setStatus(`მარკერი «${marker.name}» წაიშალა.`);
++    setStatus(studioMarkerStrings.deleted(marker.name));
+     focusMarkerTarget(neighbour ? neighbour.id : MARKER_ADD_FOCUS);
+   };
+ 
+@@ -381,7 +385,7 @@
+   ): boolean => {
+     const result = moveMarker(before, markerId, time);
+     if (result.kind === 'conflict') {
+-      const message = `ამ დროზე მარკერი უკვე არის: «${result.other.name}»`;
++      const message = studioMarkerStrings.existsAtTime(result.other.name);
+       if (!keyRepeat || status !== message) {
+         setStatus(message);
+       }
+@@ -394,7 +398,10 @@
+     commitArrangement(result.arrangement, 'Move Marker', before);
+     setSelectedMarkerId(markerId);
+     setStatus(
+-      `მარკერი «${result.marker.name}» გადავიდა: ${formatArrangementTime(result.marker.time)}.`,
++      studioMarkerStrings.moved({
++        name: result.marker.name,
++        time: formatArrangementTime(result.marker.time),
++      }),
+     );
+     return true;
+   };
+@@ -689,7 +696,7 @@
+           }}
+           aria-label="Add marker (M)"
+           aria-keyshortcuts="M"
+-          title="მარკერის დამატება playhead-ზე ან მონიშვნის დასაწყისში (M)"
++          title={studioMarkerStrings.addTitle}
+           className={MARKER_HEADER_BUTTON_CLASS}
+           data-testid="arrangement-marker-add"
+         >
+@@ -705,7 +712,7 @@
+           }}
+           aria-label="Previous marker (Ctrl+←)"
+           aria-keyshortcuts="Control+ArrowLeft"
+-          title="წინა მარკერზე გადასვლა (Ctrl+←)"
++          title={studioMarkerStrings.previousTitle}
+           className={MARKER_HEADER_BUTTON_CLASS}
+           data-testid="arrangement-marker-prev"
+         >
+@@ -721,7 +728,7 @@
+           }}
+           aria-label="Next marker (Ctrl+→)"
+           aria-keyshortcuts="Control+ArrowRight"
+-          title="შემდეგ მარკერზე გადასვლა (Ctrl+→)"
++          title={studioMarkerStrings.nextTitle}
+           className={MARKER_HEADER_BUTTON_CLASS}
+           data-testid="arrangement-marker-next"
+         >
+@@ -772,12 +779,12 @@
+                 }
+               }}
+               onKeyDown={(event) => handleFlagKeyDown(event, marker)}
+-              aria-label={`Marker «${marker.name}» — ${time}`}
++              aria-label={studioMarkerStrings.flagLabel({ name: marker.name, time })}
+               aria-current={selected ? 'true' : undefined}
+               aria-keyshortcuts={MARKER_FLAG_SHORTCUTS}
+               aria-haspopup="menu"
+               aria-expanded={menuMarker?.id === marker.id ? true : undefined}
+-              title={`«${marker.name}» — ${time}\n${MARKER_FLAG_HINT}`}
++              title={`${studioMarkerStrings.flagHeading({ name: marker.name, time })}\n${MARKER_FLAG_HINT}`}
+               className="group absolute top-0 flex h-5 cursor-grab touch-none items-center pl-1 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-surface"
+               style={{ left: marker.time * pxPerSecond }}
+               data-testid="arrangement-marker"
+@@ -828,7 +835,7 @@
+               }
+             }}
+             onBlur={() => settleEditor('blur')}
+-            aria-label="მარკერის სახელი"
++            aria-label={studioMarkerStrings.nameFieldLabel}
+             className="absolute top-0 z-10 h-5 w-40 rounded-sm border border-brand bg-background px-1 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
+             style={{ left: editor.time * pxPerSecond }}
+             data-testid="arrangement-marker-name-input"
+--- ../tmp/studio-real-loop/b-round-135/r136-granted-start/app/components/arrangement/ArrangementMarkerMenu.tsx	2026-10-24 13:18:53.396574303 +0000
++++ app/components/arrangement/ArrangementMarkerMenu.tsx	2026-10-24 13:27:13.864854129 +0000
+@@ -1,5 +1,6 @@
+ import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
++import { studioMarkerStrings } from '~/lib/arrangement/strings';
+ import { armGridMenuDismissClickSwallow } from './ArrangementGridMenu';
+ 
+ const MARKER_MENU_VIEWPORT_MARGIN_PX = 4;
+@@ -10,9 +11,9 @@
+ export type MarkerMenuCloseReason = 'escape' | 'tab' | 'outside' | 'window';
+ 
+ const MARKER_MENU_ITEMS: readonly { action: MarkerMenuAction; label: string }[] = [
+-  { action: 'rename', label: 'სახელის შეცვლა (F2)' },
+-  { action: 'play', label: 'დაკვრა აქედან' },
+-  { action: 'delete', label: 'წაშლა (Delete)' },
++  { action: 'rename', label: studioMarkerStrings.menuRename },
++  { action: 'play', label: studioMarkerStrings.menuPlay },
++  { action: 'delete', label: studioMarkerStrings.menuDelete },
+ ];
+ 
+ interface ArrangementMarkerMenuProps {
+@@ -121,7 +122,7 @@
+     <div
+       ref={menuRef}
+       role="menu"
+-      aria-label={`მარკერი «${markerName}»`}
++      aria-label={studioMarkerStrings.menuLabel(markerName)}
+       className="fixed z-50 min-w-40 rounded-md border border-outline bg-surface p-1 shadow-lg"
+       style={position}
+       onKeyDown={handleMarkerMenuKeyDown}
+--- ../tmp/studio-real-loop/b-round-135/r136-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 13:18:53.396972839 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 13:23:07.312599057 +0000
+@@ -47,6 +47,7 @@
+   studioLaneMoveStrings,
+   studioLibraryStrings,
+   studioLoopStrings,
++  studioMarkerStrings,
+   studioMetronomeStrings,
+   studioMoveStrings,
+   studioPlaybackStrings,
+@@ -1525,3 +1526,99 @@
+     }
+   });
+ });
++
++const EXPECTED_MARKER_PLAIN_STRINGS: Record<string, string> = {
++  menuRename: 'Rename (F2)',
++  menuPlay: 'Play from here',
++  menuDelete: 'Delete (Delete)',
++  flagHint:
++    'Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu',
++  atTimeStart: 'The marker is at the start of the timeline.',
++  noneAfter: 'No more markers after the playhead',
++  noneBefore: 'No more markers before the playhead',
++  notAdded: 'Marker not added',
++  addTitle: 'Add a marker at the playhead or at the start of the time selection (M)',
++  previousTitle: 'Jump to the previous marker (Ctrl+←)',
++  nextTitle: 'Jump to the next marker (Ctrl+→)',
++  nameFieldLabel: 'Marker name',
++};
++
++const ms = studioMarkerStrings;
++
++const MARKER_FORMATTER_SAMPLES: Record<string, string[]> = {
++  menuLabel: [ms.menuLabel('Intro')],
++  existsAtTime: [ms.existsAtTime('Drop')],
++  added: [ms.added({ name: 'Intro', time: '00:05.000' })],
++  renameEmpty: [ms.renameEmpty('Intro')],
++  renamed: [ms.renamed('Intro')],
++  deleted: [ms.deleted('Intro')],
++  moved: [ms.moved({ name: 'Intro', time: '00:07.000' })],
++  flagLabel: [ms.flagLabel({ name: 'Hit', time: '00:00.500' })],
++  flagHeading: [ms.flagHeading({ name: 'Hit', time: '00:00.500' })],
++};
++
++const GUILLEMET = /[«»]/;
++
++describe('V-0.3c marker strings', () => {
++  it('ST28: every plain-string property of studioMarkerStrings equals its exact English literal', () => {
++    const plainKeys = Object.entries(ms)
++      .filter(([, value]) => typeof value === 'string')
++      .map(([key]) => key)
++      .sort();
++    expect(plainKeys).toEqual(Object.keys(EXPECTED_MARKER_PLAIN_STRINGS).sort());
++    for (const [key, value] of Object.entries(ms)) {
++      if (typeof value === 'string') {
++        expect(value, key).toBe(EXPECTED_MARKER_PLAIN_STRINGS[key]);
++      }
++    }
++  });
++
++  it('ST29: every marker formatter returns the exact English for Latin inputs', () => {
++    const formatterKeys = Object.entries(ms)
++      .filter(([, value]) => typeof value === 'function')
++      .map(([key]) => key)
++      .sort();
++    expect(formatterKeys).toEqual(Object.keys(MARKER_FORMATTER_SAMPLES).sort());
++    expect(ms.menuLabel('Intro')).toBe('Marker “Intro”');
++    expect(ms.existsAtTime('Drop')).toBe('A marker already exists at this time: “Drop”');
++    expect(ms.renameEmpty('Intro')).toBe('The name is empty — “Intro” is kept');
++    expect(ms.renamed('Intro')).toBe('Marker name: “Intro”.');
++    expect(ms.deleted('Intro')).toBe('Marker “Intro” deleted.');
++    expect(ms.added({ name: 'Intro', time: '00:05.000' })).toBe(
++      'Marker “Intro” added at 00:05.000.',
++    );
++    expect(ms.moved({ name: 'Intro', time: '00:07.000' })).toBe(
++      'Marker “Intro” moved to 00:07.000.',
++    );
++    expect(ms.flagLabel({ name: 'Hit', time: '00:00.500' })).toBe('Marker “Hit” — 00:00.500');
++    expect(ms.flagHeading({ name: 'Hit', time: '00:00.500' })).toBe('“Hit” — 00:00.500');
++  });
++
++  it('ST30: studioMarkerStrings and the marker row and menu sources contain no Georgian codepoint and no «»', () => {
++    expect(GUILLEMET.test('«')).toBe(true);
++    expect(GUILLEMET.test('»')).toBe(true);
++    expect(GUILLEMET.test('“”')).toBe(false);
++    for (const [key, value] of Object.entries(ms)) {
++      if (typeof value === 'string') {
++        expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
++        expect(value, key).not.toMatch(GUILLEMET);
++      }
++    }
++    for (const [key, outputs] of Object.entries(MARKER_FORMATTER_SAMPLES)) {
++      expect(outputs.length, key).toBeGreaterThan(0);
++      for (const output of outputs) {
++        expect(output, key).not.toMatch(GEORGIAN_CODEPOINT);
++        expect(output, key).not.toMatch(GUILLEMET);
++      }
++    }
++    for (const path of [
++      '../../../components/arrangement/ArrangementMarkerRow.tsx',
++      '../../../components/arrangement/ArrangementMarkerMenu.tsx',
++    ]) {
++      const source = stripSourceComments(readStoreSource(path));
++      expect(source.length, path).toBeGreaterThan(0);
++      expect(source, path).not.toMatch(GEORGIAN_CODEPOINT);
++      expect(source, path).not.toMatch(GUILLEMET);
++    }
++  });
++});
+--- ../tmp/studio-real-loop/b-round-135/r136-granted-start/app/lib/arrangement/__tests__/markers-ui.test.tsx	2026-10-24 13:18:53.396972839 +0000
++++ app/lib/arrangement/__tests__/markers-ui.test.tsx	2026-10-24 13:24:22.282828658 +0000
+@@ -274,7 +274,7 @@
+     expect(input.selectionStart).toBe(0);
+     expect(input.selectionEnd).toBe('Marker 1'.length);
+     expect(input.maxLength).toBe(64);
+-    expect(input.getAttribute('aria-label')).toBe('მარკერის სახელი');
++    expect(input.getAttribute('aria-label')).toBe('Marker name');
+     expect(live(api).arrangement.markers).toBeUndefined();
+     expect(live(api).undoLabel).toBeNull();
+     fireEvent.change(input, { target: { value: 'აქ შედის მუსიკა' } });
+@@ -287,7 +287,7 @@
+     expect(flag.getAttribute('aria-current')).toBe('true');
+     expect(flag.title).toContain('აქ შედის მუსიკა');
+     expect(document.activeElement).toBe(flag);
+-    expect(statusText(view)).not.toContain('უკვე არის');
++    expect(statusText(view)).not.toContain('already exists');
+     expect(live(api).undoLabel).toBe('Add Marker');
+     const undoButton = view.getByTitle('Undo: Add Marker');
+     expect(undoButton).toBeTruthy();
+@@ -316,7 +316,7 @@
+     expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
+     expect(markerFlags(view)).toHaveLength(0);
+     expect(live(api).undoLabel).toBeNull();
+-    expect(statusText(view)).toBe('მარკერი არ დაემატა');
++    expect(statusText(view)).toBe('Marker not added');
+     pressM();
+     const second = nameInput(view);
+     fireEvent.change(second, { target: { value: 'ბლური' } });
+@@ -340,7 +340,7 @@
+     expect(live(api).undoLabel).toBe('Add Marker');
+     act(() => live(api).undo());
+     expect(live(api).undoLabel).toBeNull();
+-    expect(statusText(view)).not.toContain('უკვე არის');
++    expect(statusText(view)).not.toContain('already exists');
+   });
+ 
+   it('MU3: with a time range the Add button uses the range start and keeps the range', async () => {
+@@ -367,7 +367,7 @@
+     (document.activeElement instanceof HTMLElement ? document.activeElement : document.body).blur();
+     pressM();
+     expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
+-    expect(statusText(view)).toBe('ამ დროზე მარკერი უკვე არის: «აქ შედის მუსიკა»');
++    expect(statusText(view)).toBe('A marker already exists at this time: “აქ შედის მუსიკა”');
+     expect(document.activeElement).toBe(flagAt(view, '12.000'));
+     expect(flagAt(view, '12.000').getAttribute('aria-current')).toBe('true');
+     expect(live(api).arrangement).toBe(arrangementBefore);
+@@ -414,7 +414,7 @@
+     expect(flagAt(view, '40.000').getAttribute('aria-current')).toBe('true');
+     pressCtrlArrow('ArrowRight');
+     expect(live(api).getLivePosition()).toBe(PROJECT_END);
+-    expect(statusText(view)).toBe('წინ მარკერი აღარ არის');
++    expect(statusText(view)).toBe('No more markers after the playhead');
+     const backward: number[] = [];
+     for (let step = 0; step < 4; step += 1) {
+       pressCtrlArrow('ArrowLeft');
+@@ -423,7 +423,7 @@
+     expect(backward).toEqual([40, 20, 12, 0]);
+     pressCtrlArrow('ArrowLeft');
+     expect(live(api).getLivePosition()).toBe(0);
+-    expect(statusText(view)).toBe('უკან მარკერი აღარ არის');
++    expect(statusText(view)).toBe('No more markers before the playhead');
+     const next = view.getByTestId('arrangement-marker-next');
+     const prev = view.getByTestId('arrangement-marker-prev');
+     expect(next.getAttribute('aria-keyshortcuts')).toBe('Control+ArrowRight');
+@@ -434,13 +434,13 @@
+       buttons.push(live(api).getLivePosition());
+     }
+     fireEvent.click(next);
+-    expect(statusText(view)).toBe('წინ მარკერი აღარ არის');
++    expect(statusText(view)).toBe('No more markers after the playhead');
+     for (let step = 0; step < 4; step += 1) {
+       fireEvent.click(prev);
+       buttons.push(live(api).getLivePosition());
+     }
+     fireEvent.click(prev);
+-    expect(statusText(view)).toBe('უკან მარკერი აღარ არის');
++    expect(statusText(view)).toBe('No more markers before the playhead');
+     expect(buttons).toEqual([12, 20, 40, PROJECT_END, 40, 20, 12, 0]);
+     const tempo = view.getByTestId('arrangement-tempo-input');
+     tempo.focus();
+@@ -513,7 +513,7 @@
+     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+     expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
+     expect(live(api).arrangement).toBe(renamedArrangement);
+-    expect(statusText(view)).toBe('სახელი ცარიელია — დარჩა «რეკლამა»');
++    expect(statusText(view)).toBe('The name is empty — “რეკლამა” is kept');
+   });
+ 
+   it('MU8: Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a focused marker move the marker and never nudge the selected clip', async () => {
+--- ../tmp/studio-real-loop/b-round-135/r136-granted-start/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx	2026-10-24 13:18:53.396822187 +0000
++++ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx	2026-10-24 13:24:01.130770967 +0000
+@@ -368,11 +368,11 @@
+       act(() => live(api).seekTo(PROJECT_END));
+       pressStep('ArrowRight');
+       expect(live(api).getLivePosition()).toBe(PROJECT_END);
+-      expect(statusText(view)).toBe('წინ მარკერი აღარ არის');
++      expect(statusText(view)).toBe('No more markers after the playhead');
+       expect(stepSequence(api, 'ArrowLeft', 5)).toEqual([12, 7.75, 6.3, 2.25, 0]);
+       pressStep('ArrowLeft');
+       expect(live(api).getLivePosition()).toBe(0);
+-      expect(statusText(view)).toBe('უკან მარკერი აღარ არის');
++      expect(statusText(view)).toBe('No more markers before the playhead');
+     });
+ 
+     it('EN5: a clip-edge stop keeps the selected marker; an edge on a marker selects that marker', async () => {
+@@ -395,7 +395,7 @@
+       pressStep('ArrowRight');
+       expect(live(api).getLivePosition()).toBe(14);
+       expect(flagAt(view, '12.000').getAttribute('aria-current')).toBe('true');
+-      expect(statusText(view)).not.toContain('მარკერი აღარ არის');
++      expect(statusText(view)).not.toContain('No more markers');
+       expect(live(api).undoLabel).toBeNull();
+     });
+ 
+--- ../tmp/studio-real-loop/b-round-135/r136-granted-start/app/lib/arrangement/__tests__/markers-move-ui.test.tsx	2026-10-24 13:18:53.396972839 +0000
++++ app/lib/arrangement/__tests__/markers-move-ui.test.tsx	2026-10-24 13:23:21.995646958 +0000
+@@ -178,7 +178,7 @@
+   { id: 'k12', time: 12, name: 'Drop' },
+ ];
+ 
+-const MARKER_AT_START_STATUS = 'მარკერი დროის დასაწყისშია.';
++const MARKER_AT_START_STATUS = 'The marker is at the start of the timeline.';
+ 
+ function markerFlags(view: MarkerView): HTMLElement[] {
+   return view.queryAllByTestId('arrangement-marker');
+@@ -315,7 +315,7 @@
+     dragFlag(flagById(view, 'k5'), [pps, 2.4 * pps], { pointerId: 11 });
+     expect(markerTimes(view)).toEqual(['7.000', '12.000']);
+     expect(live(api).undoLabel).toBe('Move Marker');
+-    expect(statusText(view)).toBe('მარკერი «Intro» გადავიდა: 00:07.000.');
++    expect(statusText(view)).toBe('Marker “Intro” moved to 00:07.000.');
+     expect(flagById(view, 'k5').getAttribute('aria-current')).toBe('true');
+     act(() => live(api).undo());
+     expect(markerTimes(view)).toEqual(['5.000', '12.000']);
+@@ -450,7 +450,7 @@
+     const undoBefore = live(api).undoLabel;
+     const pastMarkers = live(api).arrangement.markers;
+     fireEvent.keyDown(flagById(view, 'k5'), { key: 'ArrowRight', code: 'ArrowRight' });
+-    expect(statusText(view)).toBe('ამ დროზე მარკერი უკვე არის: «Drop»');
++    expect(statusText(view)).toBe('A marker already exists at this time: “Drop”');
+     expect(live(api).arrangement.markers).toBe(pastMarkers);
+     expect(live(api).undoLabel).toBe(undoBefore);
+     expect(live(api).arrangement.clips[0].start).toBe(0);
+@@ -477,9 +477,9 @@
+     const drop = flagById(view, 'k12');
+     expect(rightClickFlag(drop, 300, 40)).toBe(false);
+     expect(menuItems(view).map((item) => item.textContent)).toEqual([
+-      'სახელის შეცვლა (F2)',
+-      'დაკვრა აქედან',
+-      'წაშლა (Delete)',
++      'Rename (F2)',
++      'Play from here',
++      'Delete (Delete)',
+     ]);
+     expect(markerMenu(view)?.getAttribute('role')).toBe('menu');
+     expect(markerMenu(view)?.style.left).toBe('300px');
+--- ../tmp/studio-real-loop/b-round-135/r136-granted-start/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx	2026-10-24 13:18:53.396972839 +0000
++++ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx	2026-10-24 13:24:04.931781584 +0000
+@@ -401,8 +401,8 @@
+ const NUDGE_SNAP_BLOCKED_TEXT = studioMoveStrings.nudgeAtTimeStart;
+ const GROUP_BLOCKED_TEXT = 'Group move stopped — a neighbouring clip or the start of the timeline.';
+ const LOOP_BLOCKED_TEXT = studioLoopStrings.stepBlocked;
+-const MARKER_START_TEXT = 'მარკერი დროის დასაწყისშია.';
+-const MARKER_NEXT_NONE_TEXT = 'წინ მარკერი აღარ არის';
++const MARKER_START_TEXT = 'The marker is at the start of the timeline.';
++const MARKER_NEXT_NONE_TEXT = 'No more markers after the playhead';
+ const CLIP_GAIN_UNCHANGED_TEXT = 'Clip Gain უცვლელია: 0.0 dB.';
+ 
+ function keyRepeatClip(id: string, start: number) {
+@@ -675,7 +675,7 @@
+     );
+     const flag = view
+       .getAllByTestId('arrangement-marker')
+-      .find((element) => element.getAttribute('aria-label')?.startsWith('Marker «Hit»') === true);
++      .find((element) => element.getAttribute('aria-label')?.startsWith('Marker “Hit”') === true);
+     if (!flag) {
+       throw new Error('marker flag not found');
+     }
+@@ -684,7 +684,7 @@
+       api,
+       region,
+       { target: flag, key: 'ArrowLeft' },
+-      'ამ დროზე მარკერი უკვე არის: «Intro»',
++      'A marker already exists at this time: “Intro”',
+     );
+     expect(live(api).arrangement.markers).toEqual([
+       { id: 'm1', time: 0.5, name: 'Intro' },
+--- ../tmp/studio-real-loop/b-round-135/r136-granted-start/docs/implementation/2026/quarter-IV/111-studio-v0-transport-navigation-strings.md	2026-10-24 13:18:53.397440324 +0000
++++ docs/implementation/2026/quarter-IV/111-studio-v0-transport-navigation-strings.md	2026-10-24 13:27:34.491454372 +0000
+@@ -1,7 +1,7 @@
+ # Studio V-0.3b — Transport-ის, ტემპის ხაზის, ruler-ის, overview-ს, loop brace-ისა და ნავიგაციის სტატუსების ტექსტები ინგლისურად
+ 
+ **თარიღი:** 2026-10-24
+-**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 135-ში; ბრაუზერის შემოწმება C-ის რაუნდ 135-ს ელოდება)
++**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 135-ში; C round 135 — PASS, browserVerified; gate 135 — 70f1e42)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -143,11 +143,10 @@
+   - m36 (მეტრონომის ტექსტი ისევ `მეტრონომი`-ა) წითელს ხდის ST27-სა და `metronome-ui` UI1-ს;
+   - m37 (დამატებითი, code-reviewer-ის Low-ის შემდეგ: `overviewVisibleStart` `start`-ს აღარ იყენებს) წითელს ხდის NS4-ს. NS4 ახლა `aria-valuetext`-ს გადახვევის შემდეგაც ამოწმებს (`Visible start 00:03.000 / 00:10.000`).
+ - code-reviewer: 9/10, Critical / High / Medium არ არის. ერთადერთი Low (overview-ს `aria-valuetext` მხოლოდ 0-ზე მოწმდებოდა) ამავე რაუნდში გასწორდა.
+-- ბრაუზერის შემოწმება (TRANSPORT, FOLLOW, ZOOM-FIT, RULER-OVERVIEW, LOOP, TEMPO, GEO-COUNT, LAYOUT) C-ის რაუნდ 135-ს ელოდება.
++- ბრაუზერის შემოწმება (TRANSPORT, FOLLOW, ZOOM-FIT, RULER-OVERVIEW, LOOP, TEMPO, GEO-COUNT, LAYOUT): C round 135 — PASS, browserVerified (c-round-135.json).
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- C round 135: ბრაუზერში შემოწმება 1440×900-სა და 1280×720-ზე.
+ - V-0.3c: MarkerRow და MarkerMenu. V-0.3d: StudioWorkspace-ის დარჩენილი 23 ხაზი (მათ შორის range readout) და waveform-zoom.ts.
+ - Backlog-ის glossary-ში ამ რაუნდის ტერმინების ჩაწერა B-ის საქმეა (`backlog.json` A-ს არ ეკუთვნის).
+ - frontend-architect checkpoint `strings.ts`-ის დაყოფაზე (დამატებები e–g) root-ს ელოდება.
+--- /dev/null	2026-10-24 13:17:05.616414939 +0000
++++ app/lib/arrangement/__tests__/marker-strings-ui.test.tsx	2026-10-24 13:25:42.117252479 +0000
+@@ -0,0 +1,332 @@
++import { act, fireEvent, render } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import {
++  type ArrangementContextValue,
++  ArrangementProvider,
++  useArrangement,
++} from '~/contexts/ArrangementContext';
++import type { Arrangement, ArrangementMarker, WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++const fakeClock = { base: 0 };
++
++function fakeNow(): number {
++  return Date.now() / 1000 - fakeClock.base;
++}
++
++class FakeParam {
++  value = 0;
++  setTargetAtTime(target: number) {
++    this.value = target;
++  }
++}
++
++class FakeNode {
++  connect(destination: FakeNode) {
++    return destination;
++  }
++  disconnect() {}
++}
++
++class FakeGain extends FakeNode {
++  gain = new FakeParam();
++}
++
++class FakePanner extends FakeNode {
++  pan = new FakeParam();
++}
++
++class FakeSource extends FakeNode {
++  buffer: unknown = null;
++  onended: (() => void) | null = null;
++  start() {}
++  stop() {}
++}
++
++class FakeAudioContext {
++  state = 'running';
++  destination = new FakeNode();
++  sampleRate = 48000;
++  get currentTime() {
++    return fakeNow();
++  }
++  resume() {
++    return Promise.resolve();
++  }
++  close() {
++    return Promise.resolve();
++  }
++  createGain() {
++    return new FakeGain();
++  }
++  createStereoPanner() {
++    return new FakePanner();
++  }
++  createBufferSource() {
++    return new FakeSource();
++  }
++}
++
++class FakeOfflineAudioContext {}
++
++class FakeAudioBuffer {
++  readonly length: number;
++  readonly numberOfChannels: number;
++  readonly sampleRate: number;
++  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
++    this.length = options.length;
++    this.numberOfChannels = options.numberOfChannels;
++    this.sampleRate = options.sampleRate;
++  }
++  get duration() {
++    return this.length / this.sampleRate;
++  }
++  getChannelData() {
++    return new Float32Array(this.length);
++  }
++}
++
++class FakeResizeObserver {
++  observe() {}
++  disconnect() {}
++}
++
++const markerStringsCollection: WorkspaceCollection = {
++  id: 'markers',
++  label: 'markers',
++  origin: 'demo',
++  sources: [
++    { id: 'song', title: 'Song', collectionLabel: 'markers', kind: 'music', origin: 'demo' },
++  ],
++  loadSource: async () => new AudioBuffer({ length: 6000, numberOfChannels: 1, sampleRate: 100 }),
++};
++
++const PROJECT_END = 50;
++
++const MARKER_FLAG_HINT_TEXT =
++  'Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu';
++
++const LABEL_MARKERS: ArrangementMarker[] = [
++  { id: 'k0', time: 0, name: 'Start' },
++  { id: 'kh', time: 0.5, name: 'Hit' },
++  { id: 'k12', time: 12, name: 'Drop' },
++];
++
++function markerStringsArrangement(markers?: ArrangementMarker[]): Arrangement {
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'ვიდეო' },
++    { id: 'music', kind: 'audio', name: 'მუსიკა' },
++  ]);
++  const arrangement: Arrangement = {
++    ...base,
++    clips: [
++      {
++        id: 'm1',
++        trackId: 'music',
++        sourceId: 'song',
++        start: 0,
++        sourceOffset: 0,
++        duration: PROJECT_END,
++      },
++    ],
++  };
++  return markers ? { ...arrangement, markers } : arrangement;
++}
++
++interface MarkerApiRef {
++  current: ArrangementContextValue | null;
++}
++
++function MarkerProbe({ api }: { api: MarkerApiRef }) {
++  api.current = useArrangement();
++  return null;
++}
++
++function live(api: MarkerApiRef): ArrangementContextValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++async function mountMarkerStringsWorkspace(initial: Arrangement = markerStringsArrangement()) {
++  const api: MarkerApiRef = { current: null };
++  const view = render(
++    <ArrangementProvider collection={markerStringsCollection} initialArrangement={initial}>
++      <StudioWorkspace />
++      <MarkerProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await act(async () => {
++    await Promise.resolve();
++    await Promise.resolve();
++  });
++  return { api, view };
++}
++
++type MarkerView = ReturnType<typeof render>;
++
++function flagById(view: MarkerView, id: string): HTMLElement {
++  const flag = view
++    .queryAllByTestId('arrangement-marker')
++    .find((entry) => entry.dataset.markerId === id);
++  if (!flag) {
++    throw new Error(`no marker ${id}`);
++  }
++  return flag;
++}
++
++function nameInput(view: MarkerView): HTMLInputElement {
++  const input = view.getByTestId('arrangement-marker-name-input');
++  if (!(input instanceof HTMLInputElement)) {
++    throw new Error('name input missing');
++  }
++  return input;
++}
++
++function statusText(view: MarkerView): string {
++  return view.getByTestId('arrangement-status').textContent ?? '';
++}
++
++function markerMenu(view: MarkerView): HTMLElement {
++  const menu = view.queryByTestId('arrangement-marker-menu');
++  if (!menu) {
++    throw new Error('marker menu not open');
++  }
++  return menu;
++}
++
++function menuItemTexts(view: MarkerView): (string | null)[] {
++  return Array.from(markerMenu(view).querySelectorAll('[role="menuitem"]')).map(
++    (item) => item.textContent,
++  );
++}
++
++function rightClickFlag(flag: HTMLElement) {
++  fireEvent.pointerDown(flag, { button: 2, buttons: 2, pointerId: 1, clientX: 300, clientY: 40 });
++  fireEvent.pointerUp(flag, { button: 2, buttons: 0, pointerId: 1, clientX: 300, clientY: 40 });
++  fireEvent.contextMenu(flag, { button: 2, clientX: 300, clientY: 40 });
++}
++
++function pressF2(flag: HTMLElement) {
++  flag.focus();
++  fireEvent.keyDown(flag, { key: 'F2', code: 'F2' });
++}
++
++beforeEach(() => {
++  fakeClock.base = Date.now() / 1000;
++  vi.stubGlobal('AudioContext', FakeAudioContext);
++  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++  vi.stubGlobal('requestAnimationFrame', () => 1);
++  vi.stubGlobal('cancelAnimationFrame', () => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++  vi.useRealTimers();
++  vi.unstubAllGlobals();
++  vi.restoreAllMocks();
++});
++
++describe('marker row and menu English strings (V-0.3c)', { timeout: 15000 }, () => {
++  it('MS1: header titles, the name field label and the flag label and title are English', async () => {
++    const { api, view } = await mountMarkerStringsWorkspace(
++      markerStringsArrangement(LABEL_MARKERS),
++    );
++    const add = view.getByTestId('arrangement-marker-add');
++    const previous = view.getByTestId('arrangement-marker-prev');
++    const next = view.getByTestId('arrangement-marker-next');
++    expect(add.title).toBe(
++      'Add a marker at the playhead or at the start of the time selection (M)',
++    );
++    expect(previous.title).toBe('Jump to the previous marker (Ctrl+←)');
++    expect(next.title).toBe('Jump to the next marker (Ctrl+→)');
++    expect(add.getAttribute('aria-label')).toBe('Add marker (M)');
++    expect(previous.getAttribute('aria-label')).toBe('Previous marker (Ctrl+←)');
++    expect(next.getAttribute('aria-label')).toBe('Next marker (Ctrl+→)');
++    const hit = flagById(view, 'kh');
++    expect(hit.getAttribute('aria-label')).toBe('Marker “Hit” — 00:00.500');
++    expect(hit.title).toBe(`“Hit” — 00:00.500\n${MARKER_FLAG_HINT_TEXT}`);
++    act(() => live(api).seekTo(3));
++    fireEvent.keyDown(document.body, { key: 'm', code: 'KeyM' });
++    expect(nameInput(view).getAttribute('aria-label')).toBe('Marker name');
++  });
++
++  it('MS2: add, cancel, rename, empty rename, delete, move and the start refusal announce English', async () => {
++    const { api, view } = await mountMarkerStringsWorkspace(
++      markerStringsArrangement(LABEL_MARKERS),
++    );
++    act(() => live(api).seekTo(3));
++    fireEvent.keyDown(document.body, { key: 'm', code: 'KeyM' });
++    let input = nameInput(view);
++    fireEvent.change(input, { target: { value: 'Intro' } });
++    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++    expect(statusText(view)).toBe('Marker “Intro” added at 00:03.000.');
++    expect(live(api).undoLabel).toBe('Add Marker');
++
++    act(() => live(api).seekTo(5));
++    fireEvent.keyDown(document.body, { key: 'm', code: 'KeyM' });
++    input = nameInput(view);
++    fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' });
++    expect(statusText(view)).toBe('Marker not added');
++
++    pressF2(flagById(view, 'k12'));
++    input = nameInput(view);
++    fireEvent.change(input, { target: { value: 'Finale' } });
++    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++    expect(statusText(view)).toBe('Marker name: “Finale”.');
++    expect(live(api).undoLabel).toBe('Rename Marker');
++
++    pressF2(flagById(view, 'k12'));
++    input = nameInput(view);
++    fireEvent.change(input, { target: { value: '' } });
++    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
++    expect(statusText(view)).toBe('The name is empty — “Finale” is kept');
++
++    const hit = flagById(view, 'kh');
++    hit.focus();
++    fireEvent.keyDown(hit, { key: 'ArrowRight', code: 'ArrowRight' });
++    expect(statusText(view)).toBe('Marker “Hit” moved to 00:00.600.');
++    expect(live(api).undoLabel).toBe('Move Marker');
++
++    const start = flagById(view, 'k0');
++    start.focus();
++    fireEvent.keyDown(start, { key: 'ArrowLeft', code: 'ArrowLeft' });
++    expect(statusText(view)).toBe('The marker is at the start of the timeline.');
++
++    const finale = flagById(view, 'k12');
++    finale.focus();
++    fireEvent.keyDown(finale, { key: 'Delete', code: 'Delete' });
++    expect(statusText(view)).toBe('Marker “Finale” deleted.');
++    expect(live(api).undoLabel).toBe('Delete Marker');
++  });
++
++  it('MS3: right-click and Shift+F10 open a menu labelled with the marker name and English items in order', async () => {
++    const { view } = await mountMarkerStringsWorkspace(markerStringsArrangement(LABEL_MARKERS));
++    rightClickFlag(flagById(view, 'kh'));
++    expect(markerMenu(view).getAttribute('aria-label')).toBe('Marker “Hit”');
++    expect(menuItemTexts(view)).toEqual(['Rename (F2)', 'Play from here', 'Delete (Delete)']);
++    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape', code: 'Escape' });
++    expect(view.queryByTestId('arrangement-marker-menu')).toBeNull();
++
++    const drop = flagById(view, 'k12');
++    drop.focus();
++    fireEvent.keyDown(drop, { key: 'F10', code: 'F10', shiftKey: true });
++    expect(markerMenu(view).getAttribute('aria-label')).toBe('Marker “Drop”');
++    expect(menuItemTexts(view)).toEqual(['Rename (F2)', 'Play from here', 'Delete (Delete)']);
++  });
++});
+--- /dev/null	2026-10-24 13:17:05.616414939 +0000
++++ docs/implementation/2026/quarter-IV/112-studio-v0-marker-strings.md	2026-10-24 13:31:05.192893062 +0000
+@@ -0,0 +1,122 @@
++# Studio V-0.3c — მარკერების ხაზისა და მარკერის მენიუს ტექსტები ინგლისურად
++
++**თარიღი:** 2026-10-24
++**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 136-ში; ბრაუზერის შემოწმება C-ის რაუნდ 136-ს ელოდება)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++VISUAL-A-ს M2 მოთხოვნით Studio-ს მთელი UI ინგლისურია, ტექსტები კი ერთი strings მოდულიდან მოდის. V-0.3b რაუნდ 135-ში დასრულდა (doc 111, C round 135 — PASS, gate 135 — `70f1e42`). ეს რაუნდი V-0.3c-ა: მარკერების ხაზი (`ArrangementMarkerRow.tsx`) და მარკერის კონტექსტური მენიუ (`ArrangementMarkerMenu.tsx`) — header-ის ღილაკების title-ები, flag-ის aria-label და title, სახელის ველი, მენიუს label და ელემენტები და მარკერის ყველა სტატუსი.
++
++### ხელახალი გაზომვა (`70f1e42`)
++
++- წყარო: MarkerRow-ში 16 ქართული ხაზი, MarkerMenu-ში 4 — სულ 20. MarkerRow-ში კიდევ 2 არაქართული ხაზი `«»` ბრჭყალებით (flag-ის aria-label და title). `markers.ts`-ში ქართული არ არის.
++- ტესტის pin-ები: 23 ხაზი 4 ფაილში (`markers-ui` 10, `marker-edge-nav-ui` 3, `markers-move-ui` 6, `status-announcement-ui` 4). `e2e/`-ში 0.
++- A-ის grep-მა იმპლემენტაციამდე იგივე სურათი აჩვენა. დამატებითი დამთხვევები სხვა სფეროებს ეკუთვნის და არ შეცვლილა: ჯგუფის header-ის title (`ArrangementGroupHeader.tsx`), envelope-ის წერტილის წაშლა (`ArrangementClipEnvelope.tsx`), ჯგუფის გადარქმევა `StudioWorkspace.tsx`-ში, `track-groups-ui`-ში და `strings.test` ST25-ში (V-0.3d).
++
++## მიდგომა
++
++- `app/lib/arrangement/strings.ts`-ს დაემატა **ერთი ახალი ობიექტი `studioMarkerStrings`** (R1) და მცირე ლოკალური interface `{ name, time }`-ისთვის. სხვა ობიექტები byte-ით უცვლელია, მოდული ისევ leaf-ია და არაფერს აიმპორტებს.
++- formatter-ები უკვე დაფორმატებულ მნიშვნელობას იღებს. `formatArrangementTime(...)` ისევ caller-ში ითვლება, flag-ის `time` კი ისევ ლოკალური ცვლადია.
++- ორ ტექსტს შორის არჩევანი caller-ში რჩება: `direction === 1 ? noneAfter : noneBefore` — იგივე პირობა და რიგი.
++- ლოკალური სახელები რჩება და მნიშვნელობას მოდულიდან იღებს: `MARKER_FLAG_HINT`, `MARKER_AT_TIME_START_MESSAGE`, `MARKER_MENU_ITEMS`. `commitMarkerMove`-ის `const message` ლოკალური რჩება, ამიტომ key repeat-ის `status !== message` შემოწმება უცვლელია.
++- flag-ის title-ში `\n` და მინიშნება caller-ში რჩება: `flagHeading(...)` + `\n` + `MARKER_FLAG_HINT`.
++- **ქცევა არ იცვლება.** უცვლელია ყველა handler, პირობა, კლავიში (M, F2, Delete, ← →, Ctrl+← / Ctrl+→, Shift+F10, Esc, Enter), დუბლიკატის წესი, focus-ის გადაცემა, მენიუს რიგი, history label-ები, `Marker N` და class-ები.
++
++### MK რუკა
++
++| # | key | ინგლისური |
++|---|---|---|
++| MK1 | `menuRename` | `Rename (F2)` |
++| MK2 | `menuPlay` | `Play from here` |
++| MK3 | `menuDelete` | `Delete (Delete)` |
++| MK4 | `menuLabel(name)` | `Marker “{name}”` |
++| MK5 | `flagHint` | `Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu` |
++| MK6 | `atTimeStart` | `The marker is at the start of the timeline.` |
++| MK7 | `existsAtTime(name)` | `A marker already exists at this time: “{name}”` |
++| MK8 | `noneAfter` | `No more markers after the playhead` |
++| MK9 | `noneBefore` | `No more markers before the playhead` |
++| MK10 | `notAdded` | `Marker not added` |
++| MK11 | `added({ name, time })` | `Marker “{name}” added at {time}.` |
++| MK12 | `renameEmpty(name)` | `The name is empty — “{name}” is kept` |
++| MK13 | `renamed(name)` | `Marker name: “{name}”.` |
++| MK14 | `deleted(name)` | `Marker “{name}” deleted.` |
++| MK15 | `moved({ name, time })` | `Marker “{name}” moved to {time}.` |
++| MK16 | `addTitle` | `Add a marker at the playhead or at the start of the time selection (M)` |
++| MK17 | `previousTitle` | `Jump to the previous marker (Ctrl+←)` |
++| MK18 | `nextTitle` | `Jump to the next marker (Ctrl+→)` |
++| MK19 | `nameFieldLabel` | `Marker name` |
++| MK20 | `flagLabel({ name, time })` | `Marker “{name}” — {time}` |
++| MK21 | `flagHeading({ name, time })` | `“{name}” — {time}` |
++
++### ფაქტები, რომლებიც უნდა შენარჩუნდეს
++
++- MK7: **არსებული** მარკერის სახელი და ის, რომ ის ამ დროზეა.
++- MK8 / MK9: ორი მიმართულება; არჩევანს caller ზუსტად ისე აკეთებს, როგორც ადრე (`წინ` → after, `უკან` → before).
++- MK10 / MK11: გაუქმება და დამატება; MK11-ში სახელიც და დროც არის.
++- MK12: ძველი სახელი რჩება. MK15: სახელი და ახალი დრო.
++- MK16: ორივე ადგილი (playhead, დროის მონიშვნის დასაწყისი) და კლავიში M. MK17 / MK18: თითო მიმართულება და მისი კლავიში.
++- MK5: ექვსივე ჟესტი და კლავიში. MK3: Delete. MK1: F2.
++
++ქართულ ტექსტთან გვერდიგვერდ შედარებისას არცერთ ხაზს ფაქტი არ დაჰკლებია.
++
++### B-ის გადაწყვეტილებები (D-29z101)
++
++- **R1 — ერთი ახალი ობიექტი.** მარკერებს საკუთარი სფეროს ობიექტი არ ჰქონდა, module contract კი ერთ ობიექტს ითხოვს თითო სფეროზე. import-ის გზა (`~/lib/arrangement/strings`) იგივეა, ამიტომ მოდულის შემდგომი დაყოფა ამ გზას შეინარჩუნებს.
++- **R2 — `«»` → `“”` მთელ მარკერის ზედაპირზე**, მათ შორის flag-ის ორ არაქართულ ხაზზე და `status-announcement-ui`-ის selector-ზე. ასე უკვე მუშაობს `studioLibraryStrings`, `studioVideoStrings` და `studioTrackGroupStrings.quoted`.
++- **R3 — ერთი ჩანაწერი თითო control-ზე.** წინა/შემდეგის title-ები `Ctrl+←` / `Ctrl+→`-ს იყენებს, ისევე როგორც მათი aria-label და `aria-keyshortcuts`.
++- **R4 — საერთო წინადადება ჯგუფის გადარქმევასთან.** MK12-ის ქართული იგივეა, რაც `StudioWorkspace.tsx`-ის ჯგუფის გადარქმევის სტატუსი. მარკერის ვერსია ახლა ინგლისურია; V-0.3d-ში ჯგუფის formatter-მა იგივე ინგლისური ფორმა უნდა გამოსცეს. ამ რაუნდში StudioWorkspace გაყინულია და ST25 ისევ 23-ზეა.
++
++### Glossary-ის დამატებები
++
++მარკერი = marker (Live: „locator“, §6.4 — შეგნებული განსხვავება, CZABA-ს ინგლისური aria-label-ები უკვე „marker“-ს იყენებს); სახელის შეცვლა = Rename (Live §6.4); დაკვრა აქედან = Play from here; გადასვლა = jump (Live §6.4); გადათრევა = drag; მარჯვენა ღილაკი = right-click; მენიუ = menu; დროის დასაწყისი = start of the timeline (იგივე, რაც `nudgeAtTimeStart`); მონიშვნის დასაწყისი = start of the time selection (Live §6.4); სახელი ცარიელია = The name is empty.
++
++## არქიტექტურა
++
++```mermaid
++flowchart LR
++  S[strings.ts — leaf<br/>studioMarkerStrings] --> R[ArrangementMarkerRow]
++  S --> M[ArrangementMarkerMenu]
++  R -->|markerName| M
++  R -->|setStatus| ST[live status region]
++```
++
++ორივე კომპონენტი `~/lib/arrangement/strings`-ს აიმპორტებს. `strings.ts` არაფერს აიმპორტებს, ამიტომ ციკლი არ ჩნდება.
++
++## შეცვლილი ფაილები
++
++- `app/lib/arrangement/strings.ts` — ახალი `studioMarkerStrings` (MK1–MK21) და ლოკალური `StudioMarkerTimeText` interface.
++- `app/components/arrangement/ArrangementMarkerMenu.tsx` — import, სამი ელემენტის label და მენიუს aria-label.
++- `app/components/arrangement/ArrangementMarkerRow.tsx` — import, `MARKER_FLAG_HINT` / `MARKER_AT_TIME_START_MESSAGE`, სტატუსები, header-ის title-ები, flag-ის aria-label / title და სახელის ველის aria-label.
++- `app/lib/arrangement/__tests__/strings.test.ts` — `studioMarkerStrings`-ის import და ახალი `describe('V-0.3c marker strings')` ST28–ST30-ით.
++- `app/lib/arrangement/__tests__/markers-ui.test.tsx`, `marker-edge-nav-ui.test.tsx`, `markers-move-ui.test.tsx`, `status-announcement-ui.test.tsx` — 23 ქართული pin ხელით დაწერილ ინგლისურ literal-ად შეიცვალა, იმავე matcher-ით. fixture-ის ქართული სახელები (`აქ შედის მუსიკა`, `რეკლამა` …) მომხმარებლის მონაცემია და ახალ literal-ებში უცვლელად დარჩა.
++- ახალი `app/lib/arrangement/__tests__/marker-strings-ui.test.tsx` — MS1–MS3, რეალურ `StudioWorkspace`-ზე jsdom-ში.
++- `docs/implementation/2026/quarter-IV/111-studio-v0-transport-navigation-strings.md` — სტატუსი და ბრაუზერის შედეგი (GATE135-DOC111-STATUS).
++
++## პრობლემები და გადაწყვეტები
++
++- **პრობლემა:** MS1-ში სახელის ველი არ გაიხსნა — playhead 0-ზე იყო, სადაც fixture-ს უკვე აქვს მარკერი `Start`, და M სწორად დუბლიკატზე უარს ამბობდა. **გადაწყვეტა:** ტესტი M-მდე playhead-ს 3 წამზე აყენებს. პროდუქტის ქცევა არ შეცვლილა.
++- **პრობლემა:** negative pin-ები (`not.toContain(...)`) ტექსტის შეცვლის შემდეგ შეიძლება ჩუმად აღარ „იკბინებოდეს“. **გადაწყვეტა:** m40 და m41 მუტაციებმა დაამტკიცა, რომ `already exists` და `No more markers` pin-ები ისევ წითლდება.
++
++## ტესტირება
++
++- `strings.test.ts`: 27 → 30 `it`. ST28 — plain string-ების ზუსტი რუკა და key-ების სია; ST29 — ყოველი formatter-ის ზუსტი ინგლისური და formatter key-ების სია; ST30 — ქართული codepoint-ისა და `«»`-ის არარსებობა ობიექტში და ორივე კომპონენტის წყაროში (კომენტარების გარეშე).
++- `marker-strings-ui.test.tsx`: 3 `it`. MS1 — header-ის title-ები და უცვლელი aria-label-ები, flag-ის aria-label / title (`Hit` 0.5 წმ-ზე), სახელის ველი; MS2 — დამატება, Esc, გადარქმევა, ცარიელი სახელი, გადატანა, უარი 0-ზე და წაშლა live status-ში; MS3 — მარჯვენა click და Shift+F10, მენიუს label და ელემენტების რიგი.
++- სხვა `it`-ების რაოდენობა უცვლელია: `markers-ui` 22, `marker-edge-nav-ui` 11 (მათ შორის ერთი `it.each`), `markers-move-ui` 18, `status-announcement-ui` 33.
++- `npx vitest run` 16 ფაილზე (6 granted/new და 10 მეზობელი): 274/274 მწვანეა. `npm run typecheck` მწვანეა, `npm run lint` exit 0-ით სრულდება, scoped `npx biome check` 9 ფაილზე სუფთაა.
++- მუტაციები (ყოველი აღდგა და sha256-ით შემოწმდა):
++  - m38 (`existsAtTime` სახელს კარგავს) წითელს ხდის ST29-ს, `markers-ui` MU4-ს, `markers-move-ui` MV6-სა და `status-announcement-ui` SK11-ს;
++  - m39 (`direction === 1`-ის არჩევანი შებრუნებულია) წითელს ხდის `markers-ui` MU6-ს, `marker-edge-nav-ui` EN4-სა და `status-announcement-ui` SK6 / SK10-ს;
++  - m40 (დამატების სტატუსი `existsAtTime`-ად იქცა) წითელს ხდის `markers-ui` MU1-სა და MS2-ს;
++  - m41 (`stepMarker` წარმატებისასაც წერს `noneAfter`-ს) წითელს ხდის `marker-edge-nav-ui` EN5-სა და `status-announcement-ui` SK10-ს;
++  - m42 (`flagLabel` ისევ `«»`-ს იყენებს) წითელს ხდის `status-announcement-ui` SK11-ს, MS1-ს, ST29-სა და ST30-ს;
++  - m43 (მენიუში `menuPlay` და `menuDelete` შებრუნებულია) წითელს ხდის `markers-move-ui` MV9-სა და MS3-ს;
++  - m44 (`MARKER_FLAG_HINT` ისევ ქართულია) წითელს ხდის ST30-სა და MS1-ს.
++- ბრაუზერის შემოწმება (MARKER-HEADER, MARKER-ADD, MARKER-EDIT, MARKER-MOVE, MARKER-NAV, MARKER-MENU, GEO-COUNT, LAYOUT) C-ის რაუნდ 136-ს ელოდება.
++
++## TODO / შემდეგი ნაბიჯები
++
++- C round 136: ბრაუზერში შემოწმება 1440×900-სა და 1280×720-ზე.
++- V-0.3d: StudioWorkspace-ის დარჩენილი 23 ხაზი (ჯგუფის გადარქმევა MK12-ის ფორმით, R4) და `waveform-zoom.ts`.
++- Backlog-ის glossary-ში ამ რაუნდის ტერმინების ჩაწერა B-ის საქმეა (`backlog.json` A-ს არ ეკუთვნის).
++- frontend-architect checkpoint `strings.ts`-ის დაყოფაზე root-ს ელოდება (რეკომენდაცია: V-0.3d-ის შემდეგ).
