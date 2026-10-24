@@ -1217,6 +1217,17 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z89 — Round 123-ის შედეგი; Round 124: ABLETON-EXPERT-REVIEW, ნაწილი 2 (Q1–Q7).**
+
+C round 123 (`tmp/studio-real-loop/c-round-123.md`, `c-round-123.json`) — **PASS**, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`: P1–P8 ყველა სფერო შესრულდა, გადატანილი არცერთი; SOURCE-SCOPE (`608187f`, 937) დასაწყისშიც და ბოლოსაც OK; G123-3 (401; fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 123 — `skipped` (რეალური ცვლილება არ არის); baseline რჩება `608187f`.
+- **R1 — ნაწილი 1:** შედეგი `tmp/studio-real-loop/user-review/ableton-review.md`-შია (ქართულად). B-მ მტკიცებულება შეამოწმა: ABL-B-1-ის სურათი (`c-round-123/shots/P2-badge-demo-soft-impact-1440.png` — „▶“ ბარათს გარეთაა, „ისმის“ იჭრება) და `out/P2c.json` (scrollWidth 139–152 > 126); ABL-B-2 — `out/P8b.json` (მეორე Z-ის შემდეგ პირველი X ხედს არ ცვლის, ორივე viewport-ზე).
+- **R2 — Low-ები:** ABL-B-1 და ABL-B-2 → `deferred_low_polish` (166) და `open_findings`; ABL-B-2 დაკავშირებულია C-R108-01-თან (იგივე ოჯახი).
+- **R3 — რეკომენდაციები:** ABL-R-1…10 → `backlog.json` `ableton_recommendations`, `awaiting_user` (მომხმარებლის 2026-10-23-ის გადაწყვეტილება: საბას დასტურამდე არ ხორციელდება). ABL-R-7 და ABL-R-10-ის „Medium“ C-ის შეთავაზებაა და არა ბაგის severity — bug gate მათზე არ ვრცელდება. ABL-R-10 ეწინააღმდეგება SRW-16-ის R3-ს (სახელის ველი მაშინვე იხსნება) — საბა წყვეტს. ABL-R-6 = B-R107-ENTER-ON-BODY (ერთი კითხვა, არ მეორდება); ABL-R-3 ↔ TRACK-FOLD-U; ABL-R-10 ↔ ROW-RANGE-M.
+- **R4 — ექსპერტი აგენტი:** `ableton-arrangement-expert` ამ runner-ზე ვერ გამოიძახება (subagent tool არ არის). C-მ მისი role ფაილი checklist-ად გამოიყენა; დასკვნები მხოლოდ ბრაუზერსა და manual-ის ტექსტს ეყრდნობა. ჩაიწერა ABL-EXPERT-AGENT-UNAVAILABLE (info); Q7-ში საბას პირდაპირ ეცნობება. Review ამით არ უქმდება — policy მოითხოვს ბრაუზერის მტკიცებულებასა და manual-ს, ორივე არსებობს.
+- **R5 — Round 124 = ნაწილი 2:** Q1 ტრანსპორტი/ვიდეო, Q2 loop/range, Q3 ჯგუფები, Q4 fade/envelope, Q5 gain/volume/pan/mute/solo/meters (T12 1–4a), Q6 export, Q7 საბოლოო გაერთიანებული ვერდიქტი და ინდექსი. Q1 და Q5 — სრულად ორივე viewport-ზე. ახალი წყაროები: `working-with-video/` (`/video/` 404-ია), `automation/`, `clip-envelopes/`, `managing-files-and-sets/`. ABL-B — 3-დან, ABL-R — 11-დან; ნაწილი 1 არ გადაიწერება (ასლი `c-round-124/ableton-review-part1.md`).
+- **R6 — შედეგი წინასწარ (round 125):** 2026-10-27-ზე ან შემდეგ — ჯერ რეგრესია; გადატანილი სფეროები — პირველად; Critical/უსაფრთხოება — გასწორება; High/Medium — შეზღუდული გასწორებები VISUAL-A-მდე; სხვაგვარად ABLETON-EXPERT-REVIEW → done და round 125 = DESIGN-UX-REVIEW (VISUAL-A-ს პირველი ნაბიჯი).
+- **R7 — Architecture:** ARCH-CHECKPOINT-PHASE1-BOUNDARY (`tmp/studio-real-loop/b-round-121-checkpoint-request.md`) ჯერ უპასუხოა; არ ბლოკავს (მიმოხილვის რაუნდები კოდს არ ცვლის); ყველაზე სასარგებლოა VISUAL-A V-0-მდე. ახალი Architecture note round 123-ს არ მოუტანია.
+
 **D-29z88 — Round 122-ის შედეგი; Round 123: ABLETON-EXPERT-REVIEW, ნაწილი 1 (P1–P8).**
 
 C round 122 (`tmp/studio-real-loop/c-round-122.md`, `c-round-122.json`) — **PASS**, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`: 67 row PASS, 0 რეგრესია, RG-SMOKE PASS (მხოლოდ `/cart`), G122-3 (401; fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 122 გამოქვეყნდა `608187f` (ორივე remote).
@@ -2149,7 +2160,9 @@ flowchart TD
 | 122 | რეგრესია | ფაზა 1 + T12 V1 ბრაუზერში ორივე viewport-ზე, გადადებული row-ები, smoke; A — doc 102/103-ის სტატუსი (D-29z87) |
 | 122 → | (შედეგი) | **C PASS** (`browserVerified`, ყველა row), gate 122 გამოქვეყნდა `608187f`; 2 Low → `deferred_low_polish`; `regression-last` = 2026-10-24 |
 | 123 | ABLETON-EXPERT-REVIEW 1 | P1–P8 ბრაუზერში Live 12-ის manual-თან; `user-review/ableton-review.md`; A — არაფერი (D-29z88) |
-| 124 | ABLETON-EXPERT-REVIEW 2 | Q1–Q7, საბოლოო ვერდიქტი (თუ Critical არ გამოჩნდა) |
+| 123 → | (შედეგი) | **C PASS** (`browserVerified`, P1–P8, 0 გადატანილი); 2 Low (ABL-B-1/2) → `deferred_low_polish`; ABL-R-1…10 → `awaiting_user`; gate 123 skipped (ცვლილება არ არის) |
+| 124 | ABLETON-EXPERT-REVIEW 2 | Q1–Q6 ბრაუზერში Live 12-ის manual-თან + Q7 საბოლოო ვერდიქტი; A — არაფერი (D-29z89) |
+| 125 | (წინასწარ) | 2026-10-27-დან რეგრესია; Medium+ ABL-B-ის გასწორებები; სხვაგვარად DESIGN-UX-REVIEW (VISUAL-A) |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2193,6 +2206,7 @@ flowchart TD
 **D-29z86:** round 121-ში A-ს ეკუთვნის ახალი `app/lib/arrangement/waveform-zoom.ts`, `ArrangementClip.tsx` (არჩევითი `waveformZoom` prop + scale-ის წყარო), `ArrangementLane.tsx` (მხოლოდ prop-ის გადაცემა), `StudioWorkspace.tsx` (view state, handler, select, `data-waveform-zoom`, lane prop), ახალი `waveform-zoom.test.tsx` და ახალი doc 103. დანარჩენი გაყინულია (`b-round-120-r121-tree-sha256.txt`, 931).
 **D-29z87:** round 122-ში A-ს ეკუთვნის მხოლოდ `docs/implementation/2026/quarter-IV/102-studio-waveform-clip-gain.md` (l.4) და `docs/implementation/2026/quarter-IV/103-studio-waveform-vertical-zoom.md` (l.4). დანარჩენი გაყინულია (`b-round-121-r122-tree-sha256.txt`, 935).
 **D-29z88:** round 123-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-123.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/`, `c-round-123*`). ყველაფერი გაყინულია (`b-round-122-r123-tree-sha256.txt`, 937).
+**D-29z89:** round 124-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-124.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/`, `c-round-124*`). ყველაფერი გაყინულია (`b-round-123-r124-tree-sha256.txt`, 937).
 
 ## 7. Done Policy
 

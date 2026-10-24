@@ -1,0 +1,21 @@
+const H=require('./h3.cjs'); const {X,L,sleep,cl,brief,byLane,dragHeader,laneBgPoint,range}=H; const fs=require('fs');
+(async()=>{ const b=await L.launch(); const net=[]; const R={};
+for (const w of [1440,1280]) { const r=R[w]={}; const {page:p,ctx}=await L.openStudio(b,X.VPS[w],'p3b-'+w,net); await X.openDetail(p);
+ const step=async(name,fn)=>{try{r[name]=await fn();}catch(e){r[name]={err:String(e).slice(0,200)};}};
+ const desel=async()=>{const q=await laneBgPoint(p,'video',0.5); await p.mouse.click(q.x,q.y); await sleep(250); return brief(await cl(p));};
+ await L.setSnapOff(p);
+ await L.addAt(p,'demo-synth-mix','music',1); await L.addAt(p,'demo-stem-bass','stems',8); await L.addAt(p,'demo-soft-impact','sfx',2);
+ await step('init',async()=>brief(await cl(p)));
+ await step('bgDeselect_sfxLane',async()=>{await L.selectClip(p,(await byLane(p,'music')).id); const q=await laneBgPoint(p,'sfx',6); await p.mouse.click(q.x,q.y); await sleep(250); return {after:brief(await cl(p)),pos:await L.posNow(p)};});
+ await step('bgDeselect_video',async()=>{await L.selectClip(p,(await byLane(p,'music')).id); return desel();});
+ await step('laneMoveKeepTime',async()=>{await desel(); const f=await byLane(p,'sfx'); const st=await dragHeader(p,f.id,0,{dyLane:'stems'}); await X.shot(p,`P3-move-to-stems-${w}.png`); return {c:brief(await cl(p)),st};});
+ await step('laneMoveOccupied',async()=>{await desel(); const f=await byLane(p,'stems'); const st=await dragHeader(p,f.id,0,{dyLane:'music'}); return {c:brief(await cl(p)),st};});
+ await step('laneMoveOccupiedGhost',async()=>{await desel(); const f=await byLane(p,'stems',1); const a=await H.hdr(p,f.id); const lb=await p.locator('[data-track-id=music]').first().boundingBox(); await p.mouse.move(a.x,a.y); await p.mouse.down(); await p.mouse.move(a.x,lb.y+lb.height*0.4,{steps:10}); await sleep(200); const ghost=await p.evaluate(()=>{const g=document.querySelector('[data-testid=arrangement-lane-move-ghost-label]'); return g?g.textContent.trim():null;}); await X.shot(p,`P3-move-occupied-ghost-${w}.png`); await p.mouse.up(); await sleep(300); return {ghost,c:brief(await cl(p)),st:await L.status(p)};});
+ await step('escapeSingle',async()=>{await desel(); const m=await byLane(p,'music'); const st=await dragHeader(p,m.id,2,{escape:true}); return {c:brief(await cl(p)),st};});
+ await step('undo',async()=>{await L.blur(p); await p.keyboard.press('Control+z'); await sleep(300); return brief(await cl(p));});
+ await step('altDragCopy',async()=>{await desel(); const m=await byLane(p,'sfx')||await byLane(p,'stems'); const st=await dragHeader(p,m.id,6,{mods:['Control']}); return {c:brief(await cl(p)),st};});
+ await step('undo2',async()=>{await L.blur(p); await p.keyboard.press('Control+z'); await sleep(300); return brief(await cl(p));});
+ await step('rangeAllDelete',async()=>{await desel(); const m=await byLane(p,'music'); await X.rangeDrag(p,m.id,10,12); await L.blur(p); await p.keyboard.press('Control+Shift+l'); await sleep(300); const rg=await range(p); await p.keyboard.press('Delete'); await sleep(400); const c=brief(await cl(p)); const st=await L.status(p); await X.shot(p,`P3-range-all-delete-${w}.png`); await p.keyboard.press('Control+z'); await sleep(300); return {rg,c,st,afterUndo:brief(await cl(p))};});
+ await step('arrowNudge',async()=>{await desel(); const m=await byLane(p,'music'); await L.selectClip(p,m.id); await L.blur(p); await p.keyboard.press('ArrowRight'); await sleep(300); return {c:brief(await cl(p)),st:await L.status(p),pos:await L.posNow(p)};});
+ await ctx.close(); }
+fs.writeFileSync('../out/P3b.json',JSON.stringify({R,net:X.netOk(net)},null,1)); console.log(JSON.stringify(R,null,1)); console.log(JSON.stringify(X.netOk(net))); await b.close();})();

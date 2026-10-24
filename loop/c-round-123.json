@@ -1,0 +1,258 @@
+{
+ "round": 123,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T01:42:33.0164903Z",
+  "round": 123,
+  "attempt": 1,
+  "store": 200
+ },
+ "allRowsRan": true,
+ "areasDone": [
+  "P1",
+  "P2",
+  "P3",
+  "P4",
+  "P5",
+  "P6",
+  "P7",
+  "P8"
+ ],
+ "areasSpilled": [],
+ "passed": [
+  "SOURCE-SCOPE-start",
+  "P1-review",
+  "P2-review",
+  "P3-review",
+  "P4-review",
+  "P5-review",
+  "P6-review",
+  "P7-review",
+  "P8-review",
+  "G123-3",
+  "SOURCE-SCOPE-end",
+  "PX-NET/REG-HYD (38 review sessions + G123-3: 0 forbidden, 0 Authorization, 0 hydration, 0 pageerror)",
+  "LIVE-KEYS Ctrl+Alt+3 / O exercised (out/keys.json)"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G123-3 fake-Bearer 403 sub-check: backend unavailable in cloud",
+  "blocked: CDP — Ctrl/Cmd+digit grid keys (CTRL-DIGIT-BROWSER-RESERVED), lone Alt (ALT-CHROME-MENU), ContextMenu key / Shift+F10 marker and grid menus, real touch hardware"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "bugs": [
+  {
+   "id": "ABL-B-1",
+   "severity": "low",
+   "area": "P2",
+   "steps": [
+    "Open /studio-lab at 1440x900 or 1280x720 (fresh context)",
+    "Click the library option 'Soft impact' (or any option)",
+    "Click '▶ მოუსმინე' in the preview box"
+   ],
+   "expected": "the '▶ ისმის' playing badge stays inside the option card (CZABA visual consistency; the option is a 126 px wide card in a 144 px list)",
+   "contract": "CZABA design rule (no overflow in the library list); no Live parity claim",
+   "actual": "the badge row overflows the option: scrollWidth 139-152 px > clientWidth 126 px; '▶' sits past the card edge and 'ისმის' wraps to a second line clipped by the list edge",
+   "evidence": "c-round-123/shots/P2-badge-demo-soft-impact-1440.png, c-round-123/shots/P2-preview-playing-1440.png, c-round-123/out/P2c.json",
+   "regression": "no (not previously recorded; badge added before round 17)"
+  },
+  {
+   "id": "ABL-B-2",
+   "severity": "low",
+   "area": "P8",
+   "steps": [
+    "Open /studio-lab (fresh context), add 'CZABA hero' to the music lane at 0",
+    "Drag a range 4->8 s on the clip waveform",
+    "Press Z (zoom to range) -> about 137.7 px/s at 1440 (113.7 at 1280)",
+    "Press Z again on the same range (view does not change)",
+    "Press X"
+   ],
+   "expected": "X returns to the previous different view (40 px/s); a Z that does not change the view adds no history step",
+   "contract": "SRW-10 R10-N2 says only 'X restores zoom+scroll exactly' (no written no-empty-step line); basis = precedent C-R108-01 (a duplicate zoom-history entry was ruled a Low bug, D-29z74) + Live 12 6.2 'the X key can be pressed multiple times to go back one step each time' (F)",
+   "actual": "the second Z pushes a duplicate entry: the first X leaves the view at 137.7 px/s while the status says 'წინა ხედი აღდგა. X კიდევ ერთი ნაბიჯით აბრუნებს.'; only the second X returns to 40 px/s. Same at 1280x720",
+   "evidence": "c-round-123/out/P8b.json (zTwice, both viewports), c-round-123/tools/p8b.cjs",
+   "regression": "no (related to deferred C-R108-01: duplicate zoom-history entry via held Enter on Zoom back/Fit)"
+  }
+ ],
+ "recommendations": [
+  {
+   "id": "ABL-R-1",
+   "area": "P1/P6",
+   "what": "Live view/transport keys: Ctrl+Alt+B toggles the library, Ctrl+Alt+3 toggles the detail panel, O toggles the metronome (all three do nothing today)",
+   "why": "Live users toggle the Browser, Clip View and metronome by key; CZABA only has buttons",
+   "manual": "42.22 'Hide/Show Browser Ctrl+Alt+B'; 42.x 'Hide/Show Clip View Ctrl+Alt+3'; 42.20 'Toggle Metronome O' https://www.ableton.com/en/live-manual/12/keyboard-shortcuts/",
+   "level": "F",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-2",
+   "area": "P1",
+   "what": "Alt+= / Alt+- change the selected lane height (and Alt while dragging the split line resizes all lanes)",
+   "why": "keyboard height change exists in Live; CZABA only has the drag handle",
+   "manual": "6.x track height 'Alt+ / Alt- shortcut keys', 'hold Alt while resizing a single track' https://www.ableton.com/en/live-manual/12/arrangement-view/",
+   "level": "F",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-3",
+   "area": "P1",
+   "what": "U folds/unfolds the selected ordinary lane (today U only acts on groups and answers 'select a group')",
+   "why": "Live U = Fold/Unfold Selected Tracks; the status text is confusing on a normal lane (TRACK-FOLD-U signal)",
+   "manual": "42.16 'Fold/Unfold Selected Tracks U or left and right arrow keys'; 6.x 'selected tracks can also be unfolded by pressing the U key'",
+   "level": "F",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-4",
+   "area": "P2",
+   "what": "a key to focus the library search (Live Ctrl+F; in a browser Ctrl+F is find-in-page, so CZABA needs another key such as '/' or Ctrl+Shift+F)",
+   "why": "mouse-free search flow described in the manual",
+   "manual": "5.2 Search Bar 'press Ctrl F … places a cursor in the search field' https://www.ableton.com/en/live-manual/12/working-with-the-browser/",
+   "level": "F",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-5",
+   "area": "P2",
+   "what": "question for Saba: should a drop below the last lane create a new lane? (Live creates a new track; CZABA has a fixed lane set)",
+   "why": "Live parity vs the agreed simple lane set",
+   "manual": "5.10 'Dragging … below Arrangement View tracks will create a new track' https://www.ableton.com/en/live-manual/12/working-with-the-browser/",
+   "level": "F",
+   "sizeRounds": 2,
+   "priority": "Low",
+   "changes": "both"
+  },
+  {
+   "id": "ABL-R-6",
+   "area": "P2",
+   "what": "question (B-R107-ENTER-ON-BODY, open user question): Enter / double-click adds at the playhead on the active lane; confirm this is the wanted target",
+   "why": "Live text says 'onto whatever track is currently selected' and does not state the time position",
+   "manual": "5.10 'double-clicking or pressing Enter on a … sample … will load the item onto whatever track is currently selected'",
+   "level": "F",
+   "sizeRounds": 0,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-7",
+   "area": "P4",
+   "what": "add the missing time commands Paste Time (Ctrl+Shift+V), Duplicate Time (Ctrl+Shift+D) and Insert Silence (Ctrl+I); at least show a status line for the keys that do nothing today (Ctrl+Shift+C/V, Ctrl+I give no feedback)",
+   "why": "opening space for a new video shot on all lanes at once is a common film-scoring edit; today it needs a manual move of every clip",
+   "manual": "6.11 Using the …Time Commands; 42.16 Copy/Paste/Duplicate Time, Insert Silence https://www.ableton.com/en/live-manual/12/arrangement-view/",
+   "level": "F",
+   "sizeRounds": 2,
+   "priority": "Medium",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-8",
+   "area": "P5",
+   "what": "optional zoom-adaptive grid mode (the division follows the zoom) next to today's fixed division, toggled by a key (Live Ctrl+5; CZABA would need a plain key such as 5)",
+   "why": "when zoomed far out a fixed 0.1 s or 1/32 grid becomes too dense to use; when zoomed in a 10 s grid is too coarse",
+   "manual": "6.10 'The grid can be set to be either zoom-adaptive or fixed'; 42.13 'Fixed/Zoom-Adaptive Grid Ctrl 5'",
+   "level": "F",
+   "sizeRounds": 1.5,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-9",
+   "area": "P6",
+   "what": "question for Saba: allow Play (transport + metronome) in an empty project, so a user can set BPM and listen to the click before adding sound",
+   "why": "Live ticks as soon as Play is pressed; CZABA refuses Play with 'nothing to play'",
+   "manual": "Recording New Clips → Metronome 'will begin ticking when the Play button is pressed' https://www.ableton.com/en/live-manual/12/recording-new-clips/",
+   "level": "F",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-10",
+   "area": "P7",
+   "what": "during playback, M adds the marker at the playhead even when a time range is still selected (today it goes to range.start, ROW-RANGE-M), and does not open the name field (today the field takes focus, so the next Space types a space into the name instead of stopping)",
+   "why": "marking hits while listening to the picture is a core scoring flow; today the user must press Enter/Escape before Space works, and a lingering range silently redirects the marker",
+   "manual": "6.4 'The Set Locator button can be used to add locators … in real time during playback'; 'while transport is not running … at the insert marker location or at the start of the time selection' https://www.ableton.com/en/live-manual/12/arrangement-view/",
+   "level": "F",
+   "sizeRounds": 1,
+   "priority": "Medium",
+   "changes": "behaviour"
+  }
+ ],
+ "invalidRuns": [
+  {
+   "row": "P1 survey",
+   "reason": "first /studio-lab load of the job: page.evaluate saw document.body null (ENV-FIRST-LOAD); discarded once and replaced",
+   "utc": "2026-10-24T01:45Z"
+  },
+  {
+   "row": "P3 deselect/lane-move (first run)",
+   "reason": "harness clicked the lane background at t=30 s, off-screen at both viewports, so the selection was not cleared and later moves dragged 3 clips; replaced by p3b.cjs (visible point)"
+  },
+  {
+   "row": "P3/P5 1280 right-edge trims",
+   "reason": "clip right edge beyond the 1280 viewport; trim drag started off-screen (harness); 1440 result used"
+  },
+  {
+   "row": "P4 first run",
+   "reason": "an unconditional Undo after a correctly refused paste removed an earlier clip; replaced by p4b.cjs (Undo only when history changed)"
+  },
+  {
+   "row": "P6 metronome first capture",
+   "reason": "the script had deleted the only clip, and Play is refused in an empty project; replaced by p6n.cjs (clip at 6 s)"
+  },
+  {
+   "row": "P7 first run add rows",
+   "reason": "M opens the name editor; the marker renders only after commit, so rows read one step late; re-read step by step in p7b.cjs"
+  },
+  {
+   "row": "P8 follow/ruler-H first run",
+   "reason": "zoom too far out (whole view visible) for Follow paging or ruler scroll; replaced by p8b.cjs at 78 px/s"
+  }
+ ],
+ "notesForB": [
+  "ableton-arrangement-expert could not be invoked (no subagent tool on this runner); C read its role file and used only browser observation + manual text.",
+  "Outcome per current-task §7 row 1: every P area done, no ABL-B at Medium or above -> round 124 = ABLETON-EXPERT-REVIEW part 2 (Q1-Q7). Transcribe ABL-B-1 and ABL-B-2 (Low) into deferred_low_polish and ABL-R-1..10 into backlog.json as awaiting_user.",
+  "ABL-R-10 touches plan R3 (user asked that the name field opens at once); it is only proposed for playback, so Saba must decide.",
+  "Round-121 inputs: waveform zoom is not an Undo step and the detail panel waveform is not zoomed (browser-confirmed); Live parity for both stays '?'.",
+  "Unreproduced observation (not a bug): native text-selection highlight on the SFX header in two first-run P3 screenshots; 4 targeted probes found selection length 0. If it appears again with a reproducible gesture, record it then."
+ ],
+ "sourceScope": {
+  "start": {
+   "head": "608187fdf279d9b579c279f3c536b27be74c0eea",
+   "status": "empty",
+   "sha256": "OK (937)",
+   "utc": "2026-10-24T01:42:52Z"
+  },
+  "end": {
+   "head": "608187fdf279d9b579c279f3c536b27be74c0eea",
+   "status": "empty",
+   "sha256": "OK (937)",
+   "utc": "2026-10-24T02:15:42Z"
+  }
+ },
+ "network": {
+  "sessions": 39,
+  "forbidden": 0,
+  "authorization": 0,
+  "hydration": 0,
+  "pageerror": 0,
+  "knownNoise": 76
+ }
+}

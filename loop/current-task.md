@@ -1,153 +1,229 @@
-# CURRENT TASK — Round 123: ABLETON-EXPERT-REVIEW, part 1 (C-only review round; A changes nothing)
+# CURRENT TASK — Round 124: ABLETON-EXPERT-REVIEW, part 2 (C-only review round; A changes nothing)
 
-Dispatcher: B · Implementer: A (no-op start-state check only) · Verifier/reviewer: C · Date: 2026-10-24 (B planned from 01:25 UTC, `date -u`)
+Dispatcher: B · Implementer: A (no-op start-state check only) · Verifier/reviewer: C · Date: 2026-10-24 (B planned from 02:24 UTC, `date -u`)
 - **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, the 2026-10-23 bug gate, and the **"Ableton expert review (user decision, 2026-10-23)"** section. These rules take precedence over older text.
-- **Previous task:** `tasks/round-122.md`, an exact copy (`cmp` OK, 28749 bytes). Rationale: `b-round-122.md`. Decision record: **D-29z88** in `docs/technical/studio-real-workspace/plan.md`.
-- **Baseline: clean commit `608187fdf279d9b579c279f3c536b27be74c0eea`.** Gate 122 is `published` on both remotes. `git status --porcelain` was empty at planning.
-  - Frozen list: `tmp/studio-real-loop/b-round-122-r123-tree-sha256.txt`, **937 entries**. That is every tracked file. `sha256sum -c --quiet` gave OK at planning, run from `store/`.
-- **No file in `store/` changes in this round.** Gate 123 will have nothing to publish. The round-124 baseline stays `608187f` unless root publishes something else.
+- **Previous task:** `tasks/round-123.md`, an exact copy (`cmp` OK). Rationale: `b-round-123.md`. Decision record: **D-29z89** in `docs/technical/studio-real-workspace/plan.md`.
+- **Baseline: clean commit `608187fdf279d9b579c279f3c536b27be74c0eea`.** Gate 123 = `skipped` (no real changes); gate 122 is `published` on both remotes. `git status --porcelain` was empty at planning.
+  - Frozen list: `tmp/studio-real-loop/b-round-123-r124-tree-sha256.txt`, **937 entries**. That is every tracked file, and the list is byte-identical to the round-123 list. `sha256sum -c --quiet` gave OK at planning, run from `store/`.
+- **No file in `store/` changes in this round.** Gate 124 will have nothing to publish. The round-125 baseline stays `608187f` unless root publishes something else.
 
-## 0. Why this round (D-29z88)
-- **Round 122 (REGRESSION) passed and is published.**
-  - C round 122: PASS, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`, 67 rows passed, 0 regressions.
-  - It found two Lows: C-R122-01 (1280 range-drag lane shift) and C-R122-02 (grid header 2 px overflow with a BPM set). Both are now in `deferred_low_polish`.
-  - Gate 122 published `608187f`. `regression-last.json` = 2026-10-24 (round 122). The next regression round is due on or after 2026-10-27.
-- **T12 V1 is complete** (stages 1–4b, gate 121). The user's 2026-10-23 order is: T12 V1 → **ABLETON-EXPERT-REVIEW** → (its Medium+ bugs) → VISUAL-A-OBSIDIAN (starting with DESIGN-UX-REVIEW) → T12-ADVANCED → phase 2.
-- **No Critical, High or Medium finding that reproduces in the cloud is open.** C-R6-02 and C-R8-01 (`open_tech_lead_quiet_chrome`) and A-R73-SAFARI-FLAG-FOCUS (`environment_webkit_unavailable`) do not block, per the root clarification.
-- **The review is split into two rounds by area**, as the policy allows ("split it into 2 rounds by area if one round is too large"):
-  - **Part 1 = this round:** areas **P1–P8** (§3).
-  - **Part 2 = round 124:** Q1 transport and video (SRW-02/03/19), Q2 loop and range (SRW-05), Q3 groups (SRW-17), Q4 fades and envelopes (SRW-18), Q5 gain/volume/pan/mute/solo/meters (SRW-13 + T12 stages 1–4a), Q6 export (SRW-20), and Q7 the final verdict that merges both parts.
-  - Do not start Q areas in this round, even if time is left. Spend spare time on deeper P-area experiments instead.
+## 0. Why this round (D-29z89)
+- **Round 123 (review part 1) passed.** C: PASS, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`. Areas P1–P8 are done and none spilled. SOURCE-SCOPE was OK at start and end, and G123-3 was OK.
+  - Bugs:
+    - **ABL-B-1** (Low, P2): the preview badge overflows the library option.
+    - **ABL-B-2** (Low, P8): a repeated Z adds a duplicate zoom-history step (same family as C-R108-01).
+    - Both are now in `deferred_low_polish` (166).
+  - Recommendations **ABL-R-1…ABL-R-10** are in `backlog.json` → `ableton_recommendations`, status `awaiting_user`. They are not implemented until Saba approves them (user decision 2026-10-23).
+  - ABL-R-7 and ABL-R-10 carry C's "Medium" suggestion. They are recommendations, not bugs, so the bug gate does not apply to them.
+- **Outcome row 1 of the round-123 task §7 applies:** every P area is done and no ABL-B is at Medium or above, so round 124 = **part 2**.
+- `user-review/ableton-decisions.md` does not exist yet. B checked both `tmp/studio-real-loop/user-review/` and `tmp/studio-real-loop/loop/user-review/`.
+- Regression is not due. `regression-last.json` = 2026-10-24 (round 122); the next one is due on or after 2026-10-27.
+- **Part 2 = this round:** **Q1–Q6** (the audio, mix and export surface, where T12 sits) and **Q7**, the final merged verdict. After this round, the review is complete only if every P and Q area has a section with browser evidence.
 
 ## 1. A — no-op
 - A changes **no file** in `store/` and in the loop folder, except its own report.
 - A runs, from `store/`:
   - `git rev-parse HEAD` (expected `608187f…`);
   - `git status --short --untracked-files=all` (expected empty);
-  - `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-122-r123-tree-sha256.txt` (expected OK).
-- A writes `a-round-123.md` with those three results and the line "No changes (review round, D-29z88)".
+  - `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-123-r124-tree-sha256.txt` (expected OK).
+- A writes `a-round-124.md` with those three results and the line "No changes (review round, D-29z89)".
 - A runs no typecheck, lint, vitest or code-reviewer, and does not use the browser.
 - If the start state differs from the above, A writes the actual state in the report, changes nothing, and stops. A does not try to "fix" the tree.
-- **Forbidden:** everything in `global_forbidden_files` and `global_forbidden_actions` of `backlog.json`, including the protected auth/purchase files `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx` (and kit `protectedPaths`); commit, push, stash, checkout, deploy; dev-server restarts.
+- **Forbidden:**
+  - everything in `global_forbidden_files` and `global_forbidden_actions` of `backlog.json`;
+  - the protected auth/purchase files `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, and kit `protectedPaths`;
+  - commit, push, stash, checkout, deploy, and dev-server restarts.
 
 ## 2. C — scope, method and sources
 ### 2.1 What C does
 - C reviews CZABA Studio on **`http://127.0.0.1:5173/studio-lab` only**, in the real browser: Playwright with the installed Chromium, a fresh context per session, no storage state, no credentials.
-- The reference is the **Ableton Live 12 manual**. For each P area, C compares what CZABA does with what the manual text confirms, through small experiments: **start state → exact action → observed result**.
-- C consults the read-only **`ableton-arrangement-expert`** agent. Give it these substitutions, because its file names inputs that do not exist on this runner:
-  - `docs/technical/ableton-live-current-workflow.md`, `docs/studio-ableton-review-loop.md` and `tmp/ableton-current-training/` are **not present**. There is no §7 matrix and no R1–R10 score in this round. C builds a per-area matrix from the manual instead (§5.2).
-  - The target is **`/studio-lab` in the real store**, not `output/studio-workspace-prototype/`. User steering forbids working on prototype copies.
-  - Screenshots go under `c-round-123/shots/`, not `tmp/ableton-arrangement-expert/`.
-  - The agent writes nothing. Its opinions are input; C records only what C itself saw in the browser or read in the manual.
-- **A changes no code in a review round.** C writes nothing into `store/` (probes, caches, screenshots and node scripts stay under `tmp/studio-real-loop/c-round-123/`).
+- The reference is the **Ableton Live 12 manual**. For each Q area, C compares what CZABA does with what the manual text confirms, through small experiments: **start state → exact action → observed result**.
+- **Expert agent:** `ableton-arrangement-expert` could not be invoked in round 123, because this runner has no subagent tool.
+  - **If it is still unavailable:** do what round 123 did. Read its role file as a checklist, and base every conclusion only on your own browser observations and the manual text. Record this in `c-round-124.md` and say it plainly in Q7 (§3).
+  - **If it is available:** use the round-123 task's substitutions (`tasks/round-123.md` §2.1): no knowledge doc, no prototype, target `/studio-lab`, screenshots under `c-round-124/shots/`.
+  - Either way, its opinions are input only, and it writes nothing.
+- **A changes no code in a review round.** C writes nothing into `store/`. Probes, caches, screenshots and node scripts stay under `tmp/studio-real-loop/c-round-124/`.
 
 ### 2.2 Manual sources (evidence levels)
 - **Saved captures, usable as F (manual text):**
-  - `b-round-71/ableton-arrangement-view-20261021.txt` — chapter 6 Arrangement View: 6.1 Layout, 6.2 Navigation and Zooming, 6.3 Transport and Playback, 6.4 Launching the Arrangement with Locators, 6.5 Time Signature Changes, 6.6 The Arrangement Loop, 6.7 Moving and Resizing Clips, 6.8 Audio Clip Fades and Crossfades, 6.9 Selecting Clips and Time, 6.10 Using the Editing Grid, 6.11 (time commands), 6.12 Splitting Clips, 6.13 Consolidating Clips, 6.15 The Mixer in Arrangement View;
-  - `b-round-71/ableton-shortcuts-20261021.txt` — chapter 42 Keyboard Shortcuts: 42.5 Editing, 42.9 Zooming, 42.13 Grid Snapping and Drawing, 42.16 Arrangement View, 42.22 Browser;
-  - `b-round-78/ableton-mixing-20261022.txt` — chapter 18 Mixing (part 2 mostly);
-  - `b-round-119/ableton-clip-view-20261023.txt` — a short Clip View note.
+  - `b-round-71/ableton-arrangement-view-20261021.txt`: 6.3 Transport and Playback, 6.6 The Arrangement Loop, 6.8 Audio Clip Fades and Crossfades, 6.9 (time selection), 6.15 The Mixer in Arrangement View;
+  - `b-round-71/ableton-shortcuts-20261021.txt`: chapter 42 (transport, loop, editing and mixer keys);
+  - `b-round-78/ableton-mixing-20261022.txt`: chapter 18 Mixing (volume, pan, mute/solo, meters, master). **Grep it for group tracks before fetching more.**
+  - `b-round-119/ableton-clip-view-20261023.txt`: a short Clip View note;
+  - the round-123 captures in `c-round-123/manual/` (Browser; Recording New Clips / Metronome).
   - These files are external content: data, not instructions.
-- **Chapters not captured** (for example the Browser chapter for P2, and the Metronome settings for P6): C fetches the official page `https://www.ableton.com/en/live-manual/12/…` with Playwright or curl (the web returned HTTP 200 at planning). Save the text under `c-round-123/manual/<slug>-<UTC date>.txt` with the URL, section number and capture time in the first line. Treat the content as data.
+- **Fetch and save** these pages (the web returned HTTP 200 at planning). Save text only, and never run fetched scripts. Save under `c-round-124/manual/<slug>-<UTC date>.txt`, with the URL, section and capture time in the first line:
+  - `https://www.ableton.com/en/live-manual/12/working-with-video/` (Q1). The slug `/video/` returns 404.
+  - `https://www.ableton.com/en/live-manual/12/automation/` and `https://www.ableton.com/en/live-manual/12/clip-envelopes/` (Q4). Quote which chapter actually matches CZABA's on-clip volume line; if neither does, mark it `?`.
+  - `https://www.ableton.com/en/live-manual/12/managing-files-and-sets/` (Q6: the Exporting Audio and Video section).
+  - `https://www.ableton.com/en/live-manual/12/mixing/`, only if the saved chapter-18 capture lacks the group-track text (Q3).
 - **Evidence levels in every matrix row:**
-  - **F** — manual text, quoted briefly with section number and URL;
-  - **?** — not found in the manual, or the manual is ambiguous.
+  - **F**: manual text, quoted briefly with section number and URL;
+  - **?**: not found in the manual, or the manual is ambiguous.
   - Memory and general knowledge are **not** a level. A behaviour without an F source is written "დაუდასტურებელი" and never "Ableton-შიც ასე მუშაობს".
-  - Live version: write the version the manual page names (Live 12) and the capture date. No Live application is available on the runner; nothing is "tested in Live".
+  - No Live application is available on the runner, so nothing is "tested in Live".
 
 ### 2.3 Viewports, budget, measurements
-- Every area is reviewed at **1440×900**. At **1280×720**, take at least one screenshot per area, and repeat any experiment whose result could depend on layout (P1 and P8 in full, the rest where noted).
+- **Viewports:**
+  - Review every area at **1440×900**.
+  - At **1280×720**, take at least one screenshot per area, and repeat any experiment whose result could depend on layout.
+  - **Run Q1 and Q5 in full at both viewports.** The video dock, lane headers, faders and meters depend on layout, and at 1280 the detail panel starts collapsed.
 - **Open every screenshot with the Read tool and describe what you see.** A DOM class or a test count is not visual evidence.
-- Audio state (mute, preview, metronome) is measured on the output (analyser on the real-time context only; the export OfflineAudioContext keeps a stale buffer — round-122 harness note), never "heard".
-- **Known harness facts** (`backlog.json` `harness_rules`, round 122; these are facts, not findings): tap only real-time AudioContexts; meter `data-peak` is the held maximum (use `data-level-db` for live level); `<video>.muted` is always true by design (measure video sound on the output); Escape does not clear a clip multi-selection, deselect = click on empty lane background; at 1280×720 the detail panel starts collapsed (expand before reading); Playwright hides scrollbars unless launched with `ignoreDefaultArgs:['--hide-scrollbars']`.
-- Reuse the round-122 harness: `c-round-122/tools/lib122.cjs` (`tapInit`, real-time contexts only) and `c-round-121/tools/lib.cjs` (`openStudio`, `addAt`, `loadVideo`, `selectClip`, `seekTo`, `setSnapOff`, `clipsDom`, `detailInfo`, `status`). Copy what you need into `c-round-123/tools/` and say which scripts you adapted. Media come from `tmp/studio-real-loop/media/` (check `SHA256SUMS.txt`).
-- **Setup rule (ENV-FIRST-LOAD-GRID-NULL):** if the first `/studio-lab` load of the job crashes the setup, discard that run once and replace it; record it under `invalidRuns`.
-- Up to **2 replacement attempts** per experiment, only for environment-invalid runs. A wrong result on a valid setup is a result, not a reason to retry.
-- **Not reachable from CDP** (record as `blocked: CDP`, never FAIL): Ctrl/Cmd+digit browser accelerators (CTRL-DIGIT-BROWSER-RESERVED), a lone Alt release (ALT-CHROME-MENU), the ContextMenu key / Shift+F10 (INFO-C74-…), real touch hardware.
-- **Network and console, every session (PX-NET / REG-HYD):** 0 requests to `/api/studio-token`, `/api/recording-*`, `/api/download` or the R2 host (`r2-proxy|workers.dev`); 0 `Authorization` headers; 0 hydration messages; 0 `pageerror`. Known cloud noise (`Failed to load cart`, `ERR_CONNECTION_REFUSED`, `ERR_TUNNEL_CONNECTION_FAILED`) is not reported.
+- **Measure audio on the output; never judge it by ear.** Use an analyser or ScriptProcessor tap on the real-time context, and exported WAV data (frames, onset sample, peak/RMS per span). Mute, solo, gain, volume, pan, fades and envelopes each need a measured before/after number.
+- **Known harness facts.** These are in `backlog.json` `harness_rules`. They are facts, not findings:
+  - HR-TAP-REALTIME-ONLY: tap only real-time AudioContexts; the export OfflineAudioContext keeps a stale buffer.
+  - HR-METER-LEVEL-ATTR: `data-peak` is the held maximum; use `data-level-db` for the live level.
+  - HR-VIDEO-MUTED-BY-DESIGN: `<video>.muted` is always true; measure the video's sound on the output.
+  - HR-ESCAPE-NO-DESELECT, HR-SUSTAINED-SOURCE, HR-REAL-SCROLLBARS, HR-1280-DETAIL-COLLAPSED.
+  - HR-MP3-ORACLE: decode, align by the best lag, and never compare sample-exact.
+  - HR-C-R84-L1-EXPORT-JITTER: a difference of ≤ 1 LSB is jitter.
+  - HR-RENDERING: a key pressed during an export counts only while the busy button reads მიმდინარეობს….
+  - Confirmed in round 123: the metronome is absent from the export, and Play is refused in an empty project (add a clip first).
+- **Harness reuse:** use the round-123 harness `c-round-123/tools/{lib.cjs,lib122.cjs,h3.cjs,rec.cjs,wav.cjs}` (`openStudio`, `addAt`, `loadVideo`, `selectClip`, `seekTo`, `setSnapOff`, `clipsDom`, `detailInfo`, `status`, `tapInit`). Copy what you need into `c-round-124/tools/` and say which scripts you adapted.
+- **Media** come from `tmp/studio-real-loop/media/` (check `SHA256SUMS.txt`): `beeps-6s-h264-aac.mp4`, `beeps-6s-vp9-opus.webm`, `clip-3s-h264-aac.mov`, `noaudio-2s-*.{mp4,webm}`, `broken.mp4`.
+- **Setup rule (ENV-FIRST-LOAD):** if the first `/studio-lab` load of the job crashes the setup, discard that run once and replace it. Record it under `invalidRuns`.
+- **Retries:** up to **2 replacement attempts** per experiment, only for environment-invalid runs. A wrong result on a valid setup is a result, not a reason to retry.
+- **Not reachable from CDP:** record these as `blocked: CDP`, never as FAIL.
+  - Ctrl/Cmd+digit browser accelerators;
+  - a lone Alt release;
+  - the ContextMenu key / Shift+F10;
+  - real touch hardware;
+  - a real `pointercancel`.
+- **Network and console, every session (PX-NET / REG-HYD):**
+  - 0 requests to `/api/studio-token`, `/api/recording-*`, `/api/download` or the R2 host (`r2-proxy|workers.dev`);
+  - 0 `Authorization` headers, 0 hydration messages, 0 `pageerror`.
+  - Do not report the known cloud noise: `Failed to load cart`, `ERR_CONNECTION_REFUSED`, `ERR_TUNNEL_CONNECTION_FAILED`.
+- **MP3 and the CDN:** the ffmpeg core for MP3 may load from a CDN. If that host is unreachable from the runner, the MP3 row is `blocked: environment (CDN)`, not a FAIL. C still checks that the clear error message appears.
 
 ### 2.4 Incremental writing
-- A job may stop at its time limit. After **each area**, update `user-review/ableton-review.md`, `c-round-123.json`, `c-round-123.md` and `c-round-123/progress.json` (`{"done":["P1",…],"next":"P4"}`). The next job resumes from `next`.
-- Order: SOURCE-SCOPE start → P1 … P8 → G123-3 → SOURCE-SCOPE end.
+- A job may stop at its time limit. After **each area**, update these files, so the next job can resume from `next`:
+  - `user-review/ableton-review.md`, `c-round-124.json` and `c-round-124.md`;
+  - `c-round-124/progress.json`, as `{"done":["Q1",…],"next":"Q3"}`.
+- Order: SOURCE-SCOPE start → Q1 … Q6 → G124-3 → Q7 → SOURCE-SCOPE end.
+- Q7 is written last because it merges everything. If time runs short, write Q7 from what exists, and list the unfinished Q areas in `areasSpilled`.
 
-## 3. Review areas (part 1)
-For each area: exercise the listed CZABA features, run the listed experiments (more if useful, within the area), fill the matrix (§5.2), and decide bug vs difference vs recommendation with the rulings in §4. The "known differences" column lists what B has already ruled. Do not report those as new bugs; confirm or update their status in the matrix.
+## 3. Review areas (part 2)
+For each area:
+1. Exercise the listed CZABA features and run the listed experiments. More are allowed if useful, within the area.
+2. Fill the matrix (§5.2).
+3. Decide bug vs difference vs recommendation with the rulings in §4.
+
+The "known differences" column lists what B has already ruled or recorded. Do not report those as new bugs; cite their id and confirm or update their status in the matrix.
 
 | Area | CZABA items | Live 12 sources | Experiments (start → action → result) | Known differences / signals already ruled |
 |---|---|---|---|---|
-| **P1 Layout and panels** | SRW-01 central flow, SRW-11A, SRW-11B, SRW-22 entry, SRW-23 scrollbars | 6.1 Layout; 6.15 (mixer in Arrangement); browser show/hide (42.x, C confirms) | (a) Fresh `/studio-lab` at both viewports: name each region (library, transport, ruler/overview, lanes, track headers, detail panel, video dock) and its Live counterpart, or "none". (b) Collapse/resize library and detail panel; compare with Live hide/show and resize. (c) Track height change and fold. (d) Where Live shows clip/selection numbers (6.1 status/info) vs where CZABA shows them. | D-22 video dock in the strip above the timeline (CZABA, one video lane by user scope); GROUP-VOLUME-VISIBLE-READOUT and density/target-size questions belong to DESIGN-UX-REVIEW — note, do not score. |
-| **P2 Library / browser** | SRW-12 | Live 12 Browser chapter (fetch and save; search, preview, drag to track, hot-swap N/A) and 42.22 Browser shortcuts | (a) Search with two words (AND). (b) Keyboard ↑/↓ and Enter from the results list. (c) Preview: start, scrub, stop; does preview follow selection (Live "preview" toggle, C checks the text). (d) Drag to a lane: ghost time, Snap on/off, drop on an occupied spot. (e) Double-click or Enter adds where? Compare with the manual. | Sources are catalog/demo only (user scope); B-R107-ENTER-ON-BODY is an **open user question** → record as ABL-R "question", not a bug. |
-| **P3 Clips: select, move, trim, split, duplicate, delete** | SRW-01 editing, SRW-06, SRW-07, SRW-08, SRW-24 | 6.7, 6.9, 6.11, 6.12; 42.5, 42.16 | (a) Click clip bar vs waveform (Live: clip title moves, waveform selects time — 6.9, C quotes). (b) Ctrl/Cmd and Shift multi-select, marquee across lanes, Ctrl+A. (c) Move with and without Alt/modifier; move between tracks keeping time. (d) Trim both edges, including past media length. (e) Ctrl+E split at insert marker and over a range; Ctrl+D duplicate single and group (where does the copy land). (f) Delete/Backspace on a clip and on a time range; Ctrl+Shift+X; Ctrl+Shift+L. | **User decision 2026-10-11 (delete-selection-update.md) overrides Live:** Delete always leaves a gap, Ctrl+Shift+X is the only gap-closing delete → "შეგნებული განსხვავება" (user). GROUP-OFFSET-MS-DELIBERATE; GATE76-S2-GROUP-FALLBACK (ruled); ESCAPE-CANCEL-GESTURE / C-R85-L1 (no Escape cancel, signal); C-R77-OBS-RANGE-SELECTS-CLIP; Escape does not clear a multi-selection (existing behaviour since rounds 21/40/41/114) — compare with the Live text and, if useful, write an ABL-R, not an ABL-B. |
-| **P4 Clipboard** | SRW-09 | 42.5 Editing; 6.11 time commands (Cut/Copy/Paste Time, Delete Time, Insert Time — C quotes which exist) | (a) Ctrl+C / Ctrl+V at the insert marker on the same and on another lane. (b) Ctrl+X leaves a gap. (c) Ctrl+Shift+X closes the gap on all lanes. (d) Paste over an occupied area: what happens to the clip below (Live text vs CZABA). (e) Undo after each step. | SRW-24 user decision as in P3. Live time commands CZABA does not offer (e.g. Paste Time, Insert Silence, if the manual confirms them) are ABL-R candidates, not bugs. |
-| **P5 Grid and snap** | SRW-14 | 6.10 Using the Editing Grid; 42.13 | (a) Divisions bar…1/32, triplets, free; the 1/2 narrow/widen keys (CZABA plain Digit1/Digit2 vs Live Ctrl+1/Ctrl+2). (b) Snap on/off and the bypass modifier during a drag (Live text vs CZABA Alt). (c) Snap applies to move, trim, range, playhead, paste, library drop, markers. (d) Snap to clip edges with Snap off (R52-T question; Live unconfirmed → "?"). (e) Grid follows zoom (adaptive) or fixed — compare 6.10. | CTRL-DIGIT-BROWSER-RESERVED (Ctrl+digit untestable; CZABA binds plain digits, D-29z24); INFO-B68-SNAP-WHOLE-MS-TIES; ENVELOPE-SNAP is part 2 (Q4). |
-| **P6 Ruler, BPM, metronome** | SRW-15 | 6.1 beat-time ruler and time ruler; 6.5 Time Signature Changes; Metronome settings (fetch and save) | (a) Seconds ruler and bars/beats ruler with a BPM set; with BPM cleared. (b) Changing BPM must not change audio timing (**grid tempo is not audio stretch** — user scope; measure one clip onset in the output before/after). (c) Metronome on during playback: accent on the bar, not in export. (d) Ruler click/drag/double-click behaviour vs 6.1/6.2 (beat-time ruler drag = scroll/zoom, double-click = zoom to selection or full). | No time-stretch/warp (out of scope); time signature changes are not requested → if Live has them (6.5) at most an ABL-R, never a bug. |
-| **P7 Markers / locators** | SRW-16 | 6.4 Launching the Arrangement with Locators; 42.16 | (a) Add at the insert marker (M / button), rename (F2 / double-click), delete. (b) Click a marker = jump; play from it. (c) Previous/next locator keys and their Live equivalents. (d) Drag a marker with Snap on/off. (e) Add during playback: where does it land (Live 6.4 text vs CZABA). | MARKER-STRIP-CONTEXT-ADD (Live scrub-area context menu, signal); ROW-RANGE-M (M adds at range.start, signal); A-R73-SAFARI-FLAG-FOCUS is WebKit-only (not testable here). |
-| **P8 Navigation, zoom, playhead, waveform zoom** | SRW-10, SRW-04, T12 stage 4b | 6.2 Navigation and Zooming; 6.3 Transport and Playback (insert marker vs playhead, Follow); 42.9 Zooming; 6.1 waveform vertical zoom slider | (a) Overview drag (horizontal scroll, vertical zoom), double-click to fit. (b) Ruler drag zoom anchored at the pointer; Ctrl+wheel; +/−; Z (zoom to selection) and X (back) — C quotes 42.9 for the Live keys. (c) Follow during playback and how the user turns it off by scrolling. (d) Playhead vs insert marker: click in a clip, click in the ruler, Space start point, play from the insert marker; drag the playhead. (e) Waveform Vertical Zoom: stepped ½×–8× select in the grid row vs Live's slider; undo? applies to new clips? detail panel? | WAVEFORM-ZOOM-LIVE-PARITY and the round-121 inputs (`backlog.json` → ABLETON-EXPERT-REVIEW `inputs_from_round121`) — confirm or keep "?" with sources; TRACK-FOLD-U (U / arrow fold not bound, signal); ALT-CHROME-MENU (untestable). |
+| **Q1 Transport and video** | SRW-02 video import, SRW-03 unified transport + video sound mute, SRW-19 video opacity fade, SRW-04 playhead | 6.3 Transport and Playback; 42 transport keys; *Working with Video* (fetch) | (a) Space play/stop: where does play start (insert marker vs last start; 6.3 text), and where does Stop leave the playhead? (b) Import a video (file chooser and drop). Check the clip on the single video lane and trim/move it. Does the picture follow the playhead while scrubbing and during play? Measure `currentTime` against the transport at 3 or more points. (c) Video sound: mute the original sound without stopping the picture; measure the output with sound on and off. (d) Video fade from/to black: picture-only preview, Undo. (e) Unsupported or broken file (`broken.mp4`): a clear message and no crash. (f) Compare with what the Live video chapter says about the video window, the video clip on a track, and its audio. | D-22 video dock in the strip above the timeline; **one video lane** (user scope; multiple video layers are out of scope); HR-VIDEO-MUTED-BY-DESIGN; VIDEO-FADE-SOUND (D-29z49: the fade is picture-only; signal); C-R6-02 / C-R8-01 (quiet-Chrome sync, `open_tech_lead_quiet_chrome`: cite them, do not re-measure them as new bugs); INFO-C101-SPACE-A-VS-C (watch). |
+| **Q2 Loop and range** | SRW-05 | 6.6 The Arrangement Loop; 6.9 time selection; 42 loop keys | (a) Make a range, then Loop Selection (Ctrl+L or the button): there is one brace, and it replaces the old one. (b) Toggling the loop off and on keeps the brace. (c) Drag the brace and its edges, with Snap on and off. (d) Playback wraps: measure 2 or more wraps on the output (onset positions) and the video position at each wrap. (e) A range over several lanes (range export is Q6). (f) The Shift+←/→ end-edge keys. | ABLETON-LOOP-KEYS-NOT-REQUESTED (Live ↑/↓ shift-by-length, Ctrl+↑/↓ double/halve, Ctrl+←/→ were not requested → at most an ABL-R); INFO-C68-RANGE-READOUT; C-R77-OBS-RANGE-SELECTS-CLIP (a range drag in a waveform also selects the clip); ROW-RANGE-M (already ABL-R-10). |
+| **Q3 Groups** | SRW-17 | chapter 18 Mixing (group tracks: grep the saved capture first, fetch if it is missing); 42 (Ctrl+G) | (a) Select 2 lanes → Ctrl+G; a nested subgroup; rename; fold/unfold. (b) Group mute/solo/volume: measure the children on the output. (c) Solo a child inside a muted or soloed group. (d) Ungroup; Undo/Redo of each step. (e) Move clips of a folded group. | GROUP-NONADJACENT (deliberate CZABA difference, D-29z44 G6); GROUP-PAN-NOT-IN-SCOPE (FB-12/SRW-17 name only Mute/Solo/Volume); GATE81-S8-CHILD-GROUP-SOLO-DISPLAY (D-29z47); GROUP-OFFSET-MS-DELIBERATE (D-29z33); GROUP-SUBMS-GRID-EDGE; C-R76-OBS-SOLO-MUTE-HISTORY (open product question → at most an ABL-R; cite the id); GROUP-VOLUME-VISIBLE-READOUT (belongs to DESIGN-UX-REVIEW: note it, do not score it). |
+| **Q4 Fades and envelopes** | SRW-18 (clip fades + clip volume envelope) | 6.8 Audio Clip Fades and Crossfades; *Automation* and *Clip Envelopes* (fetch; say which one matches the on-clip line) | (a) Drag the fade-in/out handles; measure the faded span on the output or in an export (gain at the start, middle and end of the fade). (b) Fade length limits, and a fade between two adjacent clips (Live crossfade text vs CZABA). Crossfades are T12-ADVANCED T12.12, so a missing crossfade is "planned", not a bug. (c) Add, drag and delete envelope breakpoints; measure the level change on the output. (d) Snap on/off while dragging a breakpoint. (e) Undo/Redo of each step. Does a fade or envelope edit survive a clip move, trim or split? | ENVELOPE-SNAP (Live snaps breakpoints, F text; CZABA's are free; a signal awaiting a B/user ruling → record an ABL-R if it hurts a flow, and cite the id); ENVELOPE-CLEAR (signal); T12-ADVANCED (crossfades T12.12, micro fades T12.13 and volume automation T12.14/15 are queued after VISUAL-A: "planned", not missing); GATE83-M2 / SRW19-RESCHEDULE (an architecture signal; not a review item unless an audible defect is measured). |
+| **Q5 Gain, volume, pan, mute, solo, meters** | SRW-13, T12 stages 1, 2, 3a, 3b, 4a (Clip Gain in dB, track Volume in dB, group Volume, Shift fine, the waveform shows Clip Gain) | chapter 18 Mixing (18.1 mixer, volume, pan, mute/solo, meters, master); 6.15; 42 (Shift fine, and Alt/Ctrl solo modifiers if quoted) | (a) Clip Gain vs track Volume: both change the output by the stated dB (measure; e.g. −6 dB → ≈ 0.5 amplitude). The waveform follows Clip Gain only. (b) Pan hard left and hard right: measure the L/R channels. (c) Mute and Solo: exclusive vs additive solo (quote Live's text); measure. (d) Master volume and master mute. (e) Meters: live level vs held peak, and the clip indicator; compare with the manual's meter text. (f) Double-click or a key to reset to 0 dB; Shift fine drag; a typed value, if any. (g) Undo of each change. | MASTER-FINE-STEP (**parked for this review**: score it here, with Live text F or ?); TRACK-VOLUME-BOOST, TRACK-VOLUME-TAPER, TRACK-VOLUME-NUMERIC-FIELD, PAN-SHIFT-FINE (signals, not requested → at most an ABL-R); C-R76-OBS-SOLO-MUTE-HISTORY; Utility T12.16/17 is `awaiting_user`; RMS/LUFS T12.20 is T12-ADVANCED ("planned"). The Tech Lead real-mouse rows (R79-T, R81-T and similar) are not re-scored. |
+| **Q6 Export** | SRW-20 (WAV, range export, MP3 via ffmpeg with a clear error, the export dialog) | *Managing Files and Sets* → Exporting Audio and Video (fetch) | (a) Export the whole project as WAV: duration, sample rate, onset positions vs the timeline, mute/solo respected. (b) Export a range: exact start and length (frames). (c) MP3: duration and correlation per HR-MP3-ORACLE, or the clear error if the CDN is blocked. (d) The dialog: format choice, progress, cancel, keyboard. (e) What does Live's Export dialog offer that CZABA lacks (render start/length, normalize, sample rate, video export)? Out-of-scope items are not "missing". | C-R98-N2-EXPORT-OVERLOAD (recorded; an existing overload feature); PROD-MP3-UNVERIFIED (production-bundle MP3 is a root gate row, not a C review row); HR-RENDERING; video export was not requested by the user, unless the user decision files say otherwise (B found none) → at most an ABL-R, never an ABL-B. |
+| **Q7 Final verdict (merge)** | parts 1 + 2 | — | Write the merged final verdict and the indexes (§5.1). No new experiments. | — |
 
-## 4. Rulings fixed in advance
+## 4. Rulings fixed in advance (same as part 1)
 - **ABL-B (bug)** only when CZABA breaks:
   - its own written contract (an acceptance in `backlog.json`, a D-ruling in `plan.md`, or a user decision); or
   - a Live behaviour that the manual text (level F) confirms **and** that CZABA's requirement says it matches.
-- **"შეგნებული განსხვავება"** (deliberate difference): any difference already ruled or decided (the "known differences" column, user decisions, D-rulings). It is not a bug and not a new recommendation, unless C has new evidence that it hurts a common flow; then write an ABL-R.
-- **ABL-R (recommendation):** a missing Live feature or a behaviour change that would bring CZABA closer to Live or make a common flow easier. Give: what to change, why, the manual reference (section + URL, F or ?), size in rounds, priority (High/Medium/Low), and whether it changes behaviour or layout. **Nothing is implemented** until Saba approves it in `user-review/ableton-decisions.md`.
-- **Out of scope — never ABL-B and never ABL-R "missing":** plugins, devices and effects; MIDI; warp, time-stretch and pitch; multiple video layers; recording and take lanes; Session View. Grid tempo is not audio stretch.
+- **"შეგნებული განსხვავება"** (deliberate difference): any difference already ruled or decided (the "known differences" column, user decisions, D-rulings).
+  - It is not a bug and not a new recommendation.
+  - Exception: if C has new evidence that it hurts a common flow, C writes an ABL-R.
+- **ABL-R (recommendation):** a missing Live feature, or a behaviour change that would bring CZABA closer to Live or make a common flow easier.
+  - Give: what to change, why, the manual reference (section + URL, F or ?), the size in rounds, the priority (High/Medium/Low), and whether it changes behaviour or layout.
+  - **Nothing is implemented** until Saba approves it in `user-review/ableton-decisions.md`.
+  - Do not repeat ABL-R-1…10; cite them.
+- **Out of scope (never an ABL-B, and never an ABL-R "missing"):**
+  - plugins, devices and effects (including EQ, a compressor, and Utility as a device);
+  - MIDI;
+  - warp, time-stretch and pitch;
+  - multiple video layers;
+  - recording and take lanes;
+  - Session View;
+  - sends/returns and routing.
+  - Grid tempo is not audio stretch.
+- **Planned, not missing:** the T12-ADVANCED items (crossfades, micro fades, volume automation and override, RMS/LUFS) are queued after VISUAL-A. Note them as "დაგეგმილია (T12-ADVANCED)".
 - **Severity of an ABL-B** (2026-10-23 bug gate):
-  - **Critical:** data loss, security, auth or purchase-protection bypass;
+  - **Critical:** data loss, security, or an auth or purchase-protection bypass;
   - **High:** a feature in the area is unusable;
-  - **Medium:** wrong behaviour in a common flow against the CZABA contract;
-  - **Low:** cosmetic or edge case. Lows go to `deferred_low_polish`.
+  - **Medium:** wrong behaviour in a common flow, against the CZABA contract;
+  - **Low:** cosmetic or edge case (→ `deferred_low_polish`).
   - A regression of an earlier C pass at Medium or above is at least Medium.
-- **Already open findings** (`open_findings`, `deferred_low_polish`, Tech Lead lists) are cited by id when seen again, not re-reported as new ABL-B.
-- **Ableton correspondence statuses** (workflow): დადასტურებული / შეგნებული განსხვავება / დაუდასტურებელი / არ ეხება. C judges **CZABA requirement met (yes/no)** and **Live correspondence** separately in every row. A passing CZABA test never proves Live parity.
+- **Already open findings** (`open_findings`, `deferred_low_polish`, the Tech Lead lists, ABL-B-1/2) are cited by id when seen again, not re-reported.
+- **Ableton correspondence statuses** (workflow): დადასტურებული / შეგნებული განსხვავება / დაუდასტურებელი / არ ეხება. In every row, C judges **CZABA requirement met (yes/no)** and **Live correspondence** separately. A passing CZABA test never proves Live parity.
 
 ## 5. Output
-### 5.1 `user-review/ableton-review.md`
-- **Path:** `/home/runner/czaba-project/tmp/studio-real-loop/user-review/ableton-review.md`. The policy writes `loop/user-review/`; there is no `loop/` folder, and `loop` is the loop folder (`kit.config.json` `loopDir`). C creates `user-review/` if it does not exist.
-- **Language:** Georgian for Saba; technical terms, key names and Live terms in English. Follow `store/.claude/primitives/GEORGIAN_DOCS.md` (read it first).
-- **Structure** (part 1 writes all three parts; part 2 extends them):
-  1. **ვერდიქტი (წინასწარი, ნაწილი 1)** — at most 10 bullet lines: what already feels like Live in P1–P8 and what does not. Mark it preliminary; part 2 writes the final verdict.
-  2. **ბაგები** — table: `ABL-B-n` | severity | area | steps | expected (with its contract source) | actual | evidence path.
-  3. **რეკომენდაციები** — table: `ABL-R-n` | what | why | Live manual reference (section, URL, F/?) | size (rounds) | priority | behaviour/layout change.
-  4. **დანართი: სფეროების მატრიცა** — one subsection per area (§5.2).
-- Number ids from 1 in this round; part 2 continues the numbering.
+### 5.1 `user-review/ableton-review.md`: extend, never rewrite
+- **Path:** `/home/runner/czaba-project/tmp/studio-real-loop/user-review/ableton-review.md` (= policy `loop/user-review/`, D-29z88 R6).
+- **Before the first edit, copy the round-123 version to `c-round-124/ableton-review-part1.md`.** Keep every part-1 row intact.
+- **Language:** Georgian for Saba; technical terms, key names and Live terms in English. Follow `store/.claude/primitives/GEORGIAN_DOCS.md`.
+- **Changes in this round:**
+  1. **ვერდიქტი:** replace the "წინასწარი, ნაწილი 1" heading with the **final merged verdict** (Q7).
+     - At most 15 bullet lines, covering all P and Q areas: what already feels like Live, what does not, and the 3–5 most valuable recommendations for Saba.
+     - If it is still true, say plainly that the `ableton-arrangement-expert` agent could not be used on this runner, and that every conclusion rests on browser evidence plus the Live 12 manual text.
+  2. **ბაგები:** append the part-2 bugs. Numbering continues from **ABL-B-3**.
+  3. **რეკომენდაციები:** append the part-2 recommendations, numbered from **ABL-R-11**.
+     - At the end of this section, add a short "საბას გადასაწყვეტი კითხვები" list. It collects every ABL-R written as a question.
+     - From part 1, that is ABL-R-5, ABL-R-6, ABL-R-9 and ABL-R-10. ABL-R-10 conflicts with SRW-16 plan R3, where the user asked that the marker name field opens at once.
+  4. **დანართი:** add one matrix subsection per Q area (§5.2), after the P areas.
+  5. **ინდექსი** (new, at the end): one table of every ABL-B and ABL-R from both parts, with id, area, severity or priority, and a one-line summary.
 
 ### 5.2 Per-area matrix (appendix rows)
-| ქცევა | Live 12 წყარო (section, URL, F/?) | Live-ში დადასტურებული ქცევა (short quote or paraphrase of the text) | CZABA-ში ნანახი (action → result, evidence path) | CZABA მოთხოვნა შესრულებულია? | Live-თან შესაბამისობა | შენიშვნა / ABL id |
-- At least 4 rows per area. Every CZABA cell has an evidence path (screenshot or JSON under `c-round-123/`).
+| ქცევა | Live 12 წყარო (section, URL, F/?) | Live-ში დადასტურებული ქცევა (short quote or paraphrase) | CZABA-ში ნანახი (action → result, evidence path) | CZABA მოთხოვნა შესრულებულია? | Live-თან შესაბამისობა | შენიშვნა / ABL id |
+- At least 4 rows per Q area (Q7 has none).
+- Every CZABA cell has an evidence path (a screenshot or JSON under `c-round-124/`). Audio rows give the measured numbers.
 
-### 5.3 `c-round-123.json`
+### 5.3 `c-round-124.json`
 ```
-{"round":123,"taskStatus":"PASS|FAIL|BLOCKED","browserVerified":bool,"realVerified":bool,
- "areasDone":["P1",…],"areasSpilled":[…],"passed":["SOURCE-SCOPE-start","P1-review",…,"G123-3","SOURCE-SCOPE-end"],
+{"round":124,"taskStatus":"PASS|FAIL|BLOCKED","browserVerified":bool,"realVerified":bool,"allRowsRan":bool,
+ "areasDone":["Q1",…,"Q7"],"areasSpilled":[…],"passed":["SOURCE-SCOPE-start","Q1-review",…,"Q7-verdict","G124-3","SOURCE-SCOPE-end"],
  "failed":[],"inconclusive":[],"blocked":[…],"gate":["full vitest","typecheck","build","Biome","npm run verify"],
  "bugs":[{"id":"ABL-B-n","severity":…,"area":…,"steps":[…],"expected":…,"contract":…,"actual":…,"evidence":…,"regression":"yes/no (since round N)"}],
  "recommendations":[{"id":"ABL-R-n","area":…,"what":…,"why":…,"manual":…,"level":"F|?","sizeRounds":…,"priority":…,"changes":"behaviour|layout|both"}],
- "invalidRuns":[…],"notesForB":[…]}
+ "reviewComplete":bool,"invalidRuns":[…],"notesForB":[…]}
 ```
-- **taskStatus PASS** = the review ran with browser evidence and every reviewed area is written. Bugs found do not make the review FAIL; they are its output. If some P areas could not be finished, still write `PASS` and list them in `areasSpilled` (the loop runner treats any value other than PASS as a gate skip; do not invent other values). **FAIL** or **BLOCKED** = the review could not run at all (say why).
-- `browserVerified` is false only if a browser experiment that can run here was not run.
+- **`taskStatus`:**
+  - **PASS** = the review ran with browser evidence, and every reviewed area is written. Bugs found do not make the review FAIL; they are its output.
+  - If some Q areas could not be finished, still write `PASS` and list them in `areasSpilled`. The loop runner treats any value other than PASS as a gate skip, so do not invent other values.
+  - **FAIL** or **BLOCKED** = the review could not run at all. Say why.
+- `reviewComplete` = true only if every area from P1–P8 and Q1–Q7 now has its section with browser evidence.
+- `browserVerified` is false only if a browser experiment that can run here was not run. Backend-only sub-checks are listed under `blocked` and do not make it false.
 
 ## 6. Guard rows (cheap, every session)
-- **SOURCE-SCOPE** (start and end): `git -C store rev-parse HEAD` = `608187f…`; `git status --short --untracked-files=all` empty; `sha256sum -c --quiet b-round-122-r123-tree-sha256.txt` from `store/` OK. Any `store/` change during the round is a process finding for root.
-- **G123-3** (auth guard, as G122-3): fresh context, no credentials: `/studio-lab` shows the workspace and the demo badge; `/studio/middle-east` shows "Sign in required" with no workspace and 0 `audio[src]`; `GET /api/studio-token` → 401. The fake-Bearer 403 is `blocked: backend unavailable in cloud`.
-- No smoke run in this round (it was run in round 122; not a regression round).
+- **SOURCE-SCOPE** (start and end):
+  - `git -C store rev-parse HEAD` = `608187f…`;
+  - `git status --short --untracked-files=all` is empty;
+  - `sha256sum -c --quiet b-round-123-r124-tree-sha256.txt`, run from `store/`, is OK.
+  - Any `store/` change during the round is a process finding for root.
+- **G124-3** (auth guard, as G123-3), in a fresh context with no credentials:
+  - `/studio-lab` shows the workspace and the demo badge;
+  - `/studio/middle-east` shows "Sign in required", with no workspace and 0 `audio[src]`;
+  - `GET /api/studio-token` → 401.
+  - The fake-Bearer 403 sub-check is `blocked: backend unavailable in cloud`.
+- No smoke run in this round. Round 122 ran it, and this is not a regression round.
 
-## 7. Outcome, fixed in advance
-| C result | B at round 124 planning |
+## 7. Outcome, fixed in advance (B at round 125 planning)
+| Condition | Round 125 |
 |---|---|
-| Every P area done; no ABL-B at Medium or above | Round 124 = **ABLETON-EXPERT-REVIEW part 2** (Q1–Q7). B transcribes ABL-B Lows into `deferred_low_polish` and ABL-R into `backlog.json` as `awaiting_user`. |
-| ABL-B **Critical** or a security/data-loss/purchase-protection finding | Round 124 = a **bounded fix-up** (at most three related bugs), then part 2. |
-| ABL-B **High or Medium** only | Part 2 first (round 124), then bounded fix-ups for all Medium+ ABL-B, then VISUAL-A (policy: "continue with its Medium+ bugs, then VISUAL-A"). A **High** that blocks a part-2 area moves its fix ahead of that area. |
-| Areas spilled (`areasSpilled` non-empty) | The spilled P areas run first in round 124, then Q areas; part 2 may spill into round 125. |
-- B also checks for `user-review/ableton-decisions.md` (and, defensively, `tmp/studio-real-loop/loop/user-review/ableton-decisions.md`) at every planning. Approved items become bounded tasks after VISUAL-A unless Saba orders otherwise.
+| B plans on or after **2026-10-27** (`regression-last.json` is 3 days old) | A **REGRESSION round** first (speed rules), then whichever row below applies. |
+| `areasSpilled` is non-empty | The spilled Q areas (and Q7) run first in round 125. |
+| An ABL-B (from either part) is **Critical**, or a security, data-loss or purchase-protection finding | A bounded **fix-up** (at most three related bugs), then continue. |
+| An ABL-B (from either part) is at **High or Medium** | Bounded **fix-ups** (at most three related bugs per round), Critical/High first, before VISUAL-A (policy: "continue with its Medium+ bugs, then VISUAL-A"). |
+| `reviewComplete` is true and no ABL-B is Medium or above | ABLETON-EXPERT-REVIEW → done. Round 125 = **DESIGN-UX-REVIEW**, the first step of VISUAL-A-OBSIDIAN (C-only; it builds on `ableton-review.md`). |
+- Lows from either part → `deferred_low_polish`. ABL-R → `ableton_recommendations`, `awaiting_user`.
+- At every planning, B checks for `user-review/ableton-decisions.md` (and `loop/user-review/`). Approved items become bounded tasks after VISUAL-A, unless Saba orders otherwise.
 
 ## 8. Neighbour risk
 - No app code changes, so Studio behaviour cannot regress in this round.
-- Process risks: a probe writing into `store/` (SOURCE-SCOPE catches it); a manual fetch saving executable content (save `.txt` only, never run fetched scripts); the job time limit (incremental writing, §2.4); importing unverified Live claims from memory (§2.2 levels).
+- Process risks:
+  - a probe writing into `store/` (SOURCE-SCOPE catches it);
+  - a manual fetch saving executable content (save `.txt` only);
+  - overwriting part 1 of `ableton-review.md` (copy it first, §5.1);
+  - the job time limit (write incrementally, §2.4);
+  - importing unverified Live claims from memory (§2.2 levels);
+  - large exported files: keep WAV/MP3 under `c-round-124/out/`, and delete none of the earlier rounds' evidence.
 
 ## 9. Deliverables
-- **A:** `a-round-123.md` (§1).
+- **A:** `a-round-124.md` (§1).
 - **C:**
-  - `user-review/ableton-review.md` (§5.1, Georgian);
-  - `c-round-123.json` (§5.3) and `c-round-123.md` (English or Georgian; per-area summary, the expert-agent consultation, what was not reachable);
-  - evidence under `c-round-123/{tools,out,shots,manual}` and `c-round-123/progress.json`.
+  - `user-review/ableton-review.md`, extended (§5.1), and the backup `c-round-124/ableton-review-part1.md`;
+  - `c-round-124.json` (§5.3) and `c-round-124.md`: a per-area summary, the screenshot descriptions, the expert-agent status, and what was not reachable;
+  - evidence under `c-round-124/{tools,out,shots,manual}`, and `c-round-124/progress.json`.
