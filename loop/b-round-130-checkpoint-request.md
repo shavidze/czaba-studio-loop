@@ -51,3 +51,14 @@ Still non-blocking. Rounds 132–133 (V-0.2c2/c3) do not touch the Context.
 - New timing condition from the gate reviewer: **decide the split before V-0.3** adds the component texts (Transport, TempoRow, grid labels). After that, the split costs more.
 - Request to root: run this bounded frontend-architect checkpoint after round 133 closes and **before V-0.3 is dispatched**. Same questions as (e): split into `lib/arrangement/strings/<area>.ts` + a named re-export index with every exported name unchanged (acceptance: no caller change, ST1–ST22 unchanged), and the shared Context UI test harness. "Keep" is a valid answer.
 - Still non-blocking for round 133 (no Context or component change).
+
+## Addendum (g) — B round 133 → 134 planning (D-29z99), 2026-10-24
+- **Status:** no root result for (e)/(f) was found at planning. Places checked: `gates/`, the loop folder, and `store/.claude/references/`.
+- **What B did:** per `tasks/round-133.md` §8, B dispatched **V-0.3a** (grid and Snap: `grid.ts`, `grid-divisions.ts`, `ArrangementGridMenu.tsx` l.6, five `StudioWorkspace.tsx` lines). It adds a 13th object, `studioGridStrings`.
+- **Rationale:** `ArrangementExportDialog.tsx` l.10 and `ArrangementContext.tsx` l.156 already import `~/lib/arrangement/strings`, so any split has to keep that import path (an index with the same names). A new object through the same path adds no new dependence on the decision.
+- **New inputs for the question:**
+  - The A round-133 reviewer proposed a shared ST helper (plain-string / formatter / per-file scan) and one comment stripper.
+  - `strings.test.ts` will hold ST1–ST25, about 1300 lines, after round 134.
+  - StudioWorkspace is half-migrated with a ratchet (ST25) until V-0.3d.
+- **Request to root:** run the bounded checkpoint before **V-0.3b** is dispatched (round 135 at the earliest). The questions are those of (e)/(f), plus one more: should the ST helper extraction go with the split? "Keep" is a valid answer.
+- **Not a block.** Without a result, B continues V-0.3b on the same rationale and records it.

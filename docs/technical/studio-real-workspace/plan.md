@@ -1261,6 +1261,17 @@ C round 129 (`tmp/studio-real-loop/c-round-129.md`, `c-round-129.json`) — **PA
 - **R6 — ჩართული ორი იაფი საკითხი, რაუნდის ფაილებში:** SA-DEL (+1 `it` `status-announcement-ui`-ში, ხურავს m4-ის ხარვეზს) და GATE129-S2 (ST9 ამოწმებს, რომ 6 constant აღარ არსებობს). ST13 — Context-ის დარჩენილი ქართული ხაზების ზუსტი სია (ratchet).
 - **R7 — შედეგი წინასწარ (round 131):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.2b-ს შეზღუდული გასწორება; C PASS — V-0.2c (B ჯერ ზომავს, საჭიროებისას ყოფს).
 
+**D-29z99 — Round 133-ის შედეგი; V-0.2c3 და მთლიანად V-0.2 დასრულდა; V-0.3 დაიყო ოთხად; Round 134: V-0.3a (ბადისა და Snap-ის ტექსტები ინგლისურად).**
+
+C round 133 (`tmp/studio-real-loop/c-round-133.md`, `c-round-133.json`) — **PASS**, `browserVerified`/`realVerified` — true. GROUP და LANE ზუსტია 1440-ზე და 1280-ზე, ეფექტები უცვლელი; GEO-COUNT 0 (59 ნაბიჯი); layout ≤ 1 px; G133-3 401 (fake-Bearer 403 — BLOCKED, backend cloud-ში მიუწვდომელია). Gate 133 გამოქვეყნდა `ee40ad6` (verify OK, review 9/10). B-მ advisor გამოიყენა.
+- **R0 — V-0.2c3 → მზადაა** (`c_pass_published`); V-0.2 დასრულდა. C-R133-L1 (Low, უკვე არსებული: წარმატებული დაკეცვის შემდეგ ძველი უარის სტატუსი) → `deferred_low_polish` (187). Gate 133-ის შენიშვნები: 1 — ჩართულია (doc 109 l.4/l.128); 2 — GATE133-GROUP-RENAME (V-0.3d); 3 — GATE130-S1-ს დაემატა; 4 — C-R133-L1; 5 — აღრიცხულია. Reviewer-ის რჩევა (ქართული დიაპაზონის გაფართოება) — ჩართულია (GATE133-GEO-RANGE).
+- **R1 — V-0.3 დაიყო ზედაპირის მიხედვით** (`ee40ad6`-ზე გაზომილი: 108 ქართული ხაზი 11 ფაილში): a — ბადე/Snap (22 ხაზი, 104 სატესტო pin 9 ფაილში); b — Transport, TempoRow, Ruler, Overview, LoopBrace, MarkerMenu; c — MarkerRow; d — StudioWorkspace-ის დანარჩენი + `waveform-zoom.ts`. V-0.3a ერთ რაუნდად რჩება, რადგან ყველა სტატუსი division label-ს შეიცავს. Inventory-ის შესწორება: `ArrangementGridMenu.tsx` → V-0.3a; `panels.ts`, `clip-gain-multi.ts` → V-0.4.
+- **R2 — ბადის ზედაპირი მთლიანად გადადის**, StudioWorkspace-ის 5 ხაზისა და GridMenu-ის l.6-ის ჩათვლით, რომ ახალი ორენოვანი სტატუსი არ გაჩნდეს. StudioWorkspace-ის დანარჩენი 33 ხაზი ST25-ის ratchet-ით არის დაცული.
+- **R3 — `waveform-zoom.ts` → V-0.3d,** StudioWorkspace l.2370–2371-თან ერთად (ერთი და იგივე წინადადება).
+- **R4 — strings-ის გაყოფის checkpoint:** შედეგი არ არის. V-0.3a მაინც იწყება: `~/lib/arrangement/strings`-ის import-ს უკვე ორი გაყინული ფაილი იყენებს, ამიტომ ნებისმიერი გაყოფა ამ გზას შეინარჩუნებს. დამატება (g) — root-ს ხელახლა ეთხოვა (არ ბლოკავს).
+- **R5 — Ableton:** Live 12 §6.10 (narrow/widen, triplets mode, snapping on/off; B-მ 2026-10-24-ს ჩამოტვირთა, `b-round-133/live/`) და §42.13; „1 bar“ — CZABA-ს label, Live-ში დაუდასტურებელი.
+- **R6 — შედეგი წინასწარ (round 135):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.3a-ს შეზღუდული გასწორება; C PASS — V-0.3b (ჯერ გაზომვა; checkpoint-ის შედეგი, თუ არსებობს, ჯერ მისი გამოყენება).
+
 **D-29z98 — Round 132-ის შედეგი; V-0.2c2 დასრულდა; Round 133: V-0.2c3 (ხაზებს შორის გადატანისა და ხაზების ჯგუფის ტექსტები ინგლისურად).**
 
 C round 132 (`tmp/studio-real-loop/c-round-132.md`, `c-round-132.json`) — **PASS**, `browserVerified`/`realVerified` — true, ბაგი 0. TEMPO, METRO, ZOOM ზუსტია 1440-ზე და 1280-ზე, ეფექტები უცვლელი (კლიპის start/სიგანე ტემპის ყველა ნაბიჯზე უცვლელია — ბადის ტემპი აუდიოს არ წელავს); GEO-COUNT 0; layout ≤ 1 px; G132-3 401 (fake-Bearer 403 — BLOCKED, backend cloud-ში მიუწვდომელია). Gate 132 გამოქვეყნდა `b25507e` (verify OK, review 9/10). B-მ advisor გამოიყენა.
@@ -2280,6 +2291,9 @@ flowchart TD
 | 132 → | (შედეგი) | **C PASS** (`browserVerified`; TEMPO/METRO/ZOOM ზუსტი, ბაგი 0); V-0.2c2 → მზადაა; 1 Low → deferred; gate 132 published `b25507e` |
 | 133 | VISUAL-A V-0.2c3 | ხაზებს შორის გადატანის უარისა და ხაზების ჯგუფის ტექსტები ინგლისურად (`studioLaneMoveStrings`, `studioTrackGroupStrings`; L1–L6, G1–G11); ST20–ST22; UI ლიტერალები; prefix → V-0.4; GATE133-LANE-*-MIXED; doc 108 l.4, doc 109 (D-29z98) |
 | 133 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.2c3-ის Medium+ გასწორება; სხვაგვარად checkpoint-ის შედეგი / V-0.3 ეტაპი 1 |
+| 133 → | (შედეგი) | **C PASS** (`browserVerified`; GROUP/LANE ზუსტი); V-0.2c3 → მზადაა, V-0.2 დასრულდა; 1 Low → deferred; gate 133 published `ee40ad6` |
+| 134 | VISUAL-A V-0.3a | ბადისა და Snap-ის ტექსტები ინგლისურად (`studioGridStrings`, GR1–GR20; `grid.ts`, `grid-divisions.ts`, GridMenu l.6, StudioWorkspace 5 ხაზი); ST23–ST25 (StudioWorkspace ratchet); ხურავს GATE132-TEMPO-CLEARED-MIXED; doc 109, doc 110 (D-29z99) |
+| 134 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.3a-ს Medium+ გასწორება; სხვაგვარად V-0.3b |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2339,6 +2353,8 @@ flowchart TD
 **D-29z97:** round 132-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (3 ახალი ობიექტი), `tempo.ts`, `metronome.ts`, `view.ts` (მხოლოდ import და სტრიქონები; exported სახელები რჩება), `strings.test.ts` (ST17–ST19), `tempo.test.ts`, `metronome.test.ts`, `view.test.ts` (ლიტერალი → მოდული), `tempo-ui` და `metronome-ui` (დამატებითი ლიტერალური `expect`), `marker-time-snap-ui`, `grid-snap-ui`, `grid-snap-edit`, `grid-snap-position`, `grid-snap-loop-drop` (`40 px/s`), `grid-musical-ui` l.490 და `grid-musical.test` l.118 (R3), doc 107-ის მხოლოდ l.4 და ახალი doc 108. დანარჩენი გაყინულია (`b-round-131-r132-tree-sha256.txt`, 926).
 
 **D-29z98:** round 133-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (2 ახალი ობიექტი), `selection.ts` და `groups.ts` (მხოლოდ import და სტრიქონები; l.3 prefix უცვლელი), `strings.test.ts` (ST20–ST22), `grid-snap-ui` l.110, `status-announcement-ui` l.402, `grid-snap-edit` l.115–117, `clip-fades-ui` l.110, `track-groups-ui` (3 ლიტერალი, 5 დამატებითი `expect`, TG5-ის სათაურის სიტყვები), `track-group-collapse-ui` (1 `expect`), doc 108-ის მხოლოდ l.4 და ახალი doc 109. დანარჩენი გაყინულია (`b-round-132-r133-tree-sha256.txt`, 934).
+
+**D-29z99:** round 134-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (1 ახალი ობიექტი), `grid.ts` და `grid-divisions.ts` (მხოლოდ import და სტრიქონები), `ArrangementGridMenu.tsx` (import და l.6), `StudioWorkspace.tsx` (import და l.158, 1276, 2270–2271, 2312), `strings.test.ts` (ფართო დიაპაზონი, ST23–ST25), `grid.test`, `grid-musical`, `grid-triplet`, `grid-snap-ui`, `grid-snap-menu`, `grid-snap-keys`, `grid-musical-ui`, `grid-triplet-ui`, `tempo-ui` l.104 (ქართული → ხელით დაწერილი ინგლისური), doc 109 (l.4, l.128, 1 TODO) და ახალი doc 110. დანარჩენი გაყინულია (`tmp/studio-real-loop/b-round-133-r134-tree-sha256.txt`, 930).
 
 ## 7. Done Policy
 

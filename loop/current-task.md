@@ -1,141 +1,183 @@
-# CURRENT TASK — Round 133: VISUAL-A V-0.2c3 — lane-move and track-group texts in English
+# CURRENT TASK — Round 134: VISUAL-A V-0.3a — grid and Snap texts in English
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 132)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 133)
 - **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
-- **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` (M2, V-0). Module contract: `backlog.json` → VISUAL-A-OBSIDIAN `v0_plan_d29z92.module_contract`, clarified in §1.2 (R6) below:
-  - a leaf module (`strings.ts` imports nothing), one object per area;
-  - plain strings plus small pure formatters;
-  - no type assertions;
+- **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` (M2, V-0). Module contract: `backlog.json` → VISUAL-A-OBSIDIAN `v0_plan_d29z92.module_contract`, with the R6 clarification of round 133:
+  - `strings.ts` is a leaf module (it imports nothing), with one object per area;
+  - it holds plain strings plus small pure formatters, and no type assertions;
+  - formatters take values that are already formatted; a branch that only picks between two texts stays in the caller;
   - **existing exported names keep their names and signatures and get their values from the module**.
-- **Previous task:** `tasks/round-132.md` (exact copy, `cmp` OK, 30435 bytes). Rationale: `b-round-132.md`. Decision record: **D-29z98** in `plan.md`.
-- **Baseline: commit `b25507ed0f127b2e64e46333bea7c6827bbf6eac`** (gate 132 published). The tree was **clean** at planning (`git status --short` empty).
-- **Frozen list:** `tmp/studio-real-loop/b-round-132-r133-tree-sha256.txt`, **934 entries** = `git ls-files -co --exclude-standard` (945) minus the 11 grants in `b-round-132-r133-grants.txt`. `sha256sum -c --quiet` was OK at planning, run from `store/`.
-- **Start hashes of the 11 grants:** `b-round-132-r133-granted-start-sha256.txt`. **Start copies:** `b-round-132/r133-granted-start/` (paths relative to `store/`; `sha256sum -c` OK there at planning). A checks both at the start. If a hash differs, A stops and reports.
+- **Previous task:** `tasks/round-133.md` (exact copy of the round-133 `current-task.md`, sha256 `1f8656ad…`). Rationale: `b-round-133.md`. Decision record: **D-29z99** in `docs/technical/studio-real-workspace/plan.md`.
+- **Baseline: commit `ee40ad608a7652e23cb5a55ef84bc0f82360c525`** (gate 133 published; HEAD). The tree was **clean** at planning (`git status --short` empty).
+- **Frozen list:** `tmp/studio-real-loop/b-round-133-r134-tree-sha256.txt`, **930 entries** = `git ls-files -co --exclude-standard` (946) minus the 16 grants in `b-round-133-r134-grants.txt`. `sha256sum -c --quiet` was OK at planning, run from `store/`.
+- **Start hashes of the 16 grants:** `b-round-133-r134-granted-start-sha256.txt`. **Start copies:** `b-round-133/r134-granted-start/` (paths relative to `store/`; `sha256sum -c` was OK there at planning). A checks both at the start. If a hash differs, A stops and reports.
 
-## 0. Why this round (D-29z98)
-- **Round 132: C PASS**, `browserVerified` = `realVerified` = true, no bugs. TEMPO, METRO and ZOOM texts were exact at both viewports with unchanged effects (the clip kept start 2.000 / width 150.372 s through every tempo step: grid tempo is not audio stretch). Gate 132 published `b25507e` (verify OK, review 9/10). **V-0.2c2 is done.**
-- `tasks/round-132.md` §8 fixed this step: after a V-0.2c2 PASS, round 133 = **V-0.2c3**: `selection.ts` + `groups.ts`. B re-measured first (below).
-- The regression round is not due: `regression-last.json` is dated 2026-10-24 (round 122); the next one is due on or after 2026-10-27. No Critical, High or Medium finding is open. `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist.
-- **B's measurement (exact greps at `b25507e`):**
-  - Source: 6 Georgian lines in `selection.ts` (l.7, 38–42) and 10 in `groups.ts` (l.3, 222, 474–479, 490, 495).
-  - Raw hits of these texts outside the two sources: 12 in 7 files. **9 pins in 5 test files are granted** (§2). The other 3 (`grid-snap-loop-drop` l.441/551 and `ArrangementLane.tsx` l.893) are the lane-ghost literal and stay frozen (next bullet). There are 0 hits in `e2e/`.
-  - Module-built users that need no change: `marker-snap.test.tsx` l.676, `grid-snap-clip-edges.test.tsx` l.932, and the `trackGroupRefusalMessage(...)` lines in `track-groups-ui`.
-  - `grid-snap-loop-drop.test.tsx` l.441 and l.551 pin `'00:05.000 · აქ ადგილი არ არის'`. That is the **library drop ghost** literal in `ArrangementLane.tsx` l.893 (V-0.4), **not** `CLIP_LANE_REFUSAL_MESSAGES.overlap`. They stay unchanged and are not granted.
-  - **The ArrangementContext and every component stay frozen.**
-- **Ruling D-29z98 R1 — `TRACK_GROUP_NAME_PREFIX` (`'ჯგუფი'`, the default group name) moves in V-0.4, not here.**
-  - It is used as data in **180 fixture lines in 7 test files** (`track-group-mix-ui` 86, `track-group-collapse-ui` 60, `track-groups-ui` 21, `groups.test` 7, `track-group-mix.test` 4, `group-volume-db` 1, `fader-touch` 1). Round 132 had 14 pins; §8 said "split if larger".
-  - It is an app-created default **name**, the same class as the default track names and the `library.ts` kind/folder labels already ruled into V-0.4 (GATE130-S2, D-29z96). Moving it alone would not un-mix the created/ungrouped sentences, because the track names in them stay Georgian until V-0.4.
-  - This is V-0.4 scope, not a deferral. Tracked as **GATE133-GROUP-PREFIX** (V-0.4).
-- **Ruling D-29z98 R2 — the `groups.ts` per-file scan allows exactly one line.** ST22 scans `groups.ts` with the single declaration line `export const TRACK_GROUP_NAME_PREFIX = 'ჯგუფი';` removed **by exact text**. Any other Georgian codepoint in `groups.ts` turns ST22 red. V-0.4 removes the allowance.
-- **Ruling D-29z98 R3 — two composite surfaces become two-language for a while (tracked, like GATE132-TEMPO-CLEARED-MIXED):**
-  - **GATE133-LANE-RELEASE-MIXED (V-0.4):** `ArrangementClip.tsx` l.738 builds the refused-release status `${laneRefusal} — ${CLIP_LANE_REFUSAL_KEPT_PLACE}: ${laneName}, start …`. The tail `კლიპი ბოლო თავისუფალ ადგილას დარჩა` lives in the frozen `ArrangementClip.tsx` (V-0.4). After this round the status reads `No room here — კლიპი ბოლო თავისუფალ ადგილას დარჩა: მუსიკა, start 00:01.375.` `clip-fades-ui.test.tsx` l.525 pins it through its `OVERLAP_TEXT` constant, which becomes a hand-written English literal.
-  - **GATE133-LANE-HINT-MIXED (V-0.3):** `StudioWorkspace.tsx` l.2574–2579 renders `{laneMoveRefusal} · {CLIP_LANE_SHIFT_HINT}`. The Shift hint (`Shift — დრო ჩაიკეტება, შეიცვლება მხოლოდ ხაზი`, l.142–143) is V-0.3 workspace chrome. No test pins that paragraph, so C subtracts the hint by name.
-  - The lane ghost text `აქ ადგილი არ არის` (library drop and clip lane drag, `ArrangementLane.tsx`) is already tracked as GATE130-S1 (V-0.4, must reuse the status English).
-  - Keeping the refusals Georgian instead would leave `selection.ts` half-migrated and still mix the same two surfaces after V-0.3. The single-clip blocked status `გადატანა დაბლოკილია — …` (`ArrangementClip.tsx` l.586) also stays Georgian until V-0.4, while the group version becomes English. These are separate status lines, never one line.
-- **Folded in (cheap; the round already owns the code or it is one line):**
-  - **GATE132-S5 (doc 108 status line):** l.4 still says the browser check is pending. One line changes.
-  - **GATE130-S3 forward rule:** each new formatter and each moved plain string that a UI test already reaches gets **one hand-written English literal in a UI test** (§3.2). No `it` is added.
+## 0. Why this round (D-29z99)
+- **Round 133: C PASS.** `browserVerified` = `realVerified` = true.
+  - GROUP and LANE texts were exact at both viewports, and their effects were unchanged.
+  - GEO-COUNT was 0 over 59 steps; layout stayed within 1 px; the lane hint never wrapped.
+  - G133-3 returned 401. The fake-Bearer 403 check is BLOCKED (backend unavailable in cloud).
+  - Gate 133 published `ee40ad6` (verify OK, review 9/10). **V-0.2c3 is done, so V-0.2 is complete.**
+  - C found one new Low, C-R133-L1 (pre-existing): a successful fold leaves the earlier refusal in the status line. It goes to `deferred_low_polish`.
+- **`tasks/round-133.md` §8 fixed this step:** after a PASS comes V-0.3 stage 1, measured first and split by component if it is larger than one round.
+  - **The strings-split checkpoint has not run.** There is no frontend-architect result for `b-round-130-checkpoint-request.md` addenda (e)/(f) in `gates/`, the loop folder or `store/.claude/references/` (checked at planning).
+  - §8 says that in that case B plans stage 1 on files that do not depend on the split decision. **Rationale:** `ArrangementExportDialog.tsx` l.10 and `ArrangementContext.tsx` l.156 already import from `~/lib/arrangement/strings`. Any split must therefore keep that import path valid, for example `strings/index.ts` with the same names. A new `studioGridStrings` object imported through that same path adds no new dependence on the decision. If root later approves a split, this object moves mechanically with the other twelve.
+  - B re-asked root for a bounded checkpoint (addendum (g)). It is not a block.
+- **Not due:** the regression round (`regression-last.json` = 2026-10-24, round 122; due on or after 2026-10-27).
+- **Nothing open that comes first:** no Critical, High or Medium finding is open. `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist.
+- **B's measurement (exact greps at `ee40ad6`):**
+  - **V-0.3 area:** 108 Georgian source lines in 11 files: StudioWorkspace 38, Transport 20, MarkerRow 16, grid-divisions 15, LoopBrace 5, MarkerMenu 4, TempoRow 3, Overview 3, Ruler 2, grid.ts 1, waveform-zoom 1.
+  - **Inventory correction:** 3 files that hold Georgian were in no stage:
+    - `ArrangementGridMenu.tsx` l.6 (`GRID_MENU_LABEL`, the same text as the StudioWorkspace select aria-label) → **this round**;
+    - `panels.ts` l.8 and `clip-gain-multi.ts` l.113 → V-0.4 (detail panel).
+  - **V-0.3 split (D-29z99 R1),** by surface and measured coupling:
+
+    | Stage | Scope | Size |
+    |---|---|---|
+    | **V-0.3a, this round** | Grid and Snap | 22 source lines, **104 test pin lines in 9 files** |
+    | V-0.3b | Transport, TempoRow, Ruler, Overview, LoopBrace, MarkerMenu | about 71 test lines in 30 files* |
+    | V-0.3c | MarkerRow | about 84 test lines in 15 files* |
+    | V-0.3d | The rest of StudioWorkspace + `waveform-zoom.ts` | about 83 test lines in 34 files* |
+
+    \* Fragment-based estimates. Each stage is re-measured at its own planning.
+  - **Why V-0.3a is one round, not two:** the 104 pins are mechanical. A label/status split would touch the same pins twice, because every grid status interpolates the division label. It would also leave `Grid: 1 s` and `ბადე: 1 s` mixed for a round. A gets a checkpoint rule (§2) in case the context grows.
+- **Ruling D-29z99 R2 — the grid surface moves whole, including its StudioWorkspace lines.** A lib-only round would create new two-language composites on the very surface being cleaned:
+  - the Snap status `Snap ჩართულია — ბადე 1 s (G)`;
+  - an English `Triplets (3)` item next to the Georgian menu label in one component.
+
+  So this round also takes these lines:
+  - the five grid/Snap literals in StudioWorkspace (l.158, l.1276, l.2270–2271, l.2312);
+  - `ArrangementGridMenu.tsx` l.6.
+
+  StudioWorkspace is half-migrated for now, as ArrangementContext was during V-0.2a–c1. **Guard:** the ST13-style ratchet ST25 (§3.1).
+- **Ruling D-29z99 R3 — `waveform-zoom.ts` waits for V-0.3d.** Its one string is the same sentence as the StudioWorkspace waveform-zoom aria-label/title (l.2370–2371). The pair moves together, so one sentence never exists in two languages.
+- **Folded in (the round owns the code, and each costs little):**
+  - **GATE133-DOC109-STATUS** (gate-133 reviewer, finding 1): doc 109 l.4 and l.128.
+  - **GATE133-GROUP-RENAME tracking** (gate-133 reviewer, finding 2): one TODO line in doc 109. The rename statuses at StudioWorkspace l.953/963 are **not** changed here; they belong to V-0.3d.
+  - **GATE133-GEO-RANGE** (gate-133 reviewer suggestion): widen `GEORGIAN_CODEPOINT` in `strings.test.ts` to include Mtavruli U+1C90–1CBF and Nuskhuri U+2D00–2D2F, with a self-check (ST25).
 
 ## 1. What changes (user-visible)
-Two new exported objects in `app/lib/arrangement/strings.ts`: **`studioLaneMoveStrings`** and **`studioTrackGroupStrings`**. Every Georgian literal below moves there, in English.
+One new exported object in `app/lib/arrangement/strings.ts`: **`studioGridStrings`**. Every Georgian literal below moves there, in English.
 
 **Text only.** None of these change:
-- `planClipLaneMove`, the refusal codes, their order of checks, or `findClipPlacementConflict`;
-- group create/ungroup/fold logic, nesting, the selection rules, `nextTrackGroupName` (l.310–317, which uses the prefix);
-- any condition, the order of checks, or any non-string expression.
+- the division lists, ids, `beats`, steps or their order;
+- `adjacentGridDivisionId`, the family logic, snapping, `gridLinesVisible`, or keys 1/2/3/G;
+- the menu behaviour, focus, or any condition or non-string expression.
 
 ### 1.1 The English map (exact text; A may not reword it — if a line seems wrong, report it and B rules)
-Notation: `{name}` = a group name string; `{members}` = the member names **already joined** with `', '` in `groups.ts`; `{names}` = the quoted group names **already joined** with `', '` in `groups.ts`.
+Notation:
+- `{label}` = the output of `gridDivisionLabel(id)`;
+- `{step}` = `String(step)` or the already-rounded `String(Math.round(step * 1000) / 1000)`, exactly as the caller computes it today;
+- `{bpm}` = `formatTempoBpm(bpm)`;
+- `{tempoCleared}` = `tempoStatusMessage(null)` (already English).
 
 | # | Where today (baseline line) | Object.key (A may rename the key, not the text) | English |
 |---|---|---|---|
-| L1 | `selection.ts` l.7 `GROUP_MOVE_BLOCKED_MESSAGE` | `studioLaneMoveStrings.groupMoveBlocked` | `Group move stopped — a neighbouring clip or the start of the timeline.` |
-| L2 | `selection.ts` l.38 `'video-clip'` | `studioLaneMoveStrings.videoClipKeepsTrack` | `A video clip does not change tracks — the group moves in time only.` |
-| L3 | `selection.ts` l.39 `'video-lane'` | `studioLaneMoveStrings.audioNotOnVideoTrack` | `Audio does not move to the video track` (no final period, as today) |
-| L4 | `selection.ts` l.40 `'out-of-range'` | `studioLaneMoveStrings.noTrackForPart` | `There is no track for part of the group — only the time changes.` |
-| L5 | `selection.ts` l.41 `'before-start'` | `studioLaneMoveStrings.partBeforeStart` | `Part of the group would go before the start of the timeline (0) — the track does not change.` |
-| L6 | `selection.ts` l.42 `overlap` | `studioLaneMoveStrings.noRoom` | `No room here` (no final period, as today; the ArrangementClip composite appends ` — …`) |
-| G1 | `groups.ts` l.222 `TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE` | `studioTrackGroupStrings.foldNeedsGroup` | `To fold a group, select it first — click the group name.` |
-| G2 | `groups.ts` l.474 `empty` | `studioTrackGroupStrings.groupNeedsTracks` | `To group tracks, select them first — Ctrl+click or Shift+click a track name.` |
-| G3 | `groups.ts` l.475 `unknown` | `studioTrackGroupStrings.trackGone` | `A selected track no longer exists — select again.` |
-| G4 | `groups.ts` l.476 `video` | `studioTrackGroupStrings.videoNotGroupable` | `The video track cannot be grouped.` |
-| G5 | `groups.ts` l.477 `mixed-parents` | `studioTrackGroupStrings.mixedLevels` | `Only tracks at the same level can be grouped together — the selected tracks are in different groups.` |
-| G6 | `groups.ts` l.478 `gap` | `studioTrackGroupStrings.notAdjacent` | `Only adjacent tracks can be grouped together — the selection skips a track.` |
-| G7 | `groups.ts` l.479 `'no-group'` | `studioTrackGroupStrings.ungroupNeedsGroup` | `To ungroup, select a group — click the group name.` |
-| G8 | `groups.ts` l.490 `trackGroupCreatedMessage` | `studioTrackGroupStrings.created({name, members})` | `Group “{name}” created: {members}.` |
-| G9 | `groups.ts` l.494 per-name quoting `«…»` | `studioTrackGroupStrings.quoted(name)` | `“{name}”` |
-| G10 | `groups.ts` l.495 singular branch | `studioTrackGroupStrings.ungroupedOne(names)` | `Group {names} ungrouped.` |
-| G11 | `groups.ts` l.495 plural branch | `studioTrackGroupStrings.ungroupedMany(names)` | `Groups {names} ungrouped.` |
+| GR1 | `grid.ts` l.177 `formatGridDivision` | `seconds(step)` | `{step} s` (e.g. `0.25 s`, `10 s`) |
+| GR2 | `grid-divisions.ts` l.5 bar label | `barLabel` | `1 bar` |
+| GR3 | `grid-divisions.ts` l.25 `GRID_TRIPLET_MENU_LABEL` | `tripletMenuLabel` | `Triplets (3)` |
+| GR4 | `grid-divisions.ts` l.132 narrow end | `narrowest(label)` | `The grid is already at its narrowest — {label} (1)` |
+| GR5 | `grid-divisions.ts` l.134 widen end | `widest(label)` | `The grid is already at its widest — {label} (2)` |
+| GR6 | `grid-divisions.ts` l.142 Snap state | `snapOnSuffix` / `snapOffSuffix` | `(Snap on)` / `(Snap off)` (the `snapEnabled ? :` branch stays in the caller) |
+| GR7 | `grid-divisions.ts` l.144 status | `status({label, snap})` | `Grid: {label} {snap}` |
+| GR8 | `grid-divisions.ts` l.147 musical status | `statusMusical({label, step, bpm, snap})` | `Grid: {label} · {step} s at {bpm} BPM {snap}` |
+| GR9 | `grid-divisions.ts` l.151 tempo cleared | `backToSeconds({tempoCleared, label})` | `{tempoCleared} Grid back to seconds: {label}.` |
+| GR10 | `grid-divisions.ts` l.155 | `barsGroup(bpm)` | `Bars · {bpm} BPM` |
+| GR11 | `grid-divisions.ts` l.159 | `tripletsGroup(bpm)` | `Triplets · {bpm} BPM` |
+| GR12 | `grid-divisions.ts` l.164 | `tripletNeedsTempo` | `Triplets need a tempo — enter a BPM first (3)` |
+| GR13 | `grid-divisions.ts` l.167 | `tripletNotOnBar` | `1 bar has no triplets — choose 1/2 or narrower (3)` |
+| GR14 | `grid-divisions.ts` l.169 | `tripletNeedsBarsGrid` | `Triplets work only on the bars grid — choose 1/2 … 1/32 (3)` |
+| GR15 | `grid-divisions.ts` l.175 | `titleLinesVisible(label)` | `Grid {label} · 1 — narrower, 2 — wider` |
+| GR16 | `grid-divisions.ts` l.176 | `titleLinesHidden(label)` | `Grid {label} — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider` |
+| GR17 | `ArrangementGridMenu.tsx` l.6 `GRID_MENU_LABEL` **and** `StudioWorkspace.tsx` l.2312 select `aria-label` | `menuLabel` | `Grid division` |
+| GR18 | `StudioWorkspace.tsx` l.1276 Snap-on status | `snapOnStatus(label)` | `Snap on — grid {label} (G)` |
+| GR19 | `StudioWorkspace.tsx` l.2270 Snap button title (on) | `snapOnTitle` | `Snap on — clips land on the grid (G)` |
+| GR20 | `StudioWorkspace.tsx` l.158 `SNAP_OFF_MESSAGE` **and** l.2271 Snap button title (off) — the same text today | `snapOff` | `Snap off — free movement (G)` |
 
 Examples that must come out exactly:
-- `trackGroupCreatedMessage('ჯგუფი 1', ['მუსიკა', 'სტემები'])` → `Group “ჯგუფი 1” created: მუსიკა, სტემები.`
-- one group named `ჯგუფი 2` → `Group “ჯგუფი 2” ungrouped.`; two groups `A`, `B` → `Groups “A”, “B” ungrouped.`
+- `gridDivisionStatusMessage('0.5', null, true)` → `Grid: 0.5 s (Snap on)`
+- `gridDivisionStatusMessage('1/4', 90, true)` → `Grid: 1/4 · 0.667 s at 90 BPM (Snap on)`
+- `gridDivisionStatusMessage('1/4T', 90, false)` → `Grid: 1/4T · 0.444 s at 90 BPM (Snap off)`
+- `gridDivisionEndMessage('bar', 'widen')` → `The grid is already at its widest — 1 bar (2)`
+- `gridTempoClearedMessage(0.5)` → `Tempo cleared — the bars ruler is hidden. Audio is unchanged. Grid back to seconds: 0.5 s.` (**closes GATE132-TEMPO-CLEARED-MIXED**)
+- `gridDivisionTitle('0.1', false)` → `Grid 0.1 s — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider`
 
-- **Quotes (R5):** the Georgian `«…»` become English curly quotes `“…”`, the same convention as `studioLibraryStrings` and `studioVideoStrings` (`“{title}”`). Group and track names themselves are user/default content and are **not** translated (M2).
 - **Facts that must survive (a dropped one is Medium):**
-  - L1: both reasons, "a neighbouring clip" **and** "the start of the timeline";
-  - L2: the video clip keeps its track, the group still moves in time;
-  - L4: only the time changes; L5: the `(0)` start and "the track does not change";
-  - G2: both modifiers `Ctrl+click` and `Shift+click`, and "a track name";
-  - G1 / G7: "click the group name";
-  - G5 / G6: the reason after the dash;
-  - G8: the group name and the member list; G10 / G11: the singular/plural difference.
+  - GR4/GR5: the end direction and the key (1)/(2);
+  - GR8: the step in seconds **and** the tempo;
+  - GR9: the grid went back to seconds, plus its label;
+  - GR12–GR14: each refusal reason, its remedy and the (3) key;
+  - GR15/GR16: both key hints (1 narrower, 2 wider);
+  - GR16: lines hidden, Snap still works, zoom in;
+  - GR18: the division label;
+  - GR19/GR20: the clip effect (lands on the grid / free movement) and (G).
 - **Exported names stay; their values move.**
-  - `GROUP_MOVE_BLOCKED_MESSAGE = studioLaneMoveStrings.groupMoveBlocked`.
-  - `CLIP_LANE_REFUSAL_MESSAGES` keeps its name and its type `Record<ClipLaneMoveRefusal, string>`; each value is the module value (L2–L6).
-  - `TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE = studioTrackGroupStrings.foldNeedsGroup`.
-  - The local map `GROUP_TRACKS_REFUSAL_MESSAGES` keeps its name and type; its values are the module values (G2–G7). `trackGroupRefusalMessage` is unchanged.
-  - `trackGroupCreatedMessage(groupName, memberNames)` keeps its signature and returns `studioTrackGroupStrings.created({ name: groupName, members: memberNames.join(', ') })`.
-  - `trackGroupDissolvedMessage(groups)` keeps its signature. `names` becomes `groups.map((group) => studioTrackGroupStrings.quoted(group.name)).join(', ')`, and the **existing** `groups.length === 1 ? … : …` branch stays in `groups.ts` and picks `ungroupedOne(names)` / `ungroupedMany(names)`.
-  - `TRACK_GROUP_NAME_PREFIX` is **unchanged** (R1).
-  - These importers stay frozen: `ArrangementClip.tsx`, `StudioWorkspace.tsx`, `ArrangementContext.tsx`.
-- **Imports:** `selection.ts` and `groups.ts` may import their object from `./strings`. `strings.ts` imports nothing, so no cycle can appear.
+  - `formatGridDivision(step)` returns `studioGridStrings.seconds(String(step))`.
+  - In `MUSICAL_GRID_DIVISIONS`, the bar entry's `label` becomes `studioGridStrings.barLabel`; the array, its `as const` and the other entries are unchanged. `MusicalGridDivisionId` is built from `['id']` only, so the label type change is safe. If typecheck says otherwise, that is a **stop rule**.
+  - `GRID_TRIPLET_MENU_LABEL = studioGridStrings.tripletMenuLabel`.
+  - `gridDivisionEndMessage`, `gridDivisionStatusMessage`, `gridTempoClearedMessage`, `gridMusicalGroupLabel`, `gridTripletGroupLabel`, `gridTripletRefusalMessage` and `gridDivisionTitle` keep their signatures and branches, and return the module texts.
+  - StudioWorkspace keeps the `SNAP_OFF_MESSAGE` name (value `studioGridStrings.snapOff`) and the title ternary. Only the two picked texts change.
+  - `ArrangementGridMenu.tsx` keeps the `GRID_MENU_LABEL` name (value `studioGridStrings.menuLabel`). `GRID_MENU_SNAP_LABEL` (`Snap (G)`) is already English and unchanged.
+- **Imports:**
+  - `grid.ts` and `grid-divisions.ts` import from `./strings`;
+  - `StudioWorkspace.tsx` and `ArrangementGridMenu.tsx` import from `~/lib/arrangement/strings` (the path ArrangementExportDialog already uses);
+  - `strings.ts` still imports nothing.
 - **Unchanged this round** (they stay Georgian; C subtracts them by name):
-  - (a) the default group names `ჯგუფი N` wherever they appear (R1, V-0.4) and the track names (`მუსიკა`, `სტემები`, `SFX`, …);
-  - (b) the release tail `კლიპი ბოლო თავისუფალ ადგილას დარჩა` and the single-clip `გადატანა დაბლოკილია — …` status in `ArrangementClip.tsx` (V-0.4, R3);
-  - (c) the lane-drag Shift hints in `StudioWorkspace.tsx` l.142–143 (V-0.3, R3);
-  - (d) the lane ghost texts in `ArrangementLane.tsx` (`… · აქ ადგილი არ არის`, `აუდიო ვიდეოხაზზე არ ემატება`, `ხმა ჯერ არ ჩატვირთულა`; GATE130-S1, V-0.4);
-  - (e) the group header and lane controls (`ArrangementGroupHeader`, lane names, fold button labels; V-0.4) and the move/trim history labels such as `გადატანა (n)` (V-0.4, D-29z95).
-- **Glossary additions** (doc 109 and the backlog glossary; Live 12 §18.3 terms, excerpt below):
-  - Group Tracks / Ungroup Tracks (`დაჯგუფება` / `დაშლა`; already the Undo labels);
-  - fold (`დაკეცვა`) — Live's "Fold/Unfold Group";
-  - group move (`ჯგუფის გადატანა`), timeline start (`დროის დასაწყისი`), neighbouring clip (`მეზობელი კლიპი`);
-  - No room here (`აქ ადგილი არ არის`) — the short form of `studioLibraryStrings.dropBlocked`;
-  - same level (`ერთი დონე`), adjacent tracks (`მეზობელი ხაზები`).
-
-### 1.2 Contract clarification (R6, answers gate 132 suggestion 6 and the round-132 reviewer's Low 3)
-- Formatters take **plain strings or numbers that are already formatted for display** (a joined list, a formatted time, a rounded number). They do not join arrays, round or format time themselves.
-- Branches that only choose between two texts (`groups.length === 1 ? … : …`, `bpm === null ? … : …`) **stay in the caller** and pick module values. The module holds no branching logic.
-- Pure wrapping of an argument in fixed text (`quoted(name)`, `created({name, members})`) is allowed.
+  - (a) the other 33 Georgian lines of StudioWorkspace, listed exactly in `b-round-133/r134-studioworkspace-remaining-georgian.txt`. They include the Follow/Zoom/Fit statuses, the Envelope toggle, the waveform-zoom label, the range/selection readout, the lane Shift hints (GATE133-LANE-HINT-MIXED), the group rename statuses (GATE133-GROUP-RENAME) and the video/library panel statuses. All go to V-0.3d.
+  - (b) Transport, TempoRow, Ruler, Overview, LoopBrace and MarkerMenu (V-0.3b), and MarkerRow (V-0.3c).
+  - (c) the track names, the default group names, the lane/clip/detail texts (V-0.4), and the library and video dock (V-0.5).
+- **Glossary additions** (doc 110 and the backlog glossary):
+  - ბადე = Grid;
+  - ბადის დანაყოფი = Grid division;
+  - ტრიოლები = Triplets;
+  - 1 ტაქტი = 1 bar (CZABA label; unconfirmed as a Live menu name);
+  - უფრო მჭიდრო / უფრო ფართო = narrower / wider (Live 12 §6.10 "narrows/widens the grid");
+  - Snap ჩართულია / გამორთულია = Snap on / Snap off;
+  - თავისუფალი გადაადგილება = free movement;
+  - წმ = s (existing).
 
 ## 2. A — files you own (everything else is frozen)
 | File | Change |
 |---|---|
-| `app/lib/arrangement/strings.ts` | Add the two objects with L1–L6 and G1–G11. The ten existing objects are unchanged. It still imports nothing |
-| `app/lib/arrangement/selection.ts` | **Only:** the import, l.6–7 (`GROUP_MOVE_BLOCKED_MESSAGE` value) and l.37–43 (the `CLIP_LANE_REFUSAL_MESSAGES` values) |
-| `app/lib/arrangement/groups.ts` | **Only:** the import, l.221–222, l.473–480 (the map values), l.490, l.494–495 as described in §1.1. l.3 is unchanged |
-| `app/lib/arrangement/__tests__/strings.test.ts` | New `describe('V-0.2c3 lane-move and track-group strings')` with ST20–ST22 (§3.1). ST1–ST19 are unchanged |
-| `app/lib/arrangement/__tests__/grid-snap-ui.test.tsx` | **Only l.110** `GROUP_BLOCKED_STATUS` → the hand-written L1 English |
-| `app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | **Only l.402** `GROUP_BLOCKED_TEXT` → the hand-written L1 English |
-| `app/lib/arrangement/__tests__/grid-snap-edit.test.tsx` | **Only l.115–117**: `BEFORE_START_TEXT`, `OUT_OF_RANGE_TEXT`, `OVERLAP_TEXT` → the hand-written L5, L4, L6 English. The l.597–599 comparisons stay as they are (they now compare the module with hand-written English) |
-| `app/lib/arrangement/__tests__/clip-fades-ui.test.tsx` | **Only l.110** `OVERLAP_TEXT` → `'No room here'`. l.525 is unchanged in source and now asserts the R3 composite `No room here — კლიპი ბოლო თავისუფალ ადგილას დარჩა: მუსიკა, start 00:01.375.` |
-| `app/lib/arrangement/__tests__/track-groups-ui.test.tsx` | l.453, l.500 and l.521 → the hand-written English (§3.2). **Add** the forward-rule literal lines of §3.2 inside existing `it`s. Rename **only** the TG5 title words `with a Georgian status` → `with an English status` (the title would otherwise be false). Nothing else |
-| `app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx` | **Add** one forward-rule literal after l.520 (§3.2). Nothing else |
-| `docs/implementation/2026/quarter-IV/108-studio-v0-tempo-metronome-view-strings.md` | **Only l.4** → `**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 132-ში; C round 132 — PASS, browserVerified; gate 132 — b25507e)` |
-| **new** `docs/implementation/2026/quarter-IV/109-studio-v0-lane-move-group-strings.md` | Sections from TEMPLATE.md, in Georgian: the L/G map; rulings R1 (prefix → V-0.4, GATE133-GROUP-PREFIX), R2 (the one-line scan allowance), R3 (GATE133-LANE-RELEASE-MIXED, GATE133-LANE-HINT-MIXED), R5 (quotes), R6 (the contract clarification); the facts that must survive; the glossary additions; the tests and the mutations. The status line says Completed only after §4 is green, and names C's round as still to come |
+| `app/lib/arrangement/strings.ts` | Add `studioGridStrings` with GR1–GR20. The twelve existing objects are unchanged. It still imports nothing |
+| `app/lib/arrangement/grid.ts` | **Only:** the import and l.176–178 (`formatGridDivision` body) |
+| `app/lib/arrangement/grid-divisions.ts` | **Only:** the import, l.5 (bar label value), l.25, and the string expressions in l.130–177 as in §1.1. Every condition and non-string line is unchanged |
+| `app/components/arrangement/ArrangementGridMenu.tsx` | **Only:** one added import line and l.6 |
+| `app/components/arrangement/StudioWorkspace.tsx` | **Only:** one added import (or a name added to an existing import), l.158, l.1276, l.2270–2271, l.2312. Nothing else, including the other 33 Georgian lines |
+| `app/lib/arrangement/__tests__/strings.test.ts` | Widen `GEORGIAN_CODEPOINT` (l.50) to `/[Ⴀ-ჿᲐ-Ჿⴀ-⴯]/`. New `describe('V-0.3a grid and Snap strings')` with ST23–ST25 (§3.1). ST1–ST22 are unchanged |
+| `app/lib/arrangement/__tests__/grid.test.ts` | l.157–163 → hand-written English |
+| `app/lib/arrangement/__tests__/grid-musical.test.ts` | l.44, 57, 106, 108, 111, 113–116, 118, 120–123, 125, 127, 129 → hand-written English |
+| `app/lib/arrangement/__tests__/grid-triplet.test.ts` | l.43, 54–56, 151, 152, 157, 160, 162, 166, 168 → hand-written English |
+| `app/lib/arrangement/__tests__/grid-snap-ui.test.tsx` | l.106, 109 (with its continuation line), 295, 298, 299, 301–307, 408, 425, 429, 435, 438, 585 → hand-written English |
+| `app/lib/arrangement/__tests__/grid-snap-menu.test.tsx` | l.109, 111, 112, 403, 411, 423, 450, 458, 468, 473, 476, 602, 672, 725, 783, 863, 891 → hand-written English |
+| `app/lib/arrangement/__tests__/grid-snap-keys.test.tsx` | l.104–106, 315, 317, 399, 410 → hand-written English |
+| `app/lib/arrangement/__tests__/grid-musical-ui.test.tsx` | l.112, 113, 399, 421, 423, 490, 522–524, 528, 537, 562, 576 → hand-written English |
+| `app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx` | l.113, 114, 118–121, 456, 466, 470, 474, 478, 528, 537, 564 → hand-written English |
+| `app/lib/arrangement/__tests__/tempo-ui.test.tsx` | **Only l.104** `SNAP_ON_STATUS` → `'Snap on — grid 1 s (G)'` |
+| `docs/implementation/2026/quarter-IV/109-studio-v0-lane-move-group-strings.md` | l.4 → `**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 133-ში; C round 133 — PASS, browserVerified; gate 133 — ee40ad6)`. l.128 → `- ბრაუზერის შემოწმება (GROUP, LANE, GEO-COUNT, LAYOUT): C round 133 — PASS, browserVerified (c-round-133.json).` Add one TODO line under V-0.3: `GATE133-GROUP-RENAME — ჯგუფის გადარქმევის სტატუსები (StudioWorkspace l.953/963) V-0.3d-ში, studioTrackGroupStrings-ის renamed/renameEmpty-ით და quoted()-ით.` Nothing else |
+| **new** `docs/implementation/2026/quarter-IV/110-studio-v0-grid-snap-strings.md` | Sections from TEMPLATE.md, in Georgian: the GR map; rulings R1 (the V-0.3 split and its measurement), R2 (the grid surface moves whole; StudioWorkspace ratchet), R3 (waveform-zoom → V-0.3d), the checkpoint note (§0); the closed GATE132-TEMPO-CLEARED-MIXED; the facts that must survive; the glossary additions; the tests and the mutations. The status line says Completed only after §4 is green, and names C's round as still to come |
 
-- **Test rules (as in rounds 129–132):**
-  - The UI pins in §2 and §3.2 use **hand-written English literals** (GATE130-S3).
-  - No `it` is added or removed outside the new `describe` in `strings.test.ts`. The only renamed title is TG5, words above.
-  - Line numbers are baseline (`b25507e`) positions. Find each by its text.
-- **Pre-edit grep (A records it):** for each L/G row, grep the old Georgian text in `app/**` and `e2e/**`. B's grep found only the lines in §2 plus the ghost literal in `ArrangementLane.tsx` l.893 and its two pins in `grid-snap-loop-drop` (frozen, R3 (d)). If A finds another pin, that is a stop-rule case.
+- **Test rules (as in rounds 129–133):**
+  - Every replaced pin is a **hand-written English literal** with the same matcher (GATE130-S3). Where a file holds a shared constant (`SNAP_ON_STATUS`, `HIDDEN_LINES_TITLE`, `KEYS_TITLE_SUFFIX`, `SECONDS_LABELS`, `MUSICAL_LABELS`, `NO_TEMPO_REFUSAL`, …), change the constant **once**; do not inline it.
+  - No `it` is added, removed or renamed outside the new `describe` in `strings.test.ts`. If a test **title** contains a Georgian grid text, report it and leave it.
+  - Line numbers are baseline (`ee40ad6`) positions. Find each line by its text.
+- **Pre-edit grep (A records it):**
+  - For each GR row, grep the old Georgian text in `app/**` and `e2e/**`. Also grep `\d წმ` together with `ბადე|ბადის|ტრიოლ|ტაქტ|Snap ჩართულია|Snap გამორთულია` in `app/lib/arrangement/__tests__`.
+  - B's grep found exactly the lines in §2. The fade/envelope/trim texts with `წმ` (`clip-fades-ui`, `clip-envelope-ui`, `video-fades-ui`, `grid-snap-edit` l.112/114, `grid-snap-clip-edges` l.112/114, `status-announcement*`, `delete-selection-ui` l.520) belong to V-0.4 and stay. There are 0 hits in `e2e/`.
+  - If A finds another pin of a GR text, that is a stop-rule case.
 - **Stop rule:** stop and report (B rules) if any of these happens:
   - a test outside §2 asserts an old text, or turns red;
   - a change needs a frozen file or a non-string line;
-  - an import cycle or a module-load order problem appears (e.g. a constant reads `undefined`);
-  - the `noUncheckedIndexedAccess`/strict types force a non-string change in `trackGroupDissolvedMessage`.
-- **Expected end state:** `git status` shows 11 ` M` + 1 `??` (doc 109) and no other path. The frozen list is OK at the start and at the end. Report the end sha256 of the 12 paths.
-- **Protected (unchanged; `git diff b25507e` on them is empty):**
+  - an import cycle or module-load order problem appears (e.g. a label reads `undefined`);
+  - typecheck rejects the bar label change in the `as const` array.
+- **Checkpoint rule (large mechanical round):** if your context grows large, stop at a clean point. A clean point means one file fully edited and its vitest green. Write `a-round-134-checkpoint.md` listing:
+  - the files done, with their sha256;
+  - the files left;
+  - the next step.
+
+  Then say STATUS: RESTART-NEEDED. The same phase resumes from it. Never revert finished files.
+- **Expected end state:** `git status` shows 16 ` M` + 1 `??` (doc 110) and no other path. The frozen list is OK at the start and at the end. Report the end sha256 of the 17 paths.
+- **Protected (unchanged; `git diff ee40ad6` on them is empty):**
   - `app/routes/studio.$productId.tsx`;
   - `app/routes/api.studio-token.ts`;
   - `app/lib/auth.ts`;
@@ -146,131 +188,139 @@ Examples that must come out exactly:
 - **Edit rule (C-R120-01):** lasting edits only with the Edit/Write tool. Shell writes are allowed only for temporary mutations, which are restored and checked by sha256. List every shell write.
 - **Before editing, read:**
   - `.claude/primitives-map.json`;
-  - `AGENT_DISCOVERABLE_CODE.md`;
+  - `AGENT_DISCOVERABLE_CODE.md` and `FORWARDREF_COMPONENT.md` (two components change);
   - `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`;
   - `GEORGIAN_DOCS.md` and `docs/implementation/TEMPLATE.md`.
 - **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, no `as T` (and no new `as const`), semicolons, no code comments.
 
 ## 3. A — tests and mutations
-### 3.1 `strings.test.ts`: ST20–ST22 (the file goes from 19 to 22 `it`s)
-- **ST20:**
-  - Every plain-string property of the two objects equals its exact English literal from §1.1 (`toBe`).
-  - The key list of each object equals the expected list.
-  - `GROUP_MOVE_BLOCKED_MESSAGE`, `TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE` and each of the five `CLIP_LANE_REFUSAL_MESSAGES` values are `toBe` the hand-written English. The key list of `CLIP_LANE_REFUSAL_MESSAGES` is unchanged (`video-clip`, `video-lane`, `out-of-range`, `before-start`, `overlap`).
-- **ST21:** every formatter and export returns the exact English, with `toBe`:
-  - `created({name: 'Drums', members: 'Kick, Snare'})`, `quoted('A')`, `ungroupedOne('“A”')`, `ungroupedMany('“A”, “B”')`;
-  - `trackGroupRefusalMessage` for all six reasons (`empty`, `unknown`, `video`, `mixed-parents`, `gap`, `no-group`);
-  - `trackGroupCreatedMessage('ჯგუფი 1', ['მუსიკა', 'სტემები'])` → `Group “ჯგუფი 1” created: მუსიკა, სტემები.`;
-  - `trackGroupDissolvedMessage` with one typed group (`{id: 'g1', name: 'ჯგუფი 2', parentId: null}`) → `Group “ჯგუფი 2” ungrouped.` and with two (`A`, `B`) → `Groups “A”, “B” ungrouped.`;
-  - `TRACK_GROUP_NAME_PREFIX` is still `toBe('ჯგუფი')` (documents R1).
-- **ST22:**
-  - No plain value or formatter output of the two objects contains a Georgian codepoint (formatters called with Latin inputs).
-  - **Per-file scan:** after comments are stripped, `selection.ts` contains no Georgian codepoint; `groups.ts` contains none after the single exact line `export const TRACK_GROUP_NAME_PREFIX = 'ჯგუფი';` is removed (R2). The test also asserts that this exact line is present exactly once, so the allowance cannot silently widen.
+### 3.1 `strings.test.ts`: ST23–ST25 (the file goes from 22 to 25 `it`s)
+- **ST23:**
+  - Every plain-string property of `studioGridStrings` equals its exact English literal from §1.1 (`toBe`).
+  - The key list equals the expected list.
+  - `GRID_TRIPLET_MENU_LABEL` is `toBe('Triplets (3)')`.
+  - The bar entry of `MUSICAL_GRID_DIVISIONS` has label `'1 bar'`, and the other five labels are unchanged.
+- **ST24:** every formatter and every exported grid function returns the exact English (`toBe`):
+  - each formatter with Latin inputs;
+  - `formatGridDivision` for all seven seconds steps;
+  - the six §1.1 examples;
+  - `gridDivisionEndMessage` for both directions on the seconds, straight and triplet families;
+  - `gridTripletRefusalMessage` for its three branches;
+  - `gridMusicalGroupLabel(92.5)` and `gridTripletGroupLabel(92.5)`;
+  - `gridDivisionTitle` with both `linesVisible` values.
+- **ST25:**
+  - No plain value or formatter output of `studioGridStrings` contains a Georgian codepoint.
+  - **Self-check of the widened pattern:** `GEORGIAN_CODEPOINT` matches `'ა'` (U+10D0), `'Ა'` (U+1C90) and `'ⴀ'` (U+2D00), and does not match `'abc — · …'`.
+  - **Per-file scan** (comments stripped): `grid.ts`, `grid-divisions.ts` and `ArrangementGridMenu.tsx` contain no Georgian codepoint.
+  - **StudioWorkspace ratchet** (the ST13 shape): the comment-stripped Georgian lines of `StudioWorkspace.tsx`, trimmed and with `${` → `{`, **equal** a hand-written list of 33 entries. That list is the content of `tmp/studio-real-loop/b-round-133/r134-studioworkspace-remaining-georgian.txt`, copied into the test as literals; the test must not read the loop folder. B generated the list with the narrow U+10A0–10FF grep. A confirms that the widened pattern gives the same 33 lines (StudioWorkspace has no Mtavruli or Nuskhuri). If A's stripper splits a line differently, A reports the difference and keeps the count at 33.
 
-### 3.2 Forward-rule UI literals (hand-written English)
-- `track-groups-ui.test.tsx`:
-  - **TG-UI1** l.453 (TG1): `toBe('Group “ჯგუფი 1” created: მუსიკა, სტემები.')` (replaces the Georgian literal).
-  - **TG-UI2** l.500 (TG3): `toBe('Group “ჯგუფი 2” created: მუსიკა, ჯგუფი 1.')` (replaces).
-  - **TG-UI3** l.521 (TG4): `toBe('Group “ჯგუფი 2” ungrouped.')` (replaces).
-  - **TG-UI4** after l.477 (TG2): status `toBe('To group tracks, select them first — Ctrl+click or Shift+click a track name.')` (added; the module-built line stays).
-  - **TG-UI5** after l.479 (TG2): `toBe('To ungroup, select a group — click the group name.')` (added).
-  - **TG-UI6** after l.551 (TG5): `toBe('The video track cannot be grouped.')` (added).
-  - **TG-UI7** after l.556 (TG5): `toBe('Only adjacent tracks can be grouped together — the selection skips a track.')` (added).
-  - **TG-UI8** after l.563 (TG5): `toBe('Only tracks at the same level can be grouped together — the selected tracks are in different groups.')` (added).
-- `track-group-collapse-ui.test.tsx`:
-  - **TC-UI1** after l.520: status `toBe('To fold a group, select it first — click the group name.')` (added).
-- The L1, L4, L5, L6 literals are the replaced constants in `grid-snap-ui`, `status-announcement-ui`, `grid-snap-edit` and `clip-fades-ui` (§2).
-- L2, L3 and G3 have no UI test that reaches them today; they are pinned by ST20/ST21 only, and C checks L3 in the browser (§5).
-- If an anchor line is inside a loop or helper, so the literal would run with other values, A puts it at the nearest single-value point in the same `it` and reports where.
+### 3.2 Forward rule (GATE130-S3)
+Each formatter that a UI test reaches already has a hand-written UI literal after the §2 replacements:
+- seconds labels and `status`: `grid-snap-ui`, `grid-snap-keys`;
+- `statusMusical`, `barsGroup`, `backToSeconds`, `narrowest`, `widest`: `grid-musical-ui`;
+- `tripletsGroup` and the refusals: `grid-triplet-ui`;
+- `snapOnStatus`: `tempo-ui` and `grid-snap-ui`;
+- the titles: `grid-snap-ui` l.299/585.
+
+No new `expect` is needed. If A finds a GR text with no UI literal that a UI test reaches, A reports it.
 
 ### 3.3 Mutations (each turns the named tests red; restore and check by sha256)
 | Mutation | Change | Must turn red |
 |---|---|---|
-| **m19** | `groupMoveBlocked` drops ` or the start of the timeline` | ST20, grid-snap-ui (the `GROUP_BLOCKED_STATUS` `it`) **and** status-announcement-ui SK3 |
-| **m20** | `noRoom` back to `'აქ ადგილი არ არის'` | ST20, ST22, grid-snap-edit (l.599 and the l.648 `it`) and clip-fades-ui FU5 |
-| **m21** | `groups.ts` swaps the `ungroupedOne` / `ungroupedMany` picks | ST21 and TG4 (TG-UI3) |
-| **m22** | `groups.ts` l.490 returns the old Georgian template | ST21, ST22 (per-file scan) and TG1 (TG-UI1) |
-| **m23** | `foldNeedsGroup` drops ` — click the group name` | ST20 and the collapse `it` (TC-UI1) |
+| **m24** | `seconds` returns `` `${step} წმ` `` | ST24, ST25, `grid.test` (the l.157 `it`), `grid-snap-ui` (division options `it`), `grid-snap-menu` (any menu-item `it`) |
+| **m25** | `grid-divisions.ts` swaps the `snapOnSuffix` / `snapOffSuffix` picks | ST24, `grid-musical` (status `it`), `grid-snap-keys` (l.399/410 `it`) |
+| **m26** | `titleLinesHidden` drops `; Snap still works` | ST24, `grid-snap-ui` (`HIDDEN_LINES_TITLE` `it`), `grid-musical` (l.125) |
+| **m27** | StudioWorkspace swaps the Snap title ternary picks | `grid-snap-ui` (the l.295 and l.408 `it`s) |
+| **m28** | StudioWorkspace l.2312 aria-label back to `"ბადის დანაყოფი"` | ST25 (ratchet), `grid-snap-ui` (l.298 `it`) |
+| **m29** | `backToSeconds` drops `: {label}` | ST24, `grid-musical` (l.118), `grid-musical-ui` (l.490 `it`) |
 
 ## 4. A — checks (speed rules)
-- `npm run typecheck`, `npm run lint`, and a read-only `npx biome check` on the 10 changed code and test files.
-- `npx vitest run` on these files. Every one must be green. Name the exact list and counts in the report; C runs the same list.
-  - The granted tests: `strings`, `grid-snap-ui`, `status-announcement-ui`, `grid-snap-edit`, `clip-fades-ui`, `track-groups-ui`, `track-group-collapse-ui`.
-  - The name-only importers and neighbours: `selection`, `groups`, `track-group-collapse`, `track-group-mix`, `track-group-mix-ui`, `group-volume-db`, `fader-touch`, `marker-snap`, `grid-snap-clip-edges`, `grid-snap-loop-drop`, `delete-selection-ui`. If one of these file names does not exist, report it and do not invent one.
+- Run `npm run typecheck` and `npm run lint`. Run a read-only `npx biome check` on the 15 changed code and test files.
+- Run `npx vitest run` on the files below; every one must be green. Name the exact list and counts in the report; C runs the same list.
+  - **The granted tests:** `strings`, `grid`, `grid-musical`, `grid-triplet`, `grid-snap-ui`, `grid-snap-menu`, `grid-snap-keys`, `grid-musical-ui`, `grid-triplet-ui`, `tempo-ui`.
+  - **The neighbours:** `grid-edges`, `grid-snap-position`, `grid-snap-edit`, `grid-snap-clip-edges`, `grid-snap-loop-drop`, `marker-snap`, `tempo`, `tempo-window-ui`, `metronome-ui`, `waveform-zoom`, `render-budget`, `self-disabling-focus`, `status-announcement-ui`.
+
+  If one of these file names does not exist, report it and do not invent one.
 - No full suite and no `npm run verify` (the gate runs them).
-- **code-reviewer required** (12 paths). Pass its Architecture note to B.
-- **Report `a-round-133.md`:**
-  - start HEAD, frozen OK and the 11 start hashes;
+- **code-reviewer required** (17 paths). Pass its Architecture note to B.
+- **Report `a-round-134.md`:**
+  - start HEAD, frozen OK and the 16 start hashes;
   - the pre-edit grep;
-  - per granted file, the changed keys and lines (`diff -u` vs `b-round-132/r133-granted-start/`, saved as `a-round-133/granted.diff`);
+  - per granted file, the changed lines (`diff -u` vs `b-round-133/r134-granted-start/`, saved as `a-round-134/granted.diff`);
   - `it` counts before and after, per file;
-  - m19–m23;
+  - m24–m29;
   - typecheck and lint results;
   - the reviewer's verdict and Architecture note;
   - every shell write;
-  - end `git status`, frozen OK, and the 12 end hashes;
+  - end `git status`, frozen OK, and the 17 end hashes;
   - deviations.
 
 ## 5. C — rows
 Real Playwright Chromium, a fresh context per session, **1440×900 and 1280×720**, `http://127.0.0.1:5173/studio-lab`.
-- **Tools:** reuse `c-round-132/tools/` (status reading, MutationObserver on the status region, GEO count, layout compare) and:
-  - `c-round-122/tools/` (RG-17: lane-name click / Shift+click, Ctrl+G, F2, fold, group rows);
-  - `c-round-123/tools/` (P2/P3: clip drag to another lane, the occupied ghost, `arrangement-lane-move-hint` / `arrangement-lane-move-refusal`).
-  - For a clip, use the library add (**＋ დამატება, or Enter on a focused option**). Shortcuts: Ctrl+G = Group Tracks, Ctrl+Shift+G = Ungroup Tracks, U = fold the selected group.
+- **Tools:** reuse `c-round-133/tools/` (status reading, MutationObserver, GEO count, layout compare). For the grid, start from the Playwright regression harness `c-round-122/tools/` (its grid/snap rows: division select, 1/2/3/G keys, lane context menu, BPM field). The round-57…70 tools ran on gstack/Windows; use them only as a behaviour reference.
+  - **Harness change:** select divisions by **option value / id** (`'1'`, `'0.25'`, `'1/4'`, `'1/4T'`), never by the Georgian label text. The labels change this round.
 - **Invalid runs:** ENV-FIRST-LOAD — discard one crashed first load and record it under `invalidRuns`. At most 2 replacement attempts per row, and only for runs that are invalid because of the environment.
 - **Evidence:** a unique file per run. Open every screenshot with Read and describe it.
-- **Reading values:** read the status from the live status region and record every text change with a MutationObserver; read the lane-move hint paragraph `textContent` during the drag.
+- **Reading values:** read the status from the live status region and record every text change with a MutationObserver. Read the select's `title`, `aria-label` and option/optgroup labels, the menu's `aria-label` and item texts, and the Snap button `title`.
 
 | ID | Action | Expected (PASS) |
 |---|---|---|
-| **T133-TARGETED** | A's exact §4 vitest list | All green; the counts equal A's |
-| **SOURCE-SCOPE** | `git status`; `sha256sum -c --quiet b-round-132-r133-tree-sha256.txt` (from `store/`); protected `git diff b25507e` | 11 ` M` + 1 `??`; frozen OK; protected files unchanged; no source change during C's phase |
-| **AN-REVIEW** | `diff -u` of each grant vs `b-round-132/r133-granted-start/`; read doc 109 | **`strings.ts`:** two new objects and nothing else changed; still no import.<br>**`selection.ts` / `groups.ts`:** only the import and the string expressions of §2. `planClipLaneMove`, the refusal codes, the group logic, l.3 and the `groups.length === 1` branch are unchanged.<br>**Doc 108:** only l.4.<br>**Tests:** every hunk is an import, a Georgian → hand-written English literal with the same matcher, an added forward-rule `expect`, the TG5 title words, or ST20–ST22; no `it` added or removed outside `strings.test`; no `skip`, `only` or `todo`.<br>**Meaning check:** side by side with the Georgian, no L/G row drops or adds a fact (§1.1 list).<br>Every shell write is listed |
-| **GROUP** (both viewports) | Fresh project. (a) Ctrl+G with no track selected. (b) Click the music track name, Shift+click stems, Ctrl+G. (c) Select the video track name with music (Ctrl+click), Ctrl+G. (d) Ctrl+click music and SFX (a gap), Ctrl+G. (e) Select only the music track name, press U. (f) Click the group name, press U, then U again. (g) Click the group name, Ctrl+Shift+G. (h) Select a track name only, Ctrl+Shift+G | (a) `To group tracks, select them first — Ctrl+click or Shift+click a track name.`<br>(b) `Group “ჯგუფი 1” created: მუსიკა, სტემები.`; the group row appears, Undo label `Group Tracks`.<br>(c) `The video track cannot be grouped.`<br>(d) `Only adjacent tracks can be grouped together — the selection skips a track.`<br>(e) `To fold a group, select it first — click the group name.`<br>(f) the group folds and unfolds as before.<br>(g) `Group “ჯგუფი 1” ungrouped.`; Undo label `Ungroup Tracks`.<br>(h) `To ungroup, select a group — click the group name.`<br>**Effect:** refusals leave the rows, the selection and the Undo label unchanged; create/ungroup change the rows exactly as before. C states the effect next to each message. If a step's selection gesture differs from the rounds 122 tools, C uses the gesture that reaches the same refusal code and names it |
-| **LANE** (both) | Fresh project; add a library clip on music and another on stems that overlaps the first in time. (a) Drag the music clip right by about 1 s on its own lane first, then down onto the stems lane where it overlaps (the same gesture as `clip-fades-ui` FU5; a purely vertical drag may not produce the release composite); read status and the hint paragraph during the drag, then release. (b) Drag an audio clip onto the video lane. (c) Select two clips on different tracks, drag them so one would leave the bottom track; then so one would go before 0. (d) Select two clips and press ← until the left one is at 0 | (a) During the drag: status `No room here`; the hint paragraph starts `No room here · ` followed by the frozen Georgian Shift hint (R3, subtracted by name). After release: `No room here — კლიპი ბოლო თავისუფალ ადგილას დარჩა: მუსიკა, start …` (R3 exact shape) and the clip stays on music at the last free place, as before.<br>(b) `Audio does not move to the video track`; the clip does not change track.<br>(c) `There is no track for part of the group — only the time changes.` and `Part of the group would go before the start of the timeline (0) — the track does not change.`<br>(d) `Group move stopped — a neighbouring clip or the start of the timeline.` (announced once per press).<br>**Effect:** clip positions and tracks are exactly what the rule allows, as before. Any step whose gesture cannot be reached in Chromium is **inconclusive** with the reason (unit-only), not FAIL |
-| **GEO-COUNT** (both) | After each row step | Georgian in the status region and in the `arrangement-lane-move-refusal` span = 0 after removing **by name**: the group names `ჯგუფი N`, the track names, the R3 release tail `კლიპი ბოლო თავისუფალ ადგილას დარჩა`, the Shift hint (outside the refusal span), the lane ghost texts, the single-clip `გადატანა დაბლოკილია — …` status if it appears, the load-time demo-ready status, the grid statuses written by a division change, and the clip/sound titles. List each subtracted item |
-| **LAYOUT** (both) | S0/S1 boxes vs `c-round-125/out/bbox-baseline-*.json`, outside the status region; the lane-move hint paragraph box during a refused drag | Every box outside the status region and the hint paragraph is within 1 px. A width or wrap change of those two must come from their text (the RV-1 V-0 text-width exception). No new horizontal overflow; if the English hint line wraps where the Georgian did not, C records the measurement as a Low |
-| **REG-132** (1440, short) | Type `90` in the BPM field, Enter | `Tempo 90 BPM · 4/4 — bars ruler updated. Grid only: audio is not stretched.` |
-| **G133-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav` | The workspace and the demo badge show. The product route shows "Sign in required", no workspace and 0 `audio[src]`. The token API returns **401**. The fake-Bearer 403 check is **BLOCKED (backend unavailable in cloud)** |
-| **PX-NET / REG-HYD** | every session | 0 requests to `/api/studio-token` (outside G133-3), `/api/recording-*`, `/api/download` or the R2 host; 0 `Authorization` headers; 0 hydration errors; 0 `pageerror` (the known cloud cart noise is not reported) |
+| **T134-TARGETED** | A's exact §4 vitest list | All green; the counts equal A's |
+| **SOURCE-SCOPE** | `git status`; `sha256sum -c --quiet b-round-133-r134-tree-sha256.txt` (from `store/`); protected `git diff ee40ad6` | 16 ` M` + 1 `??`; frozen OK; protected files unchanged; no source change during C's phase |
+| **AN-REVIEW** | `diff -u` of each grant vs `b-round-133/r134-granted-start/`; read doc 110 and the doc 109 hunks | **`strings.ts`:** one new object, nothing else, still no import.<br>**`grid.ts` / `grid-divisions.ts`:** only the imports and the string expressions of §2; every condition, list and number unchanged.<br>**`ArrangementGridMenu.tsx`:** only the import and l.6.<br>**`StudioWorkspace.tsx`:** only the import and the five GR17–GR20 lines; the 33 remaining Georgian lines are byte-identical.<br>**Tests:** every hunk is a Georgian → hand-written English literal with the same matcher, the widened pattern, or ST23–ST25; no `it` added or removed outside `strings.test`; no `skip`, `only` or `todo`.<br>**Meaning check:** side by side with the Georgian, no GR row drops or adds a fact (§1.1 list).<br>Every shell write is listed |
+| **GRID-SEC** (both viewports) | Fresh project, no BPM. Read the select options, `aria-label`, `title`. Press 1 until the end, then 2 until the end. Change the division with the select to 0.25 | Options `10 s`, `5 s`, `2 s`, `1 s`, `0.5 s`, `0.25 s`, `0.1 s`; `aria-label` `Grid division`; title `Grid 1 s · 1 — narrower, 2 — wider`. Statuses `Grid: 0.5 s (Snap on)` and so on, then `The grid is already at its narrowest — 0.1 s (1)` and `The grid is already at its widest — 10 s (2)`. **Effect:** the grid step (`data-grid-seconds` or the drawn line spacing) is the same as before for each division |
+| **GRID-MUSICAL** (both) | BPM `120`, Enter. Read the optgroup label and options. Choose `1/4`; press 1 until the end, then 2 until the end. Clear the BPM | Optgroup `Bars · 120 BPM`; options `1 bar`, `1/2` … `1/32`. Status `Grid: 1/4 · 0.5 s at 120 BPM (Snap on)` (or `(Snap off)` if Snap is off), `… narrowest — 1/32 (1)`, `… widest — 1 bar (2)`. After clearing: `Tempo cleared — the bars ruler is hidden. Audio is unchanged. Grid back to seconds: 0.5 s.` (no Georgian; closes GATE132-TEMPO-CLEARED-MIXED). **Effect:** grid tempo is not audio stretch — a clip keeps its start and width through every step |
+| **GRID-TRIPLET** (both) | (a) No BPM, press 3. (b) BPM 90, choose `1 bar`, press 3. (c) BPM 90, a seconds division, press 3. (d) BPM 90, `1/4`, press 3; read the optgroup, title and status; open the lane menu | (a) `Triplets need a tempo — enter a BPM first (3)`. (b) `1 bar has no triplets — choose 1/2 or narrower (3)`. (c) `Triplets work only on the bars grid — choose 1/2 … 1/32 (3)`. (d) Optgroup `Triplets · 90 BPM`; title `Grid 1/4T · 1 — narrower, 2 — wider`; status `Grid: 1/4T · 0.444 s at 90 BPM …`; the menu item reads `Triplets (3)` and is checked. **Effect:** refusals leave the division unchanged; triplet on gives the same 1/4T step as before |
+| **GRID-HIDDEN** (both) | Choose `0.1`. Read the title. If the lines are visible, zoom out until they hide; if they are already hidden (likely at the default zoom), zoom in until they show. Read the title in both states | Hidden: `Grid 0.1 s — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider`. Visible: `Grid 0.1 s · 1 — narrower, 2 — wider`. **Effect:** the title flips exactly when the drawn lines appear or disappear, as before |
+| **SNAP** (both) | Press G twice; read status and button title each time. With Snap on at `1 s`, drag a clip about 0.4 s and release | Off: status `Snap off — free movement (G)`, title the same. On: status `Snap on — grid 1 s (G)`, title `Snap on — clips land on the grid (G)`. **Effect:** with Snap on, the clip lands on a whole second, as before |
+| **MENU** (both) | Right-click a lane body; read the menu `aria-label` and items; choose `0.5 s` with the keyboard; Escape | Menu `aria-label` `Grid division`; items are the English labels, plus `Snap (G)`; the choice sets 0.5 and the status `Grid: 0.5 s (Snap on)`; focus and close behaviour as before |
+| **GEO-COUNT** (both) | After each row step | Georgian count = 0 in these places: the status region, the select (options, optgroups, `title`, `aria-label`), the grid menu and the Snap button `title`. Outside them, the 33 frozen StudioWorkspace lines, Transport and the rest are expected Georgian and are not counted. Subtract by name, and list: the load-time demo-ready status; the frozen clip move status and the `Undo: კლიპის გადატანა` label written by the SNAP drag (ArrangementClip, V-0.4); the track names; any other item C finds |
+| **LAYOUT** (both) | S0/S1 boxes vs `c-round-125/out/bbox-baseline-*.json`; the grid header (select + Snap + zoom) with no BPM, with BPM 120 and with triplets | Every box outside the status region and the grid select is within 1 px. A width change of the select must come from its option text (the RV-1 V-0 text-width exception). Record the grid header `scrollWidth` vs `clientWidth` in all three states and compare with C-R122-02 (deferred Low). A new overflow caused by the English labels is a Low; a removed one is noted |
+| **REG-133** (1440, short) | Ctrl+G with no track selected | `To group tracks, select them first — Ctrl+click or Shift+click a track name.` |
+| **G134-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav` | The workspace and the demo badge show. The product route shows "Sign in required", no workspace and 0 `audio[src]`. The token API returns **401**. The fake-Bearer 403 check is **BLOCKED (backend unavailable in cloud)** |
+| **PX-NET / REG-HYD** | every session | 0 requests to `/api/studio-token` (outside G134-3), `/api/recording-*`, `/api/download` or the R2 host; 0 `Authorization` headers; 0 hydration errors; 0 `pageerror` (the known cloud cart noise is not reported) |
 
 - **Gate rows (C does not claim them):** full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
 - **Severity guide:**
   - **Medium:**
-    - any behaviour change: a group created, refused, folded or ungrouped differently; a clip moved to a different place or track than before; a refusal code changed;
+    - any behaviour change: a different grid step, snap landing, division order, key result or menu focus/close;
     - a wrong or fact-dropping message (§1.1 list);
     - a weakened, removed or skipped test;
-    - a non-string hunk in `selection.ts` or `groups.ts`.
-  - **Low:** wording or style; a hint wrap caused by the English text.
+    - a non-string hunk in a granted source file;
+    - any change to the 33 remaining StudioWorkspace lines.
+  - **Low:** wording or style; a new grid-header overflow caused by the English labels.
 
 ## 6. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
 |---|---|---|---|---|
-| Group Tracks / Ungroup Tracks | Live 12 Reference Manual §18.3 "Group Tracks", `https://www.ableton.com/en/live-manual/12/mixing/`. Saved capture `b-round-78/ableton-mixing-20261022.txt` (Playwright, 2026-10-22, sha256 `792522f0…`), l.90 and l.100 | "select the tracks to include and execute the Edit menu's Group Tracks command"; "a group can be reverted back into individual tracks by executing the Edit Menu's Ungroup Tracks command" | Existing CZABA behaviour (SRW-17, rounds 79–80). The command names are already the Undo labels. Text only this round | GROUP |
-| Fold / Unfold a group | Same capture, l.96 ("shown or hidden via the Unfold Group button") and l.104 ("A Folded Group Track in Arrangement View") | The fold/unfold term | "fold" in G1; the U shortcut is CZABA's own (not confirmed as a Live shortcut) | GROUP (e, f) |
-| Refusal texts (adjacent tracks, same level, video track, lane-move refusals) | No Live source | — | CZABA's own rules (one video track, contiguous same-level grouping, no overlaps on one track). No Ableton claim is made | AN-REVIEW |
+| Narrow / widen the grid | Live 12 Reference Manual §6.10 "Using the Editing Grid", `https://www.ableton.com/en/live-manual/12/arrangement-view/`. Fetched by B on 2026-10-24 (curl; saved `b-round-133/live/arrangement-view.html`, sha256 `be767e38f0867736…`, text `arrangement-view.txt`) | "Ctrl 1 … narrows the grid, doubling the density of the grid lines"; "Ctrl 2 … widens the grid, halving the density" | Existing CZABA behaviour on plain 1/2 (D-29z24, SRW-14). Words "narrower / wider" and "narrowest / widest" follow the manual's verbs | GRID-SEC, GRID-MUSICAL |
+| Triplets | Same §6.10: "Ctrl 3 … toggles triplets mode". Shortcut capture `b-round-71/ableton-shortcuts-20261021.txt` (sha256 `2097004e876ee1fd…`) §42.13: "Triplet Grid Ctrl3" | Triplet mode exists and is toggled | "Triplets (3)" and "Triplets · {bpm} BPM". The refusal texts are CZABA's own rules (no source) | GRID-TRIPLET |
+| Snap on/off | §6.10: "Ctrl 4 … turns grid snapping on or off. When the grid is off, the cursor does not snap"; §42.13 "Snap to Grid Ctrl4" | Snapping toggle | CZABA binds G (D-29z24). "Snap on / Snap off" are CZABA labels | SNAP |
+| Lines hidden at a zoom level | Not in §6.10 (Live has zoom-adaptive/fixed grid) | — | CZABA's own rule (SRW-14, round 58); no Ableton claim | GRID-HIDDEN |
+| "1 bar" option label | Not found in the saved captures | — | CZABA label; unconfirmed as a Live menu name | AN-REVIEW |
 
-C rates "CZABA requirement met" and "Ableton correspondence" separately. For this round the Ableton correspondence is **not applicable / unconfirmed** apart from the reused command terms: only text changes, and no new Live behaviour is claimed.
+C rates "CZABA requirement met" and "Ableton correspondence" separately. For this round the Ableton correspondence is **not applicable / unconfirmed** apart from the reused verbs and terms above. Only text changes, and no new Live behaviour is claimed.
 
 ## 7. Evidence and reporting
-- C writes `c-round-133.md` and `c-round-133.json` as it goes, with these fields: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` (with the subtracted items), and `notesForB`. Evidence goes under `c-round-133/{tools,out,shots}/`.
+- C writes `c-round-134.md` and `c-round-134.json` as it goes, with these fields: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` (with the subtracted items), and `notesForB`. Evidence goes under `c-round-134/{tools,out,shots}/`.
 - `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`; gestures that Chromium truly cannot reach go under `inconclusive` with the reason.
 - C makes no `store/` writes.
 
-## 8. Outcome, fixed in advance (B at round 134 planning)
-| Condition | Round 134 |
+## 8. Outcome, fixed in advance (B at round 135 planning)
+| Condition | Round 135 |
 |---|---|
 | B plans on or after **2026-10-27** | The **REGRESSION round** first, then the row below |
-| C FAIL with Critical / High / Medium | A bounded V-0.2c3 fix-up (at most three related bugs) |
-| C PASS (new Lows → `deferred_low_polish`) | V-0.2c3 → `c_pass`, then `c_pass_published` after the gate; **V-0.2 is complete**. Before V-0.3 is dispatched, root runs the bounded frontend-architect checkpoint `b-round-130-checkpoint-request.md` (addenda (e), (f)): the `strings.ts` split decision must land **before** V-0.3 adds component texts. If root has the result, round 134 = the approved split (if any) or **V-0.3 stage 1**, measured first and split by component if larger than one round. If the checkpoint has not run yet, B plans V-0.3 stage 1 on the files that do not depend on the split decision and records why |
+| C FAIL with Critical / High / Medium | A bounded V-0.3a fix-up (at most three related bugs) |
+| C PASS (new Lows → `deferred_low_polish`) | V-0.3a → `c_pass`, then `c_pass_published` after the gate. Round 135 = **V-0.3b** (Transport, TempoRow, Ruler, Overview, LoopBrace, MarkerMenu), re-measured first and split if larger than one round. If root's strings-split checkpoint result exists, B applies it first (an approved split is its own bounded round with behaviour-preserving tests). If it is still absent, V-0.3b proceeds on the same rationale (§0) |
 
 At every planning, B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
 
 ## 9. Neighbour risk and root notes
 - **Where it could break:**
-  - **The group create/ungroup statuses:** the quotes change from `«»` to `“”`; any C tool or old evidence matching `«` will not match.
-  - **The lane drag:** the refused-release status and the hint paragraph become two-language (R3).
-  - **Module load order:** `selection.ts` and `groups.ts` constants are evaluated at import from `strings.ts`; a cycle would show as `undefined` text (stop rule).
-  - **The keyboard group nudge** (`ArrangementContext.tsx` l.1758) reads `GROUP_MOVE_BLOCKED_MESSAGE`; the held-key once-per-press behaviour must stay (status-announcement-ui SK3).
-- **Architecture:** no Context or component change this round. Addendum (f) to `b-round-130-checkpoint-request.md` asks root to run the checkpoint before V-0.3 (gate 132 Architecture note). It does not block A or C in this round.
-- **Commit readiness:** after C PASS, root may publish V-0.2c3 as an interim unit; that closes V-0.2.
+  - **C harnesses and old evidence** that find options or menu items by `'1 წმ'`, `'1 ტაქტი'` or `'ბადის დანაყოფი'` will not match. Use values/ids (§5).
+  - **The grid select width** follows its longest option. `0.25 s` is shorter than `0.25 წმ`, and `1 bar` is shorter than `1 ტაქტი`, so the select may narrow. This is the RV-1 text-width exception. C-R122-02 (deferred Low, grid header overflow with BPM) may change; C records it.
+  - **Menu focus by label:** `grid-snap-menu` finds items by text. A text mismatch would show as a red test, not a silent pass.
+  - **Module load order:** `MUSICAL_GRID_DIVISIONS` and `GRID_TRIPLET_MENU_LABEL` are evaluated at import from `strings.ts`. A cycle would show as `undefined` labels (stop rule).
+  - **StudioWorkspace** is a 2606-line component. Only five literal lines and one import change. The ST25 ratchet and AN-REVIEW protect the other 33 Georgian lines.
+- **Architecture:** addendum (g) to `b-round-130-checkpoint-request.md` re-asks root for the bounded strings-split checkpoint before V-0.3b/c/d. It is non-blocking (§0 rationale).
+- **Commit readiness:** after C PASS, root may publish V-0.3a as an interim unit.

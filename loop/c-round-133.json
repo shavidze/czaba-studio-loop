@@ -1,0 +1,114 @@
+{
+ "round": 133,
+ "task": "VISUAL-A V-0.2c3 — lane-move and track-group texts in English",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T10:32:31.0632002Z",
+  "round": 133,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T133-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "GROUP-1440",
+  "GROUP-1280",
+  "LANE-1440",
+  "LANE-1280",
+  "GEO-COUNT-1440",
+  "GEO-COUNT-1280",
+  "LAYOUT-1440",
+  "LAYOUT-1280",
+  "REG-132",
+  "G133-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G133-3 fake-Bearer 403 check: BLOCKED (backend unavailable in cloud)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "C-R133-L1",
+   "severity": "low",
+   "steps": [
+    "Fresh /studio-lab. Click the music track name, Shift+click stems, Ctrl+G (group 'ჯგუფი 1' is created).",
+    "Click the music track name only, press U -> status 'To fold a group, select it first — click the group name.'",
+    "Click the group name, press U."
+   ],
+   "expected": "After a successful fold the status no longer tells the user to select a group: it is cleared or confirms the fold.",
+   "actual": "The group folds (music and stems hidden), but the status line still shows the previous refusal 'To fold a group, select it first — click the group name.' A successful fold or unfold sets no status (StudioWorkspace.tsx toggleSelectedTrackGroupsCollapse only calls setStatus on refusal). This was already the case before this round (logic unchanged; only the text changed). It is not a regression from this round.",
+   "evidence": "c-round-133/shots/group-f-folded-1280-r1.png, group-f-folded-1440-r2.png; c-round-133/out/c133-1280-r1-group.json and c133-1440-r2-group.json rows GROUP f-fold/f-unfold",
+   "relatedTo": "TRACK-FOLD-U (backlog signal: U on a normal lane gives a confusing status). Related surface, not a duplicate: this finding is the stale refusal status after a SUCCESSFUL fold of a selected group."
+  }
+ ],
+ "georgianCounts": {
+  "file": "c-round-133/out/geo-count.json",
+  "steps": 59,
+  "statusNetNonZero": 0,
+  "refusalSpanGeorgian": 0,
+  "subtractedByName": [
+   "load-time demo-ready status 'დემო კოლექცია მზადაა. აირჩიე ხაზი და დაამატე ხმა (Enter ან ＋ დამატება).' (GROUP start step, both viewports; raw 50)",
+   "group name 'ჯგუფი 1' (R1, V-0.4)",
+   "track names 'მუსიკა', 'სტემები'",
+   "R3 release tail 'კლიპი ბოლო თავისუფალ ადგილას დარჩა' (GATE133-LANE-RELEASE-MIXED)",
+   "Shift hint 'Shift — დრო ჩაიკეტება, შეიცვლება მხოლოდ ხაზი' (outside the refusal span; GATE133-LANE-HINT-MIXED)",
+   "frozen move history labels/statuses from ArrangementClip.tsx (item (e), V-0.4): 'Undo: კლიპის გადატანა', 'Undo: გადატანა (2)', 'გადატანა (2): 2 კლიპი გადავიდა 00:00.500-ით მარჯვნივ.'"
+  ],
+  "note": "The move history labels are listed under 'unchanged this round (e)' in the task but are not named in the GEO-COUNT subtraction list; C subtracted them by name and lists them here. geo-count.json was recomputed after the runs from the saved statuses, with one subtraction set for all four runs (the 1440 GROUP run had used an earlier tool version without the demo-ready subtraction: raw 50 on its 'start' step -> net 0 after the by-name subtraction). Result: 59 steps, 0 net non-zero."
+ },
+ "invalidRuns": [
+  {
+   "run": "c133 1440 r1 group",
+   "reason": "ENV-FIRST-LOAD: first page load after the dev server start crashed with 'Invalid hook call' and a hydration warning; status region missing. Discarded; replacement r2 was clean.",
+   "evidence": "c-round-133/out/INVALID-envfirstload-c133-1440-r1-group.json"
+  }
+ ],
+ "toolReruns": [
+  {
+   "run": "c133 1440 r1/r2 lane, step (d)",
+   "reason": "C tool error, not product: the tool re-selected clips over an existing two-clip selection and toggled stems off, so only one clip was nudged. Steps (a)-(c) of those runs were valid and identical to r3. Final (d) evidence is r3 (1440) and r1 (1280)."
+  }
+ ],
+ "notesForB": [
+  "GATE133-LANE-RELEASE-MIXED also covers L3: releasing an audio clip over the video lane gives 'Audio does not move to the video track — კლიპი ბოლო თავისუფალ ადგილას დარჩა: მუსიკა, start 00:02.500.' (same composite as L6; not only overlap). Clip stays on music, time moved 0.5 s as dragged.",
+  "During a refused GROUP lane drag (out-of-range, before-start) the lane-move hint shows no refusal span (no blocked ghosts are published); the refusal only reaches the status line. This was already the case before this round (planClipLaneMove and the ghost logic are unchanged). Info only.",
+  "Lane hint paragraph never wrapped: height 16 px = line height at both viewports (widths 371 / 514 / 283 px); documentElement.scrollWidth == viewport width.",
+  "At 1280 the tool's ruler click for t=20 s is off-screen, so the SFX clip landed at 2 s; all LANE refusal codes were still reached. Tool limit only.",
+  "The code-reviewer Architecture note in a-round-133.md (shared ST helper, wider Georgian range U+1C90–1CBF/U+2D00–2D2F, comment stripper) is for the pre-V-0.3 checkpoint addendum (f)."
+ ],
+ "abletonCorrespondence": "Not applicable / unconfirmed apart from the reused command names (Group Tracks / Ungroup Tracks, fold) per Live 12 manual §18.3 capture b-round-78/ableton-mixing-20261022.txt. This round changed text only, so no new Live behaviour is claimed.",
+ "report": "c-round-133.md",
+ "screenshotsViewed": [
+  "group-b-created-1440-r2",
+  "group-c-video-1440-r2",
+  "group-d-gap-1280-r1",
+  "group-f-folded-1280-r1",
+  "group-g-ungrouped-1440-r2",
+  "group-h-refused-1280-r1",
+  "lane-a-during-1440-r3",
+  "lane-a-during-1280-r1",
+  "lane-b-during-1440-r3",
+  "lane-c1-during-1280-r1",
+  "lane-c2-during-1440-r3",
+  "lane-d-nudge-1280-r1",
+  "g133-3-lab-1440",
+  "g133-3-protected-1280"
+ ],
+ "screenshotsSuperseded": "lane-*-1440-r1.png and lane-*-1440-r2.png (tool error in step d; r3 is final). Other screenshots are not viewed one by one; the measured JSON data behind them is in c-round-133/out."
+}

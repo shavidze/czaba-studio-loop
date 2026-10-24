@@ -1,0 +1,67 @@
+=== m19 file=app/lib/arrangement/strings.ts pre=0ad7ea80a89cf45bb1f6094479081b252ebeb41b3ec5ab12bf7716561246f38a mutated=52cb877ea15530ea342039632b9f6824ea5d9194918435d418ad0c8fa218c048 cmd: sed -i '/groupMoveBlocked:/s/ or the start of the timeline//' app/lib/arrangement/strings.ts
+305:  groupMoveBlocked: 'Group move stopped — a neighbouring clip.',
+     × ST20: every plain-string property of the two objects and the aliased exports equal the exact English 11ms
+     × GS5b a group blocked by an unselected neighbour stops on the last grid line before it 102ms
+     × SK3 a held ArrowLeft on a two-clip group at 0 announces the group refusal once per press 115ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  app/lib/arrangement/__tests__/grid-snap-ui.test.tsx > SRW-14 stage 1 snapping of clip moves > GS5b a group blocked by an unselected neighbour stops on the last grid line before it
+ FAIL  app/lib/arrangement/__tests__/status-announcement-ui.test.tsx > a held key announces the same refusal once (GATE105-S1, D-29z71) > SK3 a held ArrowLeft on a two-clip group at 0 announces the group refusal once per press
+ FAIL  app/lib/arrangement/__tests__/strings.test.ts > V-0.2c3 lane-move and track-group strings > ST20: every plain-string property of the two objects and the aliased exports equal the exact English
+ Test Files  3 failed (3)
+      Tests  3 failed | 72 passed (75)
+restored OK 0ad7ea80a89cf45bb1f6094479081b252ebeb41b3ec5ab12bf7716561246f38a
+=== m20 file=app/lib/arrangement/strings.ts pre=0ad7ea80a89cf45bb1f6094479081b252ebeb41b3ec5ab12bf7716561246f38a mutated=3d97a1f5490a3e38834b2fe937d4a0fba6a9693a969d924992d6d708a41a5d6e cmd: sed -i "/noRoom:/s/'No room here'/'აქ ადგილი არ არის'/" app/lib/arrangement/strings.ts
+311:  noRoom: 'აქ ადგილი არ არის',
+     × ST4: the Export sources contain no Georgian codepoint outside comments 10ms
+     × ST20: every plain-string property of the two objects and the aliased exports equal the exact English 4ms
+     × ST22: the two objects, selection.ts and groups.ts (minus the prefix line) contain no Georgian codepoint 1ms
+     × FU5 a refused lane release keeps the last free place and says where the clip stayed 82ms
+     × SE16 planClipLaneMove refuses a member before 0 as before-start and a missing lane as out-of-range 8ms
+     × SE18 a group onto an occupied lane still shows blocked ghosts and the overlap text 75ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  app/lib/arrangement/__tests__/clip-fades-ui.test.tsx > SRW-18 stage 1 X1 refused lane release status (FU5) > FU5 a refused lane release keeps the last free place and says where the clip stayed
+ FAIL  app/lib/arrangement/__tests__/grid-snap-edit.test.tsx > SRW-14 stage 2 group lane refusal before time 0 > SE16 planClipLaneMove refuses a member before 0 as before-start and a missing lane as out-of-range
+ FAIL  app/lib/arrangement/__tests__/grid-snap-edit.test.tsx > SRW-14 stage 2 group lane refusal before time 0 > SE18 a group onto an occupied lane still shows blocked ghosts and the overlap text
+ FAIL  app/lib/arrangement/__tests__/strings.test.ts > studioExportStrings (V-0.1) > ST4: the Export sources contain no Georgian codepoint outside comments
+ FAIL  app/lib/arrangement/__tests__/strings.test.ts > V-0.2c3 lane-move and track-group strings > ST20: every plain-string property of the two objects and the aliased exports equal the exact English
+ FAIL  app/lib/arrangement/__tests__/strings.test.ts > V-0.2c3 lane-move and track-group strings > ST22: the two objects, selection.ts and groups.ts (minus the prefix line) contain no Georgian codepoint
+ Test Files  3 failed (3)
+      Tests  6 failed | 57 passed (63)
+restored OK 0ad7ea80a89cf45bb1f6094479081b252ebeb41b3ec5ab12bf7716561246f38a
+=== m21 file=app/lib/arrangement/groups.ts pre=baa8db84bd9bbe423d998c682a6fdb642653fb5867062e77c98627a755973f57 mutated=5c3381798165d4c30621856d6f5bf953054ffa937813b1578e7614f7834b20e5 cmd: sed -i -e 's/ungroupedOne(names)/TMPX(names)/' -e 's/ungroupedMany(names)/ungroupedOne(names)/' -e 's/TMPX(names)/ungroupedMany(names)/' app/lib/arrangement/groups.ts
+41:      kind: 'ungrouped';
+424:    kind: 'ungrouped',
+496:    ? studioTrackGroupStrings.ungroupedMany(names)
+497:    : studioTrackGroupStrings.ungroupedOne(names);
+     × ST21: every formatter and exported track-group text returns the exact English 11ms
+     × TG4 Ctrl+Shift+G dissolves only the selected group and refuses a track-only selection 431ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  app/lib/arrangement/__tests__/strings.test.ts > V-0.2c3 lane-move and track-group strings > ST21: every formatter and exported track-group text returns the exact English
+ FAIL  app/lib/arrangement/__tests__/track-groups-ui.test.tsx > SRW-17 stage 1 track groups in the workspace > TG4 Ctrl+Shift+G dissolves only the selected group and refuses a track-only selection
+ Test Files  2 failed (2)
+      Tests  2 failed | 34 passed (36)
+restored OK baa8db84bd9bbe423d998c682a6fdb642653fb5867062e77c98627a755973f57
+=== m22 file=app/lib/arrangement/groups.ts pre=baa8db84bd9bbe423d998c682a6fdb642653fb5867062e77c98627a755973f57 mutated=b16a16d509c77fa5cd2cbbd54dccff590732a918cad1edf1035eeb7824cc6f3f cmd: sed -i "s/return studioTrackGroupStrings.created({ name: groupName, members: memberNames.join(', ') });/return \`ჯგუფი «\${groupName}» შეიქმნა: \${memberNames.join(', ')}.\`;/" app/lib/arrangement/groups.ts
+490:  return `ჯგუფი «${groupName}» შეიქმნა: ${memberNames.join(', ')}.`;
+     × ST21: every formatter and exported track-group text returns the exact English 10ms
+     × ST22: the two objects, selection.ts and groups.ts (minus the prefix line) contain no Georgian codepoint 3ms
+     × TG2 Ctrl+G renders one indented group above its members, with Undo and Redo 281ms
+     × TG3 nesting by clicks and keys stacks the outer header, then the inner one 433ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  app/lib/arrangement/__tests__/strings.test.ts > V-0.2c3 lane-move and track-group strings > ST21: every formatter and exported track-group text returns the exact English
+ FAIL  app/lib/arrangement/__tests__/strings.test.ts > V-0.2c3 lane-move and track-group strings > ST22: the two objects, selection.ts and groups.ts (minus the prefix line) contain no Georgian codepoint
+ FAIL  app/lib/arrangement/__tests__/track-groups-ui.test.tsx > SRW-17 stage 1 track groups in the workspace > TG2 Ctrl+G renders one indented group above its members, with Undo and Redo
+ FAIL  app/lib/arrangement/__tests__/track-groups-ui.test.tsx > SRW-17 stage 1 track groups in the workspace > TG3 nesting by clicks and keys stacks the outer header, then the inner one
+ Test Files  2 failed (2)
+      Tests  4 failed | 32 passed (36)
+restored OK baa8db84bd9bbe423d998c682a6fdb642653fb5867062e77c98627a755973f57
+=== m23 file=app/lib/arrangement/strings.ts pre=0ad7ea80a89cf45bb1f6094479081b252ebeb41b3ec5ab12bf7716561246f38a mutated=56df4a8f8601c6d396f252b853ca037fd71d183578dcf19af16e940116086234 cmd: sed -i '/foldNeedsGroup:/s/ — click the group name//' app/lib/arrangement/strings.ts
+315:  foldNeedsGroup: 'To fold a group, select it first.',
+     × ST20: every plain-string property of the two objects and the aliased exports equal the exact English 12ms
+     × UC2 plain U toggles the selected groups and refuses a track-only selection 397ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  app/lib/arrangement/__tests__/strings.test.ts > V-0.2c3 lane-move and track-group strings > ST20: every plain-string property of the two objects and the aliased exports equal the exact English
+ FAIL  app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx > SRW-17 stage 2 track group collapse in the workspace > UC2 plain U toggles the selected groups and refuses a track-only selection
+ Test Files  2 failed (2)
+      Tests  2 failed | 42 passed (44)
+restored OK 0ad7ea80a89cf45bb1f6094479081b252ebeb41b3ec5ab12bf7716561246f38a

@@ -1,0 +1,352 @@
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-24 10:16:59.253694995 +0000
++++ app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-24 10:20:53.489551888 +0000
+@@ -107,7 +107,8 @@
+ const NUDGE_AT_ZERO_STATUS = studioMoveStrings.nudgeAtTimeStart;
+ const HIDDEN_LINES_TITLE =
+   'ბადე 0.1 წმ — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom. · 1 — უფრო მჭიდრო, 2 — უფრო ფართო';
+-const GROUP_BLOCKED_STATUS = 'ჯგუფის გადატანა შეჩერდა — მეზობელი კლიპი ან დროის დასაწყისი.';
++const GROUP_BLOCKED_STATUS =
++  'Group move stopped — a neighbouring clip or the start of the timeline.';
+ const MOVE_BLOCKED_STATUS =
+   'გადატანა დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი. კლიპი ბოლო თავისუფალ ადგილას დარჩა.';
+ 
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx	2026-10-24 10:16:59.253694995 +0000
++++ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx	2026-10-24 10:20:55.037487125 +0000
+@@ -399,7 +399,7 @@
+ 
+ const NUDGE_BLOCKED_TEXT = studioMoveStrings.nudgeBlocked;
+ const NUDGE_SNAP_BLOCKED_TEXT = studioMoveStrings.nudgeAtTimeStart;
+-const GROUP_BLOCKED_TEXT = 'ჯგუფის გადატანა შეჩერდა — მეზობელი კლიპი ან დროის დასაწყისი.';
++const GROUP_BLOCKED_TEXT = 'Group move stopped — a neighbouring clip or the start of the timeline.';
+ const LOOP_BLOCKED_TEXT = studioLoopStrings.stepBlocked;
+ const MARKER_START_TEXT = 'მარკერი დროის დასაწყისშია.';
+ const MARKER_NEXT_NONE_TEXT = 'წინ მარკერი აღარ არის';
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx	2026-10-24 10:16:59.253694995 +0000
++++ app/lib/arrangement/__tests__/grid-snap-edit.test.tsx	2026-10-24 10:20:57.543382281 +0000
+@@ -112,9 +112,10 @@
+   'Trim შეჩერდა: წყაროს დასაწყისი, მეზობელი კლიპი ან მინიმალური სიგრძე (0.05 წმ).';
+ const TRIM_END_BLOCKED =
+   'Trim შეჩერდა: წყაროს დასასრული, მეზობელი კლიპი ან მინიმალური სიგრძე (0.05 წმ).';
+-const BEFORE_START_TEXT = 'ჯგუფის ნაწილი დროის დასაწყისამდე (0) გავიდოდა — ხაზი არ იცვლება.';
+-const OUT_OF_RANGE_TEXT = 'ჯგუფის ნაწილისთვის ხაზი არ არსებობს — მხოლოდ დრო იცვლება.';
+-const OVERLAP_TEXT = 'აქ ადგილი არ არის';
++const BEFORE_START_TEXT =
++  'Part of the group would go before the start of the timeline (0) — the track does not change.';
++const OUT_OF_RANGE_TEXT = 'There is no track for part of the group — only the time changes.';
++const OVERLAP_TEXT = 'No room here';
+ 
+ const editCollection: WorkspaceCollection = {
+   id: 'edit',
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/app/lib/arrangement/__tests__/clip-fades-ui.test.tsx	2026-10-24 10:16:59.253646317 +0000
++++ app/lib/arrangement/__tests__/clip-fades-ui.test.tsx	2026-10-24 10:20:58.633336676 +0000
+@@ -107,7 +107,7 @@
+ const FADE_IN_HANDLE = 'arrangement-clip-fade-in-handle';
+ const FADE_OUT_HANDLE = 'arrangement-clip-fade-out-handle';
+ const NO_CHANGE = 'ცვლილება არ მოხდა — ისტორია არ შეიცვალა.';
+-const OVERLAP_TEXT = 'აქ ადგილი არ არის';
++const OVERLAP_TEXT = 'No room here';
+ const MOVE_LABEL = 'კლიპის გადატანა';
+ 
+ const fadeCollection: WorkspaceCollection = {
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/app/lib/arrangement/__tests__/track-groups-ui.test.tsx	2026-10-24 10:16:59.253694995 +0000
++++ app/lib/arrangement/__tests__/track-groups-ui.test.tsx	2026-10-24 10:21:12.082587682 +0000
+@@ -450,7 +450,7 @@
+       'sfx:-',
+     ]);
+     expect(live(api).undoLabel).toBe('Group Tracks');
+-    expect(status(view)).toBe('ჯგუფი «ჯგუფი 1» შეიქმნა: მუსიკა, სტემები.');
++    expect(status(view)).toBe('Group “ჯგუფი 1” created: მუსიკა, სტემები.');
+     expect(selectedRows(view)).toEqual(['group:▣ჯგუფი 1']);
+     act(() => live(api).undo());
+     expect(rowOrder(view)).toEqual(['video:-', 'music:-', 'stems:-', 'sfx:-']);
+@@ -475,8 +475,12 @@
+     expect(selectedRows(view)).toEqual([]);
+     pressGroupKey();
+     expect(status(view)).toBe(trackGroupRefusalMessage('empty'));
++    expect(status(view)).toBe(
++      'To group tracks, select them first — Ctrl+click or Shift+click a track name.',
++    );
+     pressGroupKey(true);
+     expect(status(view)).toBe(trackGroupRefusalMessage('no-group'));
++    expect(status(view)).toBe('To ungroup, select a group — click the group name.');
+     expect(live(api).undoLabel).toBeNull();
+     expect(live(api).redoLabel).toBe('Group Tracks');
+   });
+@@ -497,7 +501,7 @@
+       'stems:32px',
+       'sfx:32px',
+     ]);
+-    expect(status(view)).toBe('ჯგუფი «ჯგუფი 2» შეიქმნა: მუსიკა, ჯგუფი 1.');
++    expect(status(view)).toBe('Group “ჯგუფი 2” created: მუსიკა, ჯგუფი 1.');
+     expect(live(api).undoLabel).toBe('Group Tracks');
+     act(() => live(api).undo());
+     expect(live(api).undoLabel).toBe('Group Tracks');
+@@ -518,7 +522,7 @@
+     pressGroupKey();
+     pressGroupKey(true);
+     expect(live(api).undoLabel).toBe('Ungroup Tracks');
+-    expect(status(view)).toBe('ჯგუფი «ჯგუფი 2» დაიშალა.');
++    expect(status(view)).toBe('Group “ჯგუფი 2” ungrouped.');
+     expect(rowOrder(view)).toEqual([
+       'video:-',
+       'music:-',
+@@ -541,7 +545,7 @@
+     expect(selectedRows(view)).toEqual(['stems', 'sfx']);
+   });
+ 
+-  it('TG5 refusals leave history, rows and selection untouched with a Georgian status', async () => {
++  it('TG5 refusals leave history, rows and selection untouched with an English status', async () => {
+     const { api, view } = await mountGroupsWorkspace();
+     pressGroupKey();
+     expect(status(view)).toBe(trackGroupRefusalMessage('empty'));
+@@ -549,11 +553,15 @@
+     clickLane(view, 'მუსიკა', { shiftKey: true });
+     pressGroupKey();
+     expect(status(view)).toBe(trackGroupRefusalMessage('video'));
++    expect(status(view)).toBe('The video track cannot be grouped.');
+     expect(selectedRows(view)).toEqual(['video', 'music']);
+     clickLane(view, 'მუსიკა');
+     clickLane(view, 'SFX', { ctrlKey: true });
+     pressGroupKey();
+     expect(status(view)).toBe(trackGroupRefusalMessage('gap'));
++    expect(status(view)).toBe(
++      'Only adjacent tracks can be grouped together — the selection skips a track.',
++    );
+     expect(selectedRows(view)).toEqual(['music', 'sfx']);
+     groupStemsAndSfx(view);
+     const labelAfterGroup = live(api).undoLabel;
+@@ -561,6 +569,9 @@
+     clickLane(view, 'მუსიკა', { ctrlKey: true });
+     pressGroupKey();
+     expect(status(view)).toBe(trackGroupRefusalMessage('mixed-parents'));
++    expect(status(view)).toBe(
++      'Only tracks at the same level can be grouped together — the selected tracks are in different groups.',
++    );
+     expect(live(api).undoLabel).toBe(labelAfterGroup);
+     expect(view.container.querySelectorAll('[data-group-id]')).toHaveLength(1);
+     let release: (() => void) | null = null;
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-10-24 10:16:59.253694995 +0000
++++ app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-10-24 10:21:14.392403437 +0000
+@@ -518,6 +518,7 @@
+     const before = live(api).getArrangement();
+     pressU();
+     expect(status(view)).toBe(TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE);
++    expect(status(view)).toBe('To fold a group, select it first — click the group name.');
+     expect(renderedLaneIds(view)).toEqual(['video', 'music', 'stems', 'sfx']);
+     expect(live(api).getArrangement()).toBe(before);
+   });
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 10:16:59.253694995 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 10:22:04.886323059 +0000
+@@ -8,6 +8,7 @@
+   playPastEndMessage,
+   WEB_AUDIO_UNAVAILABLE_MESSAGE,
+ } from '~/contexts/ArrangementContext';
++import type { ArrangementTrackGroup } from '~/types/arrangement';
+ import {
+   ARRANGEMENT_EXPORT_CANCELLED_ENCODER_MESSAGE,
+   ARRANGEMENT_EXPORT_CANCELLED_MESSAGE,
+@@ -18,16 +19,26 @@
+   ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS,
+   ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE,
+ } from '../export-wav.client';
++import {
++  TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE,
++  TRACK_GROUP_NAME_PREFIX,
++  trackGroupCreatedMessage,
++  trackGroupDissolvedMessage,
++  trackGroupRefusalMessage,
++} from '../groups';
+ import { METRONOME_NEEDS_TEMPO_TITLE, METRONOME_TITLE, metronomeStatusMessage } from '../metronome';
++import { CLIP_LANE_REFUSAL_MESSAGES, GROUP_MOVE_BLOCKED_MESSAGE } from '../selection';
+ import {
+   studioEditStrings,
+   studioExportStrings,
++  studioLaneMoveStrings,
+   studioLibraryStrings,
+   studioLoopStrings,
+   studioMetronomeStrings,
+   studioMoveStrings,
+   studioPlaybackStrings,
+   studioTempoStrings,
++  studioTrackGroupStrings,
+   studioVideoStrings,
+   studioViewStrings,
+ } from '../strings';
+@@ -985,3 +996,177 @@
+     }
+   });
+ });
++
++const V02C3_OBJECTS: Record<string, Record<string, unknown>> = {
++  studioLaneMoveStrings,
++  studioTrackGroupStrings,
++};
++
++const EXPECTED_V02C3_PLAIN_STRINGS: Record<string, Record<string, string>> = {
++  studioLaneMoveStrings: {
++    groupMoveBlocked: 'Group move stopped — a neighbouring clip or the start of the timeline.',
++    videoClipKeepsTrack: 'A video clip does not change tracks — the group moves in time only.',
++    audioNotOnVideoTrack: 'Audio does not move to the video track',
++    noTrackForPart: 'There is no track for part of the group — only the time changes.',
++    partBeforeStart:
++      'Part of the group would go before the start of the timeline (0) — the track does not change.',
++    noRoom: 'No room here',
++  },
++  studioTrackGroupStrings: {
++    foldNeedsGroup: 'To fold a group, select it first — click the group name.',
++    groupNeedsTracks:
++      'To group tracks, select them first — Ctrl+click or Shift+click a track name.',
++    trackGone: 'A selected track no longer exists — select again.',
++    videoNotGroupable: 'The video track cannot be grouped.',
++    mixedLevels:
++      'Only tracks at the same level can be grouped together — the selected tracks are in different groups.',
++    notAdjacent: 'Only adjacent tracks can be grouped together — the selection skips a track.',
++    ungroupNeedsGroup: 'To ungroup, select a group — click the group name.',
++  },
++};
++
++const EXPECTED_V02C3_KEYS: Record<string, string[]> = {
++  studioLaneMoveStrings: [
++    'audioNotOnVideoTrack',
++    'groupMoveBlocked',
++    'noRoom',
++    'noTrackForPart',
++    'partBeforeStart',
++    'videoClipKeepsTrack',
++  ],
++  studioTrackGroupStrings: [
++    'created',
++    'foldNeedsGroup',
++    'groupNeedsTracks',
++    'mixedLevels',
++    'notAdjacent',
++    'quoted',
++    'trackGone',
++    'ungroupNeedsGroup',
++    'ungroupedMany',
++    'ungroupedOne',
++    'videoNotGroupable',
++  ],
++};
++
++const V02C3_FORMATTER_SAMPLES: Record<string, Record<string, string[]>> = {
++  studioLaneMoveStrings: {},
++  studioTrackGroupStrings: {
++    created: [studioTrackGroupStrings.created({ name: 'Drums', members: 'Kick, Snare' })],
++    quoted: [studioTrackGroupStrings.quoted('A')],
++    ungroupedOne: [studioTrackGroupStrings.ungroupedOne('“A”')],
++    ungroupedMany: [studioTrackGroupStrings.ungroupedMany('“A”, “B”')],
++  },
++};
++
++const TRACK_GROUP_PREFIX_LINE = "export const TRACK_GROUP_NAME_PREFIX = 'ჯგუფი';";
++
++describe('V-0.2c3 lane-move and track-group strings', () => {
++  it('ST20: every plain-string property of the two objects and the aliased exports equal the exact English', () => {
++    expect(Object.keys(V02C3_OBJECTS).sort()).toEqual(Object.keys(EXPECTED_V02C3_KEYS).sort());
++    for (const [objectName, object] of Object.entries(V02C3_OBJECTS)) {
++      expect(Object.keys(object).sort(), objectName).toEqual(EXPECTED_V02C3_KEYS[objectName]);
++      const expected = EXPECTED_V02C3_PLAIN_STRINGS[objectName] ?? {};
++      const plainKeys = Object.entries(object)
++        .filter(([, value]) => typeof value === 'string')
++        .map(([key]) => key)
++        .sort();
++      expect(plainKeys, objectName).toEqual(Object.keys(expected).sort());
++      for (const [key, value] of Object.entries(object)) {
++        if (typeof value === 'string') {
++          expect(value, `${objectName}.${key}`).toBe(expected[key]);
++        }
++      }
++    }
++    expect(GROUP_MOVE_BLOCKED_MESSAGE).toBe(
++      'Group move stopped — a neighbouring clip or the start of the timeline.',
++    );
++    expect(TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE).toBe(
++      'To fold a group, select it first — click the group name.',
++    );
++    expect(Object.keys(CLIP_LANE_REFUSAL_MESSAGES)).toEqual([
++      'video-clip',
++      'video-lane',
++      'out-of-range',
++      'before-start',
++      'overlap',
++    ]);
++    expect(CLIP_LANE_REFUSAL_MESSAGES['video-clip']).toBe(
++      'A video clip does not change tracks — the group moves in time only.',
++    );
++    expect(CLIP_LANE_REFUSAL_MESSAGES['video-lane']).toBe('Audio does not move to the video track');
++    expect(CLIP_LANE_REFUSAL_MESSAGES['out-of-range']).toBe(
++      'There is no track for part of the group — only the time changes.',
++    );
++    expect(CLIP_LANE_REFUSAL_MESSAGES['before-start']).toBe(
++      'Part of the group would go before the start of the timeline (0) — the track does not change.',
++    );
++    expect(CLIP_LANE_REFUSAL_MESSAGES.overlap).toBe('No room here');
++  });
++
++  it('ST21: every formatter and exported track-group text returns the exact English', () => {
++    expect(studioTrackGroupStrings.created({ name: 'Drums', members: 'Kick, Snare' })).toBe(
++      'Group “Drums” created: Kick, Snare.',
++    );
++    expect(studioTrackGroupStrings.quoted('A')).toBe('“A”');
++    expect(studioTrackGroupStrings.ungroupedOne('“A”')).toBe('Group “A” ungrouped.');
++    expect(studioTrackGroupStrings.ungroupedMany('“A”, “B”')).toBe('Groups “A”, “B” ungrouped.');
++    expect(trackGroupRefusalMessage('empty')).toBe(
++      'To group tracks, select them first — Ctrl+click or Shift+click a track name.',
++    );
++    expect(trackGroupRefusalMessage('unknown')).toBe(
++      'A selected track no longer exists — select again.',
++    );
++    expect(trackGroupRefusalMessage('video')).toBe('The video track cannot be grouped.');
++    expect(trackGroupRefusalMessage('mixed-parents')).toBe(
++      'Only tracks at the same level can be grouped together — the selected tracks are in different groups.',
++    );
++    expect(trackGroupRefusalMessage('gap')).toBe(
++      'Only adjacent tracks can be grouped together — the selection skips a track.',
++    );
++    expect(trackGroupRefusalMessage('no-group')).toBe(
++      'To ungroup, select a group — click the group name.',
++    );
++    expect(trackGroupCreatedMessage('ჯგუფი 1', ['მუსიკა', 'სტემები'])).toBe(
++      'Group “ჯგუფი 1” created: მუსიკა, სტემები.',
++    );
++    const single: ArrangementTrackGroup = { id: 'g1', name: 'ჯგუფი 2', parentId: null };
++    const first: ArrangementTrackGroup = { id: 'ga', name: 'A', parentId: null };
++    const second: ArrangementTrackGroup = { id: 'gb', name: 'B', parentId: null };
++    expect(trackGroupDissolvedMessage([single])).toBe('Group “ჯგუფი 2” ungrouped.');
++    expect(trackGroupDissolvedMessage([first, second])).toBe('Groups “A”, “B” ungrouped.');
++    expect(TRACK_GROUP_NAME_PREFIX).toBe('ჯგუფი');
++  });
++
++  it('ST22: the two objects, selection.ts and groups.ts (minus the prefix line) contain no Georgian codepoint', () => {
++    for (const [objectName, object] of Object.entries(V02C3_OBJECTS)) {
++      const samples = V02C3_FORMATTER_SAMPLES[objectName] ?? {};
++      const formatterKeys = Object.entries(object)
++        .filter(([, value]) => typeof value === 'function')
++        .map(([key]) => key)
++        .sort();
++      expect(formatterKeys, objectName).toEqual(Object.keys(samples).sort());
++      for (const [key, value] of Object.entries(object)) {
++        if (typeof value === 'string') {
++          expect(value, `${objectName}.${key}`).not.toMatch(GEORGIAN_CODEPOINT);
++        }
++      }
++      for (const [key, outputs] of Object.entries(samples)) {
++        expect(outputs.length, `${objectName}.${key}`).toBeGreaterThan(0);
++        for (const output of outputs) {
++          expect(output, `${objectName}.${key}`).not.toMatch(GEORGIAN_CODEPOINT);
++        }
++      }
++    }
++    const selection = stripSourceComments(readStoreSource('../selection.ts'));
++    expect(selection.length).toBeGreaterThan(0);
++    expect(selection).not.toMatch(GEORGIAN_CODEPOINT);
++    const groupLines = stripSourceComments(readStoreSource('../groups.ts')).split(/\r?\n/);
++    expect(groupLines.filter((line) => line === TRACK_GROUP_PREFIX_LINE)).toHaveLength(1);
++    const groupsWithoutPrefix = groupLines
++      .filter((line) => line !== TRACK_GROUP_PREFIX_LINE)
++      .join('\n');
++    expect(groupsWithoutPrefix.length).toBeGreaterThan(0);
++    expect(groupsWithoutPrefix).not.toMatch(GEORGIAN_CODEPOINT);
++  });
++});

@@ -1,0 +1,128 @@
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/app/lib/arrangement/strings.ts	2026-10-24 10:16:59.253694995 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 10:24:28.565033032 +0000
+@@ -300,3 +300,29 @@
+ export const studioViewStrings = {
+   zoomReadout: (value: number): string => `${value} px/s`,
+ };
++
++export const studioLaneMoveStrings = {
++  groupMoveBlocked: 'Group move stopped — a neighbouring clip or the start of the timeline.',
++  videoClipKeepsTrack: 'A video clip does not change tracks — the group moves in time only.',
++  audioNotOnVideoTrack: 'Audio does not move to the video track',
++  noTrackForPart: 'There is no track for part of the group — only the time changes.',
++  partBeforeStart:
++    'Part of the group would go before the start of the timeline (0) — the track does not change.',
++  noRoom: 'No room here',
++};
++
++export const studioTrackGroupStrings = {
++  foldNeedsGroup: 'To fold a group, select it first — click the group name.',
++  groupNeedsTracks: 'To group tracks, select them first — Ctrl+click or Shift+click a track name.',
++  trackGone: 'A selected track no longer exists — select again.',
++  videoNotGroupable: 'The video track cannot be grouped.',
++  mixedLevels:
++    'Only tracks at the same level can be grouped together — the selected tracks are in different groups.',
++  notAdjacent: 'Only adjacent tracks can be grouped together — the selection skips a track.',
++  ungroupNeedsGroup: 'To ungroup, select a group — click the group name.',
++  created: ({ name, members }: { name: string; members: string }): string =>
++    `Group “${name}” created: ${members}.`,
++  quoted: (name: string): string => `“${name}”`,
++  ungroupedOne: (names: string): string => `Group ${names} ungrouped.`,
++  ungroupedMany: (names: string): string => `Groups ${names} ungrouped.`,
++};
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/app/lib/arrangement/selection.ts	2026-10-24 10:16:59.253694995 +0000
++++ app/lib/arrangement/selection.ts	2026-10-24 10:20:38.453123880 +0000
+@@ -1,10 +1,10 @@
+ import type { Arrangement, ArrangementClip } from '~/types/arrangement';
+ import { ARRANGEMENT_EPS, type ClipPlacementConflict, findClipPlacementConflict } from './model';
++import { studioLaneMoveStrings } from './strings';
+ 
+ export type SelectionToggleMode = 'toggle' | 'add';
+ 
+-export const GROUP_MOVE_BLOCKED_MESSAGE =
+-  'ჯგუფის გადატანა შეჩერდა — მეზობელი კლიპი ან დროის დასაწყისი.';
++export const GROUP_MOVE_BLOCKED_MESSAGE = studioLaneMoveStrings.groupMoveBlocked;
+ 
+ export type ClipLaneMoveRefusal =
+   | 'video-clip'
+@@ -35,11 +35,11 @@
+ }
+ 
+ export const CLIP_LANE_REFUSAL_MESSAGES: Record<ClipLaneMoveRefusal, string> = {
+-  'video-clip': 'ვიდეოკლიპი ხაზს არ იცვლის — ჯგუფი მხოლოდ დროში გადაადგილდება.',
+-  'video-lane': 'აუდიო ვიდეოხაზზე არ გადადის',
+-  'out-of-range': 'ჯგუფის ნაწილისთვის ხაზი არ არსებობს — მხოლოდ დრო იცვლება.',
+-  'before-start': 'ჯგუფის ნაწილი დროის დასაწყისამდე (0) გავიდოდა — ხაზი არ იცვლება.',
+-  overlap: 'აქ ადგილი არ არის',
++  'video-clip': studioLaneMoveStrings.videoClipKeepsTrack,
++  'video-lane': studioLaneMoveStrings.audioNotOnVideoTrack,
++  'out-of-range': studioLaneMoveStrings.noTrackForPart,
++  'before-start': studioLaneMoveStrings.partBeforeStart,
++  overlap: studioLaneMoveStrings.noRoom,
+ };
+ 
+ export interface MarqueeBounds {
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/app/lib/arrangement/groups.ts	2026-10-24 10:16:59.253694995 +0000
++++ app/lib/arrangement/groups.ts	2026-10-24 10:24:15.137424250 +0000
+@@ -1,4 +1,5 @@
+ import type { Arrangement, ArrangementTrack, ArrangementTrackGroup } from '~/types/arrangement';
++import { studioTrackGroupStrings } from './strings';
+ 
+ export const TRACK_GROUP_NAME_PREFIX = 'ჯგუფი';
+ export const TRACK_GROUP_NAME_MAX_LENGTH = 64;
+@@ -218,8 +219,7 @@
+   return rows;
+ }
+ 
+-export const TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE =
+-  'დასაკეცად მონიშნე ჯგუფი — დააწკაპუნე ჯგუფის სახელზე.';
++export const TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE = studioTrackGroupStrings.foldNeedsGroup;
+ 
+ export interface TrackGroupOverviewClip {
+   clipId: string;
+@@ -471,12 +471,12 @@
+ }
+ 
+ const GROUP_TRACKS_REFUSAL_MESSAGES: Record<GroupTracksRefusal | 'no-group', string> = {
+-  empty: 'დასაჯგუფებლად ჯერ მონიშნე ხაზები — Ctrl+click ან Shift+click ხაზის სახელზე.',
+-  unknown: 'მონიშნული ხაზი აღარ არსებობს — მონიშნე ხელახლა.',
+-  video: 'ვიდეო ხაზი ჯგუფში ვერ შევა.',
+-  'mixed-parents': 'ერთად ჯგუფდება მხოლოდ ერთი დონის ხაზები — მონიშნულები სხვადასხვა ჯგუფშია.',
+-  gap: 'ერთად ჯგუფდება მხოლოდ მეზობელი ხაზები — მონიშვნაში გამოტოვებული ხაზია.',
+-  'no-group': 'დასაშლელად მონიშნე ჯგუფი — დააწკაპუნე ჯგუფის სახელზე.',
++  empty: studioTrackGroupStrings.groupNeedsTracks,
++  unknown: studioTrackGroupStrings.trackGone,
++  video: studioTrackGroupStrings.videoNotGroupable,
++  'mixed-parents': studioTrackGroupStrings.mixedLevels,
++  gap: studioTrackGroupStrings.notAdjacent,
++  'no-group': studioTrackGroupStrings.ungroupNeedsGroup,
+ };
+ 
+ export function trackGroupRefusalMessage(reason: GroupTracksRefusal | 'no-group'): string {
+@@ -487,10 +487,12 @@
+   groupName: string,
+   memberNames: readonly string[],
+ ): string {
+-  return `ჯგუფი «${groupName}» შეიქმნა: ${memberNames.join(', ')}.`;
++  return studioTrackGroupStrings.created({ name: groupName, members: memberNames.join(', ') });
+ }
+ 
+ export function trackGroupDissolvedMessage(groups: readonly ArrangementTrackGroup[]): string {
+-  const names = groups.map((group) => `«${group.name}»`).join(', ');
+-  return groups.length === 1 ? `ჯგუფი ${names} დაიშალა.` : `ჯგუფები ${names} დაიშალა.`;
++  const names = groups.map((group) => studioTrackGroupStrings.quoted(group.name)).join(', ');
++  return groups.length === 1
++    ? studioTrackGroupStrings.ungroupedOne(names)
++    : studioTrackGroupStrings.ungroupedMany(names);
+ }
+--- ../tmp/studio-real-loop/b-round-132/r133-granted-start/docs/implementation/2026/quarter-IV/108-studio-v0-tempo-metronome-view-strings.md	2026-10-24 10:16:59.254245022 +0000
++++ docs/implementation/2026/quarter-IV/108-studio-v0-tempo-metronome-view-strings.md	2026-10-24 10:24:40.245110289 +0000
+@@ -1,7 +1,7 @@
+ # Studio V-0.2c2 — ტემპის, მეტრონომისა და zoom-ის ტექსტები ინგლისურად
+ 
+ **თარიღი:** 2026-10-24
+-**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 132-ში; ბრაუზერის შემოწმება C-ის რაუნდ 132-ს ელოდება)
++**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 132-ში; C round 132 — PASS, browserVerified; gate 132 — b25507e)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
