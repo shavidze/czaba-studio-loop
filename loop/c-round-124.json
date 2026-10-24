@@ -1,0 +1,184 @@
+{
+ "round": 124,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T02:34:21.8584724Z",
+  "round": 124,
+  "attempt": 1,
+  "store": 200
+ },
+ "allRowsRan": true,
+ "areasDone": [
+  "Q1",
+  "Q2",
+  "Q3",
+  "Q4",
+  "Q5",
+  "Q6",
+  "Q7"
+ ],
+ "areasSpilled": [],
+ "passed": [
+  "SOURCE-SCOPE-start",
+  "Q1-review",
+  "Q2-review",
+  "Q3-review",
+  "Q4-review",
+  "Q5-review",
+  "Q6-review",
+  "G124-3",
+  "Q7-verdict",
+  "SOURCE-SCOPE-end",
+  "PX-NET/REG-HYD (14 review sessions + 2 survey + G124-3: 0 forbidden requests, 0 Authorization headers, 0 hydration, 0 pageerror)"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G124-3 fake-Bearer 403 sub-check: backend unavailable in cloud",
+  "blocked: CDP — Ctrl/Cmd+digit, lone Alt, ContextMenu key / Shift+F10, real touch hardware, real pointercancel, real OS file drag (Q1 drop used a synthetic DataTransfer drop event), Ctrl+Shift+R (browser hard-reload accelerator; via CDP the page neither reloaded nor opened the export dialog)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "bugs": [],
+ "recommendations": [
+  {
+   "id": "ABL-R-11",
+   "area": "Q2",
+   "what": "Loop brace keys from Live: Up/Down shift the brace by its own length, Ctrl+Up/Down double/halve it (today Up/Down and Ctrl+Up/Down do nothing on the focused brace and show no status)",
+   "why": "Moving a 2 s loop to the next 2 s section or doubling it is a common scoring step; today it needs a drag",
+   "manual": "6.6 'The up and down arrow keys shift the loop brace left or right in steps based on the loop brace length … Ctrl + up and down arrow keys doubles or halves the loop length'; 42.8 https://www.ableton.com/en/live-manual/12/arrangement-view/",
+   "level": "F",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-12",
+   "area": "Q4",
+   "what": "Fade curve handle: let the user bend a clip fade (today every fade is a straight linear-amplitude ramp; measured 0.25/0.50/0.75 at the quarter points)",
+   "why": "A linear-amplitude fade-out sounds abrupt at the tail; film editors shape fades by ear",
+   "manual": "6.8 'You can further adjust the fade's intensity using the Fade Curve handle, which shapes the curve of the fade' https://www.ableton.com/en/live-manual/12/arrangement-view/",
+   "level": "F",
+   "sizeRounds": 1,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-13",
+   "area": "Q4",
+   "what": "Envelope breakpoints snap to the grid while Snap is on, with Alt to bypass (today a breakpoint dragged by 0.37 s with Snap on lands at 6.370; ENVELOPE-SNAP signal)",
+   "why": "Lining a volume dip up with a cut or a marker needs snapping; clips, loop and markers already snap, so the free breakpoint is the odd one out",
+   "manual": "26.7.1 'Breakpoints automatically snap to grid lines, but you can bypass grid snapping by holding Alt' https://www.ableton.com/en/live-manual/12/automation/",
+   "level": "F",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-14",
+   "area": "Q5",
+   "what": "Delete on a focused Volume, Pan, Master or Clip Gain control returns it to its default (today Delete on a focused fader does nothing; it also does not delete the selected clip, which must stay true)",
+   "why": "Keyboard users reset a fader without aiming a double-click; same key as in Live",
+   "manual": "42.4 'Reset Parameter Value: Delete or double-click'; 42.6 'Return to Default: Delete' https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/",
+   "level": "F",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-15",
+   "area": "Q5",
+   "what": "Master Shift-drag uses a finer step (for example 0.1 dB like the lane faders); today Shift only slows the drag, and the value still jumps in 0.5 dB steps (Shift −3 px stays 0.0, Shift −10 px gives −0.5)",
+   "why": "Final loudness trims of 0.1–0.3 dB are common before export; lanes already allow 0.1 dB, so Master is the odd one out (MASTER-FINE-STEP signal)",
+   "manual": "42.6 'Finer Resolution When Dragging: Shift' (F); Live's Main step size not found in the manual (?) https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/",
+   "level": "F",
+   "sizeRounds": 0.5,
+   "priority": "Low",
+   "changes": "behaviour"
+  },
+  {
+   "id": "ABL-R-16",
+   "area": "Q6",
+   "what": "Question for Saba: export each lane (or each group) as its own WAV of equal length, like Live's 'All Individual Tracks' / 'Selected Tracks Only'",
+   "why": "A mixing engineer or editor often wants dialogue/music/SFX stems; but the lanes hold purchased CZABA stems, so per-lane export could hand out the purchased stems one by one - Saba must decide if that fits the licence",
+   "manual": "5.1.3.1 'All Individual Tracks … Live creates a separate audio file for each track … All exported files will have the same length' https://www.ableton.com/en/live-manual/12/managing-files-and-sets/",
+   "level": "F",
+   "sizeRounds": 2,
+   "priority": "Medium",
+   "changes": "both"
+  },
+  {
+   "id": "ABL-R-17",
+   "area": "Q6",
+   "what": "Question for Saba: render the edited video with the mixed audio (today the 'ვიდეო (აუდიოთი)' option is shown disabled with 'not in this cycle')",
+   "why": "For a film user the deliverable is often the picture with the new sound; today they must re-mux the WAV in another program. Not requested by the user so far (B found no decision file)",
+   "manual": "5.1.3.4 'Create Video — When this option is enabled, a video file is created … The video file will also contain the rendered audio'; 28.3 'You can also export your video file using this command' https://www.ableton.com/en/live-manual/12/managing-files-and-sets/",
+   "level": "F",
+   "sizeRounds": 4,
+   "priority": "Medium",
+   "changes": "both"
+  },
+  {
+   "id": "ABL-R-18",
+   "area": "Q6",
+   "what": "Optional render settings: Normalize, 44.1 kHz, 16-bit (with dither) next to today's fixed 24-bit 48 kHz stereo",
+   "why": "Some delivery targets (CD, certain platforms) need 44.1 kHz / 16-bit; Normalize helps a quick preview mix. Not requested",
+   "manual": "5.1.3.2 'Normalize … Sample Rate'; 5.1.3.3 'Bit Depth … 16, 24, or 32 … Dither Options' https://www.ableton.com/en/live-manual/12/managing-files-and-sets/",
+   "level": "F",
+   "sizeRounds": 1,
+   "priority": "Low",
+   "changes": "behaviour"
+  }
+ ],
+ "reviewComplete": true,
+ "invalidRuns": [
+  {
+   "row": "survey (first /studio-lab load of the job)",
+   "reason": "ENV-FIRST-LOAD: hydration error + 'Invalid hook call' console errors and an empty DOM on the first load after the dev server warm-up; discarded once and replaced (second survey clean)",
+   "utc": "2026-10-24T02:40Z"
+  },
+  {
+   "row": "Q6 first run, range export (1440)",
+   "reason": "harness: the range drag started 0.2 s (8 px) inside the SFX clip's left edge, so it trimmed the clip instead of making a range; the range radio stayed disabled and the click timed out. Replaced by a range drag inside the 16 s pad clip (q6.cjs current version), both viewports"
+  },
+  {
+   "row": "Q6 first rerun, MP3 correlation (1440)",
+   "reason": "harness: the MP3 was compared with an older export without the pad (corr 0.9227); compared with the matching export the correlation is 1.000 at lag 0; rerun replaced it"
+  }
+ ],
+ "notesForB": [
+  "ableton-arrangement-expert could not be invoked (no subagent tool on this runner); C read its role file as a checklist and used only browser observation + manual text.",
+  "Q5: the first q5.cjs check 'waveChanged:false' after Clip Gain was a harness error (it compared only a 60-character prefix of the path); q5w.cjs compared the full path: Clip Gain -6 scales the waveform x0.500, Volume -6 leaves it unchanged (both viewports).",
+  "Outcome per current-task section 7: reviewComplete true (P1-P8 in round 123, Q1-Q6 + Q7 here), no ABL-B at Medium or above (part 2 found no new bug) -> ABLETON-EXPERT-REVIEW done; round 125 = DESIGN-UX-REVIEW (first step of VISUAL-A-OBSIDIAN), unless B plans on/after 2026-10-27 (regression first).",
+  "Transcribe ABL-R-11..ABL-R-18 into backlog.json ableton_recommendations as awaiting_user. ABL-R-16 and ABL-R-17 are questions with Medium priority (recommendations, not bugs; the bug gate does not apply).",
+  "Known signals re-confirmed with fresh evidence (no new finding): VIDEO-FADE-SOUND (video sound not faded: RMS 0.118 in fade vs 0.117 after), ENVELOPE-SNAP (6.370 with Snap on), ENVELOPE-CLEAR, MASTER-FINE-STEP (scored: Shift still 0.5 dB steps -> ABL-R-15), C-R76-OBS-SOLO-MUTE-HISTORY (Mute/Solo/Master clicks are Undo steps), GROUP-VOLUME-VISIBLE-READOUT (for DESIGN-UX-REVIEW).",
+  "For DESIGN-UX-REVIEW: at 1280x720 the Export dialog's 'მონიშნული მონაკვეთი' option sits partly under the footer until scrolled (shots/Q6-dialog-1280.png); group Volume has no visible value next to the fader.",
+  "INFO-C101-SPACE-A-VS-C: in this round every Space press toggled play/stop at both viewports (keyboard.press after blur); no new information on the A-side observation."
+ ],
+ "sourceScope": {
+  "start": "HEAD 608187fdf279d9b579c279f3c536b27be74c0eea, git status empty, sha256sum -c OK (937 entries)",
+  "end": "HEAD 608187fdf279d9b579c279f3c536b27be74c0eea, git status empty, sha256sum -c OK (937 entries); no store/ change during the round"
+ },
+ "network": {
+  "reviewSessions": 14,
+  "surveySessions": 2,
+  "g124_3": "0 forbidden, 0 Authorization, 0 pageerror, 0 hydration",
+  "forbidden": 0,
+  "authHeaders": 0,
+  "hydration": 0,
+  "pageerror": 0,
+  "knownCloudNoise": 28
+ },
+ "expertAgent": "unavailable on this runner (no subagent tool); role file used as checklist",
+ "attempt2": {
+  "utc": "2026-10-24T03:10Z",
+  "note": "Attempt 1 had finished all areas Q1-Q7, G124-3 and SOURCE-SCOPE-end before stopping (result file was empty). Attempt 2 checked all artifacts (progress next=done, review sections P1-P8/Q1-Q6, verdict, index, all evidence paths in ableton-review.md exist, part-1 rows intact), re-ran G124-3 in a fresh browser context (lab workspace+demo badge, /studio/middle-east Sign in required at 1440 and 1280 with 0 audio[src], /api/studio-token 401, 0 forbidden/Authorization/pageerror/hydration; out/g124-3.json, attempt-1 copy out/g124-3-attempt1.json) and re-ran SOURCE-SCOPE (HEAD 608187f, status empty, sha256 OK). No new findings."
+ }
+}

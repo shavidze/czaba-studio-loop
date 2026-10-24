@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-24T02:22:50.061Z)
+# Active loop summary (2026-10-24T03:11:14.253Z)
 
-- backlog.json 1091 KB -> active view 246 KB
-- status: G_ROOT_GATE round 123
-- servers: `{"checkedUtc":"2026-10-24T01:42:33.0164903Z","round":123,"attempt":1,"store":200}`
+- backlog.json 1110 KB -> active view 145 KB
+- status: G_ROOT_GATE round 124
+- servers: `{"checkedUtc":"2026-10-24T02:34:21.8584724Z","round":124,"attempt":1,"store":200}`
 - last publication: 608187fdf279d9b579c279f3c536b27be74c0eea (rounds 122-122)
-- last root gate: round 123 skipped - no real changes
+- last root gate: round 124 skipped - no real changes
 
-## Current items: SRW-02, SRW-05, SRW-13, SRW-17, SRW-18, SRW-20
+## Current items: -
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -246,14 +246,21 @@
 - GATE121-S7-HEADER-WIDTH / info / converted -> C-R122-02 (deferred_low_polish) / 224 px grid header with BPM set, widest triplet division and zoom not browser-checked
 - C-R122-01 / low / deferred_low_polish / at 1280x720 a body range drag shrinks the workspace by 20 px mid-drag; lane auto-fit trims lanes 80->75 px and the selected stems clip moves
 - C-R122-02 / low / deferred_low_polish / with a BPM set the straight musical division list widens the select to 85 px; the 224 px grid control overflows (scrollWidth 225 > clientWid
+- ABL-B-1 / low / deferred_low_polish / the badge row overflows the option: scrollWidth 139-152 px > clientWidth 126 px; '▶' sits past the card edge and 'ისმის' wraps to a second l
+- ABL-B-2 / low / deferred_low_polish / the second Z pushes a duplicate entry: the first X leaves the view at 137.7 px/s while the status says 'წინა ხედი აღდგა. X კიდევ ერთი ნაბიჯი
+- C-R123-OBS-SFX-HEADER-SELECTION / info / watch (unreproduced; not a bug) / native text-selection highlight on the SFX header in two first-run P3 screenshots (harness drag started off-screen); 4 targeted probes found
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [c_pass_tech_lead_manual (C-R8-01 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; accepted Lows C-R11-04 / C-R15-01 do not hold it back; D-29z78)] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
+- SRW-13 [c_pass_tech_lead_manual (round 113 C PASS browserVerified=true, published c2837f1: A-R38-REVIEW-TOUCH done for Chromium; C-R27-01 closed round 112; open Low C-R41-01 (Tech Lead viewport question) does not hold it back; Tech Lead R38-T real touch device)] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
 - SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-16 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 6b574e8, 2a e347b97, 2b-1 db9cc25, 2b-2 60006d4, 2b-3 c062147; Tech Lead R72-T/R74-T/R77-T/R78-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next
+- SRW-17 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 74eca15, stage 2 68383fa, stage 3 efbed86; Tech Lead R79-T/R81-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
+- SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
+- SRW-20 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: 1 51e024a, 2 971141d, 3a eb1d0c0, 3b-1 35c8403, 3b-2 77cd5b6 (C round 91, gate 91); R20-X1..X4 pass; Tech Lead R86-T..R91-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; PROD-MP3-UNVERIFIED gate row open)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
 - SRW-21 [deferred_user] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

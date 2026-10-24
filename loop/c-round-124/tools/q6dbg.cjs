@@ -1,0 +1,14 @@
+const X=require('./lib122.cjs'); const H=require('./h3.cjs'); const {L,sleep}=X; const net=[]; const out={};
+(async()=>{const b=await L.launch(); const {page:p,ctx,log}=await L.openStudio(b,X.VPS[1440],'q6dbg',net);
+ await L.setSnapOff(p); await L.addAt(p,'demo-soft-impact','sfx',3); await L.addAt(p,'demo-stem-pad','stems',12);
+ const sfxId=(await L.clipsDom(p)).find(c=>c.lane==='sfx').id;
+ out.drag=await X.rangeDrag(p,sfxId,3.2,4.4); out.r1=await H.range(p);
+ let d=await X.openDlg(p); out.dlg1=d.range; out.dlg1text=d.text.slice(-200); await X.closeDlg(p); out.r1b=await H.range(p);
+ await X.openDetail(p); out.r2=await H.range(p);
+ await p.fill('[data-testid=arrangement-detail-start]','2.5'); await p.locator('[data-testid=arrangement-detail-start]').press('Enter'); await sleep(200);
+ out.r3=await H.range(p); out.st3=await L.status(p);
+ await p.fill('[data-testid=arrangement-detail-end]','6'); await p.locator('[data-testid=arrangement-detail-end]').press('Enter'); await sleep(300);
+ out.r4=await H.range(p); out.st4=await L.status(p); await L.blur(p); out.r5=await H.range(p);
+ d=await X.openDlg(p); out.dlg2=d.range; out.dlg2text=d.text.slice(-250); await X.closeDlg(p);
+ await p.screenshot({path:L.SHOTS+'/Q6-dbg-range-1440.png'});
+ L.save(L.OUT,'Q6-dbg.json',out); await ctx.close(); await b.close();})();

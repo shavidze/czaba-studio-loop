@@ -1,0 +1,5 @@
+function recInit(){ const W=window; W.__rec={blocks:[],on:false}; const oc=AudioNode.prototype.connect; const done=new WeakSet();
+ AudioNode.prototype.connect=function(dest,...rest){const r=oc.call(this,dest,...rest); try{ if(dest instanceof AudioDestinationNode && !(this.context instanceof OfflineAudioContext)){const c=this.context; if(!W.__rec.sp||W.__rec.ctx!==c){ const sp=c.createScriptProcessor(512,2,2); const g=c.createGain(); g.gain.value=0; sp.onaudioprocess=(e)=>{ if(!W.__rec.on) return; let pk=0; for(let ch=0;ch<2;ch++){const d=e.inputBuffer.getChannelData(ch); for(let i=0;i<d.length;i++){const a=Math.abs(d[i]); if(a>pk) pk=a;}} W.__rec.blocks.push([+e.playbackTime.toFixed(4),+pk.toFixed(4)]); }; oc.call(sp,g); oc.call(g,c.destination); W.__rec.sp=sp; W.__rec.ctx=c; } oc.call(this,W.__rec.sp);} }catch(e){W.__rec.err=String(e);} return r; };
+ W.__recStart=()=>{W.__rec.blocks=[];W.__rec.on=true;}; W.__recStop=()=>{W.__rec.on=false; return W.__rec.blocks;}; }
+
+module.exports={recInit};
