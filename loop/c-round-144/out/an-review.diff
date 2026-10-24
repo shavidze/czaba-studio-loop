@@ -1,0 +1,47 @@
+--- ../tmp/studio-real-loop/b-round-143/r144-granted-start/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx	2026-10-24 20:10:13.147343287 +0000
++++ app/lib/arrangement/__tests__/detail-panel-polish.test.tsx	2026-10-24 20:11:51.329236340 +0000
+@@ -359,7 +359,7 @@
+     });
+   });
+ 
+-  describe('design (d): Georgian detail labels and the w-72 info column (D-29i, D-29j)', () => {
++  describe('design (d): English detail labels and the w-72 info column (D-29i, D-29j)', () => {
+     function detailLabelTexts(view: ReturnType<typeof render>) {
+       const content = view.getByTestId('arrangement-detail-content');
+       const info = content.firstElementChild;
+--- ../tmp/studio-real-loop/b-round-143/r144-granted-start/docs/implementation/2026/quarter-IV/118-studio-v0-detail-library-strings.md	2026-10-24 20:10:13.147528113 +0000
++++ docs/implementation/2026/quarter-IV/118-studio-v0-detail-library-strings.md	2026-10-24 20:12:07.805582732 +0000
+@@ -1,7 +1,7 @@
+ # Studio V-0.4e — Clip Detail panel, range/Clip Gain შეტყობინებები და ბიბლიოთეკის kind/folder label-ები ინგლისურად
+ 
+ **თარიღი:** 2026-10-24
+-**სტატუსი:** In Progress (C round 142 — FAIL: C-R142-01; round 143 fix-up; C round 143 ჯერ არ გაშვებულა)
++**სტატუსი:** In Progress (C round 143 — FAIL მხოლოდ C-R143-01-ზე, დაიხურა B-ის D-29z109 წერილობითი დასკვნით; round 144 — C-ის ხელახალი შემოწმება)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -84,8 +84,9 @@
+ - **Problem:** `detail-panel-fit.test` l.24 (`PENDING_HIDDEN_HINT`) ქართულს შეიცავდა, მაგრამ B-ის 56 pin ხაზის სიაში არ იყო. **Solution:** R7-ის მიხედვით შეიცვალა ` — Enter saves, Esc reverts`-ით, matcher-ი უცვლელია.
+ - **Problem:** `detail-panel-polish.test`-ის ორი assertion (`not.toMatch(/\b(start|offset)\b/i)`) ამოწმებდა, რომ ინგლისური არ გაჟონილიყო. ახლა label-ები განზრახ `Start` / `Source offset`-ია. **Solution:** იმავე ხაზზე guard-ი ძველი ქართული label-ების არარსებობაზე გადატრიალდა. ტესტი არ წაშლილა.
+ - **Problem:** დავალება ითხოვდა, რომ `stems` kind-ით დაემთხვია stem წყაროებს. haystack-ში kind label არის `Stem`, ხოლო `stem` სტრიქონი `stems`-ს არ შეიცავს, ამიტომ `stems` kind-ით 0 წყაროს ემთხვევა. **Solution:** `library.ts`-ის ქცევა არ შეგვიცვლია. LB-SEARCH ამოწმებს `stem`-ს, შეუსაბამობა კი B-ს გადაეცა.
+-- **Problem (გადაუწყვეტელი, stop rule):** რეალურ Chromium-ში 1440×900-ზე, video კლიპის არჩევისას, `clipGainVideoReason` შუა სვეტში (max 408 px) 2 ხაზად გადადის. baseline-ში ქართული ტექსტი 1 ხაზი იყო (327 px). ეს LAYOUT-ის საზღვარს არღვევს. ტექსტი B-ის §1.1-ით ზუსტადაა განსაზღვრული, class-ის შეცვლა კი stop rule-ით აკრძალულია. **Solution:** კოდი არ შეცვლილა, საკითხი B-ს გადაეცა გაზომილი ალტერნატივებით (მაგ. `A video clip has no Clip Gain — use the track Volume/Mute`: 1 ხაზი, 329 px). 1280-ზე ბოლო ხაზების panel-ის ქვემოთ გასვლა ქართული ტექსტითაც იგივეა, ანუ ეს რაუნდის შედეგი არ არის.
++- **Problem (stop rule):** რეალურ Chromium-ში 1440×900-ზე, video კლიპის არჩევისას, `clipGainVideoReason` შუა სვეტში (max 408 px) 2 ხაზად გადადის. baseline-ში ქართული ტექსტი 1 ხაზი იყო (327 px). ეს LAYOUT-ის საზღვარს არღვევს. ტექსტი B-ის §1.1-ით ზუსტადაა განსაზღვრული, class-ის შეცვლა კი stop rule-ით აკრძალულია. **Solution:** კოდი არ შეცვლილა, საკითხი B-ს გადაეცა გაზომილი ალტერნატივებით (მაგ. `A video clip has no Clip Gain — use the track Volume/Mute`: 1 ხაზი, 329 px). 1280-ზე ბოლო ხაზების panel-ის ქვემოთ გასვლა ქართული ტექსტითაც იგივეა, ანუ ეს რაუნდის შედეგი არ არის. საკითხი გადაწყდა D-29z108-ით (იხ. C-R142-01-ის ჩანაწერი).
+ - **Problem (C-R142-01, Medium):** C round 142-მა იგივე დაადასტურა: 1440×900-ზე video კლიპის არჩევისას ინგლისური `clipGainVideoReason` 2 ხაზად გადადის, video placeholder კი baseline-თან შედარებით d = (+16, −8, −32, 0)-ით იძვრის. ქართული ტექსტის ჩანაცვლებით იმავე DOM-ზე 1 ხაზი და 0 px მიიღება, ანუ მიზეზი ინგლისური ტექსტია. **Solution:** A-ის გაზომილი კანდიდატებიდან (`a-round-142/probe/out/video-reason-candidates-a142.json`) B-მ D-29z108-ით აირჩია `A video clip has no Clip Gain — use the track Volume/Mute` (1 ხაზი, 329 px; ქართული baseline 327 px). წაიშალა მხოლოდ „for its sound“, აზრი იგივე რჩება. class და key არ შეცვლილა. 1280-ზე ყველა კანდიდატი და ქართული baseline-იც 2 ხაზია, ეს დარღვევა არ არის (R3).
++- **Problem (C-R143-01, Low):** C round 143-ში 1440×900-ზე video state-ში `arrangement-detail-video-placeholder` არის [735.5, 759.5, 139, 16], baseline (6e9f9b1) კი [719.5, 759.5, 171, 16], ანუ d = (+16, 0, −32, 0). placeholder-ის ინგლისური ტექსტი (`Video clip · no waveform`, 139 px) ქართულზე (171 px) ვიწროა და ცენტრშია, ამიტომ x და w იცვლება. მშობელი `arrangement-detail-waveform`-ის d = 0, ქართული ტექსტის ჩანაცვლებით კი placeholder ზუსტად baseline-ის box-ზე დგება; C-R142-01-ის y −8 აღარ არის. **Solution:** B-მ ეს delta წერილობით მიიღო (D-29z109 R1) როგორც უკვე დამტკიცებული `videoPlaceholder` string-ის სიგანის განსხვავება: მოსალოდნელი box [735.5, 759.5, 139, 16] ± 1 px. კოდი არ შეცვლილა.
+ - **Problem:** Biome-მა რამდენიმე შეცვლილი ხაზი (გრძელი const-ები, `ariaLabels` მასივები) ხელახლა გადაიტანა. **Solution:** ხელით გადატანილია `--write`-ის გარეშე, ანგარიშში ჩამოთვლილია.
+ 
+ ## ტესტირება
+@@ -95,10 +96,9 @@
+ - მუტაციები m82–m87 (m86 ორჯერ): თითოეულმა დასახელებული ტესტები გააწითლა, ფაილები აღდგა და sha256-ით შემოწმდა.
+ - A-ის ბრაუზერის probe (`tmp/studio-real-loop/a-round-142/probe/`): 1440-ზე video reason 1 → 2 ხაზი (იხ. ზემოთ). დანარჩენი reason-ები და group block baseline-ს არ აღემატება.
+ - სრული suite, `npm run verify`, build და e2e root-ის gate-ზეა.
++- Round 143: A — typecheck/lint exit 0, 15 ფაილი 357/357 მწვანე, მუტაციები m88–m90; C — ყველა row PASS, გარდა დაუმტკიცებელი placeholder delta-სი (C-R143-01); რეალური Clip Gain −20 dB → 20.03 dB კლება.
++- Round 144: C-ის ხელახალი შემოწმება D-29z109-ის მიხედვით — შედეგი მოსალოდნელია.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- B: `clipGainVideoReason`-ის მოკლე ტექსტის დამტკიცება, რომ 1440-ზე 1 ხაზში ჩაეტიოს (LAYOUT).
+-- C round 142: ბრაუზერში შემოწმება 1440×900-სა და 1280×720-ზე (DETAIL-TEXT, DETAIL-STATUS, CLIP-GAIN-AUDIO, LIBRARY-LABELS, GEO-COUNT, LAYOUT, REG-141).
+-- B: §3.2/R8-ში `stems` kind-ით match-ის მოთხოვნის გასწორება ან folder label-ის haystack-ში დამატების გადაწყვეტა.
+-- V-0.5: ბიბლიოთეკის panel-ის საკუთარი ტექსტი, preview, dock, route meta title, `collection.ts`, `studio-lab-demo.ts`, context-ის l.3468.
++- V-0.5: ბიბლიოთეკის panel-ის საკუთარი ტექსტი, preview, dock, route meta title, `collection.ts`, `studio-lab-demo.ts`, context-ის l.3468, `LIB-SEARCH-KEYWORDS` (kind-ის ძებნის საკვანძო სიტყვები, მრავლობითის ჩათვლით, display label-ებისგან ცალკე).

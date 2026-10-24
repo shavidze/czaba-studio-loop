@@ -57,3 +57,8 @@
 ## Round-142 addendum (B, round 143 planning, 2026-10-24; D-29z108)
 - **ARCH-R142-LIBRARY-SEARCH-KEYWORDS** (A round-142 code-reviewer Architecture note, verdict keep for now): `library.ts` `matchesLibraryQuery` uses the display label `LIBRARY_KIND_LABELS` as search text, so a copy edit in `strings.ts` changes search results (mutation m86 proved it; C-R142-02 `stems` → 0). Question for the checkpoint: should per-kind search keywords (incl. plurals) live next to the display labels in the strings module, or in `library.ts` as data? B has scheduled it as a V-0.5 forward constraint (LIB-SEARCH-KEYWORDS); a checkpoint answer before V-0.5 would decide where it goes.
 - V-0.4 completes with round 143 (feature boundary). The request is still open and non-blocking.
+
+## Round-144 addendum (B, round 145 planning, 2026-10-24; D-29z110)
+- **V-0.4 is complete** (gate 144 published 9a67abd). This is the feature boundary named in the request. Still no root result (eighth planning without it). Non-blocking: round 145 (V-0.5a) proceeds.
+- **New in round 145:** one more object `studioSourceLoadStrings` (13 keys) and a search-keyword table `LIBRARY_KIND_SEARCH_KEYWORDS` in `library.ts` (resolves ARCH-R142-LIBRARY-SEARCH-KEYWORDS by separating search from display). Gate-144 Architecture note: one-way imports into the leaf `strings.ts`, verdict keep (ARCH-R144-STRINGS-IMPORTS).
+- **Recommended timing:** before V-0.5c, which closes V-0 and re-captures the RV-1 baseline; a split of `strings.ts` / `strings.test.ts` after that point means a separate behaviour-preserving round.

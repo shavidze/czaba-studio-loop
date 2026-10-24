@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T20:02:29.318Z)
+# Active loop summary (2026-10-24T20:22:46.904Z)
 
-- backlog.json 1312 KB -> active view 171 KB
-- status: G_ROOT_GATE round 143
-- servers: `{"checkedUtc":"2026-10-24T19:55:00.0057281Z","round":143,"attempt":1,"store":200}`
-- last publication: 6e9f9b1e97d67703ba34e8b2a260a0a5215c3506 (rounds 141-141)
-- last root gate: round 143 skipped - C taskStatus FAIL
+- backlog.json 1317 KB -> active view 172 KB
+- status: G_ROOT_GATE round 144
+- servers: `{"checkedUtc":"2026-10-24T20:13:59.2900387Z","round":144,"attempt":1,"store":200}`
+- last publication: 9a67abd78b41162262c0882544dbdd4544afef1b (rounds 142-144)
+- last root gate: round 144 published - commit 9a67abd78b41162262c0882544dbdd4544afef1b pushed
 
 ## Current items: -
 
@@ -302,12 +302,14 @@
 - C-R141-DEMO-BADGE-SUBTRACTION / - / confirmed by B (collection.ts badge = V-0.5 collection copy, area_addition_d29z96) / 
 - A-R141-DEVIATIONS-1-4 / - / ratified (C AN-REVIEW; DS2 codepoint-built regex kept: C verified equality, reviewer endorsed, keeps the token grep empty) / 
 - G141-3-FAKE-BEARER-403 / - / blocked: backend unavailable in cloud (open backend evidence) / 
-- C-R142-01 / medium / open - fix-up dispatched round 143 (D-29z108 R1) / at 1440 with a video clip selected the English clipGainVideoReason wraps to 2 lines (baseline 1); video placeholder moves d=(+16,-8,-32,0)
-- A-R142-D2-POLISH-LEFTOVERS / low / folded into round 143 (owned stage, costs little; PL1/PL2; guard discrimination checked by m89/m90 on the guard line itself) / detail-panel-polish it titles still say 'in Georgian'; not.toContain('end, წმ') can never fail
-- GATE-142-SKIPPED / info / open_root / Round 142 root gate skipped (C FAIL); round-142 code (22 paths) is uncommitted in the tree; rounds 142+143 publish together after C PASS
+- GATE-142-SKIPPED / info / open_root / Rounds 142 and 143 root gates skipped (C FAIL); the 22 paths are uncommitted in the tree; rounds 142+143+144 publish together after C PASS
 - G142-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
 - A-R142-DEVIATIONS-D1-D7 / info / ratified (B, D-29z108 R5): D1 57th pin line PENDING_HIDDEN_HINT; D2 flipped guards (leftovers fixed round 143); D3 LB-SEARCH 'stem'; D4 Biome rewraps; D5 shared helper; D6 l.702 block is the formatter map (reviewer: A right); D7 helper rename / 
 - ARCH-R142-LIBRARY-SEARCH-KEYWORDS / info / signal -> V-0.5 forward constraint LIB-SEARCH-KEYWORDS (not scheduled alone); reviewer verdict keep for now / library.ts matchesLibraryQuery uses the display label LIBRARY_KIND_LABELS as search text, so copy edits change search results (m86 proves it
+- A-R143-REVIEW-LOWS / low / R-L1 + R-L2 folded into round 144 (owned files, cheap; D-29z109 R3); R-L3 acknowledged info (broad 'წმ' guard, low risk) / R-L1 polish describe title l.362 says 'Georgian detail labels'; R-L2 doc 118 TODO l.101-102 stale, no round-143 testing line, stale 'unresol
+- A-R143-DEVIATIONS-D1-D3 / info / ratified (B, D-29z109 R4): D1 DPS2/DPS4 stayed green under m89/m90 (toContain sees the suffixed text; B prediction wrong); D2 Biome join -1 line shift; D3 probe (b) delta, ruled by R1 / 
+- GATE-143-SKIPPED / info / open_root / Round 143 root gate skipped (C FAIL on an unratified literal criterion); publish rounds 142+143+144 together after C round 144 PASS
+- G143-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
