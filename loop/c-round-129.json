@@ -1,0 +1,110 @@
+{
+ "round": 129,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T07:24:39.2154258Z",
+  "round": 129,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T129-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "EDIT-COPY",
+  "UNDO-LABEL",
+  "EDIT-LAYOUT",
+  "REG-EXPORT-COPY",
+  "G129-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [
+  "E5 splitRangeFailed (not reachable in browser; ST7 only)",
+  "E35 cutTimeNothing (not reachable; ST7 + all-lane-clipboard unit)",
+  "E38 pasteLaneKind (not reachable without video clip paste; ST7 + ArrangementContext unit)",
+  "E39 pasteMissing (not reachable; ST7 only)",
+  "E12/E27/E31 empty-range messages: a drag on empty lane background makes no time selection in this UI, so a range with no material could not be built (bgRange empty in all runs); ST6 only",
+  "REG-EXPORT-COPY invalidRangeNoFile (X1) not reachable; ST1 only",
+  "E24 duplicateConflict: not exercised in the browser (task (c) list is E23/E26/E22); ST7 only",
+  "E36b loopRemoved suffix: not exercised (the marker half of E36b was verified); ST7 only"
+ ],
+ "blocked": [
+  "G129-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [],
+ "georgianCounts": {
+  "statusRegionNetMax": 0,
+  "undoTitleMaxAfterEdits": 0,
+  "subtractedTrackNames": [
+   "მუსიკა",
+   "სტემები"
+  ],
+  "exportDialogNet": 0,
+  "note": "E8/E9 rows show the setup's own add-clip Undo title 'Undo: დამატება — Soft impact' (V-0.2b scope, not this round)."
+ },
+ "evidence": {
+  "vitest": "c-round-129/out/vitest.log",
+  "diffs": [
+   "c-round-129/out/diff-src.txt",
+   "c-round-129/out/diff-tests.txt"
+  ],
+  "edit": [
+   "c-round-129/out/edit129-1440-r3.json",
+   "c-round-129/out/edit129-1280-r1.json",
+   "c-round-129/out/edit129-1440-r4.json",
+   "c-round-129/out/edit129-1440-r2.json"
+  ],
+  "layout": [
+   "c-round-129/out/layout-compare.json",
+   "c-round-129/out/layout129-1440-r1.json",
+   "c-round-129/out/layout129-1280-r1.json"
+  ],
+  "auth": "c-round-129/out/g129-3.json",
+  "shots": "c-round-129/shots/"
+ },
+ "invalidRuns": [
+  {
+   "run": "explore-1440 attempt 1",
+   "reason": "ENV-FIRST-LOAD: grid control missing right after load (setSnapOff null dataset); discarded, attempt 2 OK"
+  },
+  {
+   "run": "edit129-1440-r1",
+   "reason": "C harness error: Escape does not clear clip selection, so E8 met a still-selected clip (got E9 text) and E19 deleted a 2-clip selection (got E16 text). Both texts were correct for the real state. Script fixed to deselect by clicking empty SFX lane; output file was removed by C when renaming (console log only, in C transcript)."
+  },
+  {
+   "run": "edit129-1440-r2",
+   "reason": "valid; E33 step hit E32 (nothing selected after Undo/Redo of the paste; Redo does not restore selection, pre-existing and outside this string-only round). E32 text exact. r3 added a direct E33 step."
+  }
+ ],
+ "notesForB": [
+  "A deviation 1: four assertions now use fixed English fragments ('the clipboard did not change', 'the gap was closed', 'marker'). They keep matchers and are not weaker than the Georgian fragments; reviewer L2 (would pass silently on future rewording) stands as a deferred Low candidate.",
+  "A deviation 2: the 6 constants were deleted (allowed by §2(b)); ST9's constant-line check is now vacuous but the slice check covers their former uses.",
+  "m4 survived (A disclosed): no UI unit test asserts the single- or multi-clip delete status. C verified E19 and E16 exactly in the browser at both viewports; B may add the assertion in a later round.",
+  "Undo button visible label is truncated ('Undo: De…', span scrollWidth 252 > clientWidth 74) for 'Delete time selection (all tracks)'; it was already truncated before (Georgian add label 203 > 74). Button box, toolbar rows and doc width unchanged; full text is in title. Not a regression.",
+  "Redo after Paste does not restore the pasted clip selection (seen in r2). Behaviour unchanged by this string-only round; record only if B considers it in scope later.",
+  "Mixed language remains as planned: track names, toolbar 'წაშლა', detail panel and add-clip messages stay Georgian until V-0.2b/V-0.3/V-0.4."
+ ],
+ "ableton": {
+  "requirementMet": "yes (CZABA V-0.2a copy, exact text, unchanged effects)",
+  "correspondence": {
+   "Split/Cut Time/Paste/Duplicate/time selection terms": "confirmed terms (Live 12 manual ch.6 §6.11/§6.12 via B capture b-round-71)",
+   "Delete leaves gap / Cut Time closes gap on all tracks": "Cut Time confirmed; Delete-leaves-gap conscious difference (user decision 2026-10-11) — both observed in browser",
+   "Undo label wording": "unconfirmed (no source claim)",
+   "No Duplicate Time": "conscious difference, message says so"
+  }
+ }
+}

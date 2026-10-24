@@ -1250,6 +1250,17 @@ C round 128 (`tmp/studio-real-loop/c-round-128.md`, `c-round-128.json`) — **PA
 - **R6 — შედეგი წინასწარ (round 130):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.2a-ს შეზღუდული გასწორება; C PASS — V-0.2b.
 
 
+**D-29z95 — Round 129-ის შედეგი; V-0.2a დასრულდა; Round 130: V-0.2b (დაკვრის, ბიბლიოთეკის, Loop-ისა და ჩაჩოჩების შეტყობინებები ინგლისურად).**
+
+C round 129 (`tmp/studio-real-loop/c-round-129.md`, `c-round-129.json`) — **PASS**, `browserVerified`/`realVerified` — true, ბაგი 0. EDIT-COPY: 29 ზუსტი სტატუსი 1440-ზე და 1280-ზე, ეფექტები უცვლელი. UNDO-LABEL: 13 label ზუსტი, Undo/Redo აღადგენს. Layout ≤ 1 px, Export-ის ტექსტი უცვლელი, G129-3 401 (fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 129 — **published `1e453b1`**; ეს არის round 130-ის baseline.
+- **R1 — V-0.2a → მზადაა** (`c_pass_published`). ახალი Low-ები → `deferred_low_polish` (180): GATE129-S1 (Copy-ის სტატუსი მარჯვნიდან მარცხნივ მონიშვნისას — არა-სტრიქონის გამოსახულებაა `copySelection`-ში, V-0.2b-ის საზღვრებს გარეთ), GATE129-S3 (ფრაგმენტული assertion-ები), A-R129-REVIEW-L3 (`const e` alias), C-R129-UNDO-LABEL-TRUNCATED (უკვე არსებული).
+- **R2 — V-0.2b-ში შედის:** Context-ის l.178–190 constant-ები, `playPastEndMessage` და 8 callback-ის (`togglePlayback`…`nudgeSelectedClip`) ქართული სტრიქონები → 4 ახალი ობიექტი (`studioPlaybackStrings`, `studioLibraryStrings`, `studioLoopStrings`, `studioMoveStrings`), ზუსტი ინგლისური P1–P25. დამოკიდებული ტესტი ზუსტი grep-ით — 8.
+- **R3 — exported სახელები რჩება.** `GESTURE_*`, `NUDGE_AT_TIME_START_MESSAGE`, `WEB_AUDIO_UNAVAILABLE_MESSAGE` და `playPastEndMessage` 7 გაყინულ კომპონენტსა და ტესტებს შემოაქვს (`StudioWorkspace` l.1994 `===` შედარება); მნიშვნელობა მოდულიდან მოდის (module contract).
+- **R4 — ჯგუფის გადატანის Undo label `გადატანა (n)` (l.1733) ამ რაუნდში ქართულად რჩება** და V-0.4-ში გადადის `ArrangementClip.tsx`-ის იმავე label-თან (l.700/713) და დანარჩენ move/trim label-ებთან ერთად — ერთ მოქმედებას ორ ენაზე ორი label არ ექნება.
+- **R5 — P4-ში ხაზების როლები პატარა ასოებით (`music, stems or SFX`):** `strings.ts`-ში ქართული არ დაიშვება, V-0.4-ის ინგლისური სახელები ჯერ გადაწყვეტილი არ არის.
+- **R6 — ჩართული ორი იაფი საკითხი, რაუნდის ფაილებში:** SA-DEL (+1 `it` `status-announcement-ui`-ში, ხურავს m4-ის ხარვეზს) და GATE129-S2 (ST9 ამოწმებს, რომ 6 constant აღარ არსებობს). ST13 — Context-ის დარჩენილი ქართული ხაზების ზუსტი სია (ratchet).
+- **R7 — შედეგი წინასწარ (round 131):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.2b-ს შეზღუდული გასწორება; C PASS — V-0.2c (B ჯერ ზომავს, საჭიროებისას ყოფს).
+
 **D-29z91 — Round 125-ის შედეგი; DESIGN-UX-REVIEW ნაწილი 1 დასრულდა; Round 126: DESIGN-UX-REVIEW, ნაწილი 2.**
 
 C round 125 (`tmp/studio-real-loop/c-round-125.md`, `c-round-125.json`) — **PASS**, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`, `partComplete: true`: D6, D1, D2 შესრულდა, გადატანილი არცერთი; SOURCE-SCOPE (`608187f`, 937) დასაწყისშიც და ბოლოსაც OK; G125-3 (401, „Sign in required“, 0 `audio[src]`; fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 125 — `skipped`; baseline რჩება `608187f`.
@@ -2227,6 +2238,9 @@ flowchart TD
 | 128 → | (შედეგი) | **C PASS** (`browserVerified`; EX-KEYS `Close`=1/`Done`=1, EX-COPY W1–W4, REG-WAV); V-0.1 → მზადაა; C-R128-L1 (Low) → deferred; gate 128 published `77f2763` |
 | 129 | VISUAL-A V-0.2a | რედაქტირების ბრძანებების შეტყობინებები და history label-ები ინგლისურად (`studioEditStrings`, E1–E42), X1; 8 ტესტი — ლიტერალი → მოდული; ST6–ST9; doc 105 (D-29z94) |
 | 129 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.2a-ს Medium+ გასწორება; სხვაგვარად V-0.2b |
+| 129 → | (შედეგი) | **C PASS** (`browserVerified`; EDIT-COPY 29/29, UNDO-LABEL 13/13); V-0.2a → მზადაა; 4 Low → deferred; gate 129 published `1e453b1` |
+| 130 | VISUAL-A V-0.2b | დაკვრის, ბიბლიოთეკიდან დამატების/ჩაგდების, Loop-ისა და ჩაჩოჩების შეტყობინებები და history label-ები ინგლისურად (P1–P25, 4 ობიექტი); 8 ტესტი — ლიტერალი → მოდული; ST10–ST13, SA-DEL, GATE129-S2; doc 106 (D-29z95) |
+| 130 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.2b-ს Medium+ გასწორება; სხვაგვარად V-0.2c |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2278,6 +2292,8 @@ flowchart TD
 **D-29z93:** round 128-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (მხოლოდ W0–W4 მნიშვნელობები), `strings.test.ts` (მათი literal-ები), `export-dialog-hold-enter.test.tsx` (+1 `it`, HE8, და სათაურები), კიდევ 6 ტესტის მხოლოდ სათაურები (`export-dialog-focus`, `export-dialog-focus-restore`, `export-toolbar-hold-enter`, `export-dialog-footer`, `export-cancel-ui`, `export-cancel`) და doc 104. დანარჩენი გაყინულია (`b-round-127-r128-tree-sha256.txt`, 930).
 
 **D-29z94:** round 129-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (ახალი `studioEditStrings` და `invalidRangeNoFile`-ის მნიშვნელობა), `ArrangementContext.tsx` (მხოლოდ import, 6 constant l.190–201-დან — `LOOP_STEP_BLOCKED_MESSAGE` გარდა — და სტრიქონები 8 ბრძანებაში l.1766–2056), `strings.test.ts` (ST6–ST9, X1), 8 ტესტი (მხოლოდ ლიტერალი → მოდული: `delete-selection-ui`, `all-lane-clipboard`, `ArrangementContext.test`, `markers-ui`, `status-announcement-ui`, `fader-guards`, `self-disabling-focus`, `grid-snap-position`) და ახალი doc 105. დანარჩენი გაყინულია (`b-round-128-r129-tree-sha256.txt`, 929).
+
+**D-29z95:** round 130-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (4 ახალი ობიექტი), `ArrangementContext.tsx` (მხოლოდ import, l.178–190 და l.513–514-ის მნიშვნელობები exported სახელების შენარჩუნებით, 8 callback-ის სტრიქონები l.1205–1757; l.1733 რჩება), `strings.test.ts` (ST10–ST13, ST9 `index === -1`), 8 ტესტი (მხოლოდ ლიტერალი → მოდული; `status-announcement-ui` +1 `it` SA-DEL: `grid-snap-ui`, `grid-snap-loop-drop`, `marker-time-snap-ui`, `gesture-reentry`, `failed-source-refusal`, `collection-load-status`, `ArrangementContext.test`) და ახალი doc 106. დანარჩენი გაყინულია (`b-round-129-r130-tree-sha256.txt`, 930).
 
 ## 7. Done Policy
 

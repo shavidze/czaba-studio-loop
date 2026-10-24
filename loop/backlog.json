@@ -1,9 +1,9 @@
 {
  "version": 123,
- "updated": "2026-10-24 B round 128 -> 129 planning (D-29z94)",
+ "updated": "2026-10-24 B round 129 -> 130 planning (D-29z95)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 129: D-29z94 - VISUAL-A V-0.2a: edit-command messages (split/delete/Ctrl+Shift+L/duplicate/copy/cut/Cut Time/paste) in ArrangementContext.tsx l.1766-2056 + 6 constants -> new studioEditStrings in strings.ts (English, E1-E42) + X1 invalidRangeNoFile; 8 dependent tests literal -> module; ST6-ST9; doc 105; baseline 77f2763 clean; frozen b-round-128-r129-tree-sha256.txt (929))",
+ "current_task": "current-task.md (round 130: D-29z95 - VISUAL-A V-0.2b: playback/library add+drop/loop/nudge messages in ArrangementContext.tsx (l.178-190, 513-514, 1205-1757 string-only; exported names kept) -> studioPlaybackStrings/studioLibraryStrings/studioLoopStrings/studioMoveStrings (English P1-P25); 8 dependent tests literal -> module; ST10-ST13 + ST9 index===-1 (GATE129-S2) + SA-DEL (m4 gap); doc 106; baseline 1e453b1 clean; frozen b-round-129-r130-tree-sha256.txt (930))",
  "advisor_used_by_B": "round 128 -> 129 planning: advisor available and used before writing (and before finishing)",
  "baseline": {
   "tsc_errors": 0,
@@ -9048,11 +9048,22 @@
    "round": 129,
    "task": "current-task.md",
    "decision": "D-29z94",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "VISUAL-A-OBSIDIAN / V-0.2a: edit-command messages to English"
    ],
-   "note": "V-0.2 split into V-0.2a/b/c by measured test coupling (scope unchanged); 12 grants (strings.ts, strings.test.ts, ArrangementContext.tsx string-only l.190-201 subset + l.1766-2056, 8 tests literal->module, new doc 105); track names stay (V-0.4/V-0.5), subtracted by C; conditional copy stays in the Context"
+   "note": "V-0.2 split into V-0.2a/b/c by measured test coupling (scope unchanged); 12 grants (strings.ts, strings.test.ts, ArrangementContext.tsx string-only l.190-201 subset + l.1766-2056, 8 tests literal->module, new doc 105); track names stay (V-0.4/V-0.5), subtracted by C; conditional copy stays in the Context",
+   "result": "C PASS (browserVerified, realVerified), 0 bugs; gate 129 published 1e453b1"
+  },
+  {
+   "round": 130,
+   "task": "current-task.md",
+   "decision": "D-29z95",
+   "status": "dispatched",
+   "items": [
+    "VISUAL-A-OBSIDIAN / V-0.2b: playback, library add/drop, loop and nudge messages to English"
+   ],
+   "note": "12 paths (strings.ts, strings.test.ts, ArrangementContext.tsx string-only, 8 tests literal->module incl. +1 it SA-DEL, new doc 106); group nudge label and selection/collection/lane ghost texts stay (V-0.2c/V-0.4)"
   }
  ],
  "post_current_stage_queue": [
@@ -9292,7 +9303,7 @@
   },
   {
    "id": "VISUAL-A-OBSIDIAN",
-   "status": "in_progress: DESIGN-UX-REVIEW done (rounds 125-126); V-0.1 Export strings done (rounds 127-128, C PASS round 128 browserVerified, published 77f2763); V-0.2a (edit-command messages) = round 129 (D-29z94)",
+   "status": "in_progress: DESIGN-UX-REVIEW done (rounds 125-126); V-0.1 done (rounds 127-128, published 77f2763); V-0.2a done (round 129, C PASS browserVerified, published 1e453b1); V-0.2b = round 130 (D-29z95)",
    "requested": "2026-10-21",
    "approved_by_user": "2026-10-21: direction A (Obsidian & Brass), moves M1-M4 approved, Studio UI language English only (like Ableton), timing after T12 and before phase 2",
    "instruction": "Visual refresh of Studio only: colors, icons, typography, button surfaces. Do NOT change positions, sizes, layout, behaviour or shortcuts except the approved moves M1-M4. Do not start before T12-GAIN-VOLUME is complete; do not mix into phase 1 or T12 tasks.",
@@ -9478,7 +9489,7 @@
        129
       ],
       "area": "ArrangementContext.tsx edit commands splitSelection..pasteClipboard (l.1766-2056) + LOOP_REMOVED/CLIPBOARD_EMPTY/DUPLICATE_RANGE/DUPLICATE_EMPTY/GROUP_SPLIT_MISS/CUT_TIME_NEEDS_RANGE constants -> studioEditStrings; X1 invalidRangeNoFile 'time selection'",
-      "status": "dispatched_round129",
+      "status": "c_pass_published",
       "dependent_tests": [
        "delete-selection-ui",
        "all-lane-clipboard",
@@ -9488,16 +9499,37 @@
        "fader-guards",
        "self-disabling-focus",
        "grid-snap-position"
-      ]
+      ],
+      "round129_result": "C PASS browserVerified=true realVerified=true (c-round-129.json): 29 exact status matches at 1440 and 1280, 13 Undo labels exact with Undo/Redo effects, layout within 1 px, export copy unchanged, G129-3 401; gate 129 published 1e453b1. Inconclusive (unit-only): E5, E12, E24, E27, E31, E35, E36b loopRemoved, E38, E39, X1"
      },
      {
       "stage": "V-0.2b",
-      "area": "ArrangementContext.tsx playback/library add+drop/loop/move+nudge messages (l.178-187, 192, 521, 1200-1765) incl. GESTURE_*/NUDGE_*/AUDIO_ON_VIDEO_LANE/LIBRARY_DROP_BLOCKED/librarySourceFailed/WEB_AUDIO_UNAVAILABLE/LOOP_STEP_BLOCKED; ~34 test files by fragment scan (exact grep at planning)",
-      "status": "planned"
+      "area": "ArrangementContext.tsx l.178-190 constants (exported GESTURE_UNDO/GESTURE_EDIT/NUDGE_AT_TIME_START/WEB_AUDIO_UNAVAILABLE keep names; values from module), playPastEndMessage l.513-514, togglePlayback/startLibraryPreview/addSourceToActiveTrack/dropLibrarySource/toggleLoopSelection/commitLoopRange/stepLoopRange/nudgeSelectedClip string literals -> studioPlaybackStrings/studioLibraryStrings/studioLoopStrings/studioMoveStrings (P1-P25)",
+      "status": "dispatched_round130",
+      "round": [
+       130
+      ],
+      "dependent_tests": [
+       "status-announcement-ui",
+       "grid-snap-ui",
+       "grid-snap-loop-drop",
+       "marker-time-snap-ui",
+       "gesture-reentry",
+       "failed-source-refusal",
+       "collection-load-status",
+       "ArrangementContext.test"
+      ],
+      "rulings_d29z95": {
+       "group_move_label": "the keyboard group nudge history label `გადატანა (n)` (Context l.1733) stays Georgian and moves in V-0.4 together with ArrangementClip.tsx l.700/713 (same label for mouse group drag) and the other move/trim labels, so one action never has two Undo labels in two languages",
+       "p4_track_roles": "P4 names track roles in lower case (music, stems or SFX): strings.ts may not hold Georgian and V-0.4 English track names are not decided",
+       "exported_names": "exported constants keep names and signatures (7 frozen components + tests import them; StudioWorkspace l.1994 === compare); values come from the module",
+       "folded_lows": "m4 gap (SA-DEL, +1 it in status-announcement-ui) and GATE129-S2 (ST9 constant loop asserts index === -1); both in files the round owns, small cost",
+       "not_folded": "GATE129-S1 copyRangeDone unsorted range is a non-string expression in copySelection (outside the V-0.2b string-only ranges) -> deferred_low_polish"
+      }
      },
      {
       "stage": "V-0.2c",
-      "area": "ArrangementContext.tsx video import messages (l.2171-2262, 3403) + helper modules groups.ts, selection.ts, library.ts, video.ts, video.client.ts (incl. source.audioNote), tempo.ts, metronome.ts, view.ts",
+      "area": "ArrangementContext.tsx video import messages (l.2171-2262, 3403) + helper modules groups.ts, selection.ts, library.ts, video.ts, video.client.ts (incl. source.audioNote), tempo.ts, metronome.ts, view.ts; collection.ts load-failure messages (reuse the V-0.2b phrase \"failed to load — details are in the library\"); selection.ts overlap \"No room here\"",
       "status": "planned"
      },
      {
@@ -9507,7 +9539,7 @@
      },
      {
       "stage": "V-0.4",
-      "area": "lanes and detail: ArrangementLane, ArrangementClip, ArrangementClipEnvelope, ArrangementGroupHeader, ArrangementTrackMeter, ArrangementMaster, ArrangementDetailPanel; default track names (video/audio/music/stems/SFX) are UI copy",
+      "area": "lanes and detail: ArrangementLane, ArrangementClip, ArrangementClipEnvelope, ArrangementGroupHeader, ArrangementTrackMeter, ArrangementMaster, ArrangementDetailPanel; default track names (video/audio/music/stems/SFX) are UI copy; all move/trim history labels together (ArrangementClip.tsx l.700/713/715 + Context l.1733 `გადატანა (n)`, D-29z95); ArrangementLane drop ghost texts",
       "status": "planned"
      },
      {
@@ -9563,7 +9595,20 @@
      "rule": "later stages reuse these terms; a new term is added to the stage doc map and here"
     },
     "split_d29z94": "V-0.2 split into a/b/c by measured test coupling (B scan: Context remaining 85 Georgian lines; helpers' strings asserted in ~46 test files overall); scope unchanged; checkpoint request to root (strings module shape, conditional copy in formatters, Context size) when V-0.2c closes, before V-0.3",
-    "track_name_rule_d29z94": "default track names (studio-lab.tsx ვიდეო/მუსიკა/სტემები/SFX, Context fallback ვიდეო/აუდიო) are translated in V-0.4/V-0.5; until then English statuses interpolate them and C subtracts them from Georgian counts"
+    "track_name_rule_d29z94": "default track names (studio-lab.tsx ვიდეო/მუსიკა/სტემები/SFX, Context fallback ვიდეო/აუდიო) are translated in V-0.4/V-0.5; until then English statuses interpolate them and C subtracts them from Georgian counts",
+    "glossary_additions_d29z95": {
+     "ჩაჩოჩება": "Nudge (Live 12 §6.6 term for arrow-key loop brace moves)",
+     "Loop-ის დიაპაზონი": "Loop range",
+     "Loop ჩართვა/გამორთვა": "Loop on / Loop off",
+     "ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია": "failed to load — details are in the library.",
+     "აქ ადგილი არ არის": "No room here",
+     "ჯერ არ ჩატვირთულა": "has not loaded yet",
+     "უახლოესი თავისუფალი ადგილი": "nearest free spot",
+     "დამატება — {title}": "Add — {title}",
+     "ჯერ ხელი აუშვი": "let go first",
+     "დროის დასაწყისი": "start of the timeline",
+     "„…“": "“…”"
+    }
    },
    "v0_glossary_amendment_d29z93": {
     "footer dismiss button": "Done (was Close in round 127; the Modal X keeps aria-label Close)",
@@ -15352,10 +15397,42 @@
   {
    "id": "GATE128-S1-MIXED-LANGUAGE",
    "severity": "medium (scheduling note, not a defect of round 128)",
-   "status": "addressed by schedule: V-0.2a round 129, then V-0.2b/c..V-0.5; closes when V-0 completes (RV-4)",
+   "status": "addressed by schedule: V-0.2a done round 129; V-0.2b round 130; then V-0.2c..V-0.5; closes when V-0 completes (RV-4)",
    "title": "Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)",
    "source": "gates/round-128/review.md suggestion 1",
    "evidence": "gates/round-128/review.md"
+  },
+  {
+   "id": "C-R129-REDO-PASTE-SELECTION",
+   "severity": "info",
+   "status": "observation (pre-existing; product question, not scheduled)",
+   "title": "Redo after Paste does not restore the pasted clip selection",
+   "source": "c-round-129.md note 5",
+   "evidence": "c-round-129.json invalidRuns r2"
+  },
+  {
+   "id": "C-R129-EMPTY-RANGE-UNREACHABLE",
+   "severity": "info",
+   "status": "acknowledged (harness): a drag on empty lane background creates no time selection, so E12/E27/E31 are unit-only",
+   "title": "empty-range edit messages not reachable in the browser",
+   "source": "c-round-129.json inconclusive",
+   "evidence": "c-round-129.json"
+  },
+  {
+   "id": "A-R129-M4-GAP",
+   "severity": "info",
+   "status": "scheduled round 130 (SA-DEL in status-announcement-ui, D-29z95)",
+   "title": "no UI test asserted the delete-clip status (m4 survived)",
+   "source": "a-round-129.md mutations; gates/round-129/review.md info 4",
+   "evidence": "a-round-129.md"
+  },
+  {
+   "id": "GATE129-S2-ST9-VACUOUS",
+   "severity": "low",
+   "status": "scheduled round 130 (ST9 asserts index === -1; strings.test.ts owned)",
+   "title": "ST9 constant loop checks nothing after the six constants were deleted",
+   "source": "gates/round-129/review.md finding 2",
+   "evidence": "gates/round-129/review.md"
   }
  ],
  "tech_lead_notes": [
@@ -16709,6 +16786,13 @@
    "source": "gates/round-128/review.md #5 (nit)",
    "note": "MP3_FORMAT_NOTE, BOTH_FORMAT_NOTE etc. in ArrangementExportDialog and MASTER_MUTED_EXPORT_SUFFIX in ArrangementContext are now pure aliases of studioExportStrings; exportFailed('') leaves a trailing space (pre-existing). Inline when a round already owns those lines",
    "status": "signal (not scheduled)"
+  },
+  {
+   "id": "ARCH-R129-TWO-PLACE-MESSAGE-ASSEMBLY",
+   "round": 129,
+   "source": "gates/round-129/review.md Architecture note; a-round-129.md reviewer note",
+   "note": "Context picks variants and joins pieces (suffix/clipboard/lanes/trackSuffix) while strings.ts holds templates; reviewers: keep; fold into the pre-V-0.3 frontend-architect checkpoint (conditional copy in formatters vs Context, strings module shape, Context size)",
+   "status": "signal (not scheduled); part of the checkpoint request B makes when V-0.2c closes"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -18803,6 +18887,46 @@
    "evidence": "c-round-128.json notesForB",
    "repro": "Export, start a WAV render, read document.activeElement",
    "added": "2026-10-24 B round 128 -> 129 planning (D-29z94)"
+  },
+  {
+   "id": "GATE129-S1-COPY-RANGE-UNSORTED",
+   "title": "Copy status after a right-to-left time selection reads end before start (copyRangeDone gets latest.range.start/end unsorted; deleteRangeDone/extendDone sort with Math.min/Math.max)",
+   "severity": "low",
+   "status": "deferred",
+   "source": "gates/round-129/review.md finding 1",
+   "evidence": "gates/round-129/review.md",
+   "repro": "drag a time selection right-to-left on one clip, Ctrl+C, read the status",
+   "added": "2026-10-24 B round 129 -> 130 planning (D-29z95)"
+  },
+  {
+   "id": "GATE129-S3-FRAGMENT-ASSERTIONS",
+   "title": "English fragment assertions ('the clipboard did not change', 'the gap was closed', 'marker') pass silently on future rewording; prefer full formatter matches",
+   "severity": "low",
+   "status": "deferred",
+   "source": "gates/round-129/review.md finding 3; A round 129 reviewer L2",
+   "evidence": "a-round-129.md deviation 1",
+   "repro": "markers-ui.test.tsx:690, ArrangementContext.test.ts:429, all-lane-clipboard.test.tsx:416/444",
+   "added": "2026-10-24 B round 129 -> 130 planning (D-29z95)"
+  },
+  {
+   "id": "A-R129-REVIEW-L3-TEST-ALIAS",
+   "title": "const e = studioEditStrings alias in strings.test.ts hides uses from grep (follows existing const s = studioExportStrings)",
+   "severity": "low",
+   "status": "deferred",
+   "source": "a-round-129.md code review L3",
+   "evidence": "a-round-129.md",
+   "repro": "grep studioEditStrings in strings.test.ts",
+   "added": "2026-10-24 B round 129 -> 130 planning (D-29z95)"
+  },
+  {
+   "id": "C-R129-UNDO-LABEL-TRUNCATED",
+   "title": "Visible Undo label truncates long history labels ('Undo: De…', 252 px text in 74 px span); full text only in title; pre-existing (Georgian add label was also truncated)",
+   "severity": "low",
+   "status": "deferred (pre-existing; V-0.3 owns ArrangementTransport)",
+   "source": "c-round-129.md note 4",
+   "evidence": "c-round-129/shots/E36-msg-1440-r4.png",
+   "repro": "Delete a time selection on all tracks, look at the Undo button",
+   "added": "2026-10-24 B round 129 -> 130 planning (D-29z95)"
   }
  ],
  "baseline_tree_at_round108": {
@@ -19659,5 +19783,27 @@
    "app/contexts/AuthContext.tsx": "bf9ee257",
    "app/components/ui/Modal.tsx (frozen, shared)": "741c2341"
   }
+ },
+ "baseline_tree_at_round130": {
+  "head": "1e453b15185bca71f9137aa483d3e25a8b7d4abf",
+  "working_tree": "clean at planning (gate 129 published)",
+  "frozen_list": "tmp/studio-real-loop/b-round-129-r130-tree-sha256.txt",
+  "entries": 930,
+  "granted_start_hashes": "tmp/studio-real-loop/b-round-129-r130-granted-start-sha256.txt",
+  "granted_start_copies": "tmp/studio-real-loop/b-round-129/r130-granted-start/",
+  "grants": [
+   "app/lib/arrangement/strings.ts",
+   "app/lib/arrangement/__tests__/strings.test.ts",
+   "app/contexts/ArrangementContext.tsx",
+   "app/lib/arrangement/__tests__/grid-snap-ui.test.tsx",
+   "app/lib/arrangement/__tests__/status-announcement-ui.test.tsx",
+   "app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx",
+   "app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx",
+   "app/lib/arrangement/__tests__/gesture-reentry.test.tsx",
+   "app/lib/arrangement/__tests__/failed-source-refusal.test.tsx",
+   "app/lib/arrangement/__tests__/collection-load-status.test.tsx",
+   "app/lib/arrangement/__tests__/ArrangementContext.test.ts",
+   "docs/implementation/2026/quarter-IV/106-studio-v0-playback-loop-strings.md (new)"
+  ]
  }
 }

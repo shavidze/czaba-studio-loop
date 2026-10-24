@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T06:55:22.633Z)
+# Active loop summary (2026-10-24T07:46:47.261Z)
 
-- backlog.json 1167 KB -> active view 149 KB
-- status: G_ROOT_GATE round 128
-- servers: `{"checkedUtc":"2026-10-24T06:39:10.6286481Z","round":128,"attempt":1,"store":200}`
-- last publication: 77f2763b5e968d7f09683637602668e4a710501d (rounds 123-128)
-- last root gate: round 128 published - commit 77f2763b5e968d7f09683637602668e4a710501d pushed
+- backlog.json 1174 KB -> active view 149 KB
+- status: G_ROOT_GATE round 129
+- servers: `{"checkedUtc":"2026-10-24T07:24:39.2154258Z","round":129,"attempt":1,"store":200}`
+- last publication: 1e453b15185bca71f9137aa483d3e25a8b7d4abf (rounds 129-129)
+- last root gate: round 129 published - commit 1e453b15185bca71f9137aa483d3e25a8b7d4abf pushed
 
 ## Current items: -
 
@@ -253,8 +253,8 @@
 - C-R125-OBS-S1-FULL-SCALE / info / data (C-R86-OBS-DEFAULT-OVERLOAD class); relevant to T12-ADVANCED meters/RMS; not a bug / the S1 fixture export has 159 full-scale samples in the 4 s range (hero + pulse summed at 0 dB)
 - C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
 - ALTGR-SHORTCUT-GUARD / info / signal (not scheduled; no CZABA contract; C round 126 F-5) / Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or 
-- C-R127-01 / medium / scheduled round 128 (D-29z93: footer closeButton -> 'Done'; HE8 pins unique names idle + during render) / Export dialog has two buttons named 'Close' (frozen Modal X aria-label='Close' + footer text 'Close' after V-0.1); during a render the foote
-- C-R127-L1 / low / parts a-d scheduled round 128 (owned strings.ts, costs little; 2026-10-23 rule exception); parts e-f -> deferred_low_polish / Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in t
+- C-R127-L1 / low / parts a-d closed round 128 (C EX-COPY exact text in the browser, c-round-128.json); parts e-f in deferred_low_polish (C-R127-L1e/L1f) / Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in t
+- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2a round 129, then V-0.2b/c..V-0.5; closes when V-0 completes (RV-4) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

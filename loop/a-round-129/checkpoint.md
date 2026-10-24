@@ -1,0 +1,12 @@
+# A round 129 checkpoint
+- start HEAD 77f2763, tree clean, frozen OK, 11 grant hashes OK (2026-10-24)
+- next: read primitives, pre-edit grep
+- step1 strings.ts done; step2 strings.test ST6-ST9 written (ST6-8 green, ST9 red pre-Context as expected)
+- shell write: created+removed empty app/lib/arrangement/__tests__/strings.test.ts.append.tmp (no lasting effect)
+- next: Context edits
+- step3 Context done, typecheck OK, biome 3 files pending recheck
+- next: 8 test files
+- step4 8 test files edited
+- step5 tests green 19 files/386; m1-m3 red, m4 survived (no UI test pins single delete status; baseline same), m4prime red; doc105 written; granted.diff saved
+- next: code-reviewer, report
+- DONE: report a-round-129.md written; end hashes refreshed

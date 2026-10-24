@@ -1,0 +1,514 @@
+--- ../tmp/studio-real-loop/b-round-128/r129-granted-start/app/lib/arrangement/__tests__/ArrangementContext.test.ts	2026-10-24 07:07:03.157310443 +0000
++++ app/lib/arrangement/__tests__/ArrangementContext.test.ts	2026-10-24 07:15:53.272300645 +0000
+@@ -13,6 +13,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement, deleteTime } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ interface FakeStart {
+   calledAt: number;
+@@ -434,7 +435,7 @@
+     }
+     act(() => release());
+     act(() => result.current.duplicateSelection());
+-    expect(result.current.undoLabel).toBe('დუბლირება (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyDuplicate(1));
+   });
+ 
+   it('duplicates the selection after itself as one history entry (R7-D1)', async () => {
+@@ -446,7 +447,7 @@
+     );
+     expect(copy).toMatchObject({ trackId: 'music', start: 8, sourceOffset: 0, duration: 8 });
+     expect(result.current.projectEnd).toBe(16);
+-    expect(result.current.undoLabel).toBe('დუბლირება (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyDuplicate(1));
+     act(() => result.current.undo());
+     expect(result.current.arrangement.clips).toHaveLength(2);
+     expect(result.current.undoLabel).toBeNull();
+@@ -455,11 +456,11 @@
+   it('refuses Duplicate with a range and without a selection', async () => {
+     const result = await mountEditProvider();
+     act(() => result.current.duplicateSelection());
+-    expect(result.current.status).toBe('დასადუბლირებლად აირჩიე კლიპი.');
++    expect(result.current.status).toBe(studioEditStrings.duplicateNeedsClip);
+     act(() => result.current.selectClip('m1'));
+     act(() => result.current.setTimeRange({ start: 1, end: 2, trackId: 'music' }));
+     act(() => result.current.duplicateSelection());
+-    expect(result.current.status).toBe('დუბლირება კლიპებზე მუშაობს; Duplicate Time არ არის.');
++    expect(result.current.status).toBe(studioEditStrings.duplicateRangeRefused);
+     expect(result.current.undoLabel).toBeNull();
+   });
+ 
+@@ -468,7 +469,7 @@
+     act(() => result.current.selectClips(['m1', 's1']));
+     act(() => result.current.seekTo(3));
+     act(() => result.current.splitSelection());
+-    expect(result.current.undoLabel).toBe('გაყოფა (2)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historySplitClips(2));
+     expect(result.current.selectedClipIds).toHaveLength(2);
+     const rights = result.current.arrangement.clips.filter((clip) =>
+       result.current.selectedClipIds.includes(clip.id),
+@@ -479,21 +480,21 @@
+     ]);
+     act(() => result.current.seekTo(30));
+     act(() => result.current.splitSelection());
+-    expect(result.current.status).toBe('Playhead არცერთ მონიშნულ კლიპს არ კვეთს.');
+-    expect(result.current.undoLabel).toBe('გაყოფა (2)');
++    expect(result.current.status).toBe(studioEditStrings.splitMissesSelection);
++    expect(result.current.undoLabel).toBe(studioEditStrings.historySplitClips(2));
+   });
+ 
+   it('copies and pastes at the playhead onto the active track as one entry (R9-C1)', async () => {
+     const result = await mountEditProvider();
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.status).toBe('ბუფერი ცარიელია — ჯერ Copy ან Cut.');
++    expect(result.current.status).toBe(studioEditStrings.clipboardEmpty);
+     act(() => result.current.selectClip('m1'));
+     act(() => result.current.copySelection());
+     expect(result.current.undoLabel).toBeNull();
+     act(() => result.current.setActiveTrack('music'));
+     act(() => result.current.seekTo(20));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     const pasted = result.current.arrangement.clips.find(
+       (clip) => clip.id === result.current.selectedClipId,
+     );
+@@ -509,11 +510,11 @@
+     act(() => result.current.setTimeRange({ start: 9, end: 10, trackId: 'music' }));
+     act(() => result.current.cutTimeSelection());
+     expect(result.current.undoLabel).toBeNull();
+-    expect(result.current.status).toContain('ბუფერი არ შეცვლილა');
++    expect(result.current.status).toContain('the clipboard did not change');
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.seekTo(20));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     const pasted = result.current.arrangement.clips.find(
+       (clip) => clip.id === result.current.selectedClipId,
+     );
+@@ -536,9 +537,9 @@
+     );
+     act(() => result.current.seekTo(30));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (2)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(2));
+     act(() => result.current.cutTimeSelection());
+-    expect(result.current.status).toBe('Cut Time-ისთვის ჯერ მონიშნე მონაკვეთი (Ctrl+Shift+X).');
++    expect(result.current.status).toBe(studioEditStrings.cutTimeNeedsRange);
+   });
+ 
+   it('refuses split, delete and loop while a pointer gesture is active (D-26)', async () => {
+@@ -564,7 +565,7 @@
+     }
+     act(() => claim.release?.());
+     act(() => result.current.deleteSelection());
+-    expect(result.current.undoLabel).toBe('წაშლა მონაკვეთზე');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyDeleteRange);
+   });
+ 
+   it('claims one pointer gesture at a time: other pointers are refused, the same pointer aborts the stale one (D-26)', async () => {
+@@ -601,7 +602,7 @@
+     const before = result.current.arrangement;
+     act(() => result.current.pasteClipboard());
+     expect(result.current.status).toBe(
+-      'ჩასმა ვერ შესრულდა: ვიდეო ხაზზე 00:40.000-დან ეს მასალა არ ჯდება (აუდიო და ვიდეო ხაზს არ იცვლის). არაფერი შეცვლილა.',
++      studioEditStrings.pasteLaneKind({ track: 'ვიდეო', at: '00:40.000' }),
+     );
+     expect(result.current.arrangement).toBe(before);
+     expect(result.current.undoLabel).toBeNull();
+--- ../tmp/studio-real-loop/b-round-128/r129-granted-start/app/lib/arrangement/__tests__/all-lane-clipboard.test.tsx	2026-10-24 07:07:03.157438456 +0000
++++ app/lib/arrangement/__tests__/all-lane-clipboard.test.tsx	2026-10-24 07:20:54.237814940 +0000
+@@ -10,6 +10,7 @@
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { copyRangeToClipboard, planClipboardPaste } from '../clipboard';
+ import { createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -334,15 +335,17 @@
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.seekTo(20));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     expect(selectedParts(result.current)).toEqual([
+       { trackId: 'music', start: 20, sourceOffset: 13, duration: 2 },
+     ]);
+     expect(result.current.arrangement.clips.filter((clip) => clip.trackId === 'sfx')).toHaveLength(
+       1,
+     );
+-    expect(result.current.status).toBe('ჩასმა (1): 00:20.000-ზე.');
+-    expect(result.current.status).not.toContain('SFX ხაზზე');
++    expect(result.current.status).toBe(
++      studioEditStrings.pasteDone({ count: 1, at: '00:20.000', trackSuffix: '' }),
++    );
++    expect(result.current.status).not.toContain(studioEditStrings.onTrack('SFX'));
+   });
+ 
+   it('all-lane Ctrl+C then Ctrl+V with SFX active pastes on music', async () => {
+@@ -353,11 +356,11 @@
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.seekTo(26));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     expect(selectedParts(result.current)).toEqual([
+       { trackId: 'music', start: 26, sourceOffset: 13, duration: 2 },
+     ]);
+-    expect(result.current.status).not.toContain('SFX ხაზზე');
++    expect(result.current.status).not.toContain(studioEditStrings.onTrack('SFX'));
+   });
+ 
+   it('Cut Time on a window with material on music only pastes back on music', async () => {
+@@ -368,7 +371,7 @@
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.seekTo(30));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     expect(selectedParts(result.current)).toEqual([
+       { trackId: 'music', start: 30, sourceOffset: 7, duration: 2 },
+     ]);
+@@ -384,7 +387,13 @@
+     expect(selectedParts(result.current)).toEqual([
+       { trackId: 'sfx', start: 20, sourceOffset: 13, duration: 2 },
+     ]);
+-    expect(result.current.status).toBe('ჩასმა (1): 00:20.000-ზე · SFX ხაზზე.');
++    expect(result.current.status).toBe(
++      studioEditStrings.pasteDone({
++        count: 1,
++        at: '00:20.000',
++        trackSuffix: studioEditStrings.pasteTrackSuffix('SFX'),
++      }),
++    );
+   });
+ });
+ 
+@@ -404,14 +413,14 @@
+     expect(result.current.range).toEqual(point);
+     expect(result.current.selectedClipIds).toEqual(selection);
+     expect(result.current.arrangement).toBe(before);
+-    expect(result.current.status).toContain('ბუფერი არ შეცვლილა');
+-    expect(result.current.status).not.toContain('სიცარიელე დაიხურა');
++    expect(result.current.status).toContain('the clipboard did not change');
++    expect(result.current.status).not.toContain('the gap was closed');
+     expect(result.current.status).toBe(
+-      'Cut Time 00:15.000 — 00:15.000: ამოსაჭრელი დრო არ არის — არაფერი შეცვლილა, ბუფერი არ შეცვლილა.',
++      studioEditStrings.cutTimeNothing({ start: '00:15.000', end: '00:15.000' }),
+     );
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     expect(selectedParts(result.current)).toEqual([
+       { trackId: 'sfx', start: 20, sourceOffset: 0, duration: 2 },
+     ]);
+@@ -432,8 +441,8 @@
+     expect(result.current.range).toEqual(empty);
+     expect(result.current.selectedClipIds).toEqual(selection);
+     expect(result.current.arrangement).toBe(before);
+-    expect(result.current.status).toContain('ბუფერი არ შეცვლილა');
+-    expect(result.current.status).not.toContain('სიცარიელე დაიხურა');
++    expect(result.current.status).toContain('the clipboard did not change');
++    expect(result.current.status).not.toContain('the gap was closed');
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.pasteClipboard());
+     expect(selectedParts(result.current)).toEqual([
+@@ -469,7 +478,12 @@
+     expect(result.current.getLivePosition()).toBe(33);
+     expect(result.current.range).toBeNull();
+     expect(result.current.status).toBe(
+-      'Cut Time 00:24.000 — 00:26.000: მონაკვეთში ხმა არ იყო, ბუფერი არ შეცვლილა; სიცარიელე დაიხურა ყველა ხაზზე.',
++      studioEditStrings.cutTimeDone({
++        start: '00:24.000',
++        end: '00:26.000',
++        clipboard: studioEditStrings.cutTimeNoSound,
++        suffix: '',
++      }),
+     );
+     act(() => result.current.undo());
+     expect(result.current.arrangement.clips.find((clip) => clip.id === 'm2')?.start).toBe(28);
+--- ../tmp/studio-real-loop/b-round-128/r129-granted-start/app/lib/arrangement/__tests__/delete-selection-ui.test.tsx	2026-10-24 07:07:03.157438456 +0000
++++ app/lib/arrangement/__tests__/delete-selection-ui.test.tsx	2026-10-24 07:15:25.984071734 +0000
+@@ -10,6 +10,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -247,7 +248,7 @@
+     act(() => result.current.setTimeRange(MUSIC_RANGE));
+     act(() => result.current.deleteSelection());
+     const deleted = result.current.arrangement;
+-    expect(result.current.undoLabel).toBe('წაშლა მონაკვეთზე');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyDeleteRange);
+     expect(laneTable(deleted)).toEqual([
+       ['music', 0, 0, 3],
+       ['music', 5, 5, 5],
+@@ -260,7 +261,11 @@
+     expect(result.current.range).toBeNull();
+     expect(result.current.selectedClipIds).toEqual([]);
+     expect(result.current.status).toBe(
+-      '⌫ წაიშალა 00:03.000 — 00:05.000 მუსიკა ხაზზე; სიცარიელე დარჩა.',
++      studioEditStrings.deleteRangeDone({
++        start: '00:03.000',
++        end: '00:05.000',
++        lanes: studioEditStrings.onTrack('მუსიკა'),
++      }),
+     );
+     act(() => result.current.undo());
+     expect(result.current.arrangement).toEqual(initial);
+@@ -305,9 +310,7 @@
+     expect(result.current.arrangement).toBe(initial);
+     expect(result.current.undoLabel).toBeNull();
+     expect(result.current.range).toEqual(empty);
+-    expect(result.current.status).toBe(
+-      'მონიშნულ მონაკვეთში წასაშლელი მასალა არ არის — არაფერი შეცვლილა.',
+-    );
++    expect(result.current.status).toBe(studioEditStrings.deleteRangeEmpty);
+     const point = { start: 4.5, end: 4.5, trackId: 'music' };
+     act(() => result.current.setTimeRange(point));
+     act(() => result.current.deleteSelection());
+@@ -323,9 +326,7 @@
+     const initial = result.current.arrangement;
+     act(() => result.current.extendRangeToAllTracks());
+     expect(result.current.range).toBeNull();
+-    expect(result.current.status).toBe(
+-      'ყველა ხაზზე გასავრცელებლად ჯერ მონიშნე მონაკვეთი (Ctrl+Shift+L).',
+-    );
++    expect(result.current.status).toBe(studioEditStrings.extendNeedsRange);
+     act(() => result.current.setTimeRange(MUSIC_RANGE));
+     const release = result.current.claimPointerGesture(4, () => undefined);
+     act(() => result.current.extendRangeToAllTracks());
+@@ -334,11 +335,15 @@
+     act(() => release?.());
+     act(() => result.current.extendRangeToAllTracks());
+     expect(result.current.range).toEqual({ ...MUSIC_RANGE, allTracks: true });
+-    expect(result.current.status).toBe('მონიშვნა ყველა ხაზზე: 00:03.000 — 00:05.000.');
++    expect(result.current.status).toBe(
++      studioEditStrings.extendDone({ start: '00:03.000', end: '00:05.000' }),
++    );
+     act(() => result.current.setStatus('ready'));
+     act(() => result.current.extendRangeToAllTracks());
+     expect(result.current.range).toEqual({ ...MUSIC_RANGE, allTracks: true });
+-    expect(result.current.status).toBe('მონიშვნა ყველა ხაზზე: 00:03.000 — 00:05.000.');
++    expect(result.current.status).toBe(
++      studioEditStrings.extendDone({ start: '00:03.000', end: '00:05.000' }),
++    );
+     expect(result.current.arrangement).toBe(initial);
+     expect(result.current.undoLabel).toBeNull();
+   });
+@@ -349,7 +354,7 @@
+     act(() => result.current.setTimeRange({ start: 1, end: 5, trackId: 'music' }));
+     act(() => result.current.extendRangeToAllTracks());
+     act(() => result.current.deleteSelection());
+-    expect(result.current.undoLabel).toBe('წაშლა მონაკვეთზე (ყველა ხაზი)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyDeleteRangeAllTracks);
+     expect(laneTable(result.current.arrangement)).toEqual([
+       ['music', 0, 0, 1],
+       ['music', 5, 5, 5],
+@@ -358,7 +363,11 @@
+       ['video', 0, 0, 1],
+     ]);
+     expect(result.current.status).toBe(
+-      '⌫ წაიშალა 00:01.000 — 00:05.000 ყველა ხაზზე; სიცარიელე დარჩა.',
++      studioEditStrings.deleteRangeDone({
++        start: '00:01.000',
++        end: '00:05.000',
++        lanes: studioEditStrings.onAllTracks,
++      }),
+     );
+     act(() => result.current.undo());
+     expect(result.current.arrangement).toEqual(initial);
+@@ -370,9 +379,7 @@
+     act(() => result.current.setTimeRange(MUSIC_RANGE));
+     act(() => result.current.extendRangeToAllTracks());
+     act(() => result.current.splitSelection());
+-    expect(result.current.status).toBe(
+-      'გაყოფა ყველა ხაზის მონიშვნაზე არ სრულდება — მონიშნე მონაკვეთი ერთ ხაზზე.',
+-    );
++    expect(result.current.status).toBe(studioEditStrings.splitAllTracksRefused);
+     expect(result.current.arrangement).toBe(initial);
+     expect(result.current.undoLabel).toBeNull();
+     expect(result.current.range).toEqual({ ...MUSIC_RANGE, allTracks: true });
+@@ -394,7 +401,7 @@
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.seekTo(30));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (2)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(2));
+     const pasted = result.current.arrangement.clips
+       .filter((clip) => result.current.selectedClipIds.includes(clip.id))
+       .map((clip) => [clip.trackId, clip.start, clip.sourceOffset, clip.duration])
+@@ -418,7 +425,7 @@
+     ]) {
+       act(() => live(api).setTimeRange(MUSIC_RANGE));
+       fireEvent.keyDown(document.body, keys);
+-      expect(live(api).undoLabel).toBe('წაშლა მონაკვეთზე');
++      expect(live(api).undoLabel).toBe(studioEditStrings.historyDeleteRange);
+       expect(laneTable(live(api).arrangement)).toEqual([
+         ['music', 0, 0, 3],
+         ['music', 5, 5, 5],
+@@ -486,7 +493,7 @@
+     expect(live(api).arrangement).toBe(initial);
+     expect(live(api).undoLabel).toBeNull();
+     expect(view.getByTestId('arrangement-status').textContent).toBe(
+-      'წასაშლელად აირჩიე კლიპი ან მონიშნე მონაკვეთი.',
++      studioEditStrings.deleteNeedsTarget,
+     );
+   });
+ 
+@@ -525,7 +532,7 @@
+     expect(deleteButton(view).title).toBe(ALL_LANE_DELETE_HINT);
+     expect(deleteButton(view).getAttribute('aria-label')).toBe(ALL_LANE_DELETE_HINT);
+     fireEvent.click(deleteButton(view));
+-    expect(live(api).undoLabel).toBe('წაშლა მონაკვეთზე (ყველა ხაზი)');
++    expect(live(api).undoLabel).toBe(studioEditStrings.historyDeleteRangeAllTracks);
+     expect(live(api).arrangement.clips.find((clip) => clip.id === 'm2')?.start).toBe(12);
+   });
+ });
+--- ../tmp/studio-real-loop/b-round-128/r129-granted-start/app/lib/arrangement/__tests__/fader-guards.test.tsx	2026-10-24 07:07:03.157438456 +0000
++++ app/lib/arrangement/__tests__/fader-guards.test.tsx	2026-10-24 07:16:19.930522228 +0000
+@@ -12,6 +12,7 @@
+ import type { Arrangement, ArrangementTrack, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement, trackPanValue } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
++import { studioEditStrings } from '../strings';
+ import { trackVolumeFromDb } from '../track-volume-db';
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -26,7 +27,7 @@
+ const VOLUME_LABEL = 'Volume';
+ const MASTER_VOLUME_LABEL = 'Master Volume';
+ const MUTE_VIDEO_LABEL = 'Mute — ვიდეო';
+-const CLIP_DELETE_LABEL = 'კლიპის წაშლა';
++const CLIP_DELETE_LABEL = studioEditStrings.historyDeleteClip;
+ const TRACKS_PER_GRAPH = 3;
+ 
+ const fakeClock = { base: 0 };
+--- ../tmp/studio-real-loop/b-round-128/r129-granted-start/app/lib/arrangement/__tests__/grid-snap-position.test.tsx	2026-10-24 07:07:03.157438456 +0000
++++ app/lib/arrangement/__tests__/grid-snap-position.test.tsx	2026-10-24 07:16:23.312550574 +0000
+@@ -12,6 +12,7 @@
+ import { resolveGridTime } from '../grid';
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -484,8 +485,14 @@
+     expect(pasted).toHaveLength(1);
+     expect(pasted[0]?.trackId).toBe('sfx');
+     expect(pasted[0]?.start).toBe(9);
+-    expect(statusText(view)).toBe('ჩასმა (1): 00:09.000-ზე · SFX ხაზზე.');
+-    expect(live(api).undoLabel).toBe('ჩასმა (1)');
++    expect(statusText(view)).toBe(
++      studioEditStrings.pasteDone({
++        count: 1,
++        at: '00:09.000',
++        trackSuffix: studioEditStrings.pasteTrackSuffix('SFX'),
++      }),
++    );
++    expect(live(api).undoLabel).toBe(studioEditStrings.historyPaste(1));
+     pressCtrl('z');
+     expect(live(api).arrangement.clips.map((clip) => clip.id)).toEqual(['s1']);
+     clickRuler(ruler, xFor(9.3), { altUp: true });
+--- ../tmp/studio-real-loop/b-round-128/r129-granted-start/app/lib/arrangement/__tests__/markers-ui.test.tsx	2026-10-24 07:07:03.157438456 +0000
++++ app/lib/arrangement/__tests__/markers-ui.test.tsx	2026-10-24 07:16:14.378475305 +0000
+@@ -10,6 +10,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementMarker, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -575,7 +576,7 @@
+     expect(live(api).arrangement.clips).toHaveLength(0);
+     expect(live(api).arrangement.markers).toEqual(markersBefore);
+     expect(markerTimes(view)).toEqual(['0.000', '12.000', '20.000', '40.000']);
+-    expect(live(api).undoLabel).toBe('კლიპის წაშლა');
++    expect(live(api).undoLabel).toBe(studioEditStrings.historyDeleteClip);
+     act(() => live(api).undo());
+     expect(live(api).arrangement.clips).toHaveLength(1);
+     expect(live(api).arrangement.clips[0]).toMatchObject({ id: 'm1', start: 0, duration: 50 });
+@@ -676,7 +677,7 @@
+     fireEvent.keyDown(document.body, { key: 'X', code: 'KeyX', ctrlKey: true, shiftKey: true });
+     expect(live(api).undoLabel).toBe('Cut Time');
+     expect(markerTimes(view)).toEqual(['12.000', '30.000']);
+-    expect(statusText(view).endsWith(' 1 მარკერი წაიშალა.')).toBe(true);
++    expect(statusText(view).endsWith(studioEditStrings.markersRemoved(1))).toBe(true);
+     expect(live(api).arrangement.clips.map((clip) => [clip.start, clip.duration])).toEqual([
+       [0, 15],
+       [15, 25],
+@@ -686,7 +687,7 @@
+     expect(live(api).arrangement.clips).toHaveLength(1);
+     act(() => live(api).setTimeRange({ start: 42, end: 45, trackId: 'music' }));
+     fireEvent.keyDown(document.body, { key: 'X', code: 'KeyX', ctrlKey: true, shiftKey: true });
+-    expect(statusText(view)).not.toContain('მარკერი წაიშალა');
++    expect(statusText(view)).not.toContain('marker');
+   });
+ });
+ 
+--- ../tmp/studio-real-loop/b-round-128/r129-granted-start/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx	2026-10-24 07:07:03.157438456 +0000
++++ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx	2026-10-24 07:16:21.279533538 +0000
+@@ -14,6 +14,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -333,7 +334,7 @@
+     expect(live(api).arrangement.clips.length).toBe(0);
+     expect(deleteButton().disabled).toBe(true);
+     expect(document.activeElement).toBe(undoButton());
+-    expect(undoButton().title).toBe('Undo: კლიპის წაშლა');
++    expect(undoButton().title).toBe(`Undo: ${studioEditStrings.historyDeleteClip}`);
+   });
+ 
+   it('FL6: ↩ Zoom on its last history step hands focus to Fit', async () => {
+--- ../tmp/studio-real-loop/b-round-128/r129-granted-start/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx	2026-10-24 07:07:03.157438456 +0000
++++ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx	2026-10-24 07:16:18.677511658 +0000
+@@ -10,6 +10,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -706,7 +707,7 @@
+ 
+ const LOOP_OFF_TEXT = 'Loop გამორთულია; დიაპაზონი შენარჩუნებულია.';
+ const LOOP_ON_TEXT = 'Loop ჩართულია.';
+-const COPY_ONE_CLIP_TEXT = 'Copy: 1 კლიპი ბუფერშია.';
++const COPY_ONE_CLIP_TEXT = studioEditStrings.copyClipsDone(1);
+ 
+ interface OneShotPress {
+   readonly target: Element;
+@@ -815,7 +816,7 @@
+ 
+     expect(allowed).toEqual([false, false, false, false]);
+     expect(counts).toEqual([2, 2, 2, 2]);
+-    expect(addedTexts(stopWatching(watch))).toEqual(['კლიპი გაიყო 00:02.500-ზე.']);
++    expect(addedTexts(stopWatching(watch))).toEqual([studioEditStrings.splitDone('00:02.500')]);
+   });
+ 
+   it('HK3 a held Ctrl+Shift+L extends the range to all lanes with one announcement', async () => {
+@@ -838,7 +839,7 @@
+ 
+     expect(allowed).toEqual([false, false, false, false]);
+     expect(addedTexts(stopWatching(watch))).toEqual([
+-      'მონიშვნა ყველა ხაზზე: 00:01.000 — 00:03.000.',
++      studioEditStrings.extendDone({ start: '00:01.000', end: '00:03.000' }),
+     ]);
+     expect(live(api).range).toEqual({ start: 1, end: 3, trackId: 'music', allTracks: true });
+   });

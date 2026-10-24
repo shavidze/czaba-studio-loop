@@ -1,0 +1,1267 @@
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -145,7 +145,7 @@
+   createArrangementStatusEntry,
+   reduceArrangementStatus,
+ } from '~/lib/arrangement/status-announcement';
+-import { studioExportStrings } from '~/lib/arrangement/strings';
++import { studioEditStrings, studioExportStrings } from '~/lib/arrangement/strings';
+ import {
+   createPlaybackAnchor,
+   isPlaybackAnchorHolding,
+@@ -187,18 +187,11 @@
+   'ამ ბრაუზერში Web Audio მიუწვდომელია — დაკვრა და ექსპორტი ვერ იმუშავებს.';
+ const STOP_OVERSHOOT_TOLERANCE = 0.05;
+ const NO_SELECTION: readonly string[] = [];
+-const LOOP_REMOVED_MESSAGE =
+-  'Loop-ის დიაპაზონი წაშლის შემდეგ 0.1 წამზე მოკლე დარჩა, ამიტომ მოიხსნა.';
+ const LOOP_STEP_BLOCKED_MESSAGE = 'Loop ვეღარ გადაიწევს: დროის დასაწყისი ან მინიმალური სიგრძე.';
+ const DECODE_SAMPLE_RATE = 48000;
+ const RETIRED_GRAPH_GRACE = 0.25;
+ const GESTURE_WAIT_MS = 50;
+ const GESTURE_WAIT_LIMIT_MS = 30000;
+-const CLIPBOARD_EMPTY_MESSAGE = 'ბუფერი ცარიელია — ჯერ Copy ან Cut.';
+-const DUPLICATE_RANGE_MESSAGE = 'დუბლირება კლიპებზე მუშაობს; Duplicate Time არ არის.';
+-const DUPLICATE_EMPTY_MESSAGE = 'დასადუბლირებლად აირჩიე კლიპი.';
+-const GROUP_SPLIT_MISS_MESSAGE = 'Playhead არცერთ მონიშნულ კლიპს არ კვეთს.';
+-const CUT_TIME_NEEDS_RANGE_MESSAGE = 'Cut Time-ისთვის ჯერ მონიშნე მონაკვეთი (Ctrl+Shift+X).';
+ const MASTER_VOLUME_LABEL = 'Master Volume';
+ const MASTER_MUTE_LABEL = 'Master Mute';
+ const CLIP_GAIN_LABEL = 'Clip Gain';
+@@ -1770,50 +1763,48 @@
+     const latest = latestRef.current;
+     const arrangement = historyRef.current.present;
+     if (latest.range?.allTracks) {
+-      setStatus('გაყოფა ყველა ხაზის მონიშვნაზე არ სრულდება — მონიშნე მონაკვეთი ერთ ხაზზე.');
++      setStatus(studioEditStrings.splitAllTracksRefused);
+       return;
+     }
+     if (!latest.range && latest.selectedClipIds.length >= 2) {
+       const time = livePosition();
+       const result = splitClipsAtTime(arrangement, latest.selectedClipIds, time);
+       if (!result) {
+-        setStatus(GROUP_SPLIT_MISS_MESSAGE);
++        setStatus(studioEditStrings.splitMissesSelection);
+         return;
+       }
+       const count = result.rightIds.length;
+-      applyEdit(result.arrangement, `გაყოფა (${count})`);
++      applyEdit(result.arrangement, studioEditStrings.historySplitClips(count));
+       setSelection(result.rightIds);
+-      setStatus(
+-        `${count} კლიპი გაიყო ${formatArrangementTime(time)}-ზე; არჩეულია მარჯვენა ნაწილები.`,
+-      );
++      setStatus(studioEditStrings.splitClipsDone({ count, time: formatArrangementTime(time) }));
+       return;
+     }
+     if (latest.range) {
+       const result = splitClipsByRange(arrangement, latest.range);
+       if (!result) {
+-        setStatus('მონიშნულ მონაკვეთზე გაყოფა ვერ მოხერხდა.');
++        setStatus(studioEditStrings.splitRangeFailed);
+         return;
+       }
+-      applyEdit(result.arrangement, 'გაყოფა მონაკვეთზე');
++      applyEdit(result.arrangement, studioEditStrings.historySplitRange);
+       setSelectedClipId(result.middleId);
+       setRange(null);
+-      setStatus('კლიპი გაიყო მონაკვეთის ორივე საზღვარზე; შუა ნაწილი არჩეულია.');
++      setStatus(studioEditStrings.splitRangeDone);
+       return;
+     }
+     const time = livePosition();
+     const clip = arrangement.clips.find((entry) => entry.id === primarySelectedClipId());
+     if (!clip) {
+-      setStatus('გასაყოფად აირჩიე კლიპი და playhead დააყენე მის შიგნით, ან მონიშნე მონაკვეთი.');
++      setStatus(studioEditStrings.splitNeedsTarget);
+       return;
+     }
+     const result = splitClipAt(arrangement, clip.id, time);
+     if (!result) {
+-      setStatus('Playhead არჩეული კლიპის შიგნით უნდა იყოს.');
++      setStatus(studioEditStrings.splitPlayheadOutside);
+       return;
+     }
+-    applyEdit(result.arrangement, 'გაყოფა');
++    applyEdit(result.arrangement, studioEditStrings.historySplit);
+     setSelectedClipId(result.rightId);
+-    setStatus(`კლიპი გაიყო ${formatArrangementTime(time)}-ზე.`);
++    setStatus(studioEditStrings.splitDone(formatArrangementTime(time)));
+   }, [
+     applyEdit,
+     livePosition,
+@@ -1834,17 +1825,28 @@
+       const range = latest.range;
+       const next = deleteRangeKeepingGap(arrangement, range);
+       if (next === arrangement) {
+-        setStatus('მონიშნულ მონაკვეთში წასაშლელი მასალა არ არის — არაფერი შეცვლილა.');
++        setStatus(studioEditStrings.deleteRangeEmpty);
+         return;
+       }
+-      applyEdit(next, range.allTracks ? 'წაშლა მონაკვეთზე (ყველა ხაზი)' : 'წაშლა მონაკვეთზე');
++      applyEdit(
++        next,
++        range.allTracks
++          ? studioEditStrings.historyDeleteRangeAllTracks
++          : studioEditStrings.historyDeleteRange,
++      );
+       setRange(null);
+       setSelectedClipId(null);
+       const lanes = range.allTracks
+-        ? 'ყველა ხაზზე'
+-        : `${arrangement.tracks.find((track) => track.id === range.trackId)?.name ?? '—'} ხაზზე`;
++        ? studioEditStrings.onAllTracks
++        : studioEditStrings.onTrack(
++            arrangement.tracks.find((track) => track.id === range.trackId)?.name ?? '—',
++          );
+       setStatus(
+-        `⌫ წაიშალა ${formatArrangementTime(Math.min(range.start, range.end))} — ${formatArrangementTime(Math.max(range.start, range.end))} ${lanes}; სიცარიელე დარჩა.`,
++        studioEditStrings.deleteRangeDone({
++          start: formatArrangementTime(Math.min(range.start, range.end)),
++          end: formatArrangementTime(Math.max(range.start, range.end)),
++          lanes,
++        }),
+       );
+       return;
+     }
+@@ -1852,19 +1854,19 @@
+     if (ids.length >= 2) {
+       const next = deleteClips(arrangement, ids);
+       const removed = arrangement.clips.length - next.clips.length;
+-      applyEdit(next, `კლიპების წაშლა (${removed})`);
++      applyEdit(next, studioEditStrings.historyDeleteClips(removed));
+       setSelection(NO_SELECTION);
+-      setStatus(`${removed} კლიპი წაიშალა; სიცარიელე დარჩა.`);
++      setStatus(studioEditStrings.deleteClipsDone(removed));
+       return;
+     }
+     const clip = arrangement.clips.find((entry) => entry.id === primarySelectedClipId());
+     if (!clip) {
+-      setStatus('წასაშლელად აირჩიე კლიპი ან მონიშნე მონაკვეთი.');
++      setStatus(studioEditStrings.deleteNeedsTarget);
+       return;
+     }
+-    applyEdit(deleteClip(arrangement, clip.id), 'კლიპის წაშლა');
++    applyEdit(deleteClip(arrangement, clip.id), studioEditStrings.historyDeleteClip);
+     setSelectedClipId(null);
+-    setStatus('კლიპი წაიშალა; სიცარიელე დარჩა.');
++    setStatus(studioEditStrings.deleteClipDone);
+   }, [
+     applyEdit,
+     primarySelectedClipId,
+@@ -1880,14 +1882,17 @@
+     }
+     const range = latestRef.current.range;
+     if (!range) {
+-      setStatus('ყველა ხაზზე გასავრცელებლად ჯერ მონიშნე მონაკვეთი (Ctrl+Shift+L).');
++      setStatus(studioEditStrings.extendNeedsRange);
+       return;
+     }
+     if (!range.allTracks) {
+       setRange({ ...range, allTracks: true });
+     }
+     setStatus(
+-      `მონიშვნა ყველა ხაზზე: ${formatArrangementTime(Math.min(range.start, range.end))} — ${formatArrangementTime(Math.max(range.start, range.end))}.`,
++      studioEditStrings.extendDone({
++        start: formatArrangementTime(Math.min(range.start, range.end)),
++        end: formatArrangementTime(Math.max(range.start, range.end)),
++      }),
+     );
+   }, [refuseEditDuringGesture, setRange]);
+ 
+@@ -1903,30 +1908,34 @@
+     }
+     const latest = latestRef.current;
+     if (latest.range) {
+-      setStatus(DUPLICATE_RANGE_MESSAGE);
++      setStatus(studioEditStrings.duplicateRangeRefused);
+       return;
+     }
+     const result = duplicateClips(historyRef.current.present, latest.selectedClipIds);
+     if (!result) {
+-      setStatus(DUPLICATE_EMPTY_MESSAGE);
++      setStatus(studioEditStrings.duplicateNeedsClip);
+       return;
+     }
+     if (!result.arrangement) {
+       const { conflict } = result;
+       setStatus(
+-        `დუბლირება ვერ შესრულდა: ${trackLabel(conflict.trackId)} ხაზზე ${formatArrangementTime(conflict.start)}–${formatArrangementTime(conflict.end)} დაკავებულია. არაფერი შეცვლილა.`,
++        studioEditStrings.duplicateConflict({
++          track: trackLabel(conflict.trackId),
++          start: formatArrangementTime(conflict.start),
++          end: formatArrangementTime(conflict.end),
++        }),
+       );
+       return;
+     }
+     const count = result.copyIds.length;
+-    applyEdit(result.arrangement, `დუბლირება (${count})`);
++    applyEdit(result.arrangement, studioEditStrings.historyDuplicate(count));
+     setSelection(result.copyIds);
+     const firstCopy = Math.min(
+       ...result.arrangement.clips
+         .filter((clip) => result.copyIds.includes(clip.id))
+         .map((clip) => clip.start),
+     );
+-    setStatus(`დუბლირება (${count}): ასლები ${formatArrangementTime(firstCopy)}-დან.`);
++    setStatus(studioEditStrings.duplicateDone({ count, from: formatArrangementTime(firstCopy) }));
+   }, [applyEdit, refuseEditDuringGesture, setSelection, trackLabel]);
+ 
+   const copySelection = useCallback(() => {
+@@ -1938,22 +1947,29 @@
+     if (latest.range) {
+       const clipboard = copyRangeToClipboard(arrangement, latest.range);
+       if (!clipboard) {
+-        setStatus('მონიშნულ მონაკვეთში დასაკოპირებელი ხმა არ არის — ბუფერი არ შეცვლილა.');
++        setStatus(studioEditStrings.copyRangeEmpty);
+         return;
+       }
+       clipboardRef.current = clipboard;
+       setStatus(
+-        `Copy: ${latest.range.allTracks ? 'ყველა ხაზი' : trackLabel(latest.range.trackId)} ${formatArrangementTime(latest.range.start)}–${formatArrangementTime(latest.range.end)} (${clipboard.items.length} ნაწილი).`,
++        studioEditStrings.copyRangeDone({
++          lane: latest.range.allTracks
++            ? studioEditStrings.allTracks
++            : trackLabel(latest.range.trackId),
++          start: formatArrangementTime(latest.range.start),
++          end: formatArrangementTime(latest.range.end),
++          parts: clipboard.items.length,
++        }),
+       );
+       return;
+     }
+     const clipboard = copyClipsToClipboard(arrangement, latest.selectedClipIds);
+     if (!clipboard) {
+-      setStatus('დასაკოპირებლად აირჩიე კლიპი ან მონიშნე მონაკვეთი — ბუფერი არ შეცვლილა.');
++      setStatus(studioEditStrings.copyNeedsTarget);
+       return;
+     }
+     clipboardRef.current = clipboard;
+-    setStatus(`Copy: ${clipboard.items.length} კლიპი ბუფერშია.`);
++    setStatus(studioEditStrings.copyClipsDone(clipboard.items.length));
+   }, [refuseEditDuringGesture, trackLabel]);
+ 
+   const cutSelection = useCallback(() => {
+@@ -1967,11 +1983,7 @@
+       ? copyRangeToClipboard(arrangement, range)
+       : copyClipsToClipboard(arrangement, latest.selectedClipIds);
+     if (!clipboard) {
+-      setStatus(
+-        range
+-          ? 'მონიშნულ მონაკვეთში ამოსაჭრელი ხმა არ არის — არაფერი შეცვლილა.'
+-          : 'ამოსაჭრელად აირჩიე კლიპი ან მონიშნე მონაკვეთი.',
+-      );
++      setStatus(range ? studioEditStrings.cutRangeEmpty : studioEditStrings.cutNeedsTarget);
+       return;
+     }
+     const next = range
+@@ -1981,7 +1993,7 @@
+     applyEdit(next, 'Cut');
+     setRange(null);
+     setSelection(NO_SELECTION);
+-    setStatus(`Cut: ${clipboard.items.length} ნაწილი ბუფერშია; სიცარიელე დარჩა.`);
++    setStatus(studioEditStrings.cutDone(clipboard.items.length));
+   }, [applyEdit, refuseEditDuringGesture, setRange, setSelection]);
+ 
+   const cutTimeSelection = useCallback(() => {
+@@ -1990,7 +2002,7 @@
+     }
+     const range = latestRef.current.range;
+     if (!range) {
+-      setStatus(CUT_TIME_NEEDS_RANGE_MESSAGE);
++      setStatus(studioEditStrings.cutTimeNeedsRange);
+       return;
+     }
+     const arrangement = historyRef.current.present;
+@@ -2001,7 +2013,10 @@
+     const hasMaterial = result.clipboard.items.length > 0;
+     if (!applyEdit(result.arrangement, 'Cut Time', undefined, { a, b })) {
+       setStatus(
+-        `Cut Time ${formatArrangementTime(a)} — ${formatArrangementTime(b)}: ამოსაჭრელი დრო არ არის — არაფერი შეცვლილა, ბუფერი არ შეცვლილა.`,
++        studioEditStrings.cutTimeNothing({
++          start: formatArrangementTime(a),
++          end: formatArrangementTime(b),
++        }),
+       );
+       return;
+     }
+@@ -2017,7 +2032,14 @@
+     const markersRemoved =
+       (arrangement.markers?.length ?? 0) - (result.arrangement.markers?.length ?? 0);
+     setStatus(
+-      `Cut Time ${formatArrangementTime(a)} — ${formatArrangementTime(b)}: ${hasMaterial ? `${result.clipboard.items.length} ნაწილი ბუფერშია` : 'მონაკვეთში ხმა არ იყო, ბუფერი არ შეცვლილა'}; სიცარიელე დაიხურა ყველა ხაზზე.${loopRemoved ? ` ${LOOP_REMOVED_MESSAGE}` : ''}${markersRemoved > 0 ? ` ${markersRemoved} მარკერი წაიშალა.` : ''}`,
++      studioEditStrings.cutTimeDone({
++        start: formatArrangementTime(a),
++        end: formatArrangementTime(b),
++        clipboard: hasMaterial
++          ? studioEditStrings.cutTimeParts(result.clipboard.items.length)
++          : studioEditStrings.cutTimeNoSound,
++        suffix: `${loopRemoved ? ` ${studioEditStrings.loopRemoved}` : ''}${markersRemoved > 0 ? studioEditStrings.markersRemoved(markersRemoved) : ''}`,
++      }),
+     );
+   }, [applyEdit, refuseEditDuringGesture, setRange, setSelection, updatePosition]);
+ 
+@@ -2037,21 +2059,31 @@
+       const lane = trackLabel(plan.trackId);
+       setStatus(
+         plan.refusal === 'overlap' && plan.conflict
+-          ? `ჩასმა ვერ შესრულდა: ${lane} ხაზზე ${formatArrangementTime(plan.conflict.start)}–${formatArrangementTime(plan.conflict.end)} დაკავებულია. არაფერი შეცვლილა.`
++          ? studioEditStrings.pasteOverlap({
++              track: lane,
++              start: formatArrangementTime(plan.conflict.start),
++              end: formatArrangementTime(plan.conflict.end),
++            })
+           : plan.refusal === 'lane-kind'
+-            ? `ჩასმა ვერ შესრულდა: ${lane} ხაზზე ${formatArrangementTime(at)}-დან ეს მასალა არ ჯდება (აუდიო და ვიდეო ხაზს არ იცვლის). არაფერი შეცვლილა.`
++            ? studioEditStrings.pasteLaneKind({ track: lane, at: formatArrangementTime(at) })
+             : plan.refusal === 'missing'
+-              ? 'ჩასმა ვერ შესრულდა: წყარო ან ხაზი მიუწვდომელია. არაფერი შეცვლილა.'
+-              : CLIPBOARD_EMPTY_MESSAGE,
++              ? studioEditStrings.pasteMissing
++              : studioEditStrings.clipboardEmpty,
+       );
+       return;
+     }
+     const count = plan.clipIds.length;
+-    applyEdit(plan.arrangement, `ჩასმა (${count})`);
++    applyEdit(plan.arrangement, studioEditStrings.historyPaste(count));
+     setSelection(plan.clipIds);
+     setRange(null);
+     setStatus(
+-      `ჩასმა (${count}): ${formatArrangementTime(at)}-ზე${plan.trackId ? ` · ${trackLabel(plan.trackId)} ხაზზე` : ''}.`,
++      studioEditStrings.pasteDone({
++        count,
++        at: formatArrangementTime(at),
++        trackSuffix: plan.trackId
++          ? studioEditStrings.pasteTrackSuffix(trackLabel(plan.trackId))
++          : '',
++      }),
+     );
+   }, [applyEdit, livePosition, refuseEditDuringGesture, setRange, setSelection, trackLabel]);
+ 
+--- a/app/lib/arrangement/__tests__/ArrangementContext.test.ts
++++ b/app/lib/arrangement/__tests__/ArrangementContext.test.ts
+@@ -13,6 +13,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement, deleteTime } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ interface FakeStart {
+   calledAt: number;
+@@ -434,7 +435,7 @@
+     }
+     act(() => release());
+     act(() => result.current.duplicateSelection());
+-    expect(result.current.undoLabel).toBe('დუბლირება (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyDuplicate(1));
+   });
+ 
+   it('duplicates the selection after itself as one history entry (R7-D1)', async () => {
+@@ -446,7 +447,7 @@
+     );
+     expect(copy).toMatchObject({ trackId: 'music', start: 8, sourceOffset: 0, duration: 8 });
+     expect(result.current.projectEnd).toBe(16);
+-    expect(result.current.undoLabel).toBe('დუბლირება (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyDuplicate(1));
+     act(() => result.current.undo());
+     expect(result.current.arrangement.clips).toHaveLength(2);
+     expect(result.current.undoLabel).toBeNull();
+@@ -455,11 +456,11 @@
+   it('refuses Duplicate with a range and without a selection', async () => {
+     const result = await mountEditProvider();
+     act(() => result.current.duplicateSelection());
+-    expect(result.current.status).toBe('დასადუბლირებლად აირჩიე კლიპი.');
++    expect(result.current.status).toBe(studioEditStrings.duplicateNeedsClip);
+     act(() => result.current.selectClip('m1'));
+     act(() => result.current.setTimeRange({ start: 1, end: 2, trackId: 'music' }));
+     act(() => result.current.duplicateSelection());
+-    expect(result.current.status).toBe('დუბლირება კლიპებზე მუშაობს; Duplicate Time არ არის.');
++    expect(result.current.status).toBe(studioEditStrings.duplicateRangeRefused);
+     expect(result.current.undoLabel).toBeNull();
+   });
+ 
+@@ -468,7 +469,7 @@
+     act(() => result.current.selectClips(['m1', 's1']));
+     act(() => result.current.seekTo(3));
+     act(() => result.current.splitSelection());
+-    expect(result.current.undoLabel).toBe('გაყოფა (2)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historySplitClips(2));
+     expect(result.current.selectedClipIds).toHaveLength(2);
+     const rights = result.current.arrangement.clips.filter((clip) =>
+       result.current.selectedClipIds.includes(clip.id),
+@@ -479,21 +480,21 @@
+     ]);
+     act(() => result.current.seekTo(30));
+     act(() => result.current.splitSelection());
+-    expect(result.current.status).toBe('Playhead არცერთ მონიშნულ კლიპს არ კვეთს.');
+-    expect(result.current.undoLabel).toBe('გაყოფა (2)');
++    expect(result.current.status).toBe(studioEditStrings.splitMissesSelection);
++    expect(result.current.undoLabel).toBe(studioEditStrings.historySplitClips(2));
+   });
+ 
+   it('copies and pastes at the playhead onto the active track as one entry (R9-C1)', async () => {
+     const result = await mountEditProvider();
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.status).toBe('ბუფერი ცარიელია — ჯერ Copy ან Cut.');
++    expect(result.current.status).toBe(studioEditStrings.clipboardEmpty);
+     act(() => result.current.selectClip('m1'));
+     act(() => result.current.copySelection());
+     expect(result.current.undoLabel).toBeNull();
+     act(() => result.current.setActiveTrack('music'));
+     act(() => result.current.seekTo(20));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     const pasted = result.current.arrangement.clips.find(
+       (clip) => clip.id === result.current.selectedClipId,
+     );
+@@ -509,11 +510,11 @@
+     act(() => result.current.setTimeRange({ start: 9, end: 10, trackId: 'music' }));
+     act(() => result.current.cutTimeSelection());
+     expect(result.current.undoLabel).toBeNull();
+-    expect(result.current.status).toContain('ბუფერი არ შეცვლილა');
++    expect(result.current.status).toContain('the clipboard did not change');
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.seekTo(20));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     const pasted = result.current.arrangement.clips.find(
+       (clip) => clip.id === result.current.selectedClipId,
+     );
+@@ -536,9 +537,9 @@
+     );
+     act(() => result.current.seekTo(30));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (2)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(2));
+     act(() => result.current.cutTimeSelection());
+-    expect(result.current.status).toBe('Cut Time-ისთვის ჯერ მონიშნე მონაკვეთი (Ctrl+Shift+X).');
++    expect(result.current.status).toBe(studioEditStrings.cutTimeNeedsRange);
+   });
+ 
+   it('refuses split, delete and loop while a pointer gesture is active (D-26)', async () => {
+@@ -564,7 +565,7 @@
+     }
+     act(() => claim.release?.());
+     act(() => result.current.deleteSelection());
+-    expect(result.current.undoLabel).toBe('წაშლა მონაკვეთზე');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyDeleteRange);
+   });
+ 
+   it('claims one pointer gesture at a time: other pointers are refused, the same pointer aborts the stale one (D-26)', async () => {
+@@ -601,7 +602,7 @@
+     const before = result.current.arrangement;
+     act(() => result.current.pasteClipboard());
+     expect(result.current.status).toBe(
+-      'ჩასმა ვერ შესრულდა: ვიდეო ხაზზე 00:40.000-დან ეს მასალა არ ჯდება (აუდიო და ვიდეო ხაზს არ იცვლის). არაფერი შეცვლილა.',
++      studioEditStrings.pasteLaneKind({ track: 'ვიდეო', at: '00:40.000' }),
+     );
+     expect(result.current.arrangement).toBe(before);
+     expect(result.current.undoLabel).toBeNull();
+--- a/app/lib/arrangement/__tests__/all-lane-clipboard.test.tsx
++++ b/app/lib/arrangement/__tests__/all-lane-clipboard.test.tsx
+@@ -10,6 +10,7 @@
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { copyRangeToClipboard, planClipboardPaste } from '../clipboard';
+ import { createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -334,15 +335,17 @@
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.seekTo(20));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     expect(selectedParts(result.current)).toEqual([
+       { trackId: 'music', start: 20, sourceOffset: 13, duration: 2 },
+     ]);
+     expect(result.current.arrangement.clips.filter((clip) => clip.trackId === 'sfx')).toHaveLength(
+       1,
+     );
+-    expect(result.current.status).toBe('ჩასმა (1): 00:20.000-ზე.');
+-    expect(result.current.status).not.toContain('SFX ხაზზე');
++    expect(result.current.status).toBe(
++      studioEditStrings.pasteDone({ count: 1, at: '00:20.000', trackSuffix: '' }),
++    );
++    expect(result.current.status).not.toContain(studioEditStrings.onTrack('SFX'));
+   });
+ 
+   it('all-lane Ctrl+C then Ctrl+V with SFX active pastes on music', async () => {
+@@ -353,11 +356,11 @@
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.seekTo(26));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     expect(selectedParts(result.current)).toEqual([
+       { trackId: 'music', start: 26, sourceOffset: 13, duration: 2 },
+     ]);
+-    expect(result.current.status).not.toContain('SFX ხაზზე');
++    expect(result.current.status).not.toContain(studioEditStrings.onTrack('SFX'));
+   });
+ 
+   it('Cut Time on a window with material on music only pastes back on music', async () => {
+@@ -368,7 +371,7 @@
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.seekTo(30));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     expect(selectedParts(result.current)).toEqual([
+       { trackId: 'music', start: 30, sourceOffset: 7, duration: 2 },
+     ]);
+@@ -384,7 +387,13 @@
+     expect(selectedParts(result.current)).toEqual([
+       { trackId: 'sfx', start: 20, sourceOffset: 13, duration: 2 },
+     ]);
+-    expect(result.current.status).toBe('ჩასმა (1): 00:20.000-ზე · SFX ხაზზე.');
++    expect(result.current.status).toBe(
++      studioEditStrings.pasteDone({
++        count: 1,
++        at: '00:20.000',
++        trackSuffix: studioEditStrings.pasteTrackSuffix('SFX'),
++      }),
++    );
+   });
+ });
+ 
+@@ -404,14 +413,14 @@
+     expect(result.current.range).toEqual(point);
+     expect(result.current.selectedClipIds).toEqual(selection);
+     expect(result.current.arrangement).toBe(before);
+-    expect(result.current.status).toContain('ბუფერი არ შეცვლილა');
+-    expect(result.current.status).not.toContain('სიცარიელე დაიხურა');
++    expect(result.current.status).toContain('the clipboard did not change');
++    expect(result.current.status).not.toContain('the gap was closed');
+     expect(result.current.status).toBe(
+-      'Cut Time 00:15.000 — 00:15.000: ამოსაჭრელი დრო არ არის — არაფერი შეცვლილა, ბუფერი არ შეცვლილა.',
++      studioEditStrings.cutTimeNothing({ start: '00:15.000', end: '00:15.000' }),
+     );
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (1)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(1));
+     expect(selectedParts(result.current)).toEqual([
+       { trackId: 'sfx', start: 20, sourceOffset: 0, duration: 2 },
+     ]);
+@@ -432,8 +441,8 @@
+     expect(result.current.range).toEqual(empty);
+     expect(result.current.selectedClipIds).toEqual(selection);
+     expect(result.current.arrangement).toBe(before);
+-    expect(result.current.status).toContain('ბუფერი არ შეცვლილა');
+-    expect(result.current.status).not.toContain('სიცარიელე დაიხურა');
++    expect(result.current.status).toContain('the clipboard did not change');
++    expect(result.current.status).not.toContain('the gap was closed');
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.pasteClipboard());
+     expect(selectedParts(result.current)).toEqual([
+@@ -469,7 +478,12 @@
+     expect(result.current.getLivePosition()).toBe(33);
+     expect(result.current.range).toBeNull();
+     expect(result.current.status).toBe(
+-      'Cut Time 00:24.000 — 00:26.000: მონაკვეთში ხმა არ იყო, ბუფერი არ შეცვლილა; სიცარიელე დაიხურა ყველა ხაზზე.',
++      studioEditStrings.cutTimeDone({
++        start: '00:24.000',
++        end: '00:26.000',
++        clipboard: studioEditStrings.cutTimeNoSound,
++        suffix: '',
++      }),
+     );
+     act(() => result.current.undo());
+     expect(result.current.arrangement.clips.find((clip) => clip.id === 'm2')?.start).toBe(28);
+--- a/app/lib/arrangement/__tests__/delete-selection-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/delete-selection-ui.test.tsx
+@@ -10,6 +10,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -247,7 +248,7 @@
+     act(() => result.current.setTimeRange(MUSIC_RANGE));
+     act(() => result.current.deleteSelection());
+     const deleted = result.current.arrangement;
+-    expect(result.current.undoLabel).toBe('წაშლა მონაკვეთზე');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyDeleteRange);
+     expect(laneTable(deleted)).toEqual([
+       ['music', 0, 0, 3],
+       ['music', 5, 5, 5],
+@@ -260,7 +261,11 @@
+     expect(result.current.range).toBeNull();
+     expect(result.current.selectedClipIds).toEqual([]);
+     expect(result.current.status).toBe(
+-      '⌫ წაიშალა 00:03.000 — 00:05.000 მუსიკა ხაზზე; სიცარიელე დარჩა.',
++      studioEditStrings.deleteRangeDone({
++        start: '00:03.000',
++        end: '00:05.000',
++        lanes: studioEditStrings.onTrack('მუსიკა'),
++      }),
+     );
+     act(() => result.current.undo());
+     expect(result.current.arrangement).toEqual(initial);
+@@ -305,9 +310,7 @@
+     expect(result.current.arrangement).toBe(initial);
+     expect(result.current.undoLabel).toBeNull();
+     expect(result.current.range).toEqual(empty);
+-    expect(result.current.status).toBe(
+-      'მონიშნულ მონაკვეთში წასაშლელი მასალა არ არის — არაფერი შეცვლილა.',
+-    );
++    expect(result.current.status).toBe(studioEditStrings.deleteRangeEmpty);
+     const point = { start: 4.5, end: 4.5, trackId: 'music' };
+     act(() => result.current.setTimeRange(point));
+     act(() => result.current.deleteSelection());
+@@ -323,9 +326,7 @@
+     const initial = result.current.arrangement;
+     act(() => result.current.extendRangeToAllTracks());
+     expect(result.current.range).toBeNull();
+-    expect(result.current.status).toBe(
+-      'ყველა ხაზზე გასავრცელებლად ჯერ მონიშნე მონაკვეთი (Ctrl+Shift+L).',
+-    );
++    expect(result.current.status).toBe(studioEditStrings.extendNeedsRange);
+     act(() => result.current.setTimeRange(MUSIC_RANGE));
+     const release = result.current.claimPointerGesture(4, () => undefined);
+     act(() => result.current.extendRangeToAllTracks());
+@@ -334,11 +335,15 @@
+     act(() => release?.());
+     act(() => result.current.extendRangeToAllTracks());
+     expect(result.current.range).toEqual({ ...MUSIC_RANGE, allTracks: true });
+-    expect(result.current.status).toBe('მონიშვნა ყველა ხაზზე: 00:03.000 — 00:05.000.');
++    expect(result.current.status).toBe(
++      studioEditStrings.extendDone({ start: '00:03.000', end: '00:05.000' }),
++    );
+     act(() => result.current.setStatus('ready'));
+     act(() => result.current.extendRangeToAllTracks());
+     expect(result.current.range).toEqual({ ...MUSIC_RANGE, allTracks: true });
+-    expect(result.current.status).toBe('მონიშვნა ყველა ხაზზე: 00:03.000 — 00:05.000.');
++    expect(result.current.status).toBe(
++      studioEditStrings.extendDone({ start: '00:03.000', end: '00:05.000' }),
++    );
+     expect(result.current.arrangement).toBe(initial);
+     expect(result.current.undoLabel).toBeNull();
+   });
+@@ -349,7 +354,7 @@
+     act(() => result.current.setTimeRange({ start: 1, end: 5, trackId: 'music' }));
+     act(() => result.current.extendRangeToAllTracks());
+     act(() => result.current.deleteSelection());
+-    expect(result.current.undoLabel).toBe('წაშლა მონაკვეთზე (ყველა ხაზი)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyDeleteRangeAllTracks);
+     expect(laneTable(result.current.arrangement)).toEqual([
+       ['music', 0, 0, 1],
+       ['music', 5, 5, 5],
+@@ -358,7 +363,11 @@
+       ['video', 0, 0, 1],
+     ]);
+     expect(result.current.status).toBe(
+-      '⌫ წაიშალა 00:01.000 — 00:05.000 ყველა ხაზზე; სიცარიელე დარჩა.',
++      studioEditStrings.deleteRangeDone({
++        start: '00:01.000',
++        end: '00:05.000',
++        lanes: studioEditStrings.onAllTracks,
++      }),
+     );
+     act(() => result.current.undo());
+     expect(result.current.arrangement).toEqual(initial);
+@@ -370,9 +379,7 @@
+     act(() => result.current.setTimeRange(MUSIC_RANGE));
+     act(() => result.current.extendRangeToAllTracks());
+     act(() => result.current.splitSelection());
+-    expect(result.current.status).toBe(
+-      'გაყოფა ყველა ხაზის მონიშვნაზე არ სრულდება — მონიშნე მონაკვეთი ერთ ხაზზე.',
+-    );
++    expect(result.current.status).toBe(studioEditStrings.splitAllTracksRefused);
+     expect(result.current.arrangement).toBe(initial);
+     expect(result.current.undoLabel).toBeNull();
+     expect(result.current.range).toEqual({ ...MUSIC_RANGE, allTracks: true });
+@@ -394,7 +401,7 @@
+     act(() => result.current.setActiveTrack('sfx'));
+     act(() => result.current.seekTo(30));
+     act(() => result.current.pasteClipboard());
+-    expect(result.current.undoLabel).toBe('ჩასმა (2)');
++    expect(result.current.undoLabel).toBe(studioEditStrings.historyPaste(2));
+     const pasted = result.current.arrangement.clips
+       .filter((clip) => result.current.selectedClipIds.includes(clip.id))
+       .map((clip) => [clip.trackId, clip.start, clip.sourceOffset, clip.duration])
+@@ -418,7 +425,7 @@
+     ]) {
+       act(() => live(api).setTimeRange(MUSIC_RANGE));
+       fireEvent.keyDown(document.body, keys);
+-      expect(live(api).undoLabel).toBe('წაშლა მონაკვეთზე');
++      expect(live(api).undoLabel).toBe(studioEditStrings.historyDeleteRange);
+       expect(laneTable(live(api).arrangement)).toEqual([
+         ['music', 0, 0, 3],
+         ['music', 5, 5, 5],
+@@ -486,7 +493,7 @@
+     expect(live(api).arrangement).toBe(initial);
+     expect(live(api).undoLabel).toBeNull();
+     expect(view.getByTestId('arrangement-status').textContent).toBe(
+-      'წასაშლელად აირჩიე კლიპი ან მონიშნე მონაკვეთი.',
++      studioEditStrings.deleteNeedsTarget,
+     );
+   });
+ 
+@@ -525,7 +532,7 @@
+     expect(deleteButton(view).title).toBe(ALL_LANE_DELETE_HINT);
+     expect(deleteButton(view).getAttribute('aria-label')).toBe(ALL_LANE_DELETE_HINT);
+     fireEvent.click(deleteButton(view));
+-    expect(live(api).undoLabel).toBe('წაშლა მონაკვეთზე (ყველა ხაზი)');
++    expect(live(api).undoLabel).toBe(studioEditStrings.historyDeleteRangeAllTracks);
+     expect(live(api).arrangement.clips.find((clip) => clip.id === 'm2')?.start).toBe(12);
+   });
+ });
+--- a/app/lib/arrangement/__tests__/fader-guards.test.tsx
++++ b/app/lib/arrangement/__tests__/fader-guards.test.tsx
+@@ -12,6 +12,7 @@
+ import type { Arrangement, ArrangementTrack, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement, trackPanValue } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
++import { studioEditStrings } from '../strings';
+ import { trackVolumeFromDb } from '../track-volume-db';
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -26,7 +27,7 @@
+ const VOLUME_LABEL = 'Volume';
+ const MASTER_VOLUME_LABEL = 'Master Volume';
+ const MUTE_VIDEO_LABEL = 'Mute — ვიდეო';
+-const CLIP_DELETE_LABEL = 'კლიპის წაშლა';
++const CLIP_DELETE_LABEL = studioEditStrings.historyDeleteClip;
+ const TRACKS_PER_GRAPH = 3;
+ 
+ const fakeClock = { base: 0 };
+--- a/app/lib/arrangement/__tests__/grid-snap-position.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-position.test.tsx
+@@ -12,6 +12,7 @@
+ import { resolveGridTime } from '../grid';
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -484,8 +485,14 @@
+     expect(pasted).toHaveLength(1);
+     expect(pasted[0]?.trackId).toBe('sfx');
+     expect(pasted[0]?.start).toBe(9);
+-    expect(statusText(view)).toBe('ჩასმა (1): 00:09.000-ზე · SFX ხაზზე.');
+-    expect(live(api).undoLabel).toBe('ჩასმა (1)');
++    expect(statusText(view)).toBe(
++      studioEditStrings.pasteDone({
++        count: 1,
++        at: '00:09.000',
++        trackSuffix: studioEditStrings.pasteTrackSuffix('SFX'),
++      }),
++    );
++    expect(live(api).undoLabel).toBe(studioEditStrings.historyPaste(1));
+     pressCtrl('z');
+     expect(live(api).arrangement.clips.map((clip) => clip.id)).toEqual(['s1']);
+     clickRuler(ruler, xFor(9.3), { altUp: true });
+--- a/app/lib/arrangement/__tests__/markers-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+@@ -10,6 +10,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementMarker, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -575,7 +576,7 @@
+     expect(live(api).arrangement.clips).toHaveLength(0);
+     expect(live(api).arrangement.markers).toEqual(markersBefore);
+     expect(markerTimes(view)).toEqual(['0.000', '12.000', '20.000', '40.000']);
+-    expect(live(api).undoLabel).toBe('კლიპის წაშლა');
++    expect(live(api).undoLabel).toBe(studioEditStrings.historyDeleteClip);
+     act(() => live(api).undo());
+     expect(live(api).arrangement.clips).toHaveLength(1);
+     expect(live(api).arrangement.clips[0]).toMatchObject({ id: 'm1', start: 0, duration: 50 });
+@@ -676,7 +677,7 @@
+     fireEvent.keyDown(document.body, { key: 'X', code: 'KeyX', ctrlKey: true, shiftKey: true });
+     expect(live(api).undoLabel).toBe('Cut Time');
+     expect(markerTimes(view)).toEqual(['12.000', '30.000']);
+-    expect(statusText(view).endsWith(' 1 მარკერი წაიშალა.')).toBe(true);
++    expect(statusText(view).endsWith(studioEditStrings.markersRemoved(1))).toBe(true);
+     expect(live(api).arrangement.clips.map((clip) => [clip.start, clip.duration])).toEqual([
+       [0, 15],
+       [15, 25],
+@@ -686,7 +687,7 @@
+     expect(live(api).arrangement.clips).toHaveLength(1);
+     act(() => live(api).setTimeRange({ start: 42, end: 45, trackId: 'music' }));
+     fireEvent.keyDown(document.body, { key: 'X', code: 'KeyX', ctrlKey: true, shiftKey: true });
+-    expect(statusText(view)).not.toContain('მარკერი წაიშალა');
++    expect(statusText(view)).not.toContain('marker');
+   });
+ });
+ 
+--- a/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
++++ b/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
+@@ -14,6 +14,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -333,7 +334,7 @@
+     expect(live(api).arrangement.clips.length).toBe(0);
+     expect(deleteButton().disabled).toBe(true);
+     expect(document.activeElement).toBe(undoButton());
+-    expect(undoButton().title).toBe('Undo: კლიპის წაშლა');
++    expect(undoButton().title).toBe(`Undo: ${studioEditStrings.historyDeleteClip}`);
+   });
+ 
+   it('FL6: ↩ Zoom on its last history step hands focus to Fit', async () => {
+--- a/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx
+@@ -10,6 +10,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -706,7 +707,7 @@
+ 
+ const LOOP_OFF_TEXT = 'Loop გამორთულია; დიაპაზონი შენარჩუნებულია.';
+ const LOOP_ON_TEXT = 'Loop ჩართულია.';
+-const COPY_ONE_CLIP_TEXT = 'Copy: 1 კლიპი ბუფერშია.';
++const COPY_ONE_CLIP_TEXT = studioEditStrings.copyClipsDone(1);
+ 
+ interface OneShotPress {
+   readonly target: Element;
+@@ -815,7 +816,7 @@
+ 
+     expect(allowed).toEqual([false, false, false, false]);
+     expect(counts).toEqual([2, 2, 2, 2]);
+-    expect(addedTexts(stopWatching(watch))).toEqual(['კლიპი გაიყო 00:02.500-ზე.']);
++    expect(addedTexts(stopWatching(watch))).toEqual([studioEditStrings.splitDone('00:02.500')]);
+   });
+ 
+   it('HK3 a held Ctrl+Shift+L extends the range to all lanes with one announcement', async () => {
+@@ -838,7 +839,7 @@
+ 
+     expect(allowed).toEqual([false, false, false, false]);
+     expect(addedTexts(stopWatching(watch))).toEqual([
+-      'მონიშვნა ყველა ხაზზე: 00:01.000 — 00:03.000.',
++      studioEditStrings.extendDone({ start: '00:01.000', end: '00:03.000' }),
+     ]);
+     expect(live(api).range).toEqual({ start: 1, end: 3, trackId: 'music', allTracks: true });
+   });
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -11,7 +11,7 @@
+   ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS,
+   ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE,
+ } from '../export-wav.client';
+-import { studioExportStrings } from '../strings';
++import { studioEditStrings, studioExportStrings } from '../strings';
+ 
+ const GEORGIAN_CODEPOINT = /[Ⴀ-ჿ]/;
+ 
+@@ -60,7 +60,7 @@
+   emptyProjectNoFile: 'The project is empty — no file was created.',
+   videoDecodingNoFile:
+     "The video's sound is still decoding — wait and try again. No file was created.",
+-  invalidRangeNoFile: 'The range is invalid — no file was created.',
++  invalidRangeNoFile: 'The time selection is invalid — no file was created.',
+   renderingWav: 'Rendering and creating a 24-bit WAV…',
+   encoderLoading: 'Loading the MP3 encoder (ffmpeg.wasm, ~31 MB the first time)…',
+   encoderLoadFailed:
+@@ -302,3 +302,272 @@
+     );
+   });
+ });
++
++const EXPECTED_EDIT_PLAIN_STRINGS: Record<string, string> = {
++  splitAllTracksRefused:
++    'Split does not work on a selection across all tracks — make a time selection on one track.',
++  splitMissesSelection: 'The playhead does not cross any selected clip.',
++  splitRangeFailed: 'Could not split at the time selection.',
++  historySplitRange: 'Split at time selection',
++  splitRangeDone: 'Clip split at both edges of the time selection; the middle part is selected.',
++  splitNeedsTarget:
++    'To split, select a clip and place the playhead inside it, or make a time selection.',
++  splitPlayheadOutside: 'The playhead must be inside the selected clip.',
++  historySplit: 'Split',
++  deleteRangeEmpty: 'Nothing to delete in the time selection — nothing changed.',
++  historyDeleteRange: 'Delete time selection',
++  historyDeleteRangeAllTracks: 'Delete time selection (all tracks)',
++  onAllTracks: 'on all tracks',
++  deleteNeedsTarget: 'To delete, select a clip or make a time selection.',
++  historyDeleteClip: 'Delete clip',
++  deleteClipDone: 'Clip deleted; the gap remains.',
++  extendNeedsRange: 'Make a time selection first to extend it to all tracks (Ctrl+Shift+L).',
++  duplicateRangeRefused: 'Duplicate works on clips; there is no Duplicate Time.',
++  duplicateNeedsClip: 'Select a clip to duplicate.',
++  copyRangeEmpty: 'No sound to copy in the time selection — the clipboard did not change.',
++  allTracks: 'all tracks',
++  copyNeedsTarget:
++    'To copy, select a clip or make a time selection — the clipboard did not change.',
++  cutRangeEmpty: 'No sound to cut in the time selection — nothing changed.',
++  cutNeedsTarget: 'To cut, select a clip or make a time selection.',
++  cutTimeNeedsRange: 'Make a time selection first for Cut Time (Ctrl+Shift+X).',
++  cutTimeNoSound: 'no sound in the time selection, the clipboard did not change',
++  loopRemoved: 'The loop range was shorter than 0.1 s after the deletion, so it was removed.',
++  pasteMissing: 'Paste failed: the source or track is unavailable. Nothing changed.',
++  clipboardEmpty: 'The clipboard is empty — Copy or Cut first.',
++};
++
++const e = studioEditStrings;
++
++const EDIT_FORMATTER_SAMPLES: Record<string, string[]> = {
++  historySplitClips: [e.historySplitClips(1), e.historySplitClips(3)],
++  splitClipsDone: [
++    e.splitClipsDone({ count: 1, time: '00:02.500' }),
++    e.splitClipsDone({ count: 3, time: '00:02.500' }),
++  ],
++  splitDone: [e.splitDone('00:02.500')],
++  deleteRangeDone: [
++    e.deleteRangeDone({ start: '00:03.000', end: '00:05.000', lanes: e.onTrack('SFX') }),
++    e.deleteRangeDone({ start: '00:03.000', end: '00:05.000', lanes: e.onTrack('—') }),
++    e.deleteRangeDone({ start: '00:01.000', end: '00:05.000', lanes: e.onAllTracks }),
++  ],
++  onTrack: [e.onTrack('SFX'), e.onTrack('—')],
++  historyDeleteClips: [e.historyDeleteClips(1), e.historyDeleteClips(3)],
++  deleteClipsDone: [e.deleteClipsDone(1), e.deleteClipsDone(3)],
++  extendDone: [e.extendDone({ start: '00:01.000', end: '00:03.000' })],
++  duplicateConflict: [
++    e.duplicateConflict({ track: 'SFX', start: '00:08.000', end: '00:16.000' }),
++    e.duplicateConflict({ track: '—', start: '00:08.000', end: '00:16.000' }),
++  ],
++  historyDuplicate: [e.historyDuplicate(1), e.historyDuplicate(3)],
++  duplicateDone: [
++    e.duplicateDone({ count: 1, from: '00:08.000' }),
++    e.duplicateDone({ count: 3, from: '00:08.000' }),
++  ],
++  copyRangeDone: [
++    e.copyRangeDone({ lane: 'SFX', start: '00:03.000', end: '00:05.000', parts: 1 }),
++    e.copyRangeDone({ lane: e.allTracks, start: '00:03.000', end: '00:05.000', parts: 3 }),
++  ],
++  copyClipsDone: [e.copyClipsDone(1), e.copyClipsDone(3)],
++  cutDone: [e.cutDone(1), e.cutDone(3)],
++  cutTimeNothing: [e.cutTimeNothing({ start: '00:15.000', end: '00:15.000' })],
++  cutTimeParts: [e.cutTimeParts(1), e.cutTimeParts(3)],
++  markersRemoved: [e.markersRemoved(1), e.markersRemoved(3)],
++  cutTimeDone: [
++    e.cutTimeDone({
++      start: '00:24.000',
++      end: '00:26.000',
++      clipboard: e.cutTimeNoSound,
++      suffix: '',
++    }),
++    e.cutTimeDone({
++      start: '00:10.000',
++      end: '00:20.000',
++      clipboard: e.cutTimeParts(3),
++      suffix: ` ${e.loopRemoved}${e.markersRemoved(1)}`,
++    }),
++  ],
++  pasteOverlap: [
++    e.pasteOverlap({ track: 'SFX', start: '00:20.000', end: '00:22.000' }),
++    e.pasteOverlap({ track: '—', start: '00:20.000', end: '00:22.000' }),
++  ],
++  pasteLaneKind: [
++    e.pasteLaneKind({ track: 'SFX', at: '00:40.000' }),
++    e.pasteLaneKind({ track: '—', at: '00:40.000' }),
++  ],
++  historyPaste: [e.historyPaste(1), e.historyPaste(3)],
++  pasteTrackSuffix: [e.pasteTrackSuffix('SFX'), e.pasteTrackSuffix('—')],
++  pasteDone: [
++    e.pasteDone({ count: 1, at: '00:09.000', trackSuffix: e.pasteTrackSuffix('SFX') }),
++    e.pasteDone({ count: 3, at: '00:20.000', trackSuffix: '' }),
++    e.pasteDone({ count: 1, at: '00:20.000', trackSuffix: e.pasteTrackSuffix('—') }),
++  ],
++};
++
++describe('studioEditStrings (V-0.2a)', () => {
++  it('ST6: every plain-string property equals its exact English literal', () => {
++    const plainKeys = Object.entries(studioEditStrings)
++      .filter(([, value]) => typeof value === 'string')
++      .map(([key]) => key)
++      .sort();
++    expect(plainKeys).toEqual(Object.keys(EXPECTED_EDIT_PLAIN_STRINGS).sort());
++    for (const [key, value] of Object.entries(studioEditStrings)) {
++      if (typeof value === 'string') {
++        expect(value, key).toBe(EXPECTED_EDIT_PLAIN_STRINGS[key]);
++      }
++    }
++  });
++
++  it('ST7: every formatter returns the exact English text for its inputs', () => {
++    expect(e.historySplitClips(1)).toBe('Split (1)');
++    expect(e.historySplitClips(3)).toBe('Split (3)');
++    expect(e.splitClipsDone({ count: 1, time: '00:02.500' })).toBe(
++      '1 clip split at 00:02.500; the right part is selected.',
++    );
++    expect(e.splitClipsDone({ count: 3, time: '00:02.500' })).toBe(
++      '3 clips split at 00:02.500; the right parts are selected.',
++    );
++    expect(e.splitDone('00:02.500')).toBe('Clip split at 00:02.500.');
++    expect(e.onTrack('SFX')).toBe('on the SFX track');
++    expect(e.onTrack('—')).toBe('on the — track');
++    expect(
++      e.deleteRangeDone({ start: '00:03.000', end: '00:05.000', lanes: e.onTrack('SFX') }),
++    ).toBe('⌫ Deleted 00:03.000 — 00:05.000 on the SFX track; the gap remains.');
++    expect(e.deleteRangeDone({ start: '00:03.000', end: '00:05.000', lanes: e.onTrack('—') })).toBe(
++      '⌫ Deleted 00:03.000 — 00:05.000 on the — track; the gap remains.',
++    );
++    expect(e.deleteRangeDone({ start: '00:01.000', end: '00:05.000', lanes: e.onAllTracks })).toBe(
++      '⌫ Deleted 00:01.000 — 00:05.000 on all tracks; the gap remains.',
++    );
++    expect(e.historyDeleteClips(1)).toBe('Delete clips (1)');
++    expect(e.historyDeleteClips(3)).toBe('Delete clips (3)');
++    expect(e.deleteClipsDone(1)).toBe('1 clip deleted; the gap remains.');
++    expect(e.deleteClipsDone(3)).toBe('3 clips deleted; the gap remains.');
++    expect(e.extendDone({ start: '00:01.000', end: '00:03.000' })).toBe(
++      'Selection on all tracks: 00:01.000 — 00:03.000.',
++    );
++    expect(e.duplicateConflict({ track: 'SFX', start: '00:08.000', end: '00:16.000' })).toBe(
++      'Duplicate failed: 00:08.000–00:16.000 on the SFX track is occupied. Nothing changed.',
++    );
++    expect(e.duplicateConflict({ track: '—', start: '00:08.000', end: '00:16.000' })).toBe(
++      'Duplicate failed: 00:08.000–00:16.000 on the — track is occupied. Nothing changed.',
++    );
++    expect(e.historyDuplicate(1)).toBe('Duplicate (1)');
++    expect(e.historyDuplicate(3)).toBe('Duplicate (3)');
++    expect(e.duplicateDone({ count: 1, from: '00:08.000' })).toBe(
++      'Duplicate (1): the copy starts at 00:08.000.',
++    );
++    expect(e.duplicateDone({ count: 3, from: '00:08.000' })).toBe(
++      'Duplicate (3): copies start at 00:08.000.',
++    );
++    expect(e.copyRangeDone({ lane: 'SFX', start: '00:03.000', end: '00:05.000', parts: 1 })).toBe(
++      'Copy: SFX 00:03.000–00:05.000 (1 part).',
++    );
++    expect(
++      e.copyRangeDone({ lane: e.allTracks, start: '00:03.000', end: '00:05.000', parts: 3 }),
++    ).toBe('Copy: all tracks 00:03.000–00:05.000 (3 parts).');
++    expect(e.copyClipsDone(1)).toBe('Copy: 1 clip on the clipboard.');
++    expect(e.copyClipsDone(3)).toBe('Copy: 3 clips on the clipboard.');
++    expect(e.cutDone(1)).toBe('Cut: 1 part on the clipboard; the gap remains.');
++    expect(e.cutDone(3)).toBe('Cut: 3 parts on the clipboard; the gap remains.');
++    expect(e.cutTimeNothing({ start: '00:15.000', end: '00:15.000' })).toBe(
++      'Cut Time 00:15.000 — 00:15.000: no time to cut — nothing changed, the clipboard did not change.',
++    );
++    expect(e.cutTimeParts(1)).toBe('1 part on the clipboard');
++    expect(e.cutTimeParts(3)).toBe('3 parts on the clipboard');
++    expect(e.markersRemoved(1)).toBe(' 1 marker deleted.');
++    expect(e.markersRemoved(3)).toBe(' 3 markers deleted.');
++    expect(
++      e.cutTimeDone({
++        start: '00:24.000',
++        end: '00:26.000',
++        clipboard: e.cutTimeNoSound,
++        suffix: '',
++      }),
++    ).toBe(
++      'Cut Time 00:24.000 — 00:26.000: no sound in the time selection, the clipboard did not change; the gap was closed on all tracks.',
++    );
++    expect(
++      e.cutTimeDone({
++        start: '00:10.000',
++        end: '00:20.000',
++        clipboard: e.cutTimeParts(3),
++        suffix: ` ${e.loopRemoved}${e.markersRemoved(1)}`,
++      }),
++    ).toBe(
++      'Cut Time 00:10.000 — 00:20.000: 3 parts on the clipboard; the gap was closed on all tracks. The loop range was shorter than 0.1 s after the deletion, so it was removed. 1 marker deleted.',
++    );
++    expect(e.pasteOverlap({ track: 'SFX', start: '00:20.000', end: '00:22.000' })).toBe(
++      'Paste failed: 00:20.000–00:22.000 on the SFX track is occupied. Nothing changed.',
++    );
++    expect(e.pasteOverlap({ track: '—', start: '00:20.000', end: '00:22.000' })).toBe(
++      'Paste failed: 00:20.000–00:22.000 on the — track is occupied. Nothing changed.',
++    );
++    expect(e.pasteLaneKind({ track: 'SFX', at: '00:40.000' })).toBe(
++      'Paste failed: this material does not fit on the SFX track from 00:40.000 (audio and video do not swap tracks). Nothing changed.',
++    );
++    expect(e.pasteLaneKind({ track: '—', at: '00:40.000' })).toBe(
++      'Paste failed: this material does not fit on the — track from 00:40.000 (audio and video do not swap tracks). Nothing changed.',
++    );
++    expect(e.historyPaste(1)).toBe('Paste (1)');
++    expect(e.historyPaste(3)).toBe('Paste (3)');
++    expect(e.pasteTrackSuffix('SFX')).toBe(' · on the SFX track');
++    expect(e.pasteTrackSuffix('—')).toBe(' · on the — track');
++    expect(e.pasteDone({ count: 1, at: '00:09.000', trackSuffix: e.pasteTrackSuffix('SFX') })).toBe(
++      'Paste (1): at 00:09.000 · on the SFX track.',
++    );
++    expect(e.pasteDone({ count: 3, at: '00:20.000', trackSuffix: '' })).toBe(
++      'Paste (3): at 00:20.000.',
++    );
++    expect(e.pasteDone({ count: 1, at: '00:20.000', trackSuffix: e.pasteTrackSuffix('—') })).toBe(
++      'Paste (1): at 00:20.000 · on the — track.',
++    );
++  });
++
++  it('ST8: no string or formatter output in the module contains a Georgian codepoint', () => {
++    const formatterKeys = Object.entries(studioEditStrings)
++      .filter(([, value]) => typeof value === 'function')
++      .map(([key]) => key)
++      .sort();
++    expect(formatterKeys).toEqual(Object.keys(EDIT_FORMATTER_SAMPLES).sort());
++    for (const [key, value] of Object.entries(studioEditStrings)) {
++      if (typeof value === 'string') {
++        expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
++      }
++    }
++    for (const [key, outputs] of Object.entries(EDIT_FORMATTER_SAMPLES)) {
++      expect(outputs.length, key).toBeGreaterThan(0);
++      for (const output of outputs) {
++        expect(output, key).not.toMatch(GEORGIAN_CODEPOINT);
++      }
++    }
++  });
++
++  it('ST9: the edit commands in ArrangementContext contain no Georgian codepoint outside comments', () => {
++    const context = readStoreSource('../../../contexts/ArrangementContext.tsx');
++    const start = context.indexOf('const splitSelection = useCallback(');
++    const end = context.indexOf('const restoreHistory = useCallback(');
++    expect(start).toBeGreaterThan(-1);
++    expect(end).toBeGreaterThan(start);
++    expect(stripSourceComments(context.slice(start, end))).not.toMatch(GEORGIAN_CODEPOINT);
++    const constantNames = [
++      'LOOP_REMOVED_MESSAGE',
++      'CLIPBOARD_EMPTY_MESSAGE',
++      'DUPLICATE_RANGE_MESSAGE',
++      'DUPLICATE_EMPTY_MESSAGE',
++      'GROUP_SPLIT_MISS_MESSAGE',
++      'CUT_TIME_NEEDS_RANGE_MESSAGE',
++    ];
++    const lines = context.split(/\r?\n/);
++    for (const name of constantNames) {
++      const index = lines.findIndex((line) => line.startsWith(`const ${name} =`));
++      if (index === -1) {
++        continue;
++      }
++      const declaration = lines[index]?.trim().endsWith('=')
++        ? `${lines[index]}${lines[index + 1] ?? ''}`
++        : (lines[index] ?? '');
++      expect(declaration, name).not.toMatch(GEORGIAN_CODEPOINT);
++    }
++  });
++});
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -49,7 +49,7 @@
+   emptyProjectNoFile: 'The project is empty — no file was created.',
+   videoDecodingNoFile:
+     "The video's sound is still decoding — wait and try again. No file was created.",
+-  invalidRangeNoFile: 'The range is invalid — no file was created.',
++  invalidRangeNoFile: 'The time selection is invalid — no file was created.',
+   renderingWav: 'Rendering and creating a 24-bit WAV…',
+   encoderLoading: 'Loading the MP3 encoder (ffmpeg.wasm, ~31 MB the first time)…',
+   encoderLoadFailed:
+@@ -96,3 +96,106 @@
+   encoderLoadTimeout: (seconds: number): string =>
+     `The MP3 encoder did not load within ${seconds} seconds — no file was created. Check your internet connection and try again, or choose WAV.`,
+ };
++
++interface StudioTimeRangeText {
++  start: string;
++  end: string;
++}
++
++interface StudioTrackSpanText extends StudioTimeRangeText {
++  track: string;
++}
++
++export const studioEditStrings = {
++  splitAllTracksRefused:
++    'Split does not work on a selection across all tracks — make a time selection on one track.',
++  splitMissesSelection: 'The playhead does not cross any selected clip.',
++  splitRangeFailed: 'Could not split at the time selection.',
++  historySplitRange: 'Split at time selection',
++  splitRangeDone: 'Clip split at both edges of the time selection; the middle part is selected.',
++  splitNeedsTarget:
++    'To split, select a clip and place the playhead inside it, or make a time selection.',
++  splitPlayheadOutside: 'The playhead must be inside the selected clip.',
++  historySplit: 'Split',
++  deleteRangeEmpty: 'Nothing to delete in the time selection — nothing changed.',
++  historyDeleteRange: 'Delete time selection',
++  historyDeleteRangeAllTracks: 'Delete time selection (all tracks)',
++  onAllTracks: 'on all tracks',
++  deleteNeedsTarget: 'To delete, select a clip or make a time selection.',
++  historyDeleteClip: 'Delete clip',
++  deleteClipDone: 'Clip deleted; the gap remains.',
++  extendNeedsRange: 'Make a time selection first to extend it to all tracks (Ctrl+Shift+L).',
++  duplicateRangeRefused: 'Duplicate works on clips; there is no Duplicate Time.',
++  duplicateNeedsClip: 'Select a clip to duplicate.',
++  copyRangeEmpty: 'No sound to copy in the time selection — the clipboard did not change.',
++  allTracks: 'all tracks',
++  copyNeedsTarget:
++    'To copy, select a clip or make a time selection — the clipboard did not change.',
++  cutRangeEmpty: 'No sound to cut in the time selection — nothing changed.',
++  cutNeedsTarget: 'To cut, select a clip or make a time selection.',
++  cutTimeNeedsRange: 'Make a time selection first for Cut Time (Ctrl+Shift+X).',
++  cutTimeNoSound: 'no sound in the time selection, the clipboard did not change',
++  loopRemoved: 'The loop range was shorter than 0.1 s after the deletion, so it was removed.',
++  pasteMissing: 'Paste failed: the source or track is unavailable. Nothing changed.',
++  clipboardEmpty: 'The clipboard is empty — Copy or Cut first.',
++  historySplitClips: (count: number): string => `Split (${count})`,
++  splitClipsDone: ({ count, time }: { count: number; time: string }): string =>
++    count === 1
++      ? `1 clip split at ${time}; the right part is selected.`
++      : `${count} clips split at ${time}; the right parts are selected.`,
++  splitDone: (time: string): string => `Clip split at ${time}.`,
++  deleteRangeDone: ({ start, end, lanes }: StudioTimeRangeText & { lanes: string }): string =>
++    `⌫ Deleted ${start} — ${end} ${lanes}; the gap remains.`,
++  onTrack: (track: string): string => `on the ${track} track`,
++  historyDeleteClips: (count: number): string => `Delete clips (${count})`,
++  deleteClipsDone: (count: number): string =>
++    count === 1 ? '1 clip deleted; the gap remains.' : `${count} clips deleted; the gap remains.`,
++  extendDone: ({ start, end }: StudioTimeRangeText): string =>
++    `Selection on all tracks: ${start} — ${end}.`,
++  duplicateConflict: ({ track, start, end }: StudioTrackSpanText): string =>
++    `Duplicate failed: ${start}–${end} on the ${track} track is occupied. Nothing changed.`,
++  historyDuplicate: (count: number): string => `Duplicate (${count})`,
++  duplicateDone: ({ count, from }: { count: number; from: string }): string =>
++    count === 1
++      ? `Duplicate (1): the copy starts at ${from}.`
++      : `Duplicate (${count}): copies start at ${from}.`,
++  copyRangeDone: ({
++    lane,
++    start,
++    end,
++    parts,
++  }: StudioTimeRangeText & { lane: string; parts: number }): string =>
++    `Copy: ${lane} ${start}–${end} (${parts} ${parts === 1 ? 'part' : 'parts'}).`,
++  copyClipsDone: (count: number): string =>
++    `Copy: ${count} ${count === 1 ? 'clip' : 'clips'} on the clipboard.`,
++  cutDone: (parts: number): string =>
++    `Cut: ${parts} ${parts === 1 ? 'part' : 'parts'} on the clipboard; the gap remains.`,
++  cutTimeNothing: ({ start, end }: StudioTimeRangeText): string =>
++    `Cut Time ${start} — ${end}: no time to cut — nothing changed, the clipboard did not change.`,
++  cutTimeParts: (parts: number): string =>
++    `${parts} ${parts === 1 ? 'part' : 'parts'} on the clipboard`,
++  markersRemoved: (count: number): string =>
++    ` ${count} ${count === 1 ? 'marker' : 'markers'} deleted.`,
++  cutTimeDone: ({
++    start,
++    end,
++    clipboard,
++    suffix,
++  }: StudioTimeRangeText & { clipboard: string; suffix: string }): string =>
++    `Cut Time ${start} — ${end}: ${clipboard}; the gap was closed on all tracks.${suffix}`,
++  pasteOverlap: ({ track, start, end }: StudioTrackSpanText): string =>
++    `Paste failed: ${start}–${end} on the ${track} track is occupied. Nothing changed.`,
++  pasteLaneKind: ({ track, at }: { track: string; at: string }): string =>
++    `Paste failed: this material does not fit on the ${track} track from ${at} (audio and video do not swap tracks). Nothing changed.`,
++  historyPaste: (count: number): string => `Paste (${count})`,
++  pasteTrackSuffix: (track: string): string => ` · on the ${track} track`,
++  pasteDone: ({
++    count,
++    at,
++    trackSuffix,
++  }: {
++    count: number;
++    at: string;
++    trackSuffix: string;
++  }): string => `Paste (${count}): at ${at}${trackSuffix}.`,
++};
