@@ -1,9 +1,9 @@
 {
  "version": 120,
- "updated": "2026-10-24 (B round 121 result / round 122 plan, D-29z87)",
+ "updated": "2026-10-24 (B round 122 result / round 123 plan, D-29z88)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 122: D-29z87 - REGRESSION round (speed rules, regression-last 2026-10-21 -> 3 days): A edits only line 4 of docs 102 and 103 (status Completed, gates 120/121); C re-verifies in the browser at 1440x900 and 1280x720 one key acceptance per done/c_pass item (SRW-01..SRW-24 minus SRW-21, T12 stages 1-4b; rows RG-*), the parked rows RP-RANGE-1280, RP-ROW-HANDLE, RP-TOUCH-LONG, RP-HEADER-WIDTH, RG-SMOKE (npm run test:e2e:smoke, /cart only), G122-3; baseline clean 425a807; frozen b-round-121-r122-tree-sha256.txt (935); outcome table section 6)",
+ "current_task": "current-task.md (round 123: D-29z88 - ABLETON-EXPERT-REVIEW part 1, C-only review round; A no-op (start-state check + a-round-123.md, no store change); C reviews areas P1-P8 in the real browser on /studio-lab against the Live 12 manual (saved captures + live fetch), consulting ableton-arrangement-expert; output tmp/studio-real-loop/user-review/ableton-review.md (Georgian) + c-round-123.json/md; ABL-B / ABL-R ids; baseline clean 608187f; frozen b-round-122-r123-tree-sha256.txt (937))",
  "advisor_used_by_B": "round 121 -> 122 planning: advisor available and used before writing (and before finishing)",
  "baseline": {
   "tsc_errors": 0,
@@ -8971,18 +8971,28 @@
    "round": 122,
    "task": "current-task.md",
    "decision": "D-29z87",
-   "status": "dispatched",
+   "status": "completed: C PASS (browserVerified true), gate 122 published 608187f; 2 Lows deferred (C-R122-01, C-R122-02); regression-last 2026-10-24",
    "items": [
     "REGRESSION-ROUND-2026-10-24",
     "GATE121-S6-DOC103-STATUS"
    ],
    "note": "Regression round. A owns line 4 of docs 102 and 103 only (Edit tool). C: SOURCE-SCOPE, AN-REVIEW, RG-01..RG-24 (minus SRW-21), RG-T1..RG-T4B at both viewports (RG-03 drift, RG-15/RG-20 exports at 1440), RP-RANGE-1280, RP-ROW-HANDLE, RP-TOUCH-LONG, RP-HEADER-WIDTH, RG-SMOKE (serial, /cart only), G122-3, PX-NET/REG-HYD; incremental c-round-122.json + progress.json. Baseline 425a807 clean; frozen b-round-121-r122-tree-sha256.txt (935). Outcome table section 6: all PASS -> regression-last updated, round 123 ABLETON-EXPERT-REVIEW part 1; Medium+ -> round 123 bounded fix-up; Lows -> deferred_low_polish."
+  },
+  {
+   "round": 123,
+   "task": "current-task.md",
+   "decision": "D-29z88",
+   "status": "dispatched",
+   "items": [
+    "ABLETON-EXPERT-REVIEW"
+   ],
+   "note": "ABLETON-EXPERT-REVIEW part 1 (P1-P8). C-only review; A no-op; no store diff expected, so gate 123 has nothing to publish and round 124 baseline stays 608187f unless root publishes otherwise. Outcome table in current-task.md section 7."
   }
  ],
  "post_current_stage_queue": [
   {
    "id": "T12-GAIN-VOLUME",
-   "status": "v1_complete (stages 1, 2, 3a, 3b, 4a, 4b c_pass_published: 38c0e21, d5de68f, 9cb820b, 4090f6e, 0a75ba8, 425a807; T12.27 items 1-8 C-verified with browser evidence); stage 5+ is the T12-ADVANCED queue entry; REGRESSION round 122 (D-29z87), then ABLETON-EXPERT-REVIEW",
+   "status": "v1_complete (stages 1, 2, 3a, 3b, 4a, 4b c_pass_published: 38c0e21, d5de68f, 9cb820b, 4090f6e, 0a75ba8, 425a807; T12.27 items 1-8 C-verified with browser evidence); stage 5+ is the T12-ADVANCED queue entry; REGRESSION round 122 PASS (608187f), then ABLETON-EXPERT-REVIEW part 1 (round 123, D-29z88)",
    "requested": "2026-10-07",
    "instruction": "User explicitly asks: finish ALL current work first, THEN start these attached Gain/Volume requirements. Do not start T12 implementation or extend current tasks with it early.",
    "prerequisites": [
@@ -9119,7 +9129,7 @@
   },
   {
    "id": "ABLETON-EXPERT-REVIEW",
-   "status": "next_after_regression_round_122 (prerequisite T12 V1 met at gate 121, 425a807)",
+   "status": "in_progress: part 1 dispatched as round 123 (D-29z88); part 2 = round 124 unless part 1 spills",
    "requested": "2026-10-23",
    "instruction": "After T12-GAIN-VOLUME is complete and before VISUAL-A-OBSIDIAN: C runs the review as the round's verification, consulting the ableton-arrangement-expert agent, in the real browser (Playwright on /studio-lab, screenshots and measurements) with the Ableton Live 12 manual as reference. Cover every phase-1 feature and T12 (layout, library, clip select/move/trim/split/duplicate, clipboard, grid/snap, ruler/BPM, markers, groups, fades/envelopes, gain/volume/pan/mute/solo, loop/range, navigation/zoom, video, export). Split into 2 rounds by area if too large. A changes no code in a review round.",
    "output": "loop/user-review/ableton-review.md in Georgian (technical terms English): verdict; bugs ABL-B-n (severity, steps, evidence; also in open_findings; Medium+ fixed before VISUAL-A, Lows to deferred_low_polish); recommendations ABL-R-n (what, why, manual reference, size in rounds, priority) recorded as awaiting_user and NOT implemented until Saba approves in loop/user-review/ableton-decisions.md",
@@ -9135,7 +9145,32 @@
     "Detail panel (Clip View analogue) not zoomed: unconfirmed (C round 121)",
     "Video clips not zoomed: manual says audio clips; Live video untested (CZABA decision)",
     "MASTER-FINE-STEP (round 119 signal)"
-   ]
+   ],
+   "output_path": "user-review path: /home/runner/czaba-project/tmp/studio-real-loop/user-review/ (the policy name loop/ = kit.config.json loopDir; no loop/ folder exists; B ruling D-29z88)",
+   "split_d29z88": {
+    "part1_round123": [
+     "P1 layout and panels (SRW-01 central flow, SRW-11A, SRW-11B, SRW-22 entry, SRW-23 scrollbars)",
+     "P2 library / browser (SRW-12)",
+     "P3 clips: select, move, trim, split, duplicate, move between tracks, delete-gap rules (SRW-06, SRW-07, SRW-08, SRW-24, core SRW-01 editing)",
+     "P4 clipboard (SRW-09)",
+     "P5 grid and snap (SRW-14)",
+     "P6 ruler, BPM, metronome (SRW-15)",
+     "P7 markers / locators (SRW-16)",
+     "P8 navigation, zoom, playhead vs insert marker, waveform vertical zoom (SRW-10, SRW-04, T12 stage 4b)"
+    ],
+    "part2_round124": [
+     "Q1 transport and video (SRW-02, SRW-03, SRW-19)",
+     "Q2 loop and range (SRW-05)",
+     "Q3 groups (SRW-17)",
+     "Q4 fades and envelopes (SRW-18)",
+     "Q5 gain, volume, pan, mute, solo, meters (SRW-13, T12 stages 1, 2, 3a, 3b, 4a)",
+     "Q6 export (SRW-20)",
+     "Q7 final verdict section, merge of part 1 + part 2, ABL-B / ABL-R index"
+    ],
+    "spill_rule": "part-1 areas not finished in round 123 run first in round 124; the review is complete only when every P/Q area has a section with browser evidence"
+   },
+   "pre_rulings_d29z88": "ABL-B only when CZABA's own written contract (backlog acceptance, D-rulings, user decisions) is violated, or a Live behaviour confirmed by manual text that CZABA claimed to match is not met. Recorded deliberate differences and signals are 'შეგნებული განსხვავება' or ABL-R, not bugs. Out of scope (never ABL-B/ABL-R as missing): plugins, effects, devices, MIDI, warp/time-stretch/pitch, multiple video layers, recording, Session View; grid tempo is not audio stretch. ABL-R recorded awaiting_user by B at the next planning; not implemented until ableton-decisions.md approves.",
+   "abl_transcription": "B transcribes ABL-B into open_findings and ABL-R into backlog awaiting_user at each planning after a review part"
   },
   {
    "id": "VISUAL-A-OBSIDIAN",
@@ -13070,11 +13105,12 @@
   {
    "id": "C-R83-S-1280-RANGE-SHIFT",
    "severity": "info (unverified origin)",
-   "status": "open - check in the next regression round against the published tree",
+   "status": "converted -> C-R122-01 (deferred_low_polish)",
    "to": "C regression round",
    "title": "at 1280x720 a body range selection shifts the stems lane up 9 px (clip y 458 -> 449, h 71 -> 66)",
    "evidence": "c-round-83.json signals",
-   "note_round122": "scheduled as C row RP-RANGE-1280 in the round-122 regression round (D-29z87); B ruling for a failure is in current-task.md section 4"
+   "note_round122": "scheduled as C row RP-RANGE-1280 in the round-122 regression round (D-29z87); B ruling for a failure is in current-task.md section 4",
+   "note_round123_planning": "C round 122 RP-RANGE-1280 reproduced it (dy -9, dh -5, 20 px workspace shrink mid-drag); no mis-hit; Low by the pre-stated ruling"
   },
   {
    "id": "SRW19-RESCHEDULE",
@@ -13183,11 +13219,12 @@
   {
    "id": "GATE85-S6-ROW-BOUNDARY-HANDLES",
    "severity": "info",
-   "status": "open - regression round row (selected clip handles in row N vs row N+1 near the boundary)",
+   "status": "acknowledged (precondition unreachable; cross-boundary drag verified)",
    "to": "C",
    "title": "isolate per lane body: a fade handle dragged near the row boundary could be covered by the next row",
    "evidence": "gates/round-85/review.md #6",
-   "note_round122": "scheduled as C row RP-ROW-HANDLE in the round-122 regression round (D-29z87); B ruling for a failure is in current-task.md section 4"
+   "note_round122": "scheduled as C row RP-ROW-HANDLE in the round-122 regression round (D-29z87); B ruling for a failure is in current-task.md section 4",
+   "note_round123_planning": "C round 122 RP-ROW-HANDLE PASS both viewports: handle sits 26 px above the lane bottom even at the 60 px minimum, so the 4 px precondition is not reachable; a drag from the handle into the next row changes only the fade (pointer capture holds); not \"fixed\", just no defect reachable"
   },
   {
    "id": "FFMPEG-DEV-WORKER",
@@ -14332,12 +14369,13 @@
   {
    "id": "DEFERRED-LOW-POLISH",
    "severity": "info",
-   "status": "open - pointer: 160 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped",
+   "status": "open - pointer: 164 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped",
    "title": "deferred Low findings (not lost)",
    "evidence": "backlog.json deferred_low_polish",
    "round110_note": "B round 109 -> 110 planning: +C-R109-OBS-01, +GATE109-F3-BIOME-IGNORE-FIXTURE (141 entries)",
    "round111_note": "B round 110 -> 111 planning: +A-R110-S3-STALE-ARM, +GATE110-S1-NONCHROMIUM-MOUSE-CLICK, +GATE110-S3-TOGGLE-ARIA-EXPANDED",
-   "round118_note": "B round 117 -> 118 planning: +GATE117-S3-START-REF-NOT-CLEARED (160 entries)"
+   "round118_note": "B round 117 -> 118 planning: +GATE117-S3-START-REF-NOT-CLEARED (160 entries)",
+   "count_round123_planning": 164
   },
   {
    "id": "PROD-SSR-NUL",
@@ -14447,10 +14485,11 @@
   {
    "id": "GATE111-SUGG-E2E-S5",
    "severity": "info",
-   "status": "signal - not scheduled; candidate row for the next focus-owning round or the regression round (Chromium smoke e2e: collapse -> float -> focus collapse -> Escape -> Enter = 0 clips)",
+   "status": "acknowledged (browser-verified in C round 122 RG-11B; no automated e2e added)",
    "title": "no automated real-browser test for the s5 Escape-return scenario",
    "evidence": "gates/round-111/review.md Suggestions",
-   "note_round122": "scheduled as C row RG-11B (S5 scenario) in the round-122 regression round (D-29z87); B ruling for a failure is in current-task.md section 4"
+   "note_round122": "scheduled as C row RG-11B (S5 scenario) in the round-122 regression round (D-29z87); B ruling for a failure is in current-task.md section 4",
+   "note_round123_planning": "RG-11B S5 PASS both viewports: Escape returns the floating video to the dock with the same <video> nodes, Enter adds 0 clips; an automated smoke e2e is still not in the repo (signal kept)"
   },
   {
    "id": "C-R112-HARNESS-BOUNDARY",
@@ -14486,10 +14525,11 @@
   {
    "id": "TOUCH-LONGPRESS-CONTEXTMENU",
    "severity": "info",
-   "status": "signal - not tested; candidate row for the regression round (CDP long touch on a fader: contextmenu fires or not; no app menu exists on faders)",
+   "status": "acknowledged (C round 122 RP-TOUCH-LONG PASS at 1440)",
    "title": "the touchstart preventDefault on the relative faders probably also suppresses the long-press contextmenu (same mechanism as R4)",
    "evidence": "a-round-113.md known gaps (A reviewer); c-round-113.md section 7 (not a task row)",
-   "note_round122": "scheduled as C row RP-TOUCH-LONG in the round-122 regression round (D-29z87); B ruling for a failure is in current-task.md section 4"
+   "note_round122": "scheduled as C row RP-TOUCH-LONG in the round-122 regression round (D-29z87); B ruling for a failure is in current-task.md section 4",
+   "note_round123_planning": "CDP long touch 900 ms on stems Volume, Pan and Master: value unchanged, no Undo entry, 0 contextmenu events, no menu; control drag changed the value (touches reach the faders); no regression of A-R38-REVIEW-TOUCH"
   },
   {
    "id": "R38-T-SR-SWIPE",
@@ -14501,7 +14541,7 @@
   {
    "id": "ARCH-CHECKPOINT-PHASE1-BOUNDARY",
    "severity": "info",
-   "status": "requested_from_root (B round 113 planning, 2026-10-23; non-blocking) - addenda (x), (y), (z); focused request (aa) sent with the round 116 plan (stage 2 closed, before stage 3 touches the Volume machine; round 116 is UI-only and does not touch it) | addendum (ac) appended with the round 118 plan: gate-117 reviewer Architecture note (hook stored <-> slider mapping) + the group start capture is the second copy; still unanswered; non-blocking | round 119 planning: A round-118 reviewer Architecture note repeats addendum (ac) (start capture + stored<->slider mapping copied in ArrangementLane.tsx and ArrangementGroupHeader.tsx; keep; one bounded hook task later); no new addendum; still unanswered | round 121 planning: addendum (ad) appended (round-120 reviewer: move buildPeakShape/PeakShape to peaks.ts; keep); T12 V1 closes with round 121 (feature boundary) - the request stays pending and non-blocking, not re-sent",
+   "status": "requested_from_root (B round 113 planning, 2026-10-23; non-blocking) - addenda (x), (y), (z); focused request (aa) sent with the round 116 plan (stage 2 closed, before stage 3 touches the Volume machine; round 116 is UI-only and does not touch it) | addendum (ac) appended with the round 118 plan: gate-117 reviewer Architecture note (hook stored <-> slider mapping) + the group start capture is the second copy; still unanswered; non-blocking | round 119 planning: A round-118 reviewer Architecture note repeats addendum (ac) (start capture + stored<->slider mapping copied in ArrangementLane.tsx and ArrangementGroupHeader.tsx; keep; one bounded hook task later); no new addendum; still unanswered | round 121 planning: addendum (ad) appended (round-120 reviewer: move buildPeakShape/PeakShape to peaks.ts; keep); T12 V1 closes with round 121 (feature boundary) - the request stays pending and non-blocking, not re-sent | round 123 planning: T12 V1 boundary reached (regression round 122 PASS); still unanswered; restated once in b-round-122.md for root; non-blocking; the review rounds change no code",
    "title": "phase 1 is complete at this planning (the feature boundary named by the workflow); the pending frontend-architect checkpoint (b-round-78 / b-round-83 / b-round-91 requests, addenda up to (w)) is re-requested once, with (x) useTrackPanFader and (y) the third MixVolumeTarget kind that T12 stage 1 may add",
    "evidence": "b-round-113.md section 7",
    "note_round122": "T12 V1 boundary reached (gate 121, 425a807); still unanswered; B sent one bounded consolidated request b-round-121-checkpoint-request.md (keep/extract per question, <= 3 sentences each); non-blocking; the regression round and ABLETON-EXPERT-REVIEW (no code) do not wait for it; any approved extraction becomes its own B task with one owner and behaviour-preserving tests, scheduled no earlier than after the review rounds unless root orders otherwise"
@@ -14838,16 +14878,32 @@
   {
    "id": "GATE121-S6-DOC103-STATUS",
    "severity": "info",
-   "status": "scheduled round 122 (A, doc 103 line 4); doc 102 line 4 had the same stale status and is fixed in the same round",
+   "status": "done (round 122 A edit; C SOURCE-SCOPE/AN-REVIEW PASS; published 608187f)",
    "title": "doc 103 (and doc 102) status line still says C and the gate are ahead",
-   "evidence": "gates/round-121/review.md Suggestion 6; docs 102/103 line 4 at 425a807"
+   "evidence": "gates/round-121/review.md Suggestion 6; docs 102/103 line 4 at 425a807",
+   "note_round123_planning": "docs 102 and 103 line 4 now Completed"
   },
   {
    "id": "GATE121-S7-HEADER-WIDTH",
    "severity": "info",
-   "status": "scheduled round 122 as C row RP-HEADER-WIDTH",
+   "status": "converted -> C-R122-02 (deferred_low_polish)",
    "title": "224 px grid header with BPM set, widest triplet division and zoom not browser-checked",
-   "evidence": "gates/round-121/review.md Suggestion 7"
+   "evidence": "gates/round-121/review.md Suggestion 7",
+   "note_round123_planning": "C round 122 RP-HEADER-WIDTH: triplet state 0 px overflow (PASS); straight musical list overflows 2 px and clips the zoom select border ~1 px; Low"
+  },
+  {
+   "id": "C-R122-01",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "at 1280x720 a body range drag shrinks the workspace by 20 px mid-drag; lane auto-fit trims lanes 80->75 px and the selected stems clip moves y 458->449, h 71->66; stays after release (1440: no shift). No mis-hit: range, selection and next click land correctly",
+   "evidence": "c-round-122.json bugs[0]; c-round-122/out/RP-RANGE-1280.json, out/RP-RANGE-timing-1280.json, out/RP-RANGE-edge-1280-0.93.json, shots/RP-RANGE-1280.png"
+  },
+  {
+   "id": "C-R122-02",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "with a BPM set the straight musical division list widens the select to 85 px; the 224 px grid control overflows (scrollWidth 225 > clientWidth 223) and the Waveform Zoom select's right border is clipped ~1 px; all controls stay operable",
+   "evidence": "c-round-122.json bugs[1]; c-round-122/out/RP-HEADER-WIDTH-1440-straight.json, out/RP-HEADER-WIDTH-1280-straight.json, shots/RP-HEADER-WIDTH-*-grid-control.png"
   }
  ],
  "tech_lead_notes": [
@@ -15806,6 +15862,41 @@
    "id": "HR-TOKEN-401-PARAMS",
    "added": "round 111 planning",
    "rule": "the anonymous /api/studio-token check uses valid parameters (?product=middle-east&file=stem1.wav) and expects 401; without parameters the route returns 400 (parameter validation precedes auth), which is not the criterion (C round 110 observation)"
+  },
+  {
+   "id": "HR-TAP-REALTIME-ONLY",
+   "added": "round 123 planning",
+   "rule": "tap analysers only on real-time AudioContexts; the export OfflineAudioContext analyser keeps its last render buffer (stale peak) (C round 122)"
+  },
+  {
+   "id": "HR-METER-LEVEL-ATTR",
+   "added": "round 123 planning",
+   "rule": "track/master meter data-peak is the held maximum and never falls; live level and the 20 dB/s release are on data-level-db (C round 122)"
+  },
+  {
+   "id": "HR-VIDEO-MUTED-BY-DESIGN",
+   "added": "round 123 planning",
+   "rule": "<video>.muted is always true by design (video sound runs through Web Audio); measure video-sound mute on the output tap (C round 122)"
+  },
+  {
+   "id": "HR-ESCAPE-NO-DESELECT",
+   "added": "round 123 planning",
+   "rule": "Escape does not clear a clip multi-selection (existing behaviour since rounds 21/40/41/114); deselect = click on empty lane background; clicking a clip inside a multi-selection keeps it (C round 122)"
+  },
+  {
+   "id": "HR-SUSTAINED-SOURCE",
+   "added": "round 123 planning",
+   "rule": "level-ratio rows use a sustained source (pad) or a paired ratio; the pulse stem varies by quarter (C round 122 RG-18)"
+  },
+  {
+   "id": "HR-REAL-SCROLLBARS",
+   "added": "round 123 planning",
+   "rule": "Playwright headless hides scrollbars by default; launch with ignoreDefaultArgs:['--hide-scrollbars'] for scrollbar rows (C round 122 RG-23)"
+  },
+  {
+   "id": "HR-1280-DETAIL-COLLAPSED",
+   "added": "round 123 planning",
+   "rule": "at 1280x720 the detail panel starts collapsed by design (detailPanelStartsOpen); expand it before reading or typing (C round 122)"
   }
  ],
  "vitest_floor_round26": 1072,
@@ -18040,6 +18131,38 @@
    "repro": "static (ArrangementClip.tsx l.302, ArrangementLane.tsx l.136 at 425a807)",
    "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
    "deferred_round": "B round 121 -> 122 planning (2026-10-24)"
+  },
+  {
+   "id": "C-R122-01",
+   "severity": "low",
+   "status": "open",
+   "title": "at 1280x720 a body range drag shrinks the workspace by 20 px mid-drag; lane auto-fit trims lanes 80->75 px and the selected stems clip moves y 458->449, h 71->66; stays after release (1440: no shift). No mis-hit: range, selection and next click land correctly",
+   "evidence": "c-round-122.json bugs[0]; c-round-122/out/RP-RANGE-1280.json, out/RP-RANGE-timing-1280.json, out/RP-RANGE-edge-1280-0.93.json, shots/RP-RANGE-1280.png",
+   "repro": "1280x720 fresh /studio-lab, Snap off; synth mix -> music at 0, stems pulse -> stems at 2, soft impact -> SFX at 4; select the stems clip; drag a body range 5->8 s on it; compare the stems clip box before/after",
+   "links": [
+    "C-R83-S-1280-RANGE-SHIFT",
+    "SRW-04",
+    "SRW-11B"
+   ],
+   "regression": "no (pre-existing since round 83)",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 122 -> 123 planning (2026-10-24)"
+  },
+  {
+   "id": "C-R122-02",
+   "severity": "low",
+   "status": "open",
+   "title": "with a BPM set the straight musical division list widens the select to 85 px; the 224 px grid control overflows (scrollWidth 225 > clientWidth 223) and the Waveform Zoom select's right border is clipped ~1 px; all controls stay operable",
+   "evidence": "c-round-122.json bugs[1]; c-round-122/out/RP-HEADER-WIDTH-1440-straight.json, out/RP-HEADER-WIDTH-1280-straight.json, shots/RP-HEADER-WIDTH-*-grid-control.png",
+   "repro": "1440x900 or 1280x720 fresh /studio-lab; type 90 in BPM, Enter; read [data-testid=arrangement-grid-control] scrollWidth/clientWidth and the waveform-zoom select box",
+   "links": [
+    "GATE121-S7-HEADER-WIDTH",
+    "SRW-14",
+    "T12-GAIN-VOLUME stage 4b"
+   ],
+   "regression": "no (first measurement of this state)",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block T12; fixed in one polish pass after VISUAL-A-OBSIDIAN and before release; final acceptance still requires every one fixed and C-verified",
+   "deferred_round": "B round 122 -> 123 planning (2026-10-24)"
   }
  ],
  "baseline_tree_at_round108": {
@@ -18257,10 +18380,25 @@
    "id": "REGRESSION-ROUND-2026-10-24",
    "round": 122,
    "decision": "D-29z87",
-   "status": "dispatched",
+   "status": "completed (C round 122 PASS, allRowsRan true, browserVerified true, realVerified true; published 608187f)",
    "trigger": "speed rules 2026-10-21: regression-last.json 2026-10-21 (round 71 baseline), B planned 2026-10-24 00:18:55 UTC (3 days)",
    "scope": "C browser re-verification of every done/c_pass item at 1440x900 and 1280x720 (RG-01..RG-24 minus SRW-21, RG-T1..RG-T4B), parked rows RP-RANGE-1280 (C-R83-S-1280-RANGE-SHIFT), RP-ROW-HANDLE (GATE85-S6), RP-TOUCH-LONG (TOUCH-LONGPRESS-CONTEXTMENU), RP-HEADER-WIDTH (gate-121 S7), GATE111-SUGG-E2E-S5 inside RG-11B; RG-SMOKE; G122-3",
-   "regression_last_update": "B at round 123 planning per current-task.md section 6 (not before C completes every row)"
+   "regression_last_update": "B at round 123 planning per current-task.md section 6 (not before C completes every row)",
+   "result": {
+    "c_report": "c-round-122.json / c-round-122.md",
+    "passed_rows": 67,
+    "failed_rows": [
+     "RP-RANGE-1280 (C-R122-01 Low)",
+     "RP-HEADER-WIDTH-1440/1280 (C-R122-02 Low)"
+    ],
+    "blocked": [
+     "G122-3 fake-Bearer 403 (backend unavailable in cloud)",
+     "SRW-21 mount (deferred_user)"
+    ],
+    "regressions": 0,
+    "smoke": "RG-SMOKE pass (2 tests, /cart only)",
+    "regression_last_set": "2026-10-24 round 122 (B round 123 planning)"
+   }
   }
  ],
  "baseline_tree_at_round122": {
@@ -18272,6 +18410,14 @@
    "docs/implementation/2026/quarter-IV/102-studio-waveform-clip-gain.md (pre d829d7e5...)",
    "docs/implementation/2026/quarter-IV/103-studio-waveform-vertical-zoom.md (pre 22a6c287...)"
   ],
+  "new_files_granted": []
+ },
+ "baseline_tree_at_round123": {
+  "head": "608187fdf279d9b579c279f3c536b27be74c0eea",
+  "working_tree": "clean (git status --porcelain empty at 2026-10-24T01:30Z); gate 122 published 608187f (both remotes)",
+  "frozen_list": "tmp/studio-real-loop/b-round-122-r123-tree-sha256.txt",
+  "entries": 937,
+  "excluded": [],
   "new_files_granted": []
  }
 }

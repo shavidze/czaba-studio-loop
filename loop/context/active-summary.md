@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T00:18:23.263Z)
+# Active loop summary (2026-10-24T01:25:36.933Z)
 
-- backlog.json 1072 KB -> active view 138 KB
-- status: G_ROOT_GATE round 121
-- servers: `{"checkedUtc":"2026-10-24T00:00:44.2580393Z","round":121,"attempt":1,"store":200}`
-- last publication: 425a80705c7b57d6157796810bdd878f1c7b061c (rounds 121-121)
-- last root gate: round 121 published - commit 425a80705c7b57d6157796810bdd878f1c7b061c pushed
+- backlog.json 1082 KB -> active view 142 KB
+- status: G_ROOT_GATE round 122
+- servers: `{"checkedUtc":"2026-10-24T00:33:53.2837504Z","round":122,"attempt":1,"store":200}`
+- last publication: 608187fdf279d9b579c279f3c536b27be74c0eea (rounds 122-122)
+- last root gate: round 122 published - commit 608187fdf279d9b579c279f3c536b27be74c0eea pushed
 
 ## Current items: -
 
@@ -241,6 +241,10 @@
 - ARCH-R120-PEAKSHAPE-TO-PEAKS / info / signal - addendum (ad) to the pending checkpoint request b-round-91-checkpoint-request.md (ARCH-CHECKPOINT-PHASE1-BOUNDARY); reviewer verdict keep; round 121 does not move it; not scheduled / buildPeakShape/PeakShape are pure geometry exported from the ArrangementClip component file; the detail panel and tests import them from the
 - WAVEFORM-ZOOM-DISCOVERABILITY / info / signal for DESIGN-UX-REVIEW (round 121 ruling: appearance-none select without a dropdown arrow to fit the 224 px grid row; title + aria-label carry the meaning); not scheduled / the Waveform Zoom select has no visible dropdown affordance
 - WAVEFORM-ZOOM-LIVE-PARITY / info / signal for ABLETON-EXPERT-REVIEW (not scheduled): Live 12 6.1 confirms a slider for all audio tracks incl. new clips; range, location, undo behaviour and Clip View behaviour unconfirmed; CZABA uses a stepped select 0.5x-8x, lanes only, not in history / Waveform Vertical Zoom: stepped select vs Live continuous slider; detail panel not zoomed
+- GATE121-S4-RENDER-COST / info / acknowledged (reviewer: same cost class as horizontal zoom; discrete choice; throttle or useDeferredValue only if a continuous slider is added) / one Waveform Zoom change rebuilds buildPeakShape for every audio clip (up to 4096 columns)
+- GATE121-S5-ARIA-LANGUAGE / info / signal for DESIGN-UX-REVIEW (not scheduled) / Waveform Zoom aria-label mixes English 'Waveform Zoom' (Live term) and Georgian while the neighbouring grid select is Georgian only
+- GATE121-S6-DOC103-STATUS / info / scheduled round 122 (A, doc 103 line 4); doc 102 line 4 had the same stale status and is fixed in the same round / doc 103 (and doc 102) status line still says C and the gate are ahead
+- GATE121-S7-HEADER-WIDTH / info / scheduled round 122 as C row RP-HEADER-WIDTH / 224 px grid header with BPM set, widest triplet division and zoom not browser-checked
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
