@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T08:40:06.137Z)
+# Active loop summary (2026-10-24T09:23:51.262Z)
 
-- backlog.json 1183 KB -> active view 150 KB
-- status: G_ROOT_GATE round 130
-- servers: `{"checkedUtc":"2026-10-24T08:17:40.9035808Z","round":130,"attempt":1,"store":200}`
-- last publication: ba542970c31b235c1e77e23dea06ec366fe7d721 (rounds 130-130)
-- last root gate: round 130 published - commit ba542970c31b235c1e77e23dea06ec366fe7d721 pushed
+- backlog.json 1192 KB -> active view 151 KB
+- status: G_ROOT_GATE round 131
+- servers: `{"checkedUtc":"2026-10-24T09:06:45.7515601Z","round":131,"attempt":1,"store":200}`
+- last publication: c8ff326cab55e06838487d9ebd9c0a2d50c85f58 (rounds 131-131)
+- last root gate: round 131 published - commit c8ff326cab55e06838487d9ebd9c0a2d50c85f58 pushed
 
 ## Current items: -
 
@@ -254,11 +254,13 @@
 - C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
 - ALTGR-SHORTCUT-GUARD / info / signal (not scheduled; no CZABA contract; C round 126 F-5) / Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or 
 - C-R127-L1 / low / parts a-d closed round 128 (C EX-COPY exact text in the browser, c-round-128.json); parts e-f in deferred_low_polish (C-R127-L1e/L1f) / Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in t
-- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2a done round 129; V-0.2b round 130; then V-0.2c..V-0.5; closes when V-0 completes (RV-4) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
+- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2a r129, V-0.2b r130 done; V-0.2c1 r131; then V-0.2c2/c3, V-0.3..V-0.5; closes when V-0 completes (RV-4) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
 - C-R129-REDO-PASTE-SELECTION / info / observation (pre-existing; product question, not scheduled) / Redo after Paste does not restore the pasted clip selection
 - C-R129-EMPTY-RANGE-UNREACHABLE / info / acknowledged (harness): a drag on empty lane background creates no time selection, so E12/E27/E31 are unit-only / empty-range edit messages not reachable in the browser
-- A-R129-M4-GAP / info / scheduled round 130 (SA-DEL in status-announcement-ui, D-29z95) / no UI test asserted the delete-clip status (m4 survived)
-- GATE129-S2-ST9-VACUOUS / low / scheduled round 130 (ST9 asserts index === -1; strings.test.ts owned) / ST9 constant loop checks nothing after the six constants were deleted
+- GATE130-S1-GHOST-STATUS-TWO-LANGUAGES / low / ruled D-29z96: stays V-0.4 (ArrangementLane has 20 Georgian lines; tests pin the ghost; half-migrating the lane needs a second per-file scan); V-0.4 must reuse the status English for ghost/hint texts; tracked under GATE128-S1 / blocked drop shows English status and Georgian lane ghost
+- GATE130-S2-TRACKNAME-IN-SENTENCE / info / closes with V-0.4 default track names; not a new finding later / clipAdded interpolates Georgian track names into English sentences
+- GATE130-S4-ST13-BRITTLE / info / handled D-29z96: ST13 shrinks to 4 lines in round 131; an exact list of 4 lines is acceptable as a ratchet / ST13 pins remaining Georgian lines exactly
+- GATE130-S5-DOC106-STATUS / low / scheduled round 131 (doc 106 l.4 only) / doc 106 says Completed before C's browser check
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

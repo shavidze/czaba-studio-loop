@@ -1,126 +1,119 @@
-# CURRENT TASK — Round 131: VISUAL-A V-0.2c1 — video import messages in English
+# CURRENT TASK — Round 132: VISUAL-A V-0.2c2 — tempo, metronome and zoom-readout texts in English
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 130)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 131)
 - **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
 - **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` (M2, V-0). The module contract is in `backlog.json` → VISUAL-A-OBSIDIAN `v0_plan_d29z92.module_contract`:
-  - a leaf module, one object per area;
-  - plain strings plus small pure formatters;
+  - a leaf module (`strings.ts` imports nothing), one object per area;
+  - plain strings plus small pure formatters that take **already-formatted values**;
   - no type assertions;
   - **existing exported names keep their names and signatures and get their values from the module**.
-- **Previous task:** `tasks/round-130.md` (exact copy, `cmp` OK, 32190 bytes). Rationale: `b-round-130.md`. Decision record: **D-29z96** in `plan.md`.
-- **Baseline: commit `ba542970c31b235c1e77e23dea06ec366fe7d721`** (gate 130 published). The tree was **clean** at planning (`git status --short` empty).
-- **Frozen list:** `tmp/studio-real-loop/b-round-130-r131-tree-sha256.txt`, **935 entries**. It is `git ls-files -co --exclude-standard` minus the 7 grants in `b-round-130-r131-grants.txt`. `sha256sum -c --quiet` was OK at planning, run from `store/`.
-- **Start hashes of the 7 grants:** `b-round-130-r131-granted-start-sha256.txt`. **Start copies:** `b-round-130/r131-granted-start/` (paths relative to `store/`). A checks both at the start. If a hash differs, A stops and reports.
+- **Previous task:** `tasks/round-131.md` (exact copy, `cmp` OK, 30835 bytes). Rationale: `b-round-131.md`. Decision record: **D-29z97** in `plan.md`.
+- **Baseline: commit `c8ff326cab55e06838487d9ebd9c0a2d50c85f58`** (gate 131 published). The tree was **clean** at planning (`git status --short` empty).
+- **Frozen list:** `tmp/studio-real-loop/b-round-131-r132-tree-sha256.txt`, **926 entries**. It is `git ls-files -co --exclude-standard` (944) minus the 18 grants in `b-round-131-r132-grants.txt`. `sha256sum -c --quiet` was OK at planning, run from `store/`.
+- **Start hashes of the 18 grants:** `b-round-131-r132-granted-start-sha256.txt`. **Start copies:** `b-round-131/r132-granted-start/` (paths relative to `store/`; `sha256sum -c` OK there at planning). A checks both at the start. If a hash differs, A stops and reports.
 
-## 0. Why this round (D-29z96)
-- **Round 130: C PASS**, `browserVerified` = `realVerified` = true, 0 bugs. Gate 130 published `ba54297`. **V-0.2b is done.**
-- `tasks/round-130.md` §8 fixed this step: after a V-0.2b PASS comes V-0.2c, which B measures first and splits if needed.
-- B measured it (exact greps, `b-round-130.md` §3). V-0.2c as one round would be 3–4 times the size of round 130:
-  - groups: 190 test lines in 11 files (a separate, overlapping grep finds about 180 uses of the default group name `ჯგუფი N` in fixtures; B re-measures at c3 planning);
-  - collection: 42 test lines in 7 files;
-  - tempo, metronome and view: 23 test lines;
-  - video: 8 test lines.
-
-  **Split, with the scope unchanged:**
-  - **c1** = video import (this round);
-  - **c2** = `tempo.ts`, `metronome.ts`, `view.ts`;
-  - **c3** = `selection.ts` + `groups.ts`.
-
-  `collection.ts` (with the Context l.3462 load fallback) moves whole to **V-0.5** with the library UI that shows its errors. `library.ts` (the track-kind labels) moves to **V-0.4** with the default track names.
-- The regression round is not due: `regression-last.json` is dated 2026-10-24, so the next one is due on or after 2026-10-27. No Critical, High or Medium finding is open. `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist.
-- **Folded in (costs little; the round already owns the code):**
-  - **GATE130-S5:** doc 106's status line. One line changes.
-  - **GATE130-S3 forward rule:** each new formatter gets **one literal English assertion** in a UI test, besides `strings.test`. The new UI test below applies this rule.
+## 0. Why this round (D-29z97)
+- **Round 131: C PASS**, `browserVerified` = `realVerified` = true. 15 reachable video texts were exact at both viewports, with unchanged effects. Gate 131 published `c8ff326` (verify OK, review 9/10). **V-0.2c1 is done.** One new Low, C-R131-01 (a browser-recorded WebM with no Duration element is rejected with "could not open"), is pre-existing and goes to `deferred_low_polish`.
+- `tasks/round-131.md` §8 fixed this step: after a V-0.2c1 PASS, round 132 = **V-0.2c2**: `tempo.ts`, `metronome.ts` and `view.ts`, with the exported names unchanged. B measured the test coupling first (below).
+- The regression round is not due: `regression-last.json` is dated 2026-10-24 (round 122), so the next one is due on or after 2026-10-27. No Critical, High or Medium finding is open. `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist.
+- **B's measurement (exact greps at `c8ff326`):**
+  - Source: 4 Georgian lines in `tempo.ts` (l.11, 12, 43, 45), 4 in `metronome.ts` (l.10, 11, 115, 117), and 1 in `view.ts` (l.258).
+  - Tests with a literal pin: 14 lines in 9 files (§2). The module-built users (`tempo-ui`, `metronome-ui`, `grid-triplet-ui`, `tempo-window-ui`, and the other `grid-musical-ui` lines) need no change.
+  - **The ArrangementContext is not touched in this round.**
+- **Ruling D-29z97 R3 — one status becomes two-language for a while (a tracked exception):**
+  - `gridTempoClearedMessage` (`grid-divisions.ts` l.150–152, V-0.3) builds `${tempoStatusMessage(null)} ბადე დაბრუნდა წამებზე: ${formatGridDivision(step)}.`.
+  - `formatGridDivision` (`grid.ts` l.177, `${step} წმ`) is the label of every seconds grid division. Its output is pinned in 88 test lines in 11 files (the select options and menu items). Changing it is the grid-label work of V-0.3.
+  - So in this round, clearing the BPM while a musical division is chosen shows `Tempo cleared — the bars ruler is hidden. Audio is unchanged. ბადე დაბრუნდა წამებზე: 0.5 წმ.`.
+  - This differs from ruling D-29z96 (c). There, the whole line could move together at low cost. Here, the Georgian tail is the shared grid label owned by V-0.3, and the cost is outside c2. Leaving `tempoStatusMessage(null)` Georgian instead would split one tempo area across two languages and stop `tempo.ts` passing its per-file scan.
+  - The exception is tracked under GATE128-S1 as **GATE132-TEMPO-CLEARED-MIXED**. V-0.3 must close it, and V-0.3 gains `grid.ts` (`formatGridDivision`).
+- **Ruling D-29z97 R4:** `ArrangementTransport.tsx` l.245 `aria-label="Zoom (px/წმ)"` stays in V-0.3 with the rest of the Transport (no half-migrated file). Its `aria-valuetext` (from `formatZoomReadout`) becomes `px/s` in this round. C subtracts that aria-label by name.
+- **Folded in (cheap; the round already owns the code or it is one line):**
+  - **GATE131-S6 (doc 107 status line):** l.4 still says "the browser check is C's round". One line changes.
+  - **GATE130-S3 forward rule:** each new formatter gets **one hand-written English literal in a UI test**. Here, these are extra `expect` lines inside existing `it`s (§3.2). No `it` is added.
 
 ## 1. What changes (user-visible)
-One new exported object, **`studioVideoStrings`**, goes in `app/lib/arrangement/strings.ts`. Every Georgian literal below moves there, in English.
+There are three new exported objects in `app/lib/arrangement/strings.ts`: **`studioTempoStrings`**, **`studioMetronomeStrings`** and **`studioViewStrings`**. Every Georgian literal below moves there, in English.
 
-**Text only.** No change to any of these:
-- a condition or the order of checks;
-- the abort or early-return paths;
-- a state update, history push, seek or decode chain;
-- timing;
-- `classifyVideoFile`.
+**Text only.** None of these change:
+- tempo parsing (`TEMPO_TEXT_PATTERN`, `parseTempoBpm`), `formatTempoBpm`, the bounds;
+- the bars ruler marks;
+- metronome scheduling and click samples;
+- the zoom rounding `Math.round(pxPerSecond * 10) / 10`;
+- any condition, the order of checks, or any non-string expression.
 
 ### 1.1 The English map (exact text; A may not reword it — if a line seems wrong, report it and B rules)
 Notation:
-- `{name}` = a file name. It is user content and is not translated.
-- `{start}` / `{end}` = already formatted times (`formatArrangementTime`, called in the Context, as in V-0.2b).
-- `{detail}` = an error message or a file extension.
-- Georgian „…“ quotes become English “…” (U+201C / U+201D).
+- `{bpm}` = the output of `formatTempoBpm(bpm)`, called in `tempo.ts` / `metronome.ts`.
+- `{beatsPerBar}` = `TEMPO_BEATS_PER_BAR` (4).
+- `{min}` / `{max}` = `TEMPO_BPM_MIN` / `TEMPO_BPM_MAX`.
+- `{value}` = the rounded zoom number from `view.ts`.
+
+These are passed in, because `strings.ts` imports nothing.
 
 | # | Where today (baseline line) | Object.key (A may rename the key, not the text) | English |
 |---|---|---|---|
-| V1 | Context `runVideoImport` l.2230 `„${file.name}“ იხსნება…` | `opening(name)` | `Opening “{name}”…` |
-| V2 | Context l.2280 | `addToTrackFailed(name)` | `“{name}”: could not be added to the video track.` |
-| V3 | Context l.2286, the history label | `historyAddVideo(name)` | `Add video — {name}` |
-| V4 | Context l.2291 (status; no final period today, so none is added) | `added({name, start, end})` | `“{name}” added to the video track: {start} — {end}` |
-| V5 | Context `importVideoFiles` catch, l.2321 | `importFailed(detail)` | `Could not add the video: {detail}` |
-| V6 | `video.ts` `audioFileRejectionMessage` l.66 | `audioFileRejected(name)` | `“{name}”: audio files cannot be added here — only your own video can; sounds are added from the library.` |
-| V7 | `video.ts` `unsupportedFileMessage` l.72 | `notVideo(name, detail)` | `“{name}”: the format is not video ({detail}).` |
-| V7a | `video.ts` l.71, the fallback `'უცნობი ტიპი'` | `unknownType` | `unknown type` |
-| V8 | `video.ts` `audioLaneDropMessage` l.85 | `dropOnVideoTrack` | `Drop the video on the video track.` |
-| V9 | `video.client.ts` `videoProbeErrorMessage` l.35 | `probeFailed(name)` | `“{name}”: the browser could not open this video — try MP4 (H.264) or WebM.` |
-| V10 | `videoAudioNote('no-audio')` l.40 | `noSound` | `The video has no sound` |
-| V11 | `videoAudioNote('too-long')` l.43 | `tooLongToRead` | `Sound not read: the video is longer than 20 minutes` |
-| V12 | `videoAudioNote('too-large')` l.46 | `tooLargeToRead` | `Sound not read: the file is larger than 1 GB` |
-| V13 | `videoAudioNote('decode-failed')` l.48 | `soundUnreadable` | The same text as `studioExportStrings.videoSoundUnreadable`: `The video's sound could not be read — it is not in the export`. A may write it as a reference to that value inside `strings.ts`. |
-| V14 | `video.client.ts` l.70, the probe abort | `probeCancelled` | `Adding the video was cancelled.` |
-| V15 | `video.client.ts` l.141 and l.148, the decode abort | `decodeCancelled` | `Reading the video's sound was cancelled.` |
+| T1 | `tempo.ts` l.11 `TEMPO_INVALID_MESSAGE` | `studioTempoStrings.invalid({min, max})` | `Tempo must be {min}–{max} BPM (e.g. 90 or 92.5) — not changed.` → `Tempo must be 20–999 BPM (e.g. 90 or 92.5) — not changed.` |
+| T2 | `tempo.ts` l.12 `TEMPO_EMPTY_HINT` | `studioTempoStrings.emptyHint` | `Bars: set a BPM — grid only, audio is not stretched` |
+| T3 | `tempo.ts` l.43, `tempoStatusMessage(null)` | `studioTempoStrings.cleared` | `Tempo cleared — the bars ruler is hidden. Audio is unchanged.` |
+| T4 | `tempo.ts` l.45, `tempoStatusMessage(bpm)` | `studioTempoStrings.set({bpm, beatsPerBar})` | `Tempo {bpm} BPM · {beatsPerBar}/4 — bars ruler updated. Grid only: audio is not stretched.` |
+| M1 | `metronome.ts` l.10 `METRONOME_NEEDS_TEMPO_TITLE` | `studioMetronomeStrings.needsTempoTitle` | `Metronome — set a BPM first` |
+| M2 | `metronome.ts` l.11 `METRONOME_TITLE` | `studioMetronomeStrings.title(beatsPerBar)` | `Metronome — a click on every beat during playback ({beatsPerBar}/4, the first beat of each bar is louder). Master volume and Mute also apply to it. Not included in the export.` |
+| M3 | `metronome.ts` l.115, `metronomeStatusMessage(null)` | `studioMetronomeStrings.off` | `Metronome is off.` |
+| M4 | `metronome.ts` l.117, `metronomeStatusMessage(bpm)` | `studioMetronomeStrings.on({bpm, beatsPerBar})` | `Metronome is on — {bpm} BPM, {beatsPerBar}/4: a click on every beat, louder on the first beat of each bar. Not included in the export.` |
+| Z1 | `view.ts` l.258 `formatZoomReadout` | `studioViewStrings.zoomReadout(value)` | `{value} px/s` (e.g. `40 px/s`, `35.3 px/s`) |
 
-- **Exported names stay; their values move.** These functions keep their names, parameters and return types, and their bodies return module values:
-  - `audioFileRejectionMessage`, `unsupportedFileMessage` and `audioLaneDropMessage` (`video.ts`);
-  - `videoProbeErrorMessage` and `videoAudioNote` (`video.client.ts`).
-
-  Their importers stay frozen: `ArrangementLane.tsx`, the Context, `export-mp3.test`, `video.test` and `strings.test`.
-- **Conditional copy stays where it is.** These only pick module values:
-  - the `reason` branches in `videoAudioNote`;
-  - the `extension ? … : file.type || unknownType` choice;
-  - the `kind` branches in `audioLaneDropMessage`;
-  - the `error instanceof Error ? error.message : String(error)` detail.
-
-  `strings.ts` imports nothing. `video.ts` and `video.client.ts` may import `studioVideoStrings` from `./strings` (the leaf rule allows this direction).
+- **Facts that must survive (a dropped one is Medium):** "grid only", "audio is not stretched" or "Audio is unchanged" in T2–T4; "not included in the export", "Master volume and Mute also apply" and "louder on the first beat of each bar" in M2 and M4; the bounds and examples in T1. The user's constraint is that grid tempo is **not** audio stretch, so these words stay.
+- **Exported names stay; their values move.**
+  - `TEMPO_INVALID_MESSAGE = studioTempoStrings.invalid({min: TEMPO_BPM_MIN, max: TEMPO_BPM_MAX})`.
+  - `TEMPO_EMPTY_HINT = studioTempoStrings.emptyHint`.
+  - `METRONOME_NEEDS_TEMPO_TITLE = studioMetronomeStrings.needsTempoTitle`.
+  - `METRONOME_TITLE = studioMetronomeStrings.title(TEMPO_BEATS_PER_BAR)`.
+  - `tempoStatusMessage`, `metronomeStatusMessage` and `formatZoomReadout` keep their names, parameters and return types. Their bodies return module values.
+  - These importers stay frozen: `StudioWorkspace.tsx`, `ArrangementTempoRow.tsx`, `ArrangementTransport.tsx` and `grid-divisions.ts`.
+- **Conditional copy stays where it is.** The `bpm === null` branches stay in `tempo.ts` and `metronome.ts` and only pick module values.
+- **Imports:** `tempo.ts`, `metronome.ts` and `view.ts` may import their object from `./strings` (the leaf rule allows this direction). Today `tempo.ts` imports `./view`, and `metronome.ts` imports `./tempo`. No cycle appears, because `strings.ts` imports nothing.
 - **Unchanged this round** (they stay Georgian; C subtracts them by name):
-  - (a) The default track names, Context l.546–547 (V-0.4).
-  - (b) The group nudge label `გადატანა (${ids.length})`, l.1760 (V-0.4, D-29z95 R4).
-  - (c) The library load fallback `'ჩატვირთვა ვერ მოხერხდა'`, l.3462. **Ruling:** it is shown only as a library item error, after `შეცდომა:` (`ArrangementLibrary.tsx` l.122), next to the `collection.ts` thrown messages. All of these move together in V-0.5, so one library error line never mixes two languages.
-  - (d) The video lane's own texts in `ArrangementLane.tsx`: the empty-lane hint l.853, the drag hint l.864 `აქ ვიდეო არ ემატება — ჩააგდე ვიდეოხაზზე`, and the clip sound badge l.951–954 (`ხმა იშიფრება…` / `ხმა ვერ წაიკითხა` / `ხმა არ არის`). These are V-0.4, with the whole lane. **Ruling on GATE130-S1 (ghost/hint vs status):** the lane has 20 Georgian lines, and tests pin its ghost texts. Moving 3–5 of them now would leave the lane half-migrated, and it would need a second per-file scan. Instead, V-0.4 must move the lane's ghost and hint texts using the same English as the status texts (`No room here`, `has not loaded yet`, `Drop the video on the video track`). The mixed language is temporary and tracked (GATE128-S1).
-- **Where `videoAudioNote` shows (for C).** Its output is stored as `source.audioNote` and is shown **only in the Export dialog** (`ArrangementExportDialog.tsx` l.68, in the list `data-testid="arrangement-export-video-sound"`). The clip badge on the lane is the lane's own text, (d) above.
-- **Glossary additions** (doc 107 and the backlog glossary):
-  - video track (`ვიდეოხაზი`);
-  - Add video — {name} (`ვიდეოს დამატება`);
-  - Opening … (`იხსნება…`);
-  - the format is not video;
-  - unknown type;
-  - Sound not read (`ხმა არ წაიკითხა`);
-  - The video has no sound.
+  - (a) the tempo row's own texts in `ArrangementTempoRow.tsx`: the BPM field `aria-label` `პროექტის ტემპი (BPM)`, its `title`, and the `მეტრონომი` button label (V-0.3);
+  - (b) the Transport zoom `aria-label` `Zoom (px/წმ)` and the other Transport titles (V-0.3, R4);
+  - (c) every `grid-divisions.ts` and `grid.ts` text: division labels `… წმ`, `1 ტაქტი`, grid statuses, and the tail `ბადე დაბრუნდა წამებზე: … წმ.` of the tempo-cleared grid status (V-0.3, R3).
+- **Glossary additions** (doc 108 and the backlog glossary):
+  - Tempo (`ტემპი`), BPM;
+  - Bars (`ტაქტები`), bars ruler (`ტაქტების სახაზავი`);
+  - grid only — audio is not stretched (`მხოლოდ ბადე, აუდიო არ იწელება`);
+  - Metronome (`მეტრონომი`);
+  - Not included in the export (`ექსპორტში არ შედის`);
+  - `px/s` (`px/წმ`; the unit `s` is from the round-127 glossary).
 
 ## 2. A — files you own (everything else is frozen)
 | File | Change |
 |---|---|
-| `app/lib/arrangement/strings.ts` | Add `studioVideoStrings` with V1–V15. The six existing objects are unchanged. Imports nothing |
-| `app/lib/arrangement/video.ts` | **Only:** the import and the string literals of l.66, 71, 72 and 85 (module values or formatters). No condition or non-string expression changes |
-| `app/lib/arrangement/video.client.ts` | **Only:** the import and the string literals of l.35, 40, 43, 46, 48, 70, 141 and 148. The timeout constant, the `reason` order and the abort checks are unchanged |
-| `app/contexts/ArrangementContext.tsx` | **Only:** the import, and the string expressions at baseline l.2230, 2280, 2286, 2291 and 2321 → `studioVideoStrings` formatters. The times are still formatted in the Context. No condition, dependency array, call order or non-string expression changes. l.546–547, l.1760 and l.3462 stay |
-| `app/lib/arrangement/__tests__/strings.test.ts` | New `describe('V-0.2c1 video import strings')` with ST14–ST16 (§3.1). **ST13:** remove the 5 video-import lines from its expected list, which leaves 4 lines in order: `'ვიდეო'`, `'აუდიო'`, the `გადატანა` label and the l.3462 fallback. Its title may change from "later V-0 stages" only if A reports the new title. ST1–ST12 are unchanged |
-| `app/lib/arrangement/__tests__/video.test.ts` | l.59 → `studioVideoStrings.dropOnVideoTrack` (same `toBe`). l.62 → `studioVideoStrings.audioFileRejected('tone.wav')` (keep `toContain`, or use `toBe` with the same value; report which). The track names l.20–21 stay |
-| **new** `app/lib/arrangement/__tests__/video-import-status-ui.test.tsx` | Exactly **4 `it`s**, VI1–VI4 (§3.2). Copy the whole mock preamble of `export-mp3.test.tsx` l.24–41 (`@remix-run/react`, `graph.client`, `video.client` with `importOriginal`, `mp3-encoder.client`) and its mounting/provider helper (`mountMp3Dialog`/`live` style), because `decodeVideoAudio(file, getDecodeContext(), …)` evaluates the decode context first. Override only `probeVideoFile` and `decodeVideoAudio`. Drive the import through the Context's `importVideoFiles`. Read the status the way the existing Context UI tests read it. A missing test-side mock is not a stop-rule case; only a needed **production** hook is |
-| `docs/implementation/2026/quarter-IV/106-studio-v0-playback-loop-strings.md` | **Only l.4**, the status line → `**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 130-ში; C round 130 — PASS, browserVerified; gate 130 — ba54297)` (GATE130-S5) |
-| **new** `docs/implementation/2026/quarter-IV/107-studio-v0-video-import-strings.md` | TEMPLATE.md sections, in Georgian: the V map, the split of V-0.2c (c1/c2/c3, collection → V-0.5, library labels → V-0.4), rulings (c) and (d), the forward rule (one literal per formatter), the glossary additions, the tests and the mutations. Status is Completed only after §4 is green |
+| `app/lib/arrangement/strings.ts` | Add the three objects with T1–T4, M1–M4 and Z1. The seven existing objects are unchanged. It still imports nothing |
+| `app/lib/arrangement/tempo.ts` | **Only:** the import and l.11, 12, 43 and 45 (module values or formatters) |
+| `app/lib/arrangement/metronome.ts` | **Only:** the import and l.10, 11, 115 and 117 |
+| `app/lib/arrangement/view.ts` | **Only:** the import and l.258 (`return studioViewStrings.zoomReadout(Math.round(pxPerSecond * 10) / 10);` or the same rounding in a local) |
+| `app/lib/arrangement/__tests__/strings.test.ts` | New `describe('V-0.2c2 tempo, metronome and view strings')` with ST17–ST19 (§3.1). ST1–ST16 are unchanged |
+| `app/lib/arrangement/__tests__/tempo.test.ts` | l.135–145: the Georgian literals → `studioTempoStrings` values or formatters, same matchers. l.138 `toContain('92.5 BPM')` stays |
+| `app/lib/arrangement/__tests__/metronome.test.ts` | l.259–267: the same (l.262 `toContain('92.5 BPM')` stays) |
+| `app/lib/arrangement/__tests__/view.test.ts` | l.266–268 → `studioViewStrings.zoomReadout(0.5)`, `(40)`, `(35.3)`, same `toBe` |
+| `app/lib/arrangement/__tests__/tempo-ui.test.tsx` | **Add** the forward-rule literal lines of §3.2 (T-UI1–T-UI4) inside the existing `it`s. Nothing else |
+| `app/lib/arrangement/__tests__/metronome-ui.test.tsx` | **Add** M-UI1–M-UI4 (§3.2) inside the existing `it`s. l.288 (`'მეტრონომი'`) stays |
+| `marker-time-snap-ui.test.tsx` l.391, `grid-snap-ui.test.tsx` l.285, `grid-snap-edit.test.tsx` l.340, `grid-snap-position.test.tsx` l.308 and l.349, `grid-snap-loop-drop.test.tsx` l.360 (all in `app/lib/arrangement/__tests__/`) | `'40 px/წმ'` → the hand-written `'40 px/s'`, same matcher (`toBe` / `not.toBe`). These are the UI literal pins for Z1 (forward rule) |
+| `app/lib/arrangement/__tests__/grid-musical-ui.test.tsx` l.490 and `grid-musical.test.ts` l.118 | The hand-written literal → `'Tempo cleared — the bars ruler is hidden. Audio is unchanged. ბადე დაბრუნდა წამებზე: 0.5 წმ.'`, same `toBe` (the R3 exception, pinned honestly; V-0.3 changes the tail). No other line in these files changes |
+| `docs/implementation/2026/quarter-IV/107-studio-v0-video-import-strings.md` | **Only l.4** → `**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 131-ში; C round 131 — PASS, browserVerified; gate 131 — c8ff326)` |
+| **new** `docs/implementation/2026/quarter-IV/108-studio-v0-tempo-metronome-view-strings.md` | Sections from TEMPLATE.md, in Georgian: the T/M/Z map; rulings R3 (the mixed tempo-cleared grid status, GATE132-TEMPO-CLEARED-MIXED, closes in V-0.3 with `grid.ts`) and R4; the facts that must survive; the glossary additions; the tests and the mutations. The status line says Completed only after §4 is green, and names C's round as still to come |
 
-- **Test rules (as in rounds 129–130, plus one forward rule):**
-  - In existing tests, every assertion that pins a V-text uses the module value or formatter, with the same inputs and **the same matcher**.
-  - **New rule (GATE130-S3):** VI1–VI4 assert the **hand-written English literal** for each formatter they reach. A module-built expected value alone is not enough there, because it cannot catch a template change.
-  - Georgian track names inside expected text stay.
-  - No `it` is added, removed or renamed outside the new describe and the new file.
-  - Line numbers are baseline (`ba54297`) positions. Find each by its text.
-- **Pre-edit grep (A records it):** for each V row, grep the old Georgian text in `app/**/__tests__/**` and `e2e/**`. B's grep found test hits only in `video.test.ts` (l.59, l.62) and `strings.test.ts` (ST13 l.662–666). `e2e/` has no Georgian. These name-only importers need no change, because the names stay: `export-mp3.test`, `waveform-zoom.test` and `ArrangementLane.tsx`.
+- **Test rules (as in rounds 129–131):**
+  - In existing unit tests, every assertion that pins one of these texts uses the module value or formatter, with the same inputs and **the same matcher**.
+  - The UI pins in §2 and §3.2 use **hand-written English literals** (GATE130-S3).
+  - No `it` is added, removed or renamed outside the new `describe` in `strings.test.ts`.
+  - Line numbers are baseline (`c8ff326`) positions. Find each by its text.
+- **Pre-edit grep (A records it):** for each T/M/Z row, grep the old Georgian text in `app/**` and `e2e/**`. B's grep found only the lines in §2, and none in `e2e/`. If A finds another pin, that is a stop-rule case.
 - **Stop rule:** stop and report (B rules) if any of these happens:
-  - a test outside §2 asserts an old V-text, or turns red;
-  - a change needs a frozen file, or a non-string line in the Context, `video.ts` or `video.client.ts`;
-  - VI1–VI4 cannot be written with the `export-mp3` mock pattern without a new production hook.
-- **Expected end state:** `git status` shows 7 ` M` + 2 `??` (the new test and doc 107) and no other path. The frozen list is OK at the start and at the end. Report the end sha256 of the 9 paths.
-- **Protected (unchanged; `git diff ba54297` on them is empty):**
+  - a test outside §2 asserts an old text, or turns red;
+  - a change needs a frozen file or a non-string line;
+  - an import cycle or a module-load order problem appears (e.g. a `TEMPO_*` constant reads `undefined`).
+- **Expected end state:** `git status` shows 18 ` M` + 1 `??` (doc 108) and no other path. The frozen list is OK at the start and at the end. Report the end sha256 of the 19 paths.
+- **Protected (unchanged; `git diff c8ff326` on them is empty):**
   - `app/routes/studio.$productId.tsx`;
   - `app/routes/api.studio-token.ts`;
   - `app/lib/auth.ts`;
@@ -132,154 +125,136 @@ Notation:
 - **Before editing, read:**
   - `.claude/primitives-map.json`;
   - `AGENT_DISCOVERABLE_CODE.md`;
-  - `REACT_CONTEXT.md`;
-  - `AUDIO_ARCHITECTURE.md` (the decode path is touched, strings only);
+  - `AUDIO_ARCHITECTURE.md` (metronome module; strings only);
   - `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`;
-  - `.claude/prompts/new-test.md` (new test file);
   - `GEORGIAN_DOCS.md` and `docs/implementation/TEMPLATE.md`.
-- **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, no `as T` (also no `as const`), semicolons, no code comments.
+- **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, no `as T` (and no new `as const`), semicolons, no code comments.
 
 ## 3. A — tests and mutations
-### 3.1 `strings.test.ts`: ST14–ST16 (the file goes from 13 to 16 `it`s)
-- **ST14:** every plain-string property of `studioVideoStrings` equals its exact English literal from §1.1 (`toBe`). Its key list equals the expected list. `soundUnreadable` `toBe` `studioExportStrings.videoSoundUnreadable`.
-- **ST15:** every formatter returns the exact English for its inputs, with `toBe`:
-  - `opening`, `addToTrackFailed`, `historyAddVideo`, `audioFileRejected` and `probeFailed` with the name `film.mp4`;
-  - `added` with `00:01.000` / `00:07.000`;
-  - `importFailed` with `boom`;
-  - `notVideo` with `doc.pdf` / `.pdf`.
+### 3.1 `strings.test.ts`: ST17–ST19 (the file goes from 16 to 19 `it`s)
+- **ST17:**
+  - Every plain-string property of the three objects equals its exact English literal from §1.1 (`toBe`).
+  - The key list of each object equals the expected list.
+  - `TEMPO_EMPTY_HINT` and `METRONOME_NEEDS_TEMPO_TITLE` are `toBe` the module values.
+- **ST18:** every formatter returns the exact English, with `toBe`:
+  - `invalid({min: 20, max: 999})`;
+  - `set({bpm: '90', beatsPerBar: 4})` and `set({bpm: '92.5', beatsPerBar: 4})`;
+  - `title(4)`;
+  - `on({bpm: '40', beatsPerBar: 4})`;
+  - `zoomReadout(0.5)`, `(40)` and `(35.3)`.
 
-  It also checks the exported functions `toBe` the expected English:
-  - `videoAudioNote` for each of the 4 reasons;
-  - `videoProbeErrorMessage('film.mp4')`;
-  - `audioFileRejectionMessage('tone.wav')`;
-  - `unsupportedFileMessage({name: 'doc.pdf', type: 'application/pdf'})` → `.pdf`;
-  - `unsupportedFileMessage({name: 'noext', type: ''})` → `unknown type`.
-- **ST16:** no plain value and no formatter output of `studioVideoStrings` contains a Georgian codepoint. **Plus a per-file scan:** after comments are stripped, `video.ts` and `video.client.ts` contain no Georgian codepoint.
-- **ST13:** the list shrinks to the 4 lines of §2. Any new or remaining Georgian video line turns it red.
+  It also checks these exported values `toBe` the hand-written English:
+  - `TEMPO_INVALID_MESSAGE`;
+  - `tempoStatusMessage(90)` and `tempoStatusMessage(null)`;
+  - `METRONOME_TITLE`;
+  - `metronomeStatusMessage(40)` and `metronomeStatusMessage(null)`;
+  - `formatZoomReadout(35.26)` → `35.3 px/s`.
+- **ST19:**
+  - No plain value or formatter output of the three objects contains a Georgian codepoint.
+  - **Per-file scan:** after comments are stripped, `tempo.ts`, `metronome.ts` and `view.ts` contain no Georgian codepoint. `grid-divisions.ts` and `grid.ts` are **not** in the scan (V-0.3).
 
-### 3.2 `video-import-status-ui.test.tsx`: VI1–VI4
-Each `it` asserts the **hand-written English literal**. Names below are examples. A uses the same names in the file and reports them.
-- **VI1, a good import:**
-  - Mock the probe to resolve `{duration: 4, width: 640, height: 360}`, and make the decode stay pending.
-  - Call `importVideoFiles([film.mp4])` on an empty project.
-  - Expect the status `toBe('“film.mp4” added to the video track: 00:00.000 — 00:04.000')`.
-  - Expect the last history label `toBe('Add video — film.mp4')`. If the Context exposes only the Undo title, use `'Undo: Add video — film.mp4'`.
-  - Expect one video clip at 0.
-  - Also record that the transient `Opening “film.mp4”…` status was set before the probe resolved. A deferred probe promise makes this observable.
-- **VI2, a probe failure:**
-  - Mock the probe to reject with `new Error(videoProbeErrorMessage('bad.mp4'))`.
-  - Expect the status `toBe('“bad.mp4”: the browser could not open this video — try MP4 (H.264) or WebM.')`.
-  - Expect no clip.
-- **VI3, a rejected batch:**
-  - Call `importVideoFiles([tone.wav (audio/wav), doc.pdf (application/pdf)])`.
-  - Expect the status to equal both literals joined with `' · '`, in order:
-    - `“tone.wav”: audio files cannot be added here — only your own video can; sounds are added from the library.`
-    - `“doc.pdf”: the format is not video (.pdf).`
-  - Expect the probe not to be called.
-- **VI4, no sound:**
-  - The probe resolves, and the decode resolves `{buffer: null, reason: 'no-audio'}`.
-  - Expect the video source's `audio` `toBe('none')` and its `audioNote` `toBe('The video has no sound')`.
+### 3.2 Forward-rule UI literals (extra `expect` lines in existing `it`s)
+Each line is a hand-written English literal. It is added next to the existing module-built assertion, which stays.
+- `tempo-ui.test.tsx`:
+  - **T-UI1** in U2, after l.301: status `toBe('Tempo 90 BPM · 4/4 — bars ruler updated. Grid only: audio is not stretched.')`.
+  - **T-UI2** after l.353: status `toBe('Tempo must be 20–999 BPM (e.g. 90 or 92.5) — not changed.')` This anchor is inside the `for` loop over `1000`/`abc`/`999.5`. The text is the same for all three, so the literal **stays inside the loop**. This is not a deviation.
+  - **T-UI3** after l.393: status `toBe('Tempo cleared — the bars ruler is hidden. Audio is unchanged.')`.
+  - **T-UI4** after l.394: the strip `toContain('Bars: set a BPM — grid only, audio is not stretched')`.
+- `metronome-ui.test.tsx`:
+  - **M-UI1** after l.292: the toggle title `toBe('Metronome — set a BPM first')`.
+  - **M-UI2** after l.304: the toggle title `toBe` the full M2 text with `4/4`.
+  - **M-UI3** after l.307: status `toBe('Metronome is on — 120 BPM, 4/4: a click on every beat, louder on the first beat of each bar. Not included in the export.')`.
+  - **M-UI4** after l.335: status `toBe('Metronome is off.')`.
+- If an anchor line is inside a loop or helper, so the literal would run more than once with other values, A puts it at the nearest single-value point in the same `it` and reports where.
 
-### 3.3 Mutations (each turns the named test red; restore and check by sha256)
+### 3.3 Mutations (each turns the named tests red; restore and check by sha256)
 | Mutation | Change | Must turn red |
 |---|---|---|
-| **m9** | `added` drops `— {end}` | ST15 **and VI1** (this proves the forward rule) |
-| **m10** | `noSound` back to `ვიდეოს ხმა არ აქვს` | ST14, ST16 and VI4 |
-| **m11** | in `runVideoImport`, the history label uses `addToTrackFailed(file.name)` instead of `historyAddVideo` | VI1 |
-| **m12** | put `` `„${file.name}“: ვიდეოხაზზე დამატება ვერ მოხერხდა.` `` back in the Context | ST13 |
-| **m13** | in `unsupportedFileMessage`, the fallback `unknownType` → `'უცნობი ტიპი'` | ST15 and ST16 (per-file scan) |
+| **m14** | `set` drops ` · {beatsPerBar}/4` | ST18 **and T-UI1** |
+| **m15** | `emptyHint` back to the Georgian text | ST17, ST19 and T-UI4 |
+| **m16** | `title` drops ` Not included in the export.` | ST18 and M-UI2 |
+| **m17** | `view.ts` `formatZoomReadout` returns the old `` `${…} px/წმ` `` literal | ST19 (per-file scan), `view.test` and the `'40 px/s'` UI pins (name at least `grid-snap-ui`) |
+| **m18** | `metronomeStatusMessage` swaps the `null` and non-null branches | ST18, M-UI3 and M-UI4 |
 
 ## 4. A — checks (speed rules)
-- `npm run typecheck`, `npm run lint`, and a read-only `npx biome check` on the 7 changed code and test files.
+- `npm run typecheck`, `npm run lint`, and a read-only `npx biome check` on the 17 changed code and test files.
 - `npx vitest run` on these files. Every one must be green. Name the exact list and counts in the report; C runs the same list.
-  - The granted tests: `strings`, `video`, `video-import-status-ui`.
-  - The name-only importers: `export-mp3`, `waveform-zoom`.
-  - The neighbours: `ArrangementContext.test`, `gesture-reentry`, `status-announcement-ui`, `video-sync`, `video-fades`, `video-fades-ui`, `collection-load-status`, `failed-source-refusal`. If one of these file names does not exist, report it and do not invent one.
+  - The granted tests: `strings`, `tempo`, `metronome`, `view`, `tempo-ui`, `metronome-ui`, `marker-time-snap-ui`, `grid-snap-ui`, `grid-snap-edit`, `grid-snap-position`, `grid-snap-loop-drop`, `grid-musical-ui`, `grid-musical`.
+  - The name-only importers and neighbours: `tempo-window-ui`, `grid-triplet-ui`, `grid-triplet`, `grid`, `grid-snap-menu`, `status-announcement-ui`, `render-budget`, `video-import-status-ui`. If one of these file names does not exist, report it and do not invent one.
 - No full suite and no `npm run verify` (the gate runs them).
-- **code-reviewer required** (9 paths). Pass its Architecture note to B.
-- **Report `a-round-131.md`:**
-  - start HEAD, frozen OK and the 7 start hashes;
+- **code-reviewer required** (19 paths). Pass its Architecture note to B.
+- **Report `a-round-132.md`:**
+  - start HEAD, frozen OK and the 18 start hashes;
   - the pre-edit grep;
-  - per granted file, the changed keys and lines (`diff -u` vs `b-round-130/r131-granted-start/`, saved as `a-round-131/granted.diff`);
+  - per granted file, the changed keys and lines (`diff -u` vs `b-round-131/r132-granted-start/`, saved as `a-round-132/granted.diff`);
   - `it` counts before and after, per file;
-  - m9–m13;
+  - m14–m18;
   - typecheck and lint results;
   - the reviewer's verdict and Architecture note;
   - every shell write;
-  - end `git status`, frozen OK, and the 9 end hashes;
+  - end `git status`, frozen OK, and the 19 end hashes;
   - deviations.
 
 ## 5. C — rows
 Real Playwright Chromium, a fresh context per session, **1440×900 and 1280×720**, `http://127.0.0.1:5173/studio-lab`.
-- **Tools and media:** `c-round-122/tools/lib.cjs` `loadVideo` (`[data-testid=arrangement-video-input]` `setInputFiles`), the synthetic `DataTransfer` drop in `c-round-124/tools/q1.cjs` l.94–96, and `c-round-130/tools/` (status reading, Undo title, GEO count). Media: `tmp/studio-real-loop/media/` (`beeps-6s-h264-aac.mp4`, `beeps-6s-vp9-opus.webm`, `clip-3s-h264-aac.mov`, `noaudio-2s-h264.mp4`, `broken.mp4`, `tone-2s.wav`). For a non-video file, C writes its own `doc.pdf` or `.txt` under `c-round-131/`.
+- **Tools:** reuse `c-round-130/tools/` (status reading, Undo title, GEO count) and `c-round-131/tools/` (MutationObserver on the status region). Find the BPM field by `aria-label="პროექტის ტემპი (BPM)"` (frozen) or its test id; find the metronome toggle and zoom readout (`data-testid="arrangement-zoom-readout"`) the way rounds 65–66 / 130 did. For a clip, use the library add (**＋ დამატება, or Enter on a focused option**).
 - **Invalid runs:** ENV-FIRST-LOAD — discard one crashed first load and record it under `invalidRuns`. At most 2 replacement attempts per row, and only for runs that are invalid because of the environment.
 - **Evidence:** a unique file per run. Open every screenshot with Read and describe it.
 - **Reading values:**
-  - Read the status from the live status region.
-  - Record **every** text change with a MutationObserver, so the transient V1 is seen.
-  - Read the Undo button `title`.
+  - Read the status from the live status region, and record every text change with a MutationObserver.
+  - Read `title`, `aria-valuetext` and `textContent` from the DOM.
 
 | ID | Action | Expected (PASS) |
 |---|---|---|
-| **T131-TARGETED** | A's exact §4 vitest list | All green; the counts equal A's |
-| **SOURCE-SCOPE** | `git status`; `sha256sum -c --quiet b-round-130-r131-tree-sha256.txt` (from `store/`); protected `git diff ba54297` | 7 ` M` + 2 `??`; frozen OK; protected files unchanged; no source change during C's phase |
-| **AN-REVIEW** | `diff -u` of each grant vs `b-round-130/r131-granted-start/`; read the 2 new files | **`strings.ts`:** one new object and nothing else changed; no import.<br>**`video.ts` / `video.client.ts`:** only the import and string literals. The conditions, the abort checks, the `reason` order and the timeout are unchanged.<br>**Context:** only the import and the 5 string expressions; l.546–547, 1760 and 3462 unchanged; no condition, dependency array or call-order change (list every hunk).<br>**Doc 106:** only l.4.<br>**Tests:** every hunk is an import, a literal → module change with the same matcher, ST13's shorter list, ST14–ST16, or the new file; VI1–VI4 use hand-written literals; no `skip`, `only` or `todo`.<br>**Meaning check:** no V row drops or adds a fact vs the Georgian original (side by side).<br>Every shell write is listed |
-| **VID-ADD** (both viewports) | (a) `beeps-6s-h264-aac.mp4` through the video input on a fresh project. (b) `beeps-6s-vp9-opus.webm` next. (c) `clip-3s-h264-aac.mov`. (d) The Undo title after (a); Undo; Redo | (a) The observer sees `Opening “beeps-6s-h264-aac.mp4”…`, then `“beeps-6s-h264-aac.mp4” added to the video track: 00:00.000 — 00:06.000`, with the real times from the clip's start and length. The clip is on the video lane and the playhead seeks to its start.<br>(b) and (c) The same pattern with their own real times. A `.mov` is accepted as video.<br>(d) `Undo: Add video — beeps-6s-h264-aac.mp4`; Undo removes the clip; Redo restores it.<br>The effects are as before (clip count, start, seek). C states the effect next to each message |
-| **VID-REJECT** (both) | (a) `tone-2s.wav` through the video input. (b) C's `doc.pdf` (or `.txt`). (c) A file with no extension and no type, if the input accepts it; otherwise inconclusive (ST15). (d) `broken.mp4`. (e) `tone-2s.wav` + `doc.pdf` in one selection | (a) V6 for `tone-2s.wav`.<br>(b) `“doc.pdf”: the format is not video (.pdf).`<br>(c) `… (unknown type).`<br>(d) V9 for `broken.mp4` (after the browser's error or the 10 s timeout).<br>(e) Both messages joined with ` · `.<br>No clip is added in any case, and no Undo entry is created |
-| **VID-NOAUDIO** (both) | `noaudio-2s-h264.mp4`, wait until its decode settles, open Export | In the Export dialog, `arrangement-export-video-sound` shows `Original video sound (noaudio-2s-h264.mp4): The video has no sound`. The lane's clip badge `ხმა არ არის` is frozen (V-0.4) and is subtracted by name. Also do `noaudio-2s-vp9.webm` at 1440 |
-| **VID-LANE-DROP** (both; try once) | Synthetic `DataTransfer` drop (the q1.cjs pattern) of `beeps-6s-vp9-opus.webm` on the **music** lane; then of `tone-2s.wav` on the music lane | `Drop the video on the video track.` / V6. If the synthetic drop does not reach the handler, the row is inconclusive (ST15/`video.test`), not FAIL. No clip is added. The lane's drag hint (l.864) is frozen and is subtracted by name |
-| **GEO-COUNT** (both) | After each VID row | Georgian in the status region, the Undo title and the Export video-sound list = 0, after removing **by name**: the track names (`ვიდეო`, `მუსიკა`, `სტემები`), file names and sound titles, the lane's clip badge and drag hint, and the library error line. List each subtracted item |
-| **LAYOUT** (both) | S0/S1 boxes vs `c-round-125/out/bbox-baseline-*.json`, outside the status region; the status region box after the longest V message (V6 or the V6 + V7 batch) | Every box outside the status region and the Undo button is within 1 px. The status region keeps its position. A height or wrap change must come from the message text (the RV-1 V-0 text-width exception). No new horizontal overflow |
-| **REG-130** (1440, short) | One V-0.2b recheck: Ctrl+L on a time selection, then Space on an empty project in a fresh session | `Loop created and turned on: {span}.` / `Nothing to play — add a clip from the library first.` |
-| **G131-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav` | The workspace and the demo badge show. The product route shows "Sign in required", no workspace and 0 `audio[src]`. The token API returns **401**. The fake-Bearer 403 check is **BLOCKED (backend unavailable in cloud)** |
-| **PX-NET / REG-HYD** | every session | 0 requests to `/api/studio-token` (outside G131-3), `/api/recording-*`, `/api/download` or the R2 host; 0 `Authorization` headers; 0 hydration errors; 0 `pageerror` (the known cloud cart noise is not reported) |
+| **T132-TARGETED** | A's exact §4 vitest list | All green; the counts equal A's |
+| **SOURCE-SCOPE** | `git status`; `sha256sum -c --quiet b-round-131-r132-tree-sha256.txt` (from `store/`); protected `git diff c8ff326` | 18 ` M` + 1 `??`; frozen OK; protected files unchanged; no source change during C's phase |
+| **AN-REVIEW** | `diff -u` of each grant vs `b-round-131/r132-granted-start/`; read doc 108 | **`strings.ts`:** three new objects and nothing else changed; still no import.<br>**`tempo.ts` / `metronome.ts` / `view.ts`:** only the import and the string lines. Parsing, bounds, rounding, scheduling and the `null` branches are unchanged.<br>**Doc 107:** only l.4.<br>**Tests:** every hunk is an import, a literal → module change with the same matcher, a `px/s` or tempo-cleared hand-written literal, an added forward-rule `expect`, or ST17–ST19; no `it` added or removed outside `strings.test`; no `skip`, `only` or `todo`.<br>**Meaning check:** side by side with the Georgian, no T/M/Z row drops or adds a fact (§1.1 list).<br>Every shell write is listed |
+| **TEMPO** (both viewports) | Fresh project with one library clip. (a) Type `90`, Enter. (b) Type `1000`, Enter. (c) Clear the field, Enter (seconds division). (d) Choose division `0.5`, type `90`, choose `1/4`, clear, Enter | (a) `Tempo 90 BPM · 4/4 — bars ruler updated. Grid only: audio is not stretched.`; the bars strip shows bars.<br>(b) `Tempo must be 20–999 BPM (e.g. 90 or 92.5) — not changed.`; the field returns to 90.<br>(c) `Tempo cleared — the bars ruler is hidden. Audio is unchanged.`; the bars strip shows `Bars: set a BPM — grid only, audio is not stretched`.<br>(d) The R3 exception, exactly `Tempo cleared — the bars ruler is hidden. Audio is unchanged. ბადე დაბრუნდა წამებზე: 0.5 წმ.` (the tail is subtracted by name).<br>**Effect:** the clip's start and width are unchanged by every tempo step (no stretch), and the division select behaves as before. C states the effect next to each message |
+| **METRO** (both) | (a) Before a BPM is set: the metronome toggle. (b) BPM 120: the toggle `title`. (c) Click the toggle. (d) Play 2 s, then Stop. (e) Click it again | (a) Disabled, `title` `Metronome — set a BPM first`.<br>(b) The full M2 text with `4/4`.<br>(c) `aria-pressed="true"` and status M4 for 120 BPM.<br>(d) Playback runs and stops as before (the position moves; no `pageerror`).<br>(e) `aria-pressed="false"`, status `Metronome is off.` |
+| **ZOOM** (both) | Read the zoom readout and the slider `aria-valuetext` at load; press `+` once; press `−` once | The readout `textContent` and `aria-valuetext` are equal at each step and match `^\d+(\.\d)? px/s$`. The value changes with `+`/`−` as before. The slider's `aria-label` `Zoom (px/წმ)` is frozen (R4) and subtracted by name |
+| **GEO-COUNT** (both) | After each row | Georgian in the status region, the metronome `title`, the zoom readout and `aria-valuetext`, and the bars-strip hint = 0, after removing **by name**: the R3 tail, the BPM field `aria-label`/`title`, the `მეტრონომი` button label, `Zoom (px/წმ)`, the grid division labels, **the fully Georgian grid statuses written by a division change** (e.g. `ბადე: 1/4 · … (Snap ჩართულია)`, V-0.3; the observer records them, and they are not a finding), the track names and clip/sound titles. List each subtracted item |
+| **LAYOUT** (both) | S0/S1 boxes vs `c-round-125/out/bbox-baseline-*.json`, outside the status region; the tempo row, bars strip and zoom readout boxes | Every box outside the status region, the bars-strip hint and the zoom readout is within 1 px. A width or wrap change of those three must come from their text (the RV-1 V-0 text-width exception). If a neighbour moves because the readout became narrower, C records the measurement as a Low. No new horizontal overflow |
+| **REG-131** (1440, short) | `beeps-6s-h264-aac.mp4` through the video input on a fresh project | `“beeps-6s-h264-aac.mp4” added to the video track: 00:00.000 — 00:06.000` |
+| **G132-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav` | The workspace and the demo badge show. The product route shows "Sign in required", no workspace and 0 `audio[src]`. The token API returns **401**. The fake-Bearer 403 check is **BLOCKED (backend unavailable in cloud)** |
+| **PX-NET / REG-HYD** | every session | 0 requests to `/api/studio-token` (outside G132-3), `/api/recording-*`, `/api/download` or the R2 host; 0 `Authorization` headers; 0 hydration errors; 0 `pageerror` (the known cloud cart noise is not reported) |
 
-- **Known not reachable in cloud Chromium (inconclusive; covered by ST14/ST15/VI only):**
-  - V5: the outer import catch;
-  - V11 / V12: a 20-minute or 1 GB video;
-  - V13: a file whose audio marker is present but cannot be decoded, unless C has one;
-  - V14 / V15: the abort texts. The Context returns before showing them;
-  - V2: `appendVideoClip` failure.
-- **Library add note (C-R130 note 2):** the library add action is **＋ დამატება, or Enter on a focused option**. `A` is the Envelope toggle.
 - **Gate rows (C does not claim them):** full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
 - **Severity guide:**
   - **Medium:**
-    - any behaviour change: a file accepted or rejected differently, clip placement, seek, the decode result, history, export content;
-    - a wrong or fact-dropping message;
+    - any behaviour change: tempo accepted or refused differently, a clip moved or stretched, the bars ruler, the metronome schedule or toggle state, zoom steps;
+    - a wrong or fact-dropping message (§1.1 list);
     - a weakened, removed or skipped test;
-    - a non-string hunk in the Context, `video.ts` or `video.client.ts`.
-  - **Low:** wording or style.
+    - a non-string hunk in `tempo.ts`, `metronome.ts` or `view.ts`.
+  - **Low:** wording or style; a neighbour box moved by the narrower readout text.
 
 ## 6. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
 |---|---|---|---|---|
-| Importing a video file into the Arrangement | Live 12 manual has a video chapter (it is listed in the TOC of the B capture `b-round-71/ableton-arrangement-view-20261021.txt`, captured 2026-10-21). Its content was **not** captured or read for this round | **Unconfirmed**; no claim | One video track, own video only, sounds from the library: the user-agreed CZABA scope. This round changes text only | VID-ADD, VID-REJECT |
-| Video sound used in the export | — | **Unconfirmed**; no claim | Existing CZABA behaviour (SRW-13); text only | VID-NOAUDIO |
-| Wording "track", "Add …" | V-0 glossary (`tasks/round-127.md` §1.1, Live 12 terms where confirmed) | Term reuse only | "video track", "Add video — {name}" | AN-REVIEW |
+| Setting the tempo | Live 12 Reference Manual §9.1.1 "Setting the Tempo", `https://www.ableton.com/en/live-manual/12/audio-clips-tempo-and-warping/`. Saved excerpt `b-round-64/tempo-9.1.1-excerpt-20261019.txt` (captured 2026-10-19, used in round 65) | Live has a project tempo in BPM. In Live, warped clips follow it; that is **not** CZABA's behaviour | Deliberate difference (D-10, SRW-15): BPM drives only the grid and bars ruler, and audio is never stretched. The text says so. This round changes text only | TEMPO (effect column) |
+| Metronome | Live 12 §19.4.1 "Metronome Settings", `https://www.ableton.com/en/live-manual/12/recording-new-clips/`. Saved excerpt `b-round-65/metronome-excerpt-20261019.txt` (used in round 66) | A metronome toggle exists in Live | Existing CZABA behaviour (SRW-15 stage 2): a click on every beat, accented bar, not exported. Text only | METRO |
+| Words "Tempo", "Metronome", "bars" | The same two excerpts (term reuse only) | Term reuse; "bars ruler" is a CZABA term, unconfirmed as a Live name | "Tempo", "Metronome", "Bars", "bars ruler", "px/s" | AN-REVIEW |
 
-C rates "CZABA requirement met" and "Ableton correspondence" separately. For this round the Ableton correspondence is **not applicable / unconfirmed**: only text changes, and no Live behaviour is claimed.
+C rates "CZABA requirement met" and "Ableton correspondence" separately. For this round the Ableton correspondence is **not applicable / unconfirmed**: only text changes, and no new Live behaviour is claimed.
 
 ## 7. Evidence and reporting
-- C writes `c-round-131.md` and `c-round-131.json` as it goes, with these fields: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` (with the subtracted items), and `notesForB`. Evidence goes under `c-round-131/{tools,out,shots}/`.
-- `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`. An inconclusive "try once" row (VID-LANE-DROP, VID-REJECT (c)) does not make it false, as long as it was tried and recorded.
-- C makes no `store/` writes. C's own test files (`doc.pdf`) live under `c-round-131/`.
+- C writes `c-round-132.md` and `c-round-132.json` as it goes, with these fields: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` (with the subtracted items), and `notesForB`. Evidence goes under `c-round-132/{tools,out,shots}/`.
+- `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`.
+- C makes no `store/` writes.
 
-## 8. Outcome, fixed in advance (B at round 132 planning)
-| Condition | Round 132 |
+## 8. Outcome, fixed in advance (B at round 133 planning)
+| Condition | Round 133 |
 |---|---|
 | B plans on or after **2026-10-27** | The **REGRESSION round** first, then the row below |
-| C FAIL with Critical / High / Medium | A bounded V-0.2c1 fix-up (at most three related bugs) |
-| C PASS (new Lows → `deferred_low_polish`) | V-0.2c1 → `c_pass`, then `c_pass_published` after the gate. Round 132 = **V-0.2c2**: `tempo.ts` (`TEMPO_INVALID_MESSAGE`, `TEMPO_EMPTY_HINT`, the tempo status), `metronome.ts` (`METRONOME_*` titles and statuses) and `view.ts` (`px/წმ` → `px/s`). The exported names stay. B measures the test coupling first |
+| C FAIL with Critical / High / Medium | A bounded V-0.2c2 fix-up (at most three related bugs) |
+| C PASS (new Lows → `deferred_low_polish`) | V-0.2c2 → `c_pass`, then `c_pass_published` after the gate. Round 133 = **V-0.2c3**: `selection.ts` + `groups.ts`. B first re-measures the `ჯგუფი N` fixture hits and decides whether `TRACK_GROUP_NAME_PREFIX` moves with c3 or with the V-0.4 default track names; split again if it is larger than this round |
 
 At every planning, B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
 
 ## 9. Neighbour risk and root notes
 - **Where it could break:**
-  - **The import sequence:** status joins with ` · `, the per-file `report`, the abort early-returns and the `decodeChainRef` chain. Only strings change.
-  - **The Export dialog's video-sound line:** `audioNote ?? videoSoundUnreadable`.
-  - **The lane's file-drop status:** `audioLaneDropMessage`, called by the frozen `ArrangementLane`.
-  - **`export-mp3.test`:** it mocks `video.client` with `importOriginal`, so the new import of `./strings` in `video.client.ts` must not break the mock.
-- **Architecture:**
-  - This is the **last V-0.2 edit to the Context's video region**. B writes the bounded frontend-architect checkpoint request now (`b-round-130-checkpoint-request.md`), so root can run it read-only alongside c2/c3. It does not block A or C.
-  - The questions: the strings module shape and growth; conditional copy in formatters vs at the call site; the Context's re-export surface (aliases) vs direct imports; and the Context size.
-- **Commit readiness:** after C PASS, root may publish V-0.2c1 as an interim unit.
+  - **Module load order.** `metronome.ts` evaluates `METRONOME_TITLE` at import, using `TEMPO_BEATS_PER_BAR` from `tempo.ts` and now the `strings.ts` formatter. A cycle would show as `undefined` text (stop rule).
+  - **The grid tempo-cleared status:** it shares `tempoStatusMessage(null)` (R3).
+  - **The Transport zoom slider:** `aria-valuetext` now has a different unit from its `aria-label` until V-0.3 (R4).
+  - **The tempo row:** the hint text width changes.
+- **Architecture:** no Context change this round. The pending checkpoint (`b-round-130-checkpoint-request.md`) gets an addendum from the round-131 notes: should `strings.ts` (now 7 objects, 10 after this round) split per area under `lib/arrangement/strings/` with the same exported names, and should a shared Context UI test harness replace copied mock preambles? It does not block A or C.
+- **Commit readiness:** after C PASS, root may publish V-0.2c2 as an interim unit.

@@ -1,0 +1,340 @@
+--- start/app/lib/arrangement/strings.ts
++++ app/lib/arrangement/strings.ts
+@@ -255,3 +255,26 @@
+   nudgeBlocked: 'Nudge blocked — a neighbouring clip or the start of the timeline.',
+   historyNudgeClip: 'Nudge clip',
+ };
++
++export const studioVideoStrings = {
++  unknownType: 'unknown type',
++  dropOnVideoTrack: 'Drop the video on the video track.',
++  noSound: 'The video has no sound',
++  tooLongToRead: 'Sound not read: the video is longer than 20 minutes',
++  tooLargeToRead: 'Sound not read: the file is larger than 1 GB',
++  soundUnreadable: studioExportStrings.videoSoundUnreadable,
++  probeCancelled: 'Adding the video was cancelled.',
++  decodeCancelled: "Reading the video's sound was cancelled.",
++  opening: (name: string): string => `Opening “${name}”…`,
++  addToTrackFailed: (name: string): string => `“${name}”: could not be added to the video track.`,
++  historyAddVideo: (name: string): string => `Add video — ${name}`,
++  added: ({ name, start, end }: { name: string; start: string; end: string }): string =>
++    `“${name}” added to the video track: ${start} — ${end}`,
++  importFailed: (detail: string): string => `Could not add the video: ${detail}`,
++  audioFileRejected: (name: string): string =>
++    `“${name}”: audio files cannot be added here — only your own video can; sounds are added from the library.`,
++  notVideo: (name: string, detail: string): string =>
++    `“${name}”: the format is not video (${detail}).`,
++  probeFailed: (name: string): string =>
++    `“${name}”: the browser could not open this video — try MP4 (H.264) or WebM.`,
++};
+--- start/app/lib/arrangement/video.ts
++++ app/lib/arrangement/video.ts
+@@ -1,4 +1,5 @@
+ import type { Arrangement, ArrangementClip } from '~/types/arrangement';
++import { studioVideoStrings } from './strings';
+ import {
+   isContinuousVideoBoundary,
+   VIDEO_DISCONTINUITY_SECONDS,
+@@ -63,13 +64,13 @@
+ }
+ 
+ export function audioFileRejectionMessage(name: string): string {
+-  return `„${name}“: აუდიო ფაილის დამატება აქ არ შეიძლება — საკუთარი შეიძლება მხოლოდ ვიდეო; ხმები ბიბლიოთეკიდან ემატება.`;
++  return studioVideoStrings.audioFileRejected(name);
+ }
+ 
+ export function unsupportedFileMessage(file: VideoFileDescriptor): string {
+   const extension = fileExtension(file.name);
+-  const detail = extension ? `.${extension}` : file.type || 'უცნობი ტიპი';
+-  return `„${file.name}“: ფორმატი არ არის ვიდეო (${detail}).`;
++  const detail = extension ? `.${extension}` : file.type || studioVideoStrings.unknownType;
++  return studioVideoStrings.notVideo(file.name, detail);
+ }
+ 
+ export function audioLaneDropMessage(files: readonly VideoFileDescriptor[]): string {
+@@ -82,7 +83,7 @@
+       if (kind === 'unsupported') {
+         return unsupportedFileMessage(file);
+       }
+-      return 'ვიდეო ჩააგდე ვიდეოხაზზე.';
++      return studioVideoStrings.dropOnVideoTrack;
+     })
+     .filter((message, index, all) => all.indexOf(message) === index)
+     .join(' ');
+--- start/app/lib/arrangement/video.client.ts
++++ app/lib/arrangement/video.client.ts
+@@ -1,3 +1,4 @@
++import { studioVideoStrings } from './strings';
+ import { VIDEO_AUDIO_DECODE_LIMIT_SECONDS } from './video';
+ 
+ const VIDEO_PROBE_TIMEOUT_MS = 10000;
+@@ -32,20 +33,20 @@
+   | { buffer: null; reason: VideoAudioDecodeFailure };
+ 
+ export function videoProbeErrorMessage(name: string): string {
+-  return `„${name}“: ბრაუზერმა ეს ვიდეო ვერ გახსნა — სცადე MP4 (H.264) ან WebM.`;
++  return studioVideoStrings.probeFailed(name);
+ }
+ 
+ export function videoAudioNote(reason: VideoAudioDecodeFailure): string {
+   if (reason === 'no-audio') {
+-    return 'ვიდეოს ხმა არ აქვს';
++    return studioVideoStrings.noSound;
+   }
+   if (reason === 'too-long') {
+-    return 'ხმა არ წაიკითხა: ვიდეო 20 წუთზე გრძელია';
++    return studioVideoStrings.tooLongToRead;
+   }
+   if (reason === 'too-large') {
+-    return 'ხმა არ წაიკითხა: ფაილი 1 GB-ზე დიდია';
++    return studioVideoStrings.tooLargeToRead;
+   }
+-  return 'ვიდეოს ხმა ვერ წაიკითხა — ექსპორტში არ შევა';
++  return studioVideoStrings.soundUnreadable;
+ }
+ 
+ export function probeVideoFile(file: File, signal: AbortSignal): Promise<VideoProbeResult> {
+@@ -67,7 +68,7 @@
+       URL.revokeObjectURL(url);
+       reject(new Error(message));
+     };
+-    const cancelled = () => fail('ვიდეოს დამატება გაუქმდა.');
++    const cancelled = () => fail(studioVideoStrings.probeCancelled);
+     const timeout = window.setTimeout(
+       () => fail(videoProbeErrorMessage(file.name)),
+       VIDEO_PROBE_TIMEOUT_MS,
+@@ -138,14 +139,14 @@
+   }
+   const bytes = await file.arrayBuffer();
+   if (signal.aborted) {
+-    throw new Error('ვიდეოს ხმის წაკითხვა გაუქმდა.');
++    throw new Error(studioVideoStrings.decodeCancelled);
+   }
+   try {
+     const buffer = await ctx.decodeAudioData(bytes);
+     return { buffer, reason: null };
+   } catch {
+     if (signal.aborted) {
+-      throw new Error('ვიდეოს ხმის წაკითხვა გაუქმდა.');
++      throw new Error(studioVideoStrings.decodeCancelled);
+     }
+     const hasMarker = await hasAudioTrackMarker(file);
+     return { buffer: null, reason: hasMarker ? 'decode-failed' : 'no-audio' };
+--- start/app/contexts/ArrangementContext.tsx
++++ app/contexts/ArrangementContext.tsx
+@@ -152,6 +152,7 @@
+   studioLoopStrings,
+   studioMoveStrings,
+   studioPlaybackStrings,
++  studioVideoStrings,
+ } from '~/lib/arrangement/strings';
+ import {
+   createPlaybackAnchor,
+@@ -2227,7 +2228,7 @@
+           report(unsupportedFileMessage(file));
+           continue;
+         }
+-        setStatus([...messages, `„${file.name}“ იხსნება…`].join(' · '));
++        setStatus([...messages, studioVideoStrings.opening(file.name)].join(' · '));
+         let probe: Awaited<ReturnType<typeof probeVideoFile>>;
+         try {
+           probe = await probeVideoFile(file, signal);
+@@ -2277,18 +2278,22 @@
+           remaining.delete(sourceId);
+           videoSourcesRef.current = remaining;
+           setVideoSourcesState(remaining);
+-          report(`„${file.name}“: ვიდეოხაზზე დამატება ვერ მოხერხდა.`);
++          report(studioVideoStrings.addToTrackFailed(file.name));
+           continue;
+         }
+         if (isPlayingRef.current) {
+           stopPlayback();
+         }
+-        applyEdit(result.arrangement, `ვიდეოს დამატება — ${file.name}`);
++        applyEdit(result.arrangement, studioVideoStrings.historyAddVideo(file.name));
+         setSelectedClipId(null);
+         setRange(null);
+         seekTo(result.clip.start);
+         report(
+-          `„${file.name}“ დაემატა ვიდეოხაზზე ${formatArrangementTime(result.clip.start)} — ${formatArrangementTime(result.clip.start + result.clip.duration)}`,
++          studioVideoStrings.added({
++            name: file.name,
++            start: formatArrangementTime(result.clip.start),
++            end: formatArrangementTime(result.clip.start + result.clip.duration),
++          }),
+         );
+         if (!tooLong) {
+           decodeChainRef.current = decodeChainRef.current.then(() =>
+@@ -2318,7 +2323,7 @@
+         .then(() => runVideoImport(batch))
+         .catch((error: unknown) => {
+           setStatus(
+-            `ვიდეოს დამატება ვერ მოხერხდა: ${error instanceof Error ? error.message : String(error)}`,
++            studioVideoStrings.importFailed(error instanceof Error ? error.message : String(error)),
+           );
+         });
+     },
+--- start/app/lib/arrangement/__tests__/strings.test.ts
++++ app/lib/arrangement/__tests__/strings.test.ts
+@@ -25,7 +25,10 @@
+   studioLoopStrings,
+   studioMoveStrings,
+   studioPlaybackStrings,
++  studioVideoStrings,
+ } from '../strings';
++import { audioFileRejectionMessage, unsupportedFileMessage } from '../video';
++import { videoAudioNote, videoProbeErrorMessage } from '../video.client';
+ 
+ const GEORGIAN_CODEPOINT = /[Ⴀ-ჿ]/;
+ 
+@@ -659,11 +662,6 @@
+   "{ id: 'video', kind: 'video', name: 'ვიდეო' },",
+   "{ id: 'audio', kind: 'audio', name: 'აუდიო' },",
+   'applyEdit(moved, `გადატანა ({ids.length})`);',
+-  "setStatus([...messages, `„{file.name}“ იხსნება…`].join(' · '));",
+-  'report(`„{file.name}“: ვიდეოხაზზე დამატება ვერ მოხერხდა.`);',
+-  'applyEdit(result.arrangement, `ვიდეოს დამატება — {file.name}`);',
+-  '`„{file.name}“ დაემატა ვიდეოხაზზე {formatArrangementTime(result.clip.start)} — {formatArrangementTime(result.clip.start + result.clip.duration)}`,',
+-  '`ვიდეოს დამატება ვერ მოხერხდა: {error instanceof Error ? error.message : String(error)}`,',
+   "error: error instanceof Error ? error.message : 'ჩატვირთვა ვერ მოხერხდა',",
+ ];
+ 
+@@ -751,3 +749,104 @@
+     expect(georgianLines).toEqual(CONTEXT_REMAINING_GEORGIAN_LINES);
+   });
+ });
++
++const vs = studioVideoStrings;
++
++const EXPECTED_VIDEO_PLAIN_STRINGS: Record<string, string> = {
++  unknownType: 'unknown type',
++  dropOnVideoTrack: 'Drop the video on the video track.',
++  noSound: 'The video has no sound',
++  tooLongToRead: 'Sound not read: the video is longer than 20 minutes',
++  tooLargeToRead: 'Sound not read: the file is larger than 1 GB',
++  soundUnreadable: "The video's sound could not be read — it is not in the export",
++  probeCancelled: 'Adding the video was cancelled.',
++  decodeCancelled: "Reading the video's sound was cancelled.",
++};
++
++const VIDEO_FORMATTER_SAMPLES: Record<string, string[]> = {
++  opening: [vs.opening('film.mp4')],
++  addToTrackFailed: [vs.addToTrackFailed('film.mp4')],
++  historyAddVideo: [vs.historyAddVideo('film.mp4')],
++  added: [vs.added({ name: 'film.mp4', start: '00:01.000', end: '00:07.000' })],
++  importFailed: [vs.importFailed('boom')],
++  audioFileRejected: [vs.audioFileRejected('film.mp4')],
++  notVideo: [vs.notVideo('doc.pdf', '.pdf'), vs.notVideo('noext', vs.unknownType)],
++  probeFailed: [vs.probeFailed('film.mp4')],
++};
++
++describe('V-0.2c1 video import strings', () => {
++  it('ST14: every plain-string property of studioVideoStrings equals its exact English literal', () => {
++    const plainKeys = Object.entries(vs)
++      .filter(([, value]) => typeof value === 'string')
++      .map(([key]) => key)
++      .sort();
++    expect(plainKeys).toEqual(Object.keys(EXPECTED_VIDEO_PLAIN_STRINGS).sort());
++    for (const [key, value] of Object.entries(vs)) {
++      if (typeof value === 'string') {
++        expect(value, key).toBe(EXPECTED_VIDEO_PLAIN_STRINGS[key]);
++      }
++    }
++    expect(vs.soundUnreadable).toBe(studioExportStrings.videoSoundUnreadable);
++  });
++
++  it('ST15: every formatter and exported video message returns the exact English text', () => {
++    expect(vs.opening('film.mp4')).toBe('Opening “film.mp4”…');
++    expect(vs.addToTrackFailed('film.mp4')).toBe(
++      '“film.mp4”: could not be added to the video track.',
++    );
++    expect(vs.historyAddVideo('film.mp4')).toBe('Add video — film.mp4');
++    expect(vs.added({ name: 'film.mp4', start: '00:01.000', end: '00:07.000' })).toBe(
++      '“film.mp4” added to the video track: 00:01.000 — 00:07.000',
++    );
++    expect(vs.importFailed('boom')).toBe('Could not add the video: boom');
++    expect(vs.audioFileRejected('film.mp4')).toBe(
++      '“film.mp4”: audio files cannot be added here — only your own video can; sounds are added from the library.',
++    );
++    expect(vs.notVideo('doc.pdf', '.pdf')).toBe('“doc.pdf”: the format is not video (.pdf).');
++    expect(vs.probeFailed('film.mp4')).toBe(
++      '“film.mp4”: the browser could not open this video — try MP4 (H.264) or WebM.',
++    );
++    expect(videoAudioNote('no-audio')).toBe('The video has no sound');
++    expect(videoAudioNote('too-long')).toBe('Sound not read: the video is longer than 20 minutes');
++    expect(videoAudioNote('too-large')).toBe('Sound not read: the file is larger than 1 GB');
++    expect(videoAudioNote('decode-failed')).toBe(
++      "The video's sound could not be read — it is not in the export",
++    );
++    expect(videoProbeErrorMessage('film.mp4')).toBe(
++      '“film.mp4”: the browser could not open this video — try MP4 (H.264) or WebM.',
++    );
++    expect(audioFileRejectionMessage('tone.wav')).toBe(
++      '“tone.wav”: audio files cannot be added here — only your own video can; sounds are added from the library.',
++    );
++    expect(unsupportedFileMessage({ name: 'doc.pdf', type: 'application/pdf' })).toBe(
++      '“doc.pdf”: the format is not video (.pdf).',
++    );
++    expect(unsupportedFileMessage({ name: 'noext', type: '' })).toBe(
++      '“noext”: the format is not video (unknown type).',
++    );
++  });
++
++  it('ST16: studioVideoStrings and the video sources contain no Georgian codepoint', () => {
++    const formatterKeys = Object.entries(vs)
++      .filter(([, value]) => typeof value === 'function')
++      .map(([key]) => key)
++      .sort();
++    expect(formatterKeys).toEqual(Object.keys(VIDEO_FORMATTER_SAMPLES).sort());
++    for (const [key, value] of Object.entries(vs)) {
++      if (typeof value === 'string') {
++        expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
++      }
++    }
++    for (const [key, outputs] of Object.entries(VIDEO_FORMATTER_SAMPLES)) {
++      expect(outputs.length, key).toBeGreaterThan(0);
++      for (const output of outputs) {
++        expect(output, key).not.toMatch(GEORGIAN_CODEPOINT);
++      }
++    }
++    for (const path of ['../video.ts', '../video.client.ts']) {
++      const source = stripSourceComments(readStoreSource(path));
++      expect(source.length, path).toBeGreaterThan(0);
++      expect(source, path).not.toMatch(GEORGIAN_CODEPOINT);
++    }
++  });
++});
+--- start/app/lib/arrangement/__tests__/video.test.ts
++++ app/lib/arrangement/__tests__/video.test.ts
+@@ -1,6 +1,7 @@
+ import { describe, expect, it } from 'vitest';
+ import type { Arrangement, ArrangementClip } from '~/types/arrangement';
+ import { appendVideoClip, createArrangement, deleteTime, trimClipStart } from '../model';
++import { studioVideoStrings } from '../strings';
+ import {
+   audioLaneDropMessage,
+   classifyVideoFile,
+@@ -56,10 +57,10 @@
+ describe('audioLaneDropMessage', () => {
+   it('points videos to the video lane and rejects audio', () => {
+     expect(audioLaneDropMessage([{ name: 'a.webm', type: 'video/webm' }])).toBe(
+-      'ვიდეო ჩააგდე ვიდეოხაზზე.',
++      studioVideoStrings.dropOnVideoTrack,
+     );
+     expect(audioLaneDropMessage([{ name: 'tone.wav', type: 'audio/wav' }])).toContain(
+-      '„tone.wav“: აუდიო ფაილის დამატება აქ არ შეიძლება',
++      studioVideoStrings.audioFileRejected('tone.wav'),
+     );
+   });
+ });
+--- start/docs/implementation/2026/quarter-IV/106-studio-v0-playback-loop-strings.md
++++ docs/implementation/2026/quarter-IV/106-studio-v0-playback-loop-strings.md
+@@ -1,7 +1,7 @@
+ # Studio V-0.2b — playback-ის, ბიბლიოთეკის, loop-ისა და nudge-ის ტექსტები ინგლისურად
+ 
+ **თარიღი:** 2026-10-24
+-**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 130-ში; ბრაუზერის შემოწმება C-ის რაუნდია)
++**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 130-ში; C round 130 — PASS, browserVerified; gate 130 — ba54297)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი

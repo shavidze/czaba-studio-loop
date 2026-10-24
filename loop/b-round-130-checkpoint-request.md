@@ -35,3 +35,13 @@ The older unanswered questions (`b-round-121-checkpoint-request.md` Q1, Q2 and Q
 - B schedules no refactor without root's recorded result.
 - An approved extraction becomes its own B task, with one owner, behaviour-preserving tests and no new behaviour. It is scheduled after V-0, unless root orders it before V-0.3.
 - If there is no answer by V-0.3 planning, B keeps the current shape. The rationale is that the edits are mechanical, the invariants are untouched, and the migration ends at V-0.5. B records that choice.
+
+## Addendum (e) — B round 131 → 132 planning (2026-10-24)
+Source: the A round-131 reviewer's Architecture note and the gate-131 reviewer's Architecture note (signal 3, verdict "keep" from both). Backlog id: ARCH-R131-STRINGS-SPLIT-AND-HARNESS.
+5. **`strings.ts` per area and a shared Context UI test harness.**
+   - `strings.ts` has 7 objects today, and 10 after round 132. Each object costs about 100 lines in `strings.test.ts` plus a per-file scan.
+   - Should it become `lib/arrangement/strings/<area>.ts` with an index that keeps every exported name? Acceptance: no caller changes, ST1–ST19 pass, and `useArrangement()` keeps the same shape.
+   - To observe Context status text, a test today copies the `export-mp3.test.tsx` mock preamble. Should one shared test harness module replace those copies?
+   - Timing: after V-0.2c3, or after V-0.5. "Keep" is a valid answer.
+
+Still non-blocking. Rounds 132–133 (V-0.2c2/c3) do not touch the Context.

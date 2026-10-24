@@ -1261,6 +1261,17 @@ C round 129 (`tmp/studio-real-loop/c-round-129.md`, `c-round-129.json`) — **PA
 - **R6 — ჩართული ორი იაფი საკითხი, რაუნდის ფაილებში:** SA-DEL (+1 `it` `status-announcement-ui`-ში, ხურავს m4-ის ხარვეზს) და GATE129-S2 (ST9 ამოწმებს, რომ 6 constant აღარ არსებობს). ST13 — Context-ის დარჩენილი ქართული ხაზების ზუსტი სია (ratchet).
 - **R7 — შედეგი წინასწარ (round 131):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.2b-ს შეზღუდული გასწორება; C PASS — V-0.2c (B ჯერ ზომავს, საჭიროებისას ყოფს).
 
+**D-29z97 — Round 131-ის შედეგი; V-0.2c1 დასრულდა; Round 132: V-0.2c2 (ტემპის, მეტრონომისა და Zoom-ის მაჩვენებლის ტექსტები ინგლისურად).**
+
+C round 131 (`tmp/studio-real-loop/c-round-131.md`, `c-round-131.json`) — **PASS**, `browserVerified`/`realVerified` — true. ბრაუზერში მისაწვდომი 15 V-ტექსტი ზუსტია 1440-ზე და 1280-ზე, ეფექტები უცვლელი; GEO-COUNT 0; layout ≤ 1 px; G131-3 401 (fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 131 — **published `c8ff326`** (verify OK, review 9/10); ეს არის round 132-ის baseline.
+- **R1 — V-0.2c1 → მზადაა** (`c_pass_published`). V2, V5, V11–V15 რჩება unit-only. ახალი Low-ები → `deferred_low_polish` (185): C-R131-01 (MediaRecorder-ის WebM Duration-ის გარეშე — უკვე არსებული; პროდუქტის კითხვა), GATE131-S1 (V6-ის ფორმულირება; round 132-ის grant-ებს გარეთაა), GATE131-S2 (ტესტის global-ის აღდგენა). GATE130-S4/S5 დაიხურა. GATE131-S6 (doc 107 l.4) ჩართულია round 132-ში.
+- **R2 — Round 132 = V-0.2c2** (round 131-ის §8): `tempo.ts` (4 ხაზი), `metronome.ts` (4), `view.ts` (1) → `studioTempoStrings`, `studioMetronomeStrings`, `studioViewStrings`; exported სახელები რჩება, მნიშვნელობები მოდულიდან; formatter-ები იღებს უკვე დაფორმატებულ მნიშვნელობებს (`strings.ts` არაფერს აიმპორტებს). ტესტების ლიტერალი — 14 ხაზი 9 ფაილში. Context არ იცვლება. სავალდებულოდ რჩება ფაქტები: „მხოლოდ ბადე — აუდიო არ იწელება“, „ექსპორტში არ შედის“, Master-ის ხმა და Mute.
+- **R3 — GATE132-TEMPO-CLEARED-MIXED (დროებითი, აღრიცხული გამონაკლისი):** `gridTempoClearedMessage` = `tempoStatusMessage(null)` + ქართული ბოლო `ბადე დაბრუნდა წამებზე: {formatGridDivision}`; `formatGridDivision` (`grid.ts`, `{step} წმ`) ბადის ყველა წამიანი label-ია და 88 ტესტის ხაზი 11 ფაილში ამაგრებს. D-29z96 (c)-სგან განსხვავება: იქ მთელი ხაზი იაფად გადადიოდა; აქ ბოლო ნაწილი V-0.3-ის საერთო label-ია. T3-ის ქართულად დატოვება tempo-ს სფეროს ორ ენად გაყოფდა და `tempo.ts`-ის სკანირებას ჩააგდებდა. V-0.3 იღებს `grid.ts`-ს და ხურავს გამონაკლისს; GATE128-S1-ის ქვეშ აღირიცხება.
+- **R4 — Transport-ის `aria-label="Zoom (px/წმ)"`** რჩება V-0.3-ში (ნახევრად გადატანილი კომპონენტი არა); `aria-valuetext` ხდება `px/s`; C სახელით აკლებს.
+- **R5 — ახალი formatter-ების წესი (GATE130-S3):** UI-ის ხელით დაწერილი ლიტერალები — `'40 px/s'` ×6, tempo-cleared ×2 (R3-ის ტექსტით), T-UI1–4 და M-UI1–4 დამატებით `expect`-ად არსებულ `it`-ებში; ახალი `it` მხოლოდ `strings.test`-ში (ST17–ST19).
+- **R6 — Architecture:** ARCH-R131-STRINGS-SPLIT-AND-HARNESS (A-ს და gate-ის reviewer-ები: keep) — დანართი (e) `b-round-130-checkpoint-request.md`-ში; არ ბლოკავს. რეგრესია 2026-10-27-დან.
+- **R7 — შედეგი წინასწარ (round 133):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.2c2-ის შეზღუდული გასწორება; C PASS — V-0.2c3 (`selection.ts` + `groups.ts`; ჯერ `ჯგუფი N` fixture-ების ხელახალი გაზომვა და `TRACK_GROUP_NAME_PREFIX`-ის გადაწყვეტა).
+
 **D-29z96 — Round 130-ის შედეგი; V-0.2b დასრულდა; V-0.2c დაიყო სამად; Round 131: V-0.2c1 (ვიდეოს იმპორტის შეტყობინებები ინგლისურად).**
 
 C round 130 (`tmp/studio-real-loop/c-round-130.md`, `c-round-130.json`) — **PASS**, `browserVerified`/`realVerified` — true, ბაგი 0, 13 ხაზი PASS. PLAY/LIB/LOOP/NUDGE/DEL-ის ტექსტები ზუსტია 1440-ზე და 1280-ზე, ეფექტები უცვლელი; დაჭერილ ისარზე P3 ერთხელ ცხადდება; layout ≤ 1 px; G130-3 401 (fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 130 — **published `ba54297`** (verify OK, review 9/10); ეს არის round 131-ის baseline.
@@ -2252,7 +2263,8 @@ flowchart TD
 | 129 → | (შედეგი) | **C PASS** (`browserVerified`; EDIT-COPY 29/29, UNDO-LABEL 13/13); V-0.2a → მზადაა; 4 Low → deferred; gate 129 published `1e453b1` |
 | 130 | VISUAL-A V-0.2b | დაკვრის, ბიბლიოთეკიდან დამატების/ჩაგდების, Loop-ისა და ჩაჩოჩების შეტყობინებები და history label-ები ინგლისურად (P1–P25, 4 ობიექტი); 8 ტესტი — ლიტერალი → მოდული; ST10–ST13, SA-DEL, GATE129-S2; doc 106 (D-29z95) |
 | 131 | VISUAL-A V-0.2c1 | ვიდეოს იმპორტის შეტყობინებები ინგლისურად (`studioVideoStrings`, V1–V15; `video.ts`, `video.client.ts`, Context-ის 5 სტრიქონი); ST14–ST16, ST13 → 4 ხაზი; ახალი `video-import-status-ui` VI1–VI4; doc 106 l.4, doc 107 (D-29z96) |
-| 131 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.2c1-ის Medium+ გასწორება; სხვაგვარად V-0.2c2 |
+| 132 | VISUAL-A V-0.2c2 | ტემპის, მეტრონომისა და Zoom-ის მაჩვენებლის ტექსტები ინგლისურად (`studioTempoStrings`, `studioMetronomeStrings`, `studioViewStrings`; T1–T4, M1–M4, Z1); ST17–ST19; UI ლიტერალები; GATE132-TEMPO-CLEARED-MIXED → V-0.3; doc 107 l.4, doc 108 (D-29z97) |
+| 132 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.2c2-ის Medium+ გასწორება; სხვაგვარად V-0.2c3 |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2308,6 +2320,8 @@ flowchart TD
 **D-29z95:** round 130-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (4 ახალი ობიექტი), `ArrangementContext.tsx` (მხოლოდ import, l.178–190 და l.513–514-ის მნიშვნელობები exported სახელების შენარჩუნებით, 8 callback-ის სტრიქონები l.1205–1757; l.1733 რჩება), `strings.test.ts` (ST10–ST13, ST9 `index === -1`), 8 ტესტი (მხოლოდ ლიტერალი → მოდული; `status-announcement-ui` +1 `it` SA-DEL: `grid-snap-ui`, `grid-snap-loop-drop`, `marker-time-snap-ui`, `gesture-reentry`, `failed-source-refusal`, `collection-load-status`, `ArrangementContext.test`) და ახალი doc 106. დანარჩენი გაყინულია (`b-round-129-r130-tree-sha256.txt`, 930).
 
 **D-29z96:** round 131-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (ახალი `studioVideoStrings`), `video.ts` და `video.client.ts` (მხოლოდ import და სტრიქონები; exported სახელები რჩება), `ArrangementContext.tsx` (მხოლოდ import და ვიდეოს იმპორტის 5 სტრიქონი l.2230/2280/2286/2291/2321; l.546–547, 1760, 3462 რჩება), `strings.test.ts` (ST14–ST16, ST13 → 4 ხაზი), `video.test.ts` (ლიტერალი → მოდული), ახალი `video-import-status-ui.test.tsx` (VI1–VI4), doc 106-ის მხოლოდ l.4 და ახალი doc 107. დანარჩენი გაყინულია (`b-round-130-r131-tree-sha256.txt`, 935).
+
+**D-29z97:** round 132-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (3 ახალი ობიექტი), `tempo.ts`, `metronome.ts`, `view.ts` (მხოლოდ import და სტრიქონები; exported სახელები რჩება), `strings.test.ts` (ST17–ST19), `tempo.test.ts`, `metronome.test.ts`, `view.test.ts` (ლიტერალი → მოდული), `tempo-ui` და `metronome-ui` (დამატებითი ლიტერალური `expect`), `marker-time-snap-ui`, `grid-snap-ui`, `grid-snap-edit`, `grid-snap-position`, `grid-snap-loop-drop` (`40 px/s`), `grid-musical-ui` l.490 და `grid-musical.test` l.118 (R3), doc 107-ის მხოლოდ l.4 და ახალი doc 108. დანარჩენი გაყინულია (`b-round-131-r132-tree-sha256.txt`, 926).
 
 ## 7. Done Policy
 

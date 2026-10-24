@@ -1,0 +1,106 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T09:06:45.7515601Z",
+  "round": 131,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T131-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "VID-ADD",
+  "VID-REJECT",
+  "VID-NOAUDIO",
+  "VID-LANE-DROP",
+  "GEO-COUNT",
+  "LAYOUT",
+  "REG-130",
+  "G131-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [
+  "V2 addToTrackFailed, V5 importFailed, V11/V12 too long/too large, V13 decode-failed, V14/V15 abort texts: not reachable in cloud Chromium (task §5 list); covered by ST14/ST15/VI only"
+ ],
+ "blocked": [
+  "G131-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest suite",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "C-R131-01",
+   "severity": "low",
+   "steps": [
+    "C generated its own synthetic WebM with the browser's MediaRecorder (canvas.captureStream, video/webm;codecs=vp9, 2.1 s, no audio); MediaRecorder writes no Duration element, so video.duration is Infinity",
+    "/studio-lab, + own video (arrangement-video-input), choose c-round-131/media/noaudio-2s-vp9-raw-noduration.webm"
+   ],
+   "expected": "A playable browser-recorded WebM is accepted, or the message says why (e.g. no duration in the file)",
+   "actual": "Rejected with V9 “noaudio-2s-vp9.webm”: the browser could not open this video — try MP4 (H.264) or WebM. probeVideoFile fails on !Number.isFinite(duration). The same bytes with an 11-byte Duration element added (c-round-131/tools/fixdur.py) are accepted (00:02.000 — 00:04.100). Discovered through C's synthetic file; the shared fixture media/noaudio-2s-vp9.webm has a duration and is accepted. PRE-EXISTING (the condition is unchanged by round 131); not a regression; deferred_low_polish / product question (browser screen recordings are a likely user file)",
+   "evidence": "c-round-131/out/vid131-noaudio-1440-r1.json; c-round-131/media/noaudio-2s-vp9-raw-noduration.webm (sha256 e01102afcec907af…); video.client.ts probeVideoFile onloadedmetadata"
+  }
+ ],
+ "invalidRuns": [
+  {
+   "run": "vid131 add 1440 r1",
+   "reason": "ENV-FIRST-LOAD: first load of the fresh dev server crashed (hydration error + Invalid hook call); rerun r2 fine",
+   "evidence": "c-round-131/out/INVALID-vid131-add-1440-r1.json"
+  }
+ ],
+ "harnessReruns": [
+  {
+   "run": "vid131 reject 1440/1280 r1 REJ-c",
+   "reason": "Playwright setInputFiles with mimeType '' delivers application/octet-stream; status correctly said (application/octet-stream). r2 builds a File with type '' in the page and dispatches change: (unknown type) exact at both viewports (real-world observation: Playwright's file chooser path gave octet-stream; the (unknown type) branch was reached with a synthetic in-page File)"
+  },
+  {
+   "run": "vid131 noaudio 1440 r1/r2",
+   "reason": "C mistakenly used its own MediaRecorder WebM (duration-less in r1 -> C-R131-01; Duration added in r2) instead of the shared media/noaudio-2s-vp9.webm. r3 used the shared fixture (sha256 1fbf7560…, matches media/SHA256SUMS.txt): added 00:02.000 — 00:04.000, Export list both lines exact"
+  }
+ ],
+ "georgianCounts": {
+  "status": 0,
+  "undoTitle": 0,
+  "exportVideoSoundList": 0,
+  "observerTransitions": 0,
+  "subtracted": "by name only: track names ვიდეო/მუსიკა/სტემები (none occurred in V texts), lane clip badge ხმა არ არის (on the clip, not in measured regions), lane hint/drag hint (lane text, not measured). File names are ASCII. Not counted (outside the measured regions; V-0.4/V-0.5 scope): initial status 'დემო კოლექცია მზადაა…', the + საკუთარი ვიდეო button, the empty-lane hint"
+ },
+ "notesForB": [
+  "All 15 V texts that can be reached in the browser are exact, hand-written from §1.1, at both viewports; the MutationObserver saw Opening “…”… before every probe (incl. broken.mp4)",
+  "Effects unchanged: clips appended at the previous video end (0, 6.000, 12.008), playhead seeks to each new clip start, Undo removes / Redo restores; no clip and no history entry for every rejection or lane drop",
+  "C-R131-01 (Low, pre-existing): duration-less browser-recorded WebM rejected with a misleading 'could not open' message",
+  "Initial fresh-load status 'დემო კოლექცია მზადაა…' is still Georgian (collection/library, V-0.5)",
+  "A's Architecture note (strings.ts growth, shared Context test harness) stands for the checkpoint request",
+  "At 1280x720 the Export dialog's video-sound list sits below the dialog fold (needs a scroll; shots/noaudio-export-1280-r1.png); pre-existing layout, text read from the DOM"
+ ],
+ "ableton": {
+  "czabaRequirement": "met",
+  "abletonCorrespondence": "not applicable / unconfirmed (text-only round; no Live behaviour claimed)"
+ },
+ "screenshotsOpened": [
+  "add-c-1440-r2",
+  "add-a-1280-r1",
+  "rej-d-1440-r2",
+  "longmsg-1280",
+  "drop-webm-1280-r1",
+  "drop-wav-1440-r1",
+  "noaudio-export-1440-r2",
+  "noaudio-export-1440-r3",
+  "noaudio-export-1280-r1",
+  "g131-3-lab-1440",
+  "g131-3-protected-1440"
+ ],
+ "screenshotsNotOpened": "the remaining start/intermediate shots, S0/S1/S2 layout shots, REG-130 shots and g131-3-protected-1280; those rows rest on DOM measurements"
+}
