@@ -1,0 +1,72 @@
+{
+ "round": 121,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T00:00:44.2580393Z",
+  "round": 121,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "T121-TARGETED",
+  "AN-REVIEW",
+  "SOURCE-SCOPE",
+  "WZ-PRESENT-1440",
+  "WZ-PRESENT-1280",
+  "WZ-T7-1440",
+  "WZ-T7-1280",
+  "WZ-LEVELS",
+  "WZ-GAIN",
+  "WZ-HISTORY",
+  "WZ-AUDIO",
+  "WZ-METER",
+  "WZ-NEWCLIP",
+  "WZ-KEYS",
+  "WZ-RELOAD",
+  "NB-ZOOM-IN-OUT",
+  "NB-MOVE-UNDO",
+  "NB-SNAP-DIVISION-ENV",
+  "NB-FADE-ENVELOPE-OVERLAY",
+  "NB-1280-LANE-FIT",
+  "G121-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G121-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "invalidRuns": [
+  "meter-1440-1: harness waited for 2 playhead wraps, so only 1 full 1× iteration existed before the zoom change (the first iteration from the seek is not bounded by a wrap). Not an app result; all 4 recorded iterations read −10.555 dB / 3 sources anyway. Replaced once by meter-1440-2 (waits for 3 wraps)."
+ ],
+ "observations": [
+  "Zoom-change method: in headless Chromium a real mouse click opens the native select popup; ArrowDown/ArrowUp move the highlight and Enter commits. All 22 zoom changes (17 wz-1440, 3 wz-1280, 1 audio, 1 per meter run) used this method; 0 selectOption fallbacks. The grid-division change in the neighbour check used selectOption (not the subject of this round).",
+  "WZ-AUDIO: the 1× and 2× WAV exports are byte-identical (sha256 3946976d…, 29189420 bytes, 24-bit 48 kHz stereo, 4864896 frames, 101.352 s, peak 0.2967, 0 NaN, 0 full-scale). Isolation = music+SFX muted, no video (round-120 method).",
+  "WZ-METER: loop 00:02.500–00:04.500; per-iteration output-tap peak −10.555 dB in all 5 iterations (1×,1×,mixed,2×,2×), 3 createBufferSource per iteration each, 2000 ms per iteration, 0 stalls, still playing. Stems track meter data-peak −10.6 throughout.",
+  "The select uses appearance-none as the spec requires, so it shows no dropdown arrow (A reviewer nit 5). With the accent at non-1× it reads as a toggle-like chip; discoverability is a candidate for DESIGN-UX-REVIEW, not a bug.",
+  "cn()/tailwind-merge drops border-outline/bg-surface/text-foreground at non-1× and keeps border-accent bg-accent/20 text-accent, matching Snap/Env."
+ ],
+ "ableton": {
+  "separateControlNotGain": "confirmed (Live 12 manual §6.1, B capture b-round-71) — CZABA behaviour matches",
+  "allAudioTracksAndNewClips": "confirmed (§6.1) — CZABA matches (WZ-T7, WZ-NEWCLIP)",
+  "audioOnlyNotVideo": "manual wording says audio clips; video in Live untested — CZABA decision",
+  "steppedSelectRangeLocation": "unconfirmed — deliberate CZABA difference (stepped ½×–8× select vs Live slider)",
+  "notUndoStep": "inference, unconfirmed",
+  "detailPanelNotZoomed": "unconfirmed"
+ },
+ "evidence": "tmp/studio-real-loop/c-round-121/{tools,out,shots}; report c-round-121.md"
+}

@@ -1,0 +1,153 @@
+diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index 6b41d00..e1d0dc8 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -15,7 +15,7 @@ import {
+   snapTimeToGridOrEdges,
+ } from '~/lib/arrangement/grid';
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
+-import { clipLinearGain, moveClip, trimClipEnd, trimClipStart } from '~/lib/arrangement/model';
++import { moveClip, trimClipEnd, trimClipStart } from '~/lib/arrangement/model';
+ import { PEAK_BUCKETS_PER_SECOND } from '~/lib/arrangement/peaks';
+ import {
+   CLIP_LANE_REFUSAL_MESSAGES,
+@@ -28,6 +28,7 @@ import {
+   type SelectionToggleMode,
+ } from '~/lib/arrangement/selection';
+ import { setVideoClipFade } from '~/lib/arrangement/video-fades';
++import { clipWaveformScale } from '~/lib/arrangement/waveform-zoom';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementClip, TimeRange } from '~/types/arrangement';
+ import {
+@@ -116,6 +117,7 @@ export interface ArrangementClipViewProps {
+   snapSeconds?: number | null;
+   gridSeconds?: number;
+   envelopeMode?: boolean;
++  waveformZoom?: number;
+ }
+ 
+ function roundTime(value: number): number {
+@@ -297,6 +299,7 @@ function ArrangementClipViewInner({
+   snapSeconds = null,
+   gridSeconds,
+   envelopeMode = false,
++  waveformZoom = 1,
+ }: ArrangementClipViewProps) {
+   const rootRef = useRef<HTMLDivElement>(null);
+   const gestureRef = useRef<ClipGesture | null>(null);
+@@ -305,10 +308,10 @@ function ArrangementClipViewInner({
+   const fadeLabels = isVideo ? VIDEO_FADE_LABELS : CLIP_FADE_LABELS;
+   const width = clip.duration * pxPerSecond;
+   const peakColumns = Math.round(Math.min(width, PEAK_SHAPE_MAX_COLUMNS));
+-  const gainScale = clipLinearGain(clip);
++  const peakScale = clipWaveformScale(clip, isVideo, waveformZoom);
+   const peakShape = useMemo(
+-    () => buildPeakShape(peaks, clip.sourceOffset, clip.duration, peakColumns, gainScale),
+-    [peaks, clip.sourceOffset, clip.duration, peakColumns, gainScale],
++    () => buildPeakShape(peaks, clip.sourceOffset, clip.duration, peakColumns, peakScale),
++    [peaks, clip.sourceOffset, clip.duration, peakColumns, peakScale],
+   );
+ 
+   useEffect(
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index f042b9c..9abbdd8 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -113,6 +113,7 @@ interface ArrangementLaneProps {
+   depth?: number;
+   onSelectTrack?: (trackId: string, modifiers: TrackRowSelectModifiers) => void;
+   envelopeMode?: boolean;
++  waveformZoom?: number;
+ }
+ 
+ export function ArrangementLane({
+@@ -132,6 +133,7 @@ export function ArrangementLane({
+   depth = 0,
+   onSelectTrack,
+   envelopeMode = false,
++  waveformZoom = 1,
+ }: ArrangementLaneProps) {
+   const {
+     arrangement,
+@@ -976,6 +978,7 @@ export function ArrangementLane({
+               snapSeconds={snapSeconds}
+               gridSeconds={gridSeconds}
+               envelopeMode={envelopeMode}
++              waveformZoom={waveformZoom}
+             />
+           );
+         })}
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index bdf9fc4..404ce70 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -97,6 +97,14 @@ import {
+   timelineNavigationKey,
+   zoomToRangeView,
+ } from '~/lib/arrangement/view';
++import {
++  parseWaveformZoom,
++  WAVEFORM_ZOOM_DEFAULT,
++  WAVEFORM_ZOOM_LEVELS,
++  waveformZoomLabel,
++  waveformZoomPercent,
++  waveformZoomStatus,
++} from '~/lib/arrangement/waveform-zoom';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementTrack } from '~/types/arrangement';
+ import {
+@@ -467,6 +475,7 @@ export function StudioWorkspace() {
+   const [envelopeMode, setEnvelopeMode] = useState(false);
+   const envelopeModeRef = useRef(envelopeMode);
+   envelopeModeRef.current = envelopeMode;
++  const [waveformZoom, setWaveformZoom] = useState(WAVEFORM_ZOOM_DEFAULT);
+   const [secondsGridDivision, setSecondsGridDivision] = useState<number>(
+     GRID_DEFAULT_DIVISION_SECONDS,
+   );
+@@ -2249,6 +2258,7 @@ export function StudioWorkspace() {
+                     data-grid-division={gridDivisionId}
+                     data-grid-lines={gridLinesShown ? 'visible' : 'hidden'}
+                     data-envelope-mode={envelopeMode ? 'on' : 'off'}
++                    data-waveform-zoom={waveformZoom}
+                   >
+                     <button
+                       type="button"
+@@ -2348,6 +2358,30 @@ export function StudioWorkspace() {
+                     >
+                       Env
+                     </button>
++                    <select
++                      value={String(waveformZoom)}
++                      onChange={(event) => {
++                        const next = parseWaveformZoom(event.target.value);
++                        if (next !== null) {
++                          setWaveformZoom(next);
++                          setStatus(waveformZoomStatus(next));
++                        }
++                      }}
++                      aria-label="Waveform Zoom — მხოლოდ ხედი, ხმა არ იცვლება"
++                      title={`Waveform Zoom ${waveformZoomPercent(waveformZoom)}% — მხოლოდ ხედი, ხმა არ იცვლება`}
++                      className={cn(
++                        'h-6 shrink-0 appearance-none rounded-sm border border-outline bg-surface px-1 text-xs leading-none tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
++                        waveformZoom !== WAVEFORM_ZOOM_DEFAULT &&
++                          'border-accent bg-accent/20 text-accent',
++                      )}
++                      data-testid="arrangement-waveform-zoom"
++                    >
++                      {WAVEFORM_ZOOM_LEVELS.map((level) => (
++                        <option key={level} value={String(level)}>
++                          {waveformZoomLabel(level)}
++                        </option>
++                      ))}
++                    </select>
+                   </div>
+                   <ArrangementRuler
+                     seconds={timelineSeconds}
+@@ -2448,6 +2482,7 @@ export function StudioWorkspace() {
+                     gridSeconds={gridSeconds}
+                     snapSeconds={snapEnabled ? gridSeconds : null}
+                     envelopeMode={envelopeMode}
++                    waveformZoom={waveformZoom}
+                   />
+                 ),
+               )}

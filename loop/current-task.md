@@ -1,249 +1,200 @@
-# CURRENT TASK — Round 121: T12 stage 4b — Waveform Vertical Zoom (view only; T12.18 + Test 7)
+# CURRENT TASK — Round 122: REGRESSION round (phase 1 + T12 V1), doc status lines only for A
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-23 (B planned from 23:26:24 UTC, `date -u`)
-- **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, plus the LOOP POLICY, Loop v2, cloud-runner and speed rules, the 2026-10-23 bug-gate decision and the root clarification. These rules take precedence over older text.
-- **Previous task:** `tasks/round-120.md`. It was copied before this file was overwritten, and `cmp` reported the copy identical (22282 bytes). Rationale: `b-round-120.md`. Decision record: **D-29z86** in `docs/technical/studio-real-workspace/plan.md`.
-- **Round type:** one feature stage (T12 stage 4b). No bug is carried in, because C round 120 passed with 0 app bugs.
-- **Baseline: clean commit `0a75ba8757617695d19e0b2a4aaad713bc30c01c`** (gate 120 `published`, both remotes). `git status --porcelain` is empty.
-  - Frozen list: `tmp/studio-real-loop/b-round-120-r121-tree-sha256.txt`, 931 entries. That is every tracked file except the 3 granted tracked files in §2.
-  - `sha256sum -c` gave OK at planning.
-- **Browser baseline (B, taken on this clean tree):** `tmp/studio-real-loop/b-round-120/probe/baseline-r121.json`, with screenshots `baseline-{1440,1280}.png`. It holds the chrome row heights, the lane y positions and the sha256 of every clip's waveform `d` at 1×, at both viewports, using the C setup and the video below.
+Dispatcher: B · Implementer: A (two doc status lines only) · Verifier: C · Date: 2026-10-24 (B planned from 00:18:55 UTC, `date -u`)
+- **Workflow:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`. Also apply the LOOP POLICY, Loop v2, the cloud-runner and speed rules ("Regression round every 3 days"), the 2026-10-23 bug-gate decision and the root clarification. These rules take precedence over older text.
+- **Previous task:** `tasks/round-121.md`, an exact copy (`cmp` OK, 29441 bytes). Rationale: `b-round-121.md`. Decision record: **D-29z87** in `docs/technical/studio-real-workspace/plan.md`.
+- **Round type:** this is the **REGRESSION round** under the speed rules, using the round-112 pattern: a C-only round plus a one-file doc change by A.
+  - Why now: `regression-last.json` = 2026-10-21 and B planned on 2026-10-24, which is 3 days.
+  - **No app code changes in this round.** A edits only two doc status lines.
+  - C spends the round re-checking in the real browser every item that is already done or c_pass.
+- **Baseline: clean commit `425a80705c7b57d6157796810bdd878f1c7b061c`.** Gate 121 is `published` on both remotes. `git status --porcelain` is empty.
+  - Frozen list: `tmp/studio-real-loop/b-round-121-r122-tree-sha256.txt`, 935 entries. That is every tracked file except the two docs in §1.
+  - `sha256sum -c --quiet` gave OK at planning, run from `store/`.
 
-## 0. Why this round (D-29z86)
-- **Round 120 passed and is published.**
-  - C round 120: PASS (`c-round-120.json`, `browserVerified: true`, `realVerified: true`, 0 bugs).
-  - Gate 120 published `0a75ba8`.
-  - So **T12 stage 4a is `c_pass_published`**.
-- **The regression round is not due at this planning.** This changes the round-120 §0/§8 forecast, which assumed planning would happen on or after 2026-10-24.
-  - `regression-last.json` = 2026-10-21. B planned at 2026-10-23 23:26:24 UTC, which is 2 days; the rule needs 3 or more.
-  - So the next dependency-ordered scope comes first: **stage 4b**. It closes T12 V1 (T12.27 item 8).
-  - **Round 122 planning is the REGRESSION round in any case.** It falls on or after 2026-10-24, which is 3 or more days, and V1 is then complete, so the regression round covers it.
-  - **If round 121 fails C,** the bounded fix-up comes first (the 116→117 / 118→119 pattern). The regression round then runs at the next planning, on the published tree.
-- **Nothing blocks new scope.** No Critical, High or Medium finding is open and reproducible in the cloud.
-- **Sources:**
-  - T12.18 ("Waveform Vertical Zoom is NOT Gain"; two separate states, `clipGainDb` and `waveformZoom`);
-  - T12.19 (`displayAmplitude = source × clipGainDisplayScale × waveformZoomScale`; "`waveformZoomScale` never reaches the audio engine");
-  - T12.26 Test 7 ("100% → 200%: waveform visually larger; audio samples unchanged; meter output unchanged").
-  - All are in `docs/technical/studio-real-workspace/next-stage-t12/gain-volume-source.txt` l.615–672 and l.972–986.
+## 0. Why this round (D-29z87)
+- **Round 121 passed and is published.**
+  - C round 121: PASS (`c-round-121.json`, `browserVerified: true`, `realVerified: true`, 0 bugs, 23 rows passed).
+  - The only blocked row is the fake-Bearer 403, because the backend is unavailable in the cloud.
+  - Gate 121 published `425a807`.
+  - So **T12 stage 4b is `c_pass_published`**, and **T12 V1 (T12.27 items 1–8 = stages 1, 2, 3a, 3b, 4a, 4b) is complete**.
+- **The regression round is due now** (3 days since 2026-10-21). The speed rules put it ahead of new scope. It is also the natural point to check the whole phase 1 + T12 V1 surface before ABLETON-EXPERT-REVIEW starts judging it.
+- **Nothing is open at Critical, High or Medium that reproduces in the cloud.**
+  - C-R6-02 and C-R8-01 are `open_tech_lead_quiet_chrome` with no app attribution.
+  - A-R73-SAFARI-FLAG-FOCUS is `environment_webkit_unavailable`.
+  - None of these three block anything, per the root clarification.
+- **How bugs found here are fixed:** the loop runs B → A → C, so A cannot fix inside this round what C finds after A's phase. A Critical, High or Medium finding (including a regression) becomes **round 123, a bounded fix-up** (at most three related bugs, the 116→117 pattern). Section 6 fixes the outcome in advance.
 
-## 1. What changes (user-visible)
-| # | Behaviour now | Behaviour after round 121 |
-|---|---|---|
-| 1 | No way to enlarge the waveform drawing without changing Clip Gain | A **Waveform Zoom** control appears in the grid row, after `Env`. It has the steps `½× 1× 2× 4× 8×` (50–800 %), and the default is `1×` |
-| 2 | — | The zoom multiplies the drawing of **every audio clip on every lane**, together with Clip Gain: `peak × 10^(gainDb/20) × zoom`, clamped to the clip height, with the 0.02 floor kept. Audio clips added later are drawn at the current zoom too |
-| 3 | — | **Video clips' drawing is unchanged** (the manual says "audio clips"). **The detail panel is unchanged** (the manual says "in the Arrangement"; the panel keeps showing the true clip level) |
-| 4 | — | **View only.** No audio, export, meter or schedule change. Not an Undo/Redo entry, and not stored in the arrangement. It is per session: a reload returns to `1×`. A status line confirms the change: `Waveform Zoom 200% — მხოლოდ ხედი, ხმა არ იცვლება.` |
-| 5 | Grid row: Snap, division, Env | The same three controls, unchanged, plus the zoom control. **The chrome row heights and the lane positions are unchanged** |
-
-## 2. A — files you own (everything else is frozen)
+## 1. A — the only change
 | File | Change |
 |---|---|
-| `app/lib/arrangement/waveform-zoom.ts` | **new** pure module (R1). |
-| `app/components/arrangement/ArrangementClip.tsx` | R2.<br>• An **optional** prop `waveformZoom?: number`, default `1`, on `ArrangementClipViewProps`.<br>• The peak memo's scale becomes `clipWaveformScale(clip, isVideo, waveformZoom)` instead of `clipLinearGain(clip)`.<br>• The memo must recompute when the clip's gain, `isVideo` or the zoom changes. Use the form Biome's `useExhaustiveDependencies` accepts; the round-120 `gainScale` form is fine.<br>• `buildPeakShape` itself is **not** changed (signature, clamp and floor). |
-| `app/components/arrangement/ArrangementLane.tsx` | R2 pass-through **only**:<br>• an optional `waveformZoom?: number` prop, default `1`;<br>• it is forwarded to `<ArrangementClipView waveformZoom={…}>`.<br>Nothing else changes. |
-| `app/components/arrangement/StudioWorkspace.tsx` | R3:<br>• one view state, `waveformZoom` (`useState(1)`);<br>• the change handler, with its status text;<br>• the `<select>` control as the **last** child of `[data-testid="arrangement-grid-control"]`;<br>• `data-waveform-zoom={waveformZoom}` on that grid-control element;<br>• `waveformZoom={waveformZoom}` passed to every `<ArrangementLane>`.<br>Nothing else changes. |
-| `app/lib/arrangement/__tests__/waveform-zoom.test.tsx` | **new**: §3.2 tests WZ1–WZ9 |
-| `docs/implementation/2026/quarter-IV/103-studio-waveform-vertical-zoom.md` | **new** implementation doc (the TEMPLATE.md sections, in Georgian) |
+| `docs/implementation/2026/quarter-IV/102-studio-waveform-clip-gain.md` | **Line 4 only.** Today it reads `**სტატუსი:** In Progress — Round 120 (T12 ეტაპი 4a, D-29z85). A-ის ტესტები მწვანეა; C-ის ბრაუზერის შემოწმება და root-ის gate ჯერ წინაა.`<br>Replace it with exactly: ``**სტატუსი:** Completed — Round 120 (T12 ეტაპი 4a, D-29z85). C PASS, გამოქვეყნებულია `0a75ba8`-ში (gate 120).`` |
+| `docs/implementation/2026/quarter-IV/103-studio-waveform-vertical-zoom.md` | **Line 4 only.** Today it reads `**სტატუსი:** In Progress — Round 121 (T12 ეტაპი 4b, D-29z86). A-ის ტესტები მწვანეა; C-ის ბრაუზერის შემოწმება და root-ის gate ჯერ წინაა.`<br>Replace it with exactly: ``**სტატუსი:** Completed — Round 121 (T12 ეტაპი 4b, D-29z86). C PASS, გამოქვეყნებულია `425a807`-ში (gate 121).``<br>This closes gate-121 reviewer suggestion 6. |
 
-- **Frozen and must stay byte-identical:**
-  - `ArrangementDetailPanel.tsx`, `ArrangementContext.tsx`, `model.ts`, `peaks.ts`;
-  - `graph.client.ts`, `schedule.ts`, `export-wav*.ts`;
-  - `clip-gain-waveform.test.tsx`, and every other test.
-- **No existing test is granted.**
-  - B checked that `ArrangementLane` / `ArrangementClipView` are rendered directly only in `StudioWorkspace.tsx`, `ArrangementLane.tsx`, `gesture-guard.test.tsx`, `gesture-reentry.test.tsx` and `grid-snap-ui.test.tsx`. That is why both new props are **optional with default 1**.
-  - No test pins tab order (no `.tab(` / `{Tab}`), and no test counts the grid-control children or comboboxes. `grid-snap-ui.test.tsx:387` checks that the **transport toolbar** has no `select`, so **the new select must not be placed in the transport toolbar**.
-  - **A repeats these greps before editing** and records the result. If an existing test breaks, A stops and reports (§4).
-- **Expected end state:**
-  - ` M` for the 3 tracked files;
-  - `??` for the 3 new files;
-  - nothing else.
-  - `sha256sum -c --quiet b-round-120-r121-tree-sha256.txt` is OK at the start and at the end.
-- **Protected (unchanged; `git diff 0a75ba8` on them is empty):**
-  - `app/routes/studio.$productId.tsx` `fa2cf0bc`
-  - `app/routes/api.studio-token.ts` `13914809`
-  - `app/lib/auth.ts` `56f5b76f`
-  - `app/contexts/AuthContext.tsx` `bf9ee257`
-  - everything in `global_forbidden_files` / `global_forbidden_actions` of `backlog.json`.
-- **Forbidden actions:** commit, push, stash, checkout, reset, deploy, dev-server restart, `npm install`, `npm run check` (`--write`), `npm run format`.
-- **Edit rule (tightened after C-R120-01):**
-  - **Every lasting edit uses the Edit or Write tool**, so the primitives hook fires. That includes formatting fixes in new files.
-  - Shell string replaces are allowed **only** for temporary mutations. Each one is restored from a copy, and the restore is verified by sha256.
-  - A lists every shell write in its report.
-- **Before editing, read:**
-  - `.claude/primitives-map.json` and `.claude/prompts/studio-feature.md`;
-  - `AUDIO_ARCHITECTURE.md`, `FORWARDREF_COMPONENT.md`, `AGENT_DISCOVERABLE_CODE.md`, `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`, `REACT_CONTEXT.md` (for the reason state stays in the workspace and not in the context);
-  - `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`;
-  - `docs/implementation/TEMPLATE.md`.
-- **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, no `as T` casts (also no `as const`), semicolons, no code comments, Tailwind tokens only.
-- **Process rule (C-R119-01):** before touching any **untracked** file, A stores a copy of it under `a-round-121/` with its sha256.
+- In both replacement texts, the backticks around the commit hash are part of the text.
+- **Nothing else changes:**
+  - no file under `app/`, no test and no other doc;
+  - no new file in `store/`.
+- **Expected end state.** `git status --short --untracked-files=all` shows exactly ` M` for these two docs.
+  - `git diff --numstat` shows `1 1` per file, with one hunk at line 4.
+- **Frozen list.** A runs `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-121-r122-tree-sha256.txt` from `store/` at the start and at the end, and reports OK or FAIL.
+- **Pre-edit sha256** (both files are tracked, so `git show 425a807:<path>` also restores them):
+  - doc 102: `d829d7e5…f52d`;
+  - doc 103: `22a6c287…4569`.
+- **A's checks:**
+  - before editing, read the `GEORGIAN_DOCS.md` primitive;
+  - make the edits with the Edit tool only; no shell writes into `store/` (C-R120-01 rule).
+  - No code changes, so A does **not** run typecheck, lint or vitest, and does not need a code-reviewer.
+- **A's report** (`a-round-122.md`) states: the start HEAD and status, both diffs, the frozen-list result at the start and at the end, and the end status.
+- **Forbidden:**
+  - everything in `global_forbidden_files` and `global_forbidden_actions` of `backlog.json`, including the four protected auth/purchase files: `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts` and `app/contexts/AuthContext.tsx`;
+  - commit, push, stash, checkout and deploy;
+  - dev-server restarts, and probes that write into `store/`.
+- **If A is interrupted:** resume from the checkpoint. If a line is already replaced, do not replace it again.
 
-## 3. A — behaviour rules and tests
+## 2. C — scope, method and budget
+- **What C does:**
+  - re-checks in the real browser, at **1440×900 and 1280×720**, the key acceptance of every item that is done or c_pass (§3);
+  - runs the rows that earlier findings parked "for the regression round" (§4);
+  - runs `npm run test:e2e:smoke` (§5).
+- **C does not run the full vitest suite or `npm run verify`.** Those are `gate` rows (§5).
+- **One short check per item and viewport.** This is not a re-run of every historical acceptance ID.
+  - When a check fails, C may run the next listed ID of the same item once, to locate the regression.
+  - Do not widen the sweep beyond that.
+- **Tooling:** Playwright with the installed Chromium, a fresh context per session, no storage state and no credentials. Base URL `http://127.0.0.1:5173/studio-lab`.
+  - Build on `c-round-121/tools/lib.cjs`: `openStudio`, `addAt`, `loadVideo`, `selectClip`, `seekTo`, `setSnapOff`, `clipsDom`, `detailInfo`, `status`.
+  - Build on `c-round-121/tools/wav.cjs`: `parse`, `stats`, `cmp`.
+  - Copy what you need into `c-round-122/tools/`, and say which scripts you adapted.
+  - Media come from `tmp/studio-real-loop/media/`; check `SHA256SUMS.txt` first.
+  - Scripts that passed an item before, for reuse:
 
-### 3.1 Rules (D-29z86)
-- **R1 — `waveform-zoom.ts` (pure, exported names exactly as below):**
-  - `WAVEFORM_ZOOM_LEVELS: readonly number[] = [0.5, 1, 2, 4, 8]`; `WAVEFORM_ZOOM_DEFAULT = 1`.
-  - `waveformZoomLabel(level: number): string`. It returns `'½×'`, `'1×'`, `'2×'`, `'4×'` or `'8×'` for the listed levels.
-  - `waveformZoomPercent(level: number): number`, which is `Math.round(level * 100)`.
-  - `parseWaveformZoom(value: string): number | null`. It returns the level only when `Number(value)` is **exactly one of the listed levels**; anything else gives `null`.
-  - `waveformZoomStatus(level: number): string`. It returns exactly `` `Waveform Zoom ${waveformZoomPercent(level)}% — მხოლოდ ხედი, ხმა არ იცვლება.` ``
-  - `clipWaveformScale(clip: ArrangementClip, isVideo: boolean, zoom: number): number`. It returns `clipLinearGain(clip) * z` for audio clips and `clipLinearGain(clip)` for video clips. Here `z = Number.isFinite(zoom) && zoom > 0 ? zoom : 1`.
-- **R2 — the drawing.**
-  - Lane clips use `buildPeakShape(peaks, clip.sourceOffset, clip.duration, peakColumns, clipWaveformScale(clip, isVideo, waveformZoom))`.
-  - Because the product reaches the existing pre-clamp `scale` parameter, the 1.0 clamp and the 0.02 floor apply to the combined factor.
-  - **At `1×`, every drawing is byte-identical to round 120.**
-- **R3 — the control (`StudioWorkspace.tsx`).**
-  - The element is `<select data-testid="arrangement-waveform-zoom">`. It has one `<option value={String(level)}>` per level, and the option text is `waveformZoomLabel(level)`.
-  - `aria-label="Waveform Zoom — მხოლოდ ხედი, ხმა არ იცვლება"`.
-  - `title={`Waveform Zoom ${percent}% — მხოლოდ ხედი, ხმა არ იცვლება`}`.
-  - **Classes:**
-    - the same classes as the grid-division select;
-    - plus `appearance-none`, so it fits the 224 px header (B measured 28 px wide, ending at x = 210 ≤ 216);
-    - plus the accent classes the Snap and Env toggles use when it is not `1×` (`border-accent bg-accent/20 text-accent`).
-  - **On change:**
-    - parse the value with `parseWaveformZoom`, and ignore `null`;
-    - set the state;
-    - `setStatus(waveformZoomStatus(level))`.
-  - **Must not:**
-    - add a context API;
-    - call `commitArrangement`, `previewArrangement` or any history call;
-    - write to `localStorage`;
-    - change the select's keyboard behaviour. `isTypingTarget` already treats a focused select as typing, so workspace shortcuts are skipped.
-- **R4 — the audio is untouched.** The zoom is never in the arrangement, so it can never reach `scheduleKey`, the graph, the meters or the export. These files stay frozen: `ArrangementContext.tsx`, `graph.client.ts`, `schedule.ts`, `export-wav*.ts`, `model.ts`.
-- **R5 — the layout is unchanged.**
-  - The grid row stays 28 px tall, and the control stays inside the 224 px header with no overflow.
-  - Nothing is added to the transport toolbar, the tempo row, the marker row or the loop row.
-
-### 3.2 New test file `waveform-zoom.test.tsx` (meaningful, exact)
-**The WZ1 fixture:** the round-120 WG1 fixture, `peaks = new Float32Array([0.2, 0.5, 0.9, 1.0, 0.01])`, `sourceOffset 0`, `duration 0.05`, `columns 5`.
-- B computed these literals in node with `Float32Array` input, using the real formula. They are in `b-round-120/literals.txt`.
-- They are the exact expected `buildPeakShape(…, scale).path` strings:
-
-| Scale | Expected `path` |
+| Area | Script(s) to reuse |
 |---|---|
-| `0.5` | `M0 0.900h1V1.100h-1ZM1 0.750h1V1.250h-1ZM2 0.550h1V1.450h-1ZM3 0.500h1V1.500h-1ZM4 0.980h1V1.020h-1Z` |
-| `2` | `M0 0.600h1V1.400h-1ZM1 0.000h1V2.000h-1ZM2 0.000h1V2.000h-1ZM3 0.000h1V2.000h-1ZM4 0.980h1V1.020h-1Z` |
-| `4` | `M0 0.200h1V1.800h-1ZM1 0.000h1V2.000h-1ZM2 0.000h1V2.000h-1ZM3 0.000h1V2.000h-1ZM4 0.960h1V1.040h-1Z` |
-| `8` | `M0 0.000h1V2.000h-1ZM1 0.000h1V2.000h-1ZM2 0.000h1V2.000h-1ZM3 0.000h1V2.000h-1ZM4 0.920h1V1.080h-1Z` |
-| `10 ** (-6 / 20) * 2` (= 1.0023744672545445) | `M0 0.800h1V1.200h-1ZM1 0.499h1V1.501h-1ZM2 0.098h1V1.902h-1ZM3 0.000h1V2.000h-1ZM4 0.980h1V1.020h-1Z` |
-| `10 ** (-60 / 20) * 8` | `M0 0.980h1V1.020h-1ZM1 0.980h1V1.020h-1ZM2 0.980h1V1.020h-1ZM3 0.980h1V1.020h-1ZM4 0.980h1V1.020h-1Z` |
+| groups | `c-round-79/tools/g79.cjs`, `c-round-81/tools/lib81.cjs` |
+| fades and envelope | `c-round-82/tools/lib82.cjs`, `c-round-83/tools/lib83.cjs` |
+| video fades | `c-round-84/tools/lib84.cjs` |
+| range export | `c-round-85/tools/lib85.cjs` |
+| MP3 export | `c-round-90/tools/run-mp3.cjs` |
+| markers | `c-round-74/tools/mk74.cjs`, `c-round-75/tools/mk75.cjs` |
+| library focus | `c-round-110/tools/reg.cjs`, `lf-basic.cjs` |
+| video return / float | `c-round-111/tools/vr.cjs` |
+| drift sampler | `c-round-112/tools/drift.cjs` |
+| touch | `c-round-112/tools/touch.cjs`, `c-round-113/tools/touch.cjs` |
+| Clip Gain | `c-round-114/tools/ui.cjs`, `c-round-115/tools/multi.cjs` |
+| lane Volume | `c-round-116/tools/lane.cjs` |
+| group Volume | `c-round-118/tools/ui.cjs` |
+| waveform gain | `c-round-120/tools/wg.cjs` |
+| waveform zoom | `c-round-121/tools/wz.cjs` |
 
-| ID | Asserts |
+  - If no cloud script exists for an item, write a short one on top of `lib.cjs`.
+- **Setup rule (ENV-FIRST-LOAD-GRID-NULL):** if the first `/studio-lab` load of the job crashes the setup (the grid control is null), discard that run once and replace it. Record it under `invalidRuns`.
+- **Budget per row:** the measurement is valid when the setup completed. A row that fails on a valid setup is a finding; do not replace it.
+  - Up to **2 replacement attempts** per row, only for environment-invalid runs.
+  - Drift rows use the round-112 rules unchanged (§3 RG-03).
+  - Thresholds and tolerances below are **not relaxed**.
+- **Network and console, every session (PX-NET / REG-HYD):**
+  - 0 requests to `/api/studio-token`, `/api/recording-*`, `/api/download` or the R2 host (`r2-proxy|workers.dev`);
+  - 0 `Authorization` headers, 0 hydration messages, 0 `pageerror`;
+  - console errors other than the known cloud noise (`Failed to load cart`, `ERR_CONNECTION_REFUSED`, `ERR_TUNNEL_CONNECTION_FAILED`) are reported.
+- **Write `c-round-122.json` and `c-round-122.md` incrementally, after every row.** A job may stop at its time limit, and the next job resumes from the last completed row.
+  - Keep `c-round-122/progress.json`: `{"done":["RG-01-1440", …],"next":"…"}`.
+  - Order: SOURCE-SCOPE start → §3 rows in the listed order (1440, then 1280 per row) → §4 → §5 smoke → G122-3 → SOURCE-SCOPE end.
+- **Backend-dependent sub-checks** go under `blocked` with "backend unavailable in cloud": the fake-Bearer 403, the purchased route mount (SRW-21, `deferred_user`) and anything that needs `:5199`. They never count as `failed`, and they do not make `browserVerified` false.
+- **Ableton:** no new behaviour is introduced, so the Ableton source table of the workflow does not apply to this round. C judges only the **CZABA requirement** (the expected values below); the Ableton correspondence statuses stay as recorded in the original rounds. Ableton parity is the job of ABLETON-EXPERT-REVIEW, which comes next.
+
+## 3. C — regression rows (one per item; both viewports unless stated)
+All times are in seconds on the timeline. "Undo exact" means one Ctrl+Z restores the clip table (`lane, start, end, offset`) captured before the action, and Ctrl+Shift+Z re-applies it.
+
+| Row | Item | Action | Expected (PASS only if all hold) |
+|---|---|---|---|
+| SOURCE-SCOPE | — | **At the start and at the end:**<br>• `git -C store rev-parse HEAD`;<br>• `git status --short --untracked-files=all`;<br>• `sha256sum -c --quiet b-round-121-r122-tree-sha256.txt`, run from `store/`;<br>• `git diff 425a807 --stat`. | • HEAD is `425a807`.<br>• The status is exactly the two ` M` docs of §1, and the frozen list is OK.<br>• The diff is exactly the two line-4 hunks of §1.<br>• The four protected files are unchanged. |
+| AN-REVIEW | — | Read `a-round-122.md` and the two diffs | Each change is the exact text of §1, and nothing else changed |
+| RG-01 | SRW-01 | Open `/studio-lab` anonymously and wait until „იტვირთება…“ is gone. Place the demo music on the music lane at 0. Split it at 4 (insert marker at 4, then the split command used in the earlier rounds). Select the second part and press Delete. Then Undo, then Redo | • The workspace and the demo badge show.<br>• The split gives 0–4 and 4–end, and the second part's offset is the first part's offset + 4.<br>• Delete leaves a gap; later clips do not move.<br>• Undo and Redo are exact. |
+| RG-02 | SRW-02 | Load `beeps-6s-vp9-opus.webm`, then `clip-4s-vp9-opus.webm`, through `[data-testid=arrangement-video-input]`. Then Undo | • Two video clips at 0–6 and 6–10 (±1 frame), with no overlap.<br>• One Undo removes only the second clip. |
+| RG-03 | SRW-03 | **1440 only.** Video at 0 (beeps webm) plus music at 0.<br>• Play from 0 for 5 s, with the round-112 sampler (`c-round-112/tools/drift.cjs`): drift `d = video.currentTime − (pos − start + offset)`.<br>• Then, while playing, toggle `ვიდეოს ორიგინალი ხმა` off and on. | • **Drift:** median \|d\| ≤ 0.05 and max \|d\| ≤ 0.1, on the stall-excluded series (round-112 rules; report raw values too).<br>• **Mute toggle:** the video keeps playing (`paused` false); the playhead stays monotonic with no jump > 0.1; `video.muted` follows the toggle.<br>• A failure that matches C-R6-02 (one sample at a clip cut, app LoAF 0) is recorded as "C-R6-02 recurrence (known)", not as a new bug. Any other failure is a finding. |
+| RG-04 | SRW-04 | • Stopped: drag the playhead handle from 2 to 6.<br>• Play from 6, and after ~1 s select a 1 s range in a clip body.<br>• Pause at about 8.<br>• Play.<br>• Home. | • The handle follows the pointer (±1 px), and the position ends at 6 ±0.05.<br>• Selecting the range does not make the position jump: monotonic, with no step > 0.1.<br>• After Pause, Play resumes from the paused position ±0.05.<br>• Home gives 0. |
+| RG-05 | SRW-05 | • Range 2–4, Ctrl+L.<br>• Range 6–8, Ctrl+L.<br>• Undo.<br>• Toggle the loop off and on.<br>• With the 2–4 loop on: play from 1.5 for 4 s. | • After the second Ctrl+L there is one brace at 6–8, with the status `Loop ჩანაცვლდა` (prefix match); Undo gives 2–4.<br>• When the loop is off, the brace stays (dashed).<br>• With the loop on, the playhead wraps at 4 → 2 (at least one wrap, with no position > 4.05). |
+| RG-06 | SRW-06 | • Music at 0 and SFX at 3: click music, then Ctrl+click SFX. Shift+click a third clip (the stems demo at 6).<br>• Then press Escape, and drag a marquee on empty background across two lanes. | • The selection counts are 2 and then 3, as the detail panel and the selected attributes show.<br>• Ctrl+click on a selected clip removes it.<br>• The marquee selects exactly the intersected clips. |
+| RG-07 | SRW-07 | Select a music clip 0–L, then Ctrl+D | • A copy at L.000 on the same lane, with the same offset and duration.<br>• Only the copy is selected.<br>• One Undo removes the copy. |
+| RG-08 | SRW-08 | • Drag a clip by its header down one audio lane and +1 s.<br>• Then repeat on another clip, pressing Shift after the drag starts. | • **Plain drag:** the lane changes and start is +1 (±1 px); no copy is left behind; Undo is exact.<br>• **With Shift:** start is exactly unchanged, the lane changes, and the Shift hint is visible during the drag. |
+| RG-09 | SRW-09 | • Select music 0–L, Ctrl+C, seek 20, Ctrl+V.<br>• Range 2–3 on music, Ctrl+X.<br>• Undo.<br>• Range 2–3, Ctrl+Shift+X. | • **Copy/paste:** the copy lands at 20.000 with the same offset and duration.<br>• **Ctrl+X:** keeps a 2–3 gap; other lanes are unchanged.<br>• **Ctrl+Shift+X:** closes the gap on **all lanes**; clips that start later move by −1.000. |
+| RG-10 | SRW-10 | • `+` twice, then `−` once, with a playhead at 10.<br>• Range 4–6, then `Z`.<br>• Then `X`.<br>• A ruler click < 4 px while stopped. | • The zoom is anchored: the screen x of 10 stays within ±1 px.<br>• `Z` frames the range at about 60 % of the viewport, centred.<br>• `X` restores the zoom (px/s) and the scroll exactly.<br>• The ruler click seeks on release only; it does not start playback and adds no history entry. |
+| RG-11A | SRW-11A | • Collapse the library with its button, then expand it.<br>• Focus the separator, then press ArrowRight ×2 and ArrowLeft ×2. | • Collapsed width 40 ±1 px; expanding restores the previous width.<br>• The separator steps ±16 px, `aria-valuenow` matches, it is clamped to 288/480, and no history entry is added.<br>• **Focus (B-R108-LIB-FOCUS-LOSS):** after collapsing with `◀`, focus is on `▶`; after expanding with `▶`, focus is on `◀`. |
+| RG-11B | SRW-11B | • Collapse and expand the detail panel, then resize it with the separator arrows.<br>• Then the **GATE111-SUGG-E2E-S5** scenario: load a video, expand it to floating, focus the detail-panel collapse control, press Escape, then Enter. | • **Collapse/resize:** collapsed height 36 px; resizing stays within 120–280 in steps of ±16; the timeline is never covered.<br>• **S5:** Escape returns from floating, the same `<video>` DOM nodes remain, and Enter adds **0 clips** (clip count unchanged). |
+| RG-12 | SRW-12 | • Type `impact soft` in the library search.<br>• ArrowDown into the results, then Enter.<br>• Preview one item, then press ArrowDown while it previews. | • The search finds the soft-impact item (AND match).<br>• Enter adds it to the active lane at the insert marker.<br>• Only one preview source plays at a time, and the transport does not play during the preview. |
+| RG-13 | SRW-13 | **Isolated stems clip** (music and SFX muted, no video):<br>• Clip Gain field `+6` Enter, then export WAV;<br>• compare it with a 0 dB export.<br>• Master mute while playing.<br>• Pan: focus it, then ArrowLeft ×5. | • The export ratio, peak and RMS, is 1.9953 ±0.5 % (+6 dB ±0.02).<br>• Master mute: silence by the **meter rule** below.<br>• Pan moves left in 5 steps, and its valuetext matches. |
+| RG-14 | SRW-14 | • BPM empty, Snap on, grid 1 s: drag a clip from 2 to about 3.3.<br>• Then Snap off (`G`) and drag it to about 4.37. | • Snap on: start = 3.000.<br>• Snap off: a free start, within ±1 px of the pointer.<br>• The grid lines follow the division. |
+| RG-15 | SRW-15 | **1440:**<br>• Type BPM 90 in the bars field.<br>• Turn the metronome on, export WAV, then turn it off and export again (the same isolated stems clip as RG-13).<br>**1280:** BPM 90, bars visible. | • Bar numbers 1, 2, 3 appear under the seconds ruler; the seconds ruler is unchanged.<br>• The UI says the audio is not stretched.<br>• The two exports are byte-identical, or ≤ 1 LSB apart: the metronome is not in the export. |
+| RG-16 | SRW-16 | • Insert marker at 12, press `M`, type `აქ შედის მუსიკა`, Enter.<br>• Seek 0 and click the marker.<br>• Seek 0 and use the next-marker key of the SRW-16 doc (round 72 MK-NAV).<br>• Undo the add. | • The flag shows at 12 with that name.<br>• The click and the next key put the insert marker at 12.000.<br>• Undo removes the marker. |
+| RG-17 | SRW-17 | • Select the music and stems lanes, press Ctrl+G, rename the group `SFX ქუჩა`, then collapse it.<br>• Expand it, then group Mute while playing. | • A group row appears with the two children indented; collapsing hides them.<br>• Group Mute: the children are silent by the **meter rule**, and the SFX lane still sounds (its tap or track-meter peak stays above −60 dB). |
+| RG-18 | SRW-18 | Fade-in 1 s via the handle on the isolated stems clip at S, then export | • The export RMS over [S, S+1] rises monotonically in 4 quarter windows.<br>• Outside [S, S+1.01], the export equals the no-fade export (≤ 1 LSB). |
+| RG-19 | SRW-19 | Video fade-in 1 s on the video clip at 0. Stopped, seek 0.5 | • The overlay opacity is 0.5 ±0.02 (overlay = 1 − value).<br>• The export dialog states that video rendering is not available. |
+| RG-20 | SRW-20 | **1440:**<br>• Range 4–9, Export: the range radio is the default; export WAV.<br>• Then MP3 once (`run-mp3.cjs` method).<br>**1280:** open the dialog; the range default and the footer are visible. | • **WAV:** 240000 frames (±1), 24-bit, 48 kHz, stereo; content equals project frames [192000, 432000) within 1 LSB.<br>• **MP3:** the file decodes (duration 5.0 ±0.06 s), or, if the ffmpeg CDN fails in the cloud, the clear error text is shown. An encode that never ran is **inconclusive (environment)**, not PASS. |
+| RG-22 | SRW-22 | • Open `/` anonymously and click the header `Studio Lab` link, then the exit link.<br>• Also at **390×844**: open the mobile menu. | • Client navigation renders the workspace; the exit returns to `/`.<br>• The mobile menu shows the link; there is no wrap or overlap at 1440/1280. |
+| RG-23 | SRW-23 | Screenshots plus zoomed crops of the library and timeline scrollbars with overflowing content (add enough clips or zoom in) | • No arrows and no white rail; graphite track; rounded muted thumb.<br>• Wheel scrolling works.<br>• Filtering the library leaves its width stable (±1 px). |
+| RG-24 | SRW-24 | • Music 0–10, range 3–5, Delete.<br>• Undo, then Backspace.<br>• Undo, then range 3–5 + Ctrl+Shift+L.<br>• Then Ctrl+Shift+X. | • **Delete and Backspace:** 0–3 and 5–10 remain; the second part's offset is +5; no join.<br>• **Ctrl+Shift+L:** extends the range to every lane.<br>• **Ctrl+Shift+X:** removes 3–5 on all lanes and moves later clips by −2. |
+| RG-T1 | T12 stage 1 | Single audio clip: focus the Clip Gain fader, then ArrowUp ×3, then double-click it | • The value goes +0.1 per press (to +0.3), and the field and fader stay in sync.<br>• Double-click resets to 0.0.<br>• Each change is one Undo entry (`Undo: Clip Gain`). |
+| RG-T2 | T12 stage 2 | Two audio clips at −6.0 and 0.0, both selected. Raise them by +3.0 with the stage-2 method of `c-round-115/tools/multi.cjs` | • The clips become −3.0 and +3.0; the mixed range text shows.<br>• One Undo entry restores both. |
+| RG-T3A | T12 stage 3a | **Isolated stems clip** (music and SFX muted, no video, as in RG-13): drag the stems lane Volume fader to the bottom, then export | • The readout shows `-∞`, and the stored value is exactly 0.<br>• The export window of that lane is 0 non-zero samples. |
+| RG-T3B | T12 stage 3b | • Group Volume (RG-17 group) dragged −20 px: read `aria-valuetext`.<br>• Master: the same pixel distance plain vs with Shift (round-119 SH-MASTER). | • The group valuetext is in dB.<br>• Master Shift moves about 1/10 of the plain move (round 119: −2.5 vs −27.5). |
+| RG-T4A | T12 stage 4a | Clip Gain −6 on the stems clip (`wg.cjs` ratio rule) | • The lane and detail waveform ratio is 0.501187 within the round-120 tolerance.<br>• Undo restores the exact drawing (same `d` sha). |
+| RG-T4B | T12 stage 4b | Waveform Zoom 2× via a real click plus ArrowDown + Enter (`wz.cjs`), then reload | • The ratio rule holds with s = 2, and the video `d` is unchanged.<br>• After reload, `1×` and `data-waveform-zoom="1"`. |
+
+**Meter rule** (RG-13, RG-17): meters fall at 20 dB/s, as noted in C-R118-OBS-GV-INF-METER-BALLISTICS, so the visible fall is not instant. "Silent" means either of these:
+- the real output tap (`c-round-121/tools/am.cjs`, `tap()`) reads exactly 0 from 150 ms after the click;
+- for a single track, the track meter `data-peak` is ≤ −60 dB within 4 s.
+
+Report which method was used. For a group mute, use the children's track meters, and the tap for "the SFX lane still sounds".
+
+Where a row's exact control name or key differs from the current UI (for example the split command or the next-marker key), use the one in the item's implementation doc, and record which one you used. This is a lookup, not a deviation.
+
+## 4. C — rows parked for the regression round (both viewports unless stated)
+| Row | Source | Action | Expected / how B rules a failure |
+|---|---|---|---|
+| RP-RANGE-1280 | C-R83-S-1280-RANGE-SHIFT | At 1280×720 with the demo stems clip, make a body range selection. Record the stems clip box (`y`, `h`) before and after | • Expected: unchanged within ±0.5 px.<br>• **Ruling:** a shift with no mis-hit (the next pointer action still lands on the intended lane) is **Low** and goes to `deferred_low_polish`. If the shift makes a click or drag land on the wrong lane or clip, it is **Medium**. |
+| RP-ROW-HANDLE | GATE85-S6-ROW-BOUNDARY-HANDLES | Select a clip on lane N whose fade-out handle sits within 4 px of lane N's bottom edge (use the smallest lane height). Use `elementFromPoint` at the handle centre, then drag the handle 20 px | • `elementFromPoint` returns the handle, not lane N+1.<br>• The drag changes the fade; no clip on N+1 moves or gets selected.<br>• **Ruling:** if the handle is covered, this is **Medium** (a fade becomes unreachable). |
+| RP-TOUCH-LONG | TOUCH-LONGPRESS-CONTEXTMENU | **1440 only.** A CDP long touch (≥ 800 ms, no move) on the stems lane Volume fader, the Pan fader and the Master fader (`touch.cjs` method) | • Record whether `contextmenu` fires.<br>• Expected: the value is unchanged and no Undo entry is added.<br>• **Ruling:** a value change or an Undo entry is a **regression of A-R38-REVIEW-TOUCH (Medium)**. A `contextmenu` with no menu is information only. |
+| RP-HEADER-WIDTH | gate-121 reviewer suggestion 7 | BPM 90, the widest musical division label offered (a triplet division), Snap on, Env on and Waveform Zoom 8× | • `[data-testid=arrangement-grid-control]` has `scrollWidth ≤ clientWidth`.<br>• The grid row is 28 px and the four chrome rows are unchanged.<br>• Screenshot.<br>• **Ruling:** visible overflow or clipping of a control is **Low** if all controls stay operable, and **Medium** if one becomes unreachable. |
+
+## 5. C — smoke, gate rows, auth guard
+- **RG-SMOKE:** run `npm run test:e2e:smoke` in `store/`, **after** every browser row and **not at the same time** as them.
+  - The config starts its own dev server on port 5187, which shares `node_modules/.vite` (ENV-VITE-REOPTIMIZE-RELOAD).
+  - Record the result and the counts.
+  - What it covers: `e2e/agent-system-smoke.spec.ts` checks only `/cart` (the empty cart and the sign-in modal with Escape). It is **not Studio coverage**; report it as the deterministic smoke gate only.
+  - The connection-refused API errors to `:51999` are expected.
+  - Its `playwright-report/` and `test-results/` output is git-ignored (`.gitignore` l.19–20). Do not delete or commit it.
+  - **Valid setup for this row:** the 5187 `webServer` started and Chromium launched.
+    - A `webServer` timeout, a busy port 5187 or a Chromium launch failure is **inconclusive (environment)**. Record the log, and allow one retry after the cause is gone.
+    - A test assertion failure on a valid setup is a finding.
+    - This smoke has not been run on the cloud runner before. B found no smoke result in `gates/round-121`.
+- **G122-3** (auth guard, same as G121-3):
+  - `/studio-lab` shows the workspace and the demo badge;
+  - `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`;
+  - `/api/studio-token` returns **401**;
+  - the fake-Bearer 403 is **BLOCKED (backend unavailable in cloud)**.
+- **Gate rows, not claimed by C:** full vitest, typecheck, build, Biome, `npm run verify`, PROD-MP3-UNVERIFIED and PROD-SSR-NUL.
+
+## 6. Outcome, fixed in advance
+| C result | B at round 123 planning |
 |---|---|
-| WZ1 | **Module, exact.**<br>• `buildPeakShape(WZ1, 0, 0.05, 5, clipWaveformScale(clip, false, zoom)).path` equals the table rows, for: zoom 0.5/2/4/8 on a clip without `gainDb`; `gainDb −6` × zoom 2; `gainDb −60` × zoom 8.<br>• `clipWaveformScale` returns exactly `10 ** (-6 / 20) * 2` (`toBe`) for −6 dB × 2.<br>• A **video** clip at zoom 8 returns `1`.<br>• A zoom of `NaN`, `0`, `-1` or `Infinity` returns `clipLinearGain(clip)`.<br>• `parseWaveformZoom`: `'2'` gives `2`, `'0.5'` gives `0.5`; `'3'`, `''`, `'abc'` and `'Infinity'` give `null`.<br>• `waveformZoomLabel` / `waveformZoomPercent` / `waveformZoomStatus` give the R1 strings for each level (`toBe`). |
-| WZ2 | **Lane render.**<br>• Use the workspace harness with a non-zero fake decoded source (as in round 120 WG3), with two audio clips on two lanes.<br>• `fireEvent.change` the `arrangement-waveform-zoom` select to `'2'`. Then:<br>&nbsp;&nbsp;– each lane `[data-testid="arrangement-clip-waveform"] path` `d` equals `buildPeakShape(…, clipLinearGain(clip) * 2).path`, and differs from its `1×` string;<br>&nbsp;&nbsp;– the grid control has `data-waveform-zoom="2"`;<br>&nbsp;&nbsp;– the select value is `'2'`;<br>&nbsp;&nbsp;– the status text equals `waveformZoomStatus(2)`.<br>• Back to `'1'`: every `d` equals its pre-change string exactly. |
-| WZ3 | **Composition.** A clip at `gainDb −6` (set via the context) at `2×` draws `buildPeakShape(…, 10 ** (-6 / 20) * 2)`. That differs from both the gain-only and the zoom-only strings. A Clip Gain drag at `2×` (the round-120 WG4 method) keeps `d` equal to the shape for the previewed dB × 2 **before** pointerup. |
-| WZ4 | **Must-not: video.** A video clip's lane `d` is byte-identical at `1×` and `8×` (use the round-116/120 video harness) |
-| WZ5 | **Must-not: detail panel.** With an audio clip selected, `[data-testid="arrangement-detail-waveform"] path` `d` is byte-identical at `1×` and `4×` |
-| WZ6 | **Not history.**<br>• Make one edit (Clip Gain −6) and record the Undo control's title/label and its disabled state, and the Redo state.<br>• Change the zoom to `4×`: the Undo/Redo title and state are identical.<br>• Ctrl+Z undoes the **−6 edit** (the gain is back to 0), and the zoom stays `4×` (select value and `data-waveform-zoom`).<br>• Ctrl+Shift+Z / Redo brings back −6, and the zoom is still `4×`. |
-| WZ7 | **Not audio.**<br>• `api.getArrangement()` is the **same reference** before and after a zoom change.<br>• During playback, a zoom change creates **0** `createBufferSource` calls and **0** `setClipGain` calls on the fake graph (the round-114/120 method), and the position keeps advancing. |
-| WZ8 | **New clips.** At `2×`, add an audio clip from the library (the round-120 harness path). Its lane `d` uses × 2 from the first render. |
-| WZ9 | **Keys on the focused select.**<br>• With a clip selected and the zoom select focused, `fireEvent.keyDown` of `ArrowLeft`, `ArrowRight`, `Delete` and `Space` on the select:<br>&nbsp;&nbsp;– the clip start, the clip count, the playing state and the Undo title are all unchanged (`isTypingTarget` guard).<br>• A grid-division select `Digit1` still narrows the grid, as before (neighbour). |
+| Every §3/§4 row PASS, smoke PASS | • **First**, before applying the 3-day rule at round 123 planning, set `regression-last.json` = `{"date": <C's completion date>, "round": 122}`.<br>• Round 123 = **ABLETON-EXPERT-REVIEW, part 1** (C-only review round; A changes no code). |
+| Any Critical, High or Medium finding, including a regression | • Round 123 = a **bounded fix-up** (at most three related bugs, Critical first), followed by C re-running the failed rows.<br>• `regression-last.json` is still updated, because the sweep ran. |
+| Low findings only | • Add them to `deferred_low_polish` with id, severity, evidence and repro.<br>• Otherwise the same as the all-PASS row. |
+| Rows not run (time limit) or environment-inconclusive past the budget | • The missing rows continue in round 123.<br>• `regression-last.json` is updated only when every row has run.<br>• An inconclusive row is never PASS. |
 
-### 3.3 Mutations
-A runs each one, and each must turn the named test red. A restores after each one and verifies the restore by sha256.
-- **m1:** `clipWaveformScale` applies the zoom to video too → WZ1 (video case) and WZ4 red.
-- **m2:** the lane passes `waveformZoom` as `1` to `ArrangementClipView` → WZ2 red.
-- **m3:** `clipWaveformScale` returns `z` only (gain dropped) → WZ1 and WZ3 red.
-- **m4:** `parseWaveformZoom` accepts any finite positive number → WZ1 red.
-- **m5:** the peak memo does not recompute on a zoom change (zoom missing from what the memo depends on) → WZ2 red.
+**Ordering rule for the round-123 planner:** at round 123 planning, `regression-last.json` still reads 2026-10-21. If C ran every row, **update it from round 122's C result first**, and only then apply the 3-day rule. Otherwise a second regression round would be planned by mistake.
 
-## 4. A — checks (speed rules)
-- `npm run typecheck`, `npm run lint`, and a read-only `npx biome check` on every changed or new file.
-- `npx vitest run` on these files: `waveform-zoom`, `clip-gain-waveform`, `clip-gain-fader`, `clip-gain-multi`, `clip-gain`, `detail-panel`, `detail-panel-fit`, `clip-envelope-ui`, `clip-fades-ui`, `video-fades-ui`, `track-layout`, `render-budget`, `gesture-guard`, `gesture-reentry`, `grid-snap-ui`, `grid-snap-keys`, `grid-snap-menu`, `grid-musical-ui`, `grid-triplet-ui`, `tempo-ui`, `marker-time-snap-ui`, `track-header-stacking`, `track-groups-ui`, `peaks`.
-  - Every file in the list that exists must be green.
-  - Report the counts, the pre-edit grep results, and the m1–m5 results.
-- No full suite and no `npm run verify` (the gate runs them).
-- **The code-reviewer is required** (6 files). Pass its Architecture note to B.
-- **A's report `a-round-121.md`:**
-  - start HEAD and frozen OK;
-  - the diff summary per file;
-  - the new test count;
-  - the mutation results;
-  - typecheck and lint results;
-  - the reviewer verdict and Architecture note;
-  - **every shell write**;
-  - frozen OK at the end, and the end `git status`;
-  - deviations.
-- **A stops and reports (no edit; B rules) if:**
-  - an existing test outside §2 turns red;
-  - a WZ1 literal does not match. A reports the received string and does not edit the literal to fit it;
-  - the control cannot fit the header without changing another control or the row height;
-  - a needed change touches a frozen file.
+A failed row does not change its item's earlier status by itself. It opens a finding linked to the item, and the item drops from c_pass only when B rules the finding a reproducible regression.
 
-## 5. C — rows
-Use real Playwright Chromium with a fresh context per session, at 1440×900 and 1280×720.
-- **Setup** (the same as rounds 119–120 and as B's baseline):
-  - from the library, at the insert marker: `demo-middle-east` on music @0, `demo-stem-pulse` on stems @2 s, `demo-soft-impact` on SFX @4 s;
-  - then `media/beeps-6s-vp9-opus.webm` as the video (C round-120 `loadVideo`);
-  - Snap off; Stop state.
-- **Harness rule (ENV-FIRST-LOAD-GRID-NULL):** if the job's first setup crashes before the grid control exists, discard that run as invalid and replace it once.
-- **How to read the drawing and the ratio rule:** the same as round 120 §5 (`tasks/round-120.md`).
-  - `s` is the zoom, or the gain × the zoom.
-  - `h0` is the reading at `1×` and 0 dB, at the **same** horizontal zoom and clip width.
-  - Judged columns: `|h − s·h0| ≤ 0.0006 × (1 + s)`. Clamped columns read exactly `y = 0.000`. Floor columns read exactly `y = 0.980`.
-  - At least 10 judged columns are needed, or the row is invalid (not FAIL).
-- **Baseline file:** compare against `b-round-120/probe/baseline-r121.json` (the B pre-round reading on `0a75ba8`). At `1×` and 40 px/s:
-  - video `be86af38…`;
-  - music `43e96d8a…`;
-  - stems `9fa65c46…`;
-  - sfx `e1890358…`;
-  - chrome rows `[28, 20, 20, 16]`;
-  - lane y at 1440: video 275 / music 356 / stems 437 / sfx 518;
-  - lane y at 1280: video 313 / music 374 / stems 454 / sfx 534.
+## 7. Neighbour risk
+No app code changes, so this round cannot regress Studio behaviour. The risks are in the process:
+- an accidental write into `store/` by a probe (SOURCE-SCOPE catches it);
+- the smoke dev server reloading the 5173 tabs (hence the serial order);
+- the job time limit (hence the incremental reports).
 
-| ID | Action | Expected (PASS) |
-|---|---|---|
-| **T121-TARGETED** | A's vitest list (§4) | Green, with the same counts as A |
-| **AN-REVIEW** | `git diff 0a75ba8` on the 3 granted files; read the new module, the test and doc 103 | ArrangementClip: only the optional prop, its default and the scale source. Lane: only the prop and the pass-through. StudioWorkspace: only the state, the handler, the select, the `data-waveform-zoom` attribute and the lane prop. The module matches R1. WZ1–WZ9 exist with exact matchers, and the WZ1 literals are unchanged from §3.2. Doc 103 has the TEMPLATE sections. **List every shell write A reports** |
-| **SOURCE-SCOPE** | `git status`, `sha256sum -c b-round-120-r121-tree-sha256.txt`, protected hashes | The §2 end state exactly. The frozen list is OK, including `ArrangementDetailPanel.tsx` `87c878e5…`. The protected hashes are unchanged |
-| **WZ-PRESENT** (both viewports) | Load and set up; read the grid control | The select is the last child, shows `1×` and `data-waveform-zoom="1"`, ends ≤ 216 px from the grid-control's left, and the grid control does not overflow (`scrollWidth ≤ clientWidth`). The chrome rows and the lane y equal the baseline. **At `1×`, all four `d` sha256 equal the baseline.** Screenshot |
-| **WZ-T7** (both; **Test 7**) | Choose `2×` with a REAL mouse (open the select and pick the option; keyboard if the native popup cannot be driven, labelled) | Music, stems and SFX each pass the ratio rule with `s = 2`, with clamped columns at `y = 0.000` and no column past the clip (`1 + h ≤ 2`). The video `d` sha is unchanged. The detail-panel `d` (stems selected) is unchanged. Status = `Waveform Zoom 200% — მხოლოდ ხედი, ხმა არ იცვლება.` The chrome rows and the lane y are unchanged. Screenshots at 1× and 2× |
-| **WZ-LEVELS** (1440) | `½×`, `4×`, `8×`, then `1×` | The ratio rule at each level (`s` = 0.5 / 4 / 8; at 8×, ≥ 10 judged columns on the music clip, or the row is invalid). Back at `1×`: all four `d` sha256 equal the baseline |
-| **WZ-GAIN** (1440) | Stems Clip Gain −6.0 (field, Enter), zoom `2×`; then a fader press-drag −20 px, sampling before release | At rest: the ratio rule with `s = 1.002374`. Mid-drag: `s = 10^(dB/20) × 2`, with dB from the valuetext. After release: one `Clip Gain` entry |
-| **WZ-HISTORY** (1440) | Record the Undo title. Choose `4×`. Read the Undo title. Ctrl+Z, then Ctrl+Shift+Z | The Undo title is identical before and after the zoom change. Ctrl+Z undoes the last **edit** (not the zoom), and the zoom stays `4×`. Redo restores the edit, and the zoom is still `4×` |
-| **WZ-AUDIO** (1440; Test 7 "audio samples unchanged") | Only stems audible (the round-114/120 isolation). Export WAV at `1×` and at `2×` | The same frames and header. Max \|Δ\| ≤ 1 LSB at 24-bit (HR-C-R84-L1). Peak ratio and RMS ratio `1.0000 ± 0.0001`. 0 NaN |
-| **WZ-METER** (1440; Test 7 "meter output unchanged") | Music and SFX muted. A loop over stems 2.5–4.5 s. Play; at `1×` record the **per-iteration** peak of the real output tap (the round-120 `tap`) for 2 iterations; choose `2×` during play; record 2 more iterations | Per-iteration output peak at 2× = at 1×, within ±0.1 dB (a paired comparison, C-R82-LIVE-ORACLE-PAIRED). The `createBufferSource` count per iteration is the same before and after the change. The playhead keeps looping and never stops. Record the stems meter readout too, if it is exposed |
-| **WZ-NEWCLIP** (1440) | At `2×`, add `demo-soft-impact` to SFX @8 s. Then choose `1×` and read it again | The new clip's `2×` drawing passes the ratio rule against its own `1×` reading |
-| **WZ-KEYS** (1440) | Select the stems clip, then focus the zoom select. Press ArrowDown, ArrowUp, ArrowLeft, Delete; also Space if Chromium does not open the popup (labelled) | Arrow keys may change the zoom (native select), and the drawing follows. The clip start, the clip count and the Undo title are unchanged. Transport is not started by Space. No clip is deleted |
-| **WZ-RELOAD** (1280) | Choose `4×`, then reload | After reload the control shows `1×` and `data-waveform-zoom="1"` (session-only, by design) |
-| **G121-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `/api/studio-token?product=middle-east&file=stem1.wav` | Demo badge „დემო კოლექცია — ავტორიზაცია არ სჭირდება“. The product route shows "Sign in required", no workspace and 0 `audio[src]`. The token API returns **401**. Fake-Bearer 403: **BLOCKED (backend unavailable in cloud)** |
-| **PX-NET / REG-HYD** | every session | 0 forbidden-host requests, 0 `Authorization` headers, 0 hydration errors, 0 `pageerror`, no console errors beyond the known cloud noise |
-
-- **Neighbours that could break (1440, one check each):**
-  - At `2×`: one horizontal zoom in and one zoom out. The ratio rule holds at each new column count.
-  - At `2×`: a clip header move, then Undo. The zoom is unaffected.
-  - The Snap toggle and the grid-division select still work. The `Env` toggle still works, and the fade ramp and the envelope line draw over the zoomed waveform (screenshot).
-  - At 1280, the 1280 lane fit (`laneH` 61/80) is unchanged.
-- **Gate rows (C does not claim them):** full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
-- **Severity guide:**
-  - **Medium:** the zoom changes the audio, the export or the meters; the zoom is an Undo entry or is undone by Ctrl+Z; the drawing ratio is wrong; the control shifts the chrome or the lanes; video or the detail panel scale.
-  - **Low:** a clamp or floor off by one rounding step; status or title wording.
-
-## 6. Ableton source
-| Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
-|---|---|---|---|---|
-| A separate control enlarges the waveform display without changing clip gain | Live 12 Reference Manual §6.1 "Layout", https://www.ableton.com/en/live-manual/12/arrangement-view/. B capture `b-round-71/ableton-arrangement-view-20261021.txt` (2026-10-21; text re-read on 2026-10-23) | **Confirmed:** "You can enlarge the waveform display in audio clips using the Waveform Vertical Zoom Level slider. This is useful for highlighting transients and waveform details without having to adjust the clip gain." | A zoom control, view only. It multiplies Clip Gain in the drawing (T12.19 formula) | WZ-T7, WZ-AUDIO |
-| It applies to all audio tracks, including new clips | §6.1, same capture | **Confirmed:** "The zoom level is applied to all audio tracks in the Arrangement, as well as new clips as they are recorded." | One global level for every audio clip on every lane, including clips added later | WZ-T7, WZ-NEWCLIP |
-| Audio clips only (not video) | §6.1 says "audio clips" | Confirmed wording. Video in Live is not tested | Video clips are not zoomed | WZ-T7 (video sha) |
-| A continuous slider, its range and its location | not stated (no range or position in the text) | **დაუდასტურებელი** (unconfirmed) | **Deliberate CZABA difference:** a stepped select `½×–8×` in the 224 px grid row. The user spec (T12.18) asks for increase **or decrease**, so `½×` exists; Live's text says only "enlarge" | WZ-PRESENT, WZ-LEVELS |
-| The zoom is not an Undo step | not stated | **დასკვნა** (inference): a view setting. Unconfirmed | Not in history | WZ-HISTORY |
-| The Clip View / detail display also zooms | not stated | **დაუდასტურებელი** | The detail panel is **not** zoomed. It shows the true clip level, and the manual names the Arrangement | WZ-T7 (detail sha) |
-
-- C rates "CZABA requirement met" and "Ableton correspondence" separately.
-- The unconfirmed rows go to ABLETON-EXPERT-REVIEW.
-
-## 7. Evidence and reporting
-- **C writes** `c-round-121.md` and `c-round-121.json`, with the fields `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified` and `envStatus`. Evidence goes under `c-round-121/{tools,out,shots}/`. Write as you go.
-- `browserVerified` is false only if a browser row that **can** run here was not run.
-- Inconclusive rows are listed as inconclusive, never under `passed`.
-- Consult only the read-only agents in your list. C makes no `store/` writes.
-
-## 8. Outcome
-- **C PASS:** T12 stage 4b → `c_pass`. Publication makes it `c_pass_published`, and then **T12 V1 (T12.27 items 1–8) is complete for the ABLETON-EXPERT-REVIEW / VISUAL-A gates**.
-- **Next planning (on or after 2026-10-24 UTC):** the **REGRESSION round**. It covers every done / c_pass item, T12 V1 included, at both viewports, plus `npm run test:e2e:smoke`. Then comes **ABLETON-EXPERT-REVIEW**.
-- **C FAIL:** findings with severity. B plans the bounded fix-up first. The regression round follows at the next planning, on the published tree.
-
-## 9. Root / architecture (not A's work)
-- Stage 4b closes T12 V1, which is a feature boundary. The pending phase-1 checkpoint request (`b-round-91-checkpoint-request.md`, ARCH-CHECKPOINT-PHASE1-BOUNDARY) gets **addendum (ad)**: the round-120 reviewer note on moving `buildPeakShape`/`PeakShape` to `peaks.ts`, with the verdict "keep". 4b does not move it.
-- StudioWorkspace.tsx grows by one view state. This is the same signal as ARCH-CHECKPOINT-SRW14-PREFS (a), view preferences in the workspace. The checkpoint is non-blocking, and the round does not extract anything.
-- Any reviewer Architecture note from this round becomes the next addendum.
+## 8. Deliverables
+- **A:** `a-round-122.md` (§1).
+- **C:**
+  - `c-round-122.json` with `browserVerified`, `realVerified`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs` and `invalidRuns`;
+  - `c-round-122.md`;
+  - evidence under `c-round-122/{tools,out,shots}`.
+- Every bug gets: an id `C-R122-NN`, a severity, the item, the steps, the evidence path and "regression yes/no (since which round's pass)".

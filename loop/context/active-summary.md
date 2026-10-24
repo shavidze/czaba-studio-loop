@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-23T23:26:05.553Z)
+# Active loop summary (2026-10-24T00:18:23.263Z)
 
-- backlog.json 1064 KB -> active view 134 KB
-- status: G_ROOT_GATE round 120
-- servers: `{"checkedUtc":"2026-10-23T23:07:24.1069680Z","round":120,"attempt":1,"store":200}`
-- last publication: 0a75ba8757617695d19e0b2a4aaad713bc30c01c (rounds 120-120)
-- last root gate: round 120 published - commit 0a75ba8757617695d19e0b2a4aaad713bc30c01c pushed
+- backlog.json 1072 KB -> active view 138 KB
+- status: G_ROOT_GATE round 121
+- servers: `{"checkedUtc":"2026-10-24T00:00:44.2580393Z","round":121,"attempt":1,"store":200}`
+- last publication: 425a80705c7b57d6157796810bdd878f1c7b061c (rounds 121-121)
+- last root gate: round 121 published - commit 425a80705c7b57d6157796810bdd878f1c7b061c pushed
 
 ## Current items: -
 
@@ -234,8 +234,13 @@
 - A-R118-REVIEW-GV-HALVES / info / acknowledged (the move-and-return half of GV4 and the -inf text of GV3 discriminate; m2 turns GV4 red) / the first half of GV4 and GV3's stored 0 also pass on the pre-round code
 - C-R118-OBS-GV-INF-METER-BALLISTICS / info / acknowledged (B accepts C's reading: 'meters stay silent' = no signal; meters fall at METER_RELEASE_DB_PER_SECOND 20, output exactly 0 from +150 ms) / after the group goes to -inf during play the member meters fall at the 20 dB/s release instead of jumping to -inf
 - B-R118-UM9-ROW-WORDING / info / acknowledged (B spec imprecision; C tested both cases: group fader stays visible and focused; member lane fader -> focus to arrangement-group-name; PASS) / round-118 neighbour row 'U with the group fader focused -> focus to the group name, as in UM9' misdescribed UM9
-- ENV-FIRST-LOAD-GRID-NULL / info / watch (third occurrence in round 119; harness rule: discard a crashed first setup run and replace it once) / first /studio-lab load of a job crashes the C setup (grid control null); run 2 valid
+- ENV-FIRST-LOAD-GRID-NULL / info / watch (fourth occurrence in C round 120 wg-1440-1; harness rule: discard a crashed first setup run and replace it once) / first /studio-lab load of a job crashes the C setup (grid control null); run 2 valid
 - C-R119-01 / info / applied as a process rule from round 120 (current-task.md section 2: before touching an untracked granted file, A stores a pre-edit copy with sha256 under a-round-N/; B stores one under b-round-N/ when it grants such a file); not an app defect; not deferred_low_polish / no pre-edit copy of the untracked doc 101 existed, so C could verify its round-119 edit by content only, not by reverse hash
+- C-R120-01 / info / applied as a process rule from round 121 (current-task.md section 2: every lasting edit via Edit/Write incl. formatting of new files; shell replaces only for temporary mutations, restored and sha-verified; A lists every shell write); not an app defect; not deferred_low_polish / A made one lasting formatting edit to its new test file with a Python replace, bypassing the Edit-tool primitives hook
+- C-R120-WGVIDEO-NO-BASELINE / info / acknowledged; B captured a pre-round browser baseline for round 121 (b-round-120/probe/baseline-r121.json: video waveform d sha be86af38 at 1x on 0a75ba8); the round-120 equivalence rests on code + WG2 (scale 1 byte-identical) / WG-VIDEO unchanged-vs-pre-round had no browser byte baseline (inconclusive row in C round 120)
+- ARCH-R120-PEAKSHAPE-TO-PEAKS / info / signal - addendum (ad) to the pending checkpoint request b-round-91-checkpoint-request.md (ARCH-CHECKPOINT-PHASE1-BOUNDARY); reviewer verdict keep; round 121 does not move it; not scheduled / buildPeakShape/PeakShape are pure geometry exported from the ArrangementClip component file; the detail panel and tests import them from the
+- WAVEFORM-ZOOM-DISCOVERABILITY / info / signal for DESIGN-UX-REVIEW (round 121 ruling: appearance-none select without a dropdown arrow to fit the 224 px grid row; title + aria-label carry the meaning); not scheduled / the Waveform Zoom select has no visible dropdown affordance
+- WAVEFORM-ZOOM-LIVE-PARITY / info / signal for ABLETON-EXPERT-REVIEW (not scheduled): Live 12 6.1 confirms a slider for all audio tracks incl. new clips; range, location, undo behaviour and Clip View behaviour unconfirmed; CZABA uses a stepped select 0.5x-8x, lanes only, not in history / Waveform Vertical Zoom: stepped select vs Live continuous slider; detail panel not zoomed
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
