@@ -1,0 +1,368 @@
+## Georgian lines in 4 sources (incl comments)
+### app/components/arrangement/ArrangementDetailPanel.tsx count=38
+50:const DETAIL_PANEL_TITLE = 'კლიპის დეტალები';
+51:const DETAIL_NOTHING_SELECTED = 'არაფერია არჩეული';
+52:const DETAIL_NO_SELECTION_HINT = 'აირჩიე კლიპი, რომ დეტალები ნახო';
+53:const DETAIL_GROUP_NOTE = 'ჯგუფი ერთად გადაადგილდება · Delete შლის · Ctrl+D აორმაგებს';
+54:const DETAIL_VIDEO_PLACEHOLDER = 'ვიდეოკლიპი · ტალღა არ ჩანს';
+55:const DETAIL_INPUTS_GROUP_REASON = 'range ერთ კლიპზე ისმება — აირჩიე ერთი';
+56:const DETAIL_INPUTS_NONE_REASON = 'ჯერ აირჩიე კლიპი';
+57:const DETAIL_SOURCE_UNCHANGED = 'წყარო უცვლელი რჩება';
+62:  'Clip Gain მხოლოდ აუდიო კლიპებზე ისმება — ამოიღე ვიდეო მონიშვნიდან';
+63:const DETAIL_CLIP_GAIN_VIDEO_REASON = 'ვიდეო კლიპს Clip Gain არ აქვს — ხმა: ხაზის Volume/Mute';
+64:const DETAIL_CLIP_GAIN_INVALID_MESSAGE = 'Clip Gain: შეიყვანე რიცხვი dB-ში (−60…+24).';
+65:const DETAIL_CLIP_GAIN_PENDING_FULL_TEXT = 'შეუნახავია — Enter ინახავს, Esc აბრუნებს';
+66:const DETAIL_CLIP_GAIN_PENDING_LABEL = 'შეუნახავია';
+125:  return `მონიშვნა: ${formatArrangementTime(range.start)} — ${formatArrangementTime(range.end)} · ${laneName}.`;
+386:        setStatus(`Clip Gain უცვლელია: ${clipGainRangeText}.`);
+410:      setStatus(`Clip Gain უცვლელია: ${clipGainRangeText}.`);
+449:      setStatus(`Clip Gain უცვლელია: ${formatMasterGainDb(selection.clip.gainDb ?? 0)}.`);
+566:      setStatus(`Clip Gain უცვლელია: ${formatMasterGainDb(0)}.`);
+611:        : `Clip Gain უცვლელია: ${formatMasterGainDb(0)}.`,
+648:              <span className="text-dim">ხაზი</span>{' '}
+652:              <span className="font-sans text-dim">დასაწყისი</span>{' '}
+654:              · <span className="font-sans text-dim">სიგრძე</span>{' '}
+660:              <span className="font-sans text-dim">წყაროდან</span>{' '}
+669:            <p className="font-medium text-brand">{group.count} კლიპი</p>
+671:              <span className="text-dim">ხაზები</span> {group.laneNames}
+674:              <span className="font-sans text-dim">დასაწყისი</span>{' '}
+676:              · <span className="font-sans text-dim">სიგრძე</span>{' '}
+703:            საიდან, წმ
+712:              aria-label="range-ის დასაწყისი (წამი)"
+719:            სადამდე, წმ
+728:              aria-label="range-ის დასასრული (წამი)"
+748:          მონიშვნა
+853:            aria-label="Clip Gain-ის განულება (0 dB)"
+1081:      ? `${group.count} კლიპი`
+1104:        aria-label="დეტალების სიმაღლე"
+1108:        aria-valuetext={size.isCollapsed ? `დაკეცილია · ${openHeight} px` : `${openHeight} px`}
+1130:          aria-label={size.isCollapsed ? 'დეტალების გაშლა' : 'დეტალების დაკეცვა'}
+1134:          {size.isCollapsed ? 'გაშლა ▸' : 'დაკეცვა ▾'}
+### app/lib/arrangement/panels.ts count=1
+8:  'მონაკვეთი კლიპის საზღვრებში უნდა იყოს; დასასრული დასაწყისზე მეტი უნდა იყოს.';
+### app/lib/arrangement/clip-gain-multi.ts count=1
+113:  return `Clip Gain: ${span.clipIds.length} კლიპი — ${formatClipGainRange(span.minDb, span.maxDb)}.`;
+### app/lib/arrangement/library.ts count=4
+8:  music: 'მუსიკა',
+9:  stem: 'სტემი',
+14:  music: 'მუსიკა',
+15:  stem: 'სტემები',
+## pin lines: verify current content equals listed
+mismatch=0
+      3 app/lib/arrangement/__tests__/clip-gain-fader.test.tsx
+      5 app/lib/arrangement/__tests__/clip-gain-multi.test.tsx
+      6 app/lib/arrangement/__tests__/clip-gain.test.tsx
+      7 app/lib/arrangement/__tests__/detail-panel-fit.test.tsx
+      6 app/lib/arrangement/__tests__/detail-panel-polish.test.tsx
+      5 app/lib/arrangement/__tests__/detail-panel-reason.test.tsx
+     12 app/lib/arrangement/__tests__/detail-panel.test.tsx
+      3 app/lib/arrangement/__tests__/fader-guards.test.tsx
+      4 app/lib/arrangement/__tests__/library.test.ts
+      1 app/lib/arrangement/__tests__/panels.test.ts
+      1 app/lib/arrangement/__tests__/pending-status.test.tsx
+      1 app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
+      2 app/lib/arrangement/__tests__/status-announcement-ui.test.tsx
+## importers
+app/data/__tests__/studio-lab-demo.test.ts
+app/lib/arrangement/__tests__/all-lane-clipboard.test.tsx
+app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx
+app/lib/arrangement/__tests__/clip-fades-ui.test.tsx
+app/lib/arrangement/__tests__/clip-gain-fader.test.tsx
+app/lib/arrangement/__tests__/clip-gain-multi.test.tsx
+app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx
+app/lib/arrangement/__tests__/clip-gain.test.tsx
+app/lib/arrangement/__tests__/clip-strings-ui.test.tsx
+app/lib/arrangement/__tests__/collection-load-status.test.tsx
+app/lib/arrangement/__tests__/collection.test.ts
+app/lib/arrangement/__tests__/context-hygiene.test.tsx
+app/lib/arrangement/__tests__/default-track-names-ssr.test.tsx
+app/lib/arrangement/__tests__/delete-selection-ui.test.tsx
+app/lib/arrangement/__tests__/detail-panel-fit.test.tsx
+app/lib/arrangement/__tests__/detail-panel-polish.test.tsx
+app/lib/arrangement/__tests__/detail-panel-reason.test.tsx
+app/lib/arrangement/__tests__/detail-panel.test.tsx
+app/lib/arrangement/__tests__/export-cancel-ui.test.tsx
+app/lib/arrangement/__tests__/export-dialog-focus.test.tsx
+app/lib/arrangement/__tests__/export-dialog-footer.test.tsx
+app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx
+app/lib/arrangement/__tests__/export-mp3.test.tsx
+app/lib/arrangement/__tests__/export-progress-ui.test.tsx
+app/lib/arrangement/__tests__/export-range-ui.test.tsx
+app/lib/arrangement/__tests__/fader-click.test.tsx
+app/lib/arrangement/__tests__/fader-focus-order.test.tsx
+app/lib/arrangement/__tests__/fader-guards.test.tsx
+app/lib/arrangement/__tests__/fader-touch.test.tsx
+app/lib/arrangement/__tests__/floating-video.test.tsx
+app/lib/arrangement/__tests__/grid-musical-ui.test.tsx
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx
+app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
+app/lib/arrangement/__tests__/grid-snap-keys.test.tsx
+app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx
+app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
+app/lib/arrangement/__tests__/grid-snap-position.test.tsx
+app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx
+app/lib/arrangement/__tests__/group-volume-db.test.tsx
+app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx
+app/lib/arrangement/__tests__/held-enter-add.test.tsx
+app/lib/arrangement/__tests__/lane-strings-ui.test.tsx
+app/lib/arrangement/__tests__/library-focus-handoff.test.tsx
+app/lib/arrangement/__tests__/library-video-return-focus.test.tsx
+app/lib/arrangement/__tests__/library.test.ts
+app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx
+app/lib/arrangement/__tests__/marker-snap.test.tsx
+app/lib/arrangement/__tests__/marker-strings-ui.test.tsx
+app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx
+app/lib/arrangement/__tests__/markers-move-ui.test.tsx
+app/lib/arrangement/__tests__/markers-ui.test.tsx
+app/lib/arrangement/__tests__/master-ui.test.tsx
+app/lib/arrangement/__tests__/meter-ui.test.tsx
+app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx
+app/lib/arrangement/__tests__/metronome-ui.test.tsx
+app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+app/lib/arrangement/__tests__/pan-release-recovery.test.tsx
+app/lib/arrangement/__tests__/panels.test.ts
+app/lib/arrangement/__tests__/pending-status.test.tsx
+app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx
+app/lib/arrangement/__tests__/render-budget.test.tsx
+app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
+app/lib/arrangement/__tests__/ssr-layout-effect.test.tsx
+app/lib/arrangement/__tests__/status-announcement-ui.test.tsx
+app/lib/arrangement/__tests__/strings.test.ts
+app/lib/arrangement/__tests__/tempo-ui.test.tsx
+app/lib/arrangement/__tests__/tempo-window-ui.test.tsx
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx
+app/lib/arrangement/__tests__/track-header-stacking.test.tsx
+app/lib/arrangement/__tests__/track-layout.test.tsx
+app/lib/arrangement/__tests__/track-meter-ui.test.tsx
+app/lib/arrangement/__tests__/track-pan.test.tsx
+app/lib/arrangement/__tests__/track-volume-db.test.tsx
+app/lib/arrangement/__tests__/video-fades-ui.test.tsx
+app/lib/arrangement/__tests__/waveform-zoom.test.tsx
+app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx
+app/lib/ssr/__tests__/strip-nul-bytes.server.test.ts
+## kind/folder label matches
+app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx:161:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/grid-musical-ui.test.tsx:138:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/tempo-ui.test.tsx:125:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/grid-snap-ui.test.tsx:136:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/clip-fades-ui.test.tsx:145:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/clip-fades-ui.test.tsx:146:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/marker-snap.test.tsx:166:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/marker-snap.test.tsx:167:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/clip-fades.test.ts:37:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/clip-fades.test.ts:38:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/group-volume-db.test.tsx:152:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/group-volume-db.test.tsx:153:      { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/group-volume-db.test.tsx:198:  fireEvent.click(laneName(view, 'სტემები'));
+app/lib/arrangement/__tests__/grid-snap-edit.test.tsx:151:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/grid-snap-edit.test.tsx:152:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/grid-snap-position.test.tsx:137:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/grid-snap-position.test.tsx:138:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/track-meter.test.ts:311:        { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/clip-gain-fader.test.tsx:148:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/fader-touch.test.tsx:119:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/fader-touch.test.tsx:120:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/fader-touch.test.tsx:184:  fireEvent.click(laneName('სტემები'));
+app/lib/arrangement/__tests__/clipboard.test.ts:28:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/groups.test.ts:38:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/groups.test.ts:39:      { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/groups.test.ts:149:    expect(outerResult.memberNames).toEqual(['მუსიკა', 'Group 1']);
+app/lib/arrangement/__tests__/loop.test.ts:23:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/marker-strings-ui.test.tsx:128:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/fader-click.test.tsx:122:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/gesture-reentry.test.tsx:46:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/waveform-zoom.test.tsx:222:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx:109:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx:110:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/delete-selection.test.ts:14:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/delete-selection.test.ts:106:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/held-enter-add.test.tsx:107:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx:149:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx:145:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx:146:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx:517:          track: 'მუსიკა',
+app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx:538:          track: 'სტემები',
+app/lib/arrangement/__tests__/tempo-window-ui.test.tsx:225:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx:160:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx:161:      { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx:263:      fireEvent.click(laneName('სტემები'));
+app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx:338:    fireEvent.click(laneName('მუსიკა'));
+app/lib/arrangement/__tests__/detail-panel.test.tsx:116:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/detail-panel.test.tsx:313:    expect(content.textContent).toContain('მუსიკა');
+app/lib/arrangement/__tests__/default-track-names-ssr.test.tsx:55:      for (const georgianName of ['ვიდეო', 'მუსიკა', 'სტემები', 'აუდიო']) {
+app/lib/arrangement/__tests__/render-budget.test.tsx:182:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/fader-guards.test.tsx:138:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx:123:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx:161:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx:162:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:117:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx:128:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/view.test.ts:327:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/all-lane-clipboard.test.tsx:120:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/all-lane-clipboard.test.tsx:137:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/grid-musical.test.ts:32:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/markers.test.ts:30:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/selection.test.ts:30:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/selection.test.ts:154:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/selection.test.ts:155:      { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/track-layout.test.tsx:170:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/track-layout.test.tsx:171:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/track-layout.test.tsx:1044:      expectInsetRing('მუსიკა');
+app/lib/arrangement/__tests__/track-layout.test.tsx:1050:      expectInsetRing('მუსიკა');
+app/lib/arrangement/__tests__/clip-gain.test.tsx:193:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/video-import-status-ui.test.tsx:107:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/model.test.ts:29:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/model.test.ts:30:      { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:147:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:148:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/video-fades.test.ts:21:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/envelope.test.ts:57:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/envelope.test.ts:58:    { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/video-fades-ui.test.tsx:147:    { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:153:      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:154:      { id: 'stems', kind: 'audio', name: 'სტემები' },
+app/lib/arrangement/__tests__/collection.test.ts:84:    expect(collection.label).toBe('Middle East · შეძენილი სტემები');
+app/lib/arrangement/__tests__/collection.test.ts:92:        collectionLabel: 'Middle East · შეძენილი სტემები',
+app/lib/arrangement/__tests__/collection.test.ts:100:        collectionLabel: 'Middle East · შეძენილი სტემები',
+app/lib/arrangement/__tests__/collection.test.ts:108:        collectionLabel: 'Middle East · შეძენილი სტემები',
+app/lib/arrangement/__tests__/collection.test.ts:116:        collectionLabel: 'Middle East · შეძენილი სტემები',
+app/lib/arrangement/__tests__/grid-snap-ui.test.tsx:495:    expect(live(api).undoLabel).toBe('Move to track — მუსიკა');
+app/lib/arrangement/__tests__/clip-fades-ui.test.tsx:525:      `${OVERLAP_TEXT} — the clip stayed in its last free spot: მუსიკა, start 00:01.375.`,
+app/lib/arrangement/__tests__/marker-snap.test.tsx:116:const STEMS_LANE_MOVE_LABEL = 'Move to track — სტემები';
+app/lib/arrangement/__tests__/group-volume-db.test.tsx:198:  fireEvent.click(laneName(view, 'სტემები'));
+app/lib/arrangement/__tests__/group-volume-db.test.tsx:437:    const pan = () => rangeInput(view, 'input[aria-label="Pan — მუსიკა"]');
+app/lib/arrangement/__tests__/clip-gain-fader.test.tsx:276:    rangeInput('[data-track-id="music"] input[aria-label="Volume — მუსიკა"]');
+app/lib/arrangement/__tests__/fader-touch.test.tsx:184:  fireEvent.click(laneName('სტემები'));
+app/lib/arrangement/__tests__/fader-touch.test.tsx:195:    musicVolume: () => range('[data-track-id="music"] input[aria-label="Volume — მუსიკა"]'),
+app/lib/arrangement/__tests__/groups.test.ts:149:    expect(outerResult.memberNames).toEqual(['მუსიკა', 'Group 1']);
+app/lib/arrangement/__tests__/fader-click.test.tsx:24:const PAN_LABEL = 'Pan — მუსიკა';
+app/lib/arrangement/__tests__/fader-click.test.tsx:190:    musicVolume: () => range('[data-track-id="music"] input[aria-label="Volume — მუსიკა"]'),
+app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx:517:          track: 'მუსიკა',
+app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx:538:          track: 'სტემები',
+app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx:263:      fireEvent.click(laneName('სტემები'));
+app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx:338:    fireEvent.click(laneName('მუსიკა'));
+app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx:352:    expect(meterOf('music').getAttribute('title')).toBe('მუსიკა · Peak −12.0 dBFS');
+app/lib/arrangement/__tests__/detail-panel.test.tsx:313:    expect(content.textContent).toContain('მუსიკა');
+app/lib/arrangement/__tests__/detail-panel.test.tsx:327:      'მონიშვნა: 00:03.500 — 00:07.250 · მუსიკა.',
+app/lib/arrangement/__tests__/detail-panel.test.tsx:410:    expect(group.textContent).toContain('მუსიკა, SFX');
+app/lib/arrangement/__tests__/default-track-names-ssr.test.tsx:55:      for (const georgianName of ['ვიდეო', 'მუსიკა', 'სტემები', 'აუდიო']) {
+app/lib/arrangement/__tests__/fader-guards.test.tsx:26:const PAN_LABEL = 'Pan — მუსიკა';
+app/lib/arrangement/__tests__/fader-guards.test.tsx:226:    musicVolume: () => range('[data-track-id="music"] input[aria-label="Volume — მუსიკა"]'),
+app/lib/arrangement/__tests__/markers.test.ts:136:    expect(normalizeMarkerName('  აქ შედის მუსიკა  ', 'Marker 1')).toBe('აქ შედის მუსიკა');
+app/lib/arrangement/__tests__/track-layout.test.tsx:285:      expect(button.getAttribute('aria-label')).toBe('Fold or unfold — მუსიკა');
+app/lib/arrangement/__tests__/track-layout.test.tsx:1044:      expectInsetRing('მუსიკა');
+app/lib/arrangement/__tests__/track-layout.test.tsx:1050:      expectInsetRing('მუსიკა');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:405:    expect(live(api).undoLabel).toBe('Move to track — სტემები');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:406:    expect(statusText(view)).toBe('Move to track — სტემები: start 00:08.400.');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:651:    expect(live(api).undoLabel).toBe('Move to track — სტემები');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:652:    expect(statusText(view)).toBe('Move to track — სტემები: start 00:08.000.');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:694:    expect(live(api).undoLabel).toBe('Move to track — სტემები');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:695:    expect(statusText(view)).toBe('Move to track — სტემები: start 00:06.000.');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:724:    expect(live(api).undoLabel).toBe('Move to track — სტემები');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:725:    expect(statusText(view)).toBe('Move to track — სტემები: start 00:06.000.');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:735:    expect(live(api).undoLabel).toBe('Move to track — სტემები');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:776:    expect(live(api).undoLabel).toBe('Move to track — სტემები');
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx:777:    expect(statusText(view)).toBe('Move to track — სტემები: start 00:06.000.');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:288:  fireEvent.click(laneName(view, 'მუსიკა'));
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:391:    groupRows(view, 'სტემები', 'SFX');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:419:      expect(view.queryAllByRole('button', { name: /Mute — (სტემები|SFX)/ })).not.toContain(mute);
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:420:      expect(view.getAllByRole('slider', { name: /^Volume — მუსიკა/ })).toHaveLength(1);
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:421:      expect(view.queryAllByRole('slider', { name: /^Volume — სტემები/ })).toHaveLength(
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:434:    groupRows(view, 'სტემები', 'SFX');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:460:    groupRows(view, 'სტემები', 'SFX');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:480:    const stemsFader = laneFader(view, 'სტემები');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:529:    groupRows(view, 'სტემები', 'SFX');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:542:    fireEvent.click(view.getByRole('button', { name: /^Solo — მუსიკა/ }));
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:557:    fireEvent.click(view.getByRole('button', { name: /^Solo — მუსიკა/ }));
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:565:    groupRows(view, 'სტემები', 'SFX');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:570:    keyboardFader(laneFader(view, 'სტემები'), '-6');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:591:    groupRows(view, 'სტემები', 'SFX');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:607:    groupRows(view, 'სტემები', 'SFX');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:626:    groupRows(view, 'სტემები', 'SFX');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:651:    groupRows(view, 'სტემები', 'SFX');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:653:    laneFader(view, 'სტემები').focus();
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:655:    pressU(laneFader(view, 'სტემები'));
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:661:    const pending = laneFader(view, 'სტემები');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:709:    groupRows(view, 'სტემები', 'SFX');
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:710:    const laneMute = view.getByRole('button', { name: /^Mute — მუსიკა/ });
+app/lib/arrangement/__tests__/track-pan.test.tsx:44:const PAN_LABEL = 'Pan — მუსიკა';
+app/lib/arrangement/__tests__/track-pan.test.tsx:718:      expect(children[1].getAttribute('aria-label')).toBe('მუსიკა — set as the active track');
+app/lib/arrangement/__tests__/lane-strings-ui.test.tsx:235:    expect(music.textContent).toBe('მუსიკა· active');
+app/lib/arrangement/__tests__/lane-strings-ui.test.tsx:249:    expect(reset?.getAttribute('aria-label')).toBe('Reset Pan to centre — მუსიკა');
+app/lib/arrangement/__tests__/track-volume-db.test.tsx:531:      fireEvent.click(laneName('მუსიკა'));
+app/lib/arrangement/__tests__/delete-selection-ui.test.tsx:267:        lanes: studioEditStrings.onTrack('მუსიკა'),
+app/lib/arrangement/__tests__/clip-gain-multi.test.tsx:284:    rangeInput('[data-track-id="music"] input[aria-label="Volume — მუსიკა"]');
+app/lib/arrangement/__tests__/library-preview.test.tsx:238:    expect(row.getAttribute('title')).toBe('აქტიური ხაზი: მუსიკა');
+app/lib/arrangement/__tests__/library-preview.test.tsx:241:    expect(row.querySelector('span.text-foreground')?.textContent).toBe('მუსიკა');
+app/lib/arrangement/__tests__/gesture-guard.test.tsx:483:    const musicVolume = volumeSlider(view, 'მუსიკა');
+app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:253:        track: 'მუსიკა',
+app/lib/arrangement/__tests__/context-hygiene.test.tsx:276:      '[data-track-id="music"] input[aria-label="Volume — მუსიკა"]',
+app/lib/arrangement/__tests__/master-ui.test.tsx:444:      expect(result.current.undoLabel).toBe('Mute — მუსიკა');
+app/lib/arrangement/__tests__/pending-status.test.tsx:26:const MUTE_MUSIC_LABEL = 'Mute — მუსიკა';
+app/lib/arrangement/__tests__/pending-status.test.tsx:228:      '[data-track-id="music"] input[aria-label="Volume — მუსიკა"]',
+app/lib/arrangement/__tests__/markers-ui.test.tsx:280:    fireEvent.change(input, { target: { value: 'აქ შედის მუსიკა' } });
+app/lib/arrangement/__tests__/markers-ui.test.tsx:285:    expect(flag.getAttribute('aria-label')).toContain('აქ შედის მუსიკა');
+app/lib/arrangement/__tests__/markers-ui.test.tsx:288:    expect(flag.title).toContain('აქ შედის მუსიკა');
+app/lib/arrangement/__tests__/markers-ui.test.tsx:302:    expect(live(api).arrangement.markers?.map((entry) => entry.name)).toEqual(['აქ შედის მუსიკა']);
+app/lib/arrangement/__tests__/markers-ui.test.tsx:362:    addNamedMarker(view, 'აქ შედის მუსიკა');
+app/lib/arrangement/__tests__/markers-ui.test.tsx:370:    expect(statusText(view)).toBe('A marker already exists at this time: “აქ შედის მუსიკა”');
+app/lib/arrangement/__tests__/track-meter-ui.test.tsx:483:    expect(meter('music').getAttribute('title')).toBe('მუსიკა · Peak −12.0 dBFS');
+app/lib/arrangement/__tests__/pan-release-recovery.test.tsx:22:const PAN_LABEL = 'Pan — მუსიკა';
+app/lib/arrangement/__tests__/pan-release-recovery.test.tsx:204:    musicVolume: () => range('[data-track-id="music"] input[aria-label="Volume — მუსიკა"]'),
+app/lib/arrangement/__tests__/fader-focus-order.test.tsx:23:const PAN_LABEL = 'Pan — მუსიკა';
+app/lib/arrangement/__tests__/fader-focus-order.test.tsx:216:    musicVolume: () => range('[data-track-id="music"] input[aria-label="Volume — მუსიკა"]'),
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:273:  clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:274:  clickLane(view, 'სტემები', { shiftKey: true });
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:279:  clickLane(view, 'სტემები');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:417:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:420:    expect(laneName(view, 'მუსიკა').getAttribute('aria-pressed')).toBe('true');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:421:    expect(laneName(view, 'მუსიკა').getAttribute('aria-label')).toBe(
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:422:      'მუსიკა — set as the active track, selected',
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:424:    clickLane(view, 'სტემები', { shiftKey: true });
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:436:    clickLane(view, 'სტემები');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:453:    expect(status(view)).toBe('Group “Group 1” created: მუსიკა, სტემები.');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:491:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:504:    expect(status(view)).toBe('Group “Group 2” created: მუსიკა, Group 1.');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:520:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:534:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:553:    clickLane(view, 'მუსიკა', { shiftKey: true });
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:558:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:568:    clickLane(view, 'სტემები');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:569:    clickLane(view, 'მუსიკა', { ctrlKey: true });
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:581:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:645:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:706:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx:779:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:274:  clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:275:  clickLane(view, 'სტემები', { shiftKey: true });
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:280:  clickLane(view, 'სტემები');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:517:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:577:    const fader = view.getByRole('slider', { name: /^Volume — სტემები/ });
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:600:    const idleFader = view.getByRole('slider', { name: /^Volume — სტემები/ });
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:609:    const musicFader = view.getByRole('slider', { name: /^Volume — მუსიკა/ });
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:619:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:641:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:661:    expect(view.queryByRole('slider', { name: /სტემები|SFX/ })).toBeNull();
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:662:    expect(view.queryByRole('button', { name: /^(სტემები|SFX) / })).toBeNull();
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:663:    expect(view.queryByRole('button', { name: /Mute — (სტემები|SFX)/ })).toBeNull();
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:667:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:676:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:678:    const stems = laneName(view, 'სტემები');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:795:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:831:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:858:    expect(document.activeElement).toBe(laneName(view, 'სტემები'));
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:863:    const stems = laneName(view, 'სტემები');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:878:    clickLane(view, 'მუსიკა');
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:879:    clickLane(view, 'სტემები', { shiftKey: true });
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:885:    expect(document.activeElement).toBe(laneName(view, 'მუსიკა'));
+app/lib/arrangement/__tests__/strings.test.ts:1261:    expect(trackGroupCreatedMessage('Group 1', ['მუსიკა', 'სტემები'])).toBe(
+app/lib/arrangement/__tests__/strings.test.ts:1262:      'Group “Group 1” created: მუსიკა, სტემები.',
+app/lib/arrangement/__tests__/library.test.ts:44:      ['მუსიკა', 1],
+app/lib/arrangement/__tests__/library.test.ts:48:      ['მუსიკა', 1],
+app/lib/arrangement/__tests__/library.test.ts:49:      ['სტემები', 4],
+app/lib/arrangement/__tests__/library.test.ts:71:    expect(ids(filterLibrarySources(sources, all, 'სტემი პადი'))).toEqual(['pad']);
+app/lib/arrangement/__tests__/status-announcement-ui.test.tsx:709:      'მონიშვნა: 00:00.000 — 00:05.000 · მუსიკა.',
+app/lib/arrangement/__tests__/detail-panel-fit.test.tsx:331:    expect(laneNames?.textContent).toBe('ხაზები მუსიკა, SFX');

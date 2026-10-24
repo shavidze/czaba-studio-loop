@@ -1261,6 +1261,17 @@ C round 129 (`tmp/studio-real-loop/c-round-129.md`, `c-round-129.json`) — **PA
 - **R6 — ჩართული ორი იაფი საკითხი, რაუნდის ფაილებში:** SA-DEL (+1 `it` `status-announcement-ui`-ში, ხურავს m4-ის ხარვეზს) და GATE129-S2 (ST9 ამოწმებს, რომ 6 constant აღარ არსებობს). ST13 — Context-ის დარჩენილი ქართული ხაზების ზუსტი სია (ratchet).
 - **R7 — შედეგი წინასწარ (round 131):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.2b-ს შეზღუდული გასწორება; C PASS — V-0.2c (B ჯერ ზომავს, საჭიროებისას ყოფს).
 
+**D-29z108 — Round 142-ის შედეგი; V-0.4e — ბაგია; Round 143: V-0.4e-ის შეზღუდული გასწორება (ვიდეო კლიპის Clip Gain-ის მიზეზი ერთ ხაზზე).**
+
+C round 142 (`tmp/studio-real-loop/c-round-142.md`, `c-round-142.json`) — **FAIL**, `browserVerified`/`realVerified` — true. ყველა row PASS-ია 1440-ზე და 1280-ზე (DETAIL-TEXT, DETAIL-STATUS, CLIP-GAIN-AUDIO: −20 dB → 20.00–20.04 dB, reset ≤0.03 dB; LIBRARY-LABELS, GEO-COUNT net 0, REG-141, G142-3), გარდა LAYOUT-ისა: C-R142-01 (Medium) — 1440-ზე ვიდეოს მიზეზი 2 ხაზზეა, ქართული-swap კონტროლით მიზეზი ინგლისური ტექსტია. Gate 142 — skipped; round 142-ის 22 ფაილი ხეშია დაუკომიტებლად, rounds 142+143 ერთად გამოქვეყნდება.
+- **R1 — ტექსტი:** `clipGainVideoReason` → `A video clip has no Clip Gain — use the track Volume/Mute` (A-ის გაზომვით 1440-ზე 1 ხაზი, 329 px; ქართული — 327 px). იკლებს მხოლოდ „for its sound“; მნიშვნელობა რჩება. 1280-ზე ყველა ვარიანტი და ქართული baseline 2 ხაზია — დარღვევა არ არის. კლასი არ იცვლება.
+- **R2 — ზომა:** ერთი Medium + ერთი იაფი Low იმავე ეტაპის ფაილში (polish ტესტის სათაურები და მკვდარი `'end, წმ'` შემოწმება → `'წმ'`). V-0.5 არ ერთვის.
+- **R3 — 1280 გახსნილი პანელის baseline:** C-ის `c-round-142/out/c142-1280-r1.json` (`states.*.measure`); წესი — „არა უარესი“, არა „ცარიელი“ (C-R142-03 ძველია, ქართული-swap-ით დადასტურდა → `deferred_low_polish`).
+- **R4 — დაშვებული სხვაობები:** header label x/w (−45/+43, flex-1), apply +22 w და toggle +2 w (`w-fit`).
+- **R5 — B-ის შესწორებები:** D-29z107 R8 მცდარი იყო — `stems` kind-ით არ ემთხვევა (`Stem`); C-R142-02 → `deferred_low_polish`, kind-ის საძიებო სიტყვები (მრავლობითის ჩათვლით) → V-0.5-ის forward constraint LIB-SEARCH-KEYWORDS. l.518-ის aria-label კოლექციის toggle-ია, არა folder-ის. A-ის round-142 გადახრები D1–D7 დამტკიცდა.
+- **R6 — Ableton:** Clip View შენახულ წყაროში არ არის — დაუდასტურებელი, Live-ზე მტკიცება არ კეთდება.
+- **R7 — შედეგი წინასწარ (round 144):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — კიდევ ერთი გასწორება; C PASS — V-0.4 დასრულებულია, შემდეგ V-0.5 (ჯერ გაზომვა).
+
 **D-29z107 — Round 141-ის შედეგი; V-0.4d დასრულდა; Round 142: V-0.4e (Clip Detail panel-ის, range/Clip Gain-ის შეტყობინებებისა და ბიბლიოთეკის kind/folder ლეიბლების ტექსტები ინგლისურად).**
 
 C round 141 (`tmp/studio-real-loop/c-round-141.md`, `c-round-141.json`) — **PASS**, `browserVerified`/`realVerified` — true, ყველა ბრაუზერის რიგი 1440-ზე და 1280-ზე, GEO-COUNT net 0, LAYOUT 0 px; რეალური ხმა: ჯგუფის Mute −179 dB, unmute ≤0.03 dB. Gate 141 გამოქვეყნდა `6e9f9b1` (verify 166 ფაილი / 2481 ტესტი, review 8/10).
@@ -2473,6 +2484,7 @@ flowchart TD
 
 **D-29z106:** round 141-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (`studioTrackGroupStrings.defaultNamePrefix`), `groups.ts` (l.4), `ArrangementContext.tsx` (l.548–549), `routes/studio-lab.tsx` (l.13–15), `strings.test.ts` (§3.1), 9 sweep ტესტ-ფაილი (მხოლოდ `ჯგუფი` token), doc 116 (სტატუსი), ახალი `default-track-names-ssr.test.tsx` და ახალი doc 117. სხვა ყველაფერი გაყინულია (`tmp/studio-real-loop/b-round-140-r141-tree-sha256.txt`, 944).
 **D-29z107:** round 142-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (`studioDetailStrings` + `studioLibraryStrings`-ის 4 key), `ArrangementDetailPanel.tsx` (38 ხაზი), `panels.ts` (l.7–8), `clip-gain-multi.ts` (l.113), `library.ts` (l.8–9/14–15), `strings.test.ts` (§3.1), 13 pin ტესტ-ფაილი (მხოლოდ ჩამოთვლილი ხაზები + LB-SEARCH), doc 117 (სტატუსი), ახალი `detail-panel-strings-ui.test.tsx` და ახალი doc 118. სხვა ყველაფერი გაყინულია (`tmp/studio-real-loop/b-round-141-r142-tree-sha256.txt`, 941).
+**D-29z108:** round 143-ში A-ს ეკუთვნის მხოლოდ 8 არსებული ფაილი (`tmp/studio-real-loop/b-round-142-r143-grants.txt`): `strings.ts` (ერთი მნიშვნელობა, VR1), `strings.test.ts` (VR2), `clip-gain-fader`/`clip-gain`/`detail-panel-reason`/`detail-panel-fit` ტესტები (VR3), `detail-panel-polish.test.tsx` (PL1/PL2) და doc 118. სხვა ყველაფერი გაყინულია (`b-round-142-r143-tree-sha256.txt`, 955; round 142-ის დაუკომიტებელი ფაილების ჩათვლით).
 
 **D-29z103:** round 138-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (1 ახალი ობიექტი `studioClipStrings`), `ArrangementClip.tsx` (import და §1.1-ის 25 ხაზი), `ArrangementContext.tsx` (მხოლოდ import და l.1761), `strings.test.ts` (ST13-ის ერთი ჩანაწერის წაშლა, ST33-ის სათაური, ST34–ST35), 17 pin ფაილი (მხოლოდ ჩამოთვლილი ხაზები, title selector-ების ჩათვლით), doc 113 (l.4/21/70/74/75), ახალი `clip-strings-ui.test.tsx` და ახალი doc 114. სხვა ყველაფერი გაყინულია (`tmp/studio-real-loop/b-round-137-r138-tree-sha256.txt`, 931).
 

@@ -1,0 +1,371 @@
+--- ../tmp/studio-real-loop/b-round-141/r142-granted-start/app/lib/arrangement/strings.ts	2026-10-24 18:51:10.562650971 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 19:08:26.938133674 +0000
+@@ -243,6 +243,10 @@
+     time: string;
+     suffix: string;
+   }): string => `“${title}” added to the ${track} track at ${time}${suffix}.`,
++  kindMusic: 'Music',
++  kindStem: 'Stem',
++  folderMusic: 'Music',
++  folderStems: 'Stems',
+ };
+ 
+ export const studioLoopStrings = {
+@@ -611,3 +615,52 @@
+   masterPeakOverLabel: (peak: string): string =>
+     `Master Peak ${peak} dBFS — overload (Clip). Click to clear`,
+ };
++
++interface StudioDetailRangeText {
++  start: string;
++  end: string;
++  track: string;
++}
++
++const detailClipCountText = (count: number): string => (count === 1 ? '1 clip' : `${count} clips`);
++
++export const studioDetailStrings = {
++  panelTitle: 'Clip details',
++  nothingSelected: 'Nothing selected',
++  noSelectionHint: 'Select a clip to see its details',
++  multiClipNote: 'The selected clips move together · Delete deletes them · Ctrl+D duplicates them',
++  videoPlaceholder: 'Video clip · no waveform',
++  rangeMultiReason: 'A time selection is set on one clip — select only one',
++  noneReason: 'Select a clip first',
++  sourceUnchanged: 'The source file stays unchanged',
++  clipGainMultiReason: 'Clip Gain works on audio clips only — remove the video from the selection',
++  clipGainVideoReason: 'A video clip has no Clip Gain — for its sound use the track Volume/Mute',
++  clipGainInvalid: 'Clip Gain: enter a number in dB (−60…+24).',
++  pendingFull: 'Unsaved — Enter saves, Esc reverts',
++  pendingLabel: 'Unsaved',
++  rangeApplied: ({ start, end, track }: StudioDetailRangeText): string =>
++    `Time selection: ${start} — ${end} · ${track}.`,
++  clipGainUnchanged: (value: string): string => `Clip Gain unchanged: ${value}.`,
++  clipCount: (count: number): string => detailClipCountText(count),
++  clipGainMembers: (count: number, range: string): string =>
++    `Clip Gain: ${detailClipCountText(count)} — ${range}.`,
++  trackLabel: 'Track',
++  tracksLabel: 'Tracks',
++  startLabel: 'Start',
++  lengthLabel: 'Length',
++  sourceOffsetLabel: 'Source offset',
++  rangeFromLabel: 'From, s',
++  rangeToLabel: 'To, s',
++  rangeStartLabel: 'Time selection start (seconds)',
++  rangeEndLabel: 'Time selection end (seconds)',
++  applyRange: 'Set selection',
++  clipGainResetLabel: 'Reset Clip Gain (0 dB)',
++  heightLabel: 'Details height',
++  collapsedValueText: (height: number): string => `collapsed · ${height} px`,
++  expandLabel: 'Expand details',
++  collapseLabel: 'Collapse details',
++  expandText: 'Expand ▸',
++  collapseText: 'Collapse ▾',
++  rangeInvalid:
++    'The time selection must stay inside the clip, and its end must be after its start.',
++};
+--- ../tmp/studio-real-loop/b-round-141/r142-granted-start/app/components/arrangement/ArrangementDetailPanel.tsx	2026-10-24 18:51:10.561303112 +0000
++++ app/components/arrangement/ArrangementDetailPanel.tsx	2026-10-24 18:57:25.455139414 +0000
+@@ -42,28 +42,28 @@
+   detailPanelStartsOpen,
+   stepDetailPanelHeight,
+ } from '~/lib/arrangement/panels';
++import { studioDetailStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementClip, TimeRange } from '~/types/arrangement';
+ import { buildPeakShape } from './ArrangementClip';
+ import { STUDIO_SCROLLBAR_CLASS } from './studio-scrollbar';
+ 
+-const DETAIL_PANEL_TITLE = 'კლიპის დეტალები';
+-const DETAIL_NOTHING_SELECTED = 'არაფერია არჩეული';
+-const DETAIL_NO_SELECTION_HINT = 'აირჩიე კლიპი, რომ დეტალები ნახო';
+-const DETAIL_GROUP_NOTE = 'ჯგუფი ერთად გადაადგილდება · Delete შლის · Ctrl+D აორმაგებს';
+-const DETAIL_VIDEO_PLACEHOLDER = 'ვიდეოკლიპი · ტალღა არ ჩანს';
+-const DETAIL_INPUTS_GROUP_REASON = 'range ერთ კლიპზე ისმება — აირჩიე ერთი';
+-const DETAIL_INPUTS_NONE_REASON = 'ჯერ აირჩიე კლიპი';
+-const DETAIL_SOURCE_UNCHANGED = 'წყარო უცვლელი რჩება';
++const DETAIL_PANEL_TITLE = studioDetailStrings.panelTitle;
++const DETAIL_NOTHING_SELECTED = studioDetailStrings.nothingSelected;
++const DETAIL_NO_SELECTION_HINT = studioDetailStrings.noSelectionHint;
++const DETAIL_GROUP_NOTE = studioDetailStrings.multiClipNote;
++const DETAIL_VIDEO_PLACEHOLDER = studioDetailStrings.videoPlaceholder;
++const DETAIL_INPUTS_GROUP_REASON = studioDetailStrings.rangeMultiReason;
++const DETAIL_INPUTS_NONE_REASON = studioDetailStrings.noneReason;
++const DETAIL_SOURCE_UNCHANGED = studioDetailStrings.sourceUnchanged;
+ const DETAIL_PEAK_COLUMNS = 480;
+ const DETAIL_CLIP_GAIN_STEP_DB = 0.1;
+ const DETAIL_CLIP_GAIN_FINE_DIVISOR = 10;
+-const DETAIL_CLIP_GAIN_GROUP_REASON =
+-  'Clip Gain მხოლოდ აუდიო კლიპებზე ისმება — ამოიღე ვიდეო მონიშვნიდან';
+-const DETAIL_CLIP_GAIN_VIDEO_REASON = 'ვიდეო კლიპს Clip Gain არ აქვს — ხმა: ხაზის Volume/Mute';
+-const DETAIL_CLIP_GAIN_INVALID_MESSAGE = 'Clip Gain: შეიყვანე რიცხვი dB-ში (−60…+24).';
+-const DETAIL_CLIP_GAIN_PENDING_FULL_TEXT = 'შეუნახავია — Enter ინახავს, Esc აბრუნებს';
+-const DETAIL_CLIP_GAIN_PENDING_LABEL = 'შეუნახავია';
++const DETAIL_CLIP_GAIN_GROUP_REASON = studioDetailStrings.clipGainMultiReason;
++const DETAIL_CLIP_GAIN_VIDEO_REASON = studioDetailStrings.clipGainVideoReason;
++const DETAIL_CLIP_GAIN_INVALID_MESSAGE = studioDetailStrings.clipGainInvalid;
++const DETAIL_CLIP_GAIN_PENDING_FULL_TEXT = studioDetailStrings.pendingFull;
++const DETAIL_CLIP_GAIN_PENDING_LABEL = studioDetailStrings.pendingLabel;
+ const DETAIL_CLIP_GAIN_PENDING_HINT = DETAIL_CLIP_GAIN_PENDING_FULL_TEXT.slice(
+   DETAIL_CLIP_GAIN_PENDING_LABEL.length,
+ );
+@@ -122,7 +122,11 @@
+ }
+ 
+ function detailRangeAppliedMessage(range: TimeRange, laneName: string): string {
+-  return `მონიშვნა: ${formatArrangementTime(range.start)} — ${formatArrangementTime(range.end)} · ${laneName}.`;
++  return studioDetailStrings.rangeApplied({
++    start: formatArrangementTime(range.start),
++    end: formatArrangementTime(range.end),
++    track: laneName,
++  });
+ }
+ 
+ function rangeInputText(value: number): string {
+@@ -383,7 +387,7 @@
+   const commitClipGainMembersText = (trigger: 'enter' | 'blur', clipIds: readonly string[]) => {
+     if (clipGainText === displayedClipGainText) {
+       if (trigger === 'enter') {
+-        setStatus(`Clip Gain უცვლელია: ${clipGainRangeText}.`);
++        setStatus(studioDetailStrings.clipGainUnchanged(clipGainRangeText));
+       }
+       return;
+     }
+@@ -407,7 +411,7 @@
+       return;
+     }
+     if (trigger === 'enter') {
+-      setStatus(`Clip Gain უცვლელია: ${clipGainRangeText}.`);
++      setStatus(studioDetailStrings.clipGainUnchanged(clipGainRangeText));
+     }
+     setClipGainText(displayedClipGainText);
+   };
+@@ -446,7 +450,9 @@
+       return;
+     }
+     if (trigger === 'enter') {
+-      setStatus(`Clip Gain უცვლელია: ${formatMasterGainDb(selection.clip.gainDb ?? 0)}.`);
++      setStatus(
++        studioDetailStrings.clipGainUnchanged(formatMasterGainDb(selection.clip.gainDb ?? 0)),
++      );
+     }
+     setClipGainText(currentText);
+   };
+@@ -563,7 +569,7 @@
+     if (isReset) {
+       setStatus(formatClipGainMembersStatus({ clipIds, minDb: 0, maxDb: 0 }));
+     } else if (trigger === 'button') {
+-      setStatus(`Clip Gain უცვლელია: ${formatMasterGainDb(0)}.`);
++      setStatus(studioDetailStrings.clipGainUnchanged(formatMasterGainDb(0)));
+     }
+     return isReset;
+   };
+@@ -608,7 +614,7 @@
+     setStatus(
+       isReset
+         ? `Clip Gain: ${selection.title} — ${formatMasterGainDb(0)}.`
+-        : `Clip Gain უცვლელია: ${formatMasterGainDb(0)}.`,
++        : studioDetailStrings.clipGainUnchanged(formatMasterGainDb(0)),
+     );
+     setClipGainText(clipGainInputText(0));
+     if (isReset && resetHeldFocus) {
+@@ -645,19 +651,19 @@
+               {selection.title}
+             </p>
+             <p className="shrink-0 truncate">
+-              <span className="text-dim">ხაზი</span>{' '}
++              <span className="text-dim">{studioDetailStrings.trackLabel}</span>{' '}
+               <span className="text-foreground">{selection.laneName}</span>
+             </p>
+             <p className="font-mono tabular-nums">
+-              <span className="font-sans text-dim">დასაწყისი</span>{' '}
++              <span className="font-sans text-dim">{studioDetailStrings.startLabel}</span>{' '}
+               <span className="text-foreground">{formatArrangementTime(selection.clip.start)}</span>{' '}
+-              · <span className="font-sans text-dim">სიგრძე</span>{' '}
++              · <span className="font-sans text-dim">{studioDetailStrings.lengthLabel}</span>{' '}
+               <span className="text-foreground">
+                 {formatArrangementTime(selection.clip.duration)}
+               </span>
+             </p>
+             <p className="font-mono tabular-nums">
+-              <span className="font-sans text-dim">წყაროდან</span>{' '}
++              <span className="font-sans text-dim">{studioDetailStrings.sourceOffsetLabel}</span>{' '}
+               <span className="text-foreground">
+                 {formatArrangementTime(selection.clip.sourceOffset)}
+               </span>
+@@ -666,14 +672,14 @@
+           </>
+         ) : group ? (
+           <div data-testid="arrangement-detail-group" className="flex flex-col gap-0.5">
+-            <p className="font-medium text-brand">{group.count} კლიპი</p>
++            <p className="font-medium text-brand">{studioDetailStrings.clipCount(group.count)}</p>
+             <p className="shrink-0 truncate text-foreground" title={group.laneNames}>
+-              <span className="text-dim">ხაზები</span> {group.laneNames}
++              <span className="text-dim">{studioDetailStrings.tracksLabel}</span> {group.laneNames}
+             </p>
+             <p className="font-mono tabular-nums">
+-              <span className="font-sans text-dim">დასაწყისი</span>{' '}
++              <span className="font-sans text-dim">{studioDetailStrings.startLabel}</span>{' '}
+               <span className="text-foreground">{formatArrangementTime(group.earliestStart)}</span>{' '}
+-              · <span className="font-sans text-dim">სიგრძე</span>{' '}
++              · <span className="font-sans text-dim">{studioDetailStrings.lengthLabel}</span>{' '}
+               <span className="text-foreground">{formatArrangementTime(group.spanLength)}</span>
+             </p>
+             <p className="text-dim">{DETAIL_GROUP_NOTE}</p>
+@@ -700,7 +706,7 @@
+       <div className="flex w-44 shrink-0 flex-col gap-1">
+         <div className="flex gap-1">
+           <label className="flex flex-col text-dim">
+-            საიდან, წმ
++            {studioDetailStrings.rangeFromLabel}
+             <input
+               type="number"
+               step={0.001}
+@@ -709,14 +715,14 @@
+               onKeyDown={handleRangeInputKeyDown}
+               disabled={!clip}
+               title={inputsReason ?? undefined}
+-              aria-label="range-ის დასაწყისი (წამი)"
++              aria-label={studioDetailStrings.rangeStartLabel}
+               aria-describedby={inputsReason ? reasonId : undefined}
+               className={inputClass}
+               data-testid="arrangement-detail-start"
+             />
+           </label>
+           <label className="flex flex-col text-dim">
+-            სადამდე, წმ
++            {studioDetailStrings.rangeToLabel}
+             <input
+               type="number"
+               step={0.001}
+@@ -725,7 +731,7 @@
+               onKeyDown={handleRangeInputKeyDown}
+               disabled={!clip}
+               title={inputsReason ?? undefined}
+-              aria-label="range-ის დასასრული (წამი)"
++              aria-label={studioDetailStrings.rangeEndLabel}
+               aria-describedby={inputsReason ? reasonId : undefined}
+               className={inputClass}
+               data-testid="arrangement-detail-end"
+@@ -745,7 +751,7 @@
+           className="h-6 w-fit rounded-sm border border-outline px-2 text-foreground hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:text-dim"
+           data-testid="arrangement-detail-apply"
+         >
+-          მონიშვნა
++          {studioDetailStrings.applyRange}
+         </button>
+         {isNoneState ? rangeReasonNode : null}
+       </div>
+@@ -850,7 +856,7 @@
+                 : clipGainDb === undefined)
+             }
+             title={clipGainReason ?? undefined}
+-            aria-label="Clip Gain-ის განულება (0 dB)"
++            aria-label={studioDetailStrings.clipGainResetLabel}
+             className="h-6 w-fit rounded-sm border border-outline px-2 text-foreground hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:text-dim"
+             data-testid="arrangement-detail-clip-gain-reset"
+           >
+@@ -1078,7 +1084,7 @@
+   const headerLabel = selection
+     ? selection.title
+     : group
+-      ? `${group.count} კლიპი`
++      ? studioDetailStrings.clipCount(group.count)
+       : DETAIL_NOTHING_SELECTED;
+ 
+   return (
+@@ -1101,11 +1107,13 @@
+         role="separator"
+         tabIndex={0}
+         aria-orientation="horizontal"
+-        aria-label="დეტალების სიმაღლე"
++        aria-label={studioDetailStrings.heightLabel}
+         aria-valuemin={DETAIL_PANEL_MIN_HEIGHT_PX}
+         aria-valuemax={DETAIL_PANEL_MAX_HEIGHT_PX}
+         aria-valuenow={openHeight}
+-        aria-valuetext={size.isCollapsed ? `დაკეცილია · ${openHeight} px` : `${openHeight} px`}
++        aria-valuetext={
++          size.isCollapsed ? studioDetailStrings.collapsedValueText(openHeight) : `${openHeight} px`
++        }
+         aria-controls={contentId}
+         onPointerDown={handleSeparatorPointerDown}
+         onKeyDown={handleSeparatorKeyDown}
+@@ -1127,11 +1135,13 @@
+           onKeyUp={handleToggleKeyUp}
+           aria-expanded={!size.isCollapsed}
+           aria-controls={contentId}
+-          aria-label={size.isCollapsed ? 'დეტალების გაშლა' : 'დეტალების დაკეცვა'}
++          aria-label={
++            size.isCollapsed ? studioDetailStrings.expandLabel : studioDetailStrings.collapseLabel
++          }
+           className="h-6 shrink-0 rounded-sm border border-outline px-2 text-foreground hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+           data-testid="arrangement-detail-toggle"
+         >
+-          {size.isCollapsed ? 'გაშლა ▸' : 'დაკეცვა ▾'}
++          {size.isCollapsed ? studioDetailStrings.expandText : studioDetailStrings.collapseText}
+         </button>
+       </div>
+       <div id={contentId} hidden={size.isCollapsed} className="flex min-h-0 flex-1 flex-col">
+--- ../tmp/studio-real-loop/b-round-141/r142-granted-start/app/lib/arrangement/panels.ts	2026-10-24 18:51:10.561650966 +0000
++++ app/lib/arrangement/panels.ts	2026-10-24 18:56:15.530386654 +0000
+@@ -1,11 +1,12 @@
++import { studioDetailStrings } from './strings';
++
+ export const DETAIL_PANEL_DEFAULT_HEIGHT_PX = 144;
+ export const DETAIL_PANEL_MIN_HEIGHT_PX = 120;
+ export const DETAIL_PANEL_MAX_HEIGHT_PX = 280;
+ export const DETAIL_PANEL_COLLAPSED_HEIGHT_PX = 36;
+ export const DETAIL_PANEL_KEY_STEP_PX = 16;
+ export const DETAIL_RANGE_TOLERANCE_SECONDS = 0.01;
+-export const DETAIL_RANGE_INVALID_MESSAGE =
+-  'მონაკვეთი კლიპის საზღვრებში უნდა იყოს; დასასრული დასაწყისზე მეტი უნდა იყოს.';
++export const DETAIL_RANGE_INVALID_MESSAGE = studioDetailStrings.rangeInvalid;
+ 
+ export interface DetailPanelFitMetrics {
+   scrollerClientHeight: number;
+--- ../tmp/studio-real-loop/b-round-141/r142-granted-start/app/lib/arrangement/clip-gain-multi.ts	2026-10-24 18:51:10.561650966 +0000
++++ app/lib/arrangement/clip-gain-multi.ts	2026-10-24 19:08:15.685329491 +0000
+@@ -5,6 +5,7 @@
+   formatMasterGainDb,
+   normalizeClipGainDb,
+ } from './model';
++import { studioDetailStrings } from './strings';
+ 
+ export interface ClipGainMemberSpan {
+   clipIds: readonly string[];
+@@ -110,5 +111,8 @@
+ }
+ 
+ export function formatClipGainMembersStatus(span: ClipGainMemberSpan): string {
+-  return `Clip Gain: ${span.clipIds.length} კლიპი — ${formatClipGainRange(span.minDb, span.maxDb)}.`;
++  return studioDetailStrings.clipGainMembers(
++    span.clipIds.length,
++    formatClipGainRange(span.minDb, span.maxDb),
++  );
+ }
+--- ../tmp/studio-real-loop/b-round-141/r142-granted-start/app/lib/arrangement/library.ts	2026-10-24 18:51:10.561650966 +0000
++++ app/lib/arrangement/library.ts	2026-10-24 18:56:20.186479938 +0000
+@@ -1,18 +1,19 @@
+ import type { Arrangement, WorkspaceSource, WorkspaceSourceKind } from '~/types/arrangement';
++import { studioLibraryStrings } from './strings';
+ 
+ export const LIBRARY_ALL_NODE_ID = 'all';
+ export const LIBRARY_DRAG_MIME = 'application/x-czaba-workspace-source';
+ export const LIBRARY_PLACEMENT_EPS = 1e-4;
+ 
+ export const LIBRARY_KIND_LABELS: Record<WorkspaceSourceKind, string> = {
+-  music: 'მუსიკა',
+-  stem: 'სტემი',
++  music: studioLibraryStrings.kindMusic,
++  stem: studioLibraryStrings.kindStem,
+   sfx: 'SFX',
+ };
+ 
+ export const LIBRARY_FOLDER_LABELS: Record<WorkspaceSourceKind, string> = {
+-  music: 'მუსიკა',
+-  stem: 'სტემები',
++  music: studioLibraryStrings.folderMusic,
++  stem: studioLibraryStrings.folderStems,
+   sfx: 'SFX',
+ };
+ 

@@ -1,9 +1,9 @@
 {
- "version": 134,
- "updated": "2026-10-24 B round 141 -> 142 planning (D-29z107)",
+ "version": 135,
+ "updated": "2026-10-24 B round 142 -> 143 planning (D-29z108)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 142: D-29z107 - VISUAL-A V-0.4e: Clip Detail panel (ArrangementDetailPanel.tsx 38 lines), panels.ts DETAIL_RANGE_INVALID_MESSAGE, clip-gain-multi.ts l.113 and library.ts kind/folder labels to English. New studioDetailStrings (last export) + 4 keys appended to studioLibraryStrings; existing exported names keep names; 56 pins in 13 test files; strings.test ST39 exact count + ST41-ST44; new detail-panel-strings-ui.test.tsx DPS1-DPS4; doc 117 status; new doc 118; mutations m82-m87; LAYOUT baseline = B probe b-round-141/out/detail-baseline-6e9f9b1.json; baseline 6e9f9b1; frozen 941)",
+ "current_task": "current-task.md (round 143: D-29z108 - VISUAL-A V-0.4e fix-up: C-R142-01 (Medium) video Clip Gain reason -> 'A video clip has no Clip Gain — use the track Volume/Mute' (1 line at 1440, measured 329 px); 5 pin sites + ST41; polish test titles + stale-unit guard 'წმ' (A-R142 D2 / reviewer Low); doc 118; mutations m88-m89; LAYOUT 1440 vs B 6e9f9b1 baseline, 1280 open vs C round-142 baseline (no worse); baseline HEAD 6e9f9b1 + uncommitted round-142 tree (gate 142 skipped); frozen 955; grants 8)",
  "advisor_used_by_B": "round 141 -> 142 planning: advisor available and used (before writing; before finishing)",
  "baseline": {
   "tsc_errors": 0,
@@ -9191,11 +9191,22 @@
    "round": 142,
    "task": "current-task.md",
    "decision": "D-29z107",
-   "status": "dispatched",
+   "status": "c_fail (C round 142 FAIL, browserVerified=true, realVerified=true; 1 Medium C-R142-01 caused by the round; all other rows PASS; gate 142 skipped)",
    "items": [
     "VISUAL-A-OBSIDIAN / V-0.4e: Clip Detail panel, range/Clip Gain messages and library kind/folder labels to English"
    ],
-   "note": "22 paths (20 existing + 2 new): strings.ts (studioDetailStrings + 4 studioLibraryStrings keys), ArrangementDetailPanel.tsx (38 lines), panels.ts l.7-8, clip-gain-multi.ts l.113, library.ts l.8-9/14-15, strings.test (ST39 exact, ST41-ST44, library lists), 13 pin files (listed lines + LB-SEARCH), doc 117 status, new detail-panel-strings-ui.test.tsx, new doc 118; baseline 6e9f9b1; frozen 941"
+   "note": "22 paths (20 existing + 2 new): strings.ts (studioDetailStrings + 4 studioLibraryStrings keys), ArrangementDetailPanel.tsx (38 lines), panels.ts l.7-8, clip-gain-multi.ts l.113, library.ts l.8-9/14-15, strings.test (ST39 exact, ST41-ST44, library lists), 13 pin files (listed lines + LB-SEARCH), doc 117 status, new detail-panel-strings-ui.test.tsx, new doc 118; baseline 6e9f9b1; frozen 941",
+   "result_evidence": "c-round-142.md, c-round-142.json, gates/gate-round-142.json"
+  },
+  {
+   "round": 143,
+   "task": "current-task.md",
+   "decision": "D-29z108",
+   "status": "dispatched",
+   "items": [
+    "VISUAL-A-OBSIDIAN / V-0.4e fix-up: C-R142-01 one-line video Clip Gain reason; polish test leftovers (A-R142-D2-POLISH-LEFTOVERS)"
+   ],
+   "note": "8 existing paths: strings.ts (VR1 one value), strings.test (VR2), clip-gain-fader/clip-gain/detail-panel-reason/detail-panel-fit (VR3), detail-panel-polish (PL1/PL2), doc 118; baseline HEAD 6e9f9b1 + uncommitted round-142 tree; frozen 955; required A probe (1440 video: reason 1 line, placeholder <=1 px); mutations m88-m90"
   }
  ],
  "post_current_stage_queue": [
@@ -9961,7 +9972,7 @@
        {
         "stage": "V-0.4e",
         "area": "ArrangementDetailPanel.tsx (38) + panels.ts l.8 + clip-gain-multi.ts l.113 + library.ts kind/folder labels (4)",
-        "status": "dispatched round 142 (D-29z107)",
+        "status": "bug: C round 142 FAIL (C-R142-01 Medium, LAYOUT 1440 video reason 2 lines); fix-up dispatched round 143 (D-29z108); not done",
         "measurement_d29z107": {
          "baseline": "6e9f9b1",
          "source_georgian_lines_non_comment": {
@@ -9994,12 +10005,47 @@
          "R7": "pendingFull starts with pendingLabel (slice invariant)",
          "R8": "English kind labels change search: music/stem match by kind; Georgian kind words no longer match by kind; accepted (English UI)",
          "R9": "mixed state for one round: library own copy, preview, dock, collection, demo titles, route meta title, context l.3468 (V-0.5)",
-         "R10": "fold-ins: doc 117 status, ST39 exact; gate-141 #2/#3 -> V-0.5 forward constraints"
+         "R10": "fold-ins: doc 117 status, ST39 exact; gate-141 #2/#3 -> V-0.5 forward constraints",
+         "R8_correction_d29z108": "'stems' does not match by kind (kind label 'Stem'; folder label not in the haystack); LB-SEARCH asserts 'stem' (A D3, ratified); per-kind search keywords incl. plural -> V-0.5 forward constraint LIB-SEARCH-KEYWORDS"
         },
         "forward_constraints_d29z107": [
          "V-0.5: default-track-names-ssr must assert console.error not called (gate-141 #2)",
-         "V-0.5: ST40 meta-title pin changes with the route title (gate-141 #3)"
-        ]
+         "V-0.5: ST40 meta-title pin changes with the route title (gate-141 #3)",
+         "V-0.5 (D-29z108 R5): LIB-SEARCH-KEYWORDS - give each library kind its own search keywords incl. the plural ('stems'), separate from the display labels (A-R142 reviewer Architecture note); also review C's 'sfx' matching the Music previews via the collection label"
+        ],
+        "round142_result": {
+         "verdict": "FAIL",
+         "browserVerified": true,
+         "realVerified": true,
+         "passed": [
+          "T142-TARGETED",
+          "SOURCE-SCOPE",
+          "AN-REVIEW",
+          "DETAIL-TEXT",
+          "DETAIL-STATUS",
+          "CLIP-GAIN-AUDIO (drop 20.00-20.04 dB, restore <=0.03 dB, 3/3)",
+          "LIBRARY-LABELS",
+          "GEO-COUNT (net 0)",
+          "REG-141",
+          "G142-3",
+          "PX-NET",
+          "REG-HYD"
+         ],
+         "failed": [
+          "LAYOUT (1440 video state)"
+         ],
+         "inconclusive": [
+          "LAYOUT-1280-open (no B baseline; pre-existing per C Georgian-swap control)"
+         ],
+         "evidence": "c-round-142.json"
+        },
+        "rulings_d29z108": {
+         "R1": "clipGainVideoReason -> 'A video clip has no Clip Gain — use the track Volume/Mute' (A measured 1 line, 329 px at 1440 vs Georgian 327 px; drops only 'for its sound'); 1280: all candidates and Georgian baseline are 2 lines (not a breach)",
+         "R2": "one Medium + one cheap owned Low (polish leftovers); no V-0.5 scope attached",
+         "R3": "1280 open LAYOUT baseline = c-round-142/out/c142-1280-r1.json states.*.measure; rule 'no worse than baseline' (C-R142-03 pre-existing proven by Georgian-swap control)",
+         "R4": "exempt deltas vs 6e9f9b1 baseline: header label x/w -45/+43 (flex-1, shorter h2), apply +22 w, toggle +2 w (w-fit)",
+         "R5": "corrections: D-29z107 R8 was wrong ('stems' cannot match kind label 'Stem'); LIBRARY-LABELS l.518 aria-label is the collection toggle (folders have no toggle); A round-142 deviations D1-D7 ratified"
+        }
        }
       ],
       "rulings_d29z103": {
@@ -15638,14 +15684,15 @@
   {
    "id": "DEFERRED-LOW-POLISH",
    "severity": "info",
-   "status": "open - pointer: 185 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped",
+   "status": "open - pointer: 201 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped",
    "title": "deferred Low findings (not lost)",
    "evidence": "backlog.json deferred_low_polish",
    "round110_note": "B round 109 -> 110 planning: +C-R109-OBS-01, +GATE109-F3-BIOME-IGNORE-FIXTURE (141 entries)",
    "round111_note": "B round 110 -> 111 planning: +A-R110-S3-STALE-ARM, +GATE110-S1-NONCHROMIUM-MOUSE-CLICK, +GATE110-S3-TOGGLE-ARIA-EXPANDED",
    "round118_note": "B round 117 -> 118 planning: +GATE117-S3-START-REF-NOT-CLEARED (160 entries)",
    "count_round123_planning": 164,
-   "round132_note": "B round 131 -> 132 planning: +C-R131-01, +GATE131-S1-V6-WORDING, +GATE131-S2-REVOKE-OBJECTURL-RESTORE (185 entries)"
+   "round132_note": "B round 131 -> 132 planning: +C-R131-01, +GATE131-S1-V6-WORDING, +GATE131-S2-REVOKE-OBJECTURL-RESTORE (185 entries)",
+   "round143_note": "B round 142 -> 143 planning: +C-R142-02, +C-R142-03 (201 entries; pointer count corrected from the stale 185)"
   },
   {
    "id": "PROD-SSR-NUL",
@@ -16292,7 +16339,7 @@
   {
    "id": "GATE128-S1-MIXED-LANGUAGE",
    "severity": "medium (scheduling note, not a defect of round 128)",
-   "status": "addressed by schedule: V-0.2 complete (r129-r133); V-0.3 complete (r134-r137, 7e6202b); V-0.4a round 138, then V-0.4b..e, V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions per D-29z103 R5 | round 139: V-0.4b done (3f2c187); V-0.4c round 140 (D-29z105) | round 140: V-0.4c done (6ebbf3e); V-0.4d round 141 (D-29z106)",
+   "status": "addressed by schedule: V-0.2 complete (r129-r133); V-0.3 complete (r134-r137, 7e6202b); V-0.4a round 138, then V-0.4b..e, V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions per D-29z103 R5 | round 139: V-0.4b done (3f2c187); V-0.4c round 140 (D-29z105) | round 140: V-0.4c done (6ebbf3e); V-0.4d round 141 (D-29z106) | round 142: V-0.4e C FAIL (C-R142-01 Medium, layout only; texts PASS); fix-up round 143 (D-29z108)",
    "title": "Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)",
    "source": "gates/round-128/review.md suggestion 1",
    "evidence": "gates/round-128/review.md"
@@ -16817,7 +16864,7 @@
   },
   {
    "id": "GATE141-S1-ST39-WEAKENED",
-   "status": "scheduled round 142 (owned file; restore exact toBe(17))",
+   "status": "closed (C round 142 AN-REVIEW PASS: ST39 exact toBe(17) restored; evidence c-round-142.json; publishes with rounds 142+143)",
    "to": "current-task.md round 142 section 3.1",
    "evidence": "gates/round-141/review.md suggestion 1"
   },
@@ -16835,13 +16882,13 @@
   },
   {
    "id": "GATE141-S4-LIBRARY-MIXED",
-   "status": "partly scheduled: library kind/folder labels round 142 (LB1-LB3); dock fallback and library copy V-0.5",
+   "status": "library kind/folder labels done in round 142 (C LIBRARY-LABELS PASS, browserVerified); dock fallback, library own copy and collection toggle suffix remain V-0.5",
    "to": "current-task.md round 142 section 1.3",
    "evidence": "gates/round-141/review.md suggestion 4"
   },
   {
    "id": "GATE141-S5-DOC117-STATUS",
-   "status": "scheduled round 142 (doc 117 granted)",
+   "status": "closed (C round 142 AN-REVIEW PASS: doc 117 l.4 + TODO l.57 only; publishes with rounds 142+143)",
    "to": "current-task.md round 142 section 2",
    "evidence": "gates/round-141/review.md suggestion 5"
   },
@@ -16874,6 +16921,57 @@
    "status": "blocked: backend unavailable in cloud (open backend evidence)",
    "to": "backend-enabled check",
    "evidence": "c-round-141.json blocked"
+  },
+  {
+   "id": "C-R142-01",
+   "severity": "medium",
+   "status": "open - fix-up dispatched round 143 (D-29z108 R1)",
+   "to": "A round 143",
+   "title": "at 1440 with a video clip selected the English clipGainVideoReason wraps to 2 lines (baseline 1); video placeholder moves d=(+16,-8,-32,0)",
+   "steps": "Fresh /studio-lab 1440x900, Snap off; add demo-middle-east to Music and demo-hero-music to Stems; load clip-4s-vp9-opus.webm; click the video clip header; measure [data-testid=arrangement-detail-clip-gain-reason]",
+   "evidence": "c-round-142/shots/video-1440-r3.png, c-round-142/out/layout-1440-r3.json; A STOP a-round-142.md; candidates a-round-142/probe/out/video-reason-candidates-a142.json"
+  },
+  {
+   "id": "A-R142-D2-POLISH-LEFTOVERS",
+   "severity": "low",
+   "status": "folded into round 143 (owned stage, costs little; PL1/PL2; guard discrimination checked by m89/m90 on the guard line itself)",
+   "to": "A round 143",
+   "title": "detail-panel-polish it titles still say 'in Georgian'; not.toContain('end, წმ') can never fail",
+   "evidence": "a-round-142.md D2 + reviewer Lows"
+  },
+  {
+   "id": "GATE-142-SKIPPED",
+   "severity": "info",
+   "status": "open_root",
+   "to": "root",
+   "title": "Round 142 root gate skipped (C FAIL); round-142 code (22 paths) is uncommitted in the tree; rounds 142+143 publish together after C PASS",
+   "evidence": "gates/gate-round-142.json"
+  },
+  {
+   "id": "G142-3-FAKE-BEARER-403",
+   "severity": "info",
+   "status": "blocked: backend unavailable in cloud (open backend evidence)",
+   "to": "backend-enabled check",
+   "evidence": "c-round-142.json blocked"
+  },
+  {
+   "id": "A-R142-DEVIATIONS-D1-D7",
+   "severity": "info",
+   "status": "ratified (B, D-29z108 R5): D1 57th pin line PENDING_HIDDEN_HINT; D2 flipped guards (leftovers fixed round 143); D3 LB-SEARCH 'stem'; D4 Biome rewraps; D5 shared helper; D6 l.702 block is the formatter map (reviewer: A right); D7 helper rename",
+   "evidence": "a-round-142.md, c-round-142.json AN-REVIEW"
+  },
+  {
+   "id": "ARCH-R142-LIBRARY-SEARCH-KEYWORDS",
+   "severity": "info",
+   "status": "signal -> V-0.5 forward constraint LIB-SEARCH-KEYWORDS (not scheduled alone); reviewer verdict keep for now",
+   "title": "library.ts matchesLibraryQuery uses the display label LIBRARY_KIND_LABELS as search text, so copy edits change search results (m86 proves it)",
+   "evidence": "a-round-142.md code review Architecture note"
+  },
+  {
+   "id": "B-R142-SPEC-CORRECTIONS",
+   "severity": "info",
+   "status": "recorded (D-29z108 R5): R8 'stems' claim wrong; LIBRARY-LABELS l.518 is the collection toggle; B round-141 1280 'collapsed' baseline record was actually the open toggle after one click",
+   "evidence": "c-round-142.json notesForB"
   }
  ],
  "tech_lead_notes": [
@@ -20665,6 +20763,26 @@
    "cause": "inferred, not measured vs round 140: existing flex-1 truncate + 12 px nesting indent in the 224 px header; not introduced by V-0.4d (LAYOUT 0 px)",
    "deferred_reason": "user decision 2026-10-23",
    "added": "2026-10-24 B round 141 -> 142 planning (D-29z107)"
+  },
+  {
+   "id": "C-R142-02",
+   "title": "library search 'stems'/'Stems' returns 0 although the folder is labelled 'Stems' (kind label 'Stem'); 'sfx' also matches the Music previews via their collection label",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "source": "c-round-142.json bugs[1]",
+   "evidence": "c-round-142/out/lib142-1440-r1.json, lib142-1280-r1.json",
+   "repro": "Fresh /studio-lab; type 'stems' in the library search -> 0 results",
+   "note": "not a regression (Georgian baseline had the same gap); may be fixed earlier in V-0.5 when it owns library.ts (LIB-SEARCH-KEYWORDS)"
+  },
+  {
+   "id": "C-R142-03",
+   "title": "at 1280x720 with the detail panel open (120 px) the bottom line of the detail content is clipped/scrolls (contentScroll 95-98 vs 83)",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "source": "c-round-142.json bugs[2]",
+   "evidence": "c-round-142/out/layout-1280-r1.json, c-round-142/shots/{none,single,multi}-1280-r1.png and *-geoswap-1280-r1.png",
+   "repro": "Fresh /studio-lab 1280x720; expand the detail panel; select none / one clip / two clips",
+   "note": "pre-existing (identical with Georgian strings); related to DETAIL-REASON-FIT and DUX-R-3"
   }
  ],
  "baseline_tree_at_round108": {
@@ -21803,5 +21921,13 @@
   "grants": "tmp/studio-real-loop/b-round-141-r142-grants.txt (22; last 2 new)",
   "pin_lines": "tmp/studio-real-loop/b-round-141-r142-pin-lines.txt (56)",
   "browser_baseline": "tmp/studio-real-loop/b-round-141/out/detail-baseline-6e9f9b1.json"
+ },
+ "baseline_tree_at_round143": {
+  "head": "6e9f9b1e97d67703ba34e8b2a260a0a5215c3506",
+  "tree": "dirty: the 22 round-142 paths (20 M + 2 ??) uncommitted because gate 142 skipped (C FAIL)",
+  "frozen_list": "tmp/studio-real-loop/b-round-142-r143-tree-sha256.txt (955)",
+  "grants": "tmp/studio-real-loop/b-round-142-r143-grants.txt (8)",
+  "start_hashes": "tmp/studio-real-loop/b-round-142-r143-granted-start-sha256.txt",
+  "start_copies": "tmp/studio-real-loop/b-round-142/r143-granted-start/"
  }
 }

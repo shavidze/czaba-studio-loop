@@ -1,0 +1,542 @@
+{
+ "taskStatus": "FAIL",
+ "passed": [
+  "T142-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "DETAIL-TEXT",
+  "DETAIL-STATUS",
+  "CLIP-GAIN-AUDIO",
+  "LIBRARY-LABELS",
+  "GEO-COUNT",
+  "REG-141",
+  "G142-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [
+  "LAYOUT"
+ ],
+ "inconclusive": [
+  "LAYOUT-1280-open"
+ ],
+ "blocked": [
+  "G142-3 fake-Bearer 403 check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "C-R142-01",
+   "severity": "medium",
+   "steps": [
+    "Fresh /studio-lab at 1440x900, Snap off",
+    "Add demo-middle-east to Music at 1 s and demo-hero-music to Stems at 1 s (Enter from library)",
+    "Load media clip-4s-vp9-opus.webm via the video input",
+    "Click the video clip header to select it",
+    "Measure [data-testid=arrangement-detail-clip-gain-reason]"
+   ],
+   "expected": "§5 LAYOUT: video reason stays on 1 line (B baseline 1 line, box 641.5,779.5,327x16) and no other node moves x",
+   "actual": "English clipGainVideoReason \"A video clip has no Clip Gain — for its sound use the track Volume/Mute\" renders on 2 lines (box 609,771.5,392x32; d=(−32.5,−8,+65,+16)); \"Volume/Mute\" wraps alone. Video placeholder moves d=(+16,−8,−32,0). In-page Georgian-swap control on the same DOM gives 1 line and 0 px delta vs B baseline in all 5 states, so the English text is the cause. A raised this as a STOP; B has not ruled. A measured shorter 1-line candidates (data, not C recommendation): a-round-142/probe/out/video-reason-candidates-a142.json",
+   "evidence": "c-round-142/shots/video-1440-r3.png, c-round-142/shots/video-geoswap-1440-r3.png, c-round-142/out/layout-1440-r3.json, c-round-142/out/c142-1440-r3.json"
+  },
+  {
+   "id": "C-R142-02",
+   "severity": "low",
+   "steps": [
+    "Fresh /studio-lab (1440 or 1280)",
+    "Type \"stems\" (or \"Stems\") into the library search"
+   ],
+   "expected": "Task R8/§3.2: \"stems\" matches the stem sources by kind; the folder the user sees is labelled \"Stems\"",
+   "actual": "0 results for \"stems\"/\"Stems\" (kind label is \"Stem\", folder label is not in the haystack). \"stem\" → 4 stems. Not a regression: at baseline \"სტემები\" did not match \"სტემი\" either. Also observed (pre-existing, data): \"sfx\" also returns the two Music previews because their collection label contains \"SFX\". Route: deferred_low_polish / V-0.5 search-keywords task (matches reviewer Architecture note)",
+   "evidence": "c-round-142/out/lib142-1440-r1.json (search), c-round-142/out/lib142-1280-r1.json"
+  },
+  {
+   "id": "C-R142-03",
+   "severity": "low",
+   "steps": [
+    "Fresh /studio-lab at 1280x720",
+    "Expand the detail panel (starts collapsed, 36 px; opens to 120 px)",
+    "Select nothing / one clip / two clips"
+   ],
+   "expected": "§5: contentScroll shows no overflow and clippedBelowPanel is empty",
+   "actual": "contentScroll 95–98 vs client 83; bottom line clipped below the panel (none: both \"Select a clip first\" reasons; single/video: \"The source file stays unchanged\"; multi: the selected-clips note). Range multi reason and video reason take 2 lines at 1280. Georgian-swap control gives identical clipping, scroll heights and line counts → pre-existing, not caused by V-0.4e",
+   "evidence": "c-round-142/out/layout-1280-r1.json, c-round-142/shots/{none,single,multi}-1280-r1.png and *-geoswap-1280-r1.png"
+  }
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T19:21:36.5973067Z",
+  "round": 142,
+  "attempt": 1,
+  "store": 200
+ },
+ "georgianCounts": {
+  "net": {
+   "1280": 0,
+   "1440": 0
+  },
+  "detailPanel": "only selected clip source title \"Middle East — საჯარო preview\" (text + title, R9 data)",
+  "status": 0,
+  "undoRedo": "only source title inside \"Undo: Add — CZABA hero — საჯარო preview\" (data)",
+  "libraryKindChips": 0,
+  "libraryFolderLabels": 0,
+  "subtractions": [
+   "source titles (data): detail header/content, status \"… added\", selected-clip line, clip title, Undo: Add title",
+   "collection labels \"CZABA საჯარო preview + სინთეზური SFX\" / \"სინთეზური დემო · ღამის პულსი\" (tree, option context, titles)",
+   "demo badge \"დემო კოლექცია — ავტორიზაცია არ სჭირდება\"",
+   "library panel own copy: ბიბლიოთეკა, collapse, search aria/placeholder, tree aria, ყველა ფაილი, notice, list aria ხმები, preview aria/wave/toggle/add, აქტიური ხაზი, separator, collection toggle suffix \"— დაკეცვა/გაშლა\", option loading text",
+   "video dock: caption, empty box text, video aria-labels, expand",
+   "document.title \"Studio Lab — დემო სამუშაო სივრცე | CZABA\""
+  ],
+  "round141Surfaces": {
+   "file": "c-round-142/out/geogroup142.json",
+   "groupRows": 1,
+   "scannedTextAndAttrs": {
+    "1280": 111,
+    "1440": 109
+   },
+   "hits": 0,
+   "scope": "group row, track headers, master, track meters after Ctrl+G on Music+Stems"
+  }
+ },
+ "measurements": {
+  "layout1440": {
+   "breaches": [
+    {
+     "st": "video",
+     "id": "arrangement-detail-clip-gain-reason",
+     "kind": "more-lines",
+     "lines": [
+      1,
+      2
+     ]
+    },
+    {
+     "st": "video",
+     "id": "arrangement-detail-clip-gain-reason",
+     "kind": "line-limit",
+     "lim": 1,
+     "lines": 2
+    }
+   ],
+   "notes": [
+    {
+     "st": "none",
+     "id": "arrangement-detail-header-label",
+     "kind": "other-node-moved",
+     "d": [
+      -45,
+      0,
+      43,
+      0
+     ],
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "st": "single",
+     "id": "arrangement-detail-header-label",
+     "kind": "other-node-moved",
+     "d": [
+      -45,
+      0,
+      43,
+      0
+     ],
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "st": "multi",
+     "id": "arrangement-detail-header-label",
+     "kind": "other-node-moved",
+     "d": [
+      -45,
+      0,
+      43,
+      0
+     ],
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "st": "video",
+     "id": "arrangement-detail-header-label",
+     "kind": "other-node-moved",
+     "d": [
+      -45,
+      0,
+      43,
+      0
+     ],
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "st": "video",
+     "id": "arrangement-detail-video-placeholder",
+     "kind": "other-node-moved",
+     "d": [
+      16,
+      -8,
+      -32,
+      0
+     ],
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "st": "video",
+     "id": "arrangement-detail-clip-gain-reason",
+     "kind": "other-node-moved",
+     "d": [
+      -32.5,
+      -8,
+      65,
+      16
+     ],
+     "lines": [
+      1,
+      2
+     ]
+    },
+    {
+     "st": "videoMulti",
+     "id": "arrangement-detail-header-label",
+     "kind": "other-node-moved",
+     "d": [
+      -45,
+      0,
+      43,
+      0
+     ],
+     "lines": [
+      1,
+      1
+     ]
+    }
+   ],
+   "geoSwapVsBaselineMaxDelta": 0,
+   "applyWidthDelta": 22,
+   "toggleWidthDelta": 2,
+   "headerLabelDelta": [
+    -45,
+    0,
+    43,
+    0
+   ]
+  },
+  "layout1280": {
+   "breaches_preexisting_by_geoSwap": [
+    {
+     "st": "multi",
+     "id": "arrangement-detail-reason",
+     "kind": "line-limit",
+     "lim": 1,
+     "lines": 2
+    },
+    {
+     "st": "video",
+     "id": "arrangement-detail-clip-gain-reason",
+     "kind": "line-limit",
+     "lim": 1,
+     "lines": 2
+    }
+   ],
+   "notes": [
+    {
+     "st": "none",
+     "kind": "contentScroll-overflow",
+     "v": [
+      96,
+      83,
+      982,
+      982
+     ],
+     "base": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "st": "none",
+     "kind": "clippedBelowPanel",
+     "v": [
+      "arrangement-detail-reason:Select a clip first",
+      "arrangement-detail-clip-gain-reason:Select a clip first"
+     ],
+     "geoSwapClipped": [
+      "arrangement-detail-reason:ჯერ აირჩიე კლიპი",
+      "arrangement-detail-clip-gain-reason:ჯერ აირჩიე კლიპი"
+     ],
+     "geoSwapScroll": [
+      96,
+      83,
+      982,
+      982
+     ]
+    },
+    {
+     "st": "single",
+     "kind": "contentScroll-overflow",
+     "v": [
+      98,
+      83,
+      982,
+      982
+     ],
+     "base": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "st": "single",
+     "kind": "clippedBelowPanel",
+     "v": [
+      "P:The source file stays unchange"
+     ],
+     "geoSwapClipped": [
+      "P:წყარო უცვლელი რჩება"
+     ],
+     "geoSwapScroll": [
+      98,
+      83,
+      982,
+      982
+     ]
+    },
+    {
+     "st": "multi",
+     "kind": "contentScroll-overflow",
+     "v": [
+      95,
+      83,
+      982,
+      982
+     ],
+     "base": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "st": "multi",
+     "kind": "clippedBelowPanel",
+     "v": [
+      "P:The selected clips move togeth"
+     ],
+     "geoSwapClipped": [
+      "P:ჯგუფი ერთად გადაადგილდება · De"
+     ],
+     "geoSwapScroll": [
+      95,
+      83,
+      982,
+      982
+     ]
+    },
+    {
+     "st": "video",
+     "kind": "contentScroll-overflow",
+     "v": [
+      98,
+      83,
+      982,
+      982
+     ],
+     "base": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "st": "video",
+     "kind": "clippedBelowPanel",
+     "v": [
+      "P:The source file stays unchange"
+     ],
+     "geoSwapClipped": [
+      "P:წყარო უცვლელი რჩება"
+     ],
+     "geoSwapScroll": [
+      98,
+      83,
+      982,
+      982
+     ]
+    },
+    {
+     "st": "videoMulti",
+     "kind": "contentScroll-overflow",
+     "v": [
+      95,
+      83,
+      982,
+      982
+     ],
+     "base": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "st": "videoMulti",
+     "kind": "clippedBelowPanel",
+     "v": [
+      "P:The selected clips move togeth"
+     ],
+     "geoSwapClipped": [
+      "P:ჯგუფი ერთად გადაადგილდება · De"
+     ],
+     "geoSwapScroll": [
+      95,
+      83,
+      982,
+      982
+     ]
+    }
+   ],
+   "toggle": {
+    "collapsedAtLoad": "Expand details / Expand ▸ / collapsed · 120 px / 36 px",
+    "open": "Collapse details / Collapse ▾ / 120 px / 120 px"
+   },
+   "baselineCompare": {
+    "collapsedPanelAtLoad": {
+     "c": [
+      288,
+      615,
+      992,
+      36
+     ],
+     "b": [
+      288,
+      615,
+      992,
+      36
+     ],
+     "delta": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "openToggle": {
+     "c": "x1192 w76 right1268",
+     "b": "x1194 w74 right1268 (Georgian დაკეცვა ▾)",
+     "delta": "x −2, w +2 (w-fit), right edge 0"
+    },
+    "collapsedToggle": "x1199 w69 \"Expand ▸\" (no B collapsed-toggle box exists)"
+   }
+  },
+  "clipGainAudio": [
+   {
+    "base": -22.57,
+    "cut": -42.61,
+    "restored": -22.59,
+    "drop": 20.04,
+    "restoreDelta": -0.02,
+    "winFrames": [
+     102,
+     103,
+     103
+    ]
+   },
+   {
+    "base": -22.58,
+    "cut": -42.58,
+    "restored": -22.61,
+    "drop": 20,
+    "restoreDelta": -0.03,
+    "winFrames": [
+     102,
+     102,
+     102
+    ]
+   },
+   {
+    "base": -22.58,
+    "cut": -42.62,
+    "restored": -22.59,
+    "drop": 20.04,
+    "restoreDelta": -0.01,
+    "winFrames": [
+     102,
+     103,
+     102
+    ]
+   }
+  ],
+  "detailStatusCodepoints": {
+   "invalid": [
+    "U+2212",
+    "U+2026"
+   ],
+   "multi": [
+    "U+2014",
+    "U+2212"
+   ]
+  },
+  "undoRedoTitles": {
+   "rangeApply": "no history entry (Undo stays \"Undo: Add — …\")",
+   "clipGainMulti": "Undo: Clip Gain / Redo: Clip Gain (same text as rounds 13x–141 outputs)"
+  },
+  "vitestTargeted": {
+   "files": 82,
+   "tests": 1294,
+   "passed": 1294,
+   "failed": 0
+  }
+ },
+ "invalidRuns": [
+  {
+   "run": "c142-1440-r1",
+   "reason": "C harness: page.fill cannot type into input[type=number]; fixed to keyboard typing"
+  },
+  {
+   "run": "c142-1440-r2",
+   "reason": "C harness: per-clip time-selection detection used the all-tracks lane-range testid; the range was visibly drawn (shot single-range-applied-1440-r2.png); detection fixed in r3"
+  }
+ ],
+ "notesForB": [
+  "LAYOUT failed at 1440 video state only (C-R142-01, measurements.layout1440).",
+  "LAYOUT-1280-open inconclusive: B stored no open 1280 baseline (its 1280 \"collapsed\" record is actually the open toggle after one click, label \"დეტალების დაკეცვა\"). C Georgian-swap control gives identical clippedBelowPanel/contentScroll/line counts → pre-existing (C-R142-03). New 1280 open baseline = out/c142-1280-r1.json states.*.measure.",
+  "C-R142-01 is the A STOP item; §8 routes C FAIL Medium → bounded V-0.4e fix-up (string choice is B's).",
+  "LIBRARY-LABELS mixed attribute: the l.518 toggle is the COLLECTION toggle, not a folder toggle. Exact text: \"სინთეზური დემო · ღამის პულსი — დაკეცვა\" / \"… — გაშლა\", \"CZABA საჯარო preview + სინთეზური SFX — დაკეცვა\". Folders have no toggle; their labels Music/SFX/Music/Stems are English.",
+  "A deviations D1–D7 observed consistent with diff; D3 confirmed in browser (\"stems\" → 0).",
+  "Typing \"abc\" in the number input yields value \"\" in Chromium; Enter shows the §1.1 invalid text (same path as \"e\").",
+  "Ableton correspondence: unconfirmed for both rows (Clip View and Browser chapters not captured, §6); CZABA requirement rated separately.",
+  "Single-clip Clip Gain status embeds the source title (data): \"Clip Gain: Middle East — საჯარო preview — −20.0 dB.\""
+ ]
+}

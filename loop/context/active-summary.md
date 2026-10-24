@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T18:30:49.313Z)
+# Active loop summary (2026-10-24T19:35:15.468Z)
 
-- backlog.json 1295 KB -> active view 169 KB
-- status: G_ROOT_GATE round 141
-- servers: `{"checkedUtc":"2026-10-24T18:14:20.2573144Z","round":141,"attempt":1,"store":200}`
+- backlog.json 1304 KB -> active view 170 KB
+- status: G_ROOT_GATE round 142
+- servers: `{"checkedUtc":"2026-10-24T19:21:36.5973067Z","round":142,"attempt":1,"store":200}`
 - last publication: 6e9f9b1e97d67703ba34e8b2a260a0a5215c3506 (rounds 141-141)
-- last root gate: round 141 published - commit 6e9f9b1e97d67703ba34e8b2a260a0a5215c3506 pushed
+- last root gate: round 142 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -293,9 +293,17 @@
 - G138-3-FAKE-BEARER-403 / info / open backend evidence: BLOCKED (backend unavailable in cloud); re-check in a backend-enabled run / fake-Bearer 403 sub-check of the purchase-protection row
 - G139-3-FAKE-BEARER-403 / info / open backend evidence: BLOCKED (backend unavailable in cloud); re-check in a backend-enabled run / fake-Bearer 403 sub-check of the purchase-protection row
 - C-R139-NOTES-HARNESS / info / applied as harness notes in round 140 task section 5 / track fold keeps clips visible at 27 px (not hidden); group fold renders 0 clips; video Original sound line needs a row >= 80 px; a plain cl
-- GATE140-S1-DOC116-STATUS / low / folded into round 141 (doc 116 l.4/76/80) / doc 116 status still says the browser check is pending
-- GATE140-S3-ST39-HARDCODED-COUNT / low / folded into round 141 (strings.test ST39 derived count) / ST39 expect(outputs.length).toBe(17) breaks on every new formatter without adding detection
 - GATE140-S4-PLURAL-BRANCH / info / acknowledged: tested (HM4 + C browser '1 clip'); 0 clips reads '0 clips' (correct); no action / one-clip vs many-clips choice in ArrangementGroupHeader is a new caller branch
+- GATE141-S1-ST39-WEAKENED / - / scheduled round 142 (owned file; restore exact toBe(17)) / 
+- GATE141-S2-SSR-CONSOLE-SPY / - / forward constraint V-0.5 (route + SSR test owned there) / 
+- GATE141-S3-ST40-META-PIN / - / forward constraint V-0.5 / 
+- GATE141-S4-LIBRARY-MIXED / - / partly scheduled: library kind/folder labels round 142 (LB1-LB3); dock fallback and library copy V-0.5 / 
+- GATE141-S5-DOC117-STATUS / - / scheduled round 142 (doc 117 granted) / 
+- ARCH-R141-DEFAULT-NAME-SEEDS / - / signal - appended to b-round-136-checkpoint-request.md (round-141 addendum); reviewer: keep / 
+- ARCH-R141-SSR-TEST-HELPER / - / signal (extract when a third SSR test appears) / 
+- C-R141-DEMO-BADGE-SUBTRACTION / - / confirmed by B (collection.ts badge = V-0.5 collection copy, area_addition_d29z96) / 
+- A-R141-DEVIATIONS-1-4 / - / ratified (C AN-REVIEW; DS2 codepoint-built regex kept: C verified equality, reviewer endorsed, keeps the token grep empty) / 
+- G141-3-FAKE-BEARER-403 / - / blocked: backend unavailable in cloud (open backend evidence) / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
