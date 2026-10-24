@@ -1,0 +1,101 @@
+{
+ "round": 135,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T12:26:10.9263274Z",
+  "round": 135,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T135-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "TRANSPORT",
+  "FOLLOW",
+  "ZOOM-FIT",
+  "RULER-OVERVIEW",
+  "LOOP",
+  "TEMPO",
+  "GEO-COUNT",
+  "LAYOUT",
+  "REG-134",
+  "G135-3",
+  "PX-NET/REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G135-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "C-R135-01",
+   "severity": "low",
+   "steps": [
+    "/studio-lab, fresh project, no loop",
+    "Read the Loop row hint (arrangement-loop-strip) and the Transport ↻ Loop button title"
+   ],
+   "expected": "The same key notation for the same command (Live 12 §42 lists Loop Selection as Ctrl/Cmd+L)",
+   "actual": "Brace hint TR13 says 'press ↻ Loop (Ctrl+L)' while TR11/TR12 say '(Ctrl/Cmd+L)'. Carried over from the Georgian original and dictated verbatim by §1.1; not a regression of this round",
+   "evidence": "c-round-135/out/c135-1440-r4-all.json rows LOOP no-loop / TRANSPORT a-none; c-round-135/shots/tr-a-1440-r4.png; strings.ts braceHint vs selectionTitle/toggleTitle",
+   "disposition": "deferred_low_polish (wording)"
+  }
+ ],
+ "georgianCounts": {
+  "1440": {
+   "steps": 46,
+   "net": 0
+  },
+  "1280": {
+   "steps": 45,
+   "net": 0
+  },
+  "subtracted": [
+   "clip-added status: demo source title ('ღამის პულსი · პულსი') + track name ('სტემები') — library/track data, V-0.4/V-0.5",
+   "track names (მუსიკა, სტემები, ვიდეო) in statuses",
+   "outside measured scope and accepted: range readout under the lanes ('… Delete = წაშლა, სიცარიელე რჩება …', V-0.3d), selected-clip readout, library, detail panel, video dock, header 'სამუშაო სივრცე', demo badge"
+  ]
+ },
+ "invalidRuns": [],
+ "harnessIterations": "r1 (TRANSPORT 1440, locator fix), r2 both viewports and r3 1440 (harness errors: wheel at scrollLeft 0, dblclick onto the sticky header, Escape does not clear a range, raw detail value not formatted, overview whole-second rounding). These are C harness defects, not environment-invalid runs; the valid evidence is r4 (both viewports, 0 fails) plus r3 rows at 1440.",
+ "measurements": {
+  "transportEffects": "both viewports: clip Delete leaves gap (stems removed, sfx kept), Undo restores; range 4–8 Split -> stems 0+4, 4+4, 8+8; range Delete -> stems 0+4, 8+8, sfx kept; all-tracks Delete -> sfx 5–7 removed too; Undo restores each; Back to start 3 s -> 0",
+  "follow": "pps 320: on -> scrollLeft 0->590 (1440) / 970 (1280) with playhead in view; wheel during playback -> paused, NV17 observed, view still 1.25 s; click1 on+NV25 follows; click2 off+NV24 view still 2.3 s; click3 on+NV26 follows",
+  "zoomFit": "Fit pps 57.1/47.1, sl 0, 16 s = 914/754 px <= cw; Z range 3.998–7.996 -> pps 137.8/113.8; X -> exact Fit view; X -> exact start view (40 px/s, sl 0); NV9<->NV10 switch",
+  "ruler": "valuetext start follows scroll (whole-second rounding, pre-existing Math.round); overview ArrowRight +5 s (439 px at 87.9 px/s); ruler double-click without selection = Fit",
+  "loop": "Snap off: ArrowRight 4–8 -> 4.1–8.1; Shift+ArrowRight -> 4.1–8.2",
+  "tempo": "BPM 120: clips unchanged (sfx@5+2, stems@0+16); metronome on/off with English statuses",
+  "layout": "only text-width deltas: '/ end' narrower -> Undo/Redo/Split/Loop x −7.5..−8.5, same size; Delete 89->88 w; grid select from round 134. Transport bar and tempo row sw==cw both viewports with/without range; 1280 bar two lines pre-existing (tempo row y 258.5 equals baseline)",
+  "transportNoneState": "true empty selection (lane click) at both viewports: Split/Delete disabled, all (a) texts exact (out/c135-*-r5-none.json)",
+  "followNoPauseWhenStopped": "wheel scroll while stopped: follow mode stays on, title NV3 (RULER-OVERVIEW scrolled, both viewports)"
+ },
+ "abletonCorrespondence": {
+  "Follow 3 states": "confirmed (Live 12 §6.2 text + observed effect); resume subset = deliberate difference",
+  "Z / X": "confirmed (§6.2, §42)",
+  "ruler double-click Fit / zoom": "confirmed (§6.1); 'Fit' as a Live name unconfirmed",
+  "Split Ctrl/Cmd+E": "confirmed (§42); playhead split without selection = CZABA addition",
+  "Delete vs Cut Time": "deliberate difference (user decision 2026-10-11)",
+  "loop nudge 0.1 s": "deliberate difference (Live is grid-based)",
+  "BPM/metronome": "not re-checked this round"
+ },
+ "notesForB": [
+  "Fit/X pressed during playback pauses Follow (mode paused, title NV2) but the status region shows only the Fit/X status; NV17 is never rendered (same-tick replacement, inference). Unchanged code; task text says Fit's status replaces NV17. Info, no bug filed.",
+  "Z frames the range with margins (4 s range = ~48% of the viewport, centred). Unchanged code; the range is fully visible.",
+  "The 'rows' field in my bar measurement counts separators too; wrap was judged by element y vs the c-round-125 baseline instead.",
+  "Strings-split checkpoint still unanswered; A's reviewer Architecture note (split strings.ts after V-0.3d, keep ~/lib/arrangement/strings re-export) is passed on.",
+  "doc 110 changed only l.4/132/136; doc 111 names C round 135 as still to come — B/root may update after this PASS."
+ ]
+}

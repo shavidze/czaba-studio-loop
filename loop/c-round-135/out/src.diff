@@ -1,0 +1,461 @@
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/lib/arrangement/strings.ts	2026-10-24 12:07:37.768093689 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 12:22:28.112668275 +0000
+@@ -138,6 +138,15 @@
+   loopRemoved: 'The loop range was shorter than 0.1 s after the deletion, so it was removed.',
+   pasteMissing: 'Paste failed: the source or track is unavailable. Nothing changed.',
+   clipboardEmpty: 'The clipboard is empty — Copy or Cut first.',
++  splitRangeTitle: 'Split at both edges of the time selection (Ctrl/Cmd+E)',
++  splitPlayheadTitle: 'Split at the playhead (Ctrl/Cmd+E)',
++  deleteRangeHint:
++    'Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
++  deleteRangeAllTracksHint:
++    'Delete time selection on all tracks — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
++  deleteClipTitle: 'Delete clip — leaves a gap (Delete)',
++  deleteClipLabel: '⌫ Delete — the selected clip; leaves a gap',
++  deleteButton: '⌫ Delete',
+   historySplitClips: (count: number): string => `Split (${count})`,
+   splitClipsDone: ({ count, time }: { count: number; time: string }): string =>
+     count === 1
+@@ -204,6 +213,9 @@
+   webAudioUnavailable:
+     'Web Audio is not available in this browser — playback and export will not work.',
+   nothingToPlay: 'Nothing to play — add a clip from the library first.',
++  backToStartLabel: 'Back to start',
++  backToStartTitle: 'Back to start (0)',
++  projectEndPrefix: '/ end',
+   playPastEnd: ({ position, end }: { position: string; end: string }): string =>
+     `Playhead (${position}) is past the end of the project (${end}) — there is nothing to play here. Home returns to 0.`,
+ };
+@@ -244,8 +256,16 @@
+   on: 'Loop is on.',
+   off: 'Loop is off; the range is kept.',
+   historyRange: 'Loop range',
++  selectionTitle: 'Loop the time selection (Ctrl/Cmd+L)',
++  toggleTitle: 'Loop on / off (Ctrl/Cmd+L)',
++  braceHint: 'Loop: make a time selection and press ↻ Loop (Ctrl+L)',
++  braceKeyboardHint: '← → nudge · Shift + ← → length',
++  braceStartTitle: 'Loop start',
++  braceEndTitle: 'Loop end',
+   replaced: (span: string): string => `Loop replaced with the new range: ${span}.`,
+   created: (span: string): string => `Loop created and turned on: ${span}.`,
++  braceTitle: (span: string): string =>
++    `${span} · the bar moves the loop; the edges change its length`,
+ };
+ 
+ export const studioMoveStrings = {
+@@ -282,6 +302,9 @@
+ export const studioTempoStrings = {
+   emptyHint: 'Bars: set a BPM — grid only, audio is not stretched',
+   cleared: 'Tempo cleared — the bars ruler is hidden. Audio is unchanged.',
++  fieldLabel: 'Project tempo (BPM)',
++  fieldTitle:
++    'Project tempo — bars grid only; audio is not stretched (no time-stretch). Enter — save · Esc — cancel · empty — hide the bars',
+   invalid: ({ min, max }: { min: number; max: number }): string =>
+     `Tempo must be ${min}–${max} BPM (e.g. 90 or 92.5) — not changed.`,
+   set: ({ bpm, beatsPerBar }: { bpm: string; beatsPerBar: number }): string =>
+@@ -291,6 +314,7 @@
+ export const studioMetronomeStrings = {
+   needsTempoTitle: 'Metronome — set a BPM first',
+   off: 'Metronome is off.',
++  toggleLabel: 'Metronome',
+   title: (beatsPerBar: number): string =>
+     `Metronome — a click on every beat during playback (${beatsPerBar}/4, the first beat of each bar is louder). Master volume and Mute also apply to it. Not included in the export.`,
+   on: ({ bpm, beatsPerBar }: { bpm: string; beatsPerBar: number }): string =>
+@@ -298,7 +322,39 @@
+ };
+ 
+ export const studioViewStrings = {
++  followOffTitle: 'Follow off: the view does not follow playback',
++  followPausedTitle: 'Follow paused by manual navigation — press Follow or Play',
++  followOnTitle: 'Follow: the view follows the playback position',
++  zoomSliderLabel: 'Zoom (px/s)',
++  zoomSliderTitle: 'Zoom around the playhead · + / − · Ctrl+wheel',
++  zoomToSelectionLabel: 'Zoom to selection (Z)',
++  zoomToSelectionTitle: 'Zoom to the time selection (Z)',
++  zoomToSelectionNeedsRangeTitle: 'Zoom to selection: make a time selection first (Z)',
++  zoomBackTitle: 'Back to the previous zoom (X)',
++  zoomBackEmptyTitle:
++    'Previous zoom: the history is empty — use Fit or Zoom to selection first (X)',
++  fitTitle: 'Fit — the entire project is visible (double-click the ruler or the overview)',
++  playheadTitle: 'Playhead — drag · ←/→ = ±0.1 s',
++  rulerTitle:
++    'Click = playhead · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit / Zoom to selection',
++  overviewLabel: 'Overview — entire project (← → = 5 s, double-click = Fit)',
++  overviewTitle:
++    'Overview: click = centre here · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit',
++  followPaused: 'Follow paused by manual navigation. Follow or Play resumes it.',
++  zoomNeedsSelection: 'To zoom, make a time selection first.',
++  zoomHistoryEmpty: 'The zoom history is empty — there is no view to go back to.',
++  zoomBackMore: 'Previous view restored. X goes back one more step.',
++  zoomBackDone: 'Previous view restored.',
++  followOff: 'Follow off: the view does not move by itself.',
++  followResumed: 'Follow is following the playback position again.',
++  followOn: 'Follow on: the view follows the playback position during playback.',
+   zoomReadout: (value: number): string => `${value} px/s`,
++  overviewVisibleStart: ({ start, extent }: { start: string; extent: string }): string =>
++    `Visible start ${start} / ${extent}`,
++  fitStatus: (extent: string): string =>
++    `Fit: the entire project is visible (${extent}). X goes back.`,
++  zoomedToSelection: ({ start, end }: StudioTimeRangeText): string =>
++    `Zoom to selection: ${start} — ${end}. X goes back.`,
+ };
+ 
+ export const studioLaneMoveStrings = {
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/components/arrangement/ArrangementTransport.tsx	2026-10-24 12:07:37.767609523 +0000
++++ app/components/arrangement/ArrangementTransport.tsx	2026-10-24 12:17:47.635245261 +0000
+@@ -7,6 +7,12 @@
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import {
++  studioEditStrings,
++  studioLoopStrings,
++  studioPlaybackStrings,
++  studioViewStrings,
++} from '~/lib/arrangement/strings';
++import {
+   formatZoomReadout,
+   sliderPositionFromZoom,
+   TIMELINE_ZOOM_SLIDER_STEPS,
+@@ -69,9 +75,10 @@
+   } = useArrangement();
+   const loop = arrangement.loop;
+   const rangeDeleteHint = range
+-    ? `წაშლა მონაკვეთზე${range.allTracks ? ' ყველა ხაზზე' : ''} — სიცარიელე დარჩება (Delete / Backspace). დროის ამოჭრა სიცარიელის დახურვით: Ctrl+Shift+X`
++    ? range.allTracks
++      ? studioEditStrings.deleteRangeAllTracksHint
++      : studioEditStrings.deleteRangeHint
+     : null;
+-  const deleteHint = 'კლიპის წაშლა — სიცარიელე დარჩება';
+   const undoButtonRef = useRef<HTMLButtonElement>(null);
+   const redoButtonRef = useRef<HTMLButtonElement>(null);
+   const fitButtonRef = useRef<HTMLButtonElement>(null);
+@@ -123,8 +130,8 @@
+       <button
+         type="button"
+         onClick={() => seekTo(0)}
+-        aria-label="დასაწყისზე დაბრუნება"
+-        title="დასაწყისზე (0)"
++        aria-label={studioPlaybackStrings.backToStartLabel}
++        title={studioPlaybackStrings.backToStartTitle}
+         className={toolButtonClass}
+       >
+         ↤
+@@ -132,7 +139,7 @@
+       <div className="flex items-baseline gap-2 rounded-sm bg-background px-3 py-1 font-mono tabular-nums">
+         <ArrangementTransportPosition />
+         <span className="text-xs text-muted">
+-          / ბოლო{' '}
++          {studioPlaybackStrings.projectEndPrefix}{' '}
+           <span data-testid="arrangement-project-end">{formatArrangementTime(projectEnd)}</span>
+         </span>
+       </div>
+@@ -172,11 +179,7 @@
+         type="button"
+         onClick={splitSelection}
+         disabled={!range && !selectedClipId}
+-        title={
+-          range
+-            ? 'გაყოფა მონაკვეთის ორივე საზღვარზე (Ctrl/Cmd+E)'
+-            : 'გაყოფა playhead-ზე (Ctrl/Cmd+E)'
+-        }
++        title={range ? studioEditStrings.splitRangeTitle : studioEditStrings.splitPlayheadTitle}
+         className={toolButtonClass}
+       >
+         ✂ Split
+@@ -189,11 +192,11 @@
+         }}
+         onKeyDown={preventRepeatedEnterKeyDown}
+         disabled={!range && !selectedClipId}
+-        title={rangeDeleteHint ?? `${deleteHint} (Delete)`}
+-        aria-label={rangeDeleteHint ?? `⌫ წაშლა — ${deleteHint}`}
++        title={rangeDeleteHint ?? studioEditStrings.deleteClipTitle}
++        aria-label={rangeDeleteHint ?? studioEditStrings.deleteClipLabel}
+         className={cn(toolButtonClass, range && 'border-accent text-accent')}
+       >
+-        ⌫ წაშლა
++        {studioEditStrings.deleteButton}
+       </button>
+       <div className="mx-1 h-6 w-px bg-outline" />
+       <button
+@@ -201,9 +204,7 @@
+         onClick={toggleLoopSelection}
+         disabled={!range && !loop}
+         aria-pressed={loop?.enabled === true}
+-        title={
+-          range ? 'Loop მონიშნულ მონაკვეთზე (Ctrl/Cmd+L)' : 'Loop-ის ჩართვა/გამორთვა (Ctrl/Cmd+L)'
+-        }
++        title={range ? studioLoopStrings.selectionTitle : studioLoopStrings.toggleTitle}
+         className={cn(toolButtonClass, loop?.enabled && 'border-accent bg-accent/20 text-accent')}
+       >
+         ↻ Loop
+@@ -215,10 +216,10 @@
+           aria-pressed={navigation.followMode === 'on'}
+           title={
+             navigation.followMode === 'off'
+-              ? 'Follow გამორთულია: დაკვრისას ხედი არ მიჰყვება'
++              ? studioViewStrings.followOffTitle
+               : navigation.followMode === 'paused'
+-                ? 'Follow შეჩერდა ხელით ნავიგაციისას — დააჭირე Follow-ს ან Play-ს'
+-                : 'Follow: დაკვრისას ხედი პოზიციას მიჰყვება'
++                ? studioViewStrings.followPausedTitle
++                : studioViewStrings.followOnTitle
+           }
+           className={cn(
+             toolButtonClass,
+@@ -242,9 +243,9 @@
+             onChange={(event) =>
+               navigation.onZoomSlider(zoomFromSliderPosition(Number(event.target.value)))
+             }
+-            aria-label="Zoom (px/წმ)"
++            aria-label={studioViewStrings.zoomSliderLabel}
+             aria-valuetext={formatZoomReadout(pxPerSecond)}
+-            title="Zoom playhead-ის გარშემო · + / − · Ctrl+wheel"
++            title={studioViewStrings.zoomSliderTitle}
+             className="w-20 accent-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+             data-testid="arrangement-zoom"
+           />
+@@ -256,10 +257,12 @@
+           type="button"
+           onClick={navigation.onZoomToRange}
+           disabled={!range}
+-          aria-label="Zoom მონიშნულზე (Z)"
++          aria-label={studioViewStrings.zoomToSelectionLabel}
+           aria-keyshortcuts="Z"
+           title={
+-            range ? 'Zoom მონიშნულ მონაკვეთზე (Z)' : 'Zoom მონიშნულზე: ჯერ მონიშნე მონაკვეთი (Z)'
++            range
++              ? studioViewStrings.zoomToSelectionTitle
++              : studioViewStrings.zoomToSelectionNeedsRangeTitle
+           }
+           className={cn(toolButtonClass, 'w-8 justify-center px-0 text-xs')}
+           data-testid="arrangement-zoom-range"
+@@ -277,8 +280,8 @@
+           aria-keyshortcuts="X"
+           title={
+             navigation.canZoomBack
+-              ? 'წინა Zoom-ის დაბრუნება (X)'
+-              : 'წინა Zoom: ისტორია ცარიელია — ჯერ Fit ან Zoom მონიშნულზე (X)'
++              ? studioViewStrings.zoomBackTitle
++              : studioViewStrings.zoomBackEmptyTitle
+           }
+           className={cn(toolButtonClass, 'px-2 text-xs')}
+           data-testid="arrangement-zoom-back"
+@@ -289,7 +292,7 @@
+           ref={fitButtonRef}
+           type="button"
+           onClick={navigation.onFit}
+-          title="Fit — მთლიანი პროექტი ჩანს (ruler-ის ან მიმოხილვის ორმაგი click)"
++          title={studioViewStrings.fitTitle}
+           className={cn(toolButtonClass, 'px-2 text-xs')}
+           data-testid="arrangement-fit"
+         >
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/components/arrangement/ArrangementTempoRow.tsx	2026-10-24 12:07:37.767609523 +0000
++++ app/components/arrangement/ArrangementTempoRow.tsx	2026-10-24 12:17:53.701201226 +0000
+@@ -9,6 +9,7 @@
+   useSyncExternalStore,
+ } from 'react';
+ import { METRONOME_NEEDS_TEMPO_TITLE, METRONOME_TITLE } from '~/lib/arrangement/metronome';
++import { studioMetronomeStrings, studioTempoStrings } from '~/lib/arrangement/strings';
+ import {
+   barsRulerMarks,
+   formatTempoBpm,
+@@ -224,8 +225,8 @@
+           onChange={handleTempoChange}
+           onBlur={handleTempoBlur}
+           onKeyDown={handleTempoKeyDown}
+-          aria-label="პროექტის ტემპი (BPM)"
+-          title="პროექტის ტემპი — მხოლოდ ტაქტების ბადე; აუდიო არ იწელება (time-stretch არ არის). Enter — შენახვა · Esc — გაუქმება · ცარიელი — ტაქტების დამალვა"
++          aria-label={studioTempoStrings.fieldLabel}
++          title={studioTempoStrings.fieldTitle}
+           className="h-4 w-14 rounded-sm border border-outline bg-background px-1 text-xs leading-none tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
+           data-testid="arrangement-tempo-input"
+         />
+@@ -242,7 +243,7 @@
+           )}
+           data-testid="arrangement-metronome-toggle"
+         >
+-          მეტრონომი
++          {studioMetronomeStrings.toggleLabel}
+         </button>
+       </div>
+       <ArrangementBarsRuler
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/components/arrangement/ArrangementRuler.tsx	2026-10-24 12:07:37.767609523 +0000
++++ app/components/arrangement/ArrangementRuler.tsx	2026-10-24 12:13:00.269968843 +0000
+@@ -13,6 +13,7 @@
+   useArrangementPositionWriter,
+ } from '~/contexts/ArrangementContext';
+ import { resolveGridTimeWithTargets } from '~/lib/arrangement/grid';
++import { studioViewStrings } from '~/lib/arrangement/strings';
+ import {
+   RULER_TICK_STEPS_SECONDS,
+   rulerDragView,
+@@ -228,7 +229,7 @@
+         aria-valuenow={Math.round(position * 1000) / 1000}
+         aria-valuetext={formatArrangementTime(position)}
+         aria-orientation="horizontal"
+-        title="Playhead — გადაათრიე · ←/→ = ±0.1 წმ"
++        title={studioViewStrings.playheadTitle}
+         className="absolute top-0 z-10 h-5 w-3 -translate-x-1/2 cursor-ew-resize touch-none rounded-b-sm bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+         onPointerDown={handlePlayheadPointerDown}
+         onPointerMove={handlePlayheadPointerMove}
+@@ -437,7 +438,7 @@
+       onLostPointerCapture={handlePointerEnd}
+       onDoubleClick={handleDoubleClick}
+       role="presentation"
+-      title="Click = playhead · ↔ drag = გადახვევა · ↕ drag = Zoom · ორმაგი click = Fit / Zoom მონიშნულზე"
++      title={studioViewStrings.rulerTitle}
+       data-testid="arrangement-ruler"
+       data-tick-step={step.toFixed(fractionDigits)}
+     >
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/components/arrangement/ArrangementOverview.tsx	2026-10-24 12:07:37.767609523 +0000
++++ app/components/arrangement/ArrangementOverview.tsx	2026-10-24 12:13:13.273025730 +0000
+@@ -1,5 +1,6 @@
+ import { type KeyboardEvent, memo, type PointerEvent, useCallback, useEffect, useRef } from 'react';
+ import { formatArrangementTime, useArrangementPositionStore } from '~/contexts/ArrangementContext';
++import { studioViewStrings } from '~/lib/arrangement/strings';
+ import {
+   centreTimelineView,
+   overviewDragView,
+@@ -57,7 +58,10 @@
+ }
+ 
+ function overviewValueText(visibleStart: number, extent: number): string {
+-  return `ხილვადი დასაწყისი ${formatArrangementTime(visibleStart)} / ${formatArrangementTime(extent)}`;
++  return studioViewStrings.overviewVisibleStart({
++    start: formatArrangementTime(visibleStart),
++    extent: formatArrangementTime(extent),
++  });
+ }
+ 
+ function ArrangementOverviewInner({
+@@ -279,13 +283,13 @@
+       ref={rootRef}
+       role="slider"
+       tabIndex={0}
+-      aria-label="მიმოხილვა — მთლიანი პროექტი (← → = 5 წმ, ორმაგი click = Fit)"
++      aria-label={studioViewStrings.overviewLabel}
+       aria-orientation="horizontal"
+       aria-valuemin={0}
+       aria-valuemax={roundedExtent}
+       aria-valuenow={Math.min(visibleStartRef.current, roundedExtent)}
+       aria-valuetext={overviewValueText(visibleStartRef.current, extent)}
+-      title="მიმოხილვა: click = ცენტრში · ↔ drag = გადახვევა · ↕ drag = Zoom · ორმაგი click = Fit"
++      title={studioViewStrings.overviewTitle}
+       className="relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-sm bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+       onPointerDown={handleOverviewPointerDown}
+       onPointerMove={handleOverviewPointerMove}
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/components/arrangement/ArrangementLoopBrace.tsx	2026-10-24 12:07:37.767505839 +0000
++++ app/components/arrangement/ArrangementLoopBrace.tsx	2026-10-24 12:13:22.513072486 +0000
+@@ -8,14 +8,15 @@
+ } from '~/lib/arrangement/grid';
+ import { type LoopEdge, moveLoop, resizeLoop } from '~/lib/arrangement/loop';
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
++import { studioLoopStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementLoop } from '~/types/arrangement';
+ import { watchUncapturedPointerGesture } from './ArrangementClip';
+ 
+ const LOOP_DRAG_THRESHOLD_PX = 3;
+ const LOOP_KEY_STEP_SECONDS = 0.1;
+-const LOOP_HINT = 'Loop: მონიშნე მონაკვეთი და დააჭირე ↻ Loop (Ctrl+L)';
+-const LOOP_KEYBOARD_HINT = '← → გადაადგილება · Shift + ← → სიგრძე';
++const LOOP_HINT = studioLoopStrings.braceHint;
++const LOOP_KEYBOARD_HINT = studioLoopStrings.braceKeyboardHint;
+ 
+ type LoopGestureKind = 'move' | LoopEdge;
+ 
+@@ -231,7 +232,7 @@
+           // biome-ignore lint/a11y/noNoninteractiveTabindex: B task 4.3 requires a keyboard-focusable brace
+           tabIndex={0}
+           aria-label={`${span} · ${LOOP_KEYBOARD_HINT}`}
+-          title={`${span} · ზოლი გადაადგილდება; კიდეები სიგრძეს ცვლის`}
++          title={studioLoopStrings.braceTitle(span)}
+           className={cn(
+             'absolute inset-y-0 flex cursor-grab touch-none items-center overflow-hidden rounded-sm border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand active:cursor-grabbing',
+             loop.enabled
+@@ -260,13 +261,13 @@
+           </span>
+           <div
+             className="absolute inset-y-0 left-0 w-2 cursor-ew-resize hover:bg-accent/60"
+-            title="Loop-ის დასაწყისი"
++            title={studioLoopStrings.braceStartTitle}
+             onPointerDown={(event) => beginLoopGesture('start', event)}
+             data-testid="arrangement-loop-start-edge"
+           />
+           <div
+             className="absolute inset-y-0 right-0 w-2 cursor-ew-resize hover:bg-accent/60"
+-            title="Loop-ის დასასრული"
++            title={studioLoopStrings.braceEndTitle}
+             onPointerDown={(event) => beginLoopGesture('end', event)}
+             data-testid="arrangement-loop-end-edge"
+           />
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/components/arrangement/StudioWorkspace.tsx	2026-10-24 12:07:37.767714334 +0000
++++ app/components/arrangement/StudioWorkspace.tsx	2026-10-24 12:17:49.522297969 +0000
+@@ -80,7 +80,7 @@
+   type TrackLaneFitEntry,
+ } from '~/lib/arrangement/panels';
+ import { clipsInMarquee, unionSelection } from '~/lib/arrangement/selection';
+-import { studioGridStrings } from '~/lib/arrangement/strings';
++import { studioGridStrings, studioViewStrings } from '~/lib/arrangement/strings';
+ import { TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '~/lib/arrangement/tempo';
+ import {
+   anchoredTimelineView,
+@@ -142,9 +142,9 @@
+ const MARQUEE_THRESHOLD_PX = 4;
+ const CLIP_LANE_SHIFT_HINT = 'Shift — დრო ჩაიკეტება, შეიცვლება მხოლოდ ხაზი';
+ const CLIP_LANE_SHIFT_LOCKED_HINT = 'Shift — დრო ჩაკეტილია, იცვლება მხოლოდ ხაზი';
+-const FOLLOW_PAUSED_MESSAGE = 'Follow შეჩერდა ხელით ნავიგაციისას. Follow ან Play აბრუნებს.';
+-const ZOOM_RANGE_MISSING_MESSAGE = 'Zoom-ისთვის ჯერ მონიშნე მონაკვეთი.';
+-const ZOOM_HISTORY_EMPTY_MESSAGE = 'Zoom-ის ისტორია ცარიელია — დასაბრუნებელი ხედი არ არის.';
++const FOLLOW_PAUSED_MESSAGE = studioViewStrings.followPaused;
++const ZOOM_RANGE_MISSING_MESSAGE = studioViewStrings.zoomNeedsSelection;
++const ZOOM_HISTORY_EMPTY_MESSAGE = studioViewStrings.zoomHistoryEmpty;
+ const FOLLOW_SCROLL_TOLERANCE_PX = 1;
+ const VIDEO_EXPANDED_MESSAGE =
+   'ვიდეო გაფართოვდა ბიბლიოთეკის თავზე. გადაათრიე სასურველ ადგილას; Esc ან ✕ აბრუნებს.';
+@@ -1171,7 +1171,7 @@
+     pushTimelineHistory();
+     pauseFollowForNavigation();
+     applyTimelineView(fitTimelineView(extent, getTimelineViewportPx()));
+-    current.setStatus(`Fit: მთლიანი პროექტი ჩანს (${formatArrangementTime(extent)}). X აბრუნებს.`);
++    current.setStatus(studioViewStrings.fitStatus(formatArrangementTime(extent)));
+   }, [applyTimelineView, getTimelineViewportPx, pauseFollowForNavigation, pushTimelineHistory]);
+ 
+   const zoomTimelineToRange = useCallback(() => {
+@@ -1188,7 +1188,10 @@
+     pauseFollowForNavigation();
+     applyTimelineView(zoomToRangeView(selected, getTimelineViewportPx()));
+     current.setStatus(
+-      `Zoom მონიშნულზე: ${formatArrangementTime(selected.start)} — ${formatArrangementTime(selected.end)}. X აბრუნებს.`,
++      studioViewStrings.zoomedToSelection({
++        start: formatArrangementTime(selected.start),
++        end: formatArrangementTime(selected.end),
++      }),
+     );
+   }, [applyTimelineView, getTimelineViewportPx, pauseFollowForNavigation, pushTimelineHistory]);
+ 
+@@ -1207,9 +1210,7 @@
+     pauseFollowForNavigation();
+     applyTimelineView(popped.view);
+     current.setStatus(
+-      popped.history.length > 0
+-        ? 'წინა ხედი აღდგა. X კიდევ ერთი ნაბიჯით აბრუნებს.'
+-        : 'წინა ხედი აღდგა.',
++      popped.history.length > 0 ? studioViewStrings.zoomBackMore : studioViewStrings.zoomBackDone,
+     );
+   }, [applyTimelineView, pauseFollowForNavigation]);
+ 
+@@ -1261,10 +1262,10 @@
+     setFollowMode(next);
+     workspaceRef.current.setStatus(
+       next === 'off'
+-        ? 'Follow გამორთულია: ხედი თავისით არ მოძრაობს.'
++        ? studioViewStrings.followOff
+         : previous === 'paused'
+-          ? 'Follow ისევ მიჰყვება დაკვრის პოზიციას.'
+-          : 'Follow ჩართულია: დაკვრისას ხედი პოზიციას მიჰყვება.',
++          ? studioViewStrings.followResumed
++          : studioViewStrings.followOn,
+     );
+   }, [setFollowMode]);
+ 

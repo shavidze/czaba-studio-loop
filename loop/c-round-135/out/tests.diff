@@ -1,0 +1,283 @@
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 12:07:37.768093689 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 12:14:26.012332681 +0000
+@@ -382,6 +382,15 @@
+   loopRemoved: 'The loop range was shorter than 0.1 s after the deletion, so it was removed.',
+   pasteMissing: 'Paste failed: the source or track is unavailable. Nothing changed.',
+   clipboardEmpty: 'The clipboard is empty — Copy or Cut first.',
++  splitRangeTitle: 'Split at both edges of the time selection (Ctrl/Cmd+E)',
++  splitPlayheadTitle: 'Split at the playhead (Ctrl/Cmd+E)',
++  deleteRangeHint:
++    'Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
++  deleteRangeAllTracksHint:
++    'Delete time selection on all tracks — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
++  deleteClipTitle: 'Delete clip — leaves a gap (Delete)',
++  deleteClipLabel: '⌫ Delete — the selected clip; leaves a gap',
++  deleteButton: '⌫ Delete',
+ };
+ 
+ const e = studioEditStrings;
+@@ -618,6 +627,9 @@
+     webAudioUnavailable:
+       'Web Audio is not available in this browser — playback and export will not work.',
+     nothingToPlay: 'Nothing to play — add a clip from the library first.',
++    backToStartLabel: 'Back to start',
++    backToStartTitle: 'Back to start (0)',
++    projectEndPrefix: '/ end',
+   },
+   studioLibraryStrings: {
+     audioOnVideoTrack:
+@@ -639,6 +651,12 @@
+     on: 'Loop is on.',
+     off: 'Loop is off; the range is kept.',
+     historyRange: 'Loop range',
++    selectionTitle: 'Loop the time selection (Ctrl/Cmd+L)',
++    toggleTitle: 'Loop on / off (Ctrl/Cmd+L)',
++    braceHint: 'Loop: make a time selection and press ↻ Loop (Ctrl+L)',
++    braceKeyboardHint: '← → nudge · Shift + ← → length',
++    braceStartTitle: 'Loop start',
++    braceEndTitle: 'Loop end',
+   },
+   studioMoveStrings: {
+     undoBlockedDuringDrag: 'Undo/Redo does not work while dragging — let go first.',
+@@ -684,6 +702,7 @@
+   studioLoopStrings: {
+     replaced: [lp.replaced('00:01.000 — 00:03.000')],
+     created: [lp.created('00:01.000 — 00:03.000')],
++    braceTitle: [lp.braceTitle('00:01.000 — 00:03.000')],
+   },
+   studioMoveStrings: {},
+ };
+@@ -891,18 +910,77 @@
+   studioTempoStrings: {
+     emptyHint: 'Bars: set a BPM — grid only, audio is not stretched',
+     cleared: 'Tempo cleared — the bars ruler is hidden. Audio is unchanged.',
++    fieldLabel: 'Project tempo (BPM)',
++    fieldTitle:
++      'Project tempo — bars grid only; audio is not stretched (no time-stretch). Enter — save · Esc — cancel · empty — hide the bars',
+   },
+   studioMetronomeStrings: {
+     needsTempoTitle: 'Metronome — set a BPM first',
+     off: 'Metronome is off.',
++    toggleLabel: 'Metronome',
++  },
++  studioViewStrings: {
++    followOffTitle: 'Follow off: the view does not follow playback',
++    followPausedTitle: 'Follow paused by manual navigation — press Follow or Play',
++    followOnTitle: 'Follow: the view follows the playback position',
++    zoomSliderLabel: 'Zoom (px/s)',
++    zoomSliderTitle: 'Zoom around the playhead · + / − · Ctrl+wheel',
++    zoomToSelectionLabel: 'Zoom to selection (Z)',
++    zoomToSelectionTitle: 'Zoom to the time selection (Z)',
++    zoomToSelectionNeedsRangeTitle: 'Zoom to selection: make a time selection first (Z)',
++    zoomBackTitle: 'Back to the previous zoom (X)',
++    zoomBackEmptyTitle:
++      'Previous zoom: the history is empty — use Fit or Zoom to selection first (X)',
++    fitTitle: 'Fit — the entire project is visible (double-click the ruler or the overview)',
++    playheadTitle: 'Playhead — drag · ←/→ = ±0.1 s',
++    rulerTitle:
++      'Click = playhead · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit / Zoom to selection',
++    overviewLabel: 'Overview — entire project (← → = 5 s, double-click = Fit)',
++    overviewTitle:
++      'Overview: click = centre here · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit',
++    followPaused: 'Follow paused by manual navigation. Follow or Play resumes it.',
++    zoomNeedsSelection: 'To zoom, make a time selection first.',
++    zoomHistoryEmpty: 'The zoom history is empty — there is no view to go back to.',
++    zoomBackMore: 'Previous view restored. X goes back one more step.',
++    zoomBackDone: 'Previous view restored.',
++    followOff: 'Follow off: the view does not move by itself.',
++    followResumed: 'Follow is following the playback position again.',
++    followOn: 'Follow on: the view follows the playback position during playback.',
+   },
+-  studioViewStrings: {},
+ };
+ 
+ const EXPECTED_V02C2_KEYS: Record<string, string[]> = {
+-  studioTempoStrings: ['cleared', 'emptyHint', 'invalid', 'set'],
+-  studioMetronomeStrings: ['needsTempoTitle', 'off', 'on', 'title'],
+-  studioViewStrings: ['zoomReadout'],
++  studioTempoStrings: ['cleared', 'emptyHint', 'fieldLabel', 'fieldTitle', 'invalid', 'set'],
++  studioMetronomeStrings: ['needsTempoTitle', 'off', 'on', 'title', 'toggleLabel'],
++  studioViewStrings: [
++    'fitStatus',
++    'fitTitle',
++    'followOff',
++    'followOffTitle',
++    'followOn',
++    'followOnTitle',
++    'followPaused',
++    'followPausedTitle',
++    'followResumed',
++    'overviewLabel',
++    'overviewTitle',
++    'overviewVisibleStart',
++    'playheadTitle',
++    'rulerTitle',
++    'zoomBackDone',
++    'zoomBackEmptyTitle',
++    'zoomBackMore',
++    'zoomBackTitle',
++    'zoomHistoryEmpty',
++    'zoomNeedsSelection',
++    'zoomReadout',
++    'zoomSliderLabel',
++    'zoomSliderTitle',
++    'zoomToSelectionLabel',
++    'zoomToSelectionNeedsRangeTitle',
++    'zoomToSelectionTitle',
++    'zoomedToSelection',
++  ],
+ };
+ 
+ const V02C2_FORMATTER_SAMPLES: Record<string, Record<string, string[]>> = {
+@@ -923,6 +1001,13 @@
+       studioViewStrings.zoomReadout(40),
+       studioViewStrings.zoomReadout(35.3),
+     ],
++    overviewVisibleStart: [
++      studioViewStrings.overviewVisibleStart({ start: '00:02.000', extent: '00:30.000' }),
++    ],
++    fitStatus: [studioViewStrings.fitStatus('00:30.000')],
++    zoomedToSelection: [
++      studioViewStrings.zoomedToSelection({ start: '00:01.000', end: '00:03.000' }),
++    ],
+   },
+ };
+ 
+@@ -1242,9 +1327,6 @@
+ const STUDIO_WORKSPACE_REMAINING_GEORGIAN_LINES = [
+   "const CLIP_LANE_SHIFT_HINT = 'Shift — დრო ჩაიკეტება, შეიცვლება მხოლოდ ხაზი';",
+   "const CLIP_LANE_SHIFT_LOCKED_HINT = 'Shift — დრო ჩაკეტილია, იცვლება მხოლოდ ხაზი';",
+-  "const FOLLOW_PAUSED_MESSAGE = 'Follow შეჩერდა ხელით ნავიგაციისას. Follow ან Play აბრუნებს.';",
+-  "const ZOOM_RANGE_MISSING_MESSAGE = 'Zoom-ისთვის ჯერ მონიშნე მონაკვეთი.';",
+-  "const ZOOM_HISTORY_EMPTY_MESSAGE = 'Zoom-ის ისტორია ცარიელია — დასაბრუნებელი ხედი არ არის.';",
+   "'ვიდეო გაფართოვდა ბიბლიოთეკის თავზე. გადაათრიე სასურველ ადგილას; Esc ან ✕ აბრუნებს.';",
+   "'ბიბლიოთეკა დროებით გაიხსნა გაფართოებული ვიდეოსთვის; ვიდეოს დახურვისას ისევ დაიკეცება. Esc ან ✕ აბრუნებს.';",
+   "'ბიბლიოთეკა დაიკეცა, ამიტომ ვიდეო პატარა ხედს დაუბრუნდა.';",
+@@ -1253,13 +1335,6 @@
+   '\'[data-testid="arrangement-track-header"] button[aria-label*="— აქტიური ხაზის არჩევა"]\',',
+   'current.setStatus(`სახელი ცარიელია — დარჩა «{group.name}»`);',
+   'current.setStatus(`ჯგუფის სახელი: «{name}».`);',
+-  'current.setStatus(`Fit: მთლიანი პროექტი ჩანს ({formatArrangementTime(extent)}). X აბრუნებს.`);',
+-  '`Zoom მონიშნულზე: {formatArrangementTime(selected.start)} — {formatArrangementTime(selected.end)}. X აბრუნებს.`,',
+-  "? 'წინა ხედი აღდგა. X კიდევ ერთი ნაბიჯით აბრუნებს.'",
+-  ": 'წინა ხედი აღდგა.',",
+-  "? 'Follow გამორთულია: ხედი თავისით არ მოძრაობს.'",
+-  "? 'Follow ისევ მიჰყვება დაკვრის პოზიციას.'",
+-  ": 'Follow ჩართულია: დაკვრისას ხედი პოზიციას მიჰყვება.',",
+   "current.setStatus(next ? 'Envelope რეჟიმი: ჩართულია.' : 'Envelope რეჟიმი: გამორთულია.');",
+   '<span className="font-normal text-muted">· სამუშაო სივრცე</span>',
+   "? 'Envelope ჩართულია — კლიპზე double-click = წერტილი (A)'",
+@@ -1415,7 +1490,38 @@
+       .split(/\r?\n/)
+       .filter((line) => GEORGIAN_CODEPOINT.test(line))
+       .map((line) => line.trim().replaceAll('${', '{'));
+-    expect(georgianLines).toHaveLength(33);
++    expect(georgianLines).toHaveLength(23);
+     expect(georgianLines).toEqual(STUDIO_WORKSPACE_REMAINING_GEORGIAN_LINES);
+   });
+ });
++
++describe('V-0.3b transport and navigation strings', () => {
++  it('ST26: the new loop and view formatters return the exact English for Latin inputs', () => {
++    expect(studioLoopStrings.braceTitle('00:01.000 — 00:03.000')).toBe(
++      '00:01.000 — 00:03.000 · the bar moves the loop; the edges change its length',
++    );
++    expect(
++      studioViewStrings.overviewVisibleStart({ start: '00:02.000', extent: '00:30.000' }),
++    ).toBe('Visible start 00:02.000 / 00:30.000');
++    expect(studioViewStrings.fitStatus('00:30.000')).toBe(
++      'Fit: the entire project is visible (00:30.000). X goes back.',
++    );
++    expect(studioViewStrings.zoomedToSelection({ start: '00:01.000', end: '00:03.000' })).toBe(
++      'Zoom to selection: 00:01.000 — 00:03.000. X goes back.',
++    );
++  });
++
++  it('ST27: the transport, tempo row, ruler, overview and loop brace sources contain no Georgian codepoint', () => {
++    for (const path of [
++      '../../../components/arrangement/ArrangementTransport.tsx',
++      '../../../components/arrangement/ArrangementTempoRow.tsx',
++      '../../../components/arrangement/ArrangementRuler.tsx',
++      '../../../components/arrangement/ArrangementOverview.tsx',
++      '../../../components/arrangement/ArrangementLoopBrace.tsx',
++    ]) {
++      const source = stripSourceComments(readStoreSource(path));
++      expect(source.length, path).toBeGreaterThan(0);
++      expect(source, path).not.toMatch(GEORGIAN_CODEPOINT);
++    }
++  });
++});
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/lib/arrangement/__tests__/delete-selection-ui.test.tsx	2026-10-24 12:07:37.767982551 +0000
++++ app/lib/arrangement/__tests__/delete-selection-ui.test.tsx	2026-10-24 12:14:42.404401213 +0000
+@@ -141,9 +141,9 @@
+ }
+ 
+ const SINGLE_LANE_DELETE_HINT =
+-  'წაშლა მონაკვეთზე — სიცარიელე დარჩება (Delete / Backspace). დროის ამოჭრა სიცარიელის დახურვით: Ctrl+Shift+X';
++  'Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X';
+ const ALL_LANE_DELETE_HINT =
+-  'წაშლა მონაკვეთზე ყველა ხაზზე — სიცარიელე დარჩება (Delete / Backspace). დროის ამოჭრა სიცარიელის დახურვით: Ctrl+Shift+X';
++  'Delete time selection on all tracks — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X';
+ 
+ function laneTable(arrangement: Arrangement) {
+   return arrangement.clips
+@@ -211,7 +211,7 @@
+ }
+ 
+ function deleteButton(view: ReturnType<typeof render>): HTMLButtonElement {
+-  const button = view.getByText('⌫ წაშლა').closest('button');
++  const button = view.getByText('⌫ Delete').closest('button');
+   if (!(button instanceof HTMLButtonElement)) {
+     throw new Error('delete button missing');
+   }
+@@ -524,7 +524,7 @@
+   it('titles the transport delete button for a clip, a range and an all-lane range', async () => {
+     const { api, view } = await mountGapWorkspace();
+     act(() => live(api).selectClip('m1'));
+-    expect(deleteButton(view).title).toBe('კლიპის წაშლა — სიცარიელე დარჩება (Delete)');
++    expect(deleteButton(view).title).toBe('Delete clip — leaves a gap (Delete)');
+     act(() => live(api).setTimeRange(MUSIC_RANGE));
+     expect(deleteButton(view).title).toBe(SINGLE_LANE_DELETE_HINT);
+     expect(deleteButton(view).getAttribute('aria-label')).toBe(SINGLE_LANE_DELETE_HINT);
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-24 12:07:37.768093689 +0000
++++ app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-24 12:14:45.803415584 +0000
+@@ -373,14 +373,14 @@
+     );
+     expect(labels).toHaveLength(12);
+     expect(labels[0]).toBe('Play');
+-    expect(labels[1]).toBe('დასაწყისზე დაბრუნება');
++    expect(labels[1]).toBe('Back to start');
+     expect(labels[2]).toContain('Undo');
+     expect(labels[3]).toContain('Redo');
+     expect(labels[4]).toContain('Split');
+-    expect(labels[5]).toContain('წაშლა');
++    expect(labels[5]).toContain('Delete');
+     expect(labels[6]).toContain('Loop');
+     expect(labels[7]).toContain('Follow');
+-    expect(labels[8]).toBe('Zoom მონიშნულზე (Z)');
++    expect(labels[8]).toBe('Zoom to selection (Z)');
+     expect(labels[9]).toBe('↩ Zoom');
+     expect(labels[10]).toBe('Fit');
+     expect(labels[11]).toBe('Export');
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/lib/arrangement/__tests__/tempo-ui.test.tsx	2026-10-24 12:07:37.768093689 +0000
++++ app/lib/arrangement/__tests__/tempo-ui.test.tsx	2026-10-24 12:14:47.106421093 +0000
+@@ -285,7 +285,7 @@
+     expect(input.value).toBe('');
+     expect(input.type).toBe('text');
+     expect(input.inputMode).toBe('decimal');
+-    expect(input.getAttribute('aria-label')).toBe('პროექტის ტემპი (BPM)');
++    expect(input.getAttribute('aria-label')).toBe('Project tempo (BPM)');
+     const strip = barsStrip(view);
+     expect(strip.dataset.bpm).toBe('');
+     expect(barsMarks(view)).toHaveLength(0);
+--- ../tmp/studio-real-loop/b-round-134/r135-granted-start/app/lib/arrangement/__tests__/metronome-ui.test.tsx	2026-10-24 12:07:37.768093689 +0000
++++ app/lib/arrangement/__tests__/metronome-ui.test.tsx	2026-10-24 12:14:48.093425266 +0000
+@@ -285,7 +285,7 @@
+   it('UI1 is disabled and unpressed without a tempo, and Play schedules no metronome', async () => {
+     const { api, view } = await mountMetronomeWorkspace();
+     const toggle = metronomeToggle(view);
+-    expect(toggle.textContent).toBe('მეტრონომი');
++    expect(toggle.textContent).toBe('Metronome');
+     expect(toggle.type).toBe('button');
+     expect(toggle.disabled).toBe(true);
+     expect(toggle.getAttribute('aria-pressed')).toBe('false');
