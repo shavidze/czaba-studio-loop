@@ -1,0 +1,513 @@
+--- start/app/lib/arrangement/strings.ts
++++ app/lib/arrangement/strings.ts
+@@ -278,3 +278,25 @@
+   probeFailed: (name: string): string =>
+     `“${name}”: the browser could not open this video — try MP4 (H.264) or WebM.`,
+ };
++
++export const studioTempoStrings = {
++  emptyHint: 'Bars: set a BPM — grid only, audio is not stretched',
++  cleared: 'Tempo cleared — the bars ruler is hidden. Audio is unchanged.',
++  invalid: ({ min, max }: { min: number; max: number }): string =>
++    `Tempo must be ${min}–${max} BPM (e.g. 90 or 92.5) — not changed.`,
++  set: ({ bpm, beatsPerBar }: { bpm: string; beatsPerBar: number }): string =>
++    `Tempo ${bpm} BPM · ${beatsPerBar}/4 — bars ruler updated. Grid only: audio is not stretched.`,
++};
++
++export const studioMetronomeStrings = {
++  needsTempoTitle: 'Metronome — set a BPM first',
++  off: 'Metronome is off.',
++  title: (beatsPerBar: number): string =>
++    `Metronome — a click on every beat during playback (${beatsPerBar}/4, the first beat of each bar is louder). Master volume and Mute also apply to it. Not included in the export.`,
++  on: ({ bpm, beatsPerBar }: { bpm: string; beatsPerBar: number }): string =>
++    `Metronome is on — ${bpm} BPM, ${beatsPerBar}/4: a click on every beat, louder on the first beat of each bar. Not included in the export.`,
++};
++
++export const studioViewStrings = {
++  zoomReadout: (value: number): string => `${value} px/s`,
++};
+--- start/app/lib/arrangement/tempo.ts
++++ app/lib/arrangement/tempo.ts
+@@ -1,3 +1,4 @@
++import { studioTempoStrings } from './strings';
+ import {
+   RULER_LABEL_CHAR_WIDTH_PX,
+   RULER_LABEL_OFFSET_PX,
+@@ -8,8 +9,11 @@
+ export const TEMPO_BPM_MIN = 20;
+ export const TEMPO_BPM_MAX = 999;
+ export const TEMPO_BEATS_PER_BAR = 4;
+-export const TEMPO_INVALID_MESSAGE = `ტემპი უნდა იყოს ${TEMPO_BPM_MIN}–${TEMPO_BPM_MAX} BPM (მაგ. 90 ან 92.5) — არ შეიცვალა.`;
+-export const TEMPO_EMPTY_HINT = 'ტაქტები: მიუთითე BPM — მხოლოდ ბადე, აუდიო არ იწელება';
++export const TEMPO_INVALID_MESSAGE = studioTempoStrings.invalid({
++  min: TEMPO_BPM_MIN,
++  max: TEMPO_BPM_MAX,
++});
++export const TEMPO_EMPTY_HINT = studioTempoStrings.emptyHint;
+ 
+ const TEMPO_TEXT_PATTERN = /^\d{1,3}(\.\d{1,2})?$/;
+ const SECONDS_PER_MINUTE = 60;
+@@ -40,9 +44,9 @@
+ 
+ export function tempoStatusMessage(bpm: number | null): string {
+   if (bpm === null) {
+-    return 'ტემპი წაიშალა — ტაქტების სახაზავი დამალულია. აუდიო არ შეცვლილა.';
++    return studioTempoStrings.cleared;
+   }
+-  return `ტემპი ${formatTempoBpm(bpm)} BPM · ${TEMPO_BEATS_PER_BAR}/4 — ტაქტების სახაზავი განახლდა. მხოლოდ ბადეა: აუდიო არ იწელება.`;
++  return studioTempoStrings.set({ bpm: formatTempoBpm(bpm), beatsPerBar: TEMPO_BEATS_PER_BAR });
+ }
+ 
+ export function barsRulerMarks(
+--- start/app/lib/arrangement/metronome.ts
++++ app/lib/arrangement/metronome.ts
+@@ -1,4 +1,5 @@
+ import { ARRANGEMENT_EPS } from './model';
++import { studioMetronomeStrings } from './strings';
+ import { formatTempoBpm, TEMPO_BEATS_PER_BAR } from './tempo';
+ 
+ export const METRONOME_CLICK_SECONDS = 0.03;
+@@ -7,8 +8,8 @@
+ export const METRONOME_ACCENT_PEAK = 0.5;
+ export const METRONOME_BEAT_PEAK = 0.25;
+ export const METRONOME_SCHEDULE_HORIZON_SECONDS = 2;
+-export const METRONOME_NEEDS_TEMPO_TITLE = 'მეტრონომი — ჯერ მიუთითე BPM';
+-export const METRONOME_TITLE = `მეტრონომი — კლიკი ყოველ დარტყმაზე დაკვრისას (${TEMPO_BEATS_PER_BAR}/4, ტაქტის პირველი დარტყმა უფრო ხმამაღლა). Master-ის ხმა და Mute მასზეც მოქმედებს. ექსპორტში არ შედის.`;
++export const METRONOME_NEEDS_TEMPO_TITLE = studioMetronomeStrings.needsTempoTitle;
++export const METRONOME_TITLE = studioMetronomeStrings.title(TEMPO_BEATS_PER_BAR);
+ 
+ const METRONOME_DECAY_SECONDS = 0.005;
+ const SECONDS_PER_MINUTE = 60;
+@@ -112,7 +113,7 @@
+ 
+ export function metronomeStatusMessage(bpm: number | null): string {
+   if (bpm === null) {
+-    return 'მეტრონომი გამორთულია.';
++    return studioMetronomeStrings.off;
+   }
+-  return `მეტრონომი ჩართულია — ${formatTempoBpm(bpm)} BPM, ${TEMPO_BEATS_PER_BAR}/4: კლიკი ყოველ დარტყმაზე, ტაქტის პირველზე უფრო ხმამაღლა. ექსპორტში არ შედის.`;
++  return studioMetronomeStrings.on({ bpm: formatTempoBpm(bpm), beatsPerBar: TEMPO_BEATS_PER_BAR });
+ }
+--- start/app/lib/arrangement/view.ts
++++ app/lib/arrangement/view.ts
+@@ -1,4 +1,5 @@
+ import type { ArrangementLoop, TimeRange } from '~/types/arrangement';
++import { studioViewStrings } from './strings';
+ 
+ export const TIMELINE_ZOOM_MIN = 0.5;
+ export const TIMELINE_ZOOM_MAX = 320;
+@@ -255,7 +256,7 @@
+ }
+ 
+ export function formatZoomReadout(pxPerSecond: number): string {
+-  return `${Math.round(pxPerSecond * 10) / 10} px/წმ`;
++  return studioViewStrings.zoomReadout(Math.round(pxPerSecond * 10) / 10);
+ }
+ 
+ export type TimelineNavigationKey = 'zoom-in' | 'zoom-out' | 'zoom-range' | 'zoom-back';
+--- start/app/lib/arrangement/__tests__/strings.test.ts
++++ app/lib/arrangement/__tests__/strings.test.ts
+@@ -18,17 +18,23 @@
+   ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS,
+   ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE,
+ } from '../export-wav.client';
++import { METRONOME_NEEDS_TEMPO_TITLE, METRONOME_TITLE, metronomeStatusMessage } from '../metronome';
+ import {
+   studioEditStrings,
+   studioExportStrings,
+   studioLibraryStrings,
+   studioLoopStrings,
++  studioMetronomeStrings,
+   studioMoveStrings,
+   studioPlaybackStrings,
++  studioTempoStrings,
+   studioVideoStrings,
++  studioViewStrings,
+ } from '../strings';
++import { TEMPO_EMPTY_HINT, TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '../tempo';
+ import { audioFileRejectionMessage, unsupportedFileMessage } from '../video';
+ import { videoAudioNote, videoProbeErrorMessage } from '../video.client';
++import { formatZoomReadout } from '../view';
+ 
+ const GEORGIAN_CODEPOINT = /[Ⴀ-ჿ]/;
+ 
+@@ -847,6 +853,135 @@
+       const source = stripSourceComments(readStoreSource(path));
+       expect(source.length, path).toBeGreaterThan(0);
+       expect(source, path).not.toMatch(GEORGIAN_CODEPOINT);
++    }
++  });
++});
++
++const V02C2_OBJECTS: Record<string, Record<string, unknown>> = {
++  studioTempoStrings,
++  studioMetronomeStrings,
++  studioViewStrings,
++};
++
++const EXPECTED_V02C2_PLAIN_STRINGS: Record<string, Record<string, string>> = {
++  studioTempoStrings: {
++    emptyHint: 'Bars: set a BPM — grid only, audio is not stretched',
++    cleared: 'Tempo cleared — the bars ruler is hidden. Audio is unchanged.',
++  },
++  studioMetronomeStrings: {
++    needsTempoTitle: 'Metronome — set a BPM first',
++    off: 'Metronome is off.',
++  },
++  studioViewStrings: {},
++};
++
++const EXPECTED_V02C2_KEYS: Record<string, string[]> = {
++  studioTempoStrings: ['cleared', 'emptyHint', 'invalid', 'set'],
++  studioMetronomeStrings: ['needsTempoTitle', 'off', 'on', 'title'],
++  studioViewStrings: ['zoomReadout'],
++};
++
++const V02C2_FORMATTER_SAMPLES: Record<string, Record<string, string[]>> = {
++  studioTempoStrings: {
++    invalid: [studioTempoStrings.invalid({ min: 20, max: 999 })],
++    set: [
++      studioTempoStrings.set({ bpm: '90', beatsPerBar: 4 }),
++      studioTempoStrings.set({ bpm: '92.5', beatsPerBar: 4 }),
++    ],
++  },
++  studioMetronomeStrings: {
++    title: [studioMetronomeStrings.title(4)],
++    on: [studioMetronomeStrings.on({ bpm: '40', beatsPerBar: 4 })],
++  },
++  studioViewStrings: {
++    zoomReadout: [
++      studioViewStrings.zoomReadout(0.5),
++      studioViewStrings.zoomReadout(40),
++      studioViewStrings.zoomReadout(35.3),
++    ],
++  },
++};
++
++const METRONOME_TITLE_TEXT =
++  'Metronome — a click on every beat during playback (4/4, the first beat of each bar is louder). Master volume and Mute also apply to it. Not included in the export.';
++
++describe('V-0.2c2 tempo, metronome and view strings', () => {
++  it('ST17: every plain-string property of the three objects equals its exact English literal', () => {
++    expect(Object.keys(V02C2_OBJECTS).sort()).toEqual(Object.keys(EXPECTED_V02C2_KEYS).sort());
++    for (const [objectName, object] of Object.entries(V02C2_OBJECTS)) {
++      expect(Object.keys(object).sort(), objectName).toEqual(EXPECTED_V02C2_KEYS[objectName]);
++      const expected = EXPECTED_V02C2_PLAIN_STRINGS[objectName] ?? {};
++      const plainKeys = Object.entries(object)
++        .filter(([, value]) => typeof value === 'string')
++        .map(([key]) => key)
++        .sort();
++      expect(plainKeys, objectName).toEqual(Object.keys(expected).sort());
++      for (const [key, value] of Object.entries(object)) {
++        if (typeof value === 'string') {
++          expect(value, `${objectName}.${key}`).toBe(expected[key]);
++        }
++      }
++    }
++    expect(TEMPO_EMPTY_HINT).toBe(studioTempoStrings.emptyHint);
++    expect(METRONOME_NEEDS_TEMPO_TITLE).toBe(studioMetronomeStrings.needsTempoTitle);
++  });
++
++  it('ST18: every formatter and exported tempo, metronome and zoom text returns the exact English', () => {
++    expect(studioTempoStrings.invalid({ min: 20, max: 999 })).toBe(
++      'Tempo must be 20–999 BPM (e.g. 90 or 92.5) — not changed.',
++    );
++    expect(studioTempoStrings.set({ bpm: '90', beatsPerBar: 4 })).toBe(
++      'Tempo 90 BPM · 4/4 — bars ruler updated. Grid only: audio is not stretched.',
++    );
++    expect(studioTempoStrings.set({ bpm: '92.5', beatsPerBar: 4 })).toBe(
++      'Tempo 92.5 BPM · 4/4 — bars ruler updated. Grid only: audio is not stretched.',
++    );
++    expect(studioMetronomeStrings.title(4)).toBe(METRONOME_TITLE_TEXT);
++    expect(studioMetronomeStrings.on({ bpm: '40', beatsPerBar: 4 })).toBe(
++      'Metronome is on — 40 BPM, 4/4: a click on every beat, louder on the first beat of each bar. Not included in the export.',
++    );
++    expect(studioViewStrings.zoomReadout(0.5)).toBe('0.5 px/s');
++    expect(studioViewStrings.zoomReadout(40)).toBe('40 px/s');
++    expect(studioViewStrings.zoomReadout(35.3)).toBe('35.3 px/s');
++    expect(TEMPO_INVALID_MESSAGE).toBe('Tempo must be 20–999 BPM (e.g. 90 or 92.5) — not changed.');
++    expect(tempoStatusMessage(90)).toBe(
++      'Tempo 90 BPM · 4/4 — bars ruler updated. Grid only: audio is not stretched.',
++    );
++    expect(tempoStatusMessage(null)).toBe(
++      'Tempo cleared — the bars ruler is hidden. Audio is unchanged.',
++    );
++    expect(METRONOME_TITLE).toBe(METRONOME_TITLE_TEXT);
++    expect(metronomeStatusMessage(40)).toBe(
++      'Metronome is on — 40 BPM, 4/4: a click on every beat, louder on the first beat of each bar. Not included in the export.',
++    );
++    expect(metronomeStatusMessage(null)).toBe('Metronome is off.');
++    expect(formatZoomReadout(35.26)).toBe('35.3 px/s');
++  });
++
++  it('ST19: the three objects and the tempo, metronome and view sources contain no Georgian codepoint', () => {
++    for (const [objectName, object] of Object.entries(V02C2_OBJECTS)) {
++      const samples = V02C2_FORMATTER_SAMPLES[objectName] ?? {};
++      const formatterKeys = Object.entries(object)
++        .filter(([, value]) => typeof value === 'function')
++        .map(([key]) => key)
++        .sort();
++      expect(formatterKeys, objectName).toEqual(Object.keys(samples).sort());
++      for (const [key, value] of Object.entries(object)) {
++        if (typeof value === 'string') {
++          expect(value, `${objectName}.${key}`).not.toMatch(GEORGIAN_CODEPOINT);
++        }
++      }
++      for (const [key, outputs] of Object.entries(samples)) {
++        expect(outputs.length, `${objectName}.${key}`).toBeGreaterThan(0);
++        for (const output of outputs) {
++          expect(output, `${objectName}.${key}`).not.toMatch(GEORGIAN_CODEPOINT);
++        }
++      }
++    }
++    for (const path of ['../tempo.ts', '../metronome.ts', '../view.ts']) {
++      const source = stripSourceComments(readStoreSource(path));
++      expect(source.length, path).toBeGreaterThan(0);
++      expect(source, path).not.toMatch(GEORGIAN_CODEPOINT);
+     }
+   });
+ });
+--- start/app/lib/arrangement/__tests__/tempo.test.ts
++++ app/lib/arrangement/__tests__/tempo.test.ts
+@@ -1,4 +1,5 @@
+ import { describe, expect, it } from 'vitest';
++import { studioTempoStrings } from '../strings';
+ import {
+   barsRulerMarks,
+   formatTempoBpm,
+@@ -132,16 +133,10 @@
+   });
+ 
+   it('T10 status messages and the empty hint are verbatim', () => {
+-    expect(tempoStatusMessage(90)).toBe(
+-      'ტემპი 90 BPM · 4/4 — ტაქტების სახაზავი განახლდა. მხოლოდ ბადეა: აუდიო არ იწელება.',
+-    );
++    expect(tempoStatusMessage(90)).toBe(studioTempoStrings.set({ bpm: '90', beatsPerBar: 4 }));
+     expect(tempoStatusMessage(92.5)).toContain('92.5 BPM');
+-    expect(tempoStatusMessage(null)).toBe(
+-      'ტემპი წაიშალა — ტაქტების სახაზავი დამალულია. აუდიო არ შეცვლილა.',
+-    );
+-    expect(TEMPO_INVALID_MESSAGE).toBe(
+-      'ტემპი უნდა იყოს 20–999 BPM (მაგ. 90 ან 92.5) — არ შეიცვალა.',
+-    );
+-    expect(TEMPO_EMPTY_HINT).toBe('ტაქტები: მიუთითე BPM — მხოლოდ ბადე, აუდიო არ იწელება');
++    expect(tempoStatusMessage(null)).toBe(studioTempoStrings.cleared);
++    expect(TEMPO_INVALID_MESSAGE).toBe(studioTempoStrings.invalid({ min: 20, max: 999 }));
++    expect(TEMPO_EMPTY_HINT).toBe(studioTempoStrings.emptyHint);
+   });
+ });
+--- start/app/lib/arrangement/__tests__/metronome.test.ts
++++ app/lib/arrangement/__tests__/metronome.test.ts
+@@ -19,6 +19,7 @@
+   metronomeStatusMessage,
+   planMetronomeClicks,
+ } from '../metronome';
++import { studioMetronomeStrings } from '../strings';
+ 
+ interface FakeBuffer {
+   id: string;
+@@ -257,14 +258,12 @@
+ 
+   it('M8 writes the on/off status and the two toggle titles verbatim', () => {
+     expect(metronomeStatusMessage(40)).toBe(
+-      'მეტრონომი ჩართულია — 40 BPM, 4/4: კლიკი ყოველ დარტყმაზე, ტაქტის პირველზე უფრო ხმამაღლა. ექსპორტში არ შედის.',
++      studioMetronomeStrings.on({ bpm: '40', beatsPerBar: 4 }),
+     );
+     expect(metronomeStatusMessage(92.5)).toContain('92.5 BPM');
+-    expect(metronomeStatusMessage(null)).toBe('მეტრონომი გამორთულია.');
+-    expect(METRONOME_NEEDS_TEMPO_TITLE).toBe('მეტრონომი — ჯერ მიუთითე BPM');
+-    expect(METRONOME_TITLE).toBe(
+-      'მეტრონომი — კლიკი ყოველ დარტყმაზე დაკვრისას (4/4, ტაქტის პირველი დარტყმა უფრო ხმამაღლა). Master-ის ხმა და Mute მასზეც მოქმედებს. ექსპორტში არ შედის.',
+-    );
++    expect(metronomeStatusMessage(null)).toBe(studioMetronomeStrings.off);
++    expect(METRONOME_NEEDS_TEMPO_TITLE).toBe(studioMetronomeStrings.needsTempoTitle);
++    expect(METRONOME_TITLE).toBe(studioMetronomeStrings.title(4));
+   });
+ 
+   it('M9 routes every click through one metronome gain into the master gain only', () => {
+--- start/app/lib/arrangement/__tests__/view.test.ts
++++ app/lib/arrangement/__tests__/view.test.ts
+@@ -10,6 +10,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioViewStrings } from '../strings';
+ import {
+   anchoredTimelineView,
+   centreTimelineView,
+@@ -263,9 +264,9 @@
+     expect(zoomFromSliderPosition(1000)).toBeCloseTo(TIMELINE_ZOOM_MAX, 9);
+     expect(zoomFromSliderPosition(sliderPositionFromZoom(40))).toBeCloseTo(40, 0);
+     expect(sliderPositionFromZoom(TIMELINE_ZOOM_MIN)).toBe(0);
+-    expect(formatZoomReadout(0.5)).toBe('0.5 px/წმ');
+-    expect(formatZoomReadout(40)).toBe('40 px/წმ');
+-    expect(formatZoomReadout(35.26)).toBe('35.3 px/წმ');
++    expect(formatZoomReadout(0.5)).toBe(studioViewStrings.zoomReadout(0.5));
++    expect(formatZoomReadout(40)).toBe(studioViewStrings.zoomReadout(40));
++    expect(formatZoomReadout(35.26)).toBe(studioViewStrings.zoomReadout(35.3));
+   });
+ });
+ 
+--- start/app/lib/arrangement/__tests__/tempo-ui.test.tsx
++++ app/lib/arrangement/__tests__/tempo-ui.test.tsx
+@@ -299,6 +299,9 @@
+     const input = tempoInput(view);
+     commitTempo(input, '90');
+     expect(statusText(view)).toBe(tempoStatusMessage(90));
++    expect(statusText(view)).toBe(
++      'Tempo 90 BPM · 4/4 — bars ruler updated. Grid only: audio is not stretched.',
++    );
+     expect(barsStrip(view).dataset.bpm).toBe('90');
+     const bars = barMarks(view);
+     expect(bars.slice(0, 4).map((mark) => mark.dataset.time)).toEqual([
+@@ -351,6 +354,7 @@
+       expect(statusText(view)).not.toBe(TEMPO_INVALID_MESSAGE);
+       commitTempo(input, text);
+       expect(statusText(view)).toBe(TEMPO_INVALID_MESSAGE);
++      expect(statusText(view)).toBe('Tempo must be 20–999 BPM (e.g. 90 or 92.5) — not changed.');
+       expect(input.value).toBe('90');
+       expect(barsStrip(view).dataset.bpm).toBe('90');
+       expect(markSnapshot(view)).toEqual(marksBefore);
+@@ -391,7 +395,11 @@
+     expect(barsStrip(view).dataset.bpm).toBe('');
+     expect(barsMarks(view)).toHaveLength(0);
+     expect(statusText(view)).toBe(tempoStatusMessage(null));
++    expect(statusText(view)).toBe('Tempo cleared — the bars ruler is hidden. Audio is unchanged.');
+     expect(barsStrip(view).textContent).toContain(TEMPO_EMPTY_HINT);
++    expect(barsStrip(view).textContent).toContain(
++      'Bars: set a BPM — grid only, audio is not stretched',
++    );
+   });
+ 
+   it('U9 committing the same value again is a no-op without a status', async () => {
+--- start/app/lib/arrangement/__tests__/metronome-ui.test.tsx
++++ app/lib/arrangement/__tests__/metronome-ui.test.tsx
+@@ -290,6 +290,7 @@
+     expect(toggle.disabled).toBe(true);
+     expect(toggle.getAttribute('aria-pressed')).toBe('false');
+     expect(toggle.title).toBe(METRONOME_NEEDS_TEMPO_TITLE);
++    expect(toggle.title).toBe('Metronome — set a BPM first');
+     play(api);
+     expect(live(api).isPlaying).toBe(true);
+     expect(lastScheduleOptions().metronome).toBeUndefined();
+@@ -302,9 +303,15 @@
+     const toggle = metronomeToggle(view);
+     expect(toggle.disabled).toBe(false);
+     expect(toggle.title).toBe(METRONOME_TITLE);
++    expect(toggle.title).toBe(
++      'Metronome — a click on every beat during playback (4/4, the first beat of each bar is louder). Master volume and Mute also apply to it. Not included in the export.',
++    );
+     clickMetronome(view);
+     expect(toggle.getAttribute('aria-pressed')).toBe('true');
+     expect(statusText(view)).toBe(metronomeStatusMessage(120));
++    expect(statusText(view)).toBe(
++      'Metronome is on — 120 BPM, 4/4: a click on every beat, louder on the first beat of each bar. Not included in the export.',
++    );
+     play(api);
+     const options = lastScheduleOptions();
+     expect(options.from).toBe(0);
+@@ -333,6 +340,7 @@
+       clickMetronome(view);
+     });
+     expect(statusText(view)).toBe(metronomeStatusMessage(null));
++    expect(statusText(view)).toBe('Metronome is off.');
+     expect(metronomeToggle(view).getAttribute('aria-pressed')).toBe('false');
+     expect(applyScheduleMock.mock.calls.length).toBe(before + 1);
+     expect(lastScheduleOptions().metronome).toBeUndefined();
+--- start/app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx
++++ app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx
+@@ -388,7 +388,7 @@
+ describe('SRW-16 stage 2b-3 seeks snap to markers', { timeout: 15_000 }, () => {
+   it('TS1 a ruler click follows the bypass matrix with the marker as a candidate', async () => {
+     const { api, view, ruler, handle } = await mountTimeSnapWorkspace();
+-    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
++    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/s');
+     setSnap(view, true);
+     clickRuler(ruler, 6.45);
+     expect(positionOf(api)).toBe(MARKER_A);
+--- start/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
++++ app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+@@ -282,7 +282,7 @@
+ describe('SRW-14 stage 1 grid control and lines', { timeout: 15_000 }, () => {
+   it('GS1 starts with Snap off, 1 s division and visible lines in every lane', async () => {
+     const { view } = await mountGridWorkspace();
+-    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
++    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/s');
+     const control = view.getByTestId('arrangement-grid-control');
+     expect(control.dataset.snap).toBe('off');
+     expect(control.dataset.gridSeconds).toBe('1');
+--- start/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
++++ app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
+@@ -337,7 +337,7 @@
+ describe('SRW-14 stage 2 trim edges on the grid', () => {
+   it('SE2 Snap off keeps a free right trim of exactly +0.375 s', async () => {
+     const { api, view, clipParts } = await mountEditWorkspace([clipAt('m1', 'music', 7, 3)]);
+-    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
++    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/s');
+     expect(live(api).sourceDurations.get('song')).toBe(40);
+     const parts = clipParts('m1');
+     dragFrom(parts.trimEnd, parts.root, 118, [{ dx: 15 }]);
+--- start/app/lib/arrangement/__tests__/grid-snap-position.test.tsx
++++ app/lib/arrangement/__tests__/grid-snap-position.test.tsx
+@@ -305,7 +305,7 @@
+ describe('SRW-14 stage 3a ruler click on the grid', () => {
+   it('SP2 Snap off keeps a free ruler click', async () => {
+     const { api, view, ruler } = await mountPositionWorkspace([]);
+-    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
++    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/s');
+     clickRuler(ruler, xFor(7.3));
+     expect(positionOf(api)).toBeCloseTo(7.3, 9);
+   });
+@@ -346,7 +346,7 @@
+     fireEvent.pointerDown(ruler, { ...press, pointerId: 1, clientX: x, clientY: RULER_Y });
+     fireEvent.pointerMove(ruler, { pointerId: 1, clientX: x, clientY: RULER_Y + 60 });
+     fireEvent.pointerUp(ruler, { pointerId: 1, clientX: x, clientY: RULER_Y + 60 });
+-    expect(view.getByTestId('arrangement-zoom-readout').textContent).not.toBe('40 px/წმ');
++    expect(view.getByTestId('arrangement-zoom-readout').textContent).not.toBe('40 px/s');
+     expect(positionOf(api)).toBe(0);
+   });
+ 
+--- start/app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx
++++ app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx
+@@ -357,7 +357,7 @@
+ describe('SRW-14 stage 3b library drop on the grid', { timeout: 15_000 }, () => {
+   it('SD1 Snap off keeps a free drop and its ghost', async () => {
+     const { api, view, laneBody } = await mountLoopDropWorkspace(DROP_FIXTURE);
+-    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
++    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/s');
+     act(() => live(api).beginLibraryDrag('hit'));
+     dragLibraryOver(laneBody('sfx'), 9.4);
+     expect(dropGhost(view)).toEqual({ text: '00:09.400', left: '376px', blocked: 'false' });
+--- start/app/lib/arrangement/__tests__/grid-musical-ui.test.tsx
++++ app/lib/arrangement/__tests__/grid-musical-ui.test.tsx
+@@ -487,7 +487,7 @@
+     chooseDivision(view, '1/4');
+     commitTempo(view, '');
+     expect(statusText(view)).toBe(
+-      'ტემპი წაიშალა — ტაქტების სახაზავი დამალულია. აუდიო არ შეცვლილა. ბადე დაბრუნდა წამებზე: 0.5 წმ.',
++      'Tempo cleared — the bars ruler is hidden. Audio is unchanged. ბადე დაბრუნდა წამებზე: 0.5 წმ.',
+     );
+     expect(divisionSelect(view).options).toHaveLength(7);
+     expect(divisionSelect(view).value).toBe('0.5');
+--- start/app/lib/arrangement/__tests__/grid-musical.test.ts
++++ app/lib/arrangement/__tests__/grid-musical.test.ts
+@@ -115,7 +115,7 @@
+     expect(gridDivisionEndMessage('1/32', 'narrow')).toBe('ბადე უკვე ყველაზე მჭიდროა — 1/32 (1)');
+     expect(gridDivisionEndMessage('bar', 'widen')).toBe('ბადე უკვე ყველაზე ფართოა — 1 ტაქტი (2)');
+     expect(gridTempoClearedMessage(0.5)).toBe(
+-      'ტემპი წაიშალა — ტაქტების სახაზავი დამალულია. აუდიო არ შეცვლილა. ბადე დაბრუნდა წამებზე: 0.5 წმ.',
++      'Tempo cleared — the bars ruler is hidden. Audio is unchanged. ბადე დაბრუნდა წამებზე: 0.5 წმ.',
+     );
+     expect(gridMusicalGroupLabel(92.5)).toBe('ტაქტები · 92.5 BPM');
+     expect(gridDivisionLabel('bar')).toBe('1 ტაქტი');
+--- start/docs/implementation/2026/quarter-IV/107-studio-v0-video-import-strings.md
++++ docs/implementation/2026/quarter-IV/107-studio-v0-video-import-strings.md
+@@ -1,7 +1,7 @@
+ # Studio V-0.2c1 — ვიდეოს იმპორტის ტექსტები ინგლისურად
+ 
+ **თარიღი:** 2026-10-24
+-**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 131-ში; ბრაუზერის შემოწმება C-ის რაუნდია)
++**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 131-ში; C round 131 — PASS, browserVerified; gate 131 — c8ff326)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი

@@ -1,0 +1,49 @@
+== ტემპი უნდა იყოს
+app/lib/arrangement/tempo.ts:11:export const TEMPO_INVALID_MESSAGE = `ტემპი უნდა იყოს ${TEMPO_BPM_MIN}–${TEMPO_BPM_MAX} BPM (მაგ. 90 ან 92.5) — არ შეიცვალა.`;
+app/lib/arrangement/__tests__/tempo.test.ts:143:      'ტემპი უნდა იყოს 20–999 BPM (მაგ. 90 ან 92.5) — არ შეიცვალა.',
+== მიუთითე BPM
+app/lib/arrangement/metronome.ts:10:export const METRONOME_NEEDS_TEMPO_TITLE = 'მეტრონომი — ჯერ მიუთითე BPM';
+app/lib/arrangement/tempo.ts:12:export const TEMPO_EMPTY_HINT = 'ტაქტები: მიუთითე BPM — მხოლოდ ბადე, აუდიო არ იწელება';
+app/lib/arrangement/__tests__/tempo.test.ts:145:    expect(TEMPO_EMPTY_HINT).toBe('ტაქტები: მიუთითე BPM — მხოლოდ ბადე, აუდიო არ იწელება');
+app/lib/arrangement/__tests__/metronome.test.ts:264:    expect(METRONOME_NEEDS_TEMPO_TITLE).toBe('მეტრონომი — ჯერ მიუთითე BPM');
+== ტემპი წაიშალა
+app/lib/arrangement/tempo.ts:43:    return 'ტემპი წაიშალა — ტაქტების სახაზავი დამალულია. აუდიო არ შეცვლილა.';
+app/lib/arrangement/__tests__/grid-musical-ui.test.tsx:490:      'ტემპი წაიშალა — ტაქტების სახაზავი დამალულია. აუდიო არ შეცვლილა. ბადე დაბრუნდა წამებზე: 0.5 წმ.',
+app/lib/arrangement/__tests__/tempo.test.ts:140:      'ტემპი წაიშალა — ტაქტების სახაზავი დამალულია. აუდიო არ შეცვლილა.',
+app/lib/arrangement/__tests__/grid-musical.test.ts:118:      'ტემპი წაიშალა — ტაქტების სახაზავი დამალულია. აუდიო არ შეცვლილა. ბადე დაბრუნდა წამებზე: 0.5 წმ.',
+== ტაქტების სახაზავი განახლდა
+app/lib/arrangement/tempo.ts:45:  return `ტემპი ${formatTempoBpm(bpm)} BPM · ${TEMPO_BEATS_PER_BAR}/4 — ტაქტების სახაზავი განახლდა. მხოლოდ ბადეა: აუდიო არ იწელება.`;
+app/lib/arrangement/__tests__/tempo.test.ts:136:      'ტემპი 90 BPM · 4/4 — ტაქტების სახაზავი განახლდა. მხოლოდ ბადეა: აუდიო არ იწელება.',
+== მეტრონომი —
+app/lib/arrangement/metronome.ts:10:export const METRONOME_NEEDS_TEMPO_TITLE = 'მეტრონომი — ჯერ მიუთითე BPM';
+app/lib/arrangement/metronome.ts:11:export const METRONOME_TITLE = `მეტრონომი — კლიკი ყოველ დარტყმაზე დაკვრისას (${TEMPO_BEATS_PER_BAR}/4, ტაქტის პირველი დარტყმა უფრო ხმამაღლა). Master-ის ხმა და Mute მასზეც მოქმედებს. ექსპორტში არ შედის.`;
+app/lib/arrangement/__tests__/metronome.test.ts:264:    expect(METRONOME_NEEDS_TEMPO_TITLE).toBe('მეტრონომი — ჯერ მიუთითე BPM');
+app/lib/arrangement/__tests__/metronome.test.ts:266:      'მეტრონომი — კლიკი ყოველ დარტყმაზე დაკვრისას (4/4, ტაქტის პირველი დარტყმა უფრო ხმამაღლა). Master-ის ხმა და Mute მასზეც მოქმედებს. ექსპორტში არ შედის.',
+== მეტრონომი გამორთულია
+app/lib/arrangement/metronome.ts:115:    return 'მეტრონომი გამორთულია.';
+app/lib/arrangement/__tests__/metronome.test.ts:263:    expect(metronomeStatusMessage(null)).toBe('მეტრონომი გამორთულია.');
+== მეტრონომი ჩართულია
+app/lib/arrangement/metronome.ts:117:  return `მეტრონომი ჩართულია — ${formatTempoBpm(bpm)} BPM, ${TEMPO_BEATS_PER_BAR}/4: კლიკი ყოველ დარტყმაზე, ტაქტის პირველზე უფრო ხმამაღლა. ექსპორტში არ შედის.`;
+app/lib/arrangement/__tests__/metronome.test.ts:260:      'მეტრონომი ჩართულია — 40 BPM, 4/4: კლიკი ყოველ დარტყმაზე, ტაქტის პირველზე უფრო ხმამაღლა. ექსპორტში არ შედის.',
+== px/წმ
+app/components/arrangement/ArrangementTransport.tsx:245:            aria-label="Zoom (px/წმ)"
+app/lib/arrangement/view.ts:258:  return `${Math.round(pxPerSecond * 10) / 10} px/წმ`;
+app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx:391:    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
+app/lib/arrangement/__tests__/grid-snap-ui.test.tsx:285:    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
+app/lib/arrangement/__tests__/grid-snap-edit.test.tsx:340:    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
+app/lib/arrangement/__tests__/grid-snap-position.test.tsx:308:    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
+app/lib/arrangement/__tests__/grid-snap-position.test.tsx:349:    expect(view.getByTestId('arrangement-zoom-readout').textContent).not.toBe('40 px/წმ');
+app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx:360:    expect(view.getByTestId('arrangement-zoom-readout').textContent).toBe('40 px/წმ');
+app/lib/arrangement/__tests__/view.test.ts:266:    expect(formatZoomReadout(0.5)).toBe('0.5 px/წმ');
+app/lib/arrangement/__tests__/view.test.ts:267:    expect(formatZoomReadout(40)).toBe('40 px/წმ');
+app/lib/arrangement/__tests__/view.test.ts:268:    expect(formatZoomReadout(35.26)).toBe('35.3 px/წმ');
+== მხოლოდ ბადე
+app/lib/arrangement/tempo.ts:12:export const TEMPO_EMPTY_HINT = 'ტაქტები: მიუთითე BPM — მხოლოდ ბადე, აუდიო არ იწელება';
+app/lib/arrangement/tempo.ts:45:  return `ტემპი ${formatTempoBpm(bpm)} BPM · ${TEMPO_BEATS_PER_BAR}/4 — ტაქტების სახაზავი განახლდა. მხოლოდ ბადეა: აუდიო არ იწელება.`;
+app/lib/arrangement/__tests__/tempo.test.ts:136:      'ტემპი 90 BPM · 4/4 — ტაქტების სახაზავი განახლდა. მხოლოდ ბადეა: აუდიო არ იწელება.',
+app/lib/arrangement/__tests__/tempo.test.ts:145:    expect(TEMPO_EMPTY_HINT).toBe('ტაქტები: მიუთითე BPM — მხოლოდ ბადე, აუდიო არ იწელება');
+== ექსპორტში არ შედის
+app/lib/arrangement/metronome.ts:11:export const METRONOME_TITLE = `მეტრონომი — კლიკი ყოველ დარტყმაზე დაკვრისას (${TEMPO_BEATS_PER_BAR}/4, ტაქტის პირველი დარტყმა უფრო ხმამაღლა). Master-ის ხმა და Mute მასზეც მოქმედებს. ექსპორტში არ შედის.`;
+app/lib/arrangement/metronome.ts:117:  return `მეტრონომი ჩართულია — ${formatTempoBpm(bpm)} BPM, ${TEMPO_BEATS_PER_BAR}/4: კლიკი ყოველ დარტყმაზე, ტაქტის პირველზე უფრო ხმამაღლა. ექსპორტში არ შედის.`;
+app/lib/arrangement/__tests__/metronome.test.ts:260:      'მეტრონომი ჩართულია — 40 BPM, 4/4: კლიკი ყოველ დარტყმაზე, ტაქტის პირველზე უფრო ხმამაღლა. ექსპორტში არ შედის.',
+app/lib/arrangement/__tests__/metronome.test.ts:266:      'მეტრონომი — კლიკი ყოველ დარტყმაზე დაკვრისას (4/4, ტაქტის პირველი დარტყმა უფრო ხმამაღლა). Master-ის ხმა და Mute მასზეც მოქმედებს. ექსპორტში არ შედის.',

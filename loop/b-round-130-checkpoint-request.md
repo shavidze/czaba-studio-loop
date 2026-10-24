@@ -45,3 +45,9 @@ Source: the A round-131 reviewer's Architecture note and the gate-131 reviewer's
    - Timing: after V-0.2c3, or after V-0.5. "Keep" is a valid answer.
 
 Still non-blocking. Rounds 132–133 (V-0.2c2/c3) do not touch the Context.
+
+## Addendum (f) — B round 132 → 133 planning (D-29z98), 2026-10-24
+- Source: `gates/round-132/review.md` Architecture note and `a-round-132.md` reviewer note (both: **keep for now**). `strings.ts` was edited in rounds 127, 131 and 132; it holds 10 objects and will hold 12 after round 133.
+- New timing condition from the gate reviewer: **decide the split before V-0.3** adds the component texts (Transport, TempoRow, grid labels). After that, the split costs more.
+- Request to root: run this bounded frontend-architect checkpoint after round 133 closes and **before V-0.3 is dispatched**. Same questions as (e): split into `lib/arrangement/strings/<area>.ts` + a named re-export index with every exported name unchanged (acceptance: no caller change, ST1–ST22 unchanged), and the shared Context UI test harness. "Keep" is a valid answer.
+- Still non-blocking for round 133 (no Context or component change).

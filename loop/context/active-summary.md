@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T09:23:51.262Z)
+# Active loop summary (2026-10-24T10:03:06.422Z)
 
-- backlog.json 1192 KB -> active view 151 KB
-- status: G_ROOT_GATE round 131
-- servers: `{"checkedUtc":"2026-10-24T09:06:45.7515601Z","round":131,"attempt":1,"store":200}`
-- last publication: c8ff326cab55e06838487d9ebd9c0a2d50c85f58 (rounds 131-131)
-- last root gate: round 131 published - commit c8ff326cab55e06838487d9ebd9c0a2d50c85f58 pushed
+- backlog.json 1203 KB -> active view 153 KB
+- status: G_ROOT_GATE round 132
+- servers: `{"checkedUtc":"2026-10-24T09:47:16.0537196Z","round":132,"attempt":1,"store":200}`
+- last publication: b25507ed0f127b2e64e46333bea7c6827bbf6eac (rounds 132-132)
+- last root gate: round 132 published - commit b25507ed0f127b2e64e46333bea7c6827bbf6eac pushed
 
 ## Current items: -
 
@@ -191,7 +191,7 @@
 - B-R107-ENTER-ON-BODY / info / open question for the user (not deferred, not scheduled as a change): the workspace-wide Enter (target not a button/slider/separator, incl. BODY) adds the active library item; SRW-12 R12-L2 only specifies Enter from the results list. Kept unchanged in round 108; focus retention closes C-R107-01 regardless / should Enter with focus on BODY add the active library item?
 - GATE107-S3-NZ-DELTA-NIT / info / open nit - optional defensive delta < 0 in the R4 condition (doc 092 F3) / target === clip.start with a non-negative delta would announce the time-start text (no current caller)
 - A-R108-CTRLZ-EXHAUST-FOCUS / info / open - signal (not in rule F1); Ctrl+Z exhausting history while Undo is focused leaves focus on the disabled Undo/BODY because the shortcut path never arms / 
-- DEFERRED-LOW-POLISH / info / open - pointer: 164 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
+- DEFERRED-LOW-POLISH / info / open - pointer: 185 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
 - PROD-SSR-NUL / info / open - gate/Tech Lead row (production build served, NUL 0 on /studio-lab, both UAs, chunked); not run by C (dev server only) or by gate 109 (build green, HTML not measured) / production SSR HTML NUL count not measured after the round-109 filter
 - GATE109-F4-SN5-TRIPWIRE / info / acknowledged - SN5 turns red on purpose when react-dom fixes writeStringChunk; the extra typeof assertion may go with the removal task / SN5 is a deliberate upstream tripwire
 - GATE109-F5-ABORT-TIMER / info / signal - pre-existing setTimeout(abort, ABORT_DELAY) never cleared and responseStatusCode=500 after resolve has no effect (A reviewer + gate F5); entry.server.tsx frozen; not scheduled / entry.server.tsx abort timer not cleared
@@ -254,13 +254,19 @@
 - C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
 - ALTGR-SHORTCUT-GUARD / info / signal (not scheduled; no CZABA contract; C round 126 F-5) / Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or 
 - C-R127-L1 / low / parts a-d closed round 128 (C EX-COPY exact text in the browser, c-round-128.json); parts e-f in deferred_low_polish (C-R127-L1e/L1f) / Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in t
-- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2a r129, V-0.2b r130 done; V-0.2c1 r131; then V-0.2c2/c3, V-0.3..V-0.5; closes when V-0 completes (RV-4) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
+- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2a r129, V-0.2b r130, V-0.2c1 r131 done; V-0.2c2 r132; then V-0.2c3, V-0.3..V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions: GATE130-S1 (V-0.4), GATE132-TEMPO-CLEARED-MIXED (V-0.3) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
 - C-R129-REDO-PASTE-SELECTION / info / observation (pre-existing; product question, not scheduled) / Redo after Paste does not restore the pasted clip selection
 - C-R129-EMPTY-RANGE-UNREACHABLE / info / acknowledged (harness): a drag on empty lane background creates no time selection, so E12/E27/E31 are unit-only / empty-range edit messages not reachable in the browser
 - GATE130-S1-GHOST-STATUS-TWO-LANGUAGES / low / ruled D-29z96: stays V-0.4 (ArrangementLane has 20 Georgian lines; tests pin the ghost; half-migrating the lane needs a second per-file scan); V-0.4 must reuse the status English for ghost/hint texts; tracked under GATE128-S1 / blocked drop shows English status and Georgian lane ghost
 - GATE130-S2-TRACKNAME-IN-SENTENCE / info / closes with V-0.4 default track names; not a new finding later / clipAdded interpolates Georgian track names into English sentences
-- GATE130-S4-ST13-BRITTLE / info / handled D-29z96: ST13 shrinks to 4 lines in round 131; an exact list of 4 lines is acceptable as a ratchet / ST13 pins remaining Georgian lines exactly
-- GATE130-S5-DOC106-STATUS / low / scheduled round 131 (doc 106 l.4 only) / doc 106 says Completed before C's browser check
+- C-R131-01 / low / deferred_low_polish (pre-existing) / duration-less browser-recorded WebM rejected with 'could not open'
+- GATE131-S1-V6-WORDING / low / deferred_low_polish / V6 audio-rejection English reads awkwardly
+- GATE131-S2-REVOKE-OBJECTURL-RESTORE / low / deferred_low_polish / new test leaves URL.revokeObjectURL patched
+- GATE131-S3-VI-NOT-LIVE-REGION / info / acknowledged (status-announcement-ui covers the live-region mechanism; C VID-ADD saw the Opening -> added sequence in the browser) / VI1-VI4 read the context status, not the live region announcement order
+- GATE131-S5-RAW-ERROR-TEXT / info / signal (pre-existing; React escapes it; a generic importFailed text could replace raw error.message in a later stage; not scheduled) / importFailed shows raw error.message
+- GATE131-S6-DOC107-STATUS / low / scheduled round 132 (doc 107 l.4 only) / doc 107 status names C's round as still to come
+- C-R131-OBS-EXPORT-VIDEO-SOUND-BELOW-FOLD-1280 / info / acknowledged (pre-existing layout; same class as C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / ARCH-R101-MODALBODY-PADDING-SLOT) / at 1280x720 the Export dialog video-sound list needs a scroll
+- GATE132-TEMPO-CLEARED-MIXED / low / ruled D-29z97 R3: temporary tracked exception under GATE128-S1; closes in V-0.3 with grid-divisions.ts + grid.ts formatGridDivision / clearing the BPM on a musical division shows English tempo text + Georgian grid tail in one status
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,0 +1,129 @@
+{
+ "round": 132,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T09:47:16.0537196Z",
+  "round": 132,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T132-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "TEMPO",
+  "METRO",
+  "ZOOM",
+  "GEO-COUNT",
+  "LAYOUT",
+  "REG-131",
+  "G132-3 (lab demo, sign-in gate 1440/1280, token 401)",
+  "PX-NET/REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G132-3 fake-Bearer 403 check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [],
+ "invalidRuns": [
+  {
+   "run": "c132-1440-r1",
+   "reason": "ENV-FIRST-LOAD: first dev-server load crashed (React 'Invalid hook call' + hydration replaced); discarded, evidence c-round-132/out/INVALID-ENV-FIRST-LOAD-c132-1440-r1.json; replaced by c132-1440-r2 (1 of max 2 replacements)"
+  }
+ ],
+ "georgianCounts": {
+  "rule": "net Georgian codepoints in status region (after a row action), metronome title, zoom readout textContent, zoom slider aria-valuetext, bars-strip hint",
+  "result": "0 on every surface at every step, both viewports",
+  "subtractedByName": [
+   "R3 tail 'ბადე დაბრუნდა წამებზე: 0.5 წმ.' (TEMPO d4)",
+   "BPM field aria-label 'პროექტის ტემპი (BPM)' and its title (not in counted surfaces)",
+   "metronome button label 'მეტრონომი' (textContent)",
+   "zoom slider aria-label 'Zoom (px/წმ)' (R4)",
+   "grid-division statuses written by a division change: 'ბადე: 0.5 წმ (Snap გამორთულია)', 'ბადე: 1/4 · 0.667 წმ 90 BPM-ზე (Snap გამორთულია)', 'ბადე: 1 წმ (Snap გამორთულია)' (V-0.3)",
+   "track name 'მუსიკა' and sound title 'CZABA hero — საჯარო preview' in the add status (TEMPO start)"
+  ],
+  "notCounted": "the load-time status 'დემო კოლექცია მზადაა. აირჩიე ხაზი და დაამატე ხმა (Enter ან ＋ დამატება).' is shown before any row action and is not produced by tempo/metronome/view; it is outside V-0.2c2 scope (later V-0 stage)",
+  "evidence": "c-round-132/out/geo-summary.json (applies every named subtraction per step; raw and net per surface)",
+  "rawStatusCounts": {
+   "load/ZOOM/METRO-a (load message)": 50,
+   "TEMPO start (add status, track+sound names)": 12,
+   "TEMPO d1 (grid status)": 16,
+   "TEMPO d3 (grid status)": 18,
+   "TEMPO d4 (R3 tail)": 21,
+   "all other steps": 0
+  },
+  "netAfterSubtractions": "0 on all five surfaces at every step except the 4 pre-action steps that still show the load message (50); excluding the load message, 0 everywhere; observer-recorded statuses net 0",
+  "priorRoundHandling": "c-round-131.md l.42 treated the same load status as outside scope (V-0.4/V-0.5); mirrored here"
+ },
+ "measurements": {
+  "metronomePlay": {
+   "1440": {
+    "play": {
+     "pos0": 0,
+     "posMid": 1.97,
+     "pos1": 1.97,
+     "bufferSourcesCreated": 9,
+     "tapSamples": 153,
+     "maxPeak": 0.4842257499694824,
+     "framesAbove001": 16,
+     "ctxState": [
+      "running"
+     ]
+    },
+    "net": {
+     "ok": true,
+     "bad": [],
+     "noise": 2,
+     "sessions": 1
+    }
+   },
+   "1280": {
+    "play": {
+     "pos0": 0,
+     "posMid": 1.961,
+     "pos1": 1.97,
+     "bufferSourcesCreated": 9,
+     "tapSamples": 152,
+     "maxPeak": 0.4842257499694824,
+     "framesAbove001": 19,
+     "ctxState": [
+      "running"
+     ]
+    },
+    "net": {
+     "ok": true,
+     "bad": [],
+     "noise": 2,
+     "sessions": 1
+    }
+   }
+  }
+ },
+ "notesForB": [
+  "V-0.2c2 meets every C row at both viewports; status V-0.2c2 -> c_pass per task §8; next V-0.2c3 (selection.ts + groups.ts).",
+  "GATE132-TEMPO-CLEARED-MIXED observed exactly as ruled (R3); V-0.3 must close it together with grid.ts formatGridDivision and the Georgian grid statuses seen by the observer.",
+  "R4 split observed: slider aria-valuetext '40 px/s' vs aria-label 'Zoom (px/წმ)'; V-0.3.",
+  "Load-time demo-ready status is still Georgian (out of this round's scope); keep it on the V-0 string list.",
+  "A's SP6 not.toBe blind spot (Low, pre-existing) — B may add to deferred_low_polish; C did not count it as a finding of this round.",
+  "Ableton correspondence: not applicable / unconfirmed (text-only round). CZABA requirement: met. Grid tempo != audio stretch confirmed in the browser (clip start 2.000 / width 150.372 s unchanged through every tempo step)."
+ ],
+ "layoutExtra": {
+  "tempoRowBox": "x=288 w=224 h=20 (y=219 @1440, y=257 @1280), unchanged across every step, sw<=cw",
+  "zoomReadout": "64x16, unchanged",
+  "barsStrip": "no overflow, hint fits one line"
+ },
+ "finalSourceCheck": "after all C writes: git status 19 lines (18 M + 1 ??), frozen list OK, 19 granted end hashes OK"
+}
