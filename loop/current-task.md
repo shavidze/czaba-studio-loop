@@ -1,182 +1,116 @@
-# CURRENT TASK — Round 145: VISUAL-A V-0.5a — library source-load errors, library row status, demo collection labels and library search keywords in English
+# CURRENT TASK — Round 146: V-0.5a fix-up — the library "▶ Playing" marker on its own line (C-R145-01 + ABL-B-1) and two V-0.5a test-strength gaps
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 144 = **published**)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 145 = **skipped**, "C taskStatus FAIL")
 - **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
-- **Previous task:** `tasks/round-144.md`, an exact copy of the round-144 `current-task.md` (sha256 `86a17796…`). Rationale: `b-round-144.md`. Decision record: **D-29z110** in `docs/technical/studio-real-workspace/plan.md`.
-- **Baseline:** gate 144 published **`9a67abd78b41162262c0882544dbdd4544afef1b`** on both remotes (rounds 142–144, V-0.4 complete). HEAD = 9a67abd and `git status --short` is **empty** at planning.
-- **Frozen list:** `tmp/studio-real-loop/b-round-144-r145-tree-sha256.txt`, **948 entries** = `git ls-files -co --exclude-standard` (963) minus the 15 existing grants. `sha256sum -c --quiet` was OK at planning, run from `store/`.
-- **Grants:** `b-round-144-r145-grants.txt`: 15 existing files + 2 new files (`NEW` prefix). **Start hashes:** `b-round-144-r145-granted-start-sha256.txt`. **Start copies:** `b-round-144/r145-granted-start/` (paths relative to `store/`). A checks all three first. Any difference → A stops and reports.
-- **Layout baseline (B, real Chromium, 9a67abd, clean tree):** `b-round-144/out/libbase-{1440,1280}.json` with states `ready`, `previewing`, `error`; screenshots `b-round-144/shots/libbase-*.png`; script `b-round-144/tools/libbase.cjs`. 0 errors, 0 forbidden requests, 0 hydration in all 4 contexts.
+- **Previous task:** `tasks/round-145.md`, an exact copy of the round-145 `current-task.md` (sha256 `24e4e438…d571`). Rationale: `b-round-145.md`. Decision record: **D-29z111** in `docs/technical/studio-real-workspace/plan.md`.
+- **Baseline = the round-145 working tree, not a clean HEAD.** Gate 145 skipped, so HEAD is still **`9a67abd78b41162262c0882544dbdd4544afef1b`**, and A's round-145 changes are uncommitted in the tree: `git status --short` = 15 ` M` + 2 `??`, all byte-equal to `a-round-145/end-sha256.txt` (B checked: `sha256sum -c` OK). **Never revert, stash or rewrite any round-145 change.** Root publishes rounds 145 + 146 together after C PASS (as with rounds 142–144).
+- **Frozen list:** `tmp/studio-real-loop/b-round-145-r146-tree-sha256.txt`, **960 entries** = `git ls-files -co --exclude-standard` (965) minus the 5 grants, hashed on the current tree. B ran `sha256sum -c --quiet` from `store/`: OK. The 12 round-145 files that are not granted now are frozen at their round-145 end state.
+- **Grants:** `b-round-145-r146-grants.txt` (5 existing files, no new file). **Start hashes:** `b-round-145-r146-granted-start-sha256.txt` (equal to their `a-round-145/end-sha256.txt` lines). **Start copies:** `b-round-145/r146-granted-start/` (paths relative to `store/`). A checks all three first. Any difference → A stops and reports.
 
-## 0. Why this round (D-29z110)
-- **Round 144: C PASS**, `browserVerified` = `realVerified` = true, no bugs; C-R143-01 closed. Gate 144 published 9a67abd. **V-0.4e → done; V-0.4 complete.**
-- **Next stage = V-0.5** (the last V-0 stage). Re-measured at 9a67abd: **82 Georgian non-comment source lines** in 7 files:
-
-| File | Lines | Stage |
-|---|---|---|
-| `ArrangementLibrary.tsx` | 19 (l.120/122/125 row status → **V-0.5a**; 16 others → V-0.5b) | a + b |
-| `collection.ts` | 19 (9 thrown errors + l.67 label → **V-0.5a**; 10 status messages l.16–20/26–30 → V-0.5b) | a + b |
-| `studio-lab-demo.ts` | 19 (4 labels/notice + 5 thrown errors → **V-0.5a**; 9 sound-title lines stay, R3) | a |
-| `ArrangementContext.tsx` | 1 (l.3468 load fallback) | **a** |
-| `ArrangementLibraryPreview.tsx` | 8 | b |
-| `ArrangementVideoDock.tsx` | 17 | c |
-| `routes/studio-lab.tsx` | 1 (meta title, ST40) | c |
-
-- **Split (R1), by dependency.** The library row prints `შეცდომა: ${error}` where the error text comes from `collection.ts`, `studio-lab-demo.ts` and the Context fallback. Moving either side alone would put two languages on one row (GATE128-S1 rule). So **V-0.5a moves every source-load error together with the row status block** (l.118–126 only). V-0.5b moves the rest of the library panel, the preview and the collection status messages (the `ready` message names the preview's `＋ დამატება` button, so they move together). V-0.5c moves the video dock, the route title, `lang="en"`, the final RV-4 grep and the RV-1 re-capture. Scope unchanged; three bounded rounds.
-- **C-R142-02** (Low, `deferred_low_polish`: `stems` finds nothing) is fixed here because this round owns `library.ts` (2026-10-23 rule: a Low may be fixed early when the round owns the code and it is cheap). It is the planned **LIB-SEARCH-KEYWORDS** forward constraint and gate-144 review #4.
-- **Gate-144 review #1** (doc 118 status still "In Progress") is folded in: doc edit, cheap.
-- **Checks at planning:** regression due on/after 2026-10-27 (today 2026-10-24, not due); `user-review/ableton-decisions.md` and `design-ux-decisions.md` do not exist; no strings-split checkpoint result (non-blocking); no Critical/High open; no Medium open except Tech Lead manual items.
-
-### Rulings D-29z110
-- **R1 — split** as above.
-- **R2 — search keywords (LIB-SEARCH-KEYWORDS).** Search stops using the display labels. `library.ts` gets `LIBRARY_KIND_SEARCH_KEYWORDS: Record<WorkspaceSourceKind, readonly string[]>` = `{ music: ['music'], stem: ['stem', 'stems'], sfx: ['sfx'] }`, and `matchesLibraryQuery` uses `[source.title, ...LIBRARY_KIND_SEARCH_KEYWORDS[source.kind], source.collectionLabel]`. Display labels (`LIBRARY_KIND_LABELS`, `LIBRARY_FOLDER_LABELS`) stay byte-identical. **Georgian search synonyms are not added:** nobody requested them, V-0 makes the Studio English-only, and the module contract/ST44 forbid Georgian in these sources. Recorded as signal `LIB-SEARCH-GEORGIAN-SYNONYMS` (info) for Saba, not scheduled.
-- **R2b — `sfx` matching the Music previews** through their collection label (`CZABA public previews + synthetic SFX`) is intended: the collection label is searchable (LIB-03) and the label truthfully says that collection holds SFX. No change.
-- **R3 — demo sound titles stay** (D-29z92 inventory rule: demo sound titles are sound names). Unchanged: `SYNTHETIC_COMPOSITION_TITLE` (l.13), `demoStemTitles` (l.35–38), the `title` values l.44, l.51 and `title`/`shortTitle` l.72–73. Labels, the notice and thrown errors are copy and move. A title interpolated into English copy (`Synthetic demo · ღამის პულსი`) is user content inside English, the same accepted pattern as statuses naming a sound.
-- **R4 — where the strings live.** Thrown errors, the Context fallback, the purchased collection label and the row status go into a new `studioSourceLoadStrings` in `strings.ts` (shared by `collection.ts` and `studio-lab-demo.ts`: one source for identical messages). The demo collection labels and notice stay as English literals in `studio-lab-demo.ts` (data, like the English default track names in `studio-lab.tsx`).
-- **R5 — layout (written before C runs; lesson of C-R143-01).** The RV-1 V-0 text-width exception applies inside the library column only: a changed text node may change its own width and height, flex siblings after it shift x by that width delta, its containers grow by its line delta and later nodes in the column shift y by the sum. Exact rules: §4 LAYOUT-LIB (i)–(vi). Everything outside the library column must not move.
+## 0. Why this round (D-29z111)
+- **Round 145: C FAIL**, `browserVerified` = `realVerified` = true. Every row passed except **LAYOUT-LIB (vi)**: **C-R145-01 (Low)**. While a library preview plays, the row marker `▶ Playing` (42 px) overflows the 126 px option and is clipped at the list edge, so it reads **`▶ Play`**. The row then shows the opposite of its state. This is the deferred **ABL-B-1**, made worse by round 145's longer text.
+- **§7 gap, ruled:** round 145 §7 had no row for "C FAIL only on a Low". B rules: **bounded fix-up, same owner.** A waiver was possible under the 2026-10-23 bug gate. B chose the fix because (vi) was the round's own criterion, the round itself made the defect worse, nothing publishes without C PASS, and a waiver re-run would cost a round while still leaving `▶ Play` on screen during playback. The fix is cheap, and it closes ABL-B-1, which this round owns: the 2026-10-23 rule lets a Low be fixed early when the round owns the code. From now on, §7 tables include the row **"C FAIL only on a Low the round caused → bounded fix-up"**.
+- **Fix choice (written before C runs).** The marker leaves the meta row and becomes its own line inside the option. It is rendered only while previewing. B rejected `flex-wrap` on the meta row after a real-Chromium probe (`b-round-145/tools/flexprobe.cjs` → `b-round-145/out/flexprobe.json`): with wrapping, the `Error: …` span jumps to its own line (x 47 → 8, y 0 → 16), which would move the `error` state off the baseline. The marker-as-own-line fix leaves `ready` and `error` unchanged, because no new node renders there. In `previewing` the baseline option was already 63.5 px tall, because the clipped marker wrapped onto a second meta line, so the option height should stay the same.
+- **Two reviewer Lows of round 145** (A's code-reviewer, test strength, same stage, test-only): exact DM1–DM4 values are unpinned in the unit tests (`A-R145-REVIEW-DM-VALUES`), and the purchased guard errors are checked only with `toThrow(Error)` (`A-R145-REVIEW-GUARD-TEXTS`). With C-R145-01 that is three tightly related items, the policy maximum.
+- **m91 (spec error by B, no task):** round-145 §3.5 expected `failed-source-refusal` and `status-announcement-ui` to turn red. Their fake loaders reject with their own hand-written `LOADER_ERROR` literal, so no source mutation reaches them. The m91 list was wrong. These fixtures stay hand-written (GATE132-S4: pins must not be wired module-against-module). Nothing is scheduled.
+- **Checks at planning:** regression due on/after 2026-10-27 (today 2026-10-24, not due); `user-review/ableton-decisions.md` and `design-ux-decisions.md` do not exist; no Critical/High open; no Medium open except Tech Lead manual items.
 
 ## 1. What changes (user-visible)
-### 1.1 `studioSourceLoadStrings` (new, appended as the last export of `strings.ts`; exact values)
-| Key | Value (exact) | Replaces |
-|---|---|---|
-| `networkFailed` | `File failed to load (network)` | collection.ts l.93, l.105; studio-lab-demo.ts l.113, l.125 |
-| `httpFailed` | `(status: number): string => \`File failed to load (${status})\`` | collection.ts l.96; studio-lab-demo.ts l.116 |
-| `decodeFailed` | `File could not be decoded` | collection.ts l.110; studio-lab-demo.ts l.130 |
-| `unknownSource` | `Unknown source` | collection.ts l.84 |
-| `unknownDemoSource` | `Unknown demo source` | studio-lab-demo.ts l.135 |
-| `purchasedNoProductId` | `The purchased collection has no productId` | collection.ts l.54 |
-| `purchasedNoStems` | `The purchased collection has no stems` | collection.ts l.57 |
-| `purchasedDuplicateStemId` | `A stem id repeats in the purchased collection` | collection.ts l.63 |
-| `purchasedCollectionLabel` | `(productTitle: string): string => \`${productTitle} · purchased stems\`` | collection.ts l.67 |
-| `loadFailedFallback` | `Loading failed` | ArrangementContext.tsx l.3468 |
-| `rowLoading` | `Loading…` (U+2026) | ArrangementLibrary.tsx l.120 |
-| `rowError` | `(message: string): string => \`Error: ${message}\`` | ArrangementLibrary.tsx l.122 (caller keeps `state.error ?? ''`) |
-| `rowPreviewing` | `▶ Playing` | ArrangementLibrary.tsx l.125 |
+| ID | Where | Before (round-145 tree) | After (exact) |
+|---|---|---|---|
+| PM1 | `ArrangementLibrary.tsx`, `ArrangementLibraryOptionInner`, l.126–128 | `{isPreviewing ? (<span className="text-brand">{studioSourceLoadStrings.rowPreviewing}</span>) : null}` is the **third child of the meta row** `<span className="flex gap-2 text-xs tabular-nums text-muted">` | The meta row ends after its second child. Its className and both children are byte-identical. Directly after the meta row's closing `</span>`, as the **last child of the `role="option"` button**: `{isPreviewing ? (<span className="whitespace-nowrap text-xs text-brand" data-testid="arrangement-library-option-previewing">{studioSourceLoadStrings.rowPreviewing}</span>) : null}` |
 
-No imports in `strings.ts` (leaf rule). No other object, key or value in `strings.ts` changes.
-
-### 1.2 Data copy in `studio-lab-demo.ts` (English literals stay in the file, R4)
-| ID | Line | After (exact) |
-|---|---|---|
-| DM1 | l.11 `DEMO_COLLECTION_LABEL` | `'Demo collection · CZABA public previews + synthetic sounds'` |
-| DM2 | l.12 `PUBLIC_PREVIEW_COLLECTION_LABEL` | `'CZABA public previews + synthetic SFX'` |
-| DM3 | l.14 `SYNTHETIC_COLLECTION_LABEL` | `` `Synthetic demo · ${SYNTHETIC_COMPOSITION_TITLE}` `` |
-| DM4 | l.154 `notice` | `'The stems are a synthetic demo — not CZABA catalogue stems and not parts extracted from a mix.'` (U+2014) |
-| DM5 | l.113/116/125/130/135 | `studioSourceLoadStrings.networkFailed` / `.httpFailed(response.status)` / `.networkFailed` / `.decodeFailed` / `.unknownDemoSource`, + one import |
-
-### 1.3 Other source edits
-| ID | File / line | After |
-|---|---|---|
-| CO1 | `collection.ts` l.54/57/63/67/84/93/96/105/110 | the §1.1 keys, + one import. l.16–30 (status messages) **unchanged** (V-0.5b) |
-| CX1 | `ArrangementContext.tsx` l.3468 | `error: error instanceof Error ? error.message : studioSourceLoadStrings.loadFailedFallback,` and the name added to the existing `~/lib/arrangement/strings` import. **Nothing else** in the file changes |
-| LR1 | `ArrangementLibrary.tsx` l.118–126 | `studioSourceLoadStrings.rowLoading`, `studioSourceLoadStrings.rowError(state.error ?? '')`, `studioSourceLoadStrings.rowPreviewing`, + one import. No class, testid, element or condition changes. Every other line of the file, including the 16 other Georgian lines, is unchanged (V-0.5b) |
-| KW1 | `library.ts` | R2: export `LIBRARY_KIND_SEARCH_KEYWORDS` and use it in `matchesLibraryQuery`. Nothing else changes |
+- Text stays `▶ Playing` (`studioSourceLoadStrings.rowPreviewing`, unchanged). The button stays `flex w-full flex-col …`, so the marker becomes its own line under `SFX 00:02.000`.
+- No other line of `ArrangementLibrary.tsx` changes: no class, condition, testid (except the one new testid above), import or Georgian line. Biome may wrap the JSX. ST47's content ledger is unaffected because no Georgian line moves.
 
 ## 2. A — files you own (everything else is frozen)
 | Path | Allowed change |
 |---|---|
-| `app/lib/arrangement/strings.ts` | §1.1 only (new last export) |
-| `app/lib/arrangement/library.ts` | KW1 only |
-| `app/lib/arrangement/collection.ts` | CO1 only |
-| `app/data/studio-lab-demo.ts` | DM1–DM5 only |
-| `app/contexts/ArrangementContext.tsx` | CX1 only (1 line + 1 import name) |
-| `app/components/arrangement/ArrangementLibrary.tsx` | LR1 only (3 expressions + 1 import line) |
-| `app/lib/arrangement/__tests__/strings.test.ts` | ST13 ledger (§3.1), the l.1905 length assertion, the new describe (§3.1). Nothing else |
-| `app/lib/arrangement/__tests__/library.test.ts` | one new `it` LIB-KW (§3.2). Fixtures (`PUBLIC`, `SYNTH`, Georgian titles) are test data and stay |
-| The 6 pin files of §3.3 | only the listed lines |
-| `docs/.../118-studio-v0-detail-library-strings.md` | l.4 → `Completed (C round 144 — PASS, browserVerified; gate 144 — 9a67abd)`; the round-144 testing line "result pending" → `C round 144 — PASS (browserVerified; LAYOUT-1440 placeholder = D-29z109 box)`. Locate by content. Nothing else |
-| **new** `app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx` | LRS1–LRS2 (§3.4) |
-| **new** `docs/implementation/2026/quarter-IV/119-studio-v0-library-source-strings.md` | Georgian, `docs/implementation/TEMPLATE.md` sections, the per-string map (§1.1/§1.2, glossary rule), rulings R1–R5; status says C round 145 has not run yet |
+| `app/components/arrangement/ArrangementLibrary.tsx` | PM1 only |
+| `app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx` | one new `it` **LRS3** (§3.1). LRS1/LRS2 unchanged |
+| `app/data/__tests__/studio-lab-demo.test.ts` | one new `it` **DL-VAL** (§3.2); the 4 `it` titles at l.115, l.126, l.132, l.173: the word `Georgian` → `English` (they would be false now). Nothing else |
+| `app/lib/arrangement/__tests__/collection.test.ts` | PC2 (l.140–157): the three `.toThrow(Error)` at l.143, l.153, l.156 → exact-message assertions (§3.3). `it` title and fixtures unchanged |
+| `docs/implementation/2026/quarter-IV/119-studio-v0-library-source-strings.md` | status line l.4 → `In Progress (C round 145 — FAIL: C-R145-01 Low; round 146 fix-up — C ჯერ არ გაშვებულა)`. One new Problem → Solution bullet (C-R145-01/ABL-B-1, why the marker gets its own line, why `flex-wrap` was rejected: B probe). The m91 bullet gets one appended sentence saying B confirmed it as a spec error (D-29z111). Testing: the `C round 145 … ჯერ არ გაშვებულა` line → the real round-145 result (PASS rows, FAIL LAYOUT-LIB (vi)), plus one line for round 146 (A tests; C pending). "შეცვლილი ფაილები" gets the 4 round-146 code/test files. Georgian, `GEORGIAN_DOCS.md` |
 
 - **Protected (never touch):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/components/ui/Modal.tsx`, `app/routes/account.downloads.tsx`, `download-routes.test.ts`, and everything in `backlog.json` `global_forbidden_files`.
-- **Before editing** read the primitives the hook maps (`AGENT_DISCOVERABLE_CODE.md`, `AUDIO_ARCHITECTURE.md` for Studio files, `GEORGIAN_DOCS.md` for docs, `TESTING_QUALITY_GATES.md` for tests) **before** the first Edit (round-144 deviation: they were read after).
-- **Edit rule (C-R120-01):** lasting edits only through Edit/Write; no shell writes under `store/`. A Biome-forced rewrap of a changed line is allowed and reported; no `--write`/`check:fix`.
+- **Before the first Edit** read the primitives the hook maps for these files: `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`, `AUDIO_ARCHITECTURE.md` (Studio), `TESTING_QUALITY_GATES.md`, `GEORGIAN_DOCS.md`. Round 145 deviated by reading four of them after the first edits. Do not repeat that.
+- **Edit rule (C-R120-01):** lasting edits only through Edit/Write; no shell writes under `store/`. A Biome-forced rewrap is allowed and reported; no `--write`/`check:fix`.
 - **Stop rule:** A stops and reports, without widening scope, if a start check fails, a non-granted test fails, a diff appears outside the grants, or a needed change is not in this table.
 
 ## 3. A — tests and mutations
-### 3.1 `strings.test.ts` (44 → 48 `it`)
-- **ST13:** `CONTEXT_REMAINING_GEORGIAN_LINES` becomes `[]`; l.1905 `toHaveLength(1)` → `toHaveLength(0)`. The ST13 title may say that no Georgian lines are left in ArrangementContext.
-- **New `describe('V-0.5a source-load strings')`:**
-  - **ST45** every plain-string property of `studioSourceLoadStrings` equals its §1.1 literal; the key list equals exactly the 13 §1.1 keys.
-  - **ST46** formatters: `httpFailed(404)` = `File failed to load (404)`; `rowError('File could not be decoded')` = `Error: File could not be decoded`; `purchasedCollectionLabel('Middle East')` = `Middle East · purchased stems`.
-  - **ST47** Georgian-line ledgers (comments stripped, same normalisation as ST13): `ArrangementLibrary.tsx` = exactly its 16 remaining lines (9a67abd l.38, 408, 424, 425, 435, 441, 442, 457, 458, 467, 477, 488, 506, 518, 569, 604); `collection.ts` = exactly l.16–20 and l.26–30; `studio-lab-demo.ts` = exactly the 9 R3 title lines (l.13, 35–38, 44, 51, 72, 73); `library.ts`, `strings.ts` and the new test file have none, and no «».
-  - **ST48** every `LIBRARY_KIND_LABELS[kind]` and `LIBRARY_FOLDER_LABELS[kind]`, lower-cased, is in `LIBRARY_KIND_SEARCH_KEYWORDS[kind]` (a future label edit cannot silently break search).
-### 3.2 `library.test.ts` (+1 `it`, LIB-KW)
-With the existing fixtures: `stems`, `Stems`, `STEMS` and `stem` → the 4 stem ids; `music` → unchanged ids; `sfx` → exactly the fixture sfx ids; `stems პადი` → `['pad']`. The existing l.80–81 assertions stay.
-### 3.3 Pin replacements (exact English from §1.1/§1.2; nothing else on those lines; `it` counts unchanged)
-| File | Lines (9a67abd) |
-|---|---|
-| `collection.test.ts` | 84, 92, 100, 108, 116 (`Middle East · purchased stems`), 253, 280, 307, 310 (the `it` title words `უცნობი წყარო` → `Unknown source`), 327, 354 |
-| `failed-source-refusal.test.tsx` | 90; 200 (`'(ქსელი)'` → `'(network)'`, so the negative check is not vacuous) |
-| `status-announcement-ui.test.tsx` | 31 |
-| `app/data/__tests__/studio-lab-demo.test.ts` | 9, 10, 144, 212 |
-| `purchased-collection-ui.test.tsx` | 326 (`'Error: File failed to load (403)'`, hand-written), 327 (`'Error'`) |
-| `collection-load-status.test.tsx` | 59 (`ROW_LOADING = 'Loading…'`) only; l.50–57 stay (V-0.5b) |
-### 3.4 New `library-row-strings-ui.test.tsx` (jsdom, model on the `purchased-collection-ui` / `library-preview` harnesses)
-- **LRS1:** start a library preview on a ready source → its row contains the hand-written `▶ Playing`; stop → it is gone.
-- **LRS2:** a collection whose loader rejects with a non-`Error` value → that row contains the hand-written `Error: Loading failed`; another, ready row contains no `Error`.
-### 3.5 Mutations (each turns the named tests red; restore and verify by sha256)
+### 3.1 LRS3 (`library-row-strings-ui.test.tsx`, 2 → 3 `it`). This is a structural pin. The real check is C's browser row
+Use the existing `mountRows` / `libraryRow` harness. Before the preview: no `[data-testid="arrangement-library-option-previewing"]` in the `song` row. After the preview starts: exactly one such element, with text `▶ Playing` (hand-written), and its `parentElement` is the `role="option"` button of `song` (`libraryRow(view, 'song')`), **not** the meta row. The meta row (the button's child that contains the duration text) has exactly 2 child elements, and its `className` contains `flex` and does not contain `flex-wrap`. After stop: the element is gone.
+### 3.2 DL-VAL (`studio-lab-demo.test.ts`, +1 `it`)
+Against `studioLabDemoCollection`, with hand-written literals (no import from the data module's constants):
+- `label` === `Demo collection · CZABA public previews + synthetic sounds`;
+- `notice` === `The stems are a synthetic demo — not CZABA catalogue stems and not parts extracted from a mix.` (U+2014);
+- the **set** of `collectionLabel` values over `sources` equals exactly `{ 'CZABA public previews + synthetic SFX', 'Synthetic demo · ღამის პულსი' }`. The Georgian sound title is test data (R3). B checked: this file currently has 0 Georgian lines, and no test sweeps it for Georgian (`strings.test.ts` ST13/ST47 do not list it), so this one literal is allowed here.
+- Also assert the codepoints: `·` is U+00B7 and `—` is U+2014.
+### 3.3 PC2 exact messages (`collection.test.ts`)
+- l.143 (empty stems) → `.toThrow('The purchased collection has no stems')`;
+- l.153 (duplicate id) → `.toThrow('A stem id repeats in the purchased collection')`;
+- l.156 (empty productId) → `.toThrow('The purchased collection has no productId')`.
+
+Hand-written literals; no import of `studioSourceLoadStrings` for these. If `toThrow(string)` matches a substring, that is accepted, because each literal is the whole message.
+### 3.4 Mutations (Edit, restore by Edit, verify by sha256)
 | ID | Mutation | Must turn red |
 |---|---|---|
-| m91 | `networkFailed` → `'File failed to load (net)'` | ST45, collection.test l.280/354, studio-lab-demo.test, failed-source-refusal, status-announcement-ui |
-| m92 | `rowError` drops the `Error: ` prefix | ST46, purchased-collection-ui l.326, LRS2 |
-| m93 | CX1 fallback → literal `'Load failed'` | LRS2 |
-| m94 | `stem: ['stem']` (drop `stems`) | LIB-KW, ST48 |
-| m95 | LR1 row loading back to `'იტვირთება…'` | ST47, collection-load-status (ROW_LOADING) |
-| m96 | `rowPreviewing` → `'▶ Play'` | ST45, LRS1 |
-### 3.6 Commands (speed rules)
-- **Start:** frozen list (948) OK; 15 start hashes and copies OK; HEAD = 9a67abd; `git status --short` empty.
-- `npm run typecheck` and `npm run lint` exit 0; read-only `npx biome check` on every changed file → 0 new diagnostics.
-- `npx vitest run` on: strings, library, collection, collection-load-status, purchased-collection-ui, failed-source-refusal, status-announcement-ui, studio-lab-demo, library-row-strings-ui, and neighbours library-preview, held-enter-add, render-budget, fader-guards, grid-snap-keys. Save `a-round-145/vitest.json`; report per-file `it` counts before/after (only strings +4, library +1 and the new file +2 may change).
-- **code-reviewer** required (3+ files); pass its Architecture note to B.
-- **End:** frozen list OK; `git status --short` = exactly the changed grants (≤ 15 ` M` + 2 `??`); `git diff 9a67abd -- <protected>` empty; `git diff 9a67abd -- app/contexts/ArrangementContext.tsx` = only CX1; the `ArrangementLibrary.tsx` diff = only LR1; end sha256 of every granted path in `a-round-145/end-sha256.txt`; diff vs start copies in `a-round-145/diff-vs-start.patch`.
-- Not run: full suite, `npm run verify`, build, e2e (gate). No commit, stash, checkout, install.
-- Write `a-round-145.md` as you go.
+| m97 | PM1 reverted: the marker span back inside the meta row (as in the round-145 tree) | LRS3 |
+| m98 | `ArrangementLibrary.tsx` meta row className gets `flex-wrap` | LRS3 |
+| m99 | `studio-lab-demo.ts` DM4 notice: `—` → `-` | DL-VAL |
+| m100 | `strings.ts` `purchasedNoStems` → `'The purchased collection has no stem'` | PC2 (and ST45) |
 
-## 4. C — rows
-Real Playwright Chromium on `http://127.0.0.1:5173/studio-lab`, fresh context per session, Snap state recorded at start (default off). Both viewports: 1440×900 and 1280×720. Reuse `b-round-144/tools/libbase.cjs` and `c-round-144/tools/lib.cjs` freely; every output new under `c-round-145/`. **Harness note:** `lib.cjs` `openStudio` and `libbase.cjs` wait for rows matching `/იტვირთება…/`; after this round rows read `Loading…`. Make the wait accept both, or it returns before loading ends. First load of a job: a crashed setup run may be discarded and replaced once (ENV-FIRST-LOAD-GRID-NULL).
+m99 and m100 mutate frozen files. Edit each one temporarily, restore it, and check it with `sha256sum -c b-round-145-r146-tree-sha256.txt --quiet` before any other step. A frozen-list failure at the end = stop and report.
+### 3.5 Commands (speed rules)
+- **Start:** frozen list (960) OK; 5 start hashes and copies OK; `sha256sum -c a-round-145/end-sha256.txt` OK; HEAD = 9a67abd; `git status --short` = the same 15 ` M` + 2 `??` as A round 145.
+- `npm run typecheck` and `npm run lint` exit 0; read-only `npx biome check` on the 4 changed code/test files → 0 diagnostics.
+- `npx vitest run` on: library-row-strings-ui, studio-lab-demo, collection, strings, library, collection-load-status, purchased-collection-ui, library-preview, held-enter-add, render-budget. Save `a-round-146/vitest.json`. Report per-file runtime `it` counts against A round 145 (`a-round-145.md`). Only library-row-strings-ui (2 → 3) and studio-lab-demo (12 → 13) may change.
+- **code-reviewer** required (3+ changed files); pass its Architecture note to B.
+- **End:** frozen list OK; `git status --short` = the round-145 set (15 ` M` + 2 `??`, unchanged list); the paths whose hash changed vs `a-round-145/end-sha256.txt` are a subset of the 5 grants; `git diff 9a67abd -- <protected>` empty; `diff b-round-145/r146-granted-start/app/components/arrangement/ArrangementLibrary.tsx app/components/arrangement/ArrangementLibrary.tsx` = PM1 only; end sha256 of the 5 grants in `a-round-146/end-sha256.txt`; diff vs start copies in `a-round-146/diff-vs-start.patch`.
+- Not run: full suite, `npm run verify`, build, e2e (gate). No commit, stash, checkout, install.
+- Optional A-only sanity probe in real Chromium (not acceptance). Write `a-round-146.md` as you go.
+
+## 4. C — rows (bounded: round-145 rows that passed with evidence are not repeated)
+Real Playwright Chromium on `http://127.0.0.1:5173/studio-lab`, fresh context per session, Snap state recorded at start (default off). Both viewports: 1440×900 and 1280×720. Reuse `c-round-145/tools/{lib,layout145,overflow145,c145}.cjs` freely; every output new under `c-round-146/`. **Harness notes:** (1) the rows now read `Loading…`; keep the wait that accepts both. (2) `layout145.cjs` named the marker `opt:…:meta2` (third meta-row child). It is now a **sibling after the meta row**, `[data-testid="arrangement-library-option-previewing"]`. Relocate the locator and say so in the report.
 
 | Row | Start state → action → expected |
 |---|---|
-| T145-TARGETED | A's vitest list; counts equal A's |
-| SOURCE-SCOPE | frozen 948 OK at start and end; only granted paths differ from `b-round-144/r145-granted-start/`; end hashes = `a-round-145/end-sha256.txt`; Context diff = CX1 only; ArrangementLibrary diff = LR1 only; protected diff vs 9a67abd empty; no source change during C's phase |
-| AN-REVIEW | every §1 value exact (U+2026, U+2014, `·`); the R3 title lines unchanged; doc 118 has only its two edits; doc 119 is Georgian and consistent with the evidence |
-| LIB-ROW-TEXT | (a) delay `**/middle-east.mp3` ~3 s via `page.route` → its row shows exactly `Loading…`, then the duration. (b) abort `**/middle-east.mp3` → row meta = `Music` + `Error: File failed to load (network)`; selecting it and pressing Enter with the Music track active gives the English `sourceFailed` status. (c) fulfil it with status 404 → `Error: File failed to load (404)`. (d) fulfil it 200 with 64 random bytes → `Error: File could not be decoded`. (e) select Soft impact and press the preview play button → its row shows `▶ Playing` and the preview waveform's `aria-valuenow` advances within 1.5 s (real playback); press again → the marker is gone. No row meta line contains Georgian |
-| LIB-LABELS | tree collection labels = DM2 and DM3 exactly (DM3 with the Georgian title), notice = DM4 exactly; DM1 (`collection.label`) has no render site on `/studio-lab` by B's grep at 9a67abd: C reports where it appears if it does; otherwise it is covered by AN-REVIEW and unit tests only, not a gap; folder labels, kind chips and sound titles unchanged vs `libbase` (`Music 2, SFX 2, Music 1, Stems 4`). Still Georgian and expected (V-0.5b/c, not a failure): the 16 other ArrangementLibrary strings, the preview, the dock, the collection status line, `ყველა ფაილი` |
-| LIB-SEARCH | `stems`, `Stems`, `stem` → the 4 stems; `music` → middle-east, hero, synth-mix; `sfx` → middle-east, hero, soft-impact, slow-rise (R2b); `soft sfx` → soft-impact (AND, Live §4.2); `მუსიკა` → none; empty → 9. After `stems`, select the bass stem and press Enter with the Stems track active → the clip is added and the status is the English `clipAdded` text |
-| LAYOUT-LIB | compare `ready`, `previewing` and `error` with `b-round-144/out/libbase-{W}.json`. **Reproduce each state with the same action sequence as `libbase.cjs`:** `ready` = fresh context, sources loaded, Snap off; `previewing` = from `ready`, click the Soft impact option, then press the preview play button; `error` = a separate fresh context with `page.route('**/middle-east.mp3', abort)` before navigation. No scrolling, search or other selection. Rules (RV-1 V-0 text-width exception, `rv1_rule_v0`):<br>(i) library root, tree nav, list, search box and preview container: x/y/w/h ≤ 1 px.<br>(ii) a **changed text node** (row meta spans: loading / error / `▶ Playing`; tree collection labels; the notice) may change its own **w** and its own **h** (by whole lines);<br>(iii) a flex sibling after a changed span in the same row may shift **x** by exactly that span's w delta (± 1 px);<br>(iv) the containers of a changed node (meta row, option button, tree node) may change **h** by the same line delta, and nodes after them in the same column shift **y** by exactly the sum (± 1 px);<br>(v) every other node: x/y/w/h ≤ 1 px;<br>(vi) no new horizontal overflow, no clipped row text, and tree and list still scroll to their last item.<br>Report every > 1 px delta with its cause (which changed node, which rule). Any unexplained delta = FAIL |
-| LAYOUT-REST | outside the library column (ruler, track headers, lanes, detail panel, transport) nothing moves: d ≤ 1 px between the `ready` state and the same viewport's `error` / `previewing` states, and the library root box equals `libbase` ± 1 px |
-| PURCHASED-LABEL | BLOCKED (backend unavailable in cloud); unit evidence only (collection.test l.84) |
-| G145-3 (alone, last) | `/studio-lab` shows the workspace and demo badge in a fresh anonymous context; `/studio/middle-east` shows "Sign in required", no workspace, 0 `audio[src]`; `GET /api/studio-token?…` → 401; fake-Bearer 403 BLOCKED (backend unavailable in cloud) |
+| T146-TARGETED | A's vitest list; counts equal A's |
+| SOURCE-SCOPE | frozen 960 OK at start and end; only granted paths differ from `b-round-145/r146-granted-start/`; end hashes = `a-round-146/end-sha256.txt`; `git status --short` = the round-145 set; the `ArrangementLibrary.tsx` diff vs the start copy = PM1 only; protected diff vs 9a67abd empty; the non-granted round-145 files still match `a-round-145/end-sha256.txt`; no source change during C's phase |
+| AN-REVIEW | PM1 exact (classes, testid, position = last child of the option button, meta row byte-identical); LRS3, DL-VAL and PC2 assert what §3 says with hand-written literals; doc 119 has only the §2 edits, is Georgian and consistent with the evidence |
+| PLAY-MARKER | fresh `ready` → click the **Soft impact** option → press the preview play button: (a) the marker element shows `▶ Playing` **in full on screen**: its box (may be the full 110 px content width: flex stretch) and its text glyph extent (Range rect) lie inside the option content box (x ≥ option x + 8 − 1, right edge ≤ option x + 126 − 8 + 1), one line (h 16 ± 1), and `elementFromPoint` at its centre and near its right end returns the marker. Element screenshot at both viewports. (b) real playback: the preview waveform's `aria-valuenow` advances within 1.5 s and ≥ 1 `createBufferSource`. (c) press the button again → the marker is gone and the option returns to its `ready` box. (d) start a preview on a second source (Slow rise): the marker moves to that row and Soft impact has none |
+| LAYOUT-LIB | states reproduced exactly as in round 145 (`ready`: fresh, loaded, Snap off; `previewing`: from `ready`, click Soft impact, press preview play; `error`: separate fresh context with `page.route('**/middle-east.mp3', abort)` before navigation; no scroll, search or other selection), compared with `b-round-144/out/libbase-{W}.json`:<br>(i) `ready` and `error`: **every** library node d ≤ 1 px vs libbase (as measured in round 145; no exception applies);<br>(ii) `previewing`: the Soft impact option box = libbase previewing ± 1 px (1440 `[148,370,126,63.5]`, 1280 `[148,408,126,63.5]`); its meta row, `meta0` and `meta1` = their libbase **ready** boxes ± 1 px (h 16, one line); the marker box x = 156 ± 1, y = meta-row y + 16 ± 1, h 16 ± 1, right edge ≤ 266 + 1. The span box may span the full 110 px content width (flex-col stretch); w = 110 is expected, not a delta. Legibility is judged by the glyph extent (a Range rect of its text) lying inside the option and by `elementFromPoint`;<br>(iii) every other library node in `previewing` = libbase previewing ± 1 px (no y shift);<br>(iv) option and list: `scrollWidth == clientWidth` in all three states (round 145: list 155 vs 134 while previewing);<br>(v) tree and list still scroll to their last item; no horizontal page overflow; no clipped row text.<br>Report every > 1 px delta with its cause. An unexplained delta = FAIL. If (ii) differs from B's prediction but has no overflow, clipping or overlap, report the measured boxes as inconclusive for B, not as FAIL |
+| LAYOUT-REST | outside the library column nothing moves: d ≤ 1 px between `ready` and the same viewport's `previewing` / `error`; library root = libbase ± 1 px |
+| LIB-ROW-TEXT-SMOKE | one short re-check per viewport: abort `**/middle-east.mp3` → row meta `Music` + `Error: File failed to load (network)`, on the same line layout as round 145, and **no** previewing marker anywhere |
+| PURCHASED-LABEL | BLOCKED (backend unavailable in cloud); unit evidence only (collection.test l.84 + PC2) |
+| G146-3 (alone, last) | `/studio-lab` shows the workspace and demo badge in a fresh anonymous context; `/studio/middle-east` shows "Sign in required", no workspace, 0 `audio[src]`; `GET /api/studio-token?…` → 401; fake-Bearer 403 BLOCKED (backend unavailable in cloud) |
 | PX-NET / REG-HYD | 0 forbidden requests, 0 Authorization headers, 0 hydration errors, 0 pageerror (the known cart noise is expected) |
 
 - **Gate rows (not claimed by C):** full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
-- **Neighbour risk:** library add/drop flows that read the row state (conditions unchanged); search results used by keyboard add; the purchased route's tree label (unit-only); status messages that quote a loader error.
+- **Neighbour risk:** the option's click/double-click/drag/Enter handlers. The new span sits inside the button, so clicks on it must still select the source: C clicks the marker itself once and checks `aria-selected` stays true. Library preview start/stop; render-budget (the memo option re-renders on `isPreviewing`, unchanged).
 
 ## 5. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Multi-word search = AND | Live 12 Reference Manual, "Working with the Browser" §4.2 Search Bar, https://www.ableton.com/en/live-manual/12/working-with-the-browser/ (fetched by B 2026-10-24, `b-round-144/live/working-with-the-browser.html`, sha256 `f4d5c5d0…`): "results will include files that match all search terms, as opposed to any" | confirmed | already AND; unchanged | LIB-SEARCH `soft sfx` |
-| Kind/plural keywords | same §4.2: the search field "helps you find browser items and tagged content" | inference only (Live tags ≠ CZABA kind keywords) | CZABA kind keywords incl. the plural; conscious simplification | LIB-SEARCH `stems` |
-| Root "All" label / collection fold-unfold | §4.2 "select the All label"; §4.5 Collections "can be unfolded" | confirmed (terms) | applied in V-0.5b, not this round | — |
-| Row loading / error / playing text | not in the capture | unconfirmed | CZABA-only copy; no Live claim | LIB-ROW-TEXT |
+| Visible "now previewing" state of a browser item | Live 12 Reference Manual, "Working with the Browser", Previewing Files (§4.x), https://www.ableton.com/en/live-manual/12/working-with-the-browser/ (capture `b-round-144/live/working-with-the-browser.html`, fetched 2026-10-24) | B did not confirm a text marker in the capture; Live shows preview state in the browser's preview area, not as a row badge (unconfirmed) | CZABA-only row marker (existing since before round 17); the fix only makes it legible; no Live parity claim | PLAY-MARKER |
 
-C rates "CZABA requirement met" and "Ableton correspondence" separately.
+C rates "CZABA requirement met" and "Ableton correspondence" separately. Correspondence here is "unconfirmed / not applicable".
 
 ## 6. Evidence and reporting
-- C writes `c-round-145.md` and `c-round-145.json` as it goes: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `measurements` (row texts, search ids, LAYOUT-LIB deltas with causes), `invalidRuns`, `notesForB`. Evidence goes under `c-round-145/{tools,out,shots}/`; no writes under `store/`.
+- C writes `c-round-146.md` and `c-round-146.json` as it goes: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `measurements` (marker boxes, option/list scroll widths, LAYOUT-LIB deltas with causes), `invalidRuns`, `notesForB`. Evidence goes under `c-round-146/{tools,out,shots}/`; no writes under `store/`.
 - `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`.
 
-## 7. Outcome, fixed in advance (B at round 146 planning)
-| Condition | Round 146 |
+## 7. Outcome, fixed in advance (B at round 147 planning)
+| Condition | Round 147 |
 |---|---|
 | B plans on or after **2026-10-27** | the **REGRESSION round** first, then the row below |
 | C FAIL with Critical / High / Medium | a bounded fix-up (≤ 3 related bugs) |
-| C FAIL only on a literal criterion with no app defect | B rules in writing; the next round is a re-check only |
-| C PASS (new Lows → `deferred_low_polish`) | V-0.5a → `c_pass`, C-R142-02 closed; after the gate publishes, round 146 = **V-0.5b**: the rest of `ArrangementLibrary.tsx` (16, incl. `All` per Live §4.2, fold/unfold per §4.5, search copy), `ArrangementLibraryPreview.tsx` (8), `collection.ts` status messages (10) |
+| C FAIL only on a Low this round caused | a bounded fix-up, same owner |
+| C FAIL only on a literal criterion with no app defect, or LAYOUT-LIB (ii) inconclusive only | B rules in writing; the next round is a re-check only, or V-0.5b carries the ruling |
+| C PASS (new unrelated Lows → `deferred_low_polish`) | root publishes rounds 145 + 146 together; V-0.5a → `c_pass`; C-R145-01, ABL-B-1, C-R142-02 and the two A-R145 review Lows close; round 147 = **V-0.5b**: the rest of `ArrangementLibrary.tsx` (16 lines, incl. `All` per Live §4.2, fold/unfold per §4.5, search copy), `ArrangementLibraryPreview.tsx` (8), `collection.ts` status messages (10) |
 
 At every planning B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
 
 ## 8. Root notes
-- **Commit readiness:** after C PASS root may publish round 145 as V-0.5a.
-- **Architecture:** the strings-split checkpoint request (`b-round-136-checkpoint-request.md` + addenda) is repeated at the V-0.4 feature boundary in `b-round-144.md` §5; non-blocking.
+- **Commit readiness:** nothing is publishable now (gate 145 skipped). After C round 146 PASS, root may publish rounds 145 + 146 together as V-0.5a.
+- **Architecture:** the strings-split checkpoint request (`b-round-136-checkpoint-request.md` + addenda, now with a round-145 addendum) stays open and non-blocking. Best before V-0.5c.

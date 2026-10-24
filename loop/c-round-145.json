@@ -1,0 +1,95 @@
+{
+  "round": 145,
+  "stage": "VISUAL-A V-0.5a",
+  "taskStatus": "FAIL",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-24T20:59:49.9877462Z",
+    "round": 145,
+    "attempt": 1,
+    "store": 200
+  },
+  "passed": [
+    "T145-TARGETED",
+    "SOURCE-SCOPE",
+    "AN-REVIEW",
+    "LIB-ROW-TEXT",
+    "LIB-LABELS",
+    "LIB-SEARCH",
+    "LAYOUT-REST",
+    "G145-3",
+    "PX-NET",
+    "REG-HYD"
+  ],
+  "failed": [
+    "LAYOUT-LIB (vi) — previewing state at 1440x900 and 1280x720: the '▶ Playing' row marker overflows the option and the list by 12 px more than at baseline and is visibly clipped to '▶ Play' (C-R145-01). Rules (i)-(v) hold: the only >1 px library delta is that span's own width (+12 px, rule ii)."
+  ],
+  "inconclusive": [],
+  "blocked": [
+    "PURCHASED-LABEL — backend unavailable in cloud (unit evidence only: collection.test l.84 'Middle East · purchased stems', green in T145-TARGETED)",
+    "G145-3 fake-Bearer 403 — backend unavailable in cloud"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "bugs": [
+    {
+      "id": "C-R145-01",
+      "severity": "low",
+      "regressionOf": "ABL-B-1 (Low, deferred_low_polish) — worsened by this round's LR1 text",
+      "steps": [
+        "Fresh context, 1440x900 (or 1280x720), http://127.0.0.1:5173/studio-lab, wait until no library row reads 'Loading…'",
+        "Click the library option 'Soft impact'",
+        "Click the preview button '▶ მოუსმინე' (audio plays: 1 AudioBufferSourceNode created, preview slider aria-valuenow 0 -> 1 within ~0.67 s)",
+        "Look at the Soft impact row's meta line"
+      ],
+      "expected": "LAYOUT-LIB (vi): no new horizontal overflow and no clipped row text; the playing marker reads '▶ Playing' in full (or, at worst, no worse than baseline)",
+      "actual": "The marker span opt:demo-soft-impact:meta2 is [257, y, 42, 32] (baseline '▶ ისმის' was [257, y, 30, 32]); it starts inside the 126 px option (x 148..274) and ends at x 299, past the list's visible content edge. The list's scrollWidth is 155 vs clientWidth 134 while previewing (ready/error: 134 = 134). On screen the marker reads '▶ Play' — the right half of 'Playing' is clipped, so the row says the opposite of its state while audio is playing. Baseline was already clipped (ABL-B-1: 'ისმის' clipped by the list edge) but the overflow grew by 12 px and the visible residue is now a misleading word. Screen readers get the full text; the preview toggle shows '■ შეჩერება' correctly. Clip edge: the list visible content edge is ~x 278 (box x 144, clientWidth 134); baseline span ended at x 287 (9 px clipped), now x 299 (21 px clipped).",
+      "evidence": "c-round-145/shots/lib-previewing-1440.png, c-round-145/shots/previewing-1280.png, c-round-145/shots/row-playing-{1440,1280}.png vs b-round-144/shots/libbase-previewing-1440.png; c-round-145/out/layout145-{1440,1280}.json (previewing: opt:demo-soft-impact:meta2 d=[0,0,12,0]); c-round-145/out/overflow145-{1440,1280}.json (previewing list sw 155 > cw 134)"
+    }
+  ],
+  "measurements": {
+    "T145-TARGETED": "14 files, 251/251 passed; per-file it counts equal A's (strings 48, library 12, library-row-strings-ui 2, collection 14, collection-load-status 10, purchased-collection-ui 6, failed-source-refusal 8, status-announcement-ui 33, studio-lab-demo 12, library-preview 7, held-enter-add 8, render-budget 7, fader-guards 71, grid-snap-keys 13). c-round-145/out/vitest.json",
+    "SOURCE-SCOPE": "HEAD 9a67abd; frozen 948 OK at start and end; a-round-145/end-sha256.txt OK at start and end; git status = 15 M + 2 ?? (exact grants); protected diff vs 9a67abd empty; ArrangementContext diff = CX1 (+import name, fallback Biome-wrapped to 2 lines); ArrangementLibrary diff = LR1 (+import, 3 expressions, ▶ span wrapped to 3 JSX lines, no class/testid/condition change)",
+    "AN-REVIEW": "all 13 §1.1 values and DM1-DM4 byte-exact in the diff; rowLoading codepoints end in U+2026; DM4 uses U+2014; '·' is U+00B7; R3 title lines untouched (no -/+ lines; SYNTHETIC_COMPOSITION_TITLE only in a hunk header); doc 118 diff = exactly the 2 lines; doc 119 Georgian, TEMPLATE sections, glossary, R1-R5, status 'C round 145 not run yet' — consistent with evidence",
+    "LIB-ROW-TEXT": {
+      "a_delay3s": "15 samples of exactly ['Music','Loading…'] then ['Music','01:41.352'] (both viewports)",
+      "b_abort": "meta spans ['Music','Error: File failed to load (network)']; Enter on it with Music active -> status '“Middle East — საჯარო preview” failed to load — details are in the library.' and no clip added",
+      "c_404": "['Music','Error: File failed to load (404)']",
+      "d_decode": "['Music','Error: File could not be decoded'] (64 bytes, 200, audio/mpeg)",
+      "e_preview": "'▶ Playing' span present (DOM text), slider aria-valuenow 0 -> 1 after ~675 ms, 1 createBufferSource, gone after stop; NOTE visible text is clipped (C-R145-01); AudioContext state=running, currentTime 1.70 s (1440) / 1.68 s (1280), 44.1 kHz",
+      "georgianInRowMeta": "none in ready and error states at both viewports"
+    },
+    "LIB-LABELS": "tree labels 'CZABA public previews + synthetic SFX' and 'Synthetic demo · ღამის პულსი'; notice exactly DM4; folders/chips Music 2, SFX 2, Music 1, Stems 4 unchanged; DM1 has no render site on /studio-lab (document.body.innerText contains no 'Demo collection · …'; code path: library.ts:98 resolveLibraryNode collectionLabel, not rendered in this flow)",
+    "LIB-SEARCH": "stems/Stems/STEMS/stem -> demo-stem-pulse,bass,pad,lead; music -> middle-east, hero-music, synth-mix; sfx -> middle-east, hero-music, soft-impact, slow-rise (R2b); 'soft sfx' -> soft-impact; 'მუსიკა' -> 0 + empty state; '' -> 9; after 'stems' Enter on bass with Stems active -> 0->1 clip, status '“ღამის პულსი · ბასი” added to the Stems track at 00:00.000.' (both viewports)",
+    "LAYOUT-LIB": "library root, tree, list, search, notice, preview: d=0 in all 3 states, both viewports; changed text nodes (notice, tree-col0/1-label, opt context lines, meta1 error span) kept their boxes and line counts; only >1 px delta: previewing opt:demo-soft-impact:meta2 w +12 (rule ii, own width) — but (vi) fails (C-R145-01). Tree and list scroll to their last item (Stems 4 / მელოდია) at both viewports; no horizontal page overflow; no clipped leaf text in ready/error states",
+    "LAYOUT-REST": "1440: 102 nodes outside the library, 1280: 91 nodes; ready vs previewing and ready vs error: 0 nodes moved > 1 px; library root vs libbase d=[0,0,0,0] in all states",
+    "G145-3": "/studio-lab workspace + demo badge in fresh anonymous context; /studio/middle-east 'Sign in required', no workspace, 0 audio[src] at 1440 and 1280; GET /api/studio-token -> 401 {'error':'Please sign in to access Studio.'}; 0 forbidden, 0 Authorization headers, 0 errors, 0 hydration",
+    "PX-NET/REG-HYD": "all 14 contexts: 0 non-noise console errors, 0 pageerror, 0 forbidden requests, 0 Authorization headers, 0 hydration messages (cart/connection noise 2-3 per context, expected)",
+    "snap": "Snap at start = off at 1440 and 1280 (data-snap); still off after setSnapOff"
+  },
+  "invalidRuns": [
+    "c145.cjs first 1440 run: my own expected id 'demo-hero' (actual 'demo-hero-music') made LIB-SEARCH music/sfx report FAIL; actual ids were correct. Fixed the harness expectation and re-ran both viewports; the reported data are from the re-run."
+  ],
+  "notesForB": [
+    "VERDICT GAP: LAYOUT-LIB (vi) fails only on a Low (C-R145-01). §7 has no row for a FAIL with only a Low (not \"no app defect\", not Critical/High/Medium). B must rule in writing whether round 145 closes as PASS with C-R145-01 deferred (it then joins ABL-B-1 in deferred_low_polish), or whether V-0.5b or a fix-up takes the clip first. C has not changed the severity to fit a §7 row: the defect is UX-only, the accessible text and the stop button are correct.",
+    "C-R145-01 (Low) is ABL-B-1 made worse: the clipped residue now reads '▶ Play' (an action label) while playing. Rule (vi) is the round's own criterion, hence FAIL. A fix needs a class/layout change in ArrangementLibraryOptionInner (forbidden in LR1), so it is either a bounded fix-up or folded into V-0.5b which owns the rest of ArrangementLibrary.tsx; it is cheap there (e.g. let the meta row wrap the marker onto its own line, or a shorter marker such as '▶').",
+    "m91: confirmed — failed-source-refusal.test.tsx l.90 defines its own LOADER_ERROR = 'File failed to load (network)' and its loaders reject with it (l.119, l.268), so no source mutation of networkFailed can turn it red; status-announcement-ui is the same pattern per A. Spec issue, not an app defect.",
+    "code-reviewer Lows (A): no unit assertion of exact DM1-DM4 values (C checked DM2-DM4 in the browser and DM1 in the diff); purchased guard errors only toThrow(Error) in collection.test l.143/153/156.",
+    "DM1 has no render site on /studio-lab (browser text search negative).",
+    "Playwright-only observation: arrangement-library-playhead stays 00:00.000 during library preview — it shows the arrangement playhead by design (LibraryPlayheadText uses the arrangement position store), not a bug."
+  ],
+  "abletonCorrespondence": {
+    "multi-word AND search": "confirmed (Live 12 manual §4.2, B capture) — CZABA 'soft sfx' -> soft-impact only",
+    "kind/plural keywords": "conscious simplification / inference only (Live tags != CZABA kind keywords)",
+    "row loading/error/playing text": "unconfirmed — CZABA-only copy, no Live claim"
+  }
+}

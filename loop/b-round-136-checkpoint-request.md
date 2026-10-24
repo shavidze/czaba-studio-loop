@@ -62,3 +62,8 @@
 - **V-0.4 is complete** (gate 144 published 9a67abd). This is the feature boundary named in the request. Still no root result (eighth planning without it). Non-blocking: round 145 (V-0.5a) proceeds.
 - **New in round 145:** one more object `studioSourceLoadStrings` (13 keys) and a search-keyword table `LIBRARY_KIND_SEARCH_KEYWORDS` in `library.ts` (resolves ARCH-R142-LIBRARY-SEARCH-KEYWORDS by separating search from display). Gate-144 Architecture note: one-way imports into the leaf `strings.ts`, verdict keep (ARCH-R144-STRINGS-IMPORTS).
 - **Recommended timing:** before V-0.5c, which closes V-0 and re-captures the RV-1 baseline; a split of `strings.ts` / `strings.test.ts` after that point means a separate behaviour-preserving round.
+
+## Round-145 addendum (B, round 146 planning, 2026-10-24; D-29z111)
+- Still no root result (ninth planning without it). Non-blocking: round 146 (V-0.5a fix-up) proceeds.
+- **New signal ARCH-R145-STRINGS-22ND-OBJECT** (A round-145 code-reviewer Architecture note): `strings.ts` now holds its 22nd `studio*Strings` object (~680 lines). Reviewer verdict: keep, because the leaf rule is test-enforced and nothing couples in a new direction. Same question as (a) of this request: split before V-0.5c or after V-0.
+- Round 146 adds no strings and no module. It is one JSX move in `ArrangementLibrary.tsx` plus test pins.
