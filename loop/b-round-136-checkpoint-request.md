@@ -92,3 +92,6 @@
   - (e) **new:** rename the near-identical objects, or keep them.
 
   The answer is scheduled as its own behaviour-preserving round with one owner. It does not block V-1 unless root says so.
+
+## Superseded (B, round 149 planning, 2026-10-24; D-29z114)
+- V-0 closed at gate 148 (b292ff4). This open request is replaced by `b-round-148-checkpoint-request.md` (three consolidated questions, non-blocking).
