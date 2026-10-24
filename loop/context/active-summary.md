@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T06:13:12.598Z)
+# Active loop summary (2026-10-24T06:55:22.633Z)
 
-- backlog.json 1159 KB -> active view 148 KB
-- status: G_ROOT_GATE round 127
-- servers: `{"checkedUtc":"2026-10-24T05:55:01.5304737Z","round":127,"attempt":1,"store":200}`
-- last publication: 608187fdf279d9b579c279f3c536b27be74c0eea (rounds 122-122)
-- last root gate: round 127 skipped - C taskStatus FAIL
+- backlog.json 1167 KB -> active view 149 KB
+- status: G_ROOT_GATE round 128
+- servers: `{"checkedUtc":"2026-10-24T06:39:10.6286481Z","round":128,"attempt":1,"store":200}`
+- last publication: 77f2763b5e968d7f09683637602668e4a710501d (rounds 123-128)
+- last root gate: round 128 published - commit 77f2763b5e968d7f09683637602668e4a710501d pushed
 
 ## Current items: -
 
@@ -183,7 +183,6 @@
 - GATE102-S2-GUARD-MOUSE-SCROLL-MORE-OFTEN / low / acknowledged (= GATE89-S5 / A-R88 #2 ruling: cosmetic, click still lands in the same card per reviewer trace); optional :focus-visible gating only if UX objects; signal, not scheduled / measuring the card bottom makes a plain mouse click on scope-project at 1280 done scroll ~16 px (before: no scroll)
 - GATE102-S4-PROGRESSTEXT-UNDEFINED-NIT / info / open - Lows batch (dialog nit: type progressText as string | undefined and drop ?? undefined); schedule with the next dialog-owning round / progressText repeats the isRendering && progress condition only to narrow string | null
 - ARCH-R102-FOOTER-GUARD-PURE-FN / info / open - architecture signal, not scheduled; under the pending checkpoint request (addendum (o) to b-round-91-checkpoint-request.md); value low-medium, only if the guard changes again / extract the focus-guard arithmetic to a pure lib/arrangement function (exportFooterFocusScrollDelta) or fold the four dialog focus effects i
-- GATE103-S2-STALL-SECONDS-DUPLICATED / info / scheduled round 127 (owned line in V-0.1: export-wav.client.ts calls studioExportStrings.wavWorkerStalled(timeout / 1000); ST5 pins it); closes on C PASS / "30" is written in ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS and again in the stalled message
 - A-R103-EW5-TITLE-NIT / info / open - Lows batch (test title nit; EW5 title "exact message" is a prefix match now); with the next export-wav.test.ts owner / EW5 title says exact message while the worker text is now appended
 - ARCH-R103-EXPORT-ABORT-CONTRACT-DOC / info / open - architecture signal, not scheduled; addendum (p) to the pending checkpoint request (b-round-91-checkpoint-request.md); proposal: docs/technical/ note on the export pipeline abort contract (who removes which listener, where signal.aborted is checked), CU1-CU10 unchanged, no code / exportMp3 cancel/abort ordering in ArrangementContext.tsx has needed microtask-sensitive tests over several rounds (CU4, CU10)
 - ARCH-R104-STATUS-COALESCING / info / consumed by round 105: the reviewer Architecture note (Signal 4, verdict keep) proposed exactly the gesture-aware coalescing next to gestureCountRef that round 105 implements; no separate checkpoint item / the rule for coalescing repeats during a gesture belongs in the provider, not at 60+ call sites
@@ -254,6 +253,8 @@
 - C-R125-OBS-S1-FULL-SCALE / info / data (C-R86-OBS-DEFAULT-OVERLOAD class); relevant to T12-ADVANCED meters/RMS; not a bug / the S1 fixture export has 159 full-scale samples in the 4 s range (hero + pulse summed at 0 dB)
 - C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
 - ALTGR-SHORTCUT-GUARD / info / signal (not scheduled; no CZABA contract; C round 126 F-5) / Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or 
+- C-R127-01 / medium / scheduled round 128 (D-29z93: footer closeButton -> 'Done'; HE8 pins unique names idle + during render) / Export dialog has two buttons named 'Close' (frozen Modal X aria-label='Close' + footer text 'Close' after V-0.1); during a render the foote
+- C-R127-L1 / low / parts a-d scheduled round 128 (owned strings.ts, costs little; 2026-10-23 rule exception); parts e-f -> deferred_low_polish / Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in t
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

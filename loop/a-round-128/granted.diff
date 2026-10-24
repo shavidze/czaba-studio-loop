@@ -1,0 +1,554 @@
+--- ../tmp/studio-real-loop/b-round-127/r128-granted-start/app/lib/arrangement/strings.ts	2026-10-24 06:24:11.926889352 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 06:35:15.747434410 +0000
+@@ -22,7 +22,7 @@
+     'The same mix as two files — either both are created or neither. Your browser may ask for permission to download the second file.',
+   rangeMissingReason: 'Make a time selection in the Arrangement (drag on a clip or on the ruler)',
+   videoRenderReason:
+-    "Video is not rendered in this cycle — the export is audio only (the video's original sound is included if it is on).",
++    "Video is not rendered in this version — the export is audio only (the video's original sound is included if it is on).",
+   videoFadesPreviewNote:
+     'Video fades are preview only — video is not rendered, the export is audio only.',
+   wavNoteRangeLoop: 'Time selection played straight through, with the same mix — loop is ignored',
+@@ -37,31 +37,31 @@
+   emptyProjectNote: 'Export is disabled: the project is empty — add at least one clip.',
+   progressAriaLabel: 'Export progress',
+   cancelButton: 'Cancel',
+-  closeButton: 'Close',
++  closeButton: 'Done',
+   busyButton: 'Rendering…',
+   progressEncoderLoad: 'Loading MP3 encoder…',
+-  exportCancelled: 'Export cancelled — No file was created.',
++  exportCancelled: 'Export cancelled — no file was created.',
+   exportCancelledEncoder:
+-    'Export cancelled — No file was created. The MP3 encoder will load again on the next MP3 export.',
++    'Export cancelled — no file was created. The MP3 encoder will load again on the next MP3 export.',
+   wavWorkerFailed: 'Writing WAV failed (worker).',
+   emptyProjectError: 'The project is empty — export needs at least one clip.',
+   masterMutedSuffix: ' Master is muted — the file is silent.',
+-  emptyProjectNoFile: 'The project is empty — No file was created.',
++  emptyProjectNoFile: 'The project is empty — no file was created.',
+   videoDecodingNoFile:
+     "The video's sound is still decoding — wait and try again. No file was created.",
+-  invalidRangeNoFile: 'The range is invalid — No file was created.',
++  invalidRangeNoFile: 'The range is invalid — no file was created.',
+   renderingWav: 'Rendering and creating a 24-bit WAV…',
+   encoderLoading: 'Loading the MP3 encoder (ffmpeg.wasm, ~31 MB the first time)…',
+   encoderLoadFailed:
+-    'The MP3 encoder failed to load (ffmpeg.wasm, unpkg CDN) — No file was created. Check your internet connection and try again, or choose WAV.',
++    'The MP3 encoder failed to load (ffmpeg.wasm, unpkg CDN) — no file was created. Check your internet connection and try again, or choose WAV.',
+   mp3Encoding: 'Creating MP3…',
+   rangeSeconds: (seconds: number): string => `${seconds.toFixed(3)} s`,
+   projectScope: (start: string, end: string): string => `Entire project · ${start} — ${end}`,
+   rangeScope: (rangeLabel: string): string => `Time selection · ${rangeLabel}`,
+   loopRangeNote: ({ start, end, seconds }: StudioTimeSpanText): string =>
+-    `Loop does not change the export — the time selection is created (${start} — ${end}, ${seconds}).`,
++    `Loop does not change the export — the time selection is exported (${start} — ${end}, ${seconds}).`,
+   loopProjectNote: (start: string, end: string): string =>
+-    `Loop does not change the export — the entire project is created (${start} — ${end}).`,
++    `Loop does not change the export — the entire project is exported (${start} — ${end}).`,
+   videoSoundLabel: (videoName: string): string => `Original video sound (${videoName}):`,
+   noSoundNote: (creates: string, length: string): string =>
+     `There is no clip with sound in the project — ${creates} with ${length} of silence.`,
+@@ -84,15 +84,15 @@
+   }): string =>
+     `Overload: peak +${peakDb} dBFS — ${clippedSamples} ${clippedSamples === 1 ? 'sample' : 'samples'} clipped to 0 dBFS. Lower Master by at least ${reductionDb} dB and export again.`,
+   exportedRange: ({ start, end, seconds }: StudioTimeSpanText): string =>
+-    `range ${start} — ${end} (${seconds})`,
++    `time selection ${start} — ${end} (${seconds})`,
+   wavDone: (exportedLength: string, masterSuffix: string): string =>
+     `WAV created: ${exportedLength}, 24-bit · 48 kHz · stereo.${masterSuffix}`,
+   mp3Done: (exportedLength: string, masterSuffix: string): string =>
+     `MP3 created: ${exportedLength}, 48 kHz · stereo.${masterSuffix}`,
+   bothDone: (exportedLength: string, masterSuffix: string): string =>
+     `WAV and MP3 created: ${exportedLength}, WAV 24-bit · 48 kHz · stereo, MP3 48 kHz · stereo.${masterSuffix}`,
+-  exportFailed: (reason: string): string => `Export failed — No file was created. ${reason}`,
+-  mp3Failed: (reason: string): string => `Creating MP3 failed — No file was created. ${reason}`,
++  exportFailed: (reason: string): string => `Export failed — no file was created. ${reason}`,
++  mp3Failed: (reason: string): string => `Creating MP3 failed — no file was created. ${reason}`,
+   encoderLoadTimeout: (seconds: number): string =>
+-    `The MP3 encoder did not load within ${seconds} seconds — No file was created. Check your internet connection and try again, or choose WAV.`,
++    `The MP3 encoder did not load within ${seconds} seconds — no file was created. Check your internet connection and try again, or choose WAV.`,
+ };
+--- ../tmp/studio-real-loop/b-round-127/r128-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 06:24:11.926889352 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 06:27:38.404520909 +0000
+@@ -33,7 +33,7 @@
+     'The same mix as two files — either both are created or neither. Your browser may ask for permission to download the second file.',
+   rangeMissingReason: 'Make a time selection in the Arrangement (drag on a clip or on the ruler)',
+   videoRenderReason:
+-    "Video is not rendered in this cycle — the export is audio only (the video's original sound is included if it is on).",
++    "Video is not rendered in this version — the export is audio only (the video's original sound is included if it is on).",
+   videoFadesPreviewNote:
+     'Video fades are preview only — video is not rendered, the export is audio only.',
+   wavNoteRangeLoop: 'Time selection played straight through, with the same mix — loop is ignored',
+@@ -48,23 +48,23 @@
+   emptyProjectNote: 'Export is disabled: the project is empty — add at least one clip.',
+   progressAriaLabel: 'Export progress',
+   cancelButton: 'Cancel',
+-  closeButton: 'Close',
++  closeButton: 'Done',
+   busyButton: 'Rendering…',
+   progressEncoderLoad: 'Loading MP3 encoder…',
+-  exportCancelled: 'Export cancelled — No file was created.',
++  exportCancelled: 'Export cancelled — no file was created.',
+   exportCancelledEncoder:
+-    'Export cancelled — No file was created. The MP3 encoder will load again on the next MP3 export.',
++    'Export cancelled — no file was created. The MP3 encoder will load again on the next MP3 export.',
+   wavWorkerFailed: 'Writing WAV failed (worker).',
+   emptyProjectError: 'The project is empty — export needs at least one clip.',
+   masterMutedSuffix: ' Master is muted — the file is silent.',
+-  emptyProjectNoFile: 'The project is empty — No file was created.',
++  emptyProjectNoFile: 'The project is empty — no file was created.',
+   videoDecodingNoFile:
+     "The video's sound is still decoding — wait and try again. No file was created.",
+-  invalidRangeNoFile: 'The range is invalid — No file was created.',
++  invalidRangeNoFile: 'The range is invalid — no file was created.',
+   renderingWav: 'Rendering and creating a 24-bit WAV…',
+   encoderLoading: 'Loading the MP3 encoder (ffmpeg.wasm, ~31 MB the first time)…',
+   encoderLoadFailed:
+-    'The MP3 encoder failed to load (ffmpeg.wasm, unpkg CDN) — No file was created. Check your internet connection and try again, or choose WAV.',
++    'The MP3 encoder failed to load (ffmpeg.wasm, unpkg CDN) — no file was created. Check your internet connection and try again, or choose WAV.',
+   mp3Encoding: 'Creating MP3…',
+ };
+ 
+@@ -121,7 +121,7 @@
+     expect(s.scopeLegend).toBe('Range');
+     expect(s.rangeOptionName).toBe('Time selection');
+     expect(s.cancelButton).toBe('Cancel');
+-    expect(s.closeButton).toBe('Close');
++    expect(s.closeButton).toBe('Done');
+     expect(s.busyButton).toBe('Rendering…');
+     expect(s.progressAriaLabel).toBe('Export progress');
+     expect(s.videoSoundIncluded).toBe('Included');
+@@ -140,16 +140,16 @@
+     );
+     expect(s.rangeScope('x')).toBe('Time selection · x');
+     expect(s.loopRangeNote({ start: '00:04.000', end: '00:09.000', seconds: '5.000 s' })).toBe(
+-      'Loop does not change the export — the time selection is created (00:04.000 — 00:09.000, 5.000 s).',
++      'Loop does not change the export — the time selection is exported (00:04.000 — 00:09.000, 5.000 s).',
+     );
+     expect(s.loopRangeNote({ start: '00:01.000', end: '00:02.000', seconds: '1.000 s' })).toBe(
+-      'Loop does not change the export — the time selection is created (00:01.000 — 00:02.000, 1.000 s).',
++      'Loop does not change the export — the time selection is exported (00:01.000 — 00:02.000, 1.000 s).',
+     );
+     expect(s.loopProjectNote('00:00.000', '00:20.000')).toBe(
+-      'Loop does not change the export — the entire project is created (00:00.000 — 00:20.000).',
++      'Loop does not change the export — the entire project is exported (00:00.000 — 00:20.000).',
+     );
+     expect(s.loopProjectNote('00:00.000', '00:07.250')).toBe(
+-      'Loop does not change the export — the entire project is created (00:00.000 — 00:07.250).',
++      'Loop does not change the export — the entire project is exported (00:00.000 — 00:07.250).',
+     );
+     expect(s.videoSoundLabel('clip.mp4')).toBe('Original video sound (clip.mp4):');
+     expect(s.videoSoundLabel('ფილმი.mov')).toBe('Original video sound (ფილმი.mov):');
+@@ -214,18 +214,18 @@
+       'Overload: peak +1.7 dBFS — 12 samples clipped to 0 dBFS. Lower Master by at least 1.8 dB and export again.',
+     );
+     expect(s.exportedRange({ start: '00:04.000', end: '00:09.000', seconds: '5.000 s' })).toBe(
+-      'range 00:04.000 — 00:09.000 (5.000 s)',
++      'time selection 00:04.000 — 00:09.000 (5.000 s)',
+     );
+     expect(s.exportedRange({ start: '00:00.000', end: '00:04.000', seconds: '4.000 s' })).toBe(
+-      'range 00:00.000 — 00:04.000 (4.000 s)',
++      'time selection 00:00.000 — 00:04.000 (4.000 s)',
+     );
+     expect(s.wavDone('00:20.000', '')).toBe('WAV created: 00:20.000, 24-bit · 48 kHz · stereo.');
+     expect(s.wavDone('00:20.000', s.masterMutedSuffix)).toBe(
+       'WAV created: 00:20.000, 24-bit · 48 kHz · stereo. Master is muted — the file is silent.',
+     );
+     expect(s.mp3Done('00:20.000', '')).toBe('MP3 created: 00:20.000, 48 kHz · stereo.');
+-    expect(s.mp3Done('range 00:04.000 — 00:09.000 (5.000 s)', s.masterMutedSuffix)).toBe(
+-      'MP3 created: range 00:04.000 — 00:09.000 (5.000 s), 48 kHz · stereo. Master is muted — the file is silent.',
++    expect(s.mp3Done('time selection 00:04.000 — 00:09.000 (5.000 s)', s.masterMutedSuffix)).toBe(
++      'MP3 created: time selection 00:04.000 — 00:09.000 (5.000 s), 48 kHz · stereo. Master is muted — the file is silent.',
+     );
+     expect(s.bothDone('00:20.000', '')).toBe(
+       'WAV and MP3 created: 00:20.000, WAV 24-bit · 48 kHz · stereo, MP3 48 kHz · stereo.',
+@@ -233,17 +233,17 @@
+     expect(s.bothDone('00:20.000', s.masterMutedSuffix)).toBe(
+       'WAV and MP3 created: 00:20.000, WAV 24-bit · 48 kHz · stereo, MP3 48 kHz · stereo. Master is muted — the file is silent.',
+     );
+-    expect(s.exportFailed('boom')).toBe('Export failed — No file was created. boom');
+-    expect(s.exportFailed('')).toBe('Export failed — No file was created. ');
++    expect(s.exportFailed('boom')).toBe('Export failed — no file was created. boom');
++    expect(s.exportFailed('')).toBe('Export failed — no file was created. ');
+     expect(s.mp3Failed('lame exploded')).toBe(
+-      'Creating MP3 failed — No file was created. lame exploded',
++      'Creating MP3 failed — no file was created. lame exploded',
+     );
+-    expect(s.mp3Failed('')).toBe('Creating MP3 failed — No file was created. ');
++    expect(s.mp3Failed('')).toBe('Creating MP3 failed — no file was created. ');
+     expect(s.encoderLoadTimeout(120)).toBe(
+-      'The MP3 encoder did not load within 120 seconds — No file was created. Check your internet connection and try again, or choose WAV.',
++      'The MP3 encoder did not load within 120 seconds — no file was created. Check your internet connection and try again, or choose WAV.',
+     );
+     expect(s.encoderLoadTimeout(5)).toBe(
+-      'The MP3 encoder did not load within 5 seconds — No file was created. Check your internet connection and try again, or choose WAV.',
++      'The MP3 encoder did not load within 5 seconds — no file was created. Check your internet connection and try again, or choose WAV.',
+     );
+   });
+ 
+--- ../tmp/studio-real-loop/b-round-127/r128-granted-start/app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx	2026-10-24 06:24:11.926889352 +0000
++++ app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx	2026-10-24 06:35:04.638689896 +0000
+@@ -1,4 +1,4 @@
+-import { act, fireEvent, render } from '@testing-library/react';
++import { act, fireEvent, render, within } from '@testing-library/react';
+ import { type ReactNode, useState } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementExportDialog } from '~/components/arrangement/ArrangementExportDialog';
+@@ -251,7 +251,7 @@
+ }
+ 
+ describe(
+-  'GATE90-S3/S4 export dialog Close ignores a held Enter (D-29z62)',
++  'GATE90-S3/S4 export dialog Done ignores a held Enter (D-29z62)',
+   { timeout: 15_000 },
+   () => {
+     beforeEach(() => {
+@@ -294,7 +294,7 @@
+       restoreUrlStubs();
+     });
+ 
+-    it('HE1 a repeated Enter on Close after a render-phase WAV cancel is prevented: no close, the cancelled status stays and focus stays on Close', async () => {
++    it('HE1 a repeated Enter on Done after a render-phase WAV cancel is prevented: no close, the cancelled status stays and focus stays on Done', async () => {
+       const { onClose, view, renders } = await cancelledWavDialog();
+       const close = closeButton(view);
+       expect(document.activeElement).toBe(close);
+@@ -308,7 +308,7 @@
+       expect(downloads.length).toBe(0);
+     });
+ 
+-    it('HE2 a fresh Enter on Close is not prevented (jsdom sends no click), and an explicit click closes the dialog once', async () => {
++    it('HE2 a fresh Enter on Done is not prevented (jsdom sends no click), and an explicit click closes the dialog once', async () => {
+       const { onClose, view, renders } = await cancelledWavDialog();
+       const close = closeButton(view);
+       expect(fireEvent.keyDown(close, { key: 'Enter', repeat: false })).toBe(true);
+@@ -319,7 +319,7 @@
+       await settleRenders(renders);
+     });
+ 
+-    it('HE3 only Enter is guarded: repeated Space and repeated "a" on Close are not prevented', async () => {
++    it('HE3 only Enter is guarded: repeated Space and repeated "a" on Done are not prevented', async () => {
+       const { onClose, view, renders } = await cancelledWavDialog();
+       const close = closeButton(view);
+       expect(fireEvent.keyDown(close, { key: ' ', repeat: true })).toBe(true);
+@@ -329,7 +329,7 @@
+       await settleRenders(renders);
+     });
+ 
+-    it('HE4 idle dialog: focus starts on Close, a repeated Enter is prevented and a fresh Enter is not', async () => {
++    it('HE4 idle dialog: focus starts on Done, a repeated Enter is prevented and a fresh Enter is not', async () => {
+       const { onClose, view } = await mountHoldEnterDialog();
+       const close = closeButton(view);
+       expect(document.activeElement).toBe(close);
+@@ -339,7 +339,7 @@
+       expect(document.activeElement).toBe(close);
+     });
+ 
+-    it('HE5 classes: Cancel has no disabled attribute and no disabled: token; Close is disabled during the render with disabled:opacity-40 and enabled after Cancel', async () => {
++    it('HE5 classes: Cancel has no disabled attribute and no disabled: token; Done is disabled during the render with disabled:opacity-40 and enabled after Cancel', async () => {
+       const renders = pendingRenders();
+       const { view } = await mountHoldEnterDialog();
+       await clickExport(view, WAV_BUTTON);
+@@ -355,7 +355,7 @@
+       await settleRenders(renders);
+     });
+ 
+-    it('HE6 the guard does not stop propagation: a document keydown listener still receives the repeated Enter on Close', async () => {
++    it('HE6 the guard does not stop propagation: a document keydown listener still receives the repeated Enter on Done', async () => {
+       const { view, renders } = await cancelledWavDialog();
+       const close = closeButton(view);
+       const received: { key: string; repeat: boolean }[] = [];
+@@ -372,7 +372,7 @@
+       await settleRenders(renders);
+     });
+ 
+-    it('HE7 MP3 load-phase cancel: the encoder cancel text stays after a repeated Enter on Close and the dialog stays open', async () => {
++    it('HE7 MP3 load-phase cancel: the encoder cancel text stays after a repeated Enter on Done and the dialog stays open', async () => {
+       let finishLoad: (encoder: ArrangementMp3Encoder) => void = () => undefined;
+       loadEncoderMock.mockImplementationOnce(
+         () =>
+@@ -401,5 +401,36 @@
+       expect(encodeMock).toHaveBeenCalledTimes(0);
+       expect(downloads.length).toBe(0);
+     });
++
++    it('HE8 every button in the Export dialog has a unique accessible name, idle and during a WAV render: Close is only the Modal ✕ and Done is only the footer button (C-R127-01)', async () => {
++      const renders = pendingRenders();
++      const { view } = await mountHoldEnterDialog();
++      const expectUniqueButtonNames = (phase: string) => {
++        const dialog = within(view.getByRole('dialog'));
++        const modalClose = dialog.getAllByRole('button', { name: 'Close' });
++        expect(modalClose.length, phase).toBe(1);
++        expect(modalClose[0]?.getAttribute('aria-label'), phase).toBe('Close');
++        const footerDone = dialog.getAllByRole('button', {
++          name: studioExportStrings.closeButton,
++        });
++        expect(footerDone.length, phase).toBe(1);
++        expect(footerDone[0], phase).toBe(closeButton(view));
++        const names = dialog
++          .getAllByRole('button')
++          .map((button) => button.getAttribute('aria-label') ?? button.textContent?.trim() ?? '');
++        expect(new Set(names).size, `${phase} button names: ${JSON.stringify(names)}`).toBe(
++          names.length,
++        );
++        return { modalClose: modalClose[0], footerDone: footerDone[0] };
++      };
++      expectUniqueButtonNames('idle');
++      await clickExport(view, WAV_BUTTON);
++      expect(renders.length).toBe(1);
++      const rendering = expectUniqueButtonNames('rendering');
++      expect(cancelButton(view).disabled).toBe(false);
++      expect(rendering.footerDone?.matches(':disabled')).toBe(true);
++      expect(rendering.modalClose?.matches(':disabled')).toBe(false);
++      await settleRenders(renders);
++    });
+   },
+ );
+--- ../tmp/studio-real-loop/b-round-127/r128-granted-start/app/lib/arrangement/__tests__/export-dialog-focus.test.tsx	2026-10-24 06:24:11.926889352 +0000
++++ app/lib/arrangement/__tests__/export-dialog-focus.test.tsx	2026-10-24 06:28:33.738949483 +0000
+@@ -259,7 +259,7 @@
+     vi.restoreAllMocks();
+   });
+ 
+-  it('moves focus to Close inside the dialog when it opens', async () => {
++  it('moves focus to Done inside the dialog when it opens', async () => {
+     const { openExport } = await mountWorkspace();
+     const dialog = openExport();
+     expect(document.activeElement).toBe(dialogButton(dialog, studioExportStrings.closeButton));
+@@ -377,7 +377,7 @@
+     expect(live(api).exportState.phase).toBe('idle');
+   });
+ 
+-  it('does not swallow Enter on Close, and its activation closes without starting an export', async () => {
++  it('does not swallow Enter on Done, and its activation closes without starting an export', async () => {
+     const { api, view, openExport } = await mountWorkspace();
+     const dialog = openExport();
+     const close = dialogButton(dialog, studioExportStrings.closeButton);
+@@ -428,7 +428,7 @@
+     expect(document.activeElement).toBe(videoClose);
+   });
+ 
+-  it('keeps focus inside the dialog while a WAV render disables its buttons, then returns it to Close', async () => {
++  it('keeps focus inside the dialog while a WAV render disables its buttons, then returns it to Done', async () => {
+     offlineRender.reject = null;
+     vi.stubGlobal('OfflineAudioContext', ControlledOfflineAudioContext);
+     const { api, openExport } = await mountWorkspace();
+@@ -531,7 +531,7 @@
+     expect(openerFocus).not.toHaveBeenCalled();
+   });
+ 
+-  it('keeps X → WAV → MP3 → WAV + MP3 → project scope → Close → Export WAV in DOM order and intercepts Tab only at the ends (C-R14-02)', async () => {
++  it('keeps X → WAV → MP3 → WAV + MP3 → project scope → Done → Export WAV in DOM order and intercepts Tab only at the ends (C-R14-02)', async () => {
+     const { openExport } = await mountWorkspace();
+     const dialog = openExport();
+     const modalClose = modalCloseButton(dialog);
+--- ../tmp/studio-real-loop/b-round-127/r128-granted-start/app/lib/arrangement/__tests__/export-dialog-focus-restore.test.tsx	2026-10-24 06:24:11.926889352 +0000
++++ app/lib/arrangement/__tests__/export-dialog-focus-restore.test.tsx	2026-10-24 06:28:37.085973221 +0000
+@@ -243,7 +243,7 @@
+     vi.restoreAllMocks();
+   });
+ 
+-  it('FR1: restores focus to the opener after Close although a later layout effect focused a decoy during the opening commit', async () => {
++  it('FR1: restores focus to the opener after Done although a later layout effect focused a decoy during the opening commit', async () => {
+     const { view, opener, openExport } = await mountRestoreHarness(true);
+     const dialog = openExport();
+     expect(document.activeElement).toBe(dialogButton(dialog, studioExportStrings.closeButton));
+@@ -265,7 +265,7 @@
+     expect(document.activeElement).toBe(opener);
+   });
+ 
+-  it('FR3: restores focus to the opener after Close when nothing else moves focus', async () => {
++  it('FR3: restores focus to the opener after Done when nothing else moves focus', async () => {
+     const { view, opener, openExport } = await mountRestoreHarness(false);
+     const dialog = openExport();
+     fireEvent.click(dialogButton(dialog, studioExportStrings.closeButton));
+@@ -273,7 +273,7 @@
+     expect(document.activeElement).toBe(opener);
+   });
+ 
+-  it('FR4: still moves focus to Close inside the dialog after a later layout effect focused a decoy', async () => {
++  it('FR4: still moves focus to Done inside the dialog after a later layout effect focused a decoy', async () => {
+     const { decoy, openExport } = await mountRestoreHarness(true);
+     const dialog = openExport();
+     expect(document.activeElement).not.toBe(decoy);
+--- ../tmp/studio-real-loop/b-round-127/r128-granted-start/app/lib/arrangement/__tests__/export-toolbar-hold-enter.test.tsx	2026-10-24 06:24:11.926889352 +0000
++++ app/lib/arrangement/__tests__/export-toolbar-hold-enter.test.tsx	2026-10-24 06:28:38.090979395 +0000
+@@ -215,7 +215,7 @@
+     vi.restoreAllMocks();
+   });
+ 
+-  it('TH1: a repeated Enter on Export after closing from Close is prevented and does not re-open the dialog', async () => {
++  it('TH1: a repeated Enter on Export after closing from Done is prevented and does not re-open the dialog', async () => {
+     const { view, exportButton, onOpenExportSpy } = await mountToolbarExportHarness();
+     exportButton.focus();
+     fireEvent.click(exportButton);
+--- ../tmp/studio-real-loop/b-round-127/r128-granted-start/app/lib/arrangement/__tests__/export-dialog-footer.test.tsx	2026-10-24 06:24:11.926889352 +0000
++++ app/lib/arrangement/__tests__/export-dialog-footer.test.tsx	2026-10-24 06:28:41.337003715 +0000
+@@ -282,7 +282,7 @@
+     vi.restoreAllMocks();
+   });
+ 
+-  it('FT1 idle: the footer is sticky, opaque, holds Close and Export only, and is the last child of ModalBody', async () => {
++  it('FT1 idle: the footer is sticky, opaque, holds Done and Export only, and is the last child of ModalBody', async () => {
+     const { dialog } = await mountFooterDialog();
+     const footer = exportFooter(dialog);
+     const classes = footer.className.split(/\s+/);
+@@ -347,7 +347,7 @@
+     expect(downloads).toEqual(['czaba-studio-lab.wav']);
+   });
+ 
+-  it('FT3 the Tab sequence is unchanged (X → format radios → enabled scope radios → Close → Export) and the footer is not focusable', async () => {
++  it('FT3 the Tab sequence is unchanged (X → format radios → enabled scope radios → Done → Export) and the footer is not focusable', async () => {
+     const { dialog } = await mountFooterDialog();
+     const panel = dialogPanel(dialog);
+     const footer = exportFooter(dialog);
+@@ -529,7 +529,7 @@
+     expect(panel.scrollTop).toBe(48);
+   });
+ 
+-  it('FC3 a label card fully above the footer never scrolls, and Close (no label, inside the footer) never scrolls', async () => {
++  it('FC3 a label card fully above the footer never scrolls, and Done (no label, inside the footer) never scrolls', async () => {
+     const { dialog } = await mountFooterDialog();
+     const panel = dialogPanel(dialog);
+     const footer = exportFooter(dialog);
+--- ../tmp/studio-real-loop/b-round-127/r128-granted-start/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx	2026-10-24 06:24:11.926750101 +0000
++++ app/lib/arrangement/__tests__/export-cancel-ui.test.tsx	2026-10-24 06:28:43.490021536 +0000
+@@ -387,7 +387,7 @@
+   });
+   afterEach(tearDownCancelEnvironment);
+ 
+-  it('CU1 render-phase WAV cancel: Cancel only while rendering, cancelled status, no progress, Close enabled and focused, signal aborted, and a late render downloads nothing', async () => {
++  it('CU1 render-phase WAV cancel: Cancel only while rendering, cancelled status, no progress, Done enabled and focused, signal aborted, and a late render downloads nothing', async () => {
+     const controls = controlledRenders();
+     const { api, view } = await mountCancelDialog();
+     expect(cancelButton(view)).toBeNull();
+@@ -600,7 +600,7 @@
+     expect(downloads).toEqual(['czaba-studio-lab.mp3']);
+   });
+ 
+-  it('CU9 keyboard: during a render the stops are X, the format radios and Cancel; a click on the focused Cancel moves focus to Close; Escape does not cancel', async () => {
++  it('CU9 keyboard: during a render the stops are X, the format radios and Cancel; a click on the focused Cancel moves focus to Done; Escape does not cancel', async () => {
+     const controls = controlledRenders();
+     const { api, view } = await mountCancelDialog();
+     await clickExport(view, WAV_BUTTON);
+--- ../tmp/studio-real-loop/b-round-127/r128-granted-start/app/lib/arrangement/__tests__/export-cancel.test.ts	2026-10-24 06:24:11.926889352 +0000
++++ app/lib/arrangement/__tests__/export-cancel.test.ts	2026-10-24 06:28:44.578030026 +0000
+@@ -207,7 +207,7 @@
+ }
+ 
+ describe('SRW-20 stage 3b-1 export cancel messages and error (D-29z55)', () => {
+-  it('exports the exact Georgian messages and a named cancel error', () => {
++  it('exports the exact messages and a named cancel error', () => {
+     expect(ARRANGEMENT_EXPORT_CANCELLED_MESSAGE).toBe(studioExportStrings.exportCancelled);
+     expect(ARRANGEMENT_EXPORT_CANCELLED_ENCODER_MESSAGE).toBe(
+       studioExportStrings.exportCancelledEncoder,
+--- ../tmp/studio-real-loop/b-round-127/r128-granted-start/docs/implementation/2026/quarter-IV/104-studio-v0-export-strings.md	2026-10-24 06:24:11.927568483 +0000
++++ docs/implementation/2026/quarter-IV/104-studio-v0-export-strings.md	2026-10-24 06:35:24.932836224 +0000
+@@ -1,7 +1,7 @@
+ # Studio V-0.1 — Export-ის ტექსტები ინგლისურად, ერთი strings მოდულიდან
+ 
+ **თარიღი:** 2026-10-24
+-**სტატუსი:** In Progress (დაბლოკილია B-ის გადაწყვეტილებაზე, იხ. „პრობლემები და გადაწყვეტები“ P1)
++**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 128-ში; ბრაუზერის შემოწმება C-ის რაუნდია)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -15,7 +15,8 @@
+ - არსებული exported კონსტანტები (`ARRANGEMENT_EXPORT_CANCELLED_MESSAGE`, `..._ENCODER_MESSAGE`, `ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE`, `ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE`) სახელს ინარჩუნებენ და მნიშვნელობას მოდულიდან იღებენ. stall-ის ტექსტი ახლა `ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS / 1000`-დან გამოითვლება (GATE103-S2). MP3 encoder-ის timeout-ის ტექსტიც `ARRANGEMENT_MP3_ENCODER_LOAD_TIMEOUT_MS / 1000`-დან მოდის; შედეგი იგივე 120 წამია.
+ - ქცევა არ იცვლება: ელემენტები, თანმიმდევრობა, `id`/`aria-*`, `data-testid`, კლასები, disabled-ის წესები, focus/Tab, ტაიმერები, export pipeline და ფაილის სახელები უცვლელია. JSX-ში რამდენიმე text node ერთ formatter-ის გამოძახებად გაერთიანდა; `textContent` იგივე დარჩა.
+ - ტესტებში ქართული literal-ი მოდულის მნიშვნელობით ან იმავე input-ით გამოძახებული formatter-ით შეიცვალა. ინგლისური literal-ები მხოლოდ `strings.test.ts`-შია (ST1–ST5), რომ არასწორი formatter თავის თავთან შედარებით ვერ გაიაროს.
+-- **„No file was created.“** §1.1-ის ფიქსირებული glossary-ის მიხედვით ყველგან ასე იწერება, em dash-ის შემდეგაც (დიდი ასოთი). ეს B-ის არჩევანია; style-ის საკითხად შეიძლება გადაიხედოს.
++- **„no file was created.“** რაუნდი 128-ის glossary-ის შესწორებით em dash-ის შემდეგ, წინადადების შუაში, პატარა ასოთი იწერება (8 key: `exportCancelled`, `exportCancelledEncoder`, `emptyProjectNoFile`, `invalidRangeNoFile`, `encoderLoadFailed`, `exportFailed`, `mp3Failed`, `encoderLoadTimeout`). `videoDecodingNoFile`-ში `No file was created.` დიდი ასოთი რჩება, რადგან იქ ახალ წინადადებას იწყებს.
++- **Glossary-ის შესწორება (რაუნდი 128):** footer-ის `დახურვა` → `Done`; Modal ✕ რჩება `Close`. key-ის სახელი `closeButton` არ იცვლება: ის აღწერს, რას აკეთებს ღილაკი (dialog-ს ხურავს), და გადარქმევა 13 ფაილში 35 მიმართვას შეეხებოდა ქცევის მოგების გარეშე.
+ - ალტერნატივა იყო locale switch ან i18n ბიბლიოთეკა. R1 მას კრძალავს: ენა ერთია, ამიტომ plain constants საკმარისია.
+ 
+ ## არქიტექტურა
+@@ -57,7 +58,7 @@
+ | mp3FormatNote | LAME (ffmpeg.wasm) — encoder პირველ MP3 ექსპორტზე CDN-იდან იტვირთება (~31 MB) | LAME (ffmpeg.wasm) — the encoder loads from a CDN on the first MP3 export (~31 MB) | MP3 ბარათის შენიშვნა |
+ | bothFormatNote | იგივე მიქსი ორ ფაილად — ან ორივე შეიქმნება, ან არცერთი. ბრაუზერმა მეორე ფაილის ჩამოტვირთვაზე შეიძლება ნებართვა მოითხოვოს. | The same mix as two files — either both are created or neither. Your browser may ask for permission to download the second file. | WAV + MP3 ბარათის შენიშვნა |
+ | rangeMissingReason | მონიშნე დროის მონაკვეთი Arrangement-ში (drag კლიპზე ან სახაზავზე) | Make a time selection in the Arrangement (drag on a clip or on the ruler) | გამორთული range ბარათის მიზეზი |
+-| videoRenderReason | ვიდეოს რენდერი ამ ციკლში არ კეთდება — ექსპორტი მხოლოდ აუდიოა (ვიდეოს ორიგინალი ხმა შედის, თუ ჩართულია). | Video is not rendered in this cycle — the export is audio only (the video's original sound is included if it is on). | ვიდეოს ბარათის შენიშვნა |
++| videoRenderReason | ვიდეოს რენდერი ამ ციკლში არ კეთდება — ექსპორტი მხოლოდ აუდიოა (ვიდეოს ორიგინალი ხმა შედის, თუ ჩართულია). | Video is not rendered in this version — the export is audio only (the video's original sound is included if it is on). | ვიდეოს ბარათის შენიშვნა |
+ | videoFadesPreviewNote | ვიდეოს fade-ები მხოლოდ პრევიუშია — ვიდეოს რენდერი არ კეთდება, ექსპორტი მხოლოდ აუდიოა. | Video fades are preview only — video is not rendered, the export is audio only. | video fade-ის შენიშვნა |
+ | wavNoteRangeLoop | მონიშნული მონაკვეთი წრფივად, იგივე მიქსით — loop იგნორირდება | Time selection played straight through, with the same mix — loop is ignored | WAV ბარათის შენიშვნა |
+ | wavNoteRange | მონიშნული მონაკვეთი, იგივე graph რაც დაკვრისას | Time selection, the same graph as playback | იგივე |
+@@ -71,7 +72,7 @@
+ | emptyProjectNote | ექსპორტი გამორთულია: პროექტი ცარიელია — დაამატე მინიმუმ ერთი კლიპი. | Export is disabled: the project is empty — add at least one clip. | ცარიელი პროექტის შენიშვნა |
+ | progressAriaLabel | ექსპორტის პროგრესი | Export progress | `<progress>`-ის aria-label |
+ | cancelButton | გაუქმება | Cancel | რენდერის დროს ღილაკი |
+-| closeButton | დახურვა | Close | footer ღილაკი (**P1**) |
++| closeButton | დახურვა | Done | footer ღილაკი (**P1**; Modal ✕ რჩება `Close`) |
+ | busyButton | მიმდინარეობს… | Rendering… | მთავარი ღილაკი რენდერის დროს |
+ | progressEncoderLoad | MP3 encoder-ის ჩატვირთვა… | Loading MP3 encoder… | progress label |
+ | progressRendering(p) | რენდერი · p% | Rendering · p% | progress label / aria-valuetext |
+@@ -80,32 +81,32 @@
+ | rangeSeconds(s) | {s} წმ | {s} s (მაგ. `4.000 s`) | range-ის სიგრძე |
+ | projectScope(start, end) | მთელი პროექტი · {start} — {end} | Entire project · {start} — {end} | აღწერა (`0:00`) და scope ბარათი (`00:00.000`) |
+ | rangeScope(label) | მონიშნული მონაკვეთი · {label} | Time selection · {label} | აღწერა და range ბარათი |
+-| loopRangeNote | Loop ექსპორტს არ ცვლის — იქმნება მონიშნული მონაკვეთი ({start} — {end}, {seconds}). | Loop does not change the export — the time selection is created ({start} — {end}, {seconds}). | loop შენიშვნა |
+-| loopProjectNote | Loop ექსპორტს არ ცვლის — იქმნება მთელი პროექტი ({start} — {end}). | Loop does not change the export — the entire project is created ({start} — {end}). | loop შენიშვნა |
++| loopRangeNote | Loop ექსპორტს არ ცვლის — იქმნება მონიშნული მონაკვეთი ({start} — {end}, {seconds}). | Loop does not change the export — the time selection is exported ({start} — {end}, {seconds}). | loop შენიშვნა |
++| loopProjectNote | Loop ექსპორტს არ ცვლის — იქმნება მთელი პროექტი ({start} — {end}). | Loop does not change the export — the entire project is exported ({start} — {end}). | loop შენიშვნა |
+ | noSoundNote(creates, length) | პროექტში ხმოვანი კლიპი არ არის — {creates} {length} სიგრძის სიჩუმით. | There is no clip with sound in the project — {creates} with {length} of silence. | no-sound შენიშვნა |
+ | masterMutedNote(creates, length) | Master დადუმებულია (M) — {creates} {length} სიგრძის სიჩუმით. ჩართე Master, თუ ხმა გჭირდება. | Master is muted (M) — {creates} with {length} of silence. Unmute Master if you need sound. | Master-mute შენიშვნა |
+ | masterGainNote(gain) | Master: {gain} — ექსპორტში შედის. | Master: {gain} — included in the export. | Master gain შენიშვნა |
+-| exportCancelled | ექსპორტი გაუქმდა — ფაილი არ შეიქმნა. | Export cancelled — No file was created. | cancel-ის სტატუსი |
+-| exportCancelledEncoder | … MP3 encoder შემდეგ MP3 ექსპორტზე თავიდან ჩაიტვირთება. | Export cancelled — No file was created. The MP3 encoder will load again on the next MP3 export. | MP3 load/encode-ის cancel |
++| exportCancelled | ექსპორტი გაუქმდა — ფაილი არ შეიქმნა. | Export cancelled — no file was created. | cancel-ის სტატუსი |
++| exportCancelledEncoder | … MP3 encoder შემდეგ MP3 ექსპორტზე თავიდან ჩაიტვირთება. | Export cancelled — no file was created. The MP3 encoder will load again on the next MP3 export. | MP3 load/encode-ის cancel |
+ | wavWorkerFailed | WAV-ის ჩაწერა ვერ მოხერხდა (worker). | Writing WAV failed (worker). | შეცდომა |
+ | wavWorkerStalled(s) | WAV-ის ჩაწერა შეჩერდა — worker 30 წამი არ პასუხობს. | Writing WAV stalled — the worker has not responded for {s} seconds. | შეცდომა (s = 30) |
+ | overloadWarning | გადატვირთვა: პიკი +{peak} dBFS — {n} sample შეიზღუდა 0 dBFS-ზე. შეამცირე Master მინიმუმ {r} dB-ით და გაიმეორე ექსპორტი. | Overload: peak +{peak} dBFS — {n} sample(s) clipped to 0 dBFS. Lower Master by at least {r} dB and export again. | overload alert (1 → sample, სხვა → samples) |
+ | emptyProjectError | პროექტი ცარიელია — ექსპორტისთვის საჭიროა მინიმუმ ერთი კლიპი. | The project is empty — export needs at least one clip. | render-ის Error |
+ | masterMutedSuffix | ␠Master დადუმებულია — ფაილი სიჩუმეა. | ␠Master is muted — the file is silent. | done-ის სუფიქსი |
+-| emptyProjectNoFile | პროექტი ცარიელია — ფაილი არ შეიქმნა. | The project is empty — No file was created. | შეცდომა |
++| emptyProjectNoFile | პროექტი ცარიელია — ფაილი არ შეიქმნა. | The project is empty — no file was created. | შეცდომა |
+ | videoDecodingNoFile | ვიდეოს ხმა ჯერ იშიფრება — დაელოდე და სცადე თავიდან. ფაილი არ შეიქმნა. | The video's sound is still decoding — wait and try again. No file was created. | შეცდომა |
+-| invalidRangeNoFile | მონაკვეთი არასწორია — ფაილი არ შეიქმნა. | The range is invalid — No file was created. | შეცდომა |
++| invalidRangeNoFile | მონაკვეთი არასწორია — ფაილი არ შეიქმნა. | The range is invalid — no file was created. | შეცდომა |
+ | renderingWav | რენდერი და 24-bit WAV-ის შექმნა… | Rendering and creating a 24-bit WAV… | rendering სტატუსი |
+-| exportedRange | მონაკვეთი {start} — {end} ({seconds}) | range {start} — {end} ({seconds}) | done-ის სიგრძის ნაწილი |
++| exportedRange | მონაკვეთი {start} — {end} ({seconds}) | time selection {start} — {end} ({seconds}) | done-ის სიგრძის ნაწილი (`WAV created: time selection …`) |
+ | wavDone(len, suffix) | WAV შეიქმნა: {len}, 24-bit · 48 kHz · stereo.{suffix} | WAV created: {len}, 24-bit · 48 kHz · stereo.{suffix} | done |
+ | mp3Done(len, suffix) | MP3 შეიქმნა: {len}, 48 kHz · stereo.{suffix} | MP3 created: {len}, 48 kHz · stereo.{suffix} | done |
+ | bothDone(len, suffix) | WAV და MP3 შეიქმნა: {len}, WAV 24-bit · 48 kHz · stereo, MP3 48 kHz · stereo.{suffix} | WAV and MP3 created: {len}, WAV 24-bit · 48 kHz · stereo, MP3 48 kHz · stereo.{suffix} | done |
+-| exportFailed(reason) | ექსპორტი ვერ მოხერხდა — ფაილი არ შეიქმნა. {reason} | Export failed — No file was created. {reason} | შეცდომა |
++| exportFailed(reason) | ექსპორტი ვერ მოხერხდა — ფაილი არ შეიქმნა. {reason} | Export failed — no file was created. {reason} | შეცდომა |
+ | encoderLoading | MP3 encoder იტვირთება (ffmpeg.wasm, პირველად ~31 MB)… | Loading the MP3 encoder (ffmpeg.wasm, ~31 MB the first time)… | rendering სტატუსი |
+-| encoderLoadTimeout(s) | MP3 encoder 120 წამში ვერ ჩაიტვირთა — ფაილი არ შეიქმნა. შეამოწმე ინტერნეტი და სცადე თავიდან, ან აირჩიე WAV. | The MP3 encoder did not load within {s} seconds — No file was created. Check your internet connection and try again, or choose WAV. | შეცდომა (s = 120) |
+-| encoderLoadFailed | MP3 encoder ვერ ჩაიტვირთა (ffmpeg.wasm, unpkg CDN) — ფაილი არ შეიქმნა. შეამოწმე ინტერნეტი და სცადე თავიდან, ან აირჩიე WAV. | The MP3 encoder failed to load (ffmpeg.wasm, unpkg CDN) — No file was created. Check your internet connection and try again, or choose WAV. | შეცდომა |
++| encoderLoadTimeout(s) | MP3 encoder 120 წამში ვერ ჩაიტვირთა — ფაილი არ შეიქმნა. შეამოწმე ინტერნეტი და სცადე თავიდან, ან აირჩიე WAV. | The MP3 encoder did not load within {s} seconds — no file was created. Check your internet connection and try again, or choose WAV. | შეცდომა (s = 120) |
++| encoderLoadFailed | MP3 encoder ვერ ჩაიტვირთა (ffmpeg.wasm, unpkg CDN) — ფაილი არ შეიქმნა. შეამოწმე ინტერნეტი და სცადე თავიდან, ან აირჩიე WAV. | The MP3 encoder failed to load (ffmpeg.wasm, unpkg CDN) — no file was created. Check your internet connection and try again, or choose WAV. | შეცდომა |
+ | mp3Encoding | MP3-ის შექმნა… | Creating MP3… | rendering სტატუსი |
+-| mp3Failed(reason) | MP3-ის შექმნა ვერ მოხერხდა — ფაილი არ შეიქმნა. {reason} | Creating MP3 failed — No file was created. {reason} | შეცდომა |
++| mp3Failed(reason) | MP3-ის შექმნა ვერ მოხერხდა — ფაილი არ შეიქმნა. {reason} | Creating MP3 failed — no file was created. {reason} | შეცდომა |
+ 
+ უცვლელი რჩება: `Export` (სათაური), დროის ფორმატები, `WAV · 24-bit · 48 kHz · stereo`, `MP3 · 48 kHz · stereo`, ფაილის სახელები და მომხმარებლის კონტენტი. `source.audioNote` (`video.client.ts`) V-0.2-ს ეკუთვნის.
+ 
+@@ -120,10 +121,11 @@
+ - `app/contexts/ArrangementContext.tsx` — import, `MASTER_MUTED_EXPORT_SUFFIX`, `exportWav`/`exportMp3`-ის ტექსტები.
+ - `app/lib/arrangement/__tests__/strings.test.ts` — ახალი: ST1–ST5.
+ - 18 ტესტი `app/lib/arrangement/__tests__/`-ში — literal → მოდულის მნიშვნელობა.
++- რაუნდი 128: `strings.ts` (W0–W4-ის მნიშვნელობები), `strings.test.ts` (იგივე literal-ები), `export-dialog-hold-enter.test.tsx` (+HE8 და სათაურები), 6 ტესტში მხოლოდ სათაურები (`export-dialog-focus`, `export-dialog-focus-restore`, `export-toolbar-hold-enter`, `export-dialog-footer`, `export-cancel-ui`, `export-cancel`).
+ 
+ ## პრობლემები და გადაწყვეტები
+ 
+-- **P1 — ორი ღილაკი ერთი სახელით „Close“ (ღიაა, B წყვეტს).** Problem: frozen `app/components/ui/Modal.tsx`-ის ✕ ღილაკს უკვე აქვს `aria-label="Close"`. glossary-ის footer `Close` dialog-ში მეორე ღილაკს იგივე accessible name-ით ქმნის. რენდერის დროს screen reader ორ „Close“-ს ისმენს — ერთი გამორთულია, მეორე მუშაობს. 15 ტესტი, რომელიც `getByRole('button', { name })`-ით ეძებს, „Found multiple elements“ შეცდომით ვარდება. Solution: ჯერ არ არის. ვარიანტები B-სთვის: footer-ის ტექსტის შეცვლა (glossary), footer-ზე `aria-label` (R2), Modal ✕-ის სახელის შეცვლა (frozen, სხვა owner), ან 8 query-ის შეცვლა textContent-ზე (R3).
++- **P1 — ორი ღილაკი ერთი სახელით „Close“ (C-R127-01, Medium; გადაწყდა რაუნდ 128-ში).** Problem: frozen `app/components/ui/Modal.tsx`-ის ✕ ღილაკს უკვე აქვს `aria-label="Close"`. glossary-ის footer `Close` dialog-ში მეორე ღილაკს იგივე accessible name-ით ქმნიდა. რენდერის დროს screen reader ორ „Close“-ს ისმენდა — ერთი გამორთულია, მეორე მუშაობს. 15 ტესტი, რომელიც `getByRole('button', { name })`-ით ეძებს, „Found multiple elements“ შეცდომით ვარდებოდა. Solution (B-ის გადაწყვეტილება, D-29z93): footer-ის ტექსტი → `Done`. ღილაკი მხოლოდ dialog-ს ხურავს — render-ს არ აუქმებს (ეს `Cancel`-ია) და ექსპორტს არ იწყებს; `Done` განსხვავდება `Close`-ის, `Cancel`-ისა და `Export …`-ისგან და ექსპორტის დასრულების შემდეგაც ბუნებრივად იკითხება. უარყოფილი ვარიანტები: footer-ზე `aria-label` (ხილული ტექსტი და accessible name განსხვავდებოდა — WCAG 2.5.3, label in name); Modal ✕-ის სახელის შეცვლა (frozen, საერთო auth modal-თან და store-თან, `e2e/auth-modal.spec.ts` და `e2e/accessibility.spec.ts` `button[aria-label="Close"]`-ს ეძებს — ჩაიწერა სიგნალად `ARCH-R127-MODAL-CLOSE-LABEL`); ტესტების matcher-ების შესუსტება (დუბლიკატი პროდუქტში დარჩებოდა). Ableton-ის შესახებ ამ label-ზე მტკიცება არ კეთდება. ახალი HE8 ტესტი ამოწმებს, რომ dialog-ის ყველა ღილაკს უნიკალური accessible name აქვს idle-ში და WAV render-ის დროს.
+ - **P2 — Edit tool-მა ბოლო space წაშალა.** Problem: ორ ადგილას (`export-progress.ts` l.3 და ორი ტესტის სათაური) ჩანაცვლების ბოლოს space დაიკარგა. Solution: Biome-მა და code-reviewer-მა იპოვეს; Edit-ით გასწორდა.
+ - **P3 — `0.57 * 100` floor-ით 56 ხდება.** Problem: ST2-ის progress ტესტი 57%-ს ელოდა. Solution: input 0.575-ით შეიცვალა; კოდი არ შეცვლილა.
+ 
+@@ -134,9 +136,11 @@
+ - `it`-ების რაოდენობა 18 ფაილში უცვლელია.
+ - მუტაციები m1–m4 ყოველი წითლდება; აღდგენა sha256-ით შემოწმდა. m3-ზე (`Closee`) P1-ის 15 ტესტი მწვანდება, რაც ადასტურებს, რომ მიზეზი მხოლოდ სახელების დამთხვევაა.
+ - ბრაუზერში A არ ამოწმებდა; ეს C-ის რაუნდია.
++- **რაუნდი 128:** `npm run typecheck` — სუფთა; `npm run lint` — exit 0 (warning-ები არსებულია, შეცვლილ ფაილებში არცერთი); 9 შეცვლილ კოდის ფაილზე read-only `npx biome check` — სუფთა. 25 ტესტ-ფაილი (strings, 18 granted, 6 მეზობელი): 316 passed, 0 failed (315 + HE8); რაუნდ 127-ის 15 წითელი ტესტი მწვანეა. მუტაციები: m5 (`closeButton` → `Close`) — 17 წითელი (15 + HE8 + ST1); m6 (`Export WAV`) — HE8 წითელი idle-ში (`expected 2 to be 1`); m6b (`busyButton` → `Cancel`, code-reviewer-ის შენიშვნის შემდეგ) — HE8-ის საერთო უნიკალურობის `Set` შემოწმება წითელი render-ის დროს (`["Close","Cancel","Done","Cancel"]: expected 3 to be 4`); ამისთვის HE8-ში Cancel helper-ის query უნიკალურობის შემოწმების შემდეგ გადავიდა. m7 (`in this cycle` / `range ${start}`) — ST1 / ST2 წითელი. აღდგენა sha256-ით შემოწმდა.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- B: P1-ის გადაწყვეტილება; შემდეგ A ასრულებს 15 ტესტს და doc-ის სტატუსს Completed-ზე ცვლის.
+-- B: `export-cancel.test.ts`-ის სათაური „exports the exact Georgian messages“ მოძველდა; R3 მის შეცვლას არ უშვებს.
++- C: EX-KEYS, EX-COPY, EX-LAYOUT ბრაუზერში (`Done` = 1, `Close` = 1, დუბლიკატი სახელი არ არის).
++- `deferred_low_polish`: C-R127-L1e (`Rendering…` encoder load/MP3 encode-ის დროსაც) და C-R127-L1f (`export-cancel.test` / `export-wav.test` კონსტანტის შედარება საკუთარ წყაროსთან).
++- სიგნალი `ARCH-R127-MODAL-CLOSE-LABEL` — Modal ✕-ის label ცალკე დავალებად და owner-ით.
+ - V-0.2: `ArrangementContext`-ის დანარჩენი სტატუსები და `source.audioNote`.

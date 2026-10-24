@@ -1,0 +1,111 @@
+{
+ "round": 128,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T06:39:10.6286481Z",
+  "round": 128,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T128-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "EX-KEYS",
+  "EX-COPY",
+  "EX-LAYOUT",
+  "REG-WAV",
+  "G128-3",
+  "PX-NET/REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [
+  "EX-COPY strings not reachable in the browser and so not claimed: emptyProjectNoFile, invalidRangeNoFile, encoderLoadFailed (the CDN loaded), exportFailed, mp3Failed, encoderLoadTimeout. Only ST1/ST2 cover them (green in T128-TARGETED)"
+ ],
+ "blocked": [
+  "G128-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "C-R128-L1",
+   "severity": "low",
+   "steps": [
+    "Open http://127.0.0.1:5173/studio-lab at 1280x720 (fresh context)",
+    "Snap on; add demo-hero-music on music at 0 s and demo-stem-pulse on stems at 2 s",
+    "Drag on the stems clip body from 6 s to 2 s (time selection 00:02.000 — 00:06.000), optionally Ctrl+L",
+    "Open Export, keep Time selection scope, WAV, click Export WAV and wait for 'WAV created: time selection …'"
+   ],
+   "expected": "The dialog header, including the Modal ✕, stays fully visible after the done/overload status appears",
+   "actual": "The status block grows the footer area and the dialog body is scrolled, so the ✕ is cut by the dialog's top edge (half visible). Pre-existing: the same clipping is in c-round-127/shots/RANGE-done-1280-r1.png, so it is not caused by round 128. Not in backlog.json (grep found no entry). 1440 is not affected",
+   "evidence": "c-round-128/shots/RANGE-done-1280-r1.png; c-round-127/shots/RANGE-done-1280-r1.png; c-round-128/out/s2r128-range-1280-r1.json",
+   "note": "Low per the 2026-10-23 bug gate -> deferred_low_polish; does not affect the PASS"
+  }
+ ],
+ "rows": {
+  "T128-TARGETED": "A's exact 25-file list: 25 files / 316 tests passed, 0 failed (= A's counts). Includes the 15 round-127 P1 tests. HE8 is present and green (verbose: export-dialog-hold-enter 8/8). it counts: hold-enter 7->8, strings 5->5, export-dialog-focus 19->19. Evidence: c-round-128/out/vitest-targeted.log",
+  "SOURCE-SCOPE": "HEAD 608187f; git status 27 entries (24 M + 3 ??), identical at C start and end; frozen list b-round-127-r128-tree-sha256.txt OK at start and end; 10 grant hashes = A's end hashes, unchanged during C's phase; Modal.tsx 741c2341; studio.$productId fa2cf0bc, api.studio-token 13914809, auth.ts 56f5b76f, AuthContext bf9ee257, git diff 608187f empty on them",
+  "AN-REVIEW": "strings.ts: only W0-W4 values changed (closeButton Done, videoRenderReason version, loopRangeNote/loopProjectNote exported, W3 lowercase in exactly the 8 keys, videoDecodingNoFile keeps 'No file was created.', exportedRange 'time selection'); no key/signature change. strings.test.ts: only these literals, plus the mp3Done sample input moved to the 'time selection' shape (A deviation 2, a literal of the W4 shape, accepted). hold-enter: import adds `within`, describe + HE1-HE7 titles, +HE8. The 6 title-only files: every changed line is an it(...) title (14 lines), line counts unchanged. Doc 104: W0-W4 rows, P1 Problem->Solution, glossary amendment, key-name reason. No W row drops or adds a fact. A's shell writes: 5 temporary sed on strings.ts, each restored and checked by sha256 (A report); end hash matches. Diff: c-round-128/out/granted.diff",
+  "EX-KEYS": "Both viewports. Idle: Close=1 (the ✕, aria-label), Done=1 (footer), names [Close, Done, Export WAV], unique by DOM and by Playwright ariaSnapshot. During a WAV render: Close=1, Done=1, Cancel=1, names [Close, Cancel, Done, Rendering…] unique; Done disabled, ✕ enabled. Done (after export) and cancelled states unique too. Focus on open = Done. Tab from Done: Export WAV -> ✕ -> format-wav -> scope-project -> Done -> Export WAV -> ✕; Shift+Tab -> Export WAV; Escape closes, focus to toolbar Export. Held Enter on Done: closes once, 3 repeats defaultPrevented, focus to toolbar Export. Held Enter on toolbar Export: opens once, repeats prevented, no render, 0 downloads, focus on Done. Identical to round-127 EX-KEYS with Done in place of Close",
+  "EX-COPY": "(a) 1440 video on lane: 'Video is not rendered in this version — the export is audio only (the video's original sound is included if it is on).' (b) 1440+1280 time selection 2-6 s + Ctrl+L (Loop 00:02.000 — 00:06.000): range scope 'Loop does not change the export — the time selection is exported (00:02.000 — 00:06.000, 4.000 s).'; project scope '… the entire project is exported (00:00.000 — 02:30.372).' (c) both: 'Export cancelled — no file was created.', 0 downloads. (d) 1440 MP3 cancelled at 'Creating MP3 · 0%': 'Export cancelled — no file was created. The MP3 encoder will load again on the next MP3 export.', 0 downloads. (e) both: 'WAV created: time selection 00:02.000 — 00:06.000 (4.000 s), 24-bit · 48 kHz · stereo.', czaba-studio-lab-range.wav 192000 frames 48k/24/2ch. Georgian net 0 in every dialog (noaudio video: 15 chars subtracted = source.audioNote, V-0.2)",
+  "EX-LAYOUT": "S0/S1 vs c-round-125 baseline: 0 boxes >1 px at both viewports. S2 vs c-round-127: only the footer button key changes; Close 70x38 @x776/696 -> Done 68x38 @x778/698 (right-aligned, -2 px width from text), Export WAV identical, same y/h, one row, footerBox identical, no overflow. 1280 range-card/footer overlap: 45 px (S1 state) and 13 px (range state) = F-2 unchanged. 1440: -108 / -72 (no overlap)",
+  "REG-WAV": "1440 (and 1280): czaba-studio-lab.wav, 7217877 frames, 48 kHz/24-bit/2 ch, 0 NaN, rms 0.2913; status and overload alert identical to round 127. Sha differs between runs by at most 1 LSB on 12620/14435754 samples, as in round 127 (60e0…/3e8d…); not new",
+  "G128-3": "/studio-lab: workspace + demo badge. /studio/middle-east (1440 and 1280, fresh context, no credentials): 'Sign in required', no workspace, 0 audio[src]. GET /api/studio-token?product=middle-east&file=stem1.wav -> 401 'Please sign in to access Studio.'. 0 forbidden/Authorization requests, 0 errors",
+  "PX-NET/REG-HYD": "Every valid session net.ok: 0 requests to studio-token/recording/download/R2, 0 Authorization headers, 0 hydration errors, 0 pageerror; only the known cart noise (2 per session)"
+ },
+ "invalidRuns": [
+  "main128-1440-r1: first load hydration error + invalid hook call (ENV-FIRST-LOAD) -> out/invalid-main128-1440-r1.json, replaced by r2"
+ ],
+ "georgianCounts": {
+  "S2 idle 1440/1280": {
+   "net": 0
+  },
+  "loop notes range+project 1440/1280": {
+   "net": 0
+  },
+  "render done / cancel wav 1440/1280": {
+   "net": 0
+  },
+  "cancel mp3 1440": {
+   "net": 0
+  },
+  "range done 1440/1280": {
+   "net": 0
+  },
+  "video included/off/fade 1440": {
+   "net": 0
+  },
+  "video noaudio 1440": {
+   "net": 0,
+   "subtracted": 15,
+   "subtractedList": [
+    "ვიდეოს ხმა არ აქვს (source.audioNote, V-0.2)"
+   ]
+  }
+ },
+ "ableton": {
+  "Done label": "not applicable (no Ableton claim; CZABA a11y naming choice) — CZABA requirement met",
+  "time selection term in done message": "confirmed: C grepped B's capture b-round-71/ableton-arrangement-view-20261021.txt (Live 12 manual, Arrangement View, captured 2026-10-21); it uses 'time selection' (e.g. 'Zoom to Arrangement Time Selection', 'if the Arrangement contains a time selection'). CZABA requirement met: the done message now uses the same term as the scope card",
+  "export behaviour": "not applicable (copy only); export output unchanged"
+ },
+ "notesForB": [
+  "PASS: C-R127-01 fixed in the product. One accessible name per button in idle, render, done and cancelled states at both viewports; keys and export output unchanged.",
+  "C-R127-L1 wording items W1-W4 verified in the browser; L1e (busyButton 'Rendering…' during MP3 encode) still visible in CANCEL-mp3 shot, deferred as planned.",
+  "Reviewer Low (d) from A: invalidRangeNoFile still says 'The range is invalid' while W4 says 'time selection' — wording consistency, Low.",
+  "C process note: my first targeted vitest command mis-expanded the file list and ran the whole suite (123 files / 1920 tests, all green, log out/vitest-accidental-fullsuite.log). Not claimed; the gate owns the full suite. Re-ran the exact 25-file list.",
+  "During a WAV render focus sits on the dialog container (Done/Rendering… disabled, Cancel enabled). Not a change of this round: ArrangementExportDialog.tsx, ArrangementContext.tsx and Modal.tsx are frozen at their round-127 hashes (frozen list OK at C start and end), and only strings.ts values changed, so focus/disabled logic cannot differ from round 127.",
+  "New Low C-R128-L1 (pre-existing ✕ clipping at 1280 after a range export) -> deferred_low_polish."
+ ],
+ "screenshotsOpened": "28 of 28"
+}

@@ -1,175 +1,162 @@
-# CURRENT TASK — Round 128: VISUAL-A V-0.1 fix-up — one name per Export dialog button (C-R127-01) + Export wording (C-R127-L1)
+# CURRENT TASK — Round 129: VISUAL-A V-0.2a — edit-command messages in English (Split, Delete, Ctrl+Shift+L, Duplicate, Copy, Cut, Cut Time, Paste)
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned from ~06:15 UTC, `date -u`)
-- **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. These rules take precedence over older text.
-- **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md`, M2 and stage V-0.
-- **Previous task:** `tasks/round-127.md`, an exact copy (`cmp` OK, 26991 bytes). Rationale: `b-round-127.md`. Decision record: **D-29z93** in `docs/technical/studio-real-workspace/plan.md`.
-- **Baseline: commit `608187fdf279d9b579c279f3c536b27be74c0eea` plus the round-127 working tree that C verified.**
-  - Gate 127 was `skipped` (C FAIL), so nothing was published.
-  - At planning the tree had 24 ` M` and 3 `??` (`strings.ts`, `strings.test.ts`, doc 104): **the round-127 work. Keep it. Do not revert, stash or re-do it.**
-- **Frozen list:** `tmp/studio-real-loop/b-round-127-r128-tree-sha256.txt`, **930 entries**.
-  - It covers every tracked **and untracked** file (`git ls-files -co --exclude-standard`) except the 10 grants in §2. That includes the 16 round-127 files that are not granted now, frozen at their C-verified state.
-  - `sha256sum -c --quiet` was OK at planning, run from `store/`.
-- **Start hashes of the 10 grants:** `b-round-127-r128-granted-start-sha256.txt`. **Start copies:** `b-round-127/r128-granted-start/` (paths relative to `store/`). A checks both at the start. If a hash differs, A stops and reports.
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned from ~07:00 UTC)
+- **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
+- **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` (M2, V-0). The module contract is in `backlog.json` → VISUAL-A-OBSIDIAN `v0_plan_d29z92.module_contract` (leaf module, one object per area, plain strings plus small pure formatters, no type assertions).
+- **Previous task:** `tasks/round-128.md` (exact copy, `cmp` OK, 23320 bytes). Rationale: `b-round-128.md`. Decision record: **D-29z94** in `plan.md`.
+- **Baseline: commit `77f2763b5e968d7f09683637602668e4a710501d`** (gate 128 published; rounds 123–128). At planning the tree was **clean** (`git status --short` empty).
+- **Frozen list:** `tmp/studio-real-loop/b-round-128-r129-tree-sha256.txt`, **929 entries** (`git ls-files -co --exclude-standard` minus the 11 existing grants). `sha256sum -c --quiet` was OK at planning, run from `store/`.
+- **Start hashes of the 11 existing grants:** `b-round-128-r129-granted-start-sha256.txt`. **Start copies:** `b-round-128/r129-granted-start/` (paths relative to `store/`). A checks both at the start; if a hash differs, A stops and reports.
 
-## 0. Why this round (D-29z93)
-- **C round 127: FAIL** (`browserVerified` and `realVerified` true). The only failure is **C-R127-01 (Medium)**, which is A's P1.
-  - The footer button now reads `Close`. The frozen `Modal.tsx` ✕ already has `aria-label="Close"`, so one dialog has two buttons named "Close".
-  - During a render the footer one is disabled and the ✕ is enabled, so a screen-reader user hears two "Close" buttons with different states.
-  - 15 granted tests fail with `Found multiple elements … name "Close"`.
-- **Everything else passed in the real browser:**
-  - Georgian count 0 everywhere, except `source.audioNote`, which belongs to V-0.2;
-  - export output unchanged: 7217877 frames, a range of 192000 frames, a silent muted WAV, MP3 and WAV + MP3;
-  - layout attributable to the shorter text; keys otherwise at baseline;
-  - G127-3 and PX-NET passed.
-- **The §8 row "C FAIL with Medium" of round 127 applies:** a bounded V-0.1 fix-up, then V-0.2.
-- Regression is not due (`regression-last.json` 2026-10-24 → due on or after 2026-10-27). No Critical or High finding is open. `user-review/ableton-decisions.md` and `design-ux-decisions.md` do not exist.
-
-### 0.1 B ruling on P1 (A's four options)
-| Option | Ruling | Reason |
-|---|---|---|
-| 1. Relabel the footer button | **Chosen: `Done`** | It removes the duplicate **in the product** (C asked for that), it changes one module value, and it needs no query change, because every query reads `studioExportStrings.closeButton`. The ✕ keeps "Close". |
-| 2. `aria-label` on the footer | Rejected | Visible text and accessible name would differ (WCAG 2.5.3, label in name), and exact-name queries could match the ✕ silently. |
-| 3. Relabel the Modal ✕ | Rejected for now | `Modal.tsx` is frozen and shared (auth modal, store). `e2e/auth-modal.spec.ts:65` and `e2e/accessibility.spec.ts:60` select `button[aria-label="Close"]`. It needs its own task and owner. Recorded as signal `ARCH-R127-MODAL-CLOSE-LABEL`. |
-| 4. Relax the test matchers | Rejected | The duplicate would stay in the product. |
-
-- **Why `Done`, the smallest honest label.** The button only closes the dialog: it does not cancel a render (that is `Cancel`, a separate button) and it does not export. "Done" is distinct from "Close", "Cancel" and "Export …". It also reads naturally after an export finishes. No Ableton claim is made about this label (§6).
-- **The key stays `closeButton`.** It names what the button does (it closes the dialog). Renaming it would touch 35 references in 13 files for no behaviour gain. Record this reason in doc 104.
+## 0. Why this round (D-29z94)
+- **Round 128: C PASS**, `browserVerified` = `realVerified` = true; gate 128 published `77f2763`. **V-0.1 (Export copy) is done.**
+- The gate reviewer's Medium note: the Studio is now **mixed-language** (Export English, everything else Georgian) until V-0 finishes, so V-0.2 runs next.
+- **V-0.2 is split** (scope unchanged; the full V-0.2 is still required). B measured it: the Context's remaining 85 Georgian lines plus the helpers are asserted in about 46 test files, too many for one checkable round.
+  - **V-0.2a (this round):** the edit commands in `ArrangementContext.tsx` from `splitSelection` to `pasteClipboard` (l.1766–2056) and the 6 constants that only they use. Real dependent tests: **8 files** (exact grep, not fragment matching).
+  - **V-0.2b:** playback, library add/drop, loop, move/nudge (Context l.178–187, 192, 521, 1200–1765) and the gesture constants.
+  - **V-0.2c:** video import messages (Context l.2171–2262, 3403), the helper modules (`groups.ts`, `selection.ts`, `library.ts`, `video.ts`, `video.client.ts` incl. `source.audioNote`, `tempo.ts`, `metronome.ts`, `view.ts`).
+- Regression is not due (`regression-last.json` 2026-10-24 → due on or after 2026-10-27). No Critical/High/Medium finding is open. `user-review/ableton-decisions.md` and `design-ux-decisions.md` do not exist.
 
 ## 1. What changes (user-visible)
-| # | Key in `studioExportStrings` | Now | After round 128 | Where it shows |
-|---|---|---|---|---|
-| W0 | `closeButton` | `Close` | `Done` | the footer button, idle and after an export (disabled during a render, as before) |
-| W1 | `videoRenderReason` | `Video is not rendered in this cycle — …` | `Video is not rendered in this version — …` (rest unchanged) | the disabled Video option's reason |
-| W2 | `loopRangeNote`, `loopProjectNote` | `… the time selection is created (…)` / `… the entire project is created (…)` | `… the time selection is exported (…)` / `… the entire project is exported (…)` | the WAV note with Loop on, range and project scope |
-| W3 | `exportCancelled`, `exportCancelledEncoder`, `emptyProjectNoFile`, `invalidRangeNoFile`, `encoderLoadFailed`, `exportFailed`, `mp3Failed`, `encoderLoadTimeout` | `… — No file was created. …` | `… — no file was created. …` (lowercase after the dash, mid-sentence). `videoDecodingNoFile` keeps `No file was created.`, because there it starts a sentence | the cancelled and failure statuses |
-| W4 | `exportedRange` | `range 00:02.000 — 00:06.000 (4.000 s)` | `time selection 00:02.000 — 00:06.000 (4.000 s)` | the done message after a range export (`WAV created: time selection …`) |
+A new exported object **`studioEditStrings`** in `app/lib/arrangement/strings.ts`. Every Georgian literal in the scope below moves there, in English. **Text only:** no change to any condition, order of checks, state update, selection, history push, clipboard or timing.
 
-- **Nothing else changes.** No other key, element, order, `id`/`aria-*`, `data-testid`, class, disabled rule, focus or Tab logic, timer, export pipeline, file name or frame output.
-- **Glossary amendment (§1.1 of round 127):** `დახურვა` (footer) → `Done`; the Modal ✕ stays `Close`. `No file was created.` is lowercase `no file was created.` after an em dash inside a sentence.
-- **Deferred, not in this round** (→ `deferred_low_polish`):
-  - C-R127-L1e: `busyButton` `Rendering…` also shows during the encoder load and the MP3 encode. Fixing it needs state-dependent label logic.
-  - C-R127-L1f: `export-cancel.test` l.211–215 and `export-wav.test` l.170/594 compare a constant with its module source, and the EW8f title overstates what it checks.
+### 1.1 The English map (exact text; A may not reword — if a line seems wrong, report it, B rules)
+Notation: `{t}` = an already formatted time (`formatArrangementTime`), `{track}` = a track name as it is today. Plurals: the formatter picks the singular when the number is 1 (as `overloadWarning` does).
+
+| # | Where (today) | Key (suggested; A may rename the key, not the text) | English |
+|---|---|---|---|
+| E1 | split, all-track selection | `splitAllTracksRefused` | `Split does not work on a selection across all tracks — make a time selection on one track.` |
+| E2 | `GROUP_SPLIT_MISS_MESSAGE` | `splitMissesSelection` | `The playhead does not cross any selected clip.` |
+| E3 | history `გაყოფა (n)` | `historySplitClips(count)` | `Split ({n})` |
+| E4 | split of 2+ selected clips | `splitClipsDone({count, time})` | `{n} clips split at {t}; the right parts are selected.` / n=1: `1 clip split at {t}; the right part is selected.` |
+| E5 | range split failed | `splitRangeFailed` | `Could not split at the time selection.` |
+| E6 | history `გაყოფა მონაკვეთზე` | `historySplitRange` | `Split at time selection` |
+| E7 | range split done | `splitRangeDone` | `Clip split at both edges of the time selection; the middle part is selected.` |
+| E8 | split, nothing selected | `splitNeedsTarget` | `To split, select a clip and place the playhead inside it, or make a time selection.` |
+| E9 | split, playhead outside | `splitPlayheadOutside` | `The playhead must be inside the selected clip.` |
+| E10 | history `გაყოფა` | `historySplit` | `Split` |
+| E11 | single split done | `splitDone(time)` | `Clip split at {t}.` |
+| E12 | delete range, nothing there | `deleteRangeEmpty` | `Nothing to delete in the time selection — nothing changed.` |
+| E13 | history `წაშლა მონაკვეთზე` / `… (ყველა ხაზი)` | `historyDeleteRange`, `historyDeleteRangeAllTracks` | `Delete time selection` / `Delete time selection (all tracks)` |
+| E14 | delete range done | `deleteRangeDone({start, end, lanes})` | `⌫ Deleted {start} — {end} {lanes}; the gap remains.` |
+| E14a | its `lanes` phrase | `onAllTracks`, `onTrack(track)` | `on all tracks` / `on the {track} track` (the `—` fallback name stays) |
+| E15 | history `კლიპების წაშლა (n)` | `historyDeleteClips(count)` | `Delete clips ({n})` |
+| E16 | delete 2+ clips done | `deleteClipsDone(count)` | `{n} clips deleted; the gap remains.` / n=1: `1 clip deleted; the gap remains.` |
+| E17 | delete, nothing selected | `deleteNeedsTarget` | `To delete, select a clip or make a time selection.` |
+| E18 | history `კლიპის წაშლა` | `historyDeleteClip` | `Delete clip` |
+| E19 | delete one clip done | `deleteClipDone` | `Clip deleted; the gap remains.` |
+| E20 | Ctrl+Shift+L without a range | `extendNeedsRange` | `Make a time selection first to extend it to all tracks (Ctrl+Shift+L).` |
+| E21 | Ctrl+Shift+L done | `extendDone({start, end})` | `Selection on all tracks: {start} — {end}.` |
+| E22 | `DUPLICATE_RANGE_MESSAGE` | `duplicateRangeRefused` | `Duplicate works on clips; there is no Duplicate Time.` |
+| E23 | `DUPLICATE_EMPTY_MESSAGE` | `duplicateNeedsClip` | `Select a clip to duplicate.` |
+| E24 | duplicate conflict | `duplicateConflict({track, start, end})` | `Duplicate failed: {start}–{end} on the {track} track is occupied. Nothing changed.` |
+| E25 | history `დუბლირება (n)` | `historyDuplicate(count)` | `Duplicate ({n})` |
+| E26 | duplicate done | `duplicateDone({count, from})` | `Duplicate ({n}): copies start at {t}.` / n=1: `Duplicate (1): the copy starts at {t}.` |
+| E27 | copy range, no sound | `copyRangeEmpty` | `No sound to copy in the time selection — the clipboard did not change.` |
+| E28 | copy range done | `copyRangeDone({lane, start, end, parts})` | `Copy: {lane} {start}–{end} ({n} parts).` / n=1: `(1 part)`. `{lane}` = `all tracks` (`allTracks`) or the track name |
+| E29 | copy, nothing selected | `copyNeedsTarget` | `To copy, select a clip or make a time selection — the clipboard did not change.` |
+| E30 | copy clips done | `copyClipsDone(count)` | `Copy: {n} clips on the clipboard.` / n=1: `Copy: 1 clip on the clipboard.` |
+| E31 | cut range, no sound | `cutRangeEmpty` | `No sound to cut in the time selection — nothing changed.` |
+| E32 | cut, nothing selected | `cutNeedsTarget` | `To cut, select a clip or make a time selection.` |
+| E33 | cut done | `cutDone(parts)` | `Cut: {n} parts on the clipboard; the gap remains.` / n=1: `1 part` |
+| E34 | `CUT_TIME_NEEDS_RANGE_MESSAGE` | `cutTimeNeedsRange` | `Make a time selection first for Cut Time (Ctrl+Shift+X).` |
+| E35 | Cut Time, nothing to cut | `cutTimeNothing({start, end})` | `Cut Time {start} — {end}: no time to cut — nothing changed, the clipboard did not change.` |
+| E36 | Cut Time done | `cutTimeDone({start, end, clipboard, suffix})` | `Cut Time {start} — {end}: {clipboard}; the gap was closed on all tracks.{suffix}` |
+| E36a | its `clipboard` phrase | `cutTimeParts(parts)`, `cutTimeNoSound` | `{n} parts on the clipboard` (n=1: `1 part …`) / `no sound in the time selection, the clipboard did not change` |
+| E36b | its suffix parts | `loopRemoved` (was `LOOP_REMOVED_MESSAGE`), `markersRemoved(count)` | `The loop range was shorter than 0.1 s after the deletion, so it was removed.` / ` {n} markers deleted.` (n=1: ` 1 marker deleted.`, leading space as today) |
+| E37 | paste overlap | `pasteOverlap({track, start, end})` | `Paste failed: {start}–{end} on the {track} track is occupied. Nothing changed.` |
+| E38 | paste lane kind | `pasteLaneKind({track, at})` | `Paste failed: this material does not fit on the {track} track from {t} (audio and video do not swap tracks). Nothing changed.` |
+| E39 | paste missing | `pasteMissing` | `Paste failed: the source or track is unavailable. Nothing changed.` |
+| E40 | `CLIPBOARD_EMPTY_MESSAGE` | `clipboardEmpty` | `The clipboard is empty — Copy or Cut first.` |
+| E41 | history `ჩასმა (n)` | `historyPaste(count)` | `Paste ({n})` |
+| E42 | paste done | `pasteDone({count, at, trackSuffix})` + `pasteTrackSuffix(track)` | `Paste ({n}): at {t}{trackSuffix}.` with suffix ` · on the {track} track` or empty |
+| X1 | `studioExportStrings.invalidRangeNoFile` (reviewer Low (d), round 128) | value only | `The time selection is invalid — no file was created.` |
+
+- **Unchanged:** the history labels `Cut` and `Cut Time` (already English); the `Undo: ` / `Redo: ` prefixes (owned by `ArrangementTransport.tsx`, V-0.3); `⌫`, `·`, `—`, `–`; time formats.
+- **Conditional copy stays in the Context.** `range.allTracks ? …`, the paste-refusal ternary, `hasMaterial ? …`, the loop/marker suffix concatenation and the track-name lookup stay where they are; they only pick module values/formatters. Formatters take already-formatted strings and numbers (leaf rule: `strings.ts` imports nothing). This round does **not** decide the "conditional copy in formatters" question; that ruling is due before V-0.3.
+- **Track names are not translated this round.** They come from `studio-lab.tsx` (`ვიდეო`, `მუსიკა`, `სტემები`, `SFX`) and the fallback in the Context (l.546–547): V-0.4/V-0.5. So a status may read `on the მუსიკა track` for now. C subtracts track names from the Georgian count, as `source.audioNote` was subtracted in V-0.1. **Smallest honest choice:** moving the names now would change lane widths (RV-1) and many unrelated tests.
+- **Glossary additions** (doc 105 and the backlog glossary): Split, Delete clip, Delete time selection, Duplicate, Copy, Cut, Cut Time, Paste, clipboard, gap (`სიცარიელე`), part (`ნაწილი`), playhead, time selection, `on the {track} track`, `on all tracks`.
 
 ## 2. A — files you own (everything else is frozen)
 | File | Change |
 |---|---|
-| `app/lib/arrangement/strings.ts` | **Only** the values of the W0–W4 keys. No key added, removed or renamed, no signature change |
-| `app/lib/arrangement/__tests__/strings.test.ts` | The ST1/ST2 literals of the W0–W4 keys follow the new English, still `toBe`. ST1–ST5 keep their structure and their `it` count |
-| `app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx` | **+1 `it`: HE8** (§3.1), the only `it` added in the round, plus the title-only changes below. It has the render-phase harness (`pendingRenders`, `closeButton()`, `cancelButton()`) that HE8 needs |
-| Title-only, 6 more files: `export-dialog-focus`, `export-dialog-focus-restore`, `export-toolbar-hold-enter`, `export-dialog-footer`, `export-cancel-ui`, `export-cancel` (all `.test.ts(x)` under `app/lib/arrangement/__tests__/`) | Change only `it`/`describe` title text. Where a title names the **footer** button as `Close`, it now says `Done`: HE1–HE7, the 4 `export-dialog-focus` titles, FR1/FR3/FR4, TH1, FT1/FT3/FC3, CU1/CU9. A title's `X` or `✕` that means the Modal button stays. `export-cancel.test.ts` "exports the exact Georgian messages and a named cancel error" → "exports the exact messages and a named cancel error". **No other line in these 6 files changes** (and in `export-dialog-hold-enter`, no line outside HE8 and the titles) |
-| `docs/implementation/2026/quarter-IV/104-studio-v0-export-strings.md` | Update the W0–W4 map rows. Add the §0.1 P1 ruling as Problem → Solution, the glossary amendment and the key-name reason. Set the status to Completed only after the checks in §4 are green; otherwise leave it In Progress and say why |
+| `app/lib/arrangement/strings.ts` | Add `export const studioEditStrings = { … }` with the E1–E42 entries; X1's value. `studioExportStrings` keeps every other key and value. Imports nothing |
+| `app/contexts/ArrangementContext.tsx` | **Only:** (a) the import of `studioEditStrings`; (b) the 6 constants `LOOP_REMOVED_MESSAGE`, `CLIPBOARD_EMPTY_MESSAGE`, `DUPLICATE_RANGE_MESSAGE`, `DUPLICATE_EMPTY_MESSAGE`, `GROUP_SPLIT_MISS_MESSAGE`, `CUT_TIME_NEEDS_RANGE_MESSAGE` (l.190–191, 197–201): either point them at the module or replace their uses with module references — no other constant, and **`LOOP_STEP_BLOCKED_MESSAGE` (l.192, V-0.2b) stays**; (c) string literals inside `splitSelection`, `deleteSelection`, `extendRangeToAllTracks`, `duplicateSelection`, `copySelection`, `cutSelection`, `cutTimeSelection`, `pasteClipboard` (l.1766–2056) → module values/formatters. No condition, dependency array, call order or non-string expression changes |
+| `app/lib/arrangement/__tests__/strings.test.ts` | New `describe('studioEditStrings (V-0.2a)')` with ST6–ST9 (§3.1). X1's literal in ST1. ST1–ST5 keep their structure |
+| 8 tests (literal → module reference only): `delete-selection-ui.test.tsx`, `all-lane-clipboard.test.tsx`, `ArrangementContext.test.ts`, `markers-ui.test.tsx`, `status-announcement-ui.test.tsx`, `fader-guards.test.tsx`, `self-disabling-focus.test.tsx`, `grid-snap-position.test.tsx` (all under `app/lib/arrangement/__tests__/`) | Every assertion that pins one of the E1–E42 Georgian texts uses the module value/formatter with the same inputs, and **the same matcher** (`toBe` stays `toBe`, `endsWith` stays `endsWith`, `toEqual([...])` stays). Georgian **track names** inside expected text stay as they are (they are interpolated). Add the import. No other line changes: no `it` added/removed/renamed except a title that quotes a migrated Georgian text, which becomes English |
+| new `docs/implementation/2026/quarter-IV/105-studio-v0-edit-strings.md` | TEMPLATE.md sections, in Georgian: the E/X map, the split rationale (V-0.2a/b/c), the track-name rule, glossary additions, the tests and mutations. Status Completed only after §4 is green |
 
-- **Not granted** (frozen at their C-verified state): `ArrangementExportDialog.tsx`, `ArrangementContext.tsx`, `graph.client.ts`, `export-progress.ts`, `export-cancel.ts`, `export-wav.client.ts`, and the other 11 round-127 tests (`export-dialog-a11y-copy`, `export-dialog-tab-stops`, `export-mp3`, `export-progress-ui`, `export-progress`, `export-range-ui`, `export-wav`, `master-ui`, `master`, `meter-ui`, `video-fades-ui`). `app/components/ui/Modal.tsx` stays `741c2341…`.
-- **Pre-edit grep (A records the results):**
-  - Grep `app/**/__tests__/**` and `e2e/**` for each old English value of W0–W4: `in this cycle`, `is created (`, `— No file was created`, `range ${` / `'range `, and `'Close'` or `name: 'Close'` as a **footer** query.
-  - B found English literals of these values only in `strings.test.ts`. The `button[aria-label="Close"]` selectors and the `'Close'` aria-labels in `export-cancel-ui` CU9 (l.619/647), `export-dialog-focus` l.213, `export-dialog-focus-restore` l.189, `export-dialog-footer` l.151, `export-dialog-tab-stops` l.183 and `export-range-ui` l.492 all mean the **Modal ✕**. They stay unchanged.
-  - **Stop rule:** if a test outside §2 asserts an old W0–W4 literal, or turns red, or a change needs a frozen file, **stop and report**. Do not edit; B rules.
-- **Expected end state:** the same 27 `git status` entries as at the start (24 ` M` + 3 `??`), no new path. `sha256sum -c --quiet b-round-127-r128-tree-sha256.txt` is OK at the start and at the end. Report the end sha256 of each of the 10 grants.
-- **Protected (unchanged; `git diff 608187f` on them is empty):**
-  - `app/routes/studio.$productId.tsx` `fa2cf0bc`
-  - `app/routes/api.studio-token.ts` `13914809`
-  - `app/lib/auth.ts` `56f5b76f`
-  - `app/contexts/AuthContext.tsx` `bf9ee257`
-  - everything in `global_forbidden_files` / `global_forbidden_actions` of `backlog.json`.
+- **Pre-edit grep (A records it).** For each E row, grep the old Georgian text (and the 6 constant names) in `app/**/__tests__/**` and `e2e/**`. B's exact grep found them only in the 8 files above (`grid-snap-position` l.487–488: paste status and `undoLabel`). B read the frozen hits (read-only): `ArrangementTransport.tsx` l.72, l.74 and l.177 (`წაშლა მონაკვეთზე…`, `კლიპის წაშლა — სიცარიელე დარჩება`, `გაყოფა მონაკვეთის ორივე საზღვარზე…`) are its own hint text (V-0.3). It only **displays** `undoLabel` (l.149 `title`, l.153 visible span) and compares it with nothing; no source file compares `undoLabel`/`redoLabel` to a literal. `StudioWorkspace.tsx` l.2540 and `ArrangementLane.tsx` l.1001 `ყველა ხაზი` are their own range labels (V-0.3/V-0.4). All of these stay frozen. Also grep the old X1 text `The range is invalid` (B found it only in `strings.ts` and `strings.test.ts`).
+- **Stop rule:** if a test outside §2 asserts an old E-text or the old X1 text, or turns red, or a change needs a frozen file or a non-string line in the Context, **stop and report**; B rules.
+- **Expected end state:** `git status` = 11 ` M` + 1 `??` (doc 105), no other path. Frozen list OK at start and end. Report the end sha256 of the 12 grants.
+- **Protected (unchanged; `git diff 77f2763` on them is empty):** `app/routes/studio.$productId.tsx` `fa2cf0bc`, `app/routes/api.studio-token.ts` `13914809`, `app/lib/auth.ts` `56f5b76f`, `app/contexts/AuthContext.tsx` `bf9ee257`, `app/components/ui/Modal.tsx` `741c2341`, and everything in `global_forbidden_files` / `global_forbidden_actions` of `backlog.json`.
 - **Forbidden actions:** commit, push, stash, checkout, reset, deploy, dev-server restart, `npm install`, `npm run check` (`--write`), `npm run format`.
-- **Edit rule (C-R120-01):** every lasting edit uses the Edit or Write tool. Shell replaces are allowed only for temporary mutations, which are restored and checked by sha256. **This includes the untracked `strings.ts`:** take a sha256 before each mutation and check it after the restore (round 127 left `Closee` behind once). List every shell write in the report.
-- **Before editing, read:** `.claude/primitives-map.json`, `AGENT_DISCOVERABLE_CODE.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `docs/implementation/TEMPLATE.md`.
-- **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, no `as T` casts (also no `as const`), semicolons, no code comments.
+- **Edit rule (C-R120-01):** lasting edits only with the Edit/Write tool. Shell writes only for temporary mutations, restored and checked by sha256. List every shell write.
+- **Before editing, read:** `.claude/primitives-map.json`, `AGENT_DISCOVERABLE_CODE.md`, `REACT_CONTEXT.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `docs/implementation/TEMPLATE.md`.
+- **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, no `as T` (also no `as const`), semicolons, no code comments.
 
 ## 3. A — tests and mutations
+### 3.1 `strings.test.ts`: ST6–ST9 (the only `it`s added in the round: strings 5 → 9)
+- **ST6:** every plain-string property of `studioEditStrings` equals its exact English literal from §1.1 (`toBe`), and the key list equals the expected list.
+- **ST7:** every formatter returns the exact English for its inputs, `toBe`. **Each plural formatter is sampled at 1 and at 3** (E4, E16, E26, E28, E30, E33, E36a, E36b). E14/E24/E37/E38/E42 are sampled with a real track name (`SFX`) and with the `—` fallback.
+- **ST8:** no plain value and no formatter output (all ST7 samples; the formatter key list equals the sample list) contains a Georgian codepoint.
+- **ST9:** source guard: the `ArrangementContext.tsx` slice from `const splitSelection = useCallback(` to `const restoreHistory = useCallback(` has no Georgian codepoint after comments are stripped (both anchors found, end after start), and the 6 constants of §2(b), if they still exist, have no Georgian codepoint on their declaration lines.
 
-### 3.1 New test HE8 (`export-dialog-hold-enter.test.tsx`)
-**HE8 — every button in the Export dialog has a unique accessible name, idle and during a WAV render.** Use the file's existing helpers: `mountHoldEnterDialog`, `pendingRenders`, `clickExport`, `closeButton()`, `cancelButton()` and `settleRenders`. If a needed helper is missing, stop and report; do not add test infrastructure outside the HE8 `it`. Assert both states:
-1. **Idle** (dialog open, project scope):
-   - `within(dialog).getAllByRole('button', { name: 'Close' })` has length 1, and that element has `aria-label="Close"`. That is the Modal ✕; the literal is allowed here because it is `Modal.tsx`'s value, not module copy.
-   - `getAllByRole('button', { name: studioExportStrings.closeButton })` has length 1, and it is the footer button (the element the existing `closeButton()` helper returns).
-   - The list of accessible names of **all** buttons in the dialog has no duplicate. Name = `aria-label` if present, else the trimmed `textContent`. Assert with `new Set(names).size === names.length`, and print the list in the failure message.
-2. **During a WAV render** (Cancel visible): the same three assertions. Also: the footer button is disabled, and the ✕ is enabled (unchanged behaviour, now pinned).
-- HE8 is a new `it`. The `it` count of `export-dialog-hold-enter` goes 7 → 8. Every other file's count is unchanged; report before and after.
-
-### 3.2 Mutations
-A runs each one, and each must turn the named test red. After each one, A restores the file and checks the restore by sha256 (§2 edit rule).
-- **m5:** `closeButton` → `'Close'` → HE8 red, ST1 red, and the 15 round-127 P1 tests red again. This proves HE8 catches C-R127-01.
-- **m6:** `closeButton` → `'Export WAV'` → HE8 red in the idle state, because it collides with the export button. This proves the uniqueness check is general, not tied to "Close".
-- **m7:** put back `in this cycle` (W1) or `range ${start}` (W4) → ST1 or ST2 red.
+### 3.2 Mutations (each turns the named test red; restore and check by sha256)
+- **m1:** `deleteClipDone` back to `კლიპი წაიშალა; სიცარიელე დარჩა.` → ST6 and ST8 red.
+- **m2:** put `'გაყოფა'` back as the history label in `splitSelection` → ST9 red.
+- **m3:** make a plural formatter ignore the count (e.g. `copyClipsDone` always `clips`) → ST7 red.
+- **m4:** in `deleteSelection`, swap the single-clip status with `deleteClipsDone(1)` → a `delete-selection-ui` (or `status-announcement-ui`) test red. This proves the UI tests still bind the right message after the switch to module references.
 
 ## 4. A — checks (speed rules)
-- Run `npm run typecheck` and `npm run lint`, plus a read-only `npx biome check` on the 9 changed code files.
-- Run `npx vitest run` on:
-  - `strings` and the 18 round-127 granted tests: `export-cancel-ui`, `export-cancel`, `export-dialog-a11y-copy`, `export-dialog-focus-restore`, `export-dialog-focus`, `export-dialog-footer`, `export-dialog-hold-enter`, `export-dialog-tab-stops`, `export-mp3`, `export-progress-ui`, `export-progress`, `export-range-ui`, `export-toolbar-hold-enter`, `export-wav`, `master-ui`, `master`, `meter-ui`, `video-fades-ui`;
-  - neighbours: `export-range`, `export-wav-in-place`, `mp3-encoder`, `graph`, `ArrangementContext`, `status-announcement-ui`.
-  - **Every file must be green, including the 15 tests that were red in round 127.** Name the file list exactly in the report. C runs the same list.
-- No full suite and no `npm run verify`: the gate runs them.
-- **The code-reviewer is required** (10 changed files, 9 of them code). Pass its Architecture note to B.
-- **Report `a-round-128.md`:**
-  - the start HEAD, frozen OK, and the 10 start hashes matching;
-  - the pre-edit grep results;
-  - the diff of each granted file against `b-round-127/r128-granted-start/` (per file: the keys or titles changed);
-  - the test counts and the per-file `it` counts before and after;
-  - m5–m7;
-  - the typecheck and lint results;
-  - the reviewer verdict and Architecture note;
-  - every shell write;
-  - frozen OK at the end, the end `git status`, and the 10 end hashes;
-  - any deviations.
-- **A stops and reports (no edit; B rules) if:** a test outside §2 turns red or asserts an old W0–W4 literal; or a change needs a frozen file (`export-dialog-a11y-copy` is frozen this round) or a non-title line in a title-only file.
+- `npm run typecheck`, `npm run lint`, and a read-only `npx biome check` on the 11 changed code files.
+- `npx vitest run` on: `strings`, the 8 test files of §2, and the neighbours `delete-selection`, `clipboard`, `clip-gain`, `grid-snap-edit`, `model`, `gesture-guard`, `export-dialog-a11y-copy`, `export-range-ui`, `export-range`, `export-wav`. Every file green. Name the exact list and counts in the report; C runs the same list.
+- No full suite and no `npm run verify` (the gate runs them).
+- **code-reviewer required** (12 files). Pass its Architecture note to B.
+- **Report `a-round-129.md`:** start HEAD, frozen OK and the 11 start hashes; the pre-edit grep; per granted file the changed keys/lines (`diff -u` vs `b-round-128/r129-granted-start/`, saved as `a-round-129/granted.diff`); `it` counts before/after per file; m1–m4; typecheck/lint; reviewer verdict and Architecture note; every shell write; end `git status`, frozen OK, 12 end hashes; deviations.
 
 ## 5. C — rows
-- Use real Playwright Chromium, a fresh context per session, at **1440×900 and 1280×720**, on `http://127.0.0.1:5173/studio-lab`.
-- **Reuse** the `c-round-127/tools/` harness and the round-125 S0/S1/S2 fixtures. Media comes from `tmp/studio-real-loop/media/`.
-- **Harness rules:**
-  - ENV-FIRST-LOAD: discard a crashed first load once and record it under `invalidRuns`.
-  - Every run writes a uniquely named file.
-  - Open every screenshot with the Read tool and describe it.
-  - At most 2 replacement attempts per row, and only for environment-invalid runs.
-- **Do not re-verify** what round 127 already proved and this round does not touch: the per-state Georgian scan, every export format, and the frame counts beyond REG-WAV below.
+Real Playwright Chromium, fresh context per session, **1440×900 and 1280×720**, `http://127.0.0.1:5173/studio-lab`. Reuse `c-round-127/tools/` / `c-round-128/tools/` (S0/S1/S2 setups) and `c-round-106/tools/kr106.cjs` (keys). Media: `tmp/studio-real-loop/media/`. ENV-FIRST-LOAD: discard one crashed first load and record it under `invalidRuns`. Unique file per run. Open every screenshot with Read and describe it. At most 2 replacement attempts per row, only for environment-invalid runs. Read the status text from the live status region (the element the UI tests call `statusText`) and the Undo button `title`.
 
 | ID | Action | Expected (PASS) |
 |---|---|---|
-| **T128-TARGETED** | A's exact §4 vitest list | All green, including the 15 round-127 P1 tests and HE8. The counts equal A's |
-| **SOURCE-SCOPE** | `git status`; `sha256sum -c --quiet b-round-127-r128-tree-sha256.txt` (from `store/`); protected hashes and `Modal.tsx` `741c2341` | The same 27 entries, no new path; the frozen list OK; the protected hashes unchanged; no source change during C's phase |
-| **AN-REVIEW** | `diff -u` each granted file against `b-round-127/r128-granted-start/<path>` | `strings.ts`: only the W0–W4 values changed, with no key or signature change. `strings.test.ts`: only those literals changed. `export-dialog-hold-enter`: only the HE8 `it` added (plus any import it needs) and title text. The 6 title-only files: **every hunk is title text**; list them. W3 lowercases exactly the 8 keys and keeps `videoDecodingNoFile`. Doc 104 has the W0–W4 rows and the P1 ruling. **Meaning check:** no W row drops or adds a fact. List every shell write A reports |
-| **EX-KEYS** (both) | Open Export (S2 state with a time selection). Count buttons by exact accessible name, idle and during a WAV render (Playwright `getByRole('button', { name, exact: true })`). Then repeat round 127's key sequence: Tab and Shift+Tab order from the footer button, Escape, hold-Enter on the footer button, hold-Enter on the toolbar Export | `Close` = **1** (the ✕), `Done` = **1** (the footer), and no two buttons share a name, in both states. During a render, `Done` is disabled and ✕ is enabled. Focus lands on `Done` when the dialog opens. The Tab order, Escape, focus return to the toolbar Export and the hold-Enter results equal the round-127 EX-KEYS observations, with `Done` in place of the footer `Close` |
-| **EX-COPY** (1440, plus 1280 for EX-COPY-RANGE) | The states where W1–W4 show: **(a)** dialog with the disabled Video option (video clip on the lane) → its reason; **(b)** Loop on: make the time selection 00:02–00:06, press Ctrl+L (loop the selection, as in `c-round-106/tools/kr106.cjs`), open Export → the WAV note in range scope; then select `Entire project` → the WAV note in project scope; **(c)** WAV cancel during a render; **(d)** MP3 cancel while `Creating MP3` (if the CDN is reachable); **(e)** a range WAV export → the done message | Exact text: **(a)** `… in this version — …`; **(b)** `… the entire project is exported (…)` and `… the time selection is exported (…)`; **(c)** `Export cancelled — no file was created.`; **(d)** `Export cancelled — no file was created. The MP3 encoder will load again on the next MP3 export.`; **(e)** `WAV created: time selection 00:02.000 — 00:06.000 (4.000 s), …`, and the file is still 192000 frames. Georgian count in each of these dialogs is 0, minus the subtracted `source.audioNote`. **Not reachable** in the browser, and so not claimed: `emptyProjectNoFile`, `invalidRangeNoFile`, `encoderLoadFailed` (unless the CDN fails), `exportFailed`, `mp3Failed`, `encoderLoadTimeout`. They are covered by ST1/ST2 only, and listed under `inconclusive` |
-| **EX-LAYOUT** (both) | Footer bboxes in S2 vs `c-round-127` S2; S0/S1 outside the dialog vs `c-round-125/out/bbox-baseline-*.json` | Outside the dialog: every box within 1 px. In the footer: only the `Done` button's width changes, attributable to its text. The buttons stay on one row, right-aligned, with the same y and h. There is no new `scrollWidth > clientWidth`. The 1280 range-card/footer overlap is recorded and compared with F-2 (13 / 45 px) |
-| **REG-WAV** (1440) | One project WAV export from the S fixture | 7217877 frames, 48 kHz / 24-bit / 2 ch, `czaba-studio-lab.wav`. Copy-only sanity check |
-| **G128-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav` | The workspace and the demo badge show. The product route shows "Sign in required", with no workspace and 0 `audio[src]`. The token API returns **401**. Fake-Bearer 403: **BLOCKED (backend unavailable in cloud)** |
-| **PX-NET / REG-HYD** | every session | 0 requests to `/api/studio-token` (outside G128-3), `/api/recording-*`, `/api/download` or the R2 host; 0 `Authorization` headers; 0 hydration errors; 0 `pageerror`. The known cloud noise is not reported |
+| **T129-TARGETED** | A's exact §4 vitest list | All green; counts equal A's |
+| **SOURCE-SCOPE** | `git status`; `sha256sum -c --quiet b-round-128-r129-tree-sha256.txt` (from `store/`); protected hashes | 11 ` M` + 1 `??`; frozen OK; protected unchanged; no source change during C's phase |
+| **AN-REVIEW** | `diff -u` each grant vs `b-round-128/r129-granted-start/` | `strings.ts`: one new object + X1 value; no `studioExportStrings` key change; no import. Context: only the import, the 6 constants and string literals inside the 8 commands; **no condition, dependency array or call-order change** (list every hunk). Tests: every hunk is literal → module reference with the same matcher, or the import; track names kept. Meaning check: no E row drops or adds a fact vs the Georgian original (C consults the Georgian original side by side). Every shell write listed |
+| **EDIT-COPY** (both viewports) | S1-like setup (music clip on `მუსიკა`, stem on `სტემები`, SFX clip). In order, read the status after each: **(a)** Ctrl+E with nothing selected (E8); select one clip, playhead outside → Ctrl+E (E9); playhead inside → Ctrl+E (E11); select 2 clips crossed by the playhead → Ctrl+E (E4 plural); time selection inside one clip → Ctrl+E (E7). **(b)** Delete: one clip (E19), two clips (E16), time selection on one track (E14 `on the … track`), Ctrl+Shift+L on it (E21), then Delete (E14 `on all tracks`), Delete with no target (E17), Ctrl+Shift+L with no range (E20). **(c)** Ctrl+D with nothing (E23), with a clip (E26 n=1), with a time selection (E22). **(d)** Ctrl+C clip (E30 n=1), Ctrl+C time selection (E28), Ctrl+V (E42), Ctrl+X clip (E33), Ctrl+V into an occupied spot (E37) if reachable. **(e)** Ctrl+Shift+X with no range (E34), on a range (E36 incl. a marker inside → E36b) | Each status equals the §1.1 English exactly (with today's track names). Georgian count in the status region = 0 after subtracting track names (list them). Every action has the same **effect** as before (clip count, selection, gap/closed gap, clipboard paste result); C states the effect next to each message. Rows not reachable in the browser (e.g. E5, E35, E38, E39) are `inconclusive`, covered by ST7 only |
+| **UNDO-LABEL** (1440) | After E11, E19, E16, E14, E26, E42 and a Cut Time: read the Undo button `title`, then Undo once and check the effect reverted | `Undo: Split`, `Undo: Delete clip`, `Undo: Delete clips (2)`, `Undo: Delete time selection` / `(all tracks)`, `Undo: Duplicate (1)`, `Undo: Paste (n)`, `Undo: Cut Time`; Undo restores the state each time |
+| **EDIT-LAYOUT** (both) | S0/S1 boxes vs `c-round-125/out/bbox-baseline-*.json` (outside the status region); status region box after the longest message (E38 or E14); the toolbar Undo button after `Delete time selection (all tracks)` | Every box outside the status region within 1 px, except the Undo button, whose visible text is `Undo: {label}` (`ArrangementTransport.tsx` l.153, `truncate`): its width/clip may change only by its label text (RV-1 V-0 exception), with no toolbar wrap or overflow. The status region keeps its position; any height/wrap change is attributable to the message text (RV-1 V-0 text-width exception); no new horizontal overflow |
+| **REG-EXPORT-COPY** (1440) | Open Export once (S2) | The dialog copy equals round 128 (`Done`, `Export WAV`, …); `invalidRangeNoFile` is not reachable → inconclusive, ST1 only |
+| **G129-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav` | Workspace + demo badge; the product route shows "Sign in required", no workspace, 0 `audio[src]`; the token API returns **401**. Fake-Bearer 403: **BLOCKED (backend unavailable in cloud)** |
+| **PX-NET / REG-HYD** | every session | 0 requests to `/api/studio-token` (outside G129-3), `/api/recording-*`, `/api/download`, the R2 host; 0 `Authorization` headers; 0 hydration errors; 0 `pageerror` (known cloud cart noise not reported) |
 
 - **Gate rows (C does not claim them):** full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
-- **Severity guide:**
-  - **Medium:** a duplicate accessible name in the dialog; any behaviour change (focus, Tab, disabled rules, export output); a weakened, removed or skipped test; a non-title hunk in a title-only file; an English text that drops a fact.
-  - **Low:** wording or style.
+- **Severity guide:** **Medium:** any behaviour change (effect, selection, history, clipboard), a wrong or fact-dropping message, a weakened/removed/skipped test, a non-string Context hunk. **Low:** wording/style.
 
 ## 6. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
 |---|---|---|---|---|
-| The label of the button that dismisses the Export dialog | — | **არ ეხება** (not applicable). B did not verify Live's export dialog button labels, so no Ableton claim is made | `Done` is a CZABA naming and a11y choice: one name per button | EX-KEYS |
-| "Time selection" in the done message (W4) | Live 12 manual ch. 6 "Arrangement View", B capture `b-round-71/ableton-arrangement-view-20261021.txt` (2026-10-21; reused from round 127) | **Confirmed** term: "time selection" | The done message uses the same term as the scope card | EX-COPY (e) |
-| Export behaviour | — | **არ ეხება**: copy only | — | REG-WAV, EX-KEYS |
+| Terms Split / Cut Time / Paste Time / Duplicate Time / Delete Time / time selection | Live 12 manual ch. 6 "Arrangement View", §6.11 "Using the …Time Commands" (Cut/Paste/Duplicate/Delete Time) and §6.12 "Splitting Clips"; B capture `b-round-71/ableton-arrangement-view-20261021.txt` (captured 2026-10-21, reused) | **Confirmed terms** | Messages use the same terms. CZABA has no Duplicate Time (E22 says so honestly) | EDIT-COPY |
+| Delete on a time selection leaves a gap; Cut Time closes it on all tracks | same §6.11 for Cut Time; Delete-leaves-gap is the **user's decision 2026-10-11** (`delete-selection-update.md`) | Cut Time: **confirmed**. Delete-leaves-gap: **conscious difference** (user decision) | Unchanged behaviour; text only | EDIT-COPY effects |
+| Undo history label wording | — | **Unconfirmed**; no claim | CZABA naming | UNDO-LABEL |
 
-- C rates "CZABA requirement met" and "Ableton correspondence" separately.
+C rates "CZABA requirement met" and "Ableton correspondence" separately.
 
 ## 7. Evidence and reporting
-- **C writes** `c-round-128.md` and `c-round-128.json` as it goes. The JSON has `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` and `notesForB`.
-- Evidence goes under `c-round-128/{tools,out,shots}/`.
-- `browserVerified` is false only if a browser row that **can** run here was not run. Rows blocked only by the missing backend go under `blocked`. Inconclusive rows are listed as inconclusive, never under `passed`.
-- C makes no `store/` writes. Consult only the read-only agents in C's list.
+- C writes `c-round-129.md` and `c-round-129.json` as it goes: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` (with the subtracted track names), `notesForB`. Evidence under `c-round-129/{tools,out,shots}/`.
+- `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`.
+- C makes no `store/` writes.
 
-## 8. Outcome, fixed in advance (B at round 129 planning)
-| Condition | Round 129 |
+## 8. Outcome, fixed in advance (B at round 130 planning)
+| Condition | Round 130 |
 |---|---|
-| B plans on or after **2026-10-27** | The **REGRESSION round** first, then the matching row below |
-| C FAIL with Critical / High / Medium | Another bounded fix-up of V-0.1 (at most three related bugs) |
-| C PASS (new Lows → `deferred_low_polish`) | V-0.1 → `c_pass`, and `c_pass_published` after the gate. GATE103-S2 → done after the gate. Round 129 = **V-0.2**: the remaining `ArrangementContext.tsx` status, refusal and history texts, plus the helpers it calls (`groups.ts`, `selection.ts`, `library.ts`, `video.ts`, `video.client.ts` including `source.audioNote`, `tempo.ts`, `metronome.ts`, `view.ts`). ST4 gains those files. Before V-0.3, B rules on the reviewer note: whether conditional copy may live in formatters, and whether to split the file |
+| B plans on or after **2026-10-27** | The **REGRESSION round** first, then the row below |
+| C FAIL with Critical / High / Medium | A bounded V-0.2a fix-up (at most three related bugs) |
+| C PASS (new Lows → `deferred_low_polish`) | V-0.2a → `c_pass`, `c_pass_published` after the gate. Round 130 = **V-0.2b** (playback, library add/drop, loop, move/nudge messages and the gesture constants) |
 
-- At every planning, B checks for `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
+At every planning B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
 
 ## 9. Neighbour risk and root notes
-- **Where it could break:**
-  - the footer focus, Tab and hold-Enter rules (rounds 88–111): the footer button's name changes, and the tests query it through the module;
-  - the 1280 footer row: `Done` is shorter than `Close`, so the risk is low;
-  - title-only edits that slip into a test body (C checks every hunk).
-- **Architecture:** no source file outside `strings.ts` changes. The Modal ✕ label is recorded as signal `ARCH-R127-MODAL-CLOSE-LABEL`, not scheduled.
-- **Commit readiness:** after C PASS, root may publish V-0.1 (rounds 127 + 128) as one interim unit: the Export copy in English, with the other areas still Georgian until V-0.2…V-0.5.
+- **Where it could break:** the status announcement de-duplication (`status-announcement-ui`, it compares texts), history labels used by Undo/Redo tooltips, the gesture refusal before every command (untouched), and paste/duplicate conflict text that interpolates track names.
+- **Architecture:** `ArrangementContext.tsx` (3765 lines) is edited by every V-0.2 stage; this is a string-only change. Recorded signals: A-R128 note (titles embed visible words), gate-128 nits (alias constants, `exportFailed('')` trailing space). B requests the bounded frontend-architect checkpoint (strings module shape, conditional copy) from root when V-0.2c closes, before V-0.3.
+- **Commit readiness:** after C PASS, root may publish V-0.2a as an interim unit.
