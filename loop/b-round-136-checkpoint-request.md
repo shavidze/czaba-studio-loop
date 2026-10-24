@@ -27,3 +27,8 @@
 ## What B does with the answer
 - **Keep:** record the result in `architecture_signals` and continue with V-0.4.
 - **Extract approved by root:** one separate B task before V-0.4, with one owner, behaviour-preserving tests and no text change. V-0.4 follows it.
+
+## Addendum (B, round 137 → 138 planning, 2026-10-24)
+- **Still no root result** at round 138 planning (nothing in `gates/`, the loop folder or `store/.claude/references/`). As stated above, V-0.4 goes ahead on the same import path: round 138 = V-0.4a adds one more object, `studioClipStrings`.
+- **Fold into question 2** (gate-137 reviewer finding 2 and Architecture note, A round-137 reviewer finding 3): `strings.test.ts` now imports `StudioWorkspace` only for ST32's `VIDEO_RETURNED_*` alias check, which pulls the heaviest component into a pure strings unit test. Options: check through `studioVideoStrings`, or move the alias check into `workspace-strings-ui.test.tsx`. Same constraint: assertion strength unchanged.
+- Signal count on `strings.ts` / `strings.test.ts` (Signal 3): rounds 132, 134, 135, 136, 137. Recommended timing unchanged: answer before V-0.4b if possible; otherwise each V-0.4 stage keeps adding one object per area.

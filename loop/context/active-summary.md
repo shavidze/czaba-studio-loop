@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T13:52:37.116Z)
+# Active loop summary (2026-10-24T14:49:26.242Z)
 
-- backlog.json 1241 KB -> active view 161 KB
-- status: G_ROOT_GATE round 136
-- servers: `{"checkedUtc":"2026-10-24T13:33:40.5770657Z","round":136,"attempt":1,"store":200}`
-- last publication: 7d9fed0f434b506b42e0d3bc86346202a28273f2 (rounds 136-136)
-- last root gate: round 136 published - commit 7d9fed0f434b506b42e0d3bc86346202a28273f2 pushed
+- backlog.json 1249 KB -> active view 163 KB
+- status: G_ROOT_GATE round 137
+- servers: `{"checkedUtc":"2026-10-24T14:25:51.4725308Z","round":137,"attempt":1,"store":200}`
+- last publication: 7e6202bb22db0091ce90cd423b5a8ec8ed1992ef (rounds 137-137)
+- last root gate: round 137 published - commit 7e6202bb22db0091ce90cd423b5a8ec8ed1992ef pushed
 
 ## Current items: -
 
@@ -267,22 +267,26 @@
 - C-R131-OBS-EXPORT-VIDEO-SOUND-BELOW-FOLD-1280 / info / acknowledged (pre-existing layout; same class as C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / ARCH-R101-MODALBODY-PADDING-SLOT) / at 1280x720 the Export dialog video-sound list needs a scroll
 - GATE133-GROUP-PREFIX / low / ruled D-29z98 R1: V-0.4 with the default track names; tracked under GATE128-S1 / default group name 'ჯგუფი N' stays Georgian inside English created/ungrouped statuses
 - GATE133-LANE-RELEASE-MIXED / low / ruled D-29z98 R3: temporary tracked exception under GATE128-S1; closes in V-0.4 with ArrangementClip CLIP_LANE_REFUSAL_KEPT_PLACE / refused lane release shows 'No room here — კლიპი ბოლო თავისუფალ ადგილას დარჩა: …' in one status
-- GATE133-LANE-HINT-MIXED / low / ruled D-29z98 R3: temporary tracked exception under GATE128-S1; closes in V-0.3d with the StudioWorkspace Shift hints (D-29z99 split) / lane-drag hint paragraph shows the English refusal followed by the Georgian Shift hint
+- GATE133-LANE-HINT-MIXED / low / ruled D-29z98 R3: temporary tracked exception under GATE128-S1; closes in V-0.3d with the StudioWorkspace Shift hints (D-29z99 split); dispatched round 137 (D-29z102 WS1/WS2) / lane-drag hint paragraph shows the English refusal followed by the Georgian Shift hint
 - GATE132-S4-MODULE-AGAINST-MODULE-UNIT-PINS / info / signal: ST18 and the UI literals are the text guards; if ST18 is ever trimmed, put a hand-written literal back into T10/M8 / tempo/metronome/view unit tests compare the formatter with itself
 - GATE132-S5-DOC108-STATUS / low / folded into round 133 (doc 108 l.4) / doc 108 status still says the browser check is pending
 - GATE132-S6-FORMATTER-INPUT-SHAPES / info / answered by D-29z98 R6 (contract clarification in current-task.md 1.2) / set/on take formatted bpm strings while zoomReadout takes a rounded number; 4/4 bottom hard-coded
 - ARCH-R132-STRINGS-SPLIT-BEFORE-V03 / - / signal; addenda (e)-(g) of b-round-130-checkpoint-request.md; still no root result at round 135 planning (third planning without it); V-0.3a done and V-0.3b proceeds with no new object (D-29z100 R3); gate-134 reviewer proposes running it after V-0.3d (non-blocking) / strings.ts edited in rounds 127, 131, 132 (10 objects, 12 after round 133); keep for now; decide the split into lib/arrangement/strings/ (sa
-- GATE133-GROUP-RENAME / low / tracked under GATE128-S1; V-0.3d (renamed/renameEmpty formatters in studioTrackGroupStrings using quoted()); TODO line added to doc 109 in round 134 / group rename statuses stay Georgian with «…» (StudioWorkspace l.953/963) while create/ungroup are English with “…”
+- GATE133-GROUP-RENAME / low / tracked under GATE128-S1; V-0.3d (renamed/renameEmpty formatters in studioTrackGroupStrings using quoted()); TODO line added to doc 109 in round 134; dispatched round 137 (D-29z102 WS8/WS9, R3 shape = MK12) / group rename statuses stay Georgian with «…» (StudioWorkspace l.953/963) while create/ungroup are English with “…”
 - C-R133-HINT-NO-REFUSAL-SPAN-GROUP / info / acknowledged (pre-existing; planClipLaneMove and ghost logic unchanged) / during a refused GROUP lane drag (out-of-range, before-start) the lane hint shows no refusal span; only the status line carries the refusal
 - ARCH-R133-STRINGS-IMPORT-COUPLING / info / acknowledged (gate-133 reviewer verdict keep: one-way dependency into an import-free module); no task / selection.ts and groups.ts now import the strings module
 - INVENTORY-V0-UNASSIGNED / info / corrected (D-29z99): ArrangementGridMenu.tsx -> V-0.3a; panels.ts, clip-gain-multi.ts -> V-0.4 / three Studio files with Georgian UI text were in no V-0 stage area
-- GATE134-ST25-FRAGILE / info / signal (architecture_signals ARCH-R134-RATCHET-SHAPE); accepted as a temporary guard until V-0.3d replaces it with a per-file scan / ST25 compares 33 hand-copied StudioWorkspace lines; a reformat breaks it without a translation
+- GATE134-ST25-FRAGILE / info / signal (architecture_signals ARCH-R134-RATCHET-SHAPE); accepted as a temporary guard until V-0.3d replaces it with a per-file scan; round 137 replaces the ratchet with ST33 per-file scan (D-29z102) / ST25 compares 33 hand-copied StudioWorkspace lines; a reformat breaks it without a translation
 - GATE134-COMMENT-WORDING / info / noted; no code change needed / strings.test.ts l.716 comment wording about the widened pattern
 - C-R134-SNAP-DEFAULT-OFF-NOTE / info / applied in round 135 C rows (state the Snap state; default off) / round-134 task examples assumed Snap on; real default is off
-- GATE135-DOC111-STATUS / low / folded into round 136 (doc 111 l.4, l.146, delete l.150) / doc 111 status and testing lines still say the browser check waits for C round 135
+- GATE135-MIXED-LANGUAGE / low / marker part closed round 136 (7d9fed0); remaining range readout + group rename in V-0.3d round 137; lane/dock/detail parts named in D-29z102 R4 (V-0.4/V-0.5); covered by GATE128-S1 queue / English transport next to the Georgian range readout and marker row; Georgian read with an English voice (html lang=en)
 - GATE135-DELETE-LABEL-IN-NAME / info / noted, pre-existing (same shape as the Georgian version); optional polish: start both range hints with '⌫ Delete' / Delete button aria-label with a range starts 'Delete time selection…' while the visible text is '⌫ Delete' (WCAG 2.5.3 still met by the word
 - C-R135-NV17-SAME-TICK / info / noted; unchanged code, no bug filed / Fit/X during playback pauses Follow but the status region only shows the Fit/X status; NV17 is never rendered (same-tick replacement, infere
 - C-R135-Z-MARGINS / info / noted; unchanged code / Z frames a 4 s range at ~48% of the viewport, centred (range fully visible)
+- GATE136-DOC112-STATUS / low / folded into round 137 (doc 112 l.4, l.115, delete l.119) / doc 112 status and testing lines still say the browser check waits for C round 136
+- GATE136-MARKER-ALIASES / info / noted; inline when strings.ts is split (no action now) / ArrangementMarkerRow l.54-55 MARKER_FLAG_HINT / MARKER_AT_TIME_START_MESSAGE only re-export studioMarkerStrings values
+- C-R136-DRAG-REFUSAL-SILENT / info / noted; candidate polish/a11y idea only, not scheduled (pre-existing MV5 design) / a direct marker drag onto an occupied time is refused with no status announcement
+- C-R136-STALE-EDGE-STATUS / info / noted; pre-existing, unchanged code, no bug filed / after a successful previous/next jump between flags the status line keeps the earlier edge status
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

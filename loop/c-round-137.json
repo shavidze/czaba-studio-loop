@@ -1,0 +1,133 @@
+{
+ "round": 137,
+ "task": "VISUAL-A V-0.3d — rest of StudioWorkspace and Waveform Zoom in English",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T14:25:51.4725308Z",
+  "round": 137,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T137-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "HEADING-1440",
+  "HEADING-1280",
+  "LANE-HINT-1440",
+  "LANE-HINT-1280",
+  "VIDEO-STATUS-1440",
+  "VIDEO-STATUS-1280",
+  "GROUP-RENAME-1440",
+  "GROUP-RENAME-1280",
+  "ENVELOPE-1440",
+  "ENVELOPE-1280",
+  "WAVEFORM-ZOOM-1440",
+  "WAVEFORM-ZOOM-1280",
+  "RANGE-READOUT-1440",
+  "RANGE-READOUT-1280",
+  "SELECTION-1440",
+  "SELECTION-1280",
+  "GEO-COUNT-1440",
+  "GEO-COUNT-1280",
+  "LAYOUT-1440",
+  "LAYOUT-1280",
+  "REG-136-1440",
+  "REG-136-1280",
+  "G137-3 (partial: lab workspace + demo badge; protected route Sign in required at 1440/1280 with 0 audio[src]; token API 401)",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G137-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [],
+ "georgianCounts": {
+  "1440": {
+   "steps": 36,
+   "surfaceRawGeorgianOrGuillemets": 0,
+   "netAfterSubtraction": 0
+  },
+  "1280": {
+   "steps": 36,
+   "surfaceRawGeorgianOrGuillemets": 0,
+   "netAfterSubtraction": 0
+  },
+  "surface": "h1 suffix, Env text/title/aria, Waveform Zoom aria/title/options, arrangement-range, selection count, selected-clip text+title, lane-move hint (raw 0 before subtraction); status line and status observer (subtractions below)",
+  "subtracted": [
+   "status: demo-ready load-time text (collection.ts:18, V-0.5)",
+   "status: track names მუსიკა / სტემები inside English clip-added sentences (user/track data)",
+   "status + Undo title: lane-move history/status 'გადატანა ხაზზე — {track}: start …' (ArrangementClip.tsx:701, V-0.4)",
+   "status: 'Envelope: წერტილი დაემატა — … წმ · … dB.' (ArrangementClipEnvelope.tsx:171, V-0.4 per task §0)"
+  ],
+  "acceptedMixedOutsideSurface": [
+   "lane overlay 'ყველა ხაზი' (ArrangementLane.tsx:1001)",
+   "library, video dock buttons/caption, detail panel, track headers, demo badge (V-0.4/V-0.5)"
+  ]
+ },
+ "measurements": {
+  "waveformZoomAudio": {
+   "method": "real output tap: AnalyserNode attached to every connection into AudioDestinationNode; same 2 s window from Home, Slow rise clip on music at 0 s",
+   "1440_r2": {
+    "1x_dBFS": -15.682,
+    "2x_dBFS": -15.751,
+    "delta_dB": -0.069
+   },
+   "1280_r1": {
+    "1x_dBFS": -15.682,
+    "2x_dBFS": -15.695,
+    "delta_dB": -0.013
+   },
+   "tolerance_dB": 0.5,
+   "waveformPath": "2x path differs from 1x; back at 1x path byte-equal to the first 1x path (both viewports)"
+  },
+  "layout": "out/layout-compare.json: vs round 136, 0 boxes moved >1 px in S0/S1/S2 at both viewports; only the header text key changed (box identical 0,0,W,35). All-tracks readout at 1280: range sw=cw=739, status sw=cw=1256, document sw=cw=1280.",
+  "videoTransport": "paused state and currentTime unchanged across expand/close/collapse (paused cases Δct 0); playing case ct 2.26→3.11→3.94 with paused=false throughout"
+ },
+ "invalidRuns": [],
+ "harnessNotes": [
+  "1440 r1 dev runs had harness-only failures (wrong envelope line selector, Ctrl+Shift+L assumed to toggle back, Escape used to confirm a new marker, plain click inside a multi-selection assumed to select one). Fixed in the harness; final clean runs are 1440 r2 and 1280 r1, 78/78 checks each."
+ ],
+ "notesForB": [
+  "Remaining Georgian UI found while testing, outside V-0.3d (assign): ArrangementClip.tsx:701 lane-move status + history label 'გადატანა ხაზზე — {track}' (shows as 'Undo: გადატანა ხაზზე — სტემები' next to English 'Undo: Rename Group'); ArrangementClipEnvelope.tsx:171 point-added status; A's items routes/studio-lab.tsx:8 meta title and ArrangementGroupHeader.tsx:241 aria-label + l.32 title.",
+  "Observation, not a bug: StudioWorkspace WS23 call uses `title: selectedTitle ?? selectedClip.sourceId` while the visible span renders selectedTitle; if selectedTitle were ever null, title !== textContent. Browser: title === textContent held in every SELECTION step.",
+  "Unverified hypothesis (not this round's scope): a plain click on an empty lane area and Escape did not clear a 2-clip selection in the harness. Live 12 behaviour for clicking empty Arrangement space was not checked against the manual this round; B may add a bounded check later.",
+  "Forward constraint R4 still open: dock return label must use 'compact view' in V-0.5."
+ ],
+ "evidence": {
+  "tools": "c-round-137/tools/c137.cjs, layout130.cjs, g137-3.cjs",
+  "out": [
+   "c-round-137/out/vitest-16.json",
+   "c-round-137/out/c137-1440-r2-all.json",
+   "c-round-137/out/c137-1280-r1-all.json",
+   "c-round-137/out/run-1440-r2.log",
+   "c-round-137/out/run-1280-r1.log",
+   "c-round-137/out/layout-compare.json",
+   "c-round-137/out/g137-3.json",
+   "c-round-137/out/an-diff-src.txt"
+  ],
+  "shots": "c-round-137/shots/"
+ },
+ "abletonCorrespondence": {
+  "RANGE-READOUT": "confirmed term only ('time selection', Live 12 §6); readout line is a CZABA addition; Delete-leaves-gap is the 2026-10-11 user decision",
+  "ENVELOPE": "deliberate difference (Env toggle with A vs Live Draw Mode B, §3.19/§26.6.2)",
+  "GROUP-RENAME": "deliberate difference (F2 vs Ctrl+R, §18.3)",
+  "LANE-HINT": "unconfirmed (no Live source); CZABA rule",
+  "WAVEFORM-ZOOM": "unconfirmed (no Live source); audio unchanged measured",
+  "VIDEO-STATUS": "not applicable (CZABA single video track)"
+ }
+}

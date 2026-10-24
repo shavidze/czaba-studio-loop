@@ -1,226 +1,218 @@
-# CURRENT TASK — Round 137: VISUAL-A V-0.3d — the rest of StudioWorkspace and Waveform Zoom in English
+# CURRENT TASK — Round 138: VISUAL-A V-0.4a — clip gestures (move, trim, fade, lane move) in English
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 136)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 137)
 - **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
 - **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` (M2, V-0). Module contract: `backlog.json` → VISUAL-A-OBSIDIAN `v0_plan_d29z92.module_contract`, with the R6 clarification of round 133:
   - `strings.ts` is a leaf module (it imports nothing), with one object per area;
   - it holds plain strings plus small pure formatters, and no type assertions;
   - formatters take values that are already formatted; a branch that only picks between two texts stays in the caller;
   - existing local names keep their names and get their values from the module.
-- **Previous task:** `tasks/round-136.md` (exact copy of the round-136 `current-task.md`, sha256 `9068d99e…`). Rationale: `b-round-136.md`. Decision record: **D-29z102** in `docs/technical/studio-real-workspace/plan.md`.
-- **Baseline: commit `7d9fed0f434b506b42e0d3bc86346202a28273f2`** (gate 136 published on both remotes; HEAD). The tree was **clean** at planning (`git status --short` empty).
-- **Frozen list:** `tmp/studio-real-loop/b-round-136-r137-tree-sha256.txt`, **939 entries**. That is `git ls-files -co --exclude-standard` (951) minus the 12 existing grants in `b-round-136-r137-grants.txt`. The file has 14 lines; the last 2 are new files. `sha256sum -c --quiet` was OK at planning, run from `store/`.
-- **Start hashes of the 12 existing grants:** `b-round-136-r137-granted-start-sha256.txt`. **Start copies:** `b-round-136/r137-granted-start/` (paths are relative to `store/`; `sha256sum -c` was OK there at planning). A checks both at the start. If a hash differs, A stops and reports.
+- **Previous task:** `tasks/round-137.md` (exact copy of the round-137 `current-task.md`, sha256 `665c212d…`). Rationale: `b-round-137.md`. Decision record: **D-29z103** in `docs/technical/studio-real-workspace/plan.md`.
+- **Baseline: commit `7e6202bb22db0091ce90cd423b5a8ec8ed1992ef`** (gate 137 published on both remotes; HEAD). The tree was **clean** at planning (`git status --short` empty).
+- **Frozen list:** `tmp/studio-real-loop/b-round-137-r138-tree-sha256.txt`, **931 entries**. That is `git ls-files -co --exclude-standard` (953) minus the 22 existing grants in `b-round-137-r138-grants.txt`. The grants file has 24 lines; the last 2 are new files. `sha256sum -c --quiet` was OK at planning, run from `store/`.
+- **Start hashes of the 22 existing grants:** `b-round-137-r138-granted-start-sha256.txt`. **Start copies:** `b-round-137/r138-granted-start/` (paths relative to `store/`; `sha256sum -c` OK there at planning). A checks both at the start. If a hash differs, A stops and reports.
 
-## 0. Why this round (D-29z102)
-- **Round 136: C PASS.** `browserVerified` = `realVerified` = true, and every row ran at 1440 and 1280. GEO-COUNT on the marker surface was 0 Georgian and 0 `«»` before any subtraction (39 + 39 steps). Bugs: 0. Gate 136 published `7d9fed0` (verify OK: 161 files / 2450 tests, build OK, review 9/10). **V-0.3c is done.**
-- **`tasks/round-136.md` §8 fixed this step.** After a PASS comes **V-0.3d**, re-measured first. The regression round is not due: `regression-last.json` says 2026-10-24, round 122, so it is due on or after 2026-10-27. **No Critical, High or Medium finding is open.** `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist. The strings-split checkpoint has no root result, and every reviewer says to run it **after V-0.3d**. V-0.3d closes V-0.3, so B now files the bounded request (`b-round-136-checkpoint-request.md`). It does not block this round.
-- **B's re-measurement at `7d9fed0`:**
-  - **Source:** StudioWorkspace has **23** Georgian lines (l.143, 144, 150, 152, 154, 155, 157, 325, 954, 964, 1292, 2194, 2350, 2351, 2370, 2371, 2537, 2538, 2540, 2543, 2549, 2555, 2558). These are exactly the 23 lines of the ST25 ratchet. `waveform-zoom.ts` has **1** (l.22). The only `«»` lines in StudioWorkspace are l.954 and l.964.
-  - **Test pins: 23 lines in 7 files:**
-    - `floating-video.test`: l.129, 131, 132, 133, 134;
-    - `track-groups-ui`: l.613, 627;
-    - `clip-envelope-ui`: l.120, 121, 352, 356;
-    - `purchased-collection-ui`: l.31, 37;
-    - `waveform-zoom.test`: l.435, 476, 478, 485;
-    - `all-lane-clipboard`: l.495 (`it` title), 502, 504, 513, 515;
-    - `track-layout`: l.865.
-  - Also the ST25 list in `strings.test` (l.1328–1352, plus the StudioWorkspace block of ST25). **`e2e/` has 0.**
-  - **UI pin gaps:** the lane Shift hints (l.143/144) and the selection count (l.2549) have no UI pin. They get one in the new `workspace-strings-ui.test.tsx`.
-- **False matches. They are NOT V-0.3d, so do not touch them:**
-  - `detail-panel.test` l.327 and `status-announcement-ui` l.709 (`მონიშვნა: … · მუსიკა.`) come from `ArrangementDetailPanel.tsx:125` (V-0.4).
-  - `delete-selection-ui` l.517–520 (`… წმ · ყველა ხაზი`) is the lane overlay at `ArrangementLane.tsx:1001` (V-0.4). Its `getAllByText(/ყველა ხაზი$/)` still finds exactly 1 element after this round, because the workspace span becomes English.
-  - `grid-snap-edit` / `grid-snap-clip-edges` `Trim შეჩერდა…` and the `detail-panel-polish` info labels belong to V-0.4.
-  - `floating-video` l.135–136 (`EXPAND_LABEL`, `RETURN_LABEL`, dock labels) and the other `purchased-collection-ui` constants (badge, loading, ready, failed) belong to V-0.5.
-  - `clip-envelope-ui` l.117–119 (`Envelope: წერტილის …`, the ArrangementClipEnvelope point labels) belong to V-0.4.
-  - Georgian **fixture data** (track names `მუსიკა`, `სტემები`, group name `SFX ქუჩა`, and so on) is user or track data, not UI copy. It stays inside the new English literals.
-- **Ruling D-29z102 R1: the l.325 selector stays for V-0.4.** `'[data-testid="arrangement-track-header"] button[aria-label*="— აქტიური ხაზის არჩევა"]'` matches the aria-label of `ArrangementLane.tsx:697`. That label is pinned in 9 test files and is V-0.4 copy. Changing only the selector would break focus hand-off. So a fully Georgian-free StudioWorkspace is not honest this round. The smallest honest guard is a per-file scan that says StudioWorkspace has **exactly one** Georgian line, this selector, and **0** `«»`. V-0.4 changes the label and the selector together and turns the allowance into 0.
-- **Ruling D-29z102 R2: texts go to their area objects, and one new object per new area.**
-  - The video statuses go to `studioVideoStrings`.
-  - The lane Shift hints go to `studioLaneMoveStrings`.
-  - The group rename goes to `studioTrackGroupStrings`.
-  - Waveform Zoom goes to `studioViewStrings`.
-  - New: **`studioClipEnvelopeStrings`** (the Envelope area, which V-0.4 extends with the ArrangementClipEnvelope labels).
-  - New: **`studioWorkspaceStrings`** (workspace chrome: the heading suffix, the range readout, the selection count, the selected-clip line).
-  - Older ST maps only grow additively, the same as D-29z100 R3. No existing entry changes.
-- **Ruling D-29z102 R3: the group rename uses the MK12 shape (forward constraint of D-29z101 R4).** `renameEmpty` must give the **same output** as `studioMarkerStrings.renameEmpty` for the same input; ST33 asserts this. `renamed` follows MK13: `Group name: “{name}”.`
-- **Ruling D-29z102 R4: an accepted mixed state for one round, named.** The workspace readout will say `all tracks`, while the lane overlay (`ArrangementLane.tsx:1001`, V-0.4) still says `ყველა ხაზი`. Also, the dock buttons (`ვიდეოს გაფართოება`, `ვიდეოს პატარა ხედზე დაბრუნება`, V-0.5) stay Georgian next to the English statuses. **Forward constraint for V-0.5:** the dock return label must use **"compact view"**, the term chosen here (for example, `Return the video to the compact view`).
-- **Folded in (owned doc, low cost):** **GATE136-DOC112-STATUS**, gate-136 reviewer finding 1. Doc 112 l.4, l.115 and l.119 only. This is the same pattern as doc 111 last round.
+## 0. Why this round (D-29z103)
+- **Round 137: C PASS.** `browserVerified` = `realVerified` = true; every browser row ran at 1440 and 1280; GEO-COUNT 0 on the V-0.3d surface before any subtraction; bugs 0. Gate 137 published `7e6202b` (verify OK: 162 test files, typecheck clean, build OK; review 9/10). **V-0.3d is done, so V-0.3 is complete.**
+- `tasks/round-137.md` §8 fixed this step: no strings-split checkpoint result exists (`b-round-136-checkpoint-request.md` is still unanswered), so **V-0.4 goes ahead on the same import path**, re-measured and split by surface. The regression round is due on or after 2026-10-27 (`regression-last.json`: 2026-10-24, round 122). **No Critical, High or Medium finding is open.** `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist.
+- **B's V-0.4 measurement at `7e6202b`** (non-comment Georgian lines): ArrangementClip 25, ArrangementLane 22, ArrangementDetailPanel 38, ArrangementClipEnvelope 10, ArrangementGroupHeader 10, library.ts 4, ArrangementContext 4 (l.547, 548, 1761, 3467), TrackMeter 2, Master 2, groups.ts 1, panels.ts 1, clip-gain-multi.ts 1, StudioWorkspace 1 (the R1 selector). About 120 source lines with several hundred pin lines, so **V-0.4 is split by surface; no item is dropped** (ruling R1 below).
+- **This round = V-0.4a: every Georgian text of `ArrangementClip.tsx` (25 lines) + `ArrangementContext.tsx` l.1761** (`გადატანა (n)`, the keyboard group nudge). D-29z95 said all move/trim history labels move together, and this is the only Context line that belongs to that set. It also closes **GATE133-LANE-RELEASE-MIXED** (the lane-refusal status l.59/738 and l.586) and C round 137 note 1 (`Undo: გადატანა ხაზზე — სტემები` next to `Undo: Rename Group`).
+- **Pins (measured; the phrase grep plus the title selectors):**
+  - `grid-snap-ui`: l.113 (`MOVE_BLOCKED_STATUS` value line), 398, 434, 446, 474, 495, 528, 601, 660
+  - `clip-fades-ui`: l.109, 111, 358, 364, 381, 442, 525, 569
+  - `marker-snap`: l.115, 116, 117, 118, 119, 567
+  - `grid-snap-edit`: l.109, 110, 112, 114, 214, 491, 539, 626, 673
+  - `grid-snap-position`: l.216 · `fader-guards`: l.590 · `marker-edge-nav-ui`: l.213 · `marker-time-snap-ui`: l.248 · `markers-ui`: l.216 (all `[title^="drag = დროის მონიშვნა"]` selectors)
+  - `gesture-reentry`: l.151, 203, 238, 273
+  - `clip-envelope-ui`: l.629, 697, 698, 707, 763, 767
+  - `track-layout`: l.254, 468, 493, 504
+  - `grid-snap-clip-edges`: l.108, 109, 110, 112, 114, 210, 338, 405, 406, 456, 457, 492, 558, 588, 608, 636, 651, 652, 694, 695, 724, 725, 735, 748, 759, 772, 773, 842, 887, 904, 937, 938, 957, 958, 974
+  - `video-fades-ui`: l.316, 318, 367, 371, 397, 405
+  - `gesture-guard`: l.186, 204, 272, 295, 361, 438, 526, 547
+  - `track-groups-ui`: l.309 · `track-group-collapse-ui`: l.310 (both `[title$="— გადაადგილება"]` selectors)
+  - `strings.test`: the `CONTEXT_REMAINING_GEORGIAN_LINES` entry l.721 (ST13).
+  - **`e2e/` has 0.**
+- **UI pin gaps (no existing pin):** the clip range badge unit (l.920), the group move to the left (`მარცხნივ`, l.728), and the keyboard group nudge label (Context l.1761). They get tests in the new `clip-strings-ui.test.tsx`.
+- **Not V-0.4a, do not touch (false matches or later stages):**
+  - `status-announcement.test` l.60/62 and `status-announcement-ui` l.325 (`Fade In: … წმ`): these are free fixture strings passed straight to `reduceArrangementStatus` / `setStatus`; they do not check ArrangementClip output. They stay (ruling R4).
+  - `delete-selection-ui` l.520 (`… წმ · ყველა ხაზი`) is the lane overlay `ArrangementLane.tsx:1001` (V-0.4b).
+  - `clip-envelope-ui` Envelope point labels and statuses (`Envelope: წერტილის …`, l.117–119 and the others) are `ArrangementClipEnvelope.tsx` (V-0.4c).
+  - `ArrangementVideoDock.tsx:964–965` `ვიდეოს გადატანა` is a dock control (V-0.5).
+  - `detail-panel-polish` `საიდან, წმ` / `სადამდე, წმ` (DetailPanel, V-0.4e).
+  - Georgian **fixture data** (track names `მუსიკა`, `სტემები`, `SFX`, …) is track data until the default-name stage; it stays inside the new English literals, e.g. `'Move to track — სტემები'`.
+
+### Rulings D-29z103
+- **R1 — V-0.4 split by surface, scope unchanged (tentative order, each re-measured before it is planned):** V-0.4a ArrangementClip + Context l.1761 (this round) → V-0.4b ArrangementLane (incl. the l.697 aria-label **together with** the StudioWorkspace track-header selector, turning the ST33 allowance into 0; the lane overlay `ყველა ხაზი`; drop ghost texts reuse the status English, GATE130-S1) → V-0.4c ArrangementClipEnvelope + ArrangementGroupHeader + ArrangementTrackMeter + ArrangementMaster → V-0.4d default track names (Context l.547/548) and `TRACK_GROUP_NAME_PREFIX` with the fixture sweep (GATE133-GROUP-PREFIX, ST22 allowance → 0) → V-0.4e ArrangementDetailPanel + panels.ts l.8 + clip-gain-multi.ts l.113 + library.ts. V-0.5 (library, dock, route, collection.ts, `lang="en"`, final RV-4, RV-1 re-capture) is unchanged.
+- **R2 — one new object `studioClipStrings`** (the clip gesture area), appended after `studioWorkspaceStrings`. The no-change sentence is **one** formatter, `studioClipStrings.historyUnchanged(label)`. **Forward constraint for V-0.4c:** `ArrangementClipEnvelope.tsx` l.25 must become `studioClipStrings.historyUnchanged('Envelope')`, not a second copy.
+- **R3 — branches stay in the caller.** The group-move direction picks between `groupMovedRight` and `groupMovedLeft`; the folded clip header title stays `` `${moveTitle}\n${CLIP_FOLDED_TITLE_LINE}` `` in the caller; the trim kind picks `trimStartLabel` / `trimEndLabel`.
+- **R4 — reducer/setStatus fixture strings are not pins** (see §0). The final V-0.5 RV-4 scan decides whether test fixtures are swept; this round does not touch them.
+- **R5 — accepted mixed state for one round, named:** the clip badge says `2.000 s` while the lane overlay still says `… წმ · ყველა ხაზი` (V-0.4b); Envelope statuses and point titles (V-0.4c); group header, meter and Master titles (V-0.4c); detail panel (V-0.4e); default track names in sentences (V-0.4d); library and dock (V-0.5).
+- **R6 — a title text and its selectors change in the same round** (the l.325 lesson). Every `[title^=…]`, `[title=…]` and `[title$=…]` selector listed in §0 is a pin and changes with its title.
+- **Folded in (owned, low cost):** gate-137 reviewer findings **3** (ST33's title and doc 113 point at "l.325"; the selector is at l.331) and **4** (doc 113 status still "In Progress"). Finding 1 (`selectedClipDetail`) needs StudioWorkspace, which this round does not own → `deferred_low_polish`, to be folded in when StudioWorkspace is next granted (V-0.4b). Finding 2 (the strings test imports StudioWorkspace) → addendum to the strings-split checkpoint request.
 
 ## 1. What changes (user-visible)
-**Text and quote marks only.** None of these change: any handler, condition, key binding (A, Shift during a lane drag, Esc, Ctrl+Shift+L, Ctrl+Shift+X, Delete, F2, Enter), the order of the status calls, any focus hand-off (including the l.325 selector), the history labels (`Rename Group` and the others), any `data-testid`, any class name, the `Env` button text, or the zoom option labels (`½×` … `8×`).
+**Text only.** None of these change: any handler, condition, threshold, snap rule, key binding (Shift time-lock, Alt snap bypass, arrows), the order of the status calls, the commit/no-commit decisions, any `data-testid`, any class name, the fade handle positions, the clip header glyphs (`▶`, `⠿`), or the time formats (`00:00.000`, `toFixed(3)`).
 
 ### 1.1 The English map (exact text; A may not reword it. If a line seems wrong, A reports it and B rules)
-| ID | Source line(s) | Object.key | Exact English |
+All keys go into the new `studioClipStrings`. `{…}` are already formatted values passed by the caller.
+
+| ID | Source line(s) in `ArrangementClip.tsx` | Key | Exact English |
 |---|---|---|---|
-| WS1 | StudioWorkspace l.143 `CLIP_LANE_SHIFT_HINT` | `studioLaneMoveStrings.shiftHint` | `Shift — lock the time; only the track changes` |
-| WS2 | l.144 `CLIP_LANE_SHIFT_LOCKED_HINT` | `studioLaneMoveStrings.shiftLockedHint` | `Shift — the time is locked; only the track changes` |
-| WS3 | l.149–150 `VIDEO_EXPANDED_MESSAGE` | `studioVideoStrings.expanded` | `The video is expanded over the library. Drag it where you want; Esc or ✕ brings it back.` |
-| WS4 | l.151–152 `VIDEO_EXPANDED_LIBRARY_OPENED_MESSAGE` | `studioVideoStrings.expandedLibraryOpened` | `The library opened temporarily for the expanded video; it collapses again when the video closes. Esc or ✕ brings it back.` |
-| WS5 | l.153–154 `VIDEO_RETURNED_LIBRARY_COLLAPSED_MESSAGE` | `studioVideoStrings.returnedLibraryCollapsed` | `The library collapsed, so the video went back to the compact view.` |
-| WS6 | l.155 `VIDEO_RETURNED_COMPACT_MESSAGE` (exported) | `studioVideoStrings.returnedCompact` | `The video went back to the compact view.` |
-| WS7 | l.156–157 `VIDEO_RETURNED_LIBRARY_RECOLLAPSED_MESSAGE` (exported) | `studioVideoStrings.returnedLibraryRecollapsed` | `The video went back to the compact view; the library collapsed again.` |
-| WS8 | l.954 | `studioTrackGroupStrings.renameEmpty(name)` | `The name is empty — “{name}” is kept` (same output as `studioMarkerStrings.renameEmpty`) |
-| WS9 | l.964 | `studioTrackGroupStrings.renamed(name)` | `Group name: “{name}”.` |
-| WS10 | l.1292 (on) | `studioClipEnvelopeStrings.modeOn` | `Envelope mode: on.` |
-| WS11 | l.1292 (off) | `studioClipEnvelopeStrings.modeOff` | `Envelope mode: off.` |
-| WS12 | l.2350 | `studioClipEnvelopeStrings.toggleOnTitle` | `Envelope on — double-click a clip to add a point (A)` |
-| WS13 | l.2351 | `studioClipEnvelopeStrings.toggleOffTitle` | `Envelope off — edit the clip volume envelope (A)` |
-| WS14 | l.2370 | `studioViewStrings.waveformZoomLabel` | `Waveform Zoom — view only, the sound does not change` |
-| WS15 | l.2371 | `studioViewStrings.waveformZoomTitle(percent: number)` | `Waveform Zoom {percent}% — view only, the sound does not change` |
-| WS16 | `waveform-zoom.ts` l.22 | `studioViewStrings.waveformZoomStatus(percent: number)` | `Waveform Zoom {percent}% — view only, the sound does not change.` |
-| WS17 | l.2194 | `studioWorkspaceStrings.headingSuffix` | `· Workspace` |
-| WS18 | l.2537–2538 | `studioWorkspaceStrings.rangeReadout({ start, end, length })` | `Time selection: {start} — {end} · length {length} ·` (no trailing space; the caller keeps its `{' '}`) |
-| WS19 | l.2540 | none: the caller renders `{studioEditStrings.allTracks} · ` inside the existing span | span text `all tracks · ` |
-| WS20 | l.2543 | `studioWorkspaceStrings.rangeDeleteHint` | `Delete = delete, the gap remains · Ctrl+Shift+X = Cut Time` |
-| WS21 | l.2549 | `studioWorkspaceStrings.clipsSelected(count: number)` | `{count} clips selected` (it is rendered only when count > 1) |
-| WS22 | l.2558 | `studioWorkspaceStrings.clipLabel` | `Clip:` (the caller keeps `{' '}<span …>{selectedTitle}</span> · start{' '}…`, so the visible text starts `Clip: {title} · start …`) |
-| WS23 | l.2555 | `studioWorkspaceStrings.selectedClipTitle({ title, start, length, offset })` | `Clip: {title} · start {start} · length {length} · source offset {offset}` |
+| CL1 | l.42 `CLIP_FOLDED_TITLE_LINE` | `foldedTitleLine` | `The track is folded — unfold it to make a time selection` |
+| CL2 | l.56 (`VIDEO_FADE_HANDLE_TITLES.in`) | `videoFadeInTitle` | `Video Fade In — picture only, the sound does not change · drag · double-click = 0` |
+| CL3 | l.57 (`.out`) | `videoFadeOutTitle` | `Video Fade Out — picture only, the sound does not change · drag · double-click = 0` |
+| CL4 | l.59 `CLIP_LANE_REFUSAL_KEPT_PLACE` | `keptLastFreeSpot` | `the clip stayed in its last free spot` (lower case; the caller keeps `` `${refusal} — ${KEPT}: ${laneName}, start ${time}.` ``) |
+| CL5 | l.456 (fade preview while dragging) | `fadePreview(label: string, seconds: string)` | `{label}: {seconds} s` (no period) |
+| CL6 | l.671 and l.765 (fade committed / reset) | `fadeCommitted(label: string, seconds: string)` | `{label}: {seconds} s.` (l.765 passes `'0.000'`) |
+| CL7 | l.586 | `moveBlocked` | `Move blocked — a neighbouring clip or the start of the timeline. The clip stayed in its last free spot.` |
+| CL8 | l.619 | `trimStartBlocked` | `Trim stopped: the start of the source, a neighbouring clip or the minimum length (0.05 s).` |
+| CL9 | l.620 | `trimEndBlocked` | `Trim stopped: the end of the source, a neighbouring clip or the minimum length (0.05 s).` |
+| CL10 | l.667, l.703, l.721 | `historyUnchanged(label: string)` | `{label}: nothing changed — the Undo history is unchanged.` |
+| CL11 | l.700, l.713 **and Context l.1761** | `historyMoveClips(count: number)` | `Move ({count})` |
+| CL12 | l.701 | `historyMoveToTrack(name: string)` | `Move to track — {name}` |
+| CL13 | l.715 | `historyMoveClip` | `Move clip` |
+| CL14 | l.717 and l.947 (title) | `trimStartLabel` | `Trim — left edge` |
+| CL15 | l.718 and l.952 (title) | `trimEndLabel` | `Trim — right edge` |
+| CL16 | l.728 (right) | `groupMovedRight({ label, count, distance })` | `{label}: {count} clips moved {distance} to the right.` |
+| CL17 | l.728 (left) | `groupMovedLeft({ label, count, distance })` | `{label}: {count} clips moved {distance} to the left.` |
+| CL18 | l.830 | `moveTitle(title: string)` | `{title} — drag to move` (folded: the caller appends `\n` + CL1) |
+| CL19 | l.843 | `rangeBodyTitle` | `drag = time selection · click = playhead` |
+| CL20 | l.920 | `seconds(value: string)` | `{value} s` (badge text becomes `00:03.000 – 00:05.000 · 2.000 s`) |
 
-**Exact rendered text that A's pins and C's rows must match:**
-- `arrangement-range`, one track: `Time selection: 00:03.000 — 00:05.000 · length 00:02.000 · Delete = delete, the gap remains · Ctrl+Shift+X = Cut Time`
-- `arrangement-range`, all tracks: `Time selection: 00:03.000 — 00:05.000 · length 00:02.000 · all tracks · Delete = delete, the gap remains · Ctrl+Shift+X = Cut Time`
-- `arrangement-selected-clip`: the `title` equals `textContent`, for example `Clip: Song · start 00:02.000 · length 00:08.000 · source offset 00:01.000`. The `track-layout` l.866 invariant `title === textContent` must stay green.
-- The heading: `CZABA Studio Lab · Workspace` (demo) and `CZABA Studio · Workspace` (purchased). The prefix comes from `collection.ts` (V-0.5) and is unchanged.
-- `waveform-zoom.ts` `waveformZoomStatus(level)` keeps its name and signature. Its body becomes `studioViewStrings.waveformZoomStatus(waveformZoomPercent(level))`. `waveform-zoom.ts` may import `./strings`, because strings.ts imports nothing, so there is no cycle.
-- The local constant names stay (`CLIP_LANE_SHIFT_HINT`, `VIDEO_EXPANDED_MESSAGE`, …). They take their values from the module, and the two `export`s stay exported.
+**Exact rendered text that pins and C rows must match (examples):**
+- Move commit: `Move clip: start 00:08.400, length 00:02.000, source offset 00:00.000.` · Undo button title `Undo: Move clip`.
+- Lane move: `Move to track — სტემები: start 00:08.400.` · `Undo: Move to track — სტემები`.
+- Group move: `Move (2): 2 clips moved 00:06.400 to the right.` · `Undo: Move (2)`.
+- Lane refusal: `No room here — the clip stayed in its last free spot: მუსიკა, start 00:01.375.`
+- Trim commit: `Trim — right edge: start 00:07.000, length 00:03.400, source offset 00:00.000.`
+- No change: `Move clip: nothing changed — the Undo history is unchanged.` and `Fade In: nothing changed — the Undo history is unchanged.`
+- Fade: preview `Fade In: 1.000 s`, commit `Fade In: 1.000 s.`, reset `Fade In: 0.000 s.`; video: `Video Fade Out: 2.000 s.`
+- Local constant names stay (`CLIP_FOLDED_TITLE_LINE`, `VIDEO_FADE_HANDLE_TITLES`, `CLIP_LANE_REFUSAL_KEPT_PLACE`, `CLIP_FADE_LABELS`, …) and take their values from the module. `CLIP_FADE_LABELS`, `VIDEO_FADE_LABELS` and `CLIP_FADE_HANDLE_TITLES` are already English and stay byte-identical.
 
-**Glossary additions (d29z102):**
-| Georgian | English |
-|---|---|
-| `პატარა ხედი` | compact view |
-| `გაფართოებული ვიდეო` | expanded video |
-| `ბიბლიოთეკა დაიკეცა` | the library collapsed |
-| `მხოლოდ ხედი, ხმა არ იცვლება` | view only, the sound does not change |
-| `მონიშვნა` (readout) | Time selection |
-| `სიგრძე` | length |
-| `სამუშაო სივრცე` | Workspace |
-| `Envelope რეჟიმი` | Envelope mode |
-| `დრო ჩაკეტილია` | the time is locked |
-
-Existing terms are reused: track, clip, gap, all tracks, Cut Time, “…”.
+**Glossary additions (d29z103):**
+| Georgian | English | Source |
+|---|---|---|
+| `გადატანა` (history) | Move | CZABA label (Live §6.7 "Moving and Resizing Clips") |
+| `კლიპის გადატანა` | Move clip | as `Nudge clip`, `Delete clip` |
+| `გადატანა ხაზზე — {track}` | Move to track — {track} | CZABA label |
+| `მარცხენა / მარჯვენა კიდე` | left / right edge | Live §6.7 "a clip’s left or right edge" |
+| `Trim შეჩერდა` | Trim stopped | CZABA label |
+| `ცვლილება არ მოხდა — ისტორია არ შეიცვალა` | nothing changed — the Undo history is unchanged | CZABA label |
+| `ბოლო თავისუფალი ადგილი` | last free spot | reuses d29z95 `nearest free spot` shape |
+| `ხაზი დაკეცილია — … გაშალე` | The track is folded — unfold it … | Live §6.9 "unfold its track" |
+| `სურათი (ხმა არ იცვლება)` | picture only, the sound does not change | d29z102 phrase shape; picture-only per D-29z49 |
+| `გადაადგილება` (title) | drag to move | CZABA label |
+| `წმ` | s | glossary (unchanged rule) |
 
 ## 2. A — files you own (everything else is frozen)
 | Path | Allowed change |
 |---|---|
-| `app/lib/arrangement/strings.ts` | Append the WS keys to `studioLaneMoveStrings`, `studioVideoStrings`, `studioTrackGroupStrings`, `studioViewStrings`. Add two new objects after `studioMarkerStrings`: `studioClipEnvelopeStrings` and `studioWorkspaceStrings`. Formatters with 3+ same-type params take a named object (a local, not exported, interface is fine). Existing keys and values are byte-identical. No import. |
-| `app/components/arrangement/StudioWorkspace.tsx` | The import names, plus exactly the §1.1 lines (l.143, 144, 149–157, 954, 964, 1292, 2194, 2350–2351, 2370–2371, 2537–2558). **l.325 is not touched.** Biome-style wraps are allowed. |
-| `app/lib/arrangement/waveform-zoom.ts` | The import, plus the l.22 body only |
-| `app/lib/arrangement/__tests__/strings.test.ts` | The import specifiers. **Additive** entries in `EXPECTED_VIDEO_PLAIN_STRINGS`, `EXPECTED_V02C2_PLAIN_STRINGS.studioViewStrings`, `EXPECTED_V02C2_KEYS.studioViewStrings`, `V02C2_FORMATTER_SAMPLES.studioViewStrings`, `EXPECTED_V02C3_PLAIN_STRINGS.studioLaneMoveStrings`, `EXPECTED_V02C3_KEYS` (laneMove + trackGroup) and `V02C3_FORMATTER_SAMPLES.studioTrackGroupStrings`, plus any formatter-sample map that the existing ST tests require to be exhaustive. Delete `STUDIO_WORKSPACE_REMAINING_GEORGIAN_LINES` and the StudioWorkspace block at the end of ST25, and retitle ST25 to `ST25: studioGridStrings and the grid sources contain no Georgian codepoint` (granted edit of an existing `it`). New `describe('V-0.3d workspace strings')` with ST31–ST33 (§3.1). |
-| `floating-video.test.tsx` | l.129, 131, 132, 133, 134 only |
-| `track-groups-ui.test.tsx` | l.613, 627 only |
-| `clip-envelope-ui.test.tsx` | l.120, 121, 352, 356 only |
-| `purchased-collection-ui.test.tsx` | l.31, 37 only |
-| `waveform-zoom.test.tsx` | l.435, 476, 478, 485 only |
-| `all-lane-clipboard.test.tsx` | l.495 (`it` title → `after Ctrl+Shift+L the range line says all tracks`), 502, 504, 513, 515 only |
-| `track-layout.test.tsx` | l.865 only |
-| `docs/implementation/2026/quarter-IV/112-studio-v0-marker-strings.md` | l.4 → `Completed (A-ის შემოწმებები მწვანეა რაუნდ 136-ში; C round 136 — PASS, browserVerified; gate 136 — 7d9fed0)`; l.115 cites `c-round-136.json` as PASS; delete the C-round TODO line l.119 (GATE136-DOC112-STATUS) |
-| **new** `app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx` | WSU1–WSU2 (§3.3) |
-| **new** `docs/implementation/2026/quarter-IV/113-studio-v0-workspace-strings.md` | Georgian, with the `docs/implementation/TEMPLATE.md` sections. Its status says that C round 137 is still to come. |
+| `app/lib/arrangement/strings.ts` | Append the new object `studioClipStrings` (CL1–CL20) after `studioWorkspaceStrings`. Formatters with 3+ params take a named object (a local, not exported, interface is fine). Existing objects, keys and values byte-identical. No import. |
+| `app/components/arrangement/ArrangementClip.tsx` | The strings import, plus exactly the §1.1 lines (l.42, 56, 57, 59, 456, 586, 619, 620, 667, 671, 700, 701, 703, 713, 715, 717, 718, 721, 728, 765, 830, 843, 920, 947, 952). Biome-style wraps allowed. |
+| `app/contexts/ArrangementContext.tsx` | Add `studioClipStrings` to the existing strings import (l.148–156) and change **l.1761 only** to `studioClipStrings.historyMoveClips(ids.length)`. Nothing else. |
+| `app/lib/arrangement/__tests__/strings.test.ts` | The import specifiers. Delete the `applyEdit(moved, …)` entry from `CONTEXT_REMAINING_GEORGIAN_LINES` (l.721; ST13 then expects 3 lines). Retitle ST33 to `ST33: the new texts, waveform-zoom.ts and StudioWorkspace (except the track-header selector) have no Georgian and no «»` (gate-137 finding 3; body unchanged). New `describe('V-0.4a clip strings')` with ST34–ST35 (§3.1). |
+| The 17 pin files of §0 | Exactly the listed lines. No other line, no new `it`, `it` counts unchanged. |
+| `docs/implementation/2026/quarter-IV/113-studio-v0-workspace-strings.md` | l.4 → `Completed (A-ის შემოწმებები მწვანეა რაუნდ 137-ში; C round 137 — PASS, browserVerified; gate 137 — 7e6202b)`; l.70 last sentence → C round 137 PASS; delete the C-round TODO line l.74; in l.21 and l.75 replace `l.325` with `track-header selector (l.331)` (gate-137 findings 3 and 4). |
+| **new** `app/lib/arrangement/__tests__/clip-strings-ui.test.tsx` | CSU1–CSU3 (§3.3) |
+| **new** `docs/implementation/2026/quarter-IV/114-studio-v0-clip-strings.md` | Georgian, with the `docs/implementation/TEMPLATE.md` sections; status says C round 138 is still to come. |
 
 - **Protected (never touch):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/components/ui/Modal.tsx`, `app/routes/account.downloads.tsx`, `download-routes.test.ts`, and everything in `backlog.json` `global_forbidden_files`.
-- **Pin rule:** each replaced pin is a **hand-written English literal** with the same matcher (`toBe` stays `toBe`, `toContain` stays `toContain`, `not.toContain` stays `not.toContain` with the English fragment `all tracks`). No pin may import the module value it checks. No new `it` goes into the 7 pin files, and their `it` counts stay the same.
-- **Stop rule:** if the pre-edit grep finds a Georgian V-0.3d text in a file that is not granted, or a pin line differs from §0, A stops and reports. A does not widen scope.
+- **Pin rule:** each replaced pin is a **hand-written English literal** with the same matcher (`toBe` stays `toBe`, selector stays the same operator `^=` / `=` / `$=`). No pin imports the module value it checks. Fixture track names stay.
+- **Stop rule:** if the pre-edit grep finds a Georgian V-0.4a text (§1.1) in a file that is not granted, or a pin line differs from §0, A stops and reports. A does not widen scope.
 
 ## 3. A — tests and mutations
-### 3.1 `strings.test.ts` (30 → 33 `it`s)
-- **ST31:** the exact key sets of `studioClipEnvelopeStrings` and `studioWorkspaceStrings`; every plain string equals its §1.1 literal; every formatter returns the exact English for Latin samples (WS18 with `00:03.000` / `00:05.000` / `00:02.000`, WS21 with 2 and 3, WS23 with `Song`). The new keys of the four existing objects are pinned through the additive map entries.
-- **ST32:** the exported aliases: `VIDEO_RETURNED_COMPACT_MESSAGE` and `VIDEO_RETURNED_LIBRARY_RECOLLAPSED_MESSAGE` equal WS6/WS7; `waveformZoomStatus(2)` is `Waveform Zoom 200% — view only, the sound does not change.`; `waveformZoomStatus(0.5)` is `Waveform Zoom 50% — view only, the sound does not change.`
-- **ST33 (per-file scan, replaces the ratchet):**
-  - `studioClipEnvelopeStrings`, `studioWorkspaceStrings` and all the new formatter outputs contain no Georgian and no `«»`;
-  - `waveform-zoom.ts` (comments stripped) has no Georgian;
-  - `StudioWorkspace.tsx` (comments stripped) has **exactly one** Georgian line, equal to the l.325 selector line (R1), and **no** `«»`;
-  - `studioTrackGroupStrings.renameEmpty('X')` equals `studioMarkerStrings.renameEmpty('X')` for at least two names, one of them `SFX ქუჩა` (R3).
+### 3.1 `strings.test.ts` (33 → 35 `it`s)
+- **ST34:** the exact key set of `studioClipStrings`; every plain string equals its §1.1 literal; every formatter returns the exact English for Latin samples (CL5/CL6 with `'Fade In'`, `'1.000'`; CL10 with `'Move clip'` and `'Envelope'`; CL11 with 2 and 3; CL12 with `'stems'`; CL16/CL17 with `{ label: 'Move (2)', count: 2, distance: '00:01.000' }`; CL18 with `'Song'`; CL20 with `'2.000'`).
+- **ST35 (per-file scans):** `studioClipStrings` values and all sample outputs contain no Georgian and no `«»`; `ArrangementClip.tsx` (comments stripped) has **no** Georgian line and no `«»`; ST13 (existing) now pins exactly the 3 remaining Context lines.
 
-### 3.2 Pin replacements (hand-written English; fixture names stay as they are)
-The pin lines are listed in §0. Each one gets the exact §1.1 text, for example `'Group name: “SFX ქუჩა”.'`, `'The name is empty — “SFX ქუჩა” is kept'`, `'CZABA Studio Lab · Workspace'`, and the two `arrangement-range` lines given in §1.1.
+### 3.2 Pin replacements
+The pin lines are listed in §0. Each gets the exact §1.1 text with the fixture names unchanged (examples in §1.1). Selectors become `[title^="drag = time selection"]`, `[title="drag = time selection · click = playhead"]`, `[title="Trim — left edge"]`, `[title$="— drag to move"]`.
 
-### 3.3 New `workspace-strings-ui.test.tsx` (real `StudioWorkspace` in jsdom; copy the mount harness of `gesture-guard.test.tsx` l.296–336, do not import it)
-- **WSU1:** start a clip lane drag (pointer down on a clip header, then move to another lane). `arrangement-lane-move-hint` has the text `Shift — lock the time; only the track changes`. Move again with `shiftKey: true`: the text is `Shift — the time is locked; only the track changes` and `timeLocked` is true. Pointer up: the hint is gone and `arrangement-shortcut-hint` is back.
-- **WSU2:** select two clips (Ctrl+click or the existing multi-select path): `arrangement-selection-count` is `2 clips selected`. With one clip selected the element is absent.
+### 3.3 New `clip-strings-ui.test.tsx` (real `StudioWorkspace` in jsdom; copy the mount and pointer harness of `grid-snap-clip-edges.test.tsx` / `workspace-strings-ui.test.tsx`, do not import them)
+- **CSU1:** pointer drag on a clip body from 3 s to 5 s: the range badge text is exactly `00:03.000 – 00:05.000 · 2.000 s` and the body `title` is `drag = time selection · click = playhead`.
+- **CSU2:** select two clips, drag the group **left** by a known amount: status `Move (2): 2 clips moved {distance} to the left.` with the exact distance, and Undo label `Move (2)`.
+- **CSU3:** select two clips and press ArrowRight (keyboard nudge, Context l.1761): `undoLabel` is `Move (2)` and both clips moved by the nudge step.
 
 ### 3.4 Forward rule (GATE130-S3)
-Every WS key has at least one hand-written UI literal in a pin file or in WSU1–2. A lists the key → test mapping in its report. WS19 is covered by the `all-lane-clipboard` all-tracks line.
+Every CL key has at least one hand-written UI literal in a pin file or in CSU1–3. A lists the key → test mapping in its report.
 
 ### 3.5 Mutations (each turns the named tests red; restore and check by sha256)
 | ID | Mutation | Must turn red |
 |---|---|---|
-| m45 | WS2 text changed (for example `locked` → `fixed`) | ST map test, WSU1 |
-| m46 | StudioWorkspace l.2579 ternary branches swapped | WSU1 |
-| m47 | WS6 trailing `.` removed | ST32, `floating-video` (RETURNED_TEXT users) |
-| m48 | WS8 changed to `… “{name}” remains` | ST33 equality, `track-groups-ui` l.627 |
-| m49 | WS16 trailing `.` removed | ST32, `waveform-zoom.test` l.435 |
-| m50 | WS18 drops `length` | ST31, `all-lane-clipboard` l.504 and l.515 |
-| m51 | WS21 → `{count} clip selected` | ST31, WSU2 |
-| m52 | a Georgian letter added to WS17 in StudioWorkspace (inline literal) | ST33 |
+| m53 | CL13 → `Move clips` | ST34, `gesture-guard`, `grid-snap-ui` |
+| m54 | the l.728 direction ternary branches swapped | CSU2, `grid-snap-clip-edges` l.457 |
+| m55 | CL10 trailing `.` removed | ST34, `clip-fades-ui` (l.430 user), `marker-snap` l.567, `grid-snap-clip-edges` l.748 |
+| m56 | CL19 `time selection` → `selection` | ST34, CSU1, `track-layout` l.468 and the `^=` selector tests (they no longer find the body) |
+| m57 | CL20 unit `s` → `sec` | ST34, CSU1 |
+| m58 | Context l.1761 back to an inline `` `Move ${ids.length}` `` | CSU3 |
+| m59 | a Georgian letter added inline to l.830 | ST35 |
+| m60 | l.947 and l.952 titles swapped | `gesture-reentry` l.151, `grid-snap-edit` trims, `track-layout` l.493 |
 
 ## 4. A — checks (speed rules)
-- At the start: the frozen list, the 12 start hashes and the start copies all OK. `git status --short` is empty.
-- The pre-edit grep for every §1.1 Georgian text in `app/**` and `e2e/**`, saved to `a-round-137/pre-grep.txt`.
+- At the start: the frozen list, the 22 start hashes and the start copies all OK. `git status --short` is empty.
+- The pre-edit grep for every §1.1 Georgian text in `app/**` and `e2e/**`, saved to `a-round-138/pre-grep.txt`.
 - `npm run typecheck` and `npm run lint` exit 0. Read-only `npx biome check` on the changed code and test files gives 0 diagnostics.
-- `npx vitest run` on the named list: `strings`, `floating-video`, `track-groups-ui`, `clip-envelope-ui`, `purchased-collection-ui`, `waveform-zoom`, `all-lane-clipboard`, `track-layout` and `workspace-strings-ui`. Neighbours: `gesture-guard`, `delete-selection-ui`, `detail-panel`, `status-announcement-ui`, `marker-strings-ui`, `track-group-collapse-ui`, `navigation-strings-ui`. Save the results to `a-round-137/vitest.json`.
-- Mutations m45–m52 per §3.5.
+- `npx vitest run` on the named list: `strings` and the 17 pin files plus `clip-strings-ui`. Neighbours: `status-announcement`, `status-announcement-ui`, `delete-selection-ui`, `workspace-strings-ui`, `grid-musical-ui`, `track-volume-db`. Save to `a-round-138/vitest.json`.
+- Mutations m53–m60 per §3.5.
 - The code-reviewer (more than 3 files change). Its Architecture note goes to B.
 - **Not run:** the full suite, `npm run verify`, build and e2e (the gate does these).
-- At the end: `git status --short` shows the 12 ` M` + 2 `??` granted paths and nothing else. The frozen list is OK. The protected `git diff 7d9fed0` is empty. Write the end sha256 of the 14 paths to `a-round-137/end-sha256.txt`. A does no commit, stash, checkout, install, `--write` or `check:fix`.
+- At the end: `git status --short` shows the 22 ` M` + 2 `??` granted paths and nothing else (if a pin file needed no change, say so). The frozen list is OK. The protected `git diff 7e6202b` is empty. Write the end sha256 of the changed paths to `a-round-138/end-sha256.txt`. A does no commit, stash, checkout, install, `--write` or `check:fix`.
 
 ## 5. C — rows
-Real Playwright Chromium at **1440×900 and 1280×720** on `http://127.0.0.1:5173/studio-lab`, with a fresh context per session. Use test ids, not Georgian titles (the older harnesses that search for Georgian text will not match). State the Snap state at the start of each session; the default is off.
+Real Playwright Chromium at **1440×900 and 1280×720** on `http://127.0.0.1:5173/studio-lab`, fresh context per session. Use test ids and the new English titles, not Georgian ones. State the Snap state at the start of each session (default off). Undo text is read from the Undo button `title` (`Undo: {label}`).
 
 | Row | Start state → action → expected |
 |---|---|
-| T137-TARGETED | Run A's named vitest list; the counts equal A's |
-| SOURCE-SCOPE | 12 ` M` + 2 `??` and nothing else. The frozen list is OK at the start and at the end. The end hashes equal `a-round-137/end-sha256.txt`. The protected diff against `7d9fed0` is empty. No source change during C's phase |
-| AN-REVIEW | `diff -u` against `b-round-136/r137-granted-start/`. Only the §1.1 lines and the import change; l.325 is unchanged; no handler, condition, key or class changes; the pins are hand-written English with the same matchers; the ST25 edit is only the deletion and the retitle; doc 112 changes only l.4, l.115 and l.119 |
-| HEADING | Fresh load: the `h1` text is `CZABA Studio Lab · Workspace` |
-| LANE-HINT | A clip on music; there is a stems track below. Press on the clip header, move down past the threshold onto stems, and hold the button: `arrangement-lane-move-hint` shows WS1. Then move with Shift held: WS2, and the ghost keeps its start time. Release: the clip is on stems at the same start (Shift case), with one Undo entry, and the shortcut hint is back |
-| VIDEO-STATUS | Import a short generated MP4 with the round-131 harness (`c-round-131/tools/`). (a) Library open, then ⤢ `arrangement-video-expand`: status WS3. (b) ✕ `arrangement-video-close`: WS6. (c) Collapse the library (`arrangement-library-collapse`), then ⤢: WS4. ✕: WS7, and the library is collapsed again. (d) Library open, ⤢, then collapse the library while it is expanded: WS5. In each case the video keeps playing or stays paused as before (check `currentTime` and the paused state); the status text is exact |
-| GROUP-RENAME | Ctrl+G on two adjacent tracks, F2 on the group name, `Drums` + Enter: status `Group name: “Drums”.`, and Undo shows `Rename Group`. F2, clear, Enter: `The name is empty — “Drums” is kept`, and the name is unchanged. Then rename a marker to an empty name: the marker sentence has the same shape (REG-136) |
-| ENVELOPE | The `Env` button title is WS13 while off. Press A (or click): status WS10, title WS12, `aria-pressed=true`. Double-click on a clip adds an envelope point (the line has one more point). A again: status WS11 |
-| WAVEFORM-ZOOM | The `arrangement-waveform-zoom` aria-label is WS14 and its title is `Waveform Zoom 100% — …`. Choose 2×: status `Waveform Zoom 200% — view only, the sound does not change.`, and the title says 200%. The waveform path of an audio clip changes. **Audio unchanged:** the real output tap peak over the same 2 s of playback at 1× and at 2× is within ±0.5 dB. Back to 1×: the path equals the 1× path |
-| RANGE-READOUT | Make a range of 3–5 s on music: the `arrangement-range` text equals the one-track line of §1.1. Ctrl+Shift+L: it equals the all-tracks line. Delete: the clips keep a gap (the next clip's start is unchanged) and Undo restores it |
-| SELECTION | Select two clips: `2 clips selected`. Select one: the line is absent, and `arrangement-selected-clip` shows `Clip: {title} · start …` with `title === textContent` |
-| GEO-COUNT | At every step of the rows above, count Georgian in the StudioWorkspace surface: the heading suffix, the toolbar (`Env`, Waveform Zoom), the status, the range, selection and selected-clip lines, and the lane-move hint. Expect **0** after the named subtractions: track names (`მუსიკა`, `სტემები`, …), demo titles, and the dock buttons, library, lane overlay and detail panel (V-0.4/V-0.5). List every subtraction |
-| LAYOUT | S0/S1/S2 (the round-130 harness) against round 136: any change >1 px is only a text-width change of a granted element. The status, range and lane-hint lines wrap without horizontal overflow (`scrollWidth == clientWidth`) at 1280 with the all-tracks readout |
-| REG-136 | One marker sample: M at 3 s gives `Marker “Marker 1” added at 00:03.000.` (or the existing marker-exists text if one is there). See the corrected V-0.3c expectations in `backlog.json` (prev/next go to the timeline start or the project end first; a direct drag onto an occupied time is refused silently) |
-| G137-3 (alone, last) | `/studio-lab` shows the workspace and the demo badge. `/studio/middle-east` shows "Sign in required" with no workspace and 0 `audio[src]`. `GET /api/studio-token?…` → 401. The fake-Bearer 403 check is BLOCKED (backend unavailable in cloud) |
-| PX-NET / REG-HYD | 0 forbidden requests, 0 Authorization headers, 0 hydration errors and 0 pageerror (the known cart noise is expected) |
+| T138-TARGETED | Run A's named vitest list; the counts equal A's |
+| SOURCE-SCOPE | Only granted paths changed; frozen list OK at start and end; end hashes equal `a-round-138/end-sha256.txt`; protected diff against `7e6202b` empty; no source change during C's phase |
+| AN-REVIEW | `diff -u` against `b-round-137/r138-granted-start/`: only the §1.1 lines and imports change; Context changes only the import and l.1761; no handler, condition, threshold or class changes; pins hand-written English with the same matchers and selector operators; strings.test changes are only the import, the l.721 deletion, the ST33 retitle and ST34–35; doc 113 only l.4/21/70/74/75 |
+| CLIP-MOVE | Drag a clip header on music by about +1 s and release: status `Move clip: start …, length …, source offset ….` with the real values; Undo title `Undo: Move clip`; one Ctrl+Z restores the start |
+| MOVE-BLOCKED | Drag a clip into its neighbour on the same track and hold: status CL7 exactly; release: the clip is at its last free spot (not overlapping) |
+| TRIM | Hover the left edge (`title` `Trim — left edge`), drag it right and release: status `Trim — left edge: start …, length …, source offset ….`; Undo `Undo: Trim — left edge`. Drag the right edge past the source end and hold: status CL9; the clip length stops at the source end |
+| LANE-MOVE | Drag a clip from music onto stems (free place): status `Move to track — სტემები: start ….`; Undo `Undo: Move to track — სტემები`. Drag onto an occupied stems spot: status `No room here — the clip stayed in its last free spot: {track}, start ….` and the clip is where the status says |
+| GROUP-MOVE | Select two clips (Ctrl/Cmd+click), drag right: `Move (2): 2 clips moved {d} to the right.` with `{d}` equal to the measured start change; Undo `Undo: Move (2)`. Drag left: `… to the left.`. ArrowRight with both selected: Undo `Undo: Move (2)` and both starts move by the nudge step |
+| NO-CHANGE | Drag a clip and bring it back to the exact start before release (or Shift-lock with no track change): status `Move clip: nothing changed — the Undo history is unchanged.`; the Undo title is unchanged |
+| FADES | Audio clip: drag the fade-in handle: while held `Fade In: x.xxx s`; release `Fade In: x.xxx s.`; double-click the handle: `Fade In: 0.000 s.`. **Real audio:** with a 1 s fade-in, the output-tap RMS over the first 200 ms of the clip is at least 6 dB below the same window without the fade (paired comparison, same position). Use a clip with audible signal at its start (not `Slow rise`) and record the unfaded 200 ms RMS too, so the comparison is against a real level, not the noise floor; a near-silent baseline is an invalid run, not a PASS. Video clip fade handle `title` equals CL2/CL3 |
+| FOLDED-TITLE | Fold a group (Ctrl+G on two adjacent tracks, then U or the fold button): the clip **header** element (the `⠿`/`▶` row, not the clip root) has `title` `{title} — drag to move` + newline + CL1; the clip root `title` is `{title}` + newline + CL1; unfold: the header `title` is `{title} — drag to move` |
+| RANGE-BADGE | Drag on a clip body from 3 s to 5 s: the badge text is `00:03.000 – 00:05.000 · 2.000 s`; the body `title` is CL19 |
+| GEO-COUNT | At every step above count Georgian in the clip surface (header title, body title, edge and fade handle titles, badge), the status line and the Undo/Redo titles. Expect **0** after the named subtractions (R5): track names in sentences, Envelope texts, lane overlay, group header, meter/Master, detail panel, library and dock. List every subtraction |
+| LAYOUT | S0/S1/S2 (round-130 harness) against round 137: any change >1 px is only a text-width change of a granted element (the badge) |
+| REG-137 | One sample: the one-track range readout equals the round-137 line exactly |
+| G138-3 (alone, last) | `/studio-lab` shows the workspace and the demo badge. `/studio/middle-east` shows "Sign in required", no workspace, 0 `audio[src]`. `GET /api/studio-token?…` → 401. The fake-Bearer 403 check is BLOCKED (backend unavailable in cloud) |
+| PX-NET / REG-HYD | 0 forbidden requests, 0 Authorization headers, 0 hydration errors, 0 pageerror (the known cart noise is expected) |
 
 Gate rows (C does not claim them): full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
 
 ## 6. Ableton source
-Live 12 Reference Manual, Arrangement View (B's saved capture `b-round-133/live/arrangement-view.txt`, sha256 `2b9a3007…`, re-read 2026-10-24) and §3.19 / §26 (the table of contents in the same capture). Only text changes this round.
+Live 12 Reference Manual, Arrangement View, B's saved capture `b-round-133/live/arrangement-view.txt` (sha256 `2b9a3007b254689e…`, re-read 2026-10-24 for this task). Only text changes this round.
 
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Time selection readout | §6 Arrangement, "time selection" | the term "time selection" | The readout line is a CZABA addition. Delete leaves a gap: user decision 2026-10-11 | RANGE-READOUT |
-| Clip envelope edit mode | §3.19 Clip Envelopes, §26.6.2 Draw Mode | clip envelopes exist; drawing uses Draw Mode (B) | **Deliberate difference:** the CZABA `Env` toggle with A. Not a Live claim | ENVELOPE |
-| Group rename | §18.3 Grouping Tracks (D-29z98) | Rename | **Deliberate difference:** F2 instead of Ctrl+R (same as markers) | GROUP-RENAME |
-| Shift time-lock during a cross-track drag | none found | **unconfirmed** | CZABA rule; no Live claim is made | LANE-HINT |
-| Waveform Zoom (view only) | none found for the Arrangement | **unconfirmed** | CZABA view control; the audio is unchanged | WAVEFORM-ZOOM |
-| Floating expanded video | not applicable | not applicable | CZABA single video track (user scope) | VIDEO-STATUS |
+| Move and resize clips by their edges | §6.7 Moving and Resizing Clips | "Dragging a clip’s left or right edge changes the clip’s length." | Wording `Trim — left/right edge`; the label "Trim" is CZABA's. Undo label names are CZABA labels (Live's Undo menu wording is **unconfirmed**) | TRIM, CLIP-MOVE |
+| Fade handles | §6.8 Audio Clip Fades and Crossfades | fade handles at the clip edges, shown on hover | Double-click = 0 is a CZABA rule (Live: select + Delete). Picture-only video fades are CZABA (D-29z49) | FADES |
+| Folded track hides time editing | §6.9 Selecting Clips and Time | "To access the time within a clip for editing, unfold its track" | Same idea; CZABA folds groups | FOLDED-TITLE |
+| Cross-track move, lane refusal, no-change status | none found | **unconfirmed** | CZABA rules; no Live claim | LANE-MOVE, NO-CHANGE |
 
 C rates "CZABA requirement met" and "Ableton correspondence" separately.
 
 ## 7. Evidence and reporting
-- C writes `c-round-137.md` and `c-round-137.json` as it goes, with these fields: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` (with the subtracted items), `invalidRuns`, `notesForB`. Evidence goes under `c-round-137/{tools,out,shots}/`.
-- `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`. Gestures that Chromium truly cannot reach go under `inconclusive`, with the reason. C makes no `store/` writes.
-- A writes `a-round-137.md` as it goes: start checks, pre-grep, changed files, `it` counts before and after, test results, mutations, the reviewer verdict and its Architecture note, shell writes, end state, deviations and known gaps.
+- C writes `c-round-138.md` and `c-round-138.json` as it goes (`taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` with subtractions, `measurements`, `invalidRuns`, `notesForB`). Evidence under `c-round-138/{tools,out,shots}/`. No `store/` writes.
+- `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`.
+- A writes `a-round-138.md` as it goes: start checks, pre-grep, changed files, `it` counts before and after, test results, mutations, the reviewer verdict and its Architecture note, shell writes, end state, deviations and known gaps.
 
-## 8. Outcome, fixed in advance (B at round 138 planning)
-| Condition | Round 138 |
+## 8. Outcome, fixed in advance (B at round 139 planning)
+| Condition | Round 139 |
 |---|---|
-| B plans on or after **2026-10-27** | The **REGRESSION round** first (use the corrected V-0.3c expectations), then the row below |
-| C FAIL with Critical / High / Medium | A bounded V-0.3d fix-up (at most three related bugs) |
-| C PASS (new Lows → `deferred_low_polish`) | V-0.3d → `c_pass`, then `c_pass_published` after the gate. **V-0.3 is complete.** If root's strings-split checkpoint result exists, B applies it first (an approved split is its own bounded round with behaviour-preserving tests). Otherwise round 138 = **V-0.4** (lanes and detail), re-measured first and split by surface |
+| B plans on or after **2026-10-27** | The **REGRESSION round** first, then the row below |
+| C FAIL with Critical / High / Medium | A bounded V-0.4a fix-up (at most three related bugs) |
+| C PASS (new Lows → `deferred_low_polish`) | V-0.4a → `c_pass`, then `c_pass_published` after the gate. Round 139 = **V-0.4b** (ArrangementLane + the StudioWorkspace track-header selector, ST33 allowance → 0, plus gate-137 finding 1 `selectedClipDetail`), re-measured first. If root's strings-split checkpoint result arrives first, B applies it as its own bounded round before V-0.4b |
 
 At every planning B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
 
 ## 9. Neighbour risk and root notes
-- **Focus hand-off:** l.325 is the only selector that finds the track-name button. It must stay byte-identical, or Ctrl+G / group focus breaks. ST33 pins it.
-- **Status de-duplication:** the Envelope and video statuses are set once per action, and nothing compares them by value. The texts are stable strings.
-- **Width:** the English readout is longer than the Georgian one (`Time selection:` and `Delete = delete, the gap remains`). The line already wraps (`tabular-nums`, no `truncate`). LAYOUT checks 1280.
-- **jsdom vs browser:** the readout spacing comes from the JSX `{' '}` and the span boundaries. C checks the real `textContent`.
-- **Mixed for one round (accepted, named):** the lane overlay `ყველა ხაზი`, the dock buttons, the detail-panel range status (V-0.4/V-0.5).
-- **Architecture:** the strings-split checkpoint request is `b-round-136-checkpoint-request.md`, to run after C round 137 PASS and before V-0.4 is planned. It is non-blocking.
-- **Commit readiness:** after C PASS, root may publish V-0.3d as an interim unit.
+- **Selectors:** 8 test files find the clip body or handles by `title`. A title change without its selector would make those tests fail to find elements, not test the wrong thing; m56 proves it.
+- **Status de-duplication:** the fade preview is set on every pointermove with a changing value; the texts only change wording, so the claimed-gesture span logic (`status-announcement-ui` SU5) is unaffected.
+- **Undo labels:** `commitArrangement(…, label, …)` stores the label in history; Undo/Redo show it. Old-session history is not persisted, so no stored Georgian label survives a reload.
+- **Width:** the badge (`· 2.000 s`) is shorter; header titles are tooltips only. LAYOUT checks it.
+- **Architecture:** the strings-split checkpoint request (`b-round-136-checkpoint-request.md`, with the round-137 addendum) is still open and non-blocking.
+- **Commit readiness:** after C PASS, root may publish V-0.4a as an interim unit.
