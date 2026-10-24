@@ -1,168 +1,135 @@
-# CURRENT TASK — Round 143: VISUAL-A V-0.4e fix-up — one-line video Clip Gain reason (C-R142-01) + polish test leftovers
+# CURRENT TASK — Round 144: V-0.4e close-out — written ruling on the video placeholder delta (C-R143-01) + two leftover Lows + minimal C re-check
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 142 = skipped)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 143 = skipped)
 - **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
-- **Previous task:** `tasks/round-142.md` (exact copy of the round-142 `current-task.md`, sha256 `55a7d844…`). Rationale: `b-round-142.md`. Decision record: **D-29z108** in `docs/technical/studio-real-workspace/plan.md`.
-- **Baseline:** HEAD is still **`6e9f9b1e97d67703ba34e8b2a260a0a5215c3506`**. Gate 142 was **skipped** (C FAIL), so the round-142 work is **uncommitted in the tree**: 20 ` M` + 2 `??` paths (the round-142 grants). Round 143 builds on that tree. Nothing is reverted, stashed or re-done. Rounds 142 + 143 publish together after C PASS (GATE-142-SKIPPED, same pattern as GATE-72/74-SKIPPED).
-- **Frozen list:** `tmp/studio-real-loop/b-round-142-r143-tree-sha256.txt`, **955 entries** = `git ls-files -co --exclude-standard` (963, current dirty tree) minus the 8 grants. Hashes taken from the tree **as it is now**, including the uncommitted round-142 files that are not granted again. `sha256sum -c --quiet` OK at planning, run from `store/`.
-- **Grants:** `b-round-142-r143-grants.txt` (8 lines, all existing files; no new file). **Start hashes:** `b-round-142-r143-granted-start-sha256.txt`. **Start copies:** `b-round-142/r143-granted-start/` (paths relative to `store/`; `sha256sum -c` OK there). A checks all three first; any difference → A stops and reports.
+- **Previous task:** `tasks/round-143.md`, an exact copy of the round-143 `current-task.md` (sha256 `0af0ea05…`). Rationale: `b-round-143.md`. Decision record: **D-29z109** in `docs/technical/studio-real-workspace/plan.md`.
+- **Baseline:** HEAD is still **`6e9f9b1e97d67703ba34e8b2a260a0a5215c3506`**. Gates 142 and 143 were **skipped** (C FAIL). The round-142 + round-143 work is uncommitted in the tree: the same 22 paths (20 ` M` + 2 `??`). Round 144 builds on that tree. Nothing is reverted, stashed or re-done. Rounds 142 + 143 + 144 publish together after C PASS.
+- **Frozen list:** `tmp/studio-real-loop/b-round-143-r144-tree-sha256.txt`, **961 entries**. That is `git ls-files -co --exclude-standard` (963) minus the 2 grants, hashed from the tree as it is now (round-143 end state). `sha256sum -c --quiet` was OK at planning, run from `store/`.
+- **Grants:** `b-round-143-r144-grants.txt` lists 2 existing files and no new file. **Start hashes:** `b-round-143-r144-granted-start-sha256.txt`; they equal `a-round-143/end-sha256.txt` for these 2 paths. **Start copies:** `b-round-143/r144-granted-start/`, with paths relative to `store/`. A checks all three first. Any difference → A stops and reports.
 
-## 0. Why this round (D-29z108)
-- **Round 142: C FAIL**, `browserVerified` = `realVerified` = true. Every row passed at 1440×900 and 1280×720 except **LAYOUT**, and that failure is one Medium bug this round caused:
-  - **C-R142-01 (Medium).** At 1440 with a video clip selected, the English `clipGainVideoReason` (`A video clip has no Clip Gain — for its sound use the track Volume/Mute`) wraps to **2 lines**. The baseline is 1 line. The video placeholder moves by d = (+16, −8, −32, 0).
-  - C's Georgian-swap control on the same DOM gives 1 line and a 0 px delta in all 5 states, so the English text is the proven cause. A had raised the same item as a STOP.
-- `tasks/round-142.md` §8 says: C FAIL with a Medium → **a bounded V-0.4e fix-up**. Checks at planning:
-  - the regression is due on/after 2026-10-27 and today is 2026-10-24, so it is not due;
-  - `user-review/ableton-decisions.md` and `design-ux-decisions.md` do not exist;
-  - there is no strings-split checkpoint result (non-blocking).
-- **Other round-142 results (C, independent):** T142-TARGETED, SOURCE-SCOPE, AN-REVIEW, DETAIL-TEXT, DETAIL-STATUS, CLIP-GAIN-AUDIO, LIBRARY-LABELS, GEO-COUNT, REG-141, G142-3 and PX-NET/REG-HYD all **PASS**.
-  - CLIP-GAIN-AUDIO, real audio: −20 dB gives a drop of 20.00–20.04 dB; reset comes back within 0.03 dB.
-  - G142-3 fake-Bearer 403 is BLOCKED (backend unavailable in cloud).
-  - These pass results are kept. Round 143 re-checks only what it touches, plus one sample each for the neighbours (§5).
+## 0. Why this round (D-29z109)
+- **Round 143: C FAIL**, with `browserVerified` = `realVerified` = true.
+  - **Every row passed except LAYOUT 1440:** T143-TARGETED (357/357), SOURCE-SCOPE, AN-REVIEW, VIDEO-REASON-TEXT, LAYOUT 1280, NEIGHBOUR-SAMPLE, GEO-COUNT, G143-3 and PX-NET/REG-HYD.
+  - **CLIP-GAIN-AUDIO (real audio):** −20 dB gives a 20.03 dB drop, and reset comes back within −0.07 dB.
+  - **The fix works.** At 1440 the video reason is on 1 line, box [640.5, 779.5, 329, 16]. Its text, `title` and U+2014 dash are correct.
+- **The only failure is C-R143-01 (Low, process/criterion).** At 1440 the video placeholder box is [735.5, 759.5, 139, 16]. The 6e9f9b1 baseline is [719.5, 759.5, 171, 16], so d = (+16, 0, −32, 0). A measured this exact delta and raised a STOP, but B gave no written acceptance before C ran, so the literal ≤ 1 px rule failed.
+- **Why the delta is not a layout regression:**
+  - The parent `arrangement-detail-waveform` has d = 0.
+  - C's in-page Georgian-swap control puts the placeholder exactly on the baseline box.
+  - The whole x/w delta is the width of the centred round-142 `videoPlaceholder` string (`Video clip · no waveform`, 139 px, against the Georgian 171 px), and that string was already ratified.
+  - The y −8 of C-R142-01 is gone.
+- **B's own error.** The round-143 §1 sentence "the video placeholder stands where it stood before round 142" assumed the Georgian placeholder width. It could not hold with an English placeholder. This is recorded in B-R143-SPEC-CORRECTIONS.
+- **Checks at planning:**
+  - The regression is due on or after 2026-10-27; today is 2026-10-24.
+  - `user-review/ableton-decisions.md` and `design-ux-decisions.md` do not exist.
+  - There is no strings-split checkpoint result (non-blocking).
+  - No Critical or High finding is open, and no Medium is open apart from Tech Lead manual items.
 
-### Rulings D-29z108
-- **R1 — the new text.** `clipGainVideoReason` becomes **`A video clip has no Clip Gain — use the track Volume/Mute`**.
-  - A measured it live in the same slot (`a-round-142/probe/out/video-reason-candidates-a142.json`): **1 line, 329 px** at 1440, in a 408 px max column. The Georgian baseline is 327 px.
-  - Width as close as possible to the baseline means the centred middle column should put the placeholder back at about 0 px.
-  - It is the smallest honest change to the round-142 text: only "for its sound" is dropped. The meaning stays: the track Volume/Mute is the control for a video clip's sound.
-  - At 1280 every candidate wraps to 2 lines, and so does the Georgian baseline. That is not a breach (R3).
-  - No class change and no new key.
-- **R2 — round size.** One Medium bug, plus one cheap Low fold-in in a file this stage already owns: the polish leftovers (A round-142 D2 and the reviewer Low). No V-0.5 scope is attached.
-- **R3 — LAYOUT baseline at 1280 with the panel open.** B's round-141 probe stored no 1280 open state.
-  - **New 1280 open baseline:** C's `c-round-142/out/c142-1280-r1.json` `states.*.measure`, taken from the round-142 tree.
-  - C's Georgian-swap control there showed the same `clippedBelowPanel`, the same `contentScroll` (95–98 / 83) and the same line counts. That proves the clipping existed before V-0.4e (C-R142-03).
-  - The 1280 rule is therefore **"no worse than that baseline"**, not "empty". The 1440 rule is unchanged: compare with B's `b-round-141/out/detail-baseline-6e9f9b1.json`.
-- **R4 — exempt deltas (round 142, ratified).** These may differ from B's 6e9f9b1 baseline, and C reports them:
-  - `arrangement-detail-header-label` x/w (−45 / +43): the flex-1 span widens because the h2 `Clip details` is shorter;
-  - the apply button (+22 w) and the toggle (+2 w), both `w-fit`.
-- **R5 — corrections of B's round-142 text (recorded, no code change):**
-  - **R8 was wrong.** `stems` cannot match by kind: the search text uses the kind label `Stem`, and the folder label `Stems` is not in it. A's LB-SEARCH asserts `stem` (D3, ratified). C-R142-02 (Low) goes to `deferred_low_polish`. Separate search keywords per kind, including the plural, belong to the V-0.5 library stage as a forward constraint. The reviewer's Architecture note and C's `sfx`-matches-the-collection-label observation go there too.
-  - **§5 LIBRARY-LABELS wording:** the frozen `ArrangementLibrary.tsx` l.518 aria-label belongs to the **collection** toggle, not a folder toggle. Folders have no toggle.
-  - **A's round-142 deviations D1–D7 are ratified.** D1: the 57th pin line, `PENDING_HIDDEN_HINT`. D6: the l.702 block is the formatter map; the reviewer agreed with A.
+### Rulings D-29z109
+- **R1 — the placeholder delta is accepted in writing (it closes C-R143-01).**
+  - At 1440 in the video state, `arrangement-detail-video-placeholder` is expected at the literal box **[735.5, 759.5, 139, 16] ± 1 px** in each of x, y, w and h. That is d = (+16, 0, −32, 0) against `b-round-141/out/detail-baseline-6e9f9b1.json`.
+  - It is an exempt text-width delta of the ratified round-142 `videoPlaceholder` string, in the same class as R4.
+  - Conditions that must hold too:
+    - the parent `arrangement-detail-waveform` stays at d ≤ 1 px against the baseline;
+    - C's Georgian-swap control puts the placeholder back on the baseline box [719.5, 759.5, 171, 16] ± 1 px.
+  - C-R143-01 is **not** a `deferred_low_polish` item. It closes on this ruling plus C's LAYOUT re-check in this round.
+- **R2 — R4 of D-29z108 is amended.** The toggle delta is (−2, 0, +2, 0): it is right-aligned, so x follows w. The other R4 deltas are unchanged: header label (−45, 0, +43, 0), apply (0, 0, +22, 0).
+- **R3 — round shape.** No new scope; V-0.5 is not attached, because rounds 142–144 publish only on a C PASS. A gets two cheap Lows from A's round-143 reviewer, both in files this stage already owns (2026-10-23 bug-gate rule: a Low may be fixed early when the round owns the code and it costs little):
+  - **R-L1:** the polish `describe` title still says "Georgian".
+  - **R-L2:** doc 118's status line, its stale TODO and its stale "unresolved" entry, plus the testing lines for rounds 143/144.
+  - **R-L3** (the broad `'წმ'` guard) is acknowledged as info; no change.
+- **R4 — A's round-143 deviations are ratified:**
+  - **D1:** DPS2/DPS4 stay green under m89/m90, because a `toContain` cannot see an appended suffix. B's prediction was wrong.
+  - **D2:** the Biome join, −1 line shift.
+  - **D3:** the probe (b) delta, now ruled by R1.
 
 ## 1. What changes (user-visible)
-With a video clip selected, the Clip Detail panel's Clip Gain reason reads `A video clip has no Clip Gain — use the track Volume/Mute`. The field's `title` shows the same text. At 1440×900 it is one line again, and the video placeholder stands where it stood before round 142. Nothing else changes: no handler, class, testid, size, key binding or other string.
+Nothing in the app. No source code, string, class, testid, handler or key binding changes. Only one test `describe` title and doc 118 change.
 
-### 1.1 Source and test edits
+### 1.1 Edits
 | ID | File | Before | After |
 |---|---|---|---|
-| VR1 | `app/lib/arrangement/strings.ts` (`studioDetailStrings.clipGainVideoReason`, l.637 at planning) | `'A video clip has no Clip Gain — for its sound use the track Volume/Mute'` | `'A video clip has no Clip Gain — use the track Volume/Mute'` (the `—` is U+2014, as before). Nothing else in the file changes |
-| VR2 | `strings.test.ts` ST41 expected list (l.2139 at planning) | old literal | the VR1 literal, hand-written |
-| VR3 | `clip-gain-fader.test.tsx` l.36, `clip-gain.test.tsx` l.60, `detail-panel-reason.test.tsx` l.25–26, `detail-panel-fit.test.tsx` l.25–26 | old literal | the VR1 literal, hand-written, with the same matcher. Biome may join a two-line `const` back into one line; that is allowed and must be reported |
-| PL1 | `detail-panel-polish.test.tsx` `it` titles at l.381 and l.394 (planning lines) | `… in Georgian and keeps the aria-labels` | `… in English and keeps the aria-labels`. Same `it` count (16) and the same bodies otherwise |
-| PL2 | same file, l.391 and l.407 | `expect(content.textContent).not.toContain('end, წმ');` (can never fail now) | `expect(content.textContent).not.toContain('წმ');`. This is a stale-unit guard: the Georgian seconds abbreviation of the old range labels must not come back. A confirms the fixture content has no other `წმ` (data), so the guard is green now and would be red with the old `საიდან, წმ` label (m89) |
-| DOC | `docs/implementation/2026/quarter-IV/118-studio-v0-detail-library-strings.md` | — | l.36 table row: the English cell becomes the VR1 text. Add a short "Problem → Solution" entry for C-R142-01: the 2-line wrap at 1440, the measured candidates, the D-29z108 choice. Status line l.4 → `In Progress (C round 142 — FAIL: C-R142-01; round 143 fix-up; C round 143 ჯერ არ გაშვებულა)`. Georgian, as the rest of the doc. Nothing else changes |
-
-**Before editing, A greps** `store/app`, `store/e2e` and `store/docs` for `for its sound use the track` and lists every hit. At planning there were exactly 7: strings.ts, 5 test files and doc 118. Any hit outside the grants → A stops and reports.
+| CL1 | `app/lib/arrangement/__tests__/detail-panel-polish.test.tsx` l.362 | `describe('design (d): Georgian detail labels and the w-72 info column (D-29i, D-29j)', () => {` | `describe('design (d): English detail labels and the w-72 info column (D-29i, D-29j)', () => {`. Nothing else in the file changes; the `it` count stays 16 |
+| CL2 | `docs/implementation/2026/quarter-IV/118-studio-v0-detail-library-strings.md` | — | (a) The status line (l.4) becomes `In Progress (C round 143 — FAIL მხოლოდ C-R143-01-ზე, დაიხურა B-ის D-29z109 წერილობითი დასკვნით; round 144 — C-ის ხელახალი შემოწმება)`.<br>(b) The entry `**Problem (გადაუწყვეტელი, stop rule):** …` (l.87 at planning) loses the word `გადაუწყვეტელი, `, so it reads `**Problem (stop rule):**`. At the end of its Solution, add one sentence saying it is resolved by D-29z108 (see the C-R142-01 entry).<br>(c) Add one new Problem → Solution entry for C-R143-01. The placeholder's own English text is narrower and centred, so d = (+16, 0, −32, 0). The parent box d = 0, and the Georgian swap gives the baseline box. B accepted it in writing (D-29z109 R1). There is no code change.<br>(d) Under `## ტესტირება`, add two lines: round 143 (A: typecheck/lint 0, 15 files 357/357, m88–m90; C: every row PASS except the unratified placeholder delta; real Clip Gain −20 dB → 20.03 dB) and round 144 (C's re-check per D-29z109, result pending).<br>(e) Under `## TODO / შემდეგი ნაბიჯები`, delete the 3 stale lines (B's approval of the short text, C round 142, and B's §3.2/R8 `stems` decision). Keep the V-0.5 line and add `LIB-SEARCH-KEYWORDS` to it (per-kind search keywords, including the plural, kept apart from the display labels).<br>Georgian, like the rest of the doc. Nothing else changes |
 
 ## 2. A — files you own (everything else is frozen)
-The 8 paths in `b-round-142-r143-grants.txt`, limited to the edits in §1.1:
-- `app/lib/arrangement/strings.ts`: VR1 only (one value);
-- `app/lib/arrangement/__tests__/strings.test.ts`: VR2 only;
-- `clip-gain-fader.test.tsx`, `clip-gain.test.tsx`, `detail-panel-reason.test.tsx`, `detail-panel-fit.test.tsx`: VR3 only;
-- `detail-panel-polish.test.tsx`: PL1 and PL2 only;
-- `docs/implementation/2026/quarter-IV/118-studio-v0-detail-library-strings.md`: DOC only.
-
-Rules:
+You own only the 2 paths in `b-round-143-r144-grants.txt`, and only for the edits in §1.1.
 - **Protected (never touch):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/components/ui/Modal.tsx`, `app/routes/account.downloads.tsx`, `download-routes.test.ts`, and everything in `backlog.json` `global_forbidden_files`.
-- **Frozen and relevant:** `ArrangementDetailPanel.tsx`, `library.ts`, `panels.ts`, `clip-gain-multi.ts`, `ArrangementLibrary.tsx`, the other round-142 pin files and `detail-panel-strings-ui.test.tsx`. They are not granted again, and their round-142 content must stay byte-identical (frozen list).
-- **Pin rule:** replaced pins are hand-written English literals. No pin imports the module value it checks.
+- **Frozen, including all round-142/143 content:** `strings.ts`, `ArrangementDetailPanel.tsx`, `library.ts`, `panels.ts`, `clip-gain-multi.ts` and every pin/test file except the polish file. They stay byte-identical to the frozen list.
+- **Untracked file (C-R119-01):** doc 118 is untracked (`??`). Before editing it, A stores its own pre-edit copy and sha256 under `a-round-144/pre-edit/`.
+- **Edit rule (C-R120-01):** every lasting edit goes through Edit/Write, with no shell writes under `store/`. Biome may rewrap nothing here. If it reports a diagnostic on CL1, A reports it and does not run `--write`.
 - **Stop rule:** A stops and reports, without widening scope, if any of these happens:
-  - a grep hit falls outside the grants;
+  - a start check fails;
   - a non-granted test fails;
-  - in A's required browser probe, the VR1 text at 1440 in the video state does not render on 1 line, or the video placeholder is more than 1 px from the baseline. A reports the measured delta, and B rules before C runs: either accept that delta or switch to the 333 px candidate.
-- **Untracked file (C-R119-01):** doc 118 is untracked (`??`). Before editing it, A also stores its own pre-edit copy and sha256 under `a-round-143/pre-edit/`. B's `b-round-142/r143-granted-start/` copy is the reference for C.
-- **Edit rule (C-R120-01):** every lasting edit goes through Edit/Write. Shell writes are only for temporary mutations, which are restored and sha-verified. A lists every shell write.
+  - a diff appears outside the 2 grants.
 
-## 3. A — tests and mutations
-- `it` counts stay the same in every granted test file. A records them before and after.
-- **Mutations** (each turns the named tests red; restore and check by sha256):
-
-| ID | Mutation | Must turn red |
-|---|---|---|
-| m88 | `clipGainVideoReason` back to the round-142 text | ST41, clip-gain-fader (video row l.429), clip-gain (l.785), detail-panel-reason (l.290/292/352), detail-panel-fit (l.304) |
-| m89 | `studioDetailStrings.sourceUnchanged` → `'The source file stays unchanged · წმ'` (a text that is in the single-clip detail content but **outside** the polish label arrays) | the polish single-clip `it`, failing on the **PL2 `not.toContain('წმ')` line itself** (A quotes the failing assertion line). ST41 and DPS2 also turn red elsewhere |
-| m90 | `studioDetailStrings.multiClipNote` gets the suffix `' · წმ'` | the polish group `it`, failing on its PL2 line itself (A quotes it). ST41 and DPS4 also turn red elsewhere |
-
-A label mutation such as `'From, წმ'` would also turn the polish tests red, but through the `rangeLabels` pin and not through PL2. That is why m89/m90 target texts that only the guard reads (A-R138-M60-EXPECTATION lesson). If a polish `it` turns red on a different line, or not at all, A reports it: PL2's own discrimination is then not proven, and A does not claim it.
-
-- **Required A browser probe.** Use A's own copy of `b-round-141/tools/detail-probe.cjs` or the round-142 probe, against the running :5173 server, with fresh contexts. Output goes to `a-round-143/probe/`. Two criteria in the 1440 video state, compared with `b-round-141/out/detail-baseline-6e9f9b1.json`:
-  - (a) `arrangement-detail-clip-gain-reason` is on **1 line**;
-  - (b) the `arrangement-detail-video-placeholder` box is within **1 px** in x/y/w/h.
-
-  Also record the 1280 video state: the reason is 2 lines, as at baseline.
-
-## 4. A — checks (speed rules)
-- At the start, all OK: the frozen list (955), the 8 start hashes and the start copies. `git status --short` shows the 22 round-142 paths (20 ` M` + 2 `??`) and nothing else.
-- The pre-edit grep (§1.1) is saved to `a-round-143/pre-grep.txt`.
-- `npm run typecheck` and `npm run lint` exit 0. A read-only `npx biome check` on the 7 changed code/test files gives 0 diagnostics.
-- `npx vitest run` on these files, saved to `a-round-143/vitest.json`:
-  - the 6 granted test files;
-  - `detail-panel-strings-ui`, `detail-panel`, `panels`, `clip-gain-multi`, `library`, `pending-status`, `status-announcement-ui`, `self-disabling-focus` and `fader-guards`.
-- Mutations m88–m90.
-- The code-reviewer runs, because more than 3 files change. Its Architecture note goes to B.
-- **Not run:** the full suite, `npm run verify`, build or e2e (the gate does these).
-- At the end:
-  - `git status --short` still shows exactly the same 22 paths (round 143 adds none);
-  - the frozen list is OK;
+## 3. A — checks (speed rules)
+- **Start:**
+  - frozen list (961) OK;
+  - 2 start hashes and start copies OK;
+  - `git status --short` = exactly the 22 known paths.
+- **Tests:**
+  - `npm run typecheck` and `npm run lint` exit 0;
+  - read-only `npx biome check app/lib/arrangement/__tests__/detail-panel-polish.test.tsx` gives 0 diagnostics;
+  - `npx vitest run` on `detail-panel-polish`, `strings` and `detail-panel-strings-ui`, saved to `a-round-144/vitest.json`. Expected: 16 + 44 + 4 = 64, all green. Record the polish `it` count before and after (16 = 16).
+- **No mutations this round:** a title change and doc lines have no behaviour to discriminate.
+- **No code-reviewer is required:** only 2 files change, and one is a doc. If A runs it anyway, its Architecture note goes to B.
+- **Not run:** the full suite, `npm run verify`, build and e2e (the gate does these).
+- **End:**
+  - `git status --short` = the same 22 paths;
+  - frozen list OK;
   - the protected `git diff 6e9f9b1` is empty;
-  - the end sha256 of the 8 granted paths is in `a-round-143/end-sha256.txt`.
+  - the end sha256 of the 2 granted paths is in `a-round-144/end-sha256.txt`.
+- Write `a-round-144.md` as you go: start checks, the diff against the start copies (`a-round-144/diff-vs-start.patch`), test counts, shell writes, end state and deviations.
 - No commit, stash, checkout, install, `--write` or `check:fix`.
 
-## 5. C — rows
-Real Playwright Chromium at **1440×900 and 1280×720** on `http://127.0.0.1:5173/studio-lab`, with a fresh context per session. State Snap at the start (default off). The harness from round 142 may be reused (`c-round-142/tools/c142.cjs`, `layoutcmp.cjs`, `lib.cjs`), with new, uniquely named outputs under `c-round-143/` (C-R125-HARNESS-OVERWRITE). The video media is `tmp/studio-real-loop/media/clip-4s-vp9-opus.webm`. At 1280 the panel starts collapsed; expand it first.
+## 4. C — rows (minimal re-check)
+Use real Playwright Chromium on `http://127.0.0.1:5173/studio-lab`, with a fresh context per session. State Snap at the start (default off).
+- C may reuse `c-round-143/tools/` (`c143.cjs`, `layoutcmp.cjs`, `lib.cjs`, `g143-3.cjs`). Every output is new and uniquely named under `c-round-144/` (C-R125-HARNESS-OVERWRITE).
+- The video is `tmp/studio-real-loop/media/clip-4s-vp9-opus.webm`.
+- First load of a job: discard a crashed setup run and replace it once (ENV-FIRST-LOAD-GRID-NULL).
 
 | Row | Start state → action → expected |
 |---|---|
-| T143-TARGETED | Run A's named vitest list; the counts equal A's |
-| SOURCE-SCOPE | Only the 8 granted paths changed against the start copies (`b-round-142/r143-granted-start/`). The frozen list (955) is OK at start and end. End hashes equal `a-round-143/end-sha256.txt`. Protected diff vs `6e9f9b1` is empty. `git status --short` = the same 22 paths. No source changes during C's phase |
-| AN-REVIEW | `diff -u` against the start copies. Expected:<br>- strings.ts: one value (VR1);<br>- strings.test: one literal (VR2);<br>- the 4 VR3 files: only the reason literal (plus any Biome join);<br>- polish: PL1 + PL2 only, with the same `it` count;<br>- doc 118: only the DOC lines |
-| VIDEO-REASON-TEXT | In both video states (video only, video + audio), at both viewports, select the video clip and read the result:<br>- in the video-only state, `arrangement-detail-clip-gain-reason` text = `A video clip has no Clip Gain — use the track Volume/Mute`, and the Clip Gain field `title` is the same;<br>- in the video + audio state, the multi reason stays `Clip Gain works on audio clips only — remove the video from the selection`.<br>Report the codepoint of the dash (U+2014) |
-| LAYOUT | **1440:** compare all 5 states with `b-round-141/out/detail-baseline-6e9f9b1.json`.<br>- The video reason is **1 line**.<br>- The video placeholder moves ≤ 1 px against the baseline in x/y/w/h, or by exactly the delta that A measured and B accepted in writing before C's run.
-- The reason moves ≤ 1 px in x/y/h. Its width may differ by the text width (329 vs 327 px); report it.<br>- Every other strict node, column and the panel moves ≤ 1 px.<br>- Only the R4 exempt deltas may differ (header label −45/+43, apply +22 w, toggle +2 w); report them.<br>- Line counts are no worse than the baseline, and the group block stays ≤ 87 px.<br>**1280 (panel open):** compare all 5 states with `c-round-142/out/c142-1280-r1.json` `states.*.measure` (R3).<br>- Line counts, `contentScroll` and the `clippedBelowPanel` list must be no worse than that baseline; the video reason stays at 2 lines, as at baseline.<br>- No new horizontal overflow.<br>Any breach = FAIL |
-| NEIGHBOUR-SAMPLE | One sample each, at 1440 only:<br>- DETAIL-TEXT none state: header `Nothing selected` and toggle `Collapse ▾` / `Collapse details`;<br>- DETAIL-STATUS: Clip Gain Enter without a change → `Clip Gain unchanged: 0.0 dB.`;<br>- CLIP-GAIN-AUDIO: one valid paired measurement; −20 dB drops 20 ± 1 dB, and reset returns within 1 dB;<br>- LIBRARY-LABELS: folders `Music / SFX / Music / Stems` and `stem` → 4 stems |
-| GEO-COUNT | Detail panel in the video and video + audio states, both viewports: Georgian = 0 apart from the selected clip's source title (data, R9 of D-29z107; the video file name is data too). List every subtraction |
-| G143-3 (alone, last) | `/studio-lab` shows the workspace and the demo badge. `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`. `GET /api/studio-token?…` → 401. The fake-Bearer 403 check is BLOCKED (backend unavailable in cloud) |
-| PX-NET / REG-HYD | 0 forbidden requests, 0 Authorization headers, 0 hydration errors and 0 pageerror (the known cart noise is expected) |
+| T144-TARGETED | Run A's 3-file vitest list. The counts equal A's (64, polish 16) |
+| SOURCE-SCOPE | Only the 2 granted paths differ from `b-round-143/r144-granted-start/`. The frozen list (961) is OK at start and end. End hashes equal `a-round-144/end-sha256.txt`. The protected diff vs `6e9f9b1` is empty. `git status --short` = the same 22 paths. No source change during C's phase |
+| AN-REVIEW | `diff -u` against the start copies. The polish file changes in exactly one line (CL1), with the same `it` count. Doc 118 has only the CL2 (a)–(e) changes, in Georgian, and the text matches the evidence (C-R143-01 numbers, D-29z109) |
+| LAYOUT-1440 | Compare all 5 states with `b-round-141/out/detail-baseline-6e9f9b1.json`, with the same rules as round-143 §5 plus D-29z109:<br>**(i) Video state:** `arrangement-detail-video-placeholder` = **[735.5, 759.5, 139, 16] ± 1 px**. The parent `arrangement-detail-waveform` d ≤ 1 px. With the Georgian-swap control, the placeholder is on [719.5, 759.5, 171, 16] ± 1 px.<br>**(ii) The video reason:** 1 line; x/y/h ≤ 1 px, w within the text-width difference (report it).<br>**(iii) Exempt deltas:** only the amended R4 ones (header label −45/+43, apply +22 w, toggle −2/+2), each ± 1 px.<br>**(iv) Everything else:** every other strict node, column and the panel ≤ 1 px. Line counts are no worse than baseline, the group block ≤ 87 px, `contentScroll` = 107/107 and clipped = 0 in all 5 states.<br>Any breach = FAIL |
+| LAYOUT-1280-SPOT | One session, panel expanded, video state only. Compare with `c-round-142/out/c142-1280-r1.json` `states.video.measure`: every node d ≤ 1 px, the video reason on 2 lines, `contentScroll` = 98/83, `clippedBelowPanel` = the same list as that baseline (the line `The source file stays unchanged`), and no new horizontal overflow |
+| VIDEO-REASON-TEXT-1440 | Video-only state: the reason text and the Clip Gain field `title` = `A video clip has no Clip Gain — use the track Volume/Mute` (U+2014) |
+| G144-3 (alone, last) | `/studio-lab` shows the workspace and the demo badge in a fresh anonymous context. `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`. `GET /api/studio-token?…` → 401. The fake-Bearer 403 check is BLOCKED (backend unavailable in cloud) |
+| PX-NET / REG-HYD | 0 forbidden requests, 0 Authorization headers, 0 hydration errors and 0 pageerror. The known cart noise is expected |
 
-Gate rows (C does not claim them): full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
+- **Gate rows (C does not claim them):** full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED and PROD-SSR-NUL.
+- **Not re-run:** NEIGHBOUR-SAMPLE, CLIP-GAIN-AUDIO and GEO-COUNT. Round 144 changes no app code, and SOURCE-SCOPE proves the app tree equals the round-143 end tree. The round-143 PASS rows stand.
 
 **Neighbour risk:**
-- The video reason is also the Clip Gain field's `title` (detail-panel-reason l.292). VIDEO-REASON-TEXT checks both.
-- The video + audio multi reason uses a different key and must not change.
-- The polish guard `not.toContain('წმ')` would turn red if a fixture title ever contained `წმ`; A confirms it does not.
+- None in the app.
+- The polish `describe` title is only a test label.
+- The doc must not contradict the evidence.
 
-## 6. Ableton source
-Live 12 Reference Manual, B's saved capture `b-round-133/live/arrangement-view.txt` (TOC + the Arrangement View chapter; B checked it on 2026-10-24). The Clip View chapter is **not** in the capture, and no new capture was taken.
-
+## 5. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Wording of why a video clip has no Clip Gain | Live Clip View chapter — not captured | **unconfirmed** | CZABA-only explanatory text. CZABA's detail panel is its own simplified panel, not Live's Clip View. No Live claim | VIDEO-REASON-TEXT, LAYOUT |
+| Video placeholder text and its centred width in the detail panel | Live 12 Clip View chapter: **not** in B's capture `b-round-133/live/arrangement-view.txt` (checked 2026-10-24) | unconfirmed | CZABA-only placeholder, in its own simplified detail panel. No Live claim | LAYOUT-1440 (i) |
 
 C rates "CZABA requirement met" and "Ableton correspondence" separately.
 
-## 7. Evidence and reporting
-- C writes `c-round-143.md` and `c-round-143.json` as it goes, with these fields: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` with subtractions, `measurements` (the LAYOUT deltas at both viewports and the CLIP-GAIN-AUDIO values), `invalidRuns`, `notesForB`.
-- Evidence goes under `c-round-143/{tools,out,shots}/`. Every run writes a uniquely named output. C makes no writes under `store/`.
-- `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`.
-- A writes `a-round-143.md` as it goes. It covers:
-  - start checks and the pre-grep;
-  - changed files and `it` counts before/after;
-  - test results and mutations, quoting the failing assertion line for m89/m90;
-  - the required probe: (a) line count and (b) placeholder delta;
-  - the reviewer verdict and Architecture note;
-  - shell writes and the end state;
-  - deviations.
+## 6. Evidence and reporting
+- **C's report.** C writes `c-round-144.md` and `c-round-144.json` as it goes, with these fields: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `measurements` (the LAYOUT-1440 placeholder box, parent, Georgian swap, exempt deltas, and the 1280 spot), `invalidRuns` and `notesForB`.
+- **Evidence location.** Evidence goes under `c-round-144/{tools,out,shots}/`. C makes no writes under `store/`.
+- **browserVerified.** It is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`.
 
-## 8. Outcome, fixed in advance (B at round 144 planning)
-| Condition | Round 144 |
+## 7. Outcome, fixed in advance (B at round 145 planning)
+| Condition | Round 145 |
 |---|---|
 | B plans on or after **2026-10-27** | The **REGRESSION round** first (every done / c_pass item, both viewports, `test:e2e:smoke`), then the row below |
-| C FAIL with Critical / High / Medium | Another bounded fix-up (at most three related bugs) |
-| C PASS (new Lows → `deferred_low_polish`) | V-0.4e → `c_pass`, then `c_pass_published` after the gate publishes rounds 142 + 143 together; **V-0.4 complete**. Round 144 = **V-0.5**, re-measured first. Its area: library, preview, dock, route, `studio-lab-demo.ts` UI labels, `collection.ts`, context l.3468, `lang="en"`, and the final RV-4 grep. B decides the split; ≈84 source lines is likely 2–3 rounds. Forward constraints: gate-141 #2 (SSR `console.error` assertion), gate-141 #3 (ST40 meta-title pin), and LIB-SEARCH-KEYWORDS (R5: per-kind search keywords incl. the plural, kept apart from the display labels). If root's strings-split checkpoint result arrives first, B applies it as its own bounded round before V-0.5 |
+| C FAIL with Critical / High / Medium | A bounded fix-up (at most three related bugs) |
+| C FAIL only on a literal criterion with no app defect | B rules in writing at once, and the next round is a re-check only. No code fix-up for a non-defect |
+| C PASS (new Lows → `deferred_low_polish`) | V-0.4e → `c_pass`, then `c_pass_published` after the gate publishes rounds 142 + 143 + 144 together. **V-0.4 is then complete.** Round 145 = **V-0.5**, re-measured first. Its area: library, preview, dock, route, `studio-lab-demo.ts` UI labels, `collection.ts`, context l.3468, `lang="en"`, and the final RV-4 grep. B decides the split; ≈84 source lines is likely 2–3 rounds. Forward constraints: gate-141 #2 (SSR `console.error` assertion), gate-141 #3 (ST40 meta-title pin), and LIB-SEARCH-KEYWORDS. If root's strings-split checkpoint result arrives first, B applies it as its own bounded round before V-0.5 |
 
 At every planning B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
 
-## 9. Root notes
-- **Commit readiness:** after C PASS, root may publish rounds 142 + 143 together as V-0.4e (completes V-0.4). Until then the 22 round-142 paths stay uncommitted in the tree; nothing may revert them.
-- **Architecture:** the strings-split checkpoint request (`b-round-136-checkpoint-request.md` + addenda) is still open and non-blocking. V-0.4 completes with this fix-up, which is a feature boundary. B repeats the bounded request in `b-round-142.md` §5.
+## 8. Root notes
+- **Commit readiness:** after C PASS, root may publish rounds 142 + 143 + 144 together as V-0.4e, which completes V-0.4. Until then the 22 paths stay uncommitted in the tree, and nothing may revert them.
+- **Architecture:** the strings-split checkpoint request (`b-round-136-checkpoint-request.md` + addenda) is still open and non-blocking. V-0.4 completes with this round, which is a feature boundary. B repeats the bounded request in `b-round-143.md` §5.

@@ -1,0 +1,187 @@
+{
+ "taskStatus": "FAIL",
+ "passed": [
+  "T143-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "VIDEO-REASON-TEXT",
+  "NEIGHBOUR-SAMPLE",
+  "GEO-COUNT",
+  "G143-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [
+  "LAYOUT"
+ ],
+ "inconclusive": [],
+ "blocked": [
+  "G143-3 fake-Bearer 403 check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "C-R143-01",
+   "severity": "low",
+   "steps": [
+    "Fresh /studio-lab at 1440x900, Snap off, detail panel open",
+    "Add demo-middle-east to Music at 1 s and demo-hero-music to Stems at 1 s",
+    "Load media/clip-4s-vp9-opus.webm through the video input and select the video clip",
+    "Measure [data-testid=arrangement-detail-video-placeholder] and compare with b-round-141/out/detail-baseline-6e9f9b1.json video state"
+   ],
+   "expected": "§5 LAYOUT 1440: the placeholder moves ≤1 px in x/y/w/h, or by exactly a delta that A measured and B accepted in writing before C's run",
+   "actual": "Process/criterion finding, no user-visible defect. The placeholder box is [735.5,759.5,139,16] against the baseline [719.5,759.5,171,16], d=(+16,0,−32,0). A measured the same delta and raised a STOP, but no written B acceptance exists (no b-round-143*, no update to current-task.md, nothing in feature-status/loop.log). This is NOT a layout regression: the parent waveform box d=0, and C's in-page Georgian-swap control puts the placeholder at exactly the baseline box [719.5,759.5,171,16]. The whole x/w delta is the width of the centred, ratified round-142 videoPlaceholder string ('Video clip · no waveform', 139 px against 171 px). The C-R142-01 symptom is fixed: the reason is 1 line and placeholder y=0. The criterion is unmet only because B has not ruled",
+   "evidence": "c-round-143/out/layout-1440-r1.json (notes: video placeholder d=[16,0,-32,0]), c-round-143/out/c143-1440-r1.json states.video.measure / geoSwap, c-round-143/shots/video-1440-r1.png, video-geoswap-1440-r1.png"
+  }
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T19:55:00.0057281Z",
+  "round": 143,
+  "attempt": 1,
+  "store": 200
+ },
+ "georgianCounts": {
+  "detailPanel": {
+   "video": {
+    "1440": 0,
+    "1280": 0
+   },
+   "videoMulti": {
+    "1440": 0,
+    "1280": 0
+   }
+  },
+  "subtractions": "none needed in the video states. The video file name clip-4s-vp9-opus.webm is ASCII. In the single (audio) state, the only Georgian is the source title 'Middle East — საჯარო preview' (text in content + header + title), which is data (R9)",
+  "libraryTree": "collection labels and 'ყველა ფაილი' stay Georgian: V-0.5 scope, unchanged"
+ },
+ "measurements": {
+  "LAYOUT-1440": {
+   "baseline": "b-round-141/out/detail-baseline-6e9f9b1.json",
+   "breachesStrict": 0,
+   "videoReason": {
+    "box": [
+     640.5,
+     779.5,
+     329,
+     16
+    ],
+    "lines": 1,
+    "d": [
+     -1,
+     0,
+     2,
+     0
+    ]
+   },
+   "videoPlaceholder": {
+    "d": [
+     16,
+     0,
+     -32,
+     0
+    ],
+    "geoSwapD": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "exemptR4": {
+    "headerLabel": [
+     -45,
+     0,
+     43,
+     0
+    ],
+    "toggle": [
+     -2,
+     0,
+     2,
+     0
+    ],
+    "apply": [
+     0,
+     0,
+     22,
+     0
+    ]
+   },
+   "panel": "d=0 in all 5 states",
+   "contentScroll": "107/107 in all states",
+   "clipped": 0,
+   "videoMultiReasonLines": 2,
+   "groupMaxH": "≤87"
+  },
+  "LAYOUT-1280": {
+   "baseline": "c-round-142/out/c142-1280-r1.json states.*.measure (R3)",
+   "breaches": 0,
+   "allNodesD": "0 in all 5 states",
+   "videoReasonLines": 2,
+   "contentScroll": {
+    "none": [
+     96,
+     83
+    ],
+    "single": [
+     98,
+     83
+    ],
+    "multi": [
+     95,
+     83
+    ],
+    "video": [
+     98,
+     83
+    ],
+    "videoMulti": [
+     95,
+     83
+    ]
+   },
+   "clippedBelowPanel": "identical to baseline (none: both 'Select a clip first'; single/video: 'The source file stays unchanged'; multi/videoMulti: the selected-clips note)",
+   "newHOverflow": 0
+  },
+  "CLIP-GAIN-AUDIO": {
+   "vp": 1440,
+   "baseRmsDb": -22.56,
+   "cutRmsDb": -42.59,
+   "drop": 20.03,
+   "restoredRmsDb": -22.63,
+   "restoreDelta": -0.07,
+   "winFrames": [
+    102,
+    102,
+    103
+   ],
+   "valid": true
+  },
+  "vitest": {
+   "files": 15,
+   "tests": 357,
+   "passed": 357,
+   "failed": 0
+  }
+ },
+ "invalidRuns": [],
+ "notesForB": [
+  "C-R143-01 can be closed by a ruling alone: a written R4-class exemption of the placeholder delta (+16,0,−32,0) as a text-width delta of the ratified round-142 videoPlaceholder string. No code change is needed. With that ruling every C row of round 143 is PASS. B's §1 sentence 'the video placeholder stands where it stood before round 142' assumed a Georgian placeholder width and cannot hold with the English placeholder.",
+  "§8 has no row for this outcome: the FAIL comes from a literal criterion, the only finding is Low, and there is no code defect. C-R143-01 should NOT go to deferred_low_polish, because that would leave LAYOUT failed indefinitely; it closes by a ruling. A code fix-up is the wrong response: A has nothing to change, and the 333 px reason candidate would not move the placeholder either. Every other LAYOUT sub-criterion already holds in layout-1440-r1.json and layout-1280-r1.json (1280 fully passes). So round 144 can be a B ruling plus the minimal C re-check the loop requires, not a new implementation.",
+  "R4 lists the toggle as '+2 w' only. It measures (−2,0,+2,0): it is right-aligned, so x follows w. This is reported, not a breach.",
+  "A's mutations m88–m90 and deviation D1 (DPS2/DPS4 stay green) were not re-run or checked by C. They are A's claims only.",
+  "Ableton correspondence: not applicable / unconfirmed (CZABA-only explanatory text; the Clip View chapter is not captured). CZABA requirement: text, title and 1-line fit are met.",
+  "Carry-over Lows unchanged: C-R142-02 (stems search), C-R142-03 (1280 open panel clipping, identical in this round)."
+ ]
+}

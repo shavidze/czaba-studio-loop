@@ -1,0 +1,129 @@
+--- ../tmp/studio-real-loop/b-round-142/r143-granted-start/app/lib/arrangement/strings.ts	2026-10-24 19:43:41.940245478 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 19:47:27.797413119 +0000
+@@ -634,7 +634,7 @@
+   noneReason: 'Select a clip first',
+   sourceUnchanged: 'The source file stays unchanged',
+   clipGainMultiReason: 'Clip Gain works on audio clips only — remove the video from the selection',
+-  clipGainVideoReason: 'A video clip has no Clip Gain — for its sound use the track Volume/Mute',
++  clipGainVideoReason: 'A video clip has no Clip Gain — use the track Volume/Mute',
+   clipGainInvalid: 'Clip Gain: enter a number in dB (−60…+24).',
+   pendingFull: 'Unsaved — Enter saves, Esc reverts',
+   pendingLabel: 'Unsaved',
+--- ../tmp/studio-real-loop/b-round-142/r143-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 19:43:41.940245478 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 19:45:23.749807994 +0000
+@@ -2136,7 +2136,7 @@
+   noneReason: 'Select a clip first',
+   sourceUnchanged: 'The source file stays unchanged',
+   clipGainMultiReason: 'Clip Gain works on audio clips only — remove the video from the selection',
+-  clipGainVideoReason: 'A video clip has no Clip Gain — for its sound use the track Volume/Mute',
++  clipGainVideoReason: 'A video clip has no Clip Gain — use the track Volume/Mute',
+   clipGainInvalid: 'Clip Gain: enter a number in dB (−60…+24).',
+   pendingFull: 'Unsaved — Enter saves, Esc reverts',
+   pendingLabel: 'Unsaved',
+--- ../tmp/studio-real-loop/b-round-142/r143-granted-start/app/lib/arrangement/__tests__/clip-gain-fader.test.tsx	2026-10-24 19:43:41.940088896 +0000
++++ app/lib/arrangement/__tests__/clip-gain-fader.test.tsx	2026-10-24 19:45:25.037811524 +0000
+@@ -33,7 +33,7 @@
+ const MASTER_VOLUME_LABEL = 'Master Volume';
+ const NONE_REASON = 'Select a clip first';
+ const GROUP_REASON = 'Clip Gain works on audio clips only — remove the video from the selection';
+-const VIDEO_REASON = 'A video clip has no Clip Gain — for its sound use the track Volume/Mute';
++const VIDEO_REASON = 'A video clip has no Clip Gain — use the track Volume/Mute';
+ 
+ const fakeClock = { base: 0 };
+ 
+--- ../tmp/studio-real-loop/b-round-142/r143-granted-start/app/lib/arrangement/__tests__/clip-gain.test.tsx	2026-10-24 19:43:41.940245478 +0000
++++ app/lib/arrangement/__tests__/clip-gain.test.tsx	2026-10-24 19:45:26.387815230 +0000
+@@ -57,7 +57,7 @@
+ const CLIP_GAIN_LABEL = 'Clip Gain';
+ const NONE_REASON = 'Select a clip first';
+ const GROUP_REASON = 'Clip Gain works on audio clips only — remove the video from the selection';
+-const VIDEO_REASON = 'A video clip has no Clip Gain — for its sound use the track Volume/Mute';
++const VIDEO_REASON = 'A video clip has no Clip Gain — use the track Volume/Mute';
+ const INVALID_STATUS = 'Clip Gain: enter a number in dB (−60…+24).';
+ 
+ const fakeClock = { base: 0 };
+--- ../tmp/studio-real-loop/b-round-142/r143-granted-start/app/lib/arrangement/__tests__/detail-panel-reason.test.tsx	2026-10-24 19:43:41.940245478 +0000
++++ app/lib/arrangement/__tests__/detail-panel-reason.test.tsx	2026-10-24 19:45:36.917845124 +0000
+@@ -22,8 +22,7 @@
+ const RANGE_GROUP_REASON = 'A time selection is set on one clip — select only one';
+ const CLIP_GAIN_GROUP_REASON =
+   'Clip Gain works on audio clips only — remove the video from the selection';
+-const CLIP_GAIN_VIDEO_REASON =
+-  'A video clip has no Clip Gain — for its sound use the track Volume/Mute';
++const CLIP_GAIN_VIDEO_REASON = 'A video clip has no Clip Gain — use the track Volume/Mute';
+ const NONE_REASON = 'Select a clip first';
+ const VIDEO_PLACEHOLDER = 'Video clip · no waveform';
+ const RANGE_REASON_ID = 'arrangement-detail-reason';
+--- ../tmp/studio-real-loop/b-round-142/r143-granted-start/app/lib/arrangement/__tests__/detail-panel-fit.test.tsx	2026-10-24 19:43:41.940245478 +0000
++++ app/lib/arrangement/__tests__/detail-panel-fit.test.tsx	2026-10-24 19:45:38.273849105 +0000
+@@ -22,8 +22,7 @@
+ const PENDING_FULL_TEXT = 'Unsaved — Enter saves, Esc reverts';
+ const PENDING_VISIBLE_LABEL = 'Unsaved';
+ const PENDING_HIDDEN_HINT = ' — Enter saves, Esc reverts';
+-const CLIP_GAIN_VIDEO_REASON =
+-  'A video clip has no Clip Gain — for its sound use the track Volume/Mute';
++const CLIP_GAIN_VIDEO_REASON = 'A video clip has no Clip Gain — use the track Volume/Mute';
+ const CLIP_GAIN_GROUP_REASON =
+   'Clip Gain works on audio clips only — remove the video from the selection';
+ const RANGE_GROUP_REASON = 'A time selection is set on one clip — select only one';
+--- ../tmp/studio-real-loop/b-round-142/r143-granted-start/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx	2026-10-24 19:43:41.940245478 +0000
++++ app/lib/arrangement/__tests__/detail-panel-polish.test.tsx	2026-10-24 19:45:42.825862676 +0000
+@@ -378,7 +378,7 @@
+       return { content, infoLabels, rangeLabels, ariaLabels };
+     }
+ 
+-    it('labels the single clip info and the range inputs in Georgian and keeps the aria-labels', async () => {
++    it('labels the single clip info and the range inputs in English and keeps the aria-labels', async () => {
+       const { view } = await mountWithMusicSelected();
+       const { content, infoLabels, rangeLabels, ariaLabels } = detailLabelTexts(view);
+       expect(infoLabels).toEqual(['Start', 'Length', 'Source offset']);
+@@ -388,10 +388,10 @@
+         'Time selection end (seconds)',
+       ]);
+       expect(content.textContent).not.toMatch(/დასაწყისი|სიგრძე|წყაროდან/);
+-      expect(content.textContent).not.toContain('end, წმ');
++      expect(content.textContent).not.toContain('წმ');
+     });
+ 
+-    it('labels the group info and the range inputs in Georgian and keeps the aria-labels', async () => {
++    it('labels the group info and the range inputs in English and keeps the aria-labels', async () => {
+       const { api, view, toggle } = await mountPolishWorkspace();
+       fireEvent.click(toggle);
+       act(() => live(api).selectClips(['music-1', 'hit-1']));
+@@ -404,7 +404,7 @@
+         'Time selection end (seconds)',
+       ]);
+       expect(content.textContent).not.toMatch(/დასაწყისი|სიგრძე|წყაროდან/);
+-      expect(content.textContent).not.toContain('end, წმ');
++      expect(content.textContent).not.toContain('წმ');
+     });
+ 
+     it('sizes the info column wrapper with w-72 instead of w-56', async () => {
+--- ../tmp/studio-real-loop/b-round-142/r143-granted-start/docs/implementation/2026/quarter-IV/118-studio-v0-detail-library-strings.md	2026-10-24 19:43:41.940824352 +0000
++++ docs/implementation/2026/quarter-IV/118-studio-v0-detail-library-strings.md	2026-10-24 19:45:54.620897893 +0000
+@@ -1,7 +1,7 @@
+ # Studio V-0.4e — Clip Detail panel, range/Clip Gain შეტყობინებები და ბიბლიოთეკის kind/folder label-ები ინგლისურად
+ 
+ **თარიღი:** 2026-10-24
+-**სტატუსი:** In Progress (A-ის შემოწმებები მწვანეა რაუნდ 142-ში; C round 142 ჯერ არ გაშვებულა)
++**სტატუსი:** In Progress (C round 142 — FAIL: C-R142-01; round 143 fix-up; C round 143 ჯერ არ გაშვებულა)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -33,7 +33,7 @@
+ | ჯერ აირჩიე კლიპი | Select a clip first | `noneReason` |
+ | წყარო უცვლელი რჩება | The source file stays unchanged | `sourceUnchanged` |
+ | Clip Gain მხოლოდ აუდიო კლიპებზე ისმება — ამოიღე ვიდეო მონიშვნიდან | Clip Gain works on audio clips only — remove the video from the selection | `clipGainMultiReason` |
+-| ვიდეო კლიპს Clip Gain არ აქვს — ხმა: ხაზის Volume/Mute | A video clip has no Clip Gain — for its sound use the track Volume/Mute | `clipGainVideoReason` |
++| ვიდეო კლიპს Clip Gain არ აქვს — ხმა: ხაზის Volume/Mute | A video clip has no Clip Gain — use the track Volume/Mute | `clipGainVideoReason` |
+ | Clip Gain: შეიყვანე რიცხვი dB-ში (−60…+24). | Clip Gain: enter a number in dB (−60…+24). | `clipGainInvalid` |
+ | შეუნახავია — Enter ინახავს, Esc აბრუნებს | Unsaved — Enter saves, Esc reverts | `pendingFull` |
+ | შეუნახავია | Unsaved | `pendingLabel` |
+@@ -85,6 +85,7 @@
+ - **Problem:** `detail-panel-polish.test`-ის ორი assertion (`not.toMatch(/\b(start|offset)\b/i)`) ამოწმებდა, რომ ინგლისური არ გაჟონილიყო. ახლა label-ები განზრახ `Start` / `Source offset`-ია. **Solution:** იმავე ხაზზე guard-ი ძველი ქართული label-ების არარსებობაზე გადატრიალდა. ტესტი არ წაშლილა.
+ - **Problem:** დავალება ითხოვდა, რომ `stems` kind-ით დაემთხვია stem წყაროებს. haystack-ში kind label არის `Stem`, ხოლო `stem` სტრიქონი `stems`-ს არ შეიცავს, ამიტომ `stems` kind-ით 0 წყაროს ემთხვევა. **Solution:** `library.ts`-ის ქცევა არ შეგვიცვლია. LB-SEARCH ამოწმებს `stem`-ს, შეუსაბამობა კი B-ს გადაეცა.
+ - **Problem (გადაუწყვეტელი, stop rule):** რეალურ Chromium-ში 1440×900-ზე, video კლიპის არჩევისას, `clipGainVideoReason` შუა სვეტში (max 408 px) 2 ხაზად გადადის. baseline-ში ქართული ტექსტი 1 ხაზი იყო (327 px). ეს LAYOUT-ის საზღვარს არღვევს. ტექსტი B-ის §1.1-ით ზუსტადაა განსაზღვრული, class-ის შეცვლა კი stop rule-ით აკრძალულია. **Solution:** კოდი არ შეცვლილა, საკითხი B-ს გადაეცა გაზომილი ალტერნატივებით (მაგ. `A video clip has no Clip Gain — use the track Volume/Mute`: 1 ხაზი, 329 px). 1280-ზე ბოლო ხაზების panel-ის ქვემოთ გასვლა ქართული ტექსტითაც იგივეა, ანუ ეს რაუნდის შედეგი არ არის.
++- **Problem (C-R142-01, Medium):** C round 142-მა იგივე დაადასტურა: 1440×900-ზე video კლიპის არჩევისას ინგლისური `clipGainVideoReason` 2 ხაზად გადადის, video placeholder კი baseline-თან შედარებით d = (+16, −8, −32, 0)-ით იძვრის. ქართული ტექსტის ჩანაცვლებით იმავე DOM-ზე 1 ხაზი და 0 px მიიღება, ანუ მიზეზი ინგლისური ტექსტია. **Solution:** A-ის გაზომილი კანდიდატებიდან (`a-round-142/probe/out/video-reason-candidates-a142.json`) B-მ D-29z108-ით აირჩია `A video clip has no Clip Gain — use the track Volume/Mute` (1 ხაზი, 329 px; ქართული baseline 327 px). წაიშალა მხოლოდ „for its sound“, აზრი იგივე რჩება. class და key არ შეცვლილა. 1280-ზე ყველა კანდიდატი და ქართული baseline-იც 2 ხაზია, ეს დარღვევა არ არის (R3).
+ - **Problem:** Biome-მა რამდენიმე შეცვლილი ხაზი (გრძელი const-ები, `ariaLabels` მასივები) ხელახლა გადაიტანა. **Solution:** ხელით გადატანილია `--write`-ის გარეშე, ანგარიშში ჩამოთვლილია.
+ 
+ ## ტესტირება

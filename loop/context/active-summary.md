@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T19:35:15.468Z)
+# Active loop summary (2026-10-24T20:02:29.318Z)
 
-- backlog.json 1304 KB -> active view 170 KB
-- status: G_ROOT_GATE round 142
-- servers: `{"checkedUtc":"2026-10-24T19:21:36.5973067Z","round":142,"attempt":1,"store":200}`
+- backlog.json 1312 KB -> active view 171 KB
+- status: G_ROOT_GATE round 143
+- servers: `{"checkedUtc":"2026-10-24T19:55:00.0057281Z","round":143,"attempt":1,"store":200}`
 - last publication: 6e9f9b1e97d67703ba34e8b2a260a0a5215c3506 (rounds 141-141)
-- last root gate: round 142 skipped - C taskStatus FAIL
+- last root gate: round 143 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -191,7 +191,7 @@
 - B-R107-ENTER-ON-BODY / info / open question for the user (not deferred, not scheduled as a change): the workspace-wide Enter (target not a button/slider/separator, incl. BODY) adds the active library item; SRW-12 R12-L2 only specifies Enter from the results list. Kept unchanged in round 108; focus retention closes C-R107-01 regardless / should Enter with focus on BODY add the active library item?
 - GATE107-S3-NZ-DELTA-NIT / info / open nit - optional defensive delta < 0 in the R4 condition (doc 092 F3) / target === clip.start with a non-negative delta would announce the time-start text (no current caller)
 - A-R108-CTRLZ-EXHAUST-FOCUS / info / open - signal (not in rule F1); Ctrl+Z exhausting history while Undo is focused leaves focus on the disabled Undo/BODY because the shortcut path never arms / 
-- DEFERRED-LOW-POLISH / info / open - pointer: 185 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
+- DEFERRED-LOW-POLISH / info / open - pointer: 201 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
 - PROD-SSR-NUL / info / open - gate/Tech Lead row (production build served, NUL 0 on /studio-lab, both UAs, chunked); not run by C (dev server only) or by gate 109 (build green, HTML not measured) / production SSR HTML NUL count not measured after the round-109 filter
 - GATE109-F4-SN5-TRIPWIRE / info / acknowledged - SN5 turns red on purpose when react-dom fixes writeStringChunk; the extra typeof assertion may go with the removal task / SN5 is a deliberate upstream tripwire
 - GATE109-F5-ABORT-TIMER / info / signal - pre-existing setTimeout(abort, ABORT_DELAY) never cleared and responseStatusCode=500 after resolve has no effect (A reviewer + gate F5); entry.server.tsx frozen; not scheduled / entry.server.tsx abort timer not cleared
@@ -254,7 +254,7 @@
 - C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
 - ALTGR-SHORTCUT-GUARD / info / signal (not scheduled; no CZABA contract; C round 126 F-5) / Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or 
 - C-R127-L1 / low / parts a-d closed round 128 (C EX-COPY exact text in the browser, c-round-128.json); parts e-f in deferred_low_polish (C-R127-L1e/L1f) / Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in t
-- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2 complete (r129-r133); V-0.3 complete (r134-r137, 7e6202b); V-0.4a round 138, then V-0.4b..e, V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions per D-29z103 R5 | round 139: V-0.4b done (3f2c187); V-0.4c round 140 (D-29z105) | round 140: V-0.4c done (6ebbf3e); V-0.4d round 141 (D-29z106) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
+- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2 complete (r129-r133); V-0.3 complete (r134-r137, 7e6202b); V-0.4a round 138, then V-0.4b..e, V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions per D-29z103 R5 | round 139: V-0.4b done (3f2c187); V-0.4c round 140 (D-29z105) | round 140: V-0.4c done (6ebbf3e); V-0.4d round 141 (D-29z106) | round 142: V-0.4e C FAIL (C-R142-01 Medium, layout only; texts PASS); fix-up round 143 (D-29z108) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
 - C-R129-REDO-PASTE-SELECTION / info / observation (pre-existing; product question, not scheduled) / Redo after Paste does not restore the pasted clip selection
 - C-R129-EMPTY-RANGE-UNREACHABLE / info / acknowledged (harness): a drag on empty lane background creates no time selection, so E12/E27/E31 are unit-only / empty-range edit messages not reachable in the browser
 - GATE130-S2-TRACKNAME-IN-SENTENCE / info / closes with V-0.4 default track names; not a new finding later / clipAdded interpolates Georgian track names into English sentences
@@ -294,16 +294,20 @@
 - G139-3-FAKE-BEARER-403 / info / open backend evidence: BLOCKED (backend unavailable in cloud); re-check in a backend-enabled run / fake-Bearer 403 sub-check of the purchase-protection row
 - C-R139-NOTES-HARNESS / info / applied as harness notes in round 140 task section 5 / track fold keeps clips visible at 27 px (not hidden); group fold renders 0 clips; video Original sound line needs a row >= 80 px; a plain cl
 - GATE140-S4-PLURAL-BRANCH / info / acknowledged: tested (HM4 + C browser '1 clip'); 0 clips reads '0 clips' (correct); no action / one-clip vs many-clips choice in ArrangementGroupHeader is a new caller branch
-- GATE141-S1-ST39-WEAKENED / - / scheduled round 142 (owned file; restore exact toBe(17)) / 
 - GATE141-S2-SSR-CONSOLE-SPY / - / forward constraint V-0.5 (route + SSR test owned there) / 
 - GATE141-S3-ST40-META-PIN / - / forward constraint V-0.5 / 
-- GATE141-S4-LIBRARY-MIXED / - / partly scheduled: library kind/folder labels round 142 (LB1-LB3); dock fallback and library copy V-0.5 / 
-- GATE141-S5-DOC117-STATUS / - / scheduled round 142 (doc 117 granted) / 
+- GATE141-S4-LIBRARY-MIXED / - / library kind/folder labels done in round 142 (C LIBRARY-LABELS PASS, browserVerified); dock fallback, library own copy and collection toggle suffix remain V-0.5 / 
 - ARCH-R141-DEFAULT-NAME-SEEDS / - / signal - appended to b-round-136-checkpoint-request.md (round-141 addendum); reviewer: keep / 
 - ARCH-R141-SSR-TEST-HELPER / - / signal (extract when a third SSR test appears) / 
 - C-R141-DEMO-BADGE-SUBTRACTION / - / confirmed by B (collection.ts badge = V-0.5 collection copy, area_addition_d29z96) / 
 - A-R141-DEVIATIONS-1-4 / - / ratified (C AN-REVIEW; DS2 codepoint-built regex kept: C verified equality, reviewer endorsed, keeps the token grep empty) / 
 - G141-3-FAKE-BEARER-403 / - / blocked: backend unavailable in cloud (open backend evidence) / 
+- C-R142-01 / medium / open - fix-up dispatched round 143 (D-29z108 R1) / at 1440 with a video clip selected the English clipGainVideoReason wraps to 2 lines (baseline 1); video placeholder moves d=(+16,-8,-32,0)
+- A-R142-D2-POLISH-LEFTOVERS / low / folded into round 143 (owned stage, costs little; PL1/PL2; guard discrimination checked by m89/m90 on the guard line itself) / detail-panel-polish it titles still say 'in Georgian'; not.toContain('end, წმ') can never fail
+- GATE-142-SKIPPED / info / open_root / Round 142 root gate skipped (C FAIL); round-142 code (22 paths) is uncommitted in the tree; rounds 142+143 publish together after C PASS
+- G142-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
+- A-R142-DEVIATIONS-D1-D7 / info / ratified (B, D-29z108 R5): D1 57th pin line PENDING_HIDDEN_HINT; D2 flipped guards (leftovers fixed round 143); D3 LB-SEARCH 'stem'; D4 Biome rewraps; D5 shared helper; D6 l.702 block is the formatter map (reviewer: A right); D7 helper rename / 
+- ARCH-R142-LIBRARY-SEARCH-KEYWORDS / info / signal -> V-0.5 forward constraint LIB-SEARCH-KEYWORDS (not scheduled alone); reviewer verdict keep for now / library.ts matchesLibraryQuery uses the display label LIBRARY_KIND_LABELS as search text, so copy edits change search results (m86 proves it
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
