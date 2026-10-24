@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T07:46:47.261Z)
+# Active loop summary (2026-10-24T08:40:06.137Z)
 
-- backlog.json 1174 KB -> active view 149 KB
-- status: G_ROOT_GATE round 129
-- servers: `{"checkedUtc":"2026-10-24T07:24:39.2154258Z","round":129,"attempt":1,"store":200}`
-- last publication: 1e453b15185bca71f9137aa483d3e25a8b7d4abf (rounds 129-129)
-- last root gate: round 129 published - commit 1e453b15185bca71f9137aa483d3e25a8b7d4abf pushed
+- backlog.json 1183 KB -> active view 150 KB
+- status: G_ROOT_GATE round 130
+- servers: `{"checkedUtc":"2026-10-24T08:17:40.9035808Z","round":130,"attempt":1,"store":200}`
+- last publication: ba542970c31b235c1e77e23dea06ec366fe7d721 (rounds 130-130)
+- last root gate: round 130 published - commit ba542970c31b235c1e77e23dea06ec366fe7d721 pushed
 
 ## Current items: -
 
@@ -254,7 +254,11 @@
 - C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
 - ALTGR-SHORTCUT-GUARD / info / signal (not scheduled; no CZABA contract; C round 126 F-5) / Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or 
 - C-R127-L1 / low / parts a-d closed round 128 (C EX-COPY exact text in the browser, c-round-128.json); parts e-f in deferred_low_polish (C-R127-L1e/L1f) / Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in t
-- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2a round 129, then V-0.2b/c..V-0.5; closes when V-0 completes (RV-4) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
+- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2a done round 129; V-0.2b round 130; then V-0.2c..V-0.5; closes when V-0 completes (RV-4) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
+- C-R129-REDO-PASTE-SELECTION / info / observation (pre-existing; product question, not scheduled) / Redo after Paste does not restore the pasted clip selection
+- C-R129-EMPTY-RANGE-UNREACHABLE / info / acknowledged (harness): a drag on empty lane background creates no time selection, so E12/E27/E31 are unit-only / empty-range edit messages not reachable in the browser
+- A-R129-M4-GAP / info / scheduled round 130 (SA-DEL in status-announcement-ui, D-29z95) / no UI test asserted the delete-clip status (m4 survived)
+- GATE129-S2-ST9-VACUOUS / low / scheduled round 130 (ST9 asserts index === -1; strings.test.ts owned) / ST9 constant loop checks nothing after the six constants were deleted
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

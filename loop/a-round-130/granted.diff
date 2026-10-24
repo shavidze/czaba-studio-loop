@@ -1,0 +1,891 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/lib/arrangement/strings.ts	2026-10-24 07:59:45.265469613 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 08:09:39.324417383 +0000
+@@ -199,3 +199,59 @@
+     trackSuffix: string;
+   }): string => `Paste (${count}): at ${at}${trackSuffix}.`,
+ };
++
++export const studioPlaybackStrings = {
++  webAudioUnavailable:
++    'Web Audio is not available in this browser — playback and export will not work.',
++  nothingToPlay: 'Nothing to play — add a clip from the library first.',
++  playPastEnd: ({ position, end }: { position: string; end: string }): string =>
++    `Playhead (${position}) is past the end of the project (${end}) — there is nothing to play here. Home returns to 0.`,
++};
++
++export const studioLibraryStrings = {
++  audioOnVideoTrack:
++    'Choose an audio track (music, stems or SFX) — audio is not added to the video track.',
++  dropBlocked: 'No room here — clips on one track do not overlap.',
++  selectSoundFirst: 'Select a sound in the library first.',
++  addFailed: 'Could not add the clip.',
++  nearestFreeSpot: ' (nearest free spot)',
++  dropNotLoaded: 'This sound has not loaded yet — wait and try again.',
++  sourceFailed: (title: string): string =>
++    `“${title}” failed to load — details are in the library.`,
++  sourceNotLoaded: (title: string): string => `“${title}” has not loaded yet.`,
++  historyAdd: (title: string): string => `Add — ${title}`,
++  clipAdded: ({
++    title,
++    track,
++    time,
++    suffix,
++  }: {
++    title: string;
++    track: string;
++    time: string;
++    suffix: string;
++  }): string => `“${title}” added to the ${track} track at ${time}${suffix}.`,
++};
++
++export const studioLoopStrings = {
++  stepBlocked: 'The loop cannot move further: start of the timeline or minimum length.',
++  tooShort: 'A loop needs a time selection of at least 0.1 s.',
++  historyReplaced: 'Loop replaced',
++  historyCreated: 'Loop created',
++  needsSelection: 'To set a loop, first make a time selection on the waveform.',
++  historyOn: 'Loop on',
++  historyOff: 'Loop off',
++  on: 'Loop is on.',
++  off: 'Loop is off; the range is kept.',
++  historyRange: 'Loop range',
++  replaced: (span: string): string => `Loop replaced with the new range: ${span}.`,
++  created: (span: string): string => `Loop created and turned on: ${span}.`,
++};
++
++export const studioMoveStrings = {
++  undoBlockedDuringDrag: 'Undo/Redo does not work while dragging — let go first.',
++  editBlockedDuringDrag: 'Editing does not work while dragging — let go first.',
++  nudgeAtTimeStart: 'Nudge blocked — start of the timeline.',
++  nudgeBlocked: 'Nudge blocked — a neighbouring clip or the start of the timeline.',
++  historyNudgeClip: 'Nudge clip',
++};
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 07:59:45.265469613 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 08:06:23.580331175 +0000
+@@ -2,6 +2,13 @@
+ import { resolve } from 'node:path';
+ import { describe, expect, it } from 'vitest';
+ import {
++  GESTURE_EDIT_BLOCKED_MESSAGE,
++  GESTURE_UNDO_BLOCKED_MESSAGE,
++  NUDGE_AT_TIME_START_MESSAGE,
++  playPastEndMessage,
++  WEB_AUDIO_UNAVAILABLE_MESSAGE,
++} from '~/contexts/ArrangementContext';
++import {
+   ARRANGEMENT_EXPORT_CANCELLED_ENCODER_MESSAGE,
+   ARRANGEMENT_EXPORT_CANCELLED_MESSAGE,
+ } from '../export-cancel';
+@@ -11,7 +18,14 @@
+   ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS,
+   ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE,
+ } from '../export-wav.client';
+-import { studioEditStrings, studioExportStrings } from '../strings';
++import {
++  studioEditStrings,
++  studioExportStrings,
++  studioLibraryStrings,
++  studioLoopStrings,
++  studioMoveStrings,
++  studioPlaybackStrings,
++} from '../strings';
+ 
+ const GEORGIAN_CODEPOINT = /[Ⴀ-ჿ]/;
+ 
+@@ -561,13 +575,179 @@
+     const lines = context.split(/\r?\n/);
+     for (const name of constantNames) {
+       const index = lines.findIndex((line) => line.startsWith(`const ${name} =`));
+-      if (index === -1) {
+-        continue;
++      expect(index, name).toBe(-1);
++    }
++  });
++});
++
++const EXPECTED_V02B_PLAIN_STRINGS: Record<string, Record<string, string>> = {
++  studioPlaybackStrings: {
++    webAudioUnavailable:
++      'Web Audio is not available in this browser — playback and export will not work.',
++    nothingToPlay: 'Nothing to play — add a clip from the library first.',
++  },
++  studioLibraryStrings: {
++    audioOnVideoTrack:
++      'Choose an audio track (music, stems or SFX) — audio is not added to the video track.',
++    dropBlocked: 'No room here — clips on one track do not overlap.',
++    selectSoundFirst: 'Select a sound in the library first.',
++    addFailed: 'Could not add the clip.',
++    nearestFreeSpot: ' (nearest free spot)',
++    dropNotLoaded: 'This sound has not loaded yet — wait and try again.',
++  },
++  studioLoopStrings: {
++    stepBlocked: 'The loop cannot move further: start of the timeline or minimum length.',
++    tooShort: 'A loop needs a time selection of at least 0.1 s.',
++    historyReplaced: 'Loop replaced',
++    historyCreated: 'Loop created',
++    needsSelection: 'To set a loop, first make a time selection on the waveform.',
++    historyOn: 'Loop on',
++    historyOff: 'Loop off',
++    on: 'Loop is on.',
++    off: 'Loop is off; the range is kept.',
++    historyRange: 'Loop range',
++  },
++  studioMoveStrings: {
++    undoBlockedDuringDrag: 'Undo/Redo does not work while dragging — let go first.',
++    editBlockedDuringDrag: 'Editing does not work while dragging — let go first.',
++    nudgeAtTimeStart: 'Nudge blocked — start of the timeline.',
++    nudgeBlocked: 'Nudge blocked — a neighbouring clip or the start of the timeline.',
++    historyNudgeClip: 'Nudge clip',
++  },
++};
++
++const V02B_OBJECTS: Record<string, Record<string, unknown>> = {
++  studioPlaybackStrings,
++  studioLibraryStrings,
++  studioLoopStrings,
++  studioMoveStrings,
++};
++
++const pb = studioPlaybackStrings;
++const lib = studioLibraryStrings;
++const lp = studioLoopStrings;
++
++const V02B_FORMATTER_SAMPLES: Record<string, Record<string, string[]>> = {
++  studioPlaybackStrings: {
++    playPastEnd: [
++      pb.playPastEnd({ position: '00:05.000', end: '00:02.000' }),
++      pb.playPastEnd({ position: '01:00.250', end: '00:30.000' }),
++    ],
++  },
++  studioLibraryStrings: {
++    sourceFailed: [lib.sourceFailed('Hit')],
++    sourceNotLoaded: [lib.sourceNotLoaded('Hit')],
++    historyAdd: [lib.historyAdd('Hit')],
++    clipAdded: [
++      lib.clipAdded({ title: 'Hit', track: 'SFX', time: '00:09.400', suffix: '' }),
++      lib.clipAdded({
++        title: 'Hit',
++        track: 'SFX',
++        time: '00:09.400',
++        suffix: lib.nearestFreeSpot,
++      }),
++    ],
++  },
++  studioLoopStrings: {
++    replaced: [lp.replaced('00:01.000 — 00:03.000')],
++    created: [lp.created('00:01.000 — 00:03.000')],
++  },
++  studioMoveStrings: {},
++};
++
++const CONTEXT_REMAINING_GEORGIAN_LINES = [
++  "{ id: 'video', kind: 'video', name: 'ვიდეო' },",
++  "{ id: 'audio', kind: 'audio', name: 'აუდიო' },",
++  'applyEdit(moved, `გადატანა ({ids.length})`);',
++  "setStatus([...messages, `„{file.name}“ იხსნება…`].join(' · '));",
++  'report(`„{file.name}“: ვიდეოხაზზე დამატება ვერ მოხერხდა.`);',
++  'applyEdit(result.arrangement, `ვიდეოს დამატება — {file.name}`);',
++  '`„{file.name}“ დაემატა ვიდეოხაზზე {formatArrangementTime(result.clip.start)} — {formatArrangementTime(result.clip.start + result.clip.duration)}`,',
++  '`ვიდეოს დამატება ვერ მოხერხდა: {error instanceof Error ? error.message : String(error)}`,',
++  "error: error instanceof Error ? error.message : 'ჩატვირთვა ვერ მოხერხდა',",
++];
++
++describe('V-0.2b playback, library, loop and move strings', () => {
++  it('ST10: every plain-string property equals its exact English literal', () => {
++    expect(Object.keys(V02B_OBJECTS).sort()).toEqual(
++      Object.keys(EXPECTED_V02B_PLAIN_STRINGS).sort(),
++    );
++    for (const [objectName, object] of Object.entries(V02B_OBJECTS)) {
++      const expected = EXPECTED_V02B_PLAIN_STRINGS[objectName] ?? {};
++      const plainKeys = Object.entries(object)
++        .filter(([, value]) => typeof value === 'string')
++        .map(([key]) => key)
++        .sort();
++      expect(plainKeys, objectName).toEqual(Object.keys(expected).sort());
++      for (const [key, value] of Object.entries(object)) {
++        if (typeof value === 'string') {
++          expect(value, `${objectName}.${key}`).toBe(expected[key]);
++        }
+       }
+-      const declaration = lines[index]?.trim().endsWith('=')
+-        ? `${lines[index]}${lines[index + 1] ?? ''}`
+-        : (lines[index] ?? '');
+-      expect(declaration, name).not.toMatch(GEORGIAN_CODEPOINT);
+     }
+   });
++
++  it('ST11: every formatter returns the exact English text for its inputs', () => {
++    expect(pb.playPastEnd({ position: '00:05.000', end: '00:02.000' })).toBe(
++      'Playhead (00:05.000) is past the end of the project (00:02.000) — there is nothing to play here. Home returns to 0.',
++    );
++    expect(pb.playPastEnd({ position: '01:00.250', end: '00:30.000' })).toBe(
++      'Playhead (01:00.250) is past the end of the project (00:30.000) — there is nothing to play here. Home returns to 0.',
++    );
++    expect(lib.sourceFailed('Hit')).toBe('“Hit” failed to load — details are in the library.');
++    expect(lib.sourceNotLoaded('Hit')).toBe('“Hit” has not loaded yet.');
++    expect(lib.historyAdd('Hit')).toBe('Add — Hit');
++    expect(lib.clipAdded({ title: 'Hit', track: 'SFX', time: '00:09.400', suffix: '' })).toBe(
++      '“Hit” added to the SFX track at 00:09.400.',
++    );
++    expect(
++      lib.clipAdded({ title: 'Hit', track: 'SFX', time: '00:09.400', suffix: lib.nearestFreeSpot }),
++    ).toBe('“Hit” added to the SFX track at 00:09.400 (nearest free spot).');
++    expect(lp.replaced('00:01.000 — 00:03.000')).toBe(
++      'Loop replaced with the new range: 00:01.000 — 00:03.000.',
++    );
++    expect(lp.created('00:01.000 — 00:03.000')).toBe(
++      'Loop created and turned on: 00:01.000 — 00:03.000.',
++    );
++    expect(GESTURE_UNDO_BLOCKED_MESSAGE).toBe(studioMoveStrings.undoBlockedDuringDrag);
++    expect(GESTURE_EDIT_BLOCKED_MESSAGE).toBe(studioMoveStrings.editBlockedDuringDrag);
++    expect(NUDGE_AT_TIME_START_MESSAGE).toBe(studioMoveStrings.nudgeAtTimeStart);
++    expect(WEB_AUDIO_UNAVAILABLE_MESSAGE).toBe(pb.webAudioUnavailable);
++    expect(playPastEndMessage(5, 2)).toBe(
++      pb.playPastEnd({ position: '00:05.000', end: '00:02.000' }),
++    );
++  });
++
++  it('ST12: no string or formatter output of the four objects contains a Georgian codepoint', () => {
++    for (const [objectName, object] of Object.entries(V02B_OBJECTS)) {
++      const samples = V02B_FORMATTER_SAMPLES[objectName] ?? {};
++      const formatterKeys = Object.entries(object)
++        .filter(([, value]) => typeof value === 'function')
++        .map(([key]) => key)
++        .sort();
++      expect(formatterKeys, objectName).toEqual(Object.keys(samples).sort());
++      for (const [key, value] of Object.entries(object)) {
++        if (typeof value === 'string') {
++          expect(value, `${objectName}.${key}`).not.toMatch(GEORGIAN_CODEPOINT);
++        }
++      }
++      for (const [key, outputs] of Object.entries(samples)) {
++        expect(outputs.length, `${objectName}.${key}`).toBeGreaterThan(0);
++        for (const output of outputs) {
++          expect(output, `${objectName}.${key}`).not.toMatch(GEORGIAN_CODEPOINT);
++        }
++      }
++    }
++  });
++
++  it('ST13: the only Georgian lines left in ArrangementContext are the later V-0 stages', () => {
++    const context = stripSourceComments(
++      readStoreSource('../../../contexts/ArrangementContext.tsx'),
++    );
++    const georgianLines = context
++      .split(/\r?\n/)
++      .filter((line) => GEORGIAN_CODEPOINT.test(line))
++      .map((line) => line.trim().replaceAll('${', '{'));
++    expect(georgianLines).toEqual(CONTEXT_REMAINING_GEORGIAN_LINES);
++  });
+ });
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/contexts/ArrangementContext.tsx	2026-10-24 07:59:45.265185711 +0000
++++ app/contexts/ArrangementContext.tsx	2026-10-24 08:09:49.270689661 +0000
+@@ -145,7 +145,14 @@
+   createArrangementStatusEntry,
+   reduceArrangementStatus,
+ } from '~/lib/arrangement/status-announcement';
+-import { studioEditStrings, studioExportStrings } from '~/lib/arrangement/strings';
++import {
++  studioEditStrings,
++  studioExportStrings,
++  studioLibraryStrings,
++  studioLoopStrings,
++  studioMoveStrings,
++  studioPlaybackStrings,
++} from '~/lib/arrangement/strings';
+ import {
+   createPlaybackAnchor,
+   isPlaybackAnchorHolding,
+@@ -175,19 +182,16 @@
+ const LOOP_SCHEDULE_HORIZON = 2;
+ const LOOP_LATE_MARGIN = 0.02;
+ const AUDIO_PUMP_INTERVAL_MS = 200;
+-export const GESTURE_UNDO_BLOCKED_MESSAGE = 'Undo/Redo drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.';
+-export const GESTURE_EDIT_BLOCKED_MESSAGE = 'რედაქტირება drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.';
+-export const NUDGE_AT_TIME_START_MESSAGE = 'ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.';
+-const AUDIO_ON_VIDEO_LANE_MESSAGE =
+-  'აირჩიე აუდიო ხაზი (მუსიკა, სტემები ან SFX) — ვიდეოხაზზე აუდიო არ ემატება.';
+-const LIBRARY_DROP_BLOCKED_MESSAGE = 'აქ ადგილი არ არის — ერთ ხაზზე კლიპები ერთმანეთს არ ფარავს.';
+-const librarySourceFailedMessage = (title: string) =>
+-  `„${title}“ ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.`;
+-export const WEB_AUDIO_UNAVAILABLE_MESSAGE =
+-  'ამ ბრაუზერში Web Audio მიუწვდომელია — დაკვრა და ექსპორტი ვერ იმუშავებს.';
++export const GESTURE_UNDO_BLOCKED_MESSAGE = studioMoveStrings.undoBlockedDuringDrag;
++export const GESTURE_EDIT_BLOCKED_MESSAGE = studioMoveStrings.editBlockedDuringDrag;
++export const NUDGE_AT_TIME_START_MESSAGE = studioMoveStrings.nudgeAtTimeStart;
++const AUDIO_ON_VIDEO_LANE_MESSAGE = studioLibraryStrings.audioOnVideoTrack;
++const LIBRARY_DROP_BLOCKED_MESSAGE = studioLibraryStrings.dropBlocked;
++const librarySourceFailedMessage = studioLibraryStrings.sourceFailed;
++export const WEB_AUDIO_UNAVAILABLE_MESSAGE = studioPlaybackStrings.webAudioUnavailable;
+ const STOP_OVERSHOOT_TOLERANCE = 0.05;
+ const NO_SELECTION: readonly string[] = [];
+-const LOOP_STEP_BLOCKED_MESSAGE = 'Loop ვეღარ გადაიწევს: დროის დასაწყისი ან მინიმალური სიგრძე.';
++const LOOP_STEP_BLOCKED_MESSAGE = studioLoopStrings.stepBlocked;
+ const DECODE_SAMPLE_RATE = 48000;
+ const RETIRED_GRAPH_GRACE = 0.25;
+ const GESTURE_WAIT_MS = 50;
+@@ -511,7 +515,10 @@
+ }
+ 
+ export function playPastEndMessage(position: number, end: number): string {
+-  return `Playhead (${formatArrangementTime(position)}) პროექტის ბოლოს (${formatArrangementTime(end)}) მიღმაა — აქ დასაკრავი არაფერია. Home აბრუნებს 0-ზე.`;
++  return studioPlaybackStrings.playPastEnd({
++    position: formatArrangementTime(position),
++    end: formatArrangementTime(end),
++  });
+ }
+ 
+ interface LoopScheduleState {
+@@ -1211,7 +1218,7 @@
+     const arrangement = historyRef.current.present;
+     const end = projectEnd(arrangement);
+     if (end <= 0) {
+-      setStatus('დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდან დაამატე კლიპი.');
++      setStatus(studioPlaybackStrings.nothingToPlay);
+       return;
+     }
+     const current = positionRef.current;
+@@ -1258,11 +1265,11 @@
+       if (!source || !buffer || latestRef.current.sourceStates[sourceId]?.status !== 'ready') {
+         stopLibraryPreview();
+         if (!source) {
+-          setStatus('ჯერ ბიბლიოთეკაში აირჩიე ხმა.');
++          setStatus(studioLibraryStrings.selectSoundFirst);
+         } else if (latestRef.current.sourceStates[sourceId]?.status === 'error') {
+           setStatus(librarySourceFailedMessage(source.title));
+         } else {
+-          setStatus(`„${source.title}“ ჯერ არ ჩატვირთულა.`);
++          setStatus(studioLibraryStrings.sourceNotLoaded(source.title));
+         }
+         return;
+       }
+@@ -1371,7 +1378,7 @@
+       const id = sourceId ?? latest.selectedSourceId;
+       const source = collection.sources.find((entry) => entry.id === id);
+       if (!source) {
+-        setStatus('ჯერ ბიბლიოთეკაში აირჩიე ხმა.');
++        setStatus(studioLibraryStrings.selectSoundFirst);
+         return;
+       }
+       const state = latest.sourceStates[source.id];
+@@ -1379,7 +1386,7 @@
+         setStatus(
+           state?.status === 'error'
+             ? librarySourceFailedMessage(source.title)
+-            : `„${source.title}“ ჯერ არ ჩატვირთულა.`,
++            : studioLibraryStrings.sourceNotLoaded(source.title),
+         );
+         return;
+       }
+@@ -1397,15 +1404,20 @@
+         sourceDuration: state.duration,
+       });
+       if (!result) {
+-        setStatus('კლიპის დამატება ვერ მოხერხდა.');
++        setStatus(studioLibraryStrings.addFailed);
+         return;
+       }
+-      applyEdit(result.arrangement, `დამატება — ${source.title}`);
++      applyEdit(result.arrangement, studioLibraryStrings.historyAdd(source.title));
+       setSelectedClipId(result.clip.id);
+       setRange(null);
+       const moved = Math.abs(result.clip.start - desired) > ARRANGEMENT_EPS;
+       setStatus(
+-        `„${source.title}“ დაემატა ${track.name} ხაზზე ${formatArrangementTime(result.clip.start)}-ზე${moved ? ' (უახლოესი თავისუფალი ადგილი)' : ''}.`,
++        studioLibraryStrings.clipAdded({
++          title: source.title,
++          track: track.name,
++          time: formatArrangementTime(result.clip.start),
++          suffix: moved ? studioLibraryStrings.nearestFreeSpot : '',
++        }),
+       );
+     },
+     [
+@@ -1445,7 +1457,7 @@
+       const dragged = getLibraryDragSource();
+       libraryDragSourceRef.current = null;
+       if (!dragged) {
+-        setStatus('ეს ხმა ჯერ არ ჩატვირთულა — დაელოდე და სცადე თავიდან.');
++        setStatus(studioLibraryStrings.dropNotLoaded);
+         return false;
+       }
+       const arrangement = historyRef.current.present;
+@@ -1469,12 +1481,17 @@
+         setStatus(LIBRARY_DROP_BLOCKED_MESSAGE);
+         return false;
+       }
+-      applyEdit(result.arrangement, `დამატება — ${dragged.title}`);
++      applyEdit(result.arrangement, studioLibraryStrings.historyAdd(dragged.title));
+       setActiveTrackId(trackId);
+       setSelectedClipId(result.clip.id);
+       setRange(null);
+       setStatus(
+-        `„${dragged.title}“ დაემატა ${track.name} ხაზზე ${formatArrangementTime(result.clip.start)}-ზე.`,
++        studioLibraryStrings.clipAdded({
++          title: dragged.title,
++          track: track.name,
++          time: formatArrangementTime(result.clip.start),
++          suffix: '',
++        }),
+       );
+       return true;
+     },
+@@ -1640,25 +1657,31 @@
+     if (selected && !sameAsBrace) {
+       const next = setLoopFromRange(arrangement, selected);
+       if (!next) {
+-        setStatus('Loop-ისთვის მონაკვეთი მინიმუმ 0.1 წამი უნდა იყოს.');
++        setStatus(studioLoopStrings.tooShort);
+         return;
+       }
+       const replaced = loop !== null;
+-      applyEdit(next, replaced ? 'Loop ჩანაცვლდა' : 'Loop შეიქმნა');
++      applyEdit(
++        next,
++        replaced ? studioLoopStrings.historyReplaced : studioLoopStrings.historyCreated,
++      );
+       setStatus(
+         replaced
+-          ? `Loop ჩანაცვლდა ახალი მონაკვეთით: ${formatLoopSpan(selected)}.`
+-          : `Loop შეიქმნა და ჩაირთო: ${formatLoopSpan(selected)}.`,
++          ? studioLoopStrings.replaced(formatLoopSpan(selected))
++          : studioLoopStrings.created(formatLoopSpan(selected)),
+       );
+       return;
+     }
+     if (!loop) {
+-      setStatus('Loop-ისთვის ჯერ მონიშნე მონაკვეთი ტალღაზე.');
++      setStatus(studioLoopStrings.needsSelection);
+       return;
+     }
+     const enabling = !loop.enabled;
+-    applyEdit(toggleLoop(arrangement), enabling ? 'Loop ჩართვა' : 'Loop გამორთვა');
+-    setStatus(enabling ? 'Loop ჩართულია.' : 'Loop გამორთულია; დიაპაზონი შენარჩუნებულია.');
++    applyEdit(
++      toggleLoop(arrangement),
++      enabling ? studioLoopStrings.historyOn : studioLoopStrings.historyOff,
++    );
++    setStatus(enabling ? studioLoopStrings.on : studioLoopStrings.off);
+   }, [applyEdit, refuseEditDuringGesture]);
+ 
+   const previewLoopArrangement = useCallback(
+@@ -1679,7 +1702,11 @@
+   const commitLoopRange = useCallback(
+     (before: Arrangement) => {
+       lastLoopPreviewSyncRef.current = null;
+-      const committed = commitArrangement(historyRef.current.present, 'Loop-ის დიაპაზონი', before);
++      const committed = commitArrangement(
++        historyRef.current.present,
++        studioLoopStrings.historyRange,
++        before,
++      );
+       const loop = historyRef.current.present.loop;
+       syncPlayback(historyRef.current.present);
+       if (committed && loop) {
+@@ -1711,7 +1738,7 @@
+         );
+         return;
+       }
+-      applyEdit(next, 'Loop-ის დიაპაზონი');
++      applyEdit(next, studioLoopStrings.historyRange);
+       if (next.loop) {
+         setStatus(`Loop: ${formatLoopSpan(next.loop)}${next.loop.enabled ? '' : ' · off'}.`);
+       }
+@@ -1746,11 +1773,11 @@
+       }
+       const next = moveClip(arrangement, clip.id, target);
+       if (!next) {
+-        const message = 'ჩაჩოჩება დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი.';
++        const message = studioMoveStrings.nudgeBlocked;
+         setStatus(keyRepeat ? () => message : message);
+         return;
+       }
+-      applyEdit(next, 'კლიპის ჩაჩოჩება');
++      applyEdit(next, studioMoveStrings.historyNudgeClip);
+       setRange(null);
+     },
+     [applyEdit, primarySelectedClipId, setRange],
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-24 07:59:45.265469613 +0000
++++ app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-24 08:07:20.731831206 +0000
+@@ -10,6 +10,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioMoveStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -103,7 +104,7 @@
+ const MUSIC_LANE_Y = 150;
+ const SFX_LANE_Y = 250;
+ const SNAP_ON_STATUS = 'Snap ჩართულია — ბადე 1 წმ (G)';
+-const NUDGE_AT_ZERO_STATUS = 'ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.';
++const NUDGE_AT_ZERO_STATUS = studioMoveStrings.nudgeAtTimeStart;
+ const HIDDEN_LINES_TITLE =
+   'ბადე 0.1 წმ — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom. · 1 — უფრო მჭიდრო, 2 — უფრო ფართო';
+ const GROUP_BLOCKED_STATUS = 'ჯგუფის გადატანა შეჩერდა — მეზობელი კლიპი ან დროის დასაწყისი.';
+@@ -640,7 +641,7 @@
+     pressG();
+     fireEvent.keyDown(document.body, { key: 'ArrowRight', code: 'ArrowRight' });
+     expect(clipOf(api, 'm1').start).toBe(8);
+-    expect(live(api).undoLabel).toBe('კლიპის ჩაჩოჩება');
++    expect(live(api).undoLabel).toBe(studioMoveStrings.historyNudgeClip);
+     fireEvent.keyDown(document.body, { key: 'ArrowLeft', code: 'ArrowLeft' });
+     expect(clipOf(api, 'm1').start).toBe(7);
+     fireEvent.keyDown(document.body, { key: 'ArrowLeft', code: 'ArrowLeft' });
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx	2026-10-24 07:59:45.265469613 +0000
++++ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx	2026-10-24 08:06:59.795016594 +0000
+@@ -10,7 +10,13 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+-import { studioEditStrings } from '../strings';
++import {
++  studioEditStrings,
++  studioLibraryStrings,
++  studioLoopStrings,
++  studioMoveStrings,
++  studioPlaybackStrings,
++} from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -23,8 +29,8 @@
+ const OK_TITLE = 'Ready Song';
+ const BAD_TITLE = 'Broken Song';
+ const LOADER_ERROR = 'ფაილი ვერ ჩაიტვირთა (ქსელი)';
+-const NOTHING_TO_PLAY = 'დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდან დაამატე კლიპი.';
+-const FAILED_TEXT = `„${BAD_TITLE}“ ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.`;
++const NOTHING_TO_PLAY = studioPlaybackStrings.nothingToPlay;
++const FAILED_TEXT = studioLibraryStrings.sourceFailed(BAD_TITLE);
+ 
+ class FakeParam {
+   value = 0;
+@@ -391,10 +397,10 @@
+   });
+ });
+ 
+-const NUDGE_BLOCKED_TEXT = 'ჩაჩოჩება დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი.';
+-const NUDGE_SNAP_BLOCKED_TEXT = 'ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.';
++const NUDGE_BLOCKED_TEXT = studioMoveStrings.nudgeBlocked;
++const NUDGE_SNAP_BLOCKED_TEXT = studioMoveStrings.nudgeAtTimeStart;
+ const GROUP_BLOCKED_TEXT = 'ჯგუფის გადატანა შეჩერდა — მეზობელი კლიპი ან დროის დასაწყისი.';
+-const LOOP_BLOCKED_TEXT = 'Loop ვეღარ გადაიწევს: დროის დასაწყისი ან მინიმალური სიგრძე.';
++const LOOP_BLOCKED_TEXT = studioLoopStrings.stepBlocked;
+ const MARKER_START_TEXT = 'მარკერი დროის დასაწყისშია.';
+ const MARKER_NEXT_NONE_TEXT = 'წინ მარკერი აღარ არის';
+ const CLIP_GAIN_UNCHANGED_TEXT = 'Clip Gain უცვლელია: 0.0 dB.';
+@@ -705,8 +711,8 @@
+   });
+ });
+ 
+-const LOOP_OFF_TEXT = 'Loop გამორთულია; დიაპაზონი შენარჩუნებულია.';
+-const LOOP_ON_TEXT = 'Loop ჩართულია.';
++const LOOP_OFF_TEXT = studioLoopStrings.off;
++const LOOP_ON_TEXT = studioLoopStrings.on;
+ const COPY_ONE_CLIP_TEXT = studioEditStrings.copyClipsDone(1);
+ 
+ interface OneShotPress {
+@@ -780,8 +786,8 @@
+     expect(allowed).toEqual([false, false, false, false]);
+     expect(enabled).toEqual([false, false, false, false]);
+     expect(addedTexts(stopWatching(watch))).toEqual([LOOP_OFF_TEXT]);
+-    expect(live(api).undoLabel).toBe('Loop გამორთვა');
+-    expect(view.queryAllByTitle('Undo: Loop გამორთვა').length).toBe(1);
++    expect(live(api).undoLabel).toBe(studioLoopStrings.historyOff);
++    expect(view.queryAllByTitle(`Undo: ${studioLoopStrings.historyOff}`).length).toBe(1);
+ 
+     act(() => live(api).undo());
+     expect(live(api).arrangement.loop?.enabled).toBe(true);
+@@ -1041,4 +1047,23 @@
+     expect(addedTexts(stopWatching(watch))).toEqual([NUDGE_SNAP_BLOCKED_TEXT]);
+     expect(clipStart(api, 'c1')).toBe(0);
+   });
++
++  it('SA-DEL Delete on one clip and then on two clips states the English delete texts', async () => {
++    const { api, region } = await mountKeyRepeatWorkspace(
++      keyRepeatArrangement({
++        clips: [keyRepeatClip('c1', 0), keyRepeatClip('c2', 6), keyRepeatClip('c3', 12)],
++      }),
++    );
++    act(() => live(api).selectClip('c1'));
++    pressKey({ target: document.body, key: 'Delete' }, false);
++
++    expect(region.textContent).toBe(studioEditStrings.deleteClipDone);
++    expect(live(api).arrangement.clips.map((clip) => clip.id)).toEqual(['c2', 'c3']);
++
++    act(() => live(api).selectClips(['c2', 'c3']));
++    pressKey({ target: document.body, key: 'Delete' }, false);
++
++    expect(region.textContent).toBe(studioEditStrings.deleteClipsDone(2));
++    expect(live(api).arrangement.clips).toEqual([]);
++  });
+ });
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx	2026-10-24 07:59:45.265469613 +0000
++++ app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx	2026-10-24 08:07:44.466627723 +0000
+@@ -16,6 +16,7 @@
+ } from '~/types/arrangement';
+ import { LIBRARY_DRAG_MIME } from '../library';
+ import { createArrangement } from '../model';
++import { studioLibraryStrings, studioLoopStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -108,8 +109,8 @@
+ const LANE_HEIGHT_PX = 100;
+ const BRACE_X = 500;
+ const LOOP_FIXTURE: ArrangementLoop = { start: 12.3, end: 14.1, enabled: true };
+-const DROP_BLOCKED_STATUS = 'აქ ადგილი არ არის — ერთ ხაზზე კლიპები ერთმანეთს არ ფარავს.';
+-const LOOP_BLOCKED_STATUS = 'Loop ვეღარ გადაიწევს: დროის დასაწყისი ან მინიმალური სიგრძე.';
++const DROP_BLOCKED_STATUS = studioLibraryStrings.dropBlocked;
++const LOOP_BLOCKED_STATUS = studioLoopStrings.stepBlocked;
+ 
+ const loopDropCollection: WorkspaceCollection = {
+   id: 'loop-drop',
+@@ -365,7 +366,9 @@
+     expect(added).toHaveLength(1);
+     expect(added[0]?.trackId).toBe('sfx');
+     expect(added[0]?.start).toBeCloseTo(9.4, 9);
+-    expect(statusText(view)).toBe('„Hit“ დაემატა SFX ხაზზე 00:09.400-ზე.');
++    expect(statusText(view)).toBe(
++      studioLibraryStrings.clipAdded({ title: 'Hit', track: 'SFX', time: '00:09.400', suffix: '' }),
++    );
+   });
+ 
+   it('SD2 Snap on 1 s puts the ghost and the drop on the nearest line', async () => {
+@@ -381,8 +384,10 @@
+     expect(added).toHaveLength(1);
+     expect(added[0]?.start).toBe(9);
+     expect(view.container.querySelector(`[data-clip-id="${added[0]?.id}"]`)).not.toBeNull();
+-    expect(statusText(view)).toBe('„Hit“ დაემატა SFX ხაზზე 00:09.000-ზე.');
+-    expect(undoTitle(view)).toBe('Undo: დამატება — Hit');
++    expect(statusText(view)).toBe(
++      studioLibraryStrings.clipAdded({ title: 'Hit', track: 'SFX', time: '00:09.000', suffix: '' }),
++    );
++    expect(undoTitle(view)).toBe(`Undo: ${studioLibraryStrings.historyAdd('Hit')}`);
+     pressCtrl('z');
+     expect(live(api).arrangement.clips.map((clip) => clip.id)).toEqual(DROP_FIXTURE_IDS);
+     expect(undoTitle(view)).toBe('Undo');
+@@ -448,7 +453,7 @@
+     const added = addedClips(api, DROP_FIXTURE_IDS);
+     expect(added).toHaveLength(1);
+     expect(added[0]?.start).toBeCloseTo(6.2, 9);
+-    expect(undoTitle(view)).toBe('Undo: დამატება — Hit');
++    expect(undoTitle(view)).toBe(`Undo: ${studioLibraryStrings.historyAdd('Hit')}`);
+   });
+ 
+   it('SD7 the video-lane refusal ghost shows the snapped time and nothing is added', async () => {
+@@ -482,8 +487,15 @@
+       expect(added).toHaveLength(1);
+       expect(added[0]?.trackId).toBe('sfx');
+       expect(added[0]?.start).toBeCloseTo(6.4, 9);
+-      expect(statusText(view)).toBe('„Hit“ დაემატა SFX ხაზზე 00:06.400-ზე.');
+-      expect(undoTitle(view)).toBe('Undo: დამატება — Hit');
++      expect(statusText(view)).toBe(
++        studioLibraryStrings.clipAdded({
++          title: 'Hit',
++          track: 'SFX',
++          time: '00:06.400',
++          suffix: '',
++        }),
++      );
++      expect(undoTitle(view)).toBe(`Undo: ${studioLibraryStrings.historyAdd('Hit')}`);
+       pressCtrl('z');
+       expect(live(api).arrangement.clips.map((clip) => clip.id)).toEqual(DROP_FIXTURE_IDS);
+     });
+@@ -499,7 +511,14 @@
+       expect(added).toHaveLength(1);
+       expect(added[0]?.trackId).toBe('music');
+       expect(added[0]?.start).toBeCloseTo(5.3, 9);
+-      expect(statusText(view)).toBe('„Hit“ დაემატა მუსიკა ხაზზე 00:05.300-ზე.');
++      expect(statusText(view)).toBe(
++        studioLibraryStrings.clipAdded({
++          title: 'Hit',
++          track: 'მუსიკა',
++          time: '00:05.300',
++          suffix: '',
++        }),
++      );
+     });
+ 
+     it("DE3 another lane's clip end captures the drop end", async () => {
+@@ -513,7 +532,14 @@
+       expect(added).toHaveLength(1);
+       expect(added[0]?.trackId).toBe('stems');
+       expect(added[0]?.start).toBeCloseTo(4.4, 9);
+-      expect(statusText(view)).toBe('„Hit“ დაემატა სტემები ხაზზე 00:04.400-ზე.');
++      expect(statusText(view)).toBe(
++        studioLibraryStrings.clipAdded({
++          title: 'Hit',
++          track: 'სტემები',
++          time: '00:04.400',
++          suffix: '',
++        }),
++      );
+     });
+ 
+     it('DE4 a lane clip end is not an end target on its own lane', async () => {
+@@ -544,7 +570,7 @@
+       });
+       dropLibrary(laneBody('sfx'), 6.55);
+       expect(addedClips(api, DROP_FIXTURE_IDS)).toHaveLength(0);
+-      expect(statusText(view)).toBe('ეს ხმა ჯერ არ ჩატვირთულა — დაელოდე და სცადე თავიდან.');
++      expect(statusText(view)).toBe(studioLibraryStrings.dropNotLoaded);
+     });
+ 
+     it('DE6 Alt with Snap off enables edges for the drop', async () => {
+@@ -612,7 +638,7 @@
+     release();
+     expect(loopOf(api).start).toBeCloseTo(12.55, 9);
+     expect(loopOf(api).end).toBeCloseTo(14.35, 9);
+-    expect(undoTitle(view)).toBe('Undo: Loop-ის დიაპაზონი');
++    expect(undoTitle(view)).toBe(`Undo: ${studioLoopStrings.historyRange}`);
+   });
+ 
+   it('SL2 Snap on 1 s moves the brace start to the nearest line and keeps the length', async () => {
+@@ -626,7 +652,7 @@
+     expect(braceSpan(element)).toBe('Loop 00:13.000 — 00:14.800');
+     expect(loopOf(api)).toEqual({ start: 13, end: 14.8, enabled: true });
+     expect(statusText(view)).toBe('Loop: 00:13.000 — 00:14.800.');
+-    expect(undoTitle(view)).toBe('Undo: Loop-ის დიაპაზონი');
++    expect(undoTitle(view)).toBe(`Undo: ${studioLoopStrings.historyRange}`);
+     pressCtrl('z');
+     expect(loopOf(api)).toEqual(LOOP_FIXTURE);
+     expect(undoTitle(view)).toBe('Undo');
+@@ -737,7 +763,7 @@
+     expect(loopOf(api)).toEqual({ start: 12, end: 13.8, enabled: true });
+     pressBraceKey(element, 'ArrowLeft');
+     expect(loopOf(api)).toEqual({ start: 11, end: 12.8, enabled: true });
+-    expect(undoTitle(view)).toBe('Undo: Loop-ის დიაპაზონი');
++    expect(undoTitle(view)).toBe(`Undo: ${studioLoopStrings.historyRange}`);
+     pressCtrl('z');
+     expect(loopOf(api)).toEqual({ start: 12, end: 13.8, enabled: true });
+     pressCtrl('z');
+@@ -846,7 +872,7 @@
+       expect(loopOf(api)).toEqual({ start: 13, end: 14.8, enabled: true });
+       expect(braceSpan(element)).toBe('Loop 00:13.000 — 00:14.800');
+       expect(statusText(view)).toBe('Loop: 00:13.000 — 00:14.800.');
+-      expect(undoTitle(view)).toBe('Undo: Loop-ის დიაპაზონი');
++      expect(undoTitle(view)).toBe(`Undo: ${studioLoopStrings.historyRange}`);
+       pressCtrl('z');
+       expect(loopOf(api)).toEqual(LOOP_FIXTURE);
+       expect(undoTitle(view)).toBe('Undo');
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx	2026-10-24 07:59:45.265469613 +0000
++++ app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx	2026-10-24 08:07:57.445508590 +0000
+@@ -18,6 +18,7 @@
+ } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
++import { studioLoopStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -114,7 +115,7 @@
+ const BRACE_X = 500;
+ const MARKER_A = 6.375;
+ const MARKER_B = 12;
+-const LOOP_LABEL = 'Loop-ის დიაპაზონი';
++const LOOP_LABEL = studioLoopStrings.historyRange;
+ const TIME_SNAP_MARKERS: ArrangementMarker[] = [
+   { id: 'kA', time: MARKER_A, name: 'A' },
+   { id: 'kB', time: MARKER_B, name: 'B' },
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/lib/arrangement/__tests__/gesture-reentry.test.tsx	2026-10-24 07:59:45.265469613 +0000
++++ app/lib/arrangement/__tests__/gesture-reentry.test.tsx	2026-10-24 08:07:59.945485636 +0000
+@@ -9,6 +9,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioLoopStrings } from '../strings';
+ 
+ class FakeAudioBuffer {
+   readonly length: number;
+@@ -320,7 +321,7 @@
+       fireEvent.pointerMove(brace, { pointerId: 1, clientX: 140 });
+       fireEvent.pointerUp(brace, { pointerId: 1, clientX: 140 });
+       expect(liveApi(api).arrangement.loop).toEqual({ start: 3, end: 5, enabled: true });
+-      expect(liveApi(api).undoLabel).toBe('Loop-ის დიაპაზონი');
++      expect(liveApi(api).undoLabel).toBe(studioLoopStrings.historyRange);
+       expect(liveApi(api).isPointerGestureActive()).toBe(false);
+     });
+   });
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/lib/arrangement/__tests__/failed-source-refusal.test.tsx	2026-10-24 07:59:45.265469613 +0000
++++ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx	2026-10-24 08:08:05.344436009 +0000
+@@ -8,6 +8,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioLibraryStrings } from '../strings';
+ 
+ const fakeClock = { base: 0 };
+ 
+@@ -87,14 +88,14 @@
+ const BAD_TITLE = 'Broken Song';
+ const SLOW_TITLE = 'Slow Song';
+ const LOADER_ERROR = 'ფაილი ვერ ჩაიტვირთა (ქსელი)';
+-const NO_SOURCE = 'ჯერ ბიბლიოთეკაში აირჩიე ხმა.';
++const NO_SOURCE = studioLibraryStrings.selectSoundFirst;
+ 
+ function failedText(title: string): string {
+-  return `„${title}“ ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.`;
++  return studioLibraryStrings.sourceFailed(title);
+ }
+ 
+ function loadingText(title: string): string {
+-  return `„${title}“ ჯერ არ ჩატვირთულა.`;
++  return studioLibraryStrings.sourceNotLoaded(title);
+ }
+ 
+ interface SlowLoad {
+@@ -247,7 +248,12 @@
+     expect(live(api).arrangement.clips[0]?.sourceId).toBe('ok');
+     expect(live(api).arrangement.clips[0]?.start).toBe(0);
+     expect(live(api).status).toBe(
+-      `„${OK_TITLE}“ დაემატა მუსიკა ხაზზე ${formatArrangementTime(0)}-ზე.`,
++      studioLibraryStrings.clipAdded({
++        title: OK_TITLE,
++        track: 'მუსიკა',
++        time: formatArrangementTime(0),
++        suffix: '',
++      }),
+     );
+   });
+ 
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/lib/arrangement/__tests__/collection-load-status.test.tsx	2026-10-24 07:59:45.265469613 +0000
++++ app/lib/arrangement/__tests__/collection-load-status.test.tsx	2026-10-24 08:08:07.944412082 +0000
+@@ -22,6 +22,7 @@
+ import type { AudioStem } from '~/types/audio';
+ import { createPurchasedWorkspaceCollection, type PurchasedStemFetch } from '../collection';
+ import { createArrangement } from '../model';
++import { studioPlaybackStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -54,7 +55,7 @@
+ const PURCHASED_READY =
+   'შეძენილი კოლექცია მზადაა. აირჩიე ხაზი და დაამატე ხმა (Enter ან ＋ დამატება).';
+ const PURCHASED_EMPTY = 'შეძენილ კოლექციაში წყარო არ არის — ბიბლიოთეკა ცარიელია.';
+-const NOTHING_TO_PLAY = 'დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდან დაამატე კლიპი.';
++const NOTHING_TO_PLAY = studioPlaybackStrings.nothingToPlay;
+ const ROW_LOADING = 'იტვირთება…';
+ 
+ const PURCHASED_STEMS: AudioStem[] = [
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-129/r130-granted-start/app/lib/arrangement/__tests__/ArrangementContext.test.ts	2026-10-24 07:59:45.265338457 +0000
++++ app/lib/arrangement/__tests__/ArrangementContext.test.ts	2026-10-24 08:08:10.929384612 +0000
+@@ -13,7 +13,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement, deleteTime } from '../model';
+-import { studioEditStrings } from '../strings';
++import { studioEditStrings, studioPlaybackStrings } from '../strings';
+ 
+ interface FakeStart {
+   calledAt: number;
+@@ -653,7 +653,7 @@
+     expect(result.current.getLivePosition()).toBe(5);
+     expect(result.current.status).toBe(playPastEndMessage(5, 2));
+     expect(result.current.status).toBe(
+-      'Playhead (00:05.000) პროექტის ბოლოს (00:02.000) მიღმაა — აქ დასაკრავი არაფერია. Home აბრუნებს 0-ზე.',
++      studioPlaybackStrings.playPastEnd({ position: '00:05.000', end: '00:02.000' }),
+     );
+     act(() => result.current.pasteClipboard());
+     const pasted = result.current.arrangement.clips.find(

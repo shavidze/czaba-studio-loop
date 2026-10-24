@@ -1,0 +1,293 @@
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 77e028a..79d8637 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -145,7 +145,14 @@ import {
+   createArrangementStatusEntry,
+   reduceArrangementStatus,
+ } from '~/lib/arrangement/status-announcement';
+-import { studioEditStrings, studioExportStrings } from '~/lib/arrangement/strings';
++import {
++  studioEditStrings,
++  studioExportStrings,
++  studioLibraryStrings,
++  studioLoopStrings,
++  studioMoveStrings,
++  studioPlaybackStrings,
++} from '~/lib/arrangement/strings';
+ import {
+   createPlaybackAnchor,
+   isPlaybackAnchorHolding,
+@@ -175,19 +182,16 @@ const PLAYBACK_LOOKAHEAD = 0.05;
+ const LOOP_SCHEDULE_HORIZON = 2;
+ const LOOP_LATE_MARGIN = 0.02;
+ const AUDIO_PUMP_INTERVAL_MS = 200;
+-export const GESTURE_UNDO_BLOCKED_MESSAGE = 'Undo/Redo drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.';
+-export const GESTURE_EDIT_BLOCKED_MESSAGE = 'რედაქტირება drag-ის დროს არ მუშაობს — ჯერ ხელი აუშვი.';
+-export const NUDGE_AT_TIME_START_MESSAGE = 'ჩაჩოჩება დაბლოკილია — დროის დასაწყისი.';
+-const AUDIO_ON_VIDEO_LANE_MESSAGE =
+-  'აირჩიე აუდიო ხაზი (მუსიკა, სტემები ან SFX) — ვიდეოხაზზე აუდიო არ ემატება.';
+-const LIBRARY_DROP_BLOCKED_MESSAGE = 'აქ ადგილი არ არის — ერთ ხაზზე კლიპები ერთმანეთს არ ფარავს.';
+-const librarySourceFailedMessage = (title: string) =>
+-  `„${title}“ ვერ ჩაიტვირთა — დეტალები ბიბლიოთეკაშია.`;
+-export const WEB_AUDIO_UNAVAILABLE_MESSAGE =
+-  'ამ ბრაუზერში Web Audio მიუწვდომელია — დაკვრა და ექსპორტი ვერ იმუშავებს.';
++export const GESTURE_UNDO_BLOCKED_MESSAGE = studioMoveStrings.undoBlockedDuringDrag;
++export const GESTURE_EDIT_BLOCKED_MESSAGE = studioMoveStrings.editBlockedDuringDrag;
++export const NUDGE_AT_TIME_START_MESSAGE = studioMoveStrings.nudgeAtTimeStart;
++const AUDIO_ON_VIDEO_LANE_MESSAGE = studioLibraryStrings.audioOnVideoTrack;
++const LIBRARY_DROP_BLOCKED_MESSAGE = studioLibraryStrings.dropBlocked;
++const librarySourceFailedMessage = studioLibraryStrings.sourceFailed;
++export const WEB_AUDIO_UNAVAILABLE_MESSAGE = studioPlaybackStrings.webAudioUnavailable;
+ const STOP_OVERSHOOT_TOLERANCE = 0.05;
+ const NO_SELECTION: readonly string[] = [];
+-const LOOP_STEP_BLOCKED_MESSAGE = 'Loop ვეღარ გადაიწევს: დროის დასაწყისი ან მინიმალური სიგრძე.';
++const LOOP_STEP_BLOCKED_MESSAGE = studioLoopStrings.stepBlocked;
+ const DECODE_SAMPLE_RATE = 48000;
+ const RETIRED_GRAPH_GRACE = 0.25;
+ const GESTURE_WAIT_MS = 50;
+@@ -511,7 +515,10 @@ export function formatArrangementTime(seconds: number): string {
+ }
+ 
+ export function playPastEndMessage(position: number, end: number): string {
+-  return `Playhead (${formatArrangementTime(position)}) პროექტის ბოლოს (${formatArrangementTime(end)}) მიღმაა — აქ დასაკრავი არაფერია. Home აბრუნებს 0-ზე.`;
++  return studioPlaybackStrings.playPastEnd({
++    position: formatArrangementTime(position),
++    end: formatArrangementTime(end),
++  });
+ }
+ 
+ interface LoopScheduleState {
+@@ -1211,7 +1218,7 @@ export function ArrangementProvider({
+     const arrangement = historyRef.current.present;
+     const end = projectEnd(arrangement);
+     if (end <= 0) {
+-      setStatus('დასაკრავი არაფერია — ჯერ ბიბლიოთეკიდან დაამატე კლიპი.');
++      setStatus(studioPlaybackStrings.nothingToPlay);
+       return;
+     }
+     const current = positionRef.current;
+@@ -1258,11 +1265,11 @@ export function ArrangementProvider({
+       if (!source || !buffer || latestRef.current.sourceStates[sourceId]?.status !== 'ready') {
+         stopLibraryPreview();
+         if (!source) {
+-          setStatus('ჯერ ბიბლიოთეკაში აირჩიე ხმა.');
++          setStatus(studioLibraryStrings.selectSoundFirst);
+         } else if (latestRef.current.sourceStates[sourceId]?.status === 'error') {
+           setStatus(librarySourceFailedMessage(source.title));
+         } else {
+-          setStatus(`„${source.title}“ ჯერ არ ჩატვირთულა.`);
++          setStatus(studioLibraryStrings.sourceNotLoaded(source.title));
+         }
+         return;
+       }
+@@ -1371,7 +1378,7 @@ export function ArrangementProvider({
+       const id = sourceId ?? latest.selectedSourceId;
+       const source = collection.sources.find((entry) => entry.id === id);
+       if (!source) {
+-        setStatus('ჯერ ბიბლიოთეკაში აირჩიე ხმა.');
++        setStatus(studioLibraryStrings.selectSoundFirst);
+         return;
+       }
+       const state = latest.sourceStates[source.id];
+@@ -1379,7 +1386,7 @@ export function ArrangementProvider({
+         setStatus(
+           state?.status === 'error'
+             ? librarySourceFailedMessage(source.title)
+-            : `„${source.title}“ ჯერ არ ჩატვირთულა.`,
++            : studioLibraryStrings.sourceNotLoaded(source.title),
+         );
+         return;
+       }
+@@ -1397,15 +1404,20 @@ export function ArrangementProvider({
+         sourceDuration: state.duration,
+       });
+       if (!result) {
+-        setStatus('კლიპის დამატება ვერ მოხერხდა.');
++        setStatus(studioLibraryStrings.addFailed);
+         return;
+       }
+-      applyEdit(result.arrangement, `დამატება — ${source.title}`);
++      applyEdit(result.arrangement, studioLibraryStrings.historyAdd(source.title));
+       setSelectedClipId(result.clip.id);
+       setRange(null);
+       const moved = Math.abs(result.clip.start - desired) > ARRANGEMENT_EPS;
+       setStatus(
+-        `„${source.title}“ დაემატა ${track.name} ხაზზე ${formatArrangementTime(result.clip.start)}-ზე${moved ? ' (უახლოესი თავისუფალი ადგილი)' : ''}.`,
++        studioLibraryStrings.clipAdded({
++          title: source.title,
++          track: track.name,
++          time: formatArrangementTime(result.clip.start),
++          suffix: moved ? studioLibraryStrings.nearestFreeSpot : '',
++        }),
+       );
+     },
+     [
+@@ -1445,7 +1457,7 @@ export function ArrangementProvider({
+       const dragged = getLibraryDragSource();
+       libraryDragSourceRef.current = null;
+       if (!dragged) {
+-        setStatus('ეს ხმა ჯერ არ ჩატვირთულა — დაელოდე და სცადე თავიდან.');
++        setStatus(studioLibraryStrings.dropNotLoaded);
+         return false;
+       }
+       const arrangement = historyRef.current.present;
+@@ -1469,12 +1481,17 @@ export function ArrangementProvider({
+         setStatus(LIBRARY_DROP_BLOCKED_MESSAGE);
+         return false;
+       }
+-      applyEdit(result.arrangement, `დამატება — ${dragged.title}`);
++      applyEdit(result.arrangement, studioLibraryStrings.historyAdd(dragged.title));
+       setActiveTrackId(trackId);
+       setSelectedClipId(result.clip.id);
+       setRange(null);
+       setStatus(
+-        `„${dragged.title}“ დაემატა ${track.name} ხაზზე ${formatArrangementTime(result.clip.start)}-ზე.`,
++        studioLibraryStrings.clipAdded({
++          title: dragged.title,
++          track: track.name,
++          time: formatArrangementTime(result.clip.start),
++          suffix: '',
++        }),
+       );
+       return true;
+     },
+@@ -1640,25 +1657,31 @@ export function ArrangementProvider({
+     if (selected && !sameAsBrace) {
+       const next = setLoopFromRange(arrangement, selected);
+       if (!next) {
+-        setStatus('Loop-ისთვის მონაკვეთი მინიმუმ 0.1 წამი უნდა იყოს.');
++        setStatus(studioLoopStrings.tooShort);
+         return;
+       }
+       const replaced = loop !== null;
+-      applyEdit(next, replaced ? 'Loop ჩანაცვლდა' : 'Loop შეიქმნა');
++      applyEdit(
++        next,
++        replaced ? studioLoopStrings.historyReplaced : studioLoopStrings.historyCreated,
++      );
+       setStatus(
+         replaced
+-          ? `Loop ჩანაცვლდა ახალი მონაკვეთით: ${formatLoopSpan(selected)}.`
+-          : `Loop შეიქმნა და ჩაირთო: ${formatLoopSpan(selected)}.`,
++          ? studioLoopStrings.replaced(formatLoopSpan(selected))
++          : studioLoopStrings.created(formatLoopSpan(selected)),
+       );
+       return;
+     }
+     if (!loop) {
+-      setStatus('Loop-ისთვის ჯერ მონიშნე მონაკვეთი ტალღაზე.');
++      setStatus(studioLoopStrings.needsSelection);
+       return;
+     }
+     const enabling = !loop.enabled;
+-    applyEdit(toggleLoop(arrangement), enabling ? 'Loop ჩართვა' : 'Loop გამორთვა');
+-    setStatus(enabling ? 'Loop ჩართულია.' : 'Loop გამორთულია; დიაპაზონი შენარჩუნებულია.');
++    applyEdit(
++      toggleLoop(arrangement),
++      enabling ? studioLoopStrings.historyOn : studioLoopStrings.historyOff,
++    );
++    setStatus(enabling ? studioLoopStrings.on : studioLoopStrings.off);
+   }, [applyEdit, refuseEditDuringGesture]);
+ 
+   const previewLoopArrangement = useCallback(
+@@ -1679,7 +1702,11 @@ export function ArrangementProvider({
+   const commitLoopRange = useCallback(
+     (before: Arrangement) => {
+       lastLoopPreviewSyncRef.current = null;
+-      const committed = commitArrangement(historyRef.current.present, 'Loop-ის დიაპაზონი', before);
++      const committed = commitArrangement(
++        historyRef.current.present,
++        studioLoopStrings.historyRange,
++        before,
++      );
+       const loop = historyRef.current.present.loop;
+       syncPlayback(historyRef.current.present);
+       if (committed && loop) {
+@@ -1711,7 +1738,7 @@ export function ArrangementProvider({
+         );
+         return;
+       }
+-      applyEdit(next, 'Loop-ის დიაპაზონი');
++      applyEdit(next, studioLoopStrings.historyRange);
+       if (next.loop) {
+         setStatus(`Loop: ${formatLoopSpan(next.loop)}${next.loop.enabled ? '' : ' · off'}.`);
+       }
+@@ -1746,11 +1773,11 @@ export function ArrangementProvider({
+       }
+       const next = moveClip(arrangement, clip.id, target);
+       if (!next) {
+-        const message = 'ჩაჩოჩება დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი.';
++        const message = studioMoveStrings.nudgeBlocked;
+         setStatus(keyRepeat ? () => message : message);
+         return;
+       }
+-      applyEdit(next, 'კლიპის ჩაჩოჩება');
++      applyEdit(next, studioMoveStrings.historyNudgeClip);
+       setRange(null);
+     },
+     [applyEdit, primarySelectedClipId, setRange],
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index 8fc0852..477d26f 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -199,3 +199,59 @@ export const studioEditStrings = {
+     trackSuffix: string;
+   }): string => `Paste (${count}): at ${at}${trackSuffix}.`,
+ };
++
++export const studioPlaybackStrings = {
++  webAudioUnavailable:
++    'Web Audio is not available in this browser — playback and export will not work.',
++  nothingToPlay: 'Nothing to play — add a clip from the library first.',
++  playPastEnd: ({ position, end }: { position: string; end: string }): string =>
++    `Playhead (${position}) is past the end of the project (${end}) — there is nothing to play here. Home returns to 0.`,
++};
++
++export const studioLibraryStrings = {
++  audioOnVideoTrack:
++    'Choose an audio track (music, stems or SFX) — audio is not added to the video track.',
++  dropBlocked: 'No room here — clips on one track do not overlap.',
++  selectSoundFirst: 'Select a sound in the library first.',
++  addFailed: 'Could not add the clip.',
++  nearestFreeSpot: ' (nearest free spot)',
++  dropNotLoaded: 'This sound has not loaded yet — wait and try again.',
++  sourceFailed: (title: string): string =>
++    `“${title}” failed to load — details are in the library.`,
++  sourceNotLoaded: (title: string): string => `“${title}” has not loaded yet.`,
++  historyAdd: (title: string): string => `Add — ${title}`,
++  clipAdded: ({
++    title,
++    track,
++    time,
++    suffix,
++  }: {
++    title: string;
++    track: string;
++    time: string;
++    suffix: string;
++  }): string => `“${title}” added to the ${track} track at ${time}${suffix}.`,
++};
++
++export const studioLoopStrings = {
++  stepBlocked: 'The loop cannot move further: start of the timeline or minimum length.',
++  tooShort: 'A loop needs a time selection of at least 0.1 s.',
++  historyReplaced: 'Loop replaced',
++  historyCreated: 'Loop created',
++  needsSelection: 'To set a loop, first make a time selection on the waveform.',
++  historyOn: 'Loop on',
++  historyOff: 'Loop off',
++  on: 'Loop is on.',
++  off: 'Loop is off; the range is kept.',
++  historyRange: 'Loop range',
++  replaced: (span: string): string => `Loop replaced with the new range: ${span}.`,
++  created: (span: string): string => `Loop created and turned on: ${span}.`,
++};
++
++export const studioMoveStrings = {
++  undoBlockedDuringDrag: 'Undo/Redo does not work while dragging — let go first.',
++  editBlockedDuringDrag: 'Editing does not work while dragging — let go first.',
++  nudgeAtTimeStart: 'Nudge blocked — start of the timeline.',
++  nudgeBlocked: 'Nudge blocked — a neighbouring clip or the start of the timeline.',
++  historyNudgeClip: 'Nudge clip',
++};

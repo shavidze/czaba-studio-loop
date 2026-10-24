@@ -1,11 +1,12 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 129 PASS (browserVerified=true, realVerified=true, 0 bugs): EDIT-COPY 29 exact statuses at 1440 and 1280 with unchanged effects, UNDO-LABEL 13/13 with Undo/Redo restore, layout within 1 px, export copy unchanged, G129-3 401 (fake-Bearer 403 blocked: backend unavailable in cloud). Gate 129 published 1e453b1 = round 130 baseline. V-0.2a -> done; 4 new Lows (GATE129-S1/S3, A-R129-L3, C-R129-UNDO-LABEL-TRUNCATED) -> deferred_low_polish (180). Regression due on/after 2026-10-27; no Medium+ open. Round 130 = V-0.2b as fixed in advance (D-29z95). Not COMPLETE: V-0.2b..V-0.5, V-1..V-3, M1/M3/M4, T12-ADVANCED, 180 deferred Lows, Tech Lead manual checks, SRW-21 deferred_user, PROD-SSR-NUL/PROD-MP3, final regression, Saba's ABL-R/DUX-R answers. Not BLOCKED: nothing external missing. Advisor available and used.",
- "nextTask": "Round 130 (D-29z95): VISUAL-A V-0.2b - playback, library add/drop, loop and nudge messages in English.\n- A: add studioPlaybackStrings/studioLibraryStrings/studioLoopStrings/studioMoveStrings to app/lib/arrangement/strings.ts (exact English P1-P25 from current-task.md 1.1); in ArrangementContext.tsx change only the import, the l.178-190 constants and playPastEndMessage (exported names/signatures kept, values from the module) and string literals in togglePlayback..nudgeSelectedClip (l.1205-1757); group nudge label `გადატანა (n)` l.1733 stays (V-0.4 with ArrangementClip); conditional copy stays in the Context. 8 tests literal -> module with the same matcher (status-announcement-ui +1 it SA-DEL closing the m4 gap); strings.test ST10-ST13 (exact, formatters + alias checks, no Georgian, Context Georgian-line ratchet) and ST9 index===-1 (GATE129-S2); doc 106. Mutations m4-m8. Frozen b-round-129-r130-tree-sha256.txt (930), start copies b-round-129/r130-granted-start/. Typecheck, lint, named vitest list, code-reviewer.\n- C: real Chromium 1440x900 + 1280x720 on /studio-lab: T130-TARGETED, SOURCE-SCOPE, AN-REVIEW, PLAY-COPY, LIB-COPY, LOOP-COPY, NUDGE-COPY (held-arrow de-dup), DEL-COPY-RECHECK, GEO-COUNT, LAYOUT, G130-3 last, PX-NET/REG-HYD.",
+ "reason": "C round 130 PASS (browserVerified=true, realVerified=true, 0 bugs): PLAY/LIB/LOOP/NUDGE/DEL copy exact at 1440 and 1280 with unchanged effects, held-arrow P3 announced once, layout within 1 px, G130-3 401 (fake-Bearer 403 blocked: backend unavailable in cloud). Gate 130 published ba54297 = round 131 baseline. V-0.2b -> done; 2 new Lows (GATE130-S3, C-R130-ADD-DISABLED-NO-REASON) -> deferred_low_polish (182). V-0.2c measured and split (c1 video, c2 tempo/metronome/view, c3 selection+groups; collection.ts -> V-0.5, library labels -> V-0.4). Regression due on/after 2026-10-27; no Medium+ open; decision files absent. Not COMPLETE: V-0.2c1..V-0.5, V-1..V-3, M1/M3/M4, T12-ADVANCED, 182 deferred Lows, Tech Lead manual checks, SRW-21 deferred_user, PROD-SSR-NUL/PROD-MP3, final regression, Saba's ABL-R/DUX-R answers. Not BLOCKED: nothing external missing. Advisor available and used. Bounded frontend-architect checkpoint requested from root (non-blocking).",
+ "nextTask": "Round 131 (D-29z96): VISUAL-A V-0.2c1 - video import messages in English.\n- A: add studioVideoStrings (exact English V1-V15 from current-task.md 1.1) to app/lib/arrangement/strings.ts; video.ts and video.client.ts string-only (exported audioFileRejectionMessage/unsupportedFileMessage/audioLaneDropMessage/videoProbeErrorMessage/videoAudioNote keep names); ArrangementContext.tsx only the import + 5 video import string expressions (l.2230/2280/2286/2291/2321; l.546-547, 1760, 3462 stay); strings.test ST14-ST16 (exact, formatters + exported functions, no Georgian, per-file scan of video.ts/video.client.ts) and ST13 -> 4 lines; video.test literal -> module; new video-import-status-ui.test.tsx VI1-VI4 with hand-written English literals (export-mp3 mock pattern); doc 106 l.4; new doc 107. Mutations m9-m13. Frozen b-round-130-r131-tree-sha256.txt (935), start copies b-round-130/r131-granted-start/. Typecheck, lint, named vitest list, code-reviewer.\n- C: real Chromium 1440x900 + 1280x720 on /studio-lab: T131-TARGETED, SOURCE-SCOPE, AN-REVIEW, VID-ADD (mp4/webm/mov, Opening… via MutationObserver, Undo title), VID-REJECT (wav, pdf, broken.mp4, batch), VID-NOAUDIO (Export dialog video-sound line), VID-LANE-DROP (try once), GEO-COUNT, LAYOUT, REG-130, G131-3 last, PX-NET/REG-HYD.",
  "remaining": [
   "VISUAL-A-OBSIDIAN",
-  "V-0.2b",
-  "V-0.2c",
+  "V-0.2c1",
+  "V-0.2c2",
+  "V-0.2c3",
   "V-0.3",
   "V-0.4",
   "V-0.5",
@@ -130,12 +131,18 @@
   "ARCH-R128-TITLES-EMBED-VISIBLE-WORDS",
   "GATE128-S5-ALIAS-CONSTANTS",
   "GATE129-S1-COPY-RANGE-UNSORTED",
-  "GATE129-S2-ST9-VACUOUS",
   "GATE129-S3-FRAGMENT-ASSERTIONS",
   "A-R129-REVIEW-L3-TEST-ALIAS",
-  "A-R129-M4-GAP",
   "C-R129-UNDO-LABEL-TRUNCATED",
   "C-R129-REDO-PASTE-SELECTION",
-  "ARCH-R129-TWO-PLACE-MESSAGE-ASSEMBLY"
+  "ARCH-R129-TWO-PLACE-MESSAGE-ASSEMBLY",
+  "GATE130-S1-GHOST-STATUS-TWO-LANGUAGES",
+  "GATE130-S2-TRACKNAME-IN-SENTENCE",
+  "GATE130-S3-FORMATTER-SELF-COMPARE",
+  "GATE130-S5-DOC106-STATUS",
+  "C-R130-ADD-DISABLED-NO-REASON",
+  "ARCH-R130-CONTEXT-REEXPORT-SURFACE",
+  "ARCH-R130-CONDITIONAL-COPY-IN-FORMATTERS",
+  "ARCH-CHECKPOINT-V02-CLOSE (b-round-130-checkpoint-request.md)"
  ]
 }

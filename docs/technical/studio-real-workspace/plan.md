@@ -1261,6 +1261,17 @@ C round 129 (`tmp/studio-real-loop/c-round-129.md`, `c-round-129.json`) — **PA
 - **R6 — ჩართული ორი იაფი საკითხი, რაუნდის ფაილებში:** SA-DEL (+1 `it` `status-announcement-ui`-ში, ხურავს m4-ის ხარვეზს) და GATE129-S2 (ST9 ამოწმებს, რომ 6 constant აღარ არსებობს). ST13 — Context-ის დარჩენილი ქართული ხაზების ზუსტი სია (ratchet).
 - **R7 — შედეგი წინასწარ (round 131):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.2b-ს შეზღუდული გასწორება; C PASS — V-0.2c (B ჯერ ზომავს, საჭიროებისას ყოფს).
 
+**D-29z96 — Round 130-ის შედეგი; V-0.2b დასრულდა; V-0.2c დაიყო სამად; Round 131: V-0.2c1 (ვიდეოს იმპორტის შეტყობინებები ინგლისურად).**
+
+C round 130 (`tmp/studio-real-loop/c-round-130.md`, `c-round-130.json`) — **PASS**, `browserVerified`/`realVerified` — true, ბაგი 0, 13 ხაზი PASS. PLAY/LIB/LOOP/NUDGE/DEL-ის ტექსტები ზუსტია 1440-ზე და 1280-ზე, ეფექტები უცვლელი; დაჭერილ ისარზე P3 ერთხელ ცხადდება; layout ≤ 1 px; G130-3 401 (fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 130 — **published `ba54297`** (verify OK, review 9/10); ეს არის round 131-ის baseline.
+- **R1 — V-0.2b → მზადაა** (`c_pass_published`). ბრაუზერში მიუწვდომელი P5, P6, P7, P11, P12, P13, P16 რჩება unit-only. ახალი Low-ები → `deferred_low_polish` (182): GATE130-S3, C-R130-ADD-DISABLED-NO-REASON.
+- **R2 — m7-ის გადახრა მიღებულია:** UI ტესტი, რომელიც მოსალოდნელ ტექსტს იმავე formatter-ით აგებს, ამოწმებს კავშირს და არა შაბლონს; შაბლონს ST11 ამაგრებს. ახალი წესი round 131-დან: ყოველ ახალ formatter-ს ერთ UI ტესტში ერთი ხელით დაწერილი ინგლისური ლიტერალიც აქვს.
+- **R3 — V-0.2c დაიყო გაზომვით** (groups 190 ტესტის ხაზი 11 ფაილში; ცალკე, გადამფარავი grep-ით ~180 — `ჯგუფი N` fixture-ებში, c3-ის დაგეგმვისას თავიდან გაიზომება; collection 42/7; tempo/metronome/view 23; video 8): **c1** ვიდეოს იმპორტი (round 131), **c2** tempo/metronome/view, **c3** selection + groups. `collection.ts` (Context l.3462-ის fallback-ით) მთლიანად → V-0.5, ბიბლიოთეკის შეცდომის ხაზთან ერთად; `library.ts`-ის kind/folder label-ები → V-0.4, ხაზების სახელებთან ერთად. საბოლოო მოცულობა უცვლელია.
+- **R4 — GATE130-S1 (ghost ქართულად, სტატუსი ინგლისურად):** რჩება V-0.4-ში — `ArrangementLane`-ს 20 ქართული ხაზი აქვს და ghost-ს ტესტები ამაგრებს; ნახევრად გადატანილ ფაილს მეორე სკანირება დასჭირდებოდა. V-0.4 ghost/hint-ებს სტატუსის იგივე ინგლისურს მისცემს.
+- **R5 — ჩართულია:** GATE130-S5 (doc 106-ის სტატუსის ხაზი). ST13 4 ხაზამდე მცირდება (GATE130-S4 — დახურულია).
+- **R6 — Architecture:** ARCH-R130-CONTEXT-REEXPORT-SURFACE და ARCH-R130-CONDITIONAL-COPY-IN-FORMATTERS — სიგნალები. Round 131 Context-ის ბოლო V-0.2 ცვლილებაა, ამიტომ B root-ს ახლავე სთხოვს შეზღუდულ frontend-architect checkpoint-ს (`tmp/studio-real-loop/b-round-130-checkpoint-request.md`); ის c2/c3-ს არ აჩერებს.
+- **R7 — შედეგი წინასწარ (round 132):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.2c1-ის შეზღუდული გასწორება; C PASS — V-0.2c2 (tempo, metronome, view).
+
 **D-29z91 — Round 125-ის შედეგი; DESIGN-UX-REVIEW ნაწილი 1 დასრულდა; Round 126: DESIGN-UX-REVIEW, ნაწილი 2.**
 
 C round 125 (`tmp/studio-real-loop/c-round-125.md`, `c-round-125.json`) — **PASS**, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`, `partComplete: true`: D6, D1, D2 შესრულდა, გადატანილი არცერთი; SOURCE-SCOPE (`608187f`, 937) დასაწყისშიც და ბოლოსაც OK; G125-3 (401, „Sign in required“, 0 `audio[src]`; fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 125 — `skipped`; baseline რჩება `608187f`.
@@ -2240,7 +2251,8 @@ flowchart TD
 | 129 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.2a-ს Medium+ გასწორება; სხვაგვარად V-0.2b |
 | 129 → | (შედეგი) | **C PASS** (`browserVerified`; EDIT-COPY 29/29, UNDO-LABEL 13/13); V-0.2a → მზადაა; 4 Low → deferred; gate 129 published `1e453b1` |
 | 130 | VISUAL-A V-0.2b | დაკვრის, ბიბლიოთეკიდან დამატების/ჩაგდების, Loop-ისა და ჩაჩოჩების შეტყობინებები და history label-ები ინგლისურად (P1–P25, 4 ობიექტი); 8 ტესტი — ლიტერალი → მოდული; ST10–ST13, SA-DEL, GATE129-S2; doc 106 (D-29z95) |
-| 130 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.2b-ს Medium+ გასწორება; სხვაგვარად V-0.2c |
+| 131 | VISUAL-A V-0.2c1 | ვიდეოს იმპორტის შეტყობინებები ინგლისურად (`studioVideoStrings`, V1–V15; `video.ts`, `video.client.ts`, Context-ის 5 სტრიქონი); ST14–ST16, ST13 → 4 ხაზი; ახალი `video-import-status-ui` VI1–VI4; doc 106 l.4, doc 107 (D-29z96) |
+| 131 | (წინასწარ) | 2026-10-27-დან რეგრესია; V-0.2c1-ის Medium+ გასწორება; სხვაგვარად V-0.2c2 |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2294,6 +2306,8 @@ flowchart TD
 **D-29z94:** round 129-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (ახალი `studioEditStrings` და `invalidRangeNoFile`-ის მნიშვნელობა), `ArrangementContext.tsx` (მხოლოდ import, 6 constant l.190–201-დან — `LOOP_STEP_BLOCKED_MESSAGE` გარდა — და სტრიქონები 8 ბრძანებაში l.1766–2056), `strings.test.ts` (ST6–ST9, X1), 8 ტესტი (მხოლოდ ლიტერალი → მოდული: `delete-selection-ui`, `all-lane-clipboard`, `ArrangementContext.test`, `markers-ui`, `status-announcement-ui`, `fader-guards`, `self-disabling-focus`, `grid-snap-position`) და ახალი doc 105. დანარჩენი გაყინულია (`b-round-128-r129-tree-sha256.txt`, 929).
 
 **D-29z95:** round 130-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (4 ახალი ობიექტი), `ArrangementContext.tsx` (მხოლოდ import, l.178–190 და l.513–514-ის მნიშვნელობები exported სახელების შენარჩუნებით, 8 callback-ის სტრიქონები l.1205–1757; l.1733 რჩება), `strings.test.ts` (ST10–ST13, ST9 `index === -1`), 8 ტესტი (მხოლოდ ლიტერალი → მოდული; `status-announcement-ui` +1 `it` SA-DEL: `grid-snap-ui`, `grid-snap-loop-drop`, `marker-time-snap-ui`, `gesture-reentry`, `failed-source-refusal`, `collection-load-status`, `ArrangementContext.test`) და ახალი doc 106. დანარჩენი გაყინულია (`b-round-129-r130-tree-sha256.txt`, 930).
+
+**D-29z96:** round 131-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (ახალი `studioVideoStrings`), `video.ts` და `video.client.ts` (მხოლოდ import და სტრიქონები; exported სახელები რჩება), `ArrangementContext.tsx` (მხოლოდ import და ვიდეოს იმპორტის 5 სტრიქონი l.2230/2280/2286/2291/2321; l.546–547, 1760, 3462 რჩება), `strings.test.ts` (ST14–ST16, ST13 → 4 ხაზი), `video.test.ts` (ლიტერალი → მოდული), ახალი `video-import-status-ui.test.tsx` (VI1–VI4), doc 106-ის მხოლოდ l.4 და ახალი doc 107. დანარჩენი გაყინულია (`b-round-130-r131-tree-sha256.txt`, 935).
 
 ## 7. Done Policy
 

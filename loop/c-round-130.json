@@ -1,0 +1,121 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T08:17:40.9035808Z",
+  "round": 130,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T130-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "PLAY-COPY",
+  "LIB-COPY",
+  "LOOP-COPY",
+  "NUDGE-COPY",
+  "DEL-COPY-RECHECK",
+  "GEO-COUNT",
+  "LAYOUT",
+  "G130-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [
+  "P5 dropBlocked (real Chromium fires no drop on a blocked spot; ghost overlap note seen, no clip added, status unchanged; covered by ST10 + grid-snap-loop-drop jsdom)",
+  "P6 sourceFailed / P12 sourceNotLoaded / P16 dropNotLoaded (no failed or still-loading demo source in the cloud; ST10/ST11)",
+  "P7 webAudioUnavailable (Web Audio exists; ST10/ST11 alias check)",
+  "P11 selectSoundFirst (a demo source is always selected)",
+  "P13 addFailed (addClip failure not reachable)"
+ ],
+ "blocked": [
+  "G130-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest suite",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [],
+ "invalidRuns": [
+  {
+   "run": "probe-1440 r1",
+   "reason": "ENV-FIRST-LOAD: blank first page load of the fresh dev server; second load fine",
+   "evidence": "c-round-130/shots/probe-1440.png"
+  }
+ ],
+ "harnessReruns": [
+  {
+   "run": "copy130 lib 1440 r1",
+   "reason": "C harness clicked the ＋ დამატება button on the video track; it is disabled there (app behaviour, recorded); fixed to Enter on the focused option"
+  },
+  {
+   "run": "copy130 loop 1440 r1",
+   "reason": "C harness built the expected span from raw detail-input numbers (\"1\") instead of mm:ss.mmm; app text was correct"
+  },
+  {
+   "run": "copy130 nudge 1440 r1",
+   "reason": "C harness looked for sfx@2 after redo had re-applied the nudge to 2.1"
+  },
+  {
+   "run": "copy130 lib 1440 r2",
+   "reason": "redo comparator counted the selection mark; positions matched; re-run r3 with the fixed comparator"
+  }
+ ],
+ "georgianCounts": {
+  "statusNet": 0,
+  "undoTitleNet": 0,
+  "rawNonZeroSteps": "LIB-a status 12 raw (მუსიკა + CZABA hero — საჯარო preview), LIB-a/LOOP-a undo title 6 raw (CZABA hero — საჯარო preview)",
+  "subtractedItems": [
+   "track name მუსიკა",
+   "sound title CZABA hero — საჯარო preview",
+   "drop-ghost text 00:01.000 · აქ ადგილი არ არის (ghost element, not the status region)"
+  ],
+  "notReached": "group nudge label გადატანა (n), group-blocked status, collection-load message: not triggered in these rows"
+ },
+ "evidence": {
+  "vitest": "c-round-130/out/vitest.log",
+  "diffs": [
+   "c-round-130/out/diff-src.txt",
+   "c-round-130/out/diff-tests.txt"
+  ],
+  "runs": [
+   "c-round-130/out/copy130-play-1440-r1.json",
+   "c-round-130/out/copy130-play-1280-r1.json",
+   "c-round-130/out/copy130-lib-1440-r3.json",
+   "c-round-130/out/copy130-lib-1280-r1.json",
+   "c-round-130/out/copy130-loop-1440-r2.json",
+   "c-round-130/out/copy130-loop-1280-r1.json",
+   "c-round-130/out/copy130-nudge-1440-r2.json",
+   "c-round-130/out/copy130-nudge-1280-r1.json",
+   "c-round-130/out/copy130-del-1440-r1.json",
+   "c-round-130/out/copy130-del-1280-r1.json"
+  ],
+  "layout": "c-round-130/out/layout-compare.json",
+  "g3": "c-round-130/out/g130-3.json",
+  "loopEdge": [
+   "c-round-130/out/edge130-1440-r1.json",
+   "c-round-130/out/edge130-1280-r1.json"
+  ]
+ },
+ "notesForB": [
+  "m7 deviation (A §9): grid-snap-loop-drop cannot turn red on a clipAdded template mutation because B §2 makes UI tests build the expected text with the same formatter; only ST11 guards the template. Not a weakened test; B rules. C browser check used hand-written English and matched.",
+  "Task wording \"button or A\" for library add is stale: A is the Envelope toggle hotkey. Add is ＋ დამატება or Enter on a focused option. C used both.",
+  "On the video track the ＋ დამატება button is disabled (no title), so P4 is reachable only by Enter on a focused option. Existing behaviour, not changed this round; possible UX note for V-0.3/V-0.4 (a disabled control without a reason).",
+  "INFO (known signal ESCAPE-CANCEL-GESTURE, B D-29z51, not a contract): Escape during a live clip-header drag does not cancel it; the clip committed at release (sfx 2 -> 2.75). Not new, not a regression.",
+  "Architecture note from A reviewer (Context re-exports module strings; leaf test imports the Context) is for the V-0.2c frontend-architect checkpoint.",
+  "Mixed language remains by plan: track names, library UI, group nudge label and video import lines (V-0.2c / V-0.3 / V-0.4)."
+ ],
+ "g130_3_runs": [
+  "2026-10-24T08:31:48Z",
+  "2026-10-24T08:35:34Z (last session)"
+ ]
+}
