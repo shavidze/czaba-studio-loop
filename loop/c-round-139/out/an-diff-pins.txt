@@ -1,0 +1,276 @@
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/fader-touch.test.tsx	2026-10-24 16:00:25.841063194 +0000
++++ app/lib/arrangement/__tests__/fader-touch.test.tsx	2026-10-24 16:06:16.047106732 +0000
+@@ -179,7 +179,7 @@
+   });
+   const laneName = (name: string) =>
+     view.getByRole('button', {
+-      name: new RegExp(`^${escapeRegExp(name)} — აქტიური ხაზის არჩევა`),
++      name: new RegExp(`^${escapeRegExp(name)} — set as the active track`),
+     });
+   fireEvent.click(laneName('სტემები'));
+   fireEvent.click(laneName('SFX'), { shiftKey: true });
+@@ -197,7 +197,7 @@
+     master: () => range('input[aria-label="Master Volume"]'),
+     groupVolume: () => range('[data-testid="arrangement-group-volume"]'),
+     videoVolume: () =>
+-      range('[data-track-id="video"] input[aria-label="Volume — ვიდეოს ორიგინალი ხმა"]'),
++      range('[data-track-id="video"] input[aria-label="Volume — Original video sound"]'),
+     zoom: () => range('[data-testid="arrangement-zoom"]'),
+   };
+   return { api, view, controls };
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/fader-click.test.tsx	2026-10-24 16:00:25.841063194 +0000
++++ app/lib/arrangement/__tests__/fader-click.test.tsx	2026-10-24 16:06:16.047619639 +0000
+@@ -190,7 +190,7 @@
+     musicVolume: () => range('[data-track-id="music"] input[aria-label="Volume — მუსიკა"]'),
+     sfxVolume: () => range('[data-track-id="sfx"] input[aria-label="Volume — SFX"]'),
+     videoVolume: () =>
+-      range('[data-track-id="video"] input[aria-label="Volume — ვიდეოს ორიგინალი ხმა"]'),
++      range('[data-track-id="video"] input[aria-label="Volume — Original video sound"]'),
+     master: () => range('input[aria-label="Master Volume"]'),
+     zoom: () => range('[data-testid="arrangement-zoom"]'),
+   };
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/track-volume-db.test.tsx	2026-10-24 16:00:25.841605046 +0000
++++ app/lib/arrangement/__tests__/track-volume-db.test.tsx	2026-10-24 16:06:16.048112675 +0000
+@@ -38,7 +38,7 @@
+ 
+ const VOLUME_LABEL = 'Volume';
+ const MASTER_VOLUME_LABEL = 'Master Volume';
+-const VIDEO_MIX_LABEL = 'ვიდეოს ორიგინალი ხმა';
++const VIDEO_MIX_LABEL = 'Original video sound';
+ const TRACK_IDS = ['video', 'music', 'sfx'] as const;
+ 
+ const fakeClock = { base: 0 };
+@@ -300,7 +300,7 @@
+   };
+   const master = () => rangeInput('input[aria-label="Master Volume"]');
+   const laneName = (name: string) =>
+-    view.getByRole('button', { name: new RegExp(`^${name} — აქტიური ხაზის არჩევა`) });
++    view.getByRole('button', { name: new RegExp(`^${name} — set as the active track`) });
+   const groupFader = () => rangeInput('[data-testid="arrangement-group-volume"]');
+   const heightHandle = (trackId: (typeof TRACK_IDS)[number]) => {
+     const handle = view.container.querySelector(
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/group-volume-db.test.tsx	2026-10-24 16:00:25.841063194 +0000
++++ app/lib/arrangement/__tests__/group-volume-db.test.tsx	2026-10-24 16:06:16.048527619 +0000
+@@ -204,7 +204,7 @@
+ type GroupVolumeView = ReturnType<typeof render>;
+ 
+ function laneName(view: GroupVolumeView, name: string): HTMLElement {
+-  return view.getByRole('button', { name: new RegExp(`^${name} — აქტიური ხაზის არჩევა`) });
++  return view.getByRole('button', { name: new RegExp(`^${name} — set as the active track`) });
+ }
+ 
+ function rangeInput(view: GroupVolumeView, selector: string): HTMLInputElement {
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx	2026-10-24 16:00:25.841605046 +0000
++++ app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx	2026-10-24 16:06:16.049116422 +0000
+@@ -204,7 +204,7 @@
+ 
+ function laneName(view: MixView, name: string): HTMLElement {
+   return view.getByRole('button', {
+-    name: new RegExp(`^${escapeRegExp(name)} — აქტიური ხაზის არჩევა`),
++    name: new RegExp(`^${escapeRegExp(name)} — set as the active track`),
+   });
+ }
+ 
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/track-pan.test.tsx	2026-10-24 16:00:25.841605046 +0000
++++ app/lib/arrangement/__tests__/track-pan.test.tsx	2026-10-24 16:06:16.050632303 +0000
+@@ -715,7 +715,7 @@
+       const children = Array.from(row.children);
+       expect(children).toHaveLength(4);
+       expect(children[0].getAttribute('data-testid')).toBe('arrangement-track-fold');
+-      expect(children[1].getAttribute('aria-label')).toBe('მუსიკა — აქტიური ხაზის არჩევა');
++      expect(children[1].getAttribute('aria-label')).toBe('მუსიკა — set as the active track');
+       expect(children[2].getAttribute('data-testid')).toBe('arrangement-track-pan');
+       expect(children[3].getAttribute('data-testid')).toBe('arrangement-track-pan-reset');
+       expect(children[2].className).toContain('w-12');
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/track-groups-ui.test.tsx	2026-10-24 16:00:25.841605046 +0000
++++ app/lib/arrangement/__tests__/track-groups-ui.test.tsx	2026-10-24 16:06:16.049611075 +0000
+@@ -211,7 +211,7 @@
+ 
+ function laneName(view: GroupsView, name: string): HTMLElement {
+   return view.getByRole('button', {
+-    name: new RegExp(`^${escapeRegExp(name)} — აქტიური ხაზის არჩევა`),
++    name: new RegExp(`^${escapeRegExp(name)} — set as the active track`),
+   });
+ }
+ 
+@@ -419,7 +419,7 @@
+     expect(live(api).activeTrackId).toBe('music');
+     expect(laneName(view, 'მუსიკა').getAttribute('aria-pressed')).toBe('true');
+     expect(laneName(view, 'მუსიკა').getAttribute('aria-label')).toBe(
+-      'მუსიკა — აქტიური ხაზის არჩევა, მონიშნული',
++      'მუსიკა — set as the active track, selected',
+     );
+     clickLane(view, 'სტემები', { shiftKey: true });
+     expect(selectedRows(view)).toEqual(['music', 'stems']);
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-10-24 16:00:25.841605046 +0000
++++ app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-10-24 16:06:16.050159077 +0000
+@@ -212,7 +212,7 @@
+ 
+ function laneName(view: GroupsView, name: string): HTMLElement {
+   return view.getByRole('button', {
+-    name: new RegExp(`^${escapeRegExp(name)} — აქტიური ხაზის არჩევა`),
++    name: new RegExp(`^${escapeRegExp(name)} — set as the active track`),
+   });
+ }
+ 
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/marker-snap.test.tsx	2026-10-24 16:00:25.841063194 +0000
++++ app/lib/arrangement/__tests__/marker-snap.test.tsx	2026-10-24 16:06:16.051340212 +0000
+@@ -722,7 +722,7 @@
+     act(() => live(api).beginLibraryDrag('hit'));
+     dragLibraryOver(laneBody('video'), 12.35);
+     expect(dropGhost(view)).toEqual({
+-      text: '00:12.000 · აუდიო ვიდეოხაზზე არ ემატება',
++      text: '00:12.000 · Audio is not added to the video track',
+       left: '480px',
+       blocked: 'true',
+     });
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx	2026-10-24 16:00:25.841063194 +0000
++++ app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx	2026-10-24 16:06:16.051917458 +0000
+@@ -438,7 +438,7 @@
+     act(() => live(api).beginLibraryDrag('hit'));
+     dragLibraryOver(laneBody('sfx'), 4.6);
+     expect(dropGhost(view)).toEqual({
+-      text: '00:05.000 · აქ ადგილი არ არის',
++      text: '00:05.000 · No room here',
+       left: '200px',
+       blocked: 'true',
+     });
+@@ -462,7 +462,7 @@
+     act(() => live(api).beginLibraryDrag('hit'));
+     dragLibraryOver(laneBody('video'), 9.4);
+     expect(dropGhost(view)).toEqual({
+-      text: '00:09.000 · აუდიო ვიდეოხაზზე არ ემატება',
++      text: '00:09.000 · Audio is not added to the video track',
+       left: '360px',
+       blocked: 'true',
+     });
+@@ -548,7 +548,7 @@
+       act(() => live(api).beginLibraryDrag('hit'));
+       dragLibraryOver(laneBody('sfx'), 4.5);
+       expect(dropGhost(view)).toEqual({
+-        text: '00:05.000 · აქ ადგილი არ არის',
++        text: '00:05.000 · No room here',
+         left: '200px',
+         blocked: 'true',
+       });
+@@ -564,7 +564,7 @@
+       act(() => live(api).beginLibraryDrag('missing'));
+       dragLibraryOver(laneBody('sfx'), 6.55);
+       expect(dropGhost(view)).toEqual({
+-        text: '00:07.000 · ხმა ჯერ არ ჩატვირთულა',
++        text: '00:07.000 · This sound has not loaded yet',
+         left: '280px',
+         blocked: 'true',
+       });
+@@ -617,7 +617,7 @@
+       act(() => live(api).beginLibraryDrag('hit'));
+       dragLibraryOver(laneBody('video'), 6.55);
+       expect(dropGhost(view)).toEqual({
+-        text: '00:07.000 · აუდიო ვიდეოხაზზე არ ემატება',
++        text: '00:07.000 · Audio is not added to the video track',
+         left: '280px',
+         blocked: 'true',
+       });
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/delete-selection-ui.test.tsx	2026-10-24 16:00:25.840953900 +0000
++++ app/lib/arrangement/__tests__/delete-selection-ui.test.tsx	2026-10-24 16:06:16.052343253 +0000
+@@ -514,10 +514,10 @@
+       expect(overlays[0].getAttribute('aria-hidden')).toBe('true');
+       expect(overlays[0].className).toContain('pointer-events-none');
+     }
+-    const labels = view.getAllByText(/ყველა ხაზი$/);
++    const labels = view.getAllByText(/all tracks$/);
+     expect(labels).toHaveLength(1);
+     expect(labels[0].closest('[data-track-id]')?.getAttribute('data-track-id')).toBe('music');
+-    expect(labels[0].textContent).toBe('00:03.000 – 00:05.000 · 2.000 წმ · ყველა ხაზი');
++    expect(labels[0].textContent).toBe('00:03.000 – 00:05.000 · 2.000 s · all tracks');
+     expect(clipOverlays()).toHaveLength(0);
+   });
+ 
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/track-layout.test.tsx	2026-10-24 16:00:25.841605046 +0000
++++ app/lib/arrangement/__tests__/track-layout.test.tsx	2026-10-24 16:06:25.126643441 +0000
+@@ -282,8 +282,8 @@
+       expect(rowHeight('music')).toBe(81);
+       const button = fold('music');
+       expect(button.getAttribute('aria-expanded')).toBe('true');
+-      expect(button.getAttribute('aria-label')).toBe('მუსიკა დაკეცვა ან გახსნა');
+-      expect(button.title).toBe('დაკეცვა / გახსნა');
++      expect(button.getAttribute('aria-label')).toBe('Fold or unfold — მუსიკა');
++      expect(button.title).toBe('Fold / unfold');
+       expect(button.textContent).toBe('▾');
+       fireEvent.click(button);
+       expect(rowHeight('music')).toBe(36);
+@@ -292,7 +292,9 @@
+       expect(button.textContent).toBe('▸');
+       expect(view.queryByRole('slider', { name: 'Volume — მუსიკა' })).toBeNull();
+       const mute = view.getByRole('button', { name: 'Mute — მუსიკა' });
+-      const solo = view.getByRole('button', { name: 'Solo — მუსიკა (Ctrl/Cmd+click ამატებს)' });
++      const solo = view.getByRole('button', {
++        name: 'Solo — მუსიკა (Ctrl/Cmd+click = add to solo)',
++      });
+       expect(mute.getAttribute('aria-pressed')).toBe('false');
+       fireEvent.click(mute);
+       expect(mute.getAttribute('aria-pressed')).toBe('true');
+@@ -308,13 +310,13 @@
+     it('keeps the video lane picker reachable as a compact ＋ when folded and hides the original-sound line', async () => {
+       stubTimelineFrame(660);
+       const { view, header, fold } = await mountTrackLayout();
+-      expect(header('video').textContent).toContain('ორიგინალი ხმა');
+-      expect(view.getByRole('button', { name: '＋ საკუთარი ვიდეო' }).textContent).toBe(
+-        '＋ საკუთარი ვიდეო',
++      expect(header('video').textContent).toContain('Original sound');
++      expect(view.getByRole('button', { name: '＋ Your own video' }).textContent).toBe(
++        '＋ Your own video',
+       );
+       fireEvent.click(fold('video'));
+-      expect(header('video').textContent).not.toContain('ორიგინალი ხმა');
+-      const compact = view.getByRole('button', { name: '＋ საკუთარი ვიდეო' });
++      expect(header('video').textContent).not.toContain('Original sound');
++      const compact = view.getByRole('button', { name: '＋ Your own video' });
+       expect(compact.textContent).toBe('＋');
+       expect(view.getByTestId('arrangement-video-dropzone')).toBeTruthy();
+     });
+@@ -343,7 +345,7 @@
+       const { api, view, rowHeight, handle } = await mountTrackLayout();
+       const sfxHandle = handle('sfx');
+       expect(sfxHandle.getAttribute('role')).toBe('separator');
+-      expect(sfxHandle.getAttribute('aria-label')).toBe('SFX სიმაღლე');
++      expect(sfxHandle.getAttribute('aria-label')).toBe('Height — SFX');
+       expect(sfxHandle.getAttribute('aria-valuemin')).toBe('60');
+       expect(sfxHandle.getAttribute('aria-valuemax')).toBe('180');
+       expect(handle('video').getAttribute('aria-valuemin')).toBe('52');
+@@ -425,7 +427,7 @@
+       const { rowHeight, handle, fold } = await mountTrackLayout();
+       fireEvent.click(fold('sfx'));
+       expect(rowHeight('sfx')).toBe(36);
+-      expect(handle('sfx').getAttribute('aria-valuetext')).toBe('დაკეცილია · 80 px');
++      expect(handle('sfx').getAttribute('aria-valuetext')).toBe('folded · 80 px');
+       fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
+       expect(rowHeight('sfx')).toBe(81);
+       fireEvent.keyDown(handle('sfx'), { key: 'ArrowDown' });
+@@ -831,7 +833,7 @@
+       expect(folded.tabIndex).toBe(0);
+       expect(folded.getAttribute('role')).toBe('separator');
+       expect(folded.getAttribute('aria-valuenow')).toBe('80');
+-      expect(folded.getAttribute('aria-valuetext')).toBe('დაკეცილია · 80 px');
++      expect(folded.getAttribute('aria-valuetext')).toBe('folded · 80 px');
+       fireEvent.keyDown(folded, { key: 'ArrowUp' });
+       expect(rowHeight('music')).toBe(81);
+       expect(handle('music').className).toBe(UNFOLDED_HANDLE_CLASS);
+@@ -1033,7 +1035,7 @@
+       const { view, fold } = await mountTrackLayout();
+       const expectInsetRing = (name: string) => {
+         const classes = view
+-          .getByRole('button', { name: `${name} — აქტიური ხაზის არჩევა` })
++          .getByRole('button', { name: `${name} — set as the active track` })
+           .className.split(/\s+/);
+         expect(classes).toContain('focus-visible:ring-2');
+         expect(classes).toContain('focus-visible:ring-inset');
+@@ -1120,7 +1122,7 @@
+       fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+       seekToFive();
+       const separators = [
+-        view.getByRole('separator', { name: 'მუსიკა სიმაღლე' }),
++        view.getByRole('separator', { name: 'Height — მუსიკა' }),
+         view.getByTestId('arrangement-detail-separator'),
+         view.getByTestId('arrangement-library-separator'),
+       ];

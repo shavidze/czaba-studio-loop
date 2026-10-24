@@ -1,0 +1,144 @@
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 16:00:25.841605046 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 16:05:53.009482428 +0000
+@@ -51,6 +51,7 @@
+   studioExportStrings,
+   studioGridStrings,
+   studioLaneMoveStrings,
++  studioLaneStrings,
+   studioLibraryStrings,
+   studioLoopStrings,
+   studioMarkerStrings,
+@@ -1635,6 +1636,9 @@
+ const WORKSPACE_FORMATTER_SAMPLES: Record<string, string[]> = {
+   rangeReadout: [ws.rangeReadout({ start: '00:03.000', end: '00:05.000', length: '00:02.000' })],
+   clipsSelected: [ws.clipsSelected(2), ws.clipsSelected(3)],
++  selectedClipDetail: [
++    ws.selectedClipDetail({ start: '00:02.000', length: '00:08.000', offset: '00:01.000' }),
++  ],
+   selectedClipTitle: [
+     ws.selectedClipTitle({
+       title: 'Song',
+@@ -1653,9 +1657,6 @@
+   studioTrackGroupStrings.renamed('Drums'),
+ ];
+ 
+-const WORKSPACE_TRACK_HEADER_SELECTOR_LINE =
+-  '\'[data-testid="arrangement-track-header"] button[aria-label*="— აქტიური ხაზის არჩევა"]\',';
+-
+ describe('V-0.3d workspace strings', () => {
+   it('ST31: the clip-envelope and workspace objects have the exact keys, English literals and formatter outputs', () => {
+     expect(Object.keys(studioClipEnvelopeStrings).sort()).toEqual([
+@@ -1673,6 +1674,7 @@
+       'headingSuffix',
+       'rangeDeleteHint',
+       'rangeReadout',
++      'selectedClipDetail',
+       'selectedClipTitle',
+     ]);
+     const plainKeys = Object.entries(ws)
+@@ -1703,6 +1705,9 @@
+         offset: '00:01.000',
+       }),
+     ).toBe('Clip: Song · start 00:02.000 · length 00:08.000 · source offset 00:01.000');
++    expect(
++      ws.selectedClipDetail({ start: '00:02.000', length: '00:08.000', offset: '00:01.000' }),
++    ).toBe(' · start 00:02.000 · length 00:08.000 · source offset 00:01.000');
+     expect(studioViewStrings.waveformZoomTitle(100)).toBe(
+       'Waveform Zoom 100% — view only, the sound does not change',
+     );
+@@ -1728,7 +1733,7 @@
+     );
+   });
+ 
+-  it('ST33: the new texts, waveform-zoom.ts and StudioWorkspace (except the track-header selector) have no Georgian and no «»', () => {
++  it('ST33: the new texts, waveform-zoom.ts and StudioWorkspace have no Georgian and no «»', () => {
+     for (const [key, value] of Object.entries(studioClipEnvelopeStrings)) {
+       expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
+       expect(value, key).not.toMatch(GUILLEMET);
+@@ -1754,7 +1759,7 @@
+       .split(/\r?\n/)
+       .filter((line) => GEORGIAN_CODEPOINT.test(line))
+       .map((line) => line.trim());
+-    expect(georgianLines).toEqual([WORKSPACE_TRACK_HEADER_SELECTOR_LINE]);
++    expect(georgianLines).toEqual([]);
+     expect(workspace).not.toMatch(GUILLEMET);
+     for (const name of ['X', 'Drums', 'SFX ქუჩა']) {
+       expect(studioTrackGroupStrings.renameEmpty(name), name).toBe(
+@@ -1856,3 +1861,77 @@
+     expect(CONTEXT_REMAINING_GEORGIAN_LINES).toHaveLength(3);
+   });
+ });
++
++const ls = studioLaneStrings;
++
++const EXPECTED_LANE_PLAIN_STRINGS: Record<string, string> = {
++  videoMixLabel: 'Original video sound',
++  videoImportLabel: '＋ Your own video',
++  foldTitle: 'Fold / unfold',
++  soloTitle: 'Solo (Ctrl/Cmd+click = add to solo)',
++  selectedSuffix: ', selected',
++  activeBadge: '· active',
++  videoImportTitle: 'Your own video',
++  videoOriginalSound: 'Original sound',
++  noVideo: 'No video',
++  videoEmptyHint: 'use “＋ Your own video” or drop a file here',
++  dropVideoHere: 'Drop the video here',
++  videoNotOnAudioTrack: 'Video is not added here — drop it on the video track',
++  ghostAudioOnVideoTrack: 'Audio is not added to the video track',
++  ghostNotLoaded: 'This sound has not loaded yet',
++  audioDecoding: 'Sound is decoding…',
++  audioUnreadable: 'Sound could not be read',
++  audioNone: 'No sound',
++};
++
++const LANE_FORMATTER_SAMPLES: Record<string, string[]> = {
++  soloLabel: [ls.soloLabel('Drums')],
++  foldLabel: [ls.foldLabel('Drums')],
++  activeTrackLabel: [ls.activeTrackLabel('Drums')],
++  panResetLabel: [ls.panResetLabel('Drums')],
++  heightLabel: [ls.heightLabel('SFX')],
++  foldedValueText: [ls.foldedValueText(80)],
++};
++
++describe('V-0.4b lane strings', () => {
++  it('ST36: studioLaneStrings has the exact keys, English literals and formatter outputs', () => {
++    expect(Object.keys(ls).sort()).toEqual(
++      [...Object.keys(EXPECTED_LANE_PLAIN_STRINGS), ...Object.keys(LANE_FORMATTER_SAMPLES)].sort(),
++    );
++    for (const [key, value] of Object.entries(ls)) {
++      if (typeof value === 'string') {
++        expect(value, key).toBe(EXPECTED_LANE_PLAIN_STRINGS[key]);
++      } else {
++        expect(LANE_FORMATTER_SAMPLES[key], key).toBeDefined();
++      }
++    }
++    expect(ls.soloLabel('Drums')).toBe('Solo — Drums (Ctrl/Cmd+click = add to solo)');
++    expect(ls.foldLabel('Drums')).toBe('Fold or unfold — Drums');
++    expect(ls.activeTrackLabel('Drums')).toBe('Drums — set as the active track');
++    expect(ls.panResetLabel('Drums')).toBe('Reset Pan to centre — Drums');
++    expect(ls.heightLabel('SFX')).toBe('Height — SFX');
++    expect(ls.foldedValueText(80)).toBe('folded · 80 px');
++  });
++
++  it('ST37: studioLaneStrings and ArrangementLane have no Georgian and no «»', () => {
++    for (const [key, value] of Object.entries(ls)) {
++      if (typeof value === 'string') {
++        expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
++        expect(value, key).not.toMatch(GUILLEMET);
++      }
++    }
++    const outputs = Object.values(LANE_FORMATTER_SAMPLES).flat();
++    expect(outputs.length).toBeGreaterThan(0);
++    for (const output of outputs) {
++      expect(output).not.toMatch(GEORGIAN_CODEPOINT);
++      expect(output).not.toMatch(GUILLEMET);
++    }
++    const lane = stripSourceComments(
++      readStoreSource('../../../components/arrangement/ArrangementLane.tsx'),
++    );
++    expect(lane.length).toBeGreaterThan(0);
++    const georgianLines = lane.split(/\r?\n/).filter((line) => GEORGIAN_CODEPOINT.test(line));
++    expect(georgianLines).toEqual([]);
++    expect(lane).not.toMatch(GUILLEMET);
++  });
++});

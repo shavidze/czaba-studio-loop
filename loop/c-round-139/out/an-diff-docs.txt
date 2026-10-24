@@ -1,0 +1,43 @@
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/docs/implementation/2026/quarter-IV/113-studio-v0-workspace-strings.md	2026-10-24 16:00:25.842831489 +0000
++++ docs/implementation/2026/quarter-IV/113-studio-v0-workspace-strings.md	2026-10-24 16:08:58.161117483 +0000
+@@ -18,7 +18,7 @@
+ - **"all tracks" ხელახლა გამოიყენება:** მონიშვნის ხაზის span `studioEditStrings.allTracks`-ს აჩვენებს. ახალი key არ დამატებულა.
+ - **`waveformZoomStatus(level)`** სახელი და სიგნატურა უცვლელია. ტანი მოდულის formatter-ს იძახებს (`waveform-zoom.ts` → `./strings`, ციკლი არ არის).
+ - **ლოკალური სახელები რჩება:** `CLIP_LANE_SHIFT_HINT`, `CLIP_LANE_SHIFT_LOCKED_HINT` და `VIDEO_*_MESSAGE`. ორი export (`VIDEO_RETURNED_COMPACT_MESSAGE`, `VIDEO_RETURNED_LIBRARY_RECOLLAPSED_MESSAGE`) ისევ exported-ია.
+-- **track-header selector (l.331)-ის selector (R1) არ შეხებია.** ის `ArrangementLane.tsx`-ის aria-label-ს ემთხვევა, რომელიც V-0.4-ს ეკუთვნის. ამიტომ StudioWorkspace-ში ზუსტად ერთი ქართული ხაზი რჩება. ST33 ამას pin-ავს.
++- **track-header selector (l.331) (R1) არ შეხებია.** ის `ArrangementLane.tsx`-ის aria-label-ს ემთხვევა, რომელიც V-0.4-ს ეკუთვნის. ამიტომ StudioWorkspace-ში ზუსტად ერთი ქართული ხაზი რჩება. ST33 ამას pin-ავს.
+ - **ქცევა არ იცვლება:** handler-ები, პირობები, კლავიშები, სტატუსების რიგი, focus-ის გადაცემა, history label-ები, `data-testid`-ები და class-ები იგივეა.
+ 
+ ### WS რუკა (მოკლედ)
+@@ -71,6 +71,6 @@
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- V-0.4: track-header selector (l.331)-ის selector იცვლება `ArrangementLane.tsx`-ის aria-label-თან ერთად, და ST33-ის allowance 0 ხდება. ასევე lane overlay-ის `ყველა ხაზი` და detail panel.
++- V-0.4: track-header selector (l.331) იცვლება `ArrangementLane.tsx`-ის aria-label-თან ერთად, და ST33-ის allowance 0 ხდება. ასევე lane overlay-ის `ყველა ხაზი` და detail panel.
+ - V-0.5: dock-ის ღილაკები (return label-ში ტერმინი "compact view").
+ - frontend-architect checkpoint `strings.ts`-ის დაყოფაზე root-ს ელოდება (`b-round-136-checkpoint-request.md`).
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/docs/implementation/2026/quarter-IV/114-studio-v0-clip-strings.md	2026-10-24 16:00:25.842985085 +0000
++++ docs/implementation/2026/quarter-IV/114-studio-v0-clip-strings.md	2026-10-24 16:08:58.161493785 +0000
+@@ -1,7 +1,7 @@
+ # Studio V-0.4a — კლიპის gesture-ების ტექსტები (move, trim, fade, lane move) ინგლისურად
+ 
+ **თარიღი:** 2026-10-24
+-**სტატუსი:** In Progress (A-ის შემოწმებები მწვანეა რაუნდ 138-ში; ბრაუზერის შემოწმება C round 138-ს ელოდება)
++**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 138-ში; C round 138 — PASS, browserVerified; gate 138 — 1d4df51)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -69,11 +69,10 @@
+ - `npm run typecheck` exit 0, `npm run lint` exit 0; read-only `npx biome check` შეცვლილ კოდისა და ტესტის ფაილებზე 0 diagnostic.
+ - `npx vitest run` 25 ფაილზე (strings, 17 pin, clip-strings-ui და 6 მეზობელი): 527/527 მწვანეა. `strings.test` 33 → 35 `it`, `clip-strings-ui` 3. 17 pin ფაილის `it`-ების რაოდენობა უცვლელია.
+ - მუტაციები m53–m60: თითოეულმა მოკლა მინიმუმ ერთი დასახელებული ტესტი; ფაილები backup-იდან აღდგა და sha256-ით შემოწმდა. m60-ის `gesture-reentry` გამონაკლისი ზემოთაა აღწერილი.
+-- სრული suite, `npm run verify`, build და e2e root-ის gate-ზეა. ბრაუზერის შემოწმება C round 138-ს ელოდება.
++- სრული suite, `npm run verify`, build და e2e root-ის gate-ზეა. ბრაუზერის შემოწმება: C round 138 — PASS (browserVerified, 1440×900 და 1280×720).
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- C round 138: ბრაუზერში შემოწმება 1440×900-სა და 1280×720-ზე (CLIP-MOVE, MOVE-BLOCKED, TRIM, LANE-MOVE, GROUP-MOVE, NO-CHANGE, FADES რეალური აუდიოთი, FOLDED-TITLE, RANGE-BADGE, GEO-COUNT, LAYOUT).
+ - V-0.4b: `ArrangementLane.tsx` (lane overlay `ყველა ხაზი`, aria-label StudioWorkspace-ის track-header selector-თან ერთად, ST33-ის allowance → 0), gate-137 finding 1 (`selectedClipDetail`).
+ - V-0.4c: `ArrangementClipEnvelope.tsx` l.25 → `studioClipStrings.historyUnchanged('Envelope')`.
+ - frontend-architect checkpoint `strings.ts`-ის დაყოფაზე root-ს ელოდება (`b-round-136-checkpoint-request.md`).

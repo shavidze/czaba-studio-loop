@@ -37,3 +37,8 @@
 - **Still no root result** at round 139 planning. V-0.4b goes ahead on the same import path (`studioLaneStrings` appended).
 - **New signal (gate-138 Architecture note + finding 5, A round-138 Architecture note):** 8 test files locate clip bodies and trim handles by `title`, and 6 more locate the track name button by an aria-label regex; every wording round rewrites them. Proposal for question 2: give these elements `data-testid`s in one behaviour-preserving round so locators stop depending on text. Signal only; not scheduled.
 - Signal count on `strings.ts` / test pins (Signal 3): rounds 132, 134, 135, 136, 137, 138.
+
+## Addendum (B, round 139 → 140 planning, 2026-10-24)
+- **Still no root result** at round 140 planning (fourth planning without it). V-0.4c goes ahead on the same import path: envelope keys are appended to `studioClipEnvelopeStrings`; `studioGroupHeaderStrings` and `studioMeterStrings` are appended.
+- **New signal (gate-139 suggestion 1 + Architecture note Signal 2, A round-139 Architecture note) — ARCH-R139-TRACK-NAME-TESTID:** `StudioWorkspace.tsx:331` `trackRowNameButton` finds the track name button by the aria-label substring `— set as the active track`, coupled to `studioLaneStrings.activeTrackLabel` with no shared constant (guarded by ST33, `track-group-collapse-ui` UC8/UC9 and C's ungroup-focus browser check). Proposal: `data-testid="arrangement-track-name"` on the Lane name button and query it. Acceptance: `track-group-collapse-ui` l.860/887 and the focus tests green with no other edits. Value medium, risk low. Merges with ARCH-R138-TITLE-LOCATORS-TESTID into question 2. Signal only; not scheduled.
+- Signal count on `strings.ts` / test pins (Signal 3): rounds 132, 134, 135, 136, 137, 138, 139.

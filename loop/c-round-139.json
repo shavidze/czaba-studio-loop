@@ -1,0 +1,133 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T16:25:03.4515041Z",
+  "round": 139,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R139-01",
+   "severity": "low",
+   "steps": [
+    "/studio-lab 1440x900 or 1280x720, Snap off",
+    "add ღამის პულსი · სრული მიქსი on music at 0 s (Enter on the library option)",
+    "drag Soft impact from the library onto music at 5 s with the real mouse: ghost reads 00:05.000 · No room here, data-blocked=true",
+    "release the mouse there"
+   ],
+   "expected": "task §5 LIBRARY-GHOST: the status starts with No room here after release",
+   "actual": "no clip is added (correct) but the status line does not change; it still shows the previous add status. dropEffect none -> Chromium fires no drop event. Pre-existing and already recorded as INFO-R64-BLOCKED-NO-STATUS; text-only round 139 did not change it, so not a regression Re-observation of INFO-R64-BLOCKED-NO-STATUS / INFO-R55-REFUSAL-STATUS-ON-RELEASE (accepted pre-existing); no new ID needed if B prefers to reference those.",
+   "evidence": "c-round-139/out/c139-1440-r2-all.json and c139-1280-r1-all.json checks.blockedReleaseStatus / blockedReleaseClips; shots ghost-music-5-*.png. Goes to deferred_low_polish (or B rules the row expectation was wrong)"
+  },
+  {
+   "id": "C-R139-02",
+   "severity": "low",
+   "steps": [
+    "/studio-lab, Snap off",
+    "drag Soft impact from the library with the real mouse over the video lane (or over SFX) and hold",
+    "press Escape while holding, then move away and release"
+   ],
+   "expected": "the drop ghost disappears when the drag is cancelled",
+   "actual": "in Playwright Chromium the ghost (00:09.000 · Audio is not added to the video track / 00:09.000) stays on the lane after Escape and after release; dragging out to the library clears it normally. The lane clears the ghost only on dragleave/drop; the library dragend (endLibraryDrag) does not clear lane ghosts. Unconfirmed whether real Chrome sends dragleave on Escape-cancel (Tech Lead check). Pre-existing, not touched by round 139 No existing backlog ID found (grep dragend/escape ghost in active-backlog.json and backlog.json).",
+   "evidence": "c-round-139/out/ghostprobe-1440.json, ghostprobe-1280.json (after-escape, after-escape-move-up); tools/ghostprobe.cjs"
+  }
+ ],
+ "passed": [
+  "T139-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "TRACK-SELECT",
+  "TRACK-FOLD",
+  "SOLO",
+  "VIDEO-HEADER",
+  "EMPTY-VIDEO",
+  "FILE-DRAG-HINT",
+  "LIBRARY-GHOST",
+  "ALL-TRACKS-OVERLAY",
+  "HEIGHT",
+  "PAN-RESET",
+  "AUDIO-NOTE",
+  "SELECTED-CLIP",
+  "GEO-COUNT",
+  "LAYOUT",
+  "REG-138",
+  "G139-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [
+  "LIBRARY-GHOST/release-status — no status after a blocked release (C-R139-01, re-observation of INFO-R64-BLOCKED-NO-STATUS / INFO-R55-REFUSAL-STATUS-ON-RELEASE, pre-existing)"
+ ],
+ "inconclusive": [
+  "LIBRARY-GHOST/not-ready: shown only through a synthetic library-MIME dragover with no drag in progress (00:07.000 · This sound has not loaded yet, data-blocked=true); a real not-loaded source cannot be dragged (draggable only when ready); otherwise unit pin grid-snap-loop-drop l.567",
+  "AUDIO-NOTE/error-state (Sound could not be read): broken.mp4 is rejected before any clip exists (status: “broken.mp4”: the browser could not open this video — try MP4 (H.264) or WebM.; 0 video clips at 1440 and 1280, out/audio-note-broken.json); no owned file opens as video with unreadable audio; covered by LSU5b only"
+ ],
+ "blocked": [
+  "G139-3 fake-Bearer 403 check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "georgianCounts": {
+  "1280": {
+   "steps": 23,
+   "raw": 4463,
+   "net": 0
+  },
+  "1440": {
+   "steps": 23,
+   "raw": 4463,
+   "net": 0
+  },
+  "surface": "track headers (text + every attribute except meter/Master), height separators, video empty text, file-drag hints, drop ghosts, lane range overlay, video clip text, status line + every observed status change, Undo/Redo titles, selected-clip line text + title",
+  "subtractions": [
+   "data track names მუსიკა, სტემები, ვიდეო (R5, V-0.4d)",
+   "data clip/source titles ღამის პულსი, პულსი, სრული მიქსი (library data, V-0.5)",
+   "demo-ready load-time status (collection.ts, V-0.5)",
+   "group create status with default name ჯგუფი 1 (groups.ts, V-0.4d)",
+   "meter/Master titles inside arrangement-track-meter excluded from the scan (R5, V-0.4c)"
+  ]
+ },
+ "measurements": {
+  "soloAudio": "output-tap RMS at 24.25-25.3 s (only stems has signal): unsoloed -25.2/-25.1 dB (1440), -25.2/-25.0 dB (1280); with music soloed exactly 0 (digital silence) in both pairs at both viewports; music+stems soloed back to -25.1/-25.0 dB",
+  "fold": "stems folded: row 36 px, clip 72->27 px with folded title, separator folded · 80 px; unfold restores 80 px",
+  "height": "ArrowDown 80->88 aria-valuenow and row +8 px; ArrowUp back",
+  "videoDensity": "1280 default video row 60 px (regular density) shows no Original sound line by design (density full >=80); grown to 84 px it shows; 1440 default 80 px shows it",
+  "audioNote": "noaudio-2s-h264.mp4: Sound is decoding… then No sound ~30 ms later; beeps-6s-h264-aac.mp4: Sound is decoding… then no note",
+  "layout": "only granted text width changes: video name button 60->69 px and ＋ Your own video 121->112 px (right edge 503 unchanged); all other boxes <=1 px vs round 138 (key-normalized)",
+  "targeted": "22 files / 404 tests passed (= A)",
+  "trackRowNameButton": "Ctrl+Shift+G / Undo / Redo focus -> music track name button at 1440 and 1280"
+ },
+ "invalidRuns": [
+  {
+   "run": "layout130 1440 first attempt",
+   "reason": "ENV cold Vite first load: hydration error + Invalid hook call on the first request after server start; rerun clean",
+   "evidence": "c-round-139/out/layout-1440-invalid1.log"
+  },
+  {
+   "run": "c139 1440 r1",
+   "reason": "harness expectation errors (wrong clip title, Undo selector, fold expectation, Escape-based ghost cleanup); fixed and rerun as r2",
+   "evidence": "c-round-139/out/run-1440-r1.log"
+  }
+ ],
+ "notesForB": [
+  "TRACK-FOLD spec: clips are not hidden when a track is folded; they stay visible in the 36 px row at 27 px with the folded title (round-138 behaviour). B row text should say compact, not hidden",
+  "TRACK-SELECT: a plain click on a name also selects the track, so its aria-label ends , selected; the unselected neighbour has no suffix",
+  "VIDEO-HEADER at 1280: the Original sound line needs full density (row >=80 px); default 1280 row is 60 px",
+  "A known gap 1 (soloTitle has no UI pin) is covered in the browser: title Solo (Ctrl/Cmd+click = add to solo) on all four tracks",
+  "A Architecture note (StudioWorkspace l.331 hard-coded selector substring) stands. The trackRowNameButton path was exercised in the browser at both viewports: Ctrl+G moves focus to arrangement-group-name; Ctrl+Shift+G, Ctrl+Z and Ctrl+Shift+Z move focus to the music name button (aria-label მუსიკა — set as the active track, selected) through the new English selector (out/ungroup-focus.json)",
+  "LIBRARY-GHOST passed covers: free/occupied/video ghost texts and data-blocked in a real-mouse drag, and no clip added on a blocked release",
+  "AUDIO-NOTE passed covers the decoding and none states in the browser; the error state is inconclusive",
+  "VIDEO-HEADER 1280 harness raw fail contains-Original-sound is explained by density (out/video-density.json), not a defect"
+ ]
+}

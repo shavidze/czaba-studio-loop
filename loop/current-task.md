@@ -1,223 +1,222 @@
-# CURRENT TASK — Round 139: VISUAL-A V-0.4b — track lane and track header texts (ArrangementLane) in English
+# CURRENT TASK — Round 140: VISUAL-A V-0.4c — clip envelope editor, group header, track meter and Master Peak texts in English
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 138)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 139)
 - **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
 - **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` (M2, V-0). Module contract: `backlog.json` → VISUAL-A-OBSIDIAN `v0_plan_d29z92.module_contract` with the R6 clarification of round 133 (leaf module, one object per area, plain strings + small pure formatters, formatters take already formatted values, a branch that only picks between two texts stays in the caller, local names keep their names).
-- **Previous task:** `tasks/round-138.md` (exact copy of the round-138 `current-task.md`, sha256 `91668986…`). Rationale: `b-round-138.md`. Decision record: **D-29z104** in `docs/technical/studio-real-workspace/plan.md`.
-- **Baseline: commit `1d4df51594aa977fec987d72fed87d1d679e4fb7`** (gate 138 published on both remotes; HEAD). Tree **clean** at planning (`git status --short` empty).
-- **Frozen list:** `tmp/studio-real-loop/b-round-138-r139-tree-sha256.txt`, **937 entries** = `git ls-files -co --exclude-standard` (955) minus the 18 existing grants. Grants: `b-round-138-r139-grants.txt` (20 lines; the last 2 are new files). `sha256sum -c --quiet` OK at planning, run from `store/`.
-- **Start hashes of the 18 existing grants:** `b-round-138-r139-granted-start-sha256.txt`. **Start copies:** `b-round-138/r139-granted-start/` (paths relative to `store/`; `sha256sum -c` OK there). A checks both first; any difference → A stops and reports.
+- **Previous task:** `tasks/round-139.md` (exact copy of the round-139 `current-task.md`, sha256 `6649610b…`). Rationale: `b-round-139.md`. Decision record: **D-29z105** in `docs/technical/studio-real-workspace/plan.md`.
+- **Baseline: commit `3f2c187118ee4e3a1a3f71251fbbc05bf00a711e`** (gate 139 published on both remotes; HEAD). Tree **clean** at planning (`git status --short` empty).
+- **Frozen list:** `tmp/studio-real-loop/b-round-139-r140-tree-sha256.txt`, **943 entries** = `git ls-files -co --exclude-standard` (957) minus the 14 existing grants. Grants: `b-round-139-r140-grants.txt` (16 lines; the last 2 are new files). `sha256sum -c --quiet` OK at planning, run from `store/`.
+- **Start hashes of the 14 existing grants:** `b-round-139-r140-granted-start-sha256.txt`. **Start copies:** `b-round-139/r140-granted-start/` (paths relative to `store/`; `sha256sum -c` OK there). A checks both first; any difference → A stops and reports.
 
-## 0. Why this round (D-29z104)
-- **Round 138: C PASS**, `browserVerified` = `realVerified` = true, every browser row at 1440 and 1280, GEO-COUNT net 0, 2 Lows (C-R138-01 doc wording, C-R138-02 pre-existing blocked status after commit → `deferred_low_polish`). Gate 138 published `1d4df51` (163 test files / 2460 tests, build OK, review 9/10). **V-0.4a is done.**
-- `tasks/round-138.md` §8 fixed this step: C PASS → **V-0.4b**, re-measured first. No strings-split checkpoint result exists (request `b-round-136-checkpoint-request.md` still unanswered). Regression due on/after 2026-10-27 (not yet). No Critical/High/Medium open. `user-review/ableton-decisions.md` and `design-ux-decisions.md` do not exist.
-- **B's measurement at `1d4df51`:** `ArrangementLane.tsx` has **22** non-comment Georgian lines (l.58, 59, 60, 620, 621, 676, 697, 701, 711, 765, 818, 853, 864, 889, 891, 893, 951, 953, 954, 1001, 1013, 1017). `StudioWorkspace.tsx` has 1 (l.331, the track-header selector that matches l.697). `e2e/` has 0 hits.
-- **Pins (measured; phrase grep plus partial-phrase grep, incl. role-name regexes and attribute selectors — R6 extended to aria-labels):**
-  - `track-layout`: l.285, 286, 295, 311, 312, 313, 316, 317, 346, 428, 834, 1036, 1123
-  - `grid-snap-loop-drop`: l.441, 465, 551, 567, 620 (library drop ghost)
-  - `fader-touch`: l.182 (role-name regex), l.200 (video `Volume —` selector) · `fader-click`: l.193 (video `Volume —` selector)
-  - `track-volume-db`: l.41 (test-local `VIDEO_MIX_LABEL` value), l.303 (role-name regex)
-  - `group-volume-db` l.207 · `track-group-mix-ui` l.207 · `track-groups-ui` l.214 · `track-group-collapse-ui` l.215 (all `new RegExp(\`^${…} — აქტიური ხაზის არჩევა\`)`)
-  - `track-pan` l.718 · `track-groups-ui` l.422 (exact aria-labels)
-  - `marker-snap` l.725 (lane drop ghost) · `delete-selection-ui` l.517, 520 (all-tracks overlay)
-  - `strings.test`: `WORKSPACE_TRACK_HEADER_SELECTOR_LINE` (l.1656–1657) and the ST33 body that expects it.
-- **UI pin gaps (no existing literal):** l.701 `· აქტიური`, l.711 compact import title, l.765 Pan reset aria-label, l.818 `ორიგინალი ხმა` (only `toContain`), l.853 empty-video placeholder, l.864 both file-drag hints, l.951/953/954 clip audio notes (video-import-status-ui l.248 pins the *source* `studioVideoStrings.noSound`, not this overlay). They get tests in the new `lane-strings-ui.test.tsx`.
-- **Not V-0.4b, do not touch (named mixed state, R5):** `ArrangementGroupHeader.tsx` (fold title `(U)`, group fold aria-label, group Solo, `, მონიშნული`) and its pins `track-group-mix-ui` l.403/405/425/680/689/694, `track-group-collapse-ui` l.415/473/660/667/671 → V-0.4c. `ArrangementDetailPanel.tsx` l.703/719/1104/1108 and `detail-panel.test` → V-0.4e. `ArrangementVideoDock.tsx` l.227 `ვიდეო არ არის ·` and `render-budget.test` → V-0.5. `library-preview.test` `აქტიური ხაზი: …` (library) → V-0.5. Track names (`მუსიკა`, `სტემები`, `SFX`, `ვიდეო`) are fixture/default data (V-0.4d) and stay inside the new English literals.
+## 0. Why this round (D-29z105)
+- **Round 139: C PASS**, `browserVerified` = `realVerified` = true, every browser row at 1440 and 1280, GEO-COUNT net 0, real Solo audio (soloed music → digital silence on the stems-only region), 2 pre-existing Lows. Gate 139 published `3f2c187` (164 test files / 2470 tests, build OK, review 9/10). **V-0.4b is done.**
+- `tasks/round-139.md` §8 fixed this step: C PASS → **V-0.4c**, re-measured first. No strings-split checkpoint result exists (fourth planning without it; non-blocking). Regression due on/after 2026-10-27 (not yet). No Critical/High/Medium open. `user-review/ableton-decisions.md` and `design-ux-decisions.md` do not exist.
+- **B's measurement at `3f2c187`** (non-comment lines with Georgian or `«»`):
+  - `ArrangementClipEnvelope.tsx` (407 lines): **10** — l.22, 23, 24, 25, 70, 171, 266, 300, 326, 336.
+  - `ArrangementGroupHeader.tsx` (363): **10** — l.32, 33, 61, 62, 217, 241, 273, 289, 290, 310.
+  - `ArrangementTrackMeter.tsx` (104): **2** — l.18, 101. `ArrangementMaster.tsx` (205): **2** — l.32, 33.
+  - `e2e/`: 0 hits.
+- **Pins (measured; literal grep `-F` plus partial-phrase grep incl. role-name regexes and `Mute|Solo|Volume —` selectors). 30 lines in 6 files:**
+  - `clip-envelope-ui`: l.117, 118, 119 (`ADD_LABEL`/`MOVE_LABEL`/`REMOVE_LABEL` constants), 433, 477, 483, 526, 593, 649 (status `toBe`)
+  - `track-group-mix-ui`: l.212 (role-name regex `^${name} — ჯგუფი`), 397, 403, 411 (Mute/Solo/Volume aria-label `toBe`), 425, 680, 689, 694 (fold role-name)
+  - `track-groups-ui`: l.219 (role-name regex)
+  - `track-group-collapse-ui`: l.220 (role-name regex), 415 (fold role-name), 473 (fold title), 660, 667, 671 (group name aria-label `toBe`)
+  - `track-meter-ui`: l.475 (`toContain` sr-only), 477 (title `toBe`), 485, 529 (`not.toContain('გადააჭარბა')`)
+  - `meter-ui`: l.278 `CLEAR_SUFFIX`, l.279 `OVER_SUFFIX`
+- **Not pins (checked):** `track-group-mix-ui` l.244 `^Volume — ${name}` and l.419, `track-group-collapse-ui` l.665 `/Mute — (სტემები|SFX)/`, `gesture-guard` l.144, `group-volume-db` l.411 and `track-volume-db` l.293 (`aria-label^="Volume — "`) match prefixes that stay identical. `track-group-mix-ui` l.443/533 (`Mute — ჯგუფი 1`, `Solo — ჯგუფი 1`) are **Undo labels** built from the default group name — data, V-0.4d. `const GROUP_NAME = 'ჯგუფი 1'` (group-volume-db l.116, fader-touch l.23, …) is fixture data. StudioWorkspace finds the group name button by `data-testid="arrangement-group-name"` (l.329), not by text.
+- **UI pin gaps (no existing literal):** Envelope editor `title` (l.336), Envelope point `title` (l.70), group name button `title` (l.32), group name input aria-label (l.241), group Solo `title` (l.290), the singular folded text (`1 clip`). They get tests in the new `header-meter-envelope-strings-ui.test.tsx`.
+- **Not V-0.4c, do not touch (named mixed state, R5):** default group name `ჯგუფი N` (`groups.ts` l.4, V-0.4d) and default track names (`მუსიკა`, `სტემები`, `SFX`, `ვიდეო`, V-0.4d) stay inside the new English literals. `ArrangementDetailPanel.tsx` (incl. l.53 `(ჯგუფი)`) → V-0.4e. Library, VideoDock, route → V-0.5.
 
-### Rulings D-29z104
-- **R1 — one new object `studioLaneStrings`** (track lane and track header area), appended after `studioClipStrings`. Reuse instead of copies:
-  - the all-tracks overlay (l.1001) uses `studioClipStrings.seconds(…)` and `studioEditStrings.allTracks` → `00:03.000 – 00:05.000 · 2.000 s · all tracks` (same unit shape as the clip badge);
-  - the blocked ghost suffix uses **`studioLaneMoveStrings.noRoom`** (`No room here`), as already ruled in GATE130-S1 `note_round133`; no new key.
-- **R2 — ghost texts say what the status says (GATE130-S1).** The refused ghost reuses the closing clause of `studioLibraryStrings.audioOnVideoTrack` (“… audio is not added to the video track.”) as `Audio is not added to the video track`; the not-ready ghost reuses the opening clause of `studioLibraryStrings.dropNotLoaded` as `This sound has not loaded yet`. Smallest honest choice: short tail/head of the status the user sees on release, no new wording. The status sentences themselves are unchanged.
-- **R3 — branches stay in the caller:** `, selected` suffix (`selected ? … : ''`), the folded valuetext vs `${height} px`, the three ghost cases, the three audio notes, the two file-drag hints.
-- **R4 — forward constraints (V-0.4c / V-0.4e / V-0.5 must reuse, not copy):** GroupHeader l.33 = `` `${studioLaneStrings.foldTitle} (U)` ``; GroupHeader l.290 title = `studioLaneStrings.soloTitle`; GroupHeader l.62 selected suffix = `studioLaneStrings.selectedSuffix`; DetailPanel l.1108 folded valuetext = `studioLaneStrings.foldedValueText(…)`; VideoDock l.227 = `studioLaneStrings.noVideo`. B records them in `backlog.json`.
-- **R5 — accepted mixed state for one round, named:** English track headers next to Georgian **group** headers (fold title, group Solo, group aria-label) until V-0.4c; detail panel (V-0.4e); default track names in sentences (V-0.4d); library, dock and route (V-0.5); the meter/Master titles (V-0.4c).
-- **R6 — every text and its matchers change in the same round**, including aria-label role-name regexes and attribute selectors (`aria-label*=`, `aria-label="…"`), not only titles.
-- **Folded in (owned, low cost):**
-  - **gate-137 finding 1 / GATE137-SELECTED-CLIP-HALF-MOVED:** the selected-clip line's visible tail and its `title` come from one helper (§1.2);
-  - **gate-138 finding 1:** doc 114 status → Completed;
-  - **gate-138 finding 2 = C-R138-01:** doc 113 double "selector".
-  - **Not folded:** gate-138 #3 (`fadePreview` unit via `seconds()`) and #4 (singular `clips`) change existing objects' code → stay `deferred_low_polish`; #5 (`data-testid` for trim handles) and A's Architecture note → checkpoint addendum; #6 (trim strips not keyboard-reachable) → Low (a keyboard path exists: time-selection fields + Ctrl+E split + Delete), `deferred_low_polish`.
+### Rulings D-29z105
+- **R1 — objects:** envelope editor texts are **appended to the existing `studioClipEnvelopeStrings`** (one object per feature: the Envelope mode toggle texts live there already; grant: ST31's key list). Two new objects, appended after `studioLaneStrings`: **`studioGroupHeaderStrings`** and **`studioMeterStrings`** (precedent: V-0.4b `studioLaneStrings` beside `studioLaneMoveStrings`).
+- **R2 — reuse, no copies (R4 forward constraints of D-29z104):** GroupHeader l.33 = `` `${studioLaneStrings.foldTitle} (U)` ``; GroupHeader l.290 title = `studioLaneStrings.soloTitle`; GroupHeader l.62 selected suffix = `studioLaneStrings.selectedSuffix`; Envelope l.25 = `studioClipStrings.historyUnchanged('Envelope')`; every Envelope time unit = `studioClipStrings.seconds(time.toFixed(3))` (caller formats, the formatter receives `6.000 s`).
+- **R3 — branches stay in the caller:** the folded group text (`clipCount === 1 ? foldedOneClip : foldedClips(clipCount)`), the selected suffix, the meter over/normal titles, the Master over/normal labels, the Envelope preview vs committed status.
+- **R4 — terminology:** CZABA already says **point** (`studioClipEnvelopeStrings.toggleOnTitle` “double-click a clip to add a point”) → keep “point”; Live 12 calls them breakpoints (§26.6.1 title in B's capture) — deliberate difference, recorded. `ჯგუფი` as a role word → lowercase `group`. Group/ungroup → Live 12 §18.3 “Group Tracks” / the existing Undo labels `Group Tracks` / `Ungroup Tracks` (StudioWorkspace l.909/937). `გადატვირთვა` → existing glossary `Overload`, lowercase after an em dash (C-R127-L1 (c) rule).
+- **R5 — accepted mixed state for one round, named:** default group/track names inside English sentences (V-0.4d), detail panel (V-0.4e), library/dock/route (V-0.5).
+- **R6 — every text and its matchers change in the same round**, including role-name regexes and exact aria-label `toBe`s.
+- **Folded in (owned, low cost):** gate-139 #2 (doc 113 l.21 still says StudioWorkspace keeps one Georgian line) and gate-139 #4 (doc 115 status → Completed).
+- **Not folded:** gate-139 #1 + A's Architecture note (`trackRowNameButton` selector ↔ `activeTrackLabel`; proposal `data-testid="arrangement-track-name"`) → architecture signal + checkpoint addendum (Lane/StudioWorkspace not granted). Gate-139 #3 (`videoEmptyPlaceholder` formatter) → `deferred_low_polish`. C-R139-01 / C-R139-02 → `deferred_low_polish` (§9).
 
 ## 1. What changes (user-visible)
-**Text only.** None of these change: any handler, condition, threshold, key binding, drag/drop decision, Solo/Mute/fold logic, any `data-testid`, class name, the glyphs (`▸`, `▾`, `＋`, `·`), or the time formats.
+**Text only.** None of these change: any handler, condition, threshold, key binding, gesture, history behaviour, Mute/Solo/Volume/fold logic, meter latch or reset logic, any `data-testid`, class name, glyph (`▸`, `▾`, `▣`, `M`, `S`), the dB/dBFS formats (`formatClipEnvelopeGain`, `formatPeakDbfs`, `formatTrackVolumeDb`) or `toFixed(3)`.
 
 ### 1.1 The English map (exact text; A may not reword it. If a line seems wrong, A reports it and B rules)
-All new keys go into `studioLaneStrings`. `{…}` are values passed by the caller.
+`{…}` are values passed by the caller. `{time}` is always `studioClipStrings.seconds(t.toFixed(3))`, e.g. `6.000 s`.
 
-| ID | Source line(s) in `ArrangementLane.tsx` | Key | Exact English |
+**Envelope → appended to `studioClipEnvelopeStrings`**
+| ID | Source line in `ArrangementClipEnvelope.tsx` | Key | Exact English |
 |---|---|---|---|
-| LN1 | l.58 `VIDEO_MIX_LABEL` | `videoMixLabel` | `Original video sound` (so the video track reads `Mute — Original video sound`, `Volume — Original video sound`) |
-| LN2 | l.59 `VIDEO_IMPORT_LABEL` | `videoImportLabel` | `＋ Your own video` |
-| LN3 | l.60 `TRACK_FOLD_TITLE` | `foldTitle` | `Fold / unfold` |
-| LN4 | l.620 | `soloLabel(name: string)` | `Solo — {name} (Ctrl/Cmd+click = add to solo)` |
-| LN5 | l.621 | `soloTitle` | `Solo (Ctrl/Cmd+click = add to solo)` |
-| LN6 | l.676 | `foldLabel(name: string)` | `Fold or unfold — {name}` |
-| LN7 | l.697 | `activeTrackLabel(name: string)` | `{name} — set as the active track` |
-| LN8 | l.697 (selected branch) | `selectedSuffix` | `, selected` |
-| LN9 | l.701 | `activeBadge` | `· active` |
-| LN10 | l.711 | `videoImportTitle` | `Your own video` |
-| LN11 | l.765 | `panResetLabel(name: string)` | `Reset Pan to centre — {name}` |
-| LN12 | l.818 | `videoOriginalSound` | `Original sound` |
-| LN13 | l.853 | `noVideo` + `videoEmptyHint` | `No video` and `use “＋ Your own video” or drop a file here`; caller renders `` `${noVideo} — ${videoEmptyHint}` `` → `No video — use “＋ Your own video” or drop a file here` |
-| LN14 | l.864 (video lane) | `dropVideoHere` | `Drop the video here` |
-| LN15 | l.864 (audio lane) | `videoNotOnAudioTrack` | `Video is not added here — drop it on the video track` |
-| LN16 | l.889 | `ghostAudioOnVideoTrack` | `Audio is not added to the video track` (caller keeps the ` · ` prefix) |
-| LN17 | l.891 | `ghostNotLoaded` | `This sound has not loaded yet` |
-| LN18 | l.893 | (reuse) `studioLaneMoveStrings.noRoom` | `No room here` |
-| LN19 | l.951 | `audioDecoding` | `Sound is decoding…` |
-| LN20 | l.953 | `audioUnreadable` | `Sound could not be read` |
-| LN21 | l.954 | `audioNone` | `No sound` |
-| LN22 | l.1001 | (reuse) `studioClipStrings.seconds` + `studioEditStrings.allTracks` | rendered `{start} – {end} · {x.xxx} s · all tracks` |
-| LN23 | l.1013 | `heightLabel(name: string)` | `Height — {name}` |
-| LN24 | l.1017 | `foldedValueText(height: number)` | `folded · {height} px` (unfolded stays `${height} px` in the caller) |
+| EV1 | l.22 `ENVELOPE_ADD_LABEL` | `addPointLabel` | `Envelope: add point` |
+| EV2 | l.23 `ENVELOPE_MOVE_LABEL` | `movePointLabel` | `Envelope: move point` |
+| EV3 | l.24 `ENVELOPE_REMOVE_LABEL` | `deletePointLabel` | `Envelope: delete point` |
+| EV4 | l.25 `ENVELOPE_NO_CHANGE` | (reuse) `studioClipStrings.historyUnchanged('Envelope')` | `Envelope: nothing changed — the Undo history is unchanged.` |
+| EV5 | l.70 `envelopePointTitle` | `pointTitle({ time, gain })` | `Envelope: {time} · {gain} — drag · double-click = delete` |
+| EV6 | l.171 | `pointAdded({ time, gain })` | `Envelope: point added — {time} · {gain}.` |
+| EV7 | l.266 (preview) | `pointPreview({ time, gain })` | `Envelope: {time} · {gain}` |
+| EV8 | l.300 (commit) | `pointCommitted({ time, gain })` | `Envelope: {time} · {gain}.` |
+| EV9 | l.326 | `pointDeleted(time)` | `Envelope: point deleted — {time}.` |
+| EV10 | l.336 | `editorTitle` | `Envelope — double-click = add point` |
 
-**StudioWorkspace l.331 selector** → `'[data-testid="arrangement-track-header"] button[aria-label*="— set as the active track"]'`.
+**Group header → new `studioGroupHeaderStrings`**
+| ID | Source line in `ArrangementGroupHeader.tsx` | Key | Exact English |
+|---|---|---|---|
+| GH1 | l.32 `TRACK_GROUP_NAME_TITLE` | `nameTitle` | `F2: Rename · Ctrl+G: Group Tracks · Ctrl+Shift+G: Ungroup Tracks` |
+| GH2 | l.33 `TRACK_GROUP_FOLD_TITLE` | (reuse) `` `${studioLaneStrings.foldTitle} (U)` `` | `Fold / unfold (U)` |
+| GH3 | l.62 | `nameLabel(name)` | `{name} — group` |
+| GH4 | l.61 (one clip) | `foldedOneClip` | `, folded, 1 clip` |
+| GH5 | l.61 (other counts) | `foldedClips(count)` | `, folded, {count} clips` |
+| GH6 | l.62 selected | (reuse) `studioLaneStrings.selectedSuffix` | `, selected` |
+| GH7 | l.217 | `foldLabel(name)` | `Fold or unfold group — {name}` |
+| GH8 | l.241 | `nameInputLabel(name)` | `Group name — {name}` |
+| GH9 | l.273 | `muteLabel(name)` | `Mute — {name} (group)` |
+| GH10 | l.289 | `soloLabel(name)` | `Solo — {name} (group, Ctrl/Cmd+click = add to solo)` |
+| GH11 | l.290 | (reuse) `studioLaneStrings.soloTitle` | `Solo (Ctrl/Cmd+click = add to solo)` |
+| GH12 | l.310 | `volumeLabel(name)` | `Volume — {name} (group)` |
+
+`trackGroupNameLabel` keeps its name and signature; body: `` `${nameLabel(name)}${collapsed ? (clipCount === 1 ? foldedOneClip : foldedClips(clipCount)) : ''}${selected ? selectedSuffix : ''}` `` (Biome may wrap; the two ternaries stay in the caller).
+
+**Meter → new `studioMeterStrings`**
+| ID | Source line | Key | Exact English |
+|---|---|---|---|
+| MT1 | TrackMeter l.19 (normal, already English; moved so the pair lives together) | `trackPeakTitle({ name, peak })` | `{name} · Peak {peak} dBFS` (byte-identical to today) |
+| MT2 | TrackMeter l.18 (over) | `trackPeakOverTitle({ name, peak })` | `{name} · Peak {peak} dBFS — went above 0 dBFS. Click Master Peak to clear` |
+| MT3 | TrackMeter l.101 (sr-only) | `trackOverAnnouncement(name)` | `{name}: the level went above 0 dBFS` |
+| MT4 | Master l.33 (normal) | `masterPeakLabel(peak)` | `Master Peak {peak} dBFS — click to clear` |
+| MT5 | Master l.32 (over) | `masterPeakOverLabel(peak)` | `Master Peak {peak} dBFS — overload (Clip). Click to clear` |
+
+`trackMeterTitle` and `masterPeakLabel` (component-local functions) keep their names and signatures and pick the formatter.
 
 **Exact rendered text that pins and C rows must match (examples):**
-- Track name button: `მუსიკა — set as the active track`; selected: `მუსიკა — set as the active track, selected`; visible badge `· active`.
-- Fold button: aria-label `მუსიკა — …` is **not** used; it is `Fold or unfold — მუსიკა`, title `Fold / unfold`.
-- Solo: `Solo — მუსიკა (Ctrl/Cmd+click = add to solo)`, title `Solo (Ctrl/Cmd+click = add to solo)`.
-- Video track: `Volume — Original video sound`, header text contains `Original sound`, import button `＋ Your own video`.
-- Ghosts: `00:05.000 · No room here`, `00:09.000 · Audio is not added to the video track`, `00:07.000 · This sound has not loaded yet`.
-- Height separator: `Height — SFX`, valuetext `folded · 80 px`.
-- Local constant names stay (`VIDEO_MIX_LABEL`, `VIDEO_IMPORT_LABEL`, `TRACK_FOLD_TITLE`) and take their values from the module.
+- Envelope: Undo button `Undo: Envelope: add point`; statuses `Envelope: point added — 6.000 s · 0.0 dB.`, `Envelope: 6.000 s · −2.5 dB` (while dragging), `Envelope: 6.000 s · −2.5 dB.` (after release), `Envelope: point deleted — 10.000 s.`, `Envelope: nothing changed — the Undo history is unchanged.`; editor title `Envelope — double-click = add point`.
+- Group (default name kept): `ჯგუფი 1 — group`, `ჯგუფი 1 — group, selected`, `ჯგუფი 1 — group, folded, 2 clips, selected`, `ჯგუფი 1 — group, folded, 2 clips`; regex `` new RegExp(`^${escapeRegExp(name)} — group`) ``; `Mute — ჯგუფი 1 (group)`, `Solo — ჯგუფი 1 (group, Ctrl/Cmd+click = add to solo)`, `Volume — ჯგუფი 1 (group)`; fold `Fold or unfold group — ჯგუფი 2`, title `Fold / unfold (U)`.
+- Meter: `SFX · Peak +3.5 dBFS — went above 0 dBFS. Click Master Peak to clear`; `SFX: the level went above 0 dBFS`; `Master Peak −12.0 dBFS — click to clear`; `Master Peak +3.5 dBFS — overload (Clip). Click to clear`.
+- Local constant names stay (`ENVELOPE_ADD_LABEL`, `ENVELOPE_MOVE_LABEL`, `ENVELOPE_REMOVE_LABEL`, `ENVELOPE_NO_CHANGE`, `TRACK_GROUP_NAME_TITLE`, `TRACK_GROUP_FOLD_TITLE`) and take their values from the module.
 
-### 1.2 Selected-clip line (gate-137 finding 1)
-- `strings.ts`: add a **module-level, not exported** helper `selectedClipDetailText({ start, length, offset })` returning `` ` · start ${start} · length ${length} · source offset ${offset}` `` (leading space). Add the key **`selectedClipDetail`** to `studioWorkspaceStrings` (calls the helper) and make `selectedClipTitle` return `` `Clip: ${title}${selectedClipDetailText(…)}` ``. Its output is byte-identical to today (ST31's existing samples must stay green unchanged). This is the only allowed change to an existing object.
-- `StudioWorkspace.tsx` l.2576–2579: the inline `· start{' '} … · source offset{' '}` tail becomes `{studioWorkspaceStrings.selectedClipDetail({ start, length, offset })}` after the `<span>{selectedTitle}</span>`. `textContent` of `arrangement-selected-clip` must stay byte-identical.
-
-**Glossary additions (d29z104):**
+**Glossary additions (d29z105):**
 | Georgian | English | Source |
 |---|---|---|
-| `დაკეცვა / გახსნა` | Fold / unfold | Live 12 §6.9 “unfold its track”, “Unfold Track button” |
-| `აქტიური ხაზის არჩევა` | set as the active track | CZABA label |
-| `მონიშნული` | selected | glossary |
-| `Ctrl/Cmd+click ამატებს` | Ctrl/Cmd+click = add to solo | CZABA label (`click = playhead` shape) |
-| `ორიგინალი ხმა` | Original sound | CZABA label (D-29z49 video sound) |
-| `საკუთარი ვიდეო` | Your own video | reuses `studioVideoStrings.audioFileRejected` “your own video” |
-| `სიმაღლე` | Height | Live §6.9 “Adjusting an Unfolded Track’s Height” |
-| `დაკეცილია` | folded | glossary |
-| `ყველა ხაზი` | all tracks | existing `studioEditStrings.allTracks` |
+| `წერტილი` (envelope) | point | existing `toggleOnTitle`; Live 12 “breakpoint” (§26.6.1) — deliberate difference |
+| `წერტილის დამატება / გადატანა / წაშლა` | add / move / delete point | Undo label noun pattern (`Delete clip`) |
+| `ჯგუფი` (role word) | group | Live 12 §18.3 Group Tracks |
+| `დაჯგუფება / დაშლა` | Group Tracks / Ungroup Tracks | existing Undo labels |
+| `ჯგუფის სახელი` | Group name | CZABA label |
+| `0 dBFS-ს გადააჭარბა` | went above 0 dBFS | CZABA label |
+| `გასასუფთავებლად დააჭირე` | click to clear | CZABA label |
+| `გადატვირთვა (Clip)` | overload (Clip) | glossary `Overload` (V-0.1), lowercase after a dash |
 
 ## 2. A — files you own (everything else is frozen)
 | Path | Allowed change |
 |---|---|
-| `app/lib/arrangement/strings.ts` | Append `studioLaneStrings` (§1.1) after `studioClipStrings`; §1.2 helper + `selectedClipDetail` + `selectedClipTitle` body. Other objects, keys and values byte-identical. No import. |
-| `app/components/arrangement/ArrangementLane.tsx` | A new strings import, plus exactly the §1.1 lines. Biome-style wraps allowed. |
-| `app/components/arrangement/StudioWorkspace.tsx` | l.331 selector and l.2576–2579 (§1.2). Nothing else (the strings import already exists, l.~80–92). |
-| `app/lib/arrangement/__tests__/strings.test.ts` | Import specifiers; delete `WORKSPACE_TRACK_HEADER_SELECTOR_LINE`; ST33: retitle to `ST33: the new texts, waveform-zoom.ts and StudioWorkspace have no Georgian and no «»` and change only `expect(georgianLines).toEqual([WORKSPACE_TRACK_HEADER_SELECTOR_LINE])` → `toEqual([])`; ST31: add `'selectedClipDetail'` to the key list and one sample (§3.1). New `describe('V-0.4b lane strings')` with ST36–ST37. |
-| The 12 pin files of §0 | Exactly the listed lines. No other line, no new `it`, `it` counts unchanged. |
-| `docs/.../113-studio-v0-workspace-strings.md` | l.21 and l.74: `track-header selector (l.331)-ის selector` → `track-header selector (l.331)` (C-R138-01). Nothing else. |
-| `docs/.../114-studio-v0-clip-strings.md` | l.4 → `Completed (A-ის შემოწმებები მწვანეა რაუნდ 138-ში; C round 138 — PASS, browserVerified; gate 138 — 1d4df51)`; l.72 last sentence → C round 138 PASS; delete the C round 138 TODO line (l.76). Locate these lines by content (`grep -n "C round 138"`), not only by number. |
-| **new** `app/lib/arrangement/__tests__/lane-strings-ui.test.tsx` | LSU1–LSU6 (§3.3) |
-| **new** `docs/implementation/2026/quarter-IV/115-studio-v0-lane-strings.md` | Georgian, `docs/implementation/TEMPLATE.md` sections; status says C round 139 is still to come. |
+| `app/lib/arrangement/strings.ts` | Append EV keys to `studioClipEnvelopeStrings` (its 4 existing keys byte-identical); append `studioGroupHeaderStrings` and `studioMeterStrings` after `studioLaneStrings`. Other objects, keys and values byte-identical. No import. |
+| `app/components/arrangement/ArrangementClipEnvelope.tsx` | A new strings import, plus exactly the EV lines. Biome-style wraps allowed. |
+| `app/components/arrangement/ArrangementGroupHeader.tsx` | A new strings import, plus exactly the GH lines (incl. the `trackGroupNameLabel` body). |
+| `app/components/arrangement/ArrangementTrackMeter.tsx` | A new strings import, `trackMeterTitle` body (l.17–19) and l.101. |
+| `app/components/arrangement/ArrangementMaster.tsx` | A new strings import, `masterPeakLabel` body (l.31–33). |
+| `app/lib/arrangement/__tests__/strings.test.ts` | Import specifiers; ST31: `studioClipEnvelopeStrings` key list + `EXPECTED_CLIP_ENVELOPE_STRINGS` gain the EV plain strings, plus formatter samples for EV5–EV9 (the 4 existing values unchanged). New `describe('V-0.4c header, meter and envelope strings')` with ST38–ST39 (§3.1). |
+| The 6 pin files of §0 | Exactly the listed lines. No other line, no new `it`, `it` counts unchanged. |
+| `docs/.../113-studio-v0-workspace-strings.md` | l.21: the sentence “ამიტომ StudioWorkspace-ში ზუსტად ერთი ქართული ხაზი რჩება. ST33 ამას pin-ავს.” gets the suffix ` (round 138-ის მდგომარეობა; V-0.4b-ში, round 139, ეს ხაზი გადაითარგმნა და ST33 ახლა 0-ს ამოწმებს)`. Nothing else. |
+| `docs/.../115-studio-v0-lane-strings.md` | l.4 → `Completed (A-ის შემოწმებები მწვანეა რაუნდ 139-ში; C round 139 — PASS, browserVerified; gate 139 — 3f2c187)`; l.72 last sentence → C round 139 PASS; delete the C round 139 TODO line (l.76). Locate by content (`grep -n "C round 139"`). |
+| **new** `app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx` | HM1–HM6 (§3.3) |
+| **new** `docs/implementation/2026/quarter-IV/116-studio-v0-header-meter-envelope-strings.md` | Georgian, `docs/implementation/TEMPLATE.md` sections; status says C round 140 is still to come. |
 
 - **Protected (never touch):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/components/ui/Modal.tsx`, `app/routes/account.downloads.tsx`, `download-routes.test.ts`, everything in `backlog.json` `global_forbidden_files`.
-- **Pin rule:** each replaced pin is a **hand-written English literal** with the same matcher (`toBe` stays `toBe`, `toContain` stays `toContain`, a RegExp stays a RegExp with the same anchors, a selector keeps its operator `*=` / `=`). No pin imports the module value it checks. Fixture track names stay.
-- **Stop rule:** if the pre-edit grep finds a Georgian V-0.4b text (§1.1) in a non-granted file other than the R5 list, or a pin line differs from §0, A stops and reports. A does not widen scope. `delete-selection-ui` l.517 `/all tracks$/` must still find exactly the elements it found before (the overlay); if the count changes, stop and report.
+- **Pin rule:** each replaced pin is a **hand-written English literal** with the same matcher (`toBe` stays `toBe`, `toContain` stays `toContain`, `not.toContain` stays `not.toContain` with the new English over phrase `went above 0 dBFS`, a RegExp stays a RegExp with the same anchors). No pin imports the module value it checks. Fixture names (`ჯგუფი 1`, `SFX`, …) stay.
+- **Stop rule:** if the pre-edit grep finds a Georgian V-0.4c text (§1.1) in a non-granted file other than the R5 list, or a pin line differs from §0, A stops and reports. A does not widen scope.
+- **Edit rule (C-R120-01):** every lasting edit via Edit/Write; shell writes only for temporary mutations, restored and sha-verified; A lists every shell write. Before editing an untracked granted file, store a pre-edit copy with sha256 under `a-round-140/`.
 
 ## 3. A — tests and mutations
-### 3.1 `strings.test.ts` (35 → 37 `it`s)
-- **ST31 (edit):** key list gains `selectedClipDetail`; `ws.selectedClipDetail({ start: '00:02.000', length: '00:08.000', offset: '00:01.000' })` equals ` · start 00:02.000 · length 00:08.000 · source offset 00:01.000` (hand-written), and the existing `selectedClipTitle` sample is unchanged.
-- **ST36:** exact key set of `studioLaneStrings`; every plain string equals its §1.1 literal; every formatter returns the exact English for Latin samples (`soloLabel('Drums')`, `foldLabel('Drums')`, `activeTrackLabel('Drums')`, `panResetLabel('Drums')`, `heightLabel('SFX')`, `foldedValueText(80)`).
-- **ST37 (per-file scans):** `studioLaneStrings` values and all sample outputs have no Georgian and no `«»`; `ArrangementLane.tsx` (comments stripped) has **no** Georgian line and no `«»`. (ST33 now pins StudioWorkspace at 0.)
+### 3.1 `strings.test.ts` (37 → 39 `it`s)
+- **ST31 (edit):** the `studioClipEnvelopeStrings` key list gains `addPointLabel`, `deletePointLabel`, `editorTitle`, `movePointLabel`, `pointAdded`, `pointCommitted`, `pointDeleted`, `pointPreview`, `pointTitle`; plain values equal the EV literals; hand-written samples: `pointTitle({ time: '6.000 s', gain: '0.0 dB' })` = `Envelope: 6.000 s · 0.0 dB — drag · double-click = delete`, `pointAdded(…)` = `Envelope: point added — 6.000 s · 0.0 dB.`, `pointPreview` / `pointCommitted` with and without the final `.`, `pointDeleted('10.000 s')` = `Envelope: point deleted — 10.000 s.`. The loop over plain values must still check every string key (adjust the loop to skip functions, not to skip keys).
+- **ST38:** exact key sets of `studioGroupHeaderStrings` and `studioMeterStrings`; every plain string equals its §1.1 literal; every formatter returns the exact English for Latin samples (`nameLabel('Drums')`, `foldedClips(2)`, `foldLabel('Drums')`, `nameInputLabel('Drums')`, `muteLabel('Drums')`, `soloLabel('Drums')`, `volumeLabel('Drums')`, `trackPeakTitle({ name: 'SFX', peak: '−3.0' })`, `trackPeakOverTitle({ name: 'SFX', peak: '+3.5' })`, `trackOverAnnouncement('SFX')`, `masterPeakLabel('−12.0')`, `masterPeakOverLabel('+3.5')`).
+- **ST39 (per-file scans):** the new values and all sample outputs have no Georgian and no `«»`; `ArrangementClipEnvelope.tsx`, `ArrangementGroupHeader.tsx`, `ArrangementTrackMeter.tsx`, `ArrangementMaster.tsx` (comments stripped) have **no** Georgian line and no `«»`.
 
 ### 3.2 Pin replacements
-Each §0 pin gets the §1.1 English with fixture names unchanged. Examples: role-name regexes → `` new RegExp(`^${escapeRegExp(name)} — set as the active track`) ``; `track-pan` l.718 → `'მუსიკა — set as the active track'`; `track-groups-ui` l.422 → `'მუსიკა — set as the active track, selected'`; `fader-*` → `input[aria-label="Volume — Original video sound"]`; `track-volume-db` l.41 → `'Original video sound'`; `track-layout` l.285/286 → `'Fold or unfold — მუსიკა'` / `'Fold / unfold'`, l.295 → `'Solo — მუსიკა (Ctrl/Cmd+click = add to solo)'`, l.311/316 → `'Original sound'`, l.312/313/317 → `'＋ Your own video'`, l.346 → `'Height — SFX'`, l.1123 → `'Height — მუსიკა'`, l.428/834 → `'folded · 80 px'`; ghosts per §1.1; `delete-selection-ui` → `/all tracks$/` and `'00:03.000 – 00:05.000 · 2.000 s · all tracks'`.
+Each §0 pin gets the §1.1 English with fixture names unchanged. Examples: `clip-envelope-ui` l.117–119 → `'Envelope: add point'` / `'Envelope: move point'` / `'Envelope: delete point'`; l.433 → `'Envelope: point added — 6.000 s · 0.0 dB.'`; l.477 → `'Envelope: 6.000 s · −2.5 dB'`; l.483 → `'Envelope: 6.000 s · −2.5 dB.'`; l.526 → `'Envelope: nothing changed — the Undo history is unchanged.'`; l.593 → `'Envelope: 11.000 s · −12.0 dB.'`; l.649 → `'Envelope: point deleted — 10.000 s.'`; role regexes → `` new RegExp(`^${escapeRegExp(name)} — group`) ``; fold role names → `'Fold or unfold group — ჯგუფი 1'` / `` `Fold or unfold group — ${name}` ``; l.473 title → `'Fold / unfold (U)'`; l.660/667/671 → `'ჯგუფი 1 — group, selected'`, `'ჯგუფი 1 — group, folded, 2 clips, selected'`, `'ჯგუფი 1 — group, folded, 2 clips'`; `meter-ui` `CLEAR_SUFFIX = 'dBFS — click to clear'`, `OVER_SUFFIX = 'dBFS — overload (Clip). Click to clear'`; `track-meter-ui` l.475 → `'SFX: the level went above 0 dBFS'`, l.477 → the MT2 example, l.485/529 → `not.toContain('went above 0 dBFS')`.
 
-### 3.3 New `lane-strings-ui.test.tsx` (real `StudioWorkspace` in jsdom; copy the mount harness of `track-layout.test.tsx`/`clip-strings-ui.test.tsx`, do not import them)
-- **LSU1:** the active track's name button shows `· active` (textContent ends with it); the compact video import button has `title` `Your own video` and aria-label `＋ Your own video`.
-- **LSU2:** the Pan reset button aria-label is `Reset Pan to centre — მუსიკა`.
-- **LSU3:** an empty video lane shows exactly `No video — use “＋ Your own video” or drop a file here`.
-- **LSU4:** a file `dragenter`/`dragover` (with `Files` in `dataTransfer.types`) on the video lane shows `Drop the video here`; on an audio lane shows `Video is not added here — drop it on the video track`.
-- **LSU5:** a video clip whose source audio state is `decoding` / `error` / `none` renders the clip note `Sound is decoding…` / `Sound could not be read` / `No sound` (drive the state through the same path `video-import-status-ui.test.tsx` uses; if one state cannot be reached in jsdom without non-granted changes, A reports it instead of faking it).
-- **LSU6:** the selected-clip line: `textContent` of `arrangement-selected-clip` equals its `title` and equals `Clip: {title} · start … · length … · source offset …` for a known clip.
+### 3.3 New `header-meter-envelope-strings-ui.test.tsx` (real `StudioWorkspace` in jsdom; copy the mount harness of `clip-envelope-ui.test.tsx` / `track-group-collapse-ui.test.tsx`, do not import them)
+- **HM1:** in Envelope mode, the editor overlay (`arrangement-clip-envelope-editor`) has `title` `Envelope — double-click = add point`; after a double-click adds a point, the point (`arrangement-clip-envelope-point`) has `title` `Envelope: {t} s · {gain} — drag · double-click = delete` with the real values (hand-written for the fixture).
+- **HM2:** after Ctrl+G on two tracks, the group name button (`arrangement-group-name`) has `title` `F2: Rename · Ctrl+G: Group Tracks · Ctrl+Shift+G: Ungroup Tracks`; F2 opens the input (`arrangement-group-name-input`) with aria-label `Group name — ჯგუფი 1`.
+- **HM3:** the group Solo button (`arrangement-group-solo`) has `title` `Solo (Ctrl/Cmd+click = add to solo)`.
+- **HM4:** a collapsed group whose members hold exactly one clip has the name aria-label `ჯგუფი 1 — group, folded, 1 clip` (if no fixture path gives one clip without non-granted changes, A reports it instead of faking it).
+- **HM5:** the track meter `title` without overload equals `{track} · Peak {peak} dBFS` for a known frame (drive the store the way `track-meter-ui.test.tsx` does).
+- **HM6:** the Master Peak button aria-label after a reset is `Master Peak −∞ dBFS — click to clear` (hand-written).
 
 ### 3.4 Forward rule (GATE130-S3)
-Every LN key (and the §1.2 key) has at least one hand-written UI literal in a pin file or in LSU1–6. A lists the key → test mapping in its report.
+Every EV/GH/MT key has at least one hand-written UI literal in a pin file or in HM1–6. A lists the key → test mapping in its report.
 
 ### 3.5 Mutations (each turns the named tests red; restore and check by sha256)
 | ID | Mutation | Must turn red |
 |---|---|---|
-| m61 | LN7 `set as the active track` → `set active track` | ST36, the role-name regex files (e.g. `track-volume-db`, `track-groups-ui`), `track-pan` l.718 |
-| m62 | StudioWorkspace l.331 selector back to the Georgian text | ST33, and any UI test that uses track-row focus/rename through `trackRowNameButton` (A names which) |
-| m63 | the `selected ? selectedSuffix : ''` branch inverted | `track-groups-ui` l.422 or `track-pan` l.718 |
-| m64 | LN18 ghost uses a new literal `No space here` instead of `studioLaneMoveStrings.noRoom` | `grid-snap-loop-drop` l.441/551 |
-| m65 | LN22 overlay unit `s` → `sec` (inline in the Lane) | `delete-selection-ui` l.520 |
-| m66 | LN14/LN15 ternary branches swapped | LSU4 |
-| m67 | §1.2 `selectedClipDetail` drops ` · source offset …` | ST31, LSU6 |
-| m68 | a Georgian letter added inline to Lane l.701 | ST37 |
+| m69 | GH3 `— group` → `— grp` | ST38, the role-regex files (`track-group-mix-ui`, `track-groups-ui`, `track-group-collapse-ui`) |
+| m70 | the caller's `clipCount === 1` branch inverted | `track-group-collapse-ui` l.667/671 and HM4 |
+| m71 | EV4 uses a new literal `Envelope: no change.` instead of `historyUnchanged('Envelope')` | `clip-envelope-ui` l.526 |
+| m72 | the Envelope time unit built inline as `` `${t.toFixed(3)} sec` `` in the status call sites | `clip-envelope-ui` l.433/477/483 |
+| m73 | the Master over/normal branch swapped | `meter-ui` (CLEAR/OVER rows) |
+| m74 | `trackMeterTitle` over/normal branch swapped | `track-meter-ui` l.477/485 and HM5 |
+| m75 | GroupHeader l.290 `title="Solo"` literal instead of `studioLaneStrings.soloTitle` | HM3 |
+| m76 | a Georgian letter added inline to GroupHeader l.32 | ST39 |
 
 ## 4. A — checks (speed rules)
-- At the start: the frozen list, the 18 start hashes and the start copies all OK. `git status --short` empty.
-- Pre-edit grep for every §1.1 Georgian text (full and partial phrases) in `app/**` and `e2e/**`, saved to `a-round-139/pre-grep.txt`.
+- At the start: the frozen list, the 14 start hashes and the start copies all OK. `git status --short` empty.
+- Pre-edit grep for every §1.1 Georgian text (full and partial phrases) in `app/**` and `e2e/**`, saved to `a-round-140/pre-grep.txt`.
 - `npm run typecheck` and `npm run lint` exit 0. Read-only `npx biome check` on the changed code and test files: 0 diagnostics.
-- `npx vitest run` on: `strings`, the 12 pin files, `lane-strings-ui`, and neighbours `clip-strings-ui`, `workspace-strings-ui`, `video-import-status-ui`, `track-volume-db`, `grid-snap-clip-edges`, `status-announcement-ui`, `detail-panel`, `render-budget`, `library-preview`. Save to `a-round-139/vitest.json`.
-- Mutations m61–m68 per §3.5.
+- `npx vitest run` on: `strings`, the 6 pin files, `header-meter-envelope-strings-ui`, and neighbours `clip-envelope-ui`, `clip-gain-waveform`, `group-volume-db`, `fader-touch`, `gesture-guard`, `track-volume-db`, `lane-strings-ui`, `clip-strings-ui`, `status-announcement-ui`, `render-budget`. Save to `a-round-140/vitest.json`.
+- Mutations m69–m76 per §3.5.
 - The code-reviewer (more than 3 files change). Its Architecture note goes to B.
 - **Not run:** the full suite, `npm run verify`, build, e2e (the gate does these).
-- At the end: `git status --short` shows exactly the 18 ` M` + 2 `??` granted paths (if a pin file needed no change, say so). Frozen list OK. Protected `git diff 1d4df51` empty. End sha256 of the changed paths → `a-round-139/end-sha256.txt`. No commit, stash, checkout, install, `--write` or `check:fix`.
+- At the end: `git status --short` shows exactly the 14 ` M` + 2 `??` granted paths (if a pin file needed no change, say so). Frozen list OK. Protected `git diff 3f2c187` empty. End sha256 of the changed paths → `a-round-140/end-sha256.txt`. No commit, stash, checkout, install, `--write` or `check:fix`.
 
 ## 5. C — rows
-Real Playwright Chromium at **1440×900 and 1280×720** on `http://127.0.0.1:5173/studio-lab`, fresh context per session. Use `data-testid`s and the **new English** labels (the round-138 tool used the Georgian fold aria-label; it is now `Fold or unfold — {track}`). State Snap at the start of each session (default off).
+Real Playwright Chromium at **1440×900 and 1280×720** on `http://127.0.0.1:5173/studio-lab`, fresh context per session. Use `data-testid`s and the **new English** labels. State Snap at the start of each session (default off). Harness notes from round 139: a **track** fold keeps clips visible at 27 px; a **group** fold renders 0 clips of its members; the video `Original sound` line needs a row ≥ 80 px.
 
 | Row | Start state → action → expected |
 |---|---|
-| T139-TARGETED | Run A's named vitest list; counts equal A's |
-| SOURCE-SCOPE | Only granted paths changed; frozen list OK at start and end; end hashes equal `a-round-139/end-sha256.txt`; protected diff vs `1d4df51` empty; no source change during C's phase |
-| AN-REVIEW | `diff -u` against `b-round-138/r139-granted-start/`: only §1.1/§1.2 lines and the import change; no handler, condition, class or testid change; pins hand-written with the same matchers/anchors/operators; strings.test changes only the import, the constant removal, ST31 key+sample, ST33 retitle + `[]`, ST36–37; docs 113/114 only the named lines |
-| TRACK-SELECT | Click the music name button: it gets `aria-pressed=true`, shows `· active`; aria-label `{track} — set as the active track`. Ctrl/Cmd+click stems: both selected; music aria-label ends `, selected`. Ctrl+G groups them (real result: a group row appears) — this proves the `trackRowNameButton` selector path still works |
-| TRACK-FOLD | `data-testid="arrangement-track-fold"` on stems: `title` `Fold / unfold`, aria-label `Fold or unfold — სტემები`; click → `aria-expanded=false`, clips hidden, height separator valuetext `folded · {h} px`; click again → unfolded, valuetext `{h} px` |
-| SOLO | Solo on music: aria-label/title per LN4/LN5. **Behaviour:** Ctrl/Cmd+click Solo on stems → both soloed (`aria-pressed=true` on both); a plain click on SFX Solo → only SFX soloed. Real audio: with music soloed, the output-tap RMS while playing a region where only stems has signal is ≥ 20 dB below the unsoloed level (paired, same position) |
-| VIDEO-HEADER | Video header text contains `Original sound`; `Volume — Original video sound` slider exists and moving it changes `aria-valuetext`; the `＋ Your own video` button opens a file chooser (`page.waitForEvent('filechooser')`); compact density shows `＋` with title `Your own video` |
-| EMPTY-VIDEO | With no video clip: the lane shows `No video — use “＋ Your own video” or drop a file here` |
-| FILE-DRAG-HINT | Synthetic `dragenter`/`dragover` with a `Files` DataTransfer over the video lane → `Drop the video here`; over music → `Video is not added here — drop it on the video track`; `dragleave` removes it |
-| LIBRARY-GHOST | Drag a library sound over: a free spot (no suffix), an occupied spot → `{time} · No room here` with `data-blocked=true`, the video lane → `{time} · Audio is not added to the video track`. If a not-loaded source can be produced in the browser, check `· This sound has not loaded yet`; otherwise report that state as covered by the unit pin only (inconclusive, not PASS). On release over the occupied spot the status starts with `No room here` |
-| ALL-TRACKS-OVERLAY | Make a range, Ctrl+Shift+L: overlay label `{start} – {end} · {x.xxx} s · all tracks`, with the measured length |
-| HEIGHT | Separator aria-label `Height — {track}`; ArrowDown/ArrowUp change `aria-valuenow` and the real row height by the same px |
-| PAN-RESET | Move music Pan off centre, then the reset button (aria-label `Reset Pan to centre — მუსიკა`) → Pan readout `C`, button disabled |
-| AUDIO-NOTE | Import a real small video file (generate one in the tool folder, e.g. with a canvas+MediaRecorder or a committed fixture if one exists) and report which clip note states are observable (`Sound is decoding…` while decoding, `No sound` for a silent-track-less file). Unobservable states → inconclusive with the reason, covered by LSU5 only |
-| SELECTED-CLIP | Select a clip: `arrangement-selected-clip` `textContent` equals its `title` and reads `Clip: {title} · start … · length … · source offset …` with the clip's real values; move it and the line updates |
-| GEO-COUNT | At every step count Georgian in the track headers (all attributes + text), lane hints, ghosts, overlay, separators, status line, Undo/Redo titles, selected-clip line. Expect **0** after the named subtractions (R5): track names, group header, detail panel, library, dock, demo badge, meter/Master. List every subtraction |
-| LAYOUT | S0/S1/S2 (round-130 harness) against round 138: any change >1 px only from a granted text width (header badge, hints, overlay) |
-| REG-138 | One sample each: CLIP-MOVE status + `Undo: Move clip`, and RANGE-BADGE `00:03.000 – 00:05.000 · 2.000 s` |
-| G139-3 (alone, last) | `/studio-lab` shows the workspace and demo badge. `/studio/middle-east` shows "Sign in required", no workspace, 0 `audio[src]`. `GET /api/studio-token?…` → 401. Fake-Bearer 403 BLOCKED (backend unavailable in cloud) |
+| T140-TARGETED | Run A's named vitest list; counts equal A's |
+| SOURCE-SCOPE | Only granted paths changed; frozen list OK at start and end; end hashes equal `a-round-140/end-sha256.txt`; protected diff vs `3f2c187` empty; no source change during C's phase |
+| AN-REVIEW | `diff -u` against `b-round-139/r140-granted-start/`: only §1.1 lines and the imports change; no handler, condition, class or testid change; pins hand-written with the same matchers/anchors; strings.test changes only the imports, ST31 (envelope keys + samples) and ST38–39; docs 113/115 only the named lines |
+| ENVELOPE | Envelope mode on (`A` or the toggle). Editor title EV10. Double-click a clip → status EV6 with the real time/gain, Undo title `Undo: Envelope: add point`. Drag the point down to ≤ −12 dB → live status EV7 (no final `.`), release → EV8 (with `.`), Undo title `Undo: Envelope: move point`. Point title EV5 with the shown values. Double-click the point → EV9, Undo title `Undo: Envelope: delete point`. A drag that returns to the start → EV4 and the Undo title unchanged. **Behaviour:** Ctrl+Z after the move restores the point (status/title back); **real audio**: paired output-tap or range-export RMS at the point time with the point at ≤ −12 dB vs after Undo of the move is ≥ 6 dB lower (same position; C-R82-LIVE-ORACLE-PAIRED) |
+| GROUP-HEADER | Select two adjacent audio tracks, Ctrl+G → a group row; name button aria-label `ჯგუფი 1 — group, selected` (selected after creation: `replaceTrackSelection([group.id])`, StudioWorkspace l.912) and title GH1; fold button aria-label `Fold or unfold group — ჯგუფი 1`, title `Fold / unfold (U)`; click fold → `aria-expanded=false`, 0 member clips rendered, name label `ჯგუფი 1 — group, folded, {n} clips…` with the real member clip count (singular `1 clip` if a one-clip group is produced); unfold restores. F2 → input aria-label `Group name — ჯგუფი 1`; Escape keeps the name |
+| GROUP-MIX | Group Mute aria-label `Mute — ჯგუფი 1 (group)`; Solo `Solo — ჯგუფი 1 (group, Ctrl/Cmd+click = add to solo)`, title `Solo (Ctrl/Cmd+click = add to solo)`; Volume `Volume — ჯგუფი 1 (group)` and ArrowLeft changes `aria-valuetext`. **Real audio (paired, same position, a region where only group members sound):** group Mute → output RMS ≥ 20 dB lower; unmute restores; group Solo → a non-member track's region is silent (≥ 20 dB lower); Ctrl/Cmd+click Solo on a non-member track adds it (both soloed) |
+| METER | Play the default demo: the Master Peak button reaches the over state (default project export peaks above 0 dBFS, C-R86-OBS; if the live latch does not trip at Master 0 dB, raise Master Volume to +6 dB (its max) and play again; report which) → aria-label MT5 with the shown peak; click it → MT4 with `−∞`, no new Undo entry, no status text. Drive one track above 0 dBFS (e.g. Clip Gain +12 dB on a loud clip, or another real way) → its meter `title` = MT2 and the header contains the sr-only MT3; a track that did not go over has the MT1 title only. Clicking Master Peak clears the track latch too (title back to MT1). If no track can be driven over in the browser, the track-over texts are inconclusive with the reason (unit pins only) |
+| GEO-COUNT | At every step count Georgian in the envelope editor/points (titles), group header (all attributes + text), track meters, Master, status line, Undo/Redo titles. Expect **0** after the named subtractions (R5): default group name `ჯგუფი N`, track names, detail panel, library, dock, demo badge. List every subtraction |
+| LAYOUT | S0/S1/S2 (round-130 harness) against round 139: any change >1 px only from a granted text (status line). Plus one group-row snapshot (group row height, name/M/S/fader boxes) against the round-139 tree measured in the same session if C has no stored group baseline — report which |
+| REG-139 | One sample each: TRACK-SELECT aria-label `მუსიკა — set as the active track, selected` and `Solo — მუსიკა (Ctrl/Cmd+click = add to solo)` |
+| G140-3 (alone, last) | `/studio-lab` shows the workspace and demo badge. `/studio/middle-east` shows "Sign in required", no workspace, 0 `audio[src]`. `GET /api/studio-token?…` → 401. Fake-Bearer 403 BLOCKED (backend unavailable in cloud) |
 | PX-NET / REG-HYD | 0 forbidden requests, 0 Authorization headers, 0 hydration errors, 0 pageerror (known cart noise expected) |
 
 Gate rows (C does not claim them): full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
 
 ## 6. Ableton source
-Live 12 Reference Manual, Arrangement View, B's saved capture `b-round-133/live/arrangement-view.txt` (re-grepped 2026-10-24 for this task).
+Live 12 Reference Manual, B's saved capture `b-round-133/live/arrangement-view.txt` (re-grepped 2026-10-24 for this task; the capture holds the table of contents and the Arrangement View chapter).
 
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Fold / unfold a track | §6.9 Selecting Clips and Time | “unfold its track by clicking the button next to the track name”; “selected tracks can also be unfolded by pressing the U key” | Same idea; label `Fold / unfold` is CZABA's. CZABA's U applies to groups (existing behaviour, not changed here) | TRACK-FOLD |
-| Track height | §6.9 “Adjusting an Unfolded Track’s Height” | “dragging the split line below the Unfold Track button, or … Alt +/- (Win) / Option +/- (Mac)” | CZABA: drag the separator or arrow keys on the focused separator (deliberate difference in keys) | HEIGHT |
-| Solo, Ctrl/Cmd+click adds | not in the saved capture (Mixer chapter) | **unconfirmed** | CZABA rule; no Live claim this round | SOLO |
-| Active track, video header, drop hints, ghosts | none | **unconfirmed / not applicable** | CZABA labels | the rows above |
+| Envelope points | §26.6.1 “Adding Automation Envelope Breakpoints”, §42.7 “Commands for Breakpoint Envelopes” | **section titles only** (TOC); body text not captured | CZABA says “point” (existing English); add by double-click is CZABA's existing behaviour, unchanged | ENVELOPE |
+| Group tracks | §18.3 “Group Tracks” | **section title only** (TOC) | Undo labels `Group Tracks` / `Ungroup Tracks` already exist; header labels are CZABA's | GROUP-HEADER |
+| Overload indicator | §38.3 “The Overload Indicator” | **section title only**; that is the CPU overload indicator, not the meter clip indicator | Master Peak `overload (Clip)` is CZABA's label; no Live claim | METER |
+| Solo Ctrl/Cmd+click adds | Mixer chapter not captured | **unconfirmed** | CZABA rule (unchanged) | GROUP-MIX |
 
 C rates “CZABA requirement met” and “Ableton correspondence” separately.
 
 ## 7. Evidence and reporting
-- C writes `c-round-139.md` and `c-round-139.json` as it goes (`taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` with subtractions, `measurements`, `invalidRuns`, `notesForB`). Evidence under `c-round-139/{tools,out,shots}/`. No `store/` writes.
+- C writes `c-round-140.md` and `c-round-140.json` as it goes (`taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` with subtractions, `measurements`, `invalidRuns`, `notesForB`). Evidence under `c-round-140/{tools,out,shots}/`. Every run writes a uniquely named output (C-R125-HARNESS-OVERWRITE). No `store/` writes.
 - `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`; an honestly unobservable state is `inconclusive` with its reason.
-- A writes `a-round-139.md` as it goes: start checks, pre-grep, changed files, `it` counts before/after, test results, mutations, reviewer verdict and Architecture note, shell writes, end state, deviations and known gaps.
+- A writes `a-round-140.md` as it goes: start checks, pre-grep, changed files, `it` counts before/after, test results, mutations, reviewer verdict and Architecture note, shell writes, end state, deviations and known gaps.
 
-## 8. Outcome, fixed in advance (B at round 140 planning)
-| Condition | Round 140 |
+## 8. Outcome, fixed in advance (B at round 141 planning)
+| Condition | Round 141 |
 |---|---|
 | B plans on or after **2026-10-27** | The **REGRESSION round** first, then the row below |
-| C FAIL with Critical / High / Medium | A bounded V-0.4b fix-up (at most three related bugs) |
-| C PASS (new Lows → `deferred_low_polish`) | V-0.4b → `c_pass`, then `c_pass_published` after the gate. Round 140 = **V-0.4c** (ArrangementClipEnvelope with `historyUnchanged('Envelope')`, ArrangementGroupHeader with the R4 reuse, TrackMeter, Master), re-measured first. If root's strings-split checkpoint result arrives first, B applies it as its own bounded round before V-0.4c |
+| C FAIL with Critical / High / Medium | A bounded V-0.4c fix-up (at most three related bugs) |
+| C PASS (new Lows → `deferred_low_polish`) | V-0.4c → `c_pass`, then `c_pass_published` after the gate. Round 141 = **V-0.4d** (default track names, ArrangementContext l.547/548 area, and `TRACK_GROUP_NAME_PREFIX` with the fixture sweep; GATE133-GROUP-PREFIX, ST22 allowance → 0), re-measured first; B decides whether the ~180-line fixture sweep needs its own split. If root's strings-split checkpoint result arrives first, B applies it as its own bounded round before V-0.4d |
 
 At every planning B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
 
 ## 9. Neighbour risk and root notes
-- **Role-name matchers:** 6 test files find the track name button by a `^… — აქტიური ხაზის არჩევა` regex; a label change without them makes those tests fail to find the button (not test the wrong thing). m61 proves it.
-- **`trackRowNameButton` (StudioWorkspace l.323–333):** used for keyboard focus handoff and group rename; the selector and the aria-label must change together (m62, TRACK-SELECT).
-- **`/all tracks$/` regex:** the workspace range readout also contains `all tracks ·`, but it does not end with it; A confirms the match count is unchanged.
-- **Width:** `· active` and `Original sound` are about the same width; the hints are in a `max-w-md` box. LAYOUT checks it.
-- **Undo labels / status:** no status sentence changes this round (the ghost reuses existing status wording).
-- **Architecture:** strings-split checkpoint request still open and non-blocking (round-138 addendum: gate-138 Architecture note and A's `data-testid` proposal).
-- **Commit readiness:** after C PASS, root may publish V-0.4b as an interim unit.
+- **Role-name matchers:** 3 test files find the group name button by `^… — ჯგუფი`, and 2 find the fold button by its full aria-label; a label change without them makes those tests fail to find the button. m69 proves it.
+- **Prefix selectors that must keep matching:** `^Volume — ${name}` (track-group-mix-ui l.244), `aria-label^="Volume — "` (group-volume-db l.411, track-volume-db l.293), `Volume — ${trackName}` (gesture-guard l.144). The group labels keep the `Volume — {name}` / `Mute — {name}` prefix, so these stay green; A confirms with the neighbour runs.
+- **Imperative attributes:** `ArrangementTrackMeter` writes `title` via `setAttribute` in a frame callback (l.62) and Master writes the Peak label similarly; only the text source changes, not when it is written. `render-budget` is in the neighbour list.
+- **Undo labels:** the three Envelope history labels change; group Mute/Solo/Volume Undo labels (`Mute — ჯგუფი 1`) do not (they come from the context, not GroupHeader).
+- **C-R139-01** (no status after a blocked library release; = INFO-R64-BLOCKED-NO-STATUS, dropEffect none → no drop event) and **C-R139-02** (library drop ghost stays after an Escape-cancelled drag in Playwright Chromium; real-Chrome dragleave unconfirmed → Tech Lead check) are pre-existing Lows in `deferred_low_polish`; not this round.
+- **Architecture:** strings-split checkpoint request still open and non-blocking (round-139 addendum: gate-139 Signal 2 `data-testid="arrangement-track-name"` proposal).
+- **Commit readiness:** after C PASS, root may publish V-0.4c as an interim unit.

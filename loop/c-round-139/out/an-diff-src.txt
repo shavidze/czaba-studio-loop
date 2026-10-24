@@ -1,0 +1,246 @@
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/components/arrangement/ArrangementLane.tsx	2026-10-24 16:00:25.840309987 +0000
++++ app/components/arrangement/ArrangementLane.tsx	2026-10-24 16:20:39.617380771 +0000
+@@ -37,6 +37,12 @@
+   trackRowHeight,
+ } from '~/lib/arrangement/panels';
+ import {
++  studioClipStrings,
++  studioEditStrings,
++  studioLaneMoveStrings,
++  studioLaneStrings,
++} from '~/lib/arrangement/strings';
++import {
+   formatTrackVolumeDb,
+   formatTrackVolumeReadout,
+   TRACK_VOLUME_DB_DEFAULT,
+@@ -55,9 +61,9 @@
+ export const ARRANGEMENT_HEADER_WIDTH_PX = 224;
+ export const TRACK_HEADER_PADDING_X_PX = 8;
+ 
+-const VIDEO_MIX_LABEL = 'ვიდეოს ორიგინალი ხმა';
+-const VIDEO_IMPORT_LABEL = '＋ საკუთარი ვიდეო';
+-const TRACK_FOLD_TITLE = 'დაკეცვა / გახსნა';
++const VIDEO_MIX_LABEL = studioLaneStrings.videoMixLabel;
++const VIDEO_IMPORT_LABEL = studioLaneStrings.videoImportLabel;
++const TRACK_FOLD_TITLE = studioLaneStrings.foldTitle;
+ const TRACK_HEADER_FULL_MIN_PX = 80;
+ const TRACK_HEADER_REGULAR_MIN_PX = 60;
+ 
+@@ -617,8 +623,8 @@
+     <button
+       type="button"
+       aria-pressed={track.solo}
+-      aria-label={`Solo — ${mixLabel} (Ctrl/Cmd+click ამატებს)`}
+-      title="Solo (Ctrl/Cmd+click ამატებს)"
++      aria-label={studioLaneStrings.soloLabel(mixLabel)}
++      title={studioLaneStrings.soloTitle}
+       onClick={(event) => toggleTrackSolo(track.id, event.ctrlKey || event.metaKey)}
+       className={cn(
+         'h-6 w-6 shrink-0 rounded-sm border text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+@@ -673,7 +679,7 @@
+             onKeyUp={handleFoldKeyUp}
+             aria-expanded={!folded}
+             aria-controls={laneBodyId}
+-            aria-label={`${track.name} დაკეცვა ან გახსნა`}
++            aria-label={studioLaneStrings.foldLabel(track.name)}
+             title={TRACK_FOLD_TITLE}
+             className="-mr-0.5 -ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-sm leading-none text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
+             data-testid="arrangement-track-fold"
+@@ -694,11 +700,11 @@
+               });
+             }}
+             aria-pressed={isActive}
+-            aria-label={`${track.name} — აქტიური ხაზის არჩევა${selected ? ', მონიშნული' : ''}`}
++            aria-label={`${studioLaneStrings.activeTrackLabel(track.name)}${selected ? studioLaneStrings.selectedSuffix : ''}`}
+           >
+             {track.name}
+             {isActive && !folded ? (
+-              <span className="ml-1 text-xs text-brand">· აქტიური</span>
++              <span className="ml-1 text-xs text-brand">{studioLaneStrings.activeBadge}</span>
+             ) : null}
+           </button>
+           {isVideo ? (
+@@ -708,7 +714,7 @@
+                   type="button"
+                   onClick={() => fileInputRef.current?.click()}
+                   aria-label={VIDEO_IMPORT_LABEL}
+-                  title="საკუთარი ვიდეო"
++                  title={studioLaneStrings.videoImportTitle}
+                   className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-brand text-xs text-brand hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
+                 >
+                   ＋
+@@ -762,7 +768,7 @@
+                   }
+                 }}
+                 disabled={storedPan === 0}
+-                aria-label={`Pan-ის ცენტრში დაბრუნება — ${track.name}`}
++                aria-label={studioLaneStrings.panResetLabel(track.name)}
+                 title="Pan → C"
+                 className="w-7 shrink-0 rounded-sm text-right text-xs tabular-nums text-muted enabled:hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                 data-testid="arrangement-track-pan-reset"
+@@ -815,7 +821,9 @@
+             </span>
+           </div>
+         )}
+-        {isVideo && density === 'full' ? <p className="text-xs text-muted">ორიგინალი ხმა</p> : null}
++        {isVideo && density === 'full' ? (
++          <p className="text-xs text-muted">{studioLaneStrings.videoOriginalSound}</p>
++        ) : null}
+         <ArrangementTrackMeter trackId={track.id} trackName={track.name} />
+       </div>
+       <div
+@@ -850,7 +858,7 @@
+       >
+         {isVideo && clips.length === 0 && !isFileDragOver ? (
+           <p className="pointer-events-none sticky left-56 flex h-full max-w-md items-center px-3 text-sm text-muted">
+-            ვიდეო არ არის — „＋ საკუთარი ვიდეო“ ან ჩააგდე ფაილი აქ
++            {`${studioLaneStrings.noVideo} — ${studioLaneStrings.videoEmptyHint}`}
+           </p>
+         ) : null}
+         {isFileDragOver ? (
+@@ -861,7 +869,7 @@
+             )}
+             data-testid={isVideo ? 'arrangement-video-drop-hint' : undefined}
+           >
+-            {isVideo ? 'ჩააგდე ვიდეო აქ' : 'აქ ვიდეო არ ემატება — ჩააგდე ვიდეოხაზზე'}
++            {isVideo ? studioLaneStrings.dropVideoHere : studioLaneStrings.videoNotOnAudioTrack}
+           </p>
+         ) : null}
+         {libraryGhost ? (
+@@ -886,11 +894,11 @@
+             <span className="whitespace-nowrap rounded-sm bg-background/80 px-1">
+               {formatArrangementTime(libraryGhost.start)}
+               {libraryGhost.refused
+-                ? ' · აუდიო ვიდეოხაზზე არ ემატება'
++                ? ` · ${studioLaneStrings.ghostAudioOnVideoTrack}`
+                 : libraryGhost.notReady
+-                  ? ' · ხმა ჯერ არ ჩატვირთულა'
++                  ? ` · ${studioLaneStrings.ghostNotLoaded}`
+                   : libraryGhost.blocked
+-                    ? ' · აქ ადგილი არ არის'
++                    ? ` · ${studioLaneMoveStrings.noRoom}`
+                     : ''}
+             </span>
+           </div>
+@@ -948,10 +956,10 @@
+               audioNote={
+                 videoSource && videoSource.audio !== 'ready'
+                   ? videoSource.audio === 'decoding'
+-                    ? 'ხმა იშიფრება…'
++                    ? studioLaneStrings.audioDecoding
+                     : videoSource.audio === 'error'
+-                      ? 'ხმა ვერ წაიკითხა'
+-                      : 'ხმა არ არის'
++                      ? studioLaneStrings.audioUnreadable
++                      : studioLaneStrings.audioNone
+                   : null
+               }
+               pxPerSecond={pxPerSecond}
+@@ -998,7 +1006,8 @@
+               <span className="absolute top-0 left-0 whitespace-nowrap rounded-br-sm bg-foreground px-1 text-xs font-medium text-background">
+                 {formatArrangementTime(Math.min(range.start, range.end))} –{' '}
+                 {formatArrangementTime(Math.max(range.start, range.end))} ·{' '}
+-                {Math.abs(range.end - range.start).toFixed(3)} წმ · ყველა ხაზი
++                {studioClipStrings.seconds(Math.abs(range.end - range.start).toFixed(3))} ·{' '}
++                {studioEditStrings.allTracks}
+               </span>
+             ) : null}
+           </div>
+@@ -1010,11 +1019,11 @@
+         role="separator"
+         tabIndex={0}
+         aria-orientation="horizontal"
+-        aria-label={`${track.name} სიმაღლე`}
++        aria-label={studioLaneStrings.heightLabel(track.name)}
+         aria-valuemin={trackMinHeight(track.kind)}
+         aria-valuemax={TRACK_MAX_HEIGHT_PX}
+         aria-valuenow={height}
+-        aria-valuetext={folded ? `დაკეცილია · ${height} px` : `${height} px`}
++        aria-valuetext={folded ? studioLaneStrings.foldedValueText(height) : `${height} px`}
+         onPointerDown={handleHeightPointerDown}
+         onKeyDown={handleHeightKeyDown}
+         onDragOver={handleHandleDragOver}
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/components/arrangement/StudioWorkspace.tsx	2026-10-24 16:00:25.840605044 +0000
++++ app/components/arrangement/StudioWorkspace.tsx	2026-10-24 16:13:06.327137800 +0000
+@@ -328,7 +328,7 @@
+   return row.dataset.groupId !== undefined
+     ? row.querySelector<HTMLElement>('[data-testid="arrangement-group-name"]')
+     : row.querySelector<HTMLElement>(
+-        '[data-testid="arrangement-track-header"] button[aria-label*="— აქტიური ხაზის არჩევა"]',
++        '[data-testid="arrangement-track-header"] button[aria-label*="— set as the active track"]',
+       );
+ }
+ 
+@@ -2572,10 +2572,12 @@
+             data-testid="arrangement-selected-clip"
+           >
+             {studioWorkspaceStrings.clipLabel}{' '}
+-            <span className="text-foreground">{selectedTitle}</span> · start{' '}
+-            {formatArrangementTime(selectedClip.start)} · length{' '}
+-            {formatArrangementTime(selectedClip.duration)} · source offset{' '}
+-            {formatArrangementTime(selectedClip.sourceOffset)}
++            <span className="text-foreground">{selectedTitle}</span>
++            {studioWorkspaceStrings.selectedClipDetail({
++              start: formatArrangementTime(selectedClip.start),
++              length: formatArrangementTime(selectedClip.duration),
++              offset: formatArrangementTime(selectedClip.sourceOffset),
++            })}
+           </p>
+         ) : (
+           <p
+--- ../tmp/studio-real-loop/b-round-138/r139-granted-start/app/lib/arrangement/strings.ts	2026-10-24 16:00:25.841605046 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 16:12:15.382261681 +0000
+@@ -486,6 +486,11 @@
+   offset: string;
+ }
+ 
++type StudioWorkspaceClipDetail = Omit<StudioWorkspaceClipText, 'title'>;
++
++const selectedClipDetailText = ({ start, length, offset }: StudioWorkspaceClipDetail): string =>
++  ` · start ${start} · length ${length} · source offset ${offset}`;
++
+ export const studioWorkspaceStrings = {
+   headingSuffix: '· Workspace',
+   rangeReadout: ({ start, end, length }: StudioWorkspaceRangeText): string =>
+@@ -493,8 +498,9 @@
+   rangeDeleteHint: 'Delete = delete, the gap remains · Ctrl+Shift+X = Cut Time',
+   clipsSelected: (count: number): string => `${count} clips selected`,
+   clipLabel: 'Clip:',
+-  selectedClipTitle: ({ title, start, length, offset }: StudioWorkspaceClipText): string =>
+-    `Clip: ${title} · start ${start} · length ${length} · source offset ${offset}`,
++  selectedClipDetail: (detail: StudioWorkspaceClipDetail): string => selectedClipDetailText(detail),
++  selectedClipTitle: ({ title, ...detail }: StudioWorkspaceClipText): string =>
++    `Clip: ${title}${selectedClipDetailText(detail)}`,
+ };
+ 
+ interface StudioClipGroupMoveText {
+@@ -533,3 +539,29 @@
+   rangeBodyTitle: 'drag = time selection · click = playhead',
+   seconds: (value: string): string => `${value} s`,
+ };
++
++export const studioLaneStrings = {
++  videoMixLabel: 'Original video sound',
++  videoImportLabel: '＋ Your own video',
++  foldTitle: 'Fold / unfold',
++  soloLabel: (name: string): string => `Solo — ${name} (Ctrl/Cmd+click = add to solo)`,
++  soloTitle: 'Solo (Ctrl/Cmd+click = add to solo)',
++  foldLabel: (name: string): string => `Fold or unfold — ${name}`,
++  activeTrackLabel: (name: string): string => `${name} — set as the active track`,
++  selectedSuffix: ', selected',
++  activeBadge: '· active',
++  videoImportTitle: 'Your own video',
++  panResetLabel: (name: string): string => `Reset Pan to centre — ${name}`,
++  videoOriginalSound: 'Original sound',
++  noVideo: 'No video',
++  videoEmptyHint: 'use “＋ Your own video” or drop a file here',
++  dropVideoHere: 'Drop the video here',
++  videoNotOnAudioTrack: 'Video is not added here — drop it on the video track',
++  ghostAudioOnVideoTrack: 'Audio is not added to the video track',
++  ghostNotLoaded: 'This sound has not loaded yet',
++  audioDecoding: 'Sound is decoding…',
++  audioUnreadable: 'Sound could not be read',
++  audioNone: 'No sound',
++  heightLabel: (name: string): string => `Height — ${name}`,
++  foldedValueText: (height: number): string => `folded · ${height} px`,
++};
