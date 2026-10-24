@@ -1,0 +1,799 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-24 15:08:28.030603539 +0000
+@@ -110,7 +110,7 @@
+ const GROUP_BLOCKED_STATUS =
+   'Group move stopped — a neighbouring clip or the start of the timeline.';
+ const MOVE_BLOCKED_STATUS =
+-  'გადატანა დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი. კლიპი ბოლო თავისუფალ ადგილას დარჩა.';
++  'Move blocked — a neighbouring clip or the start of the timeline. The clip stayed in its last free spot.';
+ 
+ const gridCollection: WorkspaceCollection = {
+   id: 'grid',
+@@ -395,7 +395,7 @@
+     const { api, clipParts } = await mountGridWorkspace();
+     dragClip(clipParts('m1'), [{ dx: 37 }]);
+     expect(clipOf(api, 'm1').start).toBe(7.925);
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+   });
+ 
+   it('GS3 G turns Snap on without history; a drag lands on the 1 s grid; a sub-half drag locks onto a nearer clip edge', async () => {
+@@ -431,7 +431,7 @@
+     expect(view.getByTestId('arrangement-status').textContent).toBe('Grid: 2 s (Snap on)');
+     fireEvent.click(snapToggle(view));
+     expect(view.getByTestId('arrangement-status').textContent).toBe('Snap off — free movement (G)');
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+   });
+ 
+   it('GS5 a group follows the grabbed clip onto the grid with one history entry', async () => {
+@@ -443,7 +443,7 @@
+     expect(clipOf(api, 's1').start).toBe(5);
+     expect(clipOf(api, 'm1').start).toBe(7.7);
+     expect(clipOf(api, 's1').trackId).toBe('sfx');
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(live(api).undoLabel).toBe('Move (2)');
+     expect(undoAll(api)).toBe(1);
+     expect(clipOf(api, 's1').start).toBe(4.3);
+     expect(clipOf(api, 'm1').start).toBe(7);
+@@ -471,7 +471,7 @@
+     expect(clipOf(api, 'm1').start + clipOf(api, 'm1').duration).toBeLessThanOrEqual(
+       clipOf(api, 'm2').start,
+     );
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(live(api).undoLabel).toBe('Move (2)');
+     expect(undoAll(api)).toBe(1);
+     expect(clipOf(api, 's1').start).toBe(4.3);
+   });
+@@ -492,7 +492,7 @@
+     fireEvent.pointerUp(parts.root, { pointerId: 3, clientX: 120, clientY: MUSIC_LANE_Y });
+     expect(clipOf(api, 's1').trackId).toBe('music');
+     expect(clipOf(api, 's1').start).toBe(5);
+-    expect(live(api).undoLabel).toBe('გადატანა ხაზზე — მუსიკა');
++    expect(live(api).undoLabel).toBe('Move to track — მუსიკა');
+     expect(undoAll(api)).toBe(1);
+   });
+ 
+@@ -525,7 +525,7 @@
+     expect(clipOf(api, 'm2').trackId).toBe('sfx');
+     expect(clipOf(api, 'm2').start).toBe(13.2);
+     expect(clipOf(api, 'm3').start).toBe(15);
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(live(api).undoLabel).toBe('Move (2)');
+     expect(undoAll(api)).toBe(1);
+     expect(clipOf(api, 'm1').trackId).toBe('music');
+     expect(clipOf(api, 'm1').start).toBe(7.3);
+@@ -598,7 +598,7 @@
+     fireEvent.pointerMove(parts.root, { pointerId: 5, clientX: 137, clientY: MUSIC_LANE_Y });
+     fireEvent.pointerUp(parts.root, { pointerId: 5, clientX: 137, clientY: MUSIC_LANE_Y });
+     expect(clipOf(api, 'm1').start).toBe(8);
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+     expect(undoAll(api)).toBe(1);
+     expect(clipOf(api, 'm1').start).toBe(7);
+   });
+@@ -657,7 +657,7 @@
+     fireEvent.keyDown(document.body, { key: 'ArrowRight', code: 'ArrowRight' });
+     expect(clipOf(api, 's1').start).toBe(5);
+     expect(clipOf(api, 'm1').start).toBe(7.7);
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(live(api).undoLabel).toBe('Move (2)');
+     fireEvent.keyDown(document.body, { key: 'ArrowLeft', code: 'ArrowLeft' });
+     expect(clipOf(api, 's1').start).toBe(4);
+     expect(clipOf(api, 'm1').start).toBe(6.7);
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/clip-fades-ui.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/clip-fades-ui.test.tsx	2026-10-24 15:08:28.030969620 +0000
+@@ -106,9 +106,9 @@
+ const SFX_LANE_Y = 350;
+ const FADE_IN_HANDLE = 'arrangement-clip-fade-in-handle';
+ const FADE_OUT_HANDLE = 'arrangement-clip-fade-out-handle';
+-const NO_CHANGE = 'ცვლილება არ მოხდა — ისტორია არ შეიცვალა.';
++const NO_CHANGE = 'nothing changed — the Undo history is unchanged.';
+ const OVERLAP_TEXT = 'No room here';
+-const MOVE_LABEL = 'კლიპის გადატანა';
++const MOVE_LABEL = 'Move clip';
+ 
+ const fadeCollection: WorkspaceCollection = {
+   id: 'fade',
+@@ -355,13 +355,13 @@
+     dragFrom(handleOf('m1', FADE_IN_HANDLE), clipRoot('m1'), [{ dx: 20 }, { dx: 40 }], {
+       release: false,
+     });
+-    expect(statusText(view)).toBe('Fade In: 1.000 წმ');
++    expect(statusText(view)).toBe('Fade In: 1.000 s');
+     expect(clipRoot('m1').dataset.fadeIn).toBe('1.000');
+     expect(live(api).undoLabel).toBeNull();
+     fireEvent.pointerUp(clipRoot('m1'), { pointerId: 1, clientX: 140, clientY: MUSIC_LANE_Y });
+     expect(clipRoot('m1').dataset.fadeIn).toBe('1.000');
+     expect(live(api).undoLabel).toBe('Fade In');
+-    expect(statusText(view)).toBe('Fade In: 1.000 წმ.');
++    expect(statusText(view)).toBe('Fade In: 1.000 s.');
+     pressUndo();
+     expect(clipRoot('m1').dataset.fadeIn).toBe('0.000');
+     expect(live(api).arrangement.clips[0]).toStrictEqual(clipAt('m1', 'music', 0, 10));
+@@ -378,7 +378,7 @@
+     expect(clipRoot('m1').dataset.fadeOut).toBe('2.000');
+     expect(clipRoot('m1').dataset.fadeIn).toBe('0.000');
+     expect(live(api).undoLabel).toBe('Fade Out');
+-    expect(statusText(view)).toBe('Fade Out: 2.000 წმ.');
++    expect(statusText(view)).toBe('Fade Out: 2.000 s.');
+     pressUndo();
+     expect(clipRoot('m1').dataset.fadeOut).toBe('0.000');
+     pressRedo();
+@@ -439,7 +439,7 @@
+     fireEvent.doubleClick(handleOf('m1', FADE_IN_HANDLE));
+     expect(clipRoot('m1').dataset.fadeIn).toBe('0.000');
+     expect(live(api).undoLabel).toBe('Fade In');
+-    expect(statusText(view)).toBe('Fade In: 0.000 წმ.');
++    expect(statusText(view)).toBe('Fade In: 0.000 s.');
+     fireEvent.doubleClick(handleOf('m1', FADE_OUT_HANDLE));
+     fireEvent.doubleClick(handleOf('m1', FADE_IN_HANDLE));
+     document.removeEventListener('dblclick', outer);
+@@ -522,7 +522,7 @@
+     expect(moved?.trackId).toBe('music');
+     expect(clipRoot('m1').dataset.clipStart).toBe('1.375');
+     expect(statusText(view)).toBe(
+-      `${OVERLAP_TEXT} — კლიპი ბოლო თავისუფალ ადგილას დარჩა: მუსიკა, start 00:01.375.`,
++      `${OVERLAP_TEXT} — the clip stayed in its last free spot: მუსიკა, start 00:01.375.`,
+     );
+     expect(live(api).undoLabel).toBe(MOVE_LABEL);
+     expect(undoAll(api)).toBe(1);
+@@ -566,7 +566,7 @@
+     }
+     dragFrom(header, clipRoot('m1'), [{ dx: 41, y: SFX_LANE_Y }]);
+     expect(live(api).arrangement.clips.find((clip) => clip.id === 'm1')?.trackId).toBe('sfx');
+-    expect(statusText(view)).toBe('გადატანა ხაზზე — SFX: start 00:01.375.');
++    expect(statusText(view)).toBe('Move to track — SFX: start 00:01.375.');
+   });
+ 
+   it('FU5 fades travel unchanged with a lane move', async () => {
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/marker-snap.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-snap.test.tsx	2026-10-24 15:08:28.031302123 +0000
+@@ -112,11 +112,11 @@
+ const MUSIC_LANE_Y = 150;
+ const STEMS_LANE_Y = 250;
+ const SFX_LANE_Y = 350;
+-const MOVE_LABEL = 'კლიპის გადატანა';
+-const STEMS_LANE_MOVE_LABEL = 'გადატანა ხაზზე — სტემები';
+-const GROUP_MOVE_LABEL = 'გადატანა (2)';
+-const TRIM_START_TITLE = 'Trim — მარცხენა კიდე';
+-const TRIM_END_TITLE = 'Trim — მარჯვენა კიდე';
++const MOVE_LABEL = 'Move clip';
++const STEMS_LANE_MOVE_LABEL = 'Move to track — სტემები';
++const GROUP_MOVE_LABEL = 'Move (2)';
++const TRIM_START_TITLE = 'Trim — left edge';
++const TRIM_END_TITLE = 'Trim — right edge';
+ const MARKER_A = 12.3;
+ const MARKER_B = 20.7;
+ const OFF_GRID_MARKERS: ArrangementMarker[] = [
+@@ -564,7 +564,7 @@
+     expect(clipOf(api, 'm1').start).toBeCloseTo(MARKER_A, 9);
+     expect(parts.root.dataset.clipStart).toBe('12.300');
+     expect(live(api).undoLabel).toBeNull();
+-    expect(statusText(view)).toBe('კლიპის გადატანა: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.');
++    expect(statusText(view)).toBe('Move clip: nothing changed — the Undo history is unchanged.');
+   });
+ 
+   it('MS13 the Shift time lock ignores markers', async () => {
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx	2026-10-24 15:08:28.031648146 +0000
+@@ -106,12 +106,12 @@
+ const MUSIC_LANE_Y = 150;
+ const STEMS_LANE_Y = 250;
+ const SFX_LANE_Y = 350;
+-const TRIM_START_TITLE = 'Trim — მარცხენა კიდე';
+-const TRIM_END_TITLE = 'Trim — მარჯვენა კიდე';
++const TRIM_START_TITLE = 'Trim — left edge';
++const TRIM_END_TITLE = 'Trim — right edge';
+ const TRIM_START_BLOCKED =
+-  'Trim შეჩერდა: წყაროს დასაწყისი, მეზობელი კლიპი ან მინიმალური სიგრძე (0.05 წმ).';
++  'Trim stopped: the start of the source, a neighbouring clip or the minimum length (0.05 s).';
+ const TRIM_END_BLOCKED =
+-  'Trim შეჩერდა: წყაროს დასასრული, მეზობელი კლიპი ან მინიმალური სიგრძე (0.05 წმ).';
++  'Trim stopped: the end of the source, a neighbouring clip or the minimum length (0.05 s).';
+ const BEFORE_START_TEXT =
+   'Part of the group would go before the start of the timeline (0) — the track does not change.';
+ const OUT_OF_RANGE_TEXT = 'There is no track for part of the group — only the time changes.';
+@@ -211,7 +211,7 @@
+   const clipParts = (clipId: string) => {
+     const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
+     const header = root?.firstElementChild;
+-    const body = root?.querySelector<HTMLElement>('[title^="drag = დროის მონიშვნა"]');
++    const body = root?.querySelector<HTMLElement>('[title^="drag = time selection"]');
+     const trimStart = root?.querySelector<HTMLElement>(`[title="${TRIM_START_TITLE}"]`);
+     const trimEnd = root?.querySelector<HTMLElement>(`[title="${TRIM_END_TITLE}"]`);
+     if (!root || !(header instanceof HTMLElement) || !body || !trimStart || !trimEnd) {
+@@ -488,7 +488,7 @@
+     const parts = clipParts('m1');
+     dragFrom(parts.header, parts.root, 100, [{ dx: 37, altKey: true }]);
+     expect(clipOf(api, 'm1').start).toBe(7.925);
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+   });
+ 
+   it('SE12 Alt enables the current division while Snap is off and leaves Snap off', async () => {
+@@ -536,7 +536,7 @@
+     expect(clipOf(api, 'm1').start).toBe(7.925);
+     fireEvent.pointerUp(parts.root, { pointerId: 1, clientX: 137, clientY: MUSIC_LANE_Y });
+     expect(clipOf(api, 'm1').start).toBe(7.925);
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+     expect(undoAll(api)).toBe(1);
+     expect(clipOf(api, 'm1').start).toBe(7);
+   });
+@@ -623,7 +623,7 @@
+     expect(clipOf(api, 'm1').start).toBeCloseTo(6.6, 9);
+     expect(clipOf(api, 'st1').trackId).toBe('stems');
+     expect(clipOf(api, 'st1').start).toBeCloseTo(0, 9);
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(live(api).undoLabel).toBe('Move (2)');
+     expect(undoAll(api)).toBe(1);
+   });
+ 
+@@ -670,7 +670,7 @@
+     expect(clipOf(api, 's1').trackId).toBe('sfx');
+     expect(clipOf(api, 'm1').start).toBeCloseTo(7.15, 9);
+     expect(clipOf(api, 's1').start).toBeCloseTo(2.15, 9);
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(live(api).undoLabel).toBe('Move (2)');
+     expect(undoAll(api)).toBe(1);
+   });
+ });
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/grid-snap-position.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/grid-snap-position.test.tsx	2026-10-24 15:08:28.031891042 +0000
+@@ -213,7 +213,7 @@
+   const clipParts = (clipId: string) => {
+     const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
+     const header = root?.firstElementChild;
+-    const body = root?.querySelector<HTMLElement>('[title^="drag = დროის მონიშვნა"]');
++    const body = root?.querySelector<HTMLElement>('[title^="drag = time selection"]');
+     if (!root || !(header instanceof HTMLElement) || !body) {
+       throw new Error(`clip ${clipId} not rendered`);
+     }
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/gesture-reentry.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/gesture-reentry.test.tsx	2026-10-24 15:08:28.033708444 +0000
+@@ -148,7 +148,7 @@
+   stubPointerCapture(root, mode);
+   const header = root.firstElementChild;
+   const body = root.children[1];
+-  const trimStart = root.querySelector<HTMLElement>('[title="Trim — მარცხენა კიდე"]');
++  const trimStart = root.querySelector<HTMLElement>('[title="Trim — left edge"]');
+   if (!(header instanceof HTMLElement) || !(body instanceof HTMLElement) || !trimStart) {
+     throw new Error('clip parts not rendered');
+   }
+@@ -200,7 +200,7 @@
+       fireEvent.pointerUp(root, { pointerId: 1, clientX: 180 });
+       expect(liveApi(api).isPointerGestureActive()).toBe(false);
+       expect(liveApi(api).arrangement.clips[0].start).toBe(4);
+-      expect(liveApi(api).undoLabel).toBe('კლიპის გადატანა');
++      expect(liveApi(api).undoLabel).toBe('Move clip');
+       act(() => liveApi(api).undo());
+       expect(liveApi(api).arrangement.clips[0].start).toBe(2);
+       expect(liveApi(api).undoLabel).toBeNull();
+@@ -235,7 +235,7 @@
+       fireEvent.pointerUp(root, { pointerId: 7, clientX: 140 });
+       expect(liveApi(api).arrangement.clips[0].start).toBe(3);
+       expect(liveApi(api).isPointerGestureActive()).toBe(false);
+-      expect(liveApi(api).undoLabel).toBe('კლიპის გადატანა');
++      expect(liveApi(api).undoLabel).toBe('Move clip');
+     });
+ 
+     it('releases every gesture when the clip unmounts with two pointers down', async () => {
+@@ -270,7 +270,7 @@
+       fireEvent.pointerMove(root, { pointerId: 1, clientX: 140 });
+       fireEvent.pointerUp(root, { pointerId: 1, clientX: 140 });
+       expect(liveApi(api).arrangement.clips[0].start).toBe(3);
+-      expect(liveApi(api).undoLabel).toBe('კლიპის გადატანა');
++      expect(liveApi(api).undoLabel).toBe('Move clip');
+       expect(liveApi(api).isPointerGestureActive()).toBe(false);
+     });
+   });
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/fader-guards.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/fader-guards.test.tsx	2026-10-24 15:08:28.032489766 +0000
+@@ -587,7 +587,7 @@
+         return header;
+       };
+       const clipBody = () => {
+-        const body = clipRoot().querySelector<HTMLElement>('[title^="drag = დროის მონიშვნა"]');
++        const body = clipRoot().querySelector<HTMLElement>('[title^="drag = time selection"]');
+         if (!body) {
+           throw new Error('clip s1 body missing');
+         }
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx	2026-10-24 15:03:03.746284833 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx	2026-10-24 15:08:28.034029790 +0000
+@@ -626,7 +626,7 @@
+     expect(live(api).selectedClipIds).toEqual(['m1']);
+     fireEvent.pointerDown(editorOf('s1'), { ...press, shiftKey: true, clientX: 200 });
+     expect(live(api).selectedClipIds).toEqual(['m1', 's1']);
+-    const trim = clipRoot('s1').querySelector<HTMLElement>('[title="Trim — მარცხენა კიდე"]');
++    const trim = clipRoot('s1').querySelector<HTMLElement>('[title="Trim — left edge"]');
+     if (!trim) {
+       throw new Error('trim strip missing');
+     }
+@@ -694,8 +694,8 @@
+     fireEvent.pointerUp(clipRoot('s1'), { pointerId: 2, clientX: 140, clientY: STEMS_LANE_Y });
+     expect(clipRoot('s1').dataset.clipStart).toBe('3.000');
+     expect(clipRoot('s1').dataset.envelope).toBe('7.000:1.0000;11.000:0.2512;15.000:1.0000');
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
+-    const trim = clipRoot('s1').querySelector<HTMLElement>('[title="Trim — მარცხენა კიდე"]');
++    expect(live(api).undoLabel).toBe('Move clip');
++    const trim = clipRoot('s1').querySelector<HTMLElement>('[title="Trim — left edge"]');
+     if (!trim) {
+       throw new Error('trim strip missing');
+     }
+@@ -704,7 +704,7 @@
+     fireEvent.pointerUp(clipRoot('s1'), { pointerId: 3, clientX: 240, clientY: STEMS_LANE_Y });
+     expect(clipRoot('s1').dataset.clipStart).toBe('9.000');
+     expect(clipRoot('s1').dataset.envelope).toBe('11.000:0.2512;15.000:1.0000');
+-    expect(live(api).undoLabel).toBe('Trim — მარცხენა კიდე');
++    expect(live(api).undoLabel).toBe('Trim — left edge');
+   });
+ 
+   it('EU5 mode off: the body still seeks on click, the line is drawn and there are no points', async () => {
+@@ -760,11 +760,11 @@
+     fireEvent.doubleClick(handle);
+     expect(clipRoot('m1').dataset.fadeIn).toBe('1.000');
+     expect(live(api).undoLabel).toBe('Fade In');
+-    expect(statusText(view)).toBe('Fade In: 1.000 წმ.');
++    expect(statusText(view)).toBe('Fade In: 1.000 s.');
+     performanceNow += 400;
+     fireEvent.doubleClick(handle);
+     expect(clipRoot('m1').dataset.fadeIn).toBe('0.000');
+-    expect(statusText(view)).toBe('Fade In: 0.000 წმ.');
++    expect(statusText(view)).toBe('Fade In: 0.000 s.');
+     expect(undoAll(api)).toBe(2);
+   });
+ 
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx	2026-10-24 15:08:28.032840866 +0000
+@@ -210,7 +210,7 @@
+ 
+ function clickClipBody(view: EdgeView, clipId: string, pointerId: number, ctrlKey = false) {
+   const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
+-  const body = root?.querySelector<HTMLElement>('[title^="drag = დროის მონიშვნა"]');
++  const body = root?.querySelector<HTMLElement>('[title^="drag = time selection"]');
+   if (!root || !body) {
+     throw new Error(`clip ${clipId} not rendered`);
+   }
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx	2026-10-24 15:08:28.033135530 +0000
+@@ -245,7 +245,7 @@
+   };
+   const musicClip = () => {
+     const root = view.container.querySelector<HTMLElement>('[data-clip-id="m1"]');
+-    const body = root?.querySelector<HTMLElement>('[title^="drag = დროის მონიშვნა"]');
++    const body = root?.querySelector<HTMLElement>('[title^="drag = time selection"]');
+     if (!root || !body) {
+       throw new Error('music clip not rendered');
+     }
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/markers-ui.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/markers-ui.test.tsx	2026-10-24 15:08:28.033422894 +0000
+@@ -213,7 +213,7 @@
+ 
+ function clickClipBody(view: MarkerView, clipId: string, pointerId: number) {
+   const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
+-  const body = root?.querySelector<HTMLElement>('[title^="drag = დროის მონიშვნა"]');
++  const body = root?.querySelector<HTMLElement>('[title^="drag = time selection"]');
+   if (!root || !body) {
+     throw new Error(`clip ${clipId} not rendered`);
+   }
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/track-layout.test.tsx	2026-10-24 15:03:03.746497297 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/track-layout.test.tsx	2026-10-24 15:08:28.034445117 +0000
+@@ -251,7 +251,7 @@
+ }
+ 
+ const press = { button: 0, buttons: 1 };
+-const FOLDED_TITLE_LINE = 'ხაზი დაკეცილია — დროის მოსანიშნად გაშალე';
++const FOLDED_TITLE_LINE = 'The track is folded — unfold it to make a time selection';
+ 
+ describe(
+   'track fold, height and lane auto-fit (SRW-11B stage 2, D-29, R11-U)',
+@@ -465,7 +465,7 @@
+     it('renders no range body on a folded clip, adds the title line, and keeps trim with one history entry', async () => {
+       stubTimelineFrame(660);
+       const { api, view, fold } = await mountTrackLayout();
+-      const rangeBodySelector = '[title="drag = დროის მონიშვნა · click = playhead"]';
++      const rangeBodySelector = '[title="drag = time selection · click = playhead"]';
+       const openRoot = clipRoot(view.container, 'music-1');
+       stubPointerCapture(openRoot);
+       const openBody = openRoot.querySelector<HTMLElement>(rangeBodySelector);
+@@ -490,7 +490,7 @@
+       fireEvent.pointerUp(root, { pointerId: 5, clientX: 360, clientY: 30 });
+       expect(live(api).range).toBeNull();
+       expect(live(api).isPointerGestureActive()).toBe(false);
+-      const trimStart = root.querySelector<HTMLElement>('[title="Trim — მარცხენა კიდე"]');
++      const trimStart = root.querySelector<HTMLElement>('[title="Trim — left edge"]');
+       if (!trimStart) {
+         throw new Error('trim edge missing');
+       }
+@@ -501,7 +501,7 @@
+       const trimmed = live(api).arrangement.clips.find((clip) => clip.id === 'music-1');
+       expect(trimmed?.start).toBe(3);
+       expect(trimmed?.duration).toBe(7);
+-      expect(live(api).undoLabel).toBe('Trim — მარცხენა კიდე');
++      expect(live(api).undoLabel).toBe('Trim — left edge');
+       act(() => live(api).undo());
+       expect(live(api).undoLabel).toBeNull();
+       fireEvent.click(fold('music'));
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx	2026-10-24 15:08:48.112236398 +0000
+@@ -105,13 +105,13 @@
+ const MUSIC_LANE_Y = 150;
+ const STEMS_LANE_Y = 250;
+ const SFX_LANE_Y = 350;
+-const MOVE_LABEL = 'კლიპის გადატანა';
+-const TRIM_START_TITLE = 'Trim — მარცხენა კიდე';
+-const TRIM_END_TITLE = 'Trim — მარჯვენა კიდე';
++const MOVE_LABEL = 'Move clip';
++const TRIM_START_TITLE = 'Trim — left edge';
++const TRIM_END_TITLE = 'Trim — right edge';
+ const TRIM_START_BLOCKED =
+-  'Trim შეჩერდა: წყაროს დასაწყისი, მეზობელი კლიპი ან მინიმალური სიგრძე (0.05 წმ).';
++  'Trim stopped: the start of the source, a neighbouring clip or the minimum length (0.05 s).';
+ const TRIM_END_BLOCKED =
+-  'Trim შეჩერდა: წყაროს დასასრული, მეზობელი კლიპი ან მინიმალური სიგრძე (0.05 წმ).';
++  'Trim stopped: the end of the source, a neighbouring clip or the minimum length (0.05 s).';
+ 
+ const edgeCollection: WorkspaceCollection = {
+   id: 'edges',
+@@ -207,7 +207,7 @@
+   const clipParts = (clipId: string) => {
+     const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
+     const header = root?.firstElementChild;
+-    const body = root?.querySelector<HTMLElement>('[title^="drag = დროის მონიშვნა"]');
++    const body = root?.querySelector<HTMLElement>('[title^="drag = time selection"]');
+     const trimStart = root?.querySelector<HTMLElement>(`[title="${TRIM_START_TITLE}"]`);
+     const trimEnd = root?.querySelector<HTMLElement>(`[title="${TRIM_END_TITLE}"]`);
+     if (!root || !(header instanceof HTMLElement) || !body || !trimStart || !trimEnd) {
+@@ -335,7 +335,7 @@
+     expect(parts.root.dataset.clipStart).toBe('8.400');
+     expect(live(api).undoLabel).toBe(MOVE_LABEL);
+     expect(statusText(view)).toBe(
+-      'კლიპის გადატანა: start 00:08.400, length 00:02.000, source offset 00:00.000.',
++      'Move clip: start 00:08.400, length 00:02.000, source offset 00:00.000.',
+     );
+     expect(undoAll(api)).toBe(1);
+     expect(clipOf(api, 'm1').start).toBe(2);
+@@ -402,8 +402,8 @@
+     dragFrom(parts.header, parts.root, 40, [{ dx: 254, y: STEMS_LANE_Y }]);
+     expect(clipOf(api, 'm1').trackId).toBe('stems');
+     expect(clipOf(api, 'm1').start).toBeCloseTo(8.4, 9);
+-    expect(live(api).undoLabel).toBe('გადატანა ხაზზე — სტემები');
+-    expect(statusText(view)).toBe('გადატანა ხაზზე — სტემები: start 00:08.400.');
++    expect(live(api).undoLabel).toBe('Move to track — სტემები');
++    expect(statusText(view)).toBe('Move to track — სტემები: start 00:08.400.');
+   });
+ 
+   it('CM9 the Shift time lock ignores edges', async () => {
+@@ -453,8 +453,8 @@
+     dragFrom(parts.header, parts.root, 40, [{ dx: 254 }], { pointerId: 3 });
+     expect(clipOf(api, 'm1').start).toBeCloseTo(8.4, 9);
+     expect(clipOf(api, 's2').start).toBeCloseTo(8.4, 9);
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
+-    expect(statusText(view)).toBe('გადატანა (2): 2 კლიპი გადავიდა 00:06.400-ით მარჯვნივ.');
++    expect(live(api).undoLabel).toBe('Move (2)');
++    expect(statusText(view)).toBe('Move (2): 2 clips moved 00:06.400 to the right.');
+   });
+ 
+   it('CM11 the moved clip ignores its own edges', async () => {
+@@ -489,7 +489,7 @@
+     expect(live(api).undoLabel).toBe(TRIM_END_TITLE);
+     expect(statusText(view)).not.toBe(TRIM_END_BLOCKED);
+     expect(statusText(view)).toBe(
+-      'Trim — მარჯვენა კიდე: start 00:07.000, length 00:03.400, source offset 00:00.000.',
++      'Trim — right edge: start 00:07.000, length 00:03.400, source offset 00:00.000.',
+     );
+   });
+ 
+@@ -555,7 +555,7 @@
+     expect(clipOf(api, 'm1').start).toBe(6.85);
+     expect(statusText(view)).not.toBe(TRIM_START_BLOCKED);
+     expect(statusText(view)).toBe(
+-      'Trim — მარცხენა კიდე: start 00:06.850, length 00:04.450, source offset 00:00.150.',
++      'Trim — left edge: start 00:06.850, length 00:04.450, source offset 00:00.150.',
+     );
+   });
+ });
+@@ -585,7 +585,7 @@
+ });
+ 
+ const MOVE_BLOCKED_TEXT =
+-  'გადატანა დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი. კლიპი ბოლო თავისუფალ ადგილას დარჩა.';
++  'Move blocked — a neighbouring clip or the start of the timeline. The clip stayed in its last free spot.';
+ 
+ function exactClipEnd(api: EdgeApiRef, clipId: string): number {
+   const clip = clipOf(api, clipId);
+@@ -605,7 +605,7 @@
+     expect(exactClipEnd(api, 'm1')).toBeLessThanOrEqual(clipOf(api, 'm2').start + 1e-9);
+     expect(statusText(view)).not.toBe(MOVE_BLOCKED_TEXT);
+     expect(statusText(view)).toBe(
+-      'კლიპის გადატანა: start 00:08.400, length 00:02.000, source offset 00:00.000.',
++      'Move clip: start 00:08.400, length 00:02.000, source offset 00:00.000.',
+     );
+     expect(live(api).undoLabel).toBe(MOVE_LABEL);
+   });
+@@ -633,7 +633,7 @@
+     dragFrom(parts.header, parts.root, 40, [{ dx: 256 }]);
+     expect(clipOf(api, 'm1').start).toBe(8);
+     expect(statusText(view)).toBe(
+-      'კლიპის გადატანა: start 00:08.000, length 00:04.000, source offset 00:00.000.',
++      'Move clip: start 00:08.000, length 00:04.000, source offset 00:00.000.',
+     );
+     expect(live(api).undoLabel).toBe(MOVE_LABEL);
+   });
+@@ -648,8 +648,8 @@
+     dragFrom(parts.header, parts.root, 40, [{ dx: 256, y: STEMS_LANE_Y }]);
+     expect(clipOf(api, 'm1').trackId).toBe('stems');
+     expect(clipOf(api, 'm1').start).toBe(8);
+-    expect(live(api).undoLabel).toBe('გადატანა ხაზზე — სტემები');
+-    expect(statusText(view)).toBe('გადატანა ხაზზე — სტემები: start 00:08.000.');
++    expect(live(api).undoLabel).toBe('Move to track — სტემები');
++    expect(statusText(view)).toBe('Move to track — სტემები: start 00:08.000.');
+   });
+ 
+   it('CT7 a right trim ignores the end of the next clip on its lane', async () => {
+@@ -691,8 +691,8 @@
+     expect(clipOf(api, 'm1').start).toBeCloseTo(6.0004, 9);
+     expect(clipOf(api, 'm1').start).toBeGreaterThanOrEqual(exactClipEnd(api, 'st0') - 1e-9);
+     expect(statusText(view)).not.toBe(MOVE_BLOCKED_TEXT);
+-    expect(live(api).undoLabel).toBe('გადატანა ხაზზე — სტემები');
+-    expect(statusText(view)).toBe('გადატანა ხაზზე — სტემები: start 00:06.000.');
++    expect(live(api).undoLabel).toBe('Move to track — სტემები');
++    expect(statusText(view)).toBe('Move to track — სტემები: start 00:06.000.');
+   });
+ 
+   it('CT9 a right trim stops exactly on a sub-millisecond clip start of another lane', async () => {
+@@ -721,8 +721,8 @@
+     expect(clipOf(api, 'm1').trackId).toBe('stems');
+     expect(clipOf(api, 'm1').start).toBe(6.0004);
+     expect(clipOf(api, 'm1').start).toBeGreaterThanOrEqual(exactClipEnd(api, 'st0') - 1e-9);
+-    expect(live(api).undoLabel).toBe('გადატანა ხაზზე — სტემები');
+-    expect(statusText(view)).toBe('გადატანა ხაზზე — სტემები: start 00:06.000.');
++    expect(live(api).undoLabel).toBe('Move to track — სტემები');
++    expect(statusText(view)).toBe('Move to track — სტემები: start 00:06.000.');
+   });
+ 
+   it('CM9d a Shift cross-lane move keeps a sub-millisecond start on an empty lane', async () => {
+@@ -732,7 +732,7 @@
+     dragFrom(parts.header, parts.root, 40, [{ dx: 40, y: STEMS_LANE_Y, shiftKey: true }]);
+     expect(clipOf(api, 'm1').trackId).toBe('stems');
+     expect(clipOf(api, 'm1').start).toBe(6.0004);
+-    expect(live(api).undoLabel).toBe('გადატანა ხაზზე — სტემები');
++    expect(live(api).undoLabel).toBe('Move to track — სტემები');
+   });
+ 
+   it('CM9e a Shift move on the same lane changes nothing and writes no history', async () => {
+@@ -745,7 +745,9 @@
+     expect(clipOf(api, 'm1').trackId).toBe('music');
+     expect(clipOf(api, 'm1').start).toBe(6.0004);
+     expect(live(api).undoLabel).toBe(undoBefore);
+-    expect(statusText(view)).toBe(`${MOVE_LABEL}: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.`);
++    expect(statusText(view)).toBe(
++      `${MOVE_LABEL}: nothing changed — the Undo history is unchanged.`,
++    );
+   });
+ 
+   it('CM9f Shift on the last step of a same-lane move keeps the exact start and writes no history', async () => {
+@@ -756,7 +758,9 @@
+     expect(clipOf(api, 'm1').trackId).toBe('music');
+     expect(clipOf(api, 'm1').start).toBe(6.0004);
+     expect(live(api).undoLabel).toBeNull();
+-    expect(statusText(view)).toBe(`${MOVE_LABEL}: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.`);
++    expect(statusText(view)).toBe(
++      `${MOVE_LABEL}: nothing changed — the Undo history is unchanged.`,
++    );
+   });
+ 
+   it('CM9g Shift on the last step of a cross-lane move keeps the exact start', async () => {
+@@ -769,8 +773,8 @@
+     ]);
+     expect(clipOf(api, 'm1').trackId).toBe('stems');
+     expect(clipOf(api, 'm1').start).toBe(6.0004);
+-    expect(live(api).undoLabel).toBe('გადატანა ხაზზე — სტემები');
+-    expect(statusText(view)).toBe('გადატანა ხაზზე — სტემები: start 00:06.000.');
++    expect(live(api).undoLabel).toBe('Move to track — სტემები');
++    expect(statusText(view)).toBe('Move to track — სტემები: start 00:06.000.');
+   });
+ 
+   it('CM9h the Shift ghost sits at the exact start next to a touching clip', async () => {
+@@ -839,7 +843,7 @@
+     dragFrom(parts.header, parts.root, 40, [{ dx: 254 }], { pointerId: 3 });
+     expect(clipOf(api, 'm1').start).toBeCloseTo(8.4, 9);
+     expect(clipOf(api, 's2').start).toBeCloseTo(8.4, 9);
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(live(api).undoLabel).toBe('Move (2)');
+   });
+ 
+   it('CG2 the edges of other group members are not targets', async () => {
+@@ -884,7 +888,7 @@
+     expect(clipOf(api, 'm1').start).toBe(7);
+     expect(clipOf(api, 's2').start).toBe(7);
+     expect(clipOf(api, 's3').start).toBe(9.3);
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(live(api).undoLabel).toBe('Move (2)');
+   });
+ 
+   it('CG5 a cross-lane group move applies the lane rule to the anchor target lane', async () => {
+@@ -901,7 +905,7 @@
+     expect(clipOf(api, 'm1').start).toBe(8);
+     expect(clipOf(api, 'st2').trackId).toBe('sfx');
+     expect(clipOf(api, 'st2').start).toBe(6);
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(live(api).undoLabel).toBe('Move (2)');
+   });
+ 
+   it('CG6 Alt with Snap on keeps a group move free of grid and edges', async () => {
+@@ -934,8 +938,8 @@
+     expect(clipOf(api, 'm1').start).toBe(8);
+     expect(clipOf(api, 's2').start).toBe(8);
+     expect(clipOf(api, 's3').start).toBe(10.2);
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
+-    expect(statusText(view)).toBe('გადატანა (2): 2 კლიპი გადავიდა 00:06.000-ით მარჯვნივ.');
++    expect(live(api).undoLabel).toBe('Move (2)');
++    expect(statusText(view)).toBe('Move (2): 2 clips moved 00:06.000 to the right.');
+   });
+ 
+   it('CG8 a placement-lane clip start captures the anchor end in a cross-lane group move', async () => {
+@@ -954,8 +958,8 @@
+     expect(clipOf(api, 'st2').start).toBeCloseTo(6.4, 9);
+     expect(clipOf(api, 'st9').trackId).toBe('stems');
+     expect(clipOf(api, 'st9').start).toBe(10.4);
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
+-    expect(statusText(view)).toBe('გადატანა (2): start 00:08.400.');
++    expect(live(api).undoLabel).toBe('Move (2)');
++    expect(statusText(view)).toBe('Move (2): start 00:08.400.');
+   });
+ 
+   it('CG9 Alt with Snap off enables grid and edges for a group', async () => {
+@@ -971,6 +975,6 @@
+     expect(clipOf(api, 'm1').start).toBeCloseTo(8.4, 9);
+     expect(clipOf(api, 's2').start).toBeCloseTo(8.4, 9);
+     expect(snapState(view)).toBe('off');
+-    expect(live(api).undoLabel).toBe('გადატანა (2)');
++    expect(live(api).undoLabel).toBe('Move (2)');
+   });
+ });
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/video-fades-ui.test.tsx	2026-10-24 15:03:03.746497297 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/video-fades-ui.test.tsx	2026-10-24 15:08:45.292212270 +0000
+@@ -313,9 +313,11 @@
+     const video = clipRoot('v1');
+     const fadeIn = video.querySelector<HTMLElement>(`[data-testid="${VIDEO_FADE_IN_HANDLE}"]`);
+     const fadeOut = video.querySelector<HTMLElement>(`[data-testid="${VIDEO_FADE_OUT_HANDLE}"]`);
+-    expect(fadeIn?.title).toBe('Video Fade In — სურათი (ხმა არ იცვლება) · drag · double-click = 0');
++    expect(fadeIn?.title).toBe(
++      'Video Fade In — picture only, the sound does not change · drag · double-click = 0',
++    );
+     expect(fadeOut?.title).toBe(
+-      'Video Fade Out — სურათი (ხმა არ იცვლება) · drag · double-click = 0',
++      'Video Fade Out — picture only, the sound does not change · drag · double-click = 0',
+     );
+     expect(fadeIn?.style.left).toBe('0px');
+     expect(fadeOut?.style.right).toBe('0px');
+@@ -364,11 +366,11 @@
+       clientY: VIDEO_LANE_Y,
+     });
+     fireEvent.pointerMove(root, { pointerId: 1, clientX: 140, clientY: VIDEO_LANE_Y });
+-    expect(statusText(view)).toBe('Video Fade In: 1.000 წმ');
++    expect(statusText(view)).toBe('Video Fade In: 1.000 s');
+     fireEvent.pointerUp(root, { pointerId: 1, clientX: 140, clientY: VIDEO_LANE_Y });
+     expect(clipRoot('v1').dataset.fadeIn).toBe('1.000');
+     expect(live(api).undoLabel).toBe('Video Fade In');
+-    expect(statusText(view)).toBe('Video Fade In: 1.000 წმ.');
++    expect(statusText(view)).toBe('Video Fade In: 1.000 s.');
+     expect(
+       clipRoot('v1')
+         .querySelector('[data-testid="arrangement-video-fade-ramps"] path')
+@@ -394,7 +396,7 @@
+     dragHandle(handleOf('v1', VIDEO_FADE_OUT_HANDLE), clipRoot('v1'), -80);
+     expect(clipRoot('v1').dataset.fadeOut).toBe('2.000');
+     expect(live(api).undoLabel).toBe('Video Fade Out');
+-    expect(statusText(view)).toBe('Video Fade Out: 2.000 წმ.');
++    expect(statusText(view)).toBe('Video Fade Out: 2.000 s.');
+     performanceNow += 200;
+     fireEvent.doubleClick(handleOf('v1', VIDEO_FADE_OUT_HANDLE));
+     expect(clipRoot('v1').dataset.fadeOut).toBe('2.000');
+@@ -402,7 +404,7 @@
+     fireEvent.doubleClick(handleOf('v1', VIDEO_FADE_OUT_HANDLE));
+     expect(clipRoot('v1').dataset.fadeOut).toBe('0.000');
+     expect(live(api).undoLabel).toBe('Video Fade Out');
+-    expect(statusText(view)).toBe('Video Fade Out: 0.000 წმ.');
++    expect(statusText(view)).toBe('Video Fade Out: 0.000 s.');
+     fireEvent.doubleClick(handleOf('v1', VIDEO_FADE_OUT_HANDLE));
+     expect(undoAll(api)).toBe(2);
+     expect(clipRoot('v1').dataset.fadeIn).toBe('1.000');
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/gesture-guard.test.tsx	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/gesture-guard.test.tsx	2026-10-24 15:08:28.035600070 +0000
+@@ -183,7 +183,7 @@
+     expect(clipStart(api, 'music-1')).toBe(4);
+     expect(clipStart(api, 'impact')).toBe(8);
+     expect(live(api).isPointerGestureActive()).toBe(false);
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+     act(() => live(api).undo());
+     expect(clipStart(api, 'music-1')).toBe(2);
+     expect(live(api).undoLabel).toBeNull();
+@@ -201,7 +201,7 @@
+     fireEvent.pointerUp(music.root, { pointerId: 7, clientX: 140, clientY: 0 });
+     expect(live(api).arrangement.loop).toEqual({ start: 12, end: 14, enabled: true });
+     expect(clipStart(api, 'music-1')).toBe(3);
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+     expect(live(api).isPointerGestureActive()).toBe(false);
+   });
+ 
+@@ -269,7 +269,7 @@
+     expect(clipStart(api, 'music-1')).toBe(2);
+     expect(clipStart(api, 'impact')).toBe(9);
+     expect(live(api).isPointerGestureActive()).toBe(false);
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+     act(() => live(api).undo());
+     expect(clipStart(api, 'impact')).toBe(8);
+     expect(live(api).undoLabel).toBeNull();
+@@ -292,7 +292,7 @@
+     fireEvent.pointerUp(impact.root, { pointerId: 7, clientX: 380, clientY: SFX_LANE_Y });
+     expect(clipStart(api, 'impact')).toBe(9);
+     expect(live(api).arrangement.loop).toEqual({ start: 12, end: 14, enabled: true });
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+     expect(live(api).isPointerGestureActive()).toBe(false);
+   });
+ 
+@@ -358,7 +358,7 @@
+     fireEvent.pointerMove(impact.root, { pointerId: 32, clientX: 380, clientY: SFX_LANE_Y });
+     fireEvent.pointerUp(impact.root, { pointerId: 32, clientX: 380, clientY: SFX_LANE_Y });
+     expect(clipStart(api, 'impact')).toBe(9);
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+   });
+ 
+   it('ends an active gesture without an entry when the window loses focus', async () => {
+@@ -435,7 +435,7 @@
+     fireEvent.pointerMove(music.root, { pointerId: 7, clientX: 140, clientY: 0 });
+     fireEvent.pointerUp(music.root, { pointerId: 7, clientX: 140, clientY: 0 });
+     expect(trackVolume(api, 'sfx')).toBe(1);
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+     expect(live(api).isPointerGestureActive()).toBe(false);
+   });
+ 
+@@ -523,7 +523,7 @@
+     fireEvent.blur(volume);
+     expect(live(api).undoLabel).toBeNull();
+     fireEvent.pointerUp(music.root, { pointerId: 7, clientX: 140, clientY: 0 });
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+     expect(clipStart(api, 'music-1')).toBe(3);
+     act(() => live(api).undo());
+     expect(clipStart(api, 'music-1')).toBe(2);
+@@ -544,7 +544,7 @@
+       await new Promise((resolve) => setTimeout(resolve, 0));
+     });
+     expect(clipStart(api, 'music-1')).toBe(4);
+-    expect(live(api).undoLabel).toBe('კლიპის გადატანა');
++    expect(live(api).undoLabel).toBe('Move clip');
+     expect(live(api).isPointerGestureActive()).toBe(false);
+   });
+ });
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/track-groups-ui.test.tsx	2026-10-24 15:03:03.746497297 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/track-groups-ui.test.tsx	2026-10-24 15:08:28.035880213 +0000
+@@ -306,7 +306,7 @@
+ 
+ function clipMoveHandle(view: GroupsView, clipId: string) {
+   const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
+-  const handle = root?.querySelector<HTMLElement>('[title$="— გადაადგილება"]');
++  const handle = root?.querySelector<HTMLElement>('[title$="— drag to move"]');
+   if (!root || !handle) {
+     throw new Error(`clip ${clipId} not rendered`);
+   }
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-10-24 15:03:03.746497297 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-10-24 15:08:28.036206125 +0000
+@@ -307,7 +307,7 @@
+ 
+ function clipMoveHandle(view: GroupsView, clipId: string) {
+   const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
+-  const handle = root?.querySelector<HTMLElement>('[title$="— გადაადგილება"]');
++  const handle = root?.querySelector<HTMLElement>('[title$="— drag to move"]');
+   if (!root || !handle) {
+     throw new Error(`clip ${clipId} not rendered`);
+   }

@@ -1,0 +1,178 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T15:20:25.9668130Z",
+  "round": 138,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R138-01",
+   "severity": "low",
+   "steps": [
+    "Open docs/implementation/2026/quarter-IV/113-studio-v0-workspace-strings.md",
+    "Read l.21 and the V-0.4 TODO line (old l.75, now l.74)"
+   ],
+   "expected": "one 'selector' wording, e.g. 'the track-header selector (l.331)'",
+   "actual": "'track-header selector (l.331)-ის selector' (word twice), produced by the literal §2 replacement",
+   "evidence": "c-round-138/out/an-diff-doc113.txt; A Low #3. Goes to deferred_low_polish."
+  },
+  {
+   "id": "C-R138-02",
+   "severity": "low",
+   "steps": [
+    "/studio-lab, Snap off, add Soft impact on music at 2 s",
+    "Trim left edge +0.5 s, right edge -0.5 s",
+    "Drag the right edge +2 s past the source end, release (same for the left edge past the source start, or a move into a neighbour)"
+   ],
+   "expected": "after release the status names the committed edit (e.g. 'Trim — right edge: start …, length 00:01.500 …')",
+   "actual": "the blocked status (CL9 / CL8 / CL7) stays after release, while the last free length or spot is committed and Undo shows 'Undo: Trim — right edge' / 'Undo: Move clip'",
+   "evidence": "c-round-138/out/c138-{1440,1280}-r2-all.json (TRIM right-release-status-kept-CL9, left-out-status-kept-CL8; checks MOVE-BLOCKED-releaseStatus). Pre-existing: the logic (`if (updated && !gesture.blocked)`) is unchanged in round 138; not a regression. Goes to deferred_low_polish."
+  }
+ ],
+ "passed": [
+  "T138-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "CLIP-MOVE",
+  "MOVE-BLOCKED",
+  "TRIM",
+  "LANE-MOVE",
+  "GROUP-MOVE",
+  "NO-CHANGE",
+  "FADES",
+  "FOLDED-TITLE",
+  "RANGE-BADGE",
+  "GEO-COUNT",
+  "LAYOUT",
+  "REG-137",
+  "G138-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G138-3 fake-Bearer 403 check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "georgianCounts": {
+  "1440": {
+   "steps": 23,
+   "raw": 193,
+   "net": 0
+  },
+  "1280": {
+   "steps": 23,
+   "raw": 193,
+   "net": 0
+  },
+  "surface": "every clip root/header/body/trim-edge/fade-handle title and range badge, the status line (current + every MutationObserver change), Undo/Redo titles",
+  "subtractions": [
+   "data track names in sentences: მუსიკა, სტემები (R5, V-0.4d)",
+   "data clip/source titles: ღამის პულსი · პულსი, ღამის პულსი · სრული მიქსი (library data, V-0.5)",
+   "default group name ჯგუფი 1 in 'Group “ჯგუფი 1” created: სტემები, SFX.' (TRACK_GROUP_NAME_PREFIX, V-0.4d)"
+  ],
+  "notSubtracted": "the lane-move label (this round's target) — it is English: 'Move to track — სტემები' only has the track-name data"
+ },
+ "measurements": {
+  "1440": {
+   "oks": 73,
+   "fails": 0,
+   "nudgeStep": 0.1,
+   "moveBlockedReleaseStatus": "Move blocked — a neighbouring clip or the start of the timeline. The clip stayed in its last free spot.",
+   "laneRefusalUndo": "Undo: Move clip",
+   "groupFoldClipsVisible": 0,
+   "audio": {
+    "src": "demo-stem-pulse",
+    "unfadedDb": [
+     -21.43,
+     -21.46
+    ],
+    "fadedDb": -47.04,
+    "preClipDb": -200,
+    "diffDb": [
+     25.61,
+     25.58
+    ],
+    "windowFrames": [
+     11,
+     11,
+     11
+    ]
+   },
+   "net": {
+    "ok": true,
+    "bad": [],
+    "noise": 14,
+    "sessions": 7
+   }
+  },
+  "1280": {
+   "oks": 73,
+   "fails": 0,
+   "nudgeStep": 0.1,
+   "moveBlockedReleaseStatus": "Move blocked — a neighbouring clip or the start of the timeline. The clip stayed in its last free spot.",
+   "laneRefusalUndo": "Undo: Move clip",
+   "groupFoldClipsVisible": 0,
+   "audio": {
+    "src": "demo-stem-pulse",
+    "unfadedDb": [
+     -21.9,
+     -22.21
+    ],
+    "fadedDb": -47.04,
+    "preClipDb": -200,
+    "diffDb": [
+     25.14,
+     24.83
+    ],
+    "windowFrames": [
+     11,
+     11,
+     11
+    ]
+   },
+   "net": {
+    "ok": true,
+    "bad": [],
+    "noise": 14,
+    "sessions": 7
+   }
+  }
+ },
+ "invalidRuns": [],
+ "harnessCorrections": [
+  "r1 TRIM: my expectation of a commit status after a blocked trim release was wrong (code sets no status when blocked; unchanged logic) — re-run checks the kept CL8/CL9 + committed length + Undo label",
+  "r1 GROUP-MOVE: after Undo both clips stay selected and a plain click on a selected clip keeps the group, so my Ctrl+click toggled one off — re-selection made conditional",
+  "r1 FOLDED-TITLE: group fold hides member clips (0 [data-clip-id]); CL1 belongs to the track fold button — re-run folds the track"
+ ],
+ "notesForB": [
+  "FOLDED-TITLE row wording: 'Ctrl+G then U or the group fold button' cannot show the title — a folded group renders 0 clips (measured both viewports). The CL1 title appears with the TRACK fold button (aria-label 'სტემები დაკეცვა ან გახსნა'); verified there. Fix the row text in future tasks. The 'U' key path was not checked; only the track fold button was.",
+  "Blocked trim (CL8/CL9) and blocked move (CL7) keep the blocked status after release while the last free length/spot is committed and Undo shows 'Undo: Trim — …'/'Undo: Move clip'. Unchanged logic; info only (a user sees 'Trim stopped' although an edit was committed).",
+  "Low (deferred_low_polish): doc 113 l.21/l.74 now read 'track-header selector (l.331)-ის selector' (word twice), from the literal §2 replacement (A Low #3).",
+  "A Low #1: m60 does not turn gesture-reentry red (C did not re-run mutations; A's results.json reports it). §3.5 expectation was off; m60 is still killed by grid-snap-edit and track-layout.",
+  "A architecture note: 8 test files locate clip body/trim handles by title; data-testid proposal is a separate bounded task.",
+  "R5 mixed state observed as named: library, track headers, detail panel, video dock, demo badge still Georgian."
+ ],
+ "ableton": {
+  "Trim left/right edge (§6.7)": "CZABA requirement met; Ableton correspondence: confirmed for the gesture (edge drag changes length); 'Trim' wording and Undo label names are CZABA labels (Live Undo wording unconfirmed)",
+  "Fade handles (§6.8)": "met; confirmed: handles at clip edges shown on hover; deliberate difference: double-click = 0; picture-only video fade is CZABA (D-29z49)",
+  "Folded track hides time editing (§6.9)": "met (track fold); confirmed idea 'unfold its track'",
+  "Cross-track move, lane refusal, no-change status": "met; Ableton correspondence unconfirmed (no source)"
+ },
+ "anReviewCSU": "clip-strings-ui.test.tsx read: CSU1 (body title CL19, badge '00:03.000 – 00:05.000 · 2.000 s'), CSU2 (left status with 00:02.000 + undoLabel 'Move (2)'), CSU3 (ArrowRight both 6.1 + 'Move (2)'), hand-written literals, imports only StudioWorkspace/model/test helpers",
+ "g138_3_note": "G138-3 is passed except the fake-Bearer 403 sub-check, which is BLOCKED (backend unavailable in cloud)"
+}

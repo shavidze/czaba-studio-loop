@@ -1,0 +1,124 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 15:03:03.746453858 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 15:07:58.497871634 +0000
+@@ -46,6 +46,7 @@
+ import { CLIP_LANE_REFUSAL_MESSAGES, GROUP_MOVE_BLOCKED_MESSAGE } from '../selection';
+ import {
+   studioClipEnvelopeStrings,
++  studioClipStrings,
+   studioEditStrings,
+   studioExportStrings,
+   studioGridStrings,
+@@ -718,7 +719,6 @@
+ const CONTEXT_REMAINING_GEORGIAN_LINES = [
+   "{ id: 'video', kind: 'video', name: 'ვიდეო' },",
+   "{ id: 'audio', kind: 'audio', name: 'აუდიო' },",
+-  'applyEdit(moved, `გადატანა ({ids.length})`);',
+   "error: error instanceof Error ? error.message : 'ჩატვირთვა ვერ მოხერხდა',",
+ ];
+ 
+@@ -1728,7 +1728,7 @@
+     );
+   });
+ 
+-  it('ST33: the new texts, waveform-zoom.ts and StudioWorkspace (except the l.325 selector) have no Georgian and no «»', () => {
++  it('ST33: the new texts, waveform-zoom.ts and StudioWorkspace (except the track-header selector) have no Georgian and no «»', () => {
+     for (const [key, value] of Object.entries(studioClipEnvelopeStrings)) {
+       expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
+       expect(value, key).not.toMatch(GUILLEMET);
+@@ -1763,3 +1763,96 @@
+     }
+   });
+ });
++
++const cs = studioClipStrings;
++
++const EXPECTED_CLIP_PLAIN_STRINGS: Record<string, string> = {
++  foldedTitleLine: 'The track is folded — unfold it to make a time selection',
++  videoFadeInTitle:
++    'Video Fade In — picture only, the sound does not change · drag · double-click = 0',
++  videoFadeOutTitle:
++    'Video Fade Out — picture only, the sound does not change · drag · double-click = 0',
++  keptLastFreeSpot: 'the clip stayed in its last free spot',
++  moveBlocked:
++    'Move blocked — a neighbouring clip or the start of the timeline. The clip stayed in its last free spot.',
++  trimStartBlocked:
++    'Trim stopped: the start of the source, a neighbouring clip or the minimum length (0.05 s).',
++  trimEndBlocked:
++    'Trim stopped: the end of the source, a neighbouring clip or the minimum length (0.05 s).',
++  historyMoveClip: 'Move clip',
++  trimStartLabel: 'Trim — left edge',
++  trimEndLabel: 'Trim — right edge',
++  rangeBodyTitle: 'drag = time selection · click = playhead',
++};
++
++const CLIP_GROUP_MOVE_SAMPLE = { label: 'Move (2)', count: 2, distance: '00:01.000' };
++
++const CLIP_FORMATTER_SAMPLES: Record<string, string[]> = {
++  fadePreview: [cs.fadePreview('Fade In', '1.000')],
++  fadeCommitted: [cs.fadeCommitted('Fade In', '1.000'), cs.fadeCommitted('Fade In', '0.000')],
++  historyUnchanged: [cs.historyUnchanged('Move clip'), cs.historyUnchanged('Envelope')],
++  historyMoveClips: [cs.historyMoveClips(2), cs.historyMoveClips(3)],
++  historyMoveToTrack: [cs.historyMoveToTrack('stems')],
++  groupMovedRight: [cs.groupMovedRight(CLIP_GROUP_MOVE_SAMPLE)],
++  groupMovedLeft: [cs.groupMovedLeft(CLIP_GROUP_MOVE_SAMPLE)],
++  moveTitle: [cs.moveTitle('Song')],
++  seconds: [cs.seconds('2.000')],
++};
++
++describe('V-0.4a clip strings', () => {
++  it('ST34: studioClipStrings has the exact keys, English literals and formatter outputs', () => {
++    expect(Object.keys(cs).sort()).toEqual(
++      [...Object.keys(EXPECTED_CLIP_PLAIN_STRINGS), ...Object.keys(CLIP_FORMATTER_SAMPLES)].sort(),
++    );
++    for (const [key, value] of Object.entries(cs)) {
++      if (typeof value === 'string') {
++        expect(value, key).toBe(EXPECTED_CLIP_PLAIN_STRINGS[key]);
++      } else {
++        expect(CLIP_FORMATTER_SAMPLES[key], key).toBeDefined();
++      }
++    }
++    expect(cs.fadePreview('Fade In', '1.000')).toBe('Fade In: 1.000 s');
++    expect(cs.fadeCommitted('Fade In', '1.000')).toBe('Fade In: 1.000 s.');
++    expect(cs.fadeCommitted('Fade In', '0.000')).toBe('Fade In: 0.000 s.');
++    expect(cs.historyUnchanged('Move clip')).toBe(
++      'Move clip: nothing changed — the Undo history is unchanged.',
++    );
++    expect(cs.historyUnchanged('Envelope')).toBe(
++      'Envelope: nothing changed — the Undo history is unchanged.',
++    );
++    expect(cs.historyMoveClips(2)).toBe('Move (2)');
++    expect(cs.historyMoveClips(3)).toBe('Move (3)');
++    expect(cs.historyMoveToTrack('stems')).toBe('Move to track — stems');
++    expect(cs.groupMovedRight(CLIP_GROUP_MOVE_SAMPLE)).toBe(
++      'Move (2): 2 clips moved 00:01.000 to the right.',
++    );
++    expect(cs.groupMovedLeft(CLIP_GROUP_MOVE_SAMPLE)).toBe(
++      'Move (2): 2 clips moved 00:01.000 to the left.',
++    );
++    expect(cs.moveTitle('Song')).toBe('Song — drag to move');
++    expect(cs.seconds('2.000')).toBe('2.000 s');
++  });
++
++  it('ST35: studioClipStrings and ArrangementClip have no Georgian and no «»; three Context lines remain', () => {
++    for (const [key, value] of Object.entries(cs)) {
++      if (typeof value === 'string') {
++        expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
++        expect(value, key).not.toMatch(GUILLEMET);
++      }
++    }
++    const outputs = Object.values(CLIP_FORMATTER_SAMPLES).flat();
++    expect(outputs.length).toBeGreaterThan(0);
++    for (const output of outputs) {
++      expect(output).not.toMatch(GEORGIAN_CODEPOINT);
++      expect(output).not.toMatch(GUILLEMET);
++    }
++    const clip = stripSourceComments(
++      readStoreSource('../../../components/arrangement/ArrangementClip.tsx'),
++    );
++    expect(clip.length).toBeGreaterThan(0);
++    const georgianLines = clip.split(/\r?\n/).filter((line) => GEORGIAN_CODEPOINT.test(line));
++    expect(georgianLines).toEqual([]);
++    expect(clip).not.toMatch(GUILLEMET);
++    expect(CONTEXT_REMAINING_GEORGIAN_LINES).toHaveLength(3);
++  });
++});

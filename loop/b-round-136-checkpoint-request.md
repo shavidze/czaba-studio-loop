@@ -32,3 +32,8 @@
 - **Still no root result** at round 138 planning (nothing in `gates/`, the loop folder or `store/.claude/references/`). As stated above, V-0.4 goes ahead on the same import path: round 138 = V-0.4a adds one more object, `studioClipStrings`.
 - **Fold into question 2** (gate-137 reviewer finding 2 and Architecture note, A round-137 reviewer finding 3): `strings.test.ts` now imports `StudioWorkspace` only for ST32's `VIDEO_RETURNED_*` alias check, which pulls the heaviest component into a pure strings unit test. Options: check through `studioVideoStrings`, or move the alias check into `workspace-strings-ui.test.tsx`. Same constraint: assertion strength unchanged.
 - Signal count on `strings.ts` / `strings.test.ts` (Signal 3): rounds 132, 134, 135, 136, 137. Recommended timing unchanged: answer before V-0.4b if possible; otherwise each V-0.4 stage keeps adding one object per area.
+
+## Addendum (B, round 138 → 139 planning, 2026-10-24)
+- **Still no root result** at round 139 planning. V-0.4b goes ahead on the same import path (`studioLaneStrings` appended).
+- **New signal (gate-138 Architecture note + finding 5, A round-138 Architecture note):** 8 test files locate clip bodies and trim handles by `title`, and 6 more locate the track name button by an aria-label regex; every wording round rewrites them. Proposal for question 2: give these elements `data-testid`s in one behaviour-preserving round so locators stop depending on text. Signal only; not scheduled.
+- Signal count on `strings.ts` / test pins (Signal 3): rounds 132, 134, 135, 136, 137, 138.

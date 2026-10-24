@@ -1,0 +1,34 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/docs/implementation/2026/quarter-IV/113-studio-v0-workspace-strings.md	2026-10-24 15:03:03.747312101 +0000
++++ /home/runner/czaba-project/store/docs/implementation/2026/quarter-IV/113-studio-v0-workspace-strings.md	2026-10-24 15:10:43.958408259 +0000
+@@ -1,7 +1,7 @@
+ # Studio V-0.3d — StudioWorkspace-ის დარჩენილი ტექსტები და Waveform Zoom ინგლისურად
+ 
+ **თარიღი:** 2026-10-24
+-**სტატუსი:** In Progress (A-ის შემოწმებები მწვანეა რაუნდ 137-ში; ბრაუზერის შემოწმება C-ის რაუნდ 137-ს ელოდება)
++**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 137-ში; C round 137 — PASS, browserVerified; gate 137 — 7e6202b)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -18,7 +18,7 @@
+ - **"all tracks" ხელახლა გამოიყენება:** მონიშვნის ხაზის span `studioEditStrings.allTracks`-ს აჩვენებს. ახალი key არ დამატებულა.
+ - **`waveformZoomStatus(level)`** სახელი და სიგნატურა უცვლელია. ტანი მოდულის formatter-ს იძახებს (`waveform-zoom.ts` → `./strings`, ციკლი არ არის).
+ - **ლოკალური სახელები რჩება:** `CLIP_LANE_SHIFT_HINT`, `CLIP_LANE_SHIFT_LOCKED_HINT` და `VIDEO_*_MESSAGE`. ორი export (`VIDEO_RETURNED_COMPACT_MESSAGE`, `VIDEO_RETURNED_LIBRARY_RECOLLAPSED_MESSAGE`) ისევ exported-ია.
+-- **l.325-ის selector (R1) არ შეხებია.** ის `ArrangementLane.tsx`-ის aria-label-ს ემთხვევა, რომელიც V-0.4-ს ეკუთვნის. ამიტომ StudioWorkspace-ში ზუსტად ერთი ქართული ხაზი რჩება. ST33 ამას pin-ავს.
++- **track-header selector (l.331)-ის selector (R1) არ შეხებია.** ის `ArrangementLane.tsx`-ის aria-label-ს ემთხვევა, რომელიც V-0.4-ს ეკუთვნის. ამიტომ StudioWorkspace-ში ზუსტად ერთი ქართული ხაზი რჩება. ST33 ამას pin-ავს.
+ - **ქცევა არ იცვლება:** handler-ები, პირობები, კლავიშები, სტატუსების რიგი, focus-ის გადაცემა, history label-ები, `data-testid`-ები და class-ები იგივეა.
+ 
+ ### WS რუკა (მოკლედ)
+@@ -67,11 +67,10 @@
+ - `npm run typecheck` exit 0, `npm run lint` exit 0 (owned ფაილებში warning არ არის). read-only `npx biome check` 12 კოდისა და ტესტის ფაილზე 0 diagnostic-ს აჩვენებს.
+ - `npx vitest run` 16 ფაილზე (9 დასახელებული და 7 მეზობელი): 303/303 მწვანეა. `strings.test` 30 → 33 `it`, `workspace-strings-ui` 2. 7 pin ფაილის `it`-ების რაოდენობა უცვლელია.
+ - მუტაციები m45–m52: თითოეულმა დასახელებული ტესტები გააწითლა, ფაილები აღდგა და sha256-ით შემოწმდა.
+-- სრული suite, `npm run verify`, build და e2e root-ის gate-ზეა. ბრაუზერის შემოწმება C round 137-ს ელოდება.
++- სრული suite, `npm run verify`, build და e2e root-ის gate-ზეა. ბრაუზერის შემოწმება: C round 137 — PASS (browserVerified).
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- C round 137: ბრაუზერში შემოწმება 1440×900-სა და 1280×720-ზე (HEADING, LANE-HINT, VIDEO-STATUS, GROUP-RENAME, ENVELOPE, WAVEFORM-ZOOM, RANGE-READOUT, SELECTION, GEO-COUNT, LAYOUT).
+-- V-0.4: l.325-ის selector იცვლება `ArrangementLane.tsx`-ის aria-label-თან ერთად, და ST33-ის allowance 0 ხდება. ასევე lane overlay-ის `ყველა ხაზი` და detail panel.
++- V-0.4: track-header selector (l.331)-ის selector იცვლება `ArrangementLane.tsx`-ის aria-label-თან ერთად, და ST33-ის allowance 0 ხდება. ასევე lane overlay-ის `ყველა ხაზი` და detail panel.
+ - V-0.5: dock-ის ღილაკები (return label-ში ტერმინი "compact view").
+ - frontend-architect checkpoint `strings.ts`-ის დაყოფაზე root-ს ელოდება (`b-round-136-checkpoint-request.md`).

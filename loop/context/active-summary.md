@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T14:49:26.242Z)
+# Active loop summary (2026-10-24T15:45:43.914Z)
 
-- backlog.json 1249 KB -> active view 163 KB
-- status: G_ROOT_GATE round 137
-- servers: `{"checkedUtc":"2026-10-24T14:25:51.4725308Z","round":137,"attempt":1,"store":200}`
-- last publication: 7e6202bb22db0091ce90cd423b5a8ec8ed1992ef (rounds 137-137)
-- last root gate: round 137 published - commit 7e6202bb22db0091ce90cd423b5a8ec8ed1992ef pushed
+- backlog.json 1260 KB -> active view 166 KB
+- status: G_ROOT_GATE round 138
+- servers: `{"checkedUtc":"2026-10-24T15:20:25.9668130Z","round":138,"attempt":1,"store":200}`
+- last publication: 1d4df51594aa977fec987d72fed87d1d679e4fb7 (rounds 138-138)
+- last root gate: round 138 published - commit 1d4df51594aa977fec987d72fed87d1d679e4fb7 pushed
 
 ## Current items: -
 
@@ -254,7 +254,7 @@
 - C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
 - ALTGR-SHORTCUT-GUARD / info / signal (not scheduled; no CZABA contract; C round 126 F-5) / Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or 
 - C-R127-L1 / low / parts a-d closed round 128 (C EX-COPY exact text in the browser, c-round-128.json); parts e-f in deferred_low_polish (C-R127-L1e/L1f) / Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in t
-- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2a r129 .. V-0.2c3 r133 done (V-0.2 complete); V-0.3a r134; then V-0.3b..d, V-0.4, V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions: GATE130-S1 (V-0.4), GATE132-TEMPO-CLEARED-MIXED (closes r134), GATE133-LANE-HINT-MIXED (V-0.3d), GATE133-LANE-RELEASE-MIXED (V-0.4), GATE133-GROUP-PREFIX (V-0.4), GATE133-GROUP-RENAME (V-0.3d) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
+- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2 complete (r129-r133); V-0.3 complete (r134-r137, 7e6202b); V-0.4a round 138, then V-0.4b..e, V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions per D-29z103 R5 / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
 - C-R129-REDO-PASTE-SELECTION / info / observation (pre-existing; product question, not scheduled) / Redo after Paste does not restore the pasted clip selection
 - C-R129-EMPTY-RANGE-UNREACHABLE / info / acknowledged (harness): a drag on empty lane background creates no time selection, so E12/E27/E31 are unit-only / empty-range edit messages not reachable in the browser
 - GATE130-S1-GHOST-STATUS-TWO-LANGUAGES / low / ruled D-29z96: stays V-0.4 (ArrangementLane has 20 Georgian lines; tests pin the ghost; half-migrating the lane needs a second per-file scan); V-0.4 must reuse the status English for ghost/hint texts; tracked under GATE128-S1 / blocked drop shows English status and Georgian lane ghost
@@ -266,7 +266,7 @@
 - GATE131-S5-RAW-ERROR-TEXT / info / signal (pre-existing; React escapes it; a generic importFailed text could replace raw error.message in a later stage; not scheduled) / importFailed shows raw error.message
 - C-R131-OBS-EXPORT-VIDEO-SOUND-BELOW-FOLD-1280 / info / acknowledged (pre-existing layout; same class as C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / ARCH-R101-MODALBODY-PADDING-SLOT) / at 1280x720 the Export dialog video-sound list needs a scroll
 - GATE133-GROUP-PREFIX / low / ruled D-29z98 R1: V-0.4 with the default track names; tracked under GATE128-S1 / default group name 'ჯგუფი N' stays Georgian inside English created/ungrouped statuses
-- GATE133-LANE-RELEASE-MIXED / low / ruled D-29z98 R3: temporary tracked exception under GATE128-S1; closes in V-0.4 with ArrangementClip CLIP_LANE_REFUSAL_KEPT_PLACE / refused lane release shows 'No room here — კლიპი ბოლო თავისუფალ ადგილას დარჩა: …' in one status
+- GATE133-LANE-RELEASE-MIXED / low / scheduled: V-0.4a round 138 (CL4/CL7 studioClipStrings); closes on C PASS / refused lane release shows 'No room here — კლიპი ბოლო თავისუფალ ადგილას დარჩა: …' in one status
 - GATE133-LANE-HINT-MIXED / low / ruled D-29z98 R3: temporary tracked exception under GATE128-S1; closes in V-0.3d with the StudioWorkspace Shift hints (D-29z99 split); dispatched round 137 (D-29z102 WS1/WS2) / lane-drag hint paragraph shows the English refusal followed by the Georgian Shift hint
 - GATE132-S4-MODULE-AGAINST-MODULE-UNIT-PINS / info / signal: ST18 and the UI literals are the text guards; if ST18 is ever trimmed, put a hand-written literal back into T10/M8 / tempo/metronome/view unit tests compare the formatter with itself
 - GATE132-S5-DOC108-STATUS / low / folded into round 133 (doc 108 l.4) / doc 108 status still says the browser check is pending
@@ -279,14 +279,20 @@
 - GATE134-ST25-FRAGILE / info / signal (architecture_signals ARCH-R134-RATCHET-SHAPE); accepted as a temporary guard until V-0.3d replaces it with a per-file scan; round 137 replaces the ratchet with ST33 per-file scan (D-29z102) / ST25 compares 33 hand-copied StudioWorkspace lines; a reformat breaks it without a translation
 - GATE134-COMMENT-WORDING / info / noted; no code change needed / strings.test.ts l.716 comment wording about the widened pattern
 - C-R134-SNAP-DEFAULT-OFF-NOTE / info / applied in round 135 C rows (state the Snap state; default off) / round-134 task examples assumed Snap on; real default is off
-- GATE135-MIXED-LANGUAGE / low / marker part closed round 136 (7d9fed0); remaining range readout + group rename in V-0.3d round 137; lane/dock/detail parts named in D-29z102 R4 (V-0.4/V-0.5); covered by GATE128-S1 queue / English transport next to the Georgian range readout and marker row; Georgian read with an English voice (html lang=en)
+- GATE135-MIXED-LANGUAGE / low / marker part closed round 136; range readout + group rename closed round 137 (7e6202b); lane/dock/detail parts per D-29z103 R5 (V-0.4b..e / V-0.5); covered by GATE128-S1 queue / English transport next to the Georgian range readout and marker row; Georgian read with an English voice (html lang=en)
 - GATE135-DELETE-LABEL-IN-NAME / info / noted, pre-existing (same shape as the Georgian version); optional polish: start both range hints with '⌫ Delete' / Delete button aria-label with a range starts 'Delete time selection…' while the visible text is '⌫ Delete' (WCAG 2.5.3 still met by the word
 - C-R135-NV17-SAME-TICK / info / noted; unchanged code, no bug filed / Fit/X during playback pauses Follow but the status region only shows the Fit/X status; NV17 is never rendered (same-tick replacement, infere
 - C-R135-Z-MARGINS / info / noted; unchanged code / Z frames a 4 s range at ~48% of the viewport, centred (range fully visible)
-- GATE136-DOC112-STATUS / low / folded into round 137 (doc 112 l.4, l.115, delete l.119) / doc 112 status and testing lines still say the browser check waits for C round 136
 - GATE136-MARKER-ALIASES / info / noted; inline when strings.ts is split (no action now) / ArrangementMarkerRow l.54-55 MARKER_FLAG_HINT / MARKER_AT_TIME_START_MESSAGE only re-export studioMarkerStrings values
 - C-R136-DRAG-REFUSAL-SILENT / info / noted; candidate polish/a11y idea only, not scheduled (pre-existing MV5 design) / a direct marker drag onto an occupied time is refused with no status announcement
 - C-R136-STALE-EDGE-STATUS / info / noted; pre-existing, unchanged code, no bug filed / after a successful previous/next jump between flags the status line keeps the earlier edge status
+- GATE137-SELECTED-CLIP-HALF-MOVED / low / deferred_low_polish; fold into V-0.4b (StudioWorkspace granted there for the track-header selector) / selected-clip visible tail keeps inline '· start / · length / · source offset' while the title uses studioWorkspaceStrings.selectedClipTitle
+- GATE137-STRINGS-TEST-IMPORTS-WORKSPACE / low / addendum to b-round-136-checkpoint-request.md question 2 (not scheduled alone) / strings.test.ts imports StudioWorkspace only for the ST32 VIDEO_RETURNED_* alias check
+- GATE137-ST33-L325-WORDING / low / folded into round 138 (ST33 retitle; doc 113 l.21/l.75) / ST33 title and doc 113 say l.325; the selector is at StudioWorkspace l.331
+- GATE137-DOC113-STATUS / low / folded into round 138 (doc 113 l.4/70/74) / doc 113 status still says the browser check waits for C round 137
+- C-R137-REMAINING-GEORGIAN / info / assigned: ArrangementClip.tsx:701 -> V-0.4a (round 138); ArrangementClipEnvelope.tsx:171 and ArrangementGroupHeader.tsx:32/241 -> V-0.4c; routes/studio-lab.tsx:8 -> V-0.5 / Georgian UI outside V-0.3d found during C round 137
+- C-R137-TITLE-FALLBACK / info / acknowledged (gate reviewer: fallback unreachable, avoids a type assertion; same pattern as l.2128); covered by GATE137-SELECTED-CLIP-HALF-MOVED / WS23 title uses selectedTitle ?? sourceId while the visible span renders selectedTitle
+- C-R137-EMPTY-CLICK-KEEPS-MULTISELECT / info / unverified hypothesis; signal only - needs a Live 12 manual check (§6.9 selection) and a C browser repro before any task; not scheduled / a plain click on an empty lane area and Escape did not clear a 2-clip selection in the C harness
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

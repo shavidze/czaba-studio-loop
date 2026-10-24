@@ -1261,6 +1261,19 @@ C round 129 (`tmp/studio-real-loop/c-round-129.md`, `c-round-129.json`) — **PA
 - **R6 — ჩართული ორი იაფი საკითხი, რაუნდის ფაილებში:** SA-DEL (+1 `it` `status-announcement-ui`-ში, ხურავს m4-ის ხარვეზს) და GATE129-S2 (ST9 ამოწმებს, რომ 6 constant აღარ არსებობს). ST13 — Context-ის დარჩენილი ქართული ხაზების ზუსტი სია (ratchet).
 - **R7 — შედეგი წინასწარ (round 131):** 2026-10-27-დან — ჯერ რეგრესია; C FAIL Medium+ — V-0.2b-ს შეზღუდული გასწორება; C PASS — V-0.2c (B ჯერ ზომავს, საჭიროებისას ყოფს).
 
+**D-29z104 — Round 138-ის შედეგი; V-0.4a დასრულდა; Round 139: V-0.4b (ხაზის სათაურისა და ხაზის ტექსტები — ArrangementLane — ინგლისურად).**
+
+C round 138 (`tmp/studio-real-loop/c-round-138.md`, `c-round-138.json`) — **PASS**, `browserVerified`/`realVerified` — true, 73/73 შემოწმება ორივე viewport-ზე, GEO-COUNT net 0; FADES-ში რეალური გამოსავალი 1 წმ Fade In-ით ≈ 25 dB-ით ჩუმია. Gate 138 გამოქვეყნდა `1d4df51` (163 ფაილი / 2460 ტესტი, build OK, review 9/10).
+- **R0 — V-0.4a → მზადაა** (`c_pass_published`). ახალი Low-ები: C-R138-01 (doc 113) და gate-138 #1 (doc 114-ის სტატუსი) → Round 139; C-R138-02 (დაბლოკილი Trim/Move-ის სტატუსი release-ის შემდეგ, ძველი ქცევა), gate-138 #3/#4, #6 (trim strip-ები კლავიატურით მიუწვდომელია; Low, რადგან იგივე შედეგი მიიღწევა time-selection ველებით + Ctrl+E + Delete) → `deferred_low_polish`. #5 და Architecture note (`data-testid`) → checkpoint-ის დანართი, არა დავალება.
+- **R1 — ახალი ობიექტი `studioLaneStrings`** (LN1–LN24); overlay იყენებს `studioClipStrings.seconds`-ს და `studioEditStrings.allTracks`-ს, დაბლოკილი ghost — `studioLaneMoveStrings.noRoom`-ს (GATE130-S1).
+- **R2 — ghost-ები სტატუსის სიტყვებს იმეორებს:** `Audio is not added to the video track`, `This sound has not loaded yet`.
+- **R3 — განშტოებები caller-ში რჩება.** **R4 — წინასწარი შეზღუდვები:** GroupHeader (V-0.4c) იყენებს `foldTitle`/`soloTitle`/`selectedSuffix`-ს, DetailPanel (V-0.4e) — `foldedValueText`-ს, VideoDock (V-0.5) — `noVideo`-ს.
+- **R5 — შერეული მდგომარეობა ერთი რაუნდით:** ინგლისური ხაზის სათაურები ქართული ჯგუფის სათაურების გვერდით (V-0.4c-მდე).
+- **R6 — ტექსტი და ყველა მისი matcher (title, aria-label, role-name regex) ერთად იცვლება.**
+- **R7 — ჩართულია:** GATE137-SELECTED-CLIP-HALF-MOVED (`selectedClipDetail`, title = textContent), doc 113/114-ის შესწორებები.
+- **R8 — Ableton:** Live 12 §6.9 — „unfold its track by clicking the button next to the track name“, U, სიმაღლე „split line“-ით და Alt/Option +/- — დადასტურებული; Solo-ს Ctrl/Cmd+click — შენახულ წყაროში არ არის (დაუდასტურებელი).
+- **R9 — checkpoint:** root-ის პასუხი ჯერ არ არის; V-0.4b იმავე import-ით გრძელდება.
+
 **D-29z103 — Round 137-ის შედეგი; V-0.3d დასრულდა (V-0.3 სრულია); Round 138: V-0.4a (კლიპის ჟესტების ტექსტები ინგლისურად).**
 
 C round 137 (`tmp/studio-real-loop/c-round-137.md`, `c-round-137.json`) — **PASS**, `browserVerified`/`realVerified` — true, ბაგი 0. HEADING, LANE-HINT, VIDEO-STATUS, GROUP-RENAME, ENVELOPE, WAVEFORM-ZOOM (რეალური გამოსავლის peak-ის სხვაობა ≤ 0.07 dB), RANGE-READOUT, SELECTION ზუსტია 1440-ზე და 1280-ზე; GEO-COUNT 0; LAYOUT — 0 ცვლილება >1 px; fake-Bearer 403 — BLOCKED (backend unavailable in cloud). Gate 137 გამოქვეყნდა `7e6202b` (verify OK, review 9/10).
@@ -2410,6 +2423,8 @@ flowchart TD
 **D-29z98:** round 133-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (2 ახალი ობიექტი), `selection.ts` და `groups.ts` (მხოლოდ import და სტრიქონები; l.3 prefix უცვლელი), `strings.test.ts` (ST20–ST22), `grid-snap-ui` l.110, `status-announcement-ui` l.402, `grid-snap-edit` l.115–117, `clip-fades-ui` l.110, `track-groups-ui` (3 ლიტერალი, 5 დამატებითი `expect`, TG5-ის სათაურის სიტყვები), `track-group-collapse-ui` (1 `expect`), doc 108-ის მხოლოდ l.4 და ახალი doc 109. დანარჩენი გაყინულია (`b-round-132-r133-tree-sha256.txt`, 934).
 
 **D-29z100:** round 135-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (გასაღებები ემატება 6 არსებულ ობიექტს), `ArrangementTransport.tsx`, `ArrangementTempoRow.tsx`, `ArrangementRuler.tsx`, `ArrangementOverview.tsx`, `ArrangementLoopBrace.tsx` (მხოლოდ import და §1.1-ის ხაზები), `StudioWorkspace.tsx` (import-ის სახელები და 10 ნავიგაციის ხაზი), `strings.test.ts` (დამატებითი რუკები, ST25, ST26–ST27), `delete-selection-ui`, `grid-snap-ui`, `tempo-ui`, `metronome-ui` (მხოლოდ ჩამოთვლილი pin-ები), ახალი `navigation-strings-ui.test.tsx`, doc 110 (l.4/132/136) და ახალი doc 111. სხვა ყველაფერი გაყინულია (`tmp/studio-real-loop/b-round-134-r135-tree-sha256.txt`, 934).
+
+**D-29z104:** round 139-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (ახალი ობიექტი `studioLaneStrings` და `selectedClipDetail`), `ArrangementLane.tsx` (import და §1.1-ის 22 ხაზი), `StudioWorkspace.tsx` (l.331 selector და l.2576–2579), `strings.test.ts` (ST31-ის key, ST33 → [], ST36–ST37), 12 pin ფაილი (მხოლოდ ჩამოთვლილი ხაზები, role-name regex-ებისა და aria selector-ების ჩათვლით), doc 113 (l.21/74), doc 114 (l.4/72/76), ახალი `lane-strings-ui.test.tsx` და ახალი doc 115. სხვა ყველაფერი გაყინულია (`tmp/studio-real-loop/b-round-138-r139-tree-sha256.txt`, 937).
 
 **D-29z103:** round 138-ში A-ს ეკუთვნის `app/lib/arrangement/strings.ts` (1 ახალი ობიექტი `studioClipStrings`), `ArrangementClip.tsx` (import და §1.1-ის 25 ხაზი), `ArrangementContext.tsx` (მხოლოდ import და l.1761), `strings.test.ts` (ST13-ის ერთი ჩანაწერის წაშლა, ST33-ის სათაური, ST34–ST35), 17 pin ფაილი (მხოლოდ ჩამოთვლილი ხაზები, title selector-ების ჩათვლით), doc 113 (l.4/21/70/74/75), ახალი `clip-strings-ui.test.tsx` და ახალი doc 114. სხვა ყველაფერი გაყინულია (`tmp/studio-real-loop/b-round-137-r138-tree-sha256.txt`, 931).
 

@@ -1,0 +1,22 @@
+const X = require('./lib122.cjs'); const { L, sleep } = X;
+(async () => {
+  const b = await L.launch(); const net = [];
+  const { page: P } = await L.openStudio(b, X.VPS[1440], 'dbgsel', net); await L.setSnapOff(P);
+  const cnt = () => P.evaluate(() => [...document.querySelectorAll('[data-clip-id]')].filter((e) => /ring-brand/.test(e.className)).map(e=>e.dataset.clipStart));
+  const add = async (src, lane, t) => { await P.click(L.nameSel(lane)); await sleep(200); await L.blur(P); await P.keyboard.press('Home'); await P.focus('[data-testid=arrangement-playhead-handle]'); for (let i=0;i<t*10;i++) await P.keyboard.press('ArrowRight'); await L.blur(P); const o = P.locator(`[role=option][data-source-id="${src}"]`); await o.focus(); await P.keyboard.press('Enter'); await sleep(800); await L.blur(P); };
+  await add('demo-soft-impact','music',4); await add('demo-soft-impact','stems',10);
+  const ids = await P.evaluate(() => [...document.querySelectorAll('[data-clip-id]')].map(e=>e.dataset.clipId));
+  const log = [];
+  log.push(['after add', await cnt()]);
+  await L.selectClip(P, ids[0]); log.push(['click a', await cnt()]);
+  await L.selectClip(P, ids[1], ['Control']); log.push(['ctrl b', await cnt()]);
+  await L.blur(P); await P.keyboard.press('ArrowRight'); await sleep(500); log.push(['nudge', await cnt()]);
+  await L.blur(P); await P.keyboard.press('Control+z'); await sleep(500); log.push(['undo', await cnt(), await L.status(P)]);
+  await L.blur(P); await P.keyboard.press('Escape'); await sleep(400); log.push(['esc', await cnt()]);
+  await L.selectClip(P, ids[0]); log.push(['click a', await cnt()]);
+  await L.selectClip(P, ids[1], ['Control']); log.push(['ctrl b', await cnt(), await L.status(P)]);
+  await L.selectClip(P, ids[1], ['Control']); log.push(['ctrl b again', await cnt(), await L.status(P)]);
+  await L.selectClip(P, ids[1], ['Meta']); log.push(['meta b', await cnt(), await L.status(P)]);
+  await P.screenshot({path: L.SHOTS + '/dbgsel.png'});
+  console.log(JSON.stringify(log, null, 1)); await b.close();
+})();

@@ -1,0 +1,1034 @@
+import {
+  type ChangeEvent,
+  type DragEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react';
+import {
+  formatArrangementTime,
+  GESTURE_EDIT_BLOCKED_MESSAGE,
+  type LibraryDragSource,
+  useArrangement,
+} from '~/contexts/ArrangementContext';
+import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
+import { FADER_SHIFT_FINE_DIVISOR } from '~/lib/arrangement/fader';
+import {
+  clipEdgeTargets,
+  gridLinesVisible,
+  resolveSnapStep,
+  snapMoveStartToGridOrEdges,
+  snapTimeToGrid,
+} from '~/lib/arrangement/grid';
+import { TRACK_GROUP_INDENT_PX } from '~/lib/arrangement/groups';
+import { canPlaceLibraryClip, LIBRARY_DRAG_MIME, libraryDropTime } from '~/lib/arrangement/library';
+import { markerSnapTimes } from '~/lib/arrangement/markers';
+import { formatTrackPan, TRACK_PAN_STEPS, trackPanValue } from '~/lib/arrangement/model';
+import {
+  stepTrackHeight,
+  TRACK_DEFAULT_HEIGHT_PX,
+  TRACK_MAX_HEIGHT_PX,
+  trackMinHeight,
+  trackRowHeight,
+} from '~/lib/arrangement/panels';
+import {
+  formatTrackVolumeDb,
+  formatTrackVolumeReadout,
+  TRACK_VOLUME_DB_DEFAULT,
+  TRACK_VOLUME_DB_MAX,
+  TRACK_VOLUME_DB_MIN,
+  TRACK_VOLUME_DB_STEP,
+  trackVolumeFromDb,
+  trackVolumeSliderDb,
+} from '~/lib/arrangement/track-volume-db';
+import { audioLaneDropMessage } from '~/lib/arrangement/video';
+import { cn } from '~/lib/utils';
+import type { ArrangementTrack } from '~/types/arrangement';
+import { ArrangementClipView } from './ArrangementClip';
+import { ArrangementTrackMeter } from './ArrangementTrackMeter';
+
+export const ARRANGEMENT_HEADER_WIDTH_PX = 224;
+export const TRACK_HEADER_PADDING_X_PX = 8;
+
+const VIDEO_MIX_LABEL = 'ვიდეოს ორიგინალი ხმა';
+const VIDEO_IMPORT_LABEL = '＋ საკუთარი ვიდეო';
+const TRACK_FOLD_TITLE = 'დაკეცვა / გახსნა';
+const TRACK_HEADER_FULL_MIN_PX = 80;
+const TRACK_HEADER_REGULAR_MIN_PX = 60;
+
+export type TrackHeightChangeSource = 'drag' | 'key';
+
+export interface TrackRowSelectModifiers {
+  toggle: boolean;
+  range: boolean;
+}
+
+type TrackHeaderDensity = 'folded' | 'tight' | 'regular' | 'full';
+
+function trackHeaderDensity(height: number, folded: boolean): TrackHeaderDensity {
+  if (folded) {
+    return 'folded';
+  }
+  if (height >= TRACK_HEADER_FULL_MIN_PX) {
+    return 'full';
+  }
+  return height >= TRACK_HEADER_REGULAR_MIN_PX ? 'regular' : 'tight';
+}
+
+interface LibraryDropGhost {
+  start: number;
+  duration: number;
+  blocked: boolean;
+  refused: boolean;
+  notReady: boolean;
+}
+
+function hasDraggedFiles(event: DragEvent<HTMLElement>): boolean {
+  return Array.from(event.dataTransfer.types).includes('Files');
+}
+
+function hasLibrarySource(event: DragEvent<HTMLElement>): boolean {
+  return Array.from(event.dataTransfer.types).includes(LIBRARY_DRAG_MIME);
+}
+
+interface ArrangementLaneProps {
+  track: ArrangementTrack;
+  timelineWidth: number;
+  onBackgroundPointerDown: (event: PointerEvent<HTMLDivElement>, trackId: string) => void;
+  height?: number;
+  folded?: boolean;
+  isMotionArmed?: boolean;
+  onToggleTrackFold?: (trackId: string) => void;
+  onChangeTrackHeight?: (trackId: string, height: number, source: TrackHeightChangeSource) => void;
+  onSnapshotTrackLayout?: (trackId: string) => () => void;
+  gridSeconds?: number;
+  snapSeconds?: number | null;
+  onGridMenuRequest?: (event: MouseEvent<HTMLDivElement>, trackId: string) => void;
+  selected?: boolean;
+  depth?: number;
+  onSelectTrack?: (trackId: string, modifiers: TrackRowSelectModifiers) => void;
+  envelopeMode?: boolean;
+  waveformZoom?: number;
+}
+
+export function ArrangementLane({
+  track,
+  timelineWidth,
+  onBackgroundPointerDown,
+  height = TRACK_DEFAULT_HEIGHT_PX,
+  folded = false,
+  isMotionArmed = false,
+  onToggleTrackFold,
+  onChangeTrackHeight,
+  onSnapshotTrackLayout,
+  gridSeconds,
+  snapSeconds = null,
+  onGridMenuRequest,
+  selected = false,
+  depth = 0,
+  onSelectTrack,
+  envelopeMode = false,
+  waveformZoom = 1,
+}: ArrangementLaneProps) {
+  const {
+    arrangement,
+    collection,
+    sourcePeaks,
+    sourceDurations,
+    pxPerSecond,
+    selectedClipIds,
+    range,
+    activeTrackId,
+    getArrangement,
+    previewArrangement,
+    commitArrangement,
+    selectClip,
+    toggleClipSelection,
+    getSelectedClipIds,
+    setTimeRange,
+    setActiveTrack,
+    seekTo,
+    setStatus,
+    toggleTrackMute,
+    toggleTrackSolo,
+    previewTrackVolume,
+    commitTrackVolume,
+    beginTrackVolumeGesture,
+    blurTrackVolume,
+    setTrackPan,
+    beginTrackPanGesture,
+    previewTrackPan,
+    commitTrackPan,
+    cancelTrackPan,
+    isPointerGestureActive,
+    videoSources,
+    importVideoFiles,
+    claimPointerGesture,
+    getLibraryDragSource,
+    dropLibrarySource,
+    clipLaneDrag,
+    setClipLaneDrag,
+  } = useArrangement();
+  const [isFileDragOver, setIsFileDragOver] = useState(false);
+  const [libraryGhost, setLibraryGhost] = useState<LibraryDropGhost | null>(null);
+  const [isHeightDragging, setIsHeightDragging] = useState(false);
+  const [panDraft, setPanDraft] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const heightDragCleanupRef = useRef<(() => void) | null>(null);
+  const panDragCleanupRef = useRef<(() => void) | null>(null);
+  const panDragPointerRef = useRef<number | null>(null);
+  const panBlurSuppressionCleanupRef = useRef<(() => void) | null>(null);
+  const panSliderRef = useRef<HTMLInputElement | null>(null);
+  const volumeGestureStartRef = useRef<{ volume: number; sliderDb: number } | null>(null);
+  const laneBodyRef = useRef<HTMLDivElement>(null);
+  const laneBodyId = useId();
+  const trackHeaderRef = useRef<HTMLDivElement>(null);
+  const heightHandleRef = useRef<HTMLDivElement>(null);
+  const density = trackHeaderDensity(height, folded);
+  const isCompactHeader = density === 'folded' || density === 'tight';
+  const clips = arrangement.clips.filter((clip) => clip.trackId === track.id);
+  const isActive = activeTrackId === track.id;
+  const isVideo = track.kind === 'video';
+  const mixLabel = isVideo ? VIDEO_MIX_LABEL : track.name;
+  const storedPan = trackPanValue(track);
+  const displayPan = panDraft ?? storedPan;
+  const panText = formatTrackPan(displayPan);
+  const volumeText = formatTrackVolumeDb(track.volume);
+  const laneGhosts = clipLaneDrag?.ghosts.filter((ghost) => ghost.trackId === track.id) ?? [];
+  const sourceTitle = (sourceId: string) =>
+    videoSources.get(sourceId)?.name ??
+    collection.sources.find((source) => source.id === sourceId)?.title ??
+    sourceId;
+
+  const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = '';
+    importVideoFiles(files);
+  };
+
+  const libraryDropStart = (
+    event: DragEvent<HTMLDivElement>,
+    dragged: LibraryDragSource | null,
+  ): number => {
+    const raw = libraryDropTime({
+      clientX: event.clientX,
+      laneLeft: (laneBodyRef.current ?? event.currentTarget).getBoundingClientRect().left,
+      pxPerSecond,
+    });
+    const step = resolveSnapStep(snapSeconds, gridSeconds, event.altKey);
+    if (step === null) {
+      return raw;
+    }
+    if (isVideo || dragged === null) {
+      return snapTimeToGrid(raw, step);
+    }
+    const arrangement = getArrangement();
+    const { startEdges, endEdges } = clipEdgeTargets(
+      arrangement.clips,
+      '',
+      track.id,
+      markerSnapTimes(arrangement),
+    );
+    return snapMoveStartToGridOrEdges(raw, dragged.duration, step, startEdges, endEdges);
+  };
+
+  const handleLibraryDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const dragged = getLibraryDragSource();
+    const start = libraryDropStart(event, dragged);
+    const blocked =
+      !isVideo &&
+      dragged !== null &&
+      !canPlaceLibraryClip(getArrangement(), {
+        trackId: track.id,
+        start,
+        duration: dragged.duration,
+      });
+    event.dataTransfer.dropEffect = blocked ? 'none' : 'copy';
+    const next: LibraryDropGhost = {
+      start,
+      duration: dragged?.duration ?? 0,
+      blocked,
+      refused: isVideo,
+      notReady: !isVideo && dragged === null,
+    };
+    setLibraryGhost((current) =>
+      current &&
+      current.start === next.start &&
+      current.duration === next.duration &&
+      current.blocked === next.blocked &&
+      current.refused === next.refused &&
+      current.notReady === next.notReady
+        ? current
+        : next,
+    );
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (hasLibrarySource(event)) {
+      handleLibraryDragOver(event);
+      return;
+    }
+    if (!hasDraggedFiles(event)) {
+      return;
+    }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    setIsFileDragOver(true);
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    const next = event.relatedTarget;
+    if (
+      next instanceof Node &&
+      (laneBodyRef.current?.contains(next) || heightHandleRef.current?.contains(next))
+    ) {
+      return;
+    }
+    setIsFileDragOver(false);
+    setLibraryGhost(null);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    if (hasLibrarySource(event)) {
+      event.preventDefault();
+      setLibraryGhost(null);
+      const dragged = getLibraryDragSource();
+      dropLibrarySource(track.id, libraryDropStart(event, dragged));
+      return;
+    }
+    if (!hasDraggedFiles(event)) {
+      return;
+    }
+    event.preventDefault();
+    setIsFileDragOver(false);
+    const files = Array.from(event.dataTransfer.files);
+    if (files.length === 0) {
+      return;
+    }
+    if (isVideo) {
+      importVideoFiles(files);
+      return;
+    }
+    setStatus(audioLaneDropMessage(files));
+  };
+
+  useEffect(() => () => heightDragCleanupRef.current?.(), []);
+
+  useEffect(() => () => panDragCleanupRef.current?.(), []);
+
+  useEffect(() => () => panBlurSuppressionCleanupRef.current?.(), []);
+
+  const suppressPanPointerAfterBlur = (pointerId: number) => {
+    panBlurSuppressionCleanupRef.current?.();
+    const release = (end: globalThis.PointerEvent) => {
+      if (end.pointerId === pointerId) {
+        clear();
+      }
+    };
+    function clear() {
+      window.removeEventListener('pointerup', release);
+      window.removeEventListener('pointercancel', release);
+      if (panBlurSuppressionCleanupRef.current === clear) {
+        panBlurSuppressionCleanupRef.current = null;
+      }
+    }
+    window.addEventListener('pointerup', release);
+    window.addEventListener('pointercancel', release);
+    panBlurSuppressionCleanupRef.current = clear;
+  };
+
+  const beginPanPointerDrag = (pointerId: number): boolean => {
+    if (!beginTrackPanGesture(track.id, pointerId)) {
+      return false;
+    }
+    panDragCleanupRef.current?.();
+    panBlurSuppressionCleanupRef.current?.();
+    const finish = (end: globalThis.PointerEvent) => {
+      if (end.pointerId === pointerId) {
+        cleanup();
+      }
+    };
+    function cleanup() {
+      window.removeEventListener('pointerup', finish);
+      window.removeEventListener('pointercancel', finish);
+      window.removeEventListener('blur', cleanup);
+      if (panDragCleanupRef.current === cleanup) {
+        panDragCleanupRef.current = null;
+        panDragPointerRef.current = null;
+      }
+      setPanDraft(null);
+    }
+    window.addEventListener('pointerup', finish);
+    window.addEventListener('pointercancel', finish);
+    window.addEventListener('blur', cleanup);
+    panDragCleanupRef.current = cleanup;
+    panDragPointerRef.current = pointerId;
+    return true;
+  };
+
+  const refuseFaderPress = () => setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
+
+  const panFaderDrag = useRelativeFaderDrag({
+    min: -TRACK_PAN_STEPS,
+    max: TRACK_PAN_STEPS,
+    step: 1,
+    readStoredValue: () => {
+      const stored = getArrangement().tracks.find((entry) => entry.id === track.id);
+      return Math.round((stored ? trackPanValue(stored) : 0) * TRACK_PAN_STEPS);
+    },
+    isPointerGestureActive,
+    beginGesture: beginPanPointerDrag,
+    previewValue: (steps) => {
+      const pan = steps / TRACK_PAN_STEPS;
+      setPanDraft(pan);
+      previewTrackPan(track.id, pan);
+    },
+    refuseGesture: refuseFaderPress,
+  });
+
+  const readStoredTrackVolume = () =>
+    getArrangement().tracks.find((entry) => entry.id === track.id)?.volume ?? track.volume;
+
+  const volumeFaderDrag = useRelativeFaderDrag({
+    min: TRACK_VOLUME_DB_MIN,
+    max: TRACK_VOLUME_DB_MAX,
+    step: TRACK_VOLUME_DB_STEP,
+    fineDivisor: FADER_SHIFT_FINE_DIVISOR,
+    readStoredValue: () => trackVolumeSliderDb(readStoredTrackVolume()),
+    isPointerGestureActive,
+    beginGesture: (pointerId) => {
+      if (!beginTrackVolumeGesture(track.id, pointerId)) {
+        return false;
+      }
+      const volume = readStoredTrackVolume();
+      volumeGestureStartRef.current = { volume, sliderDb: trackVolumeSliderDb(volume) };
+      return true;
+    },
+    previewValue: (sliderDb) => {
+      const start = volumeGestureStartRef.current;
+      previewTrackVolume(
+        track.id,
+        start && start.sliderDb === sliderDb ? start.volume : trackVolumeFromDb(sliderDb),
+      );
+    },
+    refuseGesture: refuseFaderPress,
+  });
+
+  const attachPanFaderDrag = panFaderDrag.ref;
+  const panSliderCallbackRef = useCallback(
+    (element: HTMLInputElement | null) => {
+      panSliderRef.current = element;
+      attachPanFaderDrag(element);
+    },
+    [attachPanFaderDrag],
+  );
+
+  const resetTrackVolume = () => {
+    previewTrackVolume(track.id, trackVolumeFromDb(TRACK_VOLUME_DB_DEFAULT));
+    commitTrackVolume(track.id);
+  };
+
+  const handlePanChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (panBlurSuppressionCleanupRef.current) {
+      return;
+    }
+    const pan = Number(event.target.value) / TRACK_PAN_STEPS;
+    if (panDragCleanupRef.current && isPointerGestureActive()) {
+      setPanDraft(pan);
+      previewTrackPan(track.id, pan);
+      return;
+    }
+    panDragCleanupRef.current?.();
+    setTrackPan(track.id, pan);
+  };
+
+  const handlePanPointerEnd = (event: PointerEvent<HTMLInputElement>) => {
+    const dragPointer = panDragPointerRef.current;
+    if (dragPointer !== null && event.pointerId !== dragPointer) {
+      return;
+    }
+    commitTrackPan(track.id);
+    panDragCleanupRef.current?.();
+  };
+
+  const handlePanBlur = () => {
+    if (panDragCleanupRef.current) {
+      const cancelledPointer = panDragPointerRef.current;
+      if (cancelledPointer !== null) {
+        suppressPanPointerAfterBlur(cancelledPointer);
+      }
+      cancelTrackPan(track.id);
+      panDragCleanupRef.current();
+    }
+  };
+
+  const handlePanKeyDown = () => {
+    panBlurSuppressionCleanupRef.current?.();
+  };
+
+  const isOverLaneBody = (event: DragEvent<HTMLDivElement>) => {
+    const body = laneBodyRef.current;
+    const header = trackHeaderRef.current;
+    if (!body || !header) {
+      return false;
+    }
+    return (
+      event.clientX >=
+      Math.max(body.getBoundingClientRect().left, header.getBoundingClientRect().right)
+    );
+  };
+
+  const handleHandleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (isOverLaneBody(event)) {
+      handleDragOver(event);
+      return;
+    }
+    setIsFileDragOver(false);
+    setLibraryGhost(null);
+  };
+
+  const handleHandleDrop = (event: DragEvent<HTMLDivElement>) => {
+    if (isOverLaneBody(event)) {
+      handleDrop(event);
+    }
+  };
+
+  const toggleTrackFold = () => onToggleTrackFold?.(track.id);
+
+  const handleFoldKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== ' ') {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) {
+      toggleTrackFold();
+    }
+  };
+
+  const handleFoldKeyUp = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === ' ') {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
+  const handleHeightKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (heightDragCleanupRef.current) {
+      return;
+    }
+    if (folded) {
+      toggleTrackFold();
+      return;
+    }
+    onChangeTrackHeight?.(
+      track.id,
+      stepTrackHeight(track.kind, height, event.key === 'ArrowDown' ? 1 : -1),
+      'key',
+    );
+  };
+
+  const handleHeightPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || event.buttons === 0) {
+      return;
+    }
+    if (folded) {
+      return;
+    }
+    const pointerId = event.pointerId;
+    let restoreLayout: (() => void) | null = null;
+    const releaseGesture = claimPointerGesture(pointerId, () => {
+      restoreLayout?.();
+      cleanup();
+    });
+    if (!releaseGesture) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    heightDragCleanupRef.current?.();
+    restoreLayout = onSnapshotTrackLayout?.(track.id) ?? null;
+    const startY = event.clientY;
+    const startHeight = height;
+    let hasMoved = false;
+    const handleMove = (move: globalThis.PointerEvent) => {
+      if (move.pointerId !== pointerId || (!hasMoved && move.clientY === startY)) {
+        return;
+      }
+      hasMoved = true;
+      onChangeTrackHeight?.(track.id, startHeight + (move.clientY - startY), 'drag');
+    };
+    const finish = (end: globalThis.PointerEvent) => {
+      if (end.pointerId !== pointerId) {
+        return;
+      }
+      if (end.type === 'pointercancel') {
+        restoreLayout?.();
+      }
+      cleanup();
+    };
+    function cleanup() {
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerup', finish);
+      window.removeEventListener('pointercancel', finish);
+      if (heightDragCleanupRef.current === cleanup) {
+        heightDragCleanupRef.current = null;
+      }
+      setIsHeightDragging(false);
+      releaseGesture?.();
+    }
+    window.addEventListener('pointermove', handleMove);
+    window.addEventListener('pointerup', finish);
+    window.addEventListener('pointercancel', finish);
+    heightDragCleanupRef.current = cleanup;
+    setIsHeightDragging(true);
+  };
+
+  const muteButton = (
+    <button
+      type="button"
+      aria-pressed={track.mute}
+      aria-label={`Mute — ${mixLabel}`}
+      title="Mute"
+      onClick={() => toggleTrackMute(track.id)}
+      className={cn(
+        'h-6 w-6 shrink-0 rounded-sm border text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+        track.mute
+          ? 'border-accent bg-accent text-background'
+          : 'border-outline text-muted hover:text-foreground',
+      )}
+    >
+      M
+    </button>
+  );
+
+  const soloButton = (
+    <button
+      type="button"
+      aria-pressed={track.solo}
+      aria-label={`Solo — ${mixLabel} (Ctrl/Cmd+click ამატებს)`}
+      title="Solo (Ctrl/Cmd+click ამატებს)"
+      onClick={(event) => toggleTrackSolo(track.id, event.ctrlKey || event.metaKey)}
+      className={cn(
+        'h-6 w-6 shrink-0 rounded-sm border text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+        track.solo
+          ? 'border-brand bg-brand text-brand-foreground'
+          : 'border-outline text-muted hover:text-foreground',
+      )}
+    >
+      S
+    </button>
+  );
+
+  const gridPeriodPx =
+    gridSeconds !== undefined && gridLinesVisible(gridSeconds, pxPerSecond)
+      ? gridSeconds * pxPerSecond
+      : null;
+  const gridLinesState =
+    gridSeconds === undefined ? undefined : gridPeriodPx === null ? 'hidden' : 'visible';
+
+  return (
+    <div
+      className={cn(
+        'relative flex border-b border-outline',
+        isMotionArmed &&
+          !isHeightDragging &&
+          'motion-safe:transition-[height] motion-safe:duration-300',
+      )}
+      style={{ height: trackRowHeight(height, folded) }}
+      data-track-id={track.id}
+      data-track-folded={folded ? 'true' : 'false'}
+      data-track-selected={selected ? 'true' : undefined}
+    >
+      <div
+        className={cn(
+          'sticky left-0 z-20 flex min-h-0 shrink-0 flex-col justify-center-safe overflow-hidden border-r border-l-4 border-r-outline bg-surface px-2 pb-1.5',
+          density === 'folded' ? 'pt-0' : density === 'tight' ? 'gap-0.5 pt-0' : 'gap-1 pt-0.5',
+          isActive ? 'border-l-brand' : 'border-l-transparent',
+        )}
+        ref={trackHeaderRef}
+        style={{
+          width: ARRANGEMENT_HEADER_WIDTH_PX,
+          paddingLeft:
+            depth > 0 ? TRACK_HEADER_PADDING_X_PX + depth * TRACK_GROUP_INDENT_PX : undefined,
+        }}
+        data-testid="arrangement-track-header"
+      >
+        <div className="flex min-w-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={toggleTrackFold}
+            onKeyDown={handleFoldKeyDown}
+            onKeyUp={handleFoldKeyUp}
+            aria-expanded={!folded}
+            aria-controls={laneBodyId}
+            aria-label={`${track.name} დაკეცვა ან გახსნა`}
+            title={TRACK_FOLD_TITLE}
+            className="-mr-0.5 -ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-sm leading-none text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
+            data-testid="arrangement-track-fold"
+          >
+            {folded ? '▸' : '▾'}
+          </button>
+          <button
+            type="button"
+            className={cn(
+              'min-w-0 flex-1 select-none truncate rounded-sm text-left text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand',
+              selected && 'bg-brand/20',
+            )}
+            onClick={(event) => {
+              setActiveTrack(track.id);
+              onSelectTrack?.(track.id, {
+                toggle: event.ctrlKey || event.metaKey,
+                range: event.shiftKey,
+              });
+            }}
+            aria-pressed={isActive}
+            aria-label={`${track.name} — აქტიური ხაზის არჩევა${selected ? ', მონიშნული' : ''}`}
+          >
+            {track.name}
+            {isActive && !folded ? (
+              <span className="ml-1 text-xs text-brand">· აქტიური</span>
+            ) : null}
+          </button>
+          {isVideo ? (
+            <>
+              {isCompactHeader ? (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  aria-label={VIDEO_IMPORT_LABEL}
+                  title="საკუთარი ვიდეო"
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-brand text-xs text-brand hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
+                >
+                  ＋
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="shrink-0 rounded-sm border border-brand px-1 py-0.5 text-xs text-brand hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                >
+                  {VIDEO_IMPORT_LABEL}
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="video/*,.mov,.mkv,.m4v"
+                multiple
+                hidden
+                onChange={handleFileInputChange}
+                data-testid="arrangement-video-input"
+              />
+            </>
+          ) : null}
+          {!isVideo && !folded ? (
+            <>
+              <input
+                ref={panSliderCallbackRef}
+                type="range"
+                min={-TRACK_PAN_STEPS}
+                max={TRACK_PAN_STEPS}
+                step={1}
+                value={Math.round(displayPan * TRACK_PAN_STEPS)}
+                aria-label={`Pan — ${track.name}`}
+                aria-valuetext={panText}
+                onPointerDown={panFaderDrag.onPointerDown}
+                onChange={handlePanChange}
+                onPointerUp={handlePanPointerEnd}
+                onLostPointerCapture={handlePanPointerEnd}
+                onBlur={handlePanBlur}
+                onKeyDown={handlePanKeyDown}
+                onDoubleClick={() => setTrackPan(track.id, 0)}
+                className="h-1 w-12 shrink-0 touch-none accent-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                data-testid="arrangement-track-pan"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (setTrackPan(track.id, 0)) {
+                    panSliderRef.current?.focus();
+                  }
+                }}
+                disabled={storedPan === 0}
+                aria-label={`Pan-ის ცენტრში დაბრუნება — ${track.name}`}
+                title="Pan → C"
+                className="w-7 shrink-0 rounded-sm text-right text-xs tabular-nums text-muted enabled:hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                data-testid="arrangement-track-pan-reset"
+              >
+                {panText}
+              </button>
+            </>
+          ) : null}
+          {folded ? (
+            <>
+              {muteButton}
+              {soloButton}
+            </>
+          ) : null}
+        </div>
+        {folded ? null : (
+          <div className="flex items-center gap-1">
+            {muteButton}
+            {soloButton}
+            <input
+              ref={volumeFaderDrag.ref}
+              type="range"
+              min={TRACK_VOLUME_DB_MIN}
+              max={TRACK_VOLUME_DB_MAX}
+              step={TRACK_VOLUME_DB_STEP}
+              value={trackVolumeSliderDb(track.volume)}
+              aria-label={`Volume — ${mixLabel}`}
+              aria-valuetext={volumeText}
+              title={isVideo && density !== 'full' ? VIDEO_MIX_LABEL : undefined}
+              onChange={(event) =>
+                previewTrackVolume(track.id, trackVolumeFromDb(Number(event.target.value)))
+              }
+              onPointerDown={volumeFaderDrag.onPointerDown}
+              onDoubleClick={resetTrackVolume}
+              onPointerUp={() => commitTrackVolume(track.id)}
+              onLostPointerCapture={() => commitTrackVolume(track.id)}
+              onKeyUp={() => {
+                if (!isPointerGestureActive()) {
+                  commitTrackVolume(track.id);
+                }
+              }}
+              onBlur={() => blurTrackVolume(track.id)}
+              className="h-1 min-w-0 flex-1 touch-none accent-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            />
+            <span
+              title={volumeText}
+              className="w-10 shrink-0 whitespace-nowrap text-right text-xs tabular-nums text-muted"
+            >
+              {formatTrackVolumeReadout(track.volume)}
+            </span>
+          </div>
+        )}
+        {isVideo && density === 'full' ? <p className="text-xs text-muted">ორიგინალი ხმა</p> : null}
+        <ArrangementTrackMeter trackId={track.id} trackName={track.name} />
+      </div>
+      <div
+        ref={laneBodyRef}
+        id={laneBodyId}
+        className={cn(
+          'relative isolate shrink-0',
+          isActive ? 'bg-brand/5' : 'bg-background',
+          isFileDragOver &&
+            (isVideo ? 'ring-2 ring-inset ring-brand' : 'ring-2 ring-inset ring-accent'),
+        )}
+        style={{
+          width: timelineWidth,
+          ...(gridPeriodPx === null
+            ? {}
+            : {
+                backgroundImage: `repeating-linear-gradient(to right, var(--color-outline-light) 0 1px, transparent 1px ${gridPeriodPx}px)`,
+              }),
+        }}
+        data-grid-seconds={gridSeconds}
+        data-grid-lines={gridLinesState}
+        onPointerDown={(event) => onBackgroundPointerDown(event, track.id)}
+        onContextMenu={(event) => {
+          event.preventDefault();
+          onGridMenuRequest?.(event, track.id);
+        }}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        data-testid={isVideo ? 'arrangement-video-dropzone' : undefined}
+      >
+        {isVideo && clips.length === 0 && !isFileDragOver ? (
+          <p className="pointer-events-none sticky left-56 flex h-full max-w-md items-center px-3 text-sm text-muted">
+            ვიდეო არ არის — „＋ საკუთარი ვიდეო“ ან ჩააგდე ფაილი აქ
+          </p>
+        ) : null}
+        {isFileDragOver ? (
+          <p
+            className={cn(
+              'pointer-events-none sticky left-56 z-30 flex h-full max-w-md items-center px-3 text-sm font-medium',
+              isVideo ? 'text-brand' : 'text-accent',
+            )}
+            data-testid={isVideo ? 'arrangement-video-drop-hint' : undefined}
+          >
+            {isVideo ? 'ჩააგდე ვიდეო აქ' : 'აქ ვიდეო არ ემატება — ჩააგდე ვიდეოხაზზე'}
+          </p>
+        ) : null}
+        {libraryGhost ? (
+          <div
+            className={cn(
+              'pointer-events-none absolute top-1 bottom-1 z-30 flex min-w-24 items-start overflow-visible rounded-sm border-2 border-dashed px-1 text-xs font-medium tabular-nums',
+              libraryGhost.blocked || libraryGhost.refused || libraryGhost.notReady
+                ? 'border-accent bg-accent/20 text-accent'
+                : 'border-brand bg-brand/15 text-brand',
+            )}
+            style={{
+              left: libraryGhost.start * pxPerSecond,
+              width: Math.max(2, libraryGhost.duration * pxPerSecond),
+            }}
+            data-testid="arrangement-drop-ghost"
+            data-blocked={
+              libraryGhost.blocked || libraryGhost.refused || libraryGhost.notReady
+                ? 'true'
+                : 'false'
+            }
+          >
+            <span className="whitespace-nowrap rounded-sm bg-background/80 px-1">
+              {formatArrangementTime(libraryGhost.start)}
+              {libraryGhost.refused
+                ? ' · აუდიო ვიდეოხაზზე არ ემატება'
+                : libraryGhost.notReady
+                  ? ' · ხმა ჯერ არ ჩატვირთულა'
+                  : libraryGhost.blocked
+                    ? ' · აქ ადგილი არ არის'
+                    : ''}
+            </span>
+          </div>
+        ) : null}
+        {laneGhosts.map((ghost) => {
+          const ghostClip = arrangement.clips.find((entry) => entry.id === ghost.clipId);
+          return (
+            <div
+              key={`lane-ghost-${ghost.clipId}-${ghost.blocked ? 'blocked' : 'valid'}`}
+              className={cn(
+                'pointer-events-none absolute top-1 bottom-1 z-30 flex items-end overflow-hidden rounded-sm border-2 border-dashed text-xs font-medium',
+                ghost.blocked
+                  ? 'border-accent bg-accent/20 text-accent'
+                  : 'border-brand bg-brand/20 text-brand',
+              )}
+              style={{
+                left: ghost.start * pxPerSecond,
+                width: Math.max(2, ghost.duration * pxPerSecond),
+              }}
+              data-testid="arrangement-lane-move-ghost"
+              data-blocked={ghost.blocked ? 'true' : 'false'}
+              data-ghost-start={ghost.start.toFixed(3)}
+            >
+              <span
+                className="flex min-w-0 max-w-full items-baseline gap-1 overflow-hidden rounded-sm bg-background/80 px-1"
+                data-testid="arrangement-lane-move-ghost-label"
+              >
+                <span className="shrink-0 whitespace-nowrap tabular-nums">
+                  {formatArrangementTime(ghost.start)}
+                </span>
+                <span className="min-w-0 truncate">
+                  {ghostClip ? sourceTitle(ghostClip.sourceId) : ''}
+                </span>
+              </span>
+            </div>
+          );
+        })}
+        {clips.map((clip) => {
+          const clipRange =
+            range &&
+            !range.allTracks &&
+            range.trackId === clip.trackId &&
+            range.start >= clip.start - 1e-4 &&
+            range.end <= clip.start + clip.duration + 1e-4
+              ? range
+              : null;
+          const videoSource = isVideo ? videoSources.get(clip.sourceId) : undefined;
+          return (
+            <ArrangementClipView
+              key={clip.id}
+              clip={clip}
+              title={sourceTitle(clip.sourceId)}
+              peaks={sourcePeaks.get(clip.sourceId)}
+              isVideo={isVideo}
+              audioNote={
+                videoSource && videoSource.audio !== 'ready'
+                  ? videoSource.audio === 'decoding'
+                    ? 'ხმა იშიფრება…'
+                    : videoSource.audio === 'error'
+                      ? 'ხმა ვერ წაიკითხა'
+                      : 'ხმა არ არის'
+                  : null
+              }
+              pxPerSecond={pxPerSecond}
+              isSelected={selectedClipIds.includes(clip.id)}
+              isLaneMoveSource={
+                clipLaneDrag?.ghosts.some((ghost) => ghost.clipId === clip.id && !ghost.blocked) ??
+                false
+              }
+              range={clipRange}
+              sourceDurations={sourceDurations}
+              getArrangement={getArrangement}
+              previewArrangement={previewArrangement}
+              commitArrangement={commitArrangement}
+              selectClip={selectClip}
+              toggleClipSelection={toggleClipSelection}
+              getSelectedClipIds={getSelectedClipIds}
+              setTimeRange={setTimeRange}
+              setActiveTrack={setActiveTrack}
+              seekTo={seekTo}
+              setStatus={setStatus}
+              claimPointerGesture={claimPointerGesture}
+              setClipLaneDrag={setClipLaneDrag}
+              folded={folded}
+              snapSeconds={snapSeconds}
+              gridSeconds={gridSeconds}
+              envelopeMode={envelopeMode}
+              waveformZoom={waveformZoom}
+            />
+          );
+        })}
+        {range?.allTracks ? (
+          <div
+            className="pointer-events-none absolute inset-y-0 z-10 border-x-2 border-foreground bg-foreground/30"
+            style={{
+              left: Math.min(range.start, range.end) * pxPerSecond,
+              width: Math.max(2, Math.abs(range.end - range.start) * pxPerSecond),
+            }}
+            aria-hidden="true"
+            data-testid="arrangement-lane-range"
+            data-range-start={Math.min(range.start, range.end).toFixed(3)}
+            data-range-end={Math.max(range.start, range.end).toFixed(3)}
+          >
+            {range.trackId === track.id ? (
+              <span className="absolute top-0 left-0 whitespace-nowrap rounded-br-sm bg-foreground px-1 text-xs font-medium text-background">
+                {formatArrangementTime(Math.min(range.start, range.end))} –{' '}
+                {formatArrangementTime(Math.max(range.start, range.end))} ·{' '}
+                {Math.abs(range.end - range.start).toFixed(3)} წმ · ყველა ხაზი
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+      {/* biome-ignore lint/a11y/useSemanticElements: a focusable resize handle needs role=separator with aria-valuenow; a native <hr> is a static, non-interactive separator */}
+      <div
+        ref={heightHandleRef}
+        role="separator"
+        tabIndex={0}
+        aria-orientation="horizontal"
+        aria-label={`${track.name} სიმაღლე`}
+        aria-valuemin={trackMinHeight(track.kind)}
+        aria-valuemax={TRACK_MAX_HEIGHT_PX}
+        aria-valuenow={height}
+        aria-valuetext={folded ? `დაკეცილია · ${height} px` : `${height} px`}
+        onPointerDown={handleHeightPointerDown}
+        onKeyDown={handleHeightKeyDown}
+        onDragOver={handleHandleDragOver}
+        onDragEnter={handleHandleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleHandleDrop}
+        className={cn(
+          folded
+            ? 'absolute inset-x-0 bottom-0 z-20 h-1.5 pointer-events-none touch-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand'
+            : 'absolute inset-x-0 bottom-0 z-20 h-1.5 cursor-row-resize touch-none hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand',
+          isHeightDragging && 'bg-accent/60',
+        )}
+        data-testid="arrangement-track-height"
+      />
+    </div>
+  );
+}

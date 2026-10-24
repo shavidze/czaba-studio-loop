@@ -1,0 +1,250 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/components/arrangement/ArrangementClip.tsx	2026-10-24 15:03:03.746067856 +0000
++++ /home/runner/czaba-project/store/app/components/arrangement/ArrangementClip.tsx	2026-10-24 15:12:31.744894083 +0000
+@@ -27,6 +27,7 @@
+   planClipLaneMove,
+   type SelectionToggleMode,
+ } from '~/lib/arrangement/selection';
++import { studioClipStrings } from '~/lib/arrangement/strings';
+ import { setVideoClipFade } from '~/lib/arrangement/video-fades';
+ import { clipWaveformScale } from '~/lib/arrangement/waveform-zoom';
+ import { cn } from '~/lib/utils';
+@@ -39,7 +40,7 @@
+ const DRAG_THRESHOLD_PX = 3;
+ const TRIM_BLOCK_TOLERANCE = 0.01;
+ const PEAK_SHAPE_MAX_COLUMNS = 4096;
+-const CLIP_FOLDED_TITLE_LINE = 'ხაზი დაკეცილია — დროის მოსანიშნად გაშალე';
++const CLIP_FOLDED_TITLE_LINE = studioClipStrings.foldedTitleLine;
+ const FADE_HANDLE_PX = 10;
+ const FADE_HANDLE_MIN_CLIP_PX = 24;
+ const CLIP_BORDER_PX = 2;
+@@ -53,10 +54,10 @@
+   out: 'Video Fade Out',
+ };
+ const VIDEO_FADE_HANDLE_TITLES: Record<ClipFadeEdge, string> = {
+-  in: 'Video Fade In — სურათი (ხმა არ იცვლება) · drag · double-click = 0',
+-  out: 'Video Fade Out — სურათი (ხმა არ იცვლება) · drag · double-click = 0',
++  in: studioClipStrings.videoFadeInTitle,
++  out: studioClipStrings.videoFadeOutTitle,
+ };
+-const CLIP_LANE_REFUSAL_KEPT_PLACE = 'კლიპი ბოლო თავისუფალ ადგილას დარჩა';
++const CLIP_LANE_REFUSAL_KEPT_PLACE = studioClipStrings.keptLastFreeSpot;
+ 
+ type ClipGestureKind = 'move' | 'trimStart' | 'trimEnd' | 'range' | 'fadeIn' | 'fadeOut';
+ 
+@@ -453,7 +454,10 @@
+       previewArrangement(next);
+       const faded = next.clips.find((entry) => entry.id === gesture.original.id);
+       setStatus(
+-        `${fadeLabels[fadeEdge]}: ${(faded ? clipFadeSeconds(faded, fadeEdge) : 0).toFixed(3)} წმ`,
++        studioClipStrings.fadePreview(
++          fadeLabels[fadeEdge],
++          (faded ? clipFadeSeconds(faded, fadeEdge) : 0).toFixed(3),
++        ),
+       );
+       return;
+     }
+@@ -582,9 +586,7 @@
+         publishLaneGhosts(gesture, []);
+       } else {
+         gesture.blocked = true;
+-        setStatus(
+-          'გადატანა დაბლოკილია — მეზობელი კლიპი ან დროის დასაწყისი. კლიპი ბოლო თავისუფალ ადგილას დარჩა.',
+-        );
++        setStatus(studioClipStrings.moveBlocked);
+         publishLaneGhosts(gesture, keptGhosts);
+       }
+       return;
+@@ -616,8 +618,8 @@
+       if (gesture.blocked) {
+         setStatus(
+           gesture.kind === 'trimStart'
+-            ? 'Trim შეჩერდა: წყაროს დასაწყისი, მეზობელი კლიპი ან მინიმალური სიგრძე (0.05 წმ).'
+-            : 'Trim შეჩერდა: წყაროს დასასრული, მეზობელი კლიპი ან მინიმალური სიგრძე (0.05 წმ).',
++            ? studioClipStrings.trimStartBlocked
++            : studioClipStrings.trimEndBlocked,
+         );
+       }
+       previewArrangement(next);
+@@ -664,11 +666,16 @@
+       }
+       const fadeLabel = fadeLabels[fadeEdge];
+       if (!commitArrangement(getArrangement(), fadeLabel, gesture.before)) {
+-        setStatus(`${fadeLabel}: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.`);
++        setStatus(studioClipStrings.historyUnchanged(fadeLabel));
+         return;
+       }
+       const faded = getArrangement().clips.find((entry) => entry.id === gesture.original.id);
+-      setStatus(`${fadeLabel}: ${(faded ? clipFadeSeconds(faded, fadeEdge) : 0).toFixed(3)} წმ.`);
++      setStatus(
++        studioClipStrings.fadeCommitted(
++          fadeLabel,
++          (faded ? clipFadeSeconds(faded, fadeEdge) : 0).toFixed(3),
++        ),
++      );
+       return;
+     }
+     if (gesture.kind === 'range') {
+@@ -697,10 +704,10 @@
+         gesture.before.tracks.find((track) => track.id === laneTarget.trackId)?.name ??
+         laneTarget.trackId;
+       const laneLabel = gesture.group
+-        ? `გადატანა (${gesture.group.ids.length})`
+-        : `გადატანა ხაზზე — ${laneName}`;
++        ? studioClipStrings.historyMoveClips(gesture.group.ids.length)
++        : studioClipStrings.historyMoveToTrack(laneName);
+       if (!commitArrangement(laneTarget.arrangement, laneLabel, gesture.before)) {
+-        setStatus(`${laneLabel}: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.`);
++        setStatus(studioClipStrings.historyUnchanged(laneLabel));
+         return;
+       }
+       const moved = laneTarget.placements.find((entry) => entry.clipId === gesture.original.id);
+@@ -710,22 +717,28 @@
+       return;
+     }
+     const label = gesture.group
+-      ? `გადატანა (${gesture.group.ids.length})`
++      ? studioClipStrings.historyMoveClips(gesture.group.ids.length)
+       : gesture.kind === 'move'
+-        ? 'კლიპის გადატანა'
++        ? studioClipStrings.historyMoveClip
+         : gesture.kind === 'trimStart'
+-          ? 'Trim — მარცხენა კიდე'
+-          : 'Trim — მარჯვენა კიდე';
++          ? studioClipStrings.trimStartLabel
++          : studioClipStrings.trimEndLabel;
+     const committed = commitArrangement(getArrangement(), label, gesture.before);
+     if (!committed) {
+-      setStatus(`${label}: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.`);
++      setStatus(studioClipStrings.historyUnchanged(label));
+       return;
+     }
+     const updated = getArrangement().clips.find((entry) => entry.id === gesture.original.id);
+     if (gesture.group) {
+       if (updated && !gesture.blocked) {
+         setStatus(
+-          `${label}: ${gesture.group.ids.length} კლიპი გადავიდა ${formatArrangementTime(Math.abs(updated.start - gesture.original.start))}-ით ${updated.start >= gesture.original.start ? 'მარჯვნივ' : 'მარცხნივ'}.`,
++          (updated.start >= gesture.original.start
++            ? studioClipStrings.groupMovedRight
++            : studioClipStrings.groupMovedLeft)({
++            label,
++            count: gesture.group.ids.length,
++            distance: formatArrangementTime(Math.abs(updated.start - gesture.original.start)),
++          }),
+         );
+       }
+       return;
+@@ -762,7 +775,7 @@
+     }
+     const fadeLabel = fadeLabels[edge];
+     if (commitArrangement(next, fadeLabel, before)) {
+-      setStatus(`${fadeLabel}: 0.000 წმ.`);
++      setStatus(studioClipStrings.fadeCommitted(fadeLabel, '0.000'));
+     }
+   };
+ 
+@@ -827,7 +840,9 @@
+               : 'bg-muted-bg text-foreground',
+         )}
+         title={
+-          folded ? `${title} — გადაადგილება\n${CLIP_FOLDED_TITLE_LINE}` : `${title} — გადაადგილება`
++          folded
++            ? `${studioClipStrings.moveTitle(title)}\n${CLIP_FOLDED_TITLE_LINE}`
++            : studioClipStrings.moveTitle(title)
+         }
+         onPointerDown={(event) => beginGesture('move', event)}
+       >
+@@ -840,7 +855,7 @@
+             'relative min-h-0 flex-1 cursor-text',
+             isVideo ? 'text-accent/70' : 'text-brand/70',
+           )}
+-          title="drag = დროის მონიშვნა · click = playhead"
++          title={studioClipStrings.rangeBodyTitle}
+           onPointerDown={(event) => beginGesture('range', event)}
+         >
+           {peakShape ? (
+@@ -917,7 +932,7 @@
+             >
+               <span className="absolute top-0 left-0 whitespace-nowrap rounded-br-sm bg-foreground px-1 text-xs font-medium text-background">
+                 {formatArrangementTime(range.start)} – {formatArrangementTime(range.end)} ·{' '}
+-                {(range.end - range.start).toFixed(3)} წმ
++                {studioClipStrings.seconds((range.end - range.start).toFixed(3))}
+               </span>
+             </div>
+           ) : null}
+@@ -944,12 +959,12 @@
+       )}
+       <div
+         className="absolute inset-y-0 left-0 z-20 w-2 cursor-ew-resize hover:bg-accent/60"
+-        title="Trim — მარცხენა კიდე"
++        title={studioClipStrings.trimStartLabel}
+         onPointerDown={(event) => beginGesture('trimStart', event)}
+       />
+       <div
+         className="absolute inset-y-0 right-0 z-20 w-2 cursor-ew-resize hover:bg-accent/60"
+-        title="Trim — მარჯვენა კიდე"
++        title={studioClipStrings.trimEndLabel}
+         onPointerDown={(event) => beginGesture('trimEnd', event)}
+       />
+     </div>
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/contexts/ArrangementContext.tsx	2026-10-24 15:03:03.746067856 +0000
++++ /home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx	2026-10-24 15:12:25.463509384 +0000
+@@ -146,6 +146,7 @@
+   reduceArrangementStatus,
+ } from '~/lib/arrangement/status-announcement';
+ import {
++  studioClipStrings,
+   studioEditStrings,
+   studioExportStrings,
+   studioLibraryStrings,
+@@ -1758,7 +1759,7 @@
+           setStatus(keyRepeat ? () => GROUP_MOVE_BLOCKED_MESSAGE : GROUP_MOVE_BLOCKED_MESSAGE);
+           return;
+         }
+-        applyEdit(moved, `გადატანა (${ids.length})`);
++        applyEdit(moved, studioClipStrings.historyMoveClips(ids.length));
+         setRange(null);
+         return;
+       }
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-137/r138-granted-start/app/lib/arrangement/strings.ts	2026-10-24 15:03:03.746497297 +0000
++++ /home/runner/czaba-project/store/app/lib/arrangement/strings.ts	2026-10-24 15:12:23.688315916 +0000
+@@ -496,3 +496,40 @@
+   selectedClipTitle: ({ title, start, length, offset }: StudioWorkspaceClipText): string =>
+     `Clip: ${title} · start ${start} · length ${length} · source offset ${offset}`,
+ };
++
++interface StudioClipGroupMoveText {
++  label: string;
++  count: number;
++  distance: string;
++}
++
++export const studioClipStrings = {
++  foldedTitleLine: 'The track is folded — unfold it to make a time selection',
++  videoFadeInTitle:
++    'Video Fade In — picture only, the sound does not change · drag · double-click = 0',
++  videoFadeOutTitle:
++    'Video Fade Out — picture only, the sound does not change · drag · double-click = 0',
++  keptLastFreeSpot: 'the clip stayed in its last free spot',
++  fadePreview: (label: string, seconds: string): string => `${label}: ${seconds} s`,
++  fadeCommitted: (label: string, seconds: string): string => `${label}: ${seconds} s.`,
++  moveBlocked:
++    'Move blocked — a neighbouring clip or the start of the timeline. The clip stayed in its last free spot.',
++  trimStartBlocked:
++    'Trim stopped: the start of the source, a neighbouring clip or the minimum length (0.05 s).',
++  trimEndBlocked:
++    'Trim stopped: the end of the source, a neighbouring clip or the minimum length (0.05 s).',
++  historyUnchanged: (label: string): string =>
++    `${label}: nothing changed — the Undo history is unchanged.`,
++  historyMoveClips: (count: number): string => `Move (${count})`,
++  historyMoveToTrack: (name: string): string => `Move to track — ${name}`,
++  historyMoveClip: 'Move clip',
++  trimStartLabel: 'Trim — left edge',
++  trimEndLabel: 'Trim — right edge',
++  groupMovedRight: ({ label, count, distance }: StudioClipGroupMoveText): string =>
++    `${label}: ${count} clips moved ${distance} to the right.`,
++  groupMovedLeft: ({ label, count, distance }: StudioClipGroupMoveText): string =>
++    `${label}: ${count} clips moved ${distance} to the left.`,
++  moveTitle: (title: string): string => `${title} — drag to move`,
++  rangeBodyTitle: 'drag = time selection · click = playhead',
++  seconds: (value: string): string => `${value} s`,
++};
