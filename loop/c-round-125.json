@@ -1,0 +1,374 @@
+{
+ "round": 125,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "allRowsRan": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T03:30:01.6904302Z",
+  "round": 125,
+  "attempt": 1,
+  "store": 200
+ },
+ "sectionsDone": [
+  "D6",
+  "D1",
+  "D2"
+ ],
+ "sectionsSpilled": [],
+ "passed": [
+  "SOURCE-SCOPE-start",
+  "D6-baseline",
+  "D1-scorecard",
+  "D2-shortcuts",
+  "G125-3",
+  "SOURCE-SCOPE-end"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G125-3 fake-Bearer 403 sub-check — backend unavailable in cloud",
+  "Ctrl+R, Ctrl+F, Ctrl+Shift+R, Ctrl+1…5 — blocked: CDP / browser-reserved (not sent)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "baselines": {
+  "label": "pre-V-0 baseline (608187f)",
+  "bbox1280": "c-round-125/out/bbox-baseline-1280.json",
+  "bbox1440": "c-round-125/out/bbox-baseline-1440.json",
+  "contrast": "c-round-125/out/contrast-baseline.json",
+  "under24List": "c-round-125/out/under24px.json",
+  "determinismMaxPx": {
+   "1280": {
+    "S0": 0,
+    "S1": 0,
+    "S2": 0
+   },
+   "1440": {
+    "S0": 0,
+    "S1": 0,
+    "S2": 0
+   }
+  },
+  "elementCounts": {
+   "1280": {
+    "S0": 103,
+    "S1": 121,
+    "S2": 130
+   },
+   "1440": {
+    "S0": 111,
+    "S1": 122,
+    "S2": 131
+   }
+  },
+  "under24px": 98,
+  "under24pxUniquePerViewport": {
+   "1280": 50,
+   "1440": 48
+  },
+  "contrastByToken": {
+   "text-dim": "53/53 computed fail 4.5 (3.08-3.67), pixel-confirmed 3.67",
+   "text-muted": "396 computed, 14 below threshold: 4 disabled (metronome 2.21 at opacity .5), selected library row meta 4.38, group-name glyph 3.10",
+   "text-foreground": "174 computed, 33 below threshold, all 33 disabled (opacity .4 -> 3.45; disabled detail fields 3.67-3.92)",
+   "text-brand": "30, 6.94-10.43, 0 fail",
+   "text-accent": "8, 4.97-9.49, 0 fail",
+   "text-brand-foreground": "4 computed 11.13, 4 on backdrop ?"
+  },
+  "S1setup": [
+   "fresh context, no storage, /studio-lab, wait for demo collection ready, decline cookie banner",
+   "Snap off (toggle if data-snap=on)",
+   "click music lane name; ruler click at 0 s (Home); focus library option demo-hero-music; Enter",
+   "click stems lane name; ruler click at 2 s; focus demo-stem-pulse; Enter",
+   "click sfx lane name; ruler click at 4 s; focus demo-soft-impact; Enter",
+   "video input setInputFiles media/beeps-6s-h264-aac.mp4 (lands 0-6 s)",
+   "ruler click at 1 s; key M (Marker 1 at 1.000)",
+   "mouse range drag on the stems clip body (65% of height) from 4 s to 2 s; Ctrl+L (loop 2.000-4.000)",
+   "click music lane name, Ctrl+click stems lane name, Ctrl+G (group «ჯგუფი 1»)",
+   "click SFX clip header (select; detail shows Soft impact)",
+   "1280 only: click detail toggle (aria-expanded false -> true), HR-1280-DETAIL-COLLAPSED",
+   "blur, mouse to (2,2); capture. S2 = click Export from S1."
+  ],
+  "notes": "zoom 40 px/s, scroll 0, dpr 1 in all states; S2 scope = document.body (dialog portalled)"
+ },
+ "scorecard": [
+  {
+   "task": "T1",
+   "czaba": {
+    "keys": 0,
+    "clicks": 0,
+    "drags": 1,
+    "path": "library item drag → SFX lane at 3 s (keyboard path: lane name + ruler + item + Enter = 3 clicks + 1 key; mouse-only: 4 clicks)"
+   },
+   "live": {
+    "count": 1,
+    "source": "Live 12 §5 Browser (F): 'Dragging and dropping content from the browser into ... tracks'; Enter loads 'onto whatever track is currently selected' — position not stated (?)"
+   },
+   "easier": "equal",
+   "why": "drag: 1 vs 1. The keyboard path is not comparable (Live does not state where Enter places the clip)."
+  },
+  {
+   "task": "T2",
+   "czaba": {
+    "keys": 0,
+    "clicks": 0,
+    "drags": 1,
+    "path": "clip header drag (same lane +1 s, or to the SFX lane); keyboard: click + → (0.1 s)"
+   },
+   "live": {
+    "count": 1,
+    "source": "§6.7 (F) 'Dragging a clip moves it to another song position or track'; 42.16 nudge ←/→; 42.13 Alt bypass"
+   },
+   "easier": "equal",
+   "why": "Same gesture; Alt snap bypass matches (3.000 → 3.370 measured)."
+  },
+  {
+   "task": "T3",
+   "czaba": {
+    "keys": 0,
+    "clicks": 0,
+    "drags": 1,
+    "path": "edge drag (end −4 s → 12 s; start +1.5 s → offset 1.5)"
+   },
+   "live": {
+    "count": 1,
+    "source": "§6.7 (F) 'Dragging a clip's left or right edge changes the clip's length'"
+   },
+   "easier": "equal",
+   "why": "1 drag on both; CZABA shows start/length/offset in the status line."
+  },
+  {
+   "task": "T4",
+   "czaba": {
+    "keys": 1,
+    "clicks": 1,
+    "drags": 0,
+    "path": "click in the clip body at 6 s (sets playhead, keeps selection) + Ctrl+E; mouse-only: select + ruler + ✂ Split = 3 clicks"
+   },
+   "live": {
+    "count": 2,
+    "source": "§6.12 (F) 'click anywhere within a clip's waveform ... then use Ctrl+E or the Split context menu option'"
+   },
+   "easier": "equal",
+   "why": "1 click + Ctrl+E on both; the Live mouse-only context menu has no CZABA counterpart (clip right-click opens the grid menu)."
+  },
+  {
+   "task": "T5",
+   "czaba": {
+    "keys": 1,
+    "clicks": 1,
+    "drags": 0,
+    "path": "select + Ctrl+D (copy lands at 18.000 right after the clip)"
+   },
+   "live": {
+    "count": 2,
+    "source": "42.5 (F) Duplicate Ctrl+D"
+   },
+   "easier": "equal",
+   "why": "Same 2 actions. No mouse-only duplicate in CZABA; Live's mouse path is not in the captured text (?)."
+  },
+  {
+   "task": "T6",
+   "czaba": {
+    "keys": 2,
+    "clicks": 0,
+    "drags": 1,
+    "path": "range drag + Z, X back; Fit 1 click; Ctrl+wheel; overview click scrolls far"
+   },
+   "live": {
+    "count": 3,
+    "source": "§6.2 (F) Z / X, +/−, Ctrl+wheel; overview drag and double-click = full; 42.16 W"
+   },
+   "easier": "equal",
+   "why": "Same keys and the same counts; Fit is a button in CZABA and W in Live (both 1 action)."
+  },
+  {
+   "task": "T7",
+   "czaba": {
+    "keys": 2,
+    "clicks": 0,
+    "drags": 1,
+    "path": "range drag 8→6 + Ctrl+L + Space; playback starts from the playhead (1 s) and wraps 7.85→6.10; to hear the loop at once +1 ruler click (4 actions)"
+   },
+   "live": {
+    "count": 3,
+    "source": "§6 (F) Ctrl+L sets the loop to the time selection; 42.20 Space; where Live playback starts relative to the loop: ?"
+   },
+   "easier": "შეუდარებელი (Live ?)",
+   "why": "Setup is 3 actions on both. The start point of playback in Live is not in the manual text, so the 'hear it now' step cannot be compared."
+  },
+  {
+   "task": "T8",
+   "czaba": {
+    "keys": 4,
+    "clicks": 1,
+    "drags": 0,
+    "path": "Clip Gain: field click + Ctrl+A + '-3' + Enter (1280: +1 click to expand the detail panel). Lane Volume: no number entry: 30 × ↓ (0.1 dB) or PageDown (−6 dB jump) or ~45 px Shift-drag (0.066 dB/px; plain 0.66 dB/px)"
+   },
+   "live": {
+    "count": "?",
+    "source": "Clip Gain: ch.8 not captured (?). Track volume: 42.6 (F) 'Type In Value 0…9', 'Confirm Value Entry Enter'"
+   },
+   "easier": "Live (Volume, F) / შეუდარებელი (Clip Gain, Live ?)",
+   "why": "For an exact −3 dB on a lane, Live accepts a typed value; CZABA needs 30 key presses or a precise drag. Clip Gain in CZABA is fast (typed field) but Live's steps are not captured."
+  },
+  {
+   "task": "T9",
+   "czaba": {
+    "keys": 0,
+    "clicks": 2,
+    "drags": 0,
+    "path": "M on SFX, S on music; plain S click is exclusive, Ctrl+click adds; Undo restores solo in one step"
+   },
+   "live": {
+    "count": 2,
+    "source": "§18 Mixing (F) Track Activator / Solo switch; 'one at a time unless Ctrl is held'; 42.19 S = Solo Selected Tracks"
+   },
+   "easier": "equal",
+   "why": "Same 2 clicks and the same exclusive/additive solo rule. Live also has the S key, CZABA does not."
+  },
+  {
+   "task": "T10",
+   "czaba": {
+    "keys": 7,
+    "clicks": 1,
+    "drags": 0,
+    "path": "ruler click 7 s + M (name field opens at once) + Ctrl+A + 'Drop' + Enter; jump: ▶ Next marker 1 click per marker (Ctrl+→ also stops at clip edges: 1 → 4 → …)"
+   },
+   "live": {
+    "count": "1 click + select + Ctrl+R + typing + Enter",
+    "source": "§6 (F) Set Locator button; §6.4 (F) rename selected locators with Ctrl+R; Previous/Next Locator buttons"
+   },
+   "easier": "CZABA",
+   "why": "In CZABA one key adds the marker and opens the name field; Live needs a separate select + Ctrl+R. Jumping is 1 click on both."
+  },
+  {
+   "task": "T11",
+   "czaba": {
+    "keys": 0,
+    "clicks": 2,
+    "drags": 0,
+    "path": "Export + WAV-ის ექსპორტი (WAV and project are default); range: drag + 2 clicks (range scope is preselected). WAV 150.372 s / 48 kHz / 24-bit / stereo; range 4.000 s = 192000 frames"
+   },
+   "live": {
+    "count": 2,
+    "source": "42.3 (F) Ctrl+Shift+R; §5.1.3 (F) range from the time selection; 'click the Export button'"
+   },
+   "easier": "equal",
+   "why": "2 actions on both, and the time selection becomes the range on both. In the browser Ctrl+Shift+R is a hard reload, so CZABA uses a button."
+  }
+ ],
+ "shortcuts": {
+  "same": 31,
+  "different": 15,
+  "missing": 27,
+  "czabaOnly": 14,
+  "notApplicable": 6,
+  "undiscoverable": [
+   "Alt (snap bypass while dragging)",
+   "Shift-drag fine on faders",
+   "Shift+Space",
+   "PageDown/↑/↓ on faders and Clip Gain fader",
+   "Separator arrows (library width, detail height, track height)",
+   "Shift+wheel horizontal scroll",
+   "Ctrl+←/→ also stopping at clip edges (buttons say 'marker'; R77-BUTTON-SHORTCUT-SUPERSET)",
+   "Shift+Enter on a library item adds (not a preview)",
+   "Ctrl+click / Shift+click multi-select (Shift adds one, not first-to-last)",
+   "grid-menu and marker-menu keyboard (↑/↓/Enter, Shift+F10)"
+  ],
+  "tableFile": "c-round-125/out/d2/d2-table.json",
+  "hintLine": "one line at both viewports: text right edge 1201 px inside a 1189 px box (container 1440/1280); 12 px text-dim 3.67:1; no title; replaced by the lane-move hint during a lane drag",
+  "conflicts": [
+   "Ctrl+Alt+V pastes and Ctrl+Alt+E splits (the Ctrl-letter branches do not exclude Alt; on Windows AltGr = Ctrl+Alt) — observation, no contract",
+   "Ctrl+R / Ctrl+F / Ctrl+Shift+R / Ctrl+digit are browser-reserved: blocked: CDP / browser-reserved",
+   "Space depends on focus: on the preview wave it plays the library preview, elsewhere the timeline (INFO-C101-SPACE-A-VS-C known)"
+  ],
+  "blocked": 2,
+  "note": "blocked = Ctrl+F, Ctrl+Shift+R (browser-reserved, not sent); kept out of missing per task §2.3"
+ },
+ "bugs": [
+  {
+   "id": "DUX-B-1",
+   "severity": "low",
+   "section": "D6b",
+   "steps": [
+    "fresh /studio-lab at 1440x900 or 1280x720 (S0), then build S1 (select the SFX clip)",
+    "read the shortcut hint line, the detail panel labels (ხაზი, დასაწყისი, სიგრძე, წყაროდან, საიდან/სადამდე, Clip Gain, dB), library folder counts and video captions"
+   ],
+   "expected": "normal-size informational text >= 4.5:1 (WCAG 2.2 AA 1.4.3, adopted in visual-direction-a.md: 'ტექსტის კონტრასტი ≥ 4.5:1')",
+   "contract": "visual-direction-a.md l.113 and the dim row l.45 (≥ 4.5:1, 'to be checked'); §4 adopted WCAG",
+   "actual": "text-dim rgb(103,111,126) on surface rgb(17,19,24) = 3.67:1 (pixel-confirmed 3.67); on the selected library row rgb(17,39,42) = 3.08:1. 53/53 text-dim elements below 4.5 (none disabled). Also text-muted on the selected library row = 4.38:1. Not primary text, so Low; the planned VISUAL-A dim token (#8A8276) is the natural fix",
+   "evidence": "c-round-125/out/contrast-baseline.json (byToken.text-dim, pixelSamples); shots/D6-S1-1440.png",
+   "regression": "no (first measurement)"
+  }
+ ],
+ "recommendations": [
+  {
+   "id": "DUX-R-1",
+   "what": "Typed number entry for lane Volume (and Master), like the Clip Gain field: click the readout, type −3, Enter",
+   "why": "Live 42.6 (F) accepts typed values; in CZABA −3 dB on a lane takes 30 × ↓ or a ~45 px Shift-drag (D1 T8). Matching Live here removes the slowest step of the mix task",
+   "sizeRounds": 1,
+   "priority": "Medium",
+   "fitsVisualA": false,
+   "note": "behaviour change; awaiting_user"
+  },
+  {
+   "id": "DUX-R-2",
+   "what": "A keyboard-shortcut reference (e.g. ? or a button next to the hint line) that lists every key, including the ones that are only knowable today (Alt bypass, Shift-drag fine, Ctrl/Shift+click, menu keyboard, separator arrows, Shift+wheel)",
+   "why": "Live has the Info View and menus with shortcuts; CZABA's hint line lists 19 entries but 10 working behaviours are on no screen (D2). Beats Live if it is searchable and in Georgian",
+   "sizeRounds": 1,
+   "priority": "Low",
+   "fitsVisualA": false,
+   "note": "adds UI; awaiting_user"
+  }
+ ],
+ "rolesConsulted": [
+  "ableton-arrangement-expert, flow-sage, first-visit-host, accessibility-auditor — role files read as checklists (no subagent tool on this runner); every conclusion rests on C browser observation and manual text"
+ ],
+ "partComplete": true,
+ "invalidRuns": [
+  {
+   "row": "survey (first /studio-lab load of the job)",
+   "reason": "ENV-FIRST-LOAD: hydration error + Invalid hook call on the first load at 1440 (Vite cold start); discarded once, re-run clean (netOk true)"
+  }
+ ],
+ "notesForB": [
+  "Export of the S1 fixture has 159 full-scale samples in the 6–10 s range (hero + pulse summed at 0 dB); data, not judged here — relevant to T12 meters/part 2.",
+  "At 1280 with the detail panel expanded, the SFX lane (with the selected clip) sits behind the detail panel; right-clicks there hit the panel (D6-S1-1280, D2 menus). Friction for part 2.",
+  "Ctrl+Alt+V / Ctrl+Alt+E act as Paste / Split (Alt not excluded). AltGr on Windows = Ctrl+Alt. No contract; part 2 may judge.",
+  "Volume fader: a 6 px drag does nothing (dead zone), 30 px = −19.8 dB (0.66 dB/px on a 91 px fader).",
+  "Harness: d2 intermediate output overwrote the main run file once; re-run captured (out/d2/d2-1440-main.json)."
+ ],
+ "rows": {
+  "SOURCE-SCOPE-start": {
+   "verdict": "pass",
+   "detail": "HEAD 608187fdf279d9b579c279f3c536b27be74c0eea, git status empty, sha256sum -c --quiet OK (937 entries)"
+  },
+  "D6-baseline": {
+   "verdict": "pass",
+   "detail": "12 captures (3 states x 2 viewports x 2 fresh contexts), 0 px max difference; contrast + 120 pixel samples; 6 screenshots read"
+  },
+  "D1-scorecard": {
+   "verdict": "pass",
+   "detail": "11 tasks, 24 paths at 1440 + 13 paths at 1280 (T1,T6,T8,T10,T11), each in a fresh context; counts by wrapper; Undo checked; evidence out/d1/*.json"
+  },
+  "D2-shortcuts": {
+   "verdict": "pass",
+   "detail": "81 Live ch.42 rows (same 31 / different 15 / missing 27 / n/a 6 / blocked: CDP 2) + 17 CZABA rows (14 exercised, 3 code-only/side effect); ~160 key presses at 1440 with before/after snapshots; discoverability at 1440 and 1280"
+  },
+  "G125-3": {
+   "verdict": "pass",
+   "detail": "fresh context, no credentials: /studio-lab workspace + demo badge; /studio/middle-east Sign in required, 0 workspace, 0 audio[src] at 1440 and 1280; GET /api/studio-token 401; fake-Bearer 403 blocked (backend)"
+  },
+  "SOURCE-SCOPE-end": {
+   "verdict": "pass",
+   "detail": "HEAD 608187f, git status empty, sha256sum -c --quiet OK at end"
+  }
+ },
+ "review": "user-review/design-ux-review.md"
+}

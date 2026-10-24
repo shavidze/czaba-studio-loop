@@ -1,30 +1,27 @@
-# CURRENT TASK — Round 125: DESIGN-UX-REVIEW, part 1 (first step of VISUAL-A-OBSIDIAN; C-only review round; A changes nothing)
+# CURRENT TASK — Round 126: DESIGN-UX-REVIEW, part 2 (VISUAL-A-OBSIDIAN step 1; C-only review round; A changes nothing)
 
-Dispatcher: B · Implementer: A (no-op start-state check only) · Verifier/reviewer: C · Date: 2026-10-24 (B planned from 03:12 UTC, `date -u`)
+Dispatcher: B · Implementer: A (no-op start-state check only) · Verifier/reviewer: C · Date: 2026-10-24 (B planned from ~04:16 UTC, `date -u`)
 - **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, the 2026-10-23 bug gate, and the **"Design and comfort review at the start of VISUAL-A (user request, 2026-10-23)"** section. These rules take precedence over older text.
-- **Previous task:** `tasks/round-124.md`, an exact copy (`cmp` OK). Rationale: `b-round-124.md`. Decision record: **D-29z90** in `docs/technical/studio-real-workspace/plan.md`.
-- **Baseline: clean commit `608187fdf279d9b579c279f3c536b27be74c0eea`.** Gate 124 = `skipped` (no real changes); gate 122 is `published` on both remotes. `git status --porcelain` was empty at planning.
-  - Frozen list: `tmp/studio-real-loop/b-round-124-r125-tree-sha256.txt`, **937 entries**, byte-identical to the round-124 list. `sha256sum -c --quiet` gave OK at planning, run from `store/`.
-- **No file in `store/` changes in this round.** Gate 125 will have nothing to publish.
+- **Previous task:** `tasks/round-125.md`, an exact copy (`cmp` OK). Rationale: `b-round-125.md`. Decision record: **D-29z91** in `docs/technical/studio-real-workspace/plan.md`.
+- **Baseline: clean commit `608187fdf279d9b579c279f3c536b27be74c0eea`.** Gate 125 = `skipped` (no real changes); gate 122 is `published` on both remotes. `git status --porcelain` was empty at planning.
+  - Frozen list: `tmp/studio-real-loop/b-round-125-r126-tree-sha256.txt`, **937 entries**, byte-identical to the round-125 list. `sha256sum -c --quiet` gave OK at planning, run from `store/`.
+- **No file in `store/` changes in this round.** Gate 126 will have nothing to publish.
 
-## 0. Why this round (D-29z90)
-- **Round 124 (Ableton review part 2) passed.** C: PASS, `browserVerified: true`, `reviewComplete: true`, Q1–Q7 done, 0 spilled, 0 new bugs. **ABLETON-EXPERT-REVIEW is done.** It has no Medium+ ABL-B (ABL-B-1/2 are Low and deferred). ABL-R-1…18 are `awaiting_user`.
-- **This is outcome row 5 of the round-124 task §7:** the review is complete and no ABL-B is Medium or above, so round 125 = **DESIGN-UX-REVIEW**, the first step of VISUAL-A-OBSIDIAN.
-- Regression is not due: `regression-last.json` = 2026-10-24 (round 122); the next one is due on or after 2026-10-27.
-- `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist yet. Nothing from ABL-R is scheduled.
-- **The review is split into two parts** (D-29z90 R4). Five output sections plus six role checklists are too much for one job; the Ableton review was split the same way.
-  - **Part 1 (this round):** D1 comfort scorecard, D2 shortcut parity and discoverability, and D6, the VISUAL-A measurement baselines.
-  - **Part 2 (round 126):** D3 friction points, D4 "better than Ableton" ideas, and D5, the merged verdict and index.
-  - DUX-B bugs found on the way are written in both parts.
-- **Why D6 is here:** VISUAL-A acceptance RV-1 compares every control's bounding box with the state "before V-1" (±1 px; text-width changes from V-0 excepted), and RV-2 measures contrast on real surfaces. Neither has a baseline artifact today; `visual-direction-a.md` still lists the `dim` contrast as unmeasured. C is already measuring this build (`608187f`), so the baseline is cheapest now.
+## 0. Why this round (D-29z91)
+- **Round 125 (review part 1) passed.** C: PASS, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`, `partComplete: true`. D6, D1 and D2 are done; nothing spilled.
+  - One bug: **DUX-B-1 (Low)**, the `dim` text token at 3.67:1. It went to `deferred_low_polish` and is expected to close in VISUAL-A V-1 under RV-2.
+  - Two ideas: **DUX-R-1** (typed lane/Master Volume) and **DUX-R-2** (shortcut reference). Both are `awaiting_user`.
+- **This is the "Otherwise" row of the round-125 task §7.** Regression is not due (`regression-last.json` = 2026-10-24, so the next one is due on or after 2026-10-27). Nothing spilled, and there is no Critical, High or Medium DUX-B. So round 126 = **DESIGN-UX-REVIEW part 2**.
+- `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist yet. Nothing from ABL-R or DUX-R is scheduled.
+- **The review is complete after this round** only if D3, D4 and D5 each have a section with browser evidence. Then VISUAL-A continues with V-0.
 
 ## 1. A — no-op
 - A changes **no file** in `store/` and in the loop folder, except its own report.
 - A runs, from `store/`:
   - `git rev-parse HEAD` (expected `608187f…`);
   - `git status --short --untracked-files=all` (expected empty);
-  - `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-124-r125-tree-sha256.txt` (expected OK).
-- A writes `a-round-125.md` with those three results and the line "No changes (review round, D-29z90)".
+  - `sha256sum -c --quiet /home/runner/czaba-project/tmp/studio-real-loop/b-round-125-r126-tree-sha256.txt` (expected OK).
+- A writes `a-round-126.md` with those three results and the line "No changes (review round, D-29z91)".
 - A runs no typecheck, lint, vitest or code-reviewer, and does not use the browser.
 - If the start state differs, A records the actual state, changes nothing, and stops.
 - **Forbidden:**
@@ -35,202 +32,178 @@ Dispatcher: B · Implementer: A (no-op start-state check only) · Verifier/revie
 ## 2. C — scope, method and sources
 ### 2.1 What C does
 - Review CZABA Studio on **`http://127.0.0.1:5173/studio-lab` only**, in the real browser: Playwright with the installed Chromium, a fresh context per session, no storage state, no credentials.
-- **The question for the whole review** (user request): Is CZABA Studio as comfortable as Ableton Live 12 in design, functionality and shortcuts? What would make it better than Ableton? Part 1 answers the comfort and shortcut half with numbers.
-- **Consult roles.** These role files exist in `store/.claude/agents/`: `design-philosopher`, `design-auditor`, `flow-sage`, `first-visit-host`, `ableton-arrangement-expert` and `accessibility-auditor`.
-  - If C has no subagent tool (as in rounds 123–124), read each file as a checklist. For part 1, the relevant ones are mainly `ableton-arrangement-expert`, `flow-sage`, `first-visit-host` and `accessibility-auditor`.
-  - Say plainly in `c-round-125.md` and in the review which roles were consulted and how.
-  - Either way, a role's opinion is input only. Every conclusion rests on C's own browser observation and the manual text.
-- **Build on `user-review/ableton-review.md`; do not repeat its findings.** When the same point comes up again, cite its ABL-B or ABL-R id in one line. For example, the Live view keys are ABL-R-1, and the loop-brace arrow keys are ABL-R-11.
-- C writes nothing into `store/`. Probes, screenshots and scripts stay under `tmp/studio-real-loop/c-round-125/`.
-- **Source reading is allowed; source editing is not.** To build the CZABA keymap, C may read (never edit):
-  - the global handler `app/components/arrangement/StudioWorkspace.tsx` (`handleKeyDown` from about l.1710, `handleKeyUp` about l.2014; the hint line about l.2583);
-  - component handlers in `ArrangementLoopBrace.tsx`, `ArrangementMarkerRow.tsx`, `ArrangementMarkerMenu.tsx`, `ArrangementGridMenu.tsx`, `ArrangementLibrary.tsx`, `ArrangementLibraryPreview.tsx`, `ArrangementRuler.tsx`, `ArrangementOverview.tsx`, `ArrangementLane.tsx`, `ArrangementGroupHeader.tsx`, `ArrangementDetailPanel.tsx`, `ArrangementTempoRow.tsx`, `ArrangementExportDialog.tsx`, `ArrangementVideoDock.tsx`, and `lib/arrangement/view.ts` (`timelineNavigationKey`).
-  - **The hint line is not the full keymap.** Every keymap row must be confirmed by a browser key press with an observed result, or marked "code only, not exercised" with the reason.
+- **The question for the whole review** (user request): Is CZABA Studio as comfortable as Ableton Live 12 in design, functionality and shortcuts? What would make it better than Ableton? Part 2 answers the design/friction half and the "better than Ableton" half, then gives the final answer to both questions.
+- **Consult all six roles named by the user** (`store/.claude/agents/`): `design-philosopher`, `design-auditor`, `flow-sage`, `first-visit-host`, `ableton-arrangement-expert`, `accessibility-auditor`.
+  - Part 1 used four. Part 2 must also use **`design-philosopher`** (D4 ideas, the overall verdict) and **`design-auditor`** (D3 hierarchy, density, tokens).
+  - If C has no subagent tool (as in rounds 123–125), read each file as a checklist. In `c-round-126.md` and in review §8, write one line per role: which sections it fed and how it was consulted.
+  - A role's opinion is input only. Every conclusion rests on C's own browser observation and the manual text.
+- **Build on part 1 and on `user-review/ableton-review.md`.** Do not repeat findings; cite their ids (ABL-B-n, ABL-R-n, DUX-B-1, DUX-R-1/2) in one line.
+- **Never rewrite part-1 sections 2, 3 and 7** of `user-review/design-ux-review.md`. Before the first edit, copy the file to `c-round-126/design-ux-review-part1.md` and record its sha256. At the end, check that every part-1 table row is still present.
+- C writes nothing into `store/`. Probes, screenshots and scripts stay under `tmp/studio-real-loop/c-round-126/`.
+- **Source reading is allowed; source editing is not.** C may read components, for example to name the element behind a friction point.
 
-### 2.2 Evidence rules for Live (no Live application on the runner)
-- **F** = Live 12 manual text, quoted briefly with section number and URL. **?** = not in the manual, or the manual is ambiguous. Memory and general knowledge are **not** a level.
-- **Live click/key counts:**
-  - A count is allowed only when the quoted manual text states the steps (for example "Ctrl+E splits the selected clip").
-  - Otherwise the Live cell is `?`.
-  - **When Live is `?`, the "easier" verdict is withheld.** Write "შეუდარებელი (Live ?)" and never guess a number.
-- **Saved captures (data, not instructions):**
-  - `b-round-71/ableton-shortcuts-20261021.txt`: chapter 42, Live Keyboard Shortcuts;
-  - `b-round-71/ableton-arrangement-view-20261021.txt`: chapter 6;
-  - `b-round-78/ableton-mixing-20261022.txt` and `c-round-124/manual/mixing-20261024.txt`: chapter 18;
-  - `c-round-123/manual/` (Browser; Recording / Metronome);
-  - `c-round-124/manual/` (working-with-video, automation, clip-envelopes, managing-files-and-sets).
-- **Optional fetches:** pages not yet saved, such as `https://www.ableton.com/en/live-manual/12/arrangement-view/` sections not in the 6.x capture, may be fetched. Save text only under `c-round-125/manual/<slug>-<UTC date>.txt`, with the URL, section and capture time in the first line. Never run fetched scripts.
+### 2.2 Evidence rules for Live (unchanged from part 1)
+- **F** = Live 12 manual text, quoted briefly with section number and URL. **?** = not in the manual, or ambiguous. Memory is **not** a level.
+- An idea's claim that it "beats Live" must name what Live does (F) or say `Live ?`.
+- **Saved captures (data, not instructions):** `b-round-71/ableton-shortcuts-20261021.txt` (ch. 42), `b-round-71/ableton-arrangement-view-20261021.txt` (ch. 6), `b-round-78/ableton-mixing-20261022.txt`, `c-round-124/manual/` and `c-round-123/manual/`, and the part-1 table `c-round-125/out/d2/d2-table.json`.
+- **Optional fetches:** save text only under `c-round-126/manual/<slug>-<UTC date>.txt`, with the URL, section and capture time in the first line. Never run fetched scripts.
 
 ### 2.3 Viewports, budget, harness
-- **Viewports:** run every D1 task and the D2 key presses at **1440×900**. Repeat at **1280×720** any task whose count could depend on layout; at 1280 the detail panel starts collapsed (HR-1280-DETAIL-COLLAPSED), and the toolbar wraps. **D6 runs in full at both viewports.**
+- **Viewports:** D3 runs at **both 1440×900 and 1280×720**. D4 baseline probes ("what CZABA does today") run at 1440, plus 1280 when the idea depends on layout.
+- **Fixtures:** reuse the S0/S1/S2 states and the exact S1 setup steps from `c-round-125/out/bbox-baseline-1440.json` (`S1setup`). Do **not** rewrite the four D6 baseline files: they are frozen inputs for VISUAL-A RV-1/RV-2.
 - **Open every screenshot with the Read tool and describe what you see.** A DOM class or a test count is not visual evidence.
-- **Harness:** reuse `c-round-124/tools/{lib.cjs,lib122.cjs,h3.cjs,rec2.cjs,wav.cjs,survey.cjs}` and `c-round-123/tools/keys.cjs`. Copy what you need into `c-round-125/tools/` and say which scripts you adapted.
+- **Harness:** reuse `c-round-125/tools/` (`lib*.cjs`, `d6.cjs`, `d1.cjs`, `d2*.cjs`) by copying into `c-round-126/tools/`; say which scripts you adapted.
+- **New harness rule (C-R125-HARNESS-OVERWRITE):** every run writes a uniquely named output file (run id or UTC stamp in the name). Never reuse a main evidence file name.
 - **Media:** `tmp/studio-real-loop/media/` (check `SHA256SUMS.txt`).
-- **Known harness facts** are in `backlog.json` `harness_rules` (HR-ESCAPE-NO-DESELECT, HR-1280-DETAIL-COLLAPSED, HR-REAL-SCROLLBARS, HR-RENDERING, and the others). They are facts, not findings.
+- **Known harness facts** are in `backlog.json` `harness_rules` (HR-ESCAPE-NO-DESELECT, HR-1280-DETAIL-COLLAPSED, HR-REAL-SCROLLBARS, HR-RENDERING and others). They are facts, not findings.
 - **Setup rule (ENV-FIRST-LOAD):** if the first `/studio-lab` load of the job shows a hydration error or an empty DOM, discard that run once and record it under `invalidRuns`.
 - **Retries:** at most **2 replacement attempts** per experiment, and only for environment-invalid runs.
-- **Not reachable from CDP:** record these as `blocked: CDP`, never as FAIL or as "missing":
-  - Ctrl/Cmd+digit, a lone Alt release, the ContextMenu key or Shift+F10;
-  - real touch, a real `pointercancel`, a real OS file drag;
-  - browser-reserved accelerators (Ctrl+Shift+R, Ctrl+F, and similar).
-- **Network and console, every session (PX-NET / REG-HYD):**
-  - 0 requests to `/api/studio-token`, `/api/recording-*`, `/api/download` or the R2 host (`r2-proxy|workers.dev`);
-  - 0 `Authorization` headers, 0 hydration messages, 0 `pageerror`.
-  - Do not report the known cloud noise (`Failed to load cart`, `ERR_CONNECTION_REFUSED`, `ERR_TUNNEL_CONNECTION_FAILED`).
+- **Not reachable from CDP:** record as `blocked: CDP`, never as FAIL: Ctrl/Cmd+digit, a lone Alt release, the ContextMenu key, real touch, a real `pointercancel`, a real OS file drag, browser-reserved accelerators.
+- **Network and console, every session (PX-NET / REG-HYD):** 0 requests to `/api/studio-token`, `/api/recording-*`, `/api/download` or the R2 host (`r2-proxy|workers.dev`); 0 `Authorization` headers; 0 hydration messages; 0 `pageerror`. Do not report the known cloud noise (`Failed to load cart`, `ERR_CONNECTION_REFUSED`, `ERR_TUNNEL_CONNECTION_FAILED`).
 
 ### 2.4 Incremental writing
-- After **each section**, update `user-review/design-ux-review.md`, `c-round-125.json`, `c-round-125.md` and `c-round-125/progress.json` (`{"done":[…],"next":"D2"}`). A job can stop at its time limit, and the next job resumes from `next`.
-- **Order:** SOURCE-SCOPE start → D6 (baseline first, on an untouched app) → D1 → D2 → G125-3 → summary → SOURCE-SCOPE end.
+- After **each section**, update `user-review/design-ux-review.md`, `c-round-126.json`, `c-round-126.md` and `c-round-126/progress.json` (`{"done":[…],"next":"D4"}`). A job can stop at its time limit, and the next job resumes from `next`.
+- **Order:** SOURCE-SCOPE start → part-1 backup → D3 (D3-A first) → D4 → D5 → G126-3 → part-1 integrity check → SOURCE-SCOPE end.
 
-## 3. Sections (part 1)
+## 3. Sections (part 2)
 
-### D6 — VISUAL-A baselines (measurement only, no judgement)
-Do this first. These files are the **pre-V-0 baseline**. V-0 acceptance will use them to prove that only text widths moved, which is RV-1's own exception. The last V-0 round re-captures the bounding boxes as the RV-1 reference for V-1…V-3. The contrast file is the RV-2 reference. Label the files "pre-V-0 baseline (608187f)" in their first field.
-- **States**, each at 1280×720 and 1440×900:
-  - **S0** fresh `/studio-lab` after load: demo collection ready, nothing selected.
-  - **S1** a populated, deterministic fixture:
-    - 1 clip on each audio lane (music: CZABA hero at 0 s; stems: the first stem at 2 s; SFX: Soft impact at 4 s);
-    - `beeps-6s-h264-aac.mp4` imported on the video lane;
-    - the SFX clip selected, so the detail panel shows its fields;
-    - one marker at 1 s; a loop over 2–4 s;
-    - one group of music + stems (Ctrl+G).
-    - Write the exact setup steps in the JSON, so a later round can rebuild S1 identically.
-  - **S2** the Export dialog open from S1.
-- **D6a bounding boxes** → `c-round-125/out/bbox-baseline-1280.json` and `bbox-baseline-1440.json`.
-  - Cover every visible interactive element inside the Studio root: `button`, `input`, `select`, `textarea`, `a`, `[role=slider|option|tab|menuitem|radio|checkbox|separator]`, and `[tabindex]` ≥ 0. Also include the main panels (library, toolbar, overview, video dock, ruler rows, lane headers, timeline, detail panel, status/hint line).
-  - Each entry: a stable key (prefer `data-testid`, then `aria-label`, then role + visible text + occurrence index), tag/role, and the bounding box `x, y, w, h` rounded to 0.5 px.
-  - **Determinism check:** capture each state twice in two fresh contexts. Report the largest difference per state. A difference above 1 px is reported as baseline noise with the element key, not as a bug.
-- **D6b contrast** → `c-round-125/out/contrast-baseline.json`, plus a short table in the review.
-  - For each visible text element and each icon-only control in S0 and S1: the computed foreground colour; the background, composited through the ancestors' backgrounds with alpha; the ratio; the font size and weight; and the class (normal text ≥ 4.5:1; large text and icons ≥ 3:1).
-  - **Pixel check:** where the background is not a plain colour (images, gradients, waveform, video), mark the computed value `?` and pixel-sample the screenshot instead. Pixel-sample at least 10 representative elements anyway, including any `text-dim` and `text-muted` text, to confirm the computed method.
-  - Group the results by token (`dim`, `muted`, `foreground`, `brand`, `accent` and others, as far as the class names show it).
-- **D6c target sizes** (data only): from D6a, list the interactive elements smaller than 24×24 px (WCAG 2.2 2.5.8). Judging them belongs to part 2. Already recorded small targets, cited by id: ROOT-R65-L2 (BPM input), ROOT-R73-S3-MARKER-BUTTON-SIZE, GATE83-L2-POINT-HIT-AREA.
-- Screenshots: `c-round-125/shots/D6-S{0,1,2}-{1280,1440}.png`, each opened and described.
+### D3 — Friction points (both viewports, screenshots)
+Each friction point gets: **what** (one sentence), **where** (state, viewport, element key from the D6 baseline where possible), **measurement** (px, ratio, count or time), a **screenshot** (opened and described), **who it hurts** (first-time user, frequent editor, keyboard user), and a **verdict**: DUX-B (with severity per §4), a DUX-R candidate for D4, or "acceptable, with reason".
 
-### D1 — Comfort scorecard vs Live
-For each task: CZABA steps counted in the browser (clicks, drags, keys, from S0 or a stated start state), Live steps only from F text (§2.2), and which one is easier and why. Count the **shortest path a Live-literate user would find**, and the **mouse-only** path if it differs. Record each CZABA path as a script under `c-round-125/tools/` with the observed result (status line, DOM state or screenshot).
+**D3-A — the SFX lane behind the detail panel at 1280×720 (C-R125-OBS-1280-SFX-LANE-UNDER-PANEL). Run this first, because it can change the round-127 outcome.**
+- **Contract:** SRW-11B stage 2, decision **D-29b** (`plan.md`; `backlog.json` SRW-11B). While auto-fit is on and the user has not resized the detail panel this session, the panel renders at min(stored, cap). The cap is the largest height in [120, 280] that keeps the ruler, the loop strip, the scrollbar and **every lane at its auto-fit minimum** visible. If no such height exists, the cap is 120. The first separator drag or separator key turns the cap off.
+- **Setup:** 1280×720, the S1 fixture (round-125 steps; step 11 expands the panel with the toggle, which is not a resize). Also measure S1 **without the group** (skip step 9), because group rows were added after D-29b.
+- **Measure:** the detail panel's rendered height; the lane scroller's `clientHeight` and `scrollHeight`; each lane's top, bottom and height; and whether the SFX lane is fully visible.
+- **Then try to reach the SFX clip by mouse,** without hidden knowledge: (1) the wheel over the lane area; (2) the vertical scrollbar; (3) the visible collapse toggle; (4) the separator drag. Record which path works and how many actions it takes.
+- **Ruling, fixed in advance:**
+  - Panel height **> 120 px** while any lane is not fully visible, with auto-fit on and no user resize → the D-29b cap is broken → **DUX-B, Medium** (a contract break in a common flow at a user viewport).
+  - Panel height **= 120 px** (the documented fallback), and the SFX clip can be reached with path (1) or (2) → **friction**, not a bug. It becomes a DUX-R candidate if C has a layout idea (a layout change needs Saba).
+  - The SFX clip **cannot be reached by any path (1)–(4)** → **DUX-B, Medium**.
+  - If paths (1)–(2) fail but (3) or (4) works → **DUX-B, Low** (the clip is reachable only by changing the panel).
+- Write the measured numbers and the matching ruling line in the review.
 
-| # | Task | Start state | Notes / already known (cite, do not re-report) |
-|---|---|---|---|
-| T1 | Place a sound from the library on a lane at a chosen time | S0 | Enter / ＋ add / drag; library search (SRW-12); ABL-B-1 |
-| T2 | Move a clip (same lane; another lane) | 1 clip | grid/snap on and off (SRW-14) |
-| T3 | Trim a clip's start or end | 1 clip | edge drag; fine with Snap off |
-| T4 | Split at the playhead or insert marker | 1 clip | Ctrl+E (Live 42 F) |
-| T5 | Duplicate | 1 clip | Ctrl+D |
-| T6 | Zoom to the selection and back; scroll to a far point | S1 | Z / X (ABL-B-2 is known); Ctrl+wheel; Fit; overview |
-| T7 | Set a loop over a range and play it | S1 | Ctrl+L; brace keys (ABL-R-11) |
-| T8 | Change Clip Gain by −3 dB, then a lane Volume by −3 dB | S1 | field, fader, Shift fine, double-click reset (ABL-R-14) |
-| T9 | Mute one lane, then solo another | S1 | M / S buttons; additive solo modifiers if any |
-| T10 | Add a marker at the playhead, rename it, jump to it | S1 | marker +, F2/Enter, ◀ ▶ (ABL-R-10 is the open name-field question) |
-| T11 | Export the whole project as WAV; export a range | S1 | Export dialog; HR-RENDERING |
+**D3-B — carried items. Judge each one; do not re-measure what part 1 or round 124 already measured unless the verdict needs it.**
+- **C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER:** at 1280, the range card sits partly under the Export dialog footer (`c-round-125/shots/D6-S2-1280.png`). Related: ARCH-R101-MODALBODY-PADDING-SLOT, GATE102-S3-TALL-CARD-NO-CAP. Is the card reachable by scroll or Tab? Can a first-time user tell that it exists?
+- **GROUP-VOLUME-VISIBLE-READOUT:** the group row shows its dB only in `title`/`aria-valuetext`.
+- **The under-24 px list** (`c-round-125/out/under24px.json`, 50 keys at 1280 and 48 at 1440): judge by use frequency and by WCAG 2.2 2.5.8 spacing exceptions. A 2.5.8 miss stays **Low** unless it blocks use. Cite ROOT-R65-L2, ROOT-R73-S3-MARKER-BUTTON-SIZE and GATE83-L2-POINT-HIT-AREA; do not re-report them.
+- **C-R125-OBS-CTRL-ALT-PASTE-SPLIT:** Ctrl+Alt+V pastes and Ctrl+Alt+E splits. On Windows, AltGr = Ctrl+Alt, but a real AltGr keydown carries `ctrlKey && altKey` **and `key` = the produced character** (for example `€` or `@`); only `code` stays `KeyE`/`KeyV`. A Playwright `Control+Alt+KeyE` sends `key: 'e'`, which a real AltGr never does (precedent: INFO-R60-SHIFT1-SYNTH).
+  1. Read the Ctrl-letter branches of `handleKeyDown` (read-only) and record whether they match on `event.key` or on `event.code`.
+  2. Probe with a layout-faithful event: dispatch a `KeyboardEvent` with `ctrlKey`, `altKey`, `key: '€'` and `code: 'KeyE'` (and `key: '@'`, `code: 'KeyV'` or another AltGr character), first with focus on a CZABA text field (library search, marker name, BPM) and then with focus on the timeline.
+  3. If the handler matches on `key` and the layout-faithful event does nothing, record "observation, not reachable by AltGr" (info), not a bug.
+  4. If a layout-faithful event changes the arrangement while the user is typing in a field, it is a **DUX-B**. Severity depends on the effect on data; an edit that Undo restores in one step is at most Low.
+- **C-R125-OBS-VOLUME-DEADZONE-6PX:** a 6 px Volume drag does nothing; 0.66 dB/px. Is the dead zone visible feedback or a "nothing happened" moment?
+- **Signals to judge:** WAVEFORM-ZOOM-DISCOVERABILITY, SHIFT-FINE-DISCOVERABILITY (already in DUX-R-2; cite only), the round-125 Shift+click row (`different`), and Esc not reverting the detail range draft (no contract).
+- **Already known and scheduled, do not report:** the mixed Georgian/English UI (V-0) and GATE121-S5-ARIA-LANGUAGE (V-0).
 
-- For each row also note:
-  - **feedback:** what tells the user it worked (status line, visual change, sound);
-  - **discoverability:** how a first-time user would learn the path (visible button, tooltip, hint line, menu);
-  - **error recovery:** whether Undo restores the state in one step.
-- Write a **"რატომ"** cell for every verdict, of at most two sentences.
+**D3-C — friction survey by category** (at both viewports, from S0, S1 and S2):
+- **Visual hierarchy:** what the eye lands on first in S0 and S1, and whether the primary actions (Play, adding a sound, Export) stand out. `design-auditor`, `design-philosopher`.
+- **Density:** text sizes under 12 px, crowded rows (the toolbar wrap at 1280, the lane header controls), truncation (measure `scrollWidth` > `clientWidth`).
+- **Contrast:** use the D6 contrast baseline. DUX-B-1 is already recorded; report only failures **not** in the `dim` token (for example the `muted` 4.38 on the selected row, if C judges it separately) and the non-text contrast of controls and focus rings (WCAG 1.4.11, ≥ 3:1). Measure at least the focus ring on a lane clip, a button and a slider. A focus ring or control boundary below 3:1 against its adjacent surface is a **DUX-B, Low** (the adopted WCAG 2.2 AA rule; not primary text). A focus ring that is missing entirely at a keyboard stop on the S1 path is a **DUX-B, Medium** (WCAG 2.4.7, keyboard use in a common flow).
+- **Feedback:** for 6 common actions (add, move, trim, Undo, mute, export start), what changes on screen within 100 ms, and whether the status line is the only feedback. `flow-sage`.
+- **First-visit clarity** (`first-visit-host`): from a fresh S0 with no prior knowledge, count the actions until (a) a sound plays, (b) a clip is on a lane, and (c) an export starts. Note where a first-time user could get stuck: an empty lane with no hint, a disabled control with no reason, an unclear demo badge. Screenshots at both viewports.
+- **Keyboard and focus** (`accessibility-auditor`): Tab from page load and count the Tab stops before the first lane clip and before Export. Is the focus ring visible at every stop on the S1 path? Report this as data; a DUX-B is only for a broken written contract or an adopted WCAG rule.
 
-### D2 — Shortcut parity and discoverability
-- **Table:** Live shortcut (from chapter 42, F, with section) | CZABA shortcut | status | browser evidence | discoverable via (tooltip `title`, hint line, menu, `aria-keyshortcuts`, none).
-- **Status values:**
-  - **same:** same key, same effect;
-  - **different:** same effect on another key, or same key with another effect. Say which.
-  - **missing:** an in-scope Live command with no CZABA key. Cite an ABL-R if one exists.
-  - **CZABA-only:** a CZABA key with no Live equivalent, for example Ctrl+Shift+L, which extends a range to all lanes (delete-selection-update.md).
-  - **არ ეხება:** Live commands for out-of-scope features: Session View, MIDI and notes, devices/plugins/racks, warp/stretch/pitch, recording/takes, sends/returns/routing, multiple video layers, Push/Link. Keep them out of the "missing" count.
-- **Coverage:** every in-scope chapter-42 section that applies to CZABA (transport, editing, arrangement, loop, zoom/navigation, locators/markers, track/mixer, browser, and the export/file commands that exist in CZABA). Also cover every CZABA key found in the code and the hint line.
-- **Discoverability check:**
-  - For each CZABA shortcut, does any on-screen element tell the user about it (a `title` with the key, the hint line, a menu entry)?
-  - Is the hint line readable at both viewports? Is it truncated? Measure its width against its container.
-  - Name every shortcut that is reachable only by knowing it.
-- **Conflicts:** list CZABA keys that collide with browser or OS accelerators (`blocked: CDP` or browser-reserved), and any key whose effect depends on focus in a surprising way. Use observed evidence only; INFO-C101-SPACE-A-VS-C is a known watch item.
+### D4 — "Better than Ableton" ideas
+- Ids continue from **DUX-R-3**. Each idea has:
+  - **what** (one or two sentences);
+  - **why it beats Live or matches it** (Live behaviour F or `Live ?`);
+  - **today in CZABA**, with browser evidence (a probe or a D1/D2/D3 reference);
+  - **size** in rounds; **priority** (High/Medium/Low);
+  - **`fitsVisualA`**: `true` only if it is colour, icon or typography only. Anything that moves layout or changes behaviour is `false`. This decides whether an approved idea can join V-1…V-3 or becomes a task after VISUAL-A.
+- **Sources C must at least consider** (accept, merge, or reject with one line each):
+  - D3 friction points with no contract (each D3 friction point gets a DUX-R or an "acceptable" line);
+  - the part-1 `missing` shortcut rows that no ABL-R covers yet: S (Solo selected), W/H (optimize width/height), F and Ctrl+Alt+F (fades), Alt+U (unfold all), 0 (deactivate), Ctrl+J (consolidate), Ctrl+Space, Follow keys. For each, say whether the Live key **collides with an existing CZABA binding** (CZABA-only list in `c-round-125.json` / `d2-table.json`; for example M, U, G, Z/X, digits) or with a browser accelerator;
+  - first-visit ideas (an empty-lane hint, a "first sound" path, the demo badge);
+  - feedback ideas from D3-C.
+- **Do not propose:** anything out of scope (§4), M5 per-track colours (cite only), or anything already in ABL-R-1…18, DUX-R-1/2 or T12-ADVANCED. Merge into the existing id instead.
+- **Ranking:** end D4 with a short table "top 5 for Saba", ordered by value for a film/video editor and by cost. Mark which can ride along with VISUAL-A (`fitsVisualA: true`).
+
+### D5 — Final verdict and index
+- Add a block **"საბოლოო ვერდიქტი (ნაწილი 2)"** at the top of review §1, above the part-1 preliminary bullets. The part-1 bullets stay unchanged.
+  - Answer the user's two questions directly, in at most 10 bullets: (1) Is CZABA as comfortable as Live 12 in design, functionality and shortcuts? Give one line per area, with evidence ids. (2) What would make it better than Live? Name the top ideas by id.
+  - State the evidence limits plainly: no Live application on the runner, headless Chromium only, and which roles were read as checklists.
+- **Index (§9, new heading "ინდექსი"):** every DUX-B with severity and status (deferred, or a fix-up before V-0), and every DUX-R with priority and `fitsVisualA`.
+- **"კითხვები Saba-სთვის":** one line per DUX-R with the decision needed (approve / reject / change), so he can answer in `user-review/design-ux-decisions.md`.
+- Fill review §4 (D3) and §5 (D4: DUX-R-1/2 stay as written; new ideas are added below them).
 
 ## 4. Rulings fixed in advance
 - **DUX-B (bug)** only when CZABA breaks:
   - its own written contract (an acceptance in `backlog.json`, a D-ruling in `plan.md`, a user decision); or
-  - an accessibility requirement that the project already adopted (WCAG 2.2 AA contrast 4.5:1 / 3:1; 2.5.8 target size is recorded as Low in this project unless it blocks use).
+  - an accessibility requirement that the project already adopted (WCAG 2.2 AA contrast 4.5:1 / 3:1, non-text contrast 3:1; 2.5.8 target size is Low in this project unless it blocks use).
   - A difference from Live, by itself, is not a bug.
 - **Severity** (2026-10-23 bug gate):
   - Critical: data loss, security, auth or purchase bypass;
   - High: a feature is unusable;
   - Medium: wrong behaviour in a common flow against the CZABA contract, or a contrast failure on primary text;
   - Low: cosmetic or edge case (→ `deferred_low_polish`).
-- **Already recorded, cite by id, do not re-report:**
-  - ABL-B-1/2 and ABL-R-1…18;
-  - `deferred_low_polish` and `open_findings` entries, notably LANE-MASTER-ZERO-SIGN, LANE-READOUT-DOUBLE-READ, ROOT-R65-L2, ROOT-R73-S3-MARKER-BUTTON-SIZE, GATE83-L2-POINT-HIT-AREA, C81-1, GATE79-S4-MAC-HINT-TEXT;
-  - the design signals GROUP-VOLUME-VISIBLE-READOUT and C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER (at 1280 the range card sits partly under the footer; related ARCH-R101-MODALBODY-PADDING-SLOT, GATE102-S3-TALL-CARD-NO-CAP). Part 2 judges these; in part 1, only measure them if D6 touches them.
-- **Already approved by Saba, so not new ideas:** VISUAL-A direction A, V-0 English UI from one strings module (M2), M1 round icon-only Play, M3 library +4 px, M4 cookie banner. The mixed Georgian/English UI is therefore known and already scheduled; do not report it. M5 per-track colours is `not_approved_yet`, so cite it, do not propose it again.
-- **DUX-R** (ideas) mainly belong to part 2. If part 1 finds a strong one (for example a missing discoverability path), write it from **DUX-R-1** with: what; why it beats Live or matches it; size in rounds; priority; and whether it fits VISUAL-A's limits (colour/icon/typography only) or changes layout/behaviour. Nothing is implemented without Saba (`user-review/design-ux-decisions.md`).
-- **Out of scope** (never a DUX-B, and never "missing"): plugins/effects/devices, MIDI, warp/stretch/pitch, multiple video layers, recording, Session View, sends/routing. Grid tempo is not audio stretch.
+- **Already recorded, cite by id, do not re-report:** ABL-B-1/2, ABL-R-1…18, DUX-B-1, DUX-R-1/2; the `deferred_low_polish` and `open_findings` entries (notably LANE-MASTER-ZERO-SIGN, LANE-READOUT-DOUBLE-READ, ROOT-R65-L2, ROOT-R73-S3-MARKER-BUTTON-SIZE, GATE83-L2-POINT-HIT-AREA, C81-1, GATE79-S4-MAC-HINT-TEXT, C-R122-01/02, R77-BUTTON-SHORTCUT-SUPERSET).
+- **Already approved by Saba, so not new ideas:** VISUAL-A direction A, V-0 English UI from one strings module (M2), M1 round icon-only Play, M3 library +4 px, M4 cookie banner. M5 per-track colours is `not_approved_yet`: cite it, do not propose it again.
+- **Out of scope** (never a DUX-B, never "missing"): plugins/effects/devices, MIDI, warp/stretch/pitch, multiple video layers, recording, Session View, sends/routing. Grid tempo is not audio stretch.
 - **Planned, not missing:** the T12-ADVANCED items (crossfades, micro fades, volume automation, RMS/LUFS) and the SRW-40 video export (phase 2).
+- **Nothing from D4 is implemented without Saba.** Every DUX-R → `backlog.json` `design_ux_recommendations`, `awaiting_user`.
 
 ## 5. Output
-### 5.1 `user-review/design-ux-review.md` (new file)
-- **Path:** `/home/runner/czaba-project/tmp/studio-real-loop/user-review/design-ux-review.md`, which is the policy's `loop/user-review/`. Georgian for Saba; technical terms, key names and Live terms in English. Follow `store/.claude/primitives/GEORGIAN_DOCS.md`.
-- **Structure.** Create every heading now; part 2 fills its sections later and never rewrites part 1.
-  1. **ვერდიქტი** — "წინასწარი, ნაწილი 1": at most 8 bullets on comfort and shortcuts only.
-  2. **კომფორტის ცხრილი Ableton-თან** (D1): the table plus the "რატომ" cells.
-  3. **Shortcut-ების შესაბამისობა** (D2): the table, the discoverability findings and the conflicts.
-  4. **ხახუნის წერტილები** — "ნაწილი 2 (Round 126)".
-  5. **„Ableton-ზე უკეთესი“** — "ნაწილი 2 (Round 126)"; any part-1 DUX-R goes here.
-  6. **ბაგები** (DUX-B from 1).
-  7. **დანართი: VISUAL-A baseline** (D6): states S0–S2 and their setup steps, the JSON paths, the determinism result, the contrast table by token, and the list of elements under 24 px.
-  8. **როლები და მეთოდი:** which role files were used and how; the evidence levels.
+### 5.1 `user-review/design-ux-review.md` (update, never rewrite part 1)
+- Georgian for Saba; technical terms, key names and Live terms in English. Follow `store/.claude/primitives/GEORGIAN_DOCS.md`.
+- Change the title from "ნაწილი 1 (D1, D2, D6)" to cover both parts. Fill §1 (final block on top), §4, §5 (append), §6 (append new DUX-B), and §8 (add part-2 roles). Add §9 "ინდექსი" and "კითხვები Saba-სთვის".
+- **Integrity:** every table row of `c-round-126/design-ux-review-part1.md` sections 2, 3, 6 and 7 is still present. Report the row count checked.
 
-### 5.2 `c-round-125.json`
+### 5.2 `c-round-126.json`
 ```
-{"round":125,"taskStatus":"PASS|FAIL|BLOCKED","browserVerified":bool,"realVerified":bool,"allRowsRan":bool,
- "sectionsDone":["D6","D1","D2"],"sectionsSpilled":[…],"passed":["SOURCE-SCOPE-start","D6-baseline","D1-scorecard","D2-shortcuts","G125-3","SOURCE-SCOPE-end"],
+{"round":126,"taskStatus":"PASS|FAIL|BLOCKED","browserVerified":bool,"realVerified":bool,"allRowsRan":bool,
+ "sectionsDone":["D3","D4","D5"],"sectionsSpilled":[…],"reviewComplete":bool,
+ "passed":["SOURCE-SCOPE-start","D3-A","D3-friction","D4-ideas","D5-verdict","G126-3","PART1-INTEGRITY","SOURCE-SCOPE-end"],
  "failed":[],"inconclusive":[],"blocked":[…],"gate":["full vitest","typecheck","build","Biome","npm run verify"],
- "baselines":{"bbox1280":path,"bbox1440":path,"contrast":path,"determinismMaxPx":{…},"under24px":n},
- "scorecard":[{"task":"T1","czaba":{"keys":n,"clicks":n,"drags":n,"path":…},"live":{"count":n|"?","source":…},"easier":"CZABA|Live|equal|შეუდარებელი","why":…}],
- "shortcuts":{"same":n,"different":n,"missing":n,"czabaOnly":n,"notApplicable":n,"undiscoverable":[…]},
+ "d3a":{"viewport":"1280x720","withGroup":{"panelPx":n,"scrollerClient":n,"scrollerScroll":n,"sfxVisible":bool,"pathsWorking":[…]},"withoutGroup":{…},"ruling":"…"},
+ "friction":[{"id":"F-n","what":…,"where":…,"measure":…,"shot":…,"verdict":"DUX-B-n|DUX-R-n|acceptable","why":…}],
  "bugs":[{"id":"DUX-B-n","severity":…,"section":…,"steps":[…],"expected":…,"contract":…,"actual":…,"evidence":…,"regression":"yes/no (since round N)"}],
- "recommendations":[{"id":"DUX-R-n",…,"fitsVisualA":bool}],
- "rolesConsulted":[…],"partComplete":bool,"invalidRuns":[…],"notesForB":[…]}
+ "recommendations":[{"id":"DUX-R-n","what":…,"why":…,"today":…,"sizeRounds":n,"priority":…,"fitsVisualA":bool,"liveSource":"F …|Live ?"}],
+ "top5":[…],"rolesConsulted":[…],"part1RowsChecked":n,"invalidRuns":[…],"notesForB":[…]}
 ```
-- **`taskStatus`:** PASS = the review ran with browser evidence and every section done in this run is written. If sections spill, still write PASS and list them in `sectionsSpilled`. FAIL/BLOCKED = the review could not run at all.
-- `partComplete` = true only if D6, D1 and D2 all have their sections with browser evidence.
+- **`taskStatus`:** PASS = the review ran with browser evidence and every section done in this run is written. If sections spill, still write PASS and list them in `sectionsSpilled`.
+- **`reviewComplete`** = true only if D3, D4 and D5 all have their sections with browser evidence (D5 cites them), part 1 is intact, and the index lists every DUX-B and DUX-R.
 - `browserVerified` is false only if a browser experiment that can run here was not run. Backend-only sub-checks go under `blocked`.
 
 ## 6. Guard rows (cheap)
 - **SOURCE-SCOPE** (start and end):
   - `git -C store rev-parse HEAD` = `608187f…`;
   - `git status --short --untracked-files=all` is empty;
-  - `sha256sum -c --quiet b-round-124-r125-tree-sha256.txt`, run from `store/`, is OK.
+  - `sha256sum -c --quiet b-round-125-r126-tree-sha256.txt`, run from `store/`, is OK.
   - Any `store/` change during the round is a process finding for root.
-- **G125-3** (auth guard), in a fresh context without credentials:
+- **G126-3** (auth guard), in a fresh context without credentials:
   - `/studio-lab` shows the workspace and the demo badge;
   - `/studio/middle-east` shows "Sign in required" at 1440 and 1280, with no workspace and 0 `audio[src]`;
   - `GET /api/studio-token` → 401.
   - The fake-Bearer 403 sub-check is `blocked: backend unavailable in cloud`.
+- **PART1-INTEGRITY:** §5.1.
 - No smoke run: this is not a regression round.
 
-## 7. Outcome, fixed in advance (B at round 126 planning)
-| Condition | Round 126 |
+## 7. Outcome, fixed in advance (B at round 127 planning)
+| Condition | Round 127 |
 |---|---|
 | B plans on or after **2026-10-27** | A **REGRESSION round** first (speed rules), then the matching row below. |
-| `sectionsSpilled` is non-empty | The spilled part-1 sections run first in round 126, then part 2. |
+| `sectionsSpilled` is non-empty, or `reviewComplete` is false | The missing part-2 sections run first in round 127. |
 | A DUX-B is **Critical**, or any security, data-loss or purchase-protection finding | A bounded **fix-up** (at most three related bugs), then continue. |
-| A DUX-B is **High or Medium** | Bounded **fix-ups** before V-0 (Critical/High first). Part 2 of the review, which changes no code, may still run first if B judges that the bug does not affect it. |
-| Otherwise | Round 126 = **DESIGN-UX-REVIEW part 2** (D3 friction, D4 DUX-R ideas, D5 merged verdict and index). |
-- Lows → `deferred_low_polish`. DUX-R → `backlog.json` `design_ux_recommendations`, `awaiting_user`. Approved purely visual ideas join the VISUAL-A stages; approved layout or behaviour ideas become bounded tasks after VISUAL-A.
+| A DUX-B is **High or Medium** (for example a D3-A Medium) | Bounded **fix-ups** before V-0, Critical/High first, at most three related bugs per round. |
+| Otherwise | DESIGN-UX-REVIEW → `done`; round 127 = **VISUAL-A V-0, stage 1**. |
+- For V-0, B uses root's answer to `b-round-124-checkpoint-request.md` Q1 if one exists. Otherwise B uses the fallback recorded there: one module in `app/lib/arrangement/`, plain constants plus small formatter functions, and one owner group per round.
+- Lows → `deferred_low_polish`. DUX-R → `design_ux_recommendations`, `awaiting_user`. Approved purely visual ideas join the VISUAL-A stages; approved layout or behaviour ideas become bounded tasks after VISUAL-A.
 - At every planning, B checks for `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
-- After part 2, VISUAL-A continues with **V-0** (2–3 rounds). B plans it using root's answer to `b-round-124-checkpoint-request.md` Q1 if one exists, otherwise the smallest honest split recorded there.
 
 ## 8. Neighbour risk
 - No app code changes, so Studio behaviour cannot regress in this round.
 - **Process risks:**
   - a probe writing into `store/` (SOURCE-SCOPE catches it);
-  - editing source while reading the keymap (read-only; SOURCE-SCOPE catches it);
-  - a non-deterministic S1 fixture that makes the RV-1 baseline unusable (hence the determinism check and the written setup steps);
-  - Live counts taken from memory (§2.2);
-  - re-reporting ABL or known findings as new (§4);
+  - overwriting part 1 of the review (backup + PART1-INTEGRITY);
+  - rewriting the frozen D6 baseline files (§2.3);
+  - reusing an evidence file name (new harness rule, §2.3);
+  - Live claims from memory (§2.2);
+  - re-reporting ABL, DUX or known findings as new (§4);
   - the job time limit (write incrementally, §2.4).
 
 ## 9. Deliverables
-- **A:** `a-round-125.md` (§1).
+- **A:** `a-round-126.md` (§1).
 - **C:**
   - `user-review/design-ux-review.md` (§5.1);
-  - `c-round-125.json` (§5.2) and `c-round-125.md`: per-section summary, screenshot descriptions, roles consulted, and what was not reachable;
-  - evidence under `c-round-125/{tools,out,shots,manual}` and `c-round-125/progress.json`.
+  - `c-round-126.json` (§5.2) and `c-round-126.md`: per-section summary, screenshot descriptions, roles consulted, and what was not reachable;
+  - evidence under `c-round-126/{tools,out,shots,manual}`, `c-round-126/design-ux-review-part1.md`, and `c-round-126/progress.json`.

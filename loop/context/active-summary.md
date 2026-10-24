@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T03:11:14.253Z)
+# Active loop summary (2026-10-24T04:15:34.863Z)
 
-- backlog.json 1110 KB -> active view 145 KB
-- status: G_ROOT_GATE round 124
-- servers: `{"checkedUtc":"2026-10-24T02:34:21.8584724Z","round":124,"attempt":1,"store":200}`
+- backlog.json 1127 KB -> active view 146 KB
+- status: G_ROOT_GATE round 125
+- servers: `{"checkedUtc":"2026-10-24T03:30:01.6904302Z","round":125,"attempt":1,"store":200}`
 - last publication: 608187fdf279d9b579c279f3c536b27be74c0eea (rounds 122-122)
-- last root gate: round 124 skipped - no real changes
+- last root gate: round 125 skipped - no real changes
 
 ## Current items: -
 
@@ -136,7 +136,7 @@
 - C-R81-NB-POINTERCANCEL / info / acknowledged (Playwright cannot raise a real pointercancel; jsdom UM3 only) / group Volume pointercancel revert not browser-verified
 - GATE82-S6-PREVIEW-RESCHEDULE-PER-MOVE / info / signal: throttle preview reschedule only if users notice clicks; envelope drags inherit it / every fade/envelope preview move during playback rebuilds the graph (scheduleKey)
 - C-R82-LIVE-ORACLE-PAIRED / info / applied in round 83 (EN-LIVE / EN-MIDSTART are paired same-position comparisons) / reading-at-t1-vs-t2 live oracles are content-dominated; use paired envelope-vs-control comparisons
-- ENVELOPE-SNAP / info / signal (Live snaps breakpoints to grid, confirmed text; CZABA stage 2 free like fades); needs a B ruling before scheduling / envelope breakpoints do not snap to the grid
+- ENVELOPE-SNAP / info / scored in ABLETON-EXPERT-REVIEW part 2 (C round 124 Q4: breakpoint lands at 6.370 with Snap on; Live 26.7.1 F) -> recommendation ABL-R-13 awaiting_user; not a bug / envelope breakpoints do not snap to the grid
 - ENVELOPE-CLEAR / info / signal (Live Clear Envelope context command); not requested in FB-06 / no one-step Clear Envelope; points are deleted one by one
 - GATE83-M2-RESCHEDULE-PER-MOVE / info (signal; merges GATE82-S6) / signal: C round 83 EN-PLAY-EDIT 6 source restarts per drag, position monotonic, no glitch measured; candidate fix (exclude preview from scheduleKey until commit, or rAF throttle) needs a measured audible defect or the checkpoint ruling; SRW19-RESCHEDULE adds video-fade drags / envelope/fade/video-fade preview drags during playback rebuild the audio graph on every pointermove
 - C-R83-S-1280-RANGE-SHIFT / info (unverified origin) / converted -> C-R122-01 (deferred_low_polish) / at 1280x720 a body range selection shifts the stems lane up 9 px (clip y 458 -> 449, h 71 -> 66)
@@ -226,10 +226,10 @@
 - C-R116-OBS-AS-CONST / info / ruled accepted (B, D-29z82) / track-volume-db.test.tsx:42 uses 'as const' (const assertion; existing repo pattern)
 - TRACK-VOLUME-TAPER / info / signal (not requested by the user; Live taper unconfirmed in saved captures); Shift fine in round 118 addresses precision / lane/group Volume faders are linear in dB (100 px = 60 dB); a non-linear taper would give more resolution near 0 dB
 - GATE117-S5-TEXT-BELOW-FLOOR / info / acknowledged (reviewer: acceptable as designed; screen readers use the text) / a stored value below the -59.9 floor (e.g. 1e-4) reads -80.0 dB while the slider sits at -59.9
-- GROUP-VOLUME-VISIBLE-READOUT / info / signal for DESIGN-UX-REVIEW (layout change; not requested explicitly; D-29z83 R2) / the group row shows its dB only in title/aria-valuetext, no visible readout (lane has one)
+- GROUP-VOLUME-VISIBLE-READOUT / info / signal for DESIGN-UX-REVIEW (re-confirmed C round 124 Q3/notesForB: group Volume has no visible value; layout change needs Saba) / the group row shows its dB only in title/aria-valuetext, no visible readout (lane has one)
 - PAN-SHIFT-FINE / info / signal (Live 12 section 42.6 Shift finer resolution is generic to controls; T12 3b scoped to Volume faders; D-29z83 R5) / Pan fader has no Shift fine drag
 - GATE118-NIT-FINE-CONST / info / open nit - for the next owner of ArrangementDetailPanel.tsx / DETAIL_CLIP_GAIN_FINE_DIVISOR stays local while round 118 adds FADER_SHIFT_FINE_DIVISOR in fader.ts
-- MASTER-FINE-STEP / info / signal for ABLETON-EXPERT-REVIEW (not scheduled; not requested) / Shift fine on Master still snaps to the 0.5 dB Master step (fine = 10x travel per step, not 0.05 dB resolution); Live behaviour unconfirmed
+- MASTER-FINE-STEP / info / scored in ABLETON-EXPERT-REVIEW part 2 (C round 124 Q5: Shift still 0.5 dB steps) -> recommendation ABL-R-15 awaiting_user; not a bug / Shift fine on Master still snaps to the 0.5 dB Master step (fine = 10x travel per step, not 0.05 dB resolution); Live behaviour unconfirmed
 - SHIFT-FINE-DISCOVERABILITY / info / signal for DESIGN-UX-REVIEW (shortcut discoverability is in its scope; not scheduled) / Shift fine drag on Volume faders has no tooltip or hint
 - A-R118-REVIEW-GV-HALVES / info / acknowledged (the move-and-return half of GV4 and the -inf text of GV3 discriminate; m2 turns GV4 red) / the first half of GV4 and GV3's stored 0 also pass on the pre-round code
 - C-R118-OBS-GV-INF-METER-BALLISTICS / info / acknowledged (B accepts C's reading: 'meters stay silent' = no signal; meters fall at METER_RELEASE_DB_PER_SECOND 20, output exactly 0 from +150 ms) / after the group goes to -inf during play the member meters fall at the 20 dB/s release instead of jumping to -inf
@@ -249,6 +249,8 @@
 - ABL-B-1 / low / deferred_low_polish / the badge row overflows the option: scrollWidth 139-152 px > clientWidth 126 px; '▶' sits past the card edge and 'ისმის' wraps to a second l
 - ABL-B-2 / low / deferred_low_polish / the second Z pushes a duplicate entry: the first X leaves the view at 137.7 px/s while the status says 'წინა ხედი აღდგა. X კიდევ ერთი ნაბიჯი
 - C-R123-OBS-SFX-HEADER-SELECTION / info / watch (unreproduced; not a bug) / native text-selection highlight on the SFX header in two first-run P3 screenshots (harness drag started off-screen); 4 targeted probes found
+- C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / info / signal for DESIGN-UX-REVIEW (not a bug yet; C may score it as DUX-B or DUX-R) / at 1280x720 the Export dialog's 'მონიშნული მონაკვეთი' option sits partly under the dialog footer until the body is scrolled
+- C-R124-ENV-FIRST-LOAD / info / known environment (ENV-FIRST-LOAD rule) / first /studio-lab load after dev-server warm-up showed a hydration error + 'Invalid hook call' and an empty DOM; replaced once; all later se
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

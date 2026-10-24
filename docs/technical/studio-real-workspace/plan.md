@@ -1217,6 +1217,17 @@ C round 70 (`tmp/studio-real-loop/c-round-70.md`, `c-round-70.json`) — **PASS,
 - **R5 — ფაილები:** `metronome.ts` (additive), `ArrangementContext.tsx`; `metronome-ui.test.tsx` — UI2/UI4/UI5/**UI10**-ის ვიწრო ნებართვა (UI10-იც `PROJECT_END`-ს ამოწმებდა); ახალი `metronome-horizon.test.ts` (MH1–MH5) და `metronome-horizon-ui.test.tsx` (HU1–HU8) → 101 ფაილი; doc 063 ახალი; doc 059 — სტატუსი და ერთი წინადადება (DOC-059-STATUS-LINE); doc 062 — სტატუსი (ROOT-R70-L6).
 - **R6 — C:** რეალური აუდიო — MT-BEATS*, MH-LONG (60 BPM, 30 წმ), MH-END, MT-SEEK, MT-TEMPO-CHANGE, MT-LIVE-TOGGLE, MH-SCRUB; `createBufferSource`-ის მთვლელი — MH-NODES* (999 BPM, ≤ 120 პირველ 0.5 წმ-ში, ადრე ≈ 2200), MH-SCRUB-PERF (5 წმ-იან scrub-ზე ≤ 5000 და ≤ 80 თითო resync-ზე); MT-LOOP, MT-EXPORT-REG, MT-OFF. დამალული tab-ის შემთხვევა — მხოლოდ unit (HU4, MH4/MH5).
 
+**D-29z91 — Round 125-ის შედეგი; DESIGN-UX-REVIEW ნაწილი 1 დასრულდა; Round 126: DESIGN-UX-REVIEW, ნაწილი 2.**
+
+C round 125 (`tmp/studio-real-loop/c-round-125.md`, `c-round-125.json`) — **PASS**, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`, `partComplete: true`: D6, D1, D2 შესრულდა, გადატანილი არცერთი; SOURCE-SCOPE (`608187f`, 937) დასაწყისშიც და ბოლოსაც OK; G125-3 (401, „Sign in required“, 0 `audio[src]`; fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 125 — `skipped`; baseline რჩება `608187f`.
+- **R1 — B-ის შემოწმება:** WAV header-ები (პროექტი 7217877 frame, 48 kHz / 24-bit / stereo ორივე viewport-ზე; range 192000 frame = 4.000 წმ); `contrast-baseline.json`-ში `text-dim` 53/53 4.5-ზე დაბალია (3.08–3.67); `g125-3.json` (401); baseline-ის ოთხივე ფაილს label აქვს „pre-V-0 baseline (608187f)“; სურათები `D6-S1-1280.png`, `D2-hint-1440.png` C-ის აღწერას ემთხვევა.
+- **R2 — DUX-B-1 (Low) → `deferred_low_polish`** (167). ის VISUAL-A V-1-ის `dim` token-ით უნდა დაიხუროს და RV-2-მა იმავე ელემენტებზე ≥ 4.5:1 უნდა აჩვენოს; სიაში რჩება, სანამ C არ დაადასტურებს (ორჯერ არ იგეგმება).
+- **R3 — DUX-R-1 და DUX-R-2 → `design_ux_recommendations`, `awaiting_user`.** DUX-R-1 უკავშირდება TRACK-VOLUME-NUMERIC-FIELD-ს (ვიწრო header-ის გამო შეგნებული განსხვავება — წესი არ უქმდება, გადაწყვეტა Saba-სია) და ABL-R-14-ს; DUX-R-2 — SHIFT-FINE-DISCOVERABILITY-ს და WAVEFORM-ZOOM-DISCOVERABILITY-ს.
+- **R4 — RV-1/RV-2 baseline აღებულია** (`c-round-125/out/bbox-baseline-{1280,1440}.json`, `contrast-baseline.json`, `under24px.json`; დეტერმინიზმი 0 px) და გაყინული შემავალი მონაცემია.
+- **R5 — 1280-ზე SFX ხაზი detail panel-ის ქვეშ (C-R125-OBS-1280-SFX-LANE-UNDER-PANEL) — წინასწარი წესი D-29b-ის მიხედვით:** panel > 120 px და რომელიმე ხაზი არ ჩანს (auto-fit ჩართულია, მომხმარებელს არ შეუცვლია ზომა) → Medium DUX-B; panel = 120 და SFX wheel-ით/scrollbar-ით მისაწვდომია → ხახუნი; მხოლოდ panel-ის დაკეცვით/separator-ით → Low DUX-B; მიუწვდომელი → Medium DUX-B. Medium → შეზღუდული გასწორება V-0-მდე.
+- **R6 — ნაწილი 2-ის წესები:** ექვსივე როლი (`design-philosopher` და `design-auditor` სახელით); DUX-R-3-დან ყველა იდეას აქვს `fitsVisualA`; D5 საბოლოო ვერდიქტს §1-ის თავში ამატებს, ნაწილი 1-ის §2, §3, §7 არ იცვლება (backup + მწკრივების შემოწმება); D6-ის ფაილები არ გადაიწერება; ახალი harness წესი — ყოველი გაშვების ფაილს უნიკალური სახელი აქვს (C-R125-HARNESS-OVERWRITE).
+- **R7 — შედეგი წინასწარ (round 127):** 2026-10-27-ზე ან შემდეგ — ჯერ რეგრესია; გადატანილი სექციები ან `reviewComplete: false` — პირველად; Critical — გასწორება; High/Medium DUX-B — შეზღუდული გასწორებები V-0-მდე; სხვაგვარად DESIGN-UX-REVIEW → done და round 127 = V-0, ეტაპი 1 (root-ის პასუხით `b-round-124-checkpoint-request.md` Q1-ზე, თუ არის; სხვაგვარად იქ ჩაწერილი fallback). Architecture note ამ რაუნდში არ ყოფილა; ARCH-CHECKPOINT-PHASE1-BOUNDARY ისევ უპასუხოა და არ ბლოკავს.
+
 **D-29z90 — Round 124-ის შედეგი; ABLETON-EXPERT-REVIEW დასრულდა; Round 125: DESIGN-UX-REVIEW, ნაწილი 1 (VISUAL-A-ს პირველი ნაბიჯი).**
 
 C round 124 (`tmp/studio-real-loop/c-round-124.md`, `c-round-124.json`) — **PASS**, `browserVerified: true`, `realVerified: true`, `allRowsRan: true`, `reviewComplete: true`: Q1–Q7 შესრულდა, გადატანილი არცერთი, ახალი ბაგი 0; SOURCE-SCOPE (`608187f`, 937) დასაწყისშიც და ბოლოსაც OK; G124-3 (401, „Sign in required“; fake-Bearer 403 — BLOCKED, backend cloud-ში არ არის). Gate 124 — `skipped`; baseline რჩება `608187f`.
@@ -2175,7 +2186,9 @@ flowchart TD
 | 124 | ABLETON-EXPERT-REVIEW 2 | Q1–Q6 ბრაუზერში Live 12-ის manual-თან + Q7 საბოლოო ვერდიქტი; A — არაფერი (D-29z89) |
 | 124 → | (შედეგი) | **C PASS** (`browserVerified`, `reviewComplete`, Q1–Q7, 0 ბაგი); ABL-R-11…18 → `awaiting_user`; ABLETON-EXPERT-REVIEW → done; gate 124 skipped |
 | 125 | DESIGN-UX-REVIEW 1 | D1 კომფორტის ცხრილი, D2 shortcut-ები, D6 RV-1/RV-2 baseline; A — არაფერი (D-29z90) |
-| 126 | (წინასწარ) | 2026-10-27-დან რეგრესია; Medium+ DUX-B-ის გასწორებები; სხვაგვარად DESIGN-UX-REVIEW 2 (D3–D5) |
+| 125 → | (შედეგი) | **C PASS** (`browserVerified`, `partComplete`, D6/D1/D2); DUX-B-1 (Low) → deferred; DUX-R-1/2 → `awaiting_user`; RV-1/RV-2 baseline; gate 125 skipped |
+| 126 | DESIGN-UX-REVIEW 2 | D3 ხახუნის წერტილები (D3-A: 1280 SFX ხაზი / D-29b), D4 DUX-R-3+, D5 საბოლოო ვერდიქტი და ინდექსი; A — არაფერი (D-29z91) |
+| 127 | (წინასწარ) | 2026-10-27-დან რეგრესია; Medium+ DUX-B-ის გასწორებები; სხვაგვარად VISUAL-A V-0, ეტაპი 1 |
 | — | R26-M1 | rAF-gap sampling-ის hardening (ან Tech Lead-ის მიღება), საბოლოო რეგრესიამდე |
 | — | SRW-14, SRW-15 | Grid/Snap, bars/beats/tempo/metronome (ორ ეტაპად, თუ საჭიროა) |
 | — | SRW-16 | Markers |
@@ -2221,6 +2234,7 @@ flowchart TD
 **D-29z88:** round 123-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-123.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/`, `c-round-123*`). ყველაფერი გაყინულია (`b-round-122-r123-tree-sha256.txt`, 937).
 **D-29z89:** round 124-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-124.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/`, `c-round-124*`). ყველაფერი გაყინულია (`b-round-123-r124-tree-sha256.txt`, 937).
 **D-29z90:** round 125-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-125.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/design-ux-review.md`, `c-round-125*`). ყველაფერი გაყინულია (`b-round-124-r125-tree-sha256.txt`, 937).
+**D-29z91:** round 126-ში A-ს არცერთი ფაილი არ ეკუთვნის (მხოლოდ `a-round-126.md`). C წერს მხოლოდ loop საქაღალდეში (`user-review/design-ux-review.md` — ნაწილი 1-ის გადაწერის გარეშე, `c-round-126*`). ყველაფერი გაყინულია (`b-round-125-r126-tree-sha256.txt`, 937).
 
 ## 7. Done Policy
 
