@@ -1,0 +1,278 @@
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 11:20:33.567071698 +0000
+@@ -19,6 +19,18 @@
+   ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS,
+   ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE,
+ } from '../export-wav.client';
++import { formatGridDivision, GRID_DIVISIONS_SECONDS } from '../grid';
++import {
++  GRID_TRIPLET_MENU_LABEL,
++  gridDivisionEndMessage,
++  gridDivisionStatusMessage,
++  gridDivisionTitle,
++  gridMusicalGroupLabel,
++  gridTempoClearedMessage,
++  gridTripletGroupLabel,
++  gridTripletRefusalMessage,
++  MUSICAL_GRID_DIVISIONS,
++} from '../grid-divisions';
+ import {
+   TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE,
+   TRACK_GROUP_NAME_PREFIX,
+@@ -31,6 +43,7 @@
+ import {
+   studioEditStrings,
+   studioExportStrings,
++  studioGridStrings,
+   studioLaneMoveStrings,
+   studioLibraryStrings,
+   studioLoopStrings,
+@@ -47,7 +60,7 @@
+ import { videoAudioNote, videoProbeErrorMessage } from '../video.client';
+ import { formatZoomReadout } from '../view';
+ 
+-const GEORGIAN_CODEPOINT = /[Ⴀ-ჿ]/;
++const GEORGIAN_CODEPOINT = /[Ⴀ-ჿᲐ-Ჿⴀ-⴯]/;
+ 
+ const EXPECTED_PLAIN_STRINGS: Record<string, string> = {
+   formatButtonWav: 'Export WAV',
+@@ -1170,3 +1183,239 @@
+     expect(groupsWithoutPrefix).not.toMatch(GEORGIAN_CODEPOINT);
+   });
+ });
++
++const gs = studioGridStrings;
++
++const EXPECTED_GRID_PLAIN_STRINGS: Record<string, string> = {
++  barLabel: '1 bar',
++  tripletMenuLabel: 'Triplets (3)',
++  snapOnSuffix: '(Snap on)',
++  snapOffSuffix: '(Snap off)',
++  tripletNeedsTempo: 'Triplets need a tempo — enter a BPM first (3)',
++  tripletNotOnBar: '1 bar has no triplets — choose 1/2 or narrower (3)',
++  tripletNeedsBarsGrid: 'Triplets work only on the bars grid — choose 1/2 … 1/32 (3)',
++  menuLabel: 'Grid division',
++  snapOnTitle: 'Snap on — clips land on the grid (G)',
++  snapOff: 'Snap off — free movement (G)',
++};
++
++const EXPECTED_GRID_KEYS = [
++  'backToSeconds',
++  'barLabel',
++  'barsGroup',
++  'menuLabel',
++  'narrowest',
++  'seconds',
++  'snapOff',
++  'snapOffSuffix',
++  'snapOnStatus',
++  'snapOnSuffix',
++  'snapOnTitle',
++  'status',
++  'statusMusical',
++  'titleLinesHidden',
++  'titleLinesVisible',
++  'tripletMenuLabel',
++  'tripletNeedsBarsGrid',
++  'tripletNeedsTempo',
++  'tripletNotOnBar',
++  'tripletsGroup',
++  'widest',
++];
++
++const GRID_FORMATTER_SAMPLES: Record<string, string[]> = {
++  seconds: [gs.seconds('0.25'), gs.seconds('10')],
++  narrowest: [gs.narrowest('0.1 s'), gs.narrowest('1/32T')],
++  widest: [gs.widest('10 s'), gs.widest('1 bar')],
++  status: [gs.status({ label: '0.5 s', snap: gs.snapOnSuffix })],
++  statusMusical: [
++    gs.statusMusical({ label: '1/4', step: '0.667', bpm: '90', snap: gs.snapOffSuffix }),
++  ],
++  backToSeconds: [gs.backToSeconds({ tempoCleared: 'Tempo cleared.', label: '0.5 s' })],
++  barsGroup: [gs.barsGroup('120')],
++  tripletsGroup: [gs.tripletsGroup('92.5')],
++  titleLinesVisible: [gs.titleLinesVisible('1/4')],
++  titleLinesHidden: [gs.titleLinesHidden('0.1 s')],
++  snapOnStatus: [gs.snapOnStatus('1 s')],
++};
++
++const STUDIO_WORKSPACE_REMAINING_GEORGIAN_LINES = [
++  "const CLIP_LANE_SHIFT_HINT = 'Shift — დრო ჩაიკეტება, შეიცვლება მხოლოდ ხაზი';",
++  "const CLIP_LANE_SHIFT_LOCKED_HINT = 'Shift — დრო ჩაკეტილია, იცვლება მხოლოდ ხაზი';",
++  "const FOLLOW_PAUSED_MESSAGE = 'Follow შეჩერდა ხელით ნავიგაციისას. Follow ან Play აბრუნებს.';",
++  "const ZOOM_RANGE_MISSING_MESSAGE = 'Zoom-ისთვის ჯერ მონიშნე მონაკვეთი.';",
++  "const ZOOM_HISTORY_EMPTY_MESSAGE = 'Zoom-ის ისტორია ცარიელია — დასაბრუნებელი ხედი არ არის.';",
++  "'ვიდეო გაფართოვდა ბიბლიოთეკის თავზე. გადაათრიე სასურველ ადგილას; Esc ან ✕ აბრუნებს.';",
++  "'ბიბლიოთეკა დროებით გაიხსნა გაფართოებული ვიდეოსთვის; ვიდეოს დახურვისას ისევ დაიკეცება. Esc ან ✕ აბრუნებს.';",
++  "'ბიბლიოთეკა დაიკეცა, ამიტომ ვიდეო პატარა ხედს დაუბრუნდა.';",
++  "export const VIDEO_RETURNED_COMPACT_MESSAGE = 'ვიდეო პატარა ხედს დაუბრუნდა.';",
++  "'ვიდეო პატარა ხედს დაუბრუნდა; ბიბლიოთეკა ისევ დაიკეცა.';",
++  '\'[data-testid="arrangement-track-header"] button[aria-label*="— აქტიური ხაზის არჩევა"]\',',
++  'current.setStatus(`სახელი ცარიელია — დარჩა «{group.name}»`);',
++  'current.setStatus(`ჯგუფის სახელი: «{name}».`);',
++  'current.setStatus(`Fit: მთლიანი პროექტი ჩანს ({formatArrangementTime(extent)}). X აბრუნებს.`);',
++  '`Zoom მონიშნულზე: {formatArrangementTime(selected.start)} — {formatArrangementTime(selected.end)}. X აბრუნებს.`,',
++  "? 'წინა ხედი აღდგა. X კიდევ ერთი ნაბიჯით აბრუნებს.'",
++  ": 'წინა ხედი აღდგა.',",
++  "? 'Follow გამორთულია: ხედი თავისით არ მოძრაობს.'",
++  "? 'Follow ისევ მიჰყვება დაკვრის პოზიციას.'",
++  ": 'Follow ჩართულია: დაკვრისას ხედი პოზიციას მიჰყვება.',",
++  "current.setStatus(next ? 'Envelope რეჟიმი: ჩართულია.' : 'Envelope რეჟიმი: გამორთულია.');",
++  '<span className="font-normal text-muted">· სამუშაო სივრცე</span>',
++  "? 'Envelope ჩართულია — კლიპზე double-click = წერტილი (A)'",
++  ": 'Envelope გამორთულია — კლიპის volume envelope-ის რედაქტირება (A)'",
++  'aria-label="Waveform Zoom — მხოლოდ ხედი, ხმა არ იცვლება"',
++  'title={`Waveform Zoom {waveformZoomPercent(waveformZoom)}% — მხოლოდ ხედი, ხმა არ იცვლება`}',
++  'მონიშვნა: {formatArrangementTime(range.start)} — {formatArrangementTime(range.end)} ·',
++  "სიგრძე {formatArrangementTime(range.end - range.start)} ·{' '}",
++  '<span data-testid="arrangement-range-all-lanes">ყველა ხაზი · </span>',
++  'Delete = წაშლა, სიცარიელე რჩება · Ctrl+Shift+X = Cut Time',
++  '{selectedClipIds.length} კლიპი მონიშნულია',
++  'title={`კლიპი: {selectedTitle} · start {formatArrangementTime(selectedClip.start)} · length {formatArrangementTime(selectedClip.duration)} · source offset {formatArrangementTime(selectedClip.sourceOffset)}`}',
++  'კლიპი: <span className="text-foreground">{selectedTitle}</span> · start{\' \'}',
++];
++
++describe('V-0.3a grid and Snap strings', () => {
++  it('ST23: every plain-string property of studioGridStrings and the aliased grid exports equal the exact English', () => {
++    expect(Object.keys(gs).sort()).toEqual(EXPECTED_GRID_KEYS);
++    const plainKeys = Object.entries(gs)
++      .filter(([, value]) => typeof value === 'string')
++      .map(([key]) => key)
++      .sort();
++    expect(plainKeys).toEqual(Object.keys(EXPECTED_GRID_PLAIN_STRINGS).sort());
++    for (const [key, value] of Object.entries(gs)) {
++      if (typeof value === 'string') {
++        expect(value, key).toBe(EXPECTED_GRID_PLAIN_STRINGS[key]);
++      }
++    }
++    expect(GRID_TRIPLET_MENU_LABEL).toBe('Triplets (3)');
++    expect(MUSICAL_GRID_DIVISIONS.map((division) => division.label)).toEqual([
++      '1 bar',
++      '1/2',
++      '1/4',
++      '1/8',
++      '1/16',
++      '1/32',
++    ]);
++  });
++
++  it('ST24: every formatter and exported grid function returns the exact English', () => {
++    expect(gs.seconds('0.25')).toBe('0.25 s');
++    expect(gs.seconds('10')).toBe('10 s');
++    expect(gs.narrowest('0.1 s')).toBe('The grid is already at its narrowest — 0.1 s (1)');
++    expect(gs.widest('1 bar')).toBe('The grid is already at its widest — 1 bar (2)');
++    expect(gs.status({ label: '0.5 s', snap: '(Snap on)' })).toBe('Grid: 0.5 s (Snap on)');
++    expect(gs.statusMusical({ label: '1/4', step: '0.667', bpm: '90', snap: '(Snap off)' })).toBe(
++      'Grid: 1/4 · 0.667 s at 90 BPM (Snap off)',
++    );
++    expect(gs.backToSeconds({ tempoCleared: 'Tempo cleared.', label: '0.5 s' })).toBe(
++      'Tempo cleared. Grid back to seconds: 0.5 s.',
++    );
++    expect(gs.barsGroup('120')).toBe('Bars · 120 BPM');
++    expect(gs.tripletsGroup('92.5')).toBe('Triplets · 92.5 BPM');
++    expect(gs.titleLinesVisible('1/4')).toBe('Grid 1/4 · 1 — narrower, 2 — wider');
++    expect(gs.titleLinesHidden('0.1 s')).toBe(
++      'Grid 0.1 s — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider',
++    );
++    expect(gs.snapOnStatus('1 s')).toBe('Snap on — grid 1 s (G)');
++    expect(GRID_DIVISIONS_SECONDS.map((step) => formatGridDivision(step))).toEqual([
++      '10 s',
++      '5 s',
++      '2 s',
++      '1 s',
++      '0.5 s',
++      '0.25 s',
++      '0.1 s',
++    ]);
++    expect(gridDivisionStatusMessage('0.5', null, true)).toBe('Grid: 0.5 s (Snap on)');
++    expect(gridDivisionStatusMessage('1/4', 90, true)).toBe(
++      'Grid: 1/4 · 0.667 s at 90 BPM (Snap on)',
++    );
++    expect(gridDivisionStatusMessage('1/4T', 90, false)).toBe(
++      'Grid: 1/4T · 0.444 s at 90 BPM (Snap off)',
++    );
++    expect(gridDivisionEndMessage('bar', 'widen')).toBe(
++      'The grid is already at its widest — 1 bar (2)',
++    );
++    expect(gridTempoClearedMessage(0.5)).toBe(
++      'Tempo cleared — the bars ruler is hidden. Audio is unchanged. Grid back to seconds: 0.5 s.',
++    );
++    expect(gridDivisionTitle('0.1', false)).toBe(
++      'Grid 0.1 s — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider',
++    );
++    expect(gridDivisionEndMessage('1', 'narrow')).toBe(
++      'The grid is already at its narrowest — 0.1 s (1)',
++    );
++    expect(gridDivisionEndMessage('1', 'widen')).toBe(
++      'The grid is already at its widest — 10 s (2)',
++    );
++    expect(gridDivisionEndMessage('1/4', 'narrow')).toBe(
++      'The grid is already at its narrowest — 1/32 (1)',
++    );
++    expect(gridDivisionEndMessage('1/4', 'widen')).toBe(
++      'The grid is already at its widest — 1 bar (2)',
++    );
++    expect(gridDivisionEndMessage('1/4T', 'narrow')).toBe(
++      'The grid is already at its narrowest — 1/32T (1)',
++    );
++    expect(gridDivisionEndMessage('1/4T', 'widen')).toBe(
++      'The grid is already at its widest — 1/2T (2)',
++    );
++    expect(gridTripletRefusalMessage('1', null)).toBe(
++      'Triplets need a tempo — enter a BPM first (3)',
++    );
++    expect(gridTripletRefusalMessage('bar', 90)).toBe(
++      '1 bar has no triplets — choose 1/2 or narrower (3)',
++    );
++    expect(gridTripletRefusalMessage('0.5', 90)).toBe(
++      'Triplets work only on the bars grid — choose 1/2 … 1/32 (3)',
++    );
++    expect(gridMusicalGroupLabel(92.5)).toBe('Bars · 92.5 BPM');
++    expect(gridTripletGroupLabel(92.5)).toBe('Triplets · 92.5 BPM');
++    expect(gridDivisionTitle('1/4', true)).toBe('Grid 1/4 · 1 — narrower, 2 — wider');
++    expect(gridDivisionTitle('1/4', false)).toBe(
++      'Grid 1/4 — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider',
++    );
++  });
++
++  it('ST25: studioGridStrings and the grid sources contain no Georgian codepoint; StudioWorkspace keeps only the later V-0 lines', () => {
++    expect(GEORGIAN_CODEPOINT.test('ა')).toBe(true);
++    expect(GEORGIAN_CODEPOINT.test('Ა')).toBe(true);
++    expect(GEORGIAN_CODEPOINT.test('ⴀ')).toBe(true);
++    expect(GEORGIAN_CODEPOINT.test('abc — · …')).toBe(false);
++    const formatterKeys = Object.entries(gs)
++      .filter(([, value]) => typeof value === 'function')
++      .map(([key]) => key)
++      .sort();
++    expect(formatterKeys).toEqual(Object.keys(GRID_FORMATTER_SAMPLES).sort());
++    for (const [key, value] of Object.entries(gs)) {
++      if (typeof value === 'string') {
++        expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
++      }
++    }
++    for (const [key, outputs] of Object.entries(GRID_FORMATTER_SAMPLES)) {
++      expect(outputs.length, key).toBeGreaterThan(0);
++      for (const output of outputs) {
++        expect(output, key).not.toMatch(GEORGIAN_CODEPOINT);
++      }
++    }
++    for (const path of [
++      '../grid.ts',
++      '../grid-divisions.ts',
++      '../../../components/arrangement/ArrangementGridMenu.tsx',
++    ]) {
++      const source = stripSourceComments(readStoreSource(path));
++      expect(source.length, path).toBeGreaterThan(0);
++      expect(source, path).not.toMatch(GEORGIAN_CODEPOINT);
++    }
++    const workspace = stripSourceComments(
++      readStoreSource('../../../components/arrangement/StudioWorkspace.tsx'),
++    );
++    const georgianLines = workspace
++      .split(/\r?\n/)
++      .filter((line) => GEORGIAN_CODEPOINT.test(line))
++      .map((line) => line.trim().replaceAll('${', '{'));
++    expect(georgianLines).toHaveLength(33);
++    expect(georgianLines).toEqual(STUDIO_WORKSPACE_REMAINING_GEORGIAN_LINES);
++  });
++});

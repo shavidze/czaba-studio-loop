@@ -1,0 +1,214 @@
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/strings.ts	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 11:22:00.874970000 +0000
+@@ -326,3 +326,39 @@
+   ungroupedOne: (names: string): string => `Group ${names} ungrouped.`,
+   ungroupedMany: (names: string): string => `Groups ${names} ungrouped.`,
+ };
++
++export const studioGridStrings = {
++  seconds: (step: string): string => `${step} s`,
++  barLabel: '1 bar',
++  tripletMenuLabel: 'Triplets (3)',
++  narrowest: (label: string): string => `The grid is already at its narrowest — ${label} (1)`,
++  widest: (label: string): string => `The grid is already at its widest — ${label} (2)`,
++  snapOnSuffix: '(Snap on)',
++  snapOffSuffix: '(Snap off)',
++  status: ({ label, snap }: { label: string; snap: string }): string => `Grid: ${label} ${snap}`,
++  statusMusical: ({
++    label,
++    step,
++    bpm,
++    snap,
++  }: {
++    label: string;
++    step: string;
++    bpm: string;
++    snap: string;
++  }): string => `Grid: ${label} · ${step} s at ${bpm} BPM ${snap}`,
++  backToSeconds: ({ tempoCleared, label }: { tempoCleared: string; label: string }): string =>
++    `${tempoCleared} Grid back to seconds: ${label}.`,
++  barsGroup: (bpm: string): string => `Bars · ${bpm} BPM`,
++  tripletsGroup: (bpm: string): string => `Triplets · ${bpm} BPM`,
++  tripletNeedsTempo: 'Triplets need a tempo — enter a BPM first (3)',
++  tripletNotOnBar: '1 bar has no triplets — choose 1/2 or narrower (3)',
++  tripletNeedsBarsGrid: 'Triplets work only on the bars grid — choose 1/2 … 1/32 (3)',
++  titleLinesVisible: (label: string): string => `Grid ${label} · 1 — narrower, 2 — wider`,
++  titleLinesHidden: (label: string): string =>
++    `Grid ${label} — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider`,
++  menuLabel: 'Grid division',
++  snapOnStatus: (label: string): string => `Snap on — grid ${label} (G)`,
++  snapOnTitle: 'Snap on — clips land on the grid (G)',
++  snapOff: 'Snap off — free movement (G)',
++};
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/grid.ts	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/grid.ts	2026-10-24 11:14:47.079637326 +0000
+@@ -1,4 +1,5 @@
+ import type { ArrangementClip } from '~/types/arrangement';
++import { studioGridStrings } from './strings';
+ 
+ export const GRID_DIVISIONS_SECONDS = [10, 5, 2, 1, 0.5, 0.25, 0.1] as const;
+ 
+@@ -174,7 +175,7 @@
+ }
+ 
+ export function formatGridDivision(step: number): string {
+-  return `${step} წმ`;
++  return studioGridStrings.seconds(String(step));
+ }
+ 
+ export function adjacentGridDivision(
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/grid-divisions.ts	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/grid-divisions.ts	2026-10-24 11:22:00.876681628 +0000
+@@ -1,8 +1,9 @@
+ import { formatGridDivision, GRID_DIVISIONS_SECONDS } from './grid';
++import { studioGridStrings } from './strings';
+ import { formatTempoBpm, tempoStatusMessage } from './tempo';
+ 
+ export const MUSICAL_GRID_DIVISIONS = [
+-  { id: 'bar', label: '1 ტაქტი', beats: 4 },
++  { id: 'bar', label: studioGridStrings.barLabel, beats: 4 },
+   { id: '1/2', label: '1/2', beats: 2 },
+   { id: '1/4', label: '1/4', beats: 1 },
+   { id: '1/8', label: '1/8', beats: 0.5 },
+@@ -22,7 +23,7 @@
+   | (typeof MUSICAL_GRID_DIVISIONS)[number]['id']
+   | (typeof MUSICAL_TRIPLET_GRID_DIVISIONS)[number]['id'];
+ 
+-export const GRID_TRIPLET_MENU_LABEL = 'ტრიოლები (3)';
++export const GRID_TRIPLET_MENU_LABEL = studioGridStrings.tripletMenuLabel;
+ 
+ export interface GridDivisionOption {
+   id: string;
+@@ -129,9 +130,9 @@
+ export function gridDivisionEndMessage(id: string, direction: 'narrow' | 'widen'): string {
+   const family = gridDivisionFamilyIds(id);
+   if (direction === 'narrow') {
+-    return `ბადე უკვე ყველაზე მჭიდროა — ${gridDivisionLabel(family.at(-1) ?? id)} (1)`;
++    return studioGridStrings.narrowest(gridDivisionLabel(family.at(-1) ?? id));
+   }
+-  return `ბადე უკვე ყველაზე ფართოა — ${gridDivisionLabel(family[0] ?? id)} (2)`;
++  return studioGridStrings.widest(gridDivisionLabel(family[0] ?? id));
+ }
+ 
+ export function gridDivisionStatusMessage(
+@@ -139,39 +140,47 @@
+   bpm: number | null,
+   snapEnabled: boolean,
+ ): string {
+-  const snap = `(Snap ${snapEnabled ? 'ჩართულია' : 'გამორთულია'})`;
++  const snap = snapEnabled ? studioGridStrings.snapOnSuffix : studioGridStrings.snapOffSuffix;
+   if (!isMusicalGridDivisionId(id) || bpm === null) {
+-    return `ბადე: ${gridDivisionLabel(id)} ${snap}`;
++    return studioGridStrings.status({ label: gridDivisionLabel(id), snap });
+   }
+   const step = musicalGridDivisionSeconds(id, bpm);
+-  return `ბადე: ${gridDivisionLabel(id)} · ${String(Math.round(step * 1000) / 1000)} წმ ${formatTempoBpm(bpm)} BPM-ზე ${snap}`;
++  return studioGridStrings.statusMusical({
++    label: gridDivisionLabel(id),
++    step: String(Math.round(step * 1000) / 1000),
++    bpm: formatTempoBpm(bpm),
++    snap,
++  });
+ }
+ 
+ export function gridTempoClearedMessage(secondsStep: number): string {
+-  return `${tempoStatusMessage(null)} ბადე დაბრუნდა წამებზე: ${formatGridDivision(secondsStep)}.`;
++  return studioGridStrings.backToSeconds({
++    tempoCleared: tempoStatusMessage(null),
++    label: formatGridDivision(secondsStep),
++  });
+ }
+ 
+ export function gridMusicalGroupLabel(bpm: number): string {
+-  return `ტაქტები · ${formatTempoBpm(bpm)} BPM`;
++  return studioGridStrings.barsGroup(formatTempoBpm(bpm));
+ }
+ 
+ export function gridTripletGroupLabel(bpm: number): string {
+-  return `ტრიოლები · ${formatTempoBpm(bpm)} BPM`;
++  return studioGridStrings.tripletsGroup(formatTempoBpm(bpm));
+ }
+ 
+ export function gridTripletRefusalMessage(id: string, bpm: number | null): string {
+   if (bpm === null) {
+-    return 'ტრიოლები მხოლოდ ტემპით — ჯერ ჩაწერე BPM (3)';
++    return studioGridStrings.tripletNeedsTempo;
+   }
+   if (id === 'bar') {
+-    return '1 ტაქტს ტრიოლი არ აქვს — აირჩიე 1/2 ან უფრო მჭიდრო (3)';
++    return studioGridStrings.tripletNotOnBar;
+   }
+-  return 'ტრიოლები მხოლოდ ტაქტების ბადეზე — აირჩიე 1/2 … 1/32 (3)';
++  return studioGridStrings.tripletNeedsBarsGrid;
+ }
+ 
+ export function gridDivisionTitle(id: string, linesVisible: boolean): string {
+   const label = gridDivisionLabel(id);
+   return linesVisible
+-    ? `ბადე ${label} · 1 — უფრო მჭიდრო, 2 — უფრო ფართო`
+-    : `ბადე ${label} — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom. · 1 — უფრო მჭიდრო, 2 — უფრო ფართო`;
++    ? studioGridStrings.titleLinesVisible(label)
++    : studioGridStrings.titleLinesHidden(label);
+ }
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/components/arrangement/ArrangementGridMenu.tsx	2026-10-24 11:10:56.163023266 +0000
++++ app/components/arrangement/ArrangementGridMenu.tsx	2026-10-24 11:15:12.884528847 +0000
+@@ -1,9 +1,10 @@
+ import { Fragment, type KeyboardEvent, useEffect, useRef, useState } from 'react';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import { GRID_TRIPLET_MENU_LABEL, type GridDivisionOption } from '~/lib/arrangement/grid-divisions';
++import { studioGridStrings } from '~/lib/arrangement/strings';
+ 
+ const GRID_MENU_VIEWPORT_MARGIN_PX = 4;
+-const GRID_MENU_LABEL = 'ბადის დანაყოფი';
++const GRID_MENU_LABEL = studioGridStrings.menuLabel;
+ const GRID_MENU_SNAP_LABEL = 'Snap (G)';
+ const GRID_MENU_ITEM_CLASS =
+   'flex h-7 w-full items-center gap-2 rounded-sm px-2 text-left font-mono text-xs tabular-nums text-foreground hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/components/arrangement/StudioWorkspace.tsx	2026-10-24 11:10:56.163090446 +0000
++++ app/components/arrangement/StudioWorkspace.tsx	2026-10-24 11:22:00.878273255 +0000
+@@ -80,6 +80,7 @@
+   type TrackLaneFitEntry,
+ } from '~/lib/arrangement/panels';
+ import { clipsInMarquee, unionSelection } from '~/lib/arrangement/selection';
++import { studioGridStrings } from '~/lib/arrangement/strings';
+ import { TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '~/lib/arrangement/tempo';
+ import {
+   anchoredTimelineView,
+@@ -155,7 +156,7 @@
+ export const VIDEO_RETURNED_LIBRARY_RECOLLAPSED_MESSAGE =
+   'ვიდეო პატარა ხედს დაუბრუნდა; ბიბლიოთეკა ისევ დაიკეცა.';
+ const LIBRARY_TRANSITION_FALLBACK_MS = 100;
+-const SNAP_OFF_MESSAGE = 'Snap გამორთულია — თავისუფალი გადაადგილება (G)';
++const SNAP_OFF_MESSAGE = studioGridStrings.snapOff;
+ 
+ function parseTransitionTimesMs(value: string): number[] {
+   return value.split(',').map((entry) => {
+@@ -1273,7 +1274,7 @@
+     setSnapEnabled(next);
+     workspaceRef.current.setStatus(
+       next
+-        ? `Snap ჩართულია — ბადე ${gridDivisionLabel(gridDivisionIdRef.current)} (G)`
++        ? studioGridStrings.snapOnStatus(gridDivisionLabel(gridDivisionIdRef.current))
+         : SNAP_OFF_MESSAGE,
+     );
+   }, []);
+@@ -2266,9 +2267,7 @@
+                       aria-pressed={snapEnabled}
+                       aria-keyshortcuts="G"
+                       title={
+-                        snapEnabled
+-                          ? 'Snap ჩართულია — კლიპი ბადეზე ჯდება (G)'
+-                          : 'Snap გამორთულია — თავისუფალი გადაადგილება (G)'
++                        snapEnabled ? studioGridStrings.snapOnTitle : studioGridStrings.snapOff
+                       }
+                       className={cn(
+                         'h-6 shrink-0 rounded-sm border border-outline px-1.5 text-xs leading-none text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+@@ -2309,7 +2308,7 @@
+                           stepGridDivision(event.code === 'Digit1' ? 'narrow' : 'widen');
+                         }
+                       }}
+-                      aria-label="ბადის დანაყოფი"
++                      aria-label={studioGridStrings.menuLabel}
+                       aria-keyshortcuts={tempoBpm !== null ? '1 2 3' : '1 2'}
+                       title={gridDivisionTitle(gridDivisionId, gridLinesShown)}
+                       className="h-6 shrink-0 rounded-sm border border-outline bg-surface px-1 text-xs leading-none tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"

@@ -1,0 +1,177 @@
+{
+ "round": 134,
+ "task": "VISUAL-A V-0.3a — grid and Snap texts in English",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-24T11:30:05.8590652Z",
+  "round": 134,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T134-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "GRID-SEC-1440",
+  "GRID-SEC-1280",
+  "GRID-MUSICAL-1440",
+  "GRID-MUSICAL-1280",
+  "GRID-TRIPLET-1440",
+  "GRID-TRIPLET-1280",
+  "GRID-HIDDEN-1440",
+  "GRID-HIDDEN-1280",
+  "SNAP-1440",
+  "SNAP-1280",
+  "MENU-1440",
+  "MENU-1280",
+  "GEO-COUNT-1440",
+  "GEO-COUNT-1280",
+  "LAYOUT-1440",
+  "LAYOUT-1280",
+  "REG-133",
+  "G134-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "inconclusive": [],
+ "blocked": [
+  "G134-3 fake-Bearer 403 check: BLOCKED (backend unavailable in cloud)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [],
+ "georgianCounts": {
+  "file": "c-round-134/out/geo-count.json",
+  "steps": 95,
+  "observedStatusChanges": 83,
+  "netInCountedPlaces": 0,
+  "countedPlaces": [
+   "status region",
+   "grid select options/optgroups/title/aria-label",
+   "grid lane menu aria-label and items",
+   "Snap button title"
+  ],
+  "subtractedByName": [
+   "load-time demo-ready status 'დემო კოლექცია მზადაა. აირჩიე ხაზი და დაამატე ხმა (Enter ან ＋ დამატება).' (V-0.3d/V-0.5)",
+   "frozen ArrangementClip move statuses after the SNAP drags: 'კლიპის გადატანა: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.' and 'კლიპის გადატანა: start …, length …, source offset ….' (V-0.4)",
+   "track names მუსიკა/სტემები/ვიდეო (V-0.4)"
+  ],
+  "notCountedExpectedGeorgian": [
+   "Undo button label 'Undo: Ad…'/'კლიპის გადატანა' (V-0.4)",
+   "Transport, TempoRow, Ruler, Overview, LoopBrace, MarkerMenu, MarkerRow (V-0.3b/c)",
+   "the 33 frozen StudioWorkspace lines, library and video dock, detail panel"
+  ]
+ },
+ "invalidRuns": [
+  {
+   "run": "c-round-134/out/c134-1440-r1-sec.json first session",
+   "reason": "ENV-FIRST-LOAD: first dev-server load after vitest crashed (hydration error + 'Invalid hook call', status element missing); the harness's automatic retry in a new context was clean"
+  }
+ ],
+ "supersededHarnessRuns": [
+  {
+   "runs": "c134-1440-r1-sec, c134-1440-r2-{hidden,menu,snap,triplet}",
+   "reason": "harness assumed Snap starts ON (the task's examples show '(Snap on)'); real default is Snap OFF (data-snap=off, title 'Snap off — free movement (G)'). The app's status followed the real state each time; after the fix the expected suffix is read from data-snap and an extra Snap-on pass is added to GRID-SEC. Not an app defect."
+  },
+  {
+   "runs": "c134-1280-r1-{triplet,menu}",
+   "reason": "harness right-clicked the SFX lane, which is below the fold at 1280x720, so no menu opened; the next Enter added a library clip. Retargeted to a visible point of the music lane (r2). Not an app defect."
+  }
+ ],
+ "validRuns": {
+  "1440": [
+   "r2-sec",
+   "r2-musical",
+   "r4-triplet",
+   "r3-hidden",
+   "r3-snap",
+   "r4-menu (incl. REG-133)",
+   "r2-layout",
+   "layout130-1440-r1"
+  ],
+  "1280": [
+   "r1-sec",
+   "r1-musical",
+   "r2-triplet",
+   "r1-hidden",
+   "r1-snap",
+   "r2-menu",
+   "r1-layout",
+   "layout130-1280-r1"
+  ],
+  "auth": [
+   "g134-3"
+  ]
+ },
+ "measurements": {
+  "T134-TARGETED": "23 files / 409 tests green (out/vitest.log), equal to A's counts",
+  "GRID-SEC": "options 10/5/2/1/0.5/0.25/0.1 s by value; aria 'Grid division'; title 'Grid 1 s · 1 — narrower, 2 — wider'; every 1/2 step status exact for Snap off and Snap on; ends 'The grid is already at its narrowest — 0.1 s (1)' / '... widest — 10 s (2)'; data-grid-seconds == id each step; lane line spacing == pps × seconds on every visible lane",
+  "GRID-MUSICAL": "Steps as run (differ from the row's action column): fresh project -> Snap off -> add demo-synth-mix to music at 1.3 s (for the effect check) -> G (Snap on, so statuses read '(Snap on)') -> select 0.5 (a prior seconds division, as in unit test GU7) -> BPM 120 Enter -> select 1/4 -> 1 x4 -> 2 x6 -> clear BPM. optgroup 'Bars · 120 BPM'; options 1 bar,1/2..1/32; 1/4 → 'Grid: 1/4 · 0.5 s at 120 BPM (Snap on)'; steps 0.25/0.125/0.0625(0.063 shown)/1/2 s exact; ends 1/32 (1), 1 bar (2); clear → 'Tempo cleared — the bars ruler is hidden. Audio is unchanged. Grid back to seconds: 0.5 s.'; clip music@1.3+16 unchanged at all 14 steps (GATE132-TEMPO-CLEARED-MIXED closed in browser). Without the 0.5 pre-selection the cleared text would name the default 1 s, by design (GU7: returns to the last seconds division).",
+  "GRID-TRIPLET": "(a)(b)(c) refusal texts exact and division unchanged (1, bar, 0.5); (d) 1/4T, data-grid-seconds 0.4444 = 60/90×2/3, optgroup 'Triplets · 90 BPM', title 'Grid 1/4T · 1 — narrower, 2 — wider', status 'Grid: 1/4T · 0.444 s at 90 BPM (Snap off)'; lane menu shows 'Triplets (3)' aria-checked=true",
+  "GRID-HIDDEN": "0.1 s hidden at 40 and 50 px/s, visible at 62.5 px/s, hidden again at 50; title flips exactly with data-grid-lines on the control and every lane (both viewports)",
+  "SNAP": "default off; G → 'Snap on — grid 1 s (G)' + title 'Snap on — clips land on the grid (G)', aria-pressed true; G → 'Snap off — free movement (G)' + same title; Snap on drag +0.4 s from 2 stays at 2 (no-change status), +0.7 s → 3.000; Snap off drag +0.4 → 3.400 (free)",
+  "MENU": "aria 'Grid division'; items 10 s…0.1 s + 'Snap (G)' (✓ glyph is aria-hidden); focus opens on checked '1 s'; ArrowDown → '0.5 s', Enter sets 0.5 and 'Grid: 0.5 s (Snap off)', menu closes; reopen checks 0.5 s; Escape closes; focus after Enter and after Escape is BODY, also when the Snap toggle was focused before the right-click (the real right mousedown on the lane already blurs it). 'Focus and close as before' rests on the diff: ArrangementGridMenu.tsx changed only in l.6 and one import, so its focus/close logic is byte-identical to the baseline.",
+  "LAYOUT": "S0/S1 boxes vs c-round-125 baseline: only arrangement-grid-division (w 72→66, option text '1 s' vs '1 წმ') and the two boxes to its right in the same header (envelope toggle, waveform-zoom: x −6 px, size unchanged) differ beyond 1 px; the rest are earlier-round text keys already accepted in round 133. Grid header scrollWidth=clientWidth=223 with no BPM (select 66), BPM 120 (72) and triplet 1/4T (78): the C-R122-02 overflow (225>223, select 85) no longer reproduces; the LAYOUT row ran with BPM 120. Extra check at C-R122-02's own repro (BPM 90, out/hdr90.json, shots/hdr90-*.png): select 72 px, scrollWidth=clientWidth=223, waveform-zoom right edge 498 <= grid right edge 512, at both viewports",
+  "G134-3": "/studio-lab workspace + demo badge; /studio/middle-east 'Sign in required', no workspace, 0 audio[src] at 1440 and 1280; GET /api/studio-token → 401 {\"error\":\"Please sign in to access Studio.\"}",
+  "PX-NET": "14 valid sessions + G134-3: 0 forbidden requests, 0 Authorization headers, 0 pageerror, 0 hydration (cart noise only)"
+ },
+ "anReview": {
+  "strings.ts": "one new object studioGridStrings (21 keys), no import, other objects untouched",
+  "grid.ts/grid-divisions.ts": "only imports and string expressions; conditions, lists, numbers unchanged",
+  "ArrangementGridMenu.tsx": "import + l.6",
+  "StudioWorkspace.tsx": "import + l.158, l.1276, Snap title, aria-label; A deviation 1: Biome collapsed the 3-line title ternary into one line (baseline l.2269 condition line touched; condition and pick order identical) — accepted, not a bug",
+  "33 remaining Georgian lines": "independently re-extracted (U+10A0–10FF, U+1C90–1CBF, U+2D00–2D2F): byte-identical to baseline minus the 5 migrated lines, equal to b-round-133/r134-studioworkspace-remaining-georgian.txt",
+  "tests": "it counts unchanged except strings 22→25; 0 skip/only/todo; 51 toBe / 13 menuItem / 4 getByTestId on both sides of the 9-file diff; no Georgian on any + line",
+  "meaning": "GR1–GR20 side by side: no fact dropped or added",
+  "mutations": "m24–m29 logs reviewed (a-round-134/mut): each red as named; C did not re-run mutations (no store writes)",
+  "docs": "doc 109 l.4/l.128 + TODO as specified; doc 110 present with C round 134 pending",
+  "shellWrites": "A's list reviewed: /tmp helper scripts, a-round-134/* evidence, sed mutations on strings.ts/grid-divisions.ts/StudioWorkspace.tsx restored from a-round-134/bak and sha256-checked; end hashes and frozen list re-verified by C at start and end"
+ },
+ "ableton": {
+  "requirementMet": "yes (text-only round; behaviour unchanged as measured)",
+  "correspondence": {
+   "narrow/widen verbs (Live 12 §6.10)": "confirmed wording follows manual verbs; keys are CZABA 1/2 not Ctrl+1/2 (deliberate difference, D-29z24)",
+   "triplets": "deliberate difference (key 3; refusal rules are CZABA's own)",
+   "snap on/off": "deliberate difference (G instead of Ctrl+4)",
+   "lines hidden at zoom": "not applicable (CZABA rule)",
+   "'1 bar' label": "unconfirmed"
+  }
+ },
+ "notesForB": [
+  "Snap is OFF by default in /studio-lab; the task's §1.1 examples and GRID-SEC/MENU expectations wrote '(Snap on)'. The app is right for its state; future C rows should state the Snap state.",
+  "GRID-MUSICAL's expected 'Grid back to seconds: 0.5 s.' needs a prior seconds division of 0.5 (the app returns to the last seconds division; the default is 1 s). C pre-selected 0.5 as in GU7; future rows should list that step.",
+  "LAYOUT rule 'every other box within 1 px' cannot hold literally when the select narrows: the envelope toggle and waveform-zoom shift x by the select's width delta (−6 px, size unchanged). C treated this as part of the RV-1 text-width exception; B may want to state that explicitly for V-0.3b–d.",
+  "C-R122-02 (deferred Low: grid header overflow with BPM) no longer reproduces at 1440/1280, at its own BPM 90 repro (select 72 px, sw=cw=223, waveform-zoom inside) and at BPM 120/1/4T. B may close it as fixed-by-text after a polish-pass re-check.",
+  "Mixed surfaces still visible next to the English grid controls (expected, later stages): demo-ready status, clip move status 'კლიპის გადატანა…', Undo label, track names, detail panel, library."
+ ],
+ "screenshots": {
+  "opened": [
+   "mus-cleared-1440-r2",
+   "mus-cleared-1280-r1",
+   "trip-menu-1280-r2",
+   "trip-menu-1440-r4",
+   "menu-open-1440-r4",
+   "menu-open-1280-r2",
+   "layout-hdr-triplet-1280-r1",
+   "layout-hdr-bpm120-1440-r2",
+   "snap-drag-1280-r1",
+   "snap-g1-1440-r3",
+   "hidden-visible-1440-r3",
+   "sec-start-1280-r1",
+   "sec-narrowest-1280-r1",
+   "g134-3-protected-1280"
+  ],
+  "notOpened": "the other valid-run shots (sec-widest/select, mus-14/bpm120/narrowest/widest, trip-a/c/d, hidden-back, snap-g2, menu-chosen, reg133, layout-hdr-nobpm, S0/S1/S2, hdr90, g134-3-lab/protected-1440) were not opened; their rows rest on the DOM measurements in out/*.json"
+ }
+}

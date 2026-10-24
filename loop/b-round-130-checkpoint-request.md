@@ -62,3 +62,9 @@ Still non-blocking. Rounds 132–133 (V-0.2c2/c3) do not touch the Context.
   - StudioWorkspace is half-migrated with a ratchet (ST25) until V-0.3d.
 - **Request to root:** run the bounded checkpoint before **V-0.3b** is dispatched (round 135 at the earliest). The questions are those of (e)/(f), plus one more: should the ST helper extraction go with the split? "Keep" is a valid answer.
 - **Not a block.** Without a result, B continues V-0.3b on the same rationale and records it.
+
+## Addendum (h) — B round 134 → 135 planning (D-29z100), 2026-10-24
+- **Status:** still no root result for (e)–(g) (checked `gates/`, the loop folder, `store/.claude/references/`). This is the third planning without it.
+- **What B did:** dispatched **V-0.3b** with **no new object** (D-29z100 R3): the texts go to the six existing area objects, so `strings.ts` stays at 13 objects and its import path is unchanged.
+- **New input:** the gate-134 reviewer (Architecture note) and A's round-134 reviewer both say "keep for now" and propose running this checkpoint **after V-0.3d**, when the StudioWorkspace ratchet (ST25) is replaced by a per-file scan. B accepts that timing as the bounded window: request the checkpoint at the V-0.3 feature boundary (after V-0.3d, before V-0.4).
+- **Not a block.**

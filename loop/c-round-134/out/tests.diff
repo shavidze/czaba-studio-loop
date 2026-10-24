@@ -1,0 +1,609 @@
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/__tests__/grid.test.ts	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/__tests__/grid.test.ts	2026-10-24 11:16:11.008285569 +0000
+@@ -154,13 +154,13 @@
+ 
+   it('labels every division in seconds', () => {
+     expect(GRID_DIVISIONS_SECONDS.map((step) => formatGridDivision(step))).toEqual([
+-      '10 წმ',
+-      '5 წმ',
+-      '2 წმ',
+-      '1 წმ',
+-      '0.5 წმ',
+-      '0.25 წმ',
+-      '0.1 წმ',
++      '10 s',
++      '5 s',
++      '2 s',
++      '1 s',
++      '0.5 s',
++      '0.25 s',
++      '0.1 s',
+     ]);
+   });
+ });
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/__tests__/grid-musical.test.ts	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/__tests__/grid-musical.test.ts	2026-10-24 11:16:57.063088600 +0000
+@@ -41,7 +41,7 @@
+ }));
+ 
+ const MUSICAL_OPTIONS = [
+-  { id: 'bar', label: '1 ტაქტი', family: 'musical' },
++  { id: 'bar', label: '1 bar', family: 'musical' },
+   { id: '1/2', label: '1/2', family: 'musical' },
+   { id: '1/4', label: '1/4', family: 'musical' },
+   { id: '1/8', label: '1/8', family: 'musical' },
+@@ -54,7 +54,7 @@
+ describe('SRW-14 stage 5a musical grid divisions (D-29z32)', () => {
+   it('GM1 lists the musical divisions widest first with their beats', () => {
+     expect(MUSICAL_GRID_DIVISIONS.map(({ id, label, beats }) => ({ id, label, beats }))).toEqual([
+-      { id: 'bar', label: '1 ტაქტი', beats: 4 },
++      { id: 'bar', label: '1 bar', beats: 4 },
+       { id: '1/2', label: '1/2', beats: 2 },
+       { id: '1/4', label: '1/4', beats: 1 },
+       { id: '1/8', label: '1/8', beats: 0.5 },
+@@ -103,30 +103,38 @@
+   });
+ 
+   it('GM5 writes the status, end, tempo-cleared, group and title strings', () => {
+-    expect(gridDivisionStatusMessage('0.5', null, true)).toBe('ბადე: 0.5 წმ (Snap ჩართულია)');
++    expect(gridDivisionStatusMessage('0.5', null, true)).toBe('Grid: 0.5 s (Snap on)');
+     expect(gridDivisionStatusMessage('1/4', 90, true)).toBe(
+-      'ბადე: 1/4 · 0.667 წმ 90 BPM-ზე (Snap ჩართულია)',
++      'Grid: 1/4 · 0.667 s at 90 BPM (Snap on)',
+     );
+     expect(gridDivisionStatusMessage('1/4', 120, false)).toBe(
+-      'ბადე: 1/4 · 0.5 წმ 120 BPM-ზე (Snap გამორთულია)',
++      'Grid: 1/4 · 0.5 s at 120 BPM (Snap off)',
++    );
++    expect(gridDivisionEndMessage('0.1', 'narrow')).toBe(
++      'The grid is already at its narrowest — 0.1 s (1)',
++    );
++    expect(gridDivisionEndMessage('10', 'widen')).toBe(
++      'The grid is already at its widest — 10 s (2)',
++    );
++    expect(gridDivisionEndMessage('1/32', 'narrow')).toBe(
++      'The grid is already at its narrowest — 1/32 (1)',
++    );
++    expect(gridDivisionEndMessage('bar', 'widen')).toBe(
++      'The grid is already at its widest — 1 bar (2)',
+     );
+-    expect(gridDivisionEndMessage('0.1', 'narrow')).toBe('ბადე უკვე ყველაზე მჭიდროა — 0.1 წმ (1)');
+-    expect(gridDivisionEndMessage('10', 'widen')).toBe('ბადე უკვე ყველაზე ფართოა — 10 წმ (2)');
+-    expect(gridDivisionEndMessage('1/32', 'narrow')).toBe('ბადე უკვე ყველაზე მჭიდროა — 1/32 (1)');
+-    expect(gridDivisionEndMessage('bar', 'widen')).toBe('ბადე უკვე ყველაზე ფართოა — 1 ტაქტი (2)');
+     expect(gridTempoClearedMessage(0.5)).toBe(
+-      'Tempo cleared — the bars ruler is hidden. Audio is unchanged. ბადე დაბრუნდა წამებზე: 0.5 წმ.',
++      'Tempo cleared — the bars ruler is hidden. Audio is unchanged. Grid back to seconds: 0.5 s.',
+     );
+-    expect(gridMusicalGroupLabel(92.5)).toBe('ტაქტები · 92.5 BPM');
+-    expect(gridDivisionLabel('bar')).toBe('1 ტაქტი');
+-    expect(gridDivisionLabel('0.25')).toBe('0.25 წმ');
+-    expect(gridDivisionTitle('1/4', true)).toBe('ბადე 1/4 · 1 — უფრო მჭიდრო, 2 — უფრო ფართო');
++    expect(gridMusicalGroupLabel(92.5)).toBe('Bars · 92.5 BPM');
++    expect(gridDivisionLabel('bar')).toBe('1 bar');
++    expect(gridDivisionLabel('0.25')).toBe('0.25 s');
++    expect(gridDivisionTitle('1/4', true)).toBe('Grid 1/4 · 1 — narrower, 2 — wider');
+     expect(gridDivisionTitle('1/4', false)).toBe(
+-      'ბადე 1/4 — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom. · 1 — უფრო მჭიდრო, 2 — უფრო ფართო',
++      'Grid 1/4 — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider',
+     );
+-    expect(gridDivisionTitle('1', true)).toBe('ბადე 1 წმ · 1 — უფრო მჭიდრო, 2 — უფრო ფართო');
++    expect(gridDivisionTitle('1', true)).toBe('Grid 1 s · 1 — narrower, 2 — wider');
+     expect(gridDivisionTitle('1', false)).toBe(
+-      'ბადე 1 წმ — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom. · 1 — უფრო მჭიდრო, 2 — უფრო ფართო',
++      'Grid 1 s — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider',
+     );
+   });
+ 
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/__tests__/grid-triplet.test.ts	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/__tests__/grid-triplet.test.ts	2026-10-24 11:16:59.144079719 +0000
+@@ -40,7 +40,7 @@
+ 
+ const STRAIGHT_OPTIONS = ['bar', '1/2', '1/4', '1/8', '1/16', '1/32'].map((id) => ({
+   id,
+-  label: id === 'bar' ? '1 ტაქტი' : id,
++  label: id === 'bar' ? '1 bar' : id,
+   family: 'musical',
+ }));
+ 
+@@ -51,9 +51,9 @@
+ const TRIPLET_IDS = TRIPLET_TABLE.map((division) => division.id);
+ const ALL_IDS = [...SECONDS_IDS, ...STRAIGHT_IDS, ...TRIPLET_IDS];
+ 
+-const NO_TEMPO_REFUSAL = 'ტრიოლები მხოლოდ ტემპით — ჯერ ჩაწერე BPM (3)';
+-const BAR_REFUSAL = '1 ტაქტს ტრიოლი არ აქვს — აირჩიე 1/2 ან უფრო მჭიდრო (3)';
+-const SECONDS_REFUSAL = 'ტრიოლები მხოლოდ ტაქტების ბადეზე — აირჩიე 1/2 … 1/32 (3)';
++const NO_TEMPO_REFUSAL = 'Triplets need a tempo — enter a BPM first (3)';
++const BAR_REFUSAL = '1 bar has no triplets — choose 1/2 or narrower (3)';
++const SECONDS_REFUSAL = 'Triplets work only on the bars grid — choose 1/2 … 1/32 (3)';
+ 
+ function storedLine(index: number, step: number): number {
+   return Math.max(0, Math.round(index * step * 1000)) / 1000;
+@@ -148,24 +148,28 @@
+       }
+     }
+     expect(crossings).toEqual([]);
+-    expect(gridDivisionEndMessage('1/32T', 'narrow')).toBe('ბადე უკვე ყველაზე მჭიდროა — 1/32T (1)');
+-    expect(gridDivisionEndMessage('1/2T', 'widen')).toBe('ბადე უკვე ყველაზე ფართოა — 1/2T (2)');
++    expect(gridDivisionEndMessage('1/32T', 'narrow')).toBe(
++      'The grid is already at its narrowest — 1/32T (1)',
++    );
++    expect(gridDivisionEndMessage('1/2T', 'widen')).toBe(
++      'The grid is already at its widest — 1/2T (2)',
++    );
+   });
+ 
+   it('TR6 writes the triplet status, group, refusal, menu, label and title strings', () => {
+     expect(gridDivisionStatusMessage('1/4T', 90, true)).toBe(
+-      'ბადე: 1/4T · 0.444 წმ 90 BPM-ზე (Snap ჩართულია)',
++      'Grid: 1/4T · 0.444 s at 90 BPM (Snap on)',
+     );
+     expect(gridDivisionStatusMessage('1/8T', 120, false)).toBe(
+-      'ბადე: 1/8T · 0.167 წმ 120 BPM-ზე (Snap გამორთულია)',
++      'Grid: 1/8T · 0.167 s at 120 BPM (Snap off)',
+     );
+-    expect(gridTripletGroupLabel(92.5)).toBe('ტრიოლები · 92.5 BPM');
++    expect(gridTripletGroupLabel(92.5)).toBe('Triplets · 92.5 BPM');
+     expect(gridTripletRefusalMessage('1', null)).toBe(NO_TEMPO_REFUSAL);
+     expect(gridTripletRefusalMessage('bar', 90)).toBe(BAR_REFUSAL);
+     expect(gridTripletRefusalMessage('0.5', 90)).toBe(SECONDS_REFUSAL);
+-    expect(GRID_TRIPLET_MENU_LABEL).toBe('ტრიოლები (3)');
++    expect(GRID_TRIPLET_MENU_LABEL).toBe('Triplets (3)');
+     expect(gridDivisionLabel('1/16T')).toBe('1/16T');
+-    expect(gridDivisionTitle('1/4T', true)).toBe('ბადე 1/4T · 1 — უფრო მჭიდრო, 2 — უფრო ფართო');
++    expect(gridDivisionTitle('1/4T', true)).toBe('Grid 1/4T · 1 — narrower, 2 — wider');
+   });
+ 
+   it('TR7 the frozen snap, line and loop rules land on stored triplet lines', () => {
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-24 11:19:10.851457133 +0000
+@@ -103,10 +103,10 @@
+ const LANE_HEIGHT_PX = 100;
+ const MUSIC_LANE_Y = 150;
+ const SFX_LANE_Y = 250;
+-const SNAP_ON_STATUS = 'Snap ჩართულია — ბადე 1 წმ (G)';
++const SNAP_ON_STATUS = 'Snap on — grid 1 s (G)';
+ const NUDGE_AT_ZERO_STATUS = studioMoveStrings.nudgeAtTimeStart;
+ const HIDDEN_LINES_TITLE =
+-  'ბადე 0.1 წმ — ამ მასშტაბზე ხაზები დამალულია; Snap მაინც მუშაობს. გაადიდე Zoom. · 1 — უფრო მჭიდრო, 2 — უფრო ფართო';
++  'Grid 0.1 s — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider';
+ const GROUP_BLOCKED_STATUS =
+   'Group move stopped — a neighbouring clip or the start of the timeline.';
+ const MOVE_BLOCKED_STATUS =
+@@ -292,19 +292,19 @@
+     expect(toggle.getAttribute('aria-pressed')).toBe('false');
+     expect(toggle.textContent).toBe('Snap');
+     expect(toggle.getAttribute('aria-keyshortcuts')).toBe('G');
+-    expect(toggle.title).toBe('Snap გამორთულია — თავისუფალი გადაადგილება (G)');
++    expect(toggle.title).toBe('Snap off — free movement (G)');
+     const select = divisionSelect(view);
+     expect(select.value).toBe('1');
+-    expect(select.getAttribute('aria-label')).toBe('ბადის დანაყოფი');
+-    expect(select.title).toBe('ბადე 1 წმ · 1 — უფრო მჭიდრო, 2 — უფრო ფართო');
++    expect(select.getAttribute('aria-label')).toBe('Grid division');
++    expect(select.title).toBe('Grid 1 s · 1 — narrower, 2 — wider');
+     expect(Array.from(select.options).map((option) => [option.value, option.textContent])).toEqual([
+-      ['10', '10 წმ'],
+-      ['5', '5 წმ'],
+-      ['2', '2 წმ'],
+-      ['1', '1 წმ'],
+-      ['0.5', '0.5 წმ'],
+-      ['0.25', '0.25 წმ'],
+-      ['0.1', '0.1 წმ'],
++      ['10', '10 s'],
++      ['5', '5 s'],
++      ['2', '2 s'],
++      ['1', '1 s'],
++      ['0.5', '0.5 s'],
++      ['0.25', '0.25 s'],
++      ['0.1', '0.1 s'],
+     ]);
+     const bodies = laneBodies(view);
+     expect(bodies).toHaveLength(3);
+@@ -405,7 +405,7 @@
+     expect(view.getByTestId('arrangement-status').textContent).toBe(SNAP_ON_STATUS);
+     expect(view.getByTestId('arrangement-grid-control').dataset.snap).toBe('on');
+     expect(snapToggle(view).getAttribute('aria-pressed')).toBe('true');
+-    expect(snapToggle(view).title).toBe('Snap ჩართულია — კლიპი ბადეზე ჯდება (G)');
++    expect(snapToggle(view).title).toBe('Snap on — clips land on the grid (G)');
+     expect(live(api).undoLabel).toBeNull();
+     expect(live(api).arrangement).toBe(before);
+     dragClip(clipParts('m1'), [{ dx: 37 }]);
+@@ -421,22 +421,16 @@
+   it('GS4 a 0.25 s division snaps a 0.325 s drag to 7.25', async () => {
+     const { api, view, clipParts } = await mountGridWorkspace();
+     fireEvent.change(divisionSelect(view), { target: { value: '0.25' } });
+-    expect(view.getByTestId('arrangement-status').textContent).toBe(
+-      'ბადე: 0.25 წმ (Snap გამორთულია)',
+-    );
++    expect(view.getByTestId('arrangement-status').textContent).toBe('Grid: 0.25 s (Snap off)');
+     fireEvent.click(snapToggle(view));
+-    expect(view.getByTestId('arrangement-status').textContent).toBe(
+-      'Snap ჩართულია — ბადე 0.25 წმ (G)',
+-    );
++    expect(view.getByTestId('arrangement-status').textContent).toBe('Snap on — grid 0.25 s (G)');
+     expect(view.getByTestId('arrangement-grid-control').dataset.gridSeconds).toBe('0.25');
+     dragClip(clipParts('m1'), [{ dx: 13 }]);
+     expect(clipOf(api, 'm1').start).toBe(7.25);
+     fireEvent.change(divisionSelect(view), { target: { value: '2' } });
+-    expect(view.getByTestId('arrangement-status').textContent).toBe('ბადე: 2 წმ (Snap ჩართულია)');
++    expect(view.getByTestId('arrangement-status').textContent).toBe('Grid: 2 s (Snap on)');
+     fireEvent.click(snapToggle(view));
+-    expect(view.getByTestId('arrangement-status').textContent).toBe(
+-      'Snap გამორთულია — თავისუფალი გადაადგილება (G)',
+-    );
++    expect(view.getByTestId('arrangement-status').textContent).toBe('Snap off — free movement (G)');
+     expect(live(api).undoLabel).toBe('კლიპის გადატანა');
+   });
+ 
+@@ -582,7 +576,7 @@
+     expect(clipOf(api, 'm1').start).toBe(7.3);
+     act(() => live(api).setPxPerSecond(60));
+     expect(view.getByTestId('arrangement-grid-control').dataset.gridLines).toBe('visible');
+-    expect(divisionSelect(view).title).toBe('ბადე 0.1 წმ · 1 — უფრო მჭიდრო, 2 — უფრო ფართო');
++    expect(divisionSelect(view).title).toBe('Grid 0.1 s · 1 — narrower, 2 — wider');
+     for (const body of laneBodies(view)) {
+       expect(body.dataset.gridLines).toBe('visible');
+       expect(body.style.backgroundImage).toContain('6px');
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/__tests__/grid-snap-menu.test.tsx	2026-10-24 11:17:48.676839315 +0000
+@@ -106,10 +106,10 @@
+ const PX_PER_SECOND = 40;
+ const LANE_HEIGHT_PX = 100;
+ const MUSIC_LANE_Y = 150;
+-const MENU_LABEL = 'ბადის დანაყოფი';
++const MENU_LABEL = 'Grid division';
+ const SNAP_ITEM_LABEL = 'Snap (G)';
+-const SNAP_ON_STATUS = 'Snap ჩართულია — ბადე 1 წმ (G)';
+-const SNAP_OFF_STATUS = 'Snap გამორთულია — თავისუფალი გადაადგილება (G)';
++const SNAP_ON_STATUS = 'Snap on — grid 1 s (G)';
++const SNAP_OFF_STATUS = 'Snap off — free movement (G)';
+ const LOOP_FIXTURE: ArrangementLoop = { start: 12.3, end: 14.1, enabled: true };
+ 
+ const menuCollection: WorkspaceCollection = {
+@@ -400,7 +400,7 @@
+     expect(gridControl(view).dataset.snap).toBe('on');
+     const before = live(api).arrangement;
+     rightClick(laneBody('music'));
+-    fireEvent.click(menuItem(view, '0.25 წმ'));
++    fireEvent.click(menuItem(view, '0.25 s'));
+     expect(gridMenu(view)).toBeNull();
+     expect(gridControl(view).dataset.gridSeconds).toBe('0.25');
+     for (const body of laneTimelines(view)) {
+@@ -408,7 +408,7 @@
+     }
+     const select = view.getByTestId('arrangement-grid-division');
+     expect(select instanceof HTMLSelectElement ? select.value : null).toBe('0.25');
+-    expect(statusText(view)).toBe('ბადე: 0.25 წმ (Snap ჩართულია)');
++    expect(statusText(view)).toBe('Grid: 0.25 s (Snap on)');
+     expect(live(api).undoLabel).toBeNull();
+     fireEvent.keyDown(document.body, { key: 'z', code: 'KeyZ', ctrlKey: true });
+     expect(gridControl(view).dataset.gridSeconds).toBe('0.25');
+@@ -420,7 +420,7 @@
+     const { api, view, laneBody, clipParts } = await mountMenuWorkspace();
+     pressG();
+     rightClick(laneBody('sfx'));
+-    fireEvent.click(menuItem(view, '0.25 წმ'));
++    fireEvent.click(menuItem(view, '0.25 s'));
+     dragClip(clipParts('m1'), 13);
+     const start = clipOf(api, 'm1').start;
+     expect(start).toBe(7.25);
+@@ -447,7 +447,7 @@
+   it('GM7 keyboard: focus on the checked item, wrap, Home/End, Enter and Space choose', async () => {
+     const { api, view, laneBody } = await mountMenuWorkspace();
+     rightClick(laneBody('music'));
+-    const checked = menuItem(view, '1 წმ');
++    const checked = menuItem(view, '1 s');
+     expect(focusedElement()).toBe(checked);
+     expect(checked.tabIndex).toBe(0);
+     for (let step = 0; step < 8; step++) {
+@@ -455,7 +455,7 @@
+     }
+     expect(focusedElement()).toBe(checked);
+     pressFocused('Home');
+-    expect(focusedElement()).toBe(menuItem(view, '10 წმ'));
++    expect(focusedElement()).toBe(menuItem(view, '10 s'));
+     pressFocused('ArrowUp');
+     expect(focusedElement()).toBe(menuItem(view, SNAP_ITEM_LABEL));
+     pressFocused('Home');
+@@ -465,15 +465,15 @@
+     for (let step = 0; step < 4; step++) {
+       pressFocused('ArrowDown');
+     }
+-    expect(focusedElement()).toBe(menuItem(view, '0.5 წმ'));
++    expect(focusedElement()).toBe(menuItem(view, '0.5 s'));
+     expect(pressFocused('Enter')).toBe(false);
+     expect(gridMenu(view)).toBeNull();
+     expect(gridControl(view).dataset.gridSeconds).toBe('0.5');
+     rightClick(laneBody('music'));
+-    expect(focusedElement()).toBe(menuItem(view, '0.5 წმ'));
++    expect(focusedElement()).toBe(menuItem(view, '0.5 s'));
+     pressFocused('ArrowUp');
+     pressFocused('ArrowUp');
+-    expect(focusedElement()).toBe(menuItem(view, '2 წმ'));
++    expect(focusedElement()).toBe(menuItem(view, '2 s'));
+     expect(live(api).isPlaying).toBe(false);
+     pressFocused(' ');
+     expect(gridMenu(view)).toBeNull();
+@@ -599,7 +599,7 @@
+     act(() => live(api).togglePlayback());
+     expect(live(api).isPlaying).toBe(true);
+     rightClick(laneBody('music'));
+-    fireEvent.click(menuItem(view, '0.5 წმ'));
++    fireEvent.click(menuItem(view, '0.5 s'));
+     expect(gridMenu(view)).toBeNull();
+     expect(live(api).isPlaying).toBe(true);
+     const before = live(api).getLivePosition();
+@@ -669,7 +669,7 @@
+     expect(focusedElement()).toBe(snapButton);
+     fireEvent.contextMenu(laneBody('music'), { clientX: 300, clientY: 200 });
+     expect(openMenu(view).contains(focusedElement())).toBe(true);
+-    fireEvent.click(menuItem(view, '0.5 წმ'));
++    fireEvent.click(menuItem(view, '0.5 s'));
+     expect(gridMenu(view)).toBeNull();
+     expect(gridControl(view).dataset.gridSeconds).toBe('0.5');
+     expect(document.activeElement).toBe(snapButton);
+@@ -722,7 +722,7 @@
+     const { view, laneBody } = await mountMenuWorkspace();
+     const snapButton = view.getByTestId('arrangement-snap-toggle');
+     rightClick(laneBody('music'));
+-    const item = menuItem(view, '0.5 წმ');
++    const item = menuItem(view, '0.5 s');
+     fireEvent.pointerDown(item, { ...press, pointerId: 21 });
+     expect(gridMenu(view)).not.toBeNull();
+     fireEvent.pointerUp(item, { pointerId: 21 });
+@@ -780,7 +780,7 @@
+     const menu = openMenu(view);
+     const left = menu.style.left;
+     const top = menu.style.top;
+-    expect(fireEvent.contextMenu(menuItem(view, '0.5 წმ'), { button: 2 })).toBe(false);
++    expect(fireEvent.contextMenu(menuItem(view, '0.5 s'), { button: 2 })).toBe(false);
+     expect(fireEvent.contextMenu(menu, { button: 2 })).toBe(false);
+     expect(view.queryAllByTestId('arrangement-grid-menu')).toHaveLength(1);
+     expect(openMenu(view)).toBe(menu);
+@@ -860,7 +860,7 @@
+     const { view, laneBody } = await mountMenuWorkspace();
+     rightClick(laneBody('music'));
+     const focused = focusedElement();
+-    expect(focused).toBe(menuItem(view, '1 წმ'));
++    expect(focused).toBe(menuItem(view, '1 s'));
+     expect(fireEvent.keyDown(focused, { key: 'Tab', code: 'Tab' })).toBe(true);
+     expect(gridMenu(view)).toBeNull();
+     expect(gridControl(view).dataset.gridSeconds).toBe('1');
+@@ -888,7 +888,7 @@
+     expect(fireEvent.mouseDown(menu, { button: 0 })).toBe(false);
+     expect(fireEvent.mouseDown(menu, { button: 2 })).toBe(false);
+     expect(fireEvent.mouseDown(divider, { button: 0 })).toBe(false);
+-    expect(fireEvent.mouseDown(menuItem(view, '0.5 წმ'), { button: 0 })).toBe(true);
++    expect(fireEvent.mouseDown(menuItem(view, '0.5 s'), { button: 0 })).toBe(true);
+     expect(view.queryAllByTestId('arrangement-grid-menu')).toHaveLength(1);
+     expect(openMenu(view)).toBe(menu);
+     expect(menu.style.left).toBe(left);
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/__tests__/grid-snap-keys.test.tsx	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/__tests__/grid-snap-keys.test.tsx	2026-10-24 11:18:09.445753198 +0000
+@@ -101,9 +101,9 @@
+ const PX_PER_SECOND = 40;
+ const LANE_HEIGHT_PX = 100;
+ const MUSIC_LANE_Y = 150;
+-const KEYS_TITLE_SUFFIX = ' · 1 — უფრო მჭიდრო, 2 — უფრო ფართო';
+-const NARROWEST_STATUS = 'ბადე უკვე ყველაზე მჭიდროა — 0.1 წმ (1)';
+-const WIDEST_STATUS = 'ბადე უკვე ყველაზე ფართოა — 10 წმ (2)';
++const KEYS_TITLE_SUFFIX = ' · 1 — narrower, 2 — wider';
++const NARROWEST_STATUS = 'The grid is already at its narrowest — 0.1 s (1)';
++const WIDEST_STATUS = 'The grid is already at its widest — 10 s (2)';
+ 
+ const keysCollection: WorkspaceCollection = {
+   id: 'grid-keys',
+@@ -312,9 +312,9 @@
+     expect(gridSeconds(view)).toBe('0.5');
+     const select = divisionSelect(view);
+     expect(select.value).toBe('0.5');
+-    expect(statusText(view)).toBe('ბადე: 0.5 წმ (Snap გამორთულია)');
++    expect(statusText(view)).toBe('Grid: 0.5 s (Snap off)');
+     expect(select.getAttribute('aria-keyshortcuts')).toBe('1 2');
+-    expect(select.title).toBe(`ბადე 0.5 წმ${KEYS_TITLE_SUFFIX}`);
++    expect(select.title).toBe(`Grid 0.5 s${KEYS_TITLE_SUFFIX}`);
+   });
+ 
+   it('GK2 plain 2 widens the grid to 2 s', async () => {
+@@ -396,7 +396,7 @@
+     pressDigit('1');
+     expect(gridSeconds(view)).toBe('0.5');
+     expect(snapState(view)).toBe('on');
+-    expect(statusText(view)).toBe('ბადე: 0.5 წმ (Snap ჩართულია)');
++    expect(statusText(view)).toBe('Grid: 0.5 s (Snap on)');
+   });
+ 
+   it('GK9 C-R59-01 1 and 2 on the focused division select step the grid instead of type-ahead', async () => {
+@@ -407,7 +407,7 @@
+     expect(pressDigit('1', select)).toBe(false);
+     expect(gridSeconds(view)).toBe('0.5');
+     expect(select.value).toBe('0.5');
+-    expect(statusText(view)).toBe('ბადე: 0.5 წმ (Snap გამორთულია)');
++    expect(statusText(view)).toBe('Grid: 0.5 s (Snap off)');
+     expect(focusedElement()).toBe(select);
+     expect(pressDigit('2', select)).toBe(false);
+     expect(gridSeconds(view)).toBe('1');
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/__tests__/grid-musical-ui.test.tsx	2026-10-24 11:10:56.163178036 +0000
++++ app/lib/arrangement/__tests__/grid-musical-ui.test.tsx	2026-10-24 11:18:31.411649295 +0000
+@@ -109,8 +109,8 @@
+ const LANE_HEIGHT_PX = 100;
+ const SFX_LANE_Y = 250;
+ const RULER_Y = 10;
+-const SECONDS_LABELS = ['10 წმ', '5 წმ', '2 წმ', '1 წმ', '0.5 წმ', '0.25 წმ', '0.1 წმ'];
+-const MUSICAL_LABELS = ['1 ტაქტი', '1/2', '1/4', '1/8', '1/16', '1/32'];
++const SECONDS_LABELS = ['10 s', '5 s', '2 s', '1 s', '0.5 s', '0.25 s', '0.1 s'];
++const MUSICAL_LABELS = ['1 bar', '1/2', '1/4', '1/8', '1/16', '1/32'];
+ const SECONDS_IDS = ['10', '5', '2', '1', '0.5', '0.25', '0.1'];
+ 
+ const musicalCollection: WorkspaceCollection = {
+@@ -396,7 +396,7 @@
+     expect(select.options).toHaveLength(13);
+     const groups = select.querySelectorAll('optgroup');
+     expect(groups).toHaveLength(1);
+-    expect(groups[0].label).toBe('ტაქტები · 120 BPM');
++    expect(groups[0].label).toBe('Bars · 120 BPM');
+     expect(Array.from(groups[0].querySelectorAll('option')).map((o) => o.textContent)).toEqual(
+       MUSICAL_LABELS,
+     );
+@@ -418,9 +418,9 @@
+     for (const body of laneBodies(view)) {
+       expect(body.dataset.gridSeconds).toBe('0.5');
+     }
+-    expect(statusText(view)).toBe('ბადე: 1/4 · 0.5 წმ 120 BPM-ზე (Snap გამორთულია)');
++    expect(statusText(view)).toBe('Grid: 1/4 · 0.5 s at 120 BPM (Snap off)');
+     expect(divisionSelect(view).value).toBe('1/4');
+-    expect(divisionSelect(view).title).toBe('ბადე 1/4 · 1 — უფრო მჭიდრო, 2 — უფრო ფართო');
++    expect(divisionSelect(view).title).toBe('Grid 1/4 · 1 — narrower, 2 — wider');
+   });
+ 
+   it('GU3 R14-G1 Snap on, 1/4 at 120: a clip drag lands on 0.5 s multiples', async () => {
+@@ -487,7 +487,7 @@
+     chooseDivision(view, '1/4');
+     commitTempo(view, '');
+     expect(statusText(view)).toBe(
+-      'Tempo cleared — the bars ruler is hidden. Audio is unchanged. ბადე დაბრუნდა წამებზე: 0.5 წმ.',
++      'Tempo cleared — the bars ruler is hidden. Audio is unchanged. Grid back to seconds: 0.5 s.',
+     );
+     expect(divisionSelect(view).options).toHaveLength(7);
+     expect(divisionSelect(view).value).toBe('0.5');
+@@ -519,13 +519,13 @@
+     }
+     expect(seen).toEqual(['1/8', '1/16', '1/32']);
+     expect(narrowStatuses).toEqual([
+-      'ბადე: 1/8 · 0.25 წმ 120 BPM-ზე (Snap გამორთულია)',
+-      'ბადე: 1/16 · 0.125 წმ 120 BPM-ზე (Snap გამორთულია)',
+-      'ბადე: 1/32 · 0.063 წმ 120 BPM-ზე (Snap გამორთულია)',
++      'Grid: 1/8 · 0.25 s at 120 BPM (Snap off)',
++      'Grid: 1/16 · 0.125 s at 120 BPM (Snap off)',
++      'Grid: 1/32 · 0.063 s at 120 BPM (Snap off)',
+     ]);
+     pressDigit('1');
+     expect(gridControl(view).dataset.gridDivision).toBe('1/32');
+-    expect(statusText(view)).toBe('ბადე უკვე ყველაზე მჭიდროა — 1/32 (1)');
++    expect(statusText(view)).toBe('The grid is already at its narrowest — 1/32 (1)');
+     const widened: string[] = [];
+     for (let count = 0; count < 5; count++) {
+       pressDigit('2');
+@@ -534,7 +534,7 @@
+     expect(widened).toEqual(['1/16', '1/8', '1/4', '1/2', 'bar']);
+     pressDigit('2');
+     expect(gridControl(view).dataset.gridDivision).toBe('bar');
+-    expect(statusText(view)).toBe('ბადე უკვე ყველაზე ფართოა — 1 ტაქტი (2)');
++    expect(statusText(view)).toBe('The grid is already at its widest — 1 bar (2)');
+     for (const id of [...seen, ...widened]) {
+       expect(SECONDS_IDS).not.toContain(id);
+     }
+@@ -559,7 +559,7 @@
+     ]);
+     fireEvent.click(within(menu).getByRole('menuitemradio', { name: '1/8' }));
+     expect(gridControl(view).dataset.gridDivision).toBe('1/8');
+-    expect(statusText(view)).toBe('ბადე: 1/8 · 0.25 წმ 120 BPM-ზე (Snap გამორთულია)');
++    expect(statusText(view)).toBe('Grid: 1/8 · 0.25 s at 120 BPM (Snap off)');
+     expect(gridMenu(view)).toBeNull();
+     rightClick(laneBody('music'));
+     const reopened = within(openMenu(view)).getAllByRole('menuitemradio');
+@@ -573,7 +573,7 @@
+     commitTempo(view, '120');
+     chooseDivision(view, '1/4');
+     pressG();
+-    expect(statusText(view)).toBe('Snap ჩართულია — ბადე 1/4 (G)');
++    expect(statusText(view)).toBe('Snap on — grid 1/4 (G)');
+   });
+ 
+   it('GU11 choosing and stepping a musical division writes no history', async () => {
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx	2026-10-24 11:18:49.628557986 +0000
+@@ -110,15 +110,15 @@
+ const LANE_HEIGHT_PX = 100;
+ const SFX_LANE_Y = 250;
+ const RULER_Y = 10;
+-const SECONDS_LABELS = ['10 წმ', '5 წმ', '2 წმ', '1 წმ', '0.5 წმ', '0.25 წმ', '0.1 წმ'];
+-const STRAIGHT_LABELS = ['1 ტაქტი', '1/2', '1/4', '1/8', '1/16', '1/32'];
++const SECONDS_LABELS = ['10 s', '5 s', '2 s', '1 s', '0.5 s', '0.25 s', '0.1 s'];
++const STRAIGHT_LABELS = ['1 bar', '1/2', '1/4', '1/8', '1/16', '1/32'];
+ const TRIPLET_LABELS = ['1/2T', '1/4T', '1/8T', '1/16T', '1/32T'];
+ const SECONDS_IDS = ['10', '5', '2', '1', '0.5', '0.25', '0.1'];
+ const STRAIGHT_IDS = ['bar', '1/2', '1/4', '1/8', '1/16', '1/32'];
+-const NO_TEMPO_REFUSAL = 'ტრიოლები მხოლოდ ტემპით — ჯერ ჩაწერე BPM (3)';
+-const BAR_REFUSAL = '1 ტაქტს ტრიოლი არ აქვს — აირჩიე 1/2 ან უფრო მჭიდრო (3)';
+-const SECONDS_REFUSAL = 'ტრიოლები მხოლოდ ტაქტების ბადეზე — აირჩიე 1/2 … 1/32 (3)';
+-const TRIPLET_MENU_LABEL = 'ტრიოლები (3)';
++const NO_TEMPO_REFUSAL = 'Triplets need a tempo — enter a BPM first (3)';
++const BAR_REFUSAL = '1 bar has no triplets — choose 1/2 or narrower (3)';
++const SECONDS_REFUSAL = 'Triplets work only on the bars grid — choose 1/2 … 1/32 (3)';
++const TRIPLET_MENU_LABEL = 'Triplets (3)';
+ const SNAP_MENU_LABEL = 'Snap (G)';
+ 
+ const tripletCollection: WorkspaceCollection = {
+@@ -453,7 +453,7 @@
+     for (const body of laneBodies(view)) {
+       expect(Number(body.dataset.gridSeconds)).toBeCloseTo(0.4444444444, 9);
+     }
+-    expect(statusText(view)).toBe('ბადე: 1/4T · 0.444 წმ 90 BPM-ზე (Snap გამორთულია)');
++    expect(statusText(view)).toBe('Grid: 1/4T · 0.444 s at 90 BPM (Snap off)');
+     const select = divisionSelect(view);
+     expect(select.value).toBe('1/4T');
+     expect(select.options).toHaveLength(12);
+@@ -463,19 +463,19 @@
+     ]);
+     const groups = select.querySelectorAll('optgroup');
+     expect(groups).toHaveLength(1);
+-    expect(groups[0].label).toBe('ტრიოლები · 90 BPM');
++    expect(groups[0].label).toBe('Triplets · 90 BPM');
+     expect(Array.from(groups[0].querySelectorAll('option')).map((o) => o.textContent)).toEqual(
+       TRIPLET_LABELS,
+     );
+-    expect(select.title).toBe('ბადე 1/4T · 1 — უფრო მჭიდრო, 2 — უფრო ფართო');
++    expect(select.title).toBe('Grid 1/4T · 1 — narrower, 2 — wider');
+     pressDigit('3');
+     expect(divisionOf(view)).toBe('1/4');
+     expect(gridControl(view).dataset.gridSeconds).toBe(String(60 / 90));
+-    expect(statusText(view)).toBe('ბადე: 1/4 · 0.667 წმ 90 BPM-ზე (Snap გამორთულია)');
++    expect(statusText(view)).toBe('Grid: 1/4 · 0.667 s at 90 BPM (Snap off)');
+     expect(divisionSelect(view).options).toHaveLength(13);
+     const straightGroups = divisionSelect(view).querySelectorAll('optgroup');
+     expect(straightGroups).toHaveLength(1);
+-    expect(straightGroups[0].label).toBe('ტაქტები · 90 BPM');
++    expect(straightGroups[0].label).toBe('Bars · 90 BPM');
+     expect(
+       Array.from(straightGroups[0].querySelectorAll('option')).map((o) => o.textContent),
+     ).toEqual(STRAIGHT_LABELS);
+@@ -525,7 +525,7 @@
+     expect(narrowed).toEqual(['1/8T', '1/16T', '1/32T']);
+     pressDigit('1');
+     expect(divisionOf(view)).toBe('1/32T');
+-    expect(statusText(view)).toBe('ბადე უკვე ყველაზე მჭიდროა — 1/32T (1)');
++    expect(statusText(view)).toBe('The grid is already at its narrowest — 1/32T (1)');
+     const widened: string[] = [];
+     for (let count = 0; count < 4; count++) {
+       pressDigit('2');
+@@ -534,7 +534,7 @@
+     expect(widened).toEqual(['1/16T', '1/8T', '1/4T', '1/2T']);
+     pressDigit('2');
+     expect(divisionOf(view)).toBe('1/2T');
+-    expect(statusText(view)).toBe('ბადე უკვე ყველაზე ფართოა — 1/2T (2)');
++    expect(statusText(view)).toBe('The grid is already at its widest — 1/2T (2)');
+     for (const id of [...narrowed, ...widened]) {
+       expect([...SECONDS_IDS, ...STRAIGHT_IDS]).not.toContain(id);
+     }
+@@ -561,7 +561,7 @@
+     expect(document.activeElement).toBe(tripletMenuItem(menu));
+     fireEvent.click(tripletMenuItem(menu));
+     expect(divisionOf(view)).toBe('1/4T');
+-    expect(statusText(view)).toBe('ბადე: 1/4T · 0.444 წმ 90 BPM-ზე (Snap გამორთულია)');
++    expect(statusText(view)).toBe('Grid: 1/4T · 0.444 s at 90 BPM (Snap off)');
+     expect(gridMenu(view)).toBeNull();
+     rightClick(laneBody('music'));
+     const reopened = openMenu(view);
+--- ../tmp/studio-real-loop/b-round-133/r134-granted-start/app/lib/arrangement/__tests__/tempo-ui.test.tsx	2026-10-24 11:10:56.163277364 +0000
++++ app/lib/arrangement/__tests__/tempo-ui.test.tsx	2026-10-24 11:18:50.818552415 +0000
+@@ -101,7 +101,7 @@
+ 
+ const PX_PER_SECOND = 40;
+ const LANE_HEIGHT_PX = 100;
+-const SNAP_ON_STATUS = 'Snap ჩართულია — ბადე 1 წმ (G)';
++const SNAP_ON_STATUS = 'Snap on — grid 1 s (G)';
+ 
+ const tempoCollection: WorkspaceCollection = {
+   id: 'grid',

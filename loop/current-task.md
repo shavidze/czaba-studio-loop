@@ -1,326 +1,223 @@
-# CURRENT TASK — Round 134: VISUAL-A V-0.3a — grid and Snap texts in English
+# CURRENT TASK — Round 135: VISUAL-A V-0.3b — Transport bar, tempo row, ruler, overview, loop brace and navigation statuses in English
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 133)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 134)
 - **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
 - **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` (M2, V-0). Module contract: `backlog.json` → VISUAL-A-OBSIDIAN `v0_plan_d29z92.module_contract`, with the R6 clarification of round 133:
   - `strings.ts` is a leaf module (it imports nothing), with one object per area;
   - it holds plain strings plus small pure formatters, and no type assertions;
   - formatters take values that are already formatted; a branch that only picks between two texts stays in the caller;
-  - **existing exported names keep their names and signatures and get their values from the module**.
-- **Previous task:** `tasks/round-133.md` (exact copy of the round-133 `current-task.md`, sha256 `1f8656ad…`). Rationale: `b-round-133.md`. Decision record: **D-29z99** in `docs/technical/studio-real-workspace/plan.md`.
-- **Baseline: commit `ee40ad608a7652e23cb5a55ef84bc0f82360c525`** (gate 133 published; HEAD). The tree was **clean** at planning (`git status --short` empty).
-- **Frozen list:** `tmp/studio-real-loop/b-round-133-r134-tree-sha256.txt`, **930 entries** = `git ls-files -co --exclude-standard` (946) minus the 16 grants in `b-round-133-r134-grants.txt`. `sha256sum -c --quiet` was OK at planning, run from `store/`.
-- **Start hashes of the 16 grants:** `b-round-133-r134-granted-start-sha256.txt`. **Start copies:** `b-round-133/r134-granted-start/` (paths relative to `store/`; `sha256sum -c` was OK there at planning). A checks both at the start. If a hash differs, A stops and reports.
+  - existing exported names keep their names and signatures and get their values from the module.
+- **Previous task:** `tasks/round-134.md` (exact copy of the round-134 `current-task.md`, sha256 `6bd19815…`). Rationale: `b-round-134.md`. Decision record: **D-29z100** in `docs/technical/studio-real-workspace/plan.md`.
+- **Baseline: commit `16533c1667fa3be3e5df916b5eb6ae4ff0e76d4c`** (gate 134 published; HEAD). The tree was **clean** at planning (`git status --short` empty).
+- **Frozen list:** `tmp/studio-real-loop/b-round-134-r135-tree-sha256.txt`, **934 entries** = `git ls-files -co --exclude-standard` (947) minus the 13 grants in `b-round-134-r135-grants.txt`. `sha256sum -c --quiet` was OK at planning, run from `store/`.
+- **Start hashes of the 13 grants:** `b-round-134-r135-granted-start-sha256.txt`. **Start copies:** `b-round-134/r135-granted-start/` (paths relative to `store/`; `sha256sum -c` OK there at planning). A checks both at the start. If a hash differs, A stops and reports.
 
-## 0. Why this round (D-29z99)
-- **Round 133: C PASS.** `browserVerified` = `realVerified` = true.
-  - GROUP and LANE texts were exact at both viewports, and their effects were unchanged.
-  - GEO-COUNT was 0 over 59 steps; layout stayed within 1 px; the lane hint never wrapped.
-  - G133-3 returned 401. The fake-Bearer 403 check is BLOCKED (backend unavailable in cloud).
-  - Gate 133 published `ee40ad6` (verify OK, review 9/10). **V-0.2c3 is done, so V-0.2 is complete.**
-  - C found one new Low, C-R133-L1 (pre-existing): a successful fold leaves the earlier refusal in the status line. It goes to `deferred_low_polish`.
-- **`tasks/round-133.md` §8 fixed this step:** after a PASS comes V-0.3 stage 1, measured first and split by component if it is larger than one round.
-  - **The strings-split checkpoint has not run.** There is no frontend-architect result for `b-round-130-checkpoint-request.md` addenda (e)/(f) in `gates/`, the loop folder or `store/.claude/references/` (checked at planning).
-  - §8 says that in that case B plans stage 1 on files that do not depend on the split decision. **Rationale:** `ArrangementExportDialog.tsx` l.10 and `ArrangementContext.tsx` l.156 already import from `~/lib/arrangement/strings`. Any split must therefore keep that import path valid, for example `strings/index.ts` with the same names. A new `studioGridStrings` object imported through that same path adds no new dependence on the decision. If root later approves a split, this object moves mechanically with the other twelve.
-  - B re-asked root for a bounded checkpoint (addendum (g)). It is not a block.
-- **Not due:** the regression round (`regression-last.json` = 2026-10-24, round 122; due on or after 2026-10-27).
-- **Nothing open that comes first:** no Critical, High or Medium finding is open. `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist.
-- **B's measurement (exact greps at `ee40ad6`):**
-  - **V-0.3 area:** 108 Georgian source lines in 11 files: StudioWorkspace 38, Transport 20, MarkerRow 16, grid-divisions 15, LoopBrace 5, MarkerMenu 4, TempoRow 3, Overview 3, Ruler 2, grid.ts 1, waveform-zoom 1.
-  - **Inventory correction:** 3 files that hold Georgian were in no stage:
-    - `ArrangementGridMenu.tsx` l.6 (`GRID_MENU_LABEL`, the same text as the StudioWorkspace select aria-label) → **this round**;
-    - `panels.ts` l.8 and `clip-gain-multi.ts` l.113 → V-0.4 (detail panel).
-  - **V-0.3 split (D-29z99 R1),** by surface and measured coupling:
-
-    | Stage | Scope | Size |
-    |---|---|---|
-    | **V-0.3a, this round** | Grid and Snap | 22 source lines, **104 test pin lines in 9 files** |
-    | V-0.3b | Transport, TempoRow, Ruler, Overview, LoopBrace, MarkerMenu | about 71 test lines in 30 files* |
-    | V-0.3c | MarkerRow | about 84 test lines in 15 files* |
-    | V-0.3d | The rest of StudioWorkspace + `waveform-zoom.ts` | about 83 test lines in 34 files* |
-
-    \* Fragment-based estimates. Each stage is re-measured at its own planning.
-  - **Why V-0.3a is one round, not two:** the 104 pins are mechanical. A label/status split would touch the same pins twice, because every grid status interpolates the division label. It would also leave `Grid: 1 s` and `ბადე: 1 s` mixed for a round. A gets a checkpoint rule (§2) in case the context grows.
-- **Ruling D-29z99 R2 — the grid surface moves whole, including its StudioWorkspace lines.** A lib-only round would create new two-language composites on the very surface being cleaned:
-  - the Snap status `Snap ჩართულია — ბადე 1 s (G)`;
-  - an English `Triplets (3)` item next to the Georgian menu label in one component.
-
-  So this round also takes these lines:
-  - the five grid/Snap literals in StudioWorkspace (l.158, l.1276, l.2270–2271, l.2312);
-  - `ArrangementGridMenu.tsx` l.6.
-
-  StudioWorkspace is half-migrated for now, as ArrangementContext was during V-0.2a–c1. **Guard:** the ST13-style ratchet ST25 (§3.1).
-- **Ruling D-29z99 R3 — `waveform-zoom.ts` waits for V-0.3d.** Its one string is the same sentence as the StudioWorkspace waveform-zoom aria-label/title (l.2370–2371). The pair moves together, so one sentence never exists in two languages.
-- **Folded in (the round owns the code, and each costs little):**
-  - **GATE133-DOC109-STATUS** (gate-133 reviewer, finding 1): doc 109 l.4 and l.128.
-  - **GATE133-GROUP-RENAME tracking** (gate-133 reviewer, finding 2): one TODO line in doc 109. The rename statuses at StudioWorkspace l.953/963 are **not** changed here; they belong to V-0.3d.
-  - **GATE133-GEO-RANGE** (gate-133 reviewer suggestion): widen `GEORGIAN_CODEPOINT` in `strings.test.ts` to include Mtavruli U+1C90–1CBF and Nuskhuri U+2D00–2D2F, with a self-check (ST25).
+## 0. Why this round (D-29z100)
+- **Round 134: C PASS.** `browserVerified` = `realVerified` = true. Every grid/Snap row was exact at both viewports with unchanged effects; GEO-COUNT 0 over 95 steps; GATE132-TEMPO-CLEARED-MIXED closed in the browser; C-R122-02 no longer reproduces. Gate 134 published `16533c1` (verify OK, review 9/10). **V-0.3a is done.**
+- **`tasks/round-134.md` §8 fixed this step:** after a PASS comes **V-0.3b**, re-measured first. The strings-split checkpoint (`b-round-130-checkpoint-request.md` (e)/(f)/(g)) still has no root result (checked in `gates/`, the loop folder and `store/.claude/references/`). V-0.3b proceeds on the same rationale as round 134: the import path `~/lib/arrangement/strings` is already used by frozen files, so any later split must keep it; this round adds **no new object** (see R3).
+- **Not due:** the regression round (`regression-last.json` = 2026-10-24, round 122; due on or after 2026-10-27). **No Critical/High/Medium finding is open.** `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist.
+- **B's re-measurement at `16533c1`** (the round-133 estimate of ~71 test lines was fragment-based and too high):
+  - Source: Transport 20, TempoRow 3, Ruler 2, Overview 3, LoopBrace 5 = **33 lines**; MarkerMenu 4.
+  - **Real test pins: 9 lines in 4 files** (`delete-selection-ui` l.144, 146, 214, 527; `grid-snap-ui` l.376, 380, 383; `tempo-ui` l.288; `metronome-ui` l.288), plus `markers-move-ui` l.480–482 for MarkerMenu. **0 in `e2e/`** (e2e holds no Georgian at all).
+  - False matches, **not** V-0.3b (do not touch): `panels.test` l.349, `detail-panel.test` l.130 (`დასაწყისზე` in the panels refusal, V-0.4); `floating-video.test` l.129 (`გადაათრიე` in the video status, V-0.3d); `all-lane-clipboard` l.504/515 (range readout, V-0.3d).
+- **Ruling D-29z100 R1 — MarkerMenu moves to V-0.3c.** `markers-move-ui` pins the menu items (l.480–482) and the MarkerRow statuses (l.318) in one file; MarkerMenu l.124 `მარკერი «…»` is the same phrase and quote style as the MarkerRow statuses; the `«» → “”` change is already V-0.3c. The marker surface moves whole (same logic as R2 of D-29z99).
+- **Ruling D-29z100 R2 — the navigation statuses in StudioWorkspace join this round.** The Transport tooltips (Follow, Zoom to selection, Zoom back, Fit) and the statuses the same buttons write (StudioWorkspace l.145–147, 1174, 1191, 1211–1212, 1264, 1266–1267) are one surface. Translating only the tooltips would make every navigation click show an English tooltip and a Georgian status. These 10 lines have **0 UI pins** today, so this round also adds one new UI test file for their wiring (§3.2). The ST25 ratchet list shrinks **33 → 23** (`b-round-134/r135-studioworkspace-remaining-georgian.txt`); this edit of an existing `it` is explicitly granted.
+- **Accepted mixed surface for one round (named, not a bug):** the range readout under the lanes (StudioWorkspace l.2536–2542, `… Delete = წაშლა, სიცარიელე რჩება · Ctrl+Shift+X = Cut Time`) stays Georgian until V-0.3d while the Delete button becomes English. It has its own pins in `all-lane-clipboard` and `delete-selection-ui`, and moves with the rest of the selection readout.
+- **Ruling D-29z100 R3 — no new strings object.** Every text goes to the existing object of its area (reviewer Signal 3 is about object count): edit (split/delete), playback (back to start, end), loop (Transport loop titles and the brace), tempo (BPM field), metronome (toggle text), view (Follow, Zoom, Fit, ruler, overview and their statuses). The earlier ST maps grow **additively** (§3.1).
+- **Folded in (owned code, low cost):** **GATE134-DOC110-STATUS** (gate-134 reviewer finding 1): doc 110 l.4, l.132, and its V-0.3b TODO line l.136 (MarkerMenu → V-0.3c).
 
 ## 1. What changes (user-visible)
-One new exported object in `app/lib/arrangement/strings.ts`: **`studioGridStrings`**. Every Georgian literal below moves there, in English.
-
-**Text only.** None of these change:
-- the division lists, ids, `beats`, steps or their order;
-- `adjacentGridDivisionId`, the family logic, snapping, `gridLinesVisible`, or keys 1/2/3/G;
-- the menu behaviour, focus, or any condition or non-string expression.
+**Text only.** None of these change: any handler, condition, key binding (0, Z, X, Ctrl/Cmd+E, Ctrl/Cmd+L, + / −, arrows), Follow state machine, zoom history, the loop step, the tempo/metronome logic, focus hand-off, or any class name.
 
 ### 1.1 The English map (exact text; A may not reword it — if a line seems wrong, report it and B rules)
-Notation:
-- `{label}` = the output of `gridDivisionLabel(id)`;
-- `{step}` = `String(step)` or the already-rounded `String(Math.round(step * 1000) / 1000)`, exactly as the caller computes it today;
-- `{bpm}` = `formatTempoBpm(bpm)`;
-- `{tempoCleared}` = `tempoStatusMessage(null)` (already English).
+Line numbers are at `16533c1`. `{x}` = a value the caller already formats today with `formatArrangementTime` (or `span`, as computed today).
 
-| # | Where today (baseline line) | Object.key (A may rename the key, not the text) | English |
+| # | Where today | Object.key (A may rename the key, not the text) | English |
 |---|---|---|---|
-| GR1 | `grid.ts` l.177 `formatGridDivision` | `seconds(step)` | `{step} s` (e.g. `0.25 s`, `10 s`) |
-| GR2 | `grid-divisions.ts` l.5 bar label | `barLabel` | `1 bar` |
-| GR3 | `grid-divisions.ts` l.25 `GRID_TRIPLET_MENU_LABEL` | `tripletMenuLabel` | `Triplets (3)` |
-| GR4 | `grid-divisions.ts` l.132 narrow end | `narrowest(label)` | `The grid is already at its narrowest — {label} (1)` |
-| GR5 | `grid-divisions.ts` l.134 widen end | `widest(label)` | `The grid is already at its widest — {label} (2)` |
-| GR6 | `grid-divisions.ts` l.142 Snap state | `snapOnSuffix` / `snapOffSuffix` | `(Snap on)` / `(Snap off)` (the `snapEnabled ? :` branch stays in the caller) |
-| GR7 | `grid-divisions.ts` l.144 status | `status({label, snap})` | `Grid: {label} {snap}` |
-| GR8 | `grid-divisions.ts` l.147 musical status | `statusMusical({label, step, bpm, snap})` | `Grid: {label} · {step} s at {bpm} BPM {snap}` |
-| GR9 | `grid-divisions.ts` l.151 tempo cleared | `backToSeconds({tempoCleared, label})` | `{tempoCleared} Grid back to seconds: {label}.` |
-| GR10 | `grid-divisions.ts` l.155 | `barsGroup(bpm)` | `Bars · {bpm} BPM` |
-| GR11 | `grid-divisions.ts` l.159 | `tripletsGroup(bpm)` | `Triplets · {bpm} BPM` |
-| GR12 | `grid-divisions.ts` l.164 | `tripletNeedsTempo` | `Triplets need a tempo — enter a BPM first (3)` |
-| GR13 | `grid-divisions.ts` l.167 | `tripletNotOnBar` | `1 bar has no triplets — choose 1/2 or narrower (3)` |
-| GR14 | `grid-divisions.ts` l.169 | `tripletNeedsBarsGrid` | `Triplets work only on the bars grid — choose 1/2 … 1/32 (3)` |
-| GR15 | `grid-divisions.ts` l.175 | `titleLinesVisible(label)` | `Grid {label} · 1 — narrower, 2 — wider` |
-| GR16 | `grid-divisions.ts` l.176 | `titleLinesHidden(label)` | `Grid {label} — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider` |
-| GR17 | `ArrangementGridMenu.tsx` l.6 `GRID_MENU_LABEL` **and** `StudioWorkspace.tsx` l.2312 select `aria-label` | `menuLabel` | `Grid division` |
-| GR18 | `StudioWorkspace.tsx` l.1276 Snap-on status | `snapOnStatus(label)` | `Snap on — grid {label} (G)` |
-| GR19 | `StudioWorkspace.tsx` l.2270 Snap button title (on) | `snapOnTitle` | `Snap on — clips land on the grid (G)` |
-| GR20 | `StudioWorkspace.tsx` l.158 `SNAP_OFF_MESSAGE` **and** l.2271 Snap button title (off) — the same text today | `snapOff` | `Snap off — free movement (G)` |
+| TR1 | Transport l.126 `aria-label` | `studioPlaybackStrings.backToStartLabel` | `Back to start` |
+| TR2 | Transport l.127 `title` | `studioPlaybackStrings.backToStartTitle` | `Back to start (0)` |
+| TR3 | Transport l.135 JSX text `/ ბოლო{' '}` | `studioPlaybackStrings.projectEndPrefix` | `/ end` (the caller keeps `{' '}` and the `arrangement-project-end` span) |
+| TR4 | Transport l.177 split title (range) | `studioEditStrings.splitRangeTitle` | `Split at both edges of the time selection (Ctrl/Cmd+E)` |
+| TR5 | Transport l.178 split title (no range) | `studioEditStrings.splitPlayheadTitle` | `Split at the playhead (Ctrl/Cmd+E)` |
+| TR6 | Transport l.72 range delete hint, one track | `studioEditStrings.deleteRangeHint` | `Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X` |
+| TR7 | Transport l.72 range delete hint, `range.allTracks` | `studioEditStrings.deleteRangeAllTracksHint` | `Delete time selection on all tracks — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X` |
+| TR8 | Transport l.192 title without range (`${deleteHint} (Delete)`) | `studioEditStrings.deleteClipTitle` | `Delete clip — leaves a gap (Delete)` |
+| TR9 | Transport l.193 aria-label without range (`⌫ წაშლა — ${deleteHint}`) | `studioEditStrings.deleteClipLabel` | `⌫ Delete — the selected clip; leaves a gap` |
+| TR10 | Transport l.196 button text | `studioEditStrings.deleteButton` | `⌫ Delete` |
+| TR11 | Transport l.205 loop title (range) | `studioLoopStrings.selectionTitle` | `Loop the time selection (Ctrl/Cmd+L)` |
+| TR12 | Transport l.205 loop title (no range) | `studioLoopStrings.toggleTitle` | `Loop on / off (Ctrl/Cmd+L)` |
+| TR13 | LoopBrace l.17 `LOOP_HINT` | `studioLoopStrings.braceHint` | `Loop: make a time selection and press ↻ Loop (Ctrl+L)` |
+| TR14 | LoopBrace l.18 `LOOP_KEYBOARD_HINT` | `studioLoopStrings.braceKeyboardHint` | `← → nudge · Shift + ← → length` |
+| TR15 | LoopBrace l.234 brace title | `studioLoopStrings.braceTitle(span)` | `{span} · the bar moves the loop; the edges change its length` |
+| TR16 | LoopBrace l.263 | `studioLoopStrings.braceStartTitle` | `Loop start` |
+| TR17 | LoopBrace l.269 | `studioLoopStrings.braceEndTitle` | `Loop end` |
+| TR18 | TempoRow l.227 `aria-label` | `studioTempoStrings.fieldLabel` | `Project tempo (BPM)` |
+| TR19 | TempoRow l.228 `title` | `studioTempoStrings.fieldTitle` | `Project tempo — bars grid only; audio is not stretched (no time-stretch). Enter — save · Esc — cancel · empty — hide the bars` |
+| TR20 | TempoRow l.245 JSX text | `studioMetronomeStrings.toggleLabel` | `Metronome` |
+| NV1 | Transport l.218 Follow title (off) | `studioViewStrings.followOffTitle` | `Follow off: the view does not follow playback` |
+| NV2 | Transport l.220 Follow title (paused) | `studioViewStrings.followPausedTitle` | `Follow paused by manual navigation — press Follow or Play` |
+| NV3 | Transport l.221 Follow title (on) | `studioViewStrings.followOnTitle` | `Follow: the view follows the playback position` |
+| NV4 | Transport l.245 zoom slider `aria-label` | `studioViewStrings.zoomSliderLabel` | `Zoom (px/s)` (closes R4 of D-29z97) |
+| NV5 | Transport l.247 zoom slider `title` | `studioViewStrings.zoomSliderTitle` | `Zoom around the playhead · + / − · Ctrl+wheel` |
+| NV6 | Transport l.259 `aria-label` | `studioViewStrings.zoomToSelectionLabel` | `Zoom to selection (Z)` |
+| NV7 | Transport l.262 title (range) | `studioViewStrings.zoomToSelectionTitle` | `Zoom to the time selection (Z)` |
+| NV8 | Transport l.262 title (no range) | `studioViewStrings.zoomToSelectionNeedsRangeTitle` | `Zoom to selection: make a time selection first (Z)` |
+| NV9 | Transport l.280 zoom back title | `studioViewStrings.zoomBackTitle` | `Back to the previous zoom (X)` |
+| NV10 | Transport l.281 zoom back title (empty) | `studioViewStrings.zoomBackEmptyTitle` | `Previous zoom: the history is empty — use Fit or Zoom to selection first (X)` |
+| NV11 | Transport l.292 Fit title | `studioViewStrings.fitTitle` | `Fit — the entire project is visible (double-click the ruler or the overview)` |
+| NV12 | Ruler l.231 playhead title | `studioViewStrings.playheadTitle` | `Playhead — drag · ←/→ = ±0.1 s` |
+| NV13 | Ruler l.440 ruler title | `studioViewStrings.rulerTitle` | `Click = playhead · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit / Zoom to selection` |
+| NV14 | Overview l.282 `aria-label` | `studioViewStrings.overviewLabel` | `Overview — entire project (← → = 5 s, double-click = Fit)` |
+| NV15 | Overview l.288 `title` | `studioViewStrings.overviewTitle` | `Overview: click = centre here · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit` |
+| NV16 | Overview l.60 `overviewValueText` body | `studioViewStrings.overviewVisibleStart({start, extent})` | `Visible start {start} / {extent}` |
+| NV17 | StudioWorkspace l.145 `FOLLOW_PAUSED_MESSAGE` | `studioViewStrings.followPaused` | `Follow paused by manual navigation. Follow or Play resumes it.` |
+| NV18 | StudioWorkspace l.146 `ZOOM_RANGE_MISSING_MESSAGE` | `studioViewStrings.zoomNeedsSelection` | `To zoom, make a time selection first.` |
+| NV19 | StudioWorkspace l.147 `ZOOM_HISTORY_EMPTY_MESSAGE` | `studioViewStrings.zoomHistoryEmpty` | `The zoom history is empty — there is no view to go back to.` |
+| NV20 | StudioWorkspace l.1174 Fit status | `studioViewStrings.fitStatus(extent)` | `Fit: the entire project is visible ({extent}). X goes back.` |
+| NV21 | StudioWorkspace l.1191 zoom status | `studioViewStrings.zoomedToSelection({start, end})` | `Zoom to selection: {start} — {end}. X goes back.` |
+| NV22 | StudioWorkspace l.1211 | `studioViewStrings.zoomBackMore` | `Previous view restored. X goes back one more step.` |
+| NV23 | StudioWorkspace l.1212 | `studioViewStrings.zoomBackDone` | `Previous view restored.` |
+| NV24 | StudioWorkspace l.1264 | `studioViewStrings.followOff` | `Follow off: the view does not move by itself.` |
+| NV25 | StudioWorkspace l.1266 | `studioViewStrings.followResumed` | `Follow is following the playback position again.` |
+| NV26 | StudioWorkspace l.1267 | `studioViewStrings.followOn` | `Follow on: the view follows the playback position during playback.` |
 
-Examples that must come out exactly:
-- `gridDivisionStatusMessage('0.5', null, true)` → `Grid: 0.5 s (Snap on)`
-- `gridDivisionStatusMessage('1/4', 90, true)` → `Grid: 1/4 · 0.667 s at 90 BPM (Snap on)`
-- `gridDivisionStatusMessage('1/4T', 90, false)` → `Grid: 1/4T · 0.444 s at 90 BPM (Snap off)`
-- `gridDivisionEndMessage('bar', 'widen')` → `The grid is already at its widest — 1 bar (2)`
-- `gridTempoClearedMessage(0.5)` → `Tempo cleared — the bars ruler is hidden. Audio is unchanged. Grid back to seconds: 0.5 s.` (**closes GATE132-TEMPO-CLEARED-MIXED**)
-- `gridDivisionTitle('0.1', false)` → `Grid 0.1 s — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider`
-
-- **Facts that must survive (a dropped one is Medium):**
-  - GR4/GR5: the end direction and the key (1)/(2);
-  - GR8: the step in seconds **and** the tempo;
-  - GR9: the grid went back to seconds, plus its label;
-  - GR12–GR14: each refusal reason, its remedy and the (3) key;
-  - GR15/GR16: both key hints (1 narrower, 2 wider);
-  - GR16: lines hidden, Snap still works, zoom in;
-  - GR18: the division label;
-  - GR19/GR20: the clip effect (lands on the grid / free movement) and (G).
-- **Exported names stay; their values move.**
-  - `formatGridDivision(step)` returns `studioGridStrings.seconds(String(step))`.
-  - In `MUSICAL_GRID_DIVISIONS`, the bar entry's `label` becomes `studioGridStrings.barLabel`; the array, its `as const` and the other entries are unchanged. `MusicalGridDivisionId` is built from `['id']` only, so the label type change is safe. If typecheck says otherwise, that is a **stop rule**.
-  - `GRID_TRIPLET_MENU_LABEL = studioGridStrings.tripletMenuLabel`.
-  - `gridDivisionEndMessage`, `gridDivisionStatusMessage`, `gridTempoClearedMessage`, `gridMusicalGroupLabel`, `gridTripletGroupLabel`, `gridTripletRefusalMessage` and `gridDivisionTitle` keep their signatures and branches, and return the module texts.
-  - StudioWorkspace keeps the `SNAP_OFF_MESSAGE` name (value `studioGridStrings.snapOff`) and the title ternary. Only the two picked texts change.
-  - `ArrangementGridMenu.tsx` keeps the `GRID_MENU_LABEL` name (value `studioGridStrings.menuLabel`). `GRID_MENU_SNAP_LABEL` (`Snap (G)`) is already English and unchanged.
-- **Imports:**
-  - `grid.ts` and `grid-divisions.ts` import from `./strings`;
-  - `StudioWorkspace.tsx` and `ArrangementGridMenu.tsx` import from `~/lib/arrangement/strings` (the path ArrangementExportDialog already uses);
-  - `strings.ts` still imports nothing.
+- **Caller shapes (the only non-literal edits allowed):**
+  - Transport l.71–73: `range ? (range.allTracks ? <TR7> : <TR6>) : null` (the same condition; two full sentences instead of a template fragment). The local `deleteHint` const (l.74) may be removed; title becomes `rangeDeleteHint ?? <TR8>`, aria-label `rangeDeleteHint ?? <TR9>`.
+  - The other ternaries keep their conditions and order and only swap the picked literals.
+  - JSX text children (`/ ბოლო`, `⌫ წაშლა`, `მეტრონომი`) become `{object.key}` expressions. This is allowed in AN-REVIEW.
+  - Local names stay and take module values: `LOOP_HINT`, `LOOP_KEYBOARD_HINT`, `FOLLOW_PAUSED_MESSAGE`, `ZOOM_RANGE_MISSING_MESSAGE`, `ZOOM_HISTORY_EMPTY_MESSAGE`, `overviewValueText(visibleStart, extent)` (returns `overviewVisibleStart({ start: formatArrangementTime(visibleStart), extent: formatArrangementTime(extent) })`). LoopBrace l.233 `aria-label={`${span} · ${LOOP_KEYBOARD_HINT}`}` is unchanged.
+- **Facts that must survive (a dropped one is Medium):** TR6/TR7: the gap stays, the keys Delete/Backspace, Cut Time closes the gap on Ctrl+Shift+X, and "on all tracks" only when all tracks are selected (user decision 2026-10-11); TR8/TR9: clip delete leaves a gap; TR4/TR5 both edges vs the playhead and Ctrl/Cmd+E; TR11/TR12 and TR13 the key; TR14 both key hints; TR15 bar moves, edges change length; TR19 grid only / not stretched / Enter / Esc / empty hides; NV1–NV3 three different states; NV10 the remedy; NV11 both double-click places; NV14 5 s step and double-click; NV17 both ways back; NV20/NV21 the extent or the two times and "X goes back"; NV22 vs NV23 "one more step" only when history remains.
+- **Imports:** the five components and StudioWorkspace import from `~/lib/arrangement/strings` (StudioWorkspace adds names to its existing l.83 import). `strings.ts` still imports nothing.
 - **Unchanged this round** (they stay Georgian; C subtracts them by name):
-  - (a) the other 33 Georgian lines of StudioWorkspace, listed exactly in `b-round-133/r134-studioworkspace-remaining-georgian.txt`. They include the Follow/Zoom/Fit statuses, the Envelope toggle, the waveform-zoom label, the range/selection readout, the lane Shift hints (GATE133-LANE-HINT-MIXED), the group rename statuses (GATE133-GROUP-RENAME) and the video/library panel statuses. All go to V-0.3d.
-  - (b) Transport, TempoRow, Ruler, Overview, LoopBrace and MarkerMenu (V-0.3b), and MarkerRow (V-0.3c).
-  - (c) the track names, the default group names, the lane/clip/detail texts (V-0.4), and the library and video dock (V-0.5).
-- **Glossary additions** (doc 110 and the backlog glossary):
-  - ბადე = Grid;
-  - ბადის დანაყოფი = Grid division;
-  - ტრიოლები = Triplets;
-  - 1 ტაქტი = 1 bar (CZABA label; unconfirmed as a Live menu name);
-  - უფრო მჭიდრო / უფრო ფართო = narrower / wider (Live 12 §6.10 "narrows/widens the grid");
-  - Snap ჩართულია / გამორთულია = Snap on / Snap off;
-  - თავისუფალი გადაადგილება = free movement;
-  - წმ = s (existing).
+  - (a) the 23 StudioWorkspace lines in `b-round-134/r135-studioworkspace-remaining-georgian.txt` (lane Shift hints, video/library panel statuses, the aria-label selector l.325, group rename statuses, Envelope status/toggle, `· სამუშაო სივრცე`, waveform-zoom label/title, the range/selection readout l.2536–2557) → V-0.3d;
+  - (b) MarkerMenu and MarkerRow → V-0.3c;
+  - (c) lanes, clips, detail panel, track names (V-0.4), library and video dock (V-0.5).
+- **Glossary additions** (doc 111 and the backlog glossary): დასაწყისზე დაბრუნება = Back to start; ბოლო = end; ორმაგი click = double-click; გადახვევა = scroll; ცენტრში = centre here; მიმოხილვა = Overview (Live 12 §6.1); Zoom მონიშნულზე = Zoom to selection (Live "Zoom to Arrangement Time Selection"); წინა Zoom = previous zoom (Live "Zoom Back"); Follow შეჩერდა = Follow paused (Live 12 §6.2); ხილვადი დასაწყისი = Visible start; დროის ამოჭრა = Cut Time (Live §42 "Cut Time"); Loop-ის დასაწყისი / დასასრული = Loop start / Loop end; პროექტის ტემპი = Project tempo; გადაადგილება (brace keys) = nudge (d29z95).
 
 ## 2. A — files you own (everything else is frozen)
 | File | Change |
 |---|---|
-| `app/lib/arrangement/strings.ts` | Add `studioGridStrings` with GR1–GR20. The twelve existing objects are unchanged. It still imports nothing |
-| `app/lib/arrangement/grid.ts` | **Only:** the import and l.176–178 (`formatGridDivision` body) |
-| `app/lib/arrangement/grid-divisions.ts` | **Only:** the import, l.5 (bar label value), l.25, and the string expressions in l.130–177 as in §1.1. Every condition and non-string line is unchanged |
-| `app/components/arrangement/ArrangementGridMenu.tsx` | **Only:** one added import line and l.6 |
-| `app/components/arrangement/StudioWorkspace.tsx` | **Only:** one added import (or a name added to an existing import), l.158, l.1276, l.2270–2271, l.2312. Nothing else, including the other 33 Georgian lines |
-| `app/lib/arrangement/__tests__/strings.test.ts` | Widen `GEORGIAN_CODEPOINT` (l.50) to `/[Ⴀ-ჿᲐ-Ჿⴀ-⴯]/`. New `describe('V-0.3a grid and Snap strings')` with ST23–ST25 (§3.1). ST1–ST22 are unchanged |
-| `app/lib/arrangement/__tests__/grid.test.ts` | l.157–163 → hand-written English |
-| `app/lib/arrangement/__tests__/grid-musical.test.ts` | l.44, 57, 106, 108, 111, 113–116, 118, 120–123, 125, 127, 129 → hand-written English |
-| `app/lib/arrangement/__tests__/grid-triplet.test.ts` | l.43, 54–56, 151, 152, 157, 160, 162, 166, 168 → hand-written English |
-| `app/lib/arrangement/__tests__/grid-snap-ui.test.tsx` | l.106, 109 (with its continuation line), 295, 298, 299, 301–307, 408, 425, 429, 435, 438, 585 → hand-written English |
-| `app/lib/arrangement/__tests__/grid-snap-menu.test.tsx` | l.109, 111, 112, 403, 411, 423, 450, 458, 468, 473, 476, 602, 672, 725, 783, 863, 891 → hand-written English |
-| `app/lib/arrangement/__tests__/grid-snap-keys.test.tsx` | l.104–106, 315, 317, 399, 410 → hand-written English |
-| `app/lib/arrangement/__tests__/grid-musical-ui.test.tsx` | l.112, 113, 399, 421, 423, 490, 522–524, 528, 537, 562, 576 → hand-written English |
-| `app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx` | l.113, 114, 118–121, 456, 466, 470, 474, 478, 528, 537, 564 → hand-written English |
-| `app/lib/arrangement/__tests__/tempo-ui.test.tsx` | **Only l.104** `SNAP_ON_STATUS` → `'Snap on — grid 1 s (G)'` |
-| `docs/implementation/2026/quarter-IV/109-studio-v0-lane-move-group-strings.md` | l.4 → `**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 133-ში; C round 133 — PASS, browserVerified; gate 133 — ee40ad6)`. l.128 → `- ბრაუზერის შემოწმება (GROUP, LANE, GEO-COUNT, LAYOUT): C round 133 — PASS, browserVerified (c-round-133.json).` Add one TODO line under V-0.3: `GATE133-GROUP-RENAME — ჯგუფის გადარქმევის სტატუსები (StudioWorkspace l.953/963) V-0.3d-ში, studioTrackGroupStrings-ის renamed/renameEmpty-ით და quoted()-ით.` Nothing else |
-| **new** `docs/implementation/2026/quarter-IV/110-studio-v0-grid-snap-strings.md` | Sections from TEMPLATE.md, in Georgian: the GR map; rulings R1 (the V-0.3 split and its measurement), R2 (the grid surface moves whole; StudioWorkspace ratchet), R3 (waveform-zoom → V-0.3d), the checkpoint note (§0); the closed GATE132-TEMPO-CLEARED-MIXED; the facts that must survive; the glossary additions; the tests and the mutations. The status line says Completed only after §4 is green, and names C's round as still to come |
+| `app/lib/arrangement/strings.ts` | Add the §1.1 keys to `studioPlaybackStrings`, `studioEditStrings`, `studioLoopStrings`, `studioTempoStrings`, `studioMetronomeStrings`, `studioViewStrings`. No new object; existing keys unchanged; still no import |
+| `app/components/arrangement/ArrangementTransport.tsx` | **Only:** one import, l.71–74 (caller shape §1.1), l.126, 127, 135, 177–178, 192–193, 196, 205, 218–221, 245, 247, 259, 262, 280–281, 292 |
+| `app/components/arrangement/ArrangementTempoRow.tsx` | **Only:** the import (a new line, or names added to an existing one), l.227, 228, 245 |
+| `app/components/arrangement/ArrangementRuler.tsx` | **Only:** one import, l.231, 440 |
+| `app/components/arrangement/ArrangementOverview.tsx` | **Only:** one import, l.59–61 (`overviewValueText` body), l.282, 288 |
+| `app/components/arrangement/ArrangementLoopBrace.tsx` | **Only:** one import, l.17, 18, 234, 263, 269 |
+| `app/components/arrangement/StudioWorkspace.tsx` | **Only:** names added to the l.83 import, l.145, 146, 147, 1174, 1191 (with its 1190–1192 call), 1211–1212, 1264, 1266–1267. The other **23** Georgian lines are byte-identical. Biome may re-wrap the three sites l.1190–1192, l.1210–1213 and l.1263–1268 (and the Transport ternaries); the condition and pick order must be unchanged — this is not a deviation |
+| `app/lib/arrangement/__tests__/strings.test.ts` | Additive updates to the expected maps/key lists/formatter samples used by ST6/ST8 (edit), ST10/ST12 (playback, loop), ST17/ST19 (tempo, metronome, view); **ST25**: list → the 23 lines of `b-round-134/r135-studioworkspace-remaining-georgian.txt` as literals, `toHaveLength(23)`, title unchanged; new `describe('V-0.3b transport and navigation strings')` with ST26–ST27 (§3.1). No other ST changes |
+| `app/lib/arrangement/__tests__/delete-selection-ui.test.tsx` | l.144, 146 (the two constants' text lines), l.214, l.527 → hand-written English |
+| `app/lib/arrangement/__tests__/grid-snap-ui.test.tsx` | l.376 → `'Back to start'`; l.380 `toContain('Delete')`; l.383 → `'Zoom to selection (Z)'` |
+| `app/lib/arrangement/__tests__/tempo-ui.test.tsx` | **Only l.288** → `'Project tempo (BPM)'` |
+| `app/lib/arrangement/__tests__/metronome-ui.test.tsx` | **Only l.288** → `'Metronome'` |
+| **new** `app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx` | §3.2 |
+| `docs/implementation/2026/quarter-IV/110-studio-v0-grid-snap-strings.md` | l.4 → `**სტატუსი:** Completed (A-ის შემოწმებები მწვანეა რაუნდ 134-ში; C round 134 — PASS, browserVerified; gate 134 — 16533c1)`. l.132 → `- ბრაუზერის შემოწმება (GRID-SEC, GRID-MUSICAL, GRID-TRIPLET, GRID-HIDDEN, SNAP, MENU, GEO-COUNT, LAYOUT): C round 134 — PASS, browserVerified (c-round-134.json).` l.136 → the same TODO with MarkerMenu moved: `- V-0.3b: Transport, TempoRow, Ruler, Overview, LoopBrace და StudioWorkspace-ის ნავიგაციის სტატუსები. V-0.3c: MarkerRow და MarkerMenu. V-0.3d: StudioWorkspace-ის დარჩენილი 23 ხაზი და waveform-zoom.ts (R3), მათ შორის GATE133-LANE-HINT-MIXED და GATE133-GROUP-RENAME.` Nothing else |
+| **new** `docs/implementation/2026/quarter-IV/111-studio-v0-transport-navigation-strings.md` | Sections from TEMPLATE.md, in Georgian: the TR/NV map; rulings R1 (MarkerMenu → V-0.3c), R2 (navigation statuses join; ratchet 33 → 23; the accepted range-readout mix), R3 (no new object); the re-measurement; facts that must survive; glossary additions; tests and mutations. Status Completed only after §4 is green, naming C round 135 as still to come |
 
-- **Test rules (as in rounds 129–133):**
-  - Every replaced pin is a **hand-written English literal** with the same matcher (GATE130-S3). Where a file holds a shared constant (`SNAP_ON_STATUS`, `HIDDEN_LINES_TITLE`, `KEYS_TITLE_SUFFIX`, `SECONDS_LABELS`, `MUSICAL_LABELS`, `NO_TEMPO_REFUSAL`, …), change the constant **once**; do not inline it.
-  - No `it` is added, removed or renamed outside the new `describe` in `strings.test.ts`. If a test **title** contains a Georgian grid text, report it and leave it.
-  - Line numbers are baseline (`ee40ad6`) positions. Find each line by its text.
-- **Pre-edit grep (A records it):**
-  - For each GR row, grep the old Georgian text in `app/**` and `e2e/**`. Also grep `\d წმ` together with `ბადე|ბადის|ტრიოლ|ტაქტ|Snap ჩართულია|Snap გამორთულია` in `app/lib/arrangement/__tests__`.
-  - B's grep found exactly the lines in §2. The fade/envelope/trim texts with `წმ` (`clip-fades-ui`, `clip-envelope-ui`, `video-fades-ui`, `grid-snap-edit` l.112/114, `grid-snap-clip-edges` l.112/114, `status-announcement*`, `delete-selection-ui` l.520) belong to V-0.4 and stay. There are 0 hits in `e2e/`.
-  - If A finds another pin of a GR text, that is a stop-rule case.
-- **Stop rule:** stop and report (B rules) if any of these happens:
-  - a test outside §2 asserts an old text, or turns red;
-  - a change needs a frozen file or a non-string line;
-  - an import cycle or module-load order problem appears (e.g. a label reads `undefined`);
-  - typecheck rejects the bar label change in the `as const` array.
-- **Checkpoint rule (large mechanical round):** if your context grows large, stop at a clean point. A clean point means one file fully edited and its vitest green. Write `a-round-134-checkpoint.md` listing:
-  - the files done, with their sha256;
-  - the files left;
-  - the next step.
-
-  Then say STATUS: RESTART-NEEDED. The same phase resumes from it. Never revert finished files.
-- **Expected end state:** `git status` shows 16 ` M` + 1 `??` (doc 110) and no other path. The frozen list is OK at the start and at the end. Report the end sha256 of the 17 paths.
-- **Protected (unchanged; `git diff ee40ad6` on them is empty):**
-  - `app/routes/studio.$productId.tsx`;
-  - `app/routes/api.studio-token.ts`;
-  - `app/lib/auth.ts`;
-  - `app/contexts/AuthContext.tsx`;
-  - `app/components/ui/Modal.tsx`;
-  - everything in `global_forbidden_files` / `global_forbidden_actions` of `backlog.json`.
+- **Test rules (as in rounds 129–134):** every replaced pin is a **hand-written English literal** with the same matcher (GATE130-S3); where a file has a shared constant (`SINGLE_LANE_DELETE_HINT`, `ALL_LANE_DELETE_HINT`), change it once. No `it` is added, removed or renamed outside the new `describe` in `strings.test.ts` and the new test file. Line numbers are baseline positions; find each line by its text.
+- **Pre-edit grep (A records it):** for each TR/NV row grep the old Georgian text in `app/**` and `e2e/**`; also grep test files for regex or partial forms (`name: /`, `getByTitle(`, `getByLabelText(`, `toContain(`) with Georgian next to `Follow|Zoom|Fit|Loop|Split|Delete|Playhead|Overview`. B found exactly the pins in §2 and the false matches in §0. Another pin of a TR/NV text is a **stop-rule** case.
+- **Stop rule:** stop and report (B rules) if a test outside §2 asserts an old text or turns red; a change needs a frozen file or a non-string line beyond §1.1 caller shapes; an import cycle or `undefined` label appears; the new UI test cannot reach a state (report which; do not fake it).
+- **Checkpoint rule:** if your context grows large, stop at a clean point (one file fully edited and its vitest green) and write `a-round-135-checkpoint.md` (files done with sha256, files left, next step). Say STATUS: RESTART-NEEDED. Never revert finished files.
+- **Expected end state:** `git status` shows 13 ` M` + 2 `??` (the new test file and doc 111) and no other path. The frozen list is OK at the start and at the end. Report the end sha256 of the 15 paths.
+- **Protected (unchanged; `git diff 16533c1` on them is empty):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/components/ui/Modal.tsx`, and everything in `global_forbidden_files` / `global_forbidden_actions` of `backlog.json`.
 - **Forbidden actions:** commit, push, stash, checkout, reset, deploy, dev-server restart, `npm install`, `npm run check:fix` / any `--write`, `npm run format`.
-- **Edit rule (C-R120-01):** lasting edits only with the Edit/Write tool. Shell writes are allowed only for temporary mutations, which are restored and checked by sha256. List every shell write.
-- **Before editing, read:**
-  - `.claude/primitives-map.json`;
-  - `AGENT_DISCOVERABLE_CODE.md` and `FORWARDREF_COMPONENT.md` (two components change);
-  - `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`;
-  - `GEORGIAN_DOCS.md` and `docs/implementation/TEMPLATE.md`.
-- **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, no `as T` (and no new `as const`), semicolons, no code comments.
+- **Edit rule (C-R120-01):** lasting edits only with Edit/Write. Shell writes only for temporary mutations, restored and checked by sha256. List every shell write.
+- **Before editing, read:** `.claude/primitives-map.json`; `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md` (components change); `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `.claude/prompts/new-test.md` (new test file); `GEORGIAN_DOCS.md`, `docs/implementation/TEMPLATE.md`.
+- **Project rules:** TypeScript strict, no `any`, no `@ts-ignore`, no `as T` (no new `as const`), semicolons, no code comments.
 
 ## 3. A — tests and mutations
-### 3.1 `strings.test.ts`: ST23–ST25 (the file goes from 22 to 25 `it`s)
-- **ST23:**
-  - Every plain-string property of `studioGridStrings` equals its exact English literal from §1.1 (`toBe`).
-  - The key list equals the expected list.
-  - `GRID_TRIPLET_MENU_LABEL` is `toBe('Triplets (3)')`.
-  - The bar entry of `MUSICAL_GRID_DIVISIONS` has label `'1 bar'`, and the other five labels are unchanged.
-- **ST24:** every formatter and every exported grid function returns the exact English (`toBe`):
-  - each formatter with Latin inputs;
-  - `formatGridDivision` for all seven seconds steps;
-  - the six §1.1 examples;
-  - `gridDivisionEndMessage` for both directions on the seconds, straight and triplet families;
-  - `gridTripletRefusalMessage` for its three branches;
-  - `gridMusicalGroupLabel(92.5)` and `gridTripletGroupLabel(92.5)`;
-  - `gridDivisionTitle` with both `linesVisible` values.
-- **ST25:**
-  - No plain value or formatter output of `studioGridStrings` contains a Georgian codepoint.
-  - **Self-check of the widened pattern:** `GEORGIAN_CODEPOINT` matches `'ა'` (U+10D0), `'Ა'` (U+1C90) and `'ⴀ'` (U+2D00), and does not match `'abc — · …'`.
-  - **Per-file scan** (comments stripped): `grid.ts`, `grid-divisions.ts` and `ArrangementGridMenu.tsx` contain no Georgian codepoint.
-  - **StudioWorkspace ratchet** (the ST13 shape): the comment-stripped Georgian lines of `StudioWorkspace.tsx`, trimmed and with `${` → `{`, **equal** a hand-written list of 33 entries. That list is the content of `tmp/studio-real-loop/b-round-133/r134-studioworkspace-remaining-georgian.txt`, copied into the test as literals; the test must not read the loop folder. B generated the list with the narrow U+10A0–10FF grep. A confirms that the widened pattern gives the same 33 lines (StudioWorkspace has no Mtavruli or Nuskhuri). If A's stripper splits a line differently, A reports the difference and keeps the count at 33.
+### 3.1 `strings.test.ts` (25 → 27 `it`s)
+- **ST6/ST8, ST10/ST12, ST17/ST19 data:** add each new plain key with its exact §1.1 literal to the matching expected map / key list, and a sample for each new formatter (`braceTitle`, `overviewVisibleStart`, `fitStatus`, `zoomedToSelection`). Additions only; no existing entry changes.
+- **ST25:** the ratchet list = the 23 lines; `toHaveLength(23)`.
+- **ST26:** the four new formatters return the exact English for Latin inputs (`toBe`): `braceTitle('00:01.000 — 00:03.000')`, `overviewVisibleStart({ start: '00:02.000', extent: '00:30.000' })`, `fitStatus('00:30.000')`, `zoomedToSelection({ start: '00:01.000', end: '00:03.000' })`. Nothing else: the local consts (`LOOP_HINT`, `FOLLOW_PAUSED_MESSAGE`, …) are not exported and are covered through the DOM by NS1–NS4; do not export them for the test.
+- **ST27:** per-file scan (comments stripped): `ArrangementTransport.tsx`, `ArrangementTempoRow.tsx`, `ArrangementRuler.tsx`, `ArrangementOverview.tsx`, `ArrangementLoopBrace.tsx` contain no Georgian codepoint (widened pattern).
 
-### 3.2 Forward rule (GATE130-S3)
-Each formatter that a UI test reaches already has a hand-written UI literal after the §2 replacements:
-- seconds labels and `status`: `grid-snap-ui`, `grid-snap-keys`;
-- `statusMusical`, `barsGroup`, `backToSeconds`, `narrowest`, `widest`: `grid-musical-ui`;
-- `tripletsGroup` and the refusals: `grid-triplet-ui`;
-- `snapOnStatus`: `tempo-ui` and `grid-snap-ui`;
-- the titles: `grid-snap-ui` l.299/585.
+### 3.2 New `navigation-strings-ui.test.tsx` (renders `StudioWorkspace` in jsdom, following `self-disabling-focus.test.tsx`)
+At least these behavioural assertions, each a hand-written English literal (`toBe`), read from the real DOM title / aria-label / text and the live status region:
+- **NS1 (no range):** back-to-start label and title; the `/ end` prefix text; split title `Split at the playhead (Ctrl/Cmd+E)`; with a selected clip the delete title, aria-label and text; loop title `Loop on / off (Ctrl/Cmd+L)` (with a loop present); Follow title for the default `on`; zoom slider label and title; Zoom to selection label and the needs-range title; zoom back empty title; Fit title; tempo field label and title; metronome text.
+- **NS2 (range):** a one-track time range → split range title, `deleteRangeHint` as title and aria-label, loop selection title, zoom-to-selection title; an all-tracks range → `deleteRangeAllTracksHint`.
+- **NS3 (statuses):** Z with no range → NV18; X with empty history → NV19; Fit → NV20 with the extent as `formatArrangementTime` prints it; Z with a range → NV21; then X → NV22 or NV23 exactly as the history depth dictates, and the zoom-back title switches between NV9 and NV10; Follow click → NV24 and title NV1, click again → NV26 and title NV3. The paused state (NV2/NV17/NV25) only if reachable in jsdom; if not, report it (C covers it in the browser).
+- **NS4:** ruler title and playhead title; overview label, title and `aria-valuetext` (NV16 with the formatted times); loop brace: no loop → TR13 text; with a loop → aria-label `{span} · ← → nudge · Shift + ← → length`, title TR15, edge titles TR16/TR17.
 
-No new `expect` is needed. If A finds a GR text with no UI literal that a UI test reaches, A reports it.
+### 3.3 Forward rule (GATE130-S3)
+After §2/§3.2 every new key that a UI reaches has a hand-written UI literal (delete hints: `delete-selection-ui` + NS2; labels: `grid-snap-ui`, `tempo-ui`, `metronome-ui`; the rest: NS1–NS4). If one does not, A reports it.
 
-### 3.3 Mutations (each turns the named tests red; restore and check by sha256)
+### 3.4 Mutations (each turns the named tests red; restore and check by sha256)
 | Mutation | Change | Must turn red |
 |---|---|---|
-| **m24** | `seconds` returns `` `${step} წმ` `` | ST24, ST25, `grid.test` (the l.157 `it`), `grid-snap-ui` (division options `it`), `grid-snap-menu` (any menu-item `it`) |
-| **m25** | `grid-divisions.ts` swaps the `snapOnSuffix` / `snapOffSuffix` picks | ST24, `grid-musical` (status `it`), `grid-snap-keys` (l.399/410 `it`) |
-| **m26** | `titleLinesHidden` drops `; Snap still works` | ST24, `grid-snap-ui` (`HIDDEN_LINES_TITLE` `it`), `grid-musical` (l.125) |
-| **m27** | StudioWorkspace swaps the Snap title ternary picks | `grid-snap-ui` (the l.295 and l.408 `it`s) |
-| **m28** | StudioWorkspace l.2312 aria-label back to `"ბადის დანაყოფი"` | ST25 (ratchet), `grid-snap-ui` (l.298 `it`) |
-| **m29** | `backToSeconds` drops `: {label}` | ST24, `grid-musical` (l.118), `grid-musical-ui` (l.490 `it`) |
+| **m30** | `deleteRangeAllTracksHint` drops ` on all tracks` | ST6, `delete-selection-ui` (an `ALL_LANE_DELETE_HINT` `it`), NS2 |
+| **m31** | Transport swaps the `range.allTracks` picks | `delete-selection-ui`, NS2 |
+| **m32** | StudioWorkspace swaps the Follow `next === 'off'` status picks | NS3 |
+| **m33** | `fitStatus` drops `({extent})` | ST26, NS3 |
+| **m34** | Transport swaps the Zoom-to-selection title picks | NS1 or NS2 |
+| **m35** | StudioWorkspace `FOLLOW_PAUSED_MESSAGE` back to the Georgian | ST25 (ratchet 24 ≠ 23) |
+| **m36** | TempoRow metronome text back to `მეტრონომი` | ST27, `metronome-ui` (l.288 `it`) |
 
 ## 4. A — checks (speed rules)
-- Run `npm run typecheck` and `npm run lint`. Run a read-only `npx biome check` on the 15 changed code and test files.
-- Run `npx vitest run` on the files below; every one must be green. Name the exact list and counts in the report; C runs the same list.
-  - **The granted tests:** `strings`, `grid`, `grid-musical`, `grid-triplet`, `grid-snap-ui`, `grid-snap-menu`, `grid-snap-keys`, `grid-musical-ui`, `grid-triplet-ui`, `tempo-ui`.
-  - **The neighbours:** `grid-edges`, `grid-snap-position`, `grid-snap-edit`, `grid-snap-clip-edges`, `grid-snap-loop-drop`, `marker-snap`, `tempo`, `tempo-window-ui`, `metronome-ui`, `waveform-zoom`, `render-budget`, `self-disabling-focus`, `status-announcement-ui`.
-
-  If one of these file names does not exist, report it and do not invent one.
-- No full suite and no `npm run verify` (the gate runs them).
-- **code-reviewer required** (17 paths). Pass its Architecture note to B.
-- **Report `a-round-134.md`:**
-  - start HEAD, frozen OK and the 16 start hashes;
-  - the pre-edit grep;
-  - per granted file, the changed lines (`diff -u` vs `b-round-133/r134-granted-start/`, saved as `a-round-134/granted.diff`);
-  - `it` counts before and after, per file;
-  - m24–m29;
-  - typecheck and lint results;
-  - the reviewer's verdict and Architecture note;
-  - every shell write;
-  - end `git status`, frozen OK, and the 17 end hashes;
-  - deviations.
+- `npm run typecheck`, `npm run lint`, and a read-only `npx biome check` on the 13 changed or new code/test files.
+- `npx vitest run` on, all green; name the exact list and counts (C runs the same list):
+  - **granted/new:** `strings`, `delete-selection-ui`, `grid-snap-ui`, `tempo-ui`, `metronome-ui`, `navigation-strings-ui`;
+  - **neighbours:** `self-disabling-focus`, `transport`, `edge-navigation`, `loop`, `grid-snap-loop-drop`, `all-lane-clipboard`, `markers-move-ui`, `tempo`, `tempo-window-ui`, `waveform-zoom`, `render-budget`, `status-announcement-ui`, `grid-snap-menu`, `grid-snap-keys`, `floating-video`.
+  If a name does not exist, report it and do not invent one.
+- No full suite and no `npm run verify` (the gate runs them). **code-reviewer required** (15 paths); pass its Architecture note to B.
+- **Report `a-round-135.md`:** start HEAD, frozen OK, 13 start hashes; the pre-edit grep; per-file `diff -u` vs `b-round-134/r135-granted-start/` saved as `a-round-135/granted.diff`; `it` counts before/after per file; m30–m36; typecheck/lint; reviewer verdict and Architecture note; every shell write; end `git status`, frozen OK, 15 end hashes; deviations.
 
 ## 5. C — rows
-Real Playwright Chromium, a fresh context per session, **1440×900 and 1280×720**, `http://127.0.0.1:5173/studio-lab`.
-- **Tools:** reuse `c-round-133/tools/` (status reading, MutationObserver, GEO count, layout compare). For the grid, start from the Playwright regression harness `c-round-122/tools/` (its grid/snap rows: division select, 1/2/3/G keys, lane context menu, BPM field). The round-57…70 tools ran on gstack/Windows; use them only as a behaviour reference.
-  - **Harness change:** select divisions by **option value / id** (`'1'`, `'0.25'`, `'1/4'`, `'1/4T'`), never by the Georgian label text. The labels change this round.
-- **Invalid runs:** ENV-FIRST-LOAD — discard one crashed first load and record it under `invalidRuns`. At most 2 replacement attempts per row, and only for runs that are invalid because of the environment.
-- **Evidence:** a unique file per run. Open every screenshot with Read and describe it.
-- **Reading values:** read the status from the live status region and record every text change with a MutationObserver. Read the select's `title`, `aria-label` and option/optgroup labels, the menu's `aria-label` and item texts, and the Snap button `title`.
+Real Playwright Chromium, a fresh context per session, **1440×900 and 1280×720**, `http://127.0.0.1:5173/studio-lab`. Reuse `c-round-134/tools/` (status reading, MutationObserver, GEO count, layout compare) and `c-round-122/tools/` for transport/zoom/loop steps. **Find controls by `data-testid`, role and position, never by Georgian text** (the labels change). State the Snap state (default **off**) and every precondition in each run record.
+- **Invalid runs:** ENV-FIRST-LOAD — discard one crashed first load and record it under `invalidRuns`. At most 2 replacement attempts per row, only for environment-invalid runs. A unique evidence file per run; open every screenshot with Read and describe it.
 
 | ID | Action | Expected (PASS) |
 |---|---|---|
-| **T134-TARGETED** | A's exact §4 vitest list | All green; the counts equal A's |
-| **SOURCE-SCOPE** | `git status`; `sha256sum -c --quiet b-round-133-r134-tree-sha256.txt` (from `store/`); protected `git diff ee40ad6` | 16 ` M` + 1 `??`; frozen OK; protected files unchanged; no source change during C's phase |
-| **AN-REVIEW** | `diff -u` of each grant vs `b-round-133/r134-granted-start/`; read doc 110 and the doc 109 hunks | **`strings.ts`:** one new object, nothing else, still no import.<br>**`grid.ts` / `grid-divisions.ts`:** only the imports and the string expressions of §2; every condition, list and number unchanged.<br>**`ArrangementGridMenu.tsx`:** only the import and l.6.<br>**`StudioWorkspace.tsx`:** only the import and the five GR17–GR20 lines; the 33 remaining Georgian lines are byte-identical.<br>**Tests:** every hunk is a Georgian → hand-written English literal with the same matcher, the widened pattern, or ST23–ST25; no `it` added or removed outside `strings.test`; no `skip`, `only` or `todo`.<br>**Meaning check:** side by side with the Georgian, no GR row drops or adds a fact (§1.1 list).<br>Every shell write is listed |
-| **GRID-SEC** (both viewports) | Fresh project, no BPM. Read the select options, `aria-label`, `title`. Press 1 until the end, then 2 until the end. Change the division with the select to 0.25 | Options `10 s`, `5 s`, `2 s`, `1 s`, `0.5 s`, `0.25 s`, `0.1 s`; `aria-label` `Grid division`; title `Grid 1 s · 1 — narrower, 2 — wider`. Statuses `Grid: 0.5 s (Snap on)` and so on, then `The grid is already at its narrowest — 0.1 s (1)` and `The grid is already at its widest — 10 s (2)`. **Effect:** the grid step (`data-grid-seconds` or the drawn line spacing) is the same as before for each division |
-| **GRID-MUSICAL** (both) | BPM `120`, Enter. Read the optgroup label and options. Choose `1/4`; press 1 until the end, then 2 until the end. Clear the BPM | Optgroup `Bars · 120 BPM`; options `1 bar`, `1/2` … `1/32`. Status `Grid: 1/4 · 0.5 s at 120 BPM (Snap on)` (or `(Snap off)` if Snap is off), `… narrowest — 1/32 (1)`, `… widest — 1 bar (2)`. After clearing: `Tempo cleared — the bars ruler is hidden. Audio is unchanged. Grid back to seconds: 0.5 s.` (no Georgian; closes GATE132-TEMPO-CLEARED-MIXED). **Effect:** grid tempo is not audio stretch — a clip keeps its start and width through every step |
-| **GRID-TRIPLET** (both) | (a) No BPM, press 3. (b) BPM 90, choose `1 bar`, press 3. (c) BPM 90, a seconds division, press 3. (d) BPM 90, `1/4`, press 3; read the optgroup, title and status; open the lane menu | (a) `Triplets need a tempo — enter a BPM first (3)`. (b) `1 bar has no triplets — choose 1/2 or narrower (3)`. (c) `Triplets work only on the bars grid — choose 1/2 … 1/32 (3)`. (d) Optgroup `Triplets · 90 BPM`; title `Grid 1/4T · 1 — narrower, 2 — wider`; status `Grid: 1/4T · 0.444 s at 90 BPM …`; the menu item reads `Triplets (3)` and is checked. **Effect:** refusals leave the division unchanged; triplet on gives the same 1/4T step as before |
-| **GRID-HIDDEN** (both) | Choose `0.1`. Read the title. If the lines are visible, zoom out until they hide; if they are already hidden (likely at the default zoom), zoom in until they show. Read the title in both states | Hidden: `Grid 0.1 s — lines are hidden at this zoom; Snap still works. Zoom in. · 1 — narrower, 2 — wider`. Visible: `Grid 0.1 s · 1 — narrower, 2 — wider`. **Effect:** the title flips exactly when the drawn lines appear or disappear, as before |
-| **SNAP** (both) | Press G twice; read status and button title each time. With Snap on at `1 s`, drag a clip about 0.4 s and release | Off: status `Snap off — free movement (G)`, title the same. On: status `Snap on — grid 1 s (G)`, title `Snap on — clips land on the grid (G)`. **Effect:** with Snap on, the clip lands on a whole second, as before |
-| **MENU** (both) | Right-click a lane body; read the menu `aria-label` and items; choose `0.5 s` with the keyboard; Escape | Menu `aria-label` `Grid division`; items are the English labels, plus `Snap (G)`; the choice sets 0.5 and the status `Grid: 0.5 s (Snap on)`; focus and close behaviour as before |
-| **GEO-COUNT** (both) | After each row step | Georgian count = 0 in these places: the status region, the select (options, optgroups, `title`, `aria-label`), the grid menu and the Snap button `title`. Outside them, the 33 frozen StudioWorkspace lines, Transport and the rest are expected Georgian and are not counted. Subtract by name, and list: the load-time demo-ready status; the frozen clip move status and the `Undo: კლიპის გადატანა` label written by the SNAP drag (ArrangementClip, V-0.4); the track names; any other item C finds |
-| **LAYOUT** (both) | S0/S1 boxes vs `c-round-125/out/bbox-baseline-*.json`; the grid header (select + Snap + zoom) with no BPM, with BPM 120 and with triplets | Every box outside the status region and the grid select is within 1 px. A width change of the select must come from its option text (the RV-1 V-0 text-width exception). Record the grid header `scrollWidth` vs `clientWidth` in all three states and compare with C-R122-02 (deferred Low). A new overflow caused by the English labels is a Low; a removed one is noted |
-| **REG-133** (1440, short) | Ctrl+G with no track selected | `To group tracks, select them first — Ctrl+click or Shift+click a track name.` |
-| **G134-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav` | The workspace and the demo badge show. The product route shows "Sign in required", no workspace and 0 `audio[src]`. The token API returns **401**. The fake-Bearer 403 check is **BLOCKED (backend unavailable in cloud)** |
-| **PX-NET / REG-HYD** | every session | 0 requests to `/api/studio-token` (outside G134-3), `/api/recording-*`, `/api/download` or the R2 host; 0 `Authorization` headers; 0 hydration errors; 0 `pageerror` (the known cloud cart noise is not reported) |
+| **T135-TARGETED** | A's exact §4 vitest list | All green; counts equal A's |
+| **SOURCE-SCOPE** | `git status`; `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-134-r135-tree-sha256.txt` (from `store/`); protected `git diff 16533c1` | 13 ` M` + 2 `??`; frozen OK; protected unchanged; no source change during C's phase |
+| **AN-REVIEW** | `diff -u` of each grant vs `b-round-134/r135-granted-start/`; read the new test and doc 111 | `strings.ts`: only added keys in the six existing objects, no new object, no import. Components: only the import and the §2 lines; the §1.1 caller shapes; JSX text → `{object.key}` allowed. StudioWorkspace: only the import names and the 10 lines; the other 23 Georgian lines byte-identical to the list file. Tests: Georgian → hand-written English with the same matcher, additive ST map entries, the ST25 list, ST26–ST27, the new file; no `skip`/`only`/`todo`. Meaning check of TR1–NV26 side by side with the Georgian (the §1.1 facts list). Every shell write listed |
+| **TRANSPORT** (both) | Fresh project. Read title/aria-label/text of: back to start, the `/ end` prefix, Split, Delete, Loop, Follow, zoom slider, Zoom to selection, Zoom back, Fit — (a) nothing selected, (b) a clip selected, (c) a one-track time range, (d) an all-tracks range (Ctrl+Shift+L) | Exactly TR1–TR12 and NV1/NV3–NV11 for the state. **Effects as before:** Delete on the clip leaves a gap; Delete on the range leaves a gap on that track (all tracks for (d)); Split on the range splits at both edges; Undo restores each. Back to start puts the playhead at 0 |
+| **FOLLOW** (both) | Fresh project, Follow `on` (default). Play; scroll the lanes horizontally by hand (→ paused); read title + status; then click Follow three times; stop. Pause happens **only during playback** (`pauseFollowForNavigation` checks `isPlaying`); a Fit/Z/X press during playback also pauses, but its own status then replaces NV17 — the MutationObserver must record both | Ordered sequence: paused — title NV2, status NV17 → click 1: on, status NV25, title NV3 → click 2: off, status NV24, title NV1 → click 3: on, status NV26, title NV3 (toggle rule `previous === 'on' ? 'off' : 'on'`). **Effect:** with Follow on the view follows the playhead; off it does not |
+| **ZOOM-FIT** (both) | Z with no range; X with empty history; Fit; make a time range; Z; X; X | NV18; NV19; NV20 with the project extent; NV21 with the range times; NV22 then NV23 (or as the depth gives; the zoom-back title switches NV9 ↔ NV10 when the history empties). **Effects:** Fit shows the whole project; Z fits the range to the viewport; X restores the previous view each step |
+| **RULER-OVERVIEW** (both) | Read the ruler and playhead titles; overview aria-label, title and `aria-valuetext`; scroll and read `aria-valuetext` again; double-click the ruler with no selection | NV12, NV13, NV14, NV15; `aria-valuetext` = `Visible start {start} / {extent}` and its start changes with the scroll; the double-click does Fit as before |
+| **LOOP** (both) | No loop: read the brace hint. Make a range, Ctrl+L; read the brace aria-label, title, edge titles; focus the brace, ArrowRight, Shift+ArrowRight | TR13; then `{span} · ← → nudge · Shift + ← → length`, TR15, `Loop start`, `Loop end`; the Transport Loop title is TR11 with a range, TR12 without. **Effects:** ArrowRight moves the loop by the same step as before (0.1 s with Snap off), Shift+ArrowRight changes its length; the loop status texts are the already-English ones |
+| **TEMPO** (both) | Read the BPM field aria-label/title and the metronome button text with no BPM; enter BPM 120; toggle the metronome | TR18, TR19, `Metronome`; the metronome toggles as before with the English statuses of V-0.2c2. **Grid tempo is not audio stretch:** a clip keeps its start and width after BPM 120 |
+| **GEO-COUNT** (both) | After each row step | Georgian count = 0 in: the transport bar (titles, aria-labels, button texts), the tempo row field and metronome text, the ruler and playhead titles, the overview label/title/valuetext, the loop brace hint/aria-label/title/edges, and the status region for every NV status. Subtract by name and list: the 23 StudioWorkspace lines when shown (e.g. the range readout `… Delete = წაშლა …`, the Envelope toggle, the waveform-zoom label), the load-time demo-ready status, frozen clip/lane statuses (V-0.4), marker texts (V-0.3c), track names, and any other item C finds |
+| **LAYOUT** (both) | S0/S1 boxes vs `c-round-125/out/bbox-baseline-*.json`; transport bar and tempo row `scrollWidth` vs `clientWidth` with no selection and with a range | Every box outside the changed text nodes within 1 px, **except** (RV-1 V-0 text-width exception, stated explicitly): a control whose own text changed may change width, and its right-hand neighbours in the same flex row may shift x by that width delta with unchanged size. A new overflow (`scrollWidth > clientWidth`) or a wrap in the transport bar or tempo row is a **Low**; record both viewports |
+| **REG-134** (1440, short) | G | `Snap on — grid 1 s (G)` |
+| **G135-3** (alone, last) | `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav` | Workspace + demo badge; the product route shows "Sign in required", no workspace, 0 `audio[src]`; the token API **401**; fake-Bearer 403 **BLOCKED (backend unavailable in cloud)** |
+| **PX-NET / REG-HYD** | every session | 0 requests to `/api/studio-token` (outside G135-3), `/api/recording-*`, `/api/download` or the R2 host; 0 `Authorization` headers; 0 hydration errors; 0 `pageerror` (the known cloud cart noise is not reported) |
 
 - **Gate rows (C does not claim them):** full vitest, typecheck, build, Biome, `npm run verify`, `npm run test:e2e:smoke`, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
-- **Severity guide:**
-  - **Medium:**
-    - any behaviour change: a different grid step, snap landing, division order, key result or menu focus/close;
-    - a wrong or fact-dropping message (§1.1 list);
-    - a weakened, removed or skipped test;
-    - a non-string hunk in a granted source file;
-    - any change to the 33 remaining StudioWorkspace lines.
-  - **Low:** wording or style; a new grid-header overflow caused by the English labels.
+- **Severity guide:** **Medium:** any behaviour change (Delete/Split/Loop/Follow/Zoom/Fit/overview/brace effect, keys, focus); a wrong or fact-dropping message (§1.1 facts list); a weakened, removed or skipped test; a non-string hunk beyond the §1.1 caller shapes; any change to the 23 remaining StudioWorkspace lines. **Low:** wording or style; a new overflow or wrap caused by the English text.
 
 ## 6. Ableton source
+Sources (read as data): Live 12 Reference Manual, Arrangement View, `https://www.ableton.com/en/live-manual/12/arrangement-view/`, fetched by B on 2026-10-24 (`b-round-133/live/arrangement-view.html` sha256 `be767e38…`, text `arrangement-view.txt` sha256 `2b9a3007…`); shortcut capture `b-round-71/ableton-shortcuts-20261021.txt` (sha256 `2097004e…`), §42.
+
 | Behaviour | Ableton source | Confirmed there | CZABA decision | C check |
 |---|---|---|---|---|
-| Narrow / widen the grid | Live 12 Reference Manual §6.10 "Using the Editing Grid", `https://www.ableton.com/en/live-manual/12/arrangement-view/`. Fetched by B on 2026-10-24 (curl; saved `b-round-133/live/arrangement-view.html`, sha256 `be767e38f0867736…`, text `arrangement-view.txt`) | "Ctrl 1 … narrows the grid, doubling the density of the grid lines"; "Ctrl 2 … widens the grid, halving the density" | Existing CZABA behaviour on plain 1/2 (D-29z24, SRW-14). Words "narrower / wider" and "narrowest / widest" follow the manual's verbs | GRID-SEC, GRID-MUSICAL |
-| Triplets | Same §6.10: "Ctrl 3 … toggles triplets mode". Shortcut capture `b-round-71/ableton-shortcuts-20261021.txt` (sha256 `2097004e876ee1fd…`) §42.13: "Triplet Grid Ctrl3" | Triplet mode exists and is toggled | "Triplets (3)" and "Triplets · {bpm} BPM". The refusal texts are CZABA's own rules (no source) | GRID-TRIPLET |
-| Snap on/off | §6.10: "Ctrl 4 … turns grid snapping on or off. When the grid is off, the cursor does not snap"; §42.13 "Snap to Grid Ctrl4" | Snapping toggle | CZABA binds G (D-29z24). "Snap on / Snap off" are CZABA labels | SNAP |
-| Lines hidden at a zoom level | Not in §6.10 (Live has zoom-adaptive/fixed grid) | — | CZABA's own rule (SRW-14, round 58); no Ableton claim | GRID-HIDDEN |
-| "1 bar" option label | Not found in the saved captures | — | CZABA label; unconfirmed as a Live menu name | AN-REVIEW |
+| Follow and its pause | Manual §6.2 "Navigation and Zooming" | "turn on the Follow switch … Follow will pause if you make an edit or scroll the view horizontally … or if you click on the beat-time ruler. Follow will start again once you stop or restart playback, or click in the Arrangement or clip scrub area" | Same three states (on / paused / off). CZABA resumes with Follow or Play (subset of Live's ways) — deliberate difference. Live shortcut Ctrl+Shift+F (§42); CZABA has no key for it | FOLLOW |
+| Zoom to selection / back | §6.2: "press Z or use the Zoom to Arrangement Time Selection command … revert to the previous zoom state by pressing the X key … X can be pressed multiple times"; §42 "Zoom to Arrangement Time Selection Z", "Zoom Back … X" | Z and X, repeatable | Same keys; "Zoom to selection" is a shortened Live name | ZOOM-FIT |
+| Ruler/overview drag and double-click | §6.1: "drag left or right to scroll … drag vertically to zoom. Double-clicking in the beat-time ruler zooms in to the current selection. If nothing is selected … zooms out to show the entire Arrangement" | Confirmed | Same gestures. **"Fit" is a CZABA label** (Live names no command "Fit"); unconfirmed as a Live name | RULER-OVERVIEW |
+| Split | §42 "Split Clip at Selection Ctrl E" | Confirmed | Same key; CZABA splits at the playhead without a selection | TRANSPORT |
+| Delete vs Cut Time | §42 "Cut Time Ctrl Shift X", "Delete Time Ctrl Shift Delete"; manual Cut Time text | Live Delete Time closes the gap | **User decision 2026-10-11:** Delete/Backspace always leaves a gap; only Ctrl+Shift+X cuts time — deliberate difference | TRANSPORT |
+| Loop brace arrows | §6.x loop brace: "arrow keys nudge the loop brace … based on the current grid settings" | Grid-based nudge | CZABA nudges by a fixed 0.1 s with Snap off (snap target with Snap on) — deliberate difference; "nudge" wording follows the manual | LOOP |
+| BPM, metronome | — | Not re-checked this round | V-0.2c2 wording reused | TEMPO |
 
-C rates "CZABA requirement met" and "Ableton correspondence" separately. For this round the Ableton correspondence is **not applicable / unconfirmed** apart from the reused verbs and terms above. Only text changes, and no new Live behaviour is claimed.
+C rates "CZABA requirement met" and "Ableton correspondence" separately. Only text changes; no new Live behaviour is claimed.
 
 ## 7. Evidence and reporting
-- C writes `c-round-134.md` and `c-round-134.json` as it goes, with these fields: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` (with the subtracted items), and `notesForB`. Evidence goes under `c-round-134/{tools,out,shots}/`.
-- `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`; gestures that Chromium truly cannot reach go under `inconclusive` with the reason.
-- C makes no `store/` writes.
+- C writes `c-round-135.md` and `c-round-135.json` as it goes: `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `georgianCounts` (with the subtracted items), `invalidRuns`, `notesForB`. Evidence under `c-round-135/{tools,out,shots}/`.
+- `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`; gestures Chromium truly cannot reach go under `inconclusive` with the reason. C makes no `store/` writes.
 
-## 8. Outcome, fixed in advance (B at round 135 planning)
-| Condition | Round 135 |
+## 8. Outcome, fixed in advance (B at round 136 planning)
+| Condition | Round 136 |
 |---|---|
 | B plans on or after **2026-10-27** | The **REGRESSION round** first, then the row below |
-| C FAIL with Critical / High / Medium | A bounded V-0.3a fix-up (at most three related bugs) |
-| C PASS (new Lows → `deferred_low_polish`) | V-0.3a → `c_pass`, then `c_pass_published` after the gate. Round 135 = **V-0.3b** (Transport, TempoRow, Ruler, Overview, LoopBrace, MarkerMenu), re-measured first and split if larger than one round. If root's strings-split checkpoint result exists, B applies it first (an approved split is its own bounded round with behaviour-preserving tests). If it is still absent, V-0.3b proceeds on the same rationale (§0) |
+| C FAIL with Critical / High / Medium | A bounded V-0.3b fix-up (at most three related bugs) |
+| C PASS (new Lows → `deferred_low_polish`) | V-0.3b → `c_pass`, then `c_pass_published` after the gate. Round 136 = **V-0.3c** (MarkerRow + MarkerMenu), re-measured first and split if larger than one round. If root's strings-split checkpoint result exists, B applies it first (an approved split is its own bounded round with behaviour-preserving tests) |
 
-At every planning, B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
+At every planning B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
 
 ## 9. Neighbour risk and root notes
-- **Where it could break:**
-  - **C harnesses and old evidence** that find options or menu items by `'1 წმ'`, `'1 ტაქტი'` or `'ბადის დანაყოფი'` will not match. Use values/ids (§5).
-  - **The grid select width** follows its longest option. `0.25 s` is shorter than `0.25 წმ`, and `1 bar` is shorter than `1 ტაქტი`, so the select may narrow. This is the RV-1 text-width exception. C-R122-02 (deferred Low, grid header overflow with BPM) may change; C records it.
-  - **Menu focus by label:** `grid-snap-menu` finds items by text. A text mismatch would show as a red test, not a silent pass.
-  - **Module load order:** `MUSICAL_GRID_DIVISIONS` and `GRID_TRIPLET_MENU_LABEL` are evaluated at import from `strings.ts`. A cycle would show as `undefined` labels (stop rule).
-  - **StudioWorkspace** is a 2606-line component. Only five literal lines and one import change. The ST25 ratchet and AN-REVIEW protect the other 33 Georgian lines.
-- **Architecture:** addendum (g) to `b-round-130-checkpoint-request.md` re-asks root for the bounded strings-split checkpoint before V-0.3b/c/d. It is non-blocking (§0 rationale).
-- **Commit readiness:** after C PASS, root may publish V-0.3a as an interim unit.
+- **C harnesses** that find transport buttons by `'⌫ წაშლა'`, `'Zoom მონიშნულზე (Z)'`, `'დასაწყისზე დაბრუნება'` or `'მეტრონომი'` (e.g. `c-round-122/tools/`) will not match; use test ids/roles.
+- **Width:** `⌫ Delete` vs `⌫ წაშლა`, `Metronome` vs `მეტრონომი`, `/ end` vs `/ ბოლო` change widths in flex rows (RV-1 exception). The tempo row lives in the fixed-width header (`ARRANGEMENT_HEADER_WIDTH_PX`): watch for overflow at 1280.
+- **Label-in-name (WCAG 2.5.3):** the word `Delete` of the visible text is contained in the Delete button's aria-label in every state (TR6/TR7/TR9). With a range the aria-label has no `⌫` glyph — the same shape as before (pre-existing, not a new finding).
+- **Mixed for one round (accepted):** the Georgian range readout next to the English Delete button (V-0.3d), and MarkerRow/MarkerMenu (V-0.3c).
+- **StudioWorkspace** (2600+ lines): only 10 literal lines and import names change; ST25 and AN-REVIEW protect the other 23.
+- **Architecture:** the strings-split checkpoint (addenda e–g) is still unanswered; it is non-blocking (§0). The gate-134 reviewer suggests running it after V-0.3d.
+- **Commit readiness:** after C PASS, root may publish V-0.3b as an interim unit.

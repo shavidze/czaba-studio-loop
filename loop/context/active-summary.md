@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T10:49:47.318Z)
+# Active loop summary (2026-10-24T11:49:39.072Z)
 
-- backlog.json 1213 KB -> active view 156 KB
-- status: G_ROOT_GATE round 133
-- servers: `{"checkedUtc":"2026-10-24T10:32:31.0632002Z","round":133,"attempt":1,"store":200}`
-- last publication: ee40ad608a7652e23cb5a55ef84bc0f82360c525 (rounds 133-133)
-- last root gate: round 133 published - commit ee40ad608a7652e23cb5a55ef84bc0f82360c525 pushed
+- backlog.json 1224 KB -> active view 160 KB
+- status: G_ROOT_GATE round 134
+- servers: `{"checkedUtc":"2026-10-24T11:30:05.8590652Z","round":134,"attempt":1,"store":200}`
+- last publication: 16533c1667fa3be3e5df916b5eb6ae4ff0e76d4c (rounds 134-134)
+- last root gate: round 134 published - commit 16533c1667fa3be3e5df916b5eb6ae4ff0e76d4c pushed
 
 ## Current items: -
 
@@ -254,7 +254,7 @@
 - C-R125-HARNESS-OVERWRITE / info / applied as a harness rule from round 126: every run writes a uniquely named output (run id or UTC stamp); never reuse a main evidence file name / a d2 redo run overwrote the main evidence file; main groups were re-run (out/d2/d2-1440-main.json)
 - ALTGR-SHORTCUT-GUARD / info / signal (not scheduled; no CZABA contract; C round 126 F-5) / Ctrl-letter shortcuts match event.code and do not exclude altKey, so a Windows AltGr character (Ctrl+Alt) with timeline focus splits (E) or 
 - C-R127-L1 / low / parts a-d closed round 128 (C EX-COPY exact text in the browser, c-round-128.json); parts e-f in deferred_low_polish (C-R127-L1e/L1f) / Export English wording nits: (a) 'in this cycle' (b) 'is created' in loop notes (c) capital 'No' after an em dash (d) lowercase 'range' in t
-- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2a r129, V-0.2b r130, V-0.2c1 r131, V-0.2c2 r132 done; V-0.2c3 r133; then V-0.3..V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions: GATE130-S1 (V-0.4), GATE132-TEMPO-CLEARED-MIXED (V-0.3), GATE133-LANE-HINT-MIXED (V-0.3), GATE133-LANE-RELEASE-MIXED (V-0.4), GATE133-GROUP-PREFIX (V-0.4) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
+- GATE128-S1-MIXED-LANGUAGE / medium (scheduling note, not a defect of round 128) / addressed by schedule: V-0.2a r129 .. V-0.2c3 r133 done (V-0.2 complete); V-0.3a r134; then V-0.3b..d, V-0.4, V-0.5; closes when V-0 completes (RV-4). Tracked temporary exceptions: GATE130-S1 (V-0.4), GATE132-TEMPO-CLEARED-MIXED (closes r134), GATE133-LANE-HINT-MIXED (V-0.3d), GATE133-LANE-RELEASE-MIXED (V-0.4), GATE133-GROUP-PREFIX (V-0.4), GATE133-GROUP-RENAME (V-0.3d) / Studio is mixed-language until V-0 finishes (Export English, the rest Georgian)
 - C-R129-REDO-PASTE-SELECTION / info / observation (pre-existing; product question, not scheduled) / Redo after Paste does not restore the pasted clip selection
 - C-R129-EMPTY-RANGE-UNREACHABLE / info / acknowledged (harness): a drag on empty lane background creates no time selection, so E12/E27/E31 are unit-only / empty-range edit messages not reachable in the browser
 - GATE130-S1-GHOST-STATUS-TWO-LANGUAGES / low / ruled D-29z96: stays V-0.4 (ArrangementLane has 20 Georgian lines; tests pin the ghost; half-migrating the lane needs a second per-file scan); V-0.4 must reuse the status English for ghost/hint texts; tracked under GATE128-S1 / blocked drop shows English status and Georgian lane ghost
@@ -265,14 +265,20 @@
 - GATE131-S3-VI-NOT-LIVE-REGION / info / acknowledged (status-announcement-ui covers the live-region mechanism; C VID-ADD saw the Opening -> added sequence in the browser) / VI1-VI4 read the context status, not the live region announcement order
 - GATE131-S5-RAW-ERROR-TEXT / info / signal (pre-existing; React escapes it; a generic importFailed text could replace raw error.message in a later stage; not scheduled) / importFailed shows raw error.message
 - C-R131-OBS-EXPORT-VIDEO-SOUND-BELOW-FOLD-1280 / info / acknowledged (pre-existing layout; same class as C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / ARCH-R101-MODALBODY-PADDING-SLOT) / at 1280x720 the Export dialog video-sound list needs a scroll
-- GATE132-TEMPO-CLEARED-MIXED / low / ruled D-29z97 R3: temporary tracked exception under GATE128-S1; closes in V-0.3 with grid-divisions.ts + grid.ts formatGridDivision / clearing the BPM on a musical division shows English tempo text + Georgian grid tail in one status
+- GATE132-TEMPO-CLEARED-MIXED / low / scheduled round 134 (V-0.3a, GR9 backToSeconds): closes on C PASS of round 134 / clearing the BPM on a musical division shows English tempo text + Georgian grid tail in one status
 - GATE133-GROUP-PREFIX / low / ruled D-29z98 R1: V-0.4 with the default track names; tracked under GATE128-S1 / default group name 'ჯგუფი N' stays Georgian inside English created/ungrouped statuses
 - GATE133-LANE-RELEASE-MIXED / low / ruled D-29z98 R3: temporary tracked exception under GATE128-S1; closes in V-0.4 with ArrangementClip CLIP_LANE_REFUSAL_KEPT_PLACE / refused lane release shows 'No room here — კლიპი ბოლო თავისუფალ ადგილას დარჩა: …' in one status
-- GATE133-LANE-HINT-MIXED / low / ruled D-29z98 R3: temporary tracked exception under GATE128-S1; closes in V-0.3 with the StudioWorkspace Shift hints / lane-drag hint paragraph shows the English refusal followed by the Georgian Shift hint
+- GATE133-LANE-HINT-MIXED / low / ruled D-29z98 R3: temporary tracked exception under GATE128-S1; closes in V-0.3d with the StudioWorkspace Shift hints (D-29z99 split) / lane-drag hint paragraph shows the English refusal followed by the Georgian Shift hint
 - GATE132-S4-MODULE-AGAINST-MODULE-UNIT-PINS / info / signal: ST18 and the UI literals are the text guards; if ST18 is ever trimmed, put a hand-written literal back into T10/M8 / tempo/metronome/view unit tests compare the formatter with itself
 - GATE132-S5-DOC108-STATUS / low / folded into round 133 (doc 108 l.4) / doc 108 status still says the browser check is pending
 - GATE132-S6-FORMATTER-INPUT-SHAPES / info / answered by D-29z98 R6 (contract clarification in current-task.md 1.2) / set/on take formatted bpm strings while zoomReadout takes a rounded number; 4/4 bottom hard-coded
-- ARCH-R132-STRINGS-SPLIT-BEFORE-V03 / - / signal; addendum (f) of b-round-130-checkpoint-request.md; root asked to run the checkpoint before V-0.3 is dispatched (non-blocking for round 133) / strings.ts edited in rounds 127, 131, 132 (10 objects, 12 after round 133); keep for now; decide the split into lib/arrangement/strings/ (sa
+- ARCH-R132-STRINGS-SPLIT-BEFORE-V03 / - / signal; addenda (f)+(g) of b-round-130-checkpoint-request.md; still no root result at round 134 planning; V-0.3a proceeds on the import-path rationale (D-29z99); re-requested before V-0.3b/c/d (non-blocking) / strings.ts edited in rounds 127, 131, 132 (10 objects, 12 after round 133); keep for now; decide the split into lib/arrangement/strings/ (sa
+- GATE133-GROUP-RENAME / low / tracked under GATE128-S1; V-0.3d (renamed/renameEmpty formatters in studioTrackGroupStrings using quoted()); TODO line added to doc 109 in round 134 / group rename statuses stay Georgian with «…» (StudioWorkspace l.953/963) while create/ungroup are English with “…”
+- GATE133-DOC109-STATUS / low / folded into round 134 (doc 109 l.4 and l.128) / doc 109 status line and testing line still say the browser check is pending
+- GATE133-GEO-RANGE / info / folded into round 134 (strings.test.ts GEORGIAN_CODEPOINT widened + ST25 self-check) / GEORGIAN_CODEPOINT misses Mtavruli U+1C90-1CBF and Nuskhuri U+2D00-2D2F
+- C-R133-HINT-NO-REFUSAL-SPAN-GROUP / info / acknowledged (pre-existing; planClipLaneMove and ghost logic unchanged) / during a refused GROUP lane drag (out-of-range, before-start) the lane hint shows no refusal span; only the status line carries the refusal
+- ARCH-R133-STRINGS-IMPORT-COUPLING / info / acknowledged (gate-133 reviewer verdict keep: one-way dependency into an import-free module); no task / selection.ts and groups.ts now import the strings module
+- INVENTORY-V0-UNASSIGNED / info / corrected (D-29z99): ArrangementGridMenu.tsx -> V-0.3a; panels.ts, clip-gain-multi.ts -> V-0.4 / three Studio files with Georgian UI text were in no V-0 stage area
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
