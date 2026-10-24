@@ -76,3 +76,19 @@
   - (a) split `strings.ts` / `strings.test.ts`, or keep them;
   - (b) the shared Georgian-scan helper;
   - (c) extracting `ArrangementLibraryOption` (gate-146 signal 3).
+
+## Round-147 addendum (B, round 148 planning, 2026-10-24; D-29z113)
+- There is still no root result (eleventh planning without it). It does not block: round 148 (V-0.5c) proceeds.
+- **Round 148 is the last V-0 stage.** It adds the 24th object, `studioVideoDockStrings` (17 plain keys), and ST51, a recursive directory-walk Georgian sweep in `strings.test.ts`. ST51 partly answers question (b): the shared scan helper.
+- **New signals:**
+  - **GATE147-SIGNAL3-TESTS-IMPORT-CONSTANTS** (gate-147 Architecture note): rounds 144–147 each edited 8–9 test files that repeat the same literals.
+  - **A-R147-ARCH-NOTE:** keep `strings.ts` import-free; verdict keep.
+  - **GATE147-S5:** near-identical object names (`studioLibraryStrings` / `studioLibraryPanelStrings`). Round 148 adds `studioVideoDockStrings` next to `studioVideoStrings`.
+- **Request, unchanged in timing:** run the bounded frontend-architect checkpoint when V-0.5c closes (C round 148 PASS + gate 148). That is the V-0 feature boundary, before V-1 colour work. Questions:
+  - (a) split `strings.ts` / `strings.test.ts`, or keep them;
+  - (b) the shared Georgian-scan helper (ST51 now exists);
+  - (c) extract `ArrangementLibraryOption`;
+  - (d) **new:** should the test pins import constants from `strings.ts` while exact-literal tests (ST45/ST49/ST50 style) keep the literals? The cost is that the pins stop catching a wrong English text on their own;
+  - (e) **new:** rename the near-identical objects, or keep them.
+
+  The answer is scheduled as its own behaviour-preserving round with one owner. It does not block V-1 unless root says so.

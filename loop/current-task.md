@@ -1,236 +1,282 @@
-# CURRENT TASK — Round 147: V-0.5b — the library panel and the library preview in English, and the collection status messages (with the "＋ Add" name they mention)
+# CURRENT TASK — Round 148: V-0.5c — the video dock and the Studio Lab page title in English, the final RV-4 sweep, and the RV-1 re-capture (closes V-0)
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 146 = **published**, commit `3328e753db68c2eb84c291e0b711f933e498ced7` on both remotes)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-24 (B planned after gate 147 = **published**, commit `34ce5513e6ff9bb337389333401643c0ef197cc0` on both remotes)
 - **Rules:** `/home/runner/czaba-project/docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
-- **Previous task:** `tasks/round-146.md`, an exact copy of the round-146 `current-task.md` (sha256 `821b6ad4…0fd3`). Rationale: `b-round-146.md`. Decision record: **D-29z112** in `docs/technical/studio-real-workspace/plan.md`.
-- **Baseline = clean HEAD `3328e753db68c2eb84c291e0b711f933e498ced7`.** B checked: `git status --short` is empty, and rounds 145 + 146 are published.
-- **Frozen list:** `tmp/studio-real-loop/b-round-146-r147-tree-sha256.txt`, **950 entries**. That is `git ls-files -co --exclude-standard` (965) minus the 15 grants, hashed at 3328e75. B ran `sha256sum -c --quiet` from `store/`: OK.
-- **Grants:** `b-round-146-r147-grants.txt` (15 existing files) and `b-round-146-r147-new-files.txt` (1 new doc). **Start hashes:** `b-round-146-r147-granted-start-sha256.txt`. **Start copies:** `b-round-146/r147-granted-start/` (paths relative to `store/`). A checks all three first. Any difference → A stops and reports.
+- **Previous task:** `tasks/round-147.md` is an exact copy of the round-147 `current-task.md` (sha256 `840d750d…c658`). Rationale: `b-round-147.md`. Decision record: **D-29z113** in `docs/technical/studio-real-workspace/plan.md`.
+- **Baseline = clean HEAD `34ce5513e6ff9bb337389333401643c0ef197cc0`.** B checked that `git status --short` is empty and that rounds 145–147 are published.
+- **Frozen list:** `tmp/studio-real-loop/b-round-147-r148-tree-sha256.txt`, **957 entries**. That is `git ls-files -co --exclude-standard` (966) minus the 9 grants, hashed at 34ce551. B ran `sha256sum -c --quiet` from `store/`: OK.
+- **Grants:**
+  - `b-round-147-r148-grants.txt`: 9 existing files.
+  - `b-round-147-r148-new-files.txt`: 2 new files.
+  - Start hashes: `b-round-147-r148-granted-start-sha256.txt`.
+  - Start copies: `b-round-147/r148-granted-start/` (paths relative to `store/`).
 
-## 0. Why this round (D-29z112)
-- **Round 146: C PASS**, `browserVerified` = `realVerified` = true, and gate 146 published 145 + 146. V-0.5a → `c_pass`. These close: C-R145-01, ABL-B-1, C-R142-02, LIB-SEARCH-KEYWORDS, GATE144-S1, ARCH-R142, and both A-R145 review Lows. C-R146-01 (Low, pre-existing: a bottom-edge row's `▶ Playing` line can fall below the 1280 list viewport) → `deferred_low_polish`.
+  A checks all three first. Any difference → A stops and reports.
+
+## 0. Why this round (D-29z113)
+- **Round 147: C PASS**, `browserVerified` = `realVerified` = true. Gate 147 published it (34ce551, verify 2501 tests, build OK). V-0.5b → `c_pass`, and GATE146-S1 closes.
 - **Checks at planning:**
   - The regression round is due on or after 2026-10-27. Today is 2026-10-24, so it is not due.
   - `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist.
-  - No Critical, High or Medium finding is open, except Tech Lead manual items.
-- **Next V-0 stage = V-0.5b**, as planned in D-29z110: the rest of `ArrangementLibrary.tsx` (16 Georgian lines), `ArrangementLibraryPreview.tsx` (8) and the `collection.ts` status messages (10). B measured all 34 at 3328e75.
-- **Why one round, not split.** The `ready` status names the preview's `＋ დამატება` button, and `empty`/`failed` name the library. Translating the preview without the statuses, or the reverse, would leave a sentence that names a control in the other language (GATE128-S1). The pin coupling is 68 test lines in 9 test files plus the ST47 ledger. The grant count (15 + 1) is the same size as round 145 (15 + 2).
-- **Folded in (gate 146 suggestion 1, cheap, the round owns doc 119):** doc 119's status line and the round-146 testing line still say C has not run, but C round 146 passed.
-- **Not in this round** (signals or deferred, see `b-round-146.md`): the preview-row height jump (gate-146 #2), `▶` read aloud (gate-146 #3), LRS3 exact className pins (gate-146 #4), `rowError('')` (gate-146 #6), the "library option row layout contract" proposal (gate-146 signal 3, only if V-0.5b breaks the row again), and `ArrangementVideoDock` `პრევიუ` (V-0.5c).
+  - No Critical, High or Medium finding is open. `F1-ABSOLUTE-SNAP` is `accepted` (D-29z14), and the Tech Lead manual items do not block.
+- **V-0.5c is the last V-0 stage** (D-29z110 R1). B measured it at 34ce551 with the same comment-stripping rule as the ST47 tests:
+  - **18 non-comment Georgian lines in `ArrangementVideoDock.tsx`** (17 distinct strings).
+  - **1 line in `routes/studio-lab.tsx`**: the meta title.
+  - **9 lines in `data/studio-lab-demo.ts`**: user content (sound titles). These stay (D-29z92).
+  - The other 65 files under `components/arrangement/**` and `lib/arrangement/**` (non-test), plus `contexts/ArrangementContext.tsx`, have 0.
+  - In the rest of `app/`, the only Georgian is in trailing `//` comments: `components/loading/*Loader.tsx` and `contexts/StudioContext.tsx`. Those files are not Studio-workspace UI, and `StudioContext.tsx` is globally forbidden. **Do not widen to them.**
+- **`lang="en"` is already present** at `app/root.tsx:44`, and `root.tsx` is globally forbidden. There is no code change for it; it becomes a C check.
+- **Folded in, cheap, and owned by this round:**
+  - **GATE147-S1:** doc 120's status still says C has not run.
+  - **GATE147-S4:** `purchased-collection-ui.test.tsx` l.297–298 are Georgian negative assertions that can no longer fail. A, C and the gate all flagged them, and the V-0 closing sweep owns Georgian-negative pins.
+  - **Gate-141 #2:** the SSR test mocks `console.error` but never asserts on it. B probed this at 34ce551 by rendering `/studio-lab` with `renderToString` in node: `console.error` was called **0 times**. Evidence: `b-round-147/probe/ssr-probe.test.tsx`, run from a vitest config under the loop folder, so `store/` was untouched.
+- **Not in this round:**
+  - GATE147-S2: the `All` button's accessible name `All2`.
+  - GATE147-S3: Fold state announced twice.
+  - GATE147-S5: `studioLibraryStrings` and `studioLibraryPanelStrings` are near-identical names.
+
+  All three are Low and go to `deferred_low_polish`. Their code (`ArrangementLibrary.tsx`, `strings.ts` naming) is either not owned by this round, or it is a question for the architecture checkpoint.
 
 ## 1. What changes (user-visible), exact
-### 1.1 New object `studioLibraryPanelStrings` in `app/lib/arrangement/strings.ts` (appended after `studioSourceLoadStrings`; plain strings only, no formatter)
-| key | value (exact) | used at (3328e75 line) |
+### 1.1 New object `studioVideoDockStrings` in `app/lib/arrangement/strings.ts` (appended after `studioLibraryPanelStrings`; plain strings only)
+| key | value (exact) | used at (34ce551 line) |
 |---|---|---|
-| `library` | `Library` | ArrangementLibrary l.416 `aside aria-label`, l.443 `<h2>` |
-| `expand` | `Expand library` | l.432 aria-label, l.433 title |
-| `collapse` | `Collapse library` | l.449 aria-label, l.450 title |
-| `searchPlaceholder` | `Search: name, type, collection…` (U+2026) | l.465 |
-| `searchLabel` | `Search the library` | l.466 |
-| `clearSearch` | `Clear search` | l.475 |
-| `filterPrefix` | `Filter: ` (one trailing space) | l.485: `{studioLibraryPanelStrings.filterPrefix}<span className="text-brand">{activeNodeLabel}</span>` |
-| `sidebarLabel` | `Library sidebar` | l.496 nav aria-label |
-| `all` | `All` | l.514 |
-| `fold` | `Fold` | l.526: `` aria-label={`${entry.label} — ${isExpanded ? studioLibraryPanelStrings.fold : studioLibraryPanelStrings.unfold}`} `` |
-| `unfold` | `Unfold` | l.526 |
-| `listLabel` | `Sounds` | l.577 listbox aria-label |
-| `noResults` | `No sounds found.` | l.39: `const LIBRARY_EMPTY_MESSAGE = studioLibraryPanelStrings.noResults;` (name kept) |
-| `widthLabel` | `Library width` | l.612 separator aria-label |
-| `previewLabel` | `Preview` | ArrangementLibraryPreview l.220 section aria-label |
-| `previewEmpty` | `Select a sound in the list` | l.226 |
-| `previewWaveLabel` | `Preview waveform — click = play from here · ← → 1 s · Home/End · Space = ▶/■` | l.240 |
-| `activeTrack` | `Active track:` | l.271 title `` `${studioLibraryPanelStrings.activeTrack} ${activeLaneName}${activeLaneVideoNote}` ``, l.273 visible text `{studioLibraryPanelStrings.activeTrack}{' '}` |
-| `videoTrackNote` | ` (audio is not added here)` (one leading space) | l.105 |
-| `previewPlay` | `▶ Preview` | l.307 (not previewing) |
-| `previewStop` | `■ Stop` | l.307 (previewing) |
-| `add` | `＋ Add` (U+FF0B, as today) | l.320 |
+| `dockLabel` | `Video` | l.881 `section aria-label` |
+| `overviewNote` | `· Overview` (U+00B7) | l.888: `Arrangement <span className="text-dim">{studioVideoDockStrings.overviewNote}</span>` |
+| `captionFallback` | `Video` | l.203 `{source ? source.name : studioVideoDockStrings.captionFallback}{' '}` |
+| `captionSoundNote` | `· sound from the video track (M/S/Volume)` | l.204 inner span |
+| `gapPrefix` | `No video ·` | l.227: `{studioVideoDockStrings.gapPrefix}{' '}` (the `{' '}` and the time `<span>` stay) |
+| `empty` | `No video added yet` | l.955 |
+| `placeholderExpanded` | `Video expanded` | l.901 |
+| `placeholderReturn` | `Return` | l.909 (visible button text) |
+| `returnLabel` | `Return the video to the compact view` | l.56: `const VIDEO_RETURN_LABEL = studioVideoDockStrings.returnLabel;` (name kept) |
+| `expandLabel` | `Expand video` | l.976 aria-label and l.977 title (both branches keep `VIDEO_RETURN_LABEL`) |
+| `dragLabel` | `Move the video (arrow keys: 16 px)` | l.964 |
+| `dragTitle` | `Move the video` | l.965 |
+| `closeLabel` | `Close the expanded video` | l.989 |
+| `closeTitle` | `Close (Esc)` | l.990 |
+| `previewLabel` | `Video preview` | l.937 (active `<video>`) |
+| `standbyLabel` | `Video preview (standby)` | l.947 (standby `<video>`) |
+| `playFailed` | `Video playback failed — try MP4 (H.264) or WebM.` (U+2014) | l.54: `const VIDEO_PLAY_FAILED_MESSAGE = studioVideoDockStrings.playFailed;` (name kept) |
 
-- The em dash in l.526 and l.240 is U+2014, and `·` is U+00B7, as today.
-- Every other token of the two components stays byte-identical: classes, testids, conditions, handlers, glyphs `▶ ◀ × ▾ ▸`, the `· playhead` text and `'—'` fallbacks. The only other change is one import line per component. Biome may wrap the JSX.
+- Every other token of `ArrangementVideoDock.tsx` stays byte-identical:
+  - classes, testids, data attributes, handlers, conditions;
+  - the glyphs `⤢ ⠿ ✕`;
+  - the literal `Arrangement` word, which is already English.
 
-### 1.2 `app/lib/arrangement/collection.ts` l.16–31 (statuses; `heading` and `fileStem` unchanged)
-| key | demo (exact) | purchased (exact) |
-|---|---|---|
-| `badge` | `Demo collection — no sign-in required` | `Purchased collection` |
-| `loading` | `Loading the demo collection…` | `Loading the purchased collection…` |
-| `ready` | `` `Demo collection ready. Choose a track and add a sound (Enter or ${studioLibraryPanelStrings.add}).` `` | `` `Purchased collection ready. Choose a track and add a sound (Enter or ${studioLibraryPanelStrings.add}).` `` |
-| `empty` | `The demo collection has no sounds — the library is empty.` | `The purchased collection has no sounds — the library is empty.` |
-| `failed(count)` | `count === 1` → `1 sound in the demo collection failed to load — details are in the library.`; otherwise `` `${count} sounds in the demo collection failed to load — details are in the library.` `` | the same with `purchased collection` |
+  The only other change is one import line. Biome may wrap JSX; report any rewrap.
+- **Wording rationale (D-29z113 R3):**
+  - **`Overview`** is Live 12's term for the whole-arrangement strip (§6.1).
+  - **`compact view`** is the existing glossary term (D-29z102 R4). `studioVideoStrings.returnedCompact` already uses it.
+  - **`playFailed`** mirrors `studioVideoStrings.probeFailed` ("— try MP4 (H.264) or WebM.").
+  - **Visible text inside the accessible name (WCAG 2.5.3 label-in-name):** the button's visible text `Return` is the start of its accessible name `Return the video to the compact view`, as the Georgian `დაბრუნება` was before.
+  - **`dockLabel` and `captionFallback`** both read `Video`, but they stay separate keys because they mean different things: the region name and a missing-source fallback.
 
-- `ready` interpolates the button's own constant, so the button and the sentence that names it cannot drift apart. The plural follows the strings.ts l.152–187 precedent.
-- The import from `./strings` gains `studioLibraryPanelStrings`. No other line of `collection.ts` changes: the fetch, the guards and the round-145 `studioSourceLoadStrings` uses stay as they are.
-
-### 1.3 Glossary (Live 12 terms where confirmed; B decisions recorded in D-29z112)
-`ყველა ფაილი` → **All** (Live §4.2 "All label"). Collection arrow → **Fold / Unfold** (Live §4.5 "can be unfolded", §4.4.3 "fold and unfold … by clicking on the arrow"; glossary d29z98). The tree → **Library sidebar** (Live §4 layout "sidebar"). `პრევიუ` → **Preview** (Live §4 "Preview tab", §4.9 "Preview toggle"). The panel collapse uses **Expand / Collapse library**, following glossary d29z102 ("the library collapsed") and d29z107. Live's Show/Hide Browser is not in the capture, so it is unconfirmed. `წყარო` in user-visible statuses → **sound**, the word the panel itself uses ("Sounds", "No sounds found."). `ხაზი` → **track** (glossary).
+### 1.2 `app/routes/studio-lab.tsx` l.8
+`{ title: 'Studio Lab — Demo workspace | CZABA' },` (U+2014). Nothing else in the route changes. The e2e `toHaveTitle(/CZABA/)` specs do not open `/studio-lab`, and they would still match it.
 
 ## 2. A — files you own (everything else is frozen)
 | Path | Allowed change |
 |---|---|
 | `app/lib/arrangement/strings.ts` | §1.1 object only (append) |
-| `app/components/arrangement/ArrangementLibrary.tsx` | the 16 §1.1 uses + import |
-| `app/components/arrangement/ArrangementLibraryPreview.tsx` | the 8 §1.1 uses + import |
-| `app/lib/arrangement/collection.ts` | §1.2 + import |
-| `app/lib/arrangement/__tests__/strings.test.ts` | ST47: `LIBRARY_REMAINING_GEORGIAN_LINES` and `COLLECTION_REMAINING_GEORGIAN_LINES` → `[]` (keep the demo ledger); add `../../../components/arrangement/ArrangementLibraryPreview.tsx` to both ST47 path loops (GUILLEMET and zero-Georgian), and move `ArrangementLibrary.tsx` and `collection.ts` into the zero-Georgian loop. New **ST49** (§3.1). ST47's title may drop "later V-0 stages" wording. Nothing else |
-| `app/lib/arrangement/__tests__/collection.test.ts` | l.375–389: exact English per §1.2 (hand-written), plus `failed(1)` for both origins (§3.2) |
-| `app/lib/arrangement/__tests__/collection-load-status.test.tsx` | l.50–57 constants → English (hand-written) |
-| `app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx` | l.32–39 constants and l.380 → English (hand-written) |
-| `app/lib/arrangement/__tests__/library-preview.test.tsx` | the 11 Georgian expectation lines → English. Track-name fixtures (`მუსიკა`, `ვიდეო`) are data and stay. Nothing else |
-| `app/lib/arrangement/__tests__/held-enter-add.test.tsx` | l.266 title, l.269, l.287: `＋ დამატება` → `＋ Add` |
-| `app/lib/arrangement/__tests__/render-budget.test.tsx` | l.310 `'ხმები'` → `'Sounds'` |
-| `app/lib/arrangement/__tests__/fader-guards.test.tsx` | l.895 → `'Search the library'` |
-| `app/lib/arrangement/__tests__/grid-snap-keys.test.tsx` | l.361 → `'Search the library'` |
-| `app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx` | new `it` **LRS4** and **LRS5** (§3.3). LRS1–LRS3 unchanged |
-| `docs/implementation/2026/quarter-IV/119-studio-v0-library-source-strings.md` | l.4 → `**სტატუსი:** Completed (C round 146 — PASS, browserVerified; gate 146, 3328e75)`. In the l.91 round-146 line, `C round 146 ჯერ არ გაშვებულა` → the real C round-146 result (PASS, `browserVerified`). l.71 `LRS1–LRS2` → `LRS1–LRS2 (round 146: LRS3)`. Nothing else |
-| **new** `docs/implementation/2026/quarter-IV/120-studio-v0-library-panel-strings.md` | V-0.5b implementation doc per `TEMPLATE.md`, in Georgian (`GEORGIAN_DOCS.md`). It includes the §1 per-string map (glossary extension), the "why one round" coupling, the Live sources of §5, and the testing section. Status `In Progress (C round 147 — ჯერ არ გაშვებულა)` |
+| `app/components/arrangement/ArrangementVideoDock.tsx` | the 18 §1.1 uses (l.54, 56, 203, 204, 227, 881, 888, 901, 909, 937, 947, 955, 964, 965, 976, 977, 989, 990) + the import |
+| `app/routes/studio-lab.tsx` | l.8 per §1.2 only |
+| `app/lib/arrangement/__tests__/strings.test.ts` | **ST40**: the Georgian-lines expectation → `[]`, plus `expect(route).toContain("{ title: 'Studio Lab — Demo workspace | CZABA' },")`; the rest of ST40 unchanged. **ST47**: add `../../../components/arrangement/ArrangementVideoDock.tsx`, `../../../routes/studio-lab.tsx` and `./video-dock-strings-ui.test.tsx` to both path loops (GUILLEMET and zero-Georgian), as with `library-row-strings-ui`. New **ST50** and **ST51** (§3.1). Nothing else |
+| `app/lib/arrangement/__tests__/floating-video.test.tsx` | l.136 `EXPAND_LABEL` → `'Expand video'`, l.137 `RETURN_LABEL` → `'Return the video to the compact view'`, l.313 → `toContain('Video expanded')`. The fixtures l.114–115 (`ვიდეო`/`მუსიკა`, track names = data) and l.861–868 (a status fixture = data) stay |
+| `app/lib/arrangement/__tests__/render-budget.test.tsx` | l.370, l.450, l.454: `ვიდეო არ არის ·` → `No video ·` (hand-written). Fixtures l.181–182 stay |
+| `app/lib/arrangement/__tests__/default-track-names-ssr.test.tsx` | `expect(consoleErrorSpy).not.toHaveBeenCalled();` as the last statement of DS1 and DS2. Nothing else (the mock stays) |
+| `app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx` | l.297 → `expect(header).not.toContain('Demo collection');`, l.298 → `expect(header).not.toContain('no sign-in required');`. Nothing else |
+| `docs/implementation/2026/quarter-IV/120-studio-v0-library-panel-strings.md` | l.4 → `**სტატუსი:** Completed (C round 147 — PASS, browserVerified; gate 147, 34ce551)`; in l.98, `C round 147 ჯერ არ გაშვებულა.` → `C round 147: PASS (browserVerified = realVerified = true).` Nothing else |
+| **new** `app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx` | VDS1–VDS3 (§3.2) |
+| **new** `docs/implementation/2026/quarter-IV/121-studio-v0-video-dock-strings.md` | the V-0.5c implementation doc per `TEMPLATE.md`, in Georgian (`GEORGIAN_DOCS.md`). It contains:<ul><li>the §1 string map and glossary;</li><li>the final RV-4 sweep, saying what ST51 covers and what is excluded and why;</li><li>the `lang` finding (already `en` in `root.tsx`);</li><li>the §5 Live sources;</li><li>the testing section.</li></ul>Status `In Progress (C round 148 — ჯერ არ გაშვებულა)` |
 
-- **Protected (never touch):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/components/ui/Modal.tsx`, `app/routes/account.downloads.tsx`, `download-routes.test.ts`, and everything in `backlog.json` `global_forbidden_files`.
-- **Before the first Edit**, read the primitives the hook maps for these files: `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`, `AUDIO_ARCHITECTURE.md` (Studio), `TESTING_QUALITY_GATES.md`, `GEORGIAN_DOCS.md`. Also read `docs/implementation/TEMPLATE.md` (new doc).
-- **Edit rule (C-R120-01):** make lasting edits only through Edit/Write. No shell writes under `store/`. A Biome-forced rewrap is allowed and must be reported. No `--write` and no `check:fix`.
+- **Temporary mutation path (m113 only):** `app/lib/arrangement/zz-rv4-probe.ts` may be created for one run and must then be deleted. It must not exist at the end.
+- **Protected (never touch):**
+  - `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`;
+  - `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`;
+  - `app/components/ui/Modal.tsx`;
+  - `app/routes/account.downloads.tsx`, `download-routes.test.ts`;
+  - `app/root.tsx` and everything else in `backlog.json` `global_forbidden_files`.
+- **Before the first Edit**, read the primitives the hook maps for these files: `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`, `AUDIO_ARCHITECTURE.md` (Studio), `TESTING_QUALITY_GATES.md`, `GEORGIAN_DOCS.md`. Also read `.claude/prompts/new-test.md` (new test file) and `docs/implementation/TEMPLATE.md` (new doc).
+- **Edit rule (C-R120-01):** make lasting edits only through Edit/Write. There are no shell writes under `store/`, except deleting your own m113 probe file. A Biome-forced rewrap is allowed and must be reported. No `--write` and no `check:fix`.
 - **Stop rule:** A stops and reports, without widening scope, if any of these happens:
   - a start check fails;
   - a non-granted test fails;
   - a diff appears outside the grants;
-  - another test or source turns out to depend on one of the 34 Georgian strings (B's grep found none; e2e has none);
+  - another source or test turns out to depend on one of the 17 dock strings or on the route title (B's grep found only the pins listed above; e2e has none);
+  - the SSR spy turns out to be called at A's baseline (B saw 0 calls);
   - a needed change is not in this table.
 
 ## 3. A — tests and mutations (all literals hand-written; no module-against-module pins, GATE132-S4)
-### 3.1 ST49 (`strings.test.ts`)
-Three checks, all with hand-written literals:
-- `Object.keys(studioLibraryPanelStrings).sort()` equals the 22 keys of §1.1, and every value equals its §1.1 literal (a hand-written `Record<string,string>`).
-- No value contains a Georgian codepoint or `«»`.
-- The codepoints are exact: `searchPlaceholder` ends with U+2026, `add` starts with U+FF0B, and `previewWaveLabel` contains U+2014 and U+00B7. Use `String.fromCodePoint` for these, as DL-VAL did.
+### 3.1 `strings.test.ts`
+- **ST50:**
+  - `Object.keys(studioVideoDockStrings).sort()` equals the 17 keys of §1.1.
+  - Every value equals its §1.1 literal (a hand-written `Record<string, string>`).
+  - No value contains a Georgian codepoint or `«»`.
+  - Exact codepoints, built with `String.fromCodePoint`:
+    - `overviewNote` and `captionSoundNote` start with U+00B7;
+    - `playFailed` contains U+2014;
+    - `gapPrefix` ends with U+00B7 and has no trailing space.
+- **ST51 (the final RV-4 sweep):** a recursive directory walk with `readdirSync`/`statSync`. A hand-written list is not allowed, so that a future file is caught automatically.
+  - **Walked:**
+    - `app/components/arrangement/**` (`.ts`/`.tsx`, excluding `__tests__`);
+    - `app/lib/arrangement/**` (`.ts`/`.tsx`, excluding `__tests__`).
+  - **Added by name:** `app/contexts/ArrangementContext.tsx`, `app/routes/studio-lab.tsx`, `app/data/studio-lab-demo.ts`.
+  - **Normalisation:** use the existing `normalisedGeorgianLines` (strip comments, trim, `${` → `{`) for every file. The ledger's template-literal line matches only in that form.
+  - **Assertions:**
+    - the walked set has at least 60 files (B counted 65 at 34ce551), so the test cannot pass vacuously;
+    - for every file, `stripSourceComments` is applied and the Georgian lines are collected. `studio-lab-demo.ts` must equal the existing `DEMO_REMAINING_GEORGIAN_LINES`, and every other file must equal `[]`;
+    - the failure message names the file.
 
-### 3.2 `collection.test.ts`
-The existing copy assertions (l.375–389) become the exact English of §1.2 for both origins, `failed(2)` included. Add `failed(1)` for both origins:
-- demo `1 sound in the demo collection failed to load — details are in the library.`;
-- purchased `1 sound in the purchased collection failed to load — details are in the library.`
+### 3.2 New `video-dock-strings-ui.test.tsx` (StudioWorkspace harness; mirror the `floating-video` / `render-budget` setup, and any fixture stays local to this file)
+- **VDS1 (compact, no video).** Use accessible-name queries wherever a role exists:
+  - `region` `Video`;
+  - the overview label's text is exactly `Arrangement · Overview`;
+  - the caption (`arrangement-video-caption`) text is exactly `Video · sound from the video track (M/S/Volume)`;
+  - the empty text `No video added yet` is visible;
+  - `button` `Expand video` with title `Expand video`;
+  - the two `<video>` elements have aria-labels `Video preview` (active) and `Video preview (standby)`.
+- **VDS2 (expanded).** Click `Expand video`:
+  - the placeholder shows `Video expanded`;
+  - `getAllByRole('button', { name: 'Return the video to the compact view' })` has length 2: the placeholder's button, whose `textContent` is `Return`, and the expand toggle;
+  - the drag handle has aria-label `Move the video (arrow keys: 16 px)` and title `Move the video`;
+  - the close button has aria-label `Close the expanded video` and title `Close (Esc)`.
 
-Assert `ready` against the full hand-written sentence containing `(Enter or ＋ Add).`.
+  Press Escape: the toggle is back to `Expand video`.
+- **VDS3 (play failure).**
+  - **Setup:** a video clip is under the playhead, and `HTMLMediaElement.prototype.play` is stubbed to reject with `new DOMException('blocked', 'NotAllowedError')`. Start playback.
+  - **Expected:** the status text is exactly `Video playback failed — try MP4 (H.264) or WebM.` and the transport is no longer playing.
+  - **If the jsdom harness cannot reach this path** without editing a non-granted file, A writes that down with the reason and omits VDS3. In that case m110 is proved by C's PLAY-FAIL row instead. Do not widen.
 
-### 3.3 `library-row-strings-ui.test.tsx` (3 → 5 or 6 `it`, existing `mountRows`/StudioWorkspace harness; LRS5 may be one `it` with two mounts or two `it`s LRS5a/LRS5b, A says which)
-**LRS4** (panel copy in the DOM). Use accessible-name queries (`getByRole(…, { name })`) wherever a role exists:
-- `complementary` `Library`, and `heading` `Library`;
-- `button` `Collapse library` with title `Collapse library`;
-- `searchbox` `Search the library` with placeholder `Search: name, type, collection…`;
-- `navigation` `Library sidebar`;
-- a button whose text starts with `All` and is followed by the total count;
-- `listbox` `Sounds`;
-- `separator` `Library width`.
-
-Then four interactions:
-- **Fold toggle.** It starts as `button` `<collection label> — Fold` with `aria-expanded="true"`. A click turns it into `<label> — Unfold`, `aria-expanded="false"`, and that collection's folder buttons are gone. A second click restores them.
-- **Search.** Type a non-matching query: `button` `Clear search` appears and the empty output text is `No sounds found.`. Clear search (Escape on the search box) restores the list.
-- **Filter.** Click a collection label: the filter line reads `Filter: <label>`.
-- **Collapse.** Click `Collapse library`: `button` `Expand library` with title `Expand library`. Click it: the panel is back.
-
-**LRS5** (preview and status copy in the DOM, a demo collection with one sound that fails):
-- `region` `Preview`;
-- `slider` named exactly per §1.1;
-- the toggle text `▶ Preview`, then `■ Stop` while previewing, then `▶ Preview` after stop;
-- `button` `＋ Add`;
-- the header badge text `Demo collection — no sign-in required`;
-- the ready/failed status text exactly `1 sound in the demo collection failed to load — details are in the library.`;
-- once with all sounds ready, the status text exactly `Demo collection ready. Choose a track and add a sound (Enter or ＋ Add).`, which **contains the rendered Add button's `textContent`**.
-
-If the harness cannot reach one of these states without a new fixture, A may add a local fixture inside this test file only, and says so.
-
-### 3.4 Mutations (Edit, restore by Edit, verify by sha256)
+### 3.3 Mutations (Edit, then restore by Edit, then verify by sha256)
 | ID | Mutation | Must turn red |
 |---|---|---|
-| m101 | `studioLibraryPanelStrings.all` → `'All files'` | ST49, LRS4 |
-| m102 | l.526 condition swapped (`isExpanded ? unfold : fold`) | LRS4 |
-| m103 | `collection.ts` demo `failed`: the `count === 1` branch removed (always plural) | collection.test `failed(1)`, collection-load-status (`DEMO_ONE_FAILED`), LRS5 |
-| m104 | `collection.ts` demo `ready`: the interpolation replaced by the literal `＋ Insert` | collection.test, collection-load-status, LRS5 |
-| m105 | `ArrangementLibraryPreview.tsx` l.307 branches swapped | library-preview, LRS5 |
-| m106 | `ArrangementLibraryPreview.tsx` l.220 value → the literal `'პრევიუ'` | ST47 (zero-Georgian loop) |
+| m107 | `overviewNote` → `'· Whole project'` | ST50, VDS1 |
+| m108 | l.976/977: both branches of the ternary swapped | floating-video, VDS1/VDS2 |
+| m109 | l.227: `{studioVideoDockStrings.gapPrefix}` → the literal `ვიდეო არ არის ·` | ST47 (zero-Georgian loop), ST51, render-budget |
+| m110 | `VIDEO_PLAY_FAILED_MESSAGE = studioVideoDockStrings.empty` | VDS3 (or "not reachable in jsdom; C PLAY-FAIL", see §3.2) |
+| m111 | studio-lab.tsx l.8 → the original Georgian title | ST40, ST51 |
+| m112 | `console.error('m112');` as the first statement in `StudioLabRoute`'s body | DS1, DS2 |
+| m113 | create `app/lib/arrangement/zz-rv4-probe.ts` = `export const zzRv4Probe = 'ქ';`, run, delete | ST51 only (proves the walk) |
 
-After each restore, the edited file's sha256 equals the post-edit hash, and `sha256sum -c b-round-146-r147-tree-sha256.txt --quiet` is OK.
+After each restore:
+- the edited file's sha256 equals the post-edit hash;
+- `sha256sum -c b-round-147-r148-tree-sha256.txt --quiet` is OK;
+- after m113, `git status --short` shows no `zz-rv4-probe.ts`.
 
-### 3.5 Commands (speed rules)
+### 3.4 Commands (speed rules)
 - **Start:**
-  - frozen list (950) OK;
-  - the 15 start hashes and copies OK;
-  - HEAD = 3328e75;
+  - frozen list (957) OK;
+  - the 9 start hashes and copies OK;
+  - HEAD = 34ce551;
   - `git status --short` empty;
-  - the new doc path does not exist.
-- `npm run typecheck` and `npm run lint` exit 0. Read-only `npx biome check` on the 14 changed code/test files gives 0 diagnostics.
-- Run `npx vitest run` on these 17 files (B checked that all of them exist):
-  - the 10 changed test files: strings, collection, collection-load-status, purchased-collection-ui, library-preview, held-enter-add, render-budget, fader-guards, grid-snap-keys, library-row-strings-ui;
-  - 7 unchanged neighbours: `app/lib/arrangement/__tests__/{library,failed-source-refusal,status-announcement-ui,default-track-names-ssr,library-focus-handoff,library-video-return-focus}` and `app/data/__tests__/studio-lab-demo.test.ts`.
+  - the 2 new paths and `zz-rv4-probe.ts` do not exist.
 
-  Save `a-round-147/vitest.json`.
-- Report per-file runtime `it` counts against 3328e75. Only these may change: strings (48 → 49), library-row-strings-ui (3 → 5 or 6, see §3.3), and collection only if A adds the `failed(1)` checks as new `it`s (say which).
-- The **code-reviewer** is required (3+ changed files). Pass its Architecture note to B verbatim.
+  Run the SSR test once at baseline and record the spy's call count. B saw 0. If it is non-zero, stop.
+- `npm run typecheck` and `npm run lint` exit 0. Read-only `npx biome check` on the 9 changed or new code/test files gives 0 diagnostics.
+- `npx vitest run` on these 13 files (B checked that they all exist):
+  - **6 changed or new test files:** strings, floating-video, render-budget, default-track-names-ssr, purchased-collection-ui, video-dock-strings-ui;
+  - **7 unchanged neighbours:** `app/lib/arrangement/__tests__/{video-fades-ui,video-import-status-ui,library-video-return-focus,ssr-layout-effect,workspace-strings-ui,video-sync}` and `app/data/__tests__/studio-lab-demo.test.ts`.
+
+  Save the result as `a-round-148/vitest.json`, and save a baseline run at 34ce551 first (`vitest-baseline.json`).
+- Report the per-file runtime `it` counts against 34ce551. Only these may change:
+  - strings +2 (ST50, ST51);
+  - video-dock-strings-ui new (2 or 3);
+  - no other file gains or loses an `it`.
+- The **code-reviewer** is required (3+ files). Pass its Architecture note to B verbatim.
 - **End:**
   - frozen list OK;
-  - `git status --short` = the ` M` grants that changed, plus `?? docs/…/120-…md`, nothing else;
-  - `git diff 3328e75 -- <protected>` empty;
-  - `a-round-147/end-sha256.txt` for the 16 paths;
-  - `a-round-147/diff-vs-start.patch` against the start copies.
-  - A non-comment Georgian grep of the 3 source files returns 0 lines.
-- **Not run:** the full suite, `npm run verify`, build and e2e (these are gate rows). No commit, stash, checkout or install.
-- Write `a-round-147.md` as you go.
+  - `git status --short` = the ` M` grants that changed, plus the 2 `??` new files, and nothing else;
+  - `git diff 34ce551 -- <protected>` empty;
+  - `a-round-148/end-sha256.txt` for the 11 paths;
+  - `a-round-148/diff-vs-start.patch` against the start copies (new files from /dev/null);
+  - the non-comment Georgian grep of `ArrangementVideoDock.tsx` and `studio-lab.tsx` gives 0 lines.
+- **Not run:** the full suite, `npm run verify`, build and e2e. These are gate rows. No commit, stash, checkout or install.
+- Write `a-round-148.md` as you go.
 
 ## 4. C — rows (real Playwright Chromium on `http://127.0.0.1:5173/studio-lab`, fresh context per session, Snap state recorded at start; both viewports 1440×900 and 1280×720)
 **Harness:**
-- Reuse `tmp/studio-real-loop/b-round-146/tools/{lib.cjs,libbase147.cjs}`. Their selectors are testid/role only, and they wait for either `იტვირთება…` or `Loading…`. Write every output new under `c-round-147/`.
-- The **baseline** is `b-round-146/out/libbase147-{1440,1280}.json`. B captured it at 3328e75 before A ran. Its states are `ready`, `selected`, `previewing`, `emptySearch` (query `zzqx`), `filtered` (first collection label), `collapsed` and `error` (abort `**/middle-east.mp3`). Screenshots: `b-round-146/shots/`.
-- Older C tools search for the Georgian `მოუსმინე` / `[aria-label="პრევიუ"]`. Use `[data-testid=arrangement-library-preview-toggle]` / `[data-testid=arrangement-library-preview]` instead.
+- Reuse `tmp/studio-real-loop/b-round-147/tools/{lib.cjs,dockbase148.cjs}`. Its selectors are testid/structure only, and it waits for either `იტვირთება…` or `Loading…`.
+- Run `node dockbase148.cjs <W> dockpost148` (copied into `c-round-148/tools/`) for the post-change capture.
+- The video fixture is `tmp/studio-real-loop/media/beeps-6s-h264-aac.mp4`, loaded via `lib.cjs loadVideo`.
+- **Baseline:** `b-round-147/out/dockbase148-{1440,1280}.json`. B captured it at 34ce551 before A ran.
+  - States: `empty`, `video` (playhead 1 s), `gap` (8 s), `expanded`, `returned`.
+  - Rest-of-workspace boxes are in `rest.{empty,video,expanded}`, and the library and dock are excluded from them.
+  - Screenshots: `b-round-147/shots/`.
+- All outputs go under `c-round-148/`.
 
 | Row | Start state → action → expected |
 |---|---|
-| T147-TARGETED | A's vitest list; counts equal A's |
-| SOURCE-SCOPE | frozen 950 OK at start and end; only granted paths differ from `b-round-146/r147-granted-start/`; end hashes = `a-round-147/end-sha256.txt`; `git status --short` = A's end set; protected diff vs 3328e75 empty; 0 non-comment Georgian lines in the 3 sources; no source change during C's phase |
-| AN-REVIEW | §1.1/§1.2 exact, including the codepoints; ready interpolates the constant; no other token changed in the two components (diff vs start copies); ST49, LRS4, LRS5 and the pins assert what §3 says with hand-written literals; doc 119 has only the §2 edits; doc 120 is Georgian, follows TEMPLATE and is consistent with the evidence |
-| COPY-LIB | From `ready`, by accessible name (`getByRole`): `complementary` `Library`, `heading` `Library`, the collapse button (aria + title), `searchbox` `Search the library` + placeholder, `navigation` `Library sidebar`, the `All` button with count `9`, each collection arrow `<label> — Fold` (`aria-expanded=true`), `listbox` `Sounds`, `separator` `Library width`. Then:<br>(a) Click the first arrow: its name is `… — Unfold`, `aria-expanded=false`, and its folders are hidden. Click again: restored.<br>(b) Type `zzqx`: `Clear search` appears, `No sounds found.` is visible, and the preview title reads `Select a sound in the list`. Press Escape in the search box: the query is cleared and the list returns (Live §4.2). Type again, then click `Clear search`: same result.<br>(c) Click a collection label: `Filter: <label>`.<br>(d) Collapse: `Expand library` (aria + title) on the rail. Expand: the panel is back with the same width.<br>(e) Neighbour: focus the separator, press ArrowRight, and check that `aria-valuenow` grows by 16 |
-| COPY-PREVIEW | (a) `region` `Preview`. The slider name is exactly the §1.1 text. The lane line reads `Active track: Music · playhead 00:00.000`, and its title is `Active track: Music`.<br>(b) Make the video track active: the line shows `(audio is not added here)` and `＋ Add` is disabled.<br>(c) From an audio track, select Soft impact and press `▶ Preview`. Real playback: the waveform `aria-valuenow` advances within 1.5 s and `createBufferSource` count goes up by ≥ 1. The toggle reads `■ Stop` and the row shows `▶ Playing`. Press the toggle: it reads `▶ Preview` and the marker is gone.<br>(d) Click `＋ Add`: one clip of that sound appears on the active track. The status matches `“Soft impact” added to the … track at …`. Ctrl/Cmd+Z removes it.<br>(e) Neighbour: one Enter keypress on the focused `＋ Add` adds exactly one clip |
-| COPY-STATUS | (a) Fresh context: the header badge reads `Demo collection — no sign-in required`. While the media load, the status reads `Loading the demo collection…`. To observe this, delay one media route by about 1.5 s with `page.route`; record if it is still too fast. Then the status reads exactly `Demo collection ready. Choose a track and add a sound (Enter or ＋ Add).`, which contains the Add button's visible text.<br>(b) Abort `**/middle-east.mp3`: `1 sound in the demo collection failed to load — details are in the library.`<br>(c) Abort two media URLs (C picks the second from the network log and names it): `2 sounds in the demo collection failed to load — details are in the library.` |
-| NO-GEORGIAN | In `ready`, `previewing`, `emptySearch`, `filtered`, `collapsed` and `error`, collect the text, aria-label, title and placeholder of every node in the library subtree, plus the header badge and the status text. Count Georgian codepoints. Allowed: only the user-content sound titles and collection labels of the `studio-lab-demo.ts` ledger (`ღამის პულსი`, `საჯარო preview`, `სრული მიქსი`, `პულსი/ბასი/პადი/მელოდია`). List anything else as a finding. The video dock is outside this scope (V-0.5c) |
-| LAYOUT-LIB | Compare each state with the same state in libbase147, per viewport.<br>**RV-1 V-0 exception, written before C runs (D-29z112 R5):**<br>• A node whose own copy changed may change its own `w`, and its `glyph` extent may change. These nodes are `lib-h2`, `tree-all-label`, `arrangement-library-filter` glyph, `arrangement-library-empty`, `preview-title` (emptySearch), `preview-lane` glyph, `preview-toggle`/`preview-add` glyph, `header-badge` and `status` glyph.<br>• Fixed boxes keep their box within ≤ 1 px: `preview-lane` (`h-8`), `preview-toggle`/`preview-add` (`flex-1`), `arrangement-library-empty` box, `tree-all` button, `status` box and `filter` box.<br>• In the header right group, `ArrangementMaster` may shift x by the badge's `w` delta (flex sibling).<br>• Everything else ≤ 1 px, including every option, the tree columns, the list, the preview section and the library root.<br>• Line counts: every changed node keeps 1 line, except `preview-lane`, which may be 1–2 inside its fixed box.<br>• `scrollWidth == clientWidth` for the list, the tree and every option in all states. The filter line keeps its existing `truncate`.<br>Report every > 1 px delta with its cause. An unexplained delta = FAIL. A predicted line-count difference with no overflow, clipping or overlap = inconclusive for B, not FAIL |
-| LAYOUT-REST | Outside the library column and the header right group: nodes with d ≤ 1 px vs libbase147 `ready` (the transport, timeline, lanes and footer box) |
-| PURCHASED-STATUS | BLOCKED (backend unavailable in cloud). Unit and jsdom evidence only (purchased-collection-ui, collection-load-status, collection.test) |
-| G147-3 (alone, last) | `/studio-lab` shows the workspace and the English demo badge in a fresh anonymous context. `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`. `GET /api/studio-token?…` → 401. The fake-Bearer 403 is BLOCKED (backend unavailable in cloud) |
+| T148-TARGETED | A's vitest list; counts equal A's |
+| SOURCE-SCOPE | <ul><li>frozen 957 OK at start and end;</li><li>only granted paths differ from `b-round-147/r148-granted-start/`;</li><li>end hashes = `a-round-148/end-sha256.txt`;</li><li>`git status --short` = A's end set, and `zz-rv4-probe.ts` is absent;</li><li>protected diff vs 34ce551 empty;</li><li>0 non-comment Georgian lines in the 2 sources;</li><li>no source change during C's phase.</li></ul> |
+| AN-REVIEW | <ul><li>§1.1/§1.2 exact, including the codepoints;</li><li>no other token changed in the dock (diff vs start copies);</li><li>ST40/ST47/ST50/ST51, VDS1–3, DS1/DS2 and the pins assert what §3 says, with hand-written literals;</li><li>ST51 is a real directory walk with the ≥ 60 guard;</li><li>doc 120 has only the §2 edits;</li><li>doc 121 is in Georgian, follows TEMPLATE and is consistent with the evidence.</li></ul> |
+| COPY-DOCK | Both viewports.<br>(a) **Fresh page:**<ul><li>`region` `Video`;</li><li>the overview label reads `Arrangement · Overview`;</li><li>the caption reads `Video · sound from the video track (M/S/Volume)`;</li><li>the empty text `No video added yet` is visible;</li><li>`Expand video` (aria + title);</li><li>the video aria-labels are `Video preview` / `Video preview (standby)`.</li></ul>(b) Import the video and seek to 1 s: the caption reads `beeps-6s-h264-aac.mp4 · sound from the video track (M/S/Volume)`.<br>(c) Seek to 8 s: the gap text is exactly `No video · 00:08.000`. Then `addAt` Soft impact on Music at 10 s, which extends the project end past 8 s, because play past the project end is refused with `playPastEnd`. Seek to 8 s again and press play for about 1 s: the time inside the gap text advances in real time, so the position writer is unchanged. Stop, then Ctrl/Cmd+Z the added clip.<br>(d) Seek to 1 s, then `Expand video`: `data-video-floating=true`.<ul><li>The placeholder reads `Video expanded`. Its button's visible text is `Return`, and its accessible name is `Return the video to the compact view`. The toggle has the same name.</li><li>Drag handle: `Move the video (arrow keys: 16 px)` / title `Move the video`. One ArrowRight on the focused handle moves the box +16 px in x.</li><li>Close: `Close the expanded video` / title `Close (Esc)`.</li></ul>Then return the video three ways, one after another: Escape, the placeholder `Return` button, and ✕. Each time the box goes back to compact, and the status reads `The video went back to the compact view.` (or the library variant), as before |
+| PLAY-FAIL | **Real behaviour.**<br>**Setup:** a fresh context, with `addInitScript` making `HTMLMediaElement.prototype.play` reject with `new DOMException('blocked','NotAllowedError')` for elements with `data-testid=arrangement-video` (the original for others). Import the video and seek to 0.<br>**Action:** press play.<br>**Expected:**<ul><li>the status is exactly `Video playback failed — try MP4 (H.264) or WebM.`;</li><li>the transport stops: the playhead `aria-valuenow` no longer advances across two samples 500 ms apart.</li></ul>Record the time to the status |
+| VIDEO-SYNC (neighbour) | No override. With the video imported, play from 0 for 3 s.<ul><li>The active `<video>` `currentTime` advances.</li><li>Take ≥ 3 samples of `|video.currentTime − playhead|`; each must be ≤ 0.12 s (`VIDEO_STALL_DRIFT_SECONDS` in `video-sync.ts`; record the raw samples).</li><li>`createBufferSource` count ≥ 1 (the video track's sound plays).</li></ul>Stop. This is unchanged behaviour. A sample above 0.12 s is reported as `inconclusive`, with the samples, and becomes a B signal. It is not a FAIL of this copy-only diff, unless AN-REVIEW finds a non-copy change in the dock |
+| TITLE-LANG | <ul><li>`document.title` is exactly `Studio Lab — Demo workspace | CZABA`;</li><li>the SSR HTML from `curl http://127.0.0.1:5173/studio-lab` has the same `<title>`;</li><li>`document.documentElement.lang === 'en'`.</li></ul> |
+| NO-GEORGIAN (final RV-4, browser) | Scan the **whole page**: every node in `document.body` (skip `<script>`/`<style>`; this includes the Store header/footer, toasts and dialogs) plus `document.title`. The page has no `<main>`. B's pre-scan at 34ce551 (`b-round-147/out/bodyscan-34ce551-1440.json`, tool `b-round-147/tools/bodyscan.cjs`, `ready` only) found only ledger content and the dock strings in these states: `ready`, `video`, `gap`, `expanded`, `error` (abort `**/middle-east.mp3`), library `previewing`, and the **Export dialog open**. Collect text, aria-label, title, placeholder and aria-valuetext, and count Georgian codepoints.<br>**Allowed:** only the `studio-lab-demo.ts` ledger user content (`ღამის პულსი`, `საჯარო preview`, `სრული მიქსი`, `პულსი/ბასი/პადი/მელოდია`), which also appears inside statuses and clip titles that quote a sound name.<br>**Anything else is a finding.** Name the element and the state |
+| LAYOUT-DOCK | Compare each state with the same state in `dockbase148`, per viewport. **RV-1 V-0 exception, written before C runs (D-29z113 R5):**<ul><li>**Text nodes may change their own `w` and `glyph`:** `dock-overview-label`, `dock-overview-note`, `dock-caption-note`, `dock-placeholder-text` and `dock-placeholder-return`. The return button is a centred inline button in the fixed placeholder, so its x may shift by half its `w` delta.</li><li>**Flex sibling:** `dock-caption` may change x and w by exactly the overview label's `w` delta (it is `flex-1`), and its right edge stays fixed.</li><li>**Inside the fixed `w-40 aspect-video` video box:** `video-empty` and `video-gap` (`absolute inset-0`) keep their box ≤ 1 px. Only their glyph and line count may change (Georgian: 2 and 3 lines; English: expected 1–2).</li><li>**Everything else ≤ 1 px:** `dock`, `dock-row`, `video-box` (compact and floating), `dock-placeholder`, `video-expand`/`drag`/`close` (icon-only, so text is unchanged), and the `<video>` boxes.</li><li>`docW` has no horizontal overflow.</li></ul>Report every > 1 px delta with its cause. An unexplained delta = FAIL |
+| LAYOUT-REST | `rest.{empty,video,expanded}` vs `dockbase148`: every node ≤ 1 px. The library and the dock are excluded, and this round changes no copy outside them |
+| RV1-RECAPTURE (after every row above, before G148-3) | **Valid only if every other row PASSES and no source changed during C's phase.**<br>**Tool:** copy the C round-125 RV-1 tool chain into `c-round-148/tools/`: `c-round-125/tools/{d6.cjs,d6build.py,lib122.cjs,h3.cjs,lib.cjs}`.<br>**Before running**, grep the chain for Georgian or English text selectors and waits; known so far: `lib.cjs` l.139 `იტვირთება…`, l.152 `აქტიური ხაზის არჩევა`. Replace only those with testid/role or the current English, and list each change. Keep `KEYRULE`, the S0/S1/S2 states and the S1 setup steps unchanged.<br>**Runs:** run 1 and run 2 per viewport. Determinism must be max 0 px between the runs in all 6 states.<br>**Output:** `c-round-148/out/bbox-post-v0-{1280,1440}.json`, labelled `post-V-0 RV-1 reference (round-148 tree)`, with `S1setupObserved`. In C's copy of `d6.cjs`/`d6build.py`, change only the output directory, the filename and the `label`.<ul><li>Nothing is written under `c-round-125/`.</li><li>`c-round-125/out/contrast-baseline.json` and `under24px.json` stay frozen too.</li><li>Run 1's contrast and pixel outputs land in `c-round-148/out/d6/`. They are not deliverables of this row.</li></ul><br>**This is a capture + determinism row, not a classification of every V-0 delta vs the pre-V-0 baseline.** PASS = both viewports captured, all states present, determinism 0 px, and every S1 setup step succeeded. **Do not overwrite** `c-round-125/out/bbox-baseline-*` (frozen input). The capture becomes the RV-1 reference for V-1…V-3 only if gate 148 publishes this exact tree |
+| G148-3 (alone, last) | <ul><li>`/studio-lab` shows the workspace and the English demo badge in a fresh anonymous context;</li><li>`/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`;</li><li>`GET /api/studio-token?…` → 401;</li><li>the fake-Bearer 403 is BLOCKED (backend unavailable in cloud).</li></ul> |
 | PX-NET / REG-HYD | 0 forbidden requests, 0 Authorization headers, 0 hydration errors and 0 pageerror. The known cart noise is expected |
 
 - **Gate rows (not claimed by C):** full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
 - **Neighbour risk:** none of these may change:
-  - library keyboard navigation (ArrowDown from search into the list, Enter add);
-  - option click/double-click/drag;
-  - library collapse focus hand-off (the expand button gets focus after collapse and the collapse button after expand);
-  - preview start/stop;
-  - the render budget.
+  - the floating video drag/keyboard move and its clamp to the viewport;
+  - focus return after Escape/✕/Return (`floating-video`, `library-video-return-focus`);
+  - the expanded-video status messages (`studioVideoStrings`, unchanged);
+  - video fades (`video-fades-ui`);
+  - the import statuses (`video-import-status-ui`);
+  - the gap caption's position writer (render budget).
 
   Accessible-name changes affect only tests that query by name, and those are the granted ones.
 
 ## 5. Ableton source
-Source: Live 12 Reference Manual, chapter 4 "Working with the Browser", https://www.ableton.com/en/live-manual/12/working-with-the-browser/. B's capture is `b-round-144/live/working-with-the-browser.{html,txt}`, fetched 2026-10-24 and re-read by B at this planning. Text offsets in the `.txt` are given in brackets.
+B's captures were fetched 2026-10-24 with curl. The text extracts are in `b-round-147/live/*.txt`. Live 12 Reference Manual:
+- ch. 6 "Arrangement View": https://www.ableton.com/en/live-manual/12/arrangement-view/, saved as `b-round-147/live/arrangement-view.{html,txt}`;
+- ch. 28 "Working with Video": https://www.ableton.com/en/live-manual/12/working-with-video/, saved as `b-round-147/live/working-with-video.{html,txt}`.
 
 | Behaviour | Section | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| An "All" entry that shows every item | §4.2 Search Bar [4568–6056] | "select the All label … Esc to clear the search field and show all items in the All label again" | `All` replaces `ყველა ფაილი`; Esc in the search box clears the query (already the behaviour) | COPY-LIB (b) |
-| Fold/unfold of a group with its arrow | §4.5 Collections, §4.4.3 Tag Editor | "Folders … can be unfolded"; "fold and unfold the groups by clicking on the arrow next to a group's name" | arrow name `<label> — Fold/Unfold`; the behaviour is unchanged | COPY-LIB (a) |
-| Sidebar / content pane | §4 intro, §4.1 | "The browser's sidebar contains the Collections, Library, and Places sections"; "The content pane displays the items" | nav = `Library sidebar`; the listbox stays `Sounds` (CZABA term; Live's "content pane" is not a user label) | COPY-LIB |
-| Preview area and toggle | §4 intro, §4.9 Previewing Files | "The Preview tab displays a waveform … and plays back the sound when the Preview toggle is activated" | `region` `Preview`, button `▶ Preview` / `■ Stop`. Live's toggle is an on/off icon, while CZABA's is a labelled button: a deliberate difference | COPY-PREVIEW (c) |
-| Showing/hiding the browser | not in this capture | unconfirmed | `Expand / Collapse library` (CZABA glossary d29z102/d29z107); no Live parity claim | COPY-LIB (d) |
-| Collection load statuses, badge | none (CZABA-only) | not applicable | CZABA copy | COPY-STATUS |
+| Whole-arrangement strip | §6.1 Layout | "The Overview displays the Arrangement's entire layout of clips from start to end and can be used for zooming and navigation" | label `Arrangement · Overview` (term confirmed) | COPY-DOCK (a) |
+| Video display window | §28.2.2 The Video Window | "a separate, floating window that always remains above Live's main window. It can be dragged to any location … toggle its visibility with a command in the View menu … full screen … by double-clicking" | **Deliberate difference.** CZABA has a compact in-page dock plus an expand-to-float panel inside the page (`Expand video` / `Return` / ✕ / Esc). There is no separate OS window, no View-menu toggle and no full screen. Only the copy changes here | COPY-DOCK (d) |
+| Gaps in video | §28.2.2.1 Movies with Partial Tracks | "During gaps in video, Live's Video Window will display a black screen" | **Deliberate difference.** CZABA shows `No video · <time>` on the dark box, which is more informative. Behaviour is unchanged | COPY-DOCK (c) |
+| Video sound | §28.1, §28.2.1 | Video clips "are treated just like audio clips" | The caption note `sound from the video track (M/S/Volume)` explains that the sound is mixed on the video track: consistent | COPY-DOCK (a) |
+| Playback failure message, empty dock text, page title | none | not applicable | CZABA-only copy | PLAY-FAIL, COPY-DOCK, TITLE-LANG |
 
-C rates "CZABA requirement met" and "Ableton correspondence" separately. The statuses are: confirmed for rows 1–2, deliberate difference for row 4, unconfirmed for row 5, and not applicable for row 6.
+C rates "CZABA requirement met" and "Ableton correspondence" separately:
+- **confirmed:** row 1 (the term) and row 4;
+- **deliberate difference:** rows 2–3;
+- **not applicable:** row 5.
 
 ## 6. Evidence and reporting
-- C writes `c-round-147.md` and `c-round-147.json` as it goes. The JSON has `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `measurements` (accessible names, statuses, LAYOUT-LIB deltas with causes, Georgian counts), `invalidRuns` and `notesForB`. Evidence goes under `c-round-147/{tools,out,shots}/`. No writes under `store/`.
+- C writes `c-round-148.md` and `c-round-148.json` as it goes.
+- The JSON has `taskStatus`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `browserVerified`, `realVerified`, `envStatus`, `measurements`, `invalidRuns` and `notesForB`. `measurements` holds:
+  - accessible names, statuses and the play-fail timing;
+  - VIDEO-SYNC samples;
+  - LAYOUT-DOCK deltas with causes;
+  - Georgian counts per state;
+  - RV-1 determinism.
+- Evidence goes under `c-round-148/{tools,out,shots}/`. No writes under `store/`.
 - `browserVerified` is false only if a browser row that **can** run here was not run. Backend-only rows go under `blocked`.
 
-## 7. Outcome, fixed in advance (B at round 148 planning)
-| Condition | Round 148 |
+## 7. Outcome, fixed in advance (B at round 149 planning)
+| Condition | Round 149 |
 |---|---|
 | B plans on or after **2026-10-27** | the **REGRESSION round** first, then the row below |
 | C FAIL with Critical / High / Medium | a bounded fix-up (≤ 3 related bugs) |
 | C FAIL only on a Low this round caused | a bounded fix-up, same owner |
-| C FAIL only on a literal criterion with no app defect, or LAYOUT-LIB inconclusive only | B rules in writing; the next round is a re-check only, or V-0.5c carries the ruling |
-| C PASS (new unrelated Lows → `deferred_low_polish`) | root publishes round 147. V-0.5b → `c_pass`. GATE146-S1 closes. Round 148 = **V-0.5c**: `ArrangementVideoDock.tsx` (17 lines), `routes/studio-lab.tsx` meta title + ST40, the default-track-names-ssr `console.error` assertion, `lang="en"` on the Studio root, the final RV-4 grep and the RV-1 baseline re-capture. When V-0.5 closes, B sends root the bounded frontend-architect checkpoint request (strings split, V-0 boundary) |
+| C FAIL only on a literal criterion with no app defect, or RV1-RECAPTURE invalid only because of the tool | B rules in writing; the next round is a re-check / re-capture only |
+| C PASS (new unrelated Lows → `deferred_low_polish`) | <ul><li>root publishes round 148;</li><li>V-0.5c → `c_pass`, so **V-0 is complete** and RV-4 is done;</li><li>`bbox-post-v0-*` becomes the RV-1 reference;</li><li>GATE147-S1/S4 and gate-141 #2 close.</li></ul>**B sends root the bounded frontend-architect checkpoint request** (strings split, test pins importing constants, `ArrangementLibraryOption`; V-0 boundary). The checkpoint does not block. Round 149 = **V-1** (scoped colour tokens `[data-studio-theme=obsidian]`; RV-2 against the DUX-B-1 elements), first stage, measured by B |
 
 At every planning, B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`.
 
 ## 8. Root notes
-- **Commit readiness:** nothing new is publishable until C round 147 passes. Rounds 145 + 146 are published (3328e75).
-- **Architecture:** the strings-split checkpoint request (`b-round-136-checkpoint-request.md` + addenda) stays open and non-blocking. This round adds the 23rd `studio*Strings` object (round-147 addendum). B asks for the checkpoint at the V-0.5 boundary, after V-0.5c.
+- **Commit readiness:** nothing new is publishable until C round 148 passes. Rounds 145–147 are published (34ce551).
+- **Architecture:** this round adds the 24th `studio*Strings` object (`studioVideoDockStrings`) and the round-147 addendum in `b-round-136-checkpoint-request.md`. The checkpoint is requested **when V-0.5c closes** (C PASS + gate 148). Its questions:
+  - (a) split `strings.ts` / `strings.test.ts`, or keep them;
+  - (b) the shared Georgian-scan helper, which ST51 now partly provides;
+  - (c) `ArrangementLibraryOption`;
+  - (d) whether test pins should import constants instead of repeating literals (gate-147 Architecture note);
+  - (e) the near-identical object names (GATE147-S5: `studioLibraryStrings` / `studioLibraryPanelStrings`, and now `studioVideoStrings` / `studioVideoDockStrings`).

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T21:47:33.778Z)
+# Active loop summary (2026-10-24T22:37:36.592Z)
 
-- backlog.json 1330 KB -> active view 175 KB
-- status: G_ROOT_GATE round 146
-- servers: `{"checkedUtc":"2026-10-24T21:35:23.4209411Z","round":146,"attempt":1,"store":200}`
-- last publication: 3328e753db68c2eb84c291e0b711f933e498ced7 (rounds 145-146)
-- last root gate: round 146 published - commit 3328e753db68c2eb84c291e0b711f933e498ced7 pushed
+- backlog.json 1340 KB -> active view 174 KB
+- status: G_ROOT_GATE round 147
+- servers: `{"checkedUtc":"2026-10-24T22:23:08.8753524Z","round":147,"attempt":1,"store":200}`
+- last publication: 34ce5513e6ff9bb337389333401643c0ef197cc0 (rounds 147-147)
+- last root gate: round 147 published - commit 34ce5513e6ff9bb337389333401643c0ef197cc0 pushed
 
 ## Current items: -
 
@@ -191,7 +191,7 @@
 - B-R107-ENTER-ON-BODY / info / open question for the user (not deferred, not scheduled as a change): the workspace-wide Enter (target not a button/slider/separator, incl. BODY) adds the active library item; SRW-12 R12-L2 only specifies Enter from the results list. Kept unchanged in round 108; focus retention closes C-R107-01 regardless / should Enter with focus on BODY add the active library item?
 - GATE107-S3-NZ-DELTA-NIT / info / open nit - optional defensive delta < 0 in the R4 condition (doc 092 F3) / target === clip.start with a non-negative delta would announce the time-start text (no current caller)
 - A-R108-CTRLZ-EXHAUST-FOCUS / info / open - signal (not in rule F1); Ctrl+Z exhausting history while Undo is focused leaves focus on the disabled Undo/BODY because the shortcut path never arms / 
-- DEFERRED-LOW-POLISH / info / open - pointer: 201 Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
+- DEFERRED-LOW-POLISH / info / open - pointer: 206 open Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
 - PROD-SSR-NUL / info / open - gate/Tech Lead row (production build served, NUL 0 on /studio-lab, both UAs, chunked); not run by C (dev server only) or by gate 109 (build green, HTML not measured) / production SSR HTML NUL count not measured after the round-109 filter
 - GATE109-F4-SN5-TRIPWIRE / info / acknowledged - SN5 turns red on purpose when react-dom fixes writeStringChunk; the extra typeof assertion may go with the removal task / SN5 is a deliberate upstream tripwire
 - GATE109-F5-ABORT-TIMER / info / signal - pre-existing setTimeout(abort, ABORT_DELAY) never cleared and responseStatusCode=500 after resolve has no effect (A reviewer + gate F5); entry.server.tsx frozen; not scheduled / entry.server.tsx abort timer not cleared
@@ -243,7 +243,6 @@
 - GATE121-S7-HEADER-WIDTH / info / converted -> C-R122-02 (deferred_low_polish) / 224 px grid header with BPM set, widest triplet division and zoom not browser-checked
 - C-R122-01 / low / deferred_low_polish / at 1280x720 a body range drag shrinks the workspace by 20 px mid-drag; lane auto-fit trims lanes 80->75 px and the selected stems clip moves
 - C-R122-02 / low / deferred_low_polish / with a BPM set the straight musical division list widens the select to 85 px; the 224 px grid control overflows (scrollWidth 225 > clientWid
-- ABL-B-1 / low / scheduled round 146 with C-R145-01 (D-29z111; round owns ArrangementLibrary.tsx, cheap; 2026-10-23 early-fix rule); closes on C PASS / the badge row overflows the option: scrollWidth 139-152 px > clientWidth 126 px; '▶' sits past the card edge and 'ისმის' wraps to a second l
 - ABL-B-2 / low / deferred_low_polish / the second Z pushes a duplicate entry: the first X leaves the view at 137.7 px/s while the status says 'წინა ხედი აღდგა. X კიდევ ერთი ნაბიჯი
 - C-R123-OBS-SFX-HEADER-SELECTION / info / watch (unreproduced; not a bug) / native text-selection highlight on the SFX header in two first-run P3 screenshots (harness drag started off-screen); 4 targeted probes found
 - C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER / info / judged round 126 F-2: acceptable (active range card 13 px under the footer, ArrowDown/wheel reveal it; disabled hint card belongs to ARCH-R101-MODALBODY-PADDING-SLOT / GATE102-S3-TALL-CARD-NO-CAP) / at 1280x720 the Export dialog's 'მონიშნული მონაკვეთი' option sits partly under the dialog footer until the body is scrolled
@@ -304,21 +303,18 @@
 - G141-3-FAKE-BEARER-403 / - / blocked: backend unavailable in cloud (open backend evidence) / 
 - G142-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
 - A-R142-DEVIATIONS-D1-D7 / info / ratified (B, D-29z108 R5): D1 57th pin line PENDING_HIDDEN_HINT; D2 flipped guards (leftovers fixed round 143); D3 LB-SEARCH 'stem'; D4 Biome rewraps; D5 shared helper; D6 l.702 block is the formatter map (reviewer: A right); D7 helper rename / 
-- ARCH-R142-LIBRARY-SEARCH-KEYWORDS / info / implemented round 145 KW1; C LIB-SEARCH PASS round 145 (browser); closes on publication with round 146 / library.ts matchesLibraryQuery uses the display label LIBRARY_KIND_LABELS as search text, so copy edits change search results (m86 proves it
 - A-R143-DEVIATIONS-D1-D3 / info / ratified (B, D-29z109 R4): D1 DPS2/DPS4 stayed green under m89/m90 (toContain sees the suffixed text; B prediction wrong); D2 Biome join -1 line shift; D3 probe (b) delta, ruled by R1 / 
 - G143-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
 - G144-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
-- GATE144-S1-DOC118-STATUS / low / folded into round 145 (doc 118 is granted; cheap) / doc 118 status/testing line still In Progress after C round 144 PASS
-- GATE144-S4-LIB-SEARCH / low / scheduled round 145 = LIB-SEARCH-KEYWORDS (closes C-R142-02 on C PASS) / stems matches nothing; kind label doubles as search text
 - GATE144-S6-DESIGN-D-WEAKER / info / acknowledged (exact toEqual label checks still cover content) / 
 - ARCH-R144-STRINGS-IMPORTS / info / signal, reviewer verdict keep (one-way imports into the leaf strings.ts) / 
 - LIB-SEARCH-GEORGIAN-SYNONYMS / info / signal for Saba, not scheduled (D-29z110 R2): Georgian query words (მუსიკა/სტემი/სტემები) no longer match by kind after V-0; adding them would need a Georgian allowance in an English-only source / 
-- C-R145-01 / low / scheduled round 146 (D-29z111 R1/R2); closes on C PASS / library preview row marker '▶ Playing' overflows the 126 px option by 12 px more than baseline and is clipped to '▶ Play' while audio plays 
-- A-R145-REVIEW-DM-VALUES / low / scheduled round 146 (DL-VAL) / no unit assertion pins the exact DM1-DM4 values (label, notice, both collectionLabels); ST47 only proves they are not Georgian
-- A-R145-REVIEW-GUARD-TEXTS / low / scheduled round 146 (PC2 exact) / collection.test PC2 l.143/153/156 check the purchased guard errors only with toThrow(Error)
 - B-R145-M91-SPEC / info / ruled (D-29z111 R3): spec error, no task / round-145 m91 expected failed-source-refusal / status-announcement-ui red; their fixtures reject with hand-written LOADER_ERROR
-- GATE-145-SKIPPED / info / open: round-145 changes uncommitted; publish together with round 146 after C PASS / 
 - G145-3-FAKE-BEARER-403 / info / open backend-only evidence (backend unavailable in cloud) / 
+- GATE146-S1-DOC119-STATUS / low / scheduled round 147 (doc 119 granted, cheap; D-29z112) / doc 119 status l.4 and l.91 still say C round 146 has not run; l.71 lists only LRS1-LRS2
+- GATE146-S2-PREVIEW-ROW-HEIGHT / info / signal (B decision recorded D-29z112: keep; the fixed-slot alternative would change ready/error layout; revisit only with a measured drag/focus defect) / starting/stopping a library preview grows/shrinks the option by 16 px, shifting rows below the pointer
+- C-R146-OBS-SELECT-MOVES-PREVIEW / info / signal (pre-existing behaviour; Live 12 §4.9 preview-on-select unverified here; not a requirement) / selecting another option while a preview plays moves the preview and its marker to that option without pressing play
+- A-R146-REVIEW-PC2-SUBSTRING / info / acknowledged (task 146 §3.3 accepted substring; each literal is the whole message) / PC2 toThrow(string) is a substring match; stricter form toThrow(new Error(...))
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
