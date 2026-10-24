@@ -1,0 +1,63 @@
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/lib/arrangement/strings.ts	2026-10-24 17:02:05.937032307 +0000
++++ app/lib/arrangement/strings.ts	2026-10-24 17:13:30.188898249 +0000
+@@ -466,11 +466,29 @@
+   flagHeading: ({ name, time }: StudioMarkerTimeText): string => `“${name}” — ${time}`,
+ };
+ 
++interface StudioClipEnvelopePointText {
++  time: string;
++  gain: string;
++}
++
+ export const studioClipEnvelopeStrings = {
+   modeOn: 'Envelope mode: on.',
+   modeOff: 'Envelope mode: off.',
+   toggleOnTitle: 'Envelope on — double-click a clip to add a point (A)',
+   toggleOffTitle: 'Envelope off — edit the clip volume envelope (A)',
++  addPointLabel: 'Envelope: add point',
++  movePointLabel: 'Envelope: move point',
++  deletePointLabel: 'Envelope: delete point',
++  editorTitle: 'Envelope — double-click = add point',
++  pointTitle: ({ time, gain }: StudioClipEnvelopePointText): string =>
++    `Envelope: ${time} · ${gain} — drag · double-click = delete`,
++  pointAdded: ({ time, gain }: StudioClipEnvelopePointText): string =>
++    `Envelope: point added — ${time} · ${gain}.`,
++  pointPreview: ({ time, gain }: StudioClipEnvelopePointText): string =>
++    `Envelope: ${time} · ${gain}`,
++  pointCommitted: ({ time, gain }: StudioClipEnvelopePointText): string =>
++    `Envelope: ${time} · ${gain}.`,
++  pointDeleted: (time: string): string => `Envelope: point deleted — ${time}.`,
+ };
+ 
+ interface StudioWorkspaceRangeText {
+@@ -565,3 +583,30 @@
+   heightLabel: (name: string): string => `Height — ${name}`,
+   foldedValueText: (height: number): string => `folded · ${height} px`,
+ };
++
++export const studioGroupHeaderStrings = {
++  nameTitle: 'F2: Rename · Ctrl+G: Group Tracks · Ctrl+Shift+G: Ungroup Tracks',
++  nameLabel: (name: string): string => `${name} — group`,
++  foldedOneClip: ', folded, 1 clip',
++  foldedClips: (count: number): string => `, folded, ${count} clips`,
++  foldLabel: (name: string): string => `Fold or unfold group — ${name}`,
++  nameInputLabel: (name: string): string => `Group name — ${name}`,
++  muteLabel: (name: string): string => `Mute — ${name} (group)`,
++  soloLabel: (name: string): string => `Solo — ${name} (group, Ctrl/Cmd+click = add to solo)`,
++  volumeLabel: (name: string): string => `Volume — ${name} (group)`,
++};
++
++interface StudioMeterPeakText {
++  name: string;
++  peak: string;
++}
++
++export const studioMeterStrings = {
++  trackPeakTitle: ({ name, peak }: StudioMeterPeakText): string => `${name} · Peak ${peak} dBFS`,
++  trackPeakOverTitle: ({ name, peak }: StudioMeterPeakText): string =>
++    `${name} · Peak ${peak} dBFS — went above 0 dBFS. Click Master Peak to clear`,
++  trackOverAnnouncement: (name: string): string => `${name}: the level went above 0 dBFS`,
++  masterPeakLabel: (peak: string): string => `Master Peak ${peak} dBFS — click to clear`,
++  masterPeakOverLabel: (peak: string): string =>
++    `Master Peak ${peak} dBFS — overload (Clip). Click to clear`,
++};

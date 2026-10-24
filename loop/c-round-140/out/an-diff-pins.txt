@@ -1,0 +1,104 @@
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx	2026-10-24 17:02:05.936636883 +0000
++++ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx	2026-10-24 17:07:37.961034092 +0000
+@@ -117,3 +117,3 @@
+-const ADD_LABEL = 'Envelope: წერტილის დამატება';
+-const MOVE_LABEL = 'Envelope: წერტილის გადატანა';
+-const REMOVE_LABEL = 'Envelope: წერტილის წაშლა';
++const ADD_LABEL = 'Envelope: add point';
++const MOVE_LABEL = 'Envelope: move point';
++const REMOVE_LABEL = 'Envelope: delete point';
+@@ -433 +433 @@
+-    expect(statusText(view)).toBe('Envelope: წერტილი დაემატა — 6.000 წმ · 0.0 dB.');
++    expect(statusText(view)).toBe('Envelope: point added — 6.000 s · 0.0 dB.');
+@@ -477 +477 @@
+-    expect(statusText(view)).toBe('Envelope: 6.000 წმ · −2.5 dB');
++    expect(statusText(view)).toBe('Envelope: 6.000 s · −2.5 dB');
+@@ -483 +483 @@
+-    expect(statusText(view)).toBe('Envelope: 6.000 წმ · −2.5 dB.');
++    expect(statusText(view)).toBe('Envelope: 6.000 s · −2.5 dB.');
+@@ -526 +526 @@
+-    expect(statusText(view)).toBe('Envelope: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.');
++    expect(statusText(view)).toBe('Envelope: nothing changed — the Undo history is unchanged.');
+@@ -593 +593 @@
+-    expect(statusText(view)).toBe('Envelope: 11.000 წმ · −12.0 dB.');
++    expect(statusText(view)).toBe('Envelope: 11.000 s · −12.0 dB.');
+@@ -649 +649 @@
+-    expect(statusText(view)).toBe('Envelope: წერტილი წაიშალა — 10.000 წმ.');
++    expect(statusText(view)).toBe('Envelope: point deleted — 10.000 s.');
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/lib/arrangement/__tests__/meter-ui.test.tsx	2026-10-24 17:02:05.936835433 +0000
++++ app/lib/arrangement/__tests__/meter-ui.test.tsx	2026-10-24 17:07:40.698028455 +0000
+@@ -278,2 +278,2 @@
+-const CLEAR_SUFFIX = 'dBFS — გასასუფთავებლად დააჭირე';
+-const OVER_SUFFIX = 'dBFS — გადატვირთვა (Clip). გასასუფთავებლად დააჭირე';
++const CLEAR_SUFFIX = 'dBFS — click to clear';
++const OVER_SUFFIX = 'dBFS — overload (Clip). Click to clear';
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-10-24 17:02:05.936835433 +0000
++++ app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-10-24 17:11:07.907954162 +0000
+@@ -220 +220 @@
+-  return view.getByRole('button', { name: new RegExp(`^${escapeRegExp(name)} — ჯგუფი`) });
++  return view.getByRole('button', { name: new RegExp(`^${escapeRegExp(name)} — group`) });
+@@ -415 +415 @@
+-  return view.getByRole('button', { name: `ჯგუფის დაკეცვა / გახსნა — ${name}` });
++  return view.getByRole('button', { name: `Fold or unfold group — ${name}` });
+@@ -473 +473 @@
+-    expect(fold.getAttribute('title')).toBe('დაკეცვა / გახსნა (U)');
++    expect(fold.getAttribute('title')).toBe('Fold / unfold (U)');
+@@ -659,3 +659 @@
+-    expect(groupName(view, 'ჯგუფი 1').getAttribute('aria-label')).toBe(
+-      'ჯგუფი 1 — ჯგუფი, მონიშნული',
+-    );
++    expect(groupName(view, 'ჯგუფი 1').getAttribute('aria-label')).toBe('ჯგუფი 1 — group, selected');
+@@ -667 +665 @@
+-      'ჯგუფი 1 — ჯგუფი, დაკეცილი, 2 კლიპი, მონიშნული',
++      'ჯგუფი 1 — group, folded, 2 clips, selected',
+@@ -671 +669 @@
+-      'ჯგუფი 1 — ჯგუფი, დაკეცილი, 2 კლიპი',
++      'ჯგუფი 1 — group, folded, 2 clips',
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx	2026-10-24 17:02:05.936835433 +0000
++++ app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx	2026-10-24 17:07:51.002998948 +0000
+@@ -212 +212 @@
+-  return view.getByRole('button', { name: new RegExp(`^${escapeRegExp(name)} — ჯგუფი`) });
++  return view.getByRole('button', { name: new RegExp(`^${escapeRegExp(name)} — group`) });
+@@ -397 +397 @@
+-      expect(mute.getAttribute('aria-label')).toBe('Mute — ჯგუფი 1 (ჯგუფი)');
++      expect(mute.getAttribute('aria-label')).toBe('Mute — ჯგუფი 1 (group)');
+@@ -403 +403 @@
+-        'Solo — ჯგუფი 1 (ჯგუფი, Ctrl/Cmd+click ამატებს)',
++        'Solo — ჯგუფი 1 (group, Ctrl/Cmd+click = add to solo)',
+@@ -405 +405 @@
+-      expect(solo.getAttribute('title')).toBe('Solo (Ctrl/Cmd+click ამატებს)');
++      expect(solo.getAttribute('title')).toBe('Solo (Ctrl/Cmd+click = add to solo)');
+@@ -411 +411 @@
+-      expect(fader.getAttribute('aria-label')).toBe('Volume — ჯგუფი 1 (ჯგუფი)');
++      expect(fader.getAttribute('aria-label')).toBe('Volume — ჯგუფი 1 (group)');
+@@ -425 +425 @@
+-        fireEvent.click(view.getByRole('button', { name: 'ჯგუფის დაკეცვა / გახსნა — ჯგუფი 1' }));
++        fireEvent.click(view.getByRole('button', { name: 'Fold or unfold group — ჯგუფი 1' }));
+@@ -680 +680 @@
+-    fireEvent.click(view.getByRole('button', { name: 'ჯგუფის დაკეცვა / გახსნა — ჯგუფი 2' }));
++    fireEvent.click(view.getByRole('button', { name: 'Fold or unfold group — ჯგუფი 2' }));
+@@ -689 +689 @@
+-    fireEvent.click(view.getByRole('button', { name: 'ჯგუფის დაკეცვა / გახსნა — ჯგუფი 2' }));
++    fireEvent.click(view.getByRole('button', { name: 'Fold or unfold group — ჯგუფი 2' }));
+@@ -694 +694 @@
+-    fireEvent.click(view.getByRole('button', { name: 'ჯგუფის დაკეცვა / გახსნა — ჯგუფი 2' }));
++    fireEvent.click(view.getByRole('button', { name: 'Fold or unfold group — ჯგუფი 2' }));
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/lib/arrangement/__tests__/track-groups-ui.test.tsx	2026-10-24 17:02:05.936835433 +0000
++++ app/lib/arrangement/__tests__/track-groups-ui.test.tsx	2026-10-24 17:07:39.060032708 +0000
+@@ -219 +219 @@
+-  return view.getByRole('button', { name: new RegExp(`^${escapeRegExp(name)} — ჯგუფი`) });
++  return view.getByRole('button', { name: new RegExp(`^${escapeRegExp(name)} — group`) });
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/lib/arrangement/__tests__/track-meter-ui.test.tsx	2026-10-24 17:02:05.936835433 +0000
++++ app/lib/arrangement/__tests__/track-meter-ui.test.tsx	2026-10-24 17:08:03.146976752 +0000
+@@ -475 +475 @@
+-    expect(header('sfx').textContent).toContain('SFX: დონემ 0 dBFS-ს გადააჭარბა');
++    expect(header('sfx').textContent).toContain('SFX: the level went above 0 dBFS');
+@@ -477 +477 @@
+-      'SFX · Peak +3.5 dBFS — 0 dBFS-ს გადააჭარბა. გასასუფთავებლად დააჭირე Master Peak-ს',
++      'SFX · Peak +3.5 dBFS — went above 0 dBFS. Click Master Peak to clear',
+@@ -485 +485 @@
+-    expect(header('music').textContent).not.toContain('გადააჭარბა');
++    expect(header('music').textContent).not.toContain('went above 0 dBFS');
+@@ -529 +529 @@
+-    expect(header('sfx').textContent).not.toContain('გადააჭარბა');
++    expect(header('sfx').textContent).not.toContain('went above 0 dBFS');

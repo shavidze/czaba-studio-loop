@@ -1,0 +1,233 @@
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/components/arrangement/ArrangementClipEnvelope.tsx	2026-10-24 17:02:05.936225134 +0000
++++ app/components/arrangement/ArrangementClipEnvelope.tsx	2026-10-24 17:14:10.973699326 +0000
+@@ -9,6 +9,7 @@
+   visibleClipEnvelopePoints,
+ } from '~/lib/arrangement/envelope';
+ import type { SelectionToggleMode } from '~/lib/arrangement/selection';
++import { studioClipEnvelopeStrings, studioClipStrings } from '~/lib/arrangement/strings';
+ import type {
+   Arrangement,
+   ArrangementClip,
+@@ -19,10 +20,10 @@
+ 
+ const ENVELOPE_DRAG_THRESHOLD_PX = 3;
+ const CLIP_ENVELOPE_ROOT_BORDER_PX = 1;
+-const ENVELOPE_ADD_LABEL = 'Envelope: წერტილის დამატება';
+-const ENVELOPE_MOVE_LABEL = 'Envelope: წერტილის გადატანა';
+-const ENVELOPE_REMOVE_LABEL = 'Envelope: წერტილის წაშლა';
+-const ENVELOPE_NO_CHANGE = 'Envelope: ცვლილება არ მოხდა — ისტორია არ შეიცვალა.';
++const ENVELOPE_ADD_LABEL = studioClipEnvelopeStrings.addPointLabel;
++const ENVELOPE_MOVE_LABEL = studioClipEnvelopeStrings.movePointLabel;
++const ENVELOPE_REMOVE_LABEL = studioClipEnvelopeStrings.deletePointLabel;
++const ENVELOPE_NO_CHANGE = studioClipStrings.historyUnchanged('Envelope');
+ 
+ export interface ClipEnvelopePointerGesture {
+   pointerId: number;
+@@ -67,7 +68,10 @@
+ }
+ 
+ function envelopePointTitle(time: number, gain: number): string {
+-  return `Envelope: ${time.toFixed(3)} წმ · ${formatClipEnvelopeGain(gain)} — drag · double-click = წაშლა`;
++  return studioClipEnvelopeStrings.pointTitle({
++    time: studioClipStrings.seconds(time.toFixed(3)),
++    gain: formatClipEnvelopeGain(gain),
++  });
+ }
+ 
+ function envelopePointAfterMove(
+@@ -168,7 +172,10 @@
+       return;
+     }
+     setStatus(
+-      `Envelope: წერტილი დაემატა — ${clipEnvelopePointTimelineTime(updated, added).toFixed(3)} წმ · ${formatClipEnvelopeGain(added.gain)}.`,
++      studioClipEnvelopeStrings.pointAdded({
++        time: studioClipStrings.seconds(clipEnvelopePointTimelineTime(updated, added).toFixed(3)),
++        gain: formatClipEnvelopeGain(added.gain),
++      }),
+     );
+   };
+ 
+@@ -263,7 +270,12 @@
+     const moved = envelopePointAfterMove(next, clip.id, gesture.pointIndex);
+     if (moved) {
+       setStatus(
+-        `Envelope: ${clipEnvelopePointTimelineTime(moved.clip, moved.point).toFixed(3)} წმ · ${formatClipEnvelopeGain(moved.point.gain)}`,
++        studioClipEnvelopeStrings.pointPreview({
++          time: studioClipStrings.seconds(
++            clipEnvelopePointTimelineTime(moved.clip, moved.point).toFixed(3),
++          ),
++          gain: formatClipEnvelopeGain(moved.point.gain),
++        }),
+       );
+     }
+   };
+@@ -297,7 +309,12 @@
+     const moved = envelopePointAfterMove(getArrangement(), clip.id, gesture.pointIndex);
+     if (moved) {
+       setStatus(
+-        `Envelope: ${clipEnvelopePointTimelineTime(moved.clip, moved.point).toFixed(3)} წმ · ${formatClipEnvelopeGain(moved.point.gain)}.`,
++        studioClipEnvelopeStrings.pointCommitted({
++          time: studioClipStrings.seconds(
++            clipEnvelopePointTimelineTime(moved.clip, moved.point).toFixed(3),
++          ),
++          gain: formatClipEnvelopeGain(moved.point.gain),
++        }),
+       );
+     }
+   };
+@@ -323,7 +340,9 @@
+     }
+     if (commitArrangement(next, ENVELOPE_REMOVE_LABEL, before)) {
+       setStatus(
+-        `Envelope: წერტილი წაიშალა — ${clipEnvelopePointTimelineTime(clip, point).toFixed(3)} წმ.`,
++        studioClipEnvelopeStrings.pointDeleted(
++          studioClipStrings.seconds(clipEnvelopePointTimelineTime(clip, point).toFixed(3)),
++        ),
+       );
+     }
+   };
+@@ -333,7 +352,7 @@
+       <div
+         className="absolute inset-x-2 inset-y-0 z-10 cursor-crosshair"
+         data-testid="arrangement-clip-envelope-editor"
+-        title="Envelope — double-click = წერტილი"
++        title={studioClipEnvelopeStrings.editorTitle}
+         onPointerDown={handleEditorPointerDown}
+         onDoubleClick={handleEditorDoubleClick}
+       />
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/components/arrangement/ArrangementGroupHeader.tsx	2026-10-24 17:02:05.936402595 +0000
++++ app/components/arrangement/ArrangementGroupHeader.tsx	2026-10-24 17:14:36.550968874 +0000
+@@ -10,6 +10,7 @@
+   trackGroupSoloState,
+   trackGroupVolume,
+ } from '~/lib/arrangement/groups';
++import { studioGroupHeaderStrings, studioLaneStrings } from '~/lib/arrangement/strings';
+ import {
+   formatTrackVolumeDb,
+   TRACK_VOLUME_DB_DEFAULT,
+@@ -29,8 +30,8 @@
+ 
+ export const TRACK_GROUP_ROW_HEIGHT_PX = 28;
+ 
+-const TRACK_GROUP_NAME_TITLE = 'F2: სახელის შეცვლა · Ctrl+G: დაჯგუფება · Ctrl+Shift+G: დაშლა';
+-const TRACK_GROUP_FOLD_TITLE = 'დაკეცვა / გახსნა (U)';
++const TRACK_GROUP_NAME_TITLE = studioGroupHeaderStrings.nameTitle;
++const TRACK_GROUP_FOLD_TITLE = `${studioLaneStrings.foldTitle} (U)`;
+ const TRACK_GROUP_MIX_BUTTON_CLASS =
+   'flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border text-xs font-bold leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+ 
+@@ -58,8 +59,12 @@
+   clipCount: number,
+   selected: boolean,
+ ): string {
+-  const state = collapsed ? `, დაკეცილი, ${clipCount} კლიპი` : '';
+-  return `${name} — ჯგუფი${state}${selected ? ', მონიშნული' : ''}`;
++  const state = collapsed
++    ? clipCount === 1
++      ? studioGroupHeaderStrings.foldedOneClip
++      : studioGroupHeaderStrings.foldedClips(clipCount)
++    : '';
++  return `${studioGroupHeaderStrings.nameLabel(name)}${state}${selected ? studioLaneStrings.selectedSuffix : ''}`;
+ }
+ 
+ export function ArrangementGroupHeader({
+@@ -214,7 +219,7 @@
+             }
+           }}
+           aria-expanded={!collapsed}
+-          aria-label={`ჯგუფის დაკეცვა / გახსნა — ${group.name}`}
++          aria-label={studioGroupHeaderStrings.foldLabel(group.name)}
+           title={TRACK_GROUP_FOLD_TITLE}
+           className={cn(
+             '-ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm text-sm leading-none text-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand',
+@@ -238,7 +243,7 @@
+               }
+             }}
+             onBlur={() => settleEditor('blur')}
+-            aria-label={`ჯგუფის სახელი — ${group.name}`}
++            aria-label={studioGroupHeaderStrings.nameInputLabel(group.name)}
+             className="h-6 min-w-0 flex-1 rounded-sm border border-brand bg-background px-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
+             data-testid="arrangement-group-name-input"
+           />
+@@ -270,7 +275,7 @@
+         <button
+           type="button"
+           aria-pressed={muted}
+-          aria-label={`Mute — ${group.name} (ჯგუფი)`}
++          aria-label={studioGroupHeaderStrings.muteLabel(group.name)}
+           title="Mute"
+           onClick={() => toggleGroupMute(group.id)}
+           className={cn(
+@@ -286,8 +291,8 @@
+         <button
+           type="button"
+           aria-pressed={soloState === 'on' ? true : soloState === 'mixed' ? 'mixed' : false}
+-          aria-label={`Solo — ${group.name} (ჯგუფი, Ctrl/Cmd+click ამატებს)`}
+-          title="Solo (Ctrl/Cmd+click ამატებს)"
++          aria-label={studioGroupHeaderStrings.soloLabel(group.name)}
++          title={studioLaneStrings.soloTitle}
+           onClick={(event) => toggleGroupSolo(group.id, event.ctrlKey || event.metaKey)}
+           className={cn(
+             TRACK_GROUP_MIX_BUTTON_CLASS,
+@@ -307,7 +312,7 @@
+           max={TRACK_VOLUME_DB_MAX}
+           step={TRACK_VOLUME_DB_STEP}
+           value={trackVolumeSliderDb(volume)}
+-          aria-label={`Volume — ${group.name} (ჯგუფი)`}
++          aria-label={studioGroupHeaderStrings.volumeLabel(group.name)}
+           aria-valuetext={volumeText}
+           title={`Volume ${volumeText}`}
+           onChange={(event) =>
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/components/arrangement/ArrangementMaster.tsx	2026-10-24 17:02:05.936402595 +0000
++++ app/components/arrangement/ArrangementMaster.tsx	2026-10-24 17:14:15.949978451 +0000
+@@ -20,6 +20,7 @@
+   MASTER_GAIN_MAX_DB,
+   MASTER_GAIN_MIN_DB,
+ } from '~/lib/arrangement/model';
++import { studioMeterStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
+ 
+ const MASTER_GAIN_STEP_DB = 0.5;
+@@ -29,8 +30,8 @@
+ 
+ function masterPeakLabel(text: string, over: boolean): string {
+   return over
+-    ? `Master Peak ${text} dBFS — გადატვირთვა (Clip). გასასუფთავებლად დააჭირე`
+-    : `Master Peak ${text} dBFS — გასასუფთავებლად დააჭირე`;
++    ? studioMeterStrings.masterPeakOverLabel(text)
++    : studioMeterStrings.masterPeakLabel(text);
+ }
+ 
+ function ArrangementMasterMeter({ onResetPeak }: { onResetPeak: () => void }) {
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/components/arrangement/ArrangementTrackMeter.tsx	2026-10-24 17:02:05.936402595 +0000
++++ app/components/arrangement/ArrangementTrackMeter.tsx	2026-10-24 17:14:21.942891761 +0000
+@@ -7,6 +7,7 @@
+   METER_FLOOR_DB,
+   meterDbToFraction,
+ } from '~/lib/arrangement/meter';
++import { studioMeterStrings } from '~/lib/arrangement/strings';
+ 
+ interface ArrangementTrackMeterProps {
+   trackId: string;
+@@ -15,8 +16,8 @@
+ 
+ function trackMeterTitle(trackName: string, peakText: string, over: boolean): string {
+   return over
+-    ? `${trackName} · Peak ${peakText} dBFS — 0 dBFS-ს გადააჭარბა. გასასუფთავებლად დააჭირე Master Peak-ს`
+-    : `${trackName} · Peak ${peakText} dBFS`;
++    ? studioMeterStrings.trackPeakOverTitle({ name: trackName, peak: peakText })
++    : studioMeterStrings.trackPeakTitle({ name: trackName, peak: peakText });
+ }
+ 
+ export function ArrangementTrackMeter({ trackId, trackName }: ArrangementTrackMeterProps) {
+@@ -98,7 +99,9 @@
+           />
+         ) : null}
+       </div>
+-      {over ? <span className="sr-only">{`${trackName}: დონემ 0 dBFS-ს გადააჭარბა`}</span> : null}
++      {over ? (
++        <span className="sr-only">{studioMeterStrings.trackOverAnnouncement(trackName)}</span>
++      ) : null}
+     </>
+   );
+ }

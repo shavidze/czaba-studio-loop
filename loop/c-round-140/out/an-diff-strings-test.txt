@@ -1,0 +1,199 @@
+--- ../tmp/studio-real-loop/b-round-139/r140-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 17:02:05.936835433 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-24 17:09:28.501939246 +0000
+@@ -50,11 +50,13 @@
+   studioEditStrings,
+   studioExportStrings,
+   studioGridStrings,
++  studioGroupHeaderStrings,
+   studioLaneMoveStrings,
+   studioLaneStrings,
+   studioLibraryStrings,
+   studioLoopStrings,
+   studioMarkerStrings,
++  studioMeterStrings,
+   studioMetronomeStrings,
+   studioMoveStrings,
+   studioPlaybackStrings,
+@@ -1623,6 +1625,10 @@
+   modeOff: 'Envelope mode: off.',
+   toggleOnTitle: 'Envelope on — double-click a clip to add a point (A)',
+   toggleOffTitle: 'Envelope off — edit the clip volume envelope (A)',
++  addPointLabel: 'Envelope: add point',
++  movePointLabel: 'Envelope: move point',
++  deletePointLabel: 'Envelope: delete point',
++  editorTitle: 'Envelope — double-click = add point',
+ };
+ 
+ const EXPECTED_WORKSPACE_PLAIN_STRINGS: Record<string, string> = {
+@@ -1660,14 +1666,46 @@
+ describe('V-0.3d workspace strings', () => {
+   it('ST31: the clip-envelope and workspace objects have the exact keys, English literals and formatter outputs', () => {
+     expect(Object.keys(studioClipEnvelopeStrings).sort()).toEqual([
++      'addPointLabel',
++      'deletePointLabel',
++      'editorTitle',
+       'modeOff',
+       'modeOn',
++      'movePointLabel',
++      'pointAdded',
++      'pointCommitted',
++      'pointDeleted',
++      'pointPreview',
++      'pointTitle',
+       'toggleOffTitle',
+       'toggleOnTitle',
+     ]);
++    const envelopePlainKeys = Object.entries(studioClipEnvelopeStrings)
++      .filter(([, value]) => typeof value === 'string')
++      .map(([key]) => key)
++      .sort();
++    expect(envelopePlainKeys).toEqual(Object.keys(EXPECTED_CLIP_ENVELOPE_STRINGS).sort());
+     for (const [key, value] of Object.entries(studioClipEnvelopeStrings)) {
+-      expect(value, key).toBe(EXPECTED_CLIP_ENVELOPE_STRINGS[key]);
++      if (typeof value === 'string') {
++        expect(value, key).toBe(EXPECTED_CLIP_ENVELOPE_STRINGS[key]);
++      }
+     }
++    const envelopeSample = { time: '6.000 s', gain: '0.0 dB' };
++    expect(studioClipEnvelopeStrings.pointTitle(envelopeSample)).toBe(
++      'Envelope: 6.000 s · 0.0 dB — drag · double-click = delete',
++    );
++    expect(studioClipEnvelopeStrings.pointAdded(envelopeSample)).toBe(
++      'Envelope: point added — 6.000 s · 0.0 dB.',
++    );
++    expect(studioClipEnvelopeStrings.pointPreview({ time: '6.000 s', gain: '−2.5 dB' })).toBe(
++      'Envelope: 6.000 s · −2.5 dB',
++    );
++    expect(studioClipEnvelopeStrings.pointCommitted({ time: '6.000 s', gain: '−2.5 dB' })).toBe(
++      'Envelope: 6.000 s · −2.5 dB.',
++    );
++    expect(studioClipEnvelopeStrings.pointDeleted('10.000 s')).toBe(
++      'Envelope: point deleted — 10.000 s.',
++    );
+     expect(Object.keys(ws).sort()).toEqual([
+       'clipLabel',
+       'clipsSelected',
+@@ -1735,8 +1773,10 @@
+ 
+   it('ST33: the new texts, waveform-zoom.ts and StudioWorkspace have no Georgian and no «»', () => {
+     for (const [key, value] of Object.entries(studioClipEnvelopeStrings)) {
+-      expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
+-      expect(value, key).not.toMatch(GUILLEMET);
++      if (typeof value === 'string') {
++        expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
++        expect(value, key).not.toMatch(GUILLEMET);
++      }
+     }
+     for (const [key, value] of Object.entries(ws)) {
+       if (typeof value === 'string') {
+@@ -1935,3 +1975,110 @@
+     expect(lane).not.toMatch(GUILLEMET);
+   });
+ });
++
++const gh = studioGroupHeaderStrings;
++const mt = studioMeterStrings;
++
++const EXPECTED_GROUP_HEADER_PLAIN_STRINGS: Record<string, string> = {
++  nameTitle: 'F2: Rename · Ctrl+G: Group Tracks · Ctrl+Shift+G: Ungroup Tracks',
++  foldedOneClip: ', folded, 1 clip',
++};
++
++const GROUP_HEADER_FORMATTER_SAMPLES: Record<string, string[]> = {
++  nameLabel: [gh.nameLabel('Drums')],
++  foldedClips: [gh.foldedClips(2)],
++  foldLabel: [gh.foldLabel('Drums')],
++  nameInputLabel: [gh.nameInputLabel('Drums')],
++  muteLabel: [gh.muteLabel('Drums')],
++  soloLabel: [gh.soloLabel('Drums')],
++  volumeLabel: [gh.volumeLabel('Drums')],
++};
++
++const METER_FORMATTER_SAMPLES: Record<string, string[]> = {
++  trackPeakTitle: [mt.trackPeakTitle({ name: 'SFX', peak: '−3.0' })],
++  trackPeakOverTitle: [mt.trackPeakOverTitle({ name: 'SFX', peak: '+3.5' })],
++  trackOverAnnouncement: [mt.trackOverAnnouncement('SFX')],
++  masterPeakLabel: [mt.masterPeakLabel('−12.0')],
++  masterPeakOverLabel: [mt.masterPeakOverLabel('+3.5')],
++};
++
++const V04C_ENVELOPE_FORMATTER_OUTPUTS: string[] = [
++  studioClipEnvelopeStrings.pointTitle({ time: '6.000 s', gain: '0.0 dB' }),
++  studioClipEnvelopeStrings.pointAdded({ time: '6.000 s', gain: '0.0 dB' }),
++  studioClipEnvelopeStrings.pointPreview({ time: '6.000 s', gain: '−2.5 dB' }),
++  studioClipEnvelopeStrings.pointCommitted({ time: '6.000 s', gain: '−2.5 dB' }),
++  studioClipEnvelopeStrings.pointDeleted('10.000 s'),
++];
++
++describe('V-0.4c header, meter and envelope strings', () => {
++  it('ST38: the group header and meter objects have the exact keys, English literals and formatter outputs', () => {
++    expect(Object.keys(gh).sort()).toEqual(
++      [
++        ...Object.keys(EXPECTED_GROUP_HEADER_PLAIN_STRINGS),
++        ...Object.keys(GROUP_HEADER_FORMATTER_SAMPLES),
++      ].sort(),
++    );
++    for (const [key, value] of Object.entries(gh)) {
++      if (typeof value === 'string') {
++        expect(value, key).toBe(EXPECTED_GROUP_HEADER_PLAIN_STRINGS[key]);
++      } else {
++        expect(GROUP_HEADER_FORMATTER_SAMPLES[key], key).toBeDefined();
++      }
++    }
++    expect(Object.keys(mt).sort()).toEqual(Object.keys(METER_FORMATTER_SAMPLES).sort());
++    for (const [key, value] of Object.entries(mt)) {
++      expect(typeof value, key).toBe('function');
++    }
++    expect(gh.nameLabel('Drums')).toBe('Drums — group');
++    expect(gh.foldedClips(2)).toBe(', folded, 2 clips');
++    expect(gh.foldLabel('Drums')).toBe('Fold or unfold group — Drums');
++    expect(gh.nameInputLabel('Drums')).toBe('Group name — Drums');
++    expect(gh.muteLabel('Drums')).toBe('Mute — Drums (group)');
++    expect(gh.soloLabel('Drums')).toBe('Solo — Drums (group, Ctrl/Cmd+click = add to solo)');
++    expect(gh.volumeLabel('Drums')).toBe('Volume — Drums (group)');
++    expect(mt.trackPeakTitle({ name: 'SFX', peak: '−3.0' })).toBe('SFX · Peak −3.0 dBFS');
++    expect(mt.trackPeakOverTitle({ name: 'SFX', peak: '+3.5' })).toBe(
++      'SFX · Peak +3.5 dBFS — went above 0 dBFS. Click Master Peak to clear',
++    );
++    expect(mt.trackOverAnnouncement('SFX')).toBe('SFX: the level went above 0 dBFS');
++    expect(mt.masterPeakLabel('−12.0')).toBe('Master Peak −12.0 dBFS — click to clear');
++    expect(mt.masterPeakOverLabel('+3.5')).toBe(
++      'Master Peak +3.5 dBFS — overload (Clip). Click to clear',
++    );
++  });
++
++  it('ST39: the new texts and the envelope, group header, track meter and Master sources have no Georgian and no «»', () => {
++    for (const [key, value] of [
++      ...Object.entries(studioClipEnvelopeStrings),
++      ...Object.entries(gh),
++      ...Object.entries(mt),
++    ]) {
++      if (typeof value === 'string') {
++        expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
++        expect(value, key).not.toMatch(GUILLEMET);
++      }
++    }
++    const outputs = [
++      ...V04C_ENVELOPE_FORMATTER_OUTPUTS,
++      ...Object.values(GROUP_HEADER_FORMATTER_SAMPLES).flat(),
++      ...Object.values(METER_FORMATTER_SAMPLES).flat(),
++    ];
++    expect(outputs.length).toBe(17);
++    for (const output of outputs) {
++      expect(output).not.toMatch(GEORGIAN_CODEPOINT);
++      expect(output).not.toMatch(GUILLEMET);
++    }
++    for (const path of [
++      '../../../components/arrangement/ArrangementClipEnvelope.tsx',
++      '../../../components/arrangement/ArrangementGroupHeader.tsx',
++      '../../../components/arrangement/ArrangementTrackMeter.tsx',
++      '../../../components/arrangement/ArrangementMaster.tsx',
++    ]) {
++      const source = stripSourceComments(readStoreSource(path));
++      expect(source.length, path).toBeGreaterThan(0);
++      const georgianLines = source.split(/\r?\n/).filter((line) => GEORGIAN_CODEPOINT.test(line));
++      expect(georgianLines, path).toEqual([]);
++      expect(source, path).not.toMatch(GUILLEMET);
++    }
++  });
++});
