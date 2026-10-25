@@ -1,0 +1,81 @@
+{
+ "round": 163,
+ "verifier": "C",
+ "date": "2026-10-25",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T11:39:50.1910266Z",
+  "round": 163,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "T163-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "ICON-V3C3A",
+  "RV1-V3C3A",
+  "DOCK-STATES-BOX",
+  "FUNC-SMOKE-DOCK",
+  "G163-3-anon-lab",
+  "G163-3-protected-signin",
+  "G163-3-token-401",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G163-3-fake-bearer-403 — backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notRun": [
+  "ICON-V3C2",
+  "LANE-STATES-BOX",
+  "FUNC-SMOKE-LANE",
+  "ICON-V3C1",
+  "LIB-STATES-BOX",
+  "ICON-V3B",
+  "SURFACE-STYLE",
+  "CASCADE-SCOPE",
+  "CONTRAST-V3A",
+  "V-2 rows (code unchanged since rounds 158-162, per task §4)"
+ ],
+ "invalidRuns": [
+  {
+   "row": "warm-up load (not a measurement)",
+   "reason": "ENV-FIRST-LOAD-LUCIDE: first cold Vite load after the new lucide import gave 'Invalid hook call' + pageerror reading useState + 1 hydration message; replaced once, warm-2 clean. All 10 measured sessions and the 2 d6 sessions had 0 errors / 0 hydration.",
+   "evidence": "c-round-163/out/warm.log, warm2.log, invalid-runs.txt"
+  }
+ ],
+ "evidence": {
+  "vitest": "c-round-163/out/vitest.json (200/200; LVD1, LVD2, LG3 passed; equals A's a-round-163/vitest-after.json 200/200)",
+  "scope": "c-round-163/out/c-start-sha256.txt, c-end-sha256.txt (identical); frozen 975 OK start+end; a-round-163/end-sha256.txt OK",
+  "rv1": "c-round-163/out/rv1-v3c3a.json, out/d6/d6-{1440,1280}-r1.json (d6.cjs sha256 3abc88fe…)",
+  "browser": "c-round-163/out/c163-{1440,1280}-run1.json, shots/icon-*, shots/func-*",
+  "auth": "c-round-163/out/g163-3.json, shots/g163-3-*.png"
+ },
+ "ableton": {
+  "requirement": "PASS (ICON-V3C3A, RV1-V3C3A, DOCK-STATES-BOX, FUNC-SMOKE-DOCK)",
+  "parity": "not applicable — CZABA brand decision (visual-direction-a.md § icons); GripVertical/X are B rulings R2, not Ableton claims; Live has no comparable video dock"
+ },
+ "notes": [
+  "Every pointer action started on the svg centre read from its rect; real elementFromPoint at the X centre resolves to the svg's <path> (closest('[data-video-float-action]') still guards it), at drag/expand centres to the <svg>.",
+  "Computed stroke is resolved rgb (not 'currentcolor'): rest rgb(163,155,142) = text-muted = button color; hover rgb(236,230,218) = text-foreground = button color, at both viewports in all states.",
+  "Pre-existing d6 contrast 'pass=false' entries (Undo/Redo/Split/Delete/Loop/Zoom/Metronome disabled states) are identical to the round-162 reference; unchanged by this round.",
+  "After Esc from D2-lib-opened the status reads 'The video went back to the compact view; the library collapsed again.' and the library is back to 40 px.",
+  "d6 rename 'arrangement-video-expand:⤢' -> ':Expand video': 4 occurrences per viewport in the reference (contrastS0, pixS0, contrastS1, pixS1), matching B's count; the current run has the new key once in each section and no ⤢; 0 collisions.",
+  "R3 longer sentence: arrangement-status 0 px delta in D2 at both viewports."
+ ]
+}

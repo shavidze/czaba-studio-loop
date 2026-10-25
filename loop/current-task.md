@@ -1,220 +1,197 @@
-# CURRENT TASK — Round 163: V-3c-3a — video dock glyphs become lucide icons (⠿ GripVertical, ⤢ Maximize2, ✕ X) + the two "Esc or ✕" status sentences; boxes stay within ±1 px
+# CURRENT TASK — Round 164: SABA-B-1 (the clip volume envelope line and handle are hard to see) + SABA-B-2 (gaps at the Arrangement overview corners)
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-25 · Decision: **D-29z128** (`backlog.json` → VISUAL-A-OBSIDIAN `v3c3a_plan_d29z128`)
-- **Rules:** `docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
-- **Previous task:** `tasks/round-162.md`, an exact copy of the round-162 `current-task.md` (sha256 `e6acddcc…a929816`). Rationale for this round: `b-round-162.md`.
-- **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` § „იკონები“ (⤢ → `Maximize2`; "the icon matches the old symbol's box, so the element does not move"). It is source material only and grants no permissions.
-- **User decision files:** `tmp/studio-real-loop/user-review/`. It has no `ableton-decisions.md` and no `design-ux-decisions.md` at this planning.
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-25 · Decision: **D-29z129** (`backlog.json` → VISUAL-A-OBSIDIAN `saba_b1_b2_plan_d29z129`)
+- **Rules:** `docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, the 2026-10-23 bug gate, and the **2026-10-25 section "Bugs reported by Saba"**. They take precedence over older text.
+- **Previous task:** `tasks/round-163.md`, an exact copy of the round-163 `current-task.md` (sha256 `ee7c2339…`). Rationale for this round: `b-round-163.md`.
+- **Bug source:** `user-review/img/saba-2026-10-25-envelope-handle.png` and `saba-2026-10-25-overview-corners.png`. The images and the workflow text are source material only. They grant no permissions beyond this task.
+- **User decision files (now present):** `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`. B recorded them in `backlog.json` this planning (see `b-round-163.md` §3). None of them changes this round's code.
 
-## Baseline = HEAD `9a83018`, clean tree (gate 162 published)
-- `gates/gate-round-162.json`: status `published`, commit `9a83018e914f745dfbe06a7c075a23f8b7c93e07`, on both remotes (round 162).
-- `git status --short` is empty. `git ls-files -co --exclude-standard` lists **981** files.
-- **Frozen list:** `b-round-162-r163-tree-sha256.txt`, **975 entries** (981 minus the 6 grants).
-- **Grants:** `b-round-162-r163-grants.txt` (6 existing files). **New file:** `b-round-162-r163-new-files.txt` (1: doc 132).
-- **Start hashes:** `b-round-162-r163-granted-start-sha256.txt`. **Start copies:** `b-round-162/r163-granted-start/`.
-- **A's first step:** check that HEAD = `9a83018`, the tree is clean, the 975 frozen files match (`sha256sum -c --quiet`) and the 6 start hashes match. If anything differs, stop and report.
+## Baseline = HEAD `0e4287f`, clean tree (gate 163 published)
+- `gates/gate-round-163.json`: status `published`, commit `0e4287f423d287a1a7b4fc885ae7f1a14bdc5788`, on both remotes.
+- `git status --short` is empty. `git ls-files -co --exclude-standard` lists **982** files.
+- **Frozen list:** `b-round-163-r164-tree-sha256.txt`, **977 entries** (982 minus the 5 grants).
+- **Grants:** `b-round-163-r164-grants.txt` (5 existing files). **New file:** `b-round-163-r164-new-files.txt` (1: doc 133).
+- **Start hashes:** `b-round-163-r164-granted-start-sha256.txt`. **Start copies:** `b-round-163/r164-granted-start/`.
+- **A's first step:** check that HEAD = `0e4287f`, the tree is clean, the 977 frozen files match (`sha256sum -c --quiet`) and the 5 start hashes match. If anything differs, stop and report.
 
-## 0. Why this round (D-29z128)
-- **Round 162: C PASS.** `browserVerified` and `realVerified` are true, there are 0 bugs, and the only blocked row is the fake-Bearer 403 (backend unavailable in cloud). Root published round 162 as `9a83018`, so **V-3c-2 → მზადაა**, and C-R154-02 and GATE139-EMPTY-VIDEO-FORMATTER are closed by C's evidence.
-- **The outcome was fixed by `tasks/round-162.md` §7, "C PASS" row:** round 163 = **V-3c-3**, "split if the grants exceed about 12".
-- **Split (B ruling):** the V-3c-3 inventory is 5 components (`ArrangementVideoDock`, `ArrangementMarkerRow`, `ArrangementDetailPanel`, `ArrangementGridMenu`, `StudioWorkspace`), `strings.ts`, about 6 test files and 2 docs, so about 13 grants. Only the dock has gesture and focus risk (float drag, focus-to-handle on pointerdown, no drag from the action buttons), so it goes alone:
-  - **V-3c-3a = round 163:** the video dock and its two status sentences.
-  - **V-3c-3b = round 164:** marker row ◀ ▶, detail `Expand ▸` / `Collapse ▾`, grid menu ✓, and the `← CZABA` back link. The inventory is in `backlog.json` `v3c3a_plan_d29z128.v3c3b_inventory`. The scope is unchanged; only the order is set.
+## 0. Why this round (D-29z129)
+- **Round 163: C PASS.** `browserVerified` and `realVerified` are true, there are 0 bugs, and the only blocked row is the fake-Bearer 403 (backend unavailable in cloud). Root published round 163 as `0e4287f`, so **V-3c-3a → მზადაა**.
+- **Saba's order (workflow, 2026-10-25):** SABA-B-1 (Medium) and SABA-B-2 (Low, fixed now and not deferred) are fixed inside VISUAL-A, **next**, before the remaining V-3 and M stages. This overrides round 163 §7, which named V-3c-3b. V-3c-3b moves to a later round; its scope is unchanged.
+- **Size:** 2 bugs, under the 3-bug limit. Two owners (`ArrangementClipEnvelope.tsx`, `ArrangementOverview.tsx`); both are class/markup changes with no logic change.
 - **Checks at planning:**
   - **Regression:** due on or after 2026-10-27 (`regression-last.json`: 2026-10-24). Today is 2026-10-25, so it is not due.
-  - **User decisions:** none (see above).
-  - **Open findings:** no Critical, High or Medium finding is open, apart from the Tech Lead manual items.
-  - **Checkpoint:** `b-round-160-checkpoint-request.md` has no answer yet. It does not block icon stages (V-3c-1…3). The round-162 architecture note was "none".
+  - **Open findings:** SABA-B-1 is the only open Medium (this round). No Critical/High is open. The Tech Lead manual items do not block.
+  - **Checkpoint:** `b-round-160-checkpoint-request.md` still has no answer. It does not block these bug fixes.
 
-### 0.1 B evidence (planning data, not C rows)
-**Glyph metrics and swap probe** (`b-round-162/v3c3a-probe.cjs` → `out/v3c3a-probe.json` + screenshots). Measured in real Chromium on `/studio-lab` at `9a83018` in three states (D0-empty, D1-video with `beeps-6s-h264-aac.mp4`, D2-expanded) at 1440 and 1280. The results are identical at both viewports.
+### 0.1 B reproduction (planning data at `0e4287f`; not C rows)
+Real Chromium on `/studio-lab`, at 1440×900 and 1280×720. The tools and output are in `b-round-163/` (`saba-probe.cjs`, `saba-probe2.cjs`, `saba-sim.cjs`, `corner-zoom.cjs`, `notch-metric.cjs`, `out/`).
 
-| Site (`data-testid`) | Shown | Font | Glyph box | Button box |
-|---|---|---|---|---|
-| `arrangement-video-drag` ⠿ | D2 only | 12 px | 8.80×15 | fixed 24×24 (`VIDEO_FLOAT_BUTTON_CLASS`: `flex h-6 w-6 items-center justify-center … text-xs`) |
-| `arrangement-video-expand` ⤢ | D0, D1, D2 (in D2 it is the return button) | 12 px | 10.00×15 | fixed 24×24 |
-| `arrangement-video-close` ✕ | D2 only | 12 px | 10.06×15 | fixed 24×24 |
+**SABA-B-1, reproduced at both viewports.** Setup: `demo-middle-east` on `music` at 0 s, Env on, a point added by double-click, then dragged about 18 px down (gain 0.64, status `Envelope: 4.000 s · −3.9 dB.`).
+- **Same hue on same hue:** the line stroke (`text-accent` → rgb(201,164,106)), the point fill (`bg-accent`) and the waveform (`text-brand/70`) are all brass. The selected clip header is `bg-brand`, also brass.
+- **DPR 2 pixel contrast**, measured over about 100 columns of the clip body (`out/saba-sim-dpr2.json`, "baseline"):
+  - line core vs the darkest pixel within ±5 device px: **min 1.74**, median 7.42. Where the line crosses the waveform it disappears.
+  - DPR 1, `out/saba-probe2.json`: 75 % of the columns are below 3:1 against the pixels 3 px away.
+  - handle centre vs its own border: **1.88:1**; handle centre vs the pixels above and below it: 1.58–1.74:1.
+- **No hover style exists:** the hovered point has the same colours as at rest.
+- **States:** the selected and the normal clip (another clip selected) give the same numbers. A muted lane does not change the clip's rendering (the clip class is the same). At 0 dB the point sits half over the brass header of a selected clip (`out/saba-probe-*-env-selected.png`), which is the case in Saba's screenshot.
+- **Simulated fix** (DOM injection only, no source change; `out/saba-sim-dpr2.json`, "sim halo 4"):
+  - A background-coloured 4 px halo polyline under a foreground 1.5 px line gives line core vs halo **min 15.62** at both viewports.
+  - A foreground handle with a background border gives centre vs border **15.62**.
+  - Screenshot: `out/saba-sim-1440-selected-sim.png`.
+  - Halo 5 px sampled worse with this sampler (the core is narrower than one device row), so **4 px is ruled**.
 
-- **Swap with a 10×10 svg in every site:** the max edge delta is **0.000 px** for every element on the page (137–155 keyed elements per state). Every svg is centred exactly (dx = dy = 0).
-- `elementFromPoint` at each svg centre resolves to the svg, inside its button.
-- **The `before` arrays in that file are C's DOCK-STATES-BOX baseline.**
+**SABA-B-2, reproduced; cause found.** `out/saba-probe.json` (computed chain) and `out/corner-1440-*.png` / `out/saba-probe2-*-corner-empty-*.png` (4× DPR, 16×16 CSS px crops).
+- The overview root (`ArrangementOverview.tsx` l.293) is `overflow-hidden rounded-sm` = **6 px**. Its outline overlay (l.305) is also `rounded-sm`.
+- The view frame (l.329, `arrangement-overview-frame`) is `rounded-xs` = **2 px**, `inset-y-0`, with a bright `border-foreground/70`.
+- When the frame touches a side of the root (empty project: `left 0%`, `width 100%`; or the view at the far right), its almost-square corner is cut by the root's 6 px clip. The bright border stops before the corner, and the dim outer curve shows separately. That is the notch in Saba's screenshot. The parent dock section has no radius, border or overflow involvement (chain in the JSON).
+- **Ruled fix:** the frame uses the root's radius (`rounded-sm`). Only the radius changes: no box changes, so the ±1 px rule holds by construction.
 
-**Pointer-target check (B read `ArrangementVideoDock.tsx` l.795–818):**
-- `handleFloatPointerDown` rejects action buttons with `event.target instanceof Element && event.target.closest('[data-video-float-action]')`.
-- It finds the handle to focus with `event.target.closest('[data-video-float-handle]')` and then `instanceof HTMLElement`.
-- An `SVGElement` is an `Element`, so an svg target resolves to its button. **No `pointer-events-none` is ruled.**
-- Mutation m177 below proves the new lock would catch a guard that read the target directly.
+### 0.2 B rulings (D-29z129; user-vetoable in `feature-status.md`)
+**R1 — Envelope line, a two-tone line:**
+- The fix must stay correct after DUX-R-5, which will make waveforms neutral. A single colour fails one of the two sites:
+  - foreground on the brass waveform is about 3.3:1, and on the brass header about 1.8:1;
+  - a dark line fails on the dark body.
+- **Rule:** a background-coloured halo under a foreground line. This is the same two-tone idea as the round-150 overview playhead (`ring-1 ring-background`).
+- Tokens only: `stroke-background` and `stroke-foreground`.
 
-**d6 keys:** box keys of the dock buttons are `data-testid` keys (`tid:arrangement-video-*`) and do not change. One contrast-section key changes: `arrangement-video-expand:⤢` → `arrangement-video-expand:Expand video`, because d6 falls back to the `aria-label` when `textContent` is empty. Map: `b-round-162-r163-d6-key-renames.json`. B checked it against the reference: 4 occurrences per viewport, 0 collisions.
+**R2 — Envelope handle:**
+- `bg-foreground` with `border-background` (it was `bg-accent` + `border-foreground`).
+- Size `size-2` → `size-2.5` (8 → 10 px). Saba could not find it. It stays absolutely positioned and centred by the existing translate, so nothing else moves.
+- Hover: `hover:scale-125`, with no colour change, because DUX-R-5 reserves the accent for selection, playhead, primary button and focus. No transition is added.
+- The `z-30`, `cursor-move`, `rounded-xs`, `title`, handlers, `data-*` and inline `style` are unchanged.
 
-**New RV-1 reference:** `c-round-162/out/d6/d6-{1440,1280}-r1.json`. C measured it on the published content with `d6.cjs` sha256 `3abc88fe…` (the same tool since round 157).
+**R3 — Overview frame radius:** `rounded-xs` → `rounded-sm` on `arrangement-overview-frame`. Nothing else in `ArrangementOverview.tsx` changes.
 
-**Vitest base:** `b-round-162-r163-vitest-base.txt` (8 files). B ran it at `9a83018`: **197/197** (`b-round-162/out/vitest-base-r163.json`). The tree was clean after the run.
+**R4 — Ableton:** no parity claim. This is a CZABA visibility and contrast fix (WCAG 2.2 1.4.11). See §5.
 
-### 0.2 B rulings (D-29z128; all user-vetoable in `feature-status.md`)
-**R1 — Size (R2'', unchanged):**
-- The float buttons have `text-xs` (12 px), so each icon is `size-2.5` + `strokeWidth={2.4}`.
-- The boxes are fixed, so no gap rule applies.
-- `VIDEO_FLOAT_BUTTON_CLASS` is **byte-identical**: `text-xs` stays (it now sizes no text; recorded with REVIEW-R162-STATIC-CN-DEAD-TEXT for the polish pass).
-- A 10 px icon in a 24 px button is recorded under Q-V3-ICON-SIZE for Saba.
-
-**R2 — Icon mapping:**
-
-| Site | Glyph | Icon | Source |
-|---|---|---|---|
-| Float drag handle | ⠿ | `GripVertical` | **B ruling (spec gap)**, the same as the round-162 audio clip grip: the same 2×3 dots on a move handle. |
-| Expand and return | ⤢ | `Maximize2` **in both states** | **Spec** (⤢ → `Maximize2`, "ვიდეოს გაშლა"). The old glyph did not change between states, and the state stays in `aria-label`/`title`. Alternative for Saba: `Minimize2` in the return state. |
-| Close | ✕ | `X` | **B ruling (spec gap)**, the same as the V-3c-1 search clear. |
-
-**R3 — Sentence glyph rule (SG, from V-3c-1):** a glyph that names a control inside a sentence becomes the word. The close button's `title` is `Close (Esc)`, so the word is "Close".
-
-| Line (`strings.ts`) | Key (`studioVideoStrings`) | Old | New |
-|---|---|---|---|
-| l.304–305 | `expanded` | `'The video is expanded over the library. Drag it where you want; Esc or ✕ brings it back.'` | `'The video is expanded over the library. Drag it where you want; Esc or Close brings it back.'` |
-| l.306–307 | `expandedLibraryOpened` | `'The library opened temporarily for the expanded video; it collapses again when the video closes. Esc or ✕ brings it back.'` | `'The library opened temporarily for the expanded video; it collapses again when the video closes. Esc or Close brings it back.'` |
-
-Every other byte of `strings.ts` is unchanged, including `studioDetailStrings.expandText`/`collapseText` (l.737/738; they belong to V-3c-3b) and every `studioVideoDockStrings` label and title.
-
-**R4 — Accessibility (recorded, not changed):** every `aria-label` and `title` of the three buttons is byte-identical. The icons are `aria-hidden`, so the accessible names stay `Move the video (arrow keys: 16 px)`, `Expand video` / `Return the video to the compact view`, and `Close the expanded video`.
-
-## 1. What changes (exact; line numbers at `9a83018`)
+## 1. What changes (exact; line numbers at `0e4287f`)
 | ID | File | Change |
 |---|---|---|
-| D0 | `ArrangementVideoDock.tsx` imports | Add `import { GripVertical, Maximize2, X } from 'lucide-react';` in Biome order. |
-| D1 | l.974 drag handle | Children `⠿` → `<GripVertical className="size-2.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />`. |
-| D2 | l.987 expand/return | Children `⤢` → `<Maximize2 className="size-2.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />` (both states). |
-| D3 | l.999 close | Children `✕` → `<X className="size-2.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />`. |
-| — | `ArrangementVideoDock.tsx` | **Everything else is byte-identical:** `VIDEO_FLOAT_BUTTON_CLASS`, handlers (`handleFloatPointerDown`, `handleFloatHandleKeyDown`), `data-video-float-handle` / `data-video-float-action`, refs, `aria-*`, `title`, `data-testid`, the placeholder, fades, captions and every other element. |
-| S1 | `strings.ts` | R3: exactly the 2 values. |
-| D4 | `docs/implementation/2026/quarter-IV/131-studio-v3c2-lane-group-clip-icons.md` | Exactly one edit: the status line **l.4** → `**სტატუსი:** Completed (C round 162 PASS; published 9a83018)`. |
-| D5 | **new** `docs/implementation/2026/quarter-IV/132-studio-v3c3a-video-dock-icons.md` | <ul><li>Follows `docs/implementation/TEMPLATE.md`, in Georgian with technical terms in English.</li><li>Contents: the V-3c-3 split, R1–R4, the §0.1 probe table, the pointer-target reasoning, class and children before and after, tests and mutations.</li><li>TODO: V-3c-3b (its inventory), V-3c-4/5, Q-V3-ICON-SIZE (10 px in 24 px), the `Minimize2` alternative, REVIEW-R162-STATIC-CN-DEAD-TEXT (`text-xs` on the float buttons), M1/M3/M4.</li><li>Status: `In Progress (awaiting C round 163)`.</li></ul> |
+| E1 | `ArrangementClipEnvelope.tsx` l.408 (line `svg`) | Remove `text-accent` from the svg class. Every other class, `style`, `viewBox`, `preserveAspectRatio`, `aria-hidden` and `data-testid` is byte-identical. |
+| E2 | `ArrangementClipEnvelope.tsx` l.415–421 (`<polyline>`) | **Two** polylines with the same `points={linePoints}`, `fill="none"` and `vectorEffect="non-scaling-stroke"`. The **first** (halo) has `className="stroke-background"` and `strokeWidth={4}`. The **second** (line) has `className="stroke-foreground"` and `strokeWidth={1.5}`. Neither has a `stroke=` attribute. |
+| E3 | `ArrangementClipEnvelope.tsx` l.367 (point class) | `absolute z-30 size-2.5 -translate-x-1/2 -translate-y-1/2 cursor-move rounded-xs border border-background bg-foreground hover:scale-125`. Nothing else on the point changes. |
+| O1 | `ArrangementOverview.tsx` l.329 (frame class) | `rounded-xs` → `rounded-sm`. Nothing else changes. |
+| D1 | `docs/implementation/2026/quarter-IV/132-studio-v3c3a-video-dock-icons.md` | Exactly one edit: the status line **l.4** → `**სტატუსი:** Completed (C round 163 PASS; published 0e4287f)` (gate-163 review Low 2). |
+| D2 | **new** `docs/implementation/2026/quarter-IV/133-studio-saba-b1-b2-envelope-overview.md` | <ul><li>Follows `docs/implementation/TEMPLATE.md`, in Georgian with technical terms in English.</li><li>Contents: Saba's two reports, B's reproduction numbers (§0.1), the cause of each, R1–R4, the class and markup before and after, the DUX-R-5 coordination, tests and mutations.</li><li>TODO: re-check the envelope contrast in the DUX-R-5 stage; V-3c-3b; V-3c-5 (any panel-radius change must keep the frame radius equal to the root, lock OV1).</li><li>Status: `In Progress (awaiting C round 164)`.</li></ul> |
 
 **Not allowed:**
-- `app/styles/**`, any other component, `package.json`, `~/components/icons`;
-- `style=` (other than the existing computed px styles), custom CSS, a hex value, an arbitrary `[...]` value, or a new token;
-- any surface/colour/radius/border/hover change (V-3c-4);
-- strings other than R3;
-- any change to the pointer, keyboard or focus logic.
+- any other file, including `ArrangementClip.tsx`, `StudioWorkspace.tsx` and `app/styles/**`;
+- a new token, hex, arbitrary `[...]` value, `style=` change, custom CSS, or transition;
+- any change to the envelope gestures (add, drag, delete, guard), the overview gestures, keys or `aria-*`;
+- the Env **button** (`StudioWorkspace.tsx`, asserted `text-accent` at `clip-envelope-ui.test.tsx` l.357). It stays as it is.
 
 ## 2. A — files you own (everything else is frozen)
 | Path | Allowed change |
 |---|---|
-| `app/components/arrangement/ArrangementVideoDock.tsx` | D0–D3 |
-| `app/lib/arrangement/strings.ts` | S1 |
-| `app/lib/arrangement/__tests__/strings.test.ts` | <ul><li>l.839 and l.841 expected values follow R3.</li><li>Add **LG3** after LG2: both sentences equal the R3 values exactly, end with `Esc or Close brings it back.`, and do not match `/[▶◀×▾▸■＋⌫▣⠿⤢✕✓]/u`.</li></ul> |
-| `app/lib/arrangement/__tests__/floating-video.test.tsx` | <ul><li>l.129 and l.131 expected sentences follow R3.</li><li>`it` titles that name glyphs may stay; do not rename them.</li><li>Add **LVD2** (below).</li></ul> |
-| `app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx` | Add **LVD1** (below). Nothing else. |
-| `docs/…/131-studio-v3c2-lane-group-clip-icons.md` | D4 only |
-| **new** `docs/…/132-studio-v3c3a-video-dock-icons.md` | D5 |
+| `app/components/arrangement/ArrangementClipEnvelope.tsx` | E1–E3 |
+| `app/components/arrangement/ArrangementOverview.tsx` | O1 |
+| `app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx` | Add **EV1** (below). Existing tests unchanged. The polyline queries at l.612/736/741/849 read the first polyline; its `points` are identical, so they stay valid. |
+| `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` | Add **OV1** (below). Nothing else. |
+| `docs/…/132-studio-v3c3a-video-dock-icons.md` | D1 only |
+| **new** `docs/…/133-studio-saba-b1-b2-envelope-overview.md` | D2 |
 
 **New locks:**
-- **LVD1, icons** (`video-dock-strings-ui`, the existing `mountDockWorkspace` mount):
-  - Compact: `arrangement-video-expand` holds exactly one `svg.lucide-maximize-2` with `aria-hidden="true"`, class `size-2.5`, `stroke-width` 2.4, and its `textContent` is `''`.
-  - After a click on Expand video: `arrangement-video-drag` holds one `svg.lucide-grip-vertical`, `arrangement-video-expand` holds one `svg.lucide-maximize-2`, and `arrangement-video-close` holds one `svg.lucide-x`. Each has the same props, and each button's `textContent` is `''`.
-  - The three accessible names and titles equal the VDS2 values.
-  - No text inside the dock `section` contains any of `⠿⤢✕`, checked compact and expanded.
-- **LVD2, svg pointer targets** (`floating-video`, the existing `mountFloatWorkspace` mount, expanded):
-  - `pointerDown` on the svg inside `arrangement-video-close`, then on the svg inside `arrangement-video-expand`: `isPointerGestureActive()` stays `false` and the box does not move.
-  - `pointerDown` on the svg inside `arrangement-video-drag`: the gesture becomes active and `document.activeElement` is the drag **button**. A `pointerMove` then `pointerUp` on `window` moves the box by the pointer delta (clamped as in the existing drag tests).
-  - A `click` on the svg inside `arrangement-video-close` returns the video to compact (`data-video-floating="false"`).
+- **EV1, envelope visibility** (`clip-envelope-ui`, the existing workspace mount):
+  - With Env on and a clip that has a point: the line `svg` has exactly 2 `polyline`s with equal `points`.
+  - polyline[0] has class `stroke-background` and `stroke-width` 4. polyline[1] has class `stroke-foreground` and `stroke-width` 1.5. Neither has a `stroke` attribute.
+  - The svg class does not contain `text-accent`.
+  - Every `arrangement-clip-envelope-point` has the class tokens `size-2.5`, `bg-foreground`, `border-background`, `hover:scale-125` and `z-30`. It has none of `bg-accent`, `size-2`, `border-foreground`.
+  - With Env off and the same clip (the line still drawn), the two-polyline rule holds.
+  - On SVG elements `className` is an `SVGAnimatedString`. Read polyline and svg classes with `getAttribute('class')` or `classList.contains`, not `className.includes`.
+- **OV1, overview radius** (`studio-theme-obsidian`, the existing SSR `html` and `classTokensByTestId`, plus the source text if a node has no test id):
+  - `arrangement-overview` and `arrangement-overview-frame` both contain `rounded-sm`, and the frame contains no `rounded-xs`.
+  - The outline overlay div (`pointer-events-none absolute inset-0 rounded-sm border border-outline`) still occurs exactly once in `ArrangementOverview.tsx`.
+  - The point: any later radius change (V-3c-5) must change the root, the overlay and the frame together.
 
 **Read before editing** (`.claude/rules/read-primitives.md`):
-- `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md` and `DESIGN_TOKENS.md`;
-- `AUDIO_ARCHITECTURE.md` and `prompts/studio-feature.md` (Studio file; no audio, video or gesture logic changes);
+- `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md` and `DESIGN_TOKENS.md`;
+- `AUDIO_ARCHITECTURE.md` and `prompts/studio-feature.md` (Studio files; no audio logic changes);
 - `prompts/new-test.md`, `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`;
 - `GEORGIAN_DOCS.md`.
 
-**Protected:** the diff vs `9a83018` stays empty for:
+**Protected:** the diff vs `0e4287f` stays empty for:
 - the purchase and auth files: `studio.$productId.tsx`, `api.studio-token.ts`, `account.downloads.tsx`, `download-routes.test.ts`, `auth*`, `AuthContext.tsx`, `StudioContext.tsx`, `collection.ts`;
 - shared UI and styles: `Modal.tsx`, `Toast.tsx`, `root.tsx`, `CookieConsent.tsx`, `app/styles/**`, `app/components/icons/**`;
-- `StudioWorkspace.tsx`, `ArrangementContext.tsx`, `ArrangementTransport.tsx`, `ArrangementLibrary.tsx`, `ArrangementLibraryPreview.tsx`, `ArrangementLane.tsx`, `ArrangementGroupHeader.tsx`, `ArrangementClip.tsx`, `ArrangementMarkerRow.tsx`, `ArrangementDetailPanel.tsx`, `ArrangementGridMenu.tsx`, `studio-lab.tsx`, docs 127–130;
-- the frozen tests `library-video-return-focus`, `library-focus-handoff`, `export-dialog-focus`, `detail-panel-strings-ui` and `grid-triplet-ui`.
+- `StudioWorkspace.tsx`, `ArrangementContext.tsx`, `ArrangementClip.tsx`, `ArrangementLane.tsx`, `ArrangementVideoDock.tsx`, every other Arrangement component, `studio-lab.tsx`, and docs 127–131.
 
 **Not allowed:** any other file; commit, push, stash, install, revert, or `npm run build`. Every lasting edit goes through Edit/Write (C-R120-01). Shell writes are only for temporary mutations, restored and sha-verified.
 
-**B grep at planning:**
-- The dock glyphs ⠿ ⤢ ✕ appear in source only in `ArrangementVideoDock.tsx` l.974/987/999. "Esc or ✕" appears only in `strings.ts` l.305/307.
-- In tests, the only assertions on them are `strings.test.ts` l.839/841 and `floating-video.test.tsx` l.129/131. Other mentions are `it` titles or labels of `it.each` rows (`['✕', 'close']`), which are not assertions.
-- No e2e spec uses these glyphs.
-- `app/components/marketing/LeadMagnetPopup.tsx` has glyphs too, but it is outside Studio (VISUAL-A covers the Studio root only). It is not in scope.
-
 ## 3. A — tests and commands (speed rules)
-- **Baseline:** run the 8 files in `b-round-162-r163-vitest-base.txt`. Expect 197/197. Save the list as `a-round-163/vitest-files.txt` and the result as `a-round-163/vitest-baseline.json`.
+- **Baseline:** run the 6 files in `b-round-163-r164-vitest-base.txt`. Expect **92/92** (B ran it at `0e4287f`: `b-round-163/out/vitest-base-r164.json`). Save the list as `a-round-164/vitest-files.txt` and the result as `a-round-164/vitest-baseline.json`.
 - **After the edits:**
-  - Run the same 8 files. Expect 197 plus the new `it`s (LVD1, LVD2, LG3), all green.
+  - Run the same 6 files. Expect 92 plus the new `it`s (EV1, OV1), all green.
   - `npm run typecheck`
   - `npm run lint`
-  - A read-only `npx biome check` on the 5 code and test files.
-- **`expect(` counts:** record them per granted test file, before and after. At `9a83018` they are strings 527, floating-video 168, video-dock-strings-ui 27. A drop needs a reason.
-- **Mutations** (Edit → run → restore by Edit → sha256 equals the post-edit hash; one JSON per mutation in `a-round-163/mutations/`):
-  - **m173:** expand icon `Maximize2` → `Minimize2`. LVD1 turns red.
-  - **m174:** drag handle `GripVertical` → `GripHorizontal`. LVD1 turns red.
-  - **m175:** close icon `size-2.5` → `size-3`. LVD1 turns red.
-  - **m176:** put back `Esc or ✕` in `expanded`. LG3 and the floating-video sentence check turn red.
-  - **m177 (guard discriminator):** in `handleFloatPointerDown`, replace `event.target.closest('[data-video-float-action]')` with `event.target.hasAttribute('data-video-float-action')` (keep `instanceof Element`). LVD2 turns red (an svg on ✕ would start a drag), while the existing button-target test stays green. Restore it by Edit and verify the sha.
-  - Do not use a "remove aria-hidden" mutant: it is equivalent (INFO-R160-M160-EQUIVALENT).
+  - A read-only `npx biome check` on the 4 code and test files.
+- **`expect(` counts:** record them per granted test file, before and after. At `0e4287f` they are clip-envelope-ui 136 and studio-theme-obsidian 72. A drop needs a reason.
+- **Mutations** (Edit → run → restore by Edit → sha256 equals the post-edit hash; one JSON per mutation in `a-round-164/mutations/`):
+  - **m178:** line polyline `stroke-foreground` → `stroke-accent`. EV1 turns red.
+  - **m179:** delete the halo polyline. EV1 turns red, and the existing EU5/AL1 line tests stay green. This two-sided check shows that EV1 adds the guard.
+  - **m180:** point `bg-foreground` → `bg-accent`. EV1 turns red.
+  - **m181:** frame `rounded-sm` → `rounded-xs`. OV1 turns red.
 - **Code-reviewer: required** (more than 3 changed files). Pass any Architecture note to B verbatim.
 - **Not run by A:** the full suite, `npm run verify`, the build, e2e, and every browser row.
 - **End:**
-  - The frozen 975 files are OK, and the protected diff vs `9a83018` is empty.
-  - `git status --short` = the changed grants as ` M` (report any grant not needed) + 1 `??` (doc 132), nothing else.
-  - Write `a-round-163/end-sha256.txt` (all changed paths + doc 132) and `a-round-163/diff-vs-start.patch` (vs `b-round-162/r163-granted-start/`, plus doc 132 as new).
+  - The frozen 977 files are OK, and the protected diff vs `0e4287f` is empty.
+  - `git status --short` = the changed grants as ` M` (report any grant not needed) + 1 `??` (doc 133), nothing else.
+  - Write `a-round-164/end-sha256.txt` (all changed paths + doc 133) and `a-round-164/diff-vs-start.patch` (vs `b-round-163/r164-granted-start/`, plus doc 133 as new).
 
 ## 4. C — rows
 **Setup:**
 - Real Playwright Chromium on `http://127.0.0.1:5173/studio-lab`, with a fresh context per session, at 1440×900 and 1280×720.
-- Wait for `document.fonts.ready`. A session with a non-200 Google Fonts response is environment-invalid; replace it at most twice.
-- One cold-Vite first load may be replaced (ENV-FIRST-LOAD-LUCIDE: the new lucide imports can trigger "Invalid hook call").
-- **Harness rules:** a range is made by a clip-body drag (a ruler drag navigates). Escape does not clear a range. Snap off before move measurements.
-- Copy the tools you reuse (`c-round-162/tools/{d6,lib,lib122,h3,wav,report}.cjs`) unchanged into `c-round-163/tools/` and check the d6 sha256. B's probe and its tool copies are in `b-round-162/`.
-- Write nothing under earlier `c-round-*/out/`; every run writes a uniquely named output.
+- Wait for `document.fonts.ready`. A session with a non-200 Google Fonts response is environment-invalid; replace it at most twice. One cold-Vite first load may be replaced (ENV-FIRST-LOAD-LUCIDE).
+- **Harness rules:** Escape does not clear a clip selection. To get a **normal** (unselected) clip, select another clip, as B did with `demo-soft-impact` on `sfx` at 30 s. Snap off before drags.
+- B's tools are in `b-round-163/`. C may copy `saba-sim.cjs` (its `sample()` is the ruled metric) and `saba-probe2.cjs` unchanged into `c-round-164/tools/` and drop the DOM-injection step. Record their sha256. Copy `c-round-163/tools/{d6,lib,lib122,wav,report}.cjs` unchanged, and check that the d6 sha256 is `3abc88fe…`.
+- Write nothing under earlier `c-round-*/out/` or `b-round-*/`. Every run writes a uniquely named output.
 
 | Row | Check |
 |---|---|
-| T163-TARGETED | Re-run `a-round-163/vitest-files.txt`. The counts equal A's, and LVD1, LVD2 and LG3 are present and green. |
-| SOURCE-SCOPE | <ul><li>HEAD is `9a83018`.</li><li>The frozen 975 files are OK at start and at end.</li><li>The end hashes equal `a-round-163/end-sha256.txt`.</li><li>`git status` = the changed grants as ` M` plus doc 132 as `??`, nothing else.</li><li>The protected diff vs `9a83018` is empty (§2 list).</li><li>No source changed during C's phase.</li></ul> |
-| AN-REVIEW | C reads the diff vs `b-round-162/r163-granted-start/` itself:<ul><li>The dock changes only D0–D3.</li><li>`strings.ts` changes only the 2 R3 values.</li><li>The test files change only the listed lines plus LVD1/LVD2/LG3. No assertion is weakened: count `expect(` per file before and after; a drop needs a reason.</li><li>Doc 131 changes only D4, and doc 132 exists with the D5 sections.</li><li>No new `style=`, CSS file, hex, arbitrary `[...]` value, surface change, or pointer/keyboard/focus logic change.</li></ul> |
-| ICON-V3C3A | Both viewports. States: D0-empty, D1-video (`beeps-6s-h264-aac.mp4`), D2-expanded (from D1, click Expand video), and D2 with the library collapsed before expanding (D2-lib-opened).<ul><li>Each visible site has exactly one `svg`, `aria-hidden="true"`, the lucide class from R2 (`lucide-grip-vertical`, `lucide-maximize-2`, `lucide-x`), a rendered box of 10×10 ±0.5 px, and `stroke-width` 2.4.</li><li>Computed `stroke` equals the button's computed `color`: muted at rest, foreground on hover (`hover:text-foreground`).</li><li>Each icon is centred in its 24×24 button (centre delta ≤ 0.5 px).</li><li>No `⠿⤢✕` text in the dock.</li><li>CDP accessible names: `Expand video` in D0/D1; `Move the video (arrow keys: 16 px)`, `Return the video to the compact view` and `Close the expanded video` in D2. Titles unchanged.</li><li>Screenshots of each state at both viewports.</li></ul> |
-| RV1-V3C3A | <ul><li>Run the copied `d6.cjs` (sha256 `3abc88fe…`) unchanged, **one run** per viewport.</li><li>Compare S0/S1/S2 with **`c-round-162/out/d6/d6-{1440,1280}-r1.json`** after applying `b-round-162-r163-d6-key-renames.json` (1 key).</li><li>Expected: no key missing or added apart from that rename, and every x/y/w/h within ±1 px. The probe predicts 0 px.</li><li>A missing or added key outside the map, a collision, or any delta > 1 px is a finding.</li><li>Report the deltas for the three dock buttons and the dock section.</li></ul> |
-| DOCK-STATES-BOX | D0-empty, D1-video and D2-expanded at both viewports, as raw `getBoundingClientRect` values (0.01 px).<ul><li>The **pre-change baseline is B's probe at `9a83018`**: `b-round-162/out/v3c3a-probe.json`, the `"before"` arrays per viewport and state.</li><li>Keys are built by `measure()` in `b-round-162/v3c3a-probe.cjs`; C may reuse it with the same preparation. It strips ⠿⤢✕ from text keys, and every dock button is keyed by `data-testid`, so no rename is expected.</li><li>**Expected added keys:** none. `measure()` skips svg children. **Expected missing keys:** none.</li></ul>**Finding set:** any element delta > 1 px, or any missing or added key. The three buttons must stay 24×24 ±0.5 px. In D2, the expanded box position must equal the baseline (the expand itself is not changed). |
-| FUNC-SMOKE-DOCK | Each control does its real action, at both viewports. **Every pointer action starts on the icon's centre**, read from the svg's rect.<ul><li>**Expand:** with the video loaded, a click on the Maximize2 svg expands the video. The placeholder `Video expanded` shows, the three float buttons appear, and the status reads exactly `The video is expanded over the library. Drag it where you want; Esc or Close brings it back.`</li><li>**Library-opened sentence:** with the library collapsed first, the same click shows exactly `The library opened temporarily for the expanded video; it collapses again when the video closes. Esc or Close brings it back.`</li><li>**Drag:** a pointer drag that starts on the GripVertical svg moves the float box by the drag delta (±1 px, or clamped to the viewport). After the press the drag button has focus. After the release (pointerup), ArrowRight moves the box 16 px. Arrows are ignored during an active drag (`floating-video` l.729), so do not press them before the release.</li><li>**No drag from actions:** a 60 px pointer drag that starts on the X svg, and one that starts on the Maximize2 svg, does not move the box.</li><li>**Close:** a click on the X svg returns the video to compact, and focus goes to the expand button. Expanding again and pressing Esc also returns it. Expanding again and clicking Maximize2 (the return state) also returns it.</li><li>**Real video and audio:** expanded, press Play. The active `<video>` `currentTime` advances by ≥ 0.5 s over 1 s, and the audio tap peak is > 0. Stop. The same `<video>` nodes remain after the return (no remount).</li></ul> |
-| G163-3 | <ul><li>`/studio-lab` is anonymous, with the demo badge.</li><li>`/studio/middle-east` shows "Sign in required", no workspace, 0 `audio[src]`.</li><li>`GET /api/studio-token` returns 401.</li><li>Fake-Bearer 403: BLOCKED (backend unavailable in cloud).</li></ul> |
+| T164-TARGETED | Re-run `a-round-164/vitest-files.txt`. The counts equal A's, and EV1 and OV1 are present and green. |
+| SOURCE-SCOPE | <ul><li>HEAD is `0e4287f`.</li><li>The frozen 977 files are OK at start and at end.</li><li>The end hashes equal `a-round-164/end-sha256.txt`.</li><li>`git status` = the changed grants as ` M` plus doc 133 as `??`, nothing else.</li><li>The protected diff vs `0e4287f` is empty (§2 list).</li><li>No source changed during C's phase.</li></ul> |
+| AN-REVIEW | C reads the diff vs `b-round-163/r164-granted-start/` itself:<ul><li>The envelope changes only E1–E3, and the overview only O1.</li><li>The tests add only EV1/OV1. No assertion is weakened: count `expect(` per file; a drop needs a reason.</li><li>Doc 132 changes only D1. Doc 133 exists with the D2 sections.</li><li>No new token, hex, arbitrary value, `style=` change, transition, or gesture/key/aria change.</li></ul> |
+| ENV-VIS (SABA-B-1) | Both viewports, **deviceScaleFactor 2**. Setup as in §0.1: `demo-middle-east` on `music` at 0 s, `demo-soft-impact` on `sfx` at 30 s, Env on, double-click the body at +160 px, then drag the point about 18 px down.<br>**States:** (a) selected clip; (b) normal clip (the sfx clip selected); (c) hover on the point; (d) the `music` lane muted (B found that a muted lane does not change the clip's rendering, so (d) is expected to equal (b); record it, and do not treat the equality as a finding); (e) a fresh point at **0 dB** (top of the body, partly over the header) on a selected clip; (f) Env off, with the line still drawn.<br>**Computed checks, every state:**<ul><li>2 polylines; the line `stroke` = rgb(236,230,218) and the halo `stroke` = rgb(14,13,12); widths 1.5 and 4.</li><li>The point `background-color` = rgb(236,230,218) and `border-color` = rgb(14,13,12); the box is 10×10 ±0.5 at rest.</li><li>In (c) the computed `scale` is `1.25` and the rendered box is about 12.5 px.</li></ul>**Pixel checks** (the `sample()` metric in `b-round-163/saba-sim.cjs`: ≥ 50 columns of the body, away from the handle, the line core = the brightest pixel in a ±12 device-px band, compared with the darkest pixel within ±5):<ul><li>**line core vs halo ≥ 3:1 in every sampled column** (B's baseline min 1.74; simulated fix min 15.62).</li><li>**handle centre vs its own border ≥ 3:1** (baseline 1.88).</li><li>For the pixels 2 px above and below the handle, max(centre, border) vs that pixel ≥ 3:1.</li></ul>Report min, p10 and median per state, and save a crop of each state at both viewports. Below 3:1 in any state is a FAIL. |
+| ENV-FUNC | The envelope still works, at both viewports.<ul><li>A double-click adds a point (status `Envelope: point added — …`).</li><li>A drag changes the gain (status `Envelope: … dB.`).</li><li>A double-click on the point deletes it.</li><li>Undo and Redo restore it.</li><li>The A key toggles Env.</li></ul>**Real audio** (live playback applies the clip envelope: `graph.client.ts` schedules `envelopeGain` per clip, l.123–143 and l.230): with one point dragged to the bottom (gain 0), Play from 0 for 1 s. The output tap peak must be < 25 % of the peak at the same position with the envelope at 0 dB. |
+| OV-CORNERS (SABA-B-2) | Both viewports, deviceScaleFactor 4. 16×16 CSS-px crops of the 4 corners of `arrangement-overview` in **(a) the empty project** (frame `left 0%`, `width 100%`) and **(b)** with `demo-middle-east` on `music` and the view scrolled to the far right, so the frame touches the right side.<ul><li>Computed `border-radius` of the root, the outline overlay and the frame are all **6px**.</li><li>**Notch metric** (B's tool `b-round-163/notch-metric.cjs`; copy it unchanged and record its sha256). Count the device pixels in the outline band rgb(36,33,30) ±6 that are **not** within 1 device px (8-neighbourhood) of a bright pixel (relative luminance > 0.3). This excludes the anti-aliased edge of the bright arc itself.</li><li>**B's numbers per corner tl/tr/bl/br**, identical at both viewports (`b-round-163/out/notch-baseline-files.json`, `notch-render.json`):<ul><li>baseline (empty project): **3 / 13 / 3 / 15**;</li><li>DOM-simulated `rounded-sm` frame: **1 / 0 / 1 / 0**. The single left pixels are the anti-aliased join of the square overview playhead at 0 % with the curve; they are not the notch.</li></ul></li><li>**Pass:** every corner the frame touches is ≤ 1, and each is below its baseline value. C re-runs the tool on B's baseline crops first, to confirm the baseline numbers. If they differ, the metric run is invalid.</li><li>In state (b), only the corners the frame touches (the right ones) are judged.</li><li>Put the crops side by side with B's.</li></ul> |
+| RV1-SABA | <ul><li>Run the copied `d6.cjs` unchanged, **one run** per viewport.</li><li>Compare S0/S1/S2 with **`c-round-163/out/d6/d6-{1440,1280}-r1.json`**. No key rename is expected.</li><li>Expected: no key missing or added, and every x/y/w/h within ±1 px. B predicts 0 px: the frame changes only its radius, and the envelope handle (8 → 10 px by R2) renders only in Env mode with a point. Env mode is outside d6's S0–S2, so no d6 key covers the handle. Its size is checked in ENV-VIS, not here.</li><li>The contrast sections are unchanged except entries that belong to the overview frame or the envelope, if any. List each changed entry.</li></ul> |
+| OV-FUNC | <ul><li>A drag on the overview still moves the view.</li><li>A double-click fits.</li><li>The arrow keys move the view while the overview has focus.</li><li>The focus ring still shows.</li></ul> |
+| G164-3 | <ul><li>`/studio-lab` is anonymous, with the demo badge.</li><li>`/studio/middle-east` shows "Sign in required", no workspace, 0 `audio[src]`.</li><li>`GET /api/studio-token` returns 401.</li><li>Fake-Bearer 403: BLOCKED (backend unavailable in cloud).</li></ul> |
 | PX-NET / REG-HYD | In every valid session: 0 forbidden requests, 0 Authorization headers, 0 hydration messages, 0 pageerror. The expected cart noise is allowed. |
 
-- **Not re-run** (code unchanged since C verified it in rounds 158–162): the lane, group and clip rows (ICON-V3C2, LANE-STATES-BOX, FUNC-SMOKE-LANE), the library rows (ICON-V3C1, LIB-STATES-BOX), the transport rows (ICON-V3B, SURFACE-STYLE, CASCADE-SCOPE), CONTRAST-V3A and every V-2 row. A new observation about them is a note.
+- **Not re-run** (code unchanged): the V-3c-3a dock rows, V-3c-2 lane rows, V-3c-1 library rows, V-3b transport rows, CONTRAST-V3A and the V-2 rows. A new observation about them is a note.
 - **Gate rows (not C's):** full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
 
 **Neighbours that may break, and the row that checks each:**
 | Neighbour | Row |
 |---|---|
-| Float drag start, handle focus, no drag from action buttons | FUNC-SMOKE-DOCK, LVD2 (T163-TARGETED) |
-| Expand/return/close and Esc focus return | FUNC-SMOKE-DOCK, T163-TARGETED (`library-video-return-focus`, `library-focus-handoff`, `export-dialog-focus`) |
-| Library temporary open/re-collapse sentence | FUNC-SMOKE-DOCK, LG3 |
-| Video playback and audio in the expanded view | FUNC-SMOKE-DOCK (real video and audio) |
-| Dock layout and the float buttons' boxes | RV1-V3C3A, DOCK-STATES-BOX |
+| Envelope add/drag/delete, the double-click guard, the line through the points | ENV-FUNC, T164-TARGETED (EU1–EU7, AL1) |
+| Envelope points capped below the sticky lane header | T164-TARGETED (`track-header-stacking`) |
+| The envelope's real gain on the output | ENV-FUNC (real audio) |
+| Overview frame position, playhead, navigation | OV-FUNC, T164-TARGETED (`view.test.ts`, `navigation-strings-ui`) |
+| Page layout | RV1-SABA |
 
 ## 5. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Lucide icons for the video float drag handle, expand/return and close, sized to the old glyph slot; "Esc or Close" wording | None used. Source: the user-approved `visual-direction-a.md` § „იკონები“. Ableton Live has no video dock of this kind (CZABA's one-video-track scope). | Not checked. | **Not applicable; a CZABA brand decision.** Behaviour, shortcuts, gestures and focus are unchanged. `GripVertical`/`X` are CZABA's choices (R2), not Ableton claims. | Requirement: ICON-V3C3A, RV1-V3C3A, DOCK-STATES-BOX, FUNC-SMOKE-DOCK. Parity: not applicable. |
+| Clip volume envelope line and breakpoint visible on the clip (contrast ≥ 3:1); hover enlarges the breakpoint | Not checked this round. The Live 12 manual chapter "Automation and Editing Envelopes" covers clip envelopes, but B did not open it this planning, so **no Ableton claim is made**. | Not checked. | **CZABA visibility fix** for Saba's report, under WCAG 2.2 1.4.11. The colours follow the Obsidian tokens and DUX-R-5, not Live. | Requirement: ENV-VIS, ENV-FUNC. Parity: unverified, not claimed. |
+| Overview frame corners | Not applicable; a visual defect in CZABA's own overview. | — | — | OV-CORNERS. Parity: not applicable. |
 
 ## 6. Evidence and reporting
-- **A:** `a-round-163.md`, `a-round-163-result.json` and `a-round-163/` (vitest JSON and list, mutations, end-sha256, diff patch, `expect(` counts).
-- **C:** `c-round-163.md` and `c-round-163.json` with `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `notRun` and `invalidRuns`. Include the ICON-V3C3A, RV1-V3C3A and DOCK-STATES-BOX tables (both viewports). Put tools, out and shots in `c-round-163/`.
+- **A:** `a-round-164.md`, `a-round-164-result.json` and `a-round-164/` (vitest JSON and list, mutations, end-sha256, diff patch, `expect(` counts).
+- **C:** `c-round-164.md` and `c-round-164.json` with `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `notRun` and `invalidRuns`. Include the ENV-VIS table (state × viewport: min/p10/median, handle ratios) and the OV-CORNERS notch counts (baseline vs after). Put tools, out and shots in `c-round-164/`.
 - Write the reports as you go; the job can stop at its time limit.
 
-## 7. Outcome, fixed in advance (B at round 164 planning)
-| Condition | Round 164 |
+## 7. Outcome, fixed in advance (B at round 165 planning)
+| Condition | Round 165 |
 |---|---|
 | B plans on or after **2026-10-27** | The **REGRESSION round** comes first: every done / c_pass item, both viewports, plus `npm run test:e2e:smoke`. Then the row below applies. |
-| C FAIL Critical / High / Medium | A bounded fix-up (≤ 3 related bugs), same owner. |
-| C FAIL on RV1-V3C3A / DOCK-STATES-BOX (> 1 px) | B re-plans with C's measurements within R1, or records Q-V3-ICON-SIZE as needing Saba. It is not deferred silently. |
-| C FAIL Low only | A bounded fix-up if it is in V-3c-3a's own code and cheap; otherwise `deferred_low_polish`, and V-3c-3b goes ahead. |
-| C PASS | Root publishes round 163. V-3c-3a → **მზადაა**. Round 164 = **V-3c-3b** (marker row ◀ ▶, detail Expand/Collapse, grid menu ✓, `← CZABA`; B probes at planning), unless the regression is due. |
+| C FAIL on ENV-VIS or OV-CORNERS | A bounded fix-up, same owners. SABA-B-1/2 stay ბაგია. If the ruled halo or radius cannot reach the target, B re-plans with C's numbers. The target is not weakened. |
+| C FAIL on another Critical / High / Medium | A bounded fix-up (≤ 3 related bugs). |
+| C FAIL Low only | A fix-up if it is in this round's code and cheap; otherwise `deferred_low_polish`. |
+| C PASS | Root publishes round 164. SABA-B-1 and SABA-B-2 → closed (C evidence). Round 165 = **ROOT-RECON-MARKER-ENTER**: a test-first check of Enter during an active pointer gesture in the marker editor; a fix only if the test reproduces it. Round 166 = **V-3c-3b**. |
 
-At every planning, B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md`, and whether the checkpoint answer has arrived.
+At every planning, B checks the decision files in `user-review/`, and whether the checkpoint answer has arrived.
 
 ## 8. Root notes
-- **Gate:** on a C PASS, publish round 163: the changed granted paths plus the new doc 132, vs `9a83018`. `app/styles/**`, `root.tsx`, `Modal.tsx`, `Toast.tsx`, `CookieConsent.tsx`, `StudioWorkspace.tsx`, `ArrangementContext.tsx`, `collection.ts`, the other Arrangement components and the purchase/auth files are unchanged.
-- **Checkpoint:** `b-round-160-checkpoint-request.md` is still open. It is non-blocking for V-3c-1..3. It is the input B needs before V-3c-4 (surfaces); without an answer by then, B applies fallback (c), copies locked by tests, and records it. The round-162 review's architecture note was "none". No new request is warranted: V-3c-3b's StudioWorkspace grant will be a one-line children change, not a structural signal.
-- **User-visible decisions (may be vetoed in `feature-status.md`):** R2 (`GripVertical` handle, `X` close, `Maximize2` also in the return state; alternative `Minimize2`), R3 (`Esc or Close brings it back`), R1 (10 px icon in a 24 px button, under Q-V3-ICON-SIZE).
+- **Gate:** on a C PASS, publish round 164: the changed granted paths plus the new doc 133, vs `0e4287f`. Everything else is unchanged.
+- **Checkpoint:** `b-round-160-checkpoint-request.md` is still open. It does not block this round. It is the input B needs before V-3c-4 (surfaces); without an answer by then, B applies fallback (c).
+- **User-visible decisions (may be vetoed in `feature-status.md`):** R1 (white line with a dark halo), R2 (white 10 px handle with a dark border, enlarged on hover), R3 (6 px frame radius).

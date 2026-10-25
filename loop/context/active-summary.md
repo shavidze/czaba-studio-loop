@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T11:13:08.685Z)
+# Active loop summary (2026-10-25T11:55:18.880Z)
 
-- backlog.json 1428 KB -> active view 195 KB
-- status: G_ROOT_GATE round 162
-- servers: `{"checkedUtc":"2026-10-25T10:49:46.1059615Z","round":162,"attempt":1,"store":200}`
-- last publication: 9a83018e914f745dfbe06a7c075a23f8b7c93e07 (rounds 162-162)
-- last root gate: round 162 published - commit 9a83018e914f745dfbe06a7c075a23f8b7c93e07 pushed
+- backlog.json 1436 KB -> active view 197 KB
+- status: G_ROOT_GATE round 163
+- servers: `{"checkedUtc":"2026-10-25T11:39:50.1910266Z","round":163,"attempt":1,"store":200}`
+- last publication: 0e4287f423d287a1a7b4fc885ae7f1a14bdc5788 (rounds 163-163)
+- last root gate: round 163 published - commit 0e4287f423d287a1a7b4fc885ae7f1a14bdc5788 pushed
 
 ## Current items: -
 
@@ -359,9 +359,11 @@
 - INFO-R160-M160-EQUIVALENT / info / acknowledged: lucide-react 0.561 renders aria-hidden=true by default (Icon.js l.32-33); remove-aria-hidden mutants are equivalent; use aria-hidden=false (m160b) in future lists / m160 equivalent mutant
 - A11Y-R161-PREVIEW-NAMES / info / signal (not a finding; for the polish pass; D-29z126 R5) / after V-3c-1 the preview toggle is named Preview/Stop inside the region Preview and the Add button is named Add
 - TITLE-GLYPHS-FROZEN-TESTS / info / open - polish pass (doc 130 TODO) / it/describe titles in floating-video, library-focus-handoff, library-video-return-focus mention ◀ ▶ × although the library renders icons aft
-- ARCH-CHECKPOINT-V3C / info / requested_from_root (b-round-160-checkpoint-request.md, 2026-10-25; consolidates pending 148/155/157/158 + ARCH-R158-TOOL-BUTTON-RECIPE + ARCH-R159-GLOBAL-TRANSITION-COUPLING + ARCH-R160-TRANSPORT-ICON-TRIPLE); non-blocking for V-3c-1..3; input for V-3c-4 (fallback (c) if unanswered); still unanswered at round 162 planning (2026-10-25) / bounded frontend-architect checkpoint before V-3c surfaces
+- ARCH-CHECKPOINT-V3C / info / requested_from_root (b-round-160-checkpoint-request.md, 2026-10-25; consolidates pending 148/155/157/158 + ARCH-R158-TOOL-BUTTON-RECIPE + ARCH-R159-GLOBAL-TRANSITION-COUPLING + ARCH-R160-TRANSPORT-ICON-TRIPLE); non-blocking for V-3c-1..3; input for V-3c-4 (fallback (c) if unanswered); still unanswered at round 162 planning (2026-10-25); still unanswered at round 163 planning (2026-10-25); round 162 architecture note: none / bounded frontend-architect checkpoint before V-3c surfaces
 - ARCH-R161-ICON-RECIPE / info / signal (not scheduled): proposal for a bounded studio-icon size/stroke constant module after V-3c-3, only worth it if Q-V3-ICON-SIZE (a) is chosen; attach to ARCH-CHECKPOINT-V3C / R2'' icon class recipe repeated at 10 sites (library) and ~8 more owners in V-3c-2/3
 - INFO-C161-BRAND-EQ-ACCENT / info / signal for V-3c-4 / polish: brand and accent compute to the same rgb(201,164,106) in the Studio scope, so Stop (accent) and Preview (brand) differ only by border/hover classes / 
+- INFO-R162-CLIP-SVG-DOM / info / signal (not scheduled): measure DOM node count with many clips in a later performance pass / each clip header now mounts an svg with child paths instead of one text span (memo unchanged)
+- INFO-C162-VIDEO-INPUT-MULTIPLE / info / note (pre-existing, unchanged by round 162) / the video import file chooser reports isMultiple=true; choosing one file places one clip
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
