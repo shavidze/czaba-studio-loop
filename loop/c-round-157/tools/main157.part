@@ -1,0 +1,217 @@
+// ===== C round 157 main: TEXT-BYTES-E, MONO-STYLE-N13..N16, LAYOUT-FIT-E, CSS2-TRIM (in-page), FONT-INVENTORY, FUNC-SMOKE-E. node c157.cjs <1440|1280> [label]
+const R4 = 'https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&family=Noto+Sans+Georgian:wght@400;500&display=swap';
+const WAVL = require('./wav.cjs');
+const DESC = { sel: '#arrangement-export-title + p' };
+const POPT = { sel: 'label:has([data-testid=arrangement-export-scope-project]) > span' };
+const ROPT = { sel: 'label:has([data-testid=arrangement-export-scope-range]) > span' };
+const LNOTE = { sel: '[data-testid=arrangement-export-loop-note]' };
+const ref = {
+  project: (s, e) => `Entire project · ${s} — ${e}`,
+  range: (s, e, sec) => `Time selection · ${s} — ${e} (${sec})`,
+  loopRange: (s, e, sec) => `Loop does not change the export — the time selection is exported (${s} — ${e}, ${sec}).`,
+  loopProject: (s, e) => `Loop does not change the export — the entire project is exported (${s} — ${e}).`,
+};
+const secTxt = (a, b) => `${(b - a).toFixed(3)} s`;
+async function siteX(p, name, spec, text, monos) {
+  const r = await site(p, name, spec, { text, monos });
+  if (!r.present) return r;
+  r.secondsInSpan = await p.evaluate(({ sel }) => { const root = [...document.querySelectorAll(sel)].find((e) => e.getClientRects().length); return root ? [...root.querySelectorAll('span')].filter((s) => / s\)|\d s/.test(s.textContent)).map((s) => s.className) : null; }, spec);
+  r.nMono = r.monos.length;
+  r.ok = r.bytesEqual && r.monosOk && r.monoStyleOk && r.nMono === 2 && r.secondsInSpan.length === 0 && r.otherMonoClasses.length === 0 && !/Plex/.test(r.rootStyle.family);
+  return r;
+}
+async function axName(p, testid) {
+  const cdp = await p.context().newCDPSession(p);
+  await cdp.send('DOM.enable'); await cdp.send('Accessibility.enable');
+  const { root } = await cdp.send('DOM.getDocument', { depth: -1 });
+  const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: `[data-testid=${testid}]` });
+  if (!nodeId) { await cdp.detach(); return null; }
+  const { nodes } = await cdp.send('Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false });
+  await cdp.detach();
+  const n = nodes[0]; return { role: n.role && n.role.value, name: n.name && n.name.value, checked: (n.properties || []).find((x) => x.name === 'checked')?.value?.value };
+}
+const projEnd = (p) => p.evaluate(() => document.querySelector('[data-testid=arrangement-project-end]').textContent.trim());
+const dlgOpen = (p) => p.locator('#arrangement-export-title').count();
+async function openE(p) { await L.blur(p); await p.getByRole('button', { name: 'Export', exact: true }).click(); await p.waitForSelector('#arrangement-export-title', { timeout: 10000 }); await sleep(500); }
+async function escE(p) { await p.keyboard.press('Escape'); await sleep(500); return (await dlgOpen(p)) === 0; }
+async function scope(p, s) { await p.click(`[data-testid=arrangement-export-scope-${s}]`); await sleep(300); }
+async function fitFooter(p) {
+  return p.evaluate(() => {
+    const f = document.querySelector('[data-testid=arrangement-export-footer]').getBoundingClientRect();
+    const a = document.activeElement; const ab = a ? a.getBoundingClientRect() : null;
+    const body = document.querySelector('[data-testid=arrangement-export-footer]').parentElement;
+    let sc = body; while (sc && sc !== document.body && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
+    return { footerTop: +f.top.toFixed(1), active: a && (a.dataset.testid || a.tagName), activeBox: ab && [ab.top, ab.bottom].map((v) => +v.toFixed(1)), covered: ab ? ab.bottom > f.top + 0.5 : null, scroller: sc ? { st: sc.scrollTop, sh: sc.scrollHeight, ch: sc.clientHeight } : null };
+  });
+}
+async function focusByTab(p, testid, max = 30) {
+  for (let i = 0; i < max; i++) { await p.keyboard.press('Tab'); await sleep(60); const t = await p.evaluate(() => document.activeElement && document.activeElement.dataset.testid); if (t === testid) return i + 1; }
+  return -1;
+}
+async function invState(p, name) {
+  const els = await p.evaluate(inventory);
+  const o = { name, w700: els.filter((e) => e.weight >= 700), w600: els.filter((e) => e.weight === 600).map((e) => ({ text: e.text, tag: e.tag, testid: e.nearestTestid, inDialog: e.inDialog, family: e.family.slice(0, 20) })), plex: await plexScan(p, name), faces: await facesLoaded(p) };
+  o.badFaces = (await facesAll(p)).filter((f) => /^Instrument Sans 700|^IBM Plex Mono 500/.test(f));
+  o.toast = await p.evaluate(() => [...document.querySelectorAll('[role=alert],[role=status]')].filter((e) => !e.closest('.studio-container') && e.getClientRects().length).map((e) => e.textContent.trim().slice(0, 80)));
+  o.ok = o.w700.length === 0 && o.plex.plex500plus.length === 0 && o.badFaces.length === 0;
+  return o;
+}
+async function doExport(p, log, name, sc) {
+  await openE(p); await p.click('[data-testid=arrangement-export-format-wav]'); await scope(p, sc);
+  const btn = p.locator('[data-testid=arrangement-export-footer] button').filter({ hasText: /^Export WAV$/ });
+  const n0 = log.downloads.length;
+  const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 240000 }), btn.first().click()]);
+  const dst = path.join(L.OUT, `${LBL}-${name}.wav`); await dl.saveAs(dst); await sleep(1500);
+  const nDl = log.downloads.length - n0;
+  const msg = await p.evaluate(() => (document.querySelector('[data-testid=arrangement-export-footer] [role=status],[data-testid=arrangement-export-footer] [role=alert]') || {}).textContent || null);
+  await escE(p);
+  const buf = fs.readFileSync(dst); const w = WAVL.parse(buf); const s = WAVL.stats(w);
+  const sr = w.fmt.sr, ch = w.fmt.ch, fsMax = w.fmt.tag === 3 ? 1 : Math.pow(2, w.fmt.bits - 1);
+  const dataBytes = buf.length - 44;
+  return { suggested: dl.suggestedFilename(), nDownloads: nDl, msg, bytes: buf.length, riff: w.riff, fmt: w.fmt, frames: w.frames, seconds: +w.seconds.toFixed(5), nan: s.nan, full: s.full, peak: +s.peak.toFixed(4), rms: +s.rms.toFixed(5) };
+}
+
+(async () => {
+  const b = await L.launch();
+  try {
+    const { page: p, log } = await L.openStudio(b, X.VPS[W], LBL, net, { extraInit: X.tapInit });
+    await p.mouse.move(2, 2); await sleep(300); res.fontsWait = log.fontsReady;
+    await sec('css2Dom', async () => {
+      const links = await p.evaluate(() => [...document.querySelectorAll('link[rel=stylesheet]')].map((l) => l.href).filter((h) => /fonts\.googleapis/.test(h)));
+      return { links, exactR4: links.length === 1 && links[0] === R4 };
+    });
+    await sec('css2Body', async () => {
+      const txt = await p.evaluate(async (u) => (await fetch(u)).text(), R4);
+      const blocks = [...txt.matchAll(/@font-face\s*{([^}]*)}/g)].map((m) => ({ fam: (/font-family:\s*'([^']+)'/.exec(m[1]) || [])[1], w: (/font-weight:\s*(\d+)/.exec(m[1]) || [])[1], url: (/url\(([^)]+)\)/.exec(m[1]) || [])[1] }));
+      const counts = {}; for (const x of blocks) { const k = `${x.fam} ${x.w}`; counts[k] = (counts[k] || 0) + 1; }
+      const map = Object.fromEntries(blocks.map((x) => [x.url, `${x.fam} ${x.w}`]));
+      fs.writeFileSync(path.join(L.OUT, `${LBL}-css2.txt`), txt);
+      return { nBlocks: blocks.length, counts, keys: Object.keys(counts).sort(), map };
+    });
+    await sec('invS0', async () => invState(p, 'S0'));
+    await sec('snap', () => L.setSnapOff(p));
+    await sec('clips', async () => [await L.addAt(p, 'demo-hero-music', 'music', 0), await L.addAt(p, 'demo-stem-pulse', 'stems', 2), await L.addAt(p, 'demo-soft-impact', 'sfx', 4)].map((r) => r.status));
+    await sec('table0', async () => H.brief(await H.cl(p)));
+    await sec('projectEnd', () => projEnd(p));
+    await sec('play2s', async () => {
+      await L.blur(p); await p.keyboard.press('Home'); await sleep(300); const ph0 = await L.posNow(p);
+      await p.evaluate(() => window.__tapStart()); await p.keyboard.press('Space'); await sleep(2000); await p.keyboard.press('Space'); const S = await p.evaluate(() => window.__tapStop()); await sleep(400);
+      return { ph0, ph1: await L.posNow(p), peak: +S.reduce((a, s) => Math.max(a, s.peak), 0).toFixed(4), nTap: S.length };
+    });
+    // (a) no range
+    await sec('A_noRange', async () => {
+      await L.blur(p); await p.keyboard.press('Escape'); await sleep(200);
+      const pe = await projEnd(p); await openE(p);
+      const t = ref.project('00:00.000', pe);
+      const n13 = await siteX(p, 'N13-desc-noRange', DESC, t, ['00:00.000', pe]);
+      const n14 = await siteX(p, 'N14-projOpt-noRange', POPT, t, ['00:00.000', pe]);
+      const ax = { project: await axName(p, 'arrangement-export-scope-project'), range: await axName(p, 'arrangement-export-scope-range') };
+      const rr = await p.getByRole('radio', { name: t, exact: true }).count();
+      const sh = await shot(p, 'c157-export-noRange');
+      const closed = await escE(p);
+      return { pe, t, n13, n14, ax, axProjOk: ax.project && ax.project.name === t, getByRoleCount: rr, shot: sh, closedByEscape: closed };
+    });
+    await sec('rangeBody', async () => {
+      const hero = await H.byLane(p, 'music'); res.heroId = hero.id;
+      const st = await X.rangeDrag(p, hero.id, 3, 5); await p.mouse.move(2, 2); await sleep(250);
+      return { status: st, det: await H.range(p) };
+    });
+    const R = () => res.rangeBody.det; const rs = () => R().start, re = () => R().end;
+    await sec('B_range', async () => {
+      await openE(p);
+      const s = rs(), e = re(); const sec2 = secTxt(X.parseT(s), X.parseT(e)); const t = ref.range(s, e, sec2);
+      const n13 = await siteX(p, 'N13-desc-range', DESC, t, [s, e]);
+      const n15 = await siteX(p, 'N15-rangeOpt', ROPT, t, [s, e]);
+      const pe = await projEnd(p); const tp = ref.project('00:00.000', pe);
+      const n14 = await siteX(p, 'N14-projOpt-withRange', POPT, tp, ['00:00.000', pe]);
+      const ax = { project: await axName(p, 'arrangement-export-scope-project'), range: await axName(p, 'arrangement-export-scope-range') };
+      const sh = await shot(p, 'c157-export-range');
+      await scope(p, 'project');
+      const n13p = await siteX(p, 'N13-desc-afterProject', DESC, tp, ['00:00.000', pe]);
+      await scope(p, 'range');
+      const n13r = await siteX(p, 'N13-desc-backRange', DESC, t, [s, e]);
+      const closed = await escE(p);
+      return { s, e, t, tp, isExact3to5: s === '00:03.000' && e === '00:05.000', n13, n15, n14, ax, axOk: ax.range && ax.range.name === t && ax.project && ax.project.name === tp, n13p, n13r, shot: sh, closed };
+    });
+    await sec('C_loop', async () => {
+      const st = await X.key(p, 'Control+l'); await sleep(300);
+      const loopTimes = await p.evaluate(() => (document.querySelector('[data-testid=arrangement-loop-times]') || {}).textContent || null);
+      if (W === 1440) res.invRangeLoop = await invState(p, 'range+loop');
+      // master mute on for the Export inventory state
+      await p.click('[data-testid=arrangement-master] button[aria-label="Master Mute"]'); await sleep(250);
+      await openE(p);
+      const s = rs(), e = re(); const sec2 = secTxt(X.parseT(s), X.parseT(e));
+      const n16r = await siteX(p, 'N16-loop-range', LNOTE, ref.loopRange(s, e, sec2), [s, e]);
+      const muteNote = await p.evaluate(() => { const n = document.querySelector('[data-testid=arrangement-export-master-mute]'); return n && { text: n.textContent, spans: n.querySelectorAll('span').length, family: getComputedStyle(n).fontFamily.slice(0, 20) }; });
+      const lay = {};
+      for (const [k, sp] of Object.entries({ desc: DESC, proj: POPT, range: ROPT, loop: LNOTE })) { const r = await site(p, `fit-${k}`, sp, null); lay[k] = r.present ? r.fit : null; }
+      const inv = W === 1440 || true ? await invState(p, 'export-range-loop-mute') : null;
+      const sh = await shot(p, 'c157-export-range-loop-mute');
+      // footer cover: Tab to the range radio and project radio
+      await p.focus('[data-testid=arrangement-export-format-wav]'); await sleep(100);
+      await p.focus('[data-testid=arrangement-export-scope-range]'); await sleep(250); const fRange = await fitFooter(p);
+      await p.focus('[data-testid=arrangement-export-format-wav]'); await sleep(100); const tabs = await focusByTab(p, 'arrangement-export-scope-range'); await sleep(250); const fRangeTab = await fitFooter(p);
+      const sh2 = await shot(p, 'c157-export-range-focused');
+      await scope(p, 'project');
+      const pe = await projEnd(p);
+      const n16p = await siteX(p, 'N16-loop-project', LNOTE, ref.loopProject('00:00.000', pe), ['00:00.000', pe]);
+      const closed = await escE(p);
+      await p.click('[data-testid=arrangement-master] button[aria-label="Master Mute"]'); await sleep(250);
+      const masterMuted = await p.getAttribute('[data-testid=arrangement-master] button[aria-label="Master Mute"]', 'aria-pressed');
+      return { st, loopTimes, n16r, n16p, muteNote, lay, inv, fRange, tabs, fRangeTab, shot: sh, shot2: sh2, closed, masterMutedAfter: masterMuted };
+    });
+    await sec('C_loopNoRange', async () => {
+      await L.blur(p); await p.keyboard.press('Escape'); await sleep(300); await p.keyboard.press('Escape'); await sleep(300);
+      const hasRange = await p.evaluate(() => !!document.querySelector('[data-testid=arrangement-range]'));
+      const loopTimes = await p.evaluate(() => (document.querySelector('[data-testid=arrangement-loop-times]') || {}).textContent || null);
+      await openE(p);
+      const pe = await projEnd(p);
+      const n13 = await siteX(p, 'N13-desc-loopNoRange', DESC, ref.project('00:00.000', pe), ['00:00.000', pe]);
+      const n16 = await siteX(p, 'N16-loop-noRange', LNOTE, ref.loopProject('00:00.000', pe), ['00:00.000', pe]);
+      const rangeDisabled = await p.evaluate(() => document.querySelector('[data-testid=arrangement-export-scope-range]').disabled);
+      const sh = await shot(p, 'c157-export-loop-noRange');
+      const closed = await escE(p);
+      return { hasRange, loopTimes, n13, n16, rangeDisabled, shot: sh, closed };
+    });
+    if (W === 1440) {
+      await sec('invStates', async () => {
+        const o = {};
+        await L.selectClip(p, res.heroId); await X.openDetail(p); await sleep(300); o.selClipDetail = await invState(p, 'selClip+detail'); await p.keyboard.press('Escape'); await sleep(200);
+        const hero = await H.byLane(p, 'music'); await X.rangeDrag(p, hero.id, 3, 5); await p.mouse.move(2, 2); await sleep(200); o.range = await invState(p, 'range');
+        await X.key(p, 'Control+Shift+L'); o.allTracks = await invState(p, 'allTracks'); await X.key(p, 'Escape'); await X.key(p, 'Escape');
+        await L.seekTo(p, 1); await L.blur(p); await p.keyboard.press('m'); await sleep(400); await p.keyboard.press('Enter'); await sleep(400); await L.blur(p);
+        const mk = p.locator('[data-testid=arrangement-marker]').first(); const mb = await mk.boundingBox(); await p.mouse.click(mb.x + mb.width / 2, mb.y + mb.height / 2, { button: 'right' }); await sleep(500);
+        o.markerMenuOpen = await p.locator('[data-testid=arrangement-marker-menu]').count(); o.markerMenu = await invState(p, 'markerMenu'); await shot(p, 'c157-inv-markermenu'); await p.keyboard.press('Escape'); await sleep(300);
+        const lb = await laneBox(p, 'sfx'); await p.mouse.click(await X.tx(p, 9), lb.y + lb.height / 2, { button: 'right' }); await sleep(500);
+        o.gridMenuOpen = await p.locator('[data-testid=arrangement-grid-menu]').count(); o.gridMenu = await invState(p, 'gridMenu'); await shot(p, 'c157-inv-gridmenu'); await p.keyboard.press('Escape'); await sleep(300);
+        await p.click('[role=option][data-source-id="demo-soft-impact"]'); await sleep(500);
+        await p.click('[data-testid=arrangement-library-preview-toggle]'); await sleep(500);
+        o.previewTxt = await p.locator('[data-testid=arrangement-library-preview-toggle]').innerText(); o.preview = await invState(p, 'libraryPreview'); await shot(p, 'c157-inv-preview');
+        await p.click('[data-testid=arrangement-library-preview-toggle]'); await sleep(300);
+        return o;
+      });
+    }
+    // FUNC-SMOKE-E exports
+    await sec('expRange', async () => {
+      const hero = await H.byLane(p, 'music'); await X.rangeDrag(p, hero.id, 3, 5); await p.mouse.move(2, 2); await sleep(250);
+      const det = await H.range(p); const r = await doExport(p, log, 'range', 'range');
+      const want = X.parseT(det.end) - X.parseT(det.start);
+      return { det, ...r, want, durOk: Math.abs(r.seconds - want) <= 0.001 && r.nDownloads === 1 && r.peak > 0 && r.nan === 0 };
+    });
+    await sec('expProject', async () => {
+      const pe = await projEnd(p); const r = await doExport(p, log, 'project', 'project');
+      return { pe, ...r, want: X.parseT(pe), durOk: Math.abs(r.seconds - X.parseT(pe)) <= 0.001 && r.nDownloads === 1 && r.peak > 0 && r.nan === 0 };
+    });
+    await sec('closeFocus', async () => {
+      await openE(p); await p.locator('button', { hasText: /^Done$/ }).last().click(); await sleep(500);
+      const a1 = await p.evaluate(() => ({ open: !!document.querySelector('#arrangement-export-title'), active: document.activeElement && document.activeElement.textContent.trim().slice(0, 20), tag: document.activeElement && document.activeElement.tagName }));
+      await openE(p); await p.keyboard.press('Escape'); await sleep(500);
+      const a2 = await p.evaluate(() => ({ open: !!document.querySelector('#arrangement-export-title'), active: document.activeElement && document.activeElement.textContent.trim().slice(0, 20), tag: document.activeElement && document.activeElement.tagName }));
+      return { done: a1, escape: a2, ok: !a1.open && !a2.open && a1.active === 'Export' && a2.active === 'Export' };
+    });
+    await sec('facesEnd', async () => ({ loaded: await facesLoaded(p), all: await facesAll(p) }));
+    res.fontReqs = log.fontResp;
+  } catch (e) { res.errors.push(String(e.stack || e)); }
+  res.net = X.netOk(net); res.fontNet = net.map((n) => ({ n: n.fontResp.length, non200: n.fontResp.filter((r) => r.s !== 200), fail: n.fontFail }));
+  save(); console.log(JSON.stringify({ vp: W, errors: res.errors, net: res.net, fontNet: res.fontNet.map((f) => ({ n: f.n, non200: f.non200.length, fail: f.fail.length })) }, null, 1)); await b.close();
+})();

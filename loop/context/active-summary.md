@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T06:04:30.739Z)
+# Active loop summary (2026-10-25T06:53:10.214Z)
 
-- backlog.json 1393 KB -> active view 185 KB
-- status: G_ROOT_GATE round 156
-- servers: `{"checkedUtc":"2026-10-25T05:45:05.6635183Z","round":156,"attempt":1,"store":200}`
-- last publication: cbcd3d9446e9d61e9e1a23de5989ca6f80f3f6f9 (rounds 156-156)
-- last root gate: round 156 published - commit cbcd3d9446e9d61e9e1a23de5989ca6f80f3f6f9 pushed
+- backlog.json 1397 KB -> active view 186 KB
+- status: G_ROOT_GATE round 157
+- servers: `{"checkedUtc":"2026-10-25T06:28:46.5742789Z","round":157,"attempt":1,"store":200}`
+- last publication: f8a316a583663e9715207727d7b997323fa97019 (rounds 157-157)
+- last root gate: round 157 published - commit f8a316a583663e9715207727d7b997323fa97019 pushed
 
 ## Current items: -
 
@@ -340,10 +340,12 @@
 - B-R153-CSS2-TRIM / info / evidence complete (C round 155 PLEX500-INVENTORY + COOKIE-SOURCE PASS); scheduled V-2b-3b (round 157 on V-2b-3a PASS); trim = Instrument Sans 700 + Plex Mono 500, 600 stays / after V-2b-2, Instrument Sans 600/700 and Plex Mono 500 may be unused on /studio-lab; trim css2 URL + TH7 only with C evidence of zero consu
 - C-R153-D6-TEMPO-ROW-TESTID / info / tool note (C d6 PANELS key arrangement-tempo-row matches nothing; tempo header measured directly) / d6 does not cover the tempo row panel; not an app defect
 - C-R153-SR-UPPERCASE / info / open_tech_lead_manual (real screen reader not available in cloud) / whether a screen reader spells CSS-uppercase labels letter by letter is untested; AX names unchanged
-- B-R154-V2B3-MISSED-TIMECODES / info / absorbed_v2b3a_round_156 / two timecodes inside sentence strings in ArrangementLane.tsx missed by the round-154 N list: library drop ghost start (l.894-902) and all-tr
-- B-R155-V2B3-MISSED-TIMECODES / info / scheduled_v2b3a_round_156 / two more visible timecodes inside sentences missed by both earlier V-2b-3 lists: per-clip range badge (ArrangementClip.tsx l.934) and video 
-- B-R155-EXPORT-ZERO / low / deferred_low_polish / Export ModalDescription project scope passes 0:00 (ArrangementExportDialog.tsx l.267) while the project scope option passes 00:00.000 (l.395
-- ARCH-CHECKPOINT-V2 / info / requested (b-round-155-checkpoint-request.md, with pending b-round-148-checkpoint-request.md); non-blocking / bounded frontend-architect checkpoint at the V-2 boundary: source-level class locks (TH8/TH10/TH11) and part-templating shape
+- B-R155-EXPORT-ZERO / low / scheduled_round_157 (D-29z122 R3: owned line, cheap fix under the 2026-10-23 rule; closes on C TEXT-BYTES-E (a)) / Export ModalDescription project scope passes 0:00 (ArrangementExportDialog.tsx l.267) while the project scope option passes 00:00.000 (l.395
+- ARCH-CHECKPOINT-V2 / info / requested (b-round-155-checkpoint-request.md, with pending b-round-148-checkpoint-request.md); non-blocking | round 157 planning: still unanswered, not re-requested; V-2b-3b reuses the round-156 shape; suggested run point = V-2b end (round 157 PASS), before V-3 / bounded frontend-architect checkpoint at the V-2 boundary: source-level class locks (TH8/TH10/TH11) and part-templating shape
+- C-R156-OBS-RULER-DRAG-WORDING / info / applied as harness rule in round 157 task section 4 (time selection via clip-body or lane drag) / round-156 TEXT-BYTES (a) said 'ruler drag 3 s -> 5 s'; a ruler drag navigates the view in this build
+- C-R156-OBS-RANGE-UNDO-SELECTION / info / signal (pre-existing, code unchanged; Live 12 behaviour unconfirmed; product question for the polish/ABL triage, not scheduled) / Ctrl+Z after a range Delete restores the clips but does not re-show the time selection
+- C-R156-OBS-LABEL-OVERLAY / info / evidence added to C-R154-GHOST-TITLE (deferred_low_polish); pre-existing z-10 overlay, mono adds 6-8 px / all-tracks lane range label and library drop ghost label overlay the clip header title
+- A-R156-REVIEW-LOWS / info / acknowledged: TH11 source-count only (drop ghost / video gap DOM covered by C MONO-STYLE N9/N12 in the browser); WSU3 prefix check is the spec; mono width covered by C LAYOUT-FIT PASS / A round-156 code-reviewer Lows
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,0 +1,86 @@
+{
+ "round": 157,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T06:28:46.5742789Z",
+  "round": 157,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "T157-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "TEXT-BYTES-E-a",
+  "TEXT-BYTES-E-b",
+  "TEXT-BYTES-E-c",
+  "TEXT-BYTES-E-d",
+  "MONO-STYLE-N13",
+  "MONO-STYLE-N14",
+  "MONO-STYLE-N15",
+  "MONO-STYLE-N16",
+  "LAYOUT-FIT-E",
+  "CSS2-TRIM",
+  "FONT-INVENTORY",
+  "FONT-FAIL",
+  "FUNC-SMOKE-E",
+  "G157-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G157-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notRun": [
+  "MONO-STYLE N1-N12, TEXT-BYTES (a)-(f) r156, WEIGHT-STYLE, MASTER-OVER, RV-1, LABEL-STYLE, RV-2 (not re-run by task; code unchanged)",
+  "V-2b-DISPLAY, B-R153-PREVIEW-DUR, C-R151-2/3 (deferred, not C rows)"
+ ],
+ "invalidRuns": [
+  {
+   "run": "c157-1440-r1",
+   "reason": "ENV-FIRST-LOAD: cold Vite first load, 'Invalid hook call' + hydration replace, workspace vanished; replaced by r2/r3 (1 of 2 allowed replacements)"
+  },
+  {
+   "run": "c157-1440-r2",
+   "reason": "valid environment but superseded: C harness read the range inputs as raw seconds ('3') and Escape did not clear the range; harness fixed, re-run as r3 (not an app defect)"
+  }
+ ],
+ "validSessions": [
+  "c157-1440-r3",
+  "c157-1280-r1",
+  "ff157-1440 (FONT-FAIL + FONTS-SCOPED + raw HTML)",
+  "ff157-1280 (FONT-FAIL)",
+  "p157-1280 (probe)",
+  "g157-3",
+  "p157b-1440 (loop on, range cleared, first open: project scope, range disabled, texts byte-equal)"
+ ],
+ "abletonParity": "not applicable (CZABA brand decision, visual-direction-a.md typography)",
+ "notes": [
+  "C-157-N1 (info): Instrument Sans and Noto Sans Georgian are variable fonts on Google css2: every subset woff2 URL is shared by all requested weights (IS 400/500/600 -> the same 2 files). Removing IS 700 therefore saves no font bytes; the real byte saving of R4 is the Plex Mono 500 static files. No faux bold: 0 visible elements >=700 in every state.",
+  "C-157-N2 (info): /studio-lab also has the root Playfair Display css2 link (root.tsx l.37, protected) and the app.css @import of Inter 300-800; both pre-existing and unchanged. 'links exactly the R4 URL' is read as the Studio css2 link: exactly one Studio link, string-equal to R4, in DOM and raw SSR HTML.",
+  "C-157-N3 (harness): Escape does not clear a time selection (with or without a loop, with or without the dialog). This matches the recorded existing behaviour (deselect = click on empty lane). C used a sfx lane click at 12 s.",
+  "C-157-N4 (harness): the task row says 'Cancel and Escape'; the idle footer button is 'Done' (Cancel exists only while rendering). C tested Done and Escape: both close, focus returns to the Export button.",
+  "C-157-N5 (pre-existing, info): the demo-mix WAV exports have peak 1.0 with full-scale samples (range 797, project 4741); round 154 project export also had peak 1 (3676 full-scale, fewer clips). No audio code changed this round; not a round-157 finding.",
+  "C-157-N6 (known state): at 1280x720 with range+loop+Master mute, the range card bottom is 13 px under the footer and the loop/mute notes are below it until the body is scrolled; scrollTop 141 brings all above the footer (p157). Same as C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER; not a new finding.",
+  "Toast: no Toast appeared in any FONT-INVENTORY state (cart failure produced only console noise).",
+  "C-157-N7 (harness): in c157 the 'range cleared' state read rangeDisabled=false although its screenshot shows the range option disabled with the reason; p157b re-measured disabled=true in a clean first-open state. Not an app finding."
+ ],
+ "evidence": "c-round-157.md, c-round-157/out/*.json, c-round-157/shots/",
+ "closedFindings": [
+  "B-R155-EXPORT-ZERO (evidence: TEXT-BYTES-E (a), both viewports: description reads 'Entire project · 00:00.000 — 02:30.372')"
+ ]
+}
