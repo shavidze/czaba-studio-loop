@@ -310,3 +310,7 @@ COMMIT OK. Findings for B: gates/round-163/review.md
 ## Round 164 (2026-10-25)
 COMMIT OK. Findings for B: gates/round-164/review.md
 
+
+## Round 165 (2026-10-25)
+COMMIT OK. Findings for B: gates/round-165/review.md
+

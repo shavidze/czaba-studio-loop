@@ -1,0 +1,55 @@
+{
+ "round": 165,
+ "item": "ROOT-RECON-MARKER-ENTER",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T13:10:57.7647558Z",
+  "round": 165,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "T165-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "MK-GESTURE-1440",
+  "MK-GESTURE-1280",
+  "MK-BASELINE-CHECK",
+  "MK-POSITIVE-1440",
+  "MK-POSITIVE-1280",
+  "MK-BLUR-1440",
+  "MK-BLUR-1280",
+  "G165-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "MK-ENTER-OPEN (both viewports): BLOCKED (harness) - precondition unreachable in the browser. The synthetic pointerdown on the clip header does claim the move gesture (clipDx=40 px), but the workspace's capture-phase focus release (StudioWorkspace.tsx ~l.1578-1590, releases a typing target on pointerdown when no gesture is active yet) blurs the add editor first, so the draft commits via the MK-BLUR path ('Marker \"held\" added at 00:12.000', no refusal) before Enter can be pressed. B's premise 'a synthetic event does not move focus' does not hold because the app itself blurs. The K2 Enter guard is therefore covered only by vitest MU15/MU16 and A's mutations m183/m184, not by a browser row. Evidence c-round-165/out/mk.json enter-1440/enter-1280.",
+  "G165-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "biome",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "notRun": [
+  "V-3/V-2 visual rows, ENV-VIS, OV-CORNERS, d6 RV-1: the diff has no class or markup change (AN-REVIEW), per task section 4"
+ ],
+ "ableton": {
+  "parity": "not applicable / not claimed (task section 5); CZABA data-integrity rule judged only"
+ },
+ "notesForB": [
+  "MK-ENTER-OPEN cannot be browser-verified at this HEAD: no real or synthetic browser path keeps the marker editor open into an active pointer gesture. Treat K2 as defence-in-depth; if B wants a browser lock, it needs a test-only hook, which C does not recommend adding to source.",
+  "Observed during MK-ENTER-OPEN: a real Enter on BODY while a gesture is live shows the blocked status and adds nothing (correct). After release, Enter on BODY adds the selected library sound (ABL-R-6 intended behaviour).",
+  "A's code-reviewer residuals (blocked Enter then Tab/blur while held loses the draft; IME isComposing on Enter; no MU18) were not reproduced or verified by C; they stay A-reported Low signals.",
+  "B-R164-COMMIT-DURING-PREVIEW and the architecture note stay open signals."
+ ],
+ "evidence": "c-round-165.md, c-round-165/out/"
+}

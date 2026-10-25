@@ -1,9 +1,9 @@
 {
- "version": 154,
- "updated": "2026-10-25 (B round 164 -> 165 planning, D-29z130)",
+ "version": 155,
+ "updated": "2026-10-25 (B round 165 -> 166 planning, D-29z131)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 165: D-29z130 - ROOT-RECON-MARKER-ENTER confirmed Medium by B browser repro (held clip-header drag + Shift+Tab to a flag + F2 + Enter commits Rename Marker mid-gesture; the next preview rebuilds from gesture.before, the name is lost and the history keeps an empty Rename Marker step); fix K1 F2 -> runUnlessGesture, K2 Enter during a gesture refused with GESTURE_EDIT_BLOCKED_MESSAGE and the editor kept open with its draft; tests MU15-MU17 test-first, mutations m182-m184; baseline 7952439 clean (gate 164 published); grants b-round-164-r165-grants.txt (3), new doc 134; round 166 = V-3c-3b unless the regression is due)",
+ "current_task": "current-task.md (round 166: D-29z131 - V-3c-3b: marker prev/next ChevronLeft/ChevronRight at size-2.25 (9 px, two adjacent content-sized buttons), detail toggle word + ChevronDown/ChevronRight with pl-2 pr-1 gap-0.5, grid menu Check in a flex w-3 span, exit link ArrowLeft size-3 gap-0.75; strings expandText/collapseText lose the glyph; marker + stays text (R5, Q-V3-ICON-SIZE); B probes b-round-165/out/v3c3b-probe.json + v3c3b-final.json (combined max edge delta 0.468 px, 0 added/missing keys, both viewports); d6 renames b-round-165-r166-d6-key-renames.json (6 keys, 0 collisions); RV-1 reference c-round-164/out/d6; baseline 7581483 clean (gate 165 published); grants b-round-165-r166-grants.txt (11), new doc 135; vitest base 11 files 206/206; locks MS4, DPS5, TU11, TS7, LG4; mutations m185-m191)",
  "advisor_used_by_B": "2026-10-25 round 161 -> 162 planning: advisor available and consulted after orientation and the first probe (before writing); advice followed (first probe residuals not carried over as 0 px: per-site box-preserving gap rule R2''' and a final re-probe max 0.344 px; pointer-target grep on the icon hosts -> no SVG-rejecting guard, no pointer-events-none, C grabs each icon; group fold structural ruling with data-fold-glyph removed; d6 rename map enumerated from the reference with 0 collisions; SG strings; grants kept at 11 without split)",
  "baseline": {
   "tsc_errors": 0,
@@ -9491,11 +9491,22 @@
    "round": 165,
    "task": "current-task.md",
    "decision": "D-29z130",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "items": [
     "ROOT-RECON-MARKER-ENTER (confirmed Medium: marker rename during a held clip drag is lost and leaves an empty Undo step)"
    ],
-   "note": "baseline HEAD 7952439 clean (gate 164 published); 983 files; grants b-round-164-r165-grants.txt (3: ArrangementMarkerRow.tsx, markers-ui.test.tsx, doc 133 status), new b-round-164-r165-new-files.txt (doc 134), frozen 980 (b-round-164-r165-tree-sha256.txt); start copies b-round-164/r165-granted-start/; vitest base b-round-164-r165-vitest-base.txt (5 marker files, 72/72 run by B at 7952439; markers-ui expect( 183); B repro b-round-164/out/enter-stab-probe.json (real Shift+Tab x14 during a held header drag, both viewports) + enter-f2-probe.json; non-tests enter-probe/enter-touch-probe (editor opened before the drag: blur commits first); observation tab-abort-probe.json (forward Tab #23 aborts the drag); locks MU15-MU17 (cloud MU14 is unrelated, keep it); mutations m182-m184; C rows MK-GESTURE, MK-BASELINE-CHECK, MK-ENTER-OPEN (synthetic pointer), MK-POSITIVE, MK-BLUR, G165-3, PX-NET/REG-HYD; on C PASS round 166 = V-3c-3b unless the regression is due (on/after 2026-10-27)"
+   "note": "baseline HEAD 7952439 clean (gate 164 published); 983 files; grants b-round-164-r165-grants.txt (3: ArrangementMarkerRow.tsx, markers-ui.test.tsx, doc 133 status), new b-round-164-r165-new-files.txt (doc 134), frozen 980 (b-round-164-r165-tree-sha256.txt); start copies b-round-164/r165-granted-start/; vitest base b-round-164-r165-vitest-base.txt (5 marker files, 72/72 run by B at 7952439; markers-ui expect( 183); B repro b-round-164/out/enter-stab-probe.json (real Shift+Tab x14 during a held header drag, both viewports) + enter-f2-probe.json; non-tests enter-probe/enter-touch-probe (editor opened before the drag: blur commits first); observation tab-abort-probe.json (forward Tab #23 aborts the drag); locks MU15-MU17 (cloud MU14 is unrelated, keep it); mutations m182-m184; C rows MK-GESTURE, MK-BASELINE-CHECK, MK-ENTER-OPEN (synthetic pointer), MK-POSITIVE, MK-BLUR, G165-3, PX-NET/REG-HYD; on C PASS round 166 = V-3c-3b unless the regression is due (on/after 2026-10-27)",
+   "result": "C PASS (c-round-165.json: browserVerified=true realVerified=true, 0 bugs; passed T165-TARGETED 75/75, SOURCE-SCOPE, AN-REVIEW, MK-GESTURE 1440+1280 (real mouse hold + 14 Shift+Tab + F2: no input, blocked status, focus on flag; Move clip commits, flag Intro; Undo status Move clip -> Add Marker, no Rename Marker), MK-BASELINE-CHECK (C's checker FAILs on B's baseline enter-stab-probe.json), MK-POSITIVE 1440+1280, MK-BLUR 1440+1280, G165-3, PX-NET, REG-HYD; blocked MK-ENTER-OPEN (harness: StudioWorkspace capture-phase pointerdown focus release blurs the editor before any gesture claim, so no browser path keeps the editor open into a gesture; K2 covered by MU15/MU16 + m183/m184 only) and fake-Bearer 403 (backend unavailable in cloud)); gate 165 published 75814838b35be7f3ac8befa2c2f007b0cde51d28 on both remotes (4 paths; verify 171 files pass; review 9/10, 0 blocking) -> ROOT-RECON-MARKER-ENTER closed"
+  },
+  {
+   "round": 166,
+   "task": "current-task.md",
+   "decision": "D-29z131",
+   "status": "dispatched",
+   "items": [
+    "V-3c-3b (marker step, detail toggle, grid menu check and exit link glyphs -> lucide icons; expandText/collapseText without glyphs)"
+   ],
+   "note": "baseline HEAD 7581483 clean (gate 165 published); 984 files; grants b-round-165-r166-grants.txt (11: ArrangementMarkerRow, ArrangementDetailPanel, ArrangementGridMenu, StudioWorkspace (import + exit link only), strings.ts, 5 tests, doc 134 status), new b-round-165-r166-new-files.txt (doc 135), frozen 973 (b-round-165-r166-tree-sha256.txt); start copies b-round-165/r166-granted-start/; vitest base b-round-165-r166-vitest-base.txt (11 files, 206/206 by B at 7581483); C rows T166-TARGETED, SOURCE-SCOPE, AN-REVIEW, ICON-V3C3B, ICON-BOX (baseline b-round-165/out/v3c3b-final.json before arrays), RV1-V3C3B (c-round-164 d6 r1 + 6-key map), FUNC-SMOKE-V3C3B (incl. real audio), G166-3, PX-NET/REG-HYD; on C PASS round 167 = V-3c-4 unless the regression is due (on/after 2026-10-27)"
   }
  ],
  "post_current_stage_queue": [
@@ -9735,7 +9746,7 @@
   },
   {
    "id": "VISUAL-A-OBSIDIAN",
-   "status": "in_progress: DESIGN-UX-REVIEW done (rounds 125-126); V-0.1 done (rounds 127-128, 77f2763); V-0.2a done (round 129, 1e453b1); V-0.2b done (round 130, ba54297); V-0.2c1 done (round 131, c8ff326); V-0.2c2 done (round 132, b25507e); V-0.2c3 done (round 133, ee40ad6) -> V-0.2 complete; V-0.3a done (round 134, 16533c1); V-0.3b done (round 135, C PASS browserVerified, published 70f1e42); V-0.3c done (round 136, C PASS browserVerified, published 7d9fed0); V-0.3d done (round 137, C PASS browserVerified, published 7e6202b) -> V-0.3 complete; V-0.4a done (round 138, C PASS browserVerified, published 1d4df51); V-0.4b done (round 139, C PASS browserVerified, published 3f2c187); V-0.4c done (round 140, C PASS browserVerified, published 6ebbf3e); V-0.4d done (round 141, C PASS browserVerified, published 6e9f9b1); V-0.4e done (rounds 142-144, C round 144 PASS browserVerified, published 9a67abd) -> V-0.4 complete; V-0.5a = round 145 (D-29z110); V-0.5a round 145 C FAIL (Low C-R145-01 only) -> round 146 fix-up (D-29z111); gate 145 skipped; V-0.5a done (rounds 145-146, C round 146 PASS browserVerified, published 3328e75); V-0.5b done (round 147, C PASS browserVerified, published 34ce551); V-0.5c done (round 148, C PASS browserVerified=true realVerified=true, 0 bugs, published b292ff4) -> V-0 complete; V-1a = round 149 (D-29z114); V-1a round 149 C FAIL (Low only C-R149-1/C-R149-2; all other rows PASS browserVerified) -> V-1b + both Lows = round 150 (D-29z115); gate 149 skipped; V-1a + V-1b done (rounds 149-150, C round 150 PASS browserVerified=true realVerified=true, published e94ae88) -> V-1 complete; V-2a = round 151 (D-29z116: fonts load + UI sans + numeral mono); V-2b next (display serif only where text is already >= 16 px, 11 px uppercase 0.14em labels, weight roles); V-2a round 151 C FAIL (Low only C-R151-1/2/3; 13 rows PASS browserVerified) -> round 152 closure (D-29z117: C-R151-1 ruled tag error, C-R151-2/3 deferred_low_polish, C-R151-2 user question); gate 151 skipped; rounds 151+152 C PASS (c-round-152.json browserVerified=true realVerified=true, 0 bugs), published ff2fd6c -> V-2a done; V-2b split (D-29z118): V-2b-1 labels = round 153; V-2b-DISPLAY awaiting_user (no Studio text in the named display roles is >= 16 px; B probe b-round-152/out/size152-*.json, dispsim-*.json); V-2b-2 weight roles (600/700 -> spec 400/500) + remaining numeral mono (C-R151-SIG-SANS-TIMECODES) after V-2b-1; rounds 153 C PASS (c-round-153.json browserVerified=true realVerified=true, 0 bugs), published 037e25f -> V-2b-1 done; V-2b-2 = round 154 (D-29z119: weights 600/700 -> 500, peak over 400, timecodes N1-N6 mono by the spec list); V-2b-3 next (from/to timecodes inside range readout, selected-clip line, Export scope line); V-2b-DISPLAY + B-R153-PREVIEW-DUR awaiting_user ; V-2b-2 round 154 C FAIL low (C-R154-01 only, browserVerified true) -> not done; round 155 fix-up (D-29z120); V-2b-2 done (rounds 154-155, C round 155 PASS browserVerified=true realVerified=true, 0 bugs; C round 154 rows + round 155 N6/PLEX500 evidence; published 4c07d5f, gate 155) -> V-2b-3a = round 156 (D-29z121) | round 157 planning (D-29z122): V-2b-3a done (round 156, C PASS browserVerified=true realVerified=true, 0 bugs, published cbcd3d9); V-2b-3b = round 157 (Export timecodes mono + css2 trim + B-R155-EXPORT-ZERO) | round 158 planning (D-29z123): V-2b-3b done (round 157, C PASS browserVerified=true realVerified=true, 0 bugs, published f8a316a) -> V-2b complete except V-2b-DISPLAY (awaiting_user); V-3 split V-3a/V-3b/V-3c; V-3a = round 158 | round 159 planning (D-29z124): V-3a round 158 C FAIL Low only (C-R158-01, SURFACE-STYLE h/h-rm; every other row PASS both viewports, browserVerified=true) -> V-3a ბაგია, not done; gate 158 skipped; round 159 = V-3a fix-up (important colour-motion suffixes + motion-reduce:transition-none!); B-R157-EXPORT-PEAK closed info; rounds 158+159 C PASS (c-round-159.json browserVerified=true realVerified=true, 0 bugs; C-R158-01 closed), published ad0df77 -> V-3a done; V-3b = round 160 (D-29z125: 7 transport glyphs -> lucide, R2' sizing with per-button gaps, braceHint brought forward, ⌫ Deleted status left for V-3c) | round 161 planning (D-29z126): V-3b done (round 160, C PASS browserVerified=true realVerified=true, 0 bugs, published aeba543); V-3c split by owner V-3c-1 library (round 161) / V-3c-2 lane+group header+clip / V-3c-3 dock+marker row+detail+grid menu+back link / V-3c-4 other components' button surfaces / V-3c-5 10 px panel radius; V-3c-1 = round 161 | round 162 planning (D-29z127): V-3c-1 done (round 161, C PASS browserVerified=true realVerified=true, 0 bugs, published f08c7ce); V-3c-2 = round 162 (lane/group header/clip glyphs, R2''' box-preserving gap rule, Layers/Film/GripVertical rulings, data-fold-glyph removed; closes C-R154-02 + GATE139-EMPTY-VIDEO-FORMATTER by construction) | round 163 planning (D-29z128): V-3c-2 done (round 162, C PASS browserVerified=true realVerified=true, 0 bugs, published 9a83018; C-R154-02 + GATE139-EMPTY-VIDEO-FORMATTER closed); V-3c-3 split by risk: V-3c-3a video dock (float gesture/focus paths) = round 163; V-3c-3b marker row ◀▶ + detail Expand/Collapse + grid menu ✓ + ← CZABA back link = round 164 | round 164 planning (D-29z129): V-3c-3a done (round 163, C PASS browserVerified=true realVerified=true, 0 bugs, published 0e4287f); Saba's 2026-10-25 bugs SABA-B-1 (Medium) + SABA-B-2 (Low, fix now) = round 164 (workflow: next, before the remaining V-3/M stages); then ROOT-RECON-MARKER-ENTER (165), V-3c-3b (166), V-3c-4, V-3c-5, DUX-R-5 stage, M1, M3, M4, ROOT-RECON-GRID-HARNESS | round 165 planning (D-29z130): SABA-B-1 + SABA-B-2 done (round 164, C PASS browserVerified=true realVerified=true, 0 bugs, published 7952439); ROOT-RECON-MARKER-ENTER reproduced by B in the real browser (confirmed Medium) = round 165; then V-3c-3b (166), V-3c-4, V-3c-5, DUX-R-5 stage, M1, M3, M4, ROOT-RECON-GRID-HARNESS",
+   "status": "in_progress: DESIGN-UX-REVIEW done (rounds 125-126); V-0.1 done (rounds 127-128, 77f2763); V-0.2a done (round 129, 1e453b1); V-0.2b done (round 130, ba54297); V-0.2c1 done (round 131, c8ff326); V-0.2c2 done (round 132, b25507e); V-0.2c3 done (round 133, ee40ad6) -> V-0.2 complete; V-0.3a done (round 134, 16533c1); V-0.3b done (round 135, C PASS browserVerified, published 70f1e42); V-0.3c done (round 136, C PASS browserVerified, published 7d9fed0); V-0.3d done (round 137, C PASS browserVerified, published 7e6202b) -> V-0.3 complete; V-0.4a done (round 138, C PASS browserVerified, published 1d4df51); V-0.4b done (round 139, C PASS browserVerified, published 3f2c187); V-0.4c done (round 140, C PASS browserVerified, published 6ebbf3e); V-0.4d done (round 141, C PASS browserVerified, published 6e9f9b1); V-0.4e done (rounds 142-144, C round 144 PASS browserVerified, published 9a67abd) -> V-0.4 complete; V-0.5a = round 145 (D-29z110); V-0.5a round 145 C FAIL (Low C-R145-01 only) -> round 146 fix-up (D-29z111); gate 145 skipped; V-0.5a done (rounds 145-146, C round 146 PASS browserVerified, published 3328e75); V-0.5b done (round 147, C PASS browserVerified, published 34ce551); V-0.5c done (round 148, C PASS browserVerified=true realVerified=true, 0 bugs, published b292ff4) -> V-0 complete; V-1a = round 149 (D-29z114); V-1a round 149 C FAIL (Low only C-R149-1/C-R149-2; all other rows PASS browserVerified) -> V-1b + both Lows = round 150 (D-29z115); gate 149 skipped; V-1a + V-1b done (rounds 149-150, C round 150 PASS browserVerified=true realVerified=true, published e94ae88) -> V-1 complete; V-2a = round 151 (D-29z116: fonts load + UI sans + numeral mono); V-2b next (display serif only where text is already >= 16 px, 11 px uppercase 0.14em labels, weight roles); V-2a round 151 C FAIL (Low only C-R151-1/2/3; 13 rows PASS browserVerified) -> round 152 closure (D-29z117: C-R151-1 ruled tag error, C-R151-2/3 deferred_low_polish, C-R151-2 user question); gate 151 skipped; rounds 151+152 C PASS (c-round-152.json browserVerified=true realVerified=true, 0 bugs), published ff2fd6c -> V-2a done; V-2b split (D-29z118): V-2b-1 labels = round 153; V-2b-DISPLAY awaiting_user (no Studio text in the named display roles is >= 16 px; B probe b-round-152/out/size152-*.json, dispsim-*.json); V-2b-2 weight roles (600/700 -> spec 400/500) + remaining numeral mono (C-R151-SIG-SANS-TIMECODES) after V-2b-1; rounds 153 C PASS (c-round-153.json browserVerified=true realVerified=true, 0 bugs), published 037e25f -> V-2b-1 done; V-2b-2 = round 154 (D-29z119: weights 600/700 -> 500, peak over 400, timecodes N1-N6 mono by the spec list); V-2b-3 next (from/to timecodes inside range readout, selected-clip line, Export scope line); V-2b-DISPLAY + B-R153-PREVIEW-DUR awaiting_user ; V-2b-2 round 154 C FAIL low (C-R154-01 only, browserVerified true) -> not done; round 155 fix-up (D-29z120); V-2b-2 done (rounds 154-155, C round 155 PASS browserVerified=true realVerified=true, 0 bugs; C round 154 rows + round 155 N6/PLEX500 evidence; published 4c07d5f, gate 155) -> V-2b-3a = round 156 (D-29z121) | round 157 planning (D-29z122): V-2b-3a done (round 156, C PASS browserVerified=true realVerified=true, 0 bugs, published cbcd3d9); V-2b-3b = round 157 (Export timecodes mono + css2 trim + B-R155-EXPORT-ZERO) | round 158 planning (D-29z123): V-2b-3b done (round 157, C PASS browserVerified=true realVerified=true, 0 bugs, published f8a316a) -> V-2b complete except V-2b-DISPLAY (awaiting_user); V-3 split V-3a/V-3b/V-3c; V-3a = round 158 | round 159 planning (D-29z124): V-3a round 158 C FAIL Low only (C-R158-01, SURFACE-STYLE h/h-rm; every other row PASS both viewports, browserVerified=true) -> V-3a ბაგია, not done; gate 158 skipped; round 159 = V-3a fix-up (important colour-motion suffixes + motion-reduce:transition-none!); B-R157-EXPORT-PEAK closed info; rounds 158+159 C PASS (c-round-159.json browserVerified=true realVerified=true, 0 bugs; C-R158-01 closed), published ad0df77 -> V-3a done; V-3b = round 160 (D-29z125: 7 transport glyphs -> lucide, R2' sizing with per-button gaps, braceHint brought forward, ⌫ Deleted status left for V-3c) | round 161 planning (D-29z126): V-3b done (round 160, C PASS browserVerified=true realVerified=true, 0 bugs, published aeba543); V-3c split by owner V-3c-1 library (round 161) / V-3c-2 lane+group header+clip / V-3c-3 dock+marker row+detail+grid menu+back link / V-3c-4 other components' button surfaces / V-3c-5 10 px panel radius; V-3c-1 = round 161 | round 162 planning (D-29z127): V-3c-1 done (round 161, C PASS browserVerified=true realVerified=true, 0 bugs, published f08c7ce); V-3c-2 = round 162 (lane/group header/clip glyphs, R2''' box-preserving gap rule, Layers/Film/GripVertical rulings, data-fold-glyph removed; closes C-R154-02 + GATE139-EMPTY-VIDEO-FORMATTER by construction) | round 163 planning (D-29z128): V-3c-2 done (round 162, C PASS browserVerified=true realVerified=true, 0 bugs, published 9a83018; C-R154-02 + GATE139-EMPTY-VIDEO-FORMATTER closed); V-3c-3 split by risk: V-3c-3a video dock (float gesture/focus paths) = round 163; V-3c-3b marker row ◀▶ + detail Expand/Collapse + grid menu ✓ + ← CZABA back link = round 164 | round 164 planning (D-29z129): V-3c-3a done (round 163, C PASS browserVerified=true realVerified=true, 0 bugs, published 0e4287f); Saba's 2026-10-25 bugs SABA-B-1 (Medium) + SABA-B-2 (Low, fix now) = round 164 (workflow: next, before the remaining V-3/M stages); then ROOT-RECON-MARKER-ENTER (165), V-3c-3b (166), V-3c-4, V-3c-5, DUX-R-5 stage, M1, M3, M4, ROOT-RECON-GRID-HARNESS | round 165 planning (D-29z130): SABA-B-1 + SABA-B-2 done (round 164, C PASS browserVerified=true realVerified=true, 0 bugs, published 7952439); ROOT-RECON-MARKER-ENTER reproduced by B in the real browser (confirmed Medium) = round 165; then V-3c-3b (166), V-3c-4, V-3c-5, DUX-R-5 stage, M1, M3, M4, ROOT-RECON-GRID-HARNESS | round 166 planning (D-29z131): ROOT-RECON-MARKER-ENTER done (round 165, C PASS browserVerified=true realVerified=true, 0 bugs, published 7581483; K2 Enter guard has no browser lock - MK-ENTER-OPEN BLOCKED harness); V-3c-3b = round 166; then V-3c-4, V-3c-5, DUX-R-5 stage, M1, M3, M4, ROOT-RECON-GRID-HARNESS",
    "requested": "2026-10-21",
    "approved_by_user": "2026-10-21: direction A (Obsidian & Brass), moves M1-M4 approved, Studio UI language English only (like Ableton), timing after T12 and before phase 2",
    "instruction": "Visual refresh of Studio only: colors, icons, typography, button surfaces. Do NOT change positions, sizes, layout, behaviour or shortcuts except the approved moves M1-M4. Do not start before T12-GAIN-VOLUME is complete; do not mix into phase 1 or T12 tasks.",
@@ -9754,8 +9765,8 @@
     "V-2 typography",
     "V-3 lucide icons + borderless buttons + radius + hover motion",
     "SABA-B-1 + SABA-B-2 (Saba's 2026-10-25 bugs) = round 164: done (C PASS, published 7952439)",
-    "ROOT-RECON-MARKER-ENTER = round 165 (confirmed Medium by B browser repro, D-29z130; F2 + Enter guards in ArrangementMarkerRow.tsx); then V-3c-3b = round 166",
-    "V-3 remainder: V-3c-3b, V-3c-4 (input: ARCH-CHECKPOINT-V3C, fallback (c)), V-3c-5 (10 px panel radius; keep the overview frame radius equal to its root, lock OV1)",
+    "ROOT-RECON-MARKER-ENTER = round 165: done (C PASS, published 7581483; K2 browser lock not reachable, vitest-only)",
+    "V-3 remainder: V-3c-3b = round 166 (D-29z131), V-3c-4 (input: ARCH-CHECKPOINT-V3C, fallback (c)), V-3c-5 (10 px panel radius; keep the overview frame radius equal to its root, lock OV1)",
     "DUX-R-5 one colour rule (approved 2026-10-25; own bounded stage before M1; keep the D6 contrast thresholds; re-verify SABA-B-1 envelope contrast with the round-164 ENV-VIS metric)",
     "M1 round icon-only Play",
     "M3 library item spacing +4px",
@@ -11193,6 +11204,22 @@
     },
     "locks": "MU15 add+Enter during gesture, MU16 rename+Enter/Escape during gesture, MU17 F2 during gesture; mutations m182 (K1), m183 (K2, two-sided with MU13), m184 (K2 closes the editor)",
     "ableton": "parity not applicable / not claimed; manual not opened",
+    "user_vetoable": true
+   },
+   "v3c3b_plan_d29z131": {
+    "round": 166,
+    "probe": "b-round-165/v3c3b-probe.cjs -> out/v3c3b-probe.json (glyph metrics + single-site swaps, S0/S1-detail-toggled/S2-grid-menu, 1440+1280 identical); b-round-165/v3c3b-final.cjs -> out/v3c3b-final.json (all rulings combined: max edge delta 0.468 px, 0 added/missing keys; before arrays = C ICON-BOX baseline); header-key.cjs (d6 header key after the change)",
+    "glyph_metrics": "marker prev/next 9.234 px glyph in 19.234x16 content-sized buttons; marker + 6.000 px; detail toggle 12 px glyph 6.031 + space 2.000 + word 48/42 (74.031/68.031 x 24); exit 14 px arrow 11.734 + space 3.016; grid check 7.234 in a fixed w-3 span",
+    "rulings": {
+     "R1": "marker prev/next ChevronLeft/ChevronRight size-2.25 (9 px, not R2'' 10 px: two adjacent content-sized buttons would add +1.53 px at 10 px) strokeWidth 2.4 + inline-flex items-center justify-center on prev/next only; detail toggle word + ChevronDown (open) / ChevronRight (collapsed) size-2.5 sw 2.4, px-2 -> pl-2 pr-1 + inline-flex items-center gap-0.5 (icon 4 px wider than the glyph); grid Check size-2.5 sw 2.4, span w-3 text-accent -> flex w-3 justify-center text-accent; exit ArrowLeft size-3 sw 2 + inline-flex items-center gap-0.75 (R2'')",
+     "R2": "strings.ts expandText 'Expand ▸' -> 'Expand', collapseText 'Collapse ▾' -> 'Collapse'; key notation (Ctrl+←, ← →) stays",
+     "R3": "a11y: marker/toggle aria-label/title/aria-keyshortcuts byte-identical; grid spans already aria-hidden; exit link accessible name '← CZABA' -> 'CZABA' (decorative arrow hidden; no aria-label added)",
+     "R4": "surfaces = V-3c-4, radius = V-3c-5; +/− shortcut hint, scenes.$productId.tsx and LeadMagnetPopup.tsx (outside Studio) and the protected purchased route are out of this stage",
+     "R5": "marker + stays ASCII text: not a spec unicode symbol; a Plus icon at 8-10 px shifts prev/next 2-4 px (probe), 6 px is illegible; question added to Q-V3-ICON-SIZE"
+    },
+    "d6_renames": "b-round-165-r166-d6-key-renames.json (6 keys: detail toggle Collapse/Expand, exit CZABA, marker prev/next -> aria-label, header box key slice; 0 collisions vs c-round-164/out/d6 r1)",
+    "locks": "MS4 (marker icons, + unchanged), DPS5 (toggle icon both states + pl-2 pr-1), TU11 (grid check only on checked items), TS7 (exit ArrowLeft + CZABA), LG4 (strings); mutations m185-m191",
+    "ableton": "parity not applicable / not claimed; CZABA brand decision (visual-direction-a.md)",
     "user_vetoable": true
    }
   },
@@ -18336,7 +18363,8 @@
    "evidence": "b-round-157/measure/transport-{1440,1280}.json; current-task.md round 158 0.1/0.2 R2",
    "note_r162": "R2''' (D-29z127) adds the box-preserving gap rule to the default; round-161 reviewer question (Square outline vs filled ■ stop, fill=currentColor) attached here for Saba",
    "note_d29z128": "gate 162 reviewer suggestion 3: gap-0.75 / gap-1.25 are Tailwind spacing-multiplier utilities off the --spacing-1..24 step scale (not custom CSS); V-3c-3a puts a 10 px (size-2.5) icon in each 24x24 float button by R2''; both belong to Saba's answer on (a) 16 px spec vs (b) glyph-slot size",
-   "note_d29z129": "round 163 added a 10 px icon in each 24x24 float button (R1); alternative Minimize2 for the return state; still awaiting_user"
+   "note_d29z129": "round 163 added a 10 px icon in each 24x24 float button (R1); alternative Minimize2 for the return state; still awaiting_user",
+   "note_d29z131": "V-3c-3b (round 166): marker step icons at size-2.25 (9 px) instead of R2'' 10 px so the two adjacent content-sized buttons stay within +-1 px; detail toggle keeps its box with pr-1; question for Saba (R5): the marker + Add button stays the ASCII text '+' because a Plus icon at 8-10 px shifts prev/next by 2-4 px (b-round-165/out/v3c3b-probe.json); accept the shift or keep '+'"
   },
   {
    "id": "C-R158-01",
@@ -18433,7 +18461,7 @@
   {
    "id": "ARCH-CHECKPOINT-V3C",
    "severity": "info",
-   "status": "requested_from_root (b-round-160-checkpoint-request.md, 2026-10-25; consolidates pending 148/155/157/158 + ARCH-R158-TOOL-BUTTON-RECIPE + ARCH-R159-GLOBAL-TRANSITION-COUPLING + ARCH-R160-TRANSPORT-ICON-TRIPLE); non-blocking for V-3c-1..3; input for V-3c-4 (fallback (c) if unanswered); still unanswered at round 162 planning (2026-10-25); still unanswered at round 163 planning (2026-10-25); round 162 architecture note: none; still unanswered at round 164 planning (2026-10-25); round 163 architecture note: none; still unanswered at round 165 planning (2026-10-25); round 164 architecture notes (A reviewer, gate reviewer): none; extra candidate question B-R164-COMMIT-DURING-PREVIEW",
+   "status": "requested_from_root (b-round-160-checkpoint-request.md, 2026-10-25; consolidates pending 148/155/157/158 + ARCH-R158-TOOL-BUTTON-RECIPE + ARCH-R159-GLOBAL-TRANSITION-COUPLING + ARCH-R160-TRANSPORT-ICON-TRIPLE); non-blocking for V-3c-1..3; input for V-3c-4 (fallback (c) if unanswered); still unanswered at round 162 planning (2026-10-25); still unanswered at round 163 planning (2026-10-25); round 162 architecture note: none; still unanswered at round 164 planning (2026-10-25); round 163 architecture note: none; still unanswered at round 165 planning (2026-10-25); round 164 architecture notes (A reviewer, gate reviewer): none; extra candidate question B-R164-COMMIT-DURING-PREVIEW; still unanswered at round 166 planning (2026-10-25); round 165 architecture notes (A reviewer + gate reviewer, same point) -> addendum b-round-165-checkpoint-request.md (Q-COMMIT)",
    "title": "bounded frontend-architect checkpoint before V-3c surfaces"
   },
   {
@@ -18493,7 +18521,7 @@
   {
    "id": "ROOT-RECON-MARKER-ENTER",
    "severity": "medium (confirmed by B in the real browser, D-29z130)",
-   "status": "open: scheduled round 165 (D-29z130), test-first (MU15-MU17 red before the fix)",
+   "status": "closed: C round 165 PASS (c-round-165.json MK-GESTURE 1440+1280 real mouse hold + Shift+Tab + F2 refused, no Rename Marker in Undo; MK-BASELINE-CHECK fails on the baseline), published 7581483. Caveat: the K2 Enter-during-gesture guard has no browser lock - MK-ENTER-OPEN BLOCKED (harness): the workspace capture-phase pointerdown focus release blurs the editor before the gesture claim, so the precondition is unreachable in the browser; K2 is locked only by vitest MU15/MU16 and mutations m183/m184",
    "title": "Enter in the marker add/rename editor may reach commitArrangement during an active pointer gesture (f08c7ce ArrangementMarkerRow.tsx commitEditor guards only the blur reason with isGestureActive)",
    "source": "agent-workflow.md section on the local/cloud reconciliation (2026-10-25); PC markers-ui MU14 (open add editor + active gesture + Enter => no mutation, editor stays open)",
    "plan": "write the correct-behaviour regression test first for add and rename; a small separate fix only if it reproduces; C browser evidence; full root gate. Canonical focus-release clause and MU8c/MU8d/MU8e already cover C-R72-01; do not port the whole 4e87bec",
@@ -18501,7 +18529,8 @@
    "evidence": "b-round-164/out/enter-stab-probe.json, enter-f2-probe.json (+ png); non-tests enter-probe.json, enter-touch-probe.json; observation tab-abort-probe.json",
    "repro": "/studio-lab -> demo-middle-east on music, snap off -> add marker Intro at 5 s -> hold the mouse on the clip header and move 40 px -> Shift+Tab x14 to the flag -> F2 -> type Lost? -> Enter -> move 60 px -> release -> flag shows Intro, Undo stack Move clip -> Rename Marker -> Add Marker",
    "cause": "F2 branch of handleFlagKeyDown (l.654-665) opens the editor without runUnlessGesture; settleEditor (l.287) checks the gesture only for blur; the clip preview rebuilds from gesture.before",
-   "updated": "2026-10-25 B round 164 -> 165 planning (D-29z130)"
+   "updated": "2026-10-25 B round 164 -> 165 planning (D-29z130)",
+   "closed": "2026-10-25 B round 165 -> 166 planning (D-29z131)"
   },
   {
    "id": "ROOT-RECON-GRID-HARNESS",
@@ -18528,10 +18557,11 @@
   {
    "id": "B-R164-COMMIT-DURING-PREVIEW",
    "severity": "info (architecture signal)",
-   "status": "signal: not scheduled; candidate question for the pending frontend-architect checkpoint (b-round-160-checkpoint-request.md)",
+   "status": "signal: not scheduled; repeated by A round-165 code-reviewer and the gate-165 reviewer (same Architecture note: 7+ hand-written guards in ArrangementMarkerRow.tsx, one guard in ArrangementContext.commitArrangement proposed, keep for now) -> bounded root request b-round-165-checkpoint-request.md (Q-COMMIT, addendum to b-round-160-checkpoint-request.md); owner ArrangementContext.tsx protected; acceptance quoted there",
    "title": "commitArrangement accepts commits while a pointer gesture holds a preview built from gesture.before, so any keyboard commit during a drag is overwritten by the next preview and leaves an empty Undo step",
    "evidence": "b-round-164/out/enter-stab-probe.json (the marker case); owner ArrangementContext.tsx (protected)",
-   "added": "2026-10-25 B round 164 -> 165 planning (D-29z130)"
+   "added": "2026-10-25 B round 164 -> 165 planning (D-29z130)",
+   "updated": "2026-10-25 B round 165 -> 166 planning (D-29z131)"
   },
   {
    "id": "B-R164-TAB-ABORT",
@@ -18546,6 +18576,13 @@
    "status": "signal: envelope breakpoints are 10 px divs (below the WCAG 2.5.8 24 px target) and are not keyboard-focusable; candidate for a separate a11y task, not scheduled",
    "evidence": "gates/round-164/review.md suggestion 5",
    "added": "2026-10-25 B round 164 -> 165 planning (D-29z130)"
+  },
+  {
+   "id": "ROOT-GATE165-C-JSON",
+   "severity": "info (root note)",
+   "status": "root_note: the gate-165 reviewer did not find c-round-165.json among the gate artifacts (it exists in tmp/studio-real-loop/); root may pass it to the reviewer",
+   "evidence": "gates/round-165/review.md (first paragraph)",
+   "added": "2026-10-25 B round 165 -> 166 planning (D-29z131)"
   }
  ],
  "tech_lead_notes": [
@@ -22780,6 +22817,60 @@
    "evidence": "a-round-164.md reviewer Low 3",
    "repro": "read clip-envelope-ui.test.tsx EV1 at 7952439",
    "added": "2026-10-25 B round 164 -> 165 planning (D-29z130)"
+  },
+  {
+   "id": "GATE165-SR-REPEAT",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "a repeated GESTURE_EDIT_BLOCKED_MESSAGE (several blocked presses during one drag) sets the same live-region text, so screen readers usually do not announce it again; affects every runUnlessGesture caller",
+   "evidence": "gates/round-165/review.md suggestion 2",
+   "repro": "hold a clip drag -> press M twice -> the second identical status is not re-announced",
+   "added": "2026-10-25 B round 165 -> 166 planning (D-29z131)"
+  },
+  {
+   "id": "GATE165-MU15-BLUR-WEAK",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "the post-commit blur check in MU15 cannot catch a double commit because the input is already unmounted; rename it as a smoke check or delete it",
+   "evidence": "gates/round-165/review.md suggestion 4; a-round-165.md (doc 134 already says it is not discriminating)",
+   "repro": "read markers-ui.test.tsx MU15 at 7581483",
+   "added": "2026-10-25 B round 165 -> 166 planning (D-29z131)"
+  },
+  {
+   "id": "GATE165-MU-RELEASE-HELPER",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "MU15-MU17 repeat a `const releaseGesture: (() => void) | null = release;` narrowing workaround; a small holdGesture(api) helper returning { release } would remove it (optional)",
+   "evidence": "gates/round-165/review.md suggestion 5",
+   "repro": "read markers-ui.test.tsx MU15-MU17 at 7581483",
+   "added": "2026-10-25 B round 165 -> 166 planning (D-29z131)"
+  },
+  {
+   "id": "A-R165-DRAFT-LOSS-TAB",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "after a blocked Enter during a held drag, a Tab or blur while the button is still held closes the marker editor through the MU13 path and the typed name is lost (by spec R2; belongs with B-R164-COMMIT-DURING-PREVIEW)",
+   "evidence": "a-round-165.md reviewer (b); gates/round-165/review.md suggestion 3; doc 134 TODO; not reproduced by C (synthetic path unreachable, c-round-165.md)",
+   "repro": "vitest-only: open the editor, claim a gesture, Enter (refused), blur -> editor closes without commit",
+   "added": "2026-10-25 B round 165 -> 166 planning (D-29z131)"
+  },
+  {
+   "id": "A-R165-IME-ENTER",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "the marker name input commits on Enter without checking event.isComposing (IME composition Enter); pre-existing, not a regression",
+   "evidence": "a-round-165.md reviewer (c)",
+   "repro": "IME input in the marker name field -> confirm a composition with Enter -> the editor commits",
+   "added": "2026-10-25 B round 165 -> 166 planning (D-29z131)"
+  },
+  {
+   "id": "A-R165-MU18-MISSING",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "no test for: blocked Enter -> release -> blur while the input is still mounted -> exactly one Add Marker",
+   "evidence": "a-round-165.md reviewer (a)",
+   "repro": "read markers-ui.test.tsx at 7581483",
+   "added": "2026-10-25 B round 165 -> 166 planning (D-29z131)"
   }
  ],
  "baseline_tree_at_round108": {
