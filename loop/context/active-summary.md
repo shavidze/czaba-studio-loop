@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T20:33:27.033Z)
+# Active loop summary (2026-10-25T21:21:03.533Z)
 
-- backlog.json 1538 KB -> active view 209 KB
-- status: G_ROOT_GATE round 173
-- servers: `{"checkedUtc":"2026-10-25T20:11:39.8488978Z","round":173,"attempt":1,"store":200}`
-- last publication: 02c08fd66e7ff03c81c09f6c767dc244fffbd305 (rounds 173-173)
-- last root gate: round 173 published - commit 02c08fd66e7ff03c81c09f6c767dc244fffbd305 pushed
+- backlog.json 1547 KB -> active view 211 KB
+- status: G_ROOT_GATE round 174
+- servers: `{"checkedUtc":"2026-10-25T21:04:16.0375108Z","round":174,"attempt":1,"store":200}`
+- last publication: 0a4a41e410276b10163147800e2b56342e0ed784 (rounds 174-174)
+- last root gate: round 174 published - commit 0a4a41e410276b10163147800e2b56342e0ed784 pushed
 
 ## Current items: -
 
@@ -383,6 +383,11 @@
 - GATE171-DOCK-TEST-HELPER-DUP / info (signal) / signal: test-side token helper duplicated (video-dock-strings-ui dockClassTokens/expectDockTokens vs export test classTokens/expectSurfaceTokens); fold into the extraction round if the checkpoint says extract / 
 - GATE172-TWMERGE-RADIUS-PANEL / info (signal) / signal: app/lib/utils.ts plain twMerge treats rounded-panel as unknown, so cn('rounded-panel','rounded-md') keeps both; no conflict today (only cn() site ArrangementVideoDock l.919-924); fix when needed with extendTailwindMerge({extend:{theme:{radius:['panel']}}}); round 173 task rule R29 / 
 - B-R172-OV-FRAME-OVERFLOW / info / observation: when the view scrolls past the extent (e.g. clicking the Overview's right end at max zoom) the view frame runs 7-12 px past the root's right edge and is clipped by overflow-hidden, so its right border is hidden; pre-existing behaviour of overviewFrame (left clamped, width not); not scheduled / 
+- C-R173-N1-OVERVIEW-MOUSE-FOCUS-RING / info / product question (not scheduled): a pure mouse click on the Overview shows the brass focus-visible ring because pointerdown calls currentTarget.focus() (ArrangementOverview l.182); pre-existing / 
+- C-R173-N2-OVERVIEW-PLAYHEAD-OVER-FRAME / info / acknowledged (stacking order, pre-existing): the Overview playhead at x=0 covers the frame's left border / 
+- C-R173-N3-EXIT-RING-OUTLINE / info / acknowledged (pre-existing): the arrangement-exit focus ring is drawn by the outline; its ring-2 box-shadow computes transparent / 
+- GATE173-S1-OVERVIEW-CORNER-CUT / info / routed to round 174 D2(b): one 'known effect, vetoable' line in doc 142 R25; the 10 px overflow-hidden corner cuts ~2 px of a clip bar and ~4 px of the playhead at x=0/extent end; no code change / 
+- GATE173-S2-DOC141-TODO / low / routed to round 174 D1 (doc 141 l.83 strike-through; reviewer cited l.284) / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

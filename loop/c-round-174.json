@@ -1,0 +1,67 @@
+{
+ "round": 174,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T21:04:16.0375108Z",
+  "round": 174,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R174-ENV-BELOW-DROP",
+   "severity": "low",
+   "steps": [
+    "node c-round-174/tools/c174-env.cjs <1440|1280> 2 (a copy of c164-env.cjs with only the output names changed)",
+    "Compare the aboveBelowMax[below] of states a-selected, b-normal and d-muted with c-round-164/out/env-table.md"
+   ],
+   "expected": "ENV values unchanged from round 164 (drop <= 0.1)",
+   "actual": "The handle vs the pixels just below it dropped from 4.79 to 4.19 (-0.60) at both viewports. Still >= 3:1, and every ENV-VIS cell passes. The likely cause is the lighter neutral waveform under the handle (R30). Informational; reported because the task requires any drop > 0.1 to be reported. Disposition: no code change recommended; PASS stands under the 2026-10-23 Low rule (no deferred_low_polish entry needed).",
+   "evidence": "c-round-174/out/env/env-1440-2.json, c-round-174/out/env/env-1280-2.json"
+  }
+ ],
+ "passed": [
+  "T174-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "CC-COLOUR",
+  "NO-BRASS-CONTENT",
+  "SELECTION-BRASS",
+  "CONTRAST-DUX5A",
+  "ENV-VIS",
+  "STATE-DISTINCT",
+  "RV1-DUX5A",
+  "FUNC-SMOKE-DUX5A",
+  "RV3-STORE",
+  "G174-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G174-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "abletonParity": "not applicable (CZABA brand rule; no Live source captured)",
+ "notes": [
+  "Each viewport's first ENV-VIS run lost the grid control on cold load (ENV-FIRST-LOAD); replaced once each.",
+  "The first c174 probe run was discarded (it counted the main playhead and failed to parse oklab); the rerun is valid.",
+  "The UF sub-state (an 'unselected' video with a fade) was actually selected and is not used; its crop was renamed crop-SELECTED-video-with-fade.png. Active fade handles stay brass on unselected clips (source l.953-955); that is a DUX-R-5b site.",
+  "STATE-DISTINCT for Saba (R31): the video header vs the audio header measures 1.50:1, plus the Film icon.",
+  "Detail playhead: it renders whenever the position is inside the selected clip, stopped or not (not a bug, K3). C parked the playhead at 0; the detail scan with no exclusion was 0 brass.",
+  "overviewPlayheadColumn 420 brass px = the K2 Overview playhead itself.",
+  "The invalid ENV-VIS first attempts ran concurrently; that is a plausible cause of the cold-load loss."
+ ],
+ "report": "c-round-174.md"
+}

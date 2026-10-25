@@ -1,0 +1,17 @@
+export const STUDIO_SCROLLBAR_CLASS = [
+  '[scrollbar-gutter:stable]',
+  '[&::-webkit-scrollbar]:h-2.5',
+  '[&::-webkit-scrollbar]:w-2.5',
+  '[&::-webkit-scrollbar]:bg-surface',
+  '[&::-webkit-scrollbar-track]:bg-surface',
+  '[&::-webkit-scrollbar-corner]:bg-surface',
+  '[&::-webkit-scrollbar-button]:hidden',
+  '[&::-webkit-scrollbar-thumb]:rounded-full',
+  '[&::-webkit-scrollbar-thumb]:border-2',
+  '[&::-webkit-scrollbar-thumb]:border-solid',
+  '[&::-webkit-scrollbar-thumb]:border-surface',
+  '[&::-webkit-scrollbar-thumb]:bg-dim',
+  '[&::-webkit-scrollbar-thumb]:bg-clip-padding',
+  '[&::-webkit-scrollbar-thumb:hover]:bg-brand',
+  '[&::-webkit-scrollbar-thumb:active]:bg-brand',
+].join(' ');
