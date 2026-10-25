@@ -1,0 +1,81 @@
+{
+ "round": 162,
+ "verifier": "C",
+ "date": "2026-10-25",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T10:49:46.1059615Z",
+  "round": 162,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "T162-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "ICON-V3C2",
+  "RV1-V3C2",
+  "LANE-STATES-BOX",
+  "FUNC-SMOKE-LANE",
+  "G162-3-anon-lab",
+  "G162-3-protected-signin",
+  "G162-3-token-401",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G162-3-fake-bearer-403 — backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notRun": [
+  "ICON-V3C1",
+  "LIB-STATES-BOX",
+  "ICON-V3B",
+  "SURFACE-STYLE",
+  "CASCADE-SCOPE",
+  "CONTRAST-V3A",
+  "V-2 rows (code unchanged since rounds 158-161, per task §4)"
+ ],
+ "invalidRuns": [
+  {
+   "row": "warm-up load (not a measurement)",
+   "reason": "ENV-FIRST-LOAD-LUCIDE: first cold Vite load after the new lucide imports gave Invalid hook call + pageerror reading useState + 1 hydration message; replaced once, warm-2 clean",
+   "evidence": "c-round-162/out/warm.log, warm2.log, invalid-runs.txt"
+  },
+  {
+   "row": "FUNC-SMOKE-LANE 1440 attempt 1 (C harness defect, not app)",
+   "reason": "groupName: Ctrl+G already selects the new group, so the 'not selected -> selected' check had no unselected start; moveFilm: the Undo title is 'Move clip' both before and after because the previous entry was also a move. Script fixed (deselect via SFX name first; criterion = one Ctrl+Z restores the start, Redo re-applies, title 'Undo: Move clip'); all later runs green",
+   "evidence": "c-round-162/out/c162-1440-attempt1-harness.json"
+  }
+ ],
+ "closures": {
+  "C-R154-02": "closed by evidence: group name button has no U+25A3 text node; CSS.getPlatformFontsForNode lists only Instrument Sans (glyphCount 7) at both viewports, S1 and S1-group-collapsed",
+  "GATE139-EMPTY-VIDEO-FORMATTER": "closed by evidence: strings.ts videoEmptyHint interpolates STUDIO_VIDEO_IMPORT_LABEL; LG2 green; browser placeholder reads exactly 'No video — use “Your own video” or drop a file here' at both viewports"
+ },
+ "ableton": {
+  "requirement": "PASS (ICON-V3C2, RV1-V3C2, LANE-STATES-BOX, FUNC-SMOKE-LANE)",
+  "parity": "not applicable — CZABA brand decision (visual-direction-a.md § icons); Layers/Film/GripVertical are B rulings R2, not Ableton claims"
+ },
+ "notes": [
+  "Box deltas: every data-testid / aria-label keyed element, clip box, track header and group header 0.000 px in all 4 states x 2 viewports; only inner title spans move: group name 0.344, video clip title 0.234, audio clip titles 0.203 (B probe predicted <=0.35)",
+  "Video import file chooser reports isMultiple=true (pre-existing input attribute, unchanged by this round); choosing one file places one 6.000 s clip",
+  "A11Y R5: full import button name changes from '＋ Your own video' to 'Your own video' (intended by R4/R5); the compact button name now equals its title",
+  "A review Low carried for B polish: icon-only fold/import buttons keep dead text-sm/leading-none/text-xs classes; stale .replace('▣','') no-ops in frozen tests; docs 070/115 describe old glyphs (doc 131 TODO lists them)",
+  "1280 S1 shows the compact import (nested group indent), 1280 S1-group-collapsed shows the full import; same as the f08c7ce baseline",
+  "Space on the focused lane fold folds/unfolds and does not start transport (playing=false both presses)"
+ ],
+ "evidence": "c-round-162/ (out/c162-{1440,1280}.json, out/ana162-{1440,1280}.json, out/lane-states-box.json, out/rv1-v3c2.json, out/d6/, out/g162-3.json, out/vitest.json, out/c-{start,end}-sha256.txt, shots/)"
+}
