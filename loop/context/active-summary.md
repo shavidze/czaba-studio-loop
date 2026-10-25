@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T16:23:16.260Z)
+# Active loop summary (2026-10-25T17:08:14.360Z)
 
-- backlog.json 1490 KB -> active view 206 KB
-- status: G_ROOT_GATE round 168
-- servers: `{"checkedUtc":"2026-10-25T15:37:23.0793639Z","round":168,"attempt":1,"store":200}`
-- last publication: e50498fe20e6952f6eb0b42a7e9ec542fd0b67d9 (rounds 168-168)
-- last root gate: round 168 published - commit e50498fe20e6952f6eb0b42a7e9ec542fd0b67d9 pushed
+- backlog.json 1498 KB -> active view 208 KB
+- status: G_ROOT_GATE round 169
+- servers: `{"checkedUtc":"2026-10-25T16:50:03.2699637Z","round":169,"attempt":1,"store":200}`
+- last publication: 352dc914f6b0f6c05030f9762cc42fd3c2270250 (rounds 169-169)
+- last root gate: round 169 published - commit 352dc914f6b0f6c05030f9762cc42fd3c2270250 pushed
 
 ## Current items: -
 
@@ -372,12 +372,13 @@
 - ROOT-GATE165-C-JSON / info (root note) / root_note: the gate-165 reviewer did not find c-round-165.json among the gate artifacts (it exists in tmp/studio-real-loop/); root may pass it to the reviewer / 
 - GATE166-ICON-PROPS / info (signal) / signal: not scheduled; the gate-166 reviewer notes the icon props (size-* shrink-0, strokeWidth 2.4, aria-hidden) repeat at 7 sites across V-3c; one ICON_STROKE constant in lib/arrangement is worth it only if the stroke changes again; carried as checkpoint Q3 evidence / 
 - Q-R166-EXIT-NAME / info (user question) / awaiting_user: the exit link's accessible name became 'CZABA' in round 166 (ruling R3, D-29z131); the old name '← CZABA' did not say 'back to the store' either; option from the gate-166 reviewer and A's reviewer: aria-label 'Back to CZABA' (label-in-name preserved, WCAG 2.5.3); not scheduled until Saba answers / 
-- ARCH-R167-SURFACE-RECIPE / info (signal) / signal: not scheduled (needs root checkpoint approval); both round-167 reviewers: the SURF + MOTION recipe is copied 7 times in 5 files (ArrangementTransport l.51, StudioWorkspace l.2285/2366, ArrangementTempoRow l.241, ArrangementMarkerRow l.51, ArrangementMaster l.108/171), V-3c-4b/4c add more; proposal after V-3c-4c: one exported tool-surface class constant in app/lib/arrangement (or a ToolButton per FORWARDREF_COMPONENT.md), used via cn with own size/padding; acceptance identical className + TS8/UI11/MS5/HM7/TH10 green; do Q2 (! suffix removal) in the same task / 
-- Q-R167-ON-HOVER / info (user question) / awaiting_user: by ruling R2 (V-3c-4a/4b) on-state buttons (Snap/Env/Metronome on, Master Mute on, Peak over, Lane/Group Mute/Solo on) keep the same fill on hover and press, so they give no hover feedback; option from the gate-167 reviewer: one step stronger on hover/press (e.g. enabled:hover:bg-accent/25, destructive/20-25); not scheduled until Saba answers / 
+- ARCH-R167-SURFACE-RECIPE / info (signal) / signal: not scheduled (needs root checkpoint approval); both round-167 reviewers: the SURF + MOTION recipe is copied 7 times in 5 files (ArrangementTransport l.51, StudioWorkspace l.2285/2366, ArrangementTempoRow l.241, ArrangementMarkerRow l.51, ArrangementMaster l.108/171), V-3c-4b/4c add more; proposal after V-3c-4c: one exported tool-surface class constant in app/lib/arrangement (or a ToolButton per FORWARDREF_COMPONENT.md), used via cn with own size/padding; acceptance identical className + TS8/UI11/MS5/HM7/TH10 green; do Q2 (! suffix removal) in the same task; round 168 update: 12 copies ... [clipped; see backlog.json] / 
+- Q-R167-ON-HOVER / info (user question) / awaiting_user: by ruling R2 (V-3c-4a/4b) on-state buttons (Snap/Env/Metronome on, Master Mute on, Peak over, Lane/Group Mute/Solo on) keep the same fill on hover and press, so they give no hover feedback; option from the gate-167 reviewer: one step stronger on hover/press (e.g. enabled:hover:bg-accent/25, destructive/20-25); not scheduled until Saba answers; browser-confirmed by C round 168 (Lane/Group Mute/Solo on: 8.32 rest = hover = press); still awaiting_user; V-3c-4c-1 Stop (R10) is an outline button and does give hover feedback / 
 - GATE167-TWMERGE-DEPENDENCY / info (signal) / signal: on-state fills win only because cn uses tailwind-merge (drops the conflicting base token); a switch to plain clsx would make the fill depend on CSS order; covered by TS8/UI11/HM7 (and LSU7/UM11) asserting the dropped tokens are absent; also tailwind-merge 3.4.0 treats bg-gradient-to-r as conflicting with bg-foreground/5 (R8) / 
 - GATE167-TOKEN-TEST-FRAGILITY / info (signal) / signal: raw className token tests (TS8, UI11, MS5, HM7, LSU7, UM11) must be edited again on every later surface change; reduced by ARCH-R167-SURFACE-RECIPE if approved / 
 - C-R167-METRONOME-UNDER-MUTE / info (evidence gap) / open note, not scheduled: C round 167 did not exercise the metronome click path under Master Mute (metronome off during the mute test); code unchanged by V-3c-4a; add one line to the next regression round / 
 - A-R167-DUP-TEST-IDS / info (signal) / signal: test IDs TS8 and MS5 also exist in marker-time-snap-ui.test.tsx:601 and marker-snap.test.tsx:475 (B-assigned, no runtime effect); B now greps all tests before assigning IDs (round 168: LSU7, UM11 unique) / 
+- C-R168-BORDERLESS-REDUCED-MOTION / info (signal) / signal, not scheduled: borderless header buttons (lane fold/name/pan reset, group fold/name; also the library icon buttons and option rows kept radius-only by R7 in V-3c-4c-1) keep the global app.css interactive transition (150 ms ease-out color/background/border/box-shadow/transform/opacity) under prefers-reduced-motion; pre-existing, not changed by V-3c-4b; candidate for V-3c-5 or a motion audit together with ROOT-GLOBAL-TRANSITION-RULE / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
