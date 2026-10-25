@@ -1,0 +1,57 @@
+{
+  "round": 170,
+  "stage": "V-3c-4c-2 (ArrangementDetailPanel button surfaces + field radius, D-29z135)",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-25T17:31:43.2224530Z",
+    "round": 170,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "T170-TARGETED",
+    "SOURCE-SCOPE",
+    "AN-REVIEW",
+    "SURF-V3C4C2",
+    "BOX-V3C4C2",
+    "CONTRAST-V3C4C2",
+    "RV1-V3C4C2",
+    "FUNC-SMOKE-V3C4C2",
+    "G170-3 (anonymous lab + demo badge, Sign in required at 1440/1280, 0 audio[src], studio-token 401; fake-Bearer 403 blocked)",
+    "PX-NET/REG-HYD"
+  ],
+  "failed": [],
+  "blocked": [
+    "G170-3 Fake-Bearer 403: backend unavailable in cloud"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "notRun": [
+    "Rows the task lists as not re-run (code unchanged since rounds 158-169): transport, toolbar, lane/group header, library/preview, dock, clip, marker, icon rows, ENV-VIS, OV-CORNERS"
+  ],
+  "invalidRuns": [
+    "warm-up load (tools/warm.cjs, not a measured session): cold-Vite 'Invalid hook call' pageerror (ENV-FIRST-LOAD class); every measured session after it was clean",
+    "func-1440-1: valid session, but the harness read only arrangement-lane-range (empty for single-lane ranges), so the lane-overlay check was incomplete. Superseded by func-1440-2 with the in-clip overlay check; all other values are identical"
+  ],
+  "evidence": "c-round-170.md; c-round-170/out/{surf,func,d6}/, box-v3c4c2.json, rv1-v3c4c2.json, focus-1440.json, g170-3.json, vitest-c.json; c-round-170/shots/",
+  "notes": [
+    "FOCUS-RING-INFO: From, To, Set selection and Clip Gain each show a 2 px brand outline (offset 2 px) plus the 2 px brand box-shadow ring, so the C-R169-N1 double ring appears here too (shots c-round-170/shots/focus/). Pre-existing global focus style; already deferred as C-R169-N1-SEARCH-DOUBLE-RING (owner app/styles/app.css, protected). Not a new finding.",
+    "Task note for B: FUNC-SMOKE names arrangement-lane-range as the lane selection marker, but that testid only renders for all-lanes ranges (ArrangementLane.tsx l.1001). A single-lane range from Set selection is drawn inside the clip (ArrangementClip.tsx l.933, no testid). C measured that in-clip overlay instead: 2.000 s wide, label 00:02.000 - 00:04.000. Harness/spec wording only, not an app bug.",
+    "Mouse 0 dB reset leaves focus on BODY: this is the designed contract (self-disabling-focus FL2, onMouseDown preventDefault).",
+    "Tool disclosure: g170-3.cjs = c-round-169/tools/g169-3.cjs + output names + one line res.fonts = await L.fontsWait(page) (task requires font status in g170-3). d6.cjs copied unchanged (sha 3abc88fe...) and run via d6-fontwrap.cjs, which only records fonts.",
+    "AN-REVIEW closure of A process note (C-R120-01 class): grep -c PLACEHOLDER_R170 on the final test file = 0; the test-file sha equals a-round-170/end-sha256.txt."
+  ],
+  "ableton": "not applicable - CZABA brand decision (visual-direction-a.md); behaviour unchanged and verified",
+  "fontStatusGap": "closed: font status recorded in every measured session incl. d6 (tools/d6-fontwrap.cjs, d6.cjs unchanged) and g170-3 (one added L.fontsWait line, disclosed)"
+}
