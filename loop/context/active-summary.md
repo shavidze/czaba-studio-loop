@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T05:09:09.595Z)
+# Active loop summary (2026-10-25T06:04:30.739Z)
 
-- backlog.json 1388 KB -> active view 184 KB
-- status: G_ROOT_GATE round 155
-- servers: `{"checkedUtc":"2026-10-25T04:52:44.3635102Z","round":155,"attempt":1,"store":200}`
-- last publication: 4c07d5f4b5d682c7b1599fc788ebf8b49962558c (rounds 154-155)
-- last root gate: round 155 published - commit 4c07d5f4b5d682c7b1599fc788ebf8b49962558c pushed
+- backlog.json 1393 KB -> active view 185 KB
+- status: G_ROOT_GATE round 156
+- servers: `{"checkedUtc":"2026-10-25T05:45:05.6635183Z","round":156,"attempt":1,"store":200}`
+- last publication: cbcd3d9446e9d61e9e1a23de5989ca6f80f3f6f9 (rounds 156-156)
+- last root gate: round 156 published - commit cbcd3d9446e9d61e9e1a23de5989ca6f80f3f6f9 pushed
 
 ## Current items: -
 
@@ -337,11 +337,13 @@
 - B-R152-LABEL-WIDEN-26PX / info / user-visible decision, may be vetoed (D-29z118 R3); C round 153 measured max 26 px horizontal, 0 vertical, 0 clip (c-round-153.json labelStyle/rv1Movers) / approved label typography (uppercase + 0.14em) widens labels: same-row neighbours move horizontally up to 26 px (Arrangement -> Overview not
 - B-R153-PREVIEW-DUR / info / awaiting_user (D-29z119 R2) / library preview duration is a timecode, but mono widens it 55 -> 63 px and newly ellipsizes the default preview title (slack 0 -> -6 px; -1 
 - B-R153-SANS-LIST / info / user-visible decision, may be vetoed (D-29z119 R2) / numeral mono only for the spec list (timecode, BPM, dB, from/to): zoom readout, library counts, 4/4, pan, grid/waveform selects stay Instrum
-- B-R153-CSS2-TRIM / info / evidence pending: C round 154 WEIGHT-INVENTORY / after V-2b-2, Instrument Sans 600/700 and Plex Mono 500 may be unused on /studio-lab; trim css2 URL + TH7 only with C evidence of zero consu
+- B-R153-CSS2-TRIM / info / evidence complete (C round 155 PLEX500-INVENTORY + COOKIE-SOURCE PASS); scheduled V-2b-3b (round 157 on V-2b-3a PASS); trim = Instrument Sans 700 + Plex Mono 500, 600 stays / after V-2b-2, Instrument Sans 600/700 and Plex Mono 500 may be unused on /studio-lab; trim css2 URL + TH7 only with C evidence of zero consu
 - C-R153-D6-TEMPO-ROW-TESTID / info / tool note (C d6 PANELS key arrangement-tempo-row matches nothing; tempo header measured directly) / d6 does not cover the tempo row panel; not an app defect
 - C-R153-SR-UPPERCASE / info / open_tech_lead_manual (real screen reader not available in cloud) / whether a screen reader spells CSS-uppercase labels letter by letter is untested; AX names unchanged
-- C-R154-01 / low / open_scheduled_round_155 / lane-move ghost start time renders IBM Plex Mono 500 (Medium) instead of 400: inherited text-xs font-medium from the ghost container (Arrang
-- B-R154-V2B3-MISSED-TIMECODES / info / scheduled_v2b3 / two timecodes inside sentence strings in ArrangementLane.tsx missed by the round-154 N list: library drop ghost start (l.894-902) and all-tr
+- B-R154-V2B3-MISSED-TIMECODES / info / absorbed_v2b3a_round_156 / two timecodes inside sentence strings in ArrangementLane.tsx missed by the round-154 N list: library drop ghost start (l.894-902) and all-tr
+- B-R155-V2B3-MISSED-TIMECODES / info / scheduled_v2b3a_round_156 / two more visible timecodes inside sentences missed by both earlier V-2b-3 lists: per-clip range badge (ArrangementClip.tsx l.934) and video 
+- B-R155-EXPORT-ZERO / low / deferred_low_polish / Export ModalDescription project scope passes 0:00 (ArrangementExportDialog.tsx l.267) while the project scope option passes 00:00.000 (l.395
+- ARCH-CHECKPOINT-V2 / info / requested (b-round-155-checkpoint-request.md, with pending b-round-148-checkpoint-request.md); non-blocking / bounded frontend-architect checkpoint at the V-2 boundary: source-level class locks (TH8/TH10/TH11) and part-templating shape
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
