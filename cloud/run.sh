@@ -31,6 +31,7 @@ save_state() {
   local rc=$?
   set +e
   [ -n "${WATCH_PID:-}" ] && kill "$WATCH_PID" 2>/dev/null
+  [ -n "${MOCK_PID:-}" ] && kill "$MOCK_PID" 2>/dev/null
   log "saving state (loop exit $rc)"
   mkdir -p "$STATE/worktree"
   local plain="${RUNNER_TEMP:-/tmp}/loop-worktree.patch"
@@ -123,6 +124,12 @@ fi
 sed "s#__CZ__#$CZ#g" "$STATE/cloud/config.template.json" > "$CFG"
 
 trap save_state EXIT
+# Store verification: the loop's own mock backend (STORE-0) stands in for the .NET API on :5199 when it exists.
+if [ -f "$LOOP/mock-api/server.mjs" ]; then
+  node "$LOOP/mock-api/server.mjs" > "$LOOP/mock-api/server.log" 2>&1 &
+  MOCK_PID=$!
+  log "mock API started (pid $MOCK_PID)"
+fi
 # Context watchdog: when an agent's context nears contextRestartTokens or gets compacted, it stops only that agent and
 # the runner continues the same phase in a fresh session (checkpoint in loop/context-restart-*.md).
 python3 "$KIT/tools/watch-context.py" "$CFG" > "$LOOP/watch.out.log" 2> "$LOOP/watch.err.log" &
