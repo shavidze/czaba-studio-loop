@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T14:10:36.320Z)
+# Active loop summary (2026-10-25T15:06:04.265Z)
 
-- backlog.json 1470 KB -> active view 201 KB
-- status: G_ROOT_GATE round 166
-- servers: `{"checkedUtc":"2026-10-25T13:54:56.5694062Z","round":166,"attempt":1,"store":200}`
-- last publication: 330f1f32094c758c3bdbd178b7347e667781a309 (rounds 166-166)
-- last root gate: round 166 published - commit 330f1f32094c758c3bdbd178b7347e667781a309 pushed
+- backlog.json 1481 KB -> active view 203 KB
+- status: G_ROOT_GATE round 167
+- servers: `{"checkedUtc":"2026-10-25T14:44:48.1538217Z","round":167,"attempt":1,"store":200}`
+- last publication: 1fef3770879b34d6633e26e8f3a01a83742d7f78 (rounds 167-167)
+- last root gate: round 167 published - commit 1fef3770879b34d6633e26e8f3a01a83742d7f78 pushed
 
 ## Current items: -
 
@@ -370,6 +370,9 @@
 - B-R164-TAB-ABORT / info (observation) / observation: no work; forward Tab during a held clip drag aborts the drag when focus leaves arrangement-detail-clip-gain-fader for BODY (press 23 at 1440); nothing commits, the clip snaps back / 
 - A11Y-R164-ENV-POINT-TARGET / info (a11y signal) / signal: envelope breakpoints are 10 px divs (below the WCAG 2.5.8 24 px target) and are not keyboard-focusable; candidate for a separate a11y task, not scheduled / 
 - ROOT-GATE165-C-JSON / info (root note) / root_note: the gate-165 reviewer did not find c-round-165.json among the gate artifacts (it exists in tmp/studio-real-loop/); root may pass it to the reviewer / 
+- GATE166-ICON-PROPS / info (signal) / signal: not scheduled; the gate-166 reviewer notes the icon props (size-* shrink-0, strokeWidth 2.4, aria-hidden) repeat at 7 sites across V-3c; one ICON_STROKE constant in lib/arrangement is worth it only if the stroke changes again; carried as checkpoint Q3 evidence / 
+- Q-R166-EXIT-NAME / info (user question) / awaiting_user: the exit link's accessible name became 'CZABA' in round 166 (ruling R3, D-29z131); the old name '← CZABA' did not say 'back to the store' either; option from the gate-166 reviewer and A's reviewer: aria-label 'Back to CZABA' (label-in-name preserved, WCAG 2.5.3); not scheduled until Saba answers / 
+- C-R166-TRIPLET-CHECKED-BROWSER / info (evidence gap) / scheduled round 167: FUNC-SMOKE-V3C4A Triplets checked-icon line (BPM 120, right-click lane, Triplets, reopen, one svg.lucide-check); until C sees it in the browser it stays open; covered by vitest TU11 only / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
