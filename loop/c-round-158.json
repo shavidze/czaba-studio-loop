@@ -1,0 +1,78 @@
+{
+ "round": 158,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T07:34:26.3988726Z",
+  "round": 158,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R158-01",
+   "severity": "low",
+   "steps": [
+    "Open http://127.0.0.1:5173/studio-lab at 1440x900 or 1280x720 in a fresh context",
+    "Read getComputedStyle(transitionProperty/transitionDuration/transitionTimingFunction) on any of the 12 transport toolbar buttons",
+    "Repeat in a context created with reducedMotion: reduce"
+   ],
+   "expected": "background-color, color / 0.18s / cubic-bezier(0.2, 0.8, 0.2, 1) (D-29z123 R3, SURFACE-STYLE h); under prefers-reduced-motion: 0s or no transition",
+   "actual": "All 12 buttons, both viewports: color, background-color, border-color, box-shadow, transform, opacity / 0.15s,0.15s,0.15s,0.25s,0.15s,0.15s / ease-out x6; identical with reduced motion. The unlayered global rule app/styles/app.css l.305-314 (a, button, ... { transition }) beats Tailwind v4 @layer utilities motion-safe:* classes; TS1 only asserts class tokens in jsdom (no cascade).",
+   "evidence": "tmp/studio-real-loop/c-round-158/out/surface-1440.md, surface-1280.md rows h/h-rm; c158-{1440,1280}.json S0.btns[*].tp/td/ttf and reducedMotion; out/served-app.css (utilities layer l.347-6042, unlayered button rule l.6043/6398)",
+   "noteForB": "Not satisfiable with ordinary component classes in the 4 owned files: needs a cascade-level override (e.g. important utilities) or a new grant for app/styles/app.css. Any fix-up acceptance must be re-measured on computed style in the real browser (SURFACE-STYLE h/h-rm), not on class tokens (TS1)."
+  }
+ ],
+ "passed": [
+  "T158-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "RV1-V3A",
+  "ICON-STYLE",
+  "CONTRAST-V3A",
+  "FUNC-SMOKE-T",
+  "OVERLOAD-CHECK",
+  "G158-3",
+  "PX-NET",
+  "REG-HYD",
+  "SURFACE-STYLE(a)",
+  "SURFACE-STYLE(b)",
+  "SURFACE-STYLE(c)",
+  "SURFACE-STYLE(d)",
+  "SURFACE-STYLE(e)",
+  "SURFACE-STYLE(f)",
+  "SURFACE-STYLE(g)",
+  "SURFACE-STYLE(i)"
+ ],
+ "failed": [
+  "SURFACE-STYLE(h)"
+ ],
+ "blocked": [
+  "G158-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notRun": [
+  "V-2 rows, TEXT-BYTES-E, MONO-STYLE, CSS2-TRIM, FONT-INVENTORY, FONT-FAIL (unchanged code, per task)"
+ ],
+ "invalidRuns": [
+  "d6-1440-r1 first attempt: hydration error + Invalid hook call on the first cold load after server start (ENV-FIRST-LOAD, replaced once; did not recur in 8 warm sessions)",
+  "c158-1440-r0: harness error (C tab helper clicked the library), re-run clean"
+ ],
+ "findingsClosed": [
+  {
+   "id": "B-R157-EXPORT-PEAK",
+   "resolution": "info: SRW-20 overload warning rendered; count equals exact 24-bit full-scale samples (range 797/797 at 1440 and 1280, project 4688/4688)"
+  }
+ ],
+ "report": "tmp/studio-real-loop/c-round-158.md"
+}

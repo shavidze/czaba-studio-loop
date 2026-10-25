@@ -1,10 +1,9 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 157 PASSED with browserVerified and realVerified true and 0 bugs. Gate 157 published it as f8a316a. V-2b-3b is done and B-R155-EXPORT-ZERO is closed, so V-2b is complete except V-2b-DISPLAY, which is awaiting the user. The regression is not due until 2026-10-27. No user decision files exist. No Critical, High or Medium finding is open. Nothing needs external input; Q-V3-ICON-SIZE has a vetoable default. Scope remains: V-3a/b/c, M1, M3, M4, the deferred Lows (219), T12-ADVANCED and the regression and final regression.",
- "nextTask": "Round 158 (D-29z123) starts from f8a316a on a clean tree. Scope: V-3a, in ArrangementTransport.tsx only. (1) All 12 transport buttons go borderless: the 1 px border stays as transparent, the fill is bg-foreground/5 with enabled:hover /8 and enabled:active /12, the radius is rounded-md (8 px), and colour motion is motion-safe 180 ms on background-color and color with cubic-bezier(0.2,0.8,0.2,1). (2) Play is filled foreground with background-coloured text (hover /92, active /88); Export has a brass outline and text; the Loop-on fill survives hover. (3) Lucide Play/Pause and MoveHorizontal (16 px, stroke 1.5, aria-hidden) replace the glyphs on the fixed-width Play and Zoom to selection buttons only. The aria-labels are unchanged and the other 7 glyphs stay for V-3b. A owns 2 grants and 2 new files (transport-surface-ui.test.tsx TS1-TS6, doc 128); doc 127 becomes Completed; 974 files are frozen; mutations m151-m154; the code-reviewer is required. C checks RV1-V3A against B's pre-V-3 bbox reference (b-round-157/out/d6, captured at f8a316a with C's unchanged d6 tool, 0 px determinism), SURFACE-STYLE (a)-(i), ICON-STYLE, CONTRAST-V3A, FUNC-SMOKE-T, OVERLOAD-CHECK (triage of B-R157-EXPORT-PEAK: full-scale samples with no warning means High), G158-3 and PX-NET/REG-HYD at both viewports. On PASS, round 159 = V-3b, or the regression first if B plans on or after 2026-10-27.",
+ "reason": "C round 158 FAILED on one Low finding only (C-R158-01, SURFACE-STYLE h/h-rm). browserVerified and realVerified were true, and every other row passed at both viewports. Gate 158 was skipped, so HEAD stays f8a316a and the round-158 work is still in the tree (4/4 match a-round-158/end-sha256.txt). The failing string is V-3a's own toolButtonClass and the fix is cheap, so per round-158 §7 the next round is a bounded fix-up, not deferral. B-R157-EXPORT-PEAK is closed as info. No Critical, High or Medium finding is open. The regression is not due until 2026-10-27. No user decision files exist. Nothing needs external input.",
+ "nextTask": "Round 159 (D-29z124) starts from f8a316a plus the round-158 tree. It fixes C-R158-01 in ArrangementTransport.tsx only. toolButtonClass gets motion-safe:transition-[background-color,color]!, motion-safe:duration-180!, motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! and motion-reduce:transition-none!, so the 180 ms colour motion beats the unlayered global transition rule in app.css (which is not touched; ROOT-GLOBAL-TRANSITION-RULE) and reduced motion gives no transition. B's browser probe already confirms the mechanism. TS1 is updated, doc 128 gets a Problem -> Solution entry, A checks generation in the served CSS, and mutations are m156-m157. There are 3 grants, no new files and 975 frozen files. C re-measures SURFACE-STYLE (a)-(i) and (h-rm) on computed style at both viewports, plus CASCADE-SCOPE (other controls keep the global transition), RV1-V3A, a short FUNC-SMOKE-T, G159-3 and PX-NET/REG-HYD. On PASS root publishes rounds 158+159 and round 160 is V-3b, or the regression first if B plans on or after 2026-10-27.",
  "remaining": [
-  "V-3a(round 158)",
-  "B-R157-EXPORT-PEAK(triage, round 158 OVERLOAD-CHECK)",
+  "V-3a(round 159 fix-up, C-R158-01)",
   "V-3b",
   "V-3c",
   "Q-V3-ICON-SIZE(awaiting_user, default chosen)",
@@ -21,7 +20,8 @@
   "RV-5",
   "ARCH-CHECKPOINT-V0(requested)",
   "ARCH-CHECKPOINT-V2(requested)",
-  "ARCH-CHECKPOINT-V2B-END(re-requested, b-round-157-checkpoint-request.md)",
+  "ARCH-CHECKPOINT-V2B-END(requested, + addendum b-round-158-checkpoint-request.md)",
+  "ROOT-GLOBAL-TRANSITION-RULE(root signal)",
   "REGRESSION(due 2026-10-27)",
   "T12-ADVANCED",
   "DEFERRED-LOW-POLISH(219)",

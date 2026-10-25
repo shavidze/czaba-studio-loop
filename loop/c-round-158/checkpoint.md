@@ -1,0 +1,11 @@
+# C round 158 checkpoint
+- [x] SOURCE-SCOPE start: HEAD f8a316a, frozen 974 OK, end-sha256 4/4 OK, status 2M+2??, protected diff empty.
+- [x] AN-REVIEW: diff read; T0-T5 only.
+- [ ] T158-TARGETED vitest
+- [ ] browser rows
+- [x] T158-TARGETED 25 files 386/386, TS1-6 green
+- [x] RV1-V3A 0px all states both vp (1440 r1 first attempt INVALID env first-load hydration/invalid-hook; replaced)
+- [x] c158 1440 (r0 harness-invalid: my tab helper clicked library; r1 clean). Result: all SURFACE (a)-(g),(i), ICON, CONTRAST, FUNC, OVERLOAD pass; (h) FAIL: computed transition = global unlayered app.css l.305 rule (0.15s ease-out 6 props) overrides layered motion-safe utilities; reduced-motion still 0.15s.
+- OVERLOAD: warning shows, count == exact 24-bit FS count (797 range, 4688 project) -> B-R157-EXPORT-PEAK info.
+- [ ] c158 1280 (running), G158-3, end hashes, report
+- [x] 1280, G158-3, end checks, report + json written (FAIL Low C-R158-01)
