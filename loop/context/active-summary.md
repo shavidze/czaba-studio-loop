@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T02:43:22.154Z)
+# Active loop summary (2026-10-25T03:35:56.483Z)
 
-- backlog.json 1374 KB -> active view 182 KB
-- status: G_ROOT_GATE round 152
-- servers: `{"checkedUtc":"2026-10-25T02:25:48.1330925Z","round":152,"attempt":1,"store":200}`
-- last publication: ff2fd6ce73eeee41f92b13d743aa97520d27e502 (rounds 151-152)
-- last root gate: round 152 published - commit ff2fd6ce73eeee41f92b13d743aa97520d27e502 pushed
+- backlog.json 1378 KB -> active view 181 KB
+- status: G_ROOT_GATE round 153
+- servers: `{"checkedUtc":"2026-10-25T03:16:11.7299832Z","round":153,"attempt":1,"store":200}`
+- last publication: 037e25fdd86b76ef791d15c52cff71313b8b2a58 (rounds 153-153)
+- last root gate: round 153 published - commit 037e25fdd86b76ef791d15c52cff71313b8b2a58 pushed
 
 ## Current items: -
 
@@ -328,14 +328,14 @@
 - C-R149-OBS-SPACE-EMPTY / info / observation (not compared with earlier rounds; unrelated to colour): on an empty project S0, Space does not advance the playhead; check in the next regression round / 
 - A-R150-REVIEW-L1 / info / scheduled round 151 (D-29z116 T1: detail-panel-fit.test.tsx l.293 -> not.toContain('border-outline-strong')) / detail-panel-fit F4 l.293 not.toContain('border-outline') guards nothing after V-1b; B round-150 R5 statement was wrong
 - C-R150-BPM-EDGE-MARGIN / info / noted; re-measure if the BPM field geometry or font changes (V-2a changes its font, not its border) / BPM field left/right border pixels anti-aliased: 3.05/3.06 vs parent (>= 3.0 with small margin); top/bottom 3.50
-- C-R151-1 / low / ruled (B, D-29z117 R1): d6 tag error, not a layout move - arrangement-shortcut-hint is a content-sized <p> (width = own text), counted as text for V-2; C re-evaluates RV-1-TYPE without it in PANELS in round 152; closes on C round 152 RV-1-TYPE PASS; user may veto in feature-status.md / RV-1-TYPE: d6 kind:panel arrangement-shortcut-hint w 1189 -> 1070 (dw -119; x/y/h unchanged; determinism 0 px; = B prediction)
 - C-R151-2 / low / deferred_low_polish + awaiting_user (D-29z117 R2): no approved V-2 fix - spec approves font/weight/letter-spacing only; word-spacing 0.12em measured (B: ' · ' 8.8 px, hint 1162 px, 17 horizontal moves, 0 vertical, S0) but not approved and does not widen the 1 px dot; glyph swap changes text content (94 source lines, 44 in strings.ts, no shared constant). Must be fixed or accepted by the user before final acceptance / ' · ' separators cramped in Instrument Sans: space 2 px, dot 1 px, ' · ' 5 px at 12 px vs Inter 3/3/9 px (headless Linux integer advances)
 - C-R151-3 / low / deferred_low_polish (D-29z117 R3): U+221E is in no IBM Plex Mono subset served by Google css2 (B checked unicode-ranges); self-hosting forbidden by spec; C: visually acceptable; revisit in V-3 or the polish pass / '−∞' readout mixes Plex Mono '−' with fallback DejaVu Sans Mono '∞'
-- A-R151-REVIEW-L1 / info / ruled (D-29z117 R4): FONTS-SCOPED reworded - css2 rel=prefetch after header link hover/focus is allowed and recorded, 0 woff2 still required; checked by C round 152 / Header.tsx prefetch=intent on the Studio Lab link can prefetch the F2 css2 sheet on Store pages
-- A-R151-REVIEW-L4 / info / scheduled round 152 (T2: TH8 exact pan-reset count, expected 3) / TH8 checks the pan-reset count only as > 0
 - A-R151-ARCH-NOTE / info / signal (keep; not scheduled) / keep - obsidian block holding font declarations is still theming; route links export is the Remix place; studio-theme.css extraction stays r
-- B-R151-V2B-SIZE16 / info / V-2b planning input / S0 Studio text >= 16 px is only the mono transport position and the ◀ icon (1440 and 1280); display-serif role may have no qualifying text w
-- C-R151-SIG-SANS-TIMECODES / info / V-2b input (R5 of D-29z116) / remaining sans tabular-nums: library durations/playhead timecodes, zoom readout, ruler labels, library counts; library timecodes look most o
+- C-R151-SIG-SANS-TIMECODES / info / scheduled V-2b-2 (D-29z118 R4) / remaining sans tabular-nums: library durations/playhead timecodes, zoom readout, ruler labels, library counts; library timecodes look most o
+- B-R152-V2B-DISPLAY / info / awaiting_user (D-29z118 R2) / Display serif role has no qualifying Studio text: panel titles, track names, library entry names, selected clip name are 12-14 px in S0/S1/S
+- C-R152-DOC123-L67 / info / scheduled round 153 (D1: reword the stale clause) / doc 123 l.67 still says C round 151 has not run
+- C-R152-EXPORT-FULLSCALE / info / signal for T12-ADVANCED (meters/headroom); pre-existing 0 dB summing class (c-round-125 159 samples); not a V-2 defect / project WAV export has 3676 full-scale samples where hero music and Soft impact overlap at 0 dB
+- B-R152-LABEL-WIDEN-26PX / info / user-visible decision, may be vetoed (D-29z118 R3) / approved label typography (uppercase + 0.14em) widens labels: same-row neighbours move horizontally up to 26 px (Arrangement -> Overview not
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

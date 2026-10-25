@@ -1,199 +1,191 @@
-# CURRENT TASK — Round 153: VISUAL-A V-2b-1 — label typography (six Latin section labels: 11 px, 500, 0.14em, uppercase)
+# CURRENT TASK — Round 154: VISUAL-A V-2b-2 — weight roles (600/700 → 500) and the remaining timecodes in mono
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-25 · Decision: **D-29z118** (`docs/technical/studio-real-workspace/plan.md`)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-25 · Decision: **D-29z119** (`docs/technical/studio-real-workspace/plan.md`)
 - **Rules:** `docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
-- **Previous task:** `tasks/round-152.md`, an exact copy of the round-152 `current-task.md` (sha256 `d76725e1…0dff5d`). Rationale: `b-round-152.md`.
-- **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` § „ტიპოგრაფია“ (row „ეტიკეტები“: UI sans, 500, 11 px, `letter-spacing: 0.14em`, Latin UPPERCASE — MASTER, ARRANGEMENT etc.) and § „საზღვრები“. Use it as source material. It does not grant permissions and does not change the protected-file list.
+- **Previous task:** `tasks/round-153.md`, an exact copy of the round-153 `current-task.md` (sha256 `a3cff53b…218698`). Rationale: `b-round-153.md`.
+- **Spec:** `docs/technical/studio-real-workspace/visual-direction-a.md` § „ტიპოგრაფია“ (rows: UI sans 400/500 „ყველა სხვა ტექსტი“; ციფრები IBM Plex Mono 300/400 `tabular-nums` — „timecode, BPM, dB, საიდან/სადამდე“) and § „საზღვრები“. It is source material. It grants no permissions and does not change the protected-file list.
 
-## Baseline = HEAD `ff2fd6c`, clean tree
-- Gate 152 **published** `ff2fd6ce73eeee41f92b13d743aa97520d27e502` (rounds 151 + 152, both remotes). `git status --short` is empty.
-- **Frozen list:** `tmp/studio-real-loop/b-round-152-r153-tree-sha256.txt`, **962 entries**. That is `git ls-files -co --exclude-standard` (971) minus the 9 grants.
-- **Grants:** `b-round-152-r153-grants.txt` (9 existing files). **New file:** `b-round-152-r153-new-files.txt` (1 file, doc 124).
-- **Start hashes:** `b-round-152-r153-granted-start-sha256.txt`. **Start copies:** `b-round-152/r153-granted-start/`.
+## Baseline = HEAD `037e25f`, clean tree
+- Gate 153 **published** `037e25fdd86b76ef791d15c52cff71313b8b2a58` (both remotes). `git status --short` is empty.
+- **Frozen list:** `tmp/studio-real-loop/b-round-153-r154-tree-sha256.txt`, **959 entries** = `git ls-files -co --exclude-standard` (972) minus the 13 grants.
+- **Grants:** `b-round-153-r154-grants.txt` (13 existing files). **New file:** `b-round-153-r154-new-files.txt` (1 file, doc 125).
+- **Start hashes:** `b-round-153-r154-granted-start-sha256.txt`. **Start copies:** `b-round-153/r154-granted-start/`.
 - **First step for A:** check HEAD, the empty status, the frozen list and the start hashes. If anything differs, A stops and reports.
 
-## 0. Why this round (D-29z118)
-- **Round 152: C PASS, 0 bugs.** `browserVerified` and `realVerified` are both true. Gate 152 published `ff2fd6c`, so **V-2a is done (მზადაა)**. C-R151-1, A-R151-REVIEW-L1 and A-R151-REVIEW-L4 are closed.
-- **Checks at planning:**
-  - The regression is due on or after 2026-10-27 (`regression-last.json`: 2026-10-24, round 122). Today is 2026-10-25, so it is not due.
-  - `user-review/ableton-decisions.md` and `design-ux-decisions.md` do not exist.
-  - No Critical, High or Medium finding is open, apart from the Tech Lead manual items.
-- **B measured V-2b in real Chromium** on `ff2fd6c` (store untouched; tools in `b-round-152/tools/`, results in `b-round-152/out/`):
-  - `size152-{1440,1280}.json` covers S0, S1, the marker menu, the grid menu and S2 (Export). The only Studio texts ≥ 16 px are these:
-    - the mono transport position (numeral role);
-    - the `◀` library-collapse icon (V-3);
-    - the 24 px Export dialog title (`ModalTitle`, defaults from the protected `Modal.tsx`; not in the spec's display list).
-  - Every text the spec names for the display serif is 12–14 px: panel titles, track names, library entry names and the selected clip name.
-  - `dispsim-*.json`: raising those roles to 16 px gives 59–65 vertical moves, and long library names wrap (+27.5 px each). That is a layout change.
-  - `labelsim-*.json`: the label style on the six labels below gives **16 horizontal movers, 0 vertical, 0 new clip, 0 missing/added**, at both viewports, in S0 and S1.
+## 0. Why this round (D-29z119)
+- **Round 153: C PASS, 0 bugs**, `browserVerified` = `realVerified` = true. Gate 153 published `037e25f`. **V-2b-1 is done (მზადაა).** C-R152-DOC123-L67 is closed.
+- **Checks at planning:** the regression is due on or after 2026-10-27 (`regression-last.json`: 2026-10-24, round 122), so it is not due today. `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` do not exist. No Critical, High or Medium finding is open, apart from the Tech Lead manual items.
+- **B measured V-2b-2 in real Chromium** on `037e25f` (store untouched; tools in `b-round-153/tools/`, results in `b-round-153/out/`):
+  - `v2b2sim-{1440,1280}.json`, S0/S1/S2: 600/700 → 500 on every Studio text gives 2 movers only, the `h1` (dw −2) and its "· Workspace" span (dx −2). 0 vertical, 0 clip. Every M/S/Mute button has a fixed size.
+  - The library preview **duration** in mono gives a **new ellipsis** on the default preview title "Middle East — საჯარო preview" (slack 0 → −6 px; still −1 px even with −0.05em tracking; `previewprobe-*.json`).
+  - The zoom readout's worst case "123.4 px/s" is 70 px in mono against its `w-16` (64 px) box, and the gap to `⇔` is 6 px (`zoomprobe-*.json`).
+  - Ruler and tempo-row labels in mono, at 8 zoom positions (0.5–320 px/s, BPM 90): **0 overlaps**. The minimum gap shrinks from ≥ 18 to ≥ 14 px (`rulerprobe-*.json`).
+  - The grid-division and waveform-zoom `<select>`s in mono get +10 px wider, and `Env` moves +10 px.
 
-### 0.1 B rulings (D-29z118)
-- **R1 — V-2b is split, and scope is not reduced:**
-  - **V-2b-1 (this round):** label typography.
-  - **V-2b-2 (next round):** weight roles from the spec table, and the remaining numerals in mono.
-    - Weight roles: UI sans 400/500 and mono 300/400. The `font-semibold`/`font-bold` uses and the peak over-state `font-medium` are kept today only to avoid faux bold (D-29z116 R5).
-    - Remaining numerals (C-R151-SIG-SANS-TIMECODES): library durations, playhead timecodes, the zoom readout, ruler labels and counts.
-  - **V-2b-DISPLAY:** waits for the user (R2).
-- **R2 — Display serif → `awaiting_user`.** No text in the spec's named display roles is ≥ 16 px. Applying the serif would need a size change, and a size change is a layout change the user has not approved.
-  - Options for Saba: (a) no serif in the Studio; (b) approve 16 px for those roles (B's numbers above); (c) serif on the Export dialog title only; (d) relax the ≥ 16 px rule.
-  - Until he answers, **Cormorant is not loaded** (TH7 keeps asserting that it is absent). This is not deferral and not a scope cut: it is recorded in `feature-status.md` as a user question.
-- **R3 — Which elements are labels (smallest honest reading of „MASTER, ARRANGEMENT და სხვ.“).** A label here is a static Latin word that names a Studio section or row. There are exactly six:
+### 0.1 B rulings (D-29z119)
+- **R1 — Weight roles.** UI sans uses only 400/500. Every `font-semibold`/`font-bold` in `app/components/arrangement/**` becomes `font-medium` (7 places, W1–W5 below). The peak over-state `font-medium` on the mono peak button is removed, so the button stays at 400 per the spec's mono row (W6). Nothing uses mono 300, so Plex Mono 300 is **not** added; FONTS-SCOPED stays unchanged.
+- **R2 — Which numerals go mono (the spec list only: timecode, BPM, dB, from/to).** This keeps the round-151 rule that put the pan readout outside the list (TH8 still asserts that):
+  - **In this round:** library row durations (N1), the library playhead (N2), the ruler labels (N3), the tempo-row bar labels (N4), the clip-gain reset "0 dB" (N5), and the lane-move ghost start time (N6).
+  - **Stay sans, not on the spec list** (B ruling; the user may veto it in `feature-status.md`):
+    - the zoom readout "40 px/s" (it would also overflow `w-16`);
+    - the library counts;
+    - `4/4`;
+    - the pan readout (TH8);
+    - the grid-division and waveform-zoom `<select>`s.
+  - **The library preview duration is a timecode but stays sans for now: a user question (B-R153-PREVIEW-DUR).** Mono would newly truncate the default preview title, and that hides content. Options for Saba:
+    - (a) accept the earlier ellipsis (the full title stays in the `title` tooltip);
+    - (b) a layout change (gap or width, an M-type move);
+    - (c) keep it sans.
+  - **From/to timecodes inside sentences → the next stage, V-2b-3, which is not deferred.** These are the range readout, the selected-clip line and the Export scope line. Each is built as one string in `strings.ts`, so mono only on the times needs part-templating that keeps `textContent` byte-identical. That is its own stage.
+- **R3 — The Export dialog title (24 px / 600) is not touched.** Its weight comes from the protected `Modal.tsx`. It joins the V-2b-DISPLAY user question: its role and weight follow the option Saba picks.
+- **R4 — The css2 URL is not changed in this round.** Instrument Sans 600/700 and Plex Mono 500 may now have no consumer. Per the backlog rule ("drop unused css2 weights only with C font evidence"), C produces that evidence in WEIGHT-INVENTORY. B trims the URL (with TH7) in a later bounded round only if C shows zero consumers on the whole `/studio-lab` page.
+- **R5 — Text content is unchanged.** Only classes change, plus one `<span className="font-mono">` around the formatted library duration (N1), so the meta row keeps exactly 2 children and its exact class string (LRS test l.248).
 
-| # | Label | File / line at `ff2fd6c` | Now |
-|---|---|---|---|
-| L1 | Master | `ArrangementMaster.tsx` l.157–159 (`<span className="text-xs font-medium text-muted" aria-hidden="true">`) | 12 px / 500 |
-| L2 | Zoom | `ArrangementTransport.tsx` l.235–236 (bare text inside the `<label>` that also holds the range input and the readout) | 12 px / 400 |
-| L3 | Arrangement | `ArrangementVideoDock.tsx` l.888–890 (bare text before the `text-dim` "· Overview" span) | 12 px / 400 |
-| L4 | BPM | `ArrangementTempoRow.tsx` l.219 (`<span>BPM</span>`) | 12 px / 400 |
-| L5 | Markers | `ArrangementMarkerRow.tsx` l.687 (`<span>Markers</span>`) | 12 px / 400 |
-| L6 | Loop | `StudioWorkspace.tsx` l.2442 (the `'Loop'` fallback text of the loop strip, shown when no loop is set) | 12 px / 400 |
-
-  - **Not labels:** buttons, panel titles (display role, R2), field names in the detail panel (Track, Start, Length, Source offset), descriptive text (Original sound, No video added yet), and user content.
-  - **User-visible decision (may be vetoed in `feature-status.md`):** the approved style widens the labels, so same-row neighbours move horizontally by up to **26 px**. That is more than the ≤ ~9 px of V-2a. B's simulation (1440 S0):
-
-| Mover | dx | dw |
-|---|---|---|
-| Master fieldset and its label | −14.2 | +14.3 |
-| Follow | −10.1 | — |
-| Zoom label | −10.1 | +10.2 |
-| Arrangement | — | +26 |
-| "· Overview" note | +26 | — |
-| Video caption | +26 | −26 |
-| BPM | — | +1.6 |
-| BPM input / 4/4 / Metronome | +1.6 | — |
-| Markers | — | +18.8 |
-| `+` / `◀` / `▶` marker buttons | +18.8 | — |
-| Loop | — | +9.2 |
-
-- **R4 — Tokens, not arbitrary values.** Tailwind has no default for 11 px or 0.14em (`text-xs` is 12 px, `tracking-widest` is 0.1em). A adds three `@theme` tokens in the TYPOGRAPHY section of `app.css`; they become the `text-label` and `tracking-label` utilities. **The obsidian block is not touched**, so TH2's "exactly 21 declarations" still holds. These are size and spacing tokens, not colours; no Store page uses them. `DESIGN_TOKENS.md` is silent on font-size tokens; `TAILWIND_FIRST.md` forbids hardcoded arbitrary values, so tokens are the closer fit.
-- **R5 — Text content is unchanged.** Uppercase comes from CSS `uppercase` (`text-transform`). The DOM `textContent` of every label, and of its parent, stays byte-identical, including `VDS1`'s `'Arrangement · Overview'`.
-- **R6 — Folded in (same doc owner):** C-R152-DOC123-L67. Doc 123 l.67 still says that C round 151 has not run; the status line becomes Completed.
-
-## 1. What changes (exact)
+## 1. What changes (exact; line numbers at `037e25f`)
 | ID | File | Change |
 |---|---|---|
-| F1 | `app/styles/app.css` | In the `@theme` TYPOGRAPHY section, directly after `--font-serif: …;` (l.124), add exactly 3 lines: `--text-label: 0.6875rem;`, `--text-label--line-height: 1rem;`, `--tracking-label: 0.14em;`. No other line changes. |
-| L1 | `ArrangementMaster.tsx` l.157 | On the Master span, `text-xs` → `text-label`, and add `tracking-label uppercase`. `font-medium`, `text-muted` and `aria-hidden` stay. |
-| L2 | `ArrangementTransport.tsx` l.236 | Wrap the bare `Zoom` text in `<span className="text-label font-medium uppercase tracking-label">Zoom</span>`. The `<label>`, its classes, the input and the readout are unchanged. |
-| L3 | `ArrangementVideoDock.tsx` l.889 | Wrap `Arrangement` in the same span classes. Keep exactly one space before the `text-dim` span (for example `{' '}`), so the outer span's `textContent` stays `Arrangement · Overview`. |
-| L4 | `ArrangementTempoRow.tsx` l.219 | `<span>BPM</span>` → `<span className="text-label font-medium uppercase tracking-label">BPM</span>`. |
-| L5 | `ArrangementMarkerRow.tsx` l.687 | The same change for `Markers`. |
-| L6 | `StudioWorkspace.tsx` l.2442 | `'Loop'` → `<span className="text-label font-medium uppercase tracking-label">Loop</span>`. The loop-times branch is unchanged. |
-| T1 | `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` | New `it` **TH9** (the existing TH1–TH8 are unchanged). Details below the table. |
-| D1 | `docs/implementation/2026/quarter-IV/123-studio-v2a-typography-fonts.md` | Edit 2 lines only. l.4 status → `Completed (C round 152 PASS, gate 152 published ff2fd6c)`. On l.67, replace the clause „C round 151 ჯერ არ გაშვებულა.“ with „C round 151-ისა და 152-ის შედეგები — ქვემოთ.“ |
-| D2 | **new** `docs/implementation/2026/quarter-IV/124-studio-v2b1-label-typography.md` | Follow `docs/implementation/TEMPLATE.md`. Write it in Georgian, with technical terms in English. Include: the R1–R5 context; the six labels; the `@theme` token decision and the arbitrary-value alternative; the expected 26 px horizontal shift as a user-vetoable decision; the V-2b-DISPLAY user question; the tests and mutations; and a TODO for V-2b-2 / V-2b-DISPLAY. Status `In Progress (awaiting C round 153)`. |
+| W1 | `StudioWorkspace.tsx` l.2199 | `<h1 className="text-sm font-semibold">` → `font-medium`. |
+| W2 | `ArrangementLibrary.tsx` l.443 | Library `h2`: `font-semibold` → `font-medium`. |
+| W3 | `ArrangementGroupHeader.tsx` l.36 | `TRACK_GROUP_MIX_BUTTON_CLASS`: `font-bold` → `font-medium`. |
+| W4 | `ArrangementGroupHeader.tsx` l.264 | Group-name button: `font-semibold` → `font-medium`. |
+| W5 | `ArrangementMaster.tsx` l.170 and `ArrangementLane.tsx` l.612, l.630 | Master Mute and lane M/S buttons: `font-bold` → `font-medium`. |
+| W6 | `ArrangementMaster.tsx` l.110 | Peak over branch: `'border-destructive bg-destructive/15 font-medium text-destructive'` → `'border-destructive bg-destructive/15 text-destructive'`. |
+| N1 | `ArrangementLibrary.tsx` l.119–124 | Only in the ready branch, `formatArrangementTime(state.duration)` → `<span className="font-mono">{formatArrangementTime(state.duration)}</span>`. The loading and error strings, the meta row (l.117) and its first child are unchanged. |
+| N2 | `ArrangementLibraryPreview.tsx` l.75 | Playhead span `className="tabular-nums"` → `"font-mono tabular-nums"`. |
+| N3 | `ArrangementRuler.tsx` l.262 | Add `font-mono` to the ruler label span. |
+| N4 | `ArrangementTempoRow.tsx` l.120 | Add `font-mono` to the bar/beat label base class. l.233 (`4/4`) is unchanged. |
+| N5 | `ArrangementDetailPanel.tsx` l.860 | Add `font-mono` to the clip-gain reset button class (`arrangement-detail-clip-gain-reset`). |
+| N6 | `ArrangementLane.tsx` l.929 | Add `font-mono` to the ghost start-time span. l.773 (pan) is unchanged. |
+| T1 | `studio-theme-obsidian.test.tsx` | New `it` **TH10** (TH1–TH9 unchanged). Details below the table. |
+| T2 | `render-budget.test.tsx` l.528 | `toBe('tabular-nums')` → `toBe('font-mono tabular-nums')`. Nothing else. |
+| T3 | `library-row-strings-ui.test.tsx` | In the test that holds l.248, add assertions: the meta row's second child contains exactly one `span.font-mono` whose `textContent` is `00:20.000`, and the first child has no `font-mono`. Existing assertions are unchanged. |
+| D1 | `docs/implementation/2026/quarter-IV/124-studio-v2b1-label-typography.md` | Change l.4 only: `**სტატუსი:** Completed (C round 153 PASS, gate 153 published 037e25f)`. |
+| D2 | **new** `docs/implementation/2026/quarter-IV/125-studio-v2b2-weights-numerals.md` | Follow `docs/implementation/TEMPLATE.md`, in Georgian with technical terms in English. Include: R1–R5; the W/N table; what stays sans and why; the user questions (B-R153-PREVIEW-DUR, the Export title under V-2b-DISPLAY); V-2b-3; the css2-trim evidence plan; tests and mutations. Status `In Progress (awaiting C round 154)`. |
 
-**T1 / TH9 details:**
-- **(a) Labels in the S0 SSR.** Use `renderToString(<StudioLabRoute />)`. Exactly **6** tags carry `tracking-label`. Each has the tokens `text-label`, `font-medium`, `uppercase` and `tracking-label`, and their inner texts (in DOM order, original case) equal exactly `['Master', 'Zoom', 'Arrangement', 'BPM', 'Markers', 'Loop']` (as a set if the DOM order differs; record the order in the report).
-  - L6 is visible in S0 because S0 has no loop. If the S0 SSR does not render one of the six, A records which one and why, asserts the rest, and covers the missing one in a mounted test inside TH9.
-  - No tag in the SSR uses `text-[11px]` or `tracking-[0.14em]`.
-- **(b) The app.css tokens.** `app.css` contains each of the 3 F1 declarations exactly once, outside the obsidian block (brace depth 1 inside `@theme`).
-- **(c) Text content.** The SSR text of the dock caption span is still `Arrangement · Overview`.
+**T1 / TH10 details:**
+- **(a) Source scan.** No `.tsx` file under `app/components/arrangement` (use the existing `listFilesRecursively`) contains the class token `font-semibold` or `font-bold`. `ArrangementMaster.tsx` no longer contains `bg-destructive/15 font-medium`.
+- **(b) S0 SSR** (`renderToString(<StudioLabRoute />)`):
+  - The `h1`, the Library `h2`, the Master Mute button and the lane M/S buttons carry `font-medium` and neither `font-semibold` nor `font-bold`.
+  - `arrangement-library-playhead` carries `font-mono` and `tabular-nums`.
+  - `arrangement-zoom-readout` and the 3 `arrangement-track-pan-reset` tags have **no** `font-mono`.
+- **(c) N3 / N4 / N5 / N6.** The TH file runs under `// @vitest-environment node` (no DOM mounting). Assert each one that renders in the S0 SSR. For each one that does not (N3 and N4 likely need a measured width or a BPM; N6 needs a drag), use a **source-level assertion** on the exact class string of that element in its component file (read with `node:fs`, like TH9 reads `app.css`), and say which way each was covered. C's MONO-STYLE is the real computed-style check. Mutation m138 must still turn TH10 red.
+  - Do not change the file's test environment. No assertion may use snapshot matching.
 
-- **Nothing else changes:** no colour, no string in `strings.ts`, no other component, route or test file, and no `package.json`.
+**Nothing else changes:** no colour, no `app.css` line, no string in `strings.ts`, no route, no `package.json`. In particular, `studio-lab.tsx` and the css2 URL are not touched (R4).
 
 ## 2. A — files you own (everything else is frozen)
 | Path | Allowed change |
 |---|---|
-| `app/styles/app.css` | F1 only (3 lines) |
-| `app/components/arrangement/ArrangementMaster.tsx` | L1 only |
-| `app/components/arrangement/ArrangementTransport.tsx` | L2 only |
-| `app/components/arrangement/ArrangementVideoDock.tsx` | L3 only |
-| `app/components/arrangement/ArrangementTempoRow.tsx` | L4 only |
-| `app/components/arrangement/ArrangementMarkerRow.tsx` | L5 only |
-| `app/components/arrangement/StudioWorkspace.tsx` | L6 only |
-| `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` | T1 only (new TH9) |
-| `docs/implementation/2026/quarter-IV/123-studio-v2a-typography-fonts.md` | D1 only (2 lines) |
-| `docs/implementation/2026/quarter-IV/124-studio-v2b1-label-typography.md` (new) | D2 |
+| `app/components/arrangement/StudioWorkspace.tsx` | W1 only |
+| `app/components/arrangement/ArrangementLibrary.tsx` | W2, N1 only |
+| `app/components/arrangement/ArrangementGroupHeader.tsx` | W3, W4 only |
+| `app/components/arrangement/ArrangementMaster.tsx` | W5 (l.170), W6 only |
+| `app/components/arrangement/ArrangementLane.tsx` | W5 (l.612, l.630), N6 only |
+| `app/components/arrangement/ArrangementLibraryPreview.tsx` | N2 only |
+| `app/components/arrangement/ArrangementRuler.tsx` | N3 only |
+| `app/components/arrangement/ArrangementTempoRow.tsx` | N4 only |
+| `app/components/arrangement/ArrangementDetailPanel.tsx` | N5 only |
+| `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` | T1 only (new TH10) |
+| `app/lib/arrangement/__tests__/render-budget.test.tsx` | T2 only (1 line) |
+| `app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx` | T3 only (added assertions) |
+| `docs/implementation/2026/quarter-IV/124-studio-v2b1-label-typography.md` | D1 only (1 line) |
+| `docs/implementation/2026/quarter-IV/125-studio-v2b2-weights-numerals.md` (new) | D2 |
 
-- **Read before editing** (`.claude/rules/read-primitives.md`): `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `FORWARDREF_COMPONENT.md`, `GEORGIAN_DOCS.md`, `TESTING_QUALITY_GATES.md`.
-- **Protected:** the diff vs `ff2fd6c` stays empty for `studio.$productId.tsx`, `api.studio-token.ts`, `account.downloads.tsx`, `download-routes.test.ts`, `auth*`, `AuthContext.tsx`, `StudioContext.tsx`, `Modal.tsx` and `root.tsx`.
+- **Read before editing** (`.claude/rules/read-primitives.md`): `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `FORWARDREF_COMPONENT.md`, `AUDIO_ARCHITECTURE.md` (Master/Lane are Studio files; no audio logic changes), `GEORGIAN_DOCS.md`, `TESTING_QUALITY_GATES.md`.
+- **Protected:** the diff vs `037e25f` stays empty for `studio.$productId.tsx`, `api.studio-token.ts`, `account.downloads.tsx`, `download-routes.test.ts`, `auth*`, `AuthContext.tsx`, `StudioContext.tsx`, `Modal.tsx` and `root.tsx`.
 - **Not allowed:** any other file; commit, push, stash, install, revert; `npm run build`. Every lasting edit goes through Edit/Write (the C-R120-01 rule).
-- **If an existing test breaks because of L1–L6** (for example, an exact class or `textContent` assertion), A **stops and reports** the file, the line and the assertion. A does not edit any test file that is not granted; B grants it in the next round. B grepped `__tests__` and expects none: `VDS1` reads `textContent` (kept by L3), `GS14` reads button labels only, and the Zoom slider is found by its aria-label.
+- **If another existing test breaks because of W/N** (an exact class or `textContent` assertion), A **stops and reports** the file, the line and the assertion. A does not edit a test file that is not granted; B grants it next round. B grepped `__tests__` for exact class assertions. The only one hit was `render-budget` l.528 (T2). `library-row-strings-ui` l.248 holds because N1 wraps inside the second child. TH8 holds because pan stays sans.
 
 ## 3. A — tests and commands (speed rules)
 - **Start:** the checks in the Baseline section.
 - **Baseline run:**
   ```
-  npx vitest run app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx app/lib/arrangement/__tests__/master-ui.test.tsx app/lib/arrangement/__tests__/tempo-ui.test.tsx app/lib/arrangement/__tests__/markers-ui.test.tsx app/lib/arrangement/__tests__/grid-snap-ui.test.tsx app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+  npx vitest run app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx app/lib/arrangement/__tests__/render-budget.test.tsx app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx app/lib/arrangement/__tests__/master-ui.test.tsx app/lib/arrangement/__tests__/tempo-ui.test.tsx app/lib/arrangement/__tests__/track-layout.test.tsx app/lib/arrangement/__tests__/library-preview.test.tsx app/lib/arrangement/__tests__/track-header-stacking.test.tsx
   ```
-  Save the result as `a-round-153/vitest-baseline.json`.
+  Also run the test file(s) that cover the group header and the detail-panel clip gain. Find them by grepping `__tests__` for `arrangement-group-name` and `arrangement-detail-clip-gain-reset`, and list them in the report. Save the result as `a-round-154/vitest-baseline.json`.
 - **After the edits:**
-  - Run the same command. Every test that passed at baseline still passes, and TH9 is green.
+  - Run the same files. Every test that passed at baseline still passes, and TH10 is green.
   - `npm run typecheck`
   - `npm run lint`
-  - A read-only `npx biome check` on the 8 changed code and test files.
-- **Mutations** (Edit → run → restore by Edit → sha256 equals the post-edit hash; JSON goes in `a-round-153/mutations/`):
-  - **m134:** remove `uppercase` from L5 (Markers). Only TH9 turns red.
-  - **m135:** in F1, change `--tracking-label: 0.14em;` to `0.1em`. Only TH9 turns red.
-  - **m136:** change L3 to drop the space before "· Overview". `VDS1` and TH9 (c) turn red.
-- **Code-reviewer:** required (10 files). Pass any Architecture note to B verbatim.
+  - A read-only `npx biome check` on the 12 changed code and test files.
+- **Mutations** (Edit → run → restore by Edit → sha256 equals the post-edit hash; JSON goes in `a-round-154/mutations/`):
+  - **m137:** put `font-bold` back on lane l.612. Only TH10 turns red.
+  - **m138:** remove `font-mono` from N3 (ruler). Only TH10 turns red.
+  - **m139:** move N1's `font-mono` from the inner span onto the meta row (l.117). The LRS test turns red (l.248 and/or T3).
+  - **m140:** put `font-medium` back into the W6 over branch. Only TH10 turns red.
+- **Code-reviewer:** required (14 files). Pass any Architecture note to B verbatim.
 - **Not run by A:** the full suite, `npm run verify`, the build, e2e, and every browser row.
 - **End:**
-  - The frozen 962 are OK, and the protected diff is empty.
-  - `git status --short` = exactly the 9 granted ` M` + 1 `??` (doc 124).
-  - Write `a-round-153/end-sha256.txt` (10 paths) and `a-round-153/diff-vs-start.patch`.
+  - The frozen 959 are OK, and the protected diff is empty.
+  - `git status --short` = exactly the granted ` M` files that A really changed (≤ 13) + 1 `??` (doc 125).
+  - Write `a-round-154/end-sha256.txt` and `a-round-154/diff-vs-start.patch`.
 
 ## 4. C — rows
 **Setup:**
 - Real Playwright Chromium on `http://127.0.0.1:5173/studio-lab`, with a fresh context per session. Use both viewports, 1440×900 and 1280×720.
-- Wait for `document.fonts.ready` before measuring. A session where the Google Fonts css2/woff2 do not return 200 is **invalid (environment)**; replace it at most twice.
-- Reuse `c-round-152/tools/`; change only the output dir, labels and file names.
-- **Reference for RV-1-LABELS:** `c-round-152/out/bbox-post-v2a-{1280,1440}.json`. Write nothing under earlier `c-round-*/out/`.
+- Wait for `document.fonts.ready` before measuring. A session where the Google Fonts css2/woff2 do not all return 200 is **invalid (environment)**; replace it at most twice.
+- Reuse `c-round-153/tools/` (d6, labels, fs3, g153-3); change only the output dir, labels and file names.
+- **Reference for RV-1-V2B2:** `c-round-153/out/bbox-post-v2b1-{1280,1440}.json`. Write nothing under earlier `c-round-*/out/`.
 
 | Row | Check |
 |---|---|
-| T153-TARGETED | Re-run A's 7 vitest files. The counts equal A's. TH9 asserts the 6 labels exactly. |
-| SOURCE-SCOPE | <ul><li>HEAD is `ff2fd6c`.</li><li>The frozen 962 are OK at start and at end.</li><li>The 10 end hashes equal `a-round-153/end-sha256.txt`.</li><li>`git status` = 9 ` M` + 1 `??`.</li><li>The protected diff vs `ff2fd6c` is empty.</li><li>The `app.css` diff is exactly the 3 F1 lines.</li><li>No source changed during C's phase.</li></ul> |
-| AN-REVIEW | <ul><li>Each component diff is only its L-row.</li><li>The test diff is only the new TH9.</li><li>The doc 123 diff is the 2 D1 lines.</li><li>Doc 124 is in Georgian and has the TEMPLATE sections.</li></ul> |
-| LABEL-STYLE | For each of the six labels at both viewports (L6 in **S0**, because S1 sets a loop and that replaces the fallback text), the computed style is: `font-size` 11px, `line-height` 16px, `font-weight` 500, `letter-spacing` 1.54px, `text-transform` uppercase, family Instrument Sans (CDP `getPlatformFontsForNode`: Instrument Sans [web]). `textContent` is the original-case word, and the rendered text is uppercase in the screenshot. Report the accessible name of the Master fieldset, the Zoom slider and the marker/BPM controls; they must be unchanged from round 152. |
-| RV-1-LABELS | Re-run the d6 bbox chain (S0/S1/S2, both viewports, twice; determinism 0 px) vs the round-152 reference. PASS only if all of these hold: <ul><li>every y/h is within ±1 px;</li><li>0 keys are missing or added;</li><li>every `kind: panel` box is within ±1 px;</li><li>every mover > 1 px is horizontal, and is either a label's own width change or a same-row follower (list dx/dw/cause);</li><li>nothing is newly past 1280.</li></ul> **d6 keys only interactive, panel and clip elements** (`c-round-152/tools/d6.cjs` `collect`). So the new wrapper spans add **no** key, and the labels themselves, the "· Overview" note and the video caption are not d6 keys; LABEL-STYLE and NO-CLIP measure those. **B's prediction in d6 terms:** <ul><li>the Master `M` / Volume / Peak controls dx ≈ −14.2;</li><li>Follow dx ≈ −10.1 (the Zoom slider and readout ≤ 1 px or the same shift; report it);</li><li>the BPM input and Metronome dx ≈ +1.6;</li><li>marker `+` / `◀` / `▶` dx ≈ +18.8;</li><li>every panel (video dock, marker row, tempo row, loop strip) within ±1 px.</li></ul>The full sim table (§0.1 R3, max \|dx\| 26, including non-d6 spans) is in `b-round-152/out/labelsim-*.json`; C compares its own label/caption measurements against it. Report any mover that is not in the prediction. |
-| NO-CLIP | For the six labels and their row neighbours (marker `+`/`◀`/`▶`, BPM input, 4/4, Metronome, Follow, the video caption): no new ellipsis, wrap or `scrollWidth > clientWidth` vs round 152, in S0 and S1, at both viewports. Also check with a loaded long-named video (S1 `beeps-6s-h264-aac.mp4`): the caption is not newly truncated. |
-| FONTS-SCOPED | <ul><li>`/` and `/cart` at both viewports: 0 Instrument Sans / Plex Mono / Noto Georgian woff2 (a css2 `prefetch` after hover/focus is still allowed).</li><li>On the Store pages, `body` font-family is the Store literal, and 0 elements have computed `letter-spacing` 1.54px.</li><li>`/studio-lab` requests no new family (still exactly the V-2a css2 URL; no Cormorant).</li></ul> |
-| TOKENS-SCOPED | The obsidian block is byte-identical to `ff2fd6c`. There is no hex in the components. The only `@theme` change is the 3 F1 lines. |
-| FUNC-SMOKE | <ul><li>Play 2 s.</li><li>A clip drag, then Ctrl+Z.</li><li>Type a BPM, then Enter.</li><li>Move the Zoom slider (the readout changes).</li><li>M, then Enter, adds a marker; then marker `◀`/`▶`.</li><li>Ctrl+L on/off: the Loop label comes back when the loop is cleared/off, if the app shows it then; report what the app does.</li><li>Open the Export dialog and close it with Escape.</li></ul> Both viewports. |
-| G153-3 | <ul><li>`/studio-lab` is anonymous, with the demo badge.</li><li>`/studio/middle-east` shows "Sign in required", no workspace, 0 `audio[src]`.</li><li>`GET /api/studio-token` returns 401.</li><li>Fake-Bearer 403: BLOCKED (backend unavailable in cloud).</li></ul> |
+| T154-TARGETED | Re-run A's vitest files. The counts equal A's. TH10 covers W1–W6 and N2–N6 as A reports. |
+| SOURCE-SCOPE | <ul><li>HEAD is `037e25f`.</li><li>The frozen 959 are OK at start and at end.</li><li>The end hashes equal `a-round-154/end-sha256.txt`.</li><li>`git status` matches A's list (≤ 13 ` M` + 1 `??`).</li><li>The protected diff vs `037e25f` is empty.</li><li>`app.css` and `studio-lab.tsx` are unchanged.</li><li>No source changed during C's phase.</li></ul> |
+| AN-REVIEW | <ul><li>Each component diff is only its W/N rows.</li><li>The test diffs are only TH10, the T2 line and the T3 assertions.</li><li>The doc 124 diff is the 1 D1 line.</li><li>Doc 125 is in Georgian and has the TEMPLATE sections.</li></ul> |
+| WEIGHT-STYLE | Computed `font-weight` is **500**, and CDP `getPlatformFontsForNode` gives Instrument Sans [web], at both viewports, on: the `h1` (S0); the Library `h2`; Master Mute; every lane M/S; and in S1 (with a group) the group name, its `▣` and the group mix buttons. Each box is within ±1 px of round 153, except the `h1` (dw ≈ −2) and its "· Workspace" span (dx ≈ −2). `textContent` is unchanged. |
+| MASTER-OVER | Drive the Master peak into the over state in the real browser. **Recipe** (from C-R152-EXPORT-FULLSCALE: hero music and Soft impact overlap reaches full scale at 0 dB): place `demo-hero-music` and `demo-soft-impact` at the same start, set Master volume to max, Play from the overlap; the peak should switch to `over`. On `arrangement-master-peak` with `data-state="over"`: computed weight **400**, family IBM Plex Mono [web], and the destructive colours are still applied. If over cannot be reached in 2 attempts, the row is **not run** (say so; `browserVerified` false). |
+| MONO-STYLE | Computed family IBM Plex Mono (CDP: IBM Plex Mono [web]), weight 400 and `font-variant-numeric` tabular-nums on: <ul><li>N1, every ready library duration;</li><li>N2;</li><li>N3, the ruler labels;</li><li>N4, the tempo-row labels after BPM 90 + Enter;</li><li>N5, where the detail panel is visible;</li><li>N6, in LANE-GHOST.</li></ul> **Still sans** (Instrument Sans): the zoom readout, the library counts, `4/4`, the pan readout, the two selects, the library preview duration, the range readout and the selected-clip line. `textContent` is byte-identical to round 153 for every N element. |
+| RV-1-V2B2 | Re-run the d6 bbox chain (S0/S1/S2, both viewports, twice; determinism 0 px) vs the round-153 reference. PASS only if all of these hold: <ul><li>every y/h is within ±1 px;</li><li>0 keys are missing or added;</li><li>every `kind: panel` box is within ±1 px;</li><li>every mover > 1 px is horizontal and listed with its cause;</li><li>nothing is newly past 1280.</li></ul>**B prediction in d6 terms:** only `arrangement-detail-clip-gain-reset` dw ≈ +3 where the detail panel is visible (1440 S0/S1/S2; 1280 S1/S2 after opening it), with no follower. Everything else is within ±1 px. Report any other mover. |
+| NO-CLIP / OVERLAP | <ul><li>**Preview title:** at both viewports in S0, the "Middle East — საჯარო preview" title keeps `scrollWidth == clientWidth` (B: slack 0; N excludes the preview duration).</li><li>**Library rows:** the meta rows stay on 1 line. The active-lane row (`line-clamp-2`, `h-8`) keeps its height and line count with the mono playhead, at playheads `00:00.000` and `01:41.352`.</li><li>**Ruler/tempo:** at ≥ 6 zoom positions from 0.5 to 320 px/s (BPM 90), same-row ruler and tempo labels have 0 overlaps (B: min gap ≥ 14 px).</li><li>**Weights:** the M/S, Mute and group buttons have no `scrollWidth > clientWidth`.</li><li>**Gain reset:** the "0 dB" button keeps 1 line.</li></ul> |
+| LANE-GHOST | Drag a clip across lanes with the mouse and hold it. The ghost label's start time is IBM Plex Mono with its original text. Report whether the ghost title truncates earlier than in round 153 (info only; the ghost is transient). Release, then Ctrl+Z. |
+| WEIGHT-INVENTORY | Evidence for R4, not pass/fail beyond the first bullet. On `/studio-lab` (S0, S1 with a group, S2 Export, marker menu, grid menu, and the cookie banner if shown), at 1440: <ul><li>**PASS only if** 0 visible text elements inside `.studio-container` have computed weight ≥ 600, **excluding the Export `ModalTitle`** (protected `Modal.tsx`, expected 600, folded into V-2b-DISPLAY; it may render inside the container).</li><li>List every visible text element on the whole page with weight ≥ 600: text, family, weight, location. The Export `ModalTitle` (600) is expected.</li><li>List `document.fonts` faces with status `loaded` (family + weight).</li><li>State whether any element renders Instrument Sans 600/700 or Plex Mono 500.</li></ul> |
+| FONTS-SCOPED | <ul><li>`/` and `/cart` at both viewports: 0 Instrument Sans / Plex Mono / Noto Georgian woff2 (a css2 `prefetch` after hover/focus is allowed).</li><li>`body` is the Store literal.</li><li>`/studio-lab` requests exactly the round-153 css2 set (no new family, no Cormorant, no Plex 300).</li></ul> |
+| FUNC-SMOKE | Both viewports: <ul><li>Play 2 s.</li><li>A clip drag, then Ctrl+Z.</li><li>BPM 90 + Enter.</li><li>Zoom slider ±5 steps.</li><li>M + Enter adds a marker; then `◀`/`▶`.</li><li>Lane M and S toggle (audible state or graph evidence) and undo.</li><li>Create a group (Ctrl+G), then fold/unfold it.</li><li>Clip-gain reset in the detail panel after a gain change.</li><li>Open the Export dialog, Escape, then one real project WAV export: decodable, length = project end, 0 NaN.</li></ul> |
+| G154-3 | <ul><li>`/studio-lab` is anonymous, with the demo badge.</li><li>`/studio/middle-east` shows "Sign in required", no workspace, 0 `audio[src]`.</li><li>`GET /api/studio-token` returns 401.</li><li>Fake-Bearer 403: BLOCKED (backend unavailable in cloud).</li></ul> |
 | PX-NET / REG-HYD | In every valid session: 0 forbidden requests, 0 Authorization headers, 0 hydration messages, 0 pageerror. The expected cart noise is allowed. One cold-Vite first load may be replaced (ENV-FIRST-LOAD). |
 
-- **Not re-run** (unchanged by this round): RV-2 contrast (the label colours are unchanged, `text-muted`), FONT-FAIL. If the d6 contrast pass runs anyway, report the count; it is expected to equal round 152 (32).
-- **Not C rows:** V-2b-DISPLAY (awaiting user), C-R151-2 and C-R151-3 (`deferred_low_polish`). A new observation about them is a note, not a FAIL.
+- **Not re-run** (unchanged by this round): LABEL-STYLE (the round-153 labels are untouched), RV-2 contrast (no colour change; if the d6 contrast pass runs anyway, report the count, expected 32), FONT-FAIL.
+- **Not C rows:** V-2b-DISPLAY and B-R153-PREVIEW-DUR (awaiting user), V-2b-3 (next stage), C-R151-2 and C-R151-3 (`deferred_low_polish`). A new observation about them is a note, not a FAIL.
 - **Gate rows (not C's):** full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
 
 **Neighbours that may break, and the row that checks each:**
 | Neighbour | Row |
 |---|---|
-| Marker row buttons and the BPM row in the fixed 224 px header column (`overflow-hidden`) | NO-CLIP, RV-1-LABELS |
-| Video caption truncation (flex-1) | NO-CLIP |
-| Right-anchored transport group (Follow, Zoom) | RV-1-LABELS |
-| `VDS1` caption text, Zoom slider aria-label | T153-TARGETED, LABEL-STYLE |
-| Store pages (new `@theme` tokens) | FONTS-SCOPED |
+| Library preview title (zero slack) | NO-CLIP / OVERLAP |
+| Active-lane row line clamp (mono playhead +8 px) | NO-CLIP / OVERLAP |
+| Dense ruler / tempo labels at low zoom | NO-CLIP / OVERLAP |
+| Master peak over-state readability | MASTER-OVER |
+| `render-budget` playhead class, LRS meta row | T154-TARGETED |
+| Faux bold if a 600/700 consumer remains | WEIGHT-INVENTORY, WEIGHT-STYLE |
+| M/S/Mute/group actions | FUNC-SMOKE |
 
 ## 5. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Uppercase spaced section labels | None used. Source: the user-approved `visual-direction-a.md` § „ტიპოგრაფია“. | Not checked. | **Not applicable; CZABA brand decision.** | Requirement: LABEL-STYLE, RV-1-LABELS. Parity: not applicable. |
+| Medium-weight UI text; monospaced timecodes | None used. Source: the user-approved `visual-direction-a.md` § „ტიპოგრაფია“. | Not checked. | **Not applicable; CZABA brand decision.** | Requirement: WEIGHT-STYLE, MONO-STYLE, RV-1-V2B2. Parity: not applicable. |
 
 ## 6. Evidence and reporting
-- **A:** `a-round-153.md`, `a-round-153-result.json`, and `a-round-153/` (vitest JSON, mutations, end-sha256, the diff patch, the reviewer output).
-- **C:** `c-round-153.md` and `c-round-153.json`, with `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate` and `invalidRuns`. Include the RV-1-LABELS move table vs B's prediction and the LABEL-STYLE table. Put tools, out and shots in `c-round-153/`.
+- **A:** `a-round-154.md`, `a-round-154-result.json`, and `a-round-154/` (vitest JSON, mutations, end-sha256, the diff patch, the reviewer output).
+- **C:** `c-round-154.md` and `c-round-154.json`, with `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `notRun` and `invalidRuns`. Include the WEIGHT-STYLE and MONO-STYLE tables, the RV-1 mover table vs B's prediction, and the WEIGHT-INVENTORY lists. Put tools, out and shots in `c-round-154/`.
 - Write the reports as you go; the job can stop at its time limit.
 
-## 7. Outcome, fixed in advance (B at round 154 planning)
-| Condition | Round 154 |
+## 7. Outcome, fixed in advance (B at round 155 planning)
+| Condition | Round 155 |
 |---|---|
 | B plans on or after **2026-10-27** | The **REGRESSION round** comes first (every done / c_pass item, both viewports, `npm run test:e2e:smoke`). Then the row below applies. |
 | C FAIL Critical / High / Medium | A bounded fix-up (≤ 3 related bugs), same owner. |
-| C FAIL on a row this round owns (TH9, LABEL-STYLE, NO-CLIP, RV-1-LABELS beyond the prediction) | A bounded fix-up of that row. |
-| C PASS | Root publishes round 153. V-2b-1 → `c_pass` (**მზადაა** only with browser evidence). Round 154 = **V-2b-2**. B first measures the remaining sans numerals and the 600/700 weights, then plans. If `design-ux-decisions.md` or a user answer on V-2b-DISPLAY has arrived, B schedules it. |
+| C FAIL on a row this round owns | A bounded fix-up of that row. |
+| C PASS | Root publishes round 154. V-2b-2 → `c_pass` (**მზადაა** only with browser evidence). Round 155 = **V-2b-3** (from/to timecodes inside the range readout, the selected-clip line and the Export scope line, mono via part templating, `textContent` byte-identical). If WEIGHT-INVENTORY shows zero consumers, the css2 trim (Instrument Sans 600/700, Plex Mono 500, plus TH7) joins V-2b-3. Otherwise it stays recorded with the consumer list. B also sends root the **frontend-architect checkpoint request** for the V-2 boundary (with the pending `b-round-148-checkpoint-request.md`). Independent V-3 work is not delayed by it. |
 
-At every planning, B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` (both absent at round 153 planning).
+At every planning, B checks `user-review/ableton-decisions.md` and `user-review/design-ux-decisions.md` (both absent at round 154 planning).
 
 ## 8. Root notes
-- **Gate:** publish round 153 on C PASS. The `app.css` diff vs `ff2fd6c` must be exactly the 3 F1 lines in `@theme`; `root.tsx` and `Modal.tsx` are unchanged.
+- **Gate:** publish round 154 on C PASS. `app.css`, `studio-lab.tsx`, `root.tsx` and `Modal.tsx` are unchanged vs `037e25f`.
 - **User-visible decisions (may be vetoed in `feature-status.md`):**
-  - D-29z118 R3: label widening, with neighbours moving horizontally ≤ 26 px.
-  - D-29z118 R4: global `@theme` size/spacing tokens.
+  - D-29z119 R1: all Studio UI text at 400/500, so bold M/S and headings become medium.
+  - D-29z119 R2: the sans/mono split by the spec list.
 - **User questions:**
-  - V-2b-DISPLAY: the serif options (a)–(d) in R2.
-  - C-R151-2: the separators (accept / `word-spacing: 0.12em` / another glyph).
-- **Frontend-architect checkpoint:** `b-round-148-checkpoint-request.md` is still pending and does not block. No new owner-concentration risk this round: each component gets one line or one wrapper.
+  - B-R153-PREVIEW-DUR (a)–(c).
+  - V-2b-DISPLAY (a)–(d), which now includes the Export title weight.
+  - C-R151-2 (the separators).
+- **Frontend-architect checkpoint:** `b-round-148-checkpoint-request.md` is still pending and does not block. This round edits 9 components with one class each, so there is no new owner-concentration risk. The V-2 boundary request goes to root at round 155 planning.
