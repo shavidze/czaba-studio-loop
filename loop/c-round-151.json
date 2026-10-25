@@ -1,0 +1,138 @@
+{
+ "round": 151,
+ "taskStatus": "FAIL",
+ "verdictNote": "Only Low findings; all font/scope/contrast/no-clip/fallback/function/auth rows PASS in real Chromium. FAIL = RV-1-TYPE literal panel rule (C-R151-1, spec conflict B predicted) + round-caused Low C-R151-2.",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T01:41:34.7294789Z",
+  "round": 151,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R151-1",
+   "severity": "low",
+   "steps": [
+    "node c-round-151/tools/d6.cjs 1440 1 (and 1280; run 2 for determinism)",
+    "python3 c-round-151/tools/d6build.py; python3 c-round-151/tools/rv1type.py",
+    "Compare tid:arrangement-shortcut-hint#1 vs c-round-148/out/bbox-post-v0-{w}.json"
+   ],
+   "expected": "Per R1: kind:panel boxes within ±1 px (d6 PANELS list includes arrangement-shortcut-hint)",
+   "actual": "shortcut-hint (content-sized <p class=text-dim>) w 1189 -> 1070 (dw -119), x/y/h unchanged, all states, both viewports; determinism 0 px. Matches B §0.3 prediction and R1 own-text clause, conflicts with R1 panel clause / §7.",
+   "evidence": "c-round-151/out/rv1type-compare.json"
+  },
+  {
+   "id": "C-R151-2",
+   "severity": "low",
+   "steps": [
+    "Open /studio-lab at 1440x900 (fonts loaded)",
+    "Look at the shortcut hint, status line, library context 'Synthetic demo · …', Export format 'WAV · 24-bit · 48 kHz · stereo'",
+    "node c-round-151/tools/space2.cjs 1440 (DOM Range on the hint; Inter loaded via document.fonts.load and verified by CDP)"
+   ],
+   "expected": "' · ' separators read as separated words, as under Inter (9 px at 12 px, measured with Inter really loaded)",
+   "actual": "Instrument Sans: space 2 px, '·' 1 px at 12 px -> ' · ' = 5 px (Inter: 3/3/9 px); 18 separators x 4 px = 72 of the hint's 119 px shrink; text reads 'Space·Home·Ctrl+E', 'Arrangement·Overview' (headless Linux, integer advances; other platforms unverified)",
+   "evidence": "c-round-151/shots/hint-zoom-1440.png, c-round-151/shots/S1-1440.png vs c-round-150/shots/D6-S1-1440.png, c-round-151/shots/S2-export-1280.png, c-round-151/out/space2-1440.json, c-round-151/shots/hint-zoom-inter-sim-1440.png"
+  },
+  {
+   "id": "C-R151-3",
+   "severity": "low",
+   "steps": [
+    "Open /studio-lab; master peak idle shows '−∞', or press Home on a track Volume slider",
+    "CDP CSS.getPlatformFontsForNode on the readout"
+   ],
+   "expected": "Readout in IBM Plex Mono",
+   "actual": "'−' IBM Plex Mono [web], '∞' DejaVu Sans Mono [local] (U+221E not in Plex Mono subset); visually acceptable at 12 px",
+   "evidence": "c-round-151/out/c151-1440.json fontsS0.masterPeak, extremes.trackMinPlatform; c-round-151/shots/track-vol-min-1440.png"
+  }
+ ],
+ "passed": [
+  "T151-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "FONTS-APPLIED",
+  "FONTS-SCOPED",
+  "NO-CLIP",
+  "FONT-FAIL",
+  "RV-2",
+  "TOKENS-SCOPED",
+  "FUNC-SMOKE",
+  "G151-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [
+  "RV-1-TYPE (C-R151-1, Low, spec conflict)",
+  "VISUAL (C-R151-2 Low; C-R151-3 info)"
+ ],
+ "blocked": [
+  "G151-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "invalidRuns": [
+  "probe.cjs first load: cold-Vite duplicate React (Invalid hook call / hydration) — ENV-FIRST-LOAD, replaced once"
+ ],
+ "measurements": {
+  "fontsApplied": "c-round-151/out/c151-{1440,1280}.json fontsS0/fontsS1/markerMenu/exportDialog",
+  "fontRequests": "F2 css2 exactly once per /studio-lab load, all woff2 200; 0 F2/woff2 on /, /cart, /login (out/rv3-compare.json)",
+  "rv1type": {
+   "verticalOrHeight": 0,
+   "missingAdded": 0,
+   "determinismPx": 0,
+   "maxAbsDx": 9,
+   "maxAbsDw": 119,
+   "panelMoves": [
+    "tid:arrangement-shortcut-hint dw -119"
+   ],
+   "unexplained": 0,
+   "file": "c-round-151/out/rv1type-compare.json",
+   "vsBPrediction": {
+    "1440": "29/29 keys, max diff 0 px",
+    "1280": "27/27 keys, max diff 0 px",
+    "file": "c-round-151/out/fontprobe-vs-prediction.json"
+   }
+  },
+  "noClip": {
+   "newlyCut": 0,
+   "bpm123_45_spareP": 4,
+   "peakOver": "+29.6 text-destructive font-medium, spare 11 px"
+  },
+  "rv2": {
+   "fails150": 32,
+   "fails151": 32,
+   "newFails": 0,
+   "duxMin": 4.57,
+   "exportDialogMin": 5.38
+  },
+  "tokens": "18 colours = round 150; --font-sans/--font-mono = F1 strings on workspace, body, Export dialog, marker menu; html Store",
+  "fontFail": "DejaVu Sans / DejaVu Sans Mono fallback, workspace ~0.2 s, play/select OK, 0 pageerror",
+  "separators": {
+   "instrumentSans12px": {
+    "space": 2,
+    "dot": 1,
+    "spaceDotSpace": 5
+   },
+   "inter12px": {
+    "space": 3,
+    "dot": 3,
+    "spaceDotSpace": 9
+   },
+   "hintSeparators": 18
+  },
+  "interNotDownloadedOnStudioLab": true
+ },
+ "ableton": {
+  "parity": "not applicable (CZABA brand typography; no Ableton source)"
+ },
+ "sourceUnchangedDuringC": true
+}

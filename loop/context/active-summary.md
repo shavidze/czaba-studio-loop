@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T01:07:46.145Z)
+# Active loop summary (2026-10-25T02:09:09.198Z)
 
-- backlog.json 1363 KB -> active view 178 KB
-- status: G_ROOT_GATE round 150
-- servers: `{"checkedUtc":"2026-10-25T00:44:50.0334882Z","round":150,"attempt":1,"store":200}`
+- backlog.json 1368 KB -> active view 178 KB
+- status: G_ROOT_GATE round 151
+- servers: `{"checkedUtc":"2026-10-25T01:41:34.7294789Z","round":151,"attempt":1,"store":200}`
 - last publication: e94ae889c9f331bd681036cc154bb92d38020dc6 (rounds 149-150)
-- last root gate: round 150 published - commit e94ae889c9f331bd681036cc154bb92d38020dc6 pushed
+- last root gate: round 151 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -317,18 +317,17 @@
 - GATE147-S5-SIMILAR-OBJECT-NAMES / low / deferred_low_polish + checkpoint b-round-148-checkpoint-request.md Q1 / 
 - A-R147-REVIEW-L2-BADGE-CLASS-SELECTOR / low / deferred_low_polish / 
 - C-R147-NOTE-LIBBASE-NO-REST / info / applied in round 148 (B dockbase148 includes measureRest) / 
-- GATE148-S1-DOC121-STATUS / low / C-verified round 149 (AN-REVIEW: doc 121 l.4/l.125/l.129 exact); closes on publication of rounds 149+150 / doc 121 status l.4/l.125/l.129 still say C round 148 has not run
 - GATE148-S2-VDS3-WALLCLOCK / low / deferred_low_polish / video-dock-strings-ui VDS3 depends on wall-clock time (Date.now FakeAudioContext, ~50 ms start hold, waitFor 1000 ms); may flake on a slow r
 - GATE148-S3-DOCK-ALIASES / low / deferred_low_polish + checkpoint b-round-148-checkpoint-request.md Q1 / VIDEO_PLAY_FAILED_MESSAGE / VIDEO_RETURN_LABEL in ArrangementVideoDock.tsx l.55/57 are aliases of studioVideoDockStrings keys
 - GATE148-S4-ST51-STATSYNC / low / deferred_low_polish / ST51 collectWorkspaceSourceFiles uses statSync (follows symlinks, no loop guard)
 - GATE148-S5-A11Y-INFO / info / noted (no action): region name Video equals caption fallback and default track name; no accessible-name clash; Return label-in-name meets WCAG 2.5.3 / 
 - C-R148-LAYOUT-DOCK-RULING / info / ruled by B (D-29z114): PASS stands - dock-caption-note dx -48/dw +48 (text-right parent, right edge fixed) and dock-placeholder-text dx +25/dw -50 (centred, centre fixed) are x shifts caused by the fixed alignment anchor of the granted width change, no app defect; the R5 literal (own w/glyph) is read as including anchor-preserving x / 
 - C-R148-TOOL-LIB122-GEORGIAN-SELECTORS / info / tooling note: c-round-125/tools/lib122.cjs clipInfoSel/closeDlg/exportWav still use Georgian text regexes; any later export/WAV re-check through that chain must switch to English or testid / 
-- C-R149-1 / low / scheduled round 150 (D-29z115 L1: brace fill bg-accent/30 -> /20, predicted 5.47); caused by round 149 / Loop brace label 'Loop' 4.32 computed / 4.38 pixel (< 4.5) after V-1a: text-accent on bg-accent/30 over surface
-- C-R149-2 / low / scheduled round 150 (D-29z115 L2: ring-1 ring-background halo on the Overview playhead; halo vs bar predicted 8.32); caused by round 149 / Overview playhead (bg-accent) invisible where it crosses a full bg-brand audio bar: both #c9a46a, pixel 1.03:1
-- B-R150-PM2-SUBSTRING / info / noted (no grant): after F4 pending-status PM2 toContain('border-outline') passes only by substring of border-outline-strong; exact token pinned by theme TH5; tighten with the next owner of pending-status.test.tsx / 
+- B-R150-PM2-SUBSTRING / info / open info: pending-status.test.tsx PM2 toContain(border-outline) passes by substring; tighten with the next owner of pending-status.test.tsx (not granted in round 151) / 
 - C-R149-OBS-SELECTION-HIGHLIGHT / info / signal for VISUAL-A (not scheduled): Chromium native blue text-selection highlight in the group-name editor; no ::selection rule; pre-existing / 
 - C-R149-OBS-SPACE-EMPTY / info / observation (not compared with earlier rounds; unrelated to colour): on an empty project S0, Space does not advance the playhead; check in the next regression round / 
+- A-R150-REVIEW-L1 / info / scheduled round 151 (D-29z116 T1: detail-panel-fit.test.tsx l.293 -> not.toContain('border-outline-strong')) / detail-panel-fit F4 l.293 not.toContain('border-outline') guards nothing after V-1b; B round-150 R5 statement was wrong
+- C-R150-BPM-EDGE-MARGIN / info / noted; re-measure if the BPM field geometry or font changes (V-2a changes its font, not its border) / BPM field left/right border pixels anti-aliased: 3.05/3.06 vs parent (>= 3.0 with small margin); top/bottom 3.50
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
