@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T11:55:18.880Z)
+# Active loop summary (2026-10-25T12:44:32.005Z)
 
-- backlog.json 1436 KB -> active view 197 KB
-- status: G_ROOT_GATE round 163
-- servers: `{"checkedUtc":"2026-10-25T11:39:50.1910266Z","round":163,"attempt":1,"store":200}`
-- last publication: 0e4287f423d287a1a7b4fc885ae7f1a14bdc5788 (rounds 163-163)
-- last root gate: round 163 published - commit 0e4287f423d287a1a7b4fc885ae7f1a14bdc5788 pushed
+- backlog.json 1451 KB -> active view 201 KB
+- status: G_ROOT_GATE round 164
+- servers: `{"checkedUtc":"2026-10-25T12:28:24.2953267Z","round":164,"attempt":1,"store":200}`
+- last publication: 7952439defa941dd4246d23651f8591aede28f7c (rounds 164-164)
+- last root gate: round 164 published - commit 7952439defa941dd4246d23651f8591aede28f7c pushed
 
 ## Current items: -
 
@@ -188,7 +188,6 @@
 - ARCH-R104-STATUS-COALESCING / info / consumed by round 105: the reviewer Architecture note (Signal 4, verdict keep) proposed exactly the gesture-aware coalescing next to gestureCountRef that round 105 implements; no separate checkpoint item / the rule for coalescing repeats during a gesture belongs in the provider, not at 60+ call sites
 - ARCH-R105-STATUS-INTENT / info / signal - not scheduled; appended to the pending checkpoint request as addendum (q) (b-round-91-checkpoint-request.md); two independent reviewers (A round 105 reviewer: record the gesture flag at dispatch time; gate 105 reviewer: {text, repeat} / announceStatus vs setStatus intent); both verdict keep for now | round 106: gate-106 reviewer Architecture note (Signal 1: refusal suppression done three ways - provider updater, component status comparison, detail-panel Enter skip; proposal internal requestStatus(message, {keyRepeat}) next to setStatus; keep for now) appended as addendum (r) to b-roun ... [clipped; see backlog.json] / status repeat policy is inferred from refs (gesture) and call-site event.repeat checks; proposal: one status action that carries the intent 
 - GATE106-S4-KEYREPEAT-OPTIONS-TYPE / info / open - Lows batch nit (export one KeyRepeatOptions type; low value) / { readonly keyRepeat?: boolean } literal repeated four times
-- B-R107-ENTER-ON-BODY / info / open question for the user (not deferred, not scheduled as a change): the workspace-wide Enter (target not a button/slider/separator, incl. BODY) adds the active library item; SRW-12 R12-L2 only specifies Enter from the results list. Kept unchanged in round 108; focus retention closes C-R107-01 regardless / should Enter with focus on BODY add the active library item?
 - GATE107-S3-NZ-DELTA-NIT / info / open nit - optional defensive delta < 0 in the R4 condition (doc 092 F3) / target === clip.start with a non-negative delta would announce the time-start text (no current caller)
 - A-R108-CTRLZ-EXHAUST-FOCUS / info / open - signal (not in rule F1); Ctrl+Z exhausting history while Undo is focused leaves focus on the disabled Undo/BODY because the shortcut path never arms / 
 - DEFERRED-LOW-POLISH / info / open - pointer: 206 open Low findings in backlog.json deferred_low_polish (user decision 2026-10-23); one polish pass after VISUAL-A-OBSIDIAN and before release; none may be dropped / deferred Low findings (not lost)
@@ -359,11 +358,17 @@
 - INFO-R160-M160-EQUIVALENT / info / acknowledged: lucide-react 0.561 renders aria-hidden=true by default (Icon.js l.32-33); remove-aria-hidden mutants are equivalent; use aria-hidden=false (m160b) in future lists / m160 equivalent mutant
 - A11Y-R161-PREVIEW-NAMES / info / signal (not a finding; for the polish pass; D-29z126 R5) / after V-3c-1 the preview toggle is named Preview/Stop inside the region Preview and the Add button is named Add
 - TITLE-GLYPHS-FROZEN-TESTS / info / open - polish pass (doc 130 TODO) / it/describe titles in floating-video, library-focus-handoff, library-video-return-focus mention ◀ ▶ × although the library renders icons aft
-- ARCH-CHECKPOINT-V3C / info / requested_from_root (b-round-160-checkpoint-request.md, 2026-10-25; consolidates pending 148/155/157/158 + ARCH-R158-TOOL-BUTTON-RECIPE + ARCH-R159-GLOBAL-TRANSITION-COUPLING + ARCH-R160-TRANSPORT-ICON-TRIPLE); non-blocking for V-3c-1..3; input for V-3c-4 (fallback (c) if unanswered); still unanswered at round 162 planning (2026-10-25); still unanswered at round 163 planning (2026-10-25); round 162 architecture note: none / bounded frontend-architect checkpoint before V-3c surfaces
+- ARCH-CHECKPOINT-V3C / info / requested_from_root (b-round-160-checkpoint-request.md, 2026-10-25; consolidates pending 148/155/157/158 + ARCH-R158-TOOL-BUTTON-RECIPE + ARCH-R159-GLOBAL-TRANSITION-COUPLING + ARCH-R160-TRANSPORT-ICON-TRIPLE); non-blocking for V-3c-1..3; input for V-3c-4 (fallback (c) if unanswered); still unanswered at round 162 planning (2026-10-25); still unanswered at round 163 planning (2026-10-25); round 162 architecture note: none; still unanswered at round 164 planning (2026-10-25); round 163 architecture note: none / bounded frontend-architect checkpoint before V-3c surfaces
 - ARCH-R161-ICON-RECIPE / info / signal (not scheduled): proposal for a bounded studio-icon size/stroke constant module after V-3c-3, only worth it if Q-V3-ICON-SIZE (a) is chosen; attach to ARCH-CHECKPOINT-V3C / R2'' icon class recipe repeated at 10 sites (library) and ~8 more owners in V-3c-2/3
 - INFO-C161-BRAND-EQ-ACCENT / info / signal for V-3c-4 / polish: brand and accent compute to the same rgb(201,164,106) in the Studio scope, so Stop (accent) and Preview (brand) differ only by border/hover classes / 
 - INFO-R162-CLIP-SVG-DOM / info / signal (not scheduled): measure DOM node count with many clips in a later performance pass / each clip header now mounts an svg with child paths instead of one text span (memo unchanged)
 - INFO-C162-VIDEO-INPUT-MULTIPLE / info / note (pre-existing, unchanged by round 162) / the video import file chooser reports isMultiple=true; choosing one file places one clip
+- SABA-B-1 / medium / open: scheduled round 164 (D-29z129) / the clip volume envelope line and breakpoint handle nearly disappear on the brass clip (Saba could not find the control)
+- SABA-B-2 / low / open: scheduled round 164 (D-29z129); fixed now, not deferred (Saba saw it himself) / the ARRANGEMENT · Overview frame shows notches at its corners
+- ROOT-RECON-MARKER-ENTER / unconfirmed (source hypothesis) / scheduled round 165 (test-first) unless C fails round 164 or the regression is due / Enter in the marker add/rename editor may reach commitArrangement during an active pointer gesture (f08c7ce ArrangementMarkerRow.tsx commitE
+- ROOT-RECON-GRID-HARNESS / info (approved test-only refactor) / queued: end of VISUAL-A at a safe boundary (after M4, before REVIEW-RECOMMENDATIONS) / extract createWorkspaceTestEnvironment (helpers/workspace-test-environment.ts) from the fakeClock..FakeResizeObserver blocks of grid-snap-ui
+- ROOT-RECON-PC-BACKUP / info / note: keep backup/local-2026-10-23 (4e87bec) and refactor/grid-test-harness; no reset, no force push, no replay of old rounds / 
+- V-2b-DISPLAY / info / decided_user: no serif (design-ux-decisions.md 2026-10-25 final). Studio uses Instrument Sans + IBM Plex Mono only; no work: Cormorant is not loaded in Studio (studio-theme-obsidian.test.tsx l.237 asserts no Cormorant/Inter/Playfair); store fonts unaffected / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

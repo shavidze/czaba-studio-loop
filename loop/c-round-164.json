@@ -1,0 +1,79 @@
+{
+ "taskStatus": "PASS",
+ "round": 164,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T12:28:24.2953267Z",
+  "round": 164,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "T164-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "ENV-VIS",
+  "ENV-FUNC",
+  "OV-CORNERS",
+  "RV1-SABA",
+  "OV-FUNC",
+  "G164-3 (anonymous demo / sign-in required x2 viewports / studio-token 401; fake-Bearer sub-row is in blocked)",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G164-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notRun": [
+  "V-3c-3a dock rows, V-3c-2 lane rows, V-3c-1 library rows, V-3b transport rows, CONTRAST-V3A, V-2 rows (code unchanged, per task section 4)",
+  "full find sound -> add -> fit video -> export flow (not this round scope)"
+ ],
+ "invalidRuns": [
+  {
+   "run": "d6-1440 attempt 1",
+   "reason": "first browser load of the job on a cold dev server (started concurrently with c164-env 1440, two first-loads at once): hydration error + 'Invalid hook call', workspace never mounted; same symptom class as C-R124-ENV-FIRST-LOAD / ENV-FIRST-LOAD-LUCIDE (ENV-FIRST-LOAD rule, one replacement); attempt 2 and all later sessions clean",
+   "evidence": "c-round-164/out/invalid/d6-1440-r1-attempt1-coldvite.json"
+  },
+  {
+   "run": "ov-1440-1",
+   "reason": "harness scrolled past project end; frame at left 100% outside overview, precondition (b) not met; replaced by bisected scroll (ov-1440-2)",
+   "evidence": "c-round-164/out/invalid/ov-1440-1-pastend.json"
+  }
+ ],
+ "measurements": {
+  "envVis": "line core vs halo min 15.62 in all 12 state x viewport cells (baseline 1.74); handle centre vs border min 3.48 (hover, anti-aliased edge), 15.62 at rest (baseline 1.88); above/below min 3.26 (hover)",
+  "ovCorners": {
+   "bBaselineRecheck": "3/13/3/15 (matches B)",
+   "afterEmpty": "1/0/1/0 at 1440 and 1280",
+   "afterRightTouch": "tr 0, br 0 at 1440 and 1280",
+   "radius": "root/overlay/frame 6px"
+  },
+  "envFuncAudio": "gain0 peak 0.00000 vs reference (-3.9/-4.0 dB) 0.190/0.535 (1440), 0.188/0.237 (1280); ratio 0",
+  "rv1": "S0/S1/S2 0 missing/0 added/max 0 px both viewports; contrast 0 changed"
+ },
+ "ableton": {
+  "requirement": "met",
+  "parity": "unverified, not claimed (envelope); not applicable (overview corners)"
+ },
+ "notes": [
+  "N1 pre-existing: overview frame invisible (left clamped to 100%) when the timeline is scrolled past the project end",
+  "N2: 10 px white handle at 0 dB on a selected clip covers about 2 letters of the clip name (overlap pre-existing at 8 px)",
+  "N3: reviewer Low 5 narrow-frame pill shape not measured beyond 39-57 px frames"
+ ],
+ "report": "c-round-164.md",
+ "evidenceDir": "c-round-164/",
+ "docReview": "doc 133: TEMPLATE sections plus R1-R4, before/after class table, DUX-R-5 coordination, mutations m178-m181, TODO (DUX-R-5 re-check, V-3c-3b, V-3c-5 radius lock) all present"
+}
