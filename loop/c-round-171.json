@@ -1,0 +1,82 @@
+{
+  "round": 171,
+  "stage": "V-3c-4c-3 (Export dialog + video dock surfaces, D-29z136)",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-25T18:22:40.5125293Z",
+    "round": 171,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R171-01",
+      "severity": "low",
+      "preExisting": true,
+      "owner": "app/components/ui/Modal.tsx (protected; unchanged since 95be6f3)",
+      "steps": [
+        "/studio-lab, add demo-middle-east to Music at 1 s",
+        "Open Export from the transport",
+        "Press the mouse on Done (or any dialog button), drag off the dialog onto the backdrop, release"
+      ],
+      "expected": "Releasing outside cancels the press; the dialog stays open (no click on either target).",
+      "actual": "The dialog closes. Chromium fires click on the common ancestor (the backdrop); Modal handleBackdropClick (l.83) sees target===currentTarget and calls onClose. Reproduced at 1440 and 1280. During a render the dialog does NOT close (render continued, file delivered), so no data loss.",
+      "evidence": "c-round-171/out/func/func-{1440,1280}-1.json A.pressDoneReleaseBackdrop.open=false, C.renderPressReleaseBackdrop.open=true; first seen in out/surf-1440-1.log (E1 Export HA null)"
+    },
+    {
+      "id": "C-R171-02",
+      "severity": "low",
+      "preExisting": true,
+      "owner": "ArrangementExportDialog.tsx layout (not touched by S1-S4)",
+      "steps": [
+        "1440x900, /studio-lab, 21 clips (3 lanes x demo-middle-east + 6 Ctrl+D each)",
+        "Open Export, click Export WAV, put the pointer on Cancel as soon as it appears"
+      ],
+      "expected": "Cancel stays where it appeared, under the pointer.",
+      "actual": "About 220 ms in, when the progress label appears (Rendering · 4%), the footer moves down 31.8 px (Cancel y 759.5 -> 791.3), so the pointer loses :hover and a fast click misses. Not seen at 1280 (y 629 stays). Class-only changes in this round cannot change height, so this predates it.",
+      "evidence": "c-round-171/out/surf/surf-1440-3.json states.E2-rendering.hoverSeries; surf-1280-1.json hoverSeries (stable)"
+    }
+  ],
+  "passed": [
+    "T171-TARGETED",
+    "SOURCE-SCOPE",
+    "AN-REVIEW",
+    "SURF-V3C4C3",
+    "BOX-V3C4C3",
+    "CONTRAST-V3C4C3",
+    "RV1-V3C4C3",
+    "FUNC-SMOKE-V3C4C3",
+    "G171-3 (anonymous lab + demo badge; Sign in required at 1440/1280 with 0 audio[src]; studio-token 401)",
+    "PX-NET/REG-HYD (44 sessions: 40 surf/func + 2 d6 + g171-3 contexts; 0 forbidden, 0 auth, 0 hydration, 0 pageerror)"
+  ],
+  "failed": [],
+  "blocked": [
+    "G171-3 Fake-Bearer 403: backend unavailable in cloud"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "notRun": [
+    "Rows the task lists as not re-run (code unchanged since rounds 158-170): transport, toolbar, lane/group header, library/preview, detail panel, clip, marker, icon rows, ENV-VIS, OV-CORNERS"
+  ],
+  "invalidRuns": [
+    "warm.cjs warm-up (not measured): cold-Vite Invalid hook call pageerror (ENV-FIRST-LOAD class)",
+    "surf-1440-1: rest values valid (used for BOX), but its hover/active harness released the mouse on the backdrop and closed the dialog (C-R171-01), so E1 Export HA is null and its E2 Cancel hover was lost to C-R171-02; hover/active taken from surf-1440-2 and surf-1440-3",
+    "c171-e2try runs: timing experiments for the E2 recipe, not measurements"
+  ],
+  "evidence": "c-round-171.md; c-round-171/out/{surf,func,d6}/, box-v3c4c3.json, rv1-v3c4c3.json, g171-3.json, vitest-c.json; c-round-171/shots/",
+  "notes": [
+    "Routing for B: taskStatus PASS stands (every §4 acceptance row passed). C-R171-01 and C-R171-02 are pre-existing, outside the §1 edited lines (Modal.tsx protected; footer shift comes from the progress-label insertion, not S1-S4), Low under the 2026-10-23 bug gate -> deferred_low_polish. Per §7 C PASS row: V-3c-4c-3 -> mzadaa, round 172 = V-3c-5 (unless regression due / checkpoint says extract).",
+    "Tool disclosure: c171-surf.cjs on disk is the final version (release point inside the dialog, hoverSeries with x/y trace). surf-1440-1 was produced by the first version (release at (2,2) on the backdrop, no hoverSeries); surf-1440-2 by the version without box trace. Rest measurements are identical across all three.",
+    "Focus after Done: activeElement is a BUTTON with text Export outside the dialog (the transport Export; no transport container testid exists to check closest())."
+  ]
+}

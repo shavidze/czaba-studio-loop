@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T17:51:09.305Z)
+# Active loop summary (2026-10-25T18:48:10.505Z)
 
-- backlog.json 1507 KB -> active view 208 KB
-- status: G_ROOT_GATE round 170
-- servers: `{"checkedUtc":"2026-10-25T17:31:43.2224530Z","round":170,"attempt":1,"store":200}`
-- last publication: fe6ea99361592b9ca6dbecda8f1879d47cf0a369 (rounds 170-170)
-- last root gate: round 170 published - commit fe6ea99361592b9ca6dbecda8f1879d47cf0a369 pushed
+- backlog.json 1519 KB -> active view 209 KB
+- status: G_ROOT_GATE round 171
+- servers: `{"checkedUtc":"2026-10-25T18:22:40.5125293Z","round":171,"attempt":1,"store":200}`
+- last publication: 13ad2bd63db5fe1fcc9d413d6989fb83d3e6243d (rounds 171-171)
+- last root gate: round 171 published - commit 13ad2bd63db5fe1fcc9d413d6989fb83d3e6243d pushed
 
 ## Current items: -
 
@@ -378,7 +378,7 @@
 - GATE167-TOKEN-TEST-FRAGILITY / info (signal) / signal: raw className token tests (TS8, UI11, MS5, HM7, LSU7, UM11) must be edited again on every later surface change; reduced by ARCH-R167-SURFACE-RECIPE if approved / 
 - C-R167-METRONOME-UNDER-MUTE / info (evidence gap) / open note, not scheduled: C round 167 did not exercise the metronome click path under Master Mute (metronome off during the mute test); code unchanged by V-3c-4a; add one line to the next regression round / 
 - A-R167-DUP-TEST-IDS / info (signal) / signal: test IDs TS8 and MS5 also exist in marker-time-snap-ui.test.tsx:601 and marker-snap.test.tsx:475 (B-assigned, no runtime effect); B now greps all tests before assigning IDs (round 168: LSU7, UM11 unique) / 
-- C-R168-BORDERLESS-REDUCED-MOTION / info (signal) / signal, not scheduled: borderless header buttons (lane fold/name/pan reset, group fold/name; also the library icon buttons and option rows kept radius-only by R7 in V-3c-4c-1) keep the global app.css interactive transition (150 ms ease-out color/background/border/box-shadow/transform/opacity) under prefers-reduced-motion; pre-existing, not changed by V-3c-4b; candidate for V-3c-5 or a motion audit together with ROOT-GLOBAL-TRANSITION-RULE / 
+- C-R168-BORDERLESS-REDUCED-MOTION / info (signal) / signal, not scheduled: borderless header buttons (lane fold/name/pan reset, group fold/name; also the library icon buttons and option rows kept radius-only by R7 in V-3c-4c-1) keep the global app.css interactive transition (150 ms ease-out color/background/border/box-shadow/transform/opacity) under prefers-reduced-motion; pre-existing, not changed by V-3c-4b; candidate for V-3c-5 or a motion audit together with ROOT-GLOBAL-TRANSITION-RULE; round 171 planning: the VideoDock float buttons (drag/expand/close) and the placeholder Return keep the same global 150 ms transition under radius-only R18  ... [clipped; see backlog.json] / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

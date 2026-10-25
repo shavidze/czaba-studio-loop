@@ -1,0 +1,56 @@
+import json
+P='backlog.json'
+b=json.load(open(P))
+T='2026-10-25 B round 171 -> 172 planning (D-29z137)'
+b['version']=161
+b['updated']='2026-10-25 (B round 171 -> 172 planning, D-29z137)'
+b['current_task']=("current-task.md (round 172: D-29z137 - V-3c-5a 10 px panel radius: new @theme token --radius-panel: 0.625rem (rounded-panel, R21); "
+ "ArrangementDetailPanel l.221 waveform box + l.702 group reason box, ArrangementVideoDock l.901 placeholder + l.920 video box, ArrangementGridMenu l.175 + ArrangementMarkerMenu l.126 menu containers -> rounded-panel (R22/R23); "
+ "menu rows stay 6 px concentric (R23); docked regions stay square (R22); Modal.tsx protected -> Q-V3C5-MODAL-RADIUS; Overview + remaining 6 px controls -> V-3c-5b; "
+ "detail-panel-polish WAVEFORM_BOX_CLASS one-token update (L1); new panel-radius-ui.test.tsx PNR1-PNR3; mutations m227-m234; baseline 13ad2bd, 990 files, 7 grants + 2 new, frozen 983, vitest base 20 files 357/357)")
+b['advisor_used_by_B']=("2026-10-25 round 171 -> 172 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: "
+ "token path decided before task text (@theme --radius-panel, not a scoped --radius-lg override that would reach the portalled Modal), Overview deferred whole to V-3c-5b (frame has no min width; OV1 must move all three together), "
+ "explicit L1 grant for the WAVEFORM_BOX_CLASS exact-string lock, every remaining radius site ruled, docked regions interpretation recorded, STORE-0 mock-api hook confirmed in cloud/run.sh")
+r=[x for x in b['rounds'] if x['round']==171][0]
+r['status']='c_pass_published'
+r['result']=("C round 171 PASS browserVerified=true realVerified=true (all section 4 rows; Cancel caught in E2 during a real 21-clip render; real WAV parsed, duration delta 0, peak 1.0); "
+ "2 pre-existing Lows C-R171-01/02 -> deferred_low_polish; gate 171 published 13ad2bd on both remotes (verify 171 files / 2569 tests, review 9/10, nothing blocking)")
+b['rounds'].append({"round":172,"task":"current-task.md","decision":"D-29z137","status":"dispatched",
+ "items":["V-3c-5a (10 px panel radius: --radius-panel token; DetailPanel waveform + reason boxes, VideoDock placeholder + video box, Grid and Marker menu containers)"],
+ "note":"baseline HEAD 13ad2bd clean (gate 171 published); 990 files; grants b-round-171-r172-grants.txt (7: app.css T1 line, ArrangementDetailPanel, ArrangementVideoDock, ArrangementGridMenu, ArrangementMarkerMenu, detail-panel-polish test L1, doc 140 status), new b-round-171-r172-new-files.txt (panel-radius-ui.test.tsx, doc 141), frozen 983 (b-round-171-r172-tree-sha256.txt); start copies b-round-171/r172-granted-start/; vitest base b-round-171-r172-vitest-base.txt 20 files 357/357 (b-round-171/out/vitest-base.json)",
+ "added":T})
+v=[e for e in b['post_current_stage_queue'] if e['id']=='VISUAL-A-OBSIDIAN'][0]
+v['status']+=(" | round 172 planning (D-29z137): V-3c-4c-3 done (round 171, C PASS browserVerified=true realVerified=true, published 13ad2bd) -> V-3c-4 complete; "
+ "V-3c-5 split by owner: V-3c-5a token + DetailPanel/VideoDock/menus = round 172; V-3c-5b Overview (root+overlay+frame together, OV1 update, narrow-frame probe) + remaining 6 px control rulings (Transport readout l.159, LibraryPreview waveform l.251, StudioWorkspace back link l.2197); "
+ "then DUX-R-5 stage, M1, M3, M4, ROOT-RECON-GRID-HARNESS; checkpoint request b-round-170-checkpoint-request.md still unanswered -> fallback (c)")
+for i,o in enumerate(v['order']):
+  if o.startswith('V-3 remainder'):
+    v['order'][i]=o.replace("V-3c-4c-3 = round 171","V-3c-4c-3 done (round 171, 13ad2bd)").replace("V-3c-5 (10 px panel radius","V-3c-5a = round 172 (D-29z137: --radius-panel token; DetailPanel l.221/l.702, VideoDock l.901/l.920, GridMenu l.175, MarkerMenu l.126); V-3c-5b (Overview root/overlay/frame with OV1, remaining 6 px controls; originally: 10 px panel radius")
+v['v3c5a_plan_d29z137']={"round":172,
+ "rulings":{
+  "R21":"10 px = one new @theme token '--radius-panel: 0.625rem;' after --radius-md (app.css l.131) -> rounded-panel utility; not in the obsidian block (scoped vars generate no utility; TH1 exact map); scoped --radius-lg override rejected (body:has reaches the portalled Modal rounded-lg buttons); rounded-[10px] not allowed; unused by Store",
+  "R22":"panel = framed or floating box holding content; docked regions (library sidebar, Detail panel body, transport, dock strip) have no radius and meet straight dividers -> stay square (rounding would notch against dividers like SABA-B-2 or need new margins)",
+  "R23":"Grid and Marker menu containers (fixed z-50 border bg-surface p-1 shadow-lg) -> rounded-panel; their rows stay rounded-sm 6 px = concentric 10 - 4 px padding (alternative 8 px rows recorded)",
+  "R24":"out: Modal.tsx container rounded-xl and buttons rounded-lg (protected -> Q-V3C5-MODAL-RADIUS); clips, drop ghosts, range overlays and labels, loop brace, clip tabs, envelope/fade handles, ruler handle, meter, group overview blocks, Overview clip bars (timeline objects/handles); demo badge and marker flag chip (chips); Export footer strip (divider); Overview and remaining 6 px controls -> V-3c-5b"},
+ "sites":{"P1":"ArrangementDetailPanel l.221","P2":"ArrangementDetailPanel l.702","P3":"ArrangementVideoDock l.901","P4":"ArrangementVideoDock l.920","P5":"ArrangementGridMenu l.175","P6":"ArrangementMarkerMenu l.126","T1":"app.css after l.131","L1":"detail-panel-polish l.128 WAVEFORM_BOX_CLASS"},
+ "locks":"PNR1 (token in @theme depth 1, once; none in obsidian block), PNR2 (source counts of rounded-panel per file + exact strings; menu rows keep rounded-sm), PNR3 (rendered video box compact/floating, placeholder, group reason box, both menus + rows)",
+ "mutations":"m227-m234",
+ "b_probe":"none: the class does not exist until T1; border-radius cannot change getBoundingClientRect; C measures the compiled class (BOX/RADIUS rows)",
+ "user_vetoable":True,"added":T}
+s=[e for e in b['post_current_stage_queue'] if e['id']=='STORE-REDESIGN'][0]
+s['mock_api_hook_confirmed']={"fact":"cloud/run.sh l.127-131 (loop repo /home/runner/work/czaba-studio-loop/czaba-studio-loop/cloud/run.sh) starts node $LOOP/mock-api/server.mjs when the file exists, i.e. tmp/studio-real-loop/mock-api/server.mjs; the root question from round 171 planning is closed","added":T}
+dl=b['deferred_low_polish']
+dl.append({"id":"C-R171-01","severity":"low","status":"deferred_low_polish","preExisting":True,"title":"Pressing inside the Export dialog (e.g. on Done) and releasing on the backdrop closes the dialog: Chromium fires click on the common ancestor (backdrop); Modal.tsx handleBackdropClick l.83 checks only target===currentTarget. During a render the dialog does not close (no data loss)","owner":"app/components/ui/Modal.tsx (protected; needs an approved bounded Modal change: close only when pointerdown and pointerup both hit the backdrop)","evidence":"c-round-171/out/func/func-{1440,1280}-1.json A.pressDoneReleaseBackdrop.open=false, C.renderPressReleaseBackdrop.open=true","repro":"/studio-lab, add demo-middle-east to Music at 1 s, open Export, press on Done, drag onto the backdrop, release","added":T})
+dl.append({"id":"C-R171-02","severity":"low","status":"deferred_low_polish","preExisting":True,"title":"At 1440x900 the Export dialog footer moves down 31.8 px about 220 ms into a render when the progress label appears (Cancel y 759.5 -> 791.3); a pointer resting on Cancel loses :hover and a fast click misses; no shift at 1280x720","owner":"ArrangementExportDialog.tsx layout (progress label insertion; not the round-171 class edits)","evidence":"c-round-171/out/surf/surf-1440-3.json states.E2-rendering.hoverSeries vs surf-1280-1.json","repro":"1440x900, 21 clips (3 lanes x demo-middle-east + 6 Ctrl+D each), Export WAV, watch Cancel y as the progress label appears","added":T})
+dl.append({"id":"GATE171-DONE-DISABLED-CURSOR","severity":"low","status":"deferred_low_polish","title":"Export dialog Done (l.596) lacks disabled:cursor-not-allowed while Export (l.615) has it; pre-existing inconsistency","evidence":"gates/round-171/review.md suggestion 2","repro":"read ArrangementExportDialog.tsx l.596/l.615 at 13ad2bd; start a render and hover Done","added":T})
+of=b['open_findings']
+arch=[x for x in of if x.get('id')=='ARCH-R167-SURFACE-RECIPE'][0]
+arch['round171_update']="gate-171 review and A's round-171 reviewer: SURF+MOTION recipe now ~29 occurrences in 18 files (gate count incl. MOTION uses) / ~20 button copies in 11 component files; ExportDialog l.581/l.596/l.615 added; per-file test token lists duplicated (video-dock-strings-ui l.340-358 dockClassTokens copies export-test classTokens, gate-171 suggestion 4). Proposal (not approved scope): one bounded extraction round after the checkpoint answer. Checkpoint b-round-170-checkpoint-request.md unanswered at round 172 planning -> fallback (c); round 172 adds no copy. "+T
+of.append({"id":"Q-V3C5-MODAL-RADIUS","severity":"question","status":"awaiting_user","title":"Studio dialogs (Export) use the protected shared Modal.tsx: container rounded-xl 16 px, footer buttons rounded-lg 12 px. Should Studio dialogs follow the 10 px panel / 8 px button rule? Needs an approved bounded Modal change (e.g. a radius prop) or stays as is","evidence":"Modal.tsx l.109/l.297/l.305 at 13ad2bd; visual-direction-a.md l.86","added":T})
+of.append({"id":"GATE171-DOCK-TEST-HELPER-DUP","severity":"info (signal)","status":"signal: test-side token helper duplicated (video-dock-strings-ui dockClassTokens/expectDockTokens vs export test classTokens/expectSurfaceTokens); fold into the extraction round if the checkpoint says extract","evidence":"gates/round-171/review.md suggestion 4","added":T})
+of.append({"id":"C-R171-DOCK-OVER-VIDEO-TINT","severity":"info (veto evidence)","status":"recorded for Saba's R18 veto: floating dock buttons bg-background/80 let saturated video colour through (magenta/cyan tint); icons stay legible, rough non-text contrast ~4-5:1 > 3:1; pre-existing colours","evidence":"c-round-171.md SURF notes; c-round-171/shots/surf/crop4x-*float*","added":T})
+b['architecture_signals'].append({"round":171,"note":"A reviewer and gate-171 review: Signal 3 (surface recipe repeated; ExportDialog adds 3 copies); keep under fallback (c) until the checkpoint answer; proposal = one bounded extraction round (shared class-string module + one shared test-side token list, zero computed-style/box delta). Recorded under ARCH-R167-SURFACE-RECIPE round171_update; not scheduled","added":T})
+b['harness_facts'].append({"id":"C-R171-BACKDROP-RELEASE","fact":"a hover/active harness must release the mouse inside the dialog or menu: a release on the Modal backdrop closes the Export dialog (C-R171-01)","evidence":"c-round-171.json invalidRuns surf-1440-1","added":T})
+b['harness_facts'].append({"id":"C-R171-E2-CANCEL-RECIPE","fact":"Export Cancel is reliably caught with 21 clips (demo-middle-east on Music, Stems and SFX + 6x Ctrl+D each): Cancel appears 2-6 ms after a real-mouse Export click and the render lasts ~4 s; there is no transport-container testid, so focus restore is checked by the button text 'Export' outside the dialog","evidence":"c-round-171.md SURF section, notes","added":T})
+json.dump(b,open(P,'w'),ensure_ascii=False,indent=1)
+print('ok',b['version'],len(dl))
