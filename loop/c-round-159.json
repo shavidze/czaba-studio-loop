@@ -1,0 +1,68 @@
+{
+ "round": 159,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T08:14:17.2615794Z",
+  "round": 159,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "T159-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "SURFACE-STYLE(a)",
+  "SURFACE-STYLE(b)",
+  "SURFACE-STYLE(c)",
+  "SURFACE-STYLE(d)",
+  "SURFACE-STYLE(e)",
+  "SURFACE-STYLE(f)",
+  "SURFACE-STYLE(g)",
+  "SURFACE-STYLE(h)",
+  "SURFACE-STYLE(h-rm)",
+  "SURFACE-STYLE(i)",
+  "CASCADE-SCOPE",
+  "RV1-V3A",
+  "FUNC-SMOKE-T",
+  "G159-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G159-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notRun": [
+  "ICON-STYLE, CONTRAST-V3A, OVERLOAD-CHECK and V-2 rows are not separate rows this round (code unchanged since r158). The c159 harness still re-measured ICON (3/3 ok) and the contrast table, which is identical to r158 at both viewports (note only)"
+ ],
+ "invalidRuns": [
+  "c159-1440 r0: ENV-FIRST-LOAD (hydration warning + Invalid hook call on the first cold Vite load), replaced once; did not recur in the 6 later sessions (c159 x2 + rm x2, d6 x2), plus 2 G159-3 contexts that were also clean"
+ ],
+ "findingsClosed": [
+  {
+   "id": "C-R158-01",
+   "resolution": "All 12 transport buttons compute background-color, color / 0.18s / cubic-bezier(0.2, 0.8, 0.2, 1) at 1440 and 1280. With reducedMotion reduce (matchMedia true), transition-property is none. Real Chromium computed style."
+  }
+ ],
+ "notes": [
+  "INFO-C159-DOC128-STALE: doc 128 l.74 (the after-row of the class table) still lists the 3 non-important tokens, and l.50 (R3) still says the motion-safe pattern gives no transition under reduced motion, which C-R158-01 disproved. The new C-R158-01 entry is correct. A reported this and it is outside the D2 scope. Documentation only, so not a product bug and not filed in bugs; for B: a one-line doc fix at V-3b",
+  "INFO-C159-GLOBAL-RULE-SCOPE (inference, not measured): doc 128 l.50 says ArrangementLane and DetailPanel use the same motion-safe:transition pattern, so the unlayered global rule probably overrides them today (pre-existing). out/probe-motion.json found no motion-safe:transition element outside the transport in the empty demo state at either viewport, so this is unconfirmed. Relevant to ROOT-GLOBAL-TRANSITION-RULE (both copies: app.css and base/utilities.css)",
+  "Under reduced motion, computed transition-duration and timing still show the global 0.15s/0.25s ease-out values. transition-property none means nothing animates, which is the accepted (h-rm) branch",
+  "Served app.css has the plain motion-safe:transition-[background-color,color] selector next to the ! one. It is inert: no transport button carries it, and computed (h) comes from the ! rules",
+  "Harness hygiene: no earlier c-round-*/out file was written this round"
+ ],
+ "report": "tmp/studio-real-loop/c-round-159.md"
+}

@@ -1,0 +1,11 @@
+# C round 159 checkpoint
+- [x] SOURCE-SCOPE start: HEAD f8a316a, frozen 975 OK, end-sha256 4/4 OK, status 2M+2??, protected diff empty (08:14Z).
+- [x] AN-REVIEW: diff-vs-start matches start copies; F1/N1'/D2' only; cumulative = r158 scope + F1.
+- [ ] T159-TARGETED
+- [ ] browser rows
+- c159-1440 r0 INVALID: ENV-FIRST-LOAD (hydration + Invalid hook call, cold Vite); replaced once
+- [x] T159-TARGETED 386/386 TS1-6 green
+- [x] c159-1440 r1 valid: 134 rows 0 fails; (h) 0.18s cubic; h-rm none; focus immediate; cascade global kept; play/space/export ok; non-h rows identical to r158
+- [x] c159-1280 valid: 134 rows 0 fails, non-h identical to r158, h/h-rm/i/cascade pass
+- [x] RV1 0px both, G159-3 ok, end checks ok, report + json written (PASS)
+- [x] advisor follow-ups: hygiene check, probe-motion (no elements; note relabelled inference), served-CSS note, RV1 table
