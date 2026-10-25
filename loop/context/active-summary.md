@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T04:35:43.157Z)
+# Active loop summary (2026-10-25T05:09:09.595Z)
 
-- backlog.json 1384 KB -> active view 183 KB
-- status: G_ROOT_GATE round 154
-- servers: `{"checkedUtc":"2026-10-25T04:16:10.9461173Z","round":154,"attempt":1,"store":200}`
-- last publication: 037e25fdd86b76ef791d15c52cff71313b8b2a58 (rounds 153-153)
-- last root gate: round 154 skipped - C taskStatus FAIL
+- backlog.json 1388 KB -> active view 184 KB
+- status: G_ROOT_GATE round 155
+- servers: `{"checkedUtc":"2026-10-25T04:52:44.3635102Z","round":155,"attempt":1,"store":200}`
+- last publication: 4c07d5f4b5d682c7b1599fc788ebf8b49962558c (rounds 154-155)
+- last root gate: round 155 published - commit 4c07d5f4b5d682c7b1599fc788ebf8b49962558c pushed
 
 ## Current items: -
 
@@ -340,6 +340,8 @@
 - B-R153-CSS2-TRIM / info / evidence pending: C round 154 WEIGHT-INVENTORY / after V-2b-2, Instrument Sans 600/700 and Plex Mono 500 may be unused on /studio-lab; trim css2 URL + TH7 only with C evidence of zero consu
 - C-R153-D6-TEMPO-ROW-TESTID / info / tool note (C d6 PANELS key arrangement-tempo-row matches nothing; tempo header measured directly) / d6 does not cover the tempo row panel; not an app defect
 - C-R153-SR-UPPERCASE / info / open_tech_lead_manual (real screen reader not available in cloud) / whether a screen reader spells CSS-uppercase labels letter by letter is untested; AX names unchanged
+- C-R154-01 / low / open_scheduled_round_155 / lane-move ghost start time renders IBM Plex Mono 500 (Medium) instead of 400: inherited text-xs font-medium from the ghost container (Arrang
+- B-R154-V2B3-MISSED-TIMECODES / info / scheduled_v2b3 / two timecodes inside sentence strings in ArrangementLane.tsx missed by the round-154 N list: library drop ghost start (l.894-902) and all-tr
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

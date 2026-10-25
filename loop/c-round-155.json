@@ -1,0 +1,145 @@
+{
+ "round": 155,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T04:52:44.3635102Z",
+  "round": 155,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "T155-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "MONO-STYLE-N6",
+  "LANE-GHOST-FIT",
+  "PLEX500-INVENTORY",
+  "COOKIE-SOURCE",
+  "FUNC-SMOKE-S",
+  "G155-3",
+  "PX-NET/REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "COOKIE-SOURCE browser render: GA4 not configured in cloud (no .env / VITE_GA4_MEASUREMENT_ID), CookieConsent stays isVisible=false -> null",
+  "G155-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notRun": [
+  "WEIGHT-STYLE",
+  "MASTER-OVER",
+  "MONO-STYLE N1-N5",
+  "RV-1",
+  "NO-CLIP/OVERLAP",
+  "FONTS-SCOPED",
+  "full FUNC-SMOKE with WAV export",
+  "LABEL-STYLE",
+  "RV-2",
+  "FONT-FAIL (unchanged code since C round 154, per task)"
+ ],
+ "invalidRuns": [
+  {
+   "run": "c155-1440-r1",
+   "reason": "ENV-FIRST-LOAD: cold Vite first load gave 'Invalid hook call' + hydration replace; all sections failed; replaced (1 allowed)",
+   "evidence": "c-round-155/out/c155-1440-r1-INVALID-envfirstload.{json,log}"
+  }
+ ],
+ "infoRuns": [
+  {
+   "run": "c155-1440-r2",
+   "reason": "valid session but setup lacked the stem clip of the C-R154-01 repro (release went to Stems, undo 'Move to track — Stems'); N6 still 400 / IBM Plex Mono [web]; kept as extra evidence, not counted as the repro"
+  }
+ ],
+ "validRuns": [
+  "c155-1440-r3",
+  "c155-1440-r4",
+  "c155-1280-r1",
+  "g155-3"
+ ],
+ "n6": {
+  "1440": {
+   "family": "IBM Plex Mono",
+   "weight": "400",
+   "fvn": "tabular-nums",
+   "cdp": "IBM Plex Mono [web]",
+   "text": "00:05.000",
+   "startW": 63,
+   "title": {
+    "text": "Soft impact",
+    "weight": "500",
+    "cdp": "Instrument Sans [web]",
+    "cw": 1,
+    "sw": 65
+   },
+   "undo": "Undo: Move clip"
+  },
+  "1280": {
+   "family": "IBM Plex Mono",
+   "weight": "400",
+   "fvn": "tabular-nums",
+   "cdp": "IBM Plex Mono [web]",
+   "text": "00:05.000",
+   "startW": 63,
+   "title": {
+    "text": "Soft impact",
+    "weight": "500",
+    "cdp": "Instrument Sans [web]",
+    "cw": 1,
+    "sw": 65
+   },
+   "undo": "Undo: Move clip"
+  }
+ },
+ "plex500Inventory": {
+  "states": [
+   "S0",
+   "lane-move ghost hold",
+   "long-clip ghost hold",
+   "library drop-ghost hold",
+   "S1 group",
+   "S1 lane ghost hold",
+   "S1 drop ghost hold",
+   "marker menu",
+   "grid menu",
+   "Export dialog"
+  ],
+  "plexMono500PlusElements": 0,
+  "plexMonoVisibleWeights": "400 only in every state",
+  "facesLoadedEnd": [
+   "IBM Plex Mono 400",
+   "Instrument Sans 400",
+   "Instrument Sans 500",
+   "Instrument Sans 600",
+   "Noto Sans Georgian 400",
+   "Noto Sans Georgian 500"
+  ],
+  "plexMono500Face": "unloaded",
+  "weight600plusVisible": [
+   {
+    "text": "Export",
+    "tag": "h2",
+    "weight": 600,
+    "where": "Export dialog ModalTitle (protected Modal.tsx)"
+   }
+  ]
+ },
+ "notes": [
+  "LANE-GHOST-FIT: ghost title 'Soft impact' clientWidth 1 / scrollWidth 65 at both viewports (unchanged from round 154; ghost is 2 s wide = 80 px); long clip (hero music) title fully visible 180/180. Info only.",
+  "The library drop-ghost timecode (e.g. '00:12.000') renders Instrument Sans 500. That is expected: it is V-2b-3 scope per D-29z120 R3, not a round-155 bug.",
+  "Ableton parity for this row: not applicable (CZABA brand decision, visual-direction-a.md).",
+  "passed qualifiers: LANE-GHOST-FIT is info (measured); COOKIE-SOURCE is source-level only (render in blocked); G155-3 excludes fake-Bearer 403 (in blocked)."
+ ],
+ "openPriorFindingsReminder": "root-pre-push-review.md / publication-checkpoint.json are old (2026-10-07); no new remaining findings for this round."
+}
