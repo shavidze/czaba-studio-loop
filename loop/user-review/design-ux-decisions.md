@@ -12,3 +12,7 @@ Recorded by root from Saba's chat answers. Items not listed here are still **pen
 - **Approve all DUX-R recommendations: DUX-R-1 to DUX-R-9.** DUX-R-5 is already scheduled inside VISUAL-A. DUX-R-3 has two options: auto-reveal the selected clip, or auto-collapse the panel at 1280. Let `design-philosopher` and `flow-sage` choose, with browser evidence, and record the choice and its reason in the task.
 - **DUX-B bugs:** handled under the 2026-10-23 bug gate, as before.
 - **Order:** approved recommendations from both reviews become bounded tasks **after VISUAL-A-OBSIDIAN**, in the reviews' own priority order (Top 5 first). They come **before T12-ADVANCED** and before phase 2. B adds a queue entry `REVIEW-RECOMMENDATIONS` with one item per approved id.
+
+## 2026-10-25 (V-2b-DISPLAY, final; this replaces the delegation above)
+
+- **No display serif in Studio.** Saba decided: Studio uses only Instrument Sans (UI) and IBM Plex Mono (numerals), clean like Ableton. Do not load or apply Cormorant Garamond in Studio. Close V-2b-DISPLAY as `decided_user: no serif`. The design agents do not need to decide it, and no addendum is needed. If Cormorant is already loaded only for Studio, remove that load. Fonts outside Studio (the store) are not affected.
