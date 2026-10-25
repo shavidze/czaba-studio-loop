@@ -1,0 +1,76 @@
+{
+ "taskStatus": "PASS",
+ "round": 176,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T22:48:42.8307813Z",
+  "round": 176,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T176-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "INVENTORY-GREP",
+  "CC-ONSTATE",
+  "NO-BRASS-ONSTATE",
+  "SEP-HOVER",
+  "CONTRAST-ONSTATE",
+  "STATE-DISTINCT-ONSTATE",
+  "FUNC-SMOKE-ONSTATE",
+  "ENV-VIS",
+  "RV1-DUX5B2A",
+  "RV3-STORE",
+  "G176-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G176-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [],
+ "info": [
+  {
+   "id": "C-R176-NOBRASS-LCD-GLYPH",
+   "note": "With Chromium's default LCD subpixel text, each on-state button region contains 33-71 pixels with R-B >= 45, at both viewports. All of them are on the M/S glyph edges, with colours such as (153,119,64) and (107,52,20). In control runs with --disable-lcd-text, every region at rest, hover and press scans 0/N for all 6 buttons, at BOTH viewports (c176-1440-3-nolcd and c176-1280-2-nolcd). The CC values are identical. A within-run cross-check needs no flag: in the default-LCD screenshots, the OFF-state M/S buttons, a grey letter on a near-black fill where no brass token is possible, show the same fringe family. That is 31/1936 and 63/1936 at 1440 and at 1280 (e.g. (130,100,67) and (113,65,38)), and 0/1936 with no-LCD (out/offglyph-scan.json). So the hits come from text rendering, not from a fill token. Future glyph-bearing NO-BRASS rows should mask the glyph or use --disable-lcd-text."
+  },
+  {
+   "id": "A-R176-MIXED-REST-BASE (confirmed)",
+   "note": "C confirms A's finding in the browser. At rest the mixed button's background-color is rgba(0,0,0,0), because tailwind-merge drops bg-foreground/5. The half composite is rgb(112,108,101), 3.32 vs the group header rgb(29,26,23); B predicted 3.62 and A 3.30. It is >= 3:1 but sits at B's 3.3 floor. Hover: half rgb(121,116,110), 3.74. Press: rgb(127,122,115), 4.07."
+  },
+  {
+   "id": "C-R176-MIXED-LETTER-4.5",
+   "note": "The mixed letter on the half fill is 4.20 at rest, 3.72 on hover and 3.42 on press. That is >= 3:1 but below 4.5:1 (WCAG 1.4.3), recorded as info as the task asks. It is an improvement over 1.88."
+  },
+  {
+   "id": "C-R176-MIXED-VS-OFF-FILL",
+   "note": "Not a task criterion, recorded for B. The mixed half fill rgb(112,108,101) vs the off group-Solo fill rgb(39,36,32) is 2.96, under 3:1. Mixed vs off is still distinct through the border: rgb(236,230,218) on mixed (13.94 vs elevated) against transparent on off. B may decide whether a fill floor vs off is wanted."
+  },
+  {
+   "id": "C-R176-INVENTORY-ACCENT-COLOR",
+   "note": "The per-token scan also hits 6 'accent-foreground' tokens that are not in the section 0.3 table: DetailPanel l.841, GroupHeader l.338, Lane l.766 and l.820, Master l.199, Transport l.277. These are the round-175 (5b-1) neutral range-input accent-color utilities (accent-color: foreground), not brass. C classifies them as done 5b-1 neutral sites. B should add them to the table as such. Not A's FAIL."
+  },
+  {
+   "id": "C-R176-MUTE-SOLO-RATIO",
+   "note": "Mute-on vs Solo-on fill is 2.21:1, as section 0.1 predicted (informational). The M/S letter is the identifying cue. They are no longer the same colour (they were 1:1 before). Crops for Saba: shots/c176-*/distinct-*.png."
+  }
+ ],
+ "ableton": {
+  "onStateColours": "not applicable / unverified (no Live 12 source captured; the grey-Mute analogy is an inference only)",
+  "muteSoloBehaviour": "unchanged CZABA behaviour re-checked by FUNC-SMOKE-ONSTATE; parity was not re-verified this round"
+ },
+ "evidence": "c-round-176.md, c-round-176/out, c-round-176/shots, c-round-176/tools"
+}

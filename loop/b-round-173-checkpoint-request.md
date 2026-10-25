@@ -30,3 +30,8 @@
 - ROOT-RECON-GRID-HARNESS stays at the end of VISUAL-A.
 - Q2 is offered as an optional addition to that task.
 - B does **not** schedule an extraction on its own.
+
+## Addendum — B round 176 → 177 planning (2026-10-25, D-29z142), non-blocking
+- **Signal 3 has now fired three rounds running** (174, 175, 176): the Mute/Solo on-state strings in `ArrangementLane.tsx` / `ArrangementGroupHeader.tsx` / `ArrangementMaster.tsx` are re-edited each stage, each with matching locks in 3–5 test files, and each round adds another copy of the fake Web Audio / ResizeObserver harness.
+- **Gate-176 proposal (needs approval):** a shared `ARRANGEMENT_MIX_ON_STATE` constant (Mute and Solo recipes) so three source locks become one, plus the harness extraction under ROOT-RECON-GRID-HARNESS. Acceptance proposed: all current tests green, no behaviour change; focused DXM1–DXM6, LSU7, UM4/UM11, V-3a.
+- **This fits Q1/Q2 above.** B's default is unchanged: fallback (c); round 177 (5b-2b) and 5b-3 go ahead; ROOT-RECON-GRID-HARNESS stays at the end of VISUAL-A; B does not schedule an extraction on its own.
