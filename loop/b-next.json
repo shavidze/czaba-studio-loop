@@ -1,10 +1,9 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 171 PASSED with browserVerified and realVerified true (Cancel caught during a real render, real WAV parsed); gate 171 published 13ad2bd on both remotes (verify 171 files / 2569 tests, review 9/10, nothing blocking), so V-3c-4c-3 is done and V-3c-4 is complete. C's two findings are pre-existing Lows -> deferred_low_polish. No Critical/High/Medium finding is open (Tech Lead manual items aside). Regression is due on/after 2026-10-27, not today. The checkpoint request is still unanswered, so fallback (c) continues. STORE-0's mock-api hook is confirmed in cloud/run.sh. Much scoped work remains; nothing needs external input to continue.",
- "nextTask": "Round 172 (D-29z137) V-3c-5a from 13ad2bd, clean tree (990 files, 983 frozen, 7 grants + 2 new). app.css: one @theme line '--radius-panel: 0.625rem;' after --radius-md (R21) -> rounded-panel. ArrangementDetailPanel l.221 waveform box and l.702 group reason box, ArrangementVideoDock l.901 placeholder and l.920 video box, ArrangementGridMenu l.175 and ArrangementMarkerMenu l.126 menu containers -> rounded-panel (R22/R23); menu rows stay 6 px (concentric); docked regions stay square; Overview + remaining 6 px controls -> V-3c-5b; Modal.tsx protected -> Q-V3C5-MODAL-RADIUS. detail-panel-polish WAVEFORM_BOX_CLASS one-token update (L1). New panel-radius-ui.test.tsx PNR1-PNR3; mutations m227-m234; vitest base 357/357 on 20 files. C rows RADIUS/BOX/RV1/FUNC-SMOKE-V3C5A (real waveform, group state, floating video over real frames, Grid/Marker menus), G172-3, PX-NET/REG-HYD. Round 173 = REGRESSION if planned on/after 2026-10-27, else V-3c-5b.",
+ "reason": "C round 172 PASSED with browserVerified and realVerified true (10 px on P1-P6 at both viewports, BOX 0.00 px, RV1 0 delta, FUNC-SMOKE incl. real video and group state); gate 172 published 3810816 on both remotes (verify 172 files / 2574 tests, review 9/10, nothing blocking), so V-3c-5a is done. C's two findings are pre-existing Lows needing layout changes outside this stage -> deferred_low_polish. No Critical/High/Medium finding is open (Tech Lead manual items aside). Regression is due on/after 2026-10-27, not today. The checkpoint request is still unanswered, so fallback (c) continues. Much scoped work remains; nothing needs external input to continue.",
+ "nextTask": "Round 173 (D-29z138) V-3c-5b from 3810816, clean tree (992 files, 986 frozen, 6 grants + 1 new). ArrangementOverview root l.293, overlay l.305, frame l.329 -> rounded-panel together (R25; B probe: frame 27.05/18.59 px at max zoom -> capsule below 20 px accepted, vetoable; no min-w, no overviewFrame change); Transport readout l.159 and LibraryPreview wave l.251 -> rounded-md (R26/R27); arrangement-exit stays 6 px (R28); twMerge rule R29. OV1 block update (L1), panel-radius-ui PNR2 + new PNR4/PNR5 (L2), doc 141 -> Completed, new doc 142; mutations m235-m240; vitest base 423/423 on 25 files. C rows RADIUS/OV-CORNERS/NARROW-FRAME/BOX (vs b-round-172/out/probe-ov.json)/RV1/FUNC-SMOKE-V3C5B, G173-3, PX-NET/REG-HYD. Round 174 = REGRESSION if planned on/after 2026-10-27, else DUX-R-5 (with a refreshed checkpoint request at the V-3c boundary).",
  "remaining": [
-  "V-3c-5a(--radius-panel token; DetailPanel l.221/l.702, VideoDock l.901/l.920, GridMenu l.175, MarkerMenu l.126; round 172)",
-  "V-3c-5b(Overview root/overlay/frame 10 px with OV1 + narrow-frame probe; remaining 6 px controls: Transport readout l.159, LibraryPreview waveform l.251, StudioWorkspace back link l.2197)",
+  "V-3c-5b(round 173: Overview root/overlay/frame 10 px with OV1; Transport readout l.159 and LibraryPreview wave l.251 -> 8 px; exit link l.2197 stays 6 px)",
   "DUX-R-5(VISUAL-A stage before M1; re-verify SABA-B-1 contrast)",
   "M1",
   "M3",
@@ -33,7 +32,7 @@
   "C-R167-METRONOME-UNDER-MUTE(evidence gap; next regression)",
   "A-R167-DUP-TEST-IDS(signal)",
   "Q-R166-EXIT-NAME(awaiting_user)",
-  "ARCH-CHECKPOINT-V3C(requested; b-round-170-checkpoint-request.md unanswered at round 172 planning; fallback (c))",
+  "ARCH-CHECKPOINT-V3C(requested; b-round-170-checkpoint-request.md unanswered at round 173 planning (third); refreshed request after V-3c-5b PASS; fallback (c))",
   "RV-1",
   "RV-2",
   "RV-3",
@@ -41,7 +40,7 @@
   "ROOT-GLOBAL-TRANSITION-RULE(root signal, two copies)",
   "REGRESSION(due 2026-10-27)",
   "T12-ADVANCED",
-  "DEFERRED-LOW-POLISH(246 entries, open ones; +C-R171-01 Modal backdrop release, C-R171-02 1440 footer shift, GATE171-DONE-DISABLED-CURSOR)",
+  "DEFERRED-LOW-POLISH(248 entries, open ones; +C-R171-01 Modal backdrop release, C-R171-02 1440 footer shift, GATE171-DONE-DISABLED-CURSOR; +C-R172-01 1280 group-reason overflow, C-R172-02 Set selection footer jump)",
   "PROD-SSR-NUL",
   "PROD-MP3-UNVERIFIED",
   "BACKEND-ONLY-EVIDENCE",
@@ -56,6 +55,9 @@
   "GATE170-DISABLED-HOVER-TEXT-VARIANT(deferred_low_polish)",
   "Q-V3C5-MODAL-RADIUS(awaiting_user)",
   "GATE171-DOCK-TEST-HELPER-DUP(signal)",
-  "C-R171-DOCK-OVER-VIDEO-TINT(R18 veto evidence)"
+  "C-R171-DOCK-OVER-VIDEO-TINT(R18 veto evidence)",
+  "GATE172-TWMERGE-RADIUS-PANEL(signal)",
+  "B-R172-OV-FRAME-OVERFLOW(info)",
+  "GATE172-SAFARI-VIDEO-RADIUS(Tech Lead manual)"
  ]
 }

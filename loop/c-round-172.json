@@ -1,0 +1,82 @@
+{
+  "round": 172,
+  "stage": "V-3c-5a (10 px panel radius, --radius-panel, D-29z137)",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-25T19:16:46.2029361Z",
+    "round": 172,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R172-01",
+      "severity": "low",
+      "preExisting": true,
+      "owner": "ArrangementDetailPanel.tsx group-state middle box (P2): layout/wrapping, not its radius",
+      "steps": [
+        "1280x720, fresh context, /studio-lab",
+        "Load media/beeps-6s-h264-aac.mp4 through arrangement-video-input; add demo-middle-east to Music at 1 s",
+        "Expand Clip details (arrangement-detail-toggle; collapsed by default at 720 px height)",
+        "Real-mouse click the Music clip, then Ctrl+click the video clip (group state)"
+      ],
+      "expected": "Both group reasons fit inside the framed reason box (P2), or the box grows or scrolls, so no text crosses its border.",
+      "actual": "The P2 box is 250 x 67 px (y 556-623). The range reason now wraps to 2 lines (561-593) and the Clip Gain reason to 2 lines (595-627), so the last line 'remove the video from the selection' runs 4 px past the box's outer bottom edge. The bottom border and the bottom-left corner curve cross the glyphs. At 1440x900 it fits (bottom 767 vs box 803). In round 41, at 1280, the range reason was 1 line and the content fit (c-round-41.md l.138/153). The likely cause is the later VISUAL-A typography change (inference, not verified). Round 172 did not cause it: border-radius changes neither layout nor wrapping, and BOX/RV1 match round 171 exactly (0.00 px). Routing note for B: C judged this under the section 7 'Low only' row, not the 'visual defect at a rounded corner' row. The text crosses the straight bottom border too, not only the curve, and the cause is wrapping, not radius. A fix is NOT possible within R21-R23 (radius-only). It needs a layout change in ArrangementDetailPanel (P2 height/grow, scroll, or reason fit).",
+      "evidence": "c-round-172/shots/radius/site4x-1280-D2-P2-1.png; c-round-172/out/radius/rad-1280-2.json states.D2.m.P2 (box + children); c-round-172/out/box-v3c5a.json noBefore.1280.D2.P2"
+    },
+    {
+      "id": "C-R172-02",
+      "severity": "low",
+      "preExisting": true,
+      "owner": "StudioWorkspace footer (status lines) / workspace layout, not a round-172 file change",
+      "steps": [
+        "1440x900 (also 1280x720), /studio-lab, load beeps-6s-h264-aac.mp4, add demo-middle-east to Music at 1 s, select it (Clip details open)",
+        "In Clip details type From 2, To 4 and click Set selection"
+      ],
+      "expected": "Setting a time selection does not move the panel the user is working in. C-R11-02 reserved the footer's selected-clip line height for the same reason.",
+      "actual": "The footer gains a 4th line ('Time selection: 00:02.000 — 00:04.000 · length 00:02.000 · Delete = delete, the gap remains · Ctrl+Shift+X = Cut Time'). The workspace above shrinks, and the Clip details panel, the waveform box P1 and the library preview jump up 20 px (P1 y 732 -> 712 at 1440, 576 -> 556 at 1280; size unchanged) with no transition.",
+      "evidence": "c-round-172/shots/radius/rad-1440-2-D1.png vs rad-1440-2-D1-setsel.png; out/radius/rad-{1440,1280}-2.json func.P1.applied.p1 vs states.D1.m.P1.box; related: C-R11-02 (selected-clip line reserved), A-R28-REVIEW-4-ALL-LANE-FOOTER / C-R28-INFO-STALE-STATUS (footer range line)"
+    }
+  ],
+  "passed": [
+    "T172-TARGETED (21 files, 362/362; PNR1, PNR2, PNR3a/b/c, detail-panel-polish, OV1, TH1, VFR1, floating-video, RF1, grid/marker menu tests all green)",
+    "SOURCE-SCOPE (HEAD 13ad2bd; 983 frozen OK at start and end; A end-sha256 OK; status = 7 M + 2 ??; protected diff empty; obsidian block has no radius; no source change during C's phase, so start and end tree hashes are equal)",
+    "AN-REVIEW (app.css +1 line inside @theme; P1-P6 one token each; menu rows and Overview untouched; L1 one token; detail-panel-polish expect( 53; panel-radius-ui 25; doc 140 only l.4 + struck l.114; doc 141 has the TEMPLATE sections)",
+    "RADIUS-V3C5A (both viewports: P1-P6 are 10px on all 4 corners; menu rows 6px; Overview root, overlay and frame 6px; the video and the waveform are clipped by the rounded corners, and the corner pixels match the page background)",
+    "BOX-V3C5A (P3, P4 and the dock buttons in V0/V1 match round 171 to 0.00 px at both viewports; P1, P2, P5 and P6 are recorded with no before-value)",
+    "RV1-V3C5A (d6 at 1440 and 1280 vs round 171: 0 missing, 0 added, max delta 0, same failing-contrast set)",
+    "FUNC-SMOKE-V3C5A (both viewports: P1 click keeps the selection and Set selection works; P2 reasons match RF1 with their aria-describedby; P3/P4 Expand floats, ArrowRight moves +16 px, Space plays to ct 1.46, Return and Escape go back to compact with focus on Expand video; P5 choosing 10 s closes the menu and sets the readout to 10, Escape closes; P6 Escape closes with focus on the marker, Delete through the menu removes it)",
+    "G172-3 (anonymous /studio-lab shows the demo badge with no auth_user; /studio/middle-east shows Sign in required, no workspace and 0 audio[src] at 1440 and 1280; studio-token returns 401)",
+    "PX-NET/REG-HYD (14 valid sessions: 10 radius, 2 d6, 2 g172-3 contexts; font responses all 200; 0 forbidden, 0 auth headers, 0 hydration, 0 pageerror; only the expected cart noise)"
+  ],
+  "failed": [],
+  "blocked": [
+    "G172-3 Fake-Bearer 403: backend unavailable in cloud"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "notRun": [
+    "Rows the task lists as not re-run (unchanged since rounds 158-171): transport, toolbar, lane/group header, library/preview, Export dialog, clip, marker row, icon rows, ENV-VIS, OV-CORNERS"
+  ],
+  "invalidRuns": [
+    "warm-1: cold-Vite first load (Invalid hook call / useState of null), replaced by warm-2 (ENV-FIRST-LOAD-LUCIDE); not a measured session",
+    "rad-1280-1: harness error (Clip details collapsed at 720 px height, so the apply button had no box). Fixed by expanding the panel the way a user would. Then G1 could not reach the SFX lane at 1280, so attempt 2 right-clicks the Video lane at both viewports. rad-1440-1 is kept as a stability reference (0.00 px vs attempt 2)."
+  ],
+  "notes": [
+    "Grid menu Escape returns focus to BODY in the real browser: the right press on the lane (not focusable) blurs the focused element before the contextmenu event, so 'the element that had focus at open' is BODY. GM11 fires contextmenu without a press. This predates round 172 (no logic change) and is recorded for B as an observation, not a bug. For B: with a real mouse and a non-focusable opener (the lane), the FUNC-SMOKE wording 'focus back on its opener' cannot be met. Either the acceptance wording or GM11's setup (contextmenu without a prior press) should be revisited.",
+    "Ableton parity: not applicable (CZABA brand decision, visual-direction-a.md); no Live claim made.",
+    "Not C-confirmed: A's mutations m227-m234 were not re-run by C (speed rules); they remain A's claim.",
+    "D2 used audio + video (Ctrl+click the video clip), as in RF1, so both group reasons show. The task's audio + SFX example would show only the range reason.",
+    "Shadows: there is no before-value for any site (round 171 did not record box-shadow). Measured now: P4 floating has a 1px ring rgb(36,33,30) and 0 4px 16px rgba(4,5,6,.5); P5/P6 have 0 4px 16px rgba(4,5,6,.5). The class strings are unchanged in the diff."
+  ]
+}
