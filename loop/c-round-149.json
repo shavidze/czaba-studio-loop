@@ -1,0 +1,115 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T00:04:03.9954022Z",
+  "round": 149,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R149-1",
+   "severity": "low",
+   "steps": [
+    "Fresh context /studio-lab at 1440x900 or 1280x720",
+    "Add a clip, make a time selection, press Ctrl+L",
+    "Measure the 'Loop' label in arrangement-loop-brace"
+   ],
+   "expected": "Enabled 12 px label >= 4.5:1 (RV-2); it was 4.97 at post-V-0",
+   "actual": "text-accent rgb(201,164,106) on bg-accent/30 over surface = 4.32 computed, 4.38 pixel",
+   "evidence": "c-round-149/out/d6/contrast-post-v1a.json (arrangement-loop-brace:Loop); shots/LOOP-on-1440.png; ArrangementLoopBrace.tsx l.239/l.256"
+  },
+  {
+   "id": "C-R149-2",
+   "severity": "low",
+   "steps": [
+    "Fresh context /studio-lab",
+    "Add CZABA hero to Music at 0",
+    "Click the ruler at 1/3/10/30 s",
+    "Inspect the Overview playhead over the audio bar"
+   ],
+   "expected": "Overview playhead distinguishable from the content bar (STATE-DISTINCT); before V-1a they were orange on teal",
+   "actual": "bg-accent playhead over bg-brand bar are both #c9a46a: pixel ratio 1.03 at both viewports; the line is visible only above and below the bar",
+   "evidence": "c-round-149/out/c149b-{1440,1280}.json overview; shots/OV-playhead-t*-*.png; ArrangementOverview.tsx l.17/l.334"
+  }
+ ],
+ "passed": [
+  "T149-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "TOKENS-SCOPED",
+  "RV-1",
+  "RV-3",
+  "FUNC-SMOKE",
+  "VISUAL",
+  "G149-3",
+  "PX-NET/REG-HYD"
+ ],
+ "failed": [
+  "RV-2 (C-R149-1, Low)",
+  "STATE-DISTINCT (C-R149-2, Low)"
+ ],
+ "blocked": [
+  "G149-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "recordOnly": {
+  "RV-2-FIELDS": {
+   "bpm": 1.15,
+   "librarySearch": 1.15,
+   "detailFrom": 1.15,
+   "detailTo": 1.15,
+   "clipGain": 1.15,
+   "fillVsSurface": 1.06,
+   "borderVsFill": 1.21,
+   "groupNameEditing": "brand border vs elevated ~7.3 (only visible in F2 edit)"
+  }
+ },
+ "measurements": {
+  "tokens": {
+   "1440": "18/18 equal on workspace, body, Export panel, marker menu; html = Store",
+   "1280": "same"
+  },
+  "rv1MaxDeltaPx": 0,
+  "rv1Determinism": 0,
+  "rv2": {
+   "duxElements": 61,
+   "duxBelow45": 0,
+   "dimMin": 4.57,
+   "dimOnSurface": 5.38,
+   "groupGlyphIcon": 4.32,
+   "enabledNonDuxFailures": [
+    "arrangement-loop-brace:Loop 4.32 (pixel 4.38)"
+   ],
+   "exemptInactive": 30,
+   "exportDialogMin": 5.38,
+   "note": "the group glyph was in the c-round-125 failing list but is an icon (>=3) in the design review; excluded from the DUX count"
+  },
+  "funcSmoke": {
+   "playAdvance": 1.97,
+   "createBufferSourceDelta": 3,
+   "dragMoved": 1,
+   "undoRestored": true
+  },
+  "invalidRuns": [
+   "d6 1440 r1 cold-Vite first load (replaced once)"
+  ]
+ },
+ "report": "c-round-149.md",
+ "evidenceSupportsClosing": [
+  "DUX-B-1 (53 dim >= 4.57)",
+  "DUX-B-4 (8 muted on the selected row >= 4.5)",
+  "GATE148-S1 (doc 121 3 lines verified)"
+ ]
+}

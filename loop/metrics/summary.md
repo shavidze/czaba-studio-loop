@@ -1,13 +1,12 @@
-# Loop metrics (2026-10-24T23:50:00.606Z)
+# Loop metrics (2026-10-25T00:31:49.432Z)
 
-- rounds: 148; cost $3900.02 total, last 10 avg $22.28/round; agent time 199.7 h
-- C: PASS 113, FAIL 31, BLOCKED 4; bugs c/h/m/l 0/3/46/114
+- rounds: 149; cost $3919.94 total, last 10 avg $21.70/round; agent time 200.4 h
+- C: PASS 113, FAIL 32, BLOCKED 4; bugs c/h/m/l 0/3/46/116
 - rounds without a real check: 63, 72; agent errors 25
-- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published, 98:published, 99:published, 100:published, 101:published, 102:published, 103:published, 104:blocked, 105:blocked, 106:published, 107:published, 108:published, 109:published, 110:published, 111:published, 112:published, 113:published, 114:published, 115:published, 116:skipped, 117:published, 118:skipped, 119:published, 120:published, 121:published, 122:published, 123:skipped, 124:skipped, 125:skipped, 126:skipped, 127:skipped, 128:published, 129:published, 130:published, 131:published, 132:published, 133:published, 134:published, 135:published, 136:published, 137:published, 138:published, 139:published, 140:published, 141:published, 142:skipped, 143:skipped, 144:published, 145:skipped, 146:published, 147:published, 148:published
+- gates: 63:skipped, 64:committed_not_pushed, 66:published, 67:skipped, 68:published, 69:published, 70:published, 71:published, 72:skipped, 73:published, 74:skipped, 75:published, 76:published, 77:published, 78:published, 79:published, 80:published, 81:published, 82:published, 83:published, 84:published, 85:published, 86:published, 87:skipped, 88:skipped, 89:published, 90:published, 91:published, 92:published, 93:published, 94:published, 95:published, 96:published, 97:published, 98:published, 99:published, 100:published, 101:published, 102:published, 103:published, 104:blocked, 105:blocked, 106:published, 107:published, 108:published, 109:published, 110:published, 111:published, 112:published, 113:published, 114:published, 115:published, 116:skipped, 117:published, 118:skipped, 119:published, 120:published, 121:published, 122:published, 123:skipped, 124:skipped, 125:skipped, 126:skipped, 127:skipped, 128:published, 129:published, 130:published, 131:published, 132:published, 133:published, 134:published, 135:published, 136:published, 137:published, 138:published, 139:published, 140:published, 141:published, 142:skipped, 143:skipped, 144:published, 145:skipped, 146:published, 147:published, 148:published, 149:skipped
 
 | round | C | bugs c/h/m/l | real | $ | h | err | gate |
 |---|---|---|---|---|---|---|---|
-| 134 | PASS | 0/0/0/0 | yes | 27.07 | 0.87 | 0 | published |
 | 135 | PASS | 0/0/0/1 | yes | 27.59 | 0.51 | 0 | published |
 | 136 | PASS | 0/0/0/0 | yes | 22.43 | 0.71 | 0 | published |
 | 137 | PASS | 0/0/0/0 | yes | 24.60 | 0.82 | 0 | published |
@@ -22,3 +21,4 @@
 | 146 | PASS | 0/0/0/1 | yes | 18.93 | 0.62 | 0 | published |
 | 147 | PASS | 0/0/0/0 | yes | 24.75 | 0.74 | 0 | published |
 | 148 | PASS | 0/0/0/0 | yes | 27.14 | 0.85 | 0 | published |
+| 149 | FAIL | 0/0/0/2 | yes | 19.93 | 0.67 | 0 | skipped |

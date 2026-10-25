@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-24T23:31:43.492Z)
+# Active loop summary (2026-10-25T00:20:36.188Z)
 
-- backlog.json 1348 KB -> active view 175 KB
-- status: G_ROOT_GATE round 148
-- servers: `{"checkedUtc":"2026-10-24T23:15:00.1571236Z","round":148,"attempt":1,"store":200}`
+- backlog.json 1356 KB -> active view 176 KB
+- status: G_ROOT_GATE round 149
+- servers: `{"checkedUtc":"2026-10-25T00:04:03.9954022Z","round":149,"attempt":1,"store":200}`
 - last publication: b292ff48b7c245d3435f8a44e6c3fc511cb66289 (rounds 148-148)
-- last root gate: round 148 published - commit b292ff48b7c245d3435f8a44e6c3fc511cb66289 pushed
+- last root gate: round 149 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -293,8 +293,6 @@
 - G139-3-FAKE-BEARER-403 / info / open backend evidence: BLOCKED (backend unavailable in cloud); re-check in a backend-enabled run / fake-Bearer 403 sub-check of the purchase-protection row
 - C-R139-NOTES-HARNESS / info / applied as harness notes in round 140 task section 5 / track fold keeps clips visible at 27 px (not hidden); group fold renders 0 clips; video Original sound line needs a row >= 80 px; a plain cl
 - GATE140-S4-PLURAL-BRANCH / info / acknowledged: tested (HM4 + C browser '1 clip'); 0 clips reads '0 clips' (correct); no action / one-clip vs many-clips choice in ArrangementGroupHeader is a new caller branch
-- GATE141-S2-SSR-CONSOLE-SPY / - / scheduled round 148 (D-29z113; default-track-names-ssr DS1/DS2 assert not called; B probe 0 calls at 34ce551; mutation m112) / 
-- GATE141-S3-ST40-META-PIN / - / scheduled round 148 (D-29z113; ST40 -> [] + exact English title line; mutation m111) / 
 - GATE141-S4-LIBRARY-MIXED / - / library kind/folder labels done in round 142 (C LIBRARY-LABELS PASS, browserVerified); dock fallback, library own copy and collection toggle suffix remain V-0.5; library own copy + collection toggle done round 147 (34ce551); dock fallback 'ვიდეო' scheduled round 148 (captionFallback) / 
 - ARCH-R141-DEFAULT-NAME-SEEDS / - / signal - appended to b-round-136-checkpoint-request.md (round-141 addendum); reviewer: keep / 
 - ARCH-R141-SSR-TEST-HELPER / - / signal (extract when a third SSR test appears) / 
@@ -314,13 +312,18 @@
 - GATE146-S2-PREVIEW-ROW-HEIGHT / info / signal (B decision recorded D-29z112: keep; the fixed-slot alternative would change ready/error layout; revisit only with a measured drag/focus defect) / starting/stopping a library preview grows/shrinks the option by 16 px, shifting rows below the pointer
 - C-R146-OBS-SELECT-MOVES-PREVIEW / info / signal (pre-existing behaviour; Live 12 §4.9 preview-on-select unverified here; not a requirement) / selecting another option while a preview plays moves the preview and its marker to that option without pressing play
 - A-R146-REVIEW-PC2-SUBSTRING / info / acknowledged (task 146 §3.3 accepted substring; each literal is the whole message) / PC2 toThrow(string) is a substring match; stricter form toThrow(new Error(...))
-- GATE147-S1-DOC120-STATUS / low / scheduled round 148 (doc 120 granted, cheap; D-29z113) / doc 120 status l.4 and l.98 still say C round 147 has not run
-- GATE147-S4-VACUOUS-GEORGIAN-NEGATIVES / low / scheduled round 148 (purchased-collection-ui l.297-298 -> English negatives; V-0 closing sweep owns Georgian-negative pins; D-29z113) / purchased-collection-ui PW1 not.toContain('დემო') / ('ავტორიზაცია არ სჭირდება') can no longer fail after the English badge
 - GATE147-S2-ALL-BUTTON-NAME / low / deferred_low_polish / 
 - GATE147-S3-FOLD-DOUBLE-ANNOUNCE / low / deferred_low_polish / 
-- GATE147-S5-SIMILAR-OBJECT-NAMES / low / deferred_low_polish + architecture checkpoint question (e) / 
+- GATE147-S5-SIMILAR-OBJECT-NAMES / low / deferred_low_polish + checkpoint b-round-148-checkpoint-request.md Q1 / 
 - A-R147-REVIEW-L2-BADGE-CLASS-SELECTOR / low / deferred_low_polish / 
 - C-R147-NOTE-LIBBASE-NO-REST / info / applied in round 148 (B dockbase148 includes measureRest) / 
+- GATE148-S1-DOC121-STATUS / low / scheduled round 149 (doc 121 granted, 3 lines; D-29z114) / doc 121 status l.4/l.125/l.129 still say C round 148 has not run
+- GATE148-S2-VDS3-WALLCLOCK / low / deferred_low_polish / video-dock-strings-ui VDS3 depends on wall-clock time (Date.now FakeAudioContext, ~50 ms start hold, waitFor 1000 ms); may flake on a slow r
+- GATE148-S3-DOCK-ALIASES / low / deferred_low_polish + checkpoint b-round-148-checkpoint-request.md Q1 / VIDEO_PLAY_FAILED_MESSAGE / VIDEO_RETURN_LABEL in ArrangementVideoDock.tsx l.55/57 are aliases of studioVideoDockStrings keys
+- GATE148-S4-ST51-STATSYNC / low / deferred_low_polish / ST51 collectWorkspaceSourceFiles uses statSync (follows symlinks, no loop guard)
+- GATE148-S5-A11Y-INFO / info / noted (no action): region name Video equals caption fallback and default track name; no accessible-name clash; Return label-in-name meets WCAG 2.5.3 / 
+- C-R148-LAYOUT-DOCK-RULING / info / ruled by B (D-29z114): PASS stands - dock-caption-note dx -48/dw +48 (text-right parent, right edge fixed) and dock-placeholder-text dx +25/dw -50 (centred, centre fixed) are x shifts caused by the fixed alignment anchor of the granted width change, no app defect; the R5 literal (own w/glyph) is read as including anchor-preserving x / 
+- C-R148-TOOL-LIB122-GEORGIAN-SELECTORS / info / tooling note: c-round-125/tools/lib122.cjs clipInfoSel/closeDlg/exportWav still use Georgian text regexes; any later export/WAV re-check through that chain must switch to English or testid / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
