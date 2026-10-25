@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T19:39:38.764Z)
+# Active loop summary (2026-10-25T20:33:27.033Z)
 
-- backlog.json 1528 KB -> active view 209 KB
-- status: G_ROOT_GATE round 172
-- servers: `{"checkedUtc":"2026-10-25T19:16:46.2029361Z","round":172,"attempt":1,"store":200}`
-- last publication: 3810816ff0683b4246f4c4ca4f25067522fda35a (rounds 172-172)
-- last root gate: round 172 published - commit 3810816ff0683b4246f4c4ca4f25067522fda35a pushed
+- backlog.json 1538 KB -> active view 209 KB
+- status: G_ROOT_GATE round 173
+- servers: `{"checkedUtc":"2026-10-25T20:11:39.8488978Z","round":173,"attempt":1,"store":200}`
+- last publication: 02c08fd66e7ff03c81c09f6c767dc244fffbd305 (rounds 173-173)
+- last root gate: round 173 published - commit 02c08fd66e7ff03c81c09f6c767dc244fffbd305 pushed
 
 ## Current items: -
 
@@ -381,6 +381,8 @@
 - C-R168-BORDERLESS-REDUCED-MOTION / info (signal) / signal, not scheduled: borderless header buttons (lane fold/name/pan reset, group fold/name; also the library icon buttons and option rows kept radius-only by R7 in V-3c-4c-1) keep the global app.css interactive transition (150 ms ease-out color/background/border/box-shadow/transform/opacity) under prefers-reduced-motion; pre-existing, not changed by V-3c-4b; candidate for V-3c-5 or a motion audit together with ROOT-GLOBAL-TRANSITION-RULE; round 171 planning: the VideoDock float buttons (drag/expand/close) and the placeholder Return keep the same global 150 ms transition under radius-only R18  ... [clipped; see backlog.json] / 
 - Q-V3C5-MODAL-RADIUS / question / awaiting_user / Studio dialogs (Export) use the protected shared Modal.tsx: container rounded-xl 16 px, footer buttons rounded-lg 12 px. Should Studio dialo
 - GATE171-DOCK-TEST-HELPER-DUP / info (signal) / signal: test-side token helper duplicated (video-dock-strings-ui dockClassTokens/expectDockTokens vs export test classTokens/expectSurfaceTokens); fold into the extraction round if the checkpoint says extract / 
+- GATE172-TWMERGE-RADIUS-PANEL / info (signal) / signal: app/lib/utils.ts plain twMerge treats rounded-panel as unknown, so cn('rounded-panel','rounded-md') keeps both; no conflict today (only cn() site ArrangementVideoDock l.919-924); fix when needed with extendTailwindMerge({extend:{theme:{radius:['panel']}}}); round 173 task rule R29 / 
+- B-R172-OV-FRAME-OVERFLOW / info / observation: when the view scrolls past the extent (e.g. clicking the Overview's right end at max zoom) the view frame runs 7-12 px past the root's right edge and is clipped by overflow-hidden, so its right border is hidden; pre-existing behaviour of overviewFrame (left clamped, width not); not scheduled / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
