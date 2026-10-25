@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-25T08:31:36.598Z)
+# Active loop summary (2026-10-25T09:19:15.812Z)
 
-- backlog.json 1410 KB -> active view 209 KB
-- status: G_ROOT_GATE round 159
-- servers: `{"checkedUtc":"2026-10-25T08:14:17.2615794Z","round":159,"attempt":1,"store":200}`
-- last publication: ad0df770e7fec74c6feb236a8ab59a738f12c79a (rounds 158-159)
-- last root gate: round 159 published - commit ad0df770e7fec74c6feb236a8ab59a738f12c79a pushed
+- backlog.json 1415 KB -> active view 191 KB
+- status: G_ROOT_GATE round 160
+- servers: `{"checkedUtc":"2026-10-25T09:03:56.8757835Z","round":160,"attempt":1,"store":200}`
+- last publication: aeba543e80cda33921023081dc4ba6ed476e05c9 (rounds 160-160)
+- last root gate: round 160 published - commit aeba543e80cda33921023081dc4ba6ed476e05c9 pushed
 
-## Current items: SRW-20
+## Current items: -
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -350,10 +350,11 @@
 - C-157-N6 / info / known_state / 1280 Export range card 13 px under the footer until scrolled = C-R124-OBS-EXPORT-RANGE-UNDER-FOOTER
 - C-157-N7 / info / harness / c157 rangeDisabled read contradicted its screenshot; p157b re-measured disabled=true
 - Q-V3-ICON-SIZE / info / awaiting_user / V-3b intrinsic-width transport icons: (a) 16px per spec with measured shifts +4.3/+5.3/-2.8/+5.3/+7.9 px (M-type) (b) B default glyph-slot s
-- C-R158-01 / low / open: scheduled round 159 (D-29z124 fix-up; the failing string is V-3a's own toolButtonClass, the fix is cheap and the same recipe is reused in V-3b/V-3c) / transport colour motion is not 180 ms / cubic-bezier and reduced motion keeps a 150 ms transition: the unlayered global rule app/styles/app.
 - ROOT-GLOBAL-TRANSITION-RULE / info / signal for root (not scheduled; Store-wide, outside the Studio-only VISUAL-A scope; needs a root-approved app/styles grant and a Store-page regression) / the unlayered global transition rule app/styles/app.css l.305-314 defeats every Tailwind transition utility on a/button/[role=button]/input/
 - ENV-FIRST-LOAD-LUCIDE / info / root_note (dev-server only) / first cold browser load after server start gave a hydration error + Invalid hook call while Vite optimized the newly imported lucide-react; 
 - A-R158-IDLE-TOOLBAR-NOTE / info / user-vetoable note under D-29z123 R3 (not a finding) / at S0 7/12 transport buttons are disabled; opacity 40% on a 5% fill reads as mostly unframed text
+- INFO-C159-DOC128-STALE / info / scheduled round 160 (D4: doc 128 l.3 status, l.50 R3 claim, l.74 after-row) / doc 128 l.50 still claims motion-safe alone means no transition under reduced motion, l.74 after-row lists the non-important tokens
+- A11Y-R160-ZOOMBACK-NAME / info / signal (not a finding; for the polish pass) / after V-3b, Zoom back's accessible name is 'Zoom' (was '↩ Zoom') next to the slider 'Zoom (px/s)'; title still explains it; an aria-label ne
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
@@ -366,5 +367,6 @@
 - SRW-17 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 74eca15, stage 2 68383fa, stage 3 efbed86; Tech Lead R79-T/R81-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
+- SRW-20 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: 1 51e024a, 2 971141d, 3a eb1d0c0, 3b-1 35c8403, 3b-2 77cd5b6 (C round 91, gate 91); R20-X1..X4 pass; Tech Lead R86-T..R91-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; PROD-MP3-UNVERIFIED gate row open)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
 - SRW-21 [deferred_user] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

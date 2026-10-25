@@ -1,0 +1,69 @@
+{
+  "round": 160,
+  "role": "C",
+  "task": "V-3b: the 7 remaining transport glyphs become lucide icons (D-29z125)",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-25T09:03:56.8757835Z",
+    "round": 160,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "T160-TARGETED",
+    "SOURCE-SCOPE",
+    "AN-REVIEW",
+    "ICON-V3B",
+    "RV1-V3B",
+    "SURFACE-SPOT",
+    "FUNC-SMOKE-7",
+    "BRACE-HINT",
+    "PX-NET",
+    "REG-HYD",
+    "G160-3-anon-demo",
+    "G160-3-protected-sign-in",
+    "G160-3-token-401"
+  ],
+  "failed": [],
+  "blocked": [
+    "G160-3-fake-bearer-403: backend unavailable in cloud"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "notRun": [
+    "SURFACE-STYLE full table, CASCADE-SCOPE, CONTRAST-V3A, V-2 rows (not re-run by the task: code unchanged since C round 159)"
+  ],
+  "invalidRuns": [
+    "d6-1440-r0 and d6-1280-r0 (run at the same time, first load after the lucide import change): ENV-FIRST-LOAD, hydration error plus 'Invalid hook call' on a cold Vite. Replaced once each; all later sessions were clean. Files: c-round-160/out/d6-{1440,1280}-r0-INVALID-envfirstload.{json,log}"
+  ],
+  "evidence": {
+    "report": "c-round-160.md",
+    "vitest": "c-round-160/out/vitest.json",
+    "d6": "c-round-160/out/d6/d6-{1440,1280}-r1.json",
+    "rv1Compare": "c-round-160/out/rv1-v3b.json",
+    "browser": "c-round-160/out/c160-{1440,1280}.json",
+    "rangeDelete": "c-round-160/out/rdel-1440.json",
+    "auth": "c-round-160/out/g160-3.json",
+    "shots": "c-round-160/shots/",
+    "endHashes": "c-round-160/out/c-end-sha256.txt"
+  },
+  "notes": [
+    "RV1-V3B: d6 (0.5 px rounding) shows Delete w -1.0 at both viewports. Raw boxes (round-159 c159 S0 at 0.1 px vs round-160 c160 S0 at 0.01 px, idle, fonts ready) give Delete dx +0.5, dw -0.8; every other transport delta is at most 0.3 px; heights and y are unchanged. So the real maximum is 0.8 px, within +-1 px.",
+    "A11Y-R160-ZOOMBACK-NAME confirmed in the browser: Zoom back's accessible name is 'Zoom' (the slider is 'Zoom (px/s)'). Recorded signal per R11, not a finding.",
+    "The describe title at transport-surface-ui.test.tsx:207 still says V-3a (A's reviewer Low; outside N3's scope). It is test text only, so C does not open a finding.",
+    "m160 equivalent mutant per A report and its reviewer (lucide 0.561 defaults aria-hidden=true); C did not re-run mutations. B should use m160b in future lists.",
+    "TS6 body read by C: it asserts the 7 lucide classes, size-5/size-2.5/size-3, stroke-width, gap-0.75/gap-0.5 with no gap-1, gap-1 + w-28 on Undo/Redo, and the 7-glyph loop (l.377-453), as B specified."
+  ],
+  "ableton": "not applicable (CZABA brand decision, visual-direction-a.md); behaviour, shortcuts and labels unchanged"
+}
