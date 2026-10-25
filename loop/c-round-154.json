@@ -1,0 +1,139 @@
+{
+ "taskStatus": "FAIL",
+ "round": 154,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T04:16:10.9461173Z",
+  "round": 154,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R154-01",
+   "severity": "low",
+   "row": "MONO-STYLE (N6); WEIGHT-INVENTORY (R4)",
+   "steps": [
+    "Open /studio-lab at 1440x900 or 1280x720, snap off",
+    "Add CZABA hero to Music at 0 s and Soft impact to SFX at 4 s",
+    "Mouse-down on the Soft impact clip header, move up into the Music lane and hold",
+    "Inspect [data-testid=arrangement-lane-move-ghost-label] > span:first-child"
+   ],
+   "expected": "IBM Plex Mono weight 400, tabular-nums (spec mono row 300/400; task MONO-STYLE requires 400 on N6)",
+   "actual": "computed font-weight 500; CDP getPlatformFontsForNode = 'IBM Plex Mono Medium [web] 9'; document.fonts then has IBM Plex Mono 500 loaded. Cause: ghost container (ArrangementLane.tsx l.912) has text-xs font-medium, inherited by the new font-mono span. Also the only Plex Mono 500 consumer, so the R4 css2 trim of Plex Mono 500 has no zero-consumer evidence.",
+   "evidence": "c-round-154/out/c154-1440.json and c154-1280.json laneGhost.ghost.N6_ghostStart; c154-1440.json invMenus.facesLoaded; c-round-154/shots/c154-lane-ghost-{1440,1280}.png"
+  },
+  {
+   "id": "C-R154-02",
+   "severity": "low",
+   "row": "WEIGHT-STYLE (note, pre-existing)",
+   "steps": [
+    "Open /studio-lab, add clips to Music and Stems, select both lane names, Ctrl+G",
+    "Inspect [data-testid=arrangement-group-name] > span[aria-hidden=true] (the ▣ glyph) with CDP getPlatformFontsForNode"
+   ],
+   "expected": "Task text: Instrument Sans [web]",
+   "actual": "Computed weight 500 (OK) but platform font 'DejaVu Sans [local] 1': U+25A3 is not in Instrument Sans. Pre-existing glyph coverage, not caused by W4; same class as C-R151-3. Proposed for deferred_low_polish.",
+   "evidence": "c-round-154/out/c154-{1440,1280}.json group.m.groupGlyph"
+  }
+ ],
+ "passed": [
+  "T154-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "WEIGHT-STYLE (▣ platform font excluded: pre-existing glyph coverage, C-R154-02)",
+  "MASTER-OVER",
+  "RV-1-V2B2",
+  "NO-CLIP/OVERLAP",
+  "LANE-GHOST (own criteria; its mono weight is counted under MONO-STYLE / C-R154-01)",
+  "WEIGHT-INVENTORY",
+  "FONTS-SCOPED",
+  "FUNC-SMOKE",
+  "G154-3 (except fake-Bearer 403)",
+  "PX-NET/REG-HYD"
+ ],
+ "failed": [
+  "MONO-STYLE (N6 only: lane-move ghost start time renders IBM Plex Mono 500, C-R154-01; N1-N5 and the sans list pass)"
+ ],
+ "blocked": [
+  "G154-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notRun": [
+  "LABEL-STYLE (task: not re-run)",
+  "FONT-FAIL (task: not re-run)",
+  "RV-2 contrast as a row (ran inside d6 anyway: 32 failures, same as round 153)",
+  "cookie banner inventory (banner not shown in a fresh context)"
+ ],
+ "invalidRuns": [
+  "d6 1440 run 1: ENV-FIRST-LOAD cold-Vite Invalid hook call + hydration error; replaced once (out/d6-1440-r1-INVALID-envfirstload.log)"
+ ],
+ "rv1Movers": {
+  "arrangement-detail-clip-gain-reset": {
+   "dx": 0,
+   "dw": 3,
+   "where": "1280 S1/S2, 1440 S0/S1/S2",
+   "bPrediction": "dw ~ +3, no follower",
+   "match": true
+  },
+  "h1 (not a d6 key, WEIGHT-STYLE)": {
+   "dw": -2,
+   "workspaceSpanDx": -2
+  }
+ },
+ "weightInventory": {
+  "studioContainerWeight600plus": 0,
+  "wholePage600plus": [
+   {
+    "text": "Export",
+    "el": "h2#arrangement-export-title",
+    "family": "Instrument Sans",
+    "weight": 600,
+    "note": "protected Modal.tsx, expected"
+   }
+  ],
+  "renders": {
+   "InstrumentSans600": "Export ModalTitle only",
+   "InstrumentSans700": "none",
+   "PlexMono500": "lane-move ghost start time (C-R154-01)"
+  },
+  "facesLoadedS0": [
+   "IBM Plex Mono 400",
+   "Instrument Sans 400",
+   "Instrument Sans 500",
+   "Noto Sans Georgian 400",
+   "Noto Sans Georgian 500"
+  ],
+  "facesLoadedAfterS1AndExport": [
+   "IBM Plex Mono 400",
+   "IBM Plex Mono 500",
+   "Instrument Sans 400",
+   "Instrument Sans 500",
+   "Instrument Sans 600",
+   "Noto Sans Georgian 400",
+   "Noto Sans Georgian 500"
+  ]
+ },
+ "notes": [
+  "Ghost title hidden 1 px vs 9 px before (info)",
+  "Ruler min gap 12.8 px at 2.7 px/s vs B prediction >=14; 0 overlaps",
+  "N5 '0 dB' has no tabular-nums (as specified)",
+  "Peak −∞ ∞ glyph DejaVu fallback = C-R151-3 (deferred)",
+  "TH10 N6 check (studio-theme-obsidian.test.tsx l.420-424) counts only the span's own class string, not the inherited container font-medium",
+  "Library h2 text box 47 -> 46 px (dw -1) at both viewports, within +-1"
+ ],
+ "ableton": {
+  "requirement": "not fully met (N6)",
+  "parity": "not applicable (CZABA brand decision)"
+ },
+ "report": "c-round-154.md"
+}

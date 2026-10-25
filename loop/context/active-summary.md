@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T03:35:56.483Z)
+# Active loop summary (2026-10-25T04:35:43.157Z)
 
-- backlog.json 1378 KB -> active view 181 KB
-- status: G_ROOT_GATE round 153
-- servers: `{"checkedUtc":"2026-10-25T03:16:11.7299832Z","round":153,"attempt":1,"store":200}`
+- backlog.json 1384 KB -> active view 183 KB
+- status: G_ROOT_GATE round 154
+- servers: `{"checkedUtc":"2026-10-25T04:16:10.9461173Z","round":154,"attempt":1,"store":200}`
 - last publication: 037e25fdd86b76ef791d15c52cff71313b8b2a58 (rounds 153-153)
-- last root gate: round 153 published - commit 037e25fdd86b76ef791d15c52cff71313b8b2a58 pushed
+- last root gate: round 154 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -331,11 +331,15 @@
 - C-R151-2 / low / deferred_low_polish + awaiting_user (D-29z117 R2): no approved V-2 fix - spec approves font/weight/letter-spacing only; word-spacing 0.12em measured (B: ' · ' 8.8 px, hint 1162 px, 17 horizontal moves, 0 vertical, S0) but not approved and does not widen the 1 px dot; glyph swap changes text content (94 source lines, 44 in strings.ts, no shared constant). Must be fixed or accepted by the user before final acceptance / ' · ' separators cramped in Instrument Sans: space 2 px, dot 1 px, ' · ' 5 px at 12 px vs Inter 3/3/9 px (headless Linux integer advances)
 - C-R151-3 / low / deferred_low_polish (D-29z117 R3): U+221E is in no IBM Plex Mono subset served by Google css2 (B checked unicode-ranges); self-hosting forbidden by spec; C: visually acceptable; revisit in V-3 or the polish pass / '−∞' readout mixes Plex Mono '−' with fallback DejaVu Sans Mono '∞'
 - A-R151-ARCH-NOTE / info / signal (keep; not scheduled) / keep - obsidian block holding font declarations is still theming; route links export is the Remix place; studio-theme.css extraction stays r
-- C-R151-SIG-SANS-TIMECODES / info / scheduled V-2b-2 (D-29z118 R4) / remaining sans tabular-nums: library durations/playhead timecodes, zoom readout, ruler labels, library counts; library timecodes look most o
+- C-R151-SIG-SANS-TIMECODES / info / round 154 V-2b-2 (D-29z119 R2): timecodes N1-N6 mono; zoom readout + counts stay sans by spec list; preview duration -> B-R153-PREVIEW-DUR (awaiting_user); from/to inside sentences -> V-2b-3 / remaining sans tabular-nums: library durations/playhead timecodes, zoom readout, ruler labels, library counts; library timecodes look most o
 - B-R152-V2B-DISPLAY / info / awaiting_user (D-29z118 R2) / Display serif role has no qualifying Studio text: panel titles, track names, library entry names, selected clip name are 12-14 px in S0/S1/S
-- C-R152-DOC123-L67 / info / scheduled round 153 (D1: reword the stale clause) / doc 123 l.67 still says C round 151 has not run
 - C-R152-EXPORT-FULLSCALE / info / signal for T12-ADVANCED (meters/headroom); pre-existing 0 dB summing class (c-round-125 159 samples); not a V-2 defect / project WAV export has 3676 full-scale samples where hero music and Soft impact overlap at 0 dB
-- B-R152-LABEL-WIDEN-26PX / info / user-visible decision, may be vetoed (D-29z118 R3) / approved label typography (uppercase + 0.14em) widens labels: same-row neighbours move horizontally up to 26 px (Arrangement -> Overview not
+- B-R152-LABEL-WIDEN-26PX / info / user-visible decision, may be vetoed (D-29z118 R3); C round 153 measured max 26 px horizontal, 0 vertical, 0 clip (c-round-153.json labelStyle/rv1Movers) / approved label typography (uppercase + 0.14em) widens labels: same-row neighbours move horizontally up to 26 px (Arrangement -> Overview not
+- B-R153-PREVIEW-DUR / info / awaiting_user (D-29z119 R2) / library preview duration is a timecode, but mono widens it 55 -> 63 px and newly ellipsizes the default preview title (slack 0 -> -6 px; -1 
+- B-R153-SANS-LIST / info / user-visible decision, may be vetoed (D-29z119 R2) / numeral mono only for the spec list (timecode, BPM, dB, from/to): zoom readout, library counts, 4/4, pan, grid/waveform selects stay Instrum
+- B-R153-CSS2-TRIM / info / evidence pending: C round 154 WEIGHT-INVENTORY / after V-2b-2, Instrument Sans 600/700 and Plex Mono 500 may be unused on /studio-lab; trim css2 URL + TH7 only with C evidence of zero consu
+- C-R153-D6-TEMPO-ROW-TESTID / info / tool note (C d6 PANELS key arrangement-tempo-row matches nothing; tempo header measured directly) / d6 does not cover the tempo row panel; not an app defect
+- C-R153-SR-UPPERCASE / info / open_tech_lead_manual (real screen reader not available in cloud) / whether a screen reader spells CSS-uppercase labels letter by letter is untested; AX names unchanged
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

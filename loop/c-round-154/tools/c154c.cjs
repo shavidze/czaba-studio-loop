@@ -1,0 +1,18 @@
+// C round 154 — range readout sans + grid menu inventory at default zoom. node c154c.cjs <1440|1280>
+const X = require('./lib122.cjs'); const H = require('./h3.cjs'); const { L, sleep } = X;
+const fs = require('fs'); const path = require('path');
+const W = +process.argv[2] || 1440; const net = []; const res = { vp: W, errors: [] };
+const OUTF = path.join(L.OUT, `c154c-${W}.json`); const save = () => fs.writeFileSync(OUTF, JSON.stringify(res, null, 1));
+const sec = async (n, fn) => { try { res[n] = await fn(); } catch (e) { res.errors.push(`${n}: ${String(e.stack || e).slice(0, 700)}`); } save(); };
+const style = (p, sel) => p.evaluate((s) => [...document.querySelectorAll(s)].map((e) => { const cs = getComputedStyle(e); return { tag: e.tagName, text: e.textContent.slice(0, 90), weight: cs.fontWeight, family: cs.fontFamily.slice(0, 30), sw: e.scrollWidth, cw: e.clientWidth }; }), sel);
+function inventory() { const vw = innerWidth, vh = innerHeight; const out = []; const sc = document.querySelector('.studio-container'); for (const e of document.body.querySelectorAll('*')) { const own = [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()); if (!own && !/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(e.tagName)) continue; const b = e.getBoundingClientRect(); const cs = getComputedStyle(e); if (!(e.getClientRects().length && b.width > 0 && b.height > 0 && cs.visibility !== 'hidden' && b.right > 0 && b.bottom > 0 && b.left < vw && b.top < vh)) continue; const w = +cs.fontWeight; if (w < 600) continue; out.push({ text: (e.textContent || '').trim().slice(0, 50), tag: e.tagName.toLowerCase(), family: cs.fontFamily.slice(0, 40), weight: w, inStudio: !!(sc && sc.contains(e)) }); } return out; }
+(async () => {
+  const b = await L.launch();
+  try {
+    const { page: p } = await L.openStudio(b, X.VPS[W], `c154c-${W}`, net); await p.mouse.move(2, 2);
+    await sec('setup', async () => { await L.setSnapOff(p); return (await L.addAt(p, 'demo-soft-impact', 'sfx', 4)).status; });
+    await sec('range', async () => { const sfx = await H.byLane(p, 'sfx'); const st = await X.rangeDrag(p, sfx.id, 4.4, 5.4); await L.blur(p); await p.mouse.move(2, 2); await sleep(300); const r = await style(p, '[data-testid=arrangement-range], [data-testid=arrangement-range] *'); const bb = await p.locator('[data-testid=arrangement-range]').boundingBox(); if (bb) await p.screenshot({ path: path.join(L.SHOTS, `c154c-range-${W}.png`), clip: { x: bb.x, y: bb.y - 6, width: Math.min(700, bb.width), height: bb.height + 12 } }); return { st, r }; });
+    await sec('gridMenu', async () => { await p.keyboard.press('Escape'); await sleep(200); const pt = await H.laneBgPoint(p, 'sfx', 10); const top = await p.evaluate(({ x, y }) => { const e = document.elementFromPoint(x, y); return e ? `${e.tagName}.${String(e.className).slice(0, 60)} ${e.getAttribute('data-testid') || ''}` : null; }, pt); await p.mouse.click(pt.x, pt.y, { button: 'right' }); await sleep(600); const open = await p.locator('[data-testid=arrangement-grid-menu]').count(); const inv = await p.evaluate(inventory); await p.screenshot({ path: path.join(L.SHOTS, `c154c-grid-menu-${W}.png`) }); const items = open ? await p.locator('[data-testid=arrangement-grid-menu]').innerText() : null; await p.keyboard.press('Escape'); await sleep(300); return { pt, top, open, items, inv }; });
+  } catch (e) { res.errors.push(String(e.stack || e)); }
+  res.net = X.netOk(net); res.font = net.map((n) => ({ n: n.fontResp.length, non200: n.fontResp.filter((r) => r.s !== 200).length, fail: n.fontFail.length })); save(); console.log(JSON.stringify(res, null, 1).slice(0, 3000)); await b.close();
+})();
