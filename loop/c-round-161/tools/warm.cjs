@@ -1,0 +1,1 @@
+const L=require('./lib.cjs');(async()=>{const b=await L.launch();const net=[];const {page:p}=await L.openStudio(b,{width:1440,height:900},'warm',net);console.log(JSON.stringify(net[0].errors.slice(0,3)),net[0].hydration.length);await b.close();})();

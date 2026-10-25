@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T09:19:15.812Z)
+# Active loop summary (2026-10-25T10:09:09.062Z)
 
-- backlog.json 1415 KB -> active view 191 KB
-- status: G_ROOT_GATE round 160
-- servers: `{"checkedUtc":"2026-10-25T09:03:56.8757835Z","round":160,"attempt":1,"store":200}`
-- last publication: aeba543e80cda33921023081dc4ba6ed476e05c9 (rounds 160-160)
-- last root gate: round 160 published - commit aeba543e80cda33921023081dc4ba6ed476e05c9 pushed
+- backlog.json 1422 KB -> active view 193 KB
+- status: G_ROOT_GATE round 161
+- servers: `{"checkedUtc":"2026-10-25T09:49:13.8002046Z","round":161,"attempt":1,"store":200}`
+- last publication: f08c7ced97a8b160e2f9e34f931a938dd3a4a688 (rounds 161-161)
+- last root gate: round 161 published - commit f08c7ced97a8b160e2f9e34f931a938dd3a4a688 pushed
 
 ## Current items: -
 
@@ -353,8 +353,13 @@
 - ROOT-GLOBAL-TRANSITION-RULE / info / signal for root (not scheduled; Store-wide, outside the Studio-only VISUAL-A scope; needs a root-approved app/styles grant and a Store-page regression) / the unlayered global transition rule app/styles/app.css l.305-314 defeats every Tailwind transition utility on a/button/[role=button]/input/
 - ENV-FIRST-LOAD-LUCIDE / info / root_note (dev-server only) / first cold browser load after server start gave a hydration error + Invalid hook call while Vite optimized the newly imported lucide-react; 
 - A-R158-IDLE-TOOLBAR-NOTE / info / user-vetoable note under D-29z123 R3 (not a finding) / at S0 7/12 transport buttons are disabled; opacity 40% on a 5% fill reads as mostly unframed text
-- INFO-C159-DOC128-STALE / info / scheduled round 160 (D4: doc 128 l.3 status, l.50 R3 claim, l.74 after-row) / doc 128 l.50 still claims motion-safe alone means no transition under reduced motion, l.74 after-row lists the non-important tokens
-- A11Y-R160-ZOOMBACK-NAME / info / signal (not a finding; for the polish pass) / after V-3b, Zoom back's accessible name is 'Zoom' (was '↩ Zoom') next to the slider 'Zoom (px/s)'; title still explains it; an aria-label ne
+- A11Y-R160-ZOOMBACK-NAME / info / signal (not a finding; for the polish pass) - browser-confirmed by C round 160 (CDP name Zoom next to slider Zoom (px/s)) / after V-3b, Zoom back's accessible name is 'Zoom' (was '↩ Zoom') next to the slider 'Zoom (px/s)'; title still explains it; an aria-label ne
+- A-R160-REVIEW-DESCRIBE-TITLE / low / deferred_low_polish (test text only; transport-surface-ui.test.tsx frozen in round 161) / transport-surface-ui.test.tsx:207 describe title still says 'V-3a transport surfaces and icons (D-29z123)' after V-3b
+- G160-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / fake-Bearer 403 sub-check of the purchase-protection row
+- INFO-R160-M160-EQUIVALENT / info / acknowledged: lucide-react 0.561 renders aria-hidden=true by default (Icon.js l.32-33); remove-aria-hidden mutants are equivalent; use aria-hidden=false (m160b) in future lists / m160 equivalent mutant
+- A11Y-R161-PREVIEW-NAMES / info / signal (not a finding; for the polish pass; D-29z126 R5) / after V-3c-1 the preview toggle is named Preview/Stop inside the region Preview and the Add button is named Add
+- TITLE-GLYPHS-FROZEN-TESTS / info / open - polish pass (doc 130 TODO) / it/describe titles in floating-video, library-focus-handoff, library-video-return-focus mention ◀ ▶ × although the library renders icons aft
+- ARCH-CHECKPOINT-V3C / info / requested_from_root (b-round-160-checkpoint-request.md, 2026-10-25; consolidates pending 148/155/157/158 + ARCH-R158-TOOL-BUTTON-RECIPE + ARCH-R159-GLOBAL-TRANSITION-COUPLING + ARCH-R160-TRANSPORT-ICON-TRIPLE); non-blocking for V-3c-1..3; input for V-3c-4 (fallback (c) if unanswered) / bounded frontend-architect checkpoint before V-3c surfaces
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
