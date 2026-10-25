@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T02:09:09.198Z)
+# Active loop summary (2026-10-25T02:43:22.154Z)
 
-- backlog.json 1368 KB -> active view 178 KB
-- status: G_ROOT_GATE round 151
-- servers: `{"checkedUtc":"2026-10-25T01:41:34.7294789Z","round":151,"attempt":1,"store":200}`
-- last publication: e94ae889c9f331bd681036cc154bb92d38020dc6 (rounds 149-150)
-- last root gate: round 151 skipped - C taskStatus FAIL
+- backlog.json 1374 KB -> active view 182 KB
+- status: G_ROOT_GATE round 152
+- servers: `{"checkedUtc":"2026-10-25T02:25:48.1330925Z","round":152,"attempt":1,"store":200}`
+- last publication: ff2fd6ce73eeee41f92b13d743aa97520d27e502 (rounds 151-152)
+- last root gate: round 152 published - commit ff2fd6ce73eeee41f92b13d743aa97520d27e502 pushed
 
 ## Current items: -
 
@@ -328,6 +328,14 @@
 - C-R149-OBS-SPACE-EMPTY / info / observation (not compared with earlier rounds; unrelated to colour): on an empty project S0, Space does not advance the playhead; check in the next regression round / 
 - A-R150-REVIEW-L1 / info / scheduled round 151 (D-29z116 T1: detail-panel-fit.test.tsx l.293 -> not.toContain('border-outline-strong')) / detail-panel-fit F4 l.293 not.toContain('border-outline') guards nothing after V-1b; B round-150 R5 statement was wrong
 - C-R150-BPM-EDGE-MARGIN / info / noted; re-measure if the BPM field geometry or font changes (V-2a changes its font, not its border) / BPM field left/right border pixels anti-aliased: 3.05/3.06 vs parent (>= 3.0 with small margin); top/bottom 3.50
+- C-R151-1 / low / ruled (B, D-29z117 R1): d6 tag error, not a layout move - arrangement-shortcut-hint is a content-sized <p> (width = own text), counted as text for V-2; C re-evaluates RV-1-TYPE without it in PANELS in round 152; closes on C round 152 RV-1-TYPE PASS; user may veto in feature-status.md / RV-1-TYPE: d6 kind:panel arrangement-shortcut-hint w 1189 -> 1070 (dw -119; x/y/h unchanged; determinism 0 px; = B prediction)
+- C-R151-2 / low / deferred_low_polish + awaiting_user (D-29z117 R2): no approved V-2 fix - spec approves font/weight/letter-spacing only; word-spacing 0.12em measured (B: ' · ' 8.8 px, hint 1162 px, 17 horizontal moves, 0 vertical, S0) but not approved and does not widen the 1 px dot; glyph swap changes text content (94 source lines, 44 in strings.ts, no shared constant). Must be fixed or accepted by the user before final acceptance / ' · ' separators cramped in Instrument Sans: space 2 px, dot 1 px, ' · ' 5 px at 12 px vs Inter 3/3/9 px (headless Linux integer advances)
+- C-R151-3 / low / deferred_low_polish (D-29z117 R3): U+221E is in no IBM Plex Mono subset served by Google css2 (B checked unicode-ranges); self-hosting forbidden by spec; C: visually acceptable; revisit in V-3 or the polish pass / '−∞' readout mixes Plex Mono '−' with fallback DejaVu Sans Mono '∞'
+- A-R151-REVIEW-L1 / info / ruled (D-29z117 R4): FONTS-SCOPED reworded - css2 rel=prefetch after header link hover/focus is allowed and recorded, 0 woff2 still required; checked by C round 152 / Header.tsx prefetch=intent on the Studio Lab link can prefetch the F2 css2 sheet on Store pages
+- A-R151-REVIEW-L4 / info / scheduled round 152 (T2: TH8 exact pan-reset count, expected 3) / TH8 checks the pan-reset count only as > 0
+- A-R151-ARCH-NOTE / info / signal (keep; not scheduled) / keep - obsidian block holding font declarations is still theming; route links export is the Remix place; studio-theme.css extraction stays r
+- B-R151-V2B-SIZE16 / info / V-2b planning input / S0 Studio text >= 16 px is only the mono transport position and the ◀ icon (1440 and 1280); display-serif role may have no qualifying text w
+- C-R151-SIG-SANS-TIMECODES / info / V-2b input (R5 of D-29z116) / remaining sans tabular-nums: library durations/playhead timecodes, zoom readout, ruler labels, library counts; library timecodes look most o
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

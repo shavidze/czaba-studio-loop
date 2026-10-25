@@ -1,0 +1,106 @@
+{
+ "round": 152,
+ "verifier": "C",
+ "date": "2026-10-25",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T02:25:48.1330925Z",
+  "round": 152,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "T152-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "RV-1-TYPE",
+  "FONTS-SCOPED",
+  "FONTS-SPOT",
+  "FUNC-SMOKE",
+  "G152-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G152-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notRerun": [
+  "NO-CLIP",
+  "FONT-FAIL",
+  "RV-2",
+  "TOKENS-SCOPED",
+  "VISUAL (unchanged source; round-151 evidence stands; d6 contrast pass re-ran incidentally: text-dim min 4.57, 32 fails = round 150/151 count)"
+ ],
+ "invalidRuns": [
+  {
+   "session": "d6 1440 run 1 (first load)",
+   "reason": "ENV-FIRST-LOAD cold-Vite Invalid hook call + hydration error",
+   "replacedBy": "d6 1440 run 1 re-run, clean",
+   "evidence": "c-round-152/out/d6-1440-r1-INVALID-envfirstload.log"
+  },
+  {
+   "session": "FONTS-SCOPED first run (rv3b.json, /@1440)",
+   "reason": "'Execution context was destroyed' (navigation mid-evaluate, the same pattern as the round-150/151 '/' re-read). The same run's hover-then-focus design also hid focus (the prefetch was already inserted by hover).",
+   "replacedBy": "rv3b-hover.json (all attempt 1, clean) + rv3b-focus.json (focus only, fresh context)",
+   "evidence": "c-round-152/out/rv3b-INVALID-first-run.json"
+  }
+ ],
+ "d6PanelsEdited": [
+  "arrangement-library",
+  "arrangement-library-preview",
+  "arrangement-overview",
+  "arrangement-video-dock",
+  "arrangement-ruler",
+  "arrangement-marker-row",
+  "arrangement-loop-strip",
+  "arrangement-timeline-scroller",
+  "arrangement-detail-panel",
+  "arrangement-status",
+  "arrangement-selected-clip",
+  "arrangement-selected-clip-reserve",
+  "arrangement-track-header",
+  "arrangement-tempo-row",
+  "arrangement-grid-control",
+  "arrangement-range",
+  "+ header,footer,aside,main"
+ ],
+ "d6PanelsEditNote": "only change vs c-round-151/tools/d6.cjs: 'arrangement-shortcut-hint' removed (D-29z117 R1). Its v0 key tid:arrangement-shortcut-hint#1 is dropped from the baseline in rv1type152.py as the direct consequence. Hint box measured separately: 1070.1 x 16 at x 12 (both vps).",
+ "rv1Type": {
+  "vs148v0": "0 y/h > 1px; 0 missing/added; 0 panel moves; 0 new past 1280; 19-21 horizontal movers per state, all own-text or same-row follower; max |dx| 9 (Master Mute/Volume/peak follow arrangement-exit dw -4.5), max |dw| 5 (video lane button +5)",
+  "determinism": "0 px in all 6 state/vp pairs",
+  "vs151": "0 px max difference, 0 keys only in either (all 6 pairs)"
+ },
+ "fontsScopedPrefetch": {
+  "untouchedLoad": "0 F2 css2, 0 family woff2 on / and /cart at both vps",
+  "hover": "1 F2 css2 (resourceType other, link rel=prefetch, 200), 0 woff2 - all 4 page/vp",
+  "focusOnly(fresh context)": "1 F2 css2 prefetch, 0 woff2 - all 4",
+  "bodyFontFamily": "Inter, -apple-system, BlinkMacSystemFont ...",
+  "studioThemeAttr": 0
+ },
+ "notes": [
+  "C-R151-2 / C-R151-3 not C rows this round (B R2/R3 deferred_low_polish); no new observation.",
+  "Project WAV export at both vps: 24-bit 48 kHz stereo, 150.3724 s = project end 02:30.372, 0 NaN, first audible 0.261 s, same sha16 baf913109088dddd at both vps; 3676 full-scale samples where hero music + Soft impact sum at 0 dB (same class of pre-existing behaviour, 0 dB summing of overlapping clips; c-round-125 recorded 159 full-scale samples for hero + pulse in a 4 s range; relevant to T12 meters, not this round's change).",
+  "M opens a marker-name field; Enter commits (round-72 design), not a bug."
+ ],
+ "evidence": "c-round-152.md, c-round-152/out, c-round-152/shots, c-round-152/tools",
+ "rv1TypeScriptChanges": [
+  "Drops tid:arrangement-shortcut-hint#1 from the v0 and r151 baselines (consequence of the permitted PANELS edit).",
+  "Follower heuristic relaxed vs c-round-151/tools/rv1type.py: the lead only needs to share the row (round 151 also required the lead to be left of the follower). Cause diff vs c-round-151/out/rv1type-compare.json: wording/lead-list changes only, except tid:arrangement-follow#1 at 1280 S0/S1/S2, which was 'UNEXPLAINED' under the strict rule in round 151 (C explained it manually as a right-anchored ml-auto follower). Re-verified here from the bbox: the Export button's right edge is unchanged (1268 at 1280, 1428 at 1440) while zoom-back dw -3 and fit move inside the row, so Follow (+3) follows the right-anchored group. Same movers, same deltas as round 151 (vs151 0 px).",
+  "Panel-move test is stricter: a row counts as a panel move if either the v0 or the new kind is panel."
+ ],
+ "fontsValidity": "Font responses recorded (9, all 200, 0 failures) in the measurement sessions d6 x4 and fontspot x2. c152s/fs2 (FUNC-SMOKE) sessions did not record font responses; they are not font-dependent rows."
+}

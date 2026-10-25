@@ -1,0 +1,5 @@
+const X = require('./lib122.cjs'); const { L, sleep } = X; const fs = require('fs'); const path = require('path'); const net = [];
+(async () => { const b = await L.launch(); const { page: p } = await L.openStudio(b, X.VPS[1440], 'serif', net); await L.fontsWait(p);
+ const f = () => { const o = {}; for (const e of document.querySelectorAll('body *')) { if (!e.getClientRects().length) continue; const ff = getComputedStyle(e).fontFamily.split(',')[0]; const own = [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()); if (!own) continue; o[ff] = o[ff] || []; if (o[ff].length < 6) o[ff].push(e.tagName + ':' + e.textContent.trim().slice(0, 30) + (e.closest('.studio-container') ? '' : ' [OUTSIDE]')); } return o; };
+ const a = await p.evaluate(f); await X.openDlg(p); const c = await p.evaluate(f);
+ fs.writeFileSync(path.join(L.OUT, 'serifprobe.json'), JSON.stringify({ s0: a, export: c }, null, 1)); console.log(JSON.stringify({ s0: a, export: c }, null, 1)); await b.close(); })();
