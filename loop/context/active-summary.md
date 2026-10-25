@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T13:24:37.539Z)
+# Active loop summary (2026-10-25T14:10:36.320Z)
 
-- backlog.json 1461 KB -> active view 202 KB
-- status: G_ROOT_GATE round 165
-- servers: `{"checkedUtc":"2026-10-25T13:10:57.7647558Z","round":165,"attempt":1,"store":200}`
-- last publication: 75814838b35be7f3ac8befa2c2f007b0cde51d28 (rounds 165-165)
-- last root gate: round 165 published - commit 75814838b35be7f3ac8befa2c2f007b0cde51d28 pushed
+- backlog.json 1470 KB -> active view 201 KB
+- status: G_ROOT_GATE round 166
+- servers: `{"checkedUtc":"2026-10-25T13:54:56.5694062Z","round":166,"attempt":1,"store":200}`
+- last publication: 330f1f32094c758c3bdbd178b7347e667781a309 (rounds 166-166)
+- last root gate: round 166 published - commit 330f1f32094c758c3bdbd178b7347e667781a309 pushed
 
 ## Current items: -
 
@@ -363,13 +363,13 @@
 - INFO-C161-BRAND-EQ-ACCENT / info / signal for V-3c-4 / polish: brand and accent compute to the same rgb(201,164,106) in the Studio scope, so Stop (accent) and Preview (brand) differ only by border/hover classes / 
 - INFO-R162-CLIP-SVG-DOM / info / signal (not scheduled): measure DOM node count with many clips in a later performance pass / each clip header now mounts an svg with child paths instead of one text span (memo unchanged)
 - INFO-C162-VIDEO-INPUT-MULTIPLE / info / note (pre-existing, unchanged by round 162) / the video import file chooser reports isMultiple=true; choosing one file places one clip
-- ROOT-RECON-MARKER-ENTER / medium (confirmed by B in the real browser, D-29z130) / open: scheduled round 165 (D-29z130), test-first (MU15-MU17 red before the fix) / Enter in the marker add/rename editor may reach commitArrangement during an active pointer gesture (f08c7ce ArrangementMarkerRow.tsx commitE
 - ROOT-RECON-GRID-HARNESS / info (approved test-only refactor) / queued: end of VISUAL-A at a safe boundary (after M4, before REVIEW-RECOMMENDATIONS) / extract createWorkspaceTestEnvironment (helpers/workspace-test-environment.ts) from the fakeClock..FakeResizeObserver blocks of grid-snap-ui
 - ROOT-RECON-PC-BACKUP / info / note: keep backup/local-2026-10-23 (4e87bec) and refactor/grid-test-harness; no reset, no force push, no replay of old rounds / 
 - V-2b-DISPLAY / info / decided_user: no serif (design-ux-decisions.md 2026-10-25 final). Studio uses Instrument Sans + IBM Plex Mono only; no work: Cormorant is not loaded in Studio (studio-theme-obsidian.test.tsx l.237 asserts no Cormorant/Inter/Playfair); store fonts unaffected / 
-- B-R164-COMMIT-DURING-PREVIEW / info (architecture signal) / signal: not scheduled; candidate question for the pending frontend-architect checkpoint (b-round-160-checkpoint-request.md) / commitArrangement accepts commits while a pointer gesture holds a preview built from gesture.before, so any keyboard commit during a drag is
+- B-R164-COMMIT-DURING-PREVIEW / info (architecture signal) / signal: not scheduled; repeated by A round-165 code-reviewer and the gate-165 reviewer (same Architecture note: 7+ hand-written guards in ArrangementMarkerRow.tsx, one guard in ArrangementContext.commitArrangement proposed, keep for now) -> bounded root request b-round-165-checkpoint-request.md (Q-COMMIT, addendum to b-round-160-checkpoint-request.md); owner ArrangementContext.tsx protected; acceptance quoted there / commitArrangement accepts commits while a pointer gesture holds a preview built from gesture.before, so any keyboard commit during a drag is
 - B-R164-TAB-ABORT / info (observation) / observation: no work; forward Tab during a held clip drag aborts the drag when focus leaves arrangement-detail-clip-gain-fader for BODY (press 23 at 1440); nothing commits, the clip snaps back / 
 - A11Y-R164-ENV-POINT-TARGET / info (a11y signal) / signal: envelope breakpoints are 10 px divs (below the WCAG 2.5.8 24 px target) and are not keyboard-focusable; candidate for a separate a11y task, not scheduled / 
+- ROOT-GATE165-C-JSON / info (root note) / root_note: the gate-165 reviewer did not find c-round-165.json among the gate artifacts (it exists in tmp/studio-real-loop/); root may pass it to the reviewer / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
