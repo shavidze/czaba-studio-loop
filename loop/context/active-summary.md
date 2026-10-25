@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T21:21:03.533Z)
+# Active loop summary (2026-10-25T22:19:48.467Z)
 
-- backlog.json 1547 KB -> active view 211 KB
-- status: G_ROOT_GATE round 174
-- servers: `{"checkedUtc":"2026-10-25T21:04:16.0375108Z","round":174,"attempt":1,"store":200}`
-- last publication: 0a4a41e410276b10163147800e2b56342e0ed784 (rounds 174-174)
-- last root gate: round 174 published - commit 0a4a41e410276b10163147800e2b56342e0ed784 pushed
+- backlog.json 1557 KB -> active view 214 KB
+- status: G_ROOT_GATE round 175
+- servers: `{"checkedUtc":"2026-10-25T21:55:08.7953163Z","round":175,"attempt":1,"store":200}`
+- last publication: c53eefccd43942134d2ae0692c97e655e38880dc (rounds 175-175)
+- last root gate: round 175 published - commit c53eefccd43942134d2ae0692c97e655e38880dc pushed
 
 ## Current items: -
 
@@ -388,6 +388,10 @@
 - C-R173-N3-EXIT-RING-OUTLINE / info / acknowledged (pre-existing): the arrangement-exit focus ring is drawn by the outline; its ring-2 box-shadow computes transparent / 
 - GATE173-S1-OVERVIEW-CORNER-CUT / info / routed to round 174 D2(b): one 'known effect, vetoable' line in doc 142 R25; the 10 px overflow-hidden corner cuts ~2 px of a clip bar and ~4 px of the playhead at x=0/extent end; no code change / 
 - GATE173-S2-DOC141-TODO / low / routed to round 174 D1 (doc 141 l.83 strike-through; reviewer cited l.284) / 
+- C-R174-ENV-BELOW-DROP / info / acknowledged by B (agrees with C): envelope handle vs the pixels just below dropped 4.79 -> 4.19 at both VPs (a-selected, b-normal, d-muted), still >= 3:1; cause is the lighter neutral waveform under the handle by design (R30); no code change, no deferred_low_polish entry; ENV-VIS re-run in round 175 against c-round-174 values / 
+- B-R174-ACCENT-EQ-BRAND / low / scheduled (not deferred): in Obsidian --color-accent = --color-brand = #c9a46a (app.css l.3936/3939), so brand-vs-accent state pairs render identically: valid vs blocked drop ghosts (Lane l.886/887, l.922/923), video vs audio drop hint (l.874), Solo on vs Mute on, Follow on vs paused; text/letters still differ; source evidence by B, C to confirm; owned by 5b-2 (on-states) and 5b-3 (ghosts/hints) with distinct targets / 
+- GATE174-S1-FIXED-CN / low / routed to round 175 A9 (ArrangementClip l.859/876-879 -> plain className) / 
+- GATE174-S2-DOC143-STATUS / low / routed to round 175 D1 (doc 143 Completed) / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

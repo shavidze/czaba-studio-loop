@@ -1,0 +1,96 @@
+{
+ "taskStatus": "PASS",
+ "round": 175,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-25T21:55:08.7953163Z",
+  "round": 175,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "T175-TARGETED",
+  "SOURCE-SCOPE",
+  "AN-REVIEW",
+  "CC-AFFORD",
+  "NO-BRASS-AFFORD",
+  "CONTRAST-DUX5B1",
+  "HANDLE-DISTINCT",
+  "ENV-VIS",
+  "RV1-DUX5B1",
+  "FUNC-SMOKE-DUX5B1",
+  "RV3-STORE",
+  "G175-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G175-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "A-R175-DETAIL-SEP-ACCENT",
+   "severity": "low",
+   "steps": [
+    "Open /studio-lab at 1440x900 or 1280x720 (fresh context, DPR 2)",
+    "Hover the Clip details height separator (data-testid=arrangement-detail-separator, top edge of the Clip details panel) with the real mouse"
+   ],
+   "expected": "Under R34 / DUX-R-5 an affordance hover is neutral (hover:bg-foreground/50, like the track-height handle: composite about rgb(129,125,118), 4.49:1)",
+   "actual": "Hover fill is brass: computed oklab(0.739 0.018 0.085 / 0.6), composite rgb(129,106,71) over the panel; 19660/19660 (1280) and 22860/22860 (1440, attempt 3) pixels have R-B >= 45. Source ArrangementDetailPanel.tsx l.1121 hover:bg-accent/60. It is missing from the round-175 site table, so no round-175 row covers it; DXA7 pins it at count 1 (DETAIL_SEPARATOR_ACCENT_GAP_R175) instead of the 0 that task 3.2 asks for. ArrangementDetailPanel.tsx is one of the 11 granted files, but the line is not among the section-1 enumerated edits (B inventory gap), so A correctly left it. Not a regression; B must schedule it inside DUX-R-5b (DUX-R-5 cannot be ready with it).",
+   "evidence": "c-round-175/out/c175-1440-3.json and c175-1280-2.json rows.hover.detail-separator; c-round-175/shots/c175-1440-3/hover-detail-separator.png, c-round-175/shots/c175-1280-2/hover-detail-separator.png",
+   "severityNote": "Low, not Medium (A's code-reviewer said Medium): visual only, one hover affordance, no behaviour/data/security impact; now measured and recorded by C, so the 'no row covers it' concern is resolved; the fix is same-owner, same-file and cheap."
+  }
+ ],
+ "info": [
+  {
+   "id": "C-R175-UNFILLED-TRACK",
+   "note": "Chromium paints the unfilled range track rgb(59,59,59) with the new light accent; unfilled vs surface rgb(22,20,18) = 1.64 (informational per task; F-11 recorded 2.34 for the brass era). Thumb vs unfilled 9.01, so the 7 pre-rule (accent-muted) is NOT triggered."
+  },
+  {
+   "id": "C-R175-PRESSED-THUMB",
+   "note": "While the mouse holds a thumb, Chromium darkens it to rgb(217,205,181) (R-B 36 < 45: neutral by the test)."
+  },
+  {
+   "id": "C-R175-VOLUME-FULL",
+   "note": "Track/group Volume at 0 dB is the range max, so the track is fully filled and has no unfilled part at rest; thumb vs unfilled measured on Pan, Master, Zoom and Clip Gain."
+  },
+  {
+   "id": "C-R175-ENABLED-LOOP-EDGE",
+   "note": "Hovered enabled loop edge: 10/280 brass pixels from the brace border-accent (5b-2 site) at the edge; fill rgb(146,139,126) neutral. Selected-clip trim edge overlaps the K1 brass header (556 px), recorded as info as the task says."
+  },
+  {
+   "id": "C-R175-EVIDENCE-NOTES",
+   "note": "The selected music fade-out handle scan was 0/0 (off-screen) and is not counted. At 1280 the dragged height-handle pixels read the lane bg; the drag colour rests on computed style + DXA5 + FUNC."
+  }
+ ],
+ "evidenceRuns": {
+  "colour": [
+   "out/c175-1440-3.json",
+   "out/c175-1280-2.json"
+  ],
+  "env": [
+   "out/env/env-1440-2.json",
+   "out/env/env-1280-1.json"
+  ],
+  "func": [
+   "out/func/func-1440-2.json",
+   "out/func/func-1280-2.json"
+  ],
+  "d6": [
+   "out/d6/d6-1440-r1.json",
+   "out/d6/d6-1280-r1.json"
+  ]
+ }
+}
