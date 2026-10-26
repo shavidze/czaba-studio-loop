@@ -1,8 +1,8 @@
 # Feature status — czaba-tag-manager
 
-განახლდა: 2026-10-26, B round 4. round 4 დაიხურა და round 5 დაიგეგმა. სტატუსი `done` ხდება მხოლოდ C-ის რეალური შემოწმების შემდეგ. ბოლო publish: `7879ee0` (round 4). ამის წინ: `230b87a` (round 3), `c768567` (round 2), `c34ee5a` (round 1).
+განახლდა: 2026-10-26, B round 5. round 5 დაიხურა და round 6 დაიგეგმა. სტატუსი `done` ხდება მხოლოდ C-ის რეალური შემოწმების შემდეგ. ბოლო publish: `a8c1b53` (round 5). ამის წინ: `7879ee0` (round 4), `230b87a` (round 3), `c768567` (round 2), `c34ee5a` (round 1).
 
-**CI:** run `40323787413` (`c34ee5a`) 30 წუთის job timeout-მა გააუქმა apt step-ზე. root-ის შემდგომი შენიშვნით (13:45 UTC), run `40331357825` (`c768567`) **მწვანეა**, ყველა step success, 1 წთ 24 წმ. ესე იგი hang წყვეტილი იყო. B round 3-მა ეს შენიშვნა გამოტოვა, ამიტომ round 4-ის „CI არასდროს მუშაობდა“ მოძველებული იყო; round 4 hardening-ია (fail-fast), არა მკვდარი gate-ის აღდგენა. Actions-ზე ჯერ არ ჩანს: round 3-ის ffprobe step და round 4-ის `apt-install.sh`. მათი პირველი run `7879ee0`-ზეა, root მიაბამს.
+**CI:** run `40323787413` (`c34ee5a`) 30 წუთის job timeout-მა გააუქმა apt step-ზე. root-ის შემდგომი შენიშვნით (13:45 UTC), run `40331357825` (`c768567`) **მწვანეა**, ყველა step success, 1 წთ 24 წმ. ესე იგი hang წყვეტილი იყო. B round 3-მა ეს შენიშვნა გამოტოვა, ამიტომ round 4-ის „CI არასდროს მუშაობდა“ მოძველებული იყო; round 4 hardening-ია (fail-fast), არა მკვდარი gate-ის აღდგენა. Actions-ზე ჯერ არ ჩანს: round 3-ის ffprobe step და round 4-ის `apt-install.sh`. მათი პირველი run `7879ee0`-ზეა, root მიაბამს. B R5 close: root-ს `7879ee0`-ის ან `a8c1b53`-ის Actions run ჯერ არ მიუბამს.
 
 | ID | სათაური | სტატუსი | მტკიცებულება | შემდეგი ნაბიჯი |
 |---|---|---|---|---|
@@ -18,7 +18,8 @@
 | TM-T1-DOC | `docs/recording-tag-contract.md` + `ICAT` `WAV_METADATA.md`-ში | **done** (R3), realVerified=true | C R3-10: ქართულად, Scope 7-ის ყველა პუნქტი, ციფრები 8/10/28. D-07-ის UI გზა რეალურ UI-ში დადასტურდა (R3-7) | — |
 | TM-T1-MIG | არსებულ `schema.json`-ში `category` ავტომატურად არ ჩანს | todo | C R3-7 (რეგრესია): 12-ველიანი schema იტვირთება, `+ Category (UCS)` Hidden Standard Fields-შია, ჩართვის შემდეგ ინახება (13 key) | Saba-ს D-07-ის დადასტურება. signal: RR-R3-06 (schema-ს ვერსია + merge) |
 | TM-T1-DUP | ძველი custom ველი `ICAT` ID-ით ან `category` key-ით (მაგ. auto `CATE`) + ახალი სტანდარტული ველი | todo | B R2 კოდის წაკითხვა. root review R3 (RR-R3-01, medium): ერთი მნიშვნელობა `CATE`-შიც და `ICAT`-შიც იწერება, React-ში დუბლირებული key-ებია | Saba-ს გადაწყვეტა. შემოთავაზებული default: toggle დაიმალოს/უარყოფილი იყოს, თუ key ან RIFF ID უკვე დაკავებულია, + გაფრთხილება |
-| TM-B09 | „Tagged“ badge კონტრაქტის ველებს არ ითვალისწინებს (`FileList.tsx:77-81` `hasTags` = title/artists/bpm) (C-R3-01) | in_progress → **R5** (low) | C R3: `c-round-3/10-after-rescan.png` | R5: `hasAnyTagValue()` D-15-ის მიხედვით (B default, Saba დაადასტურებს) + RR-R2-02 ტესტი |
+| TM-B09 | „Tagged“ badge კონტრაქტის ველებს არ ითვალისწინებს (C-R3-01) | **done** (R5), realVerified=true | C R5-1…R5-7 PASS, `a8c1b53`: red 4/2 → green 28/28, mutation M1/M2/M2b, renderer 107, main 42, E2E 7/7 `--retries=0`. რეალური app: `c-round-5/r5-4-comment-only-tagged.png` (ffmpeg ICMT), `r5-4-contract-tagged.png` (ICAT), `r5-5-x-tagged.png` → `r5-5-blank-untagged.png` (ცარიელი ICAT), `r5-6-*.png`, ძველი build: badge არ ჩანს | D-15 Saba-ს დასადასტურებელია. NUL-only მნიშვნელობა ჯერ კიდევ Tagged-ია (C-R5-01) → TM-B10 |
+| TM-B10 | `meta:read` RIFF INFO-ს NUL terminator-ს ინარჩუნებს: Comment-ში `\u0000`, `\0\0` title → Tagged, NUL-იანი custom number ველი → 0 და შემდეგი save მას 0-ით გადაწერს; save NUL-ს data-დ წერს (C-R5-02, C-R5-01) | in_progress → **R6** (**medium**, C-მ low შეაფასა; B-მ აწია data-loss-ის გამო) | C R5: `c-round-5/r5-x-nul.log`, `r5-result.json`. B ექსპერიმენტები: `b-round-5-exp-nul-*.cjs` | R6: reader-ში trailing NUL-ის მოშორება (D-16) + RR-R2-01 |
 | TM-T0-CI-FU | CI follow-up: `apt-install.sh`-ის worst case (~750 s) > step 600 s (C-R4-01/RR-R4-02) + ქართული docs შენიშვნა env knob-ებზე (RR-R4-05) | todo (low) | C R4 C-R4-01, root review R4 | დაიგეგმება `7879ee0`-ის Actions run-ის შედეგის შემდეგ |
 | TM-B08 | Artists იწერება ორ `ISTR`-ად, არა `IART`-ად. ffprobe-ის `artist` = მხოლოდ პირველი (C-R2-01) | todo (low) | C R2-6: `c-round-2/r2-6-result.json` | D-12: Saba წყვეტს, შედის თუ არა artists კონტრაქტში |
 | TM-T2 | T-2 UCS CatID combobox + ვალიდაცია + batch | blocked | — | TM-T2-DATA |
@@ -44,11 +45,11 @@
 | RR-R1-05 | low | `.tmp` ფაილი რჩება, თუ `writeFileSync` ჩავარდა | review signal |
 | RR-R1-06 | info | არქიტექტურა: WAV builder ცალკე ფაილში | **closed** R3: `tests/main/riff-chunks.ts` (D-14) |
 | RR-R1-07 | info | `check.yml` required check + `needs: check` `release.yml`-ში | Saba |
-| RR-R2-01 | medium | `getRiffInfoTags` non-CombinedTag-ზე ისვრის write path-ზე, per-field `try`-ის გარეთ (არა regression, WAV-ზე მიუღწეველი) | signal: WAV-ზე მიუღწეველია, ეხება გაყინულ `metadata.ts`-ს; R5-ში არ შედის |
-| RR-R2-02 | low | FileList-ის display fix-ს renderer ტესტი არ აქვს (`test-on-bugfix`) | **R5** |
+| RR-R2-01 | medium | `getRiffInfoTags` non-CombinedTag-ზე ისვრის write path-ზე, per-field `try`-ის გარეთ (არა regression, WAV-ზე მიუღწეველი) | **R6** (TM-B10-თან ერთად, იგივე `metadata.ts` round): `return []` + export რეალური `Id3v2Tag` ტესტისთვის |
+| RR-R2-02 | low | FileList-ის display fix-ს renderer ტესტი არ აქვს (`test-on-bugfix`) | **closed** R5: C R5-2 M1 |
 | RR-R2-03 | low | `skipLibCheck` `src/preload/index.d.ts`-საც ფარავს | review signal |
 | RR-R2-04 | info | არქიტექტურა: RiffTags-typed accessor `TagObject` double cast-ის ნაცვლად | review signal |
-| C-R3-01 | low | „Tagged“ badge მხოლოდ ICAT/IKEY/ICMT-იან ფაილზე არ ჩანს | TM-B09 (**R5**) |
+| C-R3-01 | low | „Tagged“ badge მხოლოდ ICAT/IKEY/ICMT-იან ფაილზე არ ჩანს | **closed** R5 (TM-B09) |
 | C-R3-02 | low | task-ში ICMT 26 ეწერა, რეალურად 28 (ტესტი და დოკუმენტი სწორია) | **closed** R3 (B) |
 | A-R3-01 | low | `tests/renderer/setup.ts` (frozen) `window`-ს plain object-ით ცვლის. `schema-editor.test.ts` `vi.hoisted`-ით უვლის გვერდს | რაუნდი, რომელიც `setup.ts`-ს ფლობს |
 | RR-R3-01 | medium | ძველი custom `category` (`CATE`) + სტანდარტული toggle → ორი ველი ერთი key-ით | TM-T1-DUP (Saba) |
@@ -64,6 +65,15 @@
 | RR-R4-04 | info | მეორე ტესტი მხოლოდ constant-ს + `existsSync`-ს ამოწმებს | signal |
 | RR-R4-05 | low | `apt-install.sh` და env knob-ები `docs/`-ში არ არის აღწერილი | TM-T0-CI-FU |
 | RR-R4-06 | info | არქიტექტურა: ffprobe-ის შემოწმება vitest-ში (skip ffprobe-ის გარეშე) ან ცალკე `npm run test:contract` | signal, RR-R1-01-თან ერთად (`package.json` დაცულია) |
+| C-R5-01 | low | NUL-only INFO მნიშვნელობა (`ICMT '\0'`, `INAM '\0\0'`) row-ს Tagged-ად აჩენს, ffprobe ცარიელს აჩვენებს | TM-B10 (**R6**, reader-ში) |
+| C-R5-02 | low→TM-B10 medium | `meta:read` NUL terminator-ს ინარჩუნებს | TM-B10 (**R6**) |
+| RR-R5-01 | low | badge ახლა ყველა ველს ითვლის (year/track/ISRC-only ფაილიც Tagged-ია); `docs/`-ში შენიშვნა | signal, D-15-ის დადასტურების შემდეგ |
+| RR-R5-02 | low | `file-row-display.ts:11` `item.trim()` ვარაუდობს string ელემენტს; `null` row-ს render-ს ჩააგდებს | signal |
+| RR-R5-03 | info | number ველი Tagged-ია მხოლოდ `> 0`-ზე | signal |
+| RR-R5-04 | low | `getFileRow` ტესტში ზუსტად 2 parent-ით ადის, markup-ის მიმართ მყიფეა | signal |
+| RR-R5-05 | info | ტესტებში ორმაგი ბრჭყალები (RR-R3-04-ის მსგავსი) | TM-B06 |
+| RR-R5-06 | info | არქიტექტურა: „ცარიელია თუ არა“ წესი სამ ადგილასაა (`isNonEmptyFieldValue`, `TemplatePicker.tsx:130`, dirty tracking). ერთი საერთო `isEmptyFieldValue` | signal, არა task |
+| B-R6-01 | low | `bpm`/`track` INFO-only WAV-იდან 0-ად იკითხება NUL-ით და მის გარეშეც: node-taglib-sharp `IBPM`/`ITRK`-ს არ კითხულობს. `year` (ICRD) იკითხება | signal + Saba-ს კითხვა D-12/TM-B08-თან ერთად |
 
 ## კონტრაქტის გადაწყვეტილებები (Tag Manager ↔ czaba-api recording-import)
 
@@ -84,3 +94,4 @@
 | D-13 | `category` `STANDARD_FIELDS`-ის **ბოლო** ელემენტია, `keywords`-ის შემდეგ: `{ key: 'category', label: 'Category (UCS)', type: 'text', riffChunkId: 'ICAT', standard: true }` | B R2 |
 | D-14 | bext/iXML ტესტ-WAV იქმნება `tests/main/riff-chunks.ts`-ში (`tests/fixtures/**` გაყინულია). ffprobe-ის შემოწმება ცალკე `check.yml` step-ია (`tests/contract/check-ffprobe-tags.ts`, ფაილი: `test-results/recording-tag-contract/contract.wav`). `npm run check`-ს ffprobe არ სჭირდება | B R2 |
 | D-15 | „Tagged“ badge ჩანს, თუ ფაილის წაკითხული metadata-ს (meta:read აბრუნებს ზუსტად schema-ს key-ებს) ნებისმიერ ველს არაცარიელი მნიშვნელობა აქვს: string არა-whitespace შიგთავსით, string[] ერთი არა-ცარიელი ელემენტით მაინც, number > 0. `""`, whitespace, `[]`, `[""]`, `0` ცარიელია, ამიტომ ცარიელი editor save (`ICAT=""`, D-10) ფაილს tagged-ად არ აქცევს. მხოლოდ UI, შექცევადი (TM-B09) | B default (R4 close), Saba-ს დასადასტურებელი |
+| D-16 | `meta:read` ყოველი დაბრუნებული string-იდან შლის trailing NUL-ების მწკრივს (`/\u0000+$/`): სტანდარტული string ველები, array ველების (artists, genres) თითო ელემენტი, custom INFO text/tags მნიშვნელობები; custom number ველისთვის `Number()`-მდე. `''`-ად ქცეული array ელემენტი რჩება (არ იფილტრება). შიდა და წინა NUL-ს არ ეხება. ჩაწერა უცვლელია (T1-1 „no NUL“ guard-ად რჩება). ffprobe NUL-ს მალავს, ამიტომ მტკიცებულება raw INFO ბაიტებია | B (R5 close), ტექნიკური, შექცევადი; Saba-ს ეცნობება (TM-B10) |

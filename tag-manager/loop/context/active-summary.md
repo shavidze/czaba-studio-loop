@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-26T15:33:15.971Z)
+# Active loop summary (2026-10-26T16:00:51.147Z)
 
-- backlog.json 38 KB -> active view 18 KB
-- status: G_ROOT_GATE round 4
+- backlog.json 45 KB -> active view 22 KB
+- status: G_ROOT_GATE round 5
 - servers: `{"servers":"none or skipped"}`
-- last publication: 7879ee03fce194ec9ccbd544ba862cad9e80e42c (rounds 4-4)
-- last root gate: round 4 published - commit 7879ee03fce194ec9ccbd544ba862cad9e80e42c pushed
+- last publication: a8c1b53ed043560569dd528e2bc2e5190b63333a (rounds 5-5)
+- last root gate: round 5 published - commit a8c1b53ed043560569dd528e2bc2e5190b63333a pushed
 
-## Current items: TM-T0, TM-T0-CI, TM-T1, TM-T1-DOC
+## Current items: TM-T0, TM-T0-CI, TM-T1, TM-T1-DUP, TM-B09, TM-T0-CI-FU
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -25,15 +25,19 @@
 - C-R3-01 / low / open / 'Tagged' badge ignores ICAT/IKEY/ICMT (FileList.tsx:77-81 hasTags = title/artists/bpm)
 - A-R3-01 / low / open / tests/renderer/setup.ts (frozen) replaces window with a plain object; schema-editor.test.ts works around it locally with vi.hoisted
 - RR-R3-01 / medium / open / Old custom field key 'category' (auto ID CATE) + standard toggle -> two fields same key, one value in CATE and ICAT, duplicate React keys (S
-- RR-R3-02 / low / open / check.yml ffprobe step depends on contract.wav produced as a side effect of T1-1; missing file gives only 'WAV file not found' without namin
 - RR-R3-03 / info / open / Every editor-panel save writes empty ICAT (D-10 pinned on purpose)
 - RR-R3-04 / low / open / New test files use double quotes vs src single quotes; Biome does not check tests/
 - RR-R3-05 / info / open / npx --yes tsx@4 downloads a floating major at runtime (verifyCommand + check.yml); consider a pinned devDependency
 - RR-R3-06 / info / open / Architecture: schema.json has no version/migration; a versioned schema with one-time merge in loadSchema() would solve D-07 and TM-T1-DUP to
+- C-R4-01 / low / open / apt-install.sh worst case ~750 s (2 x (240+10) + dpkg recovery 240+10) > step timeout-minutes 10 (600 s); GitHub kills the step before the f
+- RR-R4-02 / low / open / Same as C-R4-01 (step budget < worst case)
+- RR-R4-03 / low / open / check-ffprobe-tags.ts missing-file hint hard-codes 'during npm run check'; a follow-up could print the exact vitest command
+- RR-R4-04 / info / open / tests/main/check-ffprobe-tags.test.ts second test only checks a constant + existsSync (low value; acceptable as a guard against a renamed pr
+- RR-R4-05 / low / open / apt-install.sh and its env knobs APT_ATTEMPT_TIMEOUT_SECONDS / APT_ATTEMPTS are not documented in docs/ (Georgian)
+- RR-R4-06 / info / open / Architecture signal: move the ffprobe cross-check into recording-tag-contract.test.ts (skip when ffprobe is missing) or into a dedicated npm
 
 ## Other open items
 - TM-T1-MIG [todo] Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no aut
-- TM-T1-DUP [todo] Old schema.json custom field colliding with standard category: (a) custom field already using RIFF ID ICAT; (b) custom field with key 'categ
 - TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
 - TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
 - TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba
@@ -42,4 +46,3 @@
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database
 - OOS-03 [out_of_scope] New npm dependencies
-- TM-B09 [todo] File list 'Tagged' badge ignores contract fields: FileList.tsx hasTags checks only title/artists/bpm, so a file with only ICAT/IKEY/ICMT sho

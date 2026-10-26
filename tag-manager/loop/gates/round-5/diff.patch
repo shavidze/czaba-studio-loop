@@ -1,0 +1,38 @@
+diff --git a/src/renderer/src/components/file-list/FileList.tsx b/src/renderer/src/components/file-list/FileList.tsx
+index 0edb6ad..b32aefb 100644
+--- a/src/renderer/src/components/file-list/FileList.tsx
++++ b/src/renderer/src/components/file-list/FileList.tsx
+@@ -1,18 +1,13 @@
+ import { ArrowDown, ArrowUp, Music } from 'lucide-react';
+ import { useCallback, useEffect, useRef } from 'react';
+ import { Badge } from '~/components/ui/badge';
++import { formatFirstFieldValue, hasAnyTagValue } from '~/lib/file-row-display';
+ import { cn, formatFileSize } from '~/lib/utils';
+ import { useFileStore, useFilteredFiles, useIsSelected } from '~/stores/file-store';
+ import { usePlayerStore } from '~/stores/player-store';
+-import type { FieldValue, SortField, WavFileEntry } from '~/types';
++import type { SortField, WavFileEntry } from '~/types';
+ import { Toolbar } from './Toolbar';
+ 
+-function formatFirstFieldValue(value: FieldValue | undefined): string {
+-  if (Array.isArray(value)) return value[0] ?? '';
+-  if (typeof value === 'string') return value;
+-  return '';
+-}
+-
+ function SortHeader({ label, field }: { label: string; field: SortField }): React.ReactElement {
+   const sortField = useFileStore((s) => s.sortField);
+   const sortDirection = useFileStore((s) => s.sortDirection);
+@@ -74,11 +69,7 @@ function FileRow({
+     play(file.path, file.name);
+   }, [file.path, file.name, play]);
+ 
+-  const hasTags =
+-    meta &&
+-    (meta.title ||
+-      (Array.isArray(meta.artists) && meta.artists.length > 0) ||
+-      (typeof meta.bpm === 'number' && meta.bpm > 0));
++  const hasTags = hasAnyTagValue(meta);
+ 
+   return (
+     <div

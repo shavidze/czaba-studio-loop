@@ -1,0 +1,145 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r5-m1[39m
+
+ [31m❯[39m tests/renderer/utils/file-row-display.test.ts [2m([22m[2m22 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 15[2mms[22m[39m
+     [32m✓[39m returns false for undefined metadata[32m 2[2mms[22m[39m
+     [32m✓[39m returns false for empty metadata[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for empty string[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for whitespace string[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for empty array[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for array with empty string[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for array with only blank strings[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for zero[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for negative number[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for NaN[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for Infinity[32m 0[2mms[22m[39m
+     [32m✓[39m returns true for non-blank string[32m 0[2mms[22m[39m
+     [32m✓[39m returns true for array with one non-blank element[32m 0[2mms[22m[39m
+     [32m✓[39m returns true for positive number[32m 0[2mms[22m[39m
+     [32m✓[39m returns true when one field is set among empty defaults[32m 0[2mms[22m[39m
+     [32m✓[39m returns false when every field is an empty default[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for undefined[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for a number[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for an empty string[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for an empty array[32m 0[2mms[22m[39m
+[31m     [31m×[31m returns the whole string, not its first character[39m[32m 7[2mms[22m[39m
+     [32m✓[39m returns the first element of an array[32m 0[2mms[22m[39m
+ [31m❯[39m tests/renderer/components/file-list.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 137[2mms[22m[39m
+     [32m✓[39m (a) shows Tagged for a row with only category[32m 67[2mms[22m[39m
+     [32m✓[39m (b) shows Tagged for a row with only keywords[32m 11[2mms[22m[39m
+     [32m✓[39m (c) shows Tagged for a row with only comment[32m 12[2mms[22m[39m
+     [32m✓[39m (d) shows no Tagged when every value is empty, blank or default[32m 13[2mms[22m[39m
+     [32m✓[39m (e) still shows Tagged for title, artists or bpm alone[32m 17[2mms[22m[39m
+[31m     [31m×[31m (f) renders a string artist whole and the first element of an artist array[39m[32m 15[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mformatFirstFieldValue[2m > [22mreturns the whole string, not its first character
+[31m[1mAssertionError[22m: expected 'F' to be 'Foo' // Object.is equality[39m
+
+Expected: [32m"F[7moo[27m"[39m
+Received: [31m"F"[39m
+
+[36m [2m❯[22m tests/renderer/utils/file-row-display.test.ts:[2m71:42[22m[39m
+    [90m 69| [39m
+    [90m 70| [39m  [34mit[39m([32m"returns the whole string, not its first character"[39m[33m,[39m () [33m=>[39m {
+    [90m 71| [39m    [34mexpect[39m([34mformatFirstFieldValue[39m([32m"Foo"[39m))[33m.[39m[34mtoBe[39m([32m"Foo"[39m)[33m;[39m
+    [90m   | [39m                                         [31m^[39m
+    [90m 72| [39m  })[33m;[39m
+    [90m 73| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList artist column (RR-R2-02)[2m > [22m(f) renders a string artist whole and the first element of an artist array
+[31m[1mTestingLibraryElementError[22m: Unable to find an element with the text: Foo. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<div[31m
+  [33mclass[31m=[32m"grid grid-cols-[1fr_80px_100px_100px_80px_70px] gap-2 items-center px-3 py-1.5 text-xs cursor-default border-b border-outline/50 transition-colors text-muted hover:bg-elevated"[31m
+[36m>[31m
+  [36m<div[31m
+    [33mclass[31m=[32m"flex items-center gap-2 min-w-0"[31m
+  [36m>[31m
+    [36m<svg[31m
+      [33mclass[31m=[32m"lucide lucide-music h-3.5 w-3.5 shrink-0 text-dim"[31m
+      [33mfill[31m=[32m"none"[31m
+      [33mheight[31m=[32m"24"[31m
+      [33mstroke[31m=[32m"currentColor"[31m
+      [33mstroke-linecap[31m=[32m"round"[31m
+      [33mstroke-linejoin[31m=[32m"round"[31m
+      [33mstroke-width[31m=[32m"2"[31m
+      [33mviewBox[31m=[32m"0 0 24 24"[31m
+      [33mwidth[31m=[32m"24"[31m
+      [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+    [36m>[31m
+      [36m<path[31m
+        [33md[31m=[32m"M9 18V5l12-2v13"[31m
+      [36m/>[31m
+      [36m<circle[31m
+        [33mcx[31m=[32m"6"[31m
+        [33mcy[31m=[32m"18"[31m
+        [33mr[31m=[32m"3"[31m
+      [36m/>[31m
+      [36m<circle[31m
+        [33mcx[31m=[32m"18"[31m
+        [33mcy[31m=[32m"16"[31m
+        [33mr[31m=[32m"3"[31m
+      [36m/>[31m
+    [36m</svg>[31m
+    [36m<span[31m
+      [33mclass[31m=[32m"truncate text-foreground"[31m
+    [36m>[31m
+      [0mstring-artist.wav[0m
+    [36m</span>[31m
+    [36m<span[31m
+      [33mclass[31m=[32m"inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs font-medium bg-brand/15 text-brand"[31m
+    [36m>[31m
+      [0mTagged[0m
+    [36m</span>[31m
+  [36m</div>[31m
+  [36m<span[31m
+    [33mclass[31m=[32m"text-right"[31m
+  [36m>[31m
+    [0m1.0 KB[0m
+  [36m</span>[31m
+  [36m<span[31m
+    [33mclass[31m=[32m"truncate"[31m
+  [36m>[31m
+    [0mF[0m
+  [36m</span>[31m
+  [36m<span[31m
+    [33mclass[31m=[32m"truncate"[31m
+  [36m/>[31m
+  [36m<span[31m
+    [33mclass[31m=[32m"text-right"[31m
+  [36m/>[31m
+  [36m<span[31m
+    [33mclass[31m=[32m"text-right text-dim"[31m
+  [36m>[31m
+    [0m10/26/2026[0m
+  [36m</span>[31m
+[36m</div>[31m[39m
+[90m [2m❯[22m Object.getElementError ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m133:22[22m[39m
+    [90m131| [39m
+    [90m132| [39m    [35mconst[39m stringRow [33m=[39m [34mwithin[39m([34mgetFileRow[39m([32m"string-artist.wav"[39m))[33m;[39m
+    [90m133| [39m    [34mexpect[39m(stringRow[33m.[39m[34mgetByText[39m([32m"Foo"[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m134| [39m    [34mexpect[39m(stringRow[33m.[39m[34mqueryByText[39m([32m"F"[39m))[33m.[39mnot[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m135| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m26 passed[39m[22m[90m (28)[39m
+[2m   Start at [22m 15:52:19
+[2m   Duration [22m 1.31s[2m (transform 230ms, setup 190ms, import 429ms, tests 152ms, environment 1.18s)[22m
+
+
+::error file=/tmp/c-r5-m1/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > formatFirstFieldValue > returns the whole string%2C not its first character,line=71,column=42::AssertionError: expected 'F' to be 'Foo' // Object.is equality%0A%0AExpected: "Foo"%0AReceived: "F"%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:71:42%0A%0A
+
+::error file=/tmp/c-r5-m1/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList artist column (RR-R2-02) > (f) renders a string artist whole and the first element of an artist array,line=133,column=22::TestingLibraryElementError: Unable to find an element with the text: Foo. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.%0A%0AIgnored nodes: comments, script, style%0A<div%0A  class="grid grid-cols-[1fr_80px_100px_100px_80px_70px] gap-2 items-center px-3 py-1.5 text-xs cursor-default border-b border-outline/50 transition-colors text-muted hover:bg-elevated"%0A>%0A  <div%0A    class="flex items-center gap-2 min-w-0"%0A  >%0A    <svg%0A      class="lucide lucide-music h-3.5 w-3.5 shrink-0 text-dim"%0A      fill="none"%0A      height="24"%0A      stroke="currentColor"%0A      stroke-linecap="round"%0A      stroke-linejoin="round"%0A      stroke-width="2"%0A      viewBox="0 0 24 24"%0A      width="24"%0A      xmlns="http://www.w3.org/2000/svg"%0A    >%0A      <path%0A        d="M9 18V5l12-2v13"%0A      />%0A      <circle%0A        cx="6"%0A        cy="18"%0A        r="3"%0A      />%0A      <circle%0A        cx="18"%0A        cy="16"%0A        r="3"%0A      />%0A    </svg>%0A    <span%0A      class="truncate text-foreground"%0A    >%0A      string-artist.wav%0A    </span>%0A    <span%0A      class="inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs font-medium bg-brand/15 text-brand"%0A    >%0A      Tagged%0A    </span>%0A  </div>%0A  <span%0A    class="text-right"%0A  >%0A    1.0 KB%0A  </span>%0A  <span%0A    class="truncate"%0A  >%0A    F%0A  </span>%0A  <span%0A    class="truncate"%0A  />%0A  <span%0A    class="text-right"%0A  />%0A  <span%0A    class="text-right text-dim"%0A  >%0A    10/26/2026%0A  </span>%0A</div>%0A ❯ Object.getElementError ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/config.js:37:19%0A ❯ ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:76:38%0A ❯ ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:52:17%0A ❯ ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:95:19%0A ❯ tests/renderer/components/file-list.test.ts:133:22%0A%0A

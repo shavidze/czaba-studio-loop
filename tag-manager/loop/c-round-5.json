@@ -1,0 +1,39 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R5-01",
+      "severity": "low",
+      "steps": [
+        "Build two WAVs from tests/fixtures/sample.wav by appending a LIST/INFO chunk: nul-comment.wav with ICMT size 1 payload 00 (+ ISFT 'Recorder 1.0\\0'), nul-title.wav with INAM size 2 payload 00 00 (python generator in c-round-5.md, C-R5-01)",
+        "ffprobe -show_entries format_tags -of json shows comment=\"\" / title=\"\" (empty)",
+        "Open the folder in the built app (xvfb-run, _electron, c-round-5/probe-nul.mjs)"
+      ],
+      "expected": "Under the intent of D-15 a file with no visible value should not be 'Tagged' (ffprobe, the backend's reader, sees only empty strings)",
+      "actual": "Both rows show 'Tagged'. meta:read keeps the NUL terminator (the Comment field of an ffmpeg-written ICMT also shows 'მძიმე კარი\\u0000'), and String.prototype.trim() does not strip \\u0000, so hasAnyTagValue counts it. Not covered by the D-15 text in current-task.md (empty = '', whitespace, [], 0, non-finite), so this is an edge outside this round's acceptance, not a FAIL of A's work. Fix belongs either to the reader (strip trailing NULs in metadata.ts, frozen this round) or to hasAnyTagValue (treat \\0 as blank) - B to decide.",
+      "evidence": "c-round-5/r5-x-nul.log (nul-comment.wav tagged=1, nul-title.wav tagged=1), c-round-5/r5-x-nul-comment.png, c-round-5/r5-result.json commentOnlyPanel.comment = 'მძიმე კარი\\u0000'"
+    },
+    {
+      "id": "C-R5-02",
+      "severity": "low",
+      "steps": [
+        "ffmpeg -i tests/fixtures/sample.wav -metadata comment='მძიმე კარი' -c copy comment-only.wav (writes ICMT NUL-terminated, 29 bytes)",
+        "Open the folder in the built app, click comment-only.wav, read the Comment input value (c-round-5/drive-r5b.mjs)"
+      ],
+      "expected": "Comment field value 'მძიმე კარი' (ffprobe shows exactly that)",
+      "actual": "Comment input value is 'მძიმე კარი\\u0000': meta:read (src/main/ipc/metadata.ts, frozen this round) keeps the RIFF INFO NUL terminator. Affects any INFO field written by ffmpeg or recorders; a later save would likely write the NUL back as data. Pre-existing, not introduced by round 5; root cause of C-R5-01. Not in the open-findings list.",
+      "evidence": "c-round-5/r5-result.json commentOnlyPanel.comment; raw INFO ICMT size 29 in r5-result.json before['comment-only.wav'].riffInfo"
+    }
+  ],
+  "passed": [
+    "R5-1",
+    "R5-2",
+    "R5-3",
+    "R5-4",
+    "R5-5",
+    "R5-6",
+    "R5-7"
+  ],
+  "blocked": [],
+  "realVerified": true
+}

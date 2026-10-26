@@ -1,103 +1,156 @@
-# CURRENT TASK — Round 5: TM-B09 "Tagged" badge counts every non-empty field (D-15) + RR-R2-02 regression test for formatFirstFieldValue
+# CURRENT TASK — Round 6: TM-B10 `meta:read` strips RIFF INFO NUL terminators (D-16) + RR-R2-01 `getRiffInfoTags` returns `[]`
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-26
 
 ## Why this round
-Round 4 (TM-T0-CI apt hardening + RR-R3-02) got **C PASS** on R4-1…R4-8, with realVerified=false because the Actions run is pending. Root review gave COMMIT OK and root published `7879ee0`. RR-R3-02 is closed. TM-T0-CI stays `in_progress` until root links a green Actions run on `7879ee0` or later. An earlier run, `40331357825` on `c768567`, was already green; it is now recorded as evidence. TM-T0-CI's follow-up (C-R4-01/RR-R4-02 step budget, RR-R4-05 docs) is backlog item **TM-T0-CI-FU**. It waits for the first Actions timings on `7879ee0`, so it is not in this round.
+Round 5 (TM-B09 "Tagged" badge, D-15, plus the RR-R2-02 test) got **C PASS** on R5-1…R5-7 with realVerified=true. Root review gave COMMIT OK and root published `a8c1b53`. TM-B09, RR-R2-02 and C-R3-01 are closed.
 
-No critical or high bug is open. Why the open mediums are not this round:
-- **RR-R1-01** (CI Build step) waits for the `7879ee0` Actions run.
-- **RR-R2-01** (`getRiffInfoTags`) cannot be reached for WAV and would reopen the frozen `metadata.ts`.
-- **RR-R3-01 / TM-T1-DUP** needs Saba's decision.
-- **RR-R4-01** (xauth) is refuted: `xauth` is a Depends of `xvfb`, and C's container run confirmed it.
+C found that `meta:read` keeps the RIFF INFO NUL terminator (C-R5-02). Because of that, NUL-only values make a row Tagged (C-R5-01). B's experiments (`b-round-5-exp-nul-*.cjs` in the loop folder) show how far this reaches:
+- node-taglib-sharp returns `comment` = `"heavy door\0"`, `title` = `"\0\0"`, `genres` = `["Foley\0"]` and `getValuesAsStrings('ICAT')` = `["DOORWood\0"]`.
+- `Number("120\0")` is `NaN`, so `metadata.ts:131` reads a NUL-terminated custom number field as `0`.
+- `MetadataPanel.tsx:76` saves the whole `editingMetadata`. Any save therefore writes `0` over that number. This is data loss; C confirms it in R6-4.
+- A read-then-save writes the NUL back as data inside the sub-chunk size. ffprobe hides it.
 
-**TM-B09** (C-R3-01) is the only user-visible bug that can be planned now. It sits in the same component as **RR-R2-02** (root review R2: the `formatFirstFieldValue` display fix has no test). Both are in `FileList.tsx`, one tightly related pair.
+RIFF INFO values are NUL-terminated by spec, so every recorder or ffmpeg file is affected. This is new item **TM-B10**, rated **medium**: C rated the finding low, and B raised it because of the data loss.
 
-**D-15 (B default, awaiting Saba, reversible, UI-only):** the badge shows when any field in the file's read metadata has a non-empty value. Empty means `""`, whitespace-only, `[]`, `[""]`/blank-only arrays, `0`, or a non-finite number. `meta:read` (`readTagsFromFile` in `src/main/ipc/metadata.ts`) returns exactly the schema keys, defaulting to `''` / `[]` / `0`. So "any key in `meta`" equals "any schema field", and recorder chunks outside the schema (e.g. ISFT) never count. Every editor save writes empty `ICAT`/`IKEY` (D-10, RR-R3-03), so a file whose only values are empty must stay **untagged**.
+**RR-R2-01** (medium, root review R2) belongs to the same reader round in the same file. `getRiffInfoTags` throws on a non-`CombinedTag`, and on the write path that throw happens outside the per-field `try`. Root's suggested fix is `return []`. A real non-`CombinedTag` exists for the test: `Id3v2Tag.fromEmpty() instanceof CombinedTag === false` (B checked).
+
+These two bugs fit one round. The open mediums that are not in it:
+- RR-R1-01 waits for an Actions run.
+- RR-R3-01 / TM-T1-DUP needs Saba.
+
+No critical or high bug is open.
+
+**D-16 (B, technical, reversible):**
+- `meta:read` strips the trailing NUL run (`/\u0000+$/`) from every string value it returns. That covers:
+  - the standard string props `title`, `album`, `comment`, `copyright`, `isrc` and `publisher`;
+  - each element of the standard arrays `artists` and `genres`;
+  - custom INFO values of type `text`, `tags` and `number`. For `number`, the strip happens before `Number()`.
+- An array element that becomes `''` is **kept**. Arrays are not filtered, so length and the D-15/T1-10 empty handling stay as they are.
+- Leading and interior NULs are not touched.
+- The write path does not change. Clean reader values are written without NUL, and the T1-1 "no NUL" assertion remains the guard.
 
 ## Baseline
-- HEAD `7879ee03fce194ec9ccbd544ba862cad9e80e42c`, working tree clean. If HEAD differs, or the tree is dirty in paths you don't own, stop and report.
+- HEAD `a8c1b53ed043560569dd528e2bc2e5190b63333a`, working tree clean. If HEAD differs, or the tree is dirty in paths you don't own, stop and report.
 - Frozen files: everything not listed under File ownership. They must stay byte-identical. In particular:
-  - `src/main/**`, `src/preload/**`, `src/shared/**`;
-  - every `src/renderer/**` file except `FileList.tsx` and the new lib module;
-  - `src/renderer/src/lib/utils.ts`, `src/renderer/src/styles/app.css` (protected);
+  - every `src/**` file except `src/main/ipc/metadata.ts`. `src/renderer/src/lib/file-row-display.ts` stays frozen: C-R5-01 is fixed at the reader only, never in two layers;
+  - `src/preload/**`, `src/shared/**`, `src/renderer/src/styles/app.css` (protected);
   - `package.json`, `package-lock.json`, all `tsconfig*.json`, `biome.json`, `playwright.config.ts`, `vitest.config.*.ts`, `electron.vite.config.ts`;
-  - `.github/**` (including `check.yml`, `apt-install.sh` and the protected `release.yml`);
-  - `tests/fixtures/**`, `tests/renderer/setup.ts`, `tests/renderer/helpers/**`, every existing test file;
-  - `tests/main/**`, `tests/e2e/**`, `tests/contract/**`;
+  - `.github/**` (including the protected `release.yml`);
+  - `tests/fixtures/**`, `tests/main/riff-chunks.ts`, `tests/main/setup.ts`, `tests/main/global-setup.ts`;
+  - every existing test file, especially `tests/main/metadata.test.ts` and `tests/main/recording-tag-contract.test.ts` (T1-1 "no NUL", T1-10 clear path);
+  - `tests/renderer/**`, `tests/e2e/**`, `tests/contract/**`;
   - `.claude/**`, `docs/**`.
 
 ## Scope
-1. **New `src/renderer/src/lib/file-row-display.ts`**, a pure module with no React and no store imports. It has two named exports:
-   - `formatFirstFieldValue(value: FieldValue | undefined): string`, **moved unchanged** from `FileList.tsx`:
-     - an array gives its first element or `''`;
-     - a string gives the string itself;
-     - anything else gives `''`.
-   - `hasAnyTagValue(meta: WavMetadata | undefined): boolean`, following D-15:
-     - `undefined` gives `false`;
-     - it is `true` if any value in `Object.values(meta)` is: a string whose `trim()` is non-empty; an array with at least one element whose `trim()` is non-empty; or a number that is `Number.isFinite` and `> 0`;
-     - otherwise it is `false`.
-   - Types are imported from `~/types`. No `any`, no casts beyond what TS strictly needs, no comments, semicolons. Follow `AGENT_DISCOVERABLE_CODE.md` naming.
-2. **`src/renderer/src/components/file-list/FileList.tsx`.** Only these changes:
-   - delete the local `formatFirstFieldValue` and import both helpers from `~/lib/file-row-display`;
-   - replace the `hasTags` expression with `hasAnyTagValue(meta)`.
+1. **`src/main/ipc/metadata.ts`**
+   - Add an internal (not exported) helper, for example `stripRiffNulTerminator(value: string): string`, that removes `/\u0000+$/`.
+   - Apply it in `STANDARD_PROP_MAP` getters. For string props: `title`, `album`, `comment`, `copyright`, `isrc`, `publisher`. For array props, per element: `artists`, `genres`. Keep the existing `?? ''` / `[]` defaults.
+   - Apply it in the `readTagsFromFile` INFO branch to every value from `getValuesAsStrings`, before the tags, number and text handling. For a number field the result is `Number(stripped) || 0`, as today. For a text field, it is the stripped values joined with `', '`.
+   - `year`, `track`, `bpm` (taglib numbers) and the whole write path stay unchanged. B-R6-01 (IBPM/ITRK not mapped by taglib) is **not** this round.
+   - `getRiffInfoTags`:
+     - export it as a named export, keeping the same name;
+     - return `[]` for a non-`CombinedTag` instead of throwing;
+     - the `CombinedTag` path stays unchanged.
 
-   Nothing else changes: markup, classes, Badge text "Tagged", columns, selection and play handlers.
-3. **Tests (red first, `test-on-bugfix`).**
-   - **`tests/renderer/components/file-list.test.ts` (new)** renders the real `FileList` with `createElement`. It seeds `useFileStore` with `folderPath`, `files` (full `WavFileEntry`) and `metadata`. Use the `vi.hoisted` window workaround from `schema-editor.test.ts` (A-R3-01; `setup.ts` stays frozen), and use `resetAllStores`. Cases:
-     - (a) a row whose metadata has only `category: 'DOORWood'` (title `''`, artists `[]`, bpm `0`, everything else default) shows `Tagged`;
-     - (b) only `keywords: ['door', 'slam']` shows `Tagged`;
-     - (c) only `comment: 'მძიმე კარი'` shows `Tagged`;
-     - (d) all defaults plus `category: ''`, `keywords: ['']` and `comment: '   '` show **no** `Tagged`;
-     - (e) regression: `title: 'X'`, or `artists: ['A']`, or `bpm: 120` each show `Tagged`;
-     - (f) RR-R2-02: `artists: 'Foo'` (string) renders `Foo`, not `F`, and `artists: ['A', 'B']` renders `A` in the artist column.
-     - Assert per row, for example with `within` on the row containing the file name, so one row's badge cannot satisfy another row's assertion.
-   - **`tests/renderer/utils/file-row-display.test.ts` (new)** gives boundary coverage of both exports:
-     - `hasAnyTagValue`: `undefined`, `{}`, `""`, `"  "`, `[]`, `[""]`, `["", " "]`, `["", "x"]`, `0`, `-1`, `NaN`, `Infinity`, `1`;
-     - `formatFirstFieldValue`: `undefined`, number, `""`, `[]`, string, array.
-   - **Red proof:** run `file-list.test.ts` against the unchanged `FileList.tsx` **before** the fix. Cases (a)–(c) must fail; (d)–(f) may pass. Save the output as `a-round-5/red-before-fix.log`. Then implement and save the green run as `a-round-5/green-after-fix.log`.
+     On the write path, a `[]` result means custom fields are skipped and standard fields still reach `file.save()`. That is the existing code after the `infoTags.length > 0` check.
+   - Rules:
+     - no `any`, `@ts-ignore` or `@ts-expect-error`;
+     - semicolons;
+     - **no new comments**. Leave the two pre-existing `//` lines in the catch blocks as they are.
+     - Follow `AGENT_DISCOVERABLE_CODE.md` naming. IPC channels, error mapping and handler signatures stay unchanged.
+2. **Tests (red first, `test-on-bugfix`).** Create one new file, `tests/main/riff-info-nul.test.ts`.
+   - Follow the `getHandler` pattern of `recording-tag-contract.test.ts`. You may import `parseListInfoSubChunks` read-only from `./riff-chunks`.
+   - Build the test WAVs inline:
+     1. copy `tests/fixtures/sample.wav`;
+     2. append a `LIST`/`INFO` chunk with odd-size pad bytes;
+     3. fix the RIFF size.
+
+     B's `b-round-5-exp-nul-read.cjs` shows the byte layout.
+   - The schema is `STANDARD_FIELDS` plus two custom fields:
+     - `{ key: 'take', label: 'Take', type: 'number', riffChunkId: 'ITKN' }`;
+     - `{ key: 'mics', label: 'Mics', type: 'tags', riffChunkId: 'IMIC' }`.
+   - Cases:
+     - (a) INFO `ICMT "heavy door\0"`, `ICAT "DOORWood\0"`, `IKEY "door, slam\0"` → `meta:read` gives `comment === 'heavy door'`, `category === 'DOORWood'` and `keywords === 'door, slam'`, with no `\u0000` in any returned string.
+     - (b) INFO `INAM "\0\0"` → `title === ''`.
+     - (c) INFO `IGNR "Foley\0"` → `genres` equals `['Foley']`.
+     - (d) INFO `ITKN "120\0"` → `take === 120`. Before the fix this gives `0`.
+     - (e) INFO `IMIC "MKH416\0"` → `mics` equals `['MKH416']`.
+     - (f) Round trip, data loss. Use the (a)+(d) file with an extra non-schema `ISFT "Recorder 1.0\0"`:
+       1. `meta:read`;
+       2. set `title: 'X'` on the returned object;
+       3. `meta:write` of the whole object with the same schema (this mirrors `MetadataPanel.tsx:76`);
+       4. read the file's raw INFO with `parseListInfoSubChunks`.
+
+       Expected: `ITKN` is exactly the bytes of `120`, `ICAT` is exactly `DOORWood` (8 bytes) and `ICMT` is exactly `heavy door`. None of the schema sub-chunks written in this test contains byte 0. `ISFT` is still present and its payload is byte-identical. If `ISFT` is already dropped on `a8c1b53`, report that as a finding with the evidence; do not work around it.
+     - (g) A NUL-free value is unchanged: `ICMT "plain"` → `'plain'`. Interior NULs are kept: `ICMT "a\0b\0"` → `'a\0b'`.
+     - (h) RR-R2-01:
+       - `getRiffInfoTags(Id3v2Tag.fromEmpty())` returns `[]` and does not throw;
+       - for the tag of a real WAV that has INFO (`File.createFromPath(...).tag`, disposed afterwards), it returns one `InfoTag`.
+   - **Red proof:**
+     1. Run the new file against `git show a8c1b53:src/main/ipc/metadata.ts` patched with the export only (`function getRiffInfoTags` → `export function getRiffInfoTags`, no behaviour change) in a `/tmp` copy. Do not edit the working tree for this.
+     2. Expected red: (a)–(f) fail, and (h)'s first assertion fails with `TypeError: File tag is not a CombinedTag`. (g) may pass.
+     3. Save that run as `a-round-6/red-before-fix.log`, and the green run as `a-round-6/green-after-fix.log`.
 
 **Explicitly NOT in this round:**
-- Any `metadata.ts` or IPC change (RR-R2-01, D-10 empty-value policy, TM-B05, TM-B08).
+- Any renderer change, including RR-R5-02, the `typeof` guard in `file-row-display.ts`.
+- The write path or the D-10 empty-value policy.
+- TM-B05, TM-B08 and B-R6-01 (IBPM/ITRK).
+- The remaining `as unknown as TagObject` casts (RR-R2-04).
 - CI changes (TM-T0-CI-FU, RR-R1-01/03).
-- Schema migration or duplicate handling (TM-T1-MIG / TM-T1-DUP).
+- Schema migration or duplicates (TM-T1-MIG/DUP).
 - Biome on `tests/` (TM-B06).
-- New badge variants, wording or styling.
 - Package installs.
 
-Read first: `.claude/primitives/AGENT_DISCOVERABLE_CODE.md`, `TESTING.md`, `TYPESCRIPT_STRICT.md`, `SEMICOLONS.md`, `STATE_MANAGEMENT.md` (store seeding), `.claude/rules/test-on-bugfix.md`, and `tests/renderer/components/schema-editor.test.ts` (pattern).
+Read first:
+- `.claude/primitives/WAV_METADATA.md`, `ELECTRON_IPC.md`, `AGENT_DISCOVERABLE_CODE.md`, `TESTING.md`, `TYPESCRIPT_STRICT.md`, `SEMICOLONS.md`;
+- `.claude/rules/test-on-bugfix.md`;
+- `tests/main/recording-tag-contract.test.ts` and `tests/main/riff-chunks.ts` (patterns);
+- `b-round-5-exp-nul-read.cjs`, `b-round-5-exp-nul-writeback.cjs` and `b-round-5-exp-nul-number.cjs` in the loop folder.
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `src/renderer/src/lib/file-row-display.ts` (new) | pure `hasAnyTagValue` (D-15) + moved `formatFirstFieldValue` |
-| `src/renderer/src/components/file-list/FileList.tsx` | import the helpers; badge uses `hasAnyTagValue` |
-| `tests/renderer/components/file-list.test.ts` (new) | red-first render test for TM-B09 + RR-R2-02 display |
-| `tests/renderer/utils/file-row-display.test.ts` (new) | boundary unit tests |
+| `src/main/ipc/metadata.ts` | D-16 NUL strip in the reader; `getRiffInfoTags` exported and returns `[]` (RR-R2-01) |
+| `tests/main/riff-info-nul.test.ts` (new) | red-first tests (a)–(h) |
 
-Generated or ignored output (`tests/fixtures/*.wav`, `out/`, `test-results/`, `playwright-report/`) is not committed. Reports and logs go to `a-round-5/` in the loop folder.
+Generated or ignored output (`tests/fixtures/*.wav`, `out/`, `test-results/`, `playwright-report/`) is not committed. Reports and logs go to `a-round-6/` in the loop folder.
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R5-1 (red/green TM-B09) | Read A's `red-before-fix.log`. In `/tmp/c-r5-red` (rsync + `node_modules` symlink), restore `git show 7879ee0:src/renderer/src/components/file-list/FileList.tsx` (keep the new lib and tests) and run `npx vitest run --config vitest.config.renderer.ts tests/renderer/components/file-list.test.ts`. Then run it on the real tree. | Red: cases (a), (b) and (c) fail against the old `FileList.tsx`. Green: all cases pass on the real tree. |
-| R5-2 (RR-R2-02 mutation) | In a `/tmp` copy, change `formatFirstFieldValue` back to the pre-R2 behaviour (`meta?.artists?.[0] ?? ''`, i.e. index a string), then run both new test files. Second mutation: make `hasAnyTagValue` treat any defined string as non-empty (drop `trim`). | Mutation 1: case (f) fails (`F` instead of `Foo`). Mutation 2: case (d) and the whitespace/`[""]` boundary cases fail. This proves the tests check real behaviour. |
-| R5-3 (gate) | Clean state: `rm -rf out test-results playwright-report tests/fixtures/*.wav`, then the full `verifyCommand`. Also run E2E with `--retries=0`. | Exit 0. Biome 0 errors (no new warnings in the owned files). Typecheck 0 errors (node/web/test). Renderer **79 + A's new count**, all green. Main **42/42**. E2E **7/7** with `--retries=0`. |
-| R5-4 (real app: contract-only file is Tagged) | Built app with `_electron` under `xvfb-run -a` (`--no-sandbox`, clean `XDG_CONFIG_HOME`, dialog stubbed to a temp folder). Two files, both shown in the same folder. **Primary, from an independent producer:** `comment-only.wav` = `ffmpeg -i tests/fixtures/sample.wav -metadata comment='მძიმე კარი' -c copy comment-only.wav`. ffmpeg also adds an `ISFT` encoder tag, which is outside the schema. **Secondary, from the UI:** `contract.wav`, a copy of `sample.wav`, where only Category `DOORWood` is set through the editor and saved. Rescan or reopen the folder, and click a row to confirm the metadata panel opens. | **comment-only.wav:** `ffprobe -show_entries format_tags -of json` shows `comment` and `encoder`/ISFT, and no title/artist. `music-metadata` agrees. The row shows `Tagged` (`c-round-5/r5-4-comment-only-tagged.png`). The badge comes from `comment`: ISFT is not a schema key, so `meta:read` does not return it. **contract.wav:** ffprobe shows `ICAT=DOORWood` and no **non-empty** title/artist. Empty sub-chunks written by the save (D-10) are allowed; attach the raw INFO dump so they are visible. The row shows `Tagged` (`r5-4-contract-tagged.png`). Optional "before" screenshot: the same folder on the `7879ee0` build (the R5-1 `/tmp` tree after `npm run build`) shows no badge on either file. |
-| R5-5 (real app: emptied value stays untagged) | In the same session, on a fresh copy `blank.wav` of `sample.wav`, use the T1-10 path: set Category `x` and save; clear Category and save again; rescan. No other field is ever set. (`isDirty` is set on any edit, `metadata-store.ts:37-52`, so Save is enabled after clearing.) | ffprobe or the raw INFO dump after the second save shows `ICAT` present and **empty** (D-10 option (a)), and no non-empty schema value. The row shows **no** `Tagged` badge (`r5-5-blank-untagged.png`). After the first save, before clearing, the row did show `Tagged` (`r5-5-x-tagged.png`), so the check can discriminate. If the second save leaves no empty `ICAT`, report it as a finding (D-10 behaviour change), not a PASS. |
-| R5-6 (real app regression) | In the same session, set only Title `X` on a third copy, save, rescan. In a file with two artists (`A`, `B`), the artist column shows `A`. | `Tagged` is shown for the title-only file. The artist column shows `A`, not `A, B` and not a single character. Screenshots `r5-6-*.png`. ffprobe confirms the title. |
-| R5-7 (frozen/ownership) | `git status --porcelain --untracked-files=all`; `git diff --stat 7879ee0`; `git diff --quiet 7879ee0 -- . ':!src/renderer/src/components/file-list/FileList.tsx' ':!src/renderer/src/lib/file-row-display.ts' ':!tests/renderer/components/file-list.test.ts' ':!tests/renderer/utils/file-row-display.test.ts'` (everything except the four owned paths). Read the `FileList.tsx` diff. | Only the four owned paths changed or were added. The `FileList.tsx` diff is limited to the import and the `hasTags` line, plus removing the local function. No `any`, `@ts-ignore`, `@ts-expect-error`, `biome-ignore` or comments added. |
+| R6-1 (red/green) | Read A's `red-before-fix.log`. Set up `/tmp/c-r6-red` (rsync + `node_modules` symlink) with `git show a8c1b53:src/main/ipc/metadata.ts` patched with the export only, keeping the new test, and run `npx vitest run --config vitest.config.main.ts tests/main/riff-info-nul.test.ts`. Then run it on the real tree. | **Red:** (a)–(f) fail, with (d) reading `0` and (f) finding byte 0 or `ITKN` = `0`. (h) fails with the `CombinedTag` TypeError. **Green:** every case passes on the real tree. |
+| R6-2 (mutations) | In `/tmp` copies of the fixed tree: **M1** makes the strip helper return its input unchanged. **M2** strips only one trailing NUL (`/\u0000$/`). **M3** restores the `throw` in `getRiffInfoTags`. **M4** strips with `/\u0000/g` (all NULs). | M1: (a)–(f) fail. M2: (b) fails (`'\0'` remains). M3: (h) fails. M4: the interior-NUL part of (g) fails. Each proves a test checks real behaviour. |
+| R6-3 (gate) | Clean state: `rm -rf out test-results playwright-report tests/fixtures/*.wav`, then the full `verifyCommand`. Also run E2E with `--retries=0`. | Exit 0. Biome 0 errors and no new warnings in `metadata.ts` (compare against `a8c1b53`). Typecheck 0 errors (node/web/test). Renderer **107/107**. Main **42 + A's new count**, all green: T1-1 "no NUL", T1-10 clear path and `metadata.test.ts` unchanged and green. E2E **7/7** with `--retries=0`. |
+| R6-4 (real app: NUL files) | Built app with `_electron` under `xvfb-run -a` (`--no-sandbox`, clean `XDG_CONFIG_HOME`, dialog stubbed to a temp folder). One folder holds four files: `nul-comment.wav` and `nul-title.wav` (C's R5 `probe-nul.mjs` layout), `comment-only.wav` (`ffmpeg -i tests/fixtures/sample.wav -metadata comment='მძიმე კარი' -c copy`), and `nul-take.wav` (sample + INFO `ITKN "120\0"`, `ICAT "DOORWood\0"`). In the Schema editor add the custom field **Take**, type Number, RIFF ID `ITKN`. | **nul-comment / nul-title:** no `Tagged` badge (`c-round-6/r6-4-nul-untagged.png`); ffprobe shows `comment:""` / `title:""`. **comment-only:** the Comment input value is exactly `მძიმე კარი`. Check with `input.value` and confirm no char code 0 (`r6-4-comment-clean.png`). **nul-take:** Take shows `120`, Category `DOORWood`. Set Title `X`, Save, Rescan. The raw INFO dump shows `ITKN` payload `120` (3 bytes), `ICAT` 8 bytes, `INAM` `X`, no byte 0 in those payloads. ffprobe shows `ITKN=120`, `ICAT=DOORWood`, `title=X`, and `music-metadata` agrees (`r6-4-take-saved.png`). **Before, required:** the same `nul-take.wav` steps on the `a8c1b53` build (the R6-1 `/tmp` tree with the original `metadata.ts` restored, then `npm run build`) show Take `0`, and after the save the raw `ITKN` payload is `0`. This confirms the data-loss claim. If the old build does **not** lose the value, report it; TM-B10 severity is then re-rated. |
+| R6-5 (real app: ffmpeg file save) | In the same session, on `comment-only.wav`: set Title `Y`, Save, Rescan. | Raw `ICMT` size **28** (it was 29 with the NUL before the save), no byte 0 inside it, and ffprobe `comment` is still `მძიმე კარი`. `ISFT` is present with an unchanged payload, or, if it was dropped, a before/after comparison against the `a8c1b53` build shows the drop is pre-existing (then it is a finding, not a FAIL). The row shows `Tagged`. Screenshot `r6-5-*.png`. |
+| R6-6 (real app regression) | Same session: (i) on a fresh copy of `sample.wav`, set only Category `DOORWood` through the editor and save. (ii) On another fresh copy, set Category `x`, save, clear it, save again (the T1-10 path), then rescan. | (i) The raw INFO shows `ICAT` = `DOORWood` (8 bytes, no NUL); ffprobe `ICAT=DOORWood`; the row is `Tagged`. (ii) After the second save `ICAT` has size 0, and the row shows **no** `Tagged` badge. |
+| R6-7 (frozen/ownership) | `git status --porcelain --untracked-files=all`; `git diff --stat a8c1b53`; `git diff --quiet a8c1b53 -- . ':!src/main/ipc/metadata.ts' ':!tests/main/riff-info-nul.test.ts'`. Read the `metadata.ts` diff. | Only the two owned paths changed or were added. The diff covers only the strip helper and its call sites, the `getRiffInfoTags` export and `return []`. The write path, IPC handlers and error mapping are unchanged. No `any`, `@ts-*`, `biome-ignore` or new comments. |
+
+**R6-4 order:** add the **Take** field in the Schema editor (manual RIFF ID `ITKN`; `SchemaEditor.tsx:95-104` accepts four uppercase letters or digits that are not reserved) **before** you open or rescan the folder. `meta:read` uses the schema at read time. If the editor stores a different ID, read it from `schema.json` in `XDG_CONFIG_HOME` and build `nul-take.wav` with that ID; record this in the report.
+
+**B experiment facts (for A and C):**
+- Interior NULs survive the library read: `ICMT "a\0b\0"` gives `tag.comment` = `"a\u0000b\u0000"`, and `getValuesAsStrings` gives the same for a custom ID (`b-round-5-exp-nul-interior.cjs`). So (g) and M4 can tell the cases apart.
+- The scripts take the repository path as their argument and write to `/tmp/b-r6/`, so run `mkdir -p /tmp/b-r6` first.
+- `b-round-5-exp-nul-writeback.cjs` reads `/tmp/b-r6/nul.wav`, so run `-nul-read.cjs` before it.
+
+**Evidence rule:** ffprobe hides NULs, so ffprobe alone never proves the NUL is gone. Every NUL claim needs raw INFO bytes, from `parseListInfoSubChunks` or an equivalent hex/size dump.
 
 ## What could break (C re-checks)
-- **Badge noise:** if `hasAnyTagValue` counts defaults (`0`, `[]`, `''`) or the empty `ICAT` from D-10, every file saved once would look tagged (R5-5).
-- **Sorting by artist/genre** (`file-store.ts:120`) is unaffected: the store is frozen. C clicks the Artist sort header once in R5-6 and confirms the rows still render.
-- **Row selection and double-click play:** handlers are unchanged. C clicks a row in R5-4 and confirms the metadata panel opens.
-- **Renderer test isolation:** the new render test must not leak store state into the existing store tests. The full renderer suite must pass in one run (R5-3).
-- **Large folders:** the predicate is O(fields) per row, with no new store subscriptions.
+- **T1-10 clearing path:** an empty value must still be written as a size-0 sub-chunk, and an old value must disappear (R6-3, R6-6 ii).
+- **"Tagged" badge:** files with real values must stay Tagged (R6-5, R6-6 i). Only NUL-only values change (R6-4).
+- **Files saved once already** carry an `id3 ` chunk and `LIST/MID`, so `tag.title`/`comment` may come from ID3 rather than INFO. The strip must not change the values those files show (R6-5 rescan).
+- **Batch read** (`meta:readBatch`) uses the same `readTagsFromFile`, so the file list and the panel agree (R6-4 badge vs panel).
+- **IPC error mapping** (`Corrupt`, `EBUSY`/`EACCES`) and `corrupt.wav` → empty metadata stay unchanged (existing `metadata.test.ts`, R6-3).
+- **Custom fields without INFO in the file** keep their defaults (`0` / `[]` / `''`).
 
 ## Next (orientation only)
-1. Root reports the first `Check` Actions run on `7879ee0`:
-   - **green:** TM-T0-CI and TM-T0 close, and TM-T0-CI-FU (step budget + docs note) becomes a small CI round;
-   - **red, or the apt step is slow:** the per-attempt timing lines decide that round's scope.
-2. Saba question batch: D-07 (TM-T1-MIG), D-10, D-12/TM-B08, TM-T1-DUP (RR-R3-01), D-15 (badge rule), RR-R1-07, RR-R3-05, and TM-T2-DATA (T-2 stays BLOCKED until it arrives).
-3. Remaining low items that need no decision: TM-B06 needs `package.json` (protected), so it is a Saba question too. RR-R2-01 can join a later `metadata.ts` round.
+1. Root reports the first `Check` Actions run on `7879ee0`, `a8c1b53` or later:
+   - **green:** TM-T0-CI and TM-T0 close, and TM-T0-CI-FU becomes a small CI round;
+   - **red or slow:** its timings set that round's scope.
+2. Saba question batch:
+   - D-07 (TM-T1-MIG), D-10, D-12/TM-B08 plus B-R6-01 (IBPM/ITRK);
+   - TM-T1-DUP (RR-R3-01), D-15 plus RR-R5-01 (docs note);
+   - D-16 (for information), RR-R1-07, RR-R3-05, TM-B06 (`package.json`);
+   - TM-T2-DATA. T-2 stays BLOCKED until it arrives.
+3. Low items that need no decision: RR-R5-02 (`typeof` guard) and RR-R5-06 (shared `isEmptyFieldValue`, a signal) can form a later renderer round.
