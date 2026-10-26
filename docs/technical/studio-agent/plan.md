@@ -1,6 +1,6 @@
 # CZABA Studio — AI აგენტის გეგმა: command layer და რაუნდები
 
-**სტატუსი:** წინადადება. Scope-ს B აფასებს და გეგმავს. Root ან Saba ამტკიცებს. დავალება backlog-ში ავტომატურად არ ჩაიწერება.
+**სტატუსი:** approved (Saba, 2026-10-26); queue position per `loop/policy.local.md`. Loop-ში შედის მხოლოდ (i) command layer; (ii)–(iv) loop-ის გარეთაა.
 **თარიღი:** 2026-10-26 · **ავტორი:** frontend-architect (read-only, checkpoint რეჟიმი)
 
 ## 0. შემოწმებული მდგომარეობა
@@ -311,7 +311,7 @@
 
 **რეკომენდებული რიგი:**
 1. **ახლა, loop-ის გარეთ, store-ის ცვლილების გარეშე:** PA-0 და PA-1 (offline eval). ეს ყველაზე იაფი ექსპერიმენტია და ძირითად კითხვას პასუხობს: დაგეგმავს თუ არა მოდელი სწორად. Loop არ ჩერდება.
-2. Saba ამტკიცებს queue entry-ს `STUDIO-AGENT-COMMANDS` (CMD-1…5), status `proposed_awaiting_user_go`.
+2. Queue entry `STUDIO-AGENT-COMMANDS` (CMD-1…5) — approved (Saba, 2026-10-26), status `queued`; პოზიცია `loop/policy.local.md`-ის მიხედვით.
 3. CMD-1…4 → VD-1/2 → PA-2…5 → CMD-5 → (SRW-44) CMD-6 → MB-0…4.
 
 **Queue-ში პოზიცია (არაფერს ანაცვლებს):**

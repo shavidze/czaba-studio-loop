@@ -25,7 +25,7 @@ Oct 26, 2026 · @Saba Shavidze · სტატუსი: **draft, მომხ�
 იგივე გზით, როგორც ფაზა 2:
 
 1. **მოთხოვნების ფაილი:** ეს დოკუმენტი, `docs/technical/studio-real-workspace/phase-2b-spotting.md`. B მას მასალად კითხულობს და არა ინსტრუქციად.
-2. **რიგის ჩანაწერი:** `post_current_stage_queue`-ის ბოლოს, `PHASE2-VIDEO-SCORING`-ის შემდეგ, ერთი ობიექტი `PHASE2B-SPOTTING` სტატუსით `queued_awaiting_user_go`. მისი ტექსტი ბოლო სექციაშია. ჩაწერა ხდება მხოლოდ მაშინ, როცა B არ მუშაობს, ფაილის ასლის შენახვის შემდეგ.
+2. **რიგის ჩანაწერი:** `post_current_stage_queue`-ის ბოლოს, `PHASE2-VIDEO-SCORING`-ის შემდეგ, ერთი ობიექტი `PHASE2B-SPOTTING` სტატუსით `queued` (Saba-მ დაამტკიცა 2026-10-26; ცალკე go-ahead არ სჭირდება). მისი ტექსტი ბოლო სექციაშია. ჩაწერა ხდება მხოლოდ მაშინ, როცა B არ მუშაობს, ფაილის ასლის შენახვის შემდეგ.
 3. **ID-ები:** SRW-46…SRW-48. ჩაწერის დღეს (2026-10-26) `backlog.json`-ში ყველაზე მაღალი ID SRW-45 იყო.
 
 ## რა შედის და რა არა
@@ -191,11 +191,11 @@ SRW-47a-ს SRW-46-ის UI არ სჭირდება და მხოლ
 ```json
 {
   "id": "PHASE2B-SPOTTING",
-  "status": "queued_awaiting_user_go",
+  "status": "queued",
   "requested": "2026-10-26",
   "instruction": "Spotting assistant: hits from video audio (SRW-46), place SFX by sync point and text suggestions at a locator (SRW-47), optional spotting list (SRW-48). Do NOT start, plan or extend any current task with this work early.",
-  "prerequisites": ["PHASE2-VIDEO-SCORING: SRW-43b done", "SRW-16 done", "explicit user go-ahead recorded by root"],
-  "gate": "Starts only after root records the user's go-ahead in this entry (status -> active_root_opened).",
+  "prerequisites": ["SRW-16 C PASS (c_pass_tech_lead_manual is sufficient)", "SRW-43b C PASS for SRW-46b only", "SRW-43a C PASS for SRW-46c only", "SP-0 fixture round C PASS"],
+  "gate": "Approved by Saba 2026-10-26; position in the queue per loop/policy.local.md. No further go-ahead.",
   "spec": "docs/technical/studio-real-workspace/phase-2b-spotting.md",
   "order": ["SRW-46a", "SRW-46b", "SRW-47a", "SRW-47b", "SRW-46c, SRW-48 optional"],
   "next_action_for_B": "When opened: one stage per round; take acceptance IDs from the spec; the spec's 'proposed rules' are B decisions (accept with a D-ID or reject with reason in b-round-N.md); if a task conflicts with an existing D-rule (D-10 included), write BLOCKED and ask the user. Verify in /studio-lab with the demo fixture; backend-only checks are BLOCKED, never PASS. Copy tasks into items only when opened.",

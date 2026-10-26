@@ -440,7 +440,7 @@ SRW-16  c_pass_tech_lead_manual  ✔ (C PASS; Tech Lead R72-T…R78-T ღია�
 
 ## 7. JSON: `PHASE2B-SPOTTING`-ის `tasks`
 
-ჩანაწერის დანარჩენი ველები draft-ის §„ზუსტად რა ჩაიწერება“-დან რჩება, ორი ცვლილებით: `prerequisites` → `["SRW-16 C PASS (c_pass_tech_lead_manual is sufficient)", "SRW-43b C PASS for SRW-46b only", "SRW-43a C PASS for SRW-46c only", "root: spotting fixtures in loop/media/spotting with SHA256SUMS", "explicit user go-ahead recorded by root"]`; `order` → `["SRW-46a", "SRW-47a", "SRW-47b", "SRW-46b (after SRW-43b)", "SRW-48 optional", "SRW-46c optional (after SRW-43a)"]`.
+ჩანაწერის დანარჩენი ველები draft-ის §„ზუსტად რა ჩაიწერება“-დან რჩება, ორი ცვლილებით: `prerequisites` → `["SRW-16 C PASS (c_pass_tech_lead_manual is sufficient)", "SRW-43b C PASS for SRW-46b only", "SRW-43a C PASS for SRW-46c only", "SP-0 fixture round C PASS (Node generator + SHA256SUMS in loop/media/spotting, no store change)"]; `status` → `"queued"`, `gate` → `"Approved by Saba 2026-10-26; position per loop/policy.local.md. No further go-ahead."``; `order` → `["SRW-46a", "SRW-47a", "SRW-47b", "SRW-46b (after SRW-43b)", "SRW-48 optional", "SRW-46c optional (after SRW-43a)"]`.
 
 ```json
 "tasks": [
