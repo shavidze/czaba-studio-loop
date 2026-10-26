@@ -23,3 +23,14 @@
 
 - The backend import tool (`czaba-api/tools/recording-import`) will read Tag Manager's fields with `ffprobe`. Field names and the WAV chunk they land in are a contract between the two streams: B records every such decision with a D-ID and lists it in `feature-status.md`.
 - Reports Saba reads are written in Georgian with English technical terms.
+
+## Root note — check.yml run on c34ee5a (2026-10-26)
+
+- Run `40323787413` (workflow `Check`, commit `c34ee5a`) was **cancelled by its 30-minute job timeout**. Steps 1–4 passed in 19 s. Step 5 "Install system packages" (`sudo apt-get update && sudo apt-get install -y ffmpeg xvfb`) ran from 12:36:29 to 13:06:24 and never finished. Lint, tests, build and E2E never ran. The `Release` workflow on the same commit passed.
+- The same packages installed in about 2 minutes in this loop's own job on `ubuntu-24.04`, so the hang is in the apt step, not in the app. Root cannot read the step log (the log storage host is not reachable from root's environment).
+- Fix belongs to **TM-T0-CI**, before TM-T1:
+  - install with `--no-install-recommends` and `-o Dpkg::Use-Pty=0`;
+  - skip man-db trigger processing (`echo 'set man-db/auto-update false' | sudo debconf-communicate` and remove `/var/lib/man-db/auto-update`);
+  - give the step its own `timeout-minutes` (for example 8) and retry it once;
+  - keep the job timeout as a backstop.
+- Root can read the Actions status of `TCzaba/czaba-tag-manager` and will record the green run that closes TM-T0-CI. A, C and B cannot see Actions from the runner: C proves the workflow locally (same commands, same order) and lists the step timings it measured.
