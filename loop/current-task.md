@@ -1,157 +1,145 @@
-# CURRENT TASK — Round 183: M4 — the cookie banner no longer covers the Studio
+# CURRENT TASK — Round 184: ROOT-RECON-GRID-HARNESS — one shared test environment for the three grid UI suites
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-26 · Decision: **D-29z148** (`backlog.json` → VISUAL-A-OBSIDIAN `m4_plan_d29z148`)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-26 · Decision: **D-29z149** (`backlog.json` → VISUAL-A-OBSIDIAN `harness_plan_d29z149`)
 - **Rules:** `docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, and the 2026-10-23 bug gate. They take precedence over older text.
-- **Previous task:** `tasks/round-182.md` is an exact copy of the round-182 `current-task.md` (sha256 `4ff73521…`, checked with `cmp`). The rationale for this round is in `b-round-182.md`.
+- **Previous task:** `tasks/round-183.md` is an exact copy of the round-183 `current-task.md` (sha256 `fb745dc5…`, checked with `cmp`). The rationale for this round is in `b-round-183.md`.
+- **This is a test-only round.** No application source file changes. No browser-visible behaviour changes.
 
-## Baseline = HEAD `f22290f` (gate 182 published)
-- **Gate:** `gates/gate-round-182.json` is `published`, commit `f22290f`, on both remotes. `git status` is clean, with **1007 tracked files**.
-- **Start state:** `sha256sum -c c-round-182/end-tree-sha256.txt` is OK (1006 files). The 1007th file is doc 150. It was untracked in C's list, and its hash equals A's round-182 end hash (`73b80132…`).
-- **Frozen list:** `b-round-182-r183-tree-sha256.txt`, **1005 entries** (1007 minus the 2 grants). B checked it: OK.
-- **Grants:** `b-round-182-r183-grants.txt` (2 existing files). **New files:** `b-round-182-r183-new-files.txt` (2 files; neither exists yet).
-- **Start hashes:** `b-round-182-r183-granted-start-sha256.txt`. **Start copies:** `b-round-182/r183-granted-start/`.
+## Baseline = HEAD `423fbc4` (gate 183 published)
+- **Gate:** `gates/gate-round-183.json` is `published`, commit `423fbc4`, on both remotes. `git status` is clean, with **1009 tracked files**.
+- **Start state:** `sha256sum -c c-round-183/end-tree-sha256.txt` is OK (1009).
+- **Frozen list:** `b-round-183-r184-tree-sha256.txt`, **1005 entries** (1009 minus the 4 grants). B checked it: OK.
+- **Grants:** `b-round-183-r184-grants.txt` (4 existing files). **New files:** `b-round-183-r184-new-files.txt` (2 files; neither exists yet).
+- **Start hashes:** `b-round-183-r184-granted-start-sha256.txt`. **Start copies:** `b-round-183/r184-granted-start/`.
 - **Vitest:**
-  - **There is no "before" base.** No existing suite imports `CookieConsent` or `~/lib/analytics`; B grepped every `*.test.ts(x)`.
-  - **The "after" list** is `b-round-182-r183-vitest-after.txt`, with 1 new file.
-  - **Never** run `npx vitest run $(cat <empty file>)`: an empty list runs the full suite.
-- **A's first step:** check that HEAD is `f22290f`, that `sha256sum -c --quiet b-round-182-r183-tree-sha256.txt` is OK, and that the 2 start hashes match. If anything differs, stop and report.
+  - The **before** and **after** lists are the same file: `b-round-183-r184-vitest-base.txt` (the 3 grid UI suites).
+  - B ran it on HEAD: **3 files, 45 tests, 45 passed** (grid-snap-ui 20, grid-musical-ui 14, grid-triplet-ui 11).
+  - **Name lock:** `b-round-183/out/vitest-base-names.txt` holds the sorted `file :: fullName :: status` list. The raw JSON is `b-round-183/out/vitest-base.json`.
+  - The old "44 targeted / 1683 full" numbers belong to the local commit `3ea2e04`, which is not in the cloud. They do not apply here.
+- **A's first step:** check that HEAD is `423fbc4`, that `sha256sum -c --quiet b-round-183-r184-tree-sha256.txt` is OK, and that the 4 start hashes match. If anything differs, stop and report.
 
-## 0. Why this round (D-29z148)
-- **Round 182: C PASS, 0 bugs.** `browserVerified` and `realVerified` are both true. Root published it as `f22290f`. **M3 → მზადაა** (vetoable, M3-RATIONALE-VETOABLE).
-- **Regression is not due yet.** `regression-last.json` is dated 2026-10-24, and today is 2026-10-26: 2 days, below the 3-day threshold. Any planning on or after 2026-10-27 makes the next round the **REGRESSION round**, expected to be round 184. It will include M1, M3 and M4.
+## 0. Why this round (D-29z149)
+- **Round 183: C PASS, 0 bugs.** `browserVerified` and `realVerified` are both true. Root published it as `423fbc4`. **M4 → მზადაა** (vetoable R44/R45). All four approved M moves are now done or `awaiting_user` (M5).
+- **Regression is not due at this planning.** `regression-last.json` is dated 2026-10-24, and today is 2026-10-26: 2 days, below the 3-day threshold.
+  - **This reverses the order in round 183's §8**, which assumed planning would happen on 2026-10-27: harness first, then regression.
+  - The first planning on or after 2026-10-27 makes the next round the **REGRESSION round**, expected to be round 185. It includes M1, M3 and M4.
 - **Bug gate:** no Critical, High or Medium finding is open.
-- **Next in the VISUAL-A order is M4.** It is approved in `visual-direction-a.md` §M (2026-10-21, `approved_moves.M4`): *"the cookie banner on `/studio-lab` no longer covers the bottom panel. Reason: it gets in the way of work. Impact: Store behaviour, a separate file."* M4 is the last approved M; M5 is `awaiting_user`.
-- **B reproduced the problem on HEAD** (`b-round-182/out/banner-head.json`, `under-banner-head.json` and the PNGs).
-  - **Setup:** a clean `f22290f` copy on :5175 with `VITE_GA4_MEASUREMENT_ID=G-B183PROBE`, its own vite `cacheDir`, and `googletagmanager.com` aborted.
-  - **What happens:** 1.5 s after load, the banner on `/studio-lab` is `position: fixed` at **(0, 832) 1440×68** and **(0, 652) 1280×68**.
-  - **What it covers:** the Studio status line ("Demo collection ready. Choose a track…", `aria-live`) and the keyboard-shortcut hint bar, at both viewports.
-  - **Store page:** on `/` the banner has the same rect.
-  - **On the shared :5173 server it never renders:** the cloud has no `.env`, so `GA4_MEASUREMENT_ID` is empty and `CookieConsent` returns early. That is why C needs its own GA-env servers (§5).
-- **Grant decision (M4-COOKIE-GRANT, resolved):**
-  - `app/components/common/CookieConsent.tsx` is **not** in `global_forbidden_files`. It was only frozen per round, so B grants it for this approved move, whose impact line names that file.
-  - `app/root.tsx` **is** globally forbidden and stays byte-identical. The route check is done inside the component.
+- **This is the last item in the VISUAL-A order.** The user approved it on 2026-10-25 (`agent-workflow.md` reconciliation, item 2): *a separate bounded test-only task: in `helpers/workspace-test-environment.ts`, a `createWorkspaceTestEnvironment` factory; each suite has its own clock/classes; assertions, setup/teardown and new canonical changes stay unchanged; the old doc063 number is taken, so use a new free number.*
+- **B checked the source at HEAD:**
+  - These three blocks are **byte-identical** (`diff` is empty), 79 lines each, from `const fakeClock` to the end of `class FakeResizeObserver`:
+    - `grid-snap-ui.test.tsx` l.23–101;
+    - `grid-musical-ui.test.tsx` l.29–107;
+    - `grid-triplet-ui.test.tsx` l.30–108.
+  - In each file, `fakeClock` appears 3 times: the declaration, `currentTime`, and the `fakeClock.base = …` reset in `beforeEach`.
+  - The Fake classes are used outside the block only in the `beforeEach` `vi.stubGlobal` lines.
+- **The local commit `3ea2e04` is not in the cloud.** The extraction is done again from the current canonical files. It is not cherry-picked, and no source function is re-implemented.
 
 ## 1. What changes (exact; line numbers are on the start tree)
-| ID | File : line | Change |
+| ID | File | Change |
 |---|---|---|
-| **L1** | `CookieConsent.tsx` l.8–10 (imports) | Add `import { useLocation } from '@remix-run/react';`. Keep Biome's import order. |
-| **L2** | `CookieConsent.tsx` l.12–13 | At the top of `CookieConsent()`, before any `return`, add `const { pathname } = useLocation();` and `const isStudioRoute = pathname.startsWith('/studio');`. Hooks stay unconditional and keep their order. |
-| **L3** | `CookieConsent.tsx` l.48 | `if (!isVisible) return null;` → `if (!isVisible \|\| isStudioRoute) return null;` |
+| **H1** | **new** `app/lib/arrangement/__tests__/helpers/workspace-test-environment.ts` | `export function createWorkspaceTestEnvironment()`. The function body contains the 79-line block, moved and unchanged in behaviour: `const fakeClock = { base: 0 };` plus `FakeParam`, `FakeNode`, `FakeGain`, `FakePanner`, `FakeSource`, `FakeAudioContext` (its `currentTime` reads this call's `fakeClock`), `FakeOfflineAudioContext`, `FakeAudioBuffer` and `FakeResizeObserver`. It returns `{ fakeClock, FakeAudioContext, FakeOfflineAudioContext, FakeAudioBuffer, FakeResizeObserver }`. FakeParam, FakeNode, FakeGain, FakePanner and FakeSource are **not** returned or exported. |
+| **H2** | `grid-snap-ui.test.tsx` | Delete l.23–101. In their place, put one module-scope line: `const { fakeClock, FakeAudioContext, FakeOfflineAudioContext, FakeAudioBuffer, FakeResizeObserver } = createWorkspaceTestEnvironment();` (Biome may wrap it). Add `import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';` where Biome's import order puts it. |
+| **H3** | `grid-musical-ui.test.tsx` | The same, for l.29–107. |
+| **H4** | `grid-triplet-ui.test.tsx` | The same, for l.30–108. |
 
 **Constraints:**
-- **Store routes stay exactly as they are:** the returned JSX, every class string, the inline `style`, the 1500 ms timer, `handleAccept` / `handleDecline`, the `fbq` calls, the Georgian header comment and the `GA4_MEASUREMENT_ID` / `hasConsentDecision` early exits.
-- **Do not fix pre-existing issues** in this file, such as the inline rgba gradient. They are out of M4 scope.
-- **No new prop, context or export.** Do not edit `root.tsx`, `analytics.ts`, `components/common/index.ts`, any Studio component or `app/styles/`.
+- **Each suite must own its environment.** `fakeClock` and every class are created **inside** the factory body. No module-level state in the helper. Two calls return different `fakeClock` objects and different class identities (R47).
+- **Leave the other suite code byte-identical:** `vi.mock(...)` blocks, the `beforeEach` / `afterEach` bodies, the constants after the block (`PX_PER_SECOND` …), every helper function, every `describe` / `it` and every assertion. The diff in each suite is exactly **two changes**: the import line, and the block replaced by one destructure.
+- **Follow the project rules:**
+  - TypeScript strict: no `any`, no `@ts-ignore`, no type assertions. Keep the existing types: `buffer: unknown`, `onended: (() => void) | null`, and the `FakeAudioBuffer` options object type.
+  - Semicolons.
+  - No code comments.
+  - An explicit return type is not required, so let TypeScript infer it. If Biome or the reviewer asks for an exported type, name it `WorkspaceTestEnvironment`.
+  - **Config facts (B checked):** `biome.json` has **no `overrides`** (`files.includes` = `app/**/*.ts(x)`). The helper gets exactly the rules the suites already pass with, including the empty methods `disconnect() {}`, `start() {}` and `observe() {}`. `npm run typecheck` is `tsc --noEmit` with no `declaration` / `composite`, so returning locally declared classes from an exported function is fine. If Biome or tsc still reports a diagnostic on the helper, report it. Do not restructure the code to silence it; B rules.
+- **Out of scope** (the user approved only these 3 suites):
+  - the **73 other suites** that carry a copy of the block;
+  - `expectTokens` / `countOccurrences`, which are checkpoint Q2 and root's decision;
+  - any file under `app/` outside the 4 test paths;
+  - `vitest.config.ts`.
 
-**Rulings (B, vetoable, recorded in `backlog.json` `m4_plan_d29z148.rulings`):**
-- **R44, hide, not move.** On `/studio*` the banner renders nothing.
-  - VISUAL-A forbids layout moves in Studio.
-  - Any fixed overlay covers some Studio surface: a bottom bar covers the status line and hint, a corner card covers lanes or the detail panel, and a top bar covers the transport.
-- **R45, no replacement consent UI inside Studio this round.**
-  - M4 does not change the pre-decision tracking posture. Before any click, a Studio visit has the same state as every Store page: `root.tsx` loads gtag with consent default `denied` for analytics and ad storage. Consent Mode may still send cookieless pings, but no analytics cookies or identifiers are stored.
-  - The question is asked on the next Store page: the timer keeps running and `isVisible` becomes true, so the banner shows as soon as the route is not `/studio*`.
-  - A Studio-native consent entry would be new behaviour and needs Saba.
-- **R46, the predicate is `pathname.startsWith('/studio')`.** It is identical to `root.tsx` l.137 `isStudioPage`, so `/studio-lab` and `/studio/:productId` behave alike.
+**Rulings (B, vetoable, recorded in `harness_plan_d29z149.rulings`):**
+- **R47, destructure at module scope.** `beforeEach` does not build the environment. This keeps setup/teardown byte-identical, as the user's constraint requires. Each suite still owns its clock and classes, through one factory call per module.
+- **R48, helper path** `app/lib/arrangement/__tests__/helpers/`. The name has no `.test.`, so vitest `include: ['app/**/*.test.{ts,tsx}']` does not collect it as a suite. `tsconfig` `include: ['**/*.ts', …]` still typechecks it.
+- **R49, 45-name lock.** After the change, the sorted `file :: fullName :: status` list must equal `b-round-183/out/vitest-base-names.txt`. Any drift is a **FAIL**, not a note: a renamed, dropped, added or skipped test, or a status other than `passed`.
 
-## 2. Tests and docs (A)
-**New test file** `app/components/common/__tests__/CookieConsent.test.tsx`. The folder is new, and vitest `include` (`app/**/*.test.{ts,tsx}`) covers it.
-
-Read `.claude/prompts/new-test.md`, `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md` first.
-
-**Setup:**
-- `vi.mock('~/lib/analytics', …)` with a non-empty `GA4_MEASUREMENT_ID`, a controllable `hasConsentDecision` (default `false`) and a spy `setAnalyticsConsent`.
-- `vi.mock('@remix-run/react', …)` with a controllable `useLocation`, following the existing pattern in the arrangement tests.
-- Fake timers, advanced by 1500 ms inside `act`.
-
-| ID | Assert |
-|---|---|
-| **CC1** | Pathname `/`: before 1500 ms nothing is rendered. After 1500 ms, the Accept and Decline buttons are present, and the banner root has the exact class string `fixed bottom-0 left-0 right-0 z-50 p-4 animate-slide-up`. |
-| **CC2** | Pathname `/studio-lab`: after 1500 ms, and again after 5000 ms, nothing is rendered (`container` is empty). |
-| **CC3** | Pathname `/studio/middle-east`: after 1500 ms, nothing is rendered. |
-| **CC4** | Pathname `/studio-lab`, advance 1500 ms, and assert that nothing is rendered. Then rerender with `/products`: the banner appears **without another timer advance** (R45). |
-| **CC5** | Pathname `/`, click Accept: `setAnalyticsConsent(true)` is called once, and the banner disappears. Also check Decline → `false`, and that `hasConsentDecision` true → nothing renders on `/`. |
-
-**Test rules:** query by role or text. Use no colour-class selector, except the exact root class-string lock in CC1, which stands in for C's Store screenshot.
+## 2. Docs (A)
+Read `GEORGIAN_DOCS.md` and `docs/implementation/TEMPLATE.md` first.
 
 | ID | File | Change |
 |---|---|---|
-| **D1** | doc 150 | l.4 status → `Completed`. At l.71, strike the TODO and mark it done: C round 182 PASS, published `f22290f`. l.72 (veto) stays. At l.73, change the next step to "M4 (round 183), then the REGRESSION round." Nothing else changes. |
-| **D2** | **new** `docs/implementation/2026/quarter-IV/151-studio-m4-cookie-banner-studio.md` | Georgian, with the `docs/implementation/TEMPLATE.md` sections. Include L1–L3, R44–R46 (with the GDPR default-denied note), B's HEAD probe numbers, CC1–CC5, mutations m308–m311 and the §6 row. Status: `In Progress (awaiting C round 183)`. |
+| **D1** | doc 151 `151-studio-m4-cookie-banner-studio.md` | l.4 status → `Completed`. At l.73, strike the TODO and mark it done: C round 183 PASS, published `423fbc4`. l.74 (veto) stays. At l.75, change the next step to "ROOT-RECON-GRID-HARNESS (round 184), then the REGRESSION round". Nothing else changes. |
+| **D2** | **new** `docs/implementation/2026/quarter-IV/152-studio-grid-test-harness.md` | Georgian, with the TEMPLATE sections. Include: the approval source (2026-10-25 reconciliation, item 2); why `3ea2e04` is not used; H1–H4; R47–R49; B's identical-block check (line ranges); the 45/45 base (20/14/11); the name-lock result; mutations m312–m313; the 73 remaining copies as a TODO signal, not scheduled; and the §6 row. Status: `In Progress (awaiting C round 184)`. |
 
 ## 3. A — files you own (everything else is frozen)
-- **The 2 grants:** `CookieConsent.tsx` (L1–L3 only) and doc 150 (D1 only).
-- **The 2 new files:** the test file and doc 151.
+- **The 4 grants:** the 3 grid UI suites (H2–H4 only) and doc 151 (D1 only).
+- **The 2 new files:** the helper and doc 152.
 - **Protected, byte-identical:**
-  - `app/root.tsx`, `app/lib/analytics.ts` and `app/components/common/index.ts`;
-  - every route (including `studio.$productId.tsx` and `studio-lab.tsx`), `app/components/studio/*` and `app/components/arrangement/*`;
-  - `app/styles/`, the contexts, `app/lib/auth.ts`, `firebase.client.ts`, the purchase / download / studio-token files, `e2e/`, `.claude/**`, `package.json` and `vite.config.ts`.
+  - every file under `app/` that is not one of the 4 test paths, including all Studio / arrangement components, `ArrangementContext.tsx`, `app/lib/arrangement/*.ts` source, routes (`studio.$productId.tsx`, `studio-lab.tsx`), `root.tsx`, `app/styles/` and the contexts;
+  - `app/lib/auth.ts`, `firebase.client.ts`, the purchase / download / studio-token files, `e2e/`, `.claude/**`, `package.json`, `vitest.config.ts`, `tsconfig.json`, `biome.json` and `vite.config.ts`;
+  - the other 73 suites.
 - **Process rules:**
-  - Read the primitives first: `FORWARDREF_COMPONENT.md`, `AGENT_DISCOVERABLE_CODE.md`, `TAILWIND_FIRST.md`, `SECURITY_AUDIT.md` (consent/tracking), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `.claude/prompts/new-test.md` and `docs/implementation/TEMPLATE.md`.
+  - Read the primitives first: `AGENT_DISCOVERABLE_CODE.md` (export naming), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `.claude/prompts/new-test.md`, `GEORGIAN_DOCS.md` and `docs/implementation/TEMPLATE.md`.
   - Make every lasting edit with Edit/Write. Use shell writes only for the temporary mutations, and restore and sha-check after each one.
-  - Write `a-round-183/end-sha256.txt` (4 paths) and `a-round-183/diff-vs-start.patch` (the 2 grants against `b-round-182/r183-granted-start/`, plus the 2 new files in full).
-  - Helper scripts go under `a-round-183/tools/`. No commit, no push.
+  - Write `a-round-184/end-sha256.txt` (6 paths) and `a-round-184/diff-vs-start.patch` (the 4 grants against `b-round-183/r184-granted-start/`, plus the 2 new files in full).
+  - Helper scripts go under `a-round-184/tools/`. No commit, no push.
 
 ## 4. A — tests and commands (speed rules)
-- **Run:** `npx vitest run $(cat ../tmp/studio-real-loop/b-round-182-r183-vitest-after.txt)`. Expect all CC1–CC5 tests green. Write the list to `a-round-183/vitest-files.txt`.
-- **Checks:** `npm run typecheck`, `npm run lint`, and `npx biome check` on the 2 code/test files.
-- **Code review:** 4 changed or new files, so ask the `code-reviewer` subagent. Pass its Architecture note to B verbatim.
+- **Run:** `npx vitest run $(cat ../tmp/studio-real-loop/b-round-183-r184-vitest-base.txt) --reporter=json --outputFile=../tmp/studio-real-loop/a-round-184/vitest-after.json`, then a default-reporter run for the log.
+  - Expect **3 files, 45 passed, 0 failed, 0 skipped**.
+  - Build the sorted name list with the same format as B's (see `b-round-183.md` §Tools) into `a-round-184/vitest-after-names.txt`.
+  - `diff` it against `b-round-183/out/vitest-base-names.txt`: it must be empty.
+  - Write the file list to `a-round-184/vitest-files.txt`.
+- **Not collected:** in the same run, confirm that `workspace-test-environment.ts` is not listed as a test file (the run reports exactly 3 files).
+- **Checks:** `npm run typecheck`, `npm run lint`, and `npx biome check` on the 4 code/test paths. Report every warning against the start tree: no new warnings are allowed.
+- **Code review:** 4 changed or new code/test files, so ask the `code-reviewer` subagent. Pass its Architecture note to B verbatim.
 - **Not A's:** the full suite, `npm run verify`, the build, e2e and the browser rows.
 
-### 4.1 Mutations (temporary edits to `CookieConsent.tsx`; restore and sha-check after each one)
-| ID | Mutation | Must turn red | Must stay green |
-|---|---|---|---|
-| m308 | L3: drop `\|\| isStudioRoute` | CC2, CC3, CC4 (its studio-side absence assert) | CC1, CC5 |
-| m309 | L2: `startsWith('/studio')` → `=== '/studio-lab'` | CC3 | CC1, CC2, CC4, CC5 |
-| m310 | L3: `isStudioRoute` → `!isStudioRoute` | CC1, CC2, CC3, CC4, CC5 (inverted on every path) | — |
-| m311 | Banner root class `bottom-0` → `top-0` | CC1 (class lock) | CC2, CC3, CC4 |
+### 4.1 Mutations (temporary; restore and sha-check after each one)
+| ID | Mutation | Must happen |
+|---|---|---|
+| **m312** (wiring) | Rename the helper's export to `createWorkspaceTestEnvironmentX`. | `npm run typecheck` reports an error in **each** of the 3 suites. The vitest run of the 3 files fails all 3 files. Record the error lines. |
+| **m313** (clock wiring, observe) | In the helper, make `currentTime` return `0` instead of `Date.now() / 1000 - fakeClock.base`. | **Observe and report** which of the 45 tests turn red. B does **not** pre-specify the red set. If **0** tests turn red, report that: it means the clock is not asserted through these suites, which is information for B and not A's defect. |
 
-If a "must turn red" test stays green, or a "must stay green" test turns red, report it. Do not weaken anything; B rules on it.
+Nothing may be weakened to make a mutation behave. B rules on any surprise.
 
 ## 5. C — rows
-Real Playwright Chromium, at 1440×900 and 1280×720, with a fresh anonymous context per session (localStorage empty, so `hasConsentDecision()` is false). Pixel reads run at DPR 2 with `--disable-lcd-text`.
-
-**GA-env servers (required: the banner cannot render on :5173):**
-- **CUR copy:** A's changes are uncommitted, so `git archive` would miss them. From `store/`, run `mkdir -p /tmp/cur183 && git ls-files -c -o --exclude-standard | tar -cf - -T - | tar -x -C /tmp/cur183`, then symlink `node_modules`.
-- **HEAD copy:** `git archive f22290f` into `/tmp/head183`.
-- **Cache:** in **each copy only**, give `vite.config.ts` its own `cacheDir` (`/tmp/<copy>-vitecache`). Never share `node_modules/.vite` (C-R180-HEAD-COPY-VITE-CACHE).
-- **Start:** `VITE_GA4_MEASUREMENT_ID=G-C183TEST npx remix vite:dev --host 127.0.0.1 --port 5174` (CUR) and `--port 5175` (HEAD). B's tool `b-round-182/tools/banner-probe.cjs` shows the pattern.
-- **Network:** in every GA-env session, `page.route` aborts `googletagmanager.com` and `google-analytics.com`. Those aborted requests are expected; count them under `gaAborted`, not as PX-NET forbidden hosts.
-- **Cold load:** wait ≥ 6 s after `domcontentloaded`, since the banner timer is 1.5 s. If the first cold load reloads (vite re-optimizes; B's first probe did), discard that run and replace it once (ENV-FIRST-LOAD).
-- **Cleanup:** remove both copies, their caches and the servers afterwards.
+Real Playwright Chromium on the shared :5173 server. Use 1440×900 and 1280×720, with a fresh anonymous context per session. Pixel reads run at DPR 2 with `--disable-lcd-text`. This round needs **no GA-env servers**.
 
 | Row | What | Pass |
 |---|---|---|
-| **T183-TARGETED** | Re-run `a-round-183/vitest-files.txt`. | All tests in the file are green, 0 failed. |
-| **SCOPE-183** | Check the frozen list (1005) at C's start and C's end, and A's `end-sha256.txt`. Run `git status`. | Frozen 1005 OK. `git status` = 2 ` M` + 2 `??` (the test folder and doc 151). The protected diff against `f22290f` (§3 list) is empty. The tree hash at C's start equals the hash at C's end. |
-| **AN-REVIEW-183** | Read the diff. | `CookieConsent.tsx` has only L1–L3: hooks before any return and the JSX untouched. The test file has CC1–CC5 as written. D1 and D2 are as written. |
-| **MUT-183** (read-only) | Read m308–m311. | Each diff is the described edit, each restore sha is OK, and the red / green sets match §4.1. |
-| **BANNER-STUDIO-M4** | On CUR :5174 and HEAD :5175, at both viewports: `/studio-lab`, then `/studio/middle-east`. | **HEAD:** the banner is present on both paths, (0, 832) 1440×68 / (0, 652) 1280×68 on `/studio-lab` (B's numbers). **CUR:** no Accept/Decline button, no `position: fixed` element at the bottom from the banner, and `elementFromPoint` at the centre of the status line and of the shortcut hint hits those elements. `/studio-lab` keeps workspace + demo badge; `/studio/middle-east` keeps "Sign in required". Screenshot each. |
-| **BANNER-STORE-M4** | CUR vs HEAD at both viewports: `/` (and `/products` if it renders without the backend; otherwise note it). | **DOM / computed-style criterion:** the banner rect and the rects of its text, the Privacy Policy link, Decline and Accept equal HEAD ±0.5 px. Computed `position`, `bottom`, `z-index`, `background-image` and `backdrop-filter` equal HEAD. Accept → localStorage `czaba_analytics_consent` = `granted`, banner gone. In a fresh context, Decline → `denied`, banner gone. A reload after a decision → no banner. **The pixel crop is supporting evidence only.** The banner uses `backdrop-filter: blur(12px)` over a 0.9–0.95 black gradient, so the page content underneath (carousel, loading states, popups without a backend) bleeds through. Crop differences explained by that content are **not** a FAIL; report them. |
-| **NAV-M4** | CUR, 1440 (1280 short): open `/studio-lab`, wait 6 s (no banner), then click the "← CZABA" back link. | The banner appears on the Store page within 3 s. Consent is still `null` until a button is clicked. Report whether the navigation was client-side or a full load. |
-| **STUDIO-RV-M4** | Shared :5173 (no GA env), `/studio-lab` rest screenshot at both viewports vs C round-182 rest shots (`c-round-182/shots/c182-*/rest-full.png` or the equivalent). | 0 changed px. The Studio is unchanged where no banner exists. |
-| **M3-NEIGHBOUR** | :5173, one short check. | The 9 library options have 4 ±0.5 px gaps at both viewports. |
-| **G183-3** | :5173: anonymous `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav`. | `/studio-lab` opens with no `auth_user` and 0 cookies. `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`. The token request returns 401. Fake-Bearer 403 → BLOCKED (backend unavailable in cloud). |
-| **PX-NET / REG-HYD** | Every session. | 0 forbidden hosts other than the aborted GA hosts on the GA-env servers, 0 Authorization headers, 0 hydration messages and 0 pageerror. Only the expected cart noise. |
+| **T184-TARGETED** | Re-run `a-round-184/vitest-files.txt` with the JSON reporter, and rebuild the sorted name list yourself. | 3 files, 45 passed, 0 failed, 0 skipped. **Your** name list equals `b-round-183/out/vitest-base-names.txt` (R49; a drift is a FAIL). The helper is not collected as a test file. |
+| **SCOPE-184** | Check the frozen list (1005) at C's start and C's end, and A's `end-sha256.txt`. Run `git status`. | Frozen 1005 OK. `git status` = 4 ` M` + 2 `??` (the `helpers/` folder and doc 152). `git diff 423fbc4 --stat` lists only the 4 grants. Every file under `app/` except the 3 suites + helper is byte-identical to `423fbc4`. The tree hash at C's start equals the hash at C's end. |
+| **AN-REVIEW-184** | Read the diff. | Each suite has exactly 2 changes, H2–H4: the import, and the block replaced by one destructure. `beforeEach` / `afterEach` and everything else are byte-identical. **Mechanical check:** extract the helper's factory body and normalise indentation. It must equal the frozen start copy `b-round-183/r184-granted-start/grid-snap-ui.test.tsx` l.23–101, plus only the `return { … }`. `fakeClock` and the classes are created inside the function, with no module-level state (R47). No `any`, `@ts-ignore`, `as` or comments. D1 and D2 are as written. |
+| **MUT-184** (read-only) | Read m312 and m313. | m312: a typecheck error in each of the 3 suites, all 3 vitest files failing, and the restore sha OK. m313: the observed red set is recorded and the restore sha is OK. Any 0-red result is reported to B as information. |
+| **STUDIO-RV-184** | :5173 `/studio-lab` rest screenshot at both viewports vs C round 183 (`c-round-183/shots/c183-1440-2/rest-full.png`, `c-round-183/shots/c183-1280-1/rest-full.png`). | 0 changed px. No source changed, so this confirms the served Studio. If the first cold 1440 load is blank (ENV-FIRST-LOAD), discard it and replace it once. |
+| **G184-3** | :5173: anonymous `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav`. | `/studio-lab` opens with no `auth_user` and 0 cookies. `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`. The token request returns 401. Fake-Bearer 403 → BLOCKED (backend unavailable in cloud). |
+| **PX-NET / REG-HYD** | Every session. | 0 forbidden hosts, 0 Authorization headers, 0 hydration messages and 0 pageerror. Only the expected cart noise. |
 
-**Gate rows (not C's):** full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED and PROD-SSR-NUL.
+**Gate rows (not C's):** full vitest (it must still collect the 3 suites, and the helper must not be counted as a file), typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED and PROD-SSR-NUL.
+
+**Adjacent behaviour that could break, with the check that catches it:**
+- a suite now shares a clock with another → AN-REVIEW R47, plus mutation m313;
+- a test is silently dropped or renamed → R49 name lock;
+- the helper gets collected as an empty suite → the file count;
+- a typecheck gap → the gate.
 
 ## 6. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Cookie consent banner inside the workspace | **None.** Ableton Live is a desktop app with no web cookie banner. | Nothing. | A user-approved CZABA move (M4, 2026-10-21), with rulings R44–R46. | BANNER-STUDIO-M4. Parity: **არ ეხება** (not applicable) |
+| Test-environment extraction (no user-visible behaviour) | **None.** This is internal test infrastructure. | Nothing. | A user-approved test-only refactor (2026-10-25). | STUDIO-RV-184. Parity: **არ ეხება** (not applicable) |
 
 ## 7. Evidence and reporting
-- **A:** `a-round-183.md` and `a-round-183/`.
-- **C:** `c-round-183.md`, `c-round-183.json` (`browserVerified`, `realVerified`, `passed` / `failed` / `blocked` / `gate`) and `c-round-183/`.
+- **A:** `a-round-184.md` and `a-round-184/`.
+- **C:** `c-round-184.md`, `c-round-184.json` (`browserVerified`, `realVerified`, `passed` / `failed` / `blocked` / `gate`) and `c-round-184/`.
 - **Both:** write the report files as you go.
 
-## 8. Outcome, fixed in advance (B at round 184 planning)
-| Condition | Round 184 |
+## 8. Outcome, fixed in advance (B at round 185 planning)
+| Condition | Round 185 |
 |---|---|
-| **C PASS** | Root publishes round 183, and M4 → **მზადაა** (vetoable R44/R45). Planning on or after 2026-10-27 → **REGRESSION round** (M1, M3 and M4 included, plus e2e smoke, C-R167-METRONOME-UNDER-MUTE and REG-DUX5-PLAYHEAD-RESCAN). Then ROOT-RECON-GRID-HARNESS at the VISUAL-A exit. |
-| C FAIL at Medium or above | A bounded fix-up in the same files. |
-| A GA-env browser row could not run | `browserVerified=false` → M4 is not done, and B re-plans that browser half. |
+| **C PASS** | Root publishes round 184. ROOT-RECON-GRID-HARNESS → **მზადაა**, and VISUAL-A-OBSIDIAN is complete (except `awaiting_user` items). Planning on or after 2026-10-27 → **REGRESSION round** (M1, M3, M4, e2e smoke, C-R167-METRONOME-UNDER-MUTE, REG-DUX5-PLAYHEAD-RESCAN). Then STORE-REDESIGN STORE-0 (mock API), unless root's checkpoint answer orders otherwise. |
+| C FAIL: name-lock drift, a protected-file change, or shared state | A bounded fix-up in the same 6 files. |
+| A browser row could not run | `browserVerified=false` → the harness is not done, and B re-plans the browser half. |
 
 ## 9. Root notes
-- **Gate (on C PASS):** the 2 grants plus the 2 new files. `root.tsx` stays unchanged.
-- **Feature boundary ahead:** after M4 and the regression round, VISUAL-A reaches its exit (ROOT-RECON-GRID-HARNESS). B will re-raise the unanswered `b-round-180-checkpoint-request.md` there as one bounded frontend-architect ask.
+- **Gate (on C PASS):** the 4 grants plus the 2 new files. No application source changes.
+- **Feature boundary:** this round closes VISUAL-A. B re-raises the unanswered checkpoint as **one bounded frontend-architect ask**: `b-round-183-checkpoint-request.md`, which supersedes `b-round-180-checkpoint-request.md`. It does not block round 184 or 185.

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T04:34:49.599Z)
+# Active loop summary (2026-10-26T05:16:56.142Z)
 
-- backlog.json 1620 KB -> active view 229 KB
-- status: G_ROOT_GATE round 182
-- servers: `{"checkedUtc":"2026-10-26T04:17:56.0764072Z","round":182,"attempt":1,"store":200}`
-- last publication: f22290fbb0af820435fe742f553d7b0628ee6801 (rounds 182-182)
-- last root gate: round 182 published - commit f22290fbb0af820435fe742f553d7b0628ee6801 pushed
+- backlog.json 1627 KB -> active view 230 KB
+- status: G_ROOT_GATE round 183
+- servers: `{"checkedUtc":"2026-10-26T04:57:04.5831224Z","round":183,"attempt":1,"store":200}`
+- last publication: 423fbc48e443c638168d8dc3962ac2b5f4019855 (rounds 183-183)
+- last root gate: round 183 published - commit 423fbc48e443c638168d8dc3962ac2b5f4019855 pushed
 
 ## Current items: -
 
@@ -425,7 +425,9 @@
 - A11Y-R181-PLAY-KEYSHORTCUTS / info / signal (not scheduled): aria-keyshortcuts='Space' on Play, like Zoom Z/X; changes the accessible description, same class as Q-R166-EXIT-NAME; for the polish pass or Saba / 
 - G181-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
 - M3-RATIONALE-VETOABLE / info / user-visible decision, may be vetoed (D-29z147): M3 spec reason (serif) dropped by V-2b-DISPLAY; move kept as approved; listed in feature-status.md vetoable list / 
-- M4-COOKIE-GRANT / info / planning note for M4: banner is app/components/common/CookieConsent.tsx (fixed bottom-0 z-50), mounted for every route in protected app/root.tsx l.161; M4 needs a grant decision on a Store-shared file + Store-page screenshot check; planned after the regression round / 
+- C-R182-N1-ARROW-SUBPIXEL-EDGE / info / info_pre_existing / 1440: ArrowDown press 6 leaves the focused library row 0.25 px below the list bottom (integer scrollTop); identical on HEAD f1782f8
+- C-R182-R42-GAP-CLICK / info / info_confirmed_ruling / R42 confirmed: click/double-click in the 4 px library gap hits the listbox div, no selection or clip; focus moves to BODY
+- C-R182-STATE-M3-WORDING / info / process_note: regression round re-words the STATE-M3 check as 'the inset ring equals the row box; the global :focus-visible outline (C-R169-N1, deferred) is excluded' / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

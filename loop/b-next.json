@@ -1,12 +1,13 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 182 PASS (browserVerified=true, realVerified=true, 0 bugs; only the G182-3 fake-Bearer 403 sub-check BLOCKED, backend unavailable in cloud); root published round 182 as f22290f (sha256sum -c c-round-182/end-tree-sha256.txt OK, doc 150 = A end hash), so M3 is done (vetoable). No Critical/High/Medium finding is open. regression-last is 2026-10-24 and today is 2026-10-26 (2 days), so the regression round is not due; next in the VISUAL-A order is M4 (user-approved 2026-10-21; the last approved M). B reproduced it on a HEAD copy with a GA ID: the banner covers the Studio status line and shortcut hint at both viewports. Much scoped work remains (M4, regression, ROOT-RECON-GRID-HARNESS, STORE-REDESIGN, REVIEW-RECOMMENDATIONS, T12-ADVANCED, deferred Lows, final regression); nothing needs external input, so not COMPLETE and not BLOCKED.",
- "nextTask": "Round 183 (D-29z148) M4 from HEAD f22290f (clean; 1007 tracked; frozen 1005; grants 2: CookieConsent.tsx L1-L3, doc 150 Completed; new 2: app/components/common/__tests__/CookieConsent.test.tsx CC1-CC5, doc 151). CookieConsent reads useLocation() and returns null while pathname.startsWith('/studio') (same predicate as protected root.tsx l.137, which stays untouched); Store banner JSX/classes/timer/handlers unchanged; consent default stays denied. Rulings R44 hide-not-move, R45 no Studio consent UI (asked on next Store page), R46 predicate (vetoable). Mutations m308-m311. C must run its own GA-env dev copies (VITE_GA4_MEASUREMENT_ID, CUR :5174 / HEAD :5175, own vite cacheDir, GA hosts aborted) because the banner never renders on :5173: rows T183-TARGETED, SCOPE-183, AN-REVIEW-183, MUT-183, BANNER-STUDIO-M4, BANNER-STORE-M4, NAV-M4, STUDIO-RV-M4, M3-NEIGHBOUR, G183-3, PX-NET/REG-HYD. On PASS: M4 done (vetoable); next planning on/after 2026-10-27 = REGRESSION round (incl. M1, M3, M4), then ROOT-RECON-GRID-HARNESS at the VISUAL-A exit.",
+ "reason": "C round 183 PASS (browserVerified=true, realVerified=true, 0 bugs; only the G183-3 fake-Bearer 403 sub-check BLOCKED, backend unavailable in cloud); root published round 183 as 423fbc4 (sha256sum -c c-round-183/end-tree-sha256.txt OK, 1009 tracked, clean), so M4 is done (vetoable R44/R45). No Critical/High/Medium finding is open. regression-last is 2026-10-24 and today is 2026-10-26 (2 days), so the regression round is not due at this planning; the next VISUAL-A item is the user-approved test-only ROOT-RECON-GRID-HARNESS (the VISUAL-A exit). Much scoped work remains (harness, regression, STORE-REDESIGN, REVIEW-RECOMMENDATIONS, T12-ADVANCED, deferred Lows, final regression); nothing needs external input, so not COMPLETE and not BLOCKED.",
+ "nextTask": "Round 184 (D-29z149) ROOT-RECON-GRID-HARNESS from HEAD 423fbc4 (clean; 1009 tracked; frozen 1005; grants 4: grid-snap-ui/grid-musical-ui/grid-triplet-ui.test.tsx H2-H4 and doc 151 Completed; new 2: app/lib/arrangement/__tests__/helpers/workspace-test-environment.ts (createWorkspaceTestEnvironment returns a fresh fakeClock + FakeAudioContext/OfflineAudioContext/AudioBuffer/ResizeObserver per call) and doc 152). Each suite: its byte-identical 79-line block (l.23-101 / l.29-107 / l.30-108) is replaced by one import + one module-scope destructure; beforeEach/afterEach and all assertions byte-identical (R47); helper not collected by vitest (R48); 45-name lock vs b-round-183/out/vitest-base-names.txt, drift = FAIL (R49). Mutations m312 (export rename -> typecheck error in each suite) and m313 (currentTime 0, observe). C rows: T184-TARGETED, SCOPE-184, AN-REVIEW-184, MUT-184, STUDIO-RV-184 (0 px vs c-round-183 rest shots), G184-3, PX-NET/REG-HYD. On PASS: harness done, VISUAL-A complete; next planning on/after 2026-10-27 = REGRESSION round (expected 185), then STORE-0.",
  "remaining": [
-  "M4(round 183 D-29z148: CookieConsent.tsx renders null on pathname.startsWith('/studio'); vetoable R44/R45; done on C PASS with GA-env browser rows)",
-  "ARCH-CHECKPOINT-DUX-R5-BOUNDARY(b-round-180-checkpoint-request.md requested_from_root; still unanswered at round 182 planning; non-blocking, fallback (c))",
-  "REGRESSION(due 2026-10-27; expected round 184; + M1, M3, M4, REG-DUX5-PLAYHEAD-RESCAN, C-R167-METRONOME-UNDER-MUTE, STATE-M3 wording, e2e smoke)",
-  "ROOT-RECON-GRID-HARNESS(VISUAL-A exit after regression; re-raise b-round-180 checkpoint as one bounded ask)",
+  "ROOT-RECON-GRID-HARNESS(round 184 D-29z149: createWorkspaceTestEnvironment in app/lib/arrangement/__tests__/helpers/workspace-test-environment.ts for grid-snap/musical/triplet-ui; 45-name lock; done on C PASS with browserVerified)",
+  "REGRESSION(due 2026-10-27; expected round 185; + M1, M3, M4 (GA-env copy), REG-DUX5-PLAYHEAD-RESCAN, C-R167-METRONOME-UNDER-MUTE, STATE-M3 wording, e2e smoke)",
+  "ARCH-CHECKPOINT-VISUAL-A-EXIT(b-round-183-checkpoint-request.md requested_from_root, supersedes b-round-180; non-blocking, fallback (c))",
+  "ARCH-R183-STUDIO-PREDICATE-DUP(signal; root.tsx:137 vs CookieConsent.tsx:16; keep until root.tsx unfreezes)",
+  "C-R183-M310-CC5-UNREACHABLE(info)",
   "GATE175-S5-SCROLLBAR-JUMP(info, vetoable)",
   "STORE-REDESIGN(STORE-0 mock API, STORE-1 bugs/loader/header, STORE-2 tokens/type, STORE-3 hero, STORE-4 product/listening, STORE-5 loading text/docs; direction A decided; after VISUAL-A)",
   "REVIEW-RECOMMENDATIONS(ABL-R-7,DUX-R-3,ABL-R-12,DUX-R-1,ABL-R-13,DUX-R-4,ABL-R-10,DUX-R-6,ABL-R-9,DUX-R-2,ABL-R-1,ABL-R-2,ABL-R-3,ABL-R-4,ABL-R-8,ABL-R-11,ABL-R-14,ABL-R-15,ABL-R-18,DUX-R-7,DUX-R-8,DUX-R-9)",
@@ -37,7 +38,6 @@
   "RV-5",
   "ROOT-GLOBAL-TRANSITION-RULE(root signal, two copies)",
   "T12-ADVANCED",
-  "DEFERRED-LOW-POLISH(256 entries, open ones; +A-R182-REVIEW-MARGIN-REGEX, A-R182-REVIEW-EXCLUSIONS; C-R169-N1 scope widened to library options)",
   "PROD-SSR-NUL",
   "PROD-MP3-UNVERIFIED",
   "BACKEND-ONLY-EVIDENCE",
@@ -79,6 +79,7 @@
   "A11Y-R181-PLAY-KEYSHORTCUTS(signal)",
   "C-R181-TITLE-TOOLTIP-HEADLESS(Tech Lead manual)",
   "C-R182-N1-ARROW-SUBPIXEL-EDGE(info, pre-existing)",
-  "C-R182-R42-GAP-CLICK(info)"
+  "C-R182-R42-GAP-CLICK(info)",
+  "DEFERRED-LOW-POLISH(260 entries, open ones; +C-R183-N-CLOSE-0X0, A-R183-COOKIE-BUTTON-TYPE, A-R183-COOKIE-INLINE-GRADIENT, A-R183-REVIEW-FBQ-BRANCH; C-R169-N1 scope widened to library options)"
  ]
 }
