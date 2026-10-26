@@ -1,0 +1,11 @@
+# C round 195 checkpoint
+- started 2026-10-26T18:12:52Z
+- T-RUN done: tree 38 green; r194 copy 7 red (G1,G2,R1-4,ST8b); m14/m15/m19 ST8b red; m16 G1+ST8b; m17 R2+ST8b; m18 green
+- servers: ref :5174 (r194 tree), head :5175 (caa09af), mock :5199 started by C pid 8325
+- GUEST tree 3.70 x4 midpoints x3vp, focus brass fv; head 1.62 (email; name cold-timeout); ref 1.21; F1 3.13/3.13/3.12 F2 3.64x3
+- guest195 error state tree==ref (destructive rgb210,119,106), boxes ±0 vs ref/head x3vp, ev 0
+- store tree/ref 1440,1280 done; popup 1440 done; 375 running
+- store compare all vps 0 layout bad / keep same / contrast worse 0 (1440 run1 home popup timing artifact; run2 clean)
+- servers stopped (ref 8365/8320, head 8358/8323, mock 8326); :5173 untouched. SCOPE end checked
+- reports written (PASS)
+- FINAL: test diff hunks checked (authorised regions only), as/any grep 0 real; report updated. PASS

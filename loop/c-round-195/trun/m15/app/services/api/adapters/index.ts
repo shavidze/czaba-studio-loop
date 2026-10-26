@@ -1,0 +1,1 @@
+export { backendProductToProductDetail } from './productAdapter';

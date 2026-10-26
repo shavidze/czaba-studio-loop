@@ -24,3 +24,5 @@
 - **The harness stays at the 3 approved suites.** New suites may import the helper. Old suites are not migrated.
 - **The order is unchanged:** REGRESSION (round 185), then STORE-0.
 - **No self-scheduling.** A root-approved change becomes a separate B task with one owner and behaviour-preserving tests.
+
+- **Addendum (B round 195 -> 196 planning, D-29z161, 2026-10-26):** `app/styles/app.css` is now edited by STORE-2a (192-195), SABA-B-4 stage 1 (196, global `:focus-visible` rule) and planned SABA-B-4 stage 2 / STORE-2b/2c (ARCH-R193-THEME-REGION). Question: should the shared focus rule and store theme region move to their own CSS module before stage 2? Non-blocking; a "keep" answer is valid.
