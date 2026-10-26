@@ -1,0 +1,71 @@
+@@ -327,7 +327,12 @@
+     await flushAsync();
+     const { view } = failing;
+     const header = view.container.querySelector('header');
+-    expect(header?.querySelector('span.border-accent')?.textContent?.trim()).toBe(DEMO_BADGE);
++    if (!header) {
++      throw new Error('workspace header missing');
++    }
++    expect(within(header).getByText(DEMO_BADGE, { selector: 'span' }).textContent?.trim()).toBe(
++      DEMO_BADGE,
++    );
+     expect(view.getByTestId('arrangement-status').textContent?.trim()).toBe(DEMO_ONE_FAILED);
+     const preview = view.getByRole('region', { name: 'Preview' });
+     expect(within(preview).getByRole('slider', { name: PREVIEW_WAVE_NAME })).toBeDefined();
+@@ -227,7 +227,14 @@
+ }
+ 
+ function badgeText(view: ReturnType<typeof render>): string | null {
+-  return headerOf(view).querySelector('span.border-accent')?.textContent?.trim() ?? null;
++  const badges = Array.from(headerOf(view).querySelectorAll('span')).filter((span) => {
++    const text = span.textContent?.trim();
++    return text === PURCHASED_BADGE || text === DEMO_BADGE;
++  });
++  if (badges.length > 1) {
++    throw new Error('header shows more than one collection badge');
++  }
++  return badges[0]?.textContent?.trim() ?? null;
+ }
+ 
+ function statusText(view: ReturnType<typeof render>): string | null {
+@@ -1,7 +1,7 @@
+ # Studio DUX-R-5b-3a — ერთი ფერის წესი, ნაწილი 3, ეტაპი 3a: label-ები, status ტექსტები, hover ტექსტი, demo badge, Grid menu-ს check-ები და Export dialog-ის note / progress / overload ნეიტრალური ხდება + gate-177 S5 + C-R177-G1-562; არაფერი გადაადგილდება
+ 
+ **თარიღი:** 2026-10-26
+-**სტატუსი:** In Progress (awaiting C round 178)
++**სტატუსი:** In Progress (awaiting C round 179)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -91,12 +91,20 @@
+ - `app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx` (ახალი): DXL1–DXL8.
+ - `docs/implementation/2026/quarter-IV/146-studio-dux-r5b2b-mode-toggle-colour.md`: სტატუსი Completed და TODO-ს suffix.
+ 
++**Round 179 (მხოლოდ ტესტები):**
++
++- `app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx`: `badgeText()` badge-ს ტექსტით პოულობს (`PURCHASED_BADGE` ან `DEMO_BADGE`), class selector-ის გარეშე.
++- `app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx`: LRS5 badge-ს `within(header).getByText(DEMO_BADGE, { selector: 'span' })`-ით პოულობს.
++
+ ## პრობლემები და გადაწყვეტები
+ 
+ - **Problem:** `font-medium text-foreground` 4–5 სიმბოლოთი გრძელია, ვიდრე წინა token. ორ ხაზზე (DetailPanel group count, StudioWorkspace refusal) და ერთ ტესტის ხაზზე (`surfaceForbidden`) Biome-ის `lineWidth` 100 გადაჭარბდა და `biome check` format error-ს აჩვენებდა.
+   **Solution:** ეს სამი ფაილი Biome-ის formatter-მა (`biome format --write`) გადაატანა. ხელით არაფერი შეცვლილა. შედეგად StudioWorkspace-ის diff 5 site-ია, მაგრამ refusal ერთი ხაზიდან 4 ხაზი გახდა; DetailPanel-ის group count 3 ხაზი გახდა. DXL8-ის ეს ორი "new" needle whitespace-normalised source-ზე მოწმდება (count 1 რჩება), რომ indent-ის ცვლილებამ ტესტი არ დაარღვიოს.
++  B-მ (round 179) ეს reflow მიიღო, როგორც მხოლოდ whitespace-ის ცვლილება იმავე token-ებით; ამიერიდან scope-ის კრიტერიუმი არის „hunk-ები მხოლოდ ამ site-ებზე, formatter-ის reflow დასაშვებია“ და არა ხაზების ზუსტი რაოდენობა.
+ - **Problem:** ორი დაცული ტესტი header badge-ს `span.border-accent` selector-ით პოულობს: `library-row-strings-ui.test.tsx` l.330 (LRS5) და `purchased-collection-ui.test.tsx` l.230 (`badgeText()`, რომელსაც PW1 და PW6 იყენებს). W2 `border-accent`-ს აშორებს, ამიტომ სამივე ტესტი წითლდება. მეორე code-reviewer-მა იპოვა.
+   **Solution:** არცერთი ფაილი ამ რაუნდის grant-ში არ არის და არ შეცვლილა. B-მ უნდა გადაწყვიტოს (მაგალითად, ორივე selector-ის `span.border-outline-strong`-ზე შეცვლის grant, ან badge-ის ტექსტით/`data-testid`-ით პოვნა).
++- **Problem:** ორი დაცული suite header badge-ს ფერის class-ით (`span.border-accent`) პოულობდა, ამიტომ W2-ის შემდეგ სამი ტესტი (LRS5, PW1, PW6) წითელი იყო (C-R178-BADGE-SELECTOR, Medium).
++  **Solution:** round 179-ში ორივე ტესტი badge-ს მისი ტექსტით პოულობს, class selector-ის გარეშე. `badgeText()` აბრუნებს ერთადერთ ცნობილ badge-ს, `null`-ს თუ არცერთი არ ჩანს, და labelled `Error`-ს აგდებს, თუ ერთზე მეტი ჩანს; LRS5 `header`-ის არარსებობაზე labelled `Error`-ს აგდებს. Assertion-ები, მათ შორის PW1-ის `not.toContain` ხაზები, უცვლელია. `data-testid` არ დამატებულა, რადგან `StudioWorkspace.tsx` round-178-ის hash-ზე გაყინულია.
+ 
+ ## ტესტირება
+ 
+@@ -105,6 +113,10 @@
+ - მეზობელი 9 ფაილი (export-dialog-hold-enter, export-cancel-ui, export-mp3, detail-panel-fit, detail-panel-polish, studio-theme-obsidian, content-colour-ui, grid-snap-ui, grid-musical-ui): **108/108**.
+ - Mutation-ები m278–m287 (`tmp/studio-real-loop/a-round-178/mutations/`): 10-ვე წითლდება მოთხოვნილ ტესტებზე. თითოეული დაბრუნდა და sha-ით შემოწმდა.
+ - `npm run typecheck` (exit 0), `npm run lint` (exit 0) და scoped `npx biome check` (0 error). ბრაუზერის row-ები (CC-TEXT, NO-BRASS-TEXT, CONTRAST-TEXT, REFUSAL, EXPORT-STATES, FUNC-SMOKE-TEXT, ENV-VIS, RV1, RV3, G178-3) C-ს ეკუთვნის, round 178.
++- **Round 179:** B-ის 14 ფაილი (`b-round-178-r179-vitest-base.txt`) edit-ებამდე **147/150** (წითელი LRS5, PW1, PW6), edit-ების შემდეგ **150/150**. Mutation-ები (`tmp/studio-real-loop/a-round-179/mutations/`), თითოეული დაბრუნდა და sha-ით შემოწმდა:
++  - **m288** (badge → ყოველთვის `'demo'`): წითელია მხოლოდ PW1; LRS5 და PW6 მწვანეა.
++  - **m289** (badge-ის ტექსტი ცარიელი): წითელია LRS5, PW1, PW6 და DXL3.
++  - **m290** (badge-ის class `border-outline-strong` → `border-accent`, მხოლოდ ფერი): წითელია DXL3 და DXL8; LRS5, PW1, PW6 და DXT8 მწვანეა, ანუ ახალი lookup-ები ფერზე აღარ არის დამოკიდებული.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 

@@ -45,3 +45,9 @@
 - Signal 3 fired a fifth round in a row (174–178). The round-178 code-reviewer note (verbatim in `a-round-178.md`) names three costs: (1) the workspace fakes block (AudioContext / OfflineAudioContext / AudioBuffer / ResizeObserver / Link) is duplicated again in `label-status-colour-ui`; (2) `readFileSync` source-count locks in three files depend on Biome line wrapping (two whitespace-normalised needles were needed); (3) DOM lookups by colour class broke two protected suites (C-R178-BADGE-SELECTOR, Medium, blocked publication).
 - Proposal on file (needs root/architect review, not scheduled): extend ROOT-RECON-GRID-HARNESS to a shared workspace mount + fakes harness and one whitespace-normalising `countOccurrences`; DOM lookups by text or `data-testid`, never colour classes. Done when the existing colour suites use them with no change in test count.
 - Plan unchanged: B sends a fresh bounded frontend-architect request at the DUX-R-5 boundary (after 5b-3b passes C), before M1.
+
+## Addendum — round 179 (B, 2026-10-26, D-29z145; non-blocking)
+- Round 179 was spent entirely on test-selector repair (C-R178-BADGE-SELECTOR). The reviewer's Architecture note repeats Signal 3 (ARCH-R179-SIGNAL3), verbatim in `a-round-179.md`.
+- Its proposals: a shared workspace mount/fakes harness, alongside the ROOT-RECON-GRID-HARNESS extension; `findCollectionBadge(header)`, which finds the badge by its text; and one token-assertion helper for the className colour locks that C listed in SELECTOR-SWEEP.
+- Round 180 already applies the rule "no colour-class DOM selectors" in its new suite.
+- B will write a **fresh bounded frontend-architect request** when DUX-R-5 passes C (round 180), before M1. This request is still unanswered, so fallback (c) applies.

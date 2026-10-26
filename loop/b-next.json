@@ -1,15 +1,12 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 178 FAILED on one Medium (C-R178-BADGE-SELECTOR): two protected suites find the collection badge by the colour class span.border-accent that W2 removed; browserVerified and realVerified true and all 13 browser rows PASS, so the product change is good but gate 178 was skipped and nothing published. B's full vitest on the round-178 tree is 2610/2613 with only LRS5, PW1, PW6 red. Bug gate: fix the Medium first, test-only. B accepted the Biome reflow (SOURCE-SCOPE/AN-REVIEW) and classified GroupHeader l.252 as K10. Regression is due on/after 2026-10-27, not today. Much scoped work remains (5b-3b, VISUAL-A M1/M3/M4, STORE-REDESIGN, REVIEW-RECOMMENDATIONS, T12-ADVANCED, deferred Lows, regressions); nothing needs external input.",
- "nextTask": "Round 179 (D-29z144) C-R178-BADGE-SELECTOR fix-up from cc984b6 + round-178 working tree (tree = c-round-178/end-tree-sha256.txt, 1003 files; frozen 1000; 3 grants: library-row-strings-ui l.329-330, purchased-collection-ui badgeText l.229-231, doc 147). F1 badgeText(): header spans whose text equals PURCHASED_BADGE or DEMO_BADGE, >1 -> labelled throw, none -> null, no class selector; F2 LRS5: labelled throw if header missing, within(header).getByText(DEMO_BADGE,{selector:'span'}); F3 doc 147 Problem->Solution, still In Progress. Vitest base 14 files 147/150 -> 150/150. Mutations m288 (origin->demo: PW1 red), m289 (empty badge: LRS5/PW1/PW6/DXL3 red), m290 (border-accent colour swap: colour locks red, LRS5/PW1/PW6 green). C rows T179-TARGETED, SCOPE-179, AN-REVIEW-179, MUT-179, HASH-CARRY (13 round-178 browser rows carry over), BADGE-BROWSER, G179-3, FUNC-SMOKE-179, SELECTOR-SWEEP (5b-3b input), PX-NET/REG-HYD. On PASS root publishes rounds 178+179 together; round 180 = REGRESSION (planned on/after 2026-10-27), then DUX-R-5b-3b.",
+ "reason": "C round 179 PASS (browserVerified=true, realVerified=true, 0 bugs; only the fake-Bearer 403 sub-check BLOCKED, backend unavailable in cloud); root published rounds 178+179 as 15189d5, so DUX-R-5b-3a is done and C-R178-BADGE-SELECTOR, C-R177-G1-562 and GATE177-S5 are closed. No Critical/High/Medium finding is open. The regression round is due on/after 2026-10-27 and today is 2026-10-26, so the next scope in order is DUX-R-5b-3b, the last DUX-R-5 slice with its stage-exit inventory. Much scoped work remains (M1/M3/M4, ROOT-RECON-GRID-HARNESS, STORE-REDESIGN with direction A decided, REVIEW-RECOMMENDATIONS, T12-ADVANCED, deferred Lows, final regression); nothing needs external input, so not COMPLETE and not BLOCKED.",
+ "nextTask": "Round 180 (D-29z145) DUX-R-5b-3b from HEAD 15189d5 (clean; tree = c-round-179/end-tree-sha256.txt 1003; frozen 997; grants 6: ArrangementLane.tsx, ArrangementLibraryPreview.tsx, affordance-colour-ui, lane-strings-ui, library-row-strings-ui, doc 147; new 2: drag-feedback-colour-ui.test.tsx, doc 148). G1-G4 ghosts valid border-foreground/bg-foreground/15|20/text-foreground, blocked border-muted/bg-muted/20/text-muted; R1 file-drag ring video ring-foreground, audio ring-muted; H1 hint text-foreground; I1-I3 video import compact/full + Preview Add border-outline-strong/text-foreground; L1-L3 lock updates; N1 DXG1-DXG7 (no colour-class selectors); D1 doc 147 Completed; D2 doc 148. Vitest base 13 files 242/242; mutations m291-m298. C rows: T180-TARGETED, SCOPE-180, AN-REVIEW-180, MUT-180, CC-DRAG, CC-R35, NO-BRASS-DRAG, CONTRAST-DRAG, BEHAVIOUR-DRAG (real drags; file drag via synthetic DragEvent in real Chromium), INVENTORY-EXIT (K7-K12 incl. Ruler l.233 K8, ExportDialog l.615 K9), ENV-VIS, RV1-DUX5B3B, G180-3, FUNC-SMOKE-180, PX-NET/REG-HYD. On PASS: DUX-R-5 done, fresh frontend-architect request, round 181 REGRESSION if planned on/after 2026-10-27, then M1.",
  "remaining": [
-  "C-R178-BADGE-SELECTOR(Medium; round 179 test-only fix: purchased-collection-ui badgeText + library-row-strings-ui LRS5 by text)",
-  "DUX-R-5b-3a(browser PASS round 178; ბაგია until round 179 C PASS and rounds 178+179 publish)",
-  "C-R177-G1-562(implemented round 178 tree; closes on publish)",
-  "GATE177-S5-DOC146-STATUS(implemented round 178 tree; closes on publish)",
-  "DUX-R-5b-3b(after: Lane drop ring l.842, drop hint l.874, ghosts l.886/887 l.922/923, R35 video import l.723/731, LibraryPreview Add l.332; LATER_STAGE_BRASS_SITES -> neutral count; stage-exit INVENTORY-GREP K only)",
+  "DUX-R-5b-3b(round 180 D-29z145: Lane ghosts/drop ring/hint, R35 import + Add; stage-exit INVENTORY-EXIT; DUX-R-5 done on C PASS)",
+  "C-R179-DOC147-STALE(info; round 180 D1)",
   "ARCH-CHECKPOINT-DUX-R5-BOUNDARY(fresh bounded frontend-architect request to root after 5b-3b C PASS; studioToggleClass + ARRANGEMENT_MIX_ON_STATE + DOM-token locks + harness)",
-  "B-R174-ACCENT-EQ-BRAND(Low; Mute/Solo done 5b-2a, Follow done round 177; ghosts/hints in 5b-3b)",
+  "B-R174-ACCENT-EQ-BRAND(Low; ghosts/ring/hint in round 180; closes on C PASS)",
   "M1",
   "M3",
   "M4",
@@ -44,7 +41,7 @@
   "RV-3",
   "RV-5",
   "ROOT-GLOBAL-TRANSITION-RULE(root signal, two copies)",
-  "REGRESSION(due 2026-10-27)",
+  "REGRESSION(due 2026-10-27; expected round 181)",
   "T12-ADVANCED",
   "DEFERRED-LOW-POLISH(252 entries, open ones; +A11Y-GATE177-FOLLOW-PAUSED-NAME, GATE177-S4-BORDER-TRANSITION)",
   "PROD-SSR-NUL",
@@ -74,6 +71,9 @@
   "C-R177-WZOOM-FOCUS-ON-PRESS(K4 signal)",
   "C-R178-EXPORT-CLIPS-AT-0DB(product question, info)",
   "C-R178-ESC-NO-DRAG-CANCEL(product question, info)",
-  "ARCH-R178-SIGNAL3(signal; checkpoint addendum)"
+  "ARCH-R178-SIGNAL3(signal; checkpoint addendum)",
+  "C-R179-SELECTOR-SWEEP(info; used for round-180 grants)",
+  "C-R179-EXPORT-PEAK(info; same as C-R178-EXPORT-CLIPS-AT-0DB)",
+  "ARCH-R179-SIGNAL3(signal; checkpoint addendum)"
  ]
 }

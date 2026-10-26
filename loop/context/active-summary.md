@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T01:18:40.912Z)
+# Active loop summary (2026-10-26T01:57:13.944Z)
 
-- backlog.json 1590 KB -> active view 221 KB
-- status: G_ROOT_GATE round 178
-- servers: `{"checkedUtc":"2026-10-26T00:50:20.0357448Z","round":178,"attempt":1,"store":200}`
-- last publication: cc984b6f06ded21ec35593fc6dbb65353c153b1e (rounds 177-177)
-- last root gate: round 178 skipped - C taskStatus FAIL
+- backlog.json 1595 KB -> active view 224 KB
+- status: G_ROOT_GATE round 179
+- servers: `{"checkedUtc":"2026-10-26T01:43:07.8701240Z","round":179,"attempt":1,"store":200}`
+- last publication: 15189d5437a06fac81ecb4fa2e83eb731f584eec (rounds 178-179)
+- last root gate: round 179 published - commit 15189d5437a06fac81ecb4fa2e83eb731f584eec pushed
 
 ## Current items: -
 
@@ -398,11 +398,18 @@
 - C-R176-NOBRASS-LCD-GLYPH / info / method note: default-LCD subpixel fringes on M/S glyphs trip R-B>=45 (also on off buttons); NO-BRASS rows on glyph buttons run with --disable-lcd-text from round 177 / 
 - A-R176-MIXED-REST-BASE / info / confirmed by C: tailwind-merge drops bg-foreground/5 under bg-gradient-to-r; mixed half vs header 3.32 at rest (>= 3:1, at B's 3.3 floor); no change / 
 - C-R176-MIXED-VS-OFF-FILL / info / B ruling round 177: no fill floor; the foreground border (13.94) carries mixed vs off; vetoable by Saba / 
-- C-R177-G1-562 / info / scheduled round 178 L5: ExportDialog progress l.562 is a 5b-3 site, E2 neutralises it and KEPT_BRASS_COUNTS goes 6 -> 5 (the K7 radios) / 
+- C-R177-G1-562 / info / implemented in round 178 working tree (E2/L5; C CC-TEXT/NO-BRASS-TEXT PASS round 178); closes when rounds 178+179 publish / 
 - C-R177-WZOOM-FOCUS-ON-PRESS / info / signal for the K4 review: a mouse press on the Waveform Zoom select matches :focus-visible in Chromium, so ring-brand shows while the native popup is open; pre-existing; K4 kept / 
 - GATE177-S1-DELETE-RANGE-LOOKS-ON / info / vetoable design item (feature-status.md): Delete with a range gets border-foreground, the same border that means on for Loop/Follow; options border-foreground/50 or dashed; needs Saba's call; not scheduled / 
 - GATE177-S3-BRACE-WEIGHT / info / vetoable design item: enabled brace border-2 foreground ~15:1 is louder than the former brass; edge hover 3.43 passes with little margin; recorded in feature-status.md vetoable list / 
-- GATE177-S5-DOC146-STATUS / info / scheduled round 178 D1 (doc 146 -> Completed) / 
+- GATE177-S5-DOC146-STATUS / info / implemented in round 178 working tree (D1; C AN-REVIEW read); closes when rounds 178+179 publish / 
+- C-R178-BADGE-SELECTOR / medium / open; scheduled round 179 (D-29z144) F1/F2 test-only fix / 
+- A-R178-BIOME-REFLOW / info / ruled accepted by B: whitespace-only Biome reflow (StudioWorkspace l.2605 1->4 lines, DetailPanel l.676 1->3, surfaceForbidden array); C confirmed same tokens; standing rule: B scope criteria say 'hunks only at these sites; formatter reflow allowed', never literal line counts / 
+- C-R178-INV-GROUPHEADER-252 / info / classified by B: K10 kept (edit-state text field border, like MarkerRow l.847 and Library search focus:border-brand); vetoable; file protected/untouched; 5b-3b stage-exit INVENTORY-GREP maps it to K / 
+- C-R178-EXPORT-CLIPS-AT-0DB / info / signal / product question, not scheduled: the demo S1 mix clips at 0 dB (1024 samples) so the overload alert shows on a plain export; existing detection working / 
+- C-R178-ESC-NO-DRAG-CANCEL / info / signal / product question, not scheduled: Escape does not cancel a clip drag (pre-existing); a refused move with a horizontal part leaves the clip at its last free spot; no Ableton parity claimed (no source captured) / 
+- B-R178-PLAN-GAP-TEST-SELECTORS / info / B self-finding: purchased-collection-ui was missing from round-178 base/neighbour lists; process rule: before freezing grants of every token-swap round, B greps app/**/__tests__ and e2e/ for selectors (querySelector*, closest, getElementsByClassName) on removed tokens; round 179 C SELECTOR-SWEEP pre-computes 5b-3b / 
+- ARCH-R178-SIGNAL3 / info / architecture signal (fifth consecutive round), not scheduled: duplicated workspace fakes harness, readFileSync source counts sensitive to Biome wrapping, colour-class DOM selectors; proposal: extend ROOT-RECON-GRID-HARNESS to shared mount/fakes + whitespace-normalised countOccurrences; DOM lookups by text/testid; appended to b-round-173-checkpoint-request.md; fresh bounded request at DUX-R-5 boundary / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
