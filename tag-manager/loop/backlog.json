@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "round 9: TM-T0-CI-FU apt-install.sh worst case fits step budget and is printed (D-19) + one E2E build path in check.yml (RR-R1-01) + Georgian check.yml docs (RR-R4-05)",
+  "current_task": "round 10: TM-B14 E2E first-window budget in a shared launch helper (D-20) + check.yml job timeout 40 (RR-R9-01) + stale run-id sentence (RR-R9-02)",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -90,6 +90,10 @@
     {
       "from_round": 8,
       "rule": "npm run <script> -- <args> appends args to the LAST command of the script (B experiment /tmp/b-r8): npm run test:e2e -- --retries=0 reaches playwright test, not npm run build."
+    },
+    {
+      "from_round": 9,
+      "rule": "Electron main ignores NODE_OPTIONS --require; '-r <absolute file>' placed before the entry path in electron.launch args runs the module first (B experiment /tmp/b-r9). playwright.config.ts retries: 1 masks first-attempt E2E failures in verifyCommand; check.yml runs --retries=0"
     }
   ],
   "decisions": [
@@ -192,8 +196,13 @@
     },
     {
       "id": "D-19",
-      "status": "B, round 8 close (technical, reversible)",
+      "status": "done R9 (499a6f3, TM-T0-CI-FU; C R9-1..R9-8); B, round 8 close (technical, reversible)",
       "decision": "apt-install.sh: knobs APT_ATTEMPT_TIMEOUT_SECONDS (T, 240), APT_ATTEMPTS (N, 2), APT_KILL_AFTER_SECONDS (K, 10, was hard-coded), APT_RECOVERY_TIMEOUT_SECONDS (R, 60, new); dpkg --configure -a and debconf-communicate bounded by R with kill-after K; script prints 'apt-install: worst case Ws' first with W=(R+K)+N(T+K)+(N-1)(R+K) (640 at defaults); check.yml apt step timeout-minutes 13 (780 s). check.yml E2E builds via npm run test:e2e (RR-R1-01)"
+    },
+    {
+      "id": "D-20",
+      "status": "B, round 9 close (technical, reversible); planned R10",
+      "decision": "E2E launch: one helper launchTagManagerApp() in tests/e2e/electron-launch.ts does electron.launch + firstWindow({timeout: FIRST_WINDOW_TIMEOUT_MS=60000}) + waitForLoadState('domcontentloaded') and returns {app, page}; every spec calls it from beforeAll with the hook timeout raised to LAUNCH_HOOK_TIMEOUT_MS=90000 (test.setTimeout inside the hook), so a slow first window no longer hits the 30 s per-test timeout. On first-window timeout the helper throws an Error naming the budget and elapsed ms and including the captured main-process stdout/stderr tail. Retries are not the fix (TM-T0 acceptance is --retries=0); playwright.config.ts stays unchanged. Test-only opt-in env TAG_MANAGER_E2E_ELECTRON_REQUIRE=<absolute path>: getElectronLaunchArgs puts '-r <path>' before the entry path (lets C inject a delayed window); unset = args unchanged (D-06 --no-sandbox Linux only kept). check.yml job timeout-minutes 30 -> 40 (RR-R9-01)"
     }
   ],
   "items": [
@@ -291,11 +300,12 @@
         "Round 3 (230b87a) added the 'Tag contract ffprobe cross-check' step; C replayed CI order locally: check 13 s, ffprobe 1 s, build 3 s, E2E 7/7 5 s. Actions still not green",
         "B round 3 observation on the loop runner (ubuntu-24.04): /var/lib/man-db/auto-update already absent, debconf-communicate and timeout present; so the man-db cause is a HYPOTHESIS for the GH image, not a confirmed fact",
         "Root update (policy.local.md, 13:45 UTC): Actions run 40331357825 (Check, c768567) GREEN, every step success, 1 min 24 s (apt step 19 s, lint/types/unit 16 s, build 4 s, E2E 8 s). First green Actions run of check.yml. Recorded late: B round 3 missed it",
-        "C round 4 PASS (c-round-4.md/.json), published 7879ee0: R4-1..R4-8 PASS. apt-install.sh shim cases a-f + mutation (timeout removed -> hangs 30 s), real sudo + real apt on runner 'attempt 1/2 ok' 16 s, fresh ubuntu:24.04 container 26 s with ffprobe/xvfb-run/xauth present, CI-order replay all steps exit 0 (apt 18.5 s, install-deps 2.5 s, check 10.2 s, ffprobe 0.8 s, build 2.4 s, E2E 7/7 3.8 s). realVerified=false: hardened step not yet seen on Actions"
+        "C round 4 PASS (c-round-4.md/.json), published 7879ee0: R4-1..R4-8 PASS. apt-install.sh shim cases a-f + mutation (timeout removed -> hangs 30 s), real sudo + real apt on runner 'attempt 1/2 ok' 16 s, fresh ubuntu:24.04 container 26 s with ffprobe/xvfb-run/xauth present, CI-order replay all steps exit 0 (apt 18.5 s, install-deps 2.5 s, check 10.2 s, ffprobe 0.8 s, build 2.4 s, E2E 7/7 3.8 s). realVerified=false: hardened step not yet seen on Actions",
+        "Round 9 (499a6f3) changed check.yml again (apt step 13 min, single build path via npm run test:e2e); C R9-5 local CI-order replay x3 green. Actions run on 499a6f3 not yet linked by root"
       ],
       "realVerified": false,
       "last_round_commit": "7879ee03fce194ec9ccbd544ba862cad9e80e42c",
-      "note": "B R8 close: still no root note on an Actions run of 7879ee0, a8c1b53, d52354d, 28ad3ab or 4a2062d; stays in_progress. Round 9 changes check.yml again (TM-T0-CI-FU); a green run on the round-9 commit closes TM-T0-CI, TM-T0 and the Actions part of TM-T0-CI-FU"
+      "note": "B R9 close: still no root note on an Actions run of 7879ee0..499a6f3; stays in_progress. A green Check run on 499a6f3 or later closes TM-T0-CI, TM-T0 and the Actions part of TM-T0-CI-FU. Round 10 (TM-B14) targets the cold-start E2E failure mode that could make that run red"
     },
     {
       "id": "TM-T0-DOC",
@@ -622,9 +632,10 @@
         "real: the hardened step seen green on Actions (root links run id; rides on TM-T0-CI)"
       ],
       "evidence": [
-        "C round 4 C-R4-01; root review round 4 Low 2 and Low 5"
+        "C round 4 C-R4-01; root review round 4 Low 2 and Low 5",
+        "C round 9 PASS (c-round-9.md/.json, realVerified=true for local checks), published 499a6f3: R9-1 static (bash -n, shellcheck 0, only shebang #, YAML diff exact), R9-2 shim cases a-h + mutation (d wall 14.03 s = W, h N=3 21.03 s = W, 12 bad-knob cases rc 2 with 0 system calls), R9-3 640 < 780, R9-4 real sudo/apt rc 0 'attempt 1/2 ok after 2s', debconf man-db/auto-update true -> false, R9-5 CI-order replay x3 all steps exit 0 (apt 1.5 s, install-deps 2.2 s, check 10.6 s, ffprobe 0.8 s, Build and E2E 5.9 s), R9-6 gate 107/62/7, R9-7 real-app DOORWood -> ffprobe + music-metadata ICAT, R9-8 ownership. Local acceptance lines 1-3 have real evidence; line 4 (Actions) realVerified=false"
       ],
-      "note": "B round 8 close: planned in round 9 before root linked an Actions run on 7879ee0+ (backlog note said 'after'). Reason: only decision-free scope left; root's link is confirmation, not a prerequisite of the local fix; a round-9 commit also qualifies for TM-T0-CI. Local acceptance R9-1..R9-8; Actions part stays with TM-T0-CI",
+      "note": "B R9 close: local acceptance done (C R9 PASS). Stays in_progress only for 'real: the hardened step seen green on Actions' which rides on TM-T0-CI (root links a Check run on 499a6f3 or later)",
       "round": 9,
       "decisions": [
         "D-19"
@@ -634,7 +645,9 @@
         "RR-R4-02",
         "RR-R4-05",
         "RR-R1-01"
-      ]
+      ],
+      "realVerified": false,
+      "last_round_commit": "499a6f3c8867ed7e9356371df9e83713b652265a"
     },
     {
       "id": "TM-B10",
@@ -738,6 +751,36 @@
       ],
       "realVerified": true,
       "commit": "4a2062d9258cb97e3d45866d553c58bdbdf65498"
+    },
+    {
+      "id": "TM-B14",
+      "type": "bug",
+      "severity": "low",
+      "source": "C-R9-02",
+      "title": "E2E cold start: first Electron window can take > 30 s on a cold runner; firstWindow sits inside the test body so the 30 s per-test timeout fails the run with --retries=0 (check.yml), while local verifyCommand masks it with playwright.config retries: 1",
+      "status": "todo",
+      "round": 10,
+      "depends_on": [],
+      "decisions": [
+        "D-20"
+      ],
+      "findings": [
+        "C-R9-02",
+        "RR-R9-01",
+        "RR-R9-02"
+      ],
+      "acceptance": [
+        "R10: red on 499a6f3 code with an injected 40 s window delay -> firstWindow / Test timeout 30000ms; green with launchTagManagerApp + same delay -> 7/7 --retries=0; mutation delay 75 s -> fails within ~90 s with a message naming 60000 ms, no orphan electron",
+        "unset injector env -> launch args identical to today (D-06)",
+        "check.yml job timeout-minutes 40, docs updated, stale run-id sentence removed",
+        "gate 107/62/7, real-app smoke",
+        "real: a cold-runner Check run green on Actions (rides on TM-T0-CI, root links run id)"
+      ],
+      "evidence": [
+        "A R9 ci-replay-run1.log (first Electron launch of the job, cold, 2 workers): folder-workflow.spec.ts:27 firstWindow Timeout 30000ms + Test timeout 30000ms; test 7 in the same file and app passed 227 ms later (window appeared late, not never). Not reproduced warm (C x3, B x4 ~0.7 s) nor after drop_caches (B x3, worst 2.7 s). Cause unknown (hypothesis: first-launch cache builds)",
+        "B R9 experiment /tmp/b-r9: '-r <file>' before the entry in electron.launch args runs a module that delays app.whenReady -> firstWindow at 5.46 s with a 5 s delay; a 2 s firstWindow timeout fails with 0 windows; NODE_OPTIONS --require is ignored by Electron main"
+      ],
+      "note": "Baseline is the round-9 check.yml (499a6f3, TM-T0-CI-FU local part done). Not blocked by the Actions part of TM-T0-CI-FU; its own Actions line rides on TM-T0-CI"
     }
   ],
   "findings": [
@@ -788,10 +831,12 @@
       "id": "RR-R1-01",
       "source": "root-review",
       "severity": "medium",
-      "status": "in_progress",
+      "status": "closed",
       "title": "check.yml: separate Build step + playwright test differs from the npm run test:e2e path (naming or merge)",
       "round": 1,
-      "routed_to": "TM-T0-CI-FU round 9 (merge: E2E step runs npm run test:e2e)"
+      "routed_to": "TM-T0-CI-FU round 9 (merge: E2E step runs npm run test:e2e)",
+      "closed_round": 9,
+      "evidence": "C round 9 PASS (c-round-9.md/.json, realVerified=true for local checks), published 499a6f3: R9-1 check.yml diff (Build step removed, Build and E2E tests runs npm run test:e2e -- ...), R9-5 replay x3: E2E step builds out/ itself, --retries=0 reaches playwright, playwright-report/index.html present"
     },
     {
       "id": "RR-R1-02",
@@ -977,11 +1022,12 @@
       "id": "C-R4-01",
       "source": "C",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "round": 4,
       "title": "apt-install.sh worst case ~750 s (2 x (240+10) + dpkg recovery 240+10) > step timeout-minutes 10 (600 s); GitHub kills the step before the final 'failed after N attempts' line (per-attempt lines already printed). Diagnostics only",
       "routed_to": "TM-T0-CI-FU round 9",
-      "evidence": "c-round-4.md C-R4-01; gates/round-4/review.md Low 2 (same as RR-R4-02)"
+      "evidence": "c-round-4.md C-R4-01; gates/round-4/review.md Low 2 (same as RR-R4-02); C round 9 PASS (c-round-9.md/.json, realVerified=true for local checks), published 499a6f3: R9-2 (d) everything hangs ignoring TERM wall 14.03 s = printed W 14, final line printed; R9-3 defaults W=640 < 780 (13 min); mutation R->T caught",
+      "closed_round": 9
     },
     {
       "id": "RR-R4-01",
@@ -997,10 +1043,12 @@
       "id": "RR-R4-02",
       "source": "root-review",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "round": 4,
       "title": "Same as C-R4-01 (step budget < worst case)",
-      "routed_to": "TM-T0-CI-FU round 9"
+      "routed_to": "TM-T0-CI-FU round 9",
+      "closed_round": 9,
+      "evidence": "C round 9 PASS (c-round-9.md/.json, realVerified=true for local checks), published 499a6f3: same as C-R4-01 (R9-2, R9-3)"
     },
     {
       "id": "RR-R4-03",
@@ -1024,10 +1072,12 @@
       "id": "RR-R4-05",
       "source": "root-review",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "round": 4,
       "title": "apt-install.sh and its env knobs APT_ATTEMPT_TIMEOUT_SECONDS / APT_ATTEMPTS are not documented in docs/ (Georgian)",
-      "routed_to": "TM-T0-CI-FU round 9"
+      "routed_to": "TM-T0-CI-FU round 9",
+      "closed_round": 9,
+      "evidence": "C round 9 PASS (c-round-9.md/.json, realVerified=true for local checks), published 499a6f3: R9-8 docs/ci-cd.md Georgian section covers steps, script, 4 knobs 240/2/10/60, W/640/13 min, log lines, exit codes"
     },
     {
       "id": "RR-R4-06",
@@ -1337,6 +1387,69 @@
       "round": 8,
       "title": "After a failed batch save (0 saved, 2 failed) the panel shows the 'Multiple values' placeholder on both files (c-round-8/r8-5-after-ii-toast.png); renderer behaviour not examined, may or may not be a bug",
       "routed_to": "candidate after round 9: reproduce first"
+    },
+    {
+      "id": "RR-R9-01",
+      "source": "root-review",
+      "severity": "low",
+      "status": "in_progress",
+      "round": 9,
+      "title": "check.yml:26 apt step 13 min + install-deps 10 min = 23 of the job 30 min before check/E2E; raise job timeout-minutes (~40) or lower APT_ATTEMPT_TIMEOUT_SECONDS",
+      "routed_to": "TM-B14 round 10 (job timeout 40)"
+    },
+    {
+      "id": "RR-R9-02",
+      "source": "root-review",
+      "severity": "low",
+      "status": "in_progress",
+      "round": 9,
+      "title": "docs/ci-cd.md:239 sentence naming Actions run 40331357825 (apt 19 s) is a one-off fact that goes stale and cannot be checked from the repo",
+      "routed_to": "TM-B14 round 10 (remove)"
+    },
+    {
+      "id": "RR-R9-03",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "round": 9,
+      "title": "apt-install.sh has no automated test for knob validation (exit 2) and the worst-case line (640 s); optional script test with fake sudo/apt-get on PATH",
+      "routed_to": "signal"
+    },
+    {
+      "id": "RR-R9-04",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "round": 9,
+      "title": "Architecture signal: worst_case_seconds and check.yml timeout-minutes are kept in sync by hand; a --print-worst-case flag or CI check comparing ceil(W/60)+margin to the YAML would prevent drift",
+      "routed_to": "signal"
+    },
+    {
+      "id": "A-R9-01",
+      "source": "A",
+      "severity": "low",
+      "status": "open",
+      "round": 9,
+      "title": "apt-install.sh knob validation accepts arbitrarily large integers; bash arithmetic overflow in worst_case_seconds possible; suggestion ^[1-9][0-9]{0,5}$",
+      "routed_to": "signal"
+    },
+    {
+      "id": "C-R9-01",
+      "source": "C",
+      "severity": "info",
+      "status": "open",
+      "round": 9,
+      "title": "hang-ignore-term cases: bash prints 'line 32: <pid> Killed sudo env ... timeout ...' to stderr on every KILL; CI log noise only, stdout lines and exit codes unchanged",
+      "routed_to": "signal"
+    },
+    {
+      "id": "C-R9-02",
+      "source": "C/A",
+      "severity": "low",
+      "status": "in_progress",
+      "round": 9,
+      "title": "cold-start electronApplication.firstWindow Timeout 30000ms (A R9 run1, folder-workflow.spec.ts:27); with --retries=0 a single cold-runner occurrence turns the Actions run red",
+      "routed_to": "TM-B14 round 10"
     }
   ],
   "rounds": [
@@ -1504,7 +1617,7 @@
     {
       "round": 9,
       "task": "TM-T0-CI-FU apt-install.sh worst case fits step budget and is printed (D-19, C-R4-01, RR-R4-02) + one E2E build path in check.yml (RR-R1-01) + Georgian check.yml docs (RR-R4-05)",
-      "status": "planned",
+      "status": "published",
       "baseline": "4a2062d9258cb97e3d45866d553c58bdbdf65498",
       "items": [
         "TM-T0-CI-FU"
@@ -1513,7 +1626,30 @@
         "C-R4-01",
         "RR-R4-02",
         "RR-R4-05",
-        "RR-R1-01"
+        "RR-R1-01",
+        "RR-R9-01",
+        "RR-R9-02",
+        "RR-R9-03",
+        "RR-R9-04",
+        "A-R9-01",
+        "C-R9-01",
+        "C-R9-02"
+      ],
+      "commit": "499a6f3c8867ed7e9356371df9e83713b652265a",
+      "c_result": "PASS, realVerified=true (R9-1..R9-8, local); Actions part not claimed; root review COMMIT OK (lows/info -> RR-R9-01..04)"
+    },
+    {
+      "round": 10,
+      "task": "TM-B14 E2E first-window budget moved out of the 30 s test body into a shared launch helper (D-20, C-R9-02) + check.yml job timeout 40 (RR-R9-01) + remove stale run-id sentence (RR-R9-02)",
+      "status": "planned",
+      "baseline": "499a6f3c8867ed7e9356371df9e83713b652265a",
+      "items": [
+        "TM-B14"
+      ],
+      "findings": [
+        "C-R9-02",
+        "RR-R9-01",
+        "RR-R9-02"
       ]
     }
   ]

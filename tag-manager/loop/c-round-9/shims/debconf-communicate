@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+case "${C_SHIM_DEBCONF_MODE:-ok}" in
+  ok) in=$(cat); echo "debconf-communicate stdin=[$in] DF=${DEBIAN_FRONTEND:-unset}" >> "$C_SHIM_LOG"; exit 0;;
+  hang) echo "debconf-communicate hang" >> "$C_SHIM_LOG"; exec sleep 994;;
+  hang-ignore-term) echo "debconf-communicate hang-ignore-term" >> "$C_SHIM_LOG"; trap '' TERM; exec sleep 993;;
+esac

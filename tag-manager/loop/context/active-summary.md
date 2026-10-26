@@ -1,18 +1,18 @@
-# Active loop summary (2026-10-26T17:13:46.975Z)
+# Active loop summary (2026-10-26T18:32:46.272Z)
 
-- backlog.json 71 KB -> active view 29 KB
-- status: G_ROOT_GATE round 8
+- backlog.json 78 KB -> active view 37 KB
+- status: G_ROOT_GATE round 9
 - servers: `{"servers":"none or skipped"}`
-- last publication: 4a2062d9258cb97e3d45866d553c58bdbdf65498 (rounds 8-8)
-- last root gate: round 8 published - commit 4a2062d9258cb97e3d45866d553c58bdbdf65498 pushed
+- last publication: 499a6f3c8867ed7e9356371df9e83713b652265a (rounds 9-9)
+- last root gate: round 9 published - commit 499a6f3c8867ed7e9356371df9e83713b652265a pushed
 
-## Current items: TM-B12, TM-B13
+## Current items: TM-T0, TM-T0-CI, TM-T1, TM-T1-DUP, TM-B08, TM-T2, TM-T2-DATA, TM-B05, TM-B06, TM-T0-CI-FU, TM-B11, TM-B13
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
 - C-R1-01 / low / open / Empty Keywords written as IKEY=""; save also adds id3, LIST/MID, IDVX, JUNK chunks and moves data to the end (audio bytes identical). Contra
 - C-R1-03 / low / open / .claude/primitives/TESTING.md:129 stale (fixtures now created by globalSetup); .claude/** frozen, needs a round that owns it
-- RR-R1-01 / medium / open / check.yml: separate Build step + playwright test differs from the npm run test:e2e path (naming or merge)
+- RR-R1-01 / medium / in_progress / check.yml: separate Build step + playwright test differs from the npm run test:e2e path (naming or merge)
 - RR-R1-03 / low / open / check.yml actions pinned to @v4 tags, not SHAs
 - RR-R1-04 / low / open / create-fixtures.ts CLI guard regex matches only create-fixtures.ts (argv[1]); suggest create-fixtures\.[cm]?[jt]s$
 - RR-R1-05 / low / open / create-fixtures.ts temp file ${filePath}.${pid}.tmp leaks if writeFileSync throws; not gitignored
@@ -26,11 +26,11 @@
 - RR-R3-04 / low / open / New test files use double quotes vs src single quotes; Biome does not check tests/
 - RR-R3-05 / info / open / npx --yes tsx@4 downloads a floating major at runtime (verifyCommand + check.yml); consider a pinned devDependency
 - RR-R3-06 / info / open / Architecture: schema.json has no version/migration; a versioned schema with one-time merge in loadSchema() would solve D-07 and TM-T1-DUP to
-- C-R4-01 / low / open / apt-install.sh worst case ~750 s (2 x (240+10) + dpkg recovery 240+10) > step timeout-minutes 10 (600 s); GitHub kills the step before the f
-- RR-R4-02 / low / open / Same as C-R4-01 (step budget < worst case)
+- C-R4-01 / low / in_progress / apt-install.sh worst case ~750 s (2 x (240+10) + dpkg recovery 240+10) > step timeout-minutes 10 (600 s); GitHub kills the step before the f
+- RR-R4-02 / low / in_progress / Same as C-R4-01 (step budget < worst case)
 - RR-R4-03 / low / open / check-ffprobe-tags.ts missing-file hint hard-codes 'during npm run check'; a follow-up could print the exact vitest command
 - RR-R4-04 / info / open / tests/main/check-ffprobe-tags.test.ts second test only checks a constant + existsSync (low value; acceptable as a guard against a renamed pr
-- RR-R4-05 / low / open / apt-install.sh and its env knobs APT_ATTEMPT_TIMEOUT_SECONDS / APT_ATTEMPTS are not documented in docs/ (Georgian)
+- RR-R4-05 / low / in_progress / apt-install.sh and its env knobs APT_ATTEMPT_TIMEOUT_SECONDS / APT_ATTEMPTS are not documented in docs/ (Georgian)
 - RR-R4-06 / info / open / Architecture signal: move the ffprobe cross-check into recording-tag-contract.test.ts (skip when ffprobe is missing) or into a dedicated npm
 - RR-R5-01 / low / open / Badge now counts every field (year/track/ISRC-only file shows Tagged); fits D-15, add a docs/ note
 - RR-R5-02 / low / open / file-row-display.ts:11 item.trim() assumes string elements; a null in an array would crash the row render (typeof guard suggested)
@@ -41,30 +41,23 @@
 - B-R6-01 / low / open / bpm and track read 0 from an INFO-only WAV with and without NUL (IBPM '120', ITRK '7'): node-taglib-sharp does not map IBPM/ITRK; STANDARD_F
 - C-R6-01 / low / open / Custom Number field in schema -> every save writes ITKN='0' (size 1) into files that never had it; pre-existing
 - RR-R6-03 / low / open / riff-info-nul.test.ts uses double quotes vs single in src; tests/ not linted
-- RR-R6-04 / low / open / Pre-existing '// InfoTag read failed' / '// InfoTag write failed' comments (metadata.ts catch blocks) violate the no-comments rule
 - RR-R6-05 / info / open / Architecture signal: one RIFF value normalisation layer readRiffValue(tag, chunkId): string[] for standard and custom fields, plus a write-s
 - C-R6-02 / info / open / Observation: music-metadata decodes RIFF INFO UTF-8 Georgian as mojibake (also on the original ffmpeg file); ffprobe and ID3 COMM are correc
-- RR-R7-01 / medium / open / D-17 makes a save all-or-nothing: standard fields are no longer written when custom INFO fields cannot be; reviewer: no code fix, document i
-- RR-R7-02 / low / open / Per-field try { setValuesFromStrings } catch {} still swallows errors (e.g. malformed riffChunkId in a user schema); save reports success. F
-- RR-R7-03 / low / open / metadata.ts:200 '// InfoTag write failed for this field' violates the no-comments rule (pre-existing, re-indented in R7)
 - RR-R7-04 / low / open / metadata-write-guard.test.ts overrides file.tag with a bare Id3v2Tag: tied to node-taglib-sharp getter shape; may break on a library upgrade
 - RR-R7-05 / info / open / Architecture signal: split writeTagsToFile into pure planTagWrite(meta, schema) -> {standard, custom} and applyTagWrite(file, plan) that val
 - A-R7-01 / info / open / Fact (A R7 M2, C R7-2 M2/M2b): on library-opened sample.wav without LIST/INFO, getRiffInfoTags is already non-empty before the title workaro
 - B-R7-02 / low / open / schema.ts isValidField does not validate riffChunkId (type/length); a hand-edited schema.json reaches the write path with 'AB', '', 'ICAT5' 
 - B-R7-03 / low / open / A non-standard schema field without riffChunkId is silently skipped on write (metadata.ts 'if (field.riffChunkId)'): value given, save repor
+- RR-R8-01 / low / open / metadata.ts:199 String(riffChunkId) is redundant (already string); push riffChunkId directly
+- RR-R8-02 / low / open / metadata-write-field-errors.test.ts uses double quotes vs single in src; tests/ not linted
+- RR-R8-03 / low / open / metadata.ts:147 empty catch {} in read path hides non-ID failures without a trace; a debug log would help diagnosis
+- RR-R8-04 / info / open / Architecture signal: validate schema at load in main (riffChunkId /^[A-Z0-9 ]{4}$/, not reserved, not duplicated); reject or flag once; keep
+- A-R8-01 / info / open / docs/recording-tag-contract.md header (line 5) and '## შემოწმება' do not mention D-17/D-18 or metadata-write-field-errors.test.ts (task said
+- A-R8-02 / low / open / node-taglib-sharp checks riffChunkId by JS string length (id.length !== 4), not bytes: a 4-character non-ASCII ID does not trigger D-18; doc
+- C-R8-01 / low / open / After a failed batch save (0 saved, 2 failed) the panel shows the 'Multiple values' placeholder on both files (c-round-8/r8-5-after-ii-toast
 
 ## Other open items
-- TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
-- TM-T0-CI [in_progress] New .github/workflows/check.yml (ubuntu-24.04, Node 22, npm ci, ffmpeg+xvfb, check, build, xvfb playwright --retries=0)
 - TM-T1-MIG [todo] Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no aut
-- TM-T1-DUP [todo] Old schema.json custom field colliding with standard category: (a) custom field already using RIFF ID ICAT; (b) custom field with key 'categ
-- TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
-- TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
-- TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba
-- TM-B05 [todo] A WAV whose data chunk is empty cannot be tagged (node-taglib-sharp 6.0.1 boundary bug) and read silently returns empty metadata
-- TM-B06 [todo] Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database
 - OOS-03 [out_of_scope] New npm dependencies
-- TM-T0-CI-FU [todo] CI follow-up: apt-install.sh worst-case budget (C-R4-01/RR-R4-02: smaller dpkg recovery bound or step timeout >= 13 min) + Georgian docs not
-- TM-B11 [todo] With a custom Number field in the schema (e.g. Take/ITKN), every single-file save writes the default 0 as INFO '0' (size 1) into files that 

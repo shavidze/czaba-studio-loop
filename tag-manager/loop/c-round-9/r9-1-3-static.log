@@ -1,0 +1,22 @@
+bash -n OK
+shellcheck 0 issues
+-- # lines:
+1:#!/usr/bin/env bash
+-- any # :
+1:#!/usr/bin/env bash
+87:if (($# == 0)); then
+YAML OK; job timeout 30 runs-on ubuntu-24.04
+0 actions/checkout@v4 |  |  
+1 actions/setup-node@v4 |  |  
+2 Install dependencies |  | npm ci 
+3 Install system packages | 13 | bash .github/scripts/apt-install.sh ffmpeg xvfb 
+4 Install Electron system libraries | 10 | npx playwright install-deps chromium 
+5 Lint, type check and unit tests |  | npm run check 
+6 Tag contract ffprobe cross-check |  | npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts test-results/recording-tag-contract/contract.wav 
+7 Build and E2E tests |  | xvfb-run -a npm run test:e2e -- --retries=0 --trace=retain-on-failure --reporter=list,html {"PLAYWRIGHT_HTML_OPEN":"never"}
+8 Upload test artifacts |  |  
+new budget 780 vs W 640 -> true
+old budget 600 vs old W 2*(240+10)+(240+10)= 750 -> RED: exceeds
+uses new ["actions/checkout@v4","actions/setup-node@v4","actions/upload-artifact@v4"] old ["actions/checkout@v4","actions/setup-node@v4","actions/upload-artifact@v4"]
+on true perm true
+ffprobe idx 6 < e2e idx 7 true build step present: false

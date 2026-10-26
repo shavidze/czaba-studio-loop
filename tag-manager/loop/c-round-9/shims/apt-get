@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+echo "apt-get argv=[$*] DF=${DEBIAN_FRONTEND:-unset}" >> "$C_SHIM_LOG"
+n=$(( $(cat "$C_SHIM_STATE" 2>/dev/null || echo 0) + 1 )); echo $n > "$C_SHIM_STATE"
+case "${C_SHIM_MODE:-ok}" in
+  ok) exit 0;;
+  hang-first) if [ "$n" -eq 1 ]; then exec sleep 999; fi; exit 0;;
+  hang) exec sleep 999;;
+  hang-ignore-term) trap '' TERM; exec sleep 997;;
+  fail) exit 100;;
+esac

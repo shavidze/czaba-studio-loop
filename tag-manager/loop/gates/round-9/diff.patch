@@ -1,0 +1,181 @@
+diff --git a/.github/scripts/apt-install.sh b/.github/scripts/apt-install.sh
+index 30fbf54..13621d5 100755
+--- a/.github/scripts/apt-install.sh
++++ b/.github/scripts/apt-install.sh
+@@ -3,21 +3,29 @@ set -euo pipefail
+ 
+ readonly APT_ATTEMPT_TIMEOUT_SECONDS="${APT_ATTEMPT_TIMEOUT_SECONDS:-240}"
+ readonly APT_ATTEMPTS="${APT_ATTEMPTS:-2}"
+-readonly APT_KILL_AFTER_SECONDS=10
++readonly APT_KILL_AFTER_SECONDS="${APT_KILL_AFTER_SECONDS:-10}"
++readonly APT_RECOVERY_TIMEOUT_SECONDS="${APT_RECOVERY_TIMEOUT_SECONDS:-60}"
+ readonly TIMEOUT_EXIT_TERM=124
+ readonly TIMEOUT_EXIT_KILL=137
+ 
+ print_usage_error() {
+   echo "Usage: bash .github/scripts/apt-install.sh <package>..." >&2
+-  echo "Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2)" >&2
++  echo "Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)" >&2
+ }
+ 
+ is_positive_integer() {
+   [[ "$1" =~ ^[1-9][0-9]*$ ]]
+ }
+ 
++worst_case_seconds() {
++  local bounded_recovery=$((APT_RECOVERY_TIMEOUT_SECONDS + APT_KILL_AFTER_SECONDS))
++  local bounded_attempt=$((APT_ATTEMPT_TIMEOUT_SECONDS + APT_KILL_AFTER_SECONDS))
++  echo $((bounded_recovery + APT_ATTEMPTS * bounded_attempt + (APT_ATTEMPTS - 1) * bounded_recovery))
++}
++
+ disable_man_db_triggers() {
+-  echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null 2>&1 || true
++  echo 'set man-db/auto-update false' \
++    | run_bounded_as_root "${APT_RECOVERY_TIMEOUT_SECONDS}" debconf-communicate >/dev/null 2>&1 || true
+   sudo rm -f /var/lib/man-db/auto-update
+ }
+ 
+@@ -62,7 +70,7 @@ run_apt_attempt() {
+ }
+ 
+ recover_interrupted_dpkg() {
+-  run_bounded_as_root "${APT_ATTEMPT_TIMEOUT_SECONDS}" dpkg --configure -a || true
++  run_bounded_as_root "${APT_RECOVERY_TIMEOUT_SECONDS}" dpkg --configure -a || true
+ }
+ 
+ describe_attempt_outcome() {
+@@ -81,14 +89,19 @@ if (($# == 0)); then
+   exit 2
+ fi
+ 
+-if ! is_positive_integer "${APT_ATTEMPT_TIMEOUT_SECONDS}" || ! is_positive_integer "${APT_ATTEMPTS}"; then
+-  print_usage_error
+-  exit 2
+-fi
++for knob_value in "${APT_ATTEMPT_TIMEOUT_SECONDS}" "${APT_ATTEMPTS}" \
++  "${APT_KILL_AFTER_SECONDS}" "${APT_RECOVERY_TIMEOUT_SECONDS}"; do
++  if ! is_positive_integer "${knob_value}"; then
++    print_usage_error
++    exit 2
++  fi
++done
+ 
+ requested_packages=("$@")
+ failed_apt_phase=""
+ 
++echo "apt-install: worst case $(worst_case_seconds)s"
++
+ disable_man_db_triggers
+ 
+ for ((attempt_number = 1; attempt_number <= APT_ATTEMPTS; attempt_number++)); do
+diff --git a/.github/workflows/check.yml b/.github/workflows/check.yml
+index 7f09894..77088a9 100644
+--- a/.github/workflows/check.yml
++++ b/.github/workflows/check.yml
+@@ -23,7 +23,7 @@ jobs:
+         run: npm ci
+ 
+       - name: Install system packages
+-        timeout-minutes: 10
++        timeout-minutes: 13
+         run: bash .github/scripts/apt-install.sh ffmpeg xvfb
+ 
+       - name: Install Electron system libraries
+@@ -36,11 +36,8 @@ jobs:
+       - name: Tag contract ffprobe cross-check
+         run: npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts test-results/recording-tag-contract/contract.wav
+ 
+-      - name: Build
+-        run: npm run build
+-
+-      - name: E2E tests
+-        run: xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure --reporter=list,html
++      - name: Build and E2E tests
++        run: xvfb-run -a npm run test:e2e -- --retries=0 --trace=retain-on-failure --reporter=list,html
+         env:
+           PLAYWRIGHT_HTML_OPEN: never
+ 
+diff --git a/docs/ci-cd.md b/docs/ci-cd.md
+index 46b860a..7bf6cb5 100644
+--- a/docs/ci-cd.md
++++ b/docs/ci-cd.md
+@@ -173,3 +173,79 @@ permissions:
+ | `Czaba-Tag-Manager-{ver}.dmg` | macOS x64 |
+ | `Czaba-Tag-Manager-{ver}-arm64.dmg` | macOS ARM64 |
+ | `Czaba-Tag-Manager-{ver}-mac.zip` | macOS ZIP |
++
++---
++
++## Check workflow (check.yml)
++
++ფაილი: `.github/workflows/check.yml`. ეს workflow ამოწმებს კოდს ყოველ ცვლილებაზე; release-ს არ ქმნის.
++
++### ტრიგერი და runner
++
++- `push` (ნებისმიერი branch) და `pull_request`.
++- Runner: `ubuntu-24.04`, Node 22, job-ის `timeout-minutes: 30`.
++- `permissions: contents: read`.
++
++### ნაბიჯები (თანმიმდევრობით)
++
++| # | ნაბიჯი | ბრძანება | შენიშვნა |
++|---|--------|----------|----------|
++| 1 | Checkout | `actions/checkout@v4` | |
++| 2 | Node setup | `actions/setup-node@v4` | Node 22, npm cache |
++| 3 | Install dependencies | `npm ci` | |
++| 4 | Install system packages | `bash .github/scripts/apt-install.sh ffmpeg xvfb` | `timeout-minutes: 13` |
++| 5 | Install Electron system libraries | `npx playwright install-deps chromium` | `timeout-minutes: 10` |
++| 6 | Lint, type check and unit tests | `npm run check` | Biome + tsc + Vitest |
++| 7 | Tag contract ffprobe cross-check | `npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts test-results/recording-tag-contract/contract.wav` | E2E-მდე უნდა გაეშვას: Playwright სტარტზე `test-results/`-ს ასუფთავებს |
++| 8 | Build and E2E tests | `xvfb-run -a npm run test:e2e -- --retries=0 --trace=retain-on-failure --reporter=list,html` | `PLAYWRIGHT_HTML_OPEN: never` |
++| 9 | Upload test artifacts | `actions/upload-artifact@v4` | მხოლოდ `if: failure()`; `playwright-report/` და `test-results/` |
++
++`Build and E2E tests` ბილდავს `npm run test:e2e`-ით (`npm run build && npx playwright test`), ანუ იმავე გზით, როგორც ლოკალური გაშვება და loop-ის `verifyCommand`. ცალკე `Build` ნაბიჯი აღარ არსებობს. `npm run <script> -- <args>` არგუმენტებს script-ის **ბოლო** ბრძანებას უმატებს, ამიტომ `--retries=0`, `--trace` და `--reporter` Playwright-ს მიდის და არა `npm run build`-ს.
++
++### apt-install.sh
++
++ფაილი: `.github/scripts/apt-install.sh`. გამოყენება: `bash .github/scripts/apt-install.sh <package>...`
++
++რას აკეთებს:
++
++1. ამოწმებს არგუმენტებს და env knob-ებს; ბეჭდავს `worst case` ხაზს.
++2. თიშავს man-db trigger-ს: `debconf-communicate`-ში `set man-db/auto-update false` (recovery bound-ით შეზღუდული, შეცდომა ტოლერირებულია) და შლის `/var/lib/man-db/auto-update`-ს.
++3. ყოველი attempt: `apt-get update` და `apt-get install -y --no-install-recommends <packages>` (`-o Dpkg::Use-Pty=0`, `DEBIAN_FRONTEND=noninteractive`). ორივე phase ერთ attempt deadline-ს იზიარებს (`APT_ATTEMPT_TIMEOUT_SECONDS`).
++4. attempt-ებს შორის: `dpkg --configure -a` recovery, `APT_RECOVERY_TIMEOUT_SECONDS`-ით შეზღუდული.
++
++`debconf-communicate`, `apt-get` და `dpkg --configure -a` ეშვება `sudo env DEBIAN_FRONTEND=noninteractive timeout --kill-after=K <bound>`-ით (`sudo rm -f` — ამის გარეშე): bound-ის შემდეგ TERM, კიდევ K წამის შემდეგ KILL.
++
++### Env knob-ები
++
++| Knob | Default | მნიშვნელობა |
++|------|---------|-------------|
++| `APT_ATTEMPT_TIMEOUT_SECONDS` | 240 | ერთი attempt-ის deadline (T) |
++| `APT_ATTEMPTS` | 2 | attempt-ების რაოდენობა (N) |
++| `APT_KILL_AFTER_SECONDS` | 10 | TERM-იდან KILL-მდე (K) |
++| `APT_RECOVERY_TIMEOUT_SECONDS` | 60 | man-db ნაბიჯის და `dpkg --configure -a`-ის bound (R) |
++
++ყოველი knob დადებითი მთელი რიცხვი უნდა იყოს. სხვა შემთხვევაში (ან არგუმენტების გარეშე) script stderr-ზე ბეჭდავს usage-ს და გამოდის **exit 2**-ით, სისტემას არ ეხება.
++
++### Worst case და step timeout
++
++```
++W = (R + K) + N × (T + K) + (N − 1) × (R + K)
++```
++
++- `(R + K)` — man-db ნაბიჯი;
++- `N × (T + K)` — attempt-ები;
++- `(N − 1) × (R + K)` — recovery attempt-ებს შორის.
++
++Default-ებით: `70 + 2 × 250 + 70 = 640` წამი. ამიტომ "Install system packages" ნაბიჯს აქვს `timeout-minutes: 13` (780 წამი > 640): script-ი საკუთარ ლიმიტებს ამოწურავს და მკაფიო ხაზს დაბეჭდავს მანამ, სანამ GitHub ნაბიჯს გააუქმებს. W მიახლოებითია: `SECONDS` მთელ წამებს ითვლის და process-ების გაშვებაც დროს მოითხოვს, ამიტომ რეალური დრო W-ს შეიძლება ~1 წამით აჭარბებდეს ყოველ attempt-ზე; 140 წამიანი რეზერვი ამას ფარავს. Actions run `40331357825`-ში apt ნაბიჯმა 19 წამი დაიკავა.
++
++### Log ხაზები
++
++| ხაზი | როდის |
++|------|-------|
++| `apt-install: worst case Ws` | პირველი ხაზი, ვალიდაციის შემდეგ |
++| `apt-install: attempt N/M ok after Ss` | attempt წარმატებულია, exit 0 |
++| `apt-install: attempt N/M timed out in <phase> after Ss` | phase (`apt-get update` ან `apt-get install`) timeout-ით შეწყდა |
++| `apt-install: attempt N/M failed (exit X) in <phase> after Ss` | phase X კოდით დასრულდა |
++| `apt-install: failed after N attempts` | ყველა attempt ჩავარდა, exit 1 |
++
++Exit კოდები: `0` წარმატება, `1` ყველა attempt ჩავარდა, `2` usage შეცდომა.

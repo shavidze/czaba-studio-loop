@@ -1,0 +1,19 @@
+== case b rc=0 wall=3.037502973s orphans=0 env=[APT_ATTEMPT_TIMEOUT_SECONDS=3 APT_RECOVERY_TIMEOUT_SECONDS=2 APT_KILL_AFTER_SECONDS=1 APT_ATTEMPTS=2 C_SHIM_MODE=hang-first] args=[ffmpeg xvfb]
+-- stdout
+apt-install: worst case 14s
+apt-install: attempt 1/2 timed out in apt-get update after 3s
+apt-install: attempt 2/2 ok after 0s
+-- stderr
+-- shim log
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 2 debconf-communicate] DF=noninteractive
+debconf-communicate stdin=[set man-db/auto-update false] DF=noninteractive
+sudo argv=[rm -f /var/lib/man-db/auto-update] DF=noninteractive
+(sudo shim: rm not executed)
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 3 apt-get -o Dpkg::Use-Pty=0 update] DF=noninteractive
+apt-get argv=[-o Dpkg::Use-Pty=0 update] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 2 dpkg --configure -a] DF=noninteractive
+dpkg argv=[--configure -a] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 3 apt-get -o Dpkg::Use-Pty=0 update] DF=noninteractive
+apt-get argv=[-o Dpkg::Use-Pty=0 update] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 3 apt-get -o Dpkg::Use-Pty=0 install -y --no-install-recommends ffmpeg xvfb] DF=noninteractive
+apt-get argv=[-o Dpkg::Use-Pty=0 install -y --no-install-recommends ffmpeg xvfb] DF=noninteractive

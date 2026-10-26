@@ -1,0 +1,109 @@
+## (a) ok, defaults
+apt-install: worst case 640s
+apt-install: attempt 1/2 ok after 0s
+rc=0 wall=.025926178s
+--- shim log
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=10 60 debconf-communicate]
+debconf-communicate DF=noninteractive
+sudo argv=[rm -f /var/lib/man-db/auto-update]
+(sudo shim: rm not executed)
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=10 240 apt-get -o Dpkg::Use-Pty=0 update]
+apt-get argv=[-o Dpkg::Use-Pty=0 update] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=10 240 apt-get -o Dpkg::Use-Pty=0 install -y --no-install-recommends ffmpeg xvfb]
+apt-get argv=[-o Dpkg::Use-Pty=0 install -y --no-install-recommends ffmpeg xvfb] DF=noninteractive
+--- leftover sleeps: 0
+## (e) apt fail exit 100, small knobs
+apt-install: worst case 14s
+apt-install: attempt 1/2 failed (exit 100) in apt-get update after 0s
+apt-install: attempt 2/2 failed (exit 100) in apt-get update after 0s
+apt-install: failed after 2 attempts
+rc=1 wall=.032487365s
+--- shim log
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 2 debconf-communicate]
+debconf-communicate DF=noninteractive
+sudo argv=[rm -f /var/lib/man-db/auto-update]
+(sudo shim: rm not executed)
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 3 apt-get -o Dpkg::Use-Pty=0 update]
+apt-get argv=[-o Dpkg::Use-Pty=0 update] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 2 dpkg --configure -a]
+dpkg argv=[--configure -a] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 3 apt-get -o Dpkg::Use-Pty=0 update]
+apt-get argv=[-o Dpkg::Use-Pty=0 update] DF=noninteractive
+--- leftover sleeps: 0
+## (f) no args
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003294722s
+--- shim log
+--- leftover sleeps: 0
+## (g) APT_ATTEMPT_TIMEOUT_SECONDS=0
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003294112s
+## (g) APT_ATTEMPT_TIMEOUT_SECONDS=-1
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003369635s
+## (g) APT_ATTEMPT_TIMEOUT_SECONDS=abc
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003355925s
+## (g) APT_ATTEMPTS=0
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003371168s
+## (g) APT_ATTEMPTS=-1
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003353812s
+## (g) APT_ATTEMPTS=abc
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003372189s
+## (g) APT_KILL_AFTER_SECONDS=0
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003412580s
+## (g) APT_KILL_AFTER_SECONDS=-1
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003371984s
+## (g) APT_KILL_AFTER_SECONDS=abc
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003336600s
+## (g) APT_RECOVERY_TIMEOUT_SECONDS=0
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003388204s
+## (g) APT_RECOVERY_TIMEOUT_SECONDS=-1
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003422866s
+## (g) APT_RECOVERY_TIMEOUT_SECONDS=abc
+Usage: bash .github/scripts/apt-install.sh <package>...
+Environment: APT_ATTEMPT_TIMEOUT_SECONDS (default 240), APT_ATTEMPTS (default 2), APT_KILL_AFTER_SECONDS (default 10), APT_RECOVERY_TIMEOUT_SECONDS (default 60)
+rc=2 wall=.003450493s
+## (h) N=3 all hang-ignore-term
+apt-install: worst case 21s
+apt-install: attempt 1/3 timed out in apt-get update after 4s
+apt-install: attempt 2/3 timed out in apt-get update after 4s
+apt-install: attempt 3/3 timed out in apt-get update after 4s
+apt-install: failed after 3 attempts
+rc=1 wall=21.033397832s
+--- shim log
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 2 debconf-communicate]
+debconf-communicate DF=noninteractive
+sudo argv=[rm -f /var/lib/man-db/auto-update]
+(sudo shim: rm not executed)
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 3 apt-get -o Dpkg::Use-Pty=0 update]
+apt-get argv=[-o Dpkg::Use-Pty=0 update] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 2 dpkg --configure -a]
+dpkg argv=[--configure -a] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 3 apt-get -o Dpkg::Use-Pty=0 update]
+apt-get argv=[-o Dpkg::Use-Pty=0 update] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 2 dpkg --configure -a]
+dpkg argv=[--configure -a] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=1 3 apt-get -o Dpkg::Use-Pty=0 update]
+apt-get argv=[-o Dpkg::Use-Pty=0 update] DF=noninteractive
+--- leftover sleeps: 0

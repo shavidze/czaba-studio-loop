@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+echo "dpkg argv=[$*] DF=${DEBIAN_FRONTEND:-unset}" >> "$C_SHIM_LOG"
+case "${C_SHIM_DPKG_MODE:-ok}" in
+  ok) exit 0;;
+  hang) exec sleep 996;;
+  hang-ignore-term) trap '' TERM; exec sleep 995;;
+esac
