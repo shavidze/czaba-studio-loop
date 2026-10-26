@@ -1,0 +1,289 @@
+import { ipcMain } from 'electron';
+import { CombinedTag, InfoTag, type Tag, File as TagFile } from 'node-taglib-sharp';
+import type {
+  BatchWriteResult,
+  FieldDefinition,
+  FieldValue,
+  WavMetadata,
+} from '../../shared/types';
+import { IPC_CHANNELS } from './channels';
+
+type TagObject = Record<string, unknown> & {
+  title: string;
+  performers: string[];
+  album: string;
+  genres: string[];
+  year: number;
+  comment: string;
+  copyright: string;
+  track: number;
+  beatsPerMinute: number;
+  isrc: string;
+  publisher: string;
+};
+
+const STANDARD_PROP_MAP: Record<
+  string,
+  { get: (tag: TagObject) => FieldValue; set: (tag: TagObject, val: FieldValue) => void }
+> = {
+  title: {
+    get: (tag) => tag.title ?? '',
+    set: (tag, val) => {
+      tag.title = val as string;
+    },
+  },
+  artists: {
+    get: (tag) => (tag.performers ? [...tag.performers] : []),
+    set: (tag, val) => {
+      tag.performers = val as string[];
+    },
+  },
+  album: {
+    get: (tag) => tag.album ?? '',
+    set: (tag, val) => {
+      tag.album = val as string;
+    },
+  },
+  genres: {
+    get: (tag) => (tag.genres ? [...tag.genres] : []),
+    set: (tag, val) => {
+      tag.genres = val as string[];
+    },
+  },
+  year: {
+    get: (tag) => tag.year ?? 0,
+    set: (tag, val) => {
+      tag.year = val as number;
+    },
+  },
+  comment: {
+    get: (tag) => tag.comment ?? '',
+    set: (tag, val) => {
+      tag.comment = val as string;
+    },
+  },
+  copyright: {
+    get: (tag) => tag.copyright ?? '',
+    set: (tag, val) => {
+      tag.copyright = val as string;
+    },
+  },
+  track: {
+    get: (tag) => tag.track ?? 0,
+    set: (tag, val) => {
+      tag.track = val as number;
+    },
+  },
+  bpm: {
+    get: (tag) => tag.beatsPerMinute ?? 0,
+    set: (tag, val) => {
+      tag.beatsPerMinute = val as number;
+    },
+  },
+  isrc: {
+    get: (tag) => tag.isrc ?? '',
+    set: (tag, val) => {
+      tag.isrc = val as string;
+    },
+  },
+  publisher: {
+    get: (tag) => tag.publisher ?? '',
+    set: (tag, val) => {
+      tag.publisher = val as string;
+    },
+  },
+};
+
+function getDefaultValue(type: FieldDefinition['type']): FieldValue {
+  if (type === 'tags') return [];
+  if (type === 'number') return 0;
+  return '';
+}
+
+function getRiffInfoTags(fileTag: Tag): InfoTag[] {
+  if (!(fileTag instanceof CombinedTag)) {
+    throw new TypeError('File tag is not a CombinedTag');
+  }
+  return fileTag.tags.filter((t): t is InfoTag => t instanceof InfoTag);
+}
+
+function readTagsFromFile(filePath: string, schema: FieldDefinition[]): WavMetadata {
+  const file = TagFile.createFromPath(filePath);
+  try {
+    const tag = file.tag as unknown as TagObject;
+    const result: WavMetadata = {};
+
+    for (const field of schema) {
+      const standardProp = STANDARD_PROP_MAP[field.key];
+      if (standardProp) {
+        result[field.key] = standardProp.get(tag);
+        continue;
+      }
+
+      if (field.riffChunkId) {
+        try {
+          const infoTags = getRiffInfoTags(file.tag);
+          if (infoTags.length > 0) {
+            const values = infoTags[0].getValuesAsStrings(field.riffChunkId);
+            if (field.type === 'tags') {
+              result[field.key] = values.length > 0 ? [...values] : [];
+            } else if (field.type === 'number') {
+              result[field.key] = values.length > 0 ? Number(values[0]) || 0 : 0;
+            } else {
+              result[field.key] = values.length > 0 ? values.join(', ') : '';
+            }
+            continue;
+          }
+        } catch {
+          // InfoTag read failed, use default
+        }
+      }
+
+      result[field.key] = getDefaultValue(field.type);
+    }
+
+    return result;
+  } finally {
+    file.dispose();
+  }
+}
+
+function writeTagsToFile(
+  filePath: string,
+  meta: Partial<WavMetadata>,
+  schema: FieldDefinition[],
+): void {
+  const file = TagFile.createFromPath(filePath);
+  try {
+    const tag = file.tag as unknown as TagObject;
+    const customFields: Array<{ riffChunkId: string; value: FieldValue }> = [];
+
+    for (const field of schema) {
+      const value = meta[field.key];
+      if (value === undefined) continue;
+
+      const standardProp = STANDARD_PROP_MAP[field.key];
+      if (standardProp) {
+        standardProp.set(tag, value);
+        continue;
+      }
+
+      if (field.riffChunkId) {
+        customFields.push({ riffChunkId: field.riffChunkId, value });
+      }
+    }
+
+    if (customFields.length > 0) {
+      let infoTags = getRiffInfoTags(file.tag);
+      if (infoTags.length === 0) {
+        tag.title = tag.title ?? '';
+        infoTags = getRiffInfoTags(file.tag);
+      }
+      if (infoTags.length > 0) {
+        for (const { riffChunkId, value } of customFields) {
+          try {
+            const strValues = Array.isArray(value) ? value.map(String) : [String(value)];
+            infoTags[0].setValuesFromStrings(riffChunkId, strValues);
+          } catch {
+            // InfoTag write failed for this field
+          }
+        }
+      }
+    }
+
+    file.save();
+  } finally {
+    file.dispose();
+  }
+}
+
+function emptyMetadata(schema: FieldDefinition[]): WavMetadata {
+  const result: WavMetadata = {};
+  for (const field of schema) {
+    result[field.key] = getDefaultValue(field.type);
+  }
+  return result;
+}
+
+export function registerMetadataHandlers(): void {
+  ipcMain.handle(
+    IPC_CHANNELS.READ_METADATA,
+    async (_event, filePath: string, schema: FieldDefinition[]) => {
+      try {
+        return readTagsFromFile(filePath, schema);
+      } catch {
+        return emptyMetadata(schema);
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.READ_METADATA_BATCH,
+    async (_event, filePaths: string[], schema: FieldDefinition[]) => {
+      const results: Record<string, WavMetadata> = {};
+      for (let i = 0; i < filePaths.length; i++) {
+        try {
+          results[filePaths[i]] = readTagsFromFile(filePaths[i], schema);
+        } catch {
+          results[filePaths[i]] = emptyMetadata(schema);
+        }
+        if (i % 10 === 9) {
+          await new Promise<void>((r) => setImmediate(r));
+        }
+      }
+      return results;
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.WRITE_METADATA,
+    async (_event, filePath: string, meta: Partial<WavMetadata>, schema: FieldDefinition[]) => {
+      try {
+        writeTagsToFile(filePath, meta, schema);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes('Corrupt') || msg.includes('corrupt')) {
+          throw new Error('File appears to be corrupted and cannot be written to');
+        }
+        if (msg.includes('EBUSY') || msg.includes('EACCES')) {
+          throw new Error('File is locked or read-only');
+        }
+        throw new Error(`Failed to write metadata: ${msg}`);
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.WRITE_METADATA_BATCH,
+    async (
+      _event,
+      filePaths: string[],
+      meta: Partial<WavMetadata>,
+      schema: FieldDefinition[],
+    ): Promise<BatchWriteResult> => {
+      const result: BatchWriteResult = { succeeded: 0, failed: [] };
+
+      for (let i = 0; i < filePaths.length; i++) {
+        try {
+          writeTagsToFile(filePaths[i], meta, schema);
+          result.succeeded++;
+        } catch (err) {
+          result.failed.push({
+            path: filePaths[i],
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
+        if (i % 5 === 4) {
+          await new Promise<void>((r) => setImmediate(r));
+        }
+      }
+
+      return result;
+    },
+  );
+}
+stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The contents aren't fixed. Use the `--write` flag to fix them.
+  
+

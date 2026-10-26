@@ -1,0 +1,102 @@
+diff --git a/src/main/ipc/metadata.ts b/src/main/ipc/metadata.ts
+index 8588a7b..c184fb8 100644
+--- a/src/main/ipc/metadata.ts
++++ b/src/main/ipc/metadata.ts
+@@ -22,30 +22,38 @@ type TagObject = Record<string, unknown> & {
+   publisher: string;
+ };
+ 
++function stripRiffNulTerminator(value: string): string {
++  let end = value.length;
++  while (end > 0 && value.charCodeAt(end - 1) === 0) {
++    end--;
++  }
++  return value.slice(0, end);
++}
++
+ const STANDARD_PROP_MAP: Record<
+   string,
+   { get: (tag: TagObject) => FieldValue; set: (tag: TagObject, val: FieldValue) => void }
+ > = {
+   title: {
+-    get: (tag) => tag.title ?? '',
++    get: (tag) => stripRiffNulTerminator(tag.title ?? ''),
+     set: (tag, val) => {
+       tag.title = val as string;
+     },
+   },
+   artists: {
+-    get: (tag) => (tag.performers ? [...tag.performers] : []),
++    get: (tag) => (tag.performers ? tag.performers.map(stripRiffNulTerminator) : []),
+     set: (tag, val) => {
+       tag.performers = val as string[];
+     },
+   },
+   album: {
+-    get: (tag) => tag.album ?? '',
++    get: (tag) => stripRiffNulTerminator(tag.album ?? ''),
+     set: (tag, val) => {
+       tag.album = val as string;
+     },
+   },
+   genres: {
+-    get: (tag) => (tag.genres ? [...tag.genres] : []),
++    get: (tag) => (tag.genres ? tag.genres.map(stripRiffNulTerminator) : []),
+     set: (tag, val) => {
+       tag.genres = val as string[];
+     },
+@@ -57,13 +65,13 @@ const STANDARD_PROP_MAP: Record<
+     },
+   },
+   comment: {
+-    get: (tag) => tag.comment ?? '',
++    get: (tag) => stripRiffNulTerminator(tag.comment ?? ''),
+     set: (tag, val) => {
+       tag.comment = val as string;
+     },
+   },
+   copyright: {
+-    get: (tag) => tag.copyright ?? '',
++    get: (tag) => stripRiffNulTerminator(tag.copyright ?? ''),
+     set: (tag, val) => {
+       tag.copyright = val as string;
+     },
+@@ -81,13 +89,13 @@ const STANDARD_PROP_MAP: Record<
+     },
+   },
+   isrc: {
+-    get: (tag) => tag.isrc ?? '',
++    get: (tag) => stripRiffNulTerminator(tag.isrc ?? ''),
+     set: (tag, val) => {
+       tag.isrc = val as string;
+     },
+   },
+   publisher: {
+-    get: (tag) => tag.publisher ?? '',
++    get: (tag) => stripRiffNulTerminator(tag.publisher ?? ''),
+     set: (tag, val) => {
+       tag.publisher = val as string;
+     },
+@@ -100,9 +108,9 @@ function getDefaultValue(type: FieldDefinition['type']): FieldValue {
+   return '';
+ }
+ 
+-function getRiffInfoTags(fileTag: Tag): InfoTag[] {
++export function getRiffInfoTags(fileTag: Tag): InfoTag[] {
+   if (!(fileTag instanceof CombinedTag)) {
+-    throw new TypeError('File tag is not a CombinedTag');
++    return [];
+   }
+   return fileTag.tags.filter((t): t is InfoTag => t instanceof InfoTag);
+ }
+@@ -124,7 +132,9 @@ function readTagsFromFile(filePath: string, schema: FieldDefinition[]): WavMetad
+         try {
+           const infoTags = getRiffInfoTags(file.tag);
+           if (infoTags.length > 0) {
+-            const values = infoTags[0].getValuesAsStrings(field.riffChunkId);
++            const values = infoTags[0]
++              .getValuesAsStrings(field.riffChunkId)
++              .map(stripRiffNulTerminator);
+             if (field.type === 'tags') {
+               result[field.key] = values.length > 0 ? [...values] : [];
+             } else if (field.type === 'number') {

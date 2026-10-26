@@ -1,0 +1,26 @@
+import { copyFileSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { ipcMain } from "electron";
+import { File as TagFile, Id3v2Tag } from "node-taglib-sharp";
+import { beforeAll, expect, it, vi } from "vitest";
+import { registerMetadataHandlers } from "../../src/main/ipc/metadata";
+import { STANDARD_FIELDS } from "../../src/shared/types";
+function h(c: string) { return (ipcMain as unknown as { _handlers: Map<string, (...a: unknown[]) => unknown> })._handlers.get(c)!; }
+beforeAll(() => registerMetadataHandlers());
+it("spy intercepts", async () => {
+  const p = "/tmp/b-r7-spy/g.wav";
+  copyFileSync(join(__dirname, "..", "fixtures", "sample.wav"), p);
+  const before = readFileSync(p);
+  const orig = TagFile.createFromPath.bind(TagFile);
+  let saved = 0;
+  const spy = vi.spyOn(TagFile, "createFromPath").mockImplementationOnce((path: string) => {
+    const f = orig(path);
+    const fake = Id3v2Tag.fromEmpty();
+    Object.defineProperty(f, "tag", { get: () => fake, configurable: true });
+    const s = f.save.bind(f); f.save = () => { saved++; s(); };
+    return f;
+  });
+  const res = await h("meta:write")({}, p, { category: "DOORWood" }, STANDARD_FIELDS);
+  console.log("calls", spy.mock.calls.length, "saved", saved, "res", res, "bytesSame", Buffer.compare(before, readFileSync(p)) === 0);
+  expect(spy).toHaveBeenCalledTimes(1);
+});

@@ -1,0 +1,44 @@
+== M1-identity
+     × (a) comment, category and keywords come back without the trailing NUL 12ms
+     × (b) a NUL-only title reads as an empty string 3ms
+     × (c) genres elements are stripped per element 4ms
+     × (d) a NUL-terminated custom number field reads as its number, not 0 2ms
+     × (e) a NUL-terminated custom tags field is stripped per element 2ms
+     × (f) read-then-save of the whole object keeps ITKN, writes no NUL and keeps ISFT 7ms
+     × (g) a NUL-free value is unchanged and interior NULs are kept 3ms
+     ✓ (h) returns [] for an Id3v2Tag and one InfoTag for a WAV with LIST/INFO 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  7 failed | 1 passed (8)
+== M2-one-nul
+     ✓ (a) comment, category and keywords come back without the trailing NUL 8ms
+     × (b) a NUL-only title reads as an empty string 7ms
+     ✓ (c) genres elements are stripped per element 2ms
+     ✓ (d) a NUL-terminated custom number field reads as its number, not 0 1ms
+     ✓ (e) a NUL-terminated custom tags field is stripped per element 1ms
+     ✓ (f) read-then-save of the whole object keeps ITKN, writes no NUL and keeps ISFT 7ms
+     ✓ (g) a NUL-free value is unchanged and interior NULs are kept 2ms
+     ✓ (h) returns [] for an Id3v2Tag and one InfoTag for a WAV with LIST/INFO 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 7 passed (8)
+== M3-throw
+     ✓ (a) comment, category and keywords come back without the trailing NUL 8ms
+     ✓ (b) a NUL-only title reads as an empty string 2ms
+     ✓ (c) genres elements are stripped per element 2ms
+     ✓ (d) a NUL-terminated custom number field reads as its number, not 0 1ms
+     ✓ (e) a NUL-terminated custom tags field is stripped per element 1ms
+     ✓ (f) read-then-save of the whole object keeps ITKN, writes no NUL and keeps ISFT 7ms
+     ✓ (g) a NUL-free value is unchanged and interior NULs are kept 2ms
+     × (h) returns [] for an Id3v2Tag and one InfoTag for a WAV with LIST/INFO 6ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 7 passed (8)
+== M4-all-nul
+     ✓ (a) comment, category and keywords come back without the trailing NUL 8ms
+     ✓ (b) a NUL-only title reads as an empty string 2ms
+     ✓ (c) genres elements are stripped per element 2ms
+     ✓ (d) a NUL-terminated custom number field reads as its number, not 0 1ms
+     ✓ (e) a NUL-terminated custom tags field is stripped per element 1ms
+     ✓ (f) read-then-save of the whole object keeps ITKN, writes no NUL and keeps ISFT 6ms
+     × (g) a NUL-free value is unchanged and interior NULs are kept 8ms
+     ✓ (h) returns [] for an Id3v2Tag and one InfoTag for a WAV with LIST/INFO 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 7 passed (8)

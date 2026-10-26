@@ -1,0 +1,42 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r6-mut[39m
+
+ [31m❯[39m tests/main/riff-info-nul.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 32[2mms[22m[39m
+     [32m✓[39m (a) comment, category and keywords come back without the trailing NUL[32m 8[2mms[22m[39m
+     [32m✓[39m (b) a NUL-only title reads as an empty string[32m 2[2mms[22m[39m
+     [32m✓[39m (c) genres elements are stripped per element[32m 2[2mms[22m[39m
+     [32m✓[39m (d) a NUL-terminated custom number field reads as its number, not 0[32m 1[2mms[22m[39m
+     [32m✓[39m (e) a NUL-terminated custom tags field is stripped per element[32m 1[2mms[22m[39m
+     [32m✓[39m (f) read-then-save of the whole object keeps ITKN, writes no NUL and keeps ISFT[32m 6[2mms[22m[39m
+     [32m✓[39m (g) a NUL-free value is unchanged and interior NULs are kept[32m 2[2mms[22m[39m
+[31m     [31m×[31m (h) returns [] for an Id3v2Tag and one InfoTag for a WAV with LIST/INFO[39m[32m 6[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/riff-info-nul.test.ts[2m > [22mRR-R2-01: getRiffInfoTags on non-CombinedTag[2m > [22m(h) returns [] for an Id3v2Tag and one InfoTag for a WAV with LIST/INFO
+[31m[1mAssertionError[22m: expected [Function] to not throw an error but 'TypeError: File tag is not a Combined…' was thrown[39m
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+"TypeError: File tag is not a CombinedTag"
+
+[36m [2m❯[22m tests/main/riff-info-nul.test.ts:[2m164:61[22m[39m
+    [90m162| [39m[34mdescribe[39m([32m"RR-R2-01: getRiffInfoTags on non-CombinedTag"[39m[33m,[39m () [33m=>[39m {
+    [90m163| [39m  it("(h) returns [] for an Id3v2Tag and one InfoTag for a WAV with LI…
+    [90m164| [39m    [34mexpect[39m(() [33m=>[39m [34mgetRiffInfoTags[39m([33mId3v2Tag[39m[33m.[39m[34mfromEmpty[39m()))[33m.[39mnot[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   | [39m                                                            [31m^[39m
+    [90m165| [39m    [34mexpect[39m([34mgetRiffInfoTags[39m([33mId3v2Tag[39m[33m.[39m[34mfromEmpty[39m()))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m166| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 16:19:29
+[2m   Duration [22m 419ms[2m (transform 88ms, setup 22ms, import 189ms, tests 32ms, environment 0ms)[22m
+
+
+::error file=/tmp/c-r6-mut/tests/main/riff-info-nul.test.ts,title=tests/main/riff-info-nul.test.ts > RR-R2-01%3A getRiffInfoTags on non-CombinedTag > (h) returns [] for an Id3v2Tag and one InfoTag for a WAV with LIST/INFO,line=164,column=61::AssertionError: expected [Function] to not throw an error but 'TypeError: File tag is not a Combined…' was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A"TypeError: File tag is not a CombinedTag"%0A%0A ❯ tests/main/riff-info-nul.test.ts:164:61%0A%0A

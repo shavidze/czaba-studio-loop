@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-26T16:00:51.147Z)
+# Active loop summary (2026-10-26T16:26:19.867Z)
 
-- backlog.json 45 KB -> active view 22 KB
-- status: G_ROOT_GATE round 5
+- backlog.json 54 KB -> active view 26 KB
+- status: G_ROOT_GATE round 6
 - servers: `{"servers":"none or skipped"}`
-- last publication: a8c1b53ed043560569dd528e2bc2e5190b63333a (rounds 5-5)
-- last root gate: round 5 published - commit a8c1b53ed043560569dd528e2bc2e5190b63333a pushed
+- last publication: d52354da08ca15692338c254f43cd6b9a1d2774e (rounds 6-6)
+- last root gate: round 6 published - commit d52354da08ca15692338c254f43cd6b9a1d2774e pushed
 
-## Current items: TM-T0, TM-T0-CI, TM-T1, TM-T1-DUP, TM-B09, TM-T0-CI-FU
+## Current items: TM-T1, TM-T1-DUP, TM-B09, TM-B10
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -19,10 +19,8 @@
 - RR-R1-07 / info / open / Architecture signal: after a green check.yml run make it a required status check and add needs: check to release.yml (release.yml frozen; ne
 - C-R2-01 / low / open / Artists written as repeated ISTR while the schema says IART; ffprobe artist shows only the first (pre-existing) -> TM-B08, D-12
 - RR-R2-01 / medium / open / metadata.ts getRiffInfoTags throws TypeError for a non-CombinedTag; on the write path it is outside the per-field try, so standard writes ne
-- RR-R2-02 / low / open / FileList.tsx formatFirstFieldValue display fix (string artists showed the first char) has no renderer test; test-on-bugfix asks for one (art
 - RR-R2-03 / low / open / skipLibCheck:true also skips the project's own src/preload/index.d.ts; consider dropping it from tsconfig.test.json once dependency types ar
 - RR-R2-04 / info / open / Architecture signal: remaining file.tag as unknown as TagObject casts (metadata.ts:113,158); a RiffTags-typed accessor resolved once per fil
-- C-R3-01 / low / open / 'Tagged' badge ignores ICAT/IKEY/ICMT (FileList.tsx:77-81 hasTags = title/artists/bpm)
 - A-R3-01 / low / open / tests/renderer/setup.ts (frozen) replaces window with a plain object; schema-editor.test.ts works around it locally with vi.hoisted
 - RR-R3-01 / medium / open / Old custom field key 'category' (auto ID CATE) + standard toggle -> two fields same key, one value in CATE and ICAT, duplicate React keys (S
 - RR-R3-03 / info / open / Every editor-panel save writes empty ICAT (D-10 pinned on purpose)
@@ -35,8 +33,19 @@
 - RR-R4-04 / info / open / tests/main/check-ffprobe-tags.test.ts second test only checks a constant + existsSync (low value; acceptable as a guard against a renamed pr
 - RR-R4-05 / low / open / apt-install.sh and its env knobs APT_ATTEMPT_TIMEOUT_SECONDS / APT_ATTEMPTS are not documented in docs/ (Georgian)
 - RR-R4-06 / info / open / Architecture signal: move the ffprobe cross-check into recording-tag-contract.test.ts (skip when ffprobe is missing) or into a dedicated npm
+- C-R5-01 / low / open / NUL-only INFO value (ICMT '\0', INAM '\0\0') makes the row Tagged; ffprobe shows empty strings
+- C-R5-02 / low / open / meta:read keeps the RIFF INFO NUL terminator (Comment input 'მძიმე კარი\u0000' for an ffmpeg-written ICMT)
+- RR-R5-01 / low / open / Badge now counts every field (year/track/ISRC-only file shows Tagged); fits D-15, add a docs/ note
+- RR-R5-02 / low / open / file-row-display.ts:11 item.trim() assumes string elements; a null in an array would crash the row render (typeof guard suggested)
+- RR-R5-03 / info / open / number field counts as tagged only when > 0; a future custom number field where 0/negative is meaningful would look empty
+- RR-R5-04 / low / open / file-list.test.ts getFileRow walks exactly two parents from the file name; brittle to row markup (data-testid/role=row would need a componen
+- RR-R5-05 / info / open / Tests use double quotes vs single quotes in src; Biome passes because tests/ is not linted
+- RR-R5-06 / info / open / Architecture signal: three different 'is this value empty' rules (file-row-display isNonEmptyFieldValue, TemplatePicker.tsx:130 val !== '' &
+- B-R6-01 / low / open / bpm and track read 0 from an INFO-only WAV with and without NUL (IBPM '120', ITRK '7'): node-taglib-sharp does not map IBPM/ITRK; STANDARD_F
 
 ## Other open items
+- TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
+- TM-T0-CI [in_progress] New .github/workflows/check.yml (ubuntu-24.04, Node 22, npm ci, ffmpeg+xvfb, check, build, xvfb playwright --retries=0)
 - TM-T1-MIG [todo] Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no aut
 - TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
 - TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
@@ -46,3 +55,4 @@
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database
 - OOS-03 [out_of_scope] New npm dependencies
+- TM-T0-CI-FU [todo] CI follow-up: apt-install.sh worst-case budget (C-R4-01/RR-R4-02: smaller dpkg recovery bound or step timeout >= 13 min) + Georgian docs not
