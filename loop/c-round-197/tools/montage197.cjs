@@ -1,0 +1,4 @@
+const { createRequire } = require('module'); const req = createRequire('/home/runner/czaba-project/store/package.json'); const { chromium } = req('playwright'); const fs = require('fs'); const path = require('path');
+(async () => { const [out, ...files] = process.argv.slice(2); const b = await chromium.launch(); const p = await b.newPage();
+ const html = '<body style="margin:0;background:#000;color:#fff;font:12px monospace">' + files.map((f) => `<div style="display:inline-block;margin:4px"><div>${path.basename(path.dirname(f))}/${path.basename(f)}</div><img style="width:${'{W}'};image-rendering:pixelated" src="data:image/png;base64,${fs.readFileSync(f).toString('base64')}"></div>`).join('').replace(/\{W\}/g, 'auto') + '</body>';
+ await p.setContent(html); await p.screenshot({ path: out, fullPage: true }); await b.close(); })();

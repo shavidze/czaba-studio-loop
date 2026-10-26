@@ -1,0 +1,48 @@
+const fs = require('fs');
+const path = require('path');
+const PORT = process.argv[2] || '5173';
+const W = +(process.argv[3] || 1440);
+process.env.A_BASE = `http://127.0.0.1:${PORT}`;
+const L = require('./lib197.cjs');
+
+(async () => {
+  const { browser, page, log } = await L.openStudio(W);
+  const pos = () => page.evaluate(() => document.querySelector('[data-testid=arrangement-playhead-handle]')?.getAttribute('aria-valuetext'));
+  const flagInfo = () => page.evaluate(() => { const f = document.querySelector('[data-testid=arrangement-marker]'); const r = f.getBoundingClientRect(); const cs = getComputedStyle(f); return { x: r.left, y: r.top, w: r.width, h: r.height, time: f.dataset.markerTime, os: cs.outlineStyle, fv: f.matches(':focus-visible'), active: document.activeElement === f, src: document.documentElement.dataset.focusSource ?? null }; });
+  await page.click('[data-testid=arrangement-marker-add]');
+  await L.sleep(500);
+  if ((await page.$$('[data-testid=arrangement-marker]')).length === 0) { await page.keyboard.press('Enter'); await L.sleep(500); }
+  const out = { PORT, W };
+  const ruler = await page.evaluate(() => { const r = document.querySelector('[data-testid=arrangement-ruler]').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
+  await page.mouse.click(ruler.x + ruler.w * 0.6, ruler.y + ruler.h / 2);
+  await L.sleep(400);
+  out.posAfterRuler = await pos();
+  let f = await flagInfo();
+  await page.mouse.click(f.x + f.w - 2, f.y + f.h / 2);
+  await L.sleep(400);
+  out.posAfterFlagRightEdgeClick = await pos();
+  out.afterPointerClick = await flagInfo();
+  f = await flagInfo();
+  out.before = f;
+  await page.mouse.move(f.x + 20, f.y + f.h / 2);
+  await page.mouse.down();
+  await page.mouse.move(f.x + 60, f.y + f.h / 2, { steps: 8 });
+  await page.mouse.move(f.x + 100, f.y + f.h / 2, { steps: 8 });
+  await page.mouse.up();
+  await L.sleep(500);
+  out.afterDrag = await flagInfo();
+  f = out.afterDrag;
+  await page.mouse.click(f.x + f.w / 2, f.y + f.h / 2, { button: 'right' });
+  await L.sleep(400);
+  out.menuOnRightClick = await page.evaluate(() => !!document.querySelector('[data-testid=arrangement-marker-menu]'));
+  await page.keyboard.press('Escape');
+  await L.sleep(300);
+  await page.keyboard.press('ArrowRight');
+  await L.sleep(200);
+  out.afterKeyAfterMouse = await flagInfo();
+  out.errors = log.errors.length;
+  out.hydration = log.hydration.length;
+  fs.writeFileSync(path.join(L.OUT, `marker-func-${PORT}-${W}.json`), JSON.stringify(out, null, 1));
+  console.log(JSON.stringify(out));
+  await browser.close();
+})().catch((e) => { console.error(e); process.exit(1); });

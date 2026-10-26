@@ -1,0 +1,12 @@
+process.env.C_BASE = `http://127.0.0.1:${process.argv[2]}`;
+const L = require('./lib.cjs'); const sleep = L.sleep; const W = +process.argv[3], H = W === 1440 ? 900 : 720;
+(async () => { const browser = await L.launch(); const net = [];
+ const { page, ctx } = await L.openStudio(browser, { width: W, height: H }, 'dbg', net, { deviceScaleFactor: 2 });
+ const mk = () => page.evaluate(() => ({ pos: document.querySelector('[data-testid=arrangement-playhead-handle]').getAttribute('aria-valuenow'), m: [...document.querySelectorAll('[data-testid=arrangement-marker]')].map((b) => [b.dataset.markerTime, b.getAttribute('aria-current'), b.getBoundingClientRect().x]), sl: document.querySelector('[data-testid=arrangement-timeline-scroller]').scrollLeft, ed: !!document.querySelector('[data-testid=arrangement-marker-name-input]') }));
+ await page.click('[data-testid=arrangement-marker-add]'); await sleep(400); await page.keyboard.press('Enter'); await sleep(400); console.log('add1', JSON.stringify(await mk()));
+ const hit = await page.evaluate(() => { const b = document.querySelector('[data-testid=arrangement-marker]'); const r = b.getBoundingClientRect(); const o = []; for (const y of [r.y + 0.5, r.y + 1.5, r.y + r.height - 1.5, r.y + r.height - 0.5]) { const e = document.elementFromPoint(r.x + r.width / 2, y); o.push([y, e.tagName, e.dataset.testid || '', (e.className || '').toString().slice(0, 80)]); } return o; });
+ console.log('hit', JSON.stringify(hit));
+ await L.seekTo(page, 8); await sleep(300); console.log('seek', JSON.stringify(await mk()));
+ await page.click('[data-testid=arrangement-marker-add]'); await sleep(400); await page.keyboard.press('Enter'); await sleep(400); console.log('add2', JSON.stringify(await mk()));
+ await page.keyboard.press('Escape'); await sleep(300); console.log('esc', JSON.stringify(await mk()));
+ await ctx.close(); await browser.close(); })();

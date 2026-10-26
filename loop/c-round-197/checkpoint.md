@@ -1,0 +1,13 @@
+- started 2026-10-26T22:09:08Z
+- ref built (store tree copy + 6 start copies, -new file; frozen 1023 OK) on :5184 own cacheDir; batch1 (ringkey/rich tree+ref) started
+- FLAG-RING tree 1440/1280 sel+unsel: all sides >=4.73 out/>=5.43 in, gap 2/2/6/6 dev px, selected-left = stem column (0 chg) 6.86/7.88; ref reproduces 1.1/1.45 fail. out/flag/*, shots/flag-montage.png
+- MARKER-FUNC 1440 tree==ref all steps (click/rightedge click, press no ring, arrow ring, dblclick plays with a clip (both: empty arrangement doesn't play), drag snap 8->10, menu right-click/Shift+F10/ContextMenu, rename via menu, F2, nudge, ctrl-arrows, delete menu/key)
+- REST both vps default+marker: 0 px changed outside/inside flag, only flag w 61->65, load scroll 0/0 spt auto both
+- G197-3 PASS (lab anon demo badge, /studio/middle-east sign in required 0 audio, token 401, fake bearer 403)
+- T-RUN: tree 32 pass+3 todo; start SFR3+SFR6 red; m10 SFR3+6, m12 SFR2+6, m13/m14/m15 SFR6, m16(-2px edge) SFR3+6, m2 SFR1. FR n/a (stub)
+- RING-KEY: ringkey default 1440/1280 + rich 1440/1280 order identical to ref (Tab+Shift+Tab); only diff flag oo -2->-1 and w 61->65; all stops 1px solid brass/.8, no style/box change; contrast>=3 all visible; ref-1440 ringkey first run invalid (cold vite optimizer, invalid hook call) rerun OK. C-R196-02 still: 1280 rich i69,70,71,74 zero changed px tree AND ref
+- POINTER-197: flag (mfunc) + Video-row M/S/Volume/fold at 1440/1280: no ring held/released, scroll 0->0, Tab/ArrowDown -> solid ring keyboard. packed markers: clicks on B stem/left px hit B in tree and ref
+- packed markers (C-R197-01 Low): tree A ring rect 512-530 crosses B stem 524, right side touches B pill border 528; ref A ring right side on B stem. hit tests ok both. R90 served css captured
+- reports written (PASS, FOCUS-REVEAL exempt, C-R197-01 Low)
+- END: HEAD 7339cd5, git status same as start, frozen 1023 OK, A end-sha OK; :5184 and mock :5199 stopped, :5173 untouched
+- advisor sharpenings applied (band count, r89 repro, mfunc 1280, null counts); DONE

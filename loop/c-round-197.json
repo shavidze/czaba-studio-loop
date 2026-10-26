@@ -1,0 +1,97 @@
+{
+  "taskStatus": "PASS",
+  "round": 197,
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-26T22:08:48.3606224Z",
+    "round": 197,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R196-02",
+      "severity": "medium",
+      "status": "open_preexisting_exempt_this_round",
+      "steps": [
+        "/studio-lab at 1280x720, fresh context",
+        "drag library item demo-middle-east onto Music; Shift-click Stems and SFX names; Ctrl+G; add a marker; open the detail panel; click the clip",
+        "Tab through the workspace to the Video row (stops 69-74)"
+      ],
+      "expected": "each focused control scrolled clear of the sticky timeline chrome and its ring visible (WCAG 2.4.11)",
+      "actual": "Video fold, name, Your own video and Volume (tops y 267/293) stay under the sticky chrome (loop strip ends y 313); 0 changed ring px; identical in the round-196 ref. R89 was reverted by A, so not fixed this round",
+      "evidence": "c-round-197/out/rich/tree-1280/result.json rows 69-71,74 (f69.png..), out/rich/ref-1280/result.json"
+    },
+    {
+      "id": "C-R197-01",
+      "severity": "low",
+      "status": "new_deferred_low_polish",
+      "steps": [
+        "/studio-lab at 1440x900",
+        "Add marker (Enter) at 0 s",
+        "click the ruler at 0.3 s, Add marker (Enter)",
+        "Tab to Marker 1 (0 s)"
+      ],
+      "expected": "Marker 1 ring clearly belongs to Marker 1",
+      "actual": "Marker 1 flag box 512-530 (pr-1); its edge ring crosses Marker 2 stem (x 524) and its right side abuts Marker 2 pill border (x 528). Ref variant: right side on Marker 2 stem. Hit testing correct in both",
+      "evidence": "c-round-197/shots/packed-zoom-tree-vs-ref.png, c-round-197/out/pointer/pointer-tree-1440.json"
+    }
+  ],
+  "passed": [
+    "FLAG-RING-197",
+    "RING-KEY-197",
+    "R90-WIDTH-197",
+    "REST-197",
+    "MARKER-FUNC-197",
+    "POINTER-197",
+    "G197-3",
+    "SCOPE-197",
+    "T-RUN-197",
+    "AN-REVIEW-197",
+    "PX-NET",
+    "REG-HYD"
+  ],
+  "notRun": [
+    {
+      "row": "FOCUS-REVEAL-197",
+      "reason": "R89 reverted by A under the task pre-written outcome (R89 scrolled the view on sticky-chrome focus); C measured C-R196-02 still present (1280 rich i69-71,74 0 ring px, tree=ref); scroll-padding-top auto; StudioWorkspace byte-identical to start"
+    },
+    {
+      "row": "T-RUN-197 FR-a/b/c, m9, m11",
+      "reason": "focus-reveal-ui.test.tsx is a 3 it.todo stub after the revert"
+    }
+  ],
+  "notes": {
+    "ringKeyCaveat": "no stop hidden under the chrome is NOT met at 1280 rich scene (the exempt C-R196-02 stops); identical to ref",
+    "scopeNote": "isolate on the flag + stem -z-1 beyond literal R88 token list; inside the flag element; required for the left ring side; locked by SFR6 (m13/m15)",
+    "engine": "HeadlessChrome 143.0.7499.4",
+    "ref": "c-round-197/ref = store tree copy with 6 grants from b-round-196/r197-granted-start and the new file removed; frozen 1023 OK; served :5184 own cacheDir; stopped",
+    "envDiscard": "first ref-1440 ringkey run hit cold vite optimisation (invalid hook call), discarded and rerun clean",
+    "ableton": "არ ეხება",
+    "flagBand": "changedTotal 664 unselected / 584 selected = exact 2-device-px band (selected minus 80 px stem column)",
+    "r89Repro": "C reproduced: injected scroll-padding-top 84px, scrollTop 46, flag focus -> 0 (without injection stays 46); out/r89-repro.json",
+    "markerFuncViewports": "tree+ref 1440, tree 1280 identical"
+  },
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "blocked": [],
+  "partial": [
+    {
+      "id": "T-RUN-197",
+      "unmet": "FR-a/b/c, m9, m11 not runnable (stub after R89 revert); SFR part passed"
+    },
+    {
+      "id": "RING-KEY-197",
+      "unmet": "'no stop hidden under the chrome' not met at 1280 rich scene: the exempt C-R196-02 Video-row stops, identical to ref"
+    }
+  ]
+}

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T21:22:47.714Z)
+# Active loop summary (2026-10-26T22:34:28.397Z)
 
-- backlog.json 1753 KB -> active view 260 KB
-- status: G_ROOT_GATE round 196
-- servers: `{"checkedUtc":"2026-10-26T20:56:50.2711857Z","round":196,"attempt":1,"store":200}`
-- last publication: 7339cd5db6ecf1c7fac3028a8b0a1f37752a1c45 (rounds 192-195)
-- last root gate: round 196 skipped - C taskStatus FAIL
+- backlog.json 1759 KB -> active view 262 KB
+- status: G_ROOT_GATE round 197
+- servers: `{"checkedUtc":"2026-10-26T22:08:48.3606224Z","round":197,"attempt":1,"store":200}`
+- last publication: 250525200f425d39a9623c738d2942c889f2ce34 (rounds 196-197)
+- last root gate: round 197 published - commit 250525200f425d39a9623c738d2942c889f2ce34 pushed
 
 ## Current items: -
 
@@ -468,9 +468,12 @@
 - B-R194-K0-SCAN-GAP / info / retro_input / Second STORE-2a round lost to B pre-dispatch inventory (same class as B-R192-PLANNING-GAP): fieldscan.mjs used tag+13 lines and missed Guest
 - ARCH-R194-TEST-WALKERS / info / signal - decision with ARCH-R193-THEME-REGION at the STORE-2 exit; not scheduled / A round-194 code-reviewer Architecture note (verbatim in a-round-194.md): store-theme-tokens.test.ts holds two independent app/ walkers (stu
 - C-R194-INFO / info / routed / C round 194 notes: F9/F10 (/cart) not reachable with the mock empty cart; F15 Textarea no route; F11-F13 and F16 blocked backend; first 375 
-- SABA-B-4 / medium / stage 1 (Studio) dispatched round 196 (D-29z161); stage 2 (store pages) after the regression round / focus ring and slider thumbs feel heavy: focused Pan shows a thick brass pill with a wide gap; Pan thumb large pure white vs cream Volume th
+- SABA-B-4 / medium / stage 1 (Studio) implemented round 196, C FAIL (RING-KEY-196 on C-R196-01); fix-up round 197 (D-29z162); stage 2 (store pages) after the regression round / focus ring and slider thumbs feel heavy: focused Pan shows a thick brass pill with a wide gap; Pan thumb large pure white vs cream Volume th
 - A-R195-SIGNALS / info / signal / A round 195 code-reviewer Architecture note (verbatim in a-round-195.md): keep the field scanner in store-theme-tokens.test.ts; if the same 
 - B-R195-WORKFLOW-DOC-DRIFT / info / root_note / docs/technical/studio-real-workspace/agent-workflow.md lacks the policy sections from SABA-B-3 onward (Retrospective, SABA-B-4, three 2026-1
+- C-R196-01 / medium / open; fix-up round 197 (R88) / marker flag inset focus ring fused with the selected pill brass border and stem: 1.45:1
+- C-R196-02 / medium / open; fix-up round 197 (R89) with stop rule; pre-existing (also in 7339cd5) / keyboard-focused Video row controls hidden under the sticky timeline chrome at 1280x720 (detail panel open, group present): 0 ring px
+- C-R196-03 / low / input to SABA-B-4 stage 2 (store pages); not a stand-alone deferred Low / home product card link focus ring clipped (tree and ref)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

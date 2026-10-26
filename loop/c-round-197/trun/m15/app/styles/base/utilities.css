@@ -1,0 +1,287 @@
+/* ============================================
+   CZABA Utility Classes
+   Global hover transitions & interactive states
+   ============================================ */
+
+/* Default transition for all interactive elements */
+a, button, [role="button"], input, textarea, select {
+  transition:
+    color var(--duration-fast) ease-out,
+    background-color var(--duration-fast) ease-out,
+    border-color var(--duration-fast) ease-out,
+    box-shadow var(--duration-normal) ease-out,
+    transform var(--duration-fast) ease-out,
+    opacity var(--duration-fast) ease-out;
+}
+
+/* Hover lift effect - subtle elevation */
+.hover-lift {
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.3);
+}
+
+/* Hover glow effect - brand accent */
+.hover-glow {
+  transition: box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px -5px rgba(19, 217, 204, 0.4);
+}
+
+/* Hover scale - subtle zoom */
+.hover-scale {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Hover border - border color transition */
+.hover-border {
+  transition: border-color var(--duration-fast) ease-out;
+}
+
+.hover-border:hover {
+  border-color: var(--color-brand);
+}
+
+/* Interactive card hover */
+.interactive-card {
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) ease-out,
+    box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.interactive-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(19, 217, 204, 0.3);
+  box-shadow:
+    0 12px 32px -8px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(19, 217, 204, 0.1);
+}
+
+/* Button press feedback */
+button:active:not(:disabled),
+[role="button"]:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Text glow utility */
+.text-glow {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Section title utility */
+.section-title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.section-title.text-center {
+  text-align: center;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
+
+/* Styled scrollbar - uses brand color (#13D9CC) with opacity */
+/* Following 8px grid: width 4px, radius uses --radius-sm (6px) */
+.styled-scrollbar {
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(175 85% 46% / 0.4) transparent;
+}
+
+.styled-scrollbar::-webkit-scrollbar {
+  width: 4px; /* 8px grid compliant */
+}
+
+.styled-scrollbar::-webkit-scrollbar-track {
+  background: hsl(0 0% 100% / 0.03);
+  border-radius: var(--radius-sm);
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(175 85% 46% / 0.4);
+  border-radius: var(--radius-sm);
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(175 85% 46% / 0.6);
+}
+
+.styled-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+.styled-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Alias for stems loader (backwards compatibility) */
+.stems-loader-list {
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(175 85% 46% / 0.4) transparent;
+}
+
+.stems-loader-list::-webkit-scrollbar {
+  width: 4px; /* 8px grid compliant */
+}
+
+.stems-loader-list::-webkit-scrollbar-track {
+  background: hsl(0 0% 100% / 0.03);
+  border-radius: var(--radius-sm);
+}
+
+.stems-loader-list::-webkit-scrollbar-thumb {
+  background: hsl(175 85% 46% / 0.4);
+  border-radius: var(--radius-sm);
+}
+
+.stems-loader-list::-webkit-scrollbar-thumb:hover {
+  background: hsl(175 85% 46% / 0.6);
+}
+
+/* ============================================
+   Premium Product Card - 3D Stacked Effect
+   Film Crux Style with CZABA Design System
+   ============================================ */
+
+/* Gold accent for premium feel */
+:root {
+  --premium-gold: hsl(43, 74%, 49%);
+  --premium-gold-glow: hsl(43, 74%, 49%, 0.3);
+}
+
+/* Container - holds perspective */
+.premium-card-container {
+  display: block;
+  width: 100%;
+  max-width: 400px; /* 8px grid: 50 * 8 = 400 */
+}
+
+/* Stack wrapper */
+.premium-card-stack {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+/* Base layer styles */
+.premium-card-layer {
+  position: absolute;
+  inset: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-lg);
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Layer 4 - furthest back */
+.premium-card-layer-4 {
+  transform: translateX(0) translateZ(-48px); /* 8px grid: 6 * 8 = 48 */
+  opacity: 0.2;
+}
+
+/* Layer 3 */
+.premium-card-layer-3 {
+  transform: translateX(0) translateZ(-32px); /* 8px grid: 4 * 8 = 32 */
+  opacity: 0.4;
+}
+
+/* Layer 2 */
+.premium-card-layer-2 {
+  transform: translateX(0) translateZ(-16px); /* 8px grid: 2 * 8 = 16 */
+  opacity: 0.6;
+}
+
+/* Hover: back layers fan out LEFT */
+.premium-card-container:hover .premium-card-layer-4 {
+  transform: translateX(-56px) translateZ(-48px); /* 8px grid: 7 * 8 = 56 */
+  opacity: 0.3;
+}
+
+.premium-card-container:hover .premium-card-layer-3 {
+  transform: translateX(-40px) translateZ(-32px); /* 8px grid: 5 * 8 = 40 */
+  opacity: 0.5;
+}
+
+.premium-card-container:hover .premium-card-layer-2 {
+  transform: translateX(-24px) translateZ(-16px); /* 8px grid: 3 * 8 = 24 */
+  opacity: 0.7;
+}
+
+/* Front card - main content */
+.premium-card-front {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 600ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hover: front card scales slightly + gold glow */
+.premium-card-container:hover .premium-card-front {
+  transform: scale(1.02);
+  border-color: var(--premium-gold-glow);
+  box-shadow: 0 0 32px var(--premium-gold-glow),
+              0 8px 32px hsl(220 20% 2% / 0.5);
+}
+
+/* Title - transitions to gold on hover */
+.premium-card-title {
+  transition: color 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-card-container:hover .premium-card-title {
+  color: var(--premium-gold);
+}
+
+/* CTA - slides in from bottom */
+.premium-card-cta {
+  color: var(--color-muted);
+  transform: translateY(8px);
+  opacity: 0;
+}
+
+.premium-card-container:hover .premium-card-cta {
+  color: var(--premium-gold);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Duration utility for 600ms */
+.duration-600 {
+  transition-duration: 600ms;
+}
+
+/* Ease-out utility */
+.ease-out {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
