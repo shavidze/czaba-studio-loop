@@ -1,0 +1,87 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r8-M2[39m
+
+ [32m✓[39m tests/main/metadata.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [31m❯[39m tests/main/metadata-write-field-errors.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 53[2mms[22m[39m
+[31m     [31m×[31m (a) meta:write rejects with the failing ID and leaves the file bytes unchanged[39m[32m 18[2mms[22m[39m
+     [32m✓[39m (b) a bad schema field whose value is undefined is not attempted and the save succeeds[32m 5[2mms[22m[39m
+[31m     [31m×[31m (c1) meta:write-batch lists every file with a failing field and leaves all bytes unchanged[39m[32m 5[2mms[22m[39m
+     [32m✓[39m (c2) meta:write-batch with the standard schema writes ICAT on both files[32m 4[2mms[22m[39m
+[31m     [31m×[31m (d) several failing fields are all reported in schema order and nothing is written[39m[32m 3[2mms[22m[39m
+     [32m✓[39m (e) a valid custom ID still writes its value next to the standard fields[32m 3[2mms[22m[39m
+     [32m✓[39m (f) meta:read with a malformed ID returns the default for that field and keeps the others[32m 10[2mms[22m[39m
+ [32m✓[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 73[2mms[22m[39m
+ [32m✓[39m tests/main/riff-info-nul.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-write-guard.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-field-errors.test.ts[2m > [22mTM-B13 / D-18: writeTagsToFile fails before save when a custom INFO field cannot be written[2m > [22m(a) meta:write rejects with the failing ID and leaves the file bytes unchanged
+[31m[1mAssertionError[22m: file bytes unchanged: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m tests/main/metadata-write-field-errors.test.ts:[2m48:75[22m[39m
+    [90m 46| [39m    )[33m;[39m
+    [90m 47| [39m
+    [90m 48| [39m    expect(readFileSync(filePath).equals(before), "file bytes unchange…
+    [90m   | [39m                                                                          [31m^[39m
+    [90m 49| [39m  })[33m;[39m
+    [90m 50| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-field-errors.test.ts[2m > [22mTM-B13 / D-18: writeTagsToFile fails before save when a custom INFO field cannot be written[2m > [22m(c1) meta:write-batch lists every file with a failing field and leaves all bytes unchanged
+[31m[1mAssertionError[22m: first file bytes unchanged: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m tests/main/metadata-write-field-errors.test.ts:[2m75:83[22m[39m
+    [90m 73| [39m      ][33m,[39m
+    [90m 74| [39m    })[33m;[39m
+    [90m 75| [39m    expect(readFileSync(first).equals(firstBefore), "first file bytes …
+    [90m   | [39m                                                                                  [31m^[39m
+    [90m 76| [39m    expect(readFileSync(second).equals(secondBefore), "second file byt…
+    [90m 77| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-field-errors.test.ts[2m > [22mTM-B13 / D-18: writeTagsToFile fails before save when a custom INFO field cannot be written[2m > [22m(d) several failing fields are all reported in schema order and nothing is written
+[31m[1mAssertionError[22m: file bytes unchanged: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m tests/main/metadata-write-field-errors.test.ts:[2m106:75[22m[39m
+    [90m104| [39m    )[33m;[39m
+    [90m105| [39m
+    [90m106| [39m    expect(readFileSync(filePath).equals(before), "file bytes unchange…
+    [90m   | [39m                                                                          [31m^[39m
+    [90m107| [39m  })[33m;[39m
+    [90m108| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m33 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 17:08:04
+[2m   Duration [22m 845ms[2m (transform 224ms, setup 88ms, import 1.04s, tests 230ms, environment 1ms)[22m
+
+
+::error file=/tmp/c-r8-M2/tests/main/metadata-write-field-errors.test.ts,title=tests/main/metadata-write-field-errors.test.ts > TM-B13 / D-18%3A writeTagsToFile fails before save when a custom INFO field cannot be written > (a) meta%3Awrite rejects with the failing ID and leaves the file bytes unchanged,line=48,column=75::AssertionError: file bytes unchanged: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/main/metadata-write-field-errors.test.ts:48:75%0A%0A
+
+::error file=/tmp/c-r8-M2/tests/main/metadata-write-field-errors.test.ts,title=tests/main/metadata-write-field-errors.test.ts > TM-B13 / D-18%3A writeTagsToFile fails before save when a custom INFO field cannot be written > (c1) meta%3Awrite-batch lists every file with a failing field and leaves all bytes unchanged,line=75,column=83::AssertionError: first file bytes unchanged: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/main/metadata-write-field-errors.test.ts:75:83%0A%0A
+
+::error file=/tmp/c-r8-M2/tests/main/metadata-write-field-errors.test.ts,title=tests/main/metadata-write-field-errors.test.ts > TM-B13 / D-18%3A writeTagsToFile fails before save when a custom INFO field cannot be written > (d) several failing fields are all reported in schema order and nothing is written,line=106,column=75::AssertionError: file bytes unchanged: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/main/metadata-write-field-errors.test.ts:106:75%0A%0A

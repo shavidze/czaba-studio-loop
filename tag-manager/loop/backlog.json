@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "round 8: TM-B13 writeTagsToFile throws before save() when any custom INFO field cannot be written (D-18, RR-R7-02) + remove // comments (RR-R6-04, RR-R7-03) + Georgian docs note on all-or-nothing saves (RR-R7-01)",
+  "current_task": "round 9: TM-T0-CI-FU apt-install.sh worst case fits step budget and is printed (D-19) + one E2E build path in check.yml (RR-R1-01) + Georgian check.yml docs (RR-R4-05)",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -86,6 +86,10 @@
     {
       "from_round": 7,
       "rule": "node-taglib-sharp opens a WAV without LIST/INFO with an InfoTag already present in its CombinedTag (A R7, C R7-2 M2/M2b); tasks must not claim the title workaround creates it. The batch write channel is 'meta:write-batch' (channels.ts)."
+    },
+    {
+      "from_round": 8,
+      "rule": "npm run <script> -- <args> appends args to the LAST command of the script (B experiment /tmp/b-r8): npm run test:e2e -- --retries=0 reaches playwright test, not npm run build."
     }
   ],
   "decisions": [
@@ -183,8 +187,13 @@
     },
     {
       "id": "D-18",
-      "status": "B, round 7 close (technical, reversible)",
+      "status": "done R8 (4a2062d, TM-B13); B, round 7 close (technical, reversible)",
       "decision": "writeTagsToFile: inside the custom INFO loop, a setValuesFromStrings failure no longer is swallowed silently. The loop collects String(riffChunkId) of every failing field (schema order, all fields tried); after the loop, if any failed, throw Error('RIFF INFO fields could not be written: ' + ids.join(', ')) BEFORE file.save(), so nothing is written (all-or-nothing, like D-17). meta:write surfaces 'Failed to write metadata: RIFF INFO fields could not be written: AB'; meta:write-batch lists each file under failed with the raw message and continues. Fields whose value is undefined are not attempted (unchanged). Custom fields without riffChunkId stay skipped (B-R7-03 signal). Read path unchanged. Caveat: an ID containing 'corrupt'/'EBUSY'/'EACCES' text would hit the meta:write message mapping; accepted"
+    },
+    {
+      "id": "D-19",
+      "status": "B, round 8 close (technical, reversible)",
+      "decision": "apt-install.sh: knobs APT_ATTEMPT_TIMEOUT_SECONDS (T, 240), APT_ATTEMPTS (N, 2), APT_KILL_AFTER_SECONDS (K, 10, was hard-coded), APT_RECOVERY_TIMEOUT_SECONDS (R, 60, new); dpkg --configure -a and debconf-communicate bounded by R with kill-after K; script prints 'apt-install: worst case Ws' first with W=(R+K)+N(T+K)+(N-1)(R+K) (640 at defaults); check.yml apt step timeout-minutes 13 (780 s). check.yml E2E builds via npm run test:e2e (RR-R1-01)"
     }
   ],
   "items": [
@@ -286,7 +295,7 @@
       ],
       "realVerified": false,
       "last_round_commit": "7879ee03fce194ec9ccbd544ba862cad9e80e42c",
-      "note": "B R6 close: still no root note on an Actions run of 7879ee0, a8c1b53 or d52354d; stays in_progress."
+      "note": "B R8 close: still no root note on an Actions run of 7879ee0, a8c1b53, d52354d, 28ad3ab or 4a2062d; stays in_progress. Round 9 changes check.yml again (TM-T0-CI-FU); a green run on the round-9 commit closes TM-T0-CI, TM-T0 and the Actions part of TM-T0-CI-FU"
     },
     {
       "id": "TM-T0-DOC",
@@ -602,18 +611,30 @@
       "type": "gap",
       "severity": "low",
       "title": "CI follow-up: apt-install.sh worst-case budget (C-R4-01/RR-R4-02: smaller dpkg recovery bound or step timeout >= 13 min) + Georgian docs note for the script and its env knobs (RR-R4-05)",
-      "status": "todo",
+      "status": "in_progress",
       "depends_on": [
         "TM-T0-CI"
       ],
       "acceptance": [
-        "worst-case script time (shims, short timeouts, recovery also hangs) < step timeout-minutes; the final 'failed after N attempts' line is printed",
-        "docs/ note lists APT_ATTEMPT_TIMEOUT_SECONDS, APT_ATTEMPTS and the log line formats"
+        "R9: apt-install.sh knobs APT_ATTEMPT_TIMEOUT_SECONDS (240), APT_ATTEMPTS (2), APT_KILL_AFTER_SECONDS (10), APT_RECOVERY_TIMEOUT_SECONDS (60); dpkg --configure -a and debconf-communicate bounded by R+K; first line 'apt-install: worst case Ws' with W=(R+K)+N(T+K)+(N-1)(R+K)=640 at defaults < step timeout-minutes 13 (780 s); shim cases incl. everything-hangs-ignoring-TERM: wall <= printed W + 3 s and final 'failed after N attempts' line printed",
+        "check.yml: separate Build step removed, E2E step 'Build and E2E tests' runs xvfb-run -a npm run test:e2e -- --retries=0 --trace=retain-on-failure --reporter=list,html (RR-R1-01); ffprobe step before E2E; CI-order replay green, playwright-report/index.html present",
+        "docs/ci-cd.md Georgian section: check.yml steps, apt-install.sh, four knobs, W formula/640 s/13 min, log line formats",
+        "real: the hardened step seen green on Actions (root links run id; rides on TM-T0-CI)"
       ],
       "evidence": [
         "C round 4 C-R4-01; root review round 4 Low 2 and Low 5"
       ],
-      "note": "Planned after root reports the first Actions run on 7879ee0, so the CI round can also act on its timings"
+      "note": "B round 8 close: planned in round 9 before root linked an Actions run on 7879ee0+ (backlog note said 'after'). Reason: only decision-free scope left; root's link is confirmation, not a prerequisite of the local fix; a round-9 commit also qualifies for TM-T0-CI. Local acceptance R9-1..R9-8; Actions part stays with TM-T0-CI",
+      "round": 9,
+      "decisions": [
+        "D-19"
+      ],
+      "findings": [
+        "C-R4-01",
+        "RR-R4-02",
+        "RR-R4-05",
+        "RR-R1-01"
+      ]
     },
     {
       "id": "TM-B10",
@@ -696,7 +717,7 @@
       "severity": "low",
       "source": "RR-R7-02",
       "title": "writeTagsToFile per-field catch around InfoTag.setValuesFromStrings swallows write errors (riffChunkId 'AB', '', 'ICAT5' from a hand-edited schema.json throws 'ID must be 4 bytes'): the field is not written, file.save() runs and meta:write / meta:write-batch report success",
-      "status": "in_progress",
+      "status": "done",
       "round": 8,
       "depends_on": [
         "TM-B12"
@@ -712,8 +733,11 @@
       "evidence": [
         "B round 7 close experiment b-round-7-exp-bad-chunkid.cjs on 28ad3ab node_modules: setValuesFromStrings('AB'|'ICAT5') throws 'Argument error: ID must be 4 bytes', '' throws 'Argument null: id was not provided'; 'abcd', 'IC T', 'ქართ' do not throw; save() succeeds afterwards",
         "Severity low: SchemaEditor blocks invalid manual IDs (isValidRiffId) and generateRiffId produces 4-char IDs; only hand-edited/foreign schema.json reaches it (B-R7-02). Silent loss in the real app is an inference until C R8",
-        "B round 7 close b-round-7-exp-valid-values.cjs: valid ID ITKN with [], [''], ['a','b'], ['ქართული'], ['0'], ['3'] never throws; D-18 fires only on malformed IDs. MetadataPanel.tsx:84-91 batch sends modifiedFields only; :76 single sends all fields"
-      ]
+        "B round 7 close b-round-7-exp-valid-values.cjs: valid ID ITKN with [], [''], ['a','b'], ['ქართული'], ['0'], ['3'] never throws; D-18 fires only on malformed IDs. MetadataPanel.tsx:84-91 batch sends modifiedFields only; :76 single sends all fields",
+        "C round 8 PASS R8-1..R8-7 realVerified=true (c-round-8.md/.json), published 4a2062d: red 3 failed (a),(c1),(d) / 8 passed on 28ad3ab metadata.ts -> green 11/11; mutations M1-M5 killed, each passes tsc; gate renderer 107, main 62 (55+7), E2E 7/7 --retries=0; real app bad schema (riffChunkId AB): after = toast 'Error invoking remote method 'meta:write': Error: Failed to write metadata: RIFF INFO fields could not be written: AB', sha256 unchanged, row untagged; before build (28ad3ab) = 'Tags saved', ICAT=DOORWood, no AB sub-chunk (silent loss confirmed); batch modified-only 'Tags saved to 2 files' (raw ICAT 8 B, ffprobe + music-metadata agree), batch with Bad changed '0 saved, 2 failed' sha256 unchanged; normal schema ICAT 8/IKEY 10/ICMT 10 no NUL, ffprobe + music-metadata agree; ownership 3 paths, no // comments. Root review COMMIT OK"
+      ],
+      "realVerified": true,
+      "commit": "4a2062d9258cb97e3d45866d553c58bdbdf65498"
     }
   ],
   "findings": [
@@ -764,9 +788,10 @@
       "id": "RR-R1-01",
       "source": "root-review",
       "severity": "medium",
-      "status": "open",
+      "status": "in_progress",
       "title": "check.yml: separate Build step + playwright test differs from the npm run test:e2e path (naming or merge)",
-      "round": 1
+      "round": 1,
+      "routed_to": "TM-T0-CI-FU round 9 (merge: E2E step runs npm run test:e2e)"
     },
     {
       "id": "RR-R1-02",
@@ -952,10 +977,10 @@
       "id": "C-R4-01",
       "source": "C",
       "severity": "low",
-      "status": "open",
+      "status": "in_progress",
       "round": 4,
       "title": "apt-install.sh worst case ~750 s (2 x (240+10) + dpkg recovery 240+10) > step timeout-minutes 10 (600 s); GitHub kills the step before the final 'failed after N attempts' line (per-attempt lines already printed). Diagnostics only",
-      "routed_to": "TM-T0-CI-FU",
+      "routed_to": "TM-T0-CI-FU round 9",
       "evidence": "c-round-4.md C-R4-01; gates/round-4/review.md Low 2 (same as RR-R4-02)"
     },
     {
@@ -972,10 +997,10 @@
       "id": "RR-R4-02",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "in_progress",
       "round": 4,
       "title": "Same as C-R4-01 (step budget < worst case)",
-      "routed_to": "TM-T0-CI-FU"
+      "routed_to": "TM-T0-CI-FU round 9"
     },
     {
       "id": "RR-R4-03",
@@ -999,10 +1024,10 @@
       "id": "RR-R4-05",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "in_progress",
       "round": 4,
       "title": "apt-install.sh and its env knobs APT_ATTEMPT_TIMEOUT_SECONDS / APT_ATTEMPTS are not documented in docs/ (Georgian)",
-      "routed_to": "TM-T0-CI-FU"
+      "routed_to": "TM-T0-CI-FU round 9"
     },
     {
       "id": "RR-R4-06",
@@ -1142,10 +1167,11 @@
       "id": "RR-R6-04",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "round": 6,
       "title": "Pre-existing '// InfoTag read failed' / '// InfoTag write failed' comments (metadata.ts catch blocks) violate the no-comments rule",
-      "routed_to": "TM-B13 round 8: both // comments removed (B fact: Biome 2 accepts an empty catch {} with this biome.json)"
+      "routed_to": "TM-B13 round 8: both // comments removed (B fact: Biome 2 accepts an empty catch {} with this biome.json)",
+      "closed_by": "round 8 (4a2062d): comment removed, C R8-7 grep empty"
     },
     {
       "id": "RR-R6-05",
@@ -1169,28 +1195,31 @@
       "id": "RR-R7-01",
       "source": "root-review",
       "severity": "medium",
-      "status": "open",
+      "status": "closed",
       "round": 7,
       "title": "D-17 makes a save all-or-nothing: standard fields are no longer written when custom INFO fields cannot be; reviewer: no code fix, document it so the 'Failed to write metadata: RIFF INFO tag is not available…' toast is expected",
-      "routed_to": "round 8 Georgian note in docs/recording-tag-contract.md (D-17 + D-18)"
+      "routed_to": "round 8 Georgian note in docs/recording-tag-contract.md (D-17 + D-18)",
+      "closed_by": "round 8 (4a2062d): docs/recording-tag-contract.md all-or-nothing section, C R8-7"
     },
     {
       "id": "RR-R7-02",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "round": 7,
       "title": "Per-field try { setValuesFromStrings } catch {} still swallows errors (e.g. malformed riffChunkId in a user schema); save reports success. Fix: collect failing IDs and throw before save()",
-      "routed_to": "TM-B13 round 8 (D-18). B fact: b-round-7-exp-bad-chunkid.cjs"
+      "routed_to": "TM-B13 round 8 (D-18). B fact: b-round-7-exp-bad-chunkid.cjs",
+      "closed_by": "round 8 (4a2062d): TM-B13 / D-18, C R8-1..R8-5"
     },
     {
       "id": "RR-R7-03",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "round": 7,
       "title": "metadata.ts:200 '// InfoTag write failed for this field' violates the no-comments rule (pre-existing, re-indented in R7)",
-      "routed_to": "TM-B13 round 8 (with RR-R6-04)"
+      "routed_to": "TM-B13 round 8 (with RR-R6-04)",
+      "closed_by": "round 8 (4a2062d): comment removed, C R8-7 grep empty"
     },
     {
       "id": "RR-R7-04",
@@ -1235,7 +1264,7 @@
       "status": "open",
       "round": 7,
       "title": "schema.ts isValidField does not validate riffChunkId (type/length); a hand-edited schema.json reaches the write path with 'AB', '', 'ICAT5' or a number. SchemaEditor UI blocks such IDs (isValidRiffId). Validation at load time is a schema behaviour change",
-      "routed_to": "signal (complements D-18); TM-T1-MIG/RR-R3-06 schema versioning"
+      "routed_to": "Saba question batch (load-time validation rejects/flags user schema fields = behaviour decision); RR-R8-04 same proposal; library checks JS string length not bytes (A-R8-02)"
     },
     {
       "id": "B-R7-03",
@@ -1245,6 +1274,69 @@
       "round": 7,
       "title": "A non-standard schema field without riffChunkId is silently skipped on write (metadata.ts 'if (field.riffChunkId)'): value given, save reports success. Not creatable via SchemaEditor (generateRiffId always assigns an ID); only hand-edited schema.json. Excluded from D-18",
       "routed_to": "signal"
+    },
+    {
+      "id": "RR-R8-01",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "round": 8,
+      "title": "metadata.ts:199 String(riffChunkId) is redundant (already string); push riffChunkId directly",
+      "routed_to": "signal"
+    },
+    {
+      "id": "RR-R8-02",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "round": 8,
+      "title": "metadata-write-field-errors.test.ts uses double quotes vs single in src; tests/ not linted",
+      "routed_to": "TM-B06"
+    },
+    {
+      "id": "RR-R8-03",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "round": 8,
+      "title": "metadata.ts:147 empty catch {} in read path hides non-ID failures without a trace; a debug log would help diagnosis",
+      "routed_to": "signal"
+    },
+    {
+      "id": "RR-R8-04",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "round": 8,
+      "title": "Architecture signal: validate schema at load in main (riffChunkId /^[A-Z0-9 ]{4}$/, not reserved, not duplicated); reject or flag once; keep all-or-nothing write as second line of defence",
+      "routed_to": "signal; same as B-R7-02, Saba question batch"
+    },
+    {
+      "id": "A-R8-01",
+      "source": "A",
+      "severity": "info",
+      "status": "open",
+      "round": 8,
+      "title": "docs/recording-tag-contract.md header (line 5) and '## შემოწმება' do not mention D-17/D-18 or metadata-write-field-errors.test.ts (task said do not change the rest)",
+      "routed_to": "signal (next docs round)"
+    },
+    {
+      "id": "A-R8-02",
+      "source": "A/C",
+      "severity": "low",
+      "status": "open",
+      "round": 8,
+      "title": "node-taglib-sharp checks riffChunkId by JS string length (id.length !== 4), not bytes: a 4-character non-ASCII ID does not trigger D-18; docs say '4 bytes (4 ASCII characters)'",
+      "routed_to": "B-R7-02 (schema load validation)"
+    },
+    {
+      "id": "C-R8-01",
+      "source": "C",
+      "severity": "low",
+      "status": "open",
+      "round": 8,
+      "title": "After a failed batch save (0 saved, 2 failed) the panel shows the 'Multiple values' placeholder on both files (c-round-8/r8-5-after-ii-toast.png); renderer behaviour not examined, may or may not be a bug",
+      "routed_to": "candidate after round 9: reproduce first"
     }
   ],
   "rounds": [
@@ -1388,7 +1480,7 @@
     {
       "round": 8,
       "task": "TM-B13 writeTagsToFile fails before save() when any custom INFO field cannot be written (D-18, RR-R7-02) + remove two // comments (RR-R6-04/RR-R7-03) + docs note all-or-nothing saves (RR-R7-01)",
-      "status": "planned",
+      "status": "published",
       "baseline": "28ad3ab15dc10a9dd83a23d43994dfc71313cbf9",
       "items": [
         "TM-B13"
@@ -1397,7 +1489,31 @@
         "RR-R7-01",
         "RR-R7-02",
         "RR-R7-03",
-        "RR-R6-04"
+        "RR-R6-04",
+        "RR-R8-01",
+        "RR-R8-02",
+        "RR-R8-03",
+        "RR-R8-04",
+        "A-R8-01",
+        "A-R8-02",
+        "C-R8-01"
+      ],
+      "commit": "4a2062d9258cb97e3d45866d553c58bdbdf65498",
+      "c_result": "PASS, realVerified=true (R8-1..R8-7); root review COMMIT OK"
+    },
+    {
+      "round": 9,
+      "task": "TM-T0-CI-FU apt-install.sh worst case fits step budget and is printed (D-19, C-R4-01, RR-R4-02) + one E2E build path in check.yml (RR-R1-01) + Georgian check.yml docs (RR-R4-05)",
+      "status": "planned",
+      "baseline": "4a2062d9258cb97e3d45866d553c58bdbdf65498",
+      "items": [
+        "TM-T0-CI-FU"
+      ],
+      "findings": [
+        "C-R4-01",
+        "RR-R4-02",
+        "RR-R4-05",
+        "RR-R1-01"
       ]
     }
   ]

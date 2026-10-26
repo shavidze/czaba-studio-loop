@@ -1,0 +1,32 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r8-M3[39m
+
+ [32m✓[39m tests/main/metadata.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [31m❯[39m tests/main/metadata-write-field-errors.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 40[2mms[22m[39m
+     [32m✓[39m (a) meta:write rejects with the failing ID and leaves the file bytes unchanged[32m 9[2mms[22m[39m
+     [32m✓[39m (b) a bad schema field whose value is undefined is not attempted and the save succeeds[32m 6[2mms[22m[39m
+     [32m✓[39m (c1) meta:write-batch lists every file with a failing field and leaves all bytes unchanged[32m 3[2mms[22m[39m
+     [32m✓[39m (c2) meta:write-batch with the standard schema writes ICAT on both files[32m 6[2mms[22m[39m
+[31m     [31m×[31m (d) several failing fields are all reported in schema order and nothing is written[39m[32m 5[2mms[22m[39m
+     [32m✓[39m (e) a valid custom ID still writes its value next to the standard fields[32m 2[2mms[22m[39m
+     [32m✓[39m (f) meta:read with a malformed ID returns the default for that field and keeps the others[32m 6[2mms[22m[39m
+ [32m✓[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32m✓[39m tests/main/riff-info-nul.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-write-guard.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-field-errors.test.ts[2m > [22mTM-B13 / D-18: writeTagsToFile fails before save when a custom INFO field cannot be written[2m > [22m(d) several failing fields are all reported in schema order and nothing is written
+[31m[1mAssertionError[22m: expected Error: Failed to write metadata: RIFF INF… to have property "message" with value 'Failed to write metadata: RIFF INFO f…'[39m
+
+Expected: [32m"Failed to write metadata: RIFF INFO fields could not be written: AB[7m, ICAT5[27m"[39m
+Received: [31m"Failed to write metadata: RIFF INFO fields could not be written: AB"[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m35 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 17:08:08
+[2m   Duration [22m 844ms[2m (transform 267ms, setup 75ms, import 1.05s, tests 214ms, environment 1ms)[22m
+

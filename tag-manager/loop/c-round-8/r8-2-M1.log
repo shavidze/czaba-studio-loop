@@ -1,0 +1,104 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r8-M1[39m
+
+ [32m✓[39m tests/main/metadata.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [31m❯[39m tests/main/metadata-write-field-errors.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 66[2mms[22m[39m
+[31m     [31m×[31m (a) meta:write rejects with the failing ID and leaves the file bytes unchanged[39m[32m 22[2mms[22m[39m
+     [32m✓[39m (b) a bad schema field whose value is undefined is not attempted and the save succeeds[32m 7[2mms[22m[39m
+[31m     [31m×[31m (c1) meta:write-batch lists every file with a failing field and leaves all bytes unchanged[39m[32m 14[2mms[22m[39m
+     [32m✓[39m (c2) meta:write-batch with the standard schema writes ICAT on both files[32m 6[2mms[22m[39m
+[31m     [31m×[31m (d) several failing fields are all reported in schema order and nothing is written[39m[32m 3[2mms[22m[39m
+     [32m✓[39m (e) a valid custom ID still writes its value next to the standard fields[32m 3[2mms[22m[39m
+     [32m✓[39m (f) meta:read with a malformed ID returns the default for that field and keeps the others[32m 5[2mms[22m[39m
+ [32m✓[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 67[2mms[22m[39m
+ [32m✓[39m tests/main/riff-info-nul.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-write-guard.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-field-errors.test.ts[2m > [22mTM-B13 / D-18: writeTagsToFile fails before save when a custom INFO field cannot be written[2m > [22m(a) meta:write rejects with the failing ID and leaves the file bytes unchanged
+[31m[1mAssertionError[22m: promise resolved "undefined" instead of rejecting[39m
+
+[32m- Expected:[39m 
+Error {
+  "message": "rejected promise",
+}
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/metadata-write-field-errors.test.ts:[2m43:97[22m[39m
+    [90m 41| [39m    [35mconst[39m before [33m=[39m [34mreadFileSync[39m(filePath)[33m;[39m
+    [90m 42| [39m
+    [90m 43| [39m    await expect(getHandler("meta:write")({}, filePath, { category: "D…
+    [90m   | [39m                                                                                                [31m^[39m
+    [90m 44| [39m      [32m"message"[39m[33m,[39m
+    [90m 45| [39m      [32m`Failed to write metadata: [39m[36m${[39m[33mFIELD_ERRORS_PREFIX[39m[36m}[39m[32mAB`[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-field-errors.test.ts[2m > [22mTM-B13 / D-18: writeTagsToFile fails before save when a custom INFO field cannot be written[2m > [22m(c1) meta:write-batch lists every file with a failing field and leaves all bytes unchanged
+[31m[1mAssertionError[22m: expected { succeeded: 2, failed: [] } to deeply equal { succeeded: +0, failed: [ …(2) ] }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "failed": [[39m
+[32m-     {[39m
+[32m-       "error": "RIFF INFO fields could not be written: AB",[39m
+[32m-       "path": "/tmp/czaba-write-field-errors-test-8100-1793034482098/c1-first.wav",[39m
+[32m-     },[39m
+[32m-     {[39m
+[32m-       "error": "RIFF INFO fields could not be written: AB",[39m
+[32m-       "path": "/tmp/czaba-write-field-errors-test-8100-1793034482098/c1-second.wav",[39m
+[32m-     },[39m
+[32m-   ],[39m
+[32m-   "succeeded": 0,[39m
+[31m+   "failed": [],[39m
+[31m+   "succeeded": 2,[39m
+[2m  }[22m
+
+[36m [2m❯[22m tests/main/metadata-write-field-errors.test.ts:[2m68:20[22m[39m
+    [90m 66| [39m    const result = await getHandler("meta:write-batch")({}, [first, se…
+    [90m 67| [39m
+    [90m 68| [39m    [34mexpect[39m(result)[33m.[39m[34mtoEqual[39m({
+    [90m   | [39m                   [31m^[39m
+    [90m 69| [39m      succeeded[33m:[39m [34m0[39m[33m,[39m
+    [90m 70| [39m      failed[33m:[39m [
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-field-errors.test.ts[2m > [22mTM-B13 / D-18: writeTagsToFile fails before save when a custom INFO field cannot be written[2m > [22m(d) several failing fields are all reported in schema order and nothing is written
+[31m[1mAssertionError[22m: promise resolved "undefined" instead of rejecting[39m
+
+[32m- Expected:[39m 
+Error {
+  "message": "rejected promise",
+}
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/metadata-write-field-errors.test.ts:[2m101:92[22m[39m
+    [90m 99| [39m    [35mconst[39m before [33m=[39m [34mreadFileSync[39m(filePath)[33m;[39m
+    [90m100| [39m
+    [90m101| [39m    await expect(getHandler("meta:write")({}, filePath, { bad2: ["y"],…
+    [90m   | [39m                                                                                           [31m^[39m
+    [90m102| [39m      [32m"message"[39m[33m,[39m
+    [90m103| [39m      [32m`Failed to write metadata: [39m[36m${[39m[33mFIELD_ERRORS_PREFIX[39m[36m}[39m[32mAB, ICAT5`[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m33 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 17:08:01
+[2m   Duration [22m 877ms[2m (transform 235ms, setup 64ms, import 1.08s, tests 237ms, environment 1ms)[22m
+
+
+::error file=/tmp/c-r8-M1/tests/main/metadata-write-field-errors.test.ts,title=tests/main/metadata-write-field-errors.test.ts > TM-B13 / D-18%3A writeTagsToFile fails before save when a custom INFO field cannot be written > (a) meta%3Awrite rejects with the failing ID and leaves the file bytes unchanged,line=43,column=97::AssertionError: promise resolved "undefined" instead of rejecting%0A%0A- Expected: %0AError {%0A  "message": "rejected promise",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/metadata-write-field-errors.test.ts:43:97%0A%0A
+
+::error file=/tmp/c-r8-M1/tests/main/metadata-write-field-errors.test.ts,title=tests/main/metadata-write-field-errors.test.ts > TM-B13 / D-18%3A writeTagsToFile fails before save when a custom INFO field cannot be written > (c1) meta%3Awrite-batch lists every file with a failing field and leaves all bytes unchanged,line=68,column=20::AssertionError: expected { succeeded: 2, failed: [] } to deeply equal { succeeded: +0, failed: [ …(2) ] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "failed": [%0A-     {%0A-       "error": "RIFF INFO fields could not be written: AB",%0A-       "path": "/tmp/czaba-write-field-errors-test-8100-1793034482098/c1-first.wav",%0A-     },%0A-     {%0A-       "error": "RIFF INFO fields could not be written: AB",%0A-       "path": "/tmp/czaba-write-field-errors-test-8100-1793034482098/c1-second.wav",%0A-     },%0A-   ],%0A-   "succeeded": 0,%0A+   "failed": [],%0A+   "succeeded": 2,%0A  }%0A%0A ❯ tests/main/metadata-write-field-errors.test.ts:68:20%0A%0A
+
+::error file=/tmp/c-r8-M1/tests/main/metadata-write-field-errors.test.ts,title=tests/main/metadata-write-field-errors.test.ts > TM-B13 / D-18%3A writeTagsToFile fails before save when a custom INFO field cannot be written > (d) several failing fields are all reported in schema order and nothing is written,line=101,column=92::AssertionError: promise resolved "undefined" instead of rejecting%0A%0A- Expected: %0AError {%0A  "message": "rejected promise",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/metadata-write-field-errors.test.ts:101:92%0A%0A

@@ -1,0 +1,10 @@
+--- /home/runner/czaba-project/czaba-tag-manager/src/main/ipc/metadata.ts	2026-10-26 17:00:52.507246247 +0000
++++ src/main/ipc/metadata.ts	2026-10-26 17:08:05.869524029 +0000
+@@ -197,6 +197,7 @@
+           infoTags[0].setValuesFromStrings(riffChunkId, strValues);
+         } catch {
+           failedIds.push(String(riffChunkId));
++          throw new Error(`RIFF INFO fields could not be written: ${failedIds.join(', ')}`);
+         }
+       }
+       if (failedIds.length > 0) {

@@ -1,177 +1,136 @@
-# CURRENT TASK — Round 8: TM-B13 `writeTagsToFile` fails before save when any custom INFO field cannot be written (D-18, RR-R7-02) + remove two `//` comments (RR-R6-04, RR-R7-03) + Georgian docs note on all-or-nothing saves (RR-R7-01)
+# CURRENT TASK — Round 9: TM-T0-CI-FU `apt-install.sh` worst case fits its step budget and is printed (C-R4-01, RR-R4-02) + one build path for E2E in `check.yml` (RR-R1-01) + Georgian `check.yml` docs (RR-R4-05)
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-26
 
 ## Why this round
-Round 7 (TM-B12, D-17) got **C PASS** on R7-1…R7-6 with realVerified=true. Root review gave COMMIT OK and root published `28ad3ab`. TM-B12, RR-R6-01 and RR-R6-02 are closed. No critical or high bug is open.
+- Round 8 (TM-B13, D-18): **C PASS** on R8-1…R8-7, realVerified=true. Root review COMMIT OK, published `4a2062d`. TM-B13 is done. No critical or high bug is open.
+- Every other open item except this one waits for a decision from Saba (D-07, D-10/TM-B11, D-12/TM-B08, TM-T1-DUP, TM-B05, TM-B06, TM-T2-DATA) or for root to link an Actions run (TM-T0-CI).
+- **TM-T0-CI-FU** (low) and **RR-R1-01** (medium, open since round 1) need no decision. They touch the same two CI files, so they form one CI round.
+- The backlog note said "plan after root reports the first Actions run on 7879ee0". B is bringing the round forward and says so in `b-round-8.md`. The reasons: this is the only decision-free scope left, and root's link only confirms the result; it does not block the work. A round-9 commit also qualifies as "7879ee0 or later" for TM-T0-CI.
 
-Root review R7 raised:
-- **RR-R7-02 (low):** the per-field `try { infoTags[0].setValuesFromStrings(…) } catch { // … }` in `writeTagsToFile` still swallows errors. The field is skipped, `file.save()` runs, and `meta:write` / `meta:write-batch` report success.
-- **RR-R7-03 / RR-R6-04 (low):** the two pre-existing `//` comments in `metadata.ts` break the "no comments in code" rule.
-- **RR-R7-01 (medium, docs only):** since D-17 a save is all-or-nothing. The reviewer asked for a note so the error toast is expected. No code fix.
-
-**B fact** (`b-round-7-exp-bad-chunkid.cjs` in the loop folder, run with the repo's `node_modules` on `28ad3ab`; this is the real library, not a mock):
-
-| `riffChunkId` | `setValuesFromStrings` | `save()` afterwards |
-|---|---|---|
-| `'AB'` | throws `Argument error: ID must be 4 bytes` | succeeds |
-| `'ICAT5'` | throws `Argument error: ID must be 4 bytes` | succeeds |
-| `''` | throws `Argument null: id was not provided` (never reached in the app: `if (field.riffChunkId)` skips it) | succeeds |
-| `'abcd'`, `'IC T'` | no throw | succeeds |
-| valid `'ITKN'` with values `[]`, `['']`, `['a','b']`, `['ქართული']`, `['0']`, `['3']` (`b-round-7-exp-valid-values.cjs`) | no throw | succeeds |
-
-So D-18 only fires on a malformed ID. Empty, multi-value, non-ASCII and number values through a valid ID never throw. A normal panel save with untouched custom fields keeps working.
-
-Also confirmed:
-- `grep -n '//' metadata.ts` on HEAD shows exactly lines 148 and 200, the two comments.
-- The batch path sends only `modifiedFields` (`MetadataPanel.tsx:84-91`). The single-file path sends the whole `editingMetadata` (`:76`).
-
-How the bad value gets there:
-- `src/main/ipc/schema.ts` `isValidField` does not check `riffChunkId`, so a hand-edited or foreign `schema.json` reaches the write path with such an ID.
-- The Schema Editor UI cannot create one (`isValidRiffId`; `generateRiffId` assigns 4 chars).
-- That is why TM-B13 is **low**. Whether the silent loss shows up in the real app is an inference until C's R8-4/R8-5 "before" run.
-
-**D-18 (B, technical, reversible):**
-- In `writeTagsToFile`'s custom INFO loop, a `setValuesFromStrings` error is no longer swallowed. The loop still tries **every** custom field. It collects `String(riffChunkId)` of each failing field, in schema order.
-- After the loop, if at least one failed, throw **before `file.save()`**:
-  `new Error(\`RIFF INFO fields could not be written: ${failedIds.join(', ')}\`)`
-  Nothing is written to the file. `finally` still disposes it.
-- How it surfaces:
-  - `meta:write` uses the existing mapping: `Failed to write metadata: RIFF INFO fields could not be written: AB`.
-  - `meta:write-batch` (the real channel name, `channels.ts:8`) puts the file in `failed` with the raw message and continues with the next file.
-- Unchanged:
-  - Fields whose value is `undefined` are not attempted.
-  - A non-standard field **without** `riffChunkId` is still skipped silently. That is signal B-R7-03 and not part of D-18.
-  - The read path.
-  - D-17's guard and message.
-- Accepted caveat: an ID that contains `corrupt`/`EBUSY`/`EACCES` would hit the `meta:write` mapping. Do not special-case it.
+**B facts** (code read on `4a2062d` and a small experiment):
+- `apt-install.sh` worst case today. T = `APT_ATTEMPT_TIMEOUT_SECONDS` (240), K = kill-after (hard-coded `10`), N = `APT_ATTEMPTS` (2):
+  - every attempt: up to T + K;
+  - every recovery: `dpkg --configure -a` is bounded by T as well (`recover_interrupted_dpkg`, line 65), so up to T + K;
+  - total: 2 × 250 + 250 = **750 s**, against the step's `timeout-minutes: 10` (600 s).
+- `disable_man_db_triggers` (line 20) runs `sudo debconf-communicate` with **no timeout**. If it hangs, no budget holds.
+- Because K is hard-coded, a shim run with a small T does not scale the whole formula. A "2 s" run alone cannot prove the 600 s budget.
+- `npm run <script> -- <args>` appends the args to the **last** command of the script. B experiment in `/tmp/b-r8`: script `echo first && echo second` with `-- --retries=0 --reporter=list,html` printed `second --retries=0 --reporter=list,html`. So `npm run test:e2e -- …` passes the flags to `npx playwright test`, not to `npm run build`.
+- `check.yml` today has `Build` (`npm run build`) and then `E2E tests` (`xvfb-run -a npx playwright test …`). The verifyCommand uses `npm run test:e2e` (`npm run build && npx playwright test`). Those are two build paths (RR-R1-01).
 
 ## Baseline
-- HEAD `28ad3ab15dc10a9dd83a23d43994dfc71313cbf9`, working tree clean. If HEAD differs, or the tree is dirty in paths you don't own, stop and report.
+- HEAD `4a2062d9258cb97e3d45866d553c58bdbdf65498`, working tree clean. If HEAD differs, or the tree is dirty in paths you don't own, stop and report.
 - Frozen files: everything not listed under File ownership. They must stay byte-identical. In particular:
-  - every `src/**` file except `src/main/ipc/metadata.ts`, including `src/main/ipc/schema.ts` (no load-time ID validation this round, B-R7-02 is a signal) and `src/main/ipc/channels.ts`;
-  - `src/preload/**`, `src/shared/**`, `src/renderer/src/styles/app.css` (protected);
-  - `package.json`, `package-lock.json`, all `tsconfig*.json`, `biome.json`, `playwright.config.ts`, `vitest.config.*.ts`, `electron.vite.config.ts`;
-  - `.github/**` (including the protected `release.yml`);
-  - `tests/fixtures/**`, `tests/main/riff-chunks.ts`, `tests/main/setup.ts`, `tests/main/global-setup.ts`;
-  - every existing test file, in particular `tests/main/metadata-write-guard.test.ts` (D-17 cases (a)–(d)), `tests/main/riff-info-nul.test.ts`, `tests/main/metadata.test.ts` and `tests/main/recording-tag-contract.test.ts`;
-  - `tests/renderer/**`, `tests/e2e/**`, `tests/contract/**`;
-  - `.claude/**`, and every `docs/**` file except `docs/recording-tag-contract.md`.
+  - all of `src/**`;
+  - all of `tests/**`, including `tests/contract/check-ffprobe-tags.ts` and `tests/fixtures/**`;
+  - `.github/workflows/release.yml` (protected);
+  - `package.json` and `package-lock.json` (protected), every `tsconfig*.json`, `biome.json`, `playwright.config.ts`, `vitest.config.*.ts`, `electron.vite.config.ts`;
+  - `.claude/**`;
+  - every `docs/**` file except `docs/ci-cd.md`.
 
 ## Scope
-1. **`src/main/ipc/metadata.ts`**
-   - **`writeTagsToFile`:** implement D-18 inside the existing `if (customFields.length > 0)` block, after the D-17 guard.
-     - Collect failing IDs in a local array.
-     - Replace the comment-only `catch` body with pushing `String(riffChunkId)`.
-     - After the loop and before `file.save()`, throw the exact D-18 message if the array is non-empty.
-     - The message text is exactly `RIFF INFO fields could not be written: ` followed by the IDs joined with `, `.
-   - **`readTagsFromFile`:** remove only the comment line `// InfoTag read failed, use default`. The `catch` stays and becomes `catch {}` (or whatever `biome format` produces). Read behaviour must not change.
-     - B fact: with this `biome.json`, Biome 2 accepts an empty `catch {}` (B ran a one-file check, exit 0).
-   - Afterwards `grep -n '//' src/main/ipc/metadata.ts` shows no comment lines (URLs or strings excepted; there are none today).
-   - Do not change:
-     - the D-17 guard;
-     - the title workaround (A-R7-01 says it may be redundant; leave it);
-     - `getRiffInfoTags`, `stripRiffNulTerminator`, `STANDARD_PROP_MAP`;
-     - the handlers, the error mapping, the channels;
-     - the D-10 empty-value behaviour.
-   - Rules:
-     - no `any`, `@ts-ignore`, `@ts-expect-error` or `biome-ignore`;
-     - semicolons;
-     - **no new comments**;
-     - no new export.
-2. **Tests (red first, `test-on-bugfix`). New file `tests/main/metadata-write-field-errors.test.ts`.**
-   - Set-up:
-     - Copy the `getHandler` / `registerMetadataHandlers()` `beforeAll` pattern from `metadata-write-guard.test.ts`.
-     - Work on copies of `tests/fixtures/sample.wav` in a per-run temp dir, and remove it in `afterAll`.
-     - No spy and no mock of taglib: these are real files and the real library.
-     - Raw bytes via `parseListInfoSubChunks` from `tests/main/riff-chunks.ts`.
-     - `BAD = [...STANDARD_FIELDS, { key: 'bad', label: 'Bad', type: 'text', riffChunkId: 'AB' }]`.
-   - Cases:
-     - **(a)** `meta:write` with `BAD`, `{ category: 'DOORWood', bad: 'x' }`:
-       - it rejects with exactly `Failed to write metadata: RIFF INFO fields could not be written: AB`;
-       - the file bytes equal the bytes before the call (`Buffer.equals`). This also proves that the ICAT already set in memory did not reach the disk.
-     - **(b)** Same schema, `{ category: 'DOORWood' }` (`bad` is `undefined`): it resolves, and raw `ICAT` is exactly `DOORWood`. This kills a guard that validates the schema instead of the attempted writes.
-     - **(c)** `meta:write-batch`:
-       - (c1) On two copies with `BAD`, `{ category: 'BATCHCat', bad: 'x' }`, the result is `{ succeeded: 0, failed: [{ path: first, error: 'RIFF INFO fields could not be written: AB' }, { path: second, error: same }] }`, and both files' bytes are unchanged.
-       - (c2) On two fresh copies with `STANDARD_FIELDS` and the same meta minus `bad`, the result is `{ succeeded: 2, failed: [] }`, with raw `ICAT` = `BATCHCat` on both.
-     - **(d)** Several bad fields: `[...STANDARD_FIELDS, { key: 'bad1', label: 'Bad 1', type: 'text', riffChunkId: 'AB' }, { key: 'bad2', label: 'Bad 2', type: 'tags', riffChunkId: 'ICAT5' }]` with `{ bad1: 'x', bad2: ['y'] }`:
-       - it rejects with exactly `Failed to write metadata: RIFF INFO fields could not be written: AB, ICAT5`;
-       - the bytes are unchanged.
-       - This kills "throw at the first failure".
-     - **(e)** Valid custom ID, regression: `[...STANDARD_FIELDS, { key: 'take', label: 'Take', type: 'text', riffChunkId: 'ITKN' }]` with `{ take: '3', category: 'X' }`: it resolves; raw `ITKN` = `3` (1 byte) and `ICAT` = `X`.
-   - **Red proof:**
-     1. Before editing `metadata.ts`, run `npx vitest run --config vitest.config.main.ts tests/main/metadata-write-field-errors.test.ts tests/main/metadata-write-guard.test.ts` on the untouched `28ad3ab` `metadata.ts`.
-     2. Expected: (a), (c1) and (d) fail, because the call resolves or returns `succeeded: 2, failed: []`. (b), (c2), (e) and guard (a)–(d) pass.
-     3. Save that run as `a-round-8/red-before-fix.log`, and the green run as `a-round-8/green-after-fix.log`.
-3. **`docs/recording-tag-contract.md`, in Georgian with English technical terms.** Add one short section, for example `## ჩაწერის შეცდომები (all-or-nothing)`, that says:
-   - A save is all-or-nothing. If any INFO field cannot be written, nothing is written to the file, including standard fields such as title.
-   - The two messages are D-17 `RIFF INFO tag is not available; custom fields were not written` and D-18 `RIFF INFO fields could not be written: <IDs>`. In the single-file save they appear with the `Failed to write metadata: ` prefix.
-   - A batch save lists such a file under failed and continues with the others.
-   - A `riffChunkId` must be exactly 4 bytes. The Schema Editor enforces this, but a hand-edited `schema.json` does not. With such a field, every Metadata-panel save fails, because the panel sends every field. A batch save fails only if that field was changed.
-   - On read, such a field shows its default value.
-   - Do not change the rest of the document.
+1. **`.github/scripts/apt-install.sh`.** This is decision **D-19** (B, technical, reversible).
+   - Knobs. Each one is read from the environment with a default and must be a positive integer; otherwise print the usage message and exit 2, as today:
+     - `APT_ATTEMPT_TIMEOUT_SECONDS` (default 240, unchanged);
+     - `APT_ATTEMPTS` (default 2, unchanged);
+     - **`APT_KILL_AFTER_SECONDS`** (default 10, today a hard-coded constant);
+     - **`APT_RECOVERY_TIMEOUT_SECONDS`** (new, default 60).
+   - `recover_interrupted_dpkg` bounds `dpkg --configure -a` with `APT_RECOVERY_TIMEOUT_SECONDS` instead of `APT_ATTEMPT_TIMEOUT_SECONDS`.
+   - `disable_man_db_triggers` bounds `debconf-communicate` with the same recovery bound. Use `run_bounded_as_root`, which also applies kill-after. The `|| true` tolerance stays. `sudo rm -f /var/lib/man-db/auto-update` stays as it is.
+   - Before anything else that touches the system (after argument and knob validation, before `disable_man_db_triggers`), print exactly one line to stdout:
+     `apt-install: worst case ${W}s`
+     where **W = (R + K) + N × (T + K) + (N − 1) × (R + K)**, with T = attempt timeout, R = recovery timeout, K = kill-after and N = attempts.
+     - With the defaults: 70 + 500 + 70 = **640**.
+     - With T=3, R=2, K=1, N=2: 3 + 8 + 3 = **14**.
+   - The usage message's `Environment:` line lists all four knobs with their defaults.
+   - Unchanged:
+     - the per-attempt deadline logic (`remaining_attempt_seconds`);
+     - `--no-install-recommends` and `-o Dpkg::Use-Pty=0`;
+     - `DEBIAN_FRONTEND=noninteractive`;
+     - the outcome lines `apt-install: attempt N/M ok|timed out in <phase>|failed (exit X) in <phase> after Ss`;
+     - the final line `apt-install: failed after N attempts` and the exit codes (0, 1, 2).
+   - Rules: `set -euo pipefail` stays, `shellcheck` reports 0 issues, and there are no `#` lines except the shebang (no comments, the project rule).
+2. **`.github/workflows/check.yml`.**
+   - "Install system packages": `timeout-minutes: 13` (780 s, which is greater than W = 640). The `run:` line stays.
+   - **RR-R1-01, merge:** delete the separate `Build` step. The E2E step becomes:
+     - name `Build and E2E tests`;
+     - `run: xvfb-run -a npm run test:e2e -- --retries=0 --trace=retain-on-failure --reporter=list,html`;
+     - the same `env: PLAYWRIGHT_HTML_OPEN: never`.
+   - The order of every other step, `on`, `permissions`, `runs-on`, the job `timeout-minutes: 30`, every `uses:` line (still `@v4`, see RR-R1-03 signal), "Install Electron system libraries" (`timeout-minutes: 10`) and the upload step stay unchanged.
+   - The `Tag contract ffprobe cross-check` step **stays before** the E2E step. Playwright cleans `test-results/` when it starts, and that step reads `test-results/recording-tag-contract/contract.wav`.
+3. **`docs/ci-cd.md`, in Georgian with English technical terms.** Add one new section at the end, for example `## Check workflow (check.yml)`. It covers:
+   - the trigger (push + pull_request), the runner and the steps in order, including that `Build and E2E tests` builds through `npm run test:e2e`, the same path as local runs;
+   - `apt-install.sh`: what it does (man-db trigger off, bounded update/install, `dpkg --configure -a` recovery between attempts);
+   - the four env knobs with their defaults;
+   - the W formula, the value 640 s, and why the step has `timeout-minutes: 13`;
+   - every log line format: `worst case Ws`, `attempt N/M ok after Ss`, `timed out in <phase> after Ss`, `failed (exit X) in <phase> after Ss`, `failed after N attempts`; and exit code 2 for usage.
+   - Do not change the existing release-workflow sections.
+
+**Red/green (A, outside the repository):**
+- Use shims in `a-round-9/shims/` for `sudo` (pass-through), `apt-get`, `dpkg` and `debconf-communicate`. The modes are ok, hang, hang-ignore-term and fail; C's R4 shims in `c-round-4/shims/` are a model.
+- Run the case "everything hangs and ignores TERM" (`apt-get`, `dpkg` **and** `debconf-communicate`) with `APT_ATTEMPT_TIMEOUT_SECONDS=3 APT_RECOVERY_TIMEOUT_SECONDS=2 APT_KILL_AFTER_SECONDS=1`:
+  - **red** on `git show 4a2062d:.github/scripts/apt-install.sh`, wrapped in an outer `timeout 120`: there is no `worst case` line, and the run does not finish within 14 + 3 s (the man-db step has no bound, and K is fixed at 10).
+  - **green** on the new script: the first line is `apt-install: worst case 14s`, the last line is `apt-install: failed after 2 attempts`, rc 1, and the wall time is ≤ 17 s.
+- Save the logs as `a-round-9/red-before.log` and `a-round-9/green-after.log`.
 
 **Explicitly NOT in this round:**
-- `riffChunkId` validation in `schema.ts` / `loadSchema` (B-R7-02).
-- Custom fields without `riffChunkId` (B-R7-03).
-- The `planTagWrite`/`applyTagWrite` refactor (RR-R7-05, a signal).
-- Removing the title workaround (A-R7-01).
-- TM-B11 (D-10, Saba), B-R6-01, TM-B05, TM-B08, TM-B06.
-- Renderer changes (RR-R5-02).
-- CI (TM-T0-CI-FU).
-- Schema migration or duplicates (TM-T1-MIG/DUP).
-- The `as unknown as TagObject` casts (RR-R2-04).
+- SHA pinning of actions (RR-R1-03, signal).
+- Making `check.yml` required or adding `needs:` to `release.yml` (RR-R1-07, Saba; `release.yml` is protected).
+- tsx pinning (RR-R3-05: `package.json` is protected, OOS-03).
+- Changing the ffprobe hint (RR-R4-03) or moving the ffprobe check into vitest (RR-R4-06).
+- Any `src/**` or `tests/**` change.
 - Package installs.
 
 Read first:
-- `.claude/primitives/WAV_METADATA.md`, `ELECTRON_IPC.md`, `AGENT_DISCOVERABLE_CODE.md`, `TESTING.md`, `TYPESCRIPT_STRICT.md`, `SEMICOLONS.md`, `GEORGIAN_DOCS.md`;
-- `.claude/rules/test-on-bugfix.md`;
-- `tests/main/metadata-write-guard.test.ts` and `tests/main/riff-chunks.ts` (patterns);
-- `b-round-7-exp-bad-chunkid.cjs` in the loop folder.
+- `.claude/primitives/GIT_RULES.md` (no commits; root publishes), `GEORGIAN_DOCS.md`, `AGENT_DISCOVERABLE_CODE.md` (naming of new knobs);
+- `c-round-4.md` (R4-3 shim table, R4-6 replay) and `c-round-4/shims/` in the loop folder.
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `src/main/ipc/metadata.ts` | D-18 in `writeTagsToFile`; remove the comment in `readTagsFromFile`'s catch |
-| `tests/main/metadata-write-field-errors.test.ts` (new) | red-first tests (a)–(e) |
-| `docs/recording-tag-contract.md` | Georgian section on all-or-nothing saves (RR-R7-01, D-17, D-18) |
+| `.github/scripts/apt-install.sh` | D-19: knobs, bounded recovery and man-db step, `worst case` line |
+| `.github/workflows/check.yml` | apt step `timeout-minutes: 13`; one build path for E2E (RR-R1-01) |
+| `docs/ci-cd.md` | Georgian `check.yml` + `apt-install.sh` section (RR-R4-05) |
 
-Generated or ignored output (`tests/fixtures/*.wav`, `out/`, `test-results/`, `playwright-report/`) is not committed. Reports and logs go to `a-round-8/` in the loop folder.
+Generated or ignored output (`tests/fixtures/*.wav`, `out/`, `test-results/`, `playwright-report/`) is not committed. Shims, reports and logs go to `a-round-9/` in the loop folder.
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R8-1 (red/green) | Read A's `red-before-fix.log`. In `/tmp/c-r8-red` (rsync + `node_modules` symlink, `git show 28ad3ab:src/main/ipc/metadata.ts`, plus the new test file), run `npx vitest run --config vitest.config.main.ts tests/main/metadata-write-field-errors.test.ts tests/main/metadata-write-guard.test.ts`. Then run the same command on the real tree. | **Red:** exactly (a), (c1) and (d) fail as described; (b), (c2), (e) and guard (a)–(d) pass. **Green:** all pass on the real tree. |
-| R8-2 (mutations) | In `/tmp` copies of the fixed tree: **M1** restores the swallowing catch (no throw). **M2** throws after `file.save()`. **M3** rethrows inside the catch at the first failure, so only that ID is in the message. **M4** changes one character of the message. **M5** pre-validates every schema field with `riffChunkId` (4-byte check) before writing, regardless of whether its value is `undefined`. Run the new file plus `metadata-write-guard`, `riff-info-nul`, `metadata.test` and `recording-tag-contract`. | M1: (a), (c1), (d) fail. M2: (a), (c1) and (d) fail on bytes. M3: (d) fails. M4: (a), (c1), (d) fail. M5: (b) fails. Each mutation is killed and passes `tsc`. |
-| R8-3 (gate) | Clean state: `rm -rf out test-results playwright-report tests/fixtures/*.wav`, then the full `verifyCommand`. Also run E2E with `--retries=0`. | Exit 0. Biome 0 errors, no new warnings in `metadata.ts` (compare against `28ad3ab`). Typecheck 0 errors (node/web/test). Renderer **107/107**. Main **55 + A's new count**, all green, with `metadata-write-guard` (a)–(d), `riff-info-nul` (a)–(i), `metadata.test.ts` and `recording-tag-contract.test.ts` (T1-1, T1-10) unchanged. E2E **7/7** with `--retries=0`. |
-| R8-4 (real app: bad schema, single save, before + after) | Built app with `_electron` under `xvfb-run -a` (`--no-sandbox`, clean `XDG_CONFIG_HOME`, dialog stubbed to a temp folder).<br>**Find the userData folder first**, for example with `electronApp.evaluate(({ app }) => app.getPath('userData'))` on a first launch. Do not assume the name: `productName` sits inside the electron-builder `build` block.<br>Write `schema.json` there: `STANDARD_FIELDS` exactly as in `src/shared/types.ts`, plus `{ "key": "bad", "label": "Bad", "type": "text", "riffChunkId": "AB" }`. Relaunch. The Bad field must appear in the panel.<br>On a fresh `sample.wav` copy, set Category `DOORWood` and Bad `x`, then Save.<br>Repeat the same steps on an app built from `28ad3ab` in a `/tmp` copy ("before"). | **After:**<br>• Error toast whose text **contains** `Failed to write metadata: RIFF INFO fields could not be written: AB` (Electron may prefix `Error invoking remote method 'meta:write': Error: `; record the full text).<br>• The file's sha256 is unchanged.<br>• The row stays untagged after Rescan.<br>**Before:**<br>• `Tags saved`.<br>• Raw INFO has `ICAT` = `DOORWood` and no `AB` sub-chunk. This is the silent loss; record the raw dump.<br>Screenshots `c-round-8/r8-4-*.png`. If the before build cannot be made, say so; the after part still counts. |
-| R8-5 (real app: batch with bad schema) | Same after-session, same bad schema. (i) Multi-select two fresh copies (click, then Ctrl+click), change **only** Category to `BATCHCat`, Save. (ii) Select two other fresh copies, change Bad to `y` (and Category to `BATCHCat`), Save. | (i) `Tags saved to 2 files`, because the batch sends only modified fields, so `bad` is not attempted. Raw `ICAT` = `BATCHCat` on both; ffprobe and music-metadata agree.<br>(ii) Toast `0 saved, 2 failed`. Both files' sha256 are unchanged.<br>Screenshots `r8-5-*.png`. |
-| R8-6 (real app: normal schema regression) | New session with a clean `XDG_CONFIG_HOME` (default schema). On a fresh copy, set Category `DOORWood`, Keywords `door, slam`, Comment `heavy door`, then Save and Rescan. | `Tags saved`. Raw INFO: `ICAT` 8, `IKEY` 10, `ICMT` 10 bytes, no byte 0. ffprobe shows `ICAT=DOORWood`, `IKEY=door, slam`, `comment=heavy door`, and music-metadata agrees. The row is `Tagged`. Screenshot `r8-6-*.png`. |
-| R8-7 (frozen/ownership + docs) | `git status --porcelain --untracked-files=all`; `git diff --stat 28ad3ab`; `git diff --quiet 28ad3ab -- . ':!src/main/ipc/metadata.ts' ':!tests/main/metadata-write-field-errors.test.ts' ':!docs/recording-tag-contract.md'`. Read the `metadata.ts` and docs diffs. | Only the three owned paths changed or were added. The `metadata.ts` diff touches only the D-18 loop/throw and the read-catch comment line. `grep -n '//' src/main/ipc/metadata.ts` is empty. No `any`, `@ts-*`, `biome-ignore` or new comments. The docs diff only adds the Georgian section and states all five points from Scope 3. |
+| R9-1 static | `bash -n`; `shellcheck .github/scripts/apt-install.sh`; a comment grep (`#` lines other than the shebang); js-yaml parse of `check.yml`; `git diff 4a2062d -- .github/workflows/check.yml` | bash and shellcheck report 0 issues; the shebang is the only `#` line. The YAML is valid. The diff only:<br>• changes the apt step's `timeout-minutes` from 10 to 13;<br>• removes the `Build` step;<br>• renames the E2E step and changes its `run:` exactly as in Scope 2.<br>The ffprobe step comes before E2E. Every `uses:` and the job timeout are unchanged. |
+| R9-2 shims | C uses its own shims: extend `c-round-4/shims/` with a hang mode for `debconf-communicate` and `dpkg`. Small knobs (T=3, R=2, K=1, N=2) unless stated; each case is wrapped in an outer `timeout`.<br>(a) ok<br>(b) first apt call hangs, then ok<br>(c) apt always hangs<br>(d) **everything hangs and ignores TERM**, including `dpkg` and `debconf-communicate`<br>(e) apt exits 100<br>(f) no args<br>(g) each of the four knobs set to `0`, `-1`, `abc`<br>(h) `APT_ATTEMPTS=3`, everything hangs | (a) rc 0. The first line is `apt-install: worst case Ws`, with W from the formula for the given knobs; then `attempt 1/2 ok`.<br>(b) rc 0. The shim log argv shows `dpkg --configure -a` bounded by R.<br>(c), (d), (h) rc 1. The last line is `apt-install: failed after N attempts`. **Measured wall ≤ printed W + 3 s.** In (d) the wall time is within 3 s of W, and no orphan `sleep` is left.<br>(e) rc 1, with `failed (exit 100)` lines.<br>(f), (g) rc 2. Usage goes to stderr and names all four knobs. The shim log has no apt or sudo call.<br>**Mutation:** restore `APT_ATTEMPT_TIMEOUT_SECONDS` as the recovery bound → the (d) wall time exceeds the printed W. |
+| R9-3 budget at defaults | Run the script with default knobs against `ok` shims and read the first line. Read `timeout-minutes` of "Install system packages" from `check.yml` with js-yaml. | It prints `apt-install: worst case 640s`, and 640 < 13 × 60 = 780.<br>Red on the old pair (`git show 4a2062d:`): the formula gives 750 > 600. |
+| R9-4 real apt | On the runner with real `sudo`: `bash .github/scripts/apt-install.sh ffmpeg xvfb` | rc 0, `worst case 640s`, `attempt 1/2 ok after Ss`. Afterwards `ffprobe -version` and `xvfb-run -a true` work, and debconf shows `man-db/auto-update` = `false`. |
+| R9-5 CI-order replay | As in R4-6: extract the `run:` steps of `check.yml` with js-yaml and run them in YAML order with `bash --noprofile --norc -eo pipefail`, `CI=true` and each step's `env`. Start clean: `rm -rf out test-results playwright-report tests/fixtures/*.wav`. Skip only `npm ci` and the `if: failure()` upload. | Every step exits 0; record the time of each step.<br>The E2E step builds `out/` itself, since no step before it builds. It gets 7/7, and the list output shows `--retries=0` took effect (no retry lines).<br>`playwright-report/index.html` exists afterwards (TM-B07 regression).<br>The ffprobe step passes before E2E. |
+| R9-6 gate | Clean state, then the full `verifyCommand`. Also run E2E with `--retries=0`. | Exit 0. Biome 0 errors (9 warnings, as on `4a2062d`). Typecheck 0 errors (node/web/test). Renderer **107/107**, main **62/62**, E2E **7/7**. |
+| R9-7 real-app smoke | Built app with `_electron` under `xvfb-run -a` (`--no-sandbox`, clean `XDG_CONFIG_HOME`, dialog stubbed to a temp folder with a `sample.wav` copy): Open Folder, select the row, set Category `DOORWood`, Save, Rescan. | `Tags saved`. ffprobe shows `ICAT=DOORWood`, music-metadata agrees, and the row is `Tagged`. Screenshot `c-round-9/r9-7-*.png`.<br>No app code changed; this guards against a broken build path. |
+| R9-8 frozen/ownership + docs | `git status --porcelain --untracked-files=all`; `git diff --quiet 4a2062d -- . ':!.github/scripts/apt-install.sh' ':!.github/workflows/check.yml' ':!docs/ci-cd.md'`; read the docs diff. | Only the three owned paths changed. The docs diff only adds the Georgian section and states every point from Scope 3. Its numbers (defaults, 640 s, 13 min) match the script and `check.yml`. |
 
-**Evidence rules:**
-- ffprobe hides NULs, so every byte claim needs a raw INFO dump (`parseListInfoSubChunks` or an equivalent hex/size dump).
-- music-metadata decodes non-Latin RIFF INFO text as mojibake, so the real-app values are ASCII.
-- A file whose sha256 is unchanged needs no reader comparison: nothing was written.
+**What realVerified means here:**
+- R9-1…R9-8 are real local checks; C may report realVerified=true for them.
+- The Actions part (the step running on GitHub) is different. TM-T0-CI stays `in_progress` until root links a green `Check` run on the round-9 commit or later. C must not claim that run.
+- Windows packaging is not part of this round.
 
 ## What could break (C re-checks)
-- **D-17 guard:** `metadata-write-guard` (a)–(d) stay green unchanged. The D-17 throw must still come before the loop.
-- **Normal WAV writes:** single and batch saves still write ICAT/IKEY/ICMT (R8-5 i, R8-6, recording-tag-contract tests).
-- **T1-10 clearing path:** an empty value is still written as a size-0 sub-chunk (the existing test, R8-3). `setValuesFromStrings(id, [''])` must not count as a failure.
-- **Read path:** removing the comment must not change behaviour. riff-info-nul (a)–(i) and `metadata.test.ts` stay green. The bad field reads as `''` in R8-4.
-- **Error mapping:** the `meta:write` mapping stays byte-identical (R8-7 diff read).
-- **Batch continues after a failing file** (c1, R8-5 ii).
-- **Custom number field (TM-B11):** unchanged. `ITKN='0'` behaviour stays as it is.
+- **ffprobe step:** it must still run before E2E and find `test-results/recording-tag-contract/contract.wav` (R9-5).
+- **playwright-report upload (TM-B07):** `--reporter=list,html` must still reach Playwright through `npm run test:e2e --` (R9-5: `playwright-report/index.html`).
+- **`--retries=0`** must reach Playwright, not `npm run build` (R9-5).
+- **apt step on a healthy runner:** still one fast attempt (R9-4). `--no-install-recommends` still gives `xauth`, which is a Depends of xvfb (RR-R4-01).
+- **Script usage and exit codes:** 0, 1 and 2 are unchanged (R9-2 e/f/g).
+- **App behaviour:** not touched; the R9-6 gate and the R9-7 smoke confirm it.
 
 ## Next (orientation only)
-1. Root links a `Check` Actions run on `7879ee0` or later (`a8c1b53`, `d52354d` and `28ad3ab` all qualify):
-   - **green:** TM-T0-CI and TM-T0 close;
-   - in either case, TM-T0-CI-FU (apt worst-case budget + Georgian docs note) is a small CI round.
+1. Root links a `Check` Actions run on `7879ee0` or later (any published commit, including this round's). If it is green, TM-T0-CI, TM-T0 and the Actions part of TM-T0-CI-FU close.
 2. Saba question batch:
    - D-07 (TM-T1-MIG);
    - D-10 plus TM-B11;
    - D-12/TM-B08 plus B-R6-01;
-   - TM-T1-DUP (RR-R3-01), D-15 plus RR-R5-01;
-   - D-16/D-17/D-18 (for information), RR-R1-07, RR-R3-05, TM-B06;
+   - TM-T1-DUP (RR-R3-01);
+   - D-15 plus RR-R5-01;
+   - B-R7-02/RR-R8-04: validate `riffChunkId` when `schema.json` is loaded. This rejects or flags user fields, so it is a behaviour decision;
+   - TM-B05, TM-B06, RR-R1-07, RR-R3-05;
    - TM-T2-DATA. T-2 stays BLOCKED until it arrives.
-3. Low items without a decision: TM-T0-CI-FU, RR-R5-02 (renderer `typeof` guard). Signals: B-R7-02, B-R7-03, RR-R7-05 (plan/apply), A-R7-01.
+3. Low items without a decision, candidates once this round closes:
+   - RR-R5-02 (renderer `typeof` guard);
+   - C-R8-01 (a failed batch save leaves "Multiple values" in the panel; reproduce first);
+   - RR-R1-04/RR-R1-05 (`create-fixtures.ts`).

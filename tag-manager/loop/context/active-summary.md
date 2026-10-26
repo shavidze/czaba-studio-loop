@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-26T16:49:09.555Z)
+# Active loop summary (2026-10-26T17:13:46.975Z)
 
-- backlog.json 63 KB -> active view 27 KB
-- status: G_ROOT_GATE round 7
+- backlog.json 71 KB -> active view 29 KB
+- status: G_ROOT_GATE round 8
 - servers: `{"servers":"none or skipped"}`
-- last publication: 28ad3ab15dc10a9dd83a23d43994dfc71313cbf9 (rounds 7-7)
-- last root gate: round 7 published - commit 28ad3ab15dc10a9dd83a23d43994dfc71313cbf9 pushed
+- last publication: 4a2062d9258cb97e3d45866d553c58bdbdf65498 (rounds 8-8)
+- last root gate: round 8 published - commit 4a2062d9258cb97e3d45866d553c58bdbdf65498 pushed
 
-## Current items: TM-T0, TM-T0-CI, TM-B10, TM-B12
+## Current items: TM-B12, TM-B13
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -40,14 +40,22 @@
 - RR-R5-06 / info / open / Architecture signal: three different 'is this value empty' rules (file-row-display isNonEmptyFieldValue, TemplatePicker.tsx:130 val !== '' &
 - B-R6-01 / low / open / bpm and track read 0 from an INFO-only WAV with and without NUL (IBPM '120', ITRK '7'): node-taglib-sharp does not map IBPM/ITRK; STANDARD_F
 - C-R6-01 / low / open / Custom Number field in schema -> every save writes ITKN='0' (size 1) into files that never had it; pre-existing
-- RR-R6-01 / medium / open / getRiffInfoTags returns [] now; writeTagsToFile then skips all custom fields, calls save() and reports success (loud -> silent). Fix: throw 
-- RR-R6-02 / low / open / year/track/bpm getters do not strip NULs; no test covers ICRD/ITRK with \0
 - RR-R6-03 / low / open / riff-info-nul.test.ts uses double quotes vs single in src; tests/ not linted
 - RR-R6-04 / low / open / Pre-existing '// InfoTag read failed' / '// InfoTag write failed' comments (metadata.ts catch blocks) violate the no-comments rule
 - RR-R6-05 / info / open / Architecture signal: one RIFF value normalisation layer readRiffValue(tag, chunkId): string[] for standard and custom fields, plus a write-s
 - C-R6-02 / info / open / Observation: music-metadata decodes RIFF INFO UTF-8 Georgian as mojibake (also on the original ffmpeg file); ffprobe and ID3 COMM are correc
+- RR-R7-01 / medium / open / D-17 makes a save all-or-nothing: standard fields are no longer written when custom INFO fields cannot be; reviewer: no code fix, document i
+- RR-R7-02 / low / open / Per-field try { setValuesFromStrings } catch {} still swallows errors (e.g. malformed riffChunkId in a user schema); save reports success. F
+- RR-R7-03 / low / open / metadata.ts:200 '// InfoTag write failed for this field' violates the no-comments rule (pre-existing, re-indented in R7)
+- RR-R7-04 / low / open / metadata-write-guard.test.ts overrides file.tag with a bare Id3v2Tag: tied to node-taglib-sharp getter shape; may break on a library upgrade
+- RR-R7-05 / info / open / Architecture signal: split writeTagsToFile into pure planTagWrite(meta, schema) -> {standard, custom} and applyTagWrite(file, plan) that val
+- A-R7-01 / info / open / Fact (A R7 M2, C R7-2 M2/M2b): on library-opened sample.wav without LIST/INFO, getRiffInfoTags is already non-empty before the title workaro
+- B-R7-02 / low / open / schema.ts isValidField does not validate riffChunkId (type/length); a hand-edited schema.json reaches the write path with 'AB', '', 'ICAT5' 
+- B-R7-03 / low / open / A non-standard schema field without riffChunkId is silently skipped on write (metadata.ts 'if (field.riffChunkId)'): value given, save repor
 
 ## Other open items
+- TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
+- TM-T0-CI [in_progress] New .github/workflows/check.yml (ubuntu-24.04, Node 22, npm ci, ffmpeg+xvfb, check, build, xvfb playwright --retries=0)
 - TM-T1-MIG [todo] Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no aut
 - TM-T1-DUP [todo] Old schema.json custom field colliding with standard category: (a) custom field already using RIFF ID ICAT; (b) custom field with key 'categ
 - TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar

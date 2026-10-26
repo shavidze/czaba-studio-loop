@@ -1,0 +1,57 @@
+diff --git a/docs/recording-tag-contract.md b/docs/recording-tag-contract.md
+index d204c7f..d78e26e 100644
+--- a/docs/recording-tag-contract.md
++++ b/docs/recording-tag-contract.md
+@@ -67,6 +67,17 @@ importer-ის წესი: **sub-chunk-ის არარსებობა
+ - ჩასართავად: **Customize Fields** (Schema Editor) → „Hidden Standard Fields“ → `+ Category (UCS)` → **Done**.
+ - `ICAT` რეზერვირებულია: custom ველს `ICAT` RIFF ID-ით Schema Editor არ ქმნის (`RIFF ID "ICAT" is already in use`). ძველ `schema.json`-ში უკვე არსებული custom `ICAT` ველი ღია საკითხია (TM-T1-DUP).
+ 
++## ჩაწერის შეცდომები (all-or-nothing, D-17, D-18)
++
++- save არის **all-or-nothing**. თუ რომელიმე INFO ველის ჩაწერა ვერ ხერხდება, ფაილში **არაფერი** იწერება, სტანდარტული ველებიც (მაგ. title) არა. ამიტომ error toast ასეთ შემთხვევაში მოსალოდნელია.
++- შეცდომის ორი შეტყობინება:
++  - D-17: `RIFF INFO tag is not available; custom fields were not written`
++  - D-18: `RIFF INFO fields could not be written: <IDs>` (მაგ. `AB, ICAT5`, schema-ს რიგით)
++- single-file save-ში (Metadata panel) ისინი `Failed to write metadata: ` prefix-ით ჩანს.
++- batch save ასეთ ფაილს `failed`-ში წერს და დანარჩენ ფაილებს აგრძელებს.
++- `riffChunkId` ზუსტად **4 ბაიტი** (4 ASCII სიმბოლო) უნდა იყოს. Schema Editor ამას ამოწმებს, ხელით შეცვლილი `schema.json` კი არა. თუ schema-ში ასეთი ველია, Metadata panel-ის **ყოველი** save ჩავარდება, რადგან panel ყველა ველს აგზავნის. batch save მხოლოდ მაშინ ჩავარდება, თუ ეს ველი შეიცვალა (`modifiedFields`).
++- წაკითხვისას ასეთი ველი default მნიშვნელობას აჩვენებს (`''`, `[]` ან `0`).
++
+ ## შემოწმება
+ 
+ - `npm run test:main` — `tests/main/recording-tag-contract.test.ts`: raw `LIST/INFO` ბაიტები, `meta:read`, `data`/`bext`/`iXML` sha256, batch, ცარიელი მნიშვნელობა. ტესტი T1-1-ის ფაილს ინახავს `test-results/recording-tag-contract/contract.wav`-ში.
+diff --git a/src/main/ipc/metadata.ts b/src/main/ipc/metadata.ts
+index 95a45ea..cd18ea0 100644
+--- a/src/main/ipc/metadata.ts
++++ b/src/main/ipc/metadata.ts
+@@ -144,9 +144,7 @@ function readTagsFromFile(filePath: string, schema: FieldDefinition[]): WavMetad
+             }
+             continue;
+           }
+-        } catch {
+-          // InfoTag read failed, use default
+-        }
++        } catch {}
+       }
+ 
+       result[field.key] = getDefaultValue(field.type);
+@@ -192,14 +190,18 @@ function writeTagsToFile(
+       if (infoTags.length === 0) {
+         throw new Error('RIFF INFO tag is not available; custom fields were not written');
+       }
++      const failedIds: string[] = [];
+       for (const { riffChunkId, value } of customFields) {
+         try {
+           const strValues = Array.isArray(value) ? value.map(String) : [String(value)];
+           infoTags[0].setValuesFromStrings(riffChunkId, strValues);
+         } catch {
+-          // InfoTag write failed for this field
++          failedIds.push(String(riffChunkId));
+         }
+       }
++      if (failedIds.length > 0) {
++        throw new Error(`RIFF INFO fields could not be written: ${failedIds.join(', ')}`);
++      }
+     }
+ 
+     file.save();

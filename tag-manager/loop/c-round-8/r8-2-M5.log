@@ -1,0 +1,42 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r8-M5[39m
+
+ [32m✓[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 67[2mms[22m[39m
+ [32m✓[39m tests/main/metadata.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 55[2mms[22m[39m
+ [31m❯[39m tests/main/metadata-write-field-errors.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 53[2mms[22m[39m
+     [32m✓[39m (a) meta:write rejects with the failing ID and leaves the file bytes unchanged[32m 12[2mms[22m[39m
+[31m     [31m×[31m (b) a bad schema field whose value is undefined is not attempted and the save succeeds[39m[32m 12[2mms[22m[39m
+     [32m✓[39m (c1) meta:write-batch lists every file with a failing field and leaves all bytes unchanged[32m 4[2mms[22m[39m
+     [32m✓[39m (c2) meta:write-batch with the standard schema writes ICAT on both files[32m 13[2mms[22m[39m
+     [32m✓[39m (d) several failing fields are all reported in schema order and nothing is written[32m 2[2mms[22m[39m
+     [32m✓[39m (e) a valid custom ID still writes its value next to the standard fields[32m 3[2mms[22m[39m
+     [32m✓[39m (f) meta:read with a malformed ID returns the default for that field and keeps the others[32m 4[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-write-guard.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/main/riff-info-nul.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-field-errors.test.ts[2m > [22mTM-B13 / D-18: writeTagsToFile fails before save when a custom INFO field cannot be written[2m > [22m(b) a bad schema field whose value is undefined is not attempted and the save succeeds
+[31m[1mAssertionError[22m: promise rejected "Error: Failed to write metadata: RIFF INF…" instead of resolving[39m
+[36m [2m❯[22m tests/main/metadata-write-field-errors.test.ts:[2m54:87[22m[39m
+    [90m 52| [39m    [35mconst[39m filePath [33m=[39m [34mcopySampleWav[39m([32m"b-undefined.wav"[39m)[33m;[39m
+    [90m 53| [39m
+    [90m 54| [39m    await expect(getHandler("meta:write")({}, filePath, { category: "D…
+    [90m   | [39m                                                                                      [31m^[39m
+    [90m 55| [39m
+    [90m 56| [39m    const icat = parseListInfoSubChunks(readFileSync(filePath)).get("I…
+
+[31m[1mCaused by: Error[22m: Failed to write metadata: RIFF INFO fields could not be written: AB[39m
+[36m [2m❯[22m src/main/ipc/metadata.ts:[2m268:15[22m[39m
+[90m [2m❯[22m tests/main/metadata-write-field-errors.test.ts:[2m54:41[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m35 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 17:08:14
+[2m   Duration [22m 856ms[2m (transform 209ms, setup 96ms, import 989ms, tests 231ms, environment 1ms)[22m
+
+
+::error file=/tmp/c-r8-M5/tests/main/metadata-write-field-errors.test.ts,title=tests/main/metadata-write-field-errors.test.ts > TM-B13 / D-18%3A writeTagsToFile fails before save when a custom INFO field cannot be written > (b) a bad schema field whose value is undefined is not attempted and the save succeeds,line=54,column=87::AssertionError: promise rejected "Error: Failed to write metadata: RIFF INF…" instead of resolving%0A ❯ tests/main/metadata-write-field-errors.test.ts:54:87%0A%0ACaused by: Caused by: Error: Failed to write metadata: RIFF INFO fields could not be written: AB%0A ❯ src/main/ipc/metadata.ts:268:15%0A ❯ tests/main/metadata-write-field-errors.test.ts:54:41%0A%0A

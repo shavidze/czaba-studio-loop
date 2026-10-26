@@ -1,0 +1,34 @@
+--- /home/runner/czaba-project/czaba-tag-manager/src/main/ipc/metadata.ts	2026-10-26 17:00:52.507246247 +0000
++++ src/main/ipc/metadata.ts	2026-10-26 17:08:02.628463496 +0000
+@@ -181,6 +181,7 @@
+       }
+     }
+ 
++    const failedIds: string[] = [];
+     if (customFields.length > 0) {
+       let infoTags = getRiffInfoTags(file.tag);
+       if (infoTags.length === 0) {
+@@ -190,7 +191,6 @@
+       if (infoTags.length === 0) {
+         throw new Error('RIFF INFO tag is not available; custom fields were not written');
+       }
+-      const failedIds: string[] = [];
+       for (const { riffChunkId, value } of customFields) {
+         try {
+           const strValues = Array.isArray(value) ? value.map(String) : [String(value)];
+@@ -199,12 +199,12 @@
+           failedIds.push(String(riffChunkId));
+         }
+       }
+-      if (failedIds.length > 0) {
+-        throw new Error(`RIFF INFO fields could not be written: ${failedIds.join(', ')}`);
+-      }
+     }
+ 
+     file.save();
++    if (failedIds.length > 0) {
++      throw new Error(`RIFF INFO fields could not be written: ${failedIds.join(', ')}`);
++    }
+   } finally {
+     file.dispose();
+   }

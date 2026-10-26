@@ -1,0 +1,13 @@
+--- /home/runner/czaba-project/czaba-tag-manager/src/main/ipc/metadata.ts	2026-10-26 17:00:52.507246247 +0000
++++ src/main/ipc/metadata.ts	2026-10-26 17:08:12.299642623 +0000
+@@ -165,6 +165,10 @@
+   try {
+     const tag = file.tag as unknown as TagObject;
+     const customFields: Array<{ riffChunkId: string; value: FieldValue }> = [];
++    const preBad = schema.filter((f) => f.riffChunkId !== undefined && f.riffChunkId !== '' && Buffer.byteLength(f.riffChunkId) !== 4).map((f) => String(f.riffChunkId));
++    if (preBad.length > 0) {
++      throw new Error(`RIFF INFO fields could not be written: ${preBad.join(', ')}`);
++    }
+ 
+     for (const field of schema) {
+       const value = meta[field.key];
