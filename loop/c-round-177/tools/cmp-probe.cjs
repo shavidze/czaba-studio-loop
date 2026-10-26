@@ -1,0 +1,6 @@
+// C173: compares c-round-173/out/probe-ov-173.json with b-round-172/out/probe-ov.json (root/overlay/frame x,y,w,h)
+const a=require('../../b-round-172/out/probe-ov.json').res, c=require('../out/probe-ov-173.json').res; const out={worst:0,rows:{}};
+for (const W of ['1440','1280']) for (const s of ['empty_default','empty_max','empty_min','clip_default','clip_max_left','clip_max_right']) for (const e of ['root','overlay','frame']) { const A=a[W][s][e], C=c[W][s][e]; const d=Math.max(...['x','y','w','h'].map(k=>Math.abs(A[k]-C[k]))); out.worst=Math.max(out.worst,d); out.rows[`${W}.${s}.${e}`]={before:[A.x,A.y,A.w,A.h,A.radius],after:[C.x,C.y,C.w,C.h,C.radius],maxDelta:+d.toFixed(2)}; }
+out.fonts={1440:c['1440'].fonts,1280:c['1280'].fonts}; out.net=require('../out/probe-ov-173.json').net.map(l=>({label:l.label,errors:l.errors,hyd:l.hydration,forbidden:l.forbidden,auth:l.authHeaders,fontBad:l.fontResp.filter(r=>r.s!==200).length+l.fontFail.length}));
+require('fs').writeFileSync(__dirname+'/../out/cmp-probe-173.json',JSON.stringify(out,null,1)); console.log(out.worst, JSON.stringify(out.fonts), JSON.stringify(out.net));
+for (const [k,v] of Object.entries(out.rows)) if (/clip_max|empty_default/.test(k)) console.log(k, JSON.stringify(v));

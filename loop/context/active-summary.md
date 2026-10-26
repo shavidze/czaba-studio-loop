@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-25T23:09:42.970Z)
+# Active loop summary (2026-10-26T00:15:42.493Z)
 
-- backlog.json 1569 KB -> active view 217 KB
-- status: G_ROOT_GATE round 176
-- servers: `{"checkedUtc":"2026-10-25T22:48:42.8307813Z","round":176,"attempt":1,"store":200}`
-- last publication: ff3f710ecd00e8ee0d3c323252b10bb1a01db76f (rounds 176-176)
-- last root gate: round 176 published - commit ff3f710ecd00e8ee0d3c323252b10bb1a01db76f pushed
+- backlog.json 1580 KB -> active view 219 KB
+- status: G_ROOT_GATE round 177
+- servers: `{"checkedUtc":"2026-10-25T23:45:33.9839092Z","round":177,"attempt":1,"store":200}`
+- last publication: cc984b6f06ded21ec35593fc6dbb65353c153b1e (rounds 177-177)
+- last root gate: round 177 published - commit cc984b6f06ded21ec35593fc6dbb65353c153b1e pushed
 
 ## Current items: -
 
@@ -392,10 +392,13 @@
 - B-R174-ACCENT-EQ-BRAND / low / scheduled (not deferred): in Obsidian --color-accent = --color-brand = #c9a46a (app.css l.3936/3939), so brand-vs-accent state pairs render identically: valid vs blocked drop ghosts (Lane l.886/887, l.922/923), video vs audio drop hint (l.874), Solo on vs Mute on, Follow on vs paused; text/letters still differ; source evidence by B, C to confirm; owned by 5b-2 (on-states) and 5b-3 (ghosts/hints) with distinct targets / 
 - GATE174-S1-FIXED-CN / low / routed to round 175 A9 (ArrangementClip l.859/876-879 -> plain className) / 
 - GATE174-S2-DOC143-STATUS / low / routed to round 175 D1 (doc 143 Completed) / 
-- A-R175-DETAIL-SEP-ACCENT / low / scheduled round 176 B1 (not deferred): C round 175 measured hover brass rgb(129,106,71), 22860/22860 px (1440), 19660/19660 (1280), 3.58; A's code-reviewer rated Medium, C Low (visual only, one hover affordance); B inventory gap in round 175 §0.2, not A's failure; DXA7 pin removed in the same round / 
-- GATE175-S2-DXA7-OUT-OF-SCOPE-COUNTS / low / routed to round 176 L4(b): ExportDialog accent-brand=6 and Lane ghost string=2 counts dropped from DXA7; untouched later-stage sites covered by C AN-REVIEW/SOURCE-SCOPE / 
-- GATE175-S3-DOC144-STATUS / low / routed to round 176 D1 (doc 144 Completed) / 
+- GATE175-S2-DXA7-OUT-OF-SCOPE-COUNTS / low / routed to round 176 L4(b): ExportDialog accent-brand=6 and Lane ghost string=2 counts dropped from DXA7; untouched later-stage sites covered by C AN-REVIEW/SOURCE-SCOPE | round 176 done; reversed in part by gate-176 S1 -> round 177 G1 restores the two counts (ExportDialog K7 kept, Lane ghost later-stage). 2026-10-25 B round 176 -> 177 planning (D-29z142) / 
 - B-R175-INVENTORY-GAPS / info / B found unclassified brass sites in its own round-175 inventory: Lane l.723/731 video import, LibraryPreview l.332 Add (both -> 5b-3 under R35), DetailPanel l.752/861/1142 hover:text-brand and StudioWorkspace l.2197 exit link hover:text-brand (-> 5b-3), DetailPanel l.180 and Ruler l.233 playheads (K8), MarkerRow l.847 name field (K10); full table in round 176 §0.3 from a token-level scan; C INVENTORY-GREP row (per token, arrangement dir + studio-lab.tsx) added so a further gap cannot pass silently / 
+- GATE176-S1-KEPT-COUNT-LOCKS / low / scheduled round 177 G1 (not deferred: DUX-R-5's own test file, test-only, cheap): restore ExportDialog accent-brand=6 (K7 kept) and Lane 'border-accent bg-accent/20 text-accent'=2 (later-stage, moves in 5b-3) in affordance-colour-ui DXA7 / 
+- GATE176-S2-MIX-ON-STATE-CONSTANT / low / signal (proposal needs approval): shared ARRANGEMENT_MIX_ON_STATE constant for Lane/GroupHeader/Master on-state recipes; under GATE167-TOKEN-TEST-FRAGILITY and checkpoint Q1; not scheduled / 
+- C-R176-NOBRASS-LCD-GLYPH / info / method note: default-LCD subpixel fringes on M/S glyphs trip R-B>=45 (also on off buttons); NO-BRASS rows on glyph buttons run with --disable-lcd-text from round 177 / 
+- A-R176-MIXED-REST-BASE / info / confirmed by C: tailwind-merge drops bg-foreground/5 under bg-gradient-to-r; mixed half vs header 3.32 at rest (>= 3:1, at B's 3.3 floor); no change / 
+- C-R176-MIXED-VS-OFF-FILL / info / B ruling round 177: no fill floor; the foreground border (13.94) carries mixed vs off; vetoable by Saba / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
