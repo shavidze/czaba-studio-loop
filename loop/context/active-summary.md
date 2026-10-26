@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T03:48:11.545Z)
+# Active loop summary (2026-10-26T04:34:49.599Z)
 
-- backlog.json 1611 KB -> active view 225 KB
-- status: G_ROOT_GATE round 181
-- servers: `{"checkedUtc":"2026-10-26T03:29:22.6753581Z","round":181,"attempt":1,"store":200}`
-- last publication: f1782f87794e0ee46d25b2ea998d57f379a984a5 (rounds 181-181)
-- last root gate: round 181 published - commit f1782f87794e0ee46d25b2ea998d57f379a984a5 pushed
+- backlog.json 1620 KB -> active view 229 KB
+- status: G_ROOT_GATE round 182
+- servers: `{"checkedUtc":"2026-10-26T04:17:56.0764072Z","round":182,"attempt":1,"store":200}`
+- last publication: f22290fbb0af820435fe742f553d7b0628ee6801 (rounds 182-182)
+- last root gate: round 182 published - commit f22290fbb0af820435fe742f553d7b0628ee6801 pushed
 
 ## Current items: -
 
@@ -416,7 +416,16 @@
 - C-R180-BLOCKED-MOVE-ONE-GHOST / info / info only: a purely vertical Music->Video drag in the real browser renders 1 blocked ghost (no kept valid ghost; jsdom showed 2 after crossing a valid lane); behaviour unchanged; C inference unverified, not scheduled / 
 - A-R180-N1-SHELL-WRITE / info / process note: two N1 debug/fix passes used a python string-replace instead of Edit; final N1 content edited with Edit and fully re-verified by A and C (T180-TARGETED 249/249); no action / 
 - C-R180-HEAD-COPY-VITE-CACHE / info / process note: C's /tmp HEAD copy symlinked store/node_modules and its vite server re-optimised the shared node_modules/.vite cache; tracked tree unchanged (start == end hash), :5173 stayed 200; later HEAD copies should not share the .vite cache (vite --force with a separate cacheDir) or should re-use a recorded HEAD measurement / 
-- A-R180-DOC147-L123 / info / scheduled round 181 D1 (strike l.124, the stale doc-147 TODO 'C round 178 evidence; then Completed'; code-reviewer Low 7) / 
+- C-R181-PRESS-SCALE / info / process rule (B, D-29z147): box-size criteria exclude the pre-existing :active scale 0.98 (identical on HEAD 59d4bab); measure at rest unless a row says otherwise; applied in round 182 section 5 / 
+- C-R181-LINE-METRIC / info / acknowledged (metric difference: C counts direct-children centre-y rows 1/2, B's probe 2/3; unchanged vs HEAD) / 
+- C-R181-CORNER-HITTEST / info / acknowledged (expected rounded hit-test: a click 3 px inside the Play box corner misses; centre hits; listed as info in the round-181 task) / 
+- C-R181-TITLE-TOOLTIP-HEADLESS / info / open_tech_lead_manual (native title tooltip not observable headless; attribute verified) / 
+- A-R181-REVIEW-TS1-TITLE / low / deferred_low_polish (test title only; round 182 does not own transport-surface-ui.test.tsx) / transport-surface-ui TS1 title still says 'gives all 12 transport buttons the 8 px radius' while Play is rounded-full
+- A-R181-REVIEW-BYNAME-DUP / low / deferred_low_polish (nit; same file as A-R181-REVIEW-TS1-TITLE) / TS1 looks up byName('Play') twice (roundPlay and play)
+- A11Y-R181-PLAY-KEYSHORTCUTS / info / signal (not scheduled): aria-keyshortcuts='Space' on Play, like Zoom Z/X; changes the accessible description, same class as Q-R166-EXIT-NAME; for the polish pass or Saba / 
+- G181-3-FAKE-BEARER-403 / info / blocked: backend unavailable in cloud (open backend evidence) / 
+- M3-RATIONALE-VETOABLE / info / user-visible decision, may be vetoed (D-29z147): M3 spec reason (serif) dropped by V-2b-DISPLAY; move kept as approved; listed in feature-status.md vetoable list / 
+- M4-COOKIE-GRANT / info / planning note for M4: banner is app/components/common/CookieConsent.tsx (fixed bottom-0 z-50), mounted for every route in protected app/root.tsx l.161; M4 needs a grant decision on a Store-shared file + Store-page screenshot check; planned after the regression round / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

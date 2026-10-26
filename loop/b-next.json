@@ -1,13 +1,12 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 181 PASS (browserVerified=true, realVerified=true, 0 bugs; only the G181-3 fake-Bearer 403 sub-check BLOCKED, backend unavailable in cloud); root published round 181 as f1782f8 (= c-round-181 end tree, sha256sum -c OK), so M1 is done and A-R180-DOC147-L123 is closed. No Critical/High/Medium finding is open. regression-last is 2026-10-24 and today is 2026-10-26 (2 days), so the regression round is not due; next in the VISUAL-A order is M3 (user-approved 2026-10-21; its serif rationale was dropped by V-2b-DISPLAY, so it is kept as approved and marked vetoable). Much scoped work remains (M3, regression, M4, ROOT-RECON-GRID-HARNESS, STORE-REDESIGN, REVIEW-RECOMMENDATIONS, T12-ADVANCED, deferred Lows, final regression); nothing needs external input, so not COMPLETE and not BLOCKED.",
- "nextTask": "Round 182 (D-29z147) M3 from HEAD f1782f8 (clean; tree = c-round-181/end-tree-sha256.txt 1006 OK; frozen 1003; grants 3: ArrangementLibrary.tsx l.597, library-row-strings-ui.test.tsx (new LGS1), doc 149 (Completed); new 1: doc 150). L1 listbox cn('min-h-0 min-w-0 flex-1 overflow-y-auto p-1') -> 'min-h-0 min-w-0 flex-1 space-y-1 overflow-y-auto p-1' (4 px between rows; option class/padding/fills unchanged; no flex gap). Rulings R41 gap not padding, R42 gap not a hit target, R43 no margin after last row (vetoable). B probe on clean f1782f8: listbox 1440 (144,233) 144x431 / 1280 (144,271) 144x213 unchanged, option n y +4n, scrollHeight 637->669, visible 6/3 unchanged. Vitest base 17 files 328/328 -> 329/329; mutations m304-m307. C rows: T182-TARGETED, SCOPE-182, AN-REVIEW-182, MUT-182, GAP-M3, LAYOUT-M3, RV1-M3, SCROLL-M3, STATE-M3, BEHAVIOUR-M3 (click/double-click/Enter/drag/preview with real output tap; gap click info), M1-NEIGHBOUR, G182-3, PX-NET/REG-HYD. On PASS: M3 done (vetoable); next planning on/after 2026-10-27 = REGRESSION round (incl. M1 + M3), then M4.",
+ "reason": "C round 182 PASS (browserVerified=true, realVerified=true, 0 bugs; only the G182-3 fake-Bearer 403 sub-check BLOCKED, backend unavailable in cloud); root published round 182 as f22290f (sha256sum -c c-round-182/end-tree-sha256.txt OK, doc 150 = A end hash), so M3 is done (vetoable). No Critical/High/Medium finding is open. regression-last is 2026-10-24 and today is 2026-10-26 (2 days), so the regression round is not due; next in the VISUAL-A order is M4 (user-approved 2026-10-21; the last approved M). B reproduced it on a HEAD copy with a GA ID: the banner covers the Studio status line and shortcut hint at both viewports. Much scoped work remains (M4, regression, ROOT-RECON-GRID-HARNESS, STORE-REDESIGN, REVIEW-RECOMMENDATIONS, T12-ADVANCED, deferred Lows, final regression); nothing needs external input, so not COMPLETE and not BLOCKED.",
+ "nextTask": "Round 183 (D-29z148) M4 from HEAD f22290f (clean; 1007 tracked; frozen 1005; grants 2: CookieConsent.tsx L1-L3, doc 150 Completed; new 2: app/components/common/__tests__/CookieConsent.test.tsx CC1-CC5, doc 151). CookieConsent reads useLocation() and returns null while pathname.startsWith('/studio') (same predicate as protected root.tsx l.137, which stays untouched); Store banner JSX/classes/timer/handlers unchanged; consent default stays denied. Rulings R44 hide-not-move, R45 no Studio consent UI (asked on next Store page), R46 predicate (vetoable). Mutations m308-m311. C must run its own GA-env dev copies (VITE_GA4_MEASUREMENT_ID, CUR :5174 / HEAD :5175, own vite cacheDir, GA hosts aborted) because the banner never renders on :5173: rows T183-TARGETED, SCOPE-183, AN-REVIEW-183, MUT-183, BANNER-STUDIO-M4, BANNER-STORE-M4, NAV-M4, STUDIO-RV-M4, M3-NEIGHBOUR, G183-3, PX-NET/REG-HYD. On PASS: M4 done (vetoable); next planning on/after 2026-10-27 = REGRESSION round (incl. M1, M3, M4), then ROOT-RECON-GRID-HARNESS at the VISUAL-A exit.",
  "remaining": [
-  "M3(round 182 D-29z147: library listbox space-y-1, rows +4 px gap; vetoable M3-RATIONALE-VETOABLE; done on C PASS)",
+  "M4(round 183 D-29z148: CookieConsent.tsx renders null on pathname.startsWith('/studio'); vetoable R44/R45; done on C PASS with GA-env browser rows)",
   "ARCH-CHECKPOINT-DUX-R5-BOUNDARY(b-round-180-checkpoint-request.md requested_from_root; still unanswered at round 182 planning; non-blocking, fallback (c))",
-  "REGRESSION(due 2026-10-27; expected round 183; + M1, M3, REG-DUX5-PLAYHEAD-RESCAN, C-R167-METRONOME-UNDER-MUTE, e2e smoke)",
-  "M4(cookie banner must not cover /studio-lab panels; CookieConsent.tsx in protected root.tsx: grant decision; M4-COOKIE-GRANT)",
-  "ROOT-RECON-GRID-HARNESS(end of VISUAL-A)",
+  "REGRESSION(due 2026-10-27; expected round 184; + M1, M3, M4, REG-DUX5-PLAYHEAD-RESCAN, C-R167-METRONOME-UNDER-MUTE, STATE-M3 wording, e2e smoke)",
+  "ROOT-RECON-GRID-HARNESS(VISUAL-A exit after regression; re-raise b-round-180 checkpoint as one bounded ask)",
   "GATE175-S5-SCROLLBAR-JUMP(info, vetoable)",
   "STORE-REDESIGN(STORE-0 mock API, STORE-1 bugs/loader/header, STORE-2 tokens/type, STORE-3 hero, STORE-4 product/listening, STORE-5 loading text/docs; direction A decided; after VISUAL-A)",
   "REVIEW-RECOMMENDATIONS(ABL-R-7,DUX-R-3,ABL-R-12,DUX-R-1,ABL-R-13,DUX-R-4,ABL-R-10,DUX-R-6,ABL-R-9,DUX-R-2,ABL-R-1,ABL-R-2,ABL-R-3,ABL-R-4,ABL-R-8,ABL-R-11,ABL-R-14,ABL-R-15,ABL-R-18,DUX-R-7,DUX-R-8,DUX-R-9)",
@@ -38,7 +37,7 @@
   "RV-5",
   "ROOT-GLOBAL-TRANSITION-RULE(root signal, two copies)",
   "T12-ADVANCED",
-  "DEFERRED-LOW-POLISH(254 entries, open ones; +A11Y-GATE177-FOLLOW-PAUSED-NAME, GATE177-S4-BORDER-TRANSITION)",
+  "DEFERRED-LOW-POLISH(256 entries, open ones; +A-R182-REVIEW-MARGIN-REGEX, A-R182-REVIEW-EXCLUSIONS; C-R169-N1 scope widened to library options)",
   "PROD-SSR-NUL",
   "PROD-MP3-UNVERIFIED",
   "BACKEND-ONLY-EVIDENCE",
@@ -78,6 +77,8 @@
   "A-R181-REVIEW-TS1-TITLE(deferred_low_polish)",
   "A-R181-REVIEW-BYNAME-DUP(deferred_low_polish)",
   "A11Y-R181-PLAY-KEYSHORTCUTS(signal)",
-  "C-R181-TITLE-TOOLTIP-HEADLESS(Tech Lead manual)"
+  "C-R181-TITLE-TOOLTIP-HEADLESS(Tech Lead manual)",
+  "C-R182-N1-ARROW-SUBPIXEL-EDGE(info, pre-existing)",
+  "C-R182-R42-GAP-CLICK(info)"
  ]
 }

@@ -1,0 +1,85 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-26T04:17:56.0764072Z",
+  "round": 182,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "T182-TARGETED",
+  "SCOPE-182",
+  "AN-REVIEW-182",
+  "MUT-182",
+  "GAP-M3",
+  "LAYOUT-M3",
+  "RV1-M3",
+  "SCROLL-M3",
+  "STATE-M3",
+  "BEHAVIOUR-M3",
+  "M1-NEIGHBOUR",
+  "G182-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [
+  "G182-3 fake-Bearer 403: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "preExistingFindings": [
+  {
+   "id": "C-R182-N1-ARROW-SUBPIXEL-EDGE",
+   "severity": "info",
+   "steps": [
+    "/studio-lab 1440x900, fresh anonymous context, DPR 2",
+    "focus the first library row",
+    "press ArrowDown 6 times"
+   ],
+   "expected": "the focused row is fully inside the list rect (flush 0 px accepted)",
+   "actual": "after press 6 the row (demo-stem-bass) bottom is 0.25 px below the list bottom (scrollTop rounds to an integer: 65 instead of 65.25). HEAD f1782f8 shows the same -0.25 px at press 6 (scrollTop 41). At 1280 every press is inside on the current tree.",
+   "evidence": "c-round-182/out/c182-1440-2.json arrow.presses[5]; HEAD c-round-182/out/head182-1440-1.json arrow.presses[5]",
+   "note": "pre-existing and not caused by round 182; sub-pixel, not visible. Not a round-182 FAIL per the SCROLL-M3 row."
+  },
+  {
+   "id": "C-R169-N1-SEARCH-DOUBLE-RING (scope extension)",
+   "severity": "low",
+   "steps": [
+    "/studio-lab 1440x900",
+    "focus the library search field",
+    "press Tab until a library row has focus"
+   ],
+   "expected": "one focus ring (the inset ring-1 ring-brand) on the row box",
+   "actual": "the inset 1 px ring sits on the row box AND the global :focus-visible outline (app/styles/app.css l.379, 2px solid brand, offset 2px) draws a second rectangle 4 px outside the row, although the option has focus-visible:outline-none. HEAD f1782f8 is identical (4828 changed px in both trees). At HEAD the outer ring overlaps the neighbouring row; with M3 it now fills the 4 px gap exactly.",
+   "evidence": "c-round-182/shots/focusprobe/{cur-1440,head-1440}.png; c-round-182/out/c182-*.json and head182-*.json state.focus",
+   "note": "already deferred_low_polish as C-R169-N1 (scope 'all ring-2 controls'); B should add the library options (ring-1 inset) to its scope."
+  }
+ ],
+ "notes": [
+  "STATE-M3 row wording ('the inset focus ring equals the row box, no taller rectangle') is NOT literally met in the Tab-focus state: the global :focus-visible outline (app.css l.379, 2px, offset 2px) draws a second rectangle 4 px outside the row. Passed only because it is pre-existing and identical on HEAD f1782f8 (4828 changed px in both trees); the inset ring itself equals the row box. B should reword STATE-M3 or widen C-R169-N1 to the library options (same handling as the round-181 CC-M1 :active-scale note).",
+  "R42 info: a click and a double-click in the 4 px gap between rows 2 and 3 hit the listbox div (not an option): no selection change, no clip added; focus moves to BODY. At the same point HEAD hit the 'Slow rise' row (selected it; the double-click added a clip, then undone).",
+  "STATE-M3: hover and selected changed-pixel bboxes are [148,308,126,66] against row box [148,307.5,126,66.5] (half-pixel edge rounding at DPR 2); HEAD has the same pattern. Gap pixels above and below the selected row = list surface rgb(22,20,18) = rest.",
+  "LAYOUT-M3: at 1280 offViewport lists option title/context spans that are scroll-clipped inside the listbox; identical on HEAD, not an overflow.",
+  "ENV-FIRST-LOAD: c182-1440-1 (vite reoptimize: Invalid hook call + hydration warning) discarded and replaced once by c182-1440-2. The first HEAD focus probe timed out on cold load and was re-run once.",
+  "HEAD reference: clean f1782f8 git-archive copy in /tmp/head182 with its own vite cacheDir (/tmp/head182-vitecache) on :5174; its rest shots are 0 px different from C round-181 rest shots at both viewports. Copy and server removed afterwards.",
+  "PX-NET coverage: the 4 harness runs and G182-3 were fully instrumented (forbidden hosts, Authorization headers, hydration, pageerror); the two focusprobe sessions recorded pageerror only (0).",
+  "SCROLL-M3 thumb: not measured as a box; the scrollbar is the listbox's own 10 px gutter (scrollbar-gutter: stable, offsetWidth-clientWidth = 10), inside its rect by construction (inferred)."
+ ],
+ "ableton": {
+  "libraryRowSpacing": "not applicable (no Ableton claim; user-approved CZABA visual move M3)",
+  "libraryKeyboardSelection": "unchanged; regression only"
+ },
+ "evidence": "c-round-182.md, c-round-182/out, c-round-182/shots, c-round-182/tools"
+}
