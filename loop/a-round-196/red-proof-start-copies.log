@@ -1,0 +1,318 @@
+
+ RUN  v4.0.16 /tmp/r196-scratch
+
+ ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts (6 tests | 5 failed) 102ms
+     ✓ walker guard: the Studio scan covers every required file 6ms
+     × SFR1: app.css holds exactly one global :focus-visible rule and one pointer rule; utilities.css holds none 25ms
+     × SFR2: Studio sources carry no own focus recipe; the only focus:outline-none is the export dialog container 61ms
+     × SFR3: the inset variant is one constant and every K0 inset site carries it 1ms
+     × SFR4: one 14 px ivory thumb, one neutral track, all six range boxes h-4, no accent-foreground, Pan and Zoom without fill 5ms
+     × SFR5: the fill style is unchanged and the fill calc uses the 14 px thumb (half = 7 px) 1ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/focus-source.test.tsx [ app/lib/__tests__/focus-source.test.tsx ]
+Error: Failed to resolve import "~/lib/focus-source" from "app/lib/__tests__/focus-source.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/r196-scratch/app/lib/__tests__/focus-source.test.tsx:4:68
+  3  |  import { StrictMode } from "react";
+  4  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  5  |  import { installFocusSourceTracking, useFocusSourceAttribute } from "~/lib/focus-source";
+     |                                                                       ^
+  6  |  const MODIFIER_KEYS = [
+  7  |    "Shift",
+ ❯ TransformPluginContext._formatLog ../../home/runner/czaba-project/store/node_modules/vitest/node_modules/vite/dist/node/chunks/config.js:28998:43
+ ❯ TransformPluginContext.error ../../home/runner/czaba-project/store/node_modules/vitest/node_modules/vite/dist/node/chunks/config.js:28995:14
+ ❯ normalizeUrl ../../home/runner/czaba-project/store/node_modules/vitest/node_modules/vite/dist/node/chunks/config.js:27118:18
+ ❯ ../../home/runner/czaba-project/store/node_modules/vitest/node_modules/vite/dist/node/chunks/config.js:27176:32
+ ❯ TransformPluginContext.transform ../../home/runner/czaba-project/store/node_modules/vitest/node_modules/vite/dist/node/chunks/config.js:27144:4
+ ❯ EnvironmentPluginContainer.transform ../../home/runner/czaba-project/store/node_modules/vitest/node_modules/vite/dist/node/chunks/config.js:28796:14
+ ❯ loadAndTransform ../../home/runner/czaba-project/store/node_modules/vitest/node_modules/vite/dist/node/chunks/config.js:22669:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > SFR1: app.css holds exactly one global :focus-visible rule and one pointer rule; utilities.css holds none
+AssertionError: expected [ ':focus-visible' ] to strictly equal [ ':focus-visible', …(1) ]
+
+- Expected
++ Received
+
+  [
+    ":focus-visible",
+-   "html[data-focus-source=\"pointer\"] :focus-visible",
+  ]
+
+ ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts:185:53
+    183|     const rules = topLevelCssRules(appCss);
+    184|     const focusRules = rules.filter((rule) => rule.selector.includes('…
+    185|     expect(focusRules.map((rule) => rule.selector)).toStrictEqual([
+       |                                                     ^
+    186|       GLOBAL_RULE_SELECTOR,
+    187|       POINTER_RULE_SELECTOR,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > SFR2: Studio sources carry no own focus recipe; the only focus:outline-none is the export dialog container
+AssertionError: expected [ …(174) ] to strictly equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-warning",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementGridMenu.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementGridMenu.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementGridMenu.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-1",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-1",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-1",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLibrary.tsx: focus:border-brand",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-1",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-inset",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:bg-brand",
++   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementLoopBrace.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementLoopBrace.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementLoopBrace.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementMarkerMenu.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementMarkerMenu.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementMarkerMenu.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-offset-1",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-offset-surface",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-1",
++   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementMaster.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementMaster.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementMaster.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementMaster.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementMaster.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementMaster.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementOverview.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementOverview.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementOverview.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementRuler.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementRuler.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementRuler.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:ring-1",
++   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementTransport.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementTransport.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementTransport.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:ring-brand",
++   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:outline-none",
++   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:ring-2",
++   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:ring-brand",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:outline-none",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-2",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-brand",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:outline-none",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-2",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-brand",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:outline-none",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-2",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-brand",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:outline-none",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-2",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-brand",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:outline-none",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-2",
++   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-brand",
++   "components/arrangement/studio-fader.ts: focus-visible:outline-2!",
++   "components/arrangement/studio-fader.ts: focus-visible:outline-offset-2!",
++   "components/arrangement/studio-fader.ts: focus-visible:outline-brand!",
++   "components/arrangement/studio-fader.ts: focus-visible:outline-none!",
++   "components/arrangement/studio-fader.ts: peer-focus-visible:before:outline-2!",
++   "components/arrangement/studio-fader.ts: peer-focus-visible:before:outline-offset-2!",
++   "components/arrangement/studio-fader.ts: peer-focus-visible:before:outline-brand!",
++ ]
+
+ ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts:214:23
+    212|       }
+    213|     }
+    214|     expect(offenders).toStrictEqual([]);
+       |                       ^
+    215|     expect(outlineNoneCount).toBe(1);
+    216|     expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > SFR3: the inset variant is one constant and every K0 inset site carries it
+Error: ENOENT: no such file or directory, open '/tmp/r196-scratch/app/components/arrangement/studio-focus.ts'
+ ❯ readAppSource app/lib/arrangement/__tests__/studio-focus-ring.test.ts:83:10
+     81| 
+     82| function readAppSource(path: string): string {
+     83|   return readFileSync(resolve(APP_ROOT, path), 'utf8');
+       |          ^
+     84| }
+     85| 
+ ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts:225:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > SFR4: one 14 px ivory thumb, one neutral track, all six range boxes h-4, no accent-foreground, Pan and Zoom without fill
+AssertionError: '[&::-webkit-slider-thumb]:size-3.5': expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts:262:53
+    260|       "'[&::-moz-range-track]:bg-outline-hover'",
+    261|     ]) {
+    262|       expect(countOccurrences(fader, token), token).toBe(1);
+       |                                                     ^
+    263|     }
+    264|     for (const retired of ['size-3.75', 'accent-foreground', 'STUDIO_F…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > SFR5: the fill style is unchanged and the fill calc uses the 14 px thumb (half = 7 px)
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts:295:48
+    293|     const fader = readAppSource(FADER_PATH);
+    294|     expect(countOccurrences(fader, FILL_STYLE_SOURCE)).toBe(1);
+    295|     expect(countOccurrences(fader, FILL_CALC)).toBe(1);
+       |                                                ^
+    296|     expect(countOccurrences(fader, "'[&::-webkit-slider-thumb]:-mt-1.2…
+    297|     expect(fader).not.toContain('*1.875');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  5 failed | 1 passed (6)
+   Start at  20:28:53
+   Duration  1.54s (transform 129ms, setup 0ms, import 157ms, tests 102ms, environment 989ms)
+
+
+::error file=/tmp/r196-scratch/app/lib/arrangement/__tests__/studio-focus-ring.test.ts,title=app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161%2C R83–R87) > SFR1%3A app.css holds exactly one global %3Afocus-visible rule and one pointer rule; utilities.css holds none,line=185,column=53::AssertionError: expected [ ':focus-visible' ] to strictly equal [ ':focus-visible', …(1) ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    ":focus-visible",%0A-   "html[data-focus-source=\"pointer\"] :focus-visible",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts:185:53%0A%0A
+
+::error file=/tmp/r196-scratch/app/lib/arrangement/__tests__/studio-focus-ring.test.ts,title=app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161%2C R83–R87) > SFR2%3A Studio sources carry no own focus recipe; the only focus%3Aoutline-none is the export dialog container,line=214,column=23::AssertionError: expected [ …(174) ] to strictly equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-warning",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementDetailPanel.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementExportDialog.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementGridMenu.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementGridMenu.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementGridMenu.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-1",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementGroupHeader.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementLane.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-1",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-1",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus:border-brand",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-1",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-inset",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:bg-brand",%0A+   "components/arrangement/ArrangementLibrary.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLibraryPreview.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementLoopBrace.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementLoopBrace.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementLoopBrace.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementMarkerMenu.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementMarkerMenu.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementMarkerMenu.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-offset-1",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-offset-surface",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-1",%0A+   "components/arrangement/ArrangementMarkerRow.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementMaster.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementMaster.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementMaster.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementMaster.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementMaster.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementMaster.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementOverview.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementOverview.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementOverview.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementRuler.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementRuler.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementRuler.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:ring-1",%0A+   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementTempoRow.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementTransport.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementTransport.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementTransport.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:outline-none",%0A+   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:ring-2",%0A+   "components/arrangement/ArrangementVideoDock.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:outline-none",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-2",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:outline-none",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-2",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:outline-none",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-2",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:outline-none",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-2",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:outline-none",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-2",%0A+   "components/arrangement/StudioWorkspace.tsx: focus-visible:ring-brand",%0A+   "components/arrangement/studio-fader.ts: focus-visible:outline-2!",%0A+   "components/arrangement/studio-fader.ts: focus-visible:outline-offset-2!",%0A+   "components/arrangement/studio-fader.ts: focus-visible:outline-brand!",%0A+   "components/arrangement/studio-fader.ts: focus-visible:outline-none!",%0A+   "components/arrangement/studio-fader.ts: peer-focus-visible:before:outline-2!",%0A+   "components/arrangement/studio-fader.ts: peer-focus-visible:before:outline-offset-2!",%0A+   "components/arrangement/studio-fader.ts: peer-focus-visible:before:outline-brand!",%0A+ ]%0A%0A ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts:214:23%0A%0A
+
+::error file=/tmp/r196-scratch/app/lib/arrangement/__tests__/studio-focus-ring.test.ts,title=app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161%2C R83–R87) > SFR3%3A the inset variant is one constant and every K0 inset site carries it,line=83,column=10::Error: ENOENT: no such file or directory, open '/tmp/r196-scratch/app/components/arrangement/studio-focus.ts'%0A ❯ readAppSource app/lib/arrangement/__tests__/studio-focus-ring.test.ts:83:10%0A ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts:225:25%0A%0A⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯%0ASerialized Error: { errno: -2, code: 'ENOENT', syscall: 'open', path: '/tmp/r196-scratch/app/components/arrangement/studio-focus.ts' }%0A
+
+::error file=/tmp/r196-scratch/app/lib/arrangement/__tests__/studio-focus-ring.test.ts,title=app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161%2C R83–R87) > SFR4%3A one 14 px ivory thumb%2C one neutral track%2C all six range boxes h-4%2C no accent-foreground%2C Pan and Zoom without fill,line=262,column=53::AssertionError: '[&::-webkit-slider-thumb]:size-3.5': expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts:262:53%0A%0A
+
+::error file=/tmp/r196-scratch/app/lib/arrangement/__tests__/studio-focus-ring.test.ts,title=app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161%2C R83–R87) > SFR5%3A the fill style is unchanged and the fill calc uses the 14 px thumb (half = 7 px),line=295,column=48::AssertionError: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/studio-focus-ring.test.ts:295:48%0A%0A

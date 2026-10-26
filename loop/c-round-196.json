@@ -1,0 +1,114 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-26T20:56:50.2711857Z",
+  "round": 196,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R196-01",
+   "severity": "medium",
+   "steps": [
+    "Open /studio-lab (fresh context, 1440x900 or 1280x720, DPR 2)",
+    "Click + in the Markers strip to add Marker 1",
+    "Tab until the marker flag Marker 1 is focused (about stop 68 in the rich scene)"
+   ],
+   "expected": "Ring follows the control shape and is >= 3:1 against the pixel just inside it (inset site), per RING-KEY-196",
+   "actual": "Square 1px inset outline drawn over the flag pill rounded brass border and next to the brass stem: ring vs inside 1.45:1 at top and bottom, 1.45 vs stem on the left (outward 5.43/4.73); the ring fuses with the pill border",
+   "evidence": "c-round-196/out/rich/tree-1440/f68.png, u68.png; c-round-196/shots/marker-ref-vs-tree.png; c-round-196/out/rich/tree-1440/result.json row 68"
+  },
+  {
+   "id": "C-R196-02",
+   "severity": "medium",
+   "steps": [
+    "1280x720 /studio-lab",
+    "Drop a library clip on Music, group Stems+SFX (Ctrl+G), open the detail panel and select the clip",
+    "Tab through the lanes to the Video row"
+   ],
+   "expected": "Focused controls are visible (WCAG 2.4.11)",
+   "actual": "Video row fold/name/Your own video/M/S/Volume are focused under the sticky tempo/markers strip; ring fully hidden (0 changed px). Same in ref 7339cd5, so pre-existing and not caused by round 196",
+   "evidence": "c-round-196/out/rich/tree-1280 and ref-1280 result.json i69-74; c-round-196/shots/r1280-video-row.png"
+  },
+  {
+   "id": "C-R196-03",
+   "severity": "low",
+   "steps": [
+    "Open / at 1440/1280/375",
+    "Keyboard-focus the first product card link"
+   ],
+   "expected": "Visible focus ring",
+   "actual": "Computed outline exists but it is clipped; no ring visible in tree or ref (pre-existing; input for SABA-B-4 stage 2)",
+   "evidence": "c-round-196/shots/store-home-card-ref-vs-tree-1440.png; c-round-196/out/store/*/result.json"
+  },
+  {
+   "id": "C-R196-04",
+   "severity": "low",
+   "steps": [
+    "Keyboard-focus any Studio control",
+    "Read getComputedStyle(el).outlineWidth"
+   ],
+   "expected": "1.5px (R83)",
+   "actual": "1px computed and painted (2 device px at DPR2). Chromium 143 floors 1.5px to 1px and 2.5px to 2px for outline and border; the served CSS says 1.5px. Engine limit; B decides between accepting 1px and R83 = 2px",
+   "evidence": "c-round-196/out/outline-width-engine.json"
+  },
+  {
+   "id": "C-R196-05",
+   "severity": "low",
+   "steps": [
+    "Tab to the library separator"
+   ],
+   "expected": "Focus is shown as a ring, not as a fill (R87)",
+   "actual": "The inset ring fills the 4px element and reads as a solid brass bar, like the old bg-brand; outward contrast 5.59/4.88. Vetoable",
+   "evidence": "c-round-196/out/ringkey/tree-1440/f25.png; c-round-196/out/extra/tree-1440/result.json"
+  }
+ ],
+ "passed": [
+  "INVENTORY-196",
+  "POINTER-196",
+  "THUMB-196",
+  "SABA-SHOT-196",
+  "REST-196",
+  "FUNC-196",
+  "STORE-FOCUS-196",
+  "G196-3",
+  "SCOPE-196",
+  "T-RUN-196",
+  "AN-REVIEW-196",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [
+  "RING-KEY-196"
+ ],
+ "blocked": [],
+ "notRun": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "abletonParity": "არ ეხება",
+ "measurements": {
+  "outlineComputed": "1px (served 1.5px)",
+  "ringContrastRange": "3.69-5.59 except marker flag 1.45",
+  "thumbs": "6/6 14x14 #ECE6DA at rest/hover/pressed, both viewports",
+  "fillDelta": "0/-0.5/0 px",
+  "sabaRing": "54x22 = input 48x16 + 3/side; thumb gap 3.0px",
+  "restOutsideMask": {
+   "1280": 0,
+   "1440": 0
+  },
+  "tabOrderEqualRef": true,
+  "pointerRingPx": 0
+ },
+ "refServer": "git archive 7339cd5 on :5174 with its own cacheDir (stopped)"
+}

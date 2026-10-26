@@ -1,0 +1,85 @@
+
+ RUN  v4.0.16 /home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-196/trun/m5
+
+ ✓ app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > walker guard: the Studio scan covers every required file 5ms
+ ✓ app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > SFR1: app.css holds exactly one global :focus-visible rule and one pointer rule; utilities.css holds none 9ms
+ ✓ app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > SFR2: Studio sources carry no own focus recipe; the only focus:outline-none is the export dialog container 31ms
+ ✓ app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > SFR3: the inset variant is one constant and every K0 inset site carries it 21ms
+ ✓ app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > SFR4: one 14 px ivory thumb, one neutral track, all six range boxes h-4, no accent-foreground, Pan and Zoom without fill 6ms
+ ✓ app/lib/arrangement/__tests__/studio-focus-ring.test.ts > SABA-B-4 stage 1 — one Studio focus ring (D-29z161, R83–R87) > SFR5: the fill style is unchanged and the fill calc uses the 14 px thumb (half = 7 px) 0ms
+ ✓ app/lib/__tests__/focus-source.test.tsx > useFocusSourceAttribute (SABA-B-4 R85) > FS-a: a pointerdown sets the source to pointer 24ms
+ ✓ app/lib/__tests__/focus-source.test.tsx > useFocusSourceAttribute (SABA-B-4 R85) > FS-b: Tab, ArrowUp, Space and a letter set the source to keyboard 4ms
+ ✓ app/lib/__tests__/focus-source.test.tsx > useFocusSourceAttribute (SABA-B-4 R85) > FS-c: a modifier key pressed alone leaves the source unchanged 4ms
+ × app/lib/__tests__/focus-source.test.tsx > useFocusSourceAttribute (SABA-B-4 R85) > FS-d: unmount removes the attribute and later events set nothing 7ms
+   → expected true to be false // Object.is equality
+ ✓ app/lib/__tests__/focus-source.test.tsx > useFocusSourceAttribute (SABA-B-4 R85) > FS-e: a target handler that stops propagation does not block the update (capture phase) 4ms
+ × app/lib/__tests__/focus-source.test.tsx > useFocusSourceAttribute (SABA-B-4 R85) > FS-f: a StrictMode mount leaves exactly one active listener pair and unmount removes it 3ms
+   → expected true to be false // Object.is equality
+ × app/lib/__tests__/focus-source.test.tsx > useFocusSourceAttribute (SABA-B-4 R85) > FS-g: the pure installer returns a dispose that removes both listeners and the attribute 1ms
+   → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/focus-source.test.tsx > useFocusSourceAttribute (SABA-B-4 R85) > FS-d: unmount removes the attribute and later events set nothing
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ app/lib/__tests__/focus-source.test.tsx:80:72
+     78|     expect(focusSourceValue()).toBe('pointer');
+     79|     view.unmount();
+     80|     expect(document.documentElement.hasAttribute('data-focus-source'))…
+       |                                                                        ^
+     81|     fireEvent.pointerDown(document.body);
+     82|     fireEvent.keyDown(document.body, { key: 'Tab' });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  app/lib/__tests__/focus-source.test.tsx > useFocusSourceAttribute (SABA-B-4 R85) > FS-f: a StrictMode mount leaves exactly one active listener pair and unmount removes it
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ app/lib/__tests__/focus-source.test.tsx:120:72
+    118|       expect(tracked(addSpy, type) - tracked(removeSpy, type), `${type…
+    119|     }
+    120|     expect(document.documentElement.hasAttribute('data-focus-source'))…
+       |                                                                        ^
+    121|   });
+    122| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  app/lib/__tests__/focus-source.test.tsx > useFocusSourceAttribute (SABA-B-4 R85) > FS-g: the pure installer returns a dispose that removes both listeners and the attribute
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ app/lib/__tests__/focus-source.test.tsx:128:72
+    126|     expect(focusSourceValue()).toBe('keyboard');
+    127|     dispose();
+    128|     expect(document.documentElement.hasAttribute('data-focus-source'))…
+       |                                                                        ^
+    129|     fireEvent.pointerDown(document.body);
+    130|     expect(document.documentElement.hasAttribute('data-focus-source'))…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 10 passed (13)
+   Start at  20:59:26
+   Duration  761ms (transform 85ms, setup 0ms, import 214ms, tests 125ms, environment 433ms)
+

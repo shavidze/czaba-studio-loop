@@ -1,9 +1,9 @@
 {
- "version": 181,
- "updated": "2026-10-26 (B round 195 -> 196 planning, D-29z161)",
+ "version": 182,
+ "updated": "2026-10-26 B round 196 -> 197 planning (D-29z162)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 196: D-29z161 - SABA-B-4 stage 1 (Studio): one global :focus-visible rule 1.5px brass/80% offset 2 (R83), inset variant (R84), focus-source pointer/keyboard attribute so no ring after a mouse press (R85), one 14px #ECE6DA slider thumb + neutral Pan/Zoom track (R86), no fill/border focus feedback (R87); 18 Studio files + app.css/utilities.css + 14 tests + 5 new; baseline HEAD 7339cd5 clean)",
+ "current_task": "round 197 SABA-B-4 stage-1 fix-up (D-29z162)",
  "advisor_used_by_B": "2026-10-26 round 189 -> 190 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: round-179-style fix-up baseline on the uncommitted round-189 tree (frozen 1016 incl. doc 155 at cdf011f9, grants 3), A must reproduce C's fresh-mode CLS and bisect before fixing (cause stays a hypothesis until measured), A's live proof measures CLS at 375/1280/1440 (round-189 lesson), no CLS case in jsdom T1, C-R189-02 taken now as R67 (Tab ends loader without preventDefault, vetoable), C-R189-I5 added to the regression harness rules, regression stays next on/after 2026-10-27",
  "baseline": {
   "tsc_errors": 0,
@@ -9932,18 +9932,34 @@
    "round": 196,
    "task": "current-task.md",
    "decision": "D-29z161",
-   "status": "dispatched",
+   "status": "C FAIL (RING-KEY-196, C-R196-01); gate skipped; tree kept uncommitted",
    "items": [
     "K0 focus-site inventory a-round-196/k0-sites.tsv (stop only for a site outside the 18 Studio grants)",
     "K1 app.css R83 global rule + R85 pointer rule; utilities.css duplicate deleted",
     "K2 Studio focus-recipe sweep (inset -> STUDIO_FOCUS_RING_INSET_CLASS)",
-    "K3 R86 one thumb/track recipe, six range inputs h-3.5, peer-ring constants deleted",
+    "K3 R86 one thumb/track recipe, six range inputs h-4, peer-ring constants deleted",
     "K4 R85 focus-source.ts mounted in StudioWorkspace",
     "T studio-focus-ring SFR1-5, focus-source FS-a..f",
     "D doc 159"
    ],
    "note": "baseline HEAD 7339cd5 clean; grants 34 (b-round-195-r196-grants.txt) + 5 new; frozen 990 OK from store root; start copies b-round-195/r196-granted-start/",
-   "added": "2026-10-26 B round 195 -> 196 planning (D-29z161)"
+   "added": "2026-10-26 B round 195 -> 196 planning (D-29z161)",
+   "correction": "items text corrected: six range inputs are h-4 (as specified in the task), not h-3.5"
+  },
+  {
+   "round": 197,
+   "task": "current-task.md",
+   "decision": "D-29z162",
+   "status": "dispatched",
+   "items": [
+    "R88 marker flag ring (C-R196-01)",
+    "R89 scroll-padding-top focus reveal (C-R196-02) with stop rule",
+    "R90 width ruling (C-R196-04)",
+    "SFR6, focus-reveal-ui FR-a..c",
+    "doc 159 Round-197 section"
+   ],
+   "note": "baseline HEAD 7339cd5 + uncommitted round-196 tree (31 M + 5 ??); frozen 1023 OK; grants 6 (b-round-196-r197-grants.txt) + 1 new; start copies b-round-196/r197-granted-start/; on PASS root publishes 196+197 together",
+   "added": "2026-10-26 B round 196 -> 197 planning (D-29z162)"
   }
  ],
  "post_current_stage_queue": [
@@ -13662,6 +13678,48 @@
    "path": "app/components/arrangement/studio-focus.ts",
    "scope": "new file",
    "justification": "SABA-B-4 stage 1"
+  },
+  {
+   "round": 197,
+   "decision": "D-29z162",
+   "path": "app/components/arrangement/ArrangementMarkerRow.tsx",
+   "scope": "SABA-B-4 stage-1 fix-up per current-task.md section 2 (R88 flag / R89 scroller only; tests: SFR6, inset count, flag token swaps; doc: Round-197 section)",
+   "justification": "C-R196-01/02 Medium; start copy b-round-196/r197-granted-start/"
+  },
+  {
+   "round": 197,
+   "decision": "D-29z162",
+   "path": "app/components/arrangement/StudioWorkspace.tsx",
+   "scope": "SABA-B-4 stage-1 fix-up per current-task.md section 2 (R88 flag / R89 scroller only; tests: SFR6, inset count, flag token swaps; doc: Round-197 section)",
+   "justification": "C-R196-01/02 Medium; start copy b-round-196/r197-granted-start/"
+  },
+  {
+   "round": 197,
+   "decision": "D-29z162",
+   "path": "app/components/arrangement/studio-focus.ts",
+   "scope": "SABA-B-4 stage-1 fix-up per current-task.md section 2 (R88 flag / R89 scroller only; tests: SFR6, inset count, flag token swaps; doc: Round-197 section)",
+   "justification": "C-R196-01/02 Medium; start copy b-round-196/r197-granted-start/"
+  },
+  {
+   "round": 197,
+   "decision": "D-29z162",
+   "path": "app/lib/arrangement/__tests__/studio-focus-ring.test.ts",
+   "scope": "SABA-B-4 stage-1 fix-up per current-task.md section 2 (R88 flag / R89 scroller only; tests: SFR6, inset count, flag token swaps; doc: Round-197 section)",
+   "justification": "C-R196-01/02 Medium; start copy b-round-196/r197-granted-start/"
+  },
+  {
+   "round": 197,
+   "decision": "D-29z162",
+   "path": "app/lib/arrangement/__tests__/markers-ui.test.tsx",
+   "scope": "SABA-B-4 stage-1 fix-up per current-task.md section 2 (R88 flag / R89 scroller only; tests: SFR6, inset count, flag token swaps; doc: Round-197 section)",
+   "justification": "C-R196-01/02 Medium; start copy b-round-196/r197-granted-start/"
+  },
+  {
+   "round": 197,
+   "decision": "D-29z162",
+   "path": "docs/implementation/2026/quarter-IV/159-saba-b-4-studio-focus-ring.md",
+   "scope": "SABA-B-4 stage-1 fix-up per current-task.md section 2 (R88 flag / R89 scroller only; tests: SFR6, inset count, flag token swaps; doc: Round-197 section)",
+   "justification": "C-R196-01/02 Medium; start copy b-round-196/r197-granted-start/"
   }
  ],
  "baseline_tree_at_round4": "HEAD cc1e531, working tree clean; the 4 protected files are committed in cc1e531 with baseline sha256 unchanged",
@@ -21538,7 +21596,7 @@
   {
    "id": "SABA-B-4",
    "severity": "medium",
-   "status": "stage 1 (Studio) dispatched round 196 (D-29z161); stage 2 (store pages) after the regression round",
+   "status": "stage 1 (Studio) implemented round 196, C FAIL (RING-KEY-196 on C-R196-01); fix-up round 197 (D-29z162); stage 2 (store pages) after the regression round",
    "title": "focus ring and slider thumbs feel heavy: focused Pan shows a thick brass pill with a wide gap; Pan thumb large pure white vs cream Volume thumb; widened by Saba to every focusable control site-wide",
    "source": "Saba 2026-10-26 (policy.local.md SABA-B-4 + scope widened); user-review/img/saba-2026-10-26-pan-focus-ring.png",
    "cause": "two unlayered global :focus-visible rules (app.css:379, base/utilities.css:79, 2px brand offset 2) beat Tailwind layered focus-visible:outline-none, so ~50 Studio controls draw outline + ring-2 (double band); Pan ring is the reset button ::before pill (studio-fader.ts STUDIO_FADER_FOCUS_PEER_RING_CLASS); Pan/Zoom native accent-foreground thumbs; Chromium :focus-visible on mouse press for range/select",
@@ -21561,7 +21619,25 @@
     "R87": "no fill/border/shadow focus feedback (separator bg-brand, search border-brand, clip-gain ring-warning, marker ring-offset removed); ExportDialog container focus:outline-none kept as listed exception; library search also drops focus:outline-none (K2)"
    },
    "vetoable": "R83-R87 recorded for Saba",
-   "added": "2026-10-26 B round 195 -> 196 planning (D-29z161)"
+   "added": "2026-10-26 B round 195 -> 196 planning (D-29z161)",
+   "stage1_result_r196": {
+    "c": "c-round-196.json taskStatus FAIL, browserVerified true, realVerified true; 13 rows passed; RING-KEY-196 failed",
+    "gate": "gates/gate-round-196.json skipped (C FAIL); round-196 tree uncommitted on 7339cd5",
+    "added": "2026-10-26 B round 196 -> 197 planning (D-29z162)"
+   },
+   "stage1_fixup_d29z162": {
+    "round": 197,
+    "items": [
+     "R88 marker-flag ring off the pill border and stem (C-R196-01)",
+     "R89 scroller scroll-padding-top = chrome height (C-R196-02), stop rule if probe fails",
+     "R90 ruling: 1.5px declared, Chromium paints 1px (C-R196-04 closed as ruled)"
+    ],
+    "added": "2026-10-26 B round 196 -> 197 planning (D-29z162)"
+   },
+   "stage2_inputs": [
+    "C-R196-03 home product card ring clipped (pre-existing)",
+    "A-R196 reviewer Signal 4: move R85 mount out of StudioWorkspace at the store-mount decision"
+   ]
   },
   {
    "id": "A-R195-SIGNALS",
@@ -21577,6 +21653,43 @@
    "status": "root_note",
    "title": "docs/technical/studio-real-workspace/agent-workflow.md lacks the policy sections from SABA-B-3 onward (Retrospective, SABA-B-4, three 2026-10-26 queue entries) that are present in policy.local.md; B follows the policy text; root may sync the file",
    "added": "2026-10-26 B round 195 -> 196 planning (D-29z161)"
+  },
+  {
+   "id": "C-R196-01",
+   "severity": "medium",
+   "status": "open; fix-up round 197 (R88)",
+   "title": "marker flag inset focus ring fused with the selected pill brass border and stem: 1.45:1",
+   "evidence": "c-round-196/out/rich/tree-1440/f68.png, u68.png; c-round-196/shots/marker-ref-vs-tree.png",
+   "repro": "/studio-lab -> + in Markers -> Tab to Marker 1 flag",
+   "origin": "C",
+   "added": "2026-10-26 B round 196 -> 197 planning (D-29z162)"
+  },
+  {
+   "id": "C-R196-02",
+   "severity": "medium",
+   "status": "open; fix-up round 197 (R89) with stop rule; pre-existing (also in 7339cd5)",
+   "title": "keyboard-focused Video row controls hidden under the sticky timeline chrome at 1280x720 (detail panel open, group present): 0 ring px",
+   "evidence": "c-round-196/out/rich/tree-1280 and ref-1280 result.json i69-74; c-round-196/shots/r1280-video-row.png",
+   "origin": "C",
+   "added": "2026-10-26 B round 196 -> 197 planning (D-29z162)"
+  },
+  {
+   "id": "C-R196-03",
+   "severity": "low",
+   "status": "input to SABA-B-4 stage 2 (store pages); not a stand-alone deferred Low",
+   "title": "home product card link focus ring clipped (tree and ref)",
+   "evidence": "c-round-196/shots/store-home-card-ref-vs-tree-1440.png",
+   "origin": "C",
+   "added": "2026-10-26 B round 196 -> 197 planning (D-29z162)"
+  },
+  {
+   "id": "C-R196-04",
+   "severity": "low",
+   "status": "closed_ruled (R90, D-29z162): keep declared 1.5px; Chromium 143 computes/paints 1px; acceptance computed 1px or 1.5px",
+   "title": "outline 1.5px floors to 1px in Chromium",
+   "evidence": "c-round-196/out/outline-width-engine.json; a-round-196/outline-width-probe.json",
+   "origin": "C+A",
+   "added": "2026-10-26 B round 196 -> 197 planning (D-29z162)"
   }
  ],
  "tech_lead_notes": [
@@ -23235,6 +23348,13 @@
    "round": 187,
    "note": "A reviewer and gate-187 reviewer: keep (AudioPreviewButton lost state/lifecycle); proposal for a STORE-2 task (overlay out of Link, slider fill on --progress pattern, delete .audio-preview-overlay-text) recorded as signal only. No owner accumulates risk. b-round-183-checkpoint-request.md still unanswered, fallback (c); next checkpoint point = STORE-REDESIGN exit.",
    "added": "2026-10-26 B round 187 -> 188 planning (D-29z153)"
+  },
+  {
+   "id": "A-R196-ARCH-SIGNALS",
+   "kind": "architecture_signal",
+   "note": "verbatim in a-round-196.md Code review Architecture note: Signal 4 (document-wide modality listener owned by StudioWorkspace; keep for stage 1, move the mount at stage-2 store-mount decision instead of mounting twice; also solves unconditional-cleanup Low); Signal 2 (--focus-offset string shared by studio-focus.ts and app.css, locked by SFR1/SFR3, keep); Signal 3 (app.css region -> ARCH-R193-THEME-REGION)",
+   "status": "recorded, not scheduled",
+   "added": "2026-10-26 B round 196 -> 197 planning (D-29z162)"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -26278,6 +26398,15 @@
    "repro": "source read",
    "owner_note": "round 195 task T1 allows A to close #4-#6 in store-theme-tokens.test.ts (optional, written into the task and SCOPE-195); #3 needs measured tokens first and stays deferred",
    "added": "2026-10-26 B round 194 -> 195 planning (D-29z160)"
+  },
+  {
+   "id": "C-R196-05",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "library separator inset ring fills the 4px element and reads as a solid brass bar (R87 spirit); vetoable",
+   "evidence": "c-round-196/out/ringkey/tree-1440/f25.png; c-round-196/out/extra/tree-1440/result.json",
+   "repro": "Tab to the library separator",
+   "added": "2026-10-26 B round 196 -> 197 planning (D-29z162)"
   }
  ],
  "baseline_tree_at_round108": {

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T19:43:41.046Z)
+# Active loop summary (2026-10-26T21:22:47.714Z)
 
-- backlog.json 1734 KB -> active view 259 KB
-- status: G_ROOT_GATE round 195
-- servers: `{"checkedUtc":"2026-10-26T18:12:35.3904924Z","round":195,"attempt":1,"store":200}`
+- backlog.json 1753 KB -> active view 260 KB
+- status: G_ROOT_GATE round 196
+- servers: `{"checkedUtc":"2026-10-26T20:56:50.2711857Z","round":196,"attempt":1,"store":200}`
 - last publication: 7339cd5db6ecf1c7fac3028a8b0a1f37752a1c45 (rounds 192-195)
-- last root gate: round 195 published - commit 7339cd5db6ecf1c7fac3028a8b0a1f37752a1c45 pushed
+- last root gate: round 196 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -460,18 +460,17 @@
 - STORE2A-EXTRA-BRASS-TEXT / info / scheduled round 193 (D-29z158) / Light text/icon on brand/buy/destructive fills beyond the 4 round-192 grants: PurchaseHeader.tsx:348 Buy Now (HEAD 4.05:1 -> 1.88 rest / 1.5
 - STORE2A-LEADMAGNET-KEEPLIST-ACK / info / root_note (B ruling R76, vetoable; non-blocking) / Keep-list LeadMagnet CONTINUE button: text colour token only (text-foreground -> text-brand-foreground); copy CONTINUE/SENDING..., size, pos
 - B-R192-PLANNING-GAP / info / retro_input / Round 192 lost a round because the task had a stop-and-report inventory rule ("anything beyond B's four sites -> stop") but B's own pre-disp
-- C-R193-01 / medium / c_verified_in_tree_unpublished (C round 194 PLACEHOLDER-194 PASS 5.10:1 at 3 viewports; closes on publication of rounds 193-195) / Keep-list LeadMagnet popup email placeholder placeholder:text-dim (#928a7d) on bg-white: 3.41:1 (HEAD 5.06:1), caused by round 193
-- C-R193-02 / medium / c_verified_in_tree_for_F1-F8/F14 (C round 194, 3.12-3.70:1); remainder = C-R194-01 GuestForm + R80 recordings, scheduled round 195 (D-29z160) / Store text-entry field borders border-outline #24211e: 1.03-1.21:1 vs surround (HEAD 1.35-1.62), caused by round 193 (R72 value)
 - STORE2A-BUTTON-REFLOW / info / retro_input / B wrote "exactly N changed lines" without checking Biome lineWidth (100); lesson candidate: check formatter width or phrase scope as semanti
 - STORE2A-INPUT-BORDER-STUDIO-SITES / info / signal (global_forbidden_files components/studio/**; purchased legacy view, backend-only) / Legacy components/studio fields keep bare border-outline: ExportDialog.tsx:283 (checkbox), VideoUploadZone.tsx:169 (text input); same faint-
 - ARCH-R193-THEME-REGION / info / signal - decision point at the STORE-2 exit; not scheduled / A round-193 code-reviewer Architecture note (signal 3): app.css @theme l.45-150 is edited by rounds 192/193 and all of STORE-2b/2c/2d, and s
 - B-R193-UNMEASURED-INFO / info / retro_input / A round-193 reviewer flagged --color-outline ~1.25:1 as info; neither A nor B measured the fields before handover, so C caught it. Lesson ca
-- C-R194-01 / medium / scheduled round 195 (D-29z160, R78 ext. + R81) / /support guest chat form fields (GuestForm name/email) border 1.21:1 (HEAD 1.62), round-193 regression not covered by round 194 grants
-- C-R194-02 / medium / scheduled round 195 (D-29z160, R82) / ST8b class guard false-passes a field whose class token sits 14 lines below the tag and does not follow class constants
-- R80-RECORDINGS-FIELD-BORDERS / medium / scheduled round 195 (D-29z160, R80); browser BLOCKED backend unavailable in cloud (ST8 source only) / recordings/ inputClass constants (SfxSoundLibrary:68, SfxSceneBuilder:112, SfxVideoSync:25, SfxQuickEdit:183) carry bare border-outline on b
+- R80-RECORDINGS-FIELD-BORDERS / medium / source done (round 195, ST8 R1-R4, published 7339cd5); browser row BLOCKED backend unavailable in cloud - open backend evidence for a backend-enabled check / recordings/ inputClass constants (SfxSoundLibrary:68, SfxSceneBuilder:112, SfxVideoSync:25, SfxQuickEdit:183) carry bare border-outline on b
 - B-R194-K0-SCAN-GAP / info / retro_input / Second STORE-2a round lost to B pre-dispatch inventory (same class as B-R192-PLANNING-GAP): fieldscan.mjs used tag+13 lines and missed Guest
 - ARCH-R194-TEST-WALKERS / info / signal - decision with ARCH-R193-THEME-REGION at the STORE-2 exit; not scheduled / A round-194 code-reviewer Architecture note (verbatim in a-round-194.md): store-theme-tokens.test.ts holds two independent app/ walkers (stu
 - C-R194-INFO / info / routed / C round 194 notes: F9/F10 (/cart) not reachable with the mock empty cart; F15 Textarea no route; F11-F13 and F16 blocked backend; first 375 
+- SABA-B-4 / medium / stage 1 (Studio) dispatched round 196 (D-29z161); stage 2 (store pages) after the regression round / focus ring and slider thumbs feel heavy: focused Pan shows a thick brass pill with a wide gap; Pan thumb large pure white vs cream Volume th
+- A-R195-SIGNALS / info / signal / A round 195 code-reviewer Architecture note (verbatim in a-round-195.md): keep the field scanner in store-theme-tokens.test.ts; if the same 
+- B-R195-WORKFLOW-DOC-DRIFT / info / root_note / docs/technical/studio-real-workspace/agent-workflow.md lacks the policy sections from SABA-B-3 onward (Retrospective, SABA-B-4, three 2026-1
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

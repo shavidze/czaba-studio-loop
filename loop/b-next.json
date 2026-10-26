@@ -1,10 +1,10 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 195 PASS (browserVerified=true, realVerified=true; RECORDINGS-195 backend-blocked, not passed); gate 195 published 7339cd5, so STORE-2a is done and C-R193-01/02, C-R194-01/02 are closed. Saba's SABA-B-4 (Medium: heavy double focus ring, Pan pill, mismatched thumbs; widened to site-wide) must run next, ahead of the remaining STORE stages, in at most 2 rounds (Studio first). Regression not due until planning on/after 2026-10-27. Large scoped work remains (SABA-B-4 stage 2, STORE-2b..5, RETRO, REVIEW-RECOMMENDATIONS, STUDIO-PERFORMANCE, T12-ADVANCED, phase-2 queue, deferred Lows) and nothing needs external input, so neither COMPLETE nor BLOCKED.",
- "nextTask": "Round 196 (D-29z161) SABA-B-4 stage 1 (Studio) on HEAD 7339cd5 (clean; 34 narrow grants + 5 new; frozen 990): one unlayered global :focus-visible rule 1.5px brass/80% offset var(--focus-offset,2px) with the utilities.css duplicate deleted (R83); STUDIO_FOCUS_RING_INSET_CLASS for clipped rows (R84); app/lib/focus-source.ts capture listeners -> html[data-focus-source=pointer|keyboard], with no ring after a pointer press (R85, mounted in StudioWorkspace); one 14px #ECE6DA thumb + neutral Pan/Zoom track, all six input boxes h-4 (only Pan grows), peer-ring constants deleted (R86); no fill/border focus feedback (R87); tests SFR1-5 + FS-a..f; doc 159. C rows: INVENTORY/RING-KEY (every Tab stop one ring >=3:1)/POINTER (no ring after mouse press, ring after ArrowUp)/THUMB/SABA-SHOT/REST (changes only inside six fader boxes)/FUNC/STORE-FOCUS (store keeps a ring, no attribute leak)/G196-3/SCOPE/T-RUN m1-m6/AN-REVIEW/PX-NET.",
+ "reason": "C round 196 FAIL (browserVerified=true): RING-KEY-196 failed on Medium C-R196-01 (marker-flag inset ring fused with the selected pill border, 1.45:1); C also found pre-existing Medium C-R196-02 (Video-row focus hidden under the sticky timeline chrome at 1280). Gate 196 skipped, so the baseline is 7339cd5 + the uncommitted round-196 tree. Per round-196 section 7 and the 2026-10-23 bug gate, one bounded fix-up of the two tightly related Studio focus Mediums runs before the regression round (due on or after 2026-10-27). Large scoped work remains and nothing needs external input, so neither COMPLETE nor BLOCKED.",
+ "nextTask": "Round 197 (D-29z162) SABA-B-4 stage-1 fix-up on 7339cd5 + round-196 tree (frozen 1023, 6 narrow grants + 1 new): R88 marker flag ring off the pill border (transparent pr-1 + measured edge offset constant, expected -1px, first; button-as-pill fallback; no group-focus); R89 timeline scroller scroll-padding-top = live chrome height via refreshTrackLaneLayout, with a live probe and a stop rule (no focusin/scrollIntoView); R90 ruling keeps declared 1.5px (Chromium paints 1px; C-R196-04 closed as ruled). Tests SFR6 + focus-reveal-ui FR-a..c; doc 159 Round-197 section. C rows: FLAG-RING-197 (selected and unselected, both viewports, each side inner and outer neighbour >=3:1, >=1 device px clear of the pill border), FOCUS-REVEAL-197, RING-KEY-197, R90-WIDTH-197, REST-197, MARKER-FUNC-197, POINTER-197, G197-3, SCOPE-197, T-RUN-197 (m9-m12 + m2), AN-REVIEW-197, PX-NET/REG-HYD. On PASS root publishes 196+197.",
  "remaining": [
-  "SABA-B-4 (Medium; stage 1 round 196 Studio, stage 2 store pages)",
-  "REGRESSION-ROUND-2026-10-27",
+  "SABA-B-4 (Medium; stage 1 fix-up round 197: C-R196-01, C-R196-02; stage 2 store pages incl. C-R196-03)",
+  "REGRESSION-ROUND (due on/after 2026-10-27)",
   "STORE-2b",
   "STORE-2c",
   "STORE-2d",
@@ -20,7 +20,7 @@
   "STUDIO-AGENT-COMMANDS",
   "RECORDING-META-S1",
   "SRW-21 (deferred_user)",
-  "deferred_low_polish (all Lows incl. C-R191-01 awaiting_user)",
+  "deferred_low_polish (273, incl. C-R196-05; C-R191-01 awaiting_user)",
   "backend-blocked evidence (R80 recordings, F11-F13, F16, fake-Bearer real backend)",
   "Tech Lead manual checks (c_pass_tech_lead_manual items)"
  ]

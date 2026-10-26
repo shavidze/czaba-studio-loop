@@ -1,0 +1,11 @@
+- started 2026-10-26T20:57:51Z
+- T-RUN done: tree 13 green; start SFR1-5 red + FS import fail; m1..m8 red as expected (see trun.txt)
+- RING-KEY tree-1440 default scene: 68 stops, all fv solid 1px (computed) brass/0.8, offset ±2, bs/bg/bc/box unchanged; contrast min 3.69 (Play); separator = solid bar (no inner box)
+- rich tree-1440: 82 stops ok except marker flag inset ring cr 1.45 vs pill border (rect ring over pill), playhead top edge clipped, separator solid bar; export WAV ring+own border; grid menu did not open via right-click on sfx lane (retry)
+- pointer tree-1440 PASS-ish: thumbs 14x14 ECE6DA all six; fill delta<=0.5; no ring after mouse; arrows ring+step; grid menu items ring 5.43; FUNC ok
+- ringkey ref-1440: 68 stops, id order + Shift+Tab order equal to tree; only Pan box diff (h4 vs h16, same centre). SCOPE token diff clean (only focus tokens/fader classes/inset/mount; 'relative' removed with Pan reset peer recipe). AN-REVIEW greps 0. Open judgement: computed 1px vs spec 1.5px; marker flag inset ring cr 1.45 vs own pill border (rect over pill)
+- REST PASS both vps (0 outside mask, ref=c191 0, boxes Δ0 except Pan h4->h16). Marker flag FAIL: ring abuts pill border cr1.45 top/bottom, stem left; ref thick ring clipped bottom. Export WAV: border+ring two lines; ref thick band (info)
+- 1280: all six thumbs 14x14 ECE6DA, pointer no ring, order eq ref. Rich 1280: video-row controls (i69-74) focused but hidden under sticky tempo/marker strip -> checking ref
+- extras: group editor inset ring inside 5.59/border 1.49 (info); groupVol ArrowDown steps; separator outward 5.59/4.88; Saba gap 3.0px, ring 54x22 (input+3/side). Video row at 1280 obscured same in ref (pre-existing)
+- store 1440: all targets ring 1px brass, cr 4.44-5.63 (home card no visible ring in tree AND ref: pre-existing clipped); rest px 0 except animated skeleton header on home (both); boxes Δ0; fsAttr null; nav lab->/ attr null
+- reports written (FAIL: RING-KEY marker flag). servers 5174/5199 stopped
