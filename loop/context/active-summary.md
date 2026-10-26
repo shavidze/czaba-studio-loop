@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T13:21:20.438Z)
+# Active loop summary (2026-10-26T14:37:07.644Z)
 
-- backlog.json 1705 KB -> active view 249 KB
-- status: G_ROOT_GATE round 192
-- servers: `{"checkedUtc":"2026-10-26T13:15:50.9113295Z","round":192,"attempt":1,"store":200}`
+- backlog.json 1713 KB -> active view 252 KB
+- status: G_ROOT_GATE round 193
+- servers: `{"checkedUtc":"2026-10-26T13:54:43.2147614Z","round":193,"attempt":1,"store":200}`
 - last publication: caa09afea79704e4315fd8102ea1a7df9bb1f789 (rounds 191-191)
-- last root gate: round 192 skipped - C taskStatus FAIL
+- last root gate: round 193 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -457,6 +457,9 @@
 - A-R191-SIGNALS / info / signal / A round 191 code-reviewer Architecture notes (verbatim in a-round-191.md): run 1 keep studio-fader.ts (stateless class-and-maths module, stu
 - ARCH-R191-PAN-RING-COUPLING / info / signal / Pan focus ring drawn by the reset button ::before (ArrangementLane.tsx:773/786 + studio-fader.ts:12-26), coupled through copied w-12/gap-1; 
 - STORE2A-PROTECTED-BRASS-TEXT / info / signal (protected files) / After STORE-2a, bg-brand text-foreground (ivory on brass ~1.8:1) remains on the protected studio.$productId.tsx:440/471 and account.download
+- STORE2A-EXTRA-BRASS-TEXT / info / scheduled round 193 (D-29z158) / Light text/icon on brand/buy/destructive fills beyond the 4 round-192 grants: PurchaseHeader.tsx:348 Buy Now (HEAD 4.05:1 -> 1.88 rest / 1.5
+- STORE2A-LEADMAGNET-KEEPLIST-ACK / info / root_note (B ruling R76, vetoable; non-blocking) / Keep-list LeadMagnet CONTINUE button: text colour token only (text-foreground -> text-brand-foreground); copy CONTINUE/SENDING..., size, pos
+- B-R192-PLANNING-GAP / info / retro_input / Round 192 lost a round because the task had a stop-and-report inventory rule ("anything beyond B's four sites -> stop") but B's own pre-disp
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

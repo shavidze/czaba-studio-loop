@@ -1,9 +1,9 @@
 {
- "version": 178,
- "updated": "2026-10-26 (B round 192 -> 193 planning, D-29z158)",
+ "version": 179,
+ "updated": "2026-10-26 (B round 193 -> 194 planning, D-29z159)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 193: D-29z158 - STORE-2a re-dispatch from caa09af: same 26 @theme colour values (R72-R74) + text-brand-foreground on all 9 non-protected light-on-fill sites S1-S9 (Button buy/destructive, hire-us submit, account.orders CTA, PurchaseHeader Buy Now, LeadMagnet CONTINUE (R76 keep-list restyle), Modal ConfirmDialog destructive, ChatButton badge, ForgetPassword CheckCircle icon), doc 157 status/FS list, new store-theme-tokens.test.ts + doc 158; Studio 0 px incl. export dialog)",
+ "current_task": "current-task.md (round 194: D-29z159 - STORE-2a fix-up on top of the uncommitted round-193 tree: C-R193-01 LeadMagnet placeholder placeholder:text-dim -> placeholder:text-brand-foreground/60 (R77), C-R193-02 store text fields border-outline -> border-outline-strong F1-F16 (R78), C-R193-03 reflow ruling R79; T1 +ST7/ST8/ST8b; doc 158 Round 194 section)",
  "advisor_used_by_B": "2026-10-26 round 189 -> 190 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: round-179-style fix-up baseline on the uncommitted round-189 tree (frozen 1016 incl. doc 155 at cdf011f9, grants 3), A must reproduce C's fresh-mode CLS and bisect before fixing (cause stays a hypothesis until measured), A's live proof measures CLS at 375/1280/1440 (round-189 lesson), no CLS case in jsdom T1, C-R189-02 taken now as R67 (Tab ends loader without preventDefault, vetoable), C-R189-I5 added to the regression harness rules, regression stays next on/after 2026-10-27",
  "baseline": {
   "tsc_errors": 0,
@@ -9873,7 +9873,7 @@
    "round": 193,
    "task": "current-task.md",
    "decision": "D-29z158",
-   "status": "dispatched",
+   "status": "c_fail_browser_verified: STORE-2a implemented as granted; 13/15 C rows PASS (TOKENS 26/26, BRASS-TEXT reached S3/S5/S6, KEEP, LAYOUT, STUDIO-RV 0 px incl. export dialog, T-RUN m1-m9, G193-3); CONTRAST-193 FAIL on 2 Medium regressions caused by the round (C-R193-01, C-R193-02); SCOPE-193 FAIL Low only (C-R193-03 formatter reflow, ruled R79). Work kept uncommitted in the tree (10 M + 2 ??); gate 193 skipped; HEAD caa09af",
    "items": [
     "K0 re-scan (stop only outside S1-S9) + reuse round-192 Studio table",
     "K1 @theme colour values (26, unchanged table)",
@@ -9883,7 +9883,28 @@
     "D2 doc 157 status + FS list"
    ],
    "note": "baseline HEAD caa09af (gate 191 published, gate 192 skipped, clean, 1022 tracked); grants b-round-192-r193-grants.txt (10); new b-round-192-r193-new-files.txt (2); frozen 1012 (b-round-192-r193-tree-sha256.txt OK from store root); start copies b-round-192/r193-granted-start/",
-   "added": "2026-10-26 B round 192 -> 193 planning (D-29z158)"
+   "added": "2026-10-26 B round 192 -> 193 planning (D-29z158)",
+   "result": {
+    "a": "a-round-193.md (code-reviewer 8.5/10, no Critical/High)",
+    "c": "c-round-193.md / c-round-193.json FAIL browserVerified=true realVerified=true",
+    "gate": "gates/gate-round-193.json skipped (C taskStatus FAIL)",
+    "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
+   }
+  },
+  {
+   "round": 194,
+   "task": "current-task.md",
+   "decision": "D-29z159",
+   "status": "dispatched",
+   "items": [
+    "K0 field scan (stop only outside F1-F16 in non-forbidden files)",
+    "K1 P1 LeadMagnet placeholder (R77)",
+    "K2 F1-F16 border-outline-strong (R78)",
+    "T1 +ST7/ST8/ST8b",
+    "D1 doc 158 Round 194 section"
+   ],
+   "note": "baseline HEAD caa09af + uncommitted round-193 tree (gate 193 skipped); grants 13; frozen 1011 OK from store root; start copies b-round-193/r194-granted-start/",
+   "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
   }
  ],
  "post_current_stage_queue": [
@@ -12068,7 +12089,7 @@
     },
     {
      "id": "STORE-2",
-     "status": "in_progress: split 2a-2d (D-29z157); 2a round 192 not implemented (K0.4 stop) -> round 193 (D-29z158)",
+     "status": "in_progress: split 2a-2d (D-29z157); 2a implemented round 193 (C FAIL: 2 Medium contrast regressions C-R193-01/02) -> fix-up round 194 (D-29z159)",
      "title": "D2-D4, D11 tokens and type (store @theme to Obsidian & Brass; obsidian block in app.css byte-identical; no data-studio-theme on store markup, TH4)",
      "split_d29z157": {
       "STORE-2a": "round 192: store @theme colour values to Obsidian & Brass (same values as the obsidian block for its 18 colour keys, secondary #cfc7ba body text, bg-alt/surface-glass midpoints, brand/accent rgb, buy/buy-hover brass) + text-brand-foreground on the 4 non-protected brass-filled controls (Button buy/destructive variants, hire-us submit, account.orders CTA); Studio 0 px; tokens only, no component restyle",
@@ -12410,6 +12431,21 @@
     "k0_stop_rule": "narrowed: stop only for a non-protected site outside S1-S9 (scan same-line + window + child icons)",
     "new_rows": "BRASS-TEXT-193 per site; STUDIO-RV export dialog mandatory; T-RUN m7 PurchaseHeader, m8 Modal, m9 CONTINUE copy",
     "added": "2026-10-26 B round 192 -> 193 planning (D-29z158)"
+   },
+   "store2a_result_r193": {
+    "round": 193,
+    "c": "FAIL browserVerified=true; CONTRAST-193 (C-R193-01/02 Medium), SCOPE-193 Low (C-R193-03 ruled R79); all other rows PASS",
+    "tree": "uncommitted 10 M + 2 ?? kept as the round-194 baseline",
+    "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
+   },
+   "store2a_fixup_d29z159": {
+    "round": 194,
+    "rulings": "R77 placeholder brand-foreground/60; R78 store text fields border-outline-strong (F1-F16); R79 formatter reflow allowed",
+    "grants": "13 (b-round-193-r194-grants.txt); frozen 1011 (b-round-193-r194-tree-sha256.txt, hashes the round-193 tree)",
+    "gate_note": "on C PASS root publishes rounds 193+194 against caa09af",
+    "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)",
+    "f1_fallback": "F1 newsletter only: border-dim if border-outline-strong < 3:1 at any edge midpoint (pre-authorised)",
+    "scope_expect": "git status 19 M + 2 ??"
    }
   },
   {
@@ -13120,6 +13156,97 @@
    "path": "app/components/auth/ForgetPassword.tsx",
    "scope": "l.80 CheckCircle icon class: text-foreground -> text-brand-foreground only (S9); no auth logic touched (reset call in frozen app/lib/auth*)",
    "justification": "UI graphic on bg-brand 1.88 < 3:1; not in global_forbidden_files; no prior grant precedent against components/auth"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/components/marketing/LeadMagnetPopup.tsx",
+   "scope": "P1 l.126 email input placeholder:text-dim -> placeholder:text-brand-foreground/60 only; copy, CONTINUE/SENDING..., everything else byte-identical (keep-list restyle, R77)",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/components/home/NewsletterSection.tsx",
+   "scope": "F1 l.78 input border-outline -> border-outline-strong only",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/routes/store.tsx",
+   "scope": "F2 l.179 search input border-outline -> border-outline-strong only",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/routes/hire-us.tsx",
+   "scope": "F3-F6 l.233/246/259/296 input/input/select/textarea border-outline -> border-outline-strong only",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/routes/free-downloads.tsx",
+   "scope": "F7 l.312 search input token only (keep-list page, restyle)",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/routes/gift-cards.tsx",
+   "scope": "F8 l.161 input token only",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/components/cart/GiftCardInput.tsx",
+   "scope": "F9 l.107 input token only",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/routes/cart.tsx",
+   "scope": "F10 l.221 (input l.213) token only",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/routes/account.tsx",
+   "scope": "F11-F13 l.330/351/371 input token only",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/components/ui/Input.tsx",
+   "scope": "F14 l.34 baseInputStyles border-2 border-outline -> border-outline-strong; F15 l.225 Textarea entry; nothing else",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/components/chat/ChatInput.tsx",
+   "scope": "F16 l.70 textarea entry token only (unmounted; test-only)",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "app/lib/__tests__/store-theme-tokens.test.ts",
+   "scope": "add ST7, ST8, ST8b; ST1-ST6 unchanged",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
+  },
+  {
+   "round": 194,
+   "decision": "D-29z159",
+   "path": "docs/implementation/2026/quarter-IV/158-store-2a-colour-tokens.md",
+   "scope": "status line + new Round 194 section",
+   "justification": "C-R193-01/02 fix-up (R77/R78); start copy b-round-193/r194-granted-start/"
   }
  ],
  "baseline_tree_at_round4": "HEAD cc1e531, working tree clean; the 4 protected files are committed in cc1e531 with baseline sha256 unchanged",
@@ -20876,6 +21003,64 @@
    "title": "Round 192 lost a round because the task had a stop-and-report inventory rule (\"anything beyond B's four sites -> stop\") but B's own pre-dispatch grep was same-line only and missed multi-line cn()/array strings and child icons. Lesson candidate for the first RETRO: before dispatching a task with a stop-on-inventory rule, B runs the same scan the task asks A to run (same-line + window + child elements) and grants the full list",
    "evidence": "tasks/round-192.md K0.4; a-round-192.md; c-round-192.md",
    "added": "2026-10-26 B round 192 -> 193 planning (D-29z158)"
+  },
+  {
+   "id": "C-R193-01",
+   "severity": "medium",
+   "status": "scheduled round 194 (D-29z159, R77)",
+   "title": "Keep-list LeadMagnet popup email placeholder placeholder:text-dim (#928a7d) on bg-white: 3.41:1 (HEAD 5.06:1), caused by round 193",
+   "evidence": "c-round-193/out/popup-{1440,1280,375}.json; c-round-193/shots/popup/",
+   "fix": "LeadMagnetPopup.tsx:126 placeholder:text-brand-foreground/60 (~5.1:1); C hint full-strength brand-foreground rejected (reads as a typed value)",
+   "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
+  },
+  {
+   "id": "C-R193-02",
+   "severity": "medium",
+   "status": "scheduled round 194 (D-29z159, R78)",
+   "title": "Store text-entry field borders border-outline #24211e: 1.03-1.21:1 vs surround (HEAD 1.35-1.62), caused by round 193 (R72 value)",
+   "evidence": "c-round-193/out/inputs-1440.json; c-round-193/out/store-compare.json; c-round-193/shots/inputs/",
+   "fix": "F1-F16 border-outline -> border-outline-strong (#736b60, ~3.1-3.7:1); fields only; B scan b-round-193/tools/fieldscan.mjs",
+   "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
+  },
+  {
+   "id": "C-R193-03",
+   "severity": "low",
+   "status": "closed_ruled (B R79, D-29z159): grant \"one changed line\" = one semantic token change; a formatter-forced reflow is allowed when biome format of the one-line form reproduces the tree byte for byte (C proved it). Not deferred_low_polish",
+   "title": "SCOPE-193 literal: Button.tsx S1 buy array reflowed to 6 lines by Biome lineWidth 100",
+   "evidence": "c-round-193/biome-scratch/",
+   "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
+  },
+  {
+   "id": "STORE2A-BUTTON-REFLOW",
+   "severity": "info",
+   "status": "retro_input",
+   "title": "B wrote \"exactly N changed lines\" without checking Biome lineWidth (100); lesson candidate: check formatter width or phrase scope as semantic token changes",
+   "evidence": "c-round-193.md C-R193-03",
+   "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
+  },
+  {
+   "id": "STORE2A-INPUT-BORDER-STUDIO-SITES",
+   "severity": "info",
+   "status": "signal (global_forbidden_files components/studio/**; purchased legacy view, backend-only)",
+   "title": "Legacy components/studio fields keep bare border-outline: ExportDialog.tsx:283 (checkbox), VideoUploadZone.tsx:169 (text input); same faint-border class as C-R193-02",
+   "evidence": "b-round-193/tools/fieldscan.mjs output",
+   "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
+  },
+  {
+   "id": "ARCH-R193-THEME-REGION",
+   "severity": "info",
+   "status": "signal - decision point at the STORE-2 exit; not scheduled",
+   "title": "A round-193 code-reviewer Architecture note (signal 3): app.css @theme l.45-150 is edited by rounds 192/193 and all of STORE-2b/2c/2d, and store-theme-tokens.test.ts:296-298 checks Studio markers. Keep one stylesheet; after STORE-2 decide whether ST4/ST6 move into studio-theme-obsidian.test.tsx and whether the obsidian override block (18 colours now identical to @theme; font overrides remain) is still needed",
+   "evidence": "a-round-193.md Code review",
+   "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
+  },
+  {
+   "id": "B-R193-UNMEASURED-INFO",
+   "severity": "info",
+   "status": "retro_input",
+   "title": "A round-193 reviewer flagged --color-outline ~1.25:1 as info; neither A nor B measured the fields before handover, so C caught it. Lesson candidate: a token value change in a task lists every UI-boundary use of that token as a contrast acceptance row",
+   "evidence": "a-round-193.md; c-round-193.md",
+   "added": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
   }
  ],
  "tech_lead_notes": [
@@ -25804,7 +25989,7 @@
   },
   {
    "id": "REGRESSION-ROUND-2026-10-27",
-   "round": "first planning on/after 2026-10-27 (rounds 192 and 193 planned 2026-10-26; round 193 = STORE-2a re-dispatch; expected round 194)",
+   "round": "first planning on/after 2026-10-27 (rounds 192-194 planned 2026-10-26; round 194 = STORE-2a fix-up; expected round 195 if its planning date is 2026-10-27 or later)",
    "decision": "pending",
    "status": "planned",
    "trigger": "speed rules 2026-10-21: regression-last.json 2026-10-24 round 122; due on/after 2026-10-27",
@@ -25842,7 +26027,8 @@
     "harness rule C-R190-I2: scrollIntoView only after performance.now()>250 and readyState!=loading",
     "SABA-B-3 (if round 191 C PASS): one fader of each kind pressed + keyboard focus at both viewports: single thin offset ring, no filled box; level look R68",
     "SABA-B-3 (round 191 C PASS, caa09af): one fader per kind (track Volume, group Volume, Master, Clip Gain, Pan, Zoom) at both viewports: pointer-down + keyboard focus show no filled box and at most one thin offset ring; level faders brass fill to thumb centre; B ruling C-R191-I1: Pan/Zoom pressed thumb shade is native (R70), the within-8 clause applies to level faders only; C-R191-01 1.82:1 is a known deferred Low, not a regression",
-    "STORE-2a (if round 192 C PASS): store tokens = obsidian values on /, /store, /products/middle-east (one computed-style probe), Studio rest 0 px"
+    "STORE-2a (if round 192 C PASS): store tokens = obsidian values on /, /store, /products/middle-east (one computed-style probe), Studio rest 0 px",
+    "STORE-2a field borders (if round 194 C PASS): one store text field per page (/ newsletter, /store search, /hire-us) border >= 3:1 vs surround; LeadMagnet placeholder >= 4.5:1"
    ],
    "added": "2026-10-26 B round 180 -> 181 planning (D-29z146)",
    "added_d29z148": "2026-10-26 B round 182 -> 183 planning (D-29z148)",
@@ -25851,7 +26037,8 @@
    "added_d29z151": "2026-10-26 B round 185 -> 186 planning (D-29z151)",
    "added_d29z152": "2026-10-26 B round 186 -> 187 planning (D-29z152)",
    "added_d29z153": "2026-10-26 B round 187 -> 188 planning (D-29z153)",
-   "added_d29z154": "2026-10-26 B round 188 -> 189 planning (D-29z154)"
+   "added_d29z154": "2026-10-26 B round 188 -> 189 planning (D-29z154)",
+   "added_d29z159": "2026-10-26 B round 193 -> 194 planning (D-29z159)"
   }
  ],
  "baseline_tree_at_round122": {

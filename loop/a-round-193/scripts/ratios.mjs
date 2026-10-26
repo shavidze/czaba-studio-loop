@@ -1,0 +1,12 @@
+const L=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4});return 0.2126*r+0.7152*g+0.0722*b;};
+const cr=(a,b)=>{const x=L(a),y=L(b);return ((Math.max(x,y)+0.05)/(Math.min(x,y)+0.05)).toFixed(2);};
+const dark=[14,13,12], bg=[14,13,12];
+const mix=(c,a,base)=>c.map((v,i)=>Math.round(v*a+base[i]*(1-a)));
+const brass=[201,164,106], brassH=[217,184,127], red=[210,119,106];
+const br11=red.map(v=>Math.min(255,Math.round(v*1.1)));
+console.log('S5 BuyNow rest', cr(dark,brass), 'hover', cr(dark,brassH));
+console.log('S3 hire-us rest', cr(dark,brass), 'hover brand/90 over surface #161412', cr(dark,mix(brass,0.9,[22,20,18])), 'over bg', cr(dark,mix(brass,0.9,bg)));
+console.log('S6 CONTINUE rest', cr(dark,red), 'hover brightness(1.1) approx', cr(dark,br11));
+console.log('S2/S7 destructive', cr(dark,red), 'hover /90 over surface', cr(dark,mix(red,0.9,[22,20,18])));
+console.log('S9 icon on brass', cr(dark,brass));
+console.log('focus ring brass vs bg', cr(brass,bg), 'vs surface', cr(brass,[22,20,18]));

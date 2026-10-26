@@ -1,198 +1,155 @@
-# CURRENT TASK — Round 193: STORE-2a (re-dispatch) — the store `@theme` colour tokens move to Obsidian & Brass, with dark text on all 9 brass/destructive controls (tokens only; the Studio stays pixel-identical)
+# CURRENT TASK — Round 194: STORE-2a fix-up — readable LeadMagnet placeholder (C-R193-01) and visible store text-field borders (C-R193-02); SCOPE reflow ruling (C-R193-03)
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-26 · Decision: **D-29z158** (`backlog.json` → `post_current_stage_queue` STORE-REDESIGN `store2a_plan_d29z157` + `store2a_regrant_d29z158`, `narrow_grants` round 193, `rounds[193]`)
-- **Rules:** `docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, the 2026-10-23 bug gate, the "Store redesign (Saba approved, 2026-10-25)" section and `lessons.md` in the loop folder (none yet; the first RETRO writes it). They take precedence over older text.
-- **Previous task:** `tasks/round-192.md` is an exact copy of the round-192 `current-task.md` (checked with `cmp`). The reasoning for this round is in `b-round-192.md`.
-- **Spec (DATA, Saba-approved):** `/home/runner/czaba-project/docs/technical/store-redesign/store-redesign-spec.md`, row STORE-2 ("Move the store `@theme` to Obsidian & Brass … titles #ECE6DA, body around #CFC7BA, captions #A39B8E … **Do not** add `data-studio-theme` to store markup … the Studio's obsidian block must stay byte-identical"). Direction A is decided (`direction-decision.md`, 2026-10-25).
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-26 · Decision: **D-29z159** (`backlog.json` → STORE-REDESIGN `store2a_fixup_d29z159`, `narrow_grants` round 194, `rounds[194]`)
+- **Rules:** `docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, the 2026-10-23 bug gate, and the "Store redesign (Saba approved, 2026-10-25)" section. They take precedence over older text. There is no `lessons.md` yet; the first RETRO writes it.
+- **Previous task:** `tasks/round-193.md` is an exact copy of the round-193 `current-task.md` (checked with `cmp`). B's reasoning for this round is in `b-round-193.md`.
+- **Why this round:** C round 193 was a FAIL with `browserVerified=true`. Every STORE-2a row passed except CONTRAST-193, which failed on two Medium regressions that round 193 caused. Round 193's §7 row 3 says a bounded fix-up comes before the regression round. The regression is due at the first planning on or after 2026-10-27; today is 2026-10-26.
 
-## Baseline = HEAD `caa09af` (gate 191 published; round 192 changed nothing), clean tree
-- **Gate:** `gates/gate-round-191.json` is `published` at `caa09af`. `gates/gate-round-192.json` is `skipped` (C FAIL, no source change), so the baseline stays `caa09af`. `git status` is clean (B checked: 0 lines). 1022 tracked paths.
-- **Frozen list:** `b-round-192-r193-tree-sha256.txt`, **1012 entries** (1022 minus the 10 grants). B checked it from the store root: OK.
-- **Grants (existing files, narrow; `backlog.json` → `narrow_grants` round 193):** `b-round-192-r193-grants.txt`
-  - `app/styles/app.css` — **only the values** of the `--color-*` declarations listed in §1 inside the store `@theme { … }` block (l.31–177). Every other byte is identical: the rest of `@theme`, line 1 (Inter `@import`), the global `:focus-visible` rule (l.379), the obsidian block (l.3920–3943) and everything else.
-  - `app/components/ui/Button.tsx` — the text token of the `buy` and `destructive` variants only.
-  - `app/routes/hire-us.tsx` — l.311 (the submit button) text token only.
-  - `app/routes/account.orders.tsx` — l.231 (the CTA link) text token only.
-  - `docs/implementation/2026/quarter-IV/157-saba-b-3-fader-pressed-state.md` — l.4 status line and l.60 "FS0–FS6" only.
-  - **New in round 193 (STORE2A-EXTRA-BRASS-TEXT, found by A's K0.4 and confirmed by C in round 192):**
-    - `app/components/product/PurchaseHeader.tsx` — l.348, the Buy Now button: `text-foreground` → `text-brand-foreground` only. **Required:** without it Buy Now drops from 4.05:1 to 1.88:1 (rest) and 1.52:1 (hover).
-    - `app/components/marketing/LeadMagnetPopup.tsx` — l.141, the CONTINUE submit: `text-foreground` → `text-brand-foreground` only. The copy (`CONTINUE`, `SENDING...`) and everything else stay byte-identical (keep-list; ruling R76).
-    - `app/components/ui/Modal.tsx` — l.307, the ConfirmDialog `destructive` string only: `'bg-destructive text-foreground hover:bg-destructive/90'` → `'bg-destructive text-brand-foreground hover:bg-destructive/90'`. **Exactly one changed line.** `Modal` is mounted in the Studio by `ArrangementExportDialog`; nothing else in this file may change.
-    - `app/components/chat/ChatButton.tsx` — l.38, the unread badge `'bg-destructive text-foreground'` → `'bg-destructive text-brand-foreground'` only.
-    - `app/components/auth/ForgetPassword.tsx` — l.80, the `CheckCircle` icon class `text-foreground` → `text-brand-foreground` only (it sits on the `bg-brand` circle at l.79). No auth logic is touched; the reset call stays in the frozen `app/lib/auth*`.
-- **New files:** `b-round-192-r193-new-files.txt`, both free at `caa09af`:
-  - `app/lib/__tests__/store-theme-tokens.test.ts`;
-  - `docs/implementation/2026/quarter-IV/158-store-2a-colour-tokens.md`.
-- **Start hashes:** `b-round-192-r193-granted-start-sha256.txt` (10). **Start copies:** `b-round-192/r193-granted-start/`.
-- **A's first step:** check these three things. If anything differs, stop and report.
+## Baseline = HEAD `caa09af` + the uncommitted round-193 tree
+- **Gate:** `gates/gate-round-193.json` is `skipped` (C FAIL), so HEAD is still `caa09af`. The round-193 work is uncommitted in the working tree: 10 ` M` and 2 `??`. A builds on top of it.
+- **On C PASS, root publishes round 193 and round 194 together, against `caa09af`.** There is no separate round-194-only diff.
+- **Frozen list:** `b-round-193-r194-tree-sha256.txt`, **1011 entries**. That is the 1022 tracked files plus the 2 round-193 untracked files, minus the 13 grants. It hashes the **round-193 tree**, not `caa09af`. B checked it from the store root: OK.
+- **Grants:** `b-round-193-r194-grants.txt` (13 existing files). Each is narrow (§1). There are no new files: `b-round-193-r194-new-files.txt` is empty.
+- **Start hashes:** `b-round-193-r194-granted-start-sha256.txt`. **Start copies:** `b-round-193/r194-granted-start/`.
+- **A's first step.** Check all four. If anything differs, stop and report.
   1. HEAD is `caa09af`.
-  2. `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-192-r193-tree-sha256.txt`, run **from the store root**, is OK.
-  3. The ten start hashes match.
-- **Mock API:** the store rows need it. If :5199 is not listening (`ss -ltn`), start `node mock-api/server.mjs > <your-folder>/mock.log 2>&1 &` from the loop folder and stop it at the end (kill **only that PID**; in round 192 a broad `pkill` ended C's own shell). Record which you did. Do not edit the mock.
-
-## 0. Why this round
-- **Round 192 did not implement STORE-2a.** A's K0.4 found 5 non-protected light-text-on-fill sites beyond B's four, and stopped before any edit, as the task required. C confirmed independently that the list is complete and that the stop was correct (`c-round-192.md`). This was a **planning gap in B's grants**, not a defect in A's work, and HEAD is unchanged. Round 192's §7 row 3 applies: the fix-up of a 2a row comes before the regression round.
-- **Regression is not due yet.** `regression-last.json` is dated 2026-10-24; today is 2026-10-26 (2 days).
-- **No Critical, High or Medium finding is open** that reproduces in the cloud.
-- **STORE-2 split is unchanged** (one stage per round, nothing dropped; `split_d29z157`): **2a** this round; **2b** hardcoded teal, glow blobs, gradient text and `shadow-glow`; **2c** typography and font loading (needs the root decision in §8); **2d** motion and reduced motion including Lenis.
-- **Reusable evidence from round 192 (DATA):** A's K0.1–K0.3 Studio-consumption table and its 29-selector map (`a-round-192.md`), the ST6 baseline (3 lines under `app/` excluding `__tests__`; 1 in `.ts/.tsx`), and the e2e grep (0 value hits; `e2e/store-page.spec.ts:61,64,76` are class-name assertions on `store.tsx`, which is frozen). C spot-confirmed only that ConfirmDialog is not Studio-reachable; the rest of the K0.1–K0.3 table was not re-audited by C.
+  2. `git status --short` is exactly the 10 ` M` and 2 `??` that round 193 left.
+  3. `sha256sum -c --quiet ../tmp/studio-real-loop/a-round-193/end-sha256.txt` is OK.
+  4. `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-193-r194-tree-sha256.txt` and the 13 start hashes are OK. Run both from the store root.
+- **Mock API:** if :5199 is not listening (`ss -ltn`), start `node mock-api/server.mjs > <your-folder>/mock.log 2>&1 &` from the loop folder. Stop **only that PID** at the end. Record which you did. Do not edit the mock.
 
 ## 1. What changes (exact)
 
-### Rulings (vetoable by Saba; record them in D1)
-- **R72 — the store palette equals the Studio palette.** Each of the 18 colour keys that the obsidian block overrides takes **the same value** in the store `@theme`. So they cannot drift, and `/studio-lab` renders exactly as before.
-- **R73 — the text tones follow the spec.** Titles `foreground` `#ece6da`, body `secondary` `#cfc7ba`, captions `muted` `#a39b8e`. Only the values change; which element uses which token is STORE-2c work.
-- **R74 — derived tokens.** `bg-alt` and `surface-glass` take the channel-wise midpoint of their new pair (rounded). `surface-glass-strong` stays equal to `surface`. The `*-rgb` triplets follow brass. `buy` and `buy-hover` become brass ("the buy-blue leaves the store").
-- **R75 — no ivory text on brass or on the new destructive red.** Ivory on brass is 1.88:1 (1.52:1 on `#d9b87f`); ivory on `#d2776a` is 2.57:1. All **9 non-protected** controls with light text or a light icon on a `brand`/`buy`/`destructive` fill switch to `text-brand-foreground` (`#0e0d0c`): 8.32:1 on brass, 6.09:1 on destructive.
-  - The protected `studio.$productId.tsx:440/471` and `account.downloads.tsx:261` have the same pattern and stay untouched (signal `STORE2A-PROTECTED-BRASS-TEXT`).
-- **R76 (new) — the keep-list LeadMagnet CONTINUE button changes text colour only.** Saba's binding rule is "restyle them only; never remove or reword". A text-colour token is a restyle: the copy, position, size and behaviour stay. Without it the button would fall to 2.57:1, which this round would cause. Recorded for root/Saba acknowledgement (§8). KEEP-193 checks the button's `innerText` byte for byte.
-- **Unchanged on purpose:** `info`, the `error-*` set, the social, decorative (crystal/premium), video and `blue-*` alias colours; `glow-*`, every `--shadow-*`, every `--gradient-*` (STORE-2b); `--font-*` (STORE-2c); the animation tokens (STORE-2d). The mixed look this leaves (brass plus some teal gradients and glows) is an expected intermediate state, not a FAIL of 2a.
+### Rulings (vetoable by Saba; record them in doc 158)
+- **R77 (C-R193-01): the keep-list LeadMagnet email placeholder becomes `placeholder:text-brand-foreground/60`.**
+  - The field is `bg-white`. `--color-dim` (`#928a7d`) is a dark-surface token and gives 3.41:1 on white; HEAD gave 5.06:1.
+  - `brand-foreground` (`#0e0d0c`) at 60 % over white composites to about `rgb(110,110,109)`, about **5.1:1**, back at HEAD's level.
+  - Rejected: (a) C's hint `placeholder:text-brand-foreground` at full strength (≈19:1). The placeholder would look like the typed value (`text-black`), and a placeholder that reads as a filled field is not honest. (b) `placeholder:text-outline-strong` (`#736b60`, ≈5:1). It is a border token, so its meaning would be wrong. (c) A hardcoded grey, which Tailwind-first forbids.
+  - This is a colour-only restyle of a keep-list item, the same reasoning as R76. The copy `Enter your email address`, the size, the position and the behaviour stay.
+- **R78 (C-R193-02): store text-entry fields use `border-outline-strong` instead of `border-outline`.**
+  - `--color-outline` (`#24211e`, the R72 Studio value) gives 1.03–1.21:1 against the page. HEAD gave 1.35–1.62:1.
+  - `--color-outline-strong` (`#736b60`) is an existing token, identical in the store and the obsidian block. It gives about 3.7:1 on `#0e0d0c`, 3.5:1 on `surface` and 3.3:1 on `elevated`. On the newsletter section's brass radial it gives about 3.1:1, which is the tight case and **must be measured**.
+  - **F1 fallback (pre-authorised):** if `border-outline-strong` on F1 reads below 3:1 at any of the four edge midpoints at any viewport in A's live proof, A uses `border-dim` (`#928a7d`, about 4.8:1 on the radial) for **F1 only**. A records the measurement and the token used in `a-round-194.md`; ST8 accepts either token for F1 only. This is still a token swap and `app.css` stays frozen.
+  - Scope is **text-entry fields only**: `<input>` (text, email, search, password), `<textarea>` and `<select>`. Pills, cards, dividers and chips that use `border-outline` stay as they are; they are STORE-2b inventory.
+  - Rejected: (a) changing `--color-outline` in `@theme`. That breaks R72/ST1 (store = Studio) and changes every card and divider. (b) A new store-only `--color-input-border` token. It needs a new `app.css` declaration plus the same per-site edits, so it is not smaller. (c) Leaving it as it is, which keeps a regression this round caused.
+- **R79 (C-R193-03, ruling; no code change): a formatter-forced reflow is allowed.** A grant of "one changed line per site" means **one semantic token change per site**. A reflow is allowed when `npx biome format` on the one-line form reproduces the tree file byte for byte. C proved this for `Button.tsx` S1 in round 193. C-R193-03 is closed as ruled; it is not a deferred Low. The RETRO lesson `STORE2A-BUTTON-REFLOW`: B checks Biome `lineWidth` (100) before writing "exactly N lines".
 
-| Token (store `@theme`) | `caa09af` | Round 193 | Basis |
+### Sites (line numbers are in the round-193 tree; A locates each by its class string)
+| # | File : line | Element | Change |
 |---|---|---|---|
-| `--color-background` | `hsl(220, 20%, 4%)` | `#0e0d0c` | R72 |
-| `--color-surface` | `hsl(220, 18%, 8%)` | `#161412` | R72 |
-| `--color-elevated` | `hsl(220, 18%, 12%)` | `#1d1a17` | R72 |
-| `--color-muted-bg` | `hsl(220, 15%, 15%)` | `#24201c` | R72 |
-| `--color-surface-glass` | `hsl(220, 18%, 10%)` | `#1a1714` | R74 midpoint of surface/elevated |
-| `--color-surface-glass-strong` | `hsl(220, 18%, 8%)` | `#161412` | R74 (= surface) |
-| `--color-outline` | `hsl(220, 15%, 22%)` | `#24211e` | R72 |
-| `--color-outline-hover` | `hsl(220, 15%, 28%)` | `#2e2a26` | R72 |
-| `--color-outline-strong` | `hsl(220, 15%, 32%)` | `#736b60` | R72 |
-| `--color-outline-light` | `hsla(220, 15%, 22%, 0.5)` | `rgb(36 33 30 / 0.5)` | R72 |
-| `--color-brand` | `hsl(175, 85%, 46%)` | `#c9a46a` | R72 |
-| `--color-brand-hover` | `hsl(175, 85%, 52%)` | `#d9b87f` | R72 |
-| `--color-brand-foreground` | `hsl(220, 20%, 4%)` | `#0e0d0c` | R72 |
-| `--color-accent` | `#f9a91f` | `#c9a46a` | R72 |
-| `--color-foreground` | `hsl(220, 10%, 94%)` | `#ece6da` | R72, R73 |
-| `--color-muted` | `hsl(220, 10%, 55%)` | `#a39b8e` | R72, R73 |
-| `--color-dim` | `hsl(220, 10%, 45%)` | `#928a7d` | R72 |
-| `--color-positive` | `#00d26a` | `#8fa382` | R72 |
-| `--color-destructive` | `hsl(0, 84%, 60%)` | `#d2776a` | R72 |
-| `--color-warning` | `#f59e0b` | `#d9a35b` | R72 |
-| `--color-secondary` | `hsl(220, 10%, 70%)` | `#cfc7ba` | R73 |
-| `--color-bg-alt` | `hsl(220, 18%, 6%)` | `#12100f` | R74 midpoint of background/surface |
-| `--color-brand-rgb` | `19, 217, 204` | `201, 164, 106` | R74 |
-| `--color-accent-rgb` | `249, 169, 31` | `201, 164, 106` | R74 |
-| `--color-buy` | `#006AFF` | `#c9a46a` | R74 |
-| `--color-buy-hover` | `#0052CC` | `#d9b87f` | R74 |
-
-Rules for the value edits:
-- Only the value between `:` and `;` changes. Spacing, comments and declaration order stay the same.
-- Where a trailing comment names the old colour (for example `/* Primary - #13D9CC */`), A may update the comment text on the **same line** to match the new value, or leave it. Nothing else.
-
-### The 9 approved light-on-fill sites (R75/R76)
-| # | Site at `caa09af` | Element | Fill | Change |
-|---|---|---|---|---|
-| S1 | `ui/Button.tsx` `buy` variant | variant string | `bg-buy` | `text-foreground` → `text-brand-foreground` |
-| S2 | `ui/Button.tsx` `destructive` variant | variant string | `bg-destructive` | same |
-| S3 | `routes/hire-us.tsx:311` | submit button | `bg-brand` | same |
-| S4 | `routes/account.orders.tsx:231` | "Browse Music" CTA | `bg-brand` | same |
-| S5 | `product/PurchaseHeader.tsx:348` | Buy Now | `bg-buy` | same |
-| S6 | `marketing/LeadMagnetPopup.tsx:141` | CONTINUE submit | `bg-destructive` | same |
-| S7 | `ui/Modal.tsx:307` | ConfirmDialog destructive confirm | `bg-destructive` | same |
-| S8 | `chat/ChatButton.tsx:38` | unread badge | `bg-destructive` | same |
-| S9 | `auth/ForgetPassword.tsx:80` | `CheckCircle` icon inside the `bg-brand` circle (l.79) | `bg-brand` (parent) | same |
+| P1 | `marketing/LeadMagnetPopup.tsx:126` | email input (`bg-white`) | `placeholder:text-dim` → `placeholder:text-brand-foreground/60` |
+| F1 | `home/NewsletterSection.tsx:78` | newsletter email input | `border-outline` → `border-outline-strong` |
+| F2 | `routes/store.tsx:179` | store search input | same |
+| F3–F6 | `routes/hire-us.tsx:233, 246, 259, 296` | name and email inputs, the `<select>`, the `<textarea>` | same, 4 lines |
+| F7 | `routes/free-downloads.tsx:312` | search input (keep-list page; restyle only) | same |
+| F8 | `routes/gift-cards.tsx:161` | code input | same |
+| F9 | `cart/GiftCardInput.tsx:107` | gift-code input | same |
+| F10 | `routes/cart.tsx:221` | input at l.213 | same |
+| F11–F13 | `routes/account.tsx:330, 351, 371` | three inputs | same, 3 lines |
+| F14 | `ui/Input.tsx:34` | `baseInputStyles` entry `'border-2 border-outline'` | `'border-2 border-outline-strong'` |
+| F15 | `ui/Input.tsx:225` | `Textarea` class entry `'bg-surface border-2 border-outline rounded-md'` | `border-outline` → `border-outline-strong` |
+| F16 | `chat/ChatInput.tsx:70` | textarea entry `'bg-elevated border border-outline rounded-lg'` | same (ChatWidget is mounted on no route, so this is test-only) |
 
 | ID | File(s) | Change |
 |---|---|---|
-| **K0** (evidence first, short) | none | <ol><li>Re-run your round-192 scan (`a-round-192/scripts/brass-scan.mjs` or equivalent) at `caa09af`: same-line **and** ±6-line window, **including child elements and icons within ±2 lines of a fill** (the S9 pattern), over `app/` excluding `__tests__` and `components/arrangement`. Fills: `bg-(brand|accent|buy|destructive|positive|warning)`; light text: `text-(foreground|white|secondary|muted)`.</li><li>**Stop rule (narrowed):** stop and report **only** if a non-protected site **outside S1–S9** appears. S1–S9 and the three protected sites are expected.</li><li>Reuse your K0.1–K0.3 Studio-consumption table from `a-round-192.md` (copy it into D1). Add one line for the new Studio-mounted grant: `Modal.tsx` — only the ConfirmDialog destructive string changes; `ConfirmDialog` is used only by `routes/cart.tsx`; `ArrangementExportDialog` uses `Modal`, not `ConfirmDialog` (cite the grep).</li></ol> |
-| **K1** (R72–R74) | `app.css` (`@theme` values only) | The 26 value changes in the table, exactly. |
-| **K2** (R75/R76) | the 8 granted component/route files | S1–S9: `text-foreground` → `text-brand-foreground`, one token per site. No other token, class order, copy or behaviour change. |
-| **T1** (new) | `store-theme-tokens.test.ts` | Read `app/styles/app.css` the way `audio-preview-player.test.tsx` and `studio-theme-obsidian.test.tsx` do (brace-matched `@theme` body). **Every CSS case runs on comment-stripped CSS.** Cases: <ol><li>**ST1:** each of the 18 colour keys of the obsidian block has **the identical value** in the store `@theme`. Parse both blocks.</li><li>**ST2:** `@theme` holds exactly the round-193 values for the 8 store-only keys (`surface-glass`, `surface-glass-strong`, `secondary`, `bg-alt`, `brand-rgb`, `accent-rgb`, `buy`, `buy-hover`).</li><li>**ST3:** no `--color-*` declaration in `@theme` outside the unchanged list contains `hsl(175`, `13d9cc`, `19, 217, 204`, `#006aff`, `#0052cc` or `#f9a91f` (case-insensitive). Name the exempt keys explicitly in the test; STORE-2b shrinks that list.</li><li>**ST4:** the obsidian block is unchanged: exactly the 21 declarations TH2 pins, and the 18 colour values asserted literally. TH2 in the frozen suite stays green.</li><li>**ST5:** for **each of S1–S9**, read the source file and locate the element by a stable substring (not a line number): its class string contains `text-brand-foreground` together with its fill class (`bg-buy`, `bg-brand`, `bg-destructive`; for S9 the `CheckCircle` icon class, with the `bg-brand` circle as its parent in the same JSX block), and does **not** contain `text-foreground`. **Byte guards:** every other `Button.tsx` variant string, and the non-destructive ConfirmDialog branch string `'bg-foreground text-background hover:bg-foreground/90'` in `Modal.tsx`, equal the start copy (embed them as literals). In `LeadMagnetPopup.tsx` the strings `CONTINUE` and `SENDING...` are still present.</li><li>**ST6:** no store markup gains `data-studio-theme`: the count under `app/` excluding `__tests__` equals the round-192 baseline (3 lines; 1 in `.ts/.tsx`).</li></ol>jsdom cannot paint; the look and the contrast are browser acceptances (§4). |
-| **D1** (new) | doc 158 | Georgian, following `docs/implementation/TEMPLATE.md`: status `In Progress (awaiting C round 193)`; R72–R76 with rejected alternatives: (a) store values different from the Studio for the overridden keys (drift); (b) `data-studio-theme` on store markup (TH4 and the spec); (c) leaving ivory on brass (1.88:1); (d) leaving the CONTINUE button ivory to avoid touching a keep-list item (2.57:1, a regression this round would cause); K0's Studio table and the S1–S9 list with ratios; round 192's stop and why (planning gap); that `ChatWidget`/`ChatButton` is mounted on no route at `caa09af` (cite the grep), so S8 is covered by ST5 only; the 2b/2c/2d split; a TODO for the protected brass-text sites and the purchased `/studio/:id` legacy view (Tech Lead / backend check). |
-| **D2** (doc 157) | doc 157 | l.4 → `**სტატუსი:** Completed (C round 191 PASS, caa09af)`; l.60 `FS0–FS6` → `FS0–FS7`. Nothing else. |
+| **K0** (evidence first, short) | none | <ol><li>Re-run B's field scan (`b-round-193/tools/fieldscan.mjs`, run from the store root) or an equivalent. It looks at `<input|textarea|select>` plus the next 14 lines for a bare `border-outline`, over `app/` excluding `__tests__` and `components/arrangement`. Also grep class arrays/constants that style fields (the `Input.tsx:34` pattern).</li><li>**Stop rule:** stop and report **only** if a field outside F1–F16 appears in a **non-forbidden** file. The two hits in `components/studio/**` (`ExportDialog.tsx:283` checkbox, `VideoUploadZone.tsx:169`) are expected. They are in `global_forbidden_files` and are not touched (signal `STORE2A-INPUT-BORDER-STUDIO-SITES`).</li><li>Confirm that the Studio does not mount `Input`/`Textarea`/`ChatInput` (`components/arrangement` imports only `Modal*` from `~/components/ui`; cite the grep).</li></ol> |
+| **K1** (R77) | `LeadMagnetPopup.tsx` | P1 only. Every other byte stays identical, including `CONTINUE`, `SENDING...` and the placeholder text. |
+| **K2** (R78) | the 10 field files | F1–F16: one token per site, `border-outline` → `border-outline-strong`. No other token, class order, copy or behaviour changes. `focus:*` classes stay. A Biome reflow is allowed only under R79. |
+| **T1** (extend) | `store-theme-tokens.test.ts` | Keep ST1–ST6 unchanged and green. Add:<ul><li>**ST7:** in `LeadMagnetPopup.tsx`, the email input class (located by `placeholder="Enter your email address"`) contains `placeholder:text-brand-foreground/60` and does not contain `placeholder:text-dim`.</li><li>**ST8:** for each of F1–F16, read the file and locate the element by a stable substring, not by line number. Its class contains `border-outline-strong` (for F1 only, `border-outline-strong` or `border-dim`, per the R78 fallback) and no bare `border-outline` (regex `border-outline(?![-\w])`).</li><li>**ST8b (class guard):** across `app/` excluding `__tests__`, `components/arrangement` and `components/studio`, no `<input|textarea|select>` element's class (the same 14-line window) carries a bare `border-outline`. So a new field with the faint border turns red.</li></ul> |
+| **D1** (doc 158) | doc 158 | Status → `In Progress (awaiting C round 194)`. Add a "Round 194" section in Georgian: C-R193-01/02 with C's numbers (tree vs HEAD), R77–R79 with their rejected alternatives, the F1–F16 list, the two forbidden legacy sites, and a TODO for the non-field `border-outline` inventory (2b). Also note: A's round-193 reviewer flagged `--color-outline` at ≈1.25:1 as info, but no one measured the fields before handover (RETRO input). |
 
-**Unchanged on purpose (frozen list, byte-identical):** every other `app/styles/**` byte, `root.tsx`, `studio-lab.tsx` and every Studio-owned file; every component other than the granted files; every existing test (`studio-theme-obsidian`, `audio-preview-player`, `panel-radius-ui`, `store-header-footer`, the `*-colour-ui` suites, `e2e/**`); the protected purchase/auth files, `app/lib/auth*`, `public/`, `.claude/**`, `package.json` and the configs.
+**Unchanged on purpose (frozen list, byte-identical):** `app/styles/**` (including the round-193 `@theme` values and the obsidian block); every other round-193 file (`Button.tsx`, `Modal.tsx`, `PurchaseHeader.tsx`, `ChatButton.tsx`, `ForgetPassword.tsx`, `account.orders.tsx`, doc 157); `root.tsx`, `studio-lab.tsx` and every Studio-owned file; every existing test and `e2e/**`; the protected purchase/auth files (`studio.$productId.tsx`, `api.studio-token.ts`, `account.downloads.tsx`, `download-routes.test.ts`, `AuthContext.tsx`, `app/lib/auth*`, `firebase.client.ts`), `components/studio/**`, `public/`, `.claude/**`, `package.json` and the configs.
 
 ## 2. A — files you own (everything else is frozen)
-- **Grants:** the 10 files above, each limited to its scope, and the 2 new files. Plus your own `a-round-193.md` and `a-round-193/`.
-- **Protected, byte-identical:** every path in the frozen list, including `studio.$productId.tsx`, `api.studio-token.ts`, `account.downloads.tsx`, `download-routes.test.ts`, `AuthContext.tsx`, `app/lib/auth.ts`, `firebase.client.ts`, `app/root.tsx`, `public/`, `.claude/**` and `package.json`. Do not touch `mock-api/` or any other loop file.
-- **If a frozen test turns red** because of your change, change your implementation so it stays green. If impossible without dropping a requirement, **stop and report** the exact failing assertion. Do not edit the frozen test.
-- **Read first** (rule `read-primitives.md`): `AGENT_DISCOVERABLE_CODE.md`, `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`, `FORWARDREF_COMPONENT.md` (Button, Modal), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`; `prompts/new-test.md`; `docs/implementation/TEMPLATE.md`.
-- Write `a-round-193/end-sha256.txt` (10 grants + 2 new files) and `a-round-193/diff-vs-start.patch` (grants against `b-round-192/r193-granted-start/`, new files in full). No commit and no push.
+- The 13 grants, each limited to its scope above. Plus your own `a-round-194.md` and `a-round-194/`.
+- **If a frozen test turns red** because of your change, change your implementation so it stays green. If that is impossible without dropping a requirement, stop and report the exact failing assertion.
+- **If a field measures below 3:1 with `border-outline-strong`** in your live proof: for F1, apply the R78 fallback (`border-dim`). For any other field, stop and report it with numbers. Never add a token or touch `app.css`.
+- **Read first** (rule `read-primitives.md`): `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`, `FORWARDREF_COMPONENT.md` (Input), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `AGENT_DISCOVERABLE_CODE.md`; `prompts/new-test.md`.
+- Write these files:
+  - `a-round-194/end-sha256.txt`: the 13 grants.
+  - `a-round-194/diff-vs-start.patch`: the grants against `b-round-193/r194-granted-start/`.
+- Use the Edit/Write tools for every lasting edit. Shell writes are for temporary mutations only; restore them and check the sha. No commit and no push.
 
 ## 3. A — tests and checks (speed rules)
-**Run:**
-- `npx vitest run app/lib/__tests__/store-theme-tokens.test.ts`: green.
-- **Neighbour suites**, all green: `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx`, `panel-radius-ui.test.tsx`, `affordance-colour-ui.test.tsx`, `fader-style-ui.test.tsx`, the arrangement export-dialog suite(s) that render `Modal` (A greps `ArrangementExportDialog` in `__tests__` and lists them); `app/lib/__tests__/audio-preview-player.test.tsx`, `store-header-footer.test.tsx`; every test that imports `Button`, `Modal`/`ConfirmDialog`, `PurchaseHeader`, `LeadMagnetPopup`, `ChatButton`/`ChatWidget` or `ForgetPassword`/`AuthModal`; and every other test that reads `app.css` or asserts a store colour (grep `app.css`, `--color-`, `bg-brand`, `text-foreground` in `*.test.*`). List what ran.
-- **e2e (frozen, run by the gate):** re-run the round-192 grep in `e2e/` and add `text-brand-foreground`, `bg-buy`, `CONTINUE`, `Buy Now`. If any frozen e2e assertion depends on a changed class or value, **stop and report**.
-- **Red proof:** run T1 against the start copies (temporary copy over the grants, then restore and check `end-sha256.txt`, or a scratch Vite alias). ST1, ST2, ST3 and ST5 must be red there; ST4 and ST6 may be green.
-- `npm run typecheck`. `npm run lint`, reporting the count against round 191's 214 warnings + 1 info. `npx biome check` on every changed and new file: 0 errors.
-- Do not run the full suite: that is the gate's job.
+- `npx vitest run app/lib/__tests__/store-theme-tokens.test.ts`: green (ST1–ST8b).
+- **Neighbour suites**, all green:
+  - `gift-card-input.test.tsx` and `store-header-footer.test.tsx`;
+  - every test that imports `Input`/`Textarea`/`PasswordInput`, `SignInForm`/`SignUpForm`/`AuthModal`/`ForgetPassword`, `NewsletterSection`, `LeadMagnetPopup`, `GiftCardInput`, `ChatInput`/`ChatWidget`, or renders the routes `store`, `hire-us`, `free-downloads`, `gift-cards`, `cart`, `account` (grep and list them);
+  - `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx`.
+- **e2e grep (the gate runs e2e):** search `e2e/` for `border-outline`, `placeholder`, `Enter your email` and `toHaveClass` on fields. If a frozen assertion depends on a changed class, **stop and report**.
+- **Red proof:** run T1 against the start copies. ST7, ST8 and ST8b must be red there. ST1–ST6 stay green, because they test the round-193 tree.
+- Run `npm run typecheck`. Run `npm run lint` and report the count against round 193's 214 warnings + 1 info. Run `npx biome check` on every changed file: 0 errors.
+- Do not run the full suite; the gate runs it.
 
-**Live proof** (Playwright Chromium on :5173, mock on :5199, DPR 2), saved under `a-round-193/`:
-- At 1440×900, 1280×720 and 375×812, on `/`, `/store` and `/products/middle-east`: full-page shots, and `getComputedStyle(document.documentElement)` for the 26 tokens.
-- Buy Now on `/products/middle-east` (rest + hover) and the `/hire-us` submit: computed colour and background, with crops.
-- The LeadMagnet popup, if it can be triggered (as rounds 188/190 did): the CONTINUE button crop and computed colours.
-- `/studio-lab` at 1440 and 1280: a rest shot vs `c-round-191/shots/c191-{1440,1280}-1/rest-full.png`, **no mask**: 0 changed px. Plus the export dialog open at 1440 vs HEAD: 0 changed px.
-- The keep-list texts on `/` captured before and after.
+**Live proof** (Playwright Chromium on :5173, mock on :5199, DPR 2), saved under `a-round-194/`:
+- **Border ratio on rendered pixels for each reachable field.** Measure the field's border pixel against the pixel just outside it at the **four edge midpoints** (top, right, bottom, left), unfocused, at 1440×900 (and 375×812 for `/`, `/store`, `/hire-us`). The fields are F1, F2, F3–F6, F7, F8, F10 (if it renders with an empty cart), and the `Input` fields in the sign-in/sign-up modal opened from the header (F14).
+- The LeadMagnet placeholder pixel ratio at 1440 and 375, using the round-193 trigger (scroll to 55 %, wait about 8 s, click FREE DOWNLOAD).
+- `/studio-lab` at 1440: a rest shot vs `c-round-191/shots/c191-1440-1/rest-full.png`, no mask, 0 changed px.
 
 **Code review:** use the `code-reviewer` subagent (≥ 3 files). Pass its Architecture note to B verbatim. Fix its Medium+ findings within the grants.
 
 ## 4. C — rows
-**Setup:** real Playwright Chromium on the shared :5173 server, a fresh anonymous context, mock API on :5199 (start it if it is not listening, log `c-round-193/mock.log`, stop **only that PID** at the end). A **HEAD reference** (`git archive caa09af`, served on its own port with its own vite `cacheDir`, as in round 191) for "before" shots and layout, or `c-round-190/shots/store-after/` + `c-round-191/shots/` + `c-round-192/shots/` (round 192 measured HEAD). Viewports: store rows at **1440×900, 1280×720 and 375×812**; Studio rows at 1440×900 and 1280×720. Pixel reads at DPR 2 with `--disable-lcd-text`.
+**Setup:**
+- Real Playwright Chromium on the shared :5173 server, a fresh anonymous context, and the mock API on :5199. Start the mock if it is not listening, log to `c-round-194/mock.log`, and stop **only that PID** at the end.
+- For "before" evidence, use either a reference of the **round-193 tree**, the `caa09af` archive from round 193 (`c-round-193/head`), or C's round-193 numbers. Say which you used.
+- Viewports: store rows at **1440×900, 1280×720 and 375×812**; Studio rows at 1440×900 and 1280×720. Pixel reads at DPR 2 with `--disable-lcd-text`.
 
 | Row | What | Pass |
 |---|---|---|
-| **TOKENS-193** | On `/`, `/store`, `/products/middle-east` × 3 viewports: the 26 tokens from `getComputedStyle(document.documentElement)`; `body` background. | Every token equals the §1 table (colour-normalised). `body` background = `rgb(14, 13, 12)` (HEAD `rgb(8,10,12)`). No element on these pages carries `data-studio-theme`. |
-| **CONTRAST-193** | Same pages and viewports. Sample at least: nav links (rest and active), h1/h2s, body paragraphs, captions/meta, prices, primary and secondary buttons and their hover, the cart badge, the newsletter field and placeholder on `/`, the footer links, **Buy Now rest and hover**. Record foreground and background **as rendered** (pixel or computed, stating which) and the ratio. | Text ≥ 4.5:1 (large ≥ 3:1), UI parts and focus ring ≥ 3:1, for every **token-coloured** sample. A sample below threshold whose colours come from a §1 token is a **FAIL (Medium, caused by this round)** unless HEAD had the same or lower ratio (then pre-existing → Low). Hardcoded teal, gradient, glow or unchanged-list colours are **STORE-2b inventory** (info, with selector and ratio), not a 2a FAIL. |
-| **BRASS-TEXT-193** | S1–S9 in the browser where reachable, rest + hover, 3 viewports: <ul><li>**S5 Buy Now** on `/products/middle-east` (required): expected ≈ 8.3:1 rest on `#c9a46a` and > 8:1 on hover `#d9b87f`.</li><li>**S3** `/hire-us` submit.</li><li>**S6** LeadMagnet CONTINUE: trigger the popup as rounds 188/190 did; if it does not appear, record exactly why.</li><li>**S7** ConfirmDialog: try add to cart → remove on `/cart` with the mock; if no destructive confirm opens, record it and rely on ST5.</li><li>**S1/S2** `Button` buy/destructive: any store page that renders them, or say none does.</li><li>**S8** ChatButton: not mounted on any route at `caa09af` → "not reachable", ST5 only.</li><li>**S9** ForgetPassword success state needs a successful reset call (Firebase not configured) → **BLOCKED — backend unavailable in cloud** unless it renders; ST5 covers the class.</li><li>**S4** account.orders: **BLOCKED — backend unavailable in cloud** (needs a signed-in user).</li></ul> | Every reached site: dark text (`rgb(14,13,12)`) on its fill, ≥ 4.5:1 rest and hover (S9 icon ≥ 3:1). Unreachable/blocked sites are listed as such, never as PASS. |
-| **KEEP-193** (binding keep-list) | On `/` (and wherever they render): the LeadMagnet "FREE DOWNLOAD" popup **including the CONTINUE button text**, the Free Samples nav link (desktop + mobile menu), SpecialOffers, the "Limited" badges, the testimonials and stats ("2,500+ Happy Customers", "Netflix Original Score"). | `innerText` of each is byte-identical to HEAD, and each is still mounted where it was (same parent route, same order). Only colours may differ. A missing element that is also missing at HEAD (C-R188-I6 testimonials) is recorded, not failed. |
-| **STORE-LAYOUT-193** | `/`, `/store`, `/products/middle-east` × 3 viewports, tree vs HEAD at the same scroll and state: bounding boxes of header, nav items, h1, hero, each section root, product cards, the product page main column (incl. Buy Now), the footer. | Every box unchanged ± 1 px. |
-| **STORE-SHOTS-193** (evidence) | Before/after full-page shots of the three pages × 3 viewports, plus a side-by-side montage, under `c-round-193/shots/store-after/`. | Evidence only; one line per page on what changed visibly. Passes when the shots exist and the description matches them. These are STORE-2b's baseline. |
-| **PERF-193** | Home `/`, fresh context, 3 runs per viewport: LCP and CLS (PerformanceObserver, as round 190). | LCP median ≤ 2.5 s; CLS median < 0.1 at each viewport. |
-| **RM-193** | `prefers-reduced-motion: reduce` on `/`. | The entrance loader is off and no new animation appears (spot check). Same as HEAD. |
-| **STUDIO-RV-193** | `/studio-lab` rest at 1440 and 1280 vs `c-round-191/shots/c191-{1440,1280}-1/rest-full.png`, **no mask**. At 1440: open the grid menu, the marker menu and **the export dialog (mandatory: `Modal.tsx` is granted)**, and compare each crop with HEAD. | **0 changed px** at rest and in the three overlays. 0 console errors. One cold blank 1440 load may be replaced once (ENV-FIRST-LOAD). |
-| **G193-3** | As G192-3. | `/studio-lab`: no `auth_user`, 0 cookies, workspace and demo badge present. `/studio/middle-east`: "Sign in required", 0 `audio[src]`. studio-token with no header → 401; with a fake Bearer → 403 (mock-backed). |
-| **SCOPE-193** | The frozen list (1012) at C's start and end, from the store root; A's `end-sha256.txt`; `git status`; `git diff caa09af` per granted file. | Frozen list OK at both ends. `git status` is exactly the 10 granted ` M` + 2 `??` (doc 157 counts among the 10). `app.css` diff touches **only** §1 declarations inside `@theme` (value, plus an optional same-line comment); the obsidian block and `:focus-visible` rule are byte-identical. Each of the 8 component/route diffs is exactly **one changed line** swapping `text-foreground` → `text-brand-foreground` at its S-site (`Button.tsx`: two lines, S1 and S2). Doc 157 diff is 2 lines. |
-| **T-RUN-193** | T1 on the tree and on the start copies. Mutants on the end copy: m1 store `--color-brand` back to `hsl(175, 85%, 46%)`; m2 one obsidian value changed (e.g. `--color-muted`); m3 `--color-secondary` back to `hsl(220, 10%, 70%)`; m4 `buy` variant back to `text-foreground`; m5 hire-us submit back; m6 `--color-buy` back to `#006AFF`; **m7** PurchaseHeader Buy Now back to `text-foreground`; **m8** the Modal destructive string back; **m9** `CONTINUE` changed to `Continue` in LeadMagnetPopup. | T1 green on the tree. ST1, ST2, ST3, ST5 red on the start copies. m1 → ST1 (and ST3) red; m2 → ST1/ST4 red (and TH2 red); m3 → ST2 red; m4, m5, m7, m8, m9 → ST5 red; m6 → ST2/ST3 red. |
-| **AN-REVIEW-193** | Read the diff, T1, D1, D2. | Only §1 values in `app.css`, no new rule or selector; no `as`, `any` or `@ts-ignore`; T1 parses the real files and would catch drift; D1 in Georgian, status `In Progress (awaiting C round 193)`, R72–R76 with rejected alternatives, K0's tables, S1–S9, the split; D2 exactly 2 lines. |
-| **DOC157-193** | doc 157 l.4 and l.60. | Status `Completed (C round 191 PASS, caa09af)`; `FS0–FS7`. |
+| **PLACEHOLDER-194** (C-R193-01) | The LeadMagnet popup, step 2, at 3 viewports: placeholder pixel vs the white field. Also the typed value after you type `a@b.co`. | Placeholder ≥ **4.5:1** on rendered pixels (expected ≈ 5.1). It is visibly lighter than the typed value (`text-black`). The placeholder text is byte-identical to HEAD. |
+| **FIELD-BORDER-194** (C-R193-02) | Unfocused border pixel vs the pixel just outside it. Pages: `/` newsletter (F1), `/store` search (F2), `/hire-us` 4 fields (F3–F6), `/free-downloads` search (F7), `/gift-cards` code (F8), `/cart` (F9/F10 where they render with the mock), and the header's sign-in/sign-up modal `Input` fields (F14). Use 3 viewports for F1, F2 and F3–F6, and 1440 for the rest. Then focus each by keyboard. | Sample the border vs the outside pixel at the **four edge midpoints**. Every reached field: all four ≥ **3:1** against its surround (WCAG 1.4.11), and better than HEAD. F1 may use `border-dim` under the R78 fallback if A recorded why. On keyboard focus the brass border/ring still shows. F11–F13 (`/account`): **BLOCKED — backend unavailable in cloud** (needs a signed-in user), ST8 only. F15 (`Textarea`) and F16 (`ChatInput`): "not reachable" if no route renders them, ST8 only. |
+| **CONTRAST-194** | Re-run the round-193 CONTRAST sample set on `/`, `/store`, `/products/middle-east` at 1 viewport (1440), plus the changed fields' placeholders. | No token-coloured sample regresses against round 193's numbers (`c-round-193/out/store-compare.json`). The pre-existing → Low escape does not apply to F1–F16 or P1, because this round fixes them. |
+| **KEEP-194** | The LeadMagnet popup steps 1–2 `innerText` (including `CONTINUE` and the placeholder attribute), Free Samples (desktop and mobile menu), SpecialOffers, Limited, `/about` stats, and the `/free-downloads` page heading and search placeholder. | Byte-identical to HEAD and mounted in the same place. |
+| **STORE-LAYOUT-194** | `/`, `/store`, `/hire-us`, `/free-downloads` × 3 viewports, tree vs the round-193 reference: field boxes, section roots, header, footer. | Every box unchanged ± 1 px (the border widths do not change). |
+| **STUDIO-RV-194** | `/studio-lab` rest at 1440 and 1280 vs `c-round-191/shots/c191-{1440,1280}-1/rest-full.png`, no mask. | **0 changed px**. 0 console errors. One cold blank 1440 load may be replaced once (ENV-FIRST-LOAD). |
+| **G194-3** | As G193-3. | `/studio-lab`: no `auth_user`, 0 cookies, workspace and demo badge present. `/studio/middle-east`: "Sign in required", 0 `audio[src]`. studio-token with no header → 401; with a fake Bearer → 403. |
+| **SCOPE-194** | Frozen list (1011) at C's start and end, from the store root; A's `end-sha256.txt`; `git status`; `git diff` of each grant against `b-round-193/r194-granted-start/`. | Frozen OK at both ends. `git status --short` is exactly **21 lines: 19 ` M` + 2 `??`**: the 10 round-193 ` M` (2 of which, `LeadMagnetPopup.tsx` and `hire-us.tsx`, are also round-194 grants), plus the 9 newly modified `NewsletterSection.tsx`, `store.tsx`, `free-downloads.tsx`, `gift-cards.tsx`, `GiftCardInput.tsx`, `cart.tsx`, `account.tsx`, `ui/Input.tsx` and `chat/ChatInput.tsx`, plus the 2 round-193 `??` (`store-theme-tokens.test.ts`, doc 158). Nothing else. Diffs: P1 one semantic change; every F-site one token swap; reflow only under R79 (prove it with `biome format`); the test file only adds ST7/ST8/ST8b; doc 158 only the status line and the Round 194 section. |
+| **T-RUN-194** | T1 on the tree and on the start copies. Mutants on scratch copies: **m10** P1 back to `placeholder:text-dim`; **m11** F2 (`store.tsx`) back to `border-outline`; **m12** F14 `Input.tsx` base back; **m13** a new scratch `<input className="border border-outline">` added to a scratch copy of `hire-us.tsx`. | T1 green on the tree. ST7/ST8/ST8b red on the start copies. m10 → ST7 red; m11, m12 → ST8 red; m13 → ST8b red. |
+| **AN-REVIEW-194** | Read the diff, T1 and doc 158. | Only the listed tokens changed; no `as`, `any` or `@ts-ignore`; ST8b would catch a new faint field; doc 158 in Georgian with R77–R79 and their rejected alternatives. |
 | **PX-NET / REG-HYD** | Every session. | 0 pageerror; 0 hydration messages; 0 non-font remote requests; 0 Authorization headers from the page. |
 
 **Outcomes written in advance:**
-- Remaining teal in hardcoded classes, inline styles, gradients, glows, loaders or emails is **expected** (STORE-2b): inventory (page, selector, colour) for B, not a FAIL.
-- Fonts do not change this round (Inter stays in the store). A font difference vs HEAD is a FAIL.
-- Any Studio pixel change at rest or in the three overlays is a **regression FAIL (Medium)**.
-- Any store layout move beyond ± 1 px is a **regression FAIL (Medium)**.
-- A keep-list text change or a missing keep-list element (that HEAD has) is a **FAIL (Medium, binding Saba rule)**.
-- The purchased `/studio/:id` workspace (legacy `components/studio/**`) consumes store tokens and cannot be opened without a backend: **BLOCKED — backend unavailable in cloud** (BACKEND-ONLY-EVIDENCE / TECH-LEAD-MANUAL). Its "Sign in required" gate page is checked in G193-3.
+- Any reached field below 3:1 after the change → **FAIL (Medium)**. Report its surround colour.
+- A placeholder below 4.5:1, or one that looks like the typed value → **FAIL (Medium)**.
+- Any Studio pixel change → **regression FAIL (Medium)**. Any store layout move beyond ± 1 px → **regression FAIL (Medium)**. Any keep-list text change → **FAIL (Medium, binding Saba rule)**.
+- Remaining teal, glow or gradient colours and non-field `border-outline` surfaces are **STORE-2b inventory**, not a FAIL.
 - New Lows go to `deferred_low_polish`.
 - **Gate rows (not C's):** full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED, PROD-SSR-NUL.
-- **SCOPE row honesty:** do not put SCOPE-193 in `passed` under a reinterpreted criterion. If A stops again without implementing, SCOPE-193 is `notRun` with a `scopeNote`.
+- **SCOPE row honesty:** if A stops without implementing, SCOPE-194 is `notRun` with a `scopeNote`, never `passed`.
 
-**Adjacent behaviour that could break, with the check that catches it:**
-- A shared component in the Studio reads a changed, non-overridden token, or the `Modal.tsx` edit leaks into the export dialog → K0 table, SCOPE-193 one-line diff, STUDIO-RV-193 export-dialog crop.
-- A test or e2e spec asserts an old colour or class → neighbour suites (A), the e2e grep, the gate's full run.
-- Ivory text left on a fill somewhere → K0 re-scan, CONTRAST-193, BRASS-TEXT-193.
-- The keep-list CONTINUE copy changed by accident → ST5 literal, m9, KEEP-193.
-- The global `:focus-visible` outline turns brass on the store (intended; reads `--color-brand`) → CONTRAST-193 ring ≥ 3:1.
+**Adjacent behaviour that could break, and the check that catches it:**
+
+| Risk | Check |
+|---|---|
+| The auth modal fields (shared `Input`) change size | STORE-LAYOUT-194 and FIELD-BORDER-194 on the modal (same border width, so ±0) |
+| A field's focus state loses its brass cue | the keyboard-focus step of FIELD-BORDER-194 |
+| The keep-list popup copy changes by accident | ST5 literals, ST7, KEEP-194 |
+| The Studio picks up a shared class | K0 grep, STUDIO-RV-194 |
 
 ## 5. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Store colour palette | **None.** This round changes the store web pages, not Arrangement behaviour. | Nothing. | Saba's approved store direction A (Obsidian & Brass), CZABA's own design. | Parity: **არ ეხება**. Do not claim "Ableton does the same". |
+| Store text-field borders and the popup placeholder | **None.** These are store web pages, not Arrangement behaviour. | Nothing. | Saba's approved store direction A plus WCAG 1.4.3/1.4.11. | Parity: **არ ეხება**. Do not claim "Ableton does the same". |
 
 ## 6. Evidence and reporting
-- **A:** `a-round-193.md` and `a-round-193/`: K0 re-scan, token probe, shots, Studio 0-px diff, keep-list capture, tests and the review.
-- **C:** `c-round-193.md`, `c-round-193.json` (`browserVerified`, `realVerified`, `passed` / `failed` / `blocked` / `notRun` / `gate`) and `c-round-193/`.
-- **Both:** write report files as you go.
+- **A:** `a-round-194.md` and `a-round-194/`.
+- **C:** `c-round-194.md`, `c-round-194.json` (`browserVerified`, `realVerified`, `passed` / `failed` / `blocked` / `notRun` / `gate`) and `c-round-194/`.
+- **Both:** write the report files as you go.
 
 ## 7. Outcome, fixed in advance
-| Condition | Round 194 |
+| Condition | Round 195 |
 |---|---|
-| **C PASS** (`browserVerified=true`) and planning on or after **2026-10-27** | Root publishes round 193; STORE-2a → **მზადაა**. Round 194 is the **REGRESSION round** (`REGRESSION-ROUND-2026-10-27`; scope in `backlog.json`, incl. SABA-B-3 one fader per kind with the C-R191-I1 ruling and the STORE-2a token probe). STORE-2b follows it. |
-| **C PASS** and planning still on 2026-10-26 | Round 194 = STORE-2b. The regression comes at the first planning on or after 2026-10-27. |
-| **C FAIL** on a STORE-2a row (tokens, contrast caused by this round, brass text, keep-list, layout, Studio pixels) | A bounded fix-up in round 194, before the regression round (a Medium this round caused). |
-| A stops again at K0 with a site outside S1–S9 | B re-grants once more with the new site; the planning cost is recorded for the RETRO. |
-| A browser row that can run here did not run | `browserVerified=false`. STORE-2a is not done; B re-plans the browser half. |
+| **C PASS** (`browserVerified=true`), whatever the date | Root publishes rounds 193 + 194 (19 M + 2 new). STORE-2a → **მზადაა**. If planning is on or after **2026-10-27**, round 195 is the **REGRESSION round** (`REGRESSION-ROUND-2026-10-27`), adding the STORE-2a token probe and one field-border spot check. Otherwise round 195 is STORE-2b, and the regression comes at the first planning on or after 2026-10-27. |
+| **C FAIL** on a 194 row | One more bounded fix-up, before the regression round. |
+| A stops at K0 with a field outside F1–F16 | B re-grants with that site. The planning cost is recorded for the RETRO. |
+| A browser row that can run here did not run | `browserVerified=false`. STORE-2a is not done, and B re-plans the browser half. |
 
 ## 8. Root notes
-- **Gate (on C PASS):** the 10 grants and the 2 new files, against `caa09af`.
-- **R76 acknowledgement requested (non-blocking):** the keep-list LeadMagnet CONTINUE button changes text colour only (ivory → `#0e0d0c`; copy, size, position, behaviour unchanged). B's reading: this is the "restyle" the keep-list allows. Root or Saba may veto; the round proceeds meanwhile.
-- **Root decision still requested (STORE-2c/2d, not this round):** a narrow grant of `app/root.tsx` — for 2c the `links()` font entries only; for 2d the Lenis reduced-motion guard only, unless it can live entirely in `useSmoothScroll`. Fallback if declined: fonts from `app.css` (`@import`) and the deviation recorded for Saba.
-- **For Saba (vetoable, nothing scheduled):** C-R191-01 (level-fader thumb vs brass fill 1.82:1: (a) dark thumb edge or (b) accept as R68); R72–R76.
-- **Signals recorded, not scheduled:** `GLOBAL-FOCUS-VISIBLE-UNLAYERED` (RETRO systemic candidate), `ARCH-R191-PAN-RING-COUPLING`, `STORE2A-PROTECTED-BRASS-TEXT`.
-- **Checkpoint:** `b-round-183-checkpoint-request.md` still unanswered; fallback (c) continues; next checkpoint point: the STORE-REDESIGN exit.
-- **Root request C-R188-I3** (mock has no `digital-gift-card` product) still open; nothing is blocked by it.
+- **Gate (on C PASS):** the round-193 diff **plus** the round-194 changes, all against `caa09af`. Together that is **19 modified + 2 new files**.
+- **For Saba, vetoable (non-blocking):** R76 (CONTINUE text colour), R77 (placeholder `brand-foreground/60`), R78 (`outline-strong` on store fields).
+- **Signals recorded, not scheduled:**
+  - `STORE2A-INPUT-BORDER-STUDIO-SITES`: the legacy `components/studio/**` fields are forbidden files.
+  - `STORE2A-PROTECTED-BRASS-TEXT`.
+  - `ARCH-R193-THEME-REGION`: A's round-193 reviewer note on moving ST4/ST6 into `studio-theme-obsidian.test.tsx` and whether the obsidian block is still needed after STORE-2. B's decision point is the STORE-2 exit.
+  - `GLOBAL-FOCUS-VISIBLE-UNLAYERED`.
+- **Still open:** the `root.tsx` narrow grant for STORE-2c/2d; root request C-R188-I3; checkpoint `b-round-183-checkpoint-request.md` (fallback (c); next point: the STORE-REDESIGN exit). RETRO: at round 200 or the STORE-REDESIGN exit.

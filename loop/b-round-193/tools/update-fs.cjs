@@ -1,0 +1,10 @@
+const fs=require('fs');const P='feature-status.md';const lines=fs.readFileSync(P,'utf8').split('\n');
+const rep=(i,from,to)=>{if(!lines[i].includes(from))throw new Error('miss '+i+' '+from);lines[i]=lines[i].replace(from,to);};
+rep(2,'B (round 192 → round 193 დაგეგმვა, D-29z158)','B (round 193 → round 194 დაგეგმვა, D-29z159)');
+const k=lines.findIndex(l=>l.startsWith('- **Round 192 (D-29z157)'));if(k<0)throw new Error('r192');
+if(lines[k+1].startsWith('- **Round 193'))throw new Error('already');
+lines.splice(k+1,0,'- **Round 193 (D-29z158): STORE-2a — ბაგია (C FAIL, `browserVerified: true`).** A-მ 26 token და მუქი ტექსტი S1–S9-ზე გააკეთა; C-ის 15 row-დან 13 PASS (TOKENS 26/26, Buy Now 8.32/10.28:1, keep-list იდენტური, layout ±1 px, Studio 0 px export dialog-ის ჩათვლით, T1 და m1–m9). CONTRAST-193 ჩავარდა ამ რაუნდის გამოწვეულ ორ Medium-ზე: **C-R193-01** — LeadMagnet-ის email placeholder თეთრ ველზე 3.41:1 (HEAD 5.06); **C-R193-02** — store-ის ტექსტური ველების border `#24211e` 1.03–1.21:1 (HEAD 1.35–1.62). C-R193-03 (Button.tsx-ის Biome reflow) — B-ის R79 გადაწყვეტილებით დაიხურა. ცვლილებები commit-ის გარეშე ხეში რჩება, gate 193 გამოტოვებულია. **შემდეგი: Round 194 (D-29z159) — fix-up:** placeholder → `brand-foreground/60` (R77), 16 ველი → `border-outline-strong` (R78); რეგრესია — 2026-10-27-ზე ან შემდეგ დაგეგმვისას (`c-round-193.md`, `b-round-193.md`).');
+const i=lines.findIndex(l=>l.startsWith('| STORE-REDESIGN |'));if(i<0)throw new Error('row');
+lines[i]=lines[i].replace('— **მუშავდება** (Round 192 შეჩერდა K0.4-ზე, ცვლილების გარეშე → Round 193, D-29z158; + PurchaseHeader, LeadMagnet CONTINUE, ConfirmDialog, ChatButton, ForgetPassword icon)','— **ბაგია** (Round 192 შეჩერდა K0.4-ზე → Round 193 განხორციელდა, C FAIL: C-R193-01 placeholder, C-R193-02 ველების border, ორივე Medium → fix-up Round 194, D-29z159)').replace('`current-task.md` (round 193)','`c-round-193.md`; `current-task.md` (round 194)');
+if(!lines[i].includes('Round 194'))throw new Error('row not updated');
+fs.writeFileSync(P,lines.join('\n'));console.log('ok');

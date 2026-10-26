@@ -1,0 +1,14 @@
+# C round 193 checkpoint
+- SCOPE start: HEAD caa09af, frozen 1012 OK, end-sha OK, git status 10M+2??, diff read: app.css 26/26 in @theme, 8 one-liners, Button 7/2 reflow
+- mock started by C: PID 8631 (mock.pid); HEAD caa09af copy at c-round-193/head on :5174 (vite pid file logs/head-vite.pid, node 8652)
+- store193 tree/head x3 vp DONE (out/store-*.json, store-compare.json): tokens 0/26 mismatch tree (26 head), bodyBg rgb(14,13,12), studioTheme 0, fonts same, layout 0 bad (13-14 boxes + docH), keep same (2,500+/Netflix absent at HEAD and tree), token text min ratios >=5.38; only low text = home StudioShowcase hardcoded neutrals (same as HEAD). Buy Now 8.32/10.28 (pixel same), hire-us 8.32 rest / 6.94 hover px. Focus ring brass 7.76-8.35. PX-NET 0 everywhere.
+- FINDING candidate: input borders (outline token #24211e) newsletter/search/hire-us 1.03-1.21 px (HEAD 1.35-1.62), both <3:1 -> rule says Medium (HEAD higher). inputs-1440.json
+- TODO: S6 popup, S7 cart, keep detail (testimonials container), PERF, RM, STUDIO-RV, G193-3, T-RUN, AN-REVIEW, montage, biome scratch check
+- popup (S6) 3vp: CONTINUE dark 6.09 rest / 7.31 hover px, texts same as HEAD; FINDING popup email placeholder (dim on white) 3.41 px (HEAD 5.06) -> Medium caused. special/limited/order/about same; Testimonials not mounted (HEAD too); /about 2,500+ same.
+- cart S7: mock 501 on add -> not reachable; code uses default variant
+- STUDIO-RV: rest 0 px 1440/1280 vs c191; grid/marker/export 0 px tree vs head; 0 errors
+- PERF 1440 564ms/0.0009, 1280 616/0.022, 375 456/0.0001; RM loader off (control shows loader w/o reduce), 0 running anims, same as HEAD
+- G193-3 PASS
+- T-RUN all as expected incl TH2 red under m2 (trun/trun.txt)
+- TODO: biome scratch, AN-REVIEW, montage, report, cleanup
+- DONE: verdict FAIL (C-R193-01 Medium popup placeholder 3.41, C-R193-02 Medium input borders 1.2, C-R193-03 Low Button reflow); browserVerified true; mock 8631 + head vite 8628/8652 killed; reports c-round-193.md/.json written

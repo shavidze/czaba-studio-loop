@@ -1,0 +1,103 @@
+{
+ "round": 193,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-26T13:54:43.2147614Z",
+  "round": 193,
+  "attempt": 1,
+  "store": 200
+ },
+ "abletonParity": "არ ეხება (store palette; no Arrangement behaviour)",
+ "bugs": [
+  {
+   "id": "C-R193-01",
+   "severity": "medium",
+   "title": "LeadMagnet popup email placeholder (keep-list) drops to 3.41:1 on its white field",
+   "steps": [
+    "Fresh anonymous context, any of 1440x900/1280x720/375x812, open http://127.0.0.1:5173/",
+    "Scroll to 55% of the page, wait about 7 s until the FREE DOWNLOAD popup opens",
+    "Click FREE DOWNLOAD (step 2)",
+    "Read the placeholder \"Enter your email address\" in the white email field"
+   ],
+   "expected": "Placeholder text at least 4.5:1 (CONTRAST-193; token-coloured sample: placeholder:text-dim = --color-dim)",
+   "actual": "--color-dim #928a7d on bg-white: 3.41:1 measured on rendered pixels at 1440 and 375 (rgb(146,138,125) on rgb(255,255,255)). At HEAD caa09af it was 5.06:1 (rgb(103,111,126)). Below threshold, token-coloured, HEAD higher, so caused by this round (Medium per the task rule). The cause is LeadMagnetPopup.tsx:126 placeholder:text-dim on a bg-white input: the dim token is meant for dark surfaces.",
+   "evidence": "c-round-193/out/popup-{1440,1280,375}.json (tree.input / head.input); c-round-193/shots/popup/{1440,375}-{tree,head}-input.png; c-round-193/shots/popup/*-step2.png",
+   "fixHint": "Change only the placeholder token on that white field in LeadMagnetPopup.tsx (already a granted file this round), e.g. placeholder:text-brand-foreground (#0e0d0c, about 19:1 on white). The copy stays unchanged; this is a colour-only restyle like R76."
+  },
+  {
+   "id": "C-R193-02",
+   "severity": "medium",
+   "title": "Store text-input boundaries (border-outline) fall from about 1.6:1 to about 1.2:1",
+   "steps": [
+    "Fresh anonymous context, 1440x900, open / (Join the Inner Circle newsletter field), /store (search field), /hire-us (form fields)",
+    "Compare the input border with the surrounding background, unfocused"
+   ],
+   "expected": "UI component boundary at least 3:1 (CONTRAST-193 UI parts), or no worse than HEAD (pre-existing, Low)",
+   "actual": "The border is --color-outline #24211e. Against the page #0e0d0c it is 1.21:1 computed. Rendered pixels: newsletter 1.03 (border on its gradient section), search 1.20, hire-us 1.21. The field fill against the page is 1.02 to 1.12, so it does not mark the field either. HEAD: border hsl(220,15%,22%) is 1.62 computed; pixels 1.35, 1.61, 1.62. Both are below 3:1, but HEAD was higher, so under the task rule this is Medium caused by this round. Mitigation: the value is R72 (identical to the Studio obsidian outline), the placeholder stays readable (newsletter 6.68, search 5.18), and the brass focus ring and border appear on focus. B decides whether the store inputs need border-outline-strong (#736b60) or a per-site fix.",
+   "evidence": "c-round-193/out/inputs-1440.json; c-round-193/shots/inputs/1440-{tree,head}-{newsletter,search,hireus-name}.png; computed ui[] in c-round-193/out/store-compare.json (borderVsOuter 1.21 tree / 1.62 head on / and /store at all 3 viewports)"
+  },
+  {
+   "id": "C-R193-03",
+   "severity": "low",
+   "title": "SCOPE-193 literal: Button.tsx S1 is a 6-line reflow, not one changed line",
+   "steps": [
+    "git diff caa09af -- app/components/ui/Button.tsx"
+   ],
+   "expected": "Button.tsx: two changed lines (S1, S2)",
+   "actual": "numstat 7/2. The buy array is reflowed to multiple lines. C confirmed independently that Biome lineWidth is 100 and the single-line form is 106 characters. biome format on the single-line scratch copy produces exactly the tree file (cmp SAME). The four strings are unchanged in order; the only semantic change is the text-brand-foreground token. Formatter-forced (signal STORE2A-BUTTON-REFLOW). B should rule on the grant text; C did not reinterpret the criterion.",
+   "evidence": "c-round-193/biome-scratch/{Button.tsx,Button.formatted.tsx}; git diff caa09af numstat"
+  }
+ ],
+ "passed": [
+  "TOKENS-193",
+  "BRASS-TEXT-193",
+  "KEEP-193",
+  "STORE-LAYOUT-193",
+  "STORE-SHOTS-193",
+  "PERF-193",
+  "RM-193",
+  "STUDIO-RV-193",
+  "G193-3",
+  "T-RUN-193",
+  "AN-REVIEW-193",
+  "DOC157-193",
+  "PX-NET/REG-HYD"
+ ],
+ "failed": [
+  "CONTRAST-193",
+  "SCOPE-193"
+ ],
+ "blocked": [
+  "BRASS-TEXT S4 account.orders CTA: backend unavailable in cloud (needs a signed-in user)",
+  "BRASS-TEXT S9 ForgetPassword success icon: backend unavailable in cloud (Firebase not configured); ST5 covers the class",
+  "Purchased /studio/:id legacy workspace (components/studio/**): backend unavailable in cloud; its Sign in required gate checked in G193-3"
+ ],
+ "notReachable": [
+  "S1/S2 Button buy/destructive: no route renders these variants (ST5 only)",
+  "S7 ConfirmDialog destructive: cart uses the default variant (cart.tsx:634, no variant prop), and the mock answers POST /api/cart/items with 501, so the cart stays empty (ST5 only)",
+  "S8 ChatButton: not mounted on any route (ST5 only)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "inventory2b": [
+  "Home StudioShowcase hardcoded neutrals (oklch 0.556/0.439 on #171717, 2.29-3.78:1, opacity 0.2-0.77 from ScrollReveal) and its red M chip #fb2c36: identical to HEAD, not tokens",
+  "Hero image and gift-card artwork stay teal (images); hardcoded hover:shadow rgba(19,217,204,.3) in SpecialOffersSection; teal glow blob replaced by a brass radial on home (gradient tokens unchanged as specified)"
+ ],
+ "scopeNote": "Frozen 1012 OK at start and end; A end-sha256 OK; git status 10 M + 2 ??; app.css diff = 26 --color value lines in 8 hunks inside @theme (l.48-146), obsidian block and :focus-visible untouched; the other 7 component/route files are 1/1; doc 157 is 2/2. The only deviation is Button.tsx 7/2 (C-R193-03). C changed nothing under store/; scratch trees live in c-round-193/trun.",
+ "servers": "mock :5199 started by C (PID 8631) and killed by PID; HEAD caa09af reference on :5174 (git archive in c-round-193/head, own cacheDir), PIDs 8628/8652 killed; :5173 untouched",
+ "rowNotes": {
+  "BRASS-TEXT-193": "PASS for reached sites S3, S5, S6 at 3 viewports; S1/S2/S7/S8 not reachable (ST5 only, see notReachable); S4/S9 blocked (backend)",
+  "CONTRAST-193": "FAIL: C-R193-01 and C-R193-02, Medium, caused by this round",
+  "SCOPE-193": "FAIL Low only: C-R193-03 formatter-forced Button.tsx reflow; every other SCOPE sub-check OK"
+ }
+}
