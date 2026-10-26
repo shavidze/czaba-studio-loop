@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T12:57:36.034Z)
+# Active loop summary (2026-10-26T13:21:20.438Z)
 
-- backlog.json 1693 KB -> active view 246 KB
-- status: G_ROOT_GATE round 191
-- servers: `{"checkedUtc":"2026-10-26T12:22:32.1730747Z","round":191,"attempt":1,"store":200}`
+- backlog.json 1705 KB -> active view 249 KB
+- status: G_ROOT_GATE round 192
+- servers: `{"checkedUtc":"2026-10-26T13:15:50.9113295Z","round":192,"attempt":1,"store":200}`
 - last publication: caa09afea79704e4315fd8102ea1a7df9bb1f789 (rounds 191-191)
-- last root gate: round 191 published - commit caa09afea79704e4315fd8102ea1a7df9bb1f789 pushed
+- last root gate: round 192 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -447,11 +447,16 @@
 - B-R188-LOADER-SIGNALS / info / signal / CinemaCurtainLoader, PianoCurtainLoader and PianoLoadingAnimation are exported from app/components/loading/index.ts and app/components/commo
 - C-R189-INFO / info / routed / C round 189 info: I1 one-sample rAF logo opacity 0 is a sampler artifact (pre-paint ResizeObserver 0 dips 9/9) -> pre-paint sampler is the r
 - A-R189-SIGNALS / info / signal / A round 189 code-reviewer unchanged Lows: tagline fully visible only ~150 ms before exit (design note for Saba, STORE-2); StrictMode double 
-- SABA-B-3 / medium / fix round 191 (D-29z156; R68-R71) / Studio volume fader turns into a solid brass box with an ivory track and oversized thumb while pressed/dragged (track Volume reported; same 
 - C-R190-INFO / info / routed / C round 190 info: I1 T1 has no portal guard (m5 17/17 green) -> parentElement===document.body case in the next round owning SpotlightLoader 
 - A-R190-SIGNALS / info / signal / A round 190 code-reviewer: Medium #1 no unit test for the portal (B decision: add with the next SpotlightLoader owner, see C-R190-INFO I1); 
 - ARCH-R190-PAGETRANSITION-FIXED / info / signal / PageTransition.tsx pageVariants y transform is the containing block for every fixed overlay inside routes during enter (DownloadDialog.tsx:9
-- GLOBAL-FOCUS-VISIBLE-UNLAYERED / info / signal / Unlayered global :focus-visible outline (app.css:379, 2px brand, offset 2px) beats Tailwind v4 layered focus-visible:outline-none, so contro
+- GLOBAL-FOCUS-VISIBLE-UNLAYERED / info / signal / Two unlayered global :focus-visible outline rules (app/styles/app.css:379 and app/styles/base/utilities.css:79, 2px brand, offset 2px) beat 
+- C-R191-01 / low / deferred_low_polish + awaiting_user (design call for Saba) / Level-fader ivory thumb vs the adjacent brass fill = 1.82:1 (< 3:1); vs unfilled graphite track 11.1:1 and vs parent 13.5-14.4:1. Inherent t
+- C-R191-INFO / info / routed / I1 Pan/Zoom native pressed shade vs PRESS within-8 clause -> B ruling R70 wins (see SABA-B-3.result); I2 doc 157 lists FS0-FS6 though FS7 ex
+- GATE191-REVIEW-SIGNALS / info / signal / gate-191 reviewer: #1 doc 157 stale status + FS0-FS6 (scheduled round 192); #2 Pan reset button own focus still double ring (-> deferred GAT
+- A-R191-SIGNALS / info / signal / A round 191 code-reviewer Architecture notes (verbatim in a-round-191.md): run 1 keep studio-fader.ts (stateless class-and-maths module, stu
+- ARCH-R191-PAN-RING-COUPLING / info / signal / Pan focus ring drawn by the reset button ::before (ArrangementLane.tsx:773/786 + studio-fader.ts:12-26), coupled through copied w-12/gap-1; 
+- STORE2A-PROTECTED-BRASS-TEXT / info / signal (protected files) / After STORE-2a, bg-brand text-foreground (ivory on brass ~1.8:1) remains on the protected studio.$productId.tsx:440/471 and account.download
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
