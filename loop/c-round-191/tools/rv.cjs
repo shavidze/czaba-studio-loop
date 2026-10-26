@@ -1,0 +1,14 @@
+// C round 191 — STUDIO-RV-191 (from c190-rv.cjs) + level-fader mask (input box ∪ thumb bbox + 4 px). node rv.cjs <W> <att>
+const X=require('./lib122.cjs');const {L,sleep}=X;const {decode}=require('./png.cjs');const fs=require('fs');const path=require('path');
+const W=+process.argv[2];const ATT=process.argv[3]||'1';const BASE_PNG=path.join(__dirname,'../../c-round-190/shots',`c190-${W}-1`,'rest-full.png');
+const TAG=`c191-${W}-${ATT}`;const ROOT=path.join(__dirname,'..');const SHD=path.join(ROOT,'shots',TAG);fs.mkdirSync(SHD,{recursive:true});const net=[];const res={W,ATT,utc:new Date().toISOString(),baseline:BASE_PNG};
+(async()=>{const b=await L.chromium.launch({headless:true,args:['--autoplay-policy=no-user-gesture-required','--disable-lcd-text']});
+try{const o=await L.openStudio(b,X.VPS[W],TAG,net,{deviceScaleFactor:2,extraInit:X.tapInit});const p=o.page;res.fonts=o.log.fontsReady;
+res.anon=await p.evaluate(()=>({auth:localStorage.getItem('auth_user'),cookie:document.cookie,ls:Object.keys(localStorage),demo:document.body.innerText.includes('Demo collection — no sign-in required')}));res.anonCookies=(await o.ctx.cookies()).length;
+await L.blur(p);await p.mouse.move(2,2);await sleep(500);const f=path.join(SHD,'rest-full.png');await p.screenshot({path:f});
+res.masks=await p.evaluate(()=>[...document.querySelectorAll('input[type=range]')].filter(i=>/^Volume — |^Master Volume$/.test(i.getAttribute('aria-label'))||i.dataset.testid==='arrangement-group-volume'||i.dataset.testid==='arrangement-detail-clip-gain-fader').map(i=>{const r=i.getBoundingClientRect();const cy=r.y+r.height/2;const y0=Math.min(r.y,cy-7.5),y1=Math.max(r.y+r.height,cy+7.5);return{l:i.getAttribute('aria-label'),x0:r.x-4,x1:r.right+4,y0:y0-4,y1:y1+4};}));
+const A=decode(fs.readFileSync(f)),B=decode(fs.readFileSync(BASE_PNG));const inMask=(x,y)=>res.masks.some(m=>x>=m.x0&&x<m.x1&&y>=m.y0&&y<m.y1);
+if(A.w!==B.w||A.h!==B.h)res.diff={size:[A.w,A.h,B.w,B.h]};else{let n=0,nm=0,max=0;const bb=[1e9,1e9,-1,-1];for(let y=0;y<A.h;y++)for(let x=0;x<A.w;x++){const q=A.px(x,y),r=B.px(x,y);const d=Math.max(Math.abs(q[0]-r[0]),Math.abs(q[1]-r[1]),Math.abs(q[2]-r[2]));if(d){if(inMask(x/2,y/2)){nm++;continue;}n++;max=Math.max(max,d);bb[0]=Math.min(bb[0],x);bb[1]=Math.min(bb[1],y);bb[2]=Math.max(bb[2],x);bb[3]=Math.max(bb[3],y);}}res.diff={changedOutsideMask:n,changedInsideMask:nm,maxDelta:max,bboxDevPx:n?bb:null};}
+res.clips=await p.evaluate(()=>document.querySelectorAll('[data-clip-id]').length);}catch(e){res.error=String(e&&e.stack||e).slice(0,800);}
+await b.close();res.net=net.map(n=>({errors:n.errors,hydration:n.hydration,forbidden:n.forbidden,auth:n.authHeaders,noise:n.noise,fonts:n.fontFail}));L.save(path.join(ROOT,'out'),`${TAG}.json`,res);
+console.log(JSON.stringify({TAG,anon:res.anon,cookies:res.anonCookies,masks:res.masks&&res.masks.length,diff:res.diff,err:res.error,net:res.net}));})();

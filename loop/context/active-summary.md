@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T11:04:12.785Z)
+# Active loop summary (2026-10-26T12:57:36.034Z)
 
-- backlog.json 1684 KB -> active view 244 KB
-- status: G_ROOT_GATE round 190
-- servers: `{"checkedUtc":"2026-10-26T10:39:20.3712934Z","round":190,"attempt":1,"store":200}`
-- last publication: 338564e1c0289260aabaf56a71a3c678034cdf3f (rounds 189-190)
-- last root gate: round 190 published - commit 338564e1c0289260aabaf56a71a3c678034cdf3f pushed
+- backlog.json 1693 KB -> active view 246 KB
+- status: G_ROOT_GATE round 191
+- servers: `{"checkedUtc":"2026-10-26T12:22:32.1730747Z","round":191,"attempt":1,"store":200}`
+- last publication: caa09afea79704e4315fd8102ea1a7df9bb1f789 (rounds 191-191)
+- last root gate: round 191 published - commit caa09afea79704e4315fd8102ea1a7df9bb1f789 pushed
 
 ## Current items: -
 
@@ -445,10 +445,13 @@
 - GATE188-REVIEW-SIGNALS / info / signal / gate-188 reviewer (COMMIT OK 9/10, Architecture note none): 1 doc 155 status stale (-> round 189 K7); 2 mobile menu aria-expanded/aria-contr
 - A-R188-SIGNALS / info / signal / A round 188 code-reviewer Architecture note (verbatim in a-round-188.md): four-link list written twice in Header.tsx (NAV_ITEMS array -> STO
 - B-R188-LOADER-SIGNALS / info / signal / CinemaCurtainLoader, PianoCurtainLoader and PianoLoadingAnimation are exported from app/components/loading/index.ts and app/components/commo
-- C-R189-01 / medium / open -> fix round 190 (D-29z155 K1) / Entrance loader (SpotlightLoader) animated centred divs inside [data-testid=entrance-loader] produce one layout shift ~470-495 ms after inse
-- C-R189-02 / low / fix round 190 (D-29z155 K2, R67) - fixed early under the 2026-10-23 bug gate because round 190 owns SpotlightLoader.tsx and the fix is one handler line / Tab while the entrance loader is up moves focus to a card link under the opaque overlay (page not inert); at 375 it scrolls the card carouse
 - C-R189-INFO / info / routed / C round 189 info: I1 one-sample rAF logo opacity 0 is a sampler artifact (pre-paint ResizeObserver 0 dips 9/9) -> pre-paint sampler is the r
 - A-R189-SIGNALS / info / signal / A round 189 code-reviewer unchanged Lows: tagline fully visible only ~150 ms before exit (design note for Saba, STORE-2); StrictMode double 
+- SABA-B-3 / medium / fix round 191 (D-29z156; R68-R71) / Studio volume fader turns into a solid brass box with an ivory track and oversized thumb while pressed/dragged (track Volume reported; same 
+- C-R190-INFO / info / routed / C round 190 info: I1 T1 has no portal guard (m5 17/17 green) -> parentElement===document.body case in the next round owning SpotlightLoader 
+- A-R190-SIGNALS / info / signal / A round 190 code-reviewer: Medium #1 no unit test for the portal (B decision: add with the next SpotlightLoader owner, see C-R190-INFO I1); 
+- ARCH-R190-PAGETRANSITION-FIXED / info / signal / PageTransition.tsx pageVariants y transform is the containing block for every fixed overlay inside routes during enter (DownloadDialog.tsx:9
+- GLOBAL-FOCUS-VISIBLE-UNLAYERED / info / signal / Unlayered global :focus-visible outline (app.css:379, 2px brand, offset 2px) beats Tailwind v4 layered focus-visible:outline-none, so contro
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

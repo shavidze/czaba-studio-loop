@@ -1,0 +1,77 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-26T12:22:32.1730747Z",
+  "round": 191,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R191-01",
+   "severity": "low",
+   "steps": [
+    "Open http://127.0.0.1:5173/studio-lab at 1440x900 or 1280x720 (fresh anonymous context, DPR 2)",
+    "Look at any level fader (track Volume, group Volume, Master, Clip Gain) at rest",
+    "Sample the ivory thumb (~236,230,218) and the brass fill pixel directly left of it (201,164,106)"
+   ],
+   "expected": "LOOK-191: thumb vs the adjacent track >= 3:1",
+   "actual": "thumb vs brass fill = 1.82:1 (fails 3:1); thumb vs unfilled graphite track 11.1:1 and vs parent 13.5-14.4:1 (pass). 'Adjacent track' is ambiguous in the row; at default value (track/group 0 dB = max) the thumb's only adjacent track is brass. Inherent to Saba's ivory-thumb + brass-fill target (R68): a Saba-visible design call (dark thumb edge vs accept), not an A fix-up; Low per the pre-written outcomes -> deferred_low_polish / B+Saba decision.",
+   "evidence": "c-round-191/out/press-eval.json (look), c-round-191/press/tree-{1440,1280}-session/*-rest.png"
+  }
+ ],
+ "info": [
+  {
+   "id": "C-R191-I1",
+   "note": "Pan/Zoom native pressed/hover thumb shade (Pan pressed 215,204,180 vs rest 210,205,196) identical to HEAD within 0.4; PRESS \"thumb colour within 8\" clause conflicts with R70 for Pan/Zoom; B rules",
+   "evidence": "c-round-191/out/press-eval.json (panzoom)"
+  },
+  {
+   "id": "C-R191-I2",
+   "note": "doc 157 file list says FS0-FS6; FS7 exists"
+  }
+ ],
+ "passed": [
+  "SCOPE-191",
+  "PRESS-191",
+  "PANZOOM-191",
+  "BEHAVIOUR-191",
+  "AUDIO-191",
+  "LAYOUT-191",
+  "STUDIO-RV-191",
+  "STORE-AFTER-191",
+  "G191-3",
+  "T-RUN-191",
+  "AN-REVIEW-191",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [
+  "LOOK-191 (sub-criterion thumb vs adjacent brass fill >= 3:1 only; C-R191-01 Low)"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notRun": [
+  "hover (info per task)",
+  "touch in browser (unit suite only)",
+  "Safari/Firefox/Windows High Contrast -> TECH-LEAD-MANUAL"
+ ],
+ "mock": "started by C for STORE-AFTER-191/G191-3, stopped at end (log c-round-191/mock.log)",
+ "headReference": "git archive HEAD 338564e served on :5174 from c-round-191/head (own cacheDir), stopped at end",
+ "ableton": "not applicable (task section 5)",
+ "verdictNote": "PASS: every SABA-B-3 FAIL condition written in advance is absent; LOOK-191 kept out of passed (one sub-criterion, Low C-R191-01).",
+ "rootNotes": [
+  "scratch vitest copies and the :5174 HEAD server used store node_modules via symlink; node_modules/.vite (ignored) may have been written; frozen list + git status confirm no project change"
+ ]
+}

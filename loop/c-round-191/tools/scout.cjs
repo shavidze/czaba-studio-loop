@@ -1,0 +1,4 @@
+const L=require('./lib.cjs');
+(async()=>{const b=await L.launch();const net=[];const o=await L.openStudio(b,{width:1440,height:900},'scout',net,{deviceScaleFactor:2});const p=o.page;
+const r=await p.evaluate(()=>({clips:[...document.querySelectorAll('[data-clip-id]')].map(c=>({id:c.dataset.clipId,lane:c.closest('[data-track-id]')?.dataset.trackId,txt:c.textContent.slice(0,30)})),tracks:[...document.querySelectorAll('[data-track-id]')].map(t=>t.dataset.trackId),ranges:[...document.querySelectorAll('input[type=range]')].map(i=>({l:i.getAttribute('aria-label'),t:i.dataset.testid,v:i.value,min:i.min,max:i.max,dis:i.disabled,r:i.getBoundingClientRect().toJSON()})),detail:document.querySelector('[data-testid=arrangement-detail-toggle]')?.getAttribute('aria-expanded')}));
+console.log(JSON.stringify(r,null,1));console.log(JSON.stringify(net));await b.close();})();

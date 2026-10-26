@@ -1,0 +1,99 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/fader-style-ui.test.tsx [2m([22m[2m8 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[33m 674[2mms[22m[39m
+     [32m✓[39m FS0: studioLevelFaderFillFraction clamps, guards a zero or non-finite span and the style carries it[32m 2[2mms[22m[39m
+     [32m✓[39m FS7: the shared recipes carry the exact single-ring, delegated-ring and level-fill tokens[32m 2[2mms[22m[39m
+[31m     [31m×[31m FS1: all six range controls carry the one offset focus ring and none keeps the old ring-2[39m[32m 234[2mms[22m[39m
+[31m     [31m×[31m FS2: the four level faders carry the level recipe and the fill is 0 at min, 1 at max and proportional between[39m[32m 111[2mms[22m[39m
+[31m     [31m×[31m FS3: ArrowRight and ArrowLeft move each level fader fill with the new value[39m[32m 133[2mms[22m[39m
+[31m     [31m×[31m FS4: a preview value from onChange (no commit) moves the fill[39m[32m 74[2mms[22m[39m
+     [32m✓[39m FS5: Pan and Zoom keep accent-foreground and carry no level recipe or fill[32m 64[2mms[22m[39m
+[31m     [31m×[31m FS6: the disabled Clip Gain fader stays disabled, dims and still shows its fill at its value[39m[32m 52[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/fader-style-ui.test.tsx[2m > [22mSABA-B-3 studio fader look (D-29z156, R68–R71)[2m > [22mFS1: all six range controls carry the one offset focus ring and none keeps the old ring-2
+[31m[1mAssertionError[22m: track volume has rounded-full: expected [ 'h-1', 'min-w-0', 'flex-1', …(5) ] to include 'rounded-full'[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/fader-style-ui.test.tsx:[2m305:49[22m[39m
+    [90m303| [39m      [35mconst[39m tokens [33m=[39m [34mtokensOf[39m(input[33m,[39m label)[33m;[39m
+    [90m304| [39m      [35mfor[39m ([35mconst[39m token [35mof[39m focusTokens) {
+    [90m305| [39m        [34mexpect[39m(tokens[33m,[39m [32m`[39m[36m${[39mlabel[36m}[39m[32m has [39m[36m${[39mtoken[36m}[39m[32m`[39m)[33m.[39m[34mtoContain[39m(token)[33m;[39m
+    [90m   | [39m                                                [31m^[39m
+    [90m306| [39m      }
+    [90m307| [39m      [34mexpect[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/fader-style-ui.test.tsx[2m > [22mSABA-B-3 studio fader look (D-29z156, R68–R71)[2m > [22mFS2: the four level faders carry the level recipe and the fill is 0 at min, 1 at max and proportional between
+[31m[1mAssertionError[22m: track volume has appearance-none: expected [ 'h-1', 'min-w-0', 'flex-1', …(5) ] to include 'appearance-none'[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/fader-style-ui.test.tsx:[2m347:48[22m[39m
+    [90m345| [39m      [35mconst[39m tokens [33m=[39m [34mtokensOf[39m([34mlevelFader[39m(name)[33m,[39m name)[33m;[39m
+    [90m346| [39m      [35mfor[39m ([35mconst[39m token [35mof[39m levelTokens) {
+    [90m347| [39m        [34mexpect[39m(tokens[33m,[39m [32m`[39m[36m${[39mname[36m}[39m[32m has [39m[36m${[39mtoken[36m}[39m[32m`[39m)[33m.[39m[34mtoContain[39m(token)[33m;[39m
+    [90m   | [39m                                               [31m^[39m
+    [90m348| [39m      }
+    [90m349| [39m      [34mexpectFillMatchesValue[39m([34mlevelFader[39m(name)[33m,[39m [32m`[39m[36m${[39mname[36m}[39m[32m initial`[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/fader-style-ui.test.tsx[2m > [22mSABA-B-3 studio fader look (D-29z156, R68–R71)[2m > [22mFS3: ArrowRight and ArrowLeft move each level fader fill with the new value
+[31m[1mAssertionError[22m: track volume ArrowRight: expected NaN to be greater than NaN[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/fader-style-ui.test.tsx:[2m377:48[22m[39m
+    [90m375| [39m      [34mkeyboardStep[39m([34mlevelFader[39m(name)[33m,[39m [32m'ArrowRight'[39m)[33m;[39m
+    [90m376| [39m      [35mconst[39m afterRight [33m=[39m [34mfillOf[39m([34mlevelFader[39m(name))[33m;[39m
+    [90m377| [39m      [34mexpect[39m(afterRight[33m,[39m [32m`[39m[36m${[39mname[36m}[39m[32m ArrowRight`[39m)[33m.[39m[34mtoBeGreaterThan[39m(before)[33m;[39m
+    [90m   | [39m                                               [31m^[39m
+    [90m378| [39m      expectFillMatchesValue(levelFader(name), `${name} after ArrowRig…
+    [90m379| [39m      [34mkeyboardStep[39m([34mlevelFader[39m(name)[33m,[39m [32m'ArrowLeft'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/fader-style-ui.test.tsx[2m > [22mSABA-B-3 studio fader look (D-29z156, R68–R71)[2m > [22mFS4: a preview value from onChange (no commit) moves the fill
+[31m[1mAssertionError[22m: track volume preview fill: expected NaN not to be NaN // Object.is equality[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/fader-style-ui.test.tsx:[2m396:57[22m[39m
+    [90m394| [39m      [35mconst[39m after [33m=[39m [34mlevelFader[39m(name)[33m;[39m
+    [90m395| [39m      [34mexpect[39m(after[33m.[39mvalue[33m,[39m [32m`[39m[36m${[39mname[36m}[39m[32m preview value`[39m)[33m.[39m[34mtoBe[39m(target)[33m;[39m
+    [90m396| [39m      [34mexpect[39m([34mfillOf[39m(after)[33m,[39m [32m`[39m[36m${[39mname[36m}[39m[32m preview fill`[39m)[33m.[39mnot[33m.[39m[34mtoBe[39m(before)[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m397| [39m      [34mexpectFillMatchesValue[39m(after[33m,[39m [32m`[39m[36m${[39mname[36m}[39m[32m preview`[39m)[33m;[39m
+    [90m398| [39m    }
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/fader-style-ui.test.tsx[2m > [22mSABA-B-3 studio fader look (D-29z156, R68–R71)[2m > [22mFS6: the disabled Clip Gain fader stays disabled, dims and still shows its fill at its value
+[31m[1mAssertionError[22m: disabled clip gain: --studio-fader-fill is set: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m expectFillMatchesValue app/lib/arrangement/__tests__/fader-style-ui.test.tsx:[2m130:70[22m[39m
+    [90m128| [39mfunction expectFillMatchesValue(input: HTMLInputElement, label: string…
+    [90m129| [39m  [35mconst[39m fill [33m=[39m [34mfillOf[39m(input)[33m;[39m
+    [90m130| [39m  expect(Number.isFinite(fill), `${label}: ${FILL_PROPERTY} is set`).t…
+    [90m   | [39m                                                                     [31m^[39m
+    [90m131| [39m  expect(Math.abs(fill - expectedFill(input)), `${label}: fill ${fill}…
+    [90m132| [39m    [33mFILL_TOLERANCE[39m[33m,[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/fader-style-ui.test.tsx:[2m425:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 12:19:25
+[2m   Duration [22m 2.58s[2m (transform 960ms, setup 0ms, import 1.39s, tests 674ms, environment 383ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/fader-style-ui.test.tsx,title=app/lib/arrangement/__tests__/fader-style-ui.test.tsx > SABA-B-3 studio fader look (D-29z156%2C R68–R71) > FS1%3A all six range controls carry the one offset focus ring and none keeps the old ring-2,line=305,column=49::AssertionError: track volume has rounded-full: expected [ 'h-1', 'min-w-0', 'flex-1', …(5) ] to include 'rounded-full'%0A ❯ app/lib/arrangement/__tests__/fader-style-ui.test.tsx:305:49%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/fader-style-ui.test.tsx,title=app/lib/arrangement/__tests__/fader-style-ui.test.tsx > SABA-B-3 studio fader look (D-29z156%2C R68–R71) > FS2%3A the four level faders carry the level recipe and the fill is 0 at min%2C 1 at max and proportional between,line=347,column=48::AssertionError: track volume has appearance-none: expected [ 'h-1', 'min-w-0', 'flex-1', …(5) ] to include 'appearance-none'%0A ❯ app/lib/arrangement/__tests__/fader-style-ui.test.tsx:347:48%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/fader-style-ui.test.tsx,title=app/lib/arrangement/__tests__/fader-style-ui.test.tsx > SABA-B-3 studio fader look (D-29z156%2C R68–R71) > FS3%3A ArrowRight and ArrowLeft move each level fader fill with the new value,line=377,column=48::AssertionError: track volume ArrowRight: expected NaN to be greater than NaN%0A ❯ app/lib/arrangement/__tests__/fader-style-ui.test.tsx:377:48%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/fader-style-ui.test.tsx,title=app/lib/arrangement/__tests__/fader-style-ui.test.tsx > SABA-B-3 studio fader look (D-29z156%2C R68–R71) > FS4%3A a preview value from onChange (no commit) moves the fill,line=396,column=57::AssertionError: track volume preview fill: expected NaN not to be NaN // Object.is equality%0A ❯ app/lib/arrangement/__tests__/fader-style-ui.test.tsx:396:57%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/fader-style-ui.test.tsx,title=app/lib/arrangement/__tests__/fader-style-ui.test.tsx > SABA-B-3 studio fader look (D-29z156%2C R68–R71) > FS6%3A the disabled Clip Gain fader stays disabled%2C dims and still shows its fill at its value,line=130,column=70::AssertionError: disabled clip gain: --studio-fader-fill is set: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ expectFillMatchesValue app/lib/arrangement/__tests__/fader-style-ui.test.tsx:130:70%0A ❯ app/lib/arrangement/__tests__/fader-style-ui.test.tsx:425:5%0A%0A

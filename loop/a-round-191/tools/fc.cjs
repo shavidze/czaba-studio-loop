@@ -1,0 +1,11 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+(async () => { const b = await chromium.launch(); const p = await b.newPage();
+await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'networkidle' }); await p.waitForTimeout(2000);
+const r = await p.evaluate(() => { const out = []; for (const s of document.styleSheets) { let rules; try { rules = s.cssRules; } catch { continue; } const walk = (rs) => { for (const x of rs) { if (x.cssRules) { if (/forced-colors/.test(x.conditionText || x.media?.mediaText || '')) { for (const y of x.cssRules) if (/appearance/.test(y.cssText)) out.push((x.conditionText || x.media.mediaText) + ' :: ' + y.cssText.slice(0, 200)); } walk(x.cssRules); } } }; walk(rules); } return out; });
+console.log(JSON.stringify(r, null, 1));
+await p.emulateMedia({ forcedColors: 'active' });
+const ap = await p.locator('input[aria-label="Master Volume"]').evaluate((el) => getComputedStyle(el).appearance);
+console.log('forced-colors active, Master appearance =', ap);
+await p.emulateMedia({ forcedColors: 'none' });
+console.log('normal, Master appearance =', await p.locator('input[aria-label="Master Volume"]').evaluate((el) => getComputedStyle(el).appearance));
+await b.close(); })();

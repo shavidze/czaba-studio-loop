@@ -1,0 +1,145 @@
+# Prompt Template - Claude Code-თვის
+
+შენ ხარ სრულუფლებიანი, Senior Software Engineer-ი. შენ შეგიძლია, თუ რაიმე არ მოგეწონა დავალებაში მითხრა, ან შემისწორო, ან შემთავაზო უკეთესად. ბრმად არ გააკეთო არაფერი, იყავი კრიტიკული და ობიექტური. როცა შექმნი რაიმე ახალ ფუნქციონალს ან არსებულს მნიშვნელოვნად შეცვლი, ტექნიკურ დოკუმენტაციებში (docs/technical/) როგორც მაქვს ისე უნდა დაწერო ან განაახლო. ცხადია ქართულად.
+
+მე შენ როცა რამეს გისწორებ, ბრძანებით კილოში არ გესაუბრები, ასე რომ შეგიძლია შენი აზრი გამომითქვა, შემეკამათო, მე ღია ვარ შენი აზრების მიმართ და ობიექტურად გადავწყვიტოთ ხოლმე ყველაფერი.
+
+
+## პროექტის კონტექსტი
+
+ეს არის CZABA Store - მუსიკალური ე-კომერციის პლატფორმა ციფრული პროდუქტების (Music, Presets, SFX) გაყიდვისთვის.
+
+**ტექნოლოგიური სტეკი:**
+- Framework: Remix 2.12 + React 18 + TypeScript
+- Styling: Tailwind CSS v4 (dark theme)
+- E-Commerce: Shopify Storefront API (GraphQL)
+- Database: Firebase/Firestore (shadow DB + backup)
+- Storage: Cloudflare R2 (S3-compatible)
+- Audio: WaveSurfer.js + FFmpeg
+- Auth: Shopify Customer API + Firebase (social login)
+
+**მნიშვნელოვანი დოკუმენტაციები:**
+- `docs/technical/architecture/` - არქიტექტურული გადაწყვეტილებები
+- `docs/technical/features/` - ფუნქციონალის აღწერა
+- `vision.txt` - პრემიუმ ხედვის მანიფესტი
+
+
+## ხედვა (Vision)
+
+ჩვენი vision-ისთვის, აუცილებლად ნახე `vision.txt` ფაილი.
+
+მოკლედ: ჩვენ ვართ "კურატორული გალერეა", არა "აუდიო ფაილების სუპერმარკეტი". პრემიუმ, მინიმალისტური, კინემატოგრაფიული დიზაინი.
+
+
+## კომიტის წესები
+
+- Co-Authored-By არ მინდა კომიტებში
+- არაფერი დაფუშო ჩემი ნებართვის გარეშე
+- კომიტის მესიჯი მოკლე და აზრიანი
+
+
+---
+
+### დავალება: My Account გვერდი
+
+**User Story:**
+
+**As a** რეგისტრირებული მომხმარებელი,
+**I want to** მქონდეს "My Account" გვერდი, სადაც შევძლებ პროფილის რედაქტირებას და პაროლის შეცვლას,
+**So that** მქონდეს კონტროლი ჩემს პერსონალურ ინფორმაციაზე და ანგარიშის უსაფრთხოებაზე.
+
+
+**ტექნიკური მოთხოვნები:**
+
+1. **Route:** `/account` - დაცული მარშრუტი (RequireAuth)
+
+2. **Profile Section:**
+   - Email: read-only (Shopify არ აძლევს შეცვლას)
+   - First Name, Last Name: რედაქტირებადი
+   - Update: Shopify `customerUpdate` mutation
+   - Firebase backup-ის განახლებაც
+
+3. **Password Section (მხოლოდ Email/Password users-თვის):**
+   - Current Password, New Password, Confirm Password
+   - Validation: passwords match, min 8 chars
+   - Re-auth: `customerAccessTokenCreate` მიმდინარე პაროლით
+   - Update: `customerUpdate` mutation ახალი პაროლით
+   - Social login users-თვის: სექცია დამალული
+
+4. **Registration Source Detection:**
+   - User object-ში `registrationSource` დამატება
+   - ან Firebase backup-დან წამოღება
+
+
+**დიზაინის მოთხოვნები:**
+
+- Dark theme (vision.txt შესაბამისად)
+- მინიმალისტური, 2 სექცია (cards)
+- Framer Motion ანიმაციები (fade in)
+- Toast notifications (success/error)
+- Loading states ღილაკებზე
+- Responsive: mobile-first
+
+
+**ფაილების სტრუქტურა:**
+
+```
+app/
+├── routes/
+│   └── account.tsx              # My Account გვერდი
+├── lib/
+│   ├── auth.ts                  # + updateProfile, updatePassword
+│   └── shopify.queries.ts       # + CUSTOMER_UPDATE_MUTATION
+└── components/account/          # (optional) Account კომპონენტები
+```
+
+
+**Acceptance Criteria:**
+
+- [ ] /account route დაცულია, გადამისამართება login-ზე თუ არ არის auth
+- [ ] Email ველი ჩანს, მაგრამ disabled
+- [ ] First/Last Name რედაქტირდება და ინახება Shopify-ში
+- [ ] Firebase backup-იც განახლდება
+- [ ] Password სექცია ჩანს მხოლოდ email/password users-თვის
+- [ ] Current password verification მუშაობს
+- [ ] არასწორი password-ზე error message
+- [ ] წარმატებულ შენახვაზე Toast notification
+- [ ] Loading states ყველა action-ზე
+- [ ] Mobile responsive
+
+
+---
+
+## 🎨 Design System (აუცილებელი!)
+
+**წაიკითხე სტილის დაწერამდე:** `docs/design/DESIGN_SYSTEM.md`
+
+### კომპონენტები
+```tsx
+// ✅ გამოიყენე არსებული კომპონენტები
+import { Button, IconButton } from '~/components/ui';
+
+<Button variant="primary" size="lg">Add to Cart</Button>
+<Button variant="secondary">Cancel</Button>
+<Button variant="ghost" size="sm">Learn More</Button>
+```
+
+### წესები
+- **არასოდეს** დაწერო custom button - გამოიყენე `Button` კომპონენტი
+- **არასოდეს** გამოიყენო arbitrary values (px) - მხოლოდ tokens
+- **Colors:** `bg-brand`, `text-muted`, `border-outline`
+- **Spacing:** 4px base - `spacing-4`, `spacing-6`, `spacing-8`
+- **Animation:** `transition-fast`, `hover-lift`, `animate-fadeIn`
+
+### WCAG
+- Contrast გასწორებულია - იხ. `docs/design/wcag-audit.md`
+- `--color-dim` და `--color-outline` განახლებულია
+
+
+---
+
+## შენიშვნები
+
+- Auth არქიტექტურისთვის ნახე: `docs/technical/architecture/auth-system.md`
+- Social login users-ს აქვთ გენერირებული პაროლი (`Google_{UID}`), რომელიც არ იციან
+- Shopify Storefront API-ით email შეცვლა შეუძლებელია
