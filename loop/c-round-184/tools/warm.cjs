@@ -1,0 +1,2 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+(async () => { const b = await chromium.launch(); for (const r of ['/studio-lab', '/studio/middle-east']) { const c = await b.newContext(); const p = await c.newPage(); await p.goto('http://127.0.0.1:5173' + r, { waitUntil: 'domcontentloaded' }); await new Promise((x) => setTimeout(x, 8000)); console.log('warmup(discarded)', r); await c.close(); } await b.close(); })();

@@ -1,0 +1,4 @@
+const L = require('./lib.cjs');
+(async () => { const b = await L.launch(); const c = await b.newContext(); const p = await c.newPage(); await p.goto(L.BASE + '/studio-lab', { waitUntil: 'domcontentloaded' });
+  const r = await p.evaluate(async () => { const ab = await (await fetch('/middle-east.mp3')).arrayBuffer(); const ctx = new OfflineAudioContext(2, 48000, 48000); const buf = await ctx.decodeAudioData(ab); let pk = 0, at = -1, over = 0; for (let k = 0; k < buf.numberOfChannels; k++) { const d = buf.getChannelData(k); for (let i = 0; i < d.length; i++) { const a = Math.abs(d[i]); if (a > pk) { pk = a; at = i / buf.sampleRate; } if (a >= 0.99999) over++; } } return { dur: buf.duration, sr: buf.sampleRate, ch: buf.numberOfChannels, pk, at, over }; });
+  console.log(JSON.stringify(r)); require('fs').writeFileSync(require('path').join(__dirname, '..', 'out', 'src-peak.json'), JSON.stringify(r)); await b.close(); })();

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T05:16:56.142Z)
+# Active loop summary (2026-10-26T05:52:11.357Z)
 
-- backlog.json 1627 KB -> active view 230 KB
-- status: G_ROOT_GATE round 183
-- servers: `{"checkedUtc":"2026-10-26T04:57:04.5831224Z","round":183,"attempt":1,"store":200}`
-- last publication: 423fbc48e443c638168d8dc3962ac2b5f4019855 (rounds 183-183)
-- last root gate: round 183 published - commit 423fbc48e443c638168d8dc3962ac2b5f4019855 pushed
+- backlog.json 1634 KB -> active view 230 KB
+- status: G_ROOT_GATE round 184
+- servers: `{"checkedUtc":"2026-10-26T05:39:57.7412101Z","round":184,"attempt":1,"store":200}`
+- last publication: 3eb4cdbbfef88b98405d6b6448bcc625803bed35 (rounds 184-184)
+- last root gate: round 184 published - commit 3eb4cdbbfef88b98405d6b6448bcc625803bed35 pushed
 
 ## Current items: -
 
@@ -363,7 +363,7 @@
 - INFO-C161-BRAND-EQ-ACCENT / info / signal for V-3c-4 / polish: brand and accent compute to the same rgb(201,164,106) in the Studio scope, so Stop (accent) and Preview (brand) differ only by border/hover classes / 
 - INFO-R162-CLIP-SVG-DOM / info / signal (not scheduled): measure DOM node count with many clips in a later performance pass / each clip header now mounts an svg with child paths instead of one text span (memo unchanged)
 - INFO-C162-VIDEO-INPUT-MULTIPLE / info / note (pre-existing, unchanged by round 162) / the video import file chooser reports isMultiple=true; choosing one file places one clip
-- ROOT-RECON-GRID-HARNESS / info (approved test-only refactor) / queued: end of VISUAL-A at a safe boundary (after M4, before REVIEW-RECOMMENDATIONS) / extract createWorkspaceTestEnvironment (helpers/workspace-test-environment.ts) from the fakeClock..FakeResizeObserver blocks of grid-snap-ui
+- ROOT-RECON-GRID-HARNESS / info (approved test-only refactor) / scheduled: round 184 (D-29z149) / extract createWorkspaceTestEnvironment (helpers/workspace-test-environment.ts) from the fakeClock..FakeResizeObserver blocks of grid-snap-ui
 - ROOT-RECON-PC-BACKUP / info / note: keep backup/local-2026-10-23 (4e87bec) and refactor/grid-test-harness; no reset, no force push, no replay of old rounds / 
 - V-2b-DISPLAY / info / decided_user: no serif (design-ux-decisions.md 2026-10-25 final). Studio uses Instrument Sans + IBM Plex Mono only; no work: Cormorant is not loaded in Studio (studio-theme-obsidian.test.tsx l.237 asserts no Cormorant/Inter/Playfair); store fonts unaffected / 
 - B-R164-COMMIT-DURING-PREVIEW / info (architecture signal) / signal: not scheduled; repeated by A round-165 code-reviewer and the gate-165 reviewer (same Architecture note: 7+ hand-written guards in ArrangementMarkerRow.tsx, one guard in ArrangementContext.commitArrangement proposed, keep for now) -> bounded root request b-round-165-checkpoint-request.md (Q-COMMIT, addendum to b-round-160-checkpoint-request.md); owner ArrangementContext.tsx protected; acceptance quoted there / commitArrangement accepts commits while a pointer gesture holds a preview built from gesture.before, so any keyboard commit during a drag is
@@ -428,6 +428,7 @@
 - C-R182-N1-ARROW-SUBPIXEL-EDGE / info / info_pre_existing / 1440: ArrowDown press 6 leaves the focused library row 0.25 px below the list bottom (integer scrollTop); identical on HEAD f1782f8
 - C-R182-R42-GAP-CLICK / info / info_confirmed_ruling / R42 confirmed: click/double-click in the 4 px library gap hits the listbox div, no selection or clip; focus moves to BODY
 - C-R182-STATE-M3-WORDING / info / process_note: regression round re-words the STATE-M3 check as 'the inset ring equals the row box; the global :focus-visible outline (C-R169-N1, deferred) is excluded' / 
+- C-R183-M310-CC5-UNREACHABLE / info / triaged_info / CC5 'decision exists -> nothing on /' cannot detect a predicate inversion (m310 stays green there)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
