@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T14:37:07.644Z)
+# Active loop summary (2026-10-26T17:02:30.898Z)
 
-- backlog.json 1713 KB -> active view 252 KB
-- status: G_ROOT_GATE round 193
-- servers: `{"checkedUtc":"2026-10-26T13:54:43.2147614Z","round":193,"attempt":1,"store":200}`
+- backlog.json 1723 KB -> active view 255 KB
+- status: G_ROOT_GATE round 194
+- servers: `{"checkedUtc":"2026-10-26T15:25:54.0574072Z","round":194,"attempt":1,"store":200}`
 - last publication: caa09afea79704e4315fd8102ea1a7df9bb1f789 (rounds 191-191)
-- last root gate: round 193 skipped - C taskStatus FAIL
+- last root gate: round 194 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -460,6 +460,12 @@
 - STORE2A-EXTRA-BRASS-TEXT / info / scheduled round 193 (D-29z158) / Light text/icon on brand/buy/destructive fills beyond the 4 round-192 grants: PurchaseHeader.tsx:348 Buy Now (HEAD 4.05:1 -> 1.88 rest / 1.5
 - STORE2A-LEADMAGNET-KEEPLIST-ACK / info / root_note (B ruling R76, vetoable; non-blocking) / Keep-list LeadMagnet CONTINUE button: text colour token only (text-foreground -> text-brand-foreground); copy CONTINUE/SENDING..., size, pos
 - B-R192-PLANNING-GAP / info / retro_input / Round 192 lost a round because the task had a stop-and-report inventory rule ("anything beyond B's four sites -> stop") but B's own pre-disp
+- C-R193-01 / medium / scheduled round 194 (D-29z159, R77) / Keep-list LeadMagnet popup email placeholder placeholder:text-dim (#928a7d) on bg-white: 3.41:1 (HEAD 5.06:1), caused by round 193
+- C-R193-02 / medium / scheduled round 194 (D-29z159, R78) / Store text-entry field borders border-outline #24211e: 1.03-1.21:1 vs surround (HEAD 1.35-1.62), caused by round 193 (R72 value)
+- STORE2A-BUTTON-REFLOW / info / retro_input / B wrote "exactly N changed lines" without checking Biome lineWidth (100); lesson candidate: check formatter width or phrase scope as semanti
+- STORE2A-INPUT-BORDER-STUDIO-SITES / info / signal (global_forbidden_files components/studio/**; purchased legacy view, backend-only) / Legacy components/studio fields keep bare border-outline: ExportDialog.tsx:283 (checkbox), VideoUploadZone.tsx:169 (text input); same faint-
+- ARCH-R193-THEME-REGION / info / signal - decision point at the STORE-2 exit; not scheduled / A round-193 code-reviewer Architecture note (signal 3): app.css @theme l.45-150 is edited by rounds 192/193 and all of STORE-2b/2c/2d, and s
+- B-R193-UNMEASURED-INFO / info / retro_input / A round-193 reviewer flagged --color-outline ~1.25:1 as info; neither A nor B measured the fields before handover, so C caught it. Lesson ca
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

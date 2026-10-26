@@ -1,0 +1,16 @@
+# C round 194 checkpoint
+- SCOPE start: HEAD caa09af, frozen 1011 OK, A end-sha OK, git status 21 (19 M + 2 ??) exact set; grant diffs: P1 1/1, F sites 1 token each (hire-us 4, account 3, Input 2), no reflow; test +218/-0; doc 158 status line + section.
+- mock started by C, pid in c-round-194/mock.pid
+- verdict plan: FAIL expected on GuestForm (/support) if measured <3:1 (C-R194-01 Medium, re-grant path); recordings BLOCKED backend
+- T-RUN done (trun/trun.txt): tree green 24; start ST7/ST8x16/ST8b red, ST1-6 green; m10 ST7 red; m11 ST8+ST8b red; m12 ST8 red; m13 ST8b red; m14 (token at tag+14) ST8b GREEN = false pass (GuestForm pattern); END-COPY green while GuestForm.tsx bare.
+- ref server (round-193 tree) on :5174, pid logs/ref-vite.pid; fields194 1440 tree running
+- PLACEHOLDER: popup194 1280/375 tree ph px 5.1 (rgb110,110,109) vs ref 3.41; typed 21; inner-region method phpx.cjs (out/popup-phpx.json). 1440 rerun done (logs/popup-1440.log)
+- FIELDS 1440 tree: F1 3.13 min, F2 3.64, F3-5 3.70, F8 3.30; ref F1 1.03, F2 1.19, F3-5 1.21, F8 1.08. F6/F7/F14/GUEST/F16 rerun with fixed selectors (logs/fields-*-1440b.log)
+- GUEST 1440: tree 1.21, ref 1.21, HEAD(:5175 caa09af) 1.62 -> C-R194-01 Medium. F7 3.50, F14 3.50 (ref 1.15), F6 3.70, F16 not rendered (mock chat)
+- fields 1280/375 done: F1 min 3.13/3.12, F2 3.64, F3-6 3.70; ref 1.03-1.21; GUEST 1.21 all vps. store194 running
+- popup texts == HEAD (c-round-193 head) x3 vp; ph attr same; field box sizes tree==ref all. store 1440: layout 0 bad x5 pages, keep same, contrast worse 0, ev 0. waiting store 1280/375 then rv/g194
+- store 375: /store 4 hidden 0x0 header links y 8 vs 0 (scrollY artifact?) rerunning tree 375 (run1 saved store-tree-375-run1.json). G194-3 PASS (out/g194-3.json)
+- 375 tree rerun: layout 0 bad (run1 diff = hidden 0x0 header links shifted by scrollY 8 -> artifact). RV 1440 0 px, 0 errors, anon ok
+- SCOPE end OK (frozen, A end-sha, status same 21). Stopped own mock 7731, ref vite 7835, head vite 11276; :5173 untouched. RV 1280 0 px. Writing reports.
+- DONE: verdict FAIL (C-R194-01 GuestForm Medium, C-R194-02 ST8b Medium), browserVerified true; reports written
+- JSON fixed: passed bare IDs, failed FIELD-BORDER-194/AN-REVIEW-194, F16 blocked, origin notes. FINAL.

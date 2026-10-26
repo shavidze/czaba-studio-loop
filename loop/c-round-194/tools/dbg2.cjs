@@ -1,0 +1,6 @@
+const L = require('./lib.cjs');
+const dump = (p) => p.evaluate(() => ({ dialogs: [...document.querySelectorAll('[role=dialog],[aria-modal]')].length, btns: [...document.querySelectorAll('button')].filter((x) => x.getBoundingClientRect().width > 0).map((x) => x.innerText.trim().slice(0, 25)).slice(0, 30), inputs: [...document.querySelectorAll('input,textarea')].filter((i) => i.getBoundingClientRect().width > 0).map((i) => i.id + '|' + i.type + '|' + i.placeholder + '|' + (i.closest('[role=dialog]') ? 'D' : '')) }));
+(async () => { const b = await L.chromium.launch({ headless: true }); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); await ctx.addInitScript(() => { try { sessionStorage.setItem('czaba_entrance_seen', '1'); } catch {} }); const p = await ctx.newPage();
+await p.goto('http://127.0.0.1:5173/support', { waitUntil: 'load' }); await L.sleep(4000); await p.locator('button', { hasText: 'Live Chat' }).first().click(); await L.sleep(2500); console.log('support', JSON.stringify(await dump(p)));
+await p.goto('http://127.0.0.1:5173/', { waitUntil: 'load' }); await L.sleep(4000); await p.locator('header button', { hasText: 'Sign In' }).first().click(); await L.sleep(2000); console.log('signin', JSON.stringify(await dump(p)));
+await b.close(); })();

@@ -1,0 +1,148 @@
+{
+ "round": 194,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-26T15:25:54.0574072Z",
+  "round": 194,
+  "attempt": 1,
+  "store": 200
+ },
+ "abletonParity": "არ ეხება (store text fields and popup placeholder; no Arrangement behaviour)",
+ "verdictNote": "All 13 grants are implemented correctly and pass in the browser (placeholder 5.1:1; F1-F8 and F14 >= 3.12:1 at the four edge midpoints; layout/keep/Studio unchanged). The round still FAILS on the pre-written rule 'any reached field below 3:1 after the change -> FAIL (Medium)': the anonymous /support GuestForm fields (outside F1-F16, not granted) measure 1.21:1. At HEAD caa09af they were 1.62:1, so round 193 caused this and it is still open. This is the section 7 'A stops at K0 -> B re-grants' path, not an error in A's granted work. ST8b also false-passes on this layout (C-R194-02).",
+ "bugs": [
+  {
+   "id": "C-R194-01",
+   "severity": "medium",
+   "title": "/support guest chat form fields (GuestForm name/email) border 1.21:1, a round-193 regression that round 194 did not cover",
+   "steps": [
+    "Fresh anonymous Playwright Chromium context at 1440x900, 1280x720 or 375x812, DPR 2, --disable-lcd-text; mock API on :5199",
+    "Open http://127.0.0.1:5173/support and click 'Live Chat'",
+    "The guest form shows #guest-name ('Your name') and #guest-email ('email@example.com')",
+    "Sample the unfocused border pixel against the pixel 2 CSS px outside it at the top/right/bottom/left midpoints"
+   ],
+   "expected": "Every reached store text field >= 3:1 against its surround (WCAG 1.4.11), and no worse than HEAD (task outcome rule: any reached field below 3:1 after the change -> FAIL Medium)",
+   "actual": "Border rgb(36,33,30) (--color-outline #24211e) = 1.21:1 at all four midpoints at all 3 viewports. HEAD caa09af (served on :5175 by C) = 1.62:1 (border rgb(48,53,65)). Round 193 changed --color-outline, which lowered it; round 194 granted only F1-F16, so app/components/chat/GuestForm.tsx:67 and :91 ('border-outline focus:border-brand') stay bare. On keyboard focus the border turns brass (5.98:1), so focus is fine; the problem is the rest state.",
+   "evidence": "c-round-194/out/fields-summary-194.json (tree/ref/head GUEST-*); out/fields-tree-{1440-F6_*,1280-*,375-*}.json; out/fields-head-1440-GUEST-name_GUEST-email_F1_F2.json; shots/fields/{1440,1280,375}-tree-GUEST-name.png and 1440-head-GUEST-name.png",
+   "fixHint": "B re-grants GuestForm.tsx (2 sites) with the same R78 swap border-outline -> border-outline-strong (GuestForm sits on the same surface family as F3-F6, which measure 3.70 with outline-strong). Not fixed by C.",
+   "origin": "Outside the round-194 grants (section 7 'A stops at K0 -> B re-grants'); caused by the round-193 --color-outline change; not an error in A's granted work."
+  },
+  {
+   "id": "C-R194-02",
+   "severity": "medium",
+   "title": "ST8b class guard false-passes a field whose class token sits 14 lines below the tag (GuestForm's layout), so the tree is green while a faint field remains",
+   "steps": [
+    "From the store root, copy app/ to a scratch dir (c-round-194/trun/m14)",
+    "Insert before '<Form method' in routes/hire-us.tsx an '<input' tag with 13 attribute lines and then 'className=\"border border-outline\" />' on the 14th line after the tag",
+    "STORE_THEME_TOKENS_ROOT=<scratch> npx vitest run app/lib/__tests__/store-theme-tokens.test.ts"
+   ],
+   "expected": "ST8b turns red ('a new field with the faint border turns red', task T1)",
+   "actual": "ST8b stays green (m14). It is also green on the real tree (END-COPY and live) even though GuestForm.tsx:67/:91 carry a bare border-outline on rendered <input> fields. The window is tag + 13 lines (i+14 exclusive), and the guard does not follow class constants. This confirms A's code-reviewer Medium #2.",
+   "evidence": "c-round-194/trun/trun.txt (m14 row, END-COPY row); c-round-194/trun/mut.sh",
+   "fixHint": "In the GuestForm re-grant round, widen or replace the scan (a parser that takes the whole tag up to its closing '>' or '/>', and follows same-file class constants) so that it goes red on GuestForm before the fix. Test-only.",
+   "origin": "Spec/tooling, not an A deviation: task T1 specified 'the same 14-line window' and b-round-193/tools/fieldscan.mjs has the same i+14-exclusive off-by-one; A implemented it as specified, A's code-reviewer flagged it (Medium #2), C confirmed with m14. B may re-rate."
+  }
+ ],
+ "passed": [
+  "PLACEHOLDER-194",
+  "CONTRAST-194",
+  "KEEP-194",
+  "STORE-LAYOUT-194",
+  "STUDIO-RV-194",
+  "G194-3",
+  "SCOPE-194",
+  "T-RUN-194",
+  "PX-NET / REG-HYD"
+ ],
+ "failed": [
+  "FIELD-BORDER-194",
+  "AN-REVIEW-194"
+ ],
+ "blocked": [
+  "F11-F13 (/account password fields): backend unavailable in cloud (needs a signed-in user); ST8 only",
+  "recordings/ constant-styled fields (SfxSoundLibrary:68, SfxSceneBuilder:112, SfxVideoSync:25, SfxQuickEdit:183) on /recordings/:id and /scenes/:id: backend unavailable in cloud (the mock answers sign-in-required for /api/products/*/recordings and /api/sfx-scenes); not measured, not passed",
+  "F16 (ChatInput on /support): /api/chat is sign-in-required in the mock, so Start Chat gives no session; backend unavailable in cloud; ST8 only"
+ ],
+ "notRun": [
+  "F9/F10 (/cart gift-card and coupon inputs): not reachable; /cart with the mock renders an empty cart without these inputs (tree and ref), and C round 193 recorded mock 501 on add-to-cart. ST8 only",
+  "F15 (ui Textarea): no route renders it; ST8 only"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome/lint",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "measurements": {
+  "placeholder": "tree rgb(110,110,109) on white = 5.10:1 at 1440/1280/375; round-193 tree (ref) rgb(146,138,125) = 3.41:1; typed value rgb(0,0,0) = 21:1; attribute 'Enter your email address' == HEAD (c-round-193/out/popup-*.json head)",
+  "fieldBorderMinTree": {
+   "F1": [
+    3.13,
+    3.13,
+    3.12
+   ],
+   "F2": [
+    3.64,
+    3.64,
+    3.64
+   ],
+   "F3-F6": [
+    3.7,
+    3.7,
+    3.7
+   ],
+   "F7@1440": 3.5,
+   "F8@1440": 3.3,
+   "F14@1440": 3.5,
+   "GuestForm": [
+    1.21,
+    1.21,
+    1.21
+   ]
+  },
+  "fieldBorderMinRef": {
+   "F1": [
+    1.03,
+    1.03,
+    1.02
+   ],
+   "F2": [
+    1.19,
+    1.19,
+    1.19
+   ],
+   "F3-F6": [
+    1.21,
+    1.21,
+    1.21
+   ],
+   "F7@1440": 1.15,
+   "F8@1440": 1.08,
+   "F14@1440": 1.15
+  },
+  "fieldBorderHead": {
+   "F2@1440": 1.6,
+   "GuestForm@1440": 1.62
+  },
+  "viewportOrder": "1440, 1280, 375"
+ },
+ "references": "ref = round-193 tree (current tree with the 13 grants replaced by b-round-193/r194-granted-start), served by C on :5174; head = git archive caa09af served by C on :5175; both stopped at the end",
+ "evidenceDir": "c-round-194/",
+ "serversStarted": {
+  "mock": 7731,
+  "refVite": 7835,
+  "headVite": 11276,
+  "allStopped": true,
+  "sharedDevServer5173": "untouched"
+ },
+ "failedDetail": {
+  "FIELD-BORDER-194": "Granted sites all pass (F1 3.12-3.13, F2 3.64, F3-F6 3.70 at 3 viewports; F7 3.50, F8 3.30, F14 3.50 at 1440; brass focus cue). The row fails on the reached non-granted /support GuestForm fields at 1.21:1 -> C-R194-01.",
+  "AN-REVIEW-194": "Only listed tokens changed, no as/any/@ts-ignore, doc 158 Georgian with R77-R79. Fails the clause 'ST8b would catch a new faint field' -> C-R194-02."
+ },
+ "grantedSitesPass": true
+}
