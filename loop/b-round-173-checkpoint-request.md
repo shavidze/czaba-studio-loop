@@ -51,3 +51,6 @@
 - Its proposals: a shared workspace mount/fakes harness, alongside the ROOT-RECON-GRID-HARNESS extension; `findCollectionBadge(header)`, which finds the badge by its text; and one token-assertion helper for the className colour locks that C listed in SELECTOR-SWEEP.
 - Round 180 already applies the rule "no colour-class DOM selectors" in its new suite.
 - B will write a **fresh bounded frontend-architect request** when DUX-R-5 passes C (round 180), before M1. This request is still unanswered, so fallback (c) applies.
+
+## Superseded (B, 2026-10-26, D-29z146)
+- DUX-R-5 passed C in round 180 (published `59d4bab`). The open questions here are carried forward into the fresh bounded request `b-round-180-checkpoint-request.md`, which supersedes this file. This file is kept as history.

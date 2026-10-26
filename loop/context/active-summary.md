@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T01:57:13.944Z)
+# Active loop summary (2026-10-26T03:02:37.655Z)
 
-- backlog.json 1595 KB -> active view 224 KB
-- status: G_ROOT_GATE round 179
-- servers: `{"checkedUtc":"2026-10-26T01:43:07.8701240Z","round":179,"attempt":1,"store":200}`
-- last publication: 15189d5437a06fac81ecb4fa2e83eb731f584eec (rounds 178-179)
-- last root gate: round 179 published - commit 15189d5437a06fac81ecb4fa2e83eb731f584eec pushed
+- backlog.json 1602 KB -> active view 224 KB
+- status: G_ROOT_GATE round 180
+- servers: `{"checkedUtc":"2026-10-26T02:35:24.5940743Z","round":180,"attempt":1,"store":200}`
+- last publication: 59d4bab5f0b2f2fbb22b3f77983e2e4169b866bc (rounds 180-180)
+- last root gate: round 180 published - commit 59d4bab5f0b2f2fbb22b3f77983e2e4169b866bc pushed
 
 ## Current items: -
 
@@ -389,7 +389,7 @@
 - GATE173-S1-OVERVIEW-CORNER-CUT / info / routed to round 174 D2(b): one 'known effect, vetoable' line in doc 142 R25; the 10 px overflow-hidden corner cuts ~2 px of a clip bar and ~4 px of the playhead at x=0/extent end; no code change / 
 - GATE173-S2-DOC141-TODO / low / routed to round 174 D1 (doc 141 l.83 strike-through; reviewer cited l.284) / 
 - C-R174-ENV-BELOW-DROP / info / acknowledged by B (agrees with C): envelope handle vs the pixels just below dropped 4.79 -> 4.19 at both VPs (a-selected, b-normal, d-muted), still >= 3:1; cause is the lighter neutral waveform under the handle by design (R30); no code change, no deferred_low_polish entry; ENV-VIS re-run in round 175 against c-round-174 values / 
-- B-R174-ACCENT-EQ-BRAND / low / scheduled (not deferred): in Obsidian --color-accent = --color-brand = #c9a46a (app.css l.3936/3939), so brand-vs-accent state pairs render identically: valid vs blocked drop ghosts (Lane l.886/887, l.922/923), video vs audio drop hint (l.874), Solo on vs Mute on, Follow on vs paused; text/letters still differ; source evidence by B, C to confirm; owned by 5b-2 (on-states) and 5b-3 (ghosts/hints) with distinct targets / 
+- B-R174-ACCENT-EQ-BRAND / low / scheduled (not deferred): in Obsidian --color-accent = --color-brand = #c9a46a (app.css l.3936/3939), so brand-vs-accent state pairs render identically: valid vs blocked drop ghosts (Lane l.886/887, l.922/923), video vs audio drop hint (l.874), Solo on vs Mute on, Follow on vs paused; text/letters still differ; source evidence by B, C to confirm; owned by 5b-2 (on-states) and 5b-3 (ghosts/hints) with distinct targets | round 180 (D-29z145): ghosts/ring valid foreground vs blocked muted (2.21 lightness step), hint foreground; closes on C PASS of round 180 / 
 - GATE174-S1-FIXED-CN / low / routed to round 175 A9 (ArrangementClip l.859/876-879 -> plain className) / 
 - GATE174-S2-DOC143-STATUS / low / routed to round 175 D1 (doc 143 Completed) / 
 - GATE175-S2-DXA7-OUT-OF-SCOPE-COUNTS / low / routed to round 176 L4(b): ExportDialog accent-brand=6 and Lane ghost string=2 counts dropped from DXA7; untouched later-stage sites covered by C AN-REVIEW/SOURCE-SCOPE | round 176 done; reversed in part by gate-176 S1 -> round 177 G1 restores the two counts (ExportDialog K7 kept, Lane ghost later-stage). 2026-10-25 B round 176 -> 177 planning (D-29z142) / 
@@ -398,18 +398,19 @@
 - C-R176-NOBRASS-LCD-GLYPH / info / method note: default-LCD subpixel fringes on M/S glyphs trip R-B>=45 (also on off buttons); NO-BRASS rows on glyph buttons run with --disable-lcd-text from round 177 / 
 - A-R176-MIXED-REST-BASE / info / confirmed by C: tailwind-merge drops bg-foreground/5 under bg-gradient-to-r; mixed half vs header 3.32 at rest (>= 3:1, at B's 3.3 floor); no change / 
 - C-R176-MIXED-VS-OFF-FILL / info / B ruling round 177: no fill floor; the foreground border (13.94) carries mixed vs off; vetoable by Saba / 
-- C-R177-G1-562 / info / implemented in round 178 working tree (E2/L5; C CC-TEXT/NO-BRASS-TEXT PASS round 178); closes when rounds 178+179 publish / 
 - C-R177-WZOOM-FOCUS-ON-PRESS / info / signal for the K4 review: a mouse press on the Waveform Zoom select matches :focus-visible in Chromium, so ring-brand shows while the native popup is open; pre-existing; K4 kept / 
 - GATE177-S1-DELETE-RANGE-LOOKS-ON / info / vetoable design item (feature-status.md): Delete with a range gets border-foreground, the same border that means on for Loop/Follow; options border-foreground/50 or dashed; needs Saba's call; not scheduled / 
 - GATE177-S3-BRACE-WEIGHT / info / vetoable design item: enabled brace border-2 foreground ~15:1 is louder than the former brass; edge hover 3.43 passes with little margin; recorded in feature-status.md vetoable list / 
-- GATE177-S5-DOC146-STATUS / info / implemented in round 178 working tree (D1; C AN-REVIEW read); closes when rounds 178+179 publish / 
-- C-R178-BADGE-SELECTOR / medium / open; scheduled round 179 (D-29z144) F1/F2 test-only fix / 
 - A-R178-BIOME-REFLOW / info / ruled accepted by B: whitespace-only Biome reflow (StudioWorkspace l.2605 1->4 lines, DetailPanel l.676 1->3, surfaceForbidden array); C confirmed same tokens; standing rule: B scope criteria say 'hunks only at these sites; formatter reflow allowed', never literal line counts / 
 - C-R178-INV-GROUPHEADER-252 / info / classified by B: K10 kept (edit-state text field border, like MarkerRow l.847 and Library search focus:border-brand); vetoable; file protected/untouched; 5b-3b stage-exit INVENTORY-GREP maps it to K / 
 - C-R178-EXPORT-CLIPS-AT-0DB / info / signal / product question, not scheduled: the demo S1 mix clips at 0 dB (1024 samples) so the overload alert shows on a plain export; existing detection working / 
 - C-R178-ESC-NO-DRAG-CANCEL / info / signal / product question, not scheduled: Escape does not cancel a clip drag (pre-existing); a refused move with a horizontal part leaves the clip at its last free spot; no Ableton parity claimed (no source captured) / 
 - B-R178-PLAN-GAP-TEST-SELECTORS / info / B self-finding: purchased-collection-ui was missing from round-178 base/neighbour lists; process rule: before freezing grants of every token-swap round, B greps app/**/__tests__ and e2e/ for selectors (querySelector*, closest, getElementsByClassName) on removed tokens; round 179 C SELECTOR-SWEEP pre-computes 5b-3b / 
-- ARCH-R178-SIGNAL3 / info / architecture signal (fifth consecutive round), not scheduled: duplicated workspace fakes harness, readFileSync source counts sensitive to Biome wrapping, colour-class DOM selectors; proposal: extend ROOT-RECON-GRID-HARNESS to shared mount/fakes + whitespace-normalised countOccurrences; DOM lookups by text/testid; appended to b-round-173-checkpoint-request.md; fresh bounded request at DUX-R-5 boundary / 
+- ARCH-R178-SIGNAL3 / info / architecture signal (fifth consecutive round), not scheduled: duplicated workspace fakes harness, readFileSync source counts sensitive to Biome wrapping, colour-class DOM selectors; proposal: extend ROOT-RECON-GRID-HARNESS to shared mount/fakes + whitespace-normalised countOccurrences; DOM lookups by text/testid; appended to b-round-173-checkpoint-request.md; fresh bounded request at DUX-R-5 boundary | round 179: reviewer note repeats (sixth mention; whole round 179 spent on selector repair); appended to b-round-173-checkpoint-request.md / 
+- C-R179-SELECTOR-SWEEP / info / used by B for round-180 grants: 0 DOM selectors on 5b-3b tokens; 3 className locks granted (affordance-colour-ui l.159, lane-strings-ui l.505, library-row-strings-ui l.578-579/586); l.842/l.874 had no lock -> new DXG suite / 
+- C-R179-DOC147-STALE / info / scheduled round 180 D1 (doc 147 Completed; l.124 TODO and round-178 'B must decide' entry annotated as resolved in round 179) / 
+- C-R179-EXPORT-PEAK / info / same signal as C-R178-EXPORT-CLIPS-AT-0DB (product question, not scheduled); not duplicated as a task / 
+- ARCH-R179-SIGNAL3 / info / architecture signal, not scheduled: shared workspace mount/fakes harness, findCollectionBadge(header) by text, one token-assertion helper for className colour locks; appended to b-round-173-checkpoint-request.md; fresh bounded frontend-architect request after DUX-R-5 C PASS, before M1 / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,0 +1,87 @@
+{
+  "round": 180,
+  "task": "DUX-R-5b-3b drag feedback + R35 import/Add neutral; DUX-R-5 stage exit",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-26T02:35:24.5940743Z",
+    "round": 180,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "T180-TARGETED",
+    "SCOPE-180",
+    "AN-REVIEW-180",
+    "MUT-180",
+    "CC-DRAG",
+    "CC-R35",
+    "NO-BRASS-DRAG",
+    "CONTRAST-DRAG",
+    "BEHAVIOUR-DRAG",
+    "INVENTORY-EXIT",
+    "ENV-VIS",
+    "RV1-DUX5B3B",
+    "G180-3",
+    "FUNC-SMOKE-180",
+    "PX-NET",
+    "REG-HYD"
+  ],
+  "failed": [],
+  "blocked": [
+    "G180-3 fake-Bearer 403: backend unavailable in cloud"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "abletonParity": {
+    "drag-feedback-colour": "unverified (no Live 12 source captured; deliberate CZABA R34 choice)",
+    "add-import-button-colour": "unverified (R35)",
+    "drag-drop-behaviour": "not applicable (unchanged; BEHAVIOUR-DRAG confirms)"
+  },
+  "info": [
+    "A-R180-N1-STRUCT-LOOKUPS: N1 uses parentElement / aria-controls->getElementById / firstElementChild lookups (no colour class; each throws a labelled Error); outside the literal role/name/text/testid rule; B rules",
+    "MUT-180: m291 and m294 also turn DXG7 red; m296 also turns LSU7 red (LSU7 l.552 already locks the compact import); stricter than section 4.1, not a finding",
+    "C-R180-BLOCKED-MOVE-ONE-GHOST: a real-browser purely vertical Music->Video drag renders 1 blocked ghost (no kept valid ghost); behaviour unchanged",
+    "Existing C-R178-EXPORT-CLIPS-AT-0DB: project WAV peak 1.0, sha 5fadd97a09874468 bit-identical to round 179",
+    "ENV-FIRST-LOAD: 1 cold-load failure replaced in ENV-VIS 1440 and 1 in the first HEAD-copy load at 1440",
+    "NO-BRASS-DRAG harness: the K8 playhead-line mask (outside the K7/K10 allowance) removed 32 px per ring strip and 1200-1600 px per hint box; these pixels are the playhead itself; B rules on a re-scan with the playhead moved; details in c-round-180/out/masks-detail.txt",
+    "HEAD-copy (/tmp/head180, git archive of 15189d5, symlinked node_modules, :5174) re-optimized the shared node_modules/.vite cache; tracked tree unchanged; copy removed"
+  ],
+  "evidence": {
+    "report": "c-round-180.md",
+    "dir": "c-round-180/",
+    "browserRuns": [
+      "c-round-180/out/c180-1440-2.json",
+      "c-round-180/out/c180-1280-1.json",
+      "c-round-180/out/c180-1440-1.json (valid; superseded only for the ring-colour parse and the hint-testid read timing)"
+    ],
+    "head": [
+      "c-round-180/out/head180-1440-2.json",
+      "c-round-180/out/head180-1280-1.json"
+    ],
+    "rv1": "c-round-180/out/rv1-final.txt",
+    "env": [
+      "c-round-180/out/env/env-1440-2.json",
+      "c-round-180/out/env/env-1280-1.json",
+      "c-round-180/out/env-cmp.json"
+    ],
+    "g3": "c-round-180/out/g180-3.json",
+    "vitest": "c-round-180/out/vitest-c.json",
+    "inventory": "c-round-180/out/inventory-raw.txt",
+    "tree": [
+      "c-round-180/start-tree-sha256.txt",
+      "c-round-180/end-tree-sha256.txt"
+    ],
+    "masks": "c-round-180/out/masks-detail.txt"
+  }
+}
