@@ -1,0 +1,43 @@
+
+ RUN  v4.0.18 /tmp/c-r3-m1
+
+ ❯ tests/main/recording-tag-contract.test.ts (9 tests | 1 failed) 58ms
+     ✓ D-13: category is the last STANDARD_FIELDS entry and the only ICAT field 2ms
+     ✓ T1-1: writes ICAT, IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL 11ms
+     ✓ T1-1b: an odd-size ICAT has no NUL, one zero pad byte outside size, and aligned neighbours 6ms
+     ✓ T1-2: meta:read returns category, keywords and comment exactly 3ms
+     ✓ T1-3: the data chunk payload sha256 is unchanged by the write 2ms
+     × T1-4: bext, iXML and data stay byte-identical on a recorder WAV and ICMT is written 11ms
+     ✓ T1-5: batch write of category only keeps title, keywords and comment 11ms
+     ✓ T1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks 3ms
+     ✓ T1-10b (D-10 pinned): writing an empty category removes the previous value 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-4: bext, iXML and data stay byte-identical on a recorder WAV and ICMT is written
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/main/recording-tag-contract.test.ts:169:81
+    167|     const written = readFileSync(filePath);
+    168|     const afterChunks = parseRiffTopLevelChunks(written);
+    169|     expect(findSingleRiffChunk(afterChunks, "bext").payload.equals(bex…
+       |                                                                                 ^
+    170|     expect(findSingleRiffChunk(afterChunks, "iXML").payload.equals(ixm…
+    171|     expect(findSingleRiffChunk(afterChunks, "data").payload.equals(dat…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  14:04:34
+   Duration  456ms (transform 90ms, setup 23ms, import 187ms, tests 58ms, environment 0ms)
+
+
+::error file=/tmp/c-r3-m1/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-4%3A bext%2C iXML and data stay byte-identical on a recorder WAV and ICMT is written,line=169,column=81::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/main/recording-tag-contract.test.ts:169:81%0A%0A

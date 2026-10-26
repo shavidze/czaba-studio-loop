@@ -1,0 +1,188 @@
+
+> czaba-tag-manager@1.3.1 test:main
+> vitest run --config vitest.config.main.ts
+
+
+ RUN  v4.0.18 /tmp/c-r3-red
+
+ ✓ tests/main/file-system.test.ts (10 tests) 41ms
+ ✓ tests/main/metadata.test.ts (7 tests) 41ms
+ ❯ tests/main/recording-tag-contract.test.ts (9 tests | 8 failed) 95ms
+     × D-13: category is the last STANDARD_FIELDS entry and the only ICAT field 20ms
+     × T1-1: writes ICAT, IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL 22ms
+     × T1-1b: an odd-size ICAT has no NUL, one zero pad byte outside size, and aligned neighbours 10ms
+     × T1-2: meta:read returns category, keywords and comment exactly 8ms
+     ✓ T1-3: the data chunk payload sha256 is unchanged by the write 3ms
+     × T1-4: bext, iXML and data stay byte-identical on a recorder WAV and ICMT is written 9ms
+     × T1-5: batch write of category only keeps title, keywords and comment 11ms
+     × T1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks 3ms
+     × T1-10b (D-10 pinned): writing an empty category removes the previous value 3ms
+ ✓ tests/main/templates.test.ts (8 tests) 37ms
+ ✓ tests/main/schema.test.ts (6 tests) 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > D-13: category is the last STANDARD_FIELDS entry and the only ICAT field
+AssertionError: expected { key: 'keywords', …(4) } to strictly equal { key: 'category', …(4) }
+
+- Expected
++ Received
+
+  {
+-   "key": "category",
+-   "label": "Category (UCS)",
+-   "riffChunkId": "ICAT",
++   "key": "keywords",
++   "label": "Keywords",
++   "riffChunkId": "IKEY",
+    "standard": true,
+    "type": "text",
+  }
+
+ ❯ tests/main/recording-tag-contract.test.ts:86:57
+     84| describe("recording tag contract (T-1)", () => {
+     85|   it("D-13: category is the last STANDARD_FIELDS entry and the only IC…
+     86|     expect(STANDARD_FIELDS[STANDARD_FIELDS.length - 1]).toStrictEqual({
+       |                                                         ^
+     87|       key: "category",
+     88|       label: "Category (UCS)",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-1: writes ICAT, IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL
+AssertionError: INFO ICAT present: expected undefined to be defined
+ ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:70:41
+     68| function expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+     69|   const payload = info.get(id);
+     70|   expect(payload, `INFO ${id} present`).toBeDefined();
+       |                                         ^
+     71|   expect(payload?.length, `INFO ${id} size`).toBe(expected.length);
+     72|   expect(payload?.equals(expected), `INFO ${id} payload`).toBe(true);
+ ❯ tests/main/recording-tag-contract.test.ts:102:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-1b: an odd-size ICAT has no NUL, one zero pad byte outside size, and aligned neighbours
+AssertionError: expected undefined to be 9 // Object.is equality
+
+- Expected: 
+9
+
++ Received: 
+undefined
+
+ ❯ tests/main/recording-tag-contract.test.ts:126:26
+    124|     const info = parseListInfoSubChunks(bytes);
+    125|     const icat = info.get("ICAT");
+    126|     expect(icat?.length).toBe(9);
+       |                          ^
+    127|     expect(icat?.equals(Buffer.from(oddCategory, "ascii"))).toBe(true);
+    128|     const padIndex = (icat?.byteOffset ?? 0) - bytes.byteOffset + (ica…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-2: meta:read returns category, keywords and comment exactly
+AssertionError: expected undefined to be 'DOORWood' // Object.is equality
+
+- Expected: 
+"DOORWood"
+
++ Received: 
+undefined
+
+ ❯ tests/main/recording-tag-contract.test.ts:140:27
+    138| 
+    139|     const meta = await readMetadataViaIpc(filePath);
+    140|     expect(meta.category).toBe(CONTRACT_CATEGORY);
+       |                           ^
+    141|     expect(meta.keywords).toBe(CONTRACT_KEYWORDS);
+    142|     expect(meta.comment).toBe(CONTRACT_COMMENT);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-4: bext, iXML and data stay byte-identical on a recorder WAV and ICMT is written
+AssertionError: expected undefined to be 'DOORWood' // Object.is equality
+
+- Expected: 
+"DOORWood"
+
++ Received: 
+undefined
+
+ ❯ tests/main/recording-tag-contract.test.ts:175:27
+    173|     const meta = await readMetadataViaIpc(filePath);
+    174|     expect(meta.comment).toBe(CONTRACT_COMMENT);
+    175|     expect(meta.category).toBe(CONTRACT_CATEGORY);
+       |                           ^
+    176|   });
+    177| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-5: batch write of category only keeps title, keywords and comment
+AssertionError: INFO ICAT present: expected undefined to be defined
+ ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:70:41
+     68| function expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+     69|   const payload = info.get(id);
+     70|   expect(payload, `INFO ${id} present`).toBeDefined();
+       |                                         ^
+     71|   expect(payload?.length, `INFO ${id} size`).toBe(expected.length);
+     72|   expect(payload?.equals(expected), `INFO ${id} payload`).toBe(true);
+ ❯ tests/main/recording-tag-contract.test.ts:203:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks
+AssertionError: expected undefined to be +0 // Object.is equality
+
+- Expected: 
+0
+
++ Received: 
+undefined
+
+ ❯ tests/main/recording-tag-contract.test.ts:223:38
+    221|     const info = readInfo(filePath);
+    222|     expect(info.get("IKEY")?.length).toBe(0);
+    223|     expect(info.get("ICAT")?.length).toBe(0);
+       |                                      ^
+    224|     const meta = await readMetadataViaIpc(filePath);
+    225|     expect(meta.keywords).toBe("");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10b (D-10 pinned): writing an empty category removes the previous value
+AssertionError: INFO ICAT present: expected undefined to be defined
+ ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:70:41
+     68| function expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+     69|   const payload = info.get(id);
+     70|   expect(payload, `INFO ${id} present`).toBeDefined();
+       |                                         ^
+     71|   expect(payload?.length, `INFO ${id} size`).toBe(expected.length);
+     72|   expect(payload?.equals(expected), `INFO ${id} payload`).toBe(true);
+ ❯ tests/main/recording-tag-contract.test.ts:232:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  8 failed | 32 passed (40)
+   Start at  14:04:26
+   Duration  723ms (transform 248ms, setup 104ms, import 620ms, tests 226ms, environment 1ms)
+
+
+::error file=/tmp/c-r3-red/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > D-13%3A category is the last STANDARD_FIELDS entry and the only ICAT field,line=86,column=57::AssertionError: expected { key: 'keywords', …(4) } to strictly equal { key: 'category', …(4) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "key": "category",%0A-   "label": "Category (UCS)",%0A-   "riffChunkId": "ICAT",%0A+   "key": "keywords",%0A+   "label": "Keywords",%0A+   "riffChunkId": "IKEY",%0A    "standard": true,%0A    "type": "text",%0A  }%0A%0A ❯ tests/main/recording-tag-contract.test.ts:86:57%0A%0A
+
+::error file=/tmp/c-r3-red/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-1%3A writes ICAT%2C IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL,line=70,column=41::AssertionError: INFO ICAT present: expected undefined to be defined%0A ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:70:41%0A ❯ tests/main/recording-tag-contract.test.ts:102:5%0A%0A
+
+::error file=/tmp/c-r3-red/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-1b%3A an odd-size ICAT has no NUL%2C one zero pad byte outside size%2C and aligned neighbours,line=126,column=26::AssertionError: expected undefined to be 9 // Object.is equality%0A%0A- Expected: %0A9%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/recording-tag-contract.test.ts:126:26%0A%0A
+
+::error file=/tmp/c-r3-red/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-2%3A meta%3Aread returns category%2C keywords and comment exactly,line=140,column=27::AssertionError: expected undefined to be 'DOORWood' // Object.is equality%0A%0A- Expected: %0A"DOORWood"%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/recording-tag-contract.test.ts:140:27%0A%0A
+
+::error file=/tmp/c-r3-red/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-4%3A bext%2C iXML and data stay byte-identical on a recorder WAV and ICMT is written,line=175,column=27::AssertionError: expected undefined to be 'DOORWood' // Object.is equality%0A%0A- Expected: %0A"DOORWood"%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/recording-tag-contract.test.ts:175:27%0A%0A
+
+::error file=/tmp/c-r3-red/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-5%3A batch write of category only keeps title%2C keywords and comment,line=70,column=41::AssertionError: INFO ICAT present: expected undefined to be defined%0A ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:70:41%0A ❯ tests/main/recording-tag-contract.test.ts:203:7%0A%0A
+
+::error file=/tmp/c-r3-red/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10a (D-10 pinned)%3A empty keywords and category are written as zero-length sub-chunks,line=223,column=38::AssertionError: expected undefined to be +0 // Object.is equality%0A%0A- Expected: %0A0%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/recording-tag-contract.test.ts:223:38%0A%0A
+
+::error file=/tmp/c-r3-red/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10b (D-10 pinned)%3A writing an empty category removes the previous value,line=70,column=41::AssertionError: INFO ICAT present: expected undefined to be defined%0A ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:70:41%0A ❯ tests/main/recording-tag-contract.test.ts:232:5%0A%0A

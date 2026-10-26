@@ -1,0 +1,2361 @@
+# red before field, HEAD c76856791126602a3016e133bd91a5f0ff2ced5b, Mon Oct 26 13:48:37 UTC 2026
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m7 failed[39m[2m)[22m[32m 54[2mms[22m[39m
+[31m     [31m×[31m D-13: category is the last STANDARD_FIELDS entry and the only ICAT field[39m[32m 10[2mms[22m[39m
+[31m     [31m×[31m T1-1: writes ICAT, IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m T1-2: meta:read returns category, keywords and comment exactly[39m[32m 7[2mms[22m[39m
+     [32m✓[39m T1-3: the data chunk payload sha256 is unchanged by the write[32m 3[2mms[22m[39m
+[31m     [31m×[31m T1-4: bext and iXML stay byte-identical on a recorder WAV and ICMT wins over bext[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m T1-5: batch write of category only keeps title, keywords and comment[39m[32m 8[2mms[22m[39m
+[31m     [31m×[31m T1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m T1-10b (D-10 pinned): writing an empty category removes the previous value[39m[32m 2[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 7 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mD-13: category is the last STANDARD_FIELDS entry and the only ICAT field
+[31m[1mAssertionError[22m: expected { key: 'keywords', …(4) } to deeply equal { key: 'category', …(4) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "key": "category",[39m
+[32m-   "label": "Category (UCS)",[39m
+[32m-   "riffChunkId": "ICAT",[39m
+[31m+   "key": "keywords",[39m
+[31m+   "label": "Keywords",[39m
+[31m+   "riffChunkId": "IKEY",[39m
+[2m    "standard": true,[22m
+[2m    "type": "text",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m81:57[22m[39m
+    [90m 79| [39m[34mdescribe[39m([32m"recording tag contract (T-1)"[39m[33m,[39m () [33m=>[39m {
+    [90m 80| [39m  it("D-13: category is the last STANDARD_FIELDS entry and the only IC…
+    [90m 81| [39m    [34mexpect[39m([33mSTANDARD_FIELDS[39m[[33mSTANDARD_FIELDS[39m[33m.[39mlength [33m-[39m [34m1[39m])[33m.[39m[34mtoEqual[39m({
+    [90m   | [39m                                                        [31m^[39m
+    [90m 82| [39m      key[33m:[39m [32m"category"[39m[33m,[39m
+    [90m 83| [39m      label[33m:[39m [32m"Category (UCS)"[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-1: writes ICAT, IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL
+[31m[1mAssertionError[22m: INFO ICAT present: expected undefined to be defined[39m
+[36m [2m❯[22m expectInfoPayload tests/main/recording-tag-contract.test.ts:[2m65:41[22m[39m
+    [90m 63| [39mfunction expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+    [90m 64| [39m  [35mconst[39m payload [33m=[39m info[33m.[39m[35mget[39m(id)[33m;[39m
+    [90m 65| [39m  [34mexpect[39m(payload[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m present`[39m)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m 66| [39m  [34mexpect[39m(payload[33m?.[39mlength[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m size`[39m)[33m.[39m[34mtoBe[39m(expected[33m.[39mlength)[33m;[39m
+    [90m 67| [39m  [34mexpect[39m(payload[33m?.[39m[34mequals[39m(expected)[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m payload`[39m)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+[90m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m96:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-2: meta:read returns category, keywords and comment exactly
+[31m[1mAssertionError[22m: expected undefined to be 'DOORWood' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"DOORWood"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m116:27[22m[39m
+    [90m114| [39m
+    [90m115| [39m    [35mconst[39m meta [33m=[39m [35mawait[39m [34mreadMetadataViaIpc[39m(filePath)[33m;[39m
+    [90m116| [39m    [34mexpect[39m(meta[33m.[39mcategory)[33m.[39m[34mtoBe[39m([33mCONTRACT_CATEGORY[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m117| [39m    [34mexpect[39m(meta[33m.[39mkeywords)[33m.[39m[34mtoBe[39m([33mCONTRACT_KEYWORDS[39m)[33m;[39m
+    [90m118| [39m    [34mexpect[39m(meta[33m.[39mcomment)[33m.[39m[34mtoBe[39m([33mCONTRACT_COMMENT[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-4: bext and iXML stay byte-identical on a recorder WAV and ICMT wins over bext
+[31m[1mAssertionError[22m: expected undefined to be 'DOORWood' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"DOORWood"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m150:27[22m[39m
+    [90m148| [39m    [35mconst[39m meta [33m=[39m [35mawait[39m [34mreadMetadataViaIpc[39m(filePath)[33m;[39m
+    [90m149| [39m    [34mexpect[39m(meta[33m.[39mcomment)[33m.[39m[34mtoBe[39m([33mCONTRACT_COMMENT[39m)[33m;[39m
+    [90m150| [39m    [34mexpect[39m(meta[33m.[39mcategory)[33m.[39m[34mtoBe[39m([33mCONTRACT_CATEGORY[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m151| [39m  })[33m;[39m
+    [90m152| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-5: batch write of category only keeps title, keywords and comment
+[31m[1mAssertionError[22m: INFO ICAT present: expected undefined to be defined[39m
+[36m [2m❯[22m expectInfoPayload tests/main/recording-tag-contract.test.ts:[2m65:41[22m[39m
+    [90m 63| [39mfunction expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+    [90m 64| [39m  [35mconst[39m payload [33m=[39m info[33m.[39m[35mget[39m(id)[33m;[39m
+    [90m 65| [39m  [34mexpect[39m(payload[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m present`[39m)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m 66| [39m  [34mexpect[39m(payload[33m?.[39mlength[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m size`[39m)[33m.[39m[34mtoBe[39m(expected[33m.[39mlength)[33m;[39m
+    [90m 67| [39m  [34mexpect[39m(payload[33m?.[39m[34mequals[39m(expected)[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m payload`[39m)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+[90m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m178:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks
+[31m[1mAssertionError[22m: expected undefined to be +0 // Object.is equality[39m
+
+[32m- Expected:[39m 
+0
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m198:38[22m[39m
+    [90m196| [39m    [35mconst[39m info [33m=[39m [34mreadInfo[39m(filePath)[33m;[39m
+    [90m197| [39m    [34mexpect[39m(info[33m.[39m[35mget[39m([32m"IKEY"[39m)[33m?.[39mlength)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m198| [39m    [34mexpect[39m(info[33m.[39m[35mget[39m([32m"ICAT"[39m)[33m?.[39mlength)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m199| [39m    [35mconst[39m meta [33m=[39m [35mawait[39m [34mreadMetadataViaIpc[39m(filePath)[33m;[39m
+    [90m200| [39m    [34mexpect[39m(meta[33m.[39mkeywords)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-10b (D-10 pinned): writing an empty category removes the previous value
+[31m[1mAssertionError[22m: INFO ICAT present: expected undefined to be defined[39m
+[36m [2m❯[22m expectInfoPayload tests/main/recording-tag-contract.test.ts:[2m65:41[22m[39m
+    [90m 63| [39mfunction expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+    [90m 64| [39m  [35mconst[39m payload [33m=[39m info[33m.[39m[35mget[39m(id)[33m;[39m
+    [90m 65| [39m  [34mexpect[39m(payload[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m present`[39m)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m 66| [39m  [34mexpect[39m(payload[33m?.[39mlength[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m size`[39m)[33m.[39m[34mtoBe[39m(expected[33m.[39mlength)[33m;[39m
+    [90m 67| [39m  [34mexpect[39m(payload[33m?.[39m[34mequals[39m(expected)[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m payload`[39m)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+[90m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m207:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m7 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 13:48:38
+[2m   Duration [22m 484ms[2m (transform 92ms, setup 24ms, import 199ms, tests 54ms, environment 0ms)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > D-13%3A category is the last STANDARD_FIELDS entry and the only ICAT field,line=81,column=57::AssertionError: expected { key: 'keywords', …(4) } to deeply equal { key: 'category', …(4) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "key": "category",%0A-   "label": "Category (UCS)",%0A-   "riffChunkId": "ICAT",%0A+   "key": "keywords",%0A+   "label": "Keywords",%0A+   "riffChunkId": "IKEY",%0A    "standard": true,%0A    "type": "text",%0A  }%0A%0A ❯ tests/main/recording-tag-contract.test.ts:81:57%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-1%3A writes ICAT%2C IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL,line=65,column=41::AssertionError: INFO ICAT present: expected undefined to be defined%0A ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:65:41%0A ❯ tests/main/recording-tag-contract.test.ts:96:5%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-2%3A meta%3Aread returns category%2C keywords and comment exactly,line=116,column=27::AssertionError: expected undefined to be 'DOORWood' // Object.is equality%0A%0A- Expected: %0A"DOORWood"%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/recording-tag-contract.test.ts:116:27%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-4%3A bext and iXML stay byte-identical on a recorder WAV and ICMT wins over bext,line=150,column=27::AssertionError: expected undefined to be 'DOORWood' // Object.is equality%0A%0A- Expected: %0A"DOORWood"%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/recording-tag-contract.test.ts:150:27%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-5%3A batch write of category only keeps title%2C keywords and comment,line=65,column=41::AssertionError: INFO ICAT present: expected undefined to be defined%0A ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:65:41%0A ❯ tests/main/recording-tag-contract.test.ts:178:7%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10a (D-10 pinned)%3A empty keywords and category are written as zero-length sub-chunks,line=198,column=38::AssertionError: expected undefined to be +0 // Object.is equality%0A%0A- Expected: %0A0%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/recording-tag-contract.test.ts:198:38%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10b (D-10 pinned)%3A writing an empty category removes the previous value,line=65,column=41::AssertionError: INFO ICAT present: expected undefined to be defined%0A ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:65:41%0A ❯ tests/main/recording-tag-contract.test.ts:207:5%0A%0A
+main exit=1
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 1430[2mms[22m[39m
+[31m     [31m×[31m rejects a custom field with RIFF ID ICAT[39m[33m 855[2mms[22m[39m
+[31m     [31m×[31m rejects a custom field with lowercase RIFF ID icat[39m[33m 530[2mms[22m[39m
+[31m     [31m×[31m lists Category (UCS) among hidden standard fields for a pre-T-1 schema[39m[32m 42[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor reserved ICAT (T1-9)[2m > [22mrejects a custom field with RIFF ID ICAT
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: RIFF ID "ICAT" is already in use. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3 space-y-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-muted"[39m
+          [36m>[39m
+            [0mActive Fields[0m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mTitle[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtext[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+            [36m>[39m
+              [0mINAM[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 5v14"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-destructive p-0.5"[39m
+                [33mtitle[39m=[32m"Hide standard field"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M18 6 6 18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m6 6 12 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mArtists[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtags[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+          ...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m41:19[22m[39m
+    [90m 39| [39m    [34maddCustomFieldViaForm[39m([32m"Client"[39m[33m,[39m [32m"ICAT"[39m)[33m;[39m
+    [90m 40| [39m
+    [90m 41| [39m    expect(screen.getByText('RIFF ID "ICAT" is already in use')).toBeI…
+    [90m   | [39m                  [31m^[39m
+    [90m 42| [39m    [34mexpect[39m(useSchemaStore[33m.[39m[34mgetState[39m()[33m.[39mfields)[33m.[39m[34mtoEqual[39m(fieldsBefore)[33m;[39m
+    [90m 43| [39m    expect(useSchemaStore.getState().fields.some((field) => field.key …
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor reserved ICAT (T1-9)[2m > [22mrejects a custom field with lowercase RIFF ID icat
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: RIFF ID "ICAT" is already in use. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3 space-y-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-muted"[39m
+          [36m>[39m
+            [0mActive Fields[0m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mTitle[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtext[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+            [36m>[39m
+              [0mINAM[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 5v14"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-destructive p-0.5"[39m
+                [33mtitle[39m=[32m"Hide standard field"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M18 6 6 18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m6 6 12 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mArtists[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtags[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+          ...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m52:19[22m[39m
+    [90m 50| [39m    [34maddCustomFieldViaForm[39m([32m"Client"[39m[33m,[39m [32m"icat"[39m)[33m;[39m
+    [90m 51| [39m
+    [90m 52| [39m    expect(screen.getByText('RIFF ID "ICAT" is already in use')).toBeI…
+    [90m   | [39m                  [31m^[39m
+    [90m 53| [39m    [34mexpect[39m(useSchemaStore[33m.[39m[34mgetState[39m()[33m.[39mfields)[33m.[39m[34mtoEqual[39m(fieldsBefore)[33m;[39m
+    [90m 54| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor reserved ICAT (T1-9)[2m > [22mlists Category (UCS) among hidden standard fields for a pre-T-1 schema
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: Hidden Standard Fields. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3 space-y-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-muted"[39m
+          [36m>[39m
+            [0mActive Fields[0m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mTitle[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtext[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+            [36m>[39m
+              [0mINAM[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 5v14"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-destructive p-0.5"[39m
+                [33mtitle[39m=[32m"Hide standard field"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M18 6 6 18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m6 6 12 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mArtists[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtags[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+          ...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m62:19[22m[39m
+    [90m 60| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m 61| [39m
+    [90m 62| [39m    expect(screen.getByText("Hidden Standard Fields")).toBeInTheDocume…
+    [90m   | [39m                  [31m^[39m
+    [90m 63| [39m    expect(screen.getByRole("button", { name: "+ Category (UCS)" })).t…
+    [90m 64| [39m    [34mexpect[39m(screen[33m.[39m[34mqueryByText[39m([32m"ICAT"[39m))[33m.[39mnot[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m   Start at [22m 13:48:39
+[2m   Duration [22m 2.63s[2m (transform 202ms, setup 94ms, import 371ms, tests 1.43s, environment 599ms)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor reserved ICAT (T1-9) > rejects a custom field with RIFF ID ICAT,line=41,column=19::TestingLibraryElementError: Unable to find an element with the text: RIFF ID "ICAT" is already in use. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.%0A%0AIgnored nodes: comments, script, style%0A<body>%0A  <div>%0A    <div%0A      class="flex flex-col h-full"%0A    >%0A      <div%0A        class="px-3 py-2 border-b border-outline flex items-center gap-2"%0A      >%0A        <button%0A          class="text-muted hover:text-foreground p-0.5 transition-colors"%0A          type="button"%0A        >%0A          <svg%0A            class="lucide lucide-arrow-left h-3.5 w-3.5"%0A            fill="none"%0A            height="24"%0A            stroke="currentColor"%0A            stroke-linecap="round"%0A            stroke-linejoin="round"%0A            stroke-width="2"%0A            viewBox="0 0 24 24"%0A            width="24"%0A            xmlns="http://www.w3.org/2000/svg"%0A          >%0A            <path%0A              d="m12 19-7-7 7-7"%0A            />%0A            <path%0A              d="M19 12H5"%0A            />%0A          </svg>%0A        </button>%0A        <span%0A          class="text-xs font-medium text-brand"%0A        >%0A          Customize Fields%0A        </span>%0A      </div>%0A      <div%0A        class="flex-1 overflow-y-auto p-3 space-y-4"%0A      >%0A        <div%0A          class="space-y-1.5"%0A        >%0A          <span%0A            class="text-xs text-muted"%0A          >%0A            Active Fields%0A          </span>%0A          <div%0A            class="flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"%0A          >%0A            <span%0A              class="flex-1 text-foreground truncate"%0A            >%0A              Title%0A            </span>%0A            <span%0A              class="text-dim text-[10px]"%0A            >%0A              text%0A            </span>%0A            <span%0A              class="text-dim text-[10px] font-mono"%0A            >%0A              INAM%0A            </span>%0A            <div%0A              class="flex items-center gap-0.5"%0A            >%0A              <button%0A                class="text-dim hover:text-foreground disabled:opacity-30 p-0.5"%0A                disabled=""%0A                type="button"%0A              >%0A                <svg%0A                  class="lucide lucide-arrow-up h-3 w-3"%0A                  fill="none"%0A                  height="24"%0A                  stroke="currentColor"%0A                  stroke-linecap="round"%0A                  stroke-linejoin="round"%0A                  stroke-width="2"%0A                  viewBox="0 0 24 24"%0A                  width="24"%0A                  xmlns="http://www.w3.org/2000/svg"%0A                >%0A                  <path%0A                    d="m5 12 7-7 7 7"%0A                  />%0A                  <path%0A                    d="M12 19V5"%0A                  />%0A                </svg>%0A              </button>%0A              <button%0A                class="text-dim hover:text-foreground disabled:opacity-30 p-0.5"%0A                type="button"%0A              >%0A                <svg%0A                  class="lucide lucide-arrow-down h-3 w-3"%0A                  fill="none"%0A                  height="24"%0A                  stroke="currentColor"%0A                  stroke-linecap="round"%0A                  stroke-linejoin="round"%0A                  stroke-width="2"%0A                  viewBox="0 0 24 24"%0A                  width="24"%0A                  xmlns="http://www.w3.org/2000/svg"%0A                >%0A                  <path%0A                    d="M12 5v14"%0A                  />%0A                  <path%0A                    d="m19 12-7 7-7-7"%0A                  />%0A                </svg>%0A              </button>%0A              <button%0A                class="text-dim hover:text-destructive p-0.5"%0A                title="Hide standard field"%0A                type="button"%0A              >%0A                <svg%0A                  class="lucide lucide-x h-3 w-3"%0A                  fill="none"%0A                  height="24"%0A                  stroke="currentColor"%0A                  stroke-linecap="round"%0A                  stroke-linejoin="round"%0A                  stroke-width="2"%0A                  viewBox="0 0 24 24"%0A                  width="24"%0A                  xmlns="http://www.w3.org/2000/svg"%0A                >%0A                  <path%0A                    d="M18 6 6 18"%0A                  />%0A                  <path%0A                    d="m6 6 12 12"%0A                  />%0A                </svg>%0A              </button>%0A            </div>%0A          </div>%0A          <div%0A            class="flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"%0A          >%0A            <span%0A              class="flex-1 text-foreground truncate"%0A            >%0A              Artists%0A            </span>%0A            <span%0A              class="text-dim text-[10px]"%0A            >%0A              tags%0A            </span>%0A            <span%0A              class="text-dim text-[10px] font-mono"%0A          ...%0A ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19%0A ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38%0A ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17%0A ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19%0A ❯ tests/renderer/components/schema-editor.test.ts:41:19%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor reserved ICAT (T1-9) > rejects a custom field with lowercase RIFF ID icat,line=52,column=19::TestingLibraryElementError: Unable to find an element with the text: RIFF ID "ICAT" is already in use. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.%0A%0AIgnored nodes: comments, script, style%0A<body>%0A  <div>%0A    <div%0A      class="flex flex-col h-full"%0A    >%0A      <div%0A        class="px-3 py-2 border-b border-outline flex items-center gap-2"%0A      >%0A        <button%0A          class="text-muted hover:text-foreground p-0.5 transition-colors"%0A          type="button"%0A        >%0A          <svg%0A            class="lucide lucide-arrow-left h-3.5 w-3.5"%0A            fill="none"%0A            height="24"%0A            stroke="currentColor"%0A            stroke-linecap="round"%0A            stroke-linejoin="round"%0A            stroke-width="2"%0A            viewBox="0 0 24 24"%0A            width="24"%0A            xmlns="http://www.w3.org/2000/svg"%0A          >%0A            <path%0A              d="m12 19-7-7 7-7"%0A            />%0A            <path%0A              d="M19 12H5"%0A            />%0A          </svg>%0A        </button>%0A        <span%0A          class="text-xs font-medium text-brand"%0A        >%0A          Customize Fields%0A        </span>%0A      </div>%0A      <div%0A        class="flex-1 overflow-y-auto p-3 space-y-4"%0A      >%0A        <div%0A          class="space-y-1.5"%0A        >%0A          <span%0A            class="text-xs text-muted"%0A          >%0A            Active Fields%0A          </span>%0A          <div%0A            class="flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"%0A          >%0A            <span%0A              class="flex-1 text-foreground truncate"%0A            >%0A              Title%0A            </span>%0A            <span%0A              class="text-dim text-[10px]"%0A            >%0A              text%0A            </span>%0A            <span%0A              class="text-dim text-[10px] font-mono"%0A            >%0A              INAM%0A            </span>%0A            <div%0A              class="flex items-center gap-0.5"%0A            >%0A              <button%0A                class="text-dim hover:text-foreground disabled:opacity-30 p-0.5"%0A                disabled=""%0A                type="button"%0A              >%0A                <svg%0A                  class="lucide lucide-arrow-up h-3 w-3"%0A                  fill="none"%0A                  height="24"%0A                  stroke="currentColor"%0A                  stroke-linecap="round"%0A                  stroke-linejoin="round"%0A                  stroke-width="2"%0A                  viewBox="0 0 24 24"%0A                  width="24"%0A                  xmlns="http://www.w3.org/2000/svg"%0A                >%0A                  <path%0A                    d="m5 12 7-7 7 7"%0A                  />%0A                  <path%0A                    d="M12 19V5"%0A                  />%0A                </svg>%0A              </button>%0A              <button%0A                class="text-dim hover:text-foreground disabled:opacity-30 p-0.5"%0A                type="button"%0A              >%0A                <svg%0A                  class="lucide lucide-arrow-down h-3 w-3"%0A                  fill="none"%0A                  height="24"%0A                  stroke="currentColor"%0A                  stroke-linecap="round"%0A                  stroke-linejoin="round"%0A                  stroke-width="2"%0A                  viewBox="0 0 24 24"%0A                  width="24"%0A                  xmlns="http://www.w3.org/2000/svg"%0A                >%0A                  <path%0A                    d="M12 5v14"%0A                  />%0A                  <path%0A                    d="m19 12-7 7-7-7"%0A                  />%0A                </svg>%0A              </button>%0A              <button%0A                class="text-dim hover:text-destructive p-0.5"%0A                title="Hide standard field"%0A                type="button"%0A              >%0A                <svg%0A                  class="lucide lucide-x h-3 w-3"%0A                  fill="none"%0A                  height="24"%0A                  stroke="currentColor"%0A                  stroke-linecap="round"%0A                  stroke-linejoin="round"%0A                  stroke-width="2"%0A                  viewBox="0 0 24 24"%0A                  width="24"%0A                  xmlns="http://www.w3.org/2000/svg"%0A                >%0A                  <path%0A                    d="M18 6 6 18"%0A                  />%0A                  <path%0A                    d="m6 6 12 12"%0A                  />%0A                </svg>%0A              </button>%0A            </div>%0A          </div>%0A          <div%0A            class="flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"%0A          >%0A            <span%0A              class="flex-1 text-foreground truncate"%0A            >%0A              Artists%0A            </span>%0A            <span%0A              class="text-dim text-[10px]"%0A            >%0A              tags%0A            </span>%0A            <span%0A              class="text-dim text-[10px] font-mono"%0A          ...%0A ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19%0A ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38%0A ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17%0A ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19%0A ❯ tests/renderer/components/schema-editor.test.ts:52:19%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor reserved ICAT (T1-9) > lists Category (UCS) among hidden standard fields for a pre-T-1 schema,line=62,column=19::TestingLibraryElementError: Unable to find an element with the text: Hidden Standard Fields. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.%0A%0AIgnored nodes: comments, script, style%0A<body>%0A  <div>%0A    <div%0A      class="flex flex-col h-full"%0A    >%0A      <div%0A        class="px-3 py-2 border-b border-outline flex items-center gap-2"%0A      >%0A        <button%0A          class="text-muted hover:text-foreground p-0.5 transition-colors"%0A          type="button"%0A        >%0A          <svg%0A            class="lucide lucide-arrow-left h-3.5 w-3.5"%0A            fill="none"%0A            height="24"%0A            stroke="currentColor"%0A            stroke-linecap="round"%0A            stroke-linejoin="round"%0A            stroke-width="2"%0A            viewBox="0 0 24 24"%0A            width="24"%0A            xmlns="http://www.w3.org/2000/svg"%0A          >%0A            <path%0A              d="m12 19-7-7 7-7"%0A            />%0A            <path%0A              d="M19 12H5"%0A            />%0A          </svg>%0A        </button>%0A        <span%0A          class="text-xs font-medium text-brand"%0A        >%0A          Customize Fields%0A        </span>%0A      </div>%0A      <div%0A        class="flex-1 overflow-y-auto p-3 space-y-4"%0A      >%0A        <div%0A          class="space-y-1.5"%0A        >%0A          <span%0A            class="text-xs text-muted"%0A          >%0A            Active Fields%0A          </span>%0A          <div%0A            class="flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"%0A          >%0A            <span%0A              class="flex-1 text-foreground truncate"%0A            >%0A              Title%0A            </span>%0A            <span%0A              class="text-dim text-[10px]"%0A            >%0A              text%0A            </span>%0A            <span%0A              class="text-dim text-[10px] font-mono"%0A            >%0A              INAM%0A            </span>%0A            <div%0A              class="flex items-center gap-0.5"%0A            >%0A              <button%0A                class="text-dim hover:text-foreground disabled:opacity-30 p-0.5"%0A                disabled=""%0A                type="button"%0A              >%0A                <svg%0A                  class="lucide lucide-arrow-up h-3 w-3"%0A                  fill="none"%0A                  height="24"%0A                  stroke="currentColor"%0A                  stroke-linecap="round"%0A                  stroke-linejoin="round"%0A                  stroke-width="2"%0A                  viewBox="0 0 24 24"%0A                  width="24"%0A                  xmlns="http://www.w3.org/2000/svg"%0A                >%0A                  <path%0A                    d="m5 12 7-7 7 7"%0A                  />%0A                  <path%0A                    d="M12 19V5"%0A                  />%0A                </svg>%0A              </button>%0A              <button%0A                class="text-dim hover:text-foreground disabled:opacity-30 p-0.5"%0A                type="button"%0A              >%0A                <svg%0A                  class="lucide lucide-arrow-down h-3 w-3"%0A                  fill="none"%0A                  height="24"%0A                  stroke="currentColor"%0A                  stroke-linecap="round"%0A                  stroke-linejoin="round"%0A                  stroke-width="2"%0A                  viewBox="0 0 24 24"%0A                  width="24"%0A                  xmlns="http://www.w3.org/2000/svg"%0A                >%0A                  <path%0A                    d="M12 5v14"%0A                  />%0A                  <path%0A                    d="m19 12-7 7-7-7"%0A                  />%0A                </svg>%0A              </button>%0A              <button%0A                class="text-dim hover:text-destructive p-0.5"%0A                title="Hide standard field"%0A                type="button"%0A              >%0A                <svg%0A                  class="lucide lucide-x h-3 w-3"%0A                  fill="none"%0A                  height="24"%0A                  stroke="currentColor"%0A                  stroke-linecap="round"%0A                  stroke-linejoin="round"%0A                  stroke-width="2"%0A                  viewBox="0 0 24 24"%0A                  width="24"%0A                  xmlns="http://www.w3.org/2000/svg"%0A                >%0A                  <path%0A                    d="M18 6 6 18"%0A                  />%0A                  <path%0A                    d="m6 6 12 12"%0A                  />%0A                </svg>%0A              </button>%0A            </div>%0A          </div>%0A          <div%0A            class="flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"%0A          >%0A            <span%0A              class="flex-1 text-foreground truncate"%0A            >%0A              Artists%0A            </span>%0A            <span%0A              class="text-dim text-[10px]"%0A            >%0A              tags%0A            </span>%0A            <span%0A              class="text-dim text-[10px] font-mono"%0A          ...%0A ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19%0A ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38%0A ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17%0A ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19%0A ❯ tests/renderer/components/schema-editor.test.ts:62:19%0A%0A
+renderer exit=1
+
+# RERUN 2 (renderer test fixed with vi.hoisted window restore; category removed from STANDARD_FIELDS = HEAD types.ts), Mon Oct 26 13:50:28 UTC 2026
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m7 failed[39m[2m)[22m[32m 51[2mms[22m[39m
+[31m     [31m×[31m D-13: category is the last STANDARD_FIELDS entry and the only ICAT field[39m[32m 9[2mms[22m[39m
+[31m     [31m×[31m T1-1: writes ICAT, IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m T1-2: meta:read returns category, keywords and comment exactly[39m[32m 6[2mms[22m[39m
+     [32m✓[39m T1-3: the data chunk payload sha256 is unchanged by the write[32m 3[2mms[22m[39m
+[31m     [31m×[31m T1-4: bext and iXML stay byte-identical on a recorder WAV and ICMT wins over bext[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m T1-5: batch write of category only keeps title, keywords and comment[39m[32m 8[2mms[22m[39m
+[31m     [31m×[31m T1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m T1-10b (D-10 pinned): writing an empty category removes the previous value[39m[32m 2[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 7 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mD-13: category is the last STANDARD_FIELDS entry and the only ICAT field
+[31m[1mAssertionError[22m: expected { key: 'keywords', …(4) } to deeply equal { key: 'category', …(4) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "key": "category",[39m
+[32m-   "label": "Category (UCS)",[39m
+[32m-   "riffChunkId": "ICAT",[39m
+[31m+   "key": "keywords",[39m
+[31m+   "label": "Keywords",[39m
+[31m+   "riffChunkId": "IKEY",[39m
+[2m    "standard": true,[22m
+[2m    "type": "text",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m81:57[22m[39m
+    [90m 79| [39m[34mdescribe[39m([32m"recording tag contract (T-1)"[39m[33m,[39m () [33m=>[39m {
+    [90m 80| [39m  it("D-13: category is the last STANDARD_FIELDS entry and the only IC…
+    [90m 81| [39m    [34mexpect[39m([33mSTANDARD_FIELDS[39m[[33mSTANDARD_FIELDS[39m[33m.[39mlength [33m-[39m [34m1[39m])[33m.[39m[34mtoEqual[39m({
+    [90m   | [39m                                                        [31m^[39m
+    [90m 82| [39m      key[33m:[39m [32m"category"[39m[33m,[39m
+    [90m 83| [39m      label[33m:[39m [32m"Category (UCS)"[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-1: writes ICAT, IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL
+[31m[1mAssertionError[22m: INFO ICAT present: expected undefined to be defined[39m
+[36m [2m❯[22m expectInfoPayload tests/main/recording-tag-contract.test.ts:[2m65:41[22m[39m
+    [90m 63| [39mfunction expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+    [90m 64| [39m  [35mconst[39m payload [33m=[39m info[33m.[39m[35mget[39m(id)[33m;[39m
+    [90m 65| [39m  [34mexpect[39m(payload[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m present`[39m)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m 66| [39m  [34mexpect[39m(payload[33m?.[39mlength[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m size`[39m)[33m.[39m[34mtoBe[39m(expected[33m.[39mlength)[33m;[39m
+    [90m 67| [39m  [34mexpect[39m(payload[33m?.[39m[34mequals[39m(expected)[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m payload`[39m)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+[90m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m96:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-2: meta:read returns category, keywords and comment exactly
+[31m[1mAssertionError[22m: expected undefined to be 'DOORWood' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"DOORWood"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m116:27[22m[39m
+    [90m114| [39m
+    [90m115| [39m    [35mconst[39m meta [33m=[39m [35mawait[39m [34mreadMetadataViaIpc[39m(filePath)[33m;[39m
+    [90m116| [39m    [34mexpect[39m(meta[33m.[39mcategory)[33m.[39m[34mtoBe[39m([33mCONTRACT_CATEGORY[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m117| [39m    [34mexpect[39m(meta[33m.[39mkeywords)[33m.[39m[34mtoBe[39m([33mCONTRACT_KEYWORDS[39m)[33m;[39m
+    [90m118| [39m    [34mexpect[39m(meta[33m.[39mcomment)[33m.[39m[34mtoBe[39m([33mCONTRACT_COMMENT[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-4: bext and iXML stay byte-identical on a recorder WAV and ICMT wins over bext
+[31m[1mAssertionError[22m: expected undefined to be 'DOORWood' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"DOORWood"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m150:27[22m[39m
+    [90m148| [39m    [35mconst[39m meta [33m=[39m [35mawait[39m [34mreadMetadataViaIpc[39m(filePath)[33m;[39m
+    [90m149| [39m    [34mexpect[39m(meta[33m.[39mcomment)[33m.[39m[34mtoBe[39m([33mCONTRACT_COMMENT[39m)[33m;[39m
+    [90m150| [39m    [34mexpect[39m(meta[33m.[39mcategory)[33m.[39m[34mtoBe[39m([33mCONTRACT_CATEGORY[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m151| [39m  })[33m;[39m
+    [90m152| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-5: batch write of category only keeps title, keywords and comment
+[31m[1mAssertionError[22m: INFO ICAT present: expected undefined to be defined[39m
+[36m [2m❯[22m expectInfoPayload tests/main/recording-tag-contract.test.ts:[2m65:41[22m[39m
+    [90m 63| [39mfunction expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+    [90m 64| [39m  [35mconst[39m payload [33m=[39m info[33m.[39m[35mget[39m(id)[33m;[39m
+    [90m 65| [39m  [34mexpect[39m(payload[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m present`[39m)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m 66| [39m  [34mexpect[39m(payload[33m?.[39mlength[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m size`[39m)[33m.[39m[34mtoBe[39m(expected[33m.[39mlength)[33m;[39m
+    [90m 67| [39m  [34mexpect[39m(payload[33m?.[39m[34mequals[39m(expected)[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m payload`[39m)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+[90m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m178:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks
+[31m[1mAssertionError[22m: expected undefined to be +0 // Object.is equality[39m
+
+[32m- Expected:[39m 
+0
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m198:38[22m[39m
+    [90m196| [39m    [35mconst[39m info [33m=[39m [34mreadInfo[39m(filePath)[33m;[39m
+    [90m197| [39m    [34mexpect[39m(info[33m.[39m[35mget[39m([32m"IKEY"[39m)[33m?.[39mlength)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m198| [39m    [34mexpect[39m(info[33m.[39m[35mget[39m([32m"ICAT"[39m)[33m?.[39mlength)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m199| [39m    [35mconst[39m meta [33m=[39m [35mawait[39m [34mreadMetadataViaIpc[39m(filePath)[33m;[39m
+    [90m200| [39m    [34mexpect[39m(meta[33m.[39mkeywords)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-10b (D-10 pinned): writing an empty category removes the previous value
+[31m[1mAssertionError[22m: INFO ICAT present: expected undefined to be defined[39m
+[36m [2m❯[22m expectInfoPayload tests/main/recording-tag-contract.test.ts:[2m65:41[22m[39m
+    [90m 63| [39mfunction expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+    [90m 64| [39m  [35mconst[39m payload [33m=[39m info[33m.[39m[35mget[39m(id)[33m;[39m
+    [90m 65| [39m  [34mexpect[39m(payload[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m present`[39m)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m 66| [39m  [34mexpect[39m(payload[33m?.[39mlength[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m size`[39m)[33m.[39m[34mtoBe[39m(expected[33m.[39mlength)[33m;[39m
+    [90m 67| [39m  [34mexpect[39m(payload[33m?.[39m[34mequals[39m(expected)[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m payload`[39m)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+[90m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m207:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m7 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 13:50:29
+[2m   Duration [22m 444ms[2m (transform 85ms, setup 22ms, import 185ms, tests 51ms, environment 0ms)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > D-13%3A category is the last STANDARD_FIELDS entry and the only ICAT field,line=81,column=57::AssertionError: expected { key: 'keywords', …(4) } to deeply equal { key: 'category', …(4) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "key": "category",%0A-   "label": "Category (UCS)",%0A-   "riffChunkId": "ICAT",%0A+   "key": "keywords",%0A+   "label": "Keywords",%0A+   "riffChunkId": "IKEY",%0A    "standard": true,%0A    "type": "text",%0A  }%0A%0A ❯ tests/main/recording-tag-contract.test.ts:81:57%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-1%3A writes ICAT%2C IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL,line=65,column=41::AssertionError: INFO ICAT present: expected undefined to be defined%0A ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:65:41%0A ❯ tests/main/recording-tag-contract.test.ts:96:5%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-2%3A meta%3Aread returns category%2C keywords and comment exactly,line=116,column=27::AssertionError: expected undefined to be 'DOORWood' // Object.is equality%0A%0A- Expected: %0A"DOORWood"%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/recording-tag-contract.test.ts:116:27%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-4%3A bext and iXML stay byte-identical on a recorder WAV and ICMT wins over bext,line=150,column=27::AssertionError: expected undefined to be 'DOORWood' // Object.is equality%0A%0A- Expected: %0A"DOORWood"%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/recording-tag-contract.test.ts:150:27%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-5%3A batch write of category only keeps title%2C keywords and comment,line=65,column=41::AssertionError: INFO ICAT present: expected undefined to be defined%0A ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:65:41%0A ❯ tests/main/recording-tag-contract.test.ts:178:7%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10a (D-10 pinned)%3A empty keywords and category are written as zero-length sub-chunks,line=198,column=38::AssertionError: expected undefined to be +0 // Object.is equality%0A%0A- Expected: %0A0%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/recording-tag-contract.test.ts:198:38%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10b (D-10 pinned)%3A writing an empty category removes the previous value,line=65,column=41::AssertionError: INFO ICAT present: expected undefined to be defined%0A ❯ expectInfoPayload tests/main/recording-tag-contract.test.ts:65:41%0A ❯ tests/main/recording-tag-contract.test.ts:207:5%0A%0A
+main exit=1
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 1446[2mms[22m[39m
+[31m     [31m×[31m rejects a custom field with RIFF ID ICAT[39m[33m 846[2mms[22m[39m
+[31m     [31m×[31m rejects a custom field with lowercase RIFF ID icat[39m[33m 558[2mms[22m[39m
+[31m     [31m×[31m lists Category (UCS) among hidden standard fields for a pre-T-1 schema[39m[32m 41[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor reserved ICAT (T1-9)[2m > [22mrejects a custom field with RIFF ID ICAT
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: RIFF ID "ICAT" is already in use. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3 space-y-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-muted"[39m
+          [36m>[39m
+            [0mActive Fields[0m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mTitle[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtext[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+            [36m>[39m
+              [0mINAM[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 5v14"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-destructive p-0.5"[39m
+                [33mtitle[39m=[32m"Hide standard field"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M18 6 6 18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m6 6 12 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mArtists[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtags[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+          ...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m48:19[22m[39m
+    [90m 46| [39m    [34maddCustomFieldViaForm[39m([32m"Client"[39m[33m,[39m [32m"ICAT"[39m)[33m;[39m
+    [90m 47| [39m
+    [90m 48| [39m    expect(screen.getByText('RIFF ID "ICAT" is already in use')).toBeI…
+    [90m   | [39m                  [31m^[39m
+    [90m 49| [39m    [34mexpect[39m(useSchemaStore[33m.[39m[34mgetState[39m()[33m.[39mfields)[33m.[39m[34mtoEqual[39m(fieldsBefore)[33m;[39m
+    [90m 50| [39m    expect(useSchemaStore.getState().fields.some((field) => field.key …
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor reserved ICAT (T1-9)[2m > [22mrejects a custom field with lowercase RIFF ID icat
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: RIFF ID "ICAT" is already in use. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3 space-y-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-muted"[39m
+          [36m>[39m
+            [0mActive Fields[0m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mTitle[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtext[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+            [36m>[39m
+              [0mINAM[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 5v14"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-destructive p-0.5"[39m
+                [33mtitle[39m=[32m"Hide standard field"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M18 6 6 18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m6 6 12 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mArtists[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtags[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+          ...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m59:19[22m[39m
+    [90m 57| [39m    [34maddCustomFieldViaForm[39m([32m"Client"[39m[33m,[39m [32m"icat"[39m)[33m;[39m
+    [90m 58| [39m
+    [90m 59| [39m    expect(screen.getByText('RIFF ID "ICAT" is already in use')).toBeI…
+    [90m   | [39m                  [31m^[39m
+    [90m 60| [39m    [34mexpect[39m(useSchemaStore[33m.[39m[34mgetState[39m()[33m.[39mfields)[33m.[39m[34mtoEqual[39m(fieldsBefore)[33m;[39m
+    [90m 61| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor reserved ICAT (T1-9)[2m > [22mlists Category (UCS) among hidden standard fields for a pre-T-1 schema
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: Hidden Standard Fields. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3 space-y-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-muted"[39m
+          [36m>[39m
+            [0mActive Fields[0m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mTitle[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtext[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+            [36m>[39m
+              [0mINAM[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 5v14"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-destructive p-0.5"[39m
+                [33mtitle[39m=[32m"Hide standard field"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M18 6 6 18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m6 6 12 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mArtists[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtags[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+          ...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m69:19[22m[39m
+    [90m 67| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m 68| [39m
+    [90m 69| [39m    expect(screen.getByText("Hidden Standard Fields")).toBeInTheDocume…
+    [90m   | [39m                  [31m^[39m
+    [90m 70| [39m    expect(screen.getByRole("button", { name: "+ Category (UCS)" })).t…
+    [90m 71| [39m    [34mexpect[39m(screen[33m.[39m[34mqueryByText[39m([32m"ICAT"[39m))[33m.[39mnot[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m   Start at [22m 13:50:30
+[2m   Duration [22m 2.57s[2m (transform 184ms, setup 96ms, import 342ms, tests 1.45s, environment 553ms)[22m
+
+
+
+
+renderer exit=0
+
+# RERUN 3 (after code-review additions T1-1b + T1-9d; category removed = HEAD types.ts), Mon Oct 26 13:59:23 UTC 2026
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m8 failed[39m[2m)[22m[32m 57[2mms[22m[39m
+[31m     [31m×[31m D-13: category is the last STANDARD_FIELDS entry and the only ICAT field[39m[32m 10[2mms[22m[39m
+[31m     [31m×[31m T1-1: writes ICAT, IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m T1-1b: an odd-size ICAT has no NUL, one zero pad byte outside size, and aligned neighbours[39m[32m 4[2mms[22m[39m
+[31m     [31m×[31m T1-2: meta:read returns category, keywords and comment exactly[39m[32m 5[2mms[22m[39m
+     [32m✓[39m T1-3: the data chunk payload sha256 is unchanged by the write[32m 2[2mms[22m[39m
+[31m     [31m×[31m T1-4: bext, iXML and data stay byte-identical on a recorder WAV and ICMT is written[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m T1-5: batch write of category only keeps title, keywords and comment[39m[32m 8[2mms[22m[39m
+[31m     [31m×[31m T1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m T1-10b (D-10 pinned): writing an empty category removes the previous value[39m[32m 3[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 8 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mD-13: category is the last STANDARD_FIELDS entry and the only ICAT field
+[31m[1mAssertionError[22m: expected { key: 'keywords', …(4) } to strictly equal { key: 'category', …(4) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "key": "category",[39m
+[32m-   "label": "Category (UCS)",[39m
+[32m-   "riffChunkId": "ICAT",[39m
+[31m+   "key": "keywords",[39m
+[31m+   "label": "Keywords",[39m
+[31m+   "riffChunkId": "IKEY",[39m
+[2m    "standard": true,[22m
+[2m    "type": "text",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m86:57[22m[39m
+    [90m 84| [39m[34mdescribe[39m([32m"recording tag contract (T-1)"[39m[33m,[39m () [33m=>[39m {
+    [90m 85| [39m  it("D-13: category is the last STANDARD_FIELDS entry and the only IC…
+    [90m 86| [39m    [34mexpect[39m([33mSTANDARD_FIELDS[39m[[33mSTANDARD_FIELDS[39m[33m.[39mlength [33m-[39m [34m1[39m])[33m.[39m[34mtoStrictEqual[39m({
+    [90m   | [39m                                                        [31m^[39m
+    [90m 87| [39m      key[33m:[39m [32m"category"[39m[33m,[39m
+    [90m 88| [39m      label[33m:[39m [32m"Category (UCS)"[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-1: writes ICAT, IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL
+[31m[1mAssertionError[22m: INFO ICAT present: expected undefined to be defined[39m
+[36m [2m❯[22m expectInfoPayload tests/main/recording-tag-contract.test.ts:[2m70:41[22m[39m
+    [90m 68| [39mfunction expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+    [90m 69| [39m  [35mconst[39m payload [33m=[39m info[33m.[39m[35mget[39m(id)[33m;[39m
+    [90m 70| [39m  [34mexpect[39m(payload[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m present`[39m)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m 71| [39m  [34mexpect[39m(payload[33m?.[39mlength[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m size`[39m)[33m.[39m[34mtoBe[39m(expected[33m.[39mlength)[33m;[39m
+    [90m 72| [39m  [34mexpect[39m(payload[33m?.[39m[34mequals[39m(expected)[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m payload`[39m)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+[90m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m102:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-1b: an odd-size ICAT has no NUL, one zero pad byte outside size, and aligned neighbours
+[31m[1mAssertionError[22m: expected undefined to be 9 // Object.is equality[39m
+
+[32m- Expected:[39m 
+9
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m126:26[22m[39m
+    [90m124| [39m    [35mconst[39m info [33m=[39m [34mparseListInfoSubChunks[39m(bytes)[33m;[39m
+    [90m125| [39m    [35mconst[39m icat [33m=[39m info[33m.[39m[35mget[39m([32m"ICAT"[39m)[33m;[39m
+    [90m126| [39m    [34mexpect[39m(icat[33m?.[39mlength)[33m.[39m[34mtoBe[39m([34m9[39m)[33m;[39m
+    [90m   | [39m                         [31m^[39m
+    [90m127| [39m    [34mexpect[39m(icat[33m?.[39m[34mequals[39m([33mBuffer[39m[33m.[39m[35mfrom[39m(oddCategory[33m,[39m [32m"ascii"[39m)))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m128| [39m    const padIndex = (icat?.byteOffset ?? 0) - bytes.byteOffset + (ica…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-2: meta:read returns category, keywords and comment exactly
+[31m[1mAssertionError[22m: expected undefined to be 'DOORWood' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"DOORWood"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m140:27[22m[39m
+    [90m138| [39m
+    [90m139| [39m    [35mconst[39m meta [33m=[39m [35mawait[39m [34mreadMetadataViaIpc[39m(filePath)[33m;[39m
+    [90m140| [39m    [34mexpect[39m(meta[33m.[39mcategory)[33m.[39m[34mtoBe[39m([33mCONTRACT_CATEGORY[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m141| [39m    [34mexpect[39m(meta[33m.[39mkeywords)[33m.[39m[34mtoBe[39m([33mCONTRACT_KEYWORDS[39m)[33m;[39m
+    [90m142| [39m    [34mexpect[39m(meta[33m.[39mcomment)[33m.[39m[34mtoBe[39m([33mCONTRACT_COMMENT[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-4: bext, iXML and data stay byte-identical on a recorder WAV and ICMT is written
+[31m[1mAssertionError[22m: expected undefined to be 'DOORWood' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"DOORWood"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m175:27[22m[39m
+    [90m173| [39m    [35mconst[39m meta [33m=[39m [35mawait[39m [34mreadMetadataViaIpc[39m(filePath)[33m;[39m
+    [90m174| [39m    [34mexpect[39m(meta[33m.[39mcomment)[33m.[39m[34mtoBe[39m([33mCONTRACT_COMMENT[39m)[33m;[39m
+    [90m175| [39m    [34mexpect[39m(meta[33m.[39mcategory)[33m.[39m[34mtoBe[39m([33mCONTRACT_CATEGORY[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m176| [39m  })[33m;[39m
+    [90m177| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-5: batch write of category only keeps title, keywords and comment
+[31m[1mAssertionError[22m: INFO ICAT present: expected undefined to be defined[39m
+[36m [2m❯[22m expectInfoPayload tests/main/recording-tag-contract.test.ts:[2m70:41[22m[39m
+    [90m 68| [39mfunction expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+    [90m 69| [39m  [35mconst[39m payload [33m=[39m info[33m.[39m[35mget[39m(id)[33m;[39m
+    [90m 70| [39m  [34mexpect[39m(payload[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m present`[39m)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m 71| [39m  [34mexpect[39m(payload[33m?.[39mlength[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m size`[39m)[33m.[39m[34mtoBe[39m(expected[33m.[39mlength)[33m;[39m
+    [90m 72| [39m  [34mexpect[39m(payload[33m?.[39m[34mequals[39m(expected)[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m payload`[39m)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+[90m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m203:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks
+[31m[1mAssertionError[22m: expected undefined to be +0 // Object.is equality[39m
+
+[32m- Expected:[39m 
+0
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m223:38[22m[39m
+    [90m221| [39m    [35mconst[39m info [33m=[39m [34mreadInfo[39m(filePath)[33m;[39m
+    [90m222| [39m    [34mexpect[39m(info[33m.[39m[35mget[39m([32m"IKEY"[39m)[33m?.[39mlength)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m223| [39m    [34mexpect[39m(info[33m.[39m[35mget[39m([32m"ICAT"[39m)[33m?.[39mlength)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m224| [39m    [35mconst[39m meta [33m=[39m [35mawait[39m [34mreadMetadataViaIpc[39m(filePath)[33m;[39m
+    [90m225| [39m    [34mexpect[39m(meta[33m.[39mkeywords)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/recording-tag-contract.test.ts[2m > [22mrecording tag contract (T-1)[2m > [22mT1-10b (D-10 pinned): writing an empty category removes the previous value
+[31m[1mAssertionError[22m: INFO ICAT present: expected undefined to be defined[39m
+[36m [2m❯[22m expectInfoPayload tests/main/recording-tag-contract.test.ts:[2m70:41[22m[39m
+    [90m 68| [39mfunction expectInfoPayload(info: Map<string, Buffer>, id: string, expe…
+    [90m 69| [39m  [35mconst[39m payload [33m=[39m info[33m.[39m[35mget[39m(id)[33m;[39m
+    [90m 70| [39m  [34mexpect[39m(payload[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m present`[39m)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m 71| [39m  [34mexpect[39m(payload[33m?.[39mlength[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m size`[39m)[33m.[39m[34mtoBe[39m(expected[33m.[39mlength)[33m;[39m
+    [90m 72| [39m  [34mexpect[39m(payload[33m?.[39m[34mequals[39m(expected)[33m,[39m [32m`INFO [39m[36m${[39mid[36m}[39m[32m payload`[39m)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+[90m [2m❯[22m tests/main/recording-tag-contract.test.ts:[2m232:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m8 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 13:59:24
+[2m   Duration [22m 446ms[2m (transform 88ms, setup 23ms, import 186ms, tests 57ms, environment 0ms)[22m
+
+
+
+
+
+
+
+
+
+main exit=0
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 1907[2mms[22m[39m
+[31m     [31m×[31m rejects a custom field with RIFF ID ICAT[39m[33m 827[2mms[22m[39m
+[31m     [31m×[31m rejects a custom field with lowercase RIFF ID icat[39m[33m 543[2mms[22m[39m
+[31m     [31m×[31m rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use)[39m[33m 500[2mms[22m[39m
+[31m     [31m×[31m lists Category (UCS) among hidden standard fields for a pre-T-1 schema[39m[32m 35[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor reserved ICAT (T1-9)[2m > [22mrejects a custom field with RIFF ID ICAT
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: RIFF ID "ICAT" is already in use. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3 space-y-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-muted"[39m
+          [36m>[39m
+            [0mActive Fields[0m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mTitle[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtext[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+            [36m>[39m
+              [0mINAM[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 5v14"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-destructive p-0.5"[39m
+                [33mtitle[39m=[32m"Hide standard field"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M18 6 6 18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m6 6 12 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mArtists[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtags[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+          ...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m48:19[22m[39m
+    [90m 46| [39m    [34maddCustomFieldViaForm[39m([32m"Client"[39m[33m,[39m [32m"ICAT"[39m)[33m;[39m
+    [90m 47| [39m
+    [90m 48| [39m    expect(screen.getByText('RIFF ID "ICAT" is already in use')).toBeI…
+    [90m   | [39m                  [31m^[39m
+    [90m 49| [39m    [34mexpect[39m(useSchemaStore[33m.[39m[34mgetState[39m()[33m.[39mfields)[33m.[39m[34mtoEqual[39m(fieldsBefore)[33m;[39m
+    [90m 50| [39m    expect(useSchemaStore.getState().fields.some((field) => field.key …
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor reserved ICAT (T1-9)[2m > [22mrejects a custom field with lowercase RIFF ID icat
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: RIFF ID "ICAT" is already in use. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3 space-y-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-muted"[39m
+          [36m>[39m
+            [0mActive Fields[0m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mTitle[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtext[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+            [36m>[39m
+              [0mINAM[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 5v14"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-destructive p-0.5"[39m
+                [33mtitle[39m=[32m"Hide standard field"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M18 6 6 18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m6 6 12 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mArtists[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtags[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+          ...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m59:19[22m[39m
+    [90m 57| [39m    [34maddCustomFieldViaForm[39m([32m"Client"[39m[33m,[39m [32m"icat"[39m)[33m;[39m
+    [90m 58| [39m
+    [90m 59| [39m    expect(screen.getByText('RIFF ID "ICAT" is already in use')).toBeI…
+    [90m   | [39m                  [31m^[39m
+    [90m 60| [39m    [34mexpect[39m(useSchemaStore[33m.[39m[34mgetState[39m()[33m.[39mfields)[33m.[39m[34mtoEqual[39m(fieldsBefore)[33m;[39m
+    [90m 61| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor reserved ICAT (T1-9)[2m > [22mrejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use)
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: RIFF ID "ICAT" is already in use. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3 space-y-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-muted"[39m
+          [36m>[39m
+            [0mActive Fields[0m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mTitle[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtext[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+            [36m>[39m
+              [0mINAM[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 5v14"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-destructive p-0.5"[39m
+                [33mtitle[39m=[32m"Hide standard field"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M18 6 6 18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m6 6 12 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mArtists[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtags[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+          ...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m69:19[22m[39m
+    [90m 67| [39m    [34maddCustomFieldViaForm[39m([32m"Client"[39m[33m,[39m [32m"ICAT"[39m)[33m;[39m
+    [90m 68| [39m
+    [90m 69| [39m    expect(screen.getByText('RIFF ID "ICAT" is already in use')).toBeI…
+    [90m   | [39m                  [31m^[39m
+    [90m 70| [39m    expect(useSchemaStore.getState().fields).toEqual(PRE_T1_STANDARD_F…
+    [90m 71| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor reserved ICAT (T1-9)[2m > [22mlists Category (UCS) among hidden standard fields for a pre-T-1 schema
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: Hidden Standard Fields. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3 space-y-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-muted"[39m
+          [36m>[39m
+            [0mActive Fields[0m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mTitle[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtext[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+            [36m>[39m
+              [0mINAM[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-foreground disabled:opacity-30 p-0.5"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 5v14"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"text-dim hover:text-destructive p-0.5"[39m
+                [33mtitle[39m=[32m"Hide standard field"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M18 6 6 18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m6 6 12 12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+            [36m>[39m
+              [0mArtists[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px]"[39m
+            [36m>[39m
+              [0mtags[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+          ...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m79:19[22m[39m
+    [90m 77| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m 78| [39m
+    [90m 79| [39m    expect(screen.getByText("Hidden Standard Fields")).toBeInTheDocume…
+    [90m   | [39m                  [31m^[39m
+    [90m 80| [39m    expect(screen.getByRole("button", { name: "+ Category (UCS)" })).t…
+    [90m 81| [39m    [34mexpect[39m(screen[33m.[39m[34mqueryByText[39m([32m"ICAT"[39m))[33m.[39mnot[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[90m (4)[39m
+[2m   Start at [22m 13:59:25
+[2m   Duration [22m 3.02s[2m (transform 170ms, setup 101ms, import 309ms, tests 1.91s, environment 561ms)[22m
+
+
+
+
+
+renderer exit=0

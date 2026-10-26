@@ -1,0 +1,44 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R3-01",
+      "severity": "low",
+      "steps": [
+        "Open a folder with sample.wav copies in the built app (xvfb, clean XDG_CONFIG_HOME)",
+        "Select contract.wav, type Category DOORWood, Keywords 'door, slam', Comment 'მძიმე კარი', click Save Tags",
+        "Click Rescan"
+      ],
+      "expected": "A file carrying the contract tags (ICAT/IKEY/ICMT) is shown as tagged in the file list",
+      "actual": "No 'Tagged' badge: FileList.tsx:77-81 hasTags only checks title/artists/bpm; title-only files get the badge",
+      "evidence": "c-round-3/10-after-rescan.png, r3-6-result.json phaseA.bodyAfterRescan (pre-existing UX, not a T-1 regression)"
+    },
+    {
+      "id": "C-R3-02",
+      "severity": "low",
+      "steps": [
+        "Write comment 'მძიმე კარი' via meta:write or the UI",
+        "Dump LIST/INFO ICMT size"
+      ],
+      "expected": "Task T1-1 text: ICMT size 26",
+      "actual": "ICMT size 28 (Buffer.byteLength = 28); tests and contract doc correctly use 28, task text is wrong",
+      "evidence": "r3-6-result.json files[contract.wav].info.ICMT.size=28; ffprobe comment matches"
+    }
+  ],
+  "passed": [
+    "R3-1",
+    "R3-2",
+    "R3-3",
+    "R3-4",
+    "R3-5",
+    "R3-6",
+    "R3-7",
+    "R3-8",
+    "R3-9",
+    "R3-10"
+  ],
+  "blocked": [
+    "Info, not a round-3 browser/API/file acceptance: the GitHub Actions run of check.yml (new Tag contract ffprobe cross-check step) cannot be observed from the runner; TM-T0-CI stays open (realVerified=false for that item) until root links a green run. Same commands replayed locally in CI order: check 13s, ffprobe step 1s exit 0, build 3s, E2E 7/7 5s."
+  ],
+  "realVerified": true
+}

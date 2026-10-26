@@ -1,0 +1,74 @@
+diff --git a/.claude/primitives/WAV_METADATA.md b/.claude/primitives/WAV_METADATA.md
+index cab5547..b1b108d 100644
+--- a/.claude/primitives/WAV_METADATA.md
++++ b/.claude/primitives/WAV_METADATA.md
+@@ -12,10 +12,11 @@
+ | Path | Properties | Example |
+ |------|-----------|---------|
+ | STANDARD_PROP_MAP | tag.title, tag.performers, tag.album, tag.genres, tag.year, tag.comment, tag.copyright, tag.track, tag.beatsPerMinute, tag.isrc, tag.publisher | Direct tag property access |
+-| riffChunkId (InfoTag) | INAM, IART, IPRD, IGNR, ICRD, ICMT, ICOP, ITRK, IBPM, IKEY | getValuesAsStrings/setValuesFromStrings |
++| riffChunkId (InfoTag) | INAM, IART, IPRD, IGNR, ICRD, ICMT, ICOP, ITRK, IBPM, IKEY, ICAT | getValuesAsStrings/setValuesFromStrings |
+ 
+ **IMPORTANT:** `keywords` field uses `riffChunkId: 'IKEY'`, NOT STANDARD_PROP_MAP.
+ Tag object-ზე `tag.keywords` არ არსებობს - InfoTag path-ით იკითხება.
++`category` (`Category (UCS)`) იყენებს `riffChunkId: 'ICAT'`-ს და `keywords`-ის მსგავსად InfoTag path-ით იწერება/იკითხება (კონტრაქტი: `docs/recording-tag-contract.md`).
+ 
+ ### Read Pattern
+ ```typescript
+diff --git a/.github/workflows/check.yml b/.github/workflows/check.yml
+index 9ccdf0d..7ac81db 100644
+--- a/.github/workflows/check.yml
++++ b/.github/workflows/check.yml
+@@ -33,6 +33,9 @@ jobs:
+       - name: Lint, type check and unit tests
+         run: npm run check
+ 
++      - name: Tag contract ffprobe cross-check
++        run: npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts test-results/recording-tag-contract/contract.wav
++
+       - name: Build
+         run: npm run build
+ 
+diff --git a/docs/plans/002-recording-tag-contract.md b/docs/plans/002-recording-tag-contract.md
+index b291141..7dbda61 100644
+--- a/docs/plans/002-recording-tag-contract.md
++++ b/docs/plans/002-recording-tag-contract.md
+@@ -2,7 +2,7 @@
+ 
+ ## Status: In Progress
+ 
+-T-0 მიმდინარეობს (loop round 1). T-1 ელოდება T-0-სა და `npm run check`-ის type check-ის გასწორებას (TM-B04). T-2 დაბლოკილია UCS სიის ფაილისა და ლიცენზიის მოლოდინში.
++T-0-ის კოდი loop round 1-ში დასრულდა; ღიაა მხოლოდ `check.yml`-ის პირველი მწვანე GitHub Actions run (TM-T0-CI). type check-ის gate (TM-B04) round 2-ში გასწორდა. **T-1 მიმდინარეობს (loop round 3)**: `category` → `ICAT`, კონტრაქტის ტესტები და `docs/recording-tag-contract.md`. T-2 დაბლოკილია UCS სიის ფაილისა და ლიცენზიის მოლოდინში.
+ 
+ ## Priority: High
+ 
+@@ -24,7 +24,7 @@ backend-ის import tool (`czaba-api/tools/recording-import`, K-4) Tag Manager
+ - `vitest.config.main.ts`-ს დაემატა `globalSetup` (`tests/main/global-setup.ts`). ის main ტესტების წინ `sample.wav`-სა და `corrupt.wav`-ს ქმნის.
+ - E2E: `tests/e2e/electron-launch.ts` (`getElectronLaunchArgs()`) `--no-sandbox`-ს მხოლოდ `process.platform === 'linux'`-ზე ამატებს. Windows/macOS-ზე launch args უცვლელია.
+ - `folder-workflow.spec.ts`-ის fixture არის 0.1 წმ (4410 sample) ნამდვილი PCM, არაცარიელი `data` chunk-ით.
+-- ახალი `.github/workflows/check.yml`: ubuntu-24.04, Node 22, `npm ci` → `ffmpeg`/`xvfb` (`ffmpeg`/`ffprobe` T-1-ის `format_tags` cross-check-ისთვის წინასწარ დგება) → `playwright install-deps chromium` → `npm run check` → `npm run build` → `xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure --reporter=list,html` (`PLAYWRIGHT_HTML_OPEN=never`, ამიტომ html reporter-ი `playwright-report/`-ს ქმნის და report server-ს არ ხსნის). ჩავარდნისას იტვირთება `playwright-report/` და `test-results/` artifact-ად. round 2-დან `npm run check` ნამდვილ type check-ს უშვებს (`npm run typecheck`: `tsc --noEmit -p` `tsconfig.node.json`, `tsconfig.web.json` და `tsconfig.test.json`-ზე, TM-B04). `permissions: contents: read`; `release.yml`-თან კავშირი (`needs`) არ აქვს.
++- ახალი `.github/workflows/check.yml`: ubuntu-24.04, Node 22, `npm ci` → `ffmpeg`/`xvfb` (`ffmpeg`/`ffprobe` T-1-ის `format_tags` cross-check-ისთვის წინასწარ დგება) → `playwright install-deps chromium` → `npm run check` → (round 3, T-1) „Tag contract ffprobe cross-check“ (`npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts test-results/recording-tag-contract/contract.wav`) → `npm run build` → `xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure --reporter=list,html` (`PLAYWRIGHT_HTML_OPEN=never`, ამიტომ html reporter-ი `playwright-report/`-ს ქმნის და report server-ს არ ხსნის). ჩავარდნისას იტვირთება `playwright-report/` და `test-results/` artifact-ად. round 2-დან `npm run check` ნამდვილ type check-ს უშვებს (`npm run typecheck`: `tsc --noEmit -p` `tsconfig.node.json`, `tsconfig.web.json` და `tsconfig.test.json`-ზე, TM-B04). `permissions: contents: read`; `release.yml`-თან კავშირი (`needs`) არ აქვს.
+ 
+ ### T-1 — ჩანაწერის tag-კონტრაქტი
+ 
+@@ -74,7 +74,7 @@ backend-ის import tool (`czaba-api/tools/recording-import`, K-4) Tag Manager
+ 2. `npm run build && xvfb-run -a npx playwright test --retries=0`: 2 spec, 6/6 პირველივე ცდაზე.
+ 3. red proof: `globalSetup`-ის გარეშე main ტესტები `ENOENT`-ით ვარდება; `--no-sandbox`-ის გარეშე Electron ვერ ეშვება; ძველი 44-ბაიტიანი fixture → „missing data chunk“.
+ 4. `npx --yes tsx@4 tests/fixtures/create-fixtures.ts` → „Fixtures created successfully“, `sample.wav` = 88244 ბაიტი.
+-5. `src/**` და `release.yml` ბაიტ-იდენტურია (`git diff --stat`).
++5. round 1-ში (T-0) `src/**` და `release.yml` ბაიტ-იდენტური იყო (`git diff --stat`). round 3-დან (T-1) `src/shared/types.ts` იცვლება, `release.yml` კვლავ უცვლელია.
+ 6. `check.yml`-ის პირველი მწვანე GitHub Actions run (`npm ci`-ის ჩათვლით).
+ 
+ ### T-1
+diff --git a/src/shared/types.ts b/src/shared/types.ts
+index 6959195..4a93854 100644
+--- a/src/shared/types.ts
++++ b/src/shared/types.ts
+@@ -30,6 +30,7 @@ export const STANDARD_FIELDS: FieldDefinition[] = [
+   { key: 'track', label: 'Track #', type: 'number', riffChunkId: 'ITRK', standard: true },
+   { key: 'comment', label: 'Comment', type: 'text', riffChunkId: 'ICMT', standard: true },
+   { key: 'keywords', label: 'Keywords', type: 'text', riffChunkId: 'IKEY', standard: true },
++  { key: 'category', label: 'Category (UCS)', type: 'text', riffChunkId: 'ICAT', standard: true },
+ ];
+ 
+ export type WavMetadata = Record<string, FieldValue>;
