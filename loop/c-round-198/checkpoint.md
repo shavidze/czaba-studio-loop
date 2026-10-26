@@ -1,0 +1,8 @@
+- started 2026-10-26T23:17:04Z
+- scope start: HEAD 2505252, status = 3 M + 2 ??, frozen 1027 OK, A end-sha OK; ref built (git ls-files 1030, grants from start copies, new files absent, frozen+start OK) on :5184 cacheDir c-round-198/ref-vite-cache
+- focus198 tree-1280-rich: 83 stops (82+wrap), 34/35 scroller stops, hidden 0/0, zero-ring 0; batch1 (ref+others) started
+- chrome198 1280 tree vs ref: all CHROME-FOCUS steps 46->46 both; B-variant shift-tab reveals hidden video controls in tree only (intended); mouse snap/mute no ring no scroll; cut fold/mute ArrowUp native reveal both; video VOLUME slider cut 6px stays cut after ArrowUp (tree=ref, pre-existing); Follow on through reveals; marker/grid menu tree=ref
+- focus batch: tree hidden 0/0 all 4 runs, ref 1280 rich 6/6; order equal fwd/back all 4; 1440 st seq identical; ring styles identical, contrast min 3.69; note Video M/S bottom ring side clipped at 1280 (pre-existing, default tree=ref b18); ref 1280 rich first run invalid cold compile, rerun OK
+- REST both vps default+marker 0 px, boxes Δ0, load 0/0 both; G198-3 PASS (mock started PID 9585, stopped)
+- T-RUN: tree 12/12, start red (FRU no module, FR-a..f red), m1 FR-a,e m2 FR-b m3 FR-c,f m4 FRU-3 m5 FR-d,FRU-2,4 m6 FR-f; AN-REVIEW clean; scope end OK; ref+mock stopped
+- reports written (PASS, 2 new Lows); 2026-10-26T23:31:57Z

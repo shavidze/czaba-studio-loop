@@ -1,0 +1,65 @@
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 6088e9c..63e1499 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -24,6 +24,7 @@ import {
+   edgeNavigationTrackIds,
+   isApplePlatform,
+ } from '~/lib/arrangement/edge-navigation';
++import { resolveFocusRevealScrollTop } from '~/lib/arrangement/focus-reveal';
+ import {
+   adjacentGridLine,
+   GRID_DEFAULT_DIVISION_SECONDS,
+@@ -1500,6 +1501,31 @@ export function StudioWorkspace() {
+     notifyTimelineScroll();
+   }, [notifyTimelineScroll, pauseFollowForNavigation]);
+ 
++  const revealKeyboardFocusBelowChrome = useCallback((event: { target: Element }) => {
++    if (document.documentElement.dataset.focusSource !== 'keyboard') {
++      return;
++    }
++    const scroller = scrollerRef.current;
++    const chrome = timelineChromeRef.current;
++    if (
++      !scroller ||
++      !chrome ||
++      event.target === scroller ||
++      !scroller.contains(event.target) ||
++      chrome.contains(event.target)
++    ) {
++      return;
++    }
++    const next = resolveFocusRevealScrollTop({
++      scrollTop: scroller.scrollTop,
++      chromeBottom: chrome.getBoundingClientRect().bottom,
++      targetTop: event.target.getBoundingClientRect().top,
++    });
++    if (next !== null) {
++      scroller.scrollTop = next;
++    }
++  }, []);
++
+   useEffect(() => {
+     if (!isPlaying) {
+       return;
+@@ -2254,6 +2280,7 @@ export function StudioWorkspace() {
+           <div
+             ref={scrollerRef}
+             onScroll={handleTimelineScroll}
++            onFocus={revealKeyboardFocusBelowChrome}
+             onPointerDownCapture={releaseEditFocusOnTimelinePointerDown}
+             className={cn('relative min-h-0 min-w-0 flex-1 overflow-auto', STUDIO_SCROLLBAR_CLASS)}
+             data-testid="arrangement-timeline-scroller"
+@@ -2263,7 +2290,11 @@ export function StudioWorkspace() {
+               className="relative"
+               style={{ width: ARRANGEMENT_HEADER_WIDTH_PX + timelineWidth }}
+             >
+-              <div ref={timelineChromeRef} className="sticky top-0 z-30 flex flex-col">
++              <div
++                ref={timelineChromeRef}
++                className="sticky top-0 z-30 flex flex-col"
++                data-testid="arrangement-timeline-chrome"
++              >
+                 <div className="flex">
+                   <div
+                     className="sticky left-0 z-30 flex shrink-0 items-center gap-2 border-r border-b border-outline bg-surface px-2 text-xs text-muted"

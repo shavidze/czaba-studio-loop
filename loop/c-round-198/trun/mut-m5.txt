@@ -1,0 +1,91 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-198/trun/tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/focus-reveal.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 7[2mms[22m[39m
+     [32m✓[39m FRU-1: a target 46 px under the chrome bottom scrolls up by 46 px, to 0[32m 1[2mms[22m[39m
+     [32m✓[39m FRU-1b: a partial overlap scrolls up by exactly the hidden amount[32m 0[2mms[22m[39m
+[31m     [31m×[31m FRU-2: a target at or below the chrome bottom needs no scroll[39m[32m 4[2mms[22m[39m
+     [32m✓[39m FRU-3: the result is never negative[32m 0[2mms[22m[39m
+[31m     [31m×[31m FRU-4: an overlap of 0.5 px is tolerated; 0.6 px is revealed[39m[32m 1[2mms[22m[39m
+     [32m✓[39m FRU-5: NaN or Infinity in any input gives null[32m 0[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/focus-reveal-ui.test.tsx [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 352[2mms[22m[39m
+     [32m✓[39m FR-a: keyboard focus on a Video lane header control under the chrome scrolls it into view[32m 123[2mms[22m[39m
+     [32m✓[39m FR-b: pointer focus, or no focus source at all, never scrolls[32m 54[2mms[22m[39m
+     [32m✓[39m FR-c: keyboard focus on chrome controls (Snap, add marker) never scrolls[32m 49[2mms[22m[39m
+[31m     [31m×[31m FR-d: keyboard focus on a lane control at or below the chrome bottom never scrolls[39m[32m 45[2mms[22m[39m
+     [32m✓[39m FR-e: the reveal keeps an open marker menu open and leaves follow mode unchanged[32m 43[2mms[22m[39m
+     [32m✓[39m FR-f: a marker menu opened by keyboard (Shift+F10) is portaled chrome UI and never scrolls[32m 36[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/focus-reveal-ui.test.tsx[2m > [22mC-R196-02 / R91: keyboard focus inside the timeline is revealed below the sticky chrome[2m > [22mFR-d: keyboard focus on a lane control at or below the chrome bottom never scrolls
+[31m[1mAssertionError[22m: expected [ 46 ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   46,[39m
+[31m+ ][39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/focus-reveal-ui.test.tsx:[2m233:28[22m[39m
+    [90m231| [39m    [34mfocusElement[39m(below)[33m;[39m
+    [90m232| [39m    [34mexpect[39m(stub[33m.[39m[34mreadTop[39m())[33m.[39m[34mtoBe[39m([33mSCROLLED_TOP[39m)[33m;[39m
+    [90m233| [39m    [34mexpect[39m(stub[33m.[39mtopWrites)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m234| [39m    [34mexpect[39m(stub[33m.[39mleftWrites)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m235| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/focus-reveal.test.ts[2m > [22mresolveFocusRevealScrollTop (C-R196-02 / R91)[2m > [22mFRU-2: a target at or below the chrome bottom needs no scroll
+[31m[1mAssertionError[22m: expected 46 to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+46
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/focus-reveal.test.ts:[2m20:7[22m[39m
+    [90m 18| [39m    [34mexpect[39m(
+    [90m 19| [39m      resolveFocusRevealScrollTop({ scrollTop: 46, chromeBottom: 313, …
+    [90m 20| [39m    )[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m      [31m^[39m
+    [90m 21| [39m    [34mexpect[39m(
+    [90m 22| [39m      resolveFocusRevealScrollTop({ scrollTop: 46, chromeBottom: 313, …
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/focus-reveal.test.ts[2m > [22mresolveFocusRevealScrollTop (C-R196-02 / R91)[2m > [22mFRU-4: an overlap of 0.5 px is tolerated; 0.6 px is revealed
+[31m[1mAssertionError[22m: expected 45.5 to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+45.5
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/focus-reveal.test.ts:[2m38:7[22m[39m
+    [90m 36| [39m    [34mexpect[39m(
+    [90m 37| [39m      resolveFocusRevealScrollTop({ scrollTop: 46, chromeBottom: 313, …
+    [90m 38| [39m    )[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m      [31m^[39m
+    [90m 39| [39m    [35mconst[39m revealed [33m=[39m [34mresolveFocusRevealScrollTop[39m({
+    [90m 40| [39m      scrollTop[33m:[39m [34m46[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 23:30:17
+[2m   Duration [22m 1.79s[2m (transform 713ms, setup 0ms, import 1.07s, tests 359ms, environment 667ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-198/trun/tree/app/lib/arrangement/__tests__/focus-reveal-ui.test.tsx,title=app/lib/arrangement/__tests__/focus-reveal-ui.test.tsx > C-R196-02 / R91%3A keyboard focus inside the timeline is revealed below the sticky chrome > FR-d%3A keyboard focus on a lane control at or below the chrome bottom never scrolls,line=233,column=28::AssertionError: expected [ 46 ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   46,%0A+ ]%0A%0A ❯ app/lib/arrangement/__tests__/focus-reveal-ui.test.tsx:233:28%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-198/trun/tree/app/lib/arrangement/__tests__/focus-reveal.test.ts,title=app/lib/arrangement/__tests__/focus-reveal.test.ts > resolveFocusRevealScrollTop (C-R196-02 / R91) > FRU-2%3A a target at or below the chrome bottom needs no scroll,line=20,column=7::AssertionError: expected 46 to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A46%0A%0A ❯ app/lib/arrangement/__tests__/focus-reveal.test.ts:20:7%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-198/trun/tree/app/lib/arrangement/__tests__/focus-reveal.test.ts,title=app/lib/arrangement/__tests__/focus-reveal.test.ts > resolveFocusRevealScrollTop (C-R196-02 / R91) > FRU-4%3A an overlap of 0.5 px is tolerated; 0.6 px is revealed,line=38,column=7::AssertionError: expected 45.5 to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A45.5%0A%0A ❯ app/lib/arrangement/__tests__/focus-reveal.test.ts:38:7%0A%0A

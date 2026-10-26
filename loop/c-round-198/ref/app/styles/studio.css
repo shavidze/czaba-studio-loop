@@ -1,0 +1,102 @@
+/* Studio Component Styles */
+
+/* Hide scrollbar in WaveSurfer waveforms - Shadow DOM parts */
+/* WaveSurfer exposes parts via the 'part' attribute for external styling */
+
+/* Target the scroll container using ::part() selector */
+wavesurfer-element::part(scroll) {
+  overflow-x: hidden !important;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+/* Hide webkit scrollbar */
+wavesurfer-element::part(scroll)::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+/* Also hide on wrapper */
+wavesurfer-element::part(wrapper) {
+  overflow-x: hidden !important;
+}
+
+/* Alternative: Target all elements with part="scroll" */
+*::part(scroll) {
+  overflow-x: hidden !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::part(scroll)::-webkit-scrollbar {
+  display: none;
+}
+
+*::part(wrapper) {
+  overflow-x: hidden !important;
+}
+
+/* Fallback: Hide scrollbars globally on waveform containers */
+.studio-track-waveform {
+  overflow-x: hidden !important;
+}
+
+.studio-track-waveform * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.studio-track-waveform *::-webkit-scrollbar {
+  display: none;
+}
+
+/* YouTube-style Play/Pause Icon Animation */
+@keyframes fade-in-scale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-scale {
+  animation: fade-in-scale 600ms ease-out;
+}
+
+/* Custom Slider Styles */
+.slider-thumb-teal::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #14b8a6;
+  cursor: pointer;
+  border: 2px solid #0f172a;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.slider-thumb-teal::-webkit-slider-thumb:hover {
+  background: #0d9488;
+  transform: scale(1.1);
+}
+
+.slider-thumb-teal::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #14b8a6;
+  cursor: pointer;
+  border: 2px solid #0f172a;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.slider-thumb-teal::-moz-range-thumb:hover {
+  background: #0d9488;
+  transform: scale(1.1);
+}

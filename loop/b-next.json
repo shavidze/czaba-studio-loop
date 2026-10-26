@@ -1,11 +1,10 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 197 PASS (browserVerified=true) and gate 197 published 2505252: SABA-B-4 stage 1 done, C-R196-01 closed. C-R196-02 (Medium, pre-existing: keyboard focus hidden under the sticky timeline chrome at 1280) is still open because R89 was reverted under its stop rule. The regression round is not due at this planning (2026-10-26T22:34Z, last 2026-10-24), so the bug gate puts the Medium first. B's live probes rule out scroll-margin (ignored by Chromium 143 focus scrolling) and scroll-padding (jumps the view on chrome focus); a keyboard-gated reveal passes every probe. Large scoped work remains and nothing needs external input, so neither COMPLETE nor BLOCKED.",
- "nextTask": "Round 198 (D-29z163) C-R196-02 on clean HEAD 2505252 (frozen 1027, 3 narrow grants + 2 new files): R91 keyboard-gated focus reveal. One React onFocus on the timeline scroller: only for html[data-focus-source=keyboard], only for targets outside the sticky chrome; scrollTop = resolveFocusRevealScrollTop({scrollTop, chromeBottom, targetTop}) from the new pure helper app/lib/arrangement/focus-reveal.ts (null when delta <= 0.5 or the input is not finite; never negative); vertical only. No addEventListener, new effect, scrollIntoView, scroll-padding, scroll-margin or smooth scrolling; stop rule if hidden stops remain. Tests: focus-reveal.test.ts FRU-1..5, and focus-reveal-ui.test.tsx FR-a..e replacing the 3 it.todo; doc 159 Round-198 section. C rows: FOCUS-REVEAL-198, CHROME-FOCUS-198, POINTER-198, SIDE-198 (follow mode, marker menu), RING-KEY-198, REST-198, G198-3, SCOPE-198, T-RUN-198 (m1-m5), AN-REVIEW-198, PX-NET/REG-HYD. Then 199 REGRESSION, 200 RETRO, 201 SABA-B-4 stage 2.",
+ "reason": "C round 198 PASS (browserVerified=true, realVerified=true, 12 rows, 0 blocked) and gate 198 published 980cfbe: C-R196-02 closed, SABA-B-4 stage 1 complete incl. R91. New pre-existing Lows C-R198-01/02 ruled Low and deferred (274). No Critical/High/Medium open that reproduces in the cloud, so round 198's pre-written outcome applies: round 199 is the REGRESSION round (regression-last 2026-10-24; planned 2026-10-26T23:40Z, C runs on 2026-10-27; shared-infrastructure changes SABA-B-4 and STORE-2a; 76 rounds since the last sweep). Large scoped work remains and nothing needs external input, so neither COMPLETE nor BLOCKED.",
+ "nextTask": "Round 199 (D-29z164) REGRESSION on clean HEAD 980cfbe (frozen 1029, 3 doc grants). A: only doc status lines (156 l.4, 158 l.4, 159 l.4 + l.69; SABA-B-4 stage 1 only), Edit tool, no code. C, real Chromium at 1440x900 and 1280x720, one short check per item: RG-01..RG-24 + RG-T1..T4B (round-122 rows with English strings.ts text, the round-179 badge selector and the STORE-1c 'Studio' link), post-122 rows RV-EN, RV-TOKENS, RV-ICONS, RV-M, RV-SABA-1-2, RV-SABA-3-4, RV-REVEAL, RV-MARKER-ENTER, store rows RS-1A..RS-2A on mock :5199, parked observations RP-METRO-MUTE/RP-SPACE-EMPTY/RP-VIDEO-MARKER, npm run test:e2e:smoke (serial), G199-3 (401 + mock-backed 403; SRW-21 mount blocked), SOURCE-SCOPE, AN-REVIEW, PX-NET/REG-HYD; incremental progress.json. Then round 200 RETRO (or a bounded fix-up first if Medium+), then SABA-B-4 stage 2, STORE-2b.",
  "remaining": [
-  "C-R196-02 (Medium, round 198)",
-  "REGRESSION-ROUND (round 199; due on/after 2026-10-27)",
-  "RETRO (round 200)",
+  "REGRESSION-ROUND (round 199)",
+  "RETRO (round 200; after a fix-up if round 199 finds Medium+)",
   "SABA-B-4 stage 2 (store pages, incl. C-R196-03 and the store half of GLOBAL-FOCUS-VISIBLE-UNLAYERED)",
   "STORE-2b",
   "STORE-2c",
@@ -21,9 +20,9 @@
   "STUDIO-AGENT-COMMANDS",
   "RECORDING-META-S1",
   "SRW-21 (deferred_user)",
-  "deferred_low_polish (272, incl. C-R196-05 and C-R197-01; C-R191-01 awaiting_user)",
-  "backend-blocked evidence (R80 recordings, F11-F13, F16, fake-Bearer real backend)",
+  "deferred_low_polish (274, incl. C-R198-01, C-R198-02, C-R197-01, C-R196-05; C-R191-01 awaiting_user)",
+  "backend-blocked evidence (R80 recordings, F11-F13, F16, real-backend fake-Bearer)",
   "Tech Lead manual checks (c_pass_tech_lead_manual items)",
-  "frontend-architect checkpoint requested at the SABA-B-4 stage-1 boundary (non-blocking)"
+  "frontend-architect checkpoint requested at the SABA-B-4 stage-1 boundary (non-blocking; + ARCH-R198-FOCUS-REGION)"
  ]
 }

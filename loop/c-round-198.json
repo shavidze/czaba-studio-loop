@@ -1,0 +1,93 @@
+{
+ "taskStatus": "PASS",
+ "round": 198,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-26T23:16:47.6405384Z",
+  "round": 198,
+  "attempt": 1,
+  "store": 200
+ },
+ "engine": "HeadlessChrome 143.0.7499.4",
+ "bugs": [
+  {
+   "id": "C-R196-02",
+   "severity": "medium",
+   "status": "closed_by_c_r198",
+   "steps": [
+    "/studio-lab 1280x720 rich scene (round 197 recipe)",
+    "Tab forward and Shift+Tab back through every stop"
+   ],
+   "expected": "every scroller stop outside the chrome has top >= chrome bottom - 0.5 and a visible ring",
+   "actual": "tree 0/0 hidden (i69-71 top 313.0 = chrome bottom), ref HEAD 2505252 6/6 hidden (tops 267-293 < 313)",
+   "evidence": "c-round-198/out/focus-compare.json, out/focus/{tree,ref}-1280-rich/result.json"
+  },
+  {
+   "id": "C-R198-01",
+   "severity": "low",
+   "status": "new_preexisting_deferred_low_polish",
+   "steps": [
+    "/studio-lab 1280x720, rich scene",
+    "set the timeline scroller scrollTop to 32 so Volume — Original video sound is cut 6 px (top 307 < chrome bottom 313)",
+    "mouse-click the visible part of the slider",
+    "press ArrowUp"
+   ],
+   "expected": "ring shows and the control is revealed below the chrome (task POINTER row)",
+   "actual": "value changes, ring solid (keyboard source), but scrollTop stays 32 and top stays 307: still 6 px under the chrome; tree = ref (no focus event on an already-focused element, range ArrowUp does not scroll)",
+   "evidence": "c-round-198/out/chrome/tree-1280/result.json and ref-1280/result.json step cut-video-volume-ArrowUp"
+  },
+  {
+   "id": "C-R198-02",
+   "severity": "low",
+   "status": "new_preexisting_deferred_low_polish",
+   "steps": [
+    "/studio-lab 1280x720 (default or rich scene)",
+    "Tab to Mute / Solo — Original video sound"
+   ],
+   "expected": "focus ring visible on all four sides",
+   "actual": "bottom side clipped: 0 changed px (rich, after reveal) / 18 px (default) vs 80 px on the other sides and other rows; default tree = ref = round 197 (18); rich-scene 0 px called pre-existing by inference (R91 writes only scrollTop, layout at scrollTop 0 identical in ref; ref never reached that state via Tab)",
+   "evidence": "c-round-198/out/focus/tree-1280-rich/f72.png, f73.png; out/focus/{tree,ref}-1280-default/result.json i40/i41"
+  }
+ ],
+ "passed": [
+  "FOCUS-REVEAL-198",
+  "CHROME-FOCUS-198",
+  "POINTER-198",
+  "SIDE-198",
+  "RING-KEY-198",
+  "REST-198",
+  "G198-3",
+  "SCOPE-198",
+  "T-RUN-198",
+  "AN-REVIEW-198",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "blocked": [],
+ "notes": {
+  "scopeDeviationsForB": [
+   "extra guard event.target === scroller || !scroller.contains(event.target) inside the one handler (reviewer H1, portaled marker menu)",
+   "handler parameter typed structurally as { target: Element }"
+  ],
+  "pointerNA": "1440: max scroll 0 in tree and ref, no partly-cut control possible; Music Volume/Mute need scrollTop >= 91 > max 46",
+  "invalidRuns": [
+   "ref 1280 rich first run aborted at load (cold vite compile, scroller null); rerun clean"
+  ],
+  "ableton": "not applicable (task §5); no parity claim",
+  "ref": "c-round-198/ref = git ls-files of HEAD 2505252 with grants from b-round-197/r198-granted-start, new files absent, frozen 1027 + start hashes OK; served :5184 own cacheDir (only vite.config.ts cacheDir line differs); stopped",
+  "mock": ":5199 started for G198-3 only, stopped",
+  "pointerRowRuling": "POINTER-198 passed on the specified button controls (Video fold, Video Mute); the range-slider variant does not meet the row's 'reveals the control' text -> C-R198-01 (Low). B rules whether the pre-written 'keyboard stop above chrome bottom -> Medium' clause applies; C's reading is that it targets Tab stops and that 2.4.11 minimum (not entirely hidden) is met at 6/16 px.",
+  "edgeStops": "i69-71 land at exactly 313.0 = chrome bottom and all use the inset ring (outline-offset -2px, top side 56 px changed); no outer-offset (+2px) stop lands at the chrome edge in any scene (i72-74 at >= 335)."
+ }
+}

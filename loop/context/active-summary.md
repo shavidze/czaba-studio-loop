@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T22:34:28.397Z)
+# Active loop summary (2026-10-26T23:40:06.936Z)
 
-- backlog.json 1759 KB -> active view 262 KB
-- status: G_ROOT_GATE round 197
-- servers: `{"checkedUtc":"2026-10-26T22:08:48.3606224Z","round":197,"attempt":1,"store":200}`
-- last publication: 250525200f425d39a9623c738d2942c889f2ce34 (rounds 196-197)
-- last root gate: round 197 published - commit 250525200f425d39a9623c738d2942c889f2ce34 pushed
+- backlog.json 1766 KB -> active view 261 KB
+- status: G_ROOT_GATE round 198
+- servers: `{"checkedUtc":"2026-10-26T23:16:47.6405384Z","round":198,"attempt":1,"store":200}`
+- last publication: 980cfbee1ba0ee2f65f0262ae9cbbe54e8b9fc0c (rounds 198-198)
+- last root gate: round 198 published - commit 980cfbee1ba0ee2f65f0262ae9cbbe54e8b9fc0c pushed
 
 ## Current items: -
 
@@ -382,7 +382,6 @@
 - GATE171-DOCK-TEST-HELPER-DUP / info (signal) / signal: test-side token helper duplicated (video-dock-strings-ui dockClassTokens/expectDockTokens vs export test classTokens/expectSurfaceTokens); fold into the extraction round if the checkpoint says extract / 
 - GATE172-TWMERGE-RADIUS-PANEL / info (signal) / signal: app/lib/utils.ts plain twMerge treats rounded-panel as unknown, so cn('rounded-panel','rounded-md') keeps both; no conflict today (only cn() site ArrangementVideoDock l.919-924); fix when needed with extendTailwindMerge({extend:{theme:{radius:['panel']}}}); round 173 task rule R29 / 
 - B-R172-OV-FRAME-OVERFLOW / info / observation: when the view scrolls past the extent (e.g. clicking the Overview's right end at max zoom) the view frame runs 7-12 px past the root's right edge and is clipped by overflow-hidden, so its right border is hidden; pre-existing behaviour of overviewFrame (left clamped, width not); not scheduled / 
-- C-R173-N1-OVERVIEW-MOUSE-FOCUS-RING / info / product question (not scheduled): a pure mouse click on the Overview shows the brass focus-visible ring because pointerdown calls currentTarget.focus() (ArrangementOverview l.182); pre-existing / 
 - C-R173-N2-OVERVIEW-PLAYHEAD-OVER-FRAME / info / acknowledged (stacking order, pre-existing): the Overview playhead at x=0 covers the frame's left border / 
 - C-R173-N3-EXIT-RING-OUTLINE / info / acknowledged (pre-existing): the arrangement-exit focus ring is drawn by the outline; its ring-2 box-shadow computes transparent / 
 - GATE173-S1-OVERVIEW-CORNER-CUT / info / routed to round 174 D2(b): one 'known effect, vetoable' line in doc 142 R25; the 10 px overflow-hidden corner cuts ~2 px of a clip bar and ~4 px of the playhead at x=0/extent end; no code change / 
@@ -396,7 +395,6 @@
 - C-R176-NOBRASS-LCD-GLYPH / info / method note: default-LCD subpixel fringes on M/S glyphs trip R-B>=45 (also on off buttons); NO-BRASS rows on glyph buttons run with --disable-lcd-text from round 177 / 
 - A-R176-MIXED-REST-BASE / info / confirmed by C: tailwind-merge drops bg-foreground/5 under bg-gradient-to-r; mixed half vs header 3.32 at rest (>= 3:1, at B's 3.3 floor); no change / 
 - C-R176-MIXED-VS-OFF-FILL / info / B ruling round 177: no fill floor; the foreground border (13.94) carries mixed vs off; vetoable by Saba / 
-- C-R177-WZOOM-FOCUS-ON-PRESS / info / signal for the K4 review: a mouse press on the Waveform Zoom select matches :focus-visible in Chromium, so ring-brand shows while the native popup is open; pre-existing; K4 kept / 
 - GATE177-S1-DELETE-RANGE-LOOKS-ON / info / vetoable design item (feature-status.md): Delete with a range gets border-foreground, the same border that means on for Loop/Follow; options border-foreground/50 or dashed; needs Saba's call; not scheduled / 
 - GATE177-S3-BRACE-WEIGHT / info / vetoable design item: enabled brace border-2 foreground ~15:1 is louder than the former brass; edge hover 3.43 passes with little margin; recorded in feature-status.md vetoable list / 
 - A-R178-BIOME-REFLOW / info / ruled accepted by B: whitespace-only Biome reflow (StudioWorkspace l.2605 1->4 lines, DetailPanel l.676 1->3, surfaceForbidden array); C confirmed same tokens; standing rule: B scope criteria say 'hunks only at these sites; formatter reflow allowed', never literal line counts / 
@@ -450,12 +448,11 @@
 - C-R190-INFO / info / routed / C round 190 info: I1 T1 has no portal guard (m5 17/17 green) -> parentElement===document.body case in the next round owning SpotlightLoader 
 - A-R190-SIGNALS / info / signal / A round 190 code-reviewer: Medium #1 no unit test for the portal (B decision: add with the next SpotlightLoader owner, see C-R190-INFO I1); 
 - ARCH-R190-PAGETRANSITION-FIXED / info / signal / PageTransition.tsx pageVariants y transform is the containing block for every fixed overlay inside routes during enter (DownloadDialog.tsx:9
-- GLOBAL-FOCUS-VISIBLE-UNLAYERED / info / signal / Two unlayered global :focus-visible outline rules (app/styles/app.css:379 and app/styles/base/utilities.css:79, 2px brand, offset 2px) beat 
+- GLOBAL-FOCUS-VISIBLE-UNLAYERED / info / Studio half closed (SABA-B-4 stage 1 C PASS, 2505252); store half open -> SABA-B-4 stage 2 (2026-10-26 B round 197 -> 198 planning (D-29z163)); history: signal / Two unlayered global :focus-visible outline rules (app/styles/app.css:379 and app/styles/base/utilities.css:79, 2px brand, offset 2px) beat 
 - C-R191-01 / low / deferred_low_polish + awaiting_user (design call for Saba) / Level-fader ivory thumb vs the adjacent brass fill = 1.82:1 (< 3:1); vs unfilled graphite track 11.1:1 and vs parent 13.5-14.4:1. Inherent t
 - C-R191-INFO / info / routed / I1 Pan/Zoom native pressed shade vs PRESS within-8 clause -> B ruling R70 wins (see SABA-B-3.result); I2 doc 157 lists FS0-FS6 though FS7 ex
 - GATE191-REVIEW-SIGNALS / info / signal / gate-191 reviewer: #1 doc 157 stale status + FS0-FS6 (scheduled round 192); #2 Pan reset button own focus still double ring (-> deferred GAT
 - A-R191-SIGNALS / info / signal / A round 191 code-reviewer Architecture notes (verbatim in a-round-191.md): run 1 keep studio-fader.ts (stateless class-and-maths module, stu
-- ARCH-R191-PAN-RING-COUPLING / info / signal / Pan focus ring drawn by the reset button ::before (ArrangementLane.tsx:773/786 + studio-fader.ts:12-26), coupled through copied w-12/gap-1; 
 - STORE2A-PROTECTED-BRASS-TEXT / info / signal (protected files) / After STORE-2a, bg-brand text-foreground (ivory on brass ~1.8:1) remains on the protected studio.$productId.tsx:440/471 and account.download
 - STORE2A-EXTRA-BRASS-TEXT / info / scheduled round 193 (D-29z158) / Light text/icon on brand/buy/destructive fills beyond the 4 round-192 grants: PurchaseHeader.tsx:348 Buy Now (HEAD 4.05:1 -> 1.88 rest / 1.5
 - STORE2A-LEADMAGNET-KEEPLIST-ACK / info / root_note (B ruling R76, vetoable; non-blocking) / Keep-list LeadMagnet CONTINUE button: text colour token only (text-foreground -> text-brand-foreground); copy CONTINUE/SENDING..., size, pos
@@ -468,11 +465,10 @@
 - B-R194-K0-SCAN-GAP / info / retro_input / Second STORE-2a round lost to B pre-dispatch inventory (same class as B-R192-PLANNING-GAP): fieldscan.mjs used tag+13 lines and missed Guest
 - ARCH-R194-TEST-WALKERS / info / signal - decision with ARCH-R193-THEME-REGION at the STORE-2 exit; not scheduled / A round-194 code-reviewer Architecture note (verbatim in a-round-194.md): store-theme-tokens.test.ts holds two independent app/ walkers (stu
 - C-R194-INFO / info / routed / C round 194 notes: F9/F10 (/cart) not reachable with the mock empty cart; F15 Textarea no route; F11-F13 and F16 blocked backend; first 375 
-- SABA-B-4 / medium / stage 1 (Studio) implemented round 196, C FAIL (RING-KEY-196 on C-R196-01); fix-up round 197 (D-29z162); stage 2 (store pages) after the regression round / focus ring and slider thumbs feel heavy: focused Pan shows a thick brass pill with a wide gap; Pan thumb large pure white vs cream Volume th
+- SABA-B-4 / medium / stage 1 (Studio) done: C PASS round 197 browserVerified=true (FOCUS-REVEAL-197 exempt, C-R196-02 pre-existing and tracked separately), published 2505252; stage 2 (store pages, C-R196-03 input) after round 198 (C-R196-02), round 199 regression and round 200 RETRO (2026-10-26 B round 197 -> 198 planning (D-29z163)) / focus ring and slider thumbs feel heavy: focused Pan shows a thick brass pill with a wide gap; Pan thumb large pure white vs cream Volume th
 - A-R195-SIGNALS / info / signal / A round 195 code-reviewer Architecture note (verbatim in a-round-195.md): keep the field scanner in store-theme-tokens.test.ts; if the same 
 - B-R195-WORKFLOW-DOC-DRIFT / info / root_note / docs/technical/studio-real-workspace/agent-workflow.md lacks the policy sections from SABA-B-3 onward (Retrospective, SABA-B-4, three 2026-1
-- C-R196-01 / medium / open; fix-up round 197 (R88) / marker flag inset focus ring fused with the selected pill brass border and stem: 1.45:1
-- C-R196-02 / medium / open; fix-up round 197 (R89) with stop rule; pre-existing (also in 7339cd5) / keyboard-focused Video row controls hidden under the sticky timeline chrome at 1280x720 (detail panel open, group present): 0 ring px
+- C-R196-02 / medium / open Medium, pre-existing; R89 (scroll-padding) reverted in round 197 under its stop rule; round 198 (D-29z163) R91 keyboard-gated focus reveal (2026-10-26 B round 197 -> 198 planning (D-29z163)) / keyboard-focused Video row controls hidden under the sticky timeline chrome at 1280x720 (detail panel open, group present): 0 ring px
 - C-R196-03 / low / input to SABA-B-4 stage 2 (store pages); not a stand-alone deferred Low / home product card link focus ring clipped (tree and ref)
 
 ## Other open items
