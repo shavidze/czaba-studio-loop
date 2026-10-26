@@ -1,18 +1,19 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 186 PASS (browserVerified=true, realVerified=true, 12 rows, 0 failed, 0 blocked); root published it as cc207d6, so STORE-1a is done and C-R185-01/02 are resolved. C's two new Lows: C-R186-01 ($0.00 variant-less SFX) touches purchase-path semantics with an unknown backend contract, so it is an open conditional Low owned by STORE-4 and part of the regression smoke; C-R186-02 (contrast) goes to deferred_low_polish, owner STORE-2. No Critical/High/Medium open. Regression is due on/after 2026-10-27 and today is 2026-10-26, so per round 186's pre-written outcome round 187 = STORE-1b (+ the stale doc 153 status flagged by the gate-186 reviewer). A lot of scoped work remains and nothing needs external input, so the decision is neither COMPLETE nor BLOCKED.",
- "nextTask": "Round 187 (D-29z152) STORE-1b from HEAD cc207d6 (clean; 1013 tracked; frozen 1010; grants 3: app/components/audio/AudioPlayer.tsx, app/components/audio/AudioPreviewButton.tsx, docs/implementation/2026/quarter-IV/153-store-1a-product-page-bugs.md; new 2: app/lib/__tests__/audio-preview-player.test.tsx, doc 154). K1: var(--color-primary) (defined nowhere) -> var(--color-brand) at AudioPlayer l.127/189 only. K2: remove the isClient post-mount flip; one interactive markup on server and client, type=button, no 'Preview' label (R55, vetoable). K3: doc 153 status Completed + cite C 186 PASS/cc207d6. T1 B1 (static markup == DOM after effects, red on start), B2, B3, B4 hydrateRoot 0 recoverable errors, P1 brand 25%/70%, P2 token in @theme, P3. C rows at 1440/1280/375 vs mock: FILL-187, FLIP-187 (JS-off vs hydrated), PREVIEW-187, STORE-AFTER-187, G187-3, STUDIO-RV-187, SCOPE-187, T-RUN-187, AN-REVIEW-187, PX-NET/REG-HYD. Next: REGRESSION on the first planning >= 2026-10-27 (expected 188), then STORE-1c.",
+ "reason": "C round 187 PASS (browserVerified=true, realVerified=true, 11 rows, 0 failed, 0 blocked, 0 bugs); root published it as cb24362, so STORE-1b is done. C's four info items are routed (I1 into STORE-1d acceptance, I2 baseline note, I3 expected, I4 pre-existing) and its task-text correction (/store has no preview buttons) moves the regression flip check to / cards. Gate-187 reviewer items are signals except the stale doc 154 status, which rides with this round. No Critical/High/Medium open. Regression is due on/after 2026-10-27 and today is 2026-10-26, so per round 187's pre-written outcome round 188 = STORE-1c. Large scoped work remains and nothing needs external input, so neither COMPLETE nor BLOCKED.",
+ "nextTask": "Round 188 (D-29z153) STORE-1c from HEAD cb24362 (clean; 1015 tracked; frozen 1011; grants 4: app/components/layout/Header.tsx, app/components/layout/Footer.tsx, e2e/navigation.spec.ts (navLinks only), doc 154 (2 status lines); new 2: app/lib/__tests__/store-header-footer.test.tsx, doc 155). K1/K2 desktop+mobile header nav = Collections /store (R56), Studio /studio-lab (no Demo badge), Free Samples, About; Gift Cards + Hire Us only in the footer (R57). K3 wordmark <h1 text-glow> -> <span block text-foreground> so each page has one h1 (R59). K4 footer (c) {APP_NAME} (R58). K5 e2e navLinks. K6 doc 154 Completed. Auth block byte-identical; 'Sign In' casing unchanged (R60). T1 N1-N5, F1, S1 (N1/N2/N3/F1/S1 red on start, N5 green). C rows at 1440/1280/375 vs mock: NAV-188, H1-188, MARK-188, FOOT-188, KEEP-188, STORE-AFTER-188, E2E-NAV-188, G188-3, STUDIO-RV-188, SCOPE-188, T-RUN-188, AN-REVIEW-188, PX-NET/REG-HYD. Next: REGRESSION on the first planning >= 2026-10-27 (expected 189), then STORE-1d.",
  "remaining": [
-  "STORE-1b(round 187 D-29z152: AudioPlayer fill var(--color-brand), AudioPreviewButton one interactive markup R55, doc 153 status; done on C PASS with browserVerified)",
-  "REGRESSION(due 2026-10-27; expected round 188; + M1, M3, M4, harness gate-log check, REG-DUX5-PLAYHEAD-RESCAN, C-R167-METRONOME-UNDER-MUTE, STATE-M3 wording, e2e smoke, store smoke vs mock incl. archived-rain 404, meta, door-slams, STORE-1b fill/flip; scrolled home baselines)",
-  "STORE-1c(D15 header, double h1, footer 'Czaba Music', Studio rename, plain wordmark)",
-  "STORE-1d(D10 entrance loader)",
-  "STORE-REDESIGN(STORE-0 done 4a73ced; STORE-1a done cc207d6; STORE-1b round 187; STORE-1c/1d; STORE-2 tokens/type (+C-R186-02); STORE-3 hero; STORE-4 product/listening (+C-R186-01); STORE-5 loading text/docs; direction A decided)",
+  "STORE-1c(round 188 D-29z153: D15 header desktop+mobile Collections/Studio/Free Samples/About, wordmark span one h1, footer (c) CZABA, e2e navLinks, doc 154 status; done on C PASS with browserVerified)",
+  "STORE-1d(D10 entrance loader <=1.2 s, skippable, once per session, off under reduced motion; + C-R187-I1 loader must not block / card Play; at most one h1 while up)",
+  "REGRESSION(due 2026-10-27; expected round 189; + M1, M3, M4, harness gate-log check, REG-DUX5-PLAYHEAD-RESCAN, C-R167-METRONOME-UNDER-MUTE, STATE-M3 wording, e2e smoke, store smoke vs mock incl. archived-rain 404, meta, door-slams, STORE-1b fill + flip on / cards, STORE-1c header/h1/footer; non-scrolled baselines or popup dismissed)",
+  "STORE-REDESIGN(STORE-0 done 4a73ced; STORE-1a done cc207d6; STORE-1b done cb24362; STORE-1c round 188; STORE-1d (+C-R187-I1); STORE-2 tokens/type (+C-R186-02, A-R187-PRODUCTCARD-PRIMARY-TOKEN, B-R187-HEADER-SIGNALS); STORE-3 hero; STORE-4 product/listening (+C-R186-01); STORE-5 loading text/docs; direction A decided)",
   "C-R186-01(open Low, conditional Medium if real backend returns active product without variants; owner STORE-4; BACKEND-ONLY-EVIDENCE)",
   "GATE186-REVIEW-SIGNALS(signal)",
   "B-R186-PLAYER-SIGNALS(signal)",
-  "STORE-1c(D15 header, double h1, footer 'Czaba Music', Studio rename, plain wordmark)",
-  "STORE-1d(D10 entrance loader)",
+  "GATE187-REVIEW-SIGNALS(signal)",
+  "A-R187-SIGNALS(signal)",
+  "C-R187-INFO(routed)",
+  "B-R187-HEADER-SIGNALS(signal)",
   "ARCH-CHECKPOINT-VISUAL-A-EXIT(b-round-183-checkpoint-request.md requested_from_root, supersedes b-round-180; non-blocking, fallback (c))",
   "ARCH-R183-STUDIO-PREDICATE-DUP(signal; root.tsx:137 vs CookieConsent.tsx:16; keep until root.tsx unfreezes)",
   "C-R183-M310-CC5-UNREACHABLE(info)",
@@ -89,6 +90,6 @@
   "C-R182-R42-GAP-CLICK(info)",
   "B-R184-FAKECLOCK-UNASSERTED(signal; m313 0 red)",
   "ARCH-R184-SIGNAL3(signal; 73 suite copies; checkpoint Q2)",
-  "DEFERRED-LOW-POLISH(264 entries incl. C-R186-02, GATE186-SITEMAP-INACTIVE, C-R185-I2, C-R185-I3, open ones; +C-R183-N-CLOSE-0X0, A-R183-COOKIE-BUTTON-TYPE, A-R183-COOKIE-INLINE-GRADIENT, A-R183-REVIEW-FBQ-BRANCH; C-R169-N1 scope widened to library options)"
+  "DEFERRED-LOW-POLISH(266 entries incl. GATE187-SVG-ARIA-HIDDEN, A-R187-PRODUCTCARD-PRIMARY-TOKEN, C-R186-02, GATE186-SITEMAP-INACTIVE, C-R185-I2, C-R185-I3 and earlier)"
  ]
 }

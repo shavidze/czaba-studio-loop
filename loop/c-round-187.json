@@ -1,0 +1,64 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-26T07:46:00.9964137Z",
+  "round": 187,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "FILL-187",
+  "FLIP-187",
+  "PREVIEW-187",
+  "STORE-AFTER-187",
+  "G187-3",
+  "STUDIO-RV-187",
+  "SCOPE-187",
+  "T-RUN-187",
+  "AN-REVIEW-187",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "notApplicable": [
+  "FLIP-187 and PREVIEW-187 /store parts: /store renders 0 preview buttons (store.tsx uses neither ProductCard nor AudioPreviewButton; SSR and DOM, JS on and off, 3 viewports). The card variant was verified on / instead. B task-text correction, not an A failure."
+ ],
+ "info": [
+  {
+   "id": "C-R187-I1",
+   "severity": "info",
+   "text": "Entrance loader overlay (fixed inset-0 z-50; SpotlightLoader/CinemaCurtainLoader) covers the / card preview button for ~3 s (hover-probe) to >5.4 s (blocker-probe, cold context); clicks and hover do not reach the button. Inferred to predate this round (loader files are not grants). Owned by STORE-1d (D10 entrance loader); B: add 'loader must not block the card Play control' to STORE-1d acceptance. Evidence c-round-187/logs/hover-probe.txt, logs/blocker-probe.txt"
+  },
+  {
+   "id": "C-R187-I2",
+   "severity": "info",
+   "text": "LeadMagnet popup (fixed) covers the first viewport of the -scrolled product shots, so their 0-px diffs are popup-vs-popup above the fold; non-scrolled 1440-store/1440-product shots are popup-free (0 px), and prod187seq covers the product page in playback. Round-188 baseline: use the non-scrolled and 185seq shots, or dismiss the popup first."
+  },
+  {
+   "id": "C-R187-I3",
+   "severity": "info",
+   "text": "K1 also makes the unfilled grey track (rgba 255,255,255,0.1) visible: before, the invalid var() voided the whole gradient, so the entire 464 px progress track changed, not only the played part. Expected consequence."
+  },
+  {
+   "id": "C-R187-I4",
+   "severity": "info",
+   "text": "375 home: /images/packs/cover.jpg is not complete after scrolling; identical in round 186 (pre-existing)."
+  }
+ ],
+ "abletonParity": "\u10d0\u10e0 \u10d4\u10ee\u10d4\u10d1\u10d0 (store page, no Arrangement behaviour)",
+ "mock": "C started mock-api on :5199 (not listening at start), log c-round-187/mock.log, stopped at end (0 listeners)"
+}

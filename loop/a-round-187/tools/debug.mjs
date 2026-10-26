@@ -1,0 +1,11 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+page.on('pageerror', (e) => console.log('PAGEERROR', String(e)));
+await page.goto('http://127.0.0.1:5173/products/middle-east', { waitUntil: 'load' });
+await page.waitForTimeout(3000);
+console.log(await page.evaluate(() => [...document.querySelectorAll('button')].map((b) => b.getAttribute('aria-label') || b.textContent.trim().slice(0, 30))));
+await page.screenshot({ path: '/home/runner/czaba-project/tmp/studio-real-loop/a-round-187/debug-1440.png' });
+await browser.close();

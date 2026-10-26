@@ -1,0 +1,178 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+stderr | app/lib/__tests__/audio-preview-player.test.tsx > AudioPlayer — progress and volume fill use a defined token (STORE-1b K1) > draws the played and set parts with var(--color-brand)_REGRESSION
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at MemoryRouter (/home/runner/czaba-project/store/node_modules/react-router/dist/umd/react-router.development.js:1102:7)
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at LinkWithRef (/home/runner/czaba-project/store/node_modules/react-router-dom/dist/umd/react-router-dom.development.js:814:9)
+    at /home/runner/czaba-project/store/node_modules/@remix-run/react/dist/components.js:180:3
+    at div
+    at div
+    at div
+    at div
+    at AudioPlayer
+    at Router (/home/runner/czaba-project/store/node_modules/react-router/dist/umd/react-router.development.js:1208:17)
+    at MemoryRouter (/home/runner/czaba-project/store/node_modules/react-router/dist/umd/react-router.development.js:1102:7)
+
+stderr | app/lib/__tests__/audio-preview-player.test.tsx > AudioPlayer — progress and volume fill use a defined token (STORE-1b K1) > renders nothing without a current track
+Warning: useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://reactjs.org/link/uselayouteffect-ssr for common fixes.
+    at MemoryRouter (/home/runner/czaba-project/store/node_modules/react-router/dist/umd/react-router.development.js:1102:7)
+
+ ❯ app/lib/__tests__/audio-preview-player.test.tsx (12 tests | 8 failed) 175ms
+     × renders the same idle markup after mount as on the server (overlay)_REGRESSION 21ms
+     × server markup is the interactive icon-only button without a "Preview" label (overlay) 7ms
+     × hydrates the server markup without recoverable errors or console errors (overlay)_REGRESSION 7ms
+     × renders the same idle markup after mount as on the server (inline)_REGRESSION 3ms
+     × server markup is the interactive icon-only button without a "Preview" label (inline) 1ms
+     × hydrates the server markup without recoverable errors or console errors (inline)_REGRESSION 3ms
+     ✓ click plays the track once and does not bubble to a parent card link 94ms
+     ✓ shows "Pause preview" while this track plays and a click pauses it 11ms
+     × marks the button busy with "Cancel loading preview" while this track loads 9ms
+     × draws the played and set parts with var(--color-brand)_REGRESSION 15ms
+     ✓ declares --color-brand in the @theme block and --color-primary nowhere 1ms
+     ✓ renders nothing without a current track 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > renders the same idle markup after mount as on the server (overlay)_REGRESSION
+AssertionError: expected '<button class="audio-preview-overlay-…' to be '<button class="audio-preview-overlay-…' // Object.is equality
+
+Expected: "<button class="audio-preview-overlay-button cursor-pointer" aria-label="Play preview"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><span class="audio-preview-overlay-text">Preview</span></button>"
+Received: "<button class="audio-preview-overlay-button cursor-pointer" aria-label="Play preview" aria-busy="false"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"
+
+ ❯ app/lib/__tests__/audio-preview-player.test.tsx:105:35
+    103|       );
+    104|       const { container } = await renderHydratedButton(variant);
+    105|       expect(container.innerHTML).toBe(serverMarkup);
+       |                                   ^
+    106|     });
+    107| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > server markup is the interactive icon-only button without a "Preview" label (overlay)
+ FAIL  app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > server markup is the interactive icon-only button without a "Preview" label (inline)
+AssertionError: expected null to be 'button' // Object.is equality
+
+- Expected: 
+"button"
+
++ Received: 
+null
+
+ ❯ app/lib/__tests__/audio-preview-player.test.tsx:115:44
+    113|       const button = host.querySelector('button');
+    114|       expect(button).not.toBeNull();
+    115|       expect(button?.getAttribute('type')).toBe('button');
+       |                                            ^
+    116|       expect(button?.getAttribute('aria-label')).toBe('Play preview');
+    117|       expect(button?.querySelector(`path[d="${PLAY_PATH}"]`)).not.toBe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > hydrates the server markup without recoverable errors or console errors (overlay)_REGRESSION
+AssertionError: expected '<button class="audio-preview-overlay-…' to be '<button class="audio-preview-overlay-…' // Object.is equality
+
+Expected: "<button class="audio-preview-overlay-button cursor-pointer" aria-label="Play preview"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><span class="audio-preview-overlay-text">Preview</span></button>"
+Received: "<button class="audio-preview-overlay-button cursor-pointer" aria-label="Play preview" aria-busy="false"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"
+
+ ❯ app/lib/__tests__/audio-preview-player.test.tsx:149:30
+    147|       expect(recoverableErrorSpy).not.toHaveBeenCalled();
+    148|       expect(consoleErrorSpy).not.toHaveBeenCalled();
+    149|       expect(host.innerHTML).toBe(expectedMarkup);
+       |                              ^
+    150|     });
+    151|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > renders the same idle markup after mount as on the server (inline)_REGRESSION
+AssertionError: expected '<button class="audio-preview-inline-b…' to be '<button class="audio-preview-inline-b…' // Object.is equality
+
+Expected: "<button class="audio-preview-inline-button cursor-pointer" aria-label="Play preview"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"
+Received: "<button class="audio-preview-inline-button cursor-pointer " aria-label="Play preview" aria-busy="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"
+
+ ❯ app/lib/__tests__/audio-preview-player.test.tsx:105:35
+    103|       );
+    104|       const { container } = await renderHydratedButton(variant);
+    105|       expect(container.innerHTML).toBe(serverMarkup);
+       |                                   ^
+    106|     });
+    107| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > hydrates the server markup without recoverable errors or console errors (inline)_REGRESSION
+AssertionError: expected '<button class="audio-preview-inline-b…' to be '<button class="audio-preview-inline-b…' // Object.is equality
+
+Expected: "<button class="audio-preview-inline-button cursor-pointer" aria-label="Play preview"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"
+Received: "<button class="audio-preview-inline-button cursor-pointer " aria-label="Play preview" aria-busy="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"
+
+ ❯ app/lib/__tests__/audio-preview-player.test.tsx:149:30
+    147|       expect(recoverableErrorSpy).not.toHaveBeenCalled();
+    148|       expect(consoleErrorSpy).not.toHaveBeenCalled();
+    149|       expect(host.innerHTML).toBe(expectedMarkup);
+       |                              ^
+    150|     });
+    151|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > marks the button busy with "Cancel loading preview" while this track loads
+AssertionError: expected null to be 'button' // Object.is equality
+
+- Expected: 
+"button"
+
++ Received: 
+null
+
+ ❯ app/lib/__tests__/audio-preview-player.test.tsx:185:43
+    183|       const button = getByRole('button', { name: 'Cancel loading previ…
+    184|       expect(button.getAttribute('aria-busy')).toBe('true');
+    185|       expect(button.getAttribute('type')).toBe('button');
+       |                                           ^
+    186|       unmount();
+    187|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  app/lib/__tests__/audio-preview-player.test.tsx > AudioPlayer — progress and volume fill use a defined token (STORE-1b K1) > draws the played and set parts with var(--color-brand)_REGRESSION
+AssertionError: expected 'background:linear-gradient(to right, …' to contain 'var(--color-brand) 25%'
+
+Expected: "var(--color-brand) 25%"
+Received: "background:linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) 25%, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.1) 100%)"
+
+ ❯ app/lib/__tests__/audio-preview-player.test.tsx:211:51
+    209|     const progress = host.querySelector('input[aria-label="Preview pos…
+    210|     const volume = host.querySelector('input[aria-label="Preview volum…
+    211|     expect(progress?.getAttribute('style') ?? '').toContain('var(--col…
+       |                                                   ^
+    212|     expect(volume?.getAttribute('style') ?? '').toContain('var(--color…
+    213|     expect(markup).not.toContain('--color-primary');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 4 passed (12)
+   Start at  07:31:39
+   Duration  932ms (transform 143ms, setup 0ms, import 330ms, tests 175ms, environment 323ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/audio-preview-player.test.tsx,title=app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > renders the same idle markup after mount as on the server (overlay)_REGRESSION,line=105,column=35::AssertionError: expected '<button class="audio-preview-overlay-…' to be '<button class="audio-preview-overlay-…' // Object.is equality%0A%0AExpected: "<button class="audio-preview-overlay-button cursor-pointer" aria-label="Play preview"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><span class="audio-preview-overlay-text">Preview</span></button>"%0AReceived: "<button class="audio-preview-overlay-button cursor-pointer" aria-label="Play preview" aria-busy="false"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"%0A%0A ❯ app/lib/__tests__/audio-preview-player.test.tsx:105:35%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/audio-preview-player.test.tsx,title=app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > server markup is the interactive icon-only button without a "Preview" label (overlay),line=115,column=44::AssertionError: expected null to be 'button' // Object.is equality%0A%0A- Expected: %0A"button"%0A%0A+ Received: %0Anull%0A%0A ❯ app/lib/__tests__/audio-preview-player.test.tsx:115:44%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/audio-preview-player.test.tsx,title=app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > hydrates the server markup without recoverable errors or console errors (overlay)_REGRESSION,line=149,column=30::AssertionError: expected '<button class="audio-preview-overlay-…' to be '<button class="audio-preview-overlay-…' // Object.is equality%0A%0AExpected: "<button class="audio-preview-overlay-button cursor-pointer" aria-label="Play preview"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><span class="audio-preview-overlay-text">Preview</span></button>"%0AReceived: "<button class="audio-preview-overlay-button cursor-pointer" aria-label="Play preview" aria-busy="false"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"%0A%0A ❯ app/lib/__tests__/audio-preview-player.test.tsx:149:30%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/audio-preview-player.test.tsx,title=app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > renders the same idle markup after mount as on the server (inline)_REGRESSION,line=105,column=35::AssertionError: expected '<button class="audio-preview-inline-b…' to be '<button class="audio-preview-inline-b…' // Object.is equality%0A%0AExpected: "<button class="audio-preview-inline-button cursor-pointer" aria-label="Play preview"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"%0AReceived: "<button class="audio-preview-inline-button cursor-pointer " aria-label="Play preview" aria-busy="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"%0A%0A ❯ app/lib/__tests__/audio-preview-player.test.tsx:105:35%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/audio-preview-player.test.tsx,title=app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > server markup is the interactive icon-only button without a "Preview" label (inline),line=115,column=44::AssertionError: expected null to be 'button' // Object.is equality%0A%0A- Expected: %0A"button"%0A%0A+ Received: %0Anull%0A%0A ❯ app/lib/__tests__/audio-preview-player.test.tsx:115:44%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/audio-preview-player.test.tsx,title=app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > hydrates the server markup without recoverable errors or console errors (inline)_REGRESSION,line=149,column=30::AssertionError: expected '<button class="audio-preview-inline-b…' to be '<button class="audio-preview-inline-b…' // Object.is equality%0A%0AExpected: "<button class="audio-preview-inline-button cursor-pointer" aria-label="Play preview"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"%0AReceived: "<button class="audio-preview-inline-button cursor-pointer " aria-label="Play preview" aria-busy="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button>"%0A%0A ❯ app/lib/__tests__/audio-preview-player.test.tsx:149:30%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/audio-preview-player.test.tsx,title=app/lib/__tests__/audio-preview-player.test.tsx > AudioPreviewButton — one markup on server and client (STORE-1b K2) > marks the button busy with "Cancel loading preview" while this track loads,line=185,column=43::AssertionError: expected null to be 'button' // Object.is equality%0A%0A- Expected: %0A"button"%0A%0A+ Received: %0Anull%0A%0A ❯ app/lib/__tests__/audio-preview-player.test.tsx:185:43%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/audio-preview-player.test.tsx,title=app/lib/__tests__/audio-preview-player.test.tsx > AudioPlayer — progress and volume fill use a defined token (STORE-1b K1) > draws the played and set parts with var(--color-brand)_REGRESSION,line=211,column=51::AssertionError: expected 'background:linear-gradient(to right, …' to contain 'var(--color-brand) 25%25'%0A%0AExpected: "var(--color-brand) 25%25"%0AReceived: "background:linear-gradient(to right, var(--color-primary) 0%25, var(--color-primary) 25%25, rgba(255, 255, 255, 0.1) 25%25, rgba(255, 255, 255, 0.1) 100%25)"%0A%0A ❯ app/lib/__tests__/audio-preview-player.test.tsx:211:51%0A%0A
