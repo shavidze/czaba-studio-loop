@@ -1,0 +1,24 @@
+diff --git a/docs/learning/data-flow.md b/docs/learning/data-flow.md
+index e6b73cd..643f0de 100644
+--- a/docs/learning/data-flow.md
++++ b/docs/learning/data-flow.md
+@@ -124,8 +124,19 @@ sequenceDiagram
+ 
+     MP->>API: readMetadataBatch(paths)
+     Note over MP: store-ის განახლება ყოველი ფაილისთვის
++
++    alt failed ცარიელია
++        MP->>MS: setEditingMetadata({})
++        Note over MP: ფორმა სუფთავდება ("Multiple values"), isDirty = false
++        Note over MP: toast "Tags saved to N files"
++    else failed არ არის ცარიელი (ყველა ან ნაწილი)
++        Note over MS: editingMetadata, modifiedFields რჩება, isDirty = true
++        Note over MP: toast "{succeeded} saved, {failed} failed", Save ღილაკი აქტიურია
++    end
+ ```
+ 
++**შეცდომა batch-ში (D-21):** თუ `writeMetadataBatch`-ის `failed` სია არ არის ცარიელი (ყველა ფაილი ჩავარდა ან მხოლოდ ნაწილი), აკრეფილი მნიშვნელობები ფორმაში რჩება — `editingMetadata` და `modifiedFields` არ იშლება, `isDirty` რჩება `true`, ამიტომ `Save to N files` ღილაკი აქტიურია. ყველა მონიშნული ფაილი (ჩავარდნილიც) თავიდან იკითხება და store-ში ახლდება (`readMetadataBatch` → `updateFileMetadata`), ამიტომ წარმატებულ ფაილებს ახალი მნიშვნელობები და `Tagged` badge უჩანთ. განმეორებითი Save იგივე `modifiedFields`-ს წერს **ყველა** მონიშნულ ფაილში, მათ შორის უკვე წარმატებულებშიც (იგივე მნიშვნელობით). ფორმა მხოლოდ მაშინ სუფთავდება, როცა `failed` ცარიელია. სხვა ფაილზე გადასვლისას შეუნახავი ცვლილებები იკარგება და ჩნდება toast `Unsaved changes were discarded`.
++
+ **Batch-ის თავისებურება:** `Partial<WavMetadata>`-ში მხოლოდ შევსებული ველები გადაიწერება. თუ ფორმაში BPM ცარიელია, არსებული BPM უცვლელი რჩება.
+ 
+ ## Template Lifecycle

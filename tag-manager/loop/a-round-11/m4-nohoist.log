@@ -1,0 +1,96 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/a-r11-old[39m
+
+ [31m❯[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[33m 623[2mms[22m[39m
+[31m     [31m×[31m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept[39m[32m 289[2mms[22m[39m
+[31m     [31m×[31m (b) partial failure: edits are kept and succeeded files are refreshed in the store[39m[32m 95[2mms[22m[39m
+[31m     [31m×[31m (c) retry after a failure writes the same fields to all selected files and clears on success[39m[32m 83[2mms[22m[39m
+[31m     [31m×[31m (d) full success clears the form back to Multiple values[39m[32m 75[2mms[22m[39m
+[31m     [31m×[31m (e) single-file write failure keeps the typed value and shows the error[39m[32m 78[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(a) all files failed: typed value, isDirty, modifiedFields and Save button are kept
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m96:43[22m[39m
+    [90m 94| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 2 files/[39m)[33m;[39m
+    [90m 95| [39m
+    [90m 96| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mwriteMetadataBatch)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m 97| [39m    [34mexpectBatchWriteCall[39m([34m0[39m)[33m;[39m
+    [90m 98| [39m    expect(useMetadataStore.getState().toastMessage).toBe("0 saved, 2 …
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(b) partial failure: edits are kept and succeeded files are refreshed in the store
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m110:43[22m[39m
+    [90m108| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 2 files/[39m)[33m;[39m
+    [90m109| [39m
+    [90m110| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mwriteMetadataBatch)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m111| [39m    [34mexpectBatchWriteCall[39m([34m0[39m)[33m;[39m
+    [90m112| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mreadMetadataBatch)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(c) retry after a failure writes the same fields to all selected files and clears on success
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toBeEnabled()[22m
+
+Received element is not enabled:
+  [31m<button
+  class="inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-50 disabled:cursor-not-allowed bg-brand text-brand-foreground hover:bg-brand-hover px-4 py-2 text-sm w-full"
+  disabled=""
+  type="button"
+/>[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m64:32[22m[39m
+    [90m 62| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 63| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 64| [39m  [34mexpect[39m([34mgetBatchSaveButton[39m())[33m.[39m[34mtoBeEnabled[39m()[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m 65| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m 66| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m125:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(d) full success clears the form back to Multiple values
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m152:43[22m[39m
+    [90m150| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 2 files/[39m)[33m;[39m
+    [90m151| [39m
+    [90m152| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mwriteMetadataBatch)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m153| [39m    [34mexpectBatchWriteCall[39m([34m0[39m)[33m;[39m
+    [90m154| [39m    [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(e) single-file write failure keeps the typed value and shows the error
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m172:38[22m[39m
+    [90m170| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save Tags/[39m)[33m;[39m
+    [90m171| [39m
+    [90m172| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mwriteMetadata)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m173| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mwriteMetadataBatch)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m174| [39m    [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[90m (5)[39m
+[2m   Start at [22m 19:43:53
+[2m   Duration [22m 1.60s[2m (transform 198ms, setup 87ms, import 321ms, tests 623ms, environment 457ms)[22m
+
+
+::error file=/tmp/a-r11-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (a) all files failed%3A typed value%2C isDirty%2C modifiedFields and Save button are kept,line=96,column=43::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:96:43%0A%0A
+
+::error file=/tmp/a-r11-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (b) partial failure%3A edits are kept and succeeded files are refreshed in the store,line=110,column=43::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:110:43%0A%0A
+
+::error file=/tmp/a-r11-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (c) retry after a failure writes the same fields to all selected files and clears on success,line=64,column=32::Error: expect(element).toBeEnabled()%0A%0AReceived element is not enabled:%0A  <button%0A  class="inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-50 disabled:cursor-not-allowed bg-brand text-brand-foreground hover:bg-brand-hover px-4 py-2 text-sm w-full"%0A  disabled=""%0A  type="button"%0A/>%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:64:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:125:5%0A%0A
+
+::error file=/tmp/a-r11-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (d) full success clears the form back to Multiple values,line=152,column=43::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:152:43%0A%0A
+
+::error file=/tmp/a-r11-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (e) single-file write failure keeps the typed value and shows the error,line=172,column=38::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:172:38%0A%0A

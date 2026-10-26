@@ -1,0 +1,60 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r11-M2[39m
+
+ [31m❯[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 917[2mms[22m[39m
+     [33m[2m✓[22m[39m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept [33m 377[2mms[22m[39m
+     [32m✓[39m (b) partial failure: edits are kept and succeeded files are refreshed in the store[32m 148[2mms[22m[39m
+[31m     [31m×[31m (c) retry after a failure writes the same fields to all selected files and clears on success[39m[32m 171[2mms[22m[39m
+[31m     [31m×[31m (d) full success clears the form back to Multiple values[39m[32m 85[2mms[22m[39m
+     [32m✓[39m (e) single-file write failure keeps the typed value and shows the error[32m 135[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(c) retry after a failure writes the same fields to all selected files and clears on success
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m143:49[22m[39m
+    [90m141| [39m    [34mexpectBatchWriteCall[39m([34m1[39m)[33m;[39m
+    [90m142| [39m    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved …
+    [90m143| [39m    [34mexpect[39m(useMetadataStore[33m.[39m[34mgetState[39m()[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                                                [31m^[39m
+    [90m144| [39m    [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m145| [39m    [34mexpect[39m([34mgetBatchSaveButton[39m())[33m.[39m[34mtoBeDisabled[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(d) full success clears the form back to Multiple values
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m163:27[22m[39m
+    [90m161| [39m    [34mexpect[39m(state[33m.[39mtoastMessage)[33m.[39m[34mtoBe[39m([32m"Tags saved to 2 files"[39m)[33m;[39m
+    [90m162| [39m    [34mexpect[39m(state[33m.[39mtoastType)[33m.[39m[34mtoBe[39m([32m"success"[39m)[33m;[39m
+    [90m163| [39m    [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m164| [39m    [34mexpect[39m(state[33m.[39mmodifiedFields[33m.[39msize)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m165| [39m    [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 19:44:49
+[2m   Duration [22m 1.90s[2m (transform 216ms, setup 76ms, import 338ms, tests 917ms, environment 454ms)[22m
+
+
+::error file=/tmp/c-r11-M2/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (c) retry after a failure writes the same fields to all selected files and clears on success,line=143,column=49::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:143:49%0A%0A
+
+::error file=/tmp/c-r11-M2/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (d) full success clears the form back to Multiple values,line=163,column=27::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:163:27%0A%0A

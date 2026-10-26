@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "round 11: TM-B15 failed batch save keeps the typed edits (D-21, C-R8-01)",
+  "current_task": "round 11 resumption (BLOCKED): TM-B15 scope item 4, .claude/primitives/STATE_MANAGEMENT.md Save flow (C-R11-01); needs user permission for .claude/** edits or user-applied patch",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -216,7 +216,7 @@
     },
     {
       "id": "D-21",
-      "status": "B, round 10 close (technical, reversible; matches the existing single-file failure behaviour); planned R11",
+      "status": "B, round 10 close (technical, reversible); implemented R11 and verified by C (R11-1..R11-7 PASS, real app); unpublished until R11-8 (.claude primitive) is done",
       "decision": "MetadataPanel batch save: after writeMetadataBatch returns, readMetadataBatch + updateFileMetadata run for all selected paths as today (succeeded files show their new values and Tagged badge). If result.failed.length === 0: setEditingMetadata({}) as today (form back to Multiple values, isDirty false). If result.failed.length > 0 (all failed or partial): editingMetadata and modifiedFields are kept and isDirty stays true, so the typed values stay in the form and Save to N files stays enabled; a retry writes the same modified fields to all selected files again (rewriting the succeeded files with the same values). Toast texts unchanged (`${succeeded} saved, ${failed} failed`, `Tags saved to ${succeeded} files`). A thrown writeMetadataBatch/readMetadataBatch keeps edits (unchanged). Selection change after a failed batch still discards with the existing \"Unsaved changes were discarded\" toast. Narrowing the selection to the failed files is NOT part of D-21 (would be a product decision). Renderer only; the K-4 tag contract is not touched"
     }
   ],
@@ -807,14 +807,15 @@
       "severity": "low",
       "source": "C-R8-01",
       "title": "A failed batch save (all failed or partial) discards the typed values: MetadataPanel handleSave calls setEditingMetadata({}) whatever writeMetadataBatch returned, so the form falls back to the Multiple values placeholders, isDirty becomes false and Save is disabled; the user must retype everything. The single-file path keeps edits on failure",
-      "status": "todo",
+      "status": "in_progress",
       "round": 11,
       "depends_on": [],
       "decisions": [
         "D-21"
       ],
       "findings": [
-        "C-R8-01"
+        "C-R8-01",
+        "C-R11-01"
       ],
       "acceptance": [
         "R11: renderer test on the real MetadataPanel + real stores (only window.api mocked) fails on 35ed18b and passes after: all-failed and partial batch keep the typed value in the input, isDirty true, modifiedFields kept, Save to 2 files enabled; a retry sends the same modified fields only",
@@ -825,8 +826,11 @@
       "evidence": [
         "C round 8 R8-5 (ii): c-round-8/r8-5-after-ii-before-save.png (Category BATCHCat, Bad y typed) -> r8-5-after-ii-toast.png (0 saved, 2 failed, every field back to Multiple values)",
         "B round 10 code read: MetadataPanel.tsx handleSave batch branch calls setEditingMetadata({}) unconditionally after writeMetadataBatch; metadata-store setEditingMetadata sets isDirty false and clears modifiedFields; Save is disabled when !isDirty",
-        "B round 10 experiment (/tmp/b-r10, b-round-10-exp-batch-save.test.ts.txt, HEAD 35ed18b): real MetadataPanel + stores, window.api mocked: all failed -> value \"\", isDirty false, modifiedFields [], toast \"0 saved, 2 failed\"; partial -> same with \"1 saved, 1 failed\"; success -> cleared, \"Tags saved to 2 files\"; writeMetadataBatch got {category: BATCHCat}"
-      ]
+        "B round 10 experiment (/tmp/b-r10, b-round-10-exp-batch-save.test.ts.txt, HEAD 35ed18b): real MetadataPanel + stores, window.api mocked: all failed -> value \"\", isDirty false, modifiedFields [], toast \"0 saved, 2 failed\"; partial -> same with \"1 saved, 1 failed\"; success -> cleared, \"Tags saved to 2 files\"; writeMetadataBatch got {category: BATCHCat}",
+        "C round 11 (c-round-11.md/.json, taskStatus BLOCKED, realVerified=true for R11-1..R11-7): R11-1 ownership OK, MetadataPanel.tsx diff +1/-2 in the batch branch only; R11-2 red on C's 35ed18b copy (a,b,c AssertionError expected '' to be 'BATCHCat'; d,e pass), tree 5/5; R11-3 M1 -> a/b/c fail, M2 -> c/d fail, M3 -> b fail, M4 (no vi.hoisted) -> 5/5 fail; R11-4 verifyCommand exit 0, renderer 112/112, main 62/62, E2E 7/7, --retries=0 7/7, Biome 9 warnings/0 errors; R11-5 real app chmod 444 p2 -> '1 saved, 1 failed', BATCHCat kept, Save enabled (r11-5-2-after-partial-fail.png), p1 ffprobe ICAT=BATCHCat + music-metadata agrees, p2 sha256 unchanged, retry -> 'Tags saved to 2 files', both ICAT=BATCHCat, both Tagged after Rescan; R11-6 all failed (AB field) -> both values kept, sha256 unchanged, row click -> 'Unsaved changes were discarded'; R11-7 (i)-(iv) regressions PASS; R11-8 data-flow.md PASS, STATE_MANAGEMENT.md NOT changed (harness sensitive-file guard refused A's Edit; a-round-11/state-management.patch, git apply --check OK)"
+      ],
+      "realVerified": false,
+      "note": "B R11 close: code, test and data-flow.md verified by C (R11-1..R11-7 PASS, real app + ffprobe + music-metadata). Scope item 4 (.claude/primitives/STATE_MANAGEMENT.md Save flow) not done: harness sensitive-file guard on .claude/** (new since round 3, whose WAV_METADATA.md edit had no denial). Work is uncommitted in the tree on 35ed18b (MetadataPanel.tsx, docs/learning/data-flow.md, new test; hashes c-round-11/end-hash.txt). Gate round 11 skipped, nothing published. Needs the user: apply a-round-11/state-management.patch or allow .claude/** edits for A"
     }
   ],
   "findings": [
@@ -1432,7 +1436,7 @@
       "status": "in_progress",
       "round": 8,
       "title": "After a failed batch save (0 saved, 2 failed) the panel shows the 'Multiple values' placeholder on both files (c-round-8/r8-5-after-ii-toast.png); renderer behaviour not examined, may or may not be a bug",
-      "routed_to": "TM-B15 round 11 (D-21). Reproduced: C R8 screenshots + B R10 renderer experiment"
+      "routed_to": "TM-B15 (D-21). Fixed in the working tree on 35ed18b, verified by C R11 (R11-2/R11-5/R11-6); unpublished, closes when round 11 is published"
     },
     {
       "id": "RR-R9-01",
@@ -1561,6 +1565,42 @@
       "status": "open",
       "title": "Un-delayed E2E Playwright 3.2 s vs R9 2.5 s (Build+E2E step 7.7 s vs 5.9 s); cause not established (machine variance or helper overhead); judged about where it was",
       "routed_to": "signal; re-measure in later replays"
+    },
+    {
+      "round": 11,
+      "id": "C-R11-01",
+      "source": "C",
+      "severity": "low",
+      "status": "open",
+      "title": ".claude/primitives/STATE_MANAGEMENT.md ### Save flow still says batch always calls setEditingMetadata({}); stale vs D-21 (scope item 4 not done; harness sensitive-file guard refused A's Edit). Patch a-round-11/state-management.patch, git apply --check OK",
+      "routed_to": "TM-B15 round 11 resumption; needs user permission or user-applied patch (BLOCKED)"
+    },
+    {
+      "round": 11,
+      "id": "A-R11-01",
+      "source": "A (code-reviewer)",
+      "severity": "low",
+      "status": "open",
+      "title": "Batch refresh: a file whose write AND re-read both fail gets emptyMetadata in the store (src/main/ipc/metadata.ts ~241 readMetadataBatch fallback); its Tagged badge can vanish although nothing on disk changed. Not verified by C (main frozen in R11)",
+      "routed_to": "signal; candidate bug, needs a B/C reproduction before a task"
+    },
+    {
+      "round": 11,
+      "id": "A-R11-02",
+      "source": "A (code-reviewer) + C",
+      "severity": "low",
+      "status": "open",
+      "title": "docs/learning/data-flow.md pre-existing inaccuracies: :115 diagram says writeMetadataBatch(paths, editingMetadata) but code sends batchMeta (modified fields only); :140 says 'filled fields' where 'modified fields' is accurate",
+      "routed_to": "signal; small docs round"
+    },
+    {
+      "round": 11,
+      "id": "B-R11-01",
+      "source": "B",
+      "severity": "info",
+      "status": "open",
+      "title": "Environment: the agent harness now refuses Edit on .claude/** as a sensitive file (A R11 permission_denials), while round 3 edited .claude/primitives/WAV_METADATA.md with no denial. .claude/settings.local.json allow entries are ignored (workspace not trusted, agent-stderr.log) and none covers .claude/** anyway. Every planned .claude/** change (C-R1-03 TESTING.md, primitives sync) is blocked until the user allows it",
+      "routed_to": "user decision (BLOCKED reason of round 11)"
     }
   ],
   "rounds": [
@@ -1775,13 +1815,31 @@
     {
       "round": 11,
       "task": "TM-B15 failed batch save keeps the typed edits (D-21, C-R8-01)",
-      "status": "planned",
+      "status": "blocked",
       "baseline": "35ed18b9211f0da3d7c23e10af5b431d6f33540f",
       "items": [
         "TM-B15"
       ],
       "findings": [
-        "C-R8-01"
+        "C-R8-01",
+        "C-R11-01",
+        "A-R11-01",
+        "A-R11-02",
+        "B-R11-01"
+      ],
+      "c_result": "BLOCKED, realVerified=true for R11-1..R11-7 (all PASS); R11-8 partial: data-flow.md PASS, .claude/primitives/STATE_MANAGEMENT.md unchanged (harness guard). gate-round-11 skipped (C BLOCKED); nothing published; work uncommitted in the tree on 35ed18b"
+    },
+    {
+      "round": 12,
+      "task": "Resume round 11: TM-B15 scope item 4 only (.claude/primitives/STATE_MANAGEMENT.md Save flow, C-R11-01) after the user unblocks .claude/** edits; then C re-checks R11-8 + ownership + gate (blocked on the user: patch apply without commit, or .claude/** edit permission)",
+      "status": "blocked",
+      "baseline": "35ed18b9211f0da3d7c23e10af5b431d6f33540f + round-11 working tree (c-round-11/end-hash.txt)",
+      "items": [
+        "TM-B15"
+      ],
+      "findings": [
+        "C-R11-01",
+        "B-R11-01"
       ]
     }
   ]

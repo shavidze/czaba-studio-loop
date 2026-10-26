@@ -1,0 +1,12 @@
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -20,7 +20,8 @@
+ ### Save flow
+ ```
+ Single:  writeMetadata → readMetadata → skipSync=true → updateFileMetadata → setEditingMetadata
+-Batch:   writeMetadataBatch(modifiedFields only) → readBatch → skipSync=true → updateAll → setEditingMetadata({})
++Batch:   writeMetadataBatch(modifiedFields only) → readBatch → skipSync=true → updateAll → failed empty ? setEditingMetadata({}) : keep edits
++Batch failed non-empty (D-21): editingMetadata, modifiedFields, isDirty kept → Save stays enabled, retry writes to all selected files
+ ```
+ 
+ ### Template apply (batch-safe)

@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-26T19:22:45.359Z)
+# Active loop summary (2026-10-26T19:49:06.268Z)
 
-- backlog.json 86 KB -> active view 33 KB
-- status: G_ROOT_GATE round 10
+- backlog.json 96 KB -> active view 41 KB
+- status: G_ROOT_GATE round 11
 - servers: `{"servers":"none or skipped"}`
 - last publication: 35ed18b9211f0da3d7c23e10af5b431d6f33540f (rounds 10-10)
-- last root gate: round 10 published - commit 35ed18b9211f0da3d7c23e10af5b431d6f33540f pushed
+- last root gate: round 11 skipped - C taskStatus BLOCKED
 
-## Current items: TM-T0, TM-T0-CI, TM-T0-CI-FU, TM-B14
+## Current items: TM-T0, TM-T0-CI, TM-T1, TM-T1-DUP, TM-B08, TM-T2, TM-T2-DATA, TM-B05, TM-B06, TM-B11, TM-B14, TM-B15
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -50,24 +50,23 @@
 - RR-R8-04 / info / open / Architecture signal: validate schema at load in main (riffChunkId /^[A-Z0-9 ]{4}$/, not reserved, not duplicated); reject or flag once; keep
 - A-R8-01 / info / open / docs/recording-tag-contract.md header (line 5) and '## შემოწმება' do not mention D-17/D-18 or metadata-write-field-errors.test.ts (task said
 - A-R8-02 / low / open / node-taglib-sharp checks riffChunkId by JS string length (id.length !== 4), not bytes: a 4-character non-ASCII ID does not trigger D-18; doc
-- C-R8-01 / low / open / After a failed batch save (0 saved, 2 failed) the panel shows the 'Multiple values' placeholder on both files (c-round-8/r8-5-after-ii-toast
-- RR-R9-01 / low / in_progress / check.yml:26 apt step 13 min + install-deps 10 min = 23 of the job 30 min before check/E2E; raise job timeout-minutes (~40) or lower APT_ATT
-- RR-R9-02 / low / in_progress / docs/ci-cd.md:239 sentence naming Actions run 40331357825 (apt 19 s) is a one-off fact that goes stale and cannot be checked from the repo
+- C-R8-01 / low / in_progress / After a failed batch save (0 saved, 2 failed) the panel shows the 'Multiple values' placeholder on both files (c-round-8/r8-5-after-ii-toast
 - RR-R9-03 / low / open / apt-install.sh has no automated test for knob validation (exit 2) and the worst-case line (640 s); optional script test with fake sudo/apt-g
 - RR-R9-04 / info / open / Architecture signal: worst_case_seconds and check.yml timeout-minutes are kept in sync by hand; a --print-worst-case flag or CI check compar
 - A-R9-01 / low / open / apt-install.sh knob validation accepts arbitrarily large integers; bash arithmetic overflow in worst_case_seconds possible; suggestion ^[1-9
 - C-R9-01 / info / open / hang-ignore-term cases: bash prints 'line 32: <pid> Killed sudo env ... timeout ...' to stderr on every KILL; CI log noise only, stdout line
 - C-R9-02 / low / in_progress / cold-start electronApplication.firstWindow Timeout 30000ms (A R9 run1, folder-workflow.spec.ts:27); with --retries=0 a single cold-runner oc
+- RR-R10-01 / low / open / tests/e2e/electron-launch.ts:253 wrapped Error drops the original stack; use new Error(msg, { cause: error })
+- RR-R10-02 / low / open / tests/e2e/electron-launch.ts:222 a TimeoutError from electron.launch itself (no window yet) is reported as "first window did not appear"; tr
+- RR-R10-03 / low / open / tests/e2e/electron-launch.ts:242 main-process output captured only after electron.launch returns; early crash output is not in the tail (doc
+- RR-R10-04 / low / open / tests/e2e/electron-launch.ts:207 SIGKILL fallback does not wait for the exit event
+- RR-R10-05 / info / open / Architecture signal: the three specs repeat the same beforeAll/afterAll; a Playwright worker-scoped fixture (test.extend<{}, { tagManager: L
+- A-R10-01 / info / open / Untested launch failure paths in launchTagManagerApp: electron.launch own 60 s timeout (app undefined, empty tail), domcontentloaded 15 s me
+- C-R10-01 / info / open / Un-delayed E2E Playwright 3.2 s vs R9 2.5 s (Build+E2E step 7.7 s vs 5.9 s); cause not established (machine variance or helper overhead); ju
 
 ## Other open items
 - TM-T1-MIG [todo] Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no aut
-- TM-T1-DUP [todo] Old schema.json custom field colliding with standard category: (a) custom field already using RIFF ID ICAT; (b) custom field with key 'categ
-- TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
-- TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
-- TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba
-- TM-B05 [todo] A WAV whose data chunk is empty cannot be tagged (node-taglib-sharp 6.0.1 boundary bug) and read silently returns empty metadata
-- TM-B06 [todo] Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database
 - OOS-03 [out_of_scope] New npm dependencies
-- TM-B11 [todo] With a custom Number field in the schema (e.g. Take/ITKN), every single-file save writes the default 0 as INFO '0' (size 1) into files that 
+- TM-T0-CI-FU [in_progress] CI follow-up: apt-install.sh worst-case budget (C-R4-01/RR-R4-02: smaller dpkg recovery bound or step timeout >= 13 min) + Georgian docs not
