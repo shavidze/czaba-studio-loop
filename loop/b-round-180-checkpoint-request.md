@@ -32,3 +32,5 @@
 - **Fallback (c) continues.** Recipes stay per component, locked by tests. M1 (round 181), the REGRESSION round (due on/after 2026-10-27), M3 and M4 go ahead.
 - **ROOT-RECON-GRID-HARNESS** stays at the end of VISUAL-A, with Q2 offered as an optional extension.
 - **No self-scheduling.** B does not schedule an extraction on its own. A root-approved change becomes a separate B task with one owner and behaviour-preserving tests.
+
+- **Round 182 planning (2026-10-26, D-29z147):** still unanswered; not re-requested; non-blocking, fallback (c). A round-181 Architecture note: none. M3 (round 182) adds no new harness copy (one test in the existing library-row-strings-ui suite).
