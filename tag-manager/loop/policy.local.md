@@ -34,3 +34,4 @@
   - give the step its own `timeout-minutes` (for example 8) and retry it once;
   - keep the job timeout as a backstop.
 - Root can read the Actions status of `TCzaba/czaba-tag-manager` and will record the green run that closes TM-T0-CI. A, C and B cannot see Actions from the runner: C proves the workflow locally (same commands, same order) and lists the step timings it measured.
+- **Update (root, 2026-10-26 13:45 UTC):** the next `Check` run is green: run `40331357825` on `c768567`, every step `success` in 1 min 24 s (apt step 19 s, lint/types/unit 16 s, build 4 s, E2E 8 s). This is the green run that TM-T0-CI asked root to link. The earlier hang was intermittent. The apt hardening above stays a small follow-up and does not block TM-T1.
