@@ -1,0 +1,27 @@
+# C — Round 10 ვერიფიკაცია (TM-B14 / D-20, C-R9-02, RR-R9-01, RR-R9-02)
+
+**Verdict: PASS** · realVerified=true (ყველა ლოკალური real check გაშვებულია) · bugs: 0
+HEAD `499a6f3`, working tree-ში მხოლოდ 6 owned ფაილი ` M`. Source ჩემი ფაზის დასაწყისში და ბოლოს იდენტურია (`c-round-10/start-hash.txt` = `end-hash.txt`).
+Injector C-ისაა: `c-round-10/delay-window.cjs` (`app.whenReady` + `setTimeout(C_WINDOW_DELAY_MS)`, `C_INJECTOR_LOG`-ში წერს `loaded`/`released`, რომ დადასტურდეს, რომ delay მართლა მოქმედებდა). Mutation-ები `/tmp/c-r10-*` copy-ებში გავუშვი (`node_modules` symlink), შემდეგ წავშალე.
+
+| ID | შედეგი | მტკიცებულება |
+|---|---|---|
+| R10-1 | PASS | `r10-1-static.log`: frozen `git diff --quiet` rc 0; `playwright.config.ts` byte-identical; `grep firstWindow tests/e2e/*.spec.ts` ცარიელი; comment-ხაზები ცარიელი; `tsc -p tsconfig.test.json` rc 0; js-yaml `jobs.check.timeout-minutes = 40`; check.yml diff მხოლოდ `30 → 40` job-level. |
+| R10-2 | PASS | `r10-2-red-old.log`: `git archive 499a6f3`, მხოლოდ `getElectronLaunchArgs`-ში `-r <C injector>`, delay 40000 → rc 1, **7/7 failed**, სამივე spec ფაილში `TimeoutError: electronApplication.firstWindow: Timeout 30000ms exceeded`; wall 129 s. C-R9-02-ის signature რეპროდუცირდა. |
+| R10-3 | PASS | `r10-3-green-{1,2}.log`: repo tree, `TAG_MANAGER_E2E_ELECTRON_REQUIRE=<C injector>`, delay 40000 → ორჯერვე rc 0, 7/7, retry ხაზი 0; wall 84 s / 85 s (Playwright 1.4m). Injector log-ში ყოველ launch-ზე `released` ~40.2 s-ის შემდეგ (delay ნამდვილად მოქმედებდა). |
+| R10-4 (a) | PASS | `r10-4a-over.log`: delay 75000 → rc 1, 3 failed + 4 did not run; სამივე spec `beforeAll`-ში: `first window did not appear within 60000 ms (elapsed 60031/60034/60035 ms)` + main process output tail; run თვითონ დასრულდა (wall 124 s, 2 worker, თითო spec ≈ 60 s < 90 s). შემდეგ `ps -eo comm` electron = 0, `out/main/index.js` process არ არის, `/tmp/czaba-e2e*` temp dir-ები არ დარჩა. |
+| R10-4 (b) | PASS (caught) | `r10-4b-mutation.log`: `folder-workflow.spec.ts`-დან `test.setTimeout(LAUNCH_HOOK_TIMEOUT_MS)` წაშლილი, delay 40000 → `"beforeAll" hook timeout of 30000ms exceeded.`; დანარჩენი 5 გაიარა. |
+| R10-4 (c) | PASS (caught) | `r10-4c-mutation.log`: wait დაბრუნდა test body-ში (`app.firstWindow({ timeout: 60000 })` პირველ ტესტში, `beforeAll`-ში მხოლოდ `electron.launch`) → `Test timeout of 30000ms exceeded.`; სხვა spec-ები გაიარა. |
+| R10-5 | PASS | `r10-5-contract.log` (`npx --yes tsx@4`): `env -u` → `["--no-sandbox","/entry.js"]`; ცარიელი → იგივე; relative → `TAG_MANAGER_E2E_ELECTRON_REQUIRE must be an absolute path…` (`getElectronLaunchArgs` და `launchTagManagerApp` ორივე ისვრის, electron process 0); missing absolute → `…must point to an existing file…` (electron 0); directory → ისვრის; existing → `["--no-sandbox","-r",<file>,"/entry.js"]`. D-06: non-linux branch `[...requireArgs, mainEntryPath]` — მხოლოდ კოდის წაკითხვით. |
+| R10-6 | PASS | `r10-6-verify.log`: clean state, სრული verifyCommand rc 0 (wall 23 s); Biome 0 error / 9 warning; typecheck node/web/test 0; renderer **107/107**, main **62/62**, E2E **7/7** (3.2 s). `r10-6-retries0-{1,2,3}.log`: `--retries=0` 7/7 ×3 (3.2/3.2/3.3 s). `r10-6-replay.log` (`ci-replay.cjs`, js-yaml step order, `bash --noprofile --norc -eo pipefail`, `CI=true`, `npm ci` და `if: failure()` upload გამოტოვებული, clean state): apt 4.0 s, install-deps 2.9 s, check 14.3 s, ffprobe cross-check 1.1 s (E2E-მდე, passed), Build+E2E 7.7 s (Playwright 3.2 s); `playwright-report/index.html` არსებობს. |
+| R10-7 | PASS | `r10-7-drive.log`, `r10-7-result.json`, `r10-7-{1..4}-*.png`: built app, `_electron`, `xvfb-run -a`, `--no-sandbox`, clean `XDG_CONFIG_HOME`, dialog stub. Open Folder → row → Category `DOORWood` → Save → toast `Tags saved` → Rescan → row `Tagged`. ffprobe `format_tags`: `ICAT=DOORWood` (+ `IKEY=""`, ცნობილი C-R1-01); music-metadata `exif` ICAT=`DOORWood` — ემთხვევა. |
+| R10-8 | PASS | `r10-8-docs.diff`: ქართული; ხაზი 186 `timeout-minutes: 40` + მიზეზი (13 + 10 = 23 წთ); `grep -n 40331357825 docs/ci-cd.md` ცარიელი, აბზაცის დანარჩენი უცვლელი; `### E2E launch budget` `## Check workflow`-ში: beforeAll/helper (60000 total, 90000 hook, 30000 test body), რატომ არა retries (`--retries=0`), timeout-ის error ტექსტი, `TAG_MANAGER_E2E_ELECTRON_REQUIRE` (test-only, absolute, `-r` entry-ს წინ, CI-ში unset) + 3-ხაზიანი delay module. რიცხვები ემთხვევა კოდს და check.yml-ს. Release სექციები (ხაზები 1–178) diff-ში არ ჩანს. |
+
+## დაკვირვებები (არა bug)
+- **D-20-დან გადახრა, B-მ უნდა დაადასტუროს:** A-მ დაამატა `DOM_CONTENT_LOADED_TIMEOUT_MS = 15000` (non-exported) და კიდევ ორი error ვარიანტი (`first window appeared but domcontentloaded…`, `first window failed before 60000 ms: …`). ტაიმაუტის შემთხვევაში მოთხოვნილი ტექსტი ზუსტად ის არის, რაც task-შია. Worst case 60 + 15 + 10 = 85 s < 90 s — კოდით სწორია; ეს ორი დამატებითი path (და `SIGKILL` fallback, `electron.launch`-ის საკუთარი timeout) ჩემი run-ებით **არ** შემოწმებულა, რადგან acceptance-ში არ არის.
+- Un-delayed E2E: Playwright 3.2 s (R9 C replay: 2.5 s), Build+E2E step 7.7 s (R9: 5.9 s). ~0.7 s სხვაობა, A-ს 3.1 s-ის მსგავსი; "about where it was"-ის ფარგლებში მივიჩნიე. მიზეზი არ დამიდგენია (machine variance ან helper-ის overhead).
+- A-ს Step 0 cold sample (7/7, 408/444 ms) მონაცემია და არაფერს ამტკიცებს.
+
+## რას არ ვაცხადებ
+- Cold GitHub runner-ზე მწვანე `Check` run — TM-T0-CI-ის საქმე, root-მა უნდა მიაბას.
+- Windows/macOS-ზე `--no-sandbox`-ის არარსებობა — მხოლოდ კოდის წაკითხვით.

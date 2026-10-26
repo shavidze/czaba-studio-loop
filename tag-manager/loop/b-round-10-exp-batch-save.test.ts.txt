@@ -1,0 +1,44 @@
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createElement } from "react";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+import { useFileStore } from "~/stores/file-store";
+import { useMetadataStore } from "~/stores/metadata-store";
+import { resetAllStores } from "../helpers/reset-stores";
+
+vi.hoisted(() => {
+  const g = globalThis as unknown as { window: { api: unknown }; api: unknown };
+  const mockApi = g.window.api;
+  g.window = globalThis as unknown as { api: unknown };
+  g.api = mockApi;
+});
+
+beforeEach(() => resetAllStores());
+afterEach(() => { cleanup(); resetAllStores(); });
+
+function categoryInput(): HTMLInputElement {
+  const label = screen.getByText("Category (UCS)");
+  const input = label.parentElement?.querySelector("input");
+  if (!input) throw new Error("no input");
+  return input;
+}
+
+it.each([
+  ["all failed", { succeeded: 0, failed: [{ path: "/a.wav", error: "x" }, { path: "/b.wav", error: "x" }] }],
+  ["partial", { succeeded: 1, failed: [{ path: "/b.wav", error: "x" }] }],
+  ["success", { succeeded: 2, failed: [] }],
+])("batch %s", async (_l, result) => {
+  const files = [
+    { path: "/a.wav", name: "a.wav", size: 1, modifiedAt: 0 },
+    { path: "/b.wav", name: "b.wav", size: 1, modifiedAt: 0 },
+  ];
+  useFileStore.setState({ files: files as never, selectedPaths: ["/a.wav", "/b.wav"], metadata: { "/a.wav": {}, "/b.wav": {} } as never });
+  vi.mocked(window.api.writeMetadataBatch).mockResolvedValue(result);
+  vi.mocked(window.api.readMetadataBatch).mockResolvedValue({ "/a.wav": {}, "/b.wav": {} } as never);
+  render(createElement(MetadataPanel));
+  fireEvent.change(categoryInput(), { target: { value: "BATCHCat" } });
+  expect(categoryInput().value).toBe("BATCHCat");
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: /Save to 2 files/ })); });
+  const s = useMetadataStore.getState();
+  console.log(_l, "value=", JSON.stringify(categoryInput().value), "dirty=", s.isDirty, "modified=", [...s.modifiedFields], "toast=", s.toastMessage, "writeArg=", JSON.stringify(vi.mocked(window.api.writeMetadataBatch).mock.calls.at(-1)?.[1]));
+});

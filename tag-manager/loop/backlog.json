@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "round 10: TM-B14 E2E first-window budget in a shared launch helper (D-20) + check.yml job timeout 40 (RR-R9-01) + stale run-id sentence (RR-R9-02)",
+  "current_task": "round 11: TM-B15 failed batch save keeps the typed edits (D-21, C-R8-01)",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -93,7 +93,16 @@
     },
     {
       "from_round": 9,
-      "rule": "Electron main ignores NODE_OPTIONS --require; '-r <absolute file>' placed before the entry path in electron.launch args runs the module first (B experiment /tmp/b-r9). playwright.config.ts retries: 1 masks first-attempt E2E failures in verifyCommand; check.yml runs --retries=0"
+      "rule": "Electron main ignores NODE_OPTIONS --require; '-r <absolute file>' placed before the entry path in electron.launch args runs the module first (B experiment /tmp/b-r9). playwright.config.ts retries: 1 masks first-attempt E2E failures in verifyCommand; check.yml runs --retries=0",
+      "correction": "round 10 (A, confirmed in code): the NODE_OPTIONS effect is caused by Playwright, not Electron: playwright-core/lib/server/electron/electron.js:164 deletes env.NODE_OPTIONS before spawning. The -r-before-entry mechanism stays valid (C R10-2/R10-3)."
+    },
+    {
+      "from_round": 10,
+      "rule": "Playwright _electron.launch deletes env.NODE_OPTIONS (playwright-core/lib/server/electron/electron.js:164); use TAG_MANAGER_E2E_ELECTRON_REQUIRE (-r before the entry, D-20) to inject a module into Electron main in E2E."
+    },
+    {
+      "from_round": 10,
+      "rule": "Renderer component tests that render MetadataPanel need the vi.hoisted window workaround from tests/renderer/components/schema-editor.test.ts (A-R3-01; tests/renderer/setup.ts is frozen). Without it, B experiment /tmp/b-r10 (b-round-10-exp-nohoist.test.ts.txt): the input shows the typed value but no store update, no IPC call and no toast happen, and the test passes falsely green."
     }
   ],
   "decisions": [
@@ -201,8 +210,14 @@
     },
     {
       "id": "D-20",
-      "status": "B, round 9 close (technical, reversible); planned R10",
-      "decision": "E2E launch: one helper launchTagManagerApp() in tests/e2e/electron-launch.ts does electron.launch + firstWindow({timeout: FIRST_WINDOW_TIMEOUT_MS=60000}) + waitForLoadState('domcontentloaded') and returns {app, page}; every spec calls it from beforeAll with the hook timeout raised to LAUNCH_HOOK_TIMEOUT_MS=90000 (test.setTimeout inside the hook), so a slow first window no longer hits the 30 s per-test timeout. On first-window timeout the helper throws an Error naming the budget and elapsed ms and including the captured main-process stdout/stderr tail. Retries are not the fix (TM-T0 acceptance is --retries=0); playwright.config.ts stays unchanged. Test-only opt-in env TAG_MANAGER_E2E_ELECTRON_REQUIRE=<absolute path>: getElectronLaunchArgs puts '-r <path>' before the entry path (lets C inject a delayed window); unset = args unchanged (D-06 --no-sandbox Linux only kept). check.yml job timeout-minutes 30 -> 40 (RR-R9-01)"
+      "status": "done R10 (35ed18b, TM-B14; C R10-1..R10-8). B, round 10 close: deviations accepted",
+      "decision": "E2E launch: one helper launchTagManagerApp() in tests/e2e/electron-launch.ts does electron.launch + firstWindow({timeout: FIRST_WINDOW_TIMEOUT_MS=60000}) + waitForLoadState('domcontentloaded') and returns {app, page}; every spec calls it from beforeAll with the hook timeout raised to LAUNCH_HOOK_TIMEOUT_MS=90000 (test.setTimeout inside the hook), so a slow first window no longer hits the 30 s per-test timeout. On first-window timeout the helper throws an Error naming the budget and elapsed ms and including the captured main-process stdout/stderr tail. Retries are not the fix (TM-T0 acceptance is --retries=0); playwright.config.ts stays unchanged. Test-only opt-in env TAG_MANAGER_E2E_ELECTRON_REQUIRE=<absolute path>: getElectronLaunchArgs puts '-r <path>' before the entry path (lets C inject a delayed window); unset = args unchanged (D-06 --no-sandbox Linux only kept). check.yml job timeout-minutes 30 -> 40 (RR-R9-01)",
+      "amendment": "R10 (accepted by B at round 10 close; root review confirmed 60+15+10=85 s < 90 s): waitForLoadState(domcontentloaded) bounded by non-exported DOM_CONTENT_LOADED_TIMEOUT_MS=15000; a failed launch is closed with a 10 s close race then SIGKILL; three error texts: first-window timeout \"first window did not appear within 60000 ms (elapsed N ms)\" + output tail (the required text, C R10-4a), \"first window appeared but domcontentloaded did not finish within 15000 ms: ...\", \"first window failed before 60000 ms: ...\". The last two paths, the electron.launch own timeout and the SIGKILL fallback are not exercised by any run (A-R10-01)."
+    },
+    {
+      "id": "D-21",
+      "status": "B, round 10 close (technical, reversible; matches the existing single-file failure behaviour); planned R11",
+      "decision": "MetadataPanel batch save: after writeMetadataBatch returns, readMetadataBatch + updateFileMetadata run for all selected paths as today (succeeded files show their new values and Tagged badge). If result.failed.length === 0: setEditingMetadata({}) as today (form back to Multiple values, isDirty false). If result.failed.length > 0 (all failed or partial): editingMetadata and modifiedFields are kept and isDirty stays true, so the typed values stay in the form and Save to N files stays enabled; a retry writes the same modified fields to all selected files again (rewriting the succeeded files with the same values). Toast texts unchanged (`${succeeded} saved, ${failed} failed`, `Tags saved to ${succeeded} files`). A thrown writeMetadataBatch/readMetadataBatch keeps edits (unchanged). Selection change after a failed batch still discards with the existing \"Unsaved changes were discarded\" toast. Narrowing the selection to the failed files is NOT part of D-21 (would be a product decision). Renderer only; the K-4 tag contract is not touched"
     }
   ],
   "items": [
@@ -305,7 +320,7 @@
       ],
       "realVerified": false,
       "last_round_commit": "7879ee03fce194ec9ccbd544ba862cad9e80e42c",
-      "note": "B R9 close: still no root note on an Actions run of 7879ee0..499a6f3; stays in_progress. A green Check run on 499a6f3 or later closes TM-T0-CI, TM-T0 and the Actions part of TM-T0-CI-FU. Round 10 (TM-B14) targets the cold-start E2E failure mode that could make that run red"
+      "note": "B R10 close: still no root note on an Actions run of 7879ee0..35ed18b (gate-round-10.json has none); stays in_progress. A green Check run on 499a6f3 or later closes TM-T0-CI, TM-T0 and the Actions part of TM-T0-CI-FU; on 35ed18b or later it also closes the Actions part of TM-B14"
     },
     {
       "id": "TM-T0-DOC",
@@ -635,7 +650,7 @@
         "C round 4 C-R4-01; root review round 4 Low 2 and Low 5",
         "C round 9 PASS (c-round-9.md/.json, realVerified=true for local checks), published 499a6f3: R9-1 static (bash -n, shellcheck 0, only shebang #, YAML diff exact), R9-2 shim cases a-h + mutation (d wall 14.03 s = W, h N=3 21.03 s = W, 12 bad-knob cases rc 2 with 0 system calls), R9-3 640 < 780, R9-4 real sudo/apt rc 0 'attempt 1/2 ok after 2s', debconf man-db/auto-update true -> false, R9-5 CI-order replay x3 all steps exit 0 (apt 1.5 s, install-deps 2.2 s, check 10.6 s, ffprobe 0.8 s, Build and E2E 5.9 s), R9-6 gate 107/62/7, R9-7 real-app DOORWood -> ffprobe + music-metadata ICAT, R9-8 ownership. Local acceptance lines 1-3 have real evidence; line 4 (Actions) realVerified=false"
       ],
-      "note": "B R9 close: local acceptance done (C R9 PASS). Stays in_progress only for 'real: the hardened step seen green on Actions' which rides on TM-T0-CI (root links a Check run on 499a6f3 or later)",
+      "note": "B R10 close: unchanged. Stays in_progress only for \"real: the hardened step seen green on Actions\" (rides on TM-T0-CI)",
       "round": 9,
       "decisions": [
         "D-19"
@@ -758,7 +773,7 @@
       "severity": "low",
       "source": "C-R9-02",
       "title": "E2E cold start: first Electron window can take > 30 s on a cold runner; firstWindow sits inside the test body so the 30 s per-test timeout fails the run with --retries=0 (check.yml), while local verifyCommand masks it with playwright.config retries: 1",
-      "status": "todo",
+      "status": "in_progress",
       "round": 10,
       "depends_on": [],
       "decisions": [
@@ -778,9 +793,40 @@
       ],
       "evidence": [
         "A R9 ci-replay-run1.log (first Electron launch of the job, cold, 2 workers): folder-workflow.spec.ts:27 firstWindow Timeout 30000ms + Test timeout 30000ms; test 7 in the same file and app passed 227 ms later (window appeared late, not never). Not reproduced warm (C x3, B x4 ~0.7 s) nor after drop_caches (B x3, worst 2.7 s). Cause unknown (hypothesis: first-launch cache builds)",
-        "B R9 experiment /tmp/b-r9: '-r <file>' before the entry in electron.launch args runs a module that delays app.whenReady -> firstWindow at 5.46 s with a 5 s delay; a 2 s firstWindow timeout fails with 0 windows; NODE_OPTIONS --require is ignored by Electron main"
+        "B R9 experiment /tmp/b-r9: '-r <file>' before the entry in electron.launch args runs a module that delays app.whenReady -> firstWindow at 5.46 s with a 5 s delay; a 2 s firstWindow timeout fails with 0 windows; NODE_OPTIONS --require is ignored by Electron main",
+        "C round 10 PASS (c-round-10.md/.json, realVerified=true for local checks), published 35ed18b: R10-1 static/ownership (no firstWindow in specs, playwright.config.ts identical, check.yml diff only job timeout 30->40, tsc test 0); R10-2 red on 499a6f3 copy with C injector delay 40 s -> 7/7 failed, firstWindow Timeout 30000ms in all 3 spec files; R10-3 green with launchTagManagerApp + same delay x2 -> 7/7 rc 0, no retries, injector log released ~40.2 s; R10-4 (a) delay 75 s -> each spec fails in beforeAll with \"first window did not appear within 60000 ms (elapsed 60031/60034/60035 ms)\" + output tail, 0 electron processes, no temp dirs left; (b) setTimeout removed -> beforeAll hook timeout 30000ms; (c) wait back in test body -> Test timeout 30000ms; R10-5 injector contract (unset/empty -> [--no-sandbox, entry]; relative/missing/dir -> throws naming TAG_MANAGER_E2E_ELECTRON_REQUIRE, no electron; file -> [--no-sandbox, -r, file, entry]); R10-6 verifyCommand 107/62/7, --retries=0 x3, CI-order replay all steps exit 0; R10-7 real app DOORWood -> ffprobe + music-metadata ICAT; R10-8 docs",
+        "A round 10 Step 0 cold sample (first Electron launch of the job): 7/7 --retries=0, first tests 408/444 ms; C-R9-02 not reproduced (data only)"
       ],
-      "note": "Baseline is the round-9 check.yml (499a6f3, TM-T0-CI-FU local part done). Not blocked by the Actions part of TM-T0-CI-FU; its own Actions line rides on TM-T0-CI"
+      "note": "B R10 close: local acceptance lines 1-4 done (C R10 PASS). Stays in_progress only for \"real: a cold-runner Check run green on Actions\" (rides on TM-T0-CI; root links a Check run on 35ed18b or later). D-20 deviations accepted (decisions D-20 amendment)",
+      "realVerified": false,
+      "last_round_commit": "35ed18b9211f0da3d7c23e10af5b431d6f33540f"
+    },
+    {
+      "id": "TM-B15",
+      "type": "bug",
+      "severity": "low",
+      "source": "C-R8-01",
+      "title": "A failed batch save (all failed or partial) discards the typed values: MetadataPanel handleSave calls setEditingMetadata({}) whatever writeMetadataBatch returned, so the form falls back to the Multiple values placeholders, isDirty becomes false and Save is disabled; the user must retype everything. The single-file path keeps edits on failure",
+      "status": "todo",
+      "round": 11,
+      "depends_on": [],
+      "decisions": [
+        "D-21"
+      ],
+      "findings": [
+        "C-R8-01"
+      ],
+      "acceptance": [
+        "R11: renderer test on the real MetadataPanel + real stores (only window.api mocked) fails on 35ed18b and passes after: all-failed and partial batch keep the typed value in the input, isDirty true, modifiedFields kept, Save to 2 files enabled; a retry sends the same modified fields only",
+        "success pin: a fully successful batch still clears the form (Multiple values, isDirty false); single-file failure still keeps edits",
+        "real app (C, _electron + xvfb): 2 files, one made read-only -> toast 1 saved, 1 failed, typed Category still in the input, Save enabled; ffprobe + music-metadata: writable file ICAT = value, read-only file sha256 unchanged; chmod back, Save again -> Tags saved to 2 files, both files ICAT = value in ffprobe + music-metadata, form cleared, both rows Tagged after Rescan",
+        "gate: verifyCommand green, renderer 107 + new tests, main 62, E2E 7/7"
+      ],
+      "evidence": [
+        "C round 8 R8-5 (ii): c-round-8/r8-5-after-ii-before-save.png (Category BATCHCat, Bad y typed) -> r8-5-after-ii-toast.png (0 saved, 2 failed, every field back to Multiple values)",
+        "B round 10 code read: MetadataPanel.tsx handleSave batch branch calls setEditingMetadata({}) unconditionally after writeMetadataBatch; metadata-store setEditingMetadata sets isDirty false and clears modifiedFields; Save is disabled when !isDirty",
+        "B round 10 experiment (/tmp/b-r10, b-round-10-exp-batch-save.test.ts.txt, HEAD 35ed18b): real MetadataPanel + stores, window.api mocked: all failed -> value \"\", isDirty false, modifiedFields [], toast \"0 saved, 2 failed\"; partial -> same with \"1 saved, 1 failed\"; success -> cleared, \"Tags saved to 2 files\"; writeMetadataBatch got {category: BATCHCat}"
+      ]
     }
   ],
   "findings": [
@@ -1383,28 +1429,30 @@
       "id": "C-R8-01",
       "source": "C",
       "severity": "low",
-      "status": "open",
+      "status": "in_progress",
       "round": 8,
       "title": "After a failed batch save (0 saved, 2 failed) the panel shows the 'Multiple values' placeholder on both files (c-round-8/r8-5-after-ii-toast.png); renderer behaviour not examined, may or may not be a bug",
-      "routed_to": "candidate after round 9: reproduce first"
+      "routed_to": "TM-B15 round 11 (D-21). Reproduced: C R8 screenshots + B R10 renderer experiment"
     },
     {
       "id": "RR-R9-01",
       "source": "root-review",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "round": 9,
       "title": "check.yml:26 apt step 13 min + install-deps 10 min = 23 of the job 30 min before check/E2E; raise job timeout-minutes (~40) or lower APT_ATTEMPT_TIMEOUT_SECONDS",
-      "routed_to": "TM-B14 round 10 (job timeout 40)"
+      "routed_to": "TM-B14 round 10 (job timeout 40)",
+      "closed_by": "R10 (35ed18b): C R10-1 check.yml job timeout-minutes 40 (js-yaml), R10-8 docs line 186"
     },
     {
       "id": "RR-R9-02",
       "source": "root-review",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "round": 9,
       "title": "docs/ci-cd.md:239 sentence naming Actions run 40331357825 (apt 19 s) is a one-off fact that goes stale and cannot be checked from the repo",
-      "routed_to": "TM-B14 round 10 (remove)"
+      "routed_to": "TM-B14 round 10 (remove)",
+      "closed_by": "R10 (35ed18b): C R10-8 grep 40331357825 docs/ci-cd.md empty, rest of paragraph unchanged"
     },
     {
       "id": "RR-R9-03",
@@ -1449,7 +1497,70 @@
       "status": "in_progress",
       "round": 9,
       "title": "cold-start electronApplication.firstWindow Timeout 30000ms (A R9 run1, folder-workflow.spec.ts:27); with --retries=0 a single cold-runner occurrence turns the Actions run red",
-      "routed_to": "TM-B14 round 10"
+      "routed_to": "TM-B14: fix done R10 (35ed18b, C R10-2/3/4 deterministic red/green); open only until a cold-runner Actions Check run is linked (TM-B14 Actions line)"
+    },
+    {
+      "round": 10,
+      "id": "RR-R10-01",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "tests/e2e/electron-launch.ts:253 wrapped Error drops the original stack; use new Error(msg, { cause: error })",
+      "routed_to": "signal; E2E harness polish round"
+    },
+    {
+      "round": 10,
+      "id": "RR-R10-02",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "tests/e2e/electron-launch.ts:222 a TimeoutError from electron.launch itself (no window yet) is reported as \"first window did not appear\"; track a launched flag and say \"electron.launch timed out\"",
+      "routed_to": "signal; E2E harness polish round (with A-R10-01)"
+    },
+    {
+      "round": 10,
+      "id": "RR-R10-03",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "tests/e2e/electron-launch.ts:242 main-process output captured only after electron.launch returns; early crash output is not in the tail (documented in docs/ci-cd.md)",
+      "routed_to": "signal"
+    },
+    {
+      "round": 10,
+      "id": "RR-R10-04",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "tests/e2e/electron-launch.ts:207 SIGKILL fallback does not wait for the exit event",
+      "routed_to": "signal"
+    },
+    {
+      "round": 10,
+      "id": "RR-R10-05",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "title": "Architecture signal: the three specs repeat the same beforeAll/afterAll; a Playwright worker-scoped fixture (test.extend<{}, { tagManager: LaunchedTagManagerApp }>) could own launch, hook timeout, cleanup, per-spec env (XDG_CONFIG_HOME) and temp dirs",
+      "routed_to": "signal, not a task"
+    },
+    {
+      "round": 10,
+      "id": "A-R10-01",
+      "source": "A",
+      "severity": "info",
+      "status": "open",
+      "title": "Untested launch failure paths in launchTagManagerApp: electron.launch own 60 s timeout (app undefined, empty tail), domcontentloaded 15 s message, non-timeout message, closeFailedTagManagerApp SIGKILL fallback; only the first-window timeout path is exercised (C R10-4a)",
+      "routed_to": "signal; pairs with RR-R10-02"
+    },
+    {
+      "round": 10,
+      "id": "C-R10-01",
+      "source": "C",
+      "severity": "info",
+      "status": "open",
+      "title": "Un-delayed E2E Playwright 3.2 s vs R9 2.5 s (Build+E2E step 7.7 s vs 5.9 s); cause not established (machine variance or helper overhead); judged about where it was",
+      "routed_to": "signal; re-measure in later replays"
     }
   ],
   "rounds": [
@@ -1641,7 +1752,7 @@
     {
       "round": 10,
       "task": "TM-B14 E2E first-window budget moved out of the 30 s test body into a shared launch helper (D-20, C-R9-02) + check.yml job timeout 40 (RR-R9-01) + remove stale run-id sentence (RR-R9-02)",
-      "status": "planned",
+      "status": "published",
       "baseline": "499a6f3c8867ed7e9356371df9e83713b652265a",
       "items": [
         "TM-B14"
@@ -1649,7 +1760,28 @@
       "findings": [
         "C-R9-02",
         "RR-R9-01",
-        "RR-R9-02"
+        "RR-R9-02",
+        "RR-R10-01",
+        "RR-R10-02",
+        "RR-R10-03",
+        "RR-R10-04",
+        "RR-R10-05",
+        "A-R10-01",
+        "C-R10-01"
+      ],
+      "commit": "35ed18b9211f0da3d7c23e10af5b431d6f33540f",
+      "c_result": "PASS, realVerified=true (R10-1..R10-8, local); cold-runner Actions part not claimed; root review COMMIT OK (lows/info -> RR-R10-01..05); D-20 deviations accepted by B"
+    },
+    {
+      "round": 11,
+      "task": "TM-B15 failed batch save keeps the typed edits (D-21, C-R8-01)",
+      "status": "planned",
+      "baseline": "35ed18b9211f0da3d7c23e10af5b431d6f33540f",
+      "items": [
+        "TM-B15"
+      ],
+      "findings": [
+        "C-R8-01"
       ]
     }
   ]

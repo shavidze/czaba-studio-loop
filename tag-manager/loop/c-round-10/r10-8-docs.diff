@@ -1,0 +1,68 @@
+diff --git a/docs/ci-cd.md b/docs/ci-cd.md
+index 7bf6cb5..c0f2447 100644
+--- a/docs/ci-cd.md
++++ b/docs/ci-cd.md
+@@ -183,7 +183,7 @@ permissions:
+ ### ტრიგერი და runner
+ 
+ - `push` (ნებისმიერი branch) და `pull_request`.
+-- Runner: `ubuntu-24.04`, Node 22, job-ის `timeout-minutes: 30`.
++- Runner: `ubuntu-24.04`, Node 22, job-ის `timeout-minutes: 40`. მხოლოდ setup ნაბიჯების step timeout-ები ჯამში 13 + 10 = 23 წუთია, ამიტომ 40 წუთი მათ ზემოთ `npm run check`-ს, build-სა და E2E-ს საკმარის დროს უტოვებს.
+ - `permissions: contents: read`.
+ 
+ ### ნაბიჯები (თანმიმდევრობით)
+@@ -236,7 +236,7 @@ W = (R + K) + N × (T + K) + (N − 1) × (R + K)
+ - `N × (T + K)` — attempt-ები;
+ - `(N − 1) × (R + K)` — recovery attempt-ებს შორის.
+ 
+-Default-ებით: `70 + 2 × 250 + 70 = 640` წამი. ამიტომ "Install system packages" ნაბიჯს აქვს `timeout-minutes: 13` (780 წამი > 640): script-ი საკუთარ ლიმიტებს ამოწურავს და მკაფიო ხაზს დაბეჭდავს მანამ, სანამ GitHub ნაბიჯს გააუქმებს. W მიახლოებითია: `SECONDS` მთელ წამებს ითვლის და process-ების გაშვებაც დროს მოითხოვს, ამიტომ რეალური დრო W-ს შეიძლება ~1 წამით აჭარბებდეს ყოველ attempt-ზე; 140 წამიანი რეზერვი ამას ფარავს. Actions run `40331357825`-ში apt ნაბიჯმა 19 წამი დაიკავა.
++Default-ებით: `70 + 2 × 250 + 70 = 640` წამი. ამიტომ "Install system packages" ნაბიჯს აქვს `timeout-minutes: 13` (780 წამი > 640): script-ი საკუთარ ლიმიტებს ამოწურავს და მკაფიო ხაზს დაბეჭდავს მანამ, სანამ GitHub ნაბიჯს გააუქმებს. W მიახლოებითია: `SECONDS` მთელ წამებს ითვლის და process-ების გაშვებაც დროს მოითხოვს, ამიტომ რეალური დრო W-ს შეიძლება ~1 წამით აჭარბებდეს ყოველ attempt-ზე; 140 წამიანი რეზერვი ამას ფარავს.
+ 
+ ### Log ხაზები
+ 
+@@ -249,3 +249,45 @@ Default-ებით: `70 + 2 × 250 + 70 = 640` წამი. ამიტო
+ | `apt-install: failed after N attempts` | ყველა attempt ჩავარდა, exit 1 |
+ 
+ Exit კოდები: `0` წარმატება, `1` ყველა attempt ჩავარდა, `2` usage შეცდომა.
++
++### E2E launch budget
++
++ფაილი: `tests/e2e/electron-launch.ts`. სამივე spec (`app-launch.spec.ts`, `folder-workflow.spec.ts`, `recording-tag-contract.spec.ts`) აპლიკაციას უშვებს `launchTagManagerApp()`-ით `beforeAll`-ში და test body-ები შენახულ `page`-ს იყენებენ. spec-ებში `firstWindow` აღარ იძახება.
++
++| Constant | მნიშვნელობა | რას ზღუდავს |
++|----------|-------------|-------------|
++| `FIRST_WINDOW_TIMEOUT_MS` | 60000 | ჯამური დრო `electron.launch`-ის დაწყებიდან პირველ ფანჯრამდე; launch და `firstWindow` ერთ budget-ს იზიარებენ |
++| `LAUNCH_HOOK_TIMEOUT_MS` | 90000 | `beforeAll` hook-ის timeout (`test.setTimeout`), temp setup-ის და launch-ის ჩათვლით |
++| `playwright.config.ts` `timeout` | 30000 | თითო test body-ს და hook-ის default timeout; არ იცვლება |
++
++რატომ `beforeAll`-ში: test body შეზღუდულია 30 წამიანი per-test timeout-ით, ამიტომ test body-ში მხოლოდ `firstWindow`-ის timeout-ის გაზრდა ვერ უშველის. ნელი პირველი ფანჯარა (cold runner) hook-ში 60 წამამდე ელოდება, test body-ები კი ჩვეულ 30 წამს ინარჩუნებენ.
++
++რატომ არა retries: `check.yml` E2E-ს `--retries=0`-ით უშვებს. ლოკალური `retries: 1` პირველ ჩავარდნას მალავს, CI-ში კი ერთი ნელი გაშვება მთელ run-ს წითლად აქცევს.
++
++თუ პირველი ფანჯარა 60 წამში არ გამოჩნდა, helper აპლიკაციას ხურავს (საჭიროებისას `SIGKILL`-ით, ობოლი Electron არ რჩება) და ისვრის `Error`-ს, რომლის ტექსტია:
++
++```
++first window did not appear within 60000 ms (elapsed <ms> ms)
++--- main process output (last 4000 chars) ---
++<main process stdout/stderr-ის ბოლო 4000 სიმბოლო>
++```
++
++თუ ფანჯარა გამოჩნდა, მაგრამ `domcontentloaded` 15000 ms-ში არ დასრულდა, ტექსტი იწყება `first window appeared but domcontentloaded did not finish within 15000 ms`-ით; თუ Electron ფანჯრამდე დაიხურა ან launch სხვა მიზეზით ჩავარდა — `first window failed before 60000 ms: <error>`-ით. ორივე შემთხვევაში elapsed და main process output იგივე ფორმატით ემატება. ჯამური worst case: 60 + 15 + 10 (failed app close) = 85 წამი < 90 წამიანი hook timeout. Main process output ითვლება `electron.launch`-ის დასრულების შემდეგ; უფრო ადრე დაბეჭდილი ხაზები tail-ში არ ჩანს.
++
++`afterAll` იძახებს `await app?.close()`-ს და temp დირექტორიებს `finally`-ში შლის, ამიტომ launch-ის ჩავარდნისას რეალური შეცდომა არ იმალება.
++
++#### `TAG_MANAGER_E2E_ELECTRON_REQUIRE`
++
++მხოლოდ ტესტისთვის: ნელი პირველი ფანჯრის დეტერმინისტული რეპროდუქცია. თუ ცვლადი დაყენებულია და ცარიელი არ არის, `getElectronLaunchArgs` entry path-ის **წინ** ამატებს `-r <value>`-ს (`NODE_OPTIONS=--require` არ გამოდგება: Playwright Electron-ის child env-იდან `NODE_OPTIONS`-ს შლის). მნიშვნელობა უნდა იყოს არსებული ფაილის absolute path, სხვა შემთხვევაში `Error` ისვრის, რომელიც ცვლადის სახელს ასახელებს. ცვლადის გარეშე args უცვლელია (D-06: `--no-sandbox` მხოლოდ Linux-ზე). CI-ში ცვლადი არ არის დაყენებული; injector ფაილი რეპოზიტორიაში არ ინახება.
++
++Delay module-ის მაგალითი (`E2E_WINDOW_DELAY_MS` მილიწამით აგვიანებს `app.whenReady`-ს):
++
++```js
++const { app } = require("electron");
++const whenReady = app.whenReady.bind(app);
++app.whenReady = () => whenReady().then(() => new Promise((resolve) => setTimeout(resolve, Number(process.env.E2E_WINDOW_DELAY_MS))));
++```
++
++```bash
++TAG_MANAGER_E2E_ELECTRON_REQUIRE=/tmp/delay-window.cjs E2E_WINDOW_DELAY_MS=40000 xvfb-run -a npx playwright test --retries=0 --reporter=list
++```

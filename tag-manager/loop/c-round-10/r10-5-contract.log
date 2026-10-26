@@ -1,0 +1,22 @@
+## unset
+{"mode":"args","env":null,"ELECTRON_REQUIRE_ENV":"TAG_MANAGER_E2E_ELECTRON_REQUIRE","FIRST_WINDOW_TIMEOUT_MS":60000,"LAUNCH_HOOK_TIMEOUT_MS":90000}
+args ["--no-sandbox","/entry.js"]
+## empty
+{"mode":"args","env":"","ELECTRON_REQUIRE_ENV":"TAG_MANAGER_E2E_ELECTRON_REQUIRE","FIRST_WINDOW_TIMEOUT_MS":60000,"LAUNCH_HOOK_TIMEOUT_MS":90000}
+args ["--no-sandbox","/entry.js"]
+## relative
+{"mode":"launch","env":"c-round-10/delay-window.cjs","ELECTRON_REQUIRE_ENV":"TAG_MANAGER_E2E_ELECTRON_REQUIRE","FIRST_WINDOW_TIMEOUT_MS":60000,"LAUNCH_HOOK_TIMEOUT_MS":90000}
+args THROWS TAG_MANAGER_E2E_ELECTRON_REQUIRE must be an absolute path, got: c-round-10/delay-window.cjs
+launch THROWS TAG_MANAGER_E2E_ELECTRON_REQUIRE must be an absolute path, got: c-round-10/delay-window.cjs
+electron procs: 0
+## missing absolute
+{"mode":"launch","env":"/tmp/does-not-exist-c10.cjs","ELECTRON_REQUIRE_ENV":"TAG_MANAGER_E2E_ELECTRON_REQUIRE","FIRST_WINDOW_TIMEOUT_MS":60000,"LAUNCH_HOOK_TIMEOUT_MS":90000}
+args THROWS TAG_MANAGER_E2E_ELECTRON_REQUIRE must point to an existing file, got: /tmp/does-not-exist-c10.cjs
+launch THROWS TAG_MANAGER_E2E_ELECTRON_REQUIRE must point to an existing file, got: /tmp/does-not-exist-c10.cjs
+electron procs: 0
+## directory
+{"mode":"args","env":"/tmp","ELECTRON_REQUIRE_ENV":"TAG_MANAGER_E2E_ELECTRON_REQUIRE","FIRST_WINDOW_TIMEOUT_MS":60000,"LAUNCH_HOOK_TIMEOUT_MS":90000}
+args THROWS TAG_MANAGER_E2E_ELECTRON_REQUIRE must point to an existing file, got: /tmp
+## existing
+{"mode":"args","env":"/home/runner/czaba-project/tmp/tag-manager-loop/c-round-10/delay-window.cjs","ELECTRON_REQUIRE_ENV":"TAG_MANAGER_E2E_ELECTRON_REQUIRE","FIRST_WINDOW_TIMEOUT_MS":60000,"LAUNCH_HOOK_TIMEOUT_MS":90000}
+args ["--no-sandbox","-r","/home/runner/czaba-project/tmp/tag-manager-loop/c-round-10/delay-window.cjs","/entry.js"]

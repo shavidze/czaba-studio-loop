@@ -1,18 +1,17 @@
-# Active loop summary (2026-10-26T18:32:46.272Z)
+# Active loop summary (2026-10-26T19:22:45.359Z)
 
-- backlog.json 78 KB -> active view 37 KB
-- status: G_ROOT_GATE round 9
+- backlog.json 86 KB -> active view 33 KB
+- status: G_ROOT_GATE round 10
 - servers: `{"servers":"none or skipped"}`
-- last publication: 499a6f3c8867ed7e9356371df9e83713b652265a (rounds 9-9)
-- last root gate: round 9 published - commit 499a6f3c8867ed7e9356371df9e83713b652265a pushed
+- last publication: 35ed18b9211f0da3d7c23e10af5b431d6f33540f (rounds 10-10)
+- last root gate: round 10 published - commit 35ed18b9211f0da3d7c23e10af5b431d6f33540f pushed
 
-## Current items: TM-T0, TM-T0-CI, TM-T1, TM-T1-DUP, TM-B08, TM-T2, TM-T2-DATA, TM-B05, TM-B06, TM-T0-CI-FU, TM-B11, TM-B13
+## Current items: TM-T0, TM-T0-CI, TM-T0-CI-FU, TM-B14
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
 - C-R1-01 / low / open / Empty Keywords written as IKEY=""; save also adds id3, LIST/MID, IDVX, JUNK chunks and moves data to the end (audio bytes identical). Contra
 - C-R1-03 / low / open / .claude/primitives/TESTING.md:129 stale (fixtures now created by globalSetup); .claude/** frozen, needs a round that owns it
-- RR-R1-01 / medium / in_progress / check.yml: separate Build step + playwright test differs from the npm run test:e2e path (naming or merge)
 - RR-R1-03 / low / open / check.yml actions pinned to @v4 tags, not SHAs
 - RR-R1-04 / low / open / create-fixtures.ts CLI guard regex matches only create-fixtures.ts (argv[1]); suggest create-fixtures\.[cm]?[jt]s$
 - RR-R1-05 / low / open / create-fixtures.ts temp file ${filePath}.${pid}.tmp leaks if writeFileSync throws; not gitignored
@@ -26,11 +25,8 @@
 - RR-R3-04 / low / open / New test files use double quotes vs src single quotes; Biome does not check tests/
 - RR-R3-05 / info / open / npx --yes tsx@4 downloads a floating major at runtime (verifyCommand + check.yml); consider a pinned devDependency
 - RR-R3-06 / info / open / Architecture: schema.json has no version/migration; a versioned schema with one-time merge in loadSchema() would solve D-07 and TM-T1-DUP to
-- C-R4-01 / low / in_progress / apt-install.sh worst case ~750 s (2 x (240+10) + dpkg recovery 240+10) > step timeout-minutes 10 (600 s); GitHub kills the step before the f
-- RR-R4-02 / low / in_progress / Same as C-R4-01 (step budget < worst case)
 - RR-R4-03 / low / open / check-ffprobe-tags.ts missing-file hint hard-codes 'during npm run check'; a follow-up could print the exact vitest command
 - RR-R4-04 / info / open / tests/main/check-ffprobe-tags.test.ts second test only checks a constant + existsSync (low value; acceptable as a guard against a renamed pr
-- RR-R4-05 / low / in_progress / apt-install.sh and its env knobs APT_ATTEMPT_TIMEOUT_SECONDS / APT_ATTEMPTS are not documented in docs/ (Georgian)
 - RR-R4-06 / info / open / Architecture signal: move the ffprobe cross-check into recording-tag-contract.test.ts (skip when ffprobe is missing) or into a dedicated npm
 - RR-R5-01 / low / open / Badge now counts every field (year/track/ISRC-only file shows Tagged); fits D-15, add a docs/ note
 - RR-R5-02 / low / open / file-row-display.ts:11 item.trim() assumes string elements; a null in an array would crash the row render (typeof guard suggested)
@@ -55,9 +51,23 @@
 - A-R8-01 / info / open / docs/recording-tag-contract.md header (line 5) and '## შემოწმება' do not mention D-17/D-18 or metadata-write-field-errors.test.ts (task said
 - A-R8-02 / low / open / node-taglib-sharp checks riffChunkId by JS string length (id.length !== 4), not bytes: a 4-character non-ASCII ID does not trigger D-18; doc
 - C-R8-01 / low / open / After a failed batch save (0 saved, 2 failed) the panel shows the 'Multiple values' placeholder on both files (c-round-8/r8-5-after-ii-toast
+- RR-R9-01 / low / in_progress / check.yml:26 apt step 13 min + install-deps 10 min = 23 of the job 30 min before check/E2E; raise job timeout-minutes (~40) or lower APT_ATT
+- RR-R9-02 / low / in_progress / docs/ci-cd.md:239 sentence naming Actions run 40331357825 (apt 19 s) is a one-off fact that goes stale and cannot be checked from the repo
+- RR-R9-03 / low / open / apt-install.sh has no automated test for knob validation (exit 2) and the worst-case line (640 s); optional script test with fake sudo/apt-g
+- RR-R9-04 / info / open / Architecture signal: worst_case_seconds and check.yml timeout-minutes are kept in sync by hand; a --print-worst-case flag or CI check compar
+- A-R9-01 / low / open / apt-install.sh knob validation accepts arbitrarily large integers; bash arithmetic overflow in worst_case_seconds possible; suggestion ^[1-9
+- C-R9-01 / info / open / hang-ignore-term cases: bash prints 'line 32: <pid> Killed sudo env ... timeout ...' to stderr on every KILL; CI log noise only, stdout line
+- C-R9-02 / low / in_progress / cold-start electronApplication.firstWindow Timeout 30000ms (A R9 run1, folder-workflow.spec.ts:27); with --retries=0 a single cold-runner oc
 
 ## Other open items
 - TM-T1-MIG [todo] Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no aut
+- TM-T1-DUP [todo] Old schema.json custom field colliding with standard category: (a) custom field already using RIFF ID ICAT; (b) custom field with key 'categ
+- TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
+- TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
+- TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba
+- TM-B05 [todo] A WAV whose data chunk is empty cannot be tagged (node-taglib-sharp 6.0.1 boundary bug) and read silently returns empty metadata
+- TM-B06 [todo] Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database
 - OOS-03 [out_of_scope] New npm dependencies
+- TM-B11 [todo] With a custom Number field in the schema (e.g. Take/ITKN), every single-file save writes the default 0 as INFO '0' (size 1) into files that 

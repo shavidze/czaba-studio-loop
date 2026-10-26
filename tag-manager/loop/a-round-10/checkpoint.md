@@ -1,0 +1,12 @@
+# A round 10 checkpoint
+- [x] Step 0 cold sample: first Electron launch in job (uptime 2 min, no prior electron cmd). 7/7 pass, 4.7s playwright, 9.40s wall. Saved cold-sample.log + cold-sample-test-results/.
+- [ ] read files / primitives
+- [x] electron-launch.ts helper + 3 specs edited, tsc test 0, no comments, no firstWindow in specs
+- [x] check.yml 30->40
+- [ ] docs/ci-cd.md, red/green/over-budget, gate, review, report
+- [x] red-before.log 7/7 fail (old code, 40s delay), green-after.log 7/7 pass 85s
+- [x] over-budget.log: 3 specs fail in beforeAll w/ 60000 ms msg, wall 124s, no orphan
+- [x] verify gate rc0 (107/62/7), retries0 x3 7/7, injector contract ok; next: code-review, report
+- [x] review fixes (launch in try, dom 15s bound, docs NODE_OPTIONS). rerunning green/over/gate
+- [x] final verify rc0, report a-round-10.md written. DONE pending advisor check
+- [x] DONE (advisor notes added to report)

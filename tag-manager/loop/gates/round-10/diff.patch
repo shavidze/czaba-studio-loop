@@ -1,0 +1,366 @@
+diff --git a/.github/workflows/check.yml b/.github/workflows/check.yml
+index 77088a9..682e54e 100644
+--- a/.github/workflows/check.yml
++++ b/.github/workflows/check.yml
+@@ -10,7 +10,7 @@ permissions:
+ jobs:
+   check:
+     runs-on: ubuntu-24.04
+-    timeout-minutes: 30
++    timeout-minutes: 40
+     steps:
+       - uses: actions/checkout@v4
+ 
+diff --git a/docs/ci-cd.md b/docs/ci-cd.md
+index 7bf6cb5..c0f2447 100644
+--- a/docs/ci-cd.md
++++ b/docs/ci-cd.md
+@@ -183,7 +183,7 @@ permissions:
+ ### ტრიგერი და runner
+ 
+ - `push` (ნებისმიერი branch) და `pull_request`.
+-- Runner: `ubuntu-24.04`, Node 22, job-ის `timeout-minutes: 30`.
++- Runner: `ubuntu-24.04`, Node 22, job-ის `timeout-minutes: 40`. მხოლოდ setup ნაბიჯების step timeout-ები ჯამში 13 + 10 = 23 წუთია, ამიტომ 40 წუთი მათ ზემოთ `npm run check`-ს, build-სა და E2E-ს საკმარის დროს უტოვებს.
+ - `permissions: contents: read`.
+ 
+ ### ნაბიჯები (თანმიმდევრობით)
+@@ -236,7 +236,7 @@ W = (R + K) + N × (T + K) + (N − 1) × (R + K)
+ - `N × (T + K)` — attempt-ები;
+ - `(N − 1) × (R + K)` — recovery attempt-ებს შორის.
+ 
+-Default-ებით: `70 + 2 × 250 + 70 = 640` წამი. ამიტომ "Install system packages" ნაბიჯს აქვს `timeout-minutes: 13` (780 წამი > 640): script-ი საკუთარ ლიმიტებს ამოწურავს და მკაფიო ხაზს დაბეჭდავს მანამ, სანამ GitHub ნაბიჯს გააუქმებს. W მიახლოებითია: `SECONDS` მთელ წამებს ითვლის და process-ების გაშვებაც დროს მოითხოვს, ამიტომ რეალური დრო W-ს შეიძლება ~1 წამით აჭარბებდეს ყოველ attempt-ზე; 140 წამიანი რეზერვი ამას ფარავს. Actions run `40331357825`-ში apt ნაბიჯმა 19 წამი დაიკავა.
++Default-ებით: `70 + 2 × 250 + 70 = 640` წამი. ამიტომ "Install system packages" ნაბიჯს აქვს `timeout-minutes: 13` (780 წამი > 640): script-ი საკუთარ ლიმიტებს ამოწურავს და მკაფიო ხაზს დაბეჭდავს მანამ, სანამ GitHub ნაბიჯს გააუქმებს. W მიახლოებითია: `SECONDS` მთელ წამებს ითვლის და process-ების გაშვებაც დროს მოითხოვს, ამიტომ რეალური დრო W-ს შეიძლება ~1 წამით აჭარბებდეს ყოველ attempt-ზე; 140 წამიანი რეზერვი ამას ფარავს.
+ 
+ ### Log ხაზები
+ 
+@@ -249,3 +249,45 @@ Default-ებით: `70 + 2 × 250 + 70 = 640` წამი. ამიტო
+ | `apt-install: failed after N attempts` | ყველა attempt ჩავარდა, exit 1 |
+ 
+ Exit კოდები: `0` წარმატება, `1` ყველა attempt ჩავარდა, `2` usage შეცდომა.
++
++### E2E launch budget
++
++ფაილი: `tests/e2e/electron-launch.ts`. სამივე spec (`app-launch.spec.ts`, `folder-workflow.spec.ts`, `recording-tag-contract.spec.ts`) აპლიკაციას უშვებს `launchTagManagerApp()`-ით `beforeAll`-ში და test body-ები შენახულ `page`-ს იყენებენ. spec-ებში `firstWindow` აღარ იძახება.
++
++| Constant | მნიშვნელობა | რას ზღუდავს |
++|----------|-------------|-------------|
++| `FIRST_WINDOW_TIMEOUT_MS` | 60000 | ჯამური დრო `electron.launch`-ის დაწყებიდან პირველ ფანჯრამდე; launch და `firstWindow` ერთ budget-ს იზიარებენ |
++| `LAUNCH_HOOK_TIMEOUT_MS` | 90000 | `beforeAll` hook-ის timeout (`test.setTimeout`), temp setup-ის და launch-ის ჩათვლით |
++| `playwright.config.ts` `timeout` | 30000 | თითო test body-ს და hook-ის default timeout; არ იცვლება |
++
++რატომ `beforeAll`-ში: test body შეზღუდულია 30 წამიანი per-test timeout-ით, ამიტომ test body-ში მხოლოდ `firstWindow`-ის timeout-ის გაზრდა ვერ უშველის. ნელი პირველი ფანჯარა (cold runner) hook-ში 60 წამამდე ელოდება, test body-ები კი ჩვეულ 30 წამს ინარჩუნებენ.
++
++რატომ არა retries: `check.yml` E2E-ს `--retries=0`-ით უშვებს. ლოკალური `retries: 1` პირველ ჩავარდნას მალავს, CI-ში კი ერთი ნელი გაშვება მთელ run-ს წითლად აქცევს.
++
++თუ პირველი ფანჯარა 60 წამში არ გამოჩნდა, helper აპლიკაციას ხურავს (საჭიროებისას `SIGKILL`-ით, ობოლი Electron არ რჩება) და ისვრის `Error`-ს, რომლის ტექსტია:
++
++```
++first window did not appear within 60000 ms (elapsed <ms> ms)
++--- main process output (last 4000 chars) ---
++<main process stdout/stderr-ის ბოლო 4000 სიმბოლო>
++```
++
++თუ ფანჯარა გამოჩნდა, მაგრამ `domcontentloaded` 15000 ms-ში არ დასრულდა, ტექსტი იწყება `first window appeared but domcontentloaded did not finish within 15000 ms`-ით; თუ Electron ფანჯრამდე დაიხურა ან launch სხვა მიზეზით ჩავარდა — `first window failed before 60000 ms: <error>`-ით. ორივე შემთხვევაში elapsed და main process output იგივე ფორმატით ემატება. ჯამური worst case: 60 + 15 + 10 (failed app close) = 85 წამი < 90 წამიანი hook timeout. Main process output ითვლება `electron.launch`-ის დასრულების შემდეგ; უფრო ადრე დაბეჭდილი ხაზები tail-ში არ ჩანს.
++
++`afterAll` იძახებს `await app?.close()`-ს და temp დირექტორიებს `finally`-ში შლის, ამიტომ launch-ის ჩავარდნისას რეალური შეცდომა არ იმალება.
++
++#### `TAG_MANAGER_E2E_ELECTRON_REQUIRE`
++
++მხოლოდ ტესტისთვის: ნელი პირველი ფანჯრის დეტერმინისტული რეპროდუქცია. თუ ცვლადი დაყენებულია და ცარიელი არ არის, `getElectronLaunchArgs` entry path-ის **წინ** ამატებს `-r <value>`-ს (`NODE_OPTIONS=--require` არ გამოდგება: Playwright Electron-ის child env-იდან `NODE_OPTIONS`-ს შლის). მნიშვნელობა უნდა იყოს არსებული ფაილის absolute path, სხვა შემთხვევაში `Error` ისვრის, რომელიც ცვლადის სახელს ასახელებს. ცვლადის გარეშე args უცვლელია (D-06: `--no-sandbox` მხოლოდ Linux-ზე). CI-ში ცვლადი არ არის დაყენებული; injector ფაილი რეპოზიტორიაში არ ინახება.
++
++Delay module-ის მაგალითი (`E2E_WINDOW_DELAY_MS` მილიწამით აგვიანებს `app.whenReady`-ს):
++
++```js
++const { app } = require("electron");
++const whenReady = app.whenReady.bind(app);
++app.whenReady = () => whenReady().then(() => new Promise((resolve) => setTimeout(resolve, Number(process.env.E2E_WINDOW_DELAY_MS))));
++```
++
++```bash
++TAG_MANAGER_E2E_ELECTRON_REQUIRE=/tmp/delay-window.cjs E2E_WINDOW_DELAY_MS=40000 xvfb-run -a npx playwright test --retries=0 --reporter=list
++```
+diff --git a/tests/e2e/app-launch.spec.ts b/tests/e2e/app-launch.spec.ts
+index 413b4a1..ea32084 100644
+--- a/tests/e2e/app-launch.spec.ts
++++ b/tests/e2e/app-launch.spec.ts
+@@ -1,30 +1,24 @@
+-import { type ElectronApplication, _electron as electron, expect, test } from "@playwright/test";
+-import { join } from "node:path";
+-import { getElectronLaunchArgs } from "./electron-launch";
++import { type ElectronApplication, type Page, expect, test } from "@playwright/test";
++import { LAUNCH_HOOK_TIMEOUT_MS, launchTagManagerApp } from "./electron-launch";
+ 
+-let app: ElectronApplication;
++let app: ElectronApplication | undefined;
++let page: Page;
+ 
+ test.beforeAll(async () => {
+-  app = await electron.launch({
+-    args: getElectronLaunchArgs(join(__dirname, "../../out/main/index.js")),
+-    env: { ...process.env, NODE_ENV: "production" },
+-  });
++  test.setTimeout(LAUNCH_HOOK_TIMEOUT_MS);
++  ({ app, page } = await launchTagManagerApp());
+ });
+ 
+ test.afterAll(async () => {
+-  await app.close();
++  await app?.close();
+ });
+ 
+ test("window opens and has correct title bar", async () => {
+-  const page = await app.firstWindow();
+-  await page.waitForLoadState("domcontentloaded");
+-
+   const title = await page.title();
+   expect(title).toBeTruthy();
+ });
+ 
+ test("window has expected minimum dimensions", async () => {
+-  const page = await app.firstWindow();
+   const { width, height } = await page.evaluate(() => ({
+     width: window.innerWidth,
+     height: window.innerHeight,
+@@ -34,13 +28,11 @@ test("window has expected minimum dimensions", async () => {
+ });
+ 
+ test("renderer exposes window.api", async () => {
+-  const page = await app.firstWindow();
+   const hasApi = await page.evaluate(() => typeof window.api === "object" && window.api !== null);
+   expect(hasApi).toBe(true);
+ });
+ 
+ test("window.api has required methods", async () => {
+-  const page = await app.firstWindow();
+   const methods = await page.evaluate(() =>
+     Object.keys(window.api).sort(),
+   );
+diff --git a/tests/e2e/electron-launch.ts b/tests/e2e/electron-launch.ts
+index 8e62cd9..caaa2f9 100644
+--- a/tests/e2e/electron-launch.ts
++++ b/tests/e2e/electron-launch.ts
+@@ -1,6 +1,114 @@
++import { type ElectronApplication, type Page, _electron as electron } from "@playwright/test";
++import type { ChildProcess } from "node:child_process";
++import { existsSync, statSync } from "node:fs";
++import { isAbsolute, join } from "node:path";
++
++export const FIRST_WINDOW_TIMEOUT_MS = 60000;
++export const LAUNCH_HOOK_TIMEOUT_MS = 90000;
++export const ELECTRON_REQUIRE_ENV = "TAG_MANAGER_E2E_ELECTRON_REQUIRE";
++
++const MAIN_OUTPUT_TAIL_CHARS = 4000;
++const FAILED_APP_CLOSE_TIMEOUT_MS = 10000;
++const DOM_CONTENT_LOADED_TIMEOUT_MS = 15000;
++
++export interface LaunchTagManagerOptions {
++  env?: Record<string, string | undefined>;
++}
++
++export interface LaunchedTagManagerApp {
++  app: ElectronApplication;
++  page: Page;
++}
++
++function getElectronRequireArgs(): string[] {
++  const requirePath = process.env[ELECTRON_REQUIRE_ENV];
++  if (requirePath === undefined || requirePath === "") {
++    return [];
++  }
++  if (!isAbsolute(requirePath)) {
++    throw new Error(`${ELECTRON_REQUIRE_ENV} must be an absolute path, got: ${requirePath}`);
++  }
++  if (!existsSync(requirePath) || !statSync(requirePath).isFile()) {
++    throw new Error(`${ELECTRON_REQUIRE_ENV} must point to an existing file, got: ${requirePath}`);
++  }
++  return ["-r", requirePath];
++}
++
+ export function getElectronLaunchArgs(mainEntryPath: string): string[] {
++  const requireArgs = getElectronRequireArgs();
+   if (process.platform === "linux") {
+-    return ["--no-sandbox", mainEntryPath];
++    return ["--no-sandbox", ...requireArgs, mainEntryPath];
++  }
++  return [...requireArgs, mainEntryPath];
++}
++
++function captureMainProcessOutput(mainProcess: ChildProcess): () => string {
++  let output = "";
++  const appendOutput = (chunk: Buffer | string): void => {
++    output = `${output}${chunk.toString()}`.slice(-MAIN_OUTPUT_TAIL_CHARS);
++  };
++  mainProcess.stdout?.on("data", appendOutput);
++  mainProcess.stderr?.on("data", appendOutput);
++  return () => output;
++}
++
++async function closeFailedTagManagerApp(app: ElectronApplication): Promise<void> {
++  const mainProcess = app.process();
++  let closeTimer: NodeJS.Timeout | undefined;
++  const closeTimeout = new Promise<void>((resolve) => {
++    closeTimer = setTimeout(resolve, FAILED_APP_CLOSE_TIMEOUT_MS);
++  });
++  await Promise.race([app.close().catch(() => undefined), closeTimeout]);
++  clearTimeout(closeTimer);
++  if (mainProcess.exitCode === null && mainProcess.signalCode === null) {
++    mainProcess.kill("SIGKILL");
++  }
++}
++
++function describeLaunchFailure(params: {
++  error: unknown;
++  windowAppeared: boolean;
++  elapsedMs: number;
++  mainOutput: string;
++}): string {
++  const { error, windowAppeared, elapsedMs, mainOutput } = params;
++  const errorMessage = error instanceof Error ? error.message : String(error);
++  let reason = `first window failed before ${FIRST_WINDOW_TIMEOUT_MS} ms: ${errorMessage}`;
++  if (windowAppeared) {
++    reason = `first window appeared but domcontentloaded did not finish within ${DOM_CONTENT_LOADED_TIMEOUT_MS} ms: ${errorMessage}`;
++  } else if (error instanceof Error && error.name === "TimeoutError") {
++    reason = `first window did not appear within ${FIRST_WINDOW_TIMEOUT_MS} ms`;
++  }
++  return `${reason} (elapsed ${elapsedMs} ms)\n--- main process output (last ${MAIN_OUTPUT_TAIL_CHARS} chars) ---\n${mainOutput}`;
++}
++
++export async function launchTagManagerApp(
++  options: LaunchTagManagerOptions = {},
++): Promise<LaunchedTagManagerApp> {
++  const launchArgs = getElectronLaunchArgs(join(__dirname, "../../out/main/index.js"));
++  const startedAt = Date.now();
++  let app: ElectronApplication | undefined;
++  let readMainOutput = (): string => "";
++  let windowAppeared = false;
++  try {
++    app = await electron.launch({
++      args: launchArgs,
++      env: { ...process.env, NODE_ENV: "production", ...options.env },
++      timeout: FIRST_WINDOW_TIMEOUT_MS,
++    });
++    readMainOutput = captureMainProcessOutput(app.process());
++    const remainingMs = Math.max(1, FIRST_WINDOW_TIMEOUT_MS - (Date.now() - startedAt));
++    const page = await app.firstWindow({ timeout: remainingMs });
++    windowAppeared = true;
++    await page.waitForLoadState("domcontentloaded", { timeout: DOM_CONTENT_LOADED_TIMEOUT_MS });
++    return { app, page };
++  } catch (error: unknown) {
++    const elapsedMs = Date.now() - startedAt;
++    if (app !== undefined) {
++      await closeFailedTagManagerApp(app);
++    }
++    throw new Error(
++      describeLaunchFailure({ error, windowAppeared, elapsedMs, mainOutput: readMainOutput() }),
++    );
+   }
+-  return [mainEntryPath];
+ }
+diff --git a/tests/e2e/folder-workflow.spec.ts b/tests/e2e/folder-workflow.spec.ts
+index 6d5284d..22b70ff 100644
+--- a/tests/e2e/folder-workflow.spec.ts
++++ b/tests/e2e/folder-workflow.spec.ts
+@@ -1,33 +1,32 @@
+-import { type ElectronApplication, _electron as electron, expect, test } from "@playwright/test";
++import { type ElectronApplication, type Page, expect, test } from "@playwright/test";
+ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+ import { join } from "node:path";
+ import { tmpdir } from "node:os";
+ import { createSineWavBuffer } from "../fixtures/create-fixtures";
+-import { getElectronLaunchArgs } from "./electron-launch";
++import { LAUNCH_HOOK_TIMEOUT_MS, launchTagManagerApp } from "./electron-launch";
+ 
+-let app: ElectronApplication;
++let app: ElectronApplication | undefined;
++let page: Page;
+ const testDir = join(tmpdir(), `czaba-e2e-${Date.now()}`);
+ 
+ test.beforeAll(async () => {
++  test.setTimeout(LAUNCH_HOOK_TIMEOUT_MS);
+   mkdirSync(testDir, { recursive: true });
+   writeFileSync(join(testDir, "track-01.wav"), createSineWavBuffer(4410));
+   writeFileSync(join(testDir, "track-02.wav"), createSineWavBuffer(4410));
+ 
+-  app = await electron.launch({
+-    args: getElectronLaunchArgs(join(__dirname, "../../out/main/index.js")),
+-    env: { ...process.env, NODE_ENV: "production" },
+-  });
++  ({ app, page } = await launchTagManagerApp());
+ });
+ 
+ test.afterAll(async () => {
+-  await app.close();
+-  rmSync(testDir, { recursive: true, force: true });
++  try {
++    await app?.close();
++  } finally {
++    rmSync(testDir, { recursive: true, force: true });
++  }
+ });
+ 
+ test("can scan a folder via IPC and get WAV files", async () => {
+-  const page = await app.firstWindow();
+-  await page.waitForLoadState("domcontentloaded");
+-
+   const files = await page.evaluate(async (dir: string) => {
+     return window.api.scanFolder(dir);
+   }, testDir);
+@@ -38,7 +37,6 @@ test("can scan a folder via IPC and get WAV files", async () => {
+ });
+ 
+ test("can read and write metadata via IPC", async () => {
+-  const page = await app.firstWindow();
+   const filePath = join(testDir, "track-01.wav");
+ 
+   const schema = await page.evaluate(async () => {
+diff --git a/tests/e2e/recording-tag-contract.spec.ts b/tests/e2e/recording-tag-contract.spec.ts
+index 7b87144..0e6ef65 100644
+--- a/tests/e2e/recording-tag-contract.spec.ts
++++ b/tests/e2e/recording-tag-contract.spec.ts
+@@ -1,34 +1,34 @@
+-import { type ElectronApplication, _electron as electron, expect, test } from "@playwright/test";
++import { type ElectronApplication, type Page, expect, test } from "@playwright/test";
+ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+ import { tmpdir } from "node:os";
+ import { join } from "node:path";
+ import { createSineWavBuffer } from "../fixtures/create-fixtures";
+-import { getElectronLaunchArgs } from "./electron-launch";
++import { LAUNCH_HOOK_TIMEOUT_MS, launchTagManagerApp } from "./electron-launch";
+ 
+-let app: ElectronApplication;
++let app: ElectronApplication | undefined;
++let page: Page;
+ let testDir: string;
+ let configHome: string;
+ 
+ test.beforeAll(async () => {
++  test.setTimeout(LAUNCH_HOOK_TIMEOUT_MS);
+   testDir = mkdtempSync(join(tmpdir(), "czaba-e2e-contract-"));
+   configHome = mkdtempSync(join(tmpdir(), "czaba-e2e-contract-config-"));
+   writeFileSync(join(testDir, "take-01.wav"), createSineWavBuffer(4410));
+ 
+-  app = await electron.launch({
+-    args: getElectronLaunchArgs(join(__dirname, "../../out/main/index.js")),
+-    env: { ...process.env, NODE_ENV: "production", XDG_CONFIG_HOME: configHome },
+-  });
++  ({ app, page } = await launchTagManagerApp({ env: { XDG_CONFIG_HOME: configHome } }));
+ });
+ 
+ test.afterAll(async () => {
+-  await app.close();
+-  rmSync(testDir, { recursive: true, force: true });
+-  rmSync(configHome, { recursive: true, force: true });
++  try {
++    await app?.close();
++  } finally {
++    rmSync(testDir, { recursive: true, force: true });
++    rmSync(configHome, { recursive: true, force: true });
++  }
+ });
+ 
+ test("writes and reads category via IPC with a clean schema (T1-7)", async () => {
+-  const page = await app.firstWindow();
+-  await page.waitForLoadState("domcontentloaded");
+   const filePath = join(testDir, "take-01.wav");
+ 
+   const schema = await page.evaluate(async () => {

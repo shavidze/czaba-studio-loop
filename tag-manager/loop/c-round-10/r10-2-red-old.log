@@ -1,0 +1,126 @@
+
+Running 7 tests using 2 workers
+
+  ✘  2 tests/e2e/folder-workflow.spec.ts:27:5 › can scan a folder via IPC and get WAV files (30.0s)
+  ✘  1 tests/e2e/app-launch.spec.ts:18:5 › window opens and has correct title bar (30.0s)
+  ✘  3 tests/e2e/folder-workflow.spec.ts:40:5 › can read and write metadata via IPC (30.0s)
+  ✘  4 tests/e2e/app-launch.spec.ts:26:5 › window has expected minimum dimensions (30.0s)
+  ✘  5 tests/e2e/recording-tag-contract.spec.ts:29:5 › writes and reads category via IPC with a clean schema (T1-7) (30.0s)
+  ✘  6 tests/e2e/app-launch.spec.ts:36:5 › renderer exposes window.api (30.0s)
+  ✘  7 tests/e2e/app-launch.spec.ts:42:5 › window.api has required methods (30.0s)
+
+
+  1) tests/e2e/app-launch.spec.ts:18:5 › window opens and has correct title bar ────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    TimeoutError: electronApplication.firstWindow: Timeout 30000ms exceeded while waiting for event "window"
+
+      17 |
+      18 | test("window opens and has correct title bar", async () => {
+    > 19 |   const page = await app.firstWindow();
+         |                          ^
+      20 |   await page.waitForLoadState("domcontentloaded");
+      21 |
+      22 |   const title = await page.title();
+        at /tmp/c-r10-old/tests/e2e/app-launch.spec.ts:19:26
+
+  2) tests/e2e/app-launch.spec.ts:26:5 › window has expected minimum dimensions ────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    TimeoutError: electronApplication.firstWindow: Timeout 30000ms exceeded while waiting for event "window"
+
+      25 |
+      26 | test("window has expected minimum dimensions", async () => {
+    > 27 |   const page = await app.firstWindow();
+         |                          ^
+      28 |   const { width, height } = await page.evaluate(() => ({
+      29 |     width: window.innerWidth,
+      30 |     height: window.innerHeight,
+        at /tmp/c-r10-old/tests/e2e/app-launch.spec.ts:27:26
+
+  3) tests/e2e/app-launch.spec.ts:36:5 › renderer exposes window.api ───────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    TimeoutError: electronApplication.firstWindow: Timeout 30000ms exceeded while waiting for event "window"
+
+      35 |
+      36 | test("renderer exposes window.api", async () => {
+    > 37 |   const page = await app.firstWindow();
+         |                          ^
+      38 |   const hasApi = await page.evaluate(() => typeof window.api === "object" && window.api !== null);
+      39 |   expect(hasApi).toBe(true);
+      40 | });
+        at /tmp/c-r10-old/tests/e2e/app-launch.spec.ts:37:26
+
+  4) tests/e2e/app-launch.spec.ts:42:5 › window.api has required methods ───────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    TimeoutError: electronApplication.firstWindow: Timeout 30000ms exceeded while waiting for event "window"
+
+      41 |
+      42 | test("window.api has required methods", async () => {
+    > 43 |   const page = await app.firstWindow();
+         |                          ^
+      44 |   const methods = await page.evaluate(() =>
+      45 |     Object.keys(window.api).sort(),
+      46 |   );
+        at /tmp/c-r10-old/tests/e2e/app-launch.spec.ts:43:26
+
+  5) tests/e2e/folder-workflow.spec.ts:27:5 › can scan a folder via IPC and get WAV files ──────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    TimeoutError: electronApplication.firstWindow: Timeout 30000ms exceeded while waiting for event "window"
+
+      26 |
+      27 | test("can scan a folder via IPC and get WAV files", async () => {
+    > 28 |   const page = await app.firstWindow();
+         |                          ^
+      29 |   await page.waitForLoadState("domcontentloaded");
+      30 |
+      31 |   const files = await page.evaluate(async (dir: string) => {
+        at /tmp/c-r10-old/tests/e2e/folder-workflow.spec.ts:28:26
+
+  6) tests/e2e/folder-workflow.spec.ts:40:5 › can read and write metadata via IPC ──────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    TimeoutError: electronApplication.firstWindow: Timeout 30000ms exceeded while waiting for event "window"
+
+      39 |
+      40 | test("can read and write metadata via IPC", async () => {
+    > 41 |   const page = await app.firstWindow();
+         |                          ^
+      42 |   const filePath = join(testDir, "track-01.wav");
+      43 |
+      44 |   const schema = await page.evaluate(async () => {
+        at /tmp/c-r10-old/tests/e2e/folder-workflow.spec.ts:41:26
+
+  7) tests/e2e/recording-tag-contract.spec.ts:29:5 › writes and reads category via IPC with a clean schema (T1-7) 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    TimeoutError: electronApplication.firstWindow: Timeout 30000ms exceeded while waiting for event "window"
+
+      28 |
+      29 | test("writes and reads category via IPC with a clean schema (T1-7)", async () => {
+    > 30 |   const page = await app.firstWindow();
+         |                          ^
+      31 |   await page.waitForLoadState("domcontentloaded");
+      32 |   const filePath = join(testDir, "take-01.wav");
+      33 |
+        at /tmp/c-r10-old/tests/e2e/recording-tag-contract.spec.ts:30:26
+
+  7 failed
+    tests/e2e/app-launch.spec.ts:18:5 › window opens and has correct title bar ─────────────────────
+    tests/e2e/app-launch.spec.ts:26:5 › window has expected minimum dimensions ─────────────────────
+    tests/e2e/app-launch.spec.ts:36:5 › renderer exposes window.api ────────────────────────────────
+    tests/e2e/app-launch.spec.ts:42:5 › window.api has required methods ────────────────────────────
+    tests/e2e/folder-workflow.spec.ts:27:5 › can scan a folder via IPC and get WAV files ───────────
+    tests/e2e/folder-workflow.spec.ts:40:5 › can read and write metadata via IPC ───────────────────
+    tests/e2e/recording-tag-contract.spec.ts:29:5 › writes and reads category via IPC with a clean schema (T1-7) 
+rc=1 wall=129s

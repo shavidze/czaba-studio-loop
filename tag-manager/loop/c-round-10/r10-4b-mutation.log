@@ -1,0 +1,30 @@
+
+Running 7 tests using 2 workers
+
+  ✘  1 tests/e2e/folder-workflow.spec.ts:28:5 › can scan a folder via IPC and get WAV files (0ms)
+  -  3 tests/e2e/folder-workflow.spec.ts:38:5 › can read and write metadata via IPC
+  ✓  2 tests/e2e/app-launch.spec.ts:16:5 › window opens and has correct title bar (33ms)
+  ✓  5 tests/e2e/app-launch.spec.ts:21:5 › window has expected minimum dimensions (26ms)
+  ✓  6 tests/e2e/app-launch.spec.ts:30:5 › renderer exposes window.api (6ms)
+  ✓  7 tests/e2e/app-launch.spec.ts:35:5 › window.api has required methods (8ms)
+  ✓  4 tests/e2e/recording-tag-contract.spec.ts:31:5 › writes and reads category via IPC with a clean schema (T1-7) (68ms)
+
+
+  1) tests/e2e/folder-workflow.spec.ts:28:5 › can scan a folder via IPC and get WAV files ──────────
+
+    [31m"beforeAll" hook timeout of 30000ms exceeded.[39m
+
+      10 | const testDir = join(tmpdir(), `czaba-e2e-${Date.now()}`);
+      11 |
+    > 12 | test.beforeAll(async () => {
+         |      ^
+      13 |   mkdirSync(testDir, { recursive: true });
+      14 |   writeFileSync(join(testDir, "track-01.wav"), createSineWavBuffer(4410));
+      15 |   writeFileSync(join(testDir, "track-02.wav"), createSineWavBuffer(4410));
+        at /tmp/c-r10-mut-b/tests/e2e/folder-workflow.spec.ts:12:6
+
+  1 failed
+    tests/e2e/folder-workflow.spec.ts:28:5 › can scan a folder via IPC and get WAV files ───────────
+  1 did not run
+  5 passed (1.2m)
+rc=1 wall=77s

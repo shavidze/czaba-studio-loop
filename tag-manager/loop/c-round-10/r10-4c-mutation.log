@@ -1,0 +1,45 @@
+
+Running 7 tests using 2 workers
+
+  ✘  2 tests/e2e/folder-workflow.spec.ts:29:5 › can scan a folder via IPC and get WAV files (30.0s)
+  ✘  3 tests/e2e/folder-workflow.spec.ts:41:5 › can read and write metadata via IPC (5ms)
+  ✓  1 tests/e2e/app-launch.spec.ts:16:5 › window opens and has correct title bar (23ms)
+  ✓  5 tests/e2e/app-launch.spec.ts:21:5 › window has expected minimum dimensions (23ms)
+  ✓  6 tests/e2e/app-launch.spec.ts:30:5 › renderer exposes window.api (7ms)
+  ✓  7 tests/e2e/app-launch.spec.ts:35:5 › window.api has required methods (11ms)
+  ✓  4 tests/e2e/recording-tag-contract.spec.ts:31:5 › writes and reads category via IPC with a clean schema (T1-7) (74ms)
+
+
+  1) tests/e2e/folder-workflow.spec.ts:29:5 › can scan a folder via IPC and get WAV files ──────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: electronApplication.firstWindow: Target page, context or browser has been closed
+
+      28 |
+      29 | test("can scan a folder via IPC and get WAV files", async () => {
+    > 30 |   page = await (app as ElectronApplication).firstWindow({ timeout: 60000 });
+         |                                             ^
+      31 |   await page.waitForLoadState("domcontentloaded");
+      32 |   const files = await page.evaluate(async (dir: string) => {
+      33 |     return window.api.scanFolder(dir);
+        at /tmp/c-r10-mut-c/tests/e2e/folder-workflow.spec.ts:30:45
+
+  2) tests/e2e/folder-workflow.spec.ts:41:5 › can read and write metadata via IPC ──────────────────
+
+    TypeError: Cannot read properties of undefined (reading 'evaluate')
+
+      42 |   const filePath = join(testDir, "track-01.wav");
+      43 |
+    > 44 |   const schema = await page.evaluate(async () => {
+         |                             ^
+      45 |     return window.api.loadSchema();
+      46 |   });
+      47 |
+        at /tmp/c-r10-mut-c/tests/e2e/folder-workflow.spec.ts:44:29
+
+  2 failed
+    tests/e2e/folder-workflow.spec.ts:29:5 › can scan a folder via IPC and get WAV files ───────────
+    tests/e2e/folder-workflow.spec.ts:41:5 › can read and write metadata via IPC ───────────────────
+  5 passed (1.3m)
+rc=1 wall=78s
