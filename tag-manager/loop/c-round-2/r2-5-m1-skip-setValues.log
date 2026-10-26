@@ -1,0 +1,43 @@
+
+ RUN  v4.0.18 /tmp/c-r2-mut
+
+ ✓ tests/main/file-system.test.ts (10 tests) 21ms
+ ✓ tests/main/templates.test.ts (8 tests) 42ms
+ ❯ tests/main/metadata.test.ts (7 tests | 1 failed) 37ms
+       ✓ reads empty metadata from a clean WAV 6ms
+       ✓ returns empty metadata for corrupt files 1ms
+       ✓ writes and reads back standard fields 11ms
+       × writes keywords into a raw IKEY chunk and reads them back 8ms
+       ✓ reads metadata from multiple files 2ms
+       ✓ writes metadata to multiple files and reports results 4ms
+       ✓ reports failures for invalid files 1ms
+ ✓ tests/main/schema.test.ts (6 tests) 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/main/metadata.test.ts > metadata handlers > meta:write keywords via InfoTag IKEY chunk > writes keywords into a raw IKEY chunk and reads them back
+AssertionError: expected '' to be 'door, slam' // Object.is equality
+
+- Expected
++ Received
+
+- door, slam
+
+ ❯ tests/main/metadata.test.ts:84:29
+     82| 
+     83|       const meta = await readHandler({}, filePath, STANDARD_FIELDS) as…
+     84|       expect(meta.keywords).toBe("door, slam");
+       |                             ^
+     85| 
+     86|       const bytes = readFileSync(filePath);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 30 passed (31)
+   Start at  13:27:29
+   Duration  499ms (transform 169ms, setup 75ms, import 351ms, tests 111ms, environment 1ms)
+
+
+::error file=/tmp/c-r2-mut/tests/main/metadata.test.ts,title=tests/main/metadata.test.ts > metadata handlers > meta%3Awrite keywords via InfoTag IKEY chunk > writes keywords into a raw IKEY chunk and reads them back,line=84,column=29::AssertionError: expected '' to be 'door, slam' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- door, slam%0A%0A ❯ tests/main/metadata.test.ts:84:29%0A%0A

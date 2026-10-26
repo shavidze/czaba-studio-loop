@@ -1,0 +1,347 @@
+diff --git a/.github/workflows/check.yml b/.github/workflows/check.yml
+index a6042fc..9ccdf0d 100644
+--- a/.github/workflows/check.yml
++++ b/.github/workflows/check.yml
+@@ -37,7 +37,9 @@ jobs:
+         run: npm run build
+ 
+       - name: E2E tests
+-        run: xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure
++        run: xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure --reporter=list,html
++        env:
++          PLAYWRIGHT_HTML_OPEN: never
+ 
+       - name: Upload test artifacts
+         if: failure()
+diff --git a/docs/plans/002-recording-tag-contract.md b/docs/plans/002-recording-tag-contract.md
+index 974e56e..b291141 100644
+--- a/docs/plans/002-recording-tag-contract.md
++++ b/docs/plans/002-recording-tag-contract.md
+@@ -24,7 +24,7 @@ backend-ის import tool (`czaba-api/tools/recording-import`, K-4) Tag Manager
+ - `vitest.config.main.ts`-ს დაემატა `globalSetup` (`tests/main/global-setup.ts`). ის main ტესტების წინ `sample.wav`-სა და `corrupt.wav`-ს ქმნის.
+ - E2E: `tests/e2e/electron-launch.ts` (`getElectronLaunchArgs()`) `--no-sandbox`-ს მხოლოდ `process.platform === 'linux'`-ზე ამატებს. Windows/macOS-ზე launch args უცვლელია.
+ - `folder-workflow.spec.ts`-ის fixture არის 0.1 წმ (4410 sample) ნამდვილი PCM, არაცარიელი `data` chunk-ით.
+-- ახალი `.github/workflows/check.yml`: ubuntu-24.04, Node 22, `npm ci` → `ffmpeg`/`xvfb` (`ffmpeg`/`ffprobe` T-1-ის `format_tags` cross-check-ისთვის წინასწარ დგება) → `playwright install-deps chromium` → `npm run check` → `npm run build` → `xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure`. ჩავარდნისას იტვირთება `playwright-report/` და `test-results/` artifact-ად. `permissions: contents: read`; `release.yml`-თან კავშირი (`needs`) არ აქვს.
++- ახალი `.github/workflows/check.yml`: ubuntu-24.04, Node 22, `npm ci` → `ffmpeg`/`xvfb` (`ffmpeg`/`ffprobe` T-1-ის `format_tags` cross-check-ისთვის წინასწარ დგება) → `playwright install-deps chromium` → `npm run check` → `npm run build` → `xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure --reporter=list,html` (`PLAYWRIGHT_HTML_OPEN=never`, ამიტომ html reporter-ი `playwright-report/`-ს ქმნის და report server-ს არ ხსნის). ჩავარდნისას იტვირთება `playwright-report/` და `test-results/` artifact-ად. round 2-დან `npm run check` ნამდვილ type check-ს უშვებს (`npm run typecheck`: `tsc --noEmit -p` `tsconfig.node.json`, `tsconfig.web.json` და `tsconfig.test.json`-ზე, TM-B04). `permissions: contents: read`; `release.yml`-თან კავშირი (`needs`) არ აქვს.
+ 
+ ### T-1 — ჩანაწერის tag-კონტრაქტი
+ 
+diff --git a/package.json b/package.json
+index e2af446..88c0175 100644
+--- a/package.json
++++ b/package.json
+@@ -18,7 +18,8 @@
+     "test:coverage": "vitest run --config vitest.config.renderer.ts --coverage && vitest run --config vitest.config.main.ts --coverage",
+     "lint": "biome check src/",
+     "lint:fix": "biome check --write src/",
+-    "check": "biome check src/ && npx tsc --noEmit && npm run test",
++    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.test.json",
++    "check": "biome check src/ && npm run typecheck && npm run test",
+     "build:win": "npm run build && electron-builder --win",
+     "build:mac": "npm run build && electron-builder --mac",
+     "build:unpack": "npm run build && electron-builder --dir"
+diff --git a/src/main/ipc/metadata.ts b/src/main/ipc/metadata.ts
+index cd18da7..8588a7b 100644
+--- a/src/main/ipc/metadata.ts
++++ b/src/main/ipc/metadata.ts
+@@ -1,5 +1,5 @@
+ import { ipcMain } from 'electron';
+-import { InfoTag, File as TagFile } from 'node-taglib-sharp';
++import { CombinedTag, InfoTag, type Tag, File as TagFile } from 'node-taglib-sharp';
+ import type {
+   BatchWriteResult,
+   FieldDefinition,
+@@ -100,6 +100,13 @@ function getDefaultValue(type: FieldDefinition['type']): FieldValue {
+   return '';
+ }
+ 
++function getRiffInfoTags(fileTag: Tag): InfoTag[] {
++  if (!(fileTag instanceof CombinedTag)) {
++    throw new TypeError('File tag is not a CombinedTag');
++  }
++  return fileTag.tags.filter((t): t is InfoTag => t instanceof InfoTag);
++}
++
+ function readTagsFromFile(filePath: string, schema: FieldDefinition[]): WavMetadata {
+   const file = TagFile.createFromPath(filePath);
+   try {
+@@ -115,7 +122,7 @@ function readTagsFromFile(filePath: string, schema: FieldDefinition[]): WavMetad
+ 
+       if (field.riffChunkId) {
+         try {
+-          const infoTags = file.tag.tags.filter((t): t is InfoTag => t instanceof InfoTag);
++          const infoTags = getRiffInfoTags(file.tag);
+           if (infoTags.length > 0) {
+             const values = infoTags[0].getValuesAsStrings(field.riffChunkId);
+             if (field.type === 'tags') {
+@@ -167,10 +174,10 @@ function writeTagsToFile(
+     }
+ 
+     if (customFields.length > 0) {
+-      let infoTags = file.tag.tags.filter((t): t is InfoTag => t instanceof InfoTag);
++      let infoTags = getRiffInfoTags(file.tag);
+       if (infoTags.length === 0) {
+         tag.title = tag.title ?? '';
+-        infoTags = file.tag.tags.filter((t): t is InfoTag => t instanceof InfoTag);
++        infoTags = getRiffInfoTags(file.tag);
+       }
+       if (infoTags.length > 0) {
+         for (const { riffChunkId, value } of customFields) {
+diff --git a/src/renderer/src/components/file-list/FileList.tsx b/src/renderer/src/components/file-list/FileList.tsx
+index 46241d5..0edb6ad 100644
+--- a/src/renderer/src/components/file-list/FileList.tsx
++++ b/src/renderer/src/components/file-list/FileList.tsx
+@@ -4,9 +4,15 @@ import { Badge } from '~/components/ui/badge';
+ import { cn, formatFileSize } from '~/lib/utils';
+ import { useFileStore, useFilteredFiles, useIsSelected } from '~/stores/file-store';
+ import { usePlayerStore } from '~/stores/player-store';
+-import type { SortField, WavFileEntry } from '~/types';
++import type { FieldValue, SortField, WavFileEntry } from '~/types';
+ import { Toolbar } from './Toolbar';
+ 
++function formatFirstFieldValue(value: FieldValue | undefined): string {
++  if (Array.isArray(value)) return value[0] ?? '';
++  if (typeof value === 'string') return value;
++  return '';
++}
++
+ function SortHeader({ label, field }: { label: string; field: SortField }): React.ReactElement {
+   const sortField = useFileStore((s) => s.sortField);
+   const sortDirection = useFileStore((s) => s.sortDirection);
+@@ -91,8 +97,8 @@ function FileRow({
+       </div>
+ 
+       <span className="text-right">{formatFileSize(file.size)}</span>
+-      <span className="truncate">{meta?.artists?.[0] ?? ''}</span>
+-      <span className="truncate">{meta?.genres?.[0] ?? ''}</span>
++      <span className="truncate">{formatFirstFieldValue(meta?.artists)}</span>
++      <span className="truncate">{formatFirstFieldValue(meta?.genres)}</span>
+       <span className="text-right">{meta?.bpm ? meta.bpm : ''}</span>
+       <span className="text-right text-dim">{new Date(file.modifiedAt).toLocaleDateString()}</span>
+     </div>
+diff --git a/src/renderer/src/lib/utils.ts b/src/renderer/src/lib/utils.ts
+index 483b017..b0a7718 100644
+--- a/src/renderer/src/lib/utils.ts
++++ b/src/renderer/src/lib/utils.ts
+@@ -1,5 +1,6 @@
+ import { type ClassValue, clsx } from 'clsx';
+ import { twMerge } from 'tailwind-merge';
++import type { FieldDefinition } from '~/types';
+ 
+ export function cn(...inputs: ClassValue[]): string {
+   return twMerge(clsx(inputs));
+@@ -47,13 +48,7 @@ const METADATA_CHUNK_SIZE = 50;
+ 
+ export async function readMetadataChunked(
+   paths: string[],
+-  schema: Array<{
+-    key: string;
+-    label: string;
+-    type: string;
+-    riffChunkId?: string;
+-    standard?: boolean;
+-  }>,
++  schema: FieldDefinition[],
+ ): Promise<{ data: Record<string, Record<string, unknown>>; failures: number }> {
+   const accumulated: Record<string, Record<string, unknown>> = {};
+   let failures = 0;
+diff --git a/tests/e2e/app-launch.spec.ts b/tests/e2e/app-launch.spec.ts
+index 433f699..413b4a1 100644
+--- a/tests/e2e/app-launch.spec.ts
++++ b/tests/e2e/app-launch.spec.ts
+@@ -16,16 +16,16 @@ test.afterAll(async () => {
+ });
+ 
+ test("window opens and has correct title bar", async () => {
+-  const window = await app.firstWindow();
+-  await window.waitForLoadState("domcontentloaded");
++  const page = await app.firstWindow();
++  await page.waitForLoadState("domcontentloaded");
+ 
+-  const title = await window.title();
++  const title = await page.title();
+   expect(title).toBeTruthy();
+ });
+ 
+ test("window has expected minimum dimensions", async () => {
+-  const window = await app.firstWindow();
+-  const { width, height } = await window.evaluate(() => ({
++  const page = await app.firstWindow();
++  const { width, height } = await page.evaluate(() => ({
+     width: window.innerWidth,
+     height: window.innerHeight,
+   }));
+@@ -34,14 +34,14 @@ test("window has expected minimum dimensions", async () => {
+ });
+ 
+ test("renderer exposes window.api", async () => {
+-  const window = await app.firstWindow();
+-  const hasApi = await window.evaluate(() => typeof window.api === "object" && window.api !== null);
++  const page = await app.firstWindow();
++  const hasApi = await page.evaluate(() => typeof window.api === "object" && window.api !== null);
+   expect(hasApi).toBe(true);
+ });
+ 
+ test("window.api has required methods", async () => {
+-  const window = await app.firstWindow();
+-  const methods = await window.evaluate(() =>
++  const page = await app.firstWindow();
++  const methods = await page.evaluate(() =>
+     Object.keys(window.api).sort(),
+   );
+   expect(methods).toContain("openFolderDialog");
+diff --git a/tests/e2e/folder-workflow.spec.ts b/tests/e2e/folder-workflow.spec.ts
+index 58f4e7b..6d5284d 100644
+--- a/tests/e2e/folder-workflow.spec.ts
++++ b/tests/e2e/folder-workflow.spec.ts
+@@ -25,10 +25,10 @@ test.afterAll(async () => {
+ });
+ 
+ test("can scan a folder via IPC and get WAV files", async () => {
+-  const window = await app.firstWindow();
+-  await window.waitForLoadState("domcontentloaded");
++  const page = await app.firstWindow();
++  await page.waitForLoadState("domcontentloaded");
+ 
+-  const files = await window.evaluate(async (dir: string) => {
++  const files = await page.evaluate(async (dir: string) => {
+     return window.api.scanFolder(dir);
+   }, testDir);
+ 
+@@ -38,14 +38,14 @@ test("can scan a folder via IPC and get WAV files", async () => {
+ });
+ 
+ test("can read and write metadata via IPC", async () => {
+-  const window = await app.firstWindow();
++  const page = await app.firstWindow();
+   const filePath = join(testDir, "track-01.wav");
+ 
+-  const schema = await window.evaluate(async () => {
++  const schema = await page.evaluate(async () => {
+     return window.api.loadSchema();
+   });
+ 
+-  await window.evaluate(
++  await page.evaluate(
+     async ({ path, schema }: { path: string; schema: unknown[] }) => {
+       await window.api.writeMetadata(
+         path,
+@@ -56,7 +56,7 @@ test("can read and write metadata via IPC", async () => {
+     { path: filePath, schema },
+   );
+ 
+-  const meta = await window.evaluate(
++  const meta = await page.evaluate(
+     async ({ path, schema }: { path: string; schema: unknown[] }) => {
+       return window.api.readMetadata(
+         path,
+diff --git a/tests/main/metadata.test.ts b/tests/main/metadata.test.ts
+index 27cfc3e..600ad42 100644
+--- a/tests/main/metadata.test.ts
++++ b/tests/main/metadata.test.ts
+@@ -1,4 +1,4 @@
+-import { copyFileSync, rmSync } from "node:fs";
++import { copyFileSync, readFileSync, rmSync } from "node:fs";
+ import { join } from "node:path";
+ import { tmpdir } from "node:os";
+ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+@@ -72,6 +72,33 @@ describe("metadata handlers", () => {
+     });
+   });
+ 
++  describe("meta:write keywords via InfoTag IKEY chunk", () => {
++    it("writes keywords into a raw IKEY chunk and reads them back", async () => {
++      const writeHandler = getHandler("meta:write");
++      const readHandler = getHandler("meta:read");
++      const filePath = join(testDir, "roundtrip.wav");
++
++      await writeHandler({}, filePath, { keywords: "door, slam" }, STANDARD_FIELDS);
++
++      const meta = await readHandler({}, filePath, STANDARD_FIELDS) as Record<string, unknown>;
++      expect(meta.keywords).toBe("door, slam");
++
++      const bytes = readFileSync(filePath);
++      const infoOffset = bytes.indexOf(Buffer.from("INFO", "ascii"));
++      expect(infoOffset).toBeGreaterThanOrEqual(8);
++      expect(bytes.toString("ascii", infoOffset - 8, infoOffset - 4)).toBe("LIST");
++      const ikeyOffset = bytes.indexOf(Buffer.from("IKEY", "ascii"), infoOffset + 4);
++      expect(ikeyOffset).toBeGreaterThan(infoOffset);
++      expect(ikeyOffset).toBeLessThan(infoOffset + bytes.readUInt32LE(infoOffset - 4));
++      const chunkSize = bytes.readUInt32LE(ikeyOffset + 4);
++      const expected = Buffer.from("door, slam", "ascii");
++      expect(chunkSize).toBeGreaterThanOrEqual(expected.length);
++      const payload = bytes.subarray(ikeyOffset + 8, ikeyOffset + 8 + chunkSize);
++      expect(payload.subarray(0, expected.length).equals(expected)).toBe(true);
++      expect(payload.subarray(expected.length).every((b) => b === 0)).toBe(true);
++    });
++  });
++
+   describe("meta:read-batch", () => {
+     it("reads metadata from multiple files", async () => {
+       copyFileSync(join(fixturesDir, "sample.wav"), join(testDir, "batch1.wav"));
+diff --git a/tests/renderer/setup.ts b/tests/renderer/setup.ts
+index 19ff6c1..6ac18ec 100644
+--- a/tests/renderer/setup.ts
++++ b/tests/renderer/setup.ts
+@@ -27,5 +27,5 @@ Object.defineProperty(globalThis, "window", {
+ if (!globalThis.window) {
+   (globalThis as Record<string, unknown>).window = { api: mockApi };
+ } else {
+-  (globalThis.window as Record<string, unknown>).api = mockApi;
++  (globalThis.window as unknown as Record<string, unknown>).api = mockApi;
+ }
+diff --git a/tsconfig.node.json b/tsconfig.node.json
+index 0b2ff7a..f9115c0 100644
+--- a/tsconfig.node.json
++++ b/tsconfig.node.json
+@@ -1,6 +1,9 @@
+ {
+   "compilerOptions": {
+     "composite": true,
++    "target": "ES2022",
++    "lib": ["ES2022"],
++    "skipLibCheck": true,
+     "module": "ESNext",
+     "moduleResolution": "bundler",
+     "allowSyntheticDefaultImports": true,
+diff --git a/tsconfig.test.json b/tsconfig.test.json
+index 2c4e287..3d1b2c2 100644
+--- a/tsconfig.test.json
++++ b/tsconfig.test.json
+@@ -1,5 +1,8 @@
+ {
+   "compilerOptions": {
++    "target": "ES2022",
++    "lib": ["ES2022", "DOM", "DOM.Iterable"],
++    "skipLibCheck": true,
+     "module": "ESNext",
+     "moduleResolution": "bundler",
+     "allowSyntheticDefaultImports": true,
+@@ -15,5 +18,5 @@
+     },
+     "types": ["vitest/globals", "node"]
+   },
+-  "include": ["tests/**/*", "src/shared/**/*"]
++  "include": ["tests/**/*", "src/shared/**/*", "src/preload/index.d.ts"]
+ }
+diff --git a/tsconfig.web.json b/tsconfig.web.json
+index 74766b9..43f0607 100644
+--- a/tsconfig.web.json
++++ b/tsconfig.web.json
+@@ -1,6 +1,9 @@
+ {
+   "compilerOptions": {
+     "composite": true,
++    "target": "ES2022",
++    "lib": ["ES2022", "DOM", "DOM.Iterable"],
++    "skipLibCheck": true,
+     "jsx": "react-jsx",
+     "module": "ESNext",
+     "moduleResolution": "bundler",
+@@ -17,5 +20,5 @@
+     },
+     "types": ["node"]
+   },
+-  "include": ["src/renderer/src/**/*", "src/shared/**/*"]
++  "include": ["src/renderer/src/**/*", "src/shared/**/*", "src/preload/index.d.ts"]
+ }

@@ -1,0 +1,38 @@
+
+ RUN  v4.0.18 /tmp/c-r2-mut
+
+ ✓ tests/main/templates.test.ts (8 tests) 40ms
+ ✓ tests/main/file-system.test.ts (10 tests) 26ms
+ ❯ tests/main/metadata.test.ts (7 tests | 1 failed) 38ms
+       ✓ reads empty metadata from a clean WAV 8ms
+       ✓ returns empty metadata for corrupt files 1ms
+       ✓ writes and reads back standard fields 11ms
+       × writes keywords into a raw IKEY chunk and reads them back 7ms
+       ✓ reads metadata from multiple files 3ms
+       ✓ writes metadata to multiple files and reports results 4ms
+       ✓ reports failures for invalid files 1ms
+ ✓ tests/main/schema.test.ts (6 tests) 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/main/metadata.test.ts > metadata handlers > meta:write keywords via InfoTag IKEY chunk > writes keywords into a raw IKEY chunk and reads them back
+Error: Failed to write metadata: File tag is not a CombinedTag
+ ❯ src/main/ipc/metadata.ts:251:15
+    249|           throw new Error('File is locked or read-only');
+    250|         }
+    251|         throw new Error(`Failed to write metadata: ${msg}`);
+       |               ^
+    252|       }
+    253|     },
+ ❯ tests/main/metadata.test.ts:81:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 30 passed (31)
+   Start at  13:27:31
+   Duration  499ms (transform 183ms, setup 77ms, import 350ms, tests 115ms, environment 1ms)
+
+
+::error file=/tmp/c-r2-mut/src/main/ipc/metadata.ts,title=tests/main/metadata.test.ts > metadata handlers > meta%3Awrite keywords via InfoTag IKEY chunk > writes keywords into a raw IKEY chunk and reads them back,line=251,column=15::Error: Failed to write metadata: File tag is not a CombinedTag%0A ❯ src/main/ipc/metadata.ts:251:15%0A ❯ tests/main/metadata.test.ts:81:13%0A%0A

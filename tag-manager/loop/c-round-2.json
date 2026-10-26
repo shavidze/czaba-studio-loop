@@ -1,0 +1,33 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R2-01",
+      "severity": "low",
+      "steps": [
+        "npm run build; launch out/main/index.js with Playwright _electron under xvfb-run (--no-sandbox), clean XDG_CONFIG_HOME (default STANDARD_FIELDS schema)",
+        "Stub dialog.showOpenDialog to a temp folder with a copy of tests/fixtures/sample.wav; Open Folder; select alpha.wav",
+        "In Artists type 'Artist One' Enter, 'Artist Two' Enter; click Save Tags",
+        "ffprobe -v error -show_entries format_tags -of json alpha.wav; dump LIST/INFO sub-chunks"
+      ],
+      "expected": "Artists land in the chunk the schema declares (STANDARD_FIELDS artists.riffChunkId = 'IART') and an ffprobe-based importer sees every artist under one key",
+      "actual": "LIST/INFO holds two ISTR sub-chunks, not the schema-declared IART. ffprobe format_tags: artist=\"Artist One\" plus a separate raw key ISTR=\"Artist Two\". music-metadata reads both into common.artists. An importer keyed on ffprobe \"artist\" sees only the first artist. This is PRE-EXISTING: the standard-prop path (tag.performers, node-taglib-sharp) is not in A's diff. It is not a round-2 regression. It is a T-1 tag-contract input (K-4 field -> chunk, needs a D-ID).",
+      "evidence": "c-round-2/r2-6-result.json (after.chunks LIST/INFO sub, ffprobe), c-round-2/r2-6-drive.log"
+    }
+  ],
+  "passed": [
+    "R2-1",
+    "R2-2",
+    "R2-3",
+    "R2-4",
+    "R2-5",
+    "R2-6",
+    "R2-7",
+    "R2-8",
+    "R2-9"
+  ],
+  "blocked": [
+    "Info, not a round-2 acceptance: TM-T0-CI stays open (realVerified=false) until root links a green GitHub Actions run of check.yml"
+  ],
+  "realVerified": true
+}

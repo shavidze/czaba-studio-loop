@@ -1,0 +1,11 @@
+# A round 2 checkpoint
+- [x] Baseline: HEAD c34ee5a, clean tree.
+- [x] Red (a): tsc -p node/web/test = 10/32/31 errors; root tsc lists 0 files.
+- [x] Red (b): old check + probe -> exit 0 (red-old-check.log).
+- [x] grep "class " src -> no hits.
+- [x] IKEY pin test added; green pre-fix 31/31; mutation (skip setValuesFromStrings) red.
+- [x] tsconfig node/web/test; metadata.ts getRiffInfoTags; FileList formatFirstFieldValue; utils FieldDefinition[]; setup cast; e2e rename -> 3x tsc exit 0.
+- [x] package.json typecheck + check.
+- [x] check.yml reporter+env; docs/plans/002 sentences; YAML valid.
+- [x] verifyCommand exit 0 (75/75, 31/31, E2E 6/6); R2-7 index.html; new-check red x3 TS2322, old-check green; listFiles 9/26/32; frozen ok.
+- [x] code-review (no blockers; IKEY test scoped to LIST/INFO), report a-round-2.md written.

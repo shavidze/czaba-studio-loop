@@ -1,0 +1,134 @@
+diff --git a/tests/e2e/app-launch.spec.ts b/tests/e2e/app-launch.spec.ts
+index 433f699..413b4a1 100644
+--- a/tests/e2e/app-launch.spec.ts
++++ b/tests/e2e/app-launch.spec.ts
+@@ -16,16 +16,16 @@ test.afterAll(async () => {
+ });
+ 
+ test("window opens and has correct title bar", async () => {
+-  const window = await app.firstWindow();
+-  await window.waitForLoadState("domcontentloaded");
++  const page = await app.firstWindow();
++  await page.waitForLoadState("domcontentloaded");
+ 
+-  const title = await window.title();
++  const title = await page.title();
+   expect(title).toBeTruthy();
+ });
+ 
+ test("window has expected minimum dimensions", async () => {
+-  const window = await app.firstWindow();
+-  const { width, height } = await window.evaluate(() => ({
++  const page = await app.firstWindow();
++  const { width, height } = await page.evaluate(() => ({
+     width: window.innerWidth,
+     height: window.innerHeight,
+   }));
+@@ -34,14 +34,14 @@ test("window has expected minimum dimensions", async () => {
+ });
+ 
+ test("renderer exposes window.api", async () => {
+-  const window = await app.firstWindow();
+-  const hasApi = await window.evaluate(() => typeof window.api === "object" && window.api !== null);
++  const page = await app.firstWindow();
++  const hasApi = await page.evaluate(() => typeof window.api === "object" && window.api !== null);
+   expect(hasApi).toBe(true);
+ });
+ 
+ test("window.api has required methods", async () => {
+-  const window = await app.firstWindow();
+-  const methods = await window.evaluate(() =>
++  const page = await app.firstWindow();
++  const methods = await page.evaluate(() =>
+     Object.keys(window.api).sort(),
+   );
+   expect(methods).toContain("openFolderDialog");
+diff --git a/tests/e2e/folder-workflow.spec.ts b/tests/e2e/folder-workflow.spec.ts
+index 58f4e7b..6d5284d 100644
+--- a/tests/e2e/folder-workflow.spec.ts
++++ b/tests/e2e/folder-workflow.spec.ts
+@@ -25,10 +25,10 @@ test.afterAll(async () => {
+ });
+ 
+ test("can scan a folder via IPC and get WAV files", async () => {
+-  const window = await app.firstWindow();
+-  await window.waitForLoadState("domcontentloaded");
++  const page = await app.firstWindow();
++  await page.waitForLoadState("domcontentloaded");
+ 
+-  const files = await window.evaluate(async (dir: string) => {
++  const files = await page.evaluate(async (dir: string) => {
+     return window.api.scanFolder(dir);
+   }, testDir);
+ 
+@@ -38,14 +38,14 @@ test("can scan a folder via IPC and get WAV files", async () => {
+ });
+ 
+ test("can read and write metadata via IPC", async () => {
+-  const window = await app.firstWindow();
++  const page = await app.firstWindow();
+   const filePath = join(testDir, "track-01.wav");
+ 
+-  const schema = await window.evaluate(async () => {
++  const schema = await page.evaluate(async () => {
+     return window.api.loadSchema();
+   });
+ 
+-  await window.evaluate(
++  await page.evaluate(
+     async ({ path, schema }: { path: string; schema: unknown[] }) => {
+       await window.api.writeMetadata(
+         path,
+@@ -56,7 +56,7 @@ test("can read and write metadata via IPC", async () => {
+     { path: filePath, schema },
+   );
+ 
+-  const meta = await window.evaluate(
++  const meta = await page.evaluate(
+     async ({ path, schema }: { path: string; schema: unknown[] }) => {
+       return window.api.readMetadata(
+         path,
+diff --git a/tests/main/metadata.test.ts b/tests/main/metadata.test.ts
+index 27cfc3e..600ad42 100644
+--- a/tests/main/metadata.test.ts
++++ b/tests/main/metadata.test.ts
+@@ -1,4 +1,4 @@
+-import { copyFileSync, rmSync } from "node:fs";
++import { copyFileSync, readFileSync, rmSync } from "node:fs";
+ import { join } from "node:path";
+ import { tmpdir } from "node:os";
+ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+@@ -72,6 +72,33 @@ describe("metadata handlers", () => {
+     });
+   });
+ 
++  describe("meta:write keywords via InfoTag IKEY chunk", () => {
++    it("writes keywords into a raw IKEY chunk and reads them back", async () => {
++      const writeHandler = getHandler("meta:write");
++      const readHandler = getHandler("meta:read");
++      const filePath = join(testDir, "roundtrip.wav");
++
++      await writeHandler({}, filePath, { keywords: "door, slam" }, STANDARD_FIELDS);
++
++      const meta = await readHandler({}, filePath, STANDARD_FIELDS) as Record<string, unknown>;
++      expect(meta.keywords).toBe("door, slam");
++
++      const bytes = readFileSync(filePath);
++      const infoOffset = bytes.indexOf(Buffer.from("INFO", "ascii"));
++      expect(infoOffset).toBeGreaterThanOrEqual(8);
++      expect(bytes.toString("ascii", infoOffset - 8, infoOffset - 4)).toBe("LIST");
++      const ikeyOffset = bytes.indexOf(Buffer.from("IKEY", "ascii"), infoOffset + 4);
++      expect(ikeyOffset).toBeGreaterThan(infoOffset);
++      expect(ikeyOffset).toBeLessThan(infoOffset + bytes.readUInt32LE(infoOffset - 4));
++      const chunkSize = bytes.readUInt32LE(ikeyOffset + 4);
++      const expected = Buffer.from("door, slam", "ascii");
++      expect(chunkSize).toBeGreaterThanOrEqual(expected.length);
++      const payload = bytes.subarray(ikeyOffset + 8, ikeyOffset + 8 + chunkSize);
++      expect(payload.subarray(0, expected.length).equals(expected)).toBe(true);
++      expect(payload.subarray(expected.length).every((b) => b === 0)).toBe(true);
++    });
++  });
++
+   describe("meta:read-batch", () => {
+     it("reads metadata from multiple files", async () => {
+       copyFileSync(join(fixturesDir, "sample.wav"), join(testDir, "batch1.wav"));

@@ -1,0 +1,26 @@
+build=0
+
+Running 6 tests using 2 workers
+
+  ✓  1 tests/e2e/app-launch.spec.ts:18:5 › window opens and has correct title bar (310ms)
+  ✓  3 tests/e2e/app-launch.spec.ts:26:5 › window has expected minimum dimensions (11ms)
+  ✓  4 tests/e2e/app-launch.spec.ts:36:5 › renderer exposes window.api (16ms)
+  ✓  2 tests/e2e/folder-workflow.spec.ts:27:5 › can scan a folder via IPC and get WAV files (377ms)
+  ✓  5 tests/e2e/app-launch.spec.ts:42:5 › window.api has required methods (10ms)
+  ✓  6 tests/e2e/folder-workflow.spec.ts:40:5 › can read and write metadata via IPC (47ms)
+
+  6 passed (2.4s)
+pw exit=0
+-rw-rw-r-- 1 runner runner 533888 Oct 26 13:27 playwright-report/index.html
+10341 /bin/bash -c source /home/runner/.claude/shell-snapshots/snapshot-bash-1793021162649-4l2les.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'cd /home/runner/czaba-project/czaba-tag-manager; O=../tmp/tag-manager-loop/c-round-2; { rm -rf playwright-report; npm run build >/dev/null 2>&1; echo build=$?; PLAYWRIGHT_HTML_OPEN=never timeout 300 xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure --reporter=list,html; echo "pw exit=$?"; ls -la playwright-report/index.html; pgrep -fa '"'"'show-report|playwright'"'"' || echo "no leftover playwright process"; node -e "const y=require('"'"'js-yaml'"'"');const d=y.load(require('"'"'fs'"'"').readFileSync('"'"'.github/workflows/check.yml'"'"','"'"'utf8'"'"'));const s=d.jobs[Object.keys(d.jobs)[0]].steps;console.log('"'"'YAML OK'"'"');for(const x of s)console.log(JSON.stringify(x))"; } 2>&1 | sed '"'"'s/\x1b\[[0-9;]*m//g'"'"' | tee $O/r2-7.log | tail -25; git diff c34ee5a -- .github/workflows/check.yml | grep -c '"'"'^[-+][^-+]'"'"'' < /dev/null && pwd -P >| /tmp/claude-ea9c-cwd
+10342 /bin/bash -c source /home/runner/.claude/shell-snapshots/snapshot-bash-1793021162649-4l2les.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'cd /home/runner/czaba-project/czaba-tag-manager; O=../tmp/tag-manager-loop/c-round-2; { rm -rf playwright-report; npm run build >/dev/null 2>&1; echo build=$?; PLAYWRIGHT_HTML_OPEN=never timeout 300 xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure --reporter=list,html; echo "pw exit=$?"; ls -la playwright-report/index.html; pgrep -fa '"'"'show-report|playwright'"'"' || echo "no leftover playwright process"; node -e "const y=require('"'"'js-yaml'"'"');const d=y.load(require('"'"'fs'"'"').readFileSync('"'"'.github/workflows/check.yml'"'"','"'"'utf8'"'"'));const s=d.jobs[Object.keys(d.jobs)[0]].steps;console.log('"'"'YAML OK'"'"');for(const x of s)console.log(JSON.stringify(x))"; } 2>&1 | sed '"'"'s/\x1b\[[0-9;]*m//g'"'"' | tee $O/r2-7.log | tail -25; git diff c34ee5a -- .github/workflows/check.yml | grep -c '"'"'^[-+][^-+]'"'"'' < /dev/null && pwd -P >| /tmp/claude-ea9c-cwd
+YAML OK
+{"uses":"actions/checkout@v4"}
+{"uses":"actions/setup-node@v4","with":{"node-version":22,"cache":"npm"}}
+{"name":"Install dependencies","run":"npm ci"}
+{"name":"Install system packages","run":"sudo apt-get update\nsudo apt-get install -y ffmpeg xvfb\n"}
+{"name":"Install Electron system libraries","run":"npx playwright install-deps chromium"}
+{"name":"Lint, type check and unit tests","run":"npm run check"}
+{"name":"Build","run":"npm run build"}
+{"name":"E2E tests","run":"xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure --reporter=list,html","env":{"PLAYWRIGHT_HTML_OPEN":"never"}}
+{"name":"Upload test artifacts","if":"failure()","uses":"actions/upload-artifact@v4","with":{"name":"playwright-artifacts","path":"playwright-report/\ntest-results/\n","if-no-files-found":"ignore"}}
