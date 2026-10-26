@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T08:09:05.581Z)
+# Active loop summary (2026-10-26T09:03:55.685Z)
 
-- backlog.json 1657 KB -> active view 235 KB
-- status: G_ROOT_GATE round 187
-- servers: `{"checkedUtc":"2026-10-26T07:46:00.9964137Z","round":187,"attempt":1,"store":200}`
-- last publication: cb2436278c323c171bf193ce39f42bda72844c0b (rounds 187-187)
-- last root gate: round 187 published - commit cb2436278c323c171bf193ce39f42bda72844c0b pushed
+- backlog.json 1667 KB -> active view 238 KB
+- status: G_ROOT_GATE round 188
+- servers: `{"checkedUtc":"2026-10-26T08:35:09.1589196Z","round":188,"attempt":1,"store":200}`
+- last publication: 850445c00162ea0378f3cdf401cd08896d693aaf (rounds 188-188)
+- last root gate: round 188 published - commit 850445c00162ea0378f3cdf401cd08896d693aaf pushed
 
 ## Current items: -
 
@@ -436,6 +436,10 @@
 - C-R186-01 / low / open_low_conditional / active SFX product without variants (/products/door-slams) shows TOTAL PRICE $0.00 with live Add to Cart and Buy Now (list card shows standa
 - GATE186-REVIEW-SIGNALS / info / signal / gate-186 reviewer: (1) doc 153 status stale -> scheduled round 187 K3; (2) sitemap lists inactive products -> GATE186-SITEMAP-INACTIVE defer
 - B-R186-PLAYER-SIGNALS / info / signal / AudioPlayer inline rgba(255,255,255,0.1) unfilled-track colour (Tailwind-first) and .audio-preview-overlay-text unused after R55 (app.css fr
+- GATE187-REVIEW-SIGNALS / info / signal / gate-187 reviewer: (1) doc 154 status stale -> scheduled round 188 K6; (2) ProductCard.tsx:117-133 AudioPreviewButton nested inside <Link> (
+- A-R187-SIGNALS / info / signal / A round 187: ProductCard.tsx:141 bg-primary/90 text-primary-foreground use undefined tokens (same class of bug as K1) on the non-new badge; 
+- C-R187-INFO / info / routed / C round 187 info: I1 entrance loader blocks / card Play for ~3-5.4 s (-> STORE-1d acceptance); I2 LeadMagnet popup covers scrolled-shot firs
+- B-R187-HEADER-SIGNALS / info / signal / Header auth-block buttons lack type=button (useButtonType), the menu toggle lacks aria-expanded/aria-controls, collapsed mobile links (max-h
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

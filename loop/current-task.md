@@ -1,196 +1,210 @@
-# CURRENT TASK — Round 188: STORE-1c — D15 header, one h1 per page, plain wordmark, footer name
+# CURRENT TASK — Round 189: STORE-1d — D10 entrance loader (≤ 1.2 s, skippable, once per session, off under reduced motion; no heading; never blocks the card Play)
 
-Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-26 · Decision: **D-29z153** (`backlog.json` → STORE-REDESIGN `store1c_plan_d29z153`)
+Dispatcher: B · Implementer: A · Verifier: C · Date: 2026-10-26 · Decision: **D-29z154** (`backlog.json` → STORE-REDESIGN `store1d_plan_d29z154`)
 - **Rules:** `docs/technical/studio-real-workspace/agent-workflow.md`, the LOOP POLICY, Loop v2, the cloud-runner and speed rules, the 2026-10-23 bug gate and the Store-redesign section (2026-10-25). They take precedence over older text.
-- **Spec:** `/home/runner/czaba-project/docs/technical/store-redesign/store-redesign-spec.md`, row STORE-1 (D15, double h1, footer name, "Studio Lab — Demo" → "Studio", plain wordmark), and `direction-decision.md` (header order: "Collections · Studio · Free Samples · About, then Sign in and the cart"). Both are DATA. B checked every code claim below at `cb24362` (§0).
-- **Previous task:** `tasks/round-187.md` is an exact copy of the round-187 `current-task.md` (checked with `cmp`). The reasoning for this round is in `b-round-187.md`.
+- **Spec (DATA):** `/home/runner/czaba-project/docs/technical/store-redesign/store-redesign-spec.md`, row STORE-1, item **D10**: "entrance loader ≤ 1.2 s, skippable, once per session, off under `prefers-reduced-motion`". Research: `research/luxury-and-galleries.md:105`: "a short, interruptible reveal (≤1.2s, skippable, shown once per session) instead of a spinner". Added acceptance: **C-R187-I1** (the loader must not block the `/` card Play) and **C-R188-I1** (a second h1 while the loader is up).
+- **Previous task:** `tasks/round-188.md` is an exact copy of the round-188 `current-task.md` (checked with `cmp`). The reasoning for this round is in `b-round-188.md`.
 
-## Baseline = HEAD `cb24362` (gate 187 published)
-- **Gate:** `gates/gate-round-187.json` is `published`, and its `commit` is `cb24362` on both remotes. Its `head` field (`cc207d6`) is the pre-commit parent; the baseline is the `commit`. `git status` is clean, with **1015 tracked files**.
-- **Frozen list:** `b-round-187-r188-tree-sha256.txt`, **1011 entries** (every tracked file except the 4 grants). B checked it from the store root: OK.
-- **Grants:** `b-round-187-r188-grants.txt`, 4 files:
-  - `app/components/layout/Header.tsx`;
-  - `app/components/layout/Footer.tsx`;
-  - `e2e/navigation.spec.ts` (the `navLinks` array only);
-  - `docs/implementation/2026/quarter-IV/154-store-1b-audio-preview-player.md` (status lines only).
+## Baseline = HEAD `850445c` (gate 188 published)
+- **Gate:** `gates/gate-round-188.json` is `published`, and its `commit` is `850445c` on both remotes. Its `head` field (`cb24362`) is the pre-commit parent; the baseline is the `commit`. `git status` is clean, with **1017 tracked files**.
+- **Frozen list:** `b-round-188-r189-tree-sha256.txt`, **1015 entries** (every tracked file except the 2 grants). B checked it from the store root: OK.
+- **Grants:** `b-round-188-r189-grants.txt`, 2 files:
+  - `app/components/loading/SpotlightLoader.tsx`;
+  - `docs/implementation/2026/quarter-IV/155-store-1c-header-footer.md` (status lines only, K7).
 
-  **Start hashes:** `b-round-187-r188-granted-start-sha256.txt` (`aa72b797…`, `1ee312a9…`, `ffca2a3d…`, `43742496…`). **Start copies:** `b-round-187/r188-granted-start/`.
-- **New files:** `b-round-187-r188-new-files.txt`: `app/lib/__tests__/store-header-footer.test.tsx` and `docs/implementation/2026/quarter-IV/155-store-1c-header-footer.md`.
+  **Start hashes:** `b-round-188-r189-granted-start-sha256.txt` (`abfe013b…`, `b47bec15…`). **Start copies:** `b-round-188/r189-granted-start/`.
+- **New files:** `b-round-188-r189-new-files.txt`: `app/lib/__tests__/store-entrance-loader.test.tsx` and `docs/implementation/2026/quarter-IV/156-store-1d-entrance-loader.md`.
 - **A's first step:** check these four things. If anything differs, stop and report.
-  1. HEAD is `cb24362`.
-  2. `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-187-r188-tree-sha256.txt`, run **from the store root**, is OK.
-  3. The four start hashes match.
+  1. HEAD is `850445c`.
+  2. `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-188-r189-tree-sha256.txt`, run **from the store root**, is OK.
+  3. The two start hashes match.
   4. Neither new file exists yet.
 - **Mock API:** `tmp/studio-real-loop/mock-api/server.mjs` serves the store data on 127.0.0.1:5199. **A and C:** if :5199 is not listening (`ss -ltn`), start `node mock-api/server.mjs > <your-folder>/mock.log 2>&1 &` and stop it at the end. Record which you did. Do not edit the mock.
 
 ## 0. Why this round
-- **Regression is not due yet.** `regression-last.json` is dated 2026-10-24; today is 2026-10-26 (2 days). Round 187's pre-written §7 outcome for "C PASS, planning still on 2026-10-26" is **STORE-1c**. The first planning on or after 2026-10-27 makes the next round the REGRESSION round.
-- **C bugs first:** C round 187 found **0 bugs** (PASS, `browserVerified=true`, `realVerified=true`, 11 rows). No Critical, High or Medium finding is open. Its four info items are routed in `b-round-187.md`. C-R187-I1 goes into STORE-1d's acceptance, not here.
-- **Code facts B checked at `cb24362`:**
-  - **Wordmark** (`Header.tsx:52-54`): `<h1 className="text-2xl font-extrabold text-glow tracking-tighter">CZABA</h1>` inside `<Link to="/">`. `.text-glow` (`app/styles/app.css:1132`) is the `--gradient-text` clip, i.e. the gradient wordmark.
-  - **Two h1s on every store page.** Every store route has its own h1 (the home page's is `HeroSection.tsx:159`), and the header adds a second one. The header is not rendered on `/studio*` (`root.tsx:137,144`).
-  - **Current nav** (`Header.tsx:57-87` desktop, `175-225` mobile): Store, Gift Cards, Free Samples, About, Hire Us, and "Studio Lab" with a "Demo" badge span.
-  - **Footer:** `Footer.tsx:41-46` already links Gift Cards and Hire Us. `Footer.tsx:74` says `© {year} Czaba Music. All rights reserved.`, while `APP_NAME = 'CZABA'` is on l.4.
-  - **No `/collections` route.** The only catalogue pages in `app/routes` are `_index.tsx` and `store.tsx`.
-  - **e2e:** `e2e/navigation.spec.ts:27-33` lists Gift Cards and Hire Us as header nav links behind an `isVisible()` guard, so after this round it would silently skip them. Line 9 (an `h1` containing "CZABA") keeps passing through the hero h1.
-  - **Router in tests:** there is no `@remix-run/testing` devDependency. Round 187 used `MemoryRouter` from the hoisted `react-router-dom`. B keeps that precedent here, which closes the round-187 reviewer item, and adds no new package.
+- **Regression is not due yet.** `regression-last.json` is dated 2026-10-24 and today is 2026-10-26, which is 2 days. Round 188 §7 ("C PASS, planning still on 2026-10-26") sends us to **STORE-1d**. The first planning on or after 2026-10-27 makes the next round the REGRESSION round.
+- **C bugs first:** C round 188 found **0 bugs** (PASS, `browserVerified=true`, `realVerified=true`, 14 rows). No Critical, High or Medium finding is open. Two of its info items belong to this round's code: C-R188-I1 (the loader h1) and C-R187-I1 (the loader blocks the card Play). The other items are routed in `b-round-188.md`.
+- **Correction of B's earlier text:**
+  - **The loader h1 is in `SpotlightLoader`.** Round 188 §4 said `SpotlightLoader` has no h1, and the backlog's STORE-1d addition named `CinemaCurtainLoader`. Both were wrong. The h1 is `SpotlightLoader.tsx:191` (`motion.h1` "CZABA"). `CinemaCurtainLoader` is exported from `app/components/loading/index.ts:3` and `app/components/common/index.ts:3`, but no route mounts it (grep). It is dead code: a STORE-5 signal, not touched here.
+  - **`.text-glow` is still used.** B's round-188 signal said it would become unused. A, C and the gate reviewer showed it is still used in 9 files.
+- **Code facts B checked at `850445c`:**
+  - **Where it mounts:** `SpotlightLoader` is mounted only at `app/routes/_index.tsx:160` (imported from `~/components/common`, l.40). Its export name and props (none) stay the same.
+  - **Timing** (l.5-9, l.43-69): 800 ms dark, then 1.2 s spotlight, then 600 ms logo delay, then 2000 ms hold, then 1.0 s exit. The total is **5.6 s**, which matches C's 0.64 → 6.3 s probe.
+  - **Show rule** (l.12-29): `localStorage` key `czaba_spotlight_last_shown`, with a random interval of 5–7 h. It is not per session, and nothing checks reduced motion.
+  - **Overlay** (l.79-85): `fixed inset-0 z-50`. It has no `pointer-events-none` and no skip handler, so it swallows hover and clicks on the page below for the whole 5.6 s.
+  - **SSR:** `shouldShow` starts `false`, so the server renders nothing. The overlay appears only after hydration.
+  - **Reduced-motion precedent:** `useReducedMotion` from framer-motion (`ProductAccordion.tsx:13`). jsdom has no `window.matchMedia`, so a test must stub it.
+  - **e2e:** `e2e/navigation.spec.ts:9` uses `page.locator('h1').filter({ hasText: 'CZABA' })` on `/`. While the loader's h1 is up, it matches 2 elements. Removing the heading only makes this test safer.
 
 ## 1. What changes (exact)
 | ID | File | Change |
 |---|---|---|
-| **K1** (D15, desktop) | `Header.tsx` l.57-87 | The desktop `<nav>` holds exactly four links, in this order: **Collections** → `/store` (`getNavLinkClass('/store')`), **Studio** → `/studio-lab` (`getNavLinkClass('/studio-lab')`), **Free Samples** → `/free-downloads`, **About** → `/about`. Keep `prefetch="intent"` and the existing class helpers. Remove the Gift Cards and Hire Us links, the "Demo" badge `<span>`, and the `whitespace-nowrap` on the Studio link (it is one word, so it has no visual effect). |
-| **K2** (D15, mobile) | `Header.tsx` l.175-225 | The mobile `<nav>` holds the **same four links in the same order with the same hrefs**. Each keeps `getMobLinkClass(...)` and `onClick={() => setIsOpen(false)}`. Remove the Gift Cards and Hire Us links and the "Demo" span. |
-| **K3** (one h1, plain wordmark) | `Header.tsx` l.53 | `<h1 …text-glow…>CZABA</h1>` → `<span className="block text-2xl font-extrabold tracking-tighter text-foreground">CZABA</span>`. `block` keeps the header's height unchanged, and `text-foreground` is an existing token. Do **not** edit `.text-glow` in `app.css` (`app/styles/**` is frozen). |
-| **K4** (footer name) | `Footer.tsx` l.74 | `© {new Date().getFullYear()} {APP_NAME}. All rights reserved.` Nothing else in `Footer.tsx` changes; its Gift Cards and Hire Us links stay. |
-| **K5** (e2e list) | `e2e/navigation.spec.ts` l.27-33 | Replace the `navLinks` entries with `{ text: 'Collections', path: '/store' }`, `{ text: 'Studio', path: '/studio-lab' }`, `{ text: 'Free Samples', path: '/free-downloads' }` and `{ text: 'About', path: '/about' }`. No other line changes. |
-| **K6** (doc 154) | doc 154 l.4 and l.61 | l.4 → `**სტატუსი:** Completed`. l.61 → C round 187 PASS (`c-round-187.md`, browserVerified), published as `cb24362`. Two lines only; this is the gate-187 reviewer's item 1. |
-| **T1** | **new** `app/lib/__tests__/store-header-footer.test.tsx` | See §3. |
-| **D1** | **new** `docs/implementation/2026/quarter-IV/155-store-1c-header-footer.md` | In Georgian, with the `TEMPLATE.md` sections: date, status `In Progress (awaiting C round 188)`, project, context, approach (rulings R56–R60 with the rejected alternatives), changed files, problem → solution, testing, and TODO (STORE-1d with C-R187-I1; the STORE-2 signals in §8). |
+| **K1** (≤ 1.2 s) | `SpotlightLoader.tsx` | From mount to unmount, the overlay is on screen for **at most 1200 ms, exit fade included**. A chooses the phase split (dark, spotlight, logo, hold, exit) and keeps the existing visuals: black stage, spotlight cone, glow, logo, rule line, tagline, dust, vignette and grain. The logo must actually be seen: its wrapper reaches opacity ≥ 0.9 for at least 200 ms. Use one constant for the total `T` (≤ 1200). The framer `transition.duration` values must shrink to fit: the logo wrapper currently fades in over 0.8 s, which cannot reach ≥ 0.9 opacity for 200 ms inside 1.2 s together with a dark phase and an exit. The test asserts the behaviour and the bound, not a particular split. Timer type: `ReturnType<typeof setTimeout>` instead of `NodeJS.Timeout`. All timers are cleared on unmount and on skip. |
+| **K2** (never blocks) | `SpotlightLoader.tsx` | From the start of the exit phase until unmount, the overlay root has `pointer-events-none`, so hover, clicks and `elementFromPoint` reach the page below while it fades. |
+| **K3** (skippable) | `SpotlightLoader.tsx` | A `click` on the overlay, or a document `keydown` with `key === 'Escape'`, ends the loader **immediately**: no exit fade, timers cleared, the component renders `null` from then on. Use `click`, not `pointerdown`: if the overlay unmounted on pointerdown, the pointerup and the compatibility `click` would land on whatever is underneath (mouse and touch). With `click`, the whole gesture completes on the overlay, so nothing beneath receives it (R63). The keydown listener exists only while the overlay is shown and is removed on skip, on finish and on unmount. No visible "Skip" control (R63). |
+| **K4** (once per session) | `SpotlightLoader.tsx` | Replace the `localStorage` 5–7 h rule. In the mount effect, read `sessionStorage` key `czaba_entrance_seen`. If it is `'1'`, render nothing. Otherwise show the loader once and write `'1'`. If `sessionStorage` throws, as with blocked storage, render nothing and do not throw (R61). The old `localStorage` key is no longer read or written, and it is not deleted (R61). |
+| **K5** (reduced motion) | `SpotlightLoader.tsx` | In the same mount effect, before deciding to show: if `window.matchMedia` exists and `matchMedia('(prefers-reduced-motion: reduce)').matches`, render nothing and do **not** write the session key (R64). One synchronous decision, so there is no flash of the overlay. A may use framer's `useReducedMotion` only if the overlay can never render for even one commit under reduce; the test enforces this. |
+| **K6** (no heading) | `SpotlightLoader.tsx` | The overlay root gets `aria-hidden="true"`. `motion.h1` "CZABA" becomes a non-heading `motion.span` with `block` and the same classes and inline styles, so it looks identical. No `h1`–`h6` and no `role="heading"` anywhere in the component. The tagline `<motion.p>` stays (R65). |
+| **K7** (doc 155) | doc 155 l.4 and l.72 | l.4 → `**სტატუსი:** Completed`. l.72 → C round 188 PASS (`c-round-188.md`, browserVerified), published as `850445c`. Two lines only; this is the gate-188 reviewer's item 1. |
+| **T1** | **new** `app/lib/__tests__/store-entrance-loader.test.tsx` | See §3. |
+| **D1** | **new** `docs/implementation/2026/quarter-IV/156-store-1d-entrance-loader.md` | In Georgian, with the `TEMPLATE.md` sections: date, status `In Progress (awaiting C round 189)`, project, context (D10, C-R187-I1, C-R188-I1), approach (rulings R61–R66 with the rejected alternatives), changed files, problem → solution, testing, and TODO (§8 signals). |
 
-**Unchanged on purpose (byte-identical in the diff):**
-- **`Header.tsx`:**
-  - the whole auth block: l.110-157 on desktop (skeleton, user menu, Sign In) and l.226-265 on mobile (`<hr>`, skeleton, Sign In, account links, Logout);
-  - the cart link and its badge animation;
-  - `CommandPalette` and the toggle button;
-  - the use of `useAuth`, `openModal` and `signOut`, and the imports.
-- **`Footer.tsx`:** the layout and the links.
-- **`HeroSection.tsx`:** its h1 stays; STORE-3 owns the hero.
-- **`studio-lab.tsx`:** it is Studio-owned. Its page title "Studio Lab — Demo workspace" and the in-workspace demo badge stay, so `/studio-lab` still declares itself a demo.
+**Unchanged on purpose:**
+- `_index.tsx`, both barrels, `CinemaCurtainLoader.tsx`, `PianoCurtainLoader.tsx` and `HeroSection.tsx` are byte-identical.
+- The **existing inline colours and gradients** in `SpotlightLoader.tsx` (`#000`, the `rgba(19,217,204,…)` glows, the `hsl(…)` gradient text, the grain SVG) stay as they are. The Obsidian retheme, the glow removal and the gradient-text removal belong to STORE-2. **Add no new** hardcoded colour, inline colour or custom CSS.
 
 ### Rulings (vetoable by Saba; record them in D1)
-- **R56: "Collections" points to `/store`.** No collections route exists, and seasonal or numbered collections (D14) are a later business decision. The smallest honest behaviour is the existing catalogue under the spec's label. Rejected:
-  - a new `/collections` route, because it invents structure;
-  - keeping "Store", because it ignores the approved D15.
-- **R57: Gift Cards and Hire Us leave the header only.** The footer already links both, so "move to the footer" needs no footer change. Their routes stay, and so do the CommandPalette search entry and the SpecialOffers "Browse Gift Cards" link. Neither page is on Saba's keep-list. **Free Samples is on the keep-list and stays** in both header lists.
-- **R58: the footer uses `APP_NAME` ("CZABA").** `ableton-export.ts:440` "Czaba Music Store" is Studio export metadata and out of scope (recorded in the STORE-1 split).
-- **R59: the wordmark is a non-heading `<span>` in plain `text-foreground`.** Its link keeps the accessible name "CZABA" and `href="/"`. Each page's own h1 becomes the only h1. The font and size stay; STORE-2 owns typography.
-- **R60: the "Sign In" casing is unchanged.** The spec writes "Sign in", but casing is typography, and the button lives in the auth block that this round keeps byte-identical. Owner: STORE-2.
+- **R61: "once per session" means `sessionStorage`.** The key is `czaba_entrance_seen`. The first visit to `/` in a tab session shows the loader once, even if the visitor opened other pages first. Reloads, client navigation back to `/` and later visits in the same tab session do not show it. A new tab or window is a new session, as `sessionStorage` defines it. Blocked storage means no loader.
+  - Rejected: keep `localStorage` with an interval, because the spec says per session.
+  - Rejected: show the loader on every visit when storage is blocked, because it would replay on every navigation to `/`.
+  - The old `localStorage` key stays inert. It is harmless, and deleting it would add a write for no benefit.
+  - Trade-off, recorded for Saba: the server cannot read `sessionStorage`, so the overlay still appears only after hydration (about 0.6 s after first paint). Rendering it on the server would show it on every visit, against "once per session".
+- **R62: ≤ 1.2 s is measured from mount to unmount, exit fade included.** The page is interactive from the start of the exit phase (K2). Rejected: ≤ 1.2 s before the fade starts, because the overlay would still be up past 1.2 s.
+- **R63: skip by a click on the overlay or by Escape, with no visible button.** The skipping click completes on the overlay and never reaches the page: clicking a black screen should not press an invisible button. Rejected:
+  - a visible "Skip" button, because it adds a focus target and visual noise to a 1.2 s reveal;
+  - any key skips, because Tab and screen-reader keys should not have side effects;
+  - pass-through clicks, because they would activate controls the user cannot see.
+- **R64: reduced motion means no loader at all,** not a shorter or fade-only one, and the session key is not written. The spec says "off". If the visitor turns reduced motion off later in the same session, the loader may show once.
+- **R65: the overlay is decorative.** It gets `aria-hidden="true"` and has no heading. The page's own h1 (the hero "CZABA") is the only h1 at all times.
+- **R66: the visual stays and only the timing is compressed.** Colours, glow and gradient text are STORE-2's job (direction A), so this round does not half-restyle them.
 
 ## 2. A — files you own (everything else is frozen)
-- **Grants:** `Header.tsx` (K1–K3), `Footer.tsx` (K4, one line), `e2e/navigation.spec.ts` (K5, the array only), doc 154 (K6, two lines).
-- **New:** T1 and D1, plus your own `a-round-188.md` and `a-round-188/`.
+- **Grants:** `SpotlightLoader.tsx` (K1–K6) and doc 155 (K7, two lines).
+- **New:** T1 and D1, plus your own `a-round-189.md` and `a-round-189/`.
 - **Protected, byte-identical:** every other tracked file. That includes:
-  - store files: `HeroSection.tsx`, `root.tsx`, `app/styles/app.css`, `app/components/layout/index.ts`, `PageContainer.tsx`, `CommandPalette`, `app/hooks/*` and `e2e/main-flow.spec.ts`;
+  - store files: `_index.tsx`, `HeroSection.tsx`, `root.tsx`, `app/styles/app.css`, `app/components/loading/index.ts`, `app/components/common/index.ts`, `CinemaCurtainLoader.tsx`, `ProductCard.tsx`, `AudioPreviewButton.tsx`, `Header.tsx`, `Footer.tsx` and every `e2e/*`;
   - every Studio-owned file: `app/components/arrangement/*`, `app/lib/arrangement/*`, `studio-lab.tsx` and `CookieConsent.tsx`;
   - the protected purchase and auth files: `studio.$productId.tsx`, `api.studio-token.ts`, `account.downloads.tsx`, `download-routes.test.ts`, `AuthContext.tsx`, `app/lib/auth.ts` and `firebase.client.ts`;
-  - the loader files (owned by STORE-1d), `public/`, `.claude/**`, `package.json` and the configs.
+  - `public/`, `.claude/**`, `package.json` and the configs.
 
   Do not touch `mock-api/` or any other loop file.
 - **Read first** (rule `read-primitives.md`):
-  - primitives: `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `SECURITY_AUDIT.md` (Header touches the auth UI, even though that block stays identical), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`;
+  - primitives: `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`;
   - templates: `.claude/prompts/new-test.md` and `docs/implementation/TEMPLATE.md`.
 
-  This is not a forwardRef refactor; the `Header` and `Footer` props stay as they are.
-- Make every lasting edit with Edit/Write. Helper scripts go under `a-round-188/tools/`. Write `a-round-188/end-sha256.txt` (the 4 grants and the 2 new files) and `a-round-188/diff-vs-start.patch`. No commit and no push.
+  `SpotlightLoader` keeps its plain function signature; this is not a forwardRef refactor.
+- Make every lasting edit with Edit/Write. Helper scripts go under `a-round-189/tools/`. Write `a-round-189/end-sha256.txt` (the 2 grants and the 2 new files) and `a-round-189/diff-vs-start.patch`. No commit and no push.
 
 ## 3. A — tests and checks (speed rules)
 **Test setup:**
-- Mock `~/hooks` with a controllable `useAuth`: `isAuthenticated`, `isInitializing`, `user`, and `vi.fn()` for `openModal` and `signOut`.
-- Mock `~/components/search` with a trivial `CommandPalette` stub.
-- Never import `AuthContext`.
-- Render inside a `MemoryRouter` with controllable `initialEntries`.
-- No type assertions and no `any`.
+- Use `vi.useFakeTimers()`, rendering with `@testing-library/react` and `act`.
+- Stub `window.matchMedia` per test (default: no match).
+- Clear `sessionStorage` and `localStorage` in `beforeEach`.
+- framer-motion is real, not mocked. If jsdom needs a `requestAnimationFrame` shim for framer, record it.
+- No type assertions, no `any`, no `@ts-ignore`.
 
 **T1 must contain at least these cases:**
-- **N1 (desktop inventory):** the first `<nav>` in `<header>` has exactly these anchors, text and `href` in order: `[["Collections","/store"],["Studio","/studio-lab"],["Free Samples","/free-downloads"],["About","/about"]]`.
-- **N2 (mobile inventory):** the second `<nav>` in `<header>` has exactly the same list. A click on "Toggle menu" and then on the **mobile** "Studio" link (inside the second `<nav>`; the desktop one is also in the DOM) closes the menu: the collapsed classes `max-h-0 opacity-0` are back on the menu wrapper.
-- **N3 (what left):** inside `<header>` there are:
-  - 0 `h1`–`h6`;
-  - no text "Gift Cards", "Hire Us", "Demo" or "Studio Lab";
-  - no element with the class `text-glow`;
-  - no `href` `/gift-cards` or `/hire-us`.
+- **L1 (SSR guard):** `renderToString(<SpotlightLoader />)` is `''`. This guard is green on the start code too.
+- **L2 (shown, decorative):** on a first mount after effects:
+  - the overlay root exists (find it by `aria-hidden="true"` or a stable `data-testid` that A adds) and has `aria-hidden="true"`;
+  - `container.querySelectorAll('h1,h2,h3,h4,h5,h6,[role="heading"]')` is empty;
+  - the text "CZABA" is inside the overlay.
+- **L3 (≤ 1.2 s):** let `T` be A's total duration; the test asserts `T ≤ 1200`. The overlay is present at 600 ms and at `T − 1` ms, and it is gone at `T`. It stays gone after advancing to 1200 + 5000 ms. The test may read `T` from A's constant for timing, but it must also assert the bound.
+- **L4 (non-blocking exit):** at `T − 1` ms the overlay root has the `pointer-events-none` class. At 100 ms it does not, so it is still skippable by click.
+- **L5 (skip by click):** `fireEvent.click(overlay)` at 300 ms. The overlay is gone after `act`, and advancing 5000 ms never brings it back.
+- **L6 (skip by Escape and listener hygiene):**
+  - At 300 ms, `fireEvent.keyDown(document, { key: 'Escape' })` makes the overlay disappear.
+  - At 300 ms in a fresh mount, `{ key: 'Tab' }` does **not** remove it.
+  - Spy on `document.addEventListener` and `document.removeEventListener`: every `keydown` listener added is removed after skip, after natural finish and after unmount mid-animation.
+- **L7 (once per session):** after a first mount, `sessionStorage.getItem('czaba_entrance_seen') === '1'` and `localStorage.getItem('czaba_spotlight_last_shown')` is `null`. Unmount, then mount again: nothing renders.
+- **L8 (old key inert):** with only `localStorage.czaba_spotlight_last_shown = String(Date.now())` preset, the overlay **is** shown. With `sessionStorage.czaba_entrance_seen = '1'` preset, nothing renders.
+- **L9 (reduced motion):** with `matchMedia` stubbed so `(prefers-reduced-motion: reduce)` matches:
+  - nothing renders after mount, and the overlay never appears at any `advanceTimersByTime` step (0, 100, 1200);
+  - the session key is not written.
+- **L10 (blocked storage):** with `sessionStorage.getItem` spied to throw, mount does not throw and nothing renders.
+- **L11 (no stray timers):** unmount at 500 ms, then advance 5000 ms. There is no React state-update warning (spy on `console.error`) and no throw.
 
-  The accessible name of the `href="/"` link is "CZABA".
-- **N4 (active state):** with `initialEntries={['/store']}`, the Collections link has `after:scale-x-100` and `text-foreground`, and the other three have `after:scale-x-0`.
-- **N5 (auth block preserved):** these cases stay green on the start code; they guard what must not change.
-  - Anonymous (`isInitializing: false`, `isAuthenticated: false`): a "Sign In" button exists, and a click calls `openModal('signin')` once.
-  - Authenticated with `user.firstName: 'Ana'`: the "User menu" button and the text "Hi, Ana!" exist, and "Logout" calls `signOut`.
-  - Initializing: the skeleton renders and there is no Sign In button.
-- **F1 (footer):** `Footer` renders the text `© {current year} CZABA. All rights reserved.` and no "Czaba Music". The links "Gift Cards" → `/gift-cards` and "Hire Us" → `/hire-us` exist.
-- **S1 (SSR):** `renderToString` of `<Header />` in a `MemoryRouter` contains no `<h1` and no `text-glow`.
-
-**Red proof:** run T1 against the start code. Either copy the start copies (`b-round-187/r188-granted-start/`) temporarily over the two code grants, then restore your end copies and check them against `end-sha256.txt`, or list one-line mutants with their red runs. **N1, N2, N3, F1 and S1 must be red on the start code**, and N5 must stay green.
+**Red proof:** run T1 against the start code. Either copy the start copy `b-round-188/r189-granted-start/SpotlightLoader.tsx` temporarily over the grant, then restore your end copy and check it against `end-sha256.txt`, or use a scratch Vite alias (C's round-188 method). **L2, L3, L4, L5, L6 (Escape), L7, L8, L9 and L10 must be red on the start code.** L1 must be green on both.
 
 **Run:**
-- `npx vitest run app/lib/__tests__/store-header-footer.test.tsx`;
-- `npm run typecheck` and `npm run lint`;
-- `npx biome check` on the 3 code files. Report the warnings. The pre-existing `useButtonType` warnings in the untouched auth block stay (see §8).
+- `npx vitest run app/lib/__tests__/store-entrance-loader.test.tsx`;
+- `npm run typecheck` and `npm run lint` (report the warning count against round 188's 214 warnings + 1 info);
+- `npx biome check` on `SpotlightLoader.tsx` and T1. Report the warnings; the pre-existing inline-style ones in untouched lines are expected.
 
 Do not run the full suite: that is the gate's job.
 
-**Live proof** (mock on :5199, store on :5173), saved under `a-round-188/`:
-- `curl -s http://127.0.0.1:5173/ | grep -o '<h1' | wc -l` → **1** (the hero; B measured **2** at `cb24362`: header + hero; the loaders render nothing on the server). The same for `/store`, `/products/middle-east` and `/about` → **1** each. The `curl` of `/` contains no `Czaba Music` and no `Studio Lab</a` in the header.
-- One Playwright Chromium check at 1440 on `/store`: the header nav inventory, the header height, the wordmark's computed `-webkit-text-fill-color` (not `transparent`), and one screenshot of the header.
+**Live proof** (mock on :5199, store on :5173), saved under `a-round-189/`:
+- One Playwright Chromium probe at 1440 on `/`, in a fresh context. A MutationObserver plus `performance.now()` measures from overlay insertion to removal, and the h1 count is sampled every animation frame until 1 s after removal.
+- A second load in the same context: no overlay within 3 s.
+- A fresh context with `reducedMotion: 'reduce'`: no overlay within 3 s.
+- One screenshot mid-loader showing the logo.
 
-**Code review:** use the `code-reviewer` subagent (6 files). Pass its Architecture note to B verbatim.
+**Code review:** use the `code-reviewer` subagent (4 files). Pass its Architecture note to B verbatim.
 
 ## 4. C — rows
 Setup:
-- Use real Playwright Chromium on the shared :5173 server, with a fresh anonymous context per session, at **1440×900, 1280×720 and 375×812**. Pixel reads run at DPR 2 with `--disable-lcd-text`.
-- Start the mock if :5199 is not listening, log to `c-round-188/mock.log`, and stop it at the end if you started it.
-- Dismiss the LeadMagnet popup (or use non-scrolled shots) before any screenshot comparison (C-R187-I2).
-- On `/`, wait for the entrance loader to unmount and hit-test before clicking (C-R187-I1).
+- Use real Playwright Chromium on the shared :5173 server, with a fresh anonymous context per session unless the row says otherwise, at **1440×900, 1280×720 and 375×812**. Pixel reads run at DPR 2 with `--disable-lcd-text`.
+- Start the mock if :5199 is not listening, log to `c-round-189/mock.log`, and stop it at the end if you started it.
+- Dismiss the LeadMagnet popup, or use non-scrolled shots, before any screenshot comparison. Park the mouse at (1,1) before screenshots (round-188 harness fix).
+- Install the timing probe with `addInitScript`: a MutationObserver on `document` that records `performance.now()` when the overlay root (`[aria-hidden="true"].fixed.inset-0`, or A's `data-testid`) is inserted and removed, plus a rAF sampler that counts `h1` elements.
 
 | Row | What | Pass |
 |---|---|---|
-| **NAV-188** (K1, K2) | 1440 and 1280: inventory the visible desktop header nav; click each link from `/` and check the URL. 375: open "Toggle menu", inventory the mobile list, click **Studio**, then check that the menu closed and the URL. | The desktop and mobile lists are both exactly: Collections `/store`, Studio `/studio-lab`, Free Samples `/free-downloads`, About `/about`, in that order. No Gift Cards, Hire Us or "Demo" anywhere in the header. Collections shows its active underline on `/store`. "Studio" lands on `/studio-lab` with the workspace and the in-page demo badge, and `auth_user` is null. Sign In is visible at 1440/1280 (desktop) and inside the 375 menu. |
-| **H1-188** (K3) | `/`, `/store`, `/products/middle-east`, `/about`, `/free-downloads`, `/gift-cards`, `/hire-us` and a 404 URL: hydrated (after the loader unmounted) and as SSR HTML (JS off). | Exactly **1** `h1` per page **outside the entrance loader overlay**, in both the SSR and the hydrated DOM. The header contains 0 headings. B checked: `SpotlightLoader` (mounted on `/`) is client-only (`shouldShow` starts `false`) and has no h1, and `CinemaCurtainLoader` (which has an h1) is not mounted on `/` at `cb24362`. If a loader h1 nevertheless appears while it is up, record the count and the duration as info for STORE-1d (not a FAIL of this round). |
-| **MARK-188** (K3) | The wordmark at the 3 viewports. | Computed `-webkit-text-fill-color` is not `transparent` and `background-image` is `none`. The colour equals the `text-foreground` token (runtime probe). Contrast against the header background is ≥ 4.5:1. The link's accessible name is "CZABA", with `href="/"`; a click from `/store` goes to `/`. The header's height is unchanged: the content below the header is not shifted (checked by STORE-AFTER-188). Report the header box height. |
-| **FOOT-188** (K4) | The footer on `/` and `/store` at the 3 viewports. | The text reads `© 2026 CZABA. All rights reserved.`. 0 "Czaba Music" in the rendered DOM of the 8 H1-188 pages. The footer's Gift Cards and Hire Us links are present and go to `/gift-cards` and `/hire-us` (200, page h1 visible); the same pages also open by direct URL. |
-| **KEEP-188** | The keep-list on `/` and in the header. | The Free Samples link is present in both header lists. The LeadMagnet popup still appears as before. SpecialOffers (incl. "Browse Gift Cards"), the "Limited" badges and the testimonials and stats are unchanged (via STORE-AFTER-188). |
-| **STORE-AFTER-188** | `/`, `/store` and `/products/middle-east` at the 3 viewports, vs `c-round-187/shots/store-after/` (e.g. `1440-store.png`, `1440-product-middle-east.png`, `*-home.png`; fallback `c-round-186/shots/store-after/`). Use the non-scrolled shots and the 185seq method, with the popup dismissed or excluded. | Changed pixels only inside the header band (wordmark, nav) and the footer copyright line; report both bboxes. 0 changed px elsewhere, except the masked auto-rotating hero on `/`. Home LCP ≤ 2.5 s and CLS < 0.1 (3 loads, median; round-187 baseline 376/352/344 ms, CLS 0.0009/0.0014/0). |
-| **E2E-NAV-188** (K5) | Run the command printed below the table, with the mock and the shared :5173 server. | The three tests pass. If the runner cannot reuse the server here, record the reason and rely on NAV-188; that is not a FAIL of A. |
-| **G188-3** | Anonymous `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav` without a header and with `Authorization: Bearer fake`. | `/studio-lab`: no `auth_user`, 0 cookies, the workspace and the demo badge are present. `/studio/middle-east`: "Sign in required", 0 `audio[src]`. No header → 401. Fake Bearer → **403** "Unable to verify ownership", and `mock.log` shows `/api/downloads auth=yes 401`. This is mock-backed, not real-backend evidence. |
-| **STUDIO-RV-188** | `/studio-lab` rest screenshot at 1440 and 1280, vs `c-round-187/shots/c187-{1440,1280}-1/rest-full.png` (fallback `c-round-186/shots/c186-{1440,1280}-1/rest-full.png`). | 0 changed px (the header is not rendered on `/studio*`). 0 console errors. One cold blank 1440 load may be replaced once (ENV-FIRST-LOAD). |
-| **SCOPE-188** | The frozen list (1011) at C's start and end, run from the store root; A's `end-sha256.txt`; `git status`; the diffs. | The frozen list is OK. `git status` is exactly 4 ` M` and 2 `??`. `Header.tsx` has added or removed lines only at the wordmark line and in the two nav lists: **no added or removed line** in l.89-166 or l.226-269 of the start file (unchanged context lines inside a hunk are fine). The `Footer.tsx` diff is 1 line. The `navigation.spec.ts` diff is only inside the `navLinks` array. The doc 154 diff is 2 lines. |
-| **T-RUN-188** | Run T1 yourself. Then run it against the start copies (a scratch config, or a temporary copy with a restore) or against your own mutants: restore the h1/text-glow, restore "Czaba Music", restore one removed link. | T1 is green on the tree. N1, N2, N3, F1 and S1 are red on the start code. N5 is green on both. |
-| **AN-REVIEW-188** | Read the diffs, T1 and D1. | No new export, no hardcoded colour, no custom CSS, no `as`/`any`/`@ts-ignore`. D1 is in Georgian, has the TEMPLATE sections and records R56–R60 with the rejected alternatives. Doc 154: l.4 is `Completed`, and the C line cites the round-187 PASS and `cb24362`. |
-| **PX-NET / REG-HYD** | Every session. | 0 pageerror. 0 hydration messages on the store pages. 0 requests to remote hosts other than the Google Fonts hosts. 0 Authorization headers from the page. |
+| **DUR-189** (K1) | Fresh context on `/`, 3 loads × 3 viewports. | The overlay appears on every load. Insertion → removal: median **≤ 1250 ms** and every load **≤ 1300 ms** (unit L3 holds the exact 1200; the margin covers timer and observer jitter). Report the raw values. The logo is really seen: on a mid-loader screenshot at each viewport "CZABA" is visible, and the sampled logo opacity reaches ≥ 0.9. |
+| **HIT-189** (K2, C-R187-I1) | Fresh context on `/`, 3 viewports. Locate a card **Play preview** button on `/` (the hover overlay at 1440/1280, the `md:hidden` corner button at 375; use the same card as round 187 PREVIEW). The cards sit below the hero fold, so first scroll the chosen card into view with `evaluate` (`scrollIntoView({block:'center'})`, at or before overlay insertion; document scrolling works under the fixed overlay). Keep the LeadMagnet popup out of the measurement: dismiss it if it appears, as in the round-187 PREVIEW harness. Then sample `elementFromPoint` at the card's centre every frame from overlay insertion onwards. | `elementFromPoint` hits the button, or a descendant of it, **no later than 1250 ms** after insertion, and from the start of the exit fade onwards (record that time). Then a real click, after hover at 1440/1280, starts the real preview: an `audio` element's `currentTime` advances ≥ 0.5 s and the button shows Pause. Record the time from insertion to the first successful hit. |
+| **SKIP-189** (K3) | Fresh context per case, 1440 and 375. (a) At about 300 ms after insertion, `mouse.click` at the viewport centre. (b) At about 300 ms, press `Escape`. (c) At about 300 ms, press `Tab`. | (a) and (b): the overlay is removed ≤ 50 ms after the input, `elementFromPoint` on the card Play hits the button in the next frame, the URL is unchanged and no audio started (the skipping click did not reach the page). (c): the overlay is **not** removed by Tab; it ends by itself within the DUR-189 bound. |
+| **SESSION-189** (K4) | 1440. (a) A fresh context loads `/` (overlay shown), then reloads: no overlay within 3 s. (b) Same context, client navigation `/` → Collections → `/` via the wordmark: no overlay. (c) A fresh context opens `/store` first, then clicks the wordmark: the overlay shows once; reload: none. (d) Read storage after (a). | (a)–(c) as stated. (d) `sessionStorage.czaba_entrance_seen === '1'`, and `localStorage.czaba_spotlight_last_shown` is absent in a fresh context (it is never written). (e) A **new page in a new context** shows the overlay again. Observe each "no overlay" case for 3 s with the MutationObserver: 0 insertions. |
+| **RM-189** (K5) | A fresh context with `reducedMotion: 'reduce'` at 1440 and 375, on `/`. | 0 overlay insertions in 3 s (the MutationObserver is installed before navigation, so even a one-frame flash counts). `sessionStorage.czaba_entrance_seen` is absent. Then, in the same context, `page.emulateMedia({ reducedMotion: 'no-preference' })` and reload: the overlay shows once (R64). The hero and cards still render. |
+| **H1-189** (K6, C-R188-I1) | Fresh context on `/`, 3 viewports. The rAF sampler runs from DOMContentLoaded until 1 s after the overlay is removed. Accessibility snapshot taken mid-loader. | **Max `h1` count = 1 at every sample**, and it is the hero "CZABA". The overlay root has `aria-hidden="true"` and contains no `h1`–`h6` or `role="heading"`. The mid-loader accessibility snapshot has exactly one heading level 1. SSR (JS off): 1 h1, no overlay. |
+| **E2E-189** | Run the command printed below the table, with the mock and the shared :5173 server. | Both tests pass. If the runner cannot reuse the server here, record why and rely on H1-189; that is not a FAIL of A. |
+| **STORE-AFTER-189** | `/`, `/store` and `/products/middle-east` at the 3 viewports after the loader is gone (or in a context where it was already seen), vs `c-round-188/shots/store-after/` (non-scrolled, popup dismissed, mouse parked, hero masked on `/`). Home LCP and CLS: 3 loads per viewport in **fresh** contexts (the loader shows) **and** 3 in seen contexts. | 0 changed px outside the masked hero on all 9 shots. Home LCP ≤ 2.5 s and CLS < 0.1 (median) in both modes. Report whether the LCP element is ever inside the overlay, and compare with round 188 (LCP 528/524/460 ms, CLS 0.0198/0.0014/0; C-R188-I5). |
+| **KEEP-189** | `/` after the loader, 1440 and 375. | The LeadMagnet popup still appears after scrolling (about 6 s, as in round 188). "Browse Gift Cards" and a "Limited" badge are present. The header is unchanged (via STORE-AFTER). |
+| **G189-3** | Anonymous `/studio-lab`; `/studio/middle-east`; `GET /api/studio-token?product=middle-east&file=stem1.wav` without a header and with `Authorization: Bearer fake`. | `/studio-lab`: no `auth_user`, 0 cookies, workspace and demo badge present, and **no entrance overlay** (it is mounted only on `/`). `/studio/middle-east`: "Sign in required", 0 `audio[src]`. No header → 401. Fake Bearer → **403** "Unable to verify ownership", and `mock.log` shows `/api/downloads auth=yes 401`. This is mock-backed, not real-backend evidence. |
+| **STUDIO-RV-189** | `/studio-lab` rest screenshot at 1440 and 1280 vs `c-round-188/shots/c188-{1440,1280}-1/rest-full.png`. | 0 changed px. 0 console errors. One cold blank 1440 load may be replaced once (ENV-FIRST-LOAD). |
+| **SCOPE-189** | The frozen list (1015) at C's start and end, run from the store root; A's `end-sha256.txt`; `git status`; the diffs. | The frozen list is OK. `git status` is exactly 2 ` M` (`SpotlightLoader.tsx` and doc 155) and 2 `??` (T1, D1). The doc 155 diff is 2 lines (l.4 and l.72). `SpotlightLoader` is still exported under the same name, with no props. |
+| **T-RUN-189** | Run T1 yourself. Then run it against the start copy (scratch Vite alias, as in C round 188) or against your own mutants. Mutants: restore `motion.h1`; drop `pointer-events-none`; restore the 2000 ms hold; skip on `pointerdown` instead of `click` (L5 turns red); switch `sessionStorage` back to `localStorage`; remove the reduced-motion check; remove the `removeEventListener`. | T1 is green on the tree. L2–L10 are red on the start code as listed in §3; L1 is green on both. Each mutant turns at least one named case red. |
+| **AN-REVIEW-189** | Read the diff, T1 and D1. | Checks: <ul><li>no **new** hardcoded colour, inline colour or custom CSS (the pre-existing inline styles are unchanged, so compare against the start copy);</li><li>no `as`, `any` or `@ts-ignore`;</li><li>no new export apart from an optional duration constant;</li><li>every listener and timer has a cleanup;</li><li>D1 is in Georgian, has the TEMPLATE sections and records R61–R66 with the rejected alternatives;</li><li>doc 155 l.4 is `Completed` and cites C round 188 PASS and `850445c`.</li></ul> |
+| **PX-NET / REG-HYD** | Every session. | 0 pageerror. 0 hydration messages on store pages. 0 requests to remote hosts other than the Google Fonts hosts. 0 Authorization headers from the page. The mock's `digital-gift-card` 404 console error (C-R188-I3) is expected and not counted. |
 
-**E2E-NAV-188 command** (type it exactly; the pipes are plain regex alternation): `CI= npx playwright test e2e/navigation.spec.ts -g "desktop nav links|homepage loads|header logo"`. `CI=` sets an empty `CI`, so `!process.env.CI` is true and `reuseExistingServer` reuses :5173.
+**E2E-189 command** (type it exactly; the pipe is plain regex alternation): `CI= npx playwright test e2e/navigation.spec.ts -g "homepage loads|header logo"`. `CI=` sets an empty `CI`, so `reuseExistingServer` reuses :5173.
 
 **Outcomes written in advance:**
-- A second h1 that comes only from the entrance loader is info for STORE-1d, not a FAIL here.
-- A header-height change that shifts page content is a K3 fix-up, with Low or Medium severity according to C's CLS evidence.
+- The overlay is inserted only after hydration, because SSR cannot read `sessionStorage` (R61). The page content therefore paints first, and the loader covers it about 0.6 s later (C measured 0.64 s in round 188). Report the insertion time as **info, not a bug**; it is a recorded trade-off for Saba.
+- If the overlay is removed in 1250–1300 ms on a single load while the median is within bound, record it as info (timer jitter), not a FAIL.
+- If the logo never reaches 0.9 opacity, the timing compression hid the reveal: that is a K1 FAIL (Medium).
+- If the skipping click activates something under the overlay, that is a K3 FAIL (Medium).
+- If a one-frame overlay flash appears under reduced motion, that is a K5 FAIL (Low; fix it now, since this round owns the code).
 - A row that needs the real backend stays BLOCKED with "backend unavailable in cloud".
 - **Gate rows (not C's):** full vitest, typecheck, build, Biome, verify, e2e smoke, PROD-MP3-UNVERIFIED and PROD-SSR-NUL.
 
 **Adjacent behaviour that could break, with the check that catches it:**
-- Sign In, the user menu or Logout stop working → N5, SCOPE-188 (no auth hunks) and NAV-188;
-- the mobile menu does not close after navigation → N2 and NAV-188;
-- the sticky header's height changes and shifts every page → MARK-188 and STORE-AFTER-188 (CLS);
-- Gift Cards or Hire Us become unreachable → FOOT-188;
-- the Studio look or purchase protection changes → STUDIO-RV-188 and G188-3.
+- The hero or cards render late or shift → STORE-AFTER-189 (pixels, LCP, CLS).
+- The card Play is dead or plays on a skip click → HIT-189, SKIP-189.
+- The loader replays on every visit to `/` → SESSION-189.
+- The e2e hero check flakes → E2E-189, H1-189.
+- The Studio look or purchase protection changes → STUDIO-RV-189, G189-3.
 
 ## 5. Ableton source
 | Behaviour | Ableton source | Confirmed there | CZABA decision / difference | C check |
 |---|---|---|---|---|
-| Store header, wordmark and footer (no Studio behaviour) | **None.** These are store pages, not an Arrangement feature. | Nothing. | Saba approved STORE-REDESIGN and direction A (2026-10-25). Rulings R56–R60. | STUDIO-RV-188. Parity: **არ ეხება** (not applicable) |
+| Store home entrance loader (no Studio behaviour) | **None.** This is a store page, not an Arrangement feature. | Nothing. | Saba approved STORE-REDESIGN, direction A and D10 (2026-10-25). Rulings R61–R66. | STUDIO-RV-189. Parity: **არ ეხება** (not applicable) |
 
 ## 6. Evidence and reporting
-- **A:** `a-round-188.md` and `a-round-188/`.
-- **C:** `c-round-188.md`, `c-round-188.json` (`browserVerified`, `realVerified`, `passed` / `failed` / `blocked` / `gate`) and `c-round-188/`. Put the after screenshots in `c-round-188/shots/store-after/` as the next baseline: non-scrolled shots with the popup dismissed, plus full-page shots with every image complete.
+- **A:** `a-round-189.md` and `a-round-189/`.
+- **C:** `c-round-189.md`, `c-round-189.json` (`browserVerified`, `realVerified`, `passed` / `failed` / `blocked` / `gate`) and `c-round-189/`. Put the after screenshots in `c-round-189/shots/store-after/`; they are the next baseline (non-scrolled with the popup dismissed, plus full-page with every image complete).
 - **Both:** write the report files as you go.
 
 ## 7. Outcome, fixed in advance
-| Condition | Round 189 |
+| Condition | Round 190 |
 |---|---|
-| **C PASS**, planning on or after 2026-10-27 (expected) | Root publishes round 188, and STORE-1c → **მზადაა**. Round 189 = **REGRESSION round**: one short check per done or c_pass item at both Studio viewports, plus `npm run test:e2e:smoke`. Additions: M1, M3, M4, C-R167-METRONOME-UNDER-MUTE, REG-DUX5-PLAYHEAD-RESCAN, the harness gate-log check, a store smoke against the mock (`/`, `/store`, `/products/middle-east`, `/products/door-slams` for C-R186-01, `/products/archived-rain` 404, meta from data, 0 unsplash), the STORE-1b fill, the flip **on the `/` card buttons** (`/store` has none), and the STORE-1c header inventory, one h1 and footer name. Then STORE-1d. |
-| **C PASS**, planning still on 2026-10-26 | STORE-1d, with C-R187-I1 in its acceptance. Regression on the first planning on or after 2026-10-27. |
-| C FAIL on NAV, H1, MARK or FOOT | A bounded fix-up in the granted files (severity by C's evidence) comes first, before the regression round if it is cheap. |
-| A browser row that can run here did not run | `browserVerified=false`, so STORE-1c is not done and B re-plans the browser half. |
+| **C PASS**, planning on or after 2026-10-27 (expected) | Root publishes round 189. STORE-1d → **მზადაა**, which completes STORE-1. Round 190 = **REGRESSION round**: one short check per done or c_pass item at both Studio viewports, plus `npm run test:e2e:smoke`. The additions are listed in `backlog.json` `regression_rounds` → `REGRESSION-ROUND-2026-10-27` (M1, M3, M4, C-R167-METRONOME-UNDER-MUTE, REG-DUX5-PLAYHEAD-RESCAN, the harness gate-log check, and the store smoke against the mock: STORE-1a/1b/1c and the STORE-1d DUR/SESSION/RM/H1 checks). Then the first STORE-2 sub-stage. |
+| **C PASS**, planning still on 2026-10-26 | The first STORE-2 sub-stage, which B splits at that planning. The `@theme` move touches frozen `app.css` and may affect Studio pages (the gold-fill signal), so the split must keep Studio-owned visuals unchanged. Regression runs at the first planning on or after 2026-10-27. |
+| C FAIL on DUR, HIT, SKIP, SESSION, RM or H1 | A bounded fix-up in `SpotlightLoader.tsx` comes first, before the regression round if it is cheap. |
+| A browser row that can run here did not run | `browserVerified=false`, so STORE-1d is not done, and B re-plans the browser half. |
 
 ## 8. Root notes
-- **Gate (on C PASS):** the 4 grants plus T1 and D1. The mock stays in the loop folder.
-- **Signals recorded, not scheduled** (gate-187 review and A-187):
-  - Move the card preview overlay out of the `Link` (`ProductCard.tsx:117-133`) and rebuild the slider fill on the `--progress`/`--color-outline` pattern → STORE-2 proposal.
-  - `aria-hidden` on the 4 play/pause SVGs in `AudioPreviewButton.tsx` → `deferred_low_polish`.
-  - The `doUnmock` test isolation in T1-187 → signal.
-  - The gold fill on Studio pages under the obsidian theme → info.
-  - `ProductCard.tsx:141` uses the undefined tokens `bg-primary`/`text-primary-foreground` on the non-new badge → deferred Low, owner STORE-2. Restyle only: "Limited" is on the keep-list.
-  - Loosen T1-187 P2 if STORE-2 adds a `primary` token.
+- **Gate (on C PASS):** the 2 grants plus T1 and D1. The mock stays in the loop folder.
+- **Root request (C-R188-I3):** the mock has no `digital-gift-card` product, so `/` and `/gift-cards` log a 404 in the cloud. B does not own `mock-api/`. Root may add a fixture entry; nothing is blocked.
+- **Signals recorded, not scheduled** (gate-188 review, A-188, C-188):
+  - Mobile menu: `aria-expanded`/`aria-controls` and an `inert` collapsed wrapper; N2 selects the wrapper through `parentElement`; one shared brand constant; a `NAV_ITEMS` array → **STORE-2**.
+  - `e2e/main-flow.spec.ts:58-61`, plus the `isVisible()` guard and the missing text assertion in `navigation.spec.ts` → signal.
+  - The footer is absent on `/store`, products, `/free-downloads`, `/hire-us` and 404, so Gift Cards and Hire Us are reachable there only through the CommandPalette or by URL. R57's premise holds only partly (C-R188-I2) → STORE-2/3 decision with Saba.
+  - The Studio link no longer says "Demo" before the click; the page itself still does (reviewer item 6) → note for Saba.
+  - `root.tsx:137` `startsWith('/studio')` hides the header on `/studio-lab` too (pre-existing) → signal.
+  - `Footer.tsx` uses `<a href>`, which causes full reloads → STORE-2 signal.
 - **New signals from B:**
-  - In the Header auth block, the buttons lack `type="button"`, the toggle lacks `aria-expanded`, and the collapsed mobile links stay focusable → STORE-2 signals. The block stays byte-identical this round.
-  - `.text-glow` becomes unused after K3 → STORE-2/5 cleanup.
-  - `e2e/main-flow.spec.ts:58-61` still lists `/music` and `/hire-us` behind `isVisible()` → signal.
+  - `CinemaCurtainLoader`, `PianoCurtainLoader` and `PianoLoadingAnimation` are exported from both barrels but mounted by no route (grep at `850445c`) → STORE-5 cleanup signal.
+  - The loader's hardcoded teal and gradient → STORE-2 (direction A).
+- **Keep-list question (C-R188-I6):** `TestimonialsSection` ("Netflix Original Score", "2,500+ Happy Customers") is mounted by no route at `850445c`. Recorded as `awaiting_user`. STORE-3 must not treat it as deleted, and must not mount or remove it without Saba.
+- **Unknown URL returns 200 (C-R188-I4):** an open Low, moved to `deferred_low_polish`.
 - **Checkpoint:** `b-round-183-checkpoint-request.md` is still unanswered. Fallback (c) continues and blocks nothing. The next checkpoint point is the STORE-REDESIGN exit.
