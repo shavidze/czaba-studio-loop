@@ -5,7 +5,9 @@
 | **სტატუსი** | `draft` — დაგეგმვა, კოდი არ შეცვლილა |
 | **თარიღი** | 2026-10-26 |
 | **წყარო** | `/mnt/user-data/outputs/001-recording-analysis-pipeline.md` (Saba-ს draft) |
-| **შემოწმებული repo-ები** | `/home/claude/czaba-api` (HEAD `7792aca`), `/home/claude/czaba-tag-manager` (HEAD `acefccc`), `/home/claude/czaba-store` (**git repo არ არის** — შეიძლება ჩამორჩეს Studio-ს loop-ის HEAD `850445c`-ს) |
+| **შემოწმებული repo-ები** | `/home/claude/czaba-api` (HEAD `7792aca`), `/home/claude/czaba-tag-manager` (HEAD `acefccc`), `/home/claude/czaba-store` (HEAD `caa09af`, round 191) |
+| **ხაზების გადამოწმება** | store-ის file:line და grant-ები `caa09af`-ზეა. B **ყველა file:line-ს და grant-ს რაუნდის დაგეგმვისას ხელახლა ამოწმებს**, PERF-8/10/13-ისა და REVIEW-RECOMMENDATIONS-ის შემდეგ: ისინი `useArrangement()`-ის ფორმას და buffer-ის მეხსიერებაში ყოფნას ცვლის. |
+| **review** | დამოუკიდებელი tech-lead review, 2026-10-26: შესწორებები §3-ში (S-1), K-2-ში (Keywords) და K-3b-ში (sync point) შეტანილია. |
 | **ექსპერიმენტები** | node-taglib-sharp 6.x + ffmpeg/ffprobe 6.1.1 (Linux); სკრიპტები: `/tmp/claude-0/-home-claude/e616ebd9-a270-5248-a635-0ba2a0ffa4ab/scratchpad/taglib/exp*.mjs` |
 
 ---
@@ -40,7 +42,7 @@
 - **დასკვნა:** round-trip მუშაობს INFO-ში ერთი მნიშვნელობის string-ზე. Importer-მა `LIST/INFO` თავად უნდა წაიკითხოს (~40 ხაზი Node, დამოკიდებულების გარეშე, UTF-8 fatal → latin1 fallback). საჭირო Tag Manager ცვლილება: **ფიქსირებული სტანდარტული ველი `category` → INFO `ICAT`** (+ UCS CatID-ის არჩევა/ვალიდაცია), Description = `comment` (`ICMT`), keywords = `IKEY`, ერთი string, `,`/`;` გამყოფით. ICMT-ის ID3 ასლი დამატებითია და importer მას არ კითხულობს.
 
 ### 0.2 არსებული loudness/onset/Description (კითხვა 2)
-- **loudness/true peak/onset/sync point არსად ითვლება:** grep (`ebur128|loudnorm|lufs|truepeak|spectral flux|onset|syncpoint`) czaba-api-ში, store-ის `app/`-სა და Tag Manager-ის `src/`-ში → ნული (ერთადერთი დამთხვევა `demo-synth.test.ts:89`-ის სახელია). `app/lib/arrangement/hits.ts`, `sync-point.ts`, `library-search.ts` **არ არსებობს** — ისინი SRW-46a/47a/47b-ის ახალი ფაილებია, ხოლო `PHASE2B-SPOTTING` `queued_awaiting_user_go`-შია (`phase-2b-spotting.md`).
+- **loudness/true peak/onset/sync point არსად ითვლება:** grep (`ebur128|loudnorm|lufs|truepeak|spectral flux|onset|syncpoint`) czaba-api-ში, store-ის `app/`-სა და Tag Manager-ის `src/`-ში → ნული (ერთადერთი დამთხვევა `demo-synth.test.ts:89`-ის სახელია). `app/lib/arrangement/hits.ts`, `sync-point.ts`, `spot-search.ts` **არ არსებობს** (`caa09af`) — ისინი SRW-46a/47a/47b-ის ახალი ფაილებია, ხოლო `PHASE2B-SPOTTING` Studio-ს queue-შია (`loop/policy.local.md`, 2026-10-26; `phase-2b-spotting-rounds.md`).
 - **Description:** სვეტი არსებობს (`015_ProductRecording.sql:16` `NVARCHAR(1000) NULL`; entity `ProductRecording.cs:10`; mapping `CzabaDbContext.cs:126`), API აბრუნებს (`ProductRecordingService.cs:59`, `ProductRecordingResponse.cs:7`), store-ის ტიპშიც არის (`client.ts:265`). **Importer მას არ წერს:** `import-recordings.mjs:189-233`-ის MERGE-ში Description არ შედის → დღეს ყოველთვის `NULL`.
 
 ### 0.3 ნუმერაცია, DTO, კონფლიქტები (კითხვა 3)
@@ -62,7 +64,7 @@
 
 ### K-1 — spike: გაუქმებულია როგორც agent-რაუნდი
 კითხვა „რომელ chunk-ში და კითხულობს თუ არა ffprobe" §0.1-ში ექსპერიმენტით არის პასუხგაცემული. დარჩენილი ორი რამ რაუნდი არ არის:
-- **H-1 (ადამიანი, Saba, ~15 წთ):** 10 ნამდვილ ჩანაწერზე პირველი დარტყმის ხელით მონიშვნა DAW-ში → `tools/recording-import/fixtures/sync-reference.json` (`sourceKey`, `hitMs`, `note`). საჭიროა მხოლოდ K-3b-სთვის.
+- **H-1 (ადამიანი, Saba, ~15 წთ):** 10 ნამდვილ ჩანაწერზე sync point-ის ხელით მონიშვნა DAW-ში, Studio-ს sync-ის წესით (canonical: [`phase-2b-spotting-rounds.md`](../studio-real-workspace/phase-2b-spotting-rounds.md#sp-2), SP-2, B2) → `tools/recording-import/fixtures/sync-reference.json` (`sourceKey`, `syncMs`, `note`). საჭიროა მხოლოდ K-3b-სთვის.
 - PC-ის ffmpeg-ის ვერსიის და Tag Manager-ის ფაილის PC-ზე წაკითხვის დადასტურება → K-4-ის მიღების მწკრივი (K4-6).
 
 ### K-2 — სქემა და API (ეტაპი A)
@@ -96,6 +98,7 @@
   public int? SyncPointMs { get; set; }
   ```
   `AnalysisVersion` API-ში **არ** ბრუნდება (შიდა ველია). EF: `HasMaxLength(32)`, `HasMaxLength(400)`, `HasPrecision(4,1)`.
+- **API-ს JSON shape (გაყინული; S-1-ის fixture მას ეყრდნობა):** `category: string | null`, **`keywords: string[]`** (Saba-ს default, review 2026-10-26; ცარიელი → `[]`, არასოდეს `null` ან raw string), `loudnessLufs: number | null`, `truePeakDbtp: number | null`, `syncPointMs: number | null`.
 - **მიღება:**
   | ID | მოქმედება | მოსალოდნელი | შემოწმება |
   |---|---|---|---|
@@ -103,10 +106,11 @@
   | K2-2 | 018 ბაზაზე 10 არსებული ჩანაწერით | რაოდენობა 10; ახალი სვეტები NULL | `SELECT COUNT(*), COUNT(Category) …` |
   | K2-3 | CHECK-ების დარღვევა: `Category='DOOR Wood'`, `LoudnessLufs=-80`, `SyncPointMs=DurationMs+1` | სამივე `INSERT/UPDATE` ვარდება 547-ით | sqlcmd გამოსავალი |
   | K2-4 | `dotnet test --filter ProductRecordingServiceTests` | ახალი ტესტები: ველები ბრუნდება; `Keywords` NULL → `[]`; `"a, b,,c"` → `["a","b","c"]` | ტესტის სახელები + რაოდენობა ანგარიშში |
-  | K2-5 | JSON serialization ტესტი `ProductRecordingResponse`-ზე | `storageKey`, `sourceKey`, `analysisVersion` key-ები JSON-ში არ არის | `System.Text.Json`-ით serialize + `ContainKey` false |
+  | K2-5 | JSON serialization ტესტი `ProductRecordingResponse`-ზე | `storageKey`, `sourceKey`, `analysisVersion` key-ები JSON-ში არ არის; `keywords` JSON array-ია (NULL-ზეც `[]`) | `System.Text.Json`-ით serialize + `ContainKey` false + `ValueKind == Array` |
   | K2-6 | არსებული უარყოფის ტესტები (სხვისი პროდუქტი, Standard-ის ლიცენზია) | უცვლელად გადის | სრული `dotnet test` (ბაზისი: 404 ტესტი) |
 - **რეგრესიის რისკი:** GO/EXEC-ის გარეშე migration პირველივე გაშვებაზე ვარდება; `decimal`-ის precision-ის გარეშე EF warning; `Keywords`-ის split-ის ლოგიკის გამეორება store-ში.
-- **ღია გადაწყვეტილებები:** (1) `Keywords` API-ში `string[]` (default) თუ raw string; (2) LUFS/TP `DECIMAL(4,1)` (default; ebur128 0.1 სიზუსტით ბეჭდავს) თუ draft-ის `(5,2)`.
+- **გადაწყვეტილი:** `Keywords` API-ში `string[]` (Saba-ს default; K-2 და S-1-ის fixture ერთნაირია).
+- **ღია გადაწყვეტილება:** LUFS/TP `DECIMAL(4,1)` (default; ebur128 0.1 სიზუსტით ბეჭდავს) თუ draft-ის `(5,2)`.
 
 ### K-3a — ხმამაღლობა `prepare`-ში (ეტაპი B, ნაწილი 1)
 - **მიზანი:** `prepare` ზომავს integrated LUFS-ს და true peak-ს წყარო-ფაილზე (არა m4a-ზე), წერს manifest-ში და `recordings.sql`-ში; MERGE ხდება NULL-safe.
@@ -166,18 +170,18 @@
 - **ღია:** (1) UCS სიის ლიცენზია/წყარო repo-ში ჩასადებად — **Saba-ს დასადასტურებელი**; default: მხოლოდ CatID-ების სია, ვერსია და წყაროს URL; (2) ცარიელი ტეგი ხელახალ იმპორტზე DB-ის მნიშვნელობას შლის — default: დიახ, ფაილები სიმართლის წყაროა (manifest-ის review-ით).
 
 ### K-3b — sync point (ეტაპი B, ნაწილი 2)
-- **მიზანი:** `SyncPointMs` = პირველი დარტყმა პირველ 2 წამში; დარტყმის გარეშე `0`.
-- **დამოკიდებულება:** H-1 (`sync-reference.json`); **SRW-46a done** (`hits.ts` და მისი ტესტ-ვექტორები) — draft ამბობს „ემთხვევა hits.ts-ს", მაგრამ ფაილი ჯერ არ არსებობს. default: K-3b ელოდება SRW-46a-ს და გადმოაქვს მისი პარამეტრები + ვექტორები (JSON ფაილის ასლი sha256-ით), არა პირიქით.
-- **ფაილები:** `analysis.mjs` (`firstHitMs(samples, sampleRate)`), `import-recordings.mjs` (ffmpeg → `-ac 1 -ar 48000 -f f32le -t 2 pipe:1`), ახალი `tools/recording-import/fixtures/hits-vectors.json` (SRW-46a-ის ასლი), `fixtures/sync-reference.json`, ტესტები, doc `009-…`.
+- **მიზანი:** `SyncPointMs` = Studio-ს sync point, **იგივე წესით**. წესი აქ დამოუკიდებლად არ იწერება: canonical განმარტება — [`phase-2b-spotting-rounds.md`](../studio-real-workspace/phase-2b-spotting-rounds.md#sp-2), SP-2, B2 (10 s ფანჯარა წყაროს დასაწყისიდან, უძლიერესი პიკის წინა დარტყმა; fallback და სიჩუმე — იქ). B2-ის ცვლილება K-3b-საც ცვლის. ძველი წესი „პირველი დარტყმა პირველ 2 s-ში" უარყოფილია: riser-ს locator-ზე იწყებს და არა ამთავრებს (იქვე, C7).
+- **დამოკიდებულება:** H-1 (`sync-reference.json`); **SP-2 (SRW-47a) C PASS** — `sync-point.ts` და SP-1/SP-2-ის ტესტ-ვექტორები (`hits.test.ts`, `sync-point.test.ts`). K-3b გადმოაქვს მათი პარამეტრები + ვექტორები (JSON ასლი sha256-ით), არა პირიქით.
+- **ფაილები:** `analysis.mjs` (`computeSyncPointMs(samples, sampleRate)` — store-ის `computeSyncPoint`-ის port), `import-recordings.mjs` (ffmpeg → `-ac 1 -ar 48000 -f f32le -t 10 pipe:1`; `-t` = B2-ის ფანჯარა), ახალი `tools/recording-import/fixtures/sync-vectors.json` (SP-1/SP-2-ის ვექტორების ასლი), `fixtures/sync-reference.json`, ტესტები, doc `009-…`.
 - **მიღება:**
   | ID | მოქმედება | მოსალოდნელი | შემოწმება |
   |---|---|---|---|
-  | K3b-1 | იგივე ვექტორები, რაც store-ის `hits.ts`-ის ტესტში | ყველა ვექტორზე იგივე პასუხი ±1 ms | `node --test` + vectors sha256 = store-ის ასლი |
+  | K3b-1 | იგივე ვექტორები, რაც store-ის `hits.test.ts`-სა და `sync-point.test.ts`-ში | ყველა ვექტორზე იგივე პასუხი ±1 ms | `node --test` + vectors sha256 = store-ის ასლი |
   | K3b-2 | 10 ჩანაწერი vs `sync-reference.json` | ≥ 9/10 ±10 ms | ცხრილი |
-  | K3b-3 | სინთეზური: სიჩუმე, თანაბარი ხმაური, დარტყმა 2.5 წმ-ზე | `0`, `0`, `0` | ტესტი |
+  | K3b-3 | სინთეზური: სიჩუმე, თანაბარი ხმაური, ერთი დარტყმა 2.5 s-ზე, crescendo დარტყმის გარეშე | თითოეული = SP-2-ის `sync-point.test.ts`-ის შესაბამისი მოსალოდნელი მნიშვნელობა ±1 ms; დარტყმა 2.5 s-ზე → ≈ 2500 (არა `0`) | `node --test` |
   | K3b-4 | **m4a vs WAV:** იგივე ალგორითმი ffmpeg-ით დეკოდირებულ playback m4a-ზე | სხვაობა ≤ 2 ms (ffmpeg edit list-ს ითვალისწინებს) | ცხრილი |
   | K3b-5 | import ორჯერ | მეორე — 0 ცვლილება | `$action` |
-- **რეგრესია / ღია რისკი:** AAC encoder priming = 1024 sample (გაზომილი: პირველი packet `pts=-0.021333`). ბრაუზერის `decodeAudioData` MP4 edit list-ს შეიძლება არ ითვალისწინებდეს → Studio-ში ~21 ms წანაცვლება. ეს **PC-ზე ვერ შემოწმდება** — S-1-ის მწკრივია.
+- **რეგრესია / ღია რისკი:** AAC encoder priming = 1024 sample (გაზომილი: პირველი packet `pts=-0.021333`). ბრაუზერის `decodeAudioData` MP4 edit list-ს შეიძლება არ ითვალისწინებდეს → Studio-ში ~21 ms წანაცვლება. ეს **PC-ზე ვერ შემოწმდება** — Studio-ს ცალკე row S1-5-ია (§3, BLOCKED K-3b-მდე).
 - **ღია:** სჭირდება თუ არა საერთოდ შენახული SyncPointMs, თუ SRW-47a მას ყოველ ჩატვირთვაზე ითვლის. default: სვეტი 018-შია (იაფია), შევსება K-3b-მდე გადადებულია.
 
 ### K-6 — AI შეთავაზებები, არჩევითი (ეტაპი D)
@@ -266,27 +270,36 @@
 ## 3. Studio loop (cloud; backend მიუწვდომელია)
 
 ### ფაქტი, რომელიც draft-ის ეტაპ E-ს ცვლის
-`WorkspaceSource`-ს `meta` **არ აქვს** (`app/types/arrangement.ts:78-85`) — ის SRW-47b-ში ემატება (`phase-2b-spotting.md`, 47b). `app/lib/arrangement/collection.ts:47-82` (`createPurchasedWorkspaceCollection`) აწყობს **მხოლოდ მუსიკის stems**-ს (`stem.audioUrl`); შეძენილი SFX ჩანაწერები (`getProductRecordingCatalog`/`getSfxLibrary`) იტვირთება მხოლოდ `recordings.$productId.tsx`, `scenes.$productId.tsx` და `app/components/recordings/*`-ში. ანუ production-ში „ProductRecording → WorkspaceSource" ხიდი Studio-ში **დღეს არ არსებობს** (ადგილობრივ clone-ში; loop-ის HEAD-ზე გადასამოწმებელი). E არ არის „ველის მიბმა" — ის მოითხოვს შეძენილი SFX-ის კოლექციას Studio-ში, stream-access token-ებს და დაცული `studio.$productId.tsx`-ის ცვლილებას.
+`WorkspaceSource`-ს `meta` **არ აქვს** (`app/types/arrangement.ts:78-85`) — ის SRW-47b-ში ემატება (`phase-2b-spotting.md`, 47b). `app/lib/arrangement/collection.ts:54-128` (`createPurchasedWorkspaceCollection`) აწყობს **მხოლოდ მუსიკის stems**-ს (`stem.audioUrl`); შეძენილი SFX ჩანაწერები (`getProductRecordingCatalog`/`getSfxLibrary`) იტვირთება მხოლოდ `recordings.$productId.tsx`, `scenes.$productId.tsx` და `app/components/recordings/*`-ში. ანუ production-ში „ProductRecording → WorkspaceSource" ხიდი Studio-ში **დღეს არ არსებობს** (store `caa09af`-ზე დადასტურებული). E არ არის „ველის მიბმა" — ის მოითხოვს შეძენილი SFX-ის კოლექციას Studio-ში, stream-access token-ებს და დაცული `studio.$productId.tsx`-ის ცვლილებას.
 
-### S-1 (SRW-47c) — ჩანაწერის მეტამონაცემების mapping, fixture-ით
+### S-1 (SRW-47c) — ჩანაწერის მეტამონაცემების mapping, fixture-ით (ერთი unit-only რაუნდი)
 - **მიზანი:** სუფთა ფუნქცია API-ს ჩანაწერიდან `WorkspaceSource['meta']`-ში; `ProductRecording` ტიპი ახალ ველებს იცნობს; production-ის მიბმა — ცალკე, root-ის ნაბიჯი.
-- **დამოკიდებულება:** SRW-47b `done` (`WorkspaceSource.meta`, `library-search.ts`); K-2-ის DTO-ს ფორმა გაყინული (JSON shape ამ დოკუმენტიდან). SyncPoint-ის მწკრივი — SRW-47a + K-3b.
+- **YAGNI-ს შენიშვნა (code-reviewer-ისთვის):** `recordingToSourceMeta`-ს production-ში გამომძახებელი **ჯერ არ ეყოლება** — „Purchased SFX in Studio" გადაწყვეტილი არ არის (იხ. ქვემოთ root-only ნაბიჯი). ეს განზრახ არის: ფუნქცია K-2-ის კონტრაქტს fixture-ით და ტესტებით აფიქსირებს. code-reviewer მას „dead code"-ის ან YAGNI-ს გამო არ ბლოკავს.
+- **დამოკიდებულება:** **SP-3a C PASS** ([`phase-2b-spotting-rounds.md`](../studio-real-workspace/phase-2b-spotting-rounds.md) SP-3, K1–K3: `WorkspaceSource.meta` და `spot-search.ts` / `rankSourcesForQuery`); K-2-ის JSON shape გაყინული (§1 K-2, `keywords: string[]`). backend არ სჭირდება. SyncPoint აქ არ შედის — ის S1-5-ია (ქვემოთ, ცალკე).
+- **Queue:** `RECORDING-META-S1` Studio-ს queue-ში ბოლოა, `PHASE2-VIDEO-SCORING`-ის შემდეგ: STORE-REDESIGN → REVIEW-RECOMMENDATIONS → STUDIO-PERFORMANCE → T12-ADVANCED → PHASE2-VIDEO-SCORING → PHASE2B-SPOTTING → STUDIO-AGENT-COMMANDS → RECORDING-META-S1 (`loop/policy.local.md`, 2026-10-26). B ქვემოთ მოცემულ file:line-ს და grant-ებს დაგეგმვისას ხელახლა ამოწმებს (PERF-8/10/13 და REVIEW-RECOMMENDATIONS მათ გადაწევს).
 - **ფაილები (grants):**
-  - `app/services/api/client.ts` — მხოლოდ `ProductRecording` interface (`:262-271`): `category?: string | null; keywords?: string[]; loudnessLufs?: number | null; truePeakDbtp?: number | null; syncPointMs?: number | null`;
+  - `app/services/api/client.ts` — მხოლოდ `ProductRecording` interface (`:262-271` `caa09af`-ზე): `category?: string | null; keywords?: string[]; loudnessLufs?: number | null; truePeakDbtp?: number | null; syncPointMs?: number | null`;
   - ახალი `app/lib/arrangement/recording-meta.ts` (`recordingToSourceMeta(recording): WorkspaceSource['meta'] | undefined` — ცარიელი სტრიქონები/მასივები `undefined`-ად; UCS CatID-ის ჩვენება როგორც `category`);
   - ახალი `app/lib/arrangement/__tests__/recording-meta.test.ts`;
-  - ახალი fixture `app/data/__fixtures__/recording-catalog-analysis.json` (K-2-ის JSON shape, 3 ჩანაწერი: სრული, ნაწილობრივი, ძველი — ახალი ველების გარეშე);
+  - ახალი fixture `app/data/__fixtures__/recording-catalog-analysis.json` (K-2-ის JSON shape, `keywords` — JSON array; 3 ჩანაწერი: სრული, ნაწილობრივი (`keywords: []`), ძველი — ახალი ველების გარეშე);
   - implementation doc.
-- **გაყინული / root-only:** `app/routes/studio.$productId.tsx` (**დაცული, root-only**), `api.studio-token.ts`, `collection.ts` (purchased SFX კოლექცია ცალკე feature-ია), `account.downloads.tsx`, `AuthContext.tsx`, `app/lib/auth.ts`, mock-api.
+- **გაყინული / root-only:** `app/routes/studio.$productId.tsx` (**დაცული, root-only**), `api.studio-token.ts`, `collection.ts` (purchased SFX კოლექცია ცალკე feature-ია), `spot-search.ts` (SP-3a; მხოლოდ იმპორტი), `app/data/studio-lab-demo.ts`, `account.downloads.tsx`, `AuthContext.tsx`, `app/lib/auth.ts`, mock-api.
 - **მიღება:**
   | ID | მოქმედება | მოსალოდნელი | შემოწმება |
   |---|---|---|---|
-  | S1-1 | `recordingToSourceMeta` fixture-ის 3 ჩანაწერზე | სრული → `{description, category, keywords[]}`; ძველი → `undefined`; `null`/`""`/`[]` არასოდეს ჩანს meta-ში | vitest |
-  | S1-2 | SRW-47b-ის `library-search` fixture-ის meta-თი: ძებნა „DOORWood"/„slam" | ჩანაწერი პოულობს category/keyword-ით; სათაურით ძებნის რანჟირება უცვლელი | vitest |
-  | S1-3 | `/studio-lab` demo fixture S1-ის mapping-ით (თუ SRW-47b demo-ს იყენებს) | „ხმა აქ" პანელში შედეგი keyword-ით ჩანს | Playwright (browserVerified) |
-  | S1-4 | `npm run typecheck`, `lint`, `test:run` | 0 error; warning-ები ბაზისზე არ იზრდება | ლოგი |
-  | S1-5 | SyncPoint (მხოლოდ SRW-47a + K-3b-ის შემდეგ): synthetic m4a (1024-sample priming) `decodeAudioData` → `firstHit` vs `syncPointMs` fixture | სხვაობა ≤ 10 ms; თუ > 10, B წერს root-ისთვის: ბრაუზერი edit list-ს არ ითვალისწინებს | Chromium-ში გაზომვა |
-- **რეგრესია:** `ProductRecording` ტიპს იყენებს `SfxSoundLibrary`, `SfxSceneBuilder`, `SfxQuickEdit`, `RecordingCatalogRow` — ველები არჩევითია, render უცვლელი.
+  | S1-1 | `recordingToSourceMeta` fixture-ის 3 ჩანაწერზე | სრული → `{description, category, keywords[]}`; ძველი → `undefined`; `null`/`""`/`[]` არასოდეს ჩანს meta-ში | C, unit (`npx vitest run recording-meta.test.ts`) |
+  | S1-2 | SP-3a-ის `spot-search` fixture + S-1-ის mapping-ით მიღებული meta: `rankSourcesForQuery` „DOORWood"/„slam" | ჩანაწერი პოულობს category/keyword-ით; სათაურით ძებნის რანჟირება უცვლელი | C, unit (vitest, `spot-search`-ის იმპორტით) |
+  | S1-4 | სრული `npm run verify` (typecheck, lint, `test:run`, build) | 0 error; warning-ები ბაზისზე არ იზრდება | **gate** (`gates/gate-round-N.json`); C არ უშვებს და `passed`-ში არ წერს (Speed rules) |
+- **რეგრესია:** `ProductRecording` ტიპს იყენებს `SfxQuickEdit`, `RecordingCatalogRow`, ხოლო `ProductRecordingCatalog`-ით — `SfxSoundLibrary`, `SfxSceneBuilder` — ველები არჩევითია, render უცვლელი.
+- **ღია გადაწყვეტილება Saba-სთვის — Loop v2-ის ცხადი გამონაკლისი (default: დამტკიცება):** S-1-ში ბრაუზერის row არ არის. Loop v2-ის წესით (`loop/policy.local.md`, „ბრაუზერის გარეშე PASS „მზადაა“ არ არის“) ასეთი რაუნდი „მზადაა“ სტატუსს ვერ მიიღებს. S-1-ს production-შიც და `/studio-lab`-შიც გამომძახებელი არ აქვს, ამიტომ ბრაუზერში შესამოწმებელი არაფერია; ხელოვნური demo-ს მიბმა `studio-lab-demo.ts`-ის grant-ს და ახალ scope-ს მოითხოვდა. **შეთავაზება:** S-1 = ერთი unit-only რაუნდი; C PASS + gate PASS საკმარისია `done`-სთვის, `browserVerified: false` ამ რაუნდში ბლოკერი არ არის. Saba-ს დასტური B-მ `backlog.json`-ის ჩანაწერში უნდა ჩაწეროს. უარის შემთხვევაში S-1 ელოდება „Purchased SFX in Studio"-ს და ბრაუზერის row მასთან ერთად იწერება.
+
+### S1-5 — SyncPoint ბრაუზერში (ცალკე, მოგვიანებით; **BLOCKED**)
+- **სტატუსი:** BLOCKED, სანამ PC ნაკადის K-3b არ დასრულდება (`SyncPointMs` და `sync-vectors.json`). S-1-ის ნაწილი არ არის და `RECORDING-META-S1`-ის `done`-ს არ აჩერებს. B მას ცალკე row-ად/რაუნდად გეგმავს K-3b-ის შემდეგ.
+- **დამოკიდებულება:** K-3b done; SP-2 (SRW-47a) C PASS (`sync-point.ts`).
+
+  | ID | მოქმედება | მოსალოდნელი | შემოწმება |
+  |---|---|---|---|
+  | S1-5 | synthetic m4a (1024-sample priming) `decodeAudioData` → `computeSyncPoint` (B2-ის წესი) vs `syncPointMs` fixture | სხვაობა ≤ 10 ms; თუ > 10, B წერს root-ისთვის: ბრაუზერი edit list-ს არ ითვალისწინებს | C, browser + measurement (Chromium) |
 - **Root-only ნაბიჯი (ბექლოგში, არა S-1-ში):** „Purchased SFX collection in Studio" — ახალი feature: `createPurchasedSfxCollection` + stream-access token + `studio.$productId.tsx`. Saba წყვეტს, სჭირდება თუ არა; მის გარეშე meta production-ში მხოლოდ `recordings`/`scenes` გვერდებზე გამოდგება (არა Studio-ში).
 
 ---
@@ -300,12 +313,13 @@
 5. **MERGE NULL-safe არ არის** (`:214-218`) — ახალი nullable სვეტები `<>`-ით ვერასოდეს განახლდება NULL-დან. `INTERSECT`-იანი შედარება + `CAST` `USING`-ში (K-3a).
 6. **`ebur128`-ის გამოსავალი stderr-ზეა**, `run()` (`:55-60`) მას აგდებს; < 400 ms → `-70.0`, სიჩუმე → `-inf` (გაზომილია) — NULL-ის წესი ცხადად.
 7. **`DECIMAL(5,2)`** ცრუ სიზუსტეა; ebur128 0.1-ს ბეჭდავს → `DECIMAL(4,1)` + CHECK-ები. migration-ში CHECK ახალ სვეტზე იმავე batch-ში ვერ დაიწერება (GO/EXEC).
-8. **„sync point ემთხვევა store-ის `hits.ts`-ს"** — `hits.ts` არ არსებობს; SRW-46a ჯერ არ გახსნილა. K-3 გაიყო: K-3a (loudness, ახლა) და K-3b (SRW-46a-ის შემდეგ, ვექტორების ასლით).
+8. **„sync point ემთხვევა store-ის `hits.ts`-ს"** — `hits.ts` არ არსებობს; SRW-46a ჯერ არ გახსნილა. K-3 გაიყო: K-3a (loudness, ახლა) და K-3b (SP-2 / SRW-47a-ის შემდეგ, B2-ის წესით და SP-1/SP-2-ის ვექტორების ასლით).
 9. **AAC priming** (1024 sample ≈ 21 ms) — WAV-ზე გაზომილი SyncPointMs Studio-ში m4a-ის decode-ზე შეიძლება წაინაცვლოს; draft ამას არ ახსენებს (K3b-4, S1-5).
-10. **ეტაპი E:** `WorkspaceSource.meta` არ არსებობს (SRW-47b ამატებს) და Studio-ს purchased კოლექცია მხოლოდ stems-ია (`collection.ts:47-82`). E = mapping (S-1) + ცალკე root-only feature.
+10. **ეტაპი E:** `WorkspaceSource.meta` არ არსებობს (SRW-47b ამატებს) და Studio-ს purchased კოლექცია მხოლოდ stems-ია (`collection.ts:54-128`). E = mapping (S-1, unit-only) + ცალკე root-only feature.
 11. **K-1 spike** ზედმეტია როგორც agent-რაუნდი: chunk/ffprobe-ის კითხვა პასუხგაცემულია; რჩება H-1 (ადამიანის მონიშვნა) და PC-ის დადასტურება K4-6-ში.
 12. **„სხვისი პროდუქტი 403/404" ტესტი K-2-ში** უკვე არსებობს (`ProductRecordingServiceTests` 18 ტესტი) — K-2-ში ის რეგრესიაა, ახალი ტესტი არა; ახალი ტესტი = JSON-ში `storageKey`/`sourceKey`/`analysisVersion`-ის არარსებობა (K2-5).
 13. **Tag Manager-ის CI ტესტები სუფთა clone-ზე ვარდება** (gitignored `sample.wav`) — cloud loop-ის პირველი რაუნდი T-0 უნდა იყოს.
+14. **„SyncPointMs = პირველი დარტყმა პირველ 2 წამში; დარტყმის გარეშე `0`"** → Studio-ს sync-ის ერთი წესი, canonical განმარტებით `phase-2b-spotting-rounds.md` SP-2, B2-ში. ძველი წესი riser-ს locator-ზე იწყებს (იქვე, C7) და Studio-ს ანალიზს არ დაემთხვეოდა (K-3b).
 
 ---
 
@@ -315,7 +329,7 @@
 |---|---|---|---|
 | PC / backend | 3 (K-2, K-3a, K-4) | 5 (+ K-3b, + 1 fix round) | 6 (+ K-6) |
 | Tag Manager cloud loop | 2 (T-0, T-1) | 4 (+ T-2, + 1 fix round) | 4 |
-| Studio loop | 1 (S-1) | 1–2 (S1-5 SyncPoint-ისთვის ცალკე, თუ K-3b გვიან მოდის) | 2 |
+| Studio loop | 1 (S-1, unit-only) | 2 (+ S1-5 ცალკე, K-3b-ის შემდეგ) | 2 |
 | ადამიანი (არა-რაუნდი) | H-1 (sync-ის მონიშვნა), UCS ლიცენზია, CLAP ნებართვა | | |
 
 ---
@@ -325,8 +339,8 @@
 ```
 K-2 (schema/API) ──► K-3a (loudness + NULL-safe MERGE) ─────────────┐
 T-0 (CI baseline) ──► T-1 (ICAT/IKEY/ICMT contract) ──► K-4 (tags+UCS) ◄── UCS list (საერთო sha256) ──► T-2 (picker)
-SRW-46a (hits.ts) + H-1 ──► K-3b (SyncPointMs) ──► S1-5
-SRW-47b (meta + library-search) + K-2 JSON shape ──► S-1 (S1-1..S1-4)
+SP-1 + SP-2 (hits.ts, sync-point.ts, B2) + H-1 ──► K-3b (SyncPointMs) ──► S1-5 (BLOCKED-მდე)
+SP-3a (meta + spot-search.ts / rankSourcesForQuery) + K-2 JSON shape ──► S-1 (S1-1, S1-2; S1-4 = gate)
 K-4 ──► K-6 (optional)
 S-1 ──► [root-only] Purchased SFX in Studio (studio.$productId.tsx) — ცალკე feature, Saba-ს გადაწყვეტილება
 ```
@@ -334,7 +348,8 @@ S-1 ──► [root-only] Purchased SFX in Studio (studio.$productId.tsx) — �
 - K-2 და T-0 პარალელურია (სხვადასხვა გარემო, საერთო ფაილი არა).
 - **T-1 უნდა იყოს merged K-4-მდე** — K4-3 Tag Manager-ის ნამდვილი build-ით დაწერილ ფაილს იყენებს.
 - UCS სია ერთხელ მზადდება (ადამიანის მიერ, ლიცენზიის დადასტურებით) და ორ repo-ში ერთი sha256-ით კოპირდება (K4-9 = T2-7).
-- S-1 SRW-47b-ზეა დამოკიდებული, ხოლო SRW-47b — `PHASE2B-SPOTTING`-ის გახსნაზე (Saba-ს go).
+- S-1 SP-3a C PASS-ზეა დამოკიდებული. Studio-ს queue-ში `RECORDING-META-S1` მერვე და ბოლოა: STORE-REDESIGN → REVIEW-RECOMMENDATIONS → STUDIO-PERFORMANCE → T12-ADVANCED → PHASE2-VIDEO-SCORING → PHASE2B-SPOTTING → STUDIO-AGENT-COMMANDS → RECORDING-META-S1.
+- B ყველა file:line-ს და grant-ს რაუნდის დაგეგმვისას ხელახლა ამოწმებს, PERF-8/10/13-ისა და REVIEW-RECOMMENDATIONS-ის შემდეგ.
 
 ## 7. გადაუმოწმებელი
 - ექსპერიმენტები Linux-ზე, ffmpeg 6.1.1-ით; PC-ის ffmpeg/ffprobe — K4-6.
@@ -342,4 +357,5 @@ S-1 ──► [root-only] Purchased SFX in Studio (studio.$productId.tsx) — �
 - ubuntu-24.04-ზე Electron-ის sandbox/xvfb ქცევა — T0-2.
 - ბრაუზერის `decodeAudioData` და MP4 edit list — S1-5.
 - UCS სიის ლიცენზია/გადანაწილება, CLAP-ის წონების ლიცენზია.
-- store-ის ადგილობრივი clone loop-ის `850445c`-ს შეიძლება ჩამორჩეს (Studio-ში purchased SFX შეიძლება უკვე არსებობდეს).
+- store-ის ხაზები `caa09af`-ზე (round 191) გადამოწმდა; Studio-ში purchased SFX იქ არ არის. S-1-მდე შვიდი queue entry სრულდება — ხაზები B-მ დაგეგმვისას ხელახლა უნდა შეამოწმოს.
+- Saba-ს დასტური S-1-ის Loop v2-ის გამონაკლისზე (§3).

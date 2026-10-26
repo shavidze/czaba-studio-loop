@@ -40,17 +40,17 @@ Studio-ს ფაზა 2-ის დოკუმენტმა მეტამ�
 | ველი | ტიპი | შინაარსი |
 | --- | --- | --- |
 | `Category` | `NVARCHAR(32) NULL` | UCS CatID, მაგ. `DOORWood` |
-| `Keywords` | `NVARCHAR(400) NULL` | მძიმით გამოყოფილი |
+| `Keywords` | `NVARCHAR(400) NULL` | ბაზაში მძიმით გამოყოფილი; API-ს JSON-ში `string[]` (ცარიელი → `[]`) |
 | `LoudnessLufs` | `DECIMAL(5,2) NULL` | integrated, BS.1770; 400 ms-ზე მოკლე ჩანაწერზე `NULL` |
 | `TruePeakDbtp` | `DECIMAL(5,2) NULL` | true peak |
-| `SyncPointMs` | `INT NULL` | პირველი დარტყმა; დარტყმის გარეშე `0` |
+| `SyncPointMs` | `INT NULL` | sync point Studio-ს წესით (canonical: [`phase-2b-spotting-rounds.md`](../studio-real-workspace/phase-2b-spotting-rounds.md#sp-2), SP-2, B2) |
 | `AnalysisVersion` | `INT NULL` | ალგორითმის ვერსია, ხელახალი გაშვების გადასაწყვეტად |
 
 `ProductRecordingResponse` ამ ველებს აბრუნებს. `StorageKey` და `SourceKey` ისევ არ ბრუნდება.
 
 **B. ავტომატური ანალიზი `prepare`-ში.**
 - ხმამაღლობა: `ffmpeg -af ebur128=peak=true`, integrated და true peak.
-- sync point: ffmpeg ფაილს 48 kHz მონო float PCM-ად შიფრავს, ხოლო Node ითვლის spectral flux-ს და პოულობს პირველ დარტყმას პირველ 2 წამში. ალგორითმი და პარამეტრები store-ის `hits.ts`-ს ემთხვევა (SRW-46a). ორივე მხარე ერთი და იგივე სატესტო ვექტორებით მოწმდება.
+- sync point: ffmpeg ფაილის დასაწყისს 48 kHz მონო float PCM-ად შიფრავს, ხოლო Node sync point-ს ითვლის Studio-ს `sync-point.ts`-ის (SRW-47a) წესით. წესი აქ არ მეორდება: canonical განმარტება `phase-2b-spotting-rounds.md`-ის SP-2, B2-შია (10 s ფანჯარა, დარტყმა უძლიერეს პიკამდე). ალგორითმი და პარამეტრები store-ის `hits.ts`-ს (SRW-46a) და `sync-point.ts`-ს ემთხვევა. ორივე მხარე SP-1/SP-2-ის ერთი და იგივე სატესტო ვექტორებით მოწმდება. ძველი წესი „პირველი დარტყმა პირველ 2 წამში" უარყოფილია.
 - ახალი დამოკიდებულება არ ემატება.
 
 **C. ადამიანის დაწერილი ველები.**
@@ -65,7 +65,7 @@ Studio-ს ფაზა 2-ის დოკუმენტმა მეტამ�
 - იმავე ნაბიჯზე embedding-ები ფაილად ინახება მომავალი სემანტიკური ძიებისთვის. ბაზაში ჩაწერა ამ გეგმაში არ შედის.
 - CLAP-ის სასწავლო მონაცემები შერეული ლიცენზიებისაა. გამოყენება შიდა შეთავაზებისთვისაა და არა მომხმარებლისთვის გამოქვეყნებული შედეგისთვის. საბოლოო ნებართვა მომხმარებლისაა.
 
-**E. Store-ში მიბმა.** კატალოგის ახალი ველები გადადის `WorkspaceSource.meta`-ში (`app/lib/arrangement/collection.ts`). დაცული `studio.$productId.tsx`-ის ცვლილება, თუ საჭირო გახდება, root-ის ცალკე ნაბიჯია.
+**E. Store-ში მიბმა.** კატალოგის ახალი ველები სუფთა ფუნქციით (`recordingToSourceMeta`) გადადის `WorkspaceSource.meta`-ში — [`rounds.md`](rounds.md) §3, S-1. S-1 დამოკიდებულია SP-3a C PASS-ზე (`spot-search.ts` / `rankSourcesForQuery`) და ერთი unit-only რაუნდია (Loop v2-ის გამონაკლისი, Saba-ს დასტურით). `recordingToSourceMeta`-ს production-ში გამომძახებელი ჯერ არ ეყოლება: „Purchased SFX in Studio" (`collection.ts` + დაცული `studio.$productId.tsx`) გადაწყვეტილი არ არის და root-ის ცალკე ნაბიჯია. ეს განზრახ არის — code-reviewer ფუნქციას YAGNI-ს გამო არ ბლოკავს.
 
 ### ალტერნატივები
 
@@ -90,11 +90,13 @@ Studio-ს ფაზა 2-ის დოკუმენტმა მეტამ�
 | `tools/recording-import/analysis.mjs` | ახალი: flux და sync point (სუფთა ფუნქციები) |
 | `tools/recording-import/ucs-categories.json` | ახალი: UCS სია, ფიქსირებული ვერსიით |
 | `tools/recording-analysis/` | ახალი, ეტაპი D (არჩევითი) |
-| store: `app/lib/arrangement/collection.ts`, `app/services/api/client.ts` | ეტაპი E |
+| store: `app/services/api/client.ts`, ახალი `app/lib/arrangement/recording-meta.ts` | ეტაპი E (S-1); `collection.ts` — ცალკე root-only feature |
 
 ---
 
 ## რაუნდები
+
+დაზუსტებული რაუნდები და მიღების row-ები: [`rounds.md`](rounds.md). კონფლიქტისას ის იმარჯვებს.
 
 ამ ნაკადს backend, SQL Server, ffmpeg და ადგილობრივი R2 სჭირდება. ღრუბლის ლუპი მხოლოდ store-ის dev სერვერს უშვებს და შეამოწმებდა მხოლოდ BLOCKED-ით. ამიტომ რაუნდები PC-ზე ეშვება, იგივე B → A → C წესით, ცალკე ლუპის საქაღალდეში (`tmp/catalog-loop/`) ან ინტერაქტიულ სესიებში. ამის არჩევა მომხმარებლისაა.
 
@@ -102,12 +104,14 @@ Studio-ს ფაზა 2-ის დოკუმენტმა მეტამ�
 | --- | --- | --- |
 | **K-1** spike | Tag Manager-ით დაწერილი ტეგი WAV-ის რომელ chunk-ში ხვდება და კითხულობს თუ არა მას ffprobe; `ebur128` 10 ნამდვილ ჩანაწერზე, მათ შორის < 400 ms-იანზე; sync point-ის პირველი ვერსია 10 ჩანაწერზე | ანგარიში ფაქტებით: chunk, ffprobe-ის გამოსავალი, LUFS ცხრილი, sync point-ები ხელით მონიშნულთან შედარებით. კოდი production-ში არ შედის |
 | **K-2** სქემა და API | ეტაპი A | migration ორჯერ, rollback-იან ტრანზაქციაში, scratch ბაზაზე; `dotnet build` 0 შეცდომა; ტესტები: ველები ბრუნდება, `StorageKey` არ ბრუნდება, სხვისი პროდუქტი 403/404 |
-| **K-3** ავტომატური ანალიზი | ეტაპი B | LUFS და TP დამოუკიდებელ `ffmpeg ebur128`-ს ±0.1 LU-ით ემთხვევა; sync point ხელით მონიშნულს ±10 ms-ით 10-დან ≥ 9 ჩანაწერზე; სატესტო ვექტორები იგივეა, რაც store-ის `hits.ts`-ში; იმპორტის მეორე გაშვება 0 ცვლილებაა |
+| **K-3** ავტომატური ანალიზი | ეტაპი B | LUFS და TP დამოუკიდებელ `ffmpeg ebur128`-ს ±0.1 LU-ით ემთხვევა; sync point (B2-ის წესით) ხელით მონიშნულს ±10 ms-ით 10-დან ≥ 9 ჩანაწერზე; სატესტო ვექტორები იგივეა, რაც store-ის `hits.test.ts`-სა და `sync-point.test.ts`-ში (SP-1/SP-2); იმპორტის მეორე გაშვება 0 ცვლილებაა |
 | **K-4** ტეგები და UCS | ეტაპი C | Tag Manager-ით დაწერილი კატეგორია, keywords და აღწერა ბაზაში აღწევს; UCS სახელის ფაილი ტეგის გარეშე სწორად იკითხება; უცნობი CatID `prepare`-ს მკაფიო შეტყობინებით აჩერებს |
-| **K-5** store-ში მიბმა | ეტაპი E | შეძენილი კოლექციის წყაროებს `meta` აქვს; SRW-47b-ის ძებნა ნამდვილ კატალოგზე პოულობს ხმას კატეგორიით; მეტამონაცემების გარეშე ძველი ქცევა უცვლელია |
+| **K-5** store-ში მიბმა | ეტაპი E → `rounds.md`-ის S-1 (Studio loop, unit-only) | `recordingToSourceMeta` fixture-ზე (`keywords: string[]`) სწორ `meta`-ს აბრუნებს; `rankSourcesForQuery` ჩანაწერს კატეგორიით/keyword-ით პოულობს; მეტამონაცემების გარეშე ძველი ქცევა უცვლელია; სრული verify — gate. SyncPoint ბრაუზერში — ცალკე row S1-5, BLOCKED K-3b-მდე |
 | **K-6** AI შეთავაზებები | ეტაპი D, არჩევითი | 10 ხელით კატეგორიზებულ ჩანაწერზე სწორი კატეგორია top-3-ში ≥ 7-ზე; შეთავაზება `Category`-ს არასოდეს ცვლის |
 
-K-5 დამოკიდებულია SRW-47b-ზე. დანარჩენი Studio-ს ლუპისგან დამოუკიდებელია და მის პარალელურად შეიძლება.
+K-5 (S-1) დამოკიდებულია SP-3a C PASS-ზე, K-3b კი SP-2-ზე (sync-ის წესი და ვექტორები). დანარჩენი Studio-ს ლუპისგან დამოუკიდებელია და მის პარალელურად შეიძლება.
+
+S-1 Studio-ს queue-ში ბოლოა, `PHASE2-VIDEO-SCORING`-ის შემდეგ: STORE-REDESIGN → REVIEW-RECOMMENDATIONS → STUDIO-PERFORMANCE → T12-ADVANCED → PHASE2-VIDEO-SCORING → PHASE2B-SPOTTING → STUDIO-AGENT-COMMANDS → RECORDING-META-S1. B ყველა file:line-ს და grant-ს რაუნდის დაგეგმვისას ხელახლა ამოწმებს, PERF-8/10/13-ისა და REVIEW-RECOMMENDATIONS-ის შემდეგ.
 
 ---
 
@@ -123,6 +127,6 @@ K-5 დამოკიდებულია SRW-47b-ზე. დანარჩ�
 
 ## TODO / შემდეგი ნაბიჯები
 
-- მომხმარებლის გადაწყვეტილებები: რაუნდების გარემო (PC ლუპი თუ სესიები); ეტაპი D შედის თუ არა; CLAP-ის გამოყენების ნებართვა.
+- მომხმარებლის გადაწყვეტილებები: რაუნდების გარემო (PC ლუპი თუ სესიები); ეტაპი D შედის თუ არა; CLAP-ის გამოყენების ნებართვა; S-1 როგორც Loop v2-ის unit-only გამონაკლისი (default: დამტკიცება, `rounds.md` §3).
 - K-1-ის შედეგის შემდეგ ეს გეგმა ზუსტდება: ტეგების chunk და მოკლე ჩანაწერების ხმამაღლობა.
 - სემანტიკური ძიება (embedding-ები ბაზაში და ძიების endpoint) ცალკე გეგმაა, ამ გეგმის შემდეგ.
