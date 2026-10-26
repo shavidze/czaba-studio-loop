@@ -1,0 +1,45 @@
+
+Running 6 tests using 2 workers
+
+  ✘  2 tests/e2e/folder-workflow.spec.ts:43:5 › can scan a folder via IPC and get WAV files (0ms)
+  -  3 tests/e2e/folder-workflow.spec.ts:56:5 › can read and write metadata via IPC
+  ✘  1 tests/e2e/app-launch.spec.ts:17:5 › window opens and has correct title bar (0ms)
+  -  4 tests/e2e/app-launch.spec.ts:25:5 › window has expected minimum dimensions
+  -  5 tests/e2e/app-launch.spec.ts:35:5 › renderer exposes window.api
+  -  6 tests/e2e/app-launch.spec.ts:41:5 › window.api has required methods
+
+
+  1) tests/e2e/app-launch.spec.ts:17:5 › window opens and has correct title bar ────────────────────
+
+    Error: Process failed to launch!
+
+    TypeError: Cannot read properties of undefined (reading 'close')
+
+      12 |
+      13 | test.afterAll(async () => {
+    > 14 |   await app.close();
+         |             ^
+      15 | });
+      16 |
+      17 | test("window opens and has correct title bar", async () => {
+        at /home/runner/czaba-project/czaba-tag-manager/tests/e2e/app-launch.spec.ts:14:13
+
+  2) tests/e2e/folder-workflow.spec.ts:43:5 › can scan a folder via IPC and get WAV files ──────────
+
+    Error: Process failed to launch!
+
+    TypeError: Cannot read properties of undefined (reading 'close')
+
+      37 |
+      38 | test.afterAll(async () => {
+    > 39 |   await app.close();
+         |             ^
+      40 |   rmSync(testDir, { recursive: true, force: true });
+      41 | });
+      42 |
+        at /home/runner/czaba-project/czaba-tag-manager/tests/e2e/folder-workflow.spec.ts:39:13
+
+  2 failed
+    tests/e2e/app-launch.spec.ts:17:5 › window opens and has correct title bar ─────────────────────
+    tests/e2e/folder-workflow.spec.ts:43:5 › can scan a folder via IPC and get WAV files ───────────
+  4 did not run

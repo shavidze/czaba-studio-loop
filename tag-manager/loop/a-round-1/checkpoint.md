@@ -1,0 +1,12 @@
+# A round 1 checkpoint
+- [x] Step 0: read task, summary, primitives; HEAD acefccc, tree clean
+- [x] Step 1: red runs (B03 main ENOENT, B01/B02 e2e)
+- [x] Step 2: fixtures generator + globalSetup
+- [x] Step 3: e2e launch helper + WAV fixture
+- [x] Step 4: check.yml
+- [x] Step 5: plan doc
+- [x] Step 6: verify + code review + report
+- Red logs: red-b03.log (6 fail ENOENT, 24 pass), red-e2e.log (2 failed, Process failed to launch), red-b02.log (5 pass, 1 fail missing data chunk)
+- Green: green-b03.log 30/30, green-e2e.log 6/6 retries=0
+- Review fixes applied (trace/html, regex anchor, >=1 guard, atomic write); final check/verify/e2e green; report a-round-1.md written
+- Advisor follow-ups done: html reporter dropped, flaky=0, install-deps dry-run logged

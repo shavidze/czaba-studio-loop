@@ -1,0 +1,123 @@
+diff --git a/tests/e2e/app-launch.spec.ts b/tests/e2e/app-launch.spec.ts
+index 5c6b0f1..433f699 100644
+--- a/tests/e2e/app-launch.spec.ts
++++ b/tests/e2e/app-launch.spec.ts
+@@ -1,11 +1,12 @@
+ import { type ElectronApplication, _electron as electron, expect, test } from "@playwright/test";
+ import { join } from "node:path";
++import { getElectronLaunchArgs } from "./electron-launch";
+ 
+ let app: ElectronApplication;
+ 
+ test.beforeAll(async () => {
+   app = await electron.launch({
+-    args: [join(__dirname, "../../out/main/index.js")],
++    args: getElectronLaunchArgs(join(__dirname, "../../out/main/index.js")),
+     env: { ...process.env, NODE_ENV: "production" },
+   });
+ });
+diff --git a/tests/e2e/folder-workflow.spec.ts b/tests/e2e/folder-workflow.spec.ts
+index bced5b5..58f4e7b 100644
+--- a/tests/e2e/folder-workflow.spec.ts
++++ b/tests/e2e/folder-workflow.spec.ts
+@@ -2,35 +2,19 @@ import { type ElectronApplication, _electron as electron, expect, test } from "@
+ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+ import { join } from "node:path";
+ import { tmpdir } from "node:os";
++import { createSineWavBuffer } from "../fixtures/create-fixtures";
++import { getElectronLaunchArgs } from "./electron-launch";
+ 
+ let app: ElectronApplication;
+ const testDir = join(tmpdir(), `czaba-e2e-${Date.now()}`);
+ 
+-function createMinimalWav(): Buffer {
+-  const buffer = Buffer.alloc(44);
+-  buffer.write("RIFF", 0);
+-  buffer.writeUInt32LE(36, 4);
+-  buffer.write("WAVE", 8);
+-  buffer.write("fmt ", 12);
+-  buffer.writeUInt32LE(16, 16);
+-  buffer.writeUInt16LE(1, 20);
+-  buffer.writeUInt16LE(1, 22);
+-  buffer.writeUInt32LE(44100, 24);
+-  buffer.writeUInt32LE(88200, 28);
+-  buffer.writeUInt16LE(2, 32);
+-  buffer.writeUInt16LE(16, 34);
+-  buffer.write("data", 36);
+-  buffer.writeUInt32LE(0, 40);
+-  return buffer;
+-}
+-
+ test.beforeAll(async () => {
+   mkdirSync(testDir, { recursive: true });
+-  writeFileSync(join(testDir, "track-01.wav"), createMinimalWav());
+-  writeFileSync(join(testDir, "track-02.wav"), createMinimalWav());
++  writeFileSync(join(testDir, "track-01.wav"), createSineWavBuffer(4410));
++  writeFileSync(join(testDir, "track-02.wav"), createSineWavBuffer(4410));
+ 
+   app = await electron.launch({
+-    args: [join(__dirname, "../../out/main/index.js")],
++    args: getElectronLaunchArgs(join(__dirname, "../../out/main/index.js")),
+     env: { ...process.env, NODE_ENV: "production" },
+   });
+ });
+diff --git a/tests/fixtures/create-fixtures.ts b/tests/fixtures/create-fixtures.ts
+index 5c99718..5211276 100644
+--- a/tests/fixtures/create-fixtures.ts
++++ b/tests/fixtures/create-fixtures.ts
+@@ -1,7 +1,10 @@
+-import { writeFileSync } from "node:fs";
+-import { join } from "node:path";
++import { renameSync, writeFileSync } from "node:fs";
++import { dirname, join, resolve } from "node:path";
+ 
+-function createWavBuffer(durationSamples: number, sampleRate = 44100): Buffer {
++export function createSineWavBuffer(durationSamples: number, sampleRate = 44100): Buffer {
++  if (!Number.isInteger(durationSamples) || durationSamples < 1) {
++    throw new RangeError("durationSamples must be a positive integer");
++  }
+   const numChannels = 1;
+   const bitsPerSample = 16;
+   const byteRate = (sampleRate * numChannels * bitsPerSample) / 8;
+@@ -52,12 +55,23 @@ function createWavBuffer(durationSamples: number, sampleRate = 44100): Buffer {
+   return buffer;
+ }
+ 
+-const fixturesDir = join(__dirname);
++function writeFixtureFileAtomically(filePath: string, content: Buffer): void {
++  const tempPath = `${filePath}.${process.pid}.tmp`;
++  writeFileSync(tempPath, content);
++  renameSync(tempPath, filePath);
++}
+ 
+-const sampleWav = createWavBuffer(44100);
+-writeFileSync(join(fixturesDir, "sample.wav"), sampleWav);
++export function createWavTestFixtures(targetDir: string): void {
++  writeFixtureFileAtomically(join(targetDir, "sample.wav"), createSineWavBuffer(44100));
++  writeFixtureFileAtomically(
++    join(targetDir, "corrupt.wav"),
++    Buffer.from("RIFF\x00\x00\x00\x00WAVEfmt "),
++  );
++}
+ 
+-const corruptWav = Buffer.from("RIFF\x00\x00\x00\x00WAVEfmt ");
+-writeFileSync(join(fixturesDir, "corrupt.wav"), corruptWav);
++const scriptPath = process.argv[1] ?? "";
+ 
+-console.log("Fixtures created successfully");
++if (/(^|[\\/])create-fixtures\.ts$/.test(scriptPath)) {
++  createWavTestFixtures(dirname(resolve(scriptPath)));
++  console.log("Fixtures created successfully");
++}
+diff --git a/vitest.config.main.ts b/vitest.config.main.ts
+index d5c88e7..d7f84af 100644
+--- a/vitest.config.main.ts
++++ b/vitest.config.main.ts
+@@ -4,6 +4,7 @@ export default defineConfig({
+   test: {
+     globals: true,
+     environment: "node",
++    globalSetup: ["./tests/main/global-setup.ts"],
+     setupFiles: ["./tests/main/setup.ts"],
+     include: ["tests/main/**/*.test.ts"],
+     coverage: {

@@ -1,0 +1,29 @@
+
+Running 6 tests using 2 workers
+
+  ✓  1 tests/e2e/app-launch.spec.ts:18:5 › window opens and has correct title bar (269ms)
+  ✓  3 tests/e2e/app-launch.spec.ts:26:5 › window has expected minimum dimensions (10ms)
+  ✓  4 tests/e2e/app-launch.spec.ts:36:5 › renderer exposes window.api (10ms)
+  ✓  2 tests/e2e/folder-workflow.spec.ts:44:5 › can scan a folder via IPC and get WAV files (327ms)
+  ✘  6 tests/e2e/folder-workflow.spec.ts:57:5 › can read and write metadata via IPC (31ms)
+  ✓  5 tests/e2e/app-launch.spec.ts:42:5 › window.api has required methods (25ms)
+
+
+  1) tests/e2e/folder-workflow.spec.ts:57:5 › can read and write metadata via IPC ──────────────────
+
+    Error: page.evaluate: Error: Error invoking remote method 'meta:write': Error: Failed to write metadata: WAV file is missing data chunk
+
+      63 |   });
+      64 |
+    > 65 |   await window.evaluate(
+         |                ^
+      66 |     async ({ path, schema }: { path: string; schema: unknown[] }) => {
+      67 |       await window.api.writeMetadata(
+      68 |         path,
+        at /home/runner/czaba-project/czaba-tag-manager/tests/e2e/folder-workflow.spec.ts:65:16
+
+    Error Context: test-results/folder-workflow-can-read-and-write-metadata-via-IPC/error-context.md
+
+  1 failed
+    tests/e2e/folder-workflow.spec.ts:57:5 › can read and write metadata via IPC ───────────────────
+  5 passed (2.7s)

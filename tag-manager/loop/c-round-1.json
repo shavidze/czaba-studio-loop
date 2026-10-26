@@ -1,0 +1,46 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R1-01",
+      "severity": "low",
+      "steps": [
+        "npm run build; launch out/main/index.js with Playwright _electron under xvfb-run (--no-sandbox), clean XDG_CONFIG_HOME (default STANDARD_FIELDS schema)",
+        "Stub dialog.showOpenDialog to a temp folder with copies of tests/fixtures/sample.wav; click 'Open Folder'; click alpha.wav",
+        "Type Title='C Round1 Title', Comment='C round1 comment ascii'; leave Keywords empty; click 'Save Tags'",
+        "ffprobe -v error -show_entries format_tags -of json alpha.wav; dump the RIFF LIST/INFO chunks"
+      ],
+      "expected": "Fields the user left empty are not written, or the absence is documented in the tag contract. The importer (K-4) should not see an empty IKEY key",
+      "actual": "LIST/INFO contains IKEY=\"\" (size 0) next to INAM/ICMT; ffprobe format_tags shows \"IKEY\": \"\". Pre-existing src behaviour (src/** is byte-identical to HEAD), NOT caused by A's diff. Relevant to T-1 (IKEY round-trip, D-02) and the importer contract",
+      "evidence": "c-round-1/r1-5-r1-9-drive.log (ffprobe block), c-round-1/r1-9-riff-chunks.json"
+    },
+    {
+      "id": "C-R1-02",
+      "severity": "low",
+      "steps": [
+        "rm -rf playwright-report test-results; npm run build; xvfb-run -a npx playwright test --retries=0 --trace=retain-on-failure",
+        "ls playwright-report"
+      ],
+      "expected": "check.yml upload step's playwright-report/ path holds a report when the E2E step fails",
+      "actual": "playwright.config.ts has no reporter, so the default 'list' reporter is used and playwright-report/ is never created. On failure the artifact holds only test-results/ (if-no-files-found: ignore hides this). A also added '--trace=retain-on-failure', which is not in Scope 4. A disclosed this, and it is harmless. The plan doc says playwright-report/ is uploaded",
+      "evidence": "c-round-1/r1-7-ci-steps.log; 'ls: cannot access playwright-report'"
+    }
+  ],
+  "passed": [
+    "R1-1",
+    "R1-2",
+    "R1-3",
+    "R1-4",
+    "R1-5",
+    "R1-6",
+    "R1-8",
+    "R1-9",
+    "R1-10"
+  ],
+  "blocked": [
+    "R1-7 / TM-T0-CI: check.yml is valid YAML and its run-steps (except npm ci, apt-get, playwright install-deps) are green locally from a clean state, but the GitHub Actions run itself has not happened. It stays open until root links a green Actions run",
+    "npm run check's tsc --noEmit type-checks 0 files (TM-B04); a green check is not type-safety evidence",
+    "Info: tsc -p tsconfig.test.json = 31 errors (baseline); none in A's new files (global-setup.ts, electron-launch.ts, create-fixtures.ts); spec errors are pre-existing window-shadowing (TM-B04)"
+  ],
+  "realVerified": false
+}
