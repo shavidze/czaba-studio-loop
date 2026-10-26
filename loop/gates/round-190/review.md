@@ -1,0 +1,47 @@
+COMMIT: OK. Nothing blocks this commit. I read the diff and both new files directly. The tests and C's browser checks I took from the logs.
+
+## Code Review: SpotlightLoader.tsx + store-entrance-loader.test.tsx + docs 155/156
+
+**Inputs checked:**
+- **Scope:** the 4 paths in `paths.txt`. None touch auth, cart, checkout, purchase or download code, and none touch `client.ts`.
+- **Tests:** `verify.log` shows 183 test files passed, including `store-entrance-loader.test.tsx` (17 tests).
+- **C's browser check (`c-round-190.json`):** PASS with browser verification and no bugs.
+  - Fresh-load CLS median: 0.00005 / 0.0014 / 0.0009 at 375 / 1280 / 1440.
+  - The overlay's parent is `BODY` and its height equals the viewport.
+  - Time on screen: 1159–1166 ms.
+
+### Critical Issues
+- None.
+
+### Suggestions (most important first; none blocking)
+1. **Low — no unit test guards the portal.** Removing `createPortal` (`SpotlightLoader.tsx:75,282`) keeps all 17 tests green; C saw the same thing (C-R190-I1). Only the browser CLS check would catch it, so a revert would quietly bring back C-R189-01.
+   **Fix:** add `expect(overlay?.parentElement).toBe(document.body);` to L2 (`store-entrance-loader.test.tsx:72-76`). This works in jsdom. Doc 156 line 94 already leaves this to B. It belongs in the next round, not this commit.
+2. **Low / Info — Escape is caught for the whole document** (`SpotlightLoader.tsx:55-59`). If a modal or the LeadMagnet popup (`z-[9999]`) opens during the 1.15 s, one Escape closes both. This is not a regression, because the old loader had no keyboard handling. Ctrl+Tab also ends the loader, which is harmless.
+   **Fix (if wanted):** only handle Escape when `!event.defaultPrevented`, and let modals call `preventDefault`. Or accept the overlap, since the window is so short.
+3. **Low — `AnimatePresence` does nothing here** (`SpotlightLoader.tsx:76`). When `isVisible` is false the component returns `null` and the whole subtree unmounts, so `AnimatePresence` never runs an exit. The fade-out is done by hand through `animate={{opacity: isExit ? 0 : 1}}`. The wrapper is misleading but harmless.
+   **Fix:** remove it in the STORE-2 retheme. Under R66, visuals and timing are frozen now.
+4. **Info — doc 156 is stale.** Line 4 still says "In Progress (awaiting C round 190)" and line 96 still says C's check hasn't been done, but C round 190 is PASS. The diff updates doc 155 the same way one round later, so this follows the workflow. Updating it before the commit would just be tidier.
+5. **Info — pre-existing, not new in this diff.** The `backgroundColor: '#000'`/teal `rgba` literals (Tailwind-first violation), `Math.random()` in render and `noArrayIndexKey` on the dust particles were all there before. R66 and the STORE-2 TODO already record them, so they don't need a new finding.
+6. **Info — ArrowDown/Space scroll the hidden page by 40 px** while the loader is up (C-R190-I4). This is outside R67 and is already noted as a Low candidate.
+
+### Good Practices Found
+- **One owner for cleanup.** All 5 timers, the keydown listener and the click listener live in one effect keyed on `isVisible`. Skipping, finishing naturally and unmounting all go through the same cleanup, and `getTimerCount() === 0` confirms it.
+- **No hydration problems.** `useState(false)` plus an effect means no hydration mismatch, and `null` is returned before `createPortal` touches `document`, so SSR is safe (L1).
+- **StrictMode-safe.** When the effect runs twice, the second `claimEntranceForSession` sees the key already written and does not reset the visible state.
+- **Reduced motion and blocked storage handled cleanly.** Reduced motion is decided synchronously before the session key is written. Blocked storage is wrapped in `try/catch`, so there is no loader and no exception.
+- **Real-browser event order is right.** Skipping uses `click`, not `pointerdown`, so the pointerup/compat click can't fall through to the page; L5 tests this. Tab has no `preventDefault`, so there is no keyboard trap.
+- **Accessibility.** `aria-hidden` plus changing `h1` to `span` gives the page a single h1. The `pointer-events-none` exit phase means the page is usable from about 910 ms.
+- **TS strict:** it uses `ReturnType<typeof setTimeout>` instead of `NodeJS.Timeout`, with no `any`, assertions or suppressions. Every statement ends with a semicolon.
+
+### Architecture note
+- **Signal 2 (coupling / containing block): `SpotlightLoader.tsx:75,282`.** The loader now gets out of the containing block created by `PageTransition`'s entrance `transform` by using a portal. Any other `position: fixed` surface rendered inside `page-transition-wrapper` has the same risk during its first ~500 ms (doc 156:100).
+  - **Keep** the loader as it is. The portal is the right local fix and adds no new lifecycle.
+  - **Proposal for planner (B):** one read-only, bounded task. Inventory every `fixed inset-0`/`fixed` surface under `page-transition-wrapper` (the UI `Modal`, cookie banner, LeadMagnet popup, Toast) and record for each whether it already uses a portal. Measure first-visit CLS and the overlay's parent and height in Playwright. Only if a gap turns up, schedule a separate fix task, either portalling that component or setting `transform: none` on the wrapper after it finishes. `PageTransition.tsx` is frozen, so that decision belongs to root.
+- This reviews the diff only; I did not audit the whole module.
+
+### Alternative Approach
+- **Current:** a portal to `document.body`, plus skipping on Escape, Tab, Shift+Tab or a click on the overlay, with no `preventDefault`.
+- **Alternative:** keep the overlay in the tree and put `inert` on the page while the loader is up, or have `PageTransition` drop its `transform` after entry.
+- **Verdict:** the current approach is better. The alternative needs the frozen `PageTransition.tsx`/`root.tsx`, or the loader reaching into neighbouring DOM, and `inert` would hold keyboard users for 1.2 s. The portal fixes CLS by itself (0.6158 → 0.00005 at 375), and its only side effect is that the overlay now covers the header too, which C read as intended (C-R190-I3).
+
+### Score: 8/10

@@ -1,15 +1,12 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 189 FAIL (browserVerified=true, realVerified=true): 15 rows PASS, STORE-AFTER-189 FAIL on fresh-mode home CLS (C-R189-01 Medium, 0.2727 at 1280 and 0.6158 at 375, overlay-sourced shift) plus C-R189-02 Low (Tab moves focus under the opaque overlay). Gate 189 skipped; STORE-1d is ბაგია, not done. Under the 2026-10-23 bug gate the Medium goes first; the Low is fixed in the same round because it owns the code and costs one line. Regression is due on/after 2026-10-27 (today 2026-10-26). Large scoped work remains (STORE-1d, regression, STORE-2..5, REVIEW-RECOMMENDATIONS, STUDIO-PERFORMANCE, T12-ADVANCED, deferred Lows, final regression) and nothing needs external input, so neither COMPLETE nor BLOCKED.",
- "nextTask": "Round 190 (D-29z155) STORE-1d fix-up from HEAD 850445c + the round-189 working tree (gate 189 skipped; frozen 1016 incl. doc 155 cdf011f9; grants 3: SpotlightLoader.tsx, store-entrance-loader.test.tsx, doc 156; new 0). K1 C-R189-01: reproduce C's fresh-mode CLS at 375/1280, bisect the animated overlay children, fix the confirmed cause keeping visuals (R66) and all round-189 properties. K2 C-R189-02: Tab/Shift+Tab end the loader like Escape without preventDefault (R67, vetoable; replaces R63 Tab clause); other keys do not skip. T1 Tab + other-keys cases; doc 156 status/R67/problem-solution. A live proof measures CLS at 375/1280/1440. C rows: CLS-FRESH-190 (median <0.1 at all 3 viewports, no overlay-sourced shift), DUR-190, VIS-190, HIT-190, SKIP-190 (a-e), H1-190, RM-190, SESSION-190, STORE-AFTER-190, G190-3, STUDIO-RV-190, SCOPE-190, T-RUN-190, AN-REVIEW-190, PX-NET/REG-HYD. Next: REGRESSION (round 191), then STORE-2 split.",
+ "reason": "C round 190 PASS (browserVerified=true, realVerified=true, 16 rows, 0 bugs) and gate 190 published 338564e: STORE-1d and STORE-1 are done, C-R189-01/02 closed. Saba reported SABA-B-3 (Medium, 2026-10-26) and ordered it fixed next; B reproduced it in the browser (pressed fader = brass band from ring-2 + global :focus-visible outline). Regression is not due (2026-10-24 + 2 days; due on/after 2026-10-27), so the round-190 prediction \"191 = regression\" no longer holds. Large scoped work remains (SABA-B-3, regression, STORE-2..5, REVIEW-RECOMMENDATIONS, STUDIO-PERFORMANCE, T12-ADVANCED, deferred Lows, final regression) and nothing needs external input, so neither COMPLETE nor BLOCKED.",
+ "nextTask": "Round 191 (D-29z156) SABA-B-3 from HEAD 338564e (clean; frozen 1013; grants 6: ArrangementLane, ArrangementGroupHeader, ArrangementMaster, ArrangementDetailPanel, ArrangementTransport, affordance-colour-ui.test (DXA1 only); new 3: studio-fader.ts, fader-style-ui.test.tsx, doc 157). K0 reproduce and confirm the cause; K1 R68 level-fader look on track/group/Master/Clip Gain (graphite track, brass value fill, neutral thumb, every state); K2/K3 R69 single thin offset focus ring on all six range controls, Pan/Zoom neutral (R70); R71 shared recipe. C rows: PRESS-191, LOOK-191, PANZOOM-191, BEHAVIOUR-191, AUDIO-191, LAYOUT-191, STUDIO-RV-191 (masked), STORE-AFTER-191, G191-3, SCOPE-191, T-RUN-191 (m1-m5), AN-REVIEW-191, PX-NET/REG-HYD. Next: REGRESSION (first planning on/after 2026-10-27), then STORE-2.",
  "remaining": [
-  "STORE-1d(bug: round 189 C FAIL C-R189-01 Medium fresh-mode CLS + C-R189-02 Low Tab; fix-up round 190 D-29z155; done only on C PASS with browserVerified)",
-  "C-R189-01(medium, round 190 K1)",
-  "C-R189-02(low, round 190 K2 R67)",
-  "REGRESSION(due 2026-10-27; expected round 191; + M1, M3, M4, harness gate-log check, REG-DUX5-PLAYHEAD-RESCAN, C-R167-METRONOME-UNDER-MUTE, STATE-M3 wording, e2e smoke, store smoke vs mock incl. STORE-1a/1b/1c and STORE-1d DUR/SESSION/RM/H1/CLS-fresh, harness rules C-R189-I1/I5)",
-  "C-R189-INFO(routed)",
+  "SABA-B-3(medium, Saba 2026-10-26; round 191 D-29z156; done only on C PASS with browserVerified)",
+  "REGRESSION(due on/after 2026-10-27; first planning on/after that date, expected round 192; + M1, M3, M4, harness gate-log check, REG-DUX5-PLAYHEAD-RESCAN, C-R167-METRONOME-UNDER-MUTE, STATE-M3 wording, e2e smoke, store smoke vs mock incl. STORE-1a/1b/1c/1d (fresh CLS + overlay parent/height, C-R190-I1), SABA-B-3 one fader per kind, harness rules C-R189-I1/I5, C-R190-I2)",
   "A-R189-SIGNALS(signal)",
-  "STORE-REDESIGN(STORE-0 done 4a73ced; STORE-1a done cc207d6; STORE-1b done cb24362; STORE-1c done 850445c; STORE-1d ბაგია (round 189 C FAIL) -> fix-up round 190 D-29z155; STORE-2 tokens/type (+C-R186-02, A-R187-PRODUCTCARD-PRIMARY-TOKEN, GATE188 header a11y signals, A-R188 NAV_ITEMS, loader colours); STORE-3 hero (+C-R188-I6 keep-list question, C-R188-I2 footer coverage); STORE-4 product/listening (+C-R186-01); STORE-5 loading text/docs (+dead CinemaCurtain/PianoCurtain/PianoLoadingAnimation loaders); direction A decided)",
+  "STORE-REDESIGN(STORE-0..STORE-1d done, STORE-1 complete 338564e; STORE-2 tokens/type (+C-R186-02, A-R187-PRODUCTCARD-PRIMARY-TOKEN, GATE188 header a11y signals, A-R188 NAV_ITEMS, loader colours, C-R190-I3 overlay over header for Saba); STORE-3 hero (+C-R188-I6, C-R188-I2); STORE-4 product/listening (+C-R186-01); STORE-5 loading text/docs (+dead loaders, SpotlightLoader portal unit guard C-R190-I1); direction A decided)",
   "C-R188-I6(awaiting_user: keep-list testimonials mounted nowhere)",
   "C-R188-I3(root request: mock digital-gift-card fixture)",
   "GATE188-REVIEW-SIGNALS(signal)",
@@ -28,6 +25,8 @@
   "C-R183-M310-CC5-UNREACHABLE(info)",
   "GATE175-S5-SCROLLBAR-JUMP(info, vetoable)",
   "REVIEW-RECOMMENDATIONS(ABL-R-7,DUX-R-3,ABL-R-12,DUX-R-1,ABL-R-13,DUX-R-4,ABL-R-10,DUX-R-6,ABL-R-9,DUX-R-2,ABL-R-1,ABL-R-2,ABL-R-3,ABL-R-4,ABL-R-8,ABL-R-11,ABL-R-14,ABL-R-15,ABL-R-18,DUX-R-7,DUX-R-8,DUX-R-9)",
+  "STUDIO-PERFORMANCE(not_started; after REVIEW-RECOMMENDATIONS, before T12-ADVANCED; PERF-1 harness first)",
+  "RETRO(first after STORE-REDESIGN or at round 200)",
   "Q-V3-ICON-SIZE(awaiting_user)",
   "B-R153-PREVIEW-DUR(awaiting_user)",
   "C-R151-2(deferred_low_polish+awaiting_user)",
@@ -99,6 +98,10 @@
   "C-R182-R42-GAP-CLICK(info)",
   "B-R184-FAKECLOCK-UNASSERTED(signal; m313 0 red)",
   "ARCH-R184-SIGNAL3(signal; 73 suite copies; checkpoint Q2)",
-  "DEFERRED-LOW-POLISH(267 entries incl. C-R188-I4, GATE187-SVG-ARIA-HIDDEN, A-R187-PRODUCTCARD-PRIMARY-TOKEN, C-R186-02, GATE186-SITEMAP-INACTIVE, C-R185-I2, C-R185-I3 and earlier)"
+  "DEFERRED-LOW-POLISH(268 entries incl. C-R190-I4, C-R188-I4, GATE187-SVG-ARIA-HIDDEN, A-R187-PRODUCTCARD-PRIMARY-TOKEN, C-R186-02, GATE186-SITEMAP-INACTIVE, C-R185-I2, C-R185-I3 and earlier)",
+  "C-R190-INFO(routed)",
+  "A-R190-SIGNALS(signal)",
+  "ARCH-R190-PAGETRANSITION-FIXED(signal)",
+  "GLOBAL-FOCUS-VISIBLE-UNLAYERED(signal; RETRO systemic candidate)"
  ]
 }

@@ -1,0 +1,44 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/__tests__/store-entrance-loader.test.tsx [2m([22m[2m17 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 313[2mms[22m[39m
+     [32m✓[39m L1 renders nothing on the server[32m 4[2mms[22m[39m
+     [32m✓[39m L2 shows a decorative overlay with no heading on first mount[32m 164[2mms[22m[39m
+     [32m✓[39m L3 stays on screen at most 1200 ms, exit fade included[32m 19[2mms[22m[39m
+     [32m✓[39m L4 lets pointer events through during the exit fade only[32m 16[2mms[22m[39m
+     [32m✓[39m L5 a click on the overlay ends it immediately and for good[32m 13[2mms[22m[39m
+       [32m✓[39m Escape at 300 ms removes the overlay and its keydown listener[32m 11[2mms[22m[39m
+       [32m✓[39m Tab ends it like Escape without preventing the focus move[32m 16[2mms[22m[39m
+       [32m✓[39m Shift+Tab ends it like Escape without preventing the focus move[32m 11[2mms[22m[39m
+[31m       [31m×[31m other keys do not skip[39m[32m 14[2mms[22m[39m
+       [32m✓[39m removes the keydown listener after the natural finish[32m 6[2mms[22m[39m
+       [32m✓[39m removes the keydown listener on unmount mid-animation[32m 10[2mms[22m[39m
+     [32m✓[39m L7 shows once per session and never writes the old localStorage key[32m 5[2mms[22m[39m
+     [32m✓[39m L8 ignores the old localStorage key and honours the session key[32m 8[2mms[22m[39m
+     [32m✓[39m L9 never renders under prefers-reduced-motion and does not claim the session[32m 2[2mms[22m[39m
+     [32m✓[39m L10 blocked storage renders nothing and does not throw[32m 2[2mms[22m[39m
+     [32m✓[39m L10b a sessionStorage write failure renders nothing and does not throw[32m 1[2mms[22m[39m
+     [32m✓[39m L11 leaves no stray timers or state updates after unmount[32m 11[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSpotlightLoader entrance (STORE-1d D10)[2m > [22mL6 Escape skip and keydown listener hygiene[2m > [22mother keys do not skip
+[31m[1mAssertionError[22m: expected null not to be null[39m
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m192:44[22m[39m
+    [90m190| [39m          fireEvent[33m.[39m[34mkeyDown[39m(document[33m,[39m { key })[33m;[39m
+    [90m191| [39m        })[33m;[39m
+    [90m192| [39m        [34mexpect[39m([34mfindOverlay[39m(container))[33m.[39mnot[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                           [31m^[39m
+    [90m193| [39m      }
+    [90m194| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m16 passed[39m[22m[90m (17)[39m
+[2m   Start at [22m 10:55:24
+[2m   Duration [22m 1.11s[2m (transform 93ms, setup 0ms, import 275ms, tests 313ms, environment 390ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SpotlightLoader entrance (STORE-1d D10) > L6 Escape skip and keydown listener hygiene > other keys do not skip,line=192,column=44::AssertionError: expected null not to be null%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:192:44%0A%0A

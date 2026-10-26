@@ -1,0 +1,32 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+const out = '/home/runner/czaba-project/tmp/studio-real-loop/b-round-190/shots/';
+(async () => {
+  const b = await chromium.launch();
+  const p = await b.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+  await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'networkidle', timeout: 60000 });
+  await p.waitForTimeout(2500);
+  const f = p.locator('input[type=range][aria-label^="Volume — "]').first();
+  await f.scrollIntoViewIfNeeded();
+  const bb = await f.boundingBox();
+  const clip = { x: bb.x - 60, y: bb.y - 14, width: bb.width + 120, height: bb.height + 28 };
+  const info = async (tag) => {
+    const s = await f.evaluate((el) => { const c = getComputedStyle(el); return { fv: el.matches(':focus-visible'), focus: el === document.activeElement, active: el.matches(':active'), accent: c.accentColor, bg: c.backgroundColor, shadow: c.boxShadow, outline: c.outline, scheme: c.colorScheme, h: el.getBoundingClientRect().height }; });
+    await p.screenshot({ path: out + `vol-${tag}.png`, clip });
+    console.log(tag, JSON.stringify(s));
+  };
+  await info('rest');
+  await p.mouse.move(bb.x + bb.width * 0.5, bb.y + bb.height / 2);
+  await p.mouse.down();
+  await p.waitForTimeout(200);
+  await info('pressed');
+  await p.mouse.move(bb.x + bb.width * 0.7, bb.y + bb.height / 2, { steps: 5 });
+  await info('drag');
+  await p.mouse.up();
+  await p.waitForTimeout(200);
+  await info('released');
+  await p.mouse.click(5, 450);
+  await f.focus();
+  await p.keyboard.press('ArrowLeft');
+  await info('keyboard');
+  await b.close();
+})().catch((e) => { console.error(e); process.exit(1); });

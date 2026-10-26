@@ -1,0 +1,124 @@
+{
+  "round": 190,
+  "task": "STORE-1d fix-up: C-R189-01 (overlay CLS) + C-R189-02 (Tab skip, R67)",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-26T10:39:20.3712934Z",
+    "round": 190,
+    "attempt": 1,
+    "store": 200
+  },
+  "mock": "C started mock-api/server.mjs on :5199 (it was not listening); log c-round-190/mock.log; stopped at the end",
+  "bugs": [],
+  "passed": [
+    "CLS-FRESH-190",
+    "DUR-190",
+    "VIS-190",
+    "HIT-190",
+    "SKIP-190",
+    "H1-190",
+    "RM-190",
+    "SESSION-190",
+    "STORE-AFTER-190",
+    "G190-3",
+    "STUDIO-RV-190",
+    "SCOPE-190",
+    "T-RUN-190",
+    "AN-REVIEW-190",
+    "PX-NET",
+    "REG-HYD"
+  ],
+  "failed": [],
+  "blocked": [],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome/lint",
+    "verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "measurements": {
+    "clsFreshMedian": {
+      "375": 5e-05,
+      "1280": 0.0014,
+      "1440": 0.0009
+    },
+    "clsSeenMedian": {
+      "375": 0,
+      "1280": 0.0014,
+      "1440": 0.0009
+    },
+    "overlaySourcedShiftMaxValue": 0,
+    "overlayParent": "BODY",
+    "overlayHeightEqualsViewport": true,
+    "durMs": {
+      "min": 1158.9,
+      "max": 1165.5
+    },
+    "logoPrePaintHiMs": [
+      454.7,
+      522.5
+    ],
+    "firstHitMs": [
+      910,
+      964
+    ],
+    "skipRemovalAfterInputMs": {
+      "click": [
+        2.5,
+        3.9
+      ],
+      "escape": [
+        4.3,
+        6
+      ],
+      "tab": [
+        2.9,
+        3.8
+      ],
+      "shiftTab": [
+        2.4,
+        3.1
+      ]
+    },
+    "storeAfterChangedPxOutsideHero": 0,
+    "studioRvChangedPx": {
+      "1280": 0,
+      "1440": 0
+    }
+  },
+  "info": [
+    {
+      "id": "C-R190-I1",
+      "note": "T1 does not guard the portal: mutant m5 (createPortal removed) keeps 17/17 green; only the browser CLS/parent check catches a revert. Already routed by A as reviewer Medium #1; B decides.",
+      "evidence": "tmp/studio-real-loop/c-round-190/logs/t1-m5-noportal.txt"
+    },
+    {
+      "id": "C-R190-I2",
+      "note": "Harness rule: card scrollIntoView before ~110 ms after navigation can land at scrollY 1299 instead of 857 at 1280 (scroll event with no overlay present); first DUR 1280 HIT run missed 3/3 for this reason. Scroll after t>250 ms and readyState!=loading. Scrollprobe: 2/4 fresh vs 0/4 seen loads (fresh calls at 71/102 ms, seen at 98-142 ms; n=4). At ~107 ms both modes are pre-hydration SSR HTML and the loader is not mounted, so the asymmetry is read as timing, not the loader.",
+      "evidence": "c-round-190/out/scroll-1280-fresh.json, scroll-1280-seen.json, dur-1280-dbg.json, dur-*-hit2.json"
+    },
+    {
+      "id": "C-R190-I3",
+      "note": "Overlay (portal) now stacks above the sticky header and cookie banner for its whole life; earlier on cold 375 loads the header showed above it for ~450 ms. Read as intended full-screen behaviour, not an R66 regression.",
+      "evidence": "a-round-190/shots/early-*; c-round-190/out/cls-375.json ovFirst"
+    },
+    {
+      "id": "C-R190-I4",
+      "note": "ArrowDown while the loader is up scrolls the hidden page by 40 px (outside R67) -> candidate Low for deferred_low_polish.",
+      "evidence": "c-round-190/out/skip-{1440,375}.json case e"
+    },
+    {
+      "id": "C-R190-I5",
+      "note": "Shift+Tab from the top focuses the footer Cookie Policy and scrolls to it (browser reverse tab order); visible, meets the row.",
+      "evidence": "c-round-190/out/tabtop-{375,1440}.json"
+    }
+  ],
+  "abletonParity": "not applicable (store page)",
+  "report": "tmp/studio-real-loop/c-round-190.md"
+}
