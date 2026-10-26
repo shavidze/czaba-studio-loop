@@ -1,0 +1,10 @@
+const X = require('./lib122.cjs'); const { L, sleep } = X;
+(async () => { const b = await L.chromium.launch({ headless: true }); const net = [];
+  const o = await L.openStudio(b, X.VPS[1440], 'probe178', net, {}); const p = o.page;
+  const r = {};
+  r.tree = await p.evaluate(() => [...document.querySelectorAll('button')].filter((b) => b.hasAttribute('aria-current') || /fold/.test(b.getAttribute('aria-label') || '')).map((b) => ({ t: b.textContent.trim().slice(0, 30), al: b.getAttribute('aria-label'), cur: b.getAttribute('aria-current') })).slice(0, 12));
+  r.tracks = await p.evaluate(() => [...document.querySelectorAll('[data-track-id]')].map((e) => { const q = e.getBoundingClientRect(); return [e.dataset.trackId, e.tagName, e.getAttribute('data-testid'), Math.round(q.x), Math.round(q.y), Math.round(q.width), Math.round(q.height), e.hasAttribute('data-grid-seconds')]; }));
+  const lane = await p.locator('[data-grid-seconds]').nth(2).boundingBox(); r.lane = lane;
+  await p.mouse.click(lane.x + lane.width - 60, lane.y + lane.height / 2, { button: 'right' }); await sleep(600);
+  r.menu = await p.evaluate(() => { const m = document.querySelector('[data-testid=arrangement-grid-menu]'); return m ? [...m.querySelectorAll('[role]')].map((i) => `${i.getAttribute('role')}|${i.textContent.trim().slice(0, 30)}|${i.getAttribute('aria-checked')}`) : null; });
+  console.log(JSON.stringify(r, null, 1)); await b.close(); })();

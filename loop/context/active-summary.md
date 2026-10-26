@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T00:15:42.493Z)
+# Active loop summary (2026-10-26T01:18:40.912Z)
 
-- backlog.json 1580 KB -> active view 219 KB
-- status: G_ROOT_GATE round 177
-- servers: `{"checkedUtc":"2026-10-25T23:45:33.9839092Z","round":177,"attempt":1,"store":200}`
+- backlog.json 1590 KB -> active view 221 KB
+- status: G_ROOT_GATE round 178
+- servers: `{"checkedUtc":"2026-10-26T00:50:20.0357448Z","round":178,"attempt":1,"store":200}`
 - last publication: cc984b6f06ded21ec35593fc6dbb65353c153b1e (rounds 177-177)
-- last root gate: round 177 published - commit cc984b6f06ded21ec35593fc6dbb65353c153b1e pushed
+- last root gate: round 178 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -394,11 +394,15 @@
 - GATE174-S2-DOC143-STATUS / low / routed to round 175 D1 (doc 143 Completed) / 
 - GATE175-S2-DXA7-OUT-OF-SCOPE-COUNTS / low / routed to round 176 L4(b): ExportDialog accent-brand=6 and Lane ghost string=2 counts dropped from DXA7; untouched later-stage sites covered by C AN-REVIEW/SOURCE-SCOPE | round 176 done; reversed in part by gate-176 S1 -> round 177 G1 restores the two counts (ExportDialog K7 kept, Lane ghost later-stage). 2026-10-25 B round 176 -> 177 planning (D-29z142) / 
 - B-R175-INVENTORY-GAPS / info / B found unclassified brass sites in its own round-175 inventory: Lane l.723/731 video import, LibraryPreview l.332 Add (both -> 5b-3 under R35), DetailPanel l.752/861/1142 hover:text-brand and StudioWorkspace l.2197 exit link hover:text-brand (-> 5b-3), DetailPanel l.180 and Ruler l.233 playheads (K8), MarkerRow l.847 name field (K10); full table in round 176 §0.3 from a token-level scan; C INVENTORY-GREP row (per token, arrangement dir + studio-lab.tsx) added so a further gap cannot pass silently / 
-- GATE176-S1-KEPT-COUNT-LOCKS / low / scheduled round 177 G1 (not deferred: DUX-R-5's own test file, test-only, cheap): restore ExportDialog accent-brand=6 (K7 kept) and Lane 'border-accent bg-accent/20 text-accent'=2 (later-stage, moves in 5b-3) in affordance-colour-ui DXA7 / 
 - GATE176-S2-MIX-ON-STATE-CONSTANT / low / signal (proposal needs approval): shared ARRANGEMENT_MIX_ON_STATE constant for Lane/GroupHeader/Master on-state recipes; under GATE167-TOKEN-TEST-FRAGILITY and checkpoint Q1; not scheduled / 
 - C-R176-NOBRASS-LCD-GLYPH / info / method note: default-LCD subpixel fringes on M/S glyphs trip R-B>=45 (also on off buttons); NO-BRASS rows on glyph buttons run with --disable-lcd-text from round 177 / 
 - A-R176-MIXED-REST-BASE / info / confirmed by C: tailwind-merge drops bg-foreground/5 under bg-gradient-to-r; mixed half vs header 3.32 at rest (>= 3:1, at B's 3.3 floor); no change / 
 - C-R176-MIXED-VS-OFF-FILL / info / B ruling round 177: no fill floor; the foreground border (13.94) carries mixed vs off; vetoable by Saba / 
+- C-R177-G1-562 / info / scheduled round 178 L5: ExportDialog progress l.562 is a 5b-3 site, E2 neutralises it and KEPT_BRASS_COUNTS goes 6 -> 5 (the K7 radios) / 
+- C-R177-WZOOM-FOCUS-ON-PRESS / info / signal for the K4 review: a mouse press on the Waveform Zoom select matches :focus-visible in Chromium, so ring-brand shows while the native popup is open; pre-existing; K4 kept / 
+- GATE177-S1-DELETE-RANGE-LOOKS-ON / info / vetoable design item (feature-status.md): Delete with a range gets border-foreground, the same border that means on for Loop/Follow; options border-foreground/50 or dashed; needs Saba's call; not scheduled / 
+- GATE177-S3-BRACE-WEIGHT / info / vetoable design item: enabled brace border-2 foreground ~15:1 is louder than the former brass; edge hover 3.43 passes with little margin; recorded in feature-status.md vetoable list / 
+- GATE177-S5-DOC146-STATUS / info / scheduled round 178 D1 (doc 146 -> Completed) / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

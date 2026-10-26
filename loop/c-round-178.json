@@ -1,0 +1,108 @@
+{
+ "taskStatus": "FAIL",
+ "round": 178,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-26T00:50:20.0357448Z",
+  "round": 178,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "INVENTORY-GREP",
+  "CC-TEXT",
+  "NO-BRASS-TEXT",
+  "CONTRAST-TEXT",
+  "REFUSAL",
+  "EXPORT-STATES",
+  "FUNC-SMOKE-TEXT",
+  "ENV-VIS",
+  "RV1-DUX5B3A",
+  "RV3-STORE",
+  "G178-3",
+  "PX-NET",
+  "REG-HYD"
+ ],
+ "failed": [
+  "T178-TARGETED"
+ ],
+ "needsRuling": [
+  "SOURCE-SCOPE: frozen list OK, A end hashes OK, protected diff empty, tree hash start==end, git status 12 M + 2 ??; but the literal 'StudioWorkspace exactly 5 changed lines / DetailPanel exactly 4' is not met: Biome re-wrapped l.2605 (1 -> 4 lines) and l.676 (1 -> 3 lines). C confirmed the extra lines are whitespace-only reflow of the same tokens. Section 3.2 l.143 anticipated a Biome re-wrap; B rules.",
+  "AN-REVIEW: every token change is exactly P1-P4, W1-W5, Y1, G1-G3, E1-E3, L1-L6, D1 (C read the full diff); N1 read: DXL1-DXL6, DXL7a/b/c, DXL8 (10 tests), labelled throws on missing elements, no any/ts-ignore/type assertions, no-brass helper exempts only focus-visible:ring-brand, DXL8 kept accent-brand = 5, two whitespace-normalised needles; D2 doc 147 read: Georgian, TEMPLATE sections, status In Progress (awaiting C round 178); kept K sites and 5b-3b sites untouched. The only extras are the same Biome reflow lines plus the 6-line surfaceForbidden array in detail-panel-strings-ui. B rules together with SOURCE-SCOPE."
+ ],
+ "blocked": [
+  "G178-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "PROD-MP3-UNVERIFIED",
+  "PROD-SSR-NUL"
+ ],
+ "bugs": [
+  {
+   "id": "C-R178-BADGE-SELECTOR",
+   "severity": "medium",
+   "steps": [
+    "cd /home/runner/czaba-project/store (working tree with A's round-178 edits)",
+    "npx vitest run app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx"
+   ],
+   "expected": "All tests green after W2 (the demo badge goes border-accent text-accent -> border-outline-strong text-muted).",
+   "actual": "3 red: LRS5 (library-row-strings-ui l.330) and PW1 / PW6 (purchased-collection-ui l.230 badgeText()). Both find the header badge with querySelector('span.border-accent'), a colour class that W2 removes. This is a test-selector break, not a rendering regression: in the real browser the badge renders at both viewports with the text 'Demo collection — no sign-in required', rgb(163,155,142) and border rgb(115,107,96). Both files are protected in section 2, so A could not fix them. purchased-collection-ui was missing from B's base and neighbour lists (a planning gap, not A's fault). Medium rather than Low because the root gate's full vitest will fail, which blocks publication of the round.",
+   "evidence": "c-round-178/out/vitest-c.json (147/150), c-round-178/out/vitest-c.log; browser badge: c-round-178/out/c178-1440-4.json and c178-1280-5.json sites.badge; shots c-round-178/shots/c178-*/badge.png; c-round-178/out/vitest-scope.json",
+   "suggestedFix": "Bounded B grant for the two protected test files: locate the badge by its text (workspaceCollectionCopy(origin).badge) or a data-testid, not a colour class. Test-only; no source change.",
+   "scope": "C grepped app/lib/arrangement/__tests__ (minus the 7 granted/new test files) and e2e/ for border-accent|text-accent|hover:text-brand|accent-brand|font-medium text-brand|className=\"text-brand\"; 9 files hit (mostly kept tokens). C ran all 9 plus export-progress-ui and workspace-strings-ui: 105/108, the only reds are LRS5, PW1, PW6. The scope is exactly 3 tests in 2 files (c-round-178/out/vitest-scope.json)."
+  }
+ ],
+ "info": [
+  {
+   "id": "C-R178-INV-GROUPHEADER-252",
+   "note": "INVENTORY-GREP: 1 hit not classified in section 0.3. ArrangementGroupHeader.tsx l.252 (group-name rename input) has 'border border-brand' as well as focus-visible:ring-brand. B's note said l.252 holds only the K4 ring. The file is unchanged since cc984b6. B classifies it (edit-state field, likely K10-like or a 5b-3b site); not A's FAIL."
+  },
+  {
+   "id": "C-R178-EXPORT-CLIPS-AT-0DB",
+   "note": "A plain S1 WAV export (clip gain 0, Master 0 dB) already has 1024 full-scale samples where the video beeps, SFX and music overlap, and the overload alert appears. This is the existing overload detection working, not a regression of this round; recorded for context. The provoked overload (clip +24 dB, Master +6 dB) gives 'peak +30.0 dBFS — 7485040 samples clipped'."
+  },
+  {
+   "id": "C-R178-ESC-NO-DRAG-CANCEL",
+   "note": "Escape does not cancel a clip drag (there is no Escape handler for drags; only floating video). Pre-existing behaviour. A refused lane move with a horizontal part leaves the clip at its 'last free spot' (run 1440-2). REFUSAL was therefore measured with a purely vertical drag, which leaves every clip unchanged."
+  },
+  {
+   "id": "HARNESS-REPLACEMENTS",
+   "note": "Discarded runs: c178-1440-1 (ENV-FIRST-LOAD invalid hook call / hydration on the cold load); c178-1440-2/-3 and c178-1280-1..4 (C harness selector bugs: Library tree node, Grid menu click point off-screen at 1280). Complete valid runs: c178-1440-4 and c178-1280-5. Progress-bar pixel scans come from c178-1440-3 and c178-1280-1, because the bar was gone before the screenshot in the complete runs. Every value from the earlier runs matches the complete runs. The store-baseline run 1 wrote screenshots into store/shots/; C moved them to c-round-178/shots/storebase178-run1-misplaced/ before the end hash."
+  },
+  {
+   "id": "C-R178-RV3-SPLASH-REF",
+   "note": "rv3-store.json '/' pixel row (4.3 % / 4.8 %, bbox from y=0) is against storebase177-home-*.png, which round 177 recorded as an intro-splash shot; it is superseded by storehome178.json vs storehome177 (header band 0 px, diff only y>=81 hero video). /cart 0 px stands."
+  }
+ ],
+ "ableton": "Parity: not applicable / unverified (section 5: no Live 12 source captured for status-text colours; a CZABA DUX-R-5 brand rule).",
+ "evidence": {
+  "report": "c-round-178.md",
+  "dir": "c-round-178/"
+ },
+ "evidenceRuns": [
+  "out/c178-1440-4.json",
+  "out/c178-1280-5.json",
+  "out/c178-1440-3.json",
+  "out/c178-1280-1.json",
+  "out/vitest-c.json",
+  "out/inventory-raw.json",
+  "out/env/env-1440-1.json",
+  "out/env/env-1280-1.json",
+  "out/d6/d6-1440-r1.json",
+  "out/d6/d6-1280-r1.json",
+  "out/rv1-dux5b3a.json",
+  "out/storebase178.json",
+  "out/storehome178.json",
+  "out/rv3-store.json",
+  "out/g178-3.json",
+  "start-tree-sha256.txt",
+  "end-tree-sha256.txt"
+ ]
+}
