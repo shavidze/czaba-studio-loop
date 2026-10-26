@@ -1,0 +1,20 @@
+### /nonexistent/contract.wav
+Tag contract check failed: WAV file not found: /nonexistent/contract.wav. It is written by tests/main/recording-tag-contract.test.ts (T1-1) during npm run check; run that first.
+rc=1
+### tests/fixtures/sample.wav
+ffprobe format_tags for tests/fixtures/sample.wav:
+{}
+Tag contract mismatch:
+  format.tags.ICAT: expected "DOORWood", got undefined
+  format.tags.IKEY: expected "door, slam", got undefined
+  format.tags.comment: expected "მძიმე კარი", got undefined
+rc=1
+### test-results/recording-tag-contract/contract.wav (after npm run test:main)
+ffprobe format_tags for test-results/recording-tag-contract/contract.wav:
+{
+  "comment": "მძიმე კარი",
+  "IKEY": "door, slam",
+  "ICAT": "DOORWood"
+}
+Tag contract ffprobe cross-check passed
+rc=0

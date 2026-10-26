@@ -1,0 +1,13 @@
+# A round 4 checkpoint
+- [x] Baseline HEAD 230b87a, clean tree
+- [x] RR-R3-02 red test written; red-before-hint.log saved (1 failed)
+- [x] Fix in tests/contract/check-ffprobe-tags.ts (CONTRACT_WAV_PRODUCER_TEST); green 2/2 (green-after-hint.log)
+- [ ] apt-install.sh
+- [ ] check.yml
+- [ ] shim tests, real run, verifyCommand, review, report
+- [x] apt-install.sh written; bash -n + shellcheck clean; shim cases a-e + mutation done (/tmp/a-r4-shim)
+- [x] check.yml two steps edited
+- [ ] verifyCommand, review, report
+- [x] verifyCommand exit 0 (79/42/7); code-reviewer done, 2 findings fixed, 1 deferred (spec conflict)
+- [x] a-round-4.md written. Remaining: none (R4-4/R4-6 replay/R4-7 left to C)
+- [x] advisor follow-ups: line format moved phase outside parens, shims rerun; red log redone with final 2-test file (2/2 failed), green 2/2

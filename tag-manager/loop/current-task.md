@@ -1,117 +1,103 @@
-# CURRENT TASK — Round 4: TM-T0-CI apt-step hang fix (check.yml hardening) + RR-R3-02 ffprobe missing-file hint
+# CURRENT TASK — Round 5: TM-B09 "Tagged" badge counts every non-empty field (D-15) + RR-R2-02 regression test for formatFirstFieldValue
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-26
 
 ## Why this round
-Round 3 (TM-T1 + TM-T1-DOC) was **C PASS with realVerified=true** (R3-1…R3-10). The root review was COMMIT OK, and root published it as `230b87a`. TM-T1 and TM-T1-DOC are done. No critical or high bug is open in the app.
+Round 4 (TM-T0-CI apt hardening + RR-R3-02) got **C PASS** on R4-1…R4-8, with realVerified=false because the Actions run is pending. Root review gave COMMIT OK and root published `7879ee0`. RR-R3-02 is closed. TM-T0-CI stays `in_progress` until root links a green Actions run on `7879ee0` or later. An earlier run, `40331357825` on `c768567`, was already green; it is now recorded as evidence. TM-T0-CI's follow-up (C-R4-01/RR-R4-02 step budget, RR-R4-05 docs) is backlog item **TM-T0-CI-FU**. It waits for the first Actions timings on `7879ee0`, so it is not in this round.
 
-The CI gate, though, has never worked. Root's note in `policy.local.md`: Actions run `40323787413` (`Check`, `c34ee5a`) was **cancelled by the 30-minute job timeout**. Step "Install system packages" (`sudo apt-get update && sudo apt-get install -y ffmpeg xvfb`) ran from 12:36:29 to 13:06:24 and never finished. Lint, tests, build and E2E never ran on GitHub. Root assigned the fix to **TM-T0-CI**, ahead of feature work. Every publish since `c34ee5a` carries a `check.yml` that has never completed, so B treats this as **high**.
+No critical or high bug is open. Why the open mediums are not this round:
+- **RR-R1-01** (CI Build step) waits for the `7879ee0` Actions run.
+- **RR-R2-01** (`getRiffInfoTags`) cannot be reached for WAV and would reopen the frozen `metadata.ts`.
+- **RR-R3-01 / TM-T1-DUP** needs Saba's decision.
+- **RR-R4-01** (xauth) is refuted: `xauth` is a Depends of `xvfb`, and C's container run confirmed it.
 
-**RR-R3-02** (root review round 3, low) is planned with it because it is on the same CI path. The ffprobe step reads a file that a unit test produces. When the file is missing, the error must name the test that produces it.
+**TM-B09** (C-R3-01) is the only user-visible bug that can be planned now. It sits in the same component as **RR-R2-02** (root review R2: the `formatFirstFieldValue` display fix has no test). Both are in `FileList.tsx`, one tightly related pair.
 
-### Facts and hypotheses (policy §8)
-- **Fact (root):** the apt step ran for 30 minutes and was cancelled. Root could not read the step log.
-- **Fact (root):** the same packages installed in about 2 minutes in the loop job on `ubuntu-24.04`.
-- **Fact (B, this runner):**
-  - `/var/lib/man-db/auto-update` does not exist here;
-  - `/usr/bin/debconf-communicate` and `/usr/bin/timeout` are present;
-  - `xvfb` has `xauth` as a Depends, and `/usr/bin/ffprobe` belongs to the `ffmpeg` package, so `--no-install-recommends` keeps both `xvfb-run` and `ffprobe`.
-- **Hypothesis:** man-db trigger processing, or a blocking dpkg/debconf prompt or pty, caused the hang on the GitHub image. This is not confirmed, and the man-db part may be a no-op on some images.
-- **The guaranteed gain is fail-fast and visible behaviour:** bounded attempts, one retry, a step timeout and timing lines in the log. The next Actions run will either pass or tell root where the time went. This round does not claim to know the cause.
+**D-15 (B default, awaiting Saba, reversible, UI-only):** the badge shows when any field in the file's read metadata has a non-empty value. Empty means `""`, whitespace-only, `[]`, `[""]`/blank-only arrays, `0`, or a non-finite number. `meta:read` (`readTagsFromFile` in `src/main/ipc/metadata.ts`) returns exactly the schema keys, defaulting to `''` / `[]` / `0`. So "any key in `meta`" equals "any schema field", and recorder chunks outside the schema (e.g. ISFT) never count. Every editor save writes empty `ICAT`/`IKEY` (D-10, RR-R3-03), so a file whose only values are empty must stay **untagged**.
 
 ## Baseline
-- HEAD `230b87a85e7301b25e86e3768a9e242cf9adc5f4`, working tree clean. If HEAD differs, or the tree is dirty in paths you don't own, stop and report.
-- Frozen files (must stay byte-identical): everything not listed under File ownership. In particular:
-  - `src/**`;
-  - `package.json` and `package-lock.json` (agents do not install or upgrade packages);
-  - all `tsconfig*.json`, `biome.json`, `playwright.config.ts`, `vitest.config.*.ts`, `electron.vite.config.ts`;
-  - `.github/workflows/release.yml` (protected);
-  - `tests/fixtures/**`, and every existing file under `tests/` except `tests/contract/check-ffprobe-tags.ts`;
-  - `.claude/**`, `docs/**`, `node_modules/**`.
+- HEAD `7879ee03fce194ec9ccbd544ba862cad9e80e42c`, working tree clean. If HEAD differs, or the tree is dirty in paths you don't own, stop and report.
+- Frozen files: everything not listed under File ownership. They must stay byte-identical. In particular:
+  - `src/main/**`, `src/preload/**`, `src/shared/**`;
+  - every `src/renderer/**` file except `FileList.tsx` and the new lib module;
+  - `src/renderer/src/lib/utils.ts`, `src/renderer/src/styles/app.css` (protected);
+  - `package.json`, `package-lock.json`, all `tsconfig*.json`, `biome.json`, `playwright.config.ts`, `vitest.config.*.ts`, `electron.vite.config.ts`;
+  - `.github/**` (including `check.yml`, `apt-install.sh` and the protected `release.yml`);
+  - `tests/fixtures/**`, `tests/renderer/setup.ts`, `tests/renderer/helpers/**`, every existing test file;
+  - `tests/main/**`, `tests/e2e/**`, `tests/contract/**`;
+  - `.claude/**`, `docs/**`.
 
 ## Scope
-1. **New `.github/scripts/apt-install.sh`** (bash). It uses only coreutils `timeout`, `sudo`, `apt-get`, `dpkg` and `debconf-communicate`. Usage: `bash .github/scripts/apt-install.sh <package>...`.
-   - `set -euo pipefail`. With no package arguments it prints a usage line to stderr and exits 2.
-   - **Before any apt call**, turn off man-db trigger processing:
-     - `echo 'set man-db/auto-update false' | sudo debconf-communicate`, tolerating failure (for example when man-db is not installed);
-     - `sudo rm -f /var/lib/man-db/auto-update`.
-   - **Non-interactive apt:** `DEBIAN_FRONTEND=noninteractive` must reach apt-get through sudo (`sudo env DEBIAN_FRONTEND=noninteractive …` or `sudo DEBIAN_FRONTEND=noninteractive …`).
-   - **apt options:** `-o Dpkg::Use-Pty=0` on both `update` and `install`. `install` also gets `-y --no-install-recommends` and the given packages.
-   - **Bounded attempts:**
-     - Each attempt runs `apt-get update` and then `apt-get install`, each bounded with coreutils `timeout --kill-after=…`.
-     - The bound per attempt comes from `APT_ATTEMPT_TIMEOUT_SECONDS` (default **240**).
-     - The number of attempts comes from `APT_ATTEMPTS` (default **2**, which means one retry).
-     - Both are environment variables, so C can test with short values.
-   - **Recovery between attempts:** after a failed or timed-out attempt, and before the next one, run `sudo dpkg --configure -a`. Bound it with the same timeout and tolerate failure, so a killed dpkg does not leave the next attempt locked out.
-   - **Logging:** each attempt prints one stdout line with:
-     - the attempt number and the total;
-     - the elapsed seconds;
-     - the outcome: `ok`, `failed (exit N)` or `timed out`.
+1. **New `src/renderer/src/lib/file-row-display.ts`**, a pure module with no React and no store imports. It has two named exports:
+   - `formatFirstFieldValue(value: FieldValue | undefined): string`, **moved unchanged** from `FileList.tsx`:
+     - an array gives its first element or `''`;
+     - a string gives the string itself;
+     - anything else gives `''`.
+   - `hasAnyTagValue(meta: WavMetadata | undefined): boolean`, following D-15:
+     - `undefined` gives `false`;
+     - it is `true` if any value in `Object.values(meta)` is: a string whose `trim()` is non-empty; an array with at least one element whose `trim()` is non-empty; or a number that is `Number.isFinite` and `> 0`;
+     - otherwise it is `false`.
+   - Types are imported from `~/types`. No `any`, no casts beyond what TS strictly needs, no comments, semicolons. Follow `AGENT_DISCOVERABLE_CODE.md` naming.
+2. **`src/renderer/src/components/file-list/FileList.tsx`.** Only these changes:
+   - delete the local `formatFirstFieldValue` and import both helpers from `~/lib/file-row-display`;
+   - replace the `hasTags` expression with `hasAnyTagValue(meta)`.
 
-     Root will read these timings in the first Actions run.
-   - **Exit status:** 0 on the first successful attempt. Otherwise, after the last attempt, it prints the final line `apt-install: failed after N attempts` and exits non-zero.
-   - **No comments** (project rule). Keep the script readable through function and variable names (`AGENT_DISCOVERABLE_CODE.md`).
-   - **Not a Vitest target:** `npm run check` must stay runnable on Windows dev machines. C tests the script with PATH shims (R4-3).
-
-2. **`.github/workflows/check.yml`.** Only these changes:
-   - **Step "Install system packages":** `run: bash .github/scripts/apt-install.sh ffmpeg xvfb`, and add `timeout-minutes: 10` to the step. 10 minutes covers 2 × 240 s attempts plus recovery. Root suggested 8, but 8 would cut the retry short.
-   - **Step "Install Electron system libraries"** (`npx playwright install-deps chromium`): it also runs apt internally, so it gets `timeout-minutes: 10`. Its `run` stays unchanged. It relies on the man-db/debconf setting from the previous step, so the order "Install system packages" → "Install Electron system libraries" must stay.
-   - **Unchanged:** the job's `timeout-minutes: 30` (backstop), triggers, permissions, and every other step with its order and text. No new `uses:` action (no third-party retry action; RR-R1-03).
-
-3. **RR-R3-02, `tests/contract/check-ffprobe-tags.ts`.**
-   - When the WAV path does not exist, the error also names the producer, for example: `WAV file not found: <path>. It is written by tests/main/recording-tag-contract.test.ts (T1-1) during npm run check; run that first.`
-   - Export the producer path as a named constant (for example `CONTRACT_WAV_PRODUCER_TEST`), following `AGENT_DISCOVERABLE_CODE.md`.
-   - Nothing else in the file changes: expected tags, ffprobe arguments, CLI guard and exit codes stay as they are.
-   - **Red first** (`test-on-bugfix`):
-     - add `tests/main/check-ffprobe-tags.test.ts` (new);
-     - it calls `checkFfprobeContractTags()` on a path that does not exist under `os.tmpdir()` and expects a throw whose message contains both `WAV file not found` and `recording-tag-contract.test.ts`;
-     - the missing-file branch returns before spawning, so the test **must not spawn ffprobe**;
-     - run it before the fix, save the failing output as `a-round-4/red-before-hint.log`, then fix.
+   Nothing else changes: markup, classes, Badge text "Tagged", columns, selection and play handlers.
+3. **Tests (red first, `test-on-bugfix`).**
+   - **`tests/renderer/components/file-list.test.ts` (new)** renders the real `FileList` with `createElement`. It seeds `useFileStore` with `folderPath`, `files` (full `WavFileEntry`) and `metadata`. Use the `vi.hoisted` window workaround from `schema-editor.test.ts` (A-R3-01; `setup.ts` stays frozen), and use `resetAllStores`. Cases:
+     - (a) a row whose metadata has only `category: 'DOORWood'` (title `''`, artists `[]`, bpm `0`, everything else default) shows `Tagged`;
+     - (b) only `keywords: ['door', 'slam']` shows `Tagged`;
+     - (c) only `comment: 'მძიმე კარი'` shows `Tagged`;
+     - (d) all defaults plus `category: ''`, `keywords: ['']` and `comment: '   '` show **no** `Tagged`;
+     - (e) regression: `title: 'X'`, or `artists: ['A']`, or `bpm: 120` each show `Tagged`;
+     - (f) RR-R2-02: `artists: 'Foo'` (string) renders `Foo`, not `F`, and `artists: ['A', 'B']` renders `A` in the artist column.
+     - Assert per row, for example with `within` on the row containing the file name, so one row's badge cannot satisfy another row's assertion.
+   - **`tests/renderer/utils/file-row-display.test.ts` (new)** gives boundary coverage of both exports:
+     - `hasAnyTagValue`: `undefined`, `{}`, `""`, `"  "`, `[]`, `[""]`, `["", " "]`, `["", "x"]`, `0`, `-1`, `NaN`, `Infinity`, `1`;
+     - `formatFirstFieldValue`: `undefined`, number, `""`, `[]`, string, array.
+   - **Red proof:** run `file-list.test.ts` against the unchanged `FileList.tsx` **before** the fix. Cases (a)–(c) must fail; (d)–(f) may pass. Save the output as `a-round-5/red-before-fix.log`. Then implement and save the green run as `a-round-5/green-after-fix.log`.
 
 **Explicitly NOT in this round:**
-- Pinning actions to SHAs (RR-R1-03), the separate Build step (RR-R1-01), `needs: check` in `release.yml` (RR-R1-07, Saba).
-- Pinning `tsx` as a devDependency (RR-R3-05; it needs `package.json`, which is protected).
-- TM-T1-DUP / RR-R3-01 (Saba decides the behaviour), TM-B09 (Tagged badge), RR-R2-01/02, TM-B05, TM-B06, TM-B08, TM-T1-MIG.
-- Installing or upgrading packages on the host, `npm ci`, any `src/**` change.
+- Any `metadata.ts` or IPC change (RR-R2-01, D-10 empty-value policy, TM-B05, TM-B08).
+- CI changes (TM-T0-CI-FU, RR-R1-01/03).
+- Schema migration or duplicate handling (TM-T1-MIG / TM-T1-DUP).
+- Biome on `tests/` (TM-B06).
+- New badge variants, wording or styling.
+- Package installs.
 
-Read first: `.claude/primitives/AGENT_DISCOVERABLE_CODE.md`, `TESTING.md`, `TYPESCRIPT_STRICT.md`, `SEMICOLONS.md`, `GIT_RULES.md` (no commit), `.claude/rules/test-on-bugfix.md`, and root's note in `policy.local.md`.
+Read first: `.claude/primitives/AGENT_DISCOVERABLE_CODE.md`, `TESTING.md`, `TYPESCRIPT_STRICT.md`, `SEMICOLONS.md`, `STATE_MANAGEMENT.md` (store seeding), `.claude/rules/test-on-bugfix.md`, and `tests/renderer/components/schema-editor.test.ts` (pattern).
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `.github/scripts/apt-install.sh` (new) | bounded, non-interactive apt install with one retry and man-db off |
-| `.github/workflows/check.yml` | two steps only: new `run` + `timeout-minutes` on "Install system packages"; `timeout-minutes` on "Install Electron system libraries" |
-| `tests/contract/check-ffprobe-tags.ts` | RR-R3-02 producer hint + exported constant |
-| `tests/main/check-ffprobe-tags.test.ts` (new) | red-first test for the hint (no ffprobe spawn) |
+| `src/renderer/src/lib/file-row-display.ts` (new) | pure `hasAnyTagValue` (D-15) + moved `formatFirstFieldValue` |
+| `src/renderer/src/components/file-list/FileList.tsx` | import the helpers; badge uses `hasAnyTagValue` |
+| `tests/renderer/components/file-list.test.ts` (new) | red-first render test for TM-B09 + RR-R2-02 display |
+| `tests/renderer/utils/file-row-display.test.ts` (new) | boundary unit tests |
 
-Generated and ignored output (`tests/fixtures/*.wav`, `out/`, `test-results/`, `playwright-report/`) is not committed. Reports and logs go to `a-round-4/` in the loop folder.
+Generated or ignored output (`tests/fixtures/*.wav`, `out/`, `test-results/`, `playwright-report/`) is not committed. Reports and logs go to `a-round-5/` in the loop folder.
 
 ## Acceptance (C)
-**TM-T0-CI stays `in_progress`, realVerified=false, after this round, even on PASS.** Its real acceptance is a green GitHub Actions run, which root links after publishing. C's evidence here is local proof only.
-
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R4-1 (YAML) | Parse `check.yml` with `js-yaml`. Compare it with `git show 230b87a:.github/workflows/check.yml`, both parsed and as a text diff. | Valid YAML. Same step names in the same order. The only differences: "Install system packages" has `run: bash .github/scripts/apt-install.sh ffmpeg xvfb` and `timeout-minutes: 10`; "Install Electron system libraries" has `timeout-minutes: 10`. Job timeout 30, triggers, permissions and the `uses:` lines are unchanged. No new action. Paste the diff. |
-| R4-2 (script static) | `bash -n .github/scripts/apt-install.sh`. Read the script. Run `shellcheck` if it is already available (do not install it). | Syntax OK; `set -euo pipefail`. The man-db commands come before the first apt-get call. `DEBIAN_FRONTEND=noninteractive` reaches apt-get through sudo. `-o Dpkg::Use-Pty=0` is on update and install; `-y --no-install-recommends` is on install. The `timeout` bounds use `--kill-after`. Env defaults are 240 / 2. No comments. |
-| R4-3 (behaviour with shims) | Make `/tmp/c-r4-shim/bin` and put it first on PATH, with shims for `sudo`, `apt-get`, `dpkg` and `debconf-communicate`. The `sudo` shim logs its argv and runs the rest without privilege. Every shim logs argv and `DEBIAN_FRONTEND`; `debconf-communicate` also logs its stdin. Run the real script from the repo with `APT_ATTEMPT_TIMEOUT_SECONDS=2`, and time each case: **(a)** apt-get succeeds; **(b)** apt-get hangs (`sleep 999`) on attempt 1 and succeeds on attempt 2; **(c)** apt-get always hangs; **(d)** apt-get always exits 100; **(e)** no package arguments. **Mutation:** in a `/tmp` copy of the script, remove the `timeout` wrapper and rerun case (b), killing it at 30 s. | **(a)** exit 0 with one attempt line. The apt argv contains `-o Dpkg::Use-Pty=0` (update and install), `-y`, `--no-install-recommends`, `ffmpeg` and `xvfb`. `DEBIAN_FRONTEND=noninteractive` is seen by apt-get. The debconf stdin is `set man-db/auto-update false`, and both it and `rm -f /var/lib/man-db/auto-update` are logged before the first apt-get. **(b)** exit 0 with two attempt lines, the first `timed out`, and `dpkg --configure -a` between them. Total time is below 15 s, and `pgrep -f 'sleep 999'` is empty afterwards. **(c) and (d)** non-zero, with the last line `apt-install: failed after 2 attempts` and bounded time; no orphan `sleep` after (c). **(e)** exit 2 with usage. **Mutation:** (b) no longer finishes within 15 s, which proves the bound is real. Logs go in `c-round-4/`. |
-| R4-4 (real apt on the runner) | `time bash .github/scripts/apt-install.sh ffmpeg xvfb` with the real `sudo`. The packages are already present, so this installs nothing new and upgrades nothing (`--no-install-recommends`, no `--only-upgrade`). Then run `sudo debconf-show man-db`, `test ! -e /var/lib/man-db/auto-update`, `ffprobe -version \| head -1` and `command -v xvfb-run`. **Optional, supporting only:** if `docker run --rm ubuntu:24.04` works without changing the host, run the script in a fresh container with a pass-through `sudo` shim and record the real fresh-install time. | Exit 0, one `ok` attempt line with elapsed seconds. The man-db `auto-update` setting is false and the file is absent. ffprobe and xvfb-run are present. Timings are recorded. The container run, if done, is reported separately and is not needed for PASS. |
-| R4-5 (RR-R3-02 red/green) | Read A's `a-round-4/red-before-hint.log`. In `/tmp/c-r4-red` (rsync + `node_modules` symlink), restore `git show 230b87a:tests/contract/check-ffprobe-tags.ts` and run the new test there. On the real tree, run `npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts` on three paths: `/nonexistent/contract.wav`; `tests/fixtures/sample.wav`; and `test-results/recording-tag-contract/contract.wav` after `npm run check`. Read the test code for any spawn. | Red against the old script, green against the new one. On the missing path the CLI exits 1 with a message naming `tests/main/recording-tag-contract.test.ts`. `sample.wav` exits 1 with the three mismatch lines, as before. `contract.wav` exits 0 with `ICAT=DOORWood`, `IKEY=door, slam` and `comment=მძიმე კარი`, as before. The test does not call ffprobe. |
-| R4-6 (gate + CI-order replay) | Clean state: `rm -rf out test-results playwright-report tests/fixtures/*.wav`, then the full `verifyCommand`. Separately, extract the `run:` steps of `check.yml` with js-yaml and replay them in YAML order, skipping only `npm ci` (agents never run it). This includes the real apt script and `npx playwright install-deps chromium`. Time every step. | `verifyCommand` exits 0. Biome 0 errors. Typecheck 0 errors (the new test is in `tsconfig.test.json`). Renderer **79**. Main **40 + A's new count**, all green. E2E **7/7** with `--retries=0`. In the replay every step exits 0; give a timing table that shows the ffprobe step running before E2E. |
-| R4-7 (real-app smoke) | Launch the built app with `_electron` under `xvfb-run` (`--no-sandbox`, a clean `XDG_CONFIG_HOME`, the dialog stubbed to a temp folder that holds a copy of `sample.wav`). Open the folder, select the file and take a screenshot. | The app starts. The file row renders, and the metadata panel shows `Category (UCS)` (screenshot in `c-round-4/`). `src/**` is unchanged (R4-8), so this is a smoke check only. |
-| R4-8 (frozen/ownership) | `git status --porcelain`; `git diff --stat 230b87a`; `git diff --quiet 230b87a -- src package.json package-lock.json 'tsconfig*.json' biome.json playwright.config.ts vitest.config.renderer.ts vitest.config.main.ts electron.vite.config.ts .github/workflows/release.yml tests/fixtures tests/main/recording-tag-contract.test.ts tests/main/riff-chunks.ts tests/main/metadata.test.ts tests/e2e tests/renderer .claude docs` | Only the four owned paths changed or were added. No `any`, `@ts-ignore`, `@ts-expect-error` or `biome-ignore` added. No comments in the shell script. |
+| R5-1 (red/green TM-B09) | Read A's `red-before-fix.log`. In `/tmp/c-r5-red` (rsync + `node_modules` symlink), restore `git show 7879ee0:src/renderer/src/components/file-list/FileList.tsx` (keep the new lib and tests) and run `npx vitest run --config vitest.config.renderer.ts tests/renderer/components/file-list.test.ts`. Then run it on the real tree. | Red: cases (a), (b) and (c) fail against the old `FileList.tsx`. Green: all cases pass on the real tree. |
+| R5-2 (RR-R2-02 mutation) | In a `/tmp` copy, change `formatFirstFieldValue` back to the pre-R2 behaviour (`meta?.artists?.[0] ?? ''`, i.e. index a string), then run both new test files. Second mutation: make `hasAnyTagValue` treat any defined string as non-empty (drop `trim`). | Mutation 1: case (f) fails (`F` instead of `Foo`). Mutation 2: case (d) and the whitespace/`[""]` boundary cases fail. This proves the tests check real behaviour. |
+| R5-3 (gate) | Clean state: `rm -rf out test-results playwright-report tests/fixtures/*.wav`, then the full `verifyCommand`. Also run E2E with `--retries=0`. | Exit 0. Biome 0 errors (no new warnings in the owned files). Typecheck 0 errors (node/web/test). Renderer **79 + A's new count**, all green. Main **42/42**. E2E **7/7** with `--retries=0`. |
+| R5-4 (real app: contract-only file is Tagged) | Built app with `_electron` under `xvfb-run -a` (`--no-sandbox`, clean `XDG_CONFIG_HOME`, dialog stubbed to a temp folder). Two files, both shown in the same folder. **Primary, from an independent producer:** `comment-only.wav` = `ffmpeg -i tests/fixtures/sample.wav -metadata comment='მძიმე კარი' -c copy comment-only.wav`. ffmpeg also adds an `ISFT` encoder tag, which is outside the schema. **Secondary, from the UI:** `contract.wav`, a copy of `sample.wav`, where only Category `DOORWood` is set through the editor and saved. Rescan or reopen the folder, and click a row to confirm the metadata panel opens. | **comment-only.wav:** `ffprobe -show_entries format_tags -of json` shows `comment` and `encoder`/ISFT, and no title/artist. `music-metadata` agrees. The row shows `Tagged` (`c-round-5/r5-4-comment-only-tagged.png`). The badge comes from `comment`: ISFT is not a schema key, so `meta:read` does not return it. **contract.wav:** ffprobe shows `ICAT=DOORWood` and no **non-empty** title/artist. Empty sub-chunks written by the save (D-10) are allowed; attach the raw INFO dump so they are visible. The row shows `Tagged` (`r5-4-contract-tagged.png`). Optional "before" screenshot: the same folder on the `7879ee0` build (the R5-1 `/tmp` tree after `npm run build`) shows no badge on either file. |
+| R5-5 (real app: emptied value stays untagged) | In the same session, on a fresh copy `blank.wav` of `sample.wav`, use the T1-10 path: set Category `x` and save; clear Category and save again; rescan. No other field is ever set. (`isDirty` is set on any edit, `metadata-store.ts:37-52`, so Save is enabled after clearing.) | ffprobe or the raw INFO dump after the second save shows `ICAT` present and **empty** (D-10 option (a)), and no non-empty schema value. The row shows **no** `Tagged` badge (`r5-5-blank-untagged.png`). After the first save, before clearing, the row did show `Tagged` (`r5-5-x-tagged.png`), so the check can discriminate. If the second save leaves no empty `ICAT`, report it as a finding (D-10 behaviour change), not a PASS. |
+| R5-6 (real app regression) | In the same session, set only Title `X` on a third copy, save, rescan. In a file with two artists (`A`, `B`), the artist column shows `A`. | `Tagged` is shown for the title-only file. The artist column shows `A`, not `A, B` and not a single character. Screenshots `r5-6-*.png`. ffprobe confirms the title. |
+| R5-7 (frozen/ownership) | `git status --porcelain --untracked-files=all`; `git diff --stat 7879ee0`; `git diff --quiet 7879ee0 -- . ':!src/renderer/src/components/file-list/FileList.tsx' ':!src/renderer/src/lib/file-row-display.ts' ':!tests/renderer/components/file-list.test.ts' ':!tests/renderer/utils/file-row-display.test.ts'` (everything except the four owned paths). Read the `FileList.tsx` diff. | Only the four owned paths changed or were added. The `FileList.tsx` diff is limited to the import and the `hasTags` line, plus removing the local function. No `any`, `@ts-ignore`, `@ts-expect-error`, `biome-ignore` or comments added. |
 
 ## What could break (C re-checks)
-- **E2E** depends on `xvfb-run`. With `--no-install-recommends`, `xvfb` still pulls in `xauth` as a Depends. C confirms that `xvfb-run -a` works after R4-4.
-- **ffprobe** ships in the `ffmpeg` package itself, so `--no-install-recommends` must not drop it (R4-4).
-- **`set -e` with `timeout`**: a timed-out attempt (exit 124) must not abort the script before the retry. Case (b) proves this.
-- **Orphan processes**: a killed apt or dpkg must not survive. The script uses `--kill-after`, and C checks with `pgrep` after (b) and (c).
-- **`playwright install-deps`** still runs and exits 0 after the apt script (R4-6 replay).
-- **ffprobe script output** for the existing positive and negative paths must not change (R4-5).
-- **`npm run check` without ffmpeg**: the new Vitest test only exercises the missing-file branch, which runs no external command.
+- **Badge noise:** if `hasAnyTagValue` counts defaults (`0`, `[]`, `''`) or the empty `ICAT` from D-10, every file saved once would look tagged (R5-5).
+- **Sorting by artist/genre** (`file-store.ts:120`) is unaffected: the store is frozen. C clicks the Artist sort header once in R5-6 and confirms the rows still render.
+- **Row selection and double-click play:** handlers are unchanged. C clicks a row in R5-4 and confirms the metadata panel opens.
+- **Renderer test isolation:** the new render test must not leak store state into the existing store tests. The full renderer suite must pass in one run (R5-3).
+- **Large folders:** the predicate is O(fields) per row, with no new store subscriptions.
 
 ## Next (orientation only)
-1. After publishing, root watches the first `Check` run:
-   - if it is green, root links it, TM-T0-CI and TM-T0 close, and root may propose RR-R1-07 (required check) to Saba;
-   - if the apt step still times out, the per-attempt timing lines decide the next CI round.
-2. A small bug round: RR-R2-01 (`getRiffInfoTags` outside the per-field try), RR-R2-02 (FileList display test) and TM-B09 (Tagged badge, C-R3-01).
-3. Questions for Saba: D-07 (TM-T1-MIG), D-10, D-12/TM-B08, and TM-T1-DUP (both collision cases, RR-R3-01). T-2 stays BLOCKED until TM-T2-DATA arrives.
+1. Root reports the first `Check` Actions run on `7879ee0`:
+   - **green:** TM-T0-CI and TM-T0 close, and TM-T0-CI-FU (step budget + docs note) becomes a small CI round;
+   - **red, or the apt step is slow:** the per-attempt timing lines decide that round's scope.
+2. Saba question batch: D-07 (TM-T1-MIG), D-10, D-12/TM-B08, TM-T1-DUP (RR-R3-01), D-15 (badge rule), RR-R1-07, RR-R3-05, and TM-T2-DATA (T-2 stays BLOCKED until it arrives).
+3. Remaining low items that need no decision: TM-B06 needs `package.json` (protected), so it is a Saba question too. RR-R2-01 can join a later `metadata.ts` round.

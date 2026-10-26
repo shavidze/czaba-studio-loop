@@ -1,0 +1,12 @@
+sudo debconf-communicate
+debconf stdin=set man-db/auto-update false
+sudo rm -f /var/lib/man-db/auto-update
+rm -f /var/lib/man-db/auto-update
+sudo env DEBIAN_FRONTEND=noninteractive timeout --kill-after=10 2 apt-get -o Dpkg::Use-Pty=0 update
+apt-get -o Dpkg::Use-Pty=0 update DF=noninteractive
+sudo env DEBIAN_FRONTEND=noninteractive timeout --kill-after=10 2 dpkg --configure -a
+dpkg --configure -a DF=noninteractive
+sudo env DEBIAN_FRONTEND=noninteractive timeout --kill-after=10 2 apt-get -o Dpkg::Use-Pty=0 update
+apt-get -o Dpkg::Use-Pty=0 update DF=noninteractive
+sudo env DEBIAN_FRONTEND=noninteractive timeout --kill-after=10 2 apt-get -o Dpkg::Use-Pty=0 install -y --no-install-recommends ffmpeg xvfb
+apt-get -o Dpkg::Use-Pty=0 install -y --no-install-recommends ffmpeg xvfb DF=noninteractive

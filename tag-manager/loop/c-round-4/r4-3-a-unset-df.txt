@@ -1,0 +1,9 @@
+case a re-run with DEBIAN_FRONTEND unset in caller env
+sudo argv=[debconf-communicate] DF=unset
+debconf-communicate stdin=[set man-db/auto-update false] DF=unset
+sudo argv=[rm -f /var/lib/man-db/auto-update] DF=unset
+(sudo shim: rm not executed)
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=10 2 apt-get -o Dpkg::Use-Pty=0 update] DF=unset
+apt-get argv=[-o Dpkg::Use-Pty=0 update] DF=noninteractive
+sudo argv=[env DEBIAN_FRONTEND=noninteractive timeout --kill-after=10 2 apt-get -o Dpkg::Use-Pty=0 install -y --no-install-recommends ffmpeg xvfb] DF=unset
+apt-get argv=[-o Dpkg::Use-Pty=0 install -y --no-install-recommends ffmpeg xvfb] DF=noninteractive

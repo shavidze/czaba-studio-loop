@@ -1,0 +1,19 @@
+diff --git a/.github/workflows/check.yml b/.github/workflows/check.yml
+index 7ac81db..7f09894 100644
+--- a/.github/workflows/check.yml
++++ b/.github/workflows/check.yml
+@@ -23,11 +23,11 @@ jobs:
+         run: npm ci
+ 
+       - name: Install system packages
+-        run: |
+-          sudo apt-get update
+-          sudo apt-get install -y ffmpeg xvfb
++        timeout-minutes: 10
++        run: bash .github/scripts/apt-install.sh ffmpeg xvfb
+ 
+       - name: Install Electron system libraries
++        timeout-minutes: 10
+         run: npx playwright install-deps chromium
+ 
+       - name: Lint, type check and unit tests

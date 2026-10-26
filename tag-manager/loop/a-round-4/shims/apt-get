@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+echo "apt-get $* DF=$DEBIAN_FRONTEND" >> "$SHIM_LOG"
+n=$(grep -c '^apt-get' "$SHIM_LOG")
+case "$SHIM_MODE" in
+  ok) exit 0;;
+  hang1) [ "$n" -le 1 ] && exec sleep 999; exit 0;;
+  hang) exec sleep 999;;
+  fail) exit 100;;
+esac

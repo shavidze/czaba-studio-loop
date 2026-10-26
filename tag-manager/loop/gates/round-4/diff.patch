@@ -1,0 +1,43 @@
+diff --git a/.github/workflows/check.yml b/.github/workflows/check.yml
+index 7ac81db..7f09894 100644
+--- a/.github/workflows/check.yml
++++ b/.github/workflows/check.yml
+@@ -23,11 +23,11 @@ jobs:
+         run: npm ci
+ 
+       - name: Install system packages
+-        run: |
+-          sudo apt-get update
+-          sudo apt-get install -y ffmpeg xvfb
++        timeout-minutes: 10
++        run: bash .github/scripts/apt-install.sh ffmpeg xvfb
+ 
+       - name: Install Electron system libraries
++        timeout-minutes: 10
+         run: npx playwright install-deps chromium
+ 
+       - name: Lint, type check and unit tests
+diff --git a/tests/contract/check-ffprobe-tags.ts b/tests/contract/check-ffprobe-tags.ts
+index 70b4057..1659007 100644
+--- a/tests/contract/check-ffprobe-tags.ts
++++ b/tests/contract/check-ffprobe-tags.ts
+@@ -7,6 +7,8 @@ export const EXPECTED_FFPROBE_CONTRACT_TAGS: Readonly<Record<string, string>> =
+   comment: "მძიმე კარი",
+ };
+ 
++export const CONTRACT_WAV_PRODUCER_TEST = "tests/main/recording-tag-contract.test.ts";
++
+ export interface FfprobeTagCheckResult {
+   tags: Record<string, string>;
+   mismatches: string[];
+@@ -14,7 +16,9 @@ export interface FfprobeTagCheckResult {
+ 
+ export function readFfprobeFormatTags(wavPath: string): Record<string, string> {
+   if (!existsSync(wavPath) || !statSync(wavPath).isFile()) {
+-    throw new Error(`WAV file not found: ${wavPath}`);
++    throw new Error(
++      `WAV file not found: ${wavPath}. It is written by ${CONTRACT_WAV_PRODUCER_TEST} (T1-1) during npm run check; run that first.`,
++    );
+   }
+   const probe = spawnSync(
+     "ffprobe",

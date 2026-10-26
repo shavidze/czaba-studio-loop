@@ -1,0 +1,22 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R4-01",
+      "severity": "low",
+      "steps": [
+        "Read .github/scripts/apt-install.sh: each apt phase is bounded by APT_ATTEMPT_TIMEOUT_SECONDS (240) + --kill-after=10, and recover_interrupted_dpkg is bounded by another 240 + 10.",
+        "Worst case with APT_ATTEMPTS=2: attempt 1 (<=250 s) + dpkg recovery (<=250 s) + attempt 2 (<=250 s), about 750 s.",
+        "Compare with check.yml step 'Install system packages' timeout-minutes: 10 (600 s)."
+      ],
+      "expected": "The script's worst-case runtime fits inside the step timeout, so the final 'apt-install: failed after 2 attempts' line always prints.",
+      "actual": "When apt ignores SIGTERM or dpkg --configure -a hangs, GitHub kills the step at 600 s before the final line prints. The per-attempt timing lines are already in the log. The normal hang case (2 x 240 s plus a fast recovery, about 480 s) fits. A flagged this itself; the task text asks for the same bound on recovery and a 10-minute step.",
+      "evidence": "c-round-4.md (C-R4-01); .github/scripts/apt-install.sh run_bounded_as_root and recover_interrupted_dpkg; a-round-4.md code review section"
+    }
+  ],
+  "passed": ["R4-1", "R4-2", "R4-3", "R4-4", "R4-5", "R4-6", "R4-7", "R4-8"],
+  "blocked": [
+    "TM-T0-CI real acceptance is a green GitHub Actions 'Check' run after publish. C cannot see Actions from the runner, so root must link it. TM-T0-CI stays in_progress, as the task states."
+  ],
+  "realVerified": false
+}

@@ -1,0 +1,12 @@
+jobs [ 'check' ] [ 'check' ]
+job timeout 30 30 runs-on ubuntu-24.04 ubuntu-24.04
+names same order true 10
+DIFF Install system packages run: "sudo apt-get update\nsudo apt-get install -y ffmpeg xvfb\n" -> "bash .github/scripts/apt-install.sh ffmpeg xvfb" | timeout-minutes: undefined -> 10
+DIFF Install Electron system libraries timeout-minutes: undefined -> 10
+job-level same true
+uses [
+  'actions/checkout@v4',
+  'actions/setup-node@v4',
+  'actions/upload-artifact@v4'
+]
+top-level same (on/permissions/name) true {"name":"Check","on":{"push":null,"pull_request":null},"permissions":{"contents":"read"}}

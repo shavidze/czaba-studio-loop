@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "round 4: TM-T0-CI apt-step hang fix in check.yml (+ RR-R3-02 ffprobe missing-file hint)",
+  "current_task": "round 5: TM-B09 Tagged badge counts any non-empty schema field (D-15) + RR-R2-02 formatFirstFieldValue regression test",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -60,7 +60,12 @@
     },
     {
       "from_round": 3,
-      "rule": "check.yml has never completed on GitHub Actions (run 40323787413 cancelled at the apt step). Until root links a green run, no item's Actions-run acceptance counts; local CI-order replays are supporting evidence only."
+      "rule": "check.yml has never completed on GitHub Actions (run 40323787413 cancelled at the apt step). Until root links a green run, no item's Actions-run acceptance counts; local CI-order replays are supporting evidence only.",
+      "superseded_by": "root update in policy.local.md (2026-10-26 13:45 UTC): Actions run 40331357825 (Check, c768567) green, every step success in 1 min 24 s (apt 19 s). The c34ee5a hang was intermittent. Not yet observed on Actions: the round-3 ffprobe step and the round-4 apt-install.sh (first run is on 7879ee0)"
+    },
+    {
+      "from_round": 4,
+      "rule": "Actions-run acceptance counts only from a run root links by run id + commit. Run 40331357825 (c768567) is green; items whose CI part changed after c768567 (T1-6 ffprobe step, TM-T0-CI apt hardening) need a green run on 7879ee0 or later."
     }
   ],
   "decisions": [
@@ -139,6 +144,11 @@
       "id": "D-14",
       "status": "B, round 2",
       "decision": "bext/iXML test WAVs are built in tests/main/riff-chunks.ts from createSineWavBuffer() output (tests/fixtures/** stays frozen). The ffprobe contract cross-check is a check.yml step on a file the contract test copies to test-results/recording-tag-contract/contract.wav, so npm run check does not need ffprobe on dev machines (Windows)."
+    },
+    {
+      "id": "D-15",
+      "status": "B default, round 4 close, awaiting Saba",
+      "decision": "The file-list 'Tagged' badge shows when any field of the file's read metadata (meta:read returns exactly the schema keys, defaults '' / [] / 0) has a non-empty value: a string with non-whitespace content, a string[] with at least one non-blank element, a number > 0. '', whitespace, [], [''], 0 count as empty, so an editor save that writes empty ICAT/IKEY (D-10) does not mark a file tagged. UI-only and reversible (TM-B09)."
     }
   ],
   "items": [
@@ -161,8 +171,10 @@
         "regression: npm ci postinstall on Linux (Actions run)"
       ],
       "evidence": [
-        "C round 1 PASS (c-round-1.md/.json), published c34ee5a: T0-1 R1-1, T0-2 R1-2, T0-3 R1-3, T0-4 R1-8 PASS. Open: 'regression: npm ci postinstall on Linux (Actions run)' = TM-T0-CI realVerified=false"
-      ]
+        "C round 1 PASS (c-round-1.md/.json), published c34ee5a: T0-1 R1-1, T0-2 R1-2, T0-3 R1-3, T0-4 R1-8 PASS. Open: 'regression: npm ci postinstall on Linux (Actions run)' = TM-T0-CI realVerified=false",
+        "Root-linked Actions run 40331357825 (c768567) green incl. npm ci step: acceptance 'regression: npm ci postinstall on Linux (Actions run)' observed. TM-T0 stays in_progress only because depends_on TM-T0-CI is in_progress"
+      ],
+      "acceptance_note": "all five acceptance lines have evidence; closes together with TM-T0-CI"
     },
     {
       "id": "TM-B01",
@@ -225,16 +237,19 @@
       "acceptance": [
         "R1-7 YAML + local steps",
         "R4-*: apt steps hardened (noninteractive, --no-install-recommends, Dpkg::Use-Pty=0, man-db trigger off, per-attempt timeout + one retry, step timeout-minutes) and proven locally",
-        "real: first green Actions run after publish (root links run URL)"
+        "real: green Actions run on 7879ee0 or later (first Actions run of apt-install.sh + the T1-6 ffprobe step); root links run id. Earlier green run 40331357825 (c768567) recorded as evidence"
       ],
       "evidence": [
         "C round 1 PASS (c-round-1.md/.json), published c34ee5a: R1-7 YAML valid, triggers push+pull_request, ubuntu-24.04, Node 22, permissions contents:read, local run-steps exit 0 (c-round-1/r1-7-ci-steps.log). Actions run NOT observed: B 'gh run list' -> HTTP 404 (token cannot see runs). Root must link a green run for c34ee5a",
         "Round 2 (c768567) changed the check.yml E2E step (reporter list,html). Still no observed Actions run; root must link a green run for c768567 or later",
         "Root note (policy.local.md, 2026-10-26): Actions run 40323787413 on c34ee5a CANCELLED by the 30-min job timeout; step 'Install system packages' (apt-get update + install ffmpeg xvfb) ran 12:36:29-13:06:24 without finishing; lint/tests/build/E2E never ran. Same packages installed in ~2 min in the loop job. Step log unreadable by root",
         "Round 3 (230b87a) added the 'Tag contract ffprobe cross-check' step; C replayed CI order locally: check 13 s, ffprobe 1 s, build 3 s, E2E 7/7 5 s. Actions still not green",
-        "B round 3 observation on the loop runner (ubuntu-24.04): /var/lib/man-db/auto-update already absent, debconf-communicate and timeout present; so the man-db cause is a HYPOTHESIS for the GH image, not a confirmed fact"
+        "B round 3 observation on the loop runner (ubuntu-24.04): /var/lib/man-db/auto-update already absent, debconf-communicate and timeout present; so the man-db cause is a HYPOTHESIS for the GH image, not a confirmed fact",
+        "Root update (policy.local.md, 13:45 UTC): Actions run 40331357825 (Check, c768567) GREEN, every step success, 1 min 24 s (apt step 19 s, lint/types/unit 16 s, build 4 s, E2E 8 s). First green Actions run of check.yml. Recorded late: B round 3 missed it",
+        "C round 4 PASS (c-round-4.md/.json), published 7879ee0: R4-1..R4-8 PASS. apt-install.sh shim cases a-f + mutation (timeout removed -> hangs 30 s), real sudo + real apt on runner 'attempt 1/2 ok' 16 s, fresh ubuntu:24.04 container 26 s with ffprobe/xvfb-run/xauth present, CI-order replay all steps exit 0 (apt 18.5 s, install-deps 2.5 s, check 10.2 s, ffprobe 0.8 s, build 2.4 s, E2E 7/7 3.8 s). realVerified=false: hardened step not yet seen on Actions"
       ],
-      "realVerified": false
+      "realVerified": false,
+      "last_round_commit": "7879ee03fce194ec9ccbd544ba862cad9e80e42c"
     },
     {
       "id": "TM-T0-DOC",
@@ -524,17 +539,40 @@
       "type": "bug",
       "severity": "low",
       "title": "File list 'Tagged' badge ignores contract fields: FileList.tsx hasTags checks only title/artists/bpm, so a file with only ICAT/IKEY/ICMT shows untagged (C-R3-01)",
-      "status": "todo",
+      "status": "in_progress",
       "depends_on": [
         "TM-T1"
       ],
       "acceptance": [
-        "failing renderer test first (file with only category/keywords/comment -> badge expected), then fix; C real UI rescan screenshot shows 'Tagged' on contract-only file"
+        "R5: failing renderer test first, then fix; hasAnyTagValue(meta) true for any field with a non-empty value (trimmed string, array with a non-blank element, number > 0); false for '', whitespace, [], [''], 0, undefined meta",
+        "C real UI: contract-only file (ffprobe: no title/artist) shows Tagged; file whose only INFO values are empty (empty editor save) shows no badge; title/artists/bpm file still Tagged"
       ],
       "evidence": [
         "C round 3: c-round-3/10-after-rescan.png, r3-6-result.json phaseA.bodyAfterRescan (pre-existing behaviour, not a T-1 regression)"
       ],
-      "needs_user_note": "which fields count as 'tagged' is UX; proposed default: any non-empty value in any schema field"
+      "needs_user_note": "which fields count as 'tagged' is UX; proposed default: any non-empty value in any schema field",
+      "round": 5,
+      "decisions": [
+        "D-15"
+      ]
+    },
+    {
+      "id": "TM-T0-CI-FU",
+      "type": "gap",
+      "severity": "low",
+      "title": "CI follow-up: apt-install.sh worst-case budget (C-R4-01/RR-R4-02: smaller dpkg recovery bound or step timeout >= 13 min) + Georgian docs note for the script and its env knobs (RR-R4-05)",
+      "status": "todo",
+      "depends_on": [
+        "TM-T0-CI"
+      ],
+      "acceptance": [
+        "worst-case script time (shims, short timeouts, recovery also hangs) < step timeout-minutes; the final 'failed after N attempts' line is printed",
+        "docs/ note lists APT_ATTEMPT_TIMEOUT_SECONDS, APT_ATTEMPTS and the log line formats"
+      ],
+      "evidence": [
+        "C round 4 C-R4-01; root review round 4 Low 2 and Low 5"
+      ],
+      "note": "Planned after root reports the first Actions run on 7879ee0, so the CI round can also act on its timings"
     }
   ],
   "findings": [
@@ -661,7 +699,8 @@
       "severity": "low",
       "status": "open",
       "title": "FileList.tsx formatFirstFieldValue display fix (string artists showed the first char) has no renderer test; test-on-bugfix asks for one (artists \"Foo\" and [\"A\",\"B\"])",
-      "round": 2
+      "round": 2,
+      "routed_to": "round 5"
     },
     {
       "id": "RR-R2-03",
@@ -694,7 +733,7 @@
       "status": "open",
       "title": "'Tagged' badge ignores ICAT/IKEY/ICMT (FileList.tsx:77-81 hasTags = title/artists/bpm)",
       "round": 3,
-      "routed_to": "TM-B09"
+      "routed_to": "TM-B09 (round 5)"
     },
     {
       "id": "C-R3-02",
@@ -723,10 +762,12 @@
     {
       "id": "RR-R3-02",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "check.yml ffprobe step depends on contract.wav produced as a side effect of T1-1; missing file gives only 'WAV file not found' without naming the producer",
       "round": 3,
-      "routed_to": "round 4 (owned: tests/contract/check-ffprobe-tags.ts)"
+      "routed_to": "round 4 (owned: tests/contract/check-ffprobe-tags.ts)",
+      "closed_round": 4,
+      "evidence": "C R4-5: red 2/2 on the 230b87a script, green 2/2; CLI on a missing path names tests/main/recording-tag-contract.test.ts; sample.wav and contract.wav output byte-identical to before; published 7879ee0"
     },
     {
       "id": "RR-R3-03",
@@ -759,6 +800,71 @@
       "title": "Architecture: schema.json has no version/migration; a versioned schema with one-time merge in loadSchema() would solve D-07 and TM-T1-DUP together",
       "round": 3,
       "routed_to": "signal for TM-T1-MIG/TM-T1-DUP decision with Saba"
+    },
+    {
+      "id": "C-R4-01",
+      "source": "C",
+      "severity": "low",
+      "status": "open",
+      "round": 4,
+      "title": "apt-install.sh worst case ~750 s (2 x (240+10) + dpkg recovery 240+10) > step timeout-minutes 10 (600 s); GitHub kills the step before the final 'failed after N attempts' line (per-attempt lines already printed). Diagnostics only",
+      "routed_to": "TM-T0-CI-FU",
+      "evidence": "c-round-4.md C-R4-01; gates/round-4/review.md Low 2 (same as RR-R4-02)"
+    },
+    {
+      "id": "RR-R4-01",
+      "source": "root-review",
+      "severity": "medium",
+      "status": "closed",
+      "round": 4,
+      "closed_round": 4,
+      "title": "--no-install-recommends could drop xauth (xvfb-run needs it)",
+      "resolution": "refuted by evidence: apt-cache show xvfb on ubuntu-24.04 (2:21.1.12-1ubuntu1.9, 1ubuntu1.5, 1ubuntu1) lists xauth under Depends (B, round 4 close); C R4-4 fresh ubuntu:24.04 container run of apt-install.sh (--no-install-recommends) ends with xauth, xvfb-run and ffprobe present (c-round-4/r4-4-container.txt)"
+    },
+    {
+      "id": "RR-R4-02",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "round": 4,
+      "title": "Same as C-R4-01 (step budget < worst case)",
+      "routed_to": "TM-T0-CI-FU"
+    },
+    {
+      "id": "RR-R4-03",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "round": 4,
+      "title": "check-ffprobe-tags.ts missing-file hint hard-codes 'during npm run check'; a follow-up could print the exact vitest command",
+      "routed_to": "signal"
+    },
+    {
+      "id": "RR-R4-04",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "round": 4,
+      "title": "tests/main/check-ffprobe-tags.test.ts second test only checks a constant + existsSync (low value; acceptable as a guard against a renamed producer)",
+      "routed_to": "signal"
+    },
+    {
+      "id": "RR-R4-05",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "round": 4,
+      "title": "apt-install.sh and its env knobs APT_ATTEMPT_TIMEOUT_SECONDS / APT_ATTEMPTS are not documented in docs/ (Georgian)",
+      "routed_to": "TM-T0-CI-FU"
+    },
+    {
+      "id": "RR-R4-06",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "round": 4,
+      "title": "Architecture signal: move the ffprobe cross-check into recording-tag-contract.test.ts (skip when ffprobe is missing) or into a dedicated npm run test:contract, removing the step-order dependency and the producer hint",
+      "routed_to": "signal, together with RR-R1-01 (a new npm script needs package.json, protected)"
     }
   ],
   "rounds": [
@@ -810,13 +916,35 @@
     {
       "round": 4,
       "task": "TM-T0-CI apt-step hang fix (CI hardening) + RR-R3-02 ffprobe missing-file hint",
-      "status": "planned",
+      "status": "published",
       "baseline": "230b87a85e7301b25e86e3768a9e242cf9adc5f4",
       "items": [
         "TM-T0-CI"
       ],
       "findings": [
-        "RR-R3-02"
+        "RR-R3-02",
+        "C-R4-01",
+        "RR-R4-01",
+        "RR-R4-02",
+        "RR-R4-03",
+        "RR-R4-04",
+        "RR-R4-05",
+        "RR-R4-06"
+      ],
+      "commit": "7879ee03fce194ec9ccbd544ba862cad9e80e42c",
+      "c_result": "PASS, realVerified=false (R4-1..R4-8 local; Actions run of 7879ee0 pending, root links); root review COMMIT OK"
+    },
+    {
+      "round": 5,
+      "task": "TM-B09 Tagged badge (D-15) + RR-R2-02 formatFirstFieldValue regression test",
+      "status": "planned",
+      "baseline": "7879ee03fce194ec9ccbd544ba862cad9e80e42c",
+      "items": [
+        "TM-B09"
+      ],
+      "findings": [
+        "RR-R2-02",
+        "C-R3-01"
       ]
     }
   ]
