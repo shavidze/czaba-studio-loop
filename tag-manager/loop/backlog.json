@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "round 7: TM-B12 writeTagsToFile throws before save() when custom INFO fields exist but no InfoTag is available (D-17, RR-R6-01) + RR-R6-02 year ICRD NUL pin test",
+  "current_task": "round 8: TM-B13 writeTagsToFile throws before save() when any custom INFO field cannot be written (D-18, RR-R7-02) + remove // comments (RR-R6-04, RR-R7-03) + Georgian docs note on all-or-nothing saves (RR-R7-01)",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -82,6 +82,10 @@
     {
       "from_round": 6,
       "rule": "Biome lint/suspicious/noControlCharactersInRegex rejects control characters such as \\u0000 in regex literals in src/ and biome-ignore is forbidden: tasks must not prescribe NUL regexes for src/ (D-16 uses a charCode loop). Tests/ is not linted (TM-B06)."
+    },
+    {
+      "from_round": 7,
+      "rule": "node-taglib-sharp opens a WAV without LIST/INFO with an InfoTag already present in its CombinedTag (A R7, C R7-2 M2/M2b); tasks must not claim the title workaround creates it. The batch write channel is 'meta:write-batch' (channels.ts)."
     }
   ],
   "decisions": [
@@ -174,8 +178,13 @@
     },
     {
       "id": "D-17",
-      "status": "B, round 6 close (technical, reversible)",
-      "decision": "writeTagsToFile: when the schema yields at least one custom INFO field (customFields.length > 0) and getRiffInfoTags still returns [] after the title workaround, throw Error('RIFF INFO tag is not available; custom fields were not written') BEFORE file.save(), so nothing is written. meta:write surfaces it as 'Failed to write metadata: RIFF INFO tag is not available; custom fields were not written'; meta:writeBatch lists the file under failed with the raw message and continues. A schema without custom INFO fields is unaffected. The per-field catch around setValuesFromStrings is unchanged (RR-R6-05 signal)."
+      "status": "done R7 (28ad3ab), B technical, reversible",
+      "decision": "writeTagsToFile: when the schema yields at least one custom INFO field (customFields.length > 0) and getRiffInfoTags still returns [] after the title workaround, throw Error('RIFF INFO tag is not available; custom fields were not written') BEFORE file.save(), so nothing is written. meta:write surfaces it as 'Failed to write metadata: RIFF INFO tag is not available; custom fields were not written'; meta:write-batch lists the file under failed with the raw message and continues. A schema without custom INFO fields is unaffected. The per-field catch around setValuesFromStrings is unchanged (RR-R6-05 signal)."
+    },
+    {
+      "id": "D-18",
+      "status": "B, round 7 close (technical, reversible)",
+      "decision": "writeTagsToFile: inside the custom INFO loop, a setValuesFromStrings failure no longer is swallowed silently. The loop collects String(riffChunkId) of every failing field (schema order, all fields tried); after the loop, if any failed, throw Error('RIFF INFO fields could not be written: ' + ids.join(', ')) BEFORE file.save(), so nothing is written (all-or-nothing, like D-17). meta:write surfaces 'Failed to write metadata: RIFF INFO fields could not be written: AB'; meta:write-batch lists each file under failed with the raw message and continues. Fields whose value is undefined are not attempted (unchanged). Custom fields without riffChunkId stay skipped (B-R7-03 signal). Read path unchanged. Caveat: an ID containing 'corrupt'/'EBUSY'/'EACCES' text would hit the meta:write message mapping; accepted"
     }
   ],
   "items": [
@@ -661,7 +670,7 @@
       "severity": "medium",
       "source": "RR-R6-01",
       "title": "writeTagsToFile silently skips every custom INFO field (category, keywords, custom) and still calls file.save() and reports success when getRiffInfoTags returns [] (non-CombinedTag) after the title workaround; since R6 the old loud TypeError became a silent success. Unreachable for WAV from node-taglib-sharp (RiffFile tag is always a CombinedTag), defensive guard",
-      "status": "in_progress",
+      "status": "done",
       "round": 7,
       "depends_on": [
         "TM-B10"
@@ -674,7 +683,36 @@
         "real app regression: single save (ICAT/IKEY/ICMT) and batch save still write raw INFO + ffprobe correctly"
       ],
       "evidence": [
-        "root review round 6 (gates/round-6/review.md medium); B R6 close experiment b-round-6-exp-spy-write.test.ts.txt on d52354d: vi.spyOn(TagFile,'createFromPath') with tag overridden to Id3v2Tag.fromEmpty() intercepts the handler's call; meta:write resolves undefined, save() called once, category not written"
+        "root review round 6 (gates/round-6/review.md medium); B R6 close experiment b-round-6-exp-spy-write.test.ts.txt on d52354d: vi.spyOn(TagFile,'createFromPath') with tag overridden to Id3v2Tag.fromEmpty() intercepts the handler's call; meta:write resolves undefined, save() called once, category not written",
+        "C round 7 PASS (c-round-7.md/.json), realVerified=true, published 28ad3ab: R7-1 red on d52354d 2 failed (a),(c) / 11 passed -> green 13/13; R7-2 M1, M2, M2b, M3, M4 killed; R7-3 verifyCommand exit 0 (renderer 107, main 55, E2E 7/7 --retries=0); R7-4 real app single save: raw ICAT 8 / IKEY 10 / ICMT 10 bytes no NUL, ffprobe + music-metadata agree, row Tagged; R7-5 real app batch 'Tags saved to 2 files' + read-only (uid 1001, chmod 444) '1 saved, 1 failed', read-only sha256 unchanged; R7-6 only 3 owned paths changed"
+      ],
+      "realVerified": true,
+      "commit": "28ad3ab15dc10a9dd83a23d43994dfc71313cbf9",
+      "note": "The guard branch itself is reachable only through the overridden-tag spy test (RiffFile tag is always CombinedTag); real-app checks are regression of normal writes"
+    },
+    {
+      "id": "TM-B13",
+      "type": "bug",
+      "severity": "low",
+      "source": "RR-R7-02",
+      "title": "writeTagsToFile per-field catch around InfoTag.setValuesFromStrings swallows write errors (riffChunkId 'AB', '', 'ICAT5' from a hand-edited schema.json throws 'ID must be 4 bytes'): the field is not written, file.save() runs and meta:write / meta:write-batch report success",
+      "status": "in_progress",
+      "round": 8,
+      "depends_on": [
+        "TM-B12"
+      ],
+      "decisions": [
+        "D-18"
+      ],
+      "acceptance": [
+        "R8: failing main test first on 28ad3ab (meta:write resolves, write-batch failed=[]), then fix: collect failing chunk IDs, throw before file.save(); file bytes unchanged; message lists every failing ID in schema order; unused bad field (value undefined) does not block the save",
+        "real app: hand-edited schema.json with riffChunkId 'AB' -> Save shows an error toast containing 'RIFF INFO fields could not be written: AB', sha256 unchanged; before-build (28ad3ab) shows 'Tags saved' and nothing for AB; normal-schema regression save raw INFO + ffprobe + music-metadata",
+        "both pre-existing // comments in metadata.ts removed (RR-R6-04, RR-R7-03); docs/recording-tag-contract.md Georgian note on all-or-nothing saves (RR-R7-01)"
+      ],
+      "evidence": [
+        "B round 7 close experiment b-round-7-exp-bad-chunkid.cjs on 28ad3ab node_modules: setValuesFromStrings('AB'|'ICAT5') throws 'Argument error: ID must be 4 bytes', '' throws 'Argument null: id was not provided'; 'abcd', 'IC T', 'ქართ' do not throw; save() succeeds afterwards",
+        "Severity low: SchemaEditor blocks invalid manual IDs (isValidRiffId) and generateRiffId produces 4-char IDs; only hand-edited/foreign schema.json reaches it (B-R7-02). Silent loss in the real app is an inference until C R8",
+        "B round 7 close b-round-7-exp-valid-values.cjs: valid ID ITKN with [], [''], ['a','b'], ['ქართული'], ['0'], ['3'] never throws; D-18 fires only on malformed IDs. MetadataPanel.tsx:84-91 batch sends modifiedFields only; :76 single sends all fields"
       ]
     }
   ],
@@ -1075,19 +1113,21 @@
       "id": "RR-R6-01",
       "source": "root-review",
       "severity": "medium",
-      "status": "open",
+      "status": "closed",
       "round": 6,
       "title": "getRiffInfoTags returns [] now; writeTagsToFile then skips all custom fields, calls save() and reports success (loud -> silent). Fix: throw when customFields.length > 0 && infoTags.length === 0 after the title workaround; test with a mocked non-WAV tag",
-      "routed_to": "TM-B12 (round 7, D-17)"
+      "routed_to": "TM-B12 (round 7, D-17)",
+      "closed_by": "TM-B12 round 7 (C R7-1, R7-2), 28ad3ab"
     },
     {
       "id": "RR-R6-02",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "round": 6,
       "title": "year/track/bpm getters do not strip NULs; no test covers ICRD/ITRK with \\0",
-      "routed_to": "round 7 pin test for ICRD '2024\\0' (B fact: already reads 2024, b-round-5-exp-nul-number.cjs); track/bpm unmapped by taglib = B-R6-01"
+      "routed_to": "round 7 pin test for ICRD '2024\\0' (B fact: already reads 2024, b-round-5-exp-nul-number.cjs); track/bpm unmapped by taglib = B-R6-01",
+      "closed_by": "round 7 pin test riff-info-nul (i) ICRD \"2024\\0\" -> 2024, green on d52354d and 28ad3ab (C R7-1); track/bpm remain B-R6-01"
     },
     {
       "id": "RR-R6-03",
@@ -1105,7 +1145,7 @@
       "status": "open",
       "round": 6,
       "title": "Pre-existing '// InfoTag read failed' / '// InfoTag write failed' comments (metadata.ts catch blocks) violate the no-comments rule",
-      "routed_to": "signal; removal changes empty-catch lint surface, plan with the RR-R6-05 per-field status work"
+      "routed_to": "TM-B13 round 8: both // comments removed (B fact: Biome 2 accepts an empty catch {} with this biome.json)"
     },
     {
       "id": "RR-R6-05",
@@ -1114,7 +1154,7 @@
       "status": "open",
       "round": 6,
       "title": "Architecture signal: one RIFF value normalisation layer readRiffValue(tag, chunkId): string[] for standard and custom fields, plus a write-side check and honest per-file BatchWriteResult instead of empty catch {} (per-field setValuesFromStrings failures are still silent)",
-      "routed_to": "signal, not a task"
+      "routed_to": "signal; the per-field silent catch part becomes TM-B13 (round 8, D-18); readRiffValue layer stays a signal"
     },
     {
       "id": "C-R6-02",
@@ -1124,6 +1164,87 @@
       "round": 6,
       "title": "Observation: music-metadata decodes RIFF INFO UTF-8 Georgian as mojibake (also on the original ffmpeg file); ffprobe and ID3 COMM are correct; ICMT bytes are valid UTF-8",
       "routed_to": "rule: ICMT comparisons use hex + ffprobe, not music-metadata text"
+    },
+    {
+      "id": "RR-R7-01",
+      "source": "root-review",
+      "severity": "medium",
+      "status": "open",
+      "round": 7,
+      "title": "D-17 makes a save all-or-nothing: standard fields are no longer written when custom INFO fields cannot be; reviewer: no code fix, document it so the 'Failed to write metadata: RIFF INFO tag is not available…' toast is expected",
+      "routed_to": "round 8 Georgian note in docs/recording-tag-contract.md (D-17 + D-18)"
+    },
+    {
+      "id": "RR-R7-02",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "round": 7,
+      "title": "Per-field try { setValuesFromStrings } catch {} still swallows errors (e.g. malformed riffChunkId in a user schema); save reports success. Fix: collect failing IDs and throw before save()",
+      "routed_to": "TM-B13 round 8 (D-18). B fact: b-round-7-exp-bad-chunkid.cjs"
+    },
+    {
+      "id": "RR-R7-03",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "round": 7,
+      "title": "metadata.ts:200 '// InfoTag write failed for this field' violates the no-comments rule (pre-existing, re-indented in R7)",
+      "routed_to": "TM-B13 round 8 (with RR-R6-04)"
+    },
+    {
+      "id": "RR-R7-04",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "round": 7,
+      "title": "metadata-write-guard.test.ts overrides file.tag with a bare Id3v2Tag: tied to node-taglib-sharp getter shape; may break on a library upgrade",
+      "routed_to": "signal"
+    },
+    {
+      "id": "RR-R7-05",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "round": 7,
+      "title": "Architecture signal: split writeTagsToFile into pure planTagWrite(meta, schema) -> {standard, custom} and applyTagWrite(file, plan) that validates everything (INFO tag present, every chunk ID valid) before mutating and saving",
+      "routed_to": "signal, not a task"
+    },
+    {
+      "id": "A-R7-01",
+      "source": "A",
+      "severity": "info",
+      "status": "open",
+      "round": 7,
+      "title": "Fact (A R7 M2, C R7-2 M2/M2b): on library-opened sample.wav without LIST/INFO, getRiffInfoTags is already non-empty before the title workaround; hypothesis: the tag.title nudge is redundant for taglib-opened WAVs",
+      "routed_to": "signal; future tasks must not claim the workaround creates the InfoTag"
+    },
+    {
+      "id": "B-R7-01",
+      "source": "B",
+      "severity": "low",
+      "status": "closed",
+      "round": 7,
+      "title": "Round 7 task text named the batch channel meta:writeBatch; the real channel is meta:write-batch (channels.ts:8). A corrected the test; D-17 text fixed",
+      "closed_by": "B round 7 close"
+    },
+    {
+      "id": "B-R7-02",
+      "source": "B",
+      "severity": "low",
+      "status": "open",
+      "round": 7,
+      "title": "schema.ts isValidField does not validate riffChunkId (type/length); a hand-edited schema.json reaches the write path with 'AB', '', 'ICAT5' or a number. SchemaEditor UI blocks such IDs (isValidRiffId). Validation at load time is a schema behaviour change",
+      "routed_to": "signal (complements D-18); TM-T1-MIG/RR-R3-06 schema versioning"
+    },
+    {
+      "id": "B-R7-03",
+      "source": "B",
+      "severity": "low",
+      "status": "open",
+      "round": 7,
+      "title": "A non-standard schema field without riffChunkId is silently skipped on write (metadata.ts 'if (field.riffChunkId)'): value given, save reports success. Not creatable via SchemaEditor (generateRiffId always assigns an ID); only hand-edited schema.json. Excluded from D-18",
+      "routed_to": "signal"
     }
   ],
   "rounds": [
@@ -1243,14 +1364,40 @@
     {
       "round": 7,
       "task": "TM-B12 writeTagsToFile refuses to report success when custom INFO fields cannot be written (D-17, RR-R6-01) + RR-R6-02 ICRD NUL pin test",
-      "status": "planned",
+      "status": "published",
       "baseline": "d52354da08ca15692338c254f43cd6b9a1d2774e",
       "items": [
         "TM-B12"
       ],
       "findings": [
         "RR-R6-01",
-        "RR-R6-02"
+        "RR-R6-02",
+        "RR-R7-01",
+        "RR-R7-02",
+        "RR-R7-03",
+        "RR-R7-04",
+        "RR-R7-05",
+        "A-R7-01",
+        "B-R7-01",
+        "B-R7-02",
+        "B-R7-03"
+      ],
+      "commit": "28ad3ab15dc10a9dd83a23d43994dfc71313cbf9",
+      "c_result": "PASS, realVerified=true (R7-1..R7-6), 0 bugs; root review COMMIT OK with 1 medium (RR-R7-01 docs) + 3 low + 1 architecture signal"
+    },
+    {
+      "round": 8,
+      "task": "TM-B13 writeTagsToFile fails before save() when any custom INFO field cannot be written (D-18, RR-R7-02) + remove two // comments (RR-R6-04/RR-R7-03) + docs note all-or-nothing saves (RR-R7-01)",
+      "status": "planned",
+      "baseline": "28ad3ab15dc10a9dd83a23d43994dfc71313cbf9",
+      "items": [
+        "TM-B13"
+      ],
+      "findings": [
+        "RR-R7-01",
+        "RR-R7-02",
+        "RR-R7-03",
+        "RR-R6-04"
       ]
     }
   ]

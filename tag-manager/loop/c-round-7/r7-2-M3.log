@@ -1,0 +1,62 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r7-M3[39m
+
+ [31m❯[39m tests/main/metadata-write-guard.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 38[2mms[22m[39m
+[31m     [31m×[31m (a) meta:write rejects, does not save and leaves the file bytes unchanged[39m[32m 19[2mms[22m[39m
+     [32m✓[39m (b) without custom values the overridden tag still saves[32m 5[2mms[22m[39m
+[31m     [31m×[31m (c) meta:write-batch reports the failing file and continues with the next one[39m[32m 6[2mms[22m[39m
+     [32m✓[39m (d) a real WAV without the override writes ICAT and IKEY[32m 2[2mms[22m[39m
+ [32m✓[39m tests/main/metadata.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 78[2mms[22m[39m
+ [32m✓[39m tests/main/riff-info-nul.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-guard.test.ts[2m > [22mTM-B12 / D-17: writeTagsToFile fails loudly when custom INFO fields cannot be written[2m > [22m(a) meta:write rejects, does not save and leaves the file bytes unchanged
+[31m[1mAssertionError[22m: expected 1 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m tests/main/metadata-write-guard.test.ts:[2m72:34[22m[39m
+    [90m 70| [39m    ).rejects.toHaveProperty("message", `Failed to write metadata: ${R…
+    [90m 71| [39m
+    [90m 72| [39m    [34mexpect[39m(override[33m.[39m[34msaveCalls[39m())[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                 [31m^[39m
+    [90m 73| [39m    expect(readFileSync(filePath).equals(before), "file bytes unchange…
+    [90m 74| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-guard.test.ts[2m > [22mTM-B12 / D-17: writeTagsToFile fails loudly when custom INFO fields cannot be written[2m > [22m(c) meta:write-batch reports the failing file and continues with the next one
+[31m[1mAssertionError[22m: first file bytes unchanged: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m tests/main/metadata-write-guard.test.ts:[2m97:83[22m[39m
+    [90m 95| [39m      failed[33m:[39m [{ path[33m:[39m first[33m,[39m error[33m:[39m [33mRIFF_INFO_UNAVAILABLE_MESSAGE[39m }][33m,[39m
+    [90m 96| [39m    })[33m;[39m
+    [90m 97| [39m    expect(readFileSync(first).equals(firstBefore), "first file bytes …
+    [90m   | [39m                                                                                  [31m^[39m
+    [90m 98| [39m    const icat = parseListInfoSubChunks(readFileSync(second)).get("ICA…
+    [90m 99| [39m    [34mexpect[39m(icat[33m?.[39mlength[33m,[39m [32m"ICAT size"[39m)[33m.[39m[34mtoBe[39m([34m8[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m27 passed[39m[22m[90m (29)[39m
+[2m   Start at [22m 16:45:12
+[2m   Duration [22m 796ms[2m (transform 184ms, setup 77ms, import 838ms, tests 195ms, environment 1ms)[22m
+
+
+::error file=/tmp/c-r7-M3/tests/main/metadata-write-guard.test.ts,title=tests/main/metadata-write-guard.test.ts > TM-B12 / D-17%3A writeTagsToFile fails loudly when custom INFO fields cannot be written > (a) meta%3Awrite rejects%2C does not save and leaves the file bytes unchanged,line=72,column=34::AssertionError: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ tests/main/metadata-write-guard.test.ts:72:34%0A%0A
+
+::error file=/tmp/c-r7-M3/tests/main/metadata-write-guard.test.ts,title=tests/main/metadata-write-guard.test.ts > TM-B12 / D-17%3A writeTagsToFile fails loudly when custom INFO fields cannot be written > (c) meta%3Awrite-batch reports the failing file and continues with the next one,line=97,column=83::AssertionError: first file bytes unchanged: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/main/metadata-write-guard.test.ts:97:83%0A%0A

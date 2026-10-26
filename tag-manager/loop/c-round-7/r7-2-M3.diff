@@ -1,0 +1,22 @@
+--- src/main/ipc/metadata.ts	2026-10-26 16:38:26.649309498 +0000
++++ /tmp/c-r7-M3/src/main/ipc/metadata.ts	2026-10-26 16:45:10.645973129 +0000
+@@ -189,9 +189,6 @@
+         tag.title = tag.title ?? '';
+         infoTags = getRiffInfoTags(file.tag);
+       }
+-      if (infoTags.length === 0) {
+-        throw new Error('RIFF INFO tag is not available; custom fields were not written');
+-      }
+       for (const { riffChunkId, value } of customFields) {
+         try {
+           const strValues = Array.isArray(value) ? value.map(String) : [String(value)];
+@@ -203,6 +200,9 @@
+     }
+ 
+     file.save();
++    if (customFields.length > 0 && getRiffInfoTags(file.tag).length === 0) {
++      throw new Error('RIFF INFO tag is not available; custom fields were not written');
++    }
+   } finally {
+     file.dispose();
+   }

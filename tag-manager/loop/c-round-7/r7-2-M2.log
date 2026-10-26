@@ -1,0 +1,38 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r7-M2[39m
+
+ [32m✓[39m tests/main/metadata.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [31m❯[39m tests/main/metadata-write-guard.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 47[2mms[22m[39m
+     [32m✓[39m (a) meta:write rejects, does not save and leaves the file bytes unchanged[32m 12[2mms[22m[39m
+[31m     [31m×[31m (b) without custom values the overridden tag still saves[39m[32m 10[2mms[22m[39m
+     [32m✓[39m (c) meta:write-batch reports the failing file and continues with the next one[32m 10[2mms[22m[39m
+     [32m✓[39m (d) a real WAV without the override writes ICAT and IKEY[32m 7[2mms[22m[39m
+ [32m✓[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 65[2mms[22m[39m
+ [32m✓[39m tests/main/riff-info-nul.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-guard.test.ts[2m > [22mTM-B12 / D-17: writeTagsToFile fails loudly when custom INFO fields cannot be written[2m > [22m(b) without custom values the overridden tag still saves
+[31m[1mAssertionError[22m: promise rejected "Error: Failed to write metadata: RIFF INF…" instead of resolving[39m
+[36m [2m❯[22m tests/main/metadata-write-guard.test.ts:[2m80:89[22m[39m
+    [90m 78| [39m    [35mconst[39m override [33m=[39m [34moverrideNextTagWithNonRiffTag[39m()[33m;[39m
+    [90m 79| [39m
+    [90m 80| [39m    await expect(getHandler("meta:write")({}, filePath, { title: "X" }…
+    [90m   | [39m                                                                                        [31m^[39m
+    [90m 81| [39m
+    [90m 82| [39m    [34mexpect[39m(override[33m.[39m[34msaveCalls[39m())[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+
+[31m[1mCaused by: Error[22m: Failed to write metadata: RIFF INFO tag is not available; custom fields were not written[39m
+[36m [2m❯[22m src/main/ipc/metadata.ts:[2m262:15[22m[39m
+[90m [2m❯[22m tests/main/metadata-write-guard.test.ts:[2m80:41[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m28 passed[39m[22m[90m (29)[39m
+[2m   Start at [22m 16:45:06
+[2m   Duration [22m 789ms[2m (transform 210ms, setup 105ms, import 817ms, tests 181ms, environment 1ms)[22m
+
+
+::error file=/tmp/c-r7-M2/tests/main/metadata-write-guard.test.ts,title=tests/main/metadata-write-guard.test.ts > TM-B12 / D-17%3A writeTagsToFile fails loudly when custom INFO fields cannot be written > (b) without custom values the overridden tag still saves,line=80,column=89::AssertionError: promise rejected "Error: Failed to write metadata: RIFF INF…" instead of resolving%0A ❯ tests/main/metadata-write-guard.test.ts:80:89%0A%0ACaused by: Caused by: Error: Failed to write metadata: RIFF INFO tag is not available; custom fields were not written%0A ❯ src/main/ipc/metadata.ts:262:15%0A ❯ tests/main/metadata-write-guard.test.ts:80:41%0A%0A

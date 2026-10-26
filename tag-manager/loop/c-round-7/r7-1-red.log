@@ -1,0 +1,71 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r7-red[39m
+
+ [32m✓[39m tests/main/riff-info-nul.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [31m❯[39m tests/main/metadata-write-guard.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 34[2mms[22m[39m
+[31m     [31m×[31m (a) meta:write rejects, does not save and leaves the file bytes unchanged[39m[32m 15[2mms[22m[39m
+     [32m✓[39m (b) without custom values the overridden tag still saves[32m 4[2mms[22m[39m
+[31m     [31m×[31m (c) meta:write-batch reports the failing file and continues with the next one[39m[32m 10[2mms[22m[39m
+     [32m✓[39m (d) a real WAV without the override writes ICAT and IKEY[32m 2[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-guard.test.ts[2m > [22mTM-B12 / D-17: writeTagsToFile fails loudly when custom INFO fields cannot be written[2m > [22m(a) meta:write rejects, does not save and leaves the file bytes unchanged
+[31m[1mAssertionError[22m: promise resolved "undefined" instead of rejecting[39m
+
+[32m- Expected:[39m 
+Error {
+  "message": "rejected promise",
+}
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/main/metadata-write-guard.test.ts:[2m70:5[22m[39m
+    [90m 68| [39m    [35mawait[39m [34mexpect[39m(
+    [90m 69| [39m      getHandler("meta:write")({}, filePath, { category: "DOORWood" },…
+    [90m 70| [39m    ).rejects.toHaveProperty("message", `Failed to write metadata: ${R…
+    [90m   | [39m    [31m^[39m
+    [90m 71| [39m
+    [90m 72| [39m    [34mexpect[39m(override[33m.[39m[34msaveCalls[39m())[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-write-guard.test.ts[2m > [22mTM-B12 / D-17: writeTagsToFile fails loudly when custom INFO fields cannot be written[2m > [22m(c) meta:write-batch reports the failing file and continues with the next one
+[31m[1mAssertionError[22m: expected { succeeded: 2, failed: [] } to deeply equal { succeeded: 1, failed: [ { …(2) } ] }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "failed": [[39m
+[32m-     {[39m
+[32m-       "error": "RIFF INFO tag is not available; custom fields were not written",[39m
+[32m-       "path": "/tmp/czaba-write-guard-test-8149-1793033087205/c-first.wav",[39m
+[32m-     },[39m
+[32m-   ],[39m
+[32m-   "succeeded": 1,[39m
+[31m+   "failed": [],[39m
+[31m+   "succeeded": 2,[39m
+[2m  }[22m
+
+[36m [2m❯[22m tests/main/metadata-write-guard.test.ts:[2m93:20[22m[39m
+    [90m 91| [39m    const result = await getHandler("meta:write-batch")({}, [first, se…
+    [90m 92| [39m
+    [90m 93| [39m    [34mexpect[39m(result)[33m.[39m[34mtoEqual[39m({
+    [90m   | [39m                   [31m^[39m
+    [90m 94| [39m      succeeded[33m:[39m [34m1[39m[33m,[39m
+    [90m 95| [39m      failed[33m:[39m [{ path[33m:[39m first[33m,[39m error[33m:[39m [33mRIFF_INFO_UNAVAILABLE_MESSAGE[39m }][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (13)[39m
+[2m   Start at [22m 16:44:46
+[2m   Duration [22m 449ms[2m (transform 188ms, setup 41ms, import 426ms, tests 66ms, environment 0ms)[22m
+
+
+::error file=/tmp/c-r7-red/tests/main/metadata-write-guard.test.ts,title=tests/main/metadata-write-guard.test.ts > TM-B12 / D-17%3A writeTagsToFile fails loudly when custom INFO fields cannot be written > (a) meta%3Awrite rejects%2C does not save and leaves the file bytes unchanged,line=70,column=5::AssertionError: promise resolved "undefined" instead of rejecting%0A%0A- Expected: %0AError {%0A  "message": "rejected promise",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/metadata-write-guard.test.ts:70:5%0A%0A
+
+::error file=/tmp/c-r7-red/tests/main/metadata-write-guard.test.ts,title=tests/main/metadata-write-guard.test.ts > TM-B12 / D-17%3A writeTagsToFile fails loudly when custom INFO fields cannot be written > (c) meta%3Awrite-batch reports the failing file and continues with the next one,line=93,column=20::AssertionError: expected { succeeded: 2, failed: [] } to deeply equal { succeeded: 1, failed: [ { …(2) } ] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "failed": [%0A-     {%0A-       "error": "RIFF INFO tag is not available; custom fields were not written",%0A-       "path": "/tmp/czaba-write-guard-test-8149-1793033087205/c-first.wav",%0A-     },%0A-   ],%0A-   "succeeded": 1,%0A+   "failed": [],%0A+   "succeeded": 2,%0A  }%0A%0A ❯ tests/main/metadata-write-guard.test.ts:93:20%0A%0A
