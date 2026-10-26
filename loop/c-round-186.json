@@ -1,0 +1,77 @@
+{
+  "round": 186,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-26T06:56:44.3844224Z",
+    "round": 186,
+    "attempt": 1,
+    "store": 200
+  },
+  "mock": {
+    "startedByC": true,
+    "stoppedByC": true,
+    "log": "c-round-186/mock.log",
+    "sha256": "a420767f9aa59295bd2818535043bcf305c93536c73daf4f23d60907dce1490b"
+  },
+  "passed": [
+    "INACTIVE-186",
+    "META-186",
+    "PX-NET-186",
+    "OFFERS-VIS-186",
+    "STORE-AFTER-186",
+    "PREVIEW-186",
+    "G186-3",
+    "STUDIO-RV-186",
+    "SCOPE-186",
+    "T-RUN-186",
+    "AN-REVIEW-186",
+    "PX-NET/REG-HYD"
+  ],
+  "failed": [],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "blocked": [],
+  "notes": [
+    "OFFERS-VIS-186: the round-185 home before-shots are blank below the hero (scroll-reveal never triggered); text and boxes were verified by equivalent checks (rendered text = source, boxes identical with img src removed, frozen A/B 0 px outside card+hero at 1440/1280; 375 pixel A/B unusable due to JS motion).",
+    "STORE-AFTER-186 product page: 0 changed px when round-185's capture sequence (Play preview then shot) is reproduced; G186-3 is mock-backed, not real-backend evidence.",
+    "META fallback branch covered by T1 only (every fixture product has a description).",
+    "Ableton parity: not applicable (store pages).",
+    "STORE-AFTER-186 home: the round-185-method diff is vacuous below the hero (both blank, inCard 0); containment rests on the frozen A/B (1440/1280) and text+box identity (375).",
+    "INACTIVE-186: middle-east and harbour-lights variant strings identical to round 185 at all 3 viewports; door-slams has no round-185 baseline."
+  ],
+  "bugs": [
+    {
+      "id": "C-R186-01",
+      "severity": "low",
+      "steps": [
+        "Start mock-api/server.mjs on :5199",
+        "Open http://127.0.0.1:5173/products/door-slams (active SFX, standardPrice 9, no variants) at any viewport"
+      ],
+      "expected": "The product page shows the product's price ($9, as the list card does) or does not offer a $0.00 purchase",
+      "actual": "TOTAL PRICE $0.00 USD with live Add to Cart and Buy Now; ProductDetailPage.tsx l.67-69 uses selectedVersion?.price ?? 0 and there are no variants. Pre-existing, code not touched in round 186; severity may rise depending on real-backend data (BACKEND-ONLY-EVIDENCE); Low only because the variant-less shape is mock-only: if the real /api/products/handle returns an active product without variants it is Medium (purchase path). Newly observed (round 185 never opened door-slams), not a regression.",
+      "evidence": "c-round-186/shots/store-after/1280-product-door-slams.png; c-round-186/out/store-{1440,1280,375}-1.json pages.product-door-slams.price/variants"
+    },
+    {
+      "id": "C-R186-02",
+      "severity": "low",
+      "steps": [
+        "Open / at 1440, 1280 or 375",
+        "Scroll to Special Offers and wait for the Gift Cards img to load",
+        "Measure the paragraph text rgb(129,136,152) against the background behind it (text hidden)"
+      ],
+      "expected": "Paragraph contrast >= 4.5:1 against all overlay pixels behind it",
+      "actual": "Min 2.59:1 (1440/1280) and 2.22:1 (375) where the paragraph crosses the gold CZABA lettering of gift-card.png; 3.31% / 1.84% of its box below 4.5:1; darkest-background contrast 5.91:1; heading passes (min 8.03:1). Overlay unchanged; owner STORE-2",
+      "evidence": "c-round-186/shots/store-after/{W}-offers.png, {W}-bg-p.png; c-round-186/out/contrast186.json"
+    }
+  ]
+}

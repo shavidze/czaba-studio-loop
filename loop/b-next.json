@@ -1,18 +1,22 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 185 PASS (browserVerified=true, realVerified=true, 11 rows; PX-NET home hit and C-R185-02 are pre-existing frozen store code, filed as Lows); root published round 185 as 4a73ced, so STORE-0 is done. No Critical/High/Medium open. Regression is due on/after 2026-10-27 (today 2026-10-26), so round 186 = STORE-1a, putting C's two bugs first plus the product meta template (STORE-1 split 1a-1d under the three-bug rule, nothing dropped). Much scoped work remains and nothing needs external input, so not COMPLETE and not BLOCKED.",
- "nextTask": "Round 186 (D-29z151) STORE-1a from HEAD 4a73ced (clean; 1011 tracked; frozen 1009; grants 2: app/routes/products.$handle.tsx, app/components/home/SpecialOffersSection.tsx; new 2: app/lib/__tests__/product-handle-route.test.tsx, doc 153). K1 C-R185-02: loader throws 404 Response when product.isActive === false (not caught into 503; true/missing unchanged). K2: meta description/og/twitter from product.description (collapsed, <=160 at a word boundary + ellipsis), fallback '{title} — {mapProductType} by CZABA.'. K3 C-R185-01: SpecialOffers Gift Cards img src -> /images/gift-card.png + loading=lazy decoding=async, text/layout unchanged (keep-list). T1 cases L1-L3, M1-M5 with mutation proof. C rows at 1440/1280/375 vs mock: INACTIVE-186, META-186, PX-NET-186 (0 unsplash), OFFERS-VIS-186, STORE-AFTER-186 (home LCP<=2.5 s, CLS<0.1), PREVIEW-186, G186-3, STUDIO-RV-186 (0 px vs c185), SCOPE-186, T-RUN-186, AN-REVIEW-186, REG-HYD. Next: REGRESSION on first planning >= 2026-10-27, then STORE-1b.",
+ "reason": "C round 186 PASS (browserVerified=true, realVerified=true, 12 rows, 0 failed, 0 blocked); root published it as cc207d6, so STORE-1a is done and C-R185-01/02 are resolved. C's two new Lows: C-R186-01 ($0.00 variant-less SFX) touches purchase-path semantics with an unknown backend contract, so it is an open conditional Low owned by STORE-4 and part of the regression smoke; C-R186-02 (contrast) goes to deferred_low_polish, owner STORE-2. No Critical/High/Medium open. Regression is due on/after 2026-10-27 and today is 2026-10-26, so per round 186's pre-written outcome round 187 = STORE-1b (+ the stale doc 153 status flagged by the gate-186 reviewer). A lot of scoped work remains and nothing needs external input, so the decision is neither COMPLETE nor BLOCKED.",
+ "nextTask": "Round 187 (D-29z152) STORE-1b from HEAD cc207d6 (clean; 1013 tracked; frozen 1010; grants 3: app/components/audio/AudioPlayer.tsx, app/components/audio/AudioPreviewButton.tsx, docs/implementation/2026/quarter-IV/153-store-1a-product-page-bugs.md; new 2: app/lib/__tests__/audio-preview-player.test.tsx, doc 154). K1: var(--color-primary) (defined nowhere) -> var(--color-brand) at AudioPlayer l.127/189 only. K2: remove the isClient post-mount flip; one interactive markup on server and client, type=button, no 'Preview' label (R55, vetoable). K3: doc 153 status Completed + cite C 186 PASS/cc207d6. T1 B1 (static markup == DOM after effects, red on start), B2, B3, B4 hydrateRoot 0 recoverable errors, P1 brand 25%/70%, P2 token in @theme, P3. C rows at 1440/1280/375 vs mock: FILL-187, FLIP-187 (JS-off vs hydrated), PREVIEW-187, STORE-AFTER-187, G187-3, STUDIO-RV-187, SCOPE-187, T-RUN-187, AN-REVIEW-187, PX-NET/REG-HYD. Next: REGRESSION on the first planning >= 2026-10-27 (expected 188), then STORE-1c.",
  "remaining": [
-  "STORE-1a(round 186 D-29z151: C-R185-02 inactive 404, C-R185-01 local gift-card.png, product meta from data; T1 + doc 153; done on C PASS with browserVerified)",
-  "STORE-1b(AudioPlayer --color-primary fill, AudioPreviewButton SSR/CSR label flip)",
+  "STORE-1b(round 187 D-29z152: AudioPlayer fill var(--color-brand), AudioPreviewButton one interactive markup R55, doc 153 status; done on C PASS with browserVerified)",
+  "REGRESSION(due 2026-10-27; expected round 188; + M1, M3, M4, harness gate-log check, REG-DUX5-PLAYHEAD-RESCAN, C-R167-METRONOME-UNDER-MUTE, STATE-M3 wording, e2e smoke, store smoke vs mock incl. archived-rain 404, meta, door-slams, STORE-1b fill/flip; scrolled home baselines)",
   "STORE-1c(D15 header, double h1, footer 'Czaba Music', Studio rename, plain wordmark)",
   "STORE-1d(D10 entrance loader)",
-  "REGRESSION(due 2026-10-27; expected round 187; + M1, M3, M4, harness gate-log check, REG-DUX5-PLAYHEAD-RESCAN, C-R167-METRONOME-UNDER-MUTE, STATE-M3 wording, e2e smoke, store smoke vs mock, STORE-1a checks)",
+  "STORE-REDESIGN(STORE-0 done 4a73ced; STORE-1a done cc207d6; STORE-1b round 187; STORE-1c/1d; STORE-2 tokens/type (+C-R186-02); STORE-3 hero; STORE-4 product/listening (+C-R186-01); STORE-5 loading text/docs; direction A decided)",
+  "C-R186-01(open Low, conditional Medium if real backend returns active product without variants; owner STORE-4; BACKEND-ONLY-EVIDENCE)",
+  "GATE186-REVIEW-SIGNALS(signal)",
+  "B-R186-PLAYER-SIGNALS(signal)",
+  "STORE-1c(D15 header, double h1, footer 'Czaba Music', Studio rename, plain wordmark)",
+  "STORE-1d(D10 entrance loader)",
   "ARCH-CHECKPOINT-VISUAL-A-EXIT(b-round-183-checkpoint-request.md requested_from_root, supersedes b-round-180; non-blocking, fallback (c))",
   "ARCH-R183-STUDIO-PREDICATE-DUP(signal; root.tsx:137 vs CookieConsent.tsx:16; keep until root.tsx unfreezes)",
   "C-R183-M310-CC5-UNREACHABLE(info)",
   "GATE175-S5-SCROLLBAR-JUMP(info, vetoable)",
-  "STORE-REDESIGN(STORE-0 done 4a73ced; STORE-1a round 186; STORE-1b/1c/1d; STORE-2 tokens/type; STORE-3 hero; STORE-4 product/listening; STORE-5 loading text/docs; direction A decided)",
   "REVIEW-RECOMMENDATIONS(ABL-R-7,DUX-R-3,ABL-R-12,DUX-R-1,ABL-R-13,DUX-R-4,ABL-R-10,DUX-R-6,ABL-R-9,DUX-R-2,ABL-R-1,ABL-R-2,ABL-R-3,ABL-R-4,ABL-R-8,ABL-R-11,ABL-R-14,ABL-R-15,ABL-R-18,DUX-R-7,DUX-R-8,DUX-R-9)",
   "Q-V3-ICON-SIZE(awaiting_user)",
   "B-R153-PREVIEW-DUR(awaiting_user)",
@@ -85,6 +89,6 @@
   "C-R182-R42-GAP-CLICK(info)",
   "B-R184-FAKECLOCK-UNASSERTED(signal; m313 0 red)",
   "ARCH-R184-SIGNAL3(signal; 73 suite copies; checkpoint Q2)",
-  "DEFERRED-LOW-POLISH(262 entries incl. C-R185-I2, C-R185-I3, open ones; +C-R183-N-CLOSE-0X0, A-R183-COOKIE-BUTTON-TYPE, A-R183-COOKIE-INLINE-GRADIENT, A-R183-REVIEW-FBQ-BRANCH; C-R169-N1 scope widened to library options)"
+  "DEFERRED-LOW-POLISH(264 entries incl. C-R186-02, GATE186-SITEMAP-INACTIVE, C-R185-I2, C-R185-I3, open ones; +C-R183-N-CLOSE-0X0, A-R183-COOKIE-BUTTON-TYPE, A-R183-COOKIE-INLINE-GRADIENT, A-R183-REVIEW-FBQ-BRANCH; C-R169-N1 scope widened to library options)"
  ]
 }

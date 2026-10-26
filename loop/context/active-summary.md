@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T06:32:03.030Z)
+# Active loop summary (2026-10-26T07:16:35.355Z)
 
-- backlog.json 1641 KB -> active view 231 KB
-- status: G_ROOT_GATE round 185
-- servers: `{"checkedUtc":"2026-10-26T06:18:09.9289338Z","round":185,"attempt":1,"store":200}`
-- last publication: 4a73cedb808c96f6f73ea20ec0fdab8b9ac1fdbe (rounds 185-185)
-- last root gate: round 185 published - commit 4a73cedb808c96f6f73ea20ec0fdab8b9ac1fdbe pushed
+- backlog.json 1649 KB -> active view 233 KB
+- status: G_ROOT_GATE round 186
+- servers: `{"checkedUtc":"2026-10-26T06:56:44.3844224Z","round":186,"attempt":1,"store":200}`
+- last publication: cc207d6f6ba37cfd0eb614630779ac1a03641802 (rounds 186-186)
+- last root gate: round 186 published - commit cc207d6f6ba37cfd0eb614630779ac1a03641802 pushed
 
 ## Current items: -
 
@@ -430,6 +430,11 @@
 - C-R183-M310-CC5-UNREACHABLE / info / triaged_info / CC5 'decision exists -> nothing on /' cannot detect a predicate inversion (m310 stays green there)
 - B-R184-FAKECLOCK-UNASSERTED / info / signal_not_scheduled / m313 (FakeAudioContext.currentTime forced to 0) turned 0 of 45 grid UI tests red: the fake clock value is not asserted through the 3 grid su
 - C-R184-EXPORT-FULLSCALE-INFO / info / info / flow smoke export has 30 full-scale samples; the decoded source /middle-east.mp3 has the same 30 -> unity pass-through, no added clipping
+- C-R185-01 / low / scheduled_round_186 (STORE-1a K3) / home / loads images.unsplash.com from SpecialOffersSection.tsx:15 (Gift Cards background photo)
+- C-R185-02 / low / scheduled_round_186 (STORE-1a K1) / inactive product (isActive:false) opens by direct URL with 200, TOTAL PRICE $0.00 and live Add to Cart / Buy Now
+- C-R185-I4-I5 / info / info / I4: AudioPreviewButton hydration mismatch not seen in round-185 sessions (layout-shift fix stays STORE-1b); I5: mock raw clientError 404 has
+- B-R185-ARTISTBIO-UNSPLASH / info / info / ArtistBioSection.tsx:12 has an unsplash URL but no route imports the component; mockProductDetail.ts and studio.$productId.tsx:177 also hold
+- B-R185-OTHER-META-TEMPLATES / info / signal / store.tsx and free-downloads.tsx meta contain similar generic marketing phrasing ('Professional ... pack' / 'creative freedom')
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
