@@ -1,0 +1,79 @@
+{
+  "round": 185,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-26T06:18:09.9289338Z",
+    "round": 185,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R185-01",
+      "severity": "low",
+      "steps": [
+        "Start the mock (node mock-api/server.mjs)",
+        "Open http://127.0.0.1:5173/ in a fresh anonymous Chromium context at 1440x900, 1280x720 or 375x812",
+        "Watch the network requests"
+      ],
+      "expected": "PX-NET: no remote host other than the existing Google Fonts (no R2, no unsplash)",
+      "actual": "1 request per home load to https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800. It comes from the frozen, pre-existing store file app/components/home/SpecialOffersSection.tsx:15 (on Saba's keep-list), not from the mock: the fixture contains no remote URL. Not A's regression; it is visible now because C checks store pages. Owner: STORE-1/STORE-2 (swap to a local asset, keep the section).",
+      "evidence": "c-round-185/out/store-{1440,1280,375}-1.json ev.foreign (page=home); grep in app/components/home/SpecialOffersSection.tsx:15"
+    },
+    {
+      "id": "C-R185-02",
+      "severity": "low",
+      "steps": [
+        "Start the mock",
+        "Fresh anonymous context, open http://127.0.0.1:5173/products/archived-rain (fixture isActive:false, no variants) at 1440x900"
+      ],
+      "expected": "An inactive product is not offered for sale (404 or an unavailable state), consistent with /store and / which hide it",
+      "actual": "Status 200, full product page with TOTAL PRICE $0.00 USD and live Add to Cart / Buy Now buttons; the products.$handle.tsx loader does not check isActive. Pre-existing store code, not A work. Severity may rise if the real backend returns inactive products by handle and accepts cart adds for them (backend-only, unknown).",
+      "evidence": "c-round-185/shots/store-before/{1440,1280,375}-product-archived.png; out/store-*-1.json pages[\"product-archived\"]"
+    }
+  ],
+  "passed": [
+    "MOCK-SELF-185",
+    "MOCK-TYPES-185",
+    "STORE-HOME-185",
+    "STORE-LIST-185",
+    "STORE-PRODUCT-185",
+    "CART-185",
+    "G185-3",
+    "STUDIO-RV-185",
+    "SCOPE-185",
+    "AN-REVIEW-185",
+    "REG-HYD-185"
+  ],
+  "failed": [
+    {
+      "id": "PX-NET-185",
+      "reason": "store home / loads images.unsplash.com from frozen app/components/home/SpecialOffersSection.tsx:15 at all 3 viewports; pre-existing, outside A grant; filed C-R185-01 Low. Studio sessions and all mock-served URLs clean (0 R2/remote, 0 auth headers).",
+      "scope": "pre-existing store code, not A work"
+    }
+  ],
+  "blocked": [
+    "Real backend ownership/auth/cart logic: backend unavailable in cloud (BACKEND-ONLY-EVIDENCE); the mock proves only that the store refuses when the backend refuses",
+    "'Error loading homepage products' in dev-server stdout: the server's stdout is a pipe owned by the cloud runner and is not readable; checked instead that SSR HTML contains all 7 active titles and the error text is absent"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "info": [
+    "C-R185-I2: /store?category=SFX shows only Door Slams but the 'All' chip stays highlighted (shots/store-before/1440-store-sfx.png). Pre-existing store UX, for STORE-1/2.",
+    "C-R185-I3: the product page's fixed bottom player overlaps the page content after Play (shots/store-before/1280-product-middle-east.png). Pre-existing, for STORE-1/3.",
+    "C-R185-I4: no hydration warnings were seen on any store page at the 3 viewports (the AudioPreviewButton mismatch did not appear in these sessions).",
+    "C-R185-I5: A's known L3 gap (raw clientError 404 without CORS) was not exercised by the browser; store never sends malformed requests."
+  ],
+  "abletonParity": "არ ეხება (not applicable): verification infrastructure, no Studio behaviour",
+  "taskStatusRationale": "All A-owned rows pass; the only failing row (PX-NET on store home) and C-R185-02 are pre-existing frozen store code outside the 3 mock files, so no mock fix-up applies; B owns them under STORE-1/2 per the 2026-10-23 Low rule."
+}

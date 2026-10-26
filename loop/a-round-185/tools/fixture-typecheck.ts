@@ -1,0 +1,538 @@
+import type { Product } from '/home/runner/czaba-project/store/app/services/api/client';
+interface ApiResponse<T> { data: T; success: boolean; message?: string; errors?: string[]; }
+interface PagedResult<T> { items: T[]; totalCount: number; pageNumber: number; pageSize: number; }
+const list: ApiResponse<PagedResult<Product>> = {
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": 8,
+        "title": "Pulse Loop Kit",
+        "description": "Mock fixture loop with drum and bass patterns.",
+        "standardPrice": 12,
+        "minPrice": 12,
+        "category": "Loop",
+        "handle": "pulse-loop-kit",
+        "imageUrl": "/images/packs/cover.jpg",
+        "audioPreviewUrl": "/videos/hero/hero-music.mp3",
+        "genre": "Electronic",
+        "bpm": 120,
+        "key": "F minor",
+        "duration": 30,
+        "formattedDuration": "0:30",
+        "vendor": "CZABA",
+        "assetType": "Loop",
+        "tags": "drums, bass, loop",
+        "isNew": true,
+        "isPremium": false,
+        "isActive": true,
+        "createdAt": "2026-10-01T10:00:00.000Z"
+      },
+      {
+        "id": 7,
+        "title": "Archived Rain",
+        "description": "Mock fixture sound effects that are inactive on purpose.",
+        "standardPrice": 7,
+        "minPrice": 7,
+        "category": "SFX",
+        "handle": "archived-rain",
+        "imageUrl": "/images/packs/cover.jpg",
+        "audioPreviewUrl": "/middle-east.mp3",
+        "genre": "Ambience",
+        "duration": 90,
+        "formattedDuration": "1:30",
+        "vendor": "CZABA",
+        "assetType": "Sound Effects",
+        "tags": "rain, ambience, weather",
+        "isNew": false,
+        "isPremium": false,
+        "isActive": false,
+        "createdAt": "2026-10-03T10:00:00.000Z"
+      },
+      {
+        "id": 6,
+        "title": "Door Slams",
+        "description": "Mock fixture sound effects with wooden and metal doors.",
+        "standardPrice": 9,
+        "minPrice": 9,
+        "category": "SFX",
+        "handle": "door-slams",
+        "imageUrl": "/images/packs/6.jpg",
+        "audioPreviewUrl": "/videos/hero/hero-music.mp3",
+        "genre": "Foley",
+        "duration": 60,
+        "formattedDuration": "1:00",
+        "vendor": "CZABA",
+        "assetType": "Sound Effects",
+        "tags": "foley, door, impact",
+        "isNew": false,
+        "isPremium": false,
+        "isActive": true,
+        "createdAt": "2026-10-06T10:00:00.000Z"
+      },
+      {
+        "id": 5,
+        "title": "Quiet Valley",
+        "description": "Mock fixture track with acoustic guitar.",
+        "standardPrice": 17,
+        "minPrice": 17,
+        "category": "Track",
+        "handle": "quiet-valley",
+        "imageUrl": "/images/packs/5.jpg",
+        "audioPreviewUrl": "/middle-east.mp3",
+        "genre": "Folk",
+        "bpm": 84,
+        "key": "G major",
+        "duration": 140,
+        "formattedDuration": "2:20",
+        "vendor": "CZABA",
+        "assetType": "Track",
+        "tags": "guitar, acoustic, warm",
+        "isNew": false,
+        "isPremium": false,
+        "isActive": true,
+        "createdAt": "2026-10-09T10:00:00.000Z"
+      },
+      {
+        "id": 4,
+        "title": "Night Train",
+        "description": "Mock fixture track with a pulsing synth bass.",
+        "standardPrice": 21,
+        "minPrice": 21,
+        "category": "Track",
+        "handle": "night-train",
+        "imageUrl": "/images/packs/4.jpg",
+        "audioPreviewUrl": "/videos/hero/hero-music.mp3",
+        "genre": "Electronic",
+        "bpm": 124,
+        "key": "A minor",
+        "duration": 165,
+        "formattedDuration": "2:45",
+        "vendor": "CZABA",
+        "assetType": "Track",
+        "tags": "synth, pulse, tension",
+        "isNew": false,
+        "isPremium": false,
+        "isActive": true,
+        "createdAt": "2026-10-12T10:00:00.000Z"
+      },
+      {
+        "id": 3,
+        "title": "Copper Horizon",
+        "description": "Mock fixture track with strings and low brass.",
+        "standardPrice": 19,
+        "minPrice": 19,
+        "category": "Track",
+        "handle": "copper-horizon",
+        "imageUrl": "/images/packs/3.png",
+        "audioPreviewUrl": "/middle-east.mp3",
+        "genre": "Orchestral",
+        "bpm": 110,
+        "key": "E minor",
+        "duration": 200,
+        "formattedDuration": "3:20",
+        "vendor": "CZABA",
+        "assetType": "Track",
+        "tags": "strings, brass, orchestral",
+        "isNew": false,
+        "isPremium": false,
+        "isActive": true,
+        "createdAt": "2026-10-15T10:00:00.000Z"
+      },
+      {
+        "id": 2,
+        "title": "Harbour Lights",
+        "description": "Mock fixture track with a slow piano theme.",
+        "standardPrice": 24,
+        "premiumPrice": 79,
+        "minPrice": 24,
+        "category": "Track",
+        "handle": "harbour-lights",
+        "imageUrl": "/images/packs/2.png",
+        "audioPreviewUrl": "/videos/hero/hero-music.mp3",
+        "genre": "Ambient",
+        "bpm": 72,
+        "key": "C major",
+        "duration": 150,
+        "formattedDuration": "2:30",
+        "vendor": "CZABA",
+        "assetType": "Track",
+        "tags": "piano, ambient, calm",
+        "isNew": false,
+        "isPremium": false,
+        "isActive": true,
+        "createdAt": "2026-10-18T10:00:00.000Z",
+        "variants": [
+          {
+            "audioMetadata": {
+              "audioFormat": "WAV",
+              "sampleRateHz": 48000,
+              "bitDepth": 24,
+              "audioFileCount": 1,
+              "downloadSizeBytes": 52428800,
+              "includesStems": false
+            },
+            "id": 21,
+            "productId": 2,
+            "name": "Standard",
+            "price": 24,
+            "position": 1,
+            "createdAt": "2026-10-18T10:00:00.000Z"
+          },
+          {
+            "audioMetadata": {
+              "audioFormat": "WAV",
+              "sampleRateHz": 48000,
+              "bitDepth": 24,
+              "audioFileCount": 6,
+              "downloadSizeBytes": 314572800,
+              "includesStems": true
+            },
+            "id": 22,
+            "productId": 2,
+            "name": "Premium",
+            "price": 79,
+            "position": 2,
+            "createdAt": "2026-10-18T10:00:00.000Z"
+          }
+        ]
+      },
+      {
+        "id": 1,
+        "title": "Middle East",
+        "description": "Mock fixture track for local store verification.",
+        "standardPrice": 29,
+        "premiumPrice": 99,
+        "minPrice": 29,
+        "category": "Track",
+        "handle": "middle-east",
+        "imageUrl": "/images/packs/1.png",
+        "audioPreviewUrl": "/middle-east.mp3",
+        "genre": "Cinematic",
+        "bpm": 90,
+        "key": "D minor",
+        "duration": 180,
+        "formattedDuration": "3:00",
+        "vendor": "CZABA",
+        "assetType": "Track",
+        "tags": "cinematic, oud, percussion",
+        "isNew": true,
+        "isPremium": true,
+        "isActive": true,
+        "createdAt": "2026-10-20T10:00:00.000Z",
+        "variants": [
+          {
+            "audioMetadata": {
+              "audioFormat": "WAV",
+              "sampleRateHz": 48000,
+              "bitDepth": 24,
+              "audioFileCount": 1,
+              "downloadSizeBytes": 52428800,
+              "includesStems": false
+            },
+            "id": 11,
+            "productId": 1,
+            "name": "Standard",
+            "price": 29,
+            "position": 1,
+            "createdAt": "2026-10-20T10:00:00.000Z"
+          },
+          {
+            "audioMetadata": {
+              "audioFormat": "WAV",
+              "sampleRateHz": 48000,
+              "bitDepth": 24,
+              "audioFileCount": 6,
+              "downloadSizeBytes": 314572800,
+              "includesStems": true
+            },
+            "id": 12,
+            "productId": 1,
+            "name": "Premium",
+            "price": 99,
+            "position": 2,
+            "createdAt": "2026-10-20T10:00:00.000Z"
+          }
+        ]
+      }
+    ],
+    "totalCount": 8,
+    "pageNumber": 1,
+    "pageSize": 100
+  }
+};
+const handle0: ApiResponse<Product> = {
+  "success": true,
+  "data": {
+    "id": 8,
+    "title": "Pulse Loop Kit",
+    "description": "Mock fixture loop with drum and bass patterns.",
+    "standardPrice": 12,
+    "minPrice": 12,
+    "category": "Loop",
+    "handle": "pulse-loop-kit",
+    "imageUrl": "/images/packs/cover.jpg",
+    "audioPreviewUrl": "/videos/hero/hero-music.mp3",
+    "genre": "Electronic",
+    "bpm": 120,
+    "key": "F minor",
+    "duration": 30,
+    "formattedDuration": "0:30",
+    "vendor": "CZABA",
+    "assetType": "Loop",
+    "tags": "drums, bass, loop",
+    "isNew": true,
+    "isPremium": false,
+    "isActive": true,
+    "createdAt": "2026-10-01T10:00:00.000Z"
+  }
+};
+const handle1: ApiResponse<Product> = {
+  "success": true,
+  "data": {
+    "id": 7,
+    "title": "Archived Rain",
+    "description": "Mock fixture sound effects that are inactive on purpose.",
+    "standardPrice": 7,
+    "minPrice": 7,
+    "category": "SFX",
+    "handle": "archived-rain",
+    "imageUrl": "/images/packs/cover.jpg",
+    "audioPreviewUrl": "/middle-east.mp3",
+    "genre": "Ambience",
+    "duration": 90,
+    "formattedDuration": "1:30",
+    "vendor": "CZABA",
+    "assetType": "Sound Effects",
+    "tags": "rain, ambience, weather",
+    "isNew": false,
+    "isPremium": false,
+    "isActive": false,
+    "createdAt": "2026-10-03T10:00:00.000Z"
+  }
+};
+const handle2: ApiResponse<Product> = {
+  "success": true,
+  "data": {
+    "id": 6,
+    "title": "Door Slams",
+    "description": "Mock fixture sound effects with wooden and metal doors.",
+    "standardPrice": 9,
+    "minPrice": 9,
+    "category": "SFX",
+    "handle": "door-slams",
+    "imageUrl": "/images/packs/6.jpg",
+    "audioPreviewUrl": "/videos/hero/hero-music.mp3",
+    "genre": "Foley",
+    "duration": 60,
+    "formattedDuration": "1:00",
+    "vendor": "CZABA",
+    "assetType": "Sound Effects",
+    "tags": "foley, door, impact",
+    "isNew": false,
+    "isPremium": false,
+    "isActive": true,
+    "createdAt": "2026-10-06T10:00:00.000Z"
+  }
+};
+const handle3: ApiResponse<Product> = {
+  "success": true,
+  "data": {
+    "id": 5,
+    "title": "Quiet Valley",
+    "description": "Mock fixture track with acoustic guitar.",
+    "standardPrice": 17,
+    "minPrice": 17,
+    "category": "Track",
+    "handle": "quiet-valley",
+    "imageUrl": "/images/packs/5.jpg",
+    "audioPreviewUrl": "/middle-east.mp3",
+    "genre": "Folk",
+    "bpm": 84,
+    "key": "G major",
+    "duration": 140,
+    "formattedDuration": "2:20",
+    "vendor": "CZABA",
+    "assetType": "Track",
+    "tags": "guitar, acoustic, warm",
+    "isNew": false,
+    "isPremium": false,
+    "isActive": true,
+    "createdAt": "2026-10-09T10:00:00.000Z"
+  }
+};
+const handle4: ApiResponse<Product> = {
+  "success": true,
+  "data": {
+    "id": 4,
+    "title": "Night Train",
+    "description": "Mock fixture track with a pulsing synth bass.",
+    "standardPrice": 21,
+    "minPrice": 21,
+    "category": "Track",
+    "handle": "night-train",
+    "imageUrl": "/images/packs/4.jpg",
+    "audioPreviewUrl": "/videos/hero/hero-music.mp3",
+    "genre": "Electronic",
+    "bpm": 124,
+    "key": "A minor",
+    "duration": 165,
+    "formattedDuration": "2:45",
+    "vendor": "CZABA",
+    "assetType": "Track",
+    "tags": "synth, pulse, tension",
+    "isNew": false,
+    "isPremium": false,
+    "isActive": true,
+    "createdAt": "2026-10-12T10:00:00.000Z"
+  }
+};
+const handle5: ApiResponse<Product> = {
+  "success": true,
+  "data": {
+    "id": 3,
+    "title": "Copper Horizon",
+    "description": "Mock fixture track with strings and low brass.",
+    "standardPrice": 19,
+    "minPrice": 19,
+    "category": "Track",
+    "handle": "copper-horizon",
+    "imageUrl": "/images/packs/3.png",
+    "audioPreviewUrl": "/middle-east.mp3",
+    "genre": "Orchestral",
+    "bpm": 110,
+    "key": "E minor",
+    "duration": 200,
+    "formattedDuration": "3:20",
+    "vendor": "CZABA",
+    "assetType": "Track",
+    "tags": "strings, brass, orchestral",
+    "isNew": false,
+    "isPremium": false,
+    "isActive": true,
+    "createdAt": "2026-10-15T10:00:00.000Z"
+  }
+};
+const handle6: ApiResponse<Product> = {
+  "success": true,
+  "data": {
+    "id": 2,
+    "title": "Harbour Lights",
+    "description": "Mock fixture track with a slow piano theme.",
+    "standardPrice": 24,
+    "premiumPrice": 79,
+    "minPrice": 24,
+    "category": "Track",
+    "handle": "harbour-lights",
+    "imageUrl": "/images/packs/2.png",
+    "audioPreviewUrl": "/videos/hero/hero-music.mp3",
+    "genre": "Ambient",
+    "bpm": 72,
+    "key": "C major",
+    "duration": 150,
+    "formattedDuration": "2:30",
+    "vendor": "CZABA",
+    "assetType": "Track",
+    "tags": "piano, ambient, calm",
+    "isNew": false,
+    "isPremium": false,
+    "isActive": true,
+    "createdAt": "2026-10-18T10:00:00.000Z",
+    "variants": [
+      {
+        "audioMetadata": {
+          "audioFormat": "WAV",
+          "sampleRateHz": 48000,
+          "bitDepth": 24,
+          "audioFileCount": 1,
+          "downloadSizeBytes": 52428800,
+          "includesStems": false
+        },
+        "id": 21,
+        "productId": 2,
+        "name": "Standard",
+        "price": 24,
+        "position": 1,
+        "createdAt": "2026-10-18T10:00:00.000Z"
+      },
+      {
+        "audioMetadata": {
+          "audioFormat": "WAV",
+          "sampleRateHz": 48000,
+          "bitDepth": 24,
+          "audioFileCount": 6,
+          "downloadSizeBytes": 314572800,
+          "includesStems": true
+        },
+        "id": 22,
+        "productId": 2,
+        "name": "Premium",
+        "price": 79,
+        "position": 2,
+        "createdAt": "2026-10-18T10:00:00.000Z"
+      }
+    ]
+  }
+};
+const handle7: ApiResponse<Product> = {
+  "success": true,
+  "data": {
+    "id": 1,
+    "title": "Middle East",
+    "description": "Mock fixture track for local store verification.",
+    "standardPrice": 29,
+    "premiumPrice": 99,
+    "minPrice": 29,
+    "category": "Track",
+    "handle": "middle-east",
+    "imageUrl": "/images/packs/1.png",
+    "audioPreviewUrl": "/middle-east.mp3",
+    "genre": "Cinematic",
+    "bpm": 90,
+    "key": "D minor",
+    "duration": 180,
+    "formattedDuration": "3:00",
+    "vendor": "CZABA",
+    "assetType": "Track",
+    "tags": "cinematic, oud, percussion",
+    "isNew": true,
+    "isPremium": true,
+    "isActive": true,
+    "createdAt": "2026-10-20T10:00:00.000Z",
+    "variants": [
+      {
+        "audioMetadata": {
+          "audioFormat": "WAV",
+          "sampleRateHz": 48000,
+          "bitDepth": 24,
+          "audioFileCount": 1,
+          "downloadSizeBytes": 52428800,
+          "includesStems": false
+        },
+        "id": 11,
+        "productId": 1,
+        "name": "Standard",
+        "price": 29,
+        "position": 1,
+        "createdAt": "2026-10-20T10:00:00.000Z"
+      },
+      {
+        "audioMetadata": {
+          "audioFormat": "WAV",
+          "sampleRateHz": 48000,
+          "bitDepth": 24,
+          "audioFileCount": 6,
+          "downloadSizeBytes": 314572800,
+          "includesStems": true
+        },
+        "id": 12,
+        "productId": 1,
+        "name": "Premium",
+        "price": 99,
+        "position": 2,
+        "createdAt": "2026-10-20T10:00:00.000Z"
+      }
+    ]
+  }
+};
+export { list, handle0, handle1, handle2, handle3, handle4, handle5, handle6, handle7 };

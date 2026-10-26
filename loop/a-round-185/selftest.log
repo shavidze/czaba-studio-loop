@@ -1,0 +1,136 @@
+PASS server starts and /__mock/health answers :: port=41241
+PASS health shape { ok, products, port } :: {"ok":true,"products":8,"port":41241}
+PASS GET /api/products envelope + PagedResult keys :: status=200
+PASS fixture has 8 products :: n=8
+PASS fixture categories 5 Track / 2 SFX / 1 Loop
+PASS exactly one inactive product and it is SFX
+PASS middle-east is a Track
+PASS every preview is a non-empty local mp3
+PASS every image is a local /images/packs path
+PASS no remote URL in fixture
+PASS vendor is CZABA everywhere
+PASS createdAt values are distinct ISO strings
+PASS >= 2 Tracks with Standard + Premium(stems) variants
+PASS at least one isNew and one isPremium Track
+PASS sortDesc=true gives newest first
+PASS default sort is oldest first
+PASS fixture keys stay inside Product / ProductVariant / VariantAudioMetadata
+PASS category filter is case-insensitive equality
+PASS category=TRACK gives 5
+PASS search matches a title substring
+PASS search matches tags/genre case-insensitively
+PASS search with no match gives an empty page
+PASS genre filter
+PASS isNew=true filter
+PASS isPremium=true filter
+PASS page/pageSize slice and totalCount after filter
+PASS defaults page=1 pageSize=20
+PASS pageSize is capped at 100
+PASS invalid page/pageSize fall back to defaults
+PASS GET /api/products/handle/middle-east -> 200 with variants
+PASS GET /api/products/handle/does-not-exist -> 404 :: status=404 body={"success":false,"message":"Product not found"}
+PASS GET /api/products/2 -> 200 by id
+PASS GET /api/products/999 -> 404 :: status=404 body={"success":false,"message":"Product not found"}
+PASS GET /api/products/abc -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/cart -> empty Cart
+PASS POST /api/cart/items -> 501 :: status=501 body={"success":false,"message":"Cart changes are not available in the CZABA mock API."}
+PASS PUT /api/cart/items/1 -> 501 :: status=501 body={"success":false,"message":"Cart changes are not available in the CZABA mock API."}
+PASS DELETE /api/cart/items/1 -> 501 :: status=501 body={"success":false,"message":"Cart changes are not available in the CZABA mock API."}
+PASS DELETE /api/cart -> 501 :: status=501 body={"success":false,"message":"Cart changes are not available in the CZABA mock API."}
+PASS POST /api/cart/checkout -> 501 :: status=501 body={"success":false,"message":"Cart changes are not available in the CZABA mock API."}
+PASS POST /api/cart/coupon -> 501 :: status=501 body={"success":false,"message":"Cart changes are not available in the CZABA mock API."}
+PASS DELETE /api/cart/coupon -> 501 :: status=501 body={"success":false,"message":"Cart changes are not available in the CZABA mock API."}
+PASS POST /api/cart/gift-card -> 501 :: status=501 body={"success":false,"message":"Cart changes are not available in the CZABA mock API."}
+PASS DELETE /api/cart/gift-card -> 501 :: status=501 body={"success":false,"message":"Cart changes are not available in the CZABA mock API."}
+PASS POST /api/auth/login -> 401 :: status=401 body={"success":false,"message":"Sign-in is not available in the CZABA mock API."}
+PASS POST /api/auth/register -> 401 :: status=401 body={"success":false,"message":"Sign-in is not available in the CZABA mock API."}
+PASS POST /api/auth/social -> 401 :: status=401 body={"success":false,"message":"Sign-in is not available in the CZABA mock API."}
+PASS POST /api/auth/refresh -> 401 :: status=401 body={"success":false,"message":"Sign-in is not available in the CZABA mock API."}
+PASS GET /api/auth/profile -> 401 :: status=401 body={"success":false,"message":"Sign-in is not available in the CZABA mock API."}
+PASS PUT /api/auth/profile -> 401 :: status=401 body={"success":false,"message":"Sign-in is not available in the CZABA mock API."}
+PASS POST /api/auth/forgot-password -> 401 :: status=401 body={"success":false,"message":"Sign-in is not available in the CZABA mock API."}
+PASS POST /api/auth/reset-password -> 401 :: status=401 body={"success":false,"message":"Sign-in is not available in the CZABA mock API."}
+PASS GET /api/downloads -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/downloads -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/downloads/1 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/downloads/1 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/orders/my?page=1&pageSize=10 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/orders/my?page=1&pageSize=10 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/orders/5 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/orders/5 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/orders/number/CZ-1 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/orders/number/CZ-1 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/payments/checkout -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/payments/checkout -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/sfx-library -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/sfx-library -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/products/1/recordings -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/products/1/recordings -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/products/middle-east/recordings/a.wav -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/products/middle-east/recordings/a.wav -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/gift-cards/redeem -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/gift-cards/redeem -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/sfx-scenes/1 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/sfx-scenes/1 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/chat/sessions/active -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /api/chat/sessions/active -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS POST /api/payments/checkout -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS POST /api/chat/sessions -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS GET /hubs/chat -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /hubs/chat/negotiate -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET / -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /etc/passwd -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/unknown -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /middle-east.mp3 -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/../../etc/passwd -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/downloads/../products/1 -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/downloads/%2e%2e/products/1 -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/downloads/%2E%2E/products/handle/middle-east -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/auth/../products/2 -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/orders/./../products -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/products/handle/..%2fmiddle-east -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/products/handle/middle-east%5c -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS GET /api/products/1/.. -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS POST /api/downloads -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS POST /api/downloads/1 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS POST /api/orders -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS POST /api/orders/my -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS PUT /api/downloads -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS PUT /api/downloads/1 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS PUT /api/orders -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS PUT /api/orders/my -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS DELETE /api/downloads -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS DELETE /api/downloads/1 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS DELETE /api/orders -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS DELETE /api/orders/my -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS PATCH /api/downloads -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS PATCH /api/downloads/1 -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS PATCH /api/orders -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS PATCH /api/orders/my -> 401 :: status=401 body={"success":false,"message":"Please sign in to continue."}
+PASS HEAD /api/downloads -> 401 with no body
+PASS HEAD /api/products -> 200 with no body
+PASS GET /api/products/handle/%E0%A4%A -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS POST /api/products -> 404 :: status=404 body={"success":false,"message":"Not found"}
+PASS OPTIONS preflight 204 echoes allowed Origin with credentials :: {"access-control-allow-origin":"http://127.0.0.1:5173","access-control-allow-credentials":"true","access-control-allow-headers":"Content-Type, Authorization, X-Session-Id","access-control-allow-methods":"GET, POST, PUT, DELETE, PATCH, OPTIONS","vary":"Origin","cache-control":"no-store","date":"Mon, 26 Oct 2026 06:15:39 GMT","connection":"keep-alive","keep-alive":"timeout=5"}
+PASS localhost Origin is echoed on GET
+PASS CORS headers on error responses too
+PASS CORS headers on 404 too
+PASS Origin without a port gets no ACAO
+PASS foreign Origin http://localhost.evil.test gets no CORS headers
+PASS foreign Origin https://127.0.0.1:5173 gets no CORS headers
+PASS foreign Origin http://127.0.0.1.evil.test gets no CORS headers
+PASS foreign Origin null gets no CORS headers
+PASS no Origin gets no ACAO
+PASS IPv6 loopback answers or is reported unavailable :: ::1 status=200
+PASS no Set-Cookie header in any response :: seen=0
+PASS busy port exits non-zero with a clear message :: code=1 stderr=czaba-mock-api: port 41241 is already in use; not starting
+PASS SIGTERM closes cleanly with code 0 :: code=0 signal=null
+PASS log line for downloads shows auth=yes and status 401
+PASS log line shows auth=no when no header
+PASS Authorization value never logged
+PASS listens on loopback only (never 0.0.0.0 or ::) :: 2026-10-26T06:15:39.679Z czaba-mock-api listening on 127.0.0.1, ::1 port 41241
+PASS SIGINT closes cleanly with code 0 :: code=0
+PASS static P2/P3: node: imports only, no fs/fetch/https/net, no Set-Cookie, env MOCK_API_PORT only :: imports=node:http,node:process,node:url env=MOCK_API_PORT
+PASS log shows Origin when present
+
+134/134 checks passed
