@@ -1,0 +1,49 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/__tests__/store-entrance-loader.test.tsx [2m([22m[2m15 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 388[2mms[22m[39m
+     [32m✓[39m L1 renders nothing on the server[32m 6[2mms[22m[39m
+     [32m✓[39m L2 shows a decorative overlay with no heading on first mount[32m 224[2mms[22m[39m
+     [32m✓[39m L3 stays on screen at most 1200 ms, exit fade included[32m 23[2mms[22m[39m
+[31m     [31m×[31m L4 lets pointer events through during the exit fade only[39m[32m 27[2mms[22m[39m
+     [32m✓[39m L5 a click on the overlay ends it immediately and for good[32m 17[2mms[22m[39m
+       [32m✓[39m Escape at 300 ms removes the overlay and its keydown listener[32m 14[2mms[22m[39m
+       [32m✓[39m Tab does not skip[32m 20[2mms[22m[39m
+       [32m✓[39m removes the keydown listener after the natural finish[32m 7[2mms[22m[39m
+       [32m✓[39m removes the keydown listener on unmount mid-animation[32m 14[2mms[22m[39m
+     [32m✓[39m L7 shows once per session and never writes the old localStorage key[32m 8[2mms[22m[39m
+     [32m✓[39m L8 ignores the old localStorage key and honours the session key[32m 7[2mms[22m[39m
+     [32m✓[39m L9 never renders under prefers-reduced-motion and does not claim the session[32m 2[2mms[22m[39m
+     [32m✓[39m L10 blocked storage renders nothing and does not throw[32m 3[2mms[22m[39m
+     [32m✓[39m L10b a sessionStorage write failure renders nothing and does not throw[32m 2[2mms[22m[39m
+     [32m✓[39m L11 leaves no stray timers or state updates after unmount[32m 14[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/store-entrance-loader.test.tsx[2m > [22mSpotlightLoader entrance (STORE-1d D10)[2m > [22mL4 lets pointer events through during the exit fade only
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/__tests__/store-entrance-loader.test.tsx:[2m101:79[22m[39m
+    [90m 99| [39m    expect(findOverlay(container)?.classList.contains('pointer-events-…
+    [90m100| [39m    [34madvanceTo[39m(clock[33m,[39m [33mTOTAL[39m [33m-[39m [34m1[39m)[33m;[39m
+    [90m101| [39m    expect(findOverlay(container)?.classList.contains('pointer-events-…
+    [90m   | [39m                                                                              [31m^[39m
+    [90m102| [39m  })[33m;[39m
+    [90m103| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m14 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 10:00:03
+[2m   Duration [22m 1.38s[2m (transform 132ms, setup 0ms, import 320ms, tests 388ms, environment 507ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/store-entrance-loader.test.tsx,title=app/lib/__tests__/store-entrance-loader.test.tsx > SpotlightLoader entrance (STORE-1d D10) > L4 lets pointer events through during the exit fade only,line=101,column=79::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/__tests__/store-entrance-loader.test.tsx:101:79%0A%0A

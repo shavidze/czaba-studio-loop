@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T09:03:55.685Z)
+# Active loop summary (2026-10-26T10:04:53.238Z)
 
-- backlog.json 1667 KB -> active view 238 KB
-- status: G_ROOT_GATE round 188
-- servers: `{"checkedUtc":"2026-10-26T08:35:09.1589196Z","round":188,"attempt":1,"store":200}`
+- backlog.json 1676 KB -> active view 241 KB
+- status: G_ROOT_GATE round 189
+- servers: `{"checkedUtc":"2026-10-26T09:44:14.9546778Z","round":189,"attempt":1,"store":200}`
 - last publication: 850445c00162ea0378f3cdf401cd08896d693aaf (rounds 188-188)
-- last root gate: round 188 published - commit 850445c00162ea0378f3cdf401cd08896d693aaf pushed
+- last root gate: round 189 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -440,6 +440,11 @@
 - A-R187-SIGNALS / info / signal / A round 187: ProductCard.tsx:141 bg-primary/90 text-primary-foreground use undefined tokens (same class of bug as K1) on the non-new badge; 
 - C-R187-INFO / info / routed / C round 187 info: I1 entrance loader blocks / card Play for ~3-5.4 s (-> STORE-1d acceptance); I2 LeadMagnet popup covers scrolled-shot firs
 - B-R187-HEADER-SIGNALS / info / signal / Header auth-block buttons lack type=button (useButtonType), the menu toggle lacks aria-expanded/aria-controls, collapsed mobile links (max-h
+- C-R188-INFO / info / routed / C round 188 info: I1 SpotlightLoader motion.h1 -> 2 h1 on / ~0.64-6.3 s (-> STORE-1d round 189 K6/H1-189); I2 Footer absent on /store, produ
+- C-R188-I6 / info / awaiting_user / Keep-list testimonials/stats ('Netflix Original Score', '2,500+ Happy Customers') live in app/components/home/TestimonialsSection.tsx, which
+- GATE188-REVIEW-SIGNALS / info / signal / gate-188 reviewer (COMMIT OK 9/10, Architecture note none): 1 doc 155 status stale (-> round 189 K7); 2 mobile menu aria-expanded/aria-contr
+- A-R188-SIGNALS / info / signal / A round 188 code-reviewer Architecture note (verbatim in a-round-188.md): four-link list written twice in Header.tsx (NAV_ITEMS array -> STO
+- B-R188-LOADER-SIGNALS / info / signal / CinemaCurtainLoader, PianoCurtainLoader and PianoLoadingAnimation are exported from app/components/loading/index.ts and app/components/commo
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

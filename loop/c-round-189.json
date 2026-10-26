@@ -1,0 +1,78 @@
+{
+  "round": 189,
+  "task": "STORE-1d D10 entrance loader",
+  "taskStatus": "FAIL",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-26T09:44:14.9546778Z",
+    "round": 189,
+    "attempt": 1,
+    "store": 200
+  },
+  "mock": "C started mock-api/server.mjs on :5199 (it was not listening); log c-round-189/mock.log; stopped at the end, :5199 free",
+  "bugs": [
+    {
+      "id": "C-R189-01",
+      "severity": "medium",
+      "steps": [
+        "Fresh Chromium context with no czaba_entrance_seen, viewport 375x812 or 1280x720",
+        "Install a layout-shift PerformanceObserver before navigation (addInitScript)",
+        "Open http://127.0.0.1:5173/ and wait 4 s"
+      ],
+      "expected": "STORE-AFTER-189: home CLS median < 0.1 in fresh mode (loader shown) as well as in seen mode",
+      "actual": "Fresh-mode CLS median 0.6158 at 375 (3/3), 0.2727 at 1280 (0.2933/0.2727/0.2727), 0.0815 at 1440 (one load 0.1938). The shift comes from the overlay itself about 470-495 ms after insertion. Sources are the absolute -translate-1/2 glow and logo divs inside [data-testid=entrance-loader]: previousRect 0x0 to currentRect 500 px tall, 400x200 or 389x125. Seen mode (key preset): 0.0198/0.0014/0, the same as round 188. The cause (framer opacity/scale/y animation finish) is a hypothesis. Whether it pre-exists is unverified, because round 188 never measured fresh mode. Nothing visibly moves: the overlay is opaque, so this is a metric-only shift. out/store-*.json perf/perfMedian is also fresh mode (a new tab is a new session); the valid seen-mode numbers are in out/cls-*.json.",
+      "evidence": "tmp/studio-real-loop/c-round-189/out/cls-{1440,1280,375}.json; out/store-*.json perfFresh; tools/cls.cjs"
+    },
+    {
+      "id": "C-R189-02",
+      "severity": "low",
+      "steps": [
+        "Fresh context at 375x812 (or 1440x900), open /",
+        "About 300 ms after the overlay appears, press Tab"
+      ],
+      "expected": "R63: Tab has no side effects; the page hidden under the opaque overlay does not change",
+      "actual": "The overlay stays up (correct), but focus moves to a card link under it ('Harbour Lights'); the page is not inert. At 375 the focus scrolled the card carousel, so the Middle East Play was no longer under its old point after removal. Nothing activates and nothing plays. Low: goes to deferred_low_polish.",
+      "evidence": "tmp/studio-real-loop/c-round-189/out/skip-{1440,375}.json case c"
+    }
+  ],
+  "passed": [
+    "DUR-189",
+    "HIT-189",
+    "SKIP-189",
+    "SESSION-189",
+    "RM-189",
+    "H1-189",
+    "E2E-189",
+    "KEEP-189",
+    "G189-3",
+    "STUDIO-RV-189",
+    "SCOPE-189",
+    "T-RUN-189",
+    "AN-REVIEW-189",
+    "PX-NET",
+    "REG-HYD"
+  ],
+  "failed": [
+    "STORE-AFTER-189 (fresh-mode home CLS median 0.2727 at 1280 and 0.6158 at 375 > 0.1; pixels 0 changed px on 9/9 shots and LCP within bound passed)"
+  ],
+  "blocked": [],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "verify",
+    "e2e smoke",
+    "PROD-MP3-UNVERIFIED",
+    "PROD-SSR-NUL"
+  ],
+  "info": [
+    "C-R189-I1: one-sample rAF logo opacity 0 is a sampler artifact; the pre-paint ResizeObserver sample saw 0 dips in 9/9 loads",
+    "C-R189-I3: overlay inserted 558-656 ms after navigation, after hydration (R61 trade-off)",
+    "C-R189-I4: 1440 load 1 lasted 1205.2 ms (a mid-loader screenshot stalled frames); median in bound",
+    "C-R189-I5: sessionStorage is per tab; seen-mode harnesses must preset the key, because a new page is a new session",
+    "C-R189-I6: on the 375 home full-page shot, /images/packs/cover.jpg was not loaded at capture; the non-scrolled diff was still 0 px"
+  ],
+  "ableton": "not applicable (store page); Studio unchanged (STUDIO-RV-189 0 px)"
+}
