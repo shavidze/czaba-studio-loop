@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-26T19:49:06.268Z)
+# Active loop summary (2026-10-27T07:45:20.149Z)
 
-- backlog.json 96 KB -> active view 41 KB
-- status: G_ROOT_GATE round 11
+- backlog.json 101 KB -> active view 36 KB
+- status: G_ROOT_GATE round 12
 - servers: `{"servers":"none or skipped"}`
-- last publication: 35ed18b9211f0da3d7c23e10af5b431d6f33540f (rounds 10-10)
-- last root gate: round 11 skipped - C taskStatus BLOCKED
+- last publication: c3bd412c0561d53c64e98563dbc5177ca98696f0 (rounds 11-12)
+- last root gate: round 12 published - commit c3bd412c0561d53c64e98563dbc5177ca98696f0 pushed
 
-## Current items: TM-T0, TM-T0-CI, TM-T1, TM-T1-DUP, TM-B08, TM-T2, TM-T2-DATA, TM-B05, TM-B06, TM-B11, TM-B14, TM-B15
+## Current items: TM-B15
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -63,10 +63,24 @@
 - RR-R10-05 / info / open / Architecture signal: the three specs repeat the same beforeAll/afterAll; a Playwright worker-scoped fixture (test.extend<{}, { tagManager: L
 - A-R10-01 / info / open / Untested launch failure paths in launchTagManagerApp: electron.launch own 60 s timeout (app undefined, empty tail), domcontentloaded 15 s me
 - C-R10-01 / info / open / Un-delayed E2E Playwright 3.2 s vs R9 2.5 s (Build+E2E step 7.7 s vs 5.9 s); cause not established (machine variance or helper overhead); ju
+- C-R11-01 / low / open / .claude/primitives/STATE_MANAGEMENT.md ### Save flow still says batch always calls setEditingMetadata({}); stale vs D-21 (scope item 4 not d
+- A-R11-01 / low / open / Batch refresh: a file whose write AND re-read both fail gets emptyMetadata in the store (src/main/ipc/metadata.ts ~241 readMetadataBatch fal
+- A-R11-02 / low / open / docs/learning/data-flow.md pre-existing inaccuracies: :115 diagram says writeMetadataBatch(paths, editingMetadata) but code sends batchMeta 
+- B-R11-01 / info / open / Environment: the agent harness now refuses Edit on .claude/** as a sensitive file (A R11 permission_denials), while round 3 edited .claude/p
 
 ## Other open items
+- TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
+- TM-T0-CI [in_progress] New .github/workflows/check.yml (ubuntu-24.04, Node 22, npm ci, ffmpeg+xvfb, check, build, xvfb playwright --retries=0)
 - TM-T1-MIG [todo] Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no aut
+- TM-T1-DUP [todo] Old schema.json custom field colliding with standard category: (a) custom field already using RIFF ID ICAT; (b) custom field with key 'categ
+- TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
+- TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
+- TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba
+- TM-B05 [todo] A WAV whose data chunk is empty cannot be tagged (node-taglib-sharp 6.0.1 boundary bug) and read silently returns empty metadata
+- TM-B06 [todo] Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database
 - OOS-03 [out_of_scope] New npm dependencies
 - TM-T0-CI-FU [in_progress] CI follow-up: apt-install.sh worst-case budget (C-R4-01/RR-R4-02: smaller dpkg recovery bound or step timeout >= 13 min) + Georgian docs not
+- TM-B11 [todo] With a custom Number field in the schema (e.g. Take/ITKN), every single-file save writes the default 0 as INFO '0' (size 1) into files that 
+- TM-B14 [in_progress] E2E cold start: first Electron window can take > 30 s on a cold runner; firstWindow sits inside the test body so the 30 s per-test timeout f
