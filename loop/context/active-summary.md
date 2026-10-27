@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-27T09:00:33.986Z)
+# Active loop summary (2026-10-27T11:48:42.466Z)
 
-- backlog.json 1847 KB -> active view 267 KB
-- status: G_ROOT_GATE round 205
-- servers: `{"checkedUtc":"2026-10-27T08:29:02.5997841Z","round":205,"attempt":1,"store":200}`
-- last publication: c27493047b42fc5b40b8c8a4ba96468757d3d46a (rounds 204-205)
-- last root gate: round 205 published - commit c27493047b42fc5b40b8c8a4ba96468757d3d46a pushed
+- backlog.json 1860 KB -> active view 263 KB
+- status: G_ROOT_GATE round 206
+- servers: `{"checkedUtc":"2026-10-27T11:04:24.8639957Z","round":206,"attempt":1,"store":200}`
+- last publication: 60c82edb222af573e99e85ba65cfe72c4f35a0d4 (rounds 206-206)
+- last root gate: round 206 published - commit 60c82edb222af573e99e85ba65cfe72c4f35a0d4 pushed
 
 ## Current items: -
 
@@ -468,19 +468,15 @@
 - OBS-R199-SNAP-DEFAULT / info / acknowledged: Snap off in a fresh session, unchanged since round 122; harness rule: set Snap explicitly / 
 - OBS-R199-PROTECTED-NAV / info / acknowledged (info): /studio/middle-east fires framenavigated 3x to the same URL; protection unchanged (Sign in required, 0 audio[src]). Not scheduled; protected file / 
 - OBS-C200-OVERVIEW-FRAME / info / harness note -> regression_rounds REGRESSION-ROUND-2026-10-30 scope_additions (scan [data-testid=arrangement-overview], not the frame) / arrangement-overview-frame is the visible-window box; the overview playhead can sit outside it
-- B-R201-HEADER-USERMENU-KEYBOARD / medium / c_pass_gate_blocked: C round 204 PASS (browserVerified=true, realVerified=true; c-round-204.json rows HIDDEN/MOBILE/USERMENU/SHOWCASE/NO-SHIFT/RING PASS); gate 204 blocked (gates/round-204/review.md Critical #1: doc 161 claims a test that did not exist); round-204 work stays in the tree; fixed by R108 in round 205 and published together with round 205 after C PASS | 2026-10-27 B round 204 -> 205 planning (D-29z170) | was: dispatched round 204 (D-29z169, R106); browser half now RUNNABLE in the cloud via the UI seam localStorage.auth_user without accessToken (AuthContext.tsx:93-94 sets the user  ... [clipped; see backlog.json] / Header signed-in user menu (Header.tsx:107 opacity-0 invisible group-hover:visible): My Account, Orders, Downloads, Logout are unreachable b
 - B-R201-HEADER-USERMENU-KEYBOARD-NOTE / info / note / severity rationale: Medium (keyboard users cannot reach account items; data safe); not High because the routes stay reachable by URL; not re
-- C-R202-04 / medium / c_pass_gate_blocked: C round 204 PASS (browserVerified=true, realVerified=true; c-round-204.json rows HIDDEN/MOBILE/USERMENU/SHOWCASE/NO-SHIFT/RING PASS); gate 204 blocked (gates/round-204/review.md Critical #1: doc 161 claims a test that did not exist); round-204 work stays in the tree; fixed by R108 in round 205 and published together with round 205 after C PASS | 2026-10-27 B round 204 -> 205 planning (D-29z170) | was: dispatched round 204 (D-29z169, R105/R107) | 2026-10-27 B round 203 -> 204 planning (D-29z169) | was: open: scheduled round 204 (hidden focusables, runtime state; Header.tsx  ... [clipped; see backlog.json] / 375x812: closed mobile menu leaves 5 tab stops (Collections, Studio, Free Samples, About, Sign In) focused at effective opacity 0
-- C-R202-05 / medium / c_pass_gate_blocked: C round 204 PASS (browserVerified=true, realVerified=true; c-round-204.json rows HIDDEN/MOBILE/USERMENU/SHOWCASE/NO-SHIFT/RING PASS); gate 204 blocked (gates/round-204/review.md Critical #1: doc 161 claims a test that did not exist); round-204 work stays in the tree; fixed by R108 in round 205 and published together with round 205 after C PASS | 2026-10-27 B round 204 -> 205 planning (D-29z170) | was: dispatched round 204 (D-29z169, R105/R107) | 2026-10-27 B round 203 -> 204 planning (D-29z169) | was: open: scheduled round 204 / "Browse the Collection" (StudioShowcase reveal block + link): 2 of 3 stops at effective opacity 0 after 3 s at 1280 and 375 (1 of 3 at 1440)
 - A-R202-REVIEW-SCROLL-CLIP / low / open_backend_blocked: unmeasured; SfxVideoSync tab panel and SfxSoundLibrary rows (sign-in routes); harness measurement later (reviewer said Medium; B rates Low: pre-existing, the old ring-2 was clipped the same way, ring visible on other sides unknown) / outlines clipped inside padding-less scroll containers on recordings/scenes routes
 - ARCH-R202-ROOT-FOCUS-LISTENERS / info / architecture signal (keep); RootErrorBoundary page shows the ring on mouse focus (AppContent not mounted) - minor, no task / AppContent owns the document capture listeners and html[data-focus-source]
 - B-R203-LENIS-FOCUS-OFFSCREEN / info / withdrawn (invalid hypothesis, same planning): a Lenis no-op stub reproduces the jump (b-round-203/out/lenistrace-nolenis-5173-1280.json); no JS scroll API ran (scrollculprit-5173.json); the cause is the LeadMagnet popup scroll lock -> see B-R203-LEADMAGNET-AUTO-OPEN-FOCUS | 2026-10-27 B round 203 -> 204 planning (D-29z169) / Lenis smooth scroll desyncs from native keyboard scrolling: after End (native scroll to 4121) Lenis keeps its target at 0; the second Shift+
 - A-R203-REVIEW-M1 / low / ruled (D-29z169): folded into SYS-3 (see systemic_tasks SYS-3.also_fixes_d29z169); reviewer rated Medium, B rates Low: fail-safe (extra ring only), not reproducible in the cloud browser; Android device check on the Tech Lead list / Android soft keyboard key=Unidentified / IME isComposing keydowns flip focus-source to keyboard (ring mid-typing on Android)
 - A-R203-REVIEW-I1 / info / ruled (D-29z169): folded into SYS-3 with M1 (AltGraph printable keys count as editing) / AltGr (Ctrl+Alt) / macOS Option typing switches focus-source to keyboard
-- B-R203-LEADMAGNET-AUTO-OPEN-FOCUS / medium / dispatched round 205 (D-29z170, R109; B scratch sketch proved focus on Close, Tab wrap, Escape, restore: b-round-204/out/lm-sketch2-*.json) | 2026-10-27 B round 204 -> 205 planning (D-29z170) | was: open: scheduled round 205 (ahead of SYS-1); owner app/components/marketing/LeadMagnetPopup.tsx (keep-list: add semantics/focus only, never remove or reword); supersedes the LeadMagnet half of C-R202-06 / LeadMagnet 'FREE DOWNLOAD' popup auto-opens (8 s after load once scroll >= 40 %) and useScrollLock fixes the body (scrollHeight 4841 -> 720,
 - B-R203-AUTH-USER-CLIENT-TRUST / info / root_note: not scheduled; no Studio action; protected file (AuthContext.tsx) / A stored localStorage.auth_user without accessToken renders the signed-in header with no backend verification (AuthContext.tsx:93-94 setUser
-- GATE204-B1 / gate_blocker / dispatched round 205 (D-29z170, R108) / doc 161 l.111 claims a jsdom test that the user menu closes when isAuthenticated becomes false; no such test (HF1-HF9, HF8b); doc status l.4
-- B-R204-SCROLLLOCK-POSITION-LOST / medium / dispatched round 205 (D-29z170, R110) / useScrollLock sets body position:fixed before reading window.scrollY, so top=0px and every unlock restores the page to the top (LeadMagnet, 
+- SABA-B-5 / medium / open: scheduled (measured in round 206 PERF-1a, fixed in PERF-FADER) / Fader drag is slow (Saba 2026-10-27): every pointer move of a track/group volume, master or clip-gain fader re-renders the whole Studio
+- GATE205-DOC162-STATUS / low / dispatched round 206 (D-29z171, R112: one-line status fix, granted) / Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,0 +1,5310 @@
+{
+  "harness": "PERF-1a",
+  "complete": true,
+  "startedAt": "2026-10-27T10:16:50.797Z",
+  "finishedAt": "2026-10-27T10:23:24.297Z",
+  "durationMs": 393500,
+  "budgetsFile": "perf/budgets.json",
+  "chromium": "143.0.7499.4",
+  "viewport": "1440x900",
+  "cpuRates": [
+    1,
+    6
+  ],
+  "passesPerRate": 3,
+  "dragSteps": 60,
+  "sequence": [
+    "load until ready (load.*)",
+    "library Add click (harness.hook-live)",
+    "fader.track.stopped",
+    "fader.pan.stopped",
+    "fader.master.stopped",
+    "fader.clipgain.stopped (click selects the added clip first)",
+    "Space -> playing (harness.audio-running)",
+    "settle 1000 ms, then 5000 ms idle playback (play.idle-*)",
+    "fader.track.playing",
+    "fader.pan.playing",
+    "fader.master.playing",
+    "fader.clipgain.playing",
+    "clip header drag +40 px = 1 s at 40 px/s (harness.restart-live)",
+    "Space -> stopped",
+    "click Stems lane name, Shift+click SFX lane name, Ctrl+G",
+    "fader.group.stopped",
+    "Space -> playing",
+    "fader.group.playing"
+  ],
+  "passes": [
+    {
+      "cpuRate": 1,
+      "pass": 1,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "cpuRate": 1,
+      "pass": 2,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "cpuRate": 1,
+      "pass": 3,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "cpuRate": 6,
+      "pass": 1,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "cpuRate": 6,
+      "pass": 2,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "cpuRate": 6,
+      "pass": 3,
+      "pageErrors": 0,
+      "problems": []
+    }
+  ],
+  "failures": [],
+  "rows": [
+    {
+      "id": "harness.hook-live",
+      "scenario": "load + library Add click",
+      "metric": "commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": ">=",
+        "value": 1
+      },
+      "owner": "PERF-1a",
+      "note": "React commits seen by the devtools-hook stub in the 2 s after the Add click; a disabled hook must fail, not report 0.",
+      "samples": [
+        2,
+        2,
+        2
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 2,
+      "min": 2,
+      "max": 2,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "harness.audio-running",
+      "scenario": "playing setup (R-H)",
+      "metric": "audio-running",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1a",
+      "note": "Play button aria-label is Pause and a tracked (non-offline) AudioContext reports state running.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "harness.restart-live",
+      "scenario": "while playing, drag the added clip 1 s right (scheduleKey change)",
+      "metric": "restart-live",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": ">=",
+        "value": 1
+      },
+      "owner": "PERF-1a",
+      "note": "start() calls on non-offline contexts from pointerdown until the page is quiet (>= 500 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; proves the restart counter is live.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "clipStartBefore": "0.000",
+          "clipStartAfter": "1.000",
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "clipStartBefore": "0.000",
+          "clipStartAfter": "1.000",
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "clipStartBefore": "0.000",
+          "clipStartAfter": "1.000",
+          "tasks": 1,
+          "startsPerTask": "1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "load.longtask-max",
+      "scenario": "fresh /studio-lab until ready",
+      "metric": "longtask-max",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-2",
+      "note": "Baseline 463–491 ms (perf-plan). Ready = library Add enabled and preview waveform bars drawn.",
+      "samples": [
+        371,
+        373,
+        363
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 371,
+      "min": 363,
+      "max": 373,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "load.longtasks-over-50",
+      "scenario": "fresh /studio-lab until ready",
+      "metric": "longtasks-over-50",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-2",
+      "note": "Long tasks over 50 ms before ready.",
+      "samples": [
+        2,
+        2,
+        2
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 2,
+      "min": 2,
+      "max": 2,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "load.ready-ms",
+      "scenario": "fresh /studio-lab until ready",
+      "metric": "ready-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-5",
+      "note": "ms from navigation start to ready; baseline 2.3–2.5 s (perf-plan).",
+      "samples": [
+        1137,
+        1174,
+        1089
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1137,
+      "min": 1089,
+      "max": 1174,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "load.commits",
+      "scenario": "fresh /studio-lab until ready",
+      "metric": "commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-2",
+      "note": "React commits until ready (record only; the Scheduler may merge commits).",
+      "samples": [
+        5,
+        5,
+        5
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 5,
+      "min": 5,
+      "max": 5,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "load.components",
+      "scenario": "fresh /studio-lab until ready",
+      "metric": "components",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-2",
+      "note": "Summed re-rendered components over the load commits.",
+      "samples": [
+        320,
+        320,
+        320
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 320,
+      "min": 320,
+      "max": 320,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "play.idle-commits",
+      "scenario": "5 s of playback after start + 1 s settle",
+      "metric": "commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1a",
+      "note": "perf-plan: 0; B saw 0–1.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "play.idle-components",
+      "scenario": "5 s of playback after start + 1 s settle",
+      "metric": "components",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1a",
+      "note": "Summed re-rendered components during idle playback.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "play.idle-longtasks-over-50",
+      "scenario": "5 s of playback after start + 1 s settle",
+      "metric": "longtasks-over-50",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-1a",
+      "note": "Asserted at 1x only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.track.stopped.components-per-commit",
+      "scenario": "drag Volume — Music, stopped, 1x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        83,
+        83,
+        83
+      ],
+      "details": [
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        }
+      ],
+      "median": 83,
+      "min": 83,
+      "max": 83,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.commits-per-move",
+      "scenario": "drag Volume — Music, stopped, 1x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.752,
+        0.752,
+        0.752
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.752,
+      "min": 0.752,
+      "max": 0.752,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.moves-dispatched",
+      "scenario": "drag Volume — Music, stopped, 1x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.frame-p95.1x",
+      "scenario": "drag Volume — Music, stopped, 1x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.8,
+        16.7,
+        16.8
+      ],
+      "details": [
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        }
+      ],
+      "median": 16.8,
+      "min": 16.7,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.frames-over-33.1x",
+      "scenario": "drag Volume — Music, stopped, 1x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.loaf-count.1x",
+      "scenario": "drag Volume — Music, stopped, 1x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.event-share-16.1x",
+      "scenario": "drag Volume — Music, stopped, 1x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 6
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 6
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 6
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.components-per-commit.6x",
+      "scenario": "drag Volume — Music, stopped, 6x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        83,
+        83,
+        83
+      ],
+      "details": [
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 609,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 608,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 608,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        }
+      ],
+      "median": 83,
+      "min": 83,
+      "max": 83,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.commits-per-move.6x",
+      "scenario": "drag Volume — Music, stopped, 6x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.752,
+        0.752,
+        0.752
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.752,
+      "min": 0.752,
+      "max": 0.752,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.moves-dispatched.6x",
+      "scenario": "drag Volume — Music, stopped, 6x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.frame-p95.6x",
+      "scenario": "drag Volume — Music, stopped, 6x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.8,
+        16.8,
+        16.7
+      ],
+      "details": [
+        {
+          "frames": 231
+        },
+        {
+          "frames": 227
+        },
+        {
+          "frames": 224
+        }
+      ],
+      "median": 16.8,
+      "min": 16.7,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.frames-over-33.6x",
+      "scenario": "drag Volume — Music, stopped, 6x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        1
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.loaf-count.6x",
+      "scenario": "drag Volume — Music, stopped, 6x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.stopped.event-share-16.6x",
+      "scenario": "drag Volume — Music, stopped, 6x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 27
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 27
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 27
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.components-per-commit",
+      "scenario": "drag Volume — Music, playing, 1x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        83,
+        83,
+        83
+      ],
+      "details": [
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 607,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 607,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 608,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        }
+      ],
+      "median": 83,
+      "min": 83,
+      "max": 83,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.commits-per-move",
+      "scenario": "drag Volume — Music, playing, 1x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.752,
+        0.752,
+        0.752
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.752,
+      "min": 0.752,
+      "max": 0.752,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.moves-dispatched",
+      "scenario": "drag Volume — Music, playing, 1x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.restarts",
+      "scenario": "drag Volume — Music, playing, 1x CPU (R-G)",
+      "metric": "restarts",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-FADER",
+      "note": "start() calls on non-offline contexts from pointerdown until quiet (>= 600 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; a fader move must not rebuild the graph.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.track.playing.frame-p95.1x",
+      "scenario": "drag Volume — Music, playing, 1x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.7,
+        16.7,
+        16.7
+      ],
+      "details": [
+        {
+          "frames": 121
+        },
+        {
+          "frames": 121
+        },
+        {
+          "frames": 122
+        }
+      ],
+      "median": 16.7,
+      "min": 16.7,
+      "max": 16.7,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.frames-over-33.1x",
+      "scenario": "drag Volume — Music, playing, 1x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.loaf-count.1x",
+      "scenario": "drag Volume — Music, playing, 1x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.event-share-16.1x",
+      "scenario": "drag Volume — Music, playing, 1x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.components-per-commit.6x",
+      "scenario": "drag Volume — Music, playing, 6x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        83,
+        83,
+        83
+      ],
+      "details": [
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 647,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 637,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 83,
+          "commits": 91,
+          "settleMs": 618,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        }
+      ],
+      "median": 83,
+      "min": 83,
+      "max": 83,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.commits-per-move.6x",
+      "scenario": "drag Volume — Music, playing, 6x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.752,
+        0.752,
+        0.752
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.752,
+      "min": 0.752,
+      "max": 0.752,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.moves-dispatched.6x",
+      "scenario": "drag Volume — Music, playing, 6x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.restarts.6x",
+      "scenario": "drag Volume — Music, playing, 6x CPU (R-G)",
+      "metric": "restarts",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-FADER",
+      "note": "start() calls on non-offline contexts from pointerdown until quiet (>= 600 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; a fader move must not rebuild the graph.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.track.playing.frame-p95.6x",
+      "scenario": "drag Volume — Music, playing, 6x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        50,
+        50,
+        33.4
+      ],
+      "details": [
+        {
+          "frames": 352
+        },
+        {
+          "frames": 352
+        },
+        {
+          "frames": 371
+        }
+      ],
+      "median": 50,
+      "min": 33.4,
+      "max": 50,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.frames-over-33.6x",
+      "scenario": "drag Volume — Music, playing, 6x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        87,
+        66,
+        36
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 66,
+      "min": 36,
+      "max": 87,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.loaf-count.6x",
+      "scenario": "drag Volume — Music, playing, 6x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        1,
+        2,
+        1
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 2,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.track.playing.event-share-16.6x",
+      "scenario": "drag Volume — Music, playing, 6x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.components-per-commit",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 1x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        85,
+        85,
+        85
+      ],
+      "details": [
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 605,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        }
+      ],
+      "median": 85,
+      "min": 85,
+      "max": 85,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.commits-per-move",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 1x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.752,
+        0.752,
+        0.752
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.752,
+      "min": 0.752,
+      "max": 0.752,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.moves-dispatched",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 1x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.frame-p95.1x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 1x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.8,
+        16.7,
+        16.7
+      ],
+      "details": [
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        }
+      ],
+      "median": 16.7,
+      "min": 16.7,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.frames-over-33.1x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 1x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.loaf-count.1x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 1x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.event-share-16.1x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 1x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 6
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 6
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 6
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.components-per-commit.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 6x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        85,
+        85,
+        85
+      ],
+      "details": [
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 609,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 610,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 609,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        }
+      ],
+      "median": 85,
+      "min": 85,
+      "max": 85,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.commits-per-move.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 6x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.752,
+        0.752,
+        0.752
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.752,
+      "min": 0.752,
+      "max": 0.752,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.moves-dispatched.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 6x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.frame-p95.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 6x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.7,
+        16.7,
+        16.8
+      ],
+      "details": [
+        {
+          "frames": 213
+        },
+        {
+          "frames": 226
+        },
+        {
+          "frames": 208
+        }
+      ],
+      "median": 16.7,
+      "min": 16.7,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.frames-over-33.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 6x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        1,
+        1,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1,
+      "min": 0,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.loaf-count.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 6x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        1,
+        1,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1,
+      "min": 0,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.stopped.event-share-16.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, stopped, 6x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 19
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 19
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 19
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.components-per-commit",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 1x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        85,
+        85,
+        85
+      ],
+      "details": [
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 607,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 607,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 607,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        }
+      ],
+      "median": 85,
+      "min": 85,
+      "max": 85,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.commits-per-move",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 1x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.752,
+        0.752,
+        0.752
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.752,
+      "min": 0.752,
+      "max": 0.752,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.moves-dispatched",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 1x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.restarts",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 1x CPU (R-G)",
+      "metric": "restarts",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-FADER",
+      "note": "start() calls on non-offline contexts from pointerdown until quiet (>= 600 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; a fader move must not rebuild the graph.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.group.playing.frame-p95.1x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 1x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.7,
+        16.7,
+        16.8
+      ],
+      "details": [
+        {
+          "frames": 121
+        },
+        {
+          "frames": 121
+        },
+        {
+          "frames": 121
+        }
+      ],
+      "median": 16.7,
+      "min": 16.7,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.frames-over-33.1x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 1x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.loaf-count.1x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 1x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.event-share-16.1x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 1x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 13
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 13
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 13
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.components-per-commit.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 6x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        85,
+        85,
+        85
+      ],
+      "details": [
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 640,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 642,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        },
+        {
+          "max": 85,
+          "commits": 91,
+          "settleMs": 638,
+          "valueStart": 0,
+          "valueLow": -27,
+          "valueHigh": 0
+        }
+      ],
+      "median": 85,
+      "min": 85,
+      "max": 85,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.commits-per-move.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 6x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.752,
+        0.752,
+        0.752
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.752,
+      "min": 0.752,
+      "max": 0.752,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.moves-dispatched.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 6x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.restarts.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 6x CPU (R-G)",
+      "metric": "restarts",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-FADER",
+      "note": "start() calls on non-offline contexts from pointerdown until quiet (>= 600 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; a fader move must not rebuild the graph.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.group.playing.frame-p95.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 6x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        50,
+        50,
+        33.4
+      ],
+      "details": [
+        {
+          "frames": 357
+        },
+        {
+          "frames": 347
+        },
+        {
+          "frames": 345
+        }
+      ],
+      "median": 50,
+      "min": 33.4,
+      "max": 50,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.frames-over-33.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 6x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        50,
+        56,
+        27
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 50,
+      "min": 27,
+      "max": 56,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.loaf-count.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 6x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        1,
+        1,
+        2
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 2,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.group.playing.event-share-16.6x",
+      "scenario": "drag Volume — <group> (group), Stems + SFX grouped with Ctrl+G, playing, 6x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 13
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 13
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 13
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.components-per-commit",
+      "scenario": "drag Master Volume, stopped, 1x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        80,
+        80,
+        80
+      ],
+      "details": [
+        {
+          "max": 80,
+          "commits": 96,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -29.5,
+          "valueHigh": 6
+        },
+        {
+          "max": 80,
+          "commits": 96,
+          "settleMs": 605,
+          "valueStart": 0,
+          "valueLow": -29.5,
+          "valueHigh": 6
+        },
+        {
+          "max": 80,
+          "commits": 96,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -29.5,
+          "valueHigh": 6
+        }
+      ],
+      "median": 80,
+      "min": 80,
+      "max": 80,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.commits-per-move",
+      "scenario": "drag Master Volume, stopped, 1x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.793,
+        0.793,
+        0.793
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.793,
+      "min": 0.793,
+      "max": 0.793,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.moves-dispatched",
+      "scenario": "drag Master Volume, stopped, 1x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.frame-p95.1x",
+      "scenario": "drag Master Volume, stopped, 1x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.8,
+        16.8,
+        16.7
+      ],
+      "details": [
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        }
+      ],
+      "median": 16.8,
+      "min": 16.7,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.frames-over-33.1x",
+      "scenario": "drag Master Volume, stopped, 1x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.loaf-count.1x",
+      "scenario": "drag Master Volume, stopped, 1x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.event-share-16.1x",
+      "scenario": "drag Master Volume, stopped, 1x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 8
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 8
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 8
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.components-per-commit.6x",
+      "scenario": "drag Master Volume, stopped, 6x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        80,
+        80,
+        80
+      ],
+      "details": [
+        {
+          "max": 80,
+          "commits": 96,
+          "settleMs": 607,
+          "valueStart": 0,
+          "valueLow": -29.5,
+          "valueHigh": 6
+        },
+        {
+          "max": 80,
+          "commits": 96,
+          "settleMs": 608,
+          "valueStart": 0,
+          "valueLow": -29.5,
+          "valueHigh": 6
+        },
+        {
+          "max": 80,
+          "commits": 96,
+          "settleMs": 609,
+          "valueStart": 0,
+          "valueLow": -29.5,
+          "valueHigh": 6
+        }
+      ],
+      "median": 80,
+      "min": 80,
+      "max": 80,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.commits-per-move.6x",
+      "scenario": "drag Master Volume, stopped, 6x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.793,
+        0.793,
+        0.793
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.793,
+      "min": 0.793,
+      "max": 0.793,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.moves-dispatched.6x",
+      "scenario": "drag Master Volume, stopped, 6x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.frame-p95.6x",
+      "scenario": "drag Master Volume, stopped, 6x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.8,
+        16.8,
+        16.8
+      ],
+      "details": [
+        {
+          "frames": 216
+        },
+        {
+          "frames": 215
+        },
+        {
+          "frames": 175
+        }
+      ],
+      "median": 16.8,
+      "min": 16.8,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.frames-over-33.6x",
+      "scenario": "drag Master Volume, stopped, 6x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.loaf-count.6x",
+      "scenario": "drag Master Volume, stopped, 6x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.stopped.event-share-16.6x",
+      "scenario": "drag Master Volume, stopped, 6x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 7
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 8
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.components-per-commit",
+      "scenario": "drag Master Volume, playing, 1x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        80,
+        80,
+        80
+      ],
+      "details": [
+        {
+          "max": 80,
+          "commits": 90,
+          "settleMs": 608,
+          "valueStart": 6,
+          "valueLow": -23.5,
+          "valueHigh": 6
+        },
+        {
+          "max": 80,
+          "commits": 90,
+          "settleMs": 606,
+          "valueStart": 6,
+          "valueLow": -23.5,
+          "valueHigh": 6
+        },
+        {
+          "max": 80,
+          "commits": 90,
+          "settleMs": 607,
+          "valueStart": 6,
+          "valueLow": -23.5,
+          "valueHigh": 6
+        }
+      ],
+      "median": 80,
+      "min": 80,
+      "max": 80,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.commits-per-move",
+      "scenario": "drag Master Volume, playing, 1x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.744,
+        0.744,
+        0.744
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.744,
+      "min": 0.744,
+      "max": 0.744,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.moves-dispatched",
+      "scenario": "drag Master Volume, playing, 1x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.restarts",
+      "scenario": "drag Master Volume, playing, 1x CPU (R-G)",
+      "metric": "restarts",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-FADER",
+      "note": "start() calls on non-offline contexts from pointerdown until quiet (>= 600 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; a fader move must not rebuild the graph.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.master.playing.frame-p95.1x",
+      "scenario": "drag Master Volume, playing, 1x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.7,
+        16.7,
+        16.8
+      ],
+      "details": [
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        },
+        {
+          "frames": 121
+        }
+      ],
+      "median": 16.7,
+      "min": 16.7,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.frames-over-33.1x",
+      "scenario": "drag Master Volume, playing, 1x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.loaf-count.1x",
+      "scenario": "drag Master Volume, playing, 1x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.event-share-16.1x",
+      "scenario": "drag Master Volume, playing, 1x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.components-per-commit.6x",
+      "scenario": "drag Master Volume, playing, 6x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        80,
+        80,
+        80
+      ],
+      "details": [
+        {
+          "max": 80,
+          "commits": 90,
+          "settleMs": 641,
+          "valueStart": 6,
+          "valueLow": -23.5,
+          "valueHigh": 6
+        },
+        {
+          "max": 80,
+          "commits": 90,
+          "settleMs": 632,
+          "valueStart": 6,
+          "valueLow": -23.5,
+          "valueHigh": 6
+        },
+        {
+          "max": 80,
+          "commits": 90,
+          "settleMs": 646,
+          "valueStart": 6,
+          "valueLow": -23.5,
+          "valueHigh": 6
+        }
+      ],
+      "median": 80,
+      "min": 80,
+      "max": 80,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.commits-per-move.6x",
+      "scenario": "drag Master Volume, playing, 6x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.744,
+        0.744,
+        0.744
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.744,
+      "min": 0.744,
+      "max": 0.744,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.moves-dispatched.6x",
+      "scenario": "drag Master Volume, playing, 6x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.restarts.6x",
+      "scenario": "drag Master Volume, playing, 6x CPU (R-G)",
+      "metric": "restarts",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-FADER",
+      "note": "start() calls on non-offline contexts from pointerdown until quiet (>= 600 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; a fader move must not rebuild the graph.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.master.playing.frame-p95.6x",
+      "scenario": "drag Master Volume, playing, 6x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        50,
+        50,
+        33.4
+      ],
+      "details": [
+        {
+          "frames": 349
+        },
+        {
+          "frames": 354
+        },
+        {
+          "frames": 327
+        }
+      ],
+      "median": 50,
+      "min": 33.4,
+      "max": 50,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.frames-over-33.6x",
+      "scenario": "drag Master Volume, playing, 6x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        62,
+        69,
+        41
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 62,
+      "min": 41,
+      "max": 69,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.loaf-count.6x",
+      "scenario": "drag Master Volume, playing, 6x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.master.playing.event-share-16.6x",
+      "scenario": "drag Master Volume, playing, 6x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 29
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.components-per-commit",
+      "scenario": "drag Pan — Music, stopped, 1x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        4,
+        4,
+        4
+      ],
+      "details": [
+        {
+          "max": 83,
+          "commits": 107,
+          "settleMs": 605,
+          "valueStart": 0,
+          "valueLow": -45,
+          "valueHigh": 45
+        },
+        {
+          "max": 83,
+          "commits": 107,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -45,
+          "valueHigh": 45
+        },
+        {
+          "max": 83,
+          "commits": 107,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -45,
+          "valueHigh": 45
+        }
+      ],
+      "median": 4,
+      "min": 4,
+      "max": 4,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.commits-per-move",
+      "scenario": "drag Pan — Music, stopped, 1x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.884,
+        0.884,
+        0.884
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.884,
+      "min": 0.884,
+      "max": 0.884,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.moves-dispatched",
+      "scenario": "drag Pan — Music, stopped, 1x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.frame-p95.1x",
+      "scenario": "drag Pan — Music, stopped, 1x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.7,
+        16.7,
+        16.7
+      ],
+      "details": [
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        }
+      ],
+      "median": 16.7,
+      "min": 16.7,
+      "max": 16.7,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.frames-over-33.1x",
+      "scenario": "drag Pan — Music, stopped, 1x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.loaf-count.1x",
+      "scenario": "drag Pan — Music, stopped, 1x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.event-share-16.1x",
+      "scenario": "drag Pan — Music, stopped, 1x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 1
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 1
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 1
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.components-per-commit.6x",
+      "scenario": "drag Pan — Music, stopped, 6x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        4,
+        4,
+        4
+      ],
+      "details": [
+        {
+          "max": 83,
+          "commits": 107,
+          "settleMs": 607,
+          "valueStart": 0,
+          "valueLow": -45,
+          "valueHigh": 45
+        },
+        {
+          "max": 83,
+          "commits": 107,
+          "settleMs": 609,
+          "valueStart": 0,
+          "valueLow": -45,
+          "valueHigh": 45
+        },
+        {
+          "max": 83,
+          "commits": 107,
+          "settleMs": 608,
+          "valueStart": 0,
+          "valueLow": -45,
+          "valueHigh": 45
+        }
+      ],
+      "median": 4,
+      "min": 4,
+      "max": 4,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.commits-per-move.6x",
+      "scenario": "drag Pan — Music, stopped, 6x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.884,
+        0.884,
+        0.884
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.884,
+      "min": 0.884,
+      "max": 0.884,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.moves-dispatched.6x",
+      "scenario": "drag Pan — Music, stopped, 6x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.frame-p95.6x",
+      "scenario": "drag Pan — Music, stopped, 6x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.8,
+        16.7,
+        16.8
+      ],
+      "details": [
+        {
+          "frames": 128
+        },
+        {
+          "frames": 127
+        },
+        {
+          "frames": 125
+        }
+      ],
+      "median": 16.8,
+      "min": 16.7,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.frames-over-33.6x",
+      "scenario": "drag Pan — Music, stopped, 6x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.loaf-count.6x",
+      "scenario": "drag Pan — Music, stopped, 6x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.stopped.event-share-16.6x",
+      "scenario": "drag Pan — Music, stopped, 6x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 2
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 2
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 3
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.components-per-commit",
+      "scenario": "drag Pan — Music, playing, 1x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        4,
+        4,
+        4
+      ],
+      "details": [
+        {
+          "max": 83,
+          "commits": 80,
+          "settleMs": 608,
+          "valueStart": 45,
+          "valueLow": 0,
+          "valueHigh": 50
+        },
+        {
+          "max": 83,
+          "commits": 80,
+          "settleMs": 606,
+          "valueStart": 45,
+          "valueLow": 0,
+          "valueHigh": 50
+        },
+        {
+          "max": 83,
+          "commits": 80,
+          "settleMs": 607,
+          "valueStart": 45,
+          "valueLow": 0,
+          "valueHigh": 50
+        }
+      ],
+      "median": 4,
+      "min": 4,
+      "max": 4,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.commits-per-move",
+      "scenario": "drag Pan — Music, playing, 1x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.661,
+        0.661,
+        0.661
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.661,
+      "min": 0.661,
+      "max": 0.661,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.moves-dispatched",
+      "scenario": "drag Pan — Music, playing, 1x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.restarts",
+      "scenario": "drag Pan — Music, playing, 1x CPU (R-G)",
+      "metric": "restarts",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-FADER",
+      "note": "start() calls on non-offline contexts from pointerdown until quiet (>= 600 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; a fader move must not rebuild the graph.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.pan.playing.frame-p95.1x",
+      "scenario": "drag Pan — Music, playing, 1x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.8,
+        16.7,
+        16.8
+      ],
+      "details": [
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        },
+        {
+          "frames": 120
+        }
+      ],
+      "median": 16.8,
+      "min": 16.7,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.frames-over-33.1x",
+      "scenario": "drag Pan — Music, playing, 1x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.loaf-count.1x",
+      "scenario": "drag Pan — Music, playing, 1x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.event-share-16.1x",
+      "scenario": "drag Pan — Music, playing, 1x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 21
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 21
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 8
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.components-per-commit.6x",
+      "scenario": "drag Pan — Music, playing, 6x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        4,
+        4,
+        4
+      ],
+      "details": [
+        {
+          "max": 83,
+          "commits": 80,
+          "settleMs": 637,
+          "valueStart": 45,
+          "valueLow": 0,
+          "valueHigh": 50
+        },
+        {
+          "max": 83,
+          "commits": 80,
+          "settleMs": 642,
+          "valueStart": 45,
+          "valueLow": 0,
+          "valueHigh": 50
+        },
+        {
+          "max": 83,
+          "commits": 80,
+          "settleMs": 629,
+          "valueStart": 45,
+          "valueLow": 0,
+          "valueHigh": 50
+        }
+      ],
+      "median": 4,
+      "min": 4,
+      "max": 4,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.commits-per-move.6x",
+      "scenario": "drag Pan — Music, playing, 6x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        0.661,
+        0.661,
+        0.661
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0.661,
+      "min": 0.661,
+      "max": 0.661,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.moves-dispatched.6x",
+      "scenario": "drag Pan — Music, playing, 6x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.restarts.6x",
+      "scenario": "drag Pan — Music, playing, 6x CPU (R-G)",
+      "metric": "restarts",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-FADER",
+      "note": "start() calls on non-offline contexts from pointerdown until quiet (>= 600 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; a fader move must not rebuild the graph.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.pan.playing.frame-p95.6x",
+      "scenario": "drag Pan — Music, playing, 6x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        33.4,
+        33.4,
+        33.3
+      ],
+      "details": [
+        {
+          "frames": 348
+        },
+        {
+          "frames": 353
+        },
+        {
+          "frames": 333
+        }
+      ],
+      "median": 33.4,
+      "min": 33.3,
+      "max": 33.4,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.frames-over-33.6x",
+      "scenario": "drag Pan — Music, playing, 6x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        32,
+        28,
+        13
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 28,
+      "min": 13,
+      "max": 32,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.loaf-count.6x",
+      "scenario": "drag Pan — Music, playing, 6x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.pan.playing.event-share-16.6x",
+      "scenario": "drag Pan — Music, playing, 6x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 21
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 21
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 21
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.components-per-commit",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 1x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        79,
+        79,
+        79
+      ],
+      "details": [
+        {
+          "max": 87,
+          "commits": 221,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -37.8,
+          "valueHigh": 24
+        },
+        {
+          "max": 87,
+          "commits": 221,
+          "settleMs": 604,
+          "valueStart": 0,
+          "valueLow": -37.8,
+          "valueHigh": 24
+        },
+        {
+          "max": 87,
+          "commits": 221,
+          "settleMs": 605,
+          "valueStart": 0,
+          "valueLow": -37.8,
+          "valueHigh": 24
+        }
+      ],
+      "median": 79,
+      "min": 79,
+      "max": 79,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.commits-per-move",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 1x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        1.826,
+        1.826,
+        1.826
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1.826,
+      "min": 1.826,
+      "max": 1.826,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.moves-dispatched",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 1x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.frame-p95.1x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 1x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        16.8,
+        16.8,
+        16.8
+      ],
+      "details": [
+        {
+          "frames": 135
+        },
+        {
+          "frames": 134
+        },
+        {
+          "frames": 137
+        }
+      ],
+      "median": 16.8,
+      "min": 16.8,
+      "max": 16.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.frames-over-33.1x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 1x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        0,
+        1,
+        1
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1,
+      "min": 0,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.loaf-count.1x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 1x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.event-share-16.1x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 1x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 8
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 8
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 8
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.components-per-commit.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 6x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        79,
+        79,
+        79
+      ],
+      "details": [
+        {
+          "max": 87,
+          "commits": 221,
+          "settleMs": 609,
+          "valueStart": 0,
+          "valueLow": -37.8,
+          "valueHigh": 24
+        },
+        {
+          "max": 87,
+          "commits": 221,
+          "settleMs": 606,
+          "valueStart": 0,
+          "valueLow": -37.8,
+          "valueHigh": 24
+        },
+        {
+          "max": 87,
+          "commits": 221,
+          "settleMs": 609,
+          "valueStart": 0,
+          "valueLow": -37.8,
+          "valueHigh": 24
+        }
+      ],
+      "median": 79,
+      "min": 79,
+      "max": 79,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.commits-per-move.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 6x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        1.826,
+        1.826,
+        1.826
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1.826,
+      "min": 1.826,
+      "max": 1.826,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.moves-dispatched.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 6x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.frame-p95.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 6x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        33.4,
+        33.3,
+        33.3
+      ],
+      "details": [
+        {
+          "frames": 381
+        },
+        {
+          "frames": 396
+        },
+        {
+          "frames": 381
+        }
+      ],
+      "median": 33.3,
+      "min": 33.3,
+      "max": 33.4,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.frames-over-33.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 6x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        23,
+        10,
+        4
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 10,
+      "min": 4,
+      "max": 23,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.loaf-count.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 6x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        5,
+        3,
+        2
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 3,
+      "min": 2,
+      "max": 5,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.stopped.event-share-16.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), stopped, 6x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 8
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 3
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 8
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.components-per-commit",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 1x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        87,
+        87,
+        87
+      ],
+      "details": [
+        {
+          "max": 87,
+          "commits": 181,
+          "settleMs": 604,
+          "valueStart": 24,
+          "valueLow": -13.8,
+          "valueHigh": 24
+        },
+        {
+          "max": 87,
+          "commits": 181,
+          "settleMs": 607,
+          "valueStart": 24,
+          "valueLow": -13.8,
+          "valueHigh": 24
+        },
+        {
+          "max": 87,
+          "commits": 181,
+          "settleMs": 608,
+          "valueStart": 24,
+          "valueLow": -13.8,
+          "valueHigh": 24
+        }
+      ],
+      "median": 87,
+      "min": 87,
+      "max": 87,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.commits-per-move",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 1x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        1.496,
+        1.496,
+        1.496
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1.496,
+      "min": 1.496,
+      "max": 1.496,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.moves-dispatched",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 1x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.restarts",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 1x CPU (R-G)",
+      "metric": "restarts",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-FADER",
+      "note": "start() calls on non-offline contexts from pointerdown until quiet (>= 600 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; a fader move must not rebuild the graph.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.clipgain.playing.frame-p95.1x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 1x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        33.4,
+        33.4,
+        33.4
+      ],
+      "details": [
+        {
+          "frames": 175
+        },
+        {
+          "frames": 172
+        },
+        {
+          "frames": 172
+        }
+      ],
+      "median": 33.4,
+      "min": 33.4,
+      "max": 33.4,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.frames-over-33.1x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 1x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        10,
+        13,
+        10
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 10,
+      "min": 10,
+      "max": 13,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.loaf-count.1x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 1x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.event-share-16.1x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 1x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 26
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 26
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 26
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.components-per-commit.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 6x CPU (R-G)",
+      "metric": "components-per-commit",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "<=",
+        "value": 3
+      },
+      "owner": "PERF-FADER",
+      "note": "Median re-rendered components per commit from pointerdown until quiet, >= 600 ms after pointerup (detail: max, commits, settleMs, slider values). Target <= 3 (PERF-FADER flips to assert). Determinism-checked; must agree across 1x and 6x.",
+      "samples": [
+        87,
+        87,
+        87
+      ],
+      "details": [
+        {
+          "max": 87,
+          "commits": 181,
+          "settleMs": 653,
+          "valueStart": 24,
+          "valueLow": -13.8,
+          "valueHigh": 24
+        },
+        {
+          "max": 87,
+          "commits": 181,
+          "settleMs": 635,
+          "valueStart": 24,
+          "valueLow": -13.8,
+          "valueHigh": 24
+        },
+        {
+          "max": 87,
+          "commits": 181,
+          "settleMs": 632,
+          "valueStart": 24,
+          "valueLow": -13.8,
+          "valueHigh": 24
+        }
+      ],
+      "median": 87,
+      "min": 87,
+      "max": 87,
+      "withinBudget": false,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.commits-per-move.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 6x CPU (R-G)",
+      "metric": "commits-per-move",
+      "unit": "ratio",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "Commits / moves dispatched; an upper bound only (the Scheduler merges commits). Not determinism-checked.",
+      "samples": [
+        1.496,
+        1.496,
+        1.496
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1.496,
+      "min": 1.496,
+      "max": 1.496,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.moves-dispatched.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 6x CPU (R-G)",
+      "metric": "moves-dispatched",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": {
+        "op": "==",
+        "value": 121
+      },
+      "owner": "PERF-1a",
+      "note": "pointermove events received by window during the drag (1 + 60 + 60). Determinism-checked.",
+      "samples": [
+        121,
+        121,
+        121
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 121,
+      "min": 121,
+      "max": 121,
+      "withinBudget": true,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.restarts.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 6x CPU (R-G)",
+      "metric": "restarts",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 0
+      },
+      "owner": "PERF-FADER",
+      "note": "start() calls on non-offline contexts from pointerdown until quiet (>= 600 ms after pointerup, 200 ms without a commit or start, cap 3 s); detail groups the calls per task; a fader move must not rebuild the graph.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "fader.clipgain.playing.frame-p95.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 6x CPU (R-G)",
+      "metric": "frame-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "p95 of rAF intervals between pointerdown and pointerup. Trend only (±30 %).",
+      "samples": [
+        66.7,
+        66.7,
+        66.6
+      ],
+      "details": [
+        {
+          "frames": 361
+        },
+        {
+          "frames": 364
+        },
+        {
+          "frames": 354
+        }
+      ],
+      "median": 66.7,
+      "min": 66.6,
+      "max": 66.7,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.frames-over-33.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 6x CPU (R-G)",
+      "metric": "frames-over-33",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "rAF intervals > 33.4 ms during the drag. Trend only.",
+      "samples": [
+        146,
+        147,
+        138
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 146,
+      "min": 138,
+      "max": 147,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.loaf-count.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 6x CPU (R-G)",
+      "metric": "loaf-count",
+      "unit": "count",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-FADER",
+      "note": "long-animation-frame entries starting during the drag. Trend only.",
+      "samples": [
+        81,
+        85,
+        43
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 81,
+      "min": 43,
+      "max": 85,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "fader.clipgain.playing.event-share-16.6x",
+      "scenario": "drag Clip Gain — fader (added clip selected), playing, 6x CPU (R-G)",
+      "metric": "event-share-16",
+      "unit": "ratio",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": {
+        "op": "<",
+        "value": 0.05
+      },
+      "owner": "PERF-FADER",
+      "note": "Share of dispatched moves with a pointermove or input Event Timing entry >= 16 ms (16 ms is the API floor). Target < 5 % (PERF-FADER: share < 5 % <=> p95 < 16 ms).",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "slowEvents": 0,
+          "eventEntries": 26
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 26
+        },
+        {
+          "slowEvents": 0,
+          "eventEntries": 26
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": true,
+      "pass": null
+    }
+  ]
+}

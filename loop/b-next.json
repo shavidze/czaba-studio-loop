@@ -1,12 +1,12 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 205 PASS (12 rows, browserVerified=true, realVerified=true, 2 Low) and gate 205 published c274930 (rounds 204+205): B-R203-LEADMAGNET-AUTO-OPEN-FOCUS, B-R204-SCROLLLOCK-POSITION-LOST, C-R202-04/05 and B-R201-HEADER-USERMENU-KEYBOARD are done. The only open Medium is SABA-B-5 (fader drag slow), which Saba's 2026-10-27 order addresses through STUDIO-PERFORMANCE next. Large scoped work remains (PERF-1a..16, SYS-1..3, STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2b, command layer, deferred Lows). Nothing needs external input, so neither COMPLETE nor BLOCKED.",
- "nextTask": "Round 206 (D-29z171), baseline HEAD c274930 (gate 205 published), all of app/ frozen (1039 files). R111 STUDIO-PERFORMANCE PERF-1a: new perf/ testDir + playwright.perf.config.ts (build + remix-serve on :5188) + npm script test:perf + perf/budgets.json (assert|record, PERF_BUDGETS override) + doc 163; addInitScript-only instrumentation (React DevTools hook stub with a fiber walk counting re-rendered components, start() counter on non-offline contexts, rAF frames, LoAF, Event Timing); median of 3 fresh contexts; load, idle playback and 5 faders (track, group, master, pan, clip gain) x stopped/playing at 1x and 6x CPU; asserts: hook live, audio running, restart counter live, idle playback 0 long tasks >50 ms, 0 restarts during fader drags while playing, count determinism. B's probe: volume 83 components per commit, master 80, pan 4, 0 restarts. R112: doc 162 l.4 status. C rows SCOPE, PERF-RUN (x2), HARNESS-LIVE, FADER (own probe), PERF-RED, ISOLATION, AN-REVIEW, G206-3.",
+ "reason": "C round 206 PASS (8/8 rows, browserVerified=true, realVerified=true) and gate 206 published 60c82ed: PERF-1a harness and R112 are done. SABA-B-6 (Saba Low, fix now, ordered before PERF-1 and missed at 206 planning, D-29z173) is scheduled as round 207. SABA-B-5 (Medium) stays open, measured, fixed next in PERF-FADER. C-R206-01 ruled Low bound to PERF-FADER (D-29z174). Large scoped work remains and nothing needs external input, so neither COMPLETE nor BLOCKED.",
+ "nextTask": "Round 207 (D-29z173), baseline HEAD 60c82ed (gate 206 published), 1043 files frozen. SABA-B-6: ArrangementClipEnvelope.tsx editor overlay cursor-crosshair -> cursor-pointer and breakpoint cursor-move -> cursor-pointer; ArrangementVideoDock.tsx floating box cursor-move -> cursor-grab + active:cursor-grabbing; tests CU1-CU3 appended to clip-envelope-ui/floating-video, new CU4 source-scan guard timeline-cursor-map.test.ts; doc 164. Ableton cursor shape: no reference found (pointer = Saba requirement; deviations D1-D3; SABA-B-6-R1 awaiting_user). C rows SCOPE, CUR-ENV, CUR-POINT, CUR-VIDEO, CUR-UNCHANGED, BEHAV, REF, AN-REVIEW, G207-3 (computed cursor at rest and during drags, 1440 and 1280). R113 (D-29z175): doc 163 l.4 post-PASS status line.",
  "remaining": [
-  "Round 206 (D-29z171): STUDIO-PERFORMANCE PERF-1a (perf harness + fader scenarios, SABA-B-5 measurement) + R112 doc 162 l.4",
-  "SABA-B-5 (Medium): fader drag slow; fix = PERF-FADER",
-  "PERF-1b (zoom, clip click, range drag, play/pause, export, bytes, DOM, memory)",
-  "PERF-FADER",
+  "Round 207 (D-29z173): SABA-B-6 timeline cursor (envelope editor + breakpoint -> pointer, floating video -> grab/grabbing; CU1-CU4; doc 164); + R113 doc 163 l.4",
+  "PERF-FADER (round 208): SABA-B-5 fix + C-R206-01/GATE206-S4 metric constraint + doc 163 l.60 / budgets note + I-206-d",
+  "PERF-1b (zoom, clip click, range/fade/trim drags, play/pause, export, bytes, DOM, memory; + GATE206-S3/S5/S6; report.ts signal if the spec grows)",
+  "SABA-B-5 (Medium): fader drag slow; measured round 206; fix = PERF-FADER",
   "PERF-2",
   "PERF-3",
   "PERF-4",
@@ -38,7 +38,7 @@
   "STUDIO-AGENT-COMMANDS",
   "RECORDING-META-S1",
   "SRW-21 (deferred_user)",
-  "deferred_low_polish (302, incl. new C-R205-01 (scheduled with the next LeadMagnetPopup owner), C-R205-02, GATE205-S1/S3/S7/S8-S9; GATE204-S4 still open)",
+  "deferred_low_polish (304, + GATE206-S1/S2 tooling, incl. new C-R205-01 (scheduled with the next LeadMagnetPopup owner), C-R205-02, GATE205-S1/S3/S7/S8-S9; GATE204-S4 still open)",
   "useDialogFocus architecture signal (round 205; not scheduled) + shared-modal-no-focus-management",
   "A-R202-REVIEW-SCROLL-CLIP (Low, backend-blocked)",
   "REGRESSION round due on/after 2026-10-30",
@@ -46,6 +46,10 @@
   "backend-blocked evidence (R80 recordings, F11-F13, F16, SRW-21 mount, SABA-B-4 account.reset and /studio/:id, useScrollLock consumers ExportDialog /studio/:id and cart ConfirmDialog, CHOOSE-VIDEO in-app)",
   "Tech Lead manual checks (c_pass_tech_lead_manual items; Android IME for SYS-3 M1; A-R204-SAFARI-USERMENU-CLICK)",
   "Saba questions: PERF-all-before-SYS/STORE order (b-round-205.md section 8), R103, R106, C-R188-I6, OBS-R199-LEDGER, announcement repeat policy, three rule-change proposals (retro-200 section 8)",
-  "frontend-architect checkpoints (b-round-203-checkpoint-request.md; new b-round-205-checkpoint-request.md, non-blocking)"
+  "frontend-architect checkpoints (b-round-203-checkpoint-request.md; new b-round-205-checkpoint-request.md, non-blocking)",
+  "SABA-B-6-R1 (awaiting_user: envelope reacts only near the line)",
+  "C-R206-01 (Low, bound to PERF-FADER)",
+  "GATE206-S3/S5/S6 (Low, with PERF-1b)",
+  "perf architecture signal (perf/lib/report.ts if PERF-1b grows the spec; not scheduled)"
  ]
 }

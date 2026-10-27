@@ -1,0 +1,21 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+(async () => {
+  const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  await ctx.addInitScript(() => localStorage.setItem('czaba_analytics_consent', 'denied'));
+  const p = await ctx.newPage();
+  await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'load', timeout: 120000 });
+  const add = p.getByRole('button', { name: 'Add', exact: true });
+  await add.waitFor();
+  console.log('add disabled at first', await add.isDisabled());
+  await p.waitForTimeout(4000);
+  console.log('add disabled later', await add.isDisabled());
+  const canv = await p.evaluate(() => [...document.querySelectorAll('canvas, svg[data-testid], [data-testid*=wave]')].map((e) => [e.tagName, e.getAttribute('data-testid'), e.getAttribute('aria-label'), Math.round(e.getBoundingClientRect().width)]).slice(0, 15));
+  console.log('WAVE before', JSON.stringify(canv));
+  await add.click(); await p.waitForTimeout(2500);
+  const clips = await p.evaluate(() => [...document.querySelectorAll('[data-testid*=clip]')].map((e) => [e.tagName, e.getAttribute('data-testid'), e.getAttribute('role'), (e.getAttribute('aria-label') || '').slice(0, 80), Math.round(e.getBoundingClientRect().x), Math.round(e.getBoundingClientRect().width)]).slice(0, 15));
+  console.log('CLIPS', JSON.stringify(clips));
+  const canv2 = await p.evaluate(() => [...document.querySelectorAll('canvas, [data-testid*=wave]')].map((e) => [e.tagName, e.getAttribute('data-testid'), Math.round(e.getBoundingClientRect().width)]).slice(0, 15));
+  console.log('WAVE after', JSON.stringify(canv2));
+  console.log('ranges', JSON.stringify(await p.evaluate(() => [...document.querySelectorAll('input[type=range]')].map((x) => [x.getAttribute('aria-label'), x.disabled]))));
+  await b.close();
+})();

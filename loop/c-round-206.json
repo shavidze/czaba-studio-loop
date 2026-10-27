@@ -1,0 +1,50 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R206-01",
+      "severity": "medium",
+      "steps": [
+        "Serve a prod build of the round-206 tree; run node c-round-206/tools/cprobe.cjs http://127.0.0.1:<port> out.json (pass 3 also drags Volume — Music and Pan — Music while playing at 6x CPU)",
+        "Read eventNamesMaxDur and inputEvents per drag; read *.event-share-16.* rows in c-round-206/out/run1.json and run2.json"
+      ],
+      "expected": "event-share-16 (budget note: share < 5 % <=> p95 < 16 ms; PERF-FADER will flip it to assert) can report a slow fader drag as non-zero, and doc 163 l.60 states its real limit",
+      "actual": "Event Timing entries during drags are only pointerover/enter/out, mouseover/out, pointerdown, pointerup, click (no pointermove); the faders fire 0 native input events during a mouse drag; so the pointermove|input filter matches nothing. All 20 event-share-16 rows are 0 in both runs, incl. clipgain.playing.6x with frame p95 66.7 ms, 136-147 frames >33 ms, 74 LoAF. Doc 163 l.60 and a-round-206.md claim it is effectively the share of native range input entries, which is false. Asserting it would pass vacuously. Harness/spec issue, not an app bug; severity for B to rule. Origins: (a) spec: metric defined by B in R111 (task §0 knew 0 pointermove entries); (b) doc: A added the false limit sentence at doc 163 l.60; budgets.json event-share notes carry the same equivalence. Neither blocks round-206 PASS (record row; all C criteria met).",
+      "evidence": "c-round-206/out/cprobe-1440.json; c-round-206/out/run1.json, run2.json (details slowEvents 0, eventEntries 26); c-round-206.md C-R206-01"
+    }
+  ],
+  "passed": [
+    "SCOPE-206",
+    "PERF-RUN-206",
+    "HARNESS-LIVE-206",
+    "FADER-206",
+    "PERF-RED-206",
+    "ISOLATION-206",
+    "AN-REVIEW-206",
+    "G206-3"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "blocked": [],
+  "info": [
+    "I-206-a fake Bearer: 500 without :5199 mock (mock not running at job start; no cloud/ folder in loop folder; cause not established), 403 with mock-api/server.mjs (no token either way)",
+    "I-206-b remix-serve listens on *:5188",
+    "I-206-c biome.json covers app/** only",
+    "I-206-d track Volume drag to 95% reaches only 0 dB (start value)"
+  ],
+  "ableton": "does not apply (perf/test-only round)",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-27T11:04:24.8639957Z",
+    "round": 206,
+    "attempt": 1,
+    "store": 200
+  }
+}

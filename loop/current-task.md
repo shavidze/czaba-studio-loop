@@ -1,181 +1,151 @@
-# CURRENT TASK — Round 206: STUDIO-PERFORMANCE PERF-1a, a perf harness that measures the fader drag (SABA-B-5), plus a one-line doc fix
+# CURRENT TASK — Round 207: SABA-B-6, the timeline "+" cursor becomes the pointing finger
 
-Decision: **D-29z171**. The queue move is D-29z172. Planned by B on 2026-10-27. Dispatcher: B. Implementer: A. Verifier: C.
+Decision: **D-29z173** (the ordering correction and this round). C-R206-01 ruling: **D-29z174**. R113 (doc 163 status line): **D-29z175**. Planned by B on 2026-10-27. Dispatcher: B. Implementer: A. Verifier: C.
 
 **Read first:**
 - `lessons.md` in the loop root.
-- The previous task, `tasks/round-205.md` (an exact copy).
-- B's rationale, in `b-round-205.md`.
-- B's planning probe:
-  - `b-round-205/tools/perfprobe.cjs`
-  - the outputs `b-round-205/out/perfprobe-head-*.json`
+- The previous task, `tasks/round-206.md` (an exact copy).
+- B's rationale and probes, in `b-round-206.md`.
+- B's probe tools `b-round-206/tools/cursormap.cjs`, `grabcheck.cjs`, `videograb.cjs`, and their outputs `b-round-206/out/cursormap-{1440,1280}.json`, `grabcheck-1440.json`, `videograb-1440.json`.
 
 ## Baseline
-- **Commit:** `c274930`. Gate 205 is **published** to both remotes, so this is a clean tree with nothing uncommitted.
-- **Frozen files:** the 1,039 files in `b-round-205-r206-tree-sha256.txt`. This covers every tracked file except the 2 grants, so **all of `app/` is frozen**.
-- **Grants:** `b-round-205-r206-grants.txt`. Their start hashes are in `b-round-205-r206-granted-start-sha256.txt`, and start copies are in `b-round-205/r206-granted-start/`.
-- **New files:** listed in `b-round-205-r206-new-files.txt`.
-- **Protected areas:** auth/purchase files, `.claude/**` and `CLAUDE.md` are frozen, as always.
+- **Commit:** `60c82ed`. Gate 206 is **published** to both remotes, so the tree is clean.
+- **Frozen files:** the 1,043 files in `b-round-206-r207-tree-sha256.txt`. This is every tracked file except the 5 grants. Check it from the store root: `sha256sum -c --quiet <loop>/b-round-206-r207-tree-sha256.txt`.
+- **Grants:** `b-round-206-r207-grants.txt`. Start hashes are in `b-round-206-r207-granted-start-sha256.txt`, and start copies are in `b-round-206/r207-granted-start/`.
+- **New files:** `b-round-206-r207-new-files.txt`.
+- **Protected areas:** frozen as always. This covers auth and purchase files, `app/components/studio/**`, `app/styles/**`, `.claude/**`, `CLAUDE.md` and `package.json`.
 
 ## 0. Why this round
-- **Saba's order (2026-10-27):** after SABA-B-4 (rounds 204 and 205, now published), **STUDIO-PERFORMANCE** comes next, starting with PERF-1, the harness. It comes before SYS-1…3 and before the remaining STORE stages. Saba finds the Studio slow, and gave the fader drag as an example (SABA-B-5, Medium).
-- **The bug gate is clear.** No Critical, High or Medium finding is open apart from:
-  - SABA-B-5 itself, which this stage measures and PERF-FADER fixes;
-  - Tech Lead, environment or accepted classes.
-  - C round 205's two new findings are Low (rulings are in `b-round-205.md` §3).
-- **Split, without shrinking scope** (tech-lead consult): PERF-1 becomes two rounds.
-  - **PERF-1a** (this round): infra, load, playback and the fader scenarios.
-  - **PERF-1b** (next): zoom, clip click, range drag, **fade-handle drag and trim drag** (Saba's SABA-B-5 text: "B checks the other continuous drags"), play/pause commit size, export, bytes, DOM and memory.
-  - All baseline rows of `perf-plan.md` stay in scope.
-- **B's probe on a scratch prod build of `c274930`** (1440×900, demo library, one "Add"). These are facts:
+- **Saba, 2026-10-27 (SABA-B-6, Low, fix now and do not defer):** somewhere on the timeline the hover cursor is a "+". He wants the pointing finger, the way Ableton shows it.
+  - The policy places this round right after SABA-B-4 closes (round 205) and before PERF-1.
+  - Round 206 ran PERF-1a first. SABA-B-6 was not in `backlog.json` at 207 planning. Whether the policy note was already there when round 206 was planned is unverified. Either way, it is corrected now (D-29z173).
+  - The round goes in now, before PERF-FADER and PERF-1b.
+- **The bug gate is clear.**
+  - SABA-B-5 (Medium) was measured in round 206. Its fix is PERF-FADER, the next round.
+  - C-R206-01 is ruled Low in `b-round-206.md` §3, and bound to PERF-FADER.
+- **B reproduced the cursor in real Chromium** (`cursormap.cjs`, at 1440×900 and 1280×720). These are facts:
+  - The method is computed `cursor` of `elementFromPoint` on a 6 px grid.
+  - The probe added two demo clips and a video, then turned Env on and added one breakpoint.
 
-| Drag (121 pointer moves, 60 steps each way) | Commits | Re-rendered components per commit (median) | `start()` calls during drag while playing | Frame p95 at 1× / 6× CPU, playing |
+| Element (testid) | Source | Cursor now | Where | Probe hits (1440 / 1280) |
 |---|---|---|---|---|
-| Track volume "Volume — Music" (runs `music-f1/f6`; the earlier `head-*` runs hit "Volume — Original video sound" and also gave 83) | 91–92 | **83** | 0 | 16.8 / **50** ms (53–105 frames > 33 ms) |
-| Master "Master Volume" | 90–96 | **80** | 0 | 16.8 / **50** ms (96–134 frames > 33 ms) |
-| Pan "Pan — Music" (already writes the AudioParam directly) | 80–107 | **4** | 0 | 16.7 / 33.4 ms (31–66 frames > 33 ms) |
-| Idle playback, 3 s | 0–1 | 0–1 | — | 16.8 / 33.2 ms |
+| clip envelope editor overlay `arrangement-clip-envelope-editor` | `ArrangementClipEnvelope.tsx:353` | **`crosshair` (a "+")** | the **whole clip body** of every audio clip while Env is on | 1303 / 1095 |
+| envelope breakpoint `arrangement-clip-envelope-point` | `ArrangementClipEnvelope.tsx:367` | **`move` (four arrows, "+"-shaped)**, at hover **and** during the drag | on the envelope line | 2 / 2 (10 px square) |
+| floating expanded video `arrangement-video-box` (+ its `<video>`) | `ArrangementVideoDock.tsx:922` | **`move`**, at hover and during the drag | over the library, not on the timeline | 1124 / 512 |
+| legacy `TransportBar.tsx:372` | `app/components/studio/**` | `crosshair` | **not rendered on `/studio-lab`** (0 hits); a frozen file | — |
 
-- **Source facts behind these numbers** (`ArrangementContext.tsx` at c274930):
-  - These four previews call `updateHistory`, which makes the whole context value new, and then `syncPlayback`, on every move:
-    - `previewVolumeTarget` (l.2365), for track and group;
-    - `previewMasterGain` (l.2727);
-    - `previewClipGainFader` (l.2846);
-    - `previewClipGainMembers` (l.2892).
-  - `syncPlayback` calls `startGraph` only when `scheduleKey` (l.533) changes. `scheduleKey` serialises clips and loop **without** `gainDb`. So root's hypothesis "a fader move rebuilds the graph" is **not supported** by the source or the probe (0 restarts).
-  - "0 restarts while playing" therefore stays an **asserted** row. It guards PERF-FADER.
-- **Measurement methods B proved on the prod bundle** (the performance-optimizer consult agrees):
-  - a `__REACT_DEVTOOLS_GLOBAL_HOOK__` stub installed with `addInitScript` receives every commit;
-  - a fiber walk, using the PerformedWork flag (1) and descending only where `child !== alternate.child`, separates 83 from 4;
-  - patching `start` on `AudioScheduledSourceNode`, and on `AudioBufferSourceNode`, `OscillatorNode` and `ConstantSourceNode` where they define their own, counts the 1 start on Play.
-  - **Fact:** a capture/bubble wrapper around `pointermove` measures only the handler (~0.1 ms). React renders a native-listener update in a later task. Event Timing at `durationThreshold: 16` recorded 0 pointermove entries at 1×. Wall-clock evidence therefore comes from rAF frame intervals and LoAF, not from handler time.
+- **Other cursors, not "+"-shaped and unchanged here:**
+  - `text` (I-beam) on the clip waveform body with Env off. Drag there selects time.
+  - `grab`/`grabbing` on the clip title bar, markers, the loop brace and the video float handle.
+  - `ew-resize` on clip edges, fades, the playhead and the overview.
+  - `row-resize` on the track-height and detail splitters.
+- **Library drag:** dragging a library item over a lane shows the OS-drawn `copy` cursor, because `dropEffect = 'copy'` (`ArrangementLane.tsx:265,294`). This is drag feedback drawn by the OS. It is not a hover cursor, and it is out of scope.
 
-## 1. Rulings (B; Saba or root may veto)
-- **R-A (placement).**
-  - The specs live in a new top-level **`perf/`** testDir. They are not under `e2e/`, so the default `playwright test` (`testDir: './e2e'`) and `npm run test:e2e` never pick them up, and `playwright.config.ts` stays frozen.
-  - The new `playwright.perf.config.ts` sets:
-    - `testDir: './perf'`, `workers: 1`, `retries: 0`;
-    - Chromium only;
-    - `webServer` runs `npm run build && npx remix-serve build/server/index.js`, with `PORT=5188`, `url: http://127.0.0.1:5188/studio-lab`, `reuseExistingServer: false` and a timeout ≥ 180 s.
-  - `package.json` gets one script: `"test:perf": "playwright test --config playwright.perf.config.ts"`. It is **not** added to `verify`.
-- **R-B (budgets).**
-  - `perf/budgets.json` is an array of rows: `{ id, scenario, metric, unit, kind: "deterministic" | "wallclock", mode: "assert" | "record", budget, tolerancePct?, owner: "PERF-n", note }`.
-  - Only `assert` rows can fail the run. A `record` row is printed and written, never asserted. Later PERF tasks flip their own rows to `assert`.
-  - `wallclock` rows are never `assert` in this round.
-  - A `PERF_BUDGETS=<path>` environment variable replaces the budgets file. It exists for C's red-proof and for later tasks.
-- **R-C (results).**
-  - Each run writes `test-results/perf/perf-1a-<ISO time>.json` and `test-results/perf/latest.json`. `test-results/` is already gitignored.
-  - Each row stores: the 3 samples, the median, min, max, and the budget with its mode and pass/fail.
-  - A short table is also printed to stdout.
-- **R-D (median of 3).** A **pass** is one fresh browser context that runs the whole scenario sequence in the fixed order of R-G. There are **3 passes per CPU rate** (so 6 page loads in total, not one context per scenario). Each row reports the median of its 3 samples.
-  - **Determinism assert:** applies **only** to `components-per-commit`, `restarts` and moves dispatched. Their 3 samples must agree within ±10 % or ±2, whichever is larger. If they do not, the run fails with "nondeterministic count <id>".
-  - **Commit counts** (`commits-per-move`, `load.commits`, `play.idle-commits`) are record-only and never under the determinism assert. The Scheduler merges commits under load, so they can vary.
-  - **Wallclock rows:** a trend only, with ±30 % expected noise.
-- **R-E (no interception).**
-  - No `page.route` or `context.route` on `/studio-lab` (perf-plan gotcha: it left the page on "Loading…").
-  - No app source change; all of `app/` is frozen. Instrumentation is `addInitScript` only.
-  - `localStorage.czaba_analytics_consent = 'denied'` is allowed (the e2e smoke precedent).
-- **R-F (CPU profiles).**
-  - Load and playback rows run at 1×.
-  - Every fader scenario runs at **1× and 6×** (`Emulation.setCPUThrottlingRate`), with 3 contexts each. B's probe shows the volume/pan difference in frames only at 6×. `components-per-commit` and `restarts` must agree across the two rates within R-D. Commit counts may differ between rates and are only recorded.
-- **R-G (fader scenarios).** There are 5 faders × {stopped, playing}. **Fixed order inside a pass:** track volume → pan → master → clip gain → **group last**. Ctrl+G changes the lane tree, so creating the group earlier would change the counts of every later fader. C's independent probe uses the same order. Each drag is `mouse.down` at the middle, 60 steps to 5 % of the width, then 60 steps to 95 %, then `mouse.up`. Moves dispatched = 121, and this is recorded.
-  1. track volume (`aria-label` "Volume — Music");
-  2. **group** volume: group two audio lanes first with click + Shift-click on the lane names, then Ctrl+G. The pattern is in `c-round-80/tools/q1.cjs`. Use the group's own fader label from `studioGroupHeaderStrings.volumeLabel`.
-  3. "Master Volume";
-  4. "Pan — Music";
-  5. "Clip Gain — fader", after a click selects the added clip.
-  - Find every element by role or label, never by class (L12).
-  - If the group or clip-gain fader cannot be reached through the UI, write **STOP — needs B ruling** (L11). Do not use a hidden route or a source change.
-- **R-H (playing state).**
-  - "Playing" means: Space after the library "Add", the Play button's `aria-label` reads "Pause", and the patched `AudioContext` constructor reports `state === 'running'` on the context that is not offline.
-  - Launch Chromium with `--autoplay-policy=no-user-gesture-required`.
-  - Count `start()` calls only on contexts that are **not** `OfflineAudioContext`.
-  - Loop stays off. Group the `start()` calls per task when reporting.
+## Reference: how Ableton Live 12 does it
+Consulted: the `ableton-arrangement-expert` consult; B's WebFetch of the Live 12 manual (all 112.8 K characters of the chapter); one WebSearch. Checked 2026-10-27.
+
+| Point | Ableton Live 12 | Source | Status |
+|---|---|---|---|
+| Behaviour: envelope line | "The line segments and the breakpoints connecting them become draggable objects." "Click at a position on a line segment to create a new breakpoint there." | [Live 12 manual, Automation and Editing Envelopes → Editing Breakpoints](https://www.ableton.com/en/live-manual/12/automation-and-editing-envelopes/#editing-breakpoints) | CONFIRMED (behaviour) |
+| Behaviour: breakpoint hover and drag | A value readout is shown when you hover or drag. "When dragging a breakpoint, a thin black vertical line will appear." | same section | CONFIRMED (readout and guide line) |
+| Clip body vs clip bar | "only the clip bar is draggable"; dragging "in the clip's waveform … allows you to select time within the clip" | [Arrangement View → Moving and Resizing Clips](https://www.ableton.com/en/live-manual/12/arrangement-view/#moving-and-resizing-clips) and [→ Selecting Clips and Time](https://www.ableton.com/en/live-manual/12/arrangement-view/#selecting-clips-and-time) | CONFIRMED (roles) |
+| Hover feedback | Third-party guides say a segment is highlighted when the pointer is near it. | [Loupedeck Live guide](https://support.loupedeck.com/ableton-live-editing.html); [Ultimate Outsider 2015](https://blog.ultimateoutsider.com/2015/03/two-methods-for-snapping-automation-to.html) | secondary, not official |
+| **Cursor shape** over a line, a breakpoint or a drag | **No reference found.** | The expert searched the Live 12 chapters arrangement-view, automation-and-editing-envelopes, clip-envelopes, clip-view, working-with-the-browser, warping, editing-midi, comping, session-view, keyboard shortcuts and concepts. None of them names a pointer shape. help.ableton.com ("mouse cursor") returned 0 articles. No official video was found. | UNCONFIRMED |
+| Shortcuts / modifiers | not changed in this round | — | does not apply |
+
+**Decision (Saba's requirement, not an Ableton claim):** Saba's text gives the default: "where Ableton shows a pointing finger (for example over an automation line or breakpoint, click adds or drags a point), we use `cursor-pointer`."
+- The manual cannot confirm the cursor shape.
+- So this is recorded as **Saba's request**. It does not count as "Ableton does the same" (workflow rule: no "Ableton-შიც ასე მუშაობს" without a source).
+
+### Cursor map (the contract for this round)
+| Element | Ours now | Ableton | Ours after | Why |
+|---|---|---|---|---|
+| Envelope editor overlay (whole clip body, Env on) | `crosshair` | shape unconfirmed; the line is clickable | **`pointer`** | Saba's default. Click selects and double-click adds a point, so the area is clickable. |
+| Envelope breakpoint, hover and during drag | `move` | shape unconfirmed; draggable, with a readout | **`pointer`** at rest **and** during the drag (`hover:scale-125` stays) | Saba's default. |
+| Floating expanded video, hover and drag | `move` | Live's video window is out of scope (one video lane, simple editing) | **`grab` at rest, `grabbing` while pressed** (`active:cursor-grabbing`) | This removes the last "+"-shaped cursor. It matches CZABA's other move-by-drag objects (clip title bar, marker, loop brace, and this box's own handle ⠿, which is already `grab`). B proved in Chromium that `:active` applies during this box's pointer drag, even with `preventDefault` (`videograb-1440.json`: rest `grab`, down and drag `grabbing`, after `grab`). |
+| Clip waveform body, Env off | `text` | time selection | unchanged | Not a "+", and the selection role matches Live. |
+| Library drag over a lane | OS `copy` | — | unchanged | Drawn by the OS during a drag; not a hover cursor. |
+| `TransportBar.tsx` crosshair | `crosshair` | — | untouched | Not rendered here; frozen. |
+
+### Deviations (listed, so they are not bugs)
+- **D1.** With Env on, the finger shows over the **whole clip body**, not only near the line. Live adds a point by a click *on a segment*; CZABA adds one by a **double-click anywhere** on the body, at that time.
+  - This is the existing SRW-18 contract and is unchanged here.
+  - Narrowing the hit area to the line would change behaviour, so it needs Saba's approval. It is recorded as `SABA-B-6-R1`, `awaiting_user`, and is not scheduled.
+- **D2.** The cursor shape is Saba's request (pointer), not a confirmed Ableton fact (no source found).
+- **D3.** The floating video uses `grab`/`grabbing` (the CZABA convention), with no Ableton reference.
+
+## 1. Rulings
+- **R-1.** Change **only** the cursor utilities named below. Do not touch any other class, any handler, the hit area, z-order or behaviour.
+  - Every token in `clip-envelope-ui.test.tsx:781-791` (EV1) stays as it is.
+  - **L23 is done:** B applied exactly these three edits on a scratch tar copy (`/tmp/b207`) and ran `clip-envelope-ui`, `floating-video`, `affordance-colour-ui` and `panel-radius-ui`: **86/86 pass**.
+  - A grep of `app/**/*.test.*` shows that no test pins `cursor-crosshair`, `cursor-move` or the `fixed z-40 cursor-move` string.
+- **R-2.** The floating box gets `cursor-grab` + `active:cursor-grabbing` only in its floating branch. The compact branch (`relative w-40`) stays without a cursor class.
+- **R-3.** The guard test scans source (L23 note). Its red-proof is "red on the start copy", which is valid here because the start copy has the tokens.
 
 ## 2. A — files you own (everything else is frozen)
 | Path | What |
 |---|---|
-| **new** `playwright.perf.config.ts` | R-A |
-| **new** `perf/studio-lab.perf.spec.ts` (+ helpers under `perf/lib/` if you want) | the scenarios below |
-| **new** `perf/budgets.json` | R-B rows listed below |
-| **new** `docs/implementation/2026/quarter-IV/163-studio-perf-harness.md` | Georgian implementation doc (TEMPLATE.md sections). It covers how to run the harness, each metric's definition and its known limit (Event Timing 16 ms floor; handler time ≠ render time; counts heuristic may slightly undercount hook bailouts), B's baseline table and your own measured medians, and the TODOs (PERF-1b scenarios, PERF-FADER flips its rows). **L26:** cite only test or row ids that exist. **L28:** write the status line conditionally ("C round 206 check pending"); root amends it at publication. |
-| `package.json` (grant) | exactly the one `test:perf` script line; no dependency change |
-| `docs/implementation/2026/quarter-IV/162-lead-magnet-dialog-focus.md` (grant), **R112** | l.4 only: the status becomes `In Progress (C round 205 PASS — c-round-205.md; published c274930; open: C-R205-01 in-flight window, Low)`. No other line changes. |
+| `app/components/arrangement/ArrangementClipEnvelope.tsx` (grant) | l.353 `cursor-crosshair` → `cursor-pointer`; l.367 `cursor-move` → `cursor-pointer`. Nothing else. |
+| `app/components/arrangement/ArrangementVideoDock.tsx` (grant) | l.922 `'fixed z-40 cursor-move touch-none shadow-lg ring-1 ring-outline'` → the same string with `cursor-grab … active:cursor-grabbing` in place of `cursor-move`. Nothing else. |
+| `app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx` (grant) | add the rows **CU1** and **CU2** (below); existing rows unchanged |
+| `app/lib/arrangement/__tests__/floating-video.test.tsx` (grant) | add the row **CU3**; existing rows unchanged |
+| **new** `app/lib/arrangement/__tests__/timeline-cursor-map.test.ts` | the row **CU4** |
+| `docs/implementation/2026/quarter-IV/163-studio-perf-harness.md` (grant), **R113** (L28, GATE206-DOC163-STATUS) | l.4 only. The status becomes `In Progress (C round 206 PASS — c-round-206.md; published 60c82ed; open: SABA-B-5 fix in PERF-FADER, C-R206-01 Low)`. No other line changes. In particular, l.60 stays as it is; PERF-FADER rewrites it. |
+| **new** `docs/implementation/2026/quarter-IV/164-timeline-cursor-pointer.md` | A Georgian implementation doc (TEMPLATE.md sections). It holds the cursor map above, the "no reference found" record with what was searched, deviations D1–D3, and the tests. **L26:** cite only rows that exist (CU1–CU4). **L28:** the status line is conditional ("C round 207 check pending"). |
 
-**TypeScript:** strict mode. `tsc` includes `**/*.ts`, so `npm run typecheck` checks `perf/` too.
-- No `any`, no `@ts-ignore`, no `as` assertions.
-- Type the fiber walk with a minimal local interface (`{ tag: number; flags: number; child, sibling, alternate: Fiber | null }`). Type the hook with `declare global { interface Window { … } }`.
-- Semicolons everywhere. Biome lints only `./app`, but keep the same style.
-
-### Scenarios and budget rows (R111)
-| Row id | Scenario | Metric | kind | mode / budget |
-|---|---|---|---|---|
-| `harness.hook-live` | load + library "Add" click | commits seen by the hook after the Add click | deterministic | **assert ≥ 1** (a disabled hook must fail, not report 0) |
-| `harness.audio-running` | playing setup (R-H) | the AudioContext is running, and Play's label is "Pause" | deterministic | **assert true** |
-| `harness.restart-live` | while playing, drag the added clip 1 s to the right (a scheduleKey change) | `start()` calls from pointerdown until 500 ms after pointerup (the move may apply on release) | deterministic | **assert ≥ 1** (proves the restart counter is live) |
-| `load.longtask-max` / `load.longtasks-over-50` / `load.ready-ms` | fresh `/studio-lab` until "ready" (A defines and documents ready as an observable UI state, e.g. the library Add button enabled and the waveform drawn) | the largest long task; the count over 50 ms; ms to ready | wallclock / deterministic / wallclock | record (owner PERF-2 / PERF-5); baseline 463–491 ms, ready 2.3–2.5 s |
-| `load.commits` | the same | commits and summed re-rendered components until ready | deterministic | record |
-| `play.idle-commits` | 5 s of playback after start + 1 s settle | commits and re-rendered components | deterministic | record (perf-plan: 0; B saw 0–1) |
-| `play.idle-longtasks-over-50` | the same | count | deterministic | **assert 0** at 1× |
-| `fader.<track/group/master/pan/clipgain>.<stopped/playing>.components-per-commit` | R-G | median of re-rendered components per commit during the drag (+ max) | deterministic | record (owner PERF-FADER, target ≤ 3) |
-| `…commits-per-move` | R-G | commits ÷ moves dispatched | deterministic | record (an upper bound only; the Scheduler merges commits) |
-| `…restarts` (playing only) | R-G | `start()` calls during the drag | deterministic | **assert 0** |
-| `…frame-p95` / `…frames-over-33` (1× and 6×) | R-G | rAF interval p95 and count > 33.4 ms during the drag | wallclock | record (trend) |
-| `…loaf-count` / `…event-share-16` | R-G | LoAF entries during the drag; the share of dispatched moves with an Event Timing pointermove or input entry ≥ 16 ms | wallclock | record (owner PERF-FADER: share < 5 % ⇔ p95 < 16 ms) |
+**Test rows (find elements by testid, never by class, L12):**
+- **CU1.** Env on: the editor overlay's `classList` contains `cursor-pointer` and does not contain `cursor-crosshair`.
+- **CU2.** Env on with a point: each `arrangement-clip-envelope-point` contains `cursor-pointer` and does not contain `cursor-move`. The EV1 tokens are still present.
+- **CU3.** Floating: `arrangement-video-box` contains `cursor-grab` and `active:cursor-grabbing`, not `cursor-move`. Compact (not expanded): the box contains none of `cursor-grab`, `cursor-move` or `active:cursor-grabbing`.
+- **CU4.** Source scan: no `.tsx` file under `app/components/arrangement/` contains `cursor-crosshair`, `cursor-move`, `cursor-cell` or `cursor-copy`.
+  - The scan reads whole files, not a line window (L13).
+  - Prove it with one named mutant: a scratch copy where `cursor-move` sits inside a multi-line `cn(` call fails CU4.
+- **Red-proof:** CU1–CU4 fail against the start copies in `b-round-206/r207-granted-start/`. Run them on a scratch copy (record the failing names); do not edit the start copies.
 
 **Self-checks before handover (A runs these, not the full suite):**
 - `npm run typecheck`
 - `npm run lint`
-- `npx biome format perf playwright.perf.config.ts` (read-only; it must report no changes)
-- `npm run test:perf` **twice**, keeping both result JSONs in `a-round-206/`
-- `npx playwright test --list` with the default config: it must show no `perf/` file
-- one red-proof of your own (see PERF-RED-206)
+- `npx vitest run app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx app/lib/arrangement/__tests__/floating-video.test.tsx app/lib/arrangement/__tests__/timeline-cursor-map.test.ts app/lib/arrangement/__tests__/affordance-colour-ui.test.tsx app/lib/arrangement/__tests__/panel-radius-ui.test.tsx`
+- the red-proof above
+- one real-Chromium check of computed `cursor` on the three elements. You may base it on B's `cursormap.cjs`/`videograb.cjs` (drop the class injection), but **copy them and their `lib*.cjs`, `wav.cjs` and `report.cjs` into `a-round-207/tools/` first**. Their `ROOT` resolves to the tools folder's parent, so running them in place would write into B's `b-round-206/out/`.
 - the code-reviewer, because 3+ files change. Carry its Architecture note to B verbatim.
 
-**Report** (`a-round-206.md`):
-- the medians table next to B's table;
-- any count that differs from B's by > 15 %, with your explanation (a different heuristic, or a group or clip-gain scenario not in B's probe);
-- the run time of `test:perf`, which should be ≤ 12 min. If it is longer, say so.
-
-**STOP conditions (L11):**
-- the hook receives no commits from the prod bundle;
-- the group or clip-gain fader cannot be reached via the UI;
-- the non-offline AudioContext stays `suspended` in headless Chromium even with the autoplay flag;
-- a needed change touches any frozen file.
+**STOP (L11):** if any needed change touches a frozen file, or if `:active` does not give `grabbing` during the real floating drag after your change, write STOP with the measurement and change nothing else.
 
 ## 3. C — rows
 **Setup:**
-- Root's dev server stays on :5173. The perf config builds and serves its own copy on :5188.
-- Run on the tree, or on a tar copy with node_modules symlinked if you want to isolate it.
-- **No ref comparison is needed:** this is a new harness, so there is no before-picture.
-- **Ableton: does not apply** (no product behaviour changes).
+- Root's dev server is on `http://127.0.0.1:5173/studio-lab`.
+- Evidence is **computed style and DOM**: `getComputedStyle(elementFromPoint(x, y)).cursor` at the real pointer position. Headless screenshots never paint the cursor, so screenshots only show where the pointer was.
+- Use **both viewports** (1440×900, 1280×720), fresh contexts, Snap off.
+- Use the real demo library "Add" and the media `beeps-6s-h264-aac.mp4`.
+- Write your own probe under `c-round-207/tools/`. Do not reuse A's test code.
 
 | Row | What C does | PASS when |
 |---|---|---|
-| **SCOPE-206** (start and end) | HEAD, `git status`, the frozen list (1039), the grant diffs vs the start copies, the new files | only `package.json` (+1 script line) and doc 162 l.4 differ among tracked files; the new files are exactly the ones in `b-round-205-r206-new-files.txt`; **0 changes under `app/`**; protected files, `.claude` and `CLAUDE.md` unchanged |
-| **PERF-RUN-206** | `npm run test:perf` twice (separate invocations) | both runs exit 0; every `assert` row passes; the JSON has every row of §2 with 3 samples, median, min and max; deterministic medians agree between the two invocations within ±10 %/±2; the run time is recorded |
-| **HARNESS-LIVE-206** | read `harness.*` in both JSONs; then run once with a `PERF_BUDGETS` copy where `harness.restart-live` needs ≥ 1000 | the three `harness.*` rows pass with real values; the ≥ 1000 copy **fails** and names that row (the counter is read, not hard-coded) |
-| **FADER-206** | compare the 5 × 2 fader rows with C's **own independent probe** (not A's code), written under `c-round-206/tools/`, for track volume and pan, stopped and playing, at 1× | C's component-per-commit medians match the harness within ±15 % (B's reference: 83 and 4); the group, master and clip-gain rows have real values with moves dispatched = 121; restarts while playing = 0 in every playing row; the 6× frame rows exist for all 10 scenarios |
-| **PERF-RED-206** | (a) a `PERF_BUDGETS` copy that flips `fader.track.stopped.components-per-commit` to `assert ≤ 3`; (b) on a tar copy outside the tree (never in A's files), remove the hook stub from the spec and run it | (a) the run fails, naming that row and the measured value; (b) `harness.hook-live` fails (a hook that is off cannot pass as "0 commits") |
-| **ISOLATION-206** | `npx playwright test --list` (default config) and `npx playwright test --config playwright.smoke.config.ts --list` | no `perf/` spec in either; `e2e/` file list unchanged from HEAD |
-| **AN-REVIEW-206** | the new `.ts` files and the docs | no `any`, `@ts-ignore` or `as` assertion; no `route(` interception; no committed fixtures or binaries; doc 163 in Georgian with the metric definitions and limits, B's table, A's medians and the TODOs; **L26:** every row id cited in doc 163 exists in `budgets.json` or the spec; doc 162 differs only at l.4 |
-| **G206-3** | fresh contexts at 1440 and 1280: `/studio-lab` opens anonymously (demo collection, no sign-in); `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token` returns 401 with no header and 403 with a fake Bearer | all true; premium auth is not bypassed |
+| **SCOPE-207** (start and end) | HEAD, `git status`, the frozen list (1043), the grant diffs vs the start copies, the new files | Only the 5 grants and the 2 new files differ. The component diffs are exactly the 3 cursor-token edits of §2. Doc 163 differs at l.4 only, with the exact R113 text. 0 other `app/` changes; protected files unchanged. |
+| **CUR-ENV-207** | Env on, one breakpoint added by double-click. Hover the editor body at 3 points (left, middle, right; upper and lower half). Do it on a selected clip, an unselected clip and a muted lane's clip. | The cursor is `pointer` at every point, at both viewports. No `crosshair` anywhere on the timeline (a grid scan like B's `cursormap.cjs`: 0 hits for `crosshair`, `move`, `cell` or `copy`). |
+| **CUR-POINT-207** | Hover a breakpoint, press it, drag it 20 px down in 5 steps (the cursor is read at the pointer after each step), release, and read again. | `pointer` at rest, during every step and after release. The drag still changes the point's gain: `data-gain` changes and the status text is updated. |
+| **CUR-VIDEO-207** | Expand the video (floating). Hover the box's centre, press, drag 40 px in 4 steps, release. Then return it to compact and hover the compact box. | Floating: `grab` at rest, `grabbing` while pressed and during the drag, `grab` after release, and the box moved. Compact: the cursor is not `grab`, `grabbing` or `move`. The ⠿ handle is still `grab`. |
+| **CUR-UNCHANGED-207** | The B map's other elements: clip waveform with Env off, clip title bar (rest and drag), clip edge, fade handles, playhead, overview, track-height splitter | The same cursor as in `b-round-206/out/cursormap-*.json` state "a" (`text`, `grab`/`grabbing`, `ew-resize`, `row-resize`). |
+| **BEHAV-207** | Behaviour next to the change: double-click the editor body adds a point; double-click a point deletes it; Ctrl-click the body toggles clip selection; the floating box's arrow keys on ⠿ move it 16 px; Esc returns the video | All as before (status text and DOM). This shows the cursor edit changed no handler. |
+| **REF-207** | The reference section above | Each cursor-map row matches, or it is one of the listed deviations D1–D3. Ableton parity: the cursor shape is "unconfirmed (no source)", not "confirmed". |
+| **AN-REVIEW-207** | the diffs, the new test, doc 164 | No `any`, `@ts-ignore` or `as`. CU1–CU4 exist; CU4 reads whole files. Doc 164 is Georgian, has the map, the search record and D1–D3, cites only CU1–CU4 (L26) and has a conditional status line (L28). |
+| **G207-3** | Fresh contexts at 1440 and 1280: `/studio-lab` anonymous; `/studio/middle-east`; `/api/studio-token` with no header and with a fake Bearer | `/studio-lab` opens anonymously (demo collection, no sign-in). `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`. `/api/studio-token` returns 401 with no header. The fake Bearer gets 403 with `mock-api/server.mjs` on :5199, or 500 without it (I-206-a). **No token is issued either way.** Record which condition applied. |
 | **gate** | full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke | not claimed by C; the root gate runs them |
 
-`browserVerified`: PERF-RUN, HARNESS-LIVE, FADER, PERF-RED and G206-3 are real Chromium rows that **can** run in the cloud. If any of them did not run, the flag is false.
+**`browserVerified`:** CUR-ENV, CUR-POINT, CUR-VIDEO, CUR-UNCHANGED, BEHAV and G207-3 are real-Chromium rows that **can** run in the cloud. If any of them did not run, the flag is false.
 
 ## 4. Adjacent behaviour that could break
-- **`npm run typecheck`:** the new `.ts` files are type-checked. A type error there fails the gate.
-- **`npm run test:e2e` and the smoke gate:** they must not pick up `perf/` (ISOLATION-206).
-- **`build/`:** `test:perf` writes the production build into `store/build`. It is gitignored, and root's dev server on :5173 does not read it. C checks that `git status` shows nothing new outside the new files.
-- **Run time:** a `test:perf` run longer than 15 min is reported as a Low.
+- The `hover:scale-125` breakpoint feedback and the EV1 tokens. Their contrast is unchanged, because no colour changes.
+- The floating box drag (it claims a gesture through the D-26 registry). `active:` must not block the drag.
+- The ⠿ handle's own `cursor-grab`.
+- The Ctrl- and Shift-click selection on the editor overlay.
 
 ## 5. Publication
-After C PASS, root runs the gate. The commit message says: "perf harness only; no app/ change; doc 162 status line". Root also amends doc 163's status line to the post-PASS wording, per L28.
+After C PASS, root runs the gate. The commit message says: "SABA-B-6 timeline cursor: envelope pointer, floating video grab; no behaviour change". Root amends doc 164's status line (L28).
 
 ## 6. After this round (not in scope)
-- **PERF-1b** also measures the fade-handle, trim and range drags. Each one that shows the same whole-provider re-render becomes its own PERF task.
-- **PERF-FADER** (SABA-B-5 fix, following the pan pattern; tech-lead traps are listed in `b-round-205.md` §5) or **PERF-1b**. B decides at round-207 planning, from the PERF-1a numbers.
-- **Then** PERF-2…16, then SYS-1…3, then STORE-2b…5 (paused), then REVIEW-RECOMMENDATIONS and T12-ADVANCED.
+- **PERF-FADER** (SABA-B-5 fix, following the pan pattern). It also owns C-R206-01 (D-29z174): the `event-share-16` metric must be replaced or liveness-proven before any flip to assert, and the false limit sentence in doc 163 l.60 and in the `budgets.json` event-share notes is rewritten in the same task. It also covers I-206-d: the track drag should change the value at both ends.
+- Then **PERF-1b**, then PERF-2…16, SYS-1…3, STORE-2b…5 (paused), REVIEW-RECOMMENDATIONS and T12-ADVANCED.
 - **Regression round:** due on or after 2026-10-30.
-- **RETRO:** at round 215, or at the end of the STUDIO-PERFORMANCE entry, whichever comes first.
+- **RETRO:** at round 215, or at the end of STUDIO-PERFORMANCE, whichever comes first.

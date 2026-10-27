@@ -1,0 +1,4 @@
+cd /home/runner/czaba-project/store
+for n in A B; do s=$(date +%s); npm run test:perf > /home/runner/czaba-project/tmp/studio-real-loop/a-round-206/final-run$n.log 2>&1; echo "exit $? secs $(( $(date +%s) - s ))" >> /home/runner/czaba-project/tmp/studio-real-loop/a-round-206/final-run$n.log; cp test-results/perf/latest.json /home/runner/czaba-project/tmp/studio-real-loop/a-round-206/perf-final-run$n.json; done
+s=$(date +%s); PERF_BUDGETS=/home/runner/czaba-project/tmp/studio-real-loop/a-round-206/red-budgets-final.json npm run test:perf > /home/runner/czaba-project/tmp/studio-real-loop/a-round-206/final-red.log 2>&1; echo "exit $? secs $(( $(date +%s) - s ))" >> /home/runner/czaba-project/tmp/studio-real-loop/a-round-206/final-red.log; cp test-results/perf/latest.json /home/runner/czaba-project/tmp/studio-real-loop/a-round-206/perf-final-red.json
+echo DONE > /home/runner/czaba-project/tmp/studio-real-loop/a-round-206/final-chain.done
