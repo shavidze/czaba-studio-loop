@@ -1,144 +1,149 @@
-# CURRENT TASK — Round 15: TM-B18 — save whose write succeeded but whose re-read rejects reports the write result, keeps the store and the edits (RR-R13-03 batch + B-R14-01 single) — D-24
+# CURRENT TASK — Round 16: TM-B19 — E2E launch helper reports which phase failed, keeps the original error as `cause`, and waits for the killed Electron to exit (RR-R10-01, RR-R10-02, RR-R10-04 + A-R10-01 tests) — D-25
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-27
 
 ## Why this round
-- Round 14 result:
-  - **C PASS**, realVerified=true (R14-1…R14-7), 0 bugs. M1–M4 were killed, the generator bytes are unchanged, and the real-app smoke gave `ICAT=R14Cat` in both readers.
-  - Root published `a4ad852` with review COMMIT OK. TM-B17/D-23 is done. RR-R1-04, RR-R1-05 and C-R1-03 are closed.
-  - No critical or high bug is open.
-- **RR-R13-03 (root review R13, low):** in `MetadataPanel.tsx` `handleSave` the batch branch has one `try` around `writeMetadataBatch` **and** `readMetadataBatch`.
-  - If the write resolves and the re-read rejects, the outer `catch` shows only the rejection text (`Error invoking remote method 'meta:read-batch': …`) as an error toast.
-  - The user is told nothing about the files that **were** written. The store stays stale.
-- **B-R14-01 (B, code read on `a4ad852`):** the single-file branch (`MetadataPanel.tsx:73-80`) has the same shape: `writeMetadata` resolves, `readMetadata` rejects, and the user sees the raw rejection as if the save had failed.
-- Both are the same defect in the same function, so they make one round.
-- **How a rejection happens:** main's `meta:read` and `meta:read-batch` handlers (`src/main/ipc/metadata.ts:222-249`) catch per file and return `emptyMetadata`. A rejection therefore comes only from the IPC layer: a missing or throwing handler, or serialization. It cannot be reached through the filesystem. R15-5 shows C how to reach it in the real app anyway.
-- **Reference first:** this is a pure fix round (error handling of an existing flow, no new UX), so it is exempt from the reference rule.
+- **Round 15 result:** C PASS, realVerified=true (R15-1…R15-7), 0 bugs. Every mutant (M1s, M1b, M2–M5) was killed. The real app with an injected IPC rejection showed the exact D-24 toasts. Root published `5854d45` with review COMMIT OK. TM-B18 and D-24 are done.
+- No critical or high bug is open. Most of the rest of the backlog waits on Saba (see Next). Two unblocked lows were left: this one and RR-R5-02.
+- **Why this one first:**
+  - B's experiments (`b-round-15.md` E1–E6) show that every failure path in this item can be reached on the real built app, so C can check each one for real.
+  - RR-R5-02 (a null array element in `file-row-display.ts`) cannot be reached from the real app today. Main maps every value through `getValuesAsStrings`/`stripRiffNulTerminator`, so that fix could only be checked with unit tests. It stays next, and its acceptance will say so honestly.
+- **Defects, all in `tests/e2e/electron-launch.ts`, all verified on the `5854d45` build:**
+  - **RR-R10-02:** if `electron.launch` itself times out (the main process is blocked before Playwright connects), the helper still reports `first window did not appear within 60000 ms`.
+    - B E1 shows Playwright's error is `electron.launch: Timeout …ms exceeded.` (`TimeoutError`, no app object yet).
+    - A non-timeout launch failure (E2, `process.exit(3)` → `electron.launch: Process failed to launch!`) is reported as `first window failed before 60000 ms: …`.
+  - **RR-R10-01:** the thrown `Error` keeps only the message. The original error and its stack are lost (no `cause`).
+  - **RR-R10-04:** `closeFailedTagManagerApp` sends `SIGKILL` and returns at once, without waiting for the process to exit.
+    - B E5: `app.close()` hangs while the main event loop is blocked, and the process is still alive (`exitCode null`) until `SIGKILL`.
+  - **A-R10-01:** none of these failure paths has a test.
+- **Not in this round, with reasons:**
+  - **RR-R10-03** (early main output). Playwright gives `app.process()` only after `electron.launch` resolves, so output printed before that cannot be captured with this launcher. `docs/ci-cd.md` keeps saying so.
+  - **RR-R10-05** (worker-scoped fixture). This is an architecture signal, not a task.
+- **Reference first:** this is a pure fix of the test harness with no product UX, so the reference rule does not apply.
 
 ## Baseline
-- HEAD `a4ad85244cd7a80515c67f342cb0cae238cebc29`. The working tree must be **clean** (`git status --porcelain` empty). If HEAD differs or the tree is dirty, stop and report.
-- Frozen (byte-identical to `a4ad852`): everything not in the ownership table. In particular:
-  - `src/main/**`, `src/renderer/src/stores/**`, `src/renderer/src/types/**`, every other component;
-  - `tests/renderer/setup.ts`, `tests/renderer/helpers/**`, `tests/main/**`, `tests/e2e/**`, `tests/fixtures/**`;
-  - configs (`vitest.config.*.ts`, `playwright.config.ts`, `biome.json`, tsconfigs), `.github/**`;
-  - `docs/**`, except the two sections named below in `docs/learning/data-flow.md`;
-  - `.claude/**`, except the `### Save flow` block of `.claude/primitives/STATE_MANAGEMENT.md`. `.claude/primitives-map.json` stays unchanged.
-- Protected (never edit):
-  - `src/preload/index.ts`, `src/preload/index.d.ts`;
-  - `src/renderer/src/styles/app.css`;
-  - `package.json`, `package-lock.json`;
-  - `.github/workflows/release.yml`;
-  - `.claude/settings*`, `.claude/hooks/**`.
+- HEAD `5854d450b67e5d5aef29a81920b0fd531f516ba7`. The working tree must be **clean** (`git status --porcelain` empty). If HEAD differs or the tree is dirty, stop and report.
+- **Frozen** (byte-identical to `5854d45`): everything not in the ownership table. In particular:
+  - `src/**`;
+  - all three specs (`tests/e2e/app-launch.spec.ts`, `folder-workflow.spec.ts`, `recording-tag-contract.spec.ts`);
+  - `tests/main/setup.ts`, `tests/main/global-setup.ts`, every other test, `tests/fixtures/**`, `tests/renderer/**`;
+  - `playwright.config.ts`, `vitest.config.*.ts`, `biome.json`, tsconfigs, `.github/**`;
+  - `.claude/**`;
+  - `docs/**` except the `### E2E launch budget` section of `docs/ci-cd.md`. Its `#### TAG_MANAGER_E2E_ELECTRON_REQUIRE` subsection stays unchanged.
+- **Protected** (never edit): `src/preload/index.ts`, `src/preload/index.d.ts`, `src/renderer/src/styles/app.css`, `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `.claude/settings*`, `.claude/hooks/**`.
 
-## Scope (D-24, see `feature-status.md`)
-Steps 1 and 2 follow the repo's `test-on-bugfix` rule: write the failing tests first, then the fix. Read `TESTING.md`, `STATE_MANAGEMENT.md`, `TYPESCRIPT_STRICT.md` and `AGENT_DISCOVERABLE_CODE.md` before editing; the hook injects them anyway.
+## Scope (D-25, see `feature-status.md`)
+Read `TESTING.md`, `TYPESCRIPT_STRICT.md` and `AGENT_DISCOVERABLE_CODE.md` before editing; the hook injects them anyway. Follow the `test-on-bugfix` rule: write the failing tests first, then the fix. `tests/**` is type-checked by `npm run typecheck` (`tsconfig.test.json`), so use no `any`, no `@ts-ignore` and no `as unknown as`. Add no comments in code and use semicolons. Keep the double-quote style of `tests/e2e/electron-launch.ts`.
 
-### Target behaviour (D-24)
-1. **The write call keeps today's error handling.**
-   - A write rejection still shows a toast with its message, and the edits stay.
-   - In batch, a rejected `writeMetadataBatch` still calls no `readMetadataBatch`.
-2. **The re-read gets its own `try`:** `readMetadata` in the single branch, `readMetadataBatch` in the batch branch.
-3. **If the re-read resolves,** behaviour is exactly as today: the single branch as it is now, the batch branch per D-21 and D-22.
-4. **If the re-read rejects:**
-   - `updateFileMetadata` is **not** called for any path.
-   - `skipSyncRef` is **not** set.
-   - `setEditingMetadata` is **not** called. `editingMetadata`, `modifiedFields` and `isDirty` stay as they are, so Save stays enabled. A retry rewrites the same values, which is idempotent (as RR-R12-02 describes).
-   - Exactly one error toast (`'error'`) reports the **write** result with these exact texts:
-     - single: `Tags saved, but reloading failed. Rescan to refresh.`
-     - batch, `failed` empty: `Tags saved to ${succeeded} files, but reloading failed. Rescan to refresh.`
-     - batch, `failed` non-empty: `${succeeded} saved, ${failed.length} failed. Reloading failed. Rescan to refresh.`
-   - `isSaving` returns to `false`, as today, through `finally`.
-5. **Why the edits stay:** without a successful re-read the app does not know what is on disk. Clearing the form would show the stale store values as if nothing had been saved.
-   - Known limit, documented and not fixed: a later selection change still shows `Unsaved changes were discarded`.
-   - Rescan (the `Rescan` button in the sidebar) shows the real values.
-6. **Not changed:** main, preload, stores, toast texts on every other path, the sync effect, and `handleSchemaChanged`.
+### Target behaviour (D-25)
+1. **The phase is tracked in `launchTagManagerApp`:**
+   - `"launch"` until `electron.launch` resolves;
+   - `"window"` until `firstWindow` resolves;
+   - `"load"` after that.
+   - This replaces the `windowAppeared` boolean.
+2. **Message by phase.** Each message is followed by ` (elapsed N ms)` and then the existing main-output tail block, in today's format.
+   | Phase | Error | Message |
+   |---|---|---|
+   | launch | `TimeoutError` | `electron.launch did not finish within ${FIRST_WINDOW_TIMEOUT_MS} ms` |
+   | launch | any other error | `electron.launch failed: ${message}` |
+   | window | `TimeoutError` | `first window did not appear within ${FIRST_WINDOW_TIMEOUT_MS} ms` (unchanged) |
+   | window | any other error | `first window failed before ${FIRST_WINDOW_TIMEOUT_MS} ms: ${message}` (unchanged) |
+   | load | any error | `first window appeared but domcontentloaded did not finish within ${DOM_CONTENT_LOADED_TIMEOUT_MS} ms: ${message}` (unchanged) |
+   - `message` is `error.message` for an `Error`, otherwise `String(error)`, as today.
+   - In the launch phase the tail is empty, because there is no process handle yet. Keep the block anyway.
+3. **The thrown error is `new Error(text, { cause: error })`.** `cause` is the original value, by identity.
+4. **`closeFailedTagManagerApp`:**
+   - It races `app.close()` against `FAILED_APP_CLOSE_TIMEOUT_MS` (10000), as today.
+   - If the process is still running after that (`exitCode === null && signalCode === null`), it registers an `exit` listener, sends `SIGKILL`, and waits for `exit` for at most the new constant `FAILED_APP_KILL_WAIT_MS = 5000`. It resolves when either comes first, and clears its timer.
+   - If the process has already exited, it sends no kill and does not wait.
+5. **Budget:** `LAUNCH_HOOK_TIMEOUT_MS` changes from 90000 to **100000**. The worst case is 60 (launch + window) + 15 (load) + 10 (close) + 5 (kill wait) = 90 s, which stays below the hook timeout.
+   - `FIRST_WINDOW_TIMEOUT_MS` (60000) and `DOM_CONTENT_LOADED_TIMEOUT_MS` (15000) stay unchanged.
+6. **New module `tests/e2e/electron-launch-failure.ts`** holds the Playwright-free parts, so that main-env Vitest can test them:
+   - It has **no runtime import** of `@playwright/test` or `electron` (`import type` is fine).
+   - It exports the phase type, the message/error builder, `closeFailedTagManagerApp`, and **all** the constants: `FIRST_WINDOW_TIMEOUT_MS`, `LAUNCH_HOOK_TIMEOUT_MS`, `DOM_CONTENT_LOADED_TIMEOUT_MS`, `FAILED_APP_CLOSE_TIMEOUT_MS`, `FAILED_APP_KILL_WAIT_MS`, and `MAIN_OUTPUT_TAIL_CHARS` if the builder uses it. Today `DOM_CONTENT_LOADED_TIMEOUT_MS` and `FAILED_APP_CLOSE_TIMEOUT_MS` are private; test (j) needs them.
+   - `closeFailedTagManagerApp` takes a minimal structural type (for example `close()` and `process()` that return the fields it uses), not `ElectronApplication`.
+   - Its timeouts can be overridden through an optional parameter (defaults = the constants), so tests run in milliseconds. Choose agent-discoverable names.
+   - `tests/e2e/electron-launch.ts` imports from it and **re-exports** `FIRST_WINDOW_TIMEOUT_MS`, `LAUNCH_HOOK_TIMEOUT_MS` and `ELECTRON_REQUIRE_ENV`, so the frozen specs' imports still resolve unchanged.
+   - Playwright's default `testMatch` does not pick up the new module, because it is not a `.spec`/`.test` file. C confirms the E2E count stays at 7.
+7. **Unchanged:**
+   - `getElectronRequireArgs` and `getElectronLaunchArgs`, byte-identical: D-06, and D-20 (the injector env is the only launch-arg change, and no injector file is stored in the repo);
+   - the `electron.launch` options and `remainingMs`;
+   - `captureMainProcessOutput`.
 
 ### Steps
-1. **Red tests first** in `tests/renderer/components/metadata-panel-batch-save.test.ts`. Add a new `describe` for TM-B18/D-24. Existing tests (a)–(i) and their helpers stay unchanged. Use the real `MetadataPanel` and the real stores; only `window.api` is mocked, exactly as the file already does.
-   - **(j) batch, all written + re-read rejects.**
-     - Setup: tagged seeds, as in (f). `writeMetadataBatch` resolves `{ succeeded: 2, failed: [] }`; `readMetadataBatch` rejects with `new Error('read-batch down')`.
-     - Type Category and Save.
-     - Expected:
-       - toast text and type exactly as in D-24;
-       - both store entries deep-equal their seeds;
-       - the typed value is still in the input, `modifiedFields` contains `category`, `isDirty` is true, and `Save to 2 files` is enabled;
-       - `isSaving` is false.
-   - **(k) batch, partial write + re-read rejects.**
-     - Setup: `{ succeeded: 1, failed: [{ path: PATH_B, … }] }`, and the re-read rejects.
-     - Expected: toast `1 saved, 1 failed. Reloading failed. Rescan to refresh.`; the same store and edit assertions as (j).
-   - **(l) single, write ok + `readMetadata` rejects.**
-     - Setup: select one tagged file. `writeMetadata` resolves, `readMetadata` rejects.
-     - Type Category and Save.
-     - Expected:
-       - toast `Tags saved, but reloading failed. Rescan to refresh.` (`error`);
-       - the store entry deep-equals its seed;
-       - the typed value is kept, `isDirty` is true, and `isSaving` is false.
-   - **(m) pin, batch write rejects.**
-     - Setup: `writeMetadataBatch` rejects with `new Error('write-batch down')`.
-     - Expected: toast `write-batch down` (`error`); `readMetadataBatch` is not called; the store is unchanged and the edits are kept.
-     - This passes on `a4ad852` and after the fix.
-   - **Red run:** run the file on `a4ad852` before the fix and record it in `a-round-15/`. (j), (k) and (l) must fail on the toast text; (m) and (a)–(i) pass.
-2. **Fix in `src/renderer/src/components/metadata-editor/MetadataPanel.tsx`, `handleSave` only.**
-   - Give the re-read its own `try`/`catch` in both branches, per D-24.
-   - No `as` cast is added beyond the ones that already exist. RR-R13-02 waits on the protected preload types.
-   - The success toasts, D-21/D-22 behaviour, `useCallback` deps and JSX are unchanged.
-   - No comments in code. Semicolons. Single quotes, as in `src/`.
-   - A small local helper or constant for the three messages is allowed if it stays inside this file.
-3. **Docs (Georgian text, English technical terms):**
-   - **`docs/learning/data-flow.md`.** Edit only the `## ტეგების შენახვა — Single File` and `## ტეგების შენახვა — Batch (რამდენიმე ფაილი)` sections. In each, add one short paragraph `**re-read-ის შეცდომა (D-24):**` that states the target behaviour above for that branch. Mermaid diagrams may stay as they are.
-   - **`.claude/primitives/STATE_MANAGEMENT.md`.** Change only the `### Save flow` code block: add one line, `Re-read rejects (D-24): no store update, no skipSync, edits kept → error toast with write result + "Rescan to refresh"`.
-     - Make this edit with the **Edit tool**: path (b), standing permission. **Do not** write to `.claude/**` through Bash.
-     - If the Edit is refused, stop and report BLOCKED for this item only.
-4. **`a-round-15.md`** (Georgian). A writes it with:
+1. **Red tests first: `tests/main/electron-launch-failure.test.ts`** (Node env; the existing `tests/main/setup.ts` electron mock is harmless here).
+   - **Messages:**
+     - (a) launch + an `Error` with `name = "TimeoutError"` gives a text that starts with `electron.launch did not finish within 60000 ms (elapsed 123 ms)`.
+     - (b) launch + `new Error("electron.launch: Process failed to launch!")` gives `electron.launch failed: electron.launch: Process failed to launch! (elapsed …)`.
+     - (c) window + TimeoutError gives today's text.
+     - (d) window + other error gives today's text.
+     - (e) load gives today's text.
+     - (f) a thrown string `"boom"` in the launch phase gives `electron.launch failed: boom`.
+     - (a)–(f) each assert `cause` identity, the ` (elapsed N ms)` suffix and the tail header `--- main process output (last 4000 chars) ---` followed by the given output.
+   - **Close** (fake app and process: an EventEmitter plus `exitCode`/`signalCode` and a `kill` spy; small override timeouts):
+     - (g) `close()` never resolves, and `kill` emits `exit` after about 50 ms. The helper resolves only **after** `exit` (an ordering flag), and `kill` was called once with `"SIGKILL"`.
+     - (h) `close()` resolves and the process has `exitCode 0`. No `kill` is sent, and the helper resolves without waiting for the kill timeout.
+     - (i) `close()` never resolves, and `kill` never emits `exit`. The helper still resolves, after at least the kill wait and before the kill wait plus a margin. No timer is left pending (use fake timers or check with `vi.getTimerCount()` if you use them).
+     - (j) a constants pin: `LAUNCH_HOOK_TIMEOUT_MS` > `FIRST_WINDOW_TIMEOUT_MS + DOM_CONTENT_LOADED_TIMEOUT_MS + FAILED_APP_CLOSE_TIMEOUT_MS + FAILED_APP_KILL_WAIT_MS`.
+   - **Red run:** the file fails on `5854d45`, because the module does not exist. Record the log in `a-round-16/`. Record the real-launch red evidence too, following the recipe of R16-5 (1)+(2), on your own build of `5854d45` (worktree, never `git stash`). If that takes too long, say so; C repeats it anyway.
+2. **Fix:**
+   - create `tests/e2e/electron-launch-failure.ts`;
+   - adapt `tests/e2e/electron-launch.ts` per D-25: phase tracking, the builder, the imported close helper, re-exports, `LAUNCH_HOOK_TIMEOUT_MS` 100000.
+3. **Docs: `docs/ci-cd.md` `### E2E launch budget` only** (Georgian, English technical terms):
+   - the constants table: `LAUNCH_HOOK_TIMEOUT_MS` is 100000, and add a row for `FAILED_APP_KILL_WAIT_MS` 5000;
+   - all five message texts;
+   - `cause`;
+   - waiting for `exit` after `SIGKILL`;
+   - the worst-case sum 60 + 15 + 10 + 5 = 90 < 100;
+   - keep the RR-R10-03 sentence (output before `electron.launch` finishes is not in the tail);
+   - one line that names `tests/main/electron-launch-failure.test.ts`.
+4. **`a-round-16.md`** (Georgian). A writes it with:
    - the red/green logs;
    - the diff summary;
    - the full `verifyCommand` result;
-   - the code-reviewer result. 3+ files change, so A runs `code-reviewer`. After the bug fix, also run `qa-engineer` read-only for a regression read, per the read-primitives rule.
-
-**Explicitly NOT in this round:**
-- **RR-R13-01** (per-path read errors from `readMetadataBatch`) and **RR-R13-02** (the `as WavMetadata` cast). Both need `src/preload/index.d.ts`, which is protected, so they wait on the user.
-- **RR-R12-04 / RR-R13-04** (`commitBatchSave` / `applyBatchSaveResult`, save-generation counter). These are architecture signals, not tasks.
-- Narrowing a retry to the failed paths only (RR-R12-02). That is a product decision.
-- **RR-R5-02** and **RR-R10-01/02 + A-R10-01**. These are the next small rounds.
+   - `--retries=0`;
+   - the code-reviewer result. 4 files change, so A runs `code-reviewer`. After the fix, also run `qa-engineer` read-only, per the read-primitives rule.
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` | D-24: own `try` for the re-read in `handleSave` (single + batch) |
-| `tests/renderer/components/metadata-panel-batch-save.test.ts` | new tests (j)–(m); (a)–(i) and existing helpers unchanged |
-| `docs/learning/data-flow.md` | one D-24 paragraph each in the Single File and Batch save sections |
-| `.claude/primitives/STATE_MANAGEMENT.md` | `### Save flow` block only, +1 line, Edit tool |
+| `tests/e2e/electron-launch.ts` | D-25 phase tracking, use the new module, re-exports, hook timeout |
+| `tests/e2e/electron-launch-failure.ts` (new) | Playwright-free builder + close helper + constants |
+| `tests/main/electron-launch-failure.test.ts` (new) | tests (a)–(j) |
+| `docs/ci-cd.md` | `### E2E launch budget` section only |
 
-Logs go to `a-round-15/` (A) and `c-round-15/` (C) in the loop folder.
+Logs go to `a-round-16/` (A) and `c-round-16/` (C) in the loop folder. Injector files live only outside the repository (for example `/tmp`). B's are in the loop folder as `b-round-15-exp-*.cjs.txt`.
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R15-1 ownership | `git status --porcelain --untracked-files=all`; `git diff --stat a4ad852`; `git diff --quiet a4ad852 -- . ':!<4 owned paths>'` | Only the 4 owned paths differ, and there are no untracked files. The `MetadataPanel.tsx` diff is inside `handleSave`, and `handleSchemaChanged` is unchanged. The test diff only adds; (a)–(i) and the existing helpers are byte-identical. The `data-flow.md` diff is inside the two save sections. The `STATE_MANAGEMENT.md` diff is +1 line inside `### Save flow`. A's result shows `permission_denials` empty. If the `.claude` Edit was refused, C's `taskStatus` is **BLOCKED**: C keeps all other evidence and root does not publish a partial round. |
-| R15-2 red/green | `git worktree add /tmp/c-r15-old a4ad852`, with `node_modules` symlinked. Never use `git stash` and never touch A's tree. Copy the new test file into the worktree and run `npx vitest run -c vitest.config.renderer.ts tests/renderer/components/metadata-panel-batch-save.test.ts`, then run it on A's tree. | Old code: (j), (k) and (l) fail (the toast is the raw rejection text); (m) and (a)–(i) pass. New code: all pass. |
-| R15-3 mutations | In a copy of the fixed tree, run the test file against each mutant: **M1s** merge the single re-read back into the outer `try`; **M1b** do the same for the batch re-read; **M2** call `setEditingMetadata({})` in the batch re-read `catch`; **M3** in the batch `catch`, call `updateFileMetadata(path, {})` for every succeeded path; **M4** use the `'success'` type in the single `catch` toast; **M5** call `readMetadataBatch` also when `writeMetadataBatch` rejects. | M1s is killed by (l); M1b by (j)/(k); M2 by (j); M3 by the (j)/(k) store assertions; M4 by (l); M5 by (m). Report which test killed each. A survivor is a FAIL unless C shows it is equivalent. |
-| R15-4 gate | Clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0` once | Exit 0. Biome: 0 errors and at most 9 warnings, as on `a4ad852` (list any new one). Typecheck 0. Renderer **116 + new** (report the exact count). Main **76/76**. E2E **7/7**, and **7/7** with `--retries=0`. |
-| R15-5 real app, rejected re-read | Built app (`npm run build`) from A's tree under `xvfb-run` with Playwright `_electron`. Put two valid WAVs (copies of the generated `tests/fixtures/sample.wav`) in a temp folder, Open Folder.<br>**Injection, in C's phase only:** `electronApp.evaluate(({ ipcMain }) => { ipcMain.removeHandler('meta:read-batch'); ipcMain.handle('meta:read-batch', () => { throw new Error('R15 injected'); }); })`. This changes only the running process and no source; record the exact snippet.<br>**Batch launch:** inject `meta:read-batch` after the scan, select both files, type Category `R15Batch`, click `Save to 2 files`.<br>**Single launch** (a fresh app launch on a fresh temp folder): inject the same way for `meta:read` after the scan, select one file, type Category `R15Single`, click `Save Tags`.<br>Take screenshots before and after each save. Read every file with `ffprobe -show_entries format_tags -of json` and with `music-metadata`. Finally, relaunch the app with no injection (or restore the original handler), open the same folder, and check the rows and the form. | The batch toast is exactly `Tags saved to 2 files, but reloading failed. Rescan to refresh.`, and the single toast is exactly `Tags saved, but reloading failed. Rescan to refresh.`. The rows keep their previous badge and values. The form still shows the typed value and Save stays enabled. ffprobe and music-metadata both show `ICAT=R15Batch` on both batch files and `ICAT=R15Single` on the single file. After the relaunch or restore, the rows and form show the new values.<br>**Red reference** on a build of `a4ad852` (worktree), same batch recipe: the toast is the raw `Error invoking remote method 'meta:read-batch'…` text, while ffprobe still shows `R15Batch` written.<br>Report which restore method was used. |
-| R15-6 real app regressions | Same built app with no injection: (i) a batch save of 2 files; (ii) a single save; (iii) a batch with one file `chmod 000` (the D-22 recipe from R13) | (i) `Tags saved to 2 files`, and the form is cleared. (ii) `Tags saved`. (iii) `1 saved, 1 failed`, and the chmod row keeps `Tagged`. Every value is confirmed in ffprobe and music-metadata. |
-| R15-7 docs | Read the `data-flow.md` and `STATE_MANAGEMENT.md` diffs against the code | Each describes D-24 as implemented: the exact toast texts, store untouched, edits kept, Rescan. The `data-flow.md` text is Georgian. No other section changed. |
+| R16-1 ownership | `git status --porcelain --untracked-files=all`; `git diff --stat 5854d45`; `git diff --quiet 5854d45 -- . ':!<4 owned paths>'`; read the diff | Only the 4 owned paths differ: 2 M and 2 new, and no other untracked file. `getElectronRequireArgs`, `getElectronLaunchArgs` and `captureMainProcessOutput` are byte-identical (compare the function bodies). The new module has no runtime import of `@playwright/test` or `electron`. There is no `any`, `@ts-ignore`, `as unknown as` or comment in the new code. The `ci-cd.md` diff is inside `### E2E launch budget`, and `#### TAG_MANAGER_E2E_ELECTRON_REQUIRE` is unchanged. A's result shows `permission_denials` empty. |
+| R16-2 red/green | `git worktree add /tmp/c-r16-old 5854d45` with `node_modules` symlinked (never `git stash`, never touch A's tree). Copy the new test file in and run `npx vitest run -c vitest.config.main.ts tests/main/electron-launch-failure.test.ts`, then run it on A's tree | Old: it fails, because the module is missing (record the error). New: every test passes, with the exact count. |
+| R16-3 mutations | In a throwaway copy of A's tree, run the unit file against each mutant. **M1:** drop `{ cause }`. **M2:** delete the launch-phase branch in the builder (launch falls through to the window texts). **M3:** no `exit` wait after `SIGKILL`. **M4:** wait for `exit` with no kill-wait timer. **M5:** send `SIGKILL` without the exited check. **M6** is real-launch only, in `electron-launch.ts`: start the phase at `"window"` instead of `"launch"`. The M6 copy needs A's built `out/` (symlink or copy); a TS-only change needs no rebuild. | M1 is killed by (a)–(f); M2 by (a)/(b)/(f); M3 by (g); M4 by (i), by timeout or assertion; M5 by (h). M6 is killed by R16-5 (1) on the mutant build: the old text `first window did not appear` comes back. Report the killing test for each. A survivor is a FAIL unless C shows it is equivalent. |
+| R16-4 gate | Clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0` once | Exit 0. Biome: 0 errors and 9 warnings, the same list as on `5854d45`. Typecheck 0, including `tsconfig.test.json`. Renderer **120/120**. Main **76 + new** (exact). E2E **7/7**, and **7/7** with `--retries=0`; the new module is not collected as a spec. |
+| R16-5 real launches | Built app (`npm run build`, A's tree), `xvfb-run`. A driver outside the repo (for example `/tmp/c-r16/drive.ts`, run with `npx --yes tsx@4`) imports `launchTagManagerApp` from A's real `tests/e2e/electron-launch.ts`. The repo is CommonJS (`package.json` has no `type`), so wrap the driver in `async function main()` and use no top-level await. B smoke E7: `b-round-15-exp-helper-smoke.ts.txt` → `title Czaba Tag Manager`, `closed`. It sets `TAG_MANAGER_E2E_ELECTRON_REQUIRE` to an injector under `/tmp`, and records the rejection's `message`, `cause` (name and message), elapsed time, and whether the Electron pid is alive. Each injector first writes `process.pid` to a file. Use the real budgets (60/15/10/5 s); no override.<br>(1) **block:** `Atomics.wait` for 75 s at require time.<br>(2) **exit:** `process.exit(3)`.<br>(3) **slow load:** a `webRequest.onBeforeRequest` delay of 30 s on the renderer's `.js` request (B E4).<br>(4) **hung main:** `app.whenReady` never resolves, and about 1 s after ready the event loop blocks (`Atomics.wait`) for 120 s (B E5). If `electron.launch` does not resolve with that timing, start the block later and record what you used.<br>(5) **no injector:** a normal launch, `page.title()`, close.<br>**Red reference:** the same (1) and (2) on a build of `5854d45`: a worktree with `node_modules` symlinked, then a real `npm run build` inside it, as in R15 (`old-build.log`). | (1) after about 60 s: `electron.launch did not finish within 60000 ms (elapsed …)`; `cause.name === "TimeoutError"`, and `cause.message` contains `electron.launch: Timeout 60000ms exceeded`; the pid is gone.<br>(2) within a few seconds: `electron.launch failed: electron.launch: Process failed to launch!`; `cause` is set; the pid is gone.<br>(3) after about 15 s: `first window appeared but domcontentloaded did not finish within 15000 ms: …`; the pid is gone.<br>(4) `first window did not appear within 60000 ms`. The rejection arrives only after the Electron pid is gone, so `process.kill(pid, 0)` throws ESRCH at the moment of the catch. Elapsed is about 70–75 s, below 100 s. `pgrep -f out/main/index.js` is empty afterwards.<br>(5) the window opens and closes cleanly.<br>Red reference: (1) gives `first window did not appear within 60000 ms` and (2) gives `first window failed before 60000 ms: …`, both with no `cause`. For (4) on the old tree, report whether the pid was still alive at the catch; this is informational only.<br>Give the full driver and the injector sources in `c-round-16/`. |
+| R16-6 docs | Read the `docs/ci-cd.md` diff against the code | Georgian text. All five message texts match the code exactly. The constants table matches the code. The sum 60 + 15 + 10 + 5 = 90 < 100 is stated. `cause` and the `exit` wait are described. The RR-R10-03 limit and the injector subsection are unchanged in meaning. |
 
 ## What could break (C re-checks)
-- **D-21/D-22 batch paths:** tests (a)–(i) must still pass unchanged (R15-2). R15-6 (iii) covers the same in the real app.
-- **Single save happy path and the sync effect:** after a normal single save the form shows the re-read values, and the next selection change shows no `Unsaved changes were discarded` toast. Test (e) and R15-6 (ii) cover this.
-- **`isSaving`:** it must return to false on every path, or the Save button stays disabled. Tests (j)–(m) assert it.
-- **Toast store:** one toast per save; the last `showToast` wins. Check that the catch does not show the D-24 text followed by a second generic toast.
-- **Schema change:** `handleSchemaChanged` also calls `readMetadataBatch`. It must stay byte-identical (the R15-1 diff hunk check).
+- **The three specs** import `LAUNCH_HOOK_TIMEOUT_MS` (and `launchTagManagerApp`) from `./electron-launch`. The re-exports must keep them resolving: E2E 7/7 (R16-4).
+- **Normal launch args (D-06):** `--no-sandbox` on Linux only, and `-r` only when the env var is set. Covered by the R16-1 byte check and R16-5 (5).
+- **No orphan Electron** after any failure (R16-5 `pgrep`).
+- **The hook timeout** grows by 10 s. That only matters on failure; the `check.yml` job timeout (40 min) is unaffected.
+- **Main test count and global setup:** the new main test must not need the WAV fixtures and must not leave timers running (R16-4 count, (i)).
 
 ## What realVerified means here
-- R15-1…R15-4 and R15-7 are real local checks.
-- R15-5 is the real Electron UI with a real IPC rejection, produced by replacing the handler in the running main process. That is a harness manipulation; the source is unchanged. The file results are read with independent readers.
-- R15-6 is the real UI with no injection.
+- R16-1…R16-4 and R16-6 are real local checks.
+- R16-5 runs the real built Electron app through the real helper, with failure injectors that exist only in C's phase (the D-20 mechanism already in the repo) and the real budgets.
+- The Actions part (a cold-runner `Check` run) belongs to TM-B14/TM-T0-CI and is root's to link.
 - Windows packaging is BLOCKED: Windows packaging is not available in the cloud. It is not part of this round.
 
 ## Next (orientation only)
-1. **RR-R5-02** (`file-row-display.ts` `typeof` guard) and **RR-R10-01/02 + A-R10-01** (E2E launch helper messages). One small round each, or paired if they turn out to be tightly related.
-2. **Root:** please link the `Check` Actions run on `a4ad852`, or on any commit since `35ed18b`. A green run closes TM-T0-CI, TM-T0, TM-T0-CI-FU and the Actions part of TM-B14.
-3. **Saba question batch:** every other backlog item waits on it.
+1. **RR-R5-02** (`file-row-display.ts` `typeof` guard). Its acceptance can only be unit tests, and the task will say so.
+2. **A MetadataPanel polish round:**
+   - RR-R13-02 + RR-R15-02: remove the `as WavMetadata` casts. The preload types already fit, so no protected edit is needed.
+   - RR-R15-01: re-read reason. This changes the D-24 wording, so it needs a D-24 amendment.
+3. **Root:** please link the `Check` Actions run on `5854d45` or `a4ad852` (or any commit since `35ed18b`). A green run closes TM-T0-CI, TM-T0, TM-T0-CI-FU and the Actions part of TM-B14.
+4. **Saba question batch:**
    - D-07 (TM-T1-MIG);
    - D-10 + TM-B11;
    - D-12/TM-B08 + B-R6-01;
@@ -150,5 +155,8 @@ Logs go to `a-round-15/` (A) and `c-round-15/` (C) in the loop folder.
    - RR-R1-07;
    - RR-R3-05;
    - TM-T2-DATA;
-   - RR-R13-01/02 (protected preload types);
+   - RR-R13-01 (protected preload return shape);
+   - RR-R15-03 (dirty after a confirmed write);
+   - RR-R15-05 (write returns the re-read; preload);
+   - C-R15-01 (toast placement; reference-first);
    - optional RR-R12-02.

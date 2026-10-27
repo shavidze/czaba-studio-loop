@@ -1,0 +1,15 @@
+import { createRequire } from "node:module";
+const require = createRequire("/home/runner/czaba-project/czaba-tag-manager/package.json");
+const { _electron: electron } = require("@playwright/test");
+const [inj, launchMs, winMs] = [process.argv[2], Number(process.argv[3]), Number(process.argv[4])];
+const t0 = Date.now(); let app;
+try {
+  app = await electron.launch({ args: ["--no-sandbox", "-r", inj, "/home/runner/czaba-project/czaba-tag-manager/out/main/index.js"], env: { ...process.env, NODE_ENV: "production" }, timeout: launchMs });
+  console.log("launched", Date.now() - t0);
+  const page = await app.firstWindow({ timeout: winMs });
+  console.log("window", Date.now() - t0, page.url());
+  await page.waitForLoadState("domcontentloaded", { timeout: 3000 });
+  console.log("dcl", Date.now() - t0, page.url());
+} catch (e) { console.log("ERR", Date.now() - t0, e.name, e.message.split("\n")[0]); }
+if (app) { const p = app.process(); const c = Date.now(); await Promise.race([app.close().catch(e=>console.log("closeerr",e.message.split("\n")[0])), new Promise(r=>setTimeout(r,4000))]); console.log("close", Date.now()-c, "exit", p.exitCode, p.signalCode); if (p.exitCode===null&&p.signalCode===null){p.kill("SIGKILL"); await new Promise(r=>p.once("exit",r)); console.log("killed", p.signalCode);} }
+process.exit(0);

@@ -1,0 +1,7 @@
+import { createRequire } from "node:module"; import { readFileSync } from "node:fs";
+const require = createRequire("/home/runner/czaba-project/czaba-tag-manager/package.json");
+const { _electron: electron } = require("@playwright/test");
+try { await electron.launch({ args: ["--no-sandbox", "-r", "/tmp/b-r16/blockpid.cjs", "/home/runner/czaba-project/czaba-tag-manager/out/main/index.js"], timeout: 3000 }); } catch (e) { console.log("ERR", e.message.split("\n")[0]); }
+const pid = Number(readFileSync("/tmp/b-r16/pid.txt","utf8"));
+for (const t of [0, 500, 2000]) { await new Promise(r=>setTimeout(r,t)); let alive=true; try{process.kill(pid,0)}catch{alive=false} console.log("after",t,"pid",pid,"alive",alive); }
+process.exit(0);

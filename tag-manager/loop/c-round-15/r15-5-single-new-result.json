@@ -1,0 +1,57 @@
+{
+  "scenario": "single-inject",
+  "appRoot": "/home/runner/czaba-project/czaba-tag-manager",
+  "label": "5-single-new",
+  "work": "/tmp/c-r15-5-single-new-z4hDhv",
+  "value": "R15Single",
+  "steps": [],
+  "rowsBefore": {
+    "a.wav": {
+      "tagged": false,
+      "text": "a.wav 86.2 KB 10/27/2026"
+    }
+  },
+  "injection": {
+    "channel": "meta:read",
+    "snippet": "({ ipcMain }, ch) => { ipcMain.removeHandler(ch); ipcMain.handle(ch, () => { throw new Error('R15 injected'); }); }"
+  },
+  "saveEnabledBefore": true,
+  "toasts": [
+    {
+      "t": "Tags saved, but reloading failed. Rescan to refresh.",
+      "error": true,
+      "success": false
+    }
+  ],
+  "rowsAfter": {
+    "a.wav": {
+      "tagged": false,
+      "text": "a.wav 86.2 KB 10/27/2026"
+    }
+  },
+  "inputAfter": "R15Single",
+  "saveEnabledAfter": true,
+  "saveBtnText": "Save Tags",
+  "files": {
+    "a.wav": {
+      "ffprobe": {
+        "IKEY": "",
+        "ICAT": "R15Single"
+      },
+      "ICAT_ffprobe": "R15Single",
+      "ICAT_mm": [
+        "R15Single"
+      ]
+    }
+  },
+  "relaunchRows": {
+    "a.wav": {
+      "tagged": true,
+      "text": "a.wav Tagged 87.4 KB 10/27/2026"
+    }
+  },
+  "relaunchForm": {
+    "a.wav": "R15Single"
+  },
+  "relaunchToasts": []
+}

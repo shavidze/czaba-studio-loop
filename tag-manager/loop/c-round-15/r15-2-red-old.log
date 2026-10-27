@@ -1,0 +1,83 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r15-old[39m
+
+ [31m❯[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m13 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 2011[2mms[22m[39m
+     [33m[2m✓[22m[39m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept [33m 403[2mms[22m[39m
+     [32m✓[39m (b) partial failure: edits are kept and succeeded files are refreshed in the store[32m 165[2mms[22m[39m
+     [32m✓[39m (c) retry after a failure writes the same fields to all selected files and clears on success[32m 227[2mms[22m[39m
+     [32m✓[39m (d) full success clears the form back to Multiple values[32m 143[2mms[22m[39m
+     [32m✓[39m (e) single-file write failure keeps the typed value and shows the error[32m 141[2mms[22m[39m
+     [32m✓[39m (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated[32m 136[2mms[22m[39m
+     [32m✓[39m (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept[32m 141[2mms[22m[39m
+     [32m✓[39m (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry[32m 151[2mms[22m[39m
+     [32m✓[39m (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01)[32m 133[2mms[22m[39m
+[31m     [31m×[31m (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept[39m[32m 85[2mms[22m[39m
+[31m     [31m×[31m (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept[39m[32m 81[2mms[22m[39m
+[31m     [31m×[31m (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept[39m[32m 74[2mms[22m[39m
+     [32m✓[39m (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept[32m 128[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save whose write succeeded but whose re-read rejects (TM-B18, D-24)[2m > [22m(j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept
+[31m[1mAssertionError[22m: expected 'read-batch down' to be 'Tags saved to 2 files, but reloading …' // Object.is equality[39m
+
+Expected: [32m"Tags saved to 2 files, but reloading failed. Rescan to refresh."[39m
+Received: [31m"read-batch down"[39m
+
+[36m [2m❯[22m expectToast tests/renderer/components/metadata-panel-batch-save.test.ts:[2m315:32[22m[39m
+    [90m313| [39m    [34mexpect[39m(toastsShown)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m314| [39m    [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m315| [39m    [34mexpect[39m(state[33m.[39mtoastMessage)[33m.[39m[34mtoBe[39m(message)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m316| [39m    [34mexpect[39m(state[33m.[39mtoastType)[33m.[39m[34mtoBe[39m([32m"error"[39m)[33m;[39m
+    [90m317| [39m  }
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m332:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save whose write succeeded but whose re-read rejects (TM-B18, D-24)[2m > [22m(k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept
+[31m[1mAssertionError[22m: expected 'read-batch down' to be '1 saved, 1 failed. Reloading failed. …' // Object.is equality[39m
+
+Expected: [32m"1 saved, 1 failed. Reloading failed. Rescan to refresh."[39m
+Received: [31m"read-batch down"[39m
+
+[36m [2m❯[22m expectToast tests/renderer/components/metadata-panel-batch-save.test.ts:[2m315:32[22m[39m
+    [90m313| [39m    [34mexpect[39m(toastsShown)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m314| [39m    [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m315| [39m    [34mexpect[39m(state[33m.[39mtoastMessage)[33m.[39m[34mtoBe[39m(message)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m316| [39m    [34mexpect[39m(state[33m.[39mtoastType)[33m.[39m[34mtoBe[39m([32m"error"[39m)[33m;[39m
+    [90m317| [39m  }
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m351:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save whose write succeeded but whose re-read rejects (TM-B18, D-24)[2m > [22m(l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept
+[31m[1mAssertionError[22m: expected 'read down' to be 'Tags saved, but reloading failed. Res…' // Object.is equality[39m
+
+Expected: [32m"Tags saved, but reloading failed. Rescan to refresh."[39m
+Received: [31m"read down"[39m
+
+[36m [2m❯[22m expectToast tests/renderer/components/metadata-panel-batch-save.test.ts:[2m315:32[22m[39m
+    [90m313| [39m    [34mexpect[39m(toastsShown)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m314| [39m    [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m315| [39m    [34mexpect[39m(state[33m.[39mtoastMessage)[33m.[39m[34mtoBe[39m(message)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m316| [39m    [34mexpect[39m(state[33m.[39mtoastType)[33m.[39m[34mtoBe[39m([32m"error"[39m)[33m;[39m
+    [90m317| [39m  }
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m374:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m10 passed[39m[22m[90m (13)[39m
+[2m   Start at [22m 09:20:14
+[2m   Duration [22m 3.12s[2m (transform 222ms, setup 90ms, import 360ms, tests 2.01s, environment 533ms)[22m
+
+
+::error file=/tmp/c-r15-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save whose write succeeded but whose re-read rejects (TM-B18%2C D-24) > (j) batch%2C all written + re-read rejects%3A write-result toast%2C store untouched%2C edits kept,line=315,column=32::AssertionError: expected 'read-batch down' to be 'Tags saved to 2 files, but reloading …' // Object.is equality%0A%0AExpected: "Tags saved to 2 files, but reloading failed. Rescan to refresh."%0AReceived: "read-batch down"%0A%0A ❯ expectToast tests/renderer/components/metadata-panel-batch-save.test.ts:315:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:332:5%0A%0A
+
+::error file=/tmp/c-r15-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save whose write succeeded but whose re-read rejects (TM-B18%2C D-24) > (k) batch%2C partial write + re-read rejects%3A write-result toast%2C store untouched%2C edits kept,line=315,column=32::AssertionError: expected 'read-batch down' to be '1 saved, 1 failed. Reloading failed. …' // Object.is equality%0A%0AExpected: "1 saved, 1 failed. Reloading failed. Rescan to refresh."%0AReceived: "read-batch down"%0A%0A ❯ expectToast tests/renderer/components/metadata-panel-batch-save.test.ts:315:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:351:5%0A%0A
+
+::error file=/tmp/c-r15-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save whose write succeeded but whose re-read rejects (TM-B18%2C D-24) > (l) single%2C write ok + readMetadata rejects%3A write-result toast%2C store untouched%2C edits kept,line=315,column=32::AssertionError: expected 'read down' to be 'Tags saved, but reloading failed. Res…' // Object.is equality%0A%0AExpected: "Tags saved, but reloading failed. Rescan to refresh."%0AReceived: "read down"%0A%0A ❯ expectToast tests/renderer/components/metadata-panel-batch-save.test.ts:315:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:374:5%0A%0A

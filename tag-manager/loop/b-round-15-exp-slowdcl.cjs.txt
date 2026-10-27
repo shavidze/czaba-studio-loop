@@ -1,0 +1,6 @@
+const { app, session } = require("electron");
+app.on("ready", () => {
+  session.defaultSession.webRequest.onBeforeRequest({ urls: ["file://*/*"] }, (d, cb) => {
+    if (/\.js$/.test(d.url) && /renderer/.test(d.url)) setTimeout(() => cb({}), Number(process.env.B_DCL_DELAY_MS || 20000)); else cb({});
+  });
+});

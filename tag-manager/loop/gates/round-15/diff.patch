@@ -1,0 +1,207 @@
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index cc834f3..9c7f9cd 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -22,6 +22,7 @@
+ Single:  writeMetadata → readMetadata → skipSync=true → updateFileMetadata → setEditingMetadata
+ Batch:   writeMetadataBatch(modifiedFields only) → readBatch → update non-failed only (D-22); skipSync only if ≥1 applied → failed empty ? setEditingMetadata({}) : keep edits
+ Batch failed non-empty (D-21): editingMetadata, modifiedFields, isDirty kept → Save stays enabled, retry writes to all selected files
++Re-read rejects (D-24): no store update, no skipSync, edits kept → error toast with write result + "Rescan to refresh"
+ ```
+ 
+ ### Template apply (batch-safe)
+diff --git a/docs/learning/data-flow.md b/docs/learning/data-flow.md
+index 5e981a6..2b80e07 100644
+--- a/docs/learning/data-flow.md
++++ b/docs/learning/data-flow.md
+@@ -96,6 +96,8 @@ sequenceDiagram
+     MP->>MS: showToast("Tags saved", "success")
+ ```
+ 
++**re-read-ის შეცდომა (D-24):** თუ `writeMetadata` წარმატებით სრულდება, მაგრამ შემდეგი `readMetadata` reject-ს აბრუნებს (IPC დონის შეცდომა), store არ ახლდება (`updateFileMetadata` არ იძახება), `skipSyncRef` არ ინიშნება და `setEditingMetadata` არ იძახება. აკრეფილი მნიშვნელობები, `modifiedFields` და `isDirty = true` ფორმაში რჩება, ამიტომ `Save Tags` ღილაკი აქტიურია; განმეორებითი Save იგივე მნიშვნელობებს წერს. ჩნდება ერთი error toast: `Tags saved, but reloading failed. Rescan to refresh.` — ფაილი დისკზე უკვე ჩაწერილია, მაგრამ აპმა ის თავიდან ვერ წაიკითხა. რეალური მნიშვნელობების სანახავად sidebar-ში დააჭირე `Rescan`-ს. ცნობილი შეზღუდვა: სხვა ფაილზე გადასვლისას მაინც ჩნდება `Unsaved changes were discarded`. `isSaving` `finally`-ში ბრუნდება `false`-ზე.
++
+ ## ტეგების შენახვა — Batch (რამდენიმე ფაილი)
+ 
+ ```mermaid
+@@ -141,6 +143,8 @@ sequenceDiagram
+ 
+ **Batch-ის თავისებურება:** `Partial<WavMetadata>`-ში მხოლოდ შეცვლილი ველები (`modifiedFields`) გადაიწერება. თუ ფორმაში BPM ცარიელია, არსებული BPM უცვლელი რჩება.
+ 
++**re-read-ის შეცდომა (D-24):** თუ `writeMetadataBatch` resolve-ს აბრუნებს, მაგრამ შემდეგი `readMetadataBatch` reject-ს აბრუნებს (IPC დონის შეცდომა), store-ში არცერთი ფაილი არ ახლდება (`updateFileMetadata` არ იძახება), `skipSyncRef` არ ინიშნება და `setEditingMetadata` არ იძახება — `editingMetadata`, `modifiedFields` და `isDirty = true` რჩება, `Save to N files` ღილაკი აქტიურია. ჩნდება ერთი error toast write-ის შედეგით: `failed` ცარიელისას `Tags saved to {succeeded} files, but reloading failed. Rescan to refresh.`, სხვა შემთხვევაში `{succeeded} saved, {failed} failed. Reloading failed. Rescan to refresh.`. rows ძველ badge-სა და მნიშვნელობებს აჩვენებს, სანამ sidebar-ში `Rescan`-ს არ დააჭერ. განმეორებითი Save იგივე ველებს ყველა მონიშნულ ფაილში წერს (idempotent). თუ თავად `writeMetadataBatch` reject-ს აბრუნებს, `readMetadataBatch` არ იძახება და toast-ში შეცდომის ტექსტი ჩანს, როგორც აქამდე. ცნობილი შეზღუდვა: სხვა მონიშვნაზე გადასვლისას მაინც ჩნდება `Unsaved changes were discarded`.
++
+ ## Template Lifecycle
+ 
+ ```mermaid
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index 1a6e83b..81fc59e 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -7,9 +7,17 @@ import { Input } from '~/components/ui/input';
+ import { useFileStore, useSelectedFiles } from '~/stores/file-store';
+ import { useMetadataStore } from '~/stores/metadata-store';
+ import { useSchemaStore } from '~/stores/schema-store';
+-import type { WavMetadata } from '~/types';
++import type { BatchWriteResult, WavMetadata } from '~/types';
+ import { TagsInput } from './TagsInput';
+ 
++function buildReloadFailedToast(batchResult?: BatchWriteResult): string {
++  if (!batchResult) return 'Tags saved, but reloading failed. Rescan to refresh.';
++  if (batchResult.failed.length === 0) {
++    return `Tags saved to ${batchResult.succeeded} files, but reloading failed. Rescan to refresh.`;
++  }
++  return `${batchResult.succeeded} saved, ${batchResult.failed.length} failed. Reloading failed. Rescan to refresh.`;
++}
++
+ export function MetadataPanel(): React.ReactElement {
+   const selectedFiles = useSelectedFiles();
+   const selectedPaths = useFileStore((s) => s.selectedPaths);
+@@ -74,7 +82,13 @@ export function MetadataPanel(): React.ReactElement {
+       if (selectedFiles.length === 1) {
+         const path = selectedFiles[0].path;
+         await window.api.writeMetadata(path, editingMetadata as Partial<WavMetadata>, fields);
+-        const updated = await window.api.readMetadata(path, fields);
++        let updated: WavMetadata;
++        try {
++          updated = await window.api.readMetadata(path, fields);
++        } catch {
++          showToast(buildReloadFailedToast(), 'error');
++          return;
++        }
+         skipSyncRef.current = true;
+         updateFileMetadata(path, updated as WavMetadata);
+         setEditingMetadata({ ...(updated as WavMetadata) });
+@@ -90,7 +104,13 @@ export function MetadataPanel(): React.ReactElement {
+         }
+         const result = await window.api.writeMetadataBatch(paths, batchMeta, fields);
+ 
+-        const refreshed = await window.api.readMetadataBatch(paths, fields);
++        let refreshed: Record<string, WavMetadata>;
++        try {
++          refreshed = await window.api.readMetadataBatch(paths, fields);
++        } catch {
++          showToast(buildReloadFailedToast(result), 'error');
++          return;
++        }
+         const failedPaths = new Set(result.failed.map((f) => f.path));
+         const savedEntries = Object.entries(refreshed).filter(([path]) => !failedPaths.has(path));
+         if (savedEntries.length > 0) {
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index d9a4376..3a85a39 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -288,3 +288,115 @@ describe("MetadataPanel batch save keeps the store entry of failed files (TM-B16
+     expect(useMetadataStore.getState().editingMetadata).toEqual({});
+   });
+ });
++
++describe("MetadataPanel save whose write succeeded but whose re-read rejects (TM-B18, D-24)", () => {
++  function expectStoreUnchanged(seedA: WavMetadata, seedB: WavMetadata): void {
++    const stored = useFileStore.getState().metadata;
++    expect(stored[PATH_A]).toEqual(seedA);
++    expect(stored[PATH_B]).toEqual(seedB);
++  }
++
++  function expectNoStaleSkipSync(expectedAfterResync: WavMetadata): void {
++    act(() => {
++      useMetadataStore.getState().setIsDirty(false);
++    });
++    expect(useMetadataStore.getState().editingMetadata).toEqual(expectedAfterResync);
++  }
++
++  async function typeCategoryAndSaveCountingToasts(saveButtonName: RegExp): Promise<number> {
++    const toastKeyBefore = useMetadataStore.getState().toastKey;
++    await typeCategoryAndSave(saveButtonName);
++    return useMetadataStore.getState().toastKey - toastKeyBefore;
++  }
++
++  function expectToast(message: string, toastsShown: number): void {
++    expect(toastsShown).toBe(1);
++    const state = useMetadataStore.getState();
++    expect(state.toastMessage).toBe(message);
++    expect(state.toastType).toBe("error");
++  }
++
++  it("(j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept", async () => {
++    const seedA = taggedSeed("old A");
++    const seedB = taggedSeed("old B");
++    seedTaggedFiles(seedA, seedB);
++    vi.mocked(window.api.writeMetadataBatch).mockResolvedValue(ALL_SUCCEEDED);
++    vi.mocked(window.api.readMetadataBatch).mockRejectedValue(new Error("read-batch down"));
++    render(createElement(MetadataPanel));
++
++    const toastsShown = await typeCategoryAndSaveCountingToasts(/Save to 2 files/);
++
++    expect(window.api.writeMetadataBatch).toHaveBeenCalledTimes(1);
++    expectBatchWriteCall(0);
++    expect(window.api.readMetadataBatch).toHaveBeenCalledTimes(1);
++    expectToast("Tags saved to 2 files, but reloading failed. Rescan to refresh.", toastsShown);
++    expectStoreUnchanged(seedA, seedB);
++    expectEditsKept();
++    expect(useMetadataStore.getState().isSaving).toBe(false);
++    expectNoStaleSkipSync({});
++  });
++
++  it("(k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept", async () => {
++    const seedA = taggedSeed("old A");
++    const seedB = taggedSeed("old B");
++    seedTaggedFiles(seedA, seedB);
++    vi.mocked(window.api.writeMetadataBatch).mockResolvedValue(PARTIAL_FAILED);
++    vi.mocked(window.api.readMetadataBatch).mockRejectedValue(new Error("read-batch down"));
++    render(createElement(MetadataPanel));
++
++    const toastsShown = await typeCategoryAndSaveCountingToasts(/Save to 2 files/);
++
++    expect(window.api.writeMetadataBatch).toHaveBeenCalledTimes(1);
++    expect(window.api.readMetadataBatch).toHaveBeenCalledTimes(1);
++    expectToast("1 saved, 1 failed. Reloading failed. Rescan to refresh.", toastsShown);
++    expectStoreUnchanged(seedA, seedB);
++    expectEditsKept();
++    expect(useMetadataStore.getState().isSaving).toBe(false);
++    expectNoStaleSkipSync({});
++  });
++
++  it("(l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept", async () => {
++    const seedA = taggedSeed("old A");
++    const seedB = taggedSeed("old B");
++    useFileStore.setState({
++      files: [FILE_A, FILE_B],
++      metadata: { [PATH_A]: { ...seedA }, [PATH_B]: { ...seedB } },
++      selectedPaths: [PATH_A],
++    });
++    vi.mocked(window.api.readMetadata).mockRejectedValue(new Error("read down"));
++    render(createElement(MetadataPanel));
++
++    const toastsShown = await typeCategoryAndSaveCountingToasts(/Save Tags/);
++
++    expect(window.api.writeMetadata).toHaveBeenCalledTimes(1);
++    expect(vi.mocked(window.api.writeMetadata).mock.calls[0]?.[0]).toBe(PATH_A);
++    expect(window.api.readMetadata).toHaveBeenCalledTimes(1);
++    expectToast("Tags saved, but reloading failed. Rescan to refresh.", toastsShown);
++    expectStoreUnchanged(seedA, seedB);
++    const state = useMetadataStore.getState();
++    expect(getCategoryInput().value).toBe(TYPED_CATEGORY);
++    expect(state.editingMetadata.category).toBe(TYPED_CATEGORY);
++    expect(state.modifiedFields).toEqual(new Set(["category"]));
++    expect(state.isDirty).toBe(true);
++    expect(state.isSaving).toBe(false);
++    expect(screen.getByRole("button", { name: /Save Tags/ })).toBeEnabled();
++    expectNoStaleSkipSync(seedA);
++  });
++
++  it("(m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept", async () => {
++    const seedA = taggedSeed("old A");
++    const seedB = taggedSeed("old B");
++    seedTaggedFiles(seedA, seedB);
++    vi.mocked(window.api.writeMetadataBatch).mockRejectedValue(new Error("write-batch down"));
++    render(createElement(MetadataPanel));
++
++    const toastsShown = await typeCategoryAndSaveCountingToasts(/Save to 2 files/);
++
++    expect(window.api.writeMetadataBatch).toHaveBeenCalledTimes(1);
++    expect(window.api.readMetadataBatch).not.toHaveBeenCalled();
++    expectToast("write-batch down", toastsShown);
++    expectStoreUnchanged(seedA, seedB);
++    expectEditsKept();
++    expect(useMetadataStore.getState().isSaving).toBe(false);
++  });
++});

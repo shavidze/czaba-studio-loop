@@ -1,0 +1,78 @@
+{
+  "scenario": "batch-inject",
+  "appRoot": "/tmp/c-r15-old",
+  "label": "5-batch-old",
+  "work": "/tmp/c-r15-5-batch-old-kaPro6",
+  "value": "R15Batch",
+  "steps": [],
+  "rowsBefore": {
+    "a.wav": {
+      "tagged": false,
+      "text": "a.wav 86.2 KB 10/27/2026"
+    },
+    "b.wav": {
+      "tagged": false,
+      "text": "b.wav 86.2 KB 10/27/2026"
+    }
+  },
+  "injection": {
+    "channel": "meta:read-batch",
+    "snippet": "({ ipcMain }, ch) => { ipcMain.removeHandler(ch); ipcMain.handle(ch, () => { throw new Error('R15 injected'); }); }"
+  },
+  "saveEnabledBefore": true,
+  "toasts": [
+    {
+      "t": "Error invoking remote method 'meta:read-batch': Error: R15 injected",
+      "error": true,
+      "success": false
+    }
+  ],
+  "rowsAfter": {
+    "a.wav": {
+      "tagged": false,
+      "text": "a.wav 86.2 KB 10/27/2026"
+    },
+    "b.wav": {
+      "tagged": false,
+      "text": "b.wav 86.2 KB 10/27/2026"
+    }
+  },
+  "inputAfter": "R15Batch",
+  "saveEnabledAfter": true,
+  "saveBtnText": "Save to 2 files",
+  "files": {
+    "a.wav": {
+      "ffprobe": {
+        "ICAT": "R15Batch"
+      },
+      "ICAT_ffprobe": "R15Batch",
+      "ICAT_mm": [
+        "R15Batch"
+      ]
+    },
+    "b.wav": {
+      "ffprobe": {
+        "ICAT": "R15Batch"
+      },
+      "ICAT_ffprobe": "R15Batch",
+      "ICAT_mm": [
+        "R15Batch"
+      ]
+    }
+  },
+  "relaunchRows": {
+    "a.wav": {
+      "tagged": true,
+      "text": "a.wav Tagged 87.4 KB 10/27/2026"
+    },
+    "b.wav": {
+      "tagged": true,
+      "text": "b.wav Tagged 87.4 KB 10/27/2026"
+    }
+  },
+  "relaunchForm": {
+    "a.wav": "R15Batch",
+    "b.wav": "R15Batch"
+  },
+  "relaunchToasts": []
+}

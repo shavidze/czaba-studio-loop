@@ -1,20 +1,17 @@
-# Active loop summary (2026-10-27T09:05:03.660Z)
+# Active loop summary (2026-10-27T09:27:12.194Z)
 
-- backlog.json 117 KB -> active view 39 KB
-- status: G_ROOT_GATE round 14
+- backlog.json 126 KB -> active view 41 KB
+- status: G_ROOT_GATE round 15
 - servers: `{"servers":"none or skipped"}`
-- last publication: a4ad85244cd7a80515c67f342cb0cae238cebc29 (rounds 14-14)
-- last root gate: round 14 published - commit a4ad85244cd7a80515c67f342cb0cae238cebc29 pushed
+- last publication: 5854d450b67e5d5aef29a81920b0fd531f516ba7 (rounds 15-15)
+- last root gate: round 15 published - commit 5854d450b67e5d5aef29a81920b0fd531f516ba7 pushed
 
-## Current items: TM-B16, TM-B17
+## Current items: TM-B17, TM-B18
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
 - C-R1-01 / low / open / Empty Keywords written as IKEY=""; save also adds id3, LIST/MID, IDVX, JUNK chunks and moves data to the end (audio bytes identical). Contra
-- C-R1-03 / low / in_progress / .claude/primitives/TESTING.md:129 stale (fixtures now created by globalSetup); .claude/** frozen, needs a round that owns it
 - RR-R1-03 / low / open / check.yml actions pinned to @v4 tags, not SHAs
-- RR-R1-04 / low / in_progress / create-fixtures.ts CLI guard regex matches only create-fixtures.ts (argv[1]); suggest create-fixtures\.[cm]?[jt]s$
-- RR-R1-05 / low / in_progress / create-fixtures.ts temp file ${filePath}.${pid}.tmp leaks if writeFileSync throws; not gitignored
 - RR-R1-07 / info / open / Architecture signal: after a green check.yml run make it a required status check and add needs: check to release.yml (release.yml frozen; ne
 - C-R2-01 / low / open / Artists written as repeated ISTR while the schema says IART; ffprobe artist shows only the first (pre-existing) -> TM-B08, D-12
 - RR-R2-03 / low / open / skipLibCheck:true also skips the project's own src/preload/index.d.ts; consider dropping it from tsconfig.test.json once dependency types ar
@@ -68,9 +65,15 @@
 - C-R12-01 / info / open / A's result JSON has no full tool transcript, so 'no Bash write to .claude/**' is confirmed only indirectly (empty permission_denials, A's re
 - RR-R13-01 / low / open / MetadataPanel.tsx:93-101 a file whose batch write succeeded but whose re-read fails still gets emptyMetadata in the store (same as D-22 know
 - RR-R13-02 / low / open / MetadataPanel.tsx:100 'updated as WavMetadata' cast without runtime check; fix = type readMetadataBatch as Record<string, WavMetadata> in sr
-- RR-R13-03 / low / open / MetadataPanel.tsx:84-108 if writeMetadataBatch succeeds and readMetadataBatch then rejects, the catch shows a generic error toast and the st
+- RR-R13-03 / low / in_progress / MetadataPanel.tsx:84-108 if writeMetadataBatch succeeds and readMetadataBatch then rejects, the catch shows a generic error toast and the st
 - RR-R13-04 / info / open / Architecture signal: move batch-save reconciliation into a file-store action applyBatchSaveResult(result, refreshed) returning the applied c
 - C-R13-01 / low / open / metadata-panel-batch-save.test.ts emptyRecordForPanelSchema() hand-copies main's emptyMetadata(schema); matches today, can drift if main cha
+- RR-R14-02 / low / open / create-fixtures.test.ts:52 ENOSPC write-failure test is skipped where /dev/full is missing (Windows/macOS); optional extra test that makes w
+- RR-R14-03 / low / open / create-fixtures.ts:69 empty catch {} would trip Biome noEmptyBlockStatements once tests/ is linted; a small cleanup helper fits the no-comme
+- RR-R14-04 / low / open / docs/plans/002-recording-tag-contract.md still writes 'npx tsx', TESTING.md writes 'npx --yes tsx@4'; align on the next docs touch
+- RR-R14-05 / info / open / Architecture signal: add tests/**/*.ts to Biome files.includes (relaxed override if needed) so semicolons, quote style and no-comments rules
+- C-R14-01 / low / open / TESTING.md fixtures section: the paragraph after the code block sits outside the list and bullets follow it; renders fine, structure slightl
+- B-R14-01 / low / in_progress / Single-file save has the same shape as RR-R13-03: writeMetadata resolves, readMetadata rejects -> outer catch shows the raw rejection text a
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

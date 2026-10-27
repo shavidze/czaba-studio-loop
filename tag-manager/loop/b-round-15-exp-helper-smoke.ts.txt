@@ -1,0 +1,8 @@
+import { launchTagManagerApp } from "/home/runner/czaba-project/czaba-tag-manager/tests/e2e/electron-launch";
+async function main(): Promise<void> {
+  const { app, page } = await launchTagManagerApp();
+  console.log("title", await page.title());
+  await app.close();
+  console.log("closed");
+}
+main().catch((e: unknown) => { console.log("ERR", e); process.exit(1); });

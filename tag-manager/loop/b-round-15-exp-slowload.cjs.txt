@@ -1,0 +1,3 @@
+const { BrowserWindow } = require("electron");
+const orig = BrowserWindow.prototype.loadFile;
+BrowserWindow.prototype.loadFile = function (...a) { setTimeout(() => orig.apply(this, a), Number(process.env.B_LOAD_DELAY_MS || 20000)); return Promise.resolve(); };
