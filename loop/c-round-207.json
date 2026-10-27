@@ -1,0 +1,65 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-27T12:19:49.7782753Z",
+  "round": 207,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R207-01",
+   "severity": "low",
+   "steps": [
+    "Open http://127.0.0.1:5173/studio-lab at 1440x900 (also 1280x720) in a fresh context",
+    "Load beeps-6s-h264-aac.mp4 through arrangement-video-input",
+    "Click arrangement-video-expand",
+    "Read getComputedStyle([data-testid=arrangement-video-drag]).cursor; also read computed cursor of disabled buttons with disabled:cursor-not-allowed (arrangement-zoom-range, arrangement-zoom-back, arrangement-metronome-toggle, Delete)"
+   ],
+   "expected": "The video handle shows grab (class cursor-grab; CUR-VIDEO-207 clause \"handle still grab\"); disabled buttons show not-allowed",
+   "actual": "pointer in both cases. Existed before this round: the unlayered top-level rule button { cursor: pointer; } in protected app/styles/app.css:476 beats the layered Tailwind utilities. Deleting only that rule via CSSOM gives grab. Not caused by the round-207 diff (handle line 971 and app.css untouched). Row CUR-VIDEO-207, handle sub-clause.",
+   "evidence": "c-round-207/out/handle-cause.json; c-round-207/out/cursor-audit-1440.json; c-round-207/out/c207-{1440,1280}.json rows[CUR-VIDEO-207].handle; B ruling needed (accept pointer on buttons or grant an app.css layer/! fix later)"
+  }
+ ],
+ "passed": [
+  "SCOPE-207",
+  "CUR-ENV-207",
+  "CUR-POINT-207",
+  "CUR-VIDEO-207",
+  "CUR-UNCHANGED-207",
+  "BEHAV-207",
+  "REF-207",
+  "AN-REVIEW-207",
+  "G207-3"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "notes": [
+  "Ableton parity of the cursor shape: unconfirmed (no source); D1-D3 are listed deviations",
+  "active:cursor-grabbing verified in Chromium only; Firefox/Safari unverified in the cloud",
+  "CUR-VIDEO-207 passes except the handle sub-clause, which is C-R207-01 (existed before this round)",
+  "G207-3: fake Bearer gives 500 without the mock and 403 with mock-api on :5199; no token issued; C stopped the mock afterwards"
+ ],
+ "ableton": {
+  "cursorShape": "unconfirmed (no source)",
+  "deviations": [
+   "D1 pointer over whole clip body (SABA-B-6-R1 awaiting_user)",
+   "D2 pointer is Saba request",
+   "D3 floating video grab/grabbing CZABA convention"
+  ],
+  "behaviourRoles": "confirmed (Live 12 manual sections cited by B)"
+ },
+ "info": [
+  "/api/studio-token without product/file params returns 400 (parameter validation runs before auth); G-rows must pass product and file to see 401",
+  "Firefox/Safari :active unverified (Chromium only)"
+ ]
+}

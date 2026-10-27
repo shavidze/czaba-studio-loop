@@ -1,0 +1,181 @@
+
+ RUN  v4.0.16 /tmp/a207
+
+ ❯ app/lib/arrangement/__tests__/timeline-cursor-map.test.ts (1 test | 1 failed) 17ms
+     × CU4 no arrangement .tsx or .ts file uses a plus-shaped cursor (crosshair, move, cell, copy, all-scroll) anywhere in the file, as a utility, arbitrary value or inline style 15ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx (28 tests | 2 failed) 2914ms
+     ✓ EU1 the Env button and the A key toggle the mode and write the status 281ms
+     ✓ EU1 A with a modifier, a repeat or in a text field does nothing 134ms
+     ✓ EU1 mode off shows no editor and no points; mode on hides the fade handles 119ms
+     ✓ EU1 a video clip, a narrow clip and a folded lane never render an editor 125ms
+     ✓ EU2 a double-click adds a point at the line value with one entry; undo and redo restore it 124ms
+     ✓ EU2 a point added between two points takes their interpolated value, not the pointer height 72ms
+     ✓ EU3 dragging a point down by a quarter of the body gives 0.75 with one entry 132ms
+     ✓ EU3 a horizontal drag past a neighbour stops 1 ms short of it 140ms
+     ✓ EU3 a press without movement writes nothing; pointercancel reverts with no entry 114ms
+     ✓ EU3 a drag that ends at its start value writes the no-change status 90ms
+     ✓ EU3 the editor unmounting mid-drag reverts with no entry and releases the gesture 103ms
+     ✓ EU3 the A key and the Env button are refused mid-drag 97ms
+     ✓ EU3 a lost pointer during an uncaptured drag reverts with no entry 87ms
+     ✓ EU7 a trimmed clip with a hidden point before the window drags the right point 88ms
+     ✓ EU7 the line stays drawn with the mode off when every point is outside the window 46ms
+     ✓ EU7 Ctrl and Shift on the editor toggle the selection; a double-click on a trim strip adds nothing 111ms
+     ✓ EU4 a double-click on a point removes it with one entry and adds nothing 92ms
+     ✓ EU4 a double-click within 500 ms after a moved drag of that point is ignored 114ms
+     ✓ EU5 in mode an editor press selects without seeking or a range; header move and trim still work 149ms
+     ✓ EU5 mode off: the body still seeks on click, the line is drawn and there are no points 122ms
+     ✓ EU5 the line passes through every visible point at y = 1 − gain 67ms
+     ✓ EV1 the line is a background halo under a foreground line, and the points are foreground with a background border 104ms
+     ✓ EU6 a double-click right after a fade drag keeps the fade; after 600 ms it resets it 89ms
+     ✓ EU6 a cancelled drag also arms the guard, and the guard is per edge 80ms
+     ✓ AL1 with a 1 px clip border at 40 px/s on an untrimmed clip: a double-click stores the ruler time and points, vertices and the line end align 61ms
+     ✓ AL1 with a 1 px clip border at 25 px/s on a start-trimmed clip: a double-click stores the ruler time and points, vertices and the line end align 67ms
+     × CU1 with Env on, every editor overlay shows the pointer cursor and no crosshair 55ms
+     × CU2 every envelope point shows the pointer cursor, no move cursor, and keeps the EV1 tokens 47ms
+ ❯ app/lib/arrangement/__tests__/floating-video.test.tsx (47 tests | 1 failed) 5188ms
+     ✓ expands the same box over the library, keeps both <video> nodes and shows the placeholder 242ms
+     ✓ returns to compact with ✕ and keeps the same <video> nodes 148ms
+     ✓ returns to compact with the placeholder button and keeps the same <video> nodes 111ms
+     ✓ returns to compact with Esc and keeps the same <video> nodes 107ms
+     ✓ ignores Esc that was already handled (defaultPrevented) 75ms
+     ✓ ignores Esc in a plain text field that does not handle Escape itself 62ms
+     ✓ clears a non-empty library search on the first Esc and returns the video on the second 69ms
+     ✓ does not change the video on Esc while the Export dialog is open  328ms
+     ✓ keeps the video when Esc closes Export and React flushes between listeners (real browser order) 204ms
+     ✓ collapses both video and library on ◀ while expanded, with the status text 101ms
+     ✓ opens a collapsed library for the video and collapses it again on return 85ms
+     ✓ places the box on the next frame under reduced motion (transition-property none, duration kept) 77ms
+     ✓ waits for the library width transitionend before placing the box 83ms
+     ✓ moves the box 16 px per arrow on ⠿ without nudging a selected clip, seeking or zooming 61ms
+     ✓ drags the box with the pointer, clamps it and claims the D-26 gesture registry 76ms
+     ✓ does not start a drag from ⤢ or ✕ 51ms
+     ✓ LVD2: pointer targets on the dock icons resolve to their buttons (D-29z128) 80ms
+     ✓ releases an active drag when the video returns to compact 74ms
+     ✓ re-clamps on window resize and does not follow a library width change 176ms
+     ✓ keeps Space as the workspace transport toggle on the float buttons 99ms
+     ✓ places the box by the fallback timer when transitionend never arrives  580ms
+     ✓ never places a box whose expand was cancelled (collapse) before the library transition ended  520ms
+     ✓ never places a box whose expand was cancelled (escape) before the library transition ended  514ms
+     ✓ commits the dragged position so the next arrow step starts from it 52ms
+     ✓ ends the drag through the registry on window blur and ignores later moves 43ms
+     ✓ focuses ⠿ on pointerdown so arrows work after a mouse click on the handle 46ms
+     ✓ returns focus to ⤢ after ✕ or Esc from a float control, but not after ◀ 75ms
+     ✓ ignores ⠿ arrows and resize re-clamps during a drag, then commits the clamped drag position 44ms
+     ✓ applies every arrow of a synchronous burst (no stale rect between React renders) 44ms
+     ✓ places the expanded box inside the library body, clear of the header, search and preview (D-29e) 39ms
+     ✓ places the box inside the remounted library body after a temporary opening (D-29e) 65ms
+     ✓ writes the return status after ✕ when the library was already open (C-R13-02) 47ms
+     ✓ writes the return status after the placeholder button when the library was already open (C-R13-02) 53ms
+     ✓ writes the return status after Esc when the library was already open (C-R13-02) 53ms
+     ✓ writes the re-collapse status after ✕ from a temporary opening (C-R13-02) 67ms
+     ✓ writes the re-collapse status after the placeholder button from a temporary opening (C-R13-02) 65ms
+     ✓ writes the re-collapse status after Esc from a temporary opening (C-R13-02) 62ms
+     ✓ writes the return status when ⤢ itself returns an expanded video (C-R13-02) 44ms
+     ✓ writes no status for a no-op return or for ▶/◀ without an expanded video (C-R13-02) 52ms
+     ✓ keeps the ◀ status text, not a return text, when ◀ collapses an expanded video 59ms
+     ✓ pads the library tree and list by the box height + 16 while expanded (D-29f, C-R14-01) 41ms
+     ✓ keeps the inset at 0 while the box waits for placement after a temporary opening (D-29f) 60ms
+     ✓ keeps the inset unchanged while the box is dragged or moved with arrows (D-29f) 50ms
+     ✓ clears every inline inset declaration after ✕ (D-29f, R15-P3) 52ms
+     ✓ clears every inline inset declaration after Esc (D-29f, R15-P3) 46ms
+     ✓ renders the tree and list without a style attribute after ◀ and ▶ from an expanded video (D-29f, R15-P3) 59ms
+     × CU3 the floating box shows grab and grabbing while pressed, and the compact box has no move cursor (SABA-B-6) 47ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SABA-B-6 envelope cursor (CU1, CU2) > CU1 with Env on, every editor overlay shows the pointer cursor and no crosshair
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx:933:59
+    931|     for (const clipId of ['s1', 's2']) {
+    932|       const editor = editorOf(clipId);
+    933|       expect(editor.classList.contains('cursor-pointer')).toBe(true);
+       |                                                           ^
+    934|       expect(editor.classList.contains('cursor-crosshair')).toBe(false…
+    935|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SABA-B-6 envelope cursor (CU1, CU2) > CU2 every envelope point shows the pointer cursor, no move cursor, and keeps the EV1 tokens
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx:946:58
+    944|     expect(points).toHaveLength(3);
+    945|     for (const point of points) {
+    946|       expect(point.classList.contains('cursor-pointer')).toBe(true);
+       |                                                          ^
+    947|       expect(point.classList.contains('cursor-move')).toBe(false);
+    948|       for (const token of [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  app/lib/arrangement/__tests__/floating-video.test.tsx > floating expanded video (SRW-11B stage 3, D-29d, R13-U) > CU3 the floating box shows grab and grabbing while pressed, and the compact box has no move cursor (SABA-B-6)
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ app/lib/arrangement/__tests__/floating-video.test.tsx:1036:51
+    1034|     fireEvent.click(expand());
+    1035|     expect(box.dataset.videoFloating).toBe('true');
+    1036|     expect(box.classList.contains('cursor-grab')).toBe(true);
+       |                                                   ^
+    1037|     expect(box.classList.contains('active:cursor-grabbing')).toBe(true…
+    1038|     expect(box.classList.contains('cursor-move')).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  app/lib/arrangement/__tests__/timeline-cursor-map.test.ts > SABA-B-6 timeline cursor map (CU4) > CU4 no arrangement .tsx or .ts file uses a plus-shaped cursor (crosshair, move, cell, copy, all-scroll) anywhere in the file, as a utility, arbitrary value or inline style
+AssertionError: expected [ …(3) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "ArrangementClipEnvelope.tsx: cursor-crosshair",
++   "ArrangementClipEnvelope.tsx: cursor-move",
++   "ArrangementVideoDock.tsx: cursor-move",
++ ]
+
+ ❯ app/lib/arrangement/__tests__/timeline-cursor-map.test.ts:30:18
+     28|       }),
+     29|     );
+     30|     expect(hits).toEqual([]);
+       |                  ^
+     31|   });
+     32| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  4 failed | 72 passed (76)
+   Start at  12:16:48
+   Duration  7.26s (transform 2.07s, setup 0ms, import 3.02s, tests 8.12s, environment 1.48s)
+
+
+::error file=/tmp/a207/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx,title=app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SABA-B-6 envelope cursor (CU1%2C CU2) > CU1 with Env on%2C every editor overlay shows the pointer cursor and no crosshair,line=933,column=59::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx:933:59%0A%0A
+
+::error file=/tmp/a207/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx,title=app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SABA-B-6 envelope cursor (CU1%2C CU2) > CU2 every envelope point shows the pointer cursor%2C no move cursor%2C and keeps the EV1 tokens,line=946,column=58::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx:946:58%0A%0A
+
+::error file=/tmp/a207/app/lib/arrangement/__tests__/floating-video.test.tsx,title=app/lib/arrangement/__tests__/floating-video.test.tsx > floating expanded video (SRW-11B stage 3%2C D-29d%2C R13-U) > CU3 the floating box shows grab and grabbing while pressed%2C and the compact box has no move cursor (SABA-B-6),line=1036,column=51::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/floating-video.test.tsx:1036:51%0A%0A
+
+::error file=/tmp/a207/app/lib/arrangement/__tests__/timeline-cursor-map.test.ts,title=app/lib/arrangement/__tests__/timeline-cursor-map.test.ts > SABA-B-6 timeline cursor map (CU4) > CU4 no arrangement .tsx or .ts file uses a plus-shaped cursor (crosshair%2C move%2C cell%2C copy%2C all-scroll) anywhere in the file%2C as a utility%2C arbitrary value or inline style,line=30,column=18::AssertionError: expected [ …(3) ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "ArrangementClipEnvelope.tsx: cursor-crosshair",%0A+   "ArrangementClipEnvelope.tsx: cursor-move",%0A+   "ArrangementVideoDock.tsx: cursor-move",%0A+ ]%0A%0A ❯ app/lib/arrangement/__tests__/timeline-cursor-map.test.ts:30:18%0A%0A
