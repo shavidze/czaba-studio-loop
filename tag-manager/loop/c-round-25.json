@@ -1,0 +1,39 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R25-03",
+      "severity": "low",
+      "steps": [
+        "Read docs/bugs/001-save-and-selection-known-limits.md line 52 (entry 3, step 3).",
+        "Compare it with the new D-33 note (line 12) and src MetadataPanel.tsx:110-116."
+      ],
+      "expected": "The docs agree on when a kept file is re-read from disk.",
+      "actual": "Entry 3 step 3 still says the new field stays empty 'until the file is read again (rescan or switching to another file and back)'. Switching files does not read the file: the sync effect fills the form from the store entry (MetadataPanel.tsx:111). The new D-33 note says this correctly, so the two texts contradict each other. The line was outside A's allowed edits ('Nothing else in entry 3 changes'). Confirms A-R25-02.",
+      "evidence": "docs/bugs/001…md:12 vs :52; src/renderer/src/components/metadata-editor/MetadataPanel.tsx:110-116"
+    },
+    {
+      "id": "C-R25-04",
+      "severity": "low",
+      "steps": [
+        "Read docs/bugs/001…md entry 10, step 3 (line ~145).",
+        "Compare it with MetadataPanel.tsx:225-231."
+      ],
+      "expected": "Entry 10 says that 'the form is not changed and the edits stay' on a rejected read only for a single selection.",
+      "actual": "The text does not limit it to a single selection. With 2+ files selected, handleSchemaChanged calls setEditingMetadata({}) at :229-230 even when the read rejects, so batch edits are cleared. Pre-existing text, outside this round's ownership. Confirms A-R25-03.",
+      "evidence": "src/renderer/src/components/metadata-editor/MetadataPanel.tsx:229-230"
+    }
+  ],
+  "passed": [
+    "R25-1",
+    "R25-2",
+    "R25-3",
+    "R25-4",
+    "R25-5",
+    "R25-6"
+  ],
+  "blocked": [
+    "Windows packaging is not available in the cloud (not part of this round)"
+  ],
+  "realVerified": true
+}

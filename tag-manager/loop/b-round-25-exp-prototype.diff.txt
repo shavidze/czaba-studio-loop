@@ -1,0 +1,100 @@
+--- /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 14:30:56.039346700 +0000
++++ src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 14:51:03.878697680 +0000
+@@ -132,6 +132,7 @@
+       if (selectedFiles.length === 1) {
+         const path = selectedFiles[0].path;
+         await window.api.writeMetadata(path, startEditingMetadata, fields);
++        useFileStore.getState().markPathsWritten([path]);
+         await refreshSavedFileStats([path]);
+         let updated: WavMetadata;
+         try {
+@@ -160,6 +161,7 @@
+         }
+         const result = await window.api.writeMetadataBatch(paths, batchMeta, fields);
+         const failedPaths = new Set(result.failed.map((f) => f.path));
++        useFileStore.getState().markPathsWritten(paths.filter((p) => !failedPaths.has(p)));
+         if (result.succeeded > 0) {
+           await refreshSavedFileStats(paths.filter((p) => !failedPaths.has(p)));
+         }
+@@ -205,20 +207,31 @@
+     const CHUNK_SIZE = 50;
+     const accumulated: Record<string, WavMetadata> = {};
+     const keptPaths = new Set<string>();
++    const issuedAt: Record<string, number> = {};
+     let failures = 0;
+     for (let i = 0; i < paths.length; i += CHUNK_SIZE) {
+       const chunk = paths.slice(i, i + CHUNK_SIZE);
++      const issuedGeneration = useFileStore.getState().writeGeneration;
+       try {
+         const result = await window.api.readMetadataBatch(chunk, newSchema);
+-        Object.assign(accumulated, result);
++        for (const [path, value] of Object.entries(result)) {
++          accumulated[path] = value;
++          issuedAt[path] = issuedGeneration;
++        }
+       } catch {
+         failures += chunk.length;
+-        const previous = useFileStore.getState().metadata;
+-        for (const path of chunk) {
+-          if (!previous[path]) continue;
+-          accumulated[path] = previous[path];
+-          keptPaths.add(path);
+-        }
++        for (const path of chunk) keptPaths.add(path);
++      }
++    }
++    const { metadata: latest, pathWriteGenerations } = useFileStore.getState();
++    for (const path of Object.keys(issuedAt)) {
++      if ((pathWriteGenerations[path] ?? 0) > issuedAt[path]) keptPaths.add(path);
++    }
++    for (const path of keptPaths) {
++      if (latest[path]) accumulated[path] = latest[path];
++      else {
++        delete accumulated[path];
++        keptPaths.delete(path);
+       }
+     }
+     setMetadata(accumulated);
+--- /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/stores/file-store.ts	2026-10-27 14:30:56.040115406 +0000
++++ src/renderer/src/stores/file-store.ts	2026-10-27 14:49:55.079357491 +0000
+@@ -11,6 +11,8 @@
+   sortField: SortField;
+   sortDirection: SortDirection;
+   isScanning: boolean;
++  writeGeneration: number;
++  pathWriteGenerations: Record<string, number>;
+ 
+   setFolderPath: (path: string | null) => void;
+   setFiles: (files: WavFileEntry[]) => void;
+@@ -26,6 +28,7 @@
+   setSortField: (field: SortField) => void;
+   toggleSortDirection: () => void;
+   setIsScanning: (scanning: boolean) => void;
++  markPathsWritten: (paths: string[]) => void;
+ }
+ 
+ export const useFileStore = create<FileState>((set) => ({
+@@ -37,6 +40,8 @@
+   sortField: 'name',
+   sortDirection: 'asc',
+   isScanning: false,
++  writeGeneration: 0,
++  pathWriteGenerations: {},
+ 
+   setFolderPath: (path) => set({ folderPath: path }),
+   setFiles: (files) => set({ files }),
+@@ -55,6 +60,14 @@
+ 
+   setMetadata: (meta) => set({ metadata: meta }),
+ 
++  markPathsWritten: (paths) =>
++    set((state) => {
++      const writeGeneration = state.writeGeneration + 1;
++      const pathWriteGenerations = { ...state.pathWriteGenerations };
++      for (const path of paths) pathWriteGenerations[path] = writeGeneration;
++      return { writeGeneration, pathWriteGenerations };
++    }),
++
+   updateFileMetadata: (path, meta) =>
+     set((state) => ({
+       metadata: { ...state.metadata, [path]: meta },

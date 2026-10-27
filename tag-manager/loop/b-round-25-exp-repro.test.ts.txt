@@ -1,0 +1,253 @@
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createElement } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+import { useFileStore } from "~/stores/file-store";
+import { useMetadataStore } from "~/stores/metadata-store";
+import type { BatchWriteResult, FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
+import { resetAllStores } from "../helpers/reset-stores";
+import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+
+vi.hoisted(() => {
+  const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+  const mockApi = globalScope.window.api;
+  globalScope.window = globalThis as unknown as { api: unknown };
+  globalScope.api = mockApi;
+});
+
+const PATH_A = "/music/a.wav";
+const PATH_B = "/music/b.wav";
+const PATH_C = "/music/c.wav";
+const NOTE_KEY = "r24note";
+const NOTE_FROM_FILE = "fromfile";
+const TYPED_CATEGORY = "R24Cat";
+
+const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
+const FILE_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
+const FILE_C: WavFileEntry = { name: "c.wav", path: PATH_C, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
+const SEED_A: WavMetadata = { title: "A-title", category: "ACat", comment: "" };
+const SEED_B: WavMetadata = { title: "B-title", category: "BCat", comment: "" };
+const ALL_SUCCEEDED: BatchWriteResult = { succeeded: 2, failed: [] };
+
+interface PendingWrite {
+  release: () => void;
+}
+
+function seedFiles(selectedPaths: string[]): void {
+  useFileStore.setState({
+    files: [FILE_A, FILE_B],
+    metadata: { [PATH_A]: { ...SEED_A }, [PATH_B]: { ...SEED_B } },
+    selectedPaths,
+  });
+}
+
+function schemaHasNote(fields: FieldDefinition[] | undefined): boolean {
+  return (fields ?? []).some((field) => field.key === NOTE_KEY);
+}
+
+function noteFor(fields: FieldDefinition[]): WavMetadata {
+  return schemaHasNote(fields) ? { [NOTE_KEY]: NOTE_FROM_FILE } : {};
+}
+
+function mockSchemaAwareReads(fileA: WavMetadata): void {
+  vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, fields) => {
+    const result: Record<string, WavMetadata> = {};
+    for (const path of paths) {
+      if (path === PATH_A) result[path] = { ...fileA, ...noteFor(fields) };
+      if (path === PATH_B) result[path] = { ...SEED_B };
+    }
+    return result;
+  });
+  vi.mocked(window.api.readMetadata).mockImplementation(async (path, fields) =>
+    path === PATH_A ? { ...fileA, ...noteFor(fields) } : { ...SEED_B },
+  );
+}
+
+function deferSingleWrite(): PendingWrite {
+  let resolveWrite: () => void = () => {};
+  vi.mocked(window.api.writeMetadata).mockReturnValueOnce(
+    new Promise<void>((resolve) => {
+      resolveWrite = () => resolve();
+    }),
+  );
+  return { release: () => resolveWrite() };
+}
+
+function deferBatchWrite(result: BatchWriteResult): PendingWrite {
+  let resolveWrite: () => void = () => {};
+  vi.mocked(window.api.writeMetadataBatch).mockReturnValueOnce(
+    new Promise<BatchWriteResult>((resolve) => {
+      resolveWrite = () => resolve(result);
+    }),
+  );
+  return { release: () => resolveWrite() };
+}
+
+function getInputByLabel(labelText: string): HTMLInputElement {
+  const label = screen.getByText(labelText);
+  const input = label.parentElement?.querySelector("input");
+  if (!input) throw new Error(`${labelText} input not found`);
+  return input;
+}
+
+async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+  fireEvent.change(getInputByLabel("Category (UCS)"), { target: { value: TYPED_CATEGORY } });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: saveButtonName }));
+  });
+}
+
+async function addNoteFieldAndDone(): Promise<void> {
+  fireEvent.click(screen.getByTitle("Customize Fields"));
+  fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R24note" } });
+  fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: /Done/ }));
+  });
+}
+
+async function settle(release: () => void): Promise<void> {
+  await act(async () => {
+    release();
+  });
+}
+
+beforeEach(() => {
+  resetAllStores();
+  resetWindowApiMocks();
+});
+
+afterEach(() => {
+  cleanup();
+  resetAllStores();
+});
+
+
+function deferBatchReadOnce(value: Record<string, WavMetadata>): PendingWrite {
+  let resolveRead: () => void = () => {};
+  vi.mocked(window.api.readMetadataBatch).mockReturnValueOnce(
+    new Promise<Record<string, WavMetadata>>((resolve) => {
+      resolveRead = () => resolve(value);
+    }),
+  );
+  return { release: () => resolveRead() };
+}
+
+const FRESH_A: WavMetadata = { ...SEED_A, category: TYPED_CATEGORY, [NOTE_KEY]: NOTE_FROM_FILE };
+const STALE_A: WavMetadata = { ...SEED_A, [NOTE_KEY]: NOTE_FROM_FILE };
+const EXTRA_FILES: WavFileEntry[] = Array.from({ length: 50 }, (_, i) => ({ name: `x${i}.wav`, path: `/music/x${i}.wav`, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" }));
+
+function seedMany(aFirst: boolean): void {
+  const files = aFirst ? [FILE_A, ...EXTRA_FILES] : [...EXTRA_FILES, FILE_A];
+  const metadata: Record<string, WavMetadata> = { [PATH_A]: { ...SEED_A } };
+  for (const f of EXTRA_FILES) metadata[f.path] = { title: f.name, category: "", comment: "" };
+  useFileStore.setState({ files, metadata, selectedPaths: [PATH_A] });
+}
+
+describe("B26 repro", () => {
+  it("(r1) batch stale", async () => {
+    seedFiles([PATH_A, PATH_B]);
+    const pendingWrite = deferBatchWrite(ALL_SUCCEEDED);
+    const staleSchemaRead = deferBatchReadOnce({ [PATH_A]: STALE_A, [PATH_B]: { ...SEED_B, [NOTE_KEY]: NOTE_FROM_FILE } });
+    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_A]: FRESH_A, [PATH_B]: { ...SEED_B, category: TYPED_CATEGORY, [NOTE_KEY]: NOTE_FROM_FILE } });
+    render(createElement(MetadataPanel));
+    await typeCategoryAndSave(/Save to 2 files/);
+    await addNoteFieldAndDone();
+    await settle(pendingWrite.release);
+    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved to 2 files");
+    await settle(staleSchemaRead.release);
+    expect(useFileStore.getState().metadata[PATH_A]).toEqual(FRESH_A);
+    expect(useFileStore.getState().metadata[PATH_B]?.category).toBe(TYPED_CATEGORY);
+  });
+
+  it("(r2) single stale + typing during save", async () => {
+    seedFiles([PATH_A]);
+    const pendingWrite = deferSingleWrite();
+    const staleSchemaRead = deferBatchReadOnce({ [PATH_A]: STALE_A, [PATH_B]: { ...SEED_B, [NOTE_KEY]: NOTE_FROM_FILE } });
+    vi.mocked(window.api.readMetadata).mockResolvedValue(FRESH_A);
+    render(createElement(MetadataPanel));
+    await typeCategoryAndSave(/Save Tags/);
+    fireEvent.change(getInputByLabel("Title"), { target: { value: "TypedDuring" } });
+    await addNoteFieldAndDone();
+    await settle(pendingWrite.release);
+    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
+    await settle(staleSchemaRead.release);
+    expect(useFileStore.getState().metadata[PATH_A]).toEqual(FRESH_A);
+    expect(getInputByLabel("Category (UCS)").value).toBe(TYPED_CATEGORY);
+    expect(getInputByLabel("Title").value).toBe("TypedDuring");
+    expect(useMetadataStore.getState().isDirty).toBe(true);
+  });
+
+  it("(r3) control fresh after write", async () => {
+    seedFiles([PATH_A]);
+    vi.mocked(window.api.readMetadata).mockResolvedValue({ ...SEED_A, category: TYPED_CATEGORY });
+    render(createElement(MetadataPanel));
+    await typeCategoryAndSave(/Save Tags/);
+    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_A]: FRESH_A, [PATH_B]: { ...SEED_B, [NOTE_KEY]: NOTE_FROM_FILE } });
+    await addNoteFieldAndDone();
+    expect(getInputByLabel("R24note").value).toBe(NOTE_FROM_FILE);
+    expect(useFileStore.getState().metadata[PATH_A]).toEqual(FRESH_A);
+  });
+
+  it("(r4) chunk issued after the write is applied even when the save re-read failed", async () => {
+    seedMany(false);
+    const pendingWrite = deferSingleWrite();
+    const chunk1 = deferBatchReadOnce({});
+    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_A]: FRESH_A });
+    vi.mocked(window.api.readMetadata).mockRejectedValue(new Error("reread down"));
+    render(createElement(MetadataPanel));
+    await typeCategoryAndSave(/Save Tags/);
+    await addNoteFieldAndDone();
+    await settle(pendingWrite.release);
+    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved, but reloading failed. Rescan to refresh.");
+    await settle(chunk1.release);
+    expect(useFileStore.getState().metadata[PATH_A]).toEqual(FRESH_A);
+  });
+
+  it("(r5) RR-R24-02 stale chunk 1, save lands between chunks", async () => {
+    seedMany(true);
+    const pendingWrite = deferSingleWrite();
+    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_A]: STALE_A });
+    const chunk2 = deferBatchReadOnce({});
+    vi.mocked(window.api.readMetadata).mockResolvedValue(FRESH_A);
+    render(createElement(MetadataPanel));
+    await typeCategoryAndSave(/Save Tags/);
+    await addNoteFieldAndDone();
+    await settle(pendingWrite.release);
+    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
+    await settle(chunk2.release);
+    expect(useFileStore.getState().metadata[PATH_A]).toEqual(FRESH_A);
+    expect(getInputByLabel("Category (UCS)").value).toBe(TYPED_CATEGORY);
+  });
+
+  it("(r6) rejected chunk 1, save lands between chunks: kept entry is the latest", async () => {
+    seedMany(true);
+    const pendingWrite = deferSingleWrite();
+    vi.mocked(window.api.readMetadataBatch).mockRejectedValueOnce(new Error("read down"));
+    const chunk2 = deferBatchReadOnce({});
+    vi.mocked(window.api.readMetadata).mockResolvedValue(FRESH_A);
+    render(createElement(MetadataPanel));
+    await typeCategoryAndSave(/Save Tags/);
+    await addNoteFieldAndDone();
+    await settle(pendingWrite.release);
+    await settle(chunk2.release);
+    expect(useMetadataStore.getState().toastMessage).toBe("Failed to read 50 files");
+    expect(useFileStore.getState().metadata[PATH_A]).toEqual(FRESH_A);
+  });
+
+  it("(r7) partial batch failure: the failed path is not superseded", async () => {
+    seedFiles([PATH_A, PATH_B]);
+    const pendingWrite = deferBatchWrite({ succeeded: 1, failed: [{ path: PATH_B, error: "locked" }] });
+    const staleSchemaRead = deferBatchReadOnce({ [PATH_A]: STALE_A, [PATH_B]: { ...SEED_B, [NOTE_KEY]: NOTE_FROM_FILE } });
+    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_A]: FRESH_A, [PATH_B]: { ...SEED_B, [NOTE_KEY]: NOTE_FROM_FILE } });
+    render(createElement(MetadataPanel));
+    await typeCategoryAndSave(/Save to 2 files/);
+    await addNoteFieldAndDone();
+    await settle(pendingWrite.release);
+    expect(useMetadataStore.getState().toastMessage).toBe("1 saved, 1 failed");
+    useFileStore.getState().updateFileMetadata(PATH_B, { ...SEED_B });
+    await settle(staleSchemaRead.release);
+    expect(useFileStore.getState().metadata[PATH_A]).toEqual(FRESH_A);
+    expect(useFileStore.getState().metadata[PATH_B]).toEqual({ ...SEED_B, [NOTE_KEY]: NOTE_FROM_FILE });
+  });
+});

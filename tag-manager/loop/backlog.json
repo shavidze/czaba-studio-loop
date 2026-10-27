@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 25: TM-B28 schema-change test and docs hygiene: shared resetWindowApiMocks helper (six mocks), (s8) absent-path pin, docs/bugs/001 entries 3/9/10 + D-33 note",
+  "current_task": "Round 26: TM-B29 stale schema re-read guard (D-34) + docs/bugs/001 entry 9 fixed, entries 3/10 corrections",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -293,6 +293,12 @@
       "id": "D-33",
       "status": "done R24, published 3d27ba9 (TM-B27; C R24-1..R24-6; part 3 added by A, A-R24-01, verified by C mutant MK-1)",
       "decision": "(1) MetadataPanel handleSave makes its post-save re-read (single readMetadata, batch readMetadataBatch) with the schema current at re-read time, useSchemaStore.getState().fields, not the schema captured when Save was clicked; the write itself keeps the click-time fields. A schema saved during a pending save therefore survives the save's re-read (fixes A-R21-03). (2) handleSchemaChanged keeps the current store entry of every path whose chunk read rejected instead of dropping it from the metadata map (same rule as D-22 for batch saves); the 'Failed to read N files' toast stays; a selected file whose read failed keeps its form values. D-21..D-32 unchanged. Not part of the K-4 contract (renderer display only) (3) A kept (not re-read) entry does not touch the form: in a single selection setEditingMetadata is called only when the selected path was freshly read (keptPaths guard), so unsaved edits and fields typed during a save (D-30) survive a rejected schema re-read (A-R24-01; the two-part version cleared them, mutant MK-1 killed by (s6)/(s7)). Known consequence (RR-R24-01): a kept entry has no value for a field added by that schema change until the next successful read; the 'Failed to read N files' toast reports it."
+    },
+    {
+      "id": "D-34",
+      "status": "planned R26 (TM-B29)",
+      "decision": "Stale-result guard for the schema re-read (renderer only). useFileStore keeps a monotonic writeGeneration and pathWriteGenerations: Record<string, number>; markPathsWritten(paths) increments writeGeneration once and stamps each given path with it. MetadataPanel.handleSave calls it after writeMetadata resolves (single) and after writeMetadataBatch resolves for the succeeded paths only (batch); a rejected write marks nothing. handleSchemaChanged records, for every path in a chunk's result, the writeGeneration read just before that chunk's readMetadataBatch call. When it writes the store (after the last chunk) a path whose pathWriteGenerations value is greater than its recorded generation is superseded: it gets the store entry current at that moment, like a kept path of a rejected chunk. Kept and superseded paths take the store entry current at store-write time (not a snapshot from the reject), are absent if the store has none, and never reset the form (D-33 part 3). Consequence (same class as RR-R24-01): a superseded entry carries the new schema's field only if the save's re-read was issued after the schema change; otherwise the field stays empty until the next successful read. The single-file write in main is synchronous, so without a delay the single-save order is not reachable in production; batch writes yield every 5 files and a multi-chunk re-read spans the save, so the batch and between-chunks orders are reachable. K-4 contract untouched. Deviation from RR-R24-05: handleSave/handleSchemaChanged stay in MetadataPanel (no store action move, RR-R23-04 signal stays open).",
+      "contract_with": "none (renderer display and save flow only)"
     }
   ],
   "items": [
@@ -1320,7 +1326,7 @@
       "severity": "low",
       "source": "root review R24 (RR-R24-01, RR-R24-02, RR-R24-03, RR-R24-04), C R24 (C-R24-01, C-R24-04)",
       "title": "Schema-change test and docs hygiene: (a) shared resetWindowApiMocks() in tests/renderer/helpers/ (six mocks incl. saveSchema) used by metadata-panel-batch-save.test.ts and metadata-panel-schema-change.test.ts (RR-R24-04, RR-R24-03 via mutant MB); (b) pin D-33 part 2 'a path without a store entry stays absent' (C-R24-01); (c) docs/bugs/001: D-33 kept-entry note (RR-R24-01), entry 3 title covers batch and entry 10 names (s7) (C-R24-04), entry 9 between-chunks variant (RR-R24-02)",
-      "status": "in_progress",
+      "status": "done",
       "round": 25,
       "depends_on": [
         "TM-B27"
@@ -1342,6 +1348,45 @@
         "docs/bugs/001 entries 3, 9, 10 and the D-33 bullet updated (Georgian), every MetadataPanel.tsx reference still points at the code; C greps",
         "real app: not needed for behaviour (no src change); C runs the built app once (schema add with no rejection, single save) as a smoke check and reads the file with ffprobe + music-metadata",
         "gate: verifyCommand green, renderer 208 (207 + 1, 11 files; the helper is not a test file), main 93, E2E 7/7, --retries=0 7/7, Biome 0 errors / 8 warnings same list"
+      ],
+      "realVerified": true,
+      "commit": "c2c19a72bed45f561eae1c9dbca9cc79567aaf41",
+      "evidence": [
+        "C round 25 PASS (c-round-25.md, c-round-25.json realVerified=true, bugs: 2 low docs findings, no FAIL): R25-1 3 M + 1 untracked (window-api-mocks.ts), diff outside owned paths empty, src unchanged, helper one export / six reset lines / window.api read at call time / no comment-any-as, batch-save and schema-change diffs as specified, (s1)-(s7) byte-identical, transcript available (1 Write, 32 Edit), permission_denials []; R25-2 renderer 208/208 (11 files), (i3) alone 1 passed, (s8) alone 1 passed; R25-3 MI-1..MI-6 each killed by (i3) alone, MB killed (24 failed), MA-1 and MA-2 killed by (s8), MBS survived (C-R25-01), MW survived (C-R25-02, call-time rule is style only); R25-4 clean verifyCommand exit 0, Biome 0 errors / 8 warnings same list, typecheck 0, 208/93/7, --retries=0 7/7; R25-5 real built app (xvfb, isolated XDG_CONFIG_HOME): Title R25T saved, schema field R25note added, form keeps R25T, no Failed-to-read toast, ffprobe title=R25T and music-metadata exif:INAM=R25T agree field by field (INAM/IKEY/ICAT), pageErrors empty; R25-6 docs PASS (A-R25-01 wording verified against src). Root gate published c2c19a7, review COMMIT OK (RR-R25-01..04)."
+      ],
+      "acceptance_note": "A-R25-01: D-33 note lists the real read paths (rescan/open, save re-read, next successful schema change) instead of the task's 'switching to another file and back' (switching reads the store, MetadataPanel.tsx:111); C confirmed."
+    },
+    {
+      "id": "TM-B29",
+      "type": "bug",
+      "severity": "medium",
+      "source": "B R23 code reading (B-R23-02), root review R24 (RR-R24-02, RR-R24-05), B R25 red reproduction (B-R25-02), C R25 / A R25 docs findings (C-R25-03 = A-R25-02, C-R25-04 = A-R25-03)",
+      "title": "Stale schema re-read overwrites a save (D-34): a handleSchemaChanged chunk read issued before a path's write resolved still replaces the save's re-read in the store and, for a single selection, resets the form (isDirty false, D-30 typing lost); with two or more chunks the store write after the last chunk also overwrites a save that landed between chunks, including kept entries snapshotted at reject time (RR-R24-02). A later save from the stale form silently writes the old values back (data-loss path). Plus docs/bugs/001 entry 3 step 3 and entry 10 step 3 corrections.",
+      "status": "in_progress",
+      "round": 26,
+      "depends_on": [
+        "TM-B28"
+      ],
+      "decisions": [
+        "D-34"
+      ],
+      "findings": [
+        "B-R23-02",
+        "RR-R24-02",
+        "RR-R24-05",
+        "B-R25-02",
+        "C-R25-03",
+        "A-R25-02",
+        "C-R25-04",
+        "A-R25-03",
+        "RR-R25-01"
+      ],
+      "acceptance": [
+        "R26: file-store writeGeneration + pathWriteGenerations + markPathsWritten(paths); handleSave marks the path after writeMetadata resolves and the succeeded paths after writeMetadataBatch resolves; handleSchemaChanged records per chunk the generation at issue and, at store-write time, keeps the latest store entry (not the chunk result, not a reject-time snapshot) for every path whose write generation is newer, and never resets the form from a kept/superseded entry",
+        "tests (s9)-(s15) in metadata-panel-schema-change.test.ts + one file-store test: on c2c19a7 src (s9)(s10)(s13)(s14)(s15) red, (s11)(s12) green pins; on A's tree all green; mutants MG-1..MG-9 each killed (B R25 prototype evidence: b-round-25-exp-mutants.log)",
+        "real app (C, built app + harness: write delayed before the real listener, schema read-batch replied late): A's build keeps the saved Category in form and store after the late schema read, c2c19a7 build reverts it; a second save from the reverted form writes the old Category back on c2c19a7 only; ffprobe + music-metadata",
+        "docs/bugs/001: entry 9 fixed by D-34 (incl. the between-chunks step) with test names, entry 3 step 3 and entry 10 step 3 corrected, every MetadataPanel.tsx/file-store.ts reference re-pointed on A's tree; README count; STATE_MANAGEMENT.md one D-34 line",
+        "gate: verifyCommand green, renderer 216 (11 files), main 93, E2E 7/7, --retries=0 7/7, Biome 0 errors / 8 warnings same list"
       ]
     }
   ],
@@ -3014,10 +3059,10 @@
       "round": 23,
       "id": "B-R23-02",
       "source": "B R23 code reading (MetadataPanel.tsx:201-228 vs :138/:169)",
-      "severity": "low",
+      "severity": "medium",
       "status": "open",
       "title": "Reverse order of A-R21-03: a schema re-read that started before a pending write finished and resolves after the save's re-read writes the pre-write values into the store and the form (isDirty false) until the next read; the file on disk is correct. D-33 does not cover this order",
-      "routed_to": "TM-B27 (round 24): docs/bugs/001 entry 9 (known limit, no test); a real fix needs a read token/sequence or locking the schema editor during a save (UX -> Saba); R24: recorded as docs/bugs/001 entries 9/10 (C R24-6 PASS); B R24 reclassification: a stale-result guard (read generation) is renderer-only and technical (same class as D-33), only locking the schema editor is UX; candidate for a fix round after a red reproduction (RR-R24-02 is the same defect, RR-R24-05 proposes the generation)"
+      "routed_to": "TM-B27 (round 24): docs/bugs/001 entry 9 (known limit, no test); a real fix needs a read token/sequence or locking the schema editor during a save (UX -> Saba); R24: recorded as docs/bugs/001 entries 9/10 (C R24-6 PASS); B R24 reclassification: a stale-result guard (read generation) is renderer-only and technical (same class as D-33), only locking the schema editor is UX; candidate for a fix round after a red reproduction (RR-R24-02 is the same defect, RR-R24-05 proposes the generation) | B R25: reproduced red (B-R25-02); severity raised low -> medium because a later save from the stale form writes the old values back; fix TM-B29 (D-34, round 26)"
     },
     {
       "round": 23,
@@ -3042,9 +3087,9 @@
       "id": "C-R24-01",
       "source": "C R24 (A known gap)",
       "severity": "low",
-      "status": "open",
+      "status": "done",
       "title": "Test gap: D-33 part 2 rule 'a path without a store entry stays absent' is not pinned; a mutant writing undefined or {} for such a path survives",
-      "routed_to": "TM-B28 (round 25) (s8)"
+      "routed_to": "TM-B28 (round 25) (s8) | done TM-B28 (round 25, c2c19a7, C R25 PASS)"
     },
     {
       "round": 24,
@@ -3069,18 +3114,18 @@
       "id": "C-R24-04",
       "source": "C R24 addendum (A known gap)",
       "severity": "info",
-      "status": "open",
+      "status": "done",
       "title": "docs/bugs/001 entry 3 title still says 'single save' although D-33 covers batch; entry 10 names (s6) but not (s7)",
-      "routed_to": "TM-B28 (round 25) docs"
+      "routed_to": "TM-B28 (round 25) docs | done TM-B28 (round 25, c2c19a7, C R25 PASS)"
     },
     {
       "round": 24,
       "id": "RR-R24-01",
       "source": "root review R24 #1",
       "severity": "low",
-      "status": "open",
+      "status": "done",
       "title": "MetadataPanel.tsx:216-221 a kept entry was read with the old schema, so a newly added custom field shows empty for that file until a rescan; the 'Failed to read N files' toast tells the user. Suggests a one-line note under D-33 in docs/bugs/001",
-      "routed_to": "TM-B28 (round 25) docs note; recorded in D-33 text"
+      "routed_to": "TM-B28 (round 25) docs note; recorded in D-33 text | done TM-B28 (round 25, c2c19a7, C R25 PASS)"
     },
     {
       "round": 24,
@@ -3089,25 +3134,25 @@
       "severity": "low",
       "status": "open",
       "title": "MetadataPanel.tsx:209-224 handleSchemaChanged writes the store only after all chunks; a save finishing between chunks can be overwritten by values read earlier. Same timing defect as B-R23-02, not made worse",
-      "routed_to": "= B-R23-02 (docs/bugs/001 entry 9); TM-B28 adds the between-chunks variant to entry 9"
+      "routed_to": "= B-R23-02 (docs/bugs/001 entry 9); TM-B28 adds the between-chunks variant to entry 9 | R25: documented as docs/bugs/001 entry 9 step 4 (TM-B28 done); fix -> TM-B29 (D-34, round 26), B R25 red reproduction (between-chunks test)"
     },
     {
       "round": 24,
       "id": "RR-R24-03",
       "source": "root review R24 #3",
       "severity": "low",
-      "status": "open",
+      "status": "done",
       "title": "(i3) calls resetWindowApiMocks() itself, so it no longer proves the shared beforeEach isolates tests; suggests a defaults-only test",
-      "routed_to": "B R24: no new test. C R24-3 mutant MB (beforeEach without the helper) is killed by 24 existing tests, and a defaults-only test is order-dependent again (the RR-R23-01 problem). TM-B28 keeps MB as a named mutant for the shared helper"
+      "routed_to": "B R24: no new test. C R24-3 mutant MB (beforeEach without the helper) is killed by 24 existing tests, and a defaults-only test is order-dependent again (the RR-R23-01 problem). TM-B28 keeps MB as a named mutant for the shared helper | done TM-B28 (round 25, c2c19a7, C R25 PASS)"
     },
     {
       "round": 24,
       "id": "RR-R24-04",
       "source": "root review R24 #4",
       "severity": "low",
-      "status": "open",
+      "status": "done",
       "title": "metadata-panel-schema-change.test.ts:112-120 copies the mock-reset code instead of reusing resetWindowApiMocks; move the helper to tests/renderer/helpers/ (with saveSchema) and use it in both files",
-      "routed_to": "TM-B28 (round 25)"
+      "routed_to": "TM-B28 (round 25) | done TM-B28 (round 25, c2c19a7, C R25 PASS)"
     },
     {
       "round": 24,
@@ -3116,7 +3161,124 @@
       "severity": "info",
       "status": "open",
       "title": "Architecture signal: handleSchemaChanged and handleSave write the store without knowing about each other; a read generation number in the file store would drop late results (fixes B-R23-02 and RR-R24-02) and let the kept-entry logic live in one store action",
-      "routed_to": "signal (RR-R12-04, RR-R13-04, RR-R15-05, RR-R20-04, RR-R21-04, RR-R23-04); B-R23-02 fix candidate"
+      "routed_to": "signal (RR-R12-04, RR-R13-04, RR-R15-05, RR-R20-04, RR-R21-04, RR-R23-04); B-R23-02 fix candidate | R25: generation adopted in the file store by D-34 (TM-B29); moving the logic into one store action stays a signal"
+    },
+    {
+      "round": 25,
+      "id": "A-R25-01",
+      "source": "A R25 spec deviation",
+      "severity": "info",
+      "status": "done",
+      "title": "Task's D-33 note example said 'switching to another file and back' re-reads; switching fills the form from the store (MetadataPanel.tsx:111). A wrote the real read paths (rescan/open, save re-read, next successful schema change)",
+      "routed_to": "done TM-B28 (C R25-6 confirmed)"
+    },
+    {
+      "round": 25,
+      "id": "A-R25-02",
+      "source": "A R25 code-reviewer",
+      "severity": "low",
+      "status": "open",
+      "title": "docs/bugs/001 entry 3 step 3 (:52) still says 'rescan or switching to another file and back', contradicting the D-33 note",
+      "routed_to": "= C-R25-03; TM-B29 docs (round 26)"
+    },
+    {
+      "round": 25,
+      "id": "A-R25-03",
+      "source": "A R25 code-reviewer",
+      "severity": "low",
+      "status": "open",
+      "title": "docs/bugs/001 entry 10 step 3 'form unchanged, edits stay' on a rejected read holds only for a single selection; batch calls setEditingMetadata({}) (MetadataPanel.tsx:229-230)",
+      "routed_to": "= C-R25-04; TM-B29 docs (round 26)"
+    },
+    {
+      "round": 25,
+      "id": "C-R25-01",
+      "source": "C R25 mutant MBS",
+      "severity": "low",
+      "status": "open",
+      "title": "MBS survives: removing resetWindowApiMocks() from the schema-change beforeEach breaks no test; once-values are consumed in their own test and persistent overrides are re-set per test (RR-R24-03 gap for the second file)",
+      "routed_to": "record (hygiene candidate; no test added: a defaults-only test depends on run order, RR-R23-01)"
+    },
+    {
+      "round": 25,
+      "id": "C-R25-02",
+      "source": "C R25 mutant MW",
+      "severity": "info",
+      "status": "open",
+      "title": "MW survives: capturing window.api at module load in window-api-mocks.ts is equivalent today (setup.ts and the vi.hoisted swap expose the same mockApi); the call-time rule is defensive style",
+      "routed_to": "record only"
+    },
+    {
+      "round": 25,
+      "id": "C-R25-03",
+      "source": "C R25-6",
+      "severity": "low",
+      "status": "open",
+      "title": "= A-R25-02 (entry 3 step 3 vs D-33 note)",
+      "routed_to": "TM-B29 docs (round 26)"
+    },
+    {
+      "round": 25,
+      "id": "C-R25-04",
+      "source": "C R25-6",
+      "severity": "low",
+      "status": "open",
+      "title": "= A-R25-03 (entry 10 step 3 single-selection only)",
+      "routed_to": "TM-B29 docs (round 26)"
+    },
+    {
+      "round": 25,
+      "id": "RR-R25-01",
+      "source": "root review R25",
+      "severity": "low",
+      "status": "open",
+      "title": "Review says docs/bugs/001:10 'MetadataPanel.tsx:111' points at 'if (meta) {' and should be :110. Disputed by B grep on c2c19a7: line 110 is 'if (selectedPaths.length === 1) {', line 111 is 'const meta = metadata[selectedPaths[0]];' (the described store lookup), 112 is 'if (meta) {'",
+      "routed_to": "disputed (reference is correct on c2c19a7); moot in round 26: TM-B29 changes MetadataPanel.tsx and A re-points every reference, C greps each"
+    },
+    {
+      "round": 25,
+      "id": "RR-R25-02",
+      "source": "root review R25",
+      "severity": "low",
+      "status": "done",
+      "title": "window-api-mocks.ts also resets saveSchema for the batch-save suite: stricter, harmless, covered by (i3)",
+      "routed_to": "no fix needed"
+    },
+    {
+      "round": 25,
+      "id": "RR-R25-03",
+      "source": "root review R25",
+      "severity": "info",
+      "status": "done",
+      "title": "(s8) checked against handleSchemaChanged: toast count 3, c.wav absent, kept a.wav keeps the form",
+      "routed_to": "confirmation only"
+    },
+    {
+      "round": 25,
+      "id": "RR-R25-04",
+      "source": "root review R25 architecture note",
+      "severity": "info",
+      "status": "open",
+      "title": "Architecture signal: per-path read generation in useFileStore so handleSchemaChanged drops late results (fixes RR-R24-02/A-R21-03 class); other test files that reset window.api mocks inline should use resetWindowApiMocks. B grep on c2c19a7: no other tests/renderer file resets window.api mocks inline (only schema-store.test.ts uses mockReset/mockClear, on its own mocks)",
+      "routed_to": "generation part -> TM-B29 (D-34); test-helper part: no current target (signal only)"
+    },
+    {
+      "round": 25,
+      "id": "B-R25-01",
+      "source": "B R25 code reading (FolderBrowser.tsx:134-158, MetadataPanel.tsx:331)",
+      "severity": "low",
+      "status": "open",
+      "title": "Hypothesis, not reproduced: Rescan (and Open Folder of the same folder) stays enabled while a save is pending; readMetadataChunked can read files before a batch write reaches them and setMetadata after the last chunk overwrites the save's re-read (same class as B-R23-02). Rescan also clears the selection, so the form is not affected",
+      "routed_to": "follow-up after TM-B29: can reuse D-34's pathWriteGenerations in FolderBrowser/App; needs a red reproduction first"
+    },
+    {
+      "round": 25,
+      "id": "B-R25-02",
+      "source": "B R25 experiment (/tmp copy of c2c19a7; b-round-25-exp-repro.test.ts.txt, b-round-25-exp-prototype.diff.txt, b-round-25-exp-mutants.log)",
+      "severity": "medium",
+      "status": "open",
+      "title": "B-R23-02 and RR-R24-02 reproduced red at component level on c2c19a7: (r1) batch, (r2) single + typing during save, (r5) stale chunk 1 + save between chunks, (r6) rejected chunk 1 snapshot + save between chunks, (r7) partial batch failure fail; (r3) fresh-after-write control and (r4) chunk issued after the write pass. A store-based generation prototype passes all 215 renderer tests with Biome 8 warnings and tsc 0; mutants MG-1..MG-9 each killed. A first prototype that compared generations when each chunk resolved failed (r5): the comparison must happen at store-write time",
+      "routed_to": "TM-B29 (round 26)"
     }
   ],
   "rounds": [
@@ -3654,7 +3816,7 @@
     {
       "round": 25,
       "task": "Round 25: TM-B28 schema-change test and docs hygiene: shared resetWindowApiMocks helper (six mocks), (s8) absent-path pin, docs/bugs/001 entries 3/9/10 + D-33 note",
-      "status": "planned",
+      "status": "done, C PASS realVerified=true, published c2c19a7",
       "baseline": "3d27ba921ab2f27e4b02a8e6bb220c2fad5850d5 (clean)",
       "items": [
         "TM-B28"
@@ -3666,6 +3828,23 @@
         "RR-R24-04",
         "C-R24-01",
         "C-R24-04"
+      ]
+    },
+    {
+      "round": 26,
+      "task": "TM-B29 stale schema re-read guard (D-34): file-store write generation, handleSchemaChanged keeps superseded/kept paths from the store at store-write time; docs/bugs/001 entry 9 fixed, entry 3/10 corrections",
+      "status": "planned",
+      "baseline": "c2c19a72bed45f561eae1c9dbca9cc79567aaf41 (clean)",
+      "items": [
+        "TM-B29"
+      ],
+      "findings": [
+        "B-R23-02",
+        "RR-R24-02",
+        "B-R25-02",
+        "C-R25-03",
+        "C-R25-04",
+        "RR-R25-01"
       ]
     }
   ]

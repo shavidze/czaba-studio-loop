@@ -1,0 +1,25 @@
+import sys,shutil,subprocess,os
+base='/tmp/b26/repo'; mp='src/renderer/src/components/metadata-editor/MetadataPanel.tsx'
+muts={
+ 'MG-1 no comparison':("      if ((pathWriteGenerations[path] ?? 0) > issuedAt[path]) keptPaths.add(path);\n",""),
+ 'MG-2 mark before write (single)':("        await window.api.writeMetadata(path, startEditingMetadata, fields);\n        useFileStore.getState().markPathsWritten([path]);\n","        useFileStore.getState().markPathsWritten([path]);\n        await window.api.writeMetadata(path, startEditingMetadata, fields);\n"),
+ 'MG-3 >= instead of >':("> issuedAt[path]) keptPaths",">= issuedAt[path]) keptPaths"),
+ 'MG-4 start-only snapshot':("      const issuedGeneration = useFileStore.getState().writeGeneration;\n","",),
+ 'MG-5 kept from reject-time snapshot':("        for (const path of chunk) keptPaths.add(path);\n","        const previous = useFileStore.getState().metadata;\n        for (const path of chunk) { if (previous[path]) { accumulated[path] = previous[path]; } }\n"),
+ 'MG-6 batch marks failed paths':("markPathsWritten(paths.filter((p) => !failedPaths.has(p)))","markPathsWritten(paths)"),
+ 'MG-7 superseded selected path resets form':("      if ((pathWriteGenerations[path] ?? 0) > issuedAt[path]) keptPaths.add(path);\n","      if ((pathWriteGenerations[path] ?? 0) > issuedAt[path]) { const l = useFileStore.getState().metadata[path]; if (l) accumulated[path] = l; }\n"),
+ 'MG-8 single save does not mark':("        useFileStore.getState().markPathsWritten([path]);\n",""),
+ 'MG-9 batch save does not mark':("        useFileStore.getState().markPathsWritten(paths.filter((p) => !failedPaths.has(p)));\n",""),
+}
+for name,(a,b) in muts.items():
+  d='/tmp/b26/mut'; shutil.rmtree(d,ignore_errors=True)
+  shutil.copytree(base,d,symlinks=True)
+  p=os.path.join(d,mp); s=open(p).read()
+  assert a in s, name
+  s=s.replace(a,b,1)
+  if name=='MG-4 start-only snapshot':
+    s=s.replace("    let failures = 0;\n","    let failures = 0;\n    const issuedGeneration = useFileStore.getState().writeGeneration;\n",1)
+  open(p,'w').write(s)
+  r=subprocess.run(['npx','vitest','run','--config','vitest.config.renderer.ts','tests/renderer/components/'],cwd=d,capture_output=True,text=True)
+  fails=[l.strip() for l in r.stdout.splitlines() if '×' in l]
+  print(name,'->','KILLED' if fails else 'SURVIVED',[f[:60] for f in fails])

@@ -1,0 +1,154 @@
+diff --git a/docs/bugs/001-save-and-selection-known-limits.md b/docs/bugs/001-save-and-selection-known-limits.md
+index 9d976b4..a3b74e3 100644
+--- a/docs/bugs/001-save-and-selection-known-limits.md
++++ b/docs/bugs/001-save-and-selection-known-limits.md
+@@ -9,7 +9,7 @@
+ - **D-30:** იგივე selection-ზე save-ის დროს აკრეფილი ველები (`modifiedFields`-ის key-ები, რომელთა მნიშვნელობა start snapshot-ისგან განსხვავდება) re-read-ის შემდეგ `mergeFields`-ით ბრუნდება. start snapshot-ს D-32 განსაზღვრავს.
+ - **D-32:** `handleSave` save-ის დასაწყისში ერთხელ კითხულობს `useMetadataStore.getState().editingMetadata`-ს. ეს ერთი მნიშვნელობა გამოიყენება single write-ის payload-ად, batch payload-ად (`modifiedFields`-ის key-ები) და D-30-ის შედარებისთვის. ხილული ქცევა არ იცვლება.
+ - **D-31:** Shift-click anchor ინახება file path-ად. ყოველი click (plain, Ctrl/Cmd, Shift) anchor-ს clicked row-ზე აყენებს. anchor იშლება, როცა selection ცარიელი ხდება.
+-- **D-33:** (1) `handleSave`-ის post-save re-read (`readMetadata` და `readMetadataBatch`) schema-ს re-read-ის მომენტში კითხულობს (`useSchemaStore.getState().fields`); write კვლავ click-ის დროის `fields`-ს იყენებს. (2) `handleSchemaChanged`-ში chunk-ის `readMetadataBatch` თუ reject-დება, ამ chunk-ის path-ებს store-ის მიმდინარე entry რჩება (D-22-ის მსგავსად); entry-ის გარეშე path-ები ისევ არ ემატება. failures-ის რაოდენობა და toast `Failed to read N files` უცვლელია. (3) შენარჩუნებული (ხელახლა არ წაკითხული) entry ფორმას არ ცვლის: single selection-ზე `setEditingMetadata` მხოლოდ ახლად წაკითხული entry-ით იძახება, ამიტომ შეუნახავი edits და save-ის დროს აკრეფილი ველები (D-30) რჩება (A-R24-01).
++- **D-33:** (1) `handleSave`-ის post-save re-read (`readMetadata` და `readMetadataBatch`) schema-ს re-read-ის მომენტში კითხულობს (`useSchemaStore.getState().fields`); write კვლავ click-ის დროის `fields`-ს იყენებს. (2) `handleSchemaChanged`-ში chunk-ის `readMetadataBatch` თუ reject-დება, ამ chunk-ის path-ებს store-ის მიმდინარე entry რჩება (D-22-ის მსგავსად); entry-ის გარეშე path-ები ისევ არ ემატება. failures-ის რაოდენობა და toast `Failed to read N files` უცვლელია. (3) შენარჩუნებული (ხელახლა არ წაკითხული) entry ფორმას არ ცვლის: single selection-ზე `setEditingMetadata` მხოლოდ ახლად წაკითხული entry-ით იძახება, ამიტომ შეუნახავი edits და save-ის დროს აკრეფილი ველები (D-30) რჩება (A-R24-01). შენარჩუნებული entry ძველი schema-თი იყო წაკითხული, ამიტომ ამ schema-ს ცვლილებით დამატებულ ველს ამ ფაილისთვის მნიშვნელობა არ აქვს შემდეგ წარმატებულ read-მდე (rescan ან folder-ის ხელახლა გახსნა, ამ ფაილის save-ის re-read, ან schema-ს შემდეგი ცვლილება წარმატებული read-ით). სხვა ფაილზე გადასვლა და დაბრუნება ფაილს ხელახლა არ კითხულობს: ფორმა store-ის entry-ს აჩვენებს (`MetadataPanel.tsx:111`). ამას toast `Failed to read N files` აცნობებს (RR-R24-01).
+ 
+ სტატუსები: `ცნობილი შეზღუდვა` ნიშნავს, რომ ქცევა გადაწყვეტილებას მიჰყვება და ცვლილება დაგეგმილი არ არის. `Saba-ს კითხვა` ნიშნავს, რომ ქცევის შეცვლაზე Saba წყვეტს. `გასწორდა` ნიშნავს, რომ ქცევა შეიცვალა და ტესტით არის დაცული.
+ 
+@@ -41,7 +41,7 @@
+ - **ტესტი:** ტესტი არ არის
+ - **სტატუსი:** ცნობილი შეზღუდვა
+ 
+-## 3. schema-ს შეცვლა single save-ის დროს: re-read save-ის დაწყების `fields`-ით
++## 3. schema-ს შეცვლა save-ის დროს (single და batch): re-read save-ის დაწყების `fields`-ით
+ 
+ - **ID:** A-R21-03
+ - **Severity:** low
+@@ -129,7 +129,8 @@
+   1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, ველი შეცვლილია, Save დაჭერილია, write ნელია.
+   2. მოქმედება: write-ის დასრულებამდე Schema Editor-ში schema ინახება (`Done`), და `handleSchemaChanged`-ის `readMetadataBatch` იწყება write-მდე, მაგრამ სრულდება save-ის re-read-ის შემდეგ.
+   3. შედეგი: `handleSchemaChanged` store-ში და ფორმაში write-მდე წაკითხულ მნიშვნელობებს წერს (`isDirty` false), სანამ ფაილი ხელახლა არ წაიკითხება. დისკზე ფაილი სწორია. D-33 ამ თანმიმდევრობას არ ფარავს.
+-- **გადაწყვეტილება:** D-33 მხოლოდ საპირისპირო თანმიმდევრობას ასწორებს. გასწორება (read token ან schema editor-ის ჩაკეტვა save-ის დროს) UX-ის საკითხია.
++  4. variant (RR-R24-02, ორი ან მეტი chunk): `handleSchemaChanged` store-ში მხოლოდ ყველა chunk-ის შემდეგ წერს (`:224`). თუ save (write და მისი re-read) ორ chunk-ს შორის სრულდება, ადრე წაკითხული chunk-ის write-მდე მნიშვნელობები save-ის re-read-ის შედეგს გადაფარავს.
++- **გადაწყვეტილება:** D-33 მხოლოდ საპირისპირო თანმიმდევრობას ასწორებს. stale-result guard (read generation, RR-R24-05) ტექნიკური და მხოლოდ renderer-ის ცვლილებაა, ამიტომ fix-ის კანდიდატია. UX-ის საკითხია მხოლოდ schema editor-ის ჩაკეტვა save-ის დროს.
+ - **ტესტი:** ტესტი არ არის
+ - **სტატუსი:** ცნობილი შეზღუდვა
+ 
+@@ -141,7 +142,7 @@
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, Category შეცვლილია და შეუნახავია (dirty).
+   2. მოქმედება: `Customize Fields` → schema-ს ცვლილება → `Done`.
+-  3. შედეგი: ფორმა ფაილიდან ხელახლა წაკითხულ მნიშვნელობებს აჩვენებს, შეუნახავი edits ქრება, `isDirty` false-ია. toast `Unsaved changes were discarded` არ ჩნდება. ეს მხოლოდ წარმატებულ read-ს ეხება: თუ მონიშნული ფაილის chunk-ის read reject-დება, ფორმა არ იცვლება და edits რჩება (D-33 part 3; ტესტი `(s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects`).
++  3. შედეგი: ფორმა ფაილიდან ხელახლა წაკითხულ მნიშვნელობებს აჩვენებს, შეუნახავი edits ქრება, `isDirty` false-ია. toast `Unsaved changes were discarded` არ ჩნდება. ეს მხოლოდ წარმატებულ read-ს ეხება: თუ მონიშნული ფაილის chunk-ის read reject-დება, ფორმა არ იცვლება და edits რჩება (D-33 part 3; ტესტები `(s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects` და `(s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)`).
+ - **გადაწყვეტილება:** არ არის. ვარიანტები: toast `Unsaved changes were discarded`; D-30-ის მსგავსი merge (შეცვლილი ველები re-read-ის შემდეგ `mergeFields`-ით ბრუნდება); ან `Customize Fields`-ის ჩაკეტვა, სანამ ფორმა dirty-ა.
+ - **ტესტი:** ტესტი არ არის
+ - **სტატუსი:** Saba-ს კითხვა
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index cbb1973..25d8077 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -7,6 +7,7 @@ import { useMetadataStore } from "~/stores/metadata-store";
+ import { useSchemaStore } from "~/stores/schema-store";
+ import type { BatchWriteResult, FieldDefinition, FieldValue, WavFileEntry, WavMetadata } from "~/types";
+ import { resetAllStores } from "../helpers/reset-stores";
++import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+ vi.hoisted(() => {
+   const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+@@ -105,14 +106,6 @@ function expectBatchWriteCall(callIndex: number): void {
+   expect(vi.mocked(window.api.writeMetadataBatch).mock.calls[callIndex]?.[1]).toEqual({ category: TYPED_CATEGORY });
+ }
+ 
+-function resetWindowApiMocks(): void {
+-  vi.mocked(window.api.writeMetadataBatch).mockReset().mockResolvedValue({ succeeded: 0, failed: [] });
+-  vi.mocked(window.api.readMetadataBatch).mockReset().mockResolvedValue({});
+-  vi.mocked(window.api.writeMetadata).mockReset().mockResolvedValue(undefined);
+-  vi.mocked(window.api.readMetadata).mockReset().mockResolvedValue({});
+-  vi.mocked(window.api.scanFolder).mockReset().mockResolvedValue([]);
+-}
+-
+ beforeEach(() => {
+   resetAllStores();
+   resetWindowApiMocks();
+@@ -1142,12 +1135,13 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+ });
+ 
+ describe("mock isolation (A-R21-04, RR-R23-01)", () => {
+-  it("(i3) resetWindowApiMocks drops once-values queued on the five window.api mocks", async () => {
++  it("(i3) resetWindowApiMocks drops once-values queued on the six window.api mocks", async () => {
+     vi.mocked(window.api.writeMetadataBatch).mockRejectedValueOnce(new Error("leaked"));
+     vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ "/leaked.wav": { title: "leaked" } });
+     vi.mocked(window.api.writeMetadata).mockRejectedValueOnce(new Error("leaked"));
+     vi.mocked(window.api.readMetadata).mockResolvedValueOnce({ title: "leaked" });
+     vi.mocked(window.api.scanFolder).mockRejectedValueOnce(new Error("leaked"));
++    vi.mocked(window.api.saveSchema).mockRejectedValueOnce(new Error("leaked"));
+ 
+     resetWindowApiMocks();
+ 
+@@ -1156,5 +1150,6 @@ describe("mock isolation (A-R21-04, RR-R23-01)", () => {
+     await expect(window.api.writeMetadata("/x.wav", {}, [])).resolves.toBeUndefined();
+     await expect(window.api.readMetadata("/x.wav", [])).resolves.toEqual({});
+     await expect(window.api.scanFolder("/x")).resolves.toEqual([]);
++    await expect(window.api.saveSchema([])).resolves.toBeUndefined();
+   });
+ });
+diff --git a/tests/renderer/components/metadata-panel-schema-change.test.ts b/tests/renderer/components/metadata-panel-schema-change.test.ts
+index 2987de9..d7bd758 100644
+--- a/tests/renderer/components/metadata-panel-schema-change.test.ts
++++ b/tests/renderer/components/metadata-panel-schema-change.test.ts
+@@ -6,6 +6,7 @@ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import type { BatchWriteResult, FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
+ import { resetAllStores } from "../helpers/reset-stores";
++import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+ vi.hoisted(() => {
+   const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+@@ -16,12 +17,14 @@ vi.hoisted(() => {
+ 
+ const PATH_A = "/music/a.wav";
+ const PATH_B = "/music/b.wav";
++const PATH_C = "/music/c.wav";
+ const NOTE_KEY = "r24note";
+ const NOTE_FROM_FILE = "fromfile";
+ const TYPED_CATEGORY = "R24Cat";
+ 
+ const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
+ const FILE_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
++const FILE_C: WavFileEntry = { name: "c.wav", path: PATH_C, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
+ const SEED_A: WavMetadata = { title: "A-title", category: "ACat", comment: "" };
+ const SEED_B: WavMetadata = { title: "B-title", category: "BCat", comment: "" };
+ const ALL_SUCCEEDED: BatchWriteResult = { succeeded: 2, failed: [] };
+@@ -111,12 +114,7 @@ async function settle(release: () => void): Promise<void> {
+ 
+ beforeEach(() => {
+   resetAllStores();
+-  vi.mocked(window.api.writeMetadataBatch).mockReset().mockResolvedValue({ succeeded: 0, failed: [] });
+-  vi.mocked(window.api.readMetadataBatch).mockReset().mockResolvedValue({});
+-  vi.mocked(window.api.writeMetadata).mockReset().mockResolvedValue(undefined);
+-  vi.mocked(window.api.readMetadata).mockReset().mockResolvedValue({});
+-  vi.mocked(window.api.scanFolder).mockReset().mockResolvedValue([]);
+-  vi.mocked(window.api.saveSchema).mockReset().mockResolvedValue(undefined);
++  resetWindowApiMocks();
+ });
+ 
+ afterEach(() => {
+@@ -236,4 +234,22 @@ describe("MetadataPanel schema change re-reads files (C-R23-01, D-33)", () => {
+     expect(state.isDirty).toBe(true);
+     expect(useFileStore.getState().metadata[PATH_A]?.category).toBe(TYPED_CATEGORY);
+   });
++
++  it("(s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects", async () => {
++    useFileStore.setState({
++      files: [FILE_A, FILE_B, FILE_C],
++      metadata: { [PATH_A]: { ...SEED_A }, [PATH_B]: { ...SEED_B } },
++      selectedPaths: [PATH_A],
++    });
++    vi.mocked(window.api.readMetadataBatch).mockRejectedValue(new Error("read down"));
++    render(createElement(MetadataPanel));
++
++    await addNoteFieldAndDone();
++
++    const metadata = useFileStore.getState().metadata;
++    expect(useMetadataStore.getState().toastMessage).toBe("Failed to read 3 files");
++    expect(Object.keys(metadata).sort()).toEqual([PATH_A, PATH_B]);
++    expect(metadata).toEqual({ [PATH_A]: SEED_A, [PATH_B]: SEED_B });
++    expect(getInputByLabel("Category (UCS)").value).toBe("ACat");
++  });
+ });

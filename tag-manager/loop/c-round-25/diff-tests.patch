@@ -1,0 +1,113 @@
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index cbb1973..25d8077 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -7,6 +7,7 @@ import { useMetadataStore } from "~/stores/metadata-store";
+ import { useSchemaStore } from "~/stores/schema-store";
+ import type { BatchWriteResult, FieldDefinition, FieldValue, WavFileEntry, WavMetadata } from "~/types";
+ import { resetAllStores } from "../helpers/reset-stores";
++import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+ vi.hoisted(() => {
+   const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+@@ -105,14 +106,6 @@ function expectBatchWriteCall(callIndex: number): void {
+   expect(vi.mocked(window.api.writeMetadataBatch).mock.calls[callIndex]?.[1]).toEqual({ category: TYPED_CATEGORY });
+ }
+ 
+-function resetWindowApiMocks(): void {
+-  vi.mocked(window.api.writeMetadataBatch).mockReset().mockResolvedValue({ succeeded: 0, failed: [] });
+-  vi.mocked(window.api.readMetadataBatch).mockReset().mockResolvedValue({});
+-  vi.mocked(window.api.writeMetadata).mockReset().mockResolvedValue(undefined);
+-  vi.mocked(window.api.readMetadata).mockReset().mockResolvedValue({});
+-  vi.mocked(window.api.scanFolder).mockReset().mockResolvedValue([]);
+-}
+-
+ beforeEach(() => {
+   resetAllStores();
+   resetWindowApiMocks();
+@@ -1142,12 +1135,13 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+ });
+ 
+ describe("mock isolation (A-R21-04, RR-R23-01)", () => {
+-  it("(i3) resetWindowApiMocks drops once-values queued on the five window.api mocks", async () => {
++  it("(i3) resetWindowApiMocks drops once-values queued on the six window.api mocks", async () => {
+     vi.mocked(window.api.writeMetadataBatch).mockRejectedValueOnce(new Error("leaked"));
+     vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ "/leaked.wav": { title: "leaked" } });
+     vi.mocked(window.api.writeMetadata).mockRejectedValueOnce(new Error("leaked"));
+     vi.mocked(window.api.readMetadata).mockResolvedValueOnce({ title: "leaked" });
+     vi.mocked(window.api.scanFolder).mockRejectedValueOnce(new Error("leaked"));
++    vi.mocked(window.api.saveSchema).mockRejectedValueOnce(new Error("leaked"));
+ 
+     resetWindowApiMocks();
+ 
+@@ -1156,5 +1150,6 @@ describe("mock isolation (A-R21-04, RR-R23-01)", () => {
+     await expect(window.api.writeMetadata("/x.wav", {}, [])).resolves.toBeUndefined();
+     await expect(window.api.readMetadata("/x.wav", [])).resolves.toEqual({});
+     await expect(window.api.scanFolder("/x")).resolves.toEqual([]);
++    await expect(window.api.saveSchema([])).resolves.toBeUndefined();
+   });
+ });
+diff --git a/tests/renderer/components/metadata-panel-schema-change.test.ts b/tests/renderer/components/metadata-panel-schema-change.test.ts
+index 2987de9..d7bd758 100644
+--- a/tests/renderer/components/metadata-panel-schema-change.test.ts
++++ b/tests/renderer/components/metadata-panel-schema-change.test.ts
+@@ -6,6 +6,7 @@ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import type { BatchWriteResult, FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
+ import { resetAllStores } from "../helpers/reset-stores";
++import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+ vi.hoisted(() => {
+   const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+@@ -16,12 +17,14 @@ vi.hoisted(() => {
+ 
+ const PATH_A = "/music/a.wav";
+ const PATH_B = "/music/b.wav";
++const PATH_C = "/music/c.wav";
+ const NOTE_KEY = "r24note";
+ const NOTE_FROM_FILE = "fromfile";
+ const TYPED_CATEGORY = "R24Cat";
+ 
+ const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
+ const FILE_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
++const FILE_C: WavFileEntry = { name: "c.wav", path: PATH_C, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
+ const SEED_A: WavMetadata = { title: "A-title", category: "ACat", comment: "" };
+ const SEED_B: WavMetadata = { title: "B-title", category: "BCat", comment: "" };
+ const ALL_SUCCEEDED: BatchWriteResult = { succeeded: 2, failed: [] };
+@@ -111,12 +114,7 @@ async function settle(release: () => void): Promise<void> {
+ 
+ beforeEach(() => {
+   resetAllStores();
+-  vi.mocked(window.api.writeMetadataBatch).mockReset().mockResolvedValue({ succeeded: 0, failed: [] });
+-  vi.mocked(window.api.readMetadataBatch).mockReset().mockResolvedValue({});
+-  vi.mocked(window.api.writeMetadata).mockReset().mockResolvedValue(undefined);
+-  vi.mocked(window.api.readMetadata).mockReset().mockResolvedValue({});
+-  vi.mocked(window.api.scanFolder).mockReset().mockResolvedValue([]);
+-  vi.mocked(window.api.saveSchema).mockReset().mockResolvedValue(undefined);
++  resetWindowApiMocks();
+ });
+ 
+ afterEach(() => {
+@@ -236,4 +234,22 @@ describe("MetadataPanel schema change re-reads files (C-R23-01, D-33)", () => {
+     expect(state.isDirty).toBe(true);
+     expect(useFileStore.getState().metadata[PATH_A]?.category).toBe(TYPED_CATEGORY);
+   });
++
++  it("(s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects", async () => {
++    useFileStore.setState({
++      files: [FILE_A, FILE_B, FILE_C],
++      metadata: { [PATH_A]: { ...SEED_A }, [PATH_B]: { ...SEED_B } },
++      selectedPaths: [PATH_A],
++    });
++    vi.mocked(window.api.readMetadataBatch).mockRejectedValue(new Error("read down"));
++    render(createElement(MetadataPanel));
++
++    await addNoteFieldAndDone();
++
++    const metadata = useFileStore.getState().metadata;
++    expect(useMetadataStore.getState().toastMessage).toBe("Failed to read 3 files");
++    expect(Object.keys(metadata).sort()).toEqual([PATH_A, PATH_B]);
++    expect(metadata).toEqual({ [PATH_A]: SEED_A, [PATH_B]: SEED_B });
++    expect(getInputByLabel("Category (UCS)").value).toBe("ACat");
++  });
+ });
