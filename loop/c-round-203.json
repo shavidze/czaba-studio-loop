@@ -1,0 +1,84 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-27T04:48:27.8310887Z",
+  "round": 203,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "SCOPE-203",
+  "ERROR-BORDER-203",
+  "CONTRAST-203",
+  "HOVER-203",
+  "TYPING-203",
+  "NONTEXT-203",
+  "KEY-RING-203",
+  "NO-SHIFT-203",
+  "T-RUN-203",
+  "AN-REVIEW-203",
+  "G203-3"
+ ],
+ "failed": [],
+ "blocked": [
+  "BLOCKED-AUTH-203: account.reset.$id.$token renders \"Sign in required\" (0 inputs) and /studio/:id components \u2014 backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "rows": {
+  "SCOPE-203": "PASS",
+  "ERROR-BORDER-203": "PASS",
+  "CONTRAST-203": "PASS",
+  "HOVER-203": "PASS",
+  "TYPING-203": "PASS",
+  "NONTEXT-203": "PASS",
+  "KEY-RING-203": "PASS",
+  "NO-SHIFT-203": "PASS",
+  "T-RUN-203": "PASS",
+  "AN-REVIEW-203": "PASS",
+  "BLOCKED-AUTH-203": "BLOCKED",
+  "G203-3": "PASS"
+ },
+ "bugs": [
+  {
+   "id": "C-R203-01",
+   "severity": "low",
+   "steps": [
+    "In a scratch copy, change only the Textarea class item in app/components/ui/Input.tsx back to error && 'border-destructive'",
+    "npx vitest run app/lib/__tests__/store-focus-fixups.test.tsx"
+   ],
+   "expected": "Some row (unit or browser) fails, because the Textarea error border would again lose to border-outline-strong",
+   "actual": "All 6 tests stay green; no route renders Textarea, so no browser row can cover it (same class as the n1 expected-green mutant)",
+   "evidence": "c-round-203/trun/mutants.log (c1-textarea-only GREEN); grep Textarea app \u2192 only ui/index.ts export"
+  },
+  {
+   "id": "C-R203-02",
+   "severity": "low",
+   "steps": [
+    "/store at 1280 or 1440",
+    "Click \"Search (\u2318K)\" in the header",
+    "Press Escape (same for Sign In \u2192 AuthModal \u2192 Escape)"
+   ],
+   "expected": "Focus returns to the opener button with the keyboard ring",
+   "actual": "document.activeElement is BODY; identical in ref (pre-existing). Tab also leaves the AuthModal into the page (known shared-modal-no-focus-management)",
+   "evidence": "c-round-203/out/typing/{tree,ref}-{1280,1440}.json fields.cmdk.escape / fields.auth-email.escape; out/authsweep/*.json"
+  }
+ ],
+ "notes": [
+  "A review M1 (Android Unidentified / IME isComposing) unverified: needs B ruling and a real device",
+  "STF2 \"new cases red on start copy\" in the T-RUN table is not reproducible as written; STF5 with the old scanner is red as intended",
+  "Ableton parity: not applicable",
+  "T-RUN deviation 1: C mutant c1 (Textarea class reverted) stays GREEN; same exemption class as n1 per task text (jsdom cascade forbidden by L12, no Textarea consumer for a browser row); filed C-R203-01, row not failed",
+  "T-RUN deviation 2: STF2 green on the start copy (repo scan; start sources carry no arbitrary focus forms); \"new STF2 cases red\" is only demonstrable by mutant (n8, c4 red); STF5 with old scanner + new fixtures is red as intended",
+  "out/typing/{tree,ref}-*.json newsletter arrowDown/tab/tabBack* entries are harness-invalid; out/typing/newsletter-{tree,ref}.json supersedes them",
+  "ref copy: cacheDir line added after the frozen-list check"
+ ]
+}

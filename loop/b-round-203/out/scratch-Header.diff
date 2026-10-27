@@ -1,0 +1,84 @@
+2a3
+> import type { FocusEvent, KeyboardEvent } from 'react';
+12a14,16
+>   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+>   const userMenuRef = useRef<HTMLDivElement>(null);
+>   const userMenuButtonRef = useRef<HTMLButtonElement>(null);
+31a36,60
+>   useEffect(() => {
+>     if (!isUserMenuOpen) return;
+>     const handlePointerDown = (event: PointerEvent) => {
+>       const root = userMenuRef.current;
+>       if (root && event.target instanceof Node && !root.contains(event.target)) {
+>         setIsUserMenuOpen(false);
+>       }
+>     };
+>     document.addEventListener('pointerdown', handlePointerDown);
+>     return () => document.removeEventListener('pointerdown', handlePointerDown);
+>   }, [isUserMenuOpen]);
+> 
+>   const handleUserMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+>     if (event.key !== 'Escape' || !isUserMenuOpen) return;
+>     event.stopPropagation();
+>     setIsUserMenuOpen(false);
+>     userMenuButtonRef.current?.focus();
+>   };
+> 
+>   const handleUserMenuBlur = (event: FocusEvent<HTMLDivElement>) => {
+>     const next = event.relatedTarget;
+>     if (next instanceof Node && event.currentTarget.contains(next)) return;
+>     setIsUserMenuOpen(false);
+>   };
+> 
+103,104c132,146
+<             <div className="relative group hidden lg:block">
+<               <button aria-label="User menu" className="btn-icon text-muted cursor-pointer">
+---
+>             <div
+>               ref={userMenuRef}
+>               className="relative group hidden lg:block"
+>               onKeyDown={handleUserMenuKeyDown}
+>               onBlur={handleUserMenuBlur}
+>             >
+>               <button
+>                 ref={userMenuButtonRef}
+>                 type="button"
+>                 aria-label="User menu"
+>                 aria-expanded={isUserMenuOpen}
+>                 aria-controls="header-user-menu"
+>                 onClick={() => setIsUserMenuOpen((open) => !open)}
+>                 className="btn-icon text-muted cursor-pointer"
+>               >
+107c149,156
+<               <div className="absolute top-full right-0 mt-2 w-52 bg-surface border border-outline rounded-md shadow-xl p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 translate-y-[-10px] group-hover:translate-y-0">
+---
+>               <div
+>                 id="header-user-menu"
+>                 className={`absolute top-full right-0 mt-2 w-52 bg-surface border border-outline rounded-md shadow-xl p-4 transition-all duration-200 ${
+>                   isUserMenuOpen
+>                     ? 'opacity-100 visible translate-y-0'
+>                     : 'opacity-0 invisible translate-y-[-10px] group-hover:opacity-100 group-hover:visible group-hover:translate-y-0'
+>                 }`}
+>               >
+113a163
+>                   onClick={() => setIsUserMenuOpen(false)}
+119a170
+>                   onClick={() => setIsUserMenuOpen(false)}
+125a177
+>                   onClick={() => setIsUserMenuOpen(false)}
+132c184,188
+<                   onClick={() => signOut()}
+---
+>                   type="button"
+>                   onClick={() => {
+>                     setIsUserMenuOpen(false);
+>                     signOut();
+>                   }}
+149a206,207
+>             aria-expanded={isOpen}
+>             aria-controls="header-mobile-menu"
+160c218,219
+<         className={`lg:hidden ${isOpen ? 'max-h-[80vh] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-300 ease-in-out`}
+---
+>         id="header-mobile-menu"
+>         className={`lg:hidden ${isOpen ? 'max-h-[80vh] opacity-100 visible' : 'max-h-0 opacity-0 invisible'} overflow-hidden transition-all duration-300 ease-in-out`}
