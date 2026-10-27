@@ -1,0 +1,86 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-27T07:16:01.5105931Z",
+  "round": 204,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "SCOPE-204",
+  "HIDDEN-204",
+  "MOBILE-204",
+  "USERMENU-204",
+  "SHOWCASE-204",
+  "NO-SHIFT-204",
+  "RING-204",
+  "T-RUN-204",
+  "AN-REVIEW-204",
+  "G204-3"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "rows": {
+  "SCOPE-204": "PASS",
+  "HIDDEN-204": "PASS",
+  "MOBILE-204": "PASS",
+  "USERMENU-204": "PASS",
+  "SHOWCASE-204": "PASS",
+  "NO-SHIFT-204": "PASS",
+  "RING-204": "PASS",
+  "T-RUN-204": "PASS",
+  "AN-REVIEW-204": "PASS",
+  "G204-3": "PASS",
+  "gate": "gate"
+ },
+ "unverified": [
+  "Safari/Firefox-mac click-focus behaviour of the user menu (no WebKit run)",
+  "cart badge animation (no backend cart in cloud)"
+ ],
+ "bugs": [
+  {
+   "id": "C-R204-01",
+   "severity": "low",
+   "steps": [
+    "Open http://127.0.0.1:5173/ at 1280x720 with czaba_lead_magnet dismissed",
+    "Run node tmp/studio-real-loop/c-round-204/tools/b2diag.cjs 5173 1280 (it locates the StudioShowcase a[href='/store'] 'Browse the Collection' inside the section containing 'Mixdown' and calls focus({preventScroll:true}))",
+    "Read the effective opacity (product of ancestor opacities) after 2.5 s",
+    "Separately at 375x812: instant scrollTo so the CTA sits at the viewport centre, no focus, wait 3 s"
+   ],
+   "expected": "A focused (or on-screen) CTA is visible at effective opacity 1",
+   "actual": "The section's own CTA wrapper goes to 1 (R107 works), but the frozen _index.tsx ScrollReveal wrapper (useInView amount 0.2) stays at opacity 0, so the effective opacity is 0. At 375 the centred CTA stays at 0 in tree and ref (visible part 498 px < 0.3 x 1778 px). Real Tab/Shift+Tab always scrolls the CTA in and reaches 1, so no keyboard path in this round fails.",
+   "evidence": "tmp/studio-real-loop/c-round-204/tools/b2diag.cjs; out/showcase/tree-*.json (b2); out/noshift/layout-tree-375.json"
+  },
+  {
+   "id": "C-R204-02",
+   "severity": "low",
+   "steps": [
+    "Seed localStorage.auth_user={id:7,firstName:'Ana',...} (no accessToken); open /store at 1280x720",
+    "Focus 'User menu', press Enter (aria-expanded true)",
+    "Mouse-click the greeting text 'Hi, Ana!' inside the panel",
+    "Move the pointer out"
+   ],
+   "expected": "(B to confirm) Clicking non-focusable panel content keeps the disclosure state and focus position, or state and visuals agree",
+   "actual": "aria-expanded becomes false and focus goes to BODY while the panel stays painted (group-hover) until the pointer leaves. This is consistent with ruling R106 (a null relatedTarget closes) and the ruled hover trade-off; it is the code-reviewer's 'null blur' note.",
+   "evidence": "tmp/studio-real-loop/c-round-204/out/usermenu/tree-1280.json, tree-1440.json (steps kb-open, click greeting, greeting then pointer out)"
+  }
+ ],
+ "notes": [
+  "DEVIATION 1 (CTA hover:[transform:scale(1.05)]) independently confirmed: with the ruled hover:scale-105 the scale jumps to 1.05 at +20 ms (the scale property is not transitioned; the computed transition-property is the global app.css:307 list); accepted delta, B/root may veto (out/showcase/dev1-1280.json)",
+  "Disclosed in-grant extra: useEffect resets isUserMenuOpen on sign-out (accepted)",
+  "HIDDEN stop counts on / : tree 36/41/41 vs ref 42/42/42; deltas -6/-1/-1 equal B's expectation; the absolute +1 is C's sweep catching the carousel 'Scroll right' button that B's 250 ms tool misses",
+  "T-RUN start copy: HF8 is red as a whole (tabindex assertion first), so B's 'HF8 green on threshold' cannot be shown; imprecise task text, not A's defect",
+  "Ableton compliance: does not apply (store header/homepage)",
+  "Ref '/' first sweep returned 0 stops (ref dev-server first-load 'Invalid hook call' during dep re-optimisation); ref '/' numbers come from out/hidden/ref-home-*.json. Sweep counts equal the visible DOM tabbables (/store 21, /about 18, product 16); /store and product render no footer."
+ ]
+}

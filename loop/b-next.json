@@ -1,10 +1,10 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 203 PASS with browserVerified=true and realVerified=true (11 rows, 0 FAIL; only backend-only rows BLOCKED). Gate 203 published 135b880 (rounds 200-203), so SABA-B-4 is done and C-R202-01/02/03/07, C-R196-03, B-R201-PRODUCTCARD-HIDDEN-PREVIEW, B-R200-HIDDEN-FOCUSABLE-GAP and GLOBAL-FOCUS-VISIBLE-UNLAYERED are closed. Open Medium findings remain (C-R202-04, C-R202-05, B-R201-HEADER-USERMENU-KEYBOARD, and the new B-R203-LEADMAGNET-AUTO-OPEN-FOCUS), and large scoped work remains (STORE-2b..5, REVIEW-RECOMMENDATIONS, STUDIO-PERFORMANCE, T12-ADVANCED, phase 2b and the command layer). Nothing needs external input to proceed, so the decision is neither COMPLETE nor BLOCKED.",
- "nextTask": "Round 204 (D-29z169) on clean HEAD 135b880 (frozen 1035, 2 grants, 2 new files): hidden focusables, runtime state. R105: Header mobile menu 'invisible' when closed + Toggle menu aria-expanded/aria-controls (C-R202-04). R106: desktop user menu becomes a disclosure (Enter/Space toggle, Tab through My Account/Orders/Downloads/Logout, Escape closes and refocuses the button, focus-out and outside pointerdown close, hover reveal kept; type=button on every Header button) (B-R201-HEADER-USERMENU-KEYBOARD; browser-testable via localStorage.auth_user without accessToken). R107: StudioShowcase reveals once and on focus, and the tabbable motion.div whileTap wrapper is replaced by Tailwind hover/active scale on the Link (C-R202-05). Tests: store-hidden-focusables.test.tsx HF1-HF9 + mutants m1-m10; doc 161. C rows at 375/1280/1440: SCOPE-204, HIDDEN-204, MOBILE-204, USERMENU-204, SHOWCASE-204, NO-SHIFT-204, RING-204, T-RUN-204, AN-REVIEW-204, G204-3. C seeds czaba_lead_magnet dismissed=true to suppress the auto-open popup (B-R203-LEADMAGNET-AUTO-OPEN-FOCUS, round 205).",
+ "reason": "C round 204 PASS (10 rows, browserVerified=true, realVerified=true, 2 Low), but gate 204 is blocked: the reviewer found that doc 161 claims a jsdom test that does not exist (GATE204-B1). So C-R202-04, C-R202-05 and B-R201-HEADER-USERMENU-KEYBOARD are c_pass_gate_blocked, not done. Open Mediums remain: B-R203-LEADMAGNET-AUTO-OPEN-FOCUS, and the new B-R204-SCROLLLOCK-POSITION-LOST (useScrollLock reads scrollY after fixing the body; HEAD measured 2037 -> 0 and 1500 -> 0). Large scoped work also remains (SYS-1..3, STORE-2b..5, REVIEW-RECOMMENDATIONS, STUDIO-PERFORMANCE, T12-ADVANCED, phase 2b, the command layer). Nothing needs external input, so the decision is neither COMPLETE nor BLOCKED.",
+ "nextTask": "Round 205 (D-29z170), baseline HEAD 135b880 + the round-204 work (2 M + 2 ??, never revert); frozen 1035, 4 grants, 2 new files. R108 GATE204-B1: HF6b in store-hidden-focusables.test.tsx (open user menu -> signed out -> signed in -> aria-expanded false; fresh element per rerender) + doc 161 status and l.111. R109 B-R203-LEADMAGNET-AUTO-OPEN-FOCUS: LeadMagnetPopup becomes role=dialog aria-modal labelled by the current step's heading; initial focus Close; step focus; Escape -> close() (not while composing); Tab containment; focus restore after the scroll lock; error role=alert; keep-list text/classes and STF2/ST5/ST7 untouched. R110 B-R204-SCROLLLOCK-POSITION-LOST: useScrollLock reads scrollY before locking. Tests store-lead-magnet-dialog.test.tsx LM1-LM9 + mutants m1-m12; doc 162. C rows at 1280/1440 (+375): SCOPE, LM-OPEN, LM-TAB, LM-STEPS, LM-CLOSE, LM-EXIT, SCROLL-LOCK, HF6B, NO-SHIFT, T-RUN, AN-REVIEW, G205-3. Root publishes rounds 204+205 together after C PASS.",
  "remaining": [
-  "Round 204 hidden focusables, runtime state (D-29z169): C-R202-04, C-R202-05, B-R201-HEADER-USERMENU-KEYBOARD",
-  "Round 205 B-R203-LEADMAGNET-AUTO-OPEN-FOCUS (Medium, pre-existing; owner LeadMagnetPopup.tsx, keep-list semantics/focus only)",
+  "Round 205 (D-29z170): GATE204-B1, B-R203-LEADMAGNET-AUTO-OPEN-FOCUS, B-R204-SCROLLLOCK-POSITION-LOST",
+  "Round 204 publication (C-R202-04, C-R202-05, B-R201-HEADER-USERMENU-KEYBOARD: c_pass_gate_blocked, published with round 205)",
   "SYS-1 (test selectors by role/name/text; closes GATE146-S4, GATE164-OV1-FRAGILE, GATE173-S4, GATE81-S2, C-R127-L1f, RETRO200-CLASS-SELECTORS)",
   "SYS-2 (held-Enter guard; closes GATE107-S1, A-R107-SWEEP-HELD-ENTER-TOOLBAR)",
   "SYS-3 (IME isComposing; closes ROOT-R65-L5, A-R165-IME-ENTER; + 3 unfiled sites in 2 files; + A-R203-REVIEW-M1/I1 in focus-source.ts)",
@@ -22,13 +22,14 @@
   "STUDIO-AGENT-COMMANDS",
   "RECORDING-META-S1",
   "SRW-21 (deferred_user)",
-  "deferred_low_polish (288, incl. C-R203-01, C-R203-02, B-R203-USERMENU-HOVER-ESCAPE, B-R203-E2E-RESPONSIVE-CLOSED-ASSERT, A-R203-REVIEW-INPUT-DESCRIBEDBY, C-R203-AUDITOR-FORCED-COLORS; C-R191-01 awaiting_user)",
+  "deferred_low_polish (296, incl. new C-R204-01, C-R204-02, A-R204-GLOBAL-TRANSITION, A-R204-CTA-FOCUS-DELAY, GATE204-S3, GATE204-S4 (optional in 205), GATE204-S5, A-R204-ACCOUNT-LINK-ENTER-FOCUS; palette half of C-R202-06; C-R191-01 awaiting_user)",
+  "shared-modal-no-focus-management (ui/Modal / AuthModal focus; open)",
   "A-R202-REVIEW-SCROLL-CLIP (Low, backend-blocked, harness measurement later)",
   "REGRESSION round due on/after 2026-10-30",
   "next RETRO: round 215 or end of STORE-REDESIGN",
   "backend-blocked evidence (R80 recordings, F11-F13, F16, SRW-21 mount, SABA-B-4 account.reset and /studio/:id components, CHOOSE-VIDEO in-app)",
-  "Tech Lead manual checks (c_pass_tech_lead_manual items; + Android IME check for SYS-3 M1)",
-  "Saba questions: R103 caret-only indicator after a click (vetoable), R106 hover vs aria-expanded (vetoable), C-R188-I6 testimonials placement, OBS-R199-LEDGER demo titles, announcement repeat policy, three rule-change proposals (retro-200 section 8)",
-  "frontend-architect checkpoint (b-round-203-checkpoint-request.md, requested from root, non-blocking)"
+  "Tech Lead manual checks (c_pass_tech_lead_manual items; Android IME check for SYS-3 M1; A-R204-SAFARI-USERMENU-CLICK)",
+  "Saba questions: R103 caret-only indicator after a click, R106 hover vs aria-expanded, C-R188-I6 testimonials placement, OBS-R199-LEDGER demo titles, announcement repeat policy, three rule-change proposals (retro-200 section 8)",
+  "frontend-architect checkpoint (b-round-203-checkpoint-request.md + question 5 addendum, requested from root, non-blocking)"
  ]
 }
