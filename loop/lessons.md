@@ -1,6 +1,6 @@
 # Lessons (read at the start of every round: B, A and C)
 
-Kept by the RETRO rounds. Source: `retros/retro-200.md` (window 123–199). ≤ 60 lines. Replace obsolete lessons; do not append forever. "(1×)" = single-event evidence, keep as hypothesis.
+Kept by the RETRO rounds. Source: `retros/retro-200.md` (window 123–199). ≤ 60 lines. Replace obsolete lessons; do not append forever. "(1×)" = single-event evidence, keep as hypothesis. Numbers are stable ids, not order (L23 was added at round-201 planning after C-R200-01).
 
 ## When writing a task (B)
 1. **Inventory before grants.** If the task has a stop-on-inventory rule, B runs the same scan first: same line, multi-line `cn()`/arrays, constants defined on a later line, child icons. Test the scanner on one known-shape mutant, and cite the result in the task. Evidence: B-R192-PLANNING-GAP, B-R194-K0-SCAN-GAP (rounds 192, 194 lost).
@@ -13,12 +13,13 @@ Kept by the RETRO rounds. Source: `retros/retro-200.md` (window 123–199). ≤ 
 8. **A deferred Low on a test selector is a time bomb.** A Low that pins styling classes or source text is scheduled before the visual stage that changes those classes. Evidence: A-R147-REVIEW-L2 (deferred round 147) → C-R178-BADGE-SELECTOR (Medium, round 178 FAIL).
 9. **Engine rounding.** Sub-pixel widths (1.5 px rings) are written with the measured Chromium result, or as "≥ 1 px painted". Evidence: C-R196-04 (1×).
 10. **Rule on every STOP before re-dispatch.** When A reports a STOP, or C reports "B has not ruled", the next task carries the explicit ruling (accepted delta or changed criterion, with the finding id) before anything is re-dispatched. Evidence: C-R142-01, C-R143-01 (no `b-round-143*` ruling existed).
+23. **Mandatory change vs frozen or protected file: grant or rule before dispatch.** For every mandatory item, grep its removed or renamed tokens and its new labels in `app/**/__tests__` and in the frozen components, then apply the change on a scratch copy and run those test files. Each collision is granted in the task or the item is changed; A never meets it first. Evidence: C-R127-01 (glossary "Close" vs the frozen Modal ✕, `a-round-127.md` §3), C-R178-BADGE-SELECTOR (W2 mandatory while its selector tests were protected, `a-round-178.md` DEVIATION 2).
 
 ## Before handing over (A self-check)
 11. **Report a STOP and change nothing else.** Write "STOP — needs B ruling on <criterion/id>" at the top of `a-round-N.md`, with the measurement, and leave the tree at the last consistent state. Evidence: rounds 142–143, 192.
-12. **No styling-class selectors in tests.** Find elements by role, accessible name, text or `data-testid`. Before removing or renaming a class token, `grep -rn "<token>" app/**/__tests__` and fix every hit in the same round. Do not assert a cascade from class tokens in jsdom; computed style (inheritance, unlayered rules) needs a browser. Evidence: C-R178-BADGE-SELECTOR, C-R158-01, C-R154-01.
+12. **No styling-class selectors in tests.** Find elements by role, accessible name, text or `data-testid`. Before removing or renaming a class token, `grep -rn "<token>" app/**/__tests__` and fix every hit in a file you own; a hit in a protected or frozen file is a STOP (L11) with the hit list, not an edit. Do not assert a cascade from class tokens in jsdom; computed style (inheritance, unlayered rules) needs a browser. Evidence: C-R158-01, C-R154-01 (jsdom cascade); C-R178-BADGE-SELECTOR (A grepped, the hits were protected, A stopped correctly).
 13. **Guards parse whole tags.** A source scanner that checks a class "near" a tag must parse the whole JSX element (tag to `>`), not a fixed line window. Prove it with one mutant that would false-pass. Evidence: C-R194-02.
-14. **Run every granted test file**, not only the new tests, and check unique accessible names in any dialog you touch (`getAllByRole(..., {name})` = 1). Evidence: C-R127-01 (15 granted tests red at C) (1×).
+14. **Unique accessible names in any dialog you touch.** In the covering tests (the speed-rule set: test files that cover the changed code; the full suite stays a gate row), `getAllByRole(role, {name})` returns 1 for every button name in the dialog. Evidence: C-R127-01 (1×; A found it through the granted tests and stopped, the cause was the task, see L23).
 15. **Measure contrast you introduced.** For a colour/token change, measure each touched boundary, including same-token overlaps (brass line on a brass bar) and ring vs the neighbouring border, before handover; put the ratios in the report. Evidence: B-R193-UNMEASURED-INFO, C-R193-02, C-R149-2, C-R196-01.
 
 ## What to probe first (C)

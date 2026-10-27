@@ -1,0 +1,126 @@
+{
+ "taskStatus": "FAIL",
+ "round": 200,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-27T01:15:47.4506333Z",
+  "round": 200,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R200-01",
+   "severity": "medium",
+   "steps": [
+    "Open retros/retro-200.md §1 and §3 (rows 127, 178; grouping; taxonomy) and lessons.md L12, L14",
+    "Open a-round-127.md l.3 and §3; c-round-127.md l.3",
+    "Open a-round-178.md l.43-49"
+   ],
+   "expected": "Each FAIL cause and origin class is traceable to the cited reports; lessons rest on evidence that supports them",
+   "actual": "Rounds 127 and 178 are counted as 'A self-check' misses (§1: '4 A could have caught before handover: 127, 154, 158, 178'; taxonomy: '127 missing test (granted tests not run)'), and L14 says 'Run every granted test file … Evidence: C-R127-01'. But A reported STOP with the 15 red granted tests in round 127 (frozen Modal ✕ vs glossary 'Close' = spec conflict), and in round 178 reported 'DEVIATION 2 / BLOCKER' because the mandatory W2 broke protected tests it was not allowed to edit. Both were caught by A before handover; the cause is on the B/task side. The correct split from the evidence is B 9 / A 2 / contrast 2 / first-visit 1. L12's 'fix every hit in the same round' was impossible in 178 (protected files).",
+   "evidence": "c-round-200.md RT-CAUSE, RT-LESSONS; a-round-127.md l.3 + §3; c-round-127.md l.3; a-round-178.md l.43-49"
+  },
+  {
+   "id": "C-R200-02",
+   "severity": "low",
+   "steps": [
+    "retro-200.md §6 SYS-3 'closes' cell",
+    "backlog.json systemic_tasks SYS-3 also_fixes_unfiled"
+   ],
+   "expected": "Same unrecorded-site count",
+   "actual": "Retro says two unrecorded sites; backlog lists three (GroupHeader:246, DetailPanel:371, :464 = 3 sites in 2 files)",
+   "evidence": "c-round-200.md RT-IDS"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "RT-NUM",
+  "RT-IDS",
+  "RT-SABA",
+  "R200-P1",
+  "G200-3"
+ ],
+ "failed": [
+  "RT-CAUSE",
+  "RT-LESSONS"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "observations": [
+  {
+   "id": "OBS-C200-ROUNDING",
+   "severity": "info",
+   "note": "Raw unrounded sums differ by $0.01-0.05 from retro totals (B 598.26, A 547.11, all 1635.46, FAIL 331.77, 123-141 417.84) because collect.py rounds per phase before cost.py sums; retro equals its named script exactly"
+  },
+  {
+   "id": "OBS-C200-OVERVIEW-FRAME",
+   "severity": "info",
+   "note": "arrangement-overview-frame is the visible-window box, not the whole overview; at 1280 after zoom the overview playhead (x 449) was outside the frame (300-448.8). Round 199 RV-TOKENS scanned the frame; next regression should scan [data-testid=arrangement-overview]"
+  }
+ ],
+ "invalidRuns": [
+  {
+   "row": "R200-P1-1440",
+   "run": "c200p1-1440-1",
+   "reason": "cold Vite first load: Invalid hook call + 1 hydration replace; replaced by c200p1-1440-2 (clean)"
+  }
+ ],
+ "rows": {
+  "SOURCE-SCOPE": {
+   "status": "PASS",
+   "evidence": "c-round-200/out/source-scope-start.txt, source-scope-end.txt"
+  },
+  "RT-NUM": {
+   "status": "PASS",
+   "evidence": "c-round-200/rt/*.stdout, independent recompute in c-round-200.md"
+  },
+  "RT-CAUSE": {
+   "status": "FAIL",
+   "bug": "C-R200-01"
+  },
+  "RT-IDS": {
+   "status": "PASS",
+   "note": "C-R200-02 low wording"
+  },
+  "RT-LESSONS": {
+   "status": "FAIL",
+   "bug": "C-R200-01",
+   "note": "form OK: 31 lines, 3 parts, 22 lessons, all cited ids exist; L14 (and L12 partly) premise contradicted by evidence",
+   "basis": "literal checks pass; FAIL on substance: L14 premise contradicted by its cited evidence (task §5 names wrong lessons as the key risk)"
+  },
+  "RT-SABA": {
+   "status": "PASS"
+  },
+  "R200-P1": {
+   "status": "PASS",
+   "viewports": [
+    1440,
+    1280
+   ],
+   "evidence": "c-round-200/out/c200p1-1440-2.json, c200p1-1280-1.json, p1-colsplit.json, c200p1b-*-2.json, c200p1bsel-*-2.json; shots/c200p1*"
+  },
+  "G200-3": {
+   "status": "PASS",
+   "viewports": [
+    1440,
+    1280
+   ],
+   "evidence": "c-round-200/out/g200-3.json; shots/g200-3-*"
+  }
+ },
+ "supersededRuns": [
+  "c200p1b-1440-1",
+  "c200p1b-1280-1",
+  "c200p1bsel-1440-1",
+  "c200p1bsel-1280-1 (frame-only overview scan; reruns -2 add the full overview)"
+ ]
+}

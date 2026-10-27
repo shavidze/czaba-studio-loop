@@ -1,71 +1,112 @@
-# CURRENT TASK — Round 200: RETRO (first retrospective, rounds 123–199). No app code. A: nothing to implement. C: traceability check of the retro, plus one parked browser row and the auth guard
+# CURRENT TASK — Round 201: SABA-B-4 stage 2 (store pages: one focus style on every store focusable) + RT-FIX re-check of the corrected retro lines
 
-Decision: **D-29z165** · Planned by B on 2026-10-27 (from 00:59 UTC) · Policy: "Retrospective: stop, look back, improve" (Saba, 2026-10-26), `backlog.json` → `retro_policy`.
+Decision: **D-29z166** · Planned by B on 2026-10-27 (from 01:32 UTC) · Dispatcher B · Implementer A · Verifier C.
 
-Read first, as every round from now on: **`lessons.md`** (loop root). It was written in this planning step and applies from round 200.
+**Read first:** `lessons.md` (loop root; L12, L14 and the new L23 were corrected in this planning step).
 
 ## Baseline: HEAD `5b1a2bb`, clean tree
-- Gate 199 published `5b1a2bba0c98dcc86564be8441fbdf989cc8f7b8` on both remotes (`gates/gate-round-199.json`). This is the round-200 baseline.
-- Frozen list: **every tracked file** (1032 entries), in `b-round-199-r200-tree-sha256.txt`. Check it with `sha256sum -c --quiet` from `store/`.
-- Grants: **none** (`b-round-199-r200-grants.txt` is empty). No file in `store/` may change in this round. Root does not publish when nothing changed; the loop state commit records the retro.
-- Protected files (unchanged, as always): `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`.
+- Gate 199 published `5b1a2bba0c98dcc86564be8441fbdf989cc8f7b8` on both remotes. Gate 200 is `skipped` (C FAIL on retro rows; no source changed), so **`5b1a2bb` stays the baseline**.
+- **Frozen list:** `b-round-200-r201-tree-sha256.txt`, **1001 entries** (the 1032 tracked files minus the 31 grants). Check from `store/` with `sha256sum -c --quiet`.
+- **Grants:** `b-round-200-r201-grants.txt` (31 files, §2). Start copies: `b-round-200/r201-granted-start/`, hashes in `b-round-200-r201-granted-start-sha256.txt`.
+- **New files:** `b-round-200-r201-new-files.txt` (2): `app/lib/__tests__/store-focus-ring.test.ts`, `docs/implementation/2026/quarter-IV/160-saba-b-4-store-focus-ring.md`.
+- **Protected, unchanged as always:** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`. Also unchanged: `.claude/**`, `CLAUDE.md`, the obsidian block in `app.css`, `CookieConsent.tsx`, `app/components/ui/Modal.tsx`, `app/lib/arrangement/**`, and every arrangement file except the R93 lines of `StudioWorkspace.tsx`.
 
 ## 0. Why this round
-- Round 199 (REGRESSION) C PASS: 91 rows, 0 bugs, 0 regressions, `browserVerified=true`. Pre-written outcome (`tasks/round-199.md` §7, first row): round 200 = **RETRO**.
-- Retro policy: "the first one runs right after STORE-REDESIGN or at round 200, whichever comes first". This is round 200.
-- `regression-last.json` was set to 2026-10-27 / round 199 **before** this planning applied the 3-day rule. The next regression round is due on or after 2026-10-30.
+- Round 200 (RETRO): C FAIL on RT-CAUSE and RT-LESSONS (C-R200-01, Medium) and a Low count error (C-R200-02). Both browser rows passed. The pre-written outcome (`tasks/round-200.md` §4, row 2): B corrects the retro first, then round 201 = **SABA-B-4 stage 2**, and C re-checks only the changed lines. B has done the correction (`retros/retro-200.md` §9, `lessons.md`, `backlog.json` v186).
+- **Saba (2026-10-26, binding):** one shared focus style site-wide. The ring shows on `:focus-visible` only: 1.5px brass, ≤ 80 % opacity, 2px offset, following the element's radius, drawn as an outline so layout never moves. No filled backgrounds, no thick pills, no glow on focus. Never after a mouse or pointer press. Contrast ≥ 3:1. Every focusable shows it. At most 2 rounds: stage 1 (Studio) is done (rounds 196–198, published `980cfbe`); this is stage 2, the store.
+- R90 (stage 1) stands: Chromium paints the declared 1.5px as 1 px. "≥ 1 px painted" is the criterion (lesson L9).
 
-## 1. What B already produced (the objects under test)
-| File | Content |
-|---|---|
-| `retros/retro-200.md` | The analysis, in Georgian with English technical terms, for Saba. Window: rounds 123–199. |
-| `lessons.md` | The living checklist, ≤ 60 lines, with three parts (B / A / C). |
-| `b-round-199/*.py`, `*.json`, `*.txt` | The scripts and data behind every number: `collect.py` → `rounds-123-199.json`; `cost.py` → `cost-rows.json` (B cost shifted: `b-round-(N−1)-result.json` is the planning of round N); `fails.py` → `fails.txt`; `fails-detail.txt`; `classify.py` → `classify-out.json`; `deferred-list.txt`. |
-| `backlog.json` v185 | `retro_runs[0]` (summary), `systemic_tasks` (SYS-n), `retro_policy.next_due`, round-199 rulings. |
+## 1. Rulings for this round (B, vetoable by Saba/root; recorded in `backlog.json` → `SABA-B-4.stage2_rulings_d29z166`)
+| ID | Ruling | Why |
+|---|---|---|
+| **R92** | The global `:focus-visible` rule in `app.css` (l.379–386) **stays unlayered and unchanged**. Add no new `:focus-visible` text anywhere in `app.css`. GLOBAL-FOCUS-VISIBLE-UNLAYERED (store half) closes on this round's C PASS by ruling. | The old split note said "layer it"; that is overridden. SFR1 (`studio-focus-ring.test.ts`) pins the top-level rule. After the sweep no utility depends on layer order. An unlayered rule cannot be silently switched off by a future `outline-none` utility. |
+| **R93** | `useFocusSourceAttribute()` is mounted **once**, in `app/root.tsx` `AppContent`. Remove its import and call from `StudioWorkspace.tsx` (2 lines). Nothing else in `StudioWorkspace.tsx` changes. | Today `html[data-focus-source]` is null on every store page (C round 196), so a mouse press on a store input or select shows the ring. This was signal 4 of the A-R196 reviewer. |
+| **R94** | Store sweep by token class, in every granted `.ts/.tsx` file. **Remove:** `focus-visible:ring-*`, `focus:ring-*`, every `*ring-offset*` with a focus variant, `focus-within:ring-*`, `focus:outline-none`, `focus-visible:outline-none`, bare `outline-none`, and `focus:border-*` (including `focus:border-destructive`; the error border stays as the base `border-destructive`). **Keep:** every `peer-focus:*` token (the Input floating label moves; it is not a focus indicator), and every non-focus `ring-*` (selection states such as `StudioTrack.tsx:214`, decorative `ring` class names in `StemsLoadingAnimation.tsx` and `CustomCursor.tsx`, which are not granted). | Same rule as Studio R87: focus never changes fill, border or shadow; the global outline is the only indicator. |
+| **R95** | `app/styles/app.css`: delete the `outline: none;` declaration in `.audio-player-progress` (l.800), `.audio-player-volume-slider` (l.868), `.video-player-slider` (l.2929), `.video-volume-slider` (l.2979) and `.command-palette-input` (l.3744). Delete the whole `.sort-select:focus` rule (l.2238) and the two unused glow rules `.newsletter-input-large:focus` (l.1500) and `.glass-input:focus` (l.3904); `grep` shows neither class is used in `app/`. Afterwards `outline: none` appears in `app.css` **only** inside the pointer rule. Nothing else in `app.css` changes. | These unlayered class rules come after the global rule with equal specificity, so they win: the AudioPlayer sliders, VideoShowcase sliders, the `/store` sort select and the ⌘K palette input have **no ring today**. That breaks "visible on every focusable". |
+| **R96** | **C-R196-03**: the home product card link (`ProductCard.tsx`, the `<Link>` at l.117) must show a visible ring on keyboard focus, following the card image radius, with no layout move (boxes ±0 px). *Hypothesis, unconfirmed:* the `<Link>` is inline around a block `overflow-hidden rounded-xl` div, so its outline box collapses. A confirms the cause in the browser before choosing the fix (for example `block rounded-xl` on the Link) and reports the measurement. | A pre-existing Low that is an input to stage 2 (`stage2_inputs`). |
+| **R97** | A store element whose ring is clipped by an `overflow` ancestor may get the inset offset as a Tailwind arbitrary property, `[--focus-offset:-2px]`, on that element only. Each use is listed in `a-round-201.md` with the measurement that required it. Do not import the Studio constant into store code. | Same mechanism as Studio R84, without coupling store to `app/components/arrangement/`. |
 
-## 2. A — nothing to implement
-1. From `store/`: confirm `git rev-parse HEAD` = `5b1a2bb…`, `git status --short --untracked-files=all` is empty, and `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-199-r200-tree-sha256.txt` prints nothing.
-2. Write `a-round-200.md`: the three results above and "no change, by RETRO policy". Do not run typecheck, lint, vitest or the code-reviewer; there is no diff.
-3. Do not edit `retros/`, `lessons.md` or any B file. If you disagree with a lesson in part "Before handing over (A self-check)", write it in `a-round-200.md` under "Lesson feedback". B rules on it at round-201 planning.
+**Ableton:** does not apply (store pages, no DAW behaviour). Do not claim Ableton parity.
 
-## 3. C — what to verify
-C writes `c-round-200.md` and `c-round-200.json`, incrementally. Rows:
+## 2. A — files you own (everything else is frozen)
+**Grants (31):**
+- Sweep (27): `app/components/cart/GiftCardInput.tsx`, `app/components/chat/{ChatButton,ChatInput,GuestForm}.tsx`, `app/components/home/NewsletterSection.tsx`, `app/components/marketing/LeadMagnetPopup.tsx`, `app/components/product/{ProductAccordion,VersionSelector}.tsx`, `app/components/recordings/{RecordingCatalogRow,SfxQuickEdit,SfxSceneBuilder,SfxSceneExport,SfxSoundLibrary,SfxVideoSync}.tsx`, `app/components/studio/{ExportDialog,VideoUploadZone}.tsx`, `app/components/ui/{Button,IconButton,Input}.tsx`, `app/routes/{account,cart,free-downloads,gift-cards,hire-us,recordings.$productId,scenes.$productId,store}.tsx`. In these files change **only R94 tokens** (and R97 where measured).
+- `app/styles/app.css`: only R95.
+- `app/root.tsx`: only the R93 import and call.
+- `app/components/arrangement/StudioWorkspace.tsx`: only the R93 removal (import line + call line).
+- `app/components/product/ProductCard.tsx`: only R96.
+
+**New files (2):** `app/lib/__tests__/store-focus-ring.test.ts`, `docs/implementation/2026/quarter-IV/160-saba-b-4-store-focus-ring.md` (Georgian, per `docs/implementation/TEMPLATE.md`: R92–R97, the rejected "layer the rule" alternative, the inventory numbers, the C-R196-03 cause as measured).
+
+**Primitives to read first:** `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `FORWARDREF_COMPONENT.md`, `AGENT_DISCOVERABLE_CODE.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`; `.claude/prompts/new-test.md`.
+
+**Steps:**
+1. Start checks from `store/`: HEAD `5b1a2bb`, `git status --short --untracked-files=all` empty, frozen list OK, and `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-200-r201-granted-start-sha256.txt` OK.
+2. Re-run B's inventory to get the same starting point: `python3 -I ../tmp/studio-real-loop/b-round-200/tools/store-focus-inventory.py . /tmp/inv.json /tmp/sites.tsv` → expected `store 155 tokens / 31 files`, `studio 13 / 5`. If the numbers differ, STOP (L11).
+3. Before deleting the two unused glow rules (R95), confirm with `grep -rn "newsletter-input-large\|glass-input" app/` (all file types, including `.ts` and CSS `@apply`) that nothing else uses them; report the result. Apply R93–R97. Then re-run the inventory. Expected after the sweep: **store 15 tokens in 5 files**, exactly these and nothing else: the 8 `peer-focus:*` tokens in `Input.tsx`; `Card.tsx:15` `outline` (a variant name); `StudioTrack.tsx:214` `ring-1 ring-inset ring-brand/50` (selection); `StemsLoadingAnimation.tsx` 2× `ring`; `CustomCursor.tsx:90` `ring`. The last four files are not granted. R97 uses (`[--focus-offset:-2px]`) are listed separately. Studio stays 13 / 5. Put the before/after counts in the report.
+4. Write `store-focus-ring.test.ts` (node environment, like `studio-focus-ring.test.ts`). Rows:
+   - **STF1 walker:** scans every `app/**/*.{ts,tsx}` outside `app/components/arrangement/`, `app/lib/arrangement/`, `app/routes/studio-lab.tsx`, `__tests__` and `*.test.*`. It must include each of the 29 granted `.tsx` paths other than `StudioWorkspace.tsx`, and it must find ≥ 200 source files (B counted 238 at HEAD).
+   - **STF2:** no scanned source has a token with a focus variant (`focus:`, `focus-visible:`, `focus-within:`, `group-focus*`, `peer-focus-visible:`) of kind ring, ring-offset, outline, border, bg, shadow, and no bare `outline-none`. `peer-focus:*` is allowed. The scanner reads whole class text (multi-line `cn()` arrays, constants, template literals), not single lines.
+   - **STF3:** in `app.css` (comments stripped), `outline: none` occurs exactly once, inside the `html[data-focus-source="pointer"] :focus-visible` rule; no selector contains `:focus` other than the two `:focus-visible` rules; the selectors `.sort-select:focus`, `.newsletter-input-large:focus` and `.glass-input:focus` are gone.
+   - **STF4:** `useFocusSourceAttribute(` has exactly one call site in `app/` outside `app/lib/focus-source.ts` (its definition) and tests, and that call site is in `root.tsx`; `StudioWorkspace.tsx` has none.
+   - **STF5 (scanner self-test):** the STF2 scanner flags these fixtures: a `focus-visible:ring-2` inside a multi-line `cn([...])`, a `const X = 'focus:outline-none'`, a `hover:focus:ring-brand/20` in a template literal, and a bare `outline-none`. It passes: `peer-focus:text-brand`, `ring-1 ring-inset ring-brand/50` with no focus variant, and a class named `ring`.
+5. Covering tests (speed rule; no full suite, no `npm run verify`): `npx vitest run app/lib/__tests__/store-focus-ring.test.ts app/lib/arrangement/__tests__/studio-focus-ring.test.ts app/lib/__tests__/focus-source.test.tsx app/lib/arrangement/__tests__/focus-reveal-ui.test.tsx app/lib/__tests__/store-theme-tokens.test.ts app/lib/__tests__/store-header-footer.test.tsx app/lib/__tests__/product-presentation.test.tsx`, plus every test file that imports a granted component (find them with `grep -rl`; list them). Then `npm run typecheck` and `npm run lint`.
+   - B ran the mandatory changes on two scratch copies of HEAD (`b-round-200/out/`). **Copy 1, the R94 token sweep only:** `store-theme-tokens`, `store-header-footer`, `product-presentation`, `studio-focus-ring` and `focus-source` were green (5 files, 69 tests), and the full suite was green (189 files, 2753 tests; `sim-full-vitest.log`). **Copy 2, the R93 mount move plus the R95 CSS edits only:** `studio-focus-ring`, `focus-reveal-ui`, `focus-source` and `store-theme-tokens` were green (4 files, 58 tests). The two were not run together. **No frozen test is expected to turn red.** If one does, that is a STOP with the test name (L11/L12). Do not edit a frozen test.
+6. Mutants (keep each one out of the final tree): m1 put `focus-visible:ring-2` back on `Button.tsx` → STF2 red; m2 put `outline: none;` back in `.video-volume-slider` → STF3 red; m3 put the hook call back in `StudioWorkspace.tsx` → STF4 red; m4 remove the `root.tsx` call (0 call sites outside `focus-source.ts`) → STF4 red; m5 add `focus-within:ring-2` inside a multi-line `cn([...])` in `ChatInput.tsx` → STF2 red. Report each result.
+7. **Browser self-check, before handover (L15):** on `/store` and `/` at 1280×720, Tab to the search input, a Button, the sort select and the product card link. Report computed `outline-style`/`outline-width`/`box-shadow` and the ring-vs-background contrast for each. Mouse-click the search input and the sort select, then report the `data-focus-source` value and the computed outline.
+8. Code review: 3+ files change, so use the `code-reviewer` subagent. Pass its Architecture note to B verbatim. Fix Medium+ findings inside the grants.
+9. Write `a-round-201.md`, `a-round-201/end-sha256.txt` (grants + new files) and `a-round-201/diff-vs-start.patch` (grants vs `b-round-200/r201-granted-start/`, new files in full). No commit, no push.
+
+**STOP rules (L11):** a red frozen test; an inventory count that differs at step 2; a store control that loses its only visible indicator and cannot be fixed with R96/R97 inside the grants; or any need to edit a file outside the grants. Write "STOP — needs B ruling on <id>" at the top of `a-round-201.md`, and leave the tree at the last consistent state.
+
+## 3. Baseline B measured at HEAD (C re-measures; these are facts, not acceptance)
+- Inventory (`b-round-200/out/focus-inventory.json`, `focus-sites.tsv`): store **155** focus/ring/outline tokens in **31** files; the most common are `focus:outline-none` 27, `focus-visible:ring-2` 24, `focus-visible:ring-brand` 24 and `focus:border-brand` 13. Scanner mutant check: all 4 known shapes were caught (multi-line `cn`, constant, template literal with `hover:focus:`, bare `outline-none`).
+- Probe `b-round-200/tools/sticky-probe.cjs` (`/store`, 58 forward Tab stops, mock on :5199): **3 INPUTs** draw a double indicator (outline + glow box-shadow) at 1280×720 and 1440×900. **0** focused elements are obscured by the sticky header going forward. Going backward (Shift+Tab) the only element above the header bottom is the LeadMagnet popup's "Close" (a fixed overlay, y 24–56), which is not obscured.
+
+## 4. C — what to verify
+Write `c-round-201.md` and `c-round-201.json` as you go. Start the mock (`node mock-api/server.mjs`) on :5199 and stop it at the end. **Ref** = HEAD `5b1a2bb` as a scratch copy (31 grants restored from `b-round-200/r201-granted-start/`, the 2 new files removed, checked against the frozen list), served on a separate port with its own `cacheDir`. Viewports: 1440×900 and 1280×720; also 375×812 where a row says so. Keyboard focus means a real Tab/Shift+Tab sequence; pointer means a real mouse click.
 
 | Row | Check | PASS means | FAIL means |
 |---|---|---|---|
-| **SOURCE-SCOPE** | Start and end: HEAD `5b1a2bb`, clean status, frozen list OK. | Nothing in `store/` changed. | Any change is a FAIL of the round, whoever made it. |
-| **RT-NUM** | Recompute **every number** in `retro-200.md` from its named file or script. Re-run the `b-round-199/*.py` scripts; they only read loop files (copy them into `c-round-200/` first if you prefer, and run them from the loop root). Check at least: the per-phase cost totals, the FAIL-round list and its cost, the PASS/FAIL counts, the gate published/skipped counts, the deferred-Low totals and the window counts. | Every number matches its source within rounding (±0.01 USD; counts exact). | A number has no source or does not match. List each one. |
-| **RT-CAUSE** | For each of the 14 C FAIL rounds in `retro-200.md` §3, open the cited C report (`c-round-N.md` / `.json`) and, where cited, the B ruling. Is the stated cause what the evidence says? | Each cause is traceable to a quoted line or id. Anything that is an inference is labelled as one. | A cause is invented, or an inference is stated as fact. |
-| **RT-IDS** | For each systemic task SYS-n (`retro-200.md` §6 and `backlog.json` → `systemic_tasks`): every Low id it claims to close exists in `deferred_low_polish` or `open_findings`, is still open, and fits the stated root cause. Spot-check each SYS-n's code claim with one `grep` at HEAD. | All ids are real, open and in class; each code claim reproduces. | An id is missing, closed or out of class, or a code claim does not reproduce. |
-| **RT-LESSONS** | `lessons.md` has ≤ 60 lines, exactly the three required parts, and each lesson is concrete and checkable (it names an observable check). Each lesson cites at least one evidence id or round that exists. | All true. | Over 60 lines, a vague lesson ("be careful…"), or a citation that does not exist. |
-| **RT-SABA** | `retro-200.md` "For Saba": every project-rule change (`.claude/primitives/*`, `CLAUDE.md`, `.claude/agents/*`) is phrased as a **proposal**, and no such file changed. | True. | A rule file changed, or a proposal is phrased as already applied. |
-| **R200-P1 (browser)** | REG-DUX5-PLAYHEAD-RESCAN (parked from C-R180-K8-PLAYHEAD-MASK; B did not carry it into round 199). `/studio-lab`, 1440×900 and 1280×720, default scene. Move the playhead to ~10 s with a ruler click, then run the round-180/199 "no brass" scan (R−B ≥ 45 device px) on the ring/hint boxes and the unselected clip bodies. Reuse `c-round-199/tools` (RV-TOKENS). | Brass pixels only on the playhead line and the overview playhead, at their new position; 0 elsewhere. | Brass elsewhere is a new finding. It is Low unless it hides content; the 2026-10-23 bug gate applies. |
-| **G200-3 (browser)** | Fresh anonymous context, both viewports: `/studio-lab` shows the workspace and the demo badge; `/studio/middle-east` shows "Sign in required" and 0 `audio[src]`; `GET /api/studio-token` with no header → 401; with a fake Bearer → 403 (mock-backed on :5199). | As stated. | Any bypass is Critical. |
+| **SCOPE-201** | Frozen list (1001) at C's start and end; A's `end-sha256.txt`; `git status`; each grant's diff vs the start copy. | `git status` = ` M` on granted paths only + `??` on the 2 new files. The 27 sweep files' diffs remove only R94 tokens (plus listed R97). `app.css` diff is only R95. `StudioWorkspace.tsx` diff is only the 2 R93 lines; `root.tsx` only the R93 import and call. Protected files, `Modal.tsx`, `.claude/**` unchanged. | Any other change. |
+| **RT-FIX** | Re-check **only the changed lines**: `retros/retro-200.md` §1 (partition bullets), §3 (rows 127 and 178, grouping, taxonomy), §6 (SYS-3 "closes" cell), §7 (lesson count), §9; `lessons.md` header note, L12, L14, L23; `backlog.json` → `retro_runs[0].headline`, `systemic_tasks` SYS-3; `b-next.json`. | Each corrected cause is traceable to the cited lines (`a-round-127.md` l.3/§3, `c-round-127.md` l.3, `a-round-178.md` l.43–49). 9 + 2 + 2 + 1 = 14 and 5 + 4 + 2 + 1 + 2 + 0 = 14. The partition is identical in retro, `retro_runs[0]` and `b-next.json`. L12/L14/L23 are concrete, checkable and evidenced. The SYS-3 count is 3 sites in 2 files. Numbers that RT-NUM passed are unchanged. | A remaining inconsistency, an untraceable claim, or a changed number. Closes C-R200-01 on PASS. |
+| **KEY-RING** | Pages `/`, `/store`, one `/products/:handle` (mock), `/support` (chat open, guest form), `/free-downloads`, `/gift-cards`, `/hire-us`, `/cart`, plus the ⌘K palette, the LeadMagnet popup and the cookie banner, at 1440 and 1280; `/` and the mobile menu at 375. Tab through every tabbable element; record computed outline and box-shadow. | Every focused element: outline solid, brass, painted ≥ 1 px, offset 2px (or −2px where R97 is listed); `box-shadow` equal to its unfocused value (no ring, no glow); no background or border change on focus. One band per element. | A second band, a glow, a fill/border change, or a focusable element without an outline. |
+| **RING-VISIBLE** | For each element in KEY-RING, take a screenshot crop around it and count brass pixels per side. Compare with ref. | A ring is visible on ≥ 3 sides of every element, or the element is listed with its ref result. An element whose only indicator was visible in ref and is not visible in the tree is a regression. | A lost indicator (Medium, WCAG 2.4.7). Pre-existing clipping that stays clipped is a new Low (recorded, does not fail the row). |
+| **CSS-CONTROLS** | Keyboard-focus the AudioPlayer progress and volume sliders (start a preview on `/store` or a product page), the VideoShowcase sliders on `/`, the `/store` sort select and the ⌘K palette input. Same in ref. | Ref: no outline (the R95 cause, confirm it). Tree: the ring is visible and contrast ≥ 3:1. | No ring in the tree. |
+| **CARD-RING (C-R196-03)** | `/` "Latest" product card link and one `/store` card, keyboard focus, at 1440, 1280 and 375. | Ring visible around the card image box, following its radius; ≥ 3:1; the card and grid boxes are identical to ref (±0 px). | No ring, or a layout change. |
+| **CONTRAST** | Ring vs the adjacent background for each KEY-RING element: page `background`, `surface`/`card` panels, the LeadMagnet popup, the chat panel and brass pill buttons. | ≥ 3:1 everywhere (WCAG 1.4.11 / 2.4.11). | Any ratio < 3:1. |
+| **POINTER** | Mouse-click the search input, a Button, the sort select, a header nav link, the newsletter field and a product card. Then press Tab once. | After the click: `html[data-focus-source="pointer"]` and no painted outline. After Tab: `keyboard` and the ring shows on the next element. On a fresh load with no input yet, the first Tab shows the ring. | A ring after a mouse press, or no ring after Tab. |
+| **STUDIO-NEIGHBOUR** | `/studio-lab` at 1440 and 1280: the stage-1 checks again on 6 controls (Play, Volume fader, Pan, library search, a marker flag, the tempo field), keyboard and mouse. Then client-navigate `/studio-lab` → `/` (CZABA link) and `/` → `/studio-lab`. | Same ring as ref on all 6 (one band, ≥ 3:1, inset where it was inset); no ring after a mouse press. After each navigation the attribute is still set and keeps updating (the stage-1 "null after navigation" state is gone). | Any Studio difference from ref, or the attribute lost after navigation. |
+| **NO-SHIFT** | Element boxes of headers, nav, cards, fields and buttons on `/`, `/store` and `/support` in the unfocused state, tree vs ref, 3 viewports. | ±0 px. | Any box moves. |
+| **ERROR-BORDER** | One invalid field on `/support` (guest form) or `/hire-us`, focused and unfocused. | The error border (`border-destructive`) shows in both states. | The error border is lost. |
+| **KEEP-LIST** | The LeadMagnet "FREE DOWNLOAD" popup, the Free Samples nav link, SpecialOffers and the "Limited" badges are present with unchanged text. | Present and unchanged. | Removed or reworded. |
+| **BLOCKED-AUTH** | `/account` (name fields), `/account/downloads` (DownloadDialog), `app/components/studio/*` under `/studio/:id`, and `/recordings/:id` and `/scenes/:id` if the mock cannot render them. | Recorded under `"blocked"` with "backend unavailable in cloud"; their code is covered by STF2. Not PASS, not FAIL. | — |
+| **T-RUN-201** | On a scratch copy: the new suite green; on the start copy STF2/STF3/STF4 red. A's 5 mutants plus 2 of C's own (for example `focus:border-brand` back on `GuestForm`; `useFocusSourceAttribute` called twice). | Each mutant turns its row red. | A mutant stays green. |
+| **AN-REVIEW-201** | Added lines: 0 `as`, `any` or `@ts-ignore`; 0 hex/colour functions in `.tsx`; doc 160 in Georgian with R92–R97 and the measured C-R196-03 cause. | True. | Otherwise. |
+| **G201-3** | Fresh anonymous context, both viewports: `/studio-lab` workspace + demo badge; `/studio/middle-east` "Sign in required" and 0 `audio[src]`; `GET /api/studio-token` no header → 401, fake Bearer → 403. | As stated. | Any bypass is Critical. |
 
-- **Gate rows** (`"gate"` in the JSON, never in `"passed"`): full vitest, typecheck, build, Biome, `npm run verify`, PROD-MP3-UNVERIFIED.
-- **`browserVerified`:** true only if R200-P1 and G200-3 ran at both viewports. They are the round's only browser rows. The RT-* rows are document checks by RETRO policy; they are not skipped browser rows.
-- **Ableton:** no new behaviour. Do not claim Ableton parity.
-- **Consults (optional):** `qa-engineer` and `consequence-tester` may review the lessons for checkability. Record any disagreement as a finding against the retro, not as an edit.
-- **Run budget:** the RT rows are reading work. Do not re-verify unrelated product features.
-
-## 4. Outcome, fixed in advance
-| C result | B at round-201 planning |
-|---|---|
-| All rows PASS | Round 201 = **SABA-B-4 stage 2**: store pages, one shared focus style on every store focusable, with the store half of GLOBAL-FOCUS-VISIBLE-UNLAYERED and C-R196-03. Then the systemic tasks in the order given in `retro-200.md` §6 and `backlog.json` → `systemic_tasks`, before STORE-2b. |
-| An RT row fails (untraceable number, invented cause, wrong id) | B corrects `retro-200.md` / `lessons.md` / `systemic_tasks` **first** at round-201 planning and records the correction in `b-round-200.md`. The correction needs another C check only when a lesson or a SYS task changes substantively; then the next C round re-checks only the changed lines. SABA-B-4 stage 2 is still round 201. |
-| R200-P1 finds Medium+ | Round 201 = bounded fix-up first (2026-10-23 bug gate). A Low goes to `deferred_low_polish`. |
-| SOURCE-SCOPE fails | Stop. Root inspects the change. Nothing is published. |
+- **Gate rows** (`"gate"`, never in `"passed"`): full vitest, typecheck, build, Biome, `npm run verify`, PROD-MP3-UNVERIFIED.
+- **`browserVerified`:** true only if every browser row above that can run here was run. BLOCKED-AUTH rows do not make it false.
+- **Consults (optional):** `accessibility-auditor`, `design-auditor` on screenshots. A disagreement is a finding, not an edit.
+- **Probe first (lessons L17, L19):** the inputs inside panels (chat, LeadMagnet, ⌘K) and cards inside `overflow` containers at 1280×720.
 
 ## 5. Neighbour risk
-None in app code: no source file changes. The risk is in the process. A wrong lesson would mislead every later round, so RT-LESSONS and RT-CAUSE are the important rows.
+- **Studio**: the R93 mount move is the only Studio change. If the attribute is not set when Studio mounts, Studio gets rings on mouse press again. STUDIO-NEIGHBOUR covers it.
+- **The protected purchased Studio** (`/studio/:id`) renders `app/components/studio/*`. Their ring changes are not browser-testable here (BLOCKED-AUTH). A must not change anything in them except R94 tokens.
+- **Error states**: removing `focus:border-destructive` must leave the error border (`border-destructive`) in place (ERROR-BORDER).
+- **STORE-2b and later** will restyle the same components; they must keep STF green. That is a future constraint, not this round's work.
 
-## 6. Deliverables
-- A: `a-round-200.md`.
-- C: `c-round-200.md`, `c-round-200.json` (`taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `rows`), evidence under `c-round-200/`.
+## 6. Outcome, fixed in advance
+| C result | B at round-202 planning |
+|---|---|
+| All rows PASS (RT-FIX included) | SABA-B-4 complete; GLOBAL-FOCUS-VISIBLE-UNLAYERED, C-R196-03 and C-R200-01 close. Round 202 = **SYS-1** (test selectors), then SYS-2 and SYS-3, then STORE-2b (`systemic_tasks` order). |
+| A store FAIL (Medium+), RT-FIX passes | Round 202 = a bounded fix-up of those rows only (2026-10-23 bug gate). New Lows go to `deferred_low_polish`. |
+| RT-FIX fails | B corrects the retro again at round-202 planning. That does not block SYS-1, unless a code row also failed. |
+| A STOP | B rules (L10) before anything is re-dispatched. C runs the short round (L22). |
+| SCOPE-201 fails | Root inspects; nothing is published. |
 
-## 7. Root notes
-- Nothing to publish from `store/` unless SOURCE-SCOPE shows a change, and that change would itself be a FAIL.
-- No-grant precedent: rounds 123–126 had only a `b-round-N-rN+1-tree-sha256.txt` and no grants file. The empty `b-round-199-r200-grants.txt` is deliberate and means "no grants"; there is no `granted-start` file.
-- Proposal for root (`retro-200.md` §8 item 4): point the B/A/C runner prompts at `lessons.md`, and do not start C when `a-round-N.md` reports a STOP and no `b-round-N*` ruling exists.
-- `retros/retro-200.md` "For Saba" lists rule-change proposals and two open questions (C-R188-I6 testimonials; OBS-R199-LEDGER demo titles). Root may forward them.
-- The frontend-architect checkpoint request (`b-round-197.md` §6, + ARCH-R198-FOCUS-REGION) is still pending and non-blocking.
+## 7. Deliverables and root notes
+- A: `a-round-201.md`, `a-round-201/end-sha256.txt`, `a-round-201/diff-vs-start.patch`, the 2 new files.
+- C: `c-round-201.md`, `c-round-201.json` (`taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `rows`), evidence under `c-round-201/`.
+- Root: on C PASS, publish the 31 granted paths and the 2 new files against `5b1a2bb`. The loop state commit includes the corrected `retros/retro-200.md`, `lessons.md` and `b-round-200/`.
+- Pending and non-blocking: the frontend-architect checkpoint request (`b-round-197.md` §6 + ARCH-R198-FOCUS-REGION). Retro §8 proposals for root/Saba are unchanged.

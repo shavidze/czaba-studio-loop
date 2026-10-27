@@ -1,6 +1,6 @@
 # RETRO 200 — პირველი რეტროსპექტივა (რაუნდები 123–199)
 
-**თარიღი:** 2026-10-27 · **ავტორი:** B (D-29z165) · **წესი:** policy „Retrospective: stop, look back, improve“ (Saba, 2026-10-26) · **სტატუსი:** C-ის შემოწმებას ელოდება (Round 200)
+**თარიღი:** 2026-10-27 · **ავტორი:** B (D-29z165) · **წესი:** policy „Retrospective: stop, look back, improve“ (Saba, 2026-10-26) · **სტატუსი:** Round 200-ში C-მ FAIL მისცა (C-R200-01, C-R200-02). შესწორდა Round 201-ის დაგეგმვაზე (§9); C შეცვლილ ხაზებს Round 201-ში ხელახლა ამოწმებს
 
 **კონსულტაციები:** `tech-lead` და `consequence-tester` (read-only). `qa-engineer` B-ის ნებადართულ სიაში არ არის, ამიტომ არ გამოძახებულა; C-ს შეუძლია Round 200-ში გამოიძახოს. Advisor ხელმისაწვდომი იყო და გამოყენებულია.
 
@@ -23,7 +23,8 @@
 - **ღირებულება:** $1635.42 = B $598.25 + A $547.08 + C $490.09. რაუნდის მედიანაა $21.12. **ყველაზე ძვირი ფაზა B-ის დაგეგმვაა.**
 - **FAIL-რაუნდების ღირებულება:** $331.75, ანუ ფანჯრის ~20%.
 - **მთავარი დასკვნა:**
-  - 14 FAIL-იდან **11** წინასწარ დაიჭირებოდა: **7** B-ს შეეძლო dispatch-მდე (spec ან ინვენტარიზაცია: 142, 143, 145, 151, 192, 193, 194), ხოლო **4** A-ს handover-მდე (self-check: 127, 154, 158, 178). დანარჩენი 3-დან 2 არ გაზომილი კონტრასტია (149, 196), 1 კი first-visit მდგომარეობა (189). დაყოფა §3-შია.
+  - 14 FAIL-იდან **11** წინასწარ დაიჭირებოდა: **9** B-ს შეეძლო dispatch-მდე (spec, ინვენტარიზაცია ან frozen/protected ფაილთან კონფლიქტი: 127, 142, 143, 145, 151, 178, 192, 193, 194), ხოლო **2** A-ს handover-მდე (self-check: 154, 158). დანარჩენი 3-დან 2 არ გაზომილი კონტრასტია (149, 196), 1 კი first-visit მდგომარეობა (189). დაყოფა §3-შია.
+  - 127-სა და 178-ში A-მ პრობლემა თავად იპოვა და handover-მდე მოახსენა (`a-round-127.md` l.3 STOP; `a-round-178.md` DEVIATION 2 / BLOCKER). მიზეზი დავალებაში იყო (C-R200-01-ის შესწორება).
   - პროდუქტის ქცევის ნამდვილი რეგრესია ცოტაა. ორი სამდღიანი რეგრესიის რაუნდი (122, 199) ორივე PASS-ით დასრულდა, 0 რეგრესიით.
 
 ## 2. ციფრები
@@ -50,6 +51,7 @@
 - `tech-lead`-მა B წანაცვლების გარეშე დაითვალა ($591). აქ ოფიციალურია წანაცვლებული რიცხვი.
 - `rounds-123-199.json`-ში Round 199-ის `b_cost` 0-ია, რადგან ანალიზისას `b-round-199-result.json` (ეს დაგეგმვა) ჯერ არ არსებობდა. `collect.py`-ის ხელახლა გაშვება იქ არანულოვან რიცხვს აჩვენებს. ეს არის Round 200-ის დაგეგმვის ღირებულება, ფანჯარას არ ეკუთვნის და `cost.py`-ის ჯამებს არ ცვლის.
 - `deferred-list.txt` და `classify-out.json` ხელახლა დაგენერირდა ამ დაგეგმვის სტატუსის ცვლილებების შემდეგ (`deferred-list.py`, `classify.py`).
+- თანხები არის **ფაზების ცენტამდე დამრგვალებული მნიშვნელობების ჯამი** (`collect.py` ამრგვალებს, `cost.py` აჯამებს). დაურგვალებელი ჯამი $0.01–0.05-ით განსხვავდება (OBS-C200-ROUNDING).
 
 ## 3. C FAIL-ები: მიზეზი და ერთი წესი, რომელიც აიცილებდა
 
@@ -57,7 +59,7 @@
 
 | რაუნდი | რა მოხდა (მტკიცებულება) | წარმოშობის კლასი | წესი (lessons.md) |
 |---|---|---|---|
-| 127 | C-R127-01: Export dialog-ში ორი „Close“ ღილაკია: frozen Modal-ის ✕ და footer. 15 granted ტესტი C-თან წითელი იყო. | A-ს self-check | L14 |
+| 127 | C-R127-01: Export dialog-ში ორი „Close“ ღილაკია: frozen Modal-ის ✕ და footer. A-მ granted ტესტები გაუშვა, 15 წითელი STOP-ით მოახსენა (`a-round-127.md` l.3, §3; `c-round-127.md` l.3: „A stopped for a B ruling“). | B-ის spec: glossary-ის ტერმინი „Close“ frozen Modal-ის label-ს ეჯახება + ruling-ის არქონა | L23, L10, L14 |
 | 142 | C-R142-01: ინგლისური clipGainVideoReason 2 ხაზად გადადის. A-მ STOP გამოაცხადა, B-ს ruling არ დაუწერია. | spec (ტექსტის სიგრძე) + ruling-ის არქონა | L3, L10 |
 | 143 | C-R143-01: placeholder-ის Δ (+16,0,−32,0) იგივე ტექსტის ეფექტია. A-მ STOP გამოაცხადა, მაგრამ „no written B acceptance exists“. მომხმარებლისთვის ხილული დეფექტი არ არის. | process: ruling-ის არქონა | L10 |
 | 145 | C-R145-01: „▶ Playing“ უფრო გრძელია, ვიდრე „▶ ისმის“; option-ს სცდება და „▶ Play“-მდე იჭრება. | spec (ტექსტის სიგრძე) | L3, L16 |
@@ -65,7 +67,7 @@
 | 151 | C-R151-1: spec-ის კონფლიქტი („R1 own-text clause“ ეწინააღმდეგება „R1 panel clause / §7“-ს) · C-R151-2: Instrument Sans-ში ` · ` ვიწროა | spec-ის კონფლიქტი + შრიფტის მეტრიკა | L4, L3 |
 | 154 | C-R154-01: ახალ mono span-ს font-medium მემკვიდრეობით გადაეცა (ArrangementLane l.912) | A-ს self-check (computed style) | L12, L21 |
 | 158 | C-R158-01: unlayered გლობალური transition rule (`app.css` l.305–314) Tailwind-ის `@layer utilities`-ს ჯობნის. TS1 jsdom-ში მხოლოდ class token-ს ამოწმებდა. | ტესტის ხარვეზი (cascade jsdom-ში) | L12 |
-| 178 | C-R178-BADGE-SELECTOR: ტესტები badge-ს `span.border-accent`-ით ეძებდნენ, W2-მ კი ეს კლასი წაშალა. **ეს კლასი Round 147-ში უკვე იყო ჩაწერილი, როგორც გადადებული Low A-R147-REVIEW-L2.** | გადადებული Low → Medium | L8, L12 |
+| 178 | C-R178-BADGE-SELECTOR: ტესტები badge-ს `span.border-accent`-ით ეძებდნენ, W2-მ კი ეს კლასი წაშალა. **ეს კლასი Round 147-ში უკვე იყო ჩაწერილი, როგორც გადადებული Low A-R147-REVIEW-L2.** A-მ hit-ები იპოვა და „DEVIATION 2 / BLOCKER“ მოახსენა: W2 სავალდებულო იყო, ორივე ტესტ-ფაილი კი დაცული (`a-round-178.md` l.43–49). | გადადებული Low → Medium; B-ის spec: სავალდებულო ცვლილება დაცულ ტესტებს ეჯახებოდა | L8, L23, L12 |
 | 189 | C-R189-01: fresh-mode CLS 0.6158 (375) / 0.2727 (1280); seen-mode 0.0198 | first-visit მდგომარეობა არ გაზომილა. *დასკვნა:* მოითხოვდა თუ არა დავალება fresh mode-ს, `tech-lead`-მა არ იცის და არც B-ს გადაუმოწმებია. | L18 |
 | 192 | A სწორად შეჩერდა K0.4-ზე, რადგან B-ის grant-ის სიას PurchaseHeader აკლდა; იმპლემენტაცია არ ყოფილა. | B-ის ინვენტარიზაცია (B-R192-PLANNING-GAP) | L1, L22 |
 | 193 | C-R193-01/02: LeadMagnet-ის placeholder 3.41:1; ველების საზღვრები ~1.6 → ~1.2:1 · C-R193-03: „exactly N lines“ Biome-ის reflow-ს ეწინააღმდეგება | token-ის მომხმარებლები (B-R193-UNMEASURED-INFO) + line-count spec | L2, L15, L5 |
@@ -73,21 +75,21 @@
 | 196 | C-R196-01: inset ring pill-ის საზღვარს ერწყმის, 1.45:1 · C-R196-02: focus sticky strip-ის ქვეშაა; ref-შიც ასეა, ანუ ძველი პრობლემაა | ring-ის კონტრასტი მეზობელ საზღვართან + sticky chrome | L15, L19 |
 
 **დაჯგუფება** (B-ის კლასიფიკაცია ზემოთა ცხრილიდან; თითო რაუნდი ერთ ჯგუფშია):
-- spec ან ინვენტარიზაცია, რომელიც B-ს dispatch-მდე შეეძლო დაეჭირა: 142, 143, 145, 151, 192, 193, 194 (**7**);
-- A-ს self-check, რომელიც ბრაუზერში ან ტესტით დაიჭირებოდა: 127, 154, 158, 178 (**4**);
+- spec, ინვენტარიზაცია ან frozen/protected ფაილთან კონფლიქტი, რომელიც B-ს dispatch-მდე შეეძლო დაეჭირა: 127, 142, 143, 145, 151, 178, 192, 193, 194 (**9**);
+- A-ს self-check, რომელიც ბრაუზერში ან ტესტით დაიჭირებოდა: 154, 158 (**2**);
 - token-ის ან ring-ის კონტრასტი, რომელიც არ გაზომილა: 149, 196 (**2**);
 - first-visit მდგომარეობა: 189 (**1**).
 
-7 + 4 + 2 + 1 = 14.
+9 + 2 + 2 + 1 = 14.
 
 **Policy-ის root-cause ტაქსონომიით** (Saba-ს ექვსი ეტიკეტი; თითო რაუნდს ერთი ძირითადი ეტიკეტი, B-ის შეფასებით):
 
 | ეტიკეტი | რაუნდები | რაოდენობა |
 |---|---|---|
 | missing acceptance row | 145 (გრძელი ტექსტის მდგომარეობა), 149 (same-token კონტრასტი), 189 (fresh mode; *დასკვნა*), 193 (token-ის მომხმარებლები), 196 (ring vs მეზობელი საზღვარი) | 5 |
-| ambiguous task text | 142 (ტექსტის სიგრძე + ruling-ის არქონა), 143 (STOP ruling-ის გარეშე), 151 (კონფლიქტური clause-ები) | 3 |
-| missing test | 127 (granted ტესტები არ გაუშვია), 154 (computed weight), 158 (cascade მხოლოდ jsdom-ში) | 3 |
-| missing shared helper / pattern | 178 (ტესტები სტილის კლასით) | 1 |
+| ambiguous task text | 127 (glossary-ის ტერმინი frozen კომპონენტის label-ს ეჯახება), 142 (ტექსტის სიგრძე + ruling-ის არქონა), 143 (STOP ruling-ის გარეშე), 151 (კონფლიქტური clause-ები) | 4 |
+| missing test | 154 (computed weight), 158 (cascade მხოლოდ jsdom-ში) | 2 |
+| missing shared helper / pattern | 178 (ტესტები სტილის კლასით; დაცვა/grant-ის კონფლიქტი B-ის მხარეს, იხ. L23) | 1 |
 | environment / harness gap | 192 (B-ის same-line grep), 194 (B-ის scanner + ST8b guard) | 2 |
 | regression from unrelated change | — | 0 |
 
@@ -127,7 +129,7 @@
 |---|---|---|---|---|
 | **SYS-1** | სტილის კლასზე მიბმული ტესტების ჩანაცვლება: role, სახელი, ტექსტი ან `data-testid`. ასევე self-compare-ის, source-text-ის და პოზიციური selector-ების ჩანაცვლება. საიტები: `library-preview.test.tsx:241` (`span.text-foreground`), `detail-panel-strings-ui.test.tsx:239,277` (`span.text-dim`), `detail-panel-polish.test.tsx:369` (`span.font-sans`), `library-row-strings-ui.test.tsx:252` (`span.font-mono`), LRS3 `className).toBe` (l.236/251), OV1 (`studio-theme-obsidian.test.tsx:228-235`), UM8 (`track-group-mix-ui.test.tsx:641-645`), `panel-radius-ui.test.tsx` პოზიციური selector, `export-cancel.test.ts:211-215`, `export-wav.test.ts:170,594`. **არა** „readFileSync-ის მოცილება“: 19 ფაილიდან ზოგი შეგნებული source check-ია. | GATE146-S4-LRS3-CLASSNAME-PINS, GATE164-OV1-FRAGILE, GATE173-S4-OVERVIEW-BAR-POSITIONAL-SELECTOR, GATE81-S2-UM8-SOURCE-TEXT, C-R127-L1f-SELF-COMPARE-TESTS, **RETRO200-CLASS-SELECTORS** (ახალი, 5 საიტი) | `app/lib/arrangement/__tests__/` (მხოლოდ ტესტები) | 1 რაუნდი |
 | **SYS-2** | Held-Enter-ის guard: არსებული `preventRepeatedEnterKeyDown` (`ArrangementTransport.tsx:122`) გამოიყენება Play-ზე (l.132), Split-ზე (l.196), Loop-ზე (l.222), Follow-ზე (l.239), Zoom to range-ზე (l.283) და marker flag-ის Enter-ზე. Acceptance-ში შედის key auto-repeat და დაჭერილი კლავიში, ერთი ტოგლი ერთ დაჭერაზე. | GATE107-S1-MARKER-FLAG-HELD-ENTER, A-R107-SWEEP-HELD-ENTER-TOOLBAR | `ArrangementTransport.tsx`, `ArrangementMarkerRow.tsx` + ტესტები | 1 რაუნდი |
-| **SYS-3** | IME: Enter-ზე commit არ ხდება, როცა `event.nativeEvent.isComposing` true-ა (Escape-ზეც). საიტები: `ArrangementTempoRow.tsx:201`, `ArrangementMarkerRow.tsx:836`, `ArrangementGroupHeader.tsx:246`, `ArrangementDetailPanel.tsx:371` (range ველი) და `:464` (Clip Gain ველი). jsdom-ში ტესტირებადია. | ROOT-R65-L5, A-R165-IME-ENTER (+ ორი ჩაუწერელი საიტი, რომლებიც იმავე დავალებაში შედის) | ზემოთ ჩამოთვლილი 4 კომპონენტი + ტესტები | 1 რაუნდი |
+| **SYS-3** | IME: Enter-ზე commit არ ხდება, როცა `event.nativeEvent.isComposing` true-ა (Escape-ზეც). საიტები: `ArrangementTempoRow.tsx:201`, `ArrangementMarkerRow.tsx:836`, `ArrangementGroupHeader.tsx:246`, `ArrangementDetailPanel.tsx:371` (range ველი) და `:464` (Clip Gain ველი). jsdom-ში ტესტირებადია. | ROOT-R65-L5, A-R165-IME-ENTER (+ სამი ჩაუწერელი საიტი ორ ფაილში: GroupHeader:246, DetailPanel:371 და :464; იმავე დავალებაში შედის) | ზემოთ ჩამოთვლილი 4 კომპონენტი + ტესტები | 1 რაუნდი |
 
 **უარყოფილი, როგორც ერთი დავალება:** announcement-ის dedupe (GATE165-SR-REPEAT, GATE106-S1, GATE107-S2, A-R105-REVIEW-2).
 - `status-announcement.ts:18-20` gesture-ის დროს გამეორებას შეგნებულად ახშობს.
@@ -141,7 +143,7 @@
 
 ## 7. გაკვეთილები
 
-`lessons.md` (31 ხაზი) შეიცავს 22 გაკვეთილს: B — 10, A — 5, C — 7. თითოს მითითებული აქვს მტკიცებულება. „(1×)“ ნიშნავს, რომ მტკიცებულება ერთ შემთხვევას ეყრდნობა და გაკვეთილი ჰიპოთეზად რჩება.
+`lessons.md` (32 ხაზი) შეიცავს 23 გაკვეთილს: B — 11 (L1–L10, L23), A — 5, C — 7. თითოს მითითებული აქვს მტკიცებულება. „(1×)“ ნიშნავს, რომ მტკიცებულება ერთ შემთხვევას ეყრდნობა და გაკვეთილი ჰიპოთეზად რჩება.
 
 **პირველი ექსპერიმენტი** (`consequence-tester`):
 - **წესი L10 (B):** A-ს STOP-ზე ან C-ის „B has not ruled“-ზე შემდეგი დავალება ruling-ს შეიცავს, სანამ რამე ხელახლა გაიგზავნება. runner-ის gate („C არ იწყება ruling-ის ფაილის გარეშე“) root-ისთვის წინადადებაა, §8.
@@ -167,3 +169,14 @@
 - **C-R188-I6:** keep-list-ის testimonials („Netflix Original Score“, „2,500+ Happy Customers“) `TestimonialsSection.tsx`-შია, მაგრამ 2026-10-02-დან (`a208b4c`) არცერთ route-ზე არ ჩანს. რომელ გვერდზე უნდა იყოს? STORE-3 მას არც დაამატებს და არც წაშლის შენი პასუხის გარეშე.
 - **OBS-R199-LEDGER:** დემოს ხმების სათაურები (საჯარო preview, ღამის პულსი, სრული მიქსი, სტემების სახელები) ქართულად რჩება, რადგან სათაური შინაარსია და არა UI-ის ტექსტი. B-ის გადაწყვეტილებაა „დარჩეს“. თუ ინგლისურად გინდა, თქვი.
 - **Announcement-ის გამეორება:** როცა ერთი და იგივე უარი რამდენჯერმე მეორდება ერთი drag-ის დროს, screen reader-მა ყოველ ჯერზე წაიკითხოს თუ მხოლოდ ერთხელ? დღეს ერთხელ კითხულობს.
+
+## 9. შესწორება — Round 201-ის დაგეგმვა (2026-10-27, D-29z166)
+
+C-მ Round 200-ში RT-CAUSE და RT-LESSONS ჩააგდო (`c-round-200.md`, `c-round-200.json`). B-მ მტკიცებულება თავად გადაამოწმა (`a-round-127.md` l.3 და §3, `c-round-127.md` l.3, `a-round-178.md` l.43–49) და C-ის კითხვა დაადასტურა.
+
+- **C-R200-01 (Medium):** 127 და 178 გადავიდა „B-ს შეეძლო dispatch-მდე“ ჯგუფში. §1: 7/4 → **9/2**. §3: ცხრილის ორი უჯრა, დაჯგუფება და ტაქსონომია (127: missing test → ambiguous task text; 3/3 → 4/2). ციფრები (ღირებულება, FAIL-ების სია, რაოდენობები) არ შეცვლილა.
+- **lessons.md:** L12 — hit დაცულ ფაილში არის STOP და არა რედაქტირება; L14 — დარჩა მხოლოდ dialog-ის უნიკალური სახელის წესი, speed rule-თან შეთანხმებით (A-ს feedback, `a-round-200.md`); ახალი **L23** (B) — სავალდებულო ცვლილება frozen/protected ფაილს ეჯახება → grant ან ruling dispatch-მდე.
+- **C-R200-02 (Low):** SYS-3-ის ჩაუწერელი საიტები: ორი → **სამი, ორ ფაილში**.
+- **OBS-C200-ROUNDING:** §2-ის შენიშვნებში დაემატა.
+- Round 201-ში C ამოწმებს მხოლოდ შეცვლილ ხაზებს (RT-FIX).
+

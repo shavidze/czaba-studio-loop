@@ -1,0 +1,14 @@
+p='feature-status.md'; s=open(p,encoding='utf-8').read()
+def rep(old,new):
+    global s
+    assert s.count(old)==1,(old[:50],s.count(old)); s=s.replace(old,new)
+rep('განახლდა: 2026-10-27 · ავტორი: B (round 199 → round 200 დაგეგმვა, D-29z165)','განახლდა: 2026-10-27 · ავტორი: B (round 200 → round 201 დაგეგმვა, D-29z166)')
+rep('- **Round 199 (D-29z164): რეგრესიის რაუნდი — მზადაა.**',
+ '- **Round 200 (D-29z165): RETRO — ბაგია (C FAIL RT-CAUSE/RT-LESSONS, `browserVerified: true`); store არ შეცვლილა, gate 200 skipped.** C-R200-01 (Medium): 127 და 178 შეცდომით იყო „A-ს self-check“ ჯგუფში; A-მ ორივეჯერ handover-მდე მოახსენა (`a-round-127.md` l.3, `a-round-178.md` l.43–49). B-მ შეასწორა Round 201-ის დაგეგმვაზე: retro §1/§3/§6/§7/§9 (9 B / 2 A), lessons L12, L14, ახალი L23; C-R200-02 (SYS-3: სამი საიტი) დაიხურა. RT-FIX — Round 201-ში. R200-P1 (REG-DUX5-PLAYHEAD-RESCAN) და G200-3 — **მზადაა** ორივე viewport-ზე (`c-round-200.json`); C-R180-K8-PLAYHEAD-MASK დაიხურა.\n- **Round 201 (D-29z166): SABA-B-4 ეტაპი 2 (store) + RT-FIX — მუშავდება.** `current-task.md`; 31 grant, R92–R97.\n- **Round 199 (D-29z164): რეგრესიის რაუნდი — მზადაა.**')
+rep('ეტაპი 2 (store-ის გვერდები, C-R196-03 შემავალი) — **არ დაწყებულა**, Round 201 (Round 199 რეგრესია მზადაა; Round 200 RETRO) | `c-round-197.md`; `c-round-197.json`; `gates/gate-round-197.json`; `b-round-197/probe-*.json`; `c-round-198.json`; `gates/gate-round-198.json` | Round 200 RETRO → Round 201 ეტაპი 2 |',
+ 'ეტაპი 2 (store-ის გვერდები, C-R196-03 შემავალი) — **მუშავდება**, Round 201 (D-29z166: R92 გლობალური წესი unlayered რჩება, R93 focus-source root-ში, R94 token sweep 27 ფაილში, R95 CSS outline:none, R96 C-R196-03, R97 inset) | `c-round-197.md`; `c-round-197.json`; `gates/gate-round-197.json`; `b-round-197/probe-*.json`; `c-round-198.json`; `gates/gate-round-198.json`; `b-round-200/out/focus-inventory.json`; `b-round-200/out/sticky-probe.json` | Round 201 C → SYS-1 |')
+rep('Round 200 — RETRO (D-29z165, მუშავდება); Round 201 — SABA-B-4 ეტაპი 2;','Round 200 — RETRO (D-29z165, C FAIL ტექსტზე; B-მ შეასწორა, RT-FIX Round 201-ში); Round 201 — SABA-B-4 ეტაპი 2 (მუშავდება);')
+rep('| RETRO | **არ დაწყებულა** — პირველი STORE-REDESIGN-ის შემდეგ ან round 200-ზე (რომელიც უფრო ადრეა); შემდეგ ყოველ 15 რაუნდში და რიგის ყოველი ერთეულის ბოლოს. კოდი არ იცვლება; შედეგი `retros/retro-<round>.md` და `lessons.md` | backlog `retro_policy`; კანდიდატი სისტემური ამოცანა: GLOBAL-FOCUS-VISIBLE-UNLAYERED |',
+ '| RETRO | **მოწმდება** — RETRO 200 (Round 200): C FAIL RT-CAUSE/RT-LESSONS-ზე (C-R200-01); B-მ შეასწორა (retro §9, lessons L12/L14/L23); C-ის RT-FIX Round 201-ში. შემდეგი RETRO: round 215 ან STORE-REDESIGN-ის ბოლოს. კოდი არ იცვლება | `retros/retro-200.md`; `lessons.md`; `c-round-200.md`; backlog `retro_runs[0]` | Round 201 RT-FIX |')
+open(p,'w',encoding='utf-8').write(s)
+print('ok')

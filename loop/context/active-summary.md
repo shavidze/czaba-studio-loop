@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-27T00:56:54.245Z)
+# Active loop summary (2026-10-27T01:31:46.318Z)
 
-- backlog.json 1771 KB -> active view 262 KB
-- status: G_ROOT_GATE round 199
-- servers: `{"checkedUtc":"2026-10-26T23:56:29.2496620Z","round":199,"attempt":1,"store":200}`
+- backlog.json 1782 KB -> active view 263 KB
+- status: G_ROOT_GATE round 200
+- servers: `{"checkedUtc":"2026-10-27T01:15:47.4506333Z","round":200,"attempt":1,"store":200}`
 - last publication: 5b1a2bba0c98dcc86564be8441fbdf989cc8f7b8 (rounds 199-199)
-- last root gate: round 199 published - commit 5b1a2bba0c98dcc86564be8441fbdf989cc8f7b8 pushed
+- last root gate: round 200 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -314,7 +314,6 @@
 - GATE147-S2-ALL-BUTTON-NAME / low / deferred_low_polish / 
 - GATE147-S3-FOLD-DOUBLE-ANNOUNCE / low / deferred_low_polish / 
 - GATE147-S5-SIMILAR-OBJECT-NAMES / low / deferred_low_polish + checkpoint b-round-148-checkpoint-request.md Q1 / 
-- A-R147-REVIEW-L2-BADGE-CLASS-SELECTOR / low / deferred_low_polish / 
 - C-R147-NOTE-LIBBASE-NO-REST / info / applied in round 148 (B dockbase148 includes measureRest) / 
 - GATE148-S2-VDS3-WALLCLOCK / low / deferred_low_polish / video-dock-strings-ui VDS3 depends on wall-clock time (Date.now FakeAudioContext, ~50 ms start hold, waitFor 1000 ms); may flake on a slow r
 - GATE148-S3-DOCK-ALIASES / low / deferred_low_polish + checkpoint b-round-148-checkpoint-request.md Q1 / VIDEO_PLAY_FAILED_MESSAGE / VIDEO_RETURN_LABEL in ArrangementVideoDock.tsx l.55/57 are aliases of studioVideoDockStrings keys
@@ -324,7 +323,6 @@
 - C-R148-TOOL-LIB122-GEORGIAN-SELECTORS / info / tooling note: c-round-125/tools/lib122.cjs clipInfoSel/closeDlg/exportWav still use Georgian text regexes; any later export/WAV re-check through that chain must switch to English or testid / 
 - B-R150-PM2-SUBSTRING / info / open info: pending-status.test.tsx PM2 toContain(border-outline) passes by substring; tighten with the next owner of pending-status.test.tsx (not granted in round 151) / 
 - C-R149-OBS-SELECTION-HIGHLIGHT / info / signal for VISUAL-A (not scheduled): Chromium native blue text-selection highlight in the group-name editor; no ::selection rule; pre-existing / 
-- C-R149-OBS-SPACE-EMPTY / info / observation (not compared with earlier rounds; unrelated to colour): on an empty project S0, Space does not advance the playhead; check in the next regression round / 
 - A-R150-REVIEW-L1 / info / scheduled round 151 (D-29z116 T1: detail-panel-fit.test.tsx l.293 -> not.toContain('border-outline-strong')) / detail-panel-fit F4 l.293 not.toContain('border-outline') guards nothing after V-1b; B round-150 R5 statement was wrong
 - C-R150-BPM-EDGE-MARGIN / info / noted; re-measure if the BPM field geometry or font changes (V-2a changes its font, not its border) / BPM field left/right border pixels anti-aliased: 3.05/3.06 vs parent (>= 3.0 with small margin); top/bottom 3.50
 - C-R151-2 / low / deferred_low_polish + awaiting_user (D-29z117 R2): no approved V-2 fix - spec approves font/weight/letter-spacing only; word-spacing 0.12em measured (B: ' · ' 8.8 px, hint 1162 px, 17 horizontal moves, 0 vertical, S0) but not approved and does not widen the 1 px dot; glyph swap changes text content (94 source lines, 44 in strings.ts, no shared constant). Must be fixed or accepted by the user before final acceptance / ' · ' separators cramped in Instrument Sans: space 2 px, dot 1 px, ' · ' 5 px at 12 px vs Inter 3/3/9 px (headless Linux integer advances)
@@ -375,7 +373,6 @@
 - Q-R167-ON-HOVER / info (user question) / awaiting_user: by ruling R2 (V-3c-4a/4b) on-state buttons (Snap/Env/Metronome on, Master Mute on, Peak over, Lane/Group Mute/Solo on) keep the same fill on hover and press, so they give no hover feedback; option from the gate-167 reviewer: one step stronger on hover/press (e.g. enabled:hover:bg-accent/25, destructive/20-25); not scheduled until Saba answers; browser-confirmed by C round 168 (Lane/Group Mute/Solo on: 8.32 rest = hover = press); still awaiting_user; V-3c-4c-1 Stop (R10) is an outline button and does give hover feedback / 
 - GATE167-TWMERGE-DEPENDENCY / info (signal) / signal: on-state fills win only because cn uses tailwind-merge (drops the conflicting base token); a switch to plain clsx would make the fill depend on CSS order; covered by TS8/UI11/HM7 (and LSU7/UM11) asserting the dropped tokens are absent; also tailwind-merge 3.4.0 treats bg-gradient-to-r as conflicting with bg-foreground/5 (R8) / 
 - GATE167-TOKEN-TEST-FRAGILITY / info (signal) / signal: raw className token tests (TS8, UI11, MS5, HM7, LSU7, UM11) must be edited again on every later surface change; reduced by ARCH-R167-SURFACE-RECIPE if approved / 
-- C-R167-METRONOME-UNDER-MUTE / info (evidence gap) / open note, not scheduled: C round 167 did not exercise the metronome click path under Master Mute (metronome off during the mute test); code unchanged by V-3c-4a; add one line to the next regression round / 
 - A-R167-DUP-TEST-IDS / info (signal) / signal: test IDs TS8 and MS5 also exist in marker-time-snap-ui.test.tsx:601 and marker-snap.test.tsx:475 (B-assigned, no runtime effect); B now greps all tests before assigning IDs (round 168: LSU7, UM11 unique) / 
 - C-R168-BORDERLESS-REDUCED-MOTION / info (signal) / signal, not scheduled: borderless header buttons (lane fold/name/pan reset, group fold/name; also the library icon buttons and option rows kept radius-only by R7 in V-3c-4c-1) keep the global app.css interactive transition (150 ms ease-out color/background/border/box-shadow/transform/opacity) under prefers-reduced-motion; pre-existing, not changed by V-3c-4b; candidate for V-3c-5 or a motion audit together with ROOT-GLOBAL-TRANSITION-RULE; round 171 planning: the VideoDock float buttons (drag/expand/close) and the placeholder Return keep the same global 150 ms transition under radius-only R18  ... [clipped; see backlog.json] / 
 - Q-V3C5-MODAL-RADIUS / question / awaiting_user / Studio dialogs (Export) use the protected shared Modal.tsx: container rounded-xl 16 px, footer buttons rounded-lg 12 px. Should Studio dialo
@@ -439,7 +436,7 @@
 - C-R187-INFO / info / routed / C round 187 info: I1 entrance loader blocks / card Play for ~3-5.4 s (-> STORE-1d acceptance); I2 LeadMagnet popup covers scrolled-shot firs
 - B-R187-HEADER-SIGNALS / info / signal / Header auth-block buttons lack type=button (useButtonType), the menu toggle lacks aria-expanded/aria-controls, collapsed mobile links (max-h
 - C-R188-INFO / info / routed / C round 188 info: I1 SpotlightLoader motion.h1 -> 2 h1 on / ~0.64-6.3 s (-> STORE-1d round 189 K6/H1-189); I2 Footer absent on /store, produ
-- C-R188-I6 / info / awaiting_user / Keep-list testimonials/stats ('Netflix Original Score', '2,500+ Happy Customers') live in app/components/home/TestimonialsSection.tsx, which
+- C-R188-I6 / info / awaiting_user (re-confirmed by C round 199 OBS-R199-KEEP-TESTIMONIALS: TestimonialsSection.tsx still unmounted since a208b4c, 2026-10-02). Listed "for Saba" in b-round-199.md and retro-200.md; STORE-3 must neither mount nor delete it without Saba (2026-10-27 B round 199 -> 200 planning (D-29z165)) / Keep-list testimonials/stats ('Netflix Original Score', '2,500+ Happy Customers') live in app/components/home/TestimonialsSection.tsx, which
 - GATE188-REVIEW-SIGNALS / info / signal / gate-188 reviewer (COMMIT OK 9/10, Architecture note none): 1 doc 155 status stale (-> round 189 K7); 2 mobile menu aria-expanded/aria-contr
 - A-R188-SIGNALS / info / signal / A round 188 code-reviewer Architecture note (verbatim in a-round-188.md): four-link list written twice in Header.tsx (NAV_ITEMS array -> STO
 - B-R188-LOADER-SIGNALS / info / signal / CinemaCurtainLoader, PianoCurtainLoader and PianoLoadingAnimation are exported from app/components/loading/index.ts and app/components/commo
@@ -470,6 +467,10 @@
 - B-R195-WORKFLOW-DOC-DRIFT / info / root_note / docs/technical/studio-real-workspace/agent-workflow.md lacks the policy sections from SABA-B-3 onward (Retrospective, SABA-B-4, three 2026-1
 - C-R196-03 / low / input to SABA-B-4 stage 2 (store pages); not a stand-alone deferred Low / home product card link focus ring clipped (tree and ref)
 - ARCH-R198-FOCUS-REGION / info / signal_recorded_not_scheduled (code-reviewer Architecture note, round 198: Signal 3 weak - scroller/chrome focus region touched rounds 196-198, R89 reverted; verdict keep: logic in lib/focus-reveal.ts, component only reads/writes refs it owns; Signal 4 absent). Folded into the pending frontend-architect checkpoint request (b-round-197.md section 6). / 
+- OBS-R199-LEDGER / info / ruled (B, D-29z165): keep. The demo sound titles in app/data/studio-lab-demo.ts are content (sound names), covered by the standing M2 ledger "user content / sound titles are not translated" (tasks 147/148). Smallest honest behaviour: no change; Saba may veto via a decisions note / 
+- OBS-R199-OV-PLAYHEAD-CORNER / info / acknowledged: notch metric counts come from the overview playhead at 0 % overlapping the left arc; 0 elsewhere; not a SABA-B-2 gap. Harness rule: move the playhead off 0 before the corner metric / 
+- OBS-R199-SNAP-DEFAULT / info / acknowledged: Snap off in a fresh session, unchanged since round 122; harness rule: set Snap explicitly / 
+- OBS-R199-PROTECTED-NAV / info / acknowledged (info): /studio/middle-east fires framenavigated 3x to the same URL; protection unchanged (Sign in required, 0 audio[src]). Not scheduled; protected file / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
