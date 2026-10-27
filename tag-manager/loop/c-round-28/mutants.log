@@ -1,0 +1,206 @@
+## baseline (no mutation)
+```diff
+```
+['Tests  68 passed (68)']
+killed by: []
+
+## MR-1 ignore generations
+```diff
+--- /tmp/c-r28-new/src/renderer/src/stores/file-store.ts	2026-10-27 20:12:34.101096711 +0000
++++ /tmp/c-r28-mut/src/renderer/src/stores/file-store.ts	2026-10-27 20:27:38.675155516 +0000
+@@ -133,7 +133,7 @@
+     set((state) => {
+       const metadata: Record<string, WavMetadata> = {};
+       for (const [path, meta] of Object.entries(read)) {
+-        const isSuperseded = (state.pathWriteGenerations[path] ?? 0) > (readGenerations[path] ?? 0);
++        const isSuperseded = false;
+         if (!isSuperseded) {
+           metadata[path] = meta;
+           continue;
+```
+['Tests  6 failed | 62 passed (68)']
+killed by: ['(g2)', '(r1)', '(r2)', '(r3)', '(r6)', '(r7)']
+
+## MR-2 >= instead of >
+```diff
+--- /tmp/c-r28-new/src/renderer/src/stores/file-store.ts	2026-10-27 20:12:34.101096711 +0000
++++ /tmp/c-r28-mut/src/renderer/src/stores/file-store.ts	2026-10-27 20:27:43.924386944 +0000
+@@ -133,7 +133,7 @@
+     set((state) => {
+       const metadata: Record<string, WavMetadata> = {};
+       for (const [path, meta] of Object.entries(read)) {
+-        const isSuperseded = (state.pathWriteGenerations[path] ?? 0) > (readGenerations[path] ?? 0);
++        const isSuperseded = (state.pathWriteGenerations[path] ?? 0) >= (readGenerations[path] ?? 0);
+         if (!isSuperseded) {
+           metadata[path] = meta;
+           continue;
+```
+['Tests  4 failed | 64 passed (68)']
+killed by: ['(g2)', '(r4)', '(r6)', '(r8)']
+
+## MR-3 generation once before loop
+```diff
+--- /tmp/c-r28-new/src/renderer/src/lib/utils.ts	2026-10-27 20:11:53.184777164 +0000
++++ /tmp/c-r28-mut/src/renderer/src/lib/utils.ts	2026-10-27 20:27:49.584162828 +0000
+@@ -58,9 +58,9 @@
+   const accumulated: Record<string, Record<string, unknown>> = {};
+   const readGenerations: Record<string, number> = {};
+   let failures = 0;
++  const chunkGeneration = getWriteGeneration();
+   for (let i = 0; i < paths.length; i += METADATA_CHUNK_SIZE) {
+     const chunk = paths.slice(i, i + METADATA_CHUNK_SIZE);
+-    const chunkGeneration = getWriteGeneration();
+     try {
+       const result = await window.api.readMetadataBatch(chunk, schema);
+       Object.assign(accumulated, result);
+```
+['Tests  2 failed | 66 passed (68)']
+killed by: ['(r8)', '(u1)']
+
+## MR-4 generation after readMetadataBatch resolves
+```diff
+--- /tmp/c-r28-new/src/renderer/src/lib/utils.ts	2026-10-27 20:11:53.184777164 +0000
++++ /tmp/c-r28-mut/src/renderer/src/lib/utils.ts	2026-10-27 20:27:54.082298445 +0000
+@@ -60,9 +60,9 @@
+   let failures = 0;
+   for (let i = 0; i < paths.length; i += METADATA_CHUNK_SIZE) {
+     const chunk = paths.slice(i, i + METADATA_CHUNK_SIZE);
+-    const chunkGeneration = getWriteGeneration();
+     try {
+       const result = await window.api.readMetadataBatch(chunk, schema);
++      const chunkGeneration = getWriteGeneration();
+       Object.assign(accumulated, result);
+       for (const path of Object.keys(result)) {
+         readGenerations[path] = chunkGeneration;
+```
+['Tests  6 failed | 62 passed (68)']
+killed by: ['(r1)', '(r2)', '(r3)', '(r6)', '(r7)', '(u1)']
+
+## MR-5 superseded w/o entry gets meta
+```diff
+--- /tmp/c-r28-new/src/renderer/src/stores/file-store.ts	2026-10-27 20:12:34.101096711 +0000
++++ /tmp/c-r28-mut/src/renderer/src/stores/file-store.ts	2026-10-27 20:27:58.582944290 +0000
+@@ -139,7 +139,7 @@
+           continue;
+         }
+         const current = state.metadata[path];
+-        if (current) metadata[path] = current;
++        metadata[path] = current ?? meta;
+       }
+       return { metadata };
+     }),
+```
+['Tests  1 failed | 67 passed (68)']
+killed by: ['(g2)']
+
+## MR-6 handleRescan keeps setMetadata
+```diff
+--- /tmp/c-r28-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:12:02.441824215 +0000
++++ /tmp/c-r28-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:28:03.031989975 +0000
+@@ -155,9 +155,7 @@
+           currentSchema,
+           () => useFileStore.getState().writeGeneration,
+         );
+-        useFileStore
+-          .getState()
+-          .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations);
++        setMetadata(meta as Record<string, WavMetadata>);
+       } else {
+         setMetadata({});
+       }
+```
+['Tests  3 failed | 65 passed (68)']
+killed by: ['(r1)', '(r2)', '(r7)']
+
+## MR-7 handleOpenFolder keeps setMetadata
+```diff
+--- /tmp/c-r28-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:12:02.441824215 +0000
++++ /tmp/c-r28-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:28:07.513604667 +0000
+@@ -113,9 +113,7 @@
+           currentSchema,
+           () => useFileStore.getState().writeGeneration,
+         );
+-        useFileStore
+-          .getState()
+-          .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations);
++        setMetadata(meta as Record<string, WavMetadata>);
+       }
+     } catch (err) {
+       useMetadataStore
+```
+['Tests  1 failed | 67 passed (68)']
+killed by: ['(r3)']
+
+## MR-8 App openFolder keeps setMetadata
+```diff
+--- /tmp/c-r28-new/src/renderer/src/App.tsx	2026-10-27 20:12:04.191836792 +0000
++++ /tmp/c-r28-mut/src/renderer/src/App.tsx	2026-10-27 20:28:11.998537624 +0000
+@@ -65,9 +65,7 @@
+             currentSchema,
+             () => useFileStore.getState().writeGeneration,
+           );
+-          useFileStore
+-            .getState()
+-            .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations);
++          setMetadata(meta as Record<string, WavMetadata>);
+         }
+       } catch (err) {
+         useMetadataStore
+```
+['Tests  1 failed | 67 passed (68)']
+killed by: ['(r6)']
+
+## MR-9 merge instead of replace
+```diff
+--- /tmp/c-r28-new/src/renderer/src/stores/file-store.ts	2026-10-27 20:12:34.101096711 +0000
++++ /tmp/c-r28-mut/src/renderer/src/stores/file-store.ts	2026-10-27 20:28:16.461980329 +0000
+@@ -131,7 +131,7 @@
+ 
+   applyMetadataRead: (read, readGenerations) =>
+     set((state) => {
+-      const metadata: Record<string, WavMetadata> = {};
++      const metadata: Record<string, WavMetadata> = { ...state.metadata };
+       for (const [path, meta] of Object.entries(read)) {
+         const isSuperseded = (state.pathWriteGenerations[path] ?? 0) > (readGenerations[path] ?? 0);
+         if (!isSuperseded) {
+```
+['Tests  2 failed | 66 passed (68)']
+killed by: ['(g2)', '(r5)']
+
+## MR-10 callers pass () => 0
+```diff
+--- /tmp/c-r28-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:12:02.441824215 +0000
++++ /tmp/c-r28-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:28:20.950710199 +0000
+@@ -111,7 +111,7 @@
+         const { data: meta, readGenerations } = await readMetadataChunked(
+           paths,
+           currentSchema,
+-          () => useFileStore.getState().writeGeneration,
++          () => 0,
+         );
+         useFileStore
+           .getState()
+@@ -153,7 +153,7 @@
+         const { data: meta, readGenerations } = await readMetadataChunked(
+           paths,
+           currentSchema,
+-          () => useFileStore.getState().writeGeneration,
++          () => 0,
+         );
+         useFileStore
+           .getState()
+--- /tmp/c-r28-new/src/renderer/src/App.tsx	2026-10-27 20:12:04.191836792 +0000
++++ /tmp/c-r28-mut/src/renderer/src/App.tsx	2026-10-27 20:28:20.950853017 +0000
+@@ -63,7 +63,7 @@
+           const { data: meta, readGenerations } = await readMetadataChunked(
+             paths,
+             currentSchema,
+-            () => useFileStore.getState().writeGeneration,
++            () => 0,
+           );
+           useFileStore
+             .getState()
+```
+['Tests  2 failed | 66 passed (68)']
+killed by: ['(r4)', '(r8)']
+

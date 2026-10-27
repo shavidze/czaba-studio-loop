@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 28: TM-B30 stale folder read guard (D-35) on baseline 6c956b4",
+  "current_task": "Round 29: TM-B31 rejected folder-read chunk keeps entries + toast (D-36) on baseline b182557",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -302,9 +302,15 @@
     },
     {
       "id": "D-35",
-      "status": "planned R28 (TM-B30)",
+      "status": "verified (C round 28 PASS), published b182557 (TM-B30)",
       "decision": "Stale-result guard for folder reads (renderer only), reusing D-34's write generation. readMetadataChunked(paths, schema, getWriteGeneration: () => number) calls getWriteGeneration() just before each chunk's readMetadataBatch and returns readGenerations: Record<string, number> for every path in that chunk's result (lib stays store-free; callers pass () => useFileStore.getState().writeGeneration). useFileStore.applyMetadataRead(read, readGenerations) replaces metadata like setMetadata, except that a path whose pathWriteGenerations value is greater than its read generation is superseded and gets the store entry current at that moment (absent if none). FolderBrowser handleOpenFolder/handleRescan and App openFolder call it instead of setMetadata on the success path; error paths, empty-folder setMetadata({}) and handleCloseFolder keep setMetadata. The comparison runs at store-write time, so a save that lands between chunks is kept. MetadataPanel (D-34) is not touched. Reachability: single writes are synchronous in main (delay-only); batch writes yield every 5 files and a folder of more than 50 files reads in several chunks, so batch + multi-chunk rescan is reachable. Not covered: a rejected chunk still drops its paths (B-R27-01). Alternative not taken: disabling Rescan/Open Folder during a save (UX, B-R27-02).",
       "contract_with": "none (renderer display and save flow only)"
+    },
+    {
+      "id": "D-36",
+      "status": "planned R29 (TM-B31)",
+      "decision": "Folder reads keep the current entry of a rejected chunk (renderer only), the D-33 rule applied to Rescan / Open Folder / drop. readMetadataChunked additionally returns failedPaths: string[] (every path of every rejected chunk, in paths order; failures stays and equals failedPaths.length). useFileStore.applyMetadataRead(read, readGenerations, keptPaths) takes a required third parameter: after the D-35 read loop, every kept path gets the store entry current at store-write time (absent if none); generations, files and selection are untouched. The three callers pass failedPaths and, after applyMetadataRead, show the existing D-33 toast 'Failed to read N files' (error) when failures > 0; no toast when 0. Error paths, the empty-folder setMetadata({}) and handleCloseFolder are unchanged. Open Folder of a different folder: kept paths have no entry and stay absent, the toast reports them. The toast store has one slot, so a later toast can replace it (same as the schema path). Reachability: main catches per-file read errors (emptyMetadata), so a chunk rejects only at IPC level; the consequence fixed is display-only. Not covered: per-file read errors returned as emptyMetadata (RR-R13-01, protected preload).",
+      "contract_with": "none (renderer display only)"
     }
   ],
   "items": [
@@ -1408,7 +1414,7 @@
       "severity": "medium",
       "source": "B R25 hypothesis (B-R25-01), B R27 red reproduction (b-round-27-exp/)",
       "title": "Stale folder read overwrites a save (D-35): Rescan, Open Folder of the same folder or a drop of it while a save is pending read the file before the write resolved and replace the save re-read in the store after the last chunk; re-selecting the file shows the old values and the next save writes them back (data-loss path, same class as TM-B29).",
-      "status": "in_progress",
+      "status": "done",
       "round": 28,
       "depends_on": [
         "TM-B29"
@@ -1419,7 +1425,14 @@
       "findings": [
         "B-R25-01",
         "RR-R25-04",
-        "B-R27-02"
+        "B-R27-02",
+        "B-R27-01",
+        "A-R28-01",
+        "A-R28-02",
+        "RR-R28-01",
+        "RR-R28-02",
+        "RR-R28-03",
+        "RR-R28-04"
       ],
       "acceptance": [
         "R28: readMetadataChunked(paths, schema, getWriteGeneration) records per path the generation read just before its chunk call and returns readGenerations; file-store applyMetadataRead(read, readGenerations) replaces metadata, keeping the current store entry for a superseded path (pathWriteGenerations > read generation; absent if none); FolderBrowser handleOpenFolder/handleRescan and App openFolder use it",
@@ -1427,6 +1440,41 @@
         "real app (C, both builds, harness: write delayed before the listener, the rescan read-batch replied late): new build keeps Category R28Cat after the late rescan read and after re-selecting a.wav; 6c956b4 reverts it and a second save writes the old Category back; ffprobe + music-metadata field by field; Open Folder same-folder variant",
         "docs/bugs/001 entry 11 fixed by D-35 with test names; README count; STATE_MANAGEMENT.md one D-35 line",
         "gate: verifyCommand green, renderer 216 + new tests, main 93, E2E 7/7, --retries=0 7/7, Biome 0 errors / 8 warnings same list"
+      ],
+      "realVerified": true,
+      "commit": "b182557baf43c21d10844e15027f9df5e0be9347",
+      "evidence": [
+        "C round 28 PASS (c-round-28.md, c-round-28.json realVerified=true, bugs: none): R28-1 only the 10 owned paths changed (9 M + 1 new test), MetadataPanel/metadata-panel tests/helpers/src/main byte-identical, lib/utils.ts imports no store, getWriteGeneration required, file-store adds only applyMetadataRead, A's transcript shows Edit/Write only on repo files; R28-2 6c956b4 src + A's tests 219 passed / 7 failed ((r1)(r2)(r3)(r6)(r7) stale ACat, (g2) not a function, (u1) readGenerations undefined), A's tree 226/226 in 12 files, each alone 1 passed; R28-3 MR-1..MR-10 all killed with the expected killers; R28-4 clean verifyCommand exit 0, Biome 0 errors / 8 warnings same list (FolderBrowser :213 -> :225 shift), typecheck 0, renderer 226, main 93/93, E2E 7/7, --retries=0 7/7; R28-5 real app old 6c956b4 vs new build under xvfb with harness (write +3 s, first read-batch during a pending write replied +6 s): new build Rescan and Open Folder keep Category R28Cat in the form after re-select, ffprobe ICAT=R28Cat and music-metadata exif:ICAT=R28Cat, title R28T2; old build shows '' and writes ICAT='' back (data loss reproduced); pageErrors []; R28-6 docs entry 11, header, README row, STATE_MANAGEMENT D-35 line, every file:line grep-checked",
+        "root gate round 28: published b182557 (rounds 26-28), review COMMIT OK (gates/round-28/review.md, no medium, 4 low -> RR-R28-01..04)"
+      ]
+    },
+    {
+      "id": "TM-B31",
+      "type": "bug",
+      "severity": "low",
+      "source": "B R27 code reading (B-R27-01), B R28 red reproduction (b-round-28-exp/), A-R28-01, A-R28-02, RR-R28-01",
+      "title": "Rejected folder-read chunk silently drops entries (D-36): readMetadataChunked counts a rejected chunk in failures but Rescan / Open Folder / drop ignore it, so applyMetadataRead removes those paths from metadata (rows lose values and Tagged badge, form empty) with no toast; opposite of the D-33 keep-current rule in the schema path. Plus docs/bugs/001 entry 11 completion ((r8) name, single-chunk + rejected re-read case, superseded path with no entry).",
+      "status": "in_progress",
+      "round": 29,
+      "depends_on": [
+        "TM-B30"
+      ],
+      "decisions": [
+        "D-36"
+      ],
+      "findings": [
+        "B-R27-01",
+        "A-R28-01",
+        "A-R28-02",
+        "RR-R28-01",
+        "RR-R28-02"
+      ],
+      "acceptance": [
+        "R29: readMetadataChunked additionally returns failedPaths (paths of rejected chunks, in order; failures unchanged); applyMetadataRead(read, readGenerations, keptPaths) keeps the current store entry for every kept path (absent if none), taken at store-write time; FolderBrowser handleOpenFolder/handleRescan and App openFolder pass failedPaths and show 'Failed to read N files' (error) when failures > 0",
+        "tests (k1)-(k7) + (g3) + (u2): on b182557 src (k1)-(k6)(g3)(u2) red, (k7) green pin; all green after the fix; mutants MK-1..MK-9c each killed",
+        "real app (C, both builds, harness rejects the rescan meta:read-batch): new build keeps the rows' values and Tagged badges and shows 'Failed to read 2 files'; b182557 empties them with no toast; files on disk unchanged (sha256 + ffprobe + music-metadata) on both",
+        "docs/bugs/001 entry 12 fixed by D-36 with test names; entry 11 adds (r8), the single-chunk + rejected re-read case and the no-entry superseded case; header/README counts; STATE_MANAGEMENT.md one D-36 line",
+        "gate: verifyCommand green, renderer 235 in 13 files, main 93, E2E 7/7, --retries=0 7/7, Biome 0 errors / 8 warnings same list"
       ],
       "realVerified": false
     }
@@ -3316,10 +3364,11 @@
       "id": "B-R25-01",
       "source": "B R25 code reading (FolderBrowser.tsx:134-158, MetadataPanel.tsx:331)",
       "severity": "medium",
-      "status": "in_progress",
+      "status": "closed",
       "title": "Hypothesis, not reproduced: Rescan (and Open Folder of the same folder) stays enabled while a save is pending; readMetadataChunked can read files before a batch write reaches them and setMetadata after the last chunk overwrites the save's re-read (same class as B-R23-02). Rescan also clears the selection, so the form is not affected",
       "routed_to": "TM-B30 round 28 (D-35)",
-      "title_b_r27": "Reproduced red by B R27 at component level on 6c956b4 (b-round-27-exp/): Rescan or Open Folder / drop of the same folder while a save is pending; readMetadataChunked reads the file before the write resolves and setMetadata after the last chunk replaces the save re-read (store keeps the old Category). Rescan clears the selection, but re-selecting the file shows the stale entry and the next save writes the old value back (data-loss path, same class as TM-B29) -> medium"
+      "title_b_r27": "Reproduced red by B R27 at component level on 6c956b4 (b-round-27-exp/): Rescan or Open Folder / drop of the same folder while a save is pending; readMetadataChunked reads the file before the write resolves and setMetadata after the last chunk replaces the save re-read (store keeps the old Category). Rescan clears the selection, but re-selecting the file shows the stale entry and the next save writes the old value back (data-loss path, same class as TM-B29) -> medium",
+      "closed_by": "TM-B30 (D-35), C round 28 PASS, published b182557"
     },
     {
       "round": 25,
@@ -3339,7 +3388,8 @@
       "status": "open",
       "title": "Loop-folder / repository desync: 6c956b4 'verified loop rounds 26-26' was published at 15:37Z citing C PASS and review, then the loop folder was restored to the round-26 start state (18:43Z) and round 26 re-ran against a moved HEAD. The original C report, gate and review for 6c956b4 are not in the loop folder; A's process evidence (Edit/Write only, A-R17-02) for that implementation is unrecoverable.",
       "routed_to": "root (restore/state process); B re-verifies the published diff in round 27",
-      "note_b_r27": "R27 supplies the missing C evidence for 6c956b4 (C PASS). Still open for root: last-publication.json / publications.jsonl say round 25 while 6c956b4 carries rounds 26-26; the original transcript/review gap is unrecoverable."
+      "note_b_r27": "R27 supplies the missing C evidence for 6c956b4 (C PASS). Still open for root: last-publication.json / publications.jsonl say round 25 while 6c956b4 carries rounds 26-26; the original transcript/review gap is unrecoverable.",
+      "note_b_r28": "publications.jsonl / last-publication.json now record round 28 as commit b182557, rounds '26-28', base 6c956b4; 6c956b4 itself (round 26's commit) still has no publication line of its own. Still open for root."
     },
     {
       "round": 26,
@@ -3374,9 +3424,10 @@
       "id": "B-R27-01",
       "source": "B R27 code reading (lib/utils.ts readMetadataChunked, FolderBrowser handleRescan/handleOpenFolder, App openFolder)",
       "severity": "low",
-      "status": "open",
+      "status": "in_progress",
       "title": "readMetadataChunked drops the paths of a rejected chunk and Rescan / Open Folder / drop ignore failures: a rescan with one rejected chunk silently removes those entries from the store with no toast (opposite of the D-33 keep-current rule in the schema path)",
-      "routed_to": "signal; candidate after TM-B30 (needs a decision: keep current entry vs absent + toast)"
+      "routed_to": "TM-B31 round 29 (D-36)",
+      "note_b_r28": "B R28 red reproduction on b182557 (b-round-28-exp/: Rescan with the only read-batch chunk rejected -> metadata {}, files 2, toastMessage null). Reachability: main's meta:read-batch catches per-file errors (emptyMetadata), so a chunk rejects only at IPC level (handler throw / clone error); consequence is display-only (rows lose values and Tagged badge, form empty; a later single save sends only defined fields, so nothing on disk is erased). Severity stays low."
     },
     {
       "round": 27,
@@ -3386,6 +3437,78 @@
       "status": "open",
       "title": "Alternative to D-35 not taken: disable Rescan / Open Folder / drop while a save is pending (UX change, needs reference-first). D-35 keeps the D-34 guard pattern instead (no UX change)",
       "routed_to": "Saba question batch (optional, with the B-R23-02 schema-editor lock option)"
+    },
+    {
+      "round": 28,
+      "id": "A-R28-01",
+      "source": "A R28 (code-reviewer note 4)",
+      "severity": "info",
+      "status": "open",
+      "title": "D-35 case not documented: a single-chunk folder read issued before the write + the save's re-read rejected (D-24) -> the path is superseded and keeps its pre-save store entry until the next Rescan (D-34 (a) analogue); the multi-chunk variant is pinned by (r8)",
+      "routed_to": "TM-B31 round 29 (docs/bugs/001 entry 11 addition)"
+    },
+    {
+      "round": 28,
+      "id": "A-R28-02",
+      "source": "A R28",
+      "severity": "low",
+      "status": "open",
+      "title": "docs/bugs/001 entry 11 test list does not name (r8), the only component-level killer of MR-3 (C R28 confirms)",
+      "routed_to": "TM-B31 round 29 (docs/bugs/001 entry 11 addition)"
+    },
+    {
+      "round": 28,
+      "id": "RR-R28-01",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "file-store.ts:141-142 a superseded path with no store entry (e.g. Open Folder of another folder while a write to that path is pending) is listed without metadata; selecting it shows an empty form until the next successful read and nothing tells the user (documented 'no entry -> absent')",
+      "routed_to": "TM-B31 round 29: documented in docs/bugs/001 entry 11 as a remaining limit; a notice/count is a signal, not scoped"
+    },
+    {
+      "round": 28,
+      "id": "RR-R28-02",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "title": "file-store.ts:141 a superseded path keeps the current entry, which is the pre-write value when the save's re-read has not landed yet or was rejected; same accepted limit as D-34 ((r8) pins that a later chunk fixes it)",
+      "routed_to": "record (= A-R28-01; docs in TM-B31)"
+    },
+    {
+      "round": 28,
+      "id": "RR-R28-03",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "Rescan / Open Folder / drop are not locked during a save; a save's re-read landing after a folder switch adds an old-folder entry to the new folder's metadata (harmless for rendering, small leak); a scan token per folder scan would drop it",
+      "routed_to": "signal (= A-R19-02 / B-R27-02 class; scan token is an architecture signal)"
+    },
+    {
+      "round": 28,
+      "id": "RR-R28-04",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "title": "file-store.test.ts (g2) uses bare keys (a, b) while files hold /music/*.wav paths; cosmetic for a unit test",
+      "routed_to": "record"
+    },
+    {
+      "round": 28,
+      "id": "RR-R28-05",
+      "source": "root-review architecture note",
+      "severity": "info",
+      "status": "open",
+      "title": "Architecture signal: handleSchemaChanged (D-34) and applyMetadataRead (D-35) repeat the generation compare / keep-current / absent-if-none logic; moving handleSchemaChanged onto readMetadataChunked + applyMetadataRead would leave one guard but its rejected-chunk keep rule differs (closed by D-36 in round 29 for folder reads)",
+      "routed_to": "signal (with RR-R23-04 / RR-R24-05 / RR-R25-04), not a task"
+    },
+    {
+      "round": 28,
+      "id": "C-R28-01",
+      "source": "C R28-5 observation",
+      "severity": "info",
+      "status": "open",
+      "title": "Rescan / Open Folder during a pending save shows 'Unsaved changes were discarded' although the save completes (D-29 baseline, both builds)",
+      "routed_to": "record (= B-R19-01 / RR-R20-01, Saba batch)"
     }
   ],
   "rounds": [
@@ -3974,7 +4097,7 @@
     {
       "round": 28,
       "task": "TM-B30 stale folder read guard (D-35): readMetadataChunked readGenerations + file-store applyMetadataRead; Rescan / Open Folder / drop keep entries written during the read; docs/bugs/001 entry 11",
-      "status": "planned",
+      "status": "PASS (C R28-1..R28-6, realVerified=true, bugs 0); root gate published b182557 (rounds 26-28), review COMMIT OK; TM-B30 done",
       "baseline": "6c956b41dee3580d01c6285c9c7c3e1c8495101c (clean)",
       "items": [
         "TM-B30"
@@ -3983,7 +4106,31 @@
         "B-R25-01",
         "RR-R25-04",
         "B-R27-01",
-        "B-R27-02"
+        "B-R27-02",
+        "A-R28-01",
+        "A-R28-02",
+        "RR-R28-01",
+        "RR-R28-02",
+        "RR-R28-03",
+        "RR-R28-04",
+        "RR-R28-05",
+        "C-R28-01"
+      ]
+    },
+    {
+      "round": 29,
+      "task": "TM-B31 rejected folder-read chunk keeps the current entry + 'Failed to read N files' toast (D-36); docs/bugs/001 entry 12 + entry 11 completion",
+      "status": "planned",
+      "baseline": "b182557baf43c21d10844e15027f9df5e0be9347 (clean)",
+      "items": [
+        "TM-B31"
+      ],
+      "findings": [
+        "B-R27-01",
+        "A-R28-01",
+        "A-R28-02",
+        "RR-R28-01",
+        "RR-R28-02"
       ]
     }
   ]

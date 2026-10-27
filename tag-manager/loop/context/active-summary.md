@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T19:51:06.898Z)
+# Active loop summary (2026-10-27T20:35:29.708Z)
 
-- backlog.json 250 KB -> active view 80 KB
-- status: G_ROOT_GATE round 27
+- backlog.json 259 KB -> active view 82 KB
+- status: G_ROOT_GATE round 28
 - servers: `{"servers":"none or skipped"}`
-- last publication: c2c19a72bed45f561eae1c9dbca9cc79567aaf41 (rounds 25-25)
-- last root gate: round 27 skipped - no real changes
+- last publication: b182557baf43c21d10844e15027f9df5e0be9347 (rounds 26-28)
+- last root gate: round 28 published - commit b182557baf43c21d10844e15027f9df5e0be9347 pushed
 
-## Current items: TM-B29
+## Current items: TM-T1, TM-T1-DUP, TM-B29, TM-B30
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -132,29 +132,23 @@
 - RR-R23-03 / low / open / (z12) pins the anchor-moves behaviour (D-31 deviation 1), which is still a Saba question; an Explorer-style answer inverts it on purpose (do
 - RR-R23-04 / info / open / Architecture signal: handleSave (~75 lines, two branches, snapshot/selection guards, skipSyncRef) could move into a store action or a useSav
 - A-R23-01 / info / open / handleSave takes selectedFiles and fields from the render closure while startSelection and the snapshot come from getState(); they cannot di
-- B-R23-02 / medium / open / Reverse order of A-R21-03: a schema re-read that started before a pending write finished and resolves after the save's re-read writes the pr
 - B-R23-03 / low / open / Saving the schema (Done) while the form has unsaved edits silently replaces them: handleSchemaChanged calls setEditingMetadata(re-read | {})
 - C-R24-03 / info / open / (s4) write-schema assertion cannot tell a write using useSchemaStore.getState().fields from one using fields: the write runs at click time, 
-- RR-R24-02 / low / open / MetadataPanel.tsx:209-224 handleSchemaChanged writes the store only after all chunks; a save finishing between chunks can be overwritten by 
 - RR-R24-05 / info / open / Architecture signal: handleSchemaChanged and handleSave write the store without knowing about each other; a read generation number in the fi
-- A-R25-02 / low / open / docs/bugs/001 entry 3 step 3 (:52) still says 'rescan or switching to another file and back', contradicting the D-33 note
-- A-R25-03 / low / open / docs/bugs/001 entry 10 step 3 'form unchanged, edits stay' on a rejected read holds only for a single selection; batch calls setEditingMetad
 - C-R25-01 / low / open / MBS survives: removing resetWindowApiMocks() from the schema-change beforeEach breaks no test; once-values are consumed in their own test an
 - C-R25-02 / info / open / MW survives: capturing window.api at module load in window-api-mocks.ts is equivalent today (setup.ts and the vi.hoisted swap expose the sam
-- C-R25-03 / low / open / = A-R25-02 (entry 3 step 3 vs D-33 note)
-- C-R25-04 / low / open / = A-R25-03 (entry 10 step 3 single-selection only)
-- RR-R25-01 / low / open / Review says docs/bugs/001:10 'MetadataPanel.tsx:111' points at 'if (meta) {' and should be :110. Disputed by B grep on c2c19a7: line 110 is 
 - RR-R25-04 / info / open / Architecture signal: per-path read generation in useFileStore so handleSchemaChanged drops late results (fixes RR-R24-02/A-R21-03 class); ot
-- B-R25-01 / low / open / Hypothesis, not reproduced: Rescan (and Open Folder of the same folder) stays enabled while a save is pending; readMetadataChunked can read 
-- B-R25-02 / medium / open / B-R23-02 and RR-R24-02 reproduced red at component level on c2c19a7: (r1) batch, (r2) single + typing during save, (r5) stale chunk 1 + save
+- B-R25-01 / medium / in_progress / Hypothesis, not reproduced: Rescan (and Open Folder of the same folder) stays enabled while a save is pending; readMetadataChunked can read 
 - B-R26-01 / medium / open / Loop-folder / repository desync: 6c956b4 'verified loop rounds 26-26' was published at 15:37Z citing C PASS and review, then the loop folder
-- C-R26-01 / info / open / Supporting data only: on 6c956b4 fixtures + npm run check exit 0, Biome 0 errors / 8 warnings, renderer 216/216 (11 files), main 93/93; E2E 
+- C-R27-01 / info / open / SchemaEditor 'Done' awaits onSave (handleSchemaChanged) before onClose; during a slow schema read the editor stays open (R27-5: Done at 1.16
+- C-R27-02 / info / open / A save after adding a custom Text field writes RNOT='' (empty value) into the file; D-10 / C-R1-01 class (empty fields are written)
+- B-R27-01 / low / open / readMetadataChunked drops the paths of a rejected chunk and Rescan / Open Folder / drop ignore failures: a rescan with one rejected chunk si
+- B-R27-02 / info / open / Alternative to D-35 not taken: disable Rescan / Open Folder / drop while a save is pending (UX change, needs reference-first). D-35 keeps th
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
 - TM-T0-CI [in_progress] New .github/workflows/check.yml (ubuntu-24.04, Node 22, npm ci, ffmpeg+xvfb, check, build, xvfb playwright --retries=0)
 - TM-T1-MIG [todo] Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no aut
-- TM-T1-DUP [todo] Old schema.json custom field colliding with standard category: (a) custom field already using RIFF ID ICAT; (b) custom field with key 'categ
 - TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
 - TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
 - TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba

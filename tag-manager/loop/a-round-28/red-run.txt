@@ -1,0 +1,296 @@
+
+ RUN  v4.0.18 /home/runner/czaba-project/czaba-tag-manager
+
+ ❯ tests/renderer/stores/file-store.test.ts (36 tests | 1 failed) 83ms
+       ✓ initializes with empty state 4ms
+       ✓ sets files 0ms
+       ✓ sets folder path 1ms
+       ✓ sets metadata 1ms
+       ✓ updates single file metadata 1ms
+       ✓ toggles selection on 1ms
+       ✓ toggles selection off 1ms
+       ✓ selects range 14ms
+       ✓ selects range with reversed indices 1ms
+       ✓ selectAll selects all visible files 1ms
+       ✓ selectAll respects search filter 0ms
+       ✓ clears selection 0ms
+       ✓ sets sort field and defaults to asc 0ms
+       ✓ toggles direction when same field set again 0ms
+       ✓ resets to asc when different field set 0ms
+       ✓ toggleSortDirection flips direction 1ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}} 3ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}} 1ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}} 4ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}} 1ms
+       ✓ (b) uses only the first element, not a later string element 4ms
+       ✓ (c) sorts a well-typed string first element by its value 1ms
+       ✓ (c) sorts a null first element as empty 4ms
+       ✓ (c) sorts an empty array as empty 1ms
+       ✓ (c) sorts bpm numerically, not lexicographically 1ms
+       ✓ (c) sorts a bpm number against missing metadata as before 4ms
+       ✓ sets search query 0ms
+       ✓ sets scanning state 1ms
+       ✓ (s1) patches size and modifiedAt of the matching path only and keeps the order 1ms
+       ✓ (s2) ignores an entry whose path is not in files 12ms
+       ✓ (s3) keeps the existing name when the entry has the same path but another name 1ms
+       ✓ (s4) leaves selectedPaths and metadata unchanged 6ms
+       ✓ (s5) an empty entry list leaves files deep-equal 0ms
+       ✓ (s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset 0ms
+       ✓ (g1) markPathsWritten bumps writeGeneration once per call and stamps only the given paths 0ms
+       × (g2) applyMetadataRead replaces metadata, keeps the current entry of superseded paths and applies equal generations 7ms
+ ❯ tests/renderer/components/folder-read-during-save.test.ts (8 tests | 5 failed) 3108ms
+     × (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value 706ms
+     × (r2) batch save of a+b pending + Rescan: both saved entries survive the stale rescan read 403ms
+     × (r3) single save pending + Open Folder on the same folder: the store keeps the saved value 339ms
+     ✓ (r4) pin: a Rescan issued after the save completed applies the file's current value 286ms
+     ✓ (r5) pin: Rescan with no save replaces metadata, so a removed file disappears, and clears the selection 128ms
+     × (r6) App: dropping the same folder during a pending save keeps the saved value 388ms
+     × (r7) 51 files: a stale chunk-1 read keeps the saved first file, and chunk 2 still applies its read 408ms
+     ✓ (r8) pin: 51 files, save of the chunk-2 file with a rejected re-read: chunk 2 read after the write applies the saved value  446ms
+ ✓ tests/renderer/components/file-list.test.ts (20 tests) 1157ms
+     ✓ (R18-e) sorts a malformed artist row as empty in both directions without throwing  524ms
+ ❯ tests/renderer/utils/utils.test.ts (24 tests | 1 failed) 22ms
+     ✓ formats bytes 2ms
+     ✓ formats kilobytes 0ms
+     ✓ formats megabytes 0ms
+     ✓ handles zero 1ms
+     ✓ handles exact boundary (1024) 0ms
+     ✓ handles exact MB boundary 0ms
+     ✓ formats seconds only 0ms
+     ✓ formats minutes and seconds 0ms
+     ✓ handles zero 1ms
+     ✓ pads single-digit seconds 0ms
+     ✓ handles fractional seconds by flooring 0ms
+     ✓ generates 4-char uppercase ID from key 0ms
+     ✓ pads short keys with X 0ms
+     ✓ strips non-alpha characters 0ms
+     ✓ truncates long keys to 4 chars 0ms
+     ✓ appends number if base ID exists 0ms
+     ✓ increments suffix when multiple collisions 0ms
+     ✓ returns null when all candidates exhausted 0ms
+     ✓ accepts valid 4-char uppercase IDs 0ms
+     ✓ rejects lowercase 0ms
+     ✓ rejects wrong length 0ms
+     ✓ rejects special characters 0ms
+     ✓ rejects empty string 0ms
+     × (u1) takes the write generation before each chunk read and records it only for paths in that chunk's result 12ms
+ ✓ tests/renderer/utils/file-row-display.test.ts (36 tests) 12ms
+ ✓ tests/renderer/components/metadata-panel-batch-save.test.ts (49 tests) 10064ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  706ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store  404ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success  396ms
+     ✓ (e) single-file write failure keeps the typed value and shows the error  364ms
+     ✓ (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry  308ms
+       ✓ (y5) pin: an equal tag array with a new reference during the write is not a change  317ms
+ ✓ tests/renderer/stores/metadata-store.test.ts (9 tests) 11ms
+ ✓ tests/renderer/stores/schema-store.test.ts (8 tests) 14ms
+ ✓ tests/renderer/stores/player-store.test.ts (9 tests) 7ms
+ ✓ tests/renderer/stores/template-store.test.ts (8 tests) 11ms
+ ✓ tests/renderer/components/schema-editor.test.ts (4 tests) 3134ms
+     ✓ rejects a custom field with RIFF ID ICAT  1431ms
+     ✓ rejects a custom field with lowercase RIFF ID icat  718ms
+     ✓ rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use)  508ms
+     ✓ lists Category (UCS) among hidden standard fields for a pre-T-1 schema  475ms
+ ✓ tests/renderer/components/metadata-panel-schema-change.test.ts (15 tests) 21882ms
+     ✓ (s1) pin: single selection, no save: the form shows the new field read with the new schema  2649ms
+     ✓ (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field  1978ms
+     ✓ (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form  1642ms
+     ✓ (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema  1672ms
+     ✓ (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema  1985ms
+     ✓ (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects  1763ms
+     ✓ (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)  1824ms
+     ✓ (s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects  1147ms
+     ✓ (s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read  1060ms
+     ✓ (s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save  1023ms
+     ✓ (s11) D-34 pin: a schema re-read issued after the write resolved is applied  1028ms
+     ✓ (s12) D-34 pin: a chunk issued after the write resolved is applied even when the save's re-read failed  1054ms
+     ✓ (s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks  1038ms
+     ✓ (s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time  1004ms
+     ✓ (s15) D-34: a path whose batch write failed is not superseded  1010ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/components/folder-read-during-save.test.ts > folder read during a pending save keeps the saved entry (TM-B30, D-35) > (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value
+AssertionError: expected { title: 'A-title', …(2) } to deeply equal { title: 'A-title', …(2) }
+
+- Expected
++ Received
+
+  {
+-   "category": "R28Cat",
++   "category": "ACat",
+    "comment": "",
+    "title": "A-title",
+  }
+
+ ❯ tests/renderer/components/folder-read-during-save.test.ts:149:54
+    147|     await settle(() => rescanRead.resolve({ [PATH_A]: { ...OLD_A }, [P…
+    148| 
+    149|     expect(useFileStore.getState().metadata[PATH_A]).toEqual(NEW_A);
+       |                                                      ^
+    150|     await settle(() => useFileStore.getState().setSelectedPaths([PATH_…
+    151|     expect(getInputByLabel("Category (UCS)").value).toBe(SAVED_CATEGOR…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  tests/renderer/components/folder-read-during-save.test.ts > folder read during a pending save keeps the saved entry (TM-B30, D-35) > (r2) batch save of a+b pending + Rescan: both saved entries survive the stale rescan read
+AssertionError: expected 'ACat' to be 'R28Cat' // Object.is equality
+
+Expected: "R28Cat"
+Received: "ACat"
+
+ ❯ tests/renderer/components/folder-read-during-save.test.ts:171:64
+    169|     await settle(() => rescanRead.resolve({ [PATH_A]: { ...OLD_A }, [P…
+    170| 
+    171|     expect(useFileStore.getState().metadata[PATH_A]?.category).toBe(SA…
+       |                                                                ^
+    172|     expect(useFileStore.getState().metadata[PATH_B]?.category).toBe(SA…
+    173|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  tests/renderer/components/folder-read-during-save.test.ts > folder read during a pending save keeps the saved entry (TM-B30, D-35) > (r3) single save pending + Open Folder on the same folder: the store keeps the saved value
+AssertionError: expected 'ACat' to be 'R28Cat' // Object.is equality
+
+Expected: "R28Cat"
+Received: "ACat"
+
+ ❯ tests/renderer/components/folder-read-during-save.test.ts:192:64
+    190|     await settle(() => openRead.resolve({ [PATH_A]: { ...OLD_A }, [PAT…
+    191| 
+    192|     expect(useFileStore.getState().metadata[PATH_A]?.category).toBe(SA…
+       |                                                                ^
+    193|   });
+    194| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  tests/renderer/components/folder-read-during-save.test.ts > folder read during a pending save keeps the saved entry (TM-B30, D-35) > (r6) App: dropping the same folder during a pending save keeps the saved value
+AssertionError: expected 'ACat' to be 'R28Cat' // Object.is equality
+
+Expected: "R28Cat"
+Received: "ACat"
+
+ ❯ tests/renderer/components/folder-read-during-save.test.ts:252:64
+    250|     await settle(() => dropRead.resolve({ [PATH_A]: { ...OLD_A }, [PAT…
+    251| 
+    252|     expect(useFileStore.getState().metadata[PATH_A]?.category).toBe(SA…
+       |                                                                ^
+    253|   });
+    254| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  tests/renderer/components/folder-read-during-save.test.ts > folder read during a pending save keeps the saved entry (TM-B30, D-35) > (r7) 51 files: a stale chunk-1 read keeps the saved first file, and chunk 2 still applies its read
+AssertionError: expected '/music/a.wav-cat' to be 'R28Cat' // Object.is equality
+
+Expected: "R28Cat"
+Received: "/music/a.wav-cat"
+
+ ❯ tests/renderer/components/folder-read-during-save.test.ts:282:64
+    280|     expect(batchCalls).toHaveLength(2);
+    281|     expect(batchCalls[1]?.[0]).toEqual([lastPath]);
+    282|     expect(useFileStore.getState().metadata[PATH_A]?.category).toBe(SA…
+       |                                                                ^
+    283|     expect(useFileStore.getState().metadata[lastPath]).toEqual(chunkTw…
+    284|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  tests/renderer/stores/file-store.test.ts > useFileStore > applyMetadataRead (TM-B30, D-35) > (g2) applyMetadataRead replaces metadata, keeps the current entry of superseded paths and applies equal generations
+TypeError: __vite_ssr_import_1__.useFileStore.getState(...).applyMetadataRead is not a function
+ ❯ tests/renderer/stores/file-store.test.ts:352:10
+    350|       useFileStore
+    351|         .getState()
+    352|         .applyMetadataRead({ a: a1, b: b1, d: d1, e: e1 }, { a: 1, b: …
+       |          ^
+    353| 
+    354|       const state = useFileStore.getState();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  tests/renderer/utils/utils.test.ts > readMetadataChunked (TM-B30, D-35) > (u1) takes the write generation before each chunk read and records it only for paths in that chunk's result
+AssertionError: expected undefined to deeply equal { '/m/0.wav': +0, …(50) }
+
+- Expected: 
+{
+  "/m/0.wav": 0,
+  "/m/1.wav": 0,
+  "/m/10.wav": 0,
+  "/m/100.wav": 1,
+  "/m/11.wav": 0,
+  "/m/12.wav": 0,
+  "/m/13.wav": 0,
+  "/m/14.wav": 0,
+  "/m/15.wav": 0,
+  "/m/16.wav": 0,
+  "/m/17.wav": 0,
+  "/m/18.wav": 0,
+  "/m/19.wav": 0,
+  "/m/2.wav": 0,
+  "/m/20.wav": 0,
+  "/m/21.wav": 0,
+  "/m/22.wav": 0,
+  "/m/23.wav": 0,
+  "/m/24.wav": 0,
+  "/m/25.wav": 0,
+  "/m/26.wav": 0,
+  "/m/27.wav": 0,
+  "/m/28.wav": 0,
+  "/m/29.wav": 0,
+  "/m/3.wav": 0,
+  "/m/30.wav": 0,
+  "/m/31.wav": 0,
+  "/m/32.wav": 0,
+  "/m/33.wav": 0,
+  "/m/34.wav": 0,
+  "/m/35.wav": 0,
+  "/m/36.wav": 0,
+  "/m/37.wav": 0,
+  "/m/38.wav": 0,
+  "/m/39.wav": 0,
+  "/m/4.wav": 0,
+  "/m/40.wav": 0,
+  "/m/41.wav": 0,
+  "/m/42.wav": 0,
+  "/m/43.wav": 0,
+  "/m/44.wav": 0,
+  "/m/45.wav": 0,
+  "/m/46.wav": 0,
+  "/m/47.wav": 0,
+  "/m/48.wav": 0,
+  "/m/49.wav": 0,
+  "/m/5.wav": 0,
+  "/m/6.wav": 0,
+  "/m/7.wav": 0,
+  "/m/8.wav": 0,
+  "/m/9.wav": 0,
+}
+
++ Received: 
+undefined
+
+ ❯ tests/renderer/utils/utils.test.ts:148:38
+    146|       expectedGenerations["/m/100.wav"] = 1;
+    147|       expect(result.failures).toBe(50);
+    148|       expect(result.readGenerations).toEqual(expectedGenerations);
+       |                                      ^
+    149|       expect(getWriteGeneration).toHaveBeenCalledTimes(3);
+    150|       expect(readBatch.mock.calls.map((call) => call[0].length)).toEqu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  3 failed | 9 passed (12)
+      Tests  7 failed | 219 passed (226)
+   Start at  20:11:16
+   Duration  23.63s (transform 1.25s, setup 1.10s, import 3.17s, tests 39.50s, environment 9.65s)
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-during-save.test.ts,title=tests/renderer/components/folder-read-during-save.test.ts > folder read during a pending save keeps the saved entry (TM-B30%2C D-35) > (r1) single save pending + Rescan whose read was issued before the write resolved%3A the store and the reselected form keep the saved value,line=149,column=54::AssertionError: expected { title: 'A-title', …(2) } to deeply equal { title: 'A-title', …(2) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "category": "R28Cat",%0A+   "category": "ACat",%0A    "comment": "",%0A    "title": "A-title",%0A  }%0A%0A ❯ tests/renderer/components/folder-read-during-save.test.ts:149:54%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-during-save.test.ts,title=tests/renderer/components/folder-read-during-save.test.ts > folder read during a pending save keeps the saved entry (TM-B30%2C D-35) > (r2) batch save of a+b pending + Rescan%3A both saved entries survive the stale rescan read,line=171,column=64::AssertionError: expected 'ACat' to be 'R28Cat' // Object.is equality%0A%0AExpected: "R28Cat"%0AReceived: "ACat"%0A%0A ❯ tests/renderer/components/folder-read-during-save.test.ts:171:64%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-during-save.test.ts,title=tests/renderer/components/folder-read-during-save.test.ts > folder read during a pending save keeps the saved entry (TM-B30%2C D-35) > (r3) single save pending + Open Folder on the same folder%3A the store keeps the saved value,line=192,column=64::AssertionError: expected 'ACat' to be 'R28Cat' // Object.is equality%0A%0AExpected: "R28Cat"%0AReceived: "ACat"%0A%0A ❯ tests/renderer/components/folder-read-during-save.test.ts:192:64%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-during-save.test.ts,title=tests/renderer/components/folder-read-during-save.test.ts > folder read during a pending save keeps the saved entry (TM-B30%2C D-35) > (r6) App%3A dropping the same folder during a pending save keeps the saved value,line=252,column=64::AssertionError: expected 'ACat' to be 'R28Cat' // Object.is equality%0A%0AExpected: "R28Cat"%0AReceived: "ACat"%0A%0A ❯ tests/renderer/components/folder-read-during-save.test.ts:252:64%0A%0A

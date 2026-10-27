@@ -1,0 +1,142 @@
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index 779980a..cc605b7 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -28,6 +28,7 @@ Selection changed during save (D-29): start selectedPaths vs current (as set); c
+ Typed during save (D-30): same set → keys in modifiedFields whose value differs from the start snapshot (arrays by content) → after setEditingMetadata(re-read | {}) mergeFields(those) → isDirty stays true; partial / reject / D-24 / changed set unchanged
+ Schema at re-read (D-33): post-save re-read uses useSchemaStore.getState().fields (write keeps the click-time fields); handleSchemaChanged keeps the store entry of paths whose chunk read rejected and never resets the form from a kept entry
+ Stale schema re-read (D-34): confirmed writes call markPathsWritten (writeGeneration +1, stamps pathWriteGenerations[path]; batch: non-failed only); handleSchemaChanged reads writeGeneration before each chunk and, when writing the store, keeps the current store entry for superseded paths (stamp > chunk generation) and kept paths, and does not reset the form from them
++Stale folder read (D-35): readMetadataChunked(paths, schema, getWriteGeneration) calls getWriteGeneration() before each chunk and returns readGenerations (result paths only); applyMetadataRead(read, readGenerations) replaces metadata and keeps the current store entry for superseded paths (stamp > read generation; no entry → absent); Rescan, Open Folder and drop use it; error and empty-folder paths keep setMetadata({})
+ ```
+ 
+ ### Template apply (batch-safe)
+diff --git a/src/renderer/src/App.tsx b/src/renderer/src/App.tsx
+index d447914..801ca2b 100644
+--- a/src/renderer/src/App.tsx
++++ b/src/renderer/src/App.tsx
+@@ -60,8 +60,14 @@ export default function App(): React.ReactElement {
+         if (wavFiles.length > 0) {
+           const paths = wavFiles.map((f) => f.path);
+           const currentSchema = useSchemaStore.getState().fields;
+-          const { data: meta } = await readMetadataChunked(paths, currentSchema);
+-          setMetadata(meta as Record<string, WavMetadata>);
++          const { data: meta, readGenerations } = await readMetadataChunked(
++            paths,
++            currentSchema,
++            () => useFileStore.getState().writeGeneration,
++          );
++          useFileStore
++            .getState()
++            .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations);
+         }
+       } catch (err) {
+         useMetadataStore
+diff --git a/src/renderer/src/components/sidebar/FolderBrowser.tsx b/src/renderer/src/components/sidebar/FolderBrowser.tsx
+index e22465e..fc8e2b9 100644
+--- a/src/renderer/src/components/sidebar/FolderBrowser.tsx
++++ b/src/renderer/src/components/sidebar/FolderBrowser.tsx
+@@ -108,8 +108,14 @@ export function FolderBrowser(): React.ReactElement {
+       if (wavFiles.length > 0) {
+         const paths = wavFiles.map((f) => f.path);
+         const currentSchema = useSchemaStore.getState().fields;
+-        const { data: meta } = await readMetadataChunked(paths, currentSchema);
+-        setMetadata(meta as Record<string, WavMetadata>);
++        const { data: meta, readGenerations } = await readMetadataChunked(
++          paths,
++          currentSchema,
++          () => useFileStore.getState().writeGeneration,
++        );
++        useFileStore
++          .getState()
++          .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations);
+       }
+     } catch (err) {
+       useMetadataStore
+@@ -144,8 +150,14 @@ export function FolderBrowser(): React.ReactElement {
+       if (wavFiles.length > 0) {
+         const paths = wavFiles.map((f) => f.path);
+         const currentSchema = useSchemaStore.getState().fields;
+-        const { data: meta } = await readMetadataChunked(paths, currentSchema);
+-        setMetadata(meta as Record<string, WavMetadata>);
++        const { data: meta, readGenerations } = await readMetadataChunked(
++          paths,
++          currentSchema,
++          () => useFileStore.getState().writeGeneration,
++        );
++        useFileStore
++          .getState()
++          .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations);
+       } else {
+         setMetadata({});
+       }
+diff --git a/src/renderer/src/lib/utils.ts b/src/renderer/src/lib/utils.ts
+index b0a7718..d04bf21 100644
+--- a/src/renderer/src/lib/utils.ts
++++ b/src/renderer/src/lib/utils.ts
+@@ -49,17 +49,27 @@ const METADATA_CHUNK_SIZE = 50;
+ export async function readMetadataChunked(
+   paths: string[],
+   schema: FieldDefinition[],
+-): Promise<{ data: Record<string, Record<string, unknown>>; failures: number }> {
++  getWriteGeneration: () => number,
++): Promise<{
++  data: Record<string, Record<string, unknown>>;
++  failures: number;
++  readGenerations: Record<string, number>;
++}> {
+   const accumulated: Record<string, Record<string, unknown>> = {};
++  const readGenerations: Record<string, number> = {};
+   let failures = 0;
+   for (let i = 0; i < paths.length; i += METADATA_CHUNK_SIZE) {
+     const chunk = paths.slice(i, i + METADATA_CHUNK_SIZE);
++    const chunkGeneration = getWriteGeneration();
+     try {
+       const result = await window.api.readMetadataBatch(chunk, schema);
+       Object.assign(accumulated, result);
++      for (const path of Object.keys(result)) {
++        readGenerations[path] = chunkGeneration;
++      }
+     } catch {
+       failures += chunk.length;
+     }
+   }
+-  return { data: accumulated, failures };
++  return { data: accumulated, failures, readGenerations };
+ }
+diff --git a/src/renderer/src/stores/file-store.ts b/src/renderer/src/stores/file-store.ts
+index c2868ce..418bc52 100644
+--- a/src/renderer/src/stores/file-store.ts
++++ b/src/renderer/src/stores/file-store.ts
+@@ -29,6 +29,10 @@ interface FileState {
+   toggleSortDirection: () => void;
+   setIsScanning: (scanning: boolean) => void;
+   markPathsWritten: (paths: string[]) => void;
++  applyMetadataRead: (
++    read: Record<string, WavMetadata>,
++    readGenerations: Record<string, number>,
++  ) => void;
+ }
+ 
+ export const useFileStore = create<FileState>((set) => ({
+@@ -124,6 +128,21 @@ export const useFileStore = create<FileState>((set) => ({
+       }
+       return { writeGeneration, pathWriteGenerations };
+     }),
++
++  applyMetadataRead: (read, readGenerations) =>
++    set((state) => {
++      const metadata: Record<string, WavMetadata> = {};
++      for (const [path, meta] of Object.entries(read)) {
++        const isSuperseded = (state.pathWriteGenerations[path] ?? 0) > (readGenerations[path] ?? 0);
++        if (!isSuperseded) {
++          metadata[path] = meta;
++          continue;
++        }
++        const current = state.metadata[path];
++        if (current) metadata[path] = current;
++      }
++      return { metadata };
++    }),
+ }));
+ 
+ function getFilteredFiles(state: FileState): WavFileEntry[] {
