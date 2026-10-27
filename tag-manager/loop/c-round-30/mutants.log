@@ -1,0 +1,157 @@
+## baseline
+```diff
+```
+['Tests  82 passed (82)'] []
+killed by: []
+
+## EX-1
+```diff
+--- /tmp/c-r30-new/src/renderer/src/lib/utils.ts	2026-10-27 21:34:47.009361108 +0000
++++ /tmp/c-r30-mut/src/renderer/src/lib/utils.ts	2026-10-27 21:36:47.363895199 +0000
+@@ -69,7 +69,7 @@
+         readGenerations[path] = chunkGeneration;
+       }
+     } catch {
+-      failedPaths.push(...chunk);
++      failedPaths.splice(0, failedPaths.length, ...chunk);
+     }
+   }
+   return { data: accumulated, failures: failedPaths.length, failedPaths, readGenerations };
+```
+['Tests  1 failed | 81 passed (82)'] []
+killed by: ['(u3)']
+
+## EX-2
+```diff
+--- /tmp/c-r30-new/src/renderer/src/lib/utils.ts	2026-10-27 21:34:47.009361108 +0000
++++ /tmp/c-r30-mut/src/renderer/src/lib/utils.ts	2026-10-27 21:36:52.243160489 +0000
+@@ -69,7 +69,7 @@
+         readGenerations[path] = chunkGeneration;
+       }
+     } catch {
+-      failedPaths.push(...chunk);
++      if (failedPaths.length === 0) failedPaths.push(...chunk);
+     }
+   }
+   return { data: accumulated, failures: failedPaths.length, failedPaths, readGenerations };
+```
+['Tests  1 failed | 81 passed (82)'] []
+killed by: ['(u3)']
+
+## ME-1 remove handleOpenFolder else
+```diff
+--- /tmp/c-r30-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:34:46.999093405 +0000
++++ /tmp/c-r30-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:36:57.103526983 +0000
+@@ -124,8 +124,6 @@
+         if (failures > 0) {
+           useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+         }
+-      } else {
+-        setMetadata({});
+       }
+     } catch (err) {
+       useMetadataStore
+```
+['Tests  2 failed | 80 passed (82)'] []
+killed by: ['(e1)', '(e3)']
+
+## ME-2 remove App openFolder else
+```diff
+--- /tmp/c-r30-new/src/renderer/src/App.tsx	2026-10-27 21:34:46.987244349 +0000
++++ /tmp/c-r30-mut/src/renderer/src/App.tsx	2026-10-27 21:37:01.950497944 +0000
+@@ -76,8 +76,6 @@
+           if (failures > 0) {
+             useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+           }
+-        } else {
+-          setMetadata({});
+         }
+       } catch (err) {
+         useMetadataStore
+```
+['Tests  1 failed | 81 passed (82)'] []
+killed by: ['(e2)']
+
+## ME-3 remove handleRescan else
+```diff
+--- /tmp/c-r30-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:34:46.999093405 +0000
++++ /tmp/c-r30-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:37:06.831023305 +0000
+@@ -176,8 +176,6 @@
+         if (failures > 0) {
+           useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+         }
+-      } else {
+-        setMetadata({});
+       }
+     } catch (err) {
+       useMetadataStore
+```
+['Tests  1 failed | 81 passed (82)'] []
+killed by: ['(e4)']
+
+## ME-4 handleOpenFolder else adds toast
+```diff
+--- /tmp/c-r30-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:34:46.999093405 +0000
++++ /tmp/c-r30-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:37:11.772197098 +0000
+@@ -126,6 +126,7 @@
+         }
+       } else {
+         setMetadata({});
++        useMetadataStore.getState().showToast('Folder is empty', 'error');
+       }
+     } catch (err) {
+       useMetadataStore
+```
+['Tests  1 failed | 81 passed (82)'] []
+killed by: ['(e1)']
+
+## ME-5 handleOpenFolder unconditional setMetadata after scan
+```diff
+--- /tmp/c-r30-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:34:46.999093405 +0000
++++ /tmp/c-r30-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:37:16.668517754 +0000
+@@ -103,6 +103,7 @@
+ 
+     try {
+       const wavFiles = await window.api.scanFolder(path);
++      setMetadata({});
+       setFiles(wavFiles);
+ 
+       if (wavFiles.length > 0) {
+@@ -124,8 +125,6 @@
+         if (failures > 0) {
+           useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+         }
+-      } else {
+-        setMetadata({});
+       }
+     } catch (err) {
+       useMetadataStore
+```
+['Tests  1 failed | 81 passed (82)'] []
+killed by: ['(k2)']
+
+## ME-5 handleOpenFolder unconditional setMetadata after scan (full suite)
+```diff
+--- /tmp/c-r30-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:34:46.999093405 +0000
++++ /tmp/c-r30-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:37:21.494315954 +0000
+@@ -103,6 +103,7 @@
+ 
+     try {
+       const wavFiles = await window.api.scanFolder(path);
++      setMetadata({});
+       setFiles(wavFiles);
+ 
+       if (wavFiles.length > 0) {
+@@ -124,8 +125,6 @@
+         if (failures > 0) {
+           useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+         }
+-      } else {
+-        setMetadata({});
+       }
+     } catch (err) {
+       useMetadataStore
+```
+['Tests  1 failed | 239 passed (240)'] []
+killed by: ['(k2)']
+

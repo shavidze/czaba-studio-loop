@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 30: TM-B32 empty folder clears metadata in Open Folder / drop (D-37) + two-rejected-chunk test (u3) on baseline 20967a0",
+  "current_task": "Round 31: TM-B33 overlapping folder loads latest-wins guard (D-38) in FolderBrowser / App / file-store, Close Folder stops a pending load; baseline bf83c7d",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -314,8 +314,14 @@
     },
     {
       "id": "D-37",
-      "status": "planned R30 (TM-B32)",
+      "status": "verified (C R30 PASS), published bf83c7d (TM-B32)",
       "decision": "An empty folder clears the store metadata in all three folder callers (renderer only): FolderBrowser handleOpenFolder and App openFolder (drop) call setMetadata({}) when scanFolder returns no WAV, as handleRescan already does. No toast. Error paths stay as they are and are documented exactly: Open Folder / drop error -> setFiles([]) + setMetadata({}) + toast; Rescan error -> toast only (files and metadata kept). Reason: Close Folder and Open Folder of a non-empty folder already drop the old folder's entries; keeping them on an empty folder let a later rejected read (D-36 keptPaths) show them as current. Display-only.",
+      "contract_with": "none (renderer display only)"
+    },
+    {
+      "id": "D-38",
+      "status": "planned R31 (TM-B33)",
+      "decision": "Folder loads are latest-wins (renderer only). useFileStore gets folderLoadId: number (starts 0, only increases, never reset) and beginFolderLoad(): number (increments and returns the new id); file-store.ts exports isFolderLoadCurrent(loadId). FolderBrowser handleOpenFolder (only after the dialog returned a path, so a cancelled dialog does not cancel the running load), handleRescan and App openFolder take a load id first. After scanFolder resolves, after readMetadataChunked resolves and at the top of catch, a superseded load returns without any store write or toast; finally calls setIsScanning(false) only for the current load. handleCloseFolder calls beginFolderLoad() and setIsScanning(false) in addition to its existing clears, so a pending load cannot repopulate a closed folder and the spinner stops on Close. setFolderPath, clearSelection and the player stop stay synchronous at load start (unchanged). D-35 generations, D-36 keptPaths and D-37 empty-folder clear are unchanged and apply inside the current load. Not covered: the save re-read after a folder switch (RR-R28-03 / RR-R30-01, MetadataPanel) and early stop of a superseded read (B-R30-01).",
       "contract_with": "none (renderer display only)"
     }
   ],
@@ -1494,7 +1500,7 @@
       "severity": "low",
       "source": "C R29 (C-R29-01 mutant EX-1, C-R29-02 docs/code read), A R29 (A-R29-01, A-R29-02), B R29 red reproduction (b-round-29-exp/)",
       "title": "Open Folder / drop of an empty folder keeps the old folder's metadata entries (D-37), so a later rejected read of that folder shows them as current; plus the two-rejected-chunk test gap in readMetadataChunked",
-      "status": "in_progress",
+      "status": "done",
       "round": 30,
       "depends_on": [
         "TM-B31"
@@ -1515,15 +1521,20 @@
         "docs/bugs/001 entry 13 fixed by D-37, entry 12 names (u3), D-35 bullet's error/empty-folder sentence exact; README 13/5/5; STATE_MANAGEMENT D-35 clause",
         "gate: verifyCommand green, renderer 240 in 13 files, main 93, E2E 7/7, --retries=0 7/7, Biome 0/8 same list"
       ],
-      "realVerified": false
+      "realVerified": true,
+      "commit": "bf83c7dc5e2462304159acc3df56ededbcd9d517",
+      "evidence": [
+        "C R30: red 237/3 on 20967a0 src ((e1)(e2)(e3) fail on metadata still holding /music a,b) -> green 240/240 (13 files), each new test alone 1 passed; mutants EX-1, EX-2, ME-1..ME-5 7/7 killed (ME-5 only by (k2)); gate verifyCommand exit 0, Biome 0/8 same list, renderer 240, main 93/93, E2E 7/7, --retries=0 7/7; real app old (20967a0) vs new: new E (m -> empty -> armed Open Folder m) == new O control (no Tagged, Category empty, 'Failed to read 2 files'), old E shows stale Tagged + R30Cat; Rescan disarmed restores R30Cat; sha256 of a/b unchanged, ffprobe ICAT=R30Cat and music-metadata exif:ICAT=R30Cat; pageErrors empty; drop not driven in the real app (covered by (e2)); docs R30-6 PASS (c-round-30.md)",
+        "root gate round 30: published bf83c7d, review COMMIT OK (gates/round-30/review.md)"
+      ]
     },
     {
       "id": "TM-B33",
       "type": "bug",
       "severity": "low",
-      "source": "root-review round 29 (RR-R29-03)",
-      "title": "Overlapping folder reads have no ordering guard: the last read to finish replaces metadata even when a newer Open Folder / Rescan / drop started later",
-      "status": "todo",
+      "source": "root-review round 29 (RR-R29-03), B R30 red reproduction (b-round-30-exp/)",
+      "title": "Overlapping folder loads have no ordering guard (D-38): Open Folder / drop / Rescan / Close Folder can be overtaken while an older scanFolder or readMetadataChunked is pending; the older result then replaces files and metadata, shows a stale toast, or clears isScanning while the newer load runs",
+      "status": "in_progress",
       "depends_on": [
         "TM-B32"
       ],
@@ -1532,9 +1543,18 @@
         "RR-R29-02"
       ],
       "acceptance": [
-        "B red reproduction first (two deferred readMetadataBatch calls, the older finishing last); then a read-sequence guard that composes with D-35 generations; real-app check old vs new"
+        "R31: file-store folderLoadId + beginFolderLoad(); exported isFolderLoadCurrent(loadId); FolderBrowser handleOpenFolder (after the dialog returns a path), handleRescan and App openFolder take a load id at start and drop every store write, toast and setIsScanning(false) of a superseded load; handleCloseFolder starts a new load id and sets isScanning false",
+        "tests (o1)-(o16) in tests/renderer/components/folder-read-overlap.test.ts + (f1) in file-store.test.ts: on bf83c7d src 16 red, (o8) green pin (241 passed / 16 failed); renderer 257 in 14 files after the fix; mutants GM-1..GM-19 killed (b-round-30-exp/mutants.log)",
+        "real app (C, both builds, harness delays meta:read-batch / fs:scan-folder for slow/): L (late read), J (late rejection), S (late scan), C (Close during a slow read); new build keeps fast's Tagged f.wav + R31Fast, no stale toast, prompt immediately on Close; old build shows each symptom; sha256 + ffprobe + music-metadata unchanged",
+        "docs/bugs/001 entry 14 fixed by D-38; D-38 bullet; header/README counts; STATE_MANAGEMENT one D-38 line",
+        "gate: verifyCommand green, main 93, E2E 7/7, --retries=0 7/7, Biome 0/8 same list"
       ],
-      "realVerified": false
+      "realVerified": false,
+      "round": 31,
+      "decisions": [
+        "D-38"
+      ],
+      "evidence_b": "B R30 (b-round-30-exp/): on bf83c7d (x1)-(x7),(x9)-(x16) red, (x8) green pin (red-run.log 15 failed / 241 passed of 256); prototype (prototype.diff.txt) 256/256, Biome 0/8 same list, tsc web + test clean (green-run.log); GM-1..GM-19 killed, GM-7 only by (x16)"
     }
   ],
   "findings": [
@@ -3582,37 +3602,41 @@
       "id": "C-R29-01",
       "source": "C R29 mutant EX-1 (c-round-29/mutants.log)",
       "severity": "low",
-      "status": "in_progress",
+      "status": "done",
       "title": "Test gap: no test rejects two chunks; mutant failedPaths.splice(0, failedPaths.length, ...chunk) (utils.ts:72, keeps only the last rejected chunk) survives the whole renderer suite (235/235)",
-      "routed_to": "TM-B32 round 30: (u3) 151 paths, chunks 1 and 3 reject"
+      "routed_to": "TM-B32 round 30: (u3) 151 paths, chunks 1 and 3 reject",
+      "closed_by": "TM-B32 round 30 (C PASS, published bf83c7d)"
     },
     {
       "round": 29,
       "id": "A-R29-01",
       "source": "A R29",
       "severity": "low",
-      "status": "in_progress",
+      "status": "done",
       "title": "= C-R29-01 (A found and measured the splice mutant first)",
-      "routed_to": "TM-B32 round 30 (u3)"
+      "routed_to": "TM-B32 round 30 (u3)",
+      "closed_by": "TM-B32 round 30 (C PASS, published bf83c7d)"
     },
     {
       "round": 29,
       "id": "C-R29-02",
       "source": "C R29-6 code read",
       "severity": "low",
-      "status": "in_progress",
+      "status": "done",
       "title": "docs/bugs/001 D-35 bullet and STATE_MANAGEMENT D-35 line say error and empty-folder paths call setMetadata({}); only handleRescan clears on an empty folder (FolderBrowser.tsx:177-179); handleOpenFolder and App openFolder keep the old entries; Rescan's error path keeps files and metadata",
       "routed_to": "TM-B32 round 30 (D-37): code fix (else setMetadata({}) in handleOpenFolder and App openFolder) + exact docs sentence",
-      "note_b_r29": "B R29 red reproduction on 20967a0 (b-round-29-exp/): (x1) Open Folder empty -> metadata keeps /music a,b; (x2) App drop empty -> same; (x3) empty then Open Folder /music with rejected read -> stale entries shown as current (vs {} after a non-empty other folder, D-36 (k5)); (x4) Rescan empty -> {} (green). Prototype else-fix: 239/239 renderer. 6ecfb40 added the else to Rescan only; no D-ID chose otherwise. Display-only, low."
+      "note_b_r29": "B R29 red reproduction on 20967a0 (b-round-29-exp/): (x1) Open Folder empty -> metadata keeps /music a,b; (x2) App drop empty -> same; (x3) empty then Open Folder /music with rejected read -> stale entries shown as current (vs {} after a non-empty other folder, D-36 (k5)); (x4) Rescan empty -> {} (green). Prototype else-fix: 239/239 renderer. 6ecfb40 added the else to Rescan only; no D-ID chose otherwise. Display-only, low.",
+      "closed_by": "TM-B32 round 30 (C PASS, published bf83c7d)"
     },
     {
       "round": 29,
       "id": "A-R29-02",
       "source": "A R29",
       "severity": "low",
-      "status": "in_progress",
+      "status": "done",
       "title": "= C-R29-02",
-      "routed_to": "TM-B32 round 30"
+      "routed_to": "TM-B32 round 30",
+      "closed_by": "TM-B32 round 30 (C PASS, published bf83c7d)"
     },
     {
       "round": 29,
@@ -3637,9 +3661,63 @@
       "id": "RR-R29-03",
       "source": "root-review (gates/round-29/review.md low 3)",
       "severity": "low",
-      "status": "open",
+      "status": "in_progress",
       "title": "Two overlapping folder reads (Rescan twice, Rescan during a drop, Open Folder A then B) have no ordering guard: the last to finish wins; e.g. A's late read replaces metadata while B's files are listed. Pre-existing, not worsened by D-36; D-35 guards writes only",
-      "routed_to": "TM-B33 (todo): B red reproduction first, then a read-sequence guard composed with D-35 generations"
+      "routed_to": "TM-B33 round 31 (D-38); B red reproduction done (b-round-30-exp/)"
+    },
+    {
+      "round": 30,
+      "id": "C-R30-01",
+      "source": "C R30-3 (c-round-30/mutants.log), A R30",
+      "severity": "info",
+      "status": "open",
+      "title": "Signal: ME-5 (handleOpenFolder calls setMetadata({}) unconditionally after scanFolder) is killed only by (k2); no D-35 (r*) test sees it",
+      "routed_to": "signal; a second killer would be a test-only round, not planned"
+    },
+    {
+      "round": 30,
+      "id": "RR-R30-01",
+      "source": "root-review (gates/round-30/review.md low 1)",
+      "severity": "low",
+      "status": "open",
+      "title": "A save on an old-folder file still running when another folder (empty or not) is opened: the save's re-read writes that entry into metadata after the clear (hidden while files is empty; shown as current if the old folder is reopened and its read rejects). Same class as RR-R28-03 / A-R19-02",
+      "routed_to": "with RR-R28-03 / A-R19-02; after TM-B33 the new folderLoadId makes a small follow-up possible (record the load id at save start, skip the re-read store write when it changed); MetadataPanel.tsx handleSave"
+    },
+    {
+      "round": 30,
+      "id": "RR-R30-02",
+      "source": "root-review (gates/round-30/review.md low 2)",
+      "severity": "info",
+      "status": "open",
+      "title": "docs/bugs/001 line refs are correct but go stale easily; referring to code by function name (e.g. handleRescan else-branch) would last longer",
+      "routed_to": "signal for a later docs touch; round 31 keeps file:line refs (existing convention) and re-points them"
+    },
+    {
+      "round": 30,
+      "id": "RR-R30-03",
+      "source": "root-review (gates/round-30/review.md architecture note)",
+      "severity": "info",
+      "status": "open",
+      "title": "Architecture signal: one shared loadFolderContents(path, { onErrorClear }) helper for handleOpenFolder, handleRescan and App openFolder would keep the empty-folder and error branches identical (same family as RR-R29-02, RR-R28-05)",
+      "routed_to": "signal (RR-R29-02 family); TM-B33 keeps the three callers and adds the D-38 guard to each"
+    },
+    {
+      "round": 30,
+      "id": "A-R30-01",
+      "source": "A R30",
+      "severity": "info",
+      "status": "open",
+      "title": "Entry 12's test list in docs/bugs/001 does not name (k7) (round 29 pin); A did not add it (not in R30 scope)",
+      "routed_to": "round 31 docs touch: A adds (k7) to entry 12's list (docs/bugs/001 owned)"
+    },
+    {
+      "round": 30,
+      "id": "B-R30-01",
+      "source": "B R30 code reading",
+      "severity": "info",
+      "status": "open",
+      "title": "readMetadataChunked keeps reading every chunk of a superseded folder load (no early stop); with 1000+ files the old load's IPC work continues after Open Folder of another folder. Display is guarded by D-38; this is IPC cost only",
+      "routed_to": "signal; utils.ts frozen in round 31; would need an isCurrent callback in readMetadataChunked"
     }
   ],
   "rounds": [
@@ -4274,16 +4352,35 @@
     {
       "round": 30,
       "task": "TM-B32 empty folder clears metadata in Open Folder / drop (D-37) + (u3) two rejected chunks; docs/bugs/001 entry 13",
-      "status": "planned",
+      "status": "PASS (C R30-1..R30-6, realVerified=true, bugs 0); root gate published bf83c7d (round 30), review COMMIT OK; TM-B32 done",
       "baseline": "20967a001e3b8adc59f99344bc802483e4f8dcce (clean)",
       "items": [
         "TM-B32"
       ],
       "findings": [
-        "C-R29-01",
         "A-R29-01",
+        "A-R29-02",
+        "A-R30-01",
+        "B-R30-01",
+        "C-R29-01",
         "C-R29-02",
-        "A-R29-02"
+        "C-R30-01",
+        "RR-R30-01",
+        "RR-R30-02",
+        "RR-R30-03"
+      ]
+    },
+    {
+      "round": 31,
+      "task": "TM-B33 overlapping folder loads latest-wins (D-38): file-store folderLoadId/beginFolderLoad/isFolderLoadCurrent, guards in handleOpenFolder/handleRescan/App openFolder, Close Folder supersedes; docs/bugs/001 entry 14",
+      "status": "planned",
+      "baseline": "bf83c7dc5e2462304159acc3df56ededbcd9d517 (clean)",
+      "items": [
+        "TM-B33"
+      ],
+      "findings": [
+        "RR-R29-03",
+        "A-R30-01"
       ]
     }
   ]

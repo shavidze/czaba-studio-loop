@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T21:12:35.972Z)
+# Active loop summary (2026-10-27T21:44:33.908Z)
 
-- backlog.json 269 KB -> active view 84 KB
-- status: G_ROOT_GATE round 29
+- backlog.json 279 KB -> active view 83 KB
+- status: G_ROOT_GATE round 30
 - servers: `{"servers":"none or skipped"}`
-- last publication: 20967a001e3b8adc59f99344bc802483e4f8dcce (rounds 29-29)
-- last root gate: round 29 published - commit 20967a001e3b8adc59f99344bc802483e4f8dcce pushed
+- last publication: bf83c7dc5e2462304159acc3df56ededbcd9d517 (rounds 30-30)
+- last root gate: round 30 published - commit bf83c7dc5e2462304159acc3df56ededbcd9d517 pushed
 
-## Current items: TM-T1, TM-T1-DUP, TM-B30, TM-B31
+## Current items: TM-B31, TM-B32, TM-B33
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -141,21 +141,24 @@
 - B-R26-01 / medium / open / Loop-folder / repository desync: 6c956b4 'verified loop rounds 26-26' was published at 15:37Z citing C PASS and review, then the loop folder
 - C-R27-01 / info / open / SchemaEditor 'Done' awaits onSave (handleSchemaChanged) before onClose; during a slow schema read the editor stays open (R27-5: Done at 1.16
 - C-R27-02 / info / open / A save after adding a custom Text field writes RNOT='' (empty value) into the file; D-10 / C-R1-01 class (empty fields are written)
-- B-R27-01 / low / in_progress / readMetadataChunked drops the paths of a rejected chunk and Rescan / Open Folder / drop ignore failures: a rescan with one rejected chunk si
 - B-R27-02 / info / open / Alternative to D-35 not taken: disable Rescan / Open Folder / drop while a save is pending (UX change, needs reference-first). D-35 keeps th
-- A-R28-01 / info / open / D-35 case not documented: a single-chunk folder read issued before the write + the save's re-read rejected (D-24) -> the path is superseded 
-- A-R28-02 / low / open / docs/bugs/001 entry 11 test list does not name (r8), the only component-level killer of MR-3 (C R28 confirms)
-- RR-R28-01 / low / open / file-store.ts:141-142 a superseded path with no store entry (e.g. Open Folder of another folder while a write to that path is pending) is li
-- RR-R28-02 / info / open / file-store.ts:141 a superseded path keeps the current entry, which is the pre-write value when the save's re-read has not landed yet or was 
 - RR-R28-03 / low / open / Rescan / Open Folder / drop are not locked during a save; a save's re-read landing after a folder switch adds an old-folder entry to the new
 - RR-R28-04 / info / open / file-store.test.ts (g2) uses bare keys (a, b) while files hold /music/*.wav paths; cosmetic for a unit test
 - RR-R28-05 / info / open / Architecture signal: handleSchemaChanged (D-34) and applyMetadataRead (D-35) repeat the generation compare / keep-current / absent-if-none l
 - C-R28-01 / info / open / Rescan / Open Folder during a pending save shows 'Unsaved changes were discarded' although the save completes (D-29 baseline, both builds)
+- C-R29-01 / low / in_progress / Test gap: no test rejects two chunks; mutant failedPaths.splice(0, failedPaths.length, ...chunk) (utils.ts:72, keeps only the last rejected 
+- A-R29-01 / low / in_progress / = C-R29-01 (A found and measured the splice mutant first)
+- C-R29-02 / low / in_progress / docs/bugs/001 D-35 bullet and STATE_MANAGEMENT D-35 line say error and empty-folder paths call setMetadata({}); only handleRescan clears on 
+- A-R29-02 / low / in_progress / = C-R29-02
+- RR-R29-01 / low / open / Toast grammar 'Failed to read 1 files' (FolderBrowser.tsx:125,175, App.tsx:77) copies D-33 MetadataPanel.tsx:252; pinned by (k4)
+- RR-R29-02 / info / open / Architecture signal: the read-chunks -> applyMetadataRead(generations, failedPaths) -> toast block is repeated three times (FolderBrowser.ts
+- RR-R29-03 / low / open / Two overlapping folder reads (Rescan twice, Rescan during a drop, Open Folder A then B) have no ordering guard: the last to finish wins; e.g
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
 - TM-T0-CI [in_progress] New .github/workflows/check.yml (ubuntu-24.04, Node 22, npm ci, ffmpeg+xvfb, check, build, xvfb playwright --retries=0)
 - TM-T1-MIG [todo] Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no aut
+- TM-T1-DUP [todo] Old schema.json custom field colliding with standard category: (a) custom field already using RIFF ID ICAT; (b) custom field with key 'categ
 - TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
 - TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
 - TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba

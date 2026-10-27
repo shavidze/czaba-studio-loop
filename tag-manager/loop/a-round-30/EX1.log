@@ -1,0 +1,122 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/a30-mut/w[39m
+
+ [31m❯[39m tests/renderer/utils/utils.test.ts [2m([22m[2m26 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 59[2mms[22m[39m
+     [32m✓[39m formats bytes[32m 4[2mms[22m[39m
+     [32m✓[39m formats kilobytes[32m 0[2mms[22m[39m
+     [32m✓[39m formats megabytes[32m 0[2mms[22m[39m
+     [32m✓[39m handles zero[32m 0[2mms[22m[39m
+     [32m✓[39m handles exact boundary (1024)[32m 0[2mms[22m[39m
+     [32m✓[39m handles exact MB boundary[32m 3[2mms[22m[39m
+     [32m✓[39m formats seconds only[32m 0[2mms[22m[39m
+     [32m✓[39m formats minutes and seconds[32m 0[2mms[22m[39m
+     [32m✓[39m handles zero[32m 1[2mms[22m[39m
+     [32m✓[39m pads single-digit seconds[32m 0[2mms[22m[39m
+     [32m✓[39m handles fractional seconds by flooring[32m 3[2mms[22m[39m
+     [32m✓[39m generates 4-char uppercase ID from key[32m 0[2mms[22m[39m
+     [32m✓[39m pads short keys with X[32m 0[2mms[22m[39m
+     [32m✓[39m strips non-alpha characters[32m 0[2mms[22m[39m
+     [32m✓[39m truncates long keys to 4 chars[32m 0[2mms[22m[39m
+     [32m✓[39m appends number if base ID exists[32m 0[2mms[22m[39m
+     [32m✓[39m increments suffix when multiple collisions[32m 0[2mms[22m[39m
+     [32m✓[39m returns null when all candidates exhausted[32m 0[2mms[22m[39m
+     [32m✓[39m accepts valid 4-char uppercase IDs[32m 0[2mms[22m[39m
+     [32m✓[39m rejects lowercase[32m 0[2mms[22m[39m
+     [32m✓[39m rejects wrong length[32m 0[2mms[22m[39m
+     [32m✓[39m rejects special characters[32m 0[2mms[22m[39m
+     [32m✓[39m rejects empty string[32m 0[2mms[22m[39m
+     [32m✓[39m (u1) takes the write generation before each chunk read and records it only for paths in that chunk's result[32m 9[2mms[22m[39m
+     [32m✓[39m (u2) returns the paths of every rejected chunk in paths order and counts them in failures[32m 11[2mms[22m[39m
+[31m     [31m×[31m (u3) two rejected chunks out of four: failedPaths holds both rejected chunks in paths order, data and readGenerations hold only the resolved chunks[39m[32m 22[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m37 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-rejected-chunk.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1692[2mms[22m[39m
+     [33m[2m✓[22m[39m (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files [33m 487[2mms[22m[39m
+     [33m[2m✓[22m[39m (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time [33m 336[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-during-save.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 2602[2mms[22m[39m
+     [33m[2m✓[22m[39m (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value [33m 899[2mms[22m[39m
+     [33m[2m✓[22m[39m (r2) batch save of a+b pending + Rescan: both saved entries survive the stale rescan read [33m 336[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/utils/utils.test.ts[2m > [22mreadMetadataChunked failedPaths (TM-B31, D-36)[2m > [22m(u3) two rejected chunks out of four: failedPaths holds both rejected chunks in paths order, data and readGenerations hold only the resolved chunks
+[31m[1mAssertionError[22m: expected [ '/m/100.wav', '/m/101.wav', …(48) ] to deeply equal [ '/m/0.wav', '/m/1.wav', …(98) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,56 +1,6 @@[39m
+[2m  [[22m
+[32m-   "/m/0.wav",[39m
+[32m-   "/m/1.wav",[39m
+[32m-   "/m/2.wav",[39m
+[32m-   "/m/3.wav",[39m
+[32m-   "/m/4.wav",[39m
+[32m-   "/m/5.wav",[39m
+[32m-   "/m/6.wav",[39m
+[32m-   "/m/7.wav",[39m
+[32m-   "/m/8.wav",[39m
+[32m-   "/m/9.wav",[39m
+[32m-   "/m/10.wav",[39m
+[32m-   "/m/11.wav",[39m
+[32m-   "/m/12.wav",[39m
+[32m-   "/m/13.wav",[39m
+[32m-   "/m/14.wav",[39m
+[32m-   "/m/15.wav",[39m
+[32m-   "/m/16.wav",[39m
+[32m-   "/m/17.wav",[39m
+[32m-   "/m/18.wav",[39m
+[32m-   "/m/19.wav",[39m
+[32m-   "/m/20.wav",[39m
+[32m-   "/m/21.wav",[39m
+[32m-   "/m/22.wav",[39m
+[32m-   "/m/23.wav",[39m
+[32m-   "/m/24.wav",[39m
+[32m-   "/m/25.wav",[39m
+[32m-   "/m/26.wav",[39m
+[32m-   "/m/27.wav",[39m
+[32m-   "/m/28.wav",[39m
+[32m-   "/m/29.wav",[39m
+[32m-   "/m/30.wav",[39m
+[32m-   "/m/31.wav",[39m
+[32m-   "/m/32.wav",[39m
+[32m-   "/m/33.wav",[39m
+[32m-   "/m/34.wav",[39m
+[32m-   "/m/35.wav",[39m
+[32m-   "/m/36.wav",[39m
+[32m-   "/m/37.wav",[39m
+[32m-   "/m/38.wav",[39m
+[32m-   "/m/39.wav",[39m
+[32m-   "/m/40.wav",[39m
+[32m-   "/m/41.wav",[39m
+[32m-   "/m/42.wav",[39m
+[32m-   "/m/43.wav",[39m
+[32m-   "/m/44.wav",[39m
+[32m-   "/m/45.wav",[39m
+[32m-   "/m/46.wav",[39m
+[32m-   "/m/47.wav",[39m
+[32m-   "/m/48.wav",[39m
+[32m-   "/m/49.wav",[39m
+[2m    "/m/100.wav",[22m
+[2m    "/m/101.wav",[22m
+[2m    "/m/102.wav",[22m
+[2m    "/m/103.wav",[22m
+[2m    "/m/104.wav",[22m
+
+[36m [2m❯[22m tests/renderer/utils/utils.test.ts:[2m197:34[22m[39m
+    [90m195| [39m      [35mconst[39m resolvedPaths [33m=[39m [[33m...[39mpaths[33m.[39m[34mslice[39m([34m50[39m[33m,[39m [34m100[39m)[33m,[39m [32m"/m/150.wav"[39m][33m;[39m
+    [90m196| [39m      [34mexpect[39m(readBatch)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m4[39m)[33m;[39m
+    [90m197| [39m      expect(result.failedPaths).toEqual([...paths.slice(0, 50), ...pa…
+    [90m   | [39m                                 [31m^[39m
+    [90m198| [39m      [34mexpect[39m(result[33m.[39mfailures)[33m.[39m[34mtoBe[39m([34m100[39m)[33m;[39m
+    [90m199| [39m      [34mexpect[39m([33mObject[39m[33m.[39m[34mkeys[39m(result[33m.[39mdata))[33m.[39m[34mtoEqual[39m(resolvedPaths)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m81 passed[39m[22m[90m (82)[39m
+[2m   Start at [22m 21:28:02
+[2m   Duration [22m 4.39s[2m (transform 953ms, setup 396ms, import 1.71s, tests 4.39s, environment 3.23s)[22m
+
+
+::error file=/tmp/a30-mut/w/tests/renderer/utils/utils.test.ts,title=tests/renderer/utils/utils.test.ts > readMetadataChunked failedPaths (TM-B31%2C D-36) > (u3) two rejected chunks out of four%3A failedPaths holds both rejected chunks in paths order%2C data and readGenerations hold only the resolved chunks,line=197,column=34::AssertionError: expected [ '/m/100.wav', '/m/101.wav', …(48) ] to deeply equal [ '/m/0.wav', '/m/1.wav', …(98) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -1,56 +1,6 @@%0A  [%0A-   "/m/0.wav",%0A-   "/m/1.wav",%0A-   "/m/2.wav",%0A-   "/m/3.wav",%0A-   "/m/4.wav",%0A-   "/m/5.wav",%0A-   "/m/6.wav",%0A-   "/m/7.wav",%0A-   "/m/8.wav",%0A-   "/m/9.wav",%0A-   "/m/10.wav",%0A-   "/m/11.wav",%0A-   "/m/12.wav",%0A-   "/m/13.wav",%0A-   "/m/14.wav",%0A-   "/m/15.wav",%0A-   "/m/16.wav",%0A-   "/m/17.wav",%0A-   "/m/18.wav",%0A-   "/m/19.wav",%0A-   "/m/20.wav",%0A-   "/m/21.wav",%0A-   "/m/22.wav",%0A-   "/m/23.wav",%0A-   "/m/24.wav",%0A-   "/m/25.wav",%0A-   "/m/26.wav",%0A-   "/m/27.wav",%0A-   "/m/28.wav",%0A-   "/m/29.wav",%0A-   "/m/30.wav",%0A-   "/m/31.wav",%0A-   "/m/32.wav",%0A-   "/m/33.wav",%0A-   "/m/34.wav",%0A-   "/m/35.wav",%0A-   "/m/36.wav",%0A-   "/m/37.wav",%0A-   "/m/38.wav",%0A-   "/m/39.wav",%0A-   "/m/40.wav",%0A-   "/m/41.wav",%0A-   "/m/42.wav",%0A-   "/m/43.wav",%0A-   "/m/44.wav",%0A-   "/m/45.wav",%0A-   "/m/46.wav",%0A-   "/m/47.wav",%0A-   "/m/48.wav",%0A-   "/m/49.wav",%0A    "/m/100.wav",%0A    "/m/101.wav",%0A    "/m/102.wav",%0A    "/m/103.wav",%0A    "/m/104.wav",%0A%0A ❯ tests/renderer/utils/utils.test.ts:197:34%0A%0A

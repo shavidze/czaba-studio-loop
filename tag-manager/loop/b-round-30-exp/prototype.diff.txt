@@ -1,0 +1,203 @@
+diff --git a/src/renderer/src/App.tsx b/tmp/b-r31/src/renderer/src/App.tsx
+index 8377967..75491ce 100644
+--- a/src/renderer/src/App.tsx
++++ b/tmp/b-r31/src/renderer/src/App.tsx
+@@ -8,7 +8,7 @@ import { AudioPlayer } from '~/components/player/AudioPlayer';
+ import { FolderBrowser } from '~/components/sidebar/FolderBrowser';
+ import { Toast } from '~/components/ui/toast';
+ import { readMetadataChunked } from '~/lib/utils';
+-import { useFileStore } from '~/stores/file-store';
++import { isFolderLoadCurrent, useFileStore } from '~/stores/file-store';
+ import { useMetadataStore } from '~/stores/metadata-store';
+ import { usePlayerStore } from '~/stores/player-store';
+ import { useSchemaStore } from '~/stores/schema-store';
+@@ -41,6 +41,7 @@ export default function App(): React.ReactElement {
+ 
+   const openFolder = useCallback(
+     async (folderPath: string) => {
++      const loadId = useFileStore.getState().beginFolderLoad();
+       usePlayerStore.getState().stop();
+       setFolderPath(folderPath);
+       setIsScanning(true);
+@@ -55,6 +56,7 @@ export default function App(): React.ReactElement {
+ 
+       try {
+         const wavFiles = await window.api.scanFolder(folderPath);
++        if (!isFolderLoadCurrent(loadId)) return;
+         setFiles(wavFiles);
+ 
+         if (wavFiles.length > 0) {
+@@ -70,6 +72,7 @@ export default function App(): React.ReactElement {
+             currentSchema,
+             () => useFileStore.getState().writeGeneration,
+           );
++          if (!isFolderLoadCurrent(loadId)) return;
+           useFileStore
+             .getState()
+             .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+@@ -80,13 +83,14 @@ export default function App(): React.ReactElement {
+           setMetadata({});
+         }
+       } catch (err) {
++        if (!isFolderLoadCurrent(loadId)) return;
+         useMetadataStore
+           .getState()
+           .showToast(err instanceof Error ? err.message : 'Failed to scan folder', 'error');
+         setFiles([]);
+         setMetadata({});
+       } finally {
+-        setIsScanning(false);
++        if (isFolderLoadCurrent(loadId)) setIsScanning(false);
+       }
+     },
+     [setFolderPath, setFiles, setMetadata, setIsScanning, clearSelection],
+diff --git a/src/renderer/src/components/sidebar/FolderBrowser.tsx b/tmp/b-r31/src/renderer/src/components/sidebar/FolderBrowser.tsx
+index 59a51c3..933a83a 100644
+--- a/src/renderer/src/components/sidebar/FolderBrowser.tsx
++++ b/tmp/b-r31/src/renderer/src/components/sidebar/FolderBrowser.tsx
+@@ -2,7 +2,7 @@ import { ChevronRight, File, FolderOpen, RefreshCw, X } from 'lucide-react';
+ import { useCallback, useMemo } from 'react';
+ import { Button } from '~/components/ui/button';
+ import { cn, readMetadataChunked } from '~/lib/utils';
+-import { useFileStore } from '~/stores/file-store';
++import { isFolderLoadCurrent, useFileStore } from '~/stores/file-store';
+ import { useMetadataStore } from '~/stores/metadata-store';
+ import { usePlayerStore } from '~/stores/player-store';
+ import { useSchemaStore } from '~/stores/schema-store';
+@@ -96,6 +96,7 @@ export function FolderBrowser(): React.ReactElement {
+     const path = await window.api.openFolderDialog();
+     if (!path) return;
+ 
++    const loadId = useFileStore.getState().beginFolderLoad();
+     usePlayerStore.getState().stop();
+     setFolderPath(path);
+     setIsScanning(true);
+@@ -103,6 +104,7 @@ export function FolderBrowser(): React.ReactElement {
+ 
+     try {
+       const wavFiles = await window.api.scanFolder(path);
++      if (!isFolderLoadCurrent(loadId)) return;
+       setFiles(wavFiles);
+ 
+       if (wavFiles.length > 0) {
+@@ -118,6 +120,7 @@ export function FolderBrowser(): React.ReactElement {
+           currentSchema,
+           () => useFileStore.getState().writeGeneration,
+         );
++        if (!isFolderLoadCurrent(loadId)) return;
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+@@ -128,33 +131,38 @@ export function FolderBrowser(): React.ReactElement {
+         setMetadata({});
+       }
+     } catch (err) {
++      if (!isFolderLoadCurrent(loadId)) return;
+       useMetadataStore
+         .getState()
+         .showToast(err instanceof Error ? err.message : 'Failed to open folder', 'error');
+       setFiles([]);
+       setMetadata({});
+     } finally {
+-      setIsScanning(false);
++      if (isFolderLoadCurrent(loadId)) setIsScanning(false);
+     }
+   }, [setFolderPath, setFiles, setMetadata, setIsScanning, clearSelection]);
+ 
+   const handleCloseFolder = useCallback(() => {
++    useFileStore.getState().beginFolderLoad();
++    setIsScanning(false);
+     setFolderPath(null);
+     setFiles([]);
+     setMetadata({});
+     clearSelection();
+     usePlayerStore.getState().stop();
+     useMetadataStore.getState().resetEditing();
+-  }, [setFolderPath, setFiles, setMetadata, clearSelection]);
++  }, [setFolderPath, setFiles, setMetadata, setIsScanning, clearSelection]);
+ 
+   const handleRescan = useCallback(async () => {
+     if (!folderPath) return;
++    const loadId = useFileStore.getState().beginFolderLoad();
+     usePlayerStore.getState().stop();
+     setIsScanning(true);
+     clearSelection();
+ 
+     try {
+       const wavFiles = await window.api.scanFolder(folderPath);
++      if (!isFolderLoadCurrent(loadId)) return;
+       setFiles(wavFiles);
+ 
+       if (wavFiles.length > 0) {
+@@ -170,6 +178,7 @@ export function FolderBrowser(): React.ReactElement {
+           currentSchema,
+           () => useFileStore.getState().writeGeneration,
+         );
++        if (!isFolderLoadCurrent(loadId)) return;
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+@@ -180,11 +189,12 @@ export function FolderBrowser(): React.ReactElement {
+         setMetadata({});
+       }
+     } catch (err) {
++      if (!isFolderLoadCurrent(loadId)) return;
+       useMetadataStore
+         .getState()
+         .showToast(err instanceof Error ? err.message : 'Rescan failed', 'error');
+     } finally {
+-      setIsScanning(false);
++      if (isFolderLoadCurrent(loadId)) setIsScanning(false);
+     }
+   }, [folderPath, setFiles, setMetadata, setIsScanning, clearSelection]);
+ 
+diff --git a/src/renderer/src/stores/file-store.ts b/tmp/b-r31/src/renderer/src/stores/file-store.ts
+index 6b62c9e..c27ae41 100644
+--- a/src/renderer/src/stores/file-store.ts
++++ b/tmp/b-r31/src/renderer/src/stores/file-store.ts
+@@ -13,6 +13,7 @@ interface FileState {
+   isScanning: boolean;
+   writeGeneration: number;
+   pathWriteGenerations: Record<string, number>;
++  folderLoadId: number;
+ 
+   setFolderPath: (path: string | null) => void;
+   setFiles: (files: WavFileEntry[]) => void;
+@@ -34,9 +35,10 @@ interface FileState {
+     readGenerations: Record<string, number>,
+     keptPaths: string[],
+   ) => void;
++  beginFolderLoad: () => number;
+ }
+ 
+-export const useFileStore = create<FileState>((set) => ({
++export const useFileStore = create<FileState>((set, get) => ({
+   folderPath: null,
+   files: [],
+   metadata: {},
+@@ -47,6 +49,7 @@ export const useFileStore = create<FileState>((set) => ({
+   isScanning: false,
+   writeGeneration: 0,
+   pathWriteGenerations: {},
++  folderLoadId: 0,
+ 
+   setFolderPath: (path) => set({ folderPath: path }),
+   setFiles: (files) => set({ files }),
+@@ -148,8 +151,17 @@ export const useFileStore = create<FileState>((set) => ({
+       }
+       return { metadata };
+     }),
++
++  beginFolderLoad: () => {
++    set((state) => ({ folderLoadId: state.folderLoadId + 1 }));
++    return get().folderLoadId;
++  },
+ }));
+ 
++export function isFolderLoadCurrent(loadId: number): boolean {
++  return useFileStore.getState().folderLoadId === loadId;
++}
++
+ function getFilteredFiles(state: FileState): WavFileEntry[] {
+   if (!state.searchQuery) return state.files;
+   const q = state.searchQuery.toLowerCase();
