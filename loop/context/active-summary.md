@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-27T12:32:46.769Z)
+# Active loop summary (2026-10-27T14:02:36.166Z)
 
-- backlog.json 1868 KB -> active view 268 KB
-- status: G_ROOT_GATE round 207
-- servers: `{"checkedUtc":"2026-10-27T12:19:49.7782753Z","round":207,"attempt":1,"store":200}`
-- last publication: d2a920c7582fc3e5cbbb60b71e3b906345bc6f75 (rounds 207-207)
-- last root gate: round 207 published - commit d2a920c7582fc3e5cbbb60b71e3b906345bc6f75 pushed
+- backlog.json 1874 KB -> active view 268 KB
+- status: G_ROOT_GATE round 208
+- servers: `{"checkedUtc":"2026-10-27T13:33:57.1249681Z","round":208,"attempt":1,"store":200}`
+- last publication: f535ab3159aae45de86c22c6cca28cbd19568f65 (rounds 208-208)
+- last root gate: round 208 published - commit f535ab3159aae45de86c22c6cca28cbd19568f65 pushed
 
 ## Current items: -
 
@@ -475,16 +475,18 @@
 - A-R203-REVIEW-M1 / low / ruled (D-29z169): folded into SYS-3 (see systemic_tasks SYS-3.also_fixes_d29z169); reviewer rated Medium, B rates Low: fail-safe (extra ring only), not reproducible in the cloud browser; Android device check on the Tech Lead list / Android soft keyboard key=Unidentified / IME isComposing keydowns flip focus-source to keyboard (ring mid-typing on Android)
 - A-R203-REVIEW-I1 / info / ruled (D-29z169): folded into SYS-3 with M1 (AltGraph printable keys count as editing) / AltGr (Ctrl+Alt) / macOS Option typing switches focus-source to keyboard
 - B-R203-AUTH-USER-CLIENT-TRUST / info / root_note: not scheduled; no Studio action; protected file (AuthContext.tsx) / A stored localStorage.auth_user without accessToken renders the signed-in header with no backend verification (AuthContext.tsx:93-94 setUser
-- SABA-B-5 / medium / open: measured (round 206 C PASS); fix = PERF-FADER round 208 (after SABA-B-6 round 207, D-29z173) / Fader drag is slow (Saba 2026-10-27): every pointer move of a track/group volume, master or clip-gain fader re-renders the whole Studio
+- SABA-B-5 / medium / open: in progress - PERF-FADER split a0 (round 208, metric) / a (track+group+master) / b (clip gain) (D-29z176) / Fader drag is slow (Saba 2026-10-27): every pointer move of a track/group volume, master or clip-gain fader re-renders the whole Studio
 - GATE205-DOC162-STATUS / low / dispatched round 206 (D-29z171, R112: one-line status fix, granted) / Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)
-- SABA-B-6 / low / scheduled: round 207 (D-29z173), fix now, not deferred / Timeline hover shows a + cursor where Ableton shows a finger
-- C-R206-01 / low / bound_to_PERF-FADER (not deferred_low_polish) / event-share-16 cannot go above 0: Event Timing reports no pointermove and the faders fire 0 native input events during a mouse drag; doc 163
-- GATE206-S4 / low / duplicate_of C-R206-01 (closes with it in PERF-FADER) / event-share-16 name/metric mismatch
+- C-R206-01 / low / scheduled: round 208 PERF-FADER-a0 replaces event-share-16 with move-to-paint + liveness (D-29z176) / event-share-16 cannot go above 0: Event Timing reports no pointermove and the faders fire 0 native input events during a mouse drag; doc 163
+- GATE206-S4 / low / duplicate_of C-R206-01 (closes with it in round 208) / event-share-16 name/metric mismatch
 - GATE206-S3 / low / scheduled_with PERF-1b / fiber walk depends on React 18 internals (tag/PerformedWork); record renderer.version and fail on unexpected major
 - GATE206-S5 / low / scheduled_with PERF-1b (document or separate build dir) / test:perf webServer rewrites shared build/; collides with a parallel verify/build
 - GATE206-S6 / low / scheduled_with PERF-1b / harness.audio-running is weak with the autoplay flag; require running context + >=1 start() in the playing window
 - I-206-a / info / root_note / fake-Bearer /api/studio-token returns 500 without the :5199 mock (mock not started at job start; no cloud/ folder in the loop folder), 403 w
 - GATE206-DOC163-STATUS / low / scheduled: round 207 R113 (D-29z175) / doc 163 l.4 published still conditional (C round 206 check pending)
+- GATE207-DOC164-STATUS / low / scheduled: round 208 R114 (D-29z178, L28) / doc 164 l.4 published as 'In Progress (C round 207 check pending)'
+- A-R207-01 / low / duplicate_of C-R207-01 / 
+- A-R207-02 / info / tech_lead_manual (non-blocking) / active:cursor-grabbing verified in Chromium only; Firefox/Safari unverified in the cloud
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

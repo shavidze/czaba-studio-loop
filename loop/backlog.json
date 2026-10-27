@@ -1,9 +1,9 @@
 {
- "version": 191,
- "updated": "2026-10-27 B round 207 -> 208 planning",
+ "version": 192,
+ "updated": "2026-10-27 (B round 208 -> 209 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 208, D-29z176)",
+ "current_task": "current-task.md (round 209, D-29z179)",
  "advisor_used_by_B": "2026-10-27 round 205 -> 206 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: PERF-1 split 1a/1b, all of app/ frozen, hook stub + start() counter proven on a scratch prod build before dispatch, C-R205-01 ruled Low but scheduled, doc 162 status fix granted, queue move recorded with a D-ID | previous: 2026-10-26 round 189 -> 190 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: round-179-style fix-up baseline on the uncommitted round-189 tree (frozen 1016 incl. doc 155 at cdf011f9, grants 3), A must reproduce C's fresh-mode CLS and bisec",
  "baseline": {
   "tsc_errors": 0,
@@ -10163,7 +10163,7 @@
    "round": 208,
    "task": "current-task.md",
    "decision": "D-29z176",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "type": "FEATURE STAGE (STUDIO-PERFORMANCE PERF-FADER-a0: harness metrics only, app/ frozen) + one-line doc fix",
    "items": [
     "move-to-paint per-move latency metric (capture pointermove -> rAF -> MessageChannel) replacing event-share-16 (closes C-R206-01, GATE206-S4)",
@@ -10175,7 +10175,27 @@
    ],
    "note": "baseline HEAD d2a920c (gate 207 published); frozen 1044 files b-round-207-r208-tree-sha256.txt; grants b-round-207-r208-grants.txt (6); optional new perf/lib/move-latency.ts; consults performance-optimizer + tech-lead (b-round-207.md section 4); re-measure = no fader/context/perf change since 60c82ed, round-206 medians current",
    "next": "round 209 PERF-FADER-a (track/group/master volume via override + display store), then PERF-FADER-b (clip gain), then PERF-1b",
-   "added": "2026-10-27 B round 207 -> 208 planning (D-29z176)"
+   "added": "2026-10-27 B round 207 -> 208 planning (D-29z176)",
+   "result": "C round 208 PASS 8/8 rows (browserVerified true, realVerified true; c-round-208.json); gate 208 published f535ab3 to both remotes; C-R206-01 + GATE206-S4 closed (event-share-16 replaced by move-to-paint with liveness asserts); I-208-a ratified D-29z180; C-R208-01 Low (doc 163 stale lines) -> round 209 (D-29z181); doc 163 l.4 published conditional -> R115 in round 209"
+  },
+  {
+   "round": 209,
+   "task": "current-task.md",
+   "decision": "D-29z179",
+   "status": "dispatched",
+   "type": "FEATURE STAGE (STUDIO-PERFORMANCE PERF-FADER-a: SABA-B-5 part 1, track/group/master Volume + Pan pointer preview)",
+   "items": [
+    "pointer path: mixOverrideRef + live graph params, no updateHistory/syncPlayback per move; pending (keyboard/double-click/onChange) path unchanged",
+    "withMixOverride(arrangement) in startGraph + syncPlayback setter branch (Space, loop wrap)",
+    "commit exact previewed value once; cancel restores all members",
+    "mix-draft-store.ts + ArrangementMixFader.tsx leaf (<= 3 components per move); pan draft moves from lane state to the store",
+    "48 budgets.json rows flipped to assert (move-components-max/per-move <= 3, release-commits >= 1)",
+    "FP1-FP12 + store tests; L23 hit list in 12 granted tests",
+    "D-29z181 doc 163 l.4 (R115) + C-R208-01 lines; doc 165"
+   ],
+   "note": "baseline HEAD f535ab3 (gate 208 published); frozen 1031 files b-round-208-r209-tree-sha256.txt; grants b-round-208-r209-grants.txt (19); new files b-round-208-r209-new-files.txt (5); consults tech-lead + performance-optimizer (b-round-208.md section 3); re-measure = C round 208 WINDOW numbers current (diff d2a920c..f535ab3 perf/docs only)",
+   "next": "PERF-FADER-b (clip gain), then PERF-1b",
+   "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
   }
  ],
  "post_current_stage_queue": [
@@ -12329,7 +12349,7 @@
   },
   {
    "id": "STUDIO-PERFORMANCE",
-   "status": "in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER split a0/a/b (D-29z176): a0 dispatched round 208; then a (209), b, then PERF-1b | in_progress: PERF-1a done (round 206 C PASS, published 60c82ed); round 207 = SABA-B-6 inserted (D-29z173, Saba order: before PERF-1, missed at 206 planning); next PERF-FADER (round 208), then PERF-1b | in_progress: PERF-1a dispatched round 206 (D-29z171) | 2026-10-27 B round 205 -> 206 planning (D-29z172, Saba 2026-10-27 queue move) | was: not_started",
+   "status": "in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a dispatched round 209 (D-29z179, pan included); then PERF-FADER-b, PERF-1b | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER split a0/a/b (D-29z176): a0 dispatched round 208; then a (209), b, then PERF-1b | in_progress: PERF-1a done (round 206 C PASS, published 60c82ed); round 207 = SABA-B-6 inserted (D-29z173, Saba order: before PERF-1, missed at 206 planning); next PERF-FADER (round 208), then PERF-1b | in_progress: PERF-1a dispatched round 206 (D-29z171) | 2026-10-27 B round 205 -> 206 planning (D-29z172, Saba 2026-10-27 queue move) | was: not_started",
    "requested": "2026-10-26 (Saba, agent-workflow policy section \"Saba's bug and the performance queue\")",
    "instruction": "After REVIEW-RECOMMENDATIONS and before T12-ADVANCED. Outline and baseline: docs/technical/performance/perf-plan.md. Before dispatching each PERF task, B consults performance-optimizer and tech-lead, re-measures, and writes the task in full detail. PERF-1 (the harness) comes first. The 2026-10-23 bug gate applies.",
    "prerequisites": [
@@ -12357,12 +12377,13 @@
     {
      "id": "PERF-FADER-a0",
      "what": "harness: move-to-paint metric + liveness red-proof (replaces event-share-16), move-window components + release-commits, I-206-d drag ends, doc 163 l.60",
-     "status": "dispatched round 208 (D-29z176)"
+     "status": "done (round 208 C PASS browserVerified=true, published f535ab3)"
     },
     {
      "id": "PERF-FADER-a",
      "what": "track + group + master volume: mixOverrideRef + withMixOverride(arrangement) in startGraph and syncPlayback setter branch; small display store for the dragged fader draft (controlled inputs otherwise snap back); pointer gestures only (keyboard/Shift/double-click pending paths unchanged); commit clears override then applyEdit with the exact previewed value; rows stopped/playing/playing-with-loop/Space mid-drag, group members revert on Esc/pointercancel/stolen claim, export bit-identity drag vs typed, move-components-max <=3 assert, release-commits >=1; grants ~15 test files (tech-lead list in b-round-207.md section 4); replace the assert row harness.move-window-live (breaks by construction after the fix) with an equivalent proof",
-     "status": "not_started (round 209)"
+     "status": "dispatched round 209 (D-29z179)",
+     "scope_ruling_d29z179": "pan joins (its move rows owned here, 4 > 3; both consults agree); required design: keyed mix-draft-store + ArrangementMixFader leaf as only draft reader (one commit <= 3 components per move; zero-commit ref writes forbidden); 48 rows flipped; harness.move-window-live kept (leaf still commits per move)"
     },
     {
      "id": "PERF-FADER-b",
@@ -12446,7 +12467,8 @@
     }
    ],
    "perf_fader_constraints_d29z174": "Before any event-share-16 row flips to assert: replace the metric (per-move frame/LoAF with liveness red-proof > 0 on a slow drag) or prove it live (C-R206-01); rewrite doc 163 l.60 and budgets.json event-share notes; drag changes the value at both ends (I-206-d); consult performance-optimizer + tech-lead and re-measure before dispatch",
-   "consults_round_208": "performance-optimizer + tech-lead, 2026-10-27, summarised in b-round-207.md section 4"
+   "consults_round_208": "performance-optimizer + tech-lead, 2026-10-27, summarised in b-round-207.md section 4",
+   "consults_round_209": "tech-lead + performance-optimizer, 2026-10-27, summarised in b-round-208.md section 3"
   },
   {
    "id": "STORE-REDESIGN",
@@ -22699,7 +22721,7 @@
    "hypothesis_rejected": "root's 'syncPlayback rebuilds the graph per move' is not supported by source (scheduleKey excludes tracks/master/gainDb) nor by the probe (0 restarts); kept as an asserted harness row (0 restarts while playing).",
    "plan": "PERF-1a (round 206) measures it (fader scenarios x stopped/playing, record mode); PERF-FADER (first PERF task after PERF-1) fixes it following the pan pattern; budgets <=3 committed components per move, 0 restarts, export of a dragged mix bit-identical to typed values",
    "origin": "Saba (user report) + root code fact",
-   "status": "open: in progress - PERF-FADER split a0 (round 208, metric) / a (track+group+master) / b (clip gain) (D-29z176)",
+   "status": "in_progress: part 1 (track/group/master/pan) dispatched round 209 PERF-FADER-a; part 2 clip gain = PERF-FADER-b; before-evidence C round 208 WINDOW-208 (83/85/80/4 components per move commit)",
    "added": "2026-10-27 B round 205 -> 206 planning (D-29z171)",
    "measured_c_round_206": "C round 206 (independent probe + harness, identical runs): components/commit stopped/playing track 83/83, group 85/85, master 80/80, pan 4/4, clipgain 79/87; restarts while playing 0 in all 10 rows (1x and 6x); 6x playing frame p95 33.4 ms (track/group/master), 33.3 (pan), 66.7 ms (clipgain, 136-147 frames >33 ms, 74 LoAF); evidence c-round-206/out/run1.json, run2.json, cprobe-1440.json"
   },
@@ -22730,17 +22752,19 @@
    "title": "event-share-16 cannot go above 0: Event Timing reports no pointermove and the faders fire 0 native input events during a mouse drag; doc 163 l.60 and budgets.json event-share notes state a false limit",
    "evidence": "c-round-206.md C-R206-01; c-round-206/out/cprobe-1440.json, run1.json, run2.json",
    "ruling": "Low: record-only row, no false PASS yet, not a user defect; gate reviewer GATE206-S4 same view. Hard constraint: before PERF-FADER flips any event-share-16 row to assert, the metric is replaced (per-move frame/LoAF metric with a liveness red-proof > 0 on a slow drag) or proven live. PERF-FADER rewrites doc 163 l.60 and the budgets.json event-share notes.",
-   "status": "scheduled: round 208 PERF-FADER-a0 replaces event-share-16 with move-to-paint + liveness (D-29z176)",
-   "added": "2026-10-27 B round 206 -> 207 planning (D-29z173)"
+   "status": "closed (round 208 C PASS: event-share-16 removed, move-to-paint + liveness asserts .sync/.deferred pass; published f535ab3)",
+   "added": "2026-10-27 B round 206 -> 207 planning (D-29z173)",
+   "closed": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
   },
   {
    "id": "GATE206-S4",
    "severity": "low",
    "origin": "gate 206 reviewer",
    "title": "event-share-16 name/metric mismatch",
-   "status": "duplicate_of C-R206-01 (closes with it in round 208)",
+   "status": "closed (round 208 C PASS: event-share-16 removed, move-to-paint + liveness asserts .sync/.deferred pass; published f535ab3)",
    "evidence": "gates/round-206/review-result.json finding 4",
-   "added": "2026-10-27 B round 206 -> 207 planning (D-29z173)"
+   "added": "2026-10-27 B round 206 -> 207 planning (D-29z173)",
+   "closed": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
   },
   {
    "id": "GATE206-S3",
@@ -22790,8 +22814,9 @@
    "severity": "low",
    "origin": "B round 208 planning (git show d2a920c doc 164 l.4)",
    "title": "doc 164 l.4 published as 'In Progress (C round 207 check pending)'",
-   "status": "scheduled: round 208 R114 (D-29z178, L28)",
-   "added": "2026-10-27 B round 207 -> 208 planning (D-29z176)"
+   "status": "closed (round 208 R114: doc 164 l.4 exact text, C SCOPE-208 PASS, published f535ab3)",
+   "added": "2026-10-27 B round 207 -> 208 planning (D-29z176)",
+   "closed": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
   },
   {
    "id": "A-R207-01",
@@ -22805,6 +22830,47 @@
    "title": "active:cursor-grabbing verified in Chromium only; Firefox/Safari unverified in the cloud",
    "status": "tech_lead_manual (non-blocking)",
    "added": "2026-10-27 B round 207 -> 208 planning (D-29z176)"
+  },
+  {
+   "id": "C-R208-01",
+   "severity": "low",
+   "origin": "C round 208 (A flagged too)",
+   "title": "doc 163 l.16/18/24-31/74/83/151 contradict the a0 harness (row count, wall-clock assert exception, pass sequence, determinism list, TODO)",
+   "evidence": "c-round-208.md DOC-208; c-round-208.json",
+   "status": "scheduled: round 209 (D-29z181), same owner, not deferred",
+   "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
+  },
+  {
+   "id": "GATE208-DOC163-STATUS",
+   "severity": "low",
+   "origin": "B round 209 planning (git show f535ab3 doc 163 l.4)",
+   "title": "doc 163 l.4 published as 'In Progress (... PERF-FADER-a0 C round 208 check pending)'",
+   "status": "scheduled: round 209 R115 (D-29z181, L28 4th time)",
+   "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
+  },
+  {
+   "id": "I-208-a",
+   "severity": "info",
+   "origin": "C round 208",
+   "title": "move window starts at the first move after the in-page pointerdown; -per-move divides by 120",
+   "status": "ratified D-29z180 (pointerdown commits allowed only with downComponentsMax <= 3)",
+   "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
+  },
+  {
+   "id": "I-208-b",
+   "severity": "info",
+   "origin": "C round 208",
+   "title": "track/group drags start at max (endsCase max): high end proves only a return to max",
+   "status": "carried into round 209 WINDOW-209/EXPORT-209 (start below max by keyboard)",
+   "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
+  },
+  {
+   "id": "I-208-c",
+   "severity": "info",
+   "origin": "C round 208",
+   "title": "liveness margin 1.2-2.0 ms over the 30 ms busy-wait floor; can only grow under load",
+   "status": "info, no action",
+   "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
   }
  ],
  "tech_lead_notes": [
@@ -24516,6 +24582,13 @@
    "proposal": "code-reviewer (A round 206): if PERF-1b adds scenarios to the spec, one bounded move of aggregation/report writing to perf/lib/report.ts; re-check fiber heuristic on React upgrade",
    "status": "signal_recorded_not_scheduled (fold into PERF-1b grants only if PERF-1b grows the spec)",
    "added": "2026-10-27 B round 206 -> 207 planning (D-29z173)"
+  },
+  {
+   "round": 208,
+   "signal": "code-reviewer A round 208 Signal 4: perf/studio-lab.perf.spec.ts:435-517 owns the injected-listener/CDP/__czabaPerfInjected lifecycle, global type in perf/lib/instrumentation.ts:78 (light cross-grant coupling)",
+   "proposal": "keep (reviewer verdict; perf-only, no app invariant, no planner proposal)",
+   "status": "signal_recorded_not_scheduled",
+   "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -29416,7 +29489,8 @@
    "request": "b-round-207-checkpoint-addendum.md",
    "question": "PERF-FADER-a introduces a mix-preview override + display store: this is the 'third target kind' trigger of ARCH-R81-VOLUME-STATE-MACHINE; should the MixVolumeTarget preview/commit/cancel machine move to a pure lib/arrangement module now (keep/extract)?",
    "blocking": false,
-   "added": "2026-10-27 B round 207 -> 208 planning (D-29z176)"
+   "added": "2026-10-27 B round 207 -> 208 planning (D-29z176)",
+   "status": "no root answer by round 209 planning -> recorded default keep applied (D-29z182): gesture machine stays in ArrangementContext; only mix-draft-store.ts + ArrangementMixFader.tsx added"
   }
  ],
  "leadmagnet_dialog_rulings_d29z170": {

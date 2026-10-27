@@ -1,13 +1,12 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 207 PASS (9/9, browserVerified=true, realVerified=true), gate 207 published d2a920c: SABA-B-6 done. SABA-B-5 (Medium) remains; after performance-optimizer + tech-lead consults PERF-FADER is split a0/a/b (D-29z176) because the current fader budget rows cannot fail honestly (event-share-16 always 0, components-per-commit includes the release commit). C-R207-01 Low pre-existing -> deferred_low_polish (D-29z177). Large scoped work remains and nothing needs external input, so neither COMPLETE nor BLOCKED.",
- "nextTask": "Round 208 (D-29z176), baseline HEAD d2a920c (gate 207 published), 1044 files frozen, all of app/ frozen. PERF-FADER-a0: perf/ harness only - move-to-paint per-move latency (capture pointermove -> rAF -> MessageChannel) with sync+deferred 30 ms liveness rows replacing the 20 event-share-16 rows; move-components-max/per-move (commits between first pointermove and in-page pointerup) + release-commits; I-206-d drags change value at both ends; doc 163 l.60 + table + a0 section (conditional status); R114 doc 164 l.4. C rows SCOPE, PERF-RUN x2, METRIC-LIVE and WINDOW (C's own probes), DRAG-ENDS, DOC, AN-REVIEW, G208-3.",
+ "reason": "C round 208 PASS (8/8, browserVerified=true, realVerified=true), gate 208 published f535ab3: PERF-FADER-a0 done, C-R206-01/GATE206-S4/GATE207-DOC164-STATUS closed. SABA-B-5 (Medium) remains open; its fix for track/group/master/pan is next (D-29z179, pan joins because its 4 components per move exceed the <=3 budget; tech-lead + performance-optimizer consulted). C-R208-01 Low + R115 fixed in the same round (D-29z181). Large scoped work remains and nothing needs external input, so neither COMPLETE nor BLOCKED.",
+ "nextTask": "Round 209 (D-29z179), baseline HEAD f535ab3 (gate 208 published), 1031 files frozen, 19 grants (ArrangementContext, Lane, GroupHeader, Master, 12 fader tests, perf budgets/spec, doc 163) + 5 new files (mix-draft-store.ts, ArrangementMixFader.tsx, 2 tests, doc 165). PERF-FADER-a: pointer drags of track/group/master Volume and Pan write an override ref + live AudioParams only (no updateHistory/syncPlayback per move), withMixOverride in startGraph + syncPlayback (Space, loop wrap), one exact-value history entry on pointerup, cancel restores all group members; draft read only by the ArrangementMixFader leaf (<= 3 components per move); keyboard/Shift/double-click/undo/visuals/export unchanged; 48 budget rows to assert. C rows SCOPE, PERF-RUN x2, WINDOW, LIVE-DISPLAY, AUDIO (loop wrap, Space), GROUP, INVARIANTS and VISUAL vs baseline build, EXPORT bit-identity, DOC, AN-REVIEW, G209-3.",
  "remaining": [
-  "Round 208 (D-29z176): PERF-FADER-a0 harness metrics (move-to-paint + liveness replacing event-share-16, move-window components, release-commits, I-206-d, doc 163 l.60) + R114 doc 164 l.4",
-  "PERF-FADER-a (round 209): track/group/master volume via context override + display store; SABA-B-5 part 1",
+  "Round 209 (D-29z179): PERF-FADER-a track/group/master Volume + Pan pointer preview (override + live params, mix-draft-store + ArrangementMixFader leaf, 48 rows to assert) + D-29z181 doc 163 (C-R208-01, R115); SABA-B-5 part 1",
   "PERF-FADER-b: clip gain single + members (WG4 ruling at planning); SABA-B-5 part 2",
   "PERF-1b (zoom, clip click, range/fade/trim drags, play/pause, export, bytes, DOM, memory; + GATE206-S3/S5/S6; report.ts signal if the spec grows)",
-  "SABA-B-5 (Medium): fader drag slow; measured round 206; fix = PERF-FADER",
+  "SABA-B-5 (Medium): fader drag slow; part 1 round 209, part 2 PERF-FADER-b",
   "PERF-2",
   "PERF-3",
   "PERF-4",
@@ -51,6 +50,8 @@
   "SABA-B-6-R1 (awaiting_user: envelope reacts only near the line)",
   "GATE206-S3/S5/S6 (Low, with PERF-1b)",
   "perf architecture signal (perf/lib/report.ts if PERF-1b grows the spec; not scheduled)",
-  "ARCH-R207-MIX-PREVIEW-STORE checkpoint addendum (b-round-207-checkpoint-addendum.md, non-blocking)"
+  "ARCH-R207-MIX-PREVIEW-STORE checkpoint addendum (b-round-207-checkpoint-addendum.md, non-blocking)",
+  "frontend-architect checkpoint on the ArrangementContext volume machine after PERF-FADER-b (before PERF-8/PERF-10)",
+  "RETRO signal: L28 doc status line published conditional 4x (structural fix proposal)"
  ]
 }

@@ -1,0 +1,49 @@
+{
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-27T13:33:57.1249681Z",
+    "round": 208,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R208-01",
+      "severity": "low",
+      "steps": [
+        "Open docs/implementation/2026/quarter-IV/163-studio-perf-harness.md",
+        "Read l.16, l.18, l.24-31, l.74, l.83, l.149",
+        "Compare with perf/budgets.json (266 rows, 2 wallclock asserts) and the spec pass sequence"
+      ],
+      "expected": "Doc 163 consistent with the PERF-FADER-a0 harness",
+      "actual": "l.16/l.83 say 161 rows and no wallclock assert; l.24-31 lack the liveness step 9; l.74 determinism list lacks move-components-*; l.149 TODO says PERF-FADER flips components-per-commit to assert (budget now null). Lines were outside the round-208 grant; the new section corrects them.",
+      "evidence": "c-round-208.md DOC-208; a-round-208.md Known gaps"
+    }
+  ],
+  "passed": [
+    "SCOPE-208",
+    "PERF-RUN-208",
+    "METRIC-LIVE-208",
+    "WINDOW-208",
+    "DRAG-ENDS-208",
+    "DOC-208",
+    "AN-REVIEW-208",
+    "G208-3"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "info": [
+    "I-208-a move window starts after in-page pointerdown; C preCommits=0 in all 30 drags; B to ratify",
+    "I-208-b track/group drags start at max (endsCase max)",
+    "I-208-c liveness margin 1.2-2.0 ms over 30 ms busy-wait floor"
+  ],
+  "blocked": []
+}
