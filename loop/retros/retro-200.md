@@ -67,7 +67,7 @@
 | 151 | C-R151-1: spec-ის კონფლიქტი („R1 own-text clause“ ეწინააღმდეგება „R1 panel clause / §7“-ს) · C-R151-2: Instrument Sans-ში ` · ` ვიწროა | spec-ის კონფლიქტი + შრიფტის მეტრიკა | L4, L3 |
 | 154 | C-R154-01: ახალ mono span-ს font-medium მემკვიდრეობით გადაეცა (ArrangementLane l.912) | A-ს self-check (computed style) | L12, L21 |
 | 158 | C-R158-01: unlayered გლობალური transition rule (`app.css` l.305–314) Tailwind-ის `@layer utilities`-ს ჯობნის. TS1 jsdom-ში მხოლოდ class token-ს ამოწმებდა. | ტესტის ხარვეზი (cascade jsdom-ში) | L12 |
-| 178 | C-R178-BADGE-SELECTOR: ტესტები badge-ს `span.border-accent`-ით ეძებდნენ, W2-მ კი ეს კლასი წაშალა. **ეს კლასი Round 147-ში უკვე იყო ჩაწერილი, როგორც გადადებული Low A-R147-REVIEW-L2.** A-მ hit-ები იპოვა და „DEVIATION 2 / BLOCKER“ მოახსენა: W2 სავალდებულო იყო, ორივე ტესტ-ფაილი კი დაცული (`a-round-178.md` l.43–49). | გადადებული Low → Medium; B-ის spec: სავალდებულო ცვლილება დაცულ ტესტებს ეჯახებოდა | L8, L23, L12 |
+| 178 | C-R178-BADGE-SELECTOR: ტესტები badge-ს `span.border-accent`-ით ეძებდნენ, W2-მ კი ეს კლასი წაშალა. **ეს კლასი Round 147-ში უკვე იყო ჩაწერილი, როგორც გადადებული Low A-R147-REVIEW-L2.** hit-ები code-reviewer-მა იპოვა, A-მ ისინი გაიმეორა და „DEVIATION 2 / BLOCKER“ მოახსენა (STOP არა; დაცული ფაილები არ შეუცვლია): W2 სავალდებულო იყო, ორივე ტესტ-ფაილი კი დაცული (`a-round-178.md` l.43–49). | გადადებული Low → Medium; B-ის spec: სავალდებულო ცვლილება დაცულ ტესტებს ეჯახებოდა | L8, L23, L12 |
 | 189 | C-R189-01: fresh-mode CLS 0.6158 (375) / 0.2727 (1280); seen-mode 0.0198 | first-visit მდგომარეობა არ გაზომილა. *დასკვნა:* მოითხოვდა თუ არა დავალება fresh mode-ს, `tech-lead`-მა არ იცის და არც B-ს გადაუმოწმებია. | L18 |
 | 192 | A სწორად შეჩერდა K0.4-ზე, რადგან B-ის grant-ის სიას PurchaseHeader აკლდა; იმპლემენტაცია არ ყოფილა. | B-ის ინვენტარიზაცია (B-R192-PLANNING-GAP) | L1, L22 |
 | 193 | C-R193-01/02: LeadMagnet-ის placeholder 3.41:1; ველების საზღვრები ~1.6 → ~1.2:1 · C-R193-03: „exactly N lines“ Biome-ის reflow-ს ეწინააღმდეგება | token-ის მომხმარებლები (B-R193-UNMEASURED-INFO) + line-count spec | L2, L15, L5 |
@@ -180,3 +180,6 @@ C-მ Round 200-ში RT-CAUSE და RT-LESSONS ჩააგდო (`c-round-2
 - **OBS-C200-ROUNDING:** §2-ის შენიშვნებში დაემატა.
 - Round 201-ში C ამოწმებს მხოლოდ შეცვლილ ხაზებს (RT-FIX).
 
+## 10. სიტყვების შესწორება — Round 202-ის დაგეგმვა (2026-10-27, D-29z167)
+
+C-მ Round 201-ში RT-FIX ჩაათვალა (PASS) და ერთი Low შენიშვნა დაწერა (C-R201-02, `c-round-201.md`). §3-ის 178-ე სტრიქონში და `lessons.md` L12-ში ავტორობა შესწორდა: hit-ები code-reviewer-მა იპოვა, A-მ ისინი გაიმეორა და BLOCKER მოახსენა, დაცული ფაილები არ შეუცვლია (`a-round-178.md` l.43–49). დაყოფა, ციფრები და გაკვეთილის შინაარსი არ შეცვლილა.

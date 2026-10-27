@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-27T01:31:46.318Z)
+# Active loop summary (2026-10-27T02:03:33.974Z)
 
-- backlog.json 1782 KB -> active view 263 KB
-- status: G_ROOT_GATE round 200
-- servers: `{"checkedUtc":"2026-10-27T01:15:47.4506333Z","round":200,"attempt":1,"store":200}`
+- backlog.json 1798 KB -> active view 266 KB
+- status: G_ROOT_GATE round 201
+- servers: `{"checkedUtc":"2026-10-27T01:58:07.5551275Z","round":201,"attempt":1,"store":200}`
 - last publication: 5b1a2bba0c98dcc86564be8441fbdf989cc8f7b8 (rounds 199-199)
-- last root gate: round 200 skipped - C taskStatus FAIL
+- last root gate: round 201 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -406,7 +406,6 @@
 - ARCH-R180-SIGNAL3 / info / architecture signal, not scheduled: three ~400-char button class strings (Lane l.723/l.731, LibraryPreview l.332) edited every colour round; ~80-line fake AudioContext/ResizeObserver setup duplicated again (drag-feedback-colour-ui l.30-107); reviewer verdict keep for now; seventh consecutive Signal 3 (174-180); in b-round-180-checkpoint-request.md Q1/Q2 / 
 - A-R180-N1-STRUCT-LOOKUPS / info / B ruling (vetoable): accepted. Rule clarified for later tasks: no colour-class selectors; structural navigation (parentElement, aria-controls -> getElementById, firstElementChild) from an element found by role/name/text/testid is allowed when every hop throws a labelled Error / 
 - B-R180-M296-EXPECTATION / info / B error in round-180 section 4.1: m296 expected lane-strings-ui green, but LSU7 l.552 already locks the compact import via importIncludes; the extra reds (m291/m294 DXG7, m296 LSU7) are stricter than planned and accepted; no action / 
-- C-R180-K8-PLAYHEAD-MASK / info / B ruling (vetoable): accepted for round 180 - the masked pixels are the playhead line itself (K8, a K-table element) crossing the lane, not drag feedback; one re-scan with the playhead moved to ~10 s is added to the next REGRESSION round (REG-DUX5-PLAYHEAD-RESCAN) instead of reopening DUX-R-5 / 
 - C-R180-BLOCKED-MOVE-ONE-GHOST / info / info only: a purely vertical Music->Video drag in the real browser renders 1 blocked ghost (no kept valid ghost; jsdom showed 2 after crossing a valid lane); behaviour unchanged; C inference unverified, not scheduled / 
 - A-R180-N1-SHELL-WRITE / info / process note: two N1 debug/fix passes used a python string-replace instead of Edit; final N1 content edited with Edit and fully re-verified by A and C (T180-TARGETED 249/249); no action / 
 - C-R180-HEAD-COPY-VITE-CACHE / info / process note: C's /tmp HEAD copy symlinked store/node_modules and its vite server re-optimised the shared node_modules/.vite cache; tracked tree unchanged (start == end hash), :5173 stayed 200; later HEAD copies should not share the .vite cache (vite --force with a separate cacheDir) or should re-use a recorded HEAD measurement / 
@@ -445,7 +444,7 @@
 - C-R190-INFO / info / routed / C round 190 info: I1 T1 has no portal guard (m5 17/17 green) -> parentElement===document.body case in the next round owning SpotlightLoader 
 - A-R190-SIGNALS / info / signal / A round 190 code-reviewer: Medium #1 no unit test for the portal (B decision: add with the next SpotlightLoader owner, see C-R190-INFO I1); 
 - ARCH-R190-PAGETRANSITION-FIXED / info / signal / PageTransition.tsx pageVariants y transform is the containing block for every fixed overlay inside routes during enter (DownloadDialog.tsx:9
-- GLOBAL-FOCUS-VISIBLE-UNLAYERED / info / Studio half closed (SABA-B-4 stage 1 C PASS, 2505252); store half open -> SABA-B-4 stage 2 (2026-10-26 B round 197 -> 198 planning (D-29z163)); history: signal / Two unlayered global :focus-visible outline rules (app/styles/app.css:379 and app/styles/base/utilities.css:79, 2px brand, offset 2px) beat 
+- GLOBAL-FOCUS-VISIBLE-UNLAYERED / info / store half scheduled round 201 (SABA-B-4 stage 2) with ruling R92: the global rule stays unlayered (SFR1 pins it; after the store sweep no utility depends on layer order and an unlayered rule cannot be suppressed by a utility); closes on round-201 C PASS | Studio half closed (SABA-B-4 stage 1 C PASS, 2505252); store half open -> SABA-B-4 stage 2 (2026-10-26 B round 197 -> 198 planning (D-29z163)); history: signal / Two unlayered global :focus-visible outline rules (app/styles/app.css:379 and app/styles/base/utilities.css:79, 2px brand, offset 2px) beat 
 - C-R191-01 / low / deferred_low_polish + awaiting_user (design call for Saba) / Level-fader ivory thumb vs the adjacent brass fill = 1.82:1 (< 3:1); vs unfilled graphite track 11.1:1 and vs parent 13.5-14.4:1. Inherent t
 - C-R191-INFO / info / routed / I1 Pan/Zoom native pressed shade vs PRESS within-8 clause -> B ruling R70 wins (see SABA-B-3.result); I2 doc 157 lists FS0-FS6 though FS7 ex
 - GATE191-REVIEW-SIGNALS / info / signal / gate-191 reviewer: #1 doc 157 stale status + FS0-FS6 (scheduled round 192); #2 Pan reset button own focus still double ring (-> deferred GAT
@@ -462,15 +461,17 @@
 - B-R194-K0-SCAN-GAP / info / retro_input / Second STORE-2a round lost to B pre-dispatch inventory (same class as B-R192-PLANNING-GAP): fieldscan.mjs used tag+13 lines and missed Guest
 - ARCH-R194-TEST-WALKERS / info / signal - decision with ARCH-R193-THEME-REGION at the STORE-2 exit; not scheduled / A round-194 code-reviewer Architecture note (verbatim in a-round-194.md): store-theme-tokens.test.ts holds two independent app/ walkers (stu
 - C-R194-INFO / info / routed / C round 194 notes: F9/F10 (/cart) not reachable with the mock empty cart; F15 Textarea no route; F11-F13 and F16 blocked backend; first 375 
-- SABA-B-4 / medium / stage 1 (Studio) done: C PASS round 197 browserVerified=true (FOCUS-REVEAL-197 exempt, C-R196-02 pre-existing and tracked separately), published 2505252; stage 2 (store pages, C-R196-03 input) after round 198 (C-R196-02), round 199 regression and round 200 RETRO (2026-10-26 B round 197 -> 198 planning (D-29z163)) | stage 1 complete incl. R91 focus reveal (C round 198 PASS, published 980cfbe); stage 2 (store pages) next after REGRESSION 199 and RETRO (2026-10-26 B round 198 -> 199 planning (D-29z164)) / focus ring and slider thumbs feel heavy: focused Pan shows a thick brass pill with a wide gap; Pan thumb large pure white vs cream Volume th
+- SABA-B-4 / medium / stage 2 (store pages) dispatched round 201 (D-29z166) | stage 1 (Studio) done: C PASS round 197 browserVerified=true (FOCUS-REVEAL-197 exempt, C-R196-02 pre-existing and tracked separately), published 2505252; stage 2 (store pages, C-R196-03 input) after round 198 (C-R196-02), round 199 regression and round 200 RETRO (2026-10-26 B round 197 -> 198 planning (D-29z163)) | stage 1 complete incl. R91 focus reveal (C round 198 PASS, published 980cfbe); stage 2 (store pages) next after REGRESSION 199 and RETRO (2026-10-26 B round 198 -> 199 planning (D-29z164)) / focus ring and slider thumbs feel heavy: focused Pan shows a thick brass pill with a wide gap; Pan thumb large pure white vs cream Volume th
 - A-R195-SIGNALS / info / signal / A round 195 code-reviewer Architecture note (verbatim in a-round-195.md): keep the field scanner in store-theme-tokens.test.ts; if the same 
 - B-R195-WORKFLOW-DOC-DRIFT / info / root_note / docs/technical/studio-real-workspace/agent-workflow.md lacks the policy sections from SABA-B-3 onward (Retrospective, SABA-B-4, three 2026-1
-- C-R196-03 / low / input to SABA-B-4 stage 2 (store pages); not a stand-alone deferred Low / home product card link focus ring clipped (tree and ref)
+- C-R196-03 / low / scheduled round 201 (SABA-B-4 stage 2, row CARD-RING); hypothesis (unconfirmed): ProductCard <Link> is inline around a block overflow-hidden rounded-xl div | input to SABA-B-4 stage 2 (store pages); not a stand-alone deferred Low / home product card link focus ring clipped (tree and ref)
 - ARCH-R198-FOCUS-REGION / info / signal_recorded_not_scheduled (code-reviewer Architecture note, round 198: Signal 3 weak - scroller/chrome focus region touched rounds 196-198, R89 reverted; verdict keep: logic in lib/focus-reveal.ts, component only reads/writes refs it owns; Signal 4 absent). Folded into the pending frontend-architect checkpoint request (b-round-197.md section 6). / 
 - OBS-R199-LEDGER / info / ruled (B, D-29z165): keep. The demo sound titles in app/data/studio-lab-demo.ts are content (sound names), covered by the standing M2 ledger "user content / sound titles are not translated" (tasks 147/148). Smallest honest behaviour: no change; Saba may veto via a decisions note / 
 - OBS-R199-OV-PLAYHEAD-CORNER / info / acknowledged: notch metric counts come from the overview playhead at 0 % overlapping the left arc; 0 elsewhere; not a SABA-B-2 gap. Harness rule: move the playhead off 0 before the corner metric / 
 - OBS-R199-SNAP-DEFAULT / info / acknowledged: Snap off in a fresh session, unchanged since round 122; harness rule: set Snap explicitly / 
 - OBS-R199-PROTECTED-NAV / info / acknowledged (info): /studio/middle-east fires framenavigated 3x to the same URL; protection unchanged (Sign in required, 0 audio[src]). Not scheduled; protected file / 
+- C-R200-01 / medium / corrected at round-201 planning (retro-200 section 9; lessons L12, L14, new L23; retro_runs[0].headline); open until C RT-FIX passes in round 201 / retro-200 filed rounds 127 and 178 as A self-check misses; the A/C reports show A stopped/reported before handover (cause on the B/task side
+- OBS-C200-OVERVIEW-FRAME / info / harness note -> regression_rounds REGRESSION-ROUND-2026-10-30 scope_additions (scan [data-testid=arrangement-overview], not the frame) / arrangement-overview-frame is the visible-window box; the overview playhead can sit outside it
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

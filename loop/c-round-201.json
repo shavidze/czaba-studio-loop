@@ -1,0 +1,92 @@
+{
+ "taskStatus": "FAIL",
+ "round": 201,
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {
+  "checkedUtc": "2026-10-27T01:58:07.5551275Z",
+  "round": 201,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R201-02",
+   "severity": "low",
+   "steps": [
+    "Read lessons.md L12 evidence and retros/retro-200.md section 3 row 178",
+    "Compare with a-round-178.md l.43-45"
+   ],
+   "expected": "Attribution matches the cited report",
+   "actual": "L12 says 'A grepped, the hits were protected, A stopped correctly'; a-round-178.md says the code-reviewer found the hits, A reproduced them and handed over with a DEVIATION 2 / BLOCKER, not a STOP. Substance of the lesson holds",
+   "evidence": "c-round-201/out/lessons-diff.txt; a-round-178.md l.43-49"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "G201-3",
+  "RT-FIX"
+ ],
+ "failed": [
+  "SCOPE-201: not implemented (A STOP)",
+  "KEY-RING: not implemented (A STOP)",
+  "RING-VISIBLE: not implemented (A STOP)",
+  "CSS-CONTROLS: not implemented (A STOP)",
+  "CARD-RING: not implemented (A STOP)",
+  "CONTRAST: not implemented (A STOP)",
+  "POINTER: not implemented (A STOP)",
+  "STUDIO-NEIGHBOUR: not implemented (A STOP)",
+  "NO-SHIFT: not implemented (A STOP)",
+  "ERROR-BORDER: not implemented (A STOP)",
+  "KEEP-LIST: not implemented (A STOP)",
+  "T-RUN-201: not implemented (A STOP)",
+  "AN-REVIEW-201: not implemented (A STOP)"
+ ],
+ "blocked": [
+  "BLOCKED-AUTH: /account, /account/downloads, app/components/studio/* under /studio/:id - backend unavailable in cloud",
+  "/recordings/:id and /scenes/:id: not attempted in the browser this round (L22 short round). With the mock, curl /scenes/pulse-loop-kit and /recordings/pulse-loop-kit return 200 with an SSR shell (titles 'Scene Builder | CZABA', 'Recordings | CZABA'); whether the client renders SfxVideoSync is unverified"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "observations": [
+  {
+   "id": "B-R200-HIDDEN-FOCUSABLE-GAP",
+   "severity": "info",
+   "origin": "B planning (retro_input, same class as B-R192-PLANNING-GAP / B-R194-K0-SCAN-GAP, both info)",
+   "fix": "B ruling (L10) before re-dispatch; add a hidden-focusable scan to the inventory (L1/L23)",
+   "detail": "Removing the label tokens leaves the opacity-0 input as the only focus target, and its outline is not painted (A probe: 69 brass px focused = 69 unfocused vs 693 in ref). A stopped correctly; no source changed; stage 2 not implemented",
+   "evidence": "a-round-201.md sections 1-3; a-round-201/brass-count.json; c-round-201.md 'A's STOP'"
+  },
+  "A STOP valid at code level (SfxVideoSync.tsx:34-40 opacity-0 input inside focus-within ring label); B must rule (L10) before re-dispatch",
+  "ProductCard.tsx:132 opacity-0 group-hover overlay around tabbable AudioPreviewButton: pre-existing invisible focus in ref (A note); record with C-R196-03/R96",
+  "C-R200-01 and C-R200-02 close on RT-FIX PASS"
+ ],
+ "invalidRuns": [
+  "g201-3 attempt 1: 1280 /studio/middle-east waitForFunction 60 s timeout on cold route (env); replaced by attempt 2"
+ ],
+ "rows": {
+  "SOURCE-SCOPE": "PASS",
+  "G201-3": "PASS (1440x900, 1280x720)",
+  "RT-FIX": "PASS (Low wording note C-R201-02)",
+  "BLOCKED-AUTH": "BLOCKED",
+  "SCOPE-201": "FAIL not implemented (A STOP)",
+  "KEY-RING": "FAIL not implemented (A STOP)",
+  "RING-VISIBLE": "FAIL not implemented (A STOP)",
+  "CSS-CONTROLS": "FAIL not implemented (A STOP)",
+  "CARD-RING": "FAIL not implemented (A STOP)",
+  "CONTRAST": "FAIL not implemented (A STOP)",
+  "POINTER": "FAIL not implemented (A STOP)",
+  "STUDIO-NEIGHBOUR": "FAIL not implemented (A STOP)",
+  "NO-SHIFT": "FAIL not implemented (A STOP)",
+  "ERROR-BORDER": "FAIL not implemented (A STOP)",
+  "KEEP-LIST": "FAIL not implemented (A STOP)",
+  "T-RUN-201": "FAIL not implemented (A STOP)",
+  "AN-REVIEW-201": "FAIL not implemented (A STOP)"
+ }
+}
