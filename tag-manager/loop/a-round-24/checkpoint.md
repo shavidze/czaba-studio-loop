@@ -1,0 +1,12 @@
+# A round 24 checkpoint
+- 13:58 baseline ok (HEAD 59c26d6, clean). primitives read (TESTING, TYPESCRIPT_STRICT, AGENT_DISCOVERABLE_CODE, STATE_MANAGEMENT, GEORGIAN_DOCS) via Bash cat at 13:57 UTC.
+- next: part A + B tests, red run.
+- 14:01 tests written; red 202/3 (s3,s4,s5); vacuity i2 pass / i3 mockClear fail; D-33 src done; green renderer run
+- 14:06 mutants MR-1/MR-2/MF-1 killed; docs 001 + README + STATE_MANAGEMENT line done. next: reviewers + final gate
+- 14:09 MI-1..5 killed by (i3) alone, MB 24 fail. gate + code-reviewer + qa-engineer running
+- 14:12 gate verify exit=0 (renderer 205/205, main 93/93, e2e 7/7), e2e --retries=0 7/7, biome 8 warnings none in MetadataPanel. waiting on reviewers
+- 14:20 code-reviewer done: fixed #3 (mock.lastCall), #1 documented in entry 10; red re-run final tests on old src 202/3. waiting qa, then final gate rerun
+- 14:30 qa found A-R24-01 (kept entry resets dirty form; breaks D-30). Adding (s6)/(s7) red, then gate form update on freshly-read paths
+- 14:40 A-R24-01 fix (keptPaths gate) green 207/207; mutants MR-1,MR-2,MF-1,MK-1 killed; docs refs updated. next: re-review + final gate
+- 14:48 FINAL gate after last edit: verify exit=0 renderer 207/207 main 93/93 e2e 7/7; --retries=0 7/7; biome 8 warnings. waiting re-review
+- 14:55 a-round-24.md written. DONE.

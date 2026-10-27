@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T13:39:42.196Z)
+# Active loop summary (2026-10-27T14:20:18.038Z)
 
-- backlog.json 213 KB -> active view 72 KB
-- status: G_ROOT_GATE round 23
+- backlog.json 225 KB -> active view 78 KB
+- status: G_ROOT_GATE round 24
 - servers: `{"servers":"none or skipped"}`
-- last publication: 59c26d6a3c6d4ca0b73e9fa78d822a5bac427d16 (rounds 23-23)
-- last root gate: round 23 published - commit 59c26d6a3c6d4ca0b73e9fa78d822a5bac427d16 pushed
+- last publication: 3d27ba921ab2f27e4b02a8e6bb220c2fad5850d5 (rounds 24-24)
+- last root gate: round 24 published - commit 3d27ba921ab2f27e4b02a8e6bb220c2fad5850d5 pushed
 
-## Current items: TM-B25, TM-B26
+## Current items: TM-B26, TM-B27
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -130,6 +130,16 @@
 - A-R22-01 / low / open / Select All then Shift-click: with the anchor, nothing changes (range is added, deviation 2); without an anchor the selection collapses to on
 - A-R22-02 / low / open / The anchor is cleared only on a non-empty -> empty transition after render; a clear + reselect in one batch would keep a stale anchor. No su
 - A-R22-03 / info / open / FileList re-renders on empty <-> non-empty selection transitions; findIndex O(n) only on Shift-click; rows share the memoised files array
+- RR-R23-01 / low / open / metadata-panel-batch-save.test.ts:1140-1156 (i2) only proves isolation if (i1) runs right before it; run alone (-t i2) or shuffled it passes
+- RR-R23-02 / low / open / docs/bugs/001 hard-codes line numbers (FileList.tsx:70, :112-114, MetadataPanel.tsx:43, :149, ...); accurate at 59c26d6 but stale after the 
+- RR-R23-03 / low / open / (z12) pins the anchor-moves behaviour (D-31 deviation 1), which is still a Saba question; an Explorer-style answer inverts it on purpose (do
+- RR-R23-04 / info / open / Architecture signal: handleSave (~75 lines, two branches, snapshot/selection guards, skipSyncRef) could move into a store action or a useSav
+- A-R23-01 / info / open / handleSave takes selectedFiles and fields from the render closure while startSelection and the snapshot come from getState(); they cannot di
+- A-R23-02 / info / open / (i1) name says 'every window.api mock' but covers 5 of 16 mocks
+- C-R23-01 / info / open / handleSchemaChanged still has no component test; the real app (R23-5 step 4) shows it works
+- B-R23-01 / low / open / handleSchemaChanged: a rejected chunk read drops those files from the metadata map (setMetadata(accumulated) without them); the list shows t
+- B-R23-02 / low / open / Reverse order of A-R21-03: a schema re-read that started before a pending write finished and resolves after the save's re-read writes the pr
+- B-R23-03 / low / open / Saving the schema (Done) while the form has unsaved edits silently replaces them: handleSchemaChanged calls setEditingMetadata(re-read | {})
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

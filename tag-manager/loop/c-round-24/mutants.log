@@ -1,0 +1,65 @@
+## MR-1
+['Tests  1 failed | 6 passed (7)']
+failed: ['× (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema 1022ms']
+msgs: ["AssertionError: expected '' to be 'fromfile' // Object.is equality"]
+
+## MR-2
+['Tests  1 failed | 6 passed (7)']
+failed: ['× (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema 1017ms']
+msgs: ["AssertionError: expected undefined to be 'fromfile' // Object.is equality"]
+
+## MF-1
+['Tests  2 failed | 5 passed (7)']
+failed: ['× (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form 981ms', '× (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects 957ms']
+msgs: ["AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }", "AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }"]
+
+## MF-1b (whole kept loop removed)
+['Tests  2 failed | 5 passed (7)']
+failed: ['× (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form 982ms', '× (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects 956ms']
+msgs: ["AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }", "AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }"]
+
+## MK-1
+['Tests  2 failed | 5 passed (7)']
+failed: ['× (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects 961ms', '× (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30) 1031ms']
+msgs: ["AssertionError: expected 'ACat' to be 'R24Cat' // Object.is equality", "AssertionError: expected 'A-title' to be 'TypedDuring' // Object.is equality"]
+
+## MB
+['Tests  24 failed | 25 passed (49)']
+failed: ['× (b) partial failure: edits are kept and succeeded files are refreshed in the store 101ms', '× (c) retry after a failure writes the same fields to all selected files and clears on success 187ms', '× (d) full success clears the form back to Multiple values 90ms', '× (e) single-file write failure keeps the typed value and shows the error 92ms', '× (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated 86ms', '× (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept 92ms', '× (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept 79ms', '× (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept 81ms', '× (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept 77ms', '× (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept 78ms', '× (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read 77ms', '× (o) batch, all succeed: both files are patched and the selection is kept 79ms', '× (p) batch, partial failure: only the written file is patched even though the scan has the failed one 83ms', '× (q) batch, all failed: no scan, files unchanged, edits kept 72ms', '× (r) single write rejects: no scan, files unchanged 72ms', '× (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged 72ms', '× (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged 84ms', '× (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged 74ms', '× (v) folderPath null: no scan, the save behaves as today 72ms', '× (w) the scan result lacks the saved path: the file keeps its stats and nothing is added 74ms', "× (x2) the follow-up save on B writes B's own values, never A's 161ms", '× (x7) pin: the write rejects after A -> B: error toast, editor shows B, store untouched, no re-read 82ms', '× (y2) the next Save writes the text typed during the first save 130ms', '× (y10) the next batch Save writes only the field typed during the first save 131ms']
+msgs: ['AssertionError: expected "vi.fn()" to be called 1 times, but got 2 times', 'AssertionError: expected "vi.fn()" to be called 2 times, but got 4 times', 'AssertionError: expected "vi.fn()" to be called 1 times, but got 5 times']
+
+## MI-1
+['Tests  1 failed | 48 skipped (49)']
+failed: ['× (i3) resetWindowApiMocks drops once-values queued on the five window.api mocks 10ms']
+msgs: ['::error file=/tmp/c-r24-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > mock isolation (A-R21-04%2C RR-R23-01) > (i3) resetWindowApiMocks drops once-values queued on the five window.api mocks,line=1154,column=67::AssertionError: promise rejected "Error: leaked" instead of resolving%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:1154:67%0A%0ACaused by: Caused by: Error: leaked%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:1146:68%0A%0A', 'AssertionError: promise rejected "Error: leaked" instead of resolving']
+
+## MI-2
+['Tests  1 failed | 48 skipped (49)']
+failed: ['× (i3) resetWindowApiMocks drops once-values queued on the five window.api mocks 8ms']
+msgs: ["AssertionError: expected { '/leaked.wav': { title: 'leaked' } } to deeply equal {}"]
+
+## MI-3
+['Tests  1 failed | 48 skipped (49)']
+failed: ['× (i3) resetWindowApiMocks drops once-values queued on the five window.api mocks 10ms']
+msgs: ['::error file=/tmp/c-r24-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > mock isolation (A-R21-04%2C RR-R23-01) > (i3) resetWindowApiMocks drops once-values queued on the five window.api mocks,line=1156,column=60::AssertionError: promise rejected "Error: leaked" instead of resolving%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:1156:60%0A%0ACaused by: Caused by: Error: leaked%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:1148:63%0A%0A', 'AssertionError: promise rejected "Error: leaked" instead of resolving']
+
+## MI-4
+['Tests  1 failed | 48 skipped (49)']
+failed: ['× (i3) resetWindowApiMocks drops once-values queued on the five window.api mocks 8ms']
+msgs: ["AssertionError: expected { title: 'leaked' } to deeply equal {}"]
+
+## MI-5
+['Tests  1 failed | 48 skipped (49)']
+failed: ['× (i3) resetWindowApiMocks drops once-values queued on the five window.api mocks 11ms']
+msgs: ['::error file=/tmp/c-r24-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > mock isolation (A-R21-04%2C RR-R23-01) > (i3) resetWindowApiMocks drops once-values queued on the five window.api mocks,line=1158,column=45::AssertionError: promise rejected "Error: leaked" instead of resolving%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:1158:45%0A%0ACaused by: Caused by: Error: leaked%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:1150:60%0A%0A', 'AssertionError: promise rejected "Error: leaked" instead of resolving']
+
+## control (A tree, batch-save -t i3)
+['Tests  1 passed | 48 skipped (49)']
+failed: []
+msgs: []
+
+## control (A tree, schema-change)
+['Tests  7 passed (7)']
+failed: []
+msgs: []
+

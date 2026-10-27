@@ -1,0 +1,56 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/components/metadata-panel-schema-change.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 7589[2mms[22m[39m
+     [33m[2m✓[22m[39m (s1) pin: single selection, no save: the form shows the new field read with the new schema [33m 1428[2mms[22m[39m
+     [33m[2m✓[22m[39m (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field [33m 1054[2mms[22m[39m
+     [33m[2m✓[22m[39m (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form [33m 992[2mms[22m[39m
+     [33m[2m✓[22m[39m (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema [33m 1013[2mms[22m[39m
+     [33m[2m✓[22m[39m (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema [33m 1040[2mms[22m[39m
+[31m     [31m×[31m (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects[39m[33m 990[2mms[22m[39m
+[31m     [31m×[31m (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)[39m[33m 1069[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema change re-reads files (C-R23-01, D-33)[2m > [22m(s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects
+[31m[1mAssertionError[22m: expected 'ACat' to be 'R24Cat' // Object.is equality[39m
+
+Expected: [32m"[7mR24[27mCat"[39m
+Received: [31m"[7mA[27mCat"[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m214:53[22m[39m
+    [90m212| [39m    [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m213| [39m    [34mexpect[39m(state[33m.[39mtoastMessage)[33m.[39m[34mtoBe[39m([32m"Failed to read 2 files"[39m)[33m;[39m
+    [90m214| [39m    expect(getInputByLabel("Category (UCS)").value).toBe(TYPED_CATEGOR…
+    [90m   | [39m                                                    [31m^[39m
+    [90m215| [39m    [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m216| [39m    [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema change re-reads files (C-R23-01, D-33)[2m > [22m(s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)
+[31m[1mAssertionError[22m: expected 'A-title' to be 'TypedDuring' // Object.is equality[39m
+
+Expected: [32m"TypedDuring"[39m
+Received: [31m"A-title"[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m234:44[22m[39m
+    [90m232| [39m    [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m233| [39m    [34mexpect[39m(state[33m.[39mtoastMessage)[33m.[39m[34mtoBe[39m([32m"Tags saved"[39m)[33m;[39m
+    [90m234| [39m    [34mexpect[39m([34mgetInputByLabel[39m([32m"Title"[39m)[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m"TypedDuring"[39m)[33m;[39m
+    [90m   | [39m                                           [31m^[39m
+    [90m235| [39m    expect(getInputByLabel("Category (UCS)").value).toBe(TYPED_CATEGOR…
+    [90m236| [39m    [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 14:06:39
+[2m   Duration [22m 8.76s[2m (transform 242ms, setup 97ms, import 391ms, tests 7.59s, environment 554ms)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema change re-reads files (C-R23-01%2C D-33) > (s6) A-R24-01%3A a dirty form keeps its unsaved edit when the schema re-read rejects,line=214,column=53::AssertionError: expected 'ACat' to be 'R24Cat' // Object.is equality%0A%0AExpected: "R24Cat"%0AReceived: "ACat"%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:214:53%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema change re-reads files (C-R23-01%2C D-33) > (s7) A-R24-01%3A a title typed during a save survives a rejected schema re-read (D-30),line=234,column=44::AssertionError: expected 'A-title' to be 'TypedDuring' // Object.is equality%0A%0AExpected: "TypedDuring"%0AReceived: "A-title"%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:234:44%0A%0A

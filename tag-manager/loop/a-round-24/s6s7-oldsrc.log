@@ -1,0 +1,125 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/a-r24-old2[39m
+
+ [31m❯[39m tests/renderer/components/metadata-panel-schema-change.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 7580[2mms[22m[39m
+     [33m[2m✓[22m[39m (s1) pin: single selection, no save: the form shows the new field read with the new schema [33m 1367[2mms[22m[39m
+     [33m[2m✓[22m[39m (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field [33m 1047[2mms[22m[39m
+[31m     [31m×[31m (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form[39m[33m 1015[2mms[22m[39m
+[31m     [31m×[31m (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema[39m[33m 1067[2mms[22m[39m
+[31m     [31m×[31m (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema[39m[33m 1054[2mms[22m[39m
+[31m     [31m×[31m (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects[39m[33m 987[2mms[22m[39m
+     [33m[2m✓[22m[39m (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30) [33m 1040[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema change re-reads files (C-R23-01, D-33)[2m > [22m(s3) B-R23-01: a rejected schema re-read keeps the store entries and the form
+[31m[1mAssertionError[22m: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "/music/a.wav": {[39m
+[32m-     "category": "ACat",[39m
+[32m-     "comment": "",[39m
+[32m-     "title": "A-title",[39m
+[32m-   },[39m
+[32m-   "/music/b.wav": {[39m
+[32m-     "category": "BCat",[39m
+[32m-     "comment": "",[39m
+[32m-     "title": "B-title",[39m
+[32m-   },[39m
+[32m- }[39m
+[31m+ {}[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m164:46[22m[39m
+    [90m162| [39m
+    [90m163| [39m    expect(useMetadataStore.getState().toastMessage).toBe("Failed to r…
+    [90m164| [39m    expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: SEED_…
+    [90m   | [39m                                             [31m^[39m
+    [90m165| [39m    [34mexpect[39m([34mgetInputByLabel[39m([32m"Category (UCS)"[39m)[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m"ACat"[39m)[33m;[39m
+    [90m166| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema change re-reads files (C-R23-01, D-33)[2m > [22m(s4) A-R21-03: single save pending while the schema changes re-reads with the current schema
+[31m[1mAssertionError[22m: expected '' to be 'fromfile' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- fromfile[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m180:46[22m[39m
+    [90m178| [39m    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved"…
+    [90m179| [39m    expect(getInputByLabel("Category (UCS)").value).toBe(TYPED_CATEGOR…
+    [90m180| [39m    [34mexpect[39m([34mgetInputByLabel[39m([32m"R24note"[39m)[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mNOTE_FROM_FILE[39m)[33m;[39m
+    [90m   | [39m                                             [31m^[39m
+    [90m181| [39m    expect(useFileStore.getState().metadata[PATH_A]?.[NOTE_KEY]).toBe(…
+    [90m182| [39m    expect(schemaHasNote(vi.mocked(window.api.readMetadata).mock.lastC…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema change re-reads files (C-R23-01, D-33)[2m > [22m(s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema
+[31m[1mAssertionError[22m: expected undefined to be 'fromfile' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"fromfile"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m200:66[22m[39m
+    [90m198| [39m
+    [90m199| [39m    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved …
+    [90m200| [39m    expect(useFileStore.getState().metadata[PATH_A]?.[NOTE_KEY]).toBe(…
+    [90m   | [39m                                                                 [31m^[39m
+    [90m201| [39m    expect(schemaHasNote(vi.mocked(window.api.readMetadataBatch).mock.…
+    [90m202| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema change re-reads files (C-R23-01, D-33)[2m > [22m(s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects
+[31m[1mAssertionError[22m: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "/music/a.wav": {[39m
+[32m-     "category": "ACat",[39m
+[32m-     "comment": "",[39m
+[32m-     "title": "A-title",[39m
+[32m-   },[39m
+[32m-   "/music/b.wav": {[39m
+[32m-     "category": "BCat",[39m
+[32m-     "comment": "",[39m
+[32m-     "title": "B-title",[39m
+[32m-   },[39m
+[32m- }[39m
+[31m+ {}[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m217:46[22m[39m
+    [90m215| [39m    [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m216| [39m    [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+    [90m217| [39m    expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: SEED_…
+    [90m   | [39m                                             [31m^[39m
+    [90m218| [39m  })[33m;[39m
+    [90m219| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 14:06:49
+[2m   Duration [22m 8.71s[2m (transform 212ms, setup 87ms, import 358ms, tests 7.58s, environment 550ms)[22m
+
+
+::error file=/tmp/a-r24-old2/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema change re-reads files (C-R23-01%2C D-33) > (s3) B-R23-01%3A a rejected schema re-read keeps the store entries and the form,line=164,column=46::AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }%0A%0A- Expected%0A+ Received%0A%0A- {%0A-   "/music/a.wav": {%0A-     "category": "ACat",%0A-     "comment": "",%0A-     "title": "A-title",%0A-   },%0A-   "/music/b.wav": {%0A-     "category": "BCat",%0A-     "comment": "",%0A-     "title": "B-title",%0A-   },%0A- }%0A+ {}%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:164:46%0A%0A
+
+::error file=/tmp/a-r24-old2/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema change re-reads files (C-R23-01%2C D-33) > (s4) A-R21-03%3A single save pending while the schema changes re-reads with the current schema,line=180,column=46::AssertionError: expected '' to be 'fromfile' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- fromfile%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:180:46%0A%0A
+
+::error file=/tmp/a-r24-old2/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema change re-reads files (C-R23-01%2C D-33) > (s5) A-R21-03%3A batch save pending while the schema changes re-reads with the current schema,line=200,column=66::AssertionError: expected undefined to be 'fromfile' // Object.is equality%0A%0A- Expected: %0A"fromfile"%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:200:66%0A%0A
+
+::error file=/tmp/a-r24-old2/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema change re-reads files (C-R23-01%2C D-33) > (s6) A-R24-01%3A a dirty form keeps its unsaved edit when the schema re-read rejects,line=217,column=46::AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }%0A%0A- Expected%0A+ Received%0A%0A- {%0A-   "/music/a.wav": {%0A-     "category": "ACat",%0A-     "comment": "",%0A-     "title": "A-title",%0A-   },%0A-   "/music/b.wav": {%0A-     "category": "BCat",%0A-     "comment": "",%0A-     "title": "B-title",%0A-   },%0A- }%0A+ {}%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:217:46%0A%0A
