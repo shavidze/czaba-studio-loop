@@ -1,0 +1,387 @@
+
+ RUN  v4.0.18 /tmp/c-r29-oldsrc
+
+ ✓ tests/renderer/components/folder-read-during-save.test.ts (8 tests) 2564ms
+     ✓ (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value  702ms
+     ✓ (r4) pin: a Rescan issued after the save completed applies the file's current value  337ms
+ ✓ tests/renderer/components/schema-editor.test.ts (4 tests) 2764ms
+     ✓ rejects a custom field with RIFF ID ICAT  926ms
+     ✓ rejects a custom field with lowercase RIFF ID icat  622ms
+     ✓ rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use)  615ms
+     ✓ lists Category (UCS) among hidden standard fields for a pre-T-1 schema  599ms
+ ✓ tests/renderer/components/metadata-panel-batch-save.test.ts (49 tests) 6380ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  475ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success  311ms
+ ✓ tests/renderer/components/file-list.test.ts (20 tests) 813ms
+     ✓ (R18-e) sorts a malformed artist row as empty in both directions without throwing  340ms
+ ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts (7 tests | 6 failed) 1134ms
+     × (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files 335ms
+     × (k2) Open Folder on the same folder whose only read chunk rejects keeps both store entries and shows Failed to read 2 files 105ms
+     × (k3) App: dropping the same folder whose only read chunk rejects keeps both store entries and shows Failed to read 2 files 59ms
+     × (k4) 51 files: chunk 1 resolves and applies its read, the rejected chunk 2 keeps the seeded entry of z and shows Failed to read 1 files 78ms
+     × (k5) Open Folder of another folder whose read rejects drops the old entries, lists the new files without entries and shows Failed to read 2 files 82ms
+     × (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time 363ms
+     ✓ (k7) pin: Rescan whose read resolves for both files applies the read and shows no error toast 110ms
+ ❯ tests/renderer/stores/file-store.test.ts (37 tests | 1 failed) 60ms
+       ✓ initializes with empty state 2ms
+       ✓ sets files 0ms
+       ✓ sets folder path 1ms
+       ✓ sets metadata 0ms
+       ✓ updates single file metadata 0ms
+       ✓ toggles selection on 0ms
+       ✓ toggles selection off 0ms
+       ✓ selects range 18ms
+       ✓ selects range with reversed indices 1ms
+       ✓ selectAll selects all visible files 0ms
+       ✓ selectAll respects search filter 0ms
+       ✓ clears selection 0ms
+       ✓ sets sort field and defaults to asc 0ms
+       ✓ toggles direction when same field set again 0ms
+       ✓ resets to asc when different field set 0ms
+       ✓ toggleSortDirection flips direction 0ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}} 2ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}} 1ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}} 1ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}} 1ms
+       ✓ (b) uses only the first element, not a later string element 1ms
+       ✓ (c) sorts a well-typed string first element by its value 3ms
+       ✓ (c) sorts a null first element as empty 1ms
+       ✓ (c) sorts an empty array as empty 1ms
+       ✓ (c) sorts bpm numerically, not lexicographically 8ms
+       ✓ (c) sorts a bpm number against missing metadata as before 0ms
+       ✓ sets search query 0ms
+       ✓ sets scanning state 0ms
+       ✓ (s1) patches size and modifiedAt of the matching path only and keeps the order 0ms
+       ✓ (s2) ignores an entry whose path is not in files 0ms
+       ✓ (s3) keeps the existing name when the entry has the same path but another name 0ms
+       ✓ (s4) leaves selectedPaths and metadata unchanged 0ms
+       ✓ (s5) an empty entry list leaves files deep-equal 0ms
+       ✓ (s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset 0ms
+       ✓ (g1) markPathsWritten bumps writeGeneration once per call and stamps only the given paths 0ms
+       ✓ (g2) applyMetadataRead replaces metadata, keeps the current entry of superseded paths and applies equal generations 0ms
+       × (g3) applyMetadataRead keeps the current entry of kept paths, leaves kept paths with no entry absent and drops the rest 11ms
+ ❯ tests/renderer/utils/utils.test.ts (25 tests | 1 failed) 31ms
+     ✓ formats bytes 1ms
+     ✓ formats kilobytes 0ms
+     ✓ formats megabytes 0ms
+     ✓ handles zero 0ms
+     ✓ handles exact boundary (1024) 0ms
+     ✓ handles exact MB boundary 0ms
+     ✓ formats seconds only 0ms
+     ✓ formats minutes and seconds 0ms
+     ✓ handles zero 0ms
+     ✓ pads single-digit seconds 0ms
+     ✓ handles fractional seconds by flooring 0ms
+     ✓ generates 4-char uppercase ID from key 0ms
+     ✓ pads short keys with X 0ms
+     ✓ strips non-alpha characters 0ms
+     ✓ truncates long keys to 4 chars 0ms
+     ✓ appends number if base ID exists 0ms
+     ✓ increments suffix when multiple collisions 0ms
+     ✓ returns null when all candidates exhausted 0ms
+     ✓ accepts valid 4-char uppercase IDs 0ms
+     ✓ rejects lowercase 0ms
+     ✓ rejects wrong length 0ms
+     ✓ rejects special characters 0ms
+     ✓ rejects empty string 0ms
+     ✓ (u1) takes the write generation before each chunk read and records it only for paths in that chunk's result 2ms
+     × (u2) returns the paths of every rejected chunk in paths order and counts them in failures 21ms
+ ✓ tests/renderer/stores/schema-store.test.ts (8 tests) 9ms
+ ✓ tests/renderer/stores/player-store.test.ts (9 tests) 6ms
+ ✓ tests/renderer/stores/template-store.test.ts (8 tests) 7ms
+ ✓ tests/renderer/stores/metadata-store.test.ts (9 tests) 12ms
+ ✓ tests/renderer/utils/file-row-display.test.ts (36 tests) 6ms
+ ✓ tests/renderer/components/metadata-panel-schema-change.test.ts (15 tests) 16012ms
+     ✓ (s1) pin: single selection, no save: the form shows the new field read with the new schema  1672ms
+     ✓ (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field  1380ms
+     ✓ (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form  1269ms
+     ✓ (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema  996ms
+     ✓ (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema  1114ms
+     ✓ (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects  1335ms
+     ✓ (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)  1339ms
+     ✓ (s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects  1318ms
+     ✓ (s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read  1049ms
+     ✓ (s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save  801ms
+     ✓ (s11) D-34 pin: a schema re-read issued after the write resolved is applied  755ms
+     ✓ (s12) D-34 pin: a chunk issued after the write resolved is applied even when the save's re-read failed  733ms
+     ✓ (s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks  737ms
+     ✓ (s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time  767ms
+     ✓ (s15) D-34: a path whose batch write failed is not superseded  745ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31, D-36) > (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files
+AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }
+
+- Expected
++ Received
+
+- {
+-   "/music/a.wav": {
+-     "category": "ACat",
+-     "comment": "",
+-     "title": "A-title",
+-   },
+-   "/music/b.wav": {
+-     "category": "BCat",
+-     "comment": "",
+-     "title": "B-title",
+-   },
+- }
++ {}
+
+ ❯ expectSeededEntriesKeptWithToast tests/renderer/components/folder-read-rejected-chunk.test.ts:123:26
+    121| function expectSeededEntriesKeptWithToast(): void {
+    122|   const state = useFileStore.getState();
+    123|   expect(state.metadata).toEqual({ [PATH_A]: OLD_A, [PATH_B]: OLD_B });
+       |                          ^
+    124|   expect(state.files).toHaveLength(2);
+    125|   expect(useMetadataStore.getState().toastMessage).toBe("Failed to rea…
+ ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:151:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31, D-36) > (k2) Open Folder on the same folder whose only read chunk rejects keeps both store entries and shows Failed to read 2 files
+AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }
+
+- Expected
++ Received
+
+- {
+-   "/music/a.wav": {
+-     "category": "ACat",
+-     "comment": "",
+-     "title": "A-title",
+-   },
+-   "/music/b.wav": {
+-     "category": "BCat",
+-     "comment": "",
+-     "title": "B-title",
+-   },
+- }
++ {}
+
+ ❯ expectSeededEntriesKeptWithToast tests/renderer/components/folder-read-rejected-chunk.test.ts:123:26
+    121| function expectSeededEntriesKeptWithToast(): void {
+    122|   const state = useFileStore.getState();
+    123|   expect(state.metadata).toEqual({ [PATH_A]: OLD_A, [PATH_B]: OLD_B });
+       |                          ^
+    124|   expect(state.files).toHaveLength(2);
+    125|   expect(useMetadataStore.getState().toastMessage).toBe("Failed to rea…
+ ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:163:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31, D-36) > (k3) App: dropping the same folder whose only read chunk rejects keeps both store entries and shows Failed to read 2 files
+AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }
+
+- Expected
++ Received
+
+- {
+-   "/music/a.wav": {
+-     "category": "ACat",
+-     "comment": "",
+-     "title": "A-title",
+-   },
+-   "/music/b.wav": {
+-     "category": "BCat",
+-     "comment": "",
+-     "title": "B-title",
+-   },
+- }
++ {}
+
+ ❯ expectSeededEntriesKeptWithToast tests/renderer/components/folder-read-rejected-chunk.test.ts:123:26
+    121| function expectSeededEntriesKeptWithToast(): void {
+    122|   const state = useFileStore.getState();
+    123|   expect(state.metadata).toEqual({ [PATH_A]: OLD_A, [PATH_B]: OLD_B });
+       |                          ^
+    124|   expect(state.files).toHaveLength(2);
+    125|   expect(useMetadataStore.getState().toastMessage).toBe("Failed to rea…
+ ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:178:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31, D-36) > (k4) 51 files: chunk 1 resolves and applies its read, the rejected chunk 2 keeps the seeded entry of z and shows Failed to read 1 files
+AssertionError: expected undefined to deeply equal { title: '/music/z.wav-title', …(2) }
+
+- Expected: 
+{
+  "category": "/music/z.wav-cat",
+  "comment": "",
+  "title": "/music/z.wav-title",
+}
+
++ Received: 
+undefined
+
+ ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:200:32
+    198|     const metadata = useFileStore.getState().metadata;
+    199|     for (const path of chunkOnePaths) expect(metadata[path]?.category)…
+    200|     expect(metadata[lastPath]).toEqual(oldMetaFor(lastPath));
+       |                                ^
+    201|     expect(Object.keys(metadata)).toHaveLength(51);
+    202|     expect(useMetadataStore.getState().toastMessage).toBe("Failed to r…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31, D-36) > (k5) Open Folder of another folder whose read rejects drops the old entries, lists the new files without entries and shows Failed to read 2 files
+AssertionError: expected null to be 'Failed to read 2 files' // Object.is equality
+
+- Expected: 
+"Failed to read 2 files"
+
++ Received: 
+null
+
+ ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:218:54
+    216|     expect(state.metadata).toEqual({});
+    217|     expect(state.files).toEqual(OTHER_FILES);
+    218|     expect(useMetadataStore.getState().toastMessage).toBe("Failed to r…
+       |                                                      ^
+    219|     expect(useMetadataStore.getState().toastType).toBe("error");
+    220|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31, D-36) > (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time
+AssertionError: expected undefined to deeply equal { title: 'A-title', …(2) }
+
+- Expected: 
+{
+  "category": "R29Cat",
+  "comment": "",
+  "title": "A-title",
+}
+
++ Received: 
+undefined
+
+ ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:240:30
+    238| 
+    239|     const metadata = useFileStore.getState().metadata;
+    240|     expect(metadata[PATH_A]).toEqual(NEW_A);
+       |                              ^
+    241|     expect(metadata[PATH_B]).toEqual(OLD_B);
+    242|     expect(useMetadataStore.getState().toastMessage).toBe("Failed to r…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  tests/renderer/stores/file-store.test.ts > useFileStore > applyMetadataRead keptPaths (TM-B31, D-36) > (g3) applyMetadataRead keeps the current entry of kept paths, leaves kept paths with no entry absent and drops the rest
+AssertionError: expected { d: { title: 'D1' } } to deeply equal { a: { title: 'A0' }, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "a": {
+-     "title": "A0",
+-   },
+    "d": {
+      "title": "D1",
+    },
+  }
+
+ ❯ tests/renderer/stores/file-store.test.ts:380:30
+    378| 
+    379|       const state = useFileStore.getState();
+    380|       expect(state.metadata).toEqual({ a: a0, d: d1 });
+       |                              ^
+    381|       expect(Object.keys(state.metadata).sort()).toEqual(["a", "d"]);
+    382|       expect(state.writeGeneration).toBe(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  tests/renderer/utils/utils.test.ts > readMetadataChunked failedPaths (TM-B31, D-36) > (u2) returns the paths of every rejected chunk in paths order and counts them in failures
+AssertionError: expected undefined to deeply equal [ '/m/50.wav', '/m/51.wav', …(48) ]
+
+- Expected: 
+[
+  "/m/50.wav",
+  "/m/51.wav",
+  "/m/52.wav",
+  "/m/53.wav",
+  "/m/54.wav",
+  "/m/55.wav",
+  "/m/56.wav",
+  "/m/57.wav",
+  "/m/58.wav",
+  "/m/59.wav",
+  "/m/60.wav",
+  "/m/61.wav",
+  "/m/62.wav",
+  "/m/63.wav",
+  "/m/64.wav",
+  "/m/65.wav",
+  "/m/66.wav",
+  "/m/67.wav",
+  "/m/68.wav",
+  "/m/69.wav",
+  "/m/70.wav",
+  "/m/71.wav",
+  "/m/72.wav",
+  "/m/73.wav",
+  "/m/74.wav",
+  "/m/75.wav",
+  "/m/76.wav",
+  "/m/77.wav",
+  "/m/78.wav",
+  "/m/79.wav",
+  "/m/80.wav",
+  "/m/81.wav",
+  "/m/82.wav",
+  "/m/83.wav",
+  "/m/84.wav",
+  "/m/85.wav",
+  "/m/86.wav",
+  "/m/87.wav",
+  "/m/88.wav",
+  "/m/89.wav",
+  "/m/90.wav",
+  "/m/91.wav",
+  "/m/92.wav",
+  "/m/93.wav",
+  "/m/94.wav",
+  "/m/95.wav",
+  "/m/96.wav",
+  "/m/97.wav",
+  "/m/98.wav",
+  "/m/99.wav",
+]
+
++ Received: 
+undefined
+
+ ❯ tests/renderer/utils/utils.test.ts:172:34
+    170|       const result = await readMetadataChunked(paths, [], () => 0);
+    171| 
+    172|       expect(result.failedPaths).toEqual(paths.slice(50, 100));
+       |                                  ^
+    173|       expect(result.failures).toBe(50);
+    174|       expect(result.failures).toBe(result.failedPaths.length);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  3 failed | 10 passed (13)
+      Tests  8 failed | 227 passed (235)
+   Start at  21:02:46
+   Duration  17.41s (transform 1.01s, setup 812ms, import 2.92s, tests 29.80s, environment 7.55s)
+
+
+::error file=/tmp/c-r29-oldsrc/tests/renderer/components/folder-read-rejected-chunk.test.ts,title=tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31%2C D-36) > (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files,line=123,column=26::AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }%0A%0A- Expected%0A+ Received%0A%0A- {%0A-   "/music/a.wav": {%0A-     "category": "ACat",%0A-     "comment": "",%0A-     "title": "A-title",%0A-   },%0A-   "/music/b.wav": {%0A-     "category": "BCat",%0A-     "comment": "",%0A-     "title": "B-title",%0A-   },%0A- }%0A+ {}%0A%0A ❯ expectSeededEntriesKeptWithToast tests/renderer/components/folder-read-rejected-chunk.test.ts:123:26%0A ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:151:5%0A%0A
+
+::error file=/tmp/c-r29-oldsrc/tests/renderer/components/folder-read-rejected-chunk.test.ts,title=tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31%2C D-36) > (k2) Open Folder on the same folder whose only read chunk rejects keeps both store entries and shows Failed to read 2 files,line=123,column=26::AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }%0A%0A- Expected%0A+ Received%0A%0A- {%0A-   "/music/a.wav": {%0A-     "category": "ACat",%0A-     "comment": "",%0A-     "title": "A-title",%0A-   },%0A-   "/music/b.wav": {%0A-     "category": "BCat",%0A-     "comment": "",%0A-     "title": "B-title",%0A-   },%0A- }%0A+ {}%0A%0A ❯ expectSeededEntriesKeptWithToast tests/renderer/components/folder-read-rejected-chunk.test.ts:123:26%0A ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:163:5%0A%0A
+
+::error file=/tmp/c-r29-oldsrc/tests/renderer/components/folder-read-rejected-chunk.test.ts,title=tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31%2C D-36) > (k3) App%3A dropping the same folder whose only read chunk rejects keeps both store entries and shows Failed to read 2 files,line=123,column=26::AssertionError: expected {} to deeply equal { '/music/a.wav': { …(3) }, …(1) }%0A%0A- Expected%0A+ Received%0A%0A- {%0A-   "/music/a.wav": {%0A-     "category": "ACat",%0A-     "comment": "",%0A-     "title": "A-title",%0A-   },%0A-   "/music/b.wav": {%0A-     "category": "BCat",%0A-     "comment": "",%0A-     "title": "B-title",%0A-   },%0A- }%0A+ {}%0A%0A ❯ expectSeededEntriesKeptWithToast tests/renderer/components/folder-read-rejected-chunk.test.ts:123:26%0A ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:178:5%0A%0A
+
+::error file=/tmp/c-r29-oldsrc/tests/renderer/components/folder-read-rejected-chunk.test.ts,title=tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31%2C D-36) > (k4) 51 files%3A chunk 1 resolves and applies its read%2C the rejected chunk 2 keeps the seeded entry of z and shows Failed to read 1 files,line=200,column=32::AssertionError: expected undefined to deeply equal { title: '/music/z.wav-title', …(2) }%0A%0A- Expected: %0A{%0A  "category": "/music/z.wav-cat",%0A  "comment": "",%0A  "title": "/music/z.wav-title",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:200:32%0A%0A
+
+::error file=/tmp/c-r29-oldsrc/tests/renderer/components/folder-read-rejected-chunk.test.ts,title=tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31%2C D-36) > (k5) Open Folder of another folder whose read rejects drops the old entries%2C lists the new files without entries and shows Failed to read 2 files,line=218,column=54::AssertionError: expected null to be 'Failed to read 2 files' // Object.is equality%0A%0A- Expected: %0A"Failed to read 2 files"%0A%0A+ Received: %0Anull%0A%0A ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:218:54%0A%0A
+
+::error file=/tmp/c-r29-oldsrc/tests/renderer/components/folder-read-rejected-chunk.test.ts,title=tests/renderer/components/folder-read-rejected-chunk.test.ts > rejected folder-read chunk keeps entries and shows a toast (TM-B31%2C D-36) > (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time,line=240,column=30::AssertionError: expected undefined to deeply equal { title: 'A-title', …(2) }%0A%0A- Expected: %0A{%0A  "category": "R29Cat",%0A  "comment": "",%0A  "title": "A-title",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/renderer/components/folder-read-rejected-chunk.test.ts:240:30%0A%0A
+
+::error file=/tmp/c-r29-oldsrc/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > applyMetadataRead keptPaths (TM-B31%2C D-36) > (g3) applyMetadataRead keeps the current entry of kept paths%2C leaves kept paths with no entry absent and drops the rest,line=380,column=30::AssertionError: expected { d: { title: 'D1' } } to deeply equal { a: { title: 'A0' }, …(1) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "a": {%0A-     "title": "A0",%0A-   },%0A    "d": {%0A      "title": "D1",%0A    },%0A  }%0A%0A ❯ tests/renderer/stores/file-store.test.ts:380:30%0A%0A
+
+::error file=/tmp/c-r29-oldsrc/tests/renderer/utils/utils.test.ts,title=tests/renderer/utils/utils.test.ts > readMetadataChunked failedPaths (TM-B31%2C D-36) > (u2) returns the paths of every rejected chunk in paths order and counts them in failures,line=172,column=34::AssertionError: expected undefined to deeply equal [ '/m/50.wav', '/m/51.wav', …(48) ]%0A%0A- Expected: %0A[%0A  "/m/50.wav",%0A  "/m/51.wav",%0A  "/m/52.wav",%0A  "/m/53.wav",%0A  "/m/54.wav",%0A  "/m/55.wav",%0A  "/m/56.wav",%0A  "/m/57.wav",%0A  "/m/58.wav",%0A  "/m/59.wav",%0A  "/m/60.wav",%0A  "/m/61.wav",%0A  "/m/62.wav",%0A  "/m/63.wav",%0A  "/m/64.wav",%0A  "/m/65.wav",%0A  "/m/66.wav",%0A  "/m/67.wav",%0A  "/m/68.wav",%0A  "/m/69.wav",%0A  "/m/70.wav",%0A  "/m/71.wav",%0A  "/m/72.wav",%0A  "/m/73.wav",%0A  "/m/74.wav",%0A  "/m/75.wav",%0A  "/m/76.wav",%0A  "/m/77.wav",%0A  "/m/78.wav",%0A  "/m/79.wav",%0A  "/m/80.wav",%0A  "/m/81.wav",%0A  "/m/82.wav",%0A  "/m/83.wav",%0A  "/m/84.wav",%0A  "/m/85.wav",%0A  "/m/86.wav",%0A  "/m/87.wav",%0A  "/m/88.wav",%0A  "/m/89.wav",%0A  "/m/90.wav",%0A  "/m/91.wav",%0A  "/m/92.wav",%0A  "/m/93.wav",%0A  "/m/94.wav",%0A  "/m/95.wav",%0A  "/m/96.wav",%0A  "/m/97.wav",%0A  "/m/98.wav",%0A  "/m/99.wav",%0A]%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/renderer/utils/utils.test.ts:172:34%0A%0A

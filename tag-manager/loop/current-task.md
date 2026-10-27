@@ -1,186 +1,168 @@
-# CURRENT TASK — Round 29: TM-B31 — a rejected folder-read chunk silently drops entries (D-36), plus docs/bugs/001 entry 11 completion
+# CURRENT TASK — Round 30: TM-B32 — Open Folder / drop of an empty folder clears metadata (D-37), plus the two-rejected-chunk test gap (C-R29-01)
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-27
 
 ## Why this round
-- **Round 28: C PASS** (R28-1…R28-6, realVerified=true, 0 bugs). TM-B30 (D-35) is **done**. Root published `b182557` (rounds 26–28) and the review returned COMMIT OK with no medium finding. `b182557` is the baseline.
-- **No critical or high bug is open.** The open medium items do not depend on this round:
-  - TM-T1-DUP/RR-R3-01 and RR-R19-01 wait on Saba's question batch;
-  - B-R26-01 belongs to root.
-- **Next dependency-ordered item: B-R27-01**, which round 28's "Next" named. It becomes **TM-B31**.
-  - **What goes wrong.** `readMetadataChunked` counts a rejected chunk in `failures` (`src/renderer/src/lib/utils.ts:70-71`), but none of the three callers reads `failures`. `applyMetadataRead` replaces `metadata`, so the paths of the rejected chunk disappear from the store. The rows lose their values and the `Tagged` badge, a selected file shows an empty form, and no toast appears.
-  - **Why this contradicts the app.** The schema path already does the opposite (D-33): it keeps the current entry and shows `Failed to read N files`.
-  - **B's red reproduction** on `b182557` (`b-round-28-exp/b-r29-rescan-reject.test.ts`, `red-run.log`): a.wav and b.wav are seeded, the only `readMetadataBatch` rejects, and Rescan is clicked. Result: `metadata` keys `[]`, `files` 2, `toastMessage` `null`.
-  - **Reachability.** Main's `meta:read-batch` catches per-file errors and returns `emptyMetadata` (`src/main/ipc/metadata.ts:233-247`), so a chunk rejects only at IPC level. The consequence is display-only: a later single save sends only defined fields (`metadata.ts:170-171`), so nothing on disk is erased. Severity stays **low**.
-- **Bundled (same file, same flow):** three docs gaps in `docs/bugs/001` entry 11, found by A and root in round 28:
-  - **A-R28-02:** (r8) is not named in the test list;
-  - **A-R28-01 / RR-R28-02:** the single-chunk read + rejected save re-read case is not described;
-  - **RR-R28-01:** the "superseded path with no entry is absent" case is not described.
-- **Reference-first rule:** exempt. This is a pure bug fix. It reuses the app's own existing toast for the same condition (D-33) and adds no new UX element.
-- **Not in this round:** C-R25-01 (test hygiene in a different file, a different class).
+- **Round 29: C PASS** (R29-1…R29-6, realVerified=true). TM-B31 (D-36) is **done**. Root published `20967a0` (round 29), and the review returned COMMIT OK with no medium finding. `20967a0` is the baseline.
+- **No critical or high bug is open.** C reported two low findings. Both concern the folder-read flow D-35/D-36 and touch the same files, so they come first (C's bugs before features):
+  - **C-R29-02 (= A-R29-02).** The D-35 bullet in `docs/bugs/001` (`:14`) and the D-35 line in `STATE_MANAGEMENT.md` (`:31`) say that the empty-folder path calls `setMetadata({})`. In the code only `handleRescan` does that (`FolderBrowser.tsx:177-179`). `handleOpenFolder` (`:108-127`) and App `openFolder` (`App.tsx:60-79`, used by drop) leave the old folder's entries in `metadata`.
+    - **B's red reproduction** on `20967a0`: `b-round-29-exp/b-r30-empty-folder.test.ts` and `red-run.log`:
+      - (x1) Open Folder of an empty folder → `metadata` still holds `/music/a.wav` and `/music/b.wav`;
+      - (x2) App drop of an empty folder → same;
+      - (x3) empty folder, then Open Folder `/music` whose only read chunk rejects → the stale entries come back as if they were current. Expected was `{}` + toast, which is what D-36 (k5) gives after a **non-empty** other folder;
+      - (x4) Rescan of a now-empty folder → `{}` (green).
+    - **History.** `6ecfb40` added the `else { setMetadata({}); }` to Rescan only. No D-ID ever chose different behaviour for Open Folder or drop.
+    - **The fix.** A two-line `else` in each caller (`b-round-29-exp/prototype.diff.txt`) turns (x1)–(x3) green, and the whole renderer suite passes, 239/239 (`green-run.log`).
+    - **Severity: low.** The stale keys are invisible until a later read of the old folder rejects; then they are shown as if they were current. Nothing is written to disk.
+    - **Why code, not docs only.** Three texts already state the intended rule (the docs, STATE_MANAGEMENT and the round-29 task). Close Folder and Open Folder of a non-empty folder both drop the old entries. Leaving the code as it is would keep RR-R28-03-class stray keys.
+  - **C-R29-01 (= A-R29-01, confirmed).** No test rejects two chunks. C's mutant EX-1 (`failedPaths.splice(0, failedPaths.length, ...chunk)`, which keeps only the last rejected chunk) survives the whole renderer suite. This round adds one unit test, (u3).
+- **Reference-first rule:** exempt. This is a pure bug fix plus a test. It adds no new UX element and no new toast text.
+- **Not in this round** (each recorded in the backlog, none dropped):
+  - **TM-B33 / RR-R29-03:** two overlapping folder reads, where the last to finish wins. Not reproduced yet, and the fix needs a read-sequence design that interacts with D-35. B reproduces it first.
+  - **RR-R29-02:** the `loadFolderMetadata` helper (architecture signal).
+  - **RR-R15-04:** the toast wording `1 files` (four sites at once if ever changed).
+  - **RR-R28-03 / A-R19-02:** the save re-read landing after a folder switch.
+  - **C-R25-01:** recorded as a pure signal (see `b-round-29.md`).
 
 ## Baseline
-- HEAD must be `b182557baf43c21d10844e15027f9df5e0be9347` and the working tree **clean** (`git status --porcelain --untracked-files=all` empty). If HEAD differs or the tree is dirty, stop and report BLOCKED.
-  - Exception (baseline rule): HEAD may be one root `chore(release): vX.Y.Z` commit directly on `b182557` that changes only the `version` fields of `package.json`/`package-lock.json`. That commit counts as the baseline.
-- **Frozen** (byte-identical to `b182557`): every path not listed under File ownership. In particular:
+- HEAD must be `20967a001e3b8adc59f99344bc802483e4f8dcce` and the working tree **clean** (`git status --porcelain --untracked-files=all` empty). If HEAD differs or the tree is dirty, stop and report BLOCKED.
+  - Exception (baseline rule): HEAD may be one root `chore(release): vX.Y.Z` commit directly on `20967a0` that changes only the `version` fields of `package.json`/`package-lock.json`. That commit counts as the baseline.
+- **Frozen** (byte-identical to `20967a0`): every path not listed under File ownership. In particular:
+  - `src/renderer/src/lib/utils.ts`;
+  - `src/renderer/src/stores/file-store.ts`;
   - `src/renderer/src/components/metadata-editor/MetadataPanel.tsx`;
-  - `tests/renderer/components/folder-read-during-save.test.ts` (R28; its tests must stay green unchanged);
-  - `tests/renderer/components/metadata-panel-schema-change.test.ts`;
-  - `tests/renderer/components/metadata-panel-batch-save.test.ts`;
+  - `tests/renderer/components/folder-read-during-save.test.ts`;
+  - `tests/renderer/stores/file-store.test.ts`;
+  - `tests/renderer/components/metadata-panel-*.test.ts`;
   - `tests/renderer/helpers/**`;
   - `tests/renderer/setup.ts`;
-  - all of `src/main/**`;
+  - `src/main/**`;
   - `src/renderer/src/types/**`.
 - **Protected** (never edit): `src/preload/index.ts`, `src/preload/index.d.ts`, `src/renderer/src/styles/app.css`, `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `.claude/settings*`, `.claude/hooks/**`.
 - **Rules:**
   - test-on-bugfix: tests first. They must be red on the baseline src, and A records the red run before touching src.
   - CLAUDE.md: no comments in code, semicolons, no `any` / `@ts-ignore`, single quotes in `src/`.
-  - Read primitives first: `TESTING.md`, `STATE_MANAGEMENT.md`, `AGENT_DISCOVERABLE_CODE.md`, `prompts/new-store.md`.
+  - Read primitives first: `TESTING.md`, `STATE_MANAGEMENT.md`, `AGENT_DISCOVERABLE_CODE.md`.
   - Use Edit/Write only; no Bash writes to repository files (A-R17-02).
   - After the change, run `/check`. With 3+ files changed, run `code-reviewer`.
 
-## Scope (D-36, renderer only)
+## Scope
 
-### Part A — `src/renderer/src/lib/utils.ts` (`readMetadataChunked`)
-- Add `failedPaths: string[]` to the return value. It holds every path of every rejected chunk, in `paths` order.
-- `failures` stays, and must equal `failedPaths.length`.
-- `data` and `readGenerations` are unchanged (D-35). The generation is still taken once per chunk, before `readMetadataBatch`.
-- Still no store import in `lib/utils.ts`.
-
-### Part B — `src/renderer/src/stores/file-store.ts` (`applyMetadataRead`)
-- New signature: `applyMetadataRead(read, readGenerations, keptPaths: string[]) => void`. `keptPaths` is a **required** third parameter, with no `?` and no default, so `tsc` forces every caller to decide. Update the declaration in `FileState`.
-- The D-35 loop over `read` is unchanged.
-- Then, for every path in `keptPaths`: `metadata[path] = state.metadata[path]` if that entry exists; otherwise the path stays absent.
-  - The entry is the one **current at store-write time** (inside the same `set`). It is not a snapshot taken before the read.
-- No new state. `writeGeneration`, `pathWriteGenerations`, `files` and `selectedPaths` are untouched.
-
-### Part C — callers (success path only)
-- Callers: `FolderBrowser.tsx` `handleOpenFolder` (`:111-118`) and `handleRescan` (`:153-160`), and `App.tsx` `openFolder` (`:63-70`).
-- Destructure `failures` and `failedPaths` too, and pass `failedPaths` as the third argument of `applyMetadataRead`.
-- After `applyMetadataRead`, if `failures > 0`, call `useMetadataStore.getState().showToast(\`Failed to read ${failures} files\`, 'error')`.
-  - The text must match D-33 (`MetadataPanel.tsx:252`) **exactly**.
-  - No toast when `failures` is 0.
+### Part A — D-37: an empty folder clears `metadata` in all three callers (renderer only)
+- `FolderBrowser.tsx` `handleOpenFolder`: after the `if (wavFiles.length > 0) { … }` block, add `else { setMetadata({}); }`, the same shape as `handleRescan` (`:177-179`).
+- `App.tsx` `openFolder`: the same `else { setMetadata({}); }`.
+- `setMetadata` is already in both `useCallback` dependency arrays, so no dependency change is needed.
+- No toast on an empty folder (unchanged). `setFiles(wavFiles)` stays as it is.
 - Unchanged:
-  - the error paths (`setMetadata({})` + their toasts);
-  - the empty-folder `setMetadata({})`;
+  - the success path (D-35/D-36);
+  - the error paths (Open Folder / drop: `setFiles([])` + `setMetadata({})` + toast; Rescan: toast only, `files`/`metadata` kept);
+  - `handleRescan`;
   - `handleCloseFolder`;
-  - `clearSelection()`;
-  - `isScanning`;
-  - the `meta as Record<…>` casts (B-R21-03).
-- No new `useCallback` deps unless a selector-bound function is used.
-- Biome must stay at 0 errors and **8** warnings, with the same list. Line shifts are allowed.
+  - `clearSelection()`, `isScanning`, the player stop;
+  - the `meta as Record<…>` casts.
+- Biome must stay at 0 errors and **8** warnings, with the same list as `c-round-29/biome-new.txt`. Line shifts are allowed.
 
-### Part D — tests first (red on `b182557` src, then green)
+### Part B — tests first (red on `20967a0` src where marked)
 
-**New file `tests/renderer/components/folder-read-rejected-chunk.test.ts`:**
-- Use the same `vi.hoisted` window swap, `resetAllStores()`, `resetWindowApiMocks()` and local defaults for `openFolderDialog` / `loadSchema` / `resolveDroppedPaths` as `folder-read-during-save.test.ts`.
-- Helpers may be copied into the new file (that file is frozen; the duplication is a known signal, RR-R17-02).
-- Seed: `folderPath: '/music'`, `a.wav`/`b.wav` with `OLD_A`/`OLD_B` (Category `ACat`/`BCat`).
-- Read the toast from `useMetadataStore.getState().toastMessage` / `toastType`.
+**`tests/renderer/components/folder-read-rejected-chunk.test.ts`:** additions only.
+- Add a new `describe("empty folder clears store metadata (TM-B32, D-37)", …)` after the existing describe.
+- Reuse the file's helpers (`seedTwoFiles`, `renderBrowserAndPanel`, `clickButton`, `dropFolder`, `FILE_A`/`FILE_B`). A new constant `EMPTY_FOLDER = "/empty"` is allowed.
+- Existing (k1)–(k7) lines must not change.
 
 | Test | Scenario | Assert | Baseline |
 |---|---|---|---|
-| (k1) | no save; Rescan; the only `readMetadataBatch` chunk **rejects** | `metadata` equals `{a: OLD_A, b: OLD_B}`; `files` has 2 entries; toast `Failed to read 2 files`, type `error` | **red** |
-| (k2) | same, via `Open Folder` → `'/music'` (same folder) | same as (k1) | **red** |
-| (k3) | `App`, `loadSchema` → `STANDARD_FIELDS`, store seeded as above; drop `/music` (`resolveDroppedPaths` → `{ folders: ['/music'], wavFiles: [] }`); the read rejects | same as (k1) | **red** |
-| (k4) | 51 files seeded with old values; `scanFolder` returns them in order, z = the 51st; Rescan; chunk 1 resolves with new values (e.g. Category `ExtCat`), chunk 2 **rejects** | the 50 chunk-1 paths have the read values; z keeps its seeded entry; toast `Failed to read 1 files` | **red** |
-| (k5) | store seeded for `/music`; `Open Folder` → `'/other'` (2 new paths, not in the store); the read rejects | `metadata` equals `{}` (old folder dropped, new paths absent: no entry to keep); `files` = the 2 `/other` files; toast `Failed to read 2 files` | **red** (toast) |
-| (k6) | single save of a pending (write deferred, re-read → `NEW_A` with `R29Cat`); Rescan with the read deferred; release the write (re-read applied); **then** reject the rescan read | `metadata[a]` equals `NEW_A` (the entry current at store-write time), `metadata[b]` equals `OLD_B`; final toast `Failed to read 2 files` | **red** |
-| (k7) pin | no save; Rescan; the read resolves for both | `metadata` = the read; `toastMessage` is `null` (no error toast for 0 failures) | green |
+| (e1) | `seedTwoFiles([])`; `openFolderDialog` → `/empty`; `scanFolder` → `[]`; Open Folder | `files` `[]`; `metadata` toEqual `{}`; `folderPath` `/empty`; `readMetadataBatch` not called; `toastMessage` `null` | **red** (metadata keeps a, b) |
+| (e2) | `App`, `loadSchema` → `STANDARD_FIELDS`, `seedTwoFiles([])`; `resolveDroppedPaths` → `{ folders: ['/empty'], wavFiles: [] }`; `scanFolder` → `[]`; drop | same as (e1) | **red** |
+| (e3) | `seedTwoFiles([])`; `openFolderDialog` → `/empty`, then `/music`; `scanFolder` → `[]`, then `[FILE_A, FILE_B]`; the only `readMetadataBatch` chunk **rejects**; Open Folder twice | `metadata` toEqual `{}` (no stale entry comes back); `files` 2; toast `Failed to read 2 files`, type `error` | **red** (metadata = OLD_A, OLD_B) |
+| (e4) pin | `seedTwoFiles([])`; `scanFolder` → `[]`; Rescan | `metadata` `{}`; `files` `[]`; `toastMessage` `null` | green |
 
-**In existing files:**
+- `dropFolder` drops `FOLDER`. (e2) relies on `resolveDroppedPaths` returning `/empty`, so the dropped path does not matter. A may add a parameter to a **new** helper but must not change `dropFolder`.
+  - If (e2) needs the schema-load wait, use the same wait as (k3). B's experiment waited 100 ms in `act` before the drop.
 
-| Test | File | Assert | Baseline |
+**`tests/renderer/utils/utils.test.ts`:** additions only.
+- Add (u3) inside the existing `describe("readMetadataChunked failedPaths (TM-B31, D-36)")`, after (u2).
+
+| Test | Scenario | Assert | Baseline |
 |---|---|---|---|
-| (g3) | `tests/renderer/stores/file-store.test.ts`, new `describe("applyMetadataRead keptPaths (TM-B31, D-36)")` | state `metadata {a: A0, c: C0}`, `pathWriteGenerations {b: 2}`; `read {b: B1, d: D1}`, `readGenerations {b: 1, d: 1}`, `keptPaths ['a', 'e']` → `metadata` equals `{a: A0, d: D1}`: a kept, e kept with no entry so absent, b superseded with no entry so absent, c dropped. `writeGeneration`, `pathWriteGenerations`, `files`, `selectedPaths` unchanged | **red** |
-| (u2) | `tests/renderer/utils/utils.test.ts`, new `describe("readMetadataChunked failedPaths (TM-B31, D-36)")` | 101 paths, chunk 2 rejects, chunks 1 and 3 resolve: `failedPaths` toEqual `paths.slice(50, 100)`; `failures === 50`; `/m/100.wav` and chunk-1 paths are not in `failedPaths` | **red** |
+| (u3) | 151 paths `/m/0.wav…/m/150.wav` = **four** chunks (50, 50, 50, 1). Mock sequence (same style as (u2)): chunk 1 **rejects**, chunk 2 resolves, chunk 3 **rejects**, chunk 4 resolves. Generation `() => 7` | `failedPaths` toEqual `[...paths.slice(0, 50), ...paths.slice(100, 150)]`; `failures === 100`; `Object.keys(data)` and `Object.keys(readGenerations)` toEqual `[...paths.slice(50, 100), '/m/150.wav']`; every `readGenerations` value is 7; `/m/150.wav` is not in `failedPaths` | green (test gap) |
 
-- **Allowed edit to an existing test:** exactly one. In `file-store.test.ts` (g2) (`:352`), the call `.applyMetadataRead({ a: a1, b: b1, d: d1, e: e1 }, { a: 1, b: 1, d: 1, e: 2 })` gains a third argument `[]`. Nothing else in existing tests changes.
-  - The required parameter would otherwise fail `tsconfig.test.json` typecheck.
-  - (u1) needs no change, since its assertions are field-by-field.
-- **One `it` per row.** The new file has 7 `it`s, and (g3) and (u2) are one `it` each. The expected renderer total is 226 + 9 = **235**, in **13** files.
-- A records the red run on the baseline src in `a-round-29.md`, per test: the first failing assertion and the symptom (entry `undefined`, toast `null`, `failedPaths` `undefined`). Expected: **8 red / 1 green** among the new tests. Every old test, including all of R28's (r1)–(r8), (g2) and (u1), stays green.
+- Restore the mock in `finally`, as (u2) does.
+- **(u3)'s purpose:** it must kill **EX-1** (`failedPaths.splice(0, failedPaths.length, ...chunk)` at `utils.ts:72`) and **EX-2** (`if (failedPaths.length === 0) failedPaths.push(...chunk);`). A runs both mutants in a throwaway copy outside the repository and records them in `a-round-30.md`.
+- **Totals:** 5 new `it`s, so renderer 235 + 5 = **240**, in **13** files.
+  - A records the red run on the baseline src in `a-round-30.md`: **3 red / 2 green** among the new tests ((e1)(e2)(e3) red; (e4)(u3) green). For each test, A records the first failing assertion.
+  - Every old test stays green.
 
-### Part E — docs (Georgian, English technical terms)
+### Part C — docs (Georgian, English technical terms)
 - **`docs/bugs/001-save-and-selection-known-limits.md`:**
-  - **New entry `## 12.`** "folder read-ის reject-ილი chunk", in the layout of entry 11:
-    - ID `B-R27-01, TM-B31`; severity low;
-    - files with `file:line`;
+  - **New entry `## 13.`** "ცარიელი folder-ის Open Folder / drop ძველ `metadata`-ს ტოვებდა", in the layout of entry 12:
+    - ID `C-R29-02, A-R29-02, TM-B32`; severity low;
+    - files with `file:line` on A's tree;
     - reproduction:
-      - start state;
-      - action (IPC-level reject of a chunk during Rescan / Open Folder / drop);
-      - result before the fix: entries removed, `Tagged` lost, empty form, no toast;
-      - reachability: main returns `emptyMetadata` per file, so only an IPC-level reject applies, and the effect is display-only;
-    - decision D-36;
-    - the remaining limit: a per-file read error still comes back as `emptyMetadata` (RR-R13-01);
-    - the full names of (k1)–(k6);
-    - `გასწორდა (D-36, TM-B31)`.
-  - **Entry 11 additions:**
-    - add (r8)'s full name to the test list (A-R28-02);
-    - in the decision paragraph, replace the "დარჩენილი შეზღუდვა: B-R27-01 …" sentence with a pointer to entry 12 (fixed);
-    - add two known-limit sentences:
-      - (A-R28-01/RR-R28-02) a single-chunk folder read issued before the write, with the save's re-read rejected (D-24): the path is superseded and keeps its pre-save store entry until the next successful read;
-      - (RR-R28-01) a superseded path with no store entry (e.g. Open Folder of another folder while a write to that path is pending) stays absent, and the form is empty until the next successful read.
-  - **Header:** "(3), (9), (11) და (12)" are listed as fixed; `**წყარო:**` adds TM-B31 (round 29).
-  - **D-35 bullet:** re-point its `file-store.ts`, `utils.ts`, `FolderBrowser.tsx` and `App.tsx` line refs if they shifted, and update its `applyMetadataRead(read, readGenerations)` signature to the three-parameter form.
-  - **New D-36 bullet.**
+      - start state (`/music` open, entries in the store);
+      - action (Open Folder or drop of a folder with no WAV);
+      - result before the fix: `files` empty but the old entries stay; a later Open Folder of `/music` whose read rejects shows them as current, unlike a non-empty other folder (D-36 (k5));
+      - nothing on disk changes;
+    - decision D-37;
+    - the full names of (e1)–(e4);
+    - `გასწორდა (D-37, TM-B32)`.
+  - **Entry 12:** append (u3)'s full name to the test list.
+  - **D-35 bullet:** replace the sentence `error path-ები და ცარიელი folder კვლავ setMetadata({})-ს იძახებენ.` with an exact statement:
+    - Open Folder / drop error → `setFiles([])` + `setMetadata({})` + toast;
+    - Rescan error → toast only, `files` and `metadata` kept;
+    - empty folder → `setMetadata({})` in all three (D-37).
+  - Re-point every shifted `FolderBrowser.tsx` / `App.tsx` line ref in the D-35 and D-36 bullets and in entries 11–12. `handleRescan` moves down by 2.
+  - **New D-37 bullet.**
+  - **Header:**
+    - title line: unchanged (it still reads `(D-29, D-30, D-31)`, as in rounds 24–29);
+    - "(3), (9), (11), (12) და (13)" are listed as fixed;
+    - `**წყარო:**` adds `TM-B32 (round 30)`.
   - Every `file:line` in the file must point at A's tree. Entries 1–10: no change except listed line-number shifts.
-- **`docs/bugs/README.md`:** row 001 status reads exactly `ცნობილი შეზღუდვების სია (12 ჩანაწერი; 4 გასწორდა, 5 მათგანი Saba-ს კითხვაა)`.
-- **`.claude/primitives/STATE_MANAGEMENT.md`:** one added line after the D-35 line (Edit tool, path (b) permission): `Rejected folder-read chunk (D-36): …`. It states:
-  - `readMetadataChunked` returns `failedPaths`;
-  - `applyMetadataRead(read, readGenerations, keptPaths)` keeps the current entry for kept paths, or absent if none;
-  - Rescan, Open Folder and drop show `Failed to read N files` when failures > 0.
-  - In the D-35 line, change only the signature token `applyMetadataRead(read, readGenerations)` to `applyMetadataRead(read, readGenerations, keptPaths)`, so it does not go stale. Nothing else in that line changes.
-
-### Not in this round
-- RR-R28-03 / A-R19-02: a stray old-folder key after a folder switch.
-- RR-R28-05: moving `handleSchemaChanged` onto `applyMetadataRead`.
-- RR-R13-01: per-file read errors (protected preload).
-- Disabling Rescan during a save (B-R27-02, Saba).
-- C-R25-01, TM-B06, any `MetadataPanel` or `src/main` change.
+- **`docs/bugs/README.md`:** row 001 status reads exactly `ცნობილი შეზღუდვების სია (13 ჩანაწერი; 5 გასწორდა, 5 მათგანი Saba-ს კითხვაა)`.
+- **`.claude/primitives/STATE_MANAGEMENT.md`** (Edit tool, path (b)):
+  - in the D-35 line, replace only the trailing clause `error and empty-folder paths keep setMetadata({})` with `error paths: Open Folder/drop setFiles([]) + setMetadata({}), Rescan toast only; empty folder: setMetadata({}) in all three (D-37)`;
+  - add no new line, unless the replacement does not fit. In that case add one line `Empty folder (D-37): …` right after the D-36 line and say so in `a-round-30.md`.
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `src/renderer/src/lib/utils.ts` | Part A: `failedPaths` |
-| `src/renderer/src/stores/file-store.ts` | Part B: `keptPaths` |
-| `src/renderer/src/components/sidebar/FolderBrowser.tsx` | Part C: `handleOpenFolder`, `handleRescan` |
-| `src/renderer/src/App.tsx` | Part C: `openFolder` |
-| `tests/renderer/components/folder-read-rejected-chunk.test.ts` (new) | (k1)–(k7) |
-| `tests/renderer/stores/file-store.test.ts` | (g3) additions + the one (g2) call argument |
-| `tests/renderer/utils/utils.test.ts` | (u2), additions only |
-| `docs/bugs/001-save-and-selection-known-limits.md` | entry 12, entry 11 additions, header, D-36 bullet, shifted refs |
+| `src/renderer/src/components/sidebar/FolderBrowser.tsx` | Part A: `handleOpenFolder` `else` |
+| `src/renderer/src/App.tsx` | Part A: `openFolder` `else` |
+| `tests/renderer/components/folder-read-rejected-chunk.test.ts` | (e1)–(e4), additions only |
+| `tests/renderer/utils/utils.test.ts` | (u3), additions only |
+| `docs/bugs/001-save-and-selection-known-limits.md` | entry 13, entry 12 (u3), D-35 sentence, D-37 bullet, header, shifted refs |
 | `docs/bugs/README.md` | row 001 count |
-| `.claude/primitives/STATE_MANAGEMENT.md` | one D-36 line |
+| `.claude/primitives/STATE_MANAGEMENT.md` | D-35 trailing clause (or one D-37 line) |
 
-A also writes `a-round-29.md` and `a-round-29-*.json` in the loop folder. Gitignored output (`out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`) is allowed.
+A also writes `a-round-30.md` (and any `a-round-30/` logs) in the loop folder. Gitignored output (`out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`) is allowed.
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R29-1 ownership + process | Run:<ul><li>`git status --porcelain --untracked-files=all`;</li><li>`git diff --stat b182557`;</li><li>`git diff --quiet b182557 -- . ':!<10 owned paths>'`.</li></ul>Read the full diff and A's result JSON / transcript. | <ul><li>Only the 10 owned paths changed; exactly one untracked file (the new test).</li><li>`folder-read-during-save.test.ts`, MetadataPanel and the metadata-panel tests are byte-identical.</li><li>`lib/utils.ts` imports no store.</li><li>`keptPaths` is required (no `?`, no default).</li><li>`file-store.ts` changes only `applyMetadataRead` (interface + implementation).</li><li>The callers change only the success path: destructure, third argument, `failures > 0` toast with the exact D-33 text.</li><li>Existing test diffs:<ul><li>`file-store.test.ts`: additions plus exactly the one (g2) call line;</li><li>`utils.test.ts`: additions only.</li></ul></li><li>No comment, `any`, `@ts-ignore` or new `as` in `src/`.</li><li>`STATE_MANAGEMENT.md`: one added D-36 line, plus the D-35 line changed only in its `applyMetadataRead` signature token.</li><li>No Bash write to repository files; "unknown" if no transcript (not a FAIL).</li></ul> |
-| R29-2 red → green | In a throwaway copy outside the repository, use the `b182557` src (the 4 owned src files from `git show b182557:`) with A's test files, and run the renderer suite. Then run the suite on A's tree, and each new test alone with `-t`. | <ul><li>Baseline src: (k1)–(k6), (g3) and (u2) fail; (k7) and all 226 old tests pass (expected **227 passed / 8 failed**).</li><li>Each red test fails on the symptom (entry `undefined` / `{}`, toast `null`, `failedPaths` `undefined`), not on setup. C records the first failing assertion.</li><li>A's tree: **235/235** in 13 files.</li><li>Each new test passes alone.</li></ul> |
-| R29-3 mutations | In copies of A's tree outside the repository, run the new test file plus `file-store.test.ts`, `utils.test.ts` and `folder-read-during-save.test.ts` once per mutant. Adapt each to A's code shape and give the exact edit:<ul><li>**MK-1:** `applyMetadataRead` ignores `keptPaths`.</li><li>**MK-2:** a kept path with no entry gets `{}`.</li><li>**MK-3:** kept entries come from a `metadata` snapshot taken before `readMetadataChunked` (caller-side), not from state at store-write time.</li><li>**MK-4:** toast when `failures >= 0`.</li><li>**MK-5:** `handleRescan` drops the toast.</li><li>**MK-6:** `handleOpenFolder` drops the toast.</li><li>**MK-7:** App `openFolder` drops the toast.</li><li>**MK-8:** `failedPaths` also receives the paths of resolved chunks.</li><li>**MK-9:** `handleRescan` passes `[]` instead of `failedPaths`.</li><li>**MK-9b:** `handleOpenFolder` passes `[]`.</li><li>**MK-9c:** App `openFolder` passes `[]`.</li></ul> | Every mutant is killed, with the killers named. Expected:<ul><li>MK-1: (k1)(k2)(k3)(k4)(k6)(g3)</li><li>MK-2: (g3)</li><li>MK-3: (k6)</li><li>MK-4: (k7)</li><li>MK-5: (k1)(k4)(k6)</li><li>MK-6: (k2)(k5)</li><li>MK-7: (k3)</li><li>MK-8: (u2)</li><li>MK-9: (k1)(k4)(k6)</li><li>MK-9b: (k2)</li><li>MK-9c: (k3)</li></ul>A survivor is a FAIL unless C shows that it is equivalent; a real survivor becomes a test-gap bug for round 30. |
-| R29-4 gate | On A's tree, from a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0`. | <ul><li>Exit 0.</li><li>Biome: 0 errors and **8** warnings, the same list as `c-round-28/biome-new.txt` (line shifts allowed).</li><li>Typecheck 0, including `tsconfig.test.json`.</li><li>Renderer **235**, main **93/93**, E2E **7/7**.</li><li>`--retries=0`: **7/7**.</li></ul> |
-| R29-5 real app, old vs new | Build `b182557` ("old") and A's tree ("new"), each in its own copy outside the working tree. Launch each with Playwright `_electron` under `xvfb-run`, `--no-sandbox`, an isolated `XDG_CONFIG_HOME`, and a `-r harness.cjs` adapted from `c-round-28/harness.cjs`.<br>The harness:<ul><li>lets the initial folder read through;</li><li>when armed (e.g. a marker file or an env-driven counter), makes `meta:read-batch` **throw** before the real listener;</li><li>logs every call.</li></ul>Copy `tests/fixtures/sample.wav` as `a.wav` and `b.wav`. Drive the UI only (the folder dialog may be stubbed).<br>**Setup:** open the folder, click `a.wav`, set Category `R29Cat`, `Save Tags`, wait for `Tags saved`. Record the sha256 of both files, and read `a.wav` with `music-metadata` (RIFF INFO under `exif:`) and `ffprobe -show_entries format_tags -of json`.<br>**Scenario A (Rescan):** arm the reject, click `Rescan`, screenshot the list and the toast, click `a.wav`, screenshot the form.<br>**Scenario B (Open Folder, same folder):** fresh copies and fresh setup, then the same steps with `Open Folder`.<br>**Scenario C (Open Folder, another folder):** fresh setup, a second folder with 2 copies, arm, `Open Folder` → the second folder. | <ul><li>**New build, A and B:**<ul><li>`a.wav` keeps its `Tagged` badge;</li><li>the form shows Category `R29Cat`;</li><li>toast `Failed to read 2 files`.</li></ul></li><li>**New build, C:** the 2 rows are listed without values, toast `Failed to read 2 files`.</li><li>**Old build (red):**<ul><li>A and B: the badge is gone, the form is empty, and there is no toast;</li><li>C: no toast.</li></ul>If the old build does not show this, C reports it with the log, and the round is not PASS until B re-plans.</li><li>**All runs:**<ul><li>sha256 of both files is unchanged by the Rescan / Open Folder;</li><li>both readers still show `ICAT=R29Cat` for `a.wav`, field by field (no disk change, display-only bug).</li></ul></li><li>`pageErrors` is empty.</li><li>Artists are record only (TM-B08).</li></ul> |
-| R29-6 docs | Read `docs/bugs/001-save-and-selection-known-limits.md`, `docs/bugs/README.md` and the `STATE_MANAGEMENT.md` line on A's tree, against A's src and D-36 in `feature-status.md` / `backlog.json` `decisions`. | <ul><li>Georgian with English technical terms.</li><li>Entry 12:<ul><li>marked `გასწორდა (D-36, TM-B31)`;</li><li>names (k1)–(k6) by full test name (grep, 1 match each);</li><li>states reachability (IPC-level reject only, display-only);</li><li>names RR-R13-01 as the remaining limit.</li></ul></li><li>Entry 11:<ul><li>names (r8) by full test name;</li><li>has the two known-limit sentences (A-R28-01, RR-R28-01);</li><li>points to entry 12 instead of "B-R27-01 remains".</li></ul></li><li>Header lists (3), (9), (11) and (12) as fixed; `წყარო` has TM-B31; there is a D-36 bullet.</li><li>Every `file:line` points at the described code on A's tree; C greps each, and a wrong number is a FAIL.</li><li>Entries 1–10 are unchanged apart from listed shifts.</li><li>The README row reads `ცნობილი შეზღუდვების სია (12 ჩანაწერი; 4 გასწორდა, 5 მათგანი Saba-ს კითხვაა)`.</li></ul> |
+| R30-1 ownership + process | Run:<ul><li>`git status --porcelain --untracked-files=all`;</li><li>`git diff --stat 20967a0`;</li><li>`git diff --quiet 20967a0 -- . ':!<7 owned paths>'`.</li></ul>Read the full diff. | <ul><li>Only owned paths changed; no untracked file.</li><li>The src diff is exactly the two `else { setMetadata({}); }` blocks (no other line in `FolderBrowser.tsx` / `App.tsx`, no dependency array change).</li><li>Both test files: additions only (`git diff` shows no `-` line except hunk context).</li><li>No comment, `any`, `@ts-ignore` or `as` added in `src/`.</li><li>`STATE_MANAGEMENT.md`: only the D-35 trailing clause changed (or exactly one D-37 line added, as A reports).</li><li>No Bash write to repository files; "unknown" if there is no transcript (not a FAIL).</li></ul> |
+| R30-2 red → green | In a throwaway copy outside the repository, use the `20967a0` versions of `FolderBrowser.tsx` and `App.tsx` with A's test files, and run the renderer suite. Then run the suite on A's tree, and each new test alone with `-t`. | <ul><li>Baseline src: (e1)(e2)(e3) fail; (e4), (u3) and all 235 old tests pass (expected **237 passed / 3 failed**).</li><li>Each red test fails on the symptom (`metadata` still holds the `/music` entries), not on setup. C records the first failing assertion.</li><li>A's tree: **240/240** in 13 files.</li><li>Each new test passes alone.</li></ul> |
+| R30-3 mutations | In copies of A's tree outside the repository, run `folder-read-rejected-chunk.test.ts`, `folder-read-during-save.test.ts`, `file-store.test.ts` and `utils.test.ts` once per mutant. Give the exact edit for each:<ul><li>**EX-1:** `utils.ts:72` `failedPaths.splice(0, failedPaths.length, ...chunk)`;</li><li>**EX-2:** `if (failedPaths.length === 0) failedPaths.push(...chunk);`;</li><li>**ME-1:** remove the new `else` in `handleOpenFolder`;</li><li>**ME-2:** remove the new `else` in App `openFolder`;</li><li>**ME-3:** remove the `else` in `handleRescan`;</li><li>**ME-4:** the new `else` in `handleOpenFolder` also calls `showToast('Folder is empty', 'error')`;</li><li>**ME-5:** instead of the `else`, `handleOpenFolder` calls `setMetadata({})` unconditionally right after `scanFolder` resolves (empty and non-empty folders alike).</li></ul> | Every mutant is killed, with the killers named. Expected:<ul><li>EX-1, EX-2: (u3);</li><li>ME-1: (e1)(e3);</li><li>ME-2: (e2);</li><li>ME-3: (e4);</li><li>ME-4: (e1);</li><li>ME-5: (k2) (the same folder with a rejected read must keep its entries); C also names any (r*) killer.</li></ul>A survivor is a FAIL unless C shows that it is equivalent; a real survivor becomes a test-gap bug for round 31. |
+| R30-4 gate | On A's tree, from a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0`. | <ul><li>Exit 0.</li><li>Biome: 0 errors and **8** warnings, the same list as `c-round-29/biome-new.txt` (line shifts allowed).</li><li>Typecheck 0, including `tsconfig.test.json`.</li><li>Renderer **240**, main **93/93**, E2E **7/7**.</li><li>`--retries=0`: **7/7**.</li></ul> |
+| R30-5 real app, old vs new | Build `20967a0` ("old") and A's tree ("new"), each in its own copy outside the working tree. Launch each with Playwright `_electron` under `xvfb-run`, `--no-sandbox`, an isolated `XDG_CONFIG_HOME`, and `-r harness.cjs` adapted from `c-round-29/harness.cjs` (a marker file arms a `meta:read-batch` throw; every call is logged).<br>Folders:<ul><li>`m/` = `a.wav`, `b.wav` (copies of `tests/fixtures/sample.wav`);</li><li>`empty/` = no WAV (it may hold a `.txt`);</li><li>`o/` = `c.wav`, `d.wav`.</li></ul>Drive the UI only; the folder dialog may be stubbed.<br>**Setup** (per scenario, fresh copies): open `m`, click `a.wav`, set Category `R30Cat`, `Save Tags`, wait for `Tags saved`. Record the sha256 of `a.wav`/`b.wav` and read `a.wav` with `music-metadata` (RIFF INFO under `exif:`) and `ffprobe -show_entries format_tags -of json`.<br>**Scenario E:** Open Folder → `empty` (screenshot: empty list, no toast); arm; Open Folder → `m`; screenshot the list and the toast; disarm; click `a.wav`; screenshot the form.<br>**Scenario O (control):** same steps with `o` instead of `empty`.<br>**Scenario R:** after E, Rescan with the harness disarmed. | <ul><li>**New build:**<ul><li>E equals O: `a.wav` has no `Tagged` badge, the form's Category is empty, toast `Failed to read 2 files`;</li><li>`empty` shows an empty list and no toast;</li><li>R: `a.wav` is `Tagged` again with `R30Cat`, no error toast.</li></ul></li><li>**Old build (red):**<ul><li>E: `a.wav` keeps `Tagged` and shows `R30Cat` (the stale entry comes back), toast `Failed to read 2 files`;</li><li>O: same as new O.</li></ul>If the old build does not show this, C reports it with the log, and the round is not PASS until B re-plans.</li><li>**All runs:**<ul><li>sha256 of both files is unchanged by every folder action;</li><li>both readers show `ICAT=R30Cat` for `a.wav`, field by field;</li><li>`pageErrors` is empty.</li></ul></li><li>Drop is not driven in the real app (Playwright cannot set a native file path on a drop); (e2) covers it. C states this.</li><li>Artists are record only (TM-B08).</li></ul> |
+| R30-6 docs | Read `docs/bugs/001-save-and-selection-known-limits.md`, `docs/bugs/README.md` and the `STATE_MANAGEMENT.md` D-35 line on A's tree, against A's src and D-37 in `feature-status.md` / `backlog.json` `decisions`. | <ul><li>Georgian with English technical terms.</li><li>Entry 13:<ul><li>marked `გასწორდა (D-37, TM-B32)`;</li><li>names (e1)–(e4) by full test name (grep, 1 match each);</li><li>states that nothing on disk changes.</li></ul></li><li>Entry 12 names (u3) by full test name.</li><li>The D-35 bullet's error / empty-folder sentence matches the code of all three callers (C reads each `catch` and `else`).</li><li>Header lists (3), (9), (11), (12) and (13) as fixed; `წყარო` has TM-B32; there is a D-37 bullet.</li><li>Every `file:line` points at the described code on A's tree; C greps each, and a wrong number is a FAIL.</li><li>Entries 1–10 are unchanged apart from listed shifts.</li><li>The README row reads exactly `ცნობილი შეზღუდვების სია (13 ჩანაწერი; 5 გასწორდა, 5 მათგანი Saba-ს კითხვაა)`.</li><li>STATE_MANAGEMENT: the D-35 line no longer claims a uniform error path.</li></ul> |
 
 ## What could break (C re-checks)
-- **D-35 (r1)–(r8), (g2), (u1):** these must stay green. In particular, (r5) (replace, not merge) and (r8) (a read issued after the write applies).
-- **D-33/D-34 (s1)–(s15), (g1):** these must stay green (MetadataPanel is frozen, but `file-store.ts` changes).
-- **Normal Open Folder / Rescan / drop with no failure** ((k7), E2E `folder-workflow.spec.ts`): no error toast, every read applies, a removed file disappears.
-- **Error paths:** a `scanFolder` reject still shows its own toast (`Failed to open folder` / `Rescan failed` / `Failed to scan folder`) and empties as before. The empty folder still yields `setMetadata({})`. Closing the folder still clears everything.
-- **D-29:** Rescan during a dirty selection still shows `Unsaved changes were discarded`. The toast store has one slot, so a later toast replaces an earlier one (accepted, same as the schema path).
-- **D-28 `refreshSavedFileStats`:** unaffected.
+- **D-36 (k1)–(k7), (g3), (u2):** in particular (k5) (another non-empty folder with a rejected read, `{}`) and (k2) (the same folder with a rejected read keeps the entries).
+- **D-35 (r1)–(r8), (g2), (u1):** a save pending while Open Folder → empty folder: the save's re-read still lands through `updateFileMetadata` (a stray key, RR-R28-03, unchanged and not asserted).
+- **D-33/D-34 (s1)–(s15), (g1).**
+- **Normal flows:** Open Folder / Rescan / drop of a non-empty folder, E2E `folder-workflow.spec.ts`. The error-path toasts `Failed to open folder` / `Rescan failed` / `Failed to scan folder` are unchanged. `handleCloseFolder` still clears everything.
+- **D-29:** Open Folder → empty while dirty still shows `Unsaved changes were discarded`. The selection is cleared before the scan, as before.
 - **Biome:** exactly 8 warnings, the same list.
 
 ## What realVerified means here
-- R29-1…R29-4 and R29-6 are real local checks.
-- R29-5 is the real-app check on two builds, with the files hashed and read by two independent readers.
-- PASS on all six closes TM-B31, B-R27-01, A-R28-01, A-R28-02 and RR-R28-01 (the docs part).
+- R30-1…R30-4 and R30-6 are real local checks.
+- R30-5 is the real-app check on two builds, with the files hashed and read by two independent readers.
+- PASS on all six closes TM-B32, C-R29-01, A-R29-01, C-R29-02 and A-R29-02.
 - Windows packaging is BLOCKED: Windows packaging is not available in the cloud. It is not part of this round.
 
 ## Next (orientation only)
-- If C finds a FAIL, round 30 fixes it first (test-on-bugfix).
-- Otherwise, **C-R25-01** (the MBS hygiene candidate, low). It needs B to design a test that does not depend on run order (RR-R23-01), or to record it as a pure signal.
-- Everything else waits on Saba's question batch (`b-round-23.md` §5, B-R23-03, C-R27-01, B-R27-02, D-07/D-10/D-12, TM-B06 scope) or on root's Actions link (TM-T0-CI/TM-B14).
+- If C finds a FAIL, round 31 fixes it first (test-on-bugfix).
+- Otherwise: **TM-B33** (RR-R29-03, two overlapping folder reads). B first reproduces it red in a throwaway copy:
+  - Open Folder A, then Open Folder B, with A's read resolving last;
+  - expected symptom: B's files are listed with A's metadata, and B's paths have no entry.
+  - B then designs a read-sequence guard that composes with the D-35 generations (RR-R29-02's single `loadFolderMetadata` helper is the natural place).
+- Everything else waits on Saba's question batch (`b-round-23.md` §5, B-R23-03, C-R27-01, B-R27-02, D-07/D-10/D-12, TM-B06 scope, RR-R19-01/B-R18-01) or on root's Actions link (TM-T0-CI/TM-B14).

@@ -1,0 +1,275 @@
+## baseline (no mutation)
+```diff
+```
+['Tests  77 passed (77)']
+killed by: []
+
+## MK-1 applyMetadataRead ignores keptPaths
+```diff
+--- /tmp/c-r29-new/src/renderer/src/stores/file-store.ts	2026-10-27 20:51:53.027325406 +0000
++++ /tmp/c-r29-mut/src/renderer/src/stores/file-store.ts	2026-10-27 21:04:48.910659258 +0000
+@@ -142,10 +142,6 @@
+         const current = state.metadata[path];
+         if (current) metadata[path] = current;
+       }
+-      for (const path of keptPaths) {
+-        const current = state.metadata[path];
+-        if (current) metadata[path] = current;
+-      }
+       return { metadata };
+     }),
+ }));
+```
+['Tests  6 failed | 71 passed (77)']
+killed by: ['(g3)', '(k1)', '(k2)', '(k3)', '(k4)', '(k6)']
+
+## MK-2 kept path with no entry gets {}
+```diff
+--- /tmp/c-r29-new/src/renderer/src/stores/file-store.ts	2026-10-27 20:51:53.027325406 +0000
++++ /tmp/c-r29-mut/src/renderer/src/stores/file-store.ts	2026-10-27 21:04:52.599252885 +0000
+@@ -144,7 +144,7 @@
+       }
+       for (const path of keptPaths) {
+         const current = state.metadata[path];
+-        if (current) metadata[path] = current;
++        metadata[path] = current ?? {};
+       }
+       return { metadata };
+     }),
+```
+['Tests  2 failed | 75 passed (77)']
+killed by: ['(g3)', '(k5)']
+
+## MK-3 caller-side snapshot before readMetadataChunked (all 3 callers)
+```diff
+--- /tmp/c-r29-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:52:04.413588914 +0000
++++ /tmp/c-r29-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:04:56.201563135 +0000
+@@ -108,6 +108,7 @@
+       if (wavFiles.length > 0) {
+         const paths = wavFiles.map((f) => f.path);
+         const currentSchema = useSchemaStore.getState().fields;
++        const before = useFileStore.getState().metadata;
+         const {
+           data: meta,
+           failures,
+@@ -121,6 +122,7 @@
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
++        useFileStore.setState((s) => { const m = { ...s.metadata }; for (const p of failedPaths) { const e = before[p]; if (e) m[p] = e; else delete m[p]; } return { metadata: m }; });
+         if (failures > 0) {
+           useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+         }
+@@ -158,6 +160,7 @@
+       if (wavFiles.length > 0) {
+         const paths = wavFiles.map((f) => f.path);
+         const currentSchema = useSchemaStore.getState().fields;
++        const before = useFileStore.getState().metadata;
+         const {
+           data: meta,
+           failures,
+@@ -171,6 +174,7 @@
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
++        useFileStore.setState((s) => { const m = { ...s.metadata }; for (const p of failedPaths) { const e = before[p]; if (e) m[p] = e; else delete m[p]; } return { metadata: m }; });
+         if (failures > 0) {
+           useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+         }
+--- /tmp/c-r29-new/src/renderer/src/App.tsx	2026-10-27 20:51:58.174444720 +0000
++++ /tmp/c-r29-mut/src/renderer/src/App.tsx	2026-10-27 21:04:56.201782345 +0000
+@@ -60,6 +60,7 @@
+         if (wavFiles.length > 0) {
+           const paths = wavFiles.map((f) => f.path);
+           const currentSchema = useSchemaStore.getState().fields;
++          const before = useFileStore.getState().metadata;
+           const {
+             data: meta,
+             failures,
+@@ -73,6 +74,7 @@
+           useFileStore
+             .getState()
+             .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
++          useFileStore.setState((s) => { const m = { ...s.metadata }; for (const p of failedPaths) { const e = before[p]; if (e) m[p] = e; else delete m[p]; } return { metadata: m }; });
+           if (failures > 0) {
+             useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+           }
+```
+['Tests  1 failed | 76 passed (77)']
+killed by: ['(k6)']
+
+## MK-4 toast when failures >= 0
+```diff
+--- /tmp/c-r29-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:52:04.413588914 +0000
++++ /tmp/c-r29-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:04:59.871009510 +0000
+@@ -121,7 +121,7 @@
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+-        if (failures > 0) {
++        if (failures >= 0) {
+           useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+         }
+       }
+@@ -171,7 +171,7 @@
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+-        if (failures > 0) {
++        if (failures >= 0) {
+           useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+         }
+       } else {
+--- /tmp/c-r29-new/src/renderer/src/App.tsx	2026-10-27 20:51:58.174444720 +0000
++++ /tmp/c-r29-mut/src/renderer/src/App.tsx	2026-10-27 21:04:59.871096831 +0000
+@@ -73,7 +73,7 @@
+           useFileStore
+             .getState()
+             .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+-          if (failures > 0) {
++          if (failures >= 0) {
+             useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+           }
+         }
+```
+['Tests  1 failed | 76 passed (77)']
+killed by: ['(k7)']
+
+## MK-5 handleRescan drops toast
+```diff
+--- /tmp/c-r29-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:52:04.413588914 +0000
++++ /tmp/c-r29-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:05:03.556806624 +0000
+@@ -171,9 +171,6 @@
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+-        if (failures > 0) {
+-          useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+-        }
+       } else {
+         setMetadata({});
+       }
+```
+['Tests  3 failed | 74 passed (77)']
+killed by: ['(k1)', '(k4)', '(k6)']
+
+## MK-6 handleOpenFolder drops toast
+```diff
+--- /tmp/c-r29-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:52:04.413588914 +0000
++++ /tmp/c-r29-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:05:07.246957687 +0000
+@@ -121,9 +121,6 @@
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+-        if (failures > 0) {
+-          useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+-        }
+       }
+     } catch (err) {
+       useMetadataStore
+```
+['Tests  2 failed | 75 passed (77)']
+killed by: ['(k2)', '(k5)']
+
+## MK-7 App openFolder drops toast
+```diff
+--- /tmp/c-r29-new/src/renderer/src/App.tsx	2026-10-27 20:51:58.174444720 +0000
++++ /tmp/c-r29-mut/src/renderer/src/App.tsx	2026-10-27 21:05:10.976289048 +0000
+@@ -73,9 +73,6 @@
+           useFileStore
+             .getState()
+             .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+-          if (failures > 0) {
+-            useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+-          }
+         }
+       } catch (err) {
+         useMetadataStore
+```
+['Tests  1 failed | 76 passed (77)']
+killed by: ['(k3)']
+
+## MK-8 failedPaths also gets resolved chunk paths
+```diff
+--- /tmp/c-r29-new/src/renderer/src/lib/utils.ts	2026-10-27 20:51:48.383217842 +0000
++++ /tmp/c-r29-mut/src/renderer/src/lib/utils.ts	2026-10-27 21:05:14.706259036 +0000
+@@ -68,6 +68,7 @@
+       for (const path of Object.keys(result)) {
+         readGenerations[path] = chunkGeneration;
+       }
++      failedPaths.push(...chunk);
+     } catch {
+       failedPaths.push(...chunk);
+     }
+```
+['Tests  7 failed | 70 passed (77)']
+killed by: ['(k4)', '(k7)', '(r4)', '(r7)', '(r8)', '(u1)', '(u2)']
+
+## MK-9 handleRescan passes []
+```diff
+--- /tmp/c-r29-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:52:04.413588914 +0000
++++ /tmp/c-r29-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:05:18.508990952 +0000
+@@ -170,7 +170,7 @@
+         );
+         useFileStore
+           .getState()
+-          .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
++          .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, []);
+         if (failures > 0) {
+           useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+         }
+```
+['Tests  3 failed | 74 passed (77)']
+killed by: ['(k1)', '(k4)', '(k6)']
+
+## MK-9b handleOpenFolder passes []
+```diff
+--- /tmp/c-r29-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 20:52:04.413588914 +0000
++++ /tmp/c-r29-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 21:05:22.294823309 +0000
+@@ -120,7 +120,7 @@
+         );
+         useFileStore
+           .getState()
+-          .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
++          .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, []);
+         if (failures > 0) {
+           useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+         }
+```
+['Tests  1 failed | 76 passed (77)']
+killed by: ['(k2)']
+
+## MK-9c App openFolder passes []
+```diff
+--- /tmp/c-r29-new/src/renderer/src/App.tsx	2026-10-27 20:51:58.174444720 +0000
++++ /tmp/c-r29-mut/src/renderer/src/App.tsx	2026-10-27 21:05:25.919551482 +0000
+@@ -72,7 +72,7 @@
+           );
+           useFileStore
+             .getState()
+-            .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
++            .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, []);
+           if (failures > 0) {
+             useMetadataStore.getState().showToast(`Failed to read ${failures} files`, 'error');
+           }
+```
+['Tests  1 failed | 76 passed (77)']
+killed by: ['(k3)']
+
+## EX-1 (A-R29-01) failedPaths keeps only last rejected chunk
+```diff
+--- /tmp/c-r29-new/src/renderer/src/lib/utils.ts	2026-10-27 20:51:48.383217842 +0000
++++ /tmp/c-r29-mut/src/renderer/src/lib/utils.ts	2026-10-27 21:05:29.549059893 +0000
+@@ -69,7 +69,7 @@
+         readGenerations[path] = chunkGeneration;
+       }
+     } catch {
+-      failedPaths.push(...chunk);
++      failedPaths.splice(0, failedPaths.length, ...chunk);
+     }
+   }
+   return { data: accumulated, failures: failedPaths.length, failedPaths, readGenerations };
+```
+['Tests  77 passed (77)']
+killed by: []
+

@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T20:35:29.708Z)
+# Active loop summary (2026-10-27T21:12:35.972Z)
 
-- backlog.json 259 KB -> active view 82 KB
-- status: G_ROOT_GATE round 28
+- backlog.json 269 KB -> active view 84 KB
+- status: G_ROOT_GATE round 29
 - servers: `{"servers":"none or skipped"}`
-- last publication: b182557baf43c21d10844e15027f9df5e0be9347 (rounds 26-28)
-- last root gate: round 28 published - commit b182557baf43c21d10844e15027f9df5e0be9347 pushed
+- last publication: 20967a001e3b8adc59f99344bc802483e4f8dcce (rounds 29-29)
+- last root gate: round 29 published - commit 20967a001e3b8adc59f99344bc802483e4f8dcce pushed
 
-## Current items: TM-T1, TM-T1-DUP, TM-B29, TM-B30
+## Current items: TM-T1, TM-T1-DUP, TM-B30, TM-B31
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -138,12 +138,19 @@
 - C-R25-01 / low / open / MBS survives: removing resetWindowApiMocks() from the schema-change beforeEach breaks no test; once-values are consumed in their own test an
 - C-R25-02 / info / open / MW survives: capturing window.api at module load in window-api-mocks.ts is equivalent today (setup.ts and the vi.hoisted swap expose the sam
 - RR-R25-04 / info / open / Architecture signal: per-path read generation in useFileStore so handleSchemaChanged drops late results (fixes RR-R24-02/A-R21-03 class); ot
-- B-R25-01 / medium / in_progress / Hypothesis, not reproduced: Rescan (and Open Folder of the same folder) stays enabled while a save is pending; readMetadataChunked can read 
 - B-R26-01 / medium / open / Loop-folder / repository desync: 6c956b4 'verified loop rounds 26-26' was published at 15:37Z citing C PASS and review, then the loop folder
 - C-R27-01 / info / open / SchemaEditor 'Done' awaits onSave (handleSchemaChanged) before onClose; during a slow schema read the editor stays open (R27-5: Done at 1.16
 - C-R27-02 / info / open / A save after adding a custom Text field writes RNOT='' (empty value) into the file; D-10 / C-R1-01 class (empty fields are written)
-- B-R27-01 / low / open / readMetadataChunked drops the paths of a rejected chunk and Rescan / Open Folder / drop ignore failures: a rescan with one rejected chunk si
+- B-R27-01 / low / in_progress / readMetadataChunked drops the paths of a rejected chunk and Rescan / Open Folder / drop ignore failures: a rescan with one rejected chunk si
 - B-R27-02 / info / open / Alternative to D-35 not taken: disable Rescan / Open Folder / drop while a save is pending (UX change, needs reference-first). D-35 keeps th
+- A-R28-01 / info / open / D-35 case not documented: a single-chunk folder read issued before the write + the save's re-read rejected (D-24) -> the path is superseded 
+- A-R28-02 / low / open / docs/bugs/001 entry 11 test list does not name (r8), the only component-level killer of MR-3 (C R28 confirms)
+- RR-R28-01 / low / open / file-store.ts:141-142 a superseded path with no store entry (e.g. Open Folder of another folder while a write to that path is pending) is li
+- RR-R28-02 / info / open / file-store.ts:141 a superseded path keeps the current entry, which is the pre-write value when the save's re-read has not landed yet or was 
+- RR-R28-03 / low / open / Rescan / Open Folder / drop are not locked during a save; a save's re-read landing after a folder switch adds an old-folder entry to the new
+- RR-R28-04 / info / open / file-store.test.ts (g2) uses bare keys (a, b) while files hold /music/*.wav paths; cosmetic for a unit test
+- RR-R28-05 / info / open / Architecture signal: handleSchemaChanged (D-34) and applyMetadataRead (D-35) repeat the generation compare / keep-current / absent-if-none l
+- C-R28-01 / info / open / Rescan / Open Folder during a pending save shows 'Unsaved changes were discarded' although the save completes (D-29 baseline, both builds)
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

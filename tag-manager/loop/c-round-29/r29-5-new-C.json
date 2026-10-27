@@ -1,0 +1,328 @@
+{
+  "label": "new",
+  "scenario": "C",
+  "appRoot": "/tmp/c-r29-new",
+  "workDir": "/tmp/c-r29-new-C-zjSXgc",
+  "phases": {
+    "scan": {
+      "a": {
+        "listed": true,
+        "tagged": false,
+        "text": "a.wav 86.2 KB 10/27/2026"
+      },
+      "b": {
+        "listed": true,
+        "tagged": false,
+        "text": "b.wav 86.2 KB 10/27/2026"
+      }
+    },
+    "setup": {
+      "before": {
+        "title": "",
+        "category": "",
+        "artists": ""
+      },
+      "toast": {
+        "text": "Tags saved",
+        "at": 1793135243289
+      },
+      "after": {
+        "title": "",
+        "category": "R29Cat",
+        "artists": ""
+      },
+      "rows": {
+        "a": {
+          "listed": true,
+          "tagged": true,
+          "text": "a.wav Tagged 87.4 KB 10/27/2026"
+        },
+        "b": {
+          "listed": true,
+          "tagged": false,
+          "text": "b.wav 86.2 KB 10/27/2026"
+        }
+      }
+    },
+    "action": {
+      "button": "Open Folder",
+      "harnessThrew": true,
+      "thrownPaths": [
+        "c.wav",
+        "d.wav"
+      ],
+      "toast": {
+        "text": "Failed to read 2 files",
+        "at": 1793135247108
+      },
+      "ipcSinceArm": [
+        {
+          "channel": "fs:open-folder-dialog",
+          "phase": "call"
+        },
+        {
+          "channel": "fs:scan-folder",
+          "phase": "call"
+        },
+        {
+          "channel": "meta:read-batch",
+          "phase": "start",
+          "armed": true,
+          "paths": [
+            "c.wav",
+            "d.wav"
+          ]
+        },
+        {
+          "channel": "meta:read-batch",
+          "phase": "throw",
+          "paths": [
+            "c.wav",
+            "d.wav"
+          ]
+        }
+      ],
+      "rows": {
+        "c": {
+          "listed": true,
+          "tagged": false,
+          "text": "c.wav 86.2 KB 10/27/2026"
+        },
+        "d": {
+          "listed": true,
+          "tagged": false,
+          "text": "d.wav 86.2 KB 10/27/2026"
+        },
+        "a": {
+          "listed": false
+        }
+      }
+    },
+    "clickC": {
+      "form": {
+        "title": "",
+        "category": "",
+        "artists": ""
+      }
+    }
+  },
+  "checks": {
+    "setup Tags saved": {
+      "pass": true
+    },
+    "harness threw on read-batch": {
+      "pass": true,
+      "detail": [
+        "c.wav",
+        "d.wav"
+      ]
+    },
+    "toast Failed to read 2 files": {
+      "pass": true,
+      "detail": {
+        "text": "Failed to read 2 files",
+        "at": 1793135247108
+      }
+    },
+    "C: c,d listed": {
+      "pass": true,
+      "detail": {
+        "c": {
+          "listed": true,
+          "tagged": false,
+          "text": "c.wav 86.2 KB 10/27/2026"
+        },
+        "d": {
+          "listed": true,
+          "tagged": false,
+          "text": "d.wav 86.2 KB 10/27/2026"
+        },
+        "a": {
+          "listed": false
+        }
+      }
+    },
+    "C: c,d no Tagged badge": {
+      "pass": true,
+      "detail": {
+        "c": {
+          "listed": true,
+          "tagged": false,
+          "text": "c.wav 86.2 KB 10/27/2026"
+        },
+        "d": {
+          "listed": true,
+          "tagged": false,
+          "text": "d.wav 86.2 KB 10/27/2026"
+        },
+        "a": {
+          "listed": false
+        }
+      }
+    },
+    "sha unchanged by action": {
+      "pass": true,
+      "detail": {
+        "afterSetup": {
+          "a": "26f47bbe1fe4a744f38bdb81c0bf3b3a1157f52d4ddb705595b3cd230c8feb97",
+          "b": "cbac699bc2cd6bc08570ddfe27b523054b63a4b366ef2913bc5725d1cd73400c"
+        },
+        "final": {
+          "a": "26f47bbe1fe4a744f38bdb81c0bf3b3a1157f52d4ddb705595b3cd230c8feb97",
+          "b": "cbac699bc2cd6bc08570ddfe27b523054b63a4b366ef2913bc5725d1cd73400c"
+        }
+      }
+    },
+    "readers ICAT=R29Cat (ffprobe + music-metadata)": {
+      "pass": true,
+      "detail": {
+        "ffICAT": "R29Cat",
+        "mmICAT": "R29Cat"
+      }
+    },
+    "pageErrors-empty": {
+      "pass": true,
+      "detail": []
+    }
+  },
+  "initialA": {
+    "ffprobe": {},
+    "mmNative": {}
+  },
+  "shaAfterSetup": {
+    "a": "26f47bbe1fe4a744f38bdb81c0bf3b3a1157f52d4ddb705595b3cd230c8feb97",
+    "b": "cbac699bc2cd6bc08570ddfe27b523054b63a4b366ef2913bc5725d1cd73400c"
+  },
+  "readersAfterSetup": {
+    "ffprobe": {
+      "IKEY": "",
+      "ICAT": "R29Cat"
+    },
+    "mmNative": {
+      "exif:IKEY": "",
+      "exif:ICAT": "R29Cat"
+    },
+    "ffICAT": "R29Cat",
+    "mmICAT": "R29Cat"
+  },
+  "ipc": [
+    {
+      "channel": "schema:load",
+      "phase": "call",
+      "at": 1793135240395
+    },
+    {
+      "channel": "fs:open-folder-dialog",
+      "phase": "call",
+      "at": 1793135241226
+    },
+    {
+      "channel": "fs:scan-folder",
+      "phase": "call",
+      "at": 1793135241227
+    },
+    {
+      "channel": "meta:read-batch",
+      "phase": "start",
+      "armed": false,
+      "paths": [
+        "a.wav",
+        "b.wav"
+      ],
+      "at": 1793135241230
+    },
+    {
+      "channel": "meta:read-batch",
+      "phase": "reply",
+      "values": [
+        [
+          "a.wav",
+          "",
+          ""
+        ],
+        [
+          "b.wav",
+          "",
+          ""
+        ]
+      ],
+      "at": 1793135241235
+    },
+    {
+      "channel": "tpl:load",
+      "phase": "call",
+      "at": 1793135242595
+    },
+    {
+      "channel": "meta:write",
+      "phase": "call",
+      "at": 1793135243275
+    },
+    {
+      "channel": "fs:scan-folder",
+      "phase": "call",
+      "at": 1793135243279
+    },
+    {
+      "channel": "meta:read",
+      "phase": "call",
+      "at": 1793135243281
+    },
+    {
+      "channel": "fs:open-folder-dialog",
+      "phase": "call",
+      "at": 1793135247055
+    },
+    {
+      "channel": "fs:scan-folder",
+      "phase": "call",
+      "at": 1793135247056
+    },
+    {
+      "channel": "meta:read-batch",
+      "phase": "start",
+      "armed": true,
+      "paths": [
+        "c.wav",
+        "d.wav"
+      ],
+      "at": 1793135247058
+    },
+    {
+      "channel": "meta:read-batch",
+      "phase": "throw",
+      "paths": [
+        "c.wav",
+        "d.wav"
+      ],
+      "at": 1793135247058
+    },
+    {
+      "channel": "tpl:load",
+      "phase": "call",
+      "at": 1793135247375
+    }
+  ],
+  "pageErrors": [],
+  "toastsSeen": [
+    "setup: Tags saved",
+    "action: Failed to read 2 files",
+    "click-c: Failed to read 2 files"
+  ],
+  "shaFinal": {
+    "a": "26f47bbe1fe4a744f38bdb81c0bf3b3a1157f52d4ddb705595b3cd230c8feb97",
+    "b": "cbac699bc2cd6bc08570ddfe27b523054b63a4b366ef2913bc5725d1cd73400c"
+  },
+  "readersFinal": {
+    "ffprobe": {
+      "IKEY": "",
+      "ICAT": "R29Cat"
+    },
+    "mmNative": {
+      "exif:IKEY": "",
+      "exif:ICAT": "R29Cat"
+    },
+    "ffICAT": "R29Cat",
+    "mmICAT": "R29Cat"
+  }
+}

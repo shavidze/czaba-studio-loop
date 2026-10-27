@@ -1,0 +1,31 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R29-01",
+      "severity": "low",
+      "steps": [
+        "Copy A's tree to /tmp (c-round-29/mut.py, mutant 'EX-1').",
+        "In src/renderer/src/lib/utils.ts:72 replace `failedPaths.push(...chunk);` with `failedPaths.splice(0, failedPaths.length, ...chunk);` (keeps only the LAST rejected chunk).",
+        "Run npx vitest run --config vitest.config.renderer.ts on folder-read-rejected-chunk, folder-read-during-save, file-store and utils tests."
+      ],
+      "expected": "At least one test fails: with two rejected chunks, failedPaths must hold the paths of both chunks.",
+      "actual": "77/77 pass (A also measured 235/235 over the whole renderer suite). No test rejects two chunks, so this mutant survives. It is not one of R29-3's listed mutants (MK-1..MK-9c all killed), so it is not an acceptance FAIL. It confirms A's A-R29-01 as a test gap for round 30.",
+      "evidence": "c-round-29/mutants.log section 'EX-1 (A-R29-01)'; c-round-29/mut-run.txt"
+    },
+    {
+      "id": "C-R29-02",
+      "severity": "low",
+      "steps": [
+        "Read docs/bugs/001-save-and-selection-known-limits.md:14 (D-35 bullet): 'error path-ები და ცარიელი folder კვლავ setMetadata({})-ს იძახებენ'. The STATE_MANAGEMENT.md D-35 line makes the same claim ('error and empty-folder paths keep setMetadata({})').",
+        "Read FolderBrowser.tsx handleOpenFolder (:108-127) and App.tsx openFolder (:60-79)."
+      ],
+      "expected": "The docs describe the empty-folder behaviour of each caller correctly.",
+      "actual": "Only handleRescan has `else { setMetadata({}); }` (FolderBrowser.tsx:177-179). With an empty folder, handleOpenFolder and App openFolder leave the old metadata in place. This wording existed before this round (it was not introduced in round 29). It confirms A's A-R29-02 and relates to RR-R28-03.",
+      "evidence": "grep of FolderBrowser.tsx / App.tsx on A's tree; c-round-29.md R29-6"
+    }
+  ],
+  "passed": ["R29-1", "R29-2", "R29-3", "R29-4", "R29-5", "R29-6"],
+  "blocked": ["Windows packaging is not available in the cloud (build:win / NSIS not part of this round)"],
+  "realVerified": true
+}

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 29: TM-B31 rejected folder-read chunk keeps entries + toast (D-36) on baseline b182557",
+  "current_task": "Round 30: TM-B32 empty folder clears metadata in Open Folder / drop (D-37) + two-rejected-chunk test (u3) on baseline 20967a0",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -308,8 +308,14 @@
     },
     {
       "id": "D-36",
-      "status": "planned R29 (TM-B31)",
+      "status": "verified (C R29 PASS), published 20967a0 (TM-B31)",
       "decision": "Folder reads keep the current entry of a rejected chunk (renderer only), the D-33 rule applied to Rescan / Open Folder / drop. readMetadataChunked additionally returns failedPaths: string[] (every path of every rejected chunk, in paths order; failures stays and equals failedPaths.length). useFileStore.applyMetadataRead(read, readGenerations, keptPaths) takes a required third parameter: after the D-35 read loop, every kept path gets the store entry current at store-write time (absent if none); generations, files and selection are untouched. The three callers pass failedPaths and, after applyMetadataRead, show the existing D-33 toast 'Failed to read N files' (error) when failures > 0; no toast when 0. Error paths, the empty-folder setMetadata({}) and handleCloseFolder are unchanged. Open Folder of a different folder: kept paths have no entry and stay absent, the toast reports them. The toast store has one slot, so a later toast can replace it (same as the schema path). Reachability: main catches per-file read errors (emptyMetadata), so a chunk rejects only at IPC level; the consequence fixed is display-only. Not covered: per-file read errors returned as emptyMetadata (RR-R13-01, protected preload).",
+      "contract_with": "none (renderer display only)"
+    },
+    {
+      "id": "D-37",
+      "status": "planned R30 (TM-B32)",
+      "decision": "An empty folder clears the store metadata in all three folder callers (renderer only): FolderBrowser handleOpenFolder and App openFolder (drop) call setMetadata({}) when scanFolder returns no WAV, as handleRescan already does. No toast. Error paths stay as they are and are documented exactly: Open Folder / drop error -> setFiles([]) + setMetadata({}) + toast; Rescan error -> toast only (files and metadata kept). Reason: Close Folder and Open Folder of a non-empty folder already drop the old folder's entries; keeping them on an empty folder let a later rejected read (D-36 keptPaths) show them as current. Display-only.",
       "contract_with": "none (renderer display only)"
     }
   ],
@@ -1454,7 +1460,7 @@
       "severity": "low",
       "source": "B R27 code reading (B-R27-01), B R28 red reproduction (b-round-28-exp/), A-R28-01, A-R28-02, RR-R28-01",
       "title": "Rejected folder-read chunk silently drops entries (D-36): readMetadataChunked counts a rejected chunk in failures but Rescan / Open Folder / drop ignore it, so applyMetadataRead removes those paths from metadata (rows lose values and Tagged badge, form empty) with no toast; opposite of the D-33 keep-current rule in the schema path. Plus docs/bugs/001 entry 11 completion ((r8) name, single-chunk + rejected re-read case, superseded path with no entry).",
-      "status": "in_progress",
+      "status": "done",
       "round": 29,
       "depends_on": [
         "TM-B30"
@@ -1475,6 +1481,58 @@
         "real app (C, both builds, harness rejects the rescan meta:read-batch): new build keeps the rows' values and Tagged badges and shows 'Failed to read 2 files'; b182557 empties them with no toast; files on disk unchanged (sha256 + ffprobe + music-metadata) on both",
         "docs/bugs/001 entry 12 fixed by D-36 with test names; entry 11 adds (r8), the single-chunk + rejected re-read case and the no-entry superseded case; header/README counts; STATE_MANAGEMENT.md one D-36 line",
         "gate: verifyCommand green, renderer 235 in 13 files, main 93, E2E 7/7, --retries=0 7/7, Biome 0 errors / 8 warnings same list"
+      ],
+      "realVerified": true,
+      "commit": "20967a001e3b8adc59f99344bc802483e4f8dcce",
+      "evidence": [
+        "C R29: red 227/8 on b182557 src -> green 235/235 (13 files); MK-1..MK-9c all killed (EX-1 extra mutant survives -> C-R29-01, TM-B32); gate verifyCommand exit 0, Biome 0/8 same list, renderer 235, main 93/93, E2E 7/7, --retries=0 7/7; real app old (b182557) vs new: new keeps Tagged + R29Cat and shows 'Failed to read 2 files' (Rescan, Open Folder same folder), other folder lists rows + toast; old empties with no toast; sha256 unchanged, ffprobe + music-metadata ICAT=R29Cat; docs entry 12/11 file:line grep-verified"
+      ]
+    },
+    {
+      "id": "TM-B32",
+      "type": "bug",
+      "severity": "low",
+      "source": "C R29 (C-R29-01 mutant EX-1, C-R29-02 docs/code read), A R29 (A-R29-01, A-R29-02), B R29 red reproduction (b-round-29-exp/)",
+      "title": "Open Folder / drop of an empty folder keeps the old folder's metadata entries (D-37), so a later rejected read of that folder shows them as current; plus the two-rejected-chunk test gap in readMetadataChunked",
+      "status": "in_progress",
+      "round": 30,
+      "depends_on": [
+        "TM-B31"
+      ],
+      "decisions": [
+        "D-37"
+      ],
+      "findings": [
+        "C-R29-01",
+        "A-R29-01",
+        "C-R29-02",
+        "A-R29-02"
+      ],
+      "acceptance": [
+        "R30: FolderBrowser handleOpenFolder and App openFolder call setMetadata({}) when scanFolder returns no WAV (same as handleRescan); success, error and close paths unchanged",
+        "tests (e1)-(e4) in folder-read-rejected-chunk.test.ts and (u3) in utils.test.ts: on 20967a0 src (e1)(e2)(e3) red, (e4)(u3) green; all 240 green after the fix; mutants EX-1, EX-2, ME-1..ME-5 killed",
+        "real app (C, both builds, harness rejects meta:read-batch): m -> empty -> armed Open Folder m: new build shows no Tagged/empty form + 'Failed to read 2 files' (same as the m -> o control), old build shows the stale R30Cat entry; sha256 unchanged, ffprobe + music-metadata ICAT=R30Cat",
+        "docs/bugs/001 entry 13 fixed by D-37, entry 12 names (u3), D-35 bullet's error/empty-folder sentence exact; README 13/5/5; STATE_MANAGEMENT D-35 clause",
+        "gate: verifyCommand green, renderer 240 in 13 files, main 93, E2E 7/7, --retries=0 7/7, Biome 0/8 same list"
+      ],
+      "realVerified": false
+    },
+    {
+      "id": "TM-B33",
+      "type": "bug",
+      "severity": "low",
+      "source": "root-review round 29 (RR-R29-03)",
+      "title": "Overlapping folder reads have no ordering guard: the last read to finish replaces metadata even when a newer Open Folder / Rescan / drop started later",
+      "status": "todo",
+      "depends_on": [
+        "TM-B32"
+      ],
+      "findings": [
+        "RR-R29-03",
+        "RR-R29-02"
+      ],
+      "acceptance": [
+        "B red reproduction first (two deferred readMetadataBatch calls, the older finishing last); then a read-sequence guard that composes with D-35 generations; real-app check old vs new"
       ],
       "realVerified": false
     }
@@ -2463,7 +2521,8 @@
       "severity": "info",
       "status": "open",
       "title": "Batch toast grammar 'Tags saved to 1 files' when succeeded === 1 and failed is empty (pre-existing wording). B note: the batch branch needs >= 2 selected files and failed empty means succeeded = paths.length >= 2, so the text is not reachable through the UI today",
-      "routed_to": "signal; only relevant if batch ever runs with one path"
+      "routed_to": "signal; only relevant if batch ever runs with one path",
+      "note_b_r29": "Same wording now also at the folder-read toast (D-36: FolderBrowser.tsx x2, App.tsx) and D-33 (MetadataPanel.tsx:252); reachable with one rejected file ((k4) pins \"Failed to read 1 files\"). If ever changed: all four sites + (k4) together (RR-R29-01)."
     },
     {
       "round": 15,
@@ -3290,7 +3349,7 @@
       "severity": "low",
       "status": "open",
       "title": "MBS survives: removing resetWindowApiMocks() from the schema-change beforeEach breaks no test; once-values are consumed in their own test and persistent overrides are re-set per test (RR-R24-03 gap for the second file)",
-      "routed_to": "record (hygiene candidate; no test added: a defaults-only test depends on run order, RR-R23-01)"
+      "routed_to": "record (pure signal, B R29 decision): a defaults-only test of the beforeEach reset depends on run order (RR-R23-01); no task. Removed from remaining."
     },
     {
       "round": 25,
@@ -3389,7 +3448,8 @@
       "title": "Loop-folder / repository desync: 6c956b4 'verified loop rounds 26-26' was published at 15:37Z citing C PASS and review, then the loop folder was restored to the round-26 start state (18:43Z) and round 26 re-ran against a moved HEAD. The original C report, gate and review for 6c956b4 are not in the loop folder; A's process evidence (Edit/Write only, A-R17-02) for that implementation is unrecoverable.",
       "routed_to": "root (restore/state process); B re-verifies the published diff in round 27",
       "note_b_r27": "R27 supplies the missing C evidence for 6c956b4 (C PASS). Still open for root: last-publication.json / publications.jsonl say round 25 while 6c956b4 carries rounds 26-26; the original transcript/review gap is unrecoverable.",
-      "note_b_r28": "publications.jsonl / last-publication.json now record round 28 as commit b182557, rounds '26-28', base 6c956b4; 6c956b4 itself (round 26's commit) still has no publication line of its own. Still open for root."
+      "note_b_r28": "publications.jsonl / last-publication.json now record round 28 as commit b182557, rounds '26-28', base 6c956b4; 6c956b4 itself (round 26's commit) still has no publication line of its own. Still open for root.",
+      "note_b_r29": "publications.jsonl now records 20967a0 as rounds 29-29 and b182557 as 26-28; 6c956b4 still has no publication line of its own. Still open for root."
     },
     {
       "round": 26,
@@ -3424,10 +3484,11 @@
       "id": "B-R27-01",
       "source": "B R27 code reading (lib/utils.ts readMetadataChunked, FolderBrowser handleRescan/handleOpenFolder, App openFolder)",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "readMetadataChunked drops the paths of a rejected chunk and Rescan / Open Folder / drop ignore failures: a rescan with one rejected chunk silently removes those entries from the store with no toast (opposite of the D-33 keep-current rule in the schema path)",
       "routed_to": "TM-B31 round 29 (D-36)",
-      "note_b_r28": "B R28 red reproduction on b182557 (b-round-28-exp/: Rescan with the only read-batch chunk rejected -> metadata {}, files 2, toastMessage null). Reachability: main's meta:read-batch catches per-file errors (emptyMetadata), so a chunk rejects only at IPC level (handler throw / clone error); consequence is display-only (rows lose values and Tagged badge, form empty; a later single save sends only defined fields, so nothing on disk is erased). Severity stays low."
+      "note_b_r28": "B R28 red reproduction on b182557 (b-round-28-exp/: Rescan with the only read-batch chunk rejected -> metadata {}, files 2, toastMessage null). Reachability: main's meta:read-batch catches per-file errors (emptyMetadata), so a chunk rejects only at IPC level (handler throw / clone error); consequence is display-only (rows lose values and Tagged badge, form empty; a later single save sends only defined fields, so nothing on disk is erased). Severity stays low.",
+      "closed_by": "TM-B31 (D-36), C R29 PASS (R29-1..R29-6, realVerified=true; c-round-29.md/.json), published 20967a0, review COMMIT OK"
     },
     {
       "round": 27,
@@ -3443,36 +3504,41 @@
       "id": "A-R28-01",
       "source": "A R28 (code-reviewer note 4)",
       "severity": "info",
-      "status": "open",
+      "status": "closed",
       "title": "D-35 case not documented: a single-chunk folder read issued before the write + the save's re-read rejected (D-24) -> the path is superseded and keeps its pre-save store entry until the next Rescan (D-34 (a) analogue); the multi-chunk variant is pinned by (r8)",
-      "routed_to": "TM-B31 round 29 (docs/bugs/001 entry 11 addition)"
+      "routed_to": "TM-B31 round 29 (docs/bugs/001 entry 11 addition)",
+      "closed_by": "TM-B31 docs (docs/bugs/001 entry 11), C R29-6 PASS, published 20967a0"
     },
     {
       "round": 28,
       "id": "A-R28-02",
       "source": "A R28",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "docs/bugs/001 entry 11 test list does not name (r8), the only component-level killer of MR-3 (C R28 confirms)",
-      "routed_to": "TM-B31 round 29 (docs/bugs/001 entry 11 addition)"
+      "routed_to": "TM-B31 round 29 (docs/bugs/001 entry 11 addition)",
+      "closed_by": "TM-B31 docs (docs/bugs/001 entry 11), C R29-6 PASS, published 20967a0"
     },
     {
       "round": 28,
       "id": "RR-R28-01",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "file-store.ts:141-142 a superseded path with no store entry (e.g. Open Folder of another folder while a write to that path is pending) is listed without metadata; selecting it shows an empty form until the next successful read and nothing tells the user (documented 'no entry -> absent')",
-      "routed_to": "TM-B31 round 29: documented in docs/bugs/001 entry 11 as a remaining limit; a notice/count is a signal, not scoped"
+      "routed_to": "TM-B31 round 29: documented in docs/bugs/001 entry 11 as a remaining limit; a notice/count is a signal, not scoped",
+      "closed_by": "TM-B31 docs (docs/bugs/001 entry 11), C R29-6 PASS, published 20967a0",
+      "note_b_r29": "Documented as a remaining limit (entry 11). A notice/count for a superseded path with no entry stays a signal, not scoped."
     },
     {
       "round": 28,
       "id": "RR-R28-02",
       "source": "root-review",
       "severity": "info",
-      "status": "open",
+      "status": "closed",
       "title": "file-store.ts:141 a superseded path keeps the current entry, which is the pre-write value when the save's re-read has not landed yet or was rejected; same accepted limit as D-34 ((r8) pins that a later chunk fixes it)",
-      "routed_to": "record (= A-R28-01; docs in TM-B31)"
+      "routed_to": "record (= A-R28-01; docs in TM-B31)",
+      "closed_by": "TM-B31 docs (docs/bugs/001 entry 11), C R29-6 PASS, published 20967a0"
     },
     {
       "round": 28,
@@ -3481,7 +3547,8 @@
       "severity": "low",
       "status": "open",
       "title": "Rescan / Open Folder / drop are not locked during a save; a save's re-read landing after a folder switch adds an old-folder entry to the new folder's metadata (harmless for rendering, small leak); a scan token per folder scan would drop it",
-      "routed_to": "signal (= A-R19-02 / B-R27-02 class; scan token is an architecture signal)"
+      "routed_to": "signal (= A-R19-02 / B-R27-02 class; scan token is an architecture signal)",
+      "note_b_r29": "Related: Open Folder / drop of an empty folder kept the old folder entries (C-R29-02) -> fixed by TM-B32 (D-37, round 30). The save re-read landing after a folder switch stays open here."
     },
     {
       "round": 28,
@@ -3509,6 +3576,70 @@
       "status": "open",
       "title": "Rescan / Open Folder during a pending save shows 'Unsaved changes were discarded' although the save completes (D-29 baseline, both builds)",
       "routed_to": "record (= B-R19-01 / RR-R20-01, Saba batch)"
+    },
+    {
+      "round": 29,
+      "id": "C-R29-01",
+      "source": "C R29 mutant EX-1 (c-round-29/mutants.log)",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "Test gap: no test rejects two chunks; mutant failedPaths.splice(0, failedPaths.length, ...chunk) (utils.ts:72, keeps only the last rejected chunk) survives the whole renderer suite (235/235)",
+      "routed_to": "TM-B32 round 30: (u3) 151 paths, chunks 1 and 3 reject"
+    },
+    {
+      "round": 29,
+      "id": "A-R29-01",
+      "source": "A R29",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "= C-R29-01 (A found and measured the splice mutant first)",
+      "routed_to": "TM-B32 round 30 (u3)"
+    },
+    {
+      "round": 29,
+      "id": "C-R29-02",
+      "source": "C R29-6 code read",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "docs/bugs/001 D-35 bullet and STATE_MANAGEMENT D-35 line say error and empty-folder paths call setMetadata({}); only handleRescan clears on an empty folder (FolderBrowser.tsx:177-179); handleOpenFolder and App openFolder keep the old entries; Rescan's error path keeps files and metadata",
+      "routed_to": "TM-B32 round 30 (D-37): code fix (else setMetadata({}) in handleOpenFolder and App openFolder) + exact docs sentence",
+      "note_b_r29": "B R29 red reproduction on 20967a0 (b-round-29-exp/): (x1) Open Folder empty -> metadata keeps /music a,b; (x2) App drop empty -> same; (x3) empty then Open Folder /music with rejected read -> stale entries shown as current (vs {} after a non-empty other folder, D-36 (k5)); (x4) Rescan empty -> {} (green). Prototype else-fix: 239/239 renderer. 6ecfb40 added the else to Rescan only; no D-ID chose otherwise. Display-only, low."
+    },
+    {
+      "round": 29,
+      "id": "A-R29-02",
+      "source": "A R29",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "= C-R29-02",
+      "routed_to": "TM-B32 round 30"
+    },
+    {
+      "round": 29,
+      "id": "RR-R29-01",
+      "source": "root-review (gates/round-29/review.md low 1)",
+      "severity": "low",
+      "status": "open",
+      "title": "Toast grammar 'Failed to read 1 files' (FolderBrowser.tsx:125,175, App.tsx:77) copies D-33 MetadataPanel.tsx:252; pinned by (k4)",
+      "routed_to": "record with RR-R15-04: if fixed, change all four sites and the tests together"
+    },
+    {
+      "round": 29,
+      "id": "RR-R29-02",
+      "source": "root-review (gates/round-29/review.md low 2 + architecture note)",
+      "severity": "info",
+      "status": "open",
+      "title": "Architecture signal: the read-chunks -> applyMetadataRead(generations, failedPaths) -> toast block is repeated three times (FolderBrowser.tsx:111-126, :161-176, App.tsx:63-78); one file-store helper loadFolderMetadata(paths, schema): Promise<{ failures }> would reduce each caller to one line and give one place for a per-read sequence guard (RR-R29-03)",
+      "routed_to": "signal (with RR-R28-05 / RR-R25-04); natural place for TM-B33's guard"
+    },
+    {
+      "round": 29,
+      "id": "RR-R29-03",
+      "source": "root-review (gates/round-29/review.md low 3)",
+      "severity": "low",
+      "status": "open",
+      "title": "Two overlapping folder reads (Rescan twice, Rescan during a drop, Open Folder A then B) have no ordering guard: the last to finish wins; e.g. A's late read replaces metadata while B's files are listed. Pre-existing, not worsened by D-36; D-35 guards writes only",
+      "routed_to": "TM-B33 (todo): B red reproduction first, then a read-sequence guard composed with D-35 generations"
     }
   ],
   "rounds": [
@@ -4120,17 +4251,39 @@
     {
       "round": 29,
       "task": "TM-B31 rejected folder-read chunk keeps the current entry + 'Failed to read N files' toast (D-36); docs/bugs/001 entry 12 + entry 11 completion",
-      "status": "planned",
+      "status": "PASS (C R29-1..R29-6, realVerified=true, 2 low findings C-R29-01/C-R29-02, no acceptance FAIL); root gate published 20967a0 (round 29), review COMMIT OK; TM-B31 done",
       "baseline": "b182557baf43c21d10844e15027f9df5e0be9347 (clean)",
       "items": [
         "TM-B31"
       ],
       "findings": [
-        "B-R27-01",
         "A-R28-01",
         "A-R28-02",
+        "A-R29-01",
+        "A-R29-02",
+        "B-R27-01",
+        "C-R29-01",
+        "C-R29-02",
         "RR-R28-01",
-        "RR-R28-02"
+        "RR-R28-02",
+        "RR-R29-01",
+        "RR-R29-02",
+        "RR-R29-03"
+      ]
+    },
+    {
+      "round": 30,
+      "task": "TM-B32 empty folder clears metadata in Open Folder / drop (D-37) + (u3) two rejected chunks; docs/bugs/001 entry 13",
+      "status": "planned",
+      "baseline": "20967a001e3b8adc59f99344bc802483e4f8dcce (clean)",
+      "items": [
+        "TM-B32"
+      ],
+      "findings": [
+        "C-R29-01",
+        "A-R29-01",
+        "C-R29-02",
+        "A-R29-02"
       ]
     }
   ]

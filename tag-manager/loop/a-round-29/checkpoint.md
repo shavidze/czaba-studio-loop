@@ -1,0 +1,18 @@
+# A round 29 checkpoint
+- [x] baseline: HEAD b182557, tree clean (verified at start)
+- [x] read task, primitives (STATE_MANAGEMENT, TESTING, AGENT_DISCOVERABLE_CODE, new-store)
+- [ ] tests written (k1-k7, g3, u2, g2 arg)
+- [ ] red run recorded
+- [ ] src fix
+- [ ] green + check + e2e
+- [ ] docs
+- [ ] code-reviewer
+- [ ] report
+- [x] tests written; red run 8 failed / 227 passed (red-run.log)
+- [x] src fix in 4 files; npm run check exit 0: biome 8 warnings, renderer 235/235, main 93/93 (check.log)
+- [x] e2e 7/7 (e2e.log); docs 001 entry 12 + entry 11 + header + D-35/D-36, README, STATE_MANAGEMENT done
+- [ ] code-reviewer next
+- [x] code-reviewer: no blocking; k6 nit applied; A-R29-01/02 recorded
+- [x] re-red 8/227 (red-run-2.log); check2 exit 0 235/93; e2e --retries=0 7/7
+- [x] report a-round-29.md written. DONE.
+- [x] braced verifyCommand exit 0 (verify.log); splice mutant confirmed survivor (A-R29-01); report updated. FINAL.

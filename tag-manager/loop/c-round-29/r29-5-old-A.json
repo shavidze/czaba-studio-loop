@@ -1,0 +1,302 @@
+{
+  "label": "old",
+  "scenario": "A",
+  "appRoot": "/tmp/c-r29-old",
+  "workDir": "/tmp/c-r29-old-A-2H0pbW",
+  "phases": {
+    "scan": {
+      "a": {
+        "listed": true,
+        "tagged": false,
+        "text": "a.wav 86.2 KB 10/27/2026"
+      },
+      "b": {
+        "listed": true,
+        "tagged": false,
+        "text": "b.wav 86.2 KB 10/27/2026"
+      }
+    },
+    "setup": {
+      "before": {
+        "title": "",
+        "category": "",
+        "artists": ""
+      },
+      "toast": {
+        "text": "Tags saved",
+        "at": 1793135252292
+      },
+      "after": {
+        "title": "",
+        "category": "R29Cat",
+        "artists": ""
+      },
+      "rows": {
+        "a": {
+          "listed": true,
+          "tagged": true,
+          "text": "a.wav Tagged 87.4 KB 10/27/2026"
+        },
+        "b": {
+          "listed": true,
+          "tagged": false,
+          "text": "b.wav 86.2 KB 10/27/2026"
+        }
+      }
+    },
+    "action": {
+      "button": "Rescan",
+      "harnessThrew": true,
+      "thrownPaths": [
+        "a.wav",
+        "b.wav"
+      ],
+      "toast": null,
+      "ipcSinceArm": [
+        {
+          "channel": "fs:scan-folder",
+          "phase": "call"
+        },
+        {
+          "channel": "meta:read-batch",
+          "phase": "start",
+          "armed": true,
+          "paths": [
+            "a.wav",
+            "b.wav"
+          ]
+        },
+        {
+          "channel": "meta:read-batch",
+          "phase": "throw",
+          "paths": [
+            "a.wav",
+            "b.wav"
+          ]
+        }
+      ],
+      "rows": {
+        "a": {
+          "listed": true,
+          "tagged": false,
+          "text": "a.wav 87.4 KB 10/27/2026"
+        },
+        "b": {
+          "listed": true,
+          "tagged": false,
+          "text": "b.wav 86.2 KB 10/27/2026"
+        }
+      }
+    },
+    "clickA": {
+      "form": {
+        "title": "",
+        "category": "",
+        "artists": ""
+      },
+      "rows": {
+        "a": {
+          "listed": true,
+          "tagged": false,
+          "text": "a.wav 87.4 KB 10/27/2026"
+        }
+      }
+    }
+  },
+  "checks": {
+    "setup Tags saved": {
+      "pass": true
+    },
+    "harness threw on read-batch": {
+      "pass": true,
+      "detail": [
+        "a.wav",
+        "b.wav"
+      ]
+    },
+    "toast Failed to read 2 files": {
+      "pass": false,
+      "detail": null
+    },
+    "a.wav keeps Tagged badge after action": {
+      "pass": false,
+      "detail": {
+        "a": {
+          "listed": true,
+          "tagged": false,
+          "text": "a.wav 87.4 KB 10/27/2026"
+        },
+        "b": {
+          "listed": true,
+          "tagged": false,
+          "text": "b.wav 86.2 KB 10/27/2026"
+        }
+      }
+    },
+    "form Category=R29Cat after click a": {
+      "pass": false,
+      "detail": {
+        "title": "",
+        "category": "",
+        "artists": ""
+      }
+    },
+    "sha unchanged by action": {
+      "pass": true,
+      "detail": {
+        "afterSetup": {
+          "a": "26f47bbe1fe4a744f38bdb81c0bf3b3a1157f52d4ddb705595b3cd230c8feb97",
+          "b": "cbac699bc2cd6bc08570ddfe27b523054b63a4b366ef2913bc5725d1cd73400c"
+        },
+        "final": {
+          "a": "26f47bbe1fe4a744f38bdb81c0bf3b3a1157f52d4ddb705595b3cd230c8feb97",
+          "b": "cbac699bc2cd6bc08570ddfe27b523054b63a4b366ef2913bc5725d1cd73400c"
+        }
+      }
+    },
+    "readers ICAT=R29Cat (ffprobe + music-metadata)": {
+      "pass": true,
+      "detail": {
+        "ffICAT": "R29Cat",
+        "mmICAT": "R29Cat"
+      }
+    },
+    "pageErrors-empty": {
+      "pass": true,
+      "detail": []
+    }
+  },
+  "initialA": {
+    "ffprobe": {},
+    "mmNative": {}
+  },
+  "shaAfterSetup": {
+    "a": "26f47bbe1fe4a744f38bdb81c0bf3b3a1157f52d4ddb705595b3cd230c8feb97",
+    "b": "cbac699bc2cd6bc08570ddfe27b523054b63a4b366ef2913bc5725d1cd73400c"
+  },
+  "readersAfterSetup": {
+    "ffprobe": {
+      "IKEY": "",
+      "ICAT": "R29Cat"
+    },
+    "mmNative": {
+      "exif:IKEY": "",
+      "exif:ICAT": "R29Cat"
+    },
+    "ffICAT": "R29Cat",
+    "mmICAT": "R29Cat"
+  },
+  "ipc": [
+    {
+      "channel": "schema:load",
+      "phase": "call",
+      "at": 1793135249385
+    },
+    {
+      "channel": "fs:open-folder-dialog",
+      "phase": "call",
+      "at": 1793135250226
+    },
+    {
+      "channel": "fs:scan-folder",
+      "phase": "call",
+      "at": 1793135250227
+    },
+    {
+      "channel": "meta:read-batch",
+      "phase": "start",
+      "armed": false,
+      "paths": [
+        "a.wav",
+        "b.wav"
+      ],
+      "at": 1793135250230
+    },
+    {
+      "channel": "meta:read-batch",
+      "phase": "reply",
+      "values": [
+        [
+          "a.wav",
+          "",
+          ""
+        ],
+        [
+          "b.wav",
+          "",
+          ""
+        ]
+      ],
+      "at": 1793135250235
+    },
+    {
+      "channel": "tpl:load",
+      "phase": "call",
+      "at": 1793135251594
+    },
+    {
+      "channel": "meta:write",
+      "phase": "call",
+      "at": 1793135252275
+    },
+    {
+      "channel": "fs:scan-folder",
+      "phase": "call",
+      "at": 1793135252279
+    },
+    {
+      "channel": "meta:read",
+      "phase": "call",
+      "at": 1793135252282
+    },
+    {
+      "channel": "fs:scan-folder",
+      "phase": "call",
+      "at": 1793135256072
+    },
+    {
+      "channel": "meta:read-batch",
+      "phase": "start",
+      "armed": true,
+      "paths": [
+        "a.wav",
+        "b.wav"
+      ],
+      "at": 1793135256075
+    },
+    {
+      "channel": "meta:read-batch",
+      "phase": "throw",
+      "paths": [
+        "a.wav",
+        "b.wav"
+      ],
+      "at": 1793135256075
+    },
+    {
+      "channel": "tpl:load",
+      "phase": "call",
+      "at": 1793135258857
+    }
+  ],
+  "pageErrors": [],
+  "toastsSeen": [
+    "setup: Tags saved"
+  ],
+  "shaFinal": {
+    "a": "26f47bbe1fe4a744f38bdb81c0bf3b3a1157f52d4ddb705595b3cd230c8feb97",
+    "b": "cbac699bc2cd6bc08570ddfe27b523054b63a4b366ef2913bc5725d1cd73400c"
+  },
+  "readersFinal": {
+    "ffprobe": {
+      "IKEY": "",
+      "ICAT": "R29Cat"
+    },
+    "mmNative": {
+      "exif:IKEY": "",
+      "exif:ICAT": "R29Cat"
+    },
+    "ffICAT": "R29Cat",
+    "mmICAT": "R29Cat"
+  }
+}
