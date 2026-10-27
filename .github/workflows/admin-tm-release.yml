@@ -1,0 +1,61 @@
+name: Admin - Tag Manager release
+
+# Root-only, two steps, driven by cloud/TM-RELEASE:
+#   first line "inspect"           -> writes cloud/tm-release-info.txt (release.yml trigger, version, tags, releases, master head)
+#   first line "release <tag> <sha>" -> pushes tag <tag> on commit <sha> of TCzaba/czaba-tag-manager, which starts its release.yml
+on:
+  push:
+    paths: ["cloud/TM-RELEASE"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: admin-tm-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.STORE_PUSH_TOKEN }}
+      - name: Inspect or tag
+        env:
+          GH_TOKEN: ${{ secrets.STORE_PUSH_TOKEN }}
+          R: TCzaba/czaba-tag-manager
+        run: |
+          set -u
+          read -r cmd tag sha < cloud/TM-RELEASE || true
+          out=cloud/tm-release-info.txt; : > "$out"
+          git clone -q "https://x-access-token:${GH_TOKEN}@github.com/$R.git" /tmp/tm
+          if [ "$cmd" = "inspect" ]; then
+            {
+              echo "== master head"; git -C /tmp/tm log -5 --format='%h %ad %s' --date=iso
+              echo "== package.json version"; jq -r '.version' /tmp/tm/package.json
+              echo "== package.json build (publish/targets)"; jq -c '.build // {} | {appId, productName, publish, win: .win.target, mac: .mac.target, linux: .linux.target}' /tmp/tm/package.json
+              echo "== electron-builder config files"; ls /tmp/tm | grep -i -E "electron-builder" || true
+              echo "== tags (newest 10)"; git -C /tmp/tm tag --sort=-creatordate | head -10
+              echo "== releases"; gh release list -R "$R" -L 10 || true
+              echo "== workflows"; ls /tmp/tm/.github/workflows
+              echo "== release.yml"; cat /tmp/tm/.github/workflows/release.yml
+              echo "== recent release.yml runs"; gh run list -R "$R" -w release.yml -L 5 || true
+            } >> "$out" 2>&1
+          elif [ "$cmd" = "release" ] && [ -n "${tag:-}" ] && [ -n "${sha:-}" ]; then
+            {
+              git -C /tmp/tm config user.name "Saba Shavidze"; git -C /tmp/tm config user.email "sabashavidze@gmail.com"
+              git -C /tmp/tm cat-file -e "$sha^{commit}" && echo "commit $sha found"
+              if git -C /tmp/tm rev-parse -q --verify "refs/tags/$tag" >/dev/null; then echo "tag $tag already exists, nothing pushed"
+              else git -C /tmp/tm tag -a "$tag" "$sha" -m "Release $tag" && git -C /tmp/tm push -q origin "refs/tags/$tag" && echo "pushed tag $tag on $sha"; fi
+              sleep 20; echo "== release.yml runs"; gh run list -R "$R" -w release.yml -L 3 || true
+            } >> "$out" 2>&1
+          else
+            echo "unknown command in cloud/TM-RELEASE: '$cmd'" >> "$out"
+          fi
+          sed -i "s/${GH_TOKEN}/***/g" "$out"
+          cat "$out"
+          git config user.name "Saba Shavidze"; git config user.email "sabashavidze@gmail.com"
+          git add "$out"; git commit -qm "admin: Tag Manager release ($cmd)"
+          for i in 1 2 3; do git push -q origin HEAD:main && break; git pull -q --rebase origin main; done
