@@ -1,0 +1,142 @@
+diff --git a/src/renderer/src/lib/file-row-display.ts b/src/renderer/src/lib/file-row-display.ts
+index f003090..d9dc835 100644
+--- a/src/renderer/src/lib/file-row-display.ts
++++ b/src/renderer/src/lib/file-row-display.ts
+@@ -1,14 +1,16 @@
+ import type { FieldValue, WavMetadata } from '~/types';
+ 
+ export function formatFirstFieldValue(value: FieldValue | undefined): string {
+-  if (Array.isArray(value)) return value[0] ?? '';
++  if (Array.isArray(value)) return typeof value[0] === 'string' ? value[0] : '';
+   if (typeof value === 'string') return value;
+   return '';
+ }
+ 
+ function isNonEmptyFieldValue(value: FieldValue): boolean {
+   if (typeof value === 'string') return value.trim() !== '';
+-  if (Array.isArray(value)) return value.some((item) => item.trim() !== '');
++  if (Array.isArray(value)) {
++    return value.some((item) => typeof item === 'string' && item.trim() !== '');
++  }
+   return Number.isFinite(value) && value > 0;
+ }
+ 
+diff --git a/tests/renderer/components/file-list.test.ts b/tests/renderer/components/file-list.test.ts
+index 0fb410d..ed1d12e 100644
+--- a/tests/renderer/components/file-list.test.ts
++++ b/tests/renderer/components/file-list.test.ts
+@@ -139,3 +139,38 @@ describe("FileList artist column (RR-R2-02)", () => {
+     expect(arrayRow.queryByText("A, B")).not.toBeInTheDocument();
+   });
+ });
++
++function parseUntypedMetadata(json: string): WavMetadata {
++  return JSON.parse(json);
++}
++
++function getCellText(name: string, columnIndex: number): string {
++  const cell = getFileRow(name).children.item(columnIndex);
++  if (!cell) throw new Error(`cell ${columnIndex} for ${name} not found`);
++  return cell.textContent ?? "";
++}
++
++const ARTIST_COLUMN_INDEX = 2;
++const GENRE_COLUMN_INDEX = 3;
++
++describe("FileList row with non-string array elements (TM-B20, D-26)", () => {
++  it("(R17-e) renders a malformed row untagged with empty artist and genre cells", () => {
++    expect(() =>
++      renderFileListWith({
++        "malformed.wav": parseUntypedMetadata('{"artists":[{}],"genres":[null]}'),
++        "tagged.wav": { artists: ["Real Artist"], genres: ["Ambience"] },
++      }),
++    ).not.toThrow();
++
++    expect(screen.getByText("malformed.wav")).toBeInTheDocument();
++    expect(screen.getByText("tagged.wav")).toBeInTheDocument();
++
++    expectUntagged("malformed.wav");
++    expect(getCellText("malformed.wav", ARTIST_COLUMN_INDEX)).toBe("");
++    expect(getCellText("malformed.wav", GENRE_COLUMN_INDEX)).toBe("");
++
++    expectTagged("tagged.wav");
++    expect(getCellText("tagged.wav", ARTIST_COLUMN_INDEX)).toBe("Real Artist");
++    expect(getCellText("tagged.wav", GENRE_COLUMN_INDEX)).toBe("Ambience");
++  });
++});
+diff --git a/tests/renderer/utils/file-row-display.test.ts b/tests/renderer/utils/file-row-display.test.ts
+index ed8c8bf..e8fdce3 100644
+--- a/tests/renderer/utils/file-row-display.test.ts
++++ b/tests/renderer/utils/file-row-display.test.ts
+@@ -1,6 +1,7 @@
+ import { describe, expect, it } from "vitest";
+ import { formatFirstFieldValue, hasAnyTagValue } from "~/lib/file-row-display";
+ import type { FieldValue } from "~/types";
++import type { WavMetadata } from "~/types";
+ 
+ describe("hasAnyTagValue", () => {
+   it("returns false for undefined metadata", () => {
+@@ -75,3 +76,63 @@ describe("formatFirstFieldValue", () => {
+     expect(formatFirstFieldValue(["A", "B"])).toBe("A");
+   });
+ });
++
++function parseUntypedMetadata(json: string): WavMetadata {
++  return JSON.parse(json);
++}
++
++function parseUntypedFieldValue(json: string): FieldValue {
++  return JSON.parse(json);
++}
++
++describe("hasAnyTagValue with non-string array elements (TM-B20, D-26)", () => {
++  const malformedOnly: Array<[string]> = [
++    ['{"artists":[null]}'],
++    ['{"genres":[5]}'],
++    ['{"keywords":[{}]}'],
++    ['{"artists":[true]}'],
++  ];
++
++  it.each(malformedOnly)("(a) %s does not throw and returns false", (json) => {
++    const meta = parseUntypedMetadata(json);
++    expect(() => hasAnyTagValue(meta)).not.toThrow();
++    expect(hasAnyTagValue(meta)).toBe(false);
++  });
++
++  const mixedWithString: Array<[string]> = [
++    ['{"artists":["x",null]}'],
++    ['{"artists":[null," y "]}'],
++  ];
++
++  it.each(mixedWithString)("(b) %s returns true", (json) => {
++    expect(hasAnyTagValue(parseUntypedMetadata(json))).toBe(true);
++  });
++
++  it("(c) a malformed array next to a real comment returns true", () => {
++    expect(hasAnyTagValue(parseUntypedMetadata('{"artists":[null],"comment":"ok"}'))).toBe(true);
++  });
++
++  it("(c) a malformed array next to empty defaults returns false", () => {
++    expect(
++      hasAnyTagValue(
++        parseUntypedMetadata(
++          '{"title":"","artists":[null],"genres":[{}],"bpm":0,"keywords":[""],"comment":"   "}',
++        ),
++      ),
++    ).toBe(false);
++  });
++});
++
++describe("formatFirstFieldValue with non-string array elements (TM-B20, D-26)", () => {
++  const nonStringFirst: Array<[string]> = [["[null]"], ["[5]"], ["[{}]"], ["[true]"], ['[{},"A"]']];
++
++  it.each(nonStringFirst)("(d) %s returns an empty string", (json) => {
++    const result = formatFirstFieldValue(parseUntypedFieldValue(json));
++    expect(typeof result).toBe("string");
++    expect(result).toBe("");
++  });
++
++  it('(d) ["A",null] returns "A"', () => {
++    expect(formatFirstFieldValue(parseUntypedFieldValue('["A",null]'))).toBe("A");
++  });
++});

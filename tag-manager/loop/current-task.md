@@ -1,138 +1,132 @@
-# CURRENT TASK — Round 17: TM-B20 — file row helpers treat non-string array elements as empty and never throw; the first-value display returns strings only (RR-R5-02, B-R16-01) — D-26
+# CURRENT TASK — Round 18: TM-B21 — the file list sort treats a non-string first array element as '' and never throws (A-R17-01) — D-27
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-27
 
 ## Why this round
-- **Round 16 result:** C PASS, realVerified=true (R16-1…R16-6), 0 bugs.
-  - Mutants M1–M5 were killed by unit tests, and M6 by a real launch.
-  - Real launches with injectors gave the exact D-25 texts, the Electron pid was gone before the catch, and no orphans were left.
-  - Root published `cb2d76b` with review COMMIT OK. TM-B19 and D-25 are done.
-- No critical or high bug is open. Most of the remaining backlog waits on Saba (see Next). This is the next unblocked low, as round 16's "Next" announced.
-- **Defect** (B experiment E1, `b-round-16-exp-row-display.mts.txt`, run with tsx against the real `cb2d76b` module):
-  - `hasAnyTagValue({ artists: [null] })` throws `Cannot read properties of null (reading 'trim')`.
-  - `[5]` and `[{}]` throw `item.trim is not a function` (RR-R5-02).
-  - `formatFirstFieldValue([5])` returns the number `5`, and `formatFirstFieldValue([{}])` returns the object `{}` (B-R16-01). `FileList.tsx:91-92` renders that value as a React child, and an object as a child makes the row render throw.
-- **Honest reach:** this cannot happen from the real app today. Main maps every array element through `stripRiffNulTerminator` / `getValuesAsStrings` (`src/main/ipc/metadata.ts:44,56,136`), and the store only receives main's results.
-  - The fix is defensive, against IPC data that does not match the declared types.
-  - Its acceptance is unit and component tests, plus a real-app regression check that well-typed rows are unchanged.
+- **Round 17 result:** C PASS, realVerified=true (R17-1…R17-5), 0 bugs.
+  - Red: 12 tests failed on `cb2d76b`. Green: 43/43. Mutants M1–M4 were all killed.
+  - Gate: 135/93/7. The real-app regression was checked with ffprobe and music-metadata.
+  - Root published `4f8a578` with review COMMIT OK. TM-B20 and D-26 are done.
+- No critical or high bug is open. This is the bug A found in round 17 (A-R17-01), confirmed by C (code reading) and by a B experiment. It is the same class as TM-B20 and needs the same kind of fix.
+- **Defect.** B ran experiments `b-round-17-exp-sort3.mts.txt` and `b-round-17-exp-sort.mts.txt` (outputs `…-output.txt`) with tsx against the real `4f8a578` `file-store.ts`, calling `selectRange`, which calls `getSortedFiles`.
+  - `src/renderer/src/stores/file-store.ts:125-127` builds the sort key as `Array.isArray(aVal) ? (aVal[0] ?? '') : String(aVal ?? '')` and then calls `aStr.localeCompare(bStr)`.
+  - A first element of `[5]`, `[{}]`, `[true]` or `[{}, "Mid"]` throws `aStr.localeCompare is not a function`.
+  - With 3 files and the malformed row **in the middle**, it throws in all 4 combinations (2 insertion orders × asc/desc), for both `artists` and `genres`.
+  - With 2 files, it throws only when the malformed row is listed second, so the throw depends on order.
+  - `[null]` and `[]` do not throw. They sort as `''`.
+  - The throw happens inside `useFilteredFiles`' `useMemo`, which makes `FileList` fail to render, and inside `selectRange`.
+- **Honest reach:** this cannot happen from the real app today, because main maps every array element to a string (`src/main/ipc/metadata.ts:44,56,136`). The fix is defensive, as in round 17.
+  - Its proof is unit and component tests.
+  - The real-app check is a regression check of sorting by Artist and Genre, which no test covers today.
   - C does **not** fake a malformed value in the real app.
-- **Reference first:** this is a pure fix with no product UX change, so the reference rule does not apply.
+- **Reference first:** this is a pure fix with no product UX change, so the rule does not apply.
 
 ## Baseline
-- HEAD `cb2d76b0b1dbb0e5e73a70ace2c8c618c0a68ffd`. The working tree must be **clean** (`git status --porcelain` empty). If HEAD differs or the tree is dirty, stop and report.
-- **Frozen** (byte-identical to `cb2d76b`): everything not in the ownership table. In particular:
-  - `src/**` except `src/renderer/src/lib/file-row-display.ts`. This includes `FileList.tsx`, `src/shared/types.ts` (`FieldValue` stays `string | string[] | number`), main and the stores;
-  - every test except the two owned files. That includes `tests/renderer/setup.ts`, `tests/renderer/helpers/**`, all of `tests/main/**`, `tests/e2e/**` and `tests/fixtures/**`;
+- HEAD `4f8a5780b338ecbdb10377e20764780cb267a4f3`, and the working tree must be **clean** (`git status --porcelain` empty). If HEAD differs or the tree is dirty, stop and report.
+- **Frozen** (byte-identical to `4f8a578`): everything not in the ownership table, in particular:
+  - all of `src/**` except `src/renderer/src/stores/file-store.ts`. That includes `src/renderer/src/lib/file-row-display.ts` (D-26), `FileList.tsx`, `MetadataPanel.tsx`, the other stores, `src/shared/types.ts` (`FieldValue` stays `string | string[] | number`, `SortField` unchanged), main and preload;
+  - every test except the two owned files, including `tests/renderer/setup.ts`, `tests/renderer/helpers/**`, `tests/renderer/utils/**`, `tests/main/**`, `tests/e2e/**` and `tests/fixtures/**`;
   - `docs/**`, `.claude/**`, `.github/**`, `biome.json`, `playwright.config.ts`, `vitest.config.*.ts` and the tsconfigs.
 - **Protected** (never edit): `src/preload/index.ts`, `src/preload/index.d.ts`, `src/renderer/src/styles/app.css`, `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `.claude/settings*`, `.claude/hooks/**`.
 
-## Scope (D-26, see `feature-status.md`)
-Read `TESTING.md`, `TYPESCRIPT_STRICT.md` and `AGENT_DISCOVERABLE_CODE.md` before editing; the hook injects them anyway. Follow the `test-on-bugfix` rule: failing tests first, then the fix.
+## Process rule for this round (A-R17-02)
+- In round 17 the read-primitives hook did not fire, and the src file was written with a Bash heredoc.
+- **Every repository write goes through the Edit or Write tool.** That means no `cat >`, heredoc, `tee`, `sed -i`, `cp`/`mv` into the repository, or a script that writes repository files. Gitignored build and test outputs from npm commands are the only exception.
+- Before the first edit, read `TESTING.md`, `TYPESCRIPT_STRICT.md`, `AGENT_DISCOVERABLE_CODE.md` and `.claude/prompts/new-store.md` (Zustand store rule). In `a-round-18.md`, state whether the hook fired and when you read each primitive.
+
+## Scope (D-27, see `feature-status.md`)
+Follow the `test-on-bugfix` rule: write the failing tests first, then the fix.
 - `src/`: semicolons, single quotes, no comments.
-- Tests: keep the existing double-quote style of the two test files.
-- No `any`, no `@ts-ignore`, no `as unknown as` anywhere. `tests/**` is type-checked by `npm run typecheck`.
+- Tests: keep each file's existing double-quote style.
+- No `any`, `@ts-ignore` or `as unknown as` anywhere, and no new `as` cast. `tests/**` is type-checked by `npm run typecheck`.
 
-### Target behaviour (D-26, amends D-15 for malformed data only)
-1. **`isNonEmptyFieldValue`, array branch:** an element counts as non-empty only if `typeof item === 'string'` and `item.trim() !== ''`.
-   - Every non-string element (`null`, number, object, boolean) counts as empty.
-   - Nothing throws.
-   - `['x', null]` stays non-empty.
-2. **`formatFirstFieldValue`:** returns `value[0]` only when it is a string, otherwise `''`.
-   - No `String()` coercion.
-   - No search for a later string element, so `['', 'x']` still gives `''` and `[{}, 'A']` gives `''`.
-   - The string and non-array branches stay as today.
-3. **Unchanged:**
-   - the whole-value rules of D-15 (string non-blank; number finite and > 0; anything else empty);
-   - the exported names and signatures (`formatFirstFieldValue(value: FieldValue | undefined): string`, `hasAnyTagValue(meta: WavMetadata | undefined): boolean`);
-   - the `FieldValue` type;
-   - `FileList.tsx`.
-   - Every existing test in both owned files stays byte-identical and green. Only additions are allowed.
+### Target behaviour (D-27)
+1. In `getSortedFiles`' `default` branch, for an **array** value the sort key is `value[0]` when `typeof value[0] === 'string'`, otherwise `''`.
+   - Change both the `aStr` and the `bStr` line.
+   - Use an inline `typeof`. The store does **not** import `file-row-display`.
+   - Do not coerce the element with `String()`, and do not search for a later string element (`[{}, "Mid"]` gives `''`).
+2. **Unchanged:**
+   - the non-array path: both numbers → numeric; otherwise `String(value ?? '')` + `localeCompare` (so a number vs. a missing value compares `"120"` with `""` as today);
+   - the `name`/`size`/`modifiedAt` cases, `dir`, every action and `useFilteredFiles`;
+   - exported names and types.
+   - A small private helper inside `file-store.ts` (e.g. `getSortKey(value: FieldValue | undefined): string`) is allowed if both lines use it, with no export. Otherwise keep the change to the two lines.
 
-### How the tests build malformed data (prescribed; B checked that it type-checks)
-`FieldValue` cannot hold `null` or `{}`, so build the value from JSON, the way untyped IPC data arrives:
-- `const meta: WavMetadata = JSON.parse('{"artists":[null]}');`
-- or a small helper, e.g. `function parseUntypedMetadata(json: string): WavMetadata { return JSON.parse(json); }`.
-- For a single value: `const value: FieldValue = JSON.parse('[{}]');`.
+### Tests (prescribed)
+Malformed data comes from `JSON.parse` annotated with the target type, never a cast (backlog rule from round 16), for example:
 
-`JSON.parse` returns an implicit `any`, so there is no written `any` and no cast. B's probe passed `tsc` with the repository's `tsconfig.test.json` settings (`b-round-16-exp-untyped-probe.test.ts.txt`). `undefined` cannot appear in JSON; cover it with `[null]`.
+```ts
+const metadata: Record<string, WavMetadata> = JSON.parse('{"/music/y.wav":{"artists":[5]}}');
+```
 
-### Steps
-1. **Red tests first.**
-   - **`tests/renderer/utils/file-row-display.test.ts`** (add only):
-     - (a) `hasAnyTagValue` for `{"artists":[null]}`, `{"genres":[5]}`, `{"keywords":[{}]}`, `{"artists":[true]}`. For each: no throw, and the result is `false`.
-     - (b) `{"artists":["x",null]}` gives `true`, and so does `{"artists":[null," y "]}`.
-     - (c) a malformed array next to another real field (`{"artists":[null],"comment":"ok"}`) gives `true`, and next to empty defaults gives `false`.
-     - (d) `formatFirstFieldValue` of `[null]`, `[5]`, `[{}]` and `[true]` gives `''`, with `typeof` `"string"`. `[{}, "A"]` gives `''`, and `["A", null]` gives `"A"`.
-   - **`tests/renderer/components/file-list.test.ts`** (add only; reuse its existing `vi.hoisted` window workaround and helpers):
-     - (e) render `FileList` with one row whose metadata (from JSON) has `artists: [{}]` and `genres: [null]`, plus a normal tagged row.
-       - Rendering does not throw.
-       - Both rows are present.
-       - The malformed row shows no `Tagged` badge, and its artist and genre cells are empty.
-       - The normal row still shows `Tagged` and its first artist.
-       - Note: `renderFileListWith` merges overrides onto string defaults, so pass the malformed values as overrides. Explain in `a-round-17.md` how the row's metadata reaches the store.
-   - **Red run on `cb2d76b`** (before the fix). Record the log in `a-round-17/` and list which tests fail and with which error.
-     - (a), (c), (e) and the `[null," y "]` case of (b) must fail with a throw (on the old code `null.trim()` runs first).
-     - The `[5]`/`[{}]`/`[true]` and `[{}, "A"]` cases of (d) must fail on type or value.
-     - The `["x",null]` case of (b) and the `[null]`/`["A", null]` cases of (d) may already pass. Say which ones.
-2. **Fix** `src/renderer/src/lib/file-row-display.ts` per D-26. Keep it minimal: one `typeof` check in the array branch of each function.
-3. **No docs change.** D-26 lives in `feature-status.md` (B). `docs/learning/data-flow.md` does not describe the Tagged rule.
-4. **`a-round-17.md`** (Georgian). A writes it with:
-   - the red and green logs;
-   - the diff;
-   - the full `verifyCommand` result;
-   - `npx playwright test --retries=0`;
-   - the `qa-engineer` read-only regression check, per the read-primitives rule after a bug fix. 3 files change, so `code-reviewer` (read-only) is required by the read-primitives rule ("3+ files"); record its result.
+Do not add a third copy of `parseUntypedMetadata` (RR-R17-02). Inline `JSON.parse` is enough.
+
+**Imports:** the only non-addition allowed in either test file is extending an **existing** import line with more named imports. Examples: `import type { WavFileEntry, WavMetadata } from "~/types";` and adding `fireEvent` to the `@testing-library/react` line. Do not add a second import line from a module that is already imported (RR-R17-01).
+
+1. **`tests/renderer/stores/file-store.test.ts`** (additions only), new `describe("sorting by array fields (TM-B21, D-27)")`. Read the order through the store, not React. A local helper does `setSelectedPaths([])`, then `selectRange(0, files.length - 1)`, and returns `selectedPaths`; after a clear, that is the sorted order.
+   - Fixture: `x.wav` with `["Zed"]`, `y.wav` with the value under test, `z.wav` with `["Abe"]`. `y` is always in the middle: insertion orders `[x, y, z]` and `[z, y, x]`, each with `asc` and `desc`. That is 4 combinations, and each test checks all 4.
+   - **(a)** `artists`: `y` = `[5]`, `[{}]` and `[true]`, plus `genres` `y` = `[{}]`. For each: no throw. The order is `y, z, x` for asc and `x, z, y` for desc (malformed sorts as `''`).
+   - **(b)** `artists` `y` = `[{}, "Mid"]` gives the same order as (a). The rule is "first element only".
+   - **(c)** Pins for well-typed data. These must already pass on `4f8a578`, so say so in the red log:
+     - `y` = `["Mid"]` gives asc `z, y, x` and desc `x, y, z`;
+     - `y` = `[null]` and `y` = `[]` give asc `y, z, x`;
+     - `bpm`: `x` = 120, `y` = 9, `z` = 30 gives asc `y, z, x`, which is numeric, not lexicographic;
+     - `bpm`: one file with 120 and one with no metadata entry, inserted 120 first, gives asc missing first and desc 120 first.
+2. **`tests/renderer/components/file-list.test.ts`** (additions only). Reuse its `vi.hoisted` window workaround, `renderFileListWith` and the existing local `parseUntypedMetadata`.
+   - **(R18-e)** Render with the default `name` sort and three rows: `a.wav` `artists: ["Zed"]`, `b.wav` with malformed `artists: [{}]` passed as an override, and `c.wav` `artists: ["Abe"]`.
+   - Click the `Artist` header (`fireEvent.click(screen.getByRole("button", { name: "Artist" }))`). Expect no throw, and the row names in DOM order `b.wav, c.wav, a.wav`.
+   - Click it again for desc: `a.wav, c.wav, b.wav`.
+   - The `Tagged` badge and the artist cells stay as D-26 says: `b.wav` untagged with an empty cell (unless other defaults count — explain in `a-round-18.md`).
+3. **Red run on `4f8a578`** (before the fix). Save the log in `a-round-18/`.
+   - (a), (b) and (R18-e) must fail with `localeCompare is not a function`, or the React or testing-library error that wraps it. Record the exact messages.
+   - (c) must pass. Say so.
+4. **Fix** `file-store.ts` per D-27.
+5. **No docs change.** D-27 lives in `feature-status.md` (B's file).
+6. **`a-round-18.md`** (Georgian) contains:
+   - the red and green logs and the diff;
+   - the full `verifyCommand`;
+   - `xvfb-run -a npx playwright test --retries=0`;
+   - `qa-engineer` read-only regression check (required by the bugfix rule);
+   - `code-reviewer` read-only check (3 files changed, so the "3+ files" rule applies), with its result recorded;
+   - the process statement (hook fired or not, when each primitive was read).
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `src/renderer/src/lib/file-row-display.ts` | D-26 `typeof` guards |
-| `tests/renderer/utils/file-row-display.test.ts` | tests (a)–(d), additions only |
-| `tests/renderer/components/file-list.test.ts` | test (e), additions only |
+| `src/renderer/src/stores/file-store.ts` | D-27 sort key (two lines, or one private helper) |
+| `tests/renderer/stores/file-store.test.ts` | tests (a)–(c), additions plus the import extension only |
+| `tests/renderer/components/file-list.test.ts` | test (R18-e), additions plus the import extension only |
 
-Logs go to `a-round-17/` (A) and `c-round-17/` (C) in the loop folder. Nothing else in the repository may be written except the gitignored build and test outputs (`out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`).
+Logs go to `a-round-18/` (A) and `c-round-18/` (C) in the loop folder. Nothing else in the repository may be written, except the gitignored outputs (`out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`).
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R17-1 ownership | `git status --porcelain --untracked-files=all`; `git diff --stat cb2d76b`; `git diff --quiet cb2d76b -- . ':!src/renderer/src/lib/file-row-display.ts' ':!tests/renderer/utils/file-row-display.test.ts' ':!tests/renderer/components/file-list.test.ts'`; read the diff | Only the 3 owned paths differ, all `M`, with no untracked file. The test diffs contain only added lines (`git diff cb2d76b -- tests/ \| grep '^-[^-]'` is empty). The src diff has no comment, `any`, `@ts-ignore` or `as`-cast. The exported signatures are unchanged. A's result shows `permission_denials` empty. |
-| R17-2 red/green | `git worktree add --detach /tmp/c-r17-old cb2d76b` with `node_modules` symlinked (never `git stash`, never touch A's tree). Copy A's two test files in and run `npx vitest run -c vitest.config.renderer.ts tests/renderer/utils/file-row-display.test.ts tests/renderer/components/file-list.test.ts`; then run the same on A's tree | Old: (a), (c), (e), the `[null," y "]` case of (b) and the non-null cases of (d) fail. Record the failing test names and the thrown messages (`reading 'trim'`, `item.trim is not a function`, React's object-child error, or a type/value mismatch). New: all pass, with the exact count. |
-| R17-3 mutations | In a throwaway copy of A's tree, run the two test files against each mutant. **M1:** drop the `typeof` check in `isNonEmptyFieldValue` (back to `item.trim()`). **M2:** `formatFirstFieldValue` returns `value[0] ?? ''` unconditionally (today's code). **M3:** the array branch of `isNonEmptyFieldValue` returns `value.length > 0`. **M4:** `formatFirstFieldValue` returns the first string element anywhere in the array, or `''`. | Each mutant is killed by at least one named test: M1 by (a)/(c)/(e); M2 by (d)/(e); M3 by (a) or an existing empty-element test; M4 by (d) (`[{}, "A"]` must give `''`). Report the killing test for each. A survivor is a FAIL unless C shows it is equivalent. |
-| R17-4 gate | Clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0` once | Exit 0. Biome: 0 errors and 9 warnings, the same list as on `cb2d76b`. Typecheck 0, including `tsconfig.test.json`. Renderer **120 + new** (exact; 10 files). Main **93/93**. E2E **7/7**, and **7/7** with `--retries=0`. |
-| R17-5 real app regression | Built app (A's tree), Playwright `_electron` under `xvfb-run`, driven through the UI. Copy the fixtures into a temp folder and scan it. (1) An untagged fixture row has no `Tagged` badge (screenshot). (2) Through the editor, set Artists to two values (e.g. `R17 Artist A`, `R17 Artist B`), Genres to one value (e.g. `R17Genre`), and Category to `R17Cat` on that file, then save. (3) The row shows `Tagged`, the artist column shows only `R17 Artist A`, and the genre column shows `R17Genre` (screenshot). (4) Read the saved file with `music-metadata` and `ffprobe -show_entries format_tags -of json`, and compare field by field. (5) Relaunch, rescan, and the row looks the same (screenshot). | All five hold. Hard reader checks: `music-metadata` and ffprobe both show category `R17Cat` (`ICAT`) and genre `R17Genre` (`IGNR`; B experiment `b-round-16-exp-genre.cjs.txt`: node-taglib-sharp genres → `IGNR`, ffprobe `genre`, music-metadata `common.genre` both `R17Genre`). Artists are **record only**: node-taglib-sharp writes repeated `ISTR` (TM-B08 / C-R2-01); in B's experiment ffprobe showed only `ISTR: "R17 Artist B"` (the last) and music-metadata had no `common.artists`, only native `ISTR` ×2; the app's save may add more chunks (C-R1-01). Record what each reader shows for artists; a mismatch is a signal for TM-B08, not a FAIL of this round. Name each screenshot in `c-round-17/`. State plainly that the malformed-element case is checked only by R17-2/R17-3, because it cannot be reached from the real app. |
+| R18-1 ownership + process | Run `git status --porcelain --untracked-files=all`, `git diff --stat 4f8a578` and `git diff --quiet 4f8a578 -- . ':!src/renderer/src/stores/file-store.ts' ':!tests/renderer/stores/file-store.test.ts' ':!tests/renderer/components/file-list.test.ts'`. Then read the diff and A's result JSON or transcript. | Only the 3 owned paths differ, all `M`, with no untracked file. In `git diff 4f8a578 -- tests/ \| grep '^-[^-]'`, every removed line is an import line that comes back with the same names plus new ones. The src diff touches only the sort key: no comment, no `any`/`@ts-ignore`/`as` cast, no new export, and `file-row-display` is not imported. `permission_denials` is empty. A wrote no repository file through Bash (`cat >`, heredoc, `tee`, `sed -i`, `cp`/`mv`); report what A's record shows, and if the transcript is not available, say so (as in C-R12-01). |
+| R18-2 red/green | Run `git worktree add --detach /tmp/c-r18-old 4f8a578` with `node_modules` symlinked. Never use `git stash`, and do not touch A's tree. Copy A's two test files in and run `npx vitest run -c vitest.config.renderer.ts tests/renderer/stores/file-store.test.ts tests/renderer/components/file-list.test.ts`. Then run the same command on A's tree. | Old code: (a), (b) and (R18-e) fail with `localeCompare is not a function` (or its React or testing-library wrapper); record the names and messages. All (c) pins pass. New code: everything passes, with the exact count. |
+| R18-3 mutations | In a throwaway copy of A's tree, run the two test files once per mutant. **M1:** back to `aVal[0] ?? ''` / `bVal[0] ?? ''`. **M2:** `String(aVal[0] ?? '')` (no throw; `[true]` becomes `"true"`). **M3:** the D-27 key is kept for arrays, but the non-array path also returns `''` for numbers when the other side is not a number (number vs. missing ties). **M4:** the first string element anywhere in the array (`find`), else `''`. **M5:** the old code with the whole comparator wrapped in `try { … } catch { return 0; }`. | Each mutant is killed by at least one named test. Expected: M1 by (a)/(R18-e); M2 by (a) `[true]` (it sorts between `Abe` and `Zed`); M3 by (c) bpm vs missing; M4 by (b); M5 by an order assertion in (a). Report the killing test for each. A survivor is a FAIL unless C shows the mutant is equivalent. |
+| R18-4 gate | From a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0` once. | Exit 0. Biome: 0 errors and 9 warnings, the same list as on `4f8a578`. Typecheck 0, including `tsconfig.test.json`. Renderer **135 + new** (exact count; 10 files). Main **93/93**. E2E **7/7**, and **7/7** with `--retries=0`. |
+| R18-5 real app sort regression | Use the built app (A's tree), Playwright `_electron` under `xvfb-run`, driven through the UI only (the folder dialog may be stubbed, as in R17). Copy `tests/fixtures/sample.wav` into a temp folder as `a-zed.wav`, `b-untagged.wav` and `c-abe.wav`, and scan it. (1) Through the editor, set `a-zed.wav` to Artists `R18 Zed`, Genres `R18 Rock`, and `c-abe.wav` to Artists `R18 Abe`, Genres `R18 Ambient`. Save each one. (2) Click the `Artist` header: the visible order is `b-untagged, c-abe, a-zed` (screenshot). Click again: `a-zed, c-abe, b-untagged` (screenshot). (3) Click `Genre`: `b-untagged, c-abe, a-zed` (screenshot). (4) Under `Artist` asc, click the first row and shift-click the second row: exactly `b-untagged` and `c-abe` are selected, and `a-zed` is not, so the range follows the sorted order (screenshot). (5) Click `Name`, `Size`, `BPM` and `Date` once each: no page error, and the rows are still listed. (6) Read the two saved files with `music-metadata` and `ffprobe -show_entries format_tags -of json`. (7) Relaunch, rescan, click `Artist`: same order as (2) (screenshot). | All seven hold. `pageErrors` is empty in every phase. Hard reader checks: for both files, ffprobe `genre` and music-metadata `common.genre` equal the saved genre (`IGNR`). Artists are **record only** (TM-B08 / C-R2-01: `IART` and repeated `ISTR`, plus the ID3 chunk from C-R1-01); a mismatch there is a TM-B08 signal, not a FAIL. Name each screenshot in `c-round-18/`. State plainly that the malformed case is checked only by R18-2/R18-3, because it cannot be reached from the real app. |
 
 ## What could break (C re-checks)
-- **The `Tagged` badge (D-15) for well-typed data:** the existing tests in `file-row-display.test.ts` and `file-list.test.ts` (a)–(f) stay byte-identical and green (R17-1, R17-4), and the real app shows the badge as before (R17-5).
-- **The artist and genre columns (RR-R2-02):** a string value is shown whole, and an array shows its first element only (existing test (f), R17-5 (3)).
-- **Batch/single save and the store sync (D-21…D-24)** are untouched, because `FileList.tsx`, `MetadataPanel.tsx` and the stores are frozen. R17-5 (2) saves through the real UI.
-- **Renderer test count:** only additions. No existing test is renamed or removed.
+- **Sorting of well-typed data:** Artist and Genre by first element (R18-5 (2)(3), pins (c)); BPM numeric (pin (c)); Name, Size and Date (R18-5 (5)); a number vs. missing metadata keeps today's order (pin (c), M3).
+- **Shift-click range selection** uses the same sorted list (`selectRange`): R18-5 (4) and the existing `selectRange` tests stay green.
+- **`selectAll`, search filter and `lastClickRef` reset:** these are untouched. Existing tests stay green, and `FileList.tsx` is frozen.
+- **Tagged badge and the artist and genre cells (D-15, D-26):** `file-row-display.ts` is frozen. The R17 tests stay byte-identical and green.
+- **Renderer test count:** additions only. No existing test is renamed or removed.
 
 ## What realVerified means here
-- R17-1…R17-4 are real local checks. R17-2/R17-3 are the only evidence for the malformed-element behaviour, because main never produces such data (see "Honest reach").
-- R17-5 is a real-app regression check with independent readers. It does not prove the defect fix.
-- The Actions part (a cold-runner `Check` run) belongs to TM-T0-CI/TM-B14, and root links it.
+- R18-1…R18-4 are real local checks. R18-2 and R18-3 are the only evidence for the malformed-element behaviour (see "Honest reach").
+- R18-5 is a real-app regression check with independent readers. It does not prove the defect fix.
+- The cold-runner Actions `Check` run belongs to TM-T0-CI/TM-B14, and root links it.
 - Windows packaging is BLOCKED: Windows packaging is not available in the cloud. It is not part of this round.
 
 ## Next (orientation only)
-1. **A MetadataPanel polish round:**
-   - RR-R13-02 + RR-R15-02: remove the `as WavMetadata` casts. The preload types already fit, so no protected edit is needed.
-   - RR-R15-01: re-read reason. This changes the D-24 wording, so it needs a D-24 amendment. B proposes one technical default and flags it for Saba.
-2. **An optional E2E close-helper hardening** (RR-R16-03 + A-R16-01, plus a docs line for RR-R16-02). This is low value, and B decides after round 17.
-3. **Root:** please link the `Check` Actions run on `cb2d76b` (or any commit since `35ed18b`). A green run closes TM-T0-CI, TM-T0, TM-T0-CI-FU and the Actions part of TM-B14.
-4. **Saba question batch** (unchanged; see `b-round-16.md`):
-   - D-07 (TM-T1-MIG);
-   - D-10 + TM-B11;
-   - D-12/TM-B08 + B-R6-01;
-   - TM-T1-DUP (RR-R3-01, medium);
-   - D-15 + RR-R5-01 (+ D-26 for information);
-   - B-R7-02/RR-R8-04;
-   - TM-B05;
-   - TM-B06 (+ RR-R14-03/05, RR-R16-01, A-R16-02);
-   - RR-R1-07;
-   - RR-R3-05;
-   - TM-T2-DATA;
-   - RR-R13-01;
-   - RR-R15-03;
-   - RR-R15-05;
-   - C-R15-01;
-   - optional RR-R12-02.
+1. **TM-B22** (C-R17-01): the Size column is stale after a save. Before scheduling it, B probes where the new size can come from (the `meta:write` result, a stat, or rescanning the saved paths) and whether main or preload has to change (preload is protected).
+2. **MetadataPanel polish:**
+   - RR-R13-02 + RR-R15-02: remove the `as WavMetadata` casts;
+   - RR-R15-01: re-read reason, which needs a D-24 amendment (Saba).
+3. **Optional E2E close-helper hardening:** RR-R16-03 + A-R16-01.
+4. **Root:**
+   - link a `Check` Actions run on `4f8a578` (or any commit since `35ed18b`);
+   - check whether the job's `~/.claude/settings.json` installs the read-primitives PreToolUse hook (A-R17-02).
+5. **Saba question batch:** unchanged, plus RR-R17-03 (see `b-round-17.md`).

@@ -1,0 +1,13 @@
+import { useFileStore } from '/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/stores/file-store.ts';
+const mk = (n: string) => ({ name: n, path: '/r/' + n, size: 1, modifiedAt: '2026-10-27T00:00:00.000Z' });
+const x = mk('x.wav'), y = mk('y.wav'), z = mk('z.wav');
+function run(label: string, field: string, yVal: string) {
+  for (const order of [[x, y, z], [z, y, x]]) for (const dir of ['asc', 'desc'] as const) {
+    const metadata = JSON.parse('{"/r/x.wav":{"' + field + '":["Zed"]},"/r/y.wav":{"' + field + '":' + yVal + '},"/r/z.wav":{"' + field + '":["Abe"]}}');
+    useFileStore.setState({ files: order, metadata, sortField: field, sortDirection: dir, selectedPaths: [] });
+    try { useFileStore.getState().selectRange(0, 2); console.log(label, order.map((f) => f.name[0]).join(''), dir, '->', useFileStore.getState().selectedPaths.map((p) => p[3]).join('')); }
+    catch (e) { console.log(label, order.map((f) => f.name[0]).join(''), dir, 'THROW', (e as Error).message); }
+  }
+}
+for (const v of ['[5]', '[{}]', '[true]', '[null]', '[{},"Mid"]', '["Mid"]', '[]']) run('artists ' + v, 'artists', v);
+run('genres [{}]', 'genres', '[{}]');

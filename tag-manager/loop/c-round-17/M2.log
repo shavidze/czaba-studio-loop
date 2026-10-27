@@ -1,0 +1,135 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r17-old[39m
+
+ [31m❯[39m tests/renderer/utils/file-row-display.test.ts [2m([22m[2m36 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 24[2mms[22m[39m
+     [32m✓[39m returns false for undefined metadata[32m 1[2mms[22m[39m
+     [32m✓[39m returns false for empty metadata[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for empty string[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for whitespace string[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for empty array[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for array with empty string[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for array with only blank strings[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for zero[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for negative number[32m 1[2mms[22m[39m
+     [32m✓[39m returns false for NaN[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for Infinity[32m 0[2mms[22m[39m
+     [32m✓[39m returns true for non-blank string[32m 0[2mms[22m[39m
+     [32m✓[39m returns true for array with one non-blank element[32m 0[2mms[22m[39m
+     [32m✓[39m returns true for positive number[32m 0[2mms[22m[39m
+     [32m✓[39m returns true when one field is set among empty defaults[32m 0[2mms[22m[39m
+     [32m✓[39m returns false when every field is an empty default[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for undefined[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for a number[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for an empty string[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for an empty array[32m 0[2mms[22m[39m
+     [32m✓[39m returns the whole string, not its first character[32m 0[2mms[22m[39m
+     [32m✓[39m returns the first element of an array[32m 0[2mms[22m[39m
+     [32m✓[39m (a) {"artists":[null]} does not throw and returns false[32m 1[2mms[22m[39m
+     [32m✓[39m (a) {"genres":[5]} does not throw and returns false[32m 0[2mms[22m[39m
+     [32m✓[39m (a) {"keywords":[{}]} does not throw and returns false[32m 0[2mms[22m[39m
+     [32m✓[39m (a) {"artists":[true]} does not throw and returns false[32m 0[2mms[22m[39m
+     [32m✓[39m (b) {"artists":["x",null]} returns true[32m 0[2mms[22m[39m
+     [32m✓[39m (b) {"artists":[null," y "]} returns true[32m 0[2mms[22m[39m
+     [32m✓[39m (c) a malformed array next to a real comment returns true[32m 0[2mms[22m[39m
+     [32m✓[39m (c) a malformed array next to empty defaults returns false[32m 0[2mms[22m[39m
+     [32m✓[39m (d) [null] returns an empty string[32m 0[2mms[22m[39m
+[31m     [31m×[31m (d) [5] returns an empty string[39m[32m 10[2mms[22m[39m
+[31m     [31m×[31m (d) [{}] returns an empty string[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m (d) [true] returns an empty string[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m (d) [{},"A"] returns an empty string[39m[32m 1[2mms[22m[39m
+     [32m✓[39m (d) ["A",null] returns "A"[32m 0[2mms[22m[39m
+ [31m❯[39m tests/renderer/components/file-list.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 156[2mms[22m[39m
+     [32m✓[39m (a) shows Tagged for a row with only category[32m 69[2mms[22m[39m
+     [32m✓[39m (b) shows Tagged for a row with only keywords[32m 11[2mms[22m[39m
+     [32m✓[39m (c) shows Tagged for a row with only comment[32m 12[2mms[22m[39m
+     [32m✓[39m (d) shows no Tagged when every value is empty, blank or default[32m 14[2mms[22m[39m
+     [32m✓[39m (e) still shows Tagged for title, artists or bpm alone[32m 18[2mms[22m[39m
+     [32m✓[39m (f) renders a string artist whole and the first element of an artist array[32m 12[2mms[22m[39m
+[31m     [31m×[31m (R17-e) renders a malformed row untagged with empty artist and genre cells[39m[32m 19[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList row with non-string array elements (TM-B20, D-26)[2m > [22m(R17-e) renders a malformed row untagged with empty artist and genre cells
+[31m[1mAssertionError[22m: expected [Function] to not throw an error but 'Error: Objects are not valid as a Rea…' was thrown[39m
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+"Error: Objects are not valid as a React child (found: object with keys {}). If you meant to render a collection of children, use an array instead."
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m163:11[22m[39m
+    [90m161| [39m        "tagged.wav": { artists: ["Real Artist"], genres: ["Ambience"]…
+    [90m162| [39m      })[33m,[39m
+    [90m163| [39m    )[33m.[39mnot[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m164| [39m
+    [90m165| [39m    [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([32m"malformed.wav"[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mformatFirstFieldValue with non-string array elements (TM-B20, D-26)[2m > [22m(d) [5] returns an empty string
+[31m[1mAssertionError[22m: expected 'number' to be 'string' // Object.is equality[39m
+
+Expected: [32m"string"[39m
+Received: [31m"number"[39m
+
+[36m [2m❯[22m tests/renderer/utils/file-row-display.test.ts:[2m131:27[22m[39m
+    [90m129| [39m  it[33m.[39m[34meach[39m(nonStringFirst)([32m"(d) %s returns an empty string"[39m[33m,[39m (json) [33m=>[39m {
+    [90m130| [39m    [35mconst[39m result [33m=[39m [34mformatFirstFieldValue[39m([34mparseUntypedFieldValue[39m(json))[33m;[39m
+    [90m131| [39m    [34mexpect[39m([35mtypeof[39m result)[33m.[39m[34mtoBe[39m([32m"string"[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m132| [39m    [34mexpect[39m(result)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m133| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mformatFirstFieldValue with non-string array elements (TM-B20, D-26)[2m > [22m(d) [{}] returns an empty string
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mformatFirstFieldValue with non-string array elements (TM-B20, D-26)[2m > [22m(d) [{},"A"] returns an empty string
+[31m[1mAssertionError[22m: expected 'object' to be 'string' // Object.is equality[39m
+
+Expected: [32m"string"[39m
+Received: [31m"object"[39m
+
+[36m [2m❯[22m tests/renderer/utils/file-row-display.test.ts:[2m131:27[22m[39m
+    [90m129| [39m  it[33m.[39m[34meach[39m(nonStringFirst)([32m"(d) %s returns an empty string"[39m[33m,[39m (json) [33m=>[39m {
+    [90m130| [39m    [35mconst[39m result [33m=[39m [34mformatFirstFieldValue[39m([34mparseUntypedFieldValue[39m(json))[33m;[39m
+    [90m131| [39m    [34mexpect[39m([35mtypeof[39m result)[33m.[39m[34mtoBe[39m([32m"string"[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m132| [39m    [34mexpect[39m(result)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m133| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mformatFirstFieldValue with non-string array elements (TM-B20, D-26)[2m > [22m(d) [true] returns an empty string
+[31m[1mAssertionError[22m: expected 'boolean' to be 'string' // Object.is equality[39m
+
+Expected: [32m"string"[39m
+Received: [31m"boolean"[39m
+
+[36m [2m❯[22m tests/renderer/utils/file-row-display.test.ts:[2m131:27[22m[39m
+    [90m129| [39m  it[33m.[39m[34meach[39m(nonStringFirst)([32m"(d) %s returns an empty string"[39m[33m,[39m (json) [33m=>[39m {
+    [90m130| [39m    [35mconst[39m result [33m=[39m [34mformatFirstFieldValue[39m([34mparseUntypedFieldValue[39m(json))[33m;[39m
+    [90m131| [39m    [34mexpect[39m([35mtypeof[39m result)[33m.[39m[34mtoBe[39m([32m"string"[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m132| [39m    [34mexpect[39m(result)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m133| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m38 passed[39m[22m[90m (43)[39m
+[2m   Start at [22m 10:24:08
+[2m   Duration [22m 1.36s[2m (transform 278ms, setup 204ms, import 439ms, tests 181ms, environment 1.18s)[22m
+
+
+::error file=/tmp/c-r17-old/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList row with non-string array elements (TM-B20%2C D-26) > (R17-e) renders a malformed row untagged with empty artist and genre cells,line=163,column=11::AssertionError: expected [Function] to not throw an error but 'Error: Objects are not valid as a Rea…' was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A"Error: Objects are not valid as a React child (found: object with keys {}). If you meant to render a collection of children, use an array instead."%0A%0A ❯ tests/renderer/components/file-list.test.ts:163:11%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > formatFirstFieldValue with non-string array elements (TM-B20%2C D-26) > (d) [5] returns an empty string,line=131,column=27::AssertionError: expected 'number' to be 'string' // Object.is equality%0A%0AExpected: "string"%0AReceived: "number"%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:131:27%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > formatFirstFieldValue with non-string array elements (TM-B20%2C D-26) > (d) [{}] returns an empty string,line=131,column=27::AssertionError: expected 'object' to be 'string' // Object.is equality%0A%0AExpected: "string"%0AReceived: "object"%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:131:27%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > formatFirstFieldValue with non-string array elements (TM-B20%2C D-26) > (d) [true] returns an empty string,line=131,column=27::AssertionError: expected 'boolean' to be 'string' // Object.is equality%0A%0AExpected: "string"%0AReceived: "boolean"%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:131:27%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > formatFirstFieldValue with non-string array elements (TM-B20%2C D-26) > (d) [{}%2C"A"] returns an empty string,line=131,column=27::AssertionError: expected 'object' to be 'string' // Object.is equality%0A%0AExpected: "string"%0AReceived: "object"%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:131:27%0A%0A

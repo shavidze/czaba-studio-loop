@@ -1,0 +1,195 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r17-old[39m
+
+ [31m❯[39m tests/renderer/utils/file-row-display.test.ts [2m([22m[2m36 tests[22m[2m | [22m[31m8 failed[39m[2m)[22m[32m 19[2mms[22m[39m
+     [32m✓[39m returns false for undefined metadata[32m 3[2mms[22m[39m
+     [32m✓[39m returns false for empty metadata[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for empty string[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for whitespace string[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for empty array[32m 0[2mms[22m[39m
+[31m     [31m×[31m returns false for array with empty string[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m returns false for array with only blank strings[39m[32m 1[2mms[22m[39m
+     [32m✓[39m returns false for zero[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for negative number[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for NaN[32m 0[2mms[22m[39m
+     [32m✓[39m returns false for Infinity[32m 0[2mms[22m[39m
+     [32m✓[39m returns true for non-blank string[32m 0[2mms[22m[39m
+     [32m✓[39m returns true for array with one non-blank element[32m 0[2mms[22m[39m
+     [32m✓[39m returns true for positive number[32m 0[2mms[22m[39m
+     [32m✓[39m returns true when one field is set among empty defaults[32m 0[2mms[22m[39m
+[31m     [31m×[31m returns false when every field is an empty default[39m[32m 1[2mms[22m[39m
+     [32m✓[39m returns empty string for undefined[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for a number[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for an empty string[32m 0[2mms[22m[39m
+     [32m✓[39m returns empty string for an empty array[32m 0[2mms[22m[39m
+     [32m✓[39m returns the whole string, not its first character[32m 0[2mms[22m[39m
+     [32m✓[39m returns the first element of an array[32m 0[2mms[22m[39m
+[31m     [31m×[31m (a) {"artists":[null]} does not throw and returns false[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m (a) {"genres":[5]} does not throw and returns false[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m (a) {"keywords":[{}]} does not throw and returns false[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m (a) {"artists":[true]} does not throw and returns false[39m[32m 1[2mms[22m[39m
+     [32m✓[39m (b) {"artists":["x",null]} returns true[32m 0[2mms[22m[39m
+     [32m✓[39m (b) {"artists":[null," y "]} returns true[32m 0[2mms[22m[39m
+     [32m✓[39m (c) a malformed array next to a real comment returns true[32m 0[2mms[22m[39m
+[31m     [31m×[31m (c) a malformed array next to empty defaults returns false[39m[32m 1[2mms[22m[39m
+     [32m✓[39m (d) [null] returns an empty string[32m 0[2mms[22m[39m
+     [32m✓[39m (d) [5] returns an empty string[32m 0[2mms[22m[39m
+     [32m✓[39m (d) [{}] returns an empty string[32m 0[2mms[22m[39m
+     [32m✓[39m (d) [true] returns an empty string[32m 0[2mms[22m[39m
+     [32m✓[39m (d) [{},"A"] returns an empty string[32m 0[2mms[22m[39m
+     [32m✓[39m (d) ["A",null] returns "A"[32m 0[2mms[22m[39m
+ [31m❯[39m tests/renderer/components/file-list.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 150[2mms[22m[39m
+     [32m✓[39m (a) shows Tagged for a row with only category[32m 67[2mms[22m[39m
+     [32m✓[39m (b) shows Tagged for a row with only keywords[32m 11[2mms[22m[39m
+     [32m✓[39m (c) shows Tagged for a row with only comment[32m 11[2mms[22m[39m
+[31m     [31m×[31m (d) shows no Tagged when every value is empty, blank or default[39m[32m 17[2mms[22m[39m
+     [32m✓[39m (e) still shows Tagged for title, artists or bpm alone[32m 18[2mms[22m[39m
+     [32m✓[39m (f) renders a string artist whole and the first element of an artist array[32m 11[2mms[22m[39m
+[31m     [31m×[31m (R17-e) renders a malformed row untagged with empty artist and genre cells[39m[32m 13[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 10 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList Tagged badge (TM-B09, D-15)[2m > [22m(d) shows no Tagged when every value is empty, blank or default
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).not.toBeInTheDocument()[22m
+
+[31mexpected document not to contain element, found <span
+  class="inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs font-medium bg-brand/15 text-brand"
+>
+  Tagged
+</span> instead[31m[39m
+[36m [2m❯[22m expectUntagged tests/renderer/components/file-list.test.ts:[2m57:62[22m[39m
+    [90m 55| [39m
+    [90m 56| [39m[35mfunction[39m [34mexpectUntagged[39m(name[33m:[39m string)[33m:[39m [35mvoid[39m {
+    [90m 57| [39m  expect(within(getFileRow(name)).queryByText("Tagged")).not.toBeInThe…
+    [90m   | [39m                                                             [31m^[39m
+    [90m 58| [39m}
+    [90m 59| [39m
+[90m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m106:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList row with non-string array elements (TM-B20, D-26)[2m > [22m(R17-e) renders a malformed row untagged with empty artist and genre cells
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).not.toBeInTheDocument()[22m
+
+[31mexpected document not to contain element, found <span
+  class="inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs font-medium bg-brand/15 text-brand"
+>
+  Tagged
+</span> instead[31m[39m
+[36m [2m❯[22m expectUntagged tests/renderer/components/file-list.test.ts:[2m57:62[22m[39m
+    [90m 55| [39m
+    [90m 56| [39m[35mfunction[39m [34mexpectUntagged[39m(name[33m:[39m string)[33m:[39m [35mvoid[39m {
+    [90m 57| [39m  expect(within(getFileRow(name)).queryByText("Tagged")).not.toBeInThe…
+    [90m   | [39m                                                             [31m^[39m
+    [90m 58| [39m}
+    [90m 59| [39m
+[90m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m168:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mhasAnyTagValue[2m > [22mreturns false for array with empty string
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mhasAnyTagValue[2m > [22mreturns false for array with only blank strings
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m tests/renderer/utils/file-row-display.test.ts:[2m28:49[22m[39m
+    [90m 26| [39m
+    [90m 27| [39m  it[33m.[39m[34meach[39m(emptyValues)([32m"returns false for %s"[39m[33m,[39m (_label[33m,[39m value) [33m=>[39m {
+    [90m 28| [39m    [34mexpect[39m([34mhasAnyTagValue[39m({ category[33m:[39m value }))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                                                [31m^[39m
+    [90m 29| [39m  })[33m;[39m
+    [90m 30| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mhasAnyTagValue[2m > [22mreturns false when every field is an empty default
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m tests/renderer/utils/file-row-display.test.ts:[2m50:7[22m[39m
+    [90m 48| [39m    [34mexpect[39m(
+    [90m 49| [39m      hasAnyTagValue({ title: "", artists: [], bpm: 0, keywords: [""],…
+    [90m 50| [39m    )[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m      [31m^[39m
+    [90m 51| [39m  })[33m;[39m
+    [90m 52| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mhasAnyTagValue with non-string array elements (TM-B20, D-26)[2m > [22m(a) {"artists":[null]} does not throw and returns false
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mhasAnyTagValue with non-string array elements (TM-B20, D-26)[2m > [22m(a) {"genres":[5]} does not throw and returns false
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mhasAnyTagValue with non-string array elements (TM-B20, D-26)[2m > [22m(a) {"keywords":[{}]} does not throw and returns false
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mhasAnyTagValue with non-string array elements (TM-B20, D-26)[2m > [22m(a) {"artists":[true]} does not throw and returns false
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m tests/renderer/utils/file-row-display.test.ts:[2m99:34[22m[39m
+    [90m 97| [39m    [35mconst[39m meta [33m=[39m [34mparseUntypedMetadata[39m(json)[33m;[39m
+    [90m 98| [39m    [34mexpect[39m(() [33m=>[39m [34mhasAnyTagValue[39m(meta))[33m.[39mnot[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m 99| [39m    [34mexpect[39m([34mhasAnyTagValue[39m(meta))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                                 [31m^[39m
+    [90m100| [39m  })[33m;[39m
+    [90m101| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/utils/file-row-display.test.ts[2m > [22mhasAnyTagValue with non-string array elements (TM-B20, D-26)[2m > [22m(c) a malformed array next to empty defaults returns false
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m tests/renderer/utils/file-row-display.test.ts:[2m122:7[22m[39m
+    [90m120| [39m        )[33m,[39m
+    [90m121| [39m      )[33m,[39m
+    [90m122| [39m    )[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m      [31m^[39m
+    [90m123| [39m  })[33m;[39m
+    [90m124| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m10 failed[39m[22m[2m | [22m[1m[32m33 passed[39m[22m[90m (43)[39m
+[2m   Start at [22m 10:24:10
+[2m   Duration [22m 1.34s[2m (transform 292ms, setup 219ms, import 436ms, tests 169ms, environment 1.17s)[22m
+
+
+::error file=/tmp/c-r17-old/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList Tagged badge (TM-B09%2C D-15) > (d) shows no Tagged when every value is empty%2C blank or default,line=57,column=62::Error: expect(element).not.toBeInTheDocument()%0A%0Aexpected document not to contain element, found <span%0A  class="inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs font-medium bg-brand/15 text-brand"%0A>%0A  Tagged%0A</span> instead%0A ❯ expectUntagged tests/renderer/components/file-list.test.ts:57:62%0A ❯ tests/renderer/components/file-list.test.ts:106:5%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList row with non-string array elements (TM-B20%2C D-26) > (R17-e) renders a malformed row untagged with empty artist and genre cells,line=57,column=62::Error: expect(element).not.toBeInTheDocument()%0A%0Aexpected document not to contain element, found <span%0A  class="inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs font-medium bg-brand/15 text-brand"%0A>%0A  Tagged%0A</span> instead%0A ❯ expectUntagged tests/renderer/components/file-list.test.ts:57:62%0A ❯ tests/renderer/components/file-list.test.ts:168:5%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > hasAnyTagValue > returns false for array with empty string,line=28,column=49::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:28:49%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > hasAnyTagValue > returns false for array with only blank strings,line=28,column=49::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:28:49%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > hasAnyTagValue > returns false when every field is an empty default,line=50,column=7::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:50:7%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > hasAnyTagValue with non-string array elements (TM-B20%2C D-26) > (a) {"artists"%3A[null]} does not throw and returns false,line=99,column=34::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:99:34%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > hasAnyTagValue with non-string array elements (TM-B20%2C D-26) > (a) {"genres"%3A[5]} does not throw and returns false,line=99,column=34::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:99:34%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > hasAnyTagValue with non-string array elements (TM-B20%2C D-26) > (a) {"keywords"%3A[{}]} does not throw and returns false,line=99,column=34::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:99:34%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > hasAnyTagValue with non-string array elements (TM-B20%2C D-26) > (a) {"artists"%3A[true]} does not throw and returns false,line=99,column=34::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:99:34%0A%0A
+
+::error file=/tmp/c-r17-old/tests/renderer/utils/file-row-display.test.ts,title=tests/renderer/utils/file-row-display.test.ts > hasAnyTagValue with non-string array elements (TM-B20%2C D-26) > (c) a malformed array next to empty defaults returns false,line=122,column=7::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/renderer/utils/file-row-display.test.ts:122:7%0A%0A

@@ -1,0 +1,15 @@
+import { useFileStore } from '/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/stores/file-store.ts';
+const files = ['a.wav','b.wav'].map((n) => ({ name: n, path: '/r/' + n, size: 1, modifiedAt: '2026-10-27T00:00:00.000Z' }));
+function run(label: string, field: string, meta: Record<string, unknown>) {
+  for (const order of [files, [...files].reverse()]) for (const dir of ['asc', 'desc'] as const) {
+  useFileStore.setState({ files: order, metadata: JSON.parse(JSON.stringify(meta)), sortField: field, sortDirection: dir, selectedPaths: [] });
+  try { useFileStore.getState().selectRange(0, 0); console.log(label, order[0].name, dir, '->', JSON.stringify(useFileStore.getState().selectedPaths)); }
+  catch (e) { console.log(label, order[0].name, dir, 'THROW', (e as Error).message); }
+  }
+}
+run('well-typed artists', 'artists', { '/r/a.wav': { artists: ['Zed'] }, '/r/b.wav': { artists: ['Abe'] } });
+run('artists [5]', 'artists', { '/r/a.wav': { artists: [5] }, '/r/b.wav': { artists: ['Abe'] } });
+run('genres [{}]', 'genres', { '/r/a.wav': { genres: [{}] }, '/r/b.wav': { genres: ['Pop'] } });
+run('artists [true]', 'artists', { '/r/a.wav': { artists: [true] }, '/r/b.wav': { artists: ['Abe'] } });
+run('artists [null]', 'artists', { '/r/a.wav': { artists: [null] }, '/r/b.wav': { artists: ['Abe'] } });
+run('title {} object', 'title', { '/r/a.wav': { title: {} }, '/r/b.wav': { title: 'T' } });

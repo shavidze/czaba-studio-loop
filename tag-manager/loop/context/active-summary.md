@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T10:07:36.366Z)
+# Active loop summary (2026-10-27T10:28:55.217Z)
 
-- backlog.json 138 KB -> active view 45 KB
-- status: G_ROOT_GATE round 16
+- backlog.json 148 KB -> active view 46 KB
+- status: G_ROOT_GATE round 17
 - servers: `{"servers":"none or skipped"}`
-- last publication: cb2d76b0b1dbb0e5e73a70ace2c8c618c0a68ffd (rounds 16-16)
-- last root gate: round 16 published - commit cb2d76b0b1dbb0e5e73a70ace2c8c618c0a68ffd pushed
+- last publication: 4f8a5780b338ecbdb10377e20764780cb267a4f3 (rounds 17-17)
+- last root gate: round 17 published - commit 4f8a5780b338ecbdb10377e20764780cb267a4f3 pushed
 
-## Current items: TM-B18, TM-B19
+## Current items: TM-B19, TM-B20
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -26,7 +26,7 @@
 - RR-R4-04 / info / open / tests/main/check-ffprobe-tags.test.ts second test only checks a constant + existsSync (low value; acceptable as a guard against a renamed pr
 - RR-R4-06 / info / open / Architecture signal: move the ffprobe cross-check into recording-tag-contract.test.ts (skip when ffprobe is missing) or into a dedicated npm
 - RR-R5-01 / low / open / Badge now counts every field (year/track/ISRC-only file shows Tagged); fits D-15, add a docs/ note
-- RR-R5-02 / low / open / file-row-display.ts:11 item.trim() assumes string elements; a null in an array would crash the row render (typeof guard suggested)
+- RR-R5-02 / low / in_progress / file-row-display.ts:11 item.trim() assumes string elements; a null in an array would crash the row render (typeof guard suggested)
 - RR-R5-03 / info / open / number field counts as tagged only when > 0; a future custom number field where 0/negative is meaningful would look empty
 - RR-R5-04 / low / open / file-list.test.ts getFileRow walks exactly two parents from the file name; brittle to row markup (data-testid/role=row would need a componen
 - RR-R5-05 / info / open / Tests use double quotes vs single quotes in src; Biome passes because tests/ is not linted
@@ -52,12 +52,8 @@
 - A-R9-01 / low / open / apt-install.sh knob validation accepts arbitrarily large integers; bash arithmetic overflow in worst_case_seconds possible; suggestion ^[1-9
 - C-R9-01 / info / open / hang-ignore-term cases: bash prints 'line 32: <pid> Killed sudo env ... timeout ...' to stderr on every KILL; CI log noise only, stdout line
 - C-R9-02 / low / in_progress / cold-start electronApplication.firstWindow Timeout 30000ms (A R9 run1, folder-workflow.spec.ts:27); with --retries=0 a single cold-runner oc
-- RR-R10-01 / low / in_progress / tests/e2e/electron-launch.ts:253 wrapped Error drops the original stack; use new Error(msg, { cause: error })
-- RR-R10-02 / low / in_progress / tests/e2e/electron-launch.ts:222 a TimeoutError from electron.launch itself (no window yet) is reported as "first window did not appear"; tr
 - RR-R10-03 / low / open / tests/e2e/electron-launch.ts:242 main-process output captured only after electron.launch returns; early crash output is not in the tail (doc
-- RR-R10-04 / low / in_progress / tests/e2e/electron-launch.ts:207 SIGKILL fallback does not wait for the exit event
 - RR-R10-05 / info / open / Architecture signal: the three specs repeat the same beforeAll/afterAll; a Playwright worker-scoped fixture (test.extend<{}, { tagManager: L
-- A-R10-01 / info / in_progress / Untested launch failure paths in launchTagManagerApp: electron.launch own 60 s timeout (app undefined, empty tail), domcontentloaded 15 s me
 - C-R10-01 / info / open / Un-delayed E2E Playwright 3.2 s vs R9 2.5 s (Build+E2E step 7.7 s vs 5.9 s); cause not established (machine variance or helper overhead); ju
 - RR-R12-02 / info / open / Retry after a partial batch failure rewrites files that already saved (documented, idempotent); sending only failed paths would be a product
 - RR-R12-03 / low / open / metadata-panel-batch-save.test.ts uses double quotes vs single in src; tests/ not linted (same as RR-R3-04/RR-R5-05)
@@ -79,7 +75,13 @@
 - RR-R15-05 / info / open / Architecture signal: single and batch write -> re-read -> apply are diverging (D-21, D-22, D-24); one pure resolveSaveOutcome(writeResult, r
 - C-R15-01 / low / open / Error toast (fixed bottom-20 right-4) covers the Save button in the bottom-right corner for ~3 s (c-round-15/r15-5-batch-new-2-after-save.pn
 - A-R15-01 / info / open / succeeded: 0 + re-read reject -> '0 saved, N failed. Reloading failed. Rescan to refresh.' matches D-24 but reads awkwardly; no test covers 
-- B-R15-01 / info / open / Fact: all four launchTagManagerApp failure paths are reachable with -r injectors on the built app: blocking main (Atomics.wait) -> electron.
+- RR-R16-01 / low / open / Biome does not reach the four R16 files (npm run check runs biome check src/ only); e.g. whether organizeImports accepts tests/e2e/electron-
+- RR-R16-02 / low / open / tests/e2e/electron-launch.ts:62 getElectronLaunchArgs runs before the try, so its error (bad TAG_MANAGER_E2E_ELECTRON_REQUIRE path) is throw
+- RR-R16-03 / low / open / tests/e2e/electron-launch-failure.ts:79-80 when kill('SIGKILL') returns false the helper still waits the full FAILED_APP_KILL_WAIT_MS (5 s);
+- RR-R16-04 / info / open / Architecture signal: capturing main output during electron.launch needs spawning Electron ourselves and connecting over CDP; only worth it i
+- A-R16-01 / low / open / closeFailedTagManagerApp: if kill() threw, the exit listener and kill-wait timer would stay for 5 s and the kill error would replace the ori
+- A-R16-02 / info / open / With a tests/-including Biome config, tests/e2e/electron-launch.ts gets one organizeImports assist (@playwright/test before node:*); pre-exi
+- B-R16-01 / low / open / file-row-display.ts:4 formatFirstFieldValue returns value[0] whatever its type: [5] -> number 5, [{}] -> object {} (an object as a React chi
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
