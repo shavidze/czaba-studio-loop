@@ -1,0 +1,33 @@
+> const CP12_SLIDER_CHUNKS: Array<[string, number, number]> = [
+>   ['a', -600, -391],
+>   ['b', -390, -181],
+>   ['c', -180, 29],
+>   ['d', 30, 240],
+> ];
+>   it('CP12-COVER: the slider chunks list every tenth of a dB from CLIP_GAIN_MIN_DB to CLIP_GAIN_MAX_DB once, in order, with no gap and no overlap', () => {
+>     const chunked: number[] = [];
+>     for (const [, fromTenth, toTenth] of CP12_SLIDER_CHUNKS) {
+>       for (let tenth = fromTenth; tenth <= toTenth; tenth++) {
+>         chunked.push(tenth);
+>       }
+>     }
+>     const full: number[] = [];
+>     for (let tenth = CLIP_GAIN_MIN_DB * 10; tenth <= CLIP_GAIN_MAX_DB * 10; tenth++) {
+>       full.push(tenth);
+>     }
+>     expect(chunked).toEqual(full);
+>   });
+> 
+>   it.each(
+>     CP12_SLIDER_CHUNKS,
+>   )('CP12%s: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth %d to tenth %d', async (_chunk, fromTenth, toTenth) => {
+>     const { api, select } = await mountClipGainWorkspace({ cm: -6, cx: 1 });
+>     for (let tenth = fromTenth; tenth <= toTenth; tenth++) {
+>     expect(mismatches).toEqual([]);
+>     expect(live(api).undoLabel).toBeNull();
+>   });
+> 
+>   it('CP12e: Shift-fine pointer and pending commits agree, and three members anchors including both clamps commit the same gains by pointer and by pending onChange', async () => {
+>     const { api, fader, select } = await mountClipGainWorkspace({ cm: -6, cx: 1 });
+>     select(['cm']);
+>     let pointerId = 200;

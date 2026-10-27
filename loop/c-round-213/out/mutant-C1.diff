@@ -1,0 +1,4 @@
+466c466
+<     return applyClipGainTargets(arrangement, override.gains);
+---
+>     return applyClipGainTargets(arrangement, override.gains.size === 1 ? new Map([...override.gains].map(([k, v]) => [k, v === -30 ? -29.9 : v])) : override.gains);

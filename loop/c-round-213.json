@@ -1,0 +1,95 @@
+{
+  "round": 213,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-27T21:55:10.2553526Z",
+    "round": 213,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "SCOPE-213",
+    "COVERAGE-213",
+    "LOAD-213",
+    "DOC-213",
+    "AN-REVIEW-213",
+    "G213-3",
+    "STUDIO-SMOKE-213"
+  ],
+  "gate": [
+    "full vitest (CP12a-d inside 30 s under gate load)",
+    "typecheck (full gate)",
+    "build",
+    "Biome (full)",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "blocked": [],
+  "notes": [
+    "Fake-Bearer /api/studio-token returned 500 because the :5199 mock was not running (curl 000); the task allows 500 in that case. No token was issued.",
+    "Ableton conformance: not applicable (test-only round).",
+    "G213-3 first attempt aborted in C's harness (document.body null during an evaluate, a dev-server reload); the rerun with the existing retry wrapper is the counted run.",
+    "LOAD-213 conditions: no other vitest/Playwright/Chromium processes; the idle :5173 dev server was up; 4 CPUs.",
+    "STUDIO-SMOKE first 1440 attempt (30 px drag, clamped +24.0) used a verdict rule that wrongly required an empty Undo stack; the drag was changed to 8 px and the rule corrected, then both viewports were rerun (counted)."
+  ],
+  "measurements": {
+    "fileAlone": {
+      "run1_ms": {
+        "COVER": 1,
+        "a": 2463,
+        "b": 3004,
+        "c": 2649,
+        "d": 2204,
+        "e": 163
+      },
+      "run2_ms": {
+        "COVER": 1,
+        "a": 2633,
+        "b": 2705,
+        "c": 2811,
+        "d": 2317,
+        "e": 184
+      },
+      "tests": "25/25 both"
+    },
+    "covering": {
+      "files": "155/155",
+      "tests": "2236/2236",
+      "wall_s": 130,
+      "ms": {
+        "COVER": 1,
+        "a": 4209,
+        "b": 4184,
+        "c": 4380,
+        "d": 4162,
+        "e": 483
+      },
+      "slowest5_ms": [
+        [
+          "CP12c",
+          4380
+        ],
+        [
+          "CP12a",
+          4209
+        ],
+        [
+          "CP12b",
+          4184
+        ],
+        [
+          "CP12d",
+          4162
+        ],
+        [
+          "mixer-onstate-colour-ui DXM3",
+          1912
+        ]
+      ]
+    },
+    "cMutantC1": "scratch ArrangementContext withMixOverride clip-gain single: -30 -> -29.9; only CP12b red ('single -30: -29.9 vs -30'), 24 passed"
+  }
+}
