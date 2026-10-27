@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T14:44:07.380Z)
+# Active loop summary (2026-10-27T18:47:17.005Z)
 
-- backlog.json 235 KB -> active view 78 KB
-- status: G_ROOT_GATE round 25
+- backlog.json 248 KB -> active view 81 KB
+- status: G_ROOT_GATE round 26
 - servers: `{"servers":"none or skipped"}`
 - last publication: c2c19a72bed45f561eae1c9dbca9cc79567aaf41 (rounds 25-25)
-- last root gate: round 25 published - commit c2c19a72bed45f561eae1c9dbca9cc79567aaf41 pushed
+- last root gate: round 26 skipped - C taskStatus BLOCKED
 
-## Current items: TM-B27, TM-B28
+## Current items: TM-B28, TM-B29
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -132,16 +132,21 @@
 - RR-R23-03 / low / open / (z12) pins the anchor-moves behaviour (D-31 deviation 1), which is still a Saba question; an Explorer-style answer inverts it on purpose (do
 - RR-R23-04 / info / open / Architecture signal: handleSave (~75 lines, two branches, snapshot/selection guards, skipSyncRef) could move into a store action or a useSav
 - A-R23-01 / info / open / handleSave takes selectedFiles and fields from the render closure while startSelection and the snapshot come from getState(); they cannot di
-- B-R23-02 / low / open / Reverse order of A-R21-03: a schema re-read that started before a pending write finished and resolves after the save's re-read writes the pr
+- B-R23-02 / medium / open / Reverse order of A-R21-03: a schema re-read that started before a pending write finished and resolves after the save's re-read writes the pr
 - B-R23-03 / low / open / Saving the schema (Done) while the form has unsaved edits silently replaces them: handleSchemaChanged calls setEditingMetadata(re-read | {})
-- C-R24-01 / low / open / Test gap: D-33 part 2 rule 'a path without a store entry stays absent' is not pinned; a mutant writing undefined or {} for such a path survi
 - C-R24-03 / info / open / (s4) write-schema assertion cannot tell a write using useSchemaStore.getState().fields from one using fields: the write runs at click time, 
-- C-R24-04 / info / open / docs/bugs/001 entry 3 title still says 'single save' although D-33 covers batch; entry 10 names (s6) but not (s7)
-- RR-R24-01 / low / open / MetadataPanel.tsx:216-221 a kept entry was read with the old schema, so a newly added custom field shows empty for that file until a rescan;
 - RR-R24-02 / low / open / MetadataPanel.tsx:209-224 handleSchemaChanged writes the store only after all chunks; a save finishing between chunks can be overwritten by 
-- RR-R24-03 / low / open / (i3) calls resetWindowApiMocks() itself, so it no longer proves the shared beforeEach isolates tests; suggests a defaults-only test
-- RR-R24-04 / low / open / metadata-panel-schema-change.test.ts:112-120 copies the mock-reset code instead of reusing resetWindowApiMocks; move the helper to tests/ren
 - RR-R24-05 / info / open / Architecture signal: handleSchemaChanged and handleSave write the store without knowing about each other; a read generation number in the fi
+- A-R25-02 / low / open / docs/bugs/001 entry 3 step 3 (:52) still says 'rescan or switching to another file and back', contradicting the D-33 note
+- A-R25-03 / low / open / docs/bugs/001 entry 10 step 3 'form unchanged, edits stay' on a rejected read holds only for a single selection; batch calls setEditingMetad
+- C-R25-01 / low / open / MBS survives: removing resetWindowApiMocks() from the schema-change beforeEach breaks no test; once-values are consumed in their own test an
+- C-R25-02 / info / open / MW survives: capturing window.api at module load in window-api-mocks.ts is equivalent today (setup.ts and the vi.hoisted swap expose the sam
+- C-R25-03 / low / open / = A-R25-02 (entry 3 step 3 vs D-33 note)
+- C-R25-04 / low / open / = A-R25-03 (entry 10 step 3 single-selection only)
+- RR-R25-01 / low / open / Review says docs/bugs/001:10 'MetadataPanel.tsx:111' points at 'if (meta) {' and should be :110. Disputed by B grep on c2c19a7: line 110 is 
+- RR-R25-04 / info / open / Architecture signal: per-path read generation in useFileStore so handleSchemaChanged drops late results (fixes RR-R24-02/A-R21-03 class); ot
+- B-R25-01 / low / open / Hypothesis, not reproduced: Rescan (and Open Folder of the same folder) stays enabled while a save is pending; readMetadataChunked can read 
+- B-R25-02 / medium / open / B-R23-02 and RR-R24-02 reproduced red at component level on c2c19a7: (r1) batch, (r2) single + typing during save, (r5) stale chunk 1 + save
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
