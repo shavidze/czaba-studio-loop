@@ -1,0 +1,814 @@
+import { act, fireEvent, render } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+import {
+  type ArrangementContextValue,
+  ArrangementProvider,
+  GESTURE_EDIT_BLOCKED_MESSAGE,
+  useArrangement,
+} from '~/contexts/ArrangementContext';
+import type {
+  Arrangement,
+  ArrangementClip,
+  WorkspaceCollection,
+  WorkspaceSource,
+} from '~/types/arrangement';
+import { trackGroupRefusalMessage } from '../groups';
+import { createArrangement } from '../model';
+import { fitLaneHeights } from '../panels';
+
+vi.mock('@remix-run/react', () => ({
+  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
+const fakeClock = { base: 0 };
+
+class FakeParam {
+  value = 0;
+  setTargetAtTime(target: number) {
+    this.value = target;
+  }
+}
+
+class FakeNode {
+  connect(destination: FakeNode) {
+    return destination;
+  }
+  disconnect() {}
+}
+
+class FakeGain extends FakeNode {
+  gain = new FakeParam();
+}
+
+class FakePanner extends FakeNode {
+  pan = new FakeParam();
+}
+
+class FakeSource extends FakeNode {
+  buffer: unknown = null;
+  onended: (() => void) | null = null;
+  start() {}
+  stop() {}
+}
+
+class FakeAudioContext {
+  state = 'running';
+  destination = new FakeNode();
+  sampleRate = 48000;
+  get currentTime() {
+    return Date.now() / 1000 - fakeClock.base;
+  }
+  resume() {
+    return Promise.resolve();
+  }
+  close() {
+    return Promise.resolve();
+  }
+  createGain() {
+    return new FakeGain();
+  }
+  createStereoPanner() {
+    return new FakePanner();
+  }
+  createBufferSource() {
+    return new FakeSource();
+  }
+}
+
+class FakeOfflineAudioContext {}
+
+class FakeAudioBuffer {
+  readonly length: number;
+  readonly numberOfChannels: number;
+  readonly sampleRate: number;
+  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
+    this.length = options.length;
+    this.numberOfChannels = options.numberOfChannels;
+    this.sampleRate = options.sampleRate;
+  }
+  get duration() {
+    return this.length / this.sampleRate;
+  }
+  getChannelData() {
+    return new Float32Array(this.length);
+  }
+}
+
+const resizeCallbacks = new Set<() => void>();
+
+class ControlledResizeObserver {
+  private readonly callback: () => void;
+  constructor(callback: () => void) {
+    this.callback = callback;
+  }
+  observe() {
+    resizeCallbacks.add(this.callback);
+  }
+  disconnect() {
+    resizeCallbacks.delete(this.callback);
+  }
+}
+
+const PX_PER_SECOND = 40;
+const HEADER_PX = 224;
+const LANE_PX = 100;
+const GROUP_ROW_PX = 28;
+const TIMELINE_CHROME_PX = 44;
+
+const SOURCE_LENGTHS: Record<string, number> = { song: 4000, stem: 1000, hit: 200 };
+
+const groupsCollection: WorkspaceCollection = {
+  id: 'track-groups',
+  label: 'track-groups',
+  origin: 'demo',
+  sources: [
+    { id: 'song', title: 'Song', collectionLabel: 'track-groups', kind: 'music', origin: 'demo' },
+    { id: 'stem', title: 'Stem', collectionLabel: 'track-groups', kind: 'stem', origin: 'demo' },
+    { id: 'hit', title: 'Hit', collectionLabel: 'track-groups', kind: 'sfx', origin: 'demo' },
+  ],
+  loadSource: async (source: WorkspaceSource) =>
+    new AudioBuffer({
+      length: SOURCE_LENGTHS[source.id] ?? 100,
+      numberOfChannels: 1,
+      sampleRate: 100,
+    }),
+};
+
+const LAB_CLIPS: ArrangementClip[] = [
+  { id: 'cm', trackId: 'music', sourceId: 'song', start: 0, sourceOffset: 0, duration: 10 },
+  { id: 'cm2', trackId: 'music', sourceId: 'song', start: 20, sourceOffset: 0, duration: 2 },
+  { id: 'cs', trackId: 'stems', sourceId: 'stem', start: 2, sourceOffset: 0, duration: 6 },
+  { id: 'cx', trackId: 'sfx', sourceId: 'hit', start: 4, sourceOffset: 0, duration: 2 },
+];
+
+function labArrangement(): Arrangement {
+  return {
+    ...createArrangement([
+      { id: 'video', kind: 'video', name: 'ვიდეო' },
+      { id: 'music', kind: 'audio', name: 'მუსიკა' },
+      { id: 'stems', kind: 'audio', name: 'სტემები' },
+      { id: 'sfx', kind: 'audio', name: 'SFX' },
+    ]),
+    clips: LAB_CLIPS,
+  };
+}
+
+interface GroupsApiRef {
+  current: ArrangementContextValue | null;
+}
+
+function GroupsProbe({ api }: { api: GroupsApiRef }) {
+  api.current = useArrangement();
+  return null;
+}
+
+function live(api: GroupsApiRef): ArrangementContextValue {
+  if (!api.current) {
+    throw new Error('provider not mounted');
+  }
+  return api.current;
+}
+
+function stubCapture(element: HTMLElement) {
+  Object.defineProperty(element, 'setPointerCapture', { configurable: true, value: () => {} });
+  Object.defineProperty(element, 'hasPointerCapture', { configurable: true, value: () => false });
+  Object.defineProperty(element, 'releasePointerCapture', { configurable: true, value: () => {} });
+}
+
+async function mountGroupsWorkspace() {
+  const api: GroupsApiRef = { current: null };
+  const view = render(
+    <ArrangementProvider collection={groupsCollection} initialArrangement={labArrangement()}>
+      <StudioWorkspace />
+      <GroupsProbe api={api} />
+    </ArrangementProvider>,
+  );
+  for (
+    let tick = 0;
+    tick < 10 && ['song', 'stem', 'hit'].some((id) => !live(api).sourceDurations.has(id));
+    tick++
+  ) {
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+  }
+  act(() => live(api).setPxPerSecond(PX_PER_SECOND));
+  return { api, view };
+}
+
+type GroupsView = ReturnType<typeof render>;
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function laneName(view: GroupsView, name: string): HTMLElement {
+  return view.getByRole('button', {
+    name: new RegExp(`^${escapeRegExp(name)} — set as the active track`),
+  });
+}
+
+function groupName(view: GroupsView, name: string): HTMLElement {
+  return view.getByRole('button', { name: new RegExp(`^${escapeRegExp(name)} — group`) });
+}
+
+function selectedRows(view: GroupsView): string[] {
+  return Array.from(
+    view.container.querySelectorAll<HTMLElement>(
+      '[data-track-selected="true"], [data-group-selected="true"]',
+    ),
+  ).map((row) => row.dataset.trackId ?? `group:${row.textContent?.trim() ?? ''}`);
+}
+
+function lanesContainer(view: GroupsView): HTMLElement {
+  const container =
+    view.container.querySelector<HTMLElement>('[data-track-id="music"]')?.parentElement;
+  if (!container) {
+    throw new Error('lanes container missing');
+  }
+  return container;
+}
+
+function rowOrder(view: GroupsView): string[] {
+  return Array.from(lanesContainer(view).children).flatMap((child) => {
+    if (!(child instanceof HTMLElement)) {
+      return [];
+    }
+    if (child.dataset.groupId !== undefined) {
+      return [`group:${child.textContent?.replace('▣', '').trim()}:${child.dataset.groupDepth}`];
+    }
+    if (child.dataset.trackId !== undefined) {
+      const header = child.querySelector<HTMLElement>('[data-testid="arrangement-track-header"]');
+      return [`${child.dataset.trackId}:${header?.style.paddingLeft || '-'}`];
+    }
+    return [];
+  });
+}
+
+function status(view: GroupsView): string {
+  return view.getByTestId('arrangement-status').textContent ?? '';
+}
+
+function pressGroupKey(shift = false, target: Element = document.body) {
+  fireEvent.keyDown(target, {
+    key: shift ? 'G' : 'g',
+    code: 'KeyG',
+    ctrlKey: true,
+    shiftKey: shift,
+  });
+}
+
+function clickLane(view: GroupsView, name: string, modifiers: MouseEventInit = {}) {
+  fireEvent.click(laneName(view, name), modifiers);
+}
+
+function groupMusicAndStems(view: GroupsView) {
+  clickLane(view, 'მუსიკა');
+  clickLane(view, 'სტემები', { shiftKey: true });
+  pressGroupKey();
+}
+
+function groupStemsAndSfx(view: GroupsView) {
+  clickLane(view, 'სტემები');
+  clickLane(view, 'SFX', { shiftKey: true });
+  pressGroupKey();
+}
+
+function layoutRows(view: GroupsView): Record<string, number> {
+  const centres: Record<string, number> = {};
+  let top = 0;
+  for (const child of Array.from(lanesContainer(view).children)) {
+    if (!(child instanceof HTMLElement)) {
+      continue;
+    }
+    const id = child.dataset.trackId ?? child.dataset.groupId;
+    if (id === undefined) {
+      continue;
+    }
+    const height = child.dataset.groupId !== undefined ? GROUP_ROW_PX : LANE_PX;
+    const rowTop = top;
+    Object.defineProperty(child, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => new DOMRect(0, rowTop, 2000, height),
+    });
+    centres[child.dataset.groupId !== undefined ? 'group' : id] = rowTop + height / 2;
+    top += height;
+  }
+  return centres;
+}
+
+function clipMoveHandle(view: GroupsView, clipId: string) {
+  const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
+  const handle = root?.querySelector<HTMLElement>('[title$="— drag to move"]');
+  if (!root || !handle) {
+    throw new Error(`clip ${clipId} not rendered`);
+  }
+  stubCapture(root);
+  return { root, handle };
+}
+
+function clipTrack(api: GroupsApiRef, clipId: string): string | undefined {
+  return live(api)
+    .getArrangement()
+    .clips.find((clip) => clip.id === clipId)?.trackId;
+}
+
+function dragClipVertically(
+  view: GroupsView,
+  api: GroupsApiRef,
+  clipId: string,
+  fromY: number,
+  path: readonly number[],
+): (string | null)[] {
+  const { root, handle } = clipMoveHandle(view, clipId);
+  const x = HEADER_PX + 21 * PX_PER_SECOND;
+  fireEvent.pointerDown(handle, {
+    button: 0,
+    buttons: 1,
+    pointerId: 7,
+    clientX: x,
+    clientY: fromY,
+  });
+  const ghostTracks: (string | null)[] = [];
+  for (const y of path) {
+    fireEvent.pointerMove(root, { pointerId: 7, clientX: x, clientY: y });
+    ghostTracks.push(live(api).clipLaneDrag?.ghosts[0]?.trackId ?? null);
+  }
+  fireEvent.pointerUp(root, { pointerId: 7, clientX: x, clientY: path.at(-1) ?? fromY });
+  return ghostTracks;
+}
+
+const layoutFrame = { column: 0 };
+
+function stubTimelineFrame(column: number) {
+  layoutFrame.column = column;
+  vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function (
+    this: HTMLElement,
+  ) {
+    if (this.dataset.testid !== 'arrangement-timeline-scroller') {
+      return 0;
+    }
+    const panel = this.nextElementSibling;
+    const panelHeight =
+      panel instanceof HTMLElement ? Number.parseFloat(panel.style.height) || 0 : 0;
+    return layoutFrame.column - panelHeight;
+  });
+  vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (
+    this: HTMLElement,
+  ) {
+    if (this.dataset.testid === 'arrangement-detail-panel') {
+      return Number.parseFloat(this.style.height) || 0;
+    }
+    const parent = this.parentElement;
+    if (parent?.parentElement?.dataset.testid === 'arrangement-timeline-scroller') {
+      return parent.firstElementChild === this ? TIMELINE_CHROME_PX : 0;
+    }
+    return 0;
+  });
+}
+
+function fireTimelineResize(column: number) {
+  layoutFrame.column = column;
+  act(() => {
+    for (const callback of resizeCallbacks) {
+      callback();
+    }
+  });
+}
+
+function withoutTrackGroups(arrangement: Arrangement): Arrangement {
+  const { groups: _groups, ...rest } = arrangement;
+  return {
+    ...rest,
+    tracks: arrangement.tracks.map(({ groupId: _groupId, ...track }) => track),
+  };
+}
+
+beforeEach(() => {
+  fakeClock.base = Date.now() / 1000;
+  resizeCallbacks.clear();
+  vi.stubGlobal('AudioContext', FakeAudioContext);
+  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+  vi.stubGlobal('ResizeObserver', ControlledResizeObserver);
+  vi.stubGlobal('requestAnimationFrame', () => 1);
+  vi.stubGlobal('cancelAnimationFrame', () => undefined);
+  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe('SRW-17 stage 1 track groups in the workspace', { timeout: 20_000 }, () => {
+  it('TG1 plain, Shift and Ctrl clicks shape the track selection while the active lane follows', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    expect(selectedRows(view)).toEqual([]);
+    clickLane(view, 'მუსიკა');
+    expect(selectedRows(view)).toEqual(['music']);
+    expect(live(api).activeTrackId).toBe('music');
+    expect(laneName(view, 'მუსიკა').getAttribute('aria-pressed')).toBe('true');
+    expect(laneName(view, 'მუსიკა').getAttribute('aria-label')).toBe(
+      'მუსიკა — set as the active track, selected',
+    );
+    clickLane(view, 'სტემები', { shiftKey: true });
+    expect(selectedRows(view)).toEqual(['music', 'stems']);
+    expect(live(api).activeTrackId).toBe('stems');
+    clickLane(view, 'SFX', { ctrlKey: true });
+    expect(selectedRows(view)).toEqual(['music', 'stems', 'sfx']);
+    expect(live(api).activeTrackId).toBe('sfx');
+    clickLane(view, 'SFX', { ctrlKey: true });
+    expect(selectedRows(view)).toEqual(['music', 'stems']);
+    expect(live(api).activeTrackId).toBe('sfx');
+    expect(laneName(view, 'SFX').getAttribute('aria-pressed')).toBe('true');
+    clickLane(view, 'ვიდეო', { metaKey: true });
+    expect(selectedRows(view)).toEqual(['video', 'music', 'stems']);
+    clickLane(view, 'სტემები');
+    expect(selectedRows(view)).toEqual(['stems']);
+    expect(live(api).activeTrackId).toBe('stems');
+  });
+
+  it('TG2 Ctrl+G renders one indented group above its members, with Undo and Redo', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    const beforeTracks = live(api).getArrangement().tracks;
+    groupMusicAndStems(view);
+    expect(rowOrder(view)).toEqual([
+      'video:-',
+      'group:Group 1:0',
+      'music:20px',
+      'stems:20px',
+      'sfx:-',
+    ]);
+    expect(live(api).undoLabel).toBe('Group Tracks');
+    expect(status(view)).toBe('Group “Group 1” created: მუსიკა, სტემები.');
+    expect(selectedRows(view)).toEqual(['group:Group 1']);
+    act(() => live(api).undo());
+    expect(rowOrder(view)).toEqual(['video:-', 'music:-', 'stems:-', 'sfx:-']);
+    expect(live(api).getArrangement().tracks).toEqual(beforeTracks);
+    expect(Object.hasOwn(live(api).getArrangement(), 'groups')).toBe(false);
+    fireEvent.keyDown(document.body, { key: 'y', code: 'KeyY', ctrlKey: true });
+    expect(rowOrder(view)).toEqual([
+      'video:-',
+      'group:Group 1:0',
+      'music:20px',
+      'stems:20px',
+      'sfx:-',
+    ]);
+    fireEvent.keyDown(document.body, { key: 'z', code: 'KeyZ', ctrlKey: true });
+    expect(rowOrder(view)).toEqual(['video:-', 'music:-', 'stems:-', 'sfx:-']);
+  });
+
+  it('TG2 after Undo removes the selected group, the stale selection is filtered, not reused', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    groupMusicAndStems(view);
+    act(() => live(api).undo());
+    expect(selectedRows(view)).toEqual([]);
+    pressGroupKey();
+    expect(status(view)).toBe(trackGroupRefusalMessage('empty'));
+    expect(status(view)).toBe(
+      'To group tracks, select them first — Ctrl+click or Shift+click a track name.',
+    );
+    pressGroupKey(true);
+    expect(status(view)).toBe(trackGroupRefusalMessage('no-group'));
+    expect(status(view)).toBe('To ungroup, select a group — click the group name.');
+    expect(live(api).undoLabel).toBeNull();
+    expect(live(api).redoLabel).toBe('Group Tracks');
+  });
+
+  it('TG3 nesting by clicks and keys stacks the outer header, then the inner one', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    groupStemsAndSfx(view);
+    clickLane(view, 'მუსიკა');
+    fireEvent.click(groupName(view, 'Group 1'), { ctrlKey: true });
+    expect(selectedRows(view)).toEqual(['music', 'group:Group 1']);
+    expect(live(api).activeTrackId).toBe('music');
+    pressGroupKey();
+    expect(rowOrder(view)).toEqual([
+      'video:-',
+      'group:Group 2:0',
+      'music:20px',
+      'group:Group 1:1',
+      'stems:32px',
+      'sfx:32px',
+    ]);
+    expect(status(view)).toBe('Group “Group 2” created: მუსიკა, Group 1.');
+    expect(live(api).undoLabel).toBe('Group Tracks');
+    act(() => live(api).undo());
+    expect(live(api).undoLabel).toBe('Group Tracks');
+    expect(rowOrder(view)).toEqual([
+      'video:-',
+      'music:-',
+      'group:Group 1:0',
+      'stems:20px',
+      'sfx:20px',
+    ]);
+  });
+
+  it('TG4 Ctrl+Shift+G dissolves only the selected group and refuses a track-only selection', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    groupStemsAndSfx(view);
+    clickLane(view, 'მუსიკა');
+    fireEvent.click(groupName(view, 'Group 1'), { ctrlKey: true });
+    pressGroupKey();
+    pressGroupKey(true);
+    expect(live(api).undoLabel).toBe('Ungroup Tracks');
+    expect(status(view)).toBe('Group “Group 2” ungrouped.');
+    expect(rowOrder(view)).toEqual([
+      'video:-',
+      'music:-',
+      'group:Group 1:0',
+      'stems:20px',
+      'sfx:20px',
+    ]);
+    expect(selectedRows(view)).toEqual(['music', 'group:Group 1']);
+    clickLane(view, 'მუსიკა');
+    const labelBefore = live(api).undoLabel;
+    const arrangementBefore = live(api).getArrangement();
+    pressGroupKey(true);
+    expect(status(view)).toBe(trackGroupRefusalMessage('no-group'));
+    expect(live(api).undoLabel).toBe(labelBefore);
+    expect(live(api).getArrangement()).toBe(arrangementBefore);
+    fireEvent.click(groupName(view, 'Group 1'));
+    pressGroupKey(true);
+    expect(rowOrder(view)).toEqual(['video:-', 'music:-', 'stems:-', 'sfx:-']);
+    expect(Object.hasOwn(live(api).getArrangement(), 'groups')).toBe(false);
+    expect(selectedRows(view)).toEqual(['stems', 'sfx']);
+  });
+
+  it('TG5 refusals leave history, rows and selection untouched with an English status', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    pressGroupKey();
+    expect(status(view)).toBe(trackGroupRefusalMessage('empty'));
+    clickLane(view, 'ვიდეო');
+    clickLane(view, 'მუსიკა', { shiftKey: true });
+    pressGroupKey();
+    expect(status(view)).toBe(trackGroupRefusalMessage('video'));
+    expect(status(view)).toBe('The video track cannot be grouped.');
+    expect(selectedRows(view)).toEqual(['video', 'music']);
+    clickLane(view, 'მუსიკა');
+    clickLane(view, 'SFX', { ctrlKey: true });
+    pressGroupKey();
+    expect(status(view)).toBe(trackGroupRefusalMessage('gap'));
+    expect(status(view)).toBe(
+      'Only adjacent tracks can be grouped together — the selection skips a track.',
+    );
+    expect(selectedRows(view)).toEqual(['music', 'sfx']);
+    groupStemsAndSfx(view);
+    const labelAfterGroup = live(api).undoLabel;
+    clickLane(view, 'სტემები');
+    clickLane(view, 'მუსიკა', { ctrlKey: true });
+    pressGroupKey();
+    expect(status(view)).toBe(trackGroupRefusalMessage('mixed-parents'));
+    expect(status(view)).toBe(
+      'Only tracks at the same level can be grouped together — the selected tracks are in different groups.',
+    );
+    expect(live(api).undoLabel).toBe(labelAfterGroup);
+    expect(view.container.querySelectorAll('[data-group-id]')).toHaveLength(1);
+    let release: (() => void) | null = null;
+    act(() => {
+      release = live(api).claimPointerGesture(42, () => {});
+    });
+    clickLane(view, 'მუსიკა');
+    pressGroupKey();
+    expect(status(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+    pressGroupKey(true);
+    expect(status(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+    expect(view.container.querySelectorAll('[data-group-id]')).toHaveLength(1);
+    expect(live(api).undoLabel).toBe(labelAfterGroup);
+    act(() => release?.());
+  });
+
+  it('TG6 F2 renames the group inline; Escape cancels; empty keeps the name; editor keys stay local', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    groupStemsAndSfx(view);
+    const button = groupName(view, 'Group 1');
+    button.focus();
+    fireEvent.keyDown(button, { key: 'F2', code: 'F2' });
+    const input = view.getByTestId('arrangement-group-name-input');
+    expect(document.activeElement).toBe(input);
+    expect(input).toHaveProperty('value', 'Group 1');
+    const snapBefore = view.getByTestId('arrangement-grid-control').dataset.snap;
+    fireEvent.keyDown(input, { key: 'g', code: 'KeyG' });
+    fireEvent.keyDown(input, { key: 'm', code: 'KeyM' });
+    fireEvent.keyDown(input, { key: ' ', code: 'Space' });
+    pressGroupKey(false, input);
+    expect(view.getByTestId('arrangement-grid-control').dataset.snap).toBe(snapBefore);
+    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
+    expect(live(api).isPlaying).toBe(false);
+    expect(view.container.querySelectorAll('[data-group-id]')).toHaveLength(1);
+    fireEvent.change(input, { target: { value: 'SFX ქუჩა' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    expect(live(api).undoLabel).toBe('Rename Group');
+    expect(groupName(view, 'SFX ქუჩა')).toBe(document.activeElement);
+    expect(status(view)).toBe('Group name: “SFX ქუჩა”.');
+    const afterRename = live(api).getArrangement();
+    fireEvent.keyDown(groupName(view, 'SFX ქუჩა'), { key: 'F2', code: 'F2' });
+    fireEvent.change(view.getByTestId('arrangement-group-name-input'), {
+      target: { value: 'სხვა' },
+    });
+    fireEvent.keyDown(view.getByTestId('arrangement-group-name-input'), { key: 'Escape' });
+    expect(view.queryByTestId('arrangement-group-name-input')).toBeNull();
+    expect(live(api).getArrangement()).toBe(afterRename);
+    expect(document.activeElement).toBe(groupName(view, 'SFX ქუჩა'));
+    fireEvent.keyDown(groupName(view, 'SFX ქუჩა'), { key: 'F2', code: 'F2' });
+    fireEvent.change(view.getByTestId('arrangement-group-name-input'), { target: { value: '  ' } });
+    fireEvent.keyDown(view.getByTestId('arrangement-group-name-input'), { key: 'Enter' });
+    expect(live(api).getArrangement()).toBe(afterRename);
+    expect(status(view)).toBe('The name is empty — “SFX ქუჩა” is kept');
+    fireEvent.keyDown(groupName(view, 'SFX ქუჩა'), { key: 'F2', code: 'F2' });
+    fireEvent.change(view.getByTestId('arrangement-group-name-input'), {
+      target: { value: 'ბლარი' },
+    });
+    fireEvent.blur(view.getByTestId('arrangement-group-name-input'));
+    expect(groupName(view, 'ბლარი')).toBeTruthy();
+    act(() => live(api).undo());
+    expect(groupName(view, 'SFX ქუჩა')).toBeTruthy();
+  });
+
+  it('TG7 plain g still toggles Snap and Ctrl+G inside the BPM field or library search is ignored', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    const control = view.getByTestId('arrangement-grid-control');
+    const snap = control.dataset.snap;
+    fireEvent.keyDown(document.body, { key: 'g', code: 'KeyG' });
+    expect(control.dataset.snap).not.toBe(snap);
+    expect(view.container.querySelectorAll('[data-group-id]')).toHaveLength(0);
+    clickLane(view, 'მუსიკა');
+    const statusBefore = status(view);
+    for (const testId of ['arrangement-tempo-input', 'arrangement-library-search']) {
+      const field = view.getByTestId(testId);
+      field.focus();
+      const event = new KeyboardEvent('keydown', {
+        key: 'g',
+        code: 'KeyG',
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      act(() => {
+        field.dispatchEvent(event);
+      });
+      expect(event.defaultPrevented, testId).toBe(false);
+    }
+    expect(view.container.querySelectorAll('[data-group-id]')).toHaveLength(0);
+    expect(status(view)).toBe(statusBefore);
+    expect(live(api).undoLabel).toBeNull();
+    const handled = new KeyboardEvent('keydown', {
+      key: 'g',
+      code: 'KeyG',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    act(() => {
+      document.body.dispatchEvent(handled);
+    });
+    expect(handled.defaultPrevented).toBe(true);
+    expect(view.container.querySelectorAll('[data-group-id]')).toHaveLength(1);
+  });
+
+  it('TG8 a clip dragged onto a group header row keeps its previous lane target (G10)', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    groupStemsAndSfx(view);
+    const y = layoutRows(view);
+    expect(rowOrder(view).slice(0, 3)).toEqual(['video:-', 'music:-', 'group:Group 1:0']);
+    const discriminating = dragClipVertically(view, api, 'cm2', y.music, [y.group, y.group]);
+    expect(discriminating).toEqual([null, null]);
+    expect(clipTrack(api, 'cm2')).toBe('music');
+    const neighbour = dragClipVertically(view, api, 'cx', y.sfx, [y.group, y.sfx]);
+    expect(neighbour).toEqual([null, null]);
+    expect(clipTrack(api, 'cx')).toBe('sfx');
+    const kept = dragClipVertically(view, api, 'cm2', y.music, [y.stems, y.group]);
+    expect(kept).toEqual(['stems', 'stems']);
+    expect(clipTrack(api, 'cm2')).toBe('stems');
+    expect(live(api).undoLabel).not.toBe('Group Tracks');
+  });
+
+  it('TG8 without groups the old first/last fallback still applies', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    const y = layoutRows(view);
+    expect(dragClipVertically(view, api, 'cm2', y.music, [4 * LANE_PX + 50])).toEqual(['sfx']);
+    expect(clipTrack(api, 'cm2')).toBe('sfx');
+  });
+
+  it('TG8b group rows never carry data-track-id and share one parent with the lane rows', async () => {
+    const { view } = await mountGroupsWorkspace();
+    groupStemsAndSfx(view);
+    clickLane(view, 'მუსიკა');
+    fireEvent.click(groupName(view, 'Group 1'), { ctrlKey: true });
+    pressGroupKey();
+    const groupRows = Array.from(view.container.querySelectorAll<HTMLElement>('[data-group-id]'));
+    expect(groupRows).toHaveLength(2);
+    for (const row of groupRows) {
+      expect(row.hasAttribute('data-track-id')).toBe(false);
+      expect(row.querySelector('[data-track-id]')).toBeNull();
+      expect(row.parentElement).toBe(lanesContainer(view));
+    }
+    for (const lane of Array.from(
+      view.container.querySelectorAll<HTMLElement>('[data-track-id]'),
+    )) {
+      expect(lane.parentElement).toBe(lanesContainer(view));
+    }
+  });
+
+  it('TG9 a marquee across a group header row selects clips on both sides', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    groupStemsAndSfx(view);
+    const y = layoutRows(view);
+    const body = view.container.querySelector<HTMLElement>(
+      '[data-track-id="music"] [data-grid-seconds]',
+    );
+    if (!body) {
+      throw new Error('music lane body missing');
+    }
+    fireEvent.pointerDown(body, {
+      button: 0,
+      buttons: 1,
+      pointerId: 3,
+      clientX: HEADER_PX + 15 * PX_PER_SECOND,
+      clientY: y.music,
+    });
+    fireEvent.pointerMove(window, { pointerId: 3, clientX: HEADER_PX, clientY: y.sfx });
+    fireEvent.pointerUp(window, { pointerId: 3, clientX: HEADER_PX, clientY: y.sfx });
+    expect([...live(api).selectedClipIds].sort()).toEqual(['cm', 'cs', 'cx']);
+  });
+
+  it('TG10 auto-fit reserves the group header rows (0, 1 and 2 groups)', async () => {
+    stubTimelineFrame(1000);
+    const { view } = await mountGroupsWorkspace();
+    const scroller = view.getByTestId('arrangement-timeline-scroller');
+    const panel = scroller.nextElementSibling;
+    const panelHeight =
+      panel instanceof HTMLElement ? Number.parseFloat(panel.style.height) || 0 : 0;
+    fireTimelineResize(panelHeight + TIMELINE_CHROME_PX + 336);
+    const visibleRows = scroller.clientHeight - TIMELINE_CHROME_PX;
+    expect(visibleRows).toBe(336);
+    const lanes = ['video', 'music', 'stems', 'sfx'].map((id) => ({
+      kind: id === 'video' ? ('video' as const) : ('audio' as const),
+      folded: false,
+    }));
+    const laneHeights = () =>
+      ['video', 'music', 'stems', 'sfx'].map(
+        (id) =>
+          Number.parseFloat(
+            view.container.querySelector<HTMLElement>(`[data-track-id="${id}"]`)?.style.height ??
+              '0',
+          ) - 1,
+      );
+    const rowsTotal = (groups: number) =>
+      laneHeights().reduce((sum, height) => sum + height + 1, 0) + groups * GROUP_ROW_PX;
+    expect(laneHeights()).toEqual(fitLaneHeights({ visibleRowsHeight: visibleRows, lanes }));
+    const zeroGroups = laneHeights();
+    expect(rowsTotal(0)).toBeLessThanOrEqual(visibleRows);
+    groupStemsAndSfx(view);
+    expect(view.container.querySelectorAll('[data-group-id]')).toHaveLength(1);
+    expect(laneHeights()).toEqual(
+      fitLaneHeights({ visibleRowsHeight: visibleRows - GROUP_ROW_PX, lanes }),
+    );
+    expect(laneHeights()).not.toEqual(zeroGroups);
+    expect(rowsTotal(1)).toBeLessThanOrEqual(visibleRows);
+    clickLane(view, 'მუსიკა');
+    fireEvent.click(groupName(view, 'Group 1'), { ctrlKey: true });
+    pressGroupKey();
+    expect(view.container.querySelectorAll('[data-group-id]')).toHaveLength(2);
+    expect(laneHeights()).toEqual(
+      fitLaneHeights({ visibleRowsHeight: visibleRows - 2 * GROUP_ROW_PX, lanes }),
+    );
+    expect(rowsTotal(2)).toBeLessThanOrEqual(visibleRows);
+    pressGroupKey(true);
+    fireEvent.click(groupName(view, 'Group 1'));
+    pressGroupKey(true);
+    expect(view.container.querySelectorAll('[data-group-id]')).toHaveLength(0);
+    expect(laneHeights()).toEqual(zeroGroups);
+  });
+
+  it('TG11 grouping and ungrouping while playing restarts no sources and the position advances', async () => {
+    const { api, view } = await mountGroupsWorkspace();
+    act(() => live(api).togglePlayback());
+    expect(live(api).isPlaying).toBe(true);
+    const sources = vi.spyOn(FakeAudioContext.prototype, 'createBufferSource');
+    const before = live(api).getArrangement();
+    const positionBefore = live(api).getLivePosition();
+    groupMusicAndStems(view);
+    const grouped = live(api).getArrangement();
+    expect(grouped).not.toBe(before);
+    expect(withoutTrackGroups(grouped)).toEqual(before);
+    pressGroupKey(true);
+    expect(live(api).undoLabel).toBe('Ungroup Tracks');
+    fakeClock.base -= 0.5;
+    expect(sources).toHaveBeenCalledTimes(0);
+    expect(live(api).isPlaying).toBe(true);
+    expect(live(api).getLivePosition()).toBeGreaterThan(positionBefore);
+    expect(live(api).getArrangement()).toEqual(before);
+    act(() => live(api).togglePlayback());
+  });
+});

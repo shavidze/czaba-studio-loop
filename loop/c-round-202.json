@@ -1,0 +1,171 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-27T02:49:50.3406884Z",
+  "round": 202,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "SCOPE-202",
+  "KEY-RING",
+  "RING-VISIBLE",
+  "HIDDEN-FOCUS",
+  "CHOOSE-VIDEO",
+  "CSS-CONTROLS",
+  "CARD-RING",
+  "POINTER",
+  "STUDIO-NEIGHBOUR",
+  "NO-SHIFT",
+  "KEEP-LIST",
+  "T-RUN-202",
+  "AN-REVIEW-202",
+  "G202-3"
+ ],
+ "failed": [
+  "ERROR-BORDER",
+  "CONTRAST"
+ ],
+ "blocked": [
+  "CHOOSE-VIDEO (in-app half): /scenes/pulse-loop-kit shows 'Sign in required' — backend unavailable in cloud; harness half PASS",
+  "BLOCKED-AUTH: /account, /account/downloads, app/components/studio/* under /studio/:id, Header user menu, /recordings/:id, /scenes/:id — backend unavailable in cloud",
+  "KEY-RING (cookie banner only): cannot render here (env: no GA4_MEASUREMENT_ID / no .env in cloud); not an unrun row; CookieConsent.tsx unchanged",
+  "CSS-CONTROLS/POINTER (sort select only): FilterBar is not mounted by any route — task inventory gap, neither pass nor fail"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "PROD-MP3-UNVERIFIED"
+ ],
+ "rows": {
+  "SCOPE-202": "PASS",
+  "KEY-RING": "PASS",
+  "RING-VISIBLE": "PASS",
+  "HIDDEN-FOCUS": "PASS",
+  "CHOOSE-VIDEO": "PASS (harness half); in-app half BLOCKED (backend)",
+  "CSS-CONTROLS": "PASS (sort select not rendered: task gap)",
+  "CARD-RING": "PASS",
+  "CONTRAST": "FAIL (C-R202-02, pre-existing)",
+  "POINTER": "PASS",
+  "STUDIO-NEIGHBOUR": "PASS",
+  "NO-SHIFT": "PASS",
+  "ERROR-BORDER": "FAIL: named target GuestForm (/support) passes; /hire-us not tested; FAIL via §5 neighbour clause on ui/Input (AuthModal) — C-R202-01",
+  "KEEP-LIST": "PASS",
+  "BLOCKED-AUTH": "BLOCKED",
+  "T-RUN-202": "PASS",
+  "AN-REVIEW-202": "PASS",
+  "G202-3": "PASS"
+ },
+ "bugs": [
+  {
+   "id": "C-R202-01",
+   "severity": "medium",
+   "steps": [
+    "Open /store (tree, mock on :5199), 1280x720 or 1440x900",
+    "Click header 'Sign In' to open the AuthModal",
+    "Click the submit button with empty fields -> 'Email is required' / 'Password is required'",
+    "Shift+Tab/Tab to the email Input; also mouse-click it"
+   ],
+   "expected": "The error border (border-destructive, rgb(210,119,106)) shows at least as at HEAD: HEAD shows it while focused (keyboard and mouse)",
+   "actual": "Tree: email Input border stays rgb(115,107,96) (border-outline-strong) unfocused, keyboard-focused and mouse-focused; HEAD/ref: rgb(210,119,106) when focused. R94 removed focus:border-destructive while the base border-outline-strong already overrode error && 'border-destructive' (same as A-R202-REVIEW-INPUT-ERROR-BORDER). Affects ui/Input + Textarea consumers (SignInForm, SignUpForm, ForgetPassword). GuestForm on /support is unaffected (red in both states).",
+   "evidence": "c-round-202/out/errborder/{tree,ref}-{1280,1440}.json, shots/errborder/auth-email-*.png, tools/errborder.cjs"
+  },
+  {
+   "id": "C-R202-02",
+   "severity": "medium",
+   "steps": [
+    "Open /products/pulse-loop-kit at 1440x900 or 1280x720",
+    "Keyboard-focus the 'Play preview' button (Shift+Tab/Tab)",
+    "Sample ring vs adjacent pixels (DSF3)"
+   ],
+   "expected": "Ring vs adjacent background >= 3:1 (CONTRAST row, Saba SABA-B-4)",
+   "actual": "Top side ring (175,151,102) vs adjacent teal glow (63,90,77) = 2.68:1, vs gap inside 2.39:1; left side 3.12-3.50. Identical on ref (pre-existing): the button's own teal box-shadow glow surrounds the ring. AudioPreviewButton is not granted this round. Not a regression and not a lost indicator: ring visible on 4 sides. Bottom side: 1.01:1 outward against light image content, 3.16:1 inward; right 4.04-4.37; left 3.12-3.50. Only this scrim-less product-page variant fails; the R99 home overlay variant measures 3.07-3.86. Adjacent colour = the button's own rgba(19,217,204,0.3) 0 4px 20px glow. Severity for B to confirm; the CONTRAST row text forces the FAIL.",
+   "evidence": "c-round-202/out/prod-play.json, shots/prod-play-*.png, out/sweep/*/result.json product stop 8 (2.37)"
+  },
+  {
+   "id": "C-R202-03",
+   "severity": "medium",
+   "steps": [
+    "/store, tree: mouse-click the search input (or the / newsletter field)",
+    "Type one printable key"
+   ],
+   "expected": "Needs B/Saba ruling: 'no ring after a mouse press' vs keyboard modality",
+   "actual": "After click: data-focus-source=pointer, outline none, and no other focus indicator (border unchanged rgb(115,107,96)); after the first key: data-focus-source=keyboard and the brass outline appears mid-typing. Ref showed ring + brass border on click. Same as A-R202-REVIEW-TYPING-RING; not a failed row, a design question.",
+   "evidence": "c-round-202/out/pointer/{tree,ref}-{1280,1440,375}.json (typing), shots/pointer/*/typing-search.png"
+  },
+  {
+   "id": "C-R202-04",
+   "severity": "medium",
+   "steps": [
+    "/ at 375x812, fresh page, mobile menu closed",
+    "Press Tab from the top"
+   ],
+   "expected": "Closed mobile menu items are not tab stops, or are visible when focused",
+   "actual": "Tab stops 4-8 (Collections, Studio, Free Samples, About, Sign In) are focused at effective opacity 0; identical on ref (pre-existing). B's hidden-focusable scan did not list this site.",
+   "evidence": "c-round-202/out/sweep/{tree,ref}-375/result.json home stops 4-8"
+  },
+  {
+   "id": "C-R202-05",
+   "severity": "medium",
+   "steps": [
+    "/ at 1280x720 (and 375), Tab to the 'Browse the Collection' stops (3 consecutive)",
+    "Wait 3 s"
+   ],
+   "expected": "Focused element visible",
+   "actual": "2 of 3 'Browse the Collection' stops (StudioShowcase reveal block + link) stay at effective opacity 0 after 3 s at 1280 and 375 (1 of 3 at 1440); identical on ref. Confirms B's §3 probe with the >=2 s settle: same class as B-R201-PRODUCTCARD-HIDDEN-PREVIEW, pre-existing.",
+   "evidence": "c-round-202/out/hidden/{tree,ref}-*.json (opAfter3s), shots/hidden/tree-1280/browse-25.png"
+  },
+  {
+   "id": "C-R202-06",
+   "severity": "low",
+   "steps": [
+    "/store: Ctrl+K to open the palette, Tab repeatedly",
+    "Fresh /: trigger the LeadMagnet popup (scroll 55%, wait 10 s), Tab"
+   ],
+   "expected": "Focus stays inside the open modal",
+   "actual": "Tab leaves the palette/popup and walks the header/footer elements behind the overlay (their rings are covered); tree = ref, pre-existing.",
+   "evidence": "c-round-202/out/sweep/*/result.json palette stops 6-27; logs noshift (lead stops reach footer links before Close)"
+  },
+  {
+   "id": "C-R202-07",
+   "severity": "low",
+   "steps": [
+    "Scratch copy of tree: change IconButton className to '[&:focus]:outline-none ' + ...",
+    "npx vitest run store-focus-ring.test.ts"
+   ],
+   "expected": "STF2 red",
+   "actual": "STF2 stays green (arbitrary-variant forms not scanned), as A's reviewer noted.",
+   "evidence": "c-round-202/trun/mutants.txt (c3)"
+  },
+  {
+   "id": "C-R202-08",
+   "severity": "low",
+   "steps": [
+    "/ at 1280/1440/375, Tab to the first 'Latest' carousel card link"
+   ],
+   "expected": "Ring on 4 sides",
+   "actual": "Left side clipped by the overflow-x carousel (pre-existing clipping; ring on 3 sides); at 375 both sides clipped on every card (top+bottom only). Ref showed no ring at all.",
+   "evidence": "c-round-202/out/sweep/tree-*/result.json home stops 10-22, shots/hidden/tree-375/stop-14-f.png"
+  },
+  {
+   "id": "C-R202-09",
+   "severity": "low",
+   "steps": [
+    "SfxVideoSync (scenes route, BLOCKED in cloud)",
+    "Drag a video file onto 'Choose video'"
+   ],
+   "expected": "Unchanged from HEAD (the opacity-0 input accepted drops)",
+   "actual": "R98 removed the covering input, so native drop on the control no longer selects a file (A-R202-REVIEW-DROP-LOST). Not verifiable in-app (sign-in required); recorded for B.",
+   "evidence": "a-round-202.md §6; c-round-202/out/choose.json"
+  }
+ ],
+ "info": [
+  "LESSON CANDIDATE (C): Playwright waitForEvent('filechooser') enables interception lazily; Promise.all([waitForEvent, action]) misses intermittently (A's Space miss; C 11/12 ref mouse misses). Register page.on('filechooser') and wait ~500 ms before acting: 36/36 tree + 24/24 ref.",
+  "Open mobile menu at 375 checked by computed style only (solid outline, opacity 1), not pixel contrast."
+ ]
+}
