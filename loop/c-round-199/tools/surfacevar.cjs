@@ -1,0 +1,3 @@
+const X = require('/home/runner/czaba-project/tmp/studio-real-loop/c-round-199/tools/lib122.cjs'); const { L } = X;
+(async () => { const b = await L.launch(); const { page: p } = await L.openStudio(b, X.VPS[1440], 'sv', []);
+console.log(await p.evaluate(() => { const r = document.querySelector('[data-studio-theme]'); const d = document.createElement('div'); d.className = 'bg-surface'; r.appendChild(d); const c = getComputedStyle(d).backgroundColor; d.className='bg-dim'; const c2 = getComputedStyle(d).backgroundColor; d.remove(); return [c, c2, r.dataset.studioTheme]; })); await b.close(); })();

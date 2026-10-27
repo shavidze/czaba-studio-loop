@@ -1,0 +1,14 @@
+const X = require('./lib122.cjs'); const { L, sleep } = X; const vp = process.argv[2]; const F = +process.argv[3];
+(async () => { const b = await L.launch(); const net = []; const res = { F };
+  const { page: p } = await L.openStudio(b, X.VPS[vp], `RP-RANGE-edge-${vp}-${F}`, net);
+  await L.setSnapOff(p); await L.addAt(p, 'demo-synth-mix', 'music', 0); await L.addAt(p, 'demo-stem-pulse', 'stems', 2); await L.addAt(p, 'demo-slow-rise', 'sfx', 2);
+  const cs = await L.clipsDom(p); const st = cs.find((c) => c.lane === 'stems'); await L.selectClip(p, st.id);
+  const y = await X.bodyY(p, st.id, F); const x0 = await X.tx(p, 3), x1 = await X.tx(p, 6);
+  res.y = y; res.laneAtDown = await p.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return e && e.closest('[data-track-id]') ? e.closest('[data-track-id]').dataset.trackId : null; }, [x0, y]);
+  await p.mouse.move(x0, y); await p.mouse.down(); await p.mouse.move((x0 + x1) / 2, y, { steps: 6 }); await p.mouse.move(x1, y, { steps: 6 }); await sleep(150);
+  res.laneAtUp = await p.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return e && e.closest('[data-track-id]') ? e.closest('[data-track-id]').dataset.trackId : null; }, [x1, y]);
+  await p.mouse.up(); await sleep(500);
+  res.status = await L.status(p); res.detail = (await L.detailInfo(p)).text; res.sel = await p.evaluate(() => [...document.querySelectorAll('[data-clip-id]')].filter((e) => /ring-brand/.test(e.className)).map((e) => e.closest('[data-track-id]').dataset.trackId));
+  res.range = await p.evaluate(() => [document.querySelector('[data-testid=arrangement-detail-start]').value, document.querySelector('[data-testid=arrangement-detail-end]').value]);
+  await X.shot(p, `RP-RANGE-edge-${vp}-${F}.png`);
+  console.log(JSON.stringify(res)); L.save(L.OUT, `RP-RANGE-edge-${vp}-${F}.json`, res); await b.close(); })();

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-26T23:40:06.936Z)
+# Active loop summary (2026-10-27T00:56:54.245Z)
 
-- backlog.json 1766 KB -> active view 261 KB
-- status: G_ROOT_GATE round 198
-- servers: `{"checkedUtc":"2026-10-26T23:16:47.6405384Z","round":198,"attempt":1,"store":200}`
-- last publication: 980cfbee1ba0ee2f65f0262ae9cbbe54e8b9fc0c (rounds 198-198)
-- last root gate: round 198 published - commit 980cfbee1ba0ee2f65f0262ae9cbbe54e8b9fc0c pushed
+- backlog.json 1771 KB -> active view 262 KB
+- status: G_ROOT_GATE round 199
+- servers: `{"checkedUtc":"2026-10-26T23:56:29.2496620Z","round":199,"attempt":1,"store":200}`
+- last publication: 5b1a2bba0c98dcc86564be8441fbdf989cc8f7b8 (rounds 199-199)
+- last root gate: round 199 published - commit 5b1a2bba0c98dcc86564be8441fbdf989cc8f7b8 pushed
 
 ## Current items: -
 
@@ -465,11 +465,11 @@
 - B-R194-K0-SCAN-GAP / info / retro_input / Second STORE-2a round lost to B pre-dispatch inventory (same class as B-R192-PLANNING-GAP): fieldscan.mjs used tag+13 lines and missed Guest
 - ARCH-R194-TEST-WALKERS / info / signal - decision with ARCH-R193-THEME-REGION at the STORE-2 exit; not scheduled / A round-194 code-reviewer Architecture note (verbatim in a-round-194.md): store-theme-tokens.test.ts holds two independent app/ walkers (stu
 - C-R194-INFO / info / routed / C round 194 notes: F9/F10 (/cart) not reachable with the mock empty cart; F15 Textarea no route; F11-F13 and F16 blocked backend; first 375 
-- SABA-B-4 / medium / stage 1 (Studio) done: C PASS round 197 browserVerified=true (FOCUS-REVEAL-197 exempt, C-R196-02 pre-existing and tracked separately), published 2505252; stage 2 (store pages, C-R196-03 input) after round 198 (C-R196-02), round 199 regression and round 200 RETRO (2026-10-26 B round 197 -> 198 planning (D-29z163)) / focus ring and slider thumbs feel heavy: focused Pan shows a thick brass pill with a wide gap; Pan thumb large pure white vs cream Volume th
+- SABA-B-4 / medium / stage 1 (Studio) done: C PASS round 197 browserVerified=true (FOCUS-REVEAL-197 exempt, C-R196-02 pre-existing and tracked separately), published 2505252; stage 2 (store pages, C-R196-03 input) after round 198 (C-R196-02), round 199 regression and round 200 RETRO (2026-10-26 B round 197 -> 198 planning (D-29z163)) | stage 1 complete incl. R91 focus reveal (C round 198 PASS, published 980cfbe); stage 2 (store pages) next after REGRESSION 199 and RETRO (2026-10-26 B round 198 -> 199 planning (D-29z164)) / focus ring and slider thumbs feel heavy: focused Pan shows a thick brass pill with a wide gap; Pan thumb large pure white vs cream Volume th
 - A-R195-SIGNALS / info / signal / A round 195 code-reviewer Architecture note (verbatim in a-round-195.md): keep the field scanner in store-theme-tokens.test.ts; if the same 
 - B-R195-WORKFLOW-DOC-DRIFT / info / root_note / docs/technical/studio-real-workspace/agent-workflow.md lacks the policy sections from SABA-B-3 onward (Retrospective, SABA-B-4, three 2026-1
-- C-R196-02 / medium / open Medium, pre-existing; R89 (scroll-padding) reverted in round 197 under its stop rule; round 198 (D-29z163) R91 keyboard-gated focus reveal (2026-10-26 B round 197 -> 198 planning (D-29z163)) / keyboard-focused Video row controls hidden under the sticky timeline chrome at 1280x720 (detail panel open, group present): 0 ring px
 - C-R196-03 / low / input to SABA-B-4 stage 2 (store pages); not a stand-alone deferred Low / home product card link focus ring clipped (tree and ref)
+- ARCH-R198-FOCUS-REGION / info / signal_recorded_not_scheduled (code-reviewer Architecture note, round 198: Signal 3 weak - scroller/chrome focus region touched rounds 196-198, R89 reverted; verdict keep: logic in lib/focus-reveal.ts, component only reads/writes refs it owns; Signal 4 absent). Folded into the pending frontend-architect checkpoint request (b-round-197.md section 6). / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
