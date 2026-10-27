@@ -52,7 +52,7 @@ save_state() {
     ROUND_LIMIT_REACHED|A_IMPLEMENTING|C_VERIFYING|G_ROOT_GATE|B_PLANNING_NEXT|B_BOOTSTRAP)
       [ "$rc" -eq 0 ] && date -u +%FT%TZ > "$STATE/cloud/KICK" ;;
   esac
-  git add -A tag-manager/loop tag-manager/worktree tag-manager/cloud/KICK
+  git add -A tag-manager/loop tag-manager/worktree tag-manager/cloud/KICK tag-manager/cloud/RELEASE-DONE 2>/dev/null || git add -A tag-manager/loop tag-manager/worktree tag-manager/cloud/KICK
   if ! git diff --cached --quiet; then
     local ph rd
     ph="$(jq -r '.phase // "?"' "$LOOP/status.json" 2>/dev/null)"; rd="$(jq -r '.round // "?"' "$LOOP/status.json" 2>/dev/null)"
