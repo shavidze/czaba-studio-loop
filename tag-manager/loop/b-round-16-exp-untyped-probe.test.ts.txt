@@ -1,0 +1,9 @@
+import { hasAnyTagValue } from "~/lib/file-row-display";
+import type { WavMetadata } from "~/types";
+
+function parseUntypedMetadata(json: string): WavMetadata {
+  return JSON.parse(json) as WavMetadata;
+}
+const a: WavMetadata = JSON.parse('{"artists":[null]}');
+const b = parseUntypedMetadata('{"artists":[{}]}');
+export const out = [hasAnyTagValue(a), hasAnyTagValue(b)];

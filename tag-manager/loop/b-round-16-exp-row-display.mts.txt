@@ -1,0 +1,7 @@
+const m = await import('/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/lib/file-row-display.ts');
+const cases: Record<string, unknown> = { nullEl: { artists: [null] }, numEl: { genres: [5] }, undefEl: { keywords: [undefined, 'x'] }, objEl: { artists: [{}] }, ok: { artists: ['A'] } };
+for (const [k, v] of Object.entries(cases)) {
+  let has: string; try { has = String(m.hasAnyTagValue(JSON.parse(JSON.stringify(v ?? null)) ?? v)); } catch (e) { has = 'THROW ' + (e as Error).message; }
+  let first: string; const val = (v as Record<string, unknown>)[Object.keys(v as object)[0]]; try { const r = m.formatFirstFieldValue(val); first = typeof r + ':' + JSON.stringify(r); } catch (e) { first = 'THROW ' + (e as Error).message; }
+  console.log(k, '| hasAnyTagValue:', has, '| formatFirstFieldValue:', first);
+}

@@ -1,0 +1,14 @@
+const path = process.argv[2];
+const repo = '/home/runner/czaba-project/czaba-tag-manager/node_modules/';
+const { File, TagTypes } = require(repo + 'node-taglib-sharp');
+const f = File.createFromPath(path);
+const tag = f.getTag(TagTypes.RiffInfo, true);
+tag.title = 'T';
+tag.genres = ['R17Genre'];
+tag.performers = ['R17 Artist A', 'R17 Artist B'];
+f.save(); f.dispose();
+(async () => {
+  const mm = await import(repo + 'music-metadata/lib/index.js').catch(() => import(repo + 'music-metadata'));
+  const r = await mm.parseFile(path);
+  console.log('mm genre', JSON.stringify(r.common.genre), 'artists', JSON.stringify(r.common.artists), 'native', JSON.stringify(r.native.exif || r.native['exif'] || Object.keys(r.native)));
+})();

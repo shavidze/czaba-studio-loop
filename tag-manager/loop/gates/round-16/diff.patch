@@ -1,0 +1,154 @@
+diff --git a/docs/ci-cd.md b/docs/ci-cd.md
+index c0f2447..be71d3a 100644
+--- a/docs/ci-cd.md
++++ b/docs/ci-cd.md
+@@ -254,17 +254,32 @@ Exit კოდები: `0` წარმატება, `1` ყველა at
+ 
+ ფაილი: `tests/e2e/electron-launch.ts`. სამივე spec (`app-launch.spec.ts`, `folder-workflow.spec.ts`, `recording-tag-contract.spec.ts`) აპლიკაციას უშვებს `launchTagManagerApp()`-ით `beforeAll`-ში და test body-ები შენახულ `page`-ს იყენებენ. spec-ებში `firstWindow` აღარ იძახება.
+ 
++Playwright-ისგან დამოუკიდებელი ნაწილი (constant-ები, შეცდომის ტექსტის builder და `closeFailedTagManagerApp`) ცალკე module-შია: `tests/e2e/electron-launch-failure.ts`. მას `@playwright/test`-ის ან `electron`-ის runtime import არ აქვს, ამიტომ main-env Vitest მას პირდაპირ ტესტავს. `tests/e2e/electron-launch.ts` იქიდან re-export-ს უკეთებს `FIRST_WINDOW_TIMEOUT_MS`-ს და `LAUNCH_HOOK_TIMEOUT_MS`-ს, `ELECTRON_REQUIRE_ENV` კი თავად ამ ფაილშია, ამიტომ spec-ების import-ები უცვლელია.
++
+ | Constant | მნიშვნელობა | რას ზღუდავს |
+ |----------|-------------|-------------|
+ | `FIRST_WINDOW_TIMEOUT_MS` | 60000 | ჯამური დრო `electron.launch`-ის დაწყებიდან პირველ ფანჯრამდე; launch და `firstWindow` ერთ budget-ს იზიარებენ |
+-| `LAUNCH_HOOK_TIMEOUT_MS` | 90000 | `beforeAll` hook-ის timeout (`test.setTimeout`), temp setup-ის და launch-ის ჩათვლით |
++| `DOM_CONTENT_LOADED_TIMEOUT_MS` | 15000 | პირველი ფანჯრის შემდეგ `domcontentloaded`-ის ლოდინი |
++| `FAILED_APP_CLOSE_TIMEOUT_MS` | 10000 | ჩავარდნისას `app.close()`-ის ლოდინი |
++| `FAILED_APP_KILL_WAIT_MS` | 5000 | `SIGKILL`-ის შემდეგ process-ის `exit` event-ის ლოდინი |
++| `LAUNCH_HOOK_TIMEOUT_MS` | 100000 | `beforeAll` hook-ის timeout (`test.setTimeout`), temp setup-ის და launch-ის ჩათვლით |
+ | `playwright.config.ts` `timeout` | 30000 | თითო test body-ს და hook-ის default timeout; არ იცვლება |
+ 
+ რატომ `beforeAll`-ში: test body შეზღუდულია 30 წამიანი per-test timeout-ით, ამიტომ test body-ში მხოლოდ `firstWindow`-ის timeout-ის გაზრდა ვერ უშველის. ნელი პირველი ფანჯარა (cold runner) hook-ში 60 წამამდე ელოდება, test body-ები კი ჩვეულ 30 წამს ინარჩუნებენ.
+ 
+ რატომ არა retries: `check.yml` E2E-ს `--retries=0`-ით უშვებს. ლოკალური `retries: 1` პირველ ჩავარდნას მალავს, CI-ში კი ერთი ნელი გაშვება მთელ run-ს წითლად აქცევს.
+ 
+-თუ პირველი ფანჯარა 60 წამში არ გამოჩნდა, helper აპლიკაციას ხურავს (საჭიროებისას `SIGKILL`-ით, ობოლი Electron არ რჩება) და ისვრის `Error`-ს, რომლის ტექსტია:
++`launchTagManagerApp` იმახსოვრებს, რომელ phase-ში ჩავარდა (D-25): `launch` — სანამ `electron.launch` დასრულდება, `window` — სანამ `firstWindow` დასრულდება, `load` — ამის შემდეგ. ჩავარდნისას helper აპლიკაციას ხურავს და ისვრის `Error`-ს, რომლის პირველი ხაზი phase-ზეა დამოკიდებული:
++
++| Phase | შეცდომა | ტექსტი |
++|-------|---------|--------|
++| `launch` | `TimeoutError` | `electron.launch did not finish within 60000 ms` |
++| `launch` | სხვა | `electron.launch failed: <error>` |
++| `window` | `TimeoutError` | `first window did not appear within 60000 ms` |
++| `window` | სხვა | `first window failed before 60000 ms: <error>` |
++| `load` | ნებისმიერი | `first window appeared but domcontentloaded did not finish within 15000 ms: <error>` |
++
++`<error>` არის `error.message`, თუ შეცდომა `Error`-ია, სხვა შემთხვევაში `String(error)`. ყველა ტექსტს ემატება elapsed და main process output ერთი ფორმატით, მაგალითად:
+ 
+ ```
+ first window did not appear within 60000 ms (elapsed <ms> ms)
+@@ -272,7 +287,15 @@ first window did not appear within 60000 ms (elapsed <ms> ms)
+ <main process stdout/stderr-ის ბოლო 4000 სიმბოლო>
+ ```
+ 
+-თუ ფანჯარა გამოჩნდა, მაგრამ `domcontentloaded` 15000 ms-ში არ დასრულდა, ტექსტი იწყება `first window appeared but domcontentloaded did not finish within 15000 ms`-ით; თუ Electron ფანჯრამდე დაიხურა ან launch სხვა მიზეზით ჩავარდა — `first window failed before 60000 ms: <error>`-ით. ორივე შემთხვევაში elapsed და main process output იგივე ფორმატით ემატება. ჯამური worst case: 60 + 15 + 10 (failed app close) = 85 წამი < 90 წამიანი hook timeout. Main process output ითვლება `electron.launch`-ის დასრულების შემდეგ; უფრო ადრე დაბეჭდილი ხაზები tail-ში არ ჩანს.
++ნასროლი შეცდომა იქმნება `new Error(text, { cause: error })`-ით: `cause` არის ორიგინალი ნასროლი მნიშვნელობა (იგივე object, `Error`-ის შემთხვევაში თავისი stack-ით; ჩვეულებრივ Playwright-ის შეცდომა), მაგალითად `launch` timeout-ზე `TimeoutError` ტექსტით `electron.launch: Timeout 60000ms exceeded.`.
++
++`launch` phase-ში process handle ჯერ არ არსებობს, ამიტომ დასახური აპლიკაცია არ არის და tail ცარიელია (block მაინც იბეჭდება). Main process output ითვლება `electron.launch`-ის დასრულების შემდეგ; უფრო ადრე დაბეჭდილი ხაზები tail-ში არ ჩანს.
++
++`closeFailedTagManagerApp` ჯერ `app.close()`-ს ელოდება `FAILED_APP_CLOSE_TIMEOUT_MS`-მდე. თუ ამის შემდეგ process ჯერ კიდევ ცოცხალია (`exitCode === null && signalCode === null`), ის ჯერ `exit` listener-ს არეგისტრირებს, შემდეგ აგზავნის `SIGKILL`-ს და `exit`-ს ელოდება მაქსიმუმ `FAILED_APP_KILL_WAIT_MS`-მდე; რომელიც პირველი მოვა, ის ასრულებს ლოდინს და timer იწმინდება. თუ process უკვე დასრულებულია, kill არ იგზავნება და ლოდინიც არ არის. ასე შეცდომა ჩვეულებრივ მხოლოდ მაშინ ისროლება, როცა Electron უკვე დასრულებულია (ობოლი Electron არ რჩება); თუ `exit` 5 წამში არ მოვიდა, helper მაინც აგრძელებს და შეცდომას ისვრის.
++
++ჯამური worst case: 60 (launch + window) + 15 (load) + 10 (failed app close) + 5 (kill wait) = 90 წამი < 100 წამიანი hook timeout.
++
++ტესტები: `tests/main/electron-launch-failure.test.ts` (ხუთივე ტექსტი, `cause`, `SIGKILL`-ის შემდეგ `exit`-ის ლოდინი, constant-ების ჯამი).
+ 
+ `afterAll` იძახებს `await app?.close()`-ს და temp დირექტორიებს `finally`-ში შლის, ამიტომ launch-ის ჩავარდნისას რეალური შეცდომა არ იმალება.
+ 
+diff --git a/tests/e2e/electron-launch.ts b/tests/e2e/electron-launch.ts
+index caaa2f9..229a94e 100644
+--- a/tests/e2e/electron-launch.ts
++++ b/tests/e2e/electron-launch.ts
+@@ -2,15 +2,19 @@ import { type ElectronApplication, type Page, _electron as electron } from "@pla
+ import type { ChildProcess } from "node:child_process";
+ import { existsSync, statSync } from "node:fs";
+ import { isAbsolute, join } from "node:path";
++import {
++  buildTagManagerLaunchError,
++  closeFailedTagManagerApp,
++  DOM_CONTENT_LOADED_TIMEOUT_MS,
++  FIRST_WINDOW_TIMEOUT_MS,
++  LAUNCH_HOOK_TIMEOUT_MS,
++  MAIN_OUTPUT_TAIL_CHARS,
++  type TagManagerLaunchPhase,
++} from "./electron-launch-failure";
+ 
+-export const FIRST_WINDOW_TIMEOUT_MS = 60000;
+-export const LAUNCH_HOOK_TIMEOUT_MS = 90000;
++export { FIRST_WINDOW_TIMEOUT_MS, LAUNCH_HOOK_TIMEOUT_MS };
+ export const ELECTRON_REQUIRE_ENV = "TAG_MANAGER_E2E_ELECTRON_REQUIRE";
+ 
+-const MAIN_OUTPUT_TAIL_CHARS = 4000;
+-const FAILED_APP_CLOSE_TIMEOUT_MS = 10000;
+-const DOM_CONTENT_LOADED_TIMEOUT_MS = 15000;
+-
+ export interface LaunchTagManagerOptions {
+   env?: Record<string, string | undefined>;
+ }
+@@ -52,36 +56,6 @@ function captureMainProcessOutput(mainProcess: ChildProcess): () => string {
+   return () => output;
+ }
+ 
+-async function closeFailedTagManagerApp(app: ElectronApplication): Promise<void> {
+-  const mainProcess = app.process();
+-  let closeTimer: NodeJS.Timeout | undefined;
+-  const closeTimeout = new Promise<void>((resolve) => {
+-    closeTimer = setTimeout(resolve, FAILED_APP_CLOSE_TIMEOUT_MS);
+-  });
+-  await Promise.race([app.close().catch(() => undefined), closeTimeout]);
+-  clearTimeout(closeTimer);
+-  if (mainProcess.exitCode === null && mainProcess.signalCode === null) {
+-    mainProcess.kill("SIGKILL");
+-  }
+-}
+-
+-function describeLaunchFailure(params: {
+-  error: unknown;
+-  windowAppeared: boolean;
+-  elapsedMs: number;
+-  mainOutput: string;
+-}): string {
+-  const { error, windowAppeared, elapsedMs, mainOutput } = params;
+-  const errorMessage = error instanceof Error ? error.message : String(error);
+-  let reason = `first window failed before ${FIRST_WINDOW_TIMEOUT_MS} ms: ${errorMessage}`;
+-  if (windowAppeared) {
+-    reason = `first window appeared but domcontentloaded did not finish within ${DOM_CONTENT_LOADED_TIMEOUT_MS} ms: ${errorMessage}`;
+-  } else if (error instanceof Error && error.name === "TimeoutError") {
+-    reason = `first window did not appear within ${FIRST_WINDOW_TIMEOUT_MS} ms`;
+-  }
+-  return `${reason} (elapsed ${elapsedMs} ms)\n--- main process output (last ${MAIN_OUTPUT_TAIL_CHARS} chars) ---\n${mainOutput}`;
+-}
+-
+ export async function launchTagManagerApp(
+   options: LaunchTagManagerOptions = {},
+ ): Promise<LaunchedTagManagerApp> {
+@@ -89,17 +63,18 @@ export async function launchTagManagerApp(
+   const startedAt = Date.now();
+   let app: ElectronApplication | undefined;
+   let readMainOutput = (): string => "";
+-  let windowAppeared = false;
++  let phase: TagManagerLaunchPhase = "launch";
+   try {
+     app = await electron.launch({
+       args: launchArgs,
+       env: { ...process.env, NODE_ENV: "production", ...options.env },
+       timeout: FIRST_WINDOW_TIMEOUT_MS,
+     });
++    phase = "window";
+     readMainOutput = captureMainProcessOutput(app.process());
+     const remainingMs = Math.max(1, FIRST_WINDOW_TIMEOUT_MS - (Date.now() - startedAt));
+     const page = await app.firstWindow({ timeout: remainingMs });
+-    windowAppeared = true;
++    phase = "load";
+     await page.waitForLoadState("domcontentloaded", { timeout: DOM_CONTENT_LOADED_TIMEOUT_MS });
+     return { app, page };
+   } catch (error: unknown) {
+@@ -107,8 +82,6 @@ export async function launchTagManagerApp(
+     if (app !== undefined) {
+       await closeFailedTagManagerApp(app);
+     }
+-    throw new Error(
+-      describeLaunchFailure({ error, windowAppeared, elapsedMs, mainOutput: readMainOutput() }),
+-    );
++    throw buildTagManagerLaunchError({ error, phase, elapsedMs, mainOutput: readMainOutput() });
+   }
+ }

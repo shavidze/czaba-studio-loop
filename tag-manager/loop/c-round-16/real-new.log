@@ -1,0 +1,29 @@
+CASE new-5-normal helper /home/runner/czaba-project/czaba-tag-manager/tests/e2e/electron-launch.ts inject (none)
+title Czaba Tag Manager
+closed PIDSTATE_AFTER_CLOSE no-pid-file
+ORPHANS: 0
+-----
+CASE new-2-exit helper /home/runner/czaba-project/czaba-tag-manager/tests/e2e/electron-launch.ts inject /tmp/c-r16/inj-exit.cjs
+MESSAGE "electron.launch failed: electron.launch: Process failed to launch!\nCall log:\n  - <launching> /home/runner/czaba-project/czaba-tag-manager/node_modules/electron/dist/electron -r /home/runner/czaba-project/czaba-tag-manager/node_modules/playwright-core/lib/server/electron/loader.js --inspect=0 --remote-debugging-port=0 --no-sandbox -r /tmp/c-r16/inj-exit.cjs /home/runner/czaba-project/czaba-tag-manager/out/main/index.js\n  - <launched> pid=13044\n  - [pid=13044][err] Debugger listening on ws://127.0.0.1:44209/0c0e6b60-e41e-4eef-b03d-83d560091ab5\n  - [pid=13044][err] For help, see: https://nodejs.org/en/docs/inspector\n  - <ws connecting> ws://127.0.0.1:44209/0c0e6b60-e41e-4eef-b03d-83d560091ab5\n  - <ws connected> ws://127.0.0.1:44209/0c0e6b60-e41e-4eef-b03d-83d560091ab5\n  - [pid=13044][err] Debugger attached.\n  - <ws disconnected> ws://127.0.0.1:44209/0c0e6b60-e41e-4eef-b03d-83d560091ab5 code=1006 reason=\n  - [pid=13044] <kill>\n  - [pid=13044] <will force kill>\n  - [pid=13044] exception while trying to kill process: Error: kill ESRCH\n  - [pid=13044] <process did exit: exitCode=3, signal=null>\n  - [pid=13044] starting temporary directories cleanup\n  - [pid=13044] finished temporary directories cleanup\n (elapsed 215 ms)\n--- main process output (last 4000 chars) ---\n"
+HAS_CAUSE true CAUSE Error: electron.launch: Process failed to launch!
+ELAPSED_DRIVER_MS 216 PIDSTATE_AT_CATCH pid 13044 gone(ESRCH)
+ORPHANS: 0
+-----
+CASE new-1-block helper /home/runner/czaba-project/czaba-tag-manager/tests/e2e/electron-launch.ts inject /tmp/c-r16/inj-block.cjs
+MESSAGE "electron.launch did not finish within 60000 ms (elapsed 60066 ms)\n--- main process output (last 4000 chars) ---\n"
+HAS_CAUSE true CAUSE TimeoutError: electron.launch: Timeout 60000ms exceeded.
+ELAPSED_DRIVER_MS 60068 PIDSTATE_AT_CATCH pid 13136 gone(ESRCH)
+ORPHANS: 0
+-----
+CASE new-3-slowload helper /home/runner/czaba-project/czaba-tag-manager/tests/e2e/electron-launch.ts inject /tmp/c-r16/inj-slowload.cjs
+MESSAGE "first window appeared but domcontentloaded did not finish within 15000 ms: page.waitForLoadState: Timeout 15000ms exceeded. (elapsed 15596 ms)\n--- main process output (last 4000 chars) ---\n[13290:1027/095907.888497:ERROR:viz_main_impl.cc(183)] Exiting GPU process due to errors during initialization\nDebugger ending on ws://127.0.0.1:43337/398d1be3-e10a-4a83-81eb-1a9e1690eef5\nFor help, see: https://nodejs.org/en/docs/inspector\n"
+HAS_CAUSE true CAUSE TimeoutError: page.waitForLoadState: Timeout 15000ms exceeded.
+ELAPSED_DRIVER_MS 15649 PIDSTATE_AT_CATCH pid 13258 gone(ESRCH)
+ORPHANS: 0
+-----
+CASE new-4-hang helper /home/runner/czaba-project/czaba-tag-manager/tests/e2e/electron-launch.ts inject /tmp/c-r16/inj-hang.cjs
+MESSAGE "first window did not appear within 60000 ms (elapsed 60046 ms)\n--- main process output (last 4000 chars) ---\n[13449:1027/095925.993075:ERROR:viz_main_impl.cc(183)] Exiting GPU process due to errors during initialization\n"
+HAS_CAUSE true CAUSE TimeoutError: electronApplication.firstWindow: Timeout 59533ms exceeded while waiting for event "window"
+ELAPSED_DRIVER_MS 70063 PIDSTATE_AT_CATCH pid 13420 gone(ESRCH)
+ORPHANS: 0
+-----

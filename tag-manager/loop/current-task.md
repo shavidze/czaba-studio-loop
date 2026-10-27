@@ -1,162 +1,138 @@
-# CURRENT TASK — Round 16: TM-B19 — E2E launch helper reports which phase failed, keeps the original error as `cause`, and waits for the killed Electron to exit (RR-R10-01, RR-R10-02, RR-R10-04 + A-R10-01 tests) — D-25
+# CURRENT TASK — Round 17: TM-B20 — file row helpers treat non-string array elements as empty and never throw; the first-value display returns strings only (RR-R5-02, B-R16-01) — D-26
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-27
 
 ## Why this round
-- **Round 15 result:** C PASS, realVerified=true (R15-1…R15-7), 0 bugs. Every mutant (M1s, M1b, M2–M5) was killed. The real app with an injected IPC rejection showed the exact D-24 toasts. Root published `5854d45` with review COMMIT OK. TM-B18 and D-24 are done.
-- No critical or high bug is open. Most of the rest of the backlog waits on Saba (see Next). Two unblocked lows were left: this one and RR-R5-02.
-- **Why this one first:**
-  - B's experiments (`b-round-15.md` E1–E6) show that every failure path in this item can be reached on the real built app, so C can check each one for real.
-  - RR-R5-02 (a null array element in `file-row-display.ts`) cannot be reached from the real app today. Main maps every value through `getValuesAsStrings`/`stripRiffNulTerminator`, so that fix could only be checked with unit tests. It stays next, and its acceptance will say so honestly.
-- **Defects, all in `tests/e2e/electron-launch.ts`, all verified on the `5854d45` build:**
-  - **RR-R10-02:** if `electron.launch` itself times out (the main process is blocked before Playwright connects), the helper still reports `first window did not appear within 60000 ms`.
-    - B E1 shows Playwright's error is `electron.launch: Timeout …ms exceeded.` (`TimeoutError`, no app object yet).
-    - A non-timeout launch failure (E2, `process.exit(3)` → `electron.launch: Process failed to launch!`) is reported as `first window failed before 60000 ms: …`.
-  - **RR-R10-01:** the thrown `Error` keeps only the message. The original error and its stack are lost (no `cause`).
-  - **RR-R10-04:** `closeFailedTagManagerApp` sends `SIGKILL` and returns at once, without waiting for the process to exit.
-    - B E5: `app.close()` hangs while the main event loop is blocked, and the process is still alive (`exitCode null`) until `SIGKILL`.
-  - **A-R10-01:** none of these failure paths has a test.
-- **Not in this round, with reasons:**
-  - **RR-R10-03** (early main output). Playwright gives `app.process()` only after `electron.launch` resolves, so output printed before that cannot be captured with this launcher. `docs/ci-cd.md` keeps saying so.
-  - **RR-R10-05** (worker-scoped fixture). This is an architecture signal, not a task.
-- **Reference first:** this is a pure fix of the test harness with no product UX, so the reference rule does not apply.
+- **Round 16 result:** C PASS, realVerified=true (R16-1…R16-6), 0 bugs.
+  - Mutants M1–M5 were killed by unit tests, and M6 by a real launch.
+  - Real launches with injectors gave the exact D-25 texts, the Electron pid was gone before the catch, and no orphans were left.
+  - Root published `cb2d76b` with review COMMIT OK. TM-B19 and D-25 are done.
+- No critical or high bug is open. Most of the remaining backlog waits on Saba (see Next). This is the next unblocked low, as round 16's "Next" announced.
+- **Defect** (B experiment E1, `b-round-16-exp-row-display.mts.txt`, run with tsx against the real `cb2d76b` module):
+  - `hasAnyTagValue({ artists: [null] })` throws `Cannot read properties of null (reading 'trim')`.
+  - `[5]` and `[{}]` throw `item.trim is not a function` (RR-R5-02).
+  - `formatFirstFieldValue([5])` returns the number `5`, and `formatFirstFieldValue([{}])` returns the object `{}` (B-R16-01). `FileList.tsx:91-92` renders that value as a React child, and an object as a child makes the row render throw.
+- **Honest reach:** this cannot happen from the real app today. Main maps every array element through `stripRiffNulTerminator` / `getValuesAsStrings` (`src/main/ipc/metadata.ts:44,56,136`), and the store only receives main's results.
+  - The fix is defensive, against IPC data that does not match the declared types.
+  - Its acceptance is unit and component tests, plus a real-app regression check that well-typed rows are unchanged.
+  - C does **not** fake a malformed value in the real app.
+- **Reference first:** this is a pure fix with no product UX change, so the reference rule does not apply.
 
 ## Baseline
-- HEAD `5854d450b67e5d5aef29a81920b0fd531f516ba7`. The working tree must be **clean** (`git status --porcelain` empty). If HEAD differs or the tree is dirty, stop and report.
-- **Frozen** (byte-identical to `5854d45`): everything not in the ownership table. In particular:
-  - `src/**`;
-  - all three specs (`tests/e2e/app-launch.spec.ts`, `folder-workflow.spec.ts`, `recording-tag-contract.spec.ts`);
-  - `tests/main/setup.ts`, `tests/main/global-setup.ts`, every other test, `tests/fixtures/**`, `tests/renderer/**`;
-  - `playwright.config.ts`, `vitest.config.*.ts`, `biome.json`, tsconfigs, `.github/**`;
-  - `.claude/**`;
-  - `docs/**` except the `### E2E launch budget` section of `docs/ci-cd.md`. Its `#### TAG_MANAGER_E2E_ELECTRON_REQUIRE` subsection stays unchanged.
+- HEAD `cb2d76b0b1dbb0e5e73a70ace2c8c618c0a68ffd`. The working tree must be **clean** (`git status --porcelain` empty). If HEAD differs or the tree is dirty, stop and report.
+- **Frozen** (byte-identical to `cb2d76b`): everything not in the ownership table. In particular:
+  - `src/**` except `src/renderer/src/lib/file-row-display.ts`. This includes `FileList.tsx`, `src/shared/types.ts` (`FieldValue` stays `string | string[] | number`), main and the stores;
+  - every test except the two owned files. That includes `tests/renderer/setup.ts`, `tests/renderer/helpers/**`, all of `tests/main/**`, `tests/e2e/**` and `tests/fixtures/**`;
+  - `docs/**`, `.claude/**`, `.github/**`, `biome.json`, `playwright.config.ts`, `vitest.config.*.ts` and the tsconfigs.
 - **Protected** (never edit): `src/preload/index.ts`, `src/preload/index.d.ts`, `src/renderer/src/styles/app.css`, `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `.claude/settings*`, `.claude/hooks/**`.
 
-## Scope (D-25, see `feature-status.md`)
-Read `TESTING.md`, `TYPESCRIPT_STRICT.md` and `AGENT_DISCOVERABLE_CODE.md` before editing; the hook injects them anyway. Follow the `test-on-bugfix` rule: write the failing tests first, then the fix. `tests/**` is type-checked by `npm run typecheck` (`tsconfig.test.json`), so use no `any`, no `@ts-ignore` and no `as unknown as`. Add no comments in code and use semicolons. Keep the double-quote style of `tests/e2e/electron-launch.ts`.
+## Scope (D-26, see `feature-status.md`)
+Read `TESTING.md`, `TYPESCRIPT_STRICT.md` and `AGENT_DISCOVERABLE_CODE.md` before editing; the hook injects them anyway. Follow the `test-on-bugfix` rule: failing tests first, then the fix.
+- `src/`: semicolons, single quotes, no comments.
+- Tests: keep the existing double-quote style of the two test files.
+- No `any`, no `@ts-ignore`, no `as unknown as` anywhere. `tests/**` is type-checked by `npm run typecheck`.
 
-### Target behaviour (D-25)
-1. **The phase is tracked in `launchTagManagerApp`:**
-   - `"launch"` until `electron.launch` resolves;
-   - `"window"` until `firstWindow` resolves;
-   - `"load"` after that.
-   - This replaces the `windowAppeared` boolean.
-2. **Message by phase.** Each message is followed by ` (elapsed N ms)` and then the existing main-output tail block, in today's format.
-   | Phase | Error | Message |
-   |---|---|---|
-   | launch | `TimeoutError` | `electron.launch did not finish within ${FIRST_WINDOW_TIMEOUT_MS} ms` |
-   | launch | any other error | `electron.launch failed: ${message}` |
-   | window | `TimeoutError` | `first window did not appear within ${FIRST_WINDOW_TIMEOUT_MS} ms` (unchanged) |
-   | window | any other error | `first window failed before ${FIRST_WINDOW_TIMEOUT_MS} ms: ${message}` (unchanged) |
-   | load | any error | `first window appeared but domcontentloaded did not finish within ${DOM_CONTENT_LOADED_TIMEOUT_MS} ms: ${message}` (unchanged) |
-   - `message` is `error.message` for an `Error`, otherwise `String(error)`, as today.
-   - In the launch phase the tail is empty, because there is no process handle yet. Keep the block anyway.
-3. **The thrown error is `new Error(text, { cause: error })`.** `cause` is the original value, by identity.
-4. **`closeFailedTagManagerApp`:**
-   - It races `app.close()` against `FAILED_APP_CLOSE_TIMEOUT_MS` (10000), as today.
-   - If the process is still running after that (`exitCode === null && signalCode === null`), it registers an `exit` listener, sends `SIGKILL`, and waits for `exit` for at most the new constant `FAILED_APP_KILL_WAIT_MS = 5000`. It resolves when either comes first, and clears its timer.
-   - If the process has already exited, it sends no kill and does not wait.
-5. **Budget:** `LAUNCH_HOOK_TIMEOUT_MS` changes from 90000 to **100000**. The worst case is 60 (launch + window) + 15 (load) + 10 (close) + 5 (kill wait) = 90 s, which stays below the hook timeout.
-   - `FIRST_WINDOW_TIMEOUT_MS` (60000) and `DOM_CONTENT_LOADED_TIMEOUT_MS` (15000) stay unchanged.
-6. **New module `tests/e2e/electron-launch-failure.ts`** holds the Playwright-free parts, so that main-env Vitest can test them:
-   - It has **no runtime import** of `@playwright/test` or `electron` (`import type` is fine).
-   - It exports the phase type, the message/error builder, `closeFailedTagManagerApp`, and **all** the constants: `FIRST_WINDOW_TIMEOUT_MS`, `LAUNCH_HOOK_TIMEOUT_MS`, `DOM_CONTENT_LOADED_TIMEOUT_MS`, `FAILED_APP_CLOSE_TIMEOUT_MS`, `FAILED_APP_KILL_WAIT_MS`, and `MAIN_OUTPUT_TAIL_CHARS` if the builder uses it. Today `DOM_CONTENT_LOADED_TIMEOUT_MS` and `FAILED_APP_CLOSE_TIMEOUT_MS` are private; test (j) needs them.
-   - `closeFailedTagManagerApp` takes a minimal structural type (for example `close()` and `process()` that return the fields it uses), not `ElectronApplication`.
-   - Its timeouts can be overridden through an optional parameter (defaults = the constants), so tests run in milliseconds. Choose agent-discoverable names.
-   - `tests/e2e/electron-launch.ts` imports from it and **re-exports** `FIRST_WINDOW_TIMEOUT_MS`, `LAUNCH_HOOK_TIMEOUT_MS` and `ELECTRON_REQUIRE_ENV`, so the frozen specs' imports still resolve unchanged.
-   - Playwright's default `testMatch` does not pick up the new module, because it is not a `.spec`/`.test` file. C confirms the E2E count stays at 7.
-7. **Unchanged:**
-   - `getElectronRequireArgs` and `getElectronLaunchArgs`, byte-identical: D-06, and D-20 (the injector env is the only launch-arg change, and no injector file is stored in the repo);
-   - the `electron.launch` options and `remainingMs`;
-   - `captureMainProcessOutput`.
+### Target behaviour (D-26, amends D-15 for malformed data only)
+1. **`isNonEmptyFieldValue`, array branch:** an element counts as non-empty only if `typeof item === 'string'` and `item.trim() !== ''`.
+   - Every non-string element (`null`, number, object, boolean) counts as empty.
+   - Nothing throws.
+   - `['x', null]` stays non-empty.
+2. **`formatFirstFieldValue`:** returns `value[0]` only when it is a string, otherwise `''`.
+   - No `String()` coercion.
+   - No search for a later string element, so `['', 'x']` still gives `''` and `[{}, 'A']` gives `''`.
+   - The string and non-array branches stay as today.
+3. **Unchanged:**
+   - the whole-value rules of D-15 (string non-blank; number finite and > 0; anything else empty);
+   - the exported names and signatures (`formatFirstFieldValue(value: FieldValue | undefined): string`, `hasAnyTagValue(meta: WavMetadata | undefined): boolean`);
+   - the `FieldValue` type;
+   - `FileList.tsx`.
+   - Every existing test in both owned files stays byte-identical and green. Only additions are allowed.
+
+### How the tests build malformed data (prescribed; B checked that it type-checks)
+`FieldValue` cannot hold `null` or `{}`, so build the value from JSON, the way untyped IPC data arrives:
+- `const meta: WavMetadata = JSON.parse('{"artists":[null]}');`
+- or a small helper, e.g. `function parseUntypedMetadata(json: string): WavMetadata { return JSON.parse(json); }`.
+- For a single value: `const value: FieldValue = JSON.parse('[{}]');`.
+
+`JSON.parse` returns an implicit `any`, so there is no written `any` and no cast. B's probe passed `tsc` with the repository's `tsconfig.test.json` settings (`b-round-16-exp-untyped-probe.test.ts.txt`). `undefined` cannot appear in JSON; cover it with `[null]`.
 
 ### Steps
-1. **Red tests first: `tests/main/electron-launch-failure.test.ts`** (Node env; the existing `tests/main/setup.ts` electron mock is harmless here).
-   - **Messages:**
-     - (a) launch + an `Error` with `name = "TimeoutError"` gives a text that starts with `electron.launch did not finish within 60000 ms (elapsed 123 ms)`.
-     - (b) launch + `new Error("electron.launch: Process failed to launch!")` gives `electron.launch failed: electron.launch: Process failed to launch! (elapsed …)`.
-     - (c) window + TimeoutError gives today's text.
-     - (d) window + other error gives today's text.
-     - (e) load gives today's text.
-     - (f) a thrown string `"boom"` in the launch phase gives `electron.launch failed: boom`.
-     - (a)–(f) each assert `cause` identity, the ` (elapsed N ms)` suffix and the tail header `--- main process output (last 4000 chars) ---` followed by the given output.
-   - **Close** (fake app and process: an EventEmitter plus `exitCode`/`signalCode` and a `kill` spy; small override timeouts):
-     - (g) `close()` never resolves, and `kill` emits `exit` after about 50 ms. The helper resolves only **after** `exit` (an ordering flag), and `kill` was called once with `"SIGKILL"`.
-     - (h) `close()` resolves and the process has `exitCode 0`. No `kill` is sent, and the helper resolves without waiting for the kill timeout.
-     - (i) `close()` never resolves, and `kill` never emits `exit`. The helper still resolves, after at least the kill wait and before the kill wait plus a margin. No timer is left pending (use fake timers or check with `vi.getTimerCount()` if you use them).
-     - (j) a constants pin: `LAUNCH_HOOK_TIMEOUT_MS` > `FIRST_WINDOW_TIMEOUT_MS + DOM_CONTENT_LOADED_TIMEOUT_MS + FAILED_APP_CLOSE_TIMEOUT_MS + FAILED_APP_KILL_WAIT_MS`.
-   - **Red run:** the file fails on `5854d45`, because the module does not exist. Record the log in `a-round-16/`. Record the real-launch red evidence too, following the recipe of R16-5 (1)+(2), on your own build of `5854d45` (worktree, never `git stash`). If that takes too long, say so; C repeats it anyway.
-2. **Fix:**
-   - create `tests/e2e/electron-launch-failure.ts`;
-   - adapt `tests/e2e/electron-launch.ts` per D-25: phase tracking, the builder, the imported close helper, re-exports, `LAUNCH_HOOK_TIMEOUT_MS` 100000.
-3. **Docs: `docs/ci-cd.md` `### E2E launch budget` only** (Georgian, English technical terms):
-   - the constants table: `LAUNCH_HOOK_TIMEOUT_MS` is 100000, and add a row for `FAILED_APP_KILL_WAIT_MS` 5000;
-   - all five message texts;
-   - `cause`;
-   - waiting for `exit` after `SIGKILL`;
-   - the worst-case sum 60 + 15 + 10 + 5 = 90 < 100;
-   - keep the RR-R10-03 sentence (output before `electron.launch` finishes is not in the tail);
-   - one line that names `tests/main/electron-launch-failure.test.ts`.
-4. **`a-round-16.md`** (Georgian). A writes it with:
-   - the red/green logs;
-   - the diff summary;
+1. **Red tests first.**
+   - **`tests/renderer/utils/file-row-display.test.ts`** (add only):
+     - (a) `hasAnyTagValue` for `{"artists":[null]}`, `{"genres":[5]}`, `{"keywords":[{}]}`, `{"artists":[true]}`. For each: no throw, and the result is `false`.
+     - (b) `{"artists":["x",null]}` gives `true`, and so does `{"artists":[null," y "]}`.
+     - (c) a malformed array next to another real field (`{"artists":[null],"comment":"ok"}`) gives `true`, and next to empty defaults gives `false`.
+     - (d) `formatFirstFieldValue` of `[null]`, `[5]`, `[{}]` and `[true]` gives `''`, with `typeof` `"string"`. `[{}, "A"]` gives `''`, and `["A", null]` gives `"A"`.
+   - **`tests/renderer/components/file-list.test.ts`** (add only; reuse its existing `vi.hoisted` window workaround and helpers):
+     - (e) render `FileList` with one row whose metadata (from JSON) has `artists: [{}]` and `genres: [null]`, plus a normal tagged row.
+       - Rendering does not throw.
+       - Both rows are present.
+       - The malformed row shows no `Tagged` badge, and its artist and genre cells are empty.
+       - The normal row still shows `Tagged` and its first artist.
+       - Note: `renderFileListWith` merges overrides onto string defaults, so pass the malformed values as overrides. Explain in `a-round-17.md` how the row's metadata reaches the store.
+   - **Red run on `cb2d76b`** (before the fix). Record the log in `a-round-17/` and list which tests fail and with which error.
+     - (a), (c), (e) and the `[null," y "]` case of (b) must fail with a throw (on the old code `null.trim()` runs first).
+     - The `[5]`/`[{}]`/`[true]` and `[{}, "A"]` cases of (d) must fail on type or value.
+     - The `["x",null]` case of (b) and the `[null]`/`["A", null]` cases of (d) may already pass. Say which ones.
+2. **Fix** `src/renderer/src/lib/file-row-display.ts` per D-26. Keep it minimal: one `typeof` check in the array branch of each function.
+3. **No docs change.** D-26 lives in `feature-status.md` (B). `docs/learning/data-flow.md` does not describe the Tagged rule.
+4. **`a-round-17.md`** (Georgian). A writes it with:
+   - the red and green logs;
+   - the diff;
    - the full `verifyCommand` result;
-   - `--retries=0`;
-   - the code-reviewer result. 4 files change, so A runs `code-reviewer`. After the fix, also run `qa-engineer` read-only, per the read-primitives rule.
+   - `npx playwright test --retries=0`;
+   - the `qa-engineer` read-only regression check, per the read-primitives rule after a bug fix. 3 files change, so `code-reviewer` (read-only) is required by the read-primitives rule ("3+ files"); record its result.
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `tests/e2e/electron-launch.ts` | D-25 phase tracking, use the new module, re-exports, hook timeout |
-| `tests/e2e/electron-launch-failure.ts` (new) | Playwright-free builder + close helper + constants |
-| `tests/main/electron-launch-failure.test.ts` (new) | tests (a)–(j) |
-| `docs/ci-cd.md` | `### E2E launch budget` section only |
+| `src/renderer/src/lib/file-row-display.ts` | D-26 `typeof` guards |
+| `tests/renderer/utils/file-row-display.test.ts` | tests (a)–(d), additions only |
+| `tests/renderer/components/file-list.test.ts` | test (e), additions only |
 
-Logs go to `a-round-16/` (A) and `c-round-16/` (C) in the loop folder. Injector files live only outside the repository (for example `/tmp`). B's are in the loop folder as `b-round-15-exp-*.cjs.txt`.
+Logs go to `a-round-17/` (A) and `c-round-17/` (C) in the loop folder. Nothing else in the repository may be written except the gitignored build and test outputs (`out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`).
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R16-1 ownership | `git status --porcelain --untracked-files=all`; `git diff --stat 5854d45`; `git diff --quiet 5854d45 -- . ':!<4 owned paths>'`; read the diff | Only the 4 owned paths differ: 2 M and 2 new, and no other untracked file. `getElectronRequireArgs`, `getElectronLaunchArgs` and `captureMainProcessOutput` are byte-identical (compare the function bodies). The new module has no runtime import of `@playwright/test` or `electron`. There is no `any`, `@ts-ignore`, `as unknown as` or comment in the new code. The `ci-cd.md` diff is inside `### E2E launch budget`, and `#### TAG_MANAGER_E2E_ELECTRON_REQUIRE` is unchanged. A's result shows `permission_denials` empty. |
-| R16-2 red/green | `git worktree add /tmp/c-r16-old 5854d45` with `node_modules` symlinked (never `git stash`, never touch A's tree). Copy the new test file in and run `npx vitest run -c vitest.config.main.ts tests/main/electron-launch-failure.test.ts`, then run it on A's tree | Old: it fails, because the module is missing (record the error). New: every test passes, with the exact count. |
-| R16-3 mutations | In a throwaway copy of A's tree, run the unit file against each mutant. **M1:** drop `{ cause }`. **M2:** delete the launch-phase branch in the builder (launch falls through to the window texts). **M3:** no `exit` wait after `SIGKILL`. **M4:** wait for `exit` with no kill-wait timer. **M5:** send `SIGKILL` without the exited check. **M6** is real-launch only, in `electron-launch.ts`: start the phase at `"window"` instead of `"launch"`. The M6 copy needs A's built `out/` (symlink or copy); a TS-only change needs no rebuild. | M1 is killed by (a)–(f); M2 by (a)/(b)/(f); M3 by (g); M4 by (i), by timeout or assertion; M5 by (h). M6 is killed by R16-5 (1) on the mutant build: the old text `first window did not appear` comes back. Report the killing test for each. A survivor is a FAIL unless C shows it is equivalent. |
-| R16-4 gate | Clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0` once | Exit 0. Biome: 0 errors and 9 warnings, the same list as on `5854d45`. Typecheck 0, including `tsconfig.test.json`. Renderer **120/120**. Main **76 + new** (exact). E2E **7/7**, and **7/7** with `--retries=0`; the new module is not collected as a spec. |
-| R16-5 real launches | Built app (`npm run build`, A's tree), `xvfb-run`. A driver outside the repo (for example `/tmp/c-r16/drive.ts`, run with `npx --yes tsx@4`) imports `launchTagManagerApp` from A's real `tests/e2e/electron-launch.ts`. The repo is CommonJS (`package.json` has no `type`), so wrap the driver in `async function main()` and use no top-level await. B smoke E7: `b-round-15-exp-helper-smoke.ts.txt` → `title Czaba Tag Manager`, `closed`. It sets `TAG_MANAGER_E2E_ELECTRON_REQUIRE` to an injector under `/tmp`, and records the rejection's `message`, `cause` (name and message), elapsed time, and whether the Electron pid is alive. Each injector first writes `process.pid` to a file. Use the real budgets (60/15/10/5 s); no override.<br>(1) **block:** `Atomics.wait` for 75 s at require time.<br>(2) **exit:** `process.exit(3)`.<br>(3) **slow load:** a `webRequest.onBeforeRequest` delay of 30 s on the renderer's `.js` request (B E4).<br>(4) **hung main:** `app.whenReady` never resolves, and about 1 s after ready the event loop blocks (`Atomics.wait`) for 120 s (B E5). If `electron.launch` does not resolve with that timing, start the block later and record what you used.<br>(5) **no injector:** a normal launch, `page.title()`, close.<br>**Red reference:** the same (1) and (2) on a build of `5854d45`: a worktree with `node_modules` symlinked, then a real `npm run build` inside it, as in R15 (`old-build.log`). | (1) after about 60 s: `electron.launch did not finish within 60000 ms (elapsed …)`; `cause.name === "TimeoutError"`, and `cause.message` contains `electron.launch: Timeout 60000ms exceeded`; the pid is gone.<br>(2) within a few seconds: `electron.launch failed: electron.launch: Process failed to launch!`; `cause` is set; the pid is gone.<br>(3) after about 15 s: `first window appeared but domcontentloaded did not finish within 15000 ms: …`; the pid is gone.<br>(4) `first window did not appear within 60000 ms`. The rejection arrives only after the Electron pid is gone, so `process.kill(pid, 0)` throws ESRCH at the moment of the catch. Elapsed is about 70–75 s, below 100 s. `pgrep -f out/main/index.js` is empty afterwards.<br>(5) the window opens and closes cleanly.<br>Red reference: (1) gives `first window did not appear within 60000 ms` and (2) gives `first window failed before 60000 ms: …`, both with no `cause`. For (4) on the old tree, report whether the pid was still alive at the catch; this is informational only.<br>Give the full driver and the injector sources in `c-round-16/`. |
-| R16-6 docs | Read the `docs/ci-cd.md` diff against the code | Georgian text. All five message texts match the code exactly. The constants table matches the code. The sum 60 + 15 + 10 + 5 = 90 < 100 is stated. `cause` and the `exit` wait are described. The RR-R10-03 limit and the injector subsection are unchanged in meaning. |
+| R17-1 ownership | `git status --porcelain --untracked-files=all`; `git diff --stat cb2d76b`; `git diff --quiet cb2d76b -- . ':!src/renderer/src/lib/file-row-display.ts' ':!tests/renderer/utils/file-row-display.test.ts' ':!tests/renderer/components/file-list.test.ts'`; read the diff | Only the 3 owned paths differ, all `M`, with no untracked file. The test diffs contain only added lines (`git diff cb2d76b -- tests/ \| grep '^-[^-]'` is empty). The src diff has no comment, `any`, `@ts-ignore` or `as`-cast. The exported signatures are unchanged. A's result shows `permission_denials` empty. |
+| R17-2 red/green | `git worktree add --detach /tmp/c-r17-old cb2d76b` with `node_modules` symlinked (never `git stash`, never touch A's tree). Copy A's two test files in and run `npx vitest run -c vitest.config.renderer.ts tests/renderer/utils/file-row-display.test.ts tests/renderer/components/file-list.test.ts`; then run the same on A's tree | Old: (a), (c), (e), the `[null," y "]` case of (b) and the non-null cases of (d) fail. Record the failing test names and the thrown messages (`reading 'trim'`, `item.trim is not a function`, React's object-child error, or a type/value mismatch). New: all pass, with the exact count. |
+| R17-3 mutations | In a throwaway copy of A's tree, run the two test files against each mutant. **M1:** drop the `typeof` check in `isNonEmptyFieldValue` (back to `item.trim()`). **M2:** `formatFirstFieldValue` returns `value[0] ?? ''` unconditionally (today's code). **M3:** the array branch of `isNonEmptyFieldValue` returns `value.length > 0`. **M4:** `formatFirstFieldValue` returns the first string element anywhere in the array, or `''`. | Each mutant is killed by at least one named test: M1 by (a)/(c)/(e); M2 by (d)/(e); M3 by (a) or an existing empty-element test; M4 by (d) (`[{}, "A"]` must give `''`). Report the killing test for each. A survivor is a FAIL unless C shows it is equivalent. |
+| R17-4 gate | Clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0` once | Exit 0. Biome: 0 errors and 9 warnings, the same list as on `cb2d76b`. Typecheck 0, including `tsconfig.test.json`. Renderer **120 + new** (exact; 10 files). Main **93/93**. E2E **7/7**, and **7/7** with `--retries=0`. |
+| R17-5 real app regression | Built app (A's tree), Playwright `_electron` under `xvfb-run`, driven through the UI. Copy the fixtures into a temp folder and scan it. (1) An untagged fixture row has no `Tagged` badge (screenshot). (2) Through the editor, set Artists to two values (e.g. `R17 Artist A`, `R17 Artist B`), Genres to one value (e.g. `R17Genre`), and Category to `R17Cat` on that file, then save. (3) The row shows `Tagged`, the artist column shows only `R17 Artist A`, and the genre column shows `R17Genre` (screenshot). (4) Read the saved file with `music-metadata` and `ffprobe -show_entries format_tags -of json`, and compare field by field. (5) Relaunch, rescan, and the row looks the same (screenshot). | All five hold. Hard reader checks: `music-metadata` and ffprobe both show category `R17Cat` (`ICAT`) and genre `R17Genre` (`IGNR`; B experiment `b-round-16-exp-genre.cjs.txt`: node-taglib-sharp genres → `IGNR`, ffprobe `genre`, music-metadata `common.genre` both `R17Genre`). Artists are **record only**: node-taglib-sharp writes repeated `ISTR` (TM-B08 / C-R2-01); in B's experiment ffprobe showed only `ISTR: "R17 Artist B"` (the last) and music-metadata had no `common.artists`, only native `ISTR` ×2; the app's save may add more chunks (C-R1-01). Record what each reader shows for artists; a mismatch is a signal for TM-B08, not a FAIL of this round. Name each screenshot in `c-round-17/`. State plainly that the malformed-element case is checked only by R17-2/R17-3, because it cannot be reached from the real app. |
 
 ## What could break (C re-checks)
-- **The three specs** import `LAUNCH_HOOK_TIMEOUT_MS` (and `launchTagManagerApp`) from `./electron-launch`. The re-exports must keep them resolving: E2E 7/7 (R16-4).
-- **Normal launch args (D-06):** `--no-sandbox` on Linux only, and `-r` only when the env var is set. Covered by the R16-1 byte check and R16-5 (5).
-- **No orphan Electron** after any failure (R16-5 `pgrep`).
-- **The hook timeout** grows by 10 s. That only matters on failure; the `check.yml` job timeout (40 min) is unaffected.
-- **Main test count and global setup:** the new main test must not need the WAV fixtures and must not leave timers running (R16-4 count, (i)).
+- **The `Tagged` badge (D-15) for well-typed data:** the existing tests in `file-row-display.test.ts` and `file-list.test.ts` (a)–(f) stay byte-identical and green (R17-1, R17-4), and the real app shows the badge as before (R17-5).
+- **The artist and genre columns (RR-R2-02):** a string value is shown whole, and an array shows its first element only (existing test (f), R17-5 (3)).
+- **Batch/single save and the store sync (D-21…D-24)** are untouched, because `FileList.tsx`, `MetadataPanel.tsx` and the stores are frozen. R17-5 (2) saves through the real UI.
+- **Renderer test count:** only additions. No existing test is renamed or removed.
 
 ## What realVerified means here
-- R16-1…R16-4 and R16-6 are real local checks.
-- R16-5 runs the real built Electron app through the real helper, with failure injectors that exist only in C's phase (the D-20 mechanism already in the repo) and the real budgets.
-- The Actions part (a cold-runner `Check` run) belongs to TM-B14/TM-T0-CI and is root's to link.
+- R17-1…R17-4 are real local checks. R17-2/R17-3 are the only evidence for the malformed-element behaviour, because main never produces such data (see "Honest reach").
+- R17-5 is a real-app regression check with independent readers. It does not prove the defect fix.
+- The Actions part (a cold-runner `Check` run) belongs to TM-T0-CI/TM-B14, and root links it.
 - Windows packaging is BLOCKED: Windows packaging is not available in the cloud. It is not part of this round.
 
 ## Next (orientation only)
-1. **RR-R5-02** (`file-row-display.ts` `typeof` guard). Its acceptance can only be unit tests, and the task will say so.
-2. **A MetadataPanel polish round:**
+1. **A MetadataPanel polish round:**
    - RR-R13-02 + RR-R15-02: remove the `as WavMetadata` casts. The preload types already fit, so no protected edit is needed.
-   - RR-R15-01: re-read reason. This changes the D-24 wording, so it needs a D-24 amendment.
-3. **Root:** please link the `Check` Actions run on `5854d45` or `a4ad852` (or any commit since `35ed18b`). A green run closes TM-T0-CI, TM-T0, TM-T0-CI-FU and the Actions part of TM-B14.
-4. **Saba question batch:**
+   - RR-R15-01: re-read reason. This changes the D-24 wording, so it needs a D-24 amendment. B proposes one technical default and flags it for Saba.
+2. **An optional E2E close-helper hardening** (RR-R16-03 + A-R16-01, plus a docs line for RR-R16-02). This is low value, and B decides after round 17.
+3. **Root:** please link the `Check` Actions run on `cb2d76b` (or any commit since `35ed18b`). A green run closes TM-T0-CI, TM-T0, TM-T0-CI-FU and the Actions part of TM-B14.
+4. **Saba question batch** (unchanged; see `b-round-16.md`):
    - D-07 (TM-T1-MIG);
    - D-10 + TM-B11;
    - D-12/TM-B08 + B-R6-01;
    - TM-T1-DUP (RR-R3-01, medium);
-   - D-15 + RR-R5-01;
+   - D-15 + RR-R5-01 (+ D-26 for information);
    - B-R7-02/RR-R8-04;
    - TM-B05;
-   - TM-B06 (+ RR-R14-03/05);
+   - TM-B06 (+ RR-R14-03/05, RR-R16-01, A-R16-02);
    - RR-R1-07;
    - RR-R3-05;
    - TM-T2-DATA;
-   - RR-R13-01 (protected preload return shape);
-   - RR-R15-03 (dirty after a confirmed write);
-   - RR-R15-05 (write returns the re-read; preload);
-   - C-R15-01 (toast placement; reference-first);
+   - RR-R13-01;
+   - RR-R15-03;
+   - RR-R15-05;
+   - C-R15-01;
    - optional RR-R12-02.

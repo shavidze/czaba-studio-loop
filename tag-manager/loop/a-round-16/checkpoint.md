@@ -1,0 +1,12 @@
+# A round 16 checkpoint
+- [x] baseline: HEAD 5854d45, tree clean
+- [x] red unit test written: tests/main/electron-launch-failure.test.ts; red-unit.log (module missing)
+- [x] old build worktree /tmp/a-r16-old + real-launch red (1)(2)
+- [x] fix (unit 14/14 green, typecheck 0) electron-launch-failure.ts + electron-launch.ts
+- [x] docs
+- [ ] verify, review, report
+- [x] verify.log VERIFY_EXIT 0 (biome 9 warnings, renderer 120/120, main 90/90, e2e 7/7); e2e-retries0.log 7/7
+- [x] real launches green-real.log (block/exit/slowload/hang/none) all as spec; red-real-old.log
+- [ ] code-reviewer, qa-engineer running; then a-round-16.md
+- [x] code-reviewer: 0 blocking; low gaps fixed via tests (g3) listener-before-kill, (h3) closeTimer cleared; docs cause wording fixed. unit 16/16; mutants killed in /tmp/a-r16/mut
+- [x] verify-final exit 0 (main 92), retries0 7/7; report written; [x] qa-engineer: 0 bugs; added (h4), i2 bound 100; final verify exit 0 main 93; DONE

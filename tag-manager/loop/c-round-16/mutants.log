@@ -1,0 +1,187 @@
+===== M0
+ ✓ tests/main/electron-launch-failure.test.ts (17 tests) 252ms
+      Tests  17 passed (17)
+===== M1
+58c58
+<   return new Error(text, { cause: error });
+---
+>   return new Error(text);
+     × (a) launch phase TimeoutError reports electron.launch did not finish 11ms
+     × (b) launch phase non-timeout Error reports electron.launch failed with the message 1ms
+     × (c) window phase TimeoutError keeps the first window did not appear text 1ms
+     × (d) window phase non-timeout Error keeps the first window failed before text 1ms
+     × (e) load phase keeps the domcontentloaded text 1ms
+     × (f) a thrown string in the launch phase is reported through String(error) 1ms
+     × (f2) a non-Error object named TimeoutError in the launch phase is not treated as a timeout 2ms
+     ✓ (g) close hangs, SIGKILL is sent once and the helper resolves only after exit 74ms
+     ✓ (h) close resolves with exitCode 0, no kill and no kill wait 1ms
+     ✓ (g3) exit emitted synchronously inside kill is not missed, so no kill wait 3ms
+     ✓ (h3) fake timers: an already exited process leaves no close timer pending 1ms
+     ✓ (h4) close resolves but the process is still alive, SIGKILL is sent once and exit is awaited 30ms
+     ✓ (h2) close rejects after the process exited by signal, no kill is sent 0ms
+     ✓ (i) close hangs and exit never comes, the helper resolves after the kill wait and leaves no timer 1ms
+     ✓ (i2) real timers: the helper resolves within the kill wait plus a margin 122ms
+     ✓ (g2) fake timers: after exit the helper leaves no timer pending 1ms
+     ✓ (j) the hook timeout covers launch, load, close and kill wait 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (a) launch phase TimeoutError reports electron.launch did not finish
+AssertionError: expected undefined to be TimeoutError: electron.launch: Timeout 60… // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (b) launch phase non-timeout Error reports electron.launch failed with the message
+AssertionError: expected undefined to be Error: electron.launch: Process failed to… // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (c) window phase TimeoutError keeps the first window did not appear text
+AssertionError: expected undefined to be TimeoutError: electronApplication.firstWi… // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (d) window phase non-timeout Error keeps the first window failed before text
+AssertionError: expected undefined to be Error: Target page, context or browser ha… // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (e) load phase keeps the domcontentloaded text
+AssertionError: expected undefined to be TimeoutError: page.waitForLoadState: Time… // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (f) a thrown string in the launch phase is reported through String(error)
+AssertionError: expected undefined to be 'boom' // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (f2) a non-Error object named TimeoutError in the launch phase is not treated as a timeout
+AssertionError: expected undefined to be { name: 'TimeoutError', …(1) } // Object.is equality
+      Tests  7 failed | 10 passed (17)
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (a) launch phase TimeoutError reports electron.launch did not finish,line=31,column=23::AssertionError: expected undefined to be TimeoutError: electron.launch: Timeout 60… // Object.is equality%0A%0A- Expected: %0ATimeoutError {%0A  "message": "electron.launch: Timeout 60000ms exceeded.",%0A  "name": "TimeoutError",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectLaunchError tests/main/electron-launch-failure.test.ts:31:23%0A ❯ tests/main/electron-launch-failure.test.ts:47:5%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (b) launch phase non-timeout Error reports electron.launch failed with the message,line=31,column=23::AssertionError: expected undefined to be Error: electron.launch: Process failed to… // Object.is equality%0A%0A- Expected: %0AError {%0A  "message": "electron.launch: Process failed to launch!",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectLaunchError tests/main/electron-launch-failure.test.ts:31:23%0A ❯ tests/main/electron-launch-failure.test.ts:56:5%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (c) window phase TimeoutError keeps the first window did not appear text,line=31,column=23::AssertionError: expected undefined to be TimeoutError: electronApplication.firstWi… // Object.is equality%0A%0A- Expected: %0ATimeoutError {%0A  "message": "electronApplication.firstWindow: Timeout 59000ms exceeded.",%0A  "name": "TimeoutError",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectLaunchError tests/main/electron-launch-failure.test.ts:31:23%0A ❯ tests/main/electron-launch-failure.test.ts:65:5%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (d) window phase non-timeout Error keeps the first window failed before text,line=31,column=23::AssertionError: expected undefined to be Error: Target page, context or browser ha… // Object.is equality%0A%0A- Expected: %0AError {%0A  "message": "Target page, context or browser has been closed",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectLaunchError tests/main/electron-launch-failure.test.ts:31:23%0A ❯ tests/main/electron-launch-failure.test.ts:74:5%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (e) load phase keeps the domcontentloaded text,line=31,column=23::AssertionError: expected undefined to be TimeoutError: page.waitForLoadState: Time… // Object.is equality%0A%0A- Expected: %0ATimeoutError {%0A  "message": "page.waitForLoadState: Timeout 15000ms exceeded.",%0A  "name": "TimeoutError",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectLaunchError tests/main/electron-launch-failure.test.ts:31:23%0A ❯ tests/main/electron-launch-failure.test.ts:84:5%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (f) a thrown string in the launch phase is reported through String(error),line=31,column=23::AssertionError: expected undefined to be 'boom' // Object.is equality%0A%0A- Expected: %0A"boom"%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectLaunchError tests/main/electron-launch-failure.test.ts:31:23%0A ❯ tests/main/electron-launch-failure.test.ts:94:5%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (f2) a non-Error object named TimeoutError in the launch phase is not treated as a timeout,line=110,column=25::AssertionError: expected undefined to be { name: 'TimeoutError', …(1) } // Object.is equality%0A%0A- Expected: %0A{%0A  "message": "plain object",%0A  "name": "TimeoutError",%0A}%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/main/electron-launch-failure.test.ts:110:25%0A%0A
+===== M2
+34,39d33
+<   if (phase === "launch") {
+<     if (isTimeoutError(error)) {
+<       return `electron.launch did not finish within ${FIRST_WINDOW_TIMEOUT_MS} ms`;
+<     }
+<     return `electron.launch failed: ${errorMessage}`;
+<   }
+     × (a) launch phase TimeoutError reports electron.launch did not finish 8ms
+     × (b) launch phase non-timeout Error reports electron.launch failed with the message 3ms
+     ✓ (c) window phase TimeoutError keeps the first window did not appear text 1ms
+     ✓ (d) window phase non-timeout Error keeps the first window failed before text 0ms
+     ✓ (e) load phase keeps the domcontentloaded text 0ms
+     × (f) a thrown string in the launch phase is reported through String(error) 1ms
+     × (f2) a non-Error object named TimeoutError in the launch phase is not treated as a timeout 1ms
+     ✓ (g) close hangs, SIGKILL is sent once and the helper resolves only after exit 72ms
+     ✓ (h) close resolves with exitCode 0, no kill and no kill wait 0ms
+     ✓ (g3) exit emitted synchronously inside kill is not missed, so no kill wait 2ms
+     ✓ (h3) fake timers: an already exited process leaves no close timer pending 1ms
+     ✓ (h4) close resolves but the process is still alive, SIGKILL is sent once and exit is awaited 30ms
+     ✓ (h2) close rejects after the process exited by signal, no kill is sent 0ms
+     ✓ (i) close hangs and exit never comes, the helper resolves after the kill wait and leaves no timer 1ms
+     ✓ (i2) real timers: the helper resolves within the kill wait plus a margin 121ms
+     ✓ (g2) fake timers: after exit the helper leaves no timer pending 1ms
+     ✓ (j) the hook timeout covers launch, load, close and kill wait 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (a) launch phase TimeoutError reports electron.launch did not finish
+AssertionError: expected false to be true // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (b) launch phase non-timeout Error reports electron.launch failed with the message
+AssertionError: expected 'first window appeared but domcontentl…' to be 'electron.launch failed: electron.laun…' // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (f) a thrown string in the launch phase is reported through String(error)
+AssertionError: expected 'first window appeared but domcontentl…' to be 'electron.launch failed: boom (elapsed…' // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (f2) a non-Error object named TimeoutError in the launch phase is not treated as a timeout
+AssertionError: expected false to be true // Object.is equality
+      Tests  4 failed | 13 passed (17)
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (a) launch phase TimeoutError reports electron.launch did not finish,line=46,column=7::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/main/electron-launch-failure.test.ts:46:7%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (b) launch phase non-timeout Error reports electron.launch failed with the message,line=32,column=25::AssertionError: expected 'first window appeared but domcontentl…' to be 'electron.launch failed: electron.laun…' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- electron.launch failed: electron.launch: Process failed to launch! (elapsed 123 ms)%0A+ first window appeared but domcontentloaded did not finish within 15000 ms: electron.launch: Process failed to launch! (elapsed 123 ms)%0A  --- main process output (last 4000 chars) ---%0A%0A%0A ❯ expectLaunchError tests/main/electron-launch-failure.test.ts:32:25%0A ❯ tests/main/electron-launch-failure.test.ts:56:5%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (f) a thrown string in the launch phase is reported through String(error),line=32,column=25::AssertionError: expected 'first window appeared but domcontentl…' to be 'electron.launch failed: boom (elapsed…' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- electron.launch failed: boom (elapsed 123 ms)%0A+ first window appeared but domcontentloaded did not finish within 15000 ms: boom (elapsed 123 ms)%0A  --- main process output (last 4000 chars) ---%0A%0A%0A ❯ expectLaunchError tests/main/electron-launch-failure.test.ts:32:25%0A ❯ tests/main/electron-launch-failure.test.ts:94:5%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > buildTagManagerLaunchError messages by phase (D-25) > (f2) a non-Error object named TimeoutError in the launch phase is not treated as a timeout,line=111,column=66::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/main/electron-launch-failure.test.ts:111:66%0A%0A
+===== M3
+100c100
+<   await killAndWaitForExit(mainProcess, killWaitMs);
+---
+>   mainProcess.kill("SIGKILL");
+     ✓ (a) launch phase TimeoutError reports electron.launch did not finish 1ms
+     ✓ (b) launch phase non-timeout Error reports electron.launch failed with the message 0ms
+     ✓ (c) window phase TimeoutError keeps the first window did not appear text 0ms
+     ✓ (d) window phase non-timeout Error keeps the first window failed before text 0ms
+     ✓ (e) load phase keeps the domcontentloaded text 0ms
+     ✓ (f) a thrown string in the launch phase is reported through String(error) 0ms
+     ✓ (f2) a non-Error object named TimeoutError in the launch phase is not treated as a timeout 0ms
+     × (g) close hangs, SIGKILL is sent once and the helper resolves only after exit 27ms
+     ✓ (h) close resolves with exitCode 0, no kill and no kill wait 1ms
+     ✓ (g3) exit emitted synchronously inside kill is not missed, so no kill wait 2ms
+     ✓ (h3) fake timers: an already exited process leaves no close timer pending 1ms
+     × (h4) close resolves but the process is still alive, SIGKILL is sent once and exit is awaited 1ms
+     ✓ (h2) close rejects after the process exited by signal, no kill is sent 0ms
+     × (i) close hangs and exit never comes, the helper resolves after the kill wait and leaves no timer 2ms
+     × (i2) real timers: the helper resolves within the kill wait plus a margin 21ms
+     ✓ (g2) fake timers: after exit the helper leaves no timer pending 1ms
+     ✓ (j) the hook timeout covers launch, load, close and kill wait 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (g) close hangs, SIGKILL is sent once and the helper resolves only after exit
+AssertionError: expected false to be true // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (h4) close resolves but the process is still alive, SIGKILL is sent once and exit is awaited
+AssertionError: expected false to be true // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (i) close hangs and exit never comes, the helper resolves after the kill wait and leaves no timer
+AssertionError: expected true to be false // Object.is equality
+ FAIL  tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (i2) real timers: the helper resolves within the kill wait plus a margin
+AssertionError: expected 20 to be greater than or equal to 100
+      Tests  4 failed | 13 passed (17)
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (g) close hangs%2C SIGKILL is sent once and the helper resolves only after exit,line=171,column=20::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/main/electron-launch-failure.test.ts:171:20%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (h4) close resolves but the process is still alive%2C SIGKILL is sent once and exit is awaited,line=236,column=20::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/main/electron-launch-failure.test.ts:236:20%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (i) close hangs and exit never comes%2C the helper resolves after the kill wait and leaves no timer,line=264,column=21::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/main/electron-launch-failure.test.ts:264:21%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (i2) real timers%3A the helper resolves within the kill wait plus a margin,line=282,column=23::AssertionError: expected 20 to be greater than or equal to 100%0A ❯ tests/main/electron-launch-failure.test.ts:282:23%0A%0A
+===== M4
+75,78d74
+<     killWaitTimer = setTimeout(() => {
+<       mainProcess.removeListener("exit", onExit);
+<       resolve();
+<     }, killWaitMs);
+     ✓ (a) launch phase TimeoutError reports electron.launch did not finish 1ms
+     ✓ (b) launch phase non-timeout Error reports electron.launch failed with the message 0ms
+     ✓ (c) window phase TimeoutError keeps the first window did not appear text 0ms
+     ✓ (d) window phase non-timeout Error keeps the first window failed before text 0ms
+     ✓ (e) load phase keeps the domcontentloaded text 0ms
+     ✓ (f) a thrown string in the launch phase is reported through String(error) 0ms
+     ✓ (f2) a non-Error object named TimeoutError in the launch phase is not treated as a timeout 0ms
+     ✓ (g) close hangs, SIGKILL is sent once and the helper resolves only after exit 72ms
+     ✓ (h) close resolves with exitCode 0, no kill and no kill wait 1ms
+     ✓ (g3) exit emitted synchronously inside kill is not missed, so no kill wait 2ms
+     ✓ (h3) fake timers: an already exited process leaves no close timer pending 1ms
+     ✓ (h4) close resolves but the process is still alive, SIGKILL is sent once and exit is awaited 31ms
+     ✓ (h2) close rejects after the process exited by signal, no kill is sent 0ms
+     × (i) close hangs and exit never comes, the helper resolves after the kill wait and leaves no timer 3004ms
+     × (i2) real timers: the helper resolves within the kill wait plus a margin 3003ms
+     ✓ (g2) fake timers: after exit the helper leaves no timer pending 1ms
+     ✓ (j) the hook timeout covers launch, load, close and kill wait 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (i) close hangs and exit never comes, the helper resolves after the kill wait and leaves no timer
+Error: Test timed out in 3000ms.
+ FAIL  tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (i2) real timers: the helper resolves within the kill wait plus a margin
+Error: Test timed out in 3000ms.
+      Tests  2 failed | 15 passed (17)
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (i) close hangs and exit never comes%2C the helper resolves after the kill wait and leaves no timer,line=252,column=3::Error: Test timed out in 3000ms.%0AIf this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".%0A ❯ tests/main/electron-launch-failure.test.ts:252:3%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (i2) real timers%3A the helper resolves within the kill wait plus a margin,line=274,column=3::Error: Test timed out in 3000ms.%0AIf this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".%0A ❯ tests/main/electron-launch-failure.test.ts:274:3%0A%0A
+===== M5
+97,99d96
+<   if (hasMainProcessExited(mainProcess)) {
+<     return;
+<   }
+     ✓ (a) launch phase TimeoutError reports electron.launch did not finish 1ms
+     ✓ (b) launch phase non-timeout Error reports electron.launch failed with the message 0ms
+     ✓ (c) window phase TimeoutError keeps the first window did not appear text 0ms
+     ✓ (d) window phase non-timeout Error keeps the first window failed before text 0ms
+     ✓ (e) load phase keeps the domcontentloaded text 0ms
+     ✓ (f) a thrown string in the launch phase is reported through String(error) 0ms
+     ✓ (f2) a non-Error object named TimeoutError in the launch phase is not treated as a timeout 0ms
+     ✓ (g) close hangs, SIGKILL is sent once and the helper resolves only after exit 72ms
+     × (h) close resolves with exitCode 0, no kill and no kill wait 2006ms
+     ✓ (g3) exit emitted synchronously inside kill is not missed, so no kill wait 3ms
+     × (h3) fake timers: an already exited process leaves no close timer pending 3003ms
+     ✓ (h4) close resolves but the process is still alive, SIGKILL is sent once and exit is awaited 31ms
+     × (h2) close rejects after the process exited by signal, no kill is sent 2005ms
+     ✓ (i) close hangs and exit never comes, the helper resolves after the kill wait and leaves no timer 1ms
+     ✓ (i2) real timers: the helper resolves within the kill wait plus a margin 121ms
+     ✓ (g2) fake timers: after exit the helper leaves no timer pending 1ms
+     ✓ (j) the hook timeout covers launch, load, close and kill wait 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (h) close resolves with exitCode 0, no kill and no kill wait
+AssertionError: expected 2002 to be less than 1000
+ FAIL  tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (h3) fake timers: an already exited process leaves no close timer pending
+Error: Test timed out in 3000ms.
+ FAIL  tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (h2) close rejects after the process exited by signal, no kill is sent
+AssertionError: expected [ 'SIGKILL' ] to deeply equal []
+      Tests  3 failed | 14 passed (17)
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (h) close resolves with exitCode 0%2C no kill and no kill wait,line=186,column=36::AssertionError: expected 2002 to be less than 1000%0A ❯ tests/main/electron-launch-failure.test.ts:186:36%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (h3) fake timers%3A an already exited process leaves no close timer pending,line=208,column=3::Error: Test timed out in 3000ms.%0AIf this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".%0A ❯ tests/main/electron-launch-failure.test.ts:208:3%0A%0A
+::error file=/tmp/c-r16-mut/tests/main/electron-launch-failure.test.ts,title=tests/main/electron-launch-failure.test.ts > closeFailedTagManagerApp waits for the killed process (D-25) > (h2) close rejects after the process exited by signal%2C no kill is sent,line=249,column=37::AssertionError: expected [ 'SIGKILL' ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "SIGKILL",%0A+ ]%0A%0A ❯ tests/main/electron-launch-failure.test.ts:249:37%0A%0A

@@ -1,0 +1,4 @@
+require("node:fs").writeFileSync("/tmp/c-r16/pid.txt", String(process.pid));
+const { app } = require("electron");
+const w = app.whenReady.bind(app);
+app.whenReady = () => w().then(() => { setTimeout(() => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 120000), Number(process.env.C_HANG_DELAY_MS || 1000)); return new Promise(() => {}); });

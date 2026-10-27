@@ -1,0 +1,32 @@
+import { readFileSync, rmSync } from "node:fs";
+interface Helper {
+  launchTagManagerApp: () => Promise<{ app: { close: () => Promise<void> }; page: { title: () => Promise<string> } }>;
+}
+function pidState(): string {
+  let pid = "";
+  try { pid = readFileSync("/tmp/c-r16/pid.txt", "utf8"); } catch { return "no-pid-file"; }
+  try { process.kill(Number(pid), 0); return `pid ${pid} ALIVE`; } catch (k: unknown) { return `pid ${pid} gone(${(k as NodeJS.ErrnoException).code})`; }
+}
+async function main(): Promise<void> {
+  const helperPath = process.argv[2];
+  const label = process.argv[3];
+  rmSync("/tmp/c-r16/pid.txt", { force: true });
+  const mod = (await import(helperPath)) as Helper;
+  const startedAt = Date.now();
+  console.log("CASE", label, "helper", helperPath, "inject", process.env.TAG_MANAGER_E2E_ELECTRON_REQUIRE ?? "(none)");
+  try {
+    const { app, page } = await mod.launchTagManagerApp();
+    console.log("title", await page.title());
+    await app.close();
+    console.log("closed", "PIDSTATE_AFTER_CLOSE", pidState());
+  } catch (e: unknown) {
+    const atCatch = pidState();
+    const elapsed = Date.now() - startedAt;
+    const err = e as Error & { cause?: unknown };
+    console.log("MESSAGE", JSON.stringify(err.message));
+    const c = err.cause;
+    console.log("HAS_CAUSE", "cause" in err, "CAUSE", c instanceof Error ? `${c.name}: ${c.message.split("\n")[0]}` : String(c));
+    console.log("ELAPSED_DRIVER_MS", elapsed, "PIDSTATE_AT_CATCH", atCatch);
+  }
+}
+main().catch((e: unknown) => { console.log("ERR", e); process.exit(1); });

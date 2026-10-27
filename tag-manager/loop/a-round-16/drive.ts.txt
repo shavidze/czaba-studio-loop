@@ -1,0 +1,28 @@
+import { readFileSync, rmSync } from "node:fs";
+async function main(): Promise<void> {
+  const helperPath = process.argv[2];
+  rmSync("/tmp/a-r16/pid.txt", { force: true });
+  const mod: { launchTagManagerApp: () => Promise<{ app: { close: () => Promise<void> }; page: { title: () => Promise<string> } }> } = await import(helperPath);
+  const startedAt = Date.now();
+  try {
+    const { app, page } = await mod.launchTagManagerApp();
+    console.log("title", await page.title());
+    await app.close();
+    console.log("closed");
+  } catch (e: unknown) {
+    const elapsed = Date.now() - startedAt;
+    let pid = "";
+    let alive = "n/a";
+    try { pid = readFileSync("/tmp/a-r16/pid.txt", "utf8"); } catch { pid = ""; }
+    if (pid !== "") {
+      try { process.kill(Number(pid), 0); alive = "alive"; } catch (k: unknown) { alive = `gone(${(k as NodeJS.ErrnoException).code})`; }
+    }
+    const err = e as Error & { cause?: unknown };
+    console.log("MESSAGE_FIRST_LINE", err.message.split("\n")[0]);
+    console.log("MESSAGE", JSON.stringify(err.message));
+    const c = err.cause;
+    console.log("CAUSE", c instanceof Error ? `${c.name}: ${c.message.split("\n")[0]}` : String(c));
+    console.log("ELAPSED_DRIVER_MS", elapsed, "PID", pid, alive);
+  }
+}
+main().catch((e: unknown) => { console.log("ERR", e); process.exit(1); });

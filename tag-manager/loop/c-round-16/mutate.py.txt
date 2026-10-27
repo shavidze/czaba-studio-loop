@@ -1,0 +1,16 @@
+import sys, re
+path, mut = sys.argv[1], sys.argv[2]
+s = open(path).read()
+o = s
+if mut == "M1":
+    s = s.replace("return new Error(text, { cause: error });", "return new Error(text);")
+elif mut == "M2":
+    s = re.sub(r'  if \(phase === "launch"\) \{\n.*?\n  \}\n(?=  if \(phase === "window"\))', '', s, flags=re.S)
+elif mut == "M3":
+    s = s.replace("await killAndWaitForExit(mainProcess, killWaitMs);", 'mainProcess.kill("SIGKILL");')
+elif mut == "M4":
+    s = re.sub(r'    killWaitTimer = setTimeout\(\(\) => \{\n.*?\n    \}, killWaitMs\);\n', '', s, flags=re.S)
+elif mut == "M5":
+    s = s.replace("  if (hasMainProcessExited(mainProcess)) {\n    return;\n  }\n", "")
+assert s != o, "mutation not applied " + mut
+open(path, "w").write(s)

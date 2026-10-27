@@ -1,0 +1,8 @@
+#!/bin/bash
+helper=$1; label=$2; inj=$3
+cd /tmp/c-r16
+if [ -n "$inj" ]; then export TAG_MANAGER_E2E_ELECTRON_REQUIRE=$inj; else unset TAG_MANAGER_E2E_ELECTRON_REQUIRE; fi
+xvfb-run -a npx --yes tsx@4 /tmp/c-r16/drive.ts "$helper" "$label" 2>&1 | grep -v '^\s*$'
+sleep 1
+echo "ORPHANS: $(ps -eo pid,args | awk '/out\/main\/index\.js/ && !/awk/' | wc -l)"; ps -eo pid,args | awk '/out\/main\/index\.js/ && !/awk/'
+echo "-----"

@@ -1,0 +1,7 @@
+require("fs").writeFileSync("/tmp/a-r16/pid.txt", String(process.pid));
+const { app, session } = require("electron");
+app.on("ready", () => {
+  session.defaultSession.webRequest.onBeforeRequest({ urls: ["file://*/*"] }, (d, cb) => {
+    if (/\.js$/.test(d.url) && /renderer/.test(d.url)) setTimeout(() => cb({}), 30000); else cb({});
+  });
+});
