@@ -1,0 +1,61 @@
+{
+ "round": 211,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-27T18:19:31.6443683Z",
+  "round": 211,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R211-01",
+   "severity": "low",
+   "steps": [
+    "/studio-lab (production build), Add, click the added clip",
+    "type -12 in Clip Gain (dB), Enter",
+    "install a MutationObserver with attributeOldValue on [data-testid=arrangement-detail-clip-gain-input]",
+    "drag 'Clip Gain — fader' 10 px right and release"
+   ],
+   "expected": "the release commit shows the committed value directly (as on 180dd2e: no field mutations after pointerup) — D-29z189 item 7: when no draft exists, the block shows exactly what it shows today",
+   "actual": "inside the release task the field first renders the stale pre-drag text -12.0 with data-pending=true, border-warning, title 'Unsaved — Enter saves, Esc reverts', aria-describedby=pending id and the pending <p> mounted; the parent layout-effect then reverts it (second release commit). Never painted: rAF frames show only the committed value.",
+   "evidence": "tmp/studio-real-loop/c-round-211/out/transient-cur-1280.json vs transient-base-1280.json; out/probe-cur-*.json release.frames; explains A DEVIATION 3 (release-commits 2)"
+  }
+ ],
+ "passed": [
+  "SCOPE-211",
+  "PERF-RUN-211",
+  "WINDOW-211",
+  "LIVE-DISPLAY-211",
+  "AUDIO-211",
+  "MEMBERS-211",
+  "INVARIANTS-211",
+  "EXPORT-211",
+  "VISUAL-211",
+  "DOC-211",
+  "AN-REVIEW-211",
+  "G211-3"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome repo-wide",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "notes": [
+  "C-R210-01 closed by doc 163 edits",
+  "DEVIATIONS 1, 2, 4, 5 need B ruling (C-R211-03)",
+  "C-R211-04 info: video clip with audio draws a lane waveform on baseline too; task section 4 premise wrong",
+  "AUDIO-211 (b): browser loop wraps start new sources in the existing graph; resyncLoopRef rebuild covered by (c) Space restart and CP7/CP8 (C mutant M7 red)",
+  "EXPORT-211 run at 1440 only (render independent of viewport)",
+  "VISUAL-211: 1280 field crop after fader interaction sequence differs 8 px Δ1 (raster history); fresh/after-focus/forced-repaint crops identical across builds",
+  "C-R211-02 (SABA-B-5 remainder, not new in round 211, record row): single Clip Gain playing move-to-paint p95 59.7 / 58.1 ms (stopped 18.1 / 18.6; members playing 10.2 / 9.4); SABA-B-5 p95 < 16 ms target not met for single playing. Keep SABA-B-5 open for a STUDIO-PERFORMANCE follow-up.",
+  "Section 4 adjacent checks verified in the browser (same as baseline): track Volume 1 component per move, meters move, video Clip Gain disabled with reason, statuses only after commit, lane redraw on waveform zoom (both viewports) and trim (1440). MG11 selection change mid-drag: jsdom only (MG11, CP10b), cannot be reached with one mouse."
+ ],
+ "ableton": "not applicable (performance round; behaviour identical to 180dd2e per INVARIANTS-211 and LIVE-DISPLAY baseline diff)"
+}

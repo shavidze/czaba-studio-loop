@@ -1,0 +1,28 @@
+const { chromium } = require('@playwright/test');
+(async () => {
+  const b = await chromium.launch();
+  const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'load', timeout: 120000 });
+  await p.waitForFunction(() => [...document.querySelectorAll('button')].some((x) => x.textContent.trim() === 'Add' && !x.disabled), undefined, { timeout: 90000 });
+  await p.getByRole('button', { name: 'Add', exact: true }).click();
+  await p.waitForTimeout(1500);
+  await p.keyboard.press('Space'); await p.waitForTimeout(4000); await p.keyboard.press('Space');
+  await p.getByRole('button', { name: 'Stems — set as the active track', exact: true }).click();
+  await p.getByRole('button', { name: 'SFX — set as the active track', exact: true }).click({ modifiers: ['Shift'] });
+  await p.evaluate(() => document.activeElement.blur());
+  await p.keyboard.press('Control+g');
+  await p.waitForTimeout(500);
+  await p.keyboard.press('Space'); await p.waitForTimeout(3000);
+  const lanes = await p.getByRole('button', { name: / — set as the active track$/ }).allTextContents();
+  console.log('lanes', lanes);
+  const opt = p.locator('[data-testid="arrangement-library-option-title"]', { hasText: 'Soft impact' });
+  await opt.click();
+  await p.waitForTimeout(1000);
+  console.log('preview', await p.locator('[data-testid="arrangement-library-preview"]').textContent());
+  await p.getByRole('button', { name: 'Add', exact: true }).click();
+  await p.waitForTimeout(1500);
+  const clips = await p.$$eval('[data-clip-id]', (els) => els.map((e) => { const r = e.getBoundingClientRect(); return { kind: e.getAttribute('data-clip-kind'), start: e.getAttribute('data-clip-start'), text: e.textContent.slice(0, 30), x: Math.round(r.x), w: Math.round(r.width), y: Math.round(r.y), wave: !!e.querySelector('[data-testid="arrangement-clip-waveform"]') }; }));
+  console.log(JSON.stringify(clips));
+  console.log(await p.locator('[role="status"]').allTextContents());
+  await b.close();
+})();

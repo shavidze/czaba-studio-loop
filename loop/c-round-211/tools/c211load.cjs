@@ -1,0 +1,4 @@
+const L = require('./c211lib.cjs');
+(async () => { const b = await L.launch(); const R = {}; for (const [base, tag] of [['http://127.0.0.1:5191', 'base'], ['http://127.0.0.1:5190', 'cur']]) { const { ctx, page } = await L.openLab(b, base, 1440, 900, { add: false });
+  R[tag] = await page.evaluate(() => ({ audioClips: document.querySelectorAll('[data-clip-kind=audio]').length, clips: document.querySelectorAll('[data-clip-id]').length, block: document.querySelectorAll('[data-testid=arrangement-detail-clip-gain]').length, laneWaves: document.querySelectorAll('[data-testid=arrangement-clip-waveform]').length, commits: window.__c.commits.length, firstCommitN: window.__c.commits[0] && window.__c.commits[0].n, maxN: Math.max(...window.__c.commits.map((c) => c.n)) }));
+  await ctx.close(); } L.save('load-check.json', R); console.log(JSON.stringify(R)); await b.close(); })();

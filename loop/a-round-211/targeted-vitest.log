@@ -1,0 +1,113 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/fader-style-ui.test.tsx (8 tests) 2629ms
+     ✓ FS1: all six range controls share one h-4 box, one thumb and one track, carry no focus recipe and none keeps the old ring-2 (SABA-B-4)  466ms
+     ✓ FS2: the four level faders carry the level recipe and the fill is 0 at min, 1 at max and proportional between  989ms
+     ✓ FS3: ArrowRight and ArrowLeft move each level fader fill with the new value  749ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-fader.test.tsx (14 tests) 3104ms
+     ✓ CF1: the fader has range −60…+24, step 0.1, the clip value, its label and a dB value text  535ms
+     ✓ CF11: Shift makes music Volume and Master ten times finer  326ms
+ ✓ app/lib/arrangement/__tests__/fader-pointer-preview.test.tsx (16 tests) 9614ms
+     ✓ FP1: a track pointer drag writes no history and re-renders no parent per move; the model stays put while the live gain follows  1397ms
+     ✓ FP2: pointerup writes exactly one Volume entry with the last previewed volume; Undo restores the model and the live gain  562ms
+     ✓ FP3: a group drag drives every member live gain; pointercancel restores every member gain and display with no entry  407ms
+     ✓ FP5: a fader blur during the gesture cancels with no entry and restores the display  411ms
+     ✓ FP6: a Master drag previews on the readout and the live master gain, then commits one Master Volume entry  502ms
+     ✓ FP9: keyboard steps, Shift fine drag and double-click reset keep their values, labels and pending behaviour  1074ms
+     ✓ FP10: a Pan drag shows the draft in the leaf without re-rendering the lane, then commits one Pan entry  892ms
+     ✓ FP12: for every slider dB the committed pointer value equals the pending onChange value (track and Master)  1150ms
+     ✓ FP13: a native Pan change after a stolen claim shows no draft, adds no live pan write after the restore by the steal and leaves the model unchanged (D-29z186)  557ms
+     ✓ FP14a pointercancel: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187)  557ms
+     ✓ FP14b fader blur mid-drag: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187)  505ms
+     ✓ FP14c stolen claim: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187)  575ms
+ ✓ app/lib/arrangement/__tests__/fader-guards.test.tsx (71 tests) 10613ms
+       ✓ Delete and Backspace on the focused musicVolume slider keep the selected clip, history, status and value  387ms
+       ✓ narrow guard: Delete on the focused playhead handle (role="slider") still deletes the selected clip  542ms
+ ✓ app/lib/arrangement/__tests__/detail-panel-polish.test.tsx (16 tests) 2623ms
+       ✓ keeps typed start text when a range on another lane appears and when it is cleared  444ms
+ ✓ app/lib/arrangement/__tests__/clip-gain.test.tsx (28 tests) 2270ms
+       ✓ type 6 + Enter commits one entry, shows the status and the stored text  451ms
+       ✓ Enter on an unchanged value, empty text and out-of-range values give the exact statuses  303ms
+ ✓ app/lib/arrangement/__tests__/waveform-zoom.test.tsx (9 tests) 2130ms
+     ✓ WZ2: 2× scales every audio lane by its gain × 2, shows the state and status; 1× restores the exact drawings  561ms
+ ✓ app/lib/arrangement/__tests__/pending-status.test.tsx (22 tests) 1767ms
+       ✓ S7: a refused music Volume press during the separator drag shows blocked, then the prior status after pointerup  397ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx (8 tests) 1605ms
+     ✓ WG3: a −6 dB clip draws the −6 dB shape (not the scale-1 one); a clip without gainDb draws scale 1  386ms
+     ✓ WG4: during a single Clip Gain drag the lane follows before release; one entry; Undo restores the exact drawing  357ms
+ ✓ app/lib/arrangement/__tests__/affordance-colour-ui.test.tsx (7 tests) 1693ms
+     ✓ DXA1: the six range thumbs stay neutral (bg-foreground thumb, no brass thumb); brass only on the R68 level fill, the ring is the one global rule (SABA-B-4)  526ms
+     ✓ DXA2: fade handles are hollow (bg-background, border-foreground); Env mode keeps the K6 point and hides them  309ms
+     ✓ DXA4: loop edges hover in foreground/50 whether the loop is enabled or disabled  317ms
+ ✓ app/lib/arrangement/__tests__/gesture-guard.test.tsx (19 tests) 1595ms
+     ✓ refuses Mute, Solo and Volume during a gesture without a history entry  325ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-multi.test.tsx (14 tests) 3353ms
+     ✓ MG3: mixed members show an empty field, the range text, the max anchor and a linked description; equal members show the value  639ms
+     ✓ MG4: a +25 px drag over 100 px shifts both by +21.0 with one entry; Undo and Redo move both; two moves are not cumulative  336ms
+     ✓ MG11: the clip ids captured at the press stay the target when the selection changes mid-drag (group→group proves the capture; the remounting cases guard the outcome)  501ms
+ ✓ app/lib/arrangement/__tests__/detail-panel-fit.test.tsx (7 tests) 1434ms
+     ✓ F1: the pending marker shows one truncating label and keeps the full hint for screen readers and hover  375ms
+Error: useArrangementPositionStore must be used within an ArrangementProvider
+    at Module.useArrangementPositionStore (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:3989:11)
+    at PositionStoreOutsideProvider (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:311:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+ ✓ app/lib/arrangement/__tests__/detail-panel-reason.test.tsx (6 tests) 1186ms
+     ✓ RF1: a group shows the range reason and then the Clip Gain reason in the middle box, still linked  426ms
+Error: useArrangementPositionStore must be used within an ArrangementProvider
+    at Module.useArrangementPositionStore (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:3989:11)
+    at PositionStoreOutsideProvider (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:311:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangement must be used within an ArrangementProvider
+    at Module.useArrangement (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:3981:11)
+    at ArrangementOutsideProvider (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:316:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangement must be used within an ArrangementProvider
+    at Module.useArrangement (/home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx:3981:11)
+    at ArrangementOutsideProvider (/home/runner/czaba-project/store/app/lib/arrangement/__tests__/context-hygiene.test.tsx:316:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+ ✓ app/lib/arrangement/__tests__/context-hygiene.test.tsx (10 tests) 918ms
+       ✓ PV4: a double-click on the music Volume fader at 0 dB causes 0 provider and 0 consumer renders and 0 entries  475ms
+       ✓ PV5: an off-default round trip writes one Volume entry per change and Undo returns to 0.72  345ms
+ ✓ app/lib/arrangement/__tests__/mix-draft-store.test.ts (6 tests) 11ms
+ ✓ app/lib/arrangement/__tests__/content-colour-ui.test.tsx (6 tests) 820ms
+     ✓ DXC1: the audio clip waveform is neutral text-muted/70, unselected and selected  323ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx (17 tests) 27525ms
+     ✓ CP1: a single Clip Gain drag writes no history and re-renders no parent per move; the model stays put while the live gain and both drawings follow  730ms
+     ✓ CP2: pointerup writes one Clip Gain entry with the exact last previewed dB; Undo restores the model, the live gain and the lane drawing  407ms
+     ✓ CP9: fader keyboard steps, double-click reset, the typed field and the reset button keep their values, labels and statuses  513ms
+     ✓ CP12: the committed pointer gainDb equals the pending onChange result for every slider dB (Shift-fine included) and for three members anchors including both clamps  23584ms
+
+ Test Files  18 passed (18)
+      Tests  284 passed (284)
+   Start at  17:41:33
+   Duration  30.24s (transform 4.49s, setup 0ms, import 18.42s, tests 74.89s, environment 13.28s)
+

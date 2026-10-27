@@ -1,0 +1,64 @@
+M2 [app/contexts/ArrangementContext.tsx] commit applies the stored arrangement instead of the override
+  red: ['CP2']
+  green: []
+  first assertion: ["AssertionError: expected [] to deeply equal [ 'Clip Gain' ]"]
+M3 [app/contexts/ArrangementContext.tsx] cancel skips the live clip gain restore
+  red: ['CP3 pointercancel', 'CP4 stolen claim', 'CP5-members fader blur', 'CP5', 'CP5b']
+  green: []
+  first assertion: ['AssertionError: expected 0.19054607179632474 to be 0.5011872336272722 // Object.is equality']
+M4 [app/contexts/ArrangementContext.tsx] stolen-claim abort does not revert the preview
+  red: ['CP4 stolen claim']
+  green: []
+  first assertion: ['AssertionError: expected 0.19054607179632474 to be 0.5011872336272722 // Object.is equality']
+M5 [app/contexts/ArrangementContext.tsx] fader blur during the gesture commits instead of cancelling
+  red: ['CP5-members fader blur', 'CP5']
+  green: ['CP5b']
+  first assertion: ['AssertionError: expected 0.19054607179632474 to be 0.5011872336272722 // Object.is equality']
+M6 [app/contexts/ArrangementContext.tsx] members status reads the pending member ids (null on the pointer path)
+  red: ['CP6']
+  green: []
+  first assertion: ["AssertionError: expected 'Demo collection ready. Choose a track…' to be 'Clip Gain: 2 clips — +15.0 … +22.0 dB.' // Object.is equality"]
+M7 [app/contexts/ArrangementContext.tsx] startGraph reads the stored clip gains
+  red: ['CP7', 'CP8']
+  green: []
+  first assertion: ['AssertionError: expected 0.5011872336272722 to be 0.07244359600749899 // Object.is equality']
+M7s [app/contexts/ArrangementContext.tsx] syncPlayback setter loop reads the stored clips
+  red: []
+  green: ['app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx (17 tests | 15 skipped) 393ms']
+  first assertion: []
+M9 [app/contexts/ArrangementContext.tsx] native change with no gesture takes the pointer path
+  red: ['CP9']
+  green: []
+  first assertion: ['AssertionError: expected -6 to be -5.9 // Object.is equality']
+M10a [app/components/arrangement/ArrangementDetailClipGain.tsx] pending marker ignores the draft
+  red: ['CP10']
+  green: ['CP10b']
+  first assertion: ["AssertionError: expected 'true' to be null"]
+M10b [app/components/arrangement/ArrangementDetailClipGain.tsx] reset disabled reads the stored gain during a draft
+  red: ['CP10']
+  green: ['CP10b']
+  first assertion: ['AssertionError: expected true to be false // Object.is equality']
+M10c [app/components/arrangement/ArrangementDetailClipGain.tsx] the draft is shown even when the selection has a reason
+  red: ['CP10b']
+  green: []
+  first assertion: ["AssertionError: expected '10.8' to be '0.0' // Object.is equality"]
+M3d [app/contexts/ArrangementContext.tsx] cancel keeps the override and its drafts
+  red: ['CP3 pointercancel', 'CP4 stolen claim', 'CP5-members fader blur', 'CP5', 'CP5b']
+  green: []
+  first assertion: ['AssertionError: expected -14.4 to be undefined']
+M11 [app/contexts/ArrangementContext.tsx] unmount does not clear the override drafts
+  red: ['CP11']
+  green: []
+  first assertion: ['AssertionError: expected -22.8 to be undefined']
+M12 [app/contexts/ArrangementContext.tsx] pointer target read back as float32
+  red: ['CP12']
+  green: []
+  first assertion: ['AssertionError: expected -4.900000095367432 to be -4.9 // Object.is equality']
+M13 [app/components/arrangement/ArrangementClip.tsx] the draft drawing drops the waveform zoom
+  red: ['CP13']
+  green: []
+  first assertion: ["AssertionError: expected 'M0 0.980h1V1.020h-1ZM1 0.980h1V1.020h…' to be 'M0 0.980h1V1.020h-1ZM1 0.967h1V1.033h…' // Object.is equality"]
+M14 [app/contexts/ArrangementContext.tsx] Trap 1: pointer path returns early at the stored value
+  red: ['CP14']
+  green: []
+  first assertion: ["AssertionError: expected '10.8' to be '-6.0' // Object.is equality"]
