@@ -46,3 +46,8 @@
 ## Reference first (Saba, 2026-10-27)
 
 Before building any feature or UX change, B studies how the same thing works in established tag editors (for example Mp3tag, Kid3, Soundminer, BWF MetaEdit) and how they look. B writes a `Reference` section in the task with sources (URLs or the consult result) and a `Deviations` list with reasons. C checks each point. B and C have WebSearch and WebFetch. A difference from the reference with no listed reason is a bug. Pure fix, refactor, test-only and docs-only rounds are exempt. If no reference is found, B says what was searched and does not invent one.
+
+## Root note — release v1.4.0 (Saba, 2026-10-27)
+
+- Saba asked for a new Tag Manager release. The repository's `release.yml` builds Windows and macOS installers when a master push carries a new `package.json` version. Root therefore commits one `chore(release): v1.4.0` commit on master that changes only `version` in `package.json` and `package-lock.json` (1.3.1 → 1.4.0). It runs between loop jobs (same concurrency group).
+- **Baseline rule:** when HEAD is a root `chore(release): vX.Y.Z` commit directly on top of the baseline named in `current-task.md`, and that commit changes only those two `version` fields, it counts as the baseline. A and C do not stop on it, and the frozen-file checks compare against it. The package.json freeze stays as before for agents.
