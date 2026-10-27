@@ -1,0 +1,195 @@
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index 480c9be..cc834f3 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -20,7 +20,7 @@
+ ### Save flow
+ ```
+ Single:  writeMetadata → readMetadata → skipSync=true → updateFileMetadata → setEditingMetadata
+-Batch:   writeMetadataBatch(modifiedFields only) → readBatch → skipSync=true → updateAll → failed empty ? setEditingMetadata({}) : keep edits
++Batch:   writeMetadataBatch(modifiedFields only) → readBatch → update non-failed only (D-22); skipSync only if ≥1 applied → failed empty ? setEditingMetadata({}) : keep edits
+ Batch failed non-empty (D-21): editingMetadata, modifiedFields, isDirty kept → Save stays enabled, retry writes to all selected files
+ ```
+ 
+diff --git a/docs/learning/data-flow.md b/docs/learning/data-flow.md
+index 643f0de..5e981a6 100644
+--- a/docs/learning/data-flow.md
++++ b/docs/learning/data-flow.md
+@@ -112,7 +112,8 @@ sequenceDiagram
+     MP->>MS: updateField(key, value)
+ 
+     U->>MP: Click "Save to 3 files"
+-    MP->>API: writeMetadataBatch(paths, editingMetadata)
++    MP->>API: writeMetadataBatch(paths, batchMeta)
++    Note over MP: batchMeta = მხოლოდ შეცვლილი ველები (modifiedFields)
+     API->>M: ipc: meta:write-batch
+ 
+     loop ყოველი ფაილი
+@@ -123,7 +124,8 @@ sequenceDiagram
+     M-->>API: { succeeded: 3, failed: [] }
+ 
+     MP->>API: readMetadataBatch(paths)
+-    Note over MP: store-ის განახლება ყოველი ფაილისთვის
++    Note over MP: store-ში ახლდება მხოლოდ წარმატებით შენახული ფაილები (D-22)
++    Note over MP: skipSyncRef = true მხოლოდ თუ ≥1 ჩანაწერი ახლდება
+ 
+     alt failed ცარიელია
+         MP->>MS: setEditingMetadata({})
+@@ -135,9 +137,9 @@ sequenceDiagram
+     end
+ ```
+ 
+-**შეცდომა batch-ში (D-21):** თუ `writeMetadataBatch`-ის `failed` სია არ არის ცარიელი (ყველა ფაილი ჩავარდა ან მხოლოდ ნაწილი), აკრეფილი მნიშვნელობები ფორმაში რჩება — `editingMetadata` და `modifiedFields` არ იშლება, `isDirty` რჩება `true`, ამიტომ `Save to N files` ღილაკი აქტიურია. ყველა მონიშნული ფაილი (ჩავარდნილიც) თავიდან იკითხება და store-ში ახლდება (`readMetadataBatch` → `updateFileMetadata`), ამიტომ წარმატებულ ფაილებს ახალი მნიშვნელობები და `Tagged` badge უჩანთ. განმეორებითი Save იგივე `modifiedFields`-ს წერს **ყველა** მონიშნულ ფაილში, მათ შორის უკვე წარმატებულებშიც (იგივე მნიშვნელობით). ფორმა მხოლოდ მაშინ სუფთავდება, როცა `failed` ცარიელია. სხვა ფაილზე გადასვლისას შეუნახავი ცვლილებები იკარგება და ჩნდება toast `Unsaved changes were discarded`.
++**შეცდომა batch-ში (D-21):** თუ `writeMetadataBatch`-ის `failed` სია არ არის ცარიელი (ყველა ფაილი ჩავარდა ან მხოლოდ ნაწილი), აკრეფილი მნიშვნელობები ფორმაში რჩება — `editingMetadata` და `modifiedFields` არ იშლება, `isDirty` რჩება `true`, ამიტომ `Save to N files` ღილაკი აქტიურია. ყველა მონიშნული ფაილი თავიდან იკითხება (`readMetadataBatch`), მაგრამ store-ში (`updateFileMetadata`) ახლდება მხოლოდ ის ფაილები, რომლებიც `failed` სიაში არ არის, ამიტომ წარმატებულ ფაილებს ახალი მნიშვნელობები და `Tagged` badge უჩანთ. ჩავარდნილი ფაილები store-ში თავის ძველ ჩანაწერს ინარჩუნებენ (D-22): თუ ფაილი არც იწერება და არც იკითხება (მაგ. `chmod 000` ან სკანის შემდეგ წაშლილი), main-ის `emptyMetadata` შედეგი store-ში აღარ ხვდება და row-ს `Tagged` badge არ ეკარგება. `skipSyncRef` მხოლოდ მაშინ ინიშნება, როცა ერთი ჩანაწერი მაინც ახლდება. განმეორებითი Save იგივე `modifiedFields`-ს წერს **ყველა** მონიშნულ ფაილში, მათ შორის უკვე წარმატებულებშიც (იგივე მნიშვნელობით). ფორმა მხოლოდ მაშინ სუფთავდება, როცა `failed` ცარიელია. სხვა ფაილზე გადასვლისას შეუნახავი ცვლილებები იკარგება და ჩნდება toast `Unsaved changes were discarded`.
+ 
+-**Batch-ის თავისებურება:** `Partial<WavMetadata>`-ში მხოლოდ შევსებული ველები გადაიწერება. თუ ფორმაში BPM ცარიელია, არსებული BPM უცვლელი რჩება.
++**Batch-ის თავისებურება:** `Partial<WavMetadata>`-ში მხოლოდ შეცვლილი ველები (`modifiedFields`) გადაიწერება. თუ ფორმაში BPM ცარიელია, არსებული BPM უცვლელი რჩება.
+ 
+ ## Template Lifecycle
+ 
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index 9229728..1a6e83b 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -91,8 +91,12 @@ export function MetadataPanel(): React.ReactElement {
+         const result = await window.api.writeMetadataBatch(paths, batchMeta, fields);
+ 
+         const refreshed = await window.api.readMetadataBatch(paths, fields);
+-        skipSyncRef.current = true;
+-        for (const [path, updated] of Object.entries(refreshed)) {
++        const failedPaths = new Set(result.failed.map((f) => f.path));
++        const savedEntries = Object.entries(refreshed).filter(([path]) => !failedPaths.has(path));
++        if (savedEntries.length > 0) {
++          skipSyncRef.current = true;
++        }
++        for (const [path, updated] of savedEntries) {
+           updateFileMetadata(path, updated as WavMetadata);
+         }
+ 
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index e1a4f9c..d9a4376 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+-import type { BatchWriteResult, WavFileEntry, WavMetadata } from "~/types";
++import { useSchemaStore } from "~/stores/schema-store";
++import type { BatchWriteResult, FieldDefinition, FieldValue, WavFileEntry, WavMetadata } from "~/types";
+ import { resetAllStores } from "../helpers/reset-stores";
+ 
+ vi.hoisted(() => {
+@@ -36,6 +37,32 @@ function seedFiles(selectedPaths: string[]): void {
+   useFileStore.setState({ files: [FILE_A, FILE_B], metadata, selectedPaths });
+ }
+ 
++function defaultValueForType(type: FieldDefinition["type"]): FieldValue {
++  if (type === "tags") return [];
++  if (type === "number") return 0;
++  return "";
++}
++
++function emptyRecordForPanelSchema(): WavMetadata {
++  const result: WavMetadata = {};
++  for (const field of useSchemaStore.getState().fields) {
++    result[field.key] = defaultValueForType(field.type);
++  }
++  return result;
++}
++
++function taggedSeed(oldComment: string): WavMetadata {
++  return { ...emptyRecordForPanelSchema(), category: "OLDCat", comment: oldComment };
++}
++
++function seedTaggedFiles(seedA: WavMetadata, seedB: WavMetadata): void {
++  useFileStore.setState({
++    files: [FILE_A, FILE_B],
++    metadata: { [PATH_A]: { ...seedA }, [PATH_B]: { ...seedB } },
++    selectedPaths: [PATH_A, PATH_B],
++  });
++}
++
+ function mockBatchApi(writeResult: BatchWriteResult, refreshed: Record<string, WavMetadata>): void {
+   vi.mocked(window.api.writeMetadataBatch).mockResolvedValue(writeResult);
+   vi.mocked(window.api.readMetadataBatch).mockResolvedValue(refreshed);
+@@ -185,3 +212,79 @@ describe("MetadataPanel batch save keeps edits on failure (TM-B15, D-21)", () =>
+     expect(screen.getByRole("button", { name: /Save Tags/ })).toBeEnabled();
+   });
+ });
++
++describe("MetadataPanel batch save keeps the store entry of failed files (TM-B16, D-22)", () => {
++  it("(f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated", async () => {
++    const seedA = taggedSeed("old A");
++    const seedB = taggedSeed("old B");
++    seedTaggedFiles(seedA, seedB);
++    const refreshedA: WavMetadata = { ...seedA, category: TYPED_CATEGORY };
++    const emptyB = emptyRecordForPanelSchema();
++    expect(Object.keys(emptyB).length).toBeGreaterThan(0);
++    mockBatchApi(PARTIAL_FAILED, { [PATH_A]: refreshedA, [PATH_B]: emptyB });
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSave(/Save to 2 files/);
++
++    expect(window.api.writeMetadataBatch).toHaveBeenCalledTimes(1);
++    expectBatchWriteCall(0);
++    expect(window.api.readMetadataBatch).toHaveBeenCalledTimes(1);
++    expect(vi.mocked(window.api.readMetadataBatch).mock.calls[0]?.[0]).toEqual([PATH_A, PATH_B]);
++    expect(useMetadataStore.getState().toastMessage).toBe("1 saved, 1 failed");
++    const stored = useFileStore.getState().metadata;
++    expect(stored[PATH_B]).toEqual(seedB);
++    expect(stored[PATH_A]).toEqual(refreshedA);
++    expectEditsKept();
++  });
++
++  it("(g) all failed + both re-reads empty: both store entries are unchanged and edits are kept", async () => {
++    const seedA = taggedSeed("old A");
++    const seedB = taggedSeed("old B");
++    seedTaggedFiles(seedA, seedB);
++    mockBatchApi(ALL_FAILED, { [PATH_A]: emptyRecordForPanelSchema(), [PATH_B]: emptyRecordForPanelSchema() });
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSave(/Save to 2 files/);
++
++    expect(window.api.writeMetadataBatch).toHaveBeenCalledTimes(1);
++    expect(window.api.readMetadataBatch).toHaveBeenCalledTimes(1);
++    expect(useMetadataStore.getState().toastMessage).toBe("0 saved, 2 failed");
++    const stored = useFileStore.getState().metadata;
++    expect(stored[PATH_A]).toEqual(seedA);
++    expect(stored[PATH_B]).toEqual(seedB);
++    expectEditsKept();
++  });
++
++  it("(h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry", async () => {
++    const seedA = taggedSeed("old A");
++    const seedB = taggedSeed("old B");
++    seedTaggedFiles(seedA, seedB);
++    mockBatchApi(ALL_FAILED, { [PATH_A]: emptyRecordForPanelSchema(), [PATH_B]: emptyRecordForPanelSchema() });
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSave(/Save to 2 files/);
++    expectEditsKept();
++
++    act(() => {
++      useFileStore.setState({ selectedPaths: [PATH_A] });
++    });
++
++    expect(useMetadataStore.getState().toastMessage).toBe("Unsaved changes were discarded");
++    expect(useMetadataStore.getState().editingMetadata).toEqual(seedA);
++  });
++
++  it("(i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01)", async () => {
++    seedTaggedFiles(taggedSeed("old A"), taggedSeed("old B"));
++    mockBatchApi(ALL_FAILED, { [PATH_A]: emptyRecordForPanelSchema(), [PATH_B]: emptyRecordForPanelSchema() });
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSave(/Save to 2 files/);
++    expectEditsKept();
++
++    act(() => {
++      useMetadataStore.getState().setIsDirty(false);
++    });
++
++    expect(useMetadataStore.getState().editingMetadata).toEqual({});
++  });
++});

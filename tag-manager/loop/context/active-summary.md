@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T07:45:20.149Z)
+# Active loop summary (2026-10-27T08:45:52.142Z)
 
-- backlog.json 101 KB -> active view 36 KB
-- status: G_ROOT_GATE round 12
+- backlog.json 109 KB -> active view 39 KB
+- status: G_ROOT_GATE round 13
 - servers: `{"servers":"none or skipped"}`
-- last publication: c3bd412c0561d53c64e98563dbc5177ca98696f0 (rounds 11-12)
-- last root gate: round 12 published - commit c3bd412c0561d53c64e98563dbc5177ca98696f0 pushed
+- last publication: a652f06e0afe16455f7370249be6c037fada902f (rounds 13-13)
+- last root gate: round 13 published - commit a652f06e0afe16455f7370249be6c037fada902f pushed
 
-## Current items: TM-B15
+## Current items: TM-B15, TM-B16
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -50,7 +50,6 @@
 - RR-R8-04 / info / open / Architecture signal: validate schema at load in main (riffChunkId /^[A-Z0-9 ]{4}$/, not reserved, not duplicated); reject or flag once; keep
 - A-R8-01 / info / open / docs/recording-tag-contract.md header (line 5) and '## შემოწმება' do not mention D-17/D-18 or metadata-write-field-errors.test.ts (task said
 - A-R8-02 / low / open / node-taglib-sharp checks riffChunkId by JS string length (id.length !== 4), not bytes: a 4-character non-ASCII ID does not trigger D-18; doc
-- C-R8-01 / low / in_progress / After a failed batch save (0 saved, 2 failed) the panel shows the 'Multiple values' placeholder on both files (c-round-8/r8-5-after-ii-toast
 - RR-R9-03 / low / open / apt-install.sh has no automated test for knob validation (exit 2) and the worst-case line (640 s); optional script test with fake sudo/apt-g
 - RR-R9-04 / info / open / Architecture signal: worst_case_seconds and check.yml timeout-minutes are kept in sync by hand; a --print-worst-case flag or CI check compar
 - A-R9-01 / low / open / apt-install.sh knob validation accepts arbitrarily large integers; bash arithmetic overflow in worst_case_seconds possible; suggestion ^[1-9
@@ -63,10 +62,13 @@
 - RR-R10-05 / info / open / Architecture signal: the three specs repeat the same beforeAll/afterAll; a Playwright worker-scoped fixture (test.extend<{}, { tagManager: L
 - A-R10-01 / info / open / Untested launch failure paths in launchTagManagerApp: electron.launch own 60 s timeout (app undefined, empty tail), domcontentloaded 15 s me
 - C-R10-01 / info / open / Un-delayed E2E Playwright 3.2 s vs R9 2.5 s (Build+E2E step 7.7 s vs 5.9 s); cause not established (machine variance or helper overhead); ju
-- C-R11-01 / low / open / .claude/primitives/STATE_MANAGEMENT.md ### Save flow still says batch always calls setEditingMetadata({}); stale vs D-21 (scope item 4 not d
-- A-R11-01 / low / open / Batch refresh: a file whose write AND re-read both fail gets emptyMetadata in the store (src/main/ipc/metadata.ts ~241 readMetadataBatch fal
-- A-R11-02 / low / open / docs/learning/data-flow.md pre-existing inaccuracies: :115 diagram says writeMetadataBatch(paths, editingMetadata) but code sends batchMeta 
-- B-R11-01 / info / open / Environment: the agent harness now refuses Edit on .claude/** as a sensitive file (A R11 permission_denials), while round 3 edited .claude/p
+- A-R11-01 / low / in_progress / Batch refresh: a file whose write AND re-read both fail gets emptyMetadata in the store (src/main/ipc/metadata.ts ~241 readMetadataBatch fal
+- A-R11-02 / low / in_progress / docs/learning/data-flow.md pre-existing inaccuracies: :115 diagram says writeMetadataBatch(paths, editingMetadata) but code sends batchMeta 
+- RR-R12-01 / low / in_progress / MetadataPanel.tsx:78,94 skipSyncRef.current = true is set even when the store does not change, so the flag can stay true with nothing to cle
+- RR-R12-02 / info / open / Retry after a partial batch failure rewrites files that already saved (documented, idempotent); sending only failed paths would be a product
+- RR-R12-03 / low / open / metadata-panel-batch-save.test.ts uses double quotes vs single in src; tests/ not linted (same as RR-R3-04/RR-R5-05)
+- RR-R12-04 / info / open / Architecture signal: replace skipSyncRef + sync effect counting with a store action commitBatchSave({ refreshed, failedPaths }) that updates
+- C-R12-01 / info / open / A's result JSON has no full tool transcript, so 'no Bash write to .claude/**' is confirmed only indirectly (empty permission_denials, A's re
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

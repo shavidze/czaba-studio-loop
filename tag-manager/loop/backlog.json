@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "round 13: TM-B16 (D-22) batch save must not overwrite the store entry of a file whose write failed; skipSyncRef only when applied; batch docs sync",
+  "current_task": "round 14: TM-B17 (D-23) fixture generator hygiene: temp cleanup on failure, CLI guard for .mts/.js copies, TESTING.md fixtures section",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -221,9 +221,15 @@
     },
     {
       "id": "D-22",
-      "status": "decided B round 12 close (technical, reversible, renderer only); to be implemented R13 (TM-B16)",
+      "status": "done R13, published a652f06 (TM-B16; C R13-1..R13-6)",
       "decision": "MetadataPanel batch save: after writeMetadataBatch, readMetadataBatch is still called for all selected paths, but updateFileMetadata is applied only to paths NOT in result.failed. A path whose write failed keeps its current store entry (a failed write is treated as leaving the file unchanged on disk), so a file that is also unreadable (EACCES/ENOENT -> main returns emptyMetadata) no longer loses its values and its Tagged badge. skipSyncRef.current is set to true only when at least one updateFileMetadata call happens (RR-R12-01), so an all-failed save leaves no stale skip flag. D-21 is unchanged (edits kept when failed is non-empty; form cleared only when failed is empty). Main IPC (meta:read-batch emptyMetadata fallback), preload and the scan/schema-change readers are unchanged. Known limits: (1) a write that fails after partly modifying the file keeps the pre-save store entry until Rescan; (2) a file whose write succeeded but whose re-read fails still gets emptyMetadata (main fallback, out of D-22). Not adopted: RR-R12-04 commitBatchSave store action (architecture signal)",
       "contract_with": "none (renderer state only; K-4 tag contract untouched)"
+    },
+    {
+      "id": "D-23",
+      "status": "decided B round 13 close (technical, reversible, test tooling only); to be implemented R14 (TM-B17)",
+      "decision": "tests/fixtures/create-fixtures.ts: writeFixtureFileAtomically removes its temp file (rmSync force) when writeFileSync or renameSync throws and rethrows the original error; the final path is never removed. The CLI guard becomes an exported predicate isCreateFixturesCliEntry(scriptPath) matching /(^|[\\\\/])create-fixtures\\.[cm]?[jt]s$/; behaviour on import (globalSetup, E2E specs, riff-chunks.ts) unchanged: nothing is written on import. createSineWavBuffer/createWavTestFixtures names, signatures and output bytes unchanged. .gitignore adds tests/fixtures/*.tmp. TESTING.md fixtures section describes the real flow (main: Vitest globalSetup; verifyCommand: CLI step; E2E: createSineWavBuffer in the spec)",
+      "contract_with": "none (test tooling; K-4 tag contract untouched)"
     }
   ],
   "items": [
@@ -592,7 +598,8 @@
       ],
       "evidence": [
         "biome.json files.includes src/**; package.json lint 'biome check src/'"
-      ]
+      ],
+      "note_b_r13": "B R13 (package.json read): scripts.typecheck already runs tsc --noEmit -p tsconfig.test.json (include tests/**/*), so the 'tsconfig.test.json not part of check' half of the title is stale since round 2 (TM-B04/D-11); the open part is Biome lint of tests/ (biome check src/ only). Scope decision still with Saba"
     },
     {
       "id": "OOS-01",
@@ -848,7 +855,7 @@
       "severity": "low",
       "source": "A-R11-01",
       "title": "Batch save with a file that can be neither written nor read (chmod 000, or removed after scan): meta:read-batch returns emptyMetadata for it and MetadataPanel overwrites its store entry, so the row loses its values and Tagged badge although nothing on disk changed; also skipSyncRef stays true when no store update happens (RR-R12-01)",
-      "status": "todo",
+      "status": "done",
       "round": 13,
       "depends_on": [],
       "decisions": [
@@ -867,7 +874,39 @@
         "gate: verifyCommand green, renderer 112 + new, main 62, E2E 7/7, --retries=0 7/7"
       ],
       "evidence": [
-        "B round 12 experiment (b-round-12-exp-unreadable.cjs): node-taglib-sharp File.createFromPath throws EACCES on a chmod 000 WAV and ENOENT on a missing path; metadata.ts READ_METADATA_BATCH catch -> emptyMetadata(schema); MetadataPanel.tsx handleSave batch branch applies every refreshed entry via updateFileMetadata. chmod 444 (C R11 recipe) does NOT reproduce: read succeeds"
+        "B round 12 experiment (b-round-12-exp-unreadable.cjs): node-taglib-sharp File.createFromPath throws EACCES on a chmod 000 WAV and ENOENT on a missing path; metadata.ts READ_METADATA_BATCH catch -> emptyMetadata(schema); MetadataPanel.tsx handleSave batch branch applies every refreshed entry via updateFileMetadata. chmod 444 (C R11 recipe) does NOT reproduce: read succeeds",
+        "C round 13 PASS (c-round-13.md/.json, realVerified=true, 0 bugs): R13-1 ownership only 4 owned paths, MetadataPanel diff +6/-2 batch branch only, STATE_MANAGEMENT.md Save flow Batch line only, permission_denials []; R13-2 c3bd412 worktree + new test file 3 failed | 6 passed (f :235, g :253, h :273 store-entry deep-equal OLDCat->'' ), fixed tree 9/9; R13-3 M1 filter revert killed (f,g,h), M2 skip all killed (b,d,f), M3 D-21 drop killed (a,b,c,f-i), M4 unconditional skipSync killed (i); R13-4 clean verifyCommand exit 0, Biome 0 errors/9 warnings (unchanged), typecheck 0, renderer 116/116, main 62/62, E2E 7/7, --retries=0 7/7; R13-5 real app (_electron + xvfb, drive-r13.mjs): chmod 000 p2, Category D22Cat, Save -> '1 saved, 1 failed', p2 row keeps Tagged without rescan (new-2-after-save-p2-chmod000.png), red reference on c3bd412 build p2 loses Tagged (old-2-...png); p1 ICAT=D22Cat in ffprobe + music-metadata, old comment kept; p2 sha256 unchanged, no ICAT, old comment in both readers; dirty selection change -> 'Unsaved changes were discarded'; rescan all Tagged; regressions batch OK (OKCat, Tags saved to 2 files, both readers) and single save (SingleCat) PASS; R13-6 docs match code. All-failed skipSyncRef path covered by tests (h)/(i) + M4 as the task allowed. Root gate round 13 published a652f06, review COMMIT OK"
+      ],
+      "realVerified": true,
+      "commit": "a652f06e0afe16455f7370249be6c037fada902f",
+      "note": "B R13 close: done on C R13 evidence; published a652f06"
+    },
+    {
+      "id": "TM-B17",
+      "type": "bug",
+      "severity": "low",
+      "source": "RR-R1-04, RR-R1-05, C-R1-03",
+      "title": "Fixture generator hygiene: (a) create-fixtures.ts leaves <file>.<pid>.tmp behind when writeFileSync/renameSync throws (RR-R1-05; B R13 repro: target sample.wav is a directory -> EISDIR, sample.wav.<pid>.tmp left) and *.tmp is not gitignored; (b) CLI guard regex only matches create-fixtures.ts, a .mts/.js/.mjs/.cjs copy runs and creates nothing (RR-R1-04; B R13 repro: tsx create-fixtures.mts exit 0, no files); (c) .claude/primitives/TESTING.md:124-129 says CI must run create-fixtures.ts before tests, but main tests get fixtures from Vitest globalSetup and E2E specs build their own WAVs (C-R1-03)",
+      "status": "todo",
+      "round": 14,
+      "depends_on": [],
+      "decisions": [
+        "D-23"
+      ],
+      "findings": [
+        "RR-R1-04",
+        "RR-R1-05",
+        "C-R1-03"
+      ],
+      "acceptance": [
+        "R14: main test (os.tmpdir(), never tests/fixtures/) fails on a652f06 and passes after: createWavTestFixtures into a dir where sample.wav is a directory throws and leaves no *.tmp; exported CLI-entry predicate accepts create-fixtures.{ts,mts,cts,js,mjs,cjs} with / and \\ separators and rejects other names",
+        "generator output unchanged: sha256 of sample.wav and corrupt.wav generated on a652f06 and after are identical; global-setup, E2E specs, riff-chunks.ts unchanged and their imports still resolve",
+        "real CLI: npx --yes tsx@4 on a .mts copy prints 'Fixtures created successfully' and creates both files (red on a652f06: nothing created); normal CLI run unchanged",
+        "docs: TESTING.md fixtures section matches reality (globalSetup for main, verifyCommand CLI step, E2E builds its own WAVs); .gitignore covers tests/fixtures/*.tmp",
+        "gate: verifyCommand green, renderer 116, main 62 + new, E2E 7/7, --retries=0 7/7"
+      ],
+      "evidence": [
+        "B round 13 experiments (b-round-13-exp-tmp-leak.mts.txt): createWavTestFixtures into /tmp/b-r13/t with t/sample.wav a non-empty directory -> threw EISDIR, readdir [sample.wav, sample.wav.10165.tmp]; tsx@4 /tmp/b-r13/m/create-fixtures.mts -> exit 0, directory still only create-fixtures.mts (guard did not match)"
       ]
     }
   ],
@@ -911,9 +950,10 @@
     {
       "id": "C-R1-03",
       "severity": "low",
-      "status": "open",
+      "status": "in_progress",
       "title": ".claude/primitives/TESTING.md:129 stale (fixtures now created by globalSetup); .claude/** frozen, needs a round that owns it",
-      "round": 1
+      "round": 1,
+      "routed_to": "TM-B17 round 14 (D-23)"
     },
     {
       "id": "RR-R1-01",
@@ -947,17 +987,19 @@
       "id": "RR-R1-04",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "in_progress",
       "title": "create-fixtures.ts CLI guard regex matches only create-fixtures.ts (argv[1]); suggest create-fixtures\\.[cm]?[jt]s$",
-      "round": 1
+      "round": 1,
+      "routed_to": "TM-B17 round 14 (D-23)"
     },
     {
       "id": "RR-R1-05",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "in_progress",
       "title": "create-fixtures.ts temp file ${filePath}.${pid}.tmp leaks if writeFileSync throws; not gitignored",
-      "round": 1
+      "round": 1,
+      "routed_to": "TM-B17 round 14 (D-23)"
     },
     {
       "id": "RR-R1-06",
@@ -1620,18 +1662,20 @@
       "id": "A-R11-01",
       "source": "A (code-reviewer)",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "Batch refresh: a file whose write AND re-read both fail gets emptyMetadata in the store (src/main/ipc/metadata.ts ~241 readMetadataBatch fallback); its Tagged badge can vanish although nothing on disk changed. Not verified by C (main frozen in R11)",
-      "routed_to": "TM-B16 (D-22), round 13; reproduced by B R12 experiment (EACCES/ENOENT on open)"
+      "routed_to": "TM-B16 (D-22), round 13; reproduced by B R12 experiment (EACCES/ENOENT on open)",
+      "closed_by": "TM-B16, C round 13 PASS, published a652f06"
     },
     {
       "round": 11,
       "id": "A-R11-02",
       "source": "A (code-reviewer) + C",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "docs/learning/data-flow.md pre-existing inaccuracies: :115 diagram says writeMetadataBatch(paths, editingMetadata) but code sends batchMeta (modified fields only); :140 says 'filled fields' where 'modified fields' is accurate",
-      "routed_to": "TM-B16 round 13 (same data-flow.md batch section)"
+      "routed_to": "TM-B16 round 13 (same data-flow.md batch section)",
+      "closed_by": "TM-B16, C round 13 PASS, published a652f06"
     },
     {
       "round": 11,
@@ -1648,9 +1692,10 @@
       "id": "RR-R12-01",
       "source": "root-review",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "MetadataPanel.tsx:78,94 skipSyncRef.current = true is set even when the store does not change, so the flag can stay true with nothing to clear it; harmless today, could hide a real update after a later sync-effect edit",
-      "routed_to": "TM-B16 round 13 (D-22: set only when at least one entry is applied)"
+      "routed_to": "TM-B16 round 13 (D-22: set only when at least one entry is applied)",
+      "closed_by": "TM-B16, C round 13 PASS, published a652f06"
     },
     {
       "round": 12,
@@ -1687,6 +1732,51 @@
       "status": "open",
       "title": "A's result JSON has no full tool transcript, so 'no Bash write to .claude/**' is confirmed only indirectly (empty permission_denials, A's report, diff equals the single Edit)",
       "routed_to": "signal for root/loop tooling: keep a tool-call log per agent if direct proof is wanted"
+    },
+    {
+      "round": 13,
+      "id": "RR-R13-01",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "MetadataPanel.tsx:93-101 a file whose batch write succeeded but whose re-read fails still gets emptyMetadata in the store (same as D-22 known limit 2); fix needs readMetadataBatch to return per-path read errors (IPC return shape -> src/preload/index.d.ts, protected)",
+      "routed_to": "signal; needs the user (protected preload types)"
+    },
+    {
+      "round": 13,
+      "id": "RR-R13-02",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "MetadataPanel.tsx:100 'updated as WavMetadata' cast without runtime check; fix = type readMetadataBatch as Record<string, WavMetadata> in src/preload/index.d.ts (protected)",
+      "routed_to": "signal; needs the user (protected preload types)"
+    },
+    {
+      "round": 13,
+      "id": "RR-R13-03",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "MetadataPanel.tsx:84-108 if writeMetadataBatch succeeds and readMetadataBatch then rejects, the catch shows a generic error toast and the store stays stale although files were written; suggestion: own try around the re-read, still show 'N saved'. Main's handler catches per file, so a rejection is IPC-level only (hard to reach in the real app)",
+      "routed_to": "candidate for a later renderer low round (renderer only)"
+    },
+    {
+      "round": 13,
+      "id": "RR-R13-04",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "title": "Architecture signal: move batch-save reconciliation into a file-store action applyBatchSaveResult(result, refreshed) returning the applied count, and replace the skipSyncRef flag with a save-generation counter compared in the effect",
+      "routed_to": "signal, not a task; pairs with RR-R12-04"
+    },
+    {
+      "round": 13,
+      "id": "C-R13-01",
+      "source": "C (A code-reviewer finding 2)",
+      "severity": "low",
+      "status": "open",
+      "title": "metadata-panel-batch-save.test.ts emptyRecordForPanelSchema() hand-copies main's emptyMetadata(schema); matches today, can drift if main changes (main helper not exported)",
+      "routed_to": "signal; future test hygiene"
     }
   ],
   "rounds": [
@@ -1939,15 +2029,36 @@
     {
       "round": 13,
       "task": "TM-B16 batch save keeps the store entry of files whose write failed (D-22, A-R11-01) + skipSyncRef only when applied (RR-R12-01) + data-flow.md / STATE_MANAGEMENT.md batch docs (A-R11-02)",
-      "status": "planned",
+      "status": "published",
       "baseline": "c3bd412c0561d53c64e98563dbc5177ca98696f0 (clean)",
       "items": [
         "TM-B16"
       ],
       "findings": [
         "A-R11-01",
+        "A-R11-02",
+        "C-R13-01",
         "RR-R12-01",
-        "A-R11-02"
+        "RR-R13-01",
+        "RR-R13-02",
+        "RR-R13-03",
+        "RR-R13-04"
+      ],
+      "commit": "a652f06e0afe16455f7370249be6c037fada902f",
+      "c_result": "PASS, realVerified=true (R13-1..R13-6), 0 bugs; real app red reference on c3bd412 seen; root review COMMIT OK (lows -> RR-R13-01..04)"
+    },
+    {
+      "round": 14,
+      "task": "TM-B17 fixture generator hygiene: temp-file cleanup on failure (RR-R1-05), CLI guard for .mts/.js copies (RR-R1-04), TESTING.md fixtures section (C-R1-03) (D-23)",
+      "status": "planned",
+      "baseline": "a652f06e0afe16455f7370249be6c037fada902f (clean)",
+      "items": [
+        "TM-B17"
+      ],
+      "findings": [
+        "RR-R1-04",
+        "RR-R1-05",
+        "C-R1-03"
       ]
     }
   ]
