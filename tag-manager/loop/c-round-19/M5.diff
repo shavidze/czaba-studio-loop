@@ -1,0 +1,19 @@
+--- /tmp/orig_tmp	2026-10-27 11:14:16.695643563 +0000
++++ /tmp/c-r19-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 11:14:16.693946938 +0000
+@@ -21,13 +21,9 @@
+ async function refreshSavedFileStats(writtenPaths: string[]): Promise<void> {
+   const { folderPath, updateFileStats } = useFileStore.getState();
+   if (folderPath === null) return;
+-  try {
+-    const scanned = await window.api.scanFolder(folderPath);
+-    const written = new Set(writtenPaths);
+-    updateFileStats(scanned.filter((entry) => written.has(entry.path)));
+-  } catch {
+-    return;
+-  }
++  const scanned = await window.api.scanFolder(folderPath);
++  const written = new Set(writtenPaths);
++  updateFileStats(scanned.filter((entry) => written.has(entry.path)));
+ }
+ 
+ export function MetadataPanel(): React.ReactElement {

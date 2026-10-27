@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T10:50:26.576Z)
+# Active loop summary (2026-10-27T11:21:40.437Z)
 
-- backlog.json 158 KB -> active view 49 KB
-- status: G_ROOT_GATE round 18
+- backlog.json 167 KB -> active view 51 KB
+- status: G_ROOT_GATE round 19
 - servers: `{"servers":"none or skipped"}`
-- last publication: d015470cc28335494de993d951e4a8036869919c (rounds 18-18)
-- last root gate: round 18 published - commit d015470cc28335494de993d951e4a8036869919c pushed
+- last publication: 3006615b365edf3847542c06e119a020b426b093 (rounds 19-19)
+- last root gate: round 19 published - commit 3006615b365edf3847542c06e119a020b426b093 pushed
 
-## Current items: TM-B20, TM-B21
+## Current items: TM-B21, TM-B22
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -84,9 +84,16 @@
 - RR-R17-02 / low / open / parseUntypedMetadata helper is defined in both file-list.test.ts and file-row-display.test.ts; could move to tests/renderer/helpers/
 - RR-R17-03 / low / open / formatFirstFieldValue(['', 'B']) returns '' while hasAnyTagValue is true: a row can show Tagged with an empty artist cell. Pre-existing and 
 - RR-R17-04 / info / open / Architecture signal: nothing checks FieldValue array shape where data enters the renderer (TemplatePicker.tsx:21 value.join, file-store sort
-- A-R17-01 / low / in_progress / file-store.ts:125-127 getSortedFiles (artists/genres/any array field) uses aVal[0] ?? '' then aStr.localeCompare: a non-string first element
 - A-R17-02 / low / open / Process: the read-primitives PreToolUse hook did not fire in A's R17 session; test Edits went through without it and the src file was writte
-- C-R17-01 / low / open / Size column keeps the pre-save size after a save (86.2 KB) until rescan/relaunch (87.6 KB): WavFileEntry.size is set only by the folder scan
+- C-R17-01 / low / in_progress / Size column keeps the pre-save size after a save (86.2 KB) until rescan/relaunch (87.6 KB): WavFileEntry.size is set only by the folder scan
+- RR-R18-01 / low / open / file-store.ts getFieldSortKey: a malformed non-array value ({"artists":{}}) still sorts as '[object Object]' (no throw, unchanged by R18); f
+- RR-R18-02 / low / open / file-store.ts:129 number vs text/missing compares as text ('120' vs ''); unchanged and pinned by R18 (c) 'bpm vs missing'
+- RR-R18-03 / low / open / R18 store tests read the sort order through selectRange (coupled to selection); a test-only reader or renderHook(useFilteredFiles) would be 
+- RR-R18-04 / info / open / Architecture signal: TM-B20 and TM-B21 both guard non-string array elements; normalise metadata once at the IPC boundary or in setMetadata/u
+- A-R18-01 / low / open / A non-array malformed object whose toString is not callable throws in String(v) on the non-array sort path; same class of defensive fix, D-2
+- A-R18-02 / info / open / R18-3 M2 (String(value[0])) is killed only by [true] and depends on ICU collation ('true' between Abe and Zed); a neighbour like ['!'] or a 
+- C-R18-01 / info / open / R18-3 M3 was implemented as a direct tie (return 0 when exactly one side is a number) instead of via '' keys; same observable bpm-vs-missing
+- B-R18-01 / info / open / D-28 refreshes Size/Date with one full recursive scanFolder per save because preload is protected; a dedicated fs:stat-files channel (main +
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
@@ -104,4 +111,3 @@
 - TM-T0-CI-FU [in_progress] CI follow-up: apt-install.sh worst-case budget (C-R4-01/RR-R4-02: smaller dpkg recovery bound or step timeout >= 13 min) + Georgian docs not
 - TM-B11 [todo] With a custom Number field in the schema (e.g. Take/ITKN), every single-file save writes the default 0 as INFO '0' (size 1) into files that 
 - TM-B14 [in_progress] E2E cold start: first Electron window can take > 30 s on a cold runner; firstWindow sits inside the test body so the 30 s per-test timeout f
-- TM-B22 [todo] File list Size column is stale after a save until rescan (WavFileEntry.size comes only from the folder scan)

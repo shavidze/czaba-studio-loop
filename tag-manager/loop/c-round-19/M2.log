@@ -1,0 +1,81 @@
+
+ RUN  v4.0.18 /tmp/c-r19-mut
+
+ ✓ tests/renderer/stores/file-store.test.ts (34 tests) 40ms
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts (23 tests | 2 failed) 2993ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  410ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store 158ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success 233ms
+     ✓ (d) full success clears the form back to Multiple values 147ms
+     ✓ (e) single-file write failure keeps the typed value and shows the error 145ms
+     ✓ (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated 143ms
+     ✓ (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept 146ms
+     ✓ (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry 148ms
+     ✓ (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01) 137ms
+     ✓ (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept 138ms
+     ✓ (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept 134ms
+     ✓ (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept 132ms
+     ✓ (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept 126ms
+     ✓ (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read 78ms
+     ✓ (o) batch, all succeed: both files are patched and the selection is kept 74ms
+     × (p) batch, partial failure: only the written file is patched even though the scan has the failed one 82ms
+     ✓ (q) batch, all failed: no scan, files unchanged, edits kept 123ms
+     ✓ (r) single write rejects: no scan, files unchanged 69ms
+     ✓ (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged 75ms
+     × (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged 81ms
+     ✓ (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged 70ms
+     ✓ (v) folderPath null: no scan, the save behaves as today 68ms
+     ✓ (w) the scan result lacks the saved path: the file keeps its stats and nothing is added 73ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 55 passed (57)
+   Start at  11:14:02
+   Duration  4.32s (transform 494ms, setup 191ms, import 718ms, tests 3.03s, environment 1.27s)
+
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (p) batch%2C partial failure%3A only the written file is patched even though the scan has the failed one,line=432,column=24::AssertionError: expected 300 to be 100 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 100%0A+ 300%0A%0A ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:494:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (t) batch partial + readMetadataBatch rejects (D-24)%3A only the written file is patched%2C D-24 toast unchanged,line=432,column=24::AssertionError: expected 300 to be 100 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 100%0A+ 300%0A%0A ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:561:5%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (p) batch, partial failure: only the written file is patched even though the scan has the failed one
+AssertionError: expected 300 to be 100 // Object.is equality
+
+- Expected
++ Received
+
+- 100
++ 300
+
+ ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24
+    430|   function expectNotRefreshed(path: string): void {
+    431|     const file = readFile(path);
+    432|     expect(file?.size).toBe(100);
+       |                        ^
+    433|     expect(file?.modifiedAt).toBe("2026-10-26T00:00:00.000Z");
+    434|   }
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:494:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged
+AssertionError: expected 300 to be 100 // Object.is equality
+
+- Expected
++ Received
+
+- 100
++ 300
+
+ ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24
+    430|   function expectNotRefreshed(path: string): void {
+    431|     const file = readFile(path);
+    432|     expect(file?.size).toBe(100);
+       |                        ^
+    433|     expect(file?.modifiedAt).toBe("2026-10-26T00:00:00.000Z");
+    434|   }
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:561:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

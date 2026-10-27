@@ -1,0 +1,324 @@
+
+ RUN  v4.0.18 /tmp/c-r19-mut
+
+ ❯ tests/renderer/stores/file-store.test.ts (34 tests | 5 failed) 57ms
+       ✓ initializes with empty state 5ms
+       ✓ sets files 0ms
+       ✓ sets folder path 1ms
+       ✓ sets metadata 1ms
+       ✓ updates single file metadata 1ms
+       ✓ toggles selection on 1ms
+       ✓ toggles selection off 0ms
+       ✓ selects range 13ms
+       ✓ selects range with reversed indices 1ms
+       ✓ selectAll selects all visible files 1ms
+       ✓ selectAll respects search filter 0ms
+       ✓ clears selection 0ms
+       ✓ sets sort field and defaults to asc 0ms
+       ✓ toggles direction when same field set again 0ms
+       ✓ resets to asc when different field set 0ms
+       ✓ toggleSortDirection flips direction 0ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}} 3ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}} 1ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}} 1ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}} 1ms
+       ✓ (b) uses only the first element, not a later string element 1ms
+       ✓ (c) sorts a well-typed string first element by its value 1ms
+       ✓ (c) sorts a null first element as empty 1ms
+       ✓ (c) sorts an empty array as empty 1ms
+       ✓ (c) sorts bpm numerically, not lexicographically 1ms
+       ✓ (c) sorts a bpm number against missing metadata as before 0ms
+       ✓ sets search query 0ms
+       ✓ sets scanning state 0ms
+       × (s1) patches size and modifiedAt of the matching path only and keeps the order 9ms
+       × (s2) ignores an entry whose path is not in files 2ms
+       × (s3) keeps the existing name when the entry has the same path but another name 2ms
+       ✓ (s4) leaves selectedPaths and metadata unchanged 0ms
+       × (s5) an empty entry list leaves files deep-equal 2ms
+       × (s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset 1ms
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts (23 tests | 5 failed) 3001ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  415ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store 158ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success 228ms
+     ✓ (d) full success clears the form back to Multiple values 146ms
+     ✓ (e) single-file write failure keeps the typed value and shows the error 144ms
+     ✓ (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated 138ms
+     ✓ (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept 147ms
+     ✓ (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry 150ms
+     ✓ (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01) 143ms
+     ✓ (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept 137ms
+     ✓ (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept 130ms
+     ✓ (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept 135ms
+     ✓ (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept 127ms
+     × (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read 83ms
+     ✓ (o) batch, all succeed: both files are patched and the selection is kept 78ms
+     × (p) batch, partial failure: only the written file is patched even though the scan has the failed one 75ms
+     ✓ (q) batch, all failed: no scan, files unchanged, edits kept 124ms
+     ✓ (r) single write rejects: no scan, files unchanged 70ms
+     × (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged 76ms
+     × (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged 83ms
+     ✓ (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged 70ms
+     ✓ (v) folderPath null: no scan, the save behaves as today 69ms
+     × (w) the scan result lacks the saved path: the file keeps its stats and nothing is added 71ms
+
+ Test Files  2 failed (2)
+      Tests  10 failed | 47 passed (57)
+   Start at  11:14:12
+   Duration  4.29s (transform 488ms, setup 199ms, import 701ms, tests 3.06s, environment 1.20s)
+
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (n) single save succeeds%3A one scan of the folder%2C only the saved file is patched%2C write -> scan -> read,line=432,column=24::AssertionError: expected undefined to be 100 // Object.is equality%0A%0A- Expected: %0A100%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:447:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (p) batch%2C partial failure%3A only the written file is patched even though the scan has the failed one,line=432,column=24::AssertionError: expected undefined to be 100 // Object.is equality%0A%0A- Expected: %0A100%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:494:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (s) single write ok + readMetadata rejects (D-24)%3A the file is patched%2C D-24 toast and edits unchanged,line=432,column=24::AssertionError: expected undefined to be 100 // Object.is equality%0A%0A- Expected: %0A100%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:539:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (t) batch partial + readMetadataBatch rejects (D-24)%3A only the written file is patched%2C D-24 toast unchanged,line=432,column=24::AssertionError: expected undefined to be 100 // Object.is equality%0A%0A- Expected: %0A100%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:561:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (w) the scan result lacks the saved path%3A the file keeps its stats and nothing is added,line=432,column=24::AssertionError: expected undefined to be 100 // Object.is equality%0A%0A- Expected: %0A100%0A%0A+ Received: %0Aundefined%0A%0A ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:611:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s1) patches size and modifiedAt of the matching path only and keeps the order,line=272,column=40::AssertionError: expected [ '/music/b.wav' ] to deeply equal [ Array(3) ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "/music/a.wav",%0A    "/music/b.wav",%0A-   "/music/c.wav",%0A  ]%0A%0A ❯ tests/renderer/stores/file-store.test.ts:272:40%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s2) ignores an entry whose path is not in files,line=283,column=21::AssertionError: expected [ { name: 'new.wav', …(3) } ] to have a length of 3 but got 1%0A%0A- Expected%0A+ Received%0A%0A- 3%0A+ 1%0A%0A ❯ tests/renderer/stores/file-store.test.ts:283:21%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s3) keeps the existing name when the entry has the same path but another name,line=291,column=27::AssertionError: expected 'renamed.wav' to be 'a.wav' // Object.is equality%0A%0AExpected: "a.wav"%0AReceived: "renamed.wav"%0A%0A ❯ tests/renderer/stores/file-store.test.ts:291:27%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s5) an empty entry list leaves files deep-equal,line=308,column=45::AssertionError: expected [] to deeply equal [ { name: 'a.wav', …(3) }, …(2) ]%0A%0A- Expected%0A+ Received%0A%0A- [%0A-   {%0A-     "modifiedAt": "2026-10-26T00:00:00.000Z",%0A-     "name": "a.wav",%0A-     "path": "/music/a.wav",%0A-     "size": 100,%0A-   },%0A-   {%0A-     "modifiedAt": "2026-10-26T00:00:00.000Z",%0A-     "name": "b.wav",%0A-     "path": "/music/b.wav",%0A-     "size": 100,%0A-   },%0A-   {%0A-     "modifiedAt": "2026-10-26T00:00:00.000Z",%0A-     "name": "c.wav",%0A-     "path": "/music/c.wav",%0A-     "size": 100,%0A-   },%0A- ]%0A+ []%0A%0A ❯ tests/renderer/stores/file-store.test.ts:308:45%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s6) keeps the same files reference when no entry matches%2C so no re-render or shift-click anchor reset,line=314,column=45::AssertionError: expected [] to be [ { name: 'a.wav', …(3) }, …(2) ] // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- [%0A-   {%0A-     "modifiedAt": "2026-10-26T00:00:00.000Z",%0A-     "name": "a.wav",%0A-     "path": "/music/a.wav",%0A-     "size": 100,%0A-   },%0A-   {%0A-     "modifiedAt": "2026-10-26T00:00:00.000Z",%0A-     "name": "b.wav",%0A-     "path": "/music/b.wav",%0A-     "size": 100,%0A-   },%0A-   {%0A-     "modifiedAt": "2026-10-26T00:00:00.000Z",%0A-     "name": "c.wav",%0A-     "path": "/music/c.wav",%0A-     "size": 100,%0A-   },%0A- ]%0A+ []%0A%0A ❯ tests/renderer/stores/file-store.test.ts:314:45%0A%0A
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read
+AssertionError: expected undefined to be 100 // Object.is equality
+
+- Expected: 
+100
+
++ Received: 
+undefined
+
+ ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24
+    430|   function expectNotRefreshed(path: string): void {
+    431|     const file = readFile(path);
+    432|     expect(file?.size).toBe(100);
+       |                        ^
+    433|     expect(file?.modifiedAt).toBe("2026-10-26T00:00:00.000Z");
+    434|   }
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:447:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (p) batch, partial failure: only the written file is patched even though the scan has the failed one
+AssertionError: expected undefined to be 100 // Object.is equality
+
+- Expected: 
+100
+
++ Received: 
+undefined
+
+ ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24
+    430|   function expectNotRefreshed(path: string): void {
+    431|     const file = readFile(path);
+    432|     expect(file?.size).toBe(100);
+       |                        ^
+    433|     expect(file?.modifiedAt).toBe("2026-10-26T00:00:00.000Z");
+    434|   }
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:494:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged
+AssertionError: expected undefined to be 100 // Object.is equality
+
+- Expected: 
+100
+
++ Received: 
+undefined
+
+ ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24
+    430|   function expectNotRefreshed(path: string): void {
+    431|     const file = readFile(path);
+    432|     expect(file?.size).toBe(100);
+       |                        ^
+    433|     expect(file?.modifiedAt).toBe("2026-10-26T00:00:00.000Z");
+    434|   }
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:539:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged
+AssertionError: expected undefined to be 100 // Object.is equality
+
+- Expected: 
+100
+
++ Received: 
+undefined
+
+ ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24
+    430|   function expectNotRefreshed(path: string): void {
+    431|     const file = readFile(path);
+    432|     expect(file?.size).toBe(100);
+       |                        ^
+    433|     expect(file?.modifiedAt).toBe("2026-10-26T00:00:00.000Z");
+    434|   }
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:561:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (w) the scan result lacks the saved path: the file keeps its stats and nothing is added
+AssertionError: expected undefined to be 100 // Object.is equality
+
+- Expected: 
+100
+
++ Received: 
+undefined
+
+ ❯ expectNotRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:432:24
+    430|   function expectNotRefreshed(path: string): void {
+    431|     const file = readFile(path);
+    432|     expect(file?.size).toBe(100);
+       |                        ^
+    433|     expect(file?.modifiedAt).toBe("2026-10-26T00:00:00.000Z");
+    434|   }
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:611:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22, D-28) > (s1) patches size and modifiedAt of the matching path only and keeps the order
+AssertionError: expected [ '/music/b.wav' ] to deeply equal [ Array(3) ]
+
+- Expected
++ Received
+
+  [
+-   "/music/a.wav",
+    "/music/b.wav",
+-   "/music/c.wav",
+  ]
+
+ ❯ tests/renderer/stores/file-store.test.ts:272:40
+    270|       useFileStore.getState().updateFileStats([{ ...STAT_B, size: 222,…
+    271|       const files = useFileStore.getState().files;
+    272|       expect(files.map((f) => f.path)).toEqual([STAT_A.path, STAT_B.pa…
+       |                                        ^
+    273|       expect(files[1]).toEqual({ name: "b.wav", path: "/music/b.wav", …
+    274|       expect(files[0]).toEqual(STAT_A);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22, D-28) > (s2) ignores an entry whose path is not in files
+AssertionError: expected [ { name: 'new.wav', …(3) } ] to have a length of 3 but got 1
+
+- Expected
++ Received
+
+- 3
++ 1
+
+ ❯ tests/renderer/stores/file-store.test.ts:283:21
+    281|         .updateFileStats([{ name: "new.wav", path: "/music/new.wav", s…
+    282|       const files = useFileStore.getState().files;
+    283|       expect(files).toHaveLength(3);
+       |                     ^
+    284|       expect(files.map((f) => f.path)).toEqual([STAT_A.path, STAT_B.pa…
+    285|       expect(files).toEqual([STAT_A, STAT_B, STAT_C]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22, D-28) > (s3) keeps the existing name when the entry has the same path but another name
+AssertionError: expected 'renamed.wav' to be 'a.wav' // Object.is equality
+
+Expected: "a.wav"
+Received: "renamed.wav"
+
+ ❯ tests/renderer/stores/file-store.test.ts:291:27
+    289|       useFileStore.getState().updateFileStats([{ ...STAT_A, name: "ren…
+    290|       const fileA = useFileStore.getState().files[0];
+    291|       expect(fileA?.name).toBe("a.wav");
+       |                           ^
+    292|       expect(fileA?.path).toBe("/music/a.wav");
+    293|       expect(fileA?.size).toBe(333);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22, D-28) > (s5) an empty entry list leaves files deep-equal
+AssertionError: expected [] to deeply equal [ { name: 'a.wav', …(3) }, …(2) ]
+
+- Expected
++ Received
+
+- [
+-   {
+-     "modifiedAt": "2026-10-26T00:00:00.000Z",
+-     "name": "a.wav",
+-     "path": "/music/a.wav",
+-     "size": 100,
+-   },
+-   {
+-     "modifiedAt": "2026-10-26T00:00:00.000Z",
+-     "name": "b.wav",
+-     "path": "/music/b.wav",
+-     "size": 100,
+-   },
+-   {
+-     "modifiedAt": "2026-10-26T00:00:00.000Z",
+-     "name": "c.wav",
+-     "path": "/music/c.wav",
+-     "size": 100,
+-   },
+- ]
++ []
+
+ ❯ tests/renderer/stores/file-store.test.ts:308:45
+    306|     it("(s5) an empty entry list leaves files deep-equal", () => {
+    307|       useFileStore.getState().updateFileStats([]);
+    308|       expect(useFileStore.getState().files).toEqual([STAT_A, STAT_B, S…
+       |                                             ^
+    309|     });
+    310| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22, D-28) > (s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset
+AssertionError: expected [] to be [ { name: 'a.wav', …(3) }, …(2) ] // Object.is equality
+
+- Expected
++ Received
+
+- [
+-   {
+-     "modifiedAt": "2026-10-26T00:00:00.000Z",
+-     "name": "a.wav",
+-     "path": "/music/a.wav",
+-     "size": 100,
+-   },
+-   {
+-     "modifiedAt": "2026-10-26T00:00:00.000Z",
+-     "name": "b.wav",
+-     "path": "/music/b.wav",
+-     "size": 100,
+-   },
+-   {
+-     "modifiedAt": "2026-10-26T00:00:00.000Z",
+-     "name": "c.wav",
+-     "path": "/music/c.wav",
+-     "size": 100,
+-   },
+- ]
++ []
+
+ ❯ tests/renderer/stores/file-store.test.ts:314:45
+    312|       const before = useFileStore.getState().files;
+    313|       useFileStore.getState().updateFileStats([]);
+    314|       expect(useFileStore.getState().files).toBe(before);
+       |                                             ^
+    315|       useFileStore
+    316|         .getState()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+

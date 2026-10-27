@@ -1,0 +1,210 @@
+
+ RUN  v4.0.18 /tmp/c-r19-mut
+
+ ❯ tests/renderer/stores/file-store.test.ts (34 tests | 2 failed) 55ms
+       ✓ initializes with empty state 3ms
+       ✓ sets files 0ms
+       ✓ sets folder path 1ms
+       ✓ sets metadata 1ms
+       ✓ updates single file metadata 1ms
+       ✓ toggles selection on 1ms
+       ✓ toggles selection off 0ms
+       ✓ selects range 17ms
+       ✓ selects range with reversed indices 1ms
+       ✓ selectAll selects all visible files 1ms
+       ✓ selectAll respects search filter 0ms
+       ✓ clears selection 0ms
+       ✓ sets sort field and defaults to asc 0ms
+       ✓ toggles direction when same field set again 0ms
+       ✓ resets to asc when different field set 0ms
+       ✓ toggleSortDirection flips direction 0ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}} 2ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}} 1ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}} 1ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}} 1ms
+       ✓ (b) uses only the first element, not a later string element 1ms
+       ✓ (c) sorts a well-typed string first element by its value 1ms
+       ✓ (c) sorts a null first element as empty 1ms
+       ✓ (c) sorts an empty array as empty 1ms
+       ✓ (c) sorts bpm numerically, not lexicographically 1ms
+       ✓ (c) sorts a bpm number against missing metadata as before 0ms
+       ✓ sets search query 0ms
+       ✓ sets scanning state 0ms
+       × (s1) patches size and modifiedAt of the matching path only and keeps the order 12ms
+       ✓ (s2) ignores an entry whose path is not in files 0ms
+       × (s3) keeps the existing name when the entry has the same path but another name 2ms
+       ✓ (s4) leaves selectedPaths and metadata unchanged 0ms
+       ✓ (s5) an empty entry list leaves files deep-equal 0ms
+       ✓ (s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset 0ms
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts (23 tests | 5 failed) 2982ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  417ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store 161ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success 232ms
+     ✓ (d) full success clears the form back to Multiple values 142ms
+     ✓ (e) single-file write failure keeps the typed value and shows the error 141ms
+     ✓ (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated 138ms
+     ✓ (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept 146ms
+     ✓ (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry 145ms
+     ✓ (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01) 136ms
+     ✓ (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept 134ms
+     ✓ (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept 133ms
+     ✓ (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept 133ms
+     ✓ (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept 129ms
+     × (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read 84ms
+     × (o) batch, all succeed: both files are patched and the selection is kept 76ms
+     × (p) batch, partial failure: only the written file is patched even though the scan has the failed one 73ms
+     ✓ (q) batch, all failed: no scan, files unchanged, edits kept 123ms
+     ✓ (r) single write rejects: no scan, files unchanged 69ms
+     × (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged 74ms
+     × (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged 86ms
+     ✓ (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged 70ms
+     ✓ (v) folderPath null: no scan, the save behaves as today 69ms
+     ✓ (w) the scan result lacks the saved path: the file keeps its stats and nothing is added 71ms
+
+ Test Files  2 failed (2)
+      Tests  7 failed | 50 passed (57)
+   Start at  11:14:22
+   Duration  4.29s (transform 499ms, setup 198ms, import 721ms, tests 3.04s, environment 1.21s)
+
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (n) single save succeeds%3A one scan of the folder%2C only the saved file is patched%2C write -> scan -> read,line=427,column=30::AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality%0A%0AExpected: "2026-10-27T10:00:00.000Z"%0AReceived: "2026-10-26T00:00:00.000Z"%0A%0A ❯ expectRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:427:30%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:446:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (o) batch%2C all succeed%3A both files are patched and the selection is kept,line=427,column=30::AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality%0A%0AExpected: "2026-10-27T10:00:00.000Z"%0AReceived: "2026-10-26T00:00:00.000Z"%0A%0A ❯ expectRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:427:30%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:470:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (p) batch%2C partial failure%3A only the written file is patched even though the scan has the failed one,line=427,column=30::AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality%0A%0AExpected: "2026-10-27T10:00:00.000Z"%0AReceived: "2026-10-26T00:00:00.000Z"%0A%0A ❯ expectRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:427:30%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:493:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (s) single write ok + readMetadata rejects (D-24)%3A the file is patched%2C D-24 toast and edits unchanged,line=427,column=30::AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality%0A%0AExpected: "2026-10-27T10:00:00.000Z"%0AReceived: "2026-10-26T00:00:00.000Z"%0A%0A ❯ expectRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:427:30%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:538:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (t) batch partial + readMetadataBatch rejects (D-24)%3A only the written file is patched%2C D-24 toast unchanged,line=427,column=30::AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality%0A%0AExpected: "2026-10-27T10:00:00.000Z"%0AReceived: "2026-10-26T00:00:00.000Z"%0A%0A ❯ expectRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:427:30%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:560:5%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s1) patches size and modifiedAt of the matching path only and keeps the order,line=273,column=24::AssertionError: expected { name: 'b.wav', …(3) } to deeply equal { name: 'b.wav', …(3) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "modifiedAt": "2026-10-27T10:00:00.000Z",%0A+   "modifiedAt": "2026-10-26T00:00:00.000Z",%0A    "name": "b.wav",%0A    "path": "/music/b.wav",%0A    "size": 222,%0A  }%0A%0A ❯ tests/renderer/stores/file-store.test.ts:273:24%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s3) keeps the existing name when the entry has the same path but another name,line=294,column=33::AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality%0A%0AExpected: "2026-10-27T10:00:00.000Z"%0AReceived: "2026-10-26T00:00:00.000Z"%0A%0A ❯ tests/renderer/stores/file-store.test.ts:294:33%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read
+AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality
+
+Expected: "2026-10-27T10:00:00.000Z"
+Received: "2026-10-26T00:00:00.000Z"
+
+ ❯ expectRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:427:30
+    425|     const file = readFile(path);
+    426|     expect(file?.size).toBe(size);
+    427|     expect(file?.modifiedAt).toBe(NEW_DATE);
+       |                              ^
+    428|   }
+    429| 
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:446:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (o) batch, all succeed: both files are patched and the selection is kept
+AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality
+
+Expected: "2026-10-27T10:00:00.000Z"
+Received: "2026-10-26T00:00:00.000Z"
+
+ ❯ expectRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:427:30
+    425|     const file = readFile(path);
+    426|     expect(file?.size).toBe(size);
+    427|     expect(file?.modifiedAt).toBe(NEW_DATE);
+       |                              ^
+    428|   }
+    429| 
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:470:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (p) batch, partial failure: only the written file is patched even though the scan has the failed one
+AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality
+
+Expected: "2026-10-27T10:00:00.000Z"
+Received: "2026-10-26T00:00:00.000Z"
+
+ ❯ expectRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:427:30
+    425|     const file = readFile(path);
+    426|     expect(file?.size).toBe(size);
+    427|     expect(file?.modifiedAt).toBe(NEW_DATE);
+       |                              ^
+    428|   }
+    429| 
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:493:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged
+AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality
+
+Expected: "2026-10-27T10:00:00.000Z"
+Received: "2026-10-26T00:00:00.000Z"
+
+ ❯ expectRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:427:30
+    425|     const file = readFile(path);
+    426|     expect(file?.size).toBe(size);
+    427|     expect(file?.modifiedAt).toBe(NEW_DATE);
+       |                              ^
+    428|   }
+    429| 
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:538:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged
+AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality
+
+Expected: "2026-10-27T10:00:00.000Z"
+Received: "2026-10-26T00:00:00.000Z"
+
+ ❯ expectRefreshed tests/renderer/components/metadata-panel-batch-save.test.ts:427:30
+    425|     const file = readFile(path);
+    426|     expect(file?.size).toBe(size);
+    427|     expect(file?.modifiedAt).toBe(NEW_DATE);
+       |                              ^
+    428|   }
+    429| 
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:560:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22, D-28) > (s1) patches size and modifiedAt of the matching path only and keeps the order
+AssertionError: expected { name: 'b.wav', …(3) } to deeply equal { name: 'b.wav', …(3) }
+
+- Expected
++ Received
+
+  {
+-   "modifiedAt": "2026-10-27T10:00:00.000Z",
++   "modifiedAt": "2026-10-26T00:00:00.000Z",
+    "name": "b.wav",
+    "path": "/music/b.wav",
+    "size": 222,
+  }
+
+ ❯ tests/renderer/stores/file-store.test.ts:273:24
+    271|       const files = useFileStore.getState().files;
+    272|       expect(files.map((f) => f.path)).toEqual([STAT_A.path, STAT_B.pa…
+    273|       expect(files[1]).toEqual({ name: "b.wav", path: "/music/b.wav", …
+       |                        ^
+    274|       expect(files[0]).toEqual(STAT_A);
+    275|       expect(files[2]).toEqual(STAT_C);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22, D-28) > (s3) keeps the existing name when the entry has the same path but another name
+AssertionError: expected '2026-10-26T00:00:00.000Z' to be '2026-10-27T10:00:00.000Z' // Object.is equality
+
+Expected: "2026-10-27T10:00:00.000Z"
+Received: "2026-10-26T00:00:00.000Z"
+
+ ❯ tests/renderer/stores/file-store.test.ts:294:33
+    292|       expect(fileA?.path).toBe("/music/a.wav");
+    293|       expect(fileA?.size).toBe(333);
+    294|       expect(fileA?.modifiedAt).toBe(NEW_DATE);
+       |                                 ^
+    295|     });
+    296| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+

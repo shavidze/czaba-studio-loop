@@ -1,0 +1,10 @@
+const { app, ipcMain } = require('electron');
+app.whenReady().then(async () => {
+  ipcMain.handle('meta:write', async (_e, v) => v * 2);
+  const h = ipcMain._invokeHandlers.get('meta:write');
+  const t = Date.now();
+  let out;
+  await h({ _reply: (r) => { out = r; }, _throw: (e) => { out = e; } }, 21);
+  console.log('result', out, 'ms', Date.now() - t);
+  app.quit();
+});

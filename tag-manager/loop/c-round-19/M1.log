@@ -1,0 +1,107 @@
+
+ RUN  v4.0.18 /tmp/c-r19-mut
+
+ ✓ tests/renderer/stores/file-store.test.ts (34 tests) 45ms
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts (23 tests | 5 failed) 3035ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  426ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store 168ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success 235ms
+     ✓ (d) full success clears the form back to Multiple values 150ms
+     ✓ (e) single-file write failure keeps the typed value and shows the error 145ms
+     ✓ (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated 142ms
+     ✓ (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept 151ms
+     ✓ (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry 151ms
+     ✓ (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01) 141ms
+     ✓ (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept 137ms
+     ✓ (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept 132ms
+     ✓ (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept 135ms
+     ✓ (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept 126ms
+     × (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read 82ms
+     × (o) batch, all succeed: both files are patched and the selection is kept 74ms
+     × (p) batch, partial failure: only the written file is patched even though the scan has the failed one 74ms
+     ✓ (q) batch, all failed: no scan, files unchanged, edits kept 123ms
+     ✓ (r) single write rejects: no scan, files unchanged 77ms
+     × (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged 70ms
+     × (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged 80ms
+     ✓ (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged 69ms
+     ✓ (v) folderPath null: no scan, the save behaves as today 72ms
+     ✓ (w) the scan result lacks the saved path: the file keeps its stats and nothing is added 70ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 52 passed (57)
+   Start at  11:13:57
+   Duration  4.33s (transform 479ms, setup 190ms, import 705ms, tests 3.08s, environment 1.23s)
+
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (n) single save succeeds%3A one scan of the folder%2C only the saved file is patched%2C write -> scan -> read,line=444,column=35::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:444:35%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (o) batch%2C all succeed%3A both files are patched and the selection is kept,line=469,column=35::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:469:35%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (p) batch%2C partial failure%3A only the written file is patched even though the scan has the failed one,line=492,column=35::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:492:35%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (s) single write ok + readMetadata rejects (D-24)%3A the file is patched%2C D-24 toast and edits unchanged,line=537,column=35::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:537:35%0A%0A
+
+::error file=/tmp/c-r19-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (t) batch partial + readMetadataBatch rejects (D-24)%3A only the written file is patched%2C D-24 toast unchanged,line=559,column=35::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:559:35%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:444:35
+    442|     await typeCategoryAndSave(/Save Tags/);
+    443| 
+    444|     expect(window.api.scanFolder).toHaveBeenCalledTimes(1);
+       |                                   ^
+    445|     expect(vi.mocked(window.api.scanFolder).mock.calls[0]?.[0]).toBe(F…
+    446|     expectRefreshed(PATH_A, 200);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (o) batch, all succeed: both files are patched and the selection is kept
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:469:35
+    467|     await typeCategoryAndSave(/Save to 2 files/);
+    468| 
+    469|     expect(window.api.scanFolder).toHaveBeenCalledTimes(1);
+       |                                   ^
+    470|     expectRefreshed(PATH_A, 200);
+    471|     expectRefreshed(PATH_B, 300);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (p) batch, partial failure: only the written file is patched even though the scan has the failed one
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:492:35
+    490|     await typeCategoryAndSave(/Save to 2 files/);
+    491| 
+    492|     expect(window.api.scanFolder).toHaveBeenCalledTimes(1);
+       |                                   ^
+    493|     expectRefreshed(PATH_A, 200);
+    494|     expectNotRefreshed(PATH_B);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:537:35
+    535|     await typeCategoryAndSave(/Save Tags/);
+    536| 
+    537|     expect(window.api.scanFolder).toHaveBeenCalledTimes(1);
+       |                                   ^
+    538|     expectRefreshed(PATH_A, 200);
+    539|     expectNotRefreshed(PATH_B);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28) > (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:559:35
+    557|     await typeCategoryAndSave(/Save to 2 files/);
+    558| 
+    559|     expect(window.api.scanFolder).toHaveBeenCalledTimes(1);
+       |                                   ^
+    560|     expectRefreshed(PATH_A, 200);
+    561|     expectNotRefreshed(PATH_B);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+

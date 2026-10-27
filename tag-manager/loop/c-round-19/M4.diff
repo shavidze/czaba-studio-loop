@@ -1,0 +1,11 @@
+--- /tmp/orig_tmp	2026-10-27 11:14:11.787808075 +0000
++++ /tmp/c-r19-mut/src/renderer/src/stores/file-store.ts	2026-10-27 11:14:11.786229014 +0000
+@@ -44,7 +44,7 @@
+   updateFileStats: (entries) =>
+     set((state) => {
+       const statsByPath = new Map(entries.map((entry) => [entry.path, entry]));
+-      if (!state.files.some((file) => statsByPath.has(file.path))) return state;
++      return { files: entries };
+       return {
+         files: state.files.map((file) => {
+           const stats = statsByPath.get(file.path);

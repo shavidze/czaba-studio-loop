@@ -1,0 +1,225 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r19-old[39m
+
+ [31m❯[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m34 tests[22m[2m | [22m[31m6 failed[39m[2m)[22m[32m 43[2mms[22m[39m
+       [32m✓[39m initializes with empty state[32m 3[2mms[22m[39m
+       [32m✓[39m sets files[32m 0[2mms[22m[39m
+       [32m✓[39m sets folder path[32m 1[2mms[22m[39m
+       [32m✓[39m sets metadata[32m 1[2mms[22m[39m
+       [32m✓[39m updates single file metadata[32m 0[2mms[22m[39m
+       [32m✓[39m toggles selection on[32m 1[2mms[22m[39m
+       [32m✓[39m toggles selection off[32m 0[2mms[22m[39m
+       [32m✓[39m selects range[32m 14[2mms[22m[39m
+       [32m✓[39m selects range with reversed indices[32m 1[2mms[22m[39m
+       [32m✓[39m selectAll selects all visible files[32m 1[2mms[22m[39m
+       [32m✓[39m selectAll respects search filter[32m 0[2mms[22m[39m
+       [32m✓[39m clears selection[32m 0[2mms[22m[39m
+       [32m✓[39m sets sort field and defaults to asc[32m 0[2mms[22m[39m
+       [32m✓[39m toggles direction when same field set again[32m 0[2mms[22m[39m
+       [32m✓[39m resets to asc when different field set[32m 0[2mms[22m[39m
+       [32m✓[39m toggleSortDirection flips direction[32m 0[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}}[32m 2[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}}[32m 1[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}}[32m 1[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}}[32m 1[2mms[22m[39m
+       [32m✓[39m (b) uses only the first element, not a later string element[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts a well-typed string first element by its value[32m 2[2mms[22m[39m
+       [32m✓[39m (c) sorts a null first element as empty[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts an empty array as empty[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts bpm numerically, not lexicographically[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts a bpm number against missing metadata as before[32m 0[2mms[22m[39m
+       [32m✓[39m sets search query[32m 0[2mms[22m[39m
+       [32m✓[39m sets scanning state[32m 0[2mms[22m[39m
+[31m       [31m×[31m (s1) patches size and modifiedAt of the matching path only and keeps the order[39m[32m 5[2mms[22m[39m
+[31m       [31m×[31m (s2) ignores an entry whose path is not in files[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m (s3) keeps the existing name when the entry has the same path but another name[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m (s4) leaves selectedPaths and metadata unchanged[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m (s5) an empty entry list leaves files deep-equal[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m (s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset[39m[32m 0[2mms[22m[39m
+ [31m❯[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m23 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[33m 3028[2mms[22m[39m
+     [33m[2m✓[22m[39m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept [33m 429[2mms[22m[39m
+     [32m✓[39m (b) partial failure: edits are kept and succeeded files are refreshed in the store[32m 160[2mms[22m[39m
+     [32m✓[39m (c) retry after a failure writes the same fields to all selected files and clears on success[32m 235[2mms[22m[39m
+     [32m✓[39m (d) full success clears the form back to Multiple values[32m 148[2mms[22m[39m
+     [32m✓[39m (e) single-file write failure keeps the typed value and shows the error[32m 145[2mms[22m[39m
+     [32m✓[39m (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated[32m 140[2mms[22m[39m
+     [32m✓[39m (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept[32m 144[2mms[22m[39m
+     [32m✓[39m (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry[32m 156[2mms[22m[39m
+     [32m✓[39m (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01)[32m 140[2mms[22m[39m
+     [32m✓[39m (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept[32m 138[2mms[22m[39m
+     [32m✓[39m (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept[32m 133[2mms[22m[39m
+     [32m✓[39m (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept[32m 135[2mms[22m[39m
+     [32m✓[39m (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept[32m 134[2mms[22m[39m
+[31m     [31m×[31m (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read[39m[32m 83[2mms[22m[39m
+[31m     [31m×[31m (o) batch, all succeed: both files are patched and the selection is kept[39m[32m 73[2mms[22m[39m
+[31m     [31m×[31m (p) batch, partial failure: only the written file is patched even though the scan has the failed one[39m[32m 71[2mms[22m[39m
+     [32m✓[39m (q) batch, all failed: no scan, files unchanged, edits kept[32m 123[2mms[22m[39m
+     [32m✓[39m (r) single write rejects: no scan, files unchanged[32m 75[2mms[22m[39m
+[31m     [31m×[31m (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged[39m[32m 69[2mms[22m[39m
+[31m     [31m×[31m (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged[39m[32m 81[2mms[22m[39m
+     [32m✓[39m (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged[32m 70[2mms[22m[39m
+     [32m✓[39m (v) folderPath null: no scan, the save behaves as today[32m 72[2mms[22m[39m
+     [32m✓[39m (w) the scan result lacks the saved path: the file keeps its stats and nothing is added[32m 71[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 11 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28)[2m > [22m(n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m444:35[22m[39m
+    [90m442| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save Tags/[39m)[33m;[39m
+    [90m443| [39m
+    [90m444| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m445| [39m    expect(vi.mocked(window.api.scanFolder).mock.calls[0]?.[0]).toBe(F…
+    [90m446| [39m    [34mexpectRefreshed[39m([33mPATH_A[39m[33m,[39m [34m200[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28)[2m > [22m(o) batch, all succeed: both files are patched and the selection is kept
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m469:35[22m[39m
+    [90m467| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 2 files/[39m)[33m;[39m
+    [90m468| [39m
+    [90m469| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m470| [39m    [34mexpectRefreshed[39m([33mPATH_A[39m[33m,[39m [34m200[39m)[33m;[39m
+    [90m471| [39m    [34mexpectRefreshed[39m([33mPATH_B[39m[33m,[39m [34m300[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28)[2m > [22m(p) batch, partial failure: only the written file is patched even though the scan has the failed one
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m492:35[22m[39m
+    [90m490| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 2 files/[39m)[33m;[39m
+    [90m491| [39m
+    [90m492| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m493| [39m    [34mexpectRefreshed[39m([33mPATH_A[39m[33m,[39m [34m200[39m)[33m;[39m
+    [90m494| [39m    [34mexpectNotRefreshed[39m([33mPATH_B[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28)[2m > [22m(s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m537:35[22m[39m
+    [90m535| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save Tags/[39m)[33m;[39m
+    [90m536| [39m
+    [90m537| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m538| [39m    [34mexpectRefreshed[39m([33mPATH_A[39m[33m,[39m [34m200[39m)[33m;[39m
+    [90m539| [39m    [34mexpectNotRefreshed[39m([33mPATH_B[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28)[2m > [22m(t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m559:35[22m[39m
+    [90m557| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 2 files/[39m)[33m;[39m
+    [90m558| [39m
+    [90m559| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m560| [39m    [34mexpectRefreshed[39m([33mPATH_A[39m[33m,[39m [34m200[39m)[33m;[39m
+    [90m561| [39m    [34mexpectNotRefreshed[39m([33mPATH_B[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22mupdateFileStats (TM-B22, D-28)[2m > [22m(s1) patches size and modifiedAt of the matching path only and keeps the order
+[31m[1mTypeError[22m: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function[39m
+[36m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m270:31[22m[39m
+    [90m268| [39m
+    [90m269| [39m    it("(s1) patches size and modifiedAt of the matching path only and…
+    [90m270| [39m      useFileStore.getState().updateFileStats([{ ...STAT_B, size: 222,…
+    [90m   | [39m                              [31m^[39m
+    [90m271| [39m      [35mconst[39m files [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m.[39mfiles[33m;[39m
+    [90m272| [39m      expect(files.map((f) => f.path)).toEqual([STAT_A.path, STAT_B.pa…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22mupdateFileStats (TM-B22, D-28)[2m > [22m(s2) ignores an entry whose path is not in files
+[31m[1mTypeError[22m: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function[39m
+[36m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m281:10[22m[39m
+    [90m279| [39m      useFileStore
+    [90m280| [39m        [33m.[39m[34mgetState[39m()
+    [90m281| [39m        .updateFileStats([{ name: "new.wav", path: "/music/new.wav", s…
+    [90m   | [39m         [31m^[39m
+    [90m282| [39m      [35mconst[39m files [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m.[39mfiles[33m;[39m
+    [90m283| [39m      [34mexpect[39m(files)[33m.[39m[34mtoHaveLength[39m([34m3[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22mupdateFileStats (TM-B22, D-28)[2m > [22m(s3) keeps the existing name when the entry has the same path but another name
+[31m[1mTypeError[22m: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function[39m
+[36m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m289:31[22m[39m
+    [90m287| [39m
+    [90m288| [39m    it("(s3) keeps the existing name when the entry has the same path …
+    [90m289| [39m      useFileStore.getState().updateFileStats([{ ...STAT_A, name: "ren…
+    [90m   | [39m                              [31m^[39m
+    [90m290| [39m      [35mconst[39m fileA [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m.[39mfiles[[34m0[39m][33m;[39m
+    [90m291| [39m      [34mexpect[39m(fileA[33m?.[39mname)[33m.[39m[34mtoBe[39m([32m"a.wav"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22mupdateFileStats (TM-B22, D-28)[2m > [22m(s4) leaves selectedPaths and metadata unchanged
+[31m[1mTypeError[22m: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function[39m
+[36m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m300:31[22m[39m
+    [90m298| [39m      const metadata: Record<string, WavMetadata> = { [STAT_A.path]: {…
+    [90m299| [39m      useFileStore.setState({ metadata, selectedPaths: [STAT_A.path, S…
+    [90m300| [39m      useFileStore.getState().updateFileStats([{ ...STAT_A, size: 444,…
+    [90m   | [39m                              [31m^[39m
+    [90m301| [39m      [35mconst[39m state [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m302| [39m      [34mexpect[39m(state[33m.[39mmetadata)[33m.[39m[34mtoBe[39m(metadata)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/11]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22mupdateFileStats (TM-B22, D-28)[2m > [22m(s5) an empty entry list leaves files deep-equal
+[31m[1mTypeError[22m: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function[39m
+[36m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m307:31[22m[39m
+    [90m305| [39m
+    [90m306| [39m    [34mit[39m([32m"(s5) an empty entry list leaves files deep-equal"[39m[33m,[39m () [33m=>[39m {
+    [90m307| [39m      useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34mupdateFileStats[39m([])[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m308| [39m      expect(useFileStore.getState().files).toEqual([STAT_A, STAT_B, S…
+    [90m309| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/11]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22mupdateFileStats (TM-B22, D-28)[2m > [22m(s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset
+[31m[1mTypeError[22m: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function[39m
+[36m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m313:31[22m[39m
+    [90m311| [39m    it("(s6) keeps the same files reference when no entry matches, so …
+    [90m312| [39m      [35mconst[39m before [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m.[39mfiles[33m;[39m
+    [90m313| [39m      useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34mupdateFileStats[39m([])[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m314| [39m      [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mfiles)[33m.[39m[34mtoBe[39m(before)[33m;[39m
+    [90m315| [39m      useFileStore
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/11]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m11 failed[39m[22m[2m | [22m[1m[32m46 passed[39m[22m[90m (57)[39m
+[2m   Start at [22m 11:13:25
+[2m   Duration [22m 4.33s[2m (transform 404ms, setup 205ms, import 710ms, tests 3.07s, environment 1.22s)[22m
+
+
+::error file=/tmp/c-r19-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (n) single save succeeds%3A one scan of the folder%2C only the saved file is patched%2C write -> scan -> read,line=444,column=35::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:444:35%0A%0A
+
+::error file=/tmp/c-r19-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (o) batch%2C all succeed%3A both files are patched and the selection is kept,line=469,column=35::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:469:35%0A%0A
+
+::error file=/tmp/c-r19-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (p) batch%2C partial failure%3A only the written file is patched even though the scan has the failed one,line=492,column=35::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:492:35%0A%0A
+
+::error file=/tmp/c-r19-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (s) single write ok + readMetadata rejects (D-24)%3A the file is patched%2C D-24 toast and edits unchanged,line=537,column=35::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:537:35%0A%0A
+
+::error file=/tmp/c-r19-old/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (t) batch partial + readMetadataBatch rejects (D-24)%3A only the written file is patched%2C D-24 toast unchanged,line=559,column=35::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:559:35%0A%0A
+
+::error file=/tmp/c-r19-old/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s1) patches size and modifiedAt of the matching path only and keeps the order,line=270,column=31::TypeError: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function%0A ❯ tests/renderer/stores/file-store.test.ts:270:31%0A%0A
+
+::error file=/tmp/c-r19-old/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s2) ignores an entry whose path is not in files,line=281,column=10::TypeError: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function%0A ❯ tests/renderer/stores/file-store.test.ts:281:10%0A%0A
+
+::error file=/tmp/c-r19-old/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s3) keeps the existing name when the entry has the same path but another name,line=289,column=31::TypeError: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function%0A ❯ tests/renderer/stores/file-store.test.ts:289:31%0A%0A
+
+::error file=/tmp/c-r19-old/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s4) leaves selectedPaths and metadata unchanged,line=300,column=31::TypeError: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function%0A ❯ tests/renderer/stores/file-store.test.ts:300:31%0A%0A
+
+::error file=/tmp/c-r19-old/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s5) an empty entry list leaves files deep-equal,line=307,column=31::TypeError: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function%0A ❯ tests/renderer/stores/file-store.test.ts:307:31%0A%0A
+
+::error file=/tmp/c-r19-old/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s6) keeps the same files reference when no entry matches%2C so no re-render or shift-click anchor reset,line=313,column=31::TypeError: __vite_ssr_import_1__.useFileStore.getState(...).updateFileStats is not a function%0A ❯ tests/renderer/stores/file-store.test.ts:313:31%0A%0A

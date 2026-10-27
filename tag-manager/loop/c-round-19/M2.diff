@@ -1,0 +1,11 @@
+--- /tmp/orig_tmp	2026-10-27 11:14:01.828885103 +0000
++++ /tmp/c-r19-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 11:14:01.827262886 +0000
+@@ -118,7 +118,7 @@
+         const result = await window.api.writeMetadataBatch(paths, batchMeta, fields);
+         const failedPaths = new Set(result.failed.map((f) => f.path));
+         if (result.succeeded > 0) {
+-          await refreshSavedFileStats(paths.filter((p) => !failedPaths.has(p)));
++          await refreshSavedFileStats(paths);
+         }
+ 
+         let refreshed: Record<string, WavMetadata>;

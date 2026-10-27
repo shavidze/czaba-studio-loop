@@ -1,0 +1,72 @@
+
+ RUN  v4.0.18 /tmp/c-r19-mut
+
+ ❯ tests/renderer/stores/file-store.test.ts (34 tests | 1 failed) 46ms
+       ✓ initializes with empty state 3ms
+       ✓ sets files 0ms
+       ✓ sets folder path 1ms
+       ✓ sets metadata 1ms
+       ✓ updates single file metadata 1ms
+       ✓ toggles selection on 1ms
+       ✓ toggles selection off 1ms
+       ✓ selects range 12ms
+       ✓ selects range with reversed indices 1ms
+       ✓ selectAll selects all visible files 0ms
+       ✓ selectAll respects search filter 0ms
+       ✓ clears selection 0ms
+       ✓ sets sort field and defaults to asc 0ms
+       ✓ toggles direction when same field set again 0ms
+       ✓ resets to asc when different field set 0ms
+       ✓ toggleSortDirection flips direction 0ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}} 2ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}} 1ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}} 1ms
+       ✓ (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}} 1ms
+       ✓ (b) uses only the first element, not a later string element 1ms
+       ✓ (c) sorts a well-typed string first element by its value 1ms
+       ✓ (c) sorts a null first element as empty 1ms
+       ✓ (c) sorts an empty array as empty 1ms
+       ✓ (c) sorts bpm numerically, not lexicographically 1ms
+       ✓ (c) sorts a bpm number against missing metadata as before 0ms
+       ✓ sets search query 0ms
+       ✓ sets scanning state 0ms
+       ✓ (s1) patches size and modifiedAt of the matching path only and keeps the order 0ms
+       ✓ (s2) ignores an entry whose path is not in files 0ms
+       ✓ (s3) keeps the existing name when the entry has the same path but another name 0ms
+       ✓ (s4) leaves selectedPaths and metadata unchanged 0ms
+       ✓ (s5) an empty entry list leaves files deep-equal 0ms
+       × (s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset 11ms
+ ✓ tests/renderer/components/metadata-panel-batch-save.test.ts (23 tests) 3177ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  419ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 56 passed (57)
+   Start at  11:14:32
+   Duration  4.49s (transform 544ms, setup 216ms, import 759ms, tests 3.22s, environment 1.21s)
+
+
+::error file=/tmp/c-r19-mut/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22%2C D-28) > (s6) keeps the same files reference when no entry matches%2C so no re-render or shift-click anchor reset,line=314,column=45::AssertionError: expected [ { name: 'a.wav', …(3) }, …(2) ] to be [ { name: 'a.wav', …(3) }, …(2) ] // Object.is equality%0A%0AIf it should pass with deep equality, replace "toBe" with "toStrictEqual"%0A%0AExpected: [ { name: 'a.wav', …(3) }, …(2) ]%0AReceived: serializes to the same string%0A%0A%0ACompared values have no visual difference.%0A%0A ❯ tests/renderer/stores/file-store.test.ts:314:45%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/stores/file-store.test.ts > useFileStore > updateFileStats (TM-B22, D-28) > (s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset
+AssertionError: expected [ { name: 'a.wav', …(3) }, …(2) ] to be [ { name: 'a.wav', …(3) }, …(2) ] // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: [ { name: 'a.wav', …(3) }, …(2) ]
+Received: serializes to the same string
+
+
+Compared values have no visual difference.
+
+ ❯ tests/renderer/stores/file-store.test.ts:314:45
+    312|       const before = useFileStore.getState().files;
+    313|       useFileStore.getState().updateFileStats([]);
+    314|       expect(useFileStore.getState().files).toBe(before);
+       |                                             ^
+    315|       useFileStore
+    316|         .getState()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
