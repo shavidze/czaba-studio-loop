@@ -1,0 +1,24 @@
+--- /tmp/c-r20-fixed.tsx	2026-10-27 11:47:20.702351303 +0000
++++ /tmp/c-r20-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 11:47:45.873995352 +0000
+@@ -116,7 +116,7 @@
+         if (selectionUnchanged) skipSyncRef.current = true;
+         updateFileMetadata(path, updated as WavMetadata);
+         if (selectionUnchanged) setEditingMetadata({ ...(updated as WavMetadata) });
+-        showToast('Tags saved', 'success');
++        if (selectionUnchanged) showToast('Tags saved', 'success');
+       } else {
+         const paths = selectedFiles.map((f) => f.path);
+         const modified = useMetadataStore.getState().modifiedFields;
+@@ -149,10 +149,10 @@
+         }
+ 
+         if (result.failed.length > 0) {
+-          showToast(`${result.succeeded} saved, ${result.failed.length} failed`, 'error');
++          if (selectionUnchanged) showToast(`${result.succeeded} saved, ${result.failed.length} failed`, 'error');
+         } else {
+           if (selectionUnchanged) setEditingMetadata({});
+-          showToast(`Tags saved to ${result.succeeded} files`, 'success');
++          if (selectionUnchanged) showToast(`Tags saved to ${result.succeeded} files`, 'success');
+         }
+       }
+     } catch (err) {

@@ -1,0 +1,10 @@
+--- /tmp/c-r20-fixed.tsx	2026-10-27 11:47:20.702351303 +0000
++++ /tmp/c-r20-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 11:47:29.176277072 +0000
+@@ -19,6 +19,7 @@
+ }
+ 
+ function isSameSelectionSet(startPaths: string[], currentPaths: string[]): boolean {
++  return startPaths.join('\0') === currentPaths.join('\0');
+   const start = new Set(startPaths);
+   const current = new Set(currentPaths);
+   if (start.size !== current.size) return false;

@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T11:21:40.437Z)
+# Active loop summary (2026-10-27T11:52:49.144Z)
 
-- backlog.json 167 KB -> active view 51 KB
-- status: G_ROOT_GATE round 19
+- backlog.json 179 KB -> active view 55 KB
+- status: G_ROOT_GATE round 20
 - servers: `{"servers":"none or skipped"}`
-- last publication: 3006615b365edf3847542c06e119a020b426b093 (rounds 19-19)
-- last root gate: round 19 published - commit 3006615b365edf3847542c06e119a020b426b093 pushed
+- last publication: b373b08f13069b26e89192a1229e3a4a31257e3e (rounds 20-20)
+- last root gate: round 20 published - commit b373b08f13069b26e89192a1229e3a4a31257e3e pushed
 
-## Current items: TM-B21, TM-B22
+## Current items: TM-B22, TM-B23, TM-B24
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -85,7 +85,6 @@
 - RR-R17-03 / low / open / formatFirstFieldValue(['', 'B']) returns '' while hasAnyTagValue is true: a row can show Tagged with an empty artist cell. Pre-existing and 
 - RR-R17-04 / info / open / Architecture signal: nothing checks FieldValue array shape where data enters the renderer (TemplatePicker.tsx:21 value.join, file-store sort
 - A-R17-02 / low / open / Process: the read-primitives PreToolUse hook did not fire in A's R17 session; test Edits went through without it and the src file was writte
-- C-R17-01 / low / in_progress / Size column keeps the pre-save size after a save (86.2 KB) until rescan/relaunch (87.6 KB): WavFileEntry.size is set only by the folder scan
 - RR-R18-01 / low / open / file-store.ts getFieldSortKey: a malformed non-array value ({"artists":{}}) still sorts as '[object Object]' (no throw, unchanged by R18); f
 - RR-R18-02 / low / open / file-store.ts:129 number vs text/missing compares as text ('120' vs ''); unchanged and pinned by R18 (c) 'bpm vs missing'
 - RR-R18-03 / low / open / R18 store tests read the sort order through selectRange (coupled to selection); a test-only reader or renderHook(useFilteredFiles) would be 
@@ -94,6 +93,14 @@
 - A-R18-02 / info / open / R18-3 M2 (String(value[0])) is killed only by [true] and depends on ICU collation ('true' between Abe and Zed); a neighbour like ['!'] or a 
 - C-R18-01 / info / open / R18-3 M3 was implemented as a direct tie (return 0 when exactly one side is a number) instead of via '' keys; same observable bpm-vs-missing
 - B-R18-01 / info / open / D-28 refreshes Size/Date with one full recursive scanFolder per save because preload is protected; a dedicated fs:stat-files channel (main +
+- RR-R19-01 / medium / open / Performance: every save awaits a full recursive scanFolder (file-system.ts scanFolderRecursive, depth 20, stat per WAV, no timeout) before t
+- RR-R19-02 / low / open / updateFileStats returns a new files array when a path matches, so FileList.tsx:107-109 resets lastClickRef after every successful save (shif
+- RR-R19-03 / info / open / refreshSavedFileStats reads folderPath after the write; a folder opened during a slow save is scanned instead; harmless because only written
+- RR-R19-04 / info / open / Architecture signal: move the stat refresh into a store action backed by a statFiles IPC, or have meta:write / meta:write-batch return the n
+- A-R19-01 / low / open / No batch test for a scanFolder rejection; the helper is shared and M5 is killed by the single test (u)
+- A-R19-02 / low / open / Folder close/switch during a pending save: updateFileMetadata adds the old folder's path to the new folder's metadata map (stray key); the e
+- C-R19-01 / info / open / After a 2-file batch save the Genres field shows its placeholder although both files carry 'R19 Batch'; matches D-21 (all-succeeded batch ->
+- B-R19-01 / low / open / A selection change while a save is pending shows 'Unsaved changes were discarded' although the edits are being written (and are written if t
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

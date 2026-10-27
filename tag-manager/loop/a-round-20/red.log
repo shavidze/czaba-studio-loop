@@ -1,0 +1,173 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m33 tests[22m[2m | [22m[31m6 failed[39m[2m)[22m[33m 2769[2mms[22m[39m
+     [33m[2m✓[22m[39m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept [33m 301[2mms[22m[39m
+     [32m✓[39m (b) partial failure: edits are kept and succeeded files are refreshed in the store[32m 110[2mms[22m[39m
+     [32m✓[39m (c) retry after a failure writes the same fields to all selected files and clears on success[32m 158[2mms[22m[39m
+     [32m✓[39m (d) full success clears the form back to Multiple values[32m 100[2mms[22m[39m
+     [32m✓[39m (e) single-file write failure keeps the typed value and shows the error[32m 97[2mms[22m[39m
+     [32m✓[39m (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated[32m 94[2mms[22m[39m
+     [32m✓[39m (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept[32m 100[2mms[22m[39m
+     [32m✓[39m (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry[32m 106[2mms[22m[39m
+     [32m✓[39m (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01)[32m 97[2mms[22m[39m
+     [32m✓[39m (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept[32m 94[2mms[22m[39m
+     [32m✓[39m (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept[32m 89[2mms[22m[39m
+     [32m✓[39m (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept[32m 94[2mms[22m[39m
+     [32m✓[39m (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept[32m 90[2mms[22m[39m
+     [32m✓[39m (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read[32m 60[2mms[22m[39m
+     [32m✓[39m (o) batch, all succeed: both files are patched and the selection is kept[32m 54[2mms[22m[39m
+     [32m✓[39m (p) batch, partial failure: only the written file is patched even though the scan has the failed one[32m 86[2mms[22m[39m
+     [32m✓[39m (q) batch, all failed: no scan, files unchanged, edits kept[32m 87[2mms[22m[39m
+     [32m✓[39m (r) single write rejects: no scan, files unchanged[32m 49[2mms[22m[39m
+     [32m✓[39m (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged[32m 52[2mms[22m[39m
+     [32m✓[39m (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged[32m 94[2mms[22m[39m
+     [32m✓[39m (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged[32m 49[2mms[22m[39m
+     [32m✓[39m (v) folderPath null: no scan, the save behaves as today[32m 50[2mms[22m[39m
+     [32m✓[39m (w) the scan result lacks the saved path: the file keeps its stats and nothing is added[32m 49[2mms[22m[39m
+[31m     [31m×[31m (x1) single A -> B during the write: the editor shows B, A's re-read only goes to the store[39m[32m 61[2mms[22m[39m
+[31m     [31m×[31m (x2) the follow-up save on B writes B's own values, never A's[39m[32m 101[2mms[22m[39m
+[31m     [31m×[31m (x3) typing on B during the write: B's edits and isDirty are kept[39m[32m 57[2mms[22m[39m
+[31m     [31m×[31m (x4) selection cleared during the write: editor stays empty, store and toast as usual[39m[32m 55[2mms[22m[39m
+[31m     [31m×[31m (x5) batch all succeeded, A+B -> A during the write: the editor shows A's refreshed values[39m[32m 56[2mms[22m[39m
+[31m     [31m×[31m (x6) batch partial, A+B -> A during the write: the editor shows A's refreshed value, B's entry is kept[39m[32m 57[2mms[22m[39m
+     [32m✓[39m (x7) pin: the write rejects after A -> B: error toast, editor shows B, store untouched, no re-read[32m 55[2mms[22m[39m
+     [32m✓[39m (x8) pin: D-24 after A -> B: reload-failed toast, editor shows B, store untouched[32m 55[2mms[22m[39m
+     [32m✓[39m (x9) pin: the same set reordered during a batch write behaves as today[32m 54[2mms[22m[39m
+     [32m✓[39m (x10) pin: A -> B -> A during the write behaves as today[32m 58[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save while the selection changes (TM-B23, D-29)[2m > [22m(x1) single A -> B during the write: the editor shows B, A's re-read only goes to the store
+[31m[1mAssertionError[22m: expected 'R20Cat' to be 'BCat' // Object.is equality[39m
+
+Expected: [32m"[7mB[27mCat"[39m
+Received: [31m"[7mR20[27mCat"[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m701:38[22m[39m
+    [90m699| [39m
+    [90m700| [39m    [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m701| [39m    [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m"BCat"[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m702| [39m    [34mexpect[39m(state[33m.[39meditingMetadata[33m.[39mcomment)[33m.[39m[34mtoBe[39m([32m"B-comment"[39m)[33m;[39m
+    [90m703| [39m    expect(useFileStore.getState().metadata[PATH_A]?.category).toBe("R…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save while the selection changes (TM-B23, D-29)[2m > [22m(x2) the follow-up save on B writes B's own values, never A's
+[31m[1mAssertionError[22m: expected 'A-comment' to be 'B-comment' // Object.is equality[39m
+
+Expected: [32m"[7mB[27m-comment"[39m
+Received: [31m"[7mA[27m-comment"[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m722:30[22m[39m
+    [90m720| [39m    [35mconst[39m written [33m=[39m secondCall[33m?.[39m[[34m1[39m][33m;[39m
+    [90m721| [39m    [34mexpect[39m(written[33m?.[39mcategory)[33m.[39m[34mtoBe[39m([32m"BEdit"[39m)[33m;[39m
+    [90m722| [39m    [34mexpect[39m(written[33m?.[39mcomment)[33m.[39m[34mtoBe[39m([32m"B-comment"[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m723| [39m    [34mexpect[39m(written[33m?.[39mtitle)[33m.[39m[34mtoBe[39m([32m"B-title"[39m)[33m;[39m
+    [90m724| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save while the selection changes (TM-B23, D-29)[2m > [22m(x3) typing on B during the write: B's edits and isDirty are kept
+[31m[1mAssertionError[22m: expected 'R20Cat' to be 'BTyped' // Object.is equality[39m
+
+Expected: [32m"BTyped"[39m
+Received: [31m"R20Cat"[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m739:38[22m[39m
+    [90m737| [39m
+    [90m738| [39m    [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m739| [39m    [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m"BTyped"[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m740| [39m    [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m741| [39m    [34mexpect[39m(state[33m.[39mmodifiedFields[33m.[39m[34mhas[39m([32m"category"[39m))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save while the selection changes (TM-B23, D-29)[2m > [22m(x4) selection cleared during the write: editor stays empty, store and toast as usual
+[31m[1mAssertionError[22m: expected { Object (title, artists, ...) } to deeply equal {}[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {}[39m
+[31m+ {[39m
+[31m+   "album": "",[39m
+[31m+   "artists": [],[39m
+[31m+   "bpm": 0,[39m
+[31m+   "category": "R20Cat",[39m
+[31m+   "comment": "A-comment",[39m
+[31m+   "copyright": "",[39m
+[31m+   "genres": [],[39m
+[31m+   "isrc": "",[39m
+[31m+   "keywords": "",[39m
+[31m+   "publisher": "",[39m
+[31m+   "title": "A-title",[39m
+[31m+   "track": 0,[39m
+[31m+   "year": 0,[39m
+[31m+ }[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m757:57[22m[39m
+    [90m755| [39m
+    [90m756| [39m    expect(screen.getByText("Select a file to edit metadata")).toBeInT…
+    [90m757| [39m    [34mexpect[39m(useMetadataStore[33m.[39m[34mgetState[39m()[33m.[39meditingMetadata)[33m.[39m[34mtoEqual[39m({})[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m758| [39m    expect(useFileStore.getState().metadata[PATH_A]?.category).toBe("R…
+    [90m759| [39m    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved"…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save while the selection changes (TM-B23, D-29)[2m > [22m(x5) batch all succeeded, A+B -> A during the write: the editor shows A's refreshed values
+[31m[1mAssertionError[22m: expected '' to be 'BATCHCat' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- BATCHCat[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m776:38[22m[39m
+    [90m774| [39m    [35mawait[39m [34msettle[39m(pending[33m.[39mrelease)[33m;[39m
+    [90m775| [39m
+    [90m776| [39m    [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m777| [39m    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved …
+    [90m778| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths)[33m.[39m[34mtoEqual[39m([[33mPATH_A[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save while the selection changes (TM-B23, D-29)[2m > [22m(x6) batch partial, A+B -> A during the write: the editor shows A's refreshed value, B's entry is kept
+[31m[1mAssertionError[22m: expected 'OLDCat' to be 'BATCHCat' // Object.is equality[39m
+
+Expected: [32m"[7mBATCH[27mCat"[39m
+Received: [31m"[7mOLD[27mCat"[39m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m796:38[22m[39m
+    [90m794| [39m    [35mawait[39m [34msettle[39m(pending[33m.[39mrelease)[33m;[39m
+    [90m795| [39m
+    [90m796| [39m    [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m797| [39m    expect(useMetadataStore.getState().toastMessage).toBe("1 saved, 1 …
+    [90m798| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mmetadata[[33mPATH_B[39m])[33m.[39m[34mtoEqual[39m(seedB)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m27 passed[39m[22m[90m (33)[39m
+[2m   Start at [22m 11:38:00
+[2m   Duration [22m 3.63s[2m (transform 216ms, setup 67ms, import 327ms, tests 2.77s, environment 368ms)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x1) single A -> B during the write%3A the editor shows B%2C A's re-read only goes to the store,line=701,column=38::AssertionError: expected 'R20Cat' to be 'BCat' // Object.is equality%0A%0AExpected: "BCat"%0AReceived: "R20Cat"%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:701:38%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x2) the follow-up save on B writes B's own values%2C never A's,line=722,column=30::AssertionError: expected 'A-comment' to be 'B-comment' // Object.is equality%0A%0AExpected: "B-comment"%0AReceived: "A-comment"%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:722:30%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x3) typing on B during the write%3A B's edits and isDirty are kept,line=739,column=38::AssertionError: expected 'R20Cat' to be 'BTyped' // Object.is equality%0A%0AExpected: "BTyped"%0AReceived: "R20Cat"%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:739:38%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x4) selection cleared during the write%3A editor stays empty%2C store and toast as usual,line=757,column=57::AssertionError: expected { Object (title, artists, ...) } to deeply equal {}%0A%0A- Expected%0A+ Received%0A%0A- {}%0A+ {%0A+   "album": "",%0A+   "artists": [],%0A+   "bpm": 0,%0A+   "category": "R20Cat",%0A+   "comment": "A-comment",%0A+   "copyright": "",%0A+   "genres": [],%0A+   "isrc": "",%0A+   "keywords": "",%0A+   "publisher": "",%0A+   "title": "A-title",%0A+   "track": 0,%0A+   "year": 0,%0A+ }%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:757:57%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x5) batch all succeeded%2C A+B -> A during the write%3A the editor shows A's refreshed values,line=776,column=38::AssertionError: expected '' to be 'BATCHCat' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- BATCHCat%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:776:38%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x6) batch partial%2C A+B -> A during the write%3A the editor shows A's refreshed value%2C B's entry is kept,line=796,column=38::AssertionError: expected 'OLDCat' to be 'BATCHCat' // Object.is equality%0A%0AExpected: "BATCHCat"%0AReceived: "OLDCat"%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:796:38%0A%0A

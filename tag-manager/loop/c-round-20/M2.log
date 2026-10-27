@@ -1,0 +1,137 @@
+
+ RUN  v4.0.18 /tmp/c-r20-mut
+
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts (34 tests | 5 failed) 2876ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  302ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store 115ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success 163ms
+     ✓ (d) full success clears the form back to Multiple values 103ms
+     ✓ (e) single-file write failure keeps the typed value and shows the error 100ms
+     ✓ (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated 98ms
+     ✓ (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept 98ms
+     ✓ (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry 109ms
+     ✓ (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01) 96ms
+     ✓ (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept 101ms
+     ✓ (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept 91ms
+     ✓ (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept 96ms
+     ✓ (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept 91ms
+     ✓ (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read 60ms
+     ✓ (o) batch, all succeed: both files are patched and the selection is kept 54ms
+     ✓ (p) batch, partial failure: only the written file is patched even though the scan has the failed one 88ms
+     ✓ (q) batch, all failed: no scan, files unchanged, edits kept 86ms
+     ✓ (r) single write rejects: no scan, files unchanged 49ms
+     ✓ (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged 53ms
+     ✓ (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged 92ms
+     ✓ (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged 50ms
+     ✓ (v) folderPath null: no scan, the save behaves as today 52ms
+     ✓ (w) the scan result lacks the saved path: the file keeps its stats and nothing is added 50ms
+     × (x1) single A -> B during the write: the editor shows B, A's re-read only goes to the store 63ms
+     ✓ (x2) the follow-up save on B writes B's own values, never A's 104ms
+     × (x3) typing on B during the write: B's edits and isDirty are kept 58ms
+     × (x4) selection cleared during the write: editor stays empty, store and toast as usual 50ms
+     × (x5) batch all succeeded, A+B -> A during the write: the editor shows A's refreshed values 57ms
+     × (x6) batch partial, A+B -> A during the write: the editor shows A's refreshed value, B's entry is kept 57ms
+     ✓ (x7) pin: the write rejects after A -> B: error toast, editor shows B, store untouched, no re-read 56ms
+     ✓ (x8) pin: D-24 after A -> B: reload-failed toast, editor shows B, store untouched 56ms
+     ✓ (x9) pin: the same set reordered during a batch write behaves as today 57ms
+     ✓ (x10) pin: A -> B -> A during the write behaves as today 58ms
+     ✓ (x11) batch all succeeded, A+B -> A and typing on A during the write: A's edits and isDirty are kept 60ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23, D-29) > (x1) single A -> B during the write: the editor shows B, A's re-read only goes to the store
+AssertionError: expected 'ACat' to be 'R20Cat' // Object.is equality
+
+Expected: "R20Cat"
+Received: "ACat"
+
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:703:64
+    701|     expect(getCategoryInput().value).toBe("BCat");
+    702|     expect(state.editingMetadata.comment).toBe("B-comment");
+    703|     expect(useFileStore.getState().metadata[PATH_A]?.category).toBe("R…
+       |                                                                ^
+    704|     expect(useFileStore.getState().metadata[PATH_B]).toEqual(SEED_B);
+    705|     expect(state.toastMessage).toBe("Tags saved");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23, D-29) > (x3) typing on B during the write: B's edits and isDirty are kept
+AssertionError: expected 'ACat' to be 'R20Cat' // Object.is equality
+
+Expected: "R20Cat"
+Received: "ACat"
+
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:742:64
+    740|     expect(state.isDirty).toBe(true);
+    741|     expect(state.modifiedFields.has("category")).toBe(true);
+    742|     expect(useFileStore.getState().metadata[PATH_A]?.category).toBe("R…
+       |                                                                ^
+    743|   });
+    744| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23, D-29) > (x4) selection cleared during the write: editor stays empty, store and toast as usual
+AssertionError: expected 'ACat' to be 'R20Cat' // Object.is equality
+
+Expected: "R20Cat"
+Received: "ACat"
+
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:758:64
+    756|     expect(screen.getByText("Select a file to edit metadata")).toBeInT…
+    757|     expect(useMetadataStore.getState().editingMetadata).toEqual({});
+    758|     expect(useFileStore.getState().metadata[PATH_A]?.category).toBe("R…
+       |                                                                ^
+    759|     expect(useMetadataStore.getState().toastMessage).toBe("Tags saved"…
+    760|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23, D-29) > (x5) batch all succeeded, A+B -> A during the write: the editor shows A's refreshed values
+AssertionError: expected 'OLDCat' to be 'BATCHCat' // Object.is equality
+
+Expected: "BATCHCat"
+Received: "OLDCat"
+
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:776:38
+    774|     await settle(pending.release);
+    775| 
+    776|     expect(getCategoryInput().value).toBe(TYPED_CATEGORY);
+       |                                      ^
+    777|     expect(useMetadataStore.getState().toastMessage).toBe("Tags saved …
+    778|     expect(useFileStore.getState().selectedPaths).toEqual([PATH_A]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23, D-29) > (x6) batch partial, A+B -> A during the write: the editor shows A's refreshed value, B's entry is kept
+AssertionError: expected 'OLDCat' to be 'BATCHCat' // Object.is equality
+
+Expected: "BATCHCat"
+Received: "OLDCat"
+
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:796:38
+    794|     await settle(pending.release);
+    795| 
+    796|     expect(getCategoryInput().value).toBe(TYPED_CATEGORY);
+       |                                      ^
+    797|     expect(useMetadataStore.getState().toastMessage).toBe("1 saved, 1 …
+    798|     expect(useFileStore.getState().metadata[PATH_B]).toEqual(seedB);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 29 passed (34)
+   Start at  11:48:03
+   Duration  3.73s (transform 230ms, setup 66ms, import 335ms, tests 2.88s, environment 360ms)
+
+
+::error file=/tmp/c-r20-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x1) single A -> B during the write%3A the editor shows B%2C A's re-read only goes to the store,line=703,column=64::AssertionError: expected 'ACat' to be 'R20Cat' // Object.is equality%0A%0AExpected: "R20Cat"%0AReceived: "ACat"%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:703:64%0A%0A
+
+::error file=/tmp/c-r20-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x3) typing on B during the write%3A B's edits and isDirty are kept,line=742,column=64::AssertionError: expected 'ACat' to be 'R20Cat' // Object.is equality%0A%0AExpected: "R20Cat"%0AReceived: "ACat"%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:742:64%0A%0A
+
+::error file=/tmp/c-r20-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x4) selection cleared during the write%3A editor stays empty%2C store and toast as usual,line=758,column=64::AssertionError: expected 'ACat' to be 'R20Cat' // Object.is equality%0A%0AExpected: "R20Cat"%0AReceived: "ACat"%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:758:64%0A%0A
+
+::error file=/tmp/c-r20-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x5) batch all succeeded%2C A+B -> A during the write%3A the editor shows A's refreshed values,line=776,column=38::AssertionError: expected 'OLDCat' to be 'BATCHCat' // Object.is equality%0A%0AExpected: "BATCHCat"%0AReceived: "OLDCat"%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:776:38%0A%0A
+
+::error file=/tmp/c-r20-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x6) batch partial%2C A+B -> A during the write%3A the editor shows A's refreshed value%2C B's entry is kept,line=796,column=38::AssertionError: expected 'OLDCat' to be 'BATCHCat' // Object.is equality%0A%0AExpected: "BATCHCat"%0AReceived: "OLDCat"%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:796:38%0A%0A

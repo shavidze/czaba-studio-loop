@@ -1,0 +1,11 @@
+--- /tmp/c-r20-fixed.tsx	2026-10-27 11:47:20.702351303 +0000
++++ /tmp/c-r20-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 11:47:41.727743611 +0000
+@@ -97,7 +97,7 @@
+     if (selectedFiles.length === 0) return;
+     const startSelection = useFileStore.getState().selectedPaths;
+     const isSelectionUnchanged = (): boolean =>
+-      isSameSelectionSet(startSelection, useFileStore.getState().selectedPaths);
++      isSameSelectionSet(startSelection, selectedFiles.map((f) => f.path));
+ 
+     setIsSaving(true);
+     try {

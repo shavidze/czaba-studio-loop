@@ -1,0 +1,72 @@
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index 0bf5445..caaf361 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -24,6 +24,7 @@ Batch:   writeMetadataBatch(modifiedFields only) → readBatch → update non-fa
+ Batch failed non-empty (D-21): editingMetadata, modifiedFields, isDirty kept → Save stays enabled, retry writes to all selected files
+ Re-read rejects (D-24): no store update, no skipSync, edits kept → error toast with write result + "Rescan to refresh"
+ File stats (D-28): after a confirmed write, before the re-read: scanFolder(folderPath) → updateFileStats(written paths only); scan reject silent; none if write rejects / all failed / folderPath null
++Selection changed during save (D-29): start selectedPaths vs current (as set); changed → store updates + toasts as usual, but no skipSync and no setEditingMetadata (sync effect shows the current selection)
+ ```
+ 
+ ### Template apply (batch-safe)
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index a1ce255..8c680c7 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -18,6 +18,13 @@ function buildReloadFailedToast(batchResult?: BatchWriteResult): string {
+   return `${batchResult.succeeded} saved, ${batchResult.failed.length} failed. Reloading failed. Rescan to refresh.`;
+ }
+ 
++function isSameSelectionSet(startPaths: string[], currentPaths: string[]): boolean {
++  const start = new Set(startPaths);
++  const current = new Set(currentPaths);
++  if (start.size !== current.size) return false;
++  return [...start].every((path) => current.has(path));
++}
++
+ async function refreshSavedFileStats(writtenPaths: string[]): Promise<void> {
+   const { folderPath, updateFileStats } = useFileStore.getState();
+   if (folderPath === null) return;
+@@ -88,6 +95,9 @@ export function MetadataPanel(): React.ReactElement {
+ 
+   const handleSave = useCallback(async () => {
+     if (selectedFiles.length === 0) return;
++    const startSelection = useFileStore.getState().selectedPaths;
++    const isSelectionUnchanged = (): boolean =>
++      isSameSelectionSet(startSelection, useFileStore.getState().selectedPaths);
+ 
+     setIsSaving(true);
+     try {
+@@ -102,9 +112,10 @@ export function MetadataPanel(): React.ReactElement {
+           showToast(buildReloadFailedToast(), 'error');
+           return;
+         }
+-        skipSyncRef.current = true;
++        const selectionUnchanged = isSelectionUnchanged();
++        if (selectionUnchanged) skipSyncRef.current = true;
+         updateFileMetadata(path, updated as WavMetadata);
+-        setEditingMetadata({ ...(updated as WavMetadata) });
++        if (selectionUnchanged) setEditingMetadata({ ...(updated as WavMetadata) });
+         showToast('Tags saved', 'success');
+       } else {
+         const paths = selectedFiles.map((f) => f.path);
+@@ -129,7 +140,8 @@ export function MetadataPanel(): React.ReactElement {
+           return;
+         }
+         const savedEntries = Object.entries(refreshed).filter(([path]) => !failedPaths.has(path));
+-        if (savedEntries.length > 0) {
++        const selectionUnchanged = isSelectionUnchanged();
++        if (savedEntries.length > 0 && selectionUnchanged) {
+           skipSyncRef.current = true;
+         }
+         for (const [path, updated] of savedEntries) {
+@@ -139,7 +151,7 @@ export function MetadataPanel(): React.ReactElement {
+         if (result.failed.length > 0) {
+           showToast(`${result.succeeded} saved, ${result.failed.length} failed`, 'error');
+         } else {
+-          setEditingMetadata({});
++          if (selectionUnchanged) setEditingMetadata({});
+           showToast(`Tags saved to ${result.succeeded} files`, 'success');
+         }
+       }

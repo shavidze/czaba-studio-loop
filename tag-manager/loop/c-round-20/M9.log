@@ -1,0 +1,65 @@
+
+ RUN  v4.0.18 /tmp/c-r20-mut
+
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts (34 tests | 1 failed) 2901ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  301ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store 115ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success 166ms
+     ✓ (d) full success clears the form back to Multiple values 101ms
+     ✓ (e) single-file write failure keeps the typed value and shows the error 102ms
+     ✓ (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated 99ms
+     ✓ (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept 105ms
+     ✓ (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry 109ms
+     ✓ (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01) 100ms
+     ✓ (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept 97ms
+     ✓ (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept 96ms
+     ✓ (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept 96ms
+     ✓ (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept 90ms
+     ✓ (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read 57ms
+     ✓ (o) batch, all succeed: both files are patched and the selection is kept 53ms
+     ✓ (p) batch, partial failure: only the written file is patched even though the scan has the failed one 88ms
+     ✓ (q) batch, all failed: no scan, files unchanged, edits kept 86ms
+     ✓ (r) single write rejects: no scan, files unchanged 51ms
+     ✓ (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged 53ms
+     ✓ (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged 91ms
+     ✓ (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged 51ms
+     ✓ (v) folderPath null: no scan, the save behaves as today 49ms
+     ✓ (w) the scan result lacks the saved path: the file keeps its stats and nothing is added 51ms
+     ✓ (x1) single A -> B during the write: the editor shows B, A's re-read only goes to the store 60ms
+     ✓ (x2) the follow-up save on B writes B's own values, never A's 107ms
+     ✓ (x3) typing on B during the write: B's edits and isDirty are kept 61ms
+     ✓ (x4) selection cleared during the write: editor stays empty, store and toast as usual 52ms
+     ✓ (x5) batch all succeeded, A+B -> A during the write: the editor shows A's refreshed values 60ms
+     ✓ (x6) batch partial, A+B -> A during the write: the editor shows A's refreshed value, B's entry is kept 57ms
+     ✓ (x7) pin: the write rejects after A -> B: error toast, editor shows B, store untouched, no re-read 56ms
+     ✓ (x8) pin: D-24 after A -> B: reload-failed toast, editor shows B, store untouched 56ms
+     ✓ (x9) pin: the same set reordered during a batch write behaves as today 55ms
+     ✓ (x10) pin: A -> B -> A during the write behaves as today 58ms
+     × (x11) batch all succeeded, A+B -> A and typing on A during the write: A's edits and isDirty are kept 69ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23, D-29) > (x11) batch all succeeded, A+B -> A and typing on A during the write: A's edits and isDirty are kept
+AssertionError: expected 'BATCHCat' to be 'ATyped' // Object.is equality
+
+Expected: "ATyped"
+Received: "BATCHCat"
+
+ ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:886:38
+    884| 
+    885|     const state = useMetadataStore.getState();
+    886|     expect(getCategoryInput().value).toBe("ATyped");
+       |                                      ^
+    887|     expect(state.isDirty).toBe(true);
+    888|     expect(state.modifiedFields.has("category")).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 33 passed (34)
+   Start at  11:47:50
+   Duration  3.75s (transform 227ms, setup 59ms, import 338ms, tests 2.90s, environment 360ms)
+
+
+::error file=/tmp/c-r20-mut/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > (x11) batch all succeeded%2C A+B -> A and typing on A during the write%3A A's edits and isDirty are kept,line=886,column=38::AssertionError: expected 'BATCHCat' to be 'ATyped' // Object.is equality%0A%0AExpected: "ATyped"%0AReceived: "BATCHCat"%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:886:38%0A%0A

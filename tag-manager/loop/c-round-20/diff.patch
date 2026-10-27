@@ -1,0 +1,355 @@
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index 0bf5445..caaf361 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -24,6 +24,7 @@ Batch:   writeMetadataBatch(modifiedFields only) → readBatch → update non-fa
+ Batch failed non-empty (D-21): editingMetadata, modifiedFields, isDirty kept → Save stays enabled, retry writes to all selected files
+ Re-read rejects (D-24): no store update, no skipSync, edits kept → error toast with write result + "Rescan to refresh"
+ File stats (D-28): after a confirmed write, before the re-read: scanFolder(folderPath) → updateFileStats(written paths only); scan reject silent; none if write rejects / all failed / folderPath null
++Selection changed during save (D-29): start selectedPaths vs current (as set); changed → store updates + toasts as usual, but no skipSync and no setEditingMetadata (sync effect shows the current selection)
+ ```
+ 
+ ### Template apply (batch-safe)
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index a1ce255..8c680c7 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -18,6 +18,13 @@ function buildReloadFailedToast(batchResult?: BatchWriteResult): string {
+   return `${batchResult.succeeded} saved, ${batchResult.failed.length} failed. Reloading failed. Rescan to refresh.`;
+ }
+ 
++function isSameSelectionSet(startPaths: string[], currentPaths: string[]): boolean {
++  const start = new Set(startPaths);
++  const current = new Set(currentPaths);
++  if (start.size !== current.size) return false;
++  return [...start].every((path) => current.has(path));
++}
++
+ async function refreshSavedFileStats(writtenPaths: string[]): Promise<void> {
+   const { folderPath, updateFileStats } = useFileStore.getState();
+   if (folderPath === null) return;
+@@ -88,6 +95,9 @@ export function MetadataPanel(): React.ReactElement {
+ 
+   const handleSave = useCallback(async () => {
+     if (selectedFiles.length === 0) return;
++    const startSelection = useFileStore.getState().selectedPaths;
++    const isSelectionUnchanged = (): boolean =>
++      isSameSelectionSet(startSelection, useFileStore.getState().selectedPaths);
+ 
+     setIsSaving(true);
+     try {
+@@ -102,9 +112,10 @@ export function MetadataPanel(): React.ReactElement {
+           showToast(buildReloadFailedToast(), 'error');
+           return;
+         }
+-        skipSyncRef.current = true;
++        const selectionUnchanged = isSelectionUnchanged();
++        if (selectionUnchanged) skipSyncRef.current = true;
+         updateFileMetadata(path, updated as WavMetadata);
+-        setEditingMetadata({ ...(updated as WavMetadata) });
++        if (selectionUnchanged) setEditingMetadata({ ...(updated as WavMetadata) });
+         showToast('Tags saved', 'success');
+       } else {
+         const paths = selectedFiles.map((f) => f.path);
+@@ -129,7 +140,8 @@ export function MetadataPanel(): React.ReactElement {
+           return;
+         }
+         const savedEntries = Object.entries(refreshed).filter(([path]) => !failedPaths.has(path));
+-        if (savedEntries.length > 0) {
++        const selectionUnchanged = isSelectionUnchanged();
++        if (savedEntries.length > 0 && selectionUnchanged) {
+           skipSyncRef.current = true;
+         }
+         for (const [path, updated] of savedEntries) {
+@@ -139,7 +151,7 @@ export function MetadataPanel(): React.ReactElement {
+         if (result.failed.length > 0) {
+           showToast(`${result.succeeded} saved, ${result.failed.length} failed`, 'error');
+         } else {
+-          setEditingMetadata({});
++          if (selectionUnchanged) setEditingMetadata({});
+           showToast(`Tags saved to ${result.succeeded} files`, 'success');
+         }
+       }
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index 066b253..a2b8726 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -614,3 +614,278 @@ describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22,
+     expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
+   });
+ });
++
++describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () => {
++  const SEED_A: WavMetadata = { ...taggedSeed("A-comment"), title: "A-title", category: "ACat" };
++  const SEED_B: WavMetadata = { ...taggedSeed("B-comment"), title: "B-title", category: "BCat" };
++  const REREAD_A: WavMetadata = { ...SEED_A, category: "R20Cat" };
++
++  interface PendingWrite {
++    release: () => void;
++    fail: (error: Error) => void;
++  }
++
++  function seedSingleA(): void {
++    seedTaggedFiles(SEED_A, SEED_B);
++    useFileStore.setState({ selectedPaths: [PATH_A] });
++  }
++
++  function seedBatchAB(): { seedA: WavMetadata; seedB: WavMetadata } {
++    const seedA = taggedSeed("old A");
++    const seedB = taggedSeed("old B");
++    seedTaggedFiles(seedA, seedB);
++    return { seedA, seedB };
++  }
++
++  function deferSingleWrite(): PendingWrite {
++    let resolveWrite: () => void = () => {};
++    let rejectWrite: (error: Error) => void = () => {};
++    vi.mocked(window.api.writeMetadata).mockReturnValueOnce(
++      new Promise<void>((resolve, reject) => {
++        resolveWrite = () => resolve();
++        rejectWrite = reject;
++      }),
++    );
++    return { release: () => resolveWrite(), fail: (error) => rejectWrite(error) };
++  }
++
++  function deferBatchWrite(result: BatchWriteResult): PendingWrite {
++    let resolveWrite: () => void = () => {};
++    let rejectWrite: (error: Error) => void = () => {};
++    vi.mocked(window.api.writeMetadataBatch).mockReturnValueOnce(
++      new Promise<BatchWriteResult>((resolve, reject) => {
++        resolveWrite = () => resolve(result);
++        rejectWrite = reject;
++      }),
++    );
++    return { release: () => resolveWrite(), fail: (error) => rejectWrite(error) };
++  }
++
++  function selectPaths(paths: string[]): void {
++    act(() => {
++      useFileStore.setState({ selectedPaths: paths });
++    });
++  }
++
++  async function settle(action: () => void): Promise<void> {
++    await act(async () => {
++      action();
++    });
++  }
++
++  async function typeCategoryAndSaveWith(value: string, saveButtonName: RegExp): Promise<void> {
++    fireEvent.change(getCategoryInput(), { target: { value } });
++    expect(getCategoryInput().value).toBe(value);
++    await clickSave(saveButtonName);
++    expect(useMetadataStore.getState().isSaving).toBe(true);
++  }
++
++  async function saveAThenSelectBAndSettle(): Promise<void> {
++    seedSingleA();
++    vi.mocked(window.api.readMetadata).mockResolvedValueOnce({ ...REREAD_A });
++    const pending = deferSingleWrite();
++    render(createElement(MetadataPanel));
++    expect(getCategoryInput().value).toBe("ACat");
++
++    await typeCategoryAndSaveWith("R20Cat", /Save Tags/);
++    selectPaths([PATH_B]);
++    expect(getCategoryInput().value).toBe("BCat");
++
++    await settle(pending.release);
++  }
++
++  it("(x1) single A -> B during the write: the editor shows B, A's re-read only goes to the store", async () => {
++    await saveAThenSelectBAndSettle();
++
++    const state = useMetadataStore.getState();
++    expect(getCategoryInput().value).toBe("BCat");
++    expect(state.editingMetadata.comment).toBe("B-comment");
++    expect(useFileStore.getState().metadata[PATH_A]?.category).toBe("R20Cat");
++    expect(useFileStore.getState().metadata[PATH_B]).toEqual(SEED_B);
++    expect(state.toastMessage).toBe("Tags saved");
++    expect(state.toastType).toBe("success");
++    expect(state.isSaving).toBe(false);
++    expect(state.isDirty).toBe(false);
++  });
++
++  it("(x2) the follow-up save on B writes B's own values, never A's", async () => {
++    await saveAThenSelectBAndSettle();
++
++    fireEvent.change(getCategoryInput(), { target: { value: "BEdit" } });
++    await clickSave(/Save Tags/);
++
++    expect(window.api.writeMetadata).toHaveBeenCalledTimes(2);
++    const secondCall = vi.mocked(window.api.writeMetadata).mock.calls[1];
++    expect(secondCall?.[0]).toBe(PATH_B);
++    const written = secondCall?.[1];
++    expect(written?.category).toBe("BEdit");
++    expect(written?.comment).toBe("B-comment");
++    expect(written?.title).toBe("B-title");
++  });
++
++  it("(x3) typing on B during the write: B's edits and isDirty are kept", async () => {
++    seedSingleA();
++    vi.mocked(window.api.readMetadata).mockResolvedValueOnce({ ...REREAD_A });
++    const pending = deferSingleWrite();
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSaveWith("R20Cat", /Save Tags/);
++    selectPaths([PATH_B]);
++    fireEvent.change(getCategoryInput(), { target: { value: "BTyped" } });
++
++    await settle(pending.release);
++
++    const state = useMetadataStore.getState();
++    expect(getCategoryInput().value).toBe("BTyped");
++    expect(state.isDirty).toBe(true);
++    expect(state.modifiedFields.has("category")).toBe(true);
++    expect(useFileStore.getState().metadata[PATH_A]?.category).toBe("R20Cat");
++  });
++
++  it("(x4) selection cleared during the write: editor stays empty, store and toast as usual", async () => {
++    seedSingleA();
++    vi.mocked(window.api.readMetadata).mockResolvedValueOnce({ ...REREAD_A });
++    const pending = deferSingleWrite();
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSaveWith("R20Cat", /Save Tags/);
++    selectPaths([]);
++
++    await settle(pending.release);
++
++    expect(screen.getByText("Select a file to edit metadata")).toBeInTheDocument();
++    expect(useMetadataStore.getState().editingMetadata).toEqual({});
++    expect(useFileStore.getState().metadata[PATH_A]?.category).toBe("R20Cat");
++    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
++  });
++
++  it("(x5) batch all succeeded, A+B -> A during the write: the editor shows A's refreshed values", async () => {
++    const { seedA, seedB } = seedBatchAB();
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValue({
++      [PATH_A]: { ...seedA, category: TYPED_CATEGORY },
++      [PATH_B]: { ...seedB, category: TYPED_CATEGORY },
++    });
++    const pending = deferBatchWrite(ALL_SUCCEEDED);
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSaveWith(TYPED_CATEGORY, /Save to 2 files/);
++    selectPaths([PATH_A]);
++
++    await settle(pending.release);
++
++    expect(getCategoryInput().value).toBe(TYPED_CATEGORY);
++    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved to 2 files");
++    expect(useFileStore.getState().selectedPaths).toEqual([PATH_A]);
++    expect(useMetadataStore.getState().isDirty).toBe(false);
++  });
++
++  it("(x6) batch partial, A+B -> A during the write: the editor shows A's refreshed value, B's entry is kept", async () => {
++    const { seedA, seedB } = seedBatchAB();
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValue({
++      [PATH_A]: { ...seedA, category: TYPED_CATEGORY },
++      [PATH_B]: emptyRecordForPanelSchema(),
++    });
++    const pending = deferBatchWrite(PARTIAL_FAILED);
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSaveWith(TYPED_CATEGORY, /Save to 2 files/);
++    selectPaths([PATH_A]);
++
++    await settle(pending.release);
++
++    expect(getCategoryInput().value).toBe(TYPED_CATEGORY);
++    expect(useMetadataStore.getState().toastMessage).toBe("1 saved, 1 failed");
++    expect(useFileStore.getState().metadata[PATH_B]).toEqual(seedB);
++  });
++
++  it("(x7) pin: the write rejects after A -> B: error toast, editor shows B, store untouched, no re-read", async () => {
++    seedSingleA();
++    const pending = deferSingleWrite();
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSaveWith("R20Cat", /Save Tags/);
++    selectPaths([PATH_B]);
++
++    await settle(() => pending.fail(new Error("EACCES")));
++
++    expect(useMetadataStore.getState().toastMessage).toBe("EACCES");
++    expect(getCategoryInput().value).toBe("BCat");
++    expect(useFileStore.getState().metadata[PATH_A]).toEqual(SEED_A);
++    expect(window.api.readMetadata).not.toHaveBeenCalled();
++  });
++
++  it("(x8) pin: D-24 after A -> B: reload-failed toast, editor shows B, store untouched", async () => {
++    seedSingleA();
++    vi.mocked(window.api.readMetadata).mockRejectedValueOnce(new Error("read down"));
++    const pending = deferSingleWrite();
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSaveWith("R20Cat", /Save Tags/);
++    selectPaths([PATH_B]);
++
++    await settle(pending.release);
++
++    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved, but reloading failed. Rescan to refresh.");
++    expect(getCategoryInput().value).toBe("BCat");
++    expect(useFileStore.getState().metadata[PATH_A]).toEqual(SEED_A);
++  });
++
++  it("(x9) pin: the same set reordered during a batch write behaves as today", async () => {
++    const { seedA, seedB } = seedBatchAB();
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValue({
++      [PATH_A]: { ...seedA, category: TYPED_CATEGORY },
++      [PATH_B]: { ...seedB, category: TYPED_CATEGORY },
++    });
++    const pending = deferBatchWrite(ALL_SUCCEEDED);
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSaveWith(TYPED_CATEGORY, /Save to 2 files/);
++    selectPaths([PATH_B, PATH_A]);
++
++    await settle(pending.release);
++
++    const state = useMetadataStore.getState();
++    expect(state.editingMetadata).toEqual({});
++    expect(state.isDirty).toBe(false);
++    expect(state.toastMessage).toBe("Tags saved to 2 files");
++  });
++
++  it("(x10) pin: A -> B -> A during the write behaves as today", async () => {
++    seedSingleA();
++    vi.mocked(window.api.readMetadata).mockResolvedValueOnce({ ...REREAD_A });
++    const pending = deferSingleWrite();
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSaveWith("R20Cat", /Save Tags/);
++    selectPaths([PATH_B]);
++    selectPaths([PATH_A]);
++
++    await settle(pending.release);
++
++    expect(getCategoryInput().value).toBe("R20Cat");
++    expect(useMetadataStore.getState().isDirty).toBe(false);
++    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
++  });
++
++  it("(x11) batch all succeeded, A+B -> A and typing on A during the write: A's edits and isDirty are kept", async () => {
++    const { seedA, seedB } = seedBatchAB();
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValue({
++      [PATH_A]: { ...seedA, category: TYPED_CATEGORY },
++      [PATH_B]: { ...seedB, category: TYPED_CATEGORY },
++    });
++    const pending = deferBatchWrite(ALL_SUCCEEDED);
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSaveWith(TYPED_CATEGORY, /Save to 2 files/);
++    selectPaths([PATH_A]);
++    fireEvent.change(getCategoryInput(), { target: { value: "ATyped" } });
++
++    await settle(pending.release);
++
++    const state = useMetadataStore.getState();
++    expect(getCategoryInput().value).toBe("ATyped");
++    expect(state.isDirty).toBe(true);
++    expect(state.modifiedFields.has("category")).toBe(true);
++    expect(state.toastMessage).toBe("Tags saved to 2 files");
++  });
++});
