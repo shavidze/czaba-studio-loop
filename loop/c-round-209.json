@@ -1,0 +1,72 @@
+{
+  "round": 209,
+  "taskStatus": "FAIL",
+  "browserVerified": false,
+  "realVerified": false,
+  "envStatus": {
+    "checkedUtc": "2026-10-27T15:11:23.0338363Z",
+    "round": 209,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R209-01",
+      "severity": "medium",
+      "steps": [
+        "cd store",
+        "npx vitest run app/lib/arrangement/__tests__/gesture-guard.test.tsx"
+      ],
+      "expected": "all rows green (or the file granted and the row re-expressed per D-29z179)",
+      "actual": "1 failed: gesture-guard.test.tsx:447 'restores the stored Volume without an entry when the slider blurs mid-drag (D-30 abort)' expected 0.2985 received 1; file not in the 19 grants (A STOP)",
+      "evidence": "tmp/studio-real-loop/c-round-209/out/vitest-stop.log; a-round-209.md STOP section"
+    },
+    {
+      "id": "C-R209-02",
+      "severity": "medium",
+      "steps": [
+        "git -C store status --short",
+        "inspect perf/budgets.json and docs/implementation/2026/quarter-IV/"
+      ],
+      "expected": "48 budgets rows flipped to assert; doc 163 D-29z181 lines fixed; new doc 165 with conditional status; red-proof/mutants and code-review on the final delta",
+      "actual": "perf/budgets.json and doc 163 unmodified; doc 165 absent; red-proof not run (A stopped per L11)",
+      "evidence": "git status in c-round-209.md SCOPE row; a-round-209.md 'Not done because of the STOP'"
+    },
+    {
+      "id": "C-R209-03",
+      "severity": "low",
+      "steps": [
+        "see a-round-209.md 'Observable delta for B'"
+      ],
+      "expected": "behaviour unchanged or an explicitly ruled delta",
+      "actual": "a native Pan change after a stolen claim no longer shows a display-only draft; unruled, untested, not browser-reproduced",
+      "evidence": "a-round-209.md Implementation, Lane bullet 'knowing simplification'"
+    }
+  ],
+  "passed": [
+    "SCOPE-209-start",
+    "G209-3"
+  ],
+  "observedNotClaimed": [
+    "WINDOW-209 (dev build, both viewports: per-move max 1 component, >=101 window commits from below max, 0 pre-move commits, release 1)",
+    "LIVE-DISPLAY-209 (25/50/75 % agree, no snap-back)",
+    "AUDIO-209 (a) (live gain follows, 0 source starts, Ctrl+Z restores)",
+    "GROUP-209 pointercancel + track blur (restored, 0 release commits)"
+  ],
+  "notRun": [
+    "SCOPE-209-end",
+    "AUDIO-209 (b) loop wrap, (c) Space mid-drag",
+    "INVARIANTS-209",
+    "EXPORT-209",
+    "VISUAL-209",
+    "AN-REVIEW-209"
+  ],
+  "gate": [
+    "gate (full vitest, typecheck, build, Biome, verify, e2e smoke)"
+  ],
+  "blocked": [],
+  "failed": [
+    "PERF-RUN-209 (48 budgets rows not flipped; not implemented)",
+    "DOC-209 (doc 165 absent; doc 163 D-29z181 lines not edited)"
+  ]
+}

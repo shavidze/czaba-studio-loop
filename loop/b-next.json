@@ -1,12 +1,12 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 208 PASS (8/8, browserVerified=true, realVerified=true), gate 208 published f535ab3: PERF-FADER-a0 done, C-R206-01/GATE206-S4/GATE207-DOC164-STATUS closed. SABA-B-5 (Medium) remains open; its fix for track/group/master/pan is next (D-29z179, pan joins because its 4 components per move exceed the <=3 budget; tech-lead + performance-optimizer consulted). C-R208-01 Low + R115 fixed in the same round (D-29z181). Large scoped work remains and nothing needs external input, so neither COMPLETE nor BLOCKED.",
- "nextTask": "Round 209 (D-29z179), baseline HEAD f535ab3 (gate 208 published), 1031 files frozen, 19 grants (ArrangementContext, Lane, GroupHeader, Master, 12 fader tests, perf budgets/spec, doc 163) + 5 new files (mix-draft-store.ts, ArrangementMixFader.tsx, 2 tests, doc 165). PERF-FADER-a: pointer drags of track/group/master Volume and Pan write an override ref + live AudioParams only (no updateHistory/syncPlayback per move), withMixOverride in startGraph + syncPlayback (Space, loop wrap), one exact-value history entry on pointerup, cancel restores all group members; draft read only by the ArrangementMixFader leaf (<= 3 components per move); keyboard/Shift/double-click/undo/visuals/export unchanged; 48 budget rows to assert. C rows SCOPE, PERF-RUN x2, WINDOW, LIVE-DISPLAY, AUDIO (loop wrap, Space), GROUP, INVARIANTS and VISUAL vs baseline build, EXPORT bit-identity, DOC, AN-REVIEW, G209-3.",
+ "reason": "C round 209 FAIL (incomplete; browserVerified=false): A stopped correctly on frozen gesture-guard.test.tsx l.447 (mid-gesture model read) and the budgets flips, docs 163/165, red-proof and final review were not done; gate 209 skipped. B ruled every STOP/finding (L10): D-29z183 grant l.447 hunk, D-29z184 WINDOW threshold, D-29z185 draft order kept, D-29z186 pan stolen-claim accepted delta + FP13, D-29z187 review Mediums mandatory + red-proof method. C's own probe of the implemented part looks right but is not a PASS. SABA-B-5 (Medium) stays open; large scoped work remains and nothing needs external input, so neither COMPLETE nor BLOCKED.",
+ "nextTask": "Round 210 (D-29z183..D-29z187), baseline HEAD f535ab3 (gate 209 skipped), resume from the preserved tree; 1030 files frozen, 20 grants (round 209 19 + gesture-guard.test.tsx l.447 hunk only), same 5 new files. A: gesture-guard hunk; FP13 (pan stolen-claim delta), FP14 (pan cancel rows), FP9 group pending; 48 budgets flips + move-window-live note; doc 163 D-29z181 lines; doc 165 (conditional status); test:perf x2; red-proof (start copy + store + hook export; named mutants FP9/11/12/13/14); code-reviewer on the final delta. C: round-209 rows as 210 + SCOPE gesture-guard hunk, WINDOW per D-29z184, AUDIO (b)/(c), GROUP blur, INVARIANTS vs f535ab3 build incl. pan cancel, PAN-DELTA-210, AN-REVIEW FP13/FP14, G210-3.",
  "remaining": [
-  "Round 209 (D-29z179): PERF-FADER-a track/group/master Volume + Pan pointer preview (override + live params, mix-draft-store + ArrangementMixFader leaf, 48 rows to assert) + D-29z181 doc 163 (C-R208-01, R115); SABA-B-5 part 1",
+  "Round 210 (D-29z183..D-29z187): PERF-FADER-a re-dispatch (finish round 209: gesture-guard grant, FP13/FP14/FP9 group, 48 budgets flips, doc 163 + 165, perf x2, red-proof, review); SABA-B-5 part 1",
   "PERF-FADER-b: clip gain single + members (WG4 ruling at planning); SABA-B-5 part 2",
   "PERF-1b (zoom, clip click, range/fade/trim drags, play/pause, export, bytes, DOM, memory; + GATE206-S3/S5/S6; report.ts signal if the spec grows)",
-  "SABA-B-5 (Medium): fader drag slow; part 1 round 209, part 2 PERF-FADER-b",
+  "SABA-B-5 (Medium): fader drag slow; part 1 round 210 (re-dispatch of 209), part 2 PERF-FADER-b",
   "PERF-2",
   "PERF-3",
   "PERF-4",
@@ -38,7 +38,7 @@
   "STUDIO-AGENT-COMMANDS",
   "RECORDING-META-S1",
   "SRW-21 (deferred_user)",
-  "deferred_low_polish (305, + C-R207-01 app.css cursor needs app/styles grant, + GATE206-S1/S2 tooling, incl. new C-R205-01 (scheduled with the next LeadMagnetPopup owner), C-R205-02, GATE205-S1/S3/S7/S8-S9; GATE204-S4 still open)",
+  "deferred_low_polish (310, + A-R209-REVIEW-L-* x5, + C-R207-01 app.css cursor needs app/styles grant, + GATE206-S1/S2 tooling, incl. new C-R205-01 (scheduled with the next LeadMagnetPopup owner), C-R205-02, GATE205-S1/S3/S7/S8-S9; GATE204-S4 still open)",
   "useDialogFocus architecture signal (round 205; not scheduled) + shared-modal-no-focus-management",
   "A-R202-REVIEW-SCROLL-CLIP (Low, backend-blocked)",
   "REGRESSION round due on/after 2026-10-30",
@@ -52,6 +52,8 @@
   "perf architecture signal (perf/lib/report.ts if PERF-1b grows the spec; not scheduled)",
   "ARCH-R207-MIX-PREVIEW-STORE checkpoint addendum (b-round-207-checkpoint-addendum.md, non-blocking)",
   "frontend-architect checkpoint on the ArrangementContext volume machine after PERF-FADER-b (before PERF-8/PERF-10)",
-  "RETRO signal: L28 doc status line published conditional 4x (structural fix proposal)"
+  "RETRO signal: L28 doc status line published conditional 4x (structural fix proposal)",
+  "ARCH-R209-MIX-OVERRIDE signal (pure gesture reducer, single pan-draft owner) -> fold into the post-PERF-FADER-b frontend-architect checkpoint",
+  "I-209-RELEASE-REBUILD (graph rebuild after pointerup/undo while playing) -> PERF-2+ signal"
  ]
 }

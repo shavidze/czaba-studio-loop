@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-27T14:02:36.166Z)
+# Active loop summary (2026-10-27T15:18:21.989Z)
 
-- backlog.json 1874 KB -> active view 268 KB
-- status: G_ROOT_GATE round 208
-- servers: `{"checkedUtc":"2026-10-27T13:33:57.1249681Z","round":208,"attempt":1,"store":200}`
+- backlog.json 1879 KB -> active view 269 KB
+- status: G_ROOT_GATE round 209
+- servers: `{"checkedUtc":"2026-10-27T15:11:23.0338363Z","round":209,"attempt":1,"store":200}`
 - last publication: f535ab3159aae45de86c22c6cca28cbd19568f65 (rounds 208-208)
-- last root gate: round 208 published - commit f535ab3159aae45de86c22c6cca28cbd19568f65 pushed
+- last root gate: round 209 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -475,18 +475,20 @@
 - A-R203-REVIEW-M1 / low / ruled (D-29z169): folded into SYS-3 (see systemic_tasks SYS-3.also_fixes_d29z169); reviewer rated Medium, B rates Low: fail-safe (extra ring only), not reproducible in the cloud browser; Android device check on the Tech Lead list / Android soft keyboard key=Unidentified / IME isComposing keydowns flip focus-source to keyboard (ring mid-typing on Android)
 - A-R203-REVIEW-I1 / info / ruled (D-29z169): folded into SYS-3 with M1 (AltGraph printable keys count as editing) / AltGr (Ctrl+Alt) / macOS Option typing switches focus-source to keyboard
 - B-R203-AUTH-USER-CLIENT-TRUST / info / root_note: not scheduled; no Studio action; protected file (AuthContext.tsx) / A stored localStorage.auth_user without accessToken renders the signed-in header with no backend verification (AuthContext.tsx:93-94 setUser
-- SABA-B-5 / medium / open: in progress - PERF-FADER split a0 (round 208, metric) / a (track+group+master) / b (clip gain) (D-29z176) / Fader drag is slow (Saba 2026-10-27): every pointer move of a track/group volume, master or clip-gain fader re-renders the whole Studio
+- SABA-B-5 / medium / in_progress: part 1 (track/group/master/pan) dispatched round 209 PERF-FADER-a; part 2 clip gain = PERF-FADER-b; before-evidence C round 208 WINDOW-208 (83/85/80/4 components per move commit) / Fader drag is slow (Saba 2026-10-27): every pointer move of a track/group volume, master or clip-gain fader re-renders the whole Studio
 - GATE205-DOC162-STATUS / low / dispatched round 206 (D-29z171, R112: one-line status fix, granted) / Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)
-- C-R206-01 / low / scheduled: round 208 PERF-FADER-a0 replaces event-share-16 with move-to-paint + liveness (D-29z176) / event-share-16 cannot go above 0: Event Timing reports no pointermove and the faders fire 0 native input events during a mouse drag; doc 163
-- GATE206-S4 / low / duplicate_of C-R206-01 (closes with it in round 208) / event-share-16 name/metric mismatch
 - GATE206-S3 / low / scheduled_with PERF-1b / fiber walk depends on React 18 internals (tag/PerformedWork); record renderer.version and fail on unexpected major
 - GATE206-S5 / low / scheduled_with PERF-1b (document or separate build dir) / test:perf webServer rewrites shared build/; collides with a parallel verify/build
 - GATE206-S6 / low / scheduled_with PERF-1b / harness.audio-running is weak with the autoplay flag; require running context + >=1 start() in the playing window
 - I-206-a / info / root_note / fake-Bearer /api/studio-token returns 500 without the :5199 mock (mock not started at job start; no cloud/ folder in the loop folder), 403 w
 - GATE206-DOC163-STATUS / low / scheduled: round 207 R113 (D-29z175) / doc 163 l.4 published still conditional (C round 206 check pending)
-- GATE207-DOC164-STATUS / low / scheduled: round 208 R114 (D-29z178, L28) / doc 164 l.4 published as 'In Progress (C round 207 check pending)'
 - A-R207-01 / low / duplicate_of C-R207-01 / 
 - A-R207-02 / info / tech_lead_manual (non-blocking) / active:cursor-grabbing verified in Chromium only; Firefox/Safari unverified in the cloud
+- C-R208-01 / low / scheduled: round 209 (D-29z181), same owner, not deferred / doc 163 l.16/18/24-31/74/83/151 contradict the a0 harness (row count, wall-clock assert exception, pass sequence, determinism list, TODO)
+- GATE208-DOC163-STATUS / low / scheduled: round 209 R115 (D-29z181, L28 4th time) / doc 163 l.4 published as 'In Progress (... PERF-FADER-a0 C round 208 check pending)'
+- I-208-a / info / ratified D-29z180 (pointerdown commits allowed only with downComponentsMax <= 3) / move window starts at the first move after the in-page pointerdown; -per-move divides by 120
+- I-208-b / info / carried into round 209 WINDOW-209/EXPORT-209 (start below max by keyboard) / track/group drags start at max (endsCase max): high end proves only a return to max
+- I-208-c / info / info, no action / liveness margin 1.2-2.0 ms over the 30 ms busy-wait floor; can only grow under load
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

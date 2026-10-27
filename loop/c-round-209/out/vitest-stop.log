@@ -1,0 +1,40 @@
+     [32m✓[39m keeps a keyboard Volume change pending during a clip drag and writes it before the move[32m 63[2mms[22m[39m
+     [32m✓[39m keeps a gesture whose own element received the pointerup when the window sees it too[32m 26[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1546[2mms[22m[39m
+     [33m[2m✓[22m[39m WG3: a −6 dB clip draws the −6 dB shape (not the scale-1 one); a clip without gainDb draws scale 1 [33m 414[2mms[22m[39m
+     [33m[2m✓[22m[39m WG4: during a single Clip Gain drag the lane follows before release; one entry; Undo restores the exact drawing [33m 364[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain.test.tsx [2m([22m[2m28 tests[22m[2m)[22m[33m 1896[2mms[22m[39m
+       [33m[2m✓[22m[39m type 6 + Enter commits one entry, shows the status and the stored text [33m 433[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain-multi.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 2541[2mms[22m[39m
+     [33m[2m✓[22m[39m MG3: mixed members show an empty field, the range text, the max anchor and a linked description; equal members show the value [33m 709[2mms[22m[39m
+     [33m[2m✓[22m[39m MG4: a +25 px drag over 100 px shifts both by +21.0 with one entry; Undo and Redo move both; two moves are not cumulative [33m 335[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/gesture-guard.test.tsx[2m > [22mD-26 one edit gesture at a time (C-R5-02, R26-U)[2m > [22mrestores the stored Volume without an entry when the slider blurs mid-drag (D-30 abort)
+[31m[1mAssertionError[22m: expected 1 to be 0.29853826189179594 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0.29853826189179594[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/gesture-guard.test.tsx:[2m447:37[22m[39m
+    [90m445| [39m    fireEvent[33m.[39m[34mpointerDown[39m(volume[33m,[39m { [33m...[39mpress[33m,[39m pointerId[33m:[39m [34m4[39m })[33m;[39m
+    [90m446| [39m    fireEvent[33m.[39m[34mchange[39m(volume[33m,[39m { target[33m:[39m { value[33m:[39m [32m'-10.5'[39m } })[33m;[39m
+    [90m447| [39m    [34mexpect[39m([34mtrackVolume[39m(api[33m,[39m [32m'sfx'[39m))[33m.[39m[34mtoBe[39m([34mtrackVolumeFromDb[39m([33m-[39m[34m10.5[39m))[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m448| [39m    fireEvent[33m.[39m[34mblur[39m(volume)[33m;[39m
+    [90m449| [39m    [34mexpect[39m([34mtrackVolume[39m(api[33m,[39m [32m'sfx'[39m))[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m68 passed[39m[22m[90m (69)[39m
+[2m   Start at [22m 15:12:29
+[2m   Duration [22m 5.54s[2m (transform 3.87s, setup 0ms, import 7.22s, tests 7.21s, environment 2.92s)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/gesture-guard.test.tsx,title=app/lib/arrangement/__tests__/gesture-guard.test.tsx > D-26 one edit gesture at a time (C-R5-02%2C R26-U) > restores the stored Volume without an entry when the slider blurs mid-drag (D-30 abort),line=447,column=37::AssertionError: expected 1 to be 0.29853826189179594 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0.29853826189179594%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/gesture-guard.test.tsx:447:37%0A%0A

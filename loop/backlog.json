@@ -1,9 +1,9 @@
 {
- "version": 192,
- "updated": "2026-10-27 (B round 208 -> 209 planning)",
+ "version": 193,
+ "updated": "2026-10-27 (B round 209 -> 210 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 209, D-29z179)",
+ "current_task": "current-task.md (round 210, D-29z183..D-29z187; PERF-FADER-a re-dispatch)",
  "advisor_used_by_B": "2026-10-27 round 205 -> 206 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: PERF-1 split 1a/1b, all of app/ frozen, hook stub + start() counter proven on a scratch prod build before dispatch, C-R205-01 ruled Low but scheduled, doc 162 status fix granted, queue move recorded with a D-ID | previous: 2026-10-26 round 189 -> 190 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: round-179-style fix-up baseline on the uncommitted round-189 tree (frozen 1016 incl. doc 155 at cdf011f9, grants 3), A must reproduce C's fresh-mode CLS and bisec",
  "baseline": {
   "tsc_errors": 0,
@@ -10182,7 +10182,7 @@
    "round": 209,
    "task": "current-task.md",
    "decision": "D-29z179",
-   "status": "dispatched",
+   "status": "c_fail_incomplete",
    "type": "FEATURE STAGE (STUDIO-PERFORMANCE PERF-FADER-a: SABA-B-5 part 1, track/group/master Volume + Pan pointer preview)",
    "items": [
     "pointer path: mixOverrideRef + live graph params, no updateHistory/syncPlayback per move; pending (keyboard/double-click/onChange) path unchanged",
@@ -10195,7 +10195,26 @@
    ],
    "note": "baseline HEAD f535ab3 (gate 208 published); frozen 1031 files b-round-208-r209-tree-sha256.txt; grants b-round-208-r209-grants.txt (19); new files b-round-208-r209-new-files.txt (5); consults tech-lead + performance-optimizer (b-round-208.md section 3); re-measure = C round 208 WINDOW numbers current (diff d2a920c..f535ab3 perf/docs only)",
    "next": "PERF-FADER-b (clip gain), then PERF-1b",
-   "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
+   "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)",
+   "result": "C round 209 FAIL (incomplete; browserVerified false, realVerified false): A STOP (L11) on frozen gesture-guard.test.tsx l.447 mid-gesture model read; 48 budgets flips, doc 163 D-29z181 lines, doc 165, red-proof and final code-review not done. Passed only SCOPE-209-start and G209-3 (auth guard: /studio-lab anonymous, /studio/middle-east sign-in required, token 401/500, no token). C's own browser probe observed (not claimed): 4 faders 1 component max per move, 0 source starts during drag, 1 release commit, Ctrl+Z restores, cancel/blur restore with 0 commits. Gate 209 skipped; tree preserved (9 M + 4 new) for the round 210 re-dispatch (D-29z183..D-29z187)."
+  },
+  {
+   "round": 210,
+   "task": "current-task.md",
+   "decision": "D-29z183..D-29z187",
+   "status": "dispatched",
+   "type": "FEATURE STAGE re-dispatch (STUDIO-PERFORMANCE PERF-FADER-a: SABA-B-5 part 1, finish)",
+   "items": [
+    "D-29z183 gesture-guard.test.tsx l.447 hunk only (C-R209-01)",
+    "FP13 pan stolen-claim accepted delta (D-29z186, C-R209-03)",
+    "FP14 pan cancel rows + FP9 group pending (review Mediums, D-29z187)",
+    "48 budgets.json flips + move-window-live note",
+    "doc 163 D-29z181 lines + doc 165",
+    "test:perf x2, red-proof (start copy + store + hook export; named mutants FP9/11/12/13/14), code-reviewer on final delta"
+   ],
+   "note": "baseline HEAD f535ab3 (gate 209 skipped); resume from the current tree (no revert); frozen 1030 files b-round-209-r210-tree-sha256.txt; grants b-round-209-r210-grants.txt (20); new files b-round-209-r210-new-files.txt (5); round-209 task sections 1-4 binding (tasks/round-209.md)",
+   "next": "PERF-FADER-b (clip gain), then frontend-architect checkpoint on the volume machine, then PERF-1b",
+   "added": "2026-10-27 B round 209 -> 210 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -22721,7 +22740,7 @@
    "hypothesis_rejected": "root's 'syncPlayback rebuilds the graph per move' is not supported by source (scheduleKey excludes tracks/master/gainDb) nor by the probe (0 restarts); kept as an asserted harness row (0 restarts while playing).",
    "plan": "PERF-1a (round 206) measures it (fader scenarios x stopped/playing, record mode); PERF-FADER (first PERF task after PERF-1) fixes it following the pan pattern; budgets <=3 committed components per move, 0 restarts, export of a dragged mix bit-identical to typed values",
    "origin": "Saba (user report) + root code fact",
-   "status": "in_progress: part 1 (track/group/master/pan) dispatched round 209 PERF-FADER-a; part 2 clip gain = PERF-FADER-b; before-evidence C round 208 WINDOW-208 (83/85/80/4 components per move commit)",
+   "status": "in_progress: part 1 PERF-FADER-a round 209 C FAIL incomplete (STOP ruled), re-dispatched round 210 (D-29z183..D-29z187); part 2 clip gain = PERF-FADER-b; before-evidence C round 208 WINDOW-208",
    "added": "2026-10-27 B round 205 -> 206 planning (D-29z171)",
    "measured_c_round_206": "C round 206 (independent probe + harness, identical runs): components/commit stopped/playing track 83/83, group 85/85, master 80/80, pan 4/4, clipgain 79/87; restarts while playing 0 in all 10 rows (1x and 6x); 6x playing frame p95 33.4 ms (track/group/master), 33.3 (pan), 66.7 ms (clipgain, 136-147 frames >33 ms, 74 LoAF); evidence c-round-206/out/run1.json, run2.json, cprobe-1440.json"
   },
@@ -22871,6 +22890,73 @@
    "title": "liveness margin 1.2-2.0 ms over the 30 ms busy-wait floor; can only grow under load",
    "status": "info, no action",
    "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
+  },
+  {
+   "id": "C-R209-01",
+   "severity": "medium",
+   "origin": "C round 209",
+   "title": "frozen gesture-guard.test.tsx l.447 reads the model mid pointer gesture; red on the round-209 tree",
+   "evidence": "c-round-209/out/vitest-stop.log; a-round-209.md STOP",
+   "status": "scheduled: round 210 (D-29z183 grant, l.447 hunk only, A's re-expression)",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "C-R209-02",
+   "severity": "medium",
+   "origin": "C round 209",
+   "title": "PERF-FADER-a mandatory deliverables missing (48 budgets flips, doc 163 D-29z181 lines, doc 165, red-proof, final code-review)",
+   "evidence": "c-round-209.md SCOPE/DOC rows; a-round-209.md 'Not done because of the STOP'",
+   "status": "scheduled: round 210 (A section 2 items 3-6)",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "C-R209-03",
+   "severity": "low",
+   "origin": "C round 209 (A declared)",
+   "title": "native Pan change after a stolen claim no longer shows a display-only draft",
+   "evidence": "a-round-209.md Lane bullet; ArrangementContext.tsx previewTrackPan guard l.2799; baseline ArrangementLane.tsx l.455-459 setPanDraft",
+   "status": "ruled D-29z186: accepted delta (old display showed a value with no audio); FP13 + C PAN-DELTA-210 in round 210",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "A-R209-REVIEW-PAN-CANCEL",
+   "severity": "medium",
+   "origin": "A round 209 code-reviewer",
+   "title": "no pan cancel rows (pointercancel, blur, stolen claim)",
+   "status": "scheduled: round 210 FP14 (D-29z187)",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "A-R209-REVIEW-GROUP-PENDING",
+   "severity": "medium",
+   "origin": "A round 209 code-reviewer",
+   "title": "no test of the group fader pending path (keyboard/double-click)",
+   "status": "scheduled: round 210 FP9 extension (D-29z187)",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "A-R209-REVIEW-LOWS",
+   "severity": "low",
+   "origin": "A round 209 code-reviewer",
+   "title": "draft clear before applyEdit (ruled keep D-29z185); takeMixOverride without kind; two owners of pan-draft clear; withMixOverride export unused outside module; test-count details",
+   "status": "filed individually in deferred_low_polish (A-R209-REVIEW-L-*); draft-order Low ruled keep D-29z185 (closed); pan-reset disabled Low is baseline-identical (info)",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "I-209-WINDOW-THRESHOLD",
+   "severity": "info",
+   "origin": "A/C round 209",
+   "title": "harness window commits 78-105 (starts at max, I-208-b clamp; pan grid repeats) vs C's >=100 criterion",
+   "status": "ruled D-29z184: >=100 only for C's below-max run; otherwise value-changing moves commit + harness +-2 on component counts",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "I-209-RELEASE-REBUILD",
+   "severity": "info",
+   "origin": "C round 209 probe",
+   "title": "while playing, the graph is rebuilt after pointerup and after Ctrl+Z (pre-existing edit-during-playback rebuild, perf-plan 1.5); no rebuild during the drag; rebuilt graph carries the committed value",
+   "status": "signal for PERF-2+ (not scheduled now)",
+   "added": "2026-10-27 B round 209 -> 210 planning"
   }
  ],
  "tech_lead_notes": [
@@ -24589,6 +24675,14 @@
    "proposal": "keep (reviewer verdict; perf-only, no app invariant, no planner proposal)",
    "status": "signal_recorded_not_scheduled",
    "added": "2026-10-27 B round 208 -> 209 planning (D-29z179)"
+  },
+  {
+   "id": "ARCH-R209-MIX-OVERRIDE",
+   "source": "a-round-209.md code-reviewer Architecture note",
+   "signals": "Signal 4 (mixOverrideRef, mixDraftStore, writeLiveMixGains/takeMixOverride, unmount in ArrangementContext.tsx); Signal 2 (pan draft cleared by lane and context)",
+   "verdict": "keep (reviewer); proposal: pure gesture->override->commit/revert reducer in lib/arrangement with a single pan-draft owner",
+   "status": "recorded; folded into the frontend-architect checkpoint requested after PERF-FADER-b; not scheduled",
+   "added": "2026-10-27 B round 209 -> 210 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -27967,6 +28061,56 @@
    "ruling": "D-29z177: not a regression (pre-existing, B's 207 probe skipped pointer, the CUR-VIDEO handle clause rested on an unmeasured premise); Low; deferred to the polish pass; fix needs a narrow grant of protected app/styles/app.css (layer the rule or remove it) - root decides at the polish pass",
    "status": "deferred_low_polish",
    "added": "2026-10-27 B round 207 -> 208 planning (D-29z176)"
+  },
+  {
+   "id": "A-R209-REVIEW-L-TAKE-KIND",
+   "severity": "low",
+   "origin": "A round 209 code-reviewer",
+   "title": "takeMixOverride takes the override whatever its kind; cross-kind leakage prevented only by the one-claim invariant (suggest takeMixOverride(kind))",
+   "evidence": "a-round-209.md code-reviewer findings (score 8.5/10)",
+   "repro": "a-round-209.md 'code-reviewer' section",
+   "ruling": "D-29z187: recorded under the 2026-10-23 bug gate; optional in round 210 (D-29z187) if small; otherwise with the PERF-FADER-b owner",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "A-R209-REVIEW-L-PAN-DRAFT-OWNERS",
+   "severity": "low",
+   "origin": "A round 209 code-reviewer",
+   "title": "pan draft cleared by both ArrangementLane (window blur) and ArrangementContext",
+   "evidence": "a-round-209.md code-reviewer findings (score 8.5/10)",
+   "repro": "a-round-209.md 'code-reviewer' section",
+   "ruling": "D-29z187: recorded under the 2026-10-23 bug gate; fold into ARCH-R209-MIX-OVERRIDE checkpoint (single owner)",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "A-R209-REVIEW-L-EXPORT-UNUSED",
+   "severity": "low",
+   "origin": "A round 209 code-reviewer",
+   "title": "withMixOverride exported but only used inside the module; FP3 computes expected gains via setTrackGroupMix",
+   "evidence": "a-round-209.md code-reviewer findings (score 8.5/10)",
+   "repro": "a-round-209.md 'code-reviewer' section",
+   "ruling": "D-29z187: recorded under the 2026-10-23 bug gate; polish pass",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "A-R209-REVIEW-L-TEST-DETAILS",
+   "severity": "low",
+   "origin": "A round 209 code-reviewer",
+   "title": "leaf render count >= 4 sums over instances; FP11 tracks only pointer* window listeners, not blur; master-ui re-expressions assert via the store (hook-level); devtools-hook probe depends on React internals",
+   "evidence": "a-round-209.md code-reviewer findings (score 8.5/10)",
+   "repro": "a-round-209.md 'code-reviewer' section",
+   "ruling": "D-29z187: recorded under the 2026-10-23 bug gate; polish pass",
+   "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "A-R209-REVIEW-L-WRITE-ALL-TRACKS",
+   "severity": "low",
+   "origin": "A round 209 code-reviewer",
+   "title": "writeLiveMixGains('tracks') writes every track gain per move (task's literal design)",
+   "evidence": "a-round-209.md code-reviewer findings (score 8.5/10)",
+   "repro": "a-round-209.md 'code-reviewer' section",
+   "ruling": "D-29z187: recorded under the 2026-10-23 bug gate; PERF-2+ review",
+   "added": "2026-10-27 B round 209 -> 210 planning"
   }
  ],
  "baseline_tree_at_round108": {
