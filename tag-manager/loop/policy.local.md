@@ -35,3 +35,10 @@
   - keep the job timeout as a backstop.
 - Root can read the Actions status of `TCzaba/czaba-tag-manager` and will record the green run that closes TM-T0-CI. A, C and B cannot see Actions from the runner: C proves the workflow locally (same commands, same order) and lists the step timings it measured.
 - **Update (root, 2026-10-26 13:45 UTC):** the next `Check` run is green: run `40331357825` on `c768567`, every step `success` in 1 min 24 s (apt step 19 s, lint/types/unit 16 s, build 4 s, E2E 8 s). This is the green run that TM-T0-CI asked root to link. The earlier hang was intermittent. The apt hardening above stays a small follow-up and does not block TM-T1.
+
+## Root note — `.claude/**` edits allowed (Saba, 2026-10-27)
+
+- Saba chose path **(b)** for round 12: agents may edit `.claude/**` in the repository.
+- How: the job's user settings (`~/.claude/settings.json`, written by `tag-manager-loop.yml`) register a `PermissionRequest` hook, `tag-manager/cloud/allow-claude-dir.py`. It approves Edit/Write on paths under the repository's `.claude/`, except `.claude/settings*` and `.claude/hooks/**`, which stay refused. Root tested it headless (`claude -p`, `acceptEdits`): an Edit under `.claude/primitives/` went through, a Write to `.claude/settings.json` was refused. An allow rule alone does not cover protected paths, so the hook is the approval.
+- Round 12 runs as `current-task.md` describes for path (b): A makes the `### Save flow` edit with the Edit tool and records path (b) in `a-round-12.md`. The no-Bash-write rule for `.claude/**` still holds. If Edit is refused again, A stops and reports BLOCKED as written.
+- This permission is standing for later rounds too (for example C-R1-03 `TESTING.md`), within each round's file ownership.
