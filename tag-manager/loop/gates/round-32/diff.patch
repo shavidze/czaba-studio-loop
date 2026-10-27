@@ -1,0 +1,317 @@
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index 8eb6c87..39dd76c 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -31,6 +31,7 @@ Stale schema re-read (D-34): confirmed writes call markPathsWritten (writeGenera
+ Stale folder read (D-35): readMetadataChunked(paths, schema, getWriteGeneration) calls getWriteGeneration() before each chunk and returns readGenerations (result paths only); applyMetadataRead(read, readGenerations, keptPaths) replaces metadata and keeps the current store entry for superseded paths (stamp > read generation; no entry → absent); Rescan, Open Folder and drop use it; error paths: Open Folder/drop setFiles([]) + setMetadata({}), Rescan toast only; empty folder: setMetadata({}) in all three (D-37)
+ Rejected folder-read chunk (D-36): readMetadataChunked also returns failedPaths (every path of every rejected chunk, failures = failedPaths.length); applyMetadataRead(read, readGenerations, keptPaths) gets failedPaths as keptPaths and keeps the current store entry for each (taken at store-write time; no entry → absent); Rescan, Open Folder and drop show 'Failed to read N files' (error) when failures > 0
+ Overlapping folder loads (D-38): handleOpenFolder (after the dialog), handleRescan and App openFolder take useFileStore.getState().beginFolderLoad() first; after scanFolder, after readMetadataChunked and in catch a load that is no longer isFolderLoadCurrent(loadId) returns without store writes or toast; finally clears isScanning only for the current load; handleCloseFolder calls beginFolderLoad() and setIsScanning(false). folderLoadId is never reset.
++Late re-reads after a folder switch (D-39): handleSave writes its re-read into the store only for paths still listed in useFileStore files (isListedPath), never keyed on folderLoadId because Rescan also begins a load; handleSchemaChanged takes folderLoadId at start and returns without store writes, editor change or toast when it is no longer current; App openFolder's schema-wait loop returns when its load is superseded.
+ ```
+ 
+ ### Template apply (batch-safe)
+diff --git a/docs/bugs/001-save-and-selection-known-limits.md b/docs/bugs/001-save-and-selection-known-limits.md
+index 731f748..266e4f0 100644
+--- a/docs/bugs/001-save-and-selection-known-limits.md
++++ b/docs/bugs/001-save-and-selection-known-limits.md
+@@ -1,20 +1,21 @@
+ # 001 — Save და selection: ცნობილი შეზღუდვები (D-29, D-30, D-31)
+ 
+-**სტატუსი:** ცნობილი შეზღუდვების სია. ბაგი, რომელიც გასწორებას ელოდება, აქ არ არის. გასწორებული ჩანაწერები (3), (9), (11), (12), (13) და (14) ისტორიისთვის რჩება.
+-**წყარო:** TM-B26 (round 23), TM-B27 (round 24), TM-B29 (round 26), TM-B30 (round 28), TM-B31 (round 29), TM-B32 (round 30), TM-B33 (round 31). ID-ები loop-ის backlog-იდანაა.
+-**კოდი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` (`handleSave`, sync effect, `handleSchemaChanged`), `src/renderer/src/components/file-list/FileList.tsx` (`handleClick`, anchor), `src/renderer/src/stores/file-store.ts` (`selectRange`, `markPathsWritten`, `applyMetadataRead`, `beginFolderLoad`/`isFolderLoadCurrent`), `src/renderer/src/components/sidebar/FolderBrowser.tsx` (`handleOpenFolder`, `handleRescan`, `handleCloseFolder`), `src/renderer/src/App.tsx` (`openFolder`), `src/renderer/src/lib/utils.ts` (`readMetadataChunked`).
++**სტატუსი:** ცნობილი შეზღუდვების სია. ბაგი, რომელიც გასწორებას ელოდება, აქ არ არის. გასწორებული ჩანაწერები (3), (9), (11), (12), (13), (14) და (15) ისტორიისთვის რჩება.
++**წყარო:** TM-B26 (round 23), TM-B27 (round 24), TM-B29 (round 26), TM-B30 (round 28), TM-B31 (round 29), TM-B32 (round 30), TM-B33 (round 31), TM-B34 (round 32). ID-ები loop-ის backlog-იდანაა.
++**კოდი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` (`handleSave`, `isListedPath`, sync effect, `handleSchemaChanged`), `src/renderer/src/components/file-list/FileList.tsx` (`handleClick`, anchor), `src/renderer/src/stores/file-store.ts` (`selectRange`, `markPathsWritten`, `applyMetadataRead`, `beginFolderLoad`/`isFolderLoadCurrent`), `src/renderer/src/components/sidebar/FolderBrowser.tsx` (`handleOpenFolder`, `handleRescan`, `handleCloseFolder`), `src/renderer/src/App.tsx` (`openFolder`, schema-ს ლოდინის loop), `src/renderer/src/lib/utils.ts` (`readMetadataChunked`).
+ 
+ გადაწყვეტილებები მოკლედ:
+ - **D-29:** თუ save-ის დროს selection შეიცვალა (set-ად შედარებით), ფაილის მხარის განახლებები რჩება, მაგრამ ფორმას ეს save არ ეხება (`skipSyncRef` არ დგება, `setEditingMetadata` არ იძახება).
+ - **D-30:** იგივე selection-ზე save-ის დროს აკრეფილი ველები (`modifiedFields`-ის key-ები, რომელთა მნიშვნელობა start snapshot-ისგან განსხვავდება) re-read-ის შემდეგ `mergeFields`-ით ბრუნდება. start snapshot-ს D-32 განსაზღვრავს.
+ - **D-32:** `handleSave` save-ის დასაწყისში ერთხელ კითხულობს `useMetadataStore.getState().editingMetadata`-ს. ეს ერთი მნიშვნელობა გამოიყენება single write-ის payload-ად, batch payload-ად (`modifiedFields`-ის key-ები) და D-30-ის შედარებისთვის. ხილული ქცევა არ იცვლება.
+ - **D-31:** Shift-click anchor ინახება file path-ად. ყოველი click (plain, Ctrl/Cmd, Shift) anchor-ს clicked row-ზე აყენებს. anchor იშლება, როცა selection ცარიელი ხდება.
+-- **D-33:** (1) `handleSave`-ის post-save re-read (`readMetadata` და `readMetadataBatch`) schema-ს re-read-ის მომენტში კითხულობს (`useSchemaStore.getState().fields`); write კვლავ click-ის დროის `fields`-ს იყენებს. (2) `handleSchemaChanged`-ში chunk-ის `readMetadataBatch` თუ reject-დება, ამ chunk-ის path-ებს store-ის მიმდინარე entry რჩება (D-22-ის მსგავსად); entry აიღება მაშინ, როცა `handleSchemaChanged` store-ში წერს ბოლო chunk-ის შემდეგ, და არა chunk-ის reject-ის მომენტში (D-34, `MetadataPanel.tsx:239-243`); entry-ის გარეშე path-ები ისევ არ ემატება. failures-ის რაოდენობა და toast `Failed to read N files` უცვლელია. (3) შენარჩუნებული (ხელახლა არ წაკითხული) entry ფორმას არ ცვლის: single selection-ზე `setEditingMetadata` მხოლოდ ახლად წაკითხული entry-ით იძახება, ამიტომ შეუნახავი edits და save-ის დროს აკრეფილი ველები (D-30) რჩება (A-R24-01). შენარჩუნებული entry ძველი schema-თი იყო წაკითხული, ამიტომ ამ schema-ს ცვლილებით დამატებულ ველს ამ ფაილისთვის მნიშვნელობა არ აქვს შემდეგ წარმატებულ read-მდე (rescan ან folder-ის ხელახლა გახსნა, ამ ფაილის save-ის re-read, ან schema-ს შემდეგი ცვლილება წარმატებული read-ით). სხვა ფაილზე გადასვლა და დაბრუნება ფაილს ხელახლა არ კითხულობს: ფორმა store-ის entry-ს აჩვენებს (`MetadataPanel.tsx:116`). ამას toast `Failed to read N files` აცნობებს (RR-R24-01).
+-- **D-34:** stale-result guard schema-ს re-read-ისთვის. ყოველი დადასტურებული write (single `writeMetadata`-ის შემდეგ, batch `writeMetadataBatch`-ის შემდეგ მხოლოდ `result.failed`-ში არმყოფ path-ებზე) იძახებს `markPathsWritten`-ს (`MetadataPanel.tsx:140`, `:170`): ის `writeGeneration`-ს ზრდის 1-ით და ამ path-ებს `pathWriteGenerations[path]`-ში ახალ მნიშვნელობას უწერს (`file-store.ts:126-134`). rejected write არაფერს ნიშნავს. `handleSchemaChanged` ყოველი chunk-ის `readMetadataBatch`-ის წინ `writeGeneration`-ს იმახსოვრებს (`MetadataPanel.tsx:219`). შედარება ერთხელ ხდება, store-ში ჩაწერისას (`:232`): path, რომლის `pathWriteGenerations` chunk-ის generation-ზე მეტია, superseded-ია. superseded და kept (reject-ებული chunk) path-ები store-ის მიმდინარე entry-ს იღებენ (`:239-242`) და ფორმას არ ცვლიან (`:247`). generation-ები app-ის სიცოცხლის განმავლობაში მხოლოდ იზრდება (`setMetadata`, `setFiles` და folder-ის ცვლილება მათ არ ეხება). schema editor არ იკეტება.
+-- **D-35:** stale-result guard folder-ის read-ისთვის (Rescan, Open Folder, drop). `readMetadataChunked` ყოველი chunk-ის `readMetadataBatch`-ის წინ ერთხელ იძახებს `getWriteGeneration()`-ს (`lib/utils.ts:64`) და შედეგში `readGenerations`-ს აბრუნებს: chunk-ის **result**-ის ყოველ path-ს ამ chunk-ის generation (`:68-70`); reject-ებული chunk `readGenerations`-ში არაფერს ამატებს. პარამეტრი სავალდებულოა, ხოლო `lib/utils.ts` store-ს არ import-ავს (გამომძახებელი გადასცემს `() => useFileStore.getState().writeGeneration`-ს). ახალი action `applyMetadataRead(read, readGenerations, keptPaths)` (`file-store.ts:136-153`) `metadata`-ს `setMetadata`-ს მსგავსად ცვლის (`read`-ში არმყოფი path ქრება, თუ ის `keptPaths`-ში არ არის, D-36); path, რომლის `pathWriteGenerations` read-ის generation-ზე მეტია (`:140`), superseded-ია და store-ის მიმდინარე entry-ს იღებს, ან საერთოდ არ ემატება, თუ entry არ არსებობს (`:145-146`); ტოლი generation გამოიყენება. მას იძახებენ `handleOpenFolder` (`FolderBrowser.tsx:113-129`), `handleRescan` (`:171-187`) და App-ის `openFolder` (`App.tsx:65-81`, drop). error path-ები: Open Folder და drop `catch`-ში იძახებენ `setFiles([])`-ს, `setMetadata({})`-ს და toast-ს (`FolderBrowser.tsx:133-139`, `App.tsx:85-91`); Rescan-ის `catch` მხოლოდ toast-ს აჩვენებს, `files` და `metadata` რჩება (`FolderBrowser.tsx:191-195`). ცარიელი folder (WAV-ის გარეშე): სამივე გამომძახებელი `else`-ში `setMetadata({})`-ს იძახებს (`FolderBrowser.tsx:130-132`, `:188-190`, `App.tsx:82-84`; D-37). Rescan / Open Folder / drop save-ის დროს არ იკეტება (ჩაკეტვა Saba-ს ვარიანტია, B-R27-02).
+-- **D-36:** reject-ებული folder-read chunk (Rescan, Open Folder, drop). `readMetadataChunked` შედეგში `failedPaths`-საც აბრუნებს: ყოველი reject-ებული chunk-ის ყველა path, `paths`-ის რიგით (`lib/utils.ts:72`); `failures` უდრის `failedPaths.length`-ს (`:75`). `applyMetadataRead`-ის მესამე პარამეტრი `keptPaths` სავალდებულოა (`file-store.ts:36`): D-35-ის loop-ის შემდეგ ყოველ kept path-ს store-ის მიმდინარე entry რჩება, აღებული store-ში ჩაწერის მომენტში (იმავე `set`-ში), ან path საერთოდ არ ემატება, თუ entry არ არსებობს (`:148-151`). სამივე გამომძახებელი `failedPaths`-ს გადასცემს (`FolderBrowser.tsx:126`, `:184`, `App.tsx:78`) და `failures > 0`-ზე აჩვენებს toast-ს `Failed to read N files` (`FolderBrowser.tsx:127-129`, `:185-187`, `App.tsx:79-81`), D-33-ის ტექსტით (`MetadataPanel.tsx:252`). error path-ები, ცარიელი folder და `handleCloseFolder` D-36-მა არ შეცვალა (ცარიელი folder-ი შემდეგ D-37-მა შეცვალა).
+-- **D-37:** ცარიელი folder (scan აბრუნებს `[]`) `metadata`-ს წმენდს სამივე გამომძახებელში: `handleOpenFolder` (`FolderBrowser.tsx:130-132`), `handleRescan` (`:188-190`, უკვე round 30-მდე) და App-ის `openFolder` (`App.tsx:82-84`, drop) `if (wavFiles.length > 0)`-ის `else`-ში `setMetadata({})`-ს იძახებენ. `readMetadataBatch` არ იძახება, toast არ ჩნდება, `setFiles(wavFiles)` უცვლელია. ასე ცარიელი folder-ის შემდეგ ძველი folder-ის entry-ები store-ში აღარ რჩება და ძველი folder-ის ხელახლა გახსნისას reject-ებული read მათ მიმდინარედ აღარ აჩვენებს (ისევე, როგორც D-36 (k5) სხვა არაცარიელ folder-ზე). ჩანაწერი (13).
+-- **D-38:** ერთმანეთზე გადაფარული folder load-ები (Open Folder, Rescan, drop, Close Folder) latest-wins-ია. `FileState`-ს აქვს `folderLoadId: number` (`file-store.ts:16`, საწყისი `0`, `:52`), რომელიც მხოლოდ იზრდება და არასოდეს reset-დება (`reset-stores.ts`-იც არ ცვლის). action `beginFolderLoad()` (`:38`, `:155-158`) `folderLoadId`-ს 1-ით ზრდის და ახალ მნიშვნელობას აბრუნებს; `isFolderLoadCurrent(loadId)` (`:161-163`) ამოწმებს, ისევ ეს load არის თუ არა ბოლო. `handleOpenFolder` id-ს dialog-ის შემდეგ იღებს (`FolderBrowser.tsx:99`, `if (!path) return;`-ის შემდეგ, ამიტომ გაუქმებული dialog მიმდინარე load-ს არ აუქმებს), `handleRescan` `if (!folderPath) return;`-ის შემდეგ (`:158`), App-ის `openFolder` პირველივე ხაზზე (`App.tsx:44`, player-ის stop-მდე და schema-ს ლოდინამდე). სამივეში `scanFolder`-ის შემდეგ (`FolderBrowser.tsx:107`, `:165`, `App.tsx:59`), `readMetadataChunked`-ის შემდეგ (`FolderBrowser.tsx:123`, `:181`, `App.tsx:75`) და `catch`-ის პირველ ხაზზე (`FolderBrowser.tsx:134`, `:192`, `App.tsx:86`) load, რომელიც აღარ არის მიმდინარე, store-ში არაფერს წერს და toast-ს არ აჩვენებს; `finally` `isScanning`-ს მხოლოდ მიმდინარე load-ისთვის აქრობს (`FolderBrowser.tsx:141`, `:197`, `App.tsx:93`). `handleCloseFolder` იძახებს `beginFolderLoad()`-ს და `setIsScanning(false)`-ს (`FolderBrowser.tsx:146-147`), ამიტომ pending load დახურულ folder-ს ვეღარ ავსებს და spinner Close-ზე ჩერდება. `setFolderPath`, `clearSelection()` და player-ის stop load-ის დასაწყისში სინქრონულად რჩება; D-35/D-36/D-37 მიმდინარე load-ის შიგნით უცვლელია; Rescan კვლავ `disabled={isScanning}`-ია. ჩანაწერი (14).
++- **D-33:** (1) `handleSave`-ის post-save re-read (`readMetadata` და `readMetadataBatch`) schema-ს re-read-ის მომენტში კითხულობს (`useSchemaStore.getState().fields`); write კვლავ click-ის დროის `fields`-ს იყენებს. (2) `handleSchemaChanged`-ში chunk-ის `readMetadataBatch` თუ reject-დება, ამ chunk-ის path-ებს store-ის მიმდინარე entry რჩება (D-22-ის მსგავსად); entry აიღება მაშინ, როცა `handleSchemaChanged` store-ში წერს ბოლო chunk-ის შემდეგ, და არა chunk-ის reject-ის მომენტში (D-34, `MetadataPanel.tsx:247-251`); entry-ის გარეშე path-ები ისევ არ ემატება. failures-ის რაოდენობა და toast `Failed to read N files` უცვლელია. (3) შენარჩუნებული (ხელახლა არ წაკითხული) entry ფორმას არ ცვლის: single selection-ზე `setEditingMetadata` მხოლოდ ახლად წაკითხული entry-ით იძახება, ამიტომ შეუნახავი edits და save-ის დროს აკრეფილი ველები (D-30) რჩება (A-R24-01). შენარჩუნებული entry ძველი schema-თი იყო წაკითხული, ამიტომ ამ schema-ს ცვლილებით დამატებულ ველს ამ ფაილისთვის მნიშვნელობა არ აქვს შემდეგ წარმატებულ read-მდე (rescan ან folder-ის ხელახლა გახსნა, ამ ფაილის save-ის re-read, ან schema-ს შემდეგი ცვლილება წარმატებული read-ით). სხვა ფაილზე გადასვლა და დაბრუნება ფაილს ხელახლა არ კითხულობს: ფორმა store-ის entry-ს აჩვენებს (`MetadataPanel.tsx:120`). ამას toast `Failed to read N files` აცნობებს (RR-R24-01).
++- **D-34:** stale-result guard schema-ს re-read-ისთვის. ყოველი დადასტურებული write (single `writeMetadata`-ის შემდეგ, batch `writeMetadataBatch`-ის შემდეგ მხოლოდ `result.failed`-ში არმყოფ path-ებზე) იძახებს `markPathsWritten`-ს (`MetadataPanel.tsx:144`, `:174`): ის `writeGeneration`-ს ზრდის 1-ით და ამ path-ებს `pathWriteGenerations[path]`-ში ახალ მნიშვნელობას უწერს (`file-store.ts:126-134`). rejected write არაფერს ნიშნავს. `handleSchemaChanged` ყოველი chunk-ის `readMetadataBatch`-ის წინ `writeGeneration`-ს იმახსოვრებს (`MetadataPanel.tsx:226`). შედარება ერთხელ ხდება, store-ში ჩაწერისას (`:240`): path, რომლის `pathWriteGenerations` chunk-ის generation-ზე მეტია, superseded-ია. superseded და kept (reject-ებული chunk) path-ები store-ის მიმდინარე entry-ს იღებენ (`:247-250`) და ფორმას არ ცვლიან (`:255`). generation-ები app-ის სიცოცხლის განმავლობაში მხოლოდ იზრდება (`setMetadata`, `setFiles` და folder-ის ცვლილება მათ არ ეხება). schema editor არ იკეტება.
++- **D-35:** stale-result guard folder-ის read-ისთვის (Rescan, Open Folder, drop). `readMetadataChunked` ყოველი chunk-ის `readMetadataBatch`-ის წინ ერთხელ იძახებს `getWriteGeneration()`-ს (`lib/utils.ts:64`) და შედეგში `readGenerations`-ს აბრუნებს: chunk-ის **result**-ის ყოველ path-ს ამ chunk-ის generation (`:68-70`); reject-ებული chunk `readGenerations`-ში არაფერს ამატებს. პარამეტრი სავალდებულოა, ხოლო `lib/utils.ts` store-ს არ import-ავს (გამომძახებელი გადასცემს `() => useFileStore.getState().writeGeneration`-ს). ახალი action `applyMetadataRead(read, readGenerations, keptPaths)` (`file-store.ts:136-153`) `metadata`-ს `setMetadata`-ს მსგავსად ცვლის (`read`-ში არმყოფი path ქრება, თუ ის `keptPaths`-ში არ არის, D-36); path, რომლის `pathWriteGenerations` read-ის generation-ზე მეტია (`:140`), superseded-ია და store-ის მიმდინარე entry-ს იღებს, ან საერთოდ არ ემატება, თუ entry არ არსებობს (`:145-146`); ტოლი generation გამოიყენება. მას იძახებენ `handleOpenFolder` (`FolderBrowser.tsx:113-129`), `handleRescan` (`:171-187`) და App-ის `openFolder` (`App.tsx:66-82`, drop). error path-ები: Open Folder და drop `catch`-ში იძახებენ `setFiles([])`-ს, `setMetadata({})`-ს და toast-ს (`FolderBrowser.tsx:133-139`, `App.tsx:86-92`); Rescan-ის `catch` მხოლოდ toast-ს აჩვენებს, `files` და `metadata` რჩება (`FolderBrowser.tsx:191-195`). ცარიელი folder (WAV-ის გარეშე): სამივე გამომძახებელი `else`-ში `setMetadata({})`-ს იძახებს (`FolderBrowser.tsx:130-132`, `:188-190`, `App.tsx:83-85`; D-37). Rescan / Open Folder / drop save-ის დროს არ იკეტება (ჩაკეტვა Saba-ს ვარიანტია, B-R27-02).
++- **D-36:** reject-ებული folder-read chunk (Rescan, Open Folder, drop). `readMetadataChunked` შედეგში `failedPaths`-საც აბრუნებს: ყოველი reject-ებული chunk-ის ყველა path, `paths`-ის რიგით (`lib/utils.ts:72`); `failures` უდრის `failedPaths.length`-ს (`:75`). `applyMetadataRead`-ის მესამე პარამეტრი `keptPaths` სავალდებულოა (`file-store.ts:36`): D-35-ის loop-ის შემდეგ ყოველ kept path-ს store-ის მიმდინარე entry რჩება, აღებული store-ში ჩაწერის მომენტში (იმავე `set`-ში), ან path საერთოდ არ ემატება, თუ entry არ არსებობს (`:148-151`). სამივე გამომძახებელი `failedPaths`-ს გადასცემს (`FolderBrowser.tsx:126`, `:184`, `App.tsx:79`) და `failures > 0`-ზე აჩვენებს toast-ს `Failed to read N files` (`FolderBrowser.tsx:127-129`, `:185-187`, `App.tsx:80-82`), D-33-ის ტექსტით (`MetadataPanel.tsx:260`). error path-ები, ცარიელი folder და `handleCloseFolder` D-36-მა არ შეცვალა (ცარიელი folder-ი შემდეგ D-37-მა შეცვალა).
++- **D-37:** ცარიელი folder (scan აბრუნებს `[]`) `metadata`-ს წმენდს სამივე გამომძახებელში: `handleOpenFolder` (`FolderBrowser.tsx:130-132`), `handleRescan` (`:188-190`, უკვე round 30-მდე) და App-ის `openFolder` (`App.tsx:83-85`, drop) `if (wavFiles.length > 0)`-ის `else`-ში `setMetadata({})`-ს იძახებენ. `readMetadataBatch` არ იძახება, toast არ ჩნდება, `setFiles(wavFiles)` უცვლელია. ასე ცარიელი folder-ის შემდეგ ძველი folder-ის entry-ები store-ში აღარ რჩება და ძველი folder-ის ხელახლა გახსნისას reject-ებული read მათ მიმდინარედ აღარ აჩვენებს (ისევე, როგორც D-36 (k5) სხვა არაცარიელ folder-ზე). ჩანაწერი (13).
++- **D-38:** ერთმანეთზე გადაფარული folder load-ები (Open Folder, Rescan, drop, Close Folder) latest-wins-ია. `FileState`-ს აქვს `folderLoadId: number` (`file-store.ts:16`, საწყისი `0`, `:52`), რომელიც მხოლოდ იზრდება და არასოდეს reset-დება (`reset-stores.ts`-იც არ ცვლის). action `beginFolderLoad()` (`:38`, `:155-158`) `folderLoadId`-ს 1-ით ზრდის და ახალ მნიშვნელობას აბრუნებს; `isFolderLoadCurrent(loadId)` (`:161-163`) ამოწმებს, ისევ ეს load არის თუ არა ბოლო. `handleOpenFolder` id-ს dialog-ის შემდეგ იღებს (`FolderBrowser.tsx:99`, `if (!path) return;`-ის შემდეგ, ამიტომ გაუქმებული dialog მიმდინარე load-ს არ აუქმებს), `handleRescan` `if (!folderPath) return;`-ის შემდეგ (`:158`), App-ის `openFolder` პირველივე ხაზზე (`App.tsx:44`, player-ის stop-მდე და schema-ს ლოდინამდე). სამივეში `scanFolder`-ის შემდეგ (`FolderBrowser.tsx:107`, `:165`, `App.tsx:60`), `readMetadataChunked`-ის შემდეგ (`FolderBrowser.tsx:123`, `:181`, `App.tsx:76`) და `catch`-ის პირველ ხაზზე (`FolderBrowser.tsx:134`, `:192`, `App.tsx:87`) load, რომელიც აღარ არის მიმდინარე, store-ში არაფერს წერს და toast-ს არ აჩვენებს; `finally` `isScanning`-ს მხოლოდ მიმდინარე load-ისთვის აქრობს (`FolderBrowser.tsx:141`, `:197`, `App.tsx:94`). `handleCloseFolder` იძახებს `beginFolderLoad()`-ს და `setIsScanning(false)`-ს (`FolderBrowser.tsx:146-147`), ამიტომ pending load დახურულ folder-ს ვეღარ ავსებს და spinner Close-ზე ჩერდება. `setFolderPath`, `clearSelection()` და player-ის stop load-ის დასაწყისში სინქრონულად რჩება; D-35/D-36/D-37 მიმდინარე load-ის შიგნით უცვლელია; Rescan კვლავ `disabled={isScanning}`-ია. ჩანაწერი (14).
++- **D-39:** გვიანი re-read-ები folder-ის შეცვლის შემდეგ. (a) `handleSave`: module-level ფუნქცია `isListedPath(path)` (`MetadataPanel.tsx:60-62`) ამოწმებს, ისევ არის თუ არა path `useFileStore.getState().files`-ში. single re-read store-ში მხოლოდ მაშინ იწერება, როცა path ჯერ კიდევ სიაშია (`if (isListedPath(path)) updateFileMetadata(path, updated);`, `:158`); batch-ის `savedEntries` `!failedPaths.has(path)`-ის გარდა `isListedPath(path)`-საც მოითხოვს (`:186-188`). write, `markPathsWritten`, `refreshSavedFileStats`, re-read, `skipSyncRef`, D-29/D-30 და ყველა toast უცვლელია. `handleSave` `folderLoadId`-ს და `folderPath`-ს არ ამოწმებს: Rescan და იმავე folder-ის Open Folder-იც `beginFolderLoad()`-ს იძახებს, ამიტომ load id-ის guard D-35-ს გააფუჭებდა, ხოლო `folderPath`-ის snapshot parent folder-ს, რომელიც ფაილს ისევ აჩვენებს, შენახულ მნიშვნელობას წაართმევდა. (b) `handleSchemaChanged` `if (allFiles.length === 0) return;`-ის შემდეგ იმახსოვრებს `const loadId = useFileStore.getState().folderLoadId;`-ს (`:217`) და chunk-ების loop-ის შემდეგ, `currentMetadata`-ს წაკითხვამდე, `if (!isFolderLoadCurrent(loadId)) return;`-ით ბრუნდება (`:235`): superseded schema re-read არც `setMetadata`-ს, არც `setEditingMetadata`-ს და არც toast-ს არ იძახებს. D-33/D-34 უცვლელია. (c) App-ის `openFolder`-ის schema-ს ლოდინის loop-ში, `setTimeout`-ის შემდეგ, `if (!isFolderLoadCurrent(loadId)) return;` (`App.tsx:55`): superseded drop `scanFolder`-ს აღარ იძახებს. ჩანაწერი (15).
+ 
+ სტატუსები: `ცნობილი შეზღუდვა` ნიშნავს, რომ ქცევა გადაწყვეტილებას მიჰყვება და ცვლილება დაგეგმილი არ არის. `Saba-ს კითხვა` ნიშნავს, რომ ქცევის შეცვლაზე Saba წყვეტს. `გასწორდა` ნიშნავს, რომ ქცევა შეიცვალა და ტესტით არის დაცული.
+ 
+@@ -24,7 +25,7 @@
+ 
+ - **ID:** RR-R21-02, A-R21-02
+ - **Severity:** low (A-R21-02: info)
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:48` (`collectFieldsTypedDuringSave`, `isSameFieldValue(current, startMetadata[key])`), `:155` (`setEditingMetadata({ ...updated })`)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:48` (`collectFieldsTypedDuringSave`, `isSameFieldValue(current, startMetadata[key])`), `:159` (`setEditingMetadata({ ...updated })`)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, Category = `R20Cat` აკრეფილია, Save დაჭერილია, write ჯერ არ დასრულებულა.
+   2. მოქმედება: write-ის დროს Category ჯერ `X`-ზე იცვლება, შემდეგ ისევ `R20Cat`-ზე.
+@@ -37,7 +38,7 @@
+ 
+ - **ID:** A-R21-01
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:48` (`current !== undefined` და `startMetadata[key]` = `undefined`), `:162-164` (batch payload `modifiedFields`-იდან)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:48` (`current !== undefined` და `startMetadata[key]` = `undefined`), `:166-168` (batch payload `modifiedFields`-იდან)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: ორი ფაილი მონიშნულია (batch), ფორმა ცარიელია (`editingMetadata` = `{}`), Category აკრეფილია, Save დაჭერილია, write ჯერ არ დასრულებულა.
+   2. მოქმედება: write-ის დროს Comment-ში რაღაც იკრიფება და მერე იშლება (ველი `''`).
+@@ -50,7 +51,7 @@
+ 
+ - **ID:** A-R21-03
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:144` (single re-read `readMetadata(path, useSchemaStore.getState().fields)`), `:177` (batch re-read `readMetadataBatch(paths, useSchemaStore.getState().fields)`), `:155` (`setEditingMetadata({ ...updated })`), `:209-254` (`handleSchemaChanged`, ფორმის განახლება `:247`)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:148` (single re-read `readMetadata(path, useSchemaStore.getState().fields)`), `:181` (batch re-read `readMetadataBatch(paths, useSchemaStore.getState().fields)`), `:159` (`setEditingMetadata({ ...updated })`), `:215-262` (`handleSchemaChanged`, ფორმის განახლება `:255`)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, ველი შეცვლილია, Save დაჭერილია, write ნელია.
+   2. მოქმედება: write-ის დროს Schema Editor-ში custom ველი ემატება და schema ინახება (`handleSchemaChanged` ყველა ფაილს ახალი schema-თი კითხულობს).
+@@ -64,7 +65,7 @@
+ 
+ - **ID:** B-R19-01, RR-R20-01
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:106-107` (sync effect)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:110-111` (sync effect)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: `a.wav` მონიშნულია, Category შეცვლილია (dirty), Save დაჭერილია, write ჯერ არ დასრულებულა.
+   2. მოქმედება: `b.wav`-ზე click.
+@@ -129,14 +130,14 @@
+ 
+ - **ID:** B-R23-02, RR-R24-02
+ - **Severity:** medium (round 25-მდე low; stale read-ის შემდეგ ფორმის შემდეგი save ძველ მნიშვნელობებს დისკზე ბრუნებდა)
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:221` (`handleSchemaChanged`-ის `readMetadataBatch(chunk, newSchema)`), `:243` (`setMetadata(accumulated)`), `:247` (`setEditingMetadata({ ...current })`), `:144`/`:177` (save-ის re-read); D-34: `MetadataPanel.tsx:140`/`:170` (`markPathsWritten`), `:219` (chunk-ის generation), `:232` (superseded შედარება), `src/renderer/src/stores/file-store.ts:126-134` (`markPathsWritten`)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:228` (`handleSchemaChanged`-ის `readMetadataBatch(chunk, newSchema)`), `:251` (`setMetadata(accumulated)`), `:255` (`setEditingMetadata({ ...current })`), `:148`/`:181` (save-ის re-read); D-34: `MetadataPanel.tsx:144`/`:174` (`markPathsWritten`), `:226` (chunk-ის generation), `:240` (superseded შედარება), `src/renderer/src/stores/file-store.ts:126-134` (`markPathsWritten`)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, ველი შეცვლილია, Save დაჭერილია, write ნელია.
+   2. მოქმედება: write-ის დასრულებამდე Schema Editor-ში schema ინახება (`Done`), და `handleSchemaChanged`-ის `readMetadataBatch` იწყება write-მდე, მაგრამ სრულდება save-ის re-read-ის შემდეგ.
+   3. შედეგი: `handleSchemaChanged` store-ში და ფორმაში write-მდე წაკითხულ მნიშვნელობებს წერს (`isDirty` false), სანამ ფაილი ხელახლა არ წაიკითხება. დისკზე ფაილი სწორია. D-33 ამ თანმიმდევრობას არ ფარავს.
+-  4. variant (RR-R24-02, ორი ან მეტი chunk): `handleSchemaChanged` store-ში მხოლოდ ყველა chunk-ის შემდეგ წერს (`:243`). თუ save (write და მისი re-read) ორ chunk-ს შორის სრულდება, ადრე წაკითხული chunk-ის write-მდე მნიშვნელობები save-ის re-read-ის შედეგს გადაფარავს.
++  4. variant (RR-R24-02, ორი ან მეტი chunk): `handleSchemaChanged` store-ში მხოლოდ ყველა chunk-ის შემდეგ წერს (`:251`). თუ save (write და მისი re-read) ორ chunk-ს შორის სრულდება, ადრე წაკითხული chunk-ის write-მდე მნიშვნელობები save-ის re-read-ის შედეგს გადაფარავს.
+   5. production-ში single save-ის თანმიმდევრობას ნელი write სჭირდება (main-ში single write სინქრონულია), batch და chunk-ებს შორის თანმიმდევრობა კი მიღწევადია (`WRITE_METADATA_BATCH` ყოველ 5 ფაილზე yield-ს აკეთებს).
+-- **გადაწყვეტილება:** D-34 არის stale-result guard (write generation, RR-R24-05): write-მდე დაწყებული chunk-ის შედეგი იმ path-ზე, რომელიც ამ chunk-ის შემდეგ ჩაიწერა, აღარ გამოიყენება; store-ში მიმდინარე entry რჩება და ფორმა არ იცვლება. schema editor არ იკეტება (ჩაკეტვა კვლავ Saba-ს ვარიანტია, UX). D-34 არ ფარავს ორ იშვიათ შემთხვევას: (a) chunk, რომელიც write-მდე დაიწყო, superseded-ია, მაგრამ თუ save-ის re-read reject-დება, store-ის მიმდინარე entry save-მდე მნიშვნელობაა და ახალი schema-ს ველი მასში არ არის (entry-ის გარეშე path store-ში არ ემატება), სანამ ფაილი ხელახლა არ წაიკითხება (toast `Tags saved, but reloading failed. Rescan to refresh.`); (b) chunk, რომელიც write-ის resolve-მდე დასრულდა (stamp ჯერ არ არსებობს), გამოიყენება: single selection-ზე ფორმა save-ის დროს reset-დება (`:247`) და, თუ save-ის re-read-იც reject-დება, store და ფორმა write-მდე მნიშვნელობებს აჩვენებს `isDirty` false-ით.
++- **გადაწყვეტილება:** D-34 არის stale-result guard (write generation, RR-R24-05): write-მდე დაწყებული chunk-ის შედეგი იმ path-ზე, რომელიც ამ chunk-ის შემდეგ ჩაიწერა, აღარ გამოიყენება; store-ში მიმდინარე entry რჩება და ფორმა არ იცვლება. schema editor არ იკეტება (ჩაკეტვა კვლავ Saba-ს ვარიანტია, UX). D-34 არ ფარავს ორ იშვიათ შემთხვევას: (a) chunk, რომელიც write-მდე დაიწყო, superseded-ია, მაგრამ თუ save-ის re-read reject-დება, store-ის მიმდინარე entry save-მდე მნიშვნელობაა და ახალი schema-ს ველი მასში არ არის (entry-ის გარეშე path store-ში არ ემატება), სანამ ფაილი ხელახლა არ წაიკითხება (toast `Tags saved, but reloading failed. Rescan to refresh.`); (b) chunk, რომელიც write-ის resolve-მდე დასრულდა (stamp ჯერ არ არსებობს), გამოიყენება: single selection-ზე ფორმა save-ის დროს reset-დება (`:255`) და, თუ save-ის re-read-იც reject-დება, store და ფორმა write-მდე მნიშვნელობებს აჩვენებს `isDirty` false-ით.
+ - **ტესტი:** `tests/renderer/components/metadata-panel-schema-change.test.ts` — `(s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read`, `(s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save`, `(s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks`, `(s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time`, `(s15) D-34: a path whose batch write failed is not superseded`
+ - **სტატუსი:** გასწორდა (D-34, TM-B29)
+ 
+@@ -144,11 +145,11 @@
+ 
+ - **ID:** B-R23-03
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:247` (`setEditingMetadata({ ...current })` `handleSchemaChanged`-ში), `src/renderer/src/stores/metadata-store.ts:32-33` (`setEditingMetadata` წმენდს `modifiedFields`-ს და `isDirty`-ს)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:255` (`setEditingMetadata({ ...current })` `handleSchemaChanged`-ში), `src/renderer/src/stores/metadata-store.ts:32-33` (`setEditingMetadata` წმენდს `modifiedFields`-ს და `isDirty`-ს)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, Category შეცვლილია და შეუნახავია (dirty).
+   2. მოქმედება: `Customize Fields` → schema-ს ცვლილება → `Done`.
+-  3. შედეგი: ფორმა ფაილიდან ხელახლა წაკითხულ მნიშვნელობებს აჩვენებს, შეუნახავი edits ქრება, `isDirty` false-ია. toast `Unsaved changes were discarded` არ ჩნდება. ეს მხოლოდ წარმატებულ read-ს ეხება: single selection-ზე, თუ მონიშნული ფაილის chunk-ის read reject-დება, ფორმა არ იცვლება და edits რჩება. 2+ მონიშნულ ფაილზე `handleSchemaChanged` ფორმას მაინც ცარიელს ხდის (`setEditingMetadata({})`, `MetadataPanel.tsx:249`), read-ის reject-ის დროსაც (D-33 part 3; ტესტები `(s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects` და `(s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)`).
++  3. შედეგი: ფორმა ფაილიდან ხელახლა წაკითხულ მნიშვნელობებს აჩვენებს, შეუნახავი edits ქრება, `isDirty` false-ია. toast `Unsaved changes were discarded` არ ჩნდება. ეს მხოლოდ წარმატებულ read-ს ეხება: single selection-ზე, თუ მონიშნული ფაილის chunk-ის read reject-დება, ფორმა არ იცვლება და edits რჩება. 2+ მონიშნულ ფაილზე `handleSchemaChanged` ფორმას მაინც ცარიელს ხდის (`setEditingMetadata({})`, `MetadataPanel.tsx:257`), read-ის reject-ის დროსაც (D-33 part 3; ტესტები `(s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects` და `(s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)`).
+ - **გადაწყვეტილება:** არ არის. ვარიანტები: toast `Unsaved changes were discarded`; D-30-ის მსგავსი merge (შეცვლილი ველები re-read-ის შემდეგ `mergeFields`-ით ბრუნდება); ან `Customize Fields`-ის ჩაკეტვა, სანამ ფორმა dirty-ა.
+ - **ტესტი:** ტესტი არ არის
+ - **სტატუსი:** Saba-ს კითხვა
+@@ -157,7 +158,7 @@
+ 
+ - **ID:** B-R25-01, TM-B30
+ - **Severity:** medium (round 28-მდე low; stale read-ის შემდეგ ფაილის ხელახლა მონიშვნა და შემდეგი save ძველ მნიშვნელობას დისკზე ბრუნებდა)
+-- **ფაილი:** `src/renderer/src/components/sidebar/FolderBrowser.tsx:113-129` (`handleOpenFolder`), `:171-187` (`handleRescan`), `src/renderer/src/App.tsx:65-81` (`openFolder`, drop), `src/renderer/src/lib/utils.ts:64` (chunk-ის generation), `:68-70` (`readGenerations`), `src/renderer/src/stores/file-store.ts:136-153` (`applyMetadataRead`), `:140` (superseded შედარება)
++- **ფაილი:** `src/renderer/src/components/sidebar/FolderBrowser.tsx:113-129` (`handleOpenFolder`), `:171-187` (`handleRescan`), `src/renderer/src/App.tsx:66-82` (`openFolder`, drop), `src/renderer/src/lib/utils.ts:64` (chunk-ის generation), `:68-70` (`readGenerations`), `src/renderer/src/stores/file-store.ts:136-153` (`applyMetadataRead`), `:140` (superseded შედარება)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: folder გახსნილია, `a.wav` მონიშნულია, Category = `R28Cat` აკრეფილია, `Save Tags` დაჭერილია, write ჯერ არ დასრულებულა.
+   2. მოქმედება: write-ის დროს `Rescan`-ზე click, `Open Folder` იმავე folder-ზე, ან იმავე folder-ის drop. folder-ის `readMetadataBatch` ფაილს write-მდე კითხულობს, მაგრამ სრულდება save-ის re-read-ის შემდეგ.
+@@ -171,7 +172,7 @@
+ 
+ - **ID:** B-R27-01, TM-B31
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/lib/utils.ts:72` (`failedPaths`), `:75` (`failures`/`failedPaths` return), `src/renderer/src/stores/file-store.ts:136-153` (`applyMetadataRead`), `:148-151` (`keptPaths`), `src/renderer/src/components/sidebar/FolderBrowser.tsx:113-129` (`handleOpenFolder`), `:171-187` (`handleRescan`), `src/renderer/src/App.tsx:65-81` (`openFolder`, drop)
++- **ფაილი:** `src/renderer/src/lib/utils.ts:72` (`failedPaths`), `:75` (`failures`/`failedPaths` return), `src/renderer/src/stores/file-store.ts:136-153` (`applyMetadataRead`), `:148-151` (`keptPaths`), `src/renderer/src/components/sidebar/FolderBrowser.tsx:113-129` (`handleOpenFolder`), `:171-187` (`handleRescan`), `src/renderer/src/App.tsx:66-82` (`openFolder`, drop)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: folder `/music` გახსნილია, `a.wav` და `b.wav` store-ში entry-ით (`a.wav`-ს `Tagged` badge აქვს).
+   2. მოქმედება: `Rescan`, `Open Folder` იმავე folder-ზე ან იმავე folder-ის drop; chunk-ის `readMetadataBatch` IPC დონეზე reject-დება.
+@@ -185,7 +186,7 @@
+ 
+ - **ID:** C-R29-02, A-R29-02, TM-B32
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/sidebar/FolderBrowser.tsx:130-132` (`handleOpenFolder`, ცარიელი folder-ის `else`), `:188-190` (`handleRescan`, იგივე `else`, round 30-მდეც არსებობდა), `src/renderer/src/App.tsx:82-84` (`openFolder`, drop, ცარიელი folder-ის `else`)
++- **ფაილი:** `src/renderer/src/components/sidebar/FolderBrowser.tsx:130-132` (`handleOpenFolder`, ცარიელი folder-ის `else`), `:188-190` (`handleRescan`, იგივე `else`, round 30-მდეც არსებობდა), `src/renderer/src/App.tsx:83-85` (`openFolder`, drop, ცარიელი folder-ის `else`)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: folder `/music` გახსნილია, `a.wav` და `b.wav` store-ში entry-ით (`a.wav`-ს `Tagged` badge აქვს).
+   2. მოქმედება: `Open Folder` ან drop folder-ზე, რომელშიც WAV ფაილი არ არის (scan აბრუნებს `[]`).
+@@ -199,13 +200,28 @@
+ 
+ - **ID:** RR-R29-03, TM-B33
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/stores/file-store.ts:16` (`folderLoadId`), `:155-158` (`beginFolderLoad`), `:161-163` (`isFolderLoadCurrent`), `src/renderer/src/components/sidebar/FolderBrowser.tsx:99` (`handleOpenFolder`, id dialog-ის შემდეგ), `:107`, `:123`, `:134`, `:141` (`handleOpenFolder`-ის guard-ები და `finally`), `:146-147` (`handleCloseFolder`), `:158` (`handleRescan`, id), `:165`, `:181`, `:192`, `:197` (`handleRescan`-ის guard-ები და `finally`), `src/renderer/src/App.tsx:44` (`openFolder`, drop, id), `:59`, `:75`, `:86`, `:93` (guard-ები და `finally`)
++- **ფაილი:** `src/renderer/src/stores/file-store.ts:16` (`folderLoadId`), `:155-158` (`beginFolderLoad`), `:161-163` (`isFolderLoadCurrent`), `src/renderer/src/components/sidebar/FolderBrowser.tsx:99` (`handleOpenFolder`, id dialog-ის შემდეგ), `:107`, `:123`, `:134`, `:141` (`handleOpenFolder`-ის guard-ები და `finally`), `:146-147` (`handleCloseFolder`), `:158` (`handleRescan`, id), `:165`, `:181`, `:192`, `:197` (`handleRescan`-ის guard-ები და `finally`), `src/renderer/src/App.tsx:44` (`openFolder`, drop, id), `:60`, `:76`, `:87`, `:94` (guard-ები და `finally`)
+ - **მიღწევადობა:** `Open Folder` და drop load-ის დროს არ იკეტება, `Rescan` კი `disabled={isScanning}`-ია. ამიტომ UI-დან მიღწევადია Open→Open, Open→drop, drop→Open, Rescan→Open და Close Folder pending load-ის დროს. Rescan→Rescan მიუღწეველია.
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: აპი გახსნილია, folder A-ს `readMetadataBatch` ნელია (ან დიდი folder-ია).
+   2. მოქმედება: `Open Folder` A, და სანამ A-ს read დასრულდება, `Open Folder` B (B სწრაფად სრულდება).
+   3. შედეგი გასწორებამდე: A-ს გვიანი read `metadata`-ს ცვლიდა, ამიტომ სიაში B-ს ფაილები ჩანდა A-ს `metadata`-ით (B-ს ფაილებს `Tagged` badge და ფორმის მნიშვნელობები ეკარგებოდა). იგივე ტიპის შედეგები: A-ს გვიანი scan B-ს `folderPath`-ის ქვეშ A-ს ფაილებს აჩვენებდა; A-ს გვიანი reject B-ის შემდეგ toast-ს `Failed to read 1 files` (ან scan-ის error-ს) აჩვენებდა და Open Folder/drop-ზე `files`-ს და `metadata`-ს წმენდდა; A-ს ადრე დასრულება `isScanning`-ს B-ს დასრულებამდე აქრობდა; Close Folder-ის შემდეგ pending read დახურულ folder-ში `metadata`-ს ისევ ავსებდა და spinner read-ის დასრულებამდე ჩანდა.
+   4. დისკზე არაფერი იცვლება: folder load ფაილებში არ წერს, ეს მხოლოდ store-ის მდგომარეობა და ჩვენებაა. თუმცა არასწორი `metadata` არის ის, რასაც ფორმა აჩვენებს და საიდანაც შემდეგი save იწყება.
+-- **გადაწყვეტილება:** D-38: folder load-ები latest-wins-ია (`beginFolderLoad`/`isFolderLoadCurrent`); load, რომელიც აღარ არის ბოლო, store-ში არაფერს წერს, toast-ს არ აჩვენებს და `isScanning`-ს არ ცვლის; Close Folder ახალ id-ს იღებს და spinner-ს აჩერებს. save-ის re-read folder-ის შეცვლის შემდეგ (RR-R28-03, `MetadataPanel.tsx` `handleSave`) ამ ჩანაწერში არ შედის.
+-- **ტესტი:** `tests/renderer/components/folder-read-overlap.test.ts` — `(o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's`, `(o2) Open Folder A (scan pending), Open Folder B (done), A's scan lands last -> files stay B's`, `(o3) Open Folder A (read pending), Open Folder B (read pending), A finishes first -> isScanning stays true until B finishes`, `(o4) Open Folder A (read pending), Open Folder B (done), A's read rejects last -> no stale toast`, `(o5) Open Folder A (read pending), Close Folder, A's read lands -> folder stays closed and spinner stops`, `(o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata`, `(o7) Rescan of folder A (read pending), Open Folder B (done), Rescan's read lands last -> B`, `(o8) pin: Open Folder A (read pending), second Open Folder dialog cancelled, A's read lands -> A applied`, `(o9) Open Folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast`, `(o10) App: drop folder A (read pending), Open Folder B (read pending), A lands first -> scanning stays, then B`, `(o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B`, `(o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast`, `(o13) Rescan of folder A (scan pending), Open Folder B (done), Rescan's scan lands last -> B`, `(o14) Rescan of folder A (scan pending), Open Folder B (done), Rescan's scan rejects last -> no Rescan toast`, `(o15) Rescan of folder A (read pending), Open Folder B (read pending), Rescan lands first -> scanning stays true until B`, `(o16) Rescan takes a new folder load id, so the earlier id is no longer current`; `tests/renderer/stores/file-store.test.ts` — `(f1) beginFolderLoad returns n+1 then n+2 and only the latest id is current`
++- **გადაწყვეტილება:** D-38: folder load-ები latest-wins-ია (`beginFolderLoad`/`isFolderLoadCurrent`); load, რომელიც აღარ არის ბოლო, store-ში არაფერს წერს, toast-ს არ აჩვენებს და `isScanning`-ს არ ცვლის; Close Folder ახალ id-ს იღებს და spinner-ს აჩერებს. save-ის re-read folder-ის შეცვლის შემდეგ (RR-R28-03, `MetadataPanel.tsx` `handleSave`) ამ ჩანაწერში არ შედის; ის ჩანაწერ (15)-შია და D-39-მა გაასწორა.
++- **ტესტი:** `tests/renderer/components/folder-read-overlap.test.ts` — `(o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's`, `(o2) Open Folder A (scan pending), Open Folder B (done), A's scan lands last -> files stay B's`, `(o3) Open Folder A (read pending), Open Folder B (read pending), A finishes first -> isScanning stays true until B finishes`, `(o4) Open Folder A (read pending), Open Folder B (done), A's read rejects last -> no stale toast`, `(o5) Open Folder A (read pending), Close Folder, A's read lands -> folder stays closed and spinner stops`, `(o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata`, `(o7) Rescan of folder A (read pending), Open Folder B (done), Rescan's read lands last -> B`, `(o8) pin: Open Folder A (read pending), second Open Folder dialog cancelled, A's read lands -> A applied`, `(o9) Open Folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast`, `(o10) App: drop folder A (read pending), Open Folder B (read pending), A lands first -> scanning stays, then B`, `(o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B`, `(o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast`, `(o13) Rescan of folder A (scan pending), Open Folder B (done), Rescan's scan lands last -> B`, `(o14) Rescan of folder A (scan pending), Open Folder B (done), Rescan's scan rejects last -> no Rescan toast`, `(o15) Rescan of folder A (read pending), Open Folder B (read pending), Rescan lands first -> scanning stays true until B`, `(o16) Rescan takes a new folder load id, so the earlier id is no longer current`, `(o17) Open Folder A (scan pending), Close Folder, A's scan lands -> folder stays closed`, `(o18) App: drop folder A (read pending), Close Folder, A's read lands -> folder stays closed`; `tests/renderer/stores/file-store.test.ts` — `(f1) beginFolderLoad returns n+1 then n+2 and only the latest id is current`
+ - **სტატუსი:** გასწორდა (D-38, TM-B33)
++
++## 15. გვიანი re-read-ები folder-ის შეცვლის შემდეგ (save, schema, drop)
++
++- **ID:** RR-R28-03, A-R19-02, RR-R30-01, A-R31-01, RR-R31-02, TM-B34
++- **Severity:** low
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:60-62` (`isListedPath`), `:158` (single re-read, `if (isListedPath(path)) updateFileMetadata(path, updated);`), `:186-188` (batch `savedEntries`, `isListedPath(path)`), `:217` (`handleSchemaChanged`, `const loadId = useFileStore.getState().folderLoadId;`), `:235` (`if (!isFolderLoadCurrent(loadId)) return;`), `src/renderer/src/App.tsx:55` (`openFolder`, schema-ს ლოდინის loop-ის guard)
++- **მიღწევადობა:** save: Open Folder, drop და Close Folder save-ის დროს არ იკეტება. schema: sidebar გამოყენებადი რჩება, სანამ schema editor `Done`-ის შემდეგ re-read-ს ელოდება (C-R27-01). drop schema-ს ჩატვირთვის დროს: მხოლოდ აპის გაშვებისას, სანამ `loadSchema` დასრულდება.
++- **Reproduction:**
++  1. (a) save. საწყისი მდგომარეობა: folder `/fa` გახსნილია (`a.wav`, `a2.wav`), `a.wav` მონიშნულია, Category აკრეფილია, `Save Tags` დაჭერილია, write ჯერ არ დასრულებულა. მოქმედება: `Open Folder` `/fb` სრულდება, შემდეგ write და save-ის re-read სრულდება. შედეგი გასწორებამდე: `updateFileMetadata` `/fb`-ის `metadata`-ს `/fa/a.wav`-ის entry-ს უმატებდა (batch-ზე ორივე `/fa` ფაილს, Close Folder-ის შემდეგ დახურულ folder-საც). თუ შემდეგ `/fa` ხელახლა იხსნება და მისი read reject-დება, D-36 ამ entry-ს kept path-ად ტოვებდა და `a.wav` მიმდინარე მნიშვნელობით, `Tagged`-ით ჩანდა `Failed to read 1 files`-ის მიუხედავად (RR-R30-01).
++  2. (b) schema. საწყისი მდგომარეობა: folder `/fa` გახსნილია, `a.wav` მონიშნულია. მოქმედება: `Customize Fields` → custom ველი → `Done` (`handleSchemaChanged`-ის read ნელია) → `Open Folder` `/fb` სრულდება → schema-ს re-read სრულდება. შედეგი გასწორებამდე: `setMetadata` `/fb`-ის მთელ `metadata`-ს `/fa`-ის map-ით ცვლიდა, ამიტომ `b.wav`-ს `Tagged` badge და ფორმის მნიშვნელობები ეკარგებოდა; reject-ებული re-read `/fb`-ის შემდეგ stale toast-ს `Failed to read 2 files` აჩვენებდა; Close Folder-ის შემდეგ `metadata` ისევ ივსებოდა.
++  3. (c) drop. საწყისი მდგომარეობა: აპი ახლახან გაიხსნა, `loadSchema` ჯერ არ დასრულებულა. მოქმედება: `/fa`-ის drop, შემდეგ `Open Folder` `/fb` სრულდება, შემდეგ schema იტვირთება. შედეგი გასწორებამდე: superseded drop-ის schema-ს ლოდინის loop load id-ს არ ამოწმებდა, ამიტომ `scanFolder('/fa')` მაინც იძახებოდა (შედეგს D-38 ყრიდა, მაგრამ scan ზედმეტი იყო).
++  4. დისკზე არაფერი იცვლება: re-read ფაილებში არ წერს, ცარიელი ფორმა მხოლოდ აკრეფილ ველებს ინახავს (`writeTagsToFile` `undefined`-ს გამოტოვებს). თუმცა არასწორი `metadata` არის ის, რასაც ფორმა აჩვენებს.
++- **გადაწყვეტილება:** D-39. save-ის წესი "path ისევ არის `files`-ში" (`isListedPath`) და არა load id: Rescan, იმავე folder-ის Open Folder და drop-იც `beginFolderLoad()`-ს იძახებს, ამიტომ load id-ის guard save-ის re-read-ს სწორედ იქ გადააგდებდა, სადაც D-35-ს ის სჭირდება (ჩანაწერი (11)). არც `folderPath`-ის snapshot: parent folder, რომელიც ფაილს ისევ აჩვენებს, შენახულ მნიშვნელობას უნდა იღებდეს ((v5)). schema-ს re-read მთელ map-ს ცვლის, ამიტომ მას load id-ის guard აქვს (D-38-ის მსგავსად). App-ის schema-ს ლოდინის loop superseded load-ზე ბრუნდება. toast-ის ტექსტები არ შეცვლილა. (o17) და (o18) Close Folder-ს pending scan-ისა და pending drop read-ის დროს ამოწმებს (იხ. (14)).
++- **ტესტი:** `tests/renderer/components/reread-after-folder-switch.test.ts` — `(v1) single save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B`, `(v2) batch save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B`, `(v3) single save pending, Close Folder, the save's re-read lands: metadata stays empty`, `(v4) RR-R30-01: save lands after Open Folder B, then reopening A with a rejected read shows no entry for a.wav`, `(v5) pin: single save pending, Open Folder of a parent that still lists the file, stale parent read: the saved value stays`, `(v6) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read lands: metadata holds only B`, `(v7) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read rejects: no toast, metadata holds B`, `(v8) A-R31-01: schema re-read pending, Close Folder, the schema re-read lands: metadata stays empty`, `(v9) RR-R31-02: drop A while the schema is loading, Open Folder B finishes, then the schema loads: A is never scanned`; `tests/renderer/components/folder-read-overlap.test.ts` — (o17), (o18) (იხ. (14))
++- **სტატუსი:** გასწორდა (D-39, TM-B34)
+diff --git a/docs/bugs/README.md b/docs/bugs/README.md
+index ca252d4..3f7314e 100644
+--- a/docs/bugs/README.md
++++ b/docs/bugs/README.md
+@@ -4,6 +4,6 @@
+ 
+ | # | აღწერა | სტატუსი |
+ |---|--------|---------|
+-| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (14 ჩანაწერი; 6 გასწორდა, 5 მათგანი Saba-ს კითხვაა) |
++| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (15 ჩანაწერი; 7 გასწორდა, 5 მათგანი Saba-ს კითხვაა) |
+ 
+ ფორმატი: `{NNN}-{short-description}.md`
+diff --git a/src/renderer/src/App.tsx b/src/renderer/src/App.tsx
+index 75491ce..9194de2 100644
+--- a/src/renderer/src/App.tsx
++++ b/src/renderer/src/App.tsx
+@@ -52,6 +52,7 @@ export default function App(): React.ReactElement {
+       while (!useSchemaStore.getState().isLoaded) {
+         if (Date.now() - start > maxWait) break;
+         await new Promise((r) => setTimeout(r, 50));
++        if (!isFolderLoadCurrent(loadId)) return;
+       }
+ 
+       try {
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index 05f6284..671eb77 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -4,7 +4,7 @@ import { SchemaEditor } from '~/components/schema/SchemaEditor';
+ import { TemplatePicker } from '~/components/templates/TemplatePicker';
+ import { Button } from '~/components/ui/button';
+ import { Input } from '~/components/ui/input';
+-import { useFileStore, useSelectedFiles } from '~/stores/file-store';
++import { isFolderLoadCurrent, useFileStore, useSelectedFiles } from '~/stores/file-store';
+ import { useMetadataStore } from '~/stores/metadata-store';
+ import { useSchemaStore } from '~/stores/schema-store';
+ import type { BatchWriteResult, FieldValue, WavMetadata } from '~/types';
+@@ -57,6 +57,10 @@ function mergeFieldsTypedDuringSave(typed: Record<string, FieldValue>): void {
+   useMetadataStore.getState().mergeFields(typed);
+ }
+ 
++function isListedPath(path: string): boolean {
++  return useFileStore.getState().files.some((file) => file.path === path);
++}
++
+ async function refreshSavedFileStats(writtenPaths: string[]): Promise<void> {
+   const { folderPath, updateFileStats } = useFileStore.getState();
+   if (folderPath === null) return;
+@@ -151,7 +155,7 @@ export function MetadataPanel(): React.ReactElement {
+           ? collectFieldsTypedDuringSave(startEditingMetadata)
+           : {};
+         if (selectionUnchanged) skipSyncRef.current = true;
+-        updateFileMetadata(path, updated);
++        if (isListedPath(path)) updateFileMetadata(path, updated);
+         if (selectionUnchanged) setEditingMetadata({ ...updated });
+         mergeFieldsTypedDuringSave(typedDuringSave);
+         showToast('Tags saved', 'success');
+@@ -179,7 +183,9 @@ export function MetadataPanel(): React.ReactElement {
+           showToast(buildReloadFailedToast(result), 'error');
+           return;
+         }
+-        const savedEntries = Object.entries(refreshed).filter(([path]) => !failedPaths.has(path));
++        const savedEntries = Object.entries(refreshed).filter(
++          ([path]) => !failedPaths.has(path) && isListedPath(path),
++        );
+         const selectionUnchanged = isSelectionUnchanged();
+         if (savedEntries.length > 0 && selectionUnchanged) {
+           skipSyncRef.current = true;
+@@ -208,6 +214,7 @@ export function MetadataPanel(): React.ReactElement {
+ 
+   const handleSchemaChanged = useCallback(async () => {
+     if (allFiles.length === 0) return;
++    const loadId = useFileStore.getState().folderLoadId;
+     const newSchema = useSchemaStore.getState().fields;
+     const paths = allFiles.map((f) => f.path);
+     const CHUNK_SIZE = 50;
+@@ -225,6 +232,7 @@ export function MetadataPanel(): React.ReactElement {
+         for (const path of chunk) keptPaths.add(path);
+       }
+     }
++    if (!isFolderLoadCurrent(loadId)) return;
+     const { metadata: currentMetadata, pathWriteGenerations } = useFileStore.getState();
+     const accumulated: Record<string, WavMetadata> = {};
+     for (const { readGeneration, result } of chunkReads) {
+diff --git a/tests/renderer/components/folder-read-overlap.test.ts b/tests/renderer/components/folder-read-overlap.test.ts
+index 3f81ed4..15d10bc 100644
+--- a/tests/renderer/components/folder-read-overlap.test.ts
++++ b/tests/renderer/components/folder-read-overlap.test.ts
+@@ -360,4 +360,42 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+     expect(isFolderLoadCurrent(before)).toBe(false);
+     expect(useFileStore.getState().folderLoadId).toBe(before + 1);
+   });
++
++  it("(o17) Open Folder A (scan pending), Close Folder, A's scan lands -> folder stays closed", async () => {
++    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fa");
++    const aScan = createDeferred<WavFileEntry[]>();
++    vi.mocked(window.api.scanFolder).mockReturnValueOnce(aScan.promise);
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValue({ [PATH_A]: A_META });
++    const { container } = renderBrowserAndPanel();
++    await clickButton(/Open Folder/);
++    const closeButton = container.querySelector('button[type="button"] svg.lucide-x')?.closest("button");
++    if (!closeButton) throw new Error("close button not found");
++    await settle(() => fireEvent.click(closeButton));
++    await settle(() => aScan.resolve(A_FILES));
++    const state = useFileStore.getState();
++    expect(state.folderPath).toBeNull();
++    expect(state.files).toEqual([]);
++    expect(state.metadata).toEqual({});
++    expect(state.isScanning).toBe(false);
++    expect(vi.mocked(window.api.readMetadataBatch)).not.toHaveBeenCalled();
++  });
++
++  it("(o18) App: drop folder A (read pending), Close Folder, A's read lands -> folder stays closed", async () => {
++    vi.mocked(window.api.scanFolder).mockResolvedValueOnce(A_FILES);
++    const aRead = createDeferred<MetadataByPath>();
++    vi.mocked(window.api.readMetadataBatch).mockReturnValueOnce(aRead.promise);
++    const root = await renderAppReady();
++    await dropFolderOn(root, "/fa");
++    await waitMs(100);
++    expect(useFileStore.getState().isScanning).toBe(true);
++    const closeButton = screen.getByTitle("/fa").parentElement?.querySelector("button");
++    if (!closeButton) throw new Error("close button not found");
++    await settle(() => fireEvent.click(closeButton));
++    await settle(() => aRead.resolve({ [PATH_A]: A_META }));
++    const state = useFileStore.getState();
++    expect(state.folderPath).toBeNull();
++    expect(state.files).toEqual([]);
++    expect(state.metadata).toEqual({});
++    expect(state.isScanning).toBe(false);
++  });
+ });
+diff --git a/tests/renderer/stores/file-store.test.ts b/tests/renderer/stores/file-store.test.ts
+index 5430f45..311eea5 100644
+--- a/tests/renderer/stores/file-store.test.ts
++++ b/tests/renderer/stores/file-store.test.ts
+@@ -1,6 +1,5 @@
+ import { afterEach, beforeEach, describe, expect, it } from "vitest";
+-import { useFileStore } from "~/stores/file-store";
+-import { isFolderLoadCurrent } from "~/stores/file-store";
++import { isFolderLoadCurrent, useFileStore } from "~/stores/file-store";
+ import type { WavFileEntry, WavMetadata } from "~/types";
+ import { resetAllStores } from "../helpers/reset-stores";
+ 

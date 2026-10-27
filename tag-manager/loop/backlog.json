@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 32: TM-B34 late save/schema re-reads and superseded drop after a folder switch (D-39) on baseline 7355d78",
+  "current_task": "Round 33: TM-B35 schema re-read waits for a pending folder load (D-40) on baseline ee15e6c",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -326,8 +326,14 @@
     },
     {
       "id": "D-39",
-      "status": "planned R32 (TM-B34)",
+      "status": "verified (C R32 PASS), published ee15e6c (TM-B34)",
       "decision": "Late re-reads after a folder switch (renderer only). (a) MetadataPanel handleSave: write, markPathsWritten, the stats refresh, the re-read and every toast stay as they are; the re-read result is written into the store (updateFileMetadata) only for paths still listed in useFileStore.getState().files at that moment (single: if (isListedPath(path)); batch: savedEntries also filtered by isListedPath). Not keyed on folderLoadId: Rescan and same-folder Open Folder also take a load id, and D-35 needs the save's re-read in those cases (B R31 SM-3). Not keyed on folderPath: a parent folder that still lists the file must get the saved value (v5). (b) handleSchemaChanged takes useFileStore.getState().folderLoadId at start; after the chunk loop, if !isFolderLoadCurrent(loadId) it returns: no setMetadata, no editor change, no toast. Any later folder load reads with the new schema already. (c) App openFolder: inside the schema-wait loop, after each 50 ms wait, a superseded load returns (no scan IPC). file-store.ts unchanged; D-34/D-35/D-36/D-37/D-38 unchanged.",
+      "contract_with": "none (renderer display only)"
+    },
+    {
+      "id": "D-40",
+      "status": "planned R33 (TM-B35)",
+      "decision": "Schema re-read waits for a pending folder load (renderer only). MetadataPanel handleSchemaChanged first awaits a module-level waitForFolderLoadIdle(): it resolves at once when useFileStore isScanning is false, otherwise on the first store change where isScanning is false (subscribe, then unsubscribe). Only then it takes files and folderLoadId from useFileStore.getState() (not the render-closure allFiles) and reads those paths with the current schema. The D-39(b) guard, D-33 (rejected chunk keeps the entry, one toast) and D-34 (write-generation keep) are unchanged. Why wait and not skip: a load whose read began before the field was added reads with the old schema; only a re-read after that load lands puts the new field's values in (RR-R32-04). Why not a files-identity guard: a save's stats refresh replaces the files array (updateFileStats) and would drop a valid re-read ((w7)). Effect: Done during a pending load keeps the editor open until the load and the re-read finish (B-R32-01).",
       "contract_with": "none (renderer display only)"
     }
   ],
@@ -1573,7 +1579,7 @@
       "severity": "low",
       "source": "RR-R28-03 / A-R19-02 / RR-R30-01 (save re-read), A-R31-01 (schema re-read), RR-R31-02 (App schema wait); B R31 red reproduction (b-round-31-exp/)",
       "title": "Late re-reads after a folder switch (D-39): a save's re-read adds the old folder's paths to the new folder's metadata (shown as current after reopening with a rejected read); a schema re-read replaces the new folder's metadata with the old folder's and shows a stale toast; a superseded drop still scans after the schema wait",
-      "status": "in_progress",
+      "status": "done",
       "round": 32,
       "depends_on": [
         "TM-B33"
@@ -1597,8 +1603,41 @@
         "docs/bugs/001 entry 15 fixed by D-39; D-39 bullet; header/README 15/7/5; STATE_MANAGEMENT one D-39 line",
         "gate: verifyCommand green, renderer 268, main 93, E2E 7/7, --retries=0 7/7, Biome 0/8 same list"
       ],
+      "realVerified": true,
+      "evidence_b": "B R31 (b-round-31-exp/): on 7355d78 src 8 red ((v1)-(v4),(v6)-(v9)) on the symptom, (v5)(o17)(o18) green (red-run.log 260 passed / 8 failed of 268); prototype (prototype.diff.txt) 268/268 in 15 files, Biome 0/8 same list, tsc web + test clean; SM-1..SM-8 killed, SM-9 equivalent (mutants.log)",
+      "commit": "ee15e6cfa72f50bb1caecb9075526101e3eb03ec",
+      "evidence": [
+        "C R32: red 260 passed / 8 failed on 7355d78 MetadataPanel.tsx+App.tsx with A's tests ((v1)-(v4),(v6)-(v9) fail on the symptom; (v5)(o17)(o18) green) -> green 268/268 (15 files), each new test alone 1 passed; SM-1..SM-8 killed with the expected killers, SM-9 survived and shown equivalent; gate verifyCommand exit 0, Biome 0/8 same list, renderer 268, main 93/93, E2E 7/7, --retries=0 7/7; real app old (7355d78) vs new with read-one/batch delay/reject harness: V, SC, SJ show each old symptom and none on the new build; Tags saved in V on both; sha256 f.wav unchanged, s.wav changed only by the V save; ffprobe ICAT + music-metadata exif:ICAT R32Fast / R32Slow / R32Slow2 field by field; no R32note written; pageErrors empty; (v3)(v5)(v8)(v9) unit-only (stated); docs R32-6 PASS (every MetadataPanel/App file:line resolved by c-round-32/refs.py)",
+        "root gate round 32: published ee15e6c, review COMMIT OK (gates/round-32/review.md), 4 low + architecture note"
+      ]
+    },
+    {
+      "id": "TM-B35",
+      "type": "bug",
+      "severity": "low",
+      "source": "A-R32-01 (Done between Open Folder B's beginFolderLoad and setFiles), RR-R32-04 (Rescan read with the old schema lands after the schema re-read); B R32 red reproduction (b-round-32-exp/)",
+      "title": "Schema change during a pending folder load (D-40): Done pressed while Open Folder B is scanning re-reads A's files under B's (current) load id and replaces B's metadata with A's (stale toast on reject); a Rescan/Open read that began with the old schema lands after the schema re-read and wipes the new field's values",
+      "status": "todo",
+      "round": 33,
+      "depends_on": [
+        "TM-B34"
+      ],
+      "decisions": [
+        "D-40"
+      ],
+      "findings": [
+        "A-R32-01",
+        "RR-R32-04"
+      ],
+      "acceptance": [
+        "R33: handleSchemaChanged first awaits waitForFolderLoadIdle() (resolves at once when isScanning is false, else on the first store change with isScanning false), then takes files and folderLoadId from useFileStore.getState(); the D-39 guard, D-33/D-34 and every toast unchanged; the allFiles selector is removed; no other src change",
+        "tests (w1)-(w7) in tests/renderer/components/schema-change-during-folder-load.test.ts: on ee15e6c src 3 red ((w1)(w2)(w3)), (w4)-(w7) green (272 passed / 3 failed of 275); 275/275 in 16 files after; mutants DM-1, DM-2, DM-4, DM-5, DM-6, DM-7 killed, DM-3 equivalent",
+        "real app (C, old ee15e6c vs new): W/WJ (Done while Open Folder fast is scanning, slow's batch read delayed/rejected -> old: f.wav loses Tagged / stale toast; new: f.wav keeps R32Fast, no slow read after Done), R (Rescan read with the old schema delayed, field R33note/R33N added, Done -> old: R33note empty after the Rescan lands; new: R33Val), N (no load: Done applies at once on both); sha256 + ffprobe + music-metadata",
+        "docs/bugs/001 entry 16 fixed by D-40; D-40 bullet; D-39 bullet (b) sentence updated; header/README 16/8/5; STATE_MANAGEMENT one D-40 line + D-39 wording",
+        "gate: verifyCommand green, renderer 275, main 93, E2E 7/7, --retries=0 7/7, Biome 0/8 same list"
+      ],
       "realVerified": false,
-      "evidence_b": "B R31 (b-round-31-exp/): on 7355d78 src 8 red ((v1)-(v4),(v6)-(v9)) on the symptom, (v5)(o17)(o18) green (red-run.log 260 passed / 8 failed of 268); prototype (prototype.diff.txt) 268/268 in 15 files, Biome 0/8 same list, tsc web + test clean; SM-1..SM-8 killed, SM-9 equivalent (mutants.log)"
+      "evidence_b": "B R32 (b-round-32-exp/): on ee15e6c src 3 red ((w1) metadata = A's map with r33note under B's list; (w2) toast 'Failed to read 2 files'; (w3) r33note missing after the old-schema Rescan read) and (w4)-(w7) green (red-run.log 272 passed / 3 failed of 275); prototype 275/275 in 16 files, Biome 0/8 same list, tsc web + test clean (green-run.log); DM-1/2/4/5/6/7 killed, DM-3 equivalent (mutants.log)"
     }
   ],
   "findings": [
@@ -2893,12 +2932,13 @@
       "id": "A-R19-02",
       "source": "qa-engineer P2 (a-round-19.md)",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "Folder close/switch during a pending save: updateFileMetadata adds the old folder's path to the new folder's metadata map (stray key); the editor half is covered by D-29 (selection cleared -> editor untouched)",
       "routed_to": "TM-B34 round 32 (D-39): B red reproduction b-round-31-exp/ (v1)(v2)(v3)",
       "notes": [
         "R20 re-check (A's qa-engineer): the editor half is fixed by D-29 (selection cleared -> editor untouched, (x4)); still open: updateFileMetadata leaves the old folder's path as a key in the new folder's metadata map, and refreshSavedFileStats scans the newly opened folder (no effect, only written paths are patched)"
-      ]
+      ],
+      "closed_by": "TM-B34 (D-39), C R32 PASS (R32-1..R32-6, realVerified=true; c-round-32.md/.json), published ee15e6c, review COMMIT OK"
     },
     {
       "round": 19,
@@ -3609,10 +3649,11 @@
       "id": "RR-R28-03",
       "source": "root-review",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "Rescan / Open Folder / drop are not locked during a save; a save's re-read landing after a folder switch adds an old-folder entry to the new folder's metadata (harmless for rendering, small leak); a scan token per folder scan would drop it",
       "routed_to": "TM-B34 round 32 (D-39): B red reproduction b-round-31-exp/ (v1)(v2)(v3)(v4); listed-path rule, not a lock",
-      "note_b_r29": "Related: Open Folder / drop of an empty folder kept the old folder entries (C-R29-02) -> fixed by TM-B32 (D-37, round 30). The save re-read landing after a folder switch stays open here."
+      "note_b_r29": "Related: Open Folder / drop of an empty folder kept the old folder entries (C-R29-02) -> fixed by TM-B32 (D-37, round 30). The save re-read landing after a folder switch stays open here.",
+      "closed_by": "TM-B34 (D-39), C R32 PASS (R32-1..R32-6, realVerified=true; c-round-32.md/.json), published ee15e6c, review COMMIT OK"
     },
     {
       "round": 28,
@@ -3724,9 +3765,10 @@
       "id": "RR-R30-01",
       "source": "root-review (gates/round-30/review.md low 1)",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "A save on an old-folder file still running when another folder (empty or not) is opened: the save's re-read writes that entry into metadata after the clear (hidden while files is empty; shown as current if the old folder is reopened and its read rejects). Same class as RR-R28-03 / A-R19-02",
-      "routed_to": "TM-B34 round 32 (D-39): B red reproduction b-round-31-exp/ (v4); NOT the folderLoadId hint: B mutant SM-3 (save keyed on folderLoadId) breaks D-35 (r1)(r2)(r3)(r6)(r7)(k6) because Rescan also calls beginFolderLoad()"
+      "routed_to": "TM-B34 round 32 (D-39): B red reproduction b-round-31-exp/ (v4); NOT the folderLoadId hint: B mutant SM-3 (save keyed on folderLoadId) breaks D-35 (r1)(r2)(r3)(r6)(r7)(k6) because Rescan also calls beginFolderLoad()",
+      "closed_by": "TM-B34 (D-39), C R32 PASS (R32-1..R32-6, realVerified=true; c-round-32.md/.json), published ee15e6c, review COMMIT OK"
     },
     {
       "round": 30,
@@ -3770,18 +3812,20 @@
       "id": "RR-R31-01",
       "source": "root-review (gates/round-31/review.md low 1)",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "tests/renderer/stores/file-store.test.ts:2-3 imports isFolderLoadCurrent in a second statement from ~/stores/file-store; merge into one import",
-      "routed_to": "TM-B34 round 32 rider (one-line test tidy, b-round-31-exp/file-store-import.diff.txt)"
+      "routed_to": "TM-B34 round 32 rider (one-line test tidy, b-round-31-exp/file-store-import.diff.txt)",
+      "closed_by": "TM-B34 (D-39), C R32 PASS (R32-1..R32-6, realVerified=true; c-round-32.md/.json), published ee15e6c, review COMMIT OK"
     },
     {
       "round": 31,
       "id": "RR-R31-02",
       "source": "root-review (gates/round-31/review.md low 2), A R31 CR-2 / qa-engineer info",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "App.tsx:50-55 schema-wait loop runs after beginFolderLoad() and never checks isFolderLoadCurrent: a superseded drop keeps polling up to 5 s and then calls scanFolder for the old folder (result discarded by the :59 guard; wasted IPC)",
-      "routed_to": "TM-B34 round 32 (D-39c), (v9) red on 7355d78"
+      "routed_to": "TM-B34 round 32 (D-39c), (v9) red on 7355d78",
+      "closed_by": "TM-B34 (D-39), C R32 PASS (R32-1..R32-6, realVerified=true; c-round-32.md/.json), published ee15e6c, review COMMIT OK"
     },
     {
       "round": 31,
@@ -3806,18 +3850,20 @@
       "id": "A-R31-01",
       "source": "A R31 qa-engineer (a-round-31.md), unconfirmed by C",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "handleSchemaChanged (MetadataPanel.tsx:209-254) reads the old folder's files and replaces the whole metadata map: Done in the schema editor, then Open Folder B (or Close Folder) while the schema re-read is pending -> B's files lose their entries (no Tagged, empty form) and a rejected re-read shows a stale 'Failed to read N files'. Display-only: an empty form saves only typed fields (writeTagsToFile skips undefined)",
-      "routed_to": "TM-B34 round 32 (D-39b): B reproduced red on 7355d78, (v6)(v7)(v8); severity low (QA said medium; B: display-only, nothing on disk)"
+      "routed_to": "TM-B34 round 32 (D-39b): B reproduced red on 7355d78, (v6)(v7)(v8); severity low (QA said medium; B: display-only, nothing on disk)",
+      "closed_by": "TM-B34 (D-39), C R32 PASS (R32-1..R32-6, realVerified=true; c-round-32.md/.json), published ee15e6c, review COMMIT OK"
     },
     {
       "round": 31,
       "id": "C-R31-01",
       "source": "C R31 signal (CR-6, also A R31 code-review CR-6)",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "Test gap: Close Folder during a pending scan, and during a pending drop load, have no unit test (only Close during a pending Open Folder read, (o5)); both Close mutants are killed by (o5)",
-      "routed_to": "TM-B34 round 32 pins (o17)(o18), green on 7355d78"
+      "routed_to": "TM-B34 round 32 pins (o17)(o18), green on 7355d78",
+      "closed_by": "TM-B34 (D-39), C R32 PASS (R32-1..R32-6, realVerified=true; c-round-32.md/.json), published ee15e6c, review COMMIT OK"
     },
     {
       "round": 31,
@@ -3842,9 +3888,100 @@
       "id": "B-R31-02",
       "source": "B R31 mutant SM-9",
       "severity": "info",
-      "status": "open",
+      "status": "closed",
       "title": "Equivalent mutant: App schema-wait guard after the loop instead of inside survives (scanFolder is still skipped); the only difference is up to 5 s of idle 50 ms polling. Not observable through the store or IPC",
-      "routed_to": "record; C states it as equivalent in R32-3"
+      "routed_to": "record; C states it as equivalent in R32-3",
+      "closed_by": "C R32-3 confirmed SM-9 survives as an equivalent mutant (c-round-32/mutants.log)"
+    },
+    {
+      "round": 32,
+      "id": "RR-R32-01",
+      "source": "root-review (gates/round-32/review.md low 1)",
+      "severity": "low",
+      "status": "open",
+      "title": "MetadataPanel.tsx:60-62,186-188 isListedPath scans the whole files list once per saved path in the batch filter (O(files x paths), ~1e6 comparisons for 1000 x 1000 on the main thread); a Set of listed paths built once per re-read gives the same result",
+      "routed_to": "signal (perf nit); see round 33 rider decision in b-round-32.md"
+    },
+    {
+      "round": 32,
+      "id": "RR-R32-02",
+      "source": "root-review (gates/round-32/review.md low 2)",
+      "severity": "low",
+      "status": "open",
+      "title": "refreshSavedFileStats reads folderPath when it runs, so a save finishing after Open Folder B scans folder B; the written-paths filter discards the result (state correct, wasted scan IPC); skip when no written path is still listed (pre-existing, RR-R19-01/RR-R19-03 class)",
+      "routed_to": "signal (with RR-R19-01 / RR-R19-03 / B-R18-01; performance is a Saba question)"
+    },
+    {
+      "round": 32,
+      "id": "RR-R32-03",
+      "source": "root-review (gates/round-32/review.md low 3)",
+      "severity": "info",
+      "status": "open",
+      "title": "App.tsx:55 the superseded early return sits before try/finally and so skips setIsScanning(false); correct (only the current load owns isScanning). Record so nobody moves it into the finally",
+      "routed_to": "record (design fact of D-39c)"
+    },
+    {
+      "round": 32,
+      "id": "RR-R32-04",
+      "source": "root-review (gates/round-32/review.md low 4)",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "A folder load (Rescan / Open Folder) whose chunked read began with the old schema and lands after the schema re-read applies old-schema data; the schema re-read is not dropped and not repeated (pre-existing, no test)",
+      "routed_to": "TM-B35 round 33 (D-40): B red reproduction b-round-32-exp/ (w3) red on ee15e6c (Rescan read with the old schema lands after the schema re-read)"
+    },
+    {
+      "round": 32,
+      "id": "RR-R32-05",
+      "source": "root-review (gates/round-32/review.md architecture note)",
+      "severity": "info",
+      "status": "open",
+      "title": "Architecture signal: folder-switch safety rests on three rules (load id for loads and schema re-read, listed path for save re-read, write generations for stale reads); one store action applyLateRead(entries, { loadId?, readGeneration? }) could hold all three so each new async path gets every guard by default",
+      "routed_to": "signal (with RR-R31-04 / RR-R29-02 / RR-R30-03 / RR-R28-05 / RR-R25-04)"
+    },
+    {
+      "round": 32,
+      "id": "A-R32-01",
+      "source": "A R32 code-reviewer + qa-engineer (a-round-32.md), C R32 B-note (inference from code, not reproduced by C)",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "handleSchemaChanged takes folderLoadId at start; Done pressed after Open Folder B's beginFolderLoad() but before its setFiles(B) captures B's (current) id while allFiles is still A's list, so the D-39(b) guard cannot fire: when A's schema chunks land after B loaded, setMetadata replaces B's map with A's entries (B loses Tagged / form values; a rejected read shows a stale toast). Display-only. A rated medium",
+      "routed_to": "TM-B35 round 33 (D-40): B red reproduction b-round-32-exp/ (w1)(w2) red on ee15e6c; severity low (A said medium; display-only)"
+    },
+    {
+      "round": 32,
+      "id": "A-R32-02",
+      "source": "A R32 code-reviewer + qa-engineer (a-round-32.md), not reproduced by C",
+      "severity": "info",
+      "status": "open",
+      "title": "Single save: skipSyncRef.current = true (MetadataPanel.tsx:157) is still set when selectionUnchanged is true but isListedPath(path) is false (updateFileMetadata skipped); the stale skip can swallow one later non-selection sync. Reach: Open Folder B, during B's scan click a.wav again in A's list, setFiles(B), then the save's re-read lands",
+      "routed_to": "B R32 explore test (b-round-32-exp/explore-a-r32-02.test.ts.txt, not in the final set): reproduced the internal state (editingMetadata holds a's re-read while a is not listed, panel shows 'Select a file'), but no user-visible effect: clicking b shows B's form, metadata holds only B. Record; revisit if a visible symptom is found"
+    },
+    {
+      "round": 32,
+      "id": "C-R32-01",
+      "source": "C R32-2 note",
+      "severity": "info",
+      "status": "open",
+      "title": "(s1) (metadata-panel-schema-change.test.ts) timed out once at 5000 ms when C ran two renderer suites in parallel on the 4-core runner; alone and in the gate 268/268. (v9) depends on the 50 ms schema poll (waitMs(20)/waitMs(150)); both are timing-sensitive under load",
+      "routed_to": "record; revisit if a gate run flakes (with A-R31-02)"
+    },
+    {
+      "round": 32,
+      "id": "B-R32-01",
+      "source": "B R32 prototype (b-round-32-exp/prototype.diff.txt)",
+      "severity": "info",
+      "status": "open",
+      "title": "Under D-40 a Done pressed during a pending folder load keeps the schema editor open until that load finishes and the re-read completes (SchemaEditor awaits onSave, C-R27-01 class); no new text or element",
+      "routed_to": "record; C measures the time in R33-5; a non-blocking Done would be a UX change (reference-first, Saba)"
+    },
+    {
+      "round": 32,
+      "id": "B-R32-02",
+      "source": "B R32 mutant DM-3 (b-round-32-exp/mutants.log)",
+      "severity": "info",
+      "status": "open",
+      "title": "Equivalent mutant DM-3: taking folderLoadId before the D-40 wait instead of after survives; a load that starts during the wait begins after the schema change and so already reads with the new schema, so dropping the re-read loses nothing",
+      "routed_to": "record; C states it as equivalent in R33-3"
     }
   ],
   "rounds": [
@@ -4522,19 +4659,42 @@
     {
       "round": 32,
       "task": "TM-B34 late re-reads after a folder switch (D-39): save re-read listed-path rule, schema re-read load-id guard, App schema-wait guard; pins (o17)(o18); docs/bugs/001 entry 15",
-      "status": "planned",
+      "status": "PASS (C R32-1..R32-6, realVerified=true, bugs 0); root gate published ee15e6c (round 32), review COMMIT OK; TM-B34 done",
       "baseline": "7355d78cecfd24bc895c29b3cc84b8e905283d58 (clean)",
       "items": [
         "TM-B34"
       ],
       "findings": [
-        "RR-R28-03",
         "A-R19-02",
-        "RR-R30-01",
         "A-R31-01",
-        "RR-R31-02",
+        "A-R32-01",
+        "A-R32-02",
+        "B-R32-01",
+        "B-R32-02",
+        "C-R31-01",
+        "C-R32-01",
+        "RR-R28-03",
+        "RR-R30-01",
         "RR-R31-01",
-        "C-R31-01"
+        "RR-R31-02",
+        "RR-R32-01",
+        "RR-R32-02",
+        "RR-R32-03",
+        "RR-R32-04",
+        "RR-R32-05"
+      ]
+    },
+    {
+      "round": 33,
+      "task": "TM-B35 schema change during a pending folder load (D-40): handleSchemaChanged waits for the load, then reads the current files; docs/bugs/001 entry 16",
+      "status": "planned",
+      "baseline": "ee15e6cfa72f50bb1caecb9075526101e3eb03ec (clean)",
+      "items": [
+        "TM-B35"
+      ],
+      "findings": [
+        "A-R32-01",
+        "RR-R32-04"
       ]
     }
   ]

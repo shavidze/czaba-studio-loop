@@ -1,0 +1,33 @@
+// B R32 explore run for A-R32-02 (not part of round 33). Appended inside the describe of b-r33-schema-load.test.ts.txt,
+// with `import { FileList } from "~/components/file-list/FileList";` added. Result on ee15e6c: PASS -> internal state
+// (editingMetadata = a's re-read while a is not listed) reproduced, no user-visible effect (b click shows B's form).
+  it("(w7) explore A-R32-02: single save on a, Open Folder B, a clicked again during B's scan, re-read lands after B loads, then b clicked: form shows B", async () => {
+    seedFolderA([PATH_A]);
+    const write = createDeferred<undefined>();
+    const scanB = createDeferred<WavFileEntry[]>();
+    vi.mocked(window.api.writeMetadata).mockReturnValueOnce(write.promise);
+    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise).mockResolvedValue([FILE_B]);
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
+    vi.mocked(window.api.readMetadata).mockResolvedValue({ ...NEW_A });
+    render(createElement(Fragment, null, createElement(FolderBrowser), createElement(FileList), createElement(MetadataPanel)));
+
+    await typeCategoryAndSave(/Save Tags/);
+    await clickButton(/Open Folder/);
+    await act(async () => {
+      fireEvent.click(screen.getByText("a.wav"));
+    });
+    const skipBefore = useFileStore.getState().selectedPaths;
+    await settle(() => scanB.resolve([FILE_B]));
+    await waitMs(20);
+    await settle(() => write.resolve(undefined));
+    await waitMs(20);
+    const editingAfterReread = useMetadataStore.getState().editingMetadata;
+    await act(async () => {
+      fireEvent.click(screen.getByText("b.wav"));
+    });
+
+    expect(skipBefore).toEqual([PATH_A]);
+    expect(editingAfterReread).toEqual(NEW_A);
+    expect(useMetadataStore.getState().editingMetadata).toEqual(B_META);
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: B_META });

@@ -1,0 +1,96 @@
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index 8eb6c87..39dd76c 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -31,6 +31,7 @@ Stale schema re-read (D-34): confirmed writes call markPathsWritten (writeGenera
+ Stale folder read (D-35): readMetadataChunked(paths, schema, getWriteGeneration) calls getWriteGeneration() before each chunk and returns readGenerations (result paths only); applyMetadataRead(read, readGenerations, keptPaths) replaces metadata and keeps the current store entry for superseded paths (stamp > read generation; no entry → absent); Rescan, Open Folder and drop use it; error paths: Open Folder/drop setFiles([]) + setMetadata({}), Rescan toast only; empty folder: setMetadata({}) in all three (D-37)
+ Rejected folder-read chunk (D-36): readMetadataChunked also returns failedPaths (every path of every rejected chunk, failures = failedPaths.length); applyMetadataRead(read, readGenerations, keptPaths) gets failedPaths as keptPaths and keeps the current store entry for each (taken at store-write time; no entry → absent); Rescan, Open Folder and drop show 'Failed to read N files' (error) when failures > 0
+ Overlapping folder loads (D-38): handleOpenFolder (after the dialog), handleRescan and App openFolder take useFileStore.getState().beginFolderLoad() first; after scanFolder, after readMetadataChunked and in catch a load that is no longer isFolderLoadCurrent(loadId) returns without store writes or toast; finally clears isScanning only for the current load; handleCloseFolder calls beginFolderLoad() and setIsScanning(false). folderLoadId is never reset.
++Late re-reads after a folder switch (D-39): handleSave writes its re-read into the store only for paths still listed in useFileStore files (isListedPath), never keyed on folderLoadId because Rescan also begins a load; handleSchemaChanged takes folderLoadId at start and returns without store writes, editor change or toast when it is no longer current; App openFolder's schema-wait loop returns when its load is superseded.
+ ```
+ 
+ ### Template apply (batch-safe)
+diff --git a/src/renderer/src/App.tsx b/src/renderer/src/App.tsx
+index 75491ce..9194de2 100644
+--- a/src/renderer/src/App.tsx
++++ b/src/renderer/src/App.tsx
+@@ -52,6 +52,7 @@ export default function App(): React.ReactElement {
+       while (!useSchemaStore.getState().isLoaded) {
+         if (Date.now() - start > maxWait) break;
+         await new Promise((r) => setTimeout(r, 50));
++        if (!isFolderLoadCurrent(loadId)) return;
+       }
+ 
+       try {
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index 05f6284..671eb77 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -4,7 +4,7 @@ import { SchemaEditor } from '~/components/schema/SchemaEditor';
+ import { TemplatePicker } from '~/components/templates/TemplatePicker';
+ import { Button } from '~/components/ui/button';
+ import { Input } from '~/components/ui/input';
+-import { useFileStore, useSelectedFiles } from '~/stores/file-store';
++import { isFolderLoadCurrent, useFileStore, useSelectedFiles } from '~/stores/file-store';
+ import { useMetadataStore } from '~/stores/metadata-store';
+ import { useSchemaStore } from '~/stores/schema-store';
+ import type { BatchWriteResult, FieldValue, WavMetadata } from '~/types';
+@@ -57,6 +57,10 @@ function mergeFieldsTypedDuringSave(typed: Record<string, FieldValue>): void {
+   useMetadataStore.getState().mergeFields(typed);
+ }
+ 
++function isListedPath(path: string): boolean {
++  return useFileStore.getState().files.some((file) => file.path === path);
++}
++
+ async function refreshSavedFileStats(writtenPaths: string[]): Promise<void> {
+   const { folderPath, updateFileStats } = useFileStore.getState();
+   if (folderPath === null) return;
+@@ -151,7 +155,7 @@ export function MetadataPanel(): React.ReactElement {
+           ? collectFieldsTypedDuringSave(startEditingMetadata)
+           : {};
+         if (selectionUnchanged) skipSyncRef.current = true;
+-        updateFileMetadata(path, updated);
++        if (isListedPath(path)) updateFileMetadata(path, updated);
+         if (selectionUnchanged) setEditingMetadata({ ...updated });
+         mergeFieldsTypedDuringSave(typedDuringSave);
+         showToast('Tags saved', 'success');
+@@ -179,7 +183,9 @@ export function MetadataPanel(): React.ReactElement {
+           showToast(buildReloadFailedToast(result), 'error');
+           return;
+         }
+-        const savedEntries = Object.entries(refreshed).filter(([path]) => !failedPaths.has(path));
++        const savedEntries = Object.entries(refreshed).filter(
++          ([path]) => !failedPaths.has(path) && isListedPath(path),
++        );
+         const selectionUnchanged = isSelectionUnchanged();
+         if (savedEntries.length > 0 && selectionUnchanged) {
+           skipSyncRef.current = true;
+@@ -208,6 +214,7 @@ export function MetadataPanel(): React.ReactElement {
+ 
+   const handleSchemaChanged = useCallback(async () => {
+     if (allFiles.length === 0) return;
++    const loadId = useFileStore.getState().folderLoadId;
+     const newSchema = useSchemaStore.getState().fields;
+     const paths = allFiles.map((f) => f.path);
+     const CHUNK_SIZE = 50;
+@@ -225,6 +232,7 @@ export function MetadataPanel(): React.ReactElement {
+         for (const path of chunk) keptPaths.add(path);
+       }
+     }
++    if (!isFolderLoadCurrent(loadId)) return;
+     const { metadata: currentMetadata, pathWriteGenerations } = useFileStore.getState();
+     const accumulated: Record<string, WavMetadata> = {};
+     for (const { readGeneration, result } of chunkReads) {
+diff --git a/tests/renderer/stores/file-store.test.ts b/tests/renderer/stores/file-store.test.ts
+index 5430f45..311eea5 100644
+--- a/tests/renderer/stores/file-store.test.ts
++++ b/tests/renderer/stores/file-store.test.ts
+@@ -1,6 +1,5 @@
+ import { afterEach, beforeEach, describe, expect, it } from "vitest";
+-import { useFileStore } from "~/stores/file-store";
+-import { isFolderLoadCurrent } from "~/stores/file-store";
++import { isFolderLoadCurrent, useFileStore } from "~/stores/file-store";
+ import type { WavFileEntry, WavMetadata } from "~/types";
+ import { resetAllStores } from "../helpers/reset-stores";
+ 

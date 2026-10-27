@@ -1,0 +1,355 @@
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createElement, Fragment } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import App from "~/App";
+import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+import { FolderBrowser } from "~/components/sidebar/FolderBrowser";
+import { useFileStore } from "~/stores/file-store";
+import { useMetadataStore } from "~/stores/metadata-store";
+import type { BatchWriteResult, FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
+import { STANDARD_FIELDS } from "~/types";
+import { resetAllStores } from "../helpers/reset-stores";
+import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+
+vi.hoisted(() => {
+  const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+  const mockApi = globalScope.window.api;
+  globalScope.window = globalThis as unknown as { api: unknown };
+  globalScope.api = mockApi;
+});
+
+type MetadataByPath = Record<string, WavMetadata>;
+
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (error: Error) => void;
+}
+
+const MODIFIED_AT = "2026-10-27T00:00:00.000Z";
+const SAVED_CATEGORY = "R33Cat";
+const PATH_A = "/fa/a.wav";
+const PATH_A2 = "/fa/a2.wav";
+const PATH_B = "/fb/b.wav";
+const PATH_SUB = "/fa/sub/x.wav";
+const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 1, modifiedAt: MODIFIED_AT };
+const FILE_A2: WavFileEntry = { name: "a2.wav", path: PATH_A2, size: 1, modifiedAt: MODIFIED_AT };
+const FILE_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 1, modifiedAt: MODIFIED_AT };
+const FILE_SUB: WavFileEntry = { name: "x.wav", path: PATH_SUB, size: 1, modifiedAt: MODIFIED_AT };
+const A_META: WavMetadata = { title: "A", category: "ACat", comment: "" };
+const A2_META: WavMetadata = { title: "A2", category: "A2Cat", comment: "" };
+const B_META: WavMetadata = { title: "B", category: "BCat", comment: "" };
+const SUB_META: WavMetadata = { title: "X", category: "XCat", comment: "" };
+const NEW_A: WavMetadata = { ...A_META, category: SAVED_CATEGORY };
+const NEW_A2: WavMetadata = { ...A2_META, category: SAVED_CATEGORY };
+const NEW_SUB: WavMetadata = { ...SUB_META, category: SAVED_CATEGORY };
+
+function createDeferred<T>(): Deferred<T> {
+  let resolve: (value: T) => void = () => {};
+  let reject: (error: Error) => void = () => {};
+  const promise = new Promise<T>((onResolve, onReject) => {
+    resolve = onResolve;
+    reject = onReject;
+  });
+  return { promise, resolve, reject };
+}
+
+async function clickButton(name: RegExp): Promise<void> {
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name }));
+  });
+}
+
+async function clickCloseFolder(): Promise<void> {
+  const closeButton = document.querySelector('button[type="button"] svg.lucide-x')?.closest("button");
+  if (!closeButton) throw new Error("close button not found");
+  await act(async () => {
+    fireEvent.click(closeButton);
+  });
+}
+
+async function settle(action: () => void): Promise<void> {
+  await act(async () => {
+    action();
+  });
+}
+
+async function waitMs(ms: number): Promise<void> {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  });
+}
+
+function getInputByLabel(labelText: string): HTMLInputElement {
+  const label = screen.getByText(labelText);
+  const input = label.parentElement?.querySelector("input");
+  if (!input) throw new Error(`${labelText} input not found`);
+  return input;
+}
+
+async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+  fireEvent.change(getInputByLabel("Category (UCS)"), { target: { value: SAVED_CATEGORY } });
+  await clickButton(saveButtonName);
+}
+
+async function addNoteFieldAndDone(): Promise<void> {
+  fireEvent.click(screen.getByTitle("Customize Fields"));
+  fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R32note" } });
+  fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
+  await clickButton(/Done/);
+}
+
+function renderBrowserAndPanel(): void {
+  render(createElement(Fragment, null, createElement(FolderBrowser), createElement(MetadataPanel)));
+}
+
+function seedFolderA(selectedPaths: string[]): void {
+  useFileStore.setState({
+    folderPath: "/fa",
+    files: [FILE_A, FILE_A2],
+    metadata: { [PATH_A]: { ...A_META }, [PATH_A2]: { ...A2_META } },
+    selectedPaths,
+  });
+}
+
+function seedSubFolder(selectedPaths: string[]): void {
+  useFileStore.setState({
+    folderPath: "/fa/sub",
+    files: [FILE_SUB],
+    metadata: { [PATH_SUB]: { ...SUB_META } },
+    selectedPaths,
+  });
+}
+
+beforeEach(() => {
+  resetAllStores();
+  resetWindowApiMocks();
+  vi.mocked(window.api.openFolderDialog).mockReset().mockResolvedValue(null);
+  vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
+});
+const PATH_C = "/fc/c.wav";
+const FILE_C: WavFileEntry = { name: "c.wav", path: PATH_C, size: 1, modifiedAt: MODIFIED_AT };
+const C_META: WavMetadata = { title: "C", category: "CCat", comment: "" };
+const NOTE_KEY = "r33note";
+const NOTE_BY_PATH: Record<string, string> = { [PATH_A]: "AN", [PATH_A2]: "A2N", [PATH_B]: "BN", [PATH_C]: "CN" };
+const BASE_BY_PATH: MetadataByPath = { [PATH_A]: A_META, [PATH_A2]: A2_META, [PATH_B]: B_META, [PATH_C]: C_META };
+
+function hasNoteField(schema: FieldDefinition[]): boolean {
+  return schema.some((field) => field.key === NOTE_KEY);
+}
+
+function readFor(paths: string[], schema: FieldDefinition[]): MetadataByPath {
+  const out: MetadataByPath = {};
+  for (const path of paths) {
+    out[path] = hasNoteField(schema) ? { ...BASE_BY_PATH[path], [NOTE_KEY]: NOTE_BY_PATH[path] } : { ...BASE_BY_PATH[path] };
+  }
+  return out;
+}
+
+function withNote(path: string): WavMetadata {
+  return { ...BASE_BY_PATH[path], [NOTE_KEY]: NOTE_BY_PATH[path] };
+}
+
+function batchReadPaths(): string[][] {
+  return vi.mocked(window.api.readMetadataBatch).mock.calls.map((call) => call[0]);
+}
+
+async function openCustomize(): Promise<void> {
+  await act(async () => {
+    fireEvent.click(screen.getByTitle("Customize Fields"));
+  });
+}
+
+async function addNoteField(): Promise<void> {
+  fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R33note" } });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
+  });
+}
+
+describe("schema change during a pending folder load (D-40)", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("(w1) A-R32-01: Done while Open Folder B's scan is pending, B loads, A's schema read would land: metadata holds only B with the new field", async () => {
+    seedFolderA([PATH_A]);
+    const scanB = createDeferred<WavFileEntry[]>();
+    const pendingA: Deferred<MetadataByPath>[] = [];
+    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => {
+      if (paths.includes(PATH_A)) {
+        const d = createDeferred<MetadataByPath>();
+        pendingA.push(d);
+        return d.promise.then(() => readFor(paths, schema));
+      }
+      return readFor(paths, schema);
+    });
+    renderBrowserAndPanel();
+
+    await openCustomize();
+    await clickButton(/Open Folder/);
+    await addNoteField();
+    await clickButton(/Done/);
+    await settle(() => scanB.resolve([FILE_B]));
+    await waitMs(20);
+    await settle(() => {
+      for (const d of pendingA) d.resolve({});
+    });
+    await waitMs(20);
+
+    expect(useFileStore.getState().files).toEqual([FILE_B]);
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: withNote(PATH_B) });
+    expect(useMetadataStore.getState().toastMessage).toBeNull();
+    expect(batchReadPaths().some((paths) => paths.includes(PATH_A))).toBe(false);
+  });
+
+  it("(w2) A-R32-01: as (w1), A's schema read rejects: no stale toast, metadata holds B", async () => {
+    seedFolderA([PATH_A]);
+    const scanB = createDeferred<WavFileEntry[]>();
+    const pendingA: Deferred<MetadataByPath>[] = [];
+    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => {
+      if (paths.includes(PATH_A)) {
+        const d = createDeferred<MetadataByPath>();
+        pendingA.push(d);
+        return d.promise;
+      }
+      return readFor(paths, schema);
+    });
+    renderBrowserAndPanel();
+
+    await openCustomize();
+    await clickButton(/Open Folder/);
+    await addNoteField();
+    await clickButton(/Done/);
+    await settle(() => scanB.resolve([FILE_B]));
+    await waitMs(20);
+    await settle(() => {
+      for (const d of pendingA) d.reject(new Error("A down"));
+    });
+    await waitMs(20);
+
+    expect(useMetadataStore.getState().toastMessage).toBeNull();
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: withNote(PATH_B) });
+  });
+
+  it("(w3) RR-R32-04: Rescan's read starts with the old schema, field added, Done, the Rescan read lands after the schema read: metadata keeps the new field", async () => {
+    seedFolderA([PATH_A]);
+    const rescanRead = createDeferred<MetadataByPath>();
+    vi.mocked(window.api.scanFolder).mockResolvedValue([FILE_A, FILE_A2]);
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => {
+      if (!hasNoteField(schema)) return rescanRead.promise.then(() => readFor(paths, schema));
+      return readFor(paths, schema);
+    });
+    renderBrowserAndPanel();
+
+    await openCustomize();
+    await clickButton(/Rescan/);
+    await waitMs(20);
+    await addNoteField();
+    await clickButton(/Done/);
+    await waitMs(20);
+    await settle(() => rescanRead.resolve({}));
+    await waitMs(20);
+
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: withNote(PATH_A), [PATH_A2]: withNote(PATH_A2) });
+    expect(useFileStore.getState().isScanning).toBe(false);
+  });
+
+  it("(w4) pin: Done while Open Folder B's scan is pending, then Close Folder: folder stays closed, no toast", async () => {
+    seedFolderA([PATH_A]);
+    const scanB = createDeferred<WavFileEntry[]>();
+    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
+    renderBrowserAndPanel();
+
+    await openCustomize();
+    await clickButton(/Open Folder/);
+    await addNoteField();
+    await clickButton(/Done/);
+    await clickCloseFolder();
+    await settle(() => scanB.resolve([FILE_B]));
+    await waitMs(20);
+
+    expect(useFileStore.getState().folderPath).toBeNull();
+    expect(useFileStore.getState().files).toEqual([]);
+    expect(useFileStore.getState().metadata).toEqual({});
+    expect(useMetadataStore.getState().toastMessage).toBeNull();
+  });
+
+  it("(w5) pin: Done while B's scan is pending, Open Folder C supersedes B: metadata holds only C with the new field", async () => {
+    seedFolderA([PATH_A]);
+    const scanB = createDeferred<WavFileEntry[]>();
+    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb").mockResolvedValueOnce("/fc");
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise).mockResolvedValueOnce([FILE_C]);
+    const pendingA: Deferred<MetadataByPath>[] = [];
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => {
+      if (paths.includes(PATH_A)) {
+        const d = createDeferred<MetadataByPath>();
+        pendingA.push(d);
+        return d.promise.then(() => readFor(paths, schema));
+      }
+      return readFor(paths, schema);
+    });
+    renderBrowserAndPanel();
+
+    await openCustomize();
+    await clickButton(/Open Folder/);
+    await addNoteField();
+    await clickButton(/Done/);
+    await clickButton(/Open Folder/);
+    await waitMs(20);
+    await settle(() => scanB.resolve([FILE_B]));
+    await settle(() => {
+      for (const d of pendingA) d.resolve({});
+    });
+    await waitMs(20);
+
+    expect(useFileStore.getState().folderPath).toBe("/fc");
+    expect(useFileStore.getState().files).toEqual([FILE_C]);
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_C]: withNote(PATH_C) });
+    expect(useMetadataStore.getState().toastMessage).toBeNull();
+  });
+
+  it("(w6) pin: no folder load pending, Done re-reads the open folder with the new field at once", async () => {
+    seedFolderA([PATH_A]);
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
+    renderBrowserAndPanel();
+
+    await openCustomize();
+    await addNoteField();
+    await clickButton(/Done/);
+
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: withNote(PATH_A), [PATH_A2]: withNote(PATH_A2) });
+    expect(batchReadPaths()).toEqual([[PATH_A, PATH_A2]]);
+  });
+
+  it("(w7) pin: a save's stats refresh replaces the files array while the schema re-read is pending: the schema re-read still applies", async () => {
+    seedFolderA([PATH_A]);
+    const write = createDeferred<undefined>();
+    const schemaRead = createDeferred<MetadataByPath>();
+    vi.mocked(window.api.writeMetadata).mockReturnValueOnce(write.promise);
+    vi.mocked(window.api.scanFolder).mockResolvedValue([{ ...FILE_A, size: 2 }, FILE_A2]);
+    vi.mocked(window.api.readMetadata).mockResolvedValue({ ...NEW_A });
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => schemaRead.promise.then(() => readFor(paths, schema)));
+    renderBrowserAndPanel();
+
+    await typeCategoryAndSave(/Save Tags/);
+    await openCustomize();
+    await addNoteField();
+    await clickButton(/Done/);
+    await settle(() => write.resolve(undefined));
+    await waitMs(20);
+    expect(useFileStore.getState().files[0].size).toBe(2);
+    await settle(() => schemaRead.resolve({}));
+    await waitMs(20);
+
+    expect(useFileStore.getState().metadata[PATH_A2]).toEqual(withNote(PATH_A2));
+    expect(useFileStore.getState().metadata[PATH_A]).toEqual(NEW_A);
+  });
+});
