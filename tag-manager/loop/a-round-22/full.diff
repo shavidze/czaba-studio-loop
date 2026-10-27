@@ -1,0 +1,251 @@
+diff --git a/src/renderer/src/components/file-list/FileList.tsx b/src/renderer/src/components/file-list/FileList.tsx
+index b32aefb..68215fa 100644
+--- a/src/renderer/src/components/file-list/FileList.tsx
++++ b/src/renderer/src/components/file-list/FileList.tsx
+@@ -38,11 +38,13 @@ function SortHeader({ label, field }: { label: string; field: SortField }): Reac
+ function FileRow({
+   file,
+   index,
+-  lastClickRef,
++  visibleFiles,
++  anchorPathRef,
+ }: {
+   file: WavFileEntry;
+   index: number;
+-  lastClickRef: React.MutableRefObject<number>;
++  visibleFiles: WavFileEntry[];
++  anchorPathRef: React.MutableRefObject<string | null>;
+ }): React.ReactElement {
+   const isSelected = useIsSelected(file.path);
+   const meta = useFileStore((s) => s.metadata[file.path]);
+@@ -53,16 +55,21 @@ function FileRow({
+ 
+   const handleClick = useCallback(
+     (e: React.MouseEvent) => {
+-      if (e.shiftKey && lastClickRef.current >= 0) {
+-        selectRange(lastClickRef.current, index);
++      const anchorPath = anchorPathRef.current;
++      const anchorIndex =
++        e.shiftKey && anchorPath !== null
++          ? visibleFiles.findIndex((visibleFile) => visibleFile.path === anchorPath)
++          : -1;
++      if (anchorIndex >= 0) {
++        selectRange(anchorIndex, index);
+       } else if (e.ctrlKey || e.metaKey) {
+         toggleSelection(file.path);
+       } else {
+         setSelectedPaths([file.path]);
+       }
+-      lastClickRef.current = index;
++      anchorPathRef.current = file.path;
+     },
+-    [file.path, index, toggleSelection, setSelectedPaths, selectRange, lastClickRef],
++    [file.path, index, visibleFiles, toggleSelection, setSelectedPaths, selectRange, anchorPathRef],
+   );
+ 
+   const handleDoubleClick = useCallback(() => {
+@@ -99,14 +106,12 @@ function FileRow({
+ export function FileList(): React.ReactElement {
+   const files = useFilteredFiles();
+   const folderPath = useFileStore((s) => s.folderPath);
+-  const searchQuery = useFileStore((s) => s.searchQuery);
+-  const sortField = useFileStore((s) => s.sortField);
+-  const sortDirection = useFileStore((s) => s.sortDirection);
+-  const lastClickRef = useRef(-1);
++  const hasSelection = useFileStore((s) => s.selectedPaths.length > 0);
++  const anchorPathRef = useRef<string | null>(null);
+ 
+   useEffect(() => {
+-    lastClickRef.current = -1;
+-  }, [files, searchQuery, sortField, sortDirection]);
++    if (!hasSelection) anchorPathRef.current = null;
++  }, [hasSelection]);
+ 
+   return (
+     <div className="flex flex-col h-full">
+@@ -123,7 +128,13 @@ export function FileList(): React.ReactElement {
+ 
+       <div className="flex-1 overflow-y-auto">
+         {files.map((file, i) => (
+-          <FileRow key={file.path} file={file} index={i} lastClickRef={lastClickRef} />
++          <FileRow
++            key={file.path}
++            file={file}
++            index={i}
++            visibleFiles={files}
++            anchorPathRef={anchorPathRef}
++          />
+         ))}
+ 
+         {folderPath && files.length === 0 && (
+diff --git a/tests/renderer/components/file-list.test.ts b/tests/renderer/components/file-list.test.ts
+index dffff26..1a7686a 100644
+--- a/tests/renderer/components/file-list.test.ts
++++ b/tests/renderer/components/file-list.test.ts
+@@ -1,4 +1,4 @@
+-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
++import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+ import { createElement } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { FileList } from "~/components/file-list/FileList";
+@@ -201,3 +201,160 @@ describe("FileList sort by Artist with a non-string first element (TM-B21, D-27)
+     expect(getCellText("c.wav", ARTIST_COLUMN_INDEX)).toBe("Abe");
+   });
+ });
++
++describe("FileList Shift-click anchor (TM-B25, D-31)", () => {
++  function selectedNames(): string[] {
++    return useFileStore
++      .getState()
++      .selectedPaths.map((path) => path.slice(FOLDER_PATH.length + 1))
++      .sort();
++  }
++
++  function renderPlainFiles(names: string[]): void {
++    const rows: Record<string, WavMetadata> = {};
++    for (const name of names) {
++      rows[name] = {};
++    }
++    renderFileListWith(rows);
++  }
++
++  const FOUR_FILES = ["a.wav", "b.wav", "c.wav", "d.wav"];
++
++  it("(z1) pin: click then Shift-click selects the range", () => {
++    renderPlainFiles(FOUR_FILES);
++
++    fireEvent.click(getFileRow("a.wav"));
++    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["a.wav", "b.wav", "c.wav"]);
++  });
++
++  it("(z2) keeps the anchor after the D-28 stats refresh of a save", () => {
++    renderPlainFiles(FOUR_FILES);
++
++    fireEvent.click(getFileRow("a.wav"));
++    act(() => {
++      useFileStore.getState().updateFileStats([{ ...createFileEntry("a.wav"), size: 2048 }]);
++    });
++    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["a.wav", "b.wav", "c.wav"]);
++  });
++
++  it("(z3) keeps the anchor after the metadata update of a save", () => {
++    renderPlainFiles(FOUR_FILES);
++
++    fireEvent.click(getFileRow("a.wav"));
++    act(() => {
++      useFileStore
++        .getState()
++        .updateFileMetadata(`${FOLDER_PATH}/a.wav`, createDefaultMetadata({ title: "T" }));
++    });
++    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["a.wav", "b.wav", "c.wav"]);
++  });
++
++  it("(z4) the anchor follows the item after a sort direction change", () => {
++    renderPlainFiles([...FOUR_FILES, "e.wav"]);
++
++    fireEvent.click(getFileRow("b.wav"));
++    act(() => {
++      useFileStore.getState().toggleSortDirection();
++    });
++    expect(getRowNamesInOrder()).toEqual(["e.wav", "d.wav", "c.wav", "b.wav", "a.wav"]);
++    fireEvent.click(getFileRow("e.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["b.wav", "c.wav", "d.wav", "e.wav"]);
++  });
++
++  it("(z5) keeps the anchor after a search change that keeps it visible", () => {
++    renderPlainFiles(FOUR_FILES);
++
++    fireEvent.click(getFileRow("a.wav"));
++    act(() => {
++      useFileStore.getState().setSearchQuery(".wav");
++    });
++    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["a.wav", "b.wav", "c.wav"]);
++  });
++
++  it("(z6) pin: a search that hides the anchor selects only the clicked row", () => {
++    renderPlainFiles(FOUR_FILES);
++
++    fireEvent.click(getFileRow("a.wav"));
++    act(() => {
++      useFileStore.getState().setSearchQuery("c");
++    });
++    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["c.wav"]);
++  });
++
++  it("(z7) pin: a rescan drops the anchor", () => {
++    renderPlainFiles(FOUR_FILES);
++
++    fireEvent.click(getFileRow("a.wav"));
++    act(() => {
++      useFileStore.getState().clearSelection();
++      useFileStore.getState().setFiles(FOUR_FILES.map(createFileEntry));
++    });
++    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["c.wav"]);
++  });
++
++  it("(z8) Deselect All drops the anchor (new D-31 behaviour)", () => {
++    renderPlainFiles(FOUR_FILES);
++
++    fireEvent.click(getFileRow("a.wav"));
++    act(() => {
++      useFileStore.getState().clearSelection();
++    });
++    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["c.wav"]);
++  });
++
++  it("(z9) pin: Shift-click without an earlier click selects only the clicked row", () => {
++    renderPlainFiles(FOUR_FILES);
++
++    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["c.wav"]);
++  });
++
++  it("(z10) pin: Ctrl-click sets the anchor and the range is added", () => {
++    renderPlainFiles(FOUR_FILES);
++
++    fireEvent.click(getFileRow("a.wav"));
++    fireEvent.click(getFileRow("c.wav"), { ctrlKey: true });
++    fireEvent.click(getFileRow("d.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["a.wav", "c.wav", "d.wav"]);
++  });
++
++  it("(z11) the anchor follows the item after a save and a sort field change", () => {
++    renderFileListWith({
++      "a.wav": { bpm: 3 },
++      "b.wav": { bpm: 1 },
++      "c.wav": { bpm: 2 },
++      "d.wav": { bpm: 4 },
++    });
++
++    fireEvent.click(getFileRow("a.wav"));
++    act(() => {
++      useFileStore
++        .getState()
++        .updateFileMetadata(`${FOLDER_PATH}/a.wav`, createDefaultMetadata({ bpm: 3 }));
++    });
++    act(() => {
++      useFileStore.getState().setSortField("bpm");
++    });
++    expect(getRowNamesInOrder()).toEqual(["b.wav", "c.wav", "a.wav", "d.wav"]);
++    fireEvent.click(getFileRow("d.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["a.wav", "d.wav"]);
++  });
++});

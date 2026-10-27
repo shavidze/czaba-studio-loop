@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T12:25:09.944Z)
+# Active loop summary (2026-10-27T13:01:43.114Z)
 
-- backlog.json 188 KB -> active view 59 KB
-- status: G_ROOT_GATE round 21
+- backlog.json 203 KB -> active view 67 KB
+- status: G_ROOT_GATE round 22
 - servers: `{"servers":"none or skipped"}`
-- last publication: 601dc4aad7e9416b8f3c690ba5ec68cccb98490d (rounds 21-21)
-- last root gate: round 21 published - commit 601dc4aad7e9416b8f3c690ba5ec68cccb98490d pushed
+- last publication: 9d1c97e005c9fb430190c7765e44a7ed24b6563f (rounds 22-22)
+- last root gate: round 22 published - commit 9d1c97e005c9fb430190c7765e44a7ed24b6563f pushed
 
-## Current items: TM-B23, TM-B24
+## Current items: TM-B24, TM-B25
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -107,6 +107,20 @@
 - RR-R20-04 / info / open / Architecture signal: a save token {selectionKey, editVersion} recorded at save start (editVersion increased by every updateField) and checke
 - A-R20-01 / low / open / The sync effect keys the selection on join('\0'), so a reorder of the same set (e.g. Select All after a partial selection in another order) 
 - C-R20-01 / info / open / A added an unplanned (x11) (batch A+B -> A + typing on A) in the same describe, additions only; it kills M9 (batch setEditingMetadata({}) un
+- RR-R21-01 / low / open / MetadataPanel.tsx:128 startEditingMetadata comes from the render closure, not useMetadataStore.getState(); the write uses the same closure v
+- RR-R21-02 / low / open / D-30: a field changed during the write and set back to its start-snapshot value is not 'typed'; the editor then shows the re-read, which dif
+- RR-R21-03 / low / open / No pin for typing during a batch save when the selection set changes (AB -> A + typing, no merge)
+- RR-R21-04 / info / open / Architecture signal: handleSave carries D-21, D-24, D-28, D-29, D-30 via skipSyncRef, flags and snapshots in a component callback; a pure po
+- A-R21-01 / low / open / A field that was not in the start snapshot, typed and erased during the save, is merged as ''/0 and keeps the form dirty; in batch the next 
+- A-R21-02 / info / open / Reverting a field to the snapshot value during the save loses the revert when the re-read differs (D-30 by design)
+- A-R21-03 / low / open / Schema change during a pending single save: the re-read made with the save-start fields overwrites the handleSchemaChanged result in the edi
+- A-R21-04 / low / open / metadata-panel-batch-save.test.ts: once-mock queues can leak into the next test if a test fails before Save; a nested beforeEach with mockRe
+- C-R21-01 / info / open / R21-5 step 4: 'Unsaved changes were discarded' appears when clicking a.wav during b.wav's pending save although b's edits are written (uncha
+- C-R21-02 / info / open / 'Tags saved' toast covers the Save button for ~3 s (existing C-R15-01)
+- C-R21-03 / info / open / C's first R21-5 run read music-metadata RIFF INFO without the 'exif:' namespace and reported false negatives; C fixed its helper and reran s
+- B-R21-01 / info / open / A-R20-01 is not reachable through today's UI: toggleSelection appends/removes, selectRange keeps the existing selection order and appends, a
+- B-R21-02 / low / open / Selection deviations from the Explorer/GTK reference kept by D-31: Shift-click moves the anchor (reference: only normal clicks set it); Shif
+- B-R21-03 / info / open / The 'as Record<string, WavMetadata>' casts in App.tsx:64 and FolderBrowser.tsx:112,148 are not redundant: readMetadataChunked (src/renderer/
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

@@ -1,0 +1,80 @@
+diff --git a/src/renderer/src/components/file-list/FileList.tsx b/src/renderer/src/components/file-list/FileList.tsx
+index b32aefb..68215fa 100644
+--- a/src/renderer/src/components/file-list/FileList.tsx
++++ b/src/renderer/src/components/file-list/FileList.tsx
+@@ -38,11 +38,13 @@ function SortHeader({ label, field }: { label: string; field: SortField }): Reac
+ function FileRow({
+   file,
+   index,
+-  lastClickRef,
++  visibleFiles,
++  anchorPathRef,
+ }: {
+   file: WavFileEntry;
+   index: number;
+-  lastClickRef: React.MutableRefObject<number>;
++  visibleFiles: WavFileEntry[];
++  anchorPathRef: React.MutableRefObject<string | null>;
+ }): React.ReactElement {
+   const isSelected = useIsSelected(file.path);
+   const meta = useFileStore((s) => s.metadata[file.path]);
+@@ -53,16 +55,21 @@ function FileRow({
+ 
+   const handleClick = useCallback(
+     (e: React.MouseEvent) => {
+-      if (e.shiftKey && lastClickRef.current >= 0) {
+-        selectRange(lastClickRef.current, index);
++      const anchorPath = anchorPathRef.current;
++      const anchorIndex =
++        e.shiftKey && anchorPath !== null
++          ? visibleFiles.findIndex((visibleFile) => visibleFile.path === anchorPath)
++          : -1;
++      if (anchorIndex >= 0) {
++        selectRange(anchorIndex, index);
+       } else if (e.ctrlKey || e.metaKey) {
+         toggleSelection(file.path);
+       } else {
+         setSelectedPaths([file.path]);
+       }
+-      lastClickRef.current = index;
++      anchorPathRef.current = file.path;
+     },
+-    [file.path, index, toggleSelection, setSelectedPaths, selectRange, lastClickRef],
++    [file.path, index, visibleFiles, toggleSelection, setSelectedPaths, selectRange, anchorPathRef],
+   );
+ 
+   const handleDoubleClick = useCallback(() => {
+@@ -99,14 +106,12 @@ function FileRow({
+ export function FileList(): React.ReactElement {
+   const files = useFilteredFiles();
+   const folderPath = useFileStore((s) => s.folderPath);
+-  const searchQuery = useFileStore((s) => s.searchQuery);
+-  const sortField = useFileStore((s) => s.sortField);
+-  const sortDirection = useFileStore((s) => s.sortDirection);
+-  const lastClickRef = useRef(-1);
++  const hasSelection = useFileStore((s) => s.selectedPaths.length > 0);
++  const anchorPathRef = useRef<string | null>(null);
+ 
+   useEffect(() => {
+-    lastClickRef.current = -1;
+-  }, [files, searchQuery, sortField, sortDirection]);
++    if (!hasSelection) anchorPathRef.current = null;
++  }, [hasSelection]);
+ 
+   return (
+     <div className="flex flex-col h-full">
+@@ -123,7 +128,13 @@ export function FileList(): React.ReactElement {
+ 
+       <div className="flex-1 overflow-y-auto">
+         {files.map((file, i) => (
+-          <FileRow key={file.path} file={file} index={i} lastClickRef={lastClickRef} />
++          <FileRow
++            key={file.path}
++            file={file}
++            index={i}
++            visibleFiles={files}
++            anchorPathRef={anchorPathRef}
++          />
+         ))}
+ 
+         {folderPath && files.length === 0 && (

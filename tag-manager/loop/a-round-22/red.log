@@ -1,0 +1,176 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/components/file-list.test.ts [2m([22m[2m19 tests[22m[2m | [22m[31m6 failed[39m[2m)[22m[33m 655[2mms[22m[39m
+     [32m✓[39m (a) shows Tagged for a row with only category[32m 66[2mms[22m[39m
+     [32m✓[39m (b) shows Tagged for a row with only keywords[32m 11[2mms[22m[39m
+     [32m✓[39m (c) shows Tagged for a row with only comment[32m 11[2mms[22m[39m
+     [32m✓[39m (d) shows no Tagged when every value is empty, blank or default[32m 12[2mms[22m[39m
+     [32m✓[39m (e) still shows Tagged for title, artists or bpm alone[32m 16[2mms[22m[39m
+     [32m✓[39m (f) renders a string artist whole and the first element of an artist array[32m 11[2mms[22m[39m
+     [32m✓[39m (R17-e) renders a malformed row untagged with empty artist and genre cells[32m 16[2mms[22m[39m
+     [32m✓[39m (R18-e) sorts a malformed artist row as empty in both directions without throwing[32m 294[2mms[22m[39m
+     [32m✓[39m (z1) pin: click then Shift-click selects the range[32m 18[2mms[22m[39m
+[31m     [31m×[31m (z2) keeps the anchor after the D-28 stats refresh of a save[39m[32m 26[2mms[22m[39m
+[31m     [31m×[31m (z3) keeps the anchor after the metadata update of a save[39m[32m 21[2mms[22m[39m
+[31m     [31m×[31m (z4) the anchor follows the item after a sort direction change[39m[32m 22[2mms[22m[39m
+[31m     [31m×[31m (z5) keeps the anchor after a search change that keeps it visible[39m[32m 19[2mms[22m[39m
+     [32m✓[39m (z6) pin: a search that hides the anchor selects only the clicked row[32m 19[2mms[22m[39m
+     [32m✓[39m (z7) pin: a rescan drops the anchor[32m 17[2mms[22m[39m
+[31m     [31m×[31m (z8) Deselect All drops the anchor (new D-31 behaviour)[39m[32m 20[2mms[22m[39m
+     [32m✓[39m (z9) pin: Shift-click without an earlier click selects only the clicked row[32m 9[2mms[22m[39m
+     [32m✓[39m (z10) pin: Ctrl-click sets the anchor and the range is added[32m 18[2mms[22m[39m
+[31m     [31m×[31m (z11) the anchor follows the item after a save and a sort field change[39m[32m 28[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList Shift-click anchor (TM-B25, D-31)[2m > [22m(z2) keeps the anchor after the D-28 stats refresh of a save
+[31m[1mAssertionError[22m: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "a.wav",[39m
+[32m-   "b.wav",[39m
+[2m    "c.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m241:29[22m[39m
+    [90m239| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"c.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m240| [39m
+    [90m241| [39m    [34mexpect[39m([34mselectedNames[39m())[33m.[39m[34mtoEqual[39m([[32m"a.wav"[39m[33m,[39m [32m"b.wav"[39m[33m,[39m [32m"c.wav"[39m])[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m242| [39m  })[33m;[39m
+    [90m243| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList Shift-click anchor (TM-B25, D-31)[2m > [22m(z3) keeps the anchor after the metadata update of a save
+[31m[1mAssertionError[22m: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "a.wav",[39m
+[32m-   "b.wav",[39m
+[2m    "c.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m255:29[22m[39m
+    [90m253| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"c.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m254| [39m
+    [90m255| [39m    [34mexpect[39m([34mselectedNames[39m())[33m.[39m[34mtoEqual[39m([[32m"a.wav"[39m[33m,[39m [32m"b.wav"[39m[33m,[39m [32m"c.wav"[39m])[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m256| [39m  })[33m;[39m
+    [90m257| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList Shift-click anchor (TM-B25, D-31)[2m > [22m(z4) the anchor follows the item after a sort direction change
+[31m[1mAssertionError[22m: expected [ 'e.wav' ] to deeply equal [ 'b.wav', 'c.wav', 'd.wav', 'e.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "b.wav",[39m
+[32m-   "c.wav",[39m
+[32m-   "d.wav",[39m
+[2m    "e.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m268:29[22m[39m
+    [90m266| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"e.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m267| [39m
+    [90m268| [39m    expect(selectedNames()).toEqual(["b.wav", "c.wav", "d.wav", "e.wav…
+    [90m   | [39m                            [31m^[39m
+    [90m269| [39m  })[33m;[39m
+    [90m270| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList Shift-click anchor (TM-B25, D-31)[2m > [22m(z5) keeps the anchor after a search change that keeps it visible
+[31m[1mAssertionError[22m: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "a.wav",[39m
+[32m-   "b.wav",[39m
+[2m    "c.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m280:29[22m[39m
+    [90m278| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"c.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m279| [39m
+    [90m280| [39m    [34mexpect[39m([34mselectedNames[39m())[33m.[39m[34mtoEqual[39m([[32m"a.wav"[39m[33m,[39m [32m"b.wav"[39m[33m,[39m [32m"c.wav"[39m])[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m281| [39m  })[33m;[39m
+    [90m282| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList Shift-click anchor (TM-B25, D-31)[2m > [22m(z8) Deselect All drops the anchor (new D-31 behaviour)
+[31m[1mAssertionError[22m: expected [ 'a.wav', 'b.wav', 'c.wav' ] to deeply equal [ 'c.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[31m+   "a.wav",[39m
+[31m+   "b.wav",[39m
+[2m    "c.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m317:29[22m[39m
+    [90m315| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"c.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m316| [39m
+    [90m317| [39m    [34mexpect[39m([34mselectedNames[39m())[33m.[39m[34mtoEqual[39m([[32m"c.wav"[39m])[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m318| [39m  })[33m;[39m
+    [90m319| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList Shift-click anchor (TM-B25, D-31)[2m > [22m(z11) the anchor follows the item after a save and a sort field change
+[31m[1mAssertionError[22m: expected [ 'd.wav' ] to deeply equal [ 'a.wav', 'd.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "a.wav",[39m
+[2m    "d.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m358:29[22m[39m
+    [90m356| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"d.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m357| [39m
+    [90m358| [39m    [34mexpect[39m([34mselectedNames[39m())[33m.[39m[34mtoEqual[39m([[32m"a.wav"[39m[33m,[39m [32m"d.wav"[39m])[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m359| [39m  })[33m;[39m
+    [90m360| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m13 passed[39m[22m[90m (19)[39m
+[2m   Start at [22m 12:44:46
+[2m   Duration [22m 1.75s[2m (transform 193ms, setup 84ms, import 338ms, tests 655ms, environment 547ms)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList Shift-click anchor (TM-B25%2C D-31) > (z2) keeps the anchor after the D-28 stats refresh of a save,line=241,column=29::AssertionError: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "a.wav",%0A-   "b.wav",%0A    "c.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:241:29%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList Shift-click anchor (TM-B25%2C D-31) > (z3) keeps the anchor after the metadata update of a save,line=255,column=29::AssertionError: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "a.wav",%0A-   "b.wav",%0A    "c.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:255:29%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList Shift-click anchor (TM-B25%2C D-31) > (z4) the anchor follows the item after a sort direction change,line=268,column=29::AssertionError: expected [ 'e.wav' ] to deeply equal [ 'b.wav', 'c.wav', 'd.wav', 'e.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "b.wav",%0A-   "c.wav",%0A-   "d.wav",%0A    "e.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:268:29%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList Shift-click anchor (TM-B25%2C D-31) > (z5) keeps the anchor after a search change that keeps it visible,line=280,column=29::AssertionError: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "a.wav",%0A-   "b.wav",%0A    "c.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:280:29%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList Shift-click anchor (TM-B25%2C D-31) > (z8) Deselect All drops the anchor (new D-31 behaviour),line=317,column=29::AssertionError: expected [ 'a.wav', 'b.wav', 'c.wav' ] to deeply equal [ 'c.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A+   "a.wav",%0A+   "b.wav",%0A    "c.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:317:29%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList Shift-click anchor (TM-B25%2C D-31) > (z11) the anchor follows the item after a save and a sort field change,line=358,column=29::AssertionError: expected [ 'd.wav' ] to deeply equal [ 'a.wav', 'd.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "a.wav",%0A    "d.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:358:29%0A%0A
