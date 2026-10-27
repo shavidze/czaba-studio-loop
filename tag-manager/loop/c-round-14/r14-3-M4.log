@@ -1,0 +1,55 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r14-mut[39m
+
+ [31m❯[39m tests/main/create-fixtures.test.ts [2m([22m[2m14 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 24[2mms[22m[39m
+[31m     [31m×[31m removes the temp file and keeps the final path when rename fails (EISDIR)[39m[32m 15[2mms[22m[39m
+[31m     [31m×[31m removes the temp path and rethrows ENOSPC when the temp write fails[39m[32m 3[2mms[22m[39m
+     [32m✓[39m creates exactly sample.wav and corrupt.wav with the a652f06 bytes[32m 3[2mms[22m[39m
+     [32m✓[39m accepts create-fixtures.ts with POSIX, Windows and bare paths[32m 0[2mms[22m[39m
+     [32m✓[39m accepts create-fixtures.mts with POSIX, Windows and bare paths[32m 0[2mms[22m[39m
+     [32m✓[39m accepts create-fixtures.cts with POSIX, Windows and bare paths[32m 0[2mms[22m[39m
+     [32m✓[39m accepts create-fixtures.js with POSIX, Windows and bare paths[32m 0[2mms[22m[39m
+     [32m✓[39m accepts create-fixtures.mjs with POSIX, Windows and bare paths[32m 0[2mms[22m[39m
+     [32m✓[39m accepts create-fixtures.cjs with POSIX, Windows and bare paths[32m 0[2mms[22m[39m
+     [32m✓[39m rejects "my-create-fixtures.ts"[32m 0[2mms[22m[39m
+     [32m✓[39m rejects "create-fixtures.test.ts"[32m 0[2mms[22m[39m
+     [32m✓[39m rejects "create-fixtures.tsx"[32m 0[2mms[22m[39m
+     [32m✓[39m rejects "create-fixtures.json"[32m 0[2mms[22m[39m
+     [32m✓[39m rejects ""[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/create-fixtures.test.ts[2m > [22mcreateWavTestFixtures temp-file cleanup and output (D-23)[2m > [22mremoves the temp file and keeps the final path when rename fails (EISDIR)
+[31m[1mAssertionError[22m: expected [Function] to throw an error[39m
+[36m [2m❯[22m tests/main/create-fixtures.test.ts:[2m45:52[22m[39m
+    [90m 43| [39m    [34mwriteFileSync[39m([34mjoin[39m(blockingDir[33m,[39m [32m"keep.txt"[39m)[33m,[39m [32m"keep"[39m)[33m;[39m
+    [90m 44| [39m
+    [90m 45| [39m    [34mexpect[39m(() [33m=>[39m [34mcreateWavTestFixtures[39m(targetDir))[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   | [39m                                                   [31m^[39m
+    [90m 46| [39m
+    [90m 47| [39m    [34mexpect[39m([34mlistTempEntries[39m(targetDir))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/create-fixtures.test.ts[2m > [22mcreateWavTestFixtures temp-file cleanup and output (D-23)[2m > [22mremoves the temp path and rethrows ENOSPC when the temp write fails
+[31m[1mAssertionError[22m: expected function to throw an error, but it didn't[39m
+[36m [2m❯[22m tests/main/create-fixtures.test.ts:[2m58:54[22m[39m
+    [90m 56| [39m      [34msymlinkSync[39m([32m"/dev/full"[39m[33m,[39m tempPath)[33m;[39m
+    [90m 57| [39m
+    [90m 58| [39m      [34mexpect[39m(() [33m=>[39m [34mcreateWavTestFixtures[39m(targetDir))[33m.[39m[34mtoThrow[39m(
+    [90m   | [39m                                                     [31m^[39m
+    [90m 59| [39m        expect[33m.[39m[34mobjectContaining[39m({ code[33m:[39m [32m"ENOSPC"[39m })[33m,[39m
+    [90m 60| [39m      )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 09:01:41
+[2m   Duration [22m 251ms[2m (transform 32ms, setup 22ms, import 32ms, tests 24ms, environment 0ms)[22m
+
+
+::error file=/tmp/c-r14-mut/tests/main/create-fixtures.test.ts,title=tests/main/create-fixtures.test.ts > createWavTestFixtures temp-file cleanup and output (D-23) > removes the temp file and keeps the final path when rename fails (EISDIR),line=45,column=52::AssertionError: expected [Function] to throw an error%0A ❯ tests/main/create-fixtures.test.ts:45:52%0A%0A
+
+::error file=/tmp/c-r14-mut/tests/main/create-fixtures.test.ts,title=tests/main/create-fixtures.test.ts > createWavTestFixtures temp-file cleanup and output (D-23) > removes the temp path and rethrows ENOSPC when the temp write fails,line=58,column=54::AssertionError: expected function to throw an error, but it didn't%0A ❯ tests/main/create-fixtures.test.ts:58:54%0A%0A

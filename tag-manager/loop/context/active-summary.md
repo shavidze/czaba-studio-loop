@@ -1,20 +1,20 @@
-# Active loop summary (2026-10-27T08:45:52.142Z)
+# Active loop summary (2026-10-27T09:05:03.660Z)
 
-- backlog.json 109 KB -> active view 39 KB
-- status: G_ROOT_GATE round 13
+- backlog.json 117 KB -> active view 39 KB
+- status: G_ROOT_GATE round 14
 - servers: `{"servers":"none or skipped"}`
-- last publication: a652f06e0afe16455f7370249be6c037fada902f (rounds 13-13)
-- last root gate: round 13 published - commit a652f06e0afe16455f7370249be6c037fada902f pushed
+- last publication: a4ad85244cd7a80515c67f342cb0cae238cebc29 (rounds 14-14)
+- last root gate: round 14 published - commit a4ad85244cd7a80515c67f342cb0cae238cebc29 pushed
 
-## Current items: TM-B15, TM-B16
+## Current items: TM-B16, TM-B17
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
 - C-R1-01 / low / open / Empty Keywords written as IKEY=""; save also adds id3, LIST/MID, IDVX, JUNK chunks and moves data to the end (audio bytes identical). Contra
-- C-R1-03 / low / open / .claude/primitives/TESTING.md:129 stale (fixtures now created by globalSetup); .claude/** frozen, needs a round that owns it
+- C-R1-03 / low / in_progress / .claude/primitives/TESTING.md:129 stale (fixtures now created by globalSetup); .claude/** frozen, needs a round that owns it
 - RR-R1-03 / low / open / check.yml actions pinned to @v4 tags, not SHAs
-- RR-R1-04 / low / open / create-fixtures.ts CLI guard regex matches only create-fixtures.ts (argv[1]); suggest create-fixtures\.[cm]?[jt]s$
-- RR-R1-05 / low / open / create-fixtures.ts temp file ${filePath}.${pid}.tmp leaks if writeFileSync throws; not gitignored
+- RR-R1-04 / low / in_progress / create-fixtures.ts CLI guard regex matches only create-fixtures.ts (argv[1]); suggest create-fixtures\.[cm]?[jt]s$
+- RR-R1-05 / low / in_progress / create-fixtures.ts temp file ${filePath}.${pid}.tmp leaks if writeFileSync throws; not gitignored
 - RR-R1-07 / info / open / Architecture signal: after a green check.yml run make it a required status check and add needs: check to release.yml (release.yml frozen; ne
 - C-R2-01 / low / open / Artists written as repeated ISTR while the schema says IART; ffprobe artist shows only the first (pre-existing) -> TM-B08, D-12
 - RR-R2-03 / low / open / skipLibCheck:true also skips the project's own src/preload/index.d.ts; consider dropping it from tsconfig.test.json once dependency types ar
@@ -62,13 +62,15 @@
 - RR-R10-05 / info / open / Architecture signal: the three specs repeat the same beforeAll/afterAll; a Playwright worker-scoped fixture (test.extend<{}, { tagManager: L
 - A-R10-01 / info / open / Untested launch failure paths in launchTagManagerApp: electron.launch own 60 s timeout (app undefined, empty tail), domcontentloaded 15 s me
 - C-R10-01 / info / open / Un-delayed E2E Playwright 3.2 s vs R9 2.5 s (Build+E2E step 7.7 s vs 5.9 s); cause not established (machine variance or helper overhead); ju
-- A-R11-01 / low / in_progress / Batch refresh: a file whose write AND re-read both fail gets emptyMetadata in the store (src/main/ipc/metadata.ts ~241 readMetadataBatch fal
-- A-R11-02 / low / in_progress / docs/learning/data-flow.md pre-existing inaccuracies: :115 diagram says writeMetadataBatch(paths, editingMetadata) but code sends batchMeta 
-- RR-R12-01 / low / in_progress / MetadataPanel.tsx:78,94 skipSyncRef.current = true is set even when the store does not change, so the flag can stay true with nothing to cle
 - RR-R12-02 / info / open / Retry after a partial batch failure rewrites files that already saved (documented, idempotent); sending only failed paths would be a product
 - RR-R12-03 / low / open / metadata-panel-batch-save.test.ts uses double quotes vs single in src; tests/ not linted (same as RR-R3-04/RR-R5-05)
 - RR-R12-04 / info / open / Architecture signal: replace skipSyncRef + sync effect counting with a store action commitBatchSave({ refreshed, failedPaths }) that updates
 - C-R12-01 / info / open / A's result JSON has no full tool transcript, so 'no Bash write to .claude/**' is confirmed only indirectly (empty permission_denials, A's re
+- RR-R13-01 / low / open / MetadataPanel.tsx:93-101 a file whose batch write succeeded but whose re-read fails still gets emptyMetadata in the store (same as D-22 know
+- RR-R13-02 / low / open / MetadataPanel.tsx:100 'updated as WavMetadata' cast without runtime check; fix = type readMetadataBatch as Record<string, WavMetadata> in sr
+- RR-R13-03 / low / open / MetadataPanel.tsx:84-108 if writeMetadataBatch succeeds and readMetadataBatch then rejects, the catch shows a generic error toast and the st
+- RR-R13-04 / info / open / Architecture signal: move batch-save reconciliation into a file-store action applyBatchSaveResult(result, refreshed) returning the applied c
+- C-R13-01 / low / open / metadata-panel-batch-save.test.ts emptyRecordForPanelSchema() hand-copies main's emptyMetadata(schema); matches today, can drift if main cha
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

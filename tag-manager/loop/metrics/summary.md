@@ -1,9 +1,9 @@
-# Loop metrics (2026-10-27T08:53:55.389Z)
+# Loop metrics (2026-10-27T09:12:44.633Z)
 
-- rounds: 14; cost $142.91 total, last 10 avg $10.01/round; agent time 5.7 h
-- C: PASS 12, FAIL 0, BLOCKED 1; bugs c/h/m/l 0/0/0/10
+- rounds: 15; cost $150.23 total, last 10 avg $9.62/round; agent time 6.0 h
+- C: PASS 13, FAIL 0, BLOCKED 1; bugs c/h/m/l 0/0/0/10
 - rounds without a real check: 1, 4; agent errors 0
-- gates: 1:published, 2:published, 3:published, 4:published, 5:published, 6:published, 7:published, 8:published, 9:published, 10:published, 11:skipped, 12:published, 13:published
+- gates: 1:published, 2:published, 3:published, 4:published, 5:published, 6:published, 7:published, 8:published, 9:published, 10:published, 11:skipped, 12:published, 13:published, 14:published
 
 | round | C | bugs c/h/m/l | real | $ | h | err | gate |
 |---|---|---|---|---|---|---|---|
@@ -21,3 +21,4 @@
 | 11 | BLOCKED | 0/0/0/1 | yes | 9.31 | 0.33 | 0 | skipped |
 | 12 | PASS | 0/0/0/0 | yes | 5.39 | 0.20 | 0 | published |
 | 13 | PASS | 0/0/0/0 | yes | 9.74 | 0.34 | 0 | published |
+| 14 | PASS | 0/0/0/0 | yes | 7.32 | 0.27 | 0 | published |

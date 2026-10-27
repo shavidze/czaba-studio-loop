@@ -1,0 +1,89 @@
+diff --git a/.claude/primitives/TESTING.md b/.claude/primitives/TESTING.md
+index 32724a7..f03eeef 100644
+--- a/.claude/primitives/TESTING.md
++++ b/.claude/primitives/TESTING.md
+@@ -122,8 +122,14 @@ it("აღწერა რომელიც ხსნის რა ბაგს
+ 
+ ## Fixture-ების გენერაცია
+ 
++- **Main ტესტები:** Vitest `globalSetup` (`tests/main/global-setup.ts`, `vitest.config.main.ts`-ში) გაშვებამდე ქმნის `sample.wav`-სა და `corrupt.wav`-ს `tests/fixtures/`-ში. ხელით ნაბიჯი საჭირო არ არის, CI-საც ცალკე step არ სჭირდება.
++- **E2E spec-ები:** საკუთარ WAV-ებს `createSineWavBuffer()`-ით აგებენ, `tests/fixtures/*.wav`-ზე არ არიან დამოკიდებული.
++- **CLI:** ხელით გაშვებისთვის ან loop-ის `verifyCommand`-ისთვის:
++
+ ```bash
+-npx tsx tests/fixtures/create-fixtures.ts
++npx --yes tsx@4 tests/fixtures/create-fixtures.ts
+ ```
+ 
+-გენერირებული ფაილები `.gitignore`-შია. CI-ში `create-fixtures.ts` უნდა გაეშვას ტესტებამდე.
++ის ბეჭდავს `Fixtures created successfully`. CLI ნაწილი ეშვება მხოლოდ მაშინ, როცა `isCreateFixturesCliEntry(process.argv[1])` true-ა (`create-fixtures.{ts,mts,cts,js,mjs,cjs}`); import-ისას ფაილები არ იწერება.
++- ფაილი ჯერ `*.tmp` temp ფაილში იწერება და `rename`-ით ინაცვლებს; შეცდომისას temp ფაილი იშლება და თავდაპირველი error ბრუნდება.
++- გენერირებული ფაილები (`sample.wav`, `corrupt.wav`) და `tests/fixtures/*.tmp` `.gitignore`-შია.
+diff --git a/.gitignore b/.gitignore
+index 4c6ccd3..844487d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -16,6 +16,7 @@ playwright-report/
+ tests/fixtures/sample.wav
+ tests/fixtures/sample-tagged.wav
+ tests/fixtures/corrupt.wav
++tests/fixtures/*.tmp
+ 
+ # OS
+ desktop.ini
+diff --git a/docs/plans/002-recording-tag-contract.md b/docs/plans/002-recording-tag-contract.md
+index 7dbda61..764f43b 100644
+--- a/docs/plans/002-recording-tag-contract.md
++++ b/docs/plans/002-recording-tag-contract.md
+@@ -20,7 +20,7 @@ backend-ის import tool (`czaba-api/tools/recording-import`, K-4) Tag Manager
+ 
+ ### T-0 — Linux-ზე შემოწმებადი baseline
+ 
+-- `tests/fixtures/create-fixtures.ts` აექსპორტებს `createSineWavBuffer()`-ს და `createWavTestFixtures(targetDir)`-ს. CLI ქცევა (`npx tsx tests/fixtures/create-fixtures.ts` → „Fixtures created successfully“) უცვლელია, fixture-ების ბაიტები იგივეა. CLI ნაწილი მხოლოდ მაშინ ეშვება, როცა `process.argv[1]` `create-fixtures.ts`-ით მთავრდება; import-ისას (Vitest `globalSetup`, Playwright spec) ფაილები არ იწერება. ფაილი ჯერ temp ფაილში იწერება და მერე `rename`-ით ინაცვლებს.
++- `tests/fixtures/create-fixtures.ts` აექსპორტებს `createSineWavBuffer()`-ს და `createWavTestFixtures(targetDir)`-ს. CLI ქცევა (`npx tsx tests/fixtures/create-fixtures.ts` → „Fixtures created successfully“) უცვლელია, fixture-ების ბაიტები იგივეა. CLI ნაწილი მხოლოდ მაშინ ეშვება, როცა `isCreateFixturesCliEntry(process.argv[1])` true-ა (`create-fixtures.{ts,mts,cts,js,mjs,cjs}`), და შეცდომისას temp ფაილი იშლება (D-23); import-ისას (Vitest `globalSetup`, Playwright spec) ფაილები არ იწერება. ფაილი ჯერ temp ფაილში იწერება და მერე `rename`-ით ინაცვლებს.
+ - `vitest.config.main.ts`-ს დაემატა `globalSetup` (`tests/main/global-setup.ts`). ის main ტესტების წინ `sample.wav`-სა და `corrupt.wav`-ს ქმნის.
+ - E2E: `tests/e2e/electron-launch.ts` (`getElectronLaunchArgs()`) `--no-sandbox`-ს მხოლოდ `process.platform === 'linux'`-ზე ამატებს. Windows/macOS-ზე launch args უცვლელია.
+ - `folder-workflow.spec.ts`-ის fixture არის 0.1 წმ (4410 sample) ნამდვილი PCM, არაცარიელი `data` chunk-ით.
+diff --git a/tests/fixtures/create-fixtures.ts b/tests/fixtures/create-fixtures.ts
+index 5211276..a15cdaa 100644
+--- a/tests/fixtures/create-fixtures.ts
++++ b/tests/fixtures/create-fixtures.ts
+@@ -1,4 +1,4 @@
+-import { renameSync, writeFileSync } from "node:fs";
++import { renameSync, rmSync, writeFileSync } from "node:fs";
+ import { dirname, join, resolve } from "node:path";
+ 
+ export function createSineWavBuffer(durationSamples: number, sampleRate = 44100): Buffer {
+@@ -57,8 +57,15 @@ export function createSineWavBuffer(durationSamples: number, sampleRate = 44100)
+ 
+ function writeFixtureFileAtomically(filePath: string, content: Buffer): void {
+   const tempPath = `${filePath}.${process.pid}.tmp`;
+-  writeFileSync(tempPath, content);
+-  renameSync(tempPath, filePath);
++  try {
++    writeFileSync(tempPath, content);
++    renameSync(tempPath, filePath);
++  } catch (error) {
++    try {
++      rmSync(tempPath, { force: true });
++    } catch {}
++    throw error;
++  }
+ }
+ 
+ export function createWavTestFixtures(targetDir: string): void {
+@@ -69,9 +76,13 @@ export function createWavTestFixtures(targetDir: string): void {
+   );
+ }
+ 
++export function isCreateFixturesCliEntry(scriptPath: string): boolean {
++  return /(^|[\\/])create-fixtures\.[cm]?[jt]s$/.test(scriptPath);
++}
++
+ const scriptPath = process.argv[1] ?? "";
+ 
+-if (/(^|[\\/])create-fixtures\.ts$/.test(scriptPath)) {
++if (isCreateFixturesCliEntry(scriptPath)) {
+   createWavTestFixtures(dirname(resolve(scriptPath)));
+   console.log("Fixtures created successfully");
+ }
