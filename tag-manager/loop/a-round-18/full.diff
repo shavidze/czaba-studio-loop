@@ -1,0 +1,201 @@
+diff --git a/src/renderer/src/stores/file-store.ts b/src/renderer/src/stores/file-store.ts
+index b8f9b89..d16608b 100644
+--- a/src/renderer/src/stores/file-store.ts
++++ b/src/renderer/src/stores/file-store.ts
+@@ -103,6 +103,13 @@ function getFilteredFiles(state: FileState): WavFileEntry[] {
+   return state.files.filter((f) => f.name.toLowerCase().includes(q));
+ }
+ 
++function getFieldSortKey(value: FieldValue | undefined): string {
++  if (Array.isArray(value)) {
++    return typeof value[0] === 'string' ? value[0] : '';
++  }
++  return String(value ?? '');
++}
++
+ function getSortedFiles(state: FileState): WavFileEntry[] {
+   const filtered = getFilteredFiles(state);
+   const { sortField, sortDirection, metadata } = state;
+@@ -122,8 +129,8 @@ function getSortedFiles(state: FileState): WavFileEntry[] {
+         if (typeof aVal === 'number' && typeof bVal === 'number') {
+           return (aVal - bVal) * dir;
+         }
+-        const aStr = Array.isArray(aVal) ? (aVal[0] ?? '') : String(aVal ?? '');
+-        const bStr = Array.isArray(bVal) ? (bVal[0] ?? '') : String(bVal ?? '');
++        const aStr = getFieldSortKey(aVal);
++        const bStr = getFieldSortKey(bVal);
+         return aStr.localeCompare(bStr) * dir;
+       }
+     }
+diff --git a/tests/renderer/components/file-list.test.ts b/tests/renderer/components/file-list.test.ts
+index ed1d12e..dffff26 100644
+--- a/tests/renderer/components/file-list.test.ts
++++ b/tests/renderer/components/file-list.test.ts
+@@ -1,4 +1,4 @@
+-import { cleanup, render, screen, within } from "@testing-library/react";
++import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+ import { createElement } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { FileList } from "~/components/file-list/FileList";
+@@ -174,3 +174,30 @@ describe("FileList row with non-string array elements (TM-B20, D-26)", () => {
+     expect(getCellText("tagged.wav", GENRE_COLUMN_INDEX)).toBe("Ambience");
+   });
+ });
++
++function getRowNamesInOrder(): string[] {
++  return screen.getAllByText(/\.wav$/).map((element) => element.textContent ?? "");
++}
++
++describe("FileList sort by Artist with a non-string first element (TM-B21, D-27)", () => {
++  it("(R18-e) sorts a malformed artist row as empty in both directions without throwing", () => {
++    renderFileListWith({
++      "a.wav": { artists: ["Zed"] },
++      "b.wav": parseUntypedMetadata('{"artists":[{}]}'),
++      "c.wav": { artists: ["Abe"] },
++    });
++
++    expect(() => fireEvent.click(screen.getByRole("button", { name: "Artist" }))).not.toThrow();
++    expect(getRowNamesInOrder()).toEqual(["b.wav", "c.wav", "a.wav"]);
++
++    expect(() => fireEvent.click(screen.getByRole("button", { name: "Artist" }))).not.toThrow();
++    expect(getRowNamesInOrder()).toEqual(["a.wav", "c.wav", "b.wav"]);
++
++    expectUntagged("b.wav");
++    expect(getCellText("b.wav", ARTIST_COLUMN_INDEX)).toBe("");
++    expectTagged("a.wav");
++    expect(getCellText("a.wav", ARTIST_COLUMN_INDEX)).toBe("Zed");
++    expectTagged("c.wav");
++    expect(getCellText("c.wav", ARTIST_COLUMN_INDEX)).toBe("Abe");
++  });
++});
+diff --git a/tests/renderer/stores/file-store.test.ts b/tests/renderer/stores/file-store.test.ts
+index d247ac8..65dbc5a 100644
+--- a/tests/renderer/stores/file-store.test.ts
++++ b/tests/renderer/stores/file-store.test.ts
+@@ -1,6 +1,6 @@
+ import { afterEach, beforeEach, describe, expect, it } from "vitest";
+ import { useFileStore } from "~/stores/file-store";
+-import type { WavFileEntry } from "~/types";
++import type { WavFileEntry, WavMetadata } from "~/types";
+ import { resetAllStores } from "../helpers/reset-stores";
+ 
+ const mockFiles: WavFileEntry[] = [
+@@ -127,6 +127,118 @@ describe("useFileStore", () => {
+     });
+   });
+ 
++  describe("sorting by array fields (TM-B21, D-27)", () => {
++    const sortFileX: WavFileEntry = { name: "x.wav", path: "/music/x.wav", size: 100, modifiedAt: "2024-01-01T00:00:00Z" };
++    const sortFileY: WavFileEntry = { name: "y.wav", path: "/music/y.wav", size: 200, modifiedAt: "2024-01-02T00:00:00Z" };
++    const sortFileZ: WavFileEntry = { name: "z.wav", path: "/music/z.wav", size: 300, modifiedAt: "2024-01-03T00:00:00Z" };
++    const insertionOrders: WavFileEntry[][] = [
++      [sortFileX, sortFileY, sortFileZ],
++      [sortFileZ, sortFileY, sortFileX],
++    ];
++    const sortDirections: ("asc" | "desc")[] = ["asc", "desc"];
++
++    function readSortedNames(): string[] {
++      const store = useFileStore.getState();
++      store.setSelectedPaths([]);
++      store.selectRange(0, store.files.length - 1);
++      return useFileStore.getState().selectedPaths.map((path) => path.replace("/music/", ""));
++    }
++
++    function expectSortedInAllCombinations(
++      field: string,
++      metadata: Record<string, WavMetadata>,
++      ascExpected: string[],
++    ): void {
++      for (const files of insertionOrders) {
++        for (const direction of sortDirections) {
++          const label = `${field} ${files.map((f) => f.name).join(",")} ${direction}`;
++          useFileStore.getState().setFiles(files);
++          useFileStore.getState().setMetadata(metadata);
++          useFileStore.setState({ sortField: field, sortDirection: direction });
++          let order: string[] = [];
++          expect(() => {
++            order = readSortedNames();
++          }, label).not.toThrow();
++          const expected = direction === "asc" ? ascExpected : [...ascExpected].reverse();
++          expect(order, label).toEqual(expected);
++        }
++      }
++    }
++
++    const malformedFirstElements: { field: string; json: string }[] = [
++      { field: "artists", json: '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}}' },
++      { field: "artists", json: '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}}' },
++      { field: "artists", json: '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}}' },
++      { field: "genres", json: '{"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}}' },
++    ];
++
++    for (const { field, json } of malformedFirstElements) {
++      it(`(a) sorts a non-string first element as empty without throwing: ${json}`, () => {
++        const metadata: Record<string, WavMetadata> = JSON.parse(json);
++        expectSortedInAllCombinations(field, metadata, ["y.wav", "z.wav", "x.wav"]);
++      });
++    }
++
++    it("(b) uses only the first element, not a later string element", () => {
++      const metadata: Record<string, WavMetadata> = JSON.parse(
++        '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{},"Mid"]},"/music/z.wav":{"artists":["Abe"]}}',
++      );
++      expectSortedInAllCombinations("artists", metadata, ["y.wav", "z.wav", "x.wav"]);
++    });
++
++    it("(c) sorts a well-typed string first element by its value", () => {
++      expectSortedInAllCombinations(
++        "artists",
++        {
++          "/music/x.wav": { artists: ["Zed"] },
++          "/music/y.wav": { artists: ["Mid"] },
++          "/music/z.wav": { artists: ["Abe"] },
++        },
++        ["z.wav", "y.wav", "x.wav"],
++      );
++    });
++
++    it("(c) sorts a null first element as empty", () => {
++      const metadata: Record<string, WavMetadata> = JSON.parse(
++        '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[null]},"/music/z.wav":{"artists":["Abe"]}}',
++      );
++      expectSortedInAllCombinations("artists", metadata, ["y.wav", "z.wav", "x.wav"]);
++    });
++
++    it("(c) sorts an empty array as empty", () => {
++      expectSortedInAllCombinations(
++        "artists",
++        {
++          "/music/x.wav": { artists: ["Zed"] },
++          "/music/y.wav": { artists: [] },
++          "/music/z.wav": { artists: ["Abe"] },
++        },
++        ["y.wav", "z.wav", "x.wav"],
++      );
++    });
++
++    it("(c) sorts bpm numerically, not lexicographically", () => {
++      expectSortedInAllCombinations(
++        "bpm",
++        {
++          "/music/x.wav": { bpm: 120 },
++          "/music/y.wav": { bpm: 9 },
++          "/music/z.wav": { bpm: 30 },
++        },
++        ["y.wav", "z.wav", "x.wav"],
++      );
++    });
++
++    it("(c) sorts a bpm number against missing metadata as before", () => {
++      useFileStore.getState().setFiles([sortFileX, sortFileY]);
++      useFileStore.getState().setMetadata({ "/music/x.wav": { bpm: 120 } });
++      useFileStore.setState({ sortField: "bpm", sortDirection: "asc" });
++      expect(readSortedNames()).toEqual(["y.wav", "x.wav"]);
++      useFileStore.setState({ sortDirection: "desc" });
++      expect(readSortedNames()).toEqual(["x.wav", "y.wav"]);
++    });
++  });
++
+   describe("search", () => {
+     it("sets search query", () => {
+       useFileStore.getState().setSearchQuery("test");

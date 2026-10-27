@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T10:28:55.217Z)
+# Active loop summary (2026-10-27T10:50:26.576Z)
 
-- backlog.json 148 KB -> active view 46 KB
-- status: G_ROOT_GATE round 17
+- backlog.json 158 KB -> active view 49 KB
+- status: G_ROOT_GATE round 18
 - servers: `{"servers":"none or skipped"}`
-- last publication: 4f8a5780b338ecbdb10377e20764780cb267a4f3 (rounds 17-17)
-- last root gate: round 17 published - commit 4f8a5780b338ecbdb10377e20764780cb267a4f3 pushed
+- last publication: d015470cc28335494de993d951e4a8036869919c (rounds 18-18)
+- last root gate: round 18 published - commit d015470cc28335494de993d951e4a8036869919c pushed
 
-## Current items: TM-B19, TM-B20
+## Current items: TM-B20, TM-B21
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -26,7 +26,6 @@
 - RR-R4-04 / info / open / tests/main/check-ffprobe-tags.test.ts second test only checks a constant + existsSync (low value; acceptable as a guard against a renamed pr
 - RR-R4-06 / info / open / Architecture signal: move the ffprobe cross-check into recording-tag-contract.test.ts (skip when ffprobe is missing) or into a dedicated npm
 - RR-R5-01 / low / open / Badge now counts every field (year/track/ISRC-only file shows Tagged); fits D-15, add a docs/ note
-- RR-R5-02 / low / in_progress / file-row-display.ts:11 item.trim() assumes string elements; a null in an array would crash the row render (typeof guard suggested)
 - RR-R5-03 / info / open / number field counts as tagged only when > 0; a future custom number field where 0/negative is meaningful would look empty
 - RR-R5-04 / low / open / file-list.test.ts getFileRow walks exactly two parents from the file name; brittle to row markup (data-testid/role=row would need a componen
 - RR-R5-05 / info / open / Tests use double quotes vs single quotes in src; Biome passes because tests/ is not linted
@@ -81,7 +80,13 @@
 - RR-R16-04 / info / open / Architecture signal: capturing main output during electron.launch needs spawning Electron ourselves and connecting over CDP; only worth it i
 - A-R16-01 / low / open / closeFailedTagManagerApp: if kill() threw, the exit listener and kill-wait timer would stay for 5 s and the kill error would replace the ori
 - A-R16-02 / info / open / With a tests/-including Biome config, tests/e2e/electron-launch.ts gets one organizeImports assist (@playwright/test before node:*); pre-exi
-- B-R16-01 / low / open / file-row-display.ts:4 formatFirstFieldValue returns value[0] whatever its type: [5] -> number 5, [{}] -> object {} (an object as a React chi
+- RR-R17-01 / low / open / tests/renderer/utils/file-row-display.test.ts:74-75 two separate 'import type ... from "~/types"' lines (A kept the old line byte-identical 
+- RR-R17-02 / low / open / parseUntypedMetadata helper is defined in both file-list.test.ts and file-row-display.test.ts; could move to tests/renderer/helpers/
+- RR-R17-03 / low / open / formatFirstFieldValue(['', 'B']) returns '' while hasAnyTagValue is true: a row can show Tagged with an empty artist cell. Pre-existing and 
+- RR-R17-04 / info / open / Architecture signal: nothing checks FieldValue array shape where data enters the renderer (TemplatePicker.tsx:21 value.join, file-store sort
+- A-R17-01 / low / in_progress / file-store.ts:125-127 getSortedFiles (artists/genres/any array field) uses aVal[0] ?? '' then aStr.localeCompare: a non-string first element
+- A-R17-02 / low / open / Process: the read-primitives PreToolUse hook did not fire in A's R17 session; test Edits went through without it and the src file was writte
+- C-R17-01 / low / open / Size column keeps the pre-save size after a save (86.2 KB) until rescan/relaunch (87.6 KB): WavFileEntry.size is set only by the folder scan
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
@@ -99,3 +104,4 @@
 - TM-T0-CI-FU [in_progress] CI follow-up: apt-install.sh worst-case budget (C-R4-01/RR-R4-02: smaller dpkg recovery bound or step timeout >= 13 min) + Georgian docs not
 - TM-B11 [todo] With a custom Number field in the schema (e.g. Take/ITKN), every single-file save writes the default 0 as INFO '0' (size 1) into files that 
 - TM-B14 [in_progress] E2E cold start: first Electron window can take > 30 s on a cold runner; firstWindow sits inside the test body so the 30 s per-test timeout f
+- TM-B22 [todo] File list Size column is stale after a save until rescan (WavFileEntry.size comes only from the folder scan)

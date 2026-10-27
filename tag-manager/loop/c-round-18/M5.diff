@@ -1,0 +1,12 @@
+132,134c132,138
+<         const aStr = getFieldSortKey(aVal);
+<         const bStr = getFieldSortKey(bVal);
+<         return aStr.localeCompare(bStr) * dir;
+---
+>         try {
+>           const aStr = Array.isArray(aVal) ? (aVal[0] ?? '') : String(aVal ?? '');
+>           const bStr = Array.isArray(bVal) ? (bVal[0] ?? '') : String(bVal ?? '');
+>           return aStr.localeCompare(bStr) * dir;
+>         } catch {
+>           return 0;
+>         }

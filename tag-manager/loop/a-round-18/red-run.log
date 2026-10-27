@@ -1,0 +1,143 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m28 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 59[2mms[22m[39m
+       [32m✓[39m initializes with empty state[32m 2[2mms[22m[39m
+       [32m✓[39m sets files[32m 0[2mms[22m[39m
+       [32m✓[39m sets folder path[32m 1[2mms[22m[39m
+       [32m✓[39m sets metadata[32m 1[2mms[22m[39m
+       [32m✓[39m updates single file metadata[32m 1[2mms[22m[39m
+       [32m✓[39m toggles selection on[32m 1[2mms[22m[39m
+       [32m✓[39m toggles selection off[32m 0[2mms[22m[39m
+       [32m✓[39m selects range[32m 15[2mms[22m[39m
+       [32m✓[39m selects range with reversed indices[32m 1[2mms[22m[39m
+       [32m✓[39m selectAll selects all visible files[32m 1[2mms[22m[39m
+       [32m✓[39m selectAll respects search filter[32m 0[2mms[22m[39m
+       [32m✓[39m clears selection[32m 0[2mms[22m[39m
+       [32m✓[39m sets sort field and defaults to asc[32m 0[2mms[22m[39m
+       [32m✓[39m toggles direction when same field set again[32m 0[2mms[22m[39m
+       [32m✓[39m resets to asc when different field set[32m 0[2mms[22m[39m
+       [32m✓[39m toggleSortDirection flips direction[32m 3[2mms[22m[39m
+[31m       [31m×[31m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}}[39m[32m 16[2mms[22m[39m
+[31m       [31m×[31m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}}[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}}[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}}[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m (b) uses only the first element, not a later string element[39m[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts a well-typed string first element by its value[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts a null first element as empty[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts an empty array as empty[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts bpm numerically, not lexicographically[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts a bpm number against missing metadata as before[32m 0[2mms[22m[39m
+       [32m✓[39m sets search query[32m 0[2mms[22m[39m
+       [32m✓[39m sets scanning state[32m 0[2mms[22m[39m
+ [31m❯[39m tests/renderer/components/file-list.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 384[2mms[22m[39m
+     [32m✓[39m (a) shows Tagged for a row with only category[32m 67[2mms[22m[39m
+     [32m✓[39m (b) shows Tagged for a row with only keywords[32m 11[2mms[22m[39m
+     [32m✓[39m (c) shows Tagged for a row with only comment[32m 11[2mms[22m[39m
+     [32m✓[39m (d) shows no Tagged when every value is empty, blank or default[32m 13[2mms[22m[39m
+     [32m✓[39m (e) still shows Tagged for title, artists or bpm alone[32m 17[2mms[22m[39m
+     [32m✓[39m (f) renders a string artist whole and the first element of an artist array[32m 11[2mms[22m[39m
+     [32m✓[39m (R17-e) renders a malformed row untagged with empty artist and genre cells[32m 17[2mms[22m[39m
+[31m     [31m×[31m (R18-e) sorts a malformed artist row as empty in both directions without throwing[39m[32m 232[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList sort by Artist with a non-string first element (TM-B21, D-27)[2m > [22m(R18-e) sorts a malformed artist row as empty in both directions without throwing
+[31m[1mAssertionError[22m: expected [Function] to not throw an error but 'TypeError: aStr.localeCompare is not …' was thrown[39m
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+"TypeError: aStr.localeCompare is not a function"
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m190:87[22m[39m
+    [90m188| [39m    })[33m;[39m
+    [90m189| [39m
+    [90m190| [39m    expect(() => fireEvent.click(screen.getByRole("button", { name: "A…
+    [90m   | [39m                                                                                      [31m^[39m
+    [90m191| [39m    [34mexpect[39m([34mgetRowNamesInOrder[39m())[33m.[39m[34mtoEqual[39m([[32m"b.wav"[39m[33m,[39m [32m"c.wav"[39m[33m,[39m [32m"a.wav"[39m])[33m;[39m
+    [90m192| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22msorting by array fields (TM-B21, D-27)[2m > [22m(a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}}
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22msorting by array fields (TM-B21, D-27)[2m > [22m(a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}}
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22msorting by array fields (TM-B21, D-27)[2m > [22m(a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}}
+[31m[1mAssertionError[22m: artists x.wav,y.wav,z.wav asc: expected [Function] to not throw an error but 'TypeError: aStr.localeCompare is not …' was thrown[39m
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+"TypeError: aStr.localeCompare is not a function"
+
+[36m [2m❯[22m expectSortedInAllCombinations tests/renderer/stores/file-store.test.ts:[2m161:25[22m[39m
+    [90m159| [39m          [34mexpect[39m(() [33m=>[39m {
+    [90m160| [39m            order [33m=[39m [34mreadSortedNames[39m()[33m;[39m
+    [90m161| [39m          }[33m,[39m label)[33m.[39mnot[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m162| [39m          const expected = direction === "asc" ? ascExpected : [...asc…
+    [90m163| [39m          [34mexpect[39m(order[33m,[39m label)[33m.[39m[34mtoEqual[39m(expected)[33m;[39m
+[90m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m178:9[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22msorting by array fields (TM-B21, D-27)[2m > [22m(a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}}
+[31m[1mAssertionError[22m: genres x.wav,y.wav,z.wav asc: expected [Function] to not throw an error but 'TypeError: aStr.localeCompare is not …' was thrown[39m
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+"TypeError: aStr.localeCompare is not a function"
+
+[36m [2m❯[22m expectSortedInAllCombinations tests/renderer/stores/file-store.test.ts:[2m161:25[22m[39m
+    [90m159| [39m          [34mexpect[39m(() [33m=>[39m {
+    [90m160| [39m            order [33m=[39m [34mreadSortedNames[39m()[33m;[39m
+    [90m161| [39m          }[33m,[39m label)[33m.[39mnot[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m162| [39m          const expected = direction === "asc" ? ascExpected : [...asc…
+    [90m163| [39m          [34mexpect[39m(order[33m,[39m label)[33m.[39m[34mtoEqual[39m(expected)[33m;[39m
+[90m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m178:9[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22msorting by array fields (TM-B21, D-27)[2m > [22m(b) uses only the first element, not a later string element
+[31m[1mAssertionError[22m: artists x.wav,y.wav,z.wav asc: expected [Function] to not throw an error but 'TypeError: aStr.localeCompare is not …' was thrown[39m
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+"TypeError: aStr.localeCompare is not a function"
+
+[36m [2m❯[22m expectSortedInAllCombinations tests/renderer/stores/file-store.test.ts:[2m161:25[22m[39m
+    [90m159| [39m          [34mexpect[39m(() [33m=>[39m {
+    [90m160| [39m            order [33m=[39m [34mreadSortedNames[39m()[33m;[39m
+    [90m161| [39m          }[33m,[39m label)[33m.[39mnot[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m162| [39m          const expected = direction === "asc" ? ascExpected : [...asc…
+    [90m163| [39m          [34mexpect[39m(order[33m,[39m label)[33m.[39m[34mtoEqual[39m(expected)[33m;[39m
+[90m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m186:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m30 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 10:41:27
+[2m   Duration [22m 1.61s[2m (transform 382ms, setup 193ms, import 573ms, tests 442ms, environment 1.18s)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList sort by Artist with a non-string first element (TM-B21%2C D-27) > (R18-e) sorts a malformed artist row as empty in both directions without throwing,line=190,column=87::AssertionError: expected [Function] to not throw an error but 'TypeError: aStr.localeCompare is not …' was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A"TypeError: aStr.localeCompare is not a function"%0A%0A ❯ tests/renderer/components/file-list.test.ts:190:87%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > sorting by array fields (TM-B21%2C D-27) > (a) sorts a non-string first element as empty without throwing%3A {"/music/x.wav"%3A{"artists"%3A["Zed"]}%2C"/music/y.wav"%3A{"artists"%3A[5]}%2C"/music/z.wav"%3A{"artists"%3A["Abe"]}},line=161,column=25::AssertionError: artists x.wav,y.wav,z.wav asc: expected [Function] to not throw an error but 'TypeError: aStr.localeCompare is not …' was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A"TypeError: aStr.localeCompare is not a function"%0A%0A ❯ expectSortedInAllCombinations tests/renderer/stores/file-store.test.ts:161:25%0A ❯ tests/renderer/stores/file-store.test.ts:178:9%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > sorting by array fields (TM-B21%2C D-27) > (a) sorts a non-string first element as empty without throwing%3A {"/music/x.wav"%3A{"artists"%3A["Zed"]}%2C"/music/y.wav"%3A{"artists"%3A[{}]}%2C"/music/z.wav"%3A{"artists"%3A["Abe"]}},line=161,column=25::AssertionError: artists x.wav,y.wav,z.wav asc: expected [Function] to not throw an error but 'TypeError: aStr.localeCompare is not …' was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A"TypeError: aStr.localeCompare is not a function"%0A%0A ❯ expectSortedInAllCombinations tests/renderer/stores/file-store.test.ts:161:25%0A ❯ tests/renderer/stores/file-store.test.ts:178:9%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > sorting by array fields (TM-B21%2C D-27) > (a) sorts a non-string first element as empty without throwing%3A {"/music/x.wav"%3A{"artists"%3A["Zed"]}%2C"/music/y.wav"%3A{"artists"%3A[true]}%2C"/music/z.wav"%3A{"artists"%3A["Abe"]}},line=161,column=25::AssertionError: artists x.wav,y.wav,z.wav asc: expected [Function] to not throw an error but 'TypeError: aStr.localeCompare is not …' was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A"TypeError: aStr.localeCompare is not a function"%0A%0A ❯ expectSortedInAllCombinations tests/renderer/stores/file-store.test.ts:161:25%0A ❯ tests/renderer/stores/file-store.test.ts:178:9%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > sorting by array fields (TM-B21%2C D-27) > (a) sorts a non-string first element as empty without throwing%3A {"/music/x.wav"%3A{"genres"%3A["Zed"]}%2C"/music/y.wav"%3A{"genres"%3A[{}]}%2C"/music/z.wav"%3A{"genres"%3A["Abe"]}},line=161,column=25::AssertionError: genres x.wav,y.wav,z.wav asc: expected [Function] to not throw an error but 'TypeError: aStr.localeCompare is not …' was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A"TypeError: aStr.localeCompare is not a function"%0A%0A ❯ expectSortedInAllCombinations tests/renderer/stores/file-store.test.ts:161:25%0A ❯ tests/renderer/stores/file-store.test.ts:178:9%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > sorting by array fields (TM-B21%2C D-27) > (b) uses only the first element%2C not a later string element,line=161,column=25::AssertionError: artists x.wav,y.wav,z.wav asc: expected [Function] to not throw an error but 'TypeError: aStr.localeCompare is not …' was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A"TypeError: aStr.localeCompare is not a function"%0A%0A ❯ expectSortedInAllCombinations tests/renderer/stores/file-store.test.ts:161:25%0A ❯ tests/renderer/stores/file-store.test.ts:186:7%0A%0A

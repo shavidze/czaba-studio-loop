@@ -1,0 +1,69 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r18-mut[39m
+
+ [31m❯[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m28 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 81[2mms[22m[39m
+       [32m✓[39m initializes with empty state[32m 5[2mms[22m[39m
+       [32m✓[39m sets files[32m 0[2mms[22m[39m
+       [32m✓[39m sets folder path[32m 1[2mms[22m[39m
+       [32m✓[39m sets metadata[32m 1[2mms[22m[39m
+       [32m✓[39m updates single file metadata[32m 0[2mms[22m[39m
+       [32m✓[39m toggles selection on[32m 1[2mms[22m[39m
+       [32m✓[39m toggles selection off[32m 0[2mms[22m[39m
+       [32m✓[39m selects range[32m 14[2mms[22m[39m
+       [32m✓[39m selects range with reversed indices[32m 1[2mms[22m[39m
+       [32m✓[39m selectAll selects all visible files[32m 1[2mms[22m[39m
+       [32m✓[39m selectAll respects search filter[32m 0[2mms[22m[39m
+       [32m✓[39m clears selection[32m 0[2mms[22m[39m
+       [32m✓[39m sets sort field and defaults to asc[32m 0[2mms[22m[39m
+       [32m✓[39m toggles direction when same field set again[32m 0[2mms[22m[39m
+       [32m✓[39m resets to asc when different field set[32m 0[2mms[22m[39m
+       [32m✓[39m toggleSortDirection flips direction[32m 0[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}}[32m 2[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}}[32m 1[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}}[32m 2[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}}[32m 3[2mms[22m[39m
+[31m       [31m×[31m (b) uses only the first element, not a later string element[39m[32m 22[2mms[22m[39m
+       [32m✓[39m (c) sorts a well-typed string first element by its value[32m 2[2mms[22m[39m
+       [32m✓[39m (c) sorts a null first element as empty[32m 4[2mms[22m[39m
+       [32m✓[39m (c) sorts an empty array as empty[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts bpm numerically, not lexicographically[32m 14[2mms[22m[39m
+       [32m✓[39m (c) sorts a bpm number against missing metadata as before[32m 0[2mms[22m[39m
+       [32m✓[39m sets search query[32m 0[2mms[22m[39m
+       [32m✓[39m sets scanning state[32m 0[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/file-list.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 899[2mms[22m[39m
+     [33m[2m✓[22m[39m (R18-e) sorts a malformed artist row as empty in both directions without throwing [33m 639[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22msorting by array fields (TM-B21, D-27)[2m > [22m(b) uses only the first element, not a later string element
+[31m[1mAssertionError[22m: artists x.wav,y.wav,z.wav asc: expected [ 'z.wav', 'y.wav', 'x.wav' ] to deeply equal [ 'y.wav', 'z.wav', 'x.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "y.wav",[39m
+[2m    "z.wav",[22m
+[31m+   "y.wav",[39m
+[2m    "x.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m expectSortedInAllCombinations tests/renderer/stores/file-store.test.ts:[2m163:32[22m[39m
+    [90m161| [39m          }[33m,[39m label)[33m.[39mnot[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m162| [39m          const expected = direction === "asc" ? ascExpected : [...asc…
+    [90m163| [39m          [34mexpect[39m(order[33m,[39m label)[33m.[39m[34mtoEqual[39m(expected)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m164| [39m        }
+    [90m165| [39m      }
+[90m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m186:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m35 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 10:45:44
+[2m   Duration [22m 2.77s[2m (transform 596ms, setup 447ms, import 947ms, tests 980ms, environment 1.68s)[22m
+
+
+::error file=/tmp/c-r18-mut/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > sorting by array fields (TM-B21%2C D-27) > (b) uses only the first element%2C not a later string element,line=163,column=32::AssertionError: artists x.wav,y.wav,z.wav asc: expected [ 'z.wav', 'y.wav', 'x.wav' ] to deeply equal [ 'y.wav', 'z.wav', 'x.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "y.wav",%0A    "z.wav",%0A+   "y.wav",%0A    "x.wav",%0A  ]%0A%0A ❯ expectSortedInAllCombinations tests/renderer/stores/file-store.test.ts:163:32%0A ❯ tests/renderer/stores/file-store.test.ts:186:7%0A%0A

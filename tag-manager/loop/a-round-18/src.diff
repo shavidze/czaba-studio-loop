@@ -1,0 +1,29 @@
+diff --git a/src/renderer/src/stores/file-store.ts b/src/renderer/src/stores/file-store.ts
+index b8f9b89..d16608b 100644
+--- a/src/renderer/src/stores/file-store.ts
++++ b/src/renderer/src/stores/file-store.ts
+@@ -103,6 +103,13 @@ function getFilteredFiles(state: FileState): WavFileEntry[] {
+   return state.files.filter((f) => f.name.toLowerCase().includes(q));
+ }
+ 
++function getFieldSortKey(value: FieldValue | undefined): string {
++  if (Array.isArray(value)) {
++    return typeof value[0] === 'string' ? value[0] : '';
++  }
++  return String(value ?? '');
++}
++
+ function getSortedFiles(state: FileState): WavFileEntry[] {
+   const filtered = getFilteredFiles(state);
+   const { sortField, sortDirection, metadata } = state;
+@@ -122,8 +129,8 @@ function getSortedFiles(state: FileState): WavFileEntry[] {
+         if (typeof aVal === 'number' && typeof bVal === 'number') {
+           return (aVal - bVal) * dir;
+         }
+-        const aStr = Array.isArray(aVal) ? (aVal[0] ?? '') : String(aVal ?? '');
+-        const bStr = Array.isArray(bVal) ? (bVal[0] ?? '') : String(bVal ?? '');
++        const aStr = getFieldSortKey(aVal);
++        const bStr = getFieldSortKey(bVal);
+         return aStr.localeCompare(bStr) * dir;
+       }
+     }
