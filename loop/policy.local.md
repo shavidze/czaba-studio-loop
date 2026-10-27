@@ -240,3 +240,15 @@ Saba's standing rule: before any feature or UX change is built, the agents look 
 - **Deviation needs a reason.** Where our design differs (brand colours, English-only labels, one shared focus style, a Saba decision), B lists it under `Deviations` with its reason. "Simpler to build" is not a reason. Where we can do better than Ableton (Saba wants to beat it), B says what is better and why. The behaviour stays recognisable to an Ableton user.
 - **C verifies against the reference section:** each reference point gets a row (match, or a listed deviation). A behaviour that differs from the reference with no listed deviation is a bug, Medium when it changes what a user must learn, otherwise Low.
 - **Not in scope:** pure performance, refactor, test-only, docs-only and RETRO rounds. If a reference cannot be found, B writes "no reference found" and what was searched, and does not invent one.
+
+## Open-source adoption (Saba, 2026-10-27)
+
+Saba approved the open-source plan in `/home/runner/czaba-project/docs/technical/performance/oss-adoption.md`. B reads it before it details any PERF task, the CMD tasks, SRW-44 or SRW-46a.
+
+- **Queue changes inside STUDIO-PERFORMANCE** (B records them with a D-ID at the next planning):
+  - PERF-6 is dropped, because PERF-16 removes ffmpeg.
+  - PERF-16 (MP3 through `mediabunny` + `@mediabunny/mp3-encoder`) moves up to right after PERF-1b.
+  - A new round **OSS-LIC** (third-party notices + a GPL/AGPL licence test) runs right after the first new dependency lands.
+- **zustand** is the external-store library for PERF-8, PERF-10 and the fader stores. If PERF-FADER-a is already dispatched with a hand-rolled store, B does not redo it; PERF-8/PERF-10 move it onto zustand.
+- **New dependencies only through root:** B writes `loop/root-deps-request.json`. Root's job step installs the exact version from `cloud/deps-allowlist.json` and commits `chore(deps): …` on store master before the round (see the doc for the baseline rule). A still never edits `package.json` or installs packages.
+- No code is copied from GPL/AGPL projects; the doc lists them.

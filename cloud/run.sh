@@ -101,6 +101,51 @@ esac
 [ "$START_ROUND" -ge 1 ] || START_ROUND=1
 log "status $PHASE round $ROUND -> start round $START_ROUND phase $START_PHASE"
 
+# ---------- root dependency step (Saba-approved OSS plan, docs/technical/performance/oss-adoption.md) ----------
+# A must not change package.json. B asks root for a pre-approved package by writing loop/root-deps-request.json
+# ({"add": ["zustand"], "remove": ["@ffmpeg/ffmpeg"]}). Only names in cloud/deps-allowlist.json are acted on, at the
+# exact version listed there. Root commits "chore(deps): ..." on master, pushes both store remotes, and records it in
+# loop/root-deps-done.json. Runs before the round, so it never lands mid-round.
+REQ="$LOOP/root-deps-request.json"; ALLOW="$STATE/cloud/deps-allowlist.json"; DONE="$LOOP/root-deps-done.json"
+if [ -s "$REQ" ] && [ -s "$ALLOW" ]; then
+  [ -s "$DONE" ] || echo '{"done": []}' > "$DONE"
+  ADDS=(); RMS=()
+  for n in $(jq -r '.add[]? // empty' "$REQ"); do
+    v="$(jq -r --arg n "$n" '.add[$n] // empty' "$ALLOW")"
+    if [ -z "$v" ]; then log "root-deps: $n is not on the allowlist, skipped"; continue; fi
+    jq -e --arg n "$n" '(.dependencies // {}) | has($n)' "$STORE/package.json" >/dev/null && { log "root-deps: $n already present"; continue; }
+    ADDS+=("$n@$v")
+  done
+  for n in $(jq -r '.remove[]? // empty' "$REQ"); do
+    jq -e --arg n "$n" '.remove | index($n)' "$ALLOW" >/dev/null || { log "root-deps: removing $n is not allowed, skipped"; continue; }
+    jq -e --arg n "$n" '(.dependencies // {}) | has($n)' "$STORE/package.json" >/dev/null || continue
+    RMS+=("$n")
+  done
+  if [ ${#ADDS[@]} -gt 0 ] || [ ${#RMS[@]} -gt 0 ]; then
+    MSG="chore(deps):"; [ ${#ADDS[@]} -gt 0 ] && MSG="$MSG add ${ADDS[*]}"; [ ${#RMS[@]} -gt 0 ] && MSG="$MSG remove ${RMS[*]}"
+    if ( cd "$STORE" \
+         && { [ ${#ADDS[@]} -eq 0 ] || npm install --save-exact --no-audit --no-fund "${ADDS[@]}" >/dev/null; } \
+         && { [ ${#RMS[@]} -eq 0 ] || npm uninstall --no-audit --no-fund "${RMS[@]}" >/dev/null; } \
+         && git add package.json package-lock.json && HUSKY=0 git commit -qm "$MSG (root, OSS plan approved by Saba)" ); then
+      ok=1
+      for r in $(jq -r '.pushRemotes[]' "$STATE/cloud/config.template.json"); do git -C "$STORE" push -q "$r" HEAD:master || ok=0; done
+      if [ "$ok" = 1 ]; then
+        log "root-deps: $MSG pushed as $(git -C "$STORE" rev-parse --short HEAD)"
+        jq --arg m "$MSG" --arg c "$(git -C "$STORE" rev-parse HEAD)" --arg t "$(date -u +%FT%TZ)" '.done += [{msg: $m, commit: $c, utc: $t}]' "$DONE" > "$DONE.tmp" && mv "$DONE.tmp" "$DONE"
+        rm -f "$REQ"
+      else
+        notify "Studio loop: dependency push failed" "Root's dependency commit ($MSG) could not be pushed to every store remote. The round continues on the pushed state."
+        git -C "$STORE" reset -q --hard "origin/master"
+      fi
+    else
+      notify "Studio loop: dependency install failed" "Root could not apply: $MSG. See the Actions log."
+      git -C "$STORE" checkout -q -- package.json package-lock.json 2>/dev/null; git -C "$STORE" reset -q --hard origin/master
+    fi
+  else
+    rm -f "$REQ"
+  fi
+fi
+
 # ---------- restore uncommitted work from the previous job ----------
 PATCH="$STATE/worktree/patch"
 if [ -f "$STATE/worktree/patch.enc" ]; then
