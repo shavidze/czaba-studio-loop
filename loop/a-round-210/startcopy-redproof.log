@@ -1,0 +1,30 @@
+     × FP1: a track pointer drag writes no history and re-renders no parent per move; the model stays put while the live gain follows 581ms
+     × FP2: pointerup writes exactly one Volume entry with the last previewed volume; Undo restores the model and the live gain 197ms
+     × FP3: a group drag drives every member live gain; pointercancel restores every member gain and display with no entry 202ms
+     × FP4: a stolen claim mid-drag reverts every group member gain and the display with no entry 141ms
+     × FP5: a fader blur during the gesture cancels with no entry and restores the display 180ms
+     × FP6: a Master drag previews on the readout and the live master gain, then commits one Master Volume entry 179ms
+     × FP7: playing, a stop and start or a forced resync mid-drag builds the new graph with the dragged value 123ms
+     × FP8: playing a short loop, a late loop wrap mid-drag rebuilds the graph with the dragged value 122ms
+     ✓ FP9: keyboard steps, Shift fine drag and double-click reset keep their values, labels and pending behaviour  638ms
+     × FP10: a Pan drag shows the draft in the leaf without re-rendering the lane, then commits one Pan entry 544ms
+     × FP11: unmounting mid-drag clears the override and the draft and leaves no window pointer listener 124ms
+     ✓ FP12: for every slider dB the committed pointer value equals the pending onChange value (track and Master)  761ms
+     × FP13: a native Pan change after a stolen claim shows no draft, adds no live pan write after the restore by the steal and leaves the model unchanged (D-29z186) 226ms
+     × FP14a pointercancel: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) 117ms
+     × FP14b fader blur mid-drag: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) 112ms
+     × FP14c stolen claim: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) 111ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 14 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected { tracks: [ { …(6) }, …(3) ], …(4) } to be { tracks: [ { …(6) }, …(3) ], …(4) } // Object.is equality
+AssertionError: expected 0.10715193052376065 to be 0.6 // Object.is equality
+AssertionError: expected { tracks: [ { …(6) }, …(3) ], …(4) } to be { tracks: [ { …(6) }, …(3) ], …(4) } // Object.is equality
+AssertionError: expected { tracks: [ { …(6) }, …(3) ], …(4) } to be { tracks: [ { …(6) }, …(3) ], …(4) } // Object.is equality
+AssertionError: expected { tracks: [ { …(6) }, …(3) ], …(4) } to be { tracks: [ { …(6) }, …(3) ], …(4) } // Object.is equality
+AssertionError: expected { tracks: [ { …(6) }, …(3) ], …(4) } to be { tracks: [ { …(6) }, …(3) ], …(4) } // Object.is equality
+AssertionError: expected { tracks: [ { …(6) }, …(3) ], …(4) } to be { tracks: [ { …(6) }, …(3) ], …(4) } // Object.is equality
+AssertionError: expected 0.15135612484362082 to be 0.6 // Object.is equality
+AssertionError: expected 3 to be +0 // Object.is equality
+AssertionError: expected undefined to be 0.15135612484362082 // Object.is equality
+AssertionError: expected '16' to be '10' // Object.is equality
+AssertionError: expected undefined to be 0.32 // Object.is equality
+      Tests  14 failed | 2 passed (16)

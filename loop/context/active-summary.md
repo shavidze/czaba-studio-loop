@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-27T15:18:21.989Z)
+# Active loop summary (2026-10-27T16:44:35.851Z)
 
-- backlog.json 1879 KB -> active view 269 KB
-- status: G_ROOT_GATE round 209
-- servers: `{"checkedUtc":"2026-10-27T15:11:23.0338363Z","round":209,"attempt":1,"store":200}`
-- last publication: f535ab3159aae45de86c22c6cca28cbd19568f65 (rounds 208-208)
-- last root gate: round 209 skipped - C taskStatus FAIL
+- backlog.json 1887 KB -> active view 273 KB
+- status: G_ROOT_GATE round 210
+- servers: `{"checkedUtc":"2026-10-27T15:57:31.4361176Z","round":210,"attempt":1,"store":200}`
+- last publication: 180dd2e6a01c905c0837c3da4248bd6dbd49a9f1 (rounds 209-210)
+- last root gate: round 210 published - commit 180dd2e6a01c905c0837c3da4248bd6dbd49a9f1 pushed
 
 ## Current items: -
 
@@ -475,7 +475,7 @@
 - A-R203-REVIEW-M1 / low / ruled (D-29z169): folded into SYS-3 (see systemic_tasks SYS-3.also_fixes_d29z169); reviewer rated Medium, B rates Low: fail-safe (extra ring only), not reproducible in the cloud browser; Android device check on the Tech Lead list / Android soft keyboard key=Unidentified / IME isComposing keydowns flip focus-source to keyboard (ring mid-typing on Android)
 - A-R203-REVIEW-I1 / info / ruled (D-29z169): folded into SYS-3 with M1 (AltGraph printable keys count as editing) / AltGr (Ctrl+Alt) / macOS Option typing switches focus-source to keyboard
 - B-R203-AUTH-USER-CLIENT-TRUST / info / root_note: not scheduled; no Studio action; protected file (AuthContext.tsx) / A stored localStorage.auth_user without accessToken renders the signed-in header with no backend verification (AuthContext.tsx:93-94 setUser
-- SABA-B-5 / medium / in_progress: part 1 (track/group/master/pan) dispatched round 209 PERF-FADER-a; part 2 clip gain = PERF-FADER-b; before-evidence C round 208 WINDOW-208 (83/85/80/4 components per move commit) / Fader drag is slow (Saba 2026-10-27): every pointer move of a track/group volume, master or clip-gain fader re-renders the whole Studio
+- SABA-B-5 / medium / in_progress: part 1 PERF-FADER-a round 209 C FAIL incomplete (STOP ruled), re-dispatched round 210 (D-29z183..D-29z187); part 2 clip gain = PERF-FADER-b; before-evidence C round 208 WINDOW-208 / Fader drag is slow (Saba 2026-10-27): every pointer move of a track/group volume, master or clip-gain fader re-renders the whole Studio
 - GATE205-DOC162-STATUS / low / dispatched round 206 (D-29z171, R112: one-line status fix, granted) / Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)
 - GATE206-S3 / low / scheduled_with PERF-1b / fiber walk depends on React 18 internals (tag/PerformedWork); record renderer.version and fail on unexpected major
 - GATE206-S5 / low / scheduled_with PERF-1b (document or separate build dir) / test:perf webServer rewrites shared build/; collides with a parallel verify/build
@@ -489,6 +489,14 @@
 - I-208-a / info / ratified D-29z180 (pointerdown commits allowed only with downComponentsMax <= 3) / move window starts at the first move after the in-page pointerdown; -per-move divides by 120
 - I-208-b / info / carried into round 209 WINDOW-209/EXPORT-209 (start below max by keyboard) / track/group drags start at max (endsCase max): high end proves only a return to max
 - I-208-c / info / info, no action / liveness margin 1.2-2.0 ms over the 30 ms busy-wait floor; can only grow under load
+- C-R209-01 / medium / scheduled: round 210 (D-29z183 grant, l.447 hunk only, A's re-expression) / frozen gesture-guard.test.tsx l.447 reads the model mid pointer gesture; red on the round-209 tree
+- C-R209-02 / medium / scheduled: round 210 (A section 2 items 3-6) / PERF-FADER-a mandatory deliverables missing (48 budgets flips, doc 163 D-29z181 lines, doc 165, red-proof, final code-review)
+- C-R209-03 / low / ruled D-29z186: accepted delta (old display showed a value with no audio); FP13 + C PAN-DELTA-210 in round 210 / native Pan change after a stolen claim no longer shows a display-only draft
+- A-R209-REVIEW-PAN-CANCEL / medium / scheduled: round 210 FP14 (D-29z187) / no pan cancel rows (pointercancel, blur, stolen claim)
+- A-R209-REVIEW-GROUP-PENDING / medium / scheduled: round 210 FP9 extension (D-29z187) / no test of the group fader pending path (keyboard/double-click)
+- A-R209-REVIEW-LOWS / low / filed individually in deferred_low_polish (A-R209-REVIEW-L-*); draft-order Low ruled keep D-29z185 (closed); pan-reset disabled Low is baseline-identical (info) / draft clear before applyEdit (ruled keep D-29z185); takeMixOverride without kind; two owners of pan-draft clear; withMixOverride export unus
+- I-209-WINDOW-THRESHOLD / info / ruled D-29z184: >=100 only for C's below-max run; otherwise value-changing moves commit + harness +-2 on component counts / harness window commits 78-105 (starts at max, I-208-b clamp; pan grid repeats) vs C's >=100 criterion
+- I-209-RELEASE-REBUILD / info / signal for PERF-2+ (not scheduled now) / while playing, the graph is rebuilt after pointerup and after Ctrl+Z (pre-existing edit-during-playback rebuild, perf-plan 1.5); no rebuild 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

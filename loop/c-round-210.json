@@ -1,0 +1,58 @@
+{
+  "round": 210,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-27T15:57:31.4361176Z",
+    "round": 210,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R210-01",
+      "severity": "low",
+      "steps": [
+        "open store/docs/implementation/2026/quarter-IV/163-studio-perf-harness.md l.68-71",
+        "compare with perf/budgets.json fader.{track,group,master,pan}.* move-components-* / release-commits rows"
+      ],
+      "expected": "doc 163 describes these 48 rows as assert (<=3 / >=1) for the four faders and harness.move-window-live as surviving",
+      "actual": "l.68/69 still say record (to be flipped by PERF-FADER-a/b) and l.71 says PERF-FADER-a replaces move-window-live; lines were outside the round-210 grant (A flagged them)",
+      "evidence": "c-round-210.md DOC-210 and Findings; a-round-210.md Docs"
+    }
+  ],
+  "passed": [
+    "SCOPE-210",
+    "PERF-RUN-210",
+    "WINDOW-210",
+    "LIVE-DISPLAY-210",
+    "AUDIO-210",
+    "GROUP-210",
+    "INVARIANTS-210",
+    "EXPORT-210",
+    "VISUAL-210",
+    "PAN-DELTA-210",
+    "DOC-210",
+    "AN-REVIEW-210",
+    "G210-3"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome repo-wide",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "blocked": [],
+  "notes": [
+    "PAN-DELTA-210: stolen-claim state not reachable by real input (chorded mouse button gives no pointerdown and cancels the gesture; touch has another pointerId and the claim is refused), identical on baseline; FP13 + mutant M13 re-run independently by C (red on assertion)",
+    "AUDIO-210(b): browser loop wraps restart sources into the existing graph; the full rebuild path verified via Space mid-drag (c) and FP8",
+    "G210-3 first attempt crashed inside the C script; identical retry clean",
+    "VISUAL-210: real keyboard-modality ring confirmed on Track Volume, Pan, Master and Group Volume at both viewports (out/focus-kb.json)",
+    "Adjacent §4 meters: Music and master meter covers move in 12/12 samples during drags (out/meters.json)",
+    "LIVE-DISPLAY screenshot kept at 50 % only; EXPORT and PAN-DELTA at 1440 only (viewport-independent)"
+  ],
+  "evidence": "tmp/studio-real-loop/c-round-210.md, c-round-210/out, c-round-210/shots, c-round-210/tools"
+}

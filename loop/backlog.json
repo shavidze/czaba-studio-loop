@@ -1,9 +1,9 @@
 {
- "version": 193,
- "updated": "2026-10-27 (B round 209 -> 210 planning)",
+ "version": 194,
+ "updated": "2026-10-27 (B round 210 -> 211 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 210, D-29z183..D-29z187; PERF-FADER-a re-dispatch)",
+ "current_task": "current-task.md (round 211, D-29z188..D-29z194; PERF-FADER-b clip gain)",
  "advisor_used_by_B": "2026-10-27 round 205 -> 206 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: PERF-1 split 1a/1b, all of app/ frozen, hook stub + start() counter proven on a scratch prod build before dispatch, C-R205-01 ruled Low but scheduled, doc 162 status fix granted, queue move recorded with a D-ID | previous: 2026-10-26 round 189 -> 190 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: round-179-style fix-up baseline on the uncommitted round-189 tree (frozen 1016 incl. doc 155 at cdf011f9, grants 3), A must reproduce C's fresh-mode CLS and bisec",
  "baseline": {
   "tsc_errors": 0,
@@ -10202,7 +10202,7 @@
    "round": 210,
    "task": "current-task.md",
    "decision": "D-29z183..D-29z187",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "type": "FEATURE STAGE re-dispatch (STUDIO-PERFORMANCE PERF-FADER-a: SABA-B-5 part 1, finish)",
    "items": [
     "D-29z183 gesture-guard.test.tsx l.447 hunk only (C-R209-01)",
@@ -10214,7 +10214,28 @@
    ],
    "note": "baseline HEAD f535ab3 (gate 209 skipped); resume from the current tree (no revert); frozen 1030 files b-round-209-r210-tree-sha256.txt; grants b-round-209-r210-grants.txt (20); new files b-round-209-r210-new-files.txt (5); round-209 task sections 1-4 binding (tasks/round-209.md)",
    "next": "PERF-FADER-b (clip gain), then frontend-architect checkpoint on the volume machine, then PERF-1b",
-   "added": "2026-10-27 B round 209 -> 210 planning"
+   "added": "2026-10-27 B round 209 -> 210 planning",
+   "result": "C round 210 PASS (13 rows, browserVerified true, realVerified true): PERF-RUN x2 (266 rows, 66 asserts, 0 failures, 48 flips pass), WINDOW (track/group 1 max 0.75 per move; master 0.792/0.742; pan 0.875/0.65; below-max runs >=100 window commits; baseline 83/85/80/4), LIVE-DISPLAY, AUDIO (a)(b)(c), GROUP cancel+blur, INVARIANTS 771 values 0 diffs vs f535ab3, EXPORT drag vs typed bit-identical, VISUAL 1062 values 0 diffs + 32 crops identical, PAN-DELTA unreachable by real input (FP13 + mutant M13 re-run by C), DOC, AN-REVIEW, G210-3. 1 Low C-R210-01 (doc 163 l.68/69/71). Gate 210 published 180dd2e (rounds 209-210) on both remotes; reviewer 9/10 COMMIT OK."
+  },
+  {
+   "round": 211,
+   "task": "current-task.md",
+   "decision": "D-29z188..D-29z194",
+   "status": "dispatched",
+   "type": "FEATURE STAGE (STUDIO-PERFORMANCE PERF-FADER-b: SABA-B-5 part 2, Clip Gain single + members pointer preview)",
+   "items": [
+    "clip-gain pointer path: override + live setClipGain for affected clips + draft keys; no updateHistory/syncPlayback per move; pending path unchanged",
+    "startGraph l.951 + syncPlayback setter l.1142 use overridden clip gains (Space, loop wrap)",
+    "WG4 ruling: waveform keeps following via shared path leaf (lane + detail); block leaf for field/range/fader (<=3 single, N+1 members)",
+    "harness members scenario after fader.group.playing; 12 clipgain flips + members asserts",
+    "L23 hits in clip-gain-fader/multi/waveform + waveform-zoom; CP1-CP14 new rows",
+    "doc 165 l.4 Completed (GATE210-S1), doc 163 l.68/69/71 (C-R210-01), new doc 166",
+    "GATE210-S2 withMixOverride not exported (closes A-R209-REVIEW-L-EXPORT-UNUSED)",
+    "advisor end review: perf comparison split (must-identical vs load.components leaf delta); reset button disabled/title draft-dependent (CP10); per-clip drafts for MG11"
+   ],
+   "note": "baseline HEAD 180dd2e (gate 210 published); frozen 1041 files b-round-210-r211-tree-sha256.txt; grants b-round-210-r211-grants.txt (14); new files b-round-210-r211-new-files.txt (4); consults tech-lead + performance-optimizer (b-round-210.md section 3); re-measure = A round-210 perf run1 clipgain rows (code untouched)",
+   "next": "frontend-architect checkpoint request (written at 211->212 planning, non-blocking), then PERF-1b",
+   "added": "2026-10-27 B round 210 -> 211 planning (D-29z189)"
   }
  ],
  "post_current_stage_queue": [
@@ -12368,7 +12389,7 @@
   },
   {
    "id": "STUDIO-PERFORMANCE",
-   "status": "in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a dispatched round 209 (D-29z179, pan included); then PERF-FADER-b, PERF-1b | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER split a0/a/b (D-29z176): a0 dispatched round 208; then a (209), b, then PERF-1b | in_progress: PERF-1a done (round 206 C PASS, published 60c82ed); round 207 = SABA-B-6 inserted (D-29z173, Saba order: before PERF-1, missed at 206 planning); next PERF-FADER (round 208), then PERF-1b | in_progress: PERF-1a dispatched round 206 (D-29z171) | 2026-10-27 B round 205 -> 206 planning (D-29z172, Saba 2026-10-27 queue move) | was: not_started",
+   "status": "in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a done (rounds 209-210, C round 210 PASS browserVerified=true, published 180dd2e); PERF-FADER-b dispatched round 211 (D-29z189); then frontend-architect checkpoint request (non-blocking), PERF-1b, PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped, D-29z194) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a dispatched round 209 (D-29z179, pan included); then PERF-FADER-b, PERF-1b | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER split a0/a/b (D-29z176): a0 dispatched round 208; then a (209), b, then PERF-1b | in_progress: PERF-1a done (round 206 C PASS, published 60c82ed); round 207 = SABA-B-6 inserted (D-29z173, Saba order: before PERF-1, missed at 206 planning); next PERF-FADER (round 208), then PERF-1b | in_progress: PERF-1a dispatched round 206 (D-29z171) | 2026-10-27 B round 205 -> 206 planning (D-29z172, Saba 2026-10-27 queue move) | was: not_started",
    "requested": "2026-10-26 (Saba, agent-workflow policy section \"Saba's bug and the performance queue\")",
    "instruction": "After REVIEW-RECOMMENDATIONS and before T12-ADVANCED. Outline and baseline: docs/technical/performance/perf-plan.md. Before dispatching each PERF task, B consults performance-optimizer and tech-lead, re-measures, and writes the task in full detail. PERF-1 (the harness) comes first. The 2026-10-23 bug gate applies.",
    "prerequisites": [
@@ -12401,13 +12422,23 @@
     {
      "id": "PERF-FADER-a",
      "what": "track + group + master volume: mixOverrideRef + withMixOverride(arrangement) in startGraph and syncPlayback setter branch; small display store for the dragged fader draft (controlled inputs otherwise snap back); pointer gestures only (keyboard/Shift/double-click pending paths unchanged); commit clears override then applyEdit with the exact previewed value; rows stopped/playing/playing-with-loop/Space mid-drag, group members revert on Esc/pointercancel/stolen claim, export bit-identity drag vs typed, move-components-max <=3 assert, release-commits >=1; grants ~15 test files (tech-lead list in b-round-207.md section 4); replace the assert row harness.move-window-live (breaks by construction after the fix) with an equivalent proof",
-     "status": "dispatched round 209 (D-29z179)",
+     "status": "done (rounds 209-210; C round 210 PASS browserVerified=true realVerified=true; published 180dd2e)",
      "scope_ruling_d29z179": "pan joins (its move rows owned here, 4 > 3; both consults agree); required design: keyed mix-draft-store + ArrangementMixFader leaf as only draft reader (one commit <= 3 components per move; zero-commit ref writes forbidden); 48 rows flipped; harness.move-window-live kept (leaf still commits per move)"
     },
     {
      "id": "PERF-FADER-b",
      "what": "clip gain single + members: Map override, detail number-input sync, member span memo (StudioWorkspace 2167-2193), lane + detail waveforms; WG4 (clip-gain-waveform.test.tsx l.376-399) requires waveform redraw mid-drag - B rules at planning (waveforms of the dragged clips subscribe to the store vs budget)",
-     "status": "not_started"
+     "status": "dispatched round 211 (D-29z189..D-29z193)"
+    },
+    {
+     "id": "PERF-16",
+     "what": "see perf-plan.md task outline",
+     "status": "not_started; moved up to right after PERF-1b (D-29z194, oss-adoption.md)"
+    },
+    {
+     "id": "OSS-LIC",
+     "what": "third-party notices + a GPL/AGPL licence test; runs right after the first new dependency lands (oss-adoption.md)",
+     "status": "not_started (D-29z194)"
     },
     {
      "id": "PERF-2",
@@ -12432,7 +12463,7 @@
     {
      "id": "PERF-6",
      "what": "see perf-plan.md task outline",
-     "status": "not_started"
+     "status": "dropped (D-29z194: oss-adoption.md, PERF-16 removes ffmpeg; Saba approved 2026-10-27)"
     },
     {
      "id": "PERF-7",
@@ -12478,16 +12509,13 @@
      "id": "PERF-15",
      "what": "see perf-plan.md task outline",
      "status": "not_started"
-    },
-    {
-     "id": "PERF-16",
-     "what": "see perf-plan.md task outline",
-     "status": "not_started"
     }
    ],
    "perf_fader_constraints_d29z174": "Before any event-share-16 row flips to assert: replace the metric (per-move frame/LoAF with liveness red-proof > 0 on a slow drag) or prove it live (C-R206-01); rewrite doc 163 l.60 and budgets.json event-share notes; drag changes the value at both ends (I-206-d); consult performance-optimizer + tech-lead and re-measure before dispatch",
    "consults_round_208": "performance-optimizer + tech-lead, 2026-10-27, summarised in b-round-207.md section 4",
-   "consults_round_209": "tech-lead + performance-optimizer, 2026-10-27, summarised in b-round-208.md section 3"
+   "consults_round_209": "tech-lead + performance-optimizer, 2026-10-27, summarised in b-round-208.md section 3",
+   "execution_order_d29z194": "PERF-FADER-b -> (checkpoint request) -> PERF-1b -> PERF-16 -> OSS-LIC (after the first new dependency lands; root installs via loop/root-deps-request.json) -> PERF-2..PERF-15 (PERF-6 dropped). zustand: PERF-FADER-a/b keep the hand-rolled mix-draft-store; PERF-8/PERF-10 move it onto zustand (D-29z193).",
+   "consults_round_211": "tech-lead + performance-optimizer, 2026-10-27, summarised in b-round-210.md section 3"
   },
   {
    "id": "STORE-REDESIGN",
@@ -22740,7 +22768,7 @@
    "hypothesis_rejected": "root's 'syncPlayback rebuilds the graph per move' is not supported by source (scheduleKey excludes tracks/master/gainDb) nor by the probe (0 restarts); kept as an asserted harness row (0 restarts while playing).",
    "plan": "PERF-1a (round 206) measures it (fader scenarios x stopped/playing, record mode); PERF-FADER (first PERF task after PERF-1) fixes it following the pan pattern; budgets <=3 committed components per move, 0 restarts, export of a dragged mix bit-identical to typed values",
    "origin": "Saba (user report) + root code fact",
-   "status": "in_progress: part 1 PERF-FADER-a round 209 C FAIL incomplete (STOP ruled), re-dispatched round 210 (D-29z183..D-29z187); part 2 clip gain = PERF-FADER-b; before-evidence C round 208 WINDOW-208",
+   "status": "in_progress: part 1 (track/group/master Volume + Pan) done - round 210 C PASS browserVerified=true, published 180dd2e (1 component per move vs 80-85, p95 1.7-3.8 ms, 0 restarts, export bit-identical); part 2 (Clip Gain single + members) = round 211 PERF-FADER-b (D-29z189), before: 95 components per move, p95 26.5/61.2 ms",
    "added": "2026-10-27 B round 205 -> 206 planning (D-29z171)",
    "measured_c_round_206": "C round 206 (independent probe + harness, identical runs): components/commit stopped/playing track 83/83, group 85/85, master 80/80, pan 4/4, clipgain 79/87; restarts while playing 0 in all 10 rows (1x and 6x); 6x playing frame p95 33.4 ms (track/group/master), 33.3 (pan), 66.7 ms (clipgain, 136-147 frames >33 ms, 74 LoAF); evidence c-round-206/out/run1.json, run2.json, cprobe-1440.json"
   },
@@ -22897,7 +22925,7 @@
    "origin": "C round 209",
    "title": "frozen gesture-guard.test.tsx l.447 reads the model mid pointer gesture; red on the round-209 tree",
    "evidence": "c-round-209/out/vitest-stop.log; a-round-209.md STOP",
-   "status": "scheduled: round 210 (D-29z183 grant, l.447 hunk only, A's re-expression)",
+   "status": "closed: round 210 C PASS (SCOPE-210 one D-29z183 hunk), published 180dd2e (D-29z188)",
    "added": "2026-10-27 B round 209 -> 210 planning"
   },
   {
@@ -22906,7 +22934,7 @@
    "origin": "C round 209",
    "title": "PERF-FADER-a mandatory deliverables missing (48 budgets flips, doc 163 D-29z181 lines, doc 165, red-proof, final code-review)",
    "evidence": "c-round-209.md SCOPE/DOC rows; a-round-209.md 'Not done because of the STOP'",
-   "status": "scheduled: round 210 (A section 2 items 3-6)",
+   "status": "closed: round 210 C PASS (48 flips, docs 163/165, perf x2, red-proof, final review), published 180dd2e (D-29z188)",
    "added": "2026-10-27 B round 209 -> 210 planning"
   },
   {
@@ -22915,7 +22943,7 @@
    "origin": "C round 209 (A declared)",
    "title": "native Pan change after a stolen claim no longer shows a display-only draft",
    "evidence": "a-round-209.md Lane bullet; ArrangementContext.tsx previewTrackPan guard l.2799; baseline ArrangementLane.tsx l.455-459 setPanDraft",
-   "status": "ruled D-29z186: accepted delta (old display showed a value with no audio); FP13 + C PAN-DELTA-210 in round 210",
+   "status": "closed: accepted delta D-29z186; FP13 + C mutant M13 red; PAN-DELTA-210 unreachable by real input (D-29z188)",
    "added": "2026-10-27 B round 209 -> 210 planning"
   },
   {
@@ -22923,7 +22951,7 @@
    "severity": "medium",
    "origin": "A round 209 code-reviewer",
    "title": "no pan cancel rows (pointercancel, blur, stolen claim)",
-   "status": "scheduled: round 210 FP14 (D-29z187)",
+   "status": "closed: FP14a/b/c green, mutants M14ab/M14c/M14w red; C AN-REVIEW-210 read them (D-29z188)",
    "added": "2026-10-27 B round 209 -> 210 planning"
   },
   {
@@ -22931,7 +22959,7 @@
    "severity": "medium",
    "origin": "A round 209 code-reviewer",
    "title": "no test of the group fader pending path (keyboard/double-click)",
-   "status": "scheduled: round 210 FP9 extension (D-29z187)",
+   "status": "closed: FP9 extended, mutant M9 red; C AN-REVIEW-210 (D-29z188)",
    "added": "2026-10-27 B round 209 -> 210 planning"
   },
   {
@@ -22947,7 +22975,7 @@
    "severity": "info",
    "origin": "A/C round 209",
    "title": "harness window commits 78-105 (starts at max, I-208-b clamp; pan grid repeats) vs C's >=100 criterion",
-   "status": "ruled D-29z184: >=100 only for C's below-max run; otherwise value-changing moves commit + harness +-2 on component counts",
+   "status": "applied in round 210 (WINDOW-210 PASS); closed",
    "added": "2026-10-27 B round 209 -> 210 planning"
   },
   {
@@ -22955,8 +22983,71 @@
    "severity": "info",
    "origin": "C round 209 probe",
    "title": "while playing, the graph is rebuilt after pointerup and after Ctrl+Z (pre-existing edit-during-playback rebuild, perf-plan 1.5); no rebuild during the drag; rebuilt graph carries the committed value",
-   "status": "signal for PERF-2+ (not scheduled now)",
+   "status": "downgraded (D-29z188): C round 210 production build saw no graph rebuild after pointerup or Ctrl+Z (same param ids); the round-209 note came from the dev build; re-measure only in PERF-2+ if seen again",
    "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "C-R210-01",
+   "severity": "low",
+   "origin": "C round 210",
+   "title": "doc 163 l.68/69/71 still describe move-components-* and release-commits as record and say PERF-FADER-a replaces move-window-live",
+   "evidence": "c-round-210.md DOC-210",
+   "status": "scheduled: round 211 (D-29z191; same owner, harness contract)",
+   "added": "2026-10-27 B round 210 -> 211 planning"
+  },
+  {
+   "id": "GATE210-S1",
+   "severity": "low",
+   "origin": "gate 210 reviewer",
+   "title": "doc 165 l.4 published conditional 'In Progress (C round 210 check pending)' (L28, 5th time)",
+   "evidence": "gates/round-210/review.md suggestion 1",
+   "status": "scheduled: round 211 exact Completed line (D-29z191); RETRO signal L28 5x",
+   "added": "2026-10-27 B round 210 -> 211 planning"
+  },
+  {
+   "id": "GATE210-S2",
+   "severity": "low",
+   "origin": "gate 210 reviewer",
+   "title": "withMixOverride exported from ArrangementContext.tsx but used only inside (Fast Refresh boundary)",
+   "evidence": "gates/round-210/review.md suggestion 2; same as deferred A-R209-REVIEW-L-EXPORT-UNUSED",
+   "status": "scheduled: round 211 mandatory (D-29z192)",
+   "added": "2026-10-27 B round 210 -> 211 planning"
+  },
+  {
+   "id": "GATE210-S3",
+   "severity": "low",
+   "origin": "gate 210 reviewer",
+   "title": "track/group preview copies the arrangement twice and writes setTrackGain for every track per move",
+   "evidence": "gates/round-210/review.md suggestion 3",
+   "status": "duplicate of deferred A-R209-REVIEW-L-WRITE-ALL-TRACKS; optional in round 211 (D-29z192), else stays deferred",
+   "added": "2026-10-27 B round 210 -> 211 planning"
+  },
+  {
+   "id": "GATE210-S4",
+   "severity": "info",
+   "origin": "gate 210 reviewer",
+   "title": "commit could in theory call applyEdit twice (before + override); unreachable today",
+   "evidence": "gates/round-210/review.md suggestion 4",
+   "status": "signal; optional dev invariant in round 211; folded into the post-PERF-FADER-b checkpoint",
+   "added": "2026-10-27 B round 210 -> 211 planning"
+  },
+  {
+   "id": "GATE210-S5",
+   "severity": "info",
+   "origin": "gate 210 reviewer",
+   "title": "watch: a draft clear outside an event (timer/rAF/promise) would show the old value for one frame",
+   "evidence": "gates/round-210/review.md suggestion 5",
+   "status": "C row in round 211 LIVE-DISPLAY-211 (D-29z192)",
+   "added": "2026-10-27 B round 210 -> 211 planning"
+  },
+  {
+   "id": "I-210-PAN-DELTA-UNREACHABLE",
+   "severity": "info",
+   "origin": "C round 210",
+   "title": "stolen-claim -> native Pan change state not reachable by real input (chorded mouse cancels; touch has another pointerId); FP13 relied on",
+   "evidence": "c-round-210.md PAN-DELTA-210",
+   "status": "info, closed",
+   "added": "2026-10-27 B round 210 -> 211 planning"
   }
  ],
  "tech_lead_notes": [
@@ -24683,6 +24774,15 @@
    "verdict": "keep (reviewer); proposal: pure gesture->override->commit/revert reducer in lib/arrangement with a single pan-draft owner",
    "status": "recorded; folded into the frontend-architect checkpoint requested after PERF-FADER-b; not scheduled",
    "added": "2026-10-27 B round 209 -> 210 planning"
+  },
+  {
+   "id": "ARCH-R210-OVERRIDE-UNIFY",
+   "source": "gates/round-210/review.md Architecture note + a-round-210.md code-reviewer Architecture note",
+   "signals": "Signal 2+4: mixOverrideRef beside panOverrideRef, draft clear called from 8 places, lane writes context-owned pan draft; Signal 3: four near-identical begin*Gesture claim/listener blocks (2549, 2745, 2907, clip gain 3135)",
+   "verdict": "keep for now (both reviewers)",
+   "proposal": "pan onto the MixOverride union (kind 'pan') + one draft-clear helper; one internal claim/listener helper; context the only pan-draft writer. Acceptance: FP1-FP14c, MD1-MD5, gesture-guard, fader-click, group-volume-db green unedited; useArrangement() shape unchanged; perf asserts unchanged",
+   "status": "recorded; folded into the post-PERF-FADER-b frontend-architect checkpoint (D-29z188); not scheduled",
+   "added": "2026-10-27 B round 210 -> 211 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -28090,7 +28190,8 @@
    "evidence": "a-round-209.md code-reviewer findings (score 8.5/10)",
    "repro": "a-round-209.md 'code-reviewer' section",
    "ruling": "D-29z187: recorded under the 2026-10-23 bug gate; polish pass",
-   "added": "2026-10-27 B round 209 -> 210 planning"
+   "added": "2026-10-27 B round 209 -> 210 planning",
+   "status": "scheduled: round 211 (GATE210-S2, D-29z192)"
   },
   {
    "id": "A-R209-REVIEW-L-TEST-DETAILS",
@@ -28110,7 +28211,28 @@
    "evidence": "a-round-209.md code-reviewer findings (score 8.5/10)",
    "repro": "a-round-209.md 'code-reviewer' section",
    "ruling": "D-29z187: recorded under the 2026-10-23 bug gate; PERF-2+ review",
-   "added": "2026-10-27 B round 209 -> 210 planning"
+   "added": "2026-10-27 B round 209 -> 210 planning",
+   "note_round_211": "same as GATE210-S3; optional in round 211 (D-29z192)"
+  },
+  {
+   "id": "A-R210-REVIEW-L2-GV405",
+   "severity": "low",
+   "origin": "A round 210 code-reviewer",
+   "title": "group-volume-db.test.tsx:405 asserts the model unchanged mid-gesture, which is now always true; the meaningful check is value === '-6'",
+   "evidence": "a-round-210.md code-reviewer L2",
+   "repro": "read group-volume-db.test.tsx l.398-410",
+   "ruling": "D-29z188: 2026-10-23 bug gate, deferred",
+   "added": "2026-10-27 B round 210 -> 211 planning"
+  },
+  {
+   "id": "A-R210-REVIEW-FP11-GAP",
+   "severity": "low",
+   "origin": "A round 210 code-reviewer",
+   "title": "FP11 covers only the track Volume unmount, not pan, group or master",
+   "evidence": "a-round-210.md code-reviewer small gap",
+   "repro": "fader-pointer-preview.test.tsx FP11",
+   "ruling": "D-29z188: deferred",
+   "added": "2026-10-27 B round 210 -> 211 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -29480,7 +29602,10 @@
   ],
   "next_due": "round 215 or the end of STORE-REDESIGN, whichever first",
   "added": "2026-10-26 B round 190 -> 191 planning (D-29z156)",
-  "first_run": "round 200 (D-29z165)"
+  "first_run": "round 200 (D-29z165)",
+  "signals_for_next_retro": [
+   "L28 doc status line published conditional 5x (doc 165 l.4, gate 210): propose a structural fix (root gate amends status line at publication, or B grants the post-PASS line by default) - 2026-10-27 B round 210 -> 211 planning"
+  ]
  },
  "closed_findings_d29z163": [
   {
@@ -29635,6 +29760,14 @@
    "blocking": false,
    "added": "2026-10-27 B round 207 -> 208 planning (D-29z176)",
    "status": "no root answer by round 209 planning -> recorded default keep applied (D-29z182): gesture machine stays in ArrangementContext; only mix-draft-store.ts + ArrangementMixFader.tsx added"
+  },
+  {
+   "id": "ARCH-CHECKPOINT-POST-PERF-FADER-B",
+   "request": "to be written by B at the round 211 -> 212 planning (b-round-211-checkpoint-request.md)",
+   "question": "bounded frontend-architect checkpoint on the ArrangementContext.tsx gesture/override machine after PERF-FADER-b (scope: the round-211 publish commit; ARCH-R209-MIX-OVERRIDE, ARCH-R210-OVERRIDE-UNIFY, ARCH-R207-MIX-PREVIEW-STORE, GATE210-S4); keep/extract before PERF-8/PERF-10",
+   "blocking": false,
+   "status": "committed (D-29z188): request is written at the 211->212 planning regardless of the round-211 verdict",
+   "added": "2026-10-27 B round 210 -> 211 planning"
   }
  ],
  "leadmagnet_dialog_rulings_d29z170": {

@@ -1,0 +1,52 @@
+== M4 volume revert does not rewrite the stored live gains | pattern FP(3|4): | exit 1
+    × FP3: a group drag drives every member live gain; pointercancel restores every member gain and display with no entry 609ms
+    × FP4: a stolen claim mid-drag reverts every group member gain and the display with no entry 189ms
+    Tests  2 failed | 14 skipped (16)
+    AssertionError: expected 0.08789618069793463 to be 0.35 // Object.is equality
+    AssertionError: expected 0.04405244365040069 to be 0.35 // Object.is equality
+== M5 volume revert drops the override without clearing the draft | pattern FP5 | exit 1
+    × FP5: a fader blur during the gesture cancels with no entry and restores the display 571ms
+    Tests  1 failed | 15 skipped (16)
+    AssertionError: expected '-16.4' to be '-4.4' // Object.is equality
+== M7 startGraph ignores the pointer override | pattern FP(7|8): | exit 1
+    × FP7: playing, a stop and start or a forced resync mid-drag builds the new graph with the dragged value 520ms
+    × FP8: playing a short loop, a late loop wrap mid-drag rebuilds the graph with the dragged value 200ms
+    Tests  2 failed | 14 skipped (16)
+    AssertionError: expected 0.6 to be 0.15135612484362082 // Object.is equality
+    AssertionError: expected 0.6 to be 0.15135612484362082 // Object.is equality
+== M9 group keyboard change forced onto the pointer path | pattern FP9 | exit 1
+    × FP9: keyboard steps, Shift fine drag and double-click reset keep their values, labels and pending behaviour 911ms
+    Tests  1 failed | 15 skipped (16)
+    AssertionError: expected 0.7 to be 0.5011872336272722 // Object.is equality
+== M11 unmount does not clear the volume override draft | pattern FP11 | exit 1
+    × FP11: unmounting mid-drag clears the override and the draft and leaves no window pointer listener 493ms
+    Tests  1 failed | 15 skipped (16)
+    AssertionError: expected 0.15135612484362082 to be undefined
+== M12 pointer override stored at float32 (AudioParam read-back) precision | pattern FP12 | exit 1
+    × FP12: for every slider dB the committed pointer value equals the pending onChange value (track and Master) 793ms
+    Tests  1 failed | 15 skipped (16)
+    AssertionError: expected [ …(599) ] to deeply equal []
+== M13 previewTrackPan gesture guard removed (l.2799) | pattern FP13 | exit 1
+    × FP13: a native Pan change after a stolen claim shows no draft, adds no live pan write after the restore by the steal and leaves the model unchanged (D-29z186) 616ms
+    Tests  1 failed | 15 skipped (16)
+    AssertionError: expected 0.32 to be undefined
+== M14ab cancelTrackPan does not restore the stored live pan | pattern FP14 | exit 1
+    × FP14a pointercancel: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) 569ms
+    × FP14b fader blur mid-drag: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) 257ms
+    ✓ FP14c stolen claim: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187)  387ms
+    Tests  2 failed | 1 passed | 13 skipped (16)
+    AssertionError: expected 0.32 to be 0.2 // Object.is equality
+== M14c stolen-claim abort does not restore the stored live pan | pattern FP14 | exit 1
+    ✓ FP14a pointercancel: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187)  788ms
+    ✓ FP14b fader blur mid-drag: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187)  400ms
+    × FP14c stolen claim: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) 201ms
+    Tests  1 failed | 2 passed | 13 skipped (16)
+    AssertionError: expected 0.32 to be 0.2 // Object.is equality
+== M14w restore writes centre (0) instead of the stored pan (review M1) | pattern FP1[34] | exit 1
+    ✓ FP13: a native Pan change after a stolen claim shows no draft, adds no live pan write after the restore by the steal and leaves the model unchanged (D-29z186)  782ms
+    × FP14a pointercancel: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) 234ms
+    × FP14b fader blur mid-drag: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) 206ms
+    × FP14c stolen claim: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) 188ms
+    Tests  3 failed | 1 passed | 12 skipped (16)
+    AssertionError: expected +0 to be 0.2 // Object.is equality
+restored f47be90bbca2ee63ea9b7b60fa84ba5e09f095da1ae2e214e84afb76101979ac
