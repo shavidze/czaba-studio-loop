@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T13:01:43.114Z)
+# Active loop summary (2026-10-27T13:39:42.196Z)
 
-- backlog.json 203 KB -> active view 67 KB
-- status: G_ROOT_GATE round 22
+- backlog.json 213 KB -> active view 72 KB
+- status: G_ROOT_GATE round 23
 - servers: `{"servers":"none or skipped"}`
-- last publication: 9d1c97e005c9fb430190c7765e44a7ed24b6563f (rounds 22-22)
-- last root gate: round 22 published - commit 9d1c97e005c9fb430190c7765e44a7ed24b6563f pushed
+- last publication: 59c26d6a3c6d4ca0b73e9fa78d822a5bac427d16 (rounds 23-23)
+- last root gate: round 23 published - commit 59c26d6a3c6d4ca0b73e9fa78d822a5bac427d16 pushed
 
-## Current items: TM-B24, TM-B25
+## Current items: TM-B25, TM-B26
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -121,6 +121,15 @@
 - B-R21-01 / info / open / A-R20-01 is not reachable through today's UI: toggleSelection appends/removes, selectRange keeps the existing selection order and appends, a
 - B-R21-02 / low / open / Selection deviations from the Explorer/GTK reference kept by D-31: Shift-click moves the anchor (reference: only normal clicks set it); Shif
 - B-R21-03 / info / open / The 'as Record<string, WavMetadata>' casts in App.tsx:64 and FolderBrowser.tsx:112,148 are not redundant: readMetadataChunked (src/renderer/
+- C-R22-01 / low / open / Test gap: no unit test pins D-31 target behaviour #2 / deviation 1 (a Shift-click moves the anchor). Mutant M7 'if (!e.shiftKey) anchorPathR
+- RR-R22-01 / low / open / FileList.tsx:63-70 a Shift-click moves the anchor to the clicked row; Windows Explorer keeps it, so a second Shift-click re-extends from the
+- RR-R22-02 / low / open / FileList.tsx:66 + :112-114 Ctrl-deselecting the last selected row clears the anchor, so a later Shift-click selects one row; Explorer keeps 
+- RR-R22-03 / low / open / FileList.tsx:64 + file-store.ts:74 passing indices still depends on the component and the store sorting the list identically (implicit contr
+- RR-R22-04 / low / open / File rows are clickable divs with no keyboard or ARIA selection support (pre-existing, not introduced by R22)
+- RR-R22-05 / info / open / Architecture signal: selectRange(anchorPath, targetPath) in the store, resolving both indices inside getSortedFiles(state); anchor as store 
+- A-R22-01 / low / open / Select All then Shift-click: with the anchor, nothing changes (range is added, deviation 2); without an anchor the selection collapses to on
+- A-R22-02 / low / open / The anchor is cleared only on a non-empty -> empty transition after render; a clear + reselect in one batch would keep a stale anchor. No su
+- A-R22-03 / info / open / FileList re-renders on empty <-> non-empty selection transitions; findIndex O(n) only on Shift-click; rows share the memoised files array
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

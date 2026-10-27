@@ -1,0 +1,284 @@
+diff --git a/docs/bugs/README.md b/docs/bugs/README.md
+index 8e3a05f..e1b1337 100644
+--- a/docs/bugs/README.md
++++ b/docs/bugs/README.md
+@@ -4,5 +4,6 @@
+ 
+ | # | აღწერა | სტატუსი |
+ |---|--------|---------|
++| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (8 ჩანაწერი; 4 მათგანი Saba-ს კითხვაა) |
+ 
+ ფორმატი: `{NNN}-{short-description}.md`
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index 322fc96..c1deb93 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -125,13 +125,13 @@ export function MetadataPanel(): React.ReactElement {
+     const startSelection = useFileStore.getState().selectedPaths;
+     const isSelectionUnchanged = (): boolean =>
+       isSameSelectionSet(startSelection, useFileStore.getState().selectedPaths);
+-    const startEditingMetadata = editingMetadata;
++    const startEditingMetadata = useMetadataStore.getState().editingMetadata;
+ 
+     setIsSaving(true);
+     try {
+       if (selectedFiles.length === 1) {
+         const path = selectedFiles[0].path;
+-        await window.api.writeMetadata(path, editingMetadata as Partial<WavMetadata>, fields);
++        await window.api.writeMetadata(path, startEditingMetadata, fields);
+         await refreshSavedFileStats([path]);
+         let updated: WavMetadata;
+         try {
+@@ -145,8 +145,8 @@ export function MetadataPanel(): React.ReactElement {
+           ? collectFieldsTypedDuringSave(startEditingMetadata)
+           : {};
+         if (selectionUnchanged) skipSyncRef.current = true;
+-        updateFileMetadata(path, updated as WavMetadata);
+-        if (selectionUnchanged) setEditingMetadata({ ...(updated as WavMetadata) });
++        updateFileMetadata(path, updated);
++        if (selectionUnchanged) setEditingMetadata({ ...updated });
+         mergeFieldsTypedDuringSave(typedDuringSave);
+         showToast('Tags saved', 'success');
+       } else {
+@@ -154,8 +154,8 @@ export function MetadataPanel(): React.ReactElement {
+         const modified = useMetadataStore.getState().modifiedFields;
+         const batchMeta: Partial<WavMetadata> = {};
+         for (const key of modified) {
+-          if (editingMetadata[key] !== undefined) {
+-            batchMeta[key] = editingMetadata[key];
++          if (startEditingMetadata[key] !== undefined) {
++            batchMeta[key] = startEditingMetadata[key];
+           }
+         }
+         const result = await window.api.writeMetadataBatch(paths, batchMeta, fields);
+@@ -177,7 +177,7 @@ export function MetadataPanel(): React.ReactElement {
+           skipSyncRef.current = true;
+         }
+         for (const [path, updated] of savedEntries) {
+-          updateFileMetadata(path, updated as WavMetadata);
++          updateFileMetadata(path, updated);
+         }
+ 
+         if (result.failed.length > 0) {
+@@ -196,15 +196,7 @@ export function MetadataPanel(): React.ReactElement {
+     } finally {
+       setIsSaving(false);
+     }
+-  }, [
+-    selectedFiles,
+-    editingMetadata,
+-    fields,
+-    setIsSaving,
+-    setEditingMetadata,
+-    showToast,
+-    updateFileMetadata,
+-  ]);
++  }, [selectedFiles, fields, setIsSaving, setEditingMetadata, showToast, updateFileMetadata]);
+ 
+   const handleSchemaChanged = useCallback(async () => {
+     if (allFiles.length === 0) return;
+@@ -222,11 +214,11 @@ export function MetadataPanel(): React.ReactElement {
+         failures += chunk.length;
+       }
+     }
+-    setMetadata(accumulated as Record<string, WavMetadata>);
++    setMetadata(accumulated);
+     const currentSelection = useFileStore.getState().selectedPaths;
+     if (currentSelection.length === 1) {
+       const current = accumulated[currentSelection[0]];
+-      if (current) setEditingMetadata({ ...(current as WavMetadata) });
++      if (current) setEditingMetadata({ ...current });
+     } else if (currentSelection.length > 1) {
+       setEditingMetadata({});
+     }
+diff --git a/tests/renderer/components/file-list.test.ts b/tests/renderer/components/file-list.test.ts
+index 1a7686a..b5a70a8 100644
+--- a/tests/renderer/components/file-list.test.ts
++++ b/tests/renderer/components/file-list.test.ts
+@@ -357,4 +357,18 @@ describe("FileList Shift-click anchor (TM-B25, D-31)", () => {
+ 
+     expect(selectedNames()).toEqual(["a.wav", "d.wav"]);
+   });
++
++  it("(z12) a Shift-click moves the anchor to the clicked row (D-31 deviation 1)", () => {
++    renderPlainFiles(["a.wav", "b.wav", "cx.wav", "dx.wav"]);
++
++    fireEvent.click(getFileRow("a.wav"));
++    fireEvent.click(getFileRow("cx.wav"), { shiftKey: true });
++    expect(selectedNames()).toEqual(["a.wav", "b.wav", "cx.wav"]);
++    act(() => {
++      useFileStore.getState().setSearchQuery("x");
++    });
++    fireEvent.click(getFileRow("dx.wav"), { shiftKey: true });
++
++    expect(selectedNames()).toEqual(["cx.wav", "dx.wav"]);
++  });
+ });
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index 35ae176..ac94b19 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -107,11 +107,11 @@ function expectBatchWriteCall(callIndex: number): void {
+ 
+ beforeEach(() => {
+   resetAllStores();
+-  vi.mocked(window.api.writeMetadataBatch).mockClear().mockResolvedValue({ succeeded: 0, failed: [] });
+-  vi.mocked(window.api.readMetadataBatch).mockClear().mockResolvedValue({});
+-  vi.mocked(window.api.writeMetadata).mockClear().mockResolvedValue(undefined);
+-  vi.mocked(window.api.readMetadata).mockClear().mockResolvedValue({});
+-  vi.mocked(window.api.scanFolder).mockClear().mockResolvedValue([]);
++  vi.mocked(window.api.writeMetadataBatch).mockReset().mockResolvedValue({ succeeded: 0, failed: [] });
++  vi.mocked(window.api.readMetadataBatch).mockReset().mockResolvedValue({});
++  vi.mocked(window.api.writeMetadata).mockReset().mockResolvedValue(undefined);
++  vi.mocked(window.api.readMetadata).mockReset().mockResolvedValue({});
++  vi.mocked(window.api.scanFolder).mockReset().mockResolvedValue([]);
+ });
+ 
+ afterEach(() => {
+@@ -1136,3 +1136,21 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+     });
+   });
+ });
++
++describe("mock isolation (A-R21-04)", () => {
++  it("(i1) leaves unconsumed once-values on every window.api mock", () => {
++    vi.mocked(window.api.writeMetadataBatch).mockRejectedValueOnce(new Error("leaked"));
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ "/leaked.wav": { title: "leaked" } });
++    vi.mocked(window.api.writeMetadata).mockRejectedValueOnce(new Error("leaked"));
++    vi.mocked(window.api.readMetadata).mockResolvedValueOnce({ title: "leaked" });
++    vi.mocked(window.api.scanFolder).mockRejectedValueOnce(new Error("leaked"));
++  });
++
++  it("(i2) starts the next test with only the default mock values", async () => {
++    await expect(window.api.writeMetadataBatch(["/x.wav"], {}, [])).resolves.toEqual({ succeeded: 0, failed: [] });
++    await expect(window.api.readMetadataBatch(["/x.wav"], [])).resolves.toEqual({});
++    await expect(window.api.writeMetadata("/x.wav", {}, [])).resolves.toBeUndefined();
++    await expect(window.api.readMetadata("/x.wav", [])).resolves.toEqual({});
++    await expect(window.api.scanFolder("/x")).resolves.toEqual([]);
++  });
++});
+diff --git a/docs/bugs/001-save-and-selection-known-limits.md b/docs/bugs/001-save-and-selection-known-limits.md
+new file mode 100644
+index 0000000..224796a
+--- /dev/null
++++ b/docs/bugs/001-save-and-selection-known-limits.md
+@@ -0,0 +1,119 @@
++# 001 — Save და selection: ცნობილი შეზღუდვები (D-29, D-30, D-31)
++
++**სტატუსი:** ცნობილი შეზღუდვების სია. ბაგი, რომელიც გასწორებას ელოდება, აქ არ არის.
++**წყარო:** TM-B26 (round 23). ID-ები loop-ის backlog-იდანაა.
++**კოდი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` (`handleSave`, sync effect, `handleSchemaChanged`), `src/renderer/src/components/file-list/FileList.tsx` (`handleClick`, anchor), `src/renderer/src/stores/file-store.ts` (`selectRange`).
++
++გადაწყვეტილებები მოკლედ:
++- **D-29:** თუ save-ის დროს selection შეიცვალა (set-ად შედარებით), ფაილის მხარის განახლებები რჩება, მაგრამ ფორმას ეს save არ ეხება (`skipSyncRef` არ დგება, `setEditingMetadata` არ იძახება).
++- **D-30:** იგივე selection-ზე save-ის დროს აკრეფილი ველები (`modifiedFields`-ის key-ები, რომელთა მნიშვნელობა start snapshot-ისგან განსხვავდება) re-read-ის შემდეგ `mergeFields`-ით ბრუნდება. start snapshot-ს D-32 განსაზღვრავს.
++- **D-32:** `handleSave` save-ის დასაწყისში ერთხელ კითხულობს `useMetadataStore.getState().editingMetadata`-ს. ეს ერთი მნიშვნელობა გამოიყენება single write-ის payload-ად, batch payload-ად (`modifiedFields`-ის key-ები) და D-30-ის შედარებისთვის. ხილული ქცევა არ იცვლება.
++- **D-31:** Shift-click anchor ინახება file path-ად. ყოველი click (plain, Ctrl/Cmd, Shift) anchor-ს clicked row-ზე აყენებს. anchor იშლება, როცა selection ცარიელი ხდება.
++
++სტატუსები: `ცნობილი შეზღუდვა` ნიშნავს, რომ ქცევა გადაწყვეტილებას მიჰყვება და ცვლილება დაგეგმილი არ არის. `Saba-ს კითხვა` ნიშნავს, რომ ქცევის შეცვლაზე Saba წყვეტს.
++
++---
++
++## 1. snapshot-ის მნიშვნელობაზე დაბრუნებული ველი "აკრეფილად" არ ითვლება
++
++- **ID:** RR-R21-02, A-R21-02
++- **Severity:** low (A-R21-02: info)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:43` (`collectFieldsTypedDuringSave`, `isSameFieldValue(current, startMetadata[key])`), `:149` (`setEditingMetadata({ ...updated })`)
++- **Reproduction:**
++  1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, Category = `R20Cat` აკრეფილია, Save დაჭერილია, write ჯერ არ დასრულებულა.
++  2. მოქმედება: write-ის დროს Category ჯერ `X`-ზე იცვლება, შემდეგ ისევ `R20Cat`-ზე.
++  3. შედეგი: ველი start snapshot-ს უდრის, ამიტომ "აკრეფილი" არ არის. ფორმა re-read-ის მნიშვნელობას აჩვენებს, `isDirty` false-ია, Save disabled. თუ writer-მა მნიშვნელობა ნორმალიზება გაუკეთა (re-read ≠ snapshot), მომხმარებლის "დაბრუნებული" მნიშვნელობა ფორმაში აღარ ჩანს.
++- **გადაწყვეტილება:** D-30 (შედარება მხოლოდ start snapshot-თან)
++- **ტესტი:** `tests/renderer/components/metadata-panel-batch-save.test.ts` — `(y4) pin: a field typed and reverted to the saved value during the write is not a change`
++- **სტატუსი:** ცნობილი შეზღუდვა
++
++## 2. snapshot-ში არარსებული ველი, აკრეფილი და წაშლილი save-ის დროს, `''`/`0`-ად merge-დება
++
++- **ID:** A-R21-01
++- **Severity:** low
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:43` (`current !== undefined` და `startMetadata[key]` = `undefined`), `:156-158` (batch payload `modifiedFields`-იდან)
++- **Reproduction:**
++  1. საწყისი მდგომარეობა: ორი ფაილი მონიშნულია (batch), ფორმა ცარიელია (`editingMetadata` = `{}`), Category აკრეფილია, Save დაჭერილია, write ჯერ არ დასრულებულა.
++  2. მოქმედება: write-ის დროს Comment-ში რაღაც იკრიფება და მერე იშლება (ველი `''`).
++  3. შედეგი: snapshot-ში `comment` არ იყო (`undefined`), მიმდინარე მნიშვნელობა `''`-ია, ამიტომ ის "აკრეფილად" ითვლება და `mergeFields`-ით ბრუნდება. ფორმა dirty რჩება, Save enabled. batch-ის შემდეგი Save ყველა მონიშნულ ფაილში Comment-ს `''`-ს წერს. number ველზე იგივე ხდება `0`-ით.
++- **გადაწყვეტილება:** D-30. იგივე ქცევაა save-ის გარეშე აკრეფა-წაშლისას (`updateField` key-ს `modifiedFields`-ში ტოვებს), ანუ D-30-მდე არსებული ქცევაა. batch-ში ცარიელი ველის სემანტიკა შესაძლო Saba-ს კითხვაა.
++- **ტესტი:** ტესტი არ არის
++- **სტატუსი:** ცნობილი შეზღუდვა
++
++## 3. schema-ს შეცვლა single save-ის დროს: re-read save-ის დაწყების `fields`-ით
++
++- **ID:** A-R21-03
++- **Severity:** low
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:138` (`readMetadata(path, fields)`, `fields` `handleSave`-ის closure-იდან), `:149` (`setEditingMetadata({ ...updated })`), `:201-228` (`handleSchemaChanged`, ფორმის განახლება `:221`)
++- **Reproduction:**
++  1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, ველი შეცვლილია, Save დაჭერილია, write ნელია.
++  2. მოქმედება: write-ის დროს Schema Editor-ში custom ველი ემატება და schema ინახება (`handleSchemaChanged` ყველა ფაილს ახალი schema-თი კითხულობს).
++  3. შედეგი (თუ `handleSchemaChanged` save-ის re-read-მდე დასრულდა): save-ის re-read ძველი `fields`-ით სრულდება, მერე `updateFileMetadata` და `setEditingMetadata` `handleSchemaChanged`-ის შედეგს ამ ფაილისთვის გადაწერს. ახალი custom ველი ფორმაში ცარიელია, სანამ ფაილი ხელახლა არ წაიკითხება (rescan ან სხვა ფაილზე გადასვლა და დაბრუნება).
++- **გადაწყვეტილება:** D-30 (start snapshot და start `fields`). D-29/D-30-მდე არსებული ქცევაა.
++- **ტესტი:** ტესტი არ არის
++- **სტატუსი:** ცნობილი შეზღუდვა
++
++## 4. `Unsaved changes were discarded` მიმდინარე save-ის დროს
++
++- **ID:** B-R19-01, RR-R20-01
++- **Severity:** low
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:101-102` (sync effect)
++- **Reproduction:**
++  1. საწყისი მდგომარეობა: `a.wav` მონიშნულია, Category შეცვლილია (dirty), Save დაჭერილია, write ჯერ არ დასრულებულა.
++  2. მოქმედება: `b.wav`-ზე click.
++  3. შედეგი: ჩნდება toast `Unsaved changes were discarded`, თუმცა `a.wav`-ის edits იწერება და write-ის შემდეგ `Tags saved` ჩნდება. ფორმა `b.wav`-ს აჩვენებს (D-29).
++- **გადაწყვეტილება:** D-29 (toast განზრახ არ შეცვლილა). ვარიანტები: toast-ის გამოტოვება, სანამ დატოვებული selection-ის save მიმდინარეობს, ან list-ის ჩაკეტვა save-ის დროს (ახალი UX, reference-first კვლევა სჭირდება).
++- **ტესტი:** ტესტი არ არის
++- **სტატუსი:** Saba-ს კითხვა
++
++## 5. D-31 deviation 1: Shift-click anchor-ს გადააადგილებს
++
++- **ID:** B-R21-02, RR-R22-01
++- **Severity:** low
++- **ფაილი:** `src/renderer/src/components/file-list/FileList.tsx:70` (`anchorPathRef.current = file.path;` ყოველ click-ზე, Shift-ის ჩათვლით)
++- **Reproduction:**
++  1. საწყისი მდგომარეობა: სიაში `a.wav`, `b.wav`, `cx.wav`, `dx.wav`.
++  2. მოქმედება: click `a.wav` → Shift-click `cx.wav` (a, b, cx) → search `x` → Shift-click `dx.wav`.
++  3. შედეგი: მონიშნულია `cx.wav`, `dx.wav` — anchor `cx.wav`-ზეა. Windows Explorer და GTK anchor-ს ადგილზე ტოვებენ (Shift-click-ის შემდეგ anchor = `a.wav`).
++- **გადაწყვეტილება:** D-31 (target behaviour #2, deviation 1)
++- **ტესტი:** `tests/renderer/components/file-list.test.ts` — `(z12) a Shift-click moves the anchor to the clicked row (D-31 deviation 1)`
++- **სტატუსი:** Saba-ს კითხვა
++
++## 6. D-31 deviation 2: Shift-click Ctrl-ის გარეშე range-ს ამატებს
++
++- **ID:** B-R21-02, A-R22-01
++- **Severity:** low
++- **ფაილი:** `src/renderer/src/components/file-list/FileList.tsx:63-64` (`selectRange(anchorIndex, index)`), `src/renderer/src/stores/file-store.ts:74-88` (`selectRange` არსებულ ხილულ selection-ს range-ს უმატებს)
++- **Reproduction:**
++  1. საწყისი მდგომარეობა: `a.wav`, `b.wav`, `c.wav`, `d.wav`; click `a.wav`, Ctrl-click `c.wav`.
++  2. მოქმედება: Shift-click `d.wav`.
++  3. შედეგი: მონიშნულია `a.wav`, `c.wav`, `d.wav` (range `c..d` დაემატა). Explorer selection-ს range-ით ცვლის. ამის გამო click `a.wav` → Select All → Shift-click `c.wav` არაფერს ცვლის (ყველა ფაილი მონიშნული რჩება). anchor-ის გარეშე (მაგ. Select All ცარიელი selection-იდან) Shift-click selection-ს ერთ row-მდე ამცირებს.
++- **გადაწყვეტილება:** D-31 (deviation 2; `selectRange` უცვლელია)
++- **ტესტი:** `tests/renderer/components/file-list.test.ts` — `(z10) pin: Ctrl-click sets the anchor and the range is added`
++- **სტატუსი:** Saba-ს კითხვა
++
++## 7. D-31 deviation 3: ბოლო მონიშნული row-ის Ctrl-deselect anchor-ს წმენდს
++
++- **ID:** RR-R22-02 (deviation ჩამოთვლილია B-R21-02-ში)
++- **Severity:** low
++- **ფაილი:** `src/renderer/src/components/file-list/FileList.tsx:65-66` (`toggleSelection`), `:112-114` (`if (!hasSelection) anchorPathRef.current = null;`)
++- **Reproduction:**
++  1. საწყისი მდგომარეობა: `a.wav`, `b.wav`, `c.wav`, `d.wav`; click `b.wav` (მხოლოდ b მონიშნულია).
++  2. მოქმედება: Ctrl-click `b.wav` (selection ცარიელია) → Shift-click `d.wav`.
++  3. შედეგი: მონიშნულია მხოლოდ `d.wav`. Explorer anchor-ს ინარჩუნებს და `b..d`-ს მონიშნავდა.
++- **გადაწყვეტილება:** D-31 (anchor იშლება, როცა selection ცარიელი ხდება). მიზეზი: ცარიელი selection ერთადერთი საიმედო სიგნალია rescan-ის, folder-ის გახსნის ან დახურვისა.
++- **ტესტი:** `tests/renderer/components/file-list.test.ts` — `(z8) Deselect All drops the anchor (new D-31 behaviour)` (Deselect All path, იგივე წესი)
++- **სტატუსი:** Saba-ს კითხვა
++
++## 8. anchor იწმინდება მხოლოდ non-empty → empty გადასვლაზე render-ის შემდეგ
++
++- **ID:** A-R22-02
++- **Severity:** low
++- **ფაილი:** `src/renderer/src/components/file-list/FileList.tsx:109` (`hasSelection`), `:112-114` (effect)
++- **Reproduction:**
++  1. საწყისი მდგომარეობა: anchor = `a.wav`.
++  2. მოქმედება (ჰიპოთეტური): კოდი, რომელიც ერთ React batch-ში ჯერ `clearSelection()`-ს და მერე `setSelectedPaths([...])`-ს იძახებს.
++  3. შედეგი: `hasSelection` render-ებს შორის true რჩება, effect არ ეშვება და ძველი anchor რჩება. ასეთი კოდი დღეს არ არის: folder open/rescan/close და Deselect All selection-ს ცარიელს ტოვებს, სანამ მომხმარებელი ახალ click-ს გააკეთებს.
++- **გადაწყვეტილება:** D-31 (anchor-ის წმენდა ცარიელ selection-ზე; store არ შეცვლილა)
++- **ტესტი:** ტესტი არ არის
++- **სტატუსი:** ცნობილი შეზღუდვა

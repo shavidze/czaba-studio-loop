@@ -1,0 +1,80 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m50 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 5194[2mms[22m[39m
+     [33m[2m✓[22m[39m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept [33m 390[2mms[22m[39m
+     [32m✓[39m (b) partial failure: edits are kept and succeeded files are refreshed in the store[32m 152[2mms[22m[39m
+     [32m✓[39m (c) retry after a failure writes the same fields to all selected files and clears on success[32m 218[2mms[22m[39m
+     [32m✓[39m (d) full success clears the form back to Multiple values[32m 135[2mms[22m[39m
+     [32m✓[39m (e) single-file write failure keeps the typed value and shows the error[32m 138[2mms[22m[39m
+     [32m✓[39m (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated[32m 133[2mms[22m[39m
+     [32m✓[39m (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept[32m 135[2mms[22m[39m
+     [32m✓[39m (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry[32m 150[2mms[22m[39m
+     [32m✓[39m (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01)[32m 131[2mms[22m[39m
+     [32m✓[39m (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept[32m 130[2mms[22m[39m
+     [32m✓[39m (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept[32m 128[2mms[22m[39m
+     [32m✓[39m (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept[32m 129[2mms[22m[39m
+     [32m✓[39m (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept[32m 119[2mms[22m[39m
+     [32m✓[39m (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read[32m 83[2mms[22m[39m
+     [32m✓[39m (o) batch, all succeed: both files are patched and the selection is kept[32m 71[2mms[22m[39m
+     [32m✓[39m (p) batch, partial failure: only the written file is patched even though the scan has the failed one[32m 118[2mms[22m[39m
+     [32m✓[39m (q) batch, all failed: no scan, files unchanged, edits kept[32m 124[2mms[22m[39m
+     [32m✓[39m (r) single write rejects: no scan, files unchanged[32m 66[2mms[22m[39m
+     [32m✓[39m (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged[32m 70[2mms[22m[39m
+     [32m✓[39m (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged[32m 123[2mms[22m[39m
+     [32m✓[39m (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged[32m 68[2mms[22m[39m
+     [32m✓[39m (v) folderPath null: no scan, the save behaves as today[32m 67[2mms[22m[39m
+     [32m✓[39m (w) the scan result lacks the saved path: the file keeps its stats and nothing is added[32m 68[2mms[22m[39m
+     [32m✓[39m (x1) single A -> B during the write: the editor shows B, A's re-read only goes to the store[32m 77[2mms[22m[39m
+     [32m✓[39m (x2) the follow-up save on B writes B's own values, never A's[32m 137[2mms[22m[39m
+     [32m✓[39m (x3) typing on B during the write: B's edits and isDirty are kept[32m 77[2mms[22m[39m
+     [32m✓[39m (x4) selection cleared during the write: editor stays empty, store and toast as usual[32m 70[2mms[22m[39m
+     [32m✓[39m (x5) batch all succeeded, A+B -> A during the write: the editor shows A's refreshed values[32m 76[2mms[22m[39m
+     [32m✓[39m (x6) batch partial, A+B -> A during the write: the editor shows A's refreshed value, B's entry is kept[32m 75[2mms[22m[39m
+     [32m✓[39m (x7) pin: the write rejects after A -> B: error toast, editor shows B, store untouched, no re-read[32m 72[2mms[22m[39m
+     [32m✓[39m (x8) pin: D-24 after A -> B: reload-failed toast, editor shows B, store untouched[32m 76[2mms[22m[39m
+     [32m✓[39m (x9) pin: the same set reordered during a batch write behaves as today[32m 71[2mms[22m[39m
+     [32m✓[39m (x10) pin: A -> B -> A during the write behaves as today[32m 75[2mms[22m[39m
+     [32m✓[39m (x11) batch all succeeded, A+B -> A and typing on A during the write: A's edits and isDirty are kept[32m 79[2mms[22m[39m
+       [32m✓[39m (y1) single, same selection: a field typed during the write is kept and Save stays enabled[32m 126[2mms[22m[39m
+       [32m✓[39m (y2) the next Save writes the text typed during the first save[32m 119[2mms[22m[39m
+       [32m✓[39m (y3) the saved field retyped during the write keeps the new value[32m 68[2mms[22m[39m
+       [32m✓[39m (y4) pin: a field typed and reverted to the saved value during the write is not a change[32m 121[2mms[22m[39m
+       [32m✓[39m (y5) pin: an equal tag array with a new reference during the write is not a change[32m 142[2mms[22m[39m
+       [32m✓[39m (y5b) tag order changed during the write is a change[32m 100[2mms[22m[39m
+       [32m✓[39m (y6) a tag added during the write is kept[32m 69[2mms[22m[39m
+       [32m✓[39m (y7) a number typed during the write is kept[32m 73[2mms[22m[39m
+       [32m✓[39m (y8) A -> B -> A and typing on A during the write: typed text on top of A's re-read[32m 84[2mms[22m[39m
+       [32m✓[39m (y9) batch all succeeded, same set: a field typed during the write is kept[32m 118[2mms[22m[39m
+       [32m✓[39m (y10) the next batch Save writes only the field typed during the first save[32m 121[2mms[22m[39m
+       [32m✓[39m (y11) pin: batch partial failure and typing during the write keeps every edit[32m 69[2mms[22m[39m
+       [32m✓[39m (y12) pin: the write rejects and typing during the write keeps every edit[32m 69[2mms[22m[39m
+       [32m✓[39m (y13) pin: D-24 re-read rejects and typing during the write keeps every edit[32m 73[2mms[22m[39m
+     [32m✓[39m (i1) leaves unconsumed once-values on every window.api mock[32m 0[2mms[22m[39m
+[31m     [31m×[31m (i2) starts the next test with only the default mock values[39m[32m 7[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mmock isolation (A-R21-04)[2m > [22m(i2) starts the next test with only the default mock values
+[31m[1mAssertionError[22m: promise rejected "Error: leaked" instead of resolving[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m1150:67[22m[39m
+    [90m1148| [39m
+    [90m1149| [39m  it("(i2) starts the next test with only the default mock values", as…
+    [90m1150| [39m    await expect(window.api.writeMetadataBatch(["/x.wav"], {}, [])).re…
+    [90m   | [39m                                                                  [31m^[39m
+    [90m1151| [39m    await expect(window.api.readMetadataBatch(["/x.wav"], [])).resolve…
+    [90m1152| [39m    await expect(window.api.writeMetadata("/x.wav", {}, [])).resolves.…
+
+[31m[1mCaused by: Error[22m: leaked[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m1142:68[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m49 passed[39m[22m[90m (50)[39m
+[2m   Start at [22m 13:20:08
+[2m   Duration [22m 6.32s[2m (transform 294ms, setup 82ms, import 442ms, tests 5.19s, environment 474ms)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > mock isolation (A-R21-04) > (i2) starts the next test with only the default mock values,line=1150,column=67::AssertionError: promise rejected "Error: leaked" instead of resolving%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:1150:67%0A%0ACaused by: Caused by: Error: leaked%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:1142:68%0A%0A

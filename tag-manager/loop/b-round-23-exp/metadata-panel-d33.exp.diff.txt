@@ -1,0 +1,40 @@
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/tmp/b-r24/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index c1deb93..3dfece2 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/tmp/b-r24/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -135,7 +135,7 @@ export function MetadataPanel(): React.ReactElement {
+         await refreshSavedFileStats([path]);
+         let updated: WavMetadata;
+         try {
+-          updated = await window.api.readMetadata(path, fields);
++          updated = await window.api.readMetadata(path, useSchemaStore.getState().fields);
+         } catch {
+           showToast(buildReloadFailedToast(), 'error');
+           return;
+@@ -166,7 +166,7 @@ export function MetadataPanel(): React.ReactElement {
+ 
+         let refreshed: Record<string, WavMetadata>;
+         try {
+-          refreshed = await window.api.readMetadataBatch(paths, fields);
++          refreshed = await window.api.readMetadataBatch(paths, useSchemaStore.getState().fields);
+         } catch {
+           showToast(buildReloadFailedToast(result), 'error');
+           return;
+@@ -203,6 +203,7 @@ export function MetadataPanel(): React.ReactElement {
+     const newSchema = useSchemaStore.getState().fields;
+     const paths = allFiles.map((f) => f.path);
+     const CHUNK_SIZE = 50;
++    const previous = useFileStore.getState().metadata;
+     const accumulated: Record<string, WavMetadata> = {};
+     let failures = 0;
+     for (let i = 0; i < paths.length; i += CHUNK_SIZE) {
+@@ -212,6 +213,9 @@ export function MetadataPanel(): React.ReactElement {
+         Object.assign(accumulated, result);
+       } catch {
+         failures += chunk.length;
++        for (const path of chunk) {
++          if (previous[path]) accumulated[path] = previous[path];
++        }
+       }
+     }
+     setMetadata(accumulated);

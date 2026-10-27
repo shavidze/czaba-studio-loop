@@ -1,0 +1,143 @@
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createElement } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+import { useFileStore } from "~/stores/file-store";
+import { useMetadataStore } from "~/stores/metadata-store";
+import { useSchemaStore } from "~/stores/schema-store";
+import type { BatchWriteResult, FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
+import { resetAllStores } from "../helpers/reset-stores";
+
+vi.hoisted(() => {
+  const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+  const mockApi = globalScope.window.api;
+  globalScope.window = globalThis as unknown as { api: unknown };
+  globalScope.api = mockApi;
+});
+
+const PATH_A = "/music/a.wav";
+const PATH_B = "/music/b.wav";
+const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 100, modifiedAt: "2026-10-26T00:00:00.000Z" };
+const FILE_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 100, modifiedAt: "2026-10-26T00:00:00.000Z" };
+const SEED_A: WavMetadata = { title: "A-title", category: "ACat", comment: "" };
+const SEED_B: WavMetadata = { title: "B-title", category: "BCat", comment: "" };
+
+function hasNote(fields: FieldDefinition[]): boolean {
+  return fields.some((f) => f.key === "r24note");
+}
+
+function getInputByLabel(labelText: string): HTMLInputElement {
+  const label = screen.getByText(labelText);
+  const input = label.parentElement?.querySelector("input");
+  if (!input) throw new Error(`${labelText} input not found`);
+  return input;
+}
+
+async function addNoteFieldAndDone(): Promise<void> {
+  fireEvent.click(screen.getByTitle("Customize Fields"));
+  fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R24note" } });
+  fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: /Done/ }));
+  });
+}
+
+beforeEach(() => {
+  resetAllStores();
+  vi.mocked(window.api.writeMetadataBatch).mockReset().mockResolvedValue({ succeeded: 0, failed: [] });
+  vi.mocked(window.api.readMetadataBatch).mockReset().mockResolvedValue({});
+  vi.mocked(window.api.writeMetadata).mockReset().mockResolvedValue(undefined);
+  vi.mocked(window.api.readMetadata).mockReset().mockResolvedValue({});
+  vi.mocked(window.api.scanFolder).mockReset().mockResolvedValue([]);
+  vi.mocked(window.api.saveSchema).mockReset().mockResolvedValue(undefined);
+  useFileStore.setState({ files: [FILE_A, FILE_B], metadata: { [PATH_A]: { ...SEED_A }, [PATH_B]: { ...SEED_B } } });
+});
+
+afterEach(() => {
+  cleanup();
+  resetAllStores();
+});
+
+describe("exp schema change", () => {
+  it("(s1) single, no save: form shows the new field read from the file", async () => {
+    useFileStore.setState({ selectedPaths: [PATH_A] });
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (_paths, fields) => ({
+      [PATH_A]: { ...SEED_A, ...(hasNote(fields) ? { r24note: "fromfile" } : {}) },
+      [PATH_B]: { ...SEED_B },
+    }));
+    render(createElement(MetadataPanel));
+    await addNoteFieldAndDone();
+    expect(getInputByLabel("R24note").value).toBe("fromfile");
+    expect(getInputByLabel("Category (UCS)").value).toBe("ACat");
+    expect(useFileStore.getState().metadata[PATH_A]?.r24note).toBe("fromfile");
+    expect(vi.mocked(window.api.readMetadataBatch)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(window.api.readMetadataBatch).mock.calls[0]?.[0]).toEqual([PATH_A, PATH_B]);
+    expect(hasNote(vi.mocked(window.api.readMetadataBatch).mock.calls[0]?.[1] ?? [])).toBe(true);
+  });
+
+  it("(s2) batch selection, no save", async () => {
+    useFileStore.setState({ selectedPaths: [PATH_A, PATH_B] });
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (_paths, fields) => ({
+      [PATH_A]: { ...SEED_A, ...(hasNote(fields) ? { r24note: "fromfile" } : {}) },
+      [PATH_B]: { ...SEED_B },
+    }));
+    render(createElement(MetadataPanel));
+    await addNoteFieldAndDone();
+    expect(useMetadataStore.getState().editingMetadata).toEqual({});
+    expect(useFileStore.getState().metadata[PATH_A]?.r24note).toBe("fromfile");
+    expect(useFileStore.getState().metadata[PATH_B]).toEqual(SEED_B);
+  });
+
+  it("(s4) single save pending + schema change: re-read uses the new schema", async () => {
+    useFileStore.setState({ selectedPaths: [PATH_A] });
+    let release: () => void = () => {};
+    vi.mocked(window.api.writeMetadata).mockReturnValueOnce(new Promise<void>((r) => { release = () => r(); }));
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (_paths, fields) => ({
+      [PATH_A]: { ...SEED_A, ...(hasNote(fields) ? { r24note: "fromfile" } : {}) },
+      [PATH_B]: { ...SEED_B },
+    }));
+    vi.mocked(window.api.readMetadata).mockImplementation(async (_path, fields) => ({
+      ...SEED_A, category: "R24Cat", ...(hasNote(fields) ? { r24note: "fromfile" } : {}),
+    }));
+    render(createElement(MetadataPanel));
+    fireEvent.change(getInputByLabel("Category (UCS)"), { target: { value: "R24Cat" } });
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: /Save Tags/ })); });
+    await addNoteFieldAndDone();
+    await act(async () => { release(); });
+    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
+    expect(getInputByLabel("Category (UCS)").value).toBe("R24Cat");
+    expect(useFileStore.getState().metadata[PATH_A]?.r24note).toBe("fromfile");
+    expect(getInputByLabel("R24note").value).toBe("fromfile");
+    const readCalls = vi.mocked(window.api.readMetadata).mock.calls;
+    expect(hasNote(readCalls[readCalls.length - 1]?.[1] ?? [])).toBe(true);
+    expect(hasNote(vi.mocked(window.api.writeMetadata).mock.calls[0]?.[2] ?? [])).toBe(false);
+  });
+
+  it("(s5) batch save pending + schema change: re-read uses the new schema", async () => {
+    useFileStore.setState({ selectedPaths: [PATH_A, PATH_B] });
+    let release: () => void = () => {};
+    const ok: BatchWriteResult = { succeeded: 2, failed: [] };
+    vi.mocked(window.api.writeMetadataBatch).mockReturnValueOnce(new Promise<BatchWriteResult>((r) => { release = () => r(ok); }));
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (_paths, fields) => ({
+      [PATH_A]: { ...SEED_A, ...(hasNote(fields) ? { r24note: "fromfile" } : {}) },
+      [PATH_B]: { ...SEED_B },
+    }));
+    render(createElement(MetadataPanel));
+    fireEvent.change(getInputByLabel("Category (UCS)"), { target: { value: "R24Cat" } });
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: /Save to 2 files/ })); });
+    await addNoteFieldAndDone();
+    await act(async () => { release(); });
+    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved to 2 files");
+    expect(useFileStore.getState().metadata[PATH_A]?.r24note).toBe("fromfile");
+  });
+
+  it("(s3) read failure toast", async () => {
+    useFileStore.setState({ selectedPaths: [PATH_A] });
+    vi.mocked(window.api.readMetadataBatch).mockRejectedValue(new Error("down"));
+    render(createElement(MetadataPanel));
+    await addNoteFieldAndDone();
+    expect(useMetadataStore.getState().toastMessage).toBe("Failed to read 2 files");
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: SEED_A, [PATH_B]: SEED_B });
+    expect(getInputByLabel("Category (UCS)").value).toBe("ACat");
+  });
+});

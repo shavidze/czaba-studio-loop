@@ -1,0 +1,56 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/a-r23-m7[39m
+
+ [31m❯[39m tests/renderer/components/file-list.test.ts [2m([22m[2m20 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 678[2mms[22m[39m
+     [32m✓[39m (a) shows Tagged for a row with only category[32m 62[2mms[22m[39m
+     [32m✓[39m (b) shows Tagged for a row with only keywords[32m 10[2mms[22m[39m
+     [32m✓[39m (c) shows Tagged for a row with only comment[32m 11[2mms[22m[39m
+     [32m✓[39m (d) shows no Tagged when every value is empty, blank or default[32m 9[2mms[22m[39m
+     [32m✓[39m (e) still shows Tagged for title, artists or bpm alone[32m 16[2mms[22m[39m
+     [32m✓[39m (f) renders a string artist whole and the first element of an artist array[32m 13[2mms[22m[39m
+     [32m✓[39m (R17-e) renders a malformed row untagged with empty artist and genre cells[32m 14[2mms[22m[39m
+     [32m✓[39m (R18-e) sorts a malformed artist row as empty in both directions without throwing[32m 291[2mms[22m[39m
+     [32m✓[39m (z1) pin: click then Shift-click selects the range[32m 19[2mms[22m[39m
+     [32m✓[39m (z2) keeps the anchor after the D-28 stats refresh of a save[32m 21[2mms[22m[39m
+     [32m✓[39m (z3) keeps the anchor after the metadata update of a save[32m 22[2mms[22m[39m
+     [32m✓[39m (z4) the anchor follows the item after a sort direction change[32m 24[2mms[22m[39m
+     [32m✓[39m (z5) keeps the anchor after a search change that keeps it visible[32m 20[2mms[22m[39m
+     [32m✓[39m (z6) pin: a search that hides the anchor selects only the clicked row[32m 16[2mms[22m[39m
+     [32m✓[39m (z7) pin: a rescan drops the anchor[32m 20[2mms[22m[39m
+     [32m✓[39m (z8) Deselect All drops the anchor (new D-31 behaviour)[32m 22[2mms[22m[39m
+     [32m✓[39m (z9) pin: Shift-click without an earlier click selects only the clicked row[32m 10[2mms[22m[39m
+     [32m✓[39m (z10) pin: Ctrl-click sets the anchor and the range is added[32m 19[2mms[22m[39m
+     [32m✓[39m (z11) the anchor follows the item after a save and a sort field change[32m 27[2mms[22m[39m
+[31m     [31m×[31m (z12) a Shift-click moves the anchor to the clicked row (D-31 deviation 1)[39m[32m 31[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mFileList Shift-click anchor (TM-B25, D-31)[2m > [22m(z12) a Shift-click moves the anchor to the clicked row (D-31 deviation 1)
+[31m[1mAssertionError[22m: expected [ 'dx.wav' ] to deeply equal [ 'cx.wav', 'dx.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "cx.wav",[39m
+[2m    "dx.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m372:29[22m[39m
+    [90m370| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"dx.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m371| [39m
+    [90m372| [39m    [34mexpect[39m([34mselectedNames[39m())[33m.[39m[34mtoEqual[39m([[32m"cx.wav"[39m[33m,[39m [32m"dx.wav"[39m])[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m373| [39m  })[33m;[39m
+    [90m374| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m19 passed[39m[22m[90m (20)[39m
+[2m   Start at [22m 13:20:21
+[2m   Duration [22m 1.66s[2m (transform 202ms, setup 79ms, import 328ms, tests 678ms, environment 452ms)[22m
+
+
+::error file=/tmp/a-r23-m7/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > FileList Shift-click anchor (TM-B25%2C D-31) > (z12) a Shift-click moves the anchor to the clicked row (D-31 deviation 1),line=372,column=29::AssertionError: expected [ 'dx.wav' ] to deeply equal [ 'cx.wav', 'dx.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "cx.wav",%0A    "dx.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:372:29%0A%0A

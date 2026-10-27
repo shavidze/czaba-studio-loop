@@ -1,0 +1,43 @@
+--- b-r24-batch-orig.ts	2026-10-27 13:44:17.440644874 +0000
++++ b-r24-batch-new.ts	2026-10-27 13:44:25.783601049 +0000
+@@ -105,13 +105,17 @@
+   expect(vi.mocked(window.api.writeMetadataBatch).mock.calls[callIndex]?.[1]).toEqual({ category: TYPED_CATEGORY });
+ }
+ 
+-beforeEach(() => {
+-  resetAllStores();
++function resetWindowApiMocks(): void {
+   vi.mocked(window.api.writeMetadataBatch).mockReset().mockResolvedValue({ succeeded: 0, failed: [] });
+   vi.mocked(window.api.readMetadataBatch).mockReset().mockResolvedValue({});
+   vi.mocked(window.api.writeMetadata).mockReset().mockResolvedValue(undefined);
+   vi.mocked(window.api.readMetadata).mockReset().mockResolvedValue({});
+   vi.mocked(window.api.scanFolder).mockReset().mockResolvedValue([]);
++}
++
++beforeEach(() => {
++  resetAllStores();
++  resetWindowApiMocks();
+ });
+ 
+ afterEach(() => {
+@@ -1137,16 +1141,16 @@
+   });
+ });
+ 
+-describe("mock isolation (A-R21-04)", () => {
+-  it("(i1) leaves unconsumed once-values on every window.api mock", () => {
++describe("mock isolation (A-R21-04, RR-R23-01)", () => {
++  it("(i3) resetWindowApiMocks drops once-values queued on the five window.api mocks", async () => {
+     vi.mocked(window.api.writeMetadataBatch).mockRejectedValueOnce(new Error("leaked"));
+     vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ "/leaked.wav": { title: "leaked" } });
+     vi.mocked(window.api.writeMetadata).mockRejectedValueOnce(new Error("leaked"));
+     vi.mocked(window.api.readMetadata).mockResolvedValueOnce({ title: "leaked" });
+     vi.mocked(window.api.scanFolder).mockRejectedValueOnce(new Error("leaked"));
+-  });
+ 
+-  it("(i2) starts the next test with only the default mock values", async () => {
++    resetWindowApiMocks();
++
+     await expect(window.api.writeMetadataBatch(["/x.wav"], {}, [])).resolves.toEqual({ succeeded: 0, failed: [] });
+     await expect(window.api.readMetadataBatch(["/x.wav"], [])).resolves.toEqual({});
+     await expect(window.api.writeMetadata("/x.wav", {}, [])).resolves.toBeUndefined();
