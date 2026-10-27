@@ -1,0 +1,257 @@
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index 6e64867..8eb6c87 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -30,6 +30,7 @@ Schema at re-read (D-33): post-save re-read uses useSchemaStore.getState().field
+ Stale schema re-read (D-34): confirmed writes call markPathsWritten (writeGeneration +1, stamps pathWriteGenerations[path]; batch: non-failed only); handleSchemaChanged reads writeGeneration before each chunk and, when writing the store, keeps the current store entry for superseded paths (stamp > chunk generation) and kept paths, and does not reset the form from them
+ Stale folder read (D-35): readMetadataChunked(paths, schema, getWriteGeneration) calls getWriteGeneration() before each chunk and returns readGenerations (result paths only); applyMetadataRead(read, readGenerations, keptPaths) replaces metadata and keeps the current store entry for superseded paths (stamp > read generation; no entry → absent); Rescan, Open Folder and drop use it; error paths: Open Folder/drop setFiles([]) + setMetadata({}), Rescan toast only; empty folder: setMetadata({}) in all three (D-37)
+ Rejected folder-read chunk (D-36): readMetadataChunked also returns failedPaths (every path of every rejected chunk, failures = failedPaths.length); applyMetadataRead(read, readGenerations, keptPaths) gets failedPaths as keptPaths and keeps the current store entry for each (taken at store-write time; no entry → absent); Rescan, Open Folder and drop show 'Failed to read N files' (error) when failures > 0
++Overlapping folder loads (D-38): handleOpenFolder (after the dialog), handleRescan and App openFolder take useFileStore.getState().beginFolderLoad() first; after scanFolder, after readMetadataChunked and in catch a load that is no longer isFolderLoadCurrent(loadId) returns without store writes or toast; finally clears isScanning only for the current load; handleCloseFolder calls beginFolderLoad() and setIsScanning(false). folderLoadId is never reset.
+ ```
+ 
+ ### Template apply (batch-safe)
+diff --git a/docs/bugs/README.md b/docs/bugs/README.md
+index 5852df6..ca252d4 100644
+--- a/docs/bugs/README.md
++++ b/docs/bugs/README.md
+@@ -4,6 +4,6 @@
+ 
+ | # | აღწერა | სტატუსი |
+ |---|--------|---------|
+-| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (13 ჩანაწერი; 5 გასწორდა, 5 მათგანი Saba-ს კითხვაა) |
++| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (14 ჩანაწერი; 6 გასწორდა, 5 მათგანი Saba-ს კითხვაა) |
+ 
+ ფორმატი: `{NNN}-{short-description}.md`
+diff --git a/src/renderer/src/App.tsx b/src/renderer/src/App.tsx
+index 8377967..75491ce 100644
+--- a/src/renderer/src/App.tsx
++++ b/src/renderer/src/App.tsx
+@@ -8,7 +8,7 @@ import { AudioPlayer } from '~/components/player/AudioPlayer';
+ import { FolderBrowser } from '~/components/sidebar/FolderBrowser';
+ import { Toast } from '~/components/ui/toast';
+ import { readMetadataChunked } from '~/lib/utils';
+-import { useFileStore } from '~/stores/file-store';
++import { isFolderLoadCurrent, useFileStore } from '~/stores/file-store';
+ import { useMetadataStore } from '~/stores/metadata-store';
+ import { usePlayerStore } from '~/stores/player-store';
+ import { useSchemaStore } from '~/stores/schema-store';
+@@ -41,6 +41,7 @@ export default function App(): React.ReactElement {
+ 
+   const openFolder = useCallback(
+     async (folderPath: string) => {
++      const loadId = useFileStore.getState().beginFolderLoad();
+       usePlayerStore.getState().stop();
+       setFolderPath(folderPath);
+       setIsScanning(true);
+@@ -55,6 +56,7 @@ export default function App(): React.ReactElement {
+ 
+       try {
+         const wavFiles = await window.api.scanFolder(folderPath);
++        if (!isFolderLoadCurrent(loadId)) return;
+         setFiles(wavFiles);
+ 
+         if (wavFiles.length > 0) {
+@@ -70,6 +72,7 @@ export default function App(): React.ReactElement {
+             currentSchema,
+             () => useFileStore.getState().writeGeneration,
+           );
++          if (!isFolderLoadCurrent(loadId)) return;
+           useFileStore
+             .getState()
+             .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+@@ -80,13 +83,14 @@ export default function App(): React.ReactElement {
+           setMetadata({});
+         }
+       } catch (err) {
++        if (!isFolderLoadCurrent(loadId)) return;
+         useMetadataStore
+           .getState()
+           .showToast(err instanceof Error ? err.message : 'Failed to scan folder', 'error');
+         setFiles([]);
+         setMetadata({});
+       } finally {
+-        setIsScanning(false);
++        if (isFolderLoadCurrent(loadId)) setIsScanning(false);
+       }
+     },
+     [setFolderPath, setFiles, setMetadata, setIsScanning, clearSelection],
+diff --git a/src/renderer/src/components/sidebar/FolderBrowser.tsx b/src/renderer/src/components/sidebar/FolderBrowser.tsx
+index 59a51c3..933a83a 100644
+--- a/src/renderer/src/components/sidebar/FolderBrowser.tsx
++++ b/src/renderer/src/components/sidebar/FolderBrowser.tsx
+@@ -2,7 +2,7 @@ import { ChevronRight, File, FolderOpen, RefreshCw, X } from 'lucide-react';
+ import { useCallback, useMemo } from 'react';
+ import { Button } from '~/components/ui/button';
+ import { cn, readMetadataChunked } from '~/lib/utils';
+-import { useFileStore } from '~/stores/file-store';
++import { isFolderLoadCurrent, useFileStore } from '~/stores/file-store';
+ import { useMetadataStore } from '~/stores/metadata-store';
+ import { usePlayerStore } from '~/stores/player-store';
+ import { useSchemaStore } from '~/stores/schema-store';
+@@ -96,6 +96,7 @@ export function FolderBrowser(): React.ReactElement {
+     const path = await window.api.openFolderDialog();
+     if (!path) return;
+ 
++    const loadId = useFileStore.getState().beginFolderLoad();
+     usePlayerStore.getState().stop();
+     setFolderPath(path);
+     setIsScanning(true);
+@@ -103,6 +104,7 @@ export function FolderBrowser(): React.ReactElement {
+ 
+     try {
+       const wavFiles = await window.api.scanFolder(path);
++      if (!isFolderLoadCurrent(loadId)) return;
+       setFiles(wavFiles);
+ 
+       if (wavFiles.length > 0) {
+@@ -118,6 +120,7 @@ export function FolderBrowser(): React.ReactElement {
+           currentSchema,
+           () => useFileStore.getState().writeGeneration,
+         );
++        if (!isFolderLoadCurrent(loadId)) return;
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+@@ -128,33 +131,38 @@ export function FolderBrowser(): React.ReactElement {
+         setMetadata({});
+       }
+     } catch (err) {
++      if (!isFolderLoadCurrent(loadId)) return;
+       useMetadataStore
+         .getState()
+         .showToast(err instanceof Error ? err.message : 'Failed to open folder', 'error');
+       setFiles([]);
+       setMetadata({});
+     } finally {
+-      setIsScanning(false);
++      if (isFolderLoadCurrent(loadId)) setIsScanning(false);
+     }
+   }, [setFolderPath, setFiles, setMetadata, setIsScanning, clearSelection]);
+ 
+   const handleCloseFolder = useCallback(() => {
++    useFileStore.getState().beginFolderLoad();
++    setIsScanning(false);
+     setFolderPath(null);
+     setFiles([]);
+     setMetadata({});
+     clearSelection();
+     usePlayerStore.getState().stop();
+     useMetadataStore.getState().resetEditing();
+-  }, [setFolderPath, setFiles, setMetadata, clearSelection]);
++  }, [setFolderPath, setFiles, setMetadata, setIsScanning, clearSelection]);
+ 
+   const handleRescan = useCallback(async () => {
+     if (!folderPath) return;
++    const loadId = useFileStore.getState().beginFolderLoad();
+     usePlayerStore.getState().stop();
+     setIsScanning(true);
+     clearSelection();
+ 
+     try {
+       const wavFiles = await window.api.scanFolder(folderPath);
++      if (!isFolderLoadCurrent(loadId)) return;
+       setFiles(wavFiles);
+ 
+       if (wavFiles.length > 0) {
+@@ -170,6 +178,7 @@ export function FolderBrowser(): React.ReactElement {
+           currentSchema,
+           () => useFileStore.getState().writeGeneration,
+         );
++        if (!isFolderLoadCurrent(loadId)) return;
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+@@ -180,11 +189,12 @@ export function FolderBrowser(): React.ReactElement {
+         setMetadata({});
+       }
+     } catch (err) {
++      if (!isFolderLoadCurrent(loadId)) return;
+       useMetadataStore
+         .getState()
+         .showToast(err instanceof Error ? err.message : 'Rescan failed', 'error');
+     } finally {
+-      setIsScanning(false);
++      if (isFolderLoadCurrent(loadId)) setIsScanning(false);
+     }
+   }, [folderPath, setFiles, setMetadata, setIsScanning, clearSelection]);
+ 
+diff --git a/src/renderer/src/stores/file-store.ts b/src/renderer/src/stores/file-store.ts
+index 6b62c9e..c27ae41 100644
+--- a/src/renderer/src/stores/file-store.ts
++++ b/src/renderer/src/stores/file-store.ts
+@@ -13,6 +13,7 @@ interface FileState {
+   isScanning: boolean;
+   writeGeneration: number;
+   pathWriteGenerations: Record<string, number>;
++  folderLoadId: number;
+ 
+   setFolderPath: (path: string | null) => void;
+   setFiles: (files: WavFileEntry[]) => void;
+@@ -34,9 +35,10 @@ interface FileState {
+     readGenerations: Record<string, number>,
+     keptPaths: string[],
+   ) => void;
++  beginFolderLoad: () => number;
+ }
+ 
+-export const useFileStore = create<FileState>((set) => ({
++export const useFileStore = create<FileState>((set, get) => ({
+   folderPath: null,
+   files: [],
+   metadata: {},
+@@ -47,6 +49,7 @@ export const useFileStore = create<FileState>((set) => ({
+   isScanning: false,
+   writeGeneration: 0,
+   pathWriteGenerations: {},
++  folderLoadId: 0,
+ 
+   setFolderPath: (path) => set({ folderPath: path }),
+   setFiles: (files) => set({ files }),
+@@ -148,8 +151,17 @@ export const useFileStore = create<FileState>((set) => ({
+       }
+       return { metadata };
+     }),
++
++  beginFolderLoad: () => {
++    set((state) => ({ folderLoadId: state.folderLoadId + 1 }));
++    return get().folderLoadId;
++  },
+ }));
+ 
++export function isFolderLoadCurrent(loadId: number): boolean {
++  return useFileStore.getState().folderLoadId === loadId;
++}
++
+ function getFilteredFiles(state: FileState): WavFileEntry[] {
+   if (!state.searchQuery) return state.files;
+   const q = state.searchQuery.toLowerCase();
+diff --git a/tests/renderer/stores/file-store.test.ts b/tests/renderer/stores/file-store.test.ts
+index f03fa90..5430f45 100644
+--- a/tests/renderer/stores/file-store.test.ts
++++ b/tests/renderer/stores/file-store.test.ts
+@@ -1,5 +1,6 @@
+ import { afterEach, beforeEach, describe, expect, it } from "vitest";
+ import { useFileStore } from "~/stores/file-store";
++import { isFolderLoadCurrent } from "~/stores/file-store";
+ import type { WavFileEntry, WavMetadata } from "~/types";
+ import { resetAllStores } from "../helpers/reset-stores";
+ 
+@@ -386,3 +387,18 @@ describe("useFileStore", () => {
+     });
+   });
+ });
++
++describe("folder load id (TM-B33, D-38)", () => {
++  it("(f1) beginFolderLoad returns n+1 then n+2 and only the latest id is current", () => {
++    const before = useFileStore.getState().folderLoadId;
++
++    const first = useFileStore.getState().beginFolderLoad();
++    const second = useFileStore.getState().beginFolderLoad();
++
++    expect(first).toBe(before + 1);
++    expect(second).toBe(before + 2);
++    expect(useFileStore.getState().folderLoadId).toBe(before + 2);
++    expect(isFolderLoadCurrent(first)).toBe(false);
++    expect(isFolderLoadCurrent(second)).toBe(true);
++  });
++});

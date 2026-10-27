@@ -1,0 +1,488 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/components/folder-read-overlap.test.ts [2m([22m[2m16 tests[22m[2m | [22m[31m15 failed[39m[2m)[22m[33m 4112[2mms[22m[39m
+[31m     [31m×[31m (o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's[39m[33m 575[2mms[22m[39m
+[31m     [31m×[31m (o2) Open Folder A (scan pending), Open Folder B (done), A's scan lands last -> files stay B's[39m[32m 254[2mms[22m[39m
+[31m     [31m×[31m (o3) Open Folder A (read pending), Open Folder B (read pending), A finishes first -> isScanning stays true until B finishes[39m[32m 171[2mms[22m[39m
+[31m     [31m×[31m (o4) Open Folder A (read pending), Open Folder B (done), A's read rejects last -> no stale toast[39m[32m 159[2mms[22m[39m
+[31m     [31m×[31m (o5) Open Folder A (read pending), Close Folder, A's read lands -> folder stays closed and spinner stops[39m[32m 77[2mms[22m[39m
+[31m     [31m×[31m (o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata[39m[33m 557[2mms[22m[39m
+[31m     [31m×[31m (o7) Rescan of folder A (read pending), Open Folder B (done), Rescan's read lands last -> B[39m[32m 207[2mms[22m[39m
+     [32m✓[39m (o8) pin: Open Folder A (read pending), second Open Folder dialog cancelled, A's read lands -> A applied[32m 128[2mms[22m[39m
+[31m     [31m×[31m (o9) Open Folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast[39m[32m 170[2mms[22m[39m
+[31m     [31m×[31m (o10) App: drop folder A (read pending), Open Folder B (read pending), A lands first -> scanning stays, then B[39m[33m 438[2mms[22m[39m
+[31m     [31m×[31m (o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B[39m[33m 451[2mms[22m[39m
+[31m     [31m×[31m (o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast[39m[33m 365[2mms[22m[39m
+[31m     [31m×[31m (o13) Rescan of folder A (scan pending), Open Folder B (done), Rescan's scan lands last -> B[39m[32m 119[2mms[22m[39m
+[31m     [31m×[31m (o14) Rescan of folder A (scan pending), Open Folder B (done), Rescan's scan rejects last -> no Rescan toast[39m[32m 137[2mms[22m[39m
+[31m     [31m×[31m (o15) Rescan of folder A (read pending), Open Folder B (read pending), Rescan lands first -> scanning stays true until B[39m[32m 204[2mms[22m[39m
+[31m     [31m×[31m (o16) Rescan takes a new folder load id, so the earlier id is no longer current[39m[32m 97[2mms[22m[39m
+ [31m❯[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m38 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 73[2mms[22m[39m
+       [32m✓[39m initializes with empty state[32m 4[2mms[22m[39m
+       [32m✓[39m sets files[32m 1[2mms[22m[39m
+       [32m✓[39m sets folder path[32m 1[2mms[22m[39m
+       [32m✓[39m sets metadata[32m 1[2mms[22m[39m
+       [32m✓[39m updates single file metadata[32m 1[2mms[22m[39m
+       [32m✓[39m toggles selection on[32m 1[2mms[22m[39m
+       [32m✓[39m toggles selection off[32m 1[2mms[22m[39m
+       [32m✓[39m selects range[32m 16[2mms[22m[39m
+       [32m✓[39m selects range with reversed indices[32m 1[2mms[22m[39m
+       [32m✓[39m selectAll selects all visible files[32m 1[2mms[22m[39m
+       [32m✓[39m selectAll respects search filter[32m 0[2mms[22m[39m
+       [32m✓[39m clears selection[32m 0[2mms[22m[39m
+       [32m✓[39m sets sort field and defaults to asc[32m 0[2mms[22m[39m
+       [32m✓[39m toggles direction when same field set again[32m 0[2mms[22m[39m
+       [32m✓[39m resets to asc when different field set[32m 0[2mms[22m[39m
+       [32m✓[39m toggleSortDirection flips direction[32m 1[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}}[32m 3[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}}[32m 2[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}}[32m 5[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}}[32m 4[2mms[22m[39m
+       [32m✓[39m (b) uses only the first element, not a later string element[32m 2[2mms[22m[39m
+       [32m✓[39m (c) sorts a well-typed string first element by its value[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts a null first element as empty[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts an empty array as empty[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts bpm numerically, not lexicographically[32m 8[2mms[22m[39m
+       [32m✓[39m (c) sorts a bpm number against missing metadata as before[32m 1[2mms[22m[39m
+       [32m✓[39m sets search query[32m 0[2mms[22m[39m
+       [32m✓[39m sets scanning state[32m 0[2mms[22m[39m
+       [32m✓[39m (s1) patches size and modifiedAt of the matching path only and keeps the order[32m 1[2mms[22m[39m
+       [32m✓[39m (s2) ignores an entry whose path is not in files[32m 1[2mms[22m[39m
+       [32m✓[39m (s3) keeps the existing name when the entry has the same path but another name[32m 0[2mms[22m[39m
+       [32m✓[39m (s4) leaves selectedPaths and metadata unchanged[32m 0[2mms[22m[39m
+       [32m✓[39m (s5) an empty entry list leaves files deep-equal[32m 0[2mms[22m[39m
+       [32m✓[39m (s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset[32m 0[2mms[22m[39m
+       [32m✓[39m (g1) markPathsWritten bumps writeGeneration once per call and stamps only the given paths[32m 1[2mms[22m[39m
+       [32m✓[39m (g2) applyMetadataRead replaces metadata, keeps the current entry of superseded paths and applies equal generations[32m 1[2mms[22m[39m
+       [32m✓[39m (g3) applyMetadataRead keeps the current entry of kept paths, leaves kept paths with no entry absent and drops the rest[32m 1[2mms[22m[39m
+[31m     [31m×[31m (f1) beginFolderLoad returns n+1 then n+2 and only the latest id is current[39m[32m 9[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-rejected-chunk.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1451[2mms[22m[39m
+     [33m[2m✓[22m[39m (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files [33m 378[2mms[22m[39m
+     [33m[2m✓[22m[39m (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time [33m 351[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m49 tests[22m[2m)[22m[33m 8785[2mms[22m[39m
+     [33m[2m✓[22m[39m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept [33m 813[2mms[22m[39m
+     [33m[2m✓[22m[39m (c) retry after a failure writes the same fields to all selected files and clears on success [33m 372[2mms[22m[39m
+       [33m[2m✓[22m[39m (y5) pin: an equal tag array with a new reference during the write is not a change [33m 329[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/file-list.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 1121[2mms[22m[39m
+     [33m[2m✓[22m[39m (R18-e) sorts a malformed artist row as empty in both directions without throwing [33m 430[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/utils.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-during-save.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 3405[2mms[22m[39m
+     [33m[2m✓[22m[39m (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value [33m 898[2mms[22m[39m
+     [33m[2m✓[22m[39m (r2) batch save of a+b pending + Rescan: both saved entries survive the stale rescan read [33m 493[2mms[22m[39m
+     [33m[2m✓[22m[39m (r3) single save pending + Open Folder on the same folder: the store keeps the saved value [33m 465[2mms[22m[39m
+     [33m[2m✓[22m[39m (r4) pin: a Rescan issued after the save completed applies the file's current value [33m 426[2mms[22m[39m
+     [33m[2m✓[22m[39m (r6) App: dropping the same folder during a pending save keeps the saved value [33m 391[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/file-row-display.test.ts [2m([22m[2m36 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/metadata-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/schema-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/player-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/template-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 2973[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a custom field with RIFF ID ICAT [33m 1385[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a custom field with lowercase RIFF ID icat [33m 568[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use) [33m 510[2mms[22m[39m
+     [33m[2m✓[22m[39m lists Category (UCS) among hidden standard fields for a pre-T-1 schema [33m 508[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/metadata-panel-schema-change.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 23416[2mms[22m[39m
+     [33m[2m✓[22m[39m (s1) pin: single selection, no save: the form shows the new field read with the new schema [33m 2251[2mms[22m[39m
+     [33m[2m✓[22m[39m (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field [33m 1655[2mms[22m[39m
+     [33m[2m✓[22m[39m (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form [33m 1685[2mms[22m[39m
+     [33m[2m✓[22m[39m (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema [33m 2137[2mms[22m[39m
+     [33m[2m✓[22m[39m (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema [33m 1997[2mms[22m[39m
+     [33m[2m✓[22m[39m (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects [33m 1945[2mms[22m[39m
+     [33m[2m✓[22m[39m (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30) [33m 2101[2mms[22m[39m
+     [33m[2m✓[22m[39m (s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects [33m 1620[2mms[22m[39m
+     [33m[2m✓[22m[39m (s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read [33m 1821[2mms[22m[39m
+     [33m[2m✓[22m[39m (s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save [33m 1097[2mms[22m[39m
+     [33m[2m✓[22m[39m (s11) D-34 pin: a schema re-read issued after the write resolved is applied [33m 1083[2mms[22m[39m
+     [33m[2m✓[22m[39m (s12) D-34 pin: a chunk issued after the write resolved is applied even when the save's re-read failed [33m 1013[2mms[22m[39m
+     [33m[2m✓[22m[39m (s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks [33m 1006[2mms[22m[39m
+     [33m[2m✓[22m[39m (s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time [33m 1002[2mms[22m[39m
+     [33m[2m✓[22m[39m (s15) D-34: a path whose batch write failed is not superseded [33m 999[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 16 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's
+[31m[1mAssertionError[22m: expected { '/fa/a.wav': { title: 'A', …(2) } } to deeply equal { '/fb/b.wav': { title: 'B', …(2) } }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "/fb/b.wav": {[39m
+[32m-     "category": "BCat",[39m
+[31m+   "/fa/a.wav": {[39m
+[31m+     "category": "ACat",[39m
+[2m      "comment": "",[22m
+[32m-     "title": "B",[39m
+[31m+     "title": "A",[39m
+[2m    },[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m123:28[22m[39m
+    [90m121| [39m    [34mexpect[39m(state[33m.[39mfolderPath)[33m.[39m[34mtoBe[39m([32m"/fb"[39m)[33m;[39m
+    [90m122| [39m    [34mexpect[39m(state[33m.[39mfiles)[33m.[39m[34mtoEqual[39m([33mB_FILES[39m)[33m;[39m
+    [90m123| [39m    [34mexpect[39m(state[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m })[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m124| [39m  })[33m;[39m
+    [90m125| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o2) Open Folder A (scan pending), Open Folder B (done), A's scan lands last -> files stay B's
+[31m[1mAssertionError[22m: expected [ { name: 'a.wav', …(3) } ] to deeply equal [ { name: 'b.wav', …(3) } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    {[22m
+[2m      "modifiedAt": "2026-10-27T00:00:00.000Z",[22m
+[32m-     "name": "b.wav",[39m
+[32m-     "path": "/fb/b.wav",[39m
+[31m+     "name": "a.wav",[39m
+[31m+     "path": "/fa/a.wav",[39m
+[2m      "size": 1,[22m
+[2m    },[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m137:25[22m[39m
+    [90m135| [39m    [35mconst[39m state [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m136| [39m    [34mexpect[39m(state[33m.[39mfolderPath)[33m.[39m[34mtoBe[39m([32m"/fb"[39m)[33m;[39m
+    [90m137| [39m    [34mexpect[39m(state[33m.[39mfiles)[33m.[39m[34mtoEqual[39m([33mB_FILES[39m)[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m138| [39m    [34mexpect[39m(state[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m })[33m;[39m
+    [90m139| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o3) Open Folder A (read pending), Open Folder B (read pending), A finishes first -> isScanning stays true until B finishes
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m151:48[22m[39m
+    [90m149| [39m    [35mawait[39m [34mclickButton[39m([36m/Open Folder/[39m)[33m;[39m
+    [90m150| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m aRead[33m.[39m[34mresolve[39m({ [[33mPATH_A[39m][33m:[39m [33mA_META[39m }))[33m;[39m
+    [90m151| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39misScanning)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                                               [31m^[39m
+    [90m152| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({})[33m;[39m
+    [90m153| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m bRead[33m.[39m[34mresolve[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m }))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o4) Open Folder A (read pending), Open Folder B (done), A's read rejects last -> no stale toast
+[31m[1mAssertionError[22m: expected 'Failed to read 1 files' to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+"Failed to read 1 files"
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m169:54[22m[39m
+    [90m167| [39m    [35mawait[39m [34mclickButton[39m([36m/Open Folder/[39m)[33m;[39m
+    [90m168| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m aRead[33m.[39m[34mreject[39m([35mnew[39m [33mError[39m([32m"late"[39m)))[33m;[39m
+    [90m169| [39m    [34mexpect[39m(useMetadataStore[33m.[39m[34mgetState[39m()[33m.[39mtoastMessage)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                                     [31m^[39m
+    [90m170| [39m    expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: B_MET…
+    [90m171| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o5) Open Folder A (read pending), Close Folder, A's read lands -> folder stays closed and spinner stops
+[31m[1mAssertionError[22m: expected { '/fa/a.wav': { title: 'A', …(2) } } to deeply equal {}[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {}[39m
+[31m+ {[39m
+[31m+   "/fa/a.wav": {[39m
+[31m+     "category": "ACat",[39m
+[31m+     "comment": "",[39m
+[31m+     "title": "A",[39m
+[31m+   },[39m
+[31m+ }[39m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m187:28[22m[39m
+    [90m185| [39m    [34mexpect[39m(state[33m.[39mfolderPath)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m186| [39m    [34mexpect[39m(state[33m.[39mfiles)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m187| [39m    [34mexpect[39m(state[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({})[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m188| [39m    [34mexpect[39m(state[33m.[39misScanning)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m189| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata
+[31m[1mAssertionError[22m: expected { '/fa/a.wav': { title: 'A', …(2) } } to deeply equal { '/fb/b.wav': { title: 'B', …(2) } }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "/fb/b.wav": {[39m
+[32m-     "category": "BCat",[39m
+[31m+   "/fa/a.wav": {[39m
+[31m+     "category": "ACat",[39m
+[2m      "comment": "",[22m
+[32m-     "title": "B",[39m
+[31m+     "title": "A",[39m
+[2m    },[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m207:28[22m[39m
+    [90m205| [39m    [34mexpect[39m(state[33m.[39mfolderPath)[33m.[39m[34mtoBe[39m([32m"/fb"[39m)[33m;[39m
+    [90m206| [39m    [34mexpect[39m(state[33m.[39mfiles)[33m.[39m[34mtoEqual[39m([33mB_FILES[39m)[33m;[39m
+    [90m207| [39m    [34mexpect[39m(state[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m })[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m208| [39m  })[33m;[39m
+    [90m209| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o7) Rescan of folder A (read pending), Open Folder B (done), Rescan's read lands last -> B
+[31m[1mAssertionError[22m: expected { '/fa/a.wav': { title: 'A', …(2) } } to deeply equal { '/fb/b.wav': { title: 'B', …(2) } }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "/fb/b.wav": {[39m
+[32m-     "category": "BCat",[39m
+[31m+   "/fa/a.wav": {[39m
+[31m+     "category": "ACat",[39m
+[2m      "comment": "",[22m
+[32m-     "title": "B",[39m
+[31m+     "title": "A",[39m
+[2m    },[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m224:28[22m[39m
+    [90m222| [39m    [35mconst[39m state [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m223| [39m    [34mexpect[39m(state[33m.[39mfiles)[33m.[39m[34mtoEqual[39m([33mB_FILES[39m)[33m;[39m
+    [90m224| [39m    [34mexpect[39m(state[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m })[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m225| [39m  })[33m;[39m
+    [90m226| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o9) Open Folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast
+[31m[1mAssertionError[22m: expected [] to deeply equal [ { name: 'b.wav', …(3) } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [[39m
+[32m-   {[39m
+[32m-     "modifiedAt": "2026-10-27T00:00:00.000Z",[39m
+[32m-     "name": "b.wav",[39m
+[32m-     "path": "/fb/b.wav",[39m
+[32m-     "size": 1,[39m
+[32m-   },[39m
+[32m- ][39m
+[31m+ [][39m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m253:25[22m[39m
+    [90m251| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m aScan[33m.[39m[34mreject[39m([35mnew[39m [33mError[39m([32m"EACCES late"[39m)))[33m;[39m
+    [90m252| [39m    [35mconst[39m state [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m253| [39m    [34mexpect[39m(state[33m.[39mfiles)[33m.[39m[34mtoEqual[39m([33mB_FILES[39m)[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m254| [39m    [34mexpect[39m(state[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m })[33m;[39m
+    [90m255| [39m    [34mexpect[39m(useMetadataStore[33m.[39m[34mgetState[39m()[33m.[39mtoastMessage)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o10) App: drop folder A (read pending), Open Folder B (read pending), A lands first -> scanning stays, then B
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m268:48[22m[39m
+    [90m266| [39m    [35mawait[39m [34mclickButton[39m([36m/Open Folder/[39m)[33m;[39m
+    [90m267| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m aRead[33m.[39m[34mresolve[39m({ [[33mPATH_A[39m][33m:[39m [33mA_META[39m }))[33m;[39m
+    [90m268| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39misScanning)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                                               [31m^[39m
+    [90m269| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({})[33m;[39m
+    [90m270| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m bRead[33m.[39m[34mresolve[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m }))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B
+[31m[1mAssertionError[22m: expected [ { name: 'a.wav', …(3) } ] to deeply equal [ { name: 'b.wav', …(3) } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    {[22m
+[2m      "modifiedAt": "2026-10-27T00:00:00.000Z",[22m
+[32m-     "name": "b.wav",[39m
+[32m-     "path": "/fb/b.wav",[39m
+[31m+     "name": "a.wav",[39m
+[31m+     "path": "/fa/a.wav",[39m
+[2m      "size": 1,[22m
+[2m    },[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m288:25[22m[39m
+    [90m286| [39m    [35mconst[39m state [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m287| [39m    [34mexpect[39m(state[33m.[39mfolderPath)[33m.[39m[34mtoBe[39m([32m"/fb"[39m)[33m;[39m
+    [90m288| [39m    [34mexpect[39m(state[33m.[39mfiles)[33m.[39m[34mtoEqual[39m([33mB_FILES[39m)[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m289| [39m    [34mexpect[39m(state[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m })[33m;[39m
+    [90m290| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast
+[31m[1mAssertionError[22m: expected [] to deeply equal [ { name: 'b.wav', …(3) } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [[39m
+[32m-   {[39m
+[32m-     "modifiedAt": "2026-10-27T00:00:00.000Z",[39m
+[32m-     "name": "b.wav",[39m
+[32m-     "path": "/fb/b.wav",[39m
+[32m-     "size": 1,[39m
+[32m-   },[39m
+[32m- ][39m
+[31m+ [][39m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m302:25[22m[39m
+    [90m300| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m aScan[33m.[39m[34mreject[39m([35mnew[39m [33mError[39m([32m"EACCES late"[39m)))[33m;[39m
+    [90m301| [39m    [35mconst[39m state [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m302| [39m    [34mexpect[39m(state[33m.[39mfiles)[33m.[39m[34mtoEqual[39m([33mB_FILES[39m)[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m303| [39m    [34mexpect[39m(state[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m })[33m;[39m
+    [90m304| [39m    [34mexpect[39m(useMetadataStore[33m.[39m[34mgetState[39m()[33m.[39mtoastMessage)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o13) Rescan of folder A (scan pending), Open Folder B (done), Rescan's scan lands last -> B
+[31m[1mAssertionError[22m: expected [ { name: 'a.wav', …(3) } ] to deeply equal [ { name: 'b.wav', …(3) } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    {[22m
+[2m      "modifiedAt": "2026-10-27T00:00:00.000Z",[22m
+[32m-     "name": "b.wav",[39m
+[32m-     "path": "/fb/b.wav",[39m
+[31m+     "name": "a.wav",[39m
+[31m+     "path": "/fa/a.wav",[39m
+[2m      "size": 1,[22m
+[2m    },[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m318:25[22m[39m
+    [90m316| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m aScan[33m.[39m[34mresolve[39m([33mA_FILES[39m))[33m;[39m
+    [90m317| [39m    [35mconst[39m state [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m318| [39m    [34mexpect[39m(state[33m.[39mfiles)[33m.[39m[34mtoEqual[39m([33mB_FILES[39m)[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m319| [39m    [34mexpect[39m(state[33m.[39mmetadata)[33m.[39m[34mtoEqual[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m })[33m;[39m
+    [90m320| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o14) Rescan of folder A (scan pending), Open Folder B (done), Rescan's scan rejects last -> no Rescan toast
+[31m[1mAssertionError[22m: expected 'Rescan late' to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+"Rescan late"
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m332:54[22m[39m
+    [90m330| [39m    [35mawait[39m [34mclickButton[39m([36m/Open Folder/[39m)[33m;[39m
+    [90m331| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m aScan[33m.[39m[34mreject[39m([35mnew[39m [33mError[39m([32m"Rescan late"[39m)))[33m;[39m
+    [90m332| [39m    [34mexpect[39m(useMetadataStore[33m.[39m[34mgetState[39m()[33m.[39mtoastMessage)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                                     [31m^[39m
+    [90m333| [39m    expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: B_MET…
+    [90m334| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o15) Rescan of folder A (read pending), Open Folder B (read pending), Rescan lands first -> scanning stays true until B
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m347:48[22m[39m
+    [90m345| [39m    [35mawait[39m [34mclickButton[39m([36m/Open Folder/[39m)[33m;[39m
+    [90m346| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m aRead[33m.[39m[34mresolve[39m({ [[33mPATH_A[39m][33m:[39m [33mA_META[39m }))[33m;[39m
+    [90m347| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39misScanning)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                                               [31m^[39m
+    [90m348| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m bRead[33m.[39m[34mresolve[39m({ [[33mPATH_B[39m][33m:[39m [33mB_META[39m }))[33m;[39m
+    [90m349| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39misScanning)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/folder-read-overlap.test.ts[2m > [22moverlapping folder loads are latest-wins (TM-B33, D-38)[2m > [22m(o16) Rescan takes a new folder load id, so the earlier id is no longer current
+[31m[1mTypeError[22m: __vi_import_5__.isFolderLoadCurrent is not a function[39m
+[36m [2m❯[22m tests/renderer/components/folder-read-overlap.test.ts:[2m360:12[22m[39m
+    [90m358| [39m    [35mconst[39m before [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m.[39mfolderLoadId[33m;[39m
+    [90m359| [39m    [35mawait[39m [34mclickButton[39m([36m/Rescan/[39m)[33m;[39m
+    [90m360| [39m    [34mexpect[39m([34misFolderLoadCurrent[39m(before))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m           [31m^[39m
+    [90m361| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mfolderLoadId)[33m.[39m[34mtoBe[39m(before [33m+[39m [34m1[39m)[33m;[39m
+    [90m362| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/16]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22mfolder load id (TM-B33, D-38)[2m > [22m(f1) beginFolderLoad returns n+1 then n+2 and only the latest id is current
+[31m[1mTypeError[22m: __vite_ssr_import_1__.useFileStore.getState(...).beginFolderLoad is not a function[39m
+[36m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m394:43[22m[39m
+    [90m392| [39m    [35mconst[39m before [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m.[39mfolderLoadId[33m;[39m
+    [90m393| [39m
+    [90m394| [39m    [35mconst[39m first [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34mbeginFolderLoad[39m()[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m395| [39m    [35mconst[39m second [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34mbeginFolderLoad[39m()[33m;[39m
+    [90m396| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/16]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (14)[39m
+[2m      Tests [22m [1m[31m16 failed[39m[22m[2m | [22m[1m[32m241 passed[39m[22m[90m (257)[39m
+[2m   Start at [22m 22:09:55
+[2m   Duration [22m 25.21s[2m (transform 1.26s, setup 1.25s, import 3.92s, tests 45.42s, environment 11.53s)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts,title=tests/renderer/components/folder-read-overlap.test.ts > overlapping folder loads are latest-wins (TM-B33%2C D-38) > (o1) Open Folder A (read pending)%2C Open Folder B (done)%2C A's read lands last -> metadata stays B's,line=123,column=28::AssertionError: expected { '/fa/a.wav': { title: 'A', …(2) } } to deeply equal { '/fb/b.wav': { title: 'B', …(2) } }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "/fb/b.wav": {%0A-     "category": "BCat",%0A+   "/fa/a.wav": {%0A+     "category": "ACat",%0A      "comment": "",%0A-     "title": "B",%0A+     "title": "A",%0A    },%0A  }%0A%0A ❯ tests/renderer/components/folder-read-overlap.test.ts:123:28%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts,title=tests/renderer/components/folder-read-overlap.test.ts > overlapping folder loads are latest-wins (TM-B33%2C D-38) > (o2) Open Folder A (scan pending)%2C Open Folder B (done)%2C A's scan lands last -> files stay B's,line=137,column=25::AssertionError: expected [ { name: 'a.wav', …(3) } ] to deeply equal [ { name: 'b.wav', …(3) } ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    {%0A      "modifiedAt": "2026-10-27T00:00:00.000Z",%0A-     "name": "b.wav",%0A-     "path": "/fb/b.wav",%0A+     "name": "a.wav",%0A+     "path": "/fa/a.wav",%0A      "size": 1,%0A    },%0A  ]%0A%0A ❯ tests/renderer/components/folder-read-overlap.test.ts:137:25%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts,title=tests/renderer/components/folder-read-overlap.test.ts > overlapping folder loads are latest-wins (TM-B33%2C D-38) > (o3) Open Folder A (read pending)%2C Open Folder B (read pending)%2C A finishes first -> isScanning stays true until B finishes,line=151,column=48::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/renderer/components/folder-read-overlap.test.ts:151:48%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts,title=tests/renderer/components/folder-read-overlap.test.ts > overlapping folder loads are latest-wins (TM-B33%2C D-38) > (o4) Open Folder A (read pending)%2C Open Folder B (done)%2C A's read rejects last -> no stale toast,line=169,column=54::AssertionError: expected 'Failed to read 1 files' to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A"Failed to read 1 files"%0A%0A ❯ tests/renderer/components/folder-read-overlap.test.ts:169:54%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts,title=tests/renderer/components/folder-read-overlap.test.ts > overlapping folder loads are latest-wins (TM-B33%2C D-38) > (o5) Open Folder A (read pending)%2C Close Folder%2C A's read lands -> folder stays closed and spinner stops,line=187,column=28::AssertionError: expected { '/fa/a.wav': { title: 'A', …(2) } } to deeply equal {}%0A%0A- Expected%0A+ Received%0A%0A- {}%0A+ {%0A+   "/fa/a.wav": {%0A+     "category": "ACat",%0A+     "comment": "",%0A+     "title": "A",%0A+   },%0A+ }%0A%0A ❯ tests/renderer/components/folder-read-overlap.test.ts:187:28%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts,title=tests/renderer/components/folder-read-overlap.test.ts > overlapping folder loads are latest-wins (TM-B33%2C D-38) > (o6) App%3A Open Folder A (read pending)%2C drop folder B (done)%2C A's read lands last -> B's metadata,line=207,column=28::AssertionError: expected { '/fa/a.wav': { title: 'A', …(2) } } to deeply equal { '/fb/b.wav': { title: 'B', …(2) } }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "/fb/b.wav": {%0A-     "category": "BCat",%0A+   "/fa/a.wav": {%0A+     "category": "ACat",%0A      "comment": "",%0A-     "title": "B",%0A+     "title": "A",%0A    },%0A  }%0A%0A ❯ tests/renderer/components/folder-read-overlap.test.ts:207:28%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts,title=tests/renderer/components/folder-read-overlap.test.ts > overlapping folder loads are latest-wins (TM-B33%2C D-38) > (o7) Rescan of folder A (read pending)%2C Open Folder B (done)%2C Rescan's read lands last -> B,line=224,column=28::AssertionError: expected { '/fa/a.wav': { title: 'A', …(2) } } to deeply equal { '/fb/b.wav': { title: 'B', …(2) } }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "/fb/b.wav": {%0A-     "category": "BCat",%0A+   "/fa/a.wav": {%0A+     "category": "ACat",%0A      "comment": "",%0A-     "title": "B",%0A+     "title": "A",%0A    },%0A  }%0A%0A ❯ tests/renderer/components/folder-read-overlap.test.ts:224:28%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts,title=tests/renderer/components/folder-read-overlap.test.ts > overlapping folder loads are latest-wins (TM-B33%2C D-38) > (o9) Open Folder A (scan pending)%2C Open Folder B (done)%2C A's scan rejects last -> B kept%2C no toast,line=253,column=25::AssertionError: expected [] to deeply equal [ { name: 'b.wav', …(3) } ]%0A%0A- Expected%0A+ Received%0A%0A- [%0A-   {%0A-     "modifiedAt": "2026-10-27T00:00:00.000Z",%0A-     "name": "b.wav",%0A-     "path": "/fb/b.wav",%0A-     "size": 1,%0A-   },%0A- ]%0A+ []%0A%0A ❯ tests/renderer/components/folder-read-overlap.test.ts:253:25%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts,title=tests/renderer/components/folder-read-overlap.test.ts > overlapping folder loads are latest-wins (TM-B33%2C D-38) > (o10) App%3A drop folder A (read pending)%2C Open Folder B (read pending)%2C A lands first -> scanning stays%2C then B,line=268,column=48::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ tests/renderer/components/folder-read-overlap.test.ts:268:48%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts,title=tests/renderer/components/folder-read-overlap.test.ts > overlapping folder loads are latest-wins (TM-B33%2C D-38) > (o11) App%3A drop folder A (scan pending)%2C Open Folder B (done)%2C A's scan lands last -> B,line=288,column=25::AssertionError: expected [ { name: 'a.wav', …(3) } ] to deeply equal [ { name: 'b.wav', …(3) } ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    {%0A      "modifiedAt": "2026-10-27T00:00:00.000Z",%0A-     "name": "b.wav",%0A-     "path": "/fb/b.wav",%0A+     "name": "a.wav",%0A+     "path": "/fa/a.wav",%0A      "size": 1,%0A    },%0A  ]%0A%0A ❯ tests/renderer/components/folder-read-overlap.test.ts:288:25%0A%0A

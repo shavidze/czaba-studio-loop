@@ -1,0 +1,13 @@
+# A round 31 checkpoint
+- [x] baseline bf83c7d clean verified
+- [x] primitives read (TESTING, STATE_MANAGEMENT, AGENT_DISCOVERABLE_CODE, new-store, GEORGIAN_DOCS, TYPESCRIPT_STRICT)
+- [x] tests written: folder-read-overlap.test.ts (o1-o16), file-store.test.ts (f1)
+- [x] red run on baseline src: 241 passed / 16 failed (257, 14 files), (o8) green -> a-round-31/red-run.log
+- [x] src (same +/- lines as B prototype) -> green 257/257 (green-run.log)
+- [x] verifyCommand EXIT 0 (verify.log), biome 8 same list, retries=0 7/7, isolated 17x pass
+- [x] docs (001 entry14, D-38, k7, shifted refs; README; STATE_MANAGEMENT 1 line)
+- [x] file-store.test.ts import made additions-only (separate import line); tsc test OK, 38/38
+- [x] a-round-31.md draft written
+- [x] code-reviewer: no blocking; CR-1..CR-7 low/info recorded in report, no src change
+- [x] qa-engineer: no D-38 regression; new pre-existing signal A-R31-01 (handleSchemaChanged vs folder switch) recorded for B
+- [x] a-round-31.md final. DONE.

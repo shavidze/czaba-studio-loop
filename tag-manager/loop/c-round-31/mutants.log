@@ -1,0 +1,340 @@
+## baseline
+```diff
+```
+['Tests  73 passed (73)'] []
+killed by: []
+
+## GM-1 open: post-scan guard removed
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:23:26.590322601 +0000
+@@ -104,7 +104,6 @@
+ 
+     try {
+       const wavFiles = await window.api.scanFolder(path);
+-      if (!isFolderLoadCurrent(loadId)) return;
+       setFiles(wavFiles);
+ 
+       if (wavFiles.length > 0) {
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o2)']
+
+## GM-2 open: post-read guard removed
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:23:32.685330602 +0000
+@@ -120,7 +120,6 @@
+           currentSchema,
+           () => useFileStore.getState().writeGeneration,
+         );
+-        if (!isFolderLoadCurrent(loadId)) return;
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+```
+['Tests  5 failed | 68 passed (73)'] []
+killed by: ['(o1)', '(o3)', '(o4)', '(o5)', '(o6)']
+
+## GM-3 open: catch guard removed
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:23:38.942552136 +0000
+@@ -131,7 +131,6 @@
+         setMetadata({});
+       }
+     } catch (err) {
+-      if (!isFolderLoadCurrent(loadId)) return;
+       useMetadataStore
+         .getState()
+         .showToast(err instanceof Error ? err.message : 'Failed to open folder', 'error');
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o9)']
+
+## GM-4 open: finally unconditional
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:23:44.938387163 +0000
+@@ -138,7 +138,7 @@
+       setFiles([]);
+       setMetadata({});
+     } finally {
+-      if (isFolderLoadCurrent(loadId)) setIsScanning(false);
++      setIsScanning(false);
+     }
+   }, [setFolderPath, setFiles, setMetadata, setIsScanning, clearSelection]);
+ 
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o3)']
+
+## GM-5 close: no beginFolderLoad
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:23:51.098413481 +0000
+@@ -143,7 +143,6 @@
+   }, [setFolderPath, setFiles, setMetadata, setIsScanning, clearSelection]);
+ 
+   const handleCloseFolder = useCallback(() => {
+-    useFileStore.getState().beginFolderLoad();
+     setIsScanning(false);
+     setFolderPath(null);
+     setFiles([]);
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o5)']
+
+## GM-6 close: no setIsScanning(false)
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:23:57.172397434 +0000
+@@ -144,7 +144,6 @@
+ 
+   const handleCloseFolder = useCallback(() => {
+     useFileStore.getState().beginFolderLoad();
+-    setIsScanning(false);
+     setFolderPath(null);
+     setFiles([]);
+     setMetadata({});
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o5)']
+
+## GM-7 rescan: reuses folderLoadId
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:24:03.334781926 +0000
+@@ -155,7 +155,7 @@
+ 
+   const handleRescan = useCallback(async () => {
+     if (!folderPath) return;
+-    const loadId = useFileStore.getState().beginFolderLoad();
++    const loadId = useFileStore.getState().folderLoadId;
+     usePlayerStore.getState().stop();
+     setIsScanning(true);
+     clearSelection();
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o16)']
+
+## GM-8 rescan: post-scan guard removed
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:24:09.367352395 +0000
+@@ -162,7 +162,6 @@
+ 
+     try {
+       const wavFiles = await window.api.scanFolder(folderPath);
+-      if (!isFolderLoadCurrent(loadId)) return;
+       setFiles(wavFiles);
+ 
+       if (wavFiles.length > 0) {
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o13)']
+
+## GM-9 rescan: post-read guard removed
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:24:15.420304616 +0000
+@@ -178,7 +178,6 @@
+           currentSchema,
+           () => useFileStore.getState().writeGeneration,
+         );
+-        if (!isFolderLoadCurrent(loadId)) return;
+         useFileStore
+           .getState()
+           .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o7)']
+
+## GM-10 rescan: catch guard removed
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:24:21.460044860 +0000
+@@ -189,7 +189,6 @@
+         setMetadata({});
+       }
+     } catch (err) {
+-      if (!isFolderLoadCurrent(loadId)) return;
+       useMetadataStore
+         .getState()
+         .showToast(err instanceof Error ? err.message : 'Rescan failed', 'error');
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o14)']
+
+## GM-11 rescan: finally unconditional
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:24:27.666086683 +0000
+@@ -194,7 +194,7 @@
+         .getState()
+         .showToast(err instanceof Error ? err.message : 'Rescan failed', 'error');
+     } finally {
+-      if (isFolderLoadCurrent(loadId)) setIsScanning(false);
++      setIsScanning(false);
+     }
+   }, [folderPath, setFiles, setMetadata, setIsScanning, clearSelection]);
+ 
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o15)']
+
+## GM-12 app: reuses folderLoadId
+```diff
+--- /tmp/c-r31-new/src/renderer/src/App.tsx	2026-10-27 22:11:01.973559061 +0000
++++ /tmp/c-r31-mut/src/renderer/src/App.tsx	2026-10-27 22:24:33.929694819 +0000
+@@ -41,7 +41,7 @@
+ 
+   const openFolder = useCallback(
+     async (folderPath: string) => {
+-      const loadId = useFileStore.getState().beginFolderLoad();
++      const loadId = useFileStore.getState().folderLoadId;
+       usePlayerStore.getState().stop();
+       setFolderPath(folderPath);
+       setIsScanning(true);
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o6)']
+
+## GM-13 app: post-scan guard removed
+```diff
+--- /tmp/c-r31-new/src/renderer/src/App.tsx	2026-10-27 22:11:01.973559061 +0000
++++ /tmp/c-r31-mut/src/renderer/src/App.tsx	2026-10-27 22:24:40.228163488 +0000
+@@ -56,7 +56,6 @@
+ 
+       try {
+         const wavFiles = await window.api.scanFolder(folderPath);
+-        if (!isFolderLoadCurrent(loadId)) return;
+         setFiles(wavFiles);
+ 
+         if (wavFiles.length > 0) {
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o11)']
+
+## GM-14 app: post-read guard removed
+```diff
+--- /tmp/c-r31-new/src/renderer/src/App.tsx	2026-10-27 22:11:01.973559061 +0000
++++ /tmp/c-r31-mut/src/renderer/src/App.tsx	2026-10-27 22:24:46.652166519 +0000
+@@ -72,7 +72,6 @@
+             currentSchema,
+             () => useFileStore.getState().writeGeneration,
+           );
+-          if (!isFolderLoadCurrent(loadId)) return;
+           useFileStore
+             .getState()
+             .applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations, failedPaths);
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o10)']
+
+## GM-15 app: catch guard removed
+```diff
+--- /tmp/c-r31-new/src/renderer/src/App.tsx	2026-10-27 22:11:01.973559061 +0000
++++ /tmp/c-r31-mut/src/renderer/src/App.tsx	2026-10-27 22:24:53.072153507 +0000
+@@ -83,7 +83,6 @@
+           setMetadata({});
+         }
+       } catch (err) {
+-        if (!isFolderLoadCurrent(loadId)) return;
+         useMetadataStore
+           .getState()
+           .showToast(err instanceof Error ? err.message : 'Failed to scan folder', 'error');
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o12)']
+
+## GM-16 app: finally unconditional
+```diff
+--- /tmp/c-r31-new/src/renderer/src/App.tsx	2026-10-27 22:11:01.973559061 +0000
++++ /tmp/c-r31-mut/src/renderer/src/App.tsx	2026-10-27 22:24:59.441835376 +0000
+@@ -90,7 +90,7 @@
+         setFiles([]);
+         setMetadata({});
+       } finally {
+-        if (isFolderLoadCurrent(loadId)) setIsScanning(false);
++        setIsScanning(false);
+       }
+     },
+     [setFolderPath, setFiles, setMetadata, setIsScanning, clearSelection],
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o10)']
+
+## GM-17 open: beginFolderLoad before the dialog
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:25:05.754683329 +0000
+@@ -93,10 +93,10 @@
+   const setIsScanning = useFileStore((s) => s.setIsScanning);
+   const clearSelection = useFileStore((s) => s.clearSelection);
+   const handleOpenFolder = useCallback(async () => {
++    const loadId = useFileStore.getState().beginFolderLoad();
+     const path = await window.api.openFolderDialog();
+     if (!path) return;
+ 
+-    const loadId = useFileStore.getState().beginFolderLoad();
+     usePlayerStore.getState().stop();
+     setFolderPath(path);
+     setIsScanning(true);
+```
+['Tests  1 failed | 72 passed (73)'] []
+killed by: ['(o8)']
+
+## GM-18 store: pre-increment id
+```diff
+--- /tmp/c-r31-new/src/renderer/src/stores/file-store.ts	2026-10-27 22:10:35.334472198 +0000
++++ /tmp/c-r31-mut/src/renderer/src/stores/file-store.ts	2026-10-27 22:25:12.117191219 +0000
+@@ -153,8 +153,9 @@
+     }),
+ 
+   beginFolderLoad: () => {
++    const id = get().folderLoadId;
+     set((state) => ({ folderLoadId: state.folderLoadId + 1 }));
+-    return get().folderLoadId;
++    return id;
+   },
+ }));
+ 
+```
+['Tests  34 failed | 39 passed (73)'] []
+killed by: ['(e1)', '(e2)', '(e3)', '(e4)', '(f1)', '(k1)', '(k2)', '(k3)', '(k4)', '(k5)', '(k6)', '(k7)', '(o1)', '(o2)', '(o3)', '(o4)', '(o6)', '(o7)', '(o8)', '(o9)', '(o10)', '(o11)', '(o12)', '(o13)', '(o14)', '(o15)', '(r1)', '(r2)', '(r3)', '(r4)', '(r5)', '(r6)', '(r7)', '(r8)']
+
+## GM-19 store: isFolderLoadCurrent uses >=
+```diff
+--- /tmp/c-r31-new/src/renderer/src/stores/file-store.ts	2026-10-27 22:10:35.334472198 +0000
++++ /tmp/c-r31-mut/src/renderer/src/stores/file-store.ts	2026-10-27 22:25:18.102932964 +0000
+@@ -159,7 +159,7 @@
+ }));
+ 
+ export function isFolderLoadCurrent(loadId: number): boolean {
+-  return useFileStore.getState().folderLoadId === loadId;
++  return useFileStore.getState().folderLoadId >= loadId;
+ }
+ 
+ function getFilteredFiles(state: FileState): WavFileEntry[] {
+```
+['Tests  16 failed | 57 passed (73)'] []
+killed by: ['(f1)', '(o1)', '(o2)', '(o3)', '(o4)', '(o5)', '(o6)', '(o7)', '(o9)', '(o10)', '(o11)', '(o12)', '(o13)', '(o14)', '(o15)', '(o16)']
+
+## GM-7b open: reuses folderLoadId (extra)
+```diff
+--- /tmp/c-r31-new/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:10:52.964520273 +0000
++++ /tmp/c-r31-mut/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-27 22:25:24.328998508 +0000
+@@ -96,7 +96,7 @@
+     const path = await window.api.openFolderDialog();
+     if (!path) return;
+ 
+-    const loadId = useFileStore.getState().beginFolderLoad();
++    const loadId = useFileStore.getState().folderLoadId;
+     usePlayerStore.getState().stop();
+     setFolderPath(path);
+     setIsScanning(true);
+```
+['Tests  12 failed | 61 passed (73)'] []
+killed by: ['(o1)', '(o2)', '(o3)', '(o4)', '(o7)', '(o9)', '(o10)', '(o11)', '(o12)', '(o13)', '(o14)', '(o15)']
+

@@ -1,0 +1,45 @@
+--- /home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts	2026-10-27 22:09:47.749263802 +0000
++++ tests/renderer/components/folder-read-overlap.test.ts	2026-10-27 22:46:39.619006281 +0000
+@@ -360,4 +360,42 @@
+     expect(isFolderLoadCurrent(before)).toBe(false);
+     expect(useFileStore.getState().folderLoadId).toBe(before + 1);
+   });
++
++  it("(o17) Open Folder A (scan pending), Close Folder, A's scan lands -> folder stays closed", async () => {
++    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fa");
++    const aScan = createDeferred<WavFileEntry[]>();
++    vi.mocked(window.api.scanFolder).mockReturnValueOnce(aScan.promise);
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValue({ [PATH_A]: A_META });
++    const { container } = renderBrowserAndPanel();
++    await clickButton(/Open Folder/);
++    const closeButton = container.querySelector('button[type="button"] svg.lucide-x')?.closest("button");
++    if (!closeButton) throw new Error("close button not found");
++    await settle(() => fireEvent.click(closeButton));
++    await settle(() => aScan.resolve(A_FILES));
++    const state = useFileStore.getState();
++    expect(state.folderPath).toBeNull();
++    expect(state.files).toEqual([]);
++    expect(state.metadata).toEqual({});
++    expect(state.isScanning).toBe(false);
++    expect(vi.mocked(window.api.readMetadataBatch)).not.toHaveBeenCalled();
++  });
++
++  it("(o18) App: drop folder A (read pending), Close Folder, A's read lands -> folder stays closed", async () => {
++    vi.mocked(window.api.scanFolder).mockResolvedValueOnce(A_FILES);
++    const aRead = createDeferred<MetadataByPath>();
++    vi.mocked(window.api.readMetadataBatch).mockReturnValueOnce(aRead.promise);
++    const root = await renderAppReady();
++    await dropFolderOn(root, "/fa");
++    await waitMs(100);
++    expect(useFileStore.getState().isScanning).toBe(true);
++    const closeButton = screen.getByTitle("/fa").parentElement?.querySelector("button");
++    if (!closeButton) throw new Error("close button not found");
++    await settle(() => fireEvent.click(closeButton));
++    await settle(() => aRead.resolve({ [PATH_A]: A_META }));
++    const state = useFileStore.getState();
++    expect(state.folderPath).toBeNull();
++    expect(state.files).toEqual([]);
++    expect(state.metadata).toEqual({});
++    expect(state.isScanning).toBe(false);
++  });
+ });

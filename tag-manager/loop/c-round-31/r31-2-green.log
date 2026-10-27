@@ -1,0 +1,67 @@
+
+ RUN  v4.0.18 /tmp/c-r31-new
+
+ ✓ tests/renderer/components/folder-read-overlap.test.ts (16 tests) 5772ms
+     ✓ (o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's  982ms
+     ✓ (o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata  749ms
+     ✓ (o7) Rescan of folder A (read pending), Open Folder B (done), Rescan's read lands last -> B  386ms
+     ✓ (o10) App: drop folder A (read pending), Open Folder B (read pending), A lands first -> scanning stays, then B  589ms
+     ✓ (o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B  449ms
+     ✓ (o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast  603ms
+ ✓ tests/renderer/components/metadata-panel-batch-save.test.ts (49 tests) 10819ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  1386ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store  438ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success  922ms
+     ✓ (d) full success clears the form back to Multiple values  470ms
+     ✓ (e) single-file write failure keeps the typed value and shows the error  434ms
+     ✓ (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated  469ms
+     ✓ (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept  325ms
+     ✓ (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry  412ms
+     ✓ (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01)  339ms
+ ✓ tests/renderer/components/schema-editor.test.ts (4 tests) 4209ms
+     ✓ rejects a custom field with RIFF ID ICAT  1496ms
+     ✓ rejects a custom field with lowercase RIFF ID icat  959ms
+     ✓ rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use)  890ms
+     ✓ lists Category (UCS) among hidden standard fields for a pre-T-1 schema  862ms
+ ✓ tests/renderer/components/folder-read-rejected-chunk.test.ts (11 tests) 1799ms
+     ✓ (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files  403ms
+     ✓ (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time  437ms
+ ✓ tests/renderer/components/folder-read-during-save.test.ts (8 tests) 3751ms
+     ✓ (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value  840ms
+     ✓ (r2) batch save of a+b pending + Rescan: both saved entries survive the stale rescan read  527ms
+     ✓ (r3) single save pending + Open Folder on the same folder: the store keeps the saved value  447ms
+     ✓ (r4) pin: a Rescan issued after the save completed applies the file's current value  406ms
+     ✓ (r6) App: dropping the same folder during a pending save keeps the saved value  478ms
+     ✓ (r7) 51 files: a stale chunk-1 read keeps the saved first file, and chunk 2 still applies its read  405ms
+     ✓ (r8) pin: 51 files, save of the chunk-2 file with a rejected re-read: chunk 2 read after the write applies the saved value  424ms
+ ✓ tests/renderer/stores/file-store.test.ts (38 tests) 57ms
+ ✓ tests/renderer/components/file-list.test.ts (20 tests) 1293ms
+     ✓ (R18-e) sorts a malformed artist row as empty in both directions without throwing  573ms
+ ✓ tests/renderer/utils/utils.test.ts (26 tests) 24ms
+ ✓ tests/renderer/utils/file-row-display.test.ts (36 tests) 13ms
+ ✓ tests/renderer/stores/metadata-store.test.ts (9 tests) 46ms
+ ✓ tests/renderer/stores/player-store.test.ts (9 tests) 10ms
+ ✓ tests/renderer/stores/schema-store.test.ts (8 tests) 18ms
+ ✓ tests/renderer/stores/template-store.test.ts (8 tests) 9ms
+ ✓ tests/renderer/components/metadata-panel-schema-change.test.ts (15 tests) 25653ms
+     ✓ (s1) pin: single selection, no save: the form shows the new field read with the new schema  3814ms
+     ✓ (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field  2229ms
+     ✓ (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form  1693ms
+     ✓ (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema  1817ms
+     ✓ (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema  1841ms
+     ✓ (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects  1665ms
+     ✓ (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)  1572ms
+     ✓ (s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects  1723ms
+     ✓ (s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read  1967ms
+     ✓ (s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save  2021ms
+     ✓ (s11) D-34 pin: a schema re-read issued after the write resolved is applied  1195ms
+     ✓ (s12) D-34 pin: a chunk issued after the write resolved is applied even when the save's re-read failed  1011ms
+     ✓ (s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks  1037ms
+     ✓ (s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time  1023ms
+     ✓ (s15) D-34: a path whose batch write failed is not superseded  1040ms
+
+ Test Files  14 passed (14)
+      Tests  257 passed (257)
+   Start at  22:21:49
+   Duration  28.29s (transform 2.05s, setup 1.38s, import 5.69s, tests 53.47s, environment 11.67s)
+

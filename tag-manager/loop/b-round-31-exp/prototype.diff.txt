@@ -1,0 +1,70 @@
+diff -ru /tmp/b-r32-src-baseline/renderer/src/App.tsx src/renderer/src/App.tsx
+--- /tmp/b-r32-src-baseline/renderer/src/App.tsx	2026-10-27 22:40:33.026335944 +0000
++++ src/renderer/src/App.tsx	2026-10-27 22:47:12.544071707 +0000
+@@ -52,6 +52,7 @@
+       while (!useSchemaStore.getState().isLoaded) {
+         if (Date.now() - start > maxWait) break;
+         await new Promise((r) => setTimeout(r, 50));
++        if (!isFolderLoadCurrent(loadId)) return;
+       }
+ 
+       try {
+diff -ru /tmp/b-r32-src-baseline/renderer/src/components/metadata-editor/MetadataPanel.tsx src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+--- /tmp/b-r32-src-baseline/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 22:40:33.026707699 +0000
++++ src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 22:47:12.544393148 +0000
+@@ -4,7 +4,7 @@
+ import { TemplatePicker } from '~/components/templates/TemplatePicker';
+ import { Button } from '~/components/ui/button';
+ import { Input } from '~/components/ui/input';
+-import { useFileStore, useSelectedFiles } from '~/stores/file-store';
++import { isFolderLoadCurrent, useFileStore, useSelectedFiles } from '~/stores/file-store';
+ import { useMetadataStore } from '~/stores/metadata-store';
+ import { useSchemaStore } from '~/stores/schema-store';
+ import type { BatchWriteResult, FieldValue, WavMetadata } from '~/types';
+@@ -57,6 +57,10 @@
+   useMetadataStore.getState().mergeFields(typed);
+ }
+ 
++function isListedPath(path: string): boolean {
++  return useFileStore.getState().files.some((file) => file.path === path);
++}
++
+ async function refreshSavedFileStats(writtenPaths: string[]): Promise<void> {
+   const { folderPath, updateFileStats } = useFileStore.getState();
+   if (folderPath === null) return;
+@@ -151,7 +155,7 @@
+           ? collectFieldsTypedDuringSave(startEditingMetadata)
+           : {};
+         if (selectionUnchanged) skipSyncRef.current = true;
+-        updateFileMetadata(path, updated);
++        if (isListedPath(path)) updateFileMetadata(path, updated);
+         if (selectionUnchanged) setEditingMetadata({ ...updated });
+         mergeFieldsTypedDuringSave(typedDuringSave);
+         showToast('Tags saved', 'success');
+@@ -179,7 +183,9 @@
+           showToast(buildReloadFailedToast(result), 'error');
+           return;
+         }
+-        const savedEntries = Object.entries(refreshed).filter(([path]) => !failedPaths.has(path));
++        const savedEntries = Object.entries(refreshed).filter(
++          ([path]) => !failedPaths.has(path) && isListedPath(path),
++        );
+         const selectionUnchanged = isSelectionUnchanged();
+         if (savedEntries.length > 0 && selectionUnchanged) {
+           skipSyncRef.current = true;
+@@ -208,6 +214,7 @@
+ 
+   const handleSchemaChanged = useCallback(async () => {
+     if (allFiles.length === 0) return;
++    const loadId = useFileStore.getState().folderLoadId;
+     const newSchema = useSchemaStore.getState().fields;
+     const paths = allFiles.map((f) => f.path);
+     const CHUNK_SIZE = 50;
+@@ -225,6 +232,7 @@
+         for (const path of chunk) keptPaths.add(path);
+       }
+     }
++    if (!isFolderLoadCurrent(loadId)) return;
+     const { metadata: currentMetadata, pathWriteGenerations } = useFileStore.getState();
+     const accumulated: Record<string, WavMetadata> = {};
+     for (const { readGeneration, result } of chunkReads) {

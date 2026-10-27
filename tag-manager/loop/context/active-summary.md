@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T21:44:33.908Z)
+# Active loop summary (2026-10-27T22:34:31.729Z)
 
-- backlog.json 279 KB -> active view 83 KB
-- status: G_ROOT_GATE round 30
+- backlog.json 286 KB -> active view 84 KB
+- status: G_ROOT_GATE round 31
 - servers: `{"servers":"none or skipped"}`
-- last publication: bf83c7dc5e2462304159acc3df56ededbcd9d517 (rounds 30-30)
-- last root gate: round 30 published - commit bf83c7dc5e2462304159acc3df56ededbcd9d517 pushed
+- last publication: 7355d78cecfd24bc895c29b3cc84b8e905283d58 (rounds 31-31)
+- last root gate: round 31 published - commit 7355d78cecfd24bc895c29b3cc84b8e905283d58 pushed
 
-## Current items: TM-B31, TM-B32, TM-B33
+## Current items: TM-B32, TM-B33
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -146,13 +146,15 @@
 - RR-R28-04 / info / open / file-store.test.ts (g2) uses bare keys (a, b) while files hold /music/*.wav paths; cosmetic for a unit test
 - RR-R28-05 / info / open / Architecture signal: handleSchemaChanged (D-34) and applyMetadataRead (D-35) repeat the generation compare / keep-current / absent-if-none l
 - C-R28-01 / info / open / Rescan / Open Folder during a pending save shows 'Unsaved changes were discarded' although the save completes (D-29 baseline, both builds)
-- C-R29-01 / low / in_progress / Test gap: no test rejects two chunks; mutant failedPaths.splice(0, failedPaths.length, ...chunk) (utils.ts:72, keeps only the last rejected 
-- A-R29-01 / low / in_progress / = C-R29-01 (A found and measured the splice mutant first)
-- C-R29-02 / low / in_progress / docs/bugs/001 D-35 bullet and STATE_MANAGEMENT D-35 line say error and empty-folder paths call setMetadata({}); only handleRescan clears on 
-- A-R29-02 / low / in_progress / = C-R29-02
 - RR-R29-01 / low / open / Toast grammar 'Failed to read 1 files' (FolderBrowser.tsx:125,175, App.tsx:77) copies D-33 MetadataPanel.tsx:252; pinned by (k4)
 - RR-R29-02 / info / open / Architecture signal: the read-chunks -> applyMetadataRead(generations, failedPaths) -> toast block is repeated three times (FolderBrowser.ts
-- RR-R29-03 / low / open / Two overlapping folder reads (Rescan twice, Rescan during a drop, Open Folder A then B) have no ordering guard: the last to finish wins; e.g
+- RR-R29-03 / low / in_progress / Two overlapping folder reads (Rescan twice, Rescan during a drop, Open Folder A then B) have no ordering guard: the last to finish wins; e.g
+- C-R30-01 / info / open / Signal: ME-5 (handleOpenFolder calls setMetadata({}) unconditionally after scanFolder) is killed only by (k2); no D-35 (r*) test sees it
+- RR-R30-01 / low / open / A save on an old-folder file still running when another folder (empty or not) is opened: the save's re-read writes that entry into metadata 
+- RR-R30-02 / info / open / docs/bugs/001 line refs are correct but go stale easily; referring to code by function name (e.g. handleRescan else-branch) would last longe
+- RR-R30-03 / info / open / Architecture signal: one shared loadFolderContents(path, { onErrorClear }) helper for handleOpenFolder, handleRescan and App openFolder woul
+- A-R30-01 / info / open / Entry 12's test list in docs/bugs/001 does not name (k7) (round 29 pin); A did not add it (not in R30 scope)
+- B-R30-01 / info / open / readMetadataChunked keeps reading every chunk of a superseded folder load (no early stop); with 1000+ files the old load's IPC work continue
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
