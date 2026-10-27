@@ -1,0 +1,289 @@
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { createElement } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { FileList } from "~/components/file-list/FileList";
+import { useFileStore } from "~/stores/file-store";
+import { STANDARD_FIELDS, type WavFileEntry, type WavMetadata } from "~/types";
+import { resetAllStores } from "../helpers/reset-stores";
+
+vi.hoisted(() => {
+  const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+  const mockApi = globalScope.window.api;
+  globalScope.window = globalThis as unknown as { api: unknown };
+  globalScope.api = mockApi;
+});
+
+const FOLDER_PATH = "/recordings";
+
+function createDefaultMetadata(overrides: WavMetadata): WavMetadata {
+  const defaults: WavMetadata = {};
+  for (const field of STANDARD_FIELDS) {
+    defaults[field.key] = field.type === "number" ? 0 : field.type === "tags" ? [] : "";
+  }
+  return { ...defaults, ...overrides };
+}
+
+function createFileEntry(name: string): WavFileEntry {
+  return {
+    name,
+    path: `${FOLDER_PATH}/${name}`,
+    size: 1024,
+    modifiedAt: "2026-10-26T12:00:00.000Z",
+  };
+}
+
+function renderFileListWith(rows: Record<string, WavMetadata>): void {
+  const names = Object.keys(rows);
+  const files = names.map(createFileEntry);
+  const metadata: Record<string, WavMetadata> = {};
+  for (const file of files) {
+    metadata[file.path] = createDefaultMetadata(rows[file.name]);
+  }
+  useFileStore.setState({ folderPath: FOLDER_PATH, files, metadata });
+  render(createElement(FileList));
+}
+
+function getFileRow(name: string): HTMLElement {
+  const row = screen.getByText(name).parentElement?.parentElement;
+  if (!row) throw new Error(`row for ${name} not found`);
+  return row;
+}
+
+function expectTagged(name: string): void {
+  expect(within(getFileRow(name)).getByText("Tagged")).toBeInTheDocument();
+}
+
+function expectUntagged(name: string): void {
+  expect(within(getFileRow(name)).queryByText("Tagged")).not.toBeInTheDocument();
+}
+
+beforeEach(() => {
+  resetAllStores();
+});
+
+afterEach(() => {
+  cleanup();
+  resetAllStores();
+});
+
+describe("FileList Tagged badge (TM-B09, D-15)", () => {
+  it("(a) shows Tagged for a row with only category", () => {
+    renderFileListWith({
+      "category-only.wav": { category: "DOORWood" },
+      "empty.wav": {},
+    });
+
+    expectTagged("category-only.wav");
+    expectUntagged("empty.wav");
+  });
+
+  it("(b) shows Tagged for a row with only keywords", () => {
+    renderFileListWith({
+      "keywords-only.wav": { keywords: ["door", "slam"] },
+      "empty.wav": {},
+    });
+
+    expectTagged("keywords-only.wav");
+    expectUntagged("empty.wav");
+  });
+
+  it("(c) shows Tagged for a row with only comment", () => {
+    renderFileListWith({
+      "comment-only.wav": { comment: "მძიმე კარი" },
+      "empty.wav": {},
+    });
+
+    expectTagged("comment-only.wav");
+    expectUntagged("empty.wav");
+  });
+
+  it("(d) shows no Tagged when every value is empty, blank or default", () => {
+    renderFileListWith({
+      "blank.wav": { category: "", keywords: [""], comment: "   " },
+      "category-only.wav": { category: "DOORWood" },
+    });
+
+    expectUntagged("blank.wav");
+    expectTagged("category-only.wav");
+  });
+
+  it("(e) still shows Tagged for title, artists or bpm alone", () => {
+    renderFileListWith({
+      "title-only.wav": { title: "X" },
+      "artist-only.wav": { artists: ["A"] },
+      "bpm-only.wav": { bpm: 120 },
+      "empty.wav": {},
+    });
+
+    expectTagged("title-only.wav");
+    expectTagged("artist-only.wav");
+    expectTagged("bpm-only.wav");
+    expectUntagged("empty.wav");
+  });
+});
+
+describe("FileList artist column (RR-R2-02)", () => {
+  it("(f) renders a string artist whole and the first element of an artist array", () => {
+    renderFileListWith({
+      "string-artist.wav": { artists: "Foo" },
+      "array-artist.wav": { artists: ["A", "B"] },
+    });
+
+    const stringRow = within(getFileRow("string-artist.wav"));
+    expect(stringRow.getByText("Foo")).toBeInTheDocument();
+    expect(stringRow.queryByText("F")).not.toBeInTheDocument();
+
+    const arrayRow = within(getFileRow("array-artist.wav"));
+    expect(arrayRow.getByText("A")).toBeInTheDocument();
+    expect(arrayRow.queryByText("B")).not.toBeInTheDocument();
+    expect(arrayRow.queryByText("A, B")).not.toBeInTheDocument();
+  });
+});
+
+function parseUntypedMetadata(json: string): WavMetadata {
+  return JSON.parse(json);
+}
+
+function getCellText(name: string, columnIndex: number): string {
+  const cell = getFileRow(name).children.item(columnIndex);
+  if (!cell) throw new Error(`cell ${columnIndex} for ${name} not found`);
+  return cell.textContent ?? "";
+}
+
+const ARTIST_COLUMN_INDEX = 2;
+const GENRE_COLUMN_INDEX = 3;
+
+describe("FileList row with non-string array elements (TM-B20, D-26)", () => {
+  it("(R17-e) renders a malformed row untagged with empty artist and genre cells", () => {
+    expect(() =>
+      renderFileListWith({
+        "malformed.wav": parseUntypedMetadata('{"artists":[{}],"genres":[null]}'),
+        "tagged.wav": { artists: ["Real Artist"], genres: ["Ambience"] },
+      }),
+    ).not.toThrow();
+
+    expect(screen.getByText("malformed.wav")).toBeInTheDocument();
+    expect(screen.getByText("tagged.wav")).toBeInTheDocument();
+
+    expectUntagged("malformed.wav");
+    expect(getCellText("malformed.wav", ARTIST_COLUMN_INDEX)).toBe("");
+    expect(getCellText("malformed.wav", GENRE_COLUMN_INDEX)).toBe("");
+
+    expectTagged("tagged.wav");
+    expect(getCellText("tagged.wav", ARTIST_COLUMN_INDEX)).toBe("Real Artist");
+    expect(getCellText("tagged.wav", GENRE_COLUMN_INDEX)).toBe("Ambience");
+  });
+});
+
+function getRowNamesInOrder(): string[] {
+  return screen.getAllByText(/\.wav$/).map((element) => element.textContent ?? "");
+}
+
+describe("FileList sort by Artist with a non-string first element (TM-B21, D-27)", () => {
+  it("(R18-e) sorts a malformed artist row as empty in both directions without throwing", () => {
+    renderFileListWith({
+      "a.wav": { artists: ["Zed"] },
+      "b.wav": parseUntypedMetadata('{"artists":[{}]}'),
+      "c.wav": { artists: ["Abe"] },
+    });
+
+    expect(() => fireEvent.click(screen.getByRole("button", { name: "Artist" }))).not.toThrow();
+    expect(getRowNamesInOrder()).toEqual(["b.wav", "c.wav", "a.wav"]);
+
+    expect(() => fireEvent.click(screen.getByRole("button", { name: "Artist" }))).not.toThrow();
+    expect(getRowNamesInOrder()).toEqual(["a.wav", "c.wav", "b.wav"]);
+
+    expectUntagged("b.wav");
+    expect(getCellText("b.wav", ARTIST_COLUMN_INDEX)).toBe("");
+    expectTagged("a.wav");
+    expect(getCellText("a.wav", ARTIST_COLUMN_INDEX)).toBe("Zed");
+    expectTagged("c.wav");
+    expect(getCellText("c.wav", ARTIST_COLUMN_INDEX)).toBe("Abe");
+  });
+});
+
+describe("EXP shift anchor after save stats refresh (RR-R19-02)", () => {
+  function selected(): string[] {
+    return [...useFileStore.getState().selectedPaths].map((p) => p.slice(FOLDER_PATH.length + 1)).sort();
+  }
+  it("EXP1 pin: click a, shift-click c selects a..c", () => {
+    renderFileListWith({ "a.wav": {}, "b.wav": {}, "c.wav": {}, "d.wav": {} });
+    fireEvent.click(getFileRow("a.wav"));
+    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["a.wav", "b.wav", "c.wav"]);
+  });
+  it("EXP2 red: click a, stats refresh for a, shift-click c selects a..c", () => {
+    renderFileListWith({ "a.wav": {}, "b.wav": {}, "c.wav": {}, "d.wav": {} });
+    fireEvent.click(getFileRow("a.wav"));
+    act(() => { useFileStore.getState().updateFileStats([{ ...createFileEntry("a.wav"), size: 2048 }]); });
+    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["a.wav", "b.wav", "c.wav"]);
+  });
+  it("EXP3 red: click a, metadata update for a, shift-click c selects a..c", () => {
+    renderFileListWith({ "a.wav": {}, "b.wav": {}, "c.wav": {}, "d.wav": {} });
+    fireEvent.click(getFileRow("a.wav"));
+    act(() => { useFileStore.getState().updateFileMetadata(`${FOLDER_PATH}/a.wav`, createDefaultMetadata({ title: "T" })); });
+    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["a.wav", "b.wav", "c.wav"]);
+  });
+
+  it("EXP4 sort desc keeps anchor item", () => {
+    renderFileListWith({ "a.wav": {}, "b.wav": {}, "c.wav": {}, "d.wav": {} });
+    fireEvent.click(getFileRow("b.wav"));
+    act(() => { useFileStore.getState().toggleSortDirection(); });
+    fireEvent.click(getFileRow("d.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["b.wav", "c.wav", "d.wav"]);
+  });
+  it("EXP5 search hides anchor -> plain", () => {
+    renderFileListWith({ "a.wav": {}, "b.wav": {}, "c.wav": {}, "d.wav": {} });
+    fireEvent.click(getFileRow("a.wav"));
+    act(() => { useFileStore.getState().setSearchQuery("c"); });
+    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["c.wav"]);
+  });
+  it("EXP6 search keeps anchor visible -> range", () => {
+    renderFileListWith({ "a.wav": {}, "b.wav": {}, "c.wav": {}, "d.wav": {} });
+    fireEvent.click(getFileRow("a.wav"));
+    act(() => { useFileStore.getState().setSearchQuery(".wav"); });
+    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["a.wav", "b.wav", "c.wav"]);
+  });
+  it("EXP7 rescan clears anchor -> plain", () => {
+    renderFileListWith({ "a.wav": {}, "b.wav": {}, "c.wav": {}, "d.wav": {} });
+    fireEvent.click(getFileRow("a.wav"));
+    act(() => { useFileStore.getState().clearSelection(); useFileStore.getState().setFiles(["a.wav","b.wav","c.wav","d.wav"].map(createFileEntry)); });
+    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["c.wav"]);
+  });
+  it("EXP8 reopen same folder without files change clears anchor -> plain", () => {
+    renderFileListWith({ "a.wav": {}, "b.wav": {}, "c.wav": {}, "d.wav": {} });
+    fireEvent.click(getFileRow("a.wav"));
+    act(() => { useFileStore.getState().clearSelection(); });
+    fireEvent.click(getFileRow("c.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["c.wav"]);
+  });
+
+  it("EXP9 z4 5 files sort desc", () => {
+    renderFileListWith({ "a.wav": {}, "b.wav": {}, "c.wav": {}, "d.wav": {}, "e.wav": {} });
+    fireEvent.click(getFileRow("b.wav"));
+    act(() => { useFileStore.getState().toggleSortDirection(); });
+    fireEvent.click(getFileRow("e.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["b.wav", "c.wav", "d.wav", "e.wav"]);
+  });
+  it("EXP10 z11 bpm sort after save", () => {
+    renderFileListWith({ "a.wav": { bpm: 3 }, "b.wav": { bpm: 1 }, "c.wav": { bpm: 2 }, "d.wav": { bpm: 4 } });
+    fireEvent.click(getFileRow("a.wav"));
+    act(() => { useFileStore.getState().updateFileMetadata(`${FOLDER_PATH}/a.wav`, createDefaultMetadata({ bpm: 3 })); });
+    act(() => { useFileStore.getState().setSortField("bpm"); });
+    fireEvent.click(getFileRow("d.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["a.wav", "d.wav"]);
+  });
+  it("EXP11 z10 ctrl sets anchor", () => {
+    renderFileListWith({ "a.wav": {}, "b.wav": {}, "c.wav": {}, "d.wav": {} });
+    fireEvent.click(getFileRow("a.wav"));
+    fireEvent.click(getFileRow("c.wav"), { ctrlKey: true });
+    fireEvent.click(getFileRow("d.wav"), { shiftKey: true });
+    expect(selected()).toEqual(["a.wav", "c.wav", "d.wav"]);
+  });
+});
+

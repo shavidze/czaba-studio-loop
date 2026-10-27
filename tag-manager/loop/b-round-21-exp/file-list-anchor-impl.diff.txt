@@ -1,0 +1,83 @@
+--- /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/file-list/FileList.tsx	2026-10-27 12:05:00.096040822 +0000
++++ /tmp/b-r22/src/renderer/src/components/file-list/FileList.tsx	2026-10-27 12:32:40.971940507 +0000
+@@ -1,5 +1,5 @@
+ import { ArrowDown, ArrowUp, Music } from 'lucide-react';
+-import { useCallback, useEffect, useRef } from 'react';
++import { useCallback, useEffect, useMemo, useRef } from 'react';
+ import { Badge } from '~/components/ui/badge';
+ import { formatFirstFieldValue, hasAnyTagValue } from '~/lib/file-row-display';
+ import { cn, formatFileSize } from '~/lib/utils';
+@@ -38,11 +38,13 @@
+ function FileRow({
+   file,
+   index,
+-  lastClickRef,
++  visiblePaths,
++  anchorPathRef,
+ }: {
+   file: WavFileEntry;
+   index: number;
+-  lastClickRef: React.MutableRefObject<number>;
++  visiblePaths: string[];
++  anchorPathRef: React.MutableRefObject<string | null>;
+ }): React.ReactElement {
+   const isSelected = useIsSelected(file.path);
+   const meta = useFileStore((s) => s.metadata[file.path]);
+@@ -53,16 +55,18 @@
+ 
+   const handleClick = useCallback(
+     (e: React.MouseEvent) => {
+-      if (e.shiftKey && lastClickRef.current >= 0) {
+-        selectRange(lastClickRef.current, index);
++      const anchorIndex =
++        anchorPathRef.current === null ? -1 : visiblePaths.indexOf(anchorPathRef.current);
++      if (e.shiftKey && anchorIndex >= 0) {
++        selectRange(anchorIndex, index);
+       } else if (e.ctrlKey || e.metaKey) {
+         toggleSelection(file.path);
+       } else {
+         setSelectedPaths([file.path]);
+       }
+-      lastClickRef.current = index;
++      anchorPathRef.current = file.path;
+     },
+-    [file.path, index, toggleSelection, setSelectedPaths, selectRange, lastClickRef],
++    [file.path, index, visiblePaths, toggleSelection, setSelectedPaths, selectRange, anchorPathRef],
+   );
+ 
+   const handleDoubleClick = useCallback(() => {
+@@ -99,14 +103,13 @@
+ export function FileList(): React.ReactElement {
+   const files = useFilteredFiles();
+   const folderPath = useFileStore((s) => s.folderPath);
+-  const searchQuery = useFileStore((s) => s.searchQuery);
+-  const sortField = useFileStore((s) => s.sortField);
+-  const sortDirection = useFileStore((s) => s.sortDirection);
+-  const lastClickRef = useRef(-1);
++  const hasSelection = useFileStore((s) => s.selectedPaths.length > 0);
++  const anchorPathRef = useRef<string | null>(null);
++  const visiblePaths = useMemo(() => files.map((f) => f.path), [files]);
+ 
+   useEffect(() => {
+-    lastClickRef.current = -1;
+-  }, [files, searchQuery, sortField, sortDirection]);
++    if (!hasSelection) anchorPathRef.current = null;
++  }, [hasSelection]);
+ 
+   return (
+     <div className="flex flex-col h-full">
+@@ -123,7 +126,13 @@
+ 
+       <div className="flex-1 overflow-y-auto">
+         {files.map((file, i) => (
+-          <FileRow key={file.path} file={file} index={i} lastClickRef={lastClickRef} />
++          <FileRow
++            key={file.path}
++            file={file}
++            index={i}
++            visiblePaths={visiblePaths}
++            anchorPathRef={anchorPathRef}
++          />
+         ))}
+ 
+         {folderPath && files.length === 0 && (

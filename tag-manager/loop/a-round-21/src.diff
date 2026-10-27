@@ -1,0 +1,82 @@
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index 8c680c7..322fc96 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -7,7 +7,7 @@ import { Input } from '~/components/ui/input';
+ import { useFileStore, useSelectedFiles } from '~/stores/file-store';
+ import { useMetadataStore } from '~/stores/metadata-store';
+ import { useSchemaStore } from '~/stores/schema-store';
+-import type { BatchWriteResult, WavMetadata } from '~/types';
++import type { BatchWriteResult, FieldValue, WavMetadata } from '~/types';
+ import { TagsInput } from './TagsInput';
+ 
+ function buildReloadFailedToast(batchResult?: BatchWriteResult): string {
+@@ -25,6 +25,33 @@ function isSameSelectionSet(startPaths: string[], currentPaths: string[]): boole
+   return [...start].every((path) => current.has(path));
+ }
+ 
++function isSameFieldValue(a: FieldValue | undefined, b: FieldValue | undefined): boolean {
++  if (Array.isArray(a) || Array.isArray(b)) {
++    if (!Array.isArray(a) || !Array.isArray(b)) return false;
++    return a.length === b.length && a.every((item, index) => item === b[index]);
++  }
++  return a === b;
++}
++
++function collectFieldsTypedDuringSave(
++  startMetadata: Record<string, FieldValue>,
++): Record<string, FieldValue> {
++  const { editingMetadata, modifiedFields } = useMetadataStore.getState();
++  const typed: Record<string, FieldValue> = {};
++  for (const key of modifiedFields) {
++    const current = editingMetadata[key];
++    if (current !== undefined && !isSameFieldValue(current, startMetadata[key])) {
++      typed[key] = current;
++    }
++  }
++  return typed;
++}
++
++function mergeFieldsTypedDuringSave(typed: Record<string, FieldValue>): void {
++  if (Object.keys(typed).length === 0) return;
++  useMetadataStore.getState().mergeFields(typed);
++}
++
+ async function refreshSavedFileStats(writtenPaths: string[]): Promise<void> {
+   const { folderPath, updateFileStats } = useFileStore.getState();
+   if (folderPath === null) return;
+@@ -98,6 +125,7 @@ export function MetadataPanel(): React.ReactElement {
+     const startSelection = useFileStore.getState().selectedPaths;
+     const isSelectionUnchanged = (): boolean =>
+       isSameSelectionSet(startSelection, useFileStore.getState().selectedPaths);
++    const startEditingMetadata = editingMetadata;
+ 
+     setIsSaving(true);
+     try {
+@@ -113,9 +141,13 @@ export function MetadataPanel(): React.ReactElement {
+           return;
+         }
+         const selectionUnchanged = isSelectionUnchanged();
++        const typedDuringSave = selectionUnchanged
++          ? collectFieldsTypedDuringSave(startEditingMetadata)
++          : {};
+         if (selectionUnchanged) skipSyncRef.current = true;
+         updateFileMetadata(path, updated as WavMetadata);
+         if (selectionUnchanged) setEditingMetadata({ ...(updated as WavMetadata) });
++        mergeFieldsTypedDuringSave(typedDuringSave);
+         showToast('Tags saved', 'success');
+       } else {
+         const paths = selectedFiles.map((f) => f.path);
+@@ -151,7 +183,11 @@ export function MetadataPanel(): React.ReactElement {
+         if (result.failed.length > 0) {
+           showToast(`${result.succeeded} saved, ${result.failed.length} failed`, 'error');
+         } else {
+-          if (selectionUnchanged) setEditingMetadata({});
++          if (selectionUnchanged) {
++            const typedDuringSave = collectFieldsTypedDuringSave(startEditingMetadata);
++            setEditingMetadata({});
++            mergeFieldsTypedDuringSave(typedDuringSave);
++          }
+           showToast(`Tags saved to ${result.succeeded} files`, 'success');
+         }
+       }

@@ -1,0 +1,350 @@
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index caaf361..a991fb5 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -25,6 +25,7 @@ Batch failed non-empty (D-21): editingMetadata, modifiedFields, isDirty kept →
+ Re-read rejects (D-24): no store update, no skipSync, edits kept → error toast with write result + "Rescan to refresh"
+ File stats (D-28): after a confirmed write, before the re-read: scanFolder(folderPath) → updateFileStats(written paths only); scan reject silent; none if write rejects / all failed / folderPath null
+ Selection changed during save (D-29): start selectedPaths vs current (as set); changed → store updates + toasts as usual, but no skipSync and no setEditingMetadata (sync effect shows the current selection)
++Typed during save (D-30): same set → keys in modifiedFields whose value differs from the start snapshot (arrays by content) → after setEditingMetadata(re-read | {}) mergeFields(those) → isDirty stays true; partial / reject / D-24 / changed set unchanged
+ ```
+ 
+ ### Template apply (batch-safe)
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index 8c680c7..322fc96 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -7,7 +7,7 @@ import { Input } from '~/components/ui/input';
+ import { useFileStore, useSelectedFiles } from '~/stores/file-store';
+ import { useMetadataStore } from '~/stores/metadata-store';
+ import { useSchemaStore } from '~/stores/schema-store';
+-import type { BatchWriteResult, WavMetadata } from '~/types';
++import type { BatchWriteResult, FieldValue, WavMetadata } from '~/types';
+ import { TagsInput } from './TagsInput';
+ 
+ function buildReloadFailedToast(batchResult?: BatchWriteResult): string {
+@@ -25,6 +25,33 @@ function isSameSelectionSet(startPaths: string[], currentPaths: string[]): boole
+   return [...start].every((path) => current.has(path));
+ }
+ 
++function isSameFieldValue(a: FieldValue | undefined, b: FieldValue | undefined): boolean {
++  if (Array.isArray(a) || Array.isArray(b)) {
++    if (!Array.isArray(a) || !Array.isArray(b)) return false;
++    return a.length === b.length && a.every((item, index) => item === b[index]);
++  }
++  return a === b;
++}
++
++function collectFieldsTypedDuringSave(
++  startMetadata: Record<string, FieldValue>,
++): Record<string, FieldValue> {
++  const { editingMetadata, modifiedFields } = useMetadataStore.getState();
++  const typed: Record<string, FieldValue> = {};
++  for (const key of modifiedFields) {
++    const current = editingMetadata[key];
++    if (current !== undefined && !isSameFieldValue(current, startMetadata[key])) {
++      typed[key] = current;
++    }
++  }
++  return typed;
++}
++
++function mergeFieldsTypedDuringSave(typed: Record<string, FieldValue>): void {
++  if (Object.keys(typed).length === 0) return;
++  useMetadataStore.getState().mergeFields(typed);
++}
++
+ async function refreshSavedFileStats(writtenPaths: string[]): Promise<void> {
+   const { folderPath, updateFileStats } = useFileStore.getState();
+   if (folderPath === null) return;
+@@ -98,6 +125,7 @@ export function MetadataPanel(): React.ReactElement {
+     const startSelection = useFileStore.getState().selectedPaths;
+     const isSelectionUnchanged = (): boolean =>
+       isSameSelectionSet(startSelection, useFileStore.getState().selectedPaths);
++    const startEditingMetadata = editingMetadata;
+ 
+     setIsSaving(true);
+     try {
+@@ -113,9 +141,13 @@ export function MetadataPanel(): React.ReactElement {
+           return;
+         }
+         const selectionUnchanged = isSelectionUnchanged();
++        const typedDuringSave = selectionUnchanged
++          ? collectFieldsTypedDuringSave(startEditingMetadata)
++          : {};
+         if (selectionUnchanged) skipSyncRef.current = true;
+         updateFileMetadata(path, updated as WavMetadata);
+         if (selectionUnchanged) setEditingMetadata({ ...(updated as WavMetadata) });
++        mergeFieldsTypedDuringSave(typedDuringSave);
+         showToast('Tags saved', 'success');
+       } else {
+         const paths = selectedFiles.map((f) => f.path);
+@@ -151,7 +183,11 @@ export function MetadataPanel(): React.ReactElement {
+         if (result.failed.length > 0) {
+           showToast(`${result.succeeded} saved, ${result.failed.length} failed`, 'error');
+         } else {
+-          if (selectionUnchanged) setEditingMetadata({});
++          if (selectionUnchanged) {
++            const typedDuringSave = collectFieldsTypedDuringSave(startEditingMetadata);
++            setEditingMetadata({});
++            mergeFieldsTypedDuringSave(typedDuringSave);
++          }
+           showToast(`Tags saved to ${result.succeeded} files`, 'success');
+         }
+       }
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index a2b8726..35ae176 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -888,4 +888,251 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+     expect(state.modifiedFields.has("category")).toBe(true);
+     expect(state.toastMessage).toBe("Tags saved to 2 files");
+   });
++
++  describe("typing while the save is pending (TM-B24, D-30)", () => {
++    function getInputByLabel(labelText: string): HTMLInputElement {
++      const label = screen.getByText(labelText);
++      const input = label.parentElement?.querySelector("input");
++      if (!input) throw new Error(`${labelText} input not found`);
++      return input;
++    }
++
++    function typeInto(labelText: string, value: string): void {
++      fireEvent.change(getInputByLabel(labelText), { target: { value } });
++    }
++
++    function setGenres(genres: string[]): void {
++      act(() => {
++        useMetadataStore.getState().updateField("genres", genres);
++      });
++    }
++
++    async function startSingleSave(beforeSave?: () => void): Promise<PendingWrite> {
++      seedSingleA();
++      vi.mocked(window.api.readMetadata).mockResolvedValueOnce({ ...REREAD_A });
++      const pending = deferSingleWrite();
++      render(createElement(MetadataPanel));
++      expect(getCategoryInput().value).toBe("ACat");
++      beforeSave?.();
++      await typeCategoryAndSaveWith("R20Cat", /Save Tags/);
++      return pending;
++    }
++
++    async function startBatchSave(result: BatchWriteResult): Promise<PendingWrite> {
++      const { seedA, seedB } = seedBatchAB();
++      vi.mocked(window.api.readMetadataBatch).mockResolvedValue({
++        [PATH_A]: { ...seedA, category: TYPED_CATEGORY },
++        [PATH_B]: result.failed.length > 0 ? { ...seedB } : { ...seedB, category: TYPED_CATEGORY },
++      });
++      const pending = deferBatchWrite(result);
++      render(createElement(MetadataPanel));
++      await typeCategoryAndSaveWith(TYPED_CATEGORY, /Save to 2 files/);
++      return pending;
++    }
++
++    async function singleSaveWithTypedTitle(): Promise<void> {
++      const pending = await startSingleSave();
++      typeInto("Title", "TypedTitle");
++      expect(getInputByLabel("Title").value).toBe("TypedTitle");
++      await settle(pending.release);
++    }
++
++    async function batchSaveWithTypedTitle(): Promise<void> {
++      const pending = await startBatchSave(ALL_SUCCEEDED);
++      typeInto("Title", "BatchTitle");
++      expect(getInputByLabel("Title").value).toBe("BatchTitle");
++      await settle(pending.release);
++    }
++
++    it("(y1) single, same selection: a field typed during the write is kept and Save stays enabled", async () => {
++      await singleSaveWithTypedTitle();
++
++      const state = useMetadataStore.getState();
++      expect(getInputByLabel("Title").value).toBe("TypedTitle");
++      expect(getCategoryInput().value).toBe("R20Cat");
++      expect(state.isDirty).toBe(true);
++      expect(state.modifiedFields).toEqual(new Set(["title"]));
++      expect(screen.getByRole("button", { name: /Save Tags/ })).toBeEnabled();
++      expect(useFileStore.getState().metadata[PATH_A]).toEqual(REREAD_A);
++      expect(state.toastMessage).toBe("Tags saved");
++      expect(state.isSaving).toBe(false);
++    });
++
++    it("(y2) the next Save writes the text typed during the first save", async () => {
++      await singleSaveWithTypedTitle();
++
++      await clickSave(/Save Tags/);
++
++      expect(window.api.writeMetadata).toHaveBeenCalledTimes(2);
++      const secondCall = vi.mocked(window.api.writeMetadata).mock.calls[1];
++      expect(secondCall?.[0]).toBe(PATH_A);
++      expect(secondCall?.[1]?.title).toBe("TypedTitle");
++      expect(secondCall?.[1]?.category).toBe("R20Cat");
++    });
++
++    it("(y3) the saved field retyped during the write keeps the new value", async () => {
++      const pending = await startSingleSave();
++      typeInto("Category (UCS)", "R21Again");
++
++      await settle(pending.release);
++
++      const state = useMetadataStore.getState();
++      expect(getCategoryInput().value).toBe("R21Again");
++      expect(state.modifiedFields).toEqual(new Set(["category"]));
++      expect(state.isDirty).toBe(true);
++    });
++
++    it("(y4) pin: a field typed and reverted to the saved value during the write is not a change", async () => {
++      const pending = await startSingleSave();
++      typeInto("Category (UCS)", "X");
++      typeInto("Category (UCS)", "R20Cat");
++
++      await settle(pending.release);
++
++      const state = useMetadataStore.getState();
++      expect(getCategoryInput().value).toBe("R20Cat");
++      expect(state.isDirty).toBe(false);
++      expect(state.modifiedFields).toEqual(new Set());
++      expect(screen.getByRole("button", { name: /Save Tags/ })).toBeDisabled();
++    });
++
++    it("(y5) pin: an equal tag array with a new reference during the write is not a change", async () => {
++      const pending = await startSingleSave(() => setGenres(["G1", "G2"]));
++      setGenres(["G1", "G2"]);
++
++      await settle(pending.release);
++
++      const state = useMetadataStore.getState();
++      expect(state.isDirty).toBe(false);
++      expect(state.modifiedFields).toEqual(new Set());
++      expect(screen.getByRole("button", { name: /Save Tags/ })).toBeDisabled();
++    });
++
++    it("(y5b) tag order changed during the write is a change", async () => {
++      const pending = await startSingleSave(() => setGenres(["G1", "G2"]));
++      setGenres(["G2", "G1"]);
++
++      await settle(pending.release);
++
++      const state = useMetadataStore.getState();
++      expect(state.editingMetadata.genres).toEqual(["G2", "G1"]);
++      expect(state.modifiedFields).toEqual(new Set(["genres"]));
++      expect(state.isDirty).toBe(true);
++    });
++
++    it("(y6) a tag added during the write is kept", async () => {
++      const pending = await startSingleSave();
++      setGenres(["R21Tag"]);
++
++      await settle(pending.release);
++
++      const state = useMetadataStore.getState();
++      expect(state.editingMetadata.genres).toEqual(["R21Tag"]);
++      expect(state.modifiedFields).toEqual(new Set(["genres"]));
++      expect(state.isDirty).toBe(true);
++      expect(getCategoryInput().value).toBe("R20Cat");
++    });
++
++    it("(y7) a number typed during the write is kept", async () => {
++      const pending = await startSingleSave();
++      typeInto("BPM", "128");
++
++      await settle(pending.release);
++
++      const state = useMetadataStore.getState();
++      expect(state.editingMetadata.bpm).toBe(128);
++      expect(state.modifiedFields).toEqual(new Set(["bpm"]));
++      expect(state.isDirty).toBe(true);
++    });
++
++    it("(y8) A -> B -> A and typing on A during the write: typed text on top of A's re-read", async () => {
++      const pending = await startSingleSave();
++      selectPaths([PATH_B]);
++      selectPaths([PATH_A]);
++      typeInto("Title", "BackTyped");
++
++      await settle(pending.release);
++
++      const state = useMetadataStore.getState();
++      expect(getInputByLabel("Title").value).toBe("BackTyped");
++      expect(getCategoryInput().value).toBe("R20Cat");
++      expect(state.modifiedFields).toEqual(new Set(["title"]));
++      expect(state.isDirty).toBe(true);
++      expect(state.toastMessage).toBe("Tags saved");
++    });
++
++    it("(y9) batch all succeeded, same set: a field typed during the write is kept", async () => {
++      await batchSaveWithTypedTitle();
++
++      const state = useMetadataStore.getState();
++      expect(state.editingMetadata).toEqual({ title: "BatchTitle" });
++      expect(getCategoryInput().value).toBe("");
++      expect(getInputByLabel("Title").value).toBe("BatchTitle");
++      expect(state.modifiedFields).toEqual(new Set(["title"]));
++      expect(state.isDirty).toBe(true);
++      expect(getBatchSaveButton()).toBeEnabled();
++      expect(state.toastMessage).toBe("Tags saved to 2 files");
++      expect(useFileStore.getState().metadata[PATH_A]?.category).toBe(TYPED_CATEGORY);
++      expect(useFileStore.getState().metadata[PATH_B]?.category).toBe(TYPED_CATEGORY);
++    });
++
++    it("(y10) the next batch Save writes only the field typed during the first save", async () => {
++      await batchSaveWithTypedTitle();
++
++      await clickSave(/Save to 2 files/);
++
++      expect(window.api.writeMetadataBatch).toHaveBeenCalledTimes(2);
++      const secondCall = vi.mocked(window.api.writeMetadataBatch).mock.calls[1];
++      expect(secondCall?.[0]).toEqual([PATH_A, PATH_B]);
++      expect(secondCall?.[1]).toEqual({ title: "BatchTitle" });
++    });
++
++    it("(y11) pin: batch partial failure and typing during the write keeps every edit", async () => {
++      const pending = await startBatchSave(PARTIAL_FAILED);
++      typeInto("Title", "BatchTitle");
++
++      await settle(pending.release);
++
++      const state = useMetadataStore.getState();
++      expect(state.editingMetadata.category).toBe(TYPED_CATEGORY);
++      expect(state.editingMetadata.title).toBe("BatchTitle");
++      expect(state.modifiedFields).toEqual(new Set(["category", "title"]));
++      expect(state.isDirty).toBe(true);
++      expect(state.toastMessage).toBe("1 saved, 1 failed");
++    });
++
++    it("(y12) pin: the write rejects and typing during the write keeps every edit", async () => {
++      seedSingleA();
++      const pending = deferSingleWrite();
++      render(createElement(MetadataPanel));
++      await typeCategoryAndSaveWith("R20Cat", /Save Tags/);
++      typeInto("Title", "TypedTitle");
++
++      await settle(() => pending.fail(new Error("EACCES")));
++
++      const state = useMetadataStore.getState();
++      expect(state.toastMessage).toBe("EACCES");
++      expect(getCategoryInput().value).toBe("R20Cat");
++      expect(getInputByLabel("Title").value).toBe("TypedTitle");
++      expect(state.modifiedFields).toEqual(new Set(["category", "title"]));
++      expect(state.isDirty).toBe(true);
++    });
++
++    it("(y13) pin: D-24 re-read rejects and typing during the write keeps every edit", async () => {
++      seedSingleA();
++      vi.mocked(window.api.readMetadata).mockRejectedValueOnce(new Error("read down"));
++      const pending = deferSingleWrite();
++      render(createElement(MetadataPanel));
++      await typeCategoryAndSaveWith("R20Cat", /Save Tags/);
++      typeInto("Title", "TypedTitle");
++
++      await settle(pending.release);
++
++      const state = useMetadataStore.getState();
++      expect(state.toastMessage).toBe("Tags saved, but reloading failed. Rescan to refresh.");
++      expect(getCategoryInput().value).toBe("R20Cat");
++      expect(getInputByLabel("Title").value).toBe("TypedTitle");
++      expect(state.isDirty).toBe(true);
++    });
++  });
+ });

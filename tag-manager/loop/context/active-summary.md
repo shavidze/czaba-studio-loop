@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T11:52:49.144Z)
+# Active loop summary (2026-10-27T12:25:09.944Z)
 
-- backlog.json 179 KB -> active view 55 KB
-- status: G_ROOT_GATE round 20
+- backlog.json 188 KB -> active view 59 KB
+- status: G_ROOT_GATE round 21
 - servers: `{"servers":"none or skipped"}`
-- last publication: b373b08f13069b26e89192a1229e3a4a31257e3e (rounds 20-20)
-- last root gate: round 20 published - commit b373b08f13069b26e89192a1229e3a4a31257e3e pushed
+- last publication: 601dc4aad7e9416b8f3c690ba5ec68cccb98490d (rounds 21-21)
+- last root gate: round 21 published - commit 601dc4aad7e9416b8f3c690ba5ec68cccb98490d pushed
 
-## Current items: TM-B22, TM-B23, TM-B24
+## Current items: TM-B23, TM-B24
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -101,6 +101,12 @@
 - A-R19-02 / low / open / Folder close/switch during a pending save: updateFileMetadata adds the old folder's path to the new folder's metadata map (stray key); the e
 - C-R19-01 / info / open / After a 2-file batch save the Genres field shows its placeholder although both files carry 'R19 Batch'; matches D-21 (all-succeeded batch ->
 - B-R19-01 / low / open / A selection change while a save is pending shows 'Unsaved changes were discarded' although the edits are being written (and are written if t
+- RR-R20-01 / low / open / Switching away from a dirty selection while a save is pending shows 'Unsaved changes were discarded' although the edits are being written (M
+- RR-R20-02 / low / open / A -> B -> A and typing on A during the write: the set is unchanged, so setEditingMetadata(updated) overwrites the new typing (pinned by x10 
+- RR-R20-03 / info / open / Conventions OK: no comments, semicolons, no any; STATE_MANAGEMENT.md D-29 line accurate; test file keeps its double-quote style
+- RR-R20-04 / info / open / Architecture signal: a save token {selectionKey, editVersion} recorded at save start (editVersion increased by every updateField) and checke
+- A-R20-01 / low / open / The sync effect keys the selection on join('\0'), so a reorder of the same set (e.g. Select All after a partial selection in another order) 
+- C-R20-01 / info / open / A added an unplanned (x11) (batch A+B -> A + typing on A) in the same describe, additions only; it kills M9 (batch setEditingMetadata({}) un
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

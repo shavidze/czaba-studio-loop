@@ -1,0 +1,71 @@
+--- /tmp/b-r22-orig-MetadataPanel.tsx	2026-10-27 12:27:38.391058808 +0000
++++ src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 12:27:26.403058068 +0000
+@@ -125,13 +125,13 @@
+     const startSelection = useFileStore.getState().selectedPaths;
+     const isSelectionUnchanged = (): boolean =>
+       isSameSelectionSet(startSelection, useFileStore.getState().selectedPaths);
+-    const startEditingMetadata = editingMetadata;
++    const startEditingMetadata = useMetadataStore.getState().editingMetadata;
+ 
+     setIsSaving(true);
+     try {
+       if (selectedFiles.length === 1) {
+         const path = selectedFiles[0].path;
+-        await window.api.writeMetadata(path, editingMetadata as Partial<WavMetadata>, fields);
++        await window.api.writeMetadata(path, startEditingMetadata, fields);
+         await refreshSavedFileStats([path]);
+         let updated: WavMetadata;
+         try {
+@@ -145,8 +145,8 @@
+           ? collectFieldsTypedDuringSave(startEditingMetadata)
+           : {};
+         if (selectionUnchanged) skipSyncRef.current = true;
+-        updateFileMetadata(path, updated as WavMetadata);
+-        if (selectionUnchanged) setEditingMetadata({ ...(updated as WavMetadata) });
++        updateFileMetadata(path, updated);
++        if (selectionUnchanged) setEditingMetadata({ ...updated });
+         mergeFieldsTypedDuringSave(typedDuringSave);
+         showToast('Tags saved', 'success');
+       } else {
+@@ -154,8 +154,8 @@
+         const modified = useMetadataStore.getState().modifiedFields;
+         const batchMeta: Partial<WavMetadata> = {};
+         for (const key of modified) {
+-          if (editingMetadata[key] !== undefined) {
+-            batchMeta[key] = editingMetadata[key];
++          if (startEditingMetadata[key] !== undefined) {
++            batchMeta[key] = startEditingMetadata[key];
+           }
+         }
+         const result = await window.api.writeMetadataBatch(paths, batchMeta, fields);
+@@ -177,7 +177,7 @@
+           skipSyncRef.current = true;
+         }
+         for (const [path, updated] of savedEntries) {
+-          updateFileMetadata(path, updated as WavMetadata);
++          updateFileMetadata(path, updated);
+         }
+ 
+         if (result.failed.length > 0) {
+@@ -198,7 +198,6 @@
+     }
+   }, [
+     selectedFiles,
+-    editingMetadata,
+     fields,
+     setIsSaving,
+     setEditingMetadata,
+@@ -222,11 +221,11 @@
+         failures += chunk.length;
+       }
+     }
+-    setMetadata(accumulated as Record<string, WavMetadata>);
++    setMetadata(accumulated);
+     const currentSelection = useFileStore.getState().selectedPaths;
+     if (currentSelection.length === 1) {
+       const current = accumulated[currentSelection[0]];
+-      if (current) setEditingMetadata({ ...(current as WavMetadata) });
++      if (current) setEditingMetadata({ ...current });
+     } else if (currentSelection.length > 1) {
+       setEditingMetadata({});
+     }

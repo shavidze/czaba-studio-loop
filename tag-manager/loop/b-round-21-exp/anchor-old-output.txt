@@ -1,0 +1,200 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/b-r22-old[39m
+
+ [31m❯[39m tests/renderer/components/file-list.test.ts [2m([22m[2m19 tests[22m[2m | [22m[31m7 failed[39m[2m)[22m[33m 652[2mms[22m[39m
+     [32m✓[39m (a) shows Tagged for a row with only category[32m 64[2mms[22m[39m
+     [32m✓[39m (b) shows Tagged for a row with only keywords[32m 10[2mms[22m[39m
+     [32m✓[39m (c) shows Tagged for a row with only comment[32m 10[2mms[22m[39m
+     [32m✓[39m (d) shows no Tagged when every value is empty, blank or default[32m 12[2mms[22m[39m
+     [32m✓[39m (e) still shows Tagged for title, artists or bpm alone[32m 16[2mms[22m[39m
+     [32m✓[39m (f) renders a string artist whole and the first element of an artist array[32m 11[2mms[22m[39m
+     [32m✓[39m (R17-e) renders a malformed row untagged with empty artist and genre cells[32m 15[2mms[22m[39m
+     [32m✓[39m (R18-e) sorts a malformed artist row as empty in both directions without throwing[32m 294[2mms[22m[39m
+     [32m✓[39m EXP1 pin: click a, shift-click c selects a..c[32m 17[2mms[22m[39m
+[31m     [31m×[31m EXP2 red: click a, stats refresh for a, shift-click c selects a..c[39m[32m 27[2mms[22m[39m
+[31m     [31m×[31m EXP3 red: click a, metadata update for a, shift-click c selects a..c[39m[32m 20[2mms[22m[39m
+[31m     [31m×[31m EXP4 sort desc keeps anchor item[39m[32m 18[2mms[22m[39m
+     [32m✓[39m EXP5 search hides anchor -> plain[32m 15[2mms[22m[39m
+[31m     [31m×[31m EXP6 search keeps anchor visible -> range[39m[32m 21[2mms[22m[39m
+     [32m✓[39m EXP7 rescan clears anchor -> plain[32m 16[2mms[22m[39m
+[31m     [31m×[31m EXP8 reopen same folder without files change clears anchor -> plain[39m[32m 19[2mms[22m[39m
+[31m     [31m×[31m EXP9 z4 5 files sort desc[39m[32m 19[2mms[22m[39m
+[31m     [31m×[31m EXP10 z11 bpm sort after save[39m[32m 26[2mms[22m[39m
+     [32m✓[39m EXP11 z10 ctrl sets anchor[32m 21[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 7 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mEXP shift anchor after save stats refresh (RR-R19-02)[2m > [22mEXP2 red: click a, stats refresh for a, shift-click c selects a..c
+[31m[1mAssertionError[22m: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "a.wav",[39m
+[32m-   "b.wav",[39m
+[2m    "c.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m220:24[22m[39m
+    [90m218| [39m    act(() => { useFileStore.getState().updateFileStats([{ ...createFi…
+    [90m219| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"c.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m220| [39m    [34mexpect[39m([34mselected[39m())[33m.[39m[34mtoEqual[39m([[32m"a.wav"[39m[33m,[39m [32m"b.wav"[39m[33m,[39m [32m"c.wav"[39m])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m221| [39m  })[33m;[39m
+    [90m222| [39m  it("EXP3 red: click a, metadata update for a, shift-click c selects …
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mEXP shift anchor after save stats refresh (RR-R19-02)[2m > [22mEXP3 red: click a, metadata update for a, shift-click c selects a..c
+[31m[1mAssertionError[22m: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "a.wav",[39m
+[32m-   "b.wav",[39m
+[2m    "c.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m227:24[22m[39m
+    [90m225| [39m    act(() => { useFileStore.getState().updateFileMetadata(`${FOLDER_P…
+    [90m226| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"c.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m227| [39m    [34mexpect[39m([34mselected[39m())[33m.[39m[34mtoEqual[39m([[32m"a.wav"[39m[33m,[39m [32m"b.wav"[39m[33m,[39m [32m"c.wav"[39m])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m228| [39m  })[33m;[39m
+    [90m229| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mEXP shift anchor after save stats refresh (RR-R19-02)[2m > [22mEXP4 sort desc keeps anchor item
+[31m[1mAssertionError[22m: expected [ 'd.wav' ] to deeply equal [ 'b.wav', 'c.wav', 'd.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "b.wav",[39m
+[32m-   "c.wav",[39m
+[2m    "d.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m235:24[22m[39m
+    [90m233| [39m    [34mact[39m(() [33m=>[39m { useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34mtoggleSortDirection[39m()[33m;[39m })[33m;[39m
+    [90m234| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"d.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m235| [39m    [34mexpect[39m([34mselected[39m())[33m.[39m[34mtoEqual[39m([[32m"b.wav"[39m[33m,[39m [32m"c.wav"[39m[33m,[39m [32m"d.wav"[39m])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m236| [39m  })[33m;[39m
+    [90m237| [39m  [34mit[39m([32m"EXP5 search hides anchor -> plain"[39m[33m,[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mEXP shift anchor after save stats refresh (RR-R19-02)[2m > [22mEXP6 search keeps anchor visible -> range
+[31m[1mAssertionError[22m: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "a.wav",[39m
+[32m-   "b.wav",[39m
+[2m    "c.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m249:24[22m[39m
+    [90m247| [39m    [34mact[39m(() [33m=>[39m { useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34msetSearchQuery[39m([32m".wav"[39m)[33m;[39m })[33m;[39m
+    [90m248| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"c.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m249| [39m    [34mexpect[39m([34mselected[39m())[33m.[39m[34mtoEqual[39m([[32m"a.wav"[39m[33m,[39m [32m"b.wav"[39m[33m,[39m [32m"c.wav"[39m])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m250| [39m  })[33m;[39m
+    [90m251| [39m  [34mit[39m([32m"EXP7 rescan clears anchor -> plain"[39m[33m,[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mEXP shift anchor after save stats refresh (RR-R19-02)[2m > [22mEXP8 reopen same folder without files change clears anchor -> plain
+[31m[1mAssertionError[22m: expected [ 'a.wav', 'b.wav', 'c.wav' ] to deeply equal [ 'c.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[31m+   "a.wav",[39m
+[31m+   "b.wav",[39m
+[2m    "c.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m263:24[22m[39m
+    [90m261| [39m    [34mact[39m(() [33m=>[39m { useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34mclearSelection[39m()[33m;[39m })[33m;[39m
+    [90m262| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"c.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m263| [39m    [34mexpect[39m([34mselected[39m())[33m.[39m[34mtoEqual[39m([[32m"c.wav"[39m])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m264| [39m  })[33m;[39m
+    [90m265| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mEXP shift anchor after save stats refresh (RR-R19-02)[2m > [22mEXP9 z4 5 files sort desc
+[31m[1mAssertionError[22m: expected [ 'e.wav' ] to deeply equal [ 'b.wav', 'c.wav', 'd.wav', 'e.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "b.wav",[39m
+[32m-   "c.wav",[39m
+[32m-   "d.wav",[39m
+[2m    "e.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m271:24[22m[39m
+    [90m269| [39m    [34mact[39m(() [33m=>[39m { useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34mtoggleSortDirection[39m()[33m;[39m })[33m;[39m
+    [90m270| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"e.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m271| [39m    [34mexpect[39m([34mselected[39m())[33m.[39m[34mtoEqual[39m([[32m"b.wav"[39m[33m,[39m [32m"c.wav"[39m[33m,[39m [32m"d.wav"[39m[33m,[39m [32m"e.wav"[39m])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m272| [39m  })[33m;[39m
+    [90m273| [39m  [34mit[39m([32m"EXP10 z11 bpm sort after save"[39m[33m,[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/file-list.test.ts[2m > [22mEXP shift anchor after save stats refresh (RR-R19-02)[2m > [22mEXP10 z11 bpm sort after save
+[31m[1mAssertionError[22m: expected [ 'd.wav' ] to deeply equal [ 'a.wav', 'd.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "a.wav",[39m
+[2m    "d.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/file-list.test.ts:[2m279:24[22m[39m
+    [90m277| [39m    [34mact[39m(() [33m=>[39m { useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34msetSortField[39m([32m"bpm"[39m)[33m;[39m })[33m;[39m
+    [90m278| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetFileRow[39m([32m"d.wav"[39m)[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m279| [39m    [34mexpect[39m([34mselected[39m())[33m.[39m[34mtoEqual[39m([[32m"a.wav"[39m[33m,[39m [32m"d.wav"[39m])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m280| [39m  })[33m;[39m
+    [90m281| [39m  [34mit[39m([32m"EXP11 z10 ctrl sets anchor"[39m[33m,[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m7 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (19)[39m
+[2m   Start at [22m 12:37:15
+[2m   Duration [22m 1.74s[2m (transform 199ms, setup 87ms, import 341ms, tests 652ms, environment 531ms)[22m
+
+
+::error file=/tmp/b-r22-old/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > EXP shift anchor after save stats refresh (RR-R19-02) > EXP2 red%3A click a%2C stats refresh for a%2C shift-click c selects a..c,line=220,column=24::AssertionError: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "a.wav",%0A-   "b.wav",%0A    "c.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:220:24%0A%0A
+
+::error file=/tmp/b-r22-old/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > EXP shift anchor after save stats refresh (RR-R19-02) > EXP3 red%3A click a%2C metadata update for a%2C shift-click c selects a..c,line=227,column=24::AssertionError: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "a.wav",%0A-   "b.wav",%0A    "c.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:227:24%0A%0A
+
+::error file=/tmp/b-r22-old/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > EXP shift anchor after save stats refresh (RR-R19-02) > EXP4 sort desc keeps anchor item,line=235,column=24::AssertionError: expected [ 'd.wav' ] to deeply equal [ 'b.wav', 'c.wav', 'd.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "b.wav",%0A-   "c.wav",%0A    "d.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:235:24%0A%0A
+
+::error file=/tmp/b-r22-old/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > EXP shift anchor after save stats refresh (RR-R19-02) > EXP6 search keeps anchor visible -> range,line=249,column=24::AssertionError: expected [ 'c.wav' ] to deeply equal [ 'a.wav', 'b.wav', 'c.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "a.wav",%0A-   "b.wav",%0A    "c.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:249:24%0A%0A
+
+::error file=/tmp/b-r22-old/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > EXP shift anchor after save stats refresh (RR-R19-02) > EXP8 reopen same folder without files change clears anchor -> plain,line=263,column=24::AssertionError: expected [ 'a.wav', 'b.wav', 'c.wav' ] to deeply equal [ 'c.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A+   "a.wav",%0A+   "b.wav",%0A    "c.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:263:24%0A%0A
+
+::error file=/tmp/b-r22-old/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > EXP shift anchor after save stats refresh (RR-R19-02) > EXP9 z4 5 files sort desc,line=271,column=24::AssertionError: expected [ 'e.wav' ] to deeply equal [ 'b.wav', 'c.wav', 'd.wav', 'e.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "b.wav",%0A-   "c.wav",%0A-   "d.wav",%0A    "e.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:271:24%0A%0A
+
+::error file=/tmp/b-r22-old/tests/renderer/components/file-list.test.ts,title=tests/renderer/components/file-list.test.ts > EXP shift anchor after save stats refresh (RR-R19-02) > EXP10 z11 bpm sort after save,line=279,column=24::AssertionError: expected [ 'd.wav' ] to deeply equal [ 'a.wav', 'd.wav' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "a.wav",%0A    "d.wav",%0A  ]%0A%0A ❯ tests/renderer/components/file-list.test.ts:279:24%0A%0A
