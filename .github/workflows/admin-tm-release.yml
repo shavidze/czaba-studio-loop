@@ -50,5 +50,5 @@ jobs:
           sed -i "s/${GH_TOKEN}/***/g" "$out"
           cat "$out"
           git config user.name "Saba Shavidze"; git config user.email "sabashavidze@gmail.com"
-          git add "$out"; git commit -qm "admin: Tag Manager release ($cmd)"
+          git add "$out"; git commit -qm "admin: Tag Manager release ($cmd)" || { echo "no change"; exit 0; }
           for i in 1 2 3; do git push -q origin HEAD:main && break; git pull -q --rebase origin main; done
