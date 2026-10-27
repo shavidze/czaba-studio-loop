@@ -1,10 +1,9 @@
 name: Admin - Tag Manager release
 
-# Root-only, two steps, driven by cloud/TM-RELEASE:
+# Root-only, read-only inspection, driven by cloud/TM-RELEASE:
 #   first line "inspect"           -> writes cloud/tm-release-info.txt (release.yml trigger, version, tags, releases, master head)
-#   first line "bump <version>"    -> commits package.json/package-lock.json version <version> on master of TCzaba/czaba-tag-manager;
-#                                     its release.yml sees a new version on the master push and builds the Windows/macOS release
-# Runs in the Tag Manager loop's concurrency group, so it never lands in the middle of a loop round.
+# A release itself is requested through tag-manager/cloud/RELEASE: the Tag Manager loop job bumps the version
+# before its round, so the bump never races a round (a separate job queued in the loop's group gets cancelled).
 on:
   push:
     paths: ["cloud/TM-RELEASE"]
@@ -13,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: tag-manager-loop
+  group: admin-tm-release
   cancel-in-progress: false
 
 jobs:
@@ -44,21 +43,6 @@ jobs:
               echo "== workflows"; ls /tmp/tm/.github/workflows
               echo "== release.yml"; cat /tmp/tm/.github/workflows/release.yml
               echo "== recent release.yml runs"; gh run list -R "$R" -w release.yml -L 5 || true
-            } >> "$out" 2>&1
-          elif [ "$cmd" = "bump" ] && [ -n "${tag:-}" ]; then
-            {
-              cd /tmp/tm
-              git config user.name "Saba Shavidze"; git config user.email "sabashavidze@gmail.com"
-              echo "master before: $(git log -1 --format='%h %s')"
-              if git rev-parse -q --verify "refs/tags/v$tag" >/dev/null; then echo "tag v$tag already exists, nothing done"
-              else
-                npm version "$tag" --no-git-tag-version --allow-same-version >/dev/null
-                git add package.json package-lock.json
-                git commit -qm "chore(release): v$tag" && git push -q origin HEAD:master && echo "pushed $(git log -1 --format='%h %s')"
-                git show --stat HEAD | tail -4
-              fi
-              cd - >/dev/null
-              sleep 30; echo "== release.yml runs"; gh run list -R "$R" -w release.yml -L 2 || true
             } >> "$out" 2>&1
           else
             echo "unknown command in cloud/TM-RELEASE: '$cmd'" >> "$out"

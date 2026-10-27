@@ -49,5 +49,5 @@ Before building any feature or UX change, B studies how the same thing works in 
 
 ## Root note — release v1.4.0 (Saba, 2026-10-27)
 
-- Saba asked for a new Tag Manager release. The repository's `release.yml` builds Windows and macOS installers when a master push carries a new `package.json` version. Root therefore commits one `chore(release): v1.4.0` commit on master that changes only `version` in `package.json` and `package-lock.json` (1.3.1 → 1.4.0). It runs between loop jobs (same concurrency group).
+- Saba asked for a new Tag Manager release. The repository's `release.yml` builds Windows and macOS installers when a master push carries a new `package.json` version. Root therefore commits one `chore(release): v1.4.0` commit on master that changes only `version` in `package.json` and `package-lock.json` (1.3.1 → 1.4.0). It runs inside a loop job, before the round starts (`tag-manager/cloud/RELEASE` → `run.sh`), so it never lands mid-round.
 - **Baseline rule:** when HEAD is a root `chore(release): vX.Y.Z` commit directly on top of the baseline named in `current-task.md`, and that commit changes only those two `version` fields, it counts as the baseline. A and C do not stop on it, and the frozen-file checks compare against it. The package.json freeze stays as before for agents.
