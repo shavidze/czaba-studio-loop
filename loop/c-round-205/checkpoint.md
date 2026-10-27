@@ -1,0 +1,13 @@
+# C round 205 checkpoint
+- SCOPE start OK (HEAD 135b880, 8 status lines, frozen OK, A end-sha OK). Diffs reviewed: R108-R110 + DEVIATION A-1 only.
+- ref :5174 (c-round-205/ref), mock :5199 started by C.
+- next: browser rows LM-OPEN/TAB/CLOSE/STEPS/EXIT, SCROLL-LOCK, NO-SHIFT, G205-3; T-RUN; AN-REVIEW
+- LM-OPEN/LM-TAB tree PASS 1280/1440/375 (out/opentab, logs/ot-*); ref before-picture 1280/1440/375.
+- LM-CLOSE tree PASS 9/9 (esc/click/enter x 3 widths) incl. wheel, reload; ref click 1280 -> scrollY 0 (out/close)
+- next: steps.cjs (incl 500 failure), exit, scroll-lock, noshift, g205-3, t-run
+- LM-STEPS 1280 PASS ok+fail paths (out/steps); in-flight Tab escapes to header (inflight-1280.json) -> Low finding
+- LM-EXIT 1440 PASS real mouse (out/exit-1440.json)
+- SCROLL-LOCK a-c PASS 1280/1440 via programmatic header click (header not sticky mid-page, ref same: hdr.cjs); ref 0. (d) export PASS = ref 1280/1440 (out/scrolllock/export-*)
+- next: noshift, g205-3, t-run, an-review
+- DONE: report + json written; servers stopped
+- advisor notes added (doc 162 status line, C-R205-01 severity for B)

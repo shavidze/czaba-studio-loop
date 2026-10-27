@@ -1,0 +1,67 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-27T08:29:02.5997841Z",
+  "round": 205,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R205-01",
+   "severity": "low",
+   "steps": [
+    "node c-round-205/tools/inflight.cjs 5173 1280 (route /api/subscribe -> 500 after 4 s)",
+    "popup open; Tab; Enter (email step); type a valid email; Enter",
+    "while the request is in flight press Tab, Tab, Escape"
+   ],
+   "expected": "R109(5) intent: Tab never reaches an element outside the dialog and Escape closes it in every state",
+   "actual": "while isSubmitting the disabled controls drop focus to BODY; Tab reaches the header links CZABA, then Collections, behind the modal; Escape does nothing; after the error the A-1 effect refocuses the email input. Window = network time. A's disclosed known gap | severity: Low, B to confirm vs Medium (race that breaks modal containment; A reviewer rated the post-error sibling Medium)",
+   "evidence": "c-round-205/out/steps/inflight-1280.json; a-round-205.md section 9"
+  },
+  {
+   "id": "C-R205-02",
+   "severity": "low",
+   "steps": [
+    "node c-round-205/tools/hdr.cjs 5173 (or 5174 ref)",
+    "/store, scroll to 800"
+   ],
+   "expected": "the position:sticky header stays at the top while scrolling",
+   "actual": "at scrollY 800 the header box is at y -800 in tree and ref (pre-existing, outside the grants); a real pointer or Tab to the header Sign In scrolls to 0 before the AuthModal opens",
+   "evidence": "c-round-205/tools/hdr.cjs, c-round-205/tools/amdebug.cjs"
+  }
+ ],
+ "passed": [
+  "SCOPE-205",
+  "LM-OPEN-205",
+  "LM-TAB-205",
+  "LM-STEPS-205",
+  "LM-CLOSE-205",
+  "LM-EXIT-205",
+  "SCROLL-LOCK-205",
+  "HF6B-205",
+  "NO-SHIFT-205",
+  "T-RUN-205",
+  "AN-REVIEW-205",
+  "G205-3"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [
+  "useScrollLock consumers studio/ExportDialog (/studio/:id) and the cart.tsx ConfirmDialog: backend unavailable in cloud (not rows)"
+ ],
+ "notes": {
+  "deviationA1": "verified in the browser (out/steps/fail-tree-1280.json); B rules accept or veto",
+  "ableton": "does not apply",
+  "exportWav": "not in scope this round; not claimed",
+  "doc162StatusLine": "doc 162 l.4 still says it waits for C round 205; stale after this PASS (GATE204-B1 class). Root or A must update it before publication; C did not edit it"
+ }
+}

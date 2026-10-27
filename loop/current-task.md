@@ -1,172 +1,181 @@
-# CURRENT TASK — Round 205: LeadMagnet popup as a real dialog (B-R203-LEADMAGNET-AUTO-OPEN-FOCUS), scroll lock keeps the page position (B-R204-SCROLLLOCK-POSITION-LOST), gate-204 fix-up (GATE204-B1)
+# CURRENT TASK — Round 206: STUDIO-PERFORMANCE PERF-1a, a perf harness that measures the fader drag (SABA-B-5), plus a one-line doc fix
 
-Decision: **D-29z170** · Planned by B on 2026-10-27 (from 07:50 UTC) · Dispatcher B · Implementer A · Verifier C.
+Decision: **D-29z171**. The queue move is D-29z172. Planned by B on 2026-10-27. Dispatcher: B. Implementer: A. Verifier: C.
 
-**Read first:** `lessons.md` (loop root). The previous task is `tasks/round-204.md` (an exact copy). B's rationale is in `b-round-204.md`.
+**Read first:**
+- `lessons.md` in the loop root.
+- The previous task, `tasks/round-205.md` (an exact copy).
+- B's rationale, in `b-round-205.md`.
+- B's planning probe:
+  - `b-round-205/tools/perfprobe.cjs`
+  - the outputs `b-round-205/out/perfprobe-head-*.json`
 
-## Baseline: HEAD `135b880` plus the round-204 work (gate 204 **blocked**, not published)
-- `gates/gate-round-204.json`: status `blocked`, reason "reviewer did not return COMMIT: OK", head `135b880`. `verify.log` is green (194 test files, Biome clean, build OK). The only blocker is `gates/round-204/review.md` Critical #1 (see GATE204-B1).
-- `git status --short --untracked-files=all` at planning (`b-round-204/git-status-at-planning.txt`) shows the round-204 work, which is **the baseline. Never revert, stash or re-create it**:
-  - ` M app/components/home/StudioShowcase.tsx`
-  - ` M app/components/layout/Header.tsx`
-  - `?? app/lib/__tests__/store-hidden-focusables.test.tsx`
-  - `?? docs/implementation/2026/quarter-IV/161-hidden-focusables-runtime.md`
-- **Frozen list:** `b-round-204-r205-tree-sha256.txt`, **1035 entries**: every tracked file (1037) minus the 2 tracked grants. `Header.tsx` and `StudioShowcase.tsx` are frozen at their **round-204 hashes** (`e907a1de…`, `f04726d9…`, which equal `a-round-204/end-sha256.txt`). From `store/`, run `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-204-r205-tree-sha256.txt`.
-- **Grants (4):** `b-round-204-r205-grants.txt`. Start copies are in `b-round-204/r205-granted-start/`, and their hashes are in `b-round-204-r205-granted-start-sha256.txt`.
-- **New files (2):** `b-round-204-r205-new-files.txt`. Neither exists at start.
-- **Protected, never touched:** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `.claude/**`, `CLAUDE.md`, and every frozen file. The frozen files include `AuthModal.tsx`, `ui/Modal.tsx`, `useLeadMagnet.ts`, `root.tsx`, `Header.tsx`, `StudioShowcase.tsx`, `store-focus-ring.test.ts`, `store-theme-tokens.test.ts` and `e2e/**`.
+## Baseline
+- **Commit:** `c274930`. Gate 205 is **published** to both remotes, so this is a clean tree with nothing uncommitted.
+- **Frozen files:** the 1,039 files in `b-round-205-r206-tree-sha256.txt`. This covers every tracked file except the 2 grants, so **all of `app/` is frozen**.
+- **Grants:** `b-round-205-r206-grants.txt`. Their start hashes are in `b-round-205-r206-granted-start-sha256.txt`, and start copies are in `b-round-205/r206-granted-start/`.
+- **New files:** listed in `b-round-205-r206-new-files.txt`.
+- **Protected areas:** auth/purchase files, `.claude/**` and `CLAUDE.md` are frozen, as always.
 
 ## 0. Why this round
-- **Bug gate:** the three items below are one class: focus and position are lost when an overlay opens or closes on a store page. All three are Medium or a gate blocker.
-- **Round 204 is C-PASSed but not published.** Its publication waits for GATE204-B1. Root publishes rounds 204 and 205 together after C PASS (the round-105 precedent).
-- **The regression round is not due:** `regression-last.json` is 2026-10-27 / round 199, so the next one is on or after 2026-10-30.
-- **RETRO is not due:** the next one comes at round 215 or at the end of STORE-REDESIGN.
+- **Saba's order (2026-10-27):** after SABA-B-4 (rounds 204 and 205, now published), **STUDIO-PERFORMANCE** comes next, starting with PERF-1, the harness. It comes before SYS-1…3 and before the remaining STORE stages. Saba finds the Studio slow, and gave the fader drag as an example (SABA-B-5, Medium).
+- **The bug gate is clear.** No Critical, High or Medium finding is open apart from:
+  - SABA-B-5 itself, which this stage measures and PERF-FADER fixes;
+  - Tech Lead, environment or accepted classes.
+  - C round 205's two new findings are Low (rulings are in `b-round-205.md` §3).
+- **Split, without shrinking scope** (tech-lead consult): PERF-1 becomes two rounds.
+  - **PERF-1a** (this round): infra, load, playback and the fader scenarios.
+  - **PERF-1b** (next): zoom, clip click, range drag, **fade-handle drag and trim drag** (Saba's SABA-B-5 text: "B checks the other continuous drags"), play/pause commit size, export, bytes, DOM and memory.
+  - All baseline rows of `perf-plan.md` stay in scope.
+- **B's probe on a scratch prod build of `c274930`** (1440×900, demo library, one "Add"). These are facts:
 
-| ID | Severity | What B measured | Where |
-|---|---|---|---|
-| **GATE204-B1** | gate blocker (reviewer "Critical") | Doc 161 l.111 says a jsdom test proves that the user menu closes when `isAuthenticated` becomes false. No such test exists (10 tests: HF1–HF9, HF8b). The doc status l.4 still says it waits for C, although C round 204 PASSed. | `store-hidden-focusables.test.tsx`, doc 161 |
-| **B-R203-LEADMAGNET-AUTO-OPEN-FOCUS** | Medium (pre-existing; supersedes the LeadMagnet half of C-R202-06) | The "FREE DOWNLOAD" popup (keep-list) auto-opens. On HEAD (`b-round-204/out/lm-head-1280.json`, `lm-head-mid-1280.json`) focus stays on the page behind it, Tab walks the header and page (Free Samples, About, Search, Cart; or Subscribe, Browse Gift Cards…), Escape does nothing, and there is no `role="dialog"`. | `LeadMagnetPopup.tsx` |
-| **B-R204-SCROLLLOCK-POSITION-LOST** | Medium (pre-existing, new at this planning) | `useScrollLock` sets `position: fixed` on the body **before** it reads `window.scrollY` for `top`. The document collapses, `scrollY` is already 0, so `top = 0px`, and on unlock the page restores to 0. **Measured on HEAD:** LeadMagnet opened at scrollY 2037 and closed with ✕ at 0 (`lm-head-close-1280.json`); Sign In (AuthModal) opened at 1500 and closed with Escape at 0 (`authmodal-scroll-5173.json`). A reader loses their place, and a restored focus would land off-screen. | `app/hooks/useScrollLock.ts` (used by `LeadMagnetPopup`, `ui/Modal`, `AuthModal`) |
+| Drag (121 pointer moves, 60 steps each way) | Commits | Re-rendered components per commit (median) | `start()` calls during drag while playing | Frame p95 at 1× / 6× CPU, playing |
+|---|---|---|---|---|
+| Track volume "Volume — Music" (runs `music-f1/f6`; the earlier `head-*` runs hit "Volume — Original video sound" and also gave 83) | 91–92 | **83** | 0 | 16.8 / **50** ms (53–105 frames > 33 ms) |
+| Master "Master Volume" | 90–96 | **80** | 0 | 16.8 / **50** ms (96–134 frames > 33 ms) |
+| Pan "Pan — Music" (already writes the AudioParam directly) | 80–107 | **4** | 0 | 16.7 / 33.4 ms (31–66 frames > 33 ms) |
+| Idle playback, 3 s | 0–1 | 0–1 | — | 16.8 / 33.2 ms |
 
-**B's scratch proof** (copy at `/tmp/b205s` on :5176, now stopped; sketches saved as `b-round-204/out/leadmagnet-sketch.tsx`, `usescrolllock-sketch.ts`, `hf6b-sketch.test.tsx`, `b205-probe.test.tsx`; tools in `b-round-204/tools/`):
-- **Sketch** (dialog semantics, initial focus on ✕, Tab wrap, Escape → `close()`, focus restore, plus `scrollY` read before the lock):
-  - opens with focus on ✕;
-  - Tab and Shift+Tab alternate ✕ ↔ FREE DOWNLOAD only;
-  - Escape closes it;
-  - focus returns to the pre-open element ("Browse the Collection") at **scrollY 2037** (`lm-sketch2-mid-1280.json`, `lm-sketch2-close-1280.json`);
-  - the AuthModal closes at 1500 (`authmodal-scroll-5176.json`);
-  - the brass ring shows on ✕ and FREE DOWNLOAD after keyboard entry (`fv true, solid 1px`).
-- **Lenis does not fight the restore:** 2037 holds at +1.8 s.
-- **Collision tests (L23):** `store-focus-ring.test.ts` (STF2: no focus-variant, outline or ring token, no bare `outline-none` in `LeadMagnetPopup.tsx`) and `store-theme-tokens.test.ts` (ST5 submit-button class attribute, ST7 email-field class region) were run on the sketch: **48/48 green**. No other test references `useScrollLock` or LeadMagnet (grep).
-- **jsdom feasibility:**
-  - A scroll-lock row with a `scrollY` getter that returns 0 while the body is `position: fixed` (the browser's clamp) is red on HEAD and green on the fix.
-  - A dialog-focus row is red on HEAD and green on the sketch.
-  - HF6b is green on the round-204 tree and red when the `isAuthenticated` effect is removed.
-  - **Harness note:** `rerender` must get a *new* element (`ui()`), or React bails out and the mocked `useAuth` is never re-read. B's first HF6b attempt failed on the good tree for this reason.
+- **Source facts behind these numbers** (`ArrangementContext.tsx` at c274930):
+  - These four previews call `updateHistory`, which makes the whole context value new, and then `syncPlayback`, on every move:
+    - `previewVolumeTarget` (l.2365), for track and group;
+    - `previewMasterGain` (l.2727);
+    - `previewClipGainFader` (l.2846);
+    - `previewClipGainMembers` (l.2892).
+  - `syncPlayback` calls `startGraph` only when `scheduleKey` (l.533) changes. `scheduleKey` serialises clips and loop **without** `gainDb`. So root's hypothesis "a fader move rebuilds the graph" is **not supported** by the source or the probe (0 restarts).
+  - "0 restarts while playing" therefore stays an **asserted** row. It guards PERF-FADER.
+- **Measurement methods B proved on the prod bundle** (the performance-optimizer consult agrees):
+  - a `__REACT_DEVTOOLS_GLOBAL_HOOK__` stub installed with `addInitScript` receives every commit;
+  - a fiber walk, using the PerformedWork flag (1) and descending only where `child !== alternate.child`, separates 83 from 4;
+  - patching `start` on `AudioScheduledSourceNode`, and on `AudioBufferSourceNode`, `OscillatorNode` and `ConstantSourceNode` where they define their own, counts the 1 start on Play.
+  - **Fact:** a capture/bubble wrapper around `pointermove` measures only the handler (~0.1 ms). React renders a native-listener update in a later task. Event Timing at `durationThreshold: 16` recorded 0 pointermove entries at 1×. Wall-clock evidence therefore comes from rAF frame intervals and LoAF, not from handler time.
 
-## 1. Rulings (recorded in `backlog.json` → `leadmagnet_dialog_rulings_d29z170`; Saba or root may veto)
-
-| ID | Ruling | Why |
-|---|---|---|
-| **R108** (GATE204-B1) | (1) Add **HF6b** to `store-hidden-focusables.test.tsx`, signed in: open the user menu (`aria-expanded="true"`) → `isAuthenticated=false`, `user=null`, rerender → `isAuthenticated=true`, `user=signedInUser`, rerender → the new "User menu" button has `aria-expanded="false"`. Each `rerender` gets a freshly created element (see the harness note). Do not change any other HF row.<br>(2) Optional, the reviewer's Low #4, in the same file: HF8b's real `setTimeout(50)` becomes deterministic (`vi.useFakeTimers()`/`advanceTimersByTime`, or `waitFor`). HF8b must stay red under m9.<br>(3) Doc 161: l.111 stays and now names **HF6b**. Status l.4 uses the TEMPLATE vocabulary, `In Progress`, followed by a parenthetical: implementation done, C round 204 PASS (`c-round-204.md`), publication together with round 205 after the gate fix. Add HF6b to the testing section and the mutant list (m11 below). Record B's ruling on DEVIATION 1 (accepted, §1 note) and the reviewer's Lows as TODO ids (§5 of `b-round-204.md`). | Deleting l.111 would leave the shipped effect (`Header.tsx:43-45`) untested, and docs are the regression dataset. Header stays frozen: the fix is test + doc only. |
-| **R109** (B-R203-LEADMAGNET-AUTO-OPEN-FOCUS) | In `LeadMagnetPopup.tsx` only. Keep every visible string, class string and step flow; keep-list: restyle-only rules apply, and nothing is removed or reworded.<br>(1) **Semantics:** the outer `fixed inset-0` element gets `role="dialog"`, `aria-modal="true"` and `aria-labelledby` pointing at the **current step's own heading(s)** (offer: both h2 → name "Get Your Tracks, Sound Effects & More"; email: "CONTINUE TO CLAIM YOUR OFFER"; success: "We've sent your free mystery pack to your email!"). Add `id`s to the existing h2 elements; no new visible text and no invented `aria-label`.<br>(2) **Initial focus** when it opens: the ✕ button ("Close", the first control in DOM order; it does not opt the user in to anything).<br>(3) **Step focus:** offer → email moves focus to the email input; → success moves it to "BACK TO SITE". A failed submit leaves focus where it is.<br>(4) **Escape** (keydown inside the dialog) calls the existing `close()` (the same as ✕: `dismissed: true`; no new snooze state) and `stopPropagation()`. It is ignored while `event.nativeEvent.isComposing` is true (the SYS-3 class).<br>(5) **Tab containment:** Tab from the last enabled control wraps to the first, and Shift+Tab from the first wraps to the last, in every step (offer: ✕, FREE DOWNLOAD; email: ✕, input, CONTINUE; success: ✕, BACK TO SITE). After a mouse click on non-focusable dialog content, Tab and Shift+Tab still never reach an element outside the dialog (e.g. `tabIndex={-1}` on the dialog element so the click focuses it; the choice is A's, the behaviour is the contract).<br>(6) **Focus restore:** when it closes (✕, Escape, BACK TO SITE), focus returns to the element that had it before opening, if that element is still connected, with `preventScroll: true`. This runs in an effect keyed on open → closed and declared **after** `useScrollLock` (never inside the click or key handler), so the scroll position is restored first. If nothing had focus (body), nothing is focused.<br>(7) The error `<p>` gets `role="alert"` (one attribute; text unchanged).<br>(8) `type="button"` on the ✕, FREE DOWNLOAD and BACK TO SITE buttons (Biome `useButtonType`); the submit button keeps `type="submit"`.<br>**Forbidden here** (STF2, ST5, ST7 pin these): any `focus:`, `focus-visible:`, `ring-*`, `outline-*` or bare `outline-none` token, and any edit to the submit button's or the email field's class string. The ring comes only from the global rule. | APG modal-dialog pattern, kept to the minimum that fixes WCAG 2.4.3 and 4.1.2 and gives a keyboard way out: initial focus inside, Escape, containment, restore. ✕ as the initial target avoids an accidental "FREE DOWNLOAD" on Enter. `inert` on the page is rejected (React 18 has no typed prop, and `root.tsx` is frozen). A portal or `ui/Modal` reuse is rejected: it would change the keep-list markup and visuals, and `Modal` has no focus management either (`shared-modal-no-focus-management`). |
-| **R110** (B-R204-SCROLLLOCK-POSITION-LOST) | In `useScrollLock.ts` only. Read `window.scrollY` into a constant **before** any body style is set, and use it for `top`. Nothing else changes: not the unlock or cleanup paths, not the scrollbar padding, and not the export or signature. | It is the actual cause of the "focus off-screen / page jumps to top" half of the LeadMagnet finding, and of the same jump on every Sign-In modal close. It is a one-line order fix in a shared hook; all three consumers want the documented behaviour ("Save current scroll position"). |
-
-**DEVIATION 1 of round 204** (CTA `hover:[transform:scale(1.05)] active:[transform:scale(0.98)]` instead of `hover:scale-105`) is **accepted by B**. C independently confirmed that the ruled form snaps because of the unlayered global transition rule. The in-grant `isAuthenticated` reset effect is accepted too; HF6b now covers it.
-
-**Ableton:** does not apply (store overlay and hook; no Arrangement counterpart). Compliance status: **არ ეხება**. Do not claim parity.
+## 1. Rulings (B; Saba or root may veto)
+- **R-A (placement).**
+  - The specs live in a new top-level **`perf/`** testDir. They are not under `e2e/`, so the default `playwright test` (`testDir: './e2e'`) and `npm run test:e2e` never pick them up, and `playwright.config.ts` stays frozen.
+  - The new `playwright.perf.config.ts` sets:
+    - `testDir: './perf'`, `workers: 1`, `retries: 0`;
+    - Chromium only;
+    - `webServer` runs `npm run build && npx remix-serve build/server/index.js`, with `PORT=5188`, `url: http://127.0.0.1:5188/studio-lab`, `reuseExistingServer: false` and a timeout ≥ 180 s.
+  - `package.json` gets one script: `"test:perf": "playwright test --config playwright.perf.config.ts"`. It is **not** added to `verify`.
+- **R-B (budgets).**
+  - `perf/budgets.json` is an array of rows: `{ id, scenario, metric, unit, kind: "deterministic" | "wallclock", mode: "assert" | "record", budget, tolerancePct?, owner: "PERF-n", note }`.
+  - Only `assert` rows can fail the run. A `record` row is printed and written, never asserted. Later PERF tasks flip their own rows to `assert`.
+  - `wallclock` rows are never `assert` in this round.
+  - A `PERF_BUDGETS=<path>` environment variable replaces the budgets file. It exists for C's red-proof and for later tasks.
+- **R-C (results).**
+  - Each run writes `test-results/perf/perf-1a-<ISO time>.json` and `test-results/perf/latest.json`. `test-results/` is already gitignored.
+  - Each row stores: the 3 samples, the median, min, max, and the budget with its mode and pass/fail.
+  - A short table is also printed to stdout.
+- **R-D (median of 3).** A **pass** is one fresh browser context that runs the whole scenario sequence in the fixed order of R-G. There are **3 passes per CPU rate** (so 6 page loads in total, not one context per scenario). Each row reports the median of its 3 samples.
+  - **Determinism assert:** applies **only** to `components-per-commit`, `restarts` and moves dispatched. Their 3 samples must agree within ±10 % or ±2, whichever is larger. If they do not, the run fails with "nondeterministic count <id>".
+  - **Commit counts** (`commits-per-move`, `load.commits`, `play.idle-commits`) are record-only and never under the determinism assert. The Scheduler merges commits under load, so they can vary.
+  - **Wallclock rows:** a trend only, with ±30 % expected noise.
+- **R-E (no interception).**
+  - No `page.route` or `context.route` on `/studio-lab` (perf-plan gotcha: it left the page on "Loading…").
+  - No app source change; all of `app/` is frozen. Instrumentation is `addInitScript` only.
+  - `localStorage.czaba_analytics_consent = 'denied'` is allowed (the e2e smoke precedent).
+- **R-F (CPU profiles).**
+  - Load and playback rows run at 1×.
+  - Every fader scenario runs at **1× and 6×** (`Emulation.setCPUThrottlingRate`), with 3 contexts each. B's probe shows the volume/pan difference in frames only at 6×. `components-per-commit` and `restarts` must agree across the two rates within R-D. Commit counts may differ between rates and are only recorded.
+- **R-G (fader scenarios).** There are 5 faders × {stopped, playing}. **Fixed order inside a pass:** track volume → pan → master → clip gain → **group last**. Ctrl+G changes the lane tree, so creating the group earlier would change the counts of every later fader. C's independent probe uses the same order. Each drag is `mouse.down` at the middle, 60 steps to 5 % of the width, then 60 steps to 95 %, then `mouse.up`. Moves dispatched = 121, and this is recorded.
+  1. track volume (`aria-label` "Volume — Music");
+  2. **group** volume: group two audio lanes first with click + Shift-click on the lane names, then Ctrl+G. The pattern is in `c-round-80/tools/q1.cjs`. Use the group's own fader label from `studioGroupHeaderStrings.volumeLabel`.
+  3. "Master Volume";
+  4. "Pan — Music";
+  5. "Clip Gain — fader", after a click selects the added clip.
+  - Find every element by role or label, never by class (L12).
+  - If the group or clip-gain fader cannot be reached through the UI, write **STOP — needs B ruling** (L11). Do not use a hidden route or a source change.
+- **R-H (playing state).**
+  - "Playing" means: Space after the library "Add", the Play button's `aria-label` reads "Pause", and the patched `AudioContext` constructor reports `state === 'running'` on the context that is not offline.
+  - Launch Chromium with `--autoplay-policy=no-user-gesture-required`.
+  - Count `start()` calls only on contexts that are **not** `OfflineAudioContext`.
+  - Loop stays off. Group the `start()` calls per task when reporting.
 
 ## 2. A — files you own (everything else is frozen)
-**Grants (4):**
-- `app/components/marketing/LeadMagnetPopup.tsx`: R109 only.
-- `app/hooks/useScrollLock.ts`: R110 only.
-- `app/lib/__tests__/store-hidden-focusables.test.tsx`: R108 (1)–(2) only.
-- `docs/implementation/2026/quarter-IV/161-hidden-focusables-runtime.md`: R108 (3) only.
+| Path | What |
+|---|---|
+| **new** `playwright.perf.config.ts` | R-A |
+| **new** `perf/studio-lab.perf.spec.ts` (+ helpers under `perf/lib/` if you want) | the scenarios below |
+| **new** `perf/budgets.json` | R-B rows listed below |
+| **new** `docs/implementation/2026/quarter-IV/163-studio-perf-harness.md` | Georgian implementation doc (TEMPLATE.md sections). It covers how to run the harness, each metric's definition and its known limit (Event Timing 16 ms floor; handler time ≠ render time; counts heuristic may slightly undercount hook bailouts), B's baseline table and your own measured medians, and the TODOs (PERF-1b scenarios, PERF-FADER flips its rows). **L26:** cite only test or row ids that exist. **L28:** write the status line conditionally ("C round 206 check pending"); root amends it at publication. |
+| `package.json` (grant) | exactly the one `test:perf` script line; no dependency change |
+| `docs/implementation/2026/quarter-IV/162-lead-magnet-dialog-focus.md` (grant), **R112** | l.4 only: the status becomes `In Progress (C round 205 PASS — c-round-205.md; published c274930; open: C-R205-01 in-flight window, Low)`. No other line changes. |
 
-**New files (2):**
-- `app/lib/__tests__/store-lead-magnet-dialog.test.tsx` (jsdom), rows LM1–LM9 (step 3).
-- `docs/implementation/2026/quarter-IV/162-lead-magnet-dialog-focus.md`, in Georgian per `docs/implementation/TEMPLATE.md`. It covers:
-  - R109 and R110;
-  - the rejected alternatives (`inert`, portal or `ui/Modal` reuse, focus on FREE DOWNLOAD, Escape as snooze);
-  - B's probe numbers (2037 → 0 on HEAD, 2037 kept on the fix; AuthModal 1500 → 0 vs 1500);
-  - TODOs: the command palette half of C-R202-06 and `shared-modal-no-focus-management` (`ui/Modal` / AuthModal focus) stay open.
+**TypeScript:** strict mode. `tsc` includes `**/*.ts`, so `npm run typecheck` checks `perf/` too.
+- No `any`, no `@ts-ignore`, no `as` assertions.
+- Type the fiber walk with a minimal local interface (`{ tag: number; flags: number; child, sibling, alternate: Fiber | null }`). Type the hook with `declare global { interface Window { … } }`.
+- Semicolons everywhere. Biome lints only `./app`, but keep the same style.
 
-**Primitives to read first:** `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`, `AGENT_DISCOVERABLE_CODE.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `.claude/prompts/new-test.md`, `.claude/prompts/new-hook.md` (hook edit).
+### Scenarios and budget rows (R111)
+| Row id | Scenario | Metric | kind | mode / budget |
+|---|---|---|---|---|
+| `harness.hook-live` | load + library "Add" click | commits seen by the hook after the Add click | deterministic | **assert ≥ 1** (a disabled hook must fail, not report 0) |
+| `harness.audio-running` | playing setup (R-H) | the AudioContext is running, and Play's label is "Pause" | deterministic | **assert true** |
+| `harness.restart-live` | while playing, drag the added clip 1 s to the right (a scheduleKey change) | `start()` calls from pointerdown until 500 ms after pointerup (the move may apply on release) | deterministic | **assert ≥ 1** (proves the restart counter is live) |
+| `load.longtask-max` / `load.longtasks-over-50` / `load.ready-ms` | fresh `/studio-lab` until "ready" (A defines and documents ready as an observable UI state, e.g. the library Add button enabled and the waveform drawn) | the largest long task; the count over 50 ms; ms to ready | wallclock / deterministic / wallclock | record (owner PERF-2 / PERF-5); baseline 463–491 ms, ready 2.3–2.5 s |
+| `load.commits` | the same | commits and summed re-rendered components until ready | deterministic | record |
+| `play.idle-commits` | 5 s of playback after start + 1 s settle | commits and re-rendered components | deterministic | record (perf-plan: 0; B saw 0–1) |
+| `play.idle-longtasks-over-50` | the same | count | deterministic | **assert 0** at 1× |
+| `fader.<track/group/master/pan/clipgain>.<stopped/playing>.components-per-commit` | R-G | median of re-rendered components per commit during the drag (+ max) | deterministic | record (owner PERF-FADER, target ≤ 3) |
+| `…commits-per-move` | R-G | commits ÷ moves dispatched | deterministic | record (an upper bound only; the Scheduler merges commits) |
+| `…restarts` (playing only) | R-G | `start()` calls during the drag | deterministic | **assert 0** |
+| `…frame-p95` / `…frames-over-33` (1× and 6×) | R-G | rAF interval p95 and count > 33.4 ms during the drag | wallclock | record (trend) |
+| `…loaf-count` / `…event-share-16` | R-G | LoAF entries during the drag; the share of dispatched moves with an Event Timing pointermove or input entry ≥ 16 ms | wallclock | record (owner PERF-FADER: share < 5 % ⇔ p95 < 16 ms) |
 
-**Steps:**
-1. **Start checks**, from `store/`. If any fails, it is a **STOP** (L11):
-   - HEAD is `135b880`;
-   - `git status` equals the four baseline lines above, exactly;
-   - the frozen list checks OK;
-   - the 4 grants equal `b-round-204-r205-granted-start-sha256.txt`;
-   - neither new file exists.
-2. **Collision grep (L23, already done by B; re-run it):** `grep -rln "useScrollLock\|LeadMagnet\|FREE DOWNLOAD\|czaba_lead_magnet" app --include=*.test.* ; grep -rln "FREE DOWNLOAD\|lead" e2e`.
-   - **Expected hits:** `store-focus-ring.test.ts` (GRANTED_STORE_SOURCES list + STF2 scan) and `store-theme-tokens.test.ts` (ST5, ST7). Both stay green. Any e2e hit is not run by you or the gate; list it.
-   - **Any other hit** in a frozen test is a STOP.
-3. **Implement R108–R110**, then write `store-lead-magnet-dialog.test.tsx`.
-   - **Setup:** mock `~/hooks` so that `useLeadMagnet` returns a mutable fixture (`shouldShow`, `currentStep`, `close` spy, `isSubmitting`, `error`) and `useScrollLock` is the **real** hook (`vi.importActual('~/hooks/useScrollLock')`). See `b-round-204/out/b205-probe.test.tsx`. Find elements by role, name and `aria-*`; **no styling-class assertions** (L12).
-   - **LM1:** with `shouldShow`, there is exactly one `role="dialog"` with `aria-modal="true"`. Its accessible name (from `aria-labelledby`) is "Get Your Tracks, Sound Effects & More" in offer, "CONTINUE TO CLAIM YOUR OFFER" in email, and "We've sent your free mystery pack to your email!" in success. `getAllByRole('button', {name})` returns 1 for every button name (L14).
-   - **LM2:** a button outside has focus; the dialog opens → `document.activeElement` is the "Close" button.
-   - **LM3:** switching the fixture step to `email` focuses the email input; switching it to `success` focuses "BACK TO SITE".
-   - **LM4:** Escape on a control inside → `close` called once, and a `document` keydown listener added by the test does not see it. Escape with `isComposing: true` → `close` is not called.
-   - **LM5:** containment per step: Tab on the last control → focus is on the first, with `preventDefault`; Shift+Tab on the first → focus is on the last. Use `fireEvent.keyDown` and assert `activeElement` (jsdom does not move focus on Tab by itself).
-   - **LM6:** after the dialog element itself is focused (the simulated click on non-focusable content), Shift+Tab lands on the last control (a handler case). Forward Tab from the dialog element is the browser's default move to ✕; jsdom cannot show it, so it is proven only by C's LM-TAB-205 post-click Tab. Do not add a handler for it.
-   - **LM7:** open (pre-focus an outside button), then `shouldShow=false` and rerender with a fresh element → `activeElement` is that outside button. If it was removed from the DOM before closing, no error is thrown and focus is not forced anywhere.
-   - **LM8 (`useScrollLock`, real hook):** spy `window.scrollTo`, and give `scrollY` a getter that returns 0 while `document.body.style.position === 'fixed'`, else 1500. Lock → `body.style.top === '-1500px'`. Unlock → `scrollTo(0, 1500)`, and `position`, `overflow`, `top` and `width` are removed. Unmount while locked → the same restore.
-   - **LM9:** the error `<p>` (fixture `error: 'x'`) has `role="alert"`, and its text is unchanged.
-   - Plus **HF6b** in the round-204 file (R108).
-4. **Mutants** (on a scratch copy, never in `store/`). Each must turn the listed row red; report the table:
-   - m1 the `role`/`aria-modal` removed → LM1;
-   - m2 no initial focus → LM2;
-   - m3 no step focus → LM3;
-   - m4 Escape not handled → LM4;
-   - m5 `isComposing` not checked → LM4;
-   - m6 no Tab wrap → LM5;
-   - m7 the wrap only handles `activeElement === last` (no dialog-element case) → LM6;
-   - m8 no focus restore → LM7;
-   - m9 restore inside the ✕ handler only → LM7 (closing through the fixture);
-   - m10 the original `useScrollLock` order → LM8;
-   - m11 the `isAuthenticated` effect removed from a **scratch** `Header.tsx` → HF6b;
-   - m12 `role="alert"` removed → LM9.
-5. **Self-checks:**
-   - `npm run typecheck`;
-   - `npm run lint` (no new warnings in the grants; `useButtonType` in `LeadMagnetPopup.tsx` goes to 0);
-   - `npx vitest run app/lib/__tests__/store-lead-magnet-dialog.test.tsx app/lib/__tests__/store-hidden-focusables.test.tsx app/lib/__tests__/store-focus-ring.test.ts app/lib/__tests__/store-theme-tokens.test.ts app/lib/__tests__/store-header-footer.test.tsx`.
-   - No full suite and no `npm run verify` (gate rows).
-6. **Browser self-check** (Playwright on :5173; the mock on :5199 is not needed for these rows). Copy `lmprobe.cjs`, `lmprobe-mid.cjs`, `lmprobe-close.cjs` and `authmodal-scroll.cjs` from `b-round-204/tools/` into `a-round-205/tools/`, change their output dir to `a-round-205/out/`, and run them at 1280×720. Expect what B saw on the sketch: focus on ✕ at open, Tab wraps, Escape closes, focus returns, scrollY 2037 (±2) kept, AuthModal 1500 kept. Put the output paths in the report.
-7. **code-reviewer** on the 6 files (3+ changed). Fix Low findings in your own files only. Report the Architecture note verbatim; do not act on it.
-8. **Report** `a-round-205.md`, plus `a-round-205/end-sha256.txt` over the 4 grants and the 2 new files. **Before handing over (L26):** grep each test id and behaviour that doc 161 and doc 162 cite (HF*, LM*); each must exist by name in the named test file, and each doc's mutant table must match your report.
+**Self-checks before handover (A runs these, not the full suite):**
+- `npm run typecheck`
+- `npm run lint`
+- `npx biome format perf playwright.perf.config.ts` (read-only; it must report no changes)
+- `npm run test:perf` **twice**, keeping both result JSONs in `a-round-206/`
+- `npx playwright test --list` with the default config: it must show no `perf/` file
+- one red-proof of your own (see PERF-RED-206)
+- the code-reviewer, because 3+ files change. Carry its Architecture note to B verbatim.
 
-**STOP conditions** (L11: write "STOP — needs B ruling" at the top and change nothing else):
-- a start check fails;
-- a frozen test turns red;
-- an item needs a file outside the grants (`root.tsx`, `ui/Modal.tsx`, `AuthModal.tsx`, `useLeadMagnet.ts`, `Header.tsx`);
-- the probe shows focus or scroll lost after R109/R110.
+**Report** (`a-round-206.md`):
+- the medians table next to B's table;
+- any count that differs from B's by > 15 %, with your explanation (a different heuristic, or a group or clip-gain scenario not in B's probe);
+- the run time of `test:perf`, which should be ≤ 12 min. If it is longer, say so.
 
-## 3. C — rows (1280×720 and 1440×900; 375×812 where marked; settle ≥ 1.2 s per key on store pages because Lenis animates 1.2 s, L1)
+**STOP conditions (L11):**
+- the hook receives no commits from the prod bundle;
+- the group or clip-gain fader cannot be reached via the UI;
+- the non-offline AudioContext stays `suspended` in headless Chromium even with the autoplay flag;
+- a needed change touches any frozen file.
+
+## 3. C — rows
 **Setup:**
-- **Ref** = a tar of `store/` minus node_modules/.git/build/.vite, with node_modules symlinked, the 4 grants restored from `b-round-204/r205-granted-start/`, the 2 new files removed, and its own `cacheDir`, served on :5174. Ref is the round-204 tree, not HEAD.
-- **Tree** = :5173 (root). The mock on :5199 is needed only by rows that load product data; start it if `curl :5199/__mock/health` fails.
-- **Popup trigger (deterministic):**
-  - fresh `czaba_lead_magnet` (absent, or `dismissed:false, submitted:false, viewCount:0` with today's date), anonymous, cookies declined;
-  - scroll to ≥ 55 % of the page and wait until "FREE DOWNLOAD" is visible (it opens 8 s after load);
-  - the exit-intent path (`mouseleave` at `clientY ≤ 0` after the scroll) is a second trigger for one row.
-- **Other rows** suppress the popup with the round-204 seed (`dismissed:true`).
+- Root's dev server stays on :5173. The perf config builds and serves its own copy on :5188.
+- Run on the tree, or on a tar copy with node_modules symlinked if you want to isolate it.
+- **No ref comparison is needed:** this is a new harness, so there is no before-picture.
+- **Ableton: does not apply** (no product behaviour changes).
 
 | Row | What C does | PASS when |
 |---|---|---|
-| **SCOPE-205** (start and end) | HEAD; `git status`; frozen 1035; grant diffs vs the start copies; new files; `a-round-205/end-sha256.txt` | only the 4 grants + 2 new files differ from the baseline; the diffs are R108–R110 and nothing else; `Header.tsx` and `StudioShowcase.tsx` still at their round-204 hashes; protected files, `.claude` and `CLAUDE.md` unchanged |
-| **LM-OPEN-205** (1280, 1440, 375) | popup trigger; before it opens, `focus()` a visible link in the viewport at 55 % (as `lmprobe-mid.cjs`); read `role`, `aria-modal`, the accessible name (Playwright `getByRole('dialog', {name})` or CDP AX tree), `activeElement` and its ring | one dialog, modal, name "Get Your Tracks, Sound Effects & More"; focus on "Close" within 500 ms of the popup being visible; ring per the global rule (keyboard source: solid ≥ 1px brass, offset 2px; record the pointer-source state as observed). Ref: no dialog, focus stays on the page (before-picture) |
-| **LM-TAB-205** (1280, 1440, 375) | from open: Tab ×4, Shift+Tab ×2, each step's `activeElement`; then mouse-click on the CZABA wordmark (non-focusable) and Tab ×2, Shift+Tab ×2 | every stop is inside the dialog: offer cycles Close ↔ FREE DOWNLOAD; no header/page element is ever focused; after the wordmark click the same. Each focused control shows the ring after keyboard. Ref lists the page stops behind the overlay |
-| **LM-STEPS-205** (1280) | Enter on FREE DOWNLOAD → email step; Tab cycle; empty submit (Enter on CONTINUE) → error; `page.route('**/api/subscribe', …)` fulfils 200 `{}` → type a valid address, submit → success; Tab cycle; Enter on BACK TO SITE | email step: focus on the email input, name "CONTINUE TO CLAIM YOUR OFFER", cycle ✕ → input → CONTINUE → ✕; the error text "Please enter your email address" is in a `role="alert"` element; success: focus on BACK TO SITE, name = the success heading, cycle ✕ ↔ BACK TO SITE; BACK TO SITE closes and focus returns to the pre-open element. The `page.route` fixture is browser-side only (no backend needed; it is not BLOCKED) |
-| **LM-CLOSE-205** (1280, 1440, 375) | three separate opens from scrollY ≈ 55 % with a focused mid-page link: (a) Escape; (b) mouse click on ✕; (c) Enter on ✕. Record scrollY before open, during open (`body.style.top`), +300 ms and +1.8 s after close; `activeElement`; body inline styles | popup gone; `czaba_lead_magnet.dismissed === true`; scrollY after = before ±2 px at +300 ms and +1.8 s; `body.style.top` during open = `-<before>px`; body `position/overflow/top/width` cleared; focus back on the pre-open link and the link is on screen. A reload does not show the popup again (dismissed). Ref: scrollY 0 after ✕ (before-picture) |
-| **LM-EXIT-205** (1440) | exit-intent trigger: scroll ≥ 40 %, then mouse to `clientY 0` and out | the same dialog opens with focus on Close; Escape closes and restores (one sample) |
-| **SCROLL-LOCK-205** (1280, 1440; popup suppressed) | (a) `/`: scroll to 1500, click header "Sign In", Escape; (b) the same, close with the modal ✕; (c) `/store`: scroll to ~800, open Sign In, close; record scrollY before/after and `body.style.top` while open. (d) `ui/Modal` consumer reachable in the cloud: `/studio-lab`, open the Export dialog (`ArrangementExportDialog`, built on `ui/Modal`), close it with Escape and with its ✕ | (a)–(c): after = before ±2 px; `top` = `-<before>px` while open; the AuthModal still opens once and closes; ref: after = 0 (before-picture). (d): the dialog opens once and closes; afterwards the body `position/overflow/top/width` inline styles are cleared, scrollY is unchanged (= before, normally 0), and the workspace responds (Space starts and stops playback, or a clip click selects it) = ref |
-| **HF6B-205** | run HF6b on the tree copy; on a scratch copy with the `isAuthenticated` effect removed from `Header.tsx` | green on the tree; red on the mutant; HF1–HF9 and HF8b unchanged and green |
-| **NO-SHIFT-205** (1280, 1440, 375) | box diff of the popup's ✕, headings, FREE DOWNLOAD, email field, CONTINUE and BACK TO SITE, tree vs ref, in the same step and scroll state; screenshots of offer and email | 0 diffs beyond ±1 px; no new visible text; keep-list strings identical |
-| **T-RUN-205** | the 5 targeted test files on a tree copy; LM1–LM9 + HF6b on the start copy (expected: LM1–LM9 red; HF6b green on the start copy because the round-204 Header already has the effect, so HF6b's red-proof is m11, per L23); A's mutant table re-run plus at least 1 C mutant | targeted green on the tree; each mutant reds its row as listed; any green mutant that should be red = FAIL |
-| **AN-REVIEW-205** | added lines: no `as`, `any` or `@ts-ignore`, no hex, no custom CSS, no focus-variant/outline/ring token; doc 162 in Georgian with R109/R110, the rejected alternatives, the probe numbers and the TODOs; doc 161 status line and HF6b updated; **L26:** every test id or test behaviour cited in doc 161 and doc 162 exists by name in the named test file (grep each HF/LM id), and each doc's mutant table matches `a-round-205.md` | all true; any cited test that does not exist = FAIL (the gate-204 block class) |
-| **G205-3** | fresh contexts at 1440 and 1280: `/studio-lab` opens anonymously (demo collection) and shows no LeadMagnet; `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token` returns 401 without a header and 403 with a fake Bearer | all true; 0 forbidden requests |
-| **gate** | full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke | not claimed by C (root gate) |
+| **SCOPE-206** (start and end) | HEAD, `git status`, the frozen list (1039), the grant diffs vs the start copies, the new files | only `package.json` (+1 script line) and doc 162 l.4 differ among tracked files; the new files are exactly the ones in `b-round-205-r206-new-files.txt`; **0 changes under `app/`**; protected files, `.claude` and `CLAUDE.md` unchanged |
+| **PERF-RUN-206** | `npm run test:perf` twice (separate invocations) | both runs exit 0; every `assert` row passes; the JSON has every row of §2 with 3 samples, median, min and max; deterministic medians agree between the two invocations within ±10 %/±2; the run time is recorded |
+| **HARNESS-LIVE-206** | read `harness.*` in both JSONs; then run once with a `PERF_BUDGETS` copy where `harness.restart-live` needs ≥ 1000 | the three `harness.*` rows pass with real values; the ≥ 1000 copy **fails** and names that row (the counter is read, not hard-coded) |
+| **FADER-206** | compare the 5 × 2 fader rows with C's **own independent probe** (not A's code), written under `c-round-206/tools/`, for track volume and pan, stopped and playing, at 1× | C's component-per-commit medians match the harness within ±15 % (B's reference: 83 and 4); the group, master and clip-gain rows have real values with moves dispatched = 121; restarts while playing = 0 in every playing row; the 6× frame rows exist for all 10 scenarios |
+| **PERF-RED-206** | (a) a `PERF_BUDGETS` copy that flips `fader.track.stopped.components-per-commit` to `assert ≤ 3`; (b) on a tar copy outside the tree (never in A's files), remove the hook stub from the spec and run it | (a) the run fails, naming that row and the measured value; (b) `harness.hook-live` fails (a hook that is off cannot pass as "0 commits") |
+| **ISOLATION-206** | `npx playwright test --list` (default config) and `npx playwright test --config playwright.smoke.config.ts --list` | no `perf/` spec in either; `e2e/` file list unchanged from HEAD |
+| **AN-REVIEW-206** | the new `.ts` files and the docs | no `any`, `@ts-ignore` or `as` assertion; no `route(` interception; no committed fixtures or binaries; doc 163 in Georgian with the metric definitions and limits, B's table, A's medians and the TODOs; **L26:** every row id cited in doc 163 exists in `budgets.json` or the spec; doc 162 differs only at l.4 |
+| **G206-3** | fresh contexts at 1440 and 1280: `/studio-lab` opens anonymously (demo collection, no sign-in); `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token` returns 401 with no header and 403 with a fake Bearer | all true; premium auth is not bypassed |
+| **gate** | full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke | not claimed by C; the root gate runs them |
 
-**Not in scope for C failures** (report new findings with severity; Lows go to `deferred_low_polish`):
-- the CommandPalette half of C-R202-06;
-- `ui/Modal`/AuthModal focus management (`shared-modal-no-focus-management`);
-- C-R204-01 and C-R204-02 (deferred Lows).
+`browserVerified`: PERF-RUN, HARNESS-LIVE, FADER, PERF-RED and G206-3 are real Chromium rows that **can** run in the cloud. If any of them did not run, the flag is false.
 
-## 4. Adjacent behaviour that could break (C probes it, A guards it)
-- `useLeadMagnet`'s show rules are unchanged:
-  - no popup when signed in (seam `auth_user`);
-  - no popup after dismiss or submit;
-  - at most one show per load.
-- AuthModal Sign In opens once from the header (desktop and 375 mobile menu) and its Escape still closes it.
-- The popup's fade-in animation still plays.
-- A Lenis wheel scroll works after the popup closes: scroll down 300 px with the mouse wheel and confirm that scrollY changes.
-- `/studio-lab` never mounts the popup (`isStudioPage`).
-- **`useScrollLock` consumers (R110 is shared infrastructure):** `LeadMagnetPopup`, `AuthModal`, and `ui/Modal`, which is used by `ArrangementExportDialog` (`/studio-lab`, row SCROLL-LOCK-205 (d)), `studio/ExportDialog` (`/studio/:id`, backend-blocked) and the `ConfirmDialog` in `cart.tsx` (needs a backend cart). The last two are not rows; C lists them as backend-blocked evidence, not FAIL.
-- The round-204 rows HIDDEN, USERMENU and SHOWCASE are not re-run unless a diff touches them: frozen hashes prove they did not change.
+## 4. Adjacent behaviour that could break
+- **`npm run typecheck`:** the new `.ts` files are type-checked. A type error there fails the gate.
+- **`npm run test:e2e` and the smoke gate:** they must not pick up `perf/` (ISOLATION-206).
+- **`build/`:** `test:perf` writes the production build into `store/build`. It is gitignored, and root's dev server on :5173 does not read it. C checks that `git status` shows nothing new outside the new files.
+- **Run time:** a `test:perf` run longer than 15 min is reported as a Low.
 
 ## 5. Publication
-On C PASS, root publishes **rounds 204 and 205 together** against `135b880`: the 2 round-204 grants (`Header.tsx`, `StudioShowcase.tsx`), the round-204 test and doc 161, the 2 round-205 code grants (`LeadMagnetPopup.tsx`, `useScrollLock.ts`) and the 2 new files.
+After C PASS, root runs the gate. The commit message says: "perf harness only; no app/ change; doc 162 status line". Root also amends doc 163's status line to the post-PASS wording, per L28.
 
-The reviewer's Suggestion #2 is a note for root's commit message: the Logout `onClick` now calls `setIsUserMenuOpen(false)` before `signOut()`, and the account links got a menu-closing `onClick`. `signOut`, `~/lib/auth` and `AuthContext` are unchanged. Do not write "auth not touched".
+## 6. After this round (not in scope)
+- **PERF-1b** also measures the fade-handle, trim and range drags. Each one that shows the same whole-provider re-render becomes its own PERF task.
+- **PERF-FADER** (SABA-B-5 fix, following the pan pattern; tech-lead traps are listed in `b-round-205.md` §5) or **PERF-1b**. B decides at round-207 planning, from the PERF-1a numbers.
+- **Then** PERF-2…16, then SYS-1…3, then STORE-2b…5 (paused), then REVIEW-RECOMMENDATIONS and T12-ADVANCED.
+- **Regression round:** due on or after 2026-10-30.
+- **RETRO:** at round 215, or at the end of the STUDIO-PERFORMANCE entry, whichever comes first.
