@@ -1,0 +1,112 @@
+diff --git a/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/App.tsx b/tmp/b-r28-exp/src/renderer/src/App.tsx
+index d447914..23c8eb6 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/App.tsx
++++ b/tmp/b-r28-exp/src/renderer/src/App.tsx
+@@ -60,8 +60,8 @@ export default function App(): React.ReactElement {
+         if (wavFiles.length > 0) {
+           const paths = wavFiles.map((f) => f.path);
+           const currentSchema = useSchemaStore.getState().fields;
+-          const { data: meta } = await readMetadataChunked(paths, currentSchema);
+-          setMetadata(meta as Record<string, WavMetadata>);
++          const { data: meta, readGenerations } = await readMetadataChunked(paths, currentSchema);
++          useFileStore.getState().applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations);
+         }
+       } catch (err) {
+         useMetadataStore
+diff --git a/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/sidebar/FolderBrowser.tsx b/tmp/b-r28-exp/src/renderer/src/components/sidebar/FolderBrowser.tsx
+index e22465e..e046123 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/sidebar/FolderBrowser.tsx
++++ b/tmp/b-r28-exp/src/renderer/src/components/sidebar/FolderBrowser.tsx
+@@ -108,8 +108,8 @@ export function FolderBrowser(): React.ReactElement {
+       if (wavFiles.length > 0) {
+         const paths = wavFiles.map((f) => f.path);
+         const currentSchema = useSchemaStore.getState().fields;
+-        const { data: meta } = await readMetadataChunked(paths, currentSchema);
+-        setMetadata(meta as Record<string, WavMetadata>);
++        const { data: meta, readGenerations } = await readMetadataChunked(paths, currentSchema);
++        useFileStore.getState().applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations);
+       }
+     } catch (err) {
+       useMetadataStore
+@@ -144,8 +144,8 @@ export function FolderBrowser(): React.ReactElement {
+       if (wavFiles.length > 0) {
+         const paths = wavFiles.map((f) => f.path);
+         const currentSchema = useSchemaStore.getState().fields;
+-        const { data: meta } = await readMetadataChunked(paths, currentSchema);
+-        setMetadata(meta as Record<string, WavMetadata>);
++        const { data: meta, readGenerations } = await readMetadataChunked(paths, currentSchema);
++        useFileStore.getState().applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations);
+       } else {
+         setMetadata({});
+       }
+diff --git a/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/lib/utils.ts b/tmp/b-r28-exp/src/renderer/src/lib/utils.ts
+index b0a7718..98174d8 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/lib/utils.ts
++++ b/tmp/b-r28-exp/src/renderer/src/lib/utils.ts
+@@ -1,5 +1,6 @@
+ import { type ClassValue, clsx } from 'clsx';
+ import { twMerge } from 'tailwind-merge';
++import { useFileStore } from '~/stores/file-store';
+ import type { FieldDefinition } from '~/types';
+ 
+ export function cn(...inputs: ClassValue[]): string {
+@@ -49,17 +50,24 @@ const METADATA_CHUNK_SIZE = 50;
+ export async function readMetadataChunked(
+   paths: string[],
+   schema: FieldDefinition[],
+-): Promise<{ data: Record<string, Record<string, unknown>>; failures: number }> {
++): Promise<{
++  data: Record<string, Record<string, unknown>>;
++  failures: number;
++  readGenerations: Record<string, number>;
++}> {
+   const accumulated: Record<string, Record<string, unknown>> = {};
++  const readGenerations: Record<string, number> = {};
+   let failures = 0;
+   for (let i = 0; i < paths.length; i += METADATA_CHUNK_SIZE) {
+     const chunk = paths.slice(i, i + METADATA_CHUNK_SIZE);
++    const readGeneration = useFileStore.getState().writeGeneration;
+     try {
+       const result = await window.api.readMetadataBatch(chunk, schema);
+       Object.assign(accumulated, result);
++      for (const path of Object.keys(result)) readGenerations[path] = readGeneration;
+     } catch {
+       failures += chunk.length;
+     }
+   }
+-  return { data: accumulated, failures };
++  return { data: accumulated, failures, readGenerations };
+ }
+diff --git a/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/stores/file-store.ts b/tmp/b-r28-exp/src/renderer/src/stores/file-store.ts
+index c2868ce..d227bac 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/src/renderer/src/stores/file-store.ts
++++ b/tmp/b-r28-exp/src/renderer/src/stores/file-store.ts
+@@ -29,6 +29,7 @@ interface FileState {
+   toggleSortDirection: () => void;
+   setIsScanning: (scanning: boolean) => void;
+   markPathsWritten: (paths: string[]) => void;
++  applyMetadataRead: (read: Record<string, WavMetadata>, readGenerations: Record<string, number>) => void;
+ }
+ 
+ export const useFileStore = create<FileState>((set) => ({
+@@ -124,6 +125,20 @@ export const useFileStore = create<FileState>((set) => ({
+       }
+       return { writeGeneration, pathWriteGenerations };
+     }),
++
++  applyMetadataRead: (read, readGenerations) =>
++    set((state) => {
++      const metadata: Record<string, WavMetadata> = {};
++      for (const [path, meta] of Object.entries(read)) {
++        if ((state.pathWriteGenerations[path] ?? 0) > (readGenerations[path] ?? 0)) {
++          const current = state.metadata[path];
++          if (current) metadata[path] = current;
++        } else {
++          metadata[path] = meta;
++        }
++      }
++      return { metadata };
++    }),
+ }));
+ 
+ function getFilteredFiles(state: FileState): WavFileEntry[] {

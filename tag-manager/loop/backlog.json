@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 27: TM-B29 re-verification on baseline 6c956b4 (C verifies c2c19a7..6c956b4; A idle)",
+  "current_task": "Round 28: TM-B30 stale folder read guard (D-35) on baseline 6c956b4",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -296,8 +296,14 @@
     },
     {
       "id": "D-34",
-      "status": "implemented in 6c956b4 (published); verification pending R27",
+      "status": "verified (C round 27 PASS), published 6c956b4 (TM-B29)",
       "decision": "Stale-result guard for the schema re-read (renderer only). useFileStore keeps a monotonic writeGeneration and pathWriteGenerations: Record<string, number>; markPathsWritten(paths) increments writeGeneration once and stamps each given path with it. MetadataPanel.handleSave calls it after writeMetadata resolves (single) and after writeMetadataBatch resolves for the succeeded paths only (batch); a rejected write marks nothing. handleSchemaChanged records, for every path in a chunk's result, the writeGeneration read just before that chunk's readMetadataBatch call. When it writes the store (after the last chunk) a path whose pathWriteGenerations value is greater than its recorded generation is superseded: it gets the store entry current at that moment, like a kept path of a rejected chunk. Kept and superseded paths take the store entry current at store-write time (not a snapshot from the reject), are absent if the store has none, and never reset the form (D-33 part 3). Consequence (same class as RR-R24-01): a superseded entry carries the new schema's field only if the save's re-read was issued after the schema change; otherwise the field stays empty until the next successful read. The single-file write in main is synchronous, so without a delay the single-save order is not reachable in production; batch writes yield every 5 files and a multi-chunk re-read spans the save, so the batch and between-chunks orders are reachable. K-4 contract untouched. Deviation from RR-R24-05: handleSave/handleSchemaChanged stay in MetadataPanel (no store action move, RR-R23-04 signal stays open).",
+      "contract_with": "none (renderer display and save flow only)"
+    },
+    {
+      "id": "D-35",
+      "status": "planned R28 (TM-B30)",
+      "decision": "Stale-result guard for folder reads (renderer only), reusing D-34's write generation. readMetadataChunked(paths, schema, getWriteGeneration: () => number) calls getWriteGeneration() just before each chunk's readMetadataBatch and returns readGenerations: Record<string, number> for every path in that chunk's result (lib stays store-free; callers pass () => useFileStore.getState().writeGeneration). useFileStore.applyMetadataRead(read, readGenerations) replaces metadata like setMetadata, except that a path whose pathWriteGenerations value is greater than its read generation is superseded and gets the store entry current at that moment (absent if none). FolderBrowser handleOpenFolder/handleRescan and App openFolder call it instead of setMetadata on the success path; error paths, empty-folder setMetadata({}) and handleCloseFolder keep setMetadata. The comparison runs at store-write time, so a save that lands between chunks is kept. MetadataPanel (D-34) is not touched. Reachability: single writes are synchronous in main (delay-only); batch writes yield every 5 files and a folder of more than 50 files reads in several chunks, so batch + multi-chunk rescan is reachable. Not covered: a rejected chunk still drops its paths (B-R27-01). Alternative not taken: disabling Rescan/Open Folder during a save (UX, B-R27-02).",
       "contract_with": "none (renderer display and save flow only)"
     }
   ],
@@ -1362,7 +1368,7 @@
       "severity": "medium",
       "source": "B R23 code reading (B-R23-02), root review R24 (RR-R24-02, RR-R24-05), B R25 red reproduction (B-R25-02), C R25 / A R25 docs findings (C-R25-03 = A-R25-02, C-R25-04 = A-R25-03)",
       "title": "Stale schema re-read overwrites a save (D-34): a handleSchemaChanged chunk read issued before a path's write resolved still replaces the save's re-read in the store and, for a single selection, resets the form (isDirty false, D-30 typing lost); with two or more chunks the store write after the last chunk also overwrites a save that landed between chunks, including kept entries snapshotted at reject time (RR-R24-02). A later save from the stale form silently writes the old values back (data-loss path). Plus docs/bugs/001 entry 3 step 3 and entry 10 step 3 corrections.",
-      "status": "in_progress",
+      "status": "done",
       "round": 27,
       "depends_on": [
         "TM-B28"
@@ -1388,8 +1394,41 @@
         "docs/bugs/001: entry 9 fixed by D-34 (incl. the between-chunks step) with test names, entry 3 step 3 and entry 10 step 3 corrected, every MetadataPanel.tsx/file-store.ts reference re-pointed on A's tree; README count; STATE_MANAGEMENT.md one D-34 line",
         "gate: verifyCommand green, renderer 216 (11 files), main 93, E2E 7/7, --retries=0 7/7, Biome 0 errors / 8 warnings same list"
       ],
-      "realVerified": false,
-      "note_b_r26": "R26 closed BLOCKED (A and C: baseline mismatch). The TM-B29 implementation is already on origin/master as 6c956b4 (parent c2c19a7, 8 owned paths only, authored 15:37Z). Its commit message cites C PASS (c-round-26.json) and review COMMIT OK, but the loop folder was restored to round-26 start at 18:43Z and holds no such C report, gate or review. C's R26 sanity run on 6c956b4 (check exit 0, Biome 0/8, renderer 216/216, main 93/93) is supporting data only, not acceptance. Not done until C re-verifies R26-1..R26-6 against c2c19a7..6c956b4 (round 27, R27-1..R27-6)."
+      "realVerified": true,
+      "note_b_r26": "R26 closed BLOCKED (A and C: baseline mismatch). The TM-B29 implementation is already on origin/master as 6c956b4 (parent c2c19a7, 8 owned paths only, authored 15:37Z). Its commit message cites C PASS (c-round-26.json) and review COMMIT OK, but the loop folder was restored to round-26 start at 18:43Z and holds no such C report, gate or review. C's R26 sanity run on 6c956b4 (check exit 0, Biome 0/8, renderer 216/216, main 93/93) is supporting data only, not acceptance. Not done until C re-verifies R26-1..R26-6 against c2c19a7..6c956b4 (round 27, R27-1..R27-6).",
+      "commit": "6c956b41dee3580d01c6285c9c7c3e1c8495101c",
+      "evidence": [
+        "C round 27 PASS (c-round-27.md, c-round-27.json realVerified=true, bugs: none, 2 info observations): R27-1 HEAD 6c956b4 clean, diff c2c19a7..6c956b4 exactly the 8 R26 paths (232+/27-), file-store adds only writeGeneration/pathWriteGenerations/markPathsWritten, test diffs additions only (154/0, 2/0, 12/0), MetadataPanel ' as ' count 2, no comment/any/ts-ignore, STATE_MANAGEMENT one line; original Edit/Write process unknown (B-R26-01, not a FAIL); R27-2 old src + new tests 210 passed / 6 failed ((s9)(s10)(s13)(s14)(s15) on the stale-entry symptom, (g1) runtime TypeError), 6c956b4 216/216, each of (s9)-(s15)+(g1) alone 1 passed; R27-3 12/12 mutants killed (MG-1..MG-10 incl. MG-7a/b, MS-1) with the expected killers; R27-4 clean verifyCommand exit 0, Biome 0 errors / 8 warnings same list as c2c19a7, typecheck 0, 216/93/7, --retries=0 7/7; R27-5 real built apps under xvfb with harness (write delayed 3 s, schema read-batch replied 6 s late): 6c956b4 form keeps Category R27Cat after the late read and after b->a, ffprobe ICAT=R27Cat title=R27T2 and music-metadata exif:ICAT=R27Cat exif:INAM=R27T2 agree; c2c19a7 reverts the form and the second save writes ICAT='' back (data-loss path reproduced); pageErrors empty on both; R27-6 docs PASS (entry 9 fixed with full test names, entry 3/10 step 3 corrected, every line reference grepped on 6c956b4, README count). Windows packaging BLOCKED (not available in the cloud). Gate round 27 skipped (no real changes): code was already published as 6c956b4."
+      ],
+      "note_b_r27": "B R27 close: done on C R27 evidence. The commit was published out of band before verification (B-R26-01 stays open for root); the loop-folder evidence now exists."
+    },
+    {
+      "id": "TM-B30",
+      "type": "bug",
+      "severity": "medium",
+      "source": "B R25 hypothesis (B-R25-01), B R27 red reproduction (b-round-27-exp/)",
+      "title": "Stale folder read overwrites a save (D-35): Rescan, Open Folder of the same folder or a drop of it while a save is pending read the file before the write resolved and replace the save re-read in the store after the last chunk; re-selecting the file shows the old values and the next save writes them back (data-loss path, same class as TM-B29).",
+      "status": "in_progress",
+      "round": 28,
+      "depends_on": [
+        "TM-B29"
+      ],
+      "decisions": [
+        "D-35"
+      ],
+      "findings": [
+        "B-R25-01",
+        "RR-R25-04",
+        "B-R27-02"
+      ],
+      "acceptance": [
+        "R28: readMetadataChunked(paths, schema, getWriteGeneration) records per path the generation read just before its chunk call and returns readGenerations; file-store applyMetadataRead(read, readGenerations) replaces metadata, keeping the current store entry for a superseded path (pathWriteGenerations > read generation; absent if none); FolderBrowser handleOpenFolder/handleRescan and App openFolder use it",
+        "tests (r1)-(r8) + (g2) + (u1): on 6c956b4 src (r1)(r2)(r3)(r6)(r7)(g2)(u1) red, (r4)(r5)(r8) green pins; all green after the fix; mutants MR-1..MR-10 each killed",
+        "real app (C, both builds, harness: write delayed before the listener, the rescan read-batch replied late): new build keeps Category R28Cat after the late rescan read and after re-selecting a.wav; 6c956b4 reverts it and a second save writes the old Category back; ffprobe + music-metadata field by field; Open Folder same-folder variant",
+        "docs/bugs/001 entry 11 fixed by D-35 with test names; README count; STATE_MANAGEMENT.md one D-35 line",
+        "gate: verifyCommand green, renderer 216 + new tests, main 93, E2E 7/7, --retries=0 7/7, Biome 0 errors / 8 warnings same list"
+      ],
+      "realVerified": false
     }
   ],
   "findings": [
@@ -3062,9 +3101,10 @@
       "id": "B-R23-02",
       "source": "B R23 code reading (MetadataPanel.tsx:201-228 vs :138/:169)",
       "severity": "medium",
-      "status": "open",
+      "status": "closed",
       "title": "Reverse order of A-R21-03: a schema re-read that started before a pending write finished and resolves after the save's re-read writes the pre-write values into the store and the form (isDirty false) until the next read; the file on disk is correct. D-33 does not cover this order",
-      "routed_to": "TM-B27 (round 24): docs/bugs/001 entry 9 (known limit, no test); a real fix needs a read token/sequence or locking the schema editor during a save (UX -> Saba); R24: recorded as docs/bugs/001 entries 9/10 (C R24-6 PASS); B R24 reclassification: a stale-result guard (read generation) is renderer-only and technical (same class as D-33), only locking the schema editor is UX; candidate for a fix round after a red reproduction (RR-R24-02 is the same defect, RR-R24-05 proposes the generation) | B R25: reproduced red (B-R25-02); severity raised low -> medium because a later save from the stale form writes the old values back; fix TM-B29 (D-34, round 26)"
+      "routed_to": "TM-B27 (round 24): docs/bugs/001 entry 9 (known limit, no test); a real fix needs a read token/sequence or locking the schema editor during a save (UX -> Saba); R24: recorded as docs/bugs/001 entries 9/10 (C R24-6 PASS); B R24 reclassification: a stale-result guard (read generation) is renderer-only and technical (same class as D-33), only locking the schema editor is UX; candidate for a fix round after a red reproduction (RR-R24-02 is the same defect, RR-R24-05 proposes the generation) | B R25: reproduced red (B-R25-02); severity raised low -> medium because a later save from the stale form writes the old values back; fix TM-B29 (D-34, round 26)",
+      "closed_by": "TM-B29 (D-34), C round 27 PASS, commit 6c956b4"
     },
     {
       "round": 23,
@@ -3134,9 +3174,10 @@
       "id": "RR-R24-02",
       "source": "root review R24 #2",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "MetadataPanel.tsx:209-224 handleSchemaChanged writes the store only after all chunks; a save finishing between chunks can be overwritten by values read earlier. Same timing defect as B-R23-02, not made worse",
-      "routed_to": "= B-R23-02 (docs/bugs/001 entry 9); TM-B28 adds the between-chunks variant to entry 9 | R25: documented as docs/bugs/001 entry 9 step 4 (TM-B28 done); fix -> TM-B29 (D-34, round 26), B R25 red reproduction (between-chunks test)"
+      "routed_to": "= B-R23-02 (docs/bugs/001 entry 9); TM-B28 adds the between-chunks variant to entry 9 | R25: documented as docs/bugs/001 entry 9 step 4 (TM-B28 done); fix -> TM-B29 (D-34, round 26), B R25 red reproduction (between-chunks test)",
+      "closed_by": "TM-B29 (D-34), C round 27 PASS, commit 6c956b4"
     },
     {
       "round": 24,
@@ -3179,18 +3220,20 @@
       "id": "A-R25-02",
       "source": "A R25 code-reviewer",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "docs/bugs/001 entry 3 step 3 (:52) still says 'rescan or switching to another file and back', contradicting the D-33 note",
-      "routed_to": "TM-B29 docs, published in 6c956b4; closes only on C R27-6"
+      "routed_to": "TM-B29 docs, published in 6c956b4; closes only on C R27-6",
+      "closed_by": "TM-B29 (D-34), C round 27 PASS, commit 6c956b4"
     },
     {
       "round": 25,
       "id": "A-R25-03",
       "source": "A R25 code-reviewer",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "docs/bugs/001 entry 10 step 3 'form unchanged, edits stay' on a rejected read holds only for a single selection; batch calls setEditingMetadata({}) (MetadataPanel.tsx:229-230)",
-      "routed_to": "TM-B29 docs, published in 6c956b4; closes only on C R27-6"
+      "routed_to": "TM-B29 docs, published in 6c956b4; closes only on C R27-6",
+      "closed_by": "TM-B29 (D-34), C round 27 PASS, commit 6c956b4"
     },
     {
       "round": 25,
@@ -3215,27 +3258,30 @@
       "id": "C-R25-03",
       "source": "C R25-6",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "= A-R25-02 (entry 3 step 3 vs D-33 note)",
-      "routed_to": "TM-B29 docs, published in 6c956b4; closes only on C R27-6"
+      "routed_to": "TM-B29 docs, published in 6c956b4; closes only on C R27-6",
+      "closed_by": "TM-B29 (D-34), C round 27 PASS, commit 6c956b4"
     },
     {
       "round": 25,
       "id": "C-R25-04",
       "source": "C R25-6",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "= A-R25-03 (entry 10 step 3 single-selection only)",
-      "routed_to": "TM-B29 docs, published in 6c956b4; closes only on C R27-6"
+      "routed_to": "TM-B29 docs, published in 6c956b4; closes only on C R27-6",
+      "closed_by": "TM-B29 (D-34), C round 27 PASS, commit 6c956b4"
     },
     {
       "round": 25,
       "id": "RR-R25-01",
       "source": "root review R25",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "Review says docs/bugs/001:10 'MetadataPanel.tsx:111' points at 'if (meta) {' and should be :110. Disputed by B grep on c2c19a7: line 110 is 'if (selectedPaths.length === 1) {', line 111 is 'const meta = metadata[selectedPaths[0]];' (the described store lookup), 112 is 'if (meta) {'",
-      "routed_to": "disputed (reference is correct on c2c19a7); moot in round 26: TM-B29 changes MetadataPanel.tsx and A re-points every reference, C greps each"
+      "routed_to": "disputed (reference is correct on c2c19a7); moot in round 26: TM-B29 changes MetadataPanel.tsx and A re-points every reference, C greps each",
+      "closed_by": "C R27-6: every MetadataPanel.tsx/file-store.ts line reference grepped on 6c956b4 and correct"
     },
     {
       "round": 25,
@@ -3262,25 +3308,28 @@
       "severity": "info",
       "status": "open",
       "title": "Architecture signal: per-path read generation in useFileStore so handleSchemaChanged drops late results (fixes RR-R24-02/A-R21-03 class); other test files that reset window.api mocks inline should use resetWindowApiMocks. B grep on c2c19a7: no other tests/renderer file resets window.api mocks inline (only schema-store.test.ts uses mockReset/mockClear, on its own mocks)",
-      "routed_to": "generation part -> TM-B29 (D-34); test-helper part: no current target (signal only)"
+      "routed_to": "generation part -> TM-B29 (D-34); test-helper part: no current target (signal only)",
+      "note_b_r27": "generation reuse for FolderBrowser/App -> TM-B30 (D-35)"
     },
     {
       "round": 25,
       "id": "B-R25-01",
       "source": "B R25 code reading (FolderBrowser.tsx:134-158, MetadataPanel.tsx:331)",
-      "severity": "low",
-      "status": "open",
+      "severity": "medium",
+      "status": "in_progress",
       "title": "Hypothesis, not reproduced: Rescan (and Open Folder of the same folder) stays enabled while a save is pending; readMetadataChunked can read files before a batch write reaches them and setMetadata after the last chunk overwrites the save's re-read (same class as B-R23-02). Rescan also clears the selection, so the form is not affected",
-      "routed_to": "follow-up after TM-B29: can reuse D-34's pathWriteGenerations in FolderBrowser/App; needs a red reproduction first"
+      "routed_to": "TM-B30 round 28 (D-35)",
+      "title_b_r27": "Reproduced red by B R27 at component level on 6c956b4 (b-round-27-exp/): Rescan or Open Folder / drop of the same folder while a save is pending; readMetadataChunked reads the file before the write resolves and setMetadata after the last chunk replaces the save re-read (store keeps the old Category). Rescan clears the selection, but re-selecting the file shows the stale entry and the next save writes the old value back (data-loss path, same class as TM-B29) -> medium"
     },
     {
       "round": 25,
       "id": "B-R25-02",
       "source": "B R25 experiment (/tmp copy of c2c19a7; b-round-25-exp-repro.test.ts.txt, b-round-25-exp-prototype.diff.txt, b-round-25-exp-mutants.log)",
       "severity": "medium",
-      "status": "open",
+      "status": "closed",
       "title": "B-R23-02 and RR-R24-02 reproduced red at component level on c2c19a7: (r1) batch, (r2) single + typing during save, (r5) stale chunk 1 + save between chunks, (r6) rejected chunk 1 snapshot + save between chunks, (r7) partial batch failure fail; (r3) fresh-after-write control and (r4) chunk issued after the write pass. A store-based generation prototype passes all 215 renderer tests with Biome 8 warnings and tsc 0; mutants MG-1..MG-9 each killed. A first prototype that compared generations when each chunk resolved failed (r5): the comparison must happen at store-write time",
-      "routed_to": "TM-B29 (round 26)"
+      "routed_to": "TM-B29 (round 26)",
+      "closed_by": "TM-B29 (D-34), C round 27 PASS, commit 6c956b4"
     },
     {
       "round": 26,
@@ -3289,16 +3338,54 @@
       "severity": "medium",
       "status": "open",
       "title": "Loop-folder / repository desync: 6c956b4 'verified loop rounds 26-26' was published at 15:37Z citing C PASS and review, then the loop folder was restored to the round-26 start state (18:43Z) and round 26 re-ran against a moved HEAD. The original C report, gate and review for 6c956b4 are not in the loop folder; A's process evidence (Edit/Write only, A-R17-02) for that implementation is unrecoverable.",
-      "routed_to": "root (restore/state process); B re-verifies the published diff in round 27"
+      "routed_to": "root (restore/state process); B re-verifies the published diff in round 27",
+      "note_b_r27": "R27 supplies the missing C evidence for 6c956b4 (C PASS). Still open for root: last-publication.json / publications.jsonl say round 25 while 6c956b4 carries rounds 26-26; the original transcript/review gap is unrecoverable."
     },
     {
       "round": 26,
       "id": "C-R26-01",
       "source": "C R26 sanity run on 6c956b4",
       "severity": "info",
-      "status": "open",
+      "status": "closed",
       "title": "Supporting data only: on 6c956b4 fixtures + npm run check exit 0, Biome 0 errors / 8 warnings, renderer 216/216 (11 files), main 93/93; E2E and real-app not run (c-round-26/check.log)",
-      "routed_to": "TM-B29 R27 (not acceptance)"
+      "routed_to": "TM-B29 R27 (not acceptance)",
+      "closed_by": "superseded by C round 27 full verification"
+    },
+    {
+      "round": 27,
+      "id": "C-R27-01",
+      "source": "C R27-5 observation (SchemaEditor.tsx:130-131)",
+      "severity": "info",
+      "status": "open",
+      "title": "SchemaEditor 'Done' awaits onSave (handleSchemaChanged) before onClose; during a slow schema read the editor stays open (R27-5: Done at 1.16 s, still open at 3.06 s). Pre-existing on both builds",
+      "routed_to": "Saba question batch (UX, next to the B-R23-02 schema-editor lock option)"
+    },
+    {
+      "round": 27,
+      "id": "C-R27-02",
+      "source": "C R27-5 observation",
+      "severity": "info",
+      "status": "open",
+      "title": "A save after adding a custom Text field writes RNOT='' (empty value) into the file; D-10 / C-R1-01 class (empty fields are written)",
+      "routed_to": "record (D-10 / TM-B11 class, Saba batch)"
+    },
+    {
+      "round": 27,
+      "id": "B-R27-01",
+      "source": "B R27 code reading (lib/utils.ts readMetadataChunked, FolderBrowser handleRescan/handleOpenFolder, App openFolder)",
+      "severity": "low",
+      "status": "open",
+      "title": "readMetadataChunked drops the paths of a rejected chunk and Rescan / Open Folder / drop ignore failures: a rescan with one rejected chunk silently removes those entries from the store with no toast (opposite of the D-33 keep-current rule in the schema path)",
+      "routed_to": "signal; candidate after TM-B30 (needs a decision: keep current entry vs absent + toast)"
+    },
+    {
+      "round": 27,
+      "id": "B-R27-02",
+      "source": "B R27 planning",
+      "severity": "info",
+      "status": "open",
+      "title": "Alternative to D-35 not taken: disable Rescan / Open Folder / drop while a save is pending (UX change, needs reference-first). D-35 keeps the D-34 guard pattern instead (no UX change)",
+      "routed_to": "Saba question batch (optional, with the B-R23-02 schema-editor lock option)"
     }
   ],
   "rounds": [
@@ -3872,7 +3959,7 @@
     {
       "round": 27,
       "task": "TM-B29 re-verification of the published diff c2c19a7..6c956b4 (R27-1..R27-6 = R26-1..R26-6); A makes no change",
-      "status": "planned",
+      "status": "PASS (C R27-1..R27-6, realVerified=true); gate skipped (no real changes, code already published as 6c956b4); TM-B29 done",
       "baseline": "6c956b41dee3580d01c6285c9c7c3e1c8495101c (clean)",
       "items": [
         "TM-B29"
@@ -3882,6 +3969,21 @@
         "C-R26-01",
         "C-R25-03",
         "C-R25-04"
+      ]
+    },
+    {
+      "round": 28,
+      "task": "TM-B30 stale folder read guard (D-35): readMetadataChunked readGenerations + file-store applyMetadataRead; Rescan / Open Folder / drop keep entries written during the read; docs/bugs/001 entry 11",
+      "status": "planned",
+      "baseline": "6c956b41dee3580d01c6285c9c7c3e1c8495101c (clean)",
+      "items": [
+        "TM-B30"
+      ],
+      "findings": [
+        "B-R25-01",
+        "RR-R25-04",
+        "B-R27-01",
+        "B-R27-02"
       ]
     }
   ]

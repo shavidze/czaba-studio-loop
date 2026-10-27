@@ -1,0 +1,239 @@
+## baseline (no mutation)
+```diff
+```
+['Tests  50 passed (50)']
+killed by: []
+
+## MG-1 no superseded check
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:42:27.300076025 +0000
+@@ -229,7 +229,7 @@
+     const accumulated: Record<string, WavMetadata> = {};
+     for (const { readGeneration, result } of chunkReads) {
+       for (const [path, meta] of Object.entries(result)) {
+-        if ((pathWriteGenerations[path] ?? 0) > readGeneration) {
++        if (false && (pathWriteGenerations[path] ?? 0) > readGeneration) {
+           keptPaths.add(path);
+         } else {
+           accumulated[path] = meta;
+```
+['Tests  4 failed | 46 passed (50)']
+killed by: ['(s10)', '(s13)', '(s15)', '(s9)']
+
+## MG-2 single marks before writeMetadata
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:42:40.171490402 +0000
+@@ -136,8 +136,8 @@
+     try {
+       if (selectedFiles.length === 1) {
+         const path = selectedFiles[0].path;
+-        await window.api.writeMetadata(path, startEditingMetadata, fields);
+         useFileStore.getState().markPathsWritten([path]);
++        await window.api.writeMetadata(path, startEditingMetadata, fields);
+         await refreshSavedFileStats([path]);
+         let updated: WavMetadata;
+         try {
+```
+['Tests  2 failed | 48 passed (50)']
+killed by: ['(s10)', '(s13)']
+
+## MG-3 >= instead of >
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:42:53.038571431 +0000
+@@ -229,7 +229,7 @@
+     const accumulated: Record<string, WavMetadata> = {};
+     for (const { readGeneration, result } of chunkReads) {
+       for (const [path, meta] of Object.entries(result)) {
+-        if ((pathWriteGenerations[path] ?? 0) > readGeneration) {
++        if ((pathWriteGenerations[path] ?? 0) >= readGeneration) {
+           keptPaths.add(path);
+         } else {
+           accumulated[path] = meta;
+```
+['Tests  6 failed | 44 passed (50)']
+killed by: ['(s1)', '(s10)', '(s11)', '(s12)', '(s15)', '(s2)']
+
+## MG-4 one generation read before the chunk loop
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:43:05.771911397 +0000
+@@ -214,9 +214,10 @@
+     const chunkReads: SchemaChunkRead[] = [];
+     const keptPaths = new Set<string>();
+     let failures = 0;
++    const startGeneration = useFileStore.getState().writeGeneration;
+     for (let i = 0; i < paths.length; i += CHUNK_SIZE) {
+       const chunk = paths.slice(i, i + CHUNK_SIZE);
+-      const readGeneration = useFileStore.getState().writeGeneration;
++      const readGeneration = startGeneration;
+       try {
+         const result = await window.api.readMetadataBatch(chunk, newSchema);
+         chunkReads.push({ readGeneration, result });
+```
+['Tests  1 failed | 49 passed (50)']
+killed by: ['(s12)']
+
+## MG-5 kept entries from reject-time snapshot
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:43:18.679825865 +0000
+@@ -214,6 +214,7 @@
+     const chunkReads: SchemaChunkRead[] = [];
+     const keptPaths = new Set<string>();
+     let failures = 0;
++    const rejectSnapshot: Record<string, WavMetadata> = {};
+     for (let i = 0; i < paths.length; i += CHUNK_SIZE) {
+       const chunk = paths.slice(i, i + CHUNK_SIZE);
+       const readGeneration = useFileStore.getState().writeGeneration;
+@@ -222,7 +223,11 @@
+         chunkReads.push({ readGeneration, result });
+       } catch {
+         failures += chunk.length;
+-        for (const path of chunk) keptPaths.add(path);
++        for (const path of chunk) {
++          keptPaths.add(path);
++          const snap = useFileStore.getState().metadata[path];
++          if (snap) rejectSnapshot[path] = snap;
++        }
+       }
+     }
+     const { metadata: currentMetadata, pathWriteGenerations } = useFileStore.getState();
+@@ -237,7 +242,7 @@
+       }
+     }
+     for (const path of keptPaths) {
+-      const currentEntry = currentMetadata[path];
++      const currentEntry = rejectSnapshot[path] ?? currentMetadata[path];
+       if (currentEntry) accumulated[path] = currentEntry;
+     }
+     setMetadata(accumulated);
+```
+['Tests  1 failed | 49 passed (50)']
+killed by: ['(s14)']
+
+## MG-6 batch marks failed paths too
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:43:31.665507747 +0000
+@@ -167,7 +167,7 @@
+         const result = await window.api.writeMetadataBatch(paths, batchMeta, fields);
+         const failedPaths = new Set(result.failed.map((f) => f.path));
+         const writtenPaths = paths.filter((p) => !failedPaths.has(p));
+-        useFileStore.getState().markPathsWritten(writtenPaths);
++        useFileStore.getState().markPathsWritten(paths);
+         if (result.succeeded > 0) {
+           await refreshSavedFileStats(writtenPaths);
+         }
+```
+['Tests  1 failed | 49 passed (50)']
+killed by: ['(s15)']
+
+## MG-7a superseded selected path resets form (from current entry)
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:43:44.651661481 +0000
+@@ -230,7 +230,7 @@
+     for (const { readGeneration, result } of chunkReads) {
+       for (const [path, meta] of Object.entries(result)) {
+         if ((pathWriteGenerations[path] ?? 0) > readGeneration) {
+-          keptPaths.add(path);
++          accumulated[path] = currentMetadata[path] ?? meta;
+         } else {
+           accumulated[path] = meta;
+         }
+```
+['Tests  1 failed | 49 passed (50)']
+killed by: ['(s10)']
+
+## MG-7b form reset ignores keptPaths entirely
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:43:57.600196175 +0000
+@@ -244,7 +244,7 @@
+     const currentSelection = useFileStore.getState().selectedPaths;
+     if (currentSelection.length === 1) {
+       const current = accumulated[currentSelection[0]];
+-      if (current && !keptPaths.has(currentSelection[0])) setEditingMetadata({ ...current });
++      if (current) setEditingMetadata({ ...current });
+     } else if (currentSelection.length > 1) {
+       setEditingMetadata({});
+     }
+```
+['Tests  3 failed | 47 passed (50)']
+killed by: ['(s10)', '(s6)', '(s7)']
+
+## MG-8 single save does not mark
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:44:10.631438465 +0000
+@@ -137,7 +137,6 @@
+       if (selectedFiles.length === 1) {
+         const path = selectedFiles[0].path;
+         await window.api.writeMetadata(path, startEditingMetadata, fields);
+-        useFileStore.getState().markPathsWritten([path]);
+         await refreshSavedFileStats([path]);
+         let updated: WavMetadata;
+         try {
+```
+['Tests  2 failed | 48 passed (50)']
+killed by: ['(s10)', '(s13)']
+
+## MG-9 batch save does not mark
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:44:23.656101908 +0000
+@@ -167,7 +167,6 @@
+         const result = await window.api.writeMetadataBatch(paths, batchMeta, fields);
+         const failedPaths = new Set(result.failed.map((f) => f.path));
+         const writtenPaths = paths.filter((p) => !failedPaths.has(p));
+-        useFileStore.getState().markPathsWritten(writtenPaths);
+         if (result.succeeded > 0) {
+           await refreshSavedFileStats(writtenPaths);
+         }
+```
+['Tests  2 failed | 48 passed (50)']
+killed by: ['(s15)', '(s9)']
+
+## MG-10 superseded check at chunk resolve time
+```diff
+--- /tmp/c-r27-new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 19:44:36.567350098 +0000
+@@ -219,7 +219,13 @@
+       const readGeneration = useFileStore.getState().writeGeneration;
+       try {
+         const result = await window.api.readMetadataBatch(chunk, newSchema);
+-        chunkReads.push({ readGeneration, result });
++        const resolvedStamps = useFileStore.getState().pathWriteGenerations;
++        const filtered: Record<string, WavMetadata> = {};
++        for (const [p, m] of Object.entries(result)) {
++          if ((resolvedStamps[p] ?? 0) > readGeneration) keptPaths.add(p);
++          else filtered[p] = m;
++        }
++        chunkReads.push({ readGeneration: Number.POSITIVE_INFINITY, result: filtered });
+       } catch {
+         failures += chunk.length;
+         for (const path of chunk) keptPaths.add(path);
+```
+['Tests  1 failed | 49 passed (50)']
+killed by: ['(s13)']
+
+## MS-1 markPathsWritten does not increment
+```diff
+--- /tmp/c-r27-new/src/renderer/src/stores/file-store.ts	2026-10-27 15:37:47.000000000 +0000
++++ /tmp/c-r27-mut/src/renderer/src/stores/file-store.ts	2026-10-27 19:44:49.665761870 +0000
+@@ -117,7 +117,7 @@
+ 
+   markPathsWritten: (paths) =>
+     set((state) => {
+-      const writeGeneration = state.writeGeneration + 1;
++      const writeGeneration = state.writeGeneration;
+       const pathWriteGenerations = { ...state.pathWriteGenerations };
+       for (const path of paths) {
+         pathWriteGenerations[path] = writeGeneration;
+```
+['Tests  5 failed | 45 passed (50)']
+killed by: ['(g1)', '(s10)', '(s13)', '(s15)', '(s9)']
+

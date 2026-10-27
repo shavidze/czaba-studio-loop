@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T18:47:17.005Z)
+# Active loop summary (2026-10-27T19:51:06.898Z)
 
-- backlog.json 248 KB -> active view 81 KB
-- status: G_ROOT_GATE round 26
+- backlog.json 250 KB -> active view 80 KB
+- status: G_ROOT_GATE round 27
 - servers: `{"servers":"none or skipped"}`
 - last publication: c2c19a72bed45f561eae1c9dbca9cc79567aaf41 (rounds 25-25)
-- last root gate: round 26 skipped - C taskStatus BLOCKED
+- last root gate: round 27 skipped - no real changes
 
-## Current items: TM-B28, TM-B29
+## Current items: TM-B29
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -147,6 +147,8 @@
 - RR-R25-04 / info / open / Architecture signal: per-path read generation in useFileStore so handleSchemaChanged drops late results (fixes RR-R24-02/A-R21-03 class); ot
 - B-R25-01 / low / open / Hypothesis, not reproduced: Rescan (and Open Folder of the same folder) stays enabled while a save is pending; readMetadataChunked can read 
 - B-R25-02 / medium / open / B-R23-02 and RR-R24-02 reproduced red at component level on c2c19a7: (r1) batch, (r2) single + typing during save, (r5) stale chunk 1 + save
+- B-R26-01 / medium / open / Loop-folder / repository desync: 6c956b4 'verified loop rounds 26-26' was published at 15:37Z citing C PASS and review, then the loop folder
+- C-R26-01 / info / open / Supporting data only: on 6c956b4 fixtures + npm run check exit 0, Biome 0 errors / 8 warnings, renderer 216/216 (11 files), main 93/93; E2E 
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

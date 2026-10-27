@@ -1,0 +1,236 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c-r27-red[39m
+
+ [32m✓[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 5983[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a custom field with RIFF ID ICAT [33m 1807[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a custom field with lowercase RIFF ID icat [33m 1420[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use) [33m 1539[2mms[22m[39m
+     [33m[2m✓[22m[39m lists Category (UCS) among hidden standard fields for a pre-T-1 schema [33m 1213[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/file-list.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 1545[2mms[22m[39m
+     [33m[2m✓[22m[39m (R18-e) sorts a malformed artist row as empty in both directions without throwing [33m 634[2mms[22m[39m
+ [31m❯[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m35 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 94[2mms[22m[39m
+       [32m✓[39m initializes with empty state[32m 6[2mms[22m[39m
+       [32m✓[39m sets files[32m 0[2mms[22m[39m
+       [32m✓[39m sets folder path[32m 1[2mms[22m[39m
+       [32m✓[39m sets metadata[32m 0[2mms[22m[39m
+       [32m✓[39m updates single file metadata[32m 3[2mms[22m[39m
+       [32m✓[39m toggles selection on[32m 0[2mms[22m[39m
+       [32m✓[39m toggles selection off[32m 0[2mms[22m[39m
+       [32m✓[39m selects range[32m 19[2mms[22m[39m
+       [32m✓[39m selects range with reversed indices[32m 1[2mms[22m[39m
+       [32m✓[39m selectAll selects all visible files[32m 4[2mms[22m[39m
+       [32m✓[39m selectAll respects search filter[32m 0[2mms[22m[39m
+       [32m✓[39m clears selection[32m 0[2mms[22m[39m
+       [32m✓[39m sets sort field and defaults to asc[32m 0[2mms[22m[39m
+       [32m✓[39m toggles direction when same field set again[32m 0[2mms[22m[39m
+       [32m✓[39m resets to asc when different field set[32m 0[2mms[22m[39m
+       [32m✓[39m toggleSortDirection flips direction[32m 0[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}}[32m 5[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}}[32m 1[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}}[32m 7[2mms[22m[39m
+       [32m✓[39m (a) sorts a non-string first element as empty without throwing: {"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}}[32m 1[2mms[22m[39m
+       [32m✓[39m (b) uses only the first element, not a later string element[32m 2[2mms[22m[39m
+       [32m✓[39m (c) sorts a well-typed string first element by its value[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts a null first element as empty[32m 16[2mms[22m[39m
+       [32m✓[39m (c) sorts an empty array as empty[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts bpm numerically, not lexicographically[32m 1[2mms[22m[39m
+       [32m✓[39m (c) sorts a bpm number against missing metadata as before[32m 6[2mms[22m[39m
+       [32m✓[39m sets search query[32m 0[2mms[22m[39m
+       [32m✓[39m sets scanning state[32m 0[2mms[22m[39m
+       [32m✓[39m (s1) patches size and modifiedAt of the matching path only and keeps the order[32m 1[2mms[22m[39m
+       [32m✓[39m (s2) ignores an entry whose path is not in files[32m 0[2mms[22m[39m
+       [32m✓[39m (s3) keeps the existing name when the entry has the same path but another name[32m 0[2mms[22m[39m
+       [32m✓[39m (s4) leaves selectedPaths and metadata unchanged[32m 0[2mms[22m[39m
+       [32m✓[39m (s5) an empty entry list leaves files deep-equal[32m 3[2mms[22m[39m
+       [32m✓[39m (s6) keeps the same files reference when no entry matches, so no re-render or shift-click anchor reset[32m 0[2mms[22m[39m
+[31m       [31m×[31m (g1) markPathsWritten bumps writeGeneration once per call and stamps only the given paths[39m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m49 tests[22m[2m)[22m[33m 12641[2mms[22m[39m
+     [33m[2m✓[22m[39m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept [33m 774[2mms[22m[39m
+     [33m[2m✓[22m[39m (c) retry after a failure writes the same fields to all selected files and clears on success [33m 539[2mms[22m[39m
+     [33m[2m✓[22m[39m (d) full success clears the form back to Multiple values [33m 346[2mms[22m[39m
+     [33m[2m✓[22m[39m (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry [33m 329[2mms[22m[39m
+     [33m[2m✓[22m[39m (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01) [33m 422[2mms[22m[39m
+     [33m[2m✓[22m[39m (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept [33m 428[2mms[22m[39m
+     [33m[2m✓[22m[39m (q) batch, all failed: no scan, files unchanged, edits kept [33m 302[2mms[22m[39m
+     [33m[2m✓[22m[39m (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged [33m 382[2mms[22m[39m
+     [33m[2m✓[22m[39m (x2) the follow-up save on B writes B's own values, never A's [33m 429[2mms[22m[39m
+       [33m[2m✓[22m[39m (y1) single, same selection: a field typed during the write is kept and Save stays enabled [33m 334[2mms[22m[39m
+       [33m[2m✓[22m[39m (y2) the next Save writes the text typed during the first save [33m 364[2mms[22m[39m
+       [33m[2m✓[22m[39m (y5) pin: an equal tag array with a new reference during the write is not a change [33m 317[2mms[22m[39m
+       [33m[2m✓[22m[39m (y9) batch all succeeded, same set: a field typed during the write is kept [33m 341[2mms[22m[39m
+       [33m[2m✓[22m[39m (y10) the next batch Save writes only the field typed during the first save [33m 388[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/template-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/schema-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/file-row-display.test.ts [2m([22m[2m36 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/utils.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/player-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/metadata-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [31m❯[39m tests/renderer/components/metadata-panel-schema-change.test.ts [2m([22m[2m15 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[33m 24329[2mms[22m[39m
+     [33m[2m✓[22m[39m (s1) pin: single selection, no save: the form shows the new field read with the new schema [33m 3076[2mms[22m[39m
+     [33m[2m✓[22m[39m (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field [33m 1631[2mms[22m[39m
+     [33m[2m✓[22m[39m (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form [33m 1882[2mms[22m[39m
+     [33m[2m✓[22m[39m (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema [33m 2071[2mms[22m[39m
+     [33m[2m✓[22m[39m (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema [33m 2983[2mms[22m[39m
+     [33m[2m✓[22m[39m (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects [33m 1996[2mms[22m[39m
+     [33m[2m✓[22m[39m (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30) [33m 2620[2mms[22m[39m
+     [33m[2m✓[22m[39m (s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects [33m 1718[2mms[22m[39m
+[31m     [31m×[31m (s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read[39m[33m 1452[2mms[22m[39m
+[31m     [31m×[31m (s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save[39m[33m 982[2mms[22m[39m
+     [33m[2m✓[22m[39m (s11) D-34 pin: a schema re-read issued after the write resolved is applied [33m 772[2mms[22m[39m
+     [33m[2m✓[22m[39m (s12) D-34 pin: a chunk issued after the write resolved is applied even when the save's re-read failed [33m 813[2mms[22m[39m
+[31m     [31m×[31m (s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks[39m[33m 769[2mms[22m[39m
+[31m     [31m×[31m (s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time[39m[33m 787[2mms[22m[39m
+[31m     [31m×[31m (s15) D-34: a path whose batch write failed is not superseded[39m[33m 773[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema re-read ignores reads superseded by a write (B-R23-02, RR-R24-02, D-34)[2m > [22m(s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read
+[31m[1mAssertionError[22m: expected { title: 'A-title', …(3) } to deeply equal { title: 'A-title', …(3) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "category": "R24Cat",[39m
+[31m+   "category": "ACat",[39m
+[2m    "comment": "",[22m
+[2m    "r24note": "fromfile",[22m
+[2m    "title": "A-title",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m301:54[22m[39m
+    [90m299| [39m    [35mawait[39m [34msettle[39m(staleSchemaRead[33m.[39mrelease)[33m;[39m
+    [90m300| [39m
+    [90m301| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mmetadata[[33mPATH_A[39m])[33m.[39m[34mtoEqual[39m([33mFRESH_A[39m)[33m;[39m
+    [90m   | [39m                                                     [31m^[39m
+    [90m302| [39m    expect(useFileStore.getState().metadata[PATH_B]?.category).toBe(TY…
+    [90m303| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema re-read ignores reads superseded by a write (B-R23-02, RR-R24-02, D-34)[2m > [22m(s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save
+[31m[1mAssertionError[22m: expected { title: 'A-title', …(3) } to deeply equal { title: 'A-title', …(3) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "category": "R24Cat",[39m
+[31m+   "category": "ACat",[39m
+[2m    "comment": "",[22m
+[2m    "r24note": "fromfile",[22m
+[2m    "title": "A-title",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m319:54[22m[39m
+    [90m317| [39m    [35mawait[39m [34msettle[39m(staleSchemaRead[33m.[39mrelease)[33m;[39m
+    [90m318| [39m
+    [90m319| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mmetadata[[33mPATH_A[39m])[33m.[39m[34mtoEqual[39m([33mFRESH_A[39m)[33m;[39m
+    [90m   | [39m                                                     [31m^[39m
+    [90m320| [39m    expect(getInputByLabel("Category (UCS)").value).toBe(TYPED_CATEGOR…
+    [90m321| [39m    [34mexpect[39m([34mgetInputByLabel[39m([32m"Title"[39m)[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m"TypedDuring"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema re-read ignores reads superseded by a write (B-R23-02, RR-R24-02, D-34)[2m > [22m(s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks
+[31m[1mAssertionError[22m: expected { title: 'A-title', …(3) } to deeply equal { title: 'A-title', …(3) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "category": "R24Cat",[39m
+[31m+   "category": "ACat",[39m
+[2m    "comment": "",[22m
+[2m    "r24note": "fromfile",[22m
+[2m    "title": "A-title",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m371:54[22m[39m
+    [90m369| [39m    [35mawait[39m [34msettle[39m(chunk2[33m.[39mrelease)[33m;[39m
+    [90m370| [39m
+    [90m371| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mmetadata[[33mPATH_A[39m])[33m.[39m[34mtoEqual[39m([33mFRESH_A[39m)[33m;[39m
+    [90m   | [39m                                                     [31m^[39m
+    [90m372| [39m    expect(getInputByLabel("Category (UCS)").value).toBe(TYPED_CATEGOR…
+    [90m373| [39m    expect(useFileStore.getState().metadata[EXTRA_FILES[0].path]).toBe…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema re-read ignores reads superseded by a write (B-R23-02, RR-R24-02, D-34)[2m > [22m(s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time
+[31m[1mAssertionError[22m: expected { title: 'A-title', …(2) } to deeply equal { title: 'A-title', …(3) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "category": "R24Cat",[39m
+[31m+   "category": "ACat",[39m
+[2m    "comment": "",[22m
+[32m-   "r24note": "fromfile",[39m
+[2m    "title": "A-title",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m390:54[22m[39m
+    [90m388| [39m
+    [90m389| [39m    expect(useMetadataStore.getState().toastMessage).toBe("Failed to r…
+    [90m390| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mmetadata[[33mPATH_A[39m])[33m.[39m[34mtoEqual[39m([33mFRESH_A[39m)[33m;[39m
+    [90m   | [39m                                                     [31m^[39m
+    [90m391| [39m  })[33m;[39m
+    [90m392| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-schema-change.test.ts[2m > [22mMetadataPanel schema re-read ignores reads superseded by a write (B-R23-02, RR-R24-02, D-34)[2m > [22m(s15) D-34: a path whose batch write failed is not superseded
+[31m[1mAssertionError[22m: expected { title: 'A-title', …(3) } to deeply equal { title: 'A-title', …(3) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "category": "R24Cat",[39m
+[31m+   "category": "ACat",[39m
+[2m    "comment": "",[22m
+[2m    "r24note": "fromfile",[22m
+[2m    "title": "A-title",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/renderer/components/metadata-panel-schema-change.test.ts:[2m406:54[22m[39m
+    [90m404| [39m    [35mawait[39m [34msettle[39m(staleSchemaRead[33m.[39mrelease)[33m;[39m
+    [90m405| [39m
+    [90m406| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mmetadata[[33mPATH_A[39m])[33m.[39m[34mtoEqual[39m([33mFRESH_A[39m)[33m;[39m
+    [90m   | [39m                                                     [31m^[39m
+    [90m407| [39m    expect(useFileStore.getState().metadata[PATH_B]).toEqual(SEED_B_WI…
+    [90m408| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/stores/file-store.test.ts[2m > [22museFileStore[2m > [22mmarkPathsWritten (TM-B29, D-34)[2m > [22m(g1) markPathsWritten bumps writeGeneration once per call and stamps only the given paths
+[31m[1mTypeError[22m: __vite_ssr_import_1__.useFileStore.getState(...).markPathsWritten is not a function[39m
+[36m [2m❯[22m tests/renderer/stores/file-store.test.ts:[2m325:31[22m[39m
+    [90m323| [39m    it("(g1) markPathsWritten bumps writeGeneration once per call and …
+    [90m324| [39m      [35mconst[39m before [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m.[39mpathWriteGenerations[33m;[39m
+    [90m325| [39m      useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34mmarkPathsWritten[39m([[32m"/a"[39m])[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m326| [39m      useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34mmarkPathsWritten[39m([[32m"/b"[39m[33m,[39m [32m"/c"[39m])[33m;[39m
+    [90m327| [39m      [35mconst[39m state [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (11)[39m
+[2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m210 passed[39m[22m[90m (216)[39m
+[2m   Start at [22m 19:40:33
+[2m   Duration [22m 26.37s[2m (transform 1.41s, setup 1.47s, import 3.48s, tests 44.73s, environment 11.37s)[22m
+
+
+::error file=/tmp/c-r27-red/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema re-read ignores reads superseded by a write (B-R23-02%2C RR-R24-02%2C D-34) > (s9) B-R23-02%3A batch save%2C schema re-read issued before the write resolves lands after the save's re-read,line=301,column=54::AssertionError: expected { title: 'A-title', …(3) } to deeply equal { title: 'A-title', …(3) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "category": "R24Cat",%0A+   "category": "ACat",%0A    "comment": "",%0A    "r24note": "fromfile",%0A    "title": "A-title",%0A  }%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:301:54%0A%0A
+
+::error file=/tmp/c-r27-red/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema re-read ignores reads superseded by a write (B-R23-02%2C RR-R24-02%2C D-34) > (s10) B-R23-02%3A single save%2C a stale schema re-read keeps the saved values and the title typed during the save,line=319,column=54::AssertionError: expected { title: 'A-title', …(3) } to deeply equal { title: 'A-title', …(3) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "category": "R24Cat",%0A+   "category": "ACat",%0A    "comment": "",%0A    "r24note": "fromfile",%0A    "title": "A-title",%0A  }%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:319:54%0A%0A
+
+::error file=/tmp/c-r27-red/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema re-read ignores reads superseded by a write (B-R23-02%2C RR-R24-02%2C D-34) > (s13) RR-R24-02%3A a stale chunk read before the write is not applied when the save lands between chunks,line=371,column=54::AssertionError: expected { title: 'A-title', …(3) } to deeply equal { title: 'A-title', …(3) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "category": "R24Cat",%0A+   "category": "ACat",%0A    "comment": "",%0A    "r24note": "fromfile",%0A    "title": "A-title",%0A  }%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:371:54%0A%0A
+
+::error file=/tmp/c-r27-red/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema re-read ignores reads superseded by a write (B-R23-02%2C RR-R24-02%2C D-34) > (s14) RR-R24-02%3A a rejected chunk keeps the entry current when the store is written%2C not the one at reject time,line=390,column=54::AssertionError: expected { title: 'A-title', …(2) } to deeply equal { title: 'A-title', …(3) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "category": "R24Cat",%0A+   "category": "ACat",%0A    "comment": "",%0A-   "r24note": "fromfile",%0A    "title": "A-title",%0A  }%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:390:54%0A%0A
+
+::error file=/tmp/c-r27-red/tests/renderer/components/metadata-panel-schema-change.test.ts,title=tests/renderer/components/metadata-panel-schema-change.test.ts > MetadataPanel schema re-read ignores reads superseded by a write (B-R23-02%2C RR-R24-02%2C D-34) > (s15) D-34%3A a path whose batch write failed is not superseded,line=406,column=54::AssertionError: expected { title: 'A-title', …(3) } to deeply equal { title: 'A-title', …(3) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "category": "R24Cat",%0A+   "category": "ACat",%0A    "comment": "",%0A    "r24note": "fromfile",%0A    "title": "A-title",%0A  }%0A%0A ❯ tests/renderer/components/metadata-panel-schema-change.test.ts:406:54%0A%0A
+
+::error file=/tmp/c-r27-red/tests/renderer/stores/file-store.test.ts,title=tests/renderer/stores/file-store.test.ts > useFileStore > markPathsWritten (TM-B29%2C D-34) > (g1) markPathsWritten bumps writeGeneration once per call and stamps only the given paths,line=325,column=31::TypeError: __vite_ssr_import_1__.useFileStore.getState(...).markPathsWritten is not a function%0A ❯ tests/renderer/stores/file-store.test.ts:325:31%0A%0A

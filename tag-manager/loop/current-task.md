@@ -1,88 +1,178 @@
-# CURRENT TASK — Round 27: TM-B29 re-verification — C verifies the published D-34 diff `c2c19a7..6c956b4`; A changes nothing
+# CURRENT TASK — Round 28: TM-B30 — stale folder read overwrites a save (D-35): Rescan / Open Folder / drop during a pending save
 
-Planner: B · Implementer: A (idle this round) · Verifier: C · Date: 2026-10-27
+Planner: B · Implementer: A · Verifier: C · Date: 2026-10-27
 
 ## Why this round
-- **Round 26 ended BLOCKED.** A and C both found HEAD = `6c956b4` (`feat(tag-manager): verified loop rounds 26-26`, parent `c2c19a7`), not the planned baseline `c2c19a7`. A stopped correctly and made no edits. Root's gate was skipped.
-- **The TM-B29 (D-34) code is already on origin/master.** C confirmed the following:
-  - `6c956b4` changes exactly the 8 paths that round 26 owned (232+/27−);
-  - the tree is clean;
-  - a sanity run passed: check exit 0, Biome 0/8, renderer 216/216, main 93/93.
-- **The verification evidence is missing.** The commit message cites a C PASS (`c-round-26.json`) and a review COMMIT OK. The loop folder was restored to the round-26 start state at 18:43Z and holds neither (finding B-R26-01, routed to root). Without them, no C evidence for TM-B29 exists in the loop folder.
-- **Status.** Under the done policy, TM-B29 stays `in_progress` with realVerified=false. C's sanity run is supporting data only (C-R26-01).
-- **What this round does.** C verifies the published diff against the same acceptance that round 26 planned (R26-1…R26-6 → R27-1…R27-6). No critical or high bug is open, and TM-B29 (medium, data-loss path) is the open item with the highest priority.
-- **No other scope.** A gets no other scope this round. Any change to the 8 TM-B29 files would blur the "`c2c19a7` src + `6c956b4` tests" comparison. Any change elsewhere would add an unrelated diff to a round whose purpose is to restore evidence.
-- **Reference-first rule:** exempt (verification-only round, no UX change).
+- **Round 27: C PASS** (R27-1…R27-6, realVerified=true, 0 bugs). TM-B29 (D-34) is **done** on `6c956b4`. Root's gate was skipped ("no real changes") because the code had already been published, so the baseline stays `6c956b4`.
+- **No critical or high bug is open.** The open medium items are:
+  - TM-T1-DUP/RR-R3-01 and RR-R19-01: both wait on Saba's question batch;
+  - B-R26-01: belongs to root.
+- **Next dependency-ordered item: B-R25-01**, the follow-up that round 27's "Next" named.
+  - B reproduced it red at component level on `6c956b4` in a throwaway copy (`b-round-27-exp/`, see `b-round-27.md` §3).
+  - Setup: Category typed and `Save Tags` clicked; while the write is pending, the user clicks **Rescan**, opens **the same folder**, or **drops it**.
+  - The folder read reads the file before the write resolves. `setMetadata(meta)` runs after the last chunk and replaces the save's re-read, so the store keeps `ACat` where `R28Cat` was saved.
+  - Rescan clears the selection, so the form is not hit at once. Selecting the file again shows the stale entry. A second save then writes the old value back to disk. This is the same data-loss class as TM-B29, so the severity goes from low to **medium**. The fix is the new item **TM-B30**.
+  - Reachability in production: `meta:write-batch` yields every 5 files and `meta:read-batch` every 10 (`src/main/ipc/metadata.ts:243,289`), and a folder with more than 50 files is read in several chunks. A batch save combined with a rescan therefore interleaves without any delay. A single write is synchronous in main, so the single case is reachable only with a delay; the harness provides one.
+- **Reference-first rule:** exempt. This is a pure bug fix with no UX change. The UX alternative (disabling Rescan / Open Folder / drop while a save runs) is **not** taken. Like D-34, which chose a guard over locking the schema editor, it stays a Saba option (B-R27-02).
 
 ## Baseline
-- HEAD must be `6c956b41dee3580d01c6285c9c7c3e1c8495101c` and the working tree **clean** (`git status --porcelain --untracked-files=all` empty). If HEAD differs or the tree is dirty, stop and report.
+- HEAD must be `6c956b41dee3580d01c6285c9c7c3e1c8495101c` and the working tree **clean** (`git status --porcelain --untracked-files=all` empty). If HEAD differs or the tree is dirty, stop and report BLOCKED.
   - Exception (baseline rule): HEAD may be one root `chore(release): vX.Y.Z` commit directly on `6c956b4` that changes only the `version` fields of `package.json`/`package-lock.json`. That commit counts as the baseline.
-- **Frozen:** the whole repository, byte-identical to `6c956b4`. A owns no repository path this round.
+- **Frozen** (byte-identical to `6c956b4`): every path not listed under File ownership. In particular:
+  - `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` (D-34, verified in R27);
+  - `tests/renderer/components/metadata-panel-schema-change.test.ts`;
+  - `tests/renderer/components/metadata-panel-batch-save.test.ts`;
+  - `tests/renderer/helpers/reset-stores.ts` (no new state, so no new reset line);
+  - `tests/renderer/helpers/window-api-mocks.ts`;
+  - `tests/renderer/setup.ts`;
+  - all of `src/main/**`;
+  - `src/renderer/src/types/**`.
 - **Protected** (never edit): `src/preload/index.ts`, `src/preload/index.d.ts`, `src/renderer/src/styles/app.css`, `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `.claude/settings*`, `.claude/hooks/**`.
-- **Reference points for C:**
-  - "old" = `c2c19a7` (the round 25 publication, before D-34);
-  - "new" = `6c956b4` (D-34 as published).
-  - Wherever round 26's acceptance says "A's tree", read `6c956b4`.
+- **Rules:**
+  - test-on-bugfix: tests first. They must be red on the baseline src, and A records the red run before touching src.
+  - CLAUDE.md: no comments in code, semicolons, no `any` / `@ts-ignore`, single quotes in `src/`.
+  - Read primitives first: `TESTING.md`, `STATE_MANAGEMENT.md`, `AGENT_DISCOVERABLE_CODE.md`, `prompts/new-store.md`.
+  - Use Edit/Write only; no Bash writes to repository files (A-R17-02).
+  - After the change, run `/check`. With 3+ files changed, run `code-reviewer`.
 
-## Scope
+## Scope (D-35, renderer only)
 
-### A (implementer) — no repository change
-1. Check the baseline as stated above. If HEAD or the tree differs, write BLOCKED and stop.
-2. Write nothing to the repository. Do not use Edit/Write on repository paths, and do not run Bash writes, `git stash`, `git checkout` or `git reset`. The only exception is gitignored npm output (`out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`).
-3. Optional: run the full `verifyCommand` once and keep the log in `a-round-27/verify.log`. This is information only; A's evidence never counts as acceptance.
-4. Write `a-round-27.md` in Georgian:
-   - the HEAD and `git status` output;
-   - a statement that no repository file was written;
-   - the log path, if step 3 ran.
-   - Do **not** re-implement, "improve" or refactor D-34.
-   - If A notices a defect in `6c956b4`, record it as a finding with file:line for B. Do not fix it.
+### Part A — `src/renderer/src/lib/utils.ts`
+- Change the signature to `readMetadataChunked(paths, schema, getWriteGeneration: () => number)`. The new parameter is **required**, so a caller cannot forget it; `tsc` enforces this.
+- Before each chunk's `window.api.readMetadataBatch` call, call `getWriteGeneration()` once.
+- Add `readGenerations: Record<string, number>` to the return value. For every path in that chunk's **result**, it holds the generation taken for that chunk.
+- A rejected chunk adds nothing to `readGenerations`, and its handling is unchanged: `failures += chunk.length`, and its paths stay absent from `data` (B-R27-01 is out of scope).
+- `data` and `failures` are unchanged.
+- `lib/utils.ts` must **not** import any store. The lib stays store-free; this is the layering decision of D-35.
 
-### C (verifier) — TM-B29 acceptance against `c2c19a7..6c956b4`
-- C runs R27-1…R27-6 below. They are round 26's R26-1…R26-6, applied to the published commit.
-- Round 26's full specification is the reference for every detail not repeated here: `tasks/round-26.md`, parts A/B/C, test table (s9)–(s15) + (g1), and the mutant list. The expected behaviour (D-34) is the `D-34` row in `feature-status.md` and the `D-34` entry in `backlog.json` `decisions`.
-- B confirmed with `git show 6c956b4:<test file>` that the published test names match the round 26 table exactly: (s9)–(s15) and (g1).
+### Part B — `src/renderer/src/stores/file-store.ts`
+- Add a new action `applyMetadataRead(read: Record<string, WavMetadata>, readGenerations: Record<string, number>) => void`. Declare it in `FileState` next to `markPathsWritten`. Add no new state.
+- It **replaces** `metadata`, like `setMetadata`: a path that is not in `read` is not in the result.
+- For each `[path, meta]` of `read`:
+  - if `(state.pathWriteGenerations[path] ?? 0) > (readGenerations[path] ?? 0)`, the path is **superseded**. It gets `state.metadata[path]` as it is at that moment, or is absent if that entry does not exist;
+  - otherwise it gets `meta`.
+- It does not change `writeGeneration`, `pathWriteGenerations`, `files`, `selectedPaths` or anything else.
+- Name: `applyMetadataRead` (grep-friendly, AGENT_DISCOVERABLE_CODE).
+
+### Part C — callers (success path only)
+- `src/renderer/src/components/sidebar/FolderBrowser.tsx` `handleOpenFolder` (`:111-112`) and `handleRescan` (`:147-148`), and `src/renderer/src/App.tsx` `openFolder` (`:63-64`):
+  - call `readMetadataChunked(paths, currentSchema, () => useFileStore.getState().writeGeneration)`;
+  - replace `setMetadata(meta as Record<string, WavMetadata>)` with `useFileStore.getState().applyMetadataRead(meta as Record<string, WavMetadata>, readGenerations)`, or use a selector-bound `applyMetadataRead` and add it to the `useCallback` deps.
+  - The cast stays, as B-R21-03 records.
+- These stay unchanged:
+  - the error paths (`setMetadata({})` at FolderBrowser `:119`, App `:71`);
+  - the empty-folder branch `setMetadata({})` (`:150`);
+  - `handleCloseFolder` (`:128`);
+  - the `clearSelection()` calls;
+  - toasts;
+  - `isScanning`.
+- Biome will reformat the longer call lines; run `npm run lint:fix` or format by hand. The warning count must stay **8**, with the same list.
+
+### Part D — tests first (red on `6c956b4` src, then green)
+
+**New file `tests/renderer/components/folder-read-during-save.test.ts`:**
+- Render `FolderBrowser` and `MetadataPanel` together (`createElement(Fragment, …)`). For (r6), render `App`.
+- Use the same `vi.hoisted` window swap, `resetAllStores()` and `resetWindowApiMocks()` as the schema-change file.
+- `resetWindowApiMocks` does not reset `openFolderDialog`, `loadSchema` or `resolveDroppedPaths`. Reset and default them **locally** in this file's `beforeEach`.
+- Seed: `folderPath: '/music'`, files `a.wav` and `b.wav`, old Category `ACat`/`BCat`. The saved value is `R28Cat`.
+- Use deferred promises for the write and for the folder read so that the order is explicit.
+- B's experiment files in `b-round-27-exp/` (`b-r28-rescan.test.ts`, `b-r28-app.test.ts`) are a starting point, not a spec. Drop x1's stray `getByText('a.wav')` click; FileList is not rendered there.
+
+| Test | Scenario | Assert | Baseline |
+|---|---|---|---|
+| (r1) | single save of a pending → Rescan → the rescan's `readMetadataBatch` is issued before the write resolves → release the write (save re-read gives `R28Cat`) → resolve the rescan read with the old data | the store `metadata[a]` equals the saved entry. Then `setSelectedPaths([a])` (in `act`): the Category input shows `R28Cat` | **red** |
+| (r2) | batch save of a+b pending → Rescan (read deferred) → release the write (`succeeded: 2`), batch re-read gives the new values → resolve the rescan read with the old data | `metadata[a]` and `metadata[b]` both have `R28Cat` | **red** |
+| (r3) | single save pending → `Open Folder` with `openFolderDialog` → `'/music'` (same folder) → same order as (r1) | store keeps `R28Cat` for a | **red** |
+| (r4) pin | save completes (write, mark, re-read applied) → **then** Rescan; the file changed outside and the read returns `ExtCat` | `metadata[a].category` = `ExtCat`: equal generations apply. This is the realistic `>=` killer | green |
+| (r5) pin | no save; Rescan, and `scanFolder` now returns only a.wav | `metadata` has exactly the key a (b is gone: replace, not merge); selection is empty | green |
+| (r6) | `App`; `loadSchema` → `STANDARD_FIELDS`; drop `/music` (`resolveDroppedPaths` → `{ folders: ['/music'] }`), click `a.wav`, type Category, `Save Tags` (write deferred), drop `/music` again with its read deferred, release the write, resolve the read with the old data | store keeps `R28Cat` for a | **red** |
+| (r7) | 51 files (a = first path, chunk 1); single save of a pending → Rescan; chunk 1 is issued before the write resolves and is resolved after the save's re-read; chunk 2 is read after | a keeps `R28Cat`; the chunk-2 file gets its read value; `readMetadataBatch` was called for 2 rescan chunks | **red** |
+| (r8) pin | 51 files, save of the **chunk-2** file z pending, `readMetadata` (re-read) **rejects** (D-24 toast); Rescan is clicked during the write, chunk 1 is pending while the write resolves, chunk 2 is issued after the mark and reads `R28Cat` | `metadata[z].category` = `R28Cat` (a read issued after the write applies). This kills "generation read once before the loop" at component level | green |
+
+**In existing files (additions only; existing tests byte-identical):**
+
+| Test | File | Assert | Baseline |
+|---|---|---|---|
+| (g2) | `tests/renderer/stores/file-store.test.ts`, new `describe("applyMetadataRead (TM-B30, D-35)")` | state `metadata {a: A0, c: C0}`, `pathWriteGenerations {a: 2, b: 2, e: 2}`; `read {a: A1, b: B1, d: D1, e: E1}`, `readGenerations {a: 1, b: 1, d: 1, e: 2}` → `metadata` equals `{a: A0, d: D1, e: E1}`: a superseded and kept, b superseded with no entry so absent, c dropped, e equal so applied. `writeGeneration`, `pathWriteGenerations`, `files` and `selectedPaths` are unchanged | **red** (runtime: not a function) |
+| (u1) | `tests/renderer/utils/utils.test.ts`, new `describe("readMetadataChunked (TM-B30, D-35)")` | 101 paths, 3 chunks. `getWriteGeneration` returns a counter that the chunk-1 `readMetadataBatch` mock increments, and chunk 2 **rejects**. Expect: chunk-1 paths have generation 0, chunk-3 paths have 1, chunk-2 paths are absent from `readGenerations` and `data`, `failures === 50`, `getWriteGeneration` called 3 times, `readMetadataBatch` called 3 times with 50/50/1 paths | **red** |
+
+- **One `it` per row.** (g2) and (u1) are each exactly **one** `it` inside their new `describe`, and (r1)–(r8) are one `it` each. The expected renderer total after the round is therefore 216 + 10 = **226**, in **12** files.
+- **Chunk membership follows `scanFolder`'s returned order**, not the name sort (`wavFiles.map((f) => f.path)`). In (r7) a must be the **first** entry `scanFolder` returns. In (r8) z must be the **51st** entry, so that it lands in chunk 2.
+- A records the red run on the baseline src in `a-round-28.md`: per test, the first failing assertion and the symptom (`ACat`, not a function, `readGenerations` undefined). Expected **7 red / 3 green** among the new tests; every old test stays green.
+
+### Part E — docs (Georgian, English technical terms)
+- **`docs/bugs/001-save-and-selection-known-limits.md`:**
+  - new entry **`## 11.`** "Rescan / folder-ის გახსნა / drop save-ის დროს", in the same layout as entry 9:
+    - steps;
+    - result before the fix;
+    - `გასწორდა (D-35, TM-B30)`;
+    - test names (r1), (r2), (r3), (r6) and (r7) in full, as in the file (grep);
+    - production reachability (batch write yields every 5 files, read every 10; more than 50 files means several chunks; single only with a delay);
+    - the remaining limit: B-R27-01 (a rejected chunk drops its paths);
+  - header: "(3), (9) და (11)" as fixed;
+  - `**წყარო:**` adds TM-B30 (round 28);
+  - `**კოდი:**` adds `FolderBrowser.tsx` (`handleOpenFolder`, `handleRescan`), `App.tsx` (`openFolder`), `lib/utils.ts` (`readMetadataChunked`) and `file-store.ts` (`applyMetadataRead`);
+  - one D-35 bullet in the decisions list;
+  - every new `file:line` reference must point at A's tree;
+  - entries 1–10: no other change, except a line number that A's change shifts (`file-store.ts:` references after the new action). Re-point and list those.
+- **`docs/bugs/README.md`:** row 001 status reads `ცნობილი შეზღუდვების სია (11 ჩანაწერი; 3 გასწორდა, 5 მათგანი Saba-ს კითხვაა)`.
+- **`.claude/primitives/STATE_MANAGEMENT.md`:** one added line after the D-34 line (Edit tool, path (b) permission): "Stale folder read (D-35): …". It states:
+  - `readMetadataChunked` takes the generation per chunk via `getWriteGeneration`;
+  - `applyMetadataRead` keeps the current entry for superseded paths;
+  - Rescan, Open Folder and drop use it;
+  - error and empty paths use `setMetadata`.
 
 ### Not in this round
-- **B-R25-01:** Rescan / Open Folder during a pending save. Needs a red reproduction first.
-- **C-R25-01:** the MBS survivor.
-- **B-R23-03:** a Saba question.
-- **Signals:** RR-R23-04, RR-R24-05 and other architecture signals.
-- **TM-B06:** linting `tests/`.
-- **`src/main`:** any change.
-- **Fixes:** anything C finds in `6c956b4` becomes a bug for round 28 (test-on-bugfix). It is not fixed in this round.
+- **B-R27-01:** rejected-chunk handling and a toast.
+- **A-R19-02:** a save into another folder adds a stray key.
+- **Any `MetadataPanel` change:** including moving `handleSchemaChanged` onto `applyMetadataRead` (RR-R23-04 / RR-R24-05 signals).
+- **Disabling Rescan during a save:** B-R27-02, Saba.
+- **C-R25-01, C-R27-01, C-R27-02, TM-B06, `src/main`.**
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| — (no repository path) | Verification-only round. A writes only `a-round-27.md`, `a-round-27-*.json` and `a-round-27/` in the loop folder. C writes only `c-round-27.md`, `c-round-27.json` and `c-round-27/` in the loop folder. |
+| `src/renderer/src/lib/utils.ts` | Part A: `getWriteGeneration` parameter, `readGenerations` |
+| `src/renderer/src/stores/file-store.ts` | Part B: `applyMetadataRead` |
+| `src/renderer/src/components/sidebar/FolderBrowser.tsx` | Part C: `handleOpenFolder`, `handleRescan` |
+| `src/renderer/src/App.tsx` | Part C: `openFolder` |
+| `tests/renderer/components/folder-read-during-save.test.ts` (new) | (r1)–(r8) |
+| `tests/renderer/stores/file-store.test.ts` | (g2), additions only |
+| `tests/renderer/utils/utils.test.ts` | (u1), additions only (import line may gain `readMetadataChunked`) |
+| `docs/bugs/001-save-and-selection-known-limits.md` | entry 11, header, D-35 bullet, shifted refs |
+| `docs/bugs/README.md` | row 001 count |
+| `.claude/primitives/STATE_MANAGEMENT.md` | one D-35 line |
+
+A also writes `a-round-28.md` and `a-round-28-*.json` in the loop folder. Gitignored output (`out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`) is allowed.
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R27-1 ownership + process | Run these:<ul><li>`git status --porcelain --untracked-files=all` on the working tree;</li><li>`git rev-parse HEAD`;</li><li>`git diff --stat c2c19a7 6c956b4`;</li><li>`git diff --quiet c2c19a7 6c956b4 -- . ':!<8 TM-B29 paths>'`.</li></ul>Read `git diff c2c19a7 6c956b4` for each file. Read A's R27 result JSON. | All of these hold:<ul><li>The working tree is clean after A's phase (A made no change), and HEAD is `6c956b4` or the allowed release commit on it.</li><li>The published diff touches only the 8 TM-B29 paths. They are listed in `tasks/round-26.md`, "File ownership".</li><li>The `file-store.ts` diff adds only `writeGeneration`, `pathWriteGenerations`, their initial values and `markPathsWritten`.</li><li>The three test-file diffs are additions only, plus the two reset lines. (s1)–(s8) and the existing file-store tests are byte-identical.</li><li>`git show 6c956b4:src/renderer/src/components/metadata-editor/MetadataPanel.tsx \| grep -c " as "` is 2.</li><li>No comment, `any` or `@ts-ignore` was added in `src/`.</li><li>The `STATE_MANAGEMENT.md` diff is one added line.</li><li>The Edit/Write-only process of the original implementation **cannot be verified** (no transcript, B-R26-01). C states this as "unknown". It is not a FAIL.</li></ul> |
-| R27-2 red → green | Make a throwaway copy outside the repository, with `c2c19a7` src (`file-store.ts`, `MetadataPanel.tsx`) and the `6c956b4` test files and `reset-stores.ts` (`git show 6c956b4:<path>`). Run the renderer suite there. Then run the renderer suite on `6c956b4`. Run each of (s9)–(s15) alone with `-t`. | <ul><li>Old src: (s9), (s10), (s13), (s14), (s15) and (g1) fail; (s11), (s12) and every other test pass. Expected: 210 passed / 6 failed. If (g1) fails at compile or collection time instead, C records how.</li><li>For each failing test, C records the first assertion line and confirms it fails on the symptom from the round 26 table, not on setup.</li><li>`6c956b4`: **216/216**, 11 files.</li><li>Each of (s9)–(s15) passes alone.</li></ul> |
-| R27-3 mutations | In copies of `6c956b4` outside the repository, run the two TM-B29 test files once per mutant:<ul><li>**MG-1:** no superseded check, so chunk results are always applied.</li><li>**MG-2:** single save marks before `writeMetadata` instead of after.</li><li>**MG-3:** `>=` instead of `>`.</li><li>**MG-4:** one generation read at the start of `handleSchemaChanged` instead of per chunk.</li><li>**MG-5:** kept entries taken from a reject-time snapshot.</li><li>**MG-6:** batch marks the failed paths too.</li><li>**MG-7:** a superseded selected path still resets the form.</li><li>**MG-8:** single save does not mark.</li><li>**MG-9:** batch save does not mark.</li><li>**MG-10:** superseded check done when each chunk resolves instead of at store-write time.</li><li>**MS-1:** `markPathsWritten` does not increment `writeGeneration`.</li></ul>Adapt each mutant to the published code shape and give the exact edit. | Every mutant is killed, and the killing test is named.<ul><li>Expected killers (from B's R25 prototype): MG-1 by (s9)(s10)(s13)(s15); MG-3 by (s11)(s12)(s1)(s2); MG-4 by (s12); MG-5 by (s14); MG-6 by (s15); MG-7 by (s10); MG-10 by (s13); MS-1 by (g1).</li><li>A survivor is a FAIL unless C shows that it is equivalent. A real survivor becomes a test-gap bug for round 28.</li></ul> |
-| R27-4 gate | On `6c956b4`, from a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0` once. | <ul><li>Exit 0.</li><li>Biome: 0 errors and **8** warnings, the same list as on `c2c19a7`.</li><li>Typecheck 0, including `tsconfig.test.json`.</li><li>Renderer **216**, main **93/93**, E2E **7/7**.</li><li>`--retries=0`: **7/7**.</li></ul> |
-| R27-5 real app, old vs new | Build `c2c19a7` and `6c956b4`, each in its own worktree or copy outside the working tree. Launch each with Playwright `_electron` under `xvfb-run`, `--no-sandbox`, an isolated `XDG_CONFIG_HOME`, and a `-r harness.cjs` adapted from `c-round-24/harness.cjs` (it exists in the loop folder).<br>The harness:<ul><li>delays `meta:write` and `meta:write-batch` by 3 s **before** running the real listener;</li><li>for the first `meta:read-batch` whose schema contains the new key (`r27note`), runs the real listener at once (so it reads the file before the write) and delays the **reply** by 6 s;</li><li>logs every call with timestamps.</li></ul>Copy `tests/fixtures/sample.wav` as `a.wav` and `b.wav`. Drive the UI only; the folder dialog may be stubbed.<ol><li>Click `a.wav`, set Category `R27Cat`, click `Save Tags`.</li><li>During the write: `Customize Fields`, add Text field `R27note`, click `Done`.</li><li>Wait for `Tags saved`, then for the late read (log), and take a screenshot.</li><li>Click `b.wav`, then `a.wav`, and take a screenshot.</li><li>Set Title `R27T2` and `Save Tags` (wait for `Tags saved`).</li><li>Read `a.wav` with `music-metadata` (RIFF INFO under `exif:`) and `ffprobe -show_entries format_tags -of json`.</li></ol>Take screenshots after each step. | <ul><li>**`6c956b4` build:**<ul><li>after step 3 and step 4 the form shows Category `R27Cat`;</li><li>after step 6 both readers show `ICAT=R27Cat` and title `R27T2`, field by field.</li></ul></li><li>**`c2c19a7` build (red):** after the late read, the form or the b→a form shows the pre-save Category, and after step 6 `ICAT` is back to its pre-save value (the data-loss path). If the old build does **not** show this, C reports it, explains the timing from the log, and the round is not PASS until B re-plans.</li><li>The harness log shows that the schema read started before the write ended and replied after the save's re-read.</li><li>`pageErrors` is empty on both builds.</li><li>Artists are record only (TM-B08).</li></ul> |
-| R27-6 docs | Read `docs/bugs/001-save-and-selection-known-limits.md`, `docs/bugs/README.md` and the `STATE_MANAGEMENT.md` line at `6c956b4` against the `6c956b4` source and the D-34 row in `feature-status.md`. | <ul><li>Georgian with English technical terms.</li><li>Entry 9 is marked `გასწორდა (D-34, TM-B29)`, names (s9), (s10), (s13), (s14) and (s15) by full test name (grep), keeps the reproduction history, and states production reachability.</li><li>Entry 3 step 3 no longer says that switching files re-reads, and names the real read paths (C-R25-03).</li><li>Entry 10 step 3 limits "edits stay" to a single selection (C-R25-04).</li><li>The header / D-33 bullet lists (3) and (9) as fixed.</li><li>Every `MetadataPanel.tsx:` and `file-store.ts:` reference points at the described code on `6c956b4`. C greps each one; a wrong number is a FAIL of R27-6.</li><li>Entries 1, 2 and 4–8 are unchanged against `c2c19a7`.</li><li>The README row 001 reads `ცნობილი შეზღუდვების სია (10 ჩანაწერი; 2 გასწორდა, 5 მათგანი Saba-ს კითხვაა)`.</li></ul> |
+| R28-1 ownership + process | Run:<ul><li>`git status --porcelain --untracked-files=all`;</li><li>`git diff --stat 6c956b4`;</li><li>`git diff --quiet 6c956b4 -- . ':!<10 owned paths>'`.</li></ul>Read the full diff. Read A's result JSON (`permission_denials`, tool use if a transcript exists). | <ul><li>Only the 10 owned paths changed; exactly one untracked file (the new test).</li><li>MetadataPanel and both metadata-panel tests are byte-identical.</li><li>`lib/utils.ts` imports no store (`grep -n "stores/" src/renderer/src/lib/utils.ts` is empty).</li><li>`getWriteGeneration` is required (no `?`, no default).</li><li>`file-store.ts` adds only `applyMetadataRead` (interface + implementation).</li><li>The three callers change only the success-path read + store write.</li><li>The test diffs in existing files are additions (plus the `utils.test.ts` import line).</li><li>No comment, `any`, `@ts-ignore` or new `as` in `src/` beyond the existing `meta as Record<…>` casts.</li><li>The `STATE_MANAGEMENT.md` diff is one added line.</li><li>No Bash write to repository files is evident. If no transcript exists, C states "unknown" (not a FAIL).</li></ul> |
+| R28-2 red → green | In a throwaway copy outside the repository, use the `6c956b4` src (the 4 owned src files from `git show 6c956b4:`) with A's test files, and run the renderer suite. Then run the suite on A's tree, and each of (r1)–(r8), (g2) and (u1) alone with `-t`. | <ul><li>Baseline src: (r1)(r2)(r3)(r6)(r7)(g2)(u1) fail; (r4)(r5)(r8) and all 216 old tests pass (expected **219 passed / 7 failed**). If the old src fails at type/collect level for (u1) or (g2), C records how.</li><li>For every red test, C records the first failing assertion and confirms it fails on the symptom (stale `ACat` / missing action / missing `readGenerations`), not on setup.</li><li>A's tree: **226/226** in 12 files.</li><li>Each test passes alone.</li></ul> |
+| R28-3 mutations | In copies of A's tree outside the repository, run the new test file plus `file-store.test.ts` and `utils.test.ts` once per mutant. Adapt each to A's code shape and give the exact edit:<ul><li>**MR-1:** `applyMetadataRead` ignores generations (always takes `meta`).</li><li>**MR-2:** `>=` instead of `>`.</li><li>**MR-3:** `getWriteGeneration()` called once before the loop.</li><li>**MR-4:** generation taken after `readMetadataBatch` resolves.</li><li>**MR-5:** a superseded path with no current entry gets `meta`.</li><li>**MR-6:** `handleRescan` keeps `setMetadata`.</li><li>**MR-7:** `handleOpenFolder` keeps `setMetadata`.</li><li>**MR-8:** App `openFolder` keeps `setMetadata`.</li><li>**MR-9:** `applyMetadataRead` merges into the existing `metadata` instead of replacing it.</li><li>**MR-10:** the callers pass `() => 0`.</li></ul> | Every mutant is killed, and the killing tests are named. Expected killers:<ul><li>MR-1: (r1)(r2)(r3)(r6)(r7)(g2)</li><li>MR-2: (r4)(g2)</li><li>MR-3: (u1)(r8)</li><li>MR-4: (u1)(r1)</li><li>MR-5: (g2)</li><li>MR-6: (r1)</li><li>MR-7: (r3)</li><li>MR-8: (r6)</li><li>MR-9: (r5)(g2)</li><li>MR-10: (r4)</li></ul>A survivor is a FAIL unless C shows that it is equivalent; a real survivor becomes a test-gap bug for round 29. |
+| R28-4 gate | On A's tree, from a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0`. | <ul><li>Exit 0.</li><li>Biome: 0 errors and **8** warnings, the same list as on `6c956b4` (`c-round-27/biome-new.txt`).</li><li>Typecheck 0, including `tsconfig.test.json`.</li><li>Renderer **226**, main **93/93**, E2E **7/7**.</li><li>`--retries=0`: **7/7**.</li></ul> |
+| R28-5 real app, old vs new | Build `6c956b4` ("old") and A's tree ("new"), each in its own copy outside the working tree. Launch each with Playwright `_electron` under `xvfb-run`, `--no-sandbox`, an isolated `XDG_CONFIG_HOME`, and a `-r harness.cjs` adapted from `c-round-27/harness.cjs`.<br>The harness:<ul><li>delays `meta:write` and `meta:write-batch` by 3 s **before** the real listener;</li><li>for the first `meta:read-batch` that starts while a write is pending, runs the real listener at once (so it reads before the write) and delays the **reply** by 6 s;</li><li>logs every call with timestamps.</li></ul>Copy `tests/fixtures/sample.wav` as `a.wav` and `b.wav`. Drive the UI only (the folder dialog may be stubbed to return the test folder).<br>**Scenario A (Rescan):**<ol><li>Click `a.wav`, set Category `R28Cat`, `Save Tags`.</li><li>During the write, click `Rescan`.</li><li>Wait for `Tags saved`, then for the late read reply (log); screenshot.</li><li>Click `a.wav`; screenshot.</li><li>Set Title `R28T2`, `Save Tags`, wait for `Tags saved`.</li><li>Read `a.wav` with `music-metadata` (RIFF INFO under `exif:`) and `ffprobe -show_entries format_tags -of json`.</li></ol>**Scenario B (Open Folder, same folder):** fresh copies; the same steps with `Open Folder` in step 2.<br>Take screenshots after each step. | <ul><li>**New build, both scenarios:**<ul><li>after step 4 the form shows Category `R28Cat`;</li><li>after step 6 both readers show `ICAT=R28Cat` and title `R28T2`, field by field.</li></ul></li><li>**Old build (red), both scenarios:** after step 4 the form shows the pre-save Category (`sample.wav` has no `ICAT`, so the field is empty `''`), and after step 6 `ICAT` is back to its pre-save value (`ICAT=''` or absent, as in R27-5). If the old build does not show this, C reports it with the timing from the log, and the round is not PASS until B re-plans.</li><li>The harness log shows the folder read started before the write ended and replied after the save's `meta:read`.</li><li>`pageErrors` is empty on all runs.</li><li>Artists are record only (TM-B08).</li></ul> |
+| R28-6 docs | Read `docs/bugs/001-save-and-selection-known-limits.md`, `docs/bugs/README.md` and the `STATE_MANAGEMENT.md` line on A's tree, against A's src and the D-35 row in `feature-status.md` / `backlog.json` `decisions`. | <ul><li>Georgian with English technical terms.</li><li>Entry 11 is marked `გასწორდა (D-35, TM-B30)`, names (r1), (r2), (r3), (r6) and (r7) by full test name (grep), states reachability and names B-R27-01 as the remaining limit.</li><li>The header lists (3), (9) and (11) as fixed; `წყარო`/`კოდი` are updated; there is a D-35 bullet.</li><li>Every `file:line` reference in the file points at the described code on A's tree. C greps each one; a wrong number is a FAIL.</li><li>Entries 1–10 are unchanged apart from listed line-number shifts.</li><li>The README row reads `ცნობილი შეზღუდვების სია (11 ჩანაწერი; 3 გასწორდა, 5 მათგანი Saba-ს კითხვაა)`.</li></ul> |
 
 ## What could break (C re-checks)
-- **D-33 (s1)–(s8):** these must stay green on `6c956b4`, because the kept entries are now taken at store-write time.
-- **The single-save tests and the 49 batch-save tests:** D-21/D-22/D-24/D-28/D-29/D-30 behaviour (toasts, re-read, `skipSyncRef`, merge) must be unchanged. A mark placed after `refreshSavedFileStats` or after the re-read is wrong (MG-2/MG-8 class). C reads where `markPathsWritten` sits in `handleSave`.
-- **Normal schema change with no pending save** ((s1)/(s2) and R27-5's final save): all results apply as before.
-- **`file-list.test.ts`, the sort and `useFilteredFiles`:** the new store fields must not appear in `metadata` or change these.
-- **Biome hook-deps:** exactly 8 warnings, the same list as on `c2c19a7`.
+- **D-33/D-34 (s1)–(s15) + (g1):** these must stay green. MetadataPanel is frozen, but `file-store.ts` changes.
+- **Normal Open Folder / Rescan / drop with no pending save** ((r5), E2E `folder-workflow.spec.ts`): every read applies, and a removed file disappears from `metadata`.
+- **Error paths:** a `scanFolder` reject still shows the toast and, for Open Folder / drop, empties `files` and `metadata`. The empty folder still yields `setMetadata({})`. Closing the folder still clears everything.
+- **D-28 `refreshSavedFileStats`:** it calls `scanFolder` and must stay unaffected (no `readMetadataChunked` there).
+- **D-29:** Rescan clears the selection during a pending save, so the save does not touch the form. The `Tags saved` toast still appears.
+- **Sort / filter / `useFilteredFiles`, `file-list.test.ts`:** no new state, so there must be no change.
+- **Biome:** exactly 8 warnings, the same list.
 
 ## What realVerified means here
-- R27-1…R27-4 and R27-6 are real local checks of the published commit.
-- R27-5 is the real-app check on two builds, with the file read by two independent readers.
-- PASS on all six closes TM-B29 (done, commit `6c956b4`) and the docs findings C-R25-03/04 (= A-R25-02/03).
-- The original implementation's Edit/Write-only process stays unverifiable (B-R26-01) and does not block PASS.
+- R28-1…R28-4 and R28-6 are real local checks.
+- R28-5 is the real-app check on two builds, with the file read by two independent readers.
+- PASS on all six closes TM-B30 and B-R25-01.
 - Windows packaging is BLOCKED: Windows packaging is not available in the cloud. It is not part of this round.
-- The Actions `Check` run belongs to TM-T0-CI/TM-B14, and root links it.
 
 ## Next (orientation only)
-- If C finds a FAIL in `6c956b4`, round 28 fixes it first (test-on-bugfix).
-- Otherwise, **B-R25-01:** Rescan / Open Folder during a pending save. B first reproduces it red (deferred batch write + rescan). If it is red, the fix reuses `pathWriteGenerations` in `FolderBrowser`/`App`.
-- **C-R25-01:** the MBS survivor (a hygiene candidate).
-- Everything else waits on Saba's question batch (`b-round-23.md` §5 + B-R23-03) or on root's Actions link.
+- If C finds a FAIL, round 29 fixes it first (test-on-bugfix).
+- Otherwise:
+  - **B-R27-01:** a rejected chunk in a folder read silently drops entries. Needs a decision (keep the current entry + toast, as D-33 does) and a red reproduction.
+  - **C-R25-01:** the MBS hygiene candidate.
+- Everything else waits on Saba's question batch (`b-round-23.md` §5, B-R23-03, C-R27-01, B-R27-02) or on root's Actions link (TM-T0-CI/TM-B14).
