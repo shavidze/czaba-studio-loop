@@ -223,3 +223,20 @@ Saba asked that the Studio loop carry three planned streams. The specs were writ
 - **Gates that still apply:** `PHASE2-VIDEO-SCORING` keeps its user go-ahead gate. When the loop reaches it, write BLOCKED "phase 2 awaiting user go-ahead" and then follow the skip rule below (the loop does not stop there). Saba may move any of the three entries earlier; root records that here.
 - **Skip rule for a gated entry (Saba, 2026-10-26):** when the next queue entry is gated on a user go-ahead (today `PHASE2-VIDEO-SCORING`), B writes that BLOCKED note once in `b-round-N.md` and in the entry's `status`, then opens the next queue entry instead of stopping the loop. The skipped entry keeps its queue position and is opened as soon as root records the go-ahead (it then goes before any entry not yet started). Inside an opened entry, B runs only stages whose own prerequisites are met: today SP-0a, SP-1 (46a), SP-2 (47a), SP-3 (47b), SP-5 (48) of `PHASE2B-SPOTTING`; CMD-1…CMD-4b and CMD-5a/5b of `STUDIO-AGENT-COMMANDS` (CMD-6 `set_duck_under` waits for SRW-44c); `RECORDING-META-S1` S-1 after SP-3a C PASS (S1-5 waits for K-3b). A stage that needs a phase-2 task (SP-4/46b needs SRW-43b + SP-0b, SP-6/46c needs SRW-43a + SP-0b, R48-2's `hit` part needs SP-4) stays BLOCKED in its row and B moves to the next runnable stage; it is not a reason to stop. If no stage in any opened entry can run, B writes BLOCKED "all remaining work awaits user go-ahead" and the loop stops as usual.
 - **`RECORDING-META-S1` unit-only exception (Saba, 2026-10-26):** S-1 is one unit-only round. It shows nothing in Studio yet, so C PASS on its unit rows (fixture mapping, `rankSourcesForQuery` with recording meta) counts as done without a browser row; the full `npm run test:run` is a gate row. This exception covers S-1 only. S1-5 (SyncPoint) stays a separate row, BLOCKED until K-3b. When recordings first appear in the Studio UI, that stage gets the normal browser rows.
+
+## Reference first: study how the same thing works before building it (Saba, 2026-10-27)
+
+Saba's standing rule: before any feature or UX change is built, the agents look at how the same thing already works in the reference product and what design it uses, and build it that way.
+
+- **Studio reference:** Ableton Live 12 Arrangement View. Other DAWs or NLEs (Pro Tools, Logic, Premiere, DaVinci Resolve) are secondary, for things Ableton lacks (video, spotting, ducking). **Store reference:** the competitor and luxury research in `docs/technical/store-redesign/research/` and the direction decision.
+- **B, before dispatching** a feature or UX task, writes a section `Reference: how <product> does it` in the task:
+  - behaviour step by step;
+  - cursor, hover and selected states;
+  - shortcuts and modifiers;
+  - visuals (size, colour role, motion);
+  - edge cases.
+
+  Each point has a source: the Ableton manual or help page URL with the section, a public screenshot or video, or the `ableton-arrangement-expert` / `docs-explorer` consult result. B and C now have WebSearch and WebFetch, and `ableton-arrangement-expert` and `docs-explorer` are on the planner's consult list.
+- **Deviation needs a reason.** Where our design differs (brand colours, English-only labels, one shared focus style, a Saba decision), B lists it under `Deviations` with its reason. "Simpler to build" is not a reason. Where we can do better than Ableton (Saba wants to beat it), B says what is better and why. The behaviour stays recognisable to an Ableton user.
+- **C verifies against the reference section:** each reference point gets a row (match, or a listed deviation). A behaviour that differs from the reference with no listed deviation is a bug, Medium when it changes what a user must learn, otherwise Low.
+- **Not in scope:** pure performance, refactor, test-only, docs-only and RETRO rounds. If a reference cannot be found, B writes "no reference found" and what was searched, and does not invent one.

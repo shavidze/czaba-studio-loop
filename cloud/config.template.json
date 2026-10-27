@@ -3,25 +3,73 @@
   "repoDir": "__CZ__/store",
   "loopDir": "__CZ__/tmp/studio-real-loop",
   "branch": "master",
-  "pushRemotes": ["https://github.com/TCzaba/czaba-store.git", "https://github.com/shavidze/czaba-store.git"],
+  "pushRemotes": [
+    "https://github.com/TCzaba/czaba-store.git",
+    "https://github.com/shavidze/czaba-store.git"
+  ],
   "verifyCommand": "npm run verify",
   "servers": [
     {
       "name": "store",
       "healthUrl": "http://127.0.0.1:5173/studio-lab",
       "startFile": "npx",
-      "startArgs": ["remix", "vite:dev", "--host", "127.0.0.1", "--port", "5173"],
+      "startArgs": [
+        "remix",
+        "vite:dev",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5173"
+      ],
       "cwd": "__CZ__/store"
     }
   ],
-  "protectedPaths": ["app/routes/studio.$productId.tsx", "app/routes/api.studio-token.ts", "app/routes/account.downloads.tsx", "app/lib/__tests__/download-routes.test.ts"],
+  "protectedPaths": [
+    "app/routes/studio.$productId.tsx",
+    "app/routes/api.studio-token.ts",
+    "app/routes/account.downloads.tsx",
+    "app/lib/__tests__/download-routes.test.ts"
+  ],
   "agentsFile": "__CZ__/tmp/studio-real-loop/agents.json",
-  "roleAgents": { "planner": "studio-task-writer", "implementer": "studio-implementer", "verifier": "studio-product-verifier", "reviewer": "code-reviewer" },
-  "models": { "planner": "", "implementer": "", "verifier": "", "reviewer": "" },
+  "roleAgents": {
+    "planner": "studio-task-writer",
+    "implementer": "studio-implementer",
+    "verifier": "studio-product-verifier",
+    "reviewer": "code-reviewer"
+  },
+  "models": {
+    "planner": "",
+    "implementer": "",
+    "verifier": "",
+    "reviewer": ""
+  },
   "consultAgents": {
-    "planner": ["tech-lead", "product-manager", "design-philosopher", "flow-sage", "first-visit-host", "consequence-tester", "performance-optimizer"],
-    "implementer": ["code-reviewer"],
-    "verifier": ["accessibility-auditor", "code-reviewer", "design-auditor", "ableton-arrangement-expert", "studio-specialist", "performance-optimizer", "design-philosopher", "flow-sage", "first-visit-host"],
+    "planner": [
+      "tech-lead",
+      "product-manager",
+      "design-philosopher",
+      "flow-sage",
+      "first-visit-host",
+      "consequence-tester",
+      "performance-optimizer",
+      "ableton-arrangement-expert",
+      "docs-explorer"
+    ],
+    "implementer": [
+      "code-reviewer"
+    ],
+    "verifier": [
+      "accessibility-auditor",
+      "code-reviewer",
+      "design-auditor",
+      "ableton-arrangement-expert",
+      "studio-specialist",
+      "performance-optimizer",
+      "design-philosopher",
+      "flow-sage",
+      "first-visit-host",
+      "docs-explorer"
+    ],
     "reviewer": []
   },
   "cleanupProcessPattern": "vitest",
@@ -31,5 +79,15 @@
   "maxLimitWaitSeconds": 5400,
   "contextRestartTokens": 650000,
   "contextRestartMode": "agent",
-  "pushTimeoutSeconds": 1800
+  "pushTimeoutSeconds": 1800,
+  "extraTools": {
+    "planner": [
+      "WebSearch",
+      "WebFetch"
+    ],
+    "verifier": [
+      "WebSearch",
+      "WebFetch"
+    ]
+  }
 }

@@ -42,3 +42,7 @@
 - How: the job's user settings (`~/.claude/settings.json`, written by `tag-manager-loop.yml`) register a `PermissionRequest` hook, `tag-manager/cloud/allow-claude-dir.py`. It approves Edit/Write on paths under the repository's `.claude/`, except `.claude/settings*` and `.claude/hooks/**`, which stay refused. Root tested it headless (`claude -p`, `acceptEdits`): an Edit under `.claude/primitives/` went through, a Write to `.claude/settings.json` was refused. An allow rule alone does not cover protected paths, so the hook is the approval.
 - Round 12 runs as `current-task.md` describes for path (b): A makes the `### Save flow` edit with the Edit tool and records path (b) in `a-round-12.md`. The no-Bash-write rule for `.claude/**` still holds. If Edit is refused again, A stops and reports BLOCKED as written.
 - This permission is standing for later rounds too (for example C-R1-03 `TESTING.md`), within each round's file ownership.
+
+## Reference first (Saba, 2026-10-27)
+
+Before building any feature or UX change, B studies how the same thing works in established tag editors (for example Mp3tag, Kid3, Soundminer, BWF MetaEdit) and how they look. B writes a `Reference` section in the task with sources (URLs or the consult result) and a `Deviations` list with reasons. C checks each point. B and C have WebSearch and WebFetch. A difference from the reference with no listed reason is a bug. Pure fix, refactor, test-only and docs-only rounds are exempt. If no reference is found, B says what was searched and does not invent one.
