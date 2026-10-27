@@ -1,0 +1,130 @@
+{
+ "taskStatus": "PASS",
+ "round": 212,
+ "bugs": [],
+ "passed": [
+  "SCOPE-212",
+  "LATENCY-212",
+  "PIX-212",
+  "RELEASE-212",
+  "SYNC-212",
+  "WAVE-LIVE-212",
+  "EXPORT-212",
+  "DOC-212",
+  "AN-REVIEW-212",
+  "G212-3",
+  "ADJACENT-212"
+ ],
+ "rulingNeeded": [
+  {
+   "id": "C-R212-01",
+   "row": "PERF-RUN-212",
+   "what": "fader.clipgain.stopped.commits-per-move (1x and 6x) 0.926 -> 0.917 vs C round 211; not named in the D-29z198 exclusions. It is whole-gesture commits / moves; the commits go 112 -> 111 at 121 moves = exactly the removed release commit (ruled release-commits 2 -> 1). Every other PERF-RUN-212 clause holds: exit 0 x2, 0 failing asserts, restarts 0, deterministic rows stable between runs and 1x/6x, move-components-max 3, single release-commits 1. Kept out of passed until B rules. Second row by the same letter: load.longtasks-over-50 1 -> 2 (all passes of C's and A's runs; C r211 [1,2,1]/[1,1,1]). C's own load probe gives 1 long task in 8/8 loads on BOTH builds and the round's code does not run at load (0 clips); interpretation (inference): environment/harness-sequence variance, outside the D-29z190 list. B rules both rows in one step.",
+   "evidence": "c-round-212/out/perfcmp.txt; c-round-212/out/perf-run{1,2}.json (components-per-commit details commits 111 vs c-round-211 112); perf/studio-lab.perf.spec.ts l.426; c-round-212/out/load-longtasks.json",
+   "rows": [
+    "fader.clipgain.stopped.commits-per-move (+.6x)",
+    "load.longtasks-over-50"
+   ]
+  }
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "notes": [
+  {
+   "id": "C-R212-03",
+   "severity": "info",
+   "text": "6x record rows are higher than C r211 (clipgain stopped 34->45, playing 43->58; members 30->40, 44->57), but C's 6x probe the same day shows current ~= baseline (45.8 vs 45.2 stopped, 59.6 vs 57.2 playing). Under 6x throttle the Clip Gain drag is still 45-60 ms on both builds; a slow-CPU follow-up is B's decision.",
+   "evidence": "c-round-212/out/lat-{cur,base}-1440-x6.json, out/perfcmp.txt"
+  },
+  {
+   "id": "C-R212-04",
+   "severity": "info",
+   "text": "Tailwind v4 auto source detection scans docs/ (confirmed: git grep shows 'antialiased' only in app/styles/app.css at 28a274c; the only new occurrence is doc 167): doc 167's word 'antialiased' adds an unused .antialiased rule to the app CSS (bundle app-Ijsdx7fz -> app-DiFcXdcK). 0 elements use it; body is already antialiased via app.css l.460; no visual effect. The fix would touch protected app/styles/**.",
+   "evidence": "CSS bundle diff (one added rule); c-round-212/out/adj-*.json antialiasedElements 0"
+  },
+  {
+   "id": "C-R212-INFO",
+   "severity": "info",
+   "text": "WG2 title still says byte-identical to the pre-round d (now checked via the legacy formatter, so the intent holds); PO1-PO4 ids collide with pending-status.test.tsx; the code-reviewer Minor (group->group pending carry-over) predates the round and was not browser-tested."
+  }
+ ],
+ "measurements": {
+  "harness_1x_p95_ms": {
+   "clipgain.stopped": [
+    6.2,
+    6.3
+   ],
+   "clipgain.playing": [
+    7.5,
+    7.6
+   ],
+   "members.stopped": [
+    5.7,
+    5.8
+   ],
+   "members.playing": [
+    8.4,
+    8.7
+   ]
+  },
+  "probe_median_p95_ms": {
+   "cur1440": {
+    "stopped": 6.1,
+    "playing": 7.3,
+    "membersStopped": 5.5,
+    "membersPlaying": 7.2
+   },
+   "cur1280": {
+    "stopped": 5.4,
+    "playing": 7.1,
+    "membersStopped": 5.7,
+    "membersPlaying": 7.9
+   },
+   "base1440_control": {
+    "stopped": 23.9,
+    "playing": 41.4
+   },
+   "x6_1440": {
+    "cur": [
+     45.8,
+     59.6
+    ],
+    "base": [
+     45.2,
+     57.2
+    ]
+   }
+  },
+  "pix": {
+   "cases": 28,
+   "over8": 0,
+   "maxDelta": 5
+  },
+  "release": {
+   "currentCommits": 1,
+   "staleRecords": 0,
+   "baselineCommits": 2
+  },
+  "export_sha256": {
+   "singleDrag": "76735f3093b6b1fd5a6ca5ee0dd48567b822455e146a9e5eb1611a46377e127c",
+   "singleTyped": "76735f3093b6b1fd5a6ca5ee0dd48567b822455e146a9e5eb1611a46377e127c",
+   "membersDrag": "5b8581cc66be5250945614edb1859fb8d7e21c5291ca6dcfc64ddc1efa98e493",
+   "membersKeys": "5b8581cc66be5250945614edb1859fb8d7e21c5291ca6dcfc64ddc1efa98e493"
+  }
+ },
+ "blocked": [],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-27T20:33:29.8980430Z",
+  "round": 212,
+  "attempt": 1,
+  "store": 200
+ }
+}

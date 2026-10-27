@@ -1,10 +1,10 @@
 {
- "version": 195,
- "updated": "2026-10-27 (B round 211 -> 212 planning)",
+ "version": 196,
+ "updated": "2026-10-27 (B round 212 -> 213 planning)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 212, D-29z195..D-29z199; PERF-FADER-c waveform outline path + C-R211-01 + GATE211-S1)",
- "advisor_used_by_B": "2026-10-27 round 205 -> 206 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: PERF-1 split 1a/1b, all of app/ frozen, hook stub + start() counter proven on a scratch prod build before dispatch, C-R205-01 ruled Low but scheduled, doc 162 status fix granted, queue move recorded with a D-ID | previous: 2026-10-26 round 189 -> 190 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: round-179-style fix-up baseline on the uncommitted round-189 tree (frozen 1016 incl. doc 155 at cdf011f9, grants 3), A must reproduce C's fresh-mode CLS and bisec",
+ "current_task": "current-task.md (round 213, D-29z200..D-29z203; GATE212-B1 CP12 split, gate fix for round 212)",
+ "advisor_used_by_B": "2026-10-27 round 212 -> 213 planning: advisor available and consulted after orientation and at the end; advice followed: archive first, C-R212-01 ruled (derived-row rule), SABA-B-5 c_pass_pending_publication, CP12 split scratch-measured (no timeout raise), 1280 detail-panel expand step, M2 clamp wording, B-R212-TIMEOUT-HEADROOM retro signal | previous: 2026-10-27 round 205 -> 206 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: PERF-1 split 1a/1b, all of app/ frozen, hook stub + start() counter proven on a scratch prod build before dispatch, C-R205-01 ruled Low but scheduled, doc 162 status fix granted, queue move recorded with a D-ID | previous: 2026-10-26 round 189 -> 190 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: round-179-style fix-up baseline on the uncommitted round-189 tree (frozen 1016 incl. doc 155 at cdf011f9, grants 3), A must reproduce C's fresh-mode CLS and bisec",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -10241,7 +10241,7 @@
    "round": 212,
    "task": "current-task.md",
    "decision": "D-29z195..D-29z199",
-   "status": "dispatched",
+   "status": "c_pass_gate_failed",
    "type": "BUG/PERF STAGE (STUDIO-PERFORMANCE PERF-FADER-c: SABA-B-5 part 3 + C-R211-01 + GATE211-S1)",
    "items": [
     "buildPeakShape path = one closed outline (same geometry; WZ1/WG1/WG2 re-expressed as geometry identity; WG2 sha via legacy formatter)",
@@ -10252,7 +10252,23 @@
    ],
    "note": "baseline HEAD 28a274c (gate 211 published); frozen 1050 files b-round-211-r212-tree-sha256.txt; grants b-round-211-r212-grants.txt (7); new files b-round-211-r212-new-files.txt (2); ArrangementContext frozen (checkpoint)",
    "next": "PERF-1b (or a measured follow-up if LATENCY-212 fails)",
-   "added": "2026-10-27 B round 211 -> 212 planning (D-29z197)"
+   "added": "2026-10-27 B round 211 -> 212 planning (D-29z197)",
+   "result": "C PASS (11 rows + PERF-RUN-212 by D-29z200), browserVerified/realVerified true; gate 212 failed: CP12 timeout 33.3 s (pre-existing, GATE212-B1); publication with round 213"
+  },
+  {
+   "round": 213,
+   "task": "current-task.md",
+   "decision": "D-29z200..D-29z203",
+   "status": "dispatched",
+   "type": "GATE FIX (test-only): GATE212-B1 CP12 split",
+   "items": [
+    "CP12 -> CP12a-d (tenths chunks [-600,-391],[-390,-181],[-180,29],[30,240]) + CP12e (Shift-fine + members) + CP12-COVER",
+    "doc 167 Problem->Solution lines for the CP12 timeout",
+    "no source change; describe timeout and 0.1 dB step unchanged"
+   ],
+   "note": "baseline HEAD 28a274c + round-212 worktree (gate 212 failed, not published); frozen 1057 files b-round-212-r213-tree-sha256.txt; grants b-round-212-r213-grants.txt (2); new files none",
+   "next": "root publishes 212+213; then PERF-1b",
+   "added": "2026-10-27 B round 212 -> 213 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -22792,7 +22808,7 @@
    "hypothesis_rejected": "root's 'syncPlayback rebuilds the graph per move' is not supported by source (scheduleKey excludes tracks/master/gainDb) nor by the probe (0 restarts); kept as an asserted harness row (0 restarts while playing).",
    "plan": "PERF-1a (round 206) measures it (fader scenarios x stopped/playing, record mode); PERF-FADER (first PERF task after PERF-1) fixes it following the pan pattern; budgets <=3 committed components per move, 0 restarts, export of a dragged mix bit-identical to typed values",
    "origin": "Saba (user report) + root code fact",
-   "status": "in_progress: part 1 (track/group/master/pan) done round 210 (180dd2e); part 2 (Clip Gain React work) done round 211 C PASS browserVerified=true, published 28a274c (3 components per move vs 95; release 1-2; restarts 0; export bit-identical); part 3 = round 212 PERF-FADER-c (D-29z197): single Clip Gain move-to-paint p95 still 18.1/18.6 ms stopped, 59.7/58.1 ms playing (C-R211-02, target < 16 ms); cause measured by B = SVG raster of the per-column rect peak path (b-round-211/diag); closes only when C LATENCY-212 passes",
+   "status": "c_pass_pending_publication: part 1 done round 210 (180dd2e); part 2 done round 211 (28a274c); part 3 C PASS round 212 LATENCY-212 (single Clip Gain move-to-paint p95 5.4-7.6 ms stopped/playing both viewports vs baseline 23.9/41.4; harness 6.2-7.6) browserVerified=true; gate 212 failed on the pre-existing CP12 timeout (GATE212-B1), so it closes at the round-213 publication (D-29z202). 6x CPU still 45-60 ms on both builds (C-R212-03 signal)",
    "added": "2026-10-27 B round 205 -> 206 planning (D-29z171)",
    "measured_c_round_206": "C round 206 (independent probe + harness, identical runs): components/commit stopped/playing track 83/83, group 85/85, master 80/80, pan 4/4, clipgain 79/87; restarts while playing 0 in all 10 rows (1x and 6x); 6x playing frame p95 33.4 ms (track/group/master), 33.3 (pan), 66.7 ms (clipgain, 136-147 frames >33 ms, 74 LoAF); evidence c-round-206/out/run1.json, run2.json, cprobe-1440.json",
    "round_211_c_result": "c-round-211.json PASS; C-R211-02 record: single playing p95 59.7/58.1, stopped 18.1/18.6, members playing 10.2/9.4"
@@ -23167,6 +23183,51 @@
    "evidence": "b-round-211/diag/result2.json",
    "status": "recorded (rejected option; contradicts the performance-optimizer consult's first recommendation)",
    "added": "2026-10-27 B round 211 -> 212 planning"
+  },
+  {
+   "id": "GATE212-B1",
+   "severity": "medium",
+   "origin": "root gate 212",
+   "title": "full-suite CP12 (clip-gain-pointer-preview.test.tsx) exceeds the 30 s timeout (33.3 s; 25.4 s in gate 211); blocks publication of round 212",
+   "evidence": "gates/round-212/verify.log l.552/1958; a-round-212.md known gap 3 (start-copy control 33.8 s)",
+   "status": "scheduled: round 213 (D-29z201)",
+   "added": "2026-10-27 B round 212 -> 213 planning"
+  },
+  {
+   "id": "C-R212-01",
+   "severity": "info",
+   "origin": "C round 212",
+   "title": "PERF-RUN-212 ruling: commits-per-move 0.926->0.917 and load.longtasks-over-50 1->2",
+   "evidence": "c-round-212/out/perfcmp.txt; c-round-212/out/load-longtasks.json",
+   "status": "closed (D-29z200 ruling)",
+   "added": "2026-10-27 B round 212 -> 213 planning"
+  },
+  {
+   "id": "C-R212-02",
+   "severity": "info",
+   "origin": "C round 212",
+   "title": "load.longtasks-over-50 2 in every pass (C r211 [1,2,1]); C probe 1 in 8/8 loads on both builds",
+   "evidence": "c-round-212/out/load-longtasks.json",
+   "status": "signal for PERF-1b (median-of-N or record row; D-29z200); not scheduled",
+   "added": "2026-10-27 B round 212 -> 213 planning"
+  },
+  {
+   "id": "C-R212-03",
+   "severity": "info",
+   "origin": "C round 212",
+   "title": "Clip Gain drag under 6x CPU throttle still 45-60 ms p95 on both current and baseline builds",
+   "evidence": "c-round-212/out/lat-{cur,base}-1440-x6.json",
+   "status": "signal: slow-CPU budget is a Saba question / PERF-1b input (D-29z202); not scheduled",
+   "added": "2026-10-27 B round 212 -> 213 planning"
+  },
+  {
+   "id": "B-R212-TIMEOUT-HEADROOM",
+   "severity": "info",
+   "origin": "B round 212 -> 213 planning",
+   "title": "RETRO 215 lesson signal: a test above ~50 % of its timeout in the last gate log (CP12 25.4/30 s at gate 211) should be split before more rows are added to its file; A flagged it in round 212 but the task froze CP12",
+   "evidence": "gates/round-211/verify.log l.562; gates/round-212/verify.log; a-round-212.md gap 3",
+   "status": "signal for RETRO 215 (lessons.md owned by RETRO)",
+   "added": "2026-10-27 B round 212 -> 213 planning"
   }
  ],
  "tech_lead_notes": [
@@ -24902,6 +24963,14 @@
    "proposal": "pan onto the MixOverride union (kind 'pan') + one draft-clear helper; one internal claim/listener helper; context the only pan-draft writer. Acceptance: FP1-FP14c, MD1-MD5, gesture-guard, fader-click, group-volume-db green unedited; useArrangement() shape unchanged; perf asserts unchanged",
    "status": "recorded; folded into the post-PERF-FADER-b frontend-architect checkpoint (D-29z188); not scheduled",
    "added": "2026-10-27 B round 210 -> 211 planning"
+  },
+  {
+   "id": "A-R212-ARCH-NOTE",
+   "source": "a-round-212.md code-reviewer Architecture note",
+   "signals": "keep; leaf ~28-prop list (not new)",
+   "verdict": "keep",
+   "proposal": "none; folded into the pending D-29z195 checkpoint as context",
+   "added": "2026-10-27 B round 212 -> 213 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -28382,6 +28451,36 @@
    "repro": "ArrangementDetailPanel.tsx l.278-308",
    "ruling": "D-29z196: deferred (reviewer: acceptable to keep)",
    "added": "2026-10-27 B round 211 -> 212 planning"
+  },
+  {
+   "id": "C-R212-04",
+   "severity": "low",
+   "origin": "C round 212",
+   "title": "Tailwind v4 auto source detection scans docs/: doc prose ('antialiased' in doc 167) adds an unused utility rule to the shipped CSS",
+   "evidence": "c-round-212.md C-R212-04; CSS bundle app-Ijsdx7fz -> app-DiFcXdcK",
+   "repro": "git grep antialiased; build; diff app CSS",
+   "ruling": "D-29z202: deferred; fix (@source not docs/) needs a root/Saba grant for protected app/styles/**",
+   "added": "2026-10-27 B round 212 -> 213 planning"
+  },
+  {
+   "id": "C-R212-PO-ID-COLLISION",
+   "severity": "low",
+   "origin": "A round 212 gap 4 / C round 212 info",
+   "title": "row ids PO1-PO4 in waveform-outline-path.test.tsx collide with PO1-PO4 in pending-status.test.tsx",
+   "evidence": "a-round-212.md gap 4; c-round-212.md DOC-212",
+   "repro": "grep -n \"'PO[1-5]\" app/lib/arrangement/__tests__/*.test.tsx",
+   "ruling": "D-29z202: deferred (doc 167 cites with the file name)",
+   "added": "2026-10-27 B round 212 -> 213 planning"
+  },
+  {
+   "id": "A-R212-REVIEW-GROUP-PENDING-CARRY",
+   "severity": "low",
+   "origin": "round 212 code-reviewer Minor (pre-existing)",
+   "title": "group->group selection change keeps key='group'; if both displayed texts are equal (e.g. mixed ''), typed pending Clip Gain text carries over to the new group",
+   "evidence": "a-round-212.md code-reviewer findings; not browser-tested (c-round-212.md section 4)",
+   "repro": "select group A, type in Clip Gain field without commit, switch to group B with equal displayed text",
+   "ruling": "D-29z202: deferred; C reproduces first in a later round that owns the block",
+   "added": "2026-10-27 B round 212 -> 213 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -29951,6 +30050,26 @@
    "id": "D-29z199",
    "date": "2026-10-27",
    "text": "queue: PERF-FADER-c inserted before PERF-1b (open Medium SABA-B-5 under the bug gate); order otherwise unchanged"
+  },
+  {
+   "id": "D-29z200",
+   "date": "2026-10-27",
+   "text": "C-R212-01 ruled: fader.clipgain.stopped.commits-per-move (1x/6x) 0.926->0.917 joins the D-29z198 exclusion (whole commits 112->111 = the removed release commit); general rule: a derived row whose numerator includes an excluded row is excluded with it. load.longtasks-over-50 1->2 accepted as harness/machine variance (C probe 1 long task in 8/8 loads on both builds; round code does not run at load); signal for PERF-1b to make it median-of-N or a record row. PERF-RUN-212 accepted by ruling; C does not re-run it. Round 212 accepted on C evidence (PASS, browserVerified/realVerified true)."
+  },
+  {
+   "id": "D-29z201",
+   "date": "2026-10-27",
+   "text": "GATE212-B1: gate 212 failed only on the pre-existing CP12 30 s timeout (25.4 s gate 211 -> 33.3 s gate 212; alone 15.6 s; A's start-copy control also timed out). Round 213 = test-only gate fix: CP12 split into CP12a-d (four contiguous 0.1 dB tenths chunks covering -60.0..+24.0) + CP12e (Shift-fine + members anchors) + CP12-COVER (union check); no assertion removed; describe timeout 30 s and step 0.1 dB unchanged. B scratch run: alone 3.6-4.1 s per chunk; covering run (155 files, 2236 tests green) 8.0-8.8 s per chunk."
+  },
+  {
+   "id": "D-29z202",
+   "date": "2026-10-27",
+   "text": "SABA-B-5 part 3 C-verified (LATENCY-212 5.4-7.6 ms) but unpublished; SABA-B-5 closes at the publication of rounds 212+213. C-R212-03 (6x 45-60 ms on both builds) = signal for PERF-1b / Saba question, not scheduled. C-R212-04, PO1-PO4 id collision and the group->group pending carry-over -> deferred_low_polish."
+  },
+  {
+   "id": "D-29z203",
+   "date": "2026-10-27",
+   "text": "Doc 167 granted for the CP12 Problem->Solution lines (l.70, l.110 equivalents); status line stays conditional, root amends at publication (L28). Root publishes 212+213 together. Queue unchanged: after publication PERF-1b next; checkpoint D-29z195 still pending root."
   }
  ]
 }

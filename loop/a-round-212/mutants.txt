@@ -1,0 +1,19 @@
+ app/components/arrangement/ArrangementClip.tsx | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+== M1 ArrangementClip.tsx buildPeakShape: drop '|| columns <= 0' from the null guard
+     × PO5: missing peaks, empty peaks, columns ≤ 0 and an empty span still give null 7ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected { columns: 1, …(1) } to be null
+      Tests  1 failed | 4 skipped (5)
+== M2 ArrangementDetailPanel.tsx sync block: delete setClipGainText(displayedClipGainText)
+     × CP15: releasing a value-changing single drag from a typed −12 dB commits the Clip Gain block once, never with the pending state 345ms
+     × CP16: after a release, Undo, Redo, typing then Escape and the reset button re-sync the field and the pending state as before 149ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ 'title', 'aria-describedby', …(1) ] to deeply equal []
+AssertionError: expected '-12.0' to be '-3.6' // Object.is equality
+      Tests  2 failed | 18 skipped (20)
+== M3 ArrangementDetailPanel.tsx draftedClipGains: undrafted members read 0 instead of storedClipGainsDb[index]
+     × CP17: a members drag builds the range from the drafts and the stored gains passed as props; a mid-drag selection change shows the new selection’s stored gains 313ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected '−14.4 … 0.0 dB' to be '−14.4 … −3.0 dB' // Object.is equality
+      Tests  1 failed | 19 skipped (20)

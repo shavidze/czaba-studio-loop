@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-27T19:17:10.534Z)
+# Active loop summary (2026-10-27T21:30:36.064Z)
 
-- backlog.json 1897 KB -> active view 275 KB
-- status: G_ROOT_GATE round 211
-- servers: `{"checkedUtc":"2026-10-27T18:19:31.6443683Z","round":211,"attempt":1,"store":200}`
+- backlog.json 1907 KB -> active view 276 KB
+- status: G_ROOT_GATE round 212
+- servers: `{"checkedUtc":"2026-10-27T20:33:29.8980430Z","round":212,"attempt":1,"store":200}`
 - last publication: 28a274c54e9b08f80f88f6c766400b05b541a95b (rounds 211-211)
-- last root gate: round 211 published - commit 28a274c54e9b08f80f88f6c766400b05b541a95b pushed
+- last root gate: round 212 failed - verify exit 1 (gates/round-212/verify.log)
 
 ## Current items: -
 
@@ -475,7 +475,7 @@
 - A-R203-REVIEW-M1 / low / ruled (D-29z169): folded into SYS-3 (see systemic_tasks SYS-3.also_fixes_d29z169); reviewer rated Medium, B rates Low: fail-safe (extra ring only), not reproducible in the cloud browser; Android device check on the Tech Lead list / Android soft keyboard key=Unidentified / IME isComposing keydowns flip focus-source to keyboard (ring mid-typing on Android)
 - A-R203-REVIEW-I1 / info / ruled (D-29z169): folded into SYS-3 with M1 (AltGraph printable keys count as editing) / AltGr (Ctrl+Alt) / macOS Option typing switches focus-source to keyboard
 - B-R203-AUTH-USER-CLIENT-TRUST / info / root_note: not scheduled; no Studio action; protected file (AuthContext.tsx) / A stored localStorage.auth_user without accessToken renders the signed-in header with no backend verification (AuthContext.tsx:93-94 setUser
-- SABA-B-5 / medium / in_progress: part 1 (track/group/master Volume + Pan) done - round 210 C PASS browserVerified=true, published 180dd2e (1 component per move vs 80-85, p95 1.7-3.8 ms, 0 restarts, export bit-identical); part 2 (Clip Gain single + members) = round 211 PERF-FADER-b (D-29z189), before: 95 components per move, p95 26.5/61.2 ms / Fader drag is slow (Saba 2026-10-27): every pointer move of a track/group volume, master or clip-gain fader re-renders the whole Studio
+- SABA-B-5 / medium / in_progress: part 1 (track/group/master/pan) done round 210 (180dd2e); part 2 (Clip Gain React work) done round 211 C PASS browserVerified=true, published 28a274c (3 components per move vs 95; release 1-2; restarts 0; export bit-identical); part 3 = round 212 PERF-FADER-c (D-29z197): single Clip Gain move-to-paint p95 still 18.1/18.6 ms stopped, 59.7/58.1 ms playing (C-R211-02, target < 16 ms); cause measured by B = SVG raster of the per-column rect peak path (b-round-211/diag); closes only when C LATENCY-212 passes / Fader drag is slow (Saba 2026-10-27): every pointer move of a track/group volume, master or clip-gain fader re-renders the whole Studio
 - GATE205-DOC162-STATUS / low / dispatched round 206 (D-29z171, R112: one-line status fix, granted) / Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)
 - GATE206-S3 / low / scheduled_with PERF-1b / fiber walk depends on React 18 internals (tag/PerformedWork); record renderer.version and fail on unexpected major
 - GATE206-S5 / low / scheduled_with PERF-1b (document or separate build dir) / test:perf webServer rewrites shared build/; collides with a parallel verify/build
@@ -492,13 +492,18 @@
 - A-R209-REVIEW-LOWS / low / filed individually in deferred_low_polish (A-R209-REVIEW-L-*); draft-order Low ruled keep D-29z185 (closed); pan-reset disabled Low is baseline-identical (info) / draft clear before applyEdit (ruled keep D-29z185); takeMixOverride without kind; two owners of pan-draft clear; withMixOverride export unus
 - I-209-WINDOW-THRESHOLD / info / applied in round 210 (WINDOW-210 PASS); closed / harness window commits 78-105 (starts at max, I-208-b clamp; pan grid repeats) vs C's >=100 criterion
 - I-209-RELEASE-REBUILD / info / downgraded (D-29z188): C round 210 production build saw no graph rebuild after pointerup or Ctrl+Z (same param ids); the round-209 note came from the dev build; re-measure only in PERF-2+ if seen again / while playing, the graph is rebuilt after pointerup and after Ctrl+Z (pre-existing edit-during-playback rebuild, perf-plan 1.5); no rebuild 
-- C-R210-01 / low / scheduled: round 211 (D-29z191; same owner, harness contract) / doc 163 l.68/69/71 still describe move-components-* and release-commits as record and say PERF-FADER-a replaces move-window-live
-- GATE210-S1 / low / scheduled: round 211 exact Completed line (D-29z191); RETRO signal L28 5x / doc 165 l.4 published conditional 'In Progress (C round 210 check pending)' (L28, 5th time)
-- GATE210-S2 / low / scheduled: round 211 mandatory (D-29z192) / withMixOverride exported from ArrangementContext.tsx but used only inside (Fast Refresh boundary)
-- GATE210-S3 / low / duplicate of deferred A-R209-REVIEW-L-WRITE-ALL-TRACKS; optional in round 211 (D-29z192), else stays deferred / track/group preview copies the arrangement twice and writes setTrackGain for every track per move
+- GATE210-S3 / low / not done in round 211 (optional); stays deferred as A-R209-REVIEW-L-WRITE-ALL-TRACKS (D-29z196) / track/group preview copies the arrangement twice and writes setTrackGain for every track per move
 - GATE210-S4 / info / signal; optional dev invariant in round 211; folded into the post-PERF-FADER-b checkpoint / commit could in theory call applyEdit twice (before + override); unreachable today
-- GATE210-S5 / info / C row in round 211 LIVE-DISPLAY-211 (D-29z192) / watch: a draft clear outside an event (timer/rAF/promise) would show the old value for one frame
 - I-210-PAN-DELTA-UNREACHABLE / info / info, closed / stolen-claim -> native Pan change state not reachable by real input (chorded mouse cancels; touch has another pointerId); FP13 relied on
+- C-R211-01 / low / scheduled: round 212 (D-29z198; same owner, fix now, not deferred) / release of a value-changing single Clip Gain drag commits a stale typed-text pending state before the parent's layout-effect sync (never pai
+- C-R211-03 / info / ruled D-29z196: DEV1 accepted (members harness scenario adds Soft impact because /studio-lab has one audio clip; runs after fader.group.playing; verified); DEV2 accepted (both leaves inside granted files; new files are a permitted subset); DEV3 = C-R211-01 (scheduled 212); DEV4 accepted (+0.5 ms on wall-clock liveness rows; the identity list covers deterministic rows only; assert >= 30 passes); DEV5 accepted (setter-loop override unreachable mid-gesture by mutant; restart path proven by CP7/CP8 and C AUDIO-211 (c)) / A DEVIATIONS 1, 2, 4, 5 need B ruling
+- C-R211-04 / info / corrected in round-212 task section 4 (D-29z196); not a regression / task premise 'video lanes draw no waveform' is wrong: a video clip with an audio stream draws a lane waveform on 180dd2e too
+- GATE211-S1 / medium / scheduled: round 212 (D-29z198; stored gains passed as a prop) / ArrangementDetailClipGain reads getArrangement() (mutable ref) during render; undefined prop falls back to 0 dB
+- GATE211-S2 / low / folded into the frontend-architect checkpoint (b-round-211-checkpoint-request.md, D-29z195); ArrangementContext frozen in round 212 / commitClipGainPending before/pointerOverride branches not exclusive (unreachable today)
+- GATE211-S6 / low / scheduled: round 212 exact Completed line (D-29z196); L28 signal (6x) for RETRO / doc 166 l.4 status still 'In Progress (C round 211 check pending)'
+- GATE211-ARCH-CLIPGAIN-GESTURE / info / signal; folded into the frontend-architect checkpoint (D-29z195); not scheduled / Clip Gain pending + pointer machines in ArrangementContext l.2979-3180; proposal lib/arrangement/clip-gain-gesture.ts pure preview/commit/ca
+- GATE211-ARCH-CLIPGAIN-PROPS / info / signal; reviewer verdict keep; folded into the checkpoint / ArrangementDetailClipGain takes ~30 props
+- A-R211-ARCH-USEMIXDRAFT / info / signal; folded into the checkpoint (D-29z195); not scheduled / useMixDraftValue exported from ArrangementMixFader.tsx and used by ArrangementClip.tsx; proposal: move next to mix-draft-store.ts
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
