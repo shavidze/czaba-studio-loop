@@ -1,0 +1,40 @@
+import subprocess,os,re
+P='/tmp/c38/new'
+SE='src/renderer/src/components/schema/SchemaEditor.tsx'
+MP='src/renderer/src/components/metadata-editor/MetadataPanel.tsx'
+muts={
+ 'GM-1 Done busy guard removed':(SE,"if (fields.length === 0 || isApplying) return;","if (fields.length === 0) return;"),
+ 'GM-2 Save guard removed':(MP,"if (selectedFiles.length === 0 || isSaveBlocked()) return;","if (selectedFiles.length === 0) return;"),
+ 'GM-3 Save not-dirty guard removed':(MP,"  return isSaving || !isDirty;\n}","  return isSaving && isDirty !== null;\n}"),
+ 'GM-4 Save busy guard removed':(MP,"  return isSaving || !isDirty;\n}","  return !isDirty;\n}"),
+ 'GM-5 Save aria-busy always false':(MP,"aria-busy={isSaving}","aria-busy={false}"),
+ 'GM-6 Done isApplying not reset on reject':(SE,"if (isMountedRef.current) setIsApplying(false);\n      return;","return;"),
+ 'GM-7 arrow own dim on every arrow':(SE,"isEdge && 'opacity-30'","'disabled:opacity-30'"),
+ 'GM-8 Save native disabled back':(MP,"aria-disabled={isSaving || !isDirty}","disabled={isSaving || !isDirty}"),
+ 'GM-9 Done aria-busy always false':(SE,"aria-busy={isApplying}","aria-busy={false}"),
+ 'GM-10 Done native disabled back':(SE,"aria-disabled={isApplying || fields.length === 0}","disabled={isApplying || fields.length === 0}"),
+ 'GM-11 stale-closure deps (isApplying dropped)':(SE,"}, [fields, isApplying, onSave, onClose]);","}, [fields, onSave, onClose]);"),
+}
+
+BT='src/renderer/src/components/ui/button.tsx'
+muts.update({
+ 'CM-1 button aria-disabled class removed':(BT,"          'aria-disabled:opacity-50 aria-disabled:cursor-not-allowed',\n",""),
+ 'CM-2 Save aria-disabled only isSaving':(MP,"aria-disabled={isSaving || !isDirty}","aria-disabled={isSaving}"),
+ 'CM-3 Done aria-disabled only isApplying':(SE,"aria-disabled={isApplying || fields.length === 0}","aria-disabled={isApplying}"),
+ 'CM-4 Done guard inverted (blocks first click)':(SE,"if (fields.length === 0 || isApplying) return;","if (fields.length === 0 || !isApplying) return;"),
+ 'CM-5 Save guard blocks when dirty':(MP,"  return isSaving || !isDirty;\n}","  return isSaving || isDirty;\n}"),
+ 'CM-6 edge class as disabled: variant':(SE,"isEdge && 'opacity-30'","isEdge && 'disabled:opacity-30'"),
+ 'CM-7 Down arrow edge index off-by-one':(SE,"reorderArrowClassName(index === fields.length - 1)","reorderArrowClassName(index === fields.length - 2)"),
+})
+for name,(f,a,b) in muts.items():
+    path=os.path.join(P,f); orig=open(path).read()
+    if orig.count(a)!=1: print(name,'PATTERN COUNT',orig.count(a),flush=True); continue
+    open(path,'w').write(orig.replace(a,b))
+    try:
+        r=subprocess.run(['npx','vitest','run','--config','vitest.config.renderer.ts'],cwd=P,capture_output=True,text=True,timeout=400)
+        out=re.sub(r'\x1b\[[0-9;]*m','',r.stdout+r.stderr)
+        killed=sorted(set(re.findall(r'× (\([a-z0-9]+\))',out)))
+        tot=re.findall(r'Tests\s+(\d+ failed)',out)
+        print(name,'| killed:',' '.join(killed) or 'NONE (survives)','|',tot[-1] if tot else '0 failed',flush=True)
+    finally:
+        open(path,'w').write(orig)

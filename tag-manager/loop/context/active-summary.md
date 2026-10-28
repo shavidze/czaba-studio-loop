@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T03:30:19.475Z)
+# Active loop summary (2026-10-28T04:14:43.442Z)
 
-- backlog.json 340 KB -> active view 99 KB
-- status: G_ROOT_GATE round 37
+- backlog.json 349 KB -> active view 102 KB
+- status: G_ROOT_GATE round 38
 - servers: `{"servers":"none or skipped"}`
-- last publication: ea4a1cb5c439b47565bce1c3883f8e41ca775511 (rounds 37-37)
-- last root gate: round 37 published - commit ea4a1cb5c439b47565bce1c3883f8e41ca775511 pushed
+- last publication: 96f1e45ff18fb23b77a348af90139a233f51f8e6 (rounds 38-38)
+- last root gate: round 38 published - commit 96f1e45ff18fb23b77a348af90139a233f51f8e6 pushed
 
-## Current items: TM-B38, TM-B39, TM-B40, TM-B41
+## Current items: TM-B39, TM-B40, TM-B41
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -164,7 +164,6 @@
 - A-R33-01 / low / open / D-40 relies on handleCloseFolder being synchronous (FolderBrowser.tsx:147 setIsScanning(false) runs before setFiles([])/setMetadata({}) :149
 - A-R33-03 / low / open / Test hygiene: a module-level waitForFolderLoadIdle subscription could leak into the next test if a future test ends with isScanning true (re
 - QA-R33-03 / info / open / A scanFolder that never settles keeps Done waiting forever (no busy indicator); Back, Open Folder and Close Folder still work and end the wa
-- C-R34-01 / low / in_progress / Stale selection after a folder switch: while Open Folder fast's scan is pending, a click on a row of the old listing (s.wav) selects /slow/s
 - RR-R34-05 / info / open / Architecture signal: MetadataPanel could own the whole 'save schema -> re-read -> close' flow and return a token or AbortSignal per open edi
 - B-R34-03 / low / open / Known limit kept by D-42/D-43: Done #1 pending, Back, reopen, add a field, and do NOT press Done again: if #1 was still waiting for a folder
 - C-R35-01 / low / open / While Done is Applying..., the fieldset's disabled:opacity-60 multiplies with the Active Fields arrows' own disabled:opacity-30 (~18%): arro
@@ -182,6 +181,15 @@
 - R36-A-01 / low / open / getButtonByText does not collapse inner whitespace; unreachable today (C probe sameAsRole=true on all 257 lookups)
 - R36-A-02 / low / open / RegExp g/y lastIndex (= RR-R36-03); unreachable today
 - B-R36-01 / info / open / The old file listing stays clickable while a folder scan is pending; locking/blanking it would be a new UX (Saba-question candidate). D-44 m
+- C-R37-01 / low / open / PM-6 (pruned selection rebuilt in files order instead of the existing order) survives 7/7. It is equivalent today: the order is used only at
+- C-R37-02 / low / in_progress / The docs/bugs/001 header (lines 3-22: fixed-entry list, sources, code list, decision summary) is not updated for entry 20 / D-44; the R37 ta
+- A-R37-01 / low / in_progress / = C-R37-02 (docs/bugs/001 header not updated for entry 20 / D-44)
+- RR-R37-01 / low / in_progress / docs/bugs/001 entry 20's file:line refs (FolderBrowser.tsx:103/108/161/166, App.tsx:48/61) go stale easily; add the function names (handleOp
+- RR-R37-02 / low / open / selection-after-folder-switch.test.ts uses double quotes while biome.json sets quoteStyle single; Biome checks only src/ (same class as RR-R
+- RR-R37-03 / info / open / Architecture signal: selection hygiene is spread across setFiles (D-44), selectRange's visible filter and FileList's anchor ref. A store hel
+- B-R37-01 / info / open / After Done succeeds the schema editor unmounts and focus goes to <body>; returning focus to the Customize Fields button (APG dialog-close co
+- B-R37-02 / info / open / Fact: in jsdom a focused button that becomes natively disabled keeps document.activeElement; focus-loss bugs cannot be reproduced in Vitest 
+- B-R37-03 / info / open / While Applying..., Inputs and Add Field inside the fieldset are at 0.6 x 0.5 = 0.3 effective opacity (their own disabled:opacity-50 stacks o
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

@@ -1,0 +1,19 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R38-01",
+      "severity": "low",
+      "steps": [
+        "Copy A's tree; in src/renderer/src/components/schema/SchemaEditor.tsx:280 change aria-disabled={isApplying || fields.length === 0} to aria-disabled={isApplying}",
+        "npx vitest run --config vitest.config.renderer.ts"
+      ],
+      "expected": "At least one test fails: an empty-field-list Done must report aria-disabled=\"true\" (D-45, Deviation 2)",
+      "actual": "304/304 pass; mutant CM-3 survives. The click guard (fields.length === 0) still blocks the action, so no user-visible failure, but the a11y state of an empty-list Done is unpinned. Test gap only, not a defect of A's code.",
+      "evidence": "c-round-38/mutants.log line 'CM-3 Done aria-disabled only isApplying | killed: NONE (survives)'; c-round-38/mut.py.txt"
+    }
+  ],
+  "passed": ["R38-1", "R38-2", "R38-3", "R38-4", "R38-5", "R38-6"],
+  "blocked": ["Windows packaging (build:win / NSIS) is not available in the cloud; not part of this round"],
+  "realVerified": true
+}

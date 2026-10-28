@@ -1,0 +1,26 @@
+import subprocess, sys, re
+DQ='tests/renderer/helpers/dom-queries.ts'
+FS='src/renderer/src/stores/file-store.ts'
+SE='src/renderer/src/components/schema/SchemaEditor.tsx'
+muts={
+ 'HM-1 uniqueness throw removed':(DQ,'  if (matches.length > 1) throw new Error(`button ${String(name)} matched ${matches.length} buttons`);\n',''),
+ 'HM-2 string === -> includes':(DQ,'text === name','text.includes(name)'),
+ 'HM-3 no trim':(DQ,'(button.textContent ?? "").trim()','(button.textContent ?? "")'),
+ 'HM-4 g/y rejection removed (= HEAD helper)':(DQ,'  if (typeof name !== "string" && (name.global || name.sticky)) {\n    throw new Error(`button ${String(name)}: g and y flags are not supported`);\n  }\n',''),
+ 'HM-5 only g rejected':(DQ,'(name.global || name.sticky)','name.global'),
+ 'PM-6 prune in files order':(FS,'  const selectedPaths = state.selectedPaths.filter((path) => listedPaths.has(path));','  const sel = new Set(state.selectedPaths);\n  const selectedPaths = files.map((f) => f.path).filter((path) => sel.has(path) && listedPaths.has(path));'),
+ 'CM-3 Done aria-disabled only isApplying':(SE,'aria-disabled={isApplying || fields.length === 0}','aria-disabled={isApplying}'),
+ 'CM-8 Done guard ignores empty list':(SE,'if (fields.length === 0 || isApplying) return;','if (isApplying) return;'),
+}
+for name,(f,a,b) in muts.items():
+    s=open(f).read()
+    assert s.count(a)==1,(name,s.count(a))
+    open(f,'w').write(s.replace(a,b))
+    try:
+        r=subprocess.run(['npx','vitest','run','--config','vitest.config.renderer.ts'],capture_output=True,text=True)
+        out=re.sub(r'\x1b\[[0-9;]*m','',r.stdout+r.stderr)
+        failed=sorted(set(re.findall(r'FAIL .*?> (\([a-z]\d+\))',out)))
+        tests=re.findall(r'Tests\s+(.*)',out)
+        print(f'{name} | killed by: {" ".join(failed) or "NONE (survives)"} | {tests[-1] if tests else "?"}',flush=True)
+    finally:
+        open(f,'w').write(s)
