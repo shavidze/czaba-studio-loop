@@ -57,3 +57,16 @@ Before building any feature or UX change, B studies how the same thing works in 
 - Root read the Actions status of `TCzaba/czaba-tag-manager`: `check.yml` run **40639002695** on **a5c6a6b** (round 41 head) completed **success** at 2026-10-28T05:36Z (https://github.com/TCzaba/czaba-tag-manager/actions/runs/40639002695). The seven runs before it, from 3035ffc to e386cca, are green too.
 - This is the Actions link that TM-T0, TM-T0-CI, TM-T0-CI-FU and TM-B14 asked root for. B may close them on this evidence at the next planning step.
 - Saba's answers to Q1–Q17 are still pending. The loop stays NEEDS_ATTENTION until root records them here.
+
+## Saba's answers to the round-41 questions (2026-10-28)
+
+- **Q1 (TM-T1-MIG / D-07):** accepted. No auto-migration. An existing `schema.json` shows `category` under Hidden Standard Fields, and a docs note explains how to enable it.
+- **Q2 (TM-T1-DUP / RR-R3-01):** hide the standard Category toggle while its key `category` or RIFF ID `ICAT` is already used by a custom field, and show a warning. A renderer test pins it.
+- **Q3 (TM-B08 / D-12):** artists are **not** in the K-4 import contract. The contract is `ICAT`/`IKEY`/`ICMT` only; artists stay as written today.
+- **Q4 (TM-B11 / D-10):** empty values are not written. Skip empty text and unset numbers; a meaningful `0` stays expressible.
+- **Q5 (TM-B05):** a clear per-file error ("audio data is empty, cannot tag"), pinned by a test. No upstream patch.
+- **Q6 (TM-B06):** yes, Biome lints `tests/**` too (relaxed override), as its own round.
+- **Q7 (UCS list + licence):** still pending from Saba. TM-T2-DATA / TM-T2 stay blocked on it.
+- **Q8 (RR-R19-01):** permission granted to change `src/preload/index.ts` and `src/preload/index.d.ts` **only** to add the narrow `fs:stat-files` IPC channel. Nothing else in preload changes. The round lists the exact diff, and C checks that nothing else changed.
+- **Q9–Q17 (UX):** no answer yet. They do not block. B keeps them open; they are not scheduled until Saba answers.
+- **Order:** B plans the next rounds in its stated order (Q2 → Q8 → Q4/Q1 → Q5 → Q3 → Q6). The loop resumes at B planning.
