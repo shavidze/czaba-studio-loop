@@ -1,0 +1,84 @@
+{
+  "round": 231,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-28T17:31:38.2891806Z",
+    "round": 231,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R231-01",
+      "severity": "low",
+      "steps": [
+        "Fresh /studio-lab at 1440x900 or 1280x720, empty project, Music active",
+        "Real mouse down on the first library option, move over the Music lane (ghost shown, lane hint hidden)",
+        "Press Escape, move back over the library, release",
+        "Click the Stems lane, then re-activate Music with its name button"
+      ],
+      "expected": "A cancelled drag clears the lane drop ghost, and the empty active Music lane shows 'Drag a sound here, or press Enter to add it' again",
+      "actual": "arrangement-drop-ghost '00:05.000' stays on Music and the hint stays hidden (hints [], 0 clips). Clicking Stems moves the hint to Stems; re-activating Music shows no hint. Under Playwright, Escape gives dragend with no dragleave and no page keydown. Extends the pre-existing deferred C-R139-02 (dragend does not clear lane ghosts, ArrangementLane.tsx l.313-329). Real-Chrome behaviour is unconfirmed (spec fires dragleave on cancel; Tech Lead R139-T).",
+      "evidence": "c-round-231/out7/cancel-A-escape-1440x900.png, cancel-A-escape-1280x720.png, out7/c231g.json, out8/c231g.json; c-round-231.md §4"
+    }
+  ],
+  "passed": [
+    "C-SCOPE-231",
+    "C-UNIT-231",
+    "RT-FIX-231",
+    "C-TEXT-231",
+    "C-BUDGET-231",
+    "C-BBOX-231",
+    "C-DETAIL-231",
+    "C-NOTICE-231",
+    "C-FIRSTRUN-231",
+    "C-LANEHINT-231",
+    "C-VIDEO-SOLO-231",
+    "G231-3",
+    "LAB-SMOKE-231",
+    "AN-REVIEW-231",
+    "C-REF-231",
+    "C-SHOTS-231"
+  ],
+  "failed": [],
+  "blocked": [],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome/lint",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "rows": {
+    "C-SCOPE-231": "HEAD 5da0f50; 18 M + N1-N3 ??; frozen/root/A-end sha rc 0; protected diff rc 0; hunks = §2.1-§2.6",
+    "C-UNIT-231": "11 files / 176 tests green (c-round-231/unit.log); new cases exist; nothingSelected grep 1 = ST-C2b assertion (N1)",
+    "RT-FIX-231": "lessons diff header+L26+EOF newline, 52 lines; l26-check 172/176 (005,006,009,076); screen-review prefix cmp-equal; N3/N4 citations verified",
+    "C-TEXT-231": "inv/after.json multiset diff == diff-before-vs-scratch.txt for all 4 keys",
+    "C-BUDGET-231": "1440 S0 5 rows, 1280 S0 4 rows, SD notice 0; footer lines 16px unchanged",
+    "C-BBOX-231": "all >1px deltas listed in delta.txt; geom equal base",
+    "C-DETAIL-231": "header '', single body line, reasons sr-only 1x1 abs, AX description 'Select a clip first' on From/To/Apply/ClipGain input/fader; boxes = base except Apply h 18->24 @1280; S1 stable; group: only the range reason renders (no Clip Gain reason element) and it is visible",
+    "C-NOTICE-231": "2 rows 236x32; 1 row at +56px; Tab search->dismiss; kb ring painted 5.45:1, none on mouse; Enter/click dismiss -> focus search, 0 clips, key=1; SD absent, 0 CLS, FCP 628/996 ms after notice removal 581/968 ms; SSR notice at effective opacity 0 in all rAF frames (no visible flash); fresh shows again",
+    "C-FIRSTRUN-231": "status exact; click(5,5)+Enter -> music 0.000; real-mouse drag -> sfx 4.900; ? opens sheet, Esc closes",
+    "C-LANEHINT-231": "S0 1 hint music; Stems/SFX/Video/Music follow; Enter->0, Ctrl+Z->1; fold 0/unfold 1; hidden mid library drag; click/marquee pass through (same as control); 1 row @1280; drag ending without a drop restores the hint (library/via Stems); Escape under emulation leaves a stale ghost (C-R231-01 Low)",
+    "C-VIDEO-SOLO-231": "video Solo title unchanged; audio titles/labels unchanged",
+    "G231-3": "both: lab 200 badge auth_user null; /studio/middle-east Sign in required 0 audio[src]; token 401 / fake 500; none issued",
+    "LAB-SMOKE-231": "both: WAV 24-bit 48k stereo 101.352 s; RMS -65.21/-21.59/-21.54 dB = C230; 0 page errors",
+    "AN-REVIEW-231": "doc 179/178/170 l.4 byte-exact; doc178 +1 sentence; doc179 L26 headings + ids exist; In Progress (stage -> only 176",
+    "C-REF-231": "R1,R2 match (measured); R3,R4 listed deviations; R5,R6 no reference",
+    "C-SHOTS-231": "out/S0-*, out/S0x-*, inv|bbox after-full-S1-*, out/SD-*"
+  },
+  "notes": [
+    "N1 nothingSelected grep row conflicts with ST-C2b",
+    "N2 duplicate PC10 id in collection.test.ts (l.332, l.405)",
+    "N3 LSU9 uses SFX not Stems",
+    "N4 empty-lane drag is a marquee, not a time selection (task recipe)",
+    "N5 reviewer R1: hint stays on active lane during drag over another lane (per spec)",
+    "N6 Apply AX description comes from title",
+    "N7 notice 1 row at library +56px",
+    "N8 Tab after dismiss: search -> dismiss -> tree 'All 9' (order holds)"
+  ],
+  "evidence": "c-round-231.md, c-round-231/"
+}

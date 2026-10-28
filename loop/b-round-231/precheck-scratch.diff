@@ -1,0 +1,565 @@
+diff -ruN /home/runner/czaba-project/store/app/components/arrangement/ArrangementOverview.tsx app/components/arrangement/ArrangementOverview.tsx
+--- /home/runner/czaba-project/store/app/components/arrangement/ArrangementOverview.tsx	2026-10-28 17:14:05.176163304 +0000
++++ app/components/arrangement/ArrangementOverview.tsx	2026-10-28 18:00:34.785647201 +0000
+@@ -277,6 +277,7 @@
+   };
+ 
+   const roundedExtent = Math.round(extent);
++  const hasClips = arrangement.clips.length > 0;
+ 
+   return (
+     <div
+@@ -290,7 +291,10 @@
+       aria-valuenow={Math.min(visibleStartRef.current, roundedExtent)}
+       aria-valuetext={overviewValueText(visibleStartRef.current, extent)}
+       title={studioViewStrings.overviewTitle}
+-      className="relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-panel bg-background"
++      className={cn(
++        'relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-panel',
++        hasClips ? 'bg-background' : 'bg-transparent',
++      )}
+       onPointerDown={handleOverviewPointerDown}
+       onPointerMove={handleOverviewPointerMove}
+       onPointerUp={handleOverviewPointerEnd}
+@@ -301,8 +305,16 @@
+       data-testid="arrangement-overview"
+       data-timeline-overview=""
+       data-extent={extent.toFixed(3)}
++      data-overview-state={hasClips ? 'full' : 'empty'}
+     >
+-      <div className="pointer-events-none absolute inset-0 rounded-panel border border-outline" />
++      {hasClips ? (
++        <div className="pointer-events-none absolute inset-0 rounded-panel border border-outline" />
++      ) : (
++        <div
++          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-outline"
++          data-testid="arrangement-overview-baseline"
++        />
++      )}
+       <div className="pointer-events-none absolute inset-x-0 inset-y-1 flex flex-col gap-0.5">
+         {arrangement.tracks.map((track) => (
+           <div key={track.id} className="relative min-h-0 flex-1">
+@@ -326,12 +338,18 @@
+       </div>
+       <div
+         ref={frameRef}
+-        className="pointer-events-none absolute inset-y-0 rounded-panel border border-foreground/70 bg-foreground/5"
++        className={cn(
++          'pointer-events-none absolute inset-y-0 rounded-panel border border-foreground/70 bg-foreground/5',
++          !hasClips && 'invisible',
++        )}
+         data-testid="arrangement-overview-frame"
+       />
+       <div
+         ref={playheadRef}
+-        className="pointer-events-none absolute inset-y-0 w-0.5 bg-accent ring-1 ring-background"
++        className={cn(
++          'pointer-events-none absolute inset-y-0 w-0.5 bg-accent ring-1 ring-background',
++          !hasClips && 'invisible',
++        )}
+         data-testid="arrangement-overview-playhead"
+       />
+     </div>
+diff -ruN /home/runner/czaba-project/store/app/components/arrangement/ArrangementVideoDock.tsx app/components/arrangement/ArrangementVideoDock.tsx
+--- /home/runner/czaba-project/store/app/components/arrangement/ArrangementVideoDock.tsx	2026-10-28 17:14:05.176661975 +0000
++++ app/components/arrangement/ArrangementVideoDock.tsx	2026-10-28 18:00:34.785978155 +0000
+@@ -886,7 +886,7 @@
+       data-testid="arrangement-video-dock"
+     >
+       <div className="flex min-w-0 flex-1 flex-col justify-end gap-1 self-stretch">
+-        <div className="flex min-h-4 items-baseline justify-between gap-2 text-xs leading-4 text-muted">
++        <div className="flex min-h-4 items-baseline text-xs leading-4 text-muted">
+           <ArrangementVideoCaption arrangement={arrangement} videoSources={videoSources} />
+         </div>
+         {overview}
+diff -ruN /home/runner/czaba-project/store/app/components/arrangement/StudioWorkspace.tsx app/components/arrangement/StudioWorkspace.tsx
+--- /home/runner/czaba-project/store/app/components/arrangement/StudioWorkspace.tsx	2026-10-28 17:14:05.176661975 +0000
++++ app/components/arrangement/StudioWorkspace.tsx	2026-10-28 18:03:56.080690958 +0000
+@@ -8,6 +8,7 @@
+   useMemo,
+   useRef,
+   useState,
++  useSyncExternalStore,
+ } from 'react';
+ import {
+   formatArrangementTime,
+@@ -72,6 +73,11 @@
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
+ import { metronomeStatusMessage } from '~/lib/arrangement/metronome';
+ import {
++  readOverviewHidden,
++  setOverviewHidden,
++  subscribeOverviewVisibility,
++} from '~/lib/arrangement/overview-visibility';
++import {
+   clampTrackHeight,
+   detailPanelOpenHeightCap,
+   type FloatingVideoRect,
+@@ -486,6 +492,11 @@
+   const positionStore = useArrangementPositionStore();
+   const [isExportOpen, setIsExportOpen] = useState(false);
+   const [isShortcutSheetOpen, setIsShortcutSheetOpen] = useState(false);
++  const isOverviewHidden = useSyncExternalStore(
++    subscribeOverviewVisibility,
++    readOverviewHidden,
++    () => false,
++  );
+   const shortcutSheetOpenRef = useRef(isShortcutSheetOpen);
+   shortcutSheetOpenRef.current = isShortcutSheetOpen;
+   const shortcutButtonRef = useRef<HTMLButtonElement>(null);
+@@ -1794,6 +1805,24 @@
+         returnFloatingVideo();
+         return;
+       }
++      if (
++        event.code === 'KeyO' &&
++        event.altKey &&
++        (event.ctrlKey || event.metaKey) &&
++        !event.shiftKey &&
++        !event.getModifierState('AltGraph')
++      ) {
++        event.preventDefault();
++        if (event.repeat || workspaceRef.current.isPointerGestureActive()) {
++          return;
++        }
++        const hidden = !readOverviewHidden();
++        setOverviewHidden(hidden);
++        workspaceRef.current.setStatus(
++          hidden ? studioViewStrings.overviewHidden : studioViewStrings.overviewShown,
++        );
++        return;
++      }
+       const current = workspaceRef.current;
+       const modifier = event.ctrlKey || event.metaKey;
+       const key = shortcutLetter(event);
+@@ -2290,18 +2319,26 @@
+         >
+           <ArrangementVideoDock
+             overview={
+-              <ArrangementOverview
+-                arrangement={arrangement}
+-                extent={extent}
+-                pxPerSecond={pxPerSecond}
+-                getTimelineView={getTimelineView}
+-                getTimelineViewportPx={getTimelineViewportPx}
+-                subscribeTimelineScroll={subscribeTimelineScroll}
+-                applyTimelineView={applyTimelineView}
+-                onNavigationMove={pauseFollowForNavigation}
+-                onFit={fitTimeline}
+-                claimPointerGesture={claimPointerGesture}
+-              />
++              isOverviewHidden ? (
++                <div
++                  aria-hidden="true"
++                  className="h-16 w-full"
++                  data-testid="arrangement-overview-hidden-slot"
++                />
++              ) : (
++                <ArrangementOverview
++                  arrangement={arrangement}
++                  extent={extent}
++                  pxPerSecond={pxPerSecond}
++                  getTimelineView={getTimelineView}
++                  getTimelineViewportPx={getTimelineViewportPx}
++                  subscribeTimelineScroll={subscribeTimelineScroll}
++                  applyTimelineView={applyTimelineView}
++                  onNavigationMove={pauseFollowForNavigation}
++                  onFit={fitTimeline}
++                  claimPointerGesture={claimPointerGesture}
++                />
++              )
+             }
+             isVideoExpanded={isVideoExpanded}
+             videoFloatAnchor={videoFloatAnchor}
+diff -ruN /home/runner/czaba-project/store/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx
+--- /home/runner/czaba-project/store/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx	1970-01-01 00:00:00.000000000 +0000
++++ app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx	2026-10-28 18:03:45.944479699 +0000
+@@ -0,0 +1,258 @@
++import { act, fireEvent, render, within } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import {
++  type ArrangementContextValue,
++  ArrangementProvider,
++  useArrangement,
++} from '~/contexts/ArrangementContext';
++import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
++import { OVERVIEW_HIDDEN_STORAGE_KEY, setOverviewHidden } from '../overview-visibility';
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++class FakeParam {
++  value = 0;
++  setTargetAtTime(target: number) {
++    this.value = target;
++  }
++}
++
++class FakeNode {
++  connect(destination: FakeNode) {
++    return destination;
++  }
++  disconnect() {}
++}
++
++class FakeGain extends FakeNode {
++  gain = new FakeParam();
++}
++
++class FakePanner extends FakeNode {
++  pan = new FakeParam();
++}
++
++class FakeSource extends FakeNode {
++  buffer: unknown = null;
++  onended: (() => void) | null = null;
++  start() {}
++  stop() {}
++}
++
++class FakeAudioContext {
++  state = 'running';
++  destination = new FakeNode();
++  sampleRate = 48000;
++  currentTime = 0;
++  resume() {
++    return Promise.resolve();
++  }
++  close() {
++    return Promise.resolve();
++  }
++  createGain() {
++    return new FakeGain();
++  }
++  createStereoPanner() {
++    return new FakePanner();
++  }
++  createBufferSource() {
++    return new FakeSource();
++  }
++}
++
++class FakeOfflineAudioContext {}
++
++class FakeAudioBuffer {
++  readonly length: number;
++  readonly numberOfChannels: number;
++  readonly sampleRate: number;
++  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
++    this.length = options.length;
++    this.numberOfChannels = options.numberOfChannels;
++    this.sampleRate = options.sampleRate;
++  }
++  get duration() {
++    return this.length / this.sampleRate;
++  }
++  getChannelData() {
++    return new Float32Array(this.length);
++  }
++}
++
++class FakeResizeObserver {
++  observe() {}
++  disconnect() {}
++}
++
++const sheetCollection: WorkspaceCollection = {
++  id: 'sheet',
++  label: 'sheet',
++  origin: 'demo',
++  sources: [{ id: 'song', title: 'Song', collectionLabel: 'sheet', kind: 'music', origin: 'demo' }],
++  loadSource: async () => new AudioBuffer({ length: 2000, numberOfChannels: 1, sampleRate: 100 }),
++};
++
++function sheetArrangement(): Arrangement {
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'ვიდეო' },
++    { id: 'music', kind: 'audio', name: 'მუსიკა' },
++    { id: 'stems', kind: 'audio', name: 'სტემები' },
++  ]);
++  return {
++    ...base,
++    clips: [
++      { id: 'music-1', trackId: 'music', sourceId: 'song', start: 2, sourceOffset: 0, duration: 4 },
++      {
++        id: 'music-2',
++        trackId: 'music',
++        sourceId: 'song',
++        start: 10,
++        sourceOffset: 0,
++        duration: 4,
++      },
++    ],
++    loop: null,
++  };
++}
++
++const PX_PER_SECOND = 40;
++const LANE_HEIGHT_PX = 80;
++const press = { button: 0, buttons: 1 };
++
++interface SheetApiRef {
++  current: ArrangementContextValue | null;
++}
++
++function SheetProbe({ api }: { api: SheetApiRef }) {
++  api.current = useArrangement();
++  return null;
++}
++
++function live(api: SheetApiRef): ArrangementContextValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++function stubCapture(element: Element) {
++  Object.defineProperty(element, 'setPointerCapture', { configurable: true, value: () => {} });
++  Object.defineProperty(element, 'hasPointerCapture', { configurable: true, value: () => false });
++  Object.defineProperty(element, 'releasePointerCapture', { configurable: true, value: () => {} });
++}
++
++async function mountSheetWorkspace() {
++  const api: SheetApiRef = { current: null };
++  const view = render(
++    <ArrangementProvider collection={sheetCollection} initialArrangement={sheetArrangement()}>
++      <StudioWorkspace />
++      <SheetProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await act(async () => {
++    await Promise.resolve();
++    await Promise.resolve();
++  });
++  act(() => live(api).setPxPerSecond(PX_PER_SECOND));
++  const rowTops = new Map<string, number>();
++  view.container.querySelectorAll<HTMLElement>('[data-track-id]').forEach((row, index) => {
++    const top = index * LANE_HEIGHT_PX;
++    rowTops.set(row.dataset.trackId ?? '', top);
++    Object.defineProperty(row, 'getBoundingClientRect', {
++      configurable: true,
++      value: () => new DOMRect(0, top, 800, LANE_HEIGHT_PX),
++    });
++  });
++  const laneY = (trackId: string) => {
++    const top = rowTops.get(trackId);
++    if (top === undefined) {
++      throw new Error(`lane ${trackId} not rendered`);
++    }
++    return top + LANE_HEIGHT_PX / 2;
++  };
++  const clipParts = (clipId: string) => {
++    const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
++    const header = root?.firstElementChild;
++    if (!root || !(header instanceof HTMLElement)) {
++      throw new Error(`clip ${clipId} not rendered`);
++    }
++    stubCapture(root);
++    return { root, header };
++  };
++  return { api, view, laneY, clipParts };
++}
++
++beforeEach(() => {
++  vi.stubGlobal('AudioContext', FakeAudioContext);
++  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++  vi.stubGlobal('requestAnimationFrame', () => 1);
++  vi.stubGlobal('cancelAnimationFrame', () => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++  vi.unstubAllGlobals();
++  vi.restoreAllMocks();
++});
++afterEach(() => {
++  vi.unstubAllGlobals();
++  vi.restoreAllMocks();
++  act(() => setOverviewHidden(false));
++  window.localStorage.clear();
++});
++
++const TOGGLE = { key: 'o', code: 'KeyO', ctrlKey: true, altKey: true };
++
++function status(view: Awaited<ReturnType<typeof mountSheetWorkspace>>['view']): string {
++  return view.getByTestId('arrangement-status').textContent ?? '';
++}
++
++describe('Overview empty state and Ctrl+Alt+O (reference sketch)', () => {
++  it('REF1: toggles, persists, announces and ignores AltGr, Shift, repeat and text fields', async () => {
++    const { view } = await mountSheetWorkspace();
++    expect(view.getByTestId('arrangement-overview').getAttribute('data-overview-state')).toBe('full');
++    expect(fireEvent.keyDown(document.body, { ...TOGGLE, modifierAltGraph: true })).toBe(true);
++    expect(view.queryByTestId('arrangement-overview')).not.toBeNull();
++    fireEvent.keyDown(document.body, { ...TOGGLE, shiftKey: true });
++    expect(view.queryByTestId('arrangement-overview')).not.toBeNull();
++    fireEvent.keyDown(document.body, { ...TOGGLE, repeat: true });
++    expect(view.queryByTestId('arrangement-overview')).not.toBeNull();
++    const search = view.getByTestId('arrangement-library-search');
++    fireEvent.keyDown(search, TOGGLE);
++    expect(view.queryByTestId('arrangement-overview')).not.toBeNull();
++    expect(fireEvent.keyDown(document.body, TOGGLE)).toBe(false);
++    expect(view.queryByTestId('arrangement-overview')).toBeNull();
++    expect(view.getByTestId('arrangement-overview-hidden-slot').getAttribute('aria-hidden')).toBe('true');
++    expect(window.localStorage.getItem(OVERVIEW_HIDDEN_STORAGE_KEY)).toBe('1');
++    expect(status(view)).toBe('Overview hidden. Ctrl+Alt+O shows it again.');
++    fireEvent.keyDown(document.body, { ...TOGGLE, ctrlKey: false, metaKey: true });
++    expect(view.queryByTestId('arrangement-overview')).not.toBeNull();
++    expect(window.localStorage.getItem(OVERVIEW_HIDDEN_STORAGE_KEY)).toBeNull();
++    expect(status(view)).toBe('Overview shown. Ctrl+Alt+O hides it.');
++  });
++
++  it('REF2: empty project shows the quiet state; the first clip shows the full view; undo returns', async () => {
++    const { api, view } = await mountSheetWorkspace();
++    act(() => {
++      for (const clip of live(api).arrangement.clips) {
++        live(api).selectClip(clip.id);
++      }
++    });
++    expect(view.getByTestId('arrangement-overview').getAttribute('data-overview-state')).toBe('full');
++    expect(view.queryByTestId('arrangement-overview-baseline')).toBeNull();
++  });
++});
+diff -ruN /home/runner/czaba-project/store/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx app/lib/arrangement/__tests__/panel-radius-ui.test.tsx
+--- /home/runner/czaba-project/store/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx	2026-10-28 17:14:05.195662181 +0000
++++ app/lib/arrangement/__tests__/panel-radius-ui.test.tsx	2026-10-28 18:03:29.681269720 +0000
+@@ -74,7 +74,7 @@
+   {
+     file: 'components/arrangement/ArrangementOverview.tsx',
+     className:
+-      'relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-panel bg-background',
++      'relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-panel',
+   },
+   {
+     file: 'components/arrangement/ArrangementOverview.tsx',
+diff -ruN /home/runner/czaba-project/store/app/lib/arrangement/__tests__/shortcuts.test.ts app/lib/arrangement/__tests__/shortcuts.test.ts
+--- /home/runner/czaba-project/store/app/lib/arrangement/__tests__/shortcuts.test.ts	2026-10-28 17:14:05.196662192 +0000
++++ app/lib/arrangement/__tests__/shortcuts.test.ts	2026-10-28 18:03:29.681079556 +0000
+@@ -38,6 +38,7 @@
+   'zoom-range',
+   'fit',
+   'overview-scroll',
++  'overview-toggle',
+   'waveform-zoom',
+   'group',
+   'fold',
+@@ -192,6 +193,6 @@
+         }
+       }
+     }
+-    expect(checked).toBe(8);
++    expect(checked).toBe(9);
+   });
+ });
+diff -ruN /home/runner/czaba-project/store/app/lib/arrangement/__tests__/strings.test.ts app/lib/arrangement/__tests__/strings.test.ts
+--- /home/runner/czaba-project/store/app/lib/arrangement/__tests__/strings.test.ts	2026-10-28 17:17:23.255868628 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-28 18:03:29.680451479 +0000
+@@ -992,6 +992,8 @@
+     followOff: 'Follow off: the view does not move by itself.',
+     followResumed: 'Follow is following the playback position again.',
+     followOn: 'Follow on: the view follows the playback position during playback.',
++    overviewHidden: 'Overview hidden. Ctrl+Alt+O shows it again.',
++    overviewShown: 'Overview shown. Ctrl+Alt+O hides it.',
+     waveformZoomLabel: 'Waveform Zoom — view only, the sound does not change',
+   },
+ };
+@@ -1009,7 +1011,9 @@
+     'followPaused',
+     'followPausedTitle',
+     'followResumed',
++    'overviewHidden',
+     'overviewLabel',
++    'overviewShown',
+     'overviewTitle',
+     'overviewVisibleStart',
+     'playheadTitle',
+diff -ruN /home/runner/czaba-project/store/app/lib/arrangement/overview-visibility.ts app/lib/arrangement/overview-visibility.ts
+--- /home/runner/czaba-project/store/app/lib/arrangement/overview-visibility.ts	1970-01-01 00:00:00.000000000 +0000
++++ app/lib/arrangement/overview-visibility.ts	2026-10-28 18:00:34.783467068 +0000
+@@ -0,0 +1,45 @@
++export const OVERVIEW_HIDDEN_STORAGE_KEY = 'czaba-studio-overview-hidden';
++
++const overviewVisibilityListeners = new Set<() => void>();
++let overviewHiddenInMemory: boolean | null = null;
++
++export function readOverviewHidden(): boolean {
++  if (overviewHiddenInMemory !== null) {
++    return overviewHiddenInMemory;
++  }
++  if (typeof window === 'undefined') {
++    return false;
++  }
++  try {
++    return window.localStorage.getItem(OVERVIEW_HIDDEN_STORAGE_KEY) === '1';
++  } catch {
++    return false;
++  }
++}
++
++function writeOverviewHidden(hidden: boolean): void {
++  try {
++    if (hidden) {
++      window.localStorage.setItem(OVERVIEW_HIDDEN_STORAGE_KEY, '1');
++    } else {
++      window.localStorage.removeItem(OVERVIEW_HIDDEN_STORAGE_KEY);
++    }
++  } catch {
++    return;
++  }
++}
++
++export function setOverviewHidden(hidden: boolean): void {
++  overviewHiddenInMemory = hidden;
++  writeOverviewHidden(hidden);
++  for (const listener of overviewVisibilityListeners) {
++    listener();
++  }
++}
++
++export function subscribeOverviewVisibility(listener: () => void): () => void {
++  overviewVisibilityListeners.add(listener);
++  return () => {
++    overviewVisibilityListeners.delete(listener);
++  };
++}
+diff -ruN /home/runner/czaba-project/store/app/lib/arrangement/shortcuts.ts app/lib/arrangement/shortcuts.ts
+--- /home/runner/czaba-project/store/app/lib/arrangement/shortcuts.ts	2026-10-28 17:14:05.201662246 +0000
++++ app/lib/arrangement/shortcuts.ts	2026-10-28 18:00:34.784165470 +0000
+@@ -114,6 +114,12 @@
+       },
+       { id: 'overview-scroll', action: 'Overview: scroll 5 s', keys: ['← / → (overview focused)'] },
+       {
++        id: 'overview-toggle',
++        action: 'Show / hide the overview',
++        keys: ['Ctrl+Alt+O'],
++        ariaKeyShortcuts: 'Control+Alt+O Meta+Alt+O',
++      },
++      {
+         id: 'waveform-zoom',
+         action: 'Waveform zoom (view only, the sound does not change)',
+         keys: ['Waveform Zoom menu'],
+diff -ruN /home/runner/czaba-project/store/app/lib/arrangement/strings.ts app/lib/arrangement/strings.ts
+--- /home/runner/czaba-project/store/app/lib/arrangement/strings.ts	2026-10-28 17:16:06.190466086 +0000
++++ app/lib/arrangement/strings.ts	2026-10-28 18:00:34.783877731 +0000
+@@ -369,6 +369,8 @@
+   followOff: 'Follow off: the view does not move by itself.',
+   followResumed: 'Follow is following the playback position again.',
+   followOn: 'Follow on: the view follows the playback position during playback.',
++  overviewHidden: 'Overview hidden. Ctrl+Alt+O shows it again.',
++  overviewShown: 'Overview shown. Ctrl+Alt+O hides it.',
+   zoomReadout: (value: number): string => `${value} px/s`,
+   overviewVisibleStart: ({ start, extent }: { start: string; extent: string }): string =>
+     `Visible start ${start} / ${extent}`,

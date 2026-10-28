@@ -1,0 +1,77 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/collection.test.ts [2m([22m[2m15 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 15[2mms[22m[39m
+     [32m✓[39m PC1 shape: id, label, origin, no notice, sources sorted by order (stable) with exact titles; later input changes do not reach the collection[32m 3[2mms[22m[39m
+     [32m✓[39m PC2 validation: an empty stems array, a duplicate stem id and an empty productId each throw[32m 1[2mms[22m[39m
+     [32m✓[39m PC3 request: fetchAudio is called once with the stem URL and exactly { credentials: "omit", signal } (no headers, no method)[32m 0[2mms[22m[39m
+     [32m✓[39m PC3 the default fetchAudio uses the global fetch at call time, not at module load[32m 0[2mms[22m[39m
+     [32m✓[39m PC4 decode: resolves to the decodeAudioData result, called with the response ArrayBuffer[32m 0[2mms[22m[39m
+     [32m✓[39m PC5 HTTP 401 rejects with the status only; the message never contains the URL or the token[32m 1[2mms[22m[39m
+     [32m✓[39m PC5 HTTP 403 rejects with the status only; the message never contains the URL or the token[32m 0[2mms[22m[39m
+     [32m✓[39m PC5 HTTP 404 rejects with the status only; the message never contains the URL or the token[32m 0[2mms[22m[39m
+     [32m✓[39m PC5 HTTP 500 rejects with the status only; the message never contains the URL or the token[32m 0[2mms[22m[39m
+     [32m✓[39m PC6 network: a non-aborted rejection becomes the network text; with an aborted signal the original error is rethrown[32m 1[2mms[22m[39m
+     [32m✓[39m PC7 decode error: a decodeAudioData rejection becomes exactly the decode text[32m 1[2mms[22m[39m
+     [32m✓[39m PC8 unknown source id rejects with Unknown source and never calls fetchAudio[32m 0[2mms[22m[39m
+     [32m✓[39m PC10 body read failure: a non-aborted arrayBuffer rejection becomes the network text without the URL; when aborted the original error is rethrown and decode never runs[32m 1[2mms[22m[39m
+[31m     [31m×[31m PC9 copy: demo returns the published demo texts; purchased returns the purchased texts[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m PC10 copy: both ready texts teach drag and Enter and end with the shortcut-sheet key[39m[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/collection.test.ts[2m > [22mSRW-21 stage 1 purchased WorkspaceCollection adapter (D-29z57)[2m > [22mPC9 copy: demo returns the published demo texts; purchased returns the purchased texts
+[31m[1mAssertionError[22m: expected { heading: 'CZABA Studio Lab', …(6) } to strictly equal { heading: 'CZABA Studio Lab', …(6) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -3,7 +3,7 @@[39m
+[2m    "empty": "The demo collection has no sounds — the library is empty.",[22m
+[2m    "failed": "2 sounds in the demo collection failed to load — details are in the library.",[22m
+[2m    "fileStem": "czaba-studio-lab",[22m
+[2m    "heading": "CZABA Studio Lab",[22m
+[2m    "loading": "Loading the demo collection…",[22m
+[32m-   "ready": "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.",[39m
+[31m+   "ready": "Demo collection ready. Choose a track and add a sound (Enter or Add).",[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/collection.test.ts:[2m374:49[22m[39m
+    [90m372| [39m  it('PC9 copy: demo returns the published demo texts; purchased retur…
+    [90m373| [39m    [35mconst[39m demo [33m=[39m [34mworkspaceCollectionCopy[39m([32m'demo'[39m)[33m;[39m
+    [90m374| [39m    [34mexpect[39m({ [33m...[39mdemo[33m,[39m failed[33m:[39m demo[33m.[39m[34mfailed[39m([34m2[39m) })[33m.[39m[34mtoStrictEqual[39m({
+    [90m   | [39m                                                [31m^[39m
+    [90m375| [39m      heading[33m:[39m [32m'CZABA Studio Lab'[39m[33m,[39m
+    [90m376| [39m      badge[33m:[39m [32m'Demo collection — no sign-in required'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/collection.test.ts[2m > [22mSRW-21 stage 1 purchased WorkspaceCollection adapter (D-29z57)[2m > [22mPC10 copy: both ready texts teach drag and Enter and end with the shortcut-sheet key
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/collection.test.ts:[2m413:66[22m[39m
+    [90m411| [39m    [35mfor[39m ([35mconst[39m origin [35mof[39m origins) {
+    [90m412| [39m      [35mconst[39m { ready } [33m=[39m [34mworkspaceCollectionCopy[39m(origin)[33m;[39m
+    [90m413| [39m      expect(ready.endsWith(`Press ${sheetKey} for shortcuts.`)).toBe(…
+    [90m   | [39m                                                                 [31m^[39m
+    [90m414| [39m      [34mexpect[39m(ready)[33m.[39m[34mtoContain[39m([32m'Drag a sound onto a track'[39m)[33m;[39m
+    [90m415| [39m      [34mexpect[39m(ready)[33m.[39m[34mtoContain[39m([32m'press Enter to add it'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m13 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 17:20:51
+[2m   Duration [22m 452ms[2m (transform 79ms, setup 0ms, import 94ms, tests 15ms, environment 251ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/collection.test.ts,title=app/lib/arrangement/__tests__/collection.test.ts > SRW-21 stage 1 purchased WorkspaceCollection adapter (D-29z57) > PC9 copy%3A demo returns the published demo texts; purchased returns the purchased texts,line=374,column=49::AssertionError: expected { heading: 'CZABA Studio Lab', …(6) } to strictly equal { heading: 'CZABA Studio Lab', …(6) }%0A%0A- Expected%0A+ Received%0A%0A@@ -3,7 +3,7 @@%0A    "empty": "The demo collection has no sounds — the library is empty.",%0A    "failed": "2 sounds in the demo collection failed to load — details are in the library.",%0A    "fileStem": "czaba-studio-lab",%0A    "heading": "CZABA Studio Lab",%0A    "loading": "Loading the demo collection…",%0A-   "ready": "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.",%0A+   "ready": "Demo collection ready. Choose a track and add a sound (Enter or Add).",%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/collection.test.ts:374:49%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/collection.test.ts,title=app/lib/arrangement/__tests__/collection.test.ts > SRW-21 stage 1 purchased WorkspaceCollection adapter (D-29z57) > PC10 copy%3A both ready texts teach drag and Enter and end with the shortcut-sheet key,line=413,column=66::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/collection.test.ts:413:66%0A%0A

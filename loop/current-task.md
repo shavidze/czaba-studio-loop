@@ -1,393 +1,317 @@
-# Round 231: SABA-B-8 CALM-2b — one-line detail empty state, a shorter dismissible library notice, a first-run status that teaches, and the active empty-lane hint (+ RT-FIX-231)
+# Round 232: SABA-B-8 CALM-3 — a quiet Overview in an empty project, and Ctrl+Alt+O to hide or show it (+ GATE229-S2, GATE229-S4 row)
 
-**Planned by:** B, at the round 230 → 231 planning, 2026-10-28. **Decisions:** D-29z299…D-29z305.
-**Type:** feature stage, the **final stage of CALM-2** (2a = round 229, done). Saba decision 2 (policy "SABA-B-8 Calm Studio"):
-- "the Clip details empty state becomes one line, and the fields keep their geometry";
-- "the library notice becomes one line ('Synthetic demo stems — not CZABA catalogue audio.'), and the viewer can dismiss it (remembered per browser)";
-- "the first-run status teaches drag, Enter and `?`";
-- "the DUX-R-4(a) empty-lane hint shows only on the active empty lane and only before the first clip".
+**Planned by:** B, at the round 231 → 232 planning, 2026-10-28. **Decisions:** D-29z306…D-29z312.
+**Type:** feature stage, the **final stage of SABA-B-8 "Calm Studio"** (CALM-1 done, CALM-2a + CALM-2b done). Saba decision 3 (policy "SABA-B-8 Calm Studio"):
+- "Overview: stays, thin, as a quiet hairline in an empty project. Its full view appears with the first clip, and its bbox is unchanged."
+- "It can be hidden with **Ctrl+Alt+O** as in Live; the choice is remembered, and the shortcut is listed in the sheet."
+- "Collapsing the whole dock row when there is no video is **not** approved (layout change)."
 
-**Read first:** `lessons.md` in full (B, A and C). **L26 changed at this planning** (C-R230-01); read the new wording. These lessons apply directly:
-- L4 (§2 rulings);
-- L12 (no class pins; `sr-only` is checked in the browser, not by a class assertion);
-- L11, L32 and L33 (STOP);
+**Read first:** `lessons.md` in full (B, A and C). These lessons apply directly:
+- L4 (one rule per element, §2 rulings);
+- L11, L32, L33 (STOP);
+- L12 (no class pins; the visual empty state is checked in the browser, §5);
 - L23 (pre-check done, §0.2);
-- L26 and L28 (doc headings and status lines, §2.8);
-- L29 (every named signal and recipe was run, §0.3);
+- L26, L28 (doc 180, §2.8);
+- L29 (every named signal and recipe was run in the browser at baseline and on B's scratch, §0.3);
 - L31 (§0.3);
-- L39 (this round adds one empty-state line and removes others; C counts, §3);
+- L39 (this round removes persistent paint and adds none; C counts, §5);
 - L40 (changed testid elements, §0.3).
 
 **Not this round:**
-- CALM-3: the Overview empty state and Ctrl+Alt+O. The Overview and the dock stay byte-identical (GATE229-S2 waits for CALM-3).
-- DUX-R-4(b)/SYS-5: disabled reasons that are reachable by keyboard. The detail panel keeps its native `disabled` fields; this round keeps their reasons in the accessibility tree (§2.2) and does no more.
-- The screen-review candidates SR-230-1…10. They await Saba. In particular, the "Synthetic demo ·" labels on the library cards (SR-230-6, `SYNTHETIC_COLLECTION_LABEL`) and the "Active track:" line (SR-230-7) stay unchanged.
-- Rewording "Active track:" as "Adds to …". This is not in Saba's decision 2 (D-29z287 stands).
+- Collapsing the dock row when there is no video (not approved; Saba Q3).
+- Any change to the Overview's interactions (click = centre, ↔ drag = scroll, ↕ drag = zoom, double-click = Fit, ← / → = 5 s), its `aria-label`, `title` or role.
+- A visible Overview toggle button or a View menu (Saba: "no new visible control"; calm-studio-review §3 item 3).
+- C-R231-01 / C-R139-02 (stale library ghost after an Escape-cancelled drag): deferred Low; `ArrangementLane.tsx` is not granted (D-29z307).
+- The "any drag active" lane-hint proposal (A round 231 reviewer R1): an architecture signal, not scheduled (D-29z307).
+- Screen-review candidates SR-230-1…10 and SABA-Q-NOTICE-ONE-ROW: awaiting Saba.
 
 ## 0. Baseline and scope
 
-**Baseline:** HEAD = `5da0f506a8d09d851cf34fe7d663b1c4a223b2eb`. Gate 230 has status `skipped` (C taskStatus FAIL in a no-code RETRO round), so the baseline stays the gate-229 commit.
-- At the start, `git status --short --untracked-files=all` must be empty (B checked it: `b-round-230/git-status-at-planning.txt`).
+**Baseline:** HEAD = `e5507ffe56a4e59234bbb5a66f0537aaad5ceb62` (gate 231 `published`, its `commit`). At the start, `git status --short --untracked-files=all` must be empty (B checked: `b-round-231/git-status-at-planning.txt`, 0 lines).
 - If HEAD differs, or any path is dirty at the start: **STOP** (L11).
 - One exception: a root commit that touches only the 4 root files. Then re-hash those files and continue.
 
-**Frozen:** `b-round-230-r231-tree-sha256.txt` lists 1,065 tracked files: every tracked file except the 18 grants and the 4 root files. Run it from `store/`; it gives rc 0 at planning. The frozen set includes:
-- every protected auth and purchase file: `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx` and `entry.server.tsx`;
+**Frozen:** `b-round-231-r232-tree-sha256.txt` lists 1,078 tracked files: every tracked file except the 8 grants and the 4 root files. Run it from `store/` with `sha256sum -c --quiet`; it gives rc 0 at planning. The frozen set includes:
+- every protected auth and purchase file: `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/routes/__tests__/download-routes.test.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx` and `entry.server.tsx`;
 - `.claude/**`, `CLAUDE.md` and every config file;
-- `StudioWorkspace.tsx`, `ArrangementVideoDock.tsx`, `ArrangementOverview.tsx`, `ArrangementLibraryPreview.tsx`, `ArrangementTransport.tsx`, `shortcuts.ts`, `ArrangementContext.tsx` and `track-layout.test.tsx`.
+- `ArrangementLane.tsx`, `ArrangementLibrary.tsx`, `ArrangementDetailPanel.tsx`, `ArrangementShortcutSheet.tsx`, `ArrangementTransport.tsx`, `ArrangementContext.tsx`, `view.ts` and `library-notice.ts`;
+- the tests `track-layout.test.tsx`, `content-colour-ui.test.tsx`, `studio-theme-obsidian.test.tsx`, `shortcut-sheet-ui.test.tsx` and `render-budget.test.tsx`.
 
-**Root-owned, must equal HEAD:** `b-round-230-r231-root-files.txt` (`package.json`, `package-lock.json`, `vite.config.ts`, `vitest.config.ts`). Their start hashes are in `b-round-230-r231-root-files-start-sha256.txt`.
+**Root-owned, must equal HEAD:** `b-round-231-r232-root-files.txt` (`package.json`, `package-lock.json`, `vite.config.ts`, `vitest.config.ts`). Start hashes are in `b-round-231-r232-root-files-start-sha256.txt`. No dependency is needed.
 
 ### 0.1 Grants
-- The list is `b-round-230-r231-grants.txt`. Start hashes are in `b-round-230-r231-granted-start-sha256.txt`; start copies are in `b-round-230/granted-start/`.
-- The new files are listed in `b-round-230-r231-new-files.txt`.
+- The list is `b-round-231-r232-grants.txt`. Start hashes are in `b-round-231-r232-granted-start-sha256.txt`; start copies are in `b-round-231/granted-start/`.
+- The new files are listed in `b-round-231-r232-new-files.txt` (N1–N4).
 
 | # | Path | What may change |
 |---|---|---|
-| 1 | `app/lib/arrangement/strings.ts` | Exactly §2.1. Nothing else. |
-| 2 | `app/lib/arrangement/collection.ts` | The two `ready` strings (§2.4). Drop the now-unused `studioLibraryPanelStrings` import. |
-| 3 | `app/data/studio-lab-demo.ts` | `studioLabDemoCollection.notice` only (§2.3). `SYNTHETIC_COLLECTION_LABEL` and every other line stay. |
-| 4 | `app/components/arrangement/ArrangementDetailPanel.tsx` | §2.2 only: remove `DETAIL_NOTHING_SELECTED`; `headerLabel` is `''` when nothing is selected; the two reason `<p>` elements get `sr-only` in the none state. |
-| 5 | `app/components/arrangement/ArrangementLane.tsx` | §2.5: the audio empty-lane hint, and the video Solo `title` → `studioLaneStrings.videoSoloTitle` (§2.6). Nothing else. |
-| 6 | `app/components/arrangement/ArrangementLibrary.tsx` | §2.3: the notice row with its dismiss button, the `useSyncExternalStore` read, and the imports these need. Nothing else. |
-| 7 | `app/lib/arrangement/__tests__/strings.test.ts` | ST36, ST41 and ST49 maps, key lists and the count (22 → 23), as in `b-round-230/precheck-tests.py`. **New case ST-C2b** (§2.7). |
-| 8 | `app/lib/arrangement/__tests__/collection.test.ts` | PC9: the two `ready` literals and the `toContain('(Enter or Add)')` line. **New case PC10** (§2.7). |
-| 9 | `app/lib/arrangement/__tests__/collection-load-status.test.tsx` | The `DEMO_READY` and `PURCHASED_READY` literals only. |
-| 10 | `app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx` | The two ready literals only. |
-| 11 | `app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx` | `DEMO_READY` and LRS5's `toContain` line only. **No new cases** (L31, D-29z303). |
-| 12 | `app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx` | DPS1: the header label becomes `''` and the hint gets the new literal. |
-| 13 | `app/lib/arrangement/__tests__/detail-panel.test.tsx` | The hint literal (l.400) only. |
-| 14 | `app/data/__tests__/studio-lab-demo.test.ts` | DL-VAL: the notice literal only. |
-| 15 | `app/lib/arrangement/__tests__/detail-panel-reason.test.tsx` | **New case RF7** (§2.7). Existing cases stay unchanged; RF3 must stay green as written. |
-| 16 | `app/lib/arrangement/__tests__/lane-strings-ui.test.tsx` | **New case LSU9** (§2.7). LSU8 additionally asserts the video Solo `title` equals `studioLaneStrings.videoSoloTitle`. |
-| 17 | `docs/implementation/2026/quarter-IV/178-calm-2a-canvas-dock-copy.md` | l.4 → exactly `**სტატუსი:** Completed (C round 231 PASS)` (L28: the final stage of CALM-2). Add **one** sentence in `## პრობლემები და გადაწყვეტები` or `## მიდგომა` (GATE229-S5): the empty overlay `div` is still `absolute inset-0 z-20`, so it still catches the pointer, and that is why drag and float did not change. |
-| 18 | `docs/implementation/2026/quarter-IV/170-perf-16a-mp3-mediabunny.md` | l.4 → exactly `**სტატუსი:** Completed (C round 221 PASS)` (D-29z297). Nothing else. |
-| N1 | `app/lib/arrangement/library-notice.ts` | **New.** §2.3. |
-| N2 | `app/lib/arrangement/__tests__/library-notice-ui.test.tsx` | **New.** §2.7. |
-| N3 | `docs/implementation/2026/quarter-IV/179-calm-2b-detail-library-firstrun.md` | **New** (number 179 is free at planning). §2.8. |
+| 1 | `app/components/arrangement/ArrangementOverview.tsx` | §2.4 only: the empty state. |
+| 2 | `app/components/arrangement/StudioWorkspace.tsx` | §2.5 only: the visibility read, the hidden slot, the Ctrl+Alt+O branch of the window keydown handler, and the imports these need. |
+| 3 | `app/components/arrangement/ArrangementVideoDock.tsx` | §2.6 only (GATE229-S2): the l.889 caption row loses `justify-between gap-2`. Nothing else. |
+| 4 | `app/lib/arrangement/shortcuts.ts` | §2.2: one new row, `overview-toggle`. |
+| 5 | `app/lib/arrangement/strings.ts` | §2.1: two new `studioViewStrings` keys. Nothing else. |
+| 6 | `app/lib/arrangement/__tests__/strings.test.ts` | The ST17 map and key list gain the two new keys (as in `b-round-231/precheck-tests.py`). **New case ST-C3** (§2.7). |
+| 7 | `app/lib/arrangement/__tests__/shortcuts.test.ts` | SC1 `EXPECTED_ROW_ORDER` gains `overview-toggle` after `overview-scroll`; the SC5 count goes 8 → 9. **New case SC-C3** (§2.7). |
+| 8 | `app/lib/arrangement/__tests__/panel-radius-ui.test.tsx` | l.77 only: the Overview root site literal becomes `'relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-panel'`, because the background token moves into a conditional (§2.4). |
+| N1 | `app/lib/arrangement/overview-visibility.ts` | New (§2.3). |
+| N2 | `app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx` | New (§2.7). |
+| N3 | `docs/implementation/2026/quarter-IV/180-calm-3-overview-empty-toggle.md` | New (§2.8). |
+| N4 | `app/lib/arrangement/__tests__/overview-visibility-persist-ui.test.tsx` | New (§2.7): OV-T3 only, in its own file so the module's in-memory value starts `null`. |
 
-Nothing else changes.
+Anything else is out of scope. If a needed edit falls outside the grants, write a **STOP** (L11) and do not make the edit.
 
 ### 0.2 B's collision pre-check (L23, done)
-- **Scratch:** `/tmp/b231` = `git archive 5da0f50`.
-- **App edits:** B applied §2.1–§2.6 with `b-round-230/precheck-apply.py`.
-  - `tsc` was clean: no test imports a deleted key, so no typecheck-only collision exists this time. B checked this explicitly (L23, deleted export `nothingSelected`): `grep -rn nothingSelected app` finds only the `strings.test.ts` literal map.
-  - Biome `--write` reflowed 2 files.
-- **Sweep:** `npx vitest run app` on the scratch → **8 files, 19 tests red, 2,961 green** (`b-round-230/l23-sweep-raw.log`):
-
-  | File | Red cases | Cause |
-  |---|---|---|
-  | strings | ST36, ST41, ST49 | maps, key lists and the count |
-  | collection | PC9 | ready literals |
-  | collection-load-status | LS3, LS3b, LS4 ×2, LS5, LS6, LS7, PM1 | ready literals |
-  | purchased-collection-ui | PW2, PW5, PW6 | ready literals |
-  | library-row-strings-ui | LRS5 | ready literal |
-  | detail-panel-strings-ui | DPS1 | header and hint literals |
-  | detail-panel | "disables the inputs … no selection …" | hint literal |
-  | studio-lab-demo | DL-VAL | notice literal |
-
-  Every red case is pinned copy or a key list; none is a behaviour failure.
-- **After the test fixes** (`b-round-230/precheck-tests.py`, both rounds): the 8 files plus 11 neighbours → **19 files green** (`b-round-230/l23-precheck-fixed.log`, then the 3-file re-run).
-  - The 11 neighbours are detail-panel-reason, lane-strings-ui, track-layout, clip-gain-fader, clip-gain-multi, clip-gain-pointer-preview, clip-gain, detail-panel-fit, markers-ui, panel-radius-ui and pending-status.
-  - The second round of fixes covers PC9 and LRS5 `toContain('(Enter or Add)')`, the ST41 key list and the ST49 count; the first run found them.
-  - `tsc` rc 0 and Biome clean after the fixes.
-- **Reference diff:** `b-round-230/precheck-scratch.diff` (36 hunks, 15 files). A may use it, and A owns the result. It does not contain the new cases of §2.7 or the docs.
-- **`e2e/` and `perf/` (frozen, run by the gate):** `grep -rnE "Nothing selected|Select a clip|synthetic demo|library-notice|Choose a track|collection ready|Enter or Add" e2e perf` → 0 hits. `perf/` detects "ready" by the enabled Add button and the preview wave, not by the status text.
-- **Browser recipe check (L29), on the scratch at both viewports** (`b-round-230/probe-calm2b.mjs` → `probe/scratch.json`, baseline `probe/baseline.json`):
-  - **Enter adds:** fresh page, click at (5, 5), press Enter → 1 clip on Music at 00:00.000.
-  - **Drag adds:** `dragTo` of the first library option onto the SFX lane → 1 clip on SFX.
-  - **The hint follows the active lane:** clicking the Stems name button moves the hint to Stems; clicking the Video name button leaves 0 hints.
-  - **The hint returns after Undo:** Ctrl+Z back to 0 clips → 1 hint again.
-  - **Dismiss:** focus moves to `arrangement-library-search`. The key `czaba-studio-notice-dismissed:studio-lab-demo` = `1`. After a reload the notice is absent, with 0 `layout-shift` entries. A fresh context shows it again.
-  - 0 page errors.
-- **Box check:** C's `c-round-229/bbox-after.mjs`, run on base and scratch → `b-round-230/bbox/delta.txt`. The allowed deltas in C-BBOX-231 come from it.
-
-  > **Incident:** B's first copy of that script still had C's hard-coded output folder. Three runs rewrote `c-round-229/after-full-S0-*.png` (3–4 bytes each; the JSON files came out byte-identical). B restored both PNGs with `git checkout` in the loop repo and re-ran the script into `b-round-230/bbox/`. `git status -- c-round-229/` is clean.
+- **Reference implementation.** `b-round-231/precheck-apply.py` (app) and `b-round-231/precheck-tests.py` (test fixes) were applied to a scratch copy of `e5507ff` outside the repo. The full diff is `b-round-231/precheck-scratch.diff`.
+  - A may use it as a starting point and must still meet every clause below. `patch -p0 --dry-run` of it against a fresh `git archive HEAD app` copy gives rc 0; `patch` warns about the absolute `---` names and uses the relative `+++` names. The diff also adds B's two-case sketch as `overview-visibility-ui.test.tsx`; A replaces it with the real N2.
+  - The reference test sketch is `b-round-231/reference-overview-visibility-ui.test.tsx.txt` (two cases). A writes the real N2.
+- **Sweep with the app change only.** Every test file that imports the workspace, the route, the Overview, the dock, `shortcuts` or `strings` was run on the scratch: 121 files, listed in `b-round-231/l23-sweep-files.txt`. Result: **3 files / 4 tests red** (`l23-sweep-raw.log`):
+  - PNR2 (`panel-radius-ui`): the Overview root site literal ended in `bg-background`. Fixed by grant 8.
+  - SC1 and SC5 (`shortcuts.test.ts`): the row order and the aria row count. Fixed by grant 7.
+  - ST17 (`strings.test.ts`): the `studioViewStrings` key list and plain-string map. Fixed by grant 6.
+- **After the test fixes and the sketch file:** 122 files / 1,789 tests green, `tsc --noEmit` rc 0, and Biome clean on the 6 changed app files (`l23-precheck-fixed.log`).
+- **Pins that stay green by design.** Do not break them:
+  - OV1 (`studio-theme-obsidian`, frozen) counts the exact literal `<div className="pointer-events-none absolute inset-0 rounded-panel border border-outline" />` = 1 in `ArrangementOverview.tsx`. Keep that line byte-identical, and render it only when the project has clips (§2.4).
+  - PNR4 (`panel-radius-ui`) counts `rounded-panel` = 3 in the Overview source. The new baseline element must not use `rounded-panel`.
+  - DXC4 (`content-colour-ui`, frozen) and PNR4 read `overview.children[1]` as the bar-rows container. So in the empty state the baseline **replaces** the outline overlay as child 0, and child 1 stays the rows container in both states.
+  - TH5 (frozen) reads the playhead tokens in the empty SSR route. The playhead keeps `bg-accent ring-1 ring-background`.
+- **Mutant shown red on the scratch:** removing `!event.getModifierState('AltGraph')` turns the sketch's REF1 red, so jsdom honours `modifierAltGraph`.
 
 ### 0.3 Render conditions, timeouts and testids (L29, L31, L40)
-**L29, the signals this task names:**
-- `arrangement-detail-header-label` renders always. After this round its text is `''` when `selection === null && group === null`.
-- `arrangement-detail-hint` renders in the none state (DetailPanel l.917). `arrangement-detail-reason` and `arrangement-detail-clip-gain-reason` render when `inputsReason` or `clipGainReason` is non-null. In the none state they sit in the input column (l.986) and in the Clip Gain column (l.1028).
-- `arrangement-library-notice` renders when `collection.notice` is set, and after this round also when the notice is not dismissed. Only the demo collection sets `notice` (`grep -rn "notice" app/data app/lib/arrangement/collection.ts`).
-- `arrangement-lane-empty-hint` is new; its condition is in §2.5. The lane already reads `arrangement.clips` (Lane l.226), so no frozen file is needed.
-- The `[data-track-id]` lane rows exist (Lane l.692).
-- Global Enter adds the selected sound to the active track when the target is not a button, slider or separator (StudioWorkspace l.2072–2081, frozen). The library option's Enter adds too (Library l.298).
-
-**L31, times in the gate-229 `verify.log`** (no `testTimeout` is configured, so the default is 5 s per test):
-
-| File | File time | Slowest test |
-|---|---|---|
-| library-row-strings-ui | 4.1 s | LRS4 1,756 ms (35 %) |
-| lane-strings-ui | 3.7 s | — |
-| detail-panel | 3.7 s | — |
-| detail-panel-reason | 1.3 s | — |
-
-- In B's loaded full-suite scratch sweep, LRS4 took 3,003 ms (60 %) and LSU1 1,881 ms (38 %).
-- **Ruling (D-29z303):** library-row-strings-ui gets no new rows; the notice cases go to the new N2.
-- If any test in a file you add rows to (lane-strings-ui, detail-panel-reason, strings, collection) runs above 50 % in your covering run, that is a STOP (L32).
-
-**L40, changed elements that carry a `data-testid`:**
-- `arrangement-detail-header-label` (its content);
-- `arrangement-detail-hint` (its content);
-- `arrangement-detail-reason` and `arrangement-detail-clip-gain-reason` (their class, none state);
-- `arrangement-library-notice` (a new wrapper row and a narrower box);
-- the lane body (a new child).
-
-A greps `arrangement-detail-header-label|arrangement-detail-hint|arrangement-detail-reason|arrangement-detail-clip-gain-reason|arrangement-library-notice|arrangement-lane-empty-hint|arrangement-video-dropzone|arrangement-library-search` in `app/**/__tests__` and adds every hit file to the covering set. B's hits at `5da0f50` are 12 files, all already in the 19 pre-check files of §0.2: clip-gain-fader, clip-gain-multi, clip-gain-pointer-preview, clip-gain, detail-panel-fit, detail-panel-reason, detail-panel-strings-ui, detail-panel, markers-ui, panel-radius-ui, pending-status and track-layout. The `arrangement-library-search` part adds 8 more: delete-selection-ui, fader-guards, floating-video, library-focus-handoff, library-video-return-focus, studio-theme-obsidian, track-group-collapse-ui and track-groups-ui (all green in B's full scratch sweep; library-row-strings-ui and markers-ui are already listed). They join the covering set.
-
-### 0.4 RT-FIX-231 (round 230 close-out, no app code)
-- `lessons.md` changed only at the header history line and L26, and the final newline was restored (C-R230-01, N2; D-29z299). The before copy is `b-round-230/lessons-before-231.md`.
-- `user-review/screen-review-230.md` gained an appended addendum (N3, N4; D-29z300). Every byte before it equals `b-round-230/screen-review-230-before-231.md`.
-- A does not touch either file.
+- **Baseline browser probe** (`b-round-231/probe-overview.mjs` → `probe/baseline.json`; both viewports; the running :5173 server at `e5507ff`):
+  - **Heights:** the dock is 107 px tall, set by the 160×90 video box and not by the Overview. The Overview is 64 px (h-16), with the 16 px caption row above it. The scroller `clientHeight` is 516 (1440) / 406 (1280).
+  - **Empty extent:** the empty project's `data-extent` is 10.000 s, so the view frame covers the whole Overview (956 / 796 px wide). That is the "empty frame with a title" look.
+  - **Without the Overview:** taking it out of layout leaves the dock and the scroller unchanged, but the caption row drops 68 px (y 98 → 166 at 1440). Hence the hidden **slot** (§2.5, D-29z309).
+  - **Today:** Ctrl+Alt+O does nothing, whether the body or the Overview has focus. Chromium has no binding for it.
+  - **Tab order around the Overview:** library separator → **Overview** → `arrangement-video-expand`.
+- **B's scratch run** (`b-round-231/probe-calm3.mjs` on a scratch dev server at :5174 → `probe-scratch/scratch.json`, screenshots `probe-scratch/*.png`). Every recipe in §5 was run at both viewports:
+  - **Empty state:** the root is transparent. The baseline is 1 px (956×1 at y 181 at 1440; 796×1 at y 219 at 1280). The outline overlay is absent, and the frame and playhead have `visibility: hidden`.
+  - **Navigation:** ← in the empty Overview still moves `aria-valuenow` 0 → 5.
+  - **Hide:** Ctrl+Alt+O with the Overview focused hides it. The slot is 956×64 / 796×64 at the same place, and the dock, caption and scroller are unchanged. The status reads "Overview hidden. Ctrl+Alt+O shows it again.", and the key is `'1'`.
+  - **Focus:** it falls to `body`, and the next Tab reaches `arrangement-video-expand` (Chromium's sequential focus starting point; D-29z309).
+  - **Persistence:** a reload keeps it hidden. Ctrl+Alt+O shows it again and removes the key.
+  - **First clip:** Enter (from the body) adds a clip → `data-overview-state="full"`, a 1 px outline, and the frame and playhead visible. Ctrl+Z → empty again.
+  - **Sheet:** searching "overview" lists `fit`, `overview-scroll` and `overview-toggle`.
+  - 0 page errors.
+- **Signals and their render branch (L29):**
+  - `data-overview-state` is on the Overview root in both branches. It is `'empty'` exactly when `arrangement.clips.length === 0`.
+  - `arrangement-overview-baseline` renders only in the empty branch.
+  - `arrangement-overview-hidden-slot` renders only while the Overview is hidden; `arrangement-overview` is then absent.
+  - The status text is in `arrangement-status` (existing).
+- **L31:** rows are added to `strings.test.ts` (63 tests, 70 ms total at gate 231), `shortcuts.test.ts` (5 tests, 22 ms) and the new N2. No test in them is near 50 % of its timeout. N2 mounts the workspace the way `shortcut-sheet-ui` does (11 tests, 4,088 ms at gate 231). Keep each N2 case under 2.5 s, or split it.
+- **L40 (changed testid elements):** `arrangement-overview`, `arrangement-overview-frame`, `arrangement-overview-playhead`, and the caption row of `arrangement-video-dock`. Their test hits are in the covering set `b-round-231/covering-files.txt` (32 files with N2 and N4, including `track-layout.test.tsx` per D-29z283). A hit that pins a class in a frozen file is a STOP (L11) with the hit list.
 
 ## 1. Why
-- Saba (2026-10-28): the Studio screen is overloaded (`calm-studio-review.md` §1, §4). CALM-1 and CALM-2a removed the shortcut line and the canvas and dock sentences. This stage finishes the empty-project copy.
-- **Measured on the baseline at S0 (rows of text, `b-round-230/probe-rows.mjs`):**
-  - **1440×900, 8 rows:** status 1, "Nothing selected" 1, hint 1, two visible "Select a clip first" 2, and the library notice 3 (48 px).
-  - **1280×720, 5 rows** (the detail panel starts collapsed): status 1, "Nothing selected" 1, notice 3.
-- **After, on the scratch:**
-  - **1440×900, 5 rows:** status 1, hint 1, notice 2, lane hint 1.
-  - **1280×720, 4 rows:** status 1, notice 2, lane hint 1.
-- The status now teaches drag, Enter and `?`. Today drag is not written anywhere (ABL-B-1, DUX §1 T1).
-- **Why we missed it:** no new Saba-found issue in this stage. SABA-B-8's section is `tasks/round-226.md` §1.1, with lesson L39.
+Saba finds the Studio screen overloaded (SABA-B-8). In an empty project the Overview is a framed 64 px box with nothing in it: form without content (calm-studio-review §3). Live has the same Overview (6.1) and lets the user hide it (42.1, Ctrl+Alt+O). CALM-1 and CALM-2 removed the label and the helper text. This stage makes the empty Overview quiet and adds the keyboard toggle.
+
+**Why we missed it** (policy rule for Saba-reported issues; SABA-B-8 is Saba's report): the full analysis is in CALM-1's task (round 226). In short, no round looked at the whole screen in its empty state, and the Overview was verified only as a navigation control. Lesson L39 (screen budget) is the rule that now catches this. C checks that it exists (C-LESSON-232).
 
 ## 2. Changes
 
 ### 2.1 `strings.ts` (exact)
-| Object.key | Before | After |
-|---|---|---|
-| `studioDetailStrings.nothingSelected` | `Nothing selected` | **deleted** (no consumer after §2.2; one source) |
-| `studioDetailStrings.noSelectionHint` | `Select a clip to see its details` | `Select a clip to edit its time selection and Clip Gain.` (calm doc l.45) |
-| `studioDetailStrings.noneReason` | `Select a clip first` | unchanged (fields' `title` and the sr-only reason) |
-| `studioLaneStrings.videoSoloTitle` (new, after `videoMuteTitle`) | — | `` `Solo — ${STUDIO_VIDEO_MIX_LABEL} (Ctrl/Cmd+click = add to solo)` `` → `Solo — Original video sound (Ctrl/Cmd+click = add to solo)` (GATE229-S3) |
-| `studioLaneStrings.audioEmptyHint` (new, after `videoEmptyHint`) | — | `Drag a sound here, or press Enter to add it` |
-| `studioLibraryPanelStrings.dismissNotice` (new, after `clearSearch`) | — | `Dismiss this notice` |
+Add these two keys to `studioViewStrings`, directly after `followOn`:
+- `overviewHidden: 'Overview hidden. Ctrl+Alt+O shows it again.'`
+- `overviewShown: 'Overview shown. Ctrl+Alt+O hides it.'`
 
-- Wording of the lane hint: it uses the same verbs as the status and as Live 4.10 ("dragged and dropped … into tracks"; "pressing Enter … will load the item onto whatever track is currently selected"). It has no trailing full stop, like the video hint next to it (`No video — use … or drop a file here`).
-- The value of `videoSoloTitle` equals today's `soloLabel(STUDIO_VIDEO_MIX_LABEL)`, so the video Solo title the user sees does not change; only its source does.
+Nothing else changes. `overviewLabel` and `overviewTitle` stay byte-identical.
 
-### 2.2 Detail panel empty state (`ArrangementDetailPanel.tsx`)
-| State | Header label | Body line | Reasons ("Select a clip first") | Fields |
-|---|---|---|---|---|
-| none (no clip, no group) | `''` (the element stays; "Clip details" `h2` stays) | `arrangement-detail-hint` = the new `noSelectionHint`, the **only** visible line | both `<p>` keep their `id`, text and column, and get `sr-only`. `aria-describedby` of From, To, Apply and Clip Gain still resolves to them | unchanged: disabled, `title` = `Select a clip first`, same boxes |
-| one clip, group, video | unchanged | unchanged | unchanged and **visible** (group and video reasons are different texts and stay visible, RF1, RF2, RF6) | unchanged |
+### 2.2 `shortcuts.ts` (exact)
+In group `zoom-view`, directly after `overview-scroll`, add:
+`{ id: 'overview-toggle', action: 'Show / hide the overview', keys: ['Ctrl+Alt+O'], ariaKeyShortcuts: 'Control+Alt+O Meta+Alt+O' }`.
 
-- Use `cn('text-dim', isNoneState && 'sr-only')` or equivalent. Do not change the `isGroupState` or video branches.
-- **Why `sr-only` and not deletion (L4, D-29z301):** the reasons are the `aria-describedby` targets of four disabled fields. Deleting them would remove the only non-hover reason, which SYS-5 is about to strengthen. `sr-only` keeps them in the accessibility tree and removes 2 visible rows.
-- **Why the line lives in the body and the header is empty:** at 1280×720 the panel starts collapsed. A sentence in the header would stay permanently visible there, while the body line shows only when the panel is open (the quieter home, L39). The calm doc places the line in the panel body (l.45).
-- **Geometry (D-29z302):** the field boxes keep x, y and w ±1 px. The one allowed change is `arrangement-detail-apply` height 18 → 24 px at 1280×720 when expanded. On the baseline the visible reason squeezed it; `probe/baseline.json` vs `probe/scratch.json`.
+No other row moves. The sheet renders the new row from the source, so the sheet itself does not change.
 
-### 2.3 Library notice and dismiss (`studio-lab-demo.ts`, `ArrangementLibrary.tsx`, new `library-notice.ts`)
-- **Text:** `studioLabDemoCollection.notice` = `Synthetic demo stems — not CZABA catalogue audio.` (Saba's exact wording).
-- **Rows, a measured fact (D-29z301):** the sentence is 291 px wide at the Studio's 12 px text. The library content box is 264 px at the default 288 px library width, and 236 px beside the dismiss button. It therefore renders as **one sentence on 2 rows** (32 px; it was 3 rows, 48 px). Do not shrink the font, truncate or change the wording.
-  - Saba's "one line" read as one visual row cannot be met with his exact wording at the default width. B records it as `SABA-Q-NOTICE-ONE-ROW` (awaiting_user): keep it, use a shorter wording, or widen the library.
-- **Row markup:** a `div` (`flex items-start gap-1`) holds:
-  - the `p` (`data-testid="arrangement-library-notice"`, `min-w-0 flex-1 text-xs text-muted`, no truncation);
-  - a `button type="button"` (`data-testid="arrangement-library-notice-dismiss"`, `aria-label` and `title` = `studioLibraryPanelStrings.dismissNotice`). It copies the search-clear button pattern (Library l.478–487): `flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted hover:text-foreground`, with `<X className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />`. There is no custom focus class: the global SABA-B-4 `:focus-visible` ring applies.
-- **Click** (or keyboard activation of the button) → `dismissLibraryNotice(collection.id)`, then `librarySearchInputRef.current?.focus()`, so focus never falls to `body`.
-- **`library-notice.ts` contract:**
-  - `libraryNoticeStorageKey(id)` = `czaba-studio-notice-dismissed:${id}`. It is per collection and per browser, and it holds no personal data.
-  - `readLibraryNoticeDismissed(id)`: `true` if the in-memory set has the id, or `localStorage.getItem(key) === '1'`. It returns `false` on the server (`typeof window === 'undefined'`) and when storage throws.
-  - `dismissLibraryNotice(id)`: adds the id to the in-memory set, tries `localStorage.setItem(key, '1')` (a storage error is swallowed, and the notice still hides for this page), then notifies the subscribers.
-  - `subscribeLibraryNoticeDismissal(listener)` returns an unsubscribe function.
-  - No `any`, no `as`, no comments except a TODO. B's sketch is in `precheck-scratch.diff`.
-- **Read:** `useSyncExternalStore(subscribeLibraryNoticeDismissal, () => readLibraryNoticeDismissed(collection.id), () => false)`. The server snapshot is "visible" because `/studio-lab` is server-rendered (`curl` shows the notice in the HTML). In a dismissed browser the notice is in the server HTML and is removed during hydration. This is the honest minimum; C records it (C-NOTICE-231).
-- Test isolation: the in-memory set is module state. Tests that dismiss must use a distinct collection id or `vi.resetModules()`; do not add a test-only export.
+### 2.3 New `overview-visibility.ts` (N1)
+It uses the same pattern as `library-notice.ts` (no third storage pattern):
+- `OVERVIEW_HIDDEN_STORAGE_KEY = 'czaba-studio-overview-hidden'`. There is one key per browser, **not** one per collection (D-29z309). It is a view preference of the workspace, like Live's view toggles, not a fact about the content.
+- `readOverviewHidden(): boolean`:
+  - returns the in-memory value first (set by the last `setOverviewHidden`);
+  - else `false` on the server;
+  - else `localStorage.getItem(key) === '1'`;
+  - `false` if storage throws.
+- `setOverviewHidden(hidden: boolean): void` sets the in-memory value. It writes `'1'` when hidden and **removes** the key when shown (in a try/catch, silent on failure), then notifies the listeners.
+- `subscribeOverviewVisibility(listener): () => void`.
+- No `any`, no type assertions, no comments; every statement ends with a semicolon.
 
-### 2.4 First-run status (`collection.ts`)
-| Origin | Before | After |
-|---|---|---|
-| demo | `Demo collection ready. Choose a track and add a sound (Enter or Add).` | `Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.` |
-| purchased | `Purchased collection ready. Choose a track and add a sound (Enter or Add).` | `Purchased collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.` |
+### 2.4 Overview empty state (`ArrangementOverview.tsx`)
+One rule (L4): **empty** ⇔ `arrangement.clips.length === 0`. It is project-level and counts clips on any track, video included (the same rule as the CALM-2b lane hint). The empty state returns after an Undo back to 0 clips.
+- **Root:** add `data-overview-state={hasClips ? 'full' : 'empty'}`. The background token becomes conditional: `bg-background` when full, `bg-transparent` when empty. Every other root class, `role="slider"`, `tabIndex`, all `aria-*`, `title`, `data-*` and every handler stay unchanged.
+- **Child 0:** when full, the existing outline overlay line, byte-identical (OV1). When empty, a baseline in its place, with no `rounded-panel`: `<div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-outline" data-testid="arrangement-overview-baseline" />`.
+- **Child 1:** the rows container, unchanged.
+- **Frame and playhead:** `arrangement-overview-frame` and `arrangement-overview-playhead` get `invisible` when empty. They stay mounted, so `updateOverviewFrame` keeps writing `aria-valuenow` and `aria-valuetext` in the empty state. Their other tokens are unchanged (TH5, OV1).
+- **Bbox:** unchanged in both states (h-16, full width, ±1 px).
+- **Focus ring:** the existing shared ring, not touched. It stays visible on keyboard focus in both states (C row).
 
-- One pattern for both origins (L4). The purchased text is checked by unit tests only, because the route needs the backend.
-- `?` is the key of the shortcut sheet: `shortcuts.ts` l.158, `{ id: 'shortcuts', keys: ['?'] }`. PC10 pins that parity (§2.7).
-- The status is a one-time status: it is replaced by the next action (unchanged).
+### 2.5 Toggle and hidden slot (`StudioWorkspace.tsx`)
+- **Visibility read:** `const isOverviewHidden = useSyncExternalStore(subscribeOverviewVisibility, readOverviewHidden, () => false)`. The server snapshot is "shown" because the route is SSR (the same as the CALM-2b notice).
+- **The dock's `overview` prop:**
+  - hidden → `<div aria-hidden="true" className="h-16 w-full" data-testid="arrangement-overview-hidden-slot" />`. The slot keeps the caption row and every other element in place (D-29z309). The baseline probe showed the caption drops 68 px without it.
+  - shown → the existing `<ArrangementOverview …/>`, with its props unchanged.
+- **Key branch in the window `keydown` handler.** Place it after the floating-video Escape branch and before `const current = workspaceRef.current`. The existing early returns (shortcut sheet open, Export open, typing target) then apply to it too.
+  - **Condition:** `event.code === 'KeyO' && event.altKey && (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.getModifierState('AltGraph')`.
+  - **Effect:** call `preventDefault()`. If `event.repeat` is set or a pointer gesture is active (`workspaceRef.current.isPointerGestureActive()`), stop there. Otherwise:
+    - `hidden = !readOverviewHidden()`;
+    - `setOverviewHidden(hidden)`;
+    - `setStatus(hidden ? studioViewStrings.overviewHidden : studioViewStrings.overviewShown)`.
+  - **View state only:** it adds **no** arrangement history entry, and Undo does not touch it.
+  - **Code-based:** it works on the Georgian layout, where `event.key` is `ო`.
+  - **AltGr:** AltGr (Ctrl+Alt on Windows, e.g. Polish `ó`) is ignored, so the character still types wherever text is allowed.
+- **Focus:** if the Overview has focus when it hides, the code does **not** move focus (D-29z309, the smallest honest behaviour; no new focus target is invented).
+  - Chromium keeps the sequential focus starting point, so the next Tab goes to `arrangement-video-expand` (measured, §0.3).
+  - The status line announces the change.
+  - C measures this. If a browser drops the starting point to the top of the document, C reports a Low. It is not a STOP.
 
-### 2.5 Active empty-lane hint (`ArrangementLane.tsx`, DUX-R-4(a))
-- **Markup:** inside the lane body, just before the `isFileDragOver` block, mirroring the video hint (Lane l.883–887):
-  ```
-  !isVideo && isActive && density !== 'folded' && arrangement.clips.length === 0 && !isFileDragOver && libraryGhost === null
-  → <p className="pointer-events-none sticky left-56 flex h-full max-w-md items-center px-3 text-sm text-muted" data-testid="arrangement-lane-empty-hint">{studioLaneStrings.audioEmptyHint}</p>
-  ```
-- **"Only before the first clip" (D-29z301):**
-  - The rule is project-level, not lane-level: the hint shows while the arrangement has 0 clips of any kind (a video clip counts).
-  - It returns when the project is empty again, for example after Undo or deleting every clip. It is an empty-state line (one of L39's quieter homes), not a one-time tip.
-  - It needs no new stored state. B chose this as the smallest honest reading; Saba can ask for "never again after the first clip".
-- **Only on the active lane:** exactly one hint, on the active **audio** track. The video track keeps its own action hint (calm doc l.38, keep), so when Video is active there is no audio hint.
-- **Hidden** while a library drag ghost or an OS file drag is over that lane (the ghost and the drop text take that place), and on a folded lane.
-- **`pointer-events-none`:** the lane background keeps every gesture. A drag on the hint area still makes a time selection.
-
-### 2.6 GATE229-S3 (`ArrangementLane.tsx`)
-The video Solo `title` reads `studioLaneStrings.videoSoloTitle`. The audio Solo `title` stays `soloTitle`, and the `aria-label` stays `soloLabel(mixLabel)`.
+### 2.6 GATE229-S2 (`ArrangementVideoDock.tsx`)
+l.889 changes from `<div className="flex min-h-4 items-baseline justify-between gap-2 text-xs leading-4 text-muted">` to `<div className="flex min-h-4 items-baseline text-xs leading-4 text-muted">`. The row has one child, so the bbox does not change (C-BBOX and the GATE229-S4 row check it). Nothing else in the dock changes.
 
 ### 2.7 Tests: new and changed cases
-**ST-C2b (`strings.test.ts`):**
-- `'nothingSelected' in studioDetailStrings` is false.
-- `noSelectionHint`, `audioEmptyHint` and `dismissNotice` equal the §2.1 literals.
-- `videoSoloTitle` equals `studioLaneStrings.soloLabel(studioLaneStrings.videoMixLabel)`.
+- **Fixes (grants 6–8):** exactly as in `b-round-231/precheck-tests.py`.
+- **ST-C3** (`strings.test.ts`): both new strings equal their literals. Both mention `Ctrl+Alt+O`, which must equal `findStudioShortcut('overview-toggle')?.keys[0]`, so the status and the sheet cannot drift apart.
+- **SC-C3** (`shortcuts.test.ts`):
+  - `findStudioShortcut('overview-toggle')` has keys `['Ctrl+Alt+O']` and aria `'Control+Alt+O Meta+Alt+O'`;
+  - the row sits in group `zoom-view`, directly after `overview-scroll`;
+  - `filterStudioShortcutGroups('overview')` contains `fit`, `overview-scroll` and `overview-toggle`.
+- **N2 `overview-visibility-ui.test.tsx`.**
+  - **Setup:** mount like `shortcut-sheet-ui`. Reset in `afterEach` with `act(() => setOverviewHidden(false))` and `localStorage.clear()`. Find elements by testid, role and text only; no class assertions (L12).
+  - **Module state (binding):** `setOverviewHidden` sets the in-memory value, and `readOverviewHidden` reads it before `localStorage`. After the first `afterEach`, a preset storage key is therefore never read in N2. No N2 case may depend on reading storage at mount; that case lives in N4.
+  - **OV-E1:** with 0 clips, `data-overview-state="empty"`, the baseline exists, and the root's child 1 is the rows container. Adding one clip through the context API → `full` and no baseline. `undo()` → `empty`.
+  - **OV-E2:** in the empty state, `aria-valuenow` and `aria-valuemax` are present, and ArrowRight on the focused Overview changes `aria-valuenow` (navigation unchanged).
+  - **OV-T1:** Ctrl+Alt+O on the body:
+    - `fireEvent` returns `false` (default prevented);
+    - `arrangement-overview` is absent, and the slot exists with `aria-hidden="true"`;
+    - the storage key is `'1'`;
+    - the status equals `overviewHidden`.
 
-**PC10 (`collection.test.ts`):** for both origins, `ready` ends with `` `Press ${findStudioShortcut('shortcuts')?.keys[0]} for shortcuts.` ``, contains `Drag a sound onto a track` and `press Enter to add it`, and does not contain `(Enter or Add)`.
+    The Meta variant (`metaKey` + `altKey`) then shows it again: the key is removed and the status equals `overviewShown`.
+  - **OV-T2 (ignored cases).** Each leaves the Overview shown and the key `null`:
+    - `modifierAltGraph: true` (here `fireEvent` also returns `true`);
+    - Shift added;
+    - `repeat: true`;
+    - the target is the library search field;
+    - the shortcut sheet is open;
+    - Ctrl+O without Alt;
+    - Alt+O without Ctrl or Meta.
+  - **OV-T3** is in **N4**, not N2 (see below).
+  - **OV-T4:** the toggle adds no history entry. Undo availability is the same after hide and show, and `undo()` after a toggle undoes the previous edit, not the toggle.
+  - **OV-T5:** when storage throws (a `setItem` / `getItem` spy that throws), the toggle still hides and shows within the session (in memory), with no error.
+- **N4 `overview-visibility-persist-ui.test.tsx`: OV-T3 only.** Vitest isolates module state per file (default `isolate`; `vitest.config.ts` does not change it), so the in-memory value starts `null` here. One test, so the result does not depend on order (A ran `--sequence.shuffle` in round 231):
+  1. set `localStorage` key `'1'`;
+  2. `renderToString` of the workspace tree renders `arrangement-overview` (server snapshot "shown"); `setOverviewHidden` is never called in this file;
+  3. `render` of the same tree mounts hidden: the slot exists and `arrangement-overview` is absent (client snapshot reads storage).
+  Reset storage in `afterEach`. Do not import a helper that calls `setOverviewHidden` at module load.
+  B verified this on the scratch: the sketch `b-round-231/reference-overview-visibility-persist-ui.test.tsx.txt` passes, and MU-4 turns it red.
+- **Mutants A must show red.** Restore each one and keep the logs in `a-round-232/mutants/`.
 
-**RF7 (`detail-panel-reason.test.tsx`)**, real workspace, nothing selected:
-- the header label `textContent` is `''`;
-- the hint `textContent` is the new `noSelectionHint`;
-- From, To and the Clip Gain field have `aria-describedby` that resolves (`document.getElementById`) to an element with text `Select a clip first`;
-- after `selectClip`, the header label is the clip title and the reasons are gone.
+  | Mutant | Change | Expected |
+  |---|---|---|
+  | MU-1 | Invert the empty-state rule (`hasClips` → `!hasClips`) | red |
+  | MU-2 | Drop the AltGraph guard | red |
+  | MU-3 | Drop the `event.repeat` guard | red |
+  | MU-4 | Server snapshot = `readOverviewHidden` | red (OV-T3 in N4) |
+  | MU-5 | `setOverviewHidden(false)` writes `'0'` instead of removing the key | red (OV-T1) |
+  | MU-6 | Render `null` instead of the slot when hidden | red in N2; C-TOGGLE also checks the caption position in the browser |
+  | MU-7 | Swap the two status strings | red |
+  | MU-8 | Drop `invisible` from the frame | expected green in jsdom, so **browser-only** (C-OVERVIEW-EMPTY). Do not add a class pin (L12). |
 
-Do not assert the `sr-only` class (L12). Whether the reasons are visually hidden is checked in the browser (C-DETAIL-231).
+### 2.8 Doc (N3)
+`docs/implementation/2026/quarter-IV/180-calm-3-overview-empty-toggle.md`, in Georgian with English technical terms (TEMPLATE.md):
+- l.4 is exactly `**სტატუსი:** Completed (C round 232 PASS)` (L28);
+- the seven TEMPLATE headings after `## Prompt`, in order (L26);
+- cite only test ids that exist (OV-E1, OV-E2, OV-T1…T5, ST-C3, SC-C3), and say that OV-T3 is in N4;
+- state the reason for the hidden slot, the focus ruling and the AltGr limit.
 
-**LSU9 (`lane-strings-ui.test.tsx`)**, real workspace:
-1. Fresh: exactly one `arrangement-lane-empty-hint`. `closest('[data-track-id]')` is the Music lane, and the text is `audioEmptyHint`.
-2. After making Stems active (its name button `studioLaneStrings.activeTrackLabel('Stems')`): one hint, in Stems.
-3. After making Video active: 0 hints.
-4. Music active again, then one clip added (`addSourceToActiveTrack` or the Add button): 0 hints. After Undo: 1 hint, in Music.
-5. **Folded:** the active Music lane folded with its fold button → 0 hints.
-
-**Fallback (no STOP):** if step 5 cannot be reached in this mount, assert 1–4 only; C-LANEHINT-231 covers the fold in the browser. A says which variant it wrote.
-
-**LSU8:** add one line, `video Solo title === studioLaneStrings.videoSoloTitle`.
-
-**N2 `library-notice-ui.test.tsx`** (new):
-- **LN1:** the demo workspace shows the notice with the exact text, and a button named `Dismiss this notice`.
-- **LN2:** clicking it removes the notice, sets `localStorage['czaba-studio-notice-dismissed:studio-lab-demo'] === '1'`, and focus is on the library search field (`getByRole('searchbox', { name: 'Search the library' })` or its testid).
-- **LN3:** with the key preset to `'1'` before the mount, the notice is absent and nothing else in the library changes (the search field and the list render). A preset key for **another** id leaves the notice visible.
-- **LN4:** with `Storage.prototype.setItem` throwing, a click still hides the notice for the page.
-- **LN5:** `renderToString` of the library (or the workspace) with the key preset contains the notice text: the server snapshot is visible.
-- **LN6:** Enter on the focused dismiss button hides the notice and adds **no** clip (the global Enter handler ignores buttons).
-- Clean `localStorage` in `afterEach`. Isolate the in-memory set (§2.3).
-
-Rules for every case: no `any`, no `as`, no `@ts-ignore`; narrow with `if (!x) throw new Error(...)`. Find elements by role, name, text or `data-testid` (L12).
-
-### 2.8 Docs
-- **Doc 179 (new):** `docs/implementation/2026/quarter-IV/179-calm-2b-detail-library-firstrun.md`, following `docs/implementation/TEMPLATE.md`. Georgian, with English technical terms.
-  - l.4, exactly: `**სტატუსი:** Completed (C round 231 PASS)` (L28: CALM-2 has 2 stages and this is the last).
-  - Headings per the new **L26**: the seven TEMPLATE headings after `## Prompt`, in order.
-  - Content:
-    - კონტექსტი: Saba decision 2, and the row counts of §1.
-    - მიდგომა: the rulings of §2.2–§2.5: sr-only reasons; the body line; the 2-row notice fact with SABA-Q-NOTICE-ONE-ROW; the dismiss key and the server snapshot; one pattern for both origins; the project-level "before the first clip".
-    - შეცვლილი ფაილები: grants 1–16, N1 and N2.
-    - პრობლემები და გადაწყვეტები: the `aria-describedby` targets; the hydration flash.
-    - ტესტირება: ST-C2b, PC10, RF7, LSU9, LN1–LN6 and the mutants.
-    - TODO: CALM-3, SYS-5 and SABA-Q-NOTICE-ONE-ROW.
-  - Cite only ids and tests that exist (L26).
-- **Doc 178:** grant 17. **Doc 170:** grant 18.
-- After this round, `grep -rn 'In Progress (stage' docs/implementation` must give only doc 176, which is tied to the open stage PERF-HARNESS-SHARED-LIB-b-ii (D-29z304).
+The SABA-B-8 docs 177–179 already read `Completed`, so no other doc line is granted. `grep -rn 'In Progress (stage' docs/implementation` returns only doc 176, which is tied to the open PERF-HARNESS-SHARED-LIB-b-ii stage.
 
 ## 3. Reference: how Ableton Live 12 does it
-Sources fetched 2026-10-28 (WebFetch / WebSearch):
-- ch. 4 "Working with the Browser", 4.10 "Adding Content from the Browser to a Live Set": https://www.ableton.com/en/live-manual/12/working-with-the-browser/
-- ch. 6 "Arrangement View", 6.1 Layout, item 12 "Mixer Drop Area": https://www.ableton.com/en/live-manual/12/arrangement-view/
-- ch. 2 "First Steps", 2.2.2 Info View: https://www.ableton.com/en/live-manual/12/first-steps/ (already cited in round 229 R6).
-- An Ableton forum thread (2009, Live 8 era) mentions a "Drop Files and Devices Here" area: https://forum.ableton.com/viewtopic.php?p=861782. This is user discussion, not documentation, and not confirmed for Live 12.
+Sources, re-fetched by B with WebFetch on 2026-10-28 (earlier capture: `b-round-71/ableton-*-20261021.txt`):
+- Live 12 manual **6.1 Layout**: https://www.ableton.com/en/live-manual/12/arrangement-view/
+- Live 12 manual **42.1 Showing and Hiding Views**: https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/
 
-| # | Behaviour | Source | Confirmed there | CZABA decision | C row |
-|---|---|---|---|---|---|
-| R1 | Put a sound on a track by dragging | 4.10: "Items can be dragged and dropped from the browser into tracks in the Session or Arrangement View." | Drag from the browser onto a track places it. | **Match.** The status and the lane hint teach it ("Drag a sound onto a track"). | C-FIRSTRUN-231 |
-| R2 | Put a sound on the selected track with a key | 4.10: "In the Arrangement View, double-clicking or pressing Enter on a device or sample in the browser will load the item onto whatever track is currently selected." | Enter or double-click loads onto the selected track. | **Match.** CZABA: Enter (and double-click in the library) adds the selected sound to the active track at the playhead. The status and the hint say "press Enter to add it". | C-FIRSTRUN-231 |
-| R3 | Text in an empty part of the Arrangement | 6.1 item 12: "You can add new tracks to the Arrangement by dragging instruments and devices into the Mixer Drop Area underneath tracks." The forum (2009) quotes a "Drop Files and Devices Here" label. | The manual describes a drop **area** that creates a new track. A visible label is **not** stated in the manual (the forum label is a hypothesis for Live 12). | **Deviation:** CZABA has a fixed set of tracks and no "new track" drop area. The hint sits on the active empty lane, and a drop there adds to that lane. Saba's DUX-R-4(a) decision limits it to the active lane before the first clip. | C-LANEHINT-231 |
-| R4 | Where help and teaching text lives | 2.2.2: "The Info View displays the name and function of whatever element of the UI that you hover over with the mouse." | Hover help sits in a panel. | **Deviation (existing, round 228 K1):** no Info View. The one-time status line teaches the first steps, and native `title`s carry the rest. "No reference found" for a first-run status message: searched the 4.10, 6.1 and 2.2.2 text. | C-FIRSTRUN-231 |
-| R5 | Detail panel with nothing selected | — | No reference found. The Clip View sections were not fetched for an empty state; B does not claim Live's behaviour. | CZABA: one line, fields kept in place and disabled. | C-DETAIL-231 |
-| R6 | A dismissible notice in the browser | — | No reference found (Live's browser has no such notice; it is a CZABA demo fact). | CZABA-only: a per-browser dismiss. The fact stays reachable on every library card ("Synthetic demo ·") and in a fresh browser. | C-NOTICE-231 |
+| # | Behaviour | Live 12 (source) | CZABA decision | C check |
+|---|---|---|---|---|
+| R1 | What the Overview is | 6.1: it "displays the Arrangement's entire layout of clips from start to end and can be used for zooming and navigation"; "the black outline represents the currently displayed part" | Same role. The outline is our view frame, unchanged when the project has clips | C-OVERVIEW-FIRSTCLIP |
+| R2 | Gestures | 6.1: drag horizontally = scroll, drag vertically = zoom; double-click inside the outline = the whole Arrangement | Unchanged. Click = centre, double-click anywhere = Fit and ← / → = 5 s are earlier CZABA choices | C-OVERVIEW-EMPTY (gestures still work when empty) |
+| R3 | Hide and show | 42.1: Hide/Show Overview = **Ctrl+Alt+O** (Win) / **Cmd+Option+O** (Mac) | Same keys (Ctrl or Cmd, with Alt/Option) | C-TOGGLE, Mac row TLM-R232-MAC |
+| R4 | Discoverability | 42.1 lists it under "Showing and Hiding Views" | Listed in the sheet's "Zoom & view" group, plus a one-time status line on toggle | C-SHEET-232 |
+| R5 | Empty-project look | No reference found: 6.1 and 42.1 say nothing about the Overview of an empty Arrangement (both pages searched) | CZABA/Saba: a quiet hairline, with no outline, frame or playhead | C-OVERVIEW-EMPTY |
+| R6 | Toggle remembered across sessions | Not confirmed: the manual does not say, and it was not observed | CZABA/Saba: remembered per browser | C-TOGGLE-PERSIST |
 
-**Deviations, listed:**
-- English-only labels (policy).
-- No Info View (R4).
-- The lane hint is on a fixed track, not a new-track area (R3).
-- The notice takes 2 rows at the default width (SABA-Q-NOTICE-ONE-ROW).
+**Deviations, with reasons:**
+- **D1.** The empty-state hairline is CZABA's (Saba decision 3). Live documents no empty look.
+- **D2.** No View-menu entry and no visible button. Saba approved only the key ("no new visible control"), and CZABA has no menu bar.
+- **D3.** A one-time status message on toggle. Live documents none. Ours is there because there is no visible control: the status line, the Studio's one feedback channel, confirms the action and teaches the way back.
+- **D4.** The hidden Overview leaves an empty 64 px slot. The video monitor sets the dock row height (Saba did not approve collapsing it), and the slot keeps the caption from jumping. Whether Live gives the space back is an inference, not confirmed (the fetched pages do not say). We could not without the unapproved layout change.
+- **D5.** AltGr+O (Ctrl+Alt on some Windows layouts) is ignored, so that it can still type a character. On those layouts the toggle needs the left Ctrl+Alt.
+- **D6.** `?` opens the sheet, not Info View (CALM-1, unchanged).
 
-**Better than Live (claimed carefully):** the very first screen names both ways to place a sound and how to see every key. Live's manual teaches them in a chapter.
-
-**Screen budget (L39):**
-- **Adds:** one empty-state-only line, the lane hint. Saba approved it (DUX-R-4(a) inside CALM-2). B rejected the other homes:
-  - a tooltip (the user does not know where to hover);
-  - the `?` sheet (it does not show where to drop);
-  - first-run only (the status is first-run only already and is replaced by the next action; the hint must stay while the lane is the target);
-  - the status (it already carries the sentence, but far from the lane).
-- **Removes:** 4 rows at 1440 S0 (header, 2 reasons and 1 notice row), and 2 rows at 1280 S0 (header and 1 notice row).
-- **Net:** −3 rows at 1440 and −1 at 1280 (§1). C counts them (C-BUDGET-231).
+**Screen budget (L39):** this round adds no persistent text and no persistent element. It removes the empty Overview's outline, frame and playhead paint. The new status messages appear only after the user presses the key. Quieter homes considered:
+- the Overview's tooltip: adding the key there is allowed but not needed, because the sheet carries it;
+- the `?` sheet: chosen;
+- the status line: chosen, one-time.
 
 ## 4. A: checks to run (speed rule: no full suite, no `verify`)
-1. **Start:** HEAD is `5da0f50`; `git status --short --untracked-files=all` is empty; `sha256sum -c --quiet` gives rc 0 for the tree, granted-start and root-files lists.
-2. `npm run typecheck` rc 0. `npm run lint` rc 0, with no new warnings in the granted files. `npx biome check` on grants 1–16 and N1–N2 is clean.
-3. **Covering set:** `npx vitest run` on:
-   - the 19 pre-check files (§0.2);
-   - N2;
-   - every extra hit of the L40 grep (§0.3);
-   - every hit of `grep -rlnE "Nothing selected|nothingSelected|noSelectionHint|Choose a track|Enter or Add|synthetic demo|library-notice|audioEmptyHint|videoSoloTitle|dismissNotice|lane-empty-hint" app --include=*.test.*`.
-
-   Everything must be green. Report the per-test times, with any test above 50 % at the top (L32).
-4. **Mutants** (restore each one and verify its sha):
-   - **MU-1:** `headerLabel` back to a non-empty text in the none state → DPS1 and RF7 red.
-   - **MU-2:** drop `arrangement.clips.length === 0` from the hint condition → LSU9 red.
-   - **MU-3:** drop `isActive` → LSU9 red.
-   - **MU-4:** drop `!isVideo` → LSU9 step 3 red.
-   - **MU-5:** `dismissLibraryNotice` does not write storage → LN2 red.
-   - **MU-6:** the server snapshot returns `readLibraryNoticeDismissed(...)` → LN5 red.
-   - **MU-7:** the demo `ready` string back to the old text → PC10 red.
-   - **MU-8:** remove the `sr-only` from the none-state reasons. Name the test that goes red; if none does, write "browser-only: C-DETAIL-231", and do not add a class pin.
-   - **MU-9:** the reason `<p>` deleted in the none state → RF7 red (`aria-describedby` no longer resolves).
-5. **Optional browser self-check** at 1280×720:
-   - the hint is on Music;
-   - the notice has 2 rows with the X;
-   - with the panel expanded, the only body line is the new hint;
-   - after a dismiss and a reload, the notice is gone.
-6. **code-reviewer:** run it (21 files). Forward its Architecture notes.
+1. **Start:**
+   - HEAD is `e5507ff` and the status is empty;
+   - from `store/`, `sha256sum -c --quiet` gives rc 0 on `b-round-231-r232-tree-sha256.txt`, `b-round-231-r232-granted-start-sha256.txt` and `b-round-231-r232-root-files-start-sha256.txt`.
+2. **Static:**
+   - `npm run typecheck` rc 0;
+   - `npm run lint` rc 0, with 0 diagnostics in the grants and new files;
+   - `npx biome check` on the changed app and test paths: clean.
+3. **Covering set:** `npx vitest run $(cat ../tmp/studio-real-loop/b-round-231/covering-files.txt)` (32 files including N2 and N4), all green. Also run N2 and N4 once with `--sequence.shuffle`.
+   - L32: a failure, a timeout, or a test above 50 % of its timeout is a STOP at the top of `a-round-232.md`. Report your time and the gate-231 time.
+   - Add any extra file your own grep finds (L40).
+4. **Mutants:** MU-1…MU-8 as in §2.7. MU-8 is browser-only.
+5. **Optional browser self-check:** copy `b-round-231/probe-calm3.mjs` into `a-round-232/` and run it against :5173. Do not edit B's file. Compare the result with `b-round-231/probe-scratch/scratch.json`.
+6. **code-reviewer** (3+ files changed): forward its Architecture note to B. Do not act on it outside the grants.
 7. **End:**
-   - `git status` shows grants 1–18 as `M` and exactly three `??`: N1, N2 and N3;
+   - `git status` shows exactly 8 `M` and N1–N4 as `??`;
    - the frozen and root lists give rc 0;
-   - write `a-round-231/changed-end-sha256.txt` and `a-round-231/granted-hunks.diff` (diff against `b-round-230/granted-start/`).
+   - write `a-round-232/changed-end-sha256.txt` and `a-round-232/granted-hunks.diff` (against `b-round-231/granted-start/`; new files against /dev/null).
 
 ## 5. C: acceptance (real Chromium on `/studio-lab` at 1440×900 and 1280×720)
-**States:**
-- **S0:** a fresh anonymous empty demo (empty storage).
-- **S0x:** S0 with the detail panel expanded (at 1280 click `arrangement-detail-toggle`).
-- **S1:** one clip added (the first "Add"), then a click at (5, 5); this is exactly the S1 of `b-round-230/text-inventory/inventory.mjs`.
-- **SD:** S0, dismiss the notice, reload.
+B's numbers are in `b-round-231/probe/baseline.json` (before) and `b-round-231/probe-scratch/scratch.json` (after, on B's scratch). The gate rows (full vitest, typecheck, build, lint, verify, e2e smoke) are `gate` and are not claimed.
 
-**Tools (copy them; do not edit B's):**
-- `b-round-230/probe-calm2b.mjs <base> <outdir> <label>`;
-- `b-round-230/text-inventory/inventory.mjs <outdir> <label> <base>`;
-- `b-round-230/bbox/bbox.mjs <outdir>` (env `BASE`).
-
-**Text rows:** count with `Range.getClientRects()` unique tops on the element's text nodes, not box height / line-height. The lane hint box is the full lane height.
-
-| Row | What | Pass |
+| Row | Check | Pass when |
 |---|---|---|
-| C-SCOPE-231 | HEAD, `git status`, hash lists, hunks | HEAD is `5da0f50`. Grants 1–18 are `M` and N1–N3 are the only `??`. The frozen and root lists give rc 0, and A's `changed-end-sha256.txt` gives rc 0. Protected files: `git diff --quiet HEAD` rc 0. **Hunk scope:** `diff -u b-round-230/granted-start/<path> store/<path>` shows only what §0.1 permits. For grants 1–14 compare with `b-round-230/precheck-scratch.diff`; extra hunks are allowed only for the new cases of §2.7 and the two doc lines. |
-| C-UNIT-231 | `npx vitest run` on grants 7–16 and N2 | Green. ST-C2b, PC10, RF7, LSU9 and LN1–LN6 exist. `grep -rn nothingSelected app` → 0. |
-| RT-FIX-231 | Round-230 close-out | (1) `diff b-round-230/lessons-before-231.md lessons.md` shows only the header history line, L26 and the final newline; `tail -c1 lessons.md` is `\n`; ≤ 60 lines; three parts. (2) The new L26 is checkable: `python3 -I b-round-230/l26-check.py` gave 171 of 175 at `5da0f50` (B's `b-round-230/l26-check.txt`). After A's doc 179 exists it must give **172 of 176**; the non-passing docs in both runs are exactly 005, 006, 009 and 076, which predate the rule. (3) `screen-review-230.md`: the bytes before `## დამატება — round 231` equal `b-round-230/screen-review-230-before-231.md`. N3 says ~0:18 at 1280. The N4 table cites `calm-studio-review.md` l.44, l.46, l.50 and l.152, and each cited line says what the table claims. |
-| C-TEXT-231 | `inventory.mjs` after-run, diffed against `b-round-230/text-inventory/before.json` as a multiset of `(region, text)` | Exactly the entries of `b-round-230/text-inventory/diff-before-vs-scratch.txt`, per key; nothing else. In 1440-S0: −2× reason, −header, −old hint, −old notice, −old status; +new hint, +lane hint, +new notice, +new status. 1280-S0 and both S1 have the subsets listed there. |
-| C-BUDGET-231 (L39) | Text rows at S0 (both viewports) and SD | **1440 S0:** 8 → 5 (status 1, hint 1, notice 2, lane hint 1). **1280 S0:** 5 → 4 (status 1, notice 2, lane hint 1). **SD:** the notice rows → 0. The footer line count and line heights equal `b-round-230/bbox/base/geom-after.json` (the status stays 1 row at both viewports); the footer text differs only by the status change. |
-| C-BBOX-231 | `bbox.mjs` after, vs `b-round-230/bbox/base/bbox-after.json` (S0, S1) | 0 deltas over 1 px, except exactly those in `b-round-230/bbox/delta.txt`. **Allowed:** library tree, list, folders, option rows and their buttons y −16 (tree and list h +16); `arrangement-library-notice` w −28, h −16; `arrangement-detail-header-label` (empty: y +8, h −16); the two reasons in S0 (sr-only); new `arrangement-lane-empty-hint` and `arrangement-library-notice-dismiss`. `geom-after.json` (footer and scroller) equal to base. |
-| C-DETAIL-231 | Detail empty state (S0x both viewports, S1) | **S0x:** <ul><li>the header label is empty;</li><li>the only visible body text is `Select a clip to edit its time selection and Clip Gain.`;</li><li>both reasons are in the DOM with text `Select a clip first`, and they are visually hidden (box ≤ 1×1 px, or clipped);</li><li>CDP `Accessibility.getPartialAXTree` (or `getFullAXTree`) of From, To and Clip Gain gives description `Select a clip first`;</li><li>`title` is unchanged;</li><li>field boxes equal base ±1 px, except Apply h 18 → 24 at 1280.</li></ul> **S1:** <ul><li>the header shows the clip title;</li><li>the field boxes do not move between S0x and S1 (±1 px).</li></ul> **Group** (Ctrl+click two clips): the range and Clip Gain reasons are **visible** as before. |
-| C-NOTICE-231 | Notice and dismiss | <ul><li>Text exact; 2 rows (32 ±1 px) at the default width. Also record the library width at which it becomes 1 row (drag `arrangement-library-separator`); this is info.</li><li>**Keyboard:** Tab reaches the dismiss button after the search field; its name is `Dismiss this notice`; the SABA-B-4 ring is visible on keyboard focus (outline ≥ 1 px painted, ≥ 3:1 against the panel), and there is no ring after a mouse press.</li><li>**Enter on the focused button:** the notice goes, focus is on the search field, and clips stay 0.</li><li>**Mouse click (fresh context):** the same.</li><li>`localStorage['czaba-studio-notice-dismissed:studio-lab-demo'] === '1'`.</li><li>**SD:** absent after settle. Record the `layout-shift` entries and a screenshot taken as early as possible after `domcontentloaded`. A visible notice flash ≥ 100 ms is a Low finding, not a FAIL.</li><li>A **fresh context** shows the notice again.</li></ul> |
-| C-FIRSTRUN-231 | Status and the taught actions (fresh, both viewports) | <ul><li>The status is exactly `Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.`;</li><li>a click at (5, 5) then Enter → one clip on Music at 00:00.000;</li><li>in a fresh context, a real-mouse drag of a library option onto the SFX lane → one clip on SFX;</li><li>in a fresh context, `?` → the shortcut sheet opens and Esc closes it.</li></ul> |
-| C-LANEHINT-231 | Lane hint | <ul><li>**S0:** exactly one hint, in the Music lane, with the §2.1 text.</li><li>**Active lane:** click the Stems name button → the hint is in Stems; click the Video name button → 0 hints.</li><li>**First clip:** Music active, Enter → 0 hints; Ctrl+Z → 1 hint again.</li><li>**Fold:** fold the active lane → 0 hints; unfold → 1.</li><li>**Gestures:** a real-mouse drag across the hint area makes a time selection, as elsewhere in the lane (the range hint appears).</li><li>**Library drag:** during a drag over the lane (mouse down on an option, move over the lane, screenshot, then drop), the hint is hidden. If Playwright cannot hold an HTML5 drag mid-way, record the method and treat this sub-row as info.</li><li>**1280:** the hint is one text row.</li></ul> |
-| C-VIDEO-SOLO-231 | Neighbour | The video Solo `title` is still `Solo — Original video sound (Ctrl/Cmd+click = add to solo)`. The music Solo `title` and every `aria-label` are unchanged. |
-| G231-3 | Auth guard | <ul><li>`/studio/middle-east` → "Sign in required", 0 `audio[src]`;</li><li>`/api/studio-token` with no header → 401;</li><li>a fake Bearer → 403 with the `:5199` mock, or 500 without it;</li><li>no token is issued;</li><li>a fresh `/studio-lab` shows the demo badge, and `auth_user` is null.</li></ul> |
-| LAB-SMOKE-231 | Add a clip, then Export WAV | 24-bit, 48 kHz, stereo. The RMS segments are identical to C round 230's undone export (−65.21 / −21.59 / −21.54 dB). 0 page errors. |
-| AN-REVIEW-231 | Docs | <ul><li>Doc 179 l.4, doc 178 l.4 and doc 170 l.4 are byte-exact.</li><li>Doc 178 gained one sentence (GATE229-S5).</li><li>Doc 179 headings pass `l26-check.py`, and every cited id or test exists.</li><li>`grep -rn 'In Progress (stage' docs/implementation` → only doc 176.</li></ul> |
-| C-REF-231 | §3 R1–R6 | Each one is a match or a listed deviation. Any other difference is a bug (Medium if it changes what the user must learn, else Low). |
-| C-SHOTS-231 | Calm doc row 12 | Full-window screenshots S0, S0x, S1 and SD, both viewports, after. The before images are `b-round-230/probe/baseline-S0-*.png`, `baseline-S0x-*.png` and C round 229's `after-full-S1-*.png`. |
-| gate | full suite, build, lint, `verify`, e2e smoke | Not claimed by C. |
+| C-SCOPE-232 | HEAD, status, hashes, hunks | <ul><li>HEAD is `e5507ff`;</li><li>8 `M` plus N1–N4;</li><li>the frozen, root and A-end lists give rc 0;</li><li>protected files: `git diff --quiet HEAD` gives rc 0;</li><li>the hunks are §2.1–§2.6 plus the §2.7 test changes.</li></ul> |
+| C-UNIT-232 | Covering set | `covering-files.txt` (32 files) is green. ST-C3, SC-C3, OV-E1/E2, OV-T1, OV-T2, OV-T4, OV-T5 (N2) and OV-T3 (N4) exist. N2 and N4 also pass with `--sequence.shuffle`. |
+| C-OVERVIEW-EMPTY | Fresh context, 0 clips, both viewports | <ul><li>`data-overview-state="empty"`.</li><li>The root background is transparent (computed `rgba(0, 0, 0, 0)`), and no element at the Overview has a 1 px `border-outline` box.</li><li>The frame and playhead have computed `visibility: hidden`.</li><li>The baseline is 1 px tall, the full Overview width, at the Overview's bottom edge.</li><li>**Pixels:** a screenshot crop of the Overview shows no outline or frame rectangle (compare `probe/ov-empty-*` before and after).</li><li>The Overview bbox equals the baseline ±1 px.</li><li>← / → on the focused Overview change `aria-valuenow`.</li><li>Double-click runs Fit (status "Fit: …").</li><li>A horizontal drag in the empty Overview does not throw (0 page errors).</li><li>**Keyboard focus ring:** visible on the empty Overview (brass pixels painted > 0, contrast against the dock ≥ 3:1).</li><li>A mouse press shows no ring.</li></ul> |
+| C-OVERVIEW-FIRSTCLIP | Enter adds a clip; then Ctrl+Z | <ul><li>After Enter: `full`, a 1 px outline overlay, the frame and playhead visible, and the root background back to its before value (`rgb(14, 13, 12)`). The bars are visible.</li><li>After Ctrl+Z: `empty` again.</li><li>The same at both viewports.</li></ul> |
+| C-TOGGLE | Ctrl+Alt+O from the body and from the focused Overview | <ul><li>**Hidden:** `arrangement-overview` is absent, and the slot is at the Overview's former bbox ±1 px.</li><li>The dock bbox, the caption row bbox and the scroller `clientHeight` equal the shown state ±1 px.</li><li>The status is exactly "Overview hidden. Ctrl+Alt+O shows it again."</li><li>Pressing it again shows it, with the status "Overview shown. Ctrl+Alt+O hides it."</li><li>**Negative:** in the library search field the key does nothing to the Overview; while the shortcut sheet is open, nothing happens; Ctrl+O alone and Alt+O alone do nothing; a held key (auto-repeat, ≥ 10 repeats) toggles exactly once.</li></ul> |
+| C-TOGGLE-FOCUS | Overview focused, then Ctrl+Alt+O | After hiding, the next Tab lands on `arrangement-video-expand`. After a fresh hide, Shift+Tab lands on the library separator. Record `document.activeElement` honestly. |
+| C-TOGGLE-PERSIST | Reload; fresh context | <ul><li>A reload keeps it hidden (key `'1'`), with 0 `layout-shift` entries after hydration.</li><li>Measure whether the SSR Overview paints before hydration removes it (C-NOTICE-231 method: FCP versus the removal time, and the per-rAF effective opacity). A visible flash is a Low, not a FAIL.</li><li>A fresh context shows the Overview.</li><li>Showing it removes the key.</li></ul> |
+| C-UNDO-232 | Toggle after an edit | Add a clip, toggle twice, then press Ctrl+Z: the clip is undone (the toggle is not in history). |
+| C-SHEET-232 | `?`, then search "overview" | <ul><li>The rows are `fit`, `overview-scroll` and `overview-toggle`.</li><li>The `overview-toggle` row shows `Ctrl+Alt+O` in the "Zoom & view" group.</li><li>The sheet's row count equals the source count.</li></ul> |
+| C-CAPTION-232 (GATE229-S4) | Caption row at 1280 | <ul><li>The row is 16 px tall with an empty caption.</li><li>It is also 16 px with a long file name: load a local video whose name has ≥ 80 characters through "Your own video" (L25 filechooser recipe). The text truncates on one line, and the Overview below does not move.</li><li>Check both viewports, with the Overview shown and hidden.</li></ul> |
+| C-BBOX-232 | D6 all-element bbox | Every element's bbox delta is ≤ 1 px against the baseline, except the Overview's own children and the listed state changes. |
+| C-BUDGET-232 (L39) | Persistent text rows | Count the rows outside the timeline at S0 and S1, at both viewports, before and after: no increase. |
+| C-LESSON-232 | `lessons.md` | L39 exists (the "Why we missed it" rule). |
+| G232-3 | Purchase protection | <ul><li>`/studio-lab` returns 200, shows the demo badge, and `auth_user` is null.</li><li>`/studio/middle-east` shows "Sign in required", with 0 `audio[src]`.</li><li>`/api/studio-token` with no header → 401.</li><li>No token is issued.</li></ul> |
+| LAB-SMOKE-232 | Real audio | Add, then Export WAV: 24-bit, 48 kHz, stereo. The length and RMS equal C round 231 (101.352 s; −65.21 / −21.59 / −21.54 dB). 0 page errors. |
+| AN-REVIEW-232 | Doc 180 | l.4 is byte-exact `**სტატუსი:** Completed (C round 232 PASS)`; the L26 headings are present; the cited ids exist. |
+| C-REF-232 | §3 table | R1–R4 match or are listed deviations; R5 and R6 are recorded as no reference / not confirmed; no unlisted difference. |
+| C-SHOTS-232 | Screenshots | S0 and S1, before (B's `probe/`) and after, plus the hidden state, at both viewports. |
+| TLM-R232-MAC | Tech Lead manual check | Cmd+Option+O toggles on a Mac. It cannot be claimed in the cloud: mark it `blocked` with the reason "needs a Mac". It is not a FAIL. |
 
-**`browserVerified`:** true only if C-TEXT, C-BUDGET, C-BBOX, C-DETAIL, C-NOTICE, C-FIRSTRUN, C-LANEHINT, G231-3 and LAB-SMOKE ran at both viewports. RT-FIX-231 and AN-REVIEW-231 are document checks.
+**Ableton conformance** (separate from the CZABA requirement): R1–R3 are confirmed by the manual; R4 is a CZABA addition; R5 has no reference; R6 is not confirmed.
 
 ## 6. Neighbouring behaviour that could break (C probes these first)
-- **The global Enter handler:** Enter on the focused dismiss button must not add a clip (LN6, C-NOTICE). Enter in the library search field keeps its behaviour.
-- **Library keyboard order:** search → clear (when there is text) → dismiss → tree → list. The library resize separator still works, and the notice re-wraps.
-- **The detail panel group and video states:** the reasons stay visible there (RF1, RF2, RF6 unchanged).
-- **Lane drag and drop:** a library ghost and an OS file drop still show over an empty active lane. The video lane hint is unchanged.
-- **Purchased route:** not mountable in the cloud. Its status text is unit-checked only (PW2, LS*). No protected file is touched.
+- **Overview navigation with clips:** a click outside the frame re-centres, ↔ drag scrolls, ↕ drag zooms, double-click runs Fit, and Space on the focused Overview plays.
+- **Window shortcuts with Alt or Ctrl:** Ctrl+←/→ edge navigation, Alt+drag snap bypass, Ctrl+Z/Y, `?`, and G, A, U, M, 1/2/3. None of them changes.
+- **Floating video:** expand and return, and the placeholder, still sit beside the slot or the Overview. Escape still returns the floating video.
+- **Export dialog open:** Ctrl+Alt+O does nothing.
+- **render-budget:** Play → Pause → Play re-renders the Overview 0 times (covering set).
 
 ## 7. Outcomes for B's next planning
-- **C PASS and gate PASS:** CALM-2 is done, and RT-FIX-231 closes RETRO 230. Round 232 is **CALM-3** (Overview empty state + Ctrl+Alt+O; it carries GATE229-S2 and the GATE229-S4 C row), if round-232 planning is before 2026-10-30. Otherwise REGRESSION comes first (D-29z305). Then SABA-B-7, SYS-5 and PERF b-ii.
+- **C PASS and gate PASS:** SABA-B-8 is complete.
+  - B files the bounded frontend-architect checkpoint request (`b-round-231-checkpoint-request.md`, D-29z312).
+  - If round-233 planning falls on or after 2026-10-30, the next round is **REGRESSION** (`regression-last.json` is round 199; carry every `scope_additions` entry, L6).
+  - Otherwise it is **SABA-B-7-ENVELOPE-DB** (reference-first, with the checkpoint addendum `b-round-229-checkpoint-request.md`).
+  - Then SYS-5, then PERF b-ii.
 - **C FAIL on a feature row:** a fix-up on the same grants.
-- **C FAIL only on RT-FIX-231:** B fixes the loop file; the next round re-checks the changed lines.
 - **Gate fail:** B re-runs L23 against the actual tree and grants the fix precisely.
 
 ## 8. Root notes
-- **Re-forward to Saba:** the addendum at the end of `user-review/screen-review-230.md` (D-29z300), and the new question `SABA-Q-NOTICE-ONE-ROW` (backlog `open_findings`).
-- **Still pending and non-blocking:** `b-round-229-checkpoint-request.md` (SABA-B-7 envelope addendum; wanted before SABA-B-7 is dispatched after CALM-3), and the `b-round-211`, `-221` and `-225` requests.
-- **Loop folder:** B's planning briefly rewrote two of C's round-229 screenshots and restored them with `git checkout` (§0.2 incident). `git status -- c-round-229/` is clean.
+- **Checkpoint:** SABA-B-8 ends with this round. `b-round-231-checkpoint-request.md` asks for one bounded frontend-architect checkpoint after C PASS. It covers the two `useSyncExternalStore` storage helpers (`library-notice.ts`, `overview-visibility.ts`) and the growth of the `StudioWorkspace` keydown handler (GATE228-S2/S4 signals). It is non-blocking.
+- **Still pending and non-blocking:** `b-round-229-checkpoint-request.md` (wanted before SABA-B-7), and the `b-round-211`, `-221` and `-225` requests.
+- **Saba:** SABA-Q-NOTICE-ONE-ROW (C round 231 N7: the notice fits one row when the library is 56 px wider), SR-230-1…10 and the `screen-review-230.md` addendum await him.
+- **Loop folder:** B's scratch copy and scratch dev server were outside the repo (`/tmp/b231-scratch`, port 5174, now stopped). `store/` was not touched: HEAD `e5507ff`, empty status, and the frozen list gives rc 0 at the end.

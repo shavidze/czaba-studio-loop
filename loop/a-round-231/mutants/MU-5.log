@@ -1,0 +1,54 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/library-notice-ui.test.tsx [2m([22m[2m6 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 787[2mms[22m[39m
+     [32m✓[39m LN1: the demo workspace shows the one-sentence notice and a named dismiss button[32m 274[2mms[22m[39m
+[31m     [31m×[31m LN2: a click hides the notice, remembers it per collection and moves focus to the search field[39m[32m 157[2mms[22m[39m
+     [32m✓[39m LN3: a remembered dismissal hides only that collection notice and leaves the library intact[32m 136[2mms[22m[39m
+[31m     [31m×[31m LN4: when storage refuses the write the notice still hides for this page[39m[32m 85[2mms[22m[39m
+     [32m✓[39m LN5: the server snapshot shows the notice even when this browser dismissed it[32m 23[2mms[22m[39m
+     [32m✓[39m LN6: Enter on the focused dismiss button hides the notice and adds no clip[32m 111[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-notice-ui.test.tsx[2m > [22mCALM-2b dismissible library notice (SABA-B-8)[2m > [22mLN2: a click hides the notice, remembers it per collection and moves focus to the search field
+[31m[1mAssertionError[22m: expected null to be '1' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"1"
+
+[31m+ Received:[39m 
+null
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-notice-ui.test.tsx:[2m199:59[22m[39m
+    [90m197| [39m    [34mexpect[39m(mounted[33m.[39m[34mnotice[39m())[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m198| [39m    expect(mounted.view.queryByRole('button', { name: DISMISS_NAME }))…
+    [90m199| [39m    [34mexpect[39m(window[33m.[39mlocalStorage[33m.[39m[34mgetItem[39m([33mDEMO_STORAGE_KEY[39m))[33m.[39m[34mtoBe[39m([32m'1'[39m)[33m;[39m
+    [90m   | [39m                                                          [31m^[39m
+    [90m200| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m(mounted[33m.[39m[34msearch[39m())[33m;[39m
+    [90m201| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-notice-ui.test.tsx[2m > [22mCALM-2b dismissible library notice (SABA-B-8)[2m > [22mLN4: when storage refuses the write the notice still hides for this page
+[31m[1mAssertionError[22m: expected "setItem" to be called at least once[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-notice-ui.test.tsx:[2m222:21[22m[39m
+    [90m220| [39m    [35mconst[39m mounted [33m=[39m [35mawait[39m [34mmountNoticeWorkspace[39m([32m'ln4-storage-error'[39m)[33m;[39m
+    [90m221| [39m    fireEvent[33m.[39m[34mclick[39m(mounted[33m.[39m[34mdismiss[39m())[33m;[39m
+    [90m222| [39m    [34mexpect[39m(setItem)[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m223| [39m    [34mexpect[39m(mounted[33m.[39m[34mnotice[39m())[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m224| [39m    expect(window.localStorage.getItem(libraryNoticeStorageKey('ln4-st…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 17:20:46
+[2m   Duration [22m 2.12s[2m (transform 677ms, setup 0ms, import 988ms, tests 787ms, environment 263ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/library-notice-ui.test.tsx,title=app/lib/arrangement/__tests__/library-notice-ui.test.tsx > CALM-2b dismissible library notice (SABA-B-8) > LN2%3A a click hides the notice%2C remembers it per collection and moves focus to the search field,line=199,column=59::AssertionError: expected null to be '1' // Object.is equality%0A%0A- Expected: %0A"1"%0A%0A+ Received: %0Anull%0A%0A ❯ app/lib/arrangement/__tests__/library-notice-ui.test.tsx:199:59%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/library-notice-ui.test.tsx,title=app/lib/arrangement/__tests__/library-notice-ui.test.tsx > CALM-2b dismissible library notice (SABA-B-8) > LN4%3A when storage refuses the write the notice still hides for this page,line=222,column=21::AssertionError: expected "setItem" to be called at least once%0A ❯ app/lib/arrangement/__tests__/library-notice-ui.test.tsx:222:21%0A%0A
