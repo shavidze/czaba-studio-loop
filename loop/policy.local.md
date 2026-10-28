@@ -310,3 +310,53 @@ Saba dragged a clip envelope point to the bottom and the music "did not go fully
   - existing tests for fades and the envelope still pass;
   - no click at the points (the existing envelope-click rows).
 - `Why we missed it`: the reference-first rule did not exist when the envelope was built (rounds 82–83).
+
+## SABA-B-9/10/11: transport, Insert Marker and a musical grid (Saba, 2026-10-28, approved)
+
+Saba found three gaps against Live. The root review is `/home/runner/czaba-project/docs/technical/studio-real-workspace/transport-grid-review.md`. It has:
+- the Live references (manual 6.3, 6.10, the Control Bar section, the Live 12 shortcut pages);
+- our behaviour with file:line;
+- a gesture-by-gesture table;
+- a `Why we missed it` section for each gap;
+- six proposed tasks, each with browser acceptance rows.
+
+The review read master **2d4a93f** (round 222). B re-checks every file:line on the current master before each dispatch; rounds 226–231 changed `ArrangementTransport.tsx` and added `shortcuts.ts`.
+
+**Saba's decisions.** Each one overrides any different default written in the review.
+1. **A click during playback moves only the Insert Marker.** Playback continues.
+2. **A click on the top strip of the bars ruler starts playback from that point,** as Live's scrub area does.
+3. **Grid unit:**
+   - An asset with a BPM: Studio takes the tempo from the asset's catalogue BPM. The default grid is musical (bar … 1/32, triplets) and Snap is on.
+   - No asset in the project has a BPM (SFX, ambience): the default grid is **seconds**, as in Logic and Pro Tools. **Never invent 120 BPM.** This differs from the review's Q3 default.
+   - A mixed project takes its tempo from the music asset.
+   - The user can switch the grid family by hand. The min:sec ruler always stays visible.
+   - Audio is never stretched.
+   - A frame grid (24/25/30 fps) is **not** in scope; B may list it as a later candidate.
+4. **Transport layout:**
+   - a centre group: Follow · clock · Play · a new Stop · back to start · Loop;
+   - the master volume (`ArrangementMaster`, now in the header's right side) moves to the **bottom-right corner** of the workspace, where Live keeps the Main track's mixer.
+
+   These are the only position moves approved. The toolbar must not grow or wrap at 1280×720.
+
+**Order:** after SABA-B-8 CALM-3 and SABA-B-7, before the next PERF task.
+
+| Order | Task | Scope | Rounds |
+|---|---|---|---|
+| 1 | SABA-B-11a | Tempo from the product BPM; musical default grid; seconds when there is no BPM; the bars ruler becomes interactive | ~2 |
+| 2 | SABA-B-11b | Zoom-adaptive grid as in Live 6.10; closes ABL-R-8. Live's keys (Ctrl/Cmd+1/2/3/4/5) are the reference; B maps our current G and 1/2/3 keys onto them, or lists each difference as a deviation | ~1.5 |
+| 3 | SABA-B-10a | A separate Insert Marker and playhead model. Space plays from the marker; Stop and Space start again from the marker; Shift+Space continues from the stop point; Home or a double Stop sends the marker to the start; Space with a time selection plays from its start; Ctrl/Cmd+Shift+Space moves the marker to the playhead | ~2 |
+| 4 | SABA-B-10b | The flashing marker (`motion-safe:` only) and the shortcut-sheet rows | ~1–1.5 |
+| 5 | SABA-B-9 | The centre transport group, the Stop button and master volume bottom-right | ~1.5 |
+| 6 | SABA-B-11c | Time selection on an empty lane background, no clamp to one clip, relative snap. Dispatch only after an `ableton-arrangement-expert` consult confirms whether Live keeps an off-grid clip's offset | ~2 |
+
+**Tests.** SABA-B-10a changes the Space contract that many tests pin (44 test files use Space or `togglePlayback`, plus the D-27 and paste tests). B lists every test that changes and why, in the task. A rewrites those tests to the new contract. A test whose only change is removing an assertion is a Medium bug.
+
+**Lessons.** B adds these four to `lessons.md` at the planning of SABA-B-11a. The file stays at 60 lines or fewer, so B merges or drops an old lesson in the same step and records which.
+- **L43:** a position frozen by the rules is a question for Saba, not a pass.
+- **L44:** a ⚖ deviation recorded by the planner is not a Saba decision. Every deliberate difference from Live is sent to Saba as a question once.
+- **L45:** build the reference's unit first. Here the musical grid came before the seconds grid in Live.
+- **L46:** a parked check (such as R49-T) gets a deadline round. When the deadline passes, it goes to Saba.
+
+**Closes:** R49-T and F1-ABSOLUTE-SNAP (by 11c), ABL-R-8 (by 11b), D-15 (replaced by 10a).
+
+**Reference first: tutorials too (Saba, 2026-10-28).** For every new user-visible feature, the reference section also lists recent Ableton tutorial videos (title, channel, date, URL, the relevant timestamp) found by WebSearch. The loop cannot open YouTube from Actions and does not try. Root reads the transcripts when needed. For each new user-visible feature, B writes the reference and the plan, then stops the dispatch with a short `AGREE-WITH-SABA` note in `loop/user-review/`. Root brings it to Saba. A builds only after root records Saba's answer in this file. Performance, bug-fix, refactor, test-only and RETRO rounds do not wait. **SABA-B-9/10/11 above are already agreed** and do not wait.
