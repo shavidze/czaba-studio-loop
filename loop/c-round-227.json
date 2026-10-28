@@ -1,0 +1,113 @@
+{
+ "taskStatus": "PASS",
+ "round": 227,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-28T14:01:34.1297331Z",
+  "round": 227,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R227-01",
+   "severity": "low",
+   "steps": [
+    "Fresh /studio-lab, Add 2 clips, click a clip title (clip selected, no time selection)",
+    "Zoom in with = (11 px/s at 1440)",
+    "Double-click the ruler"
+   ],
+   "expected": "The fit chip 'Double-click the ruler (no selection)' describes when a ruler double-click fits",
+   "actual": "With a selected clip (a selection, but no time selection) the ruler double-click still fits (11 -> 4.5 px/s at 1440, 9.1 -> 3.7 at 1280). Only a time selection switches it to Zoom to selection. '(no selection)' may make a user deselect the clip first; '(no time selection)' would be exact. Same as A's code-reviewer Low 2; B's D-29z276 wording. Copy only, goes to deferred_low_polish or CALM-2 copy pass.",
+   "evidence": "c-round-227/out/c227-{1440x900,1280x720}.json C-FIT-227 d0/d1 (clip selected) vs out/fitA-*.json (empty state)"
+  },
+  {
+   "id": "C-R227-02",
+   "severity": "low",
+   "steps": [
+    "Open docs/implementation/2026/quarter-IV/177-calm-1-shortcut-sheet.md",
+    "Read l.74 and l.109 and the changed-files list"
+   ],
+   "expected": "The doc's test lists include SC4 and the round-227 track-layout.test.tsx change",
+   "actual": "l.74 still lists 'shortcuts.test.ts (new): SC1–SC3', l.109 'SC1–SC3 და SS1–SS10'; the changed-files list omits track-layout.test.tsx. Outside round-227 grant #5 (only l.4 + two entries), so not A's fault; L26 holds (all cited ids exist). Same as A's code-reviewer Low 4.",
+   "evidence": "grep -n 'SC1–SC3' doc 177 -> l.74, l.109"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-227",
+  "C-UNIT-227",
+  "C-ROWS-227",
+  "C-FIT-227",
+  "C-WZ-227",
+  "C-SEARCH-227",
+  "C-WIDE-227",
+  "C-BBOX-227",
+  "C-SLOT-227",
+  "C-OPEN-227",
+  "C-LESSON-227",
+  "G227-3",
+  "LAB-SMOKE-227",
+  "AN-REVIEW-227"
+ ],
+ "gate": [
+  "full suite",
+  "build",
+  "lint",
+  "verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "notesForB": [
+  "A deviation D1 (row.children length 2 pins in track-layout case) is inside grant #1; it is a structure pin on the footer row wrapper: CALM-2/CALM-3 must include track-layout.test.tsx in L23 pre-check and covering set (A's own L8 note).",
+  "A code-reviewer Low 3 (select shows only 1x, accessible name 'Waveform Zoom' visible on hover) and Low 4 (doc 177 l.74/l.109 still say SC1-SC3; changed-files list omits track-layout) are not verified as bugs by C beyond reading; Low 4 confirmed by grep is for B.",
+  "C-BBOX-227: 1280 deltas also include video dropzone h+4, track-height/meter y +4..+7 (lane rows); identical to round 226 bbox-diff that B ruled under exception (d).",
+  "fit li is 64 px tall (2 chips on 2 lines) vs 42 px in round 226; each chip one line; observation only."
+ ],
+ "ableton": {
+  "status": "not applicable",
+  "reason": "no behaviour change; round-226 R1-R5 rows and deviations stand; no Live claim made about ruler double-click"
+ },
+ "fitMeasurements": {
+  "emptyRulerDbl": {
+   "1440": [
+    11,
+    4.5
+   ],
+   "1280": [
+    9.1,
+    3.7
+   ]
+  },
+  "overviewDbl": {
+   "1440": [
+    11,
+    4.5
+   ],
+   "1280": [
+    9.1,
+    3.7
+   ]
+  },
+  "timeSelectionRulerDbl": {
+   "1440": [
+    4.5,
+    35.5
+   ],
+   "1280": [
+    3.7,
+    24.2
+   ]
+  },
+  "clipSelectedRulerDbl": {
+   "1440": [
+    11,
+    4.5
+   ],
+   "1280": [
+    9.1,
+    3.7
+   ]
+  }
+ }
+}

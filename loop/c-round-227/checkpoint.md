@@ -1,0 +1,11 @@
+# C round 227 checkpoint
+- [x] C-SCOPE PASS (scope-start.txt, granted-hunks.diff) - hunks inside grants; A D1 extra asserts in same case
+- [x] C-UNIT PASS (unit.log 3 files 63 tests; className 0 in case; SC4, UC12 title only)
+- [ ] browser: rows/wide/search/wz/fit/open/slot (c227.cjs)
+- [ ] g227 guard+smoke, bbox
+- [ ] lesson, AN-REVIEW
+- [x] c227.cjs both vp: ROWS 43/43, WIDE, SEARCH, OPEN, WZ, FIT, SLOT PASS; note fit chip '(no selection)' but clip-selected ruler dblclick fits (Low copy)
+- [x] g227 guard+smoke PASS (g/g227.json); bbox PASS (equals 226)
+- [x] lesson, AN-REVIEW PASS
+- [x] c-round-227.md + c-round-227.json written (PASS, 2 Low)
+- [x] advisor: re-probed fit (a) true empty state (fitA.cjs) PASS; report updated

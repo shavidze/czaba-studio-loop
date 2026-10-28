@@ -1,0 +1,133 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-226/granted-start/app/lib/arrangement/__tests__/track-layout.test.tsx	2026-10-28 13:50:42.174581116 +0000
++++ app/lib/arrangement/__tests__/track-layout.test.tsx	2026-10-28 13:59:17.750533997 +0000
+@@ -1,4 +1,4 @@
+-import { act, fireEvent, render } from '@testing-library/react';
++import { act, fireEvent, render, within } from '@testing-library/react';
+ import { Profiler, type ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementDetailPanel } from '~/components/arrangement/ArrangementDetailPanel';
+@@ -14,6 +14,7 @@
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
++import { studioShortcutSheetStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -856,16 +857,20 @@
+       expect(line()).toBeNull();
+       expect(placeholder?.getAttribute('aria-hidden')).toBe('true');
+       expect(placeholder?.textContent).toBe(String.fromCharCode(160));
+-      expect(placeholder?.className.split(' ').sort()).toEqual(
+-        ['basis-full', 'tabular-nums', 'text-muted'].sort(),
+-      );
++      if (!placeholder) throw new Error('placeholder missing');
++      const row = placeholder.parentElement;
++      if (!row) throw new Error('footer row missing');
++      const shortcutButton = within(row).getByRole('button', {
++        name: studioShortcutSheetStrings.footerButtonLabel,
++      });
++      expect(shortcutButton.parentElement).toBe(row);
++      expect(row.children).toHaveLength(2);
+       act(() => live(api).selectClip('music-1'));
+       const selected = line();
+       expect(selected).not.toBeNull();
+       expect(reserve()).toBeNull();
+-      expect(selected?.className.split(' ')).toEqual(
+-        expect.arrayContaining(['basis-full', 'truncate', 'tabular-nums', 'text-muted']),
+-      );
++      expect(selected?.parentElement).toBe(row);
++      expect(row.children).toHaveLength(2);
+       expect(selected?.textContent).toBe(
+         'Clip: Song · start 00:02.000 · length 00:08.000 · source offset 00:01.000',
+       );
+@@ -874,6 +879,7 @@
+       act(() => live(api).selectClip(null));
+       expect(line()).toBeNull();
+       expect(reserve()?.getAttribute('data-testid')).toBe('arrangement-selected-clip-reserve');
++      expect(reserve()?.parentElement).toBe(row);
+     });
+ 
+     it('keeps the capped panel height when the first manual lane change turns auto-fit off, through resize and reopen (C-R11-03)', async () => {
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-226/granted-start/app/lib/arrangement/shortcuts.ts	2026-10-28 13:50:42.174581116 +0000
++++ app/lib/arrangement/shortcuts.ts	2026-10-28 13:54:56.190140660 +0000
+@@ -90,13 +90,13 @@
+       {
+         id: 'fit',
+         action: 'Fit the whole project',
+-        keys: ['Double-click the ruler or the overview'],
++        keys: ['Double-click the overview', 'Double-click the ruler (no selection)'],
+       },
+       { id: 'overview-scroll', action: 'Overview: scroll 5 s', keys: ['← / → (overview focused)'] },
+       {
+         id: 'waveform-zoom',
+         action: 'Waveform zoom (view only, the sound does not change)',
+-        keys: ['1× button'],
++        keys: ['Waveform Zoom menu'],
+       },
+     ],
+   },
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-226/granted-start/app/lib/arrangement/__tests__/shortcuts.test.ts	2026-10-28 13:50:42.174465656 +0000
++++ app/lib/arrangement/__tests__/shortcuts.test.ts	2026-10-28 13:53:42.301996824 +0000
+@@ -136,4 +136,19 @@
+       expect(group.rows.length).toBeGreaterThan(0);
+     }
+   });
++
++  it('SC4: the fit and waveform-zoom keys name the real controls, and no key names a button', () => {
++    expect(findStudioShortcut('fit')?.keys).toEqual([
++      'Double-click the overview',
++      'Double-click the ruler (no selection)',
++    ]);
++    expect(findStudioShortcut('waveform-zoom')?.keys).toEqual(['Waveform Zoom menu']);
++    for (const group of STUDIO_SHORTCUT_GROUPS) {
++      for (const row of group.rows) {
++        for (const key of row.keys) {
++          expect(/button/i.test(key), `${row.id}: ${key}`).toBe(false);
++        }
++      }
++    }
++  });
+ });
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-226/granted-start/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-10-28 13:50:42.174581116 +0000
++++ app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-10-28 13:53:42.301707588 +0000
+@@ -983,7 +983,7 @@
+     expect(live(api).isPlaying).toBe(false);
+   });
+ 
+-  it('UC12 the shortcut hint lists the group keys and track fold stays independent', async () => {
++  it('UC12 the shortcut sheet lists the group keys and track fold stays independent', async () => {
+     const { view } = await mountGroupsWorkspace();
+     expect(findStudioShortcut('group')?.keys).toEqual(
+       expect.arrayContaining(['Ctrl+G', 'Ctrl+Shift+G']),
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-226/granted-start/docs/implementation/2026/quarter-IV/177-calm-1-shortcut-sheet.md	2026-10-28 13:50:42.174954797 +0000
++++ docs/implementation/2026/quarter-IV/177-calm-1-shortcut-sheet.md	2026-10-28 13:53:57.561161453 +0000
+@@ -1,7 +1,7 @@
+ # Calm Studio — `?` shortcut sheet და მუდმივი shortcut ხაზის მოხსნა (SABA-B-8 CALM-1a)
+ 
+ **თარიღი:** 2026-10-28
+-**სტატუსი:** In Progress (stage 1 of 2; C round 226 PASS)
++**სტატუსი:** In Progress (stage 1 of 2; C round 227 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -90,6 +90,19 @@
+   **Solution:** sheet ღიაობისას repeat `?` keydown-ს `preventDefault`-ით ბლოკავს (SS3).
+ - **Problem:** TH10 (studio-theme-obsidian) კრძალავს `font-semibold`-ს.
+   **Solution:** სათაური `font-medium`-ია.
++- **Problem (GATE226-B1):** footer-ის slot-ები ახალ row wrapper-ში გადავიდა და `basis-full` wrapper-ზე
++  აღმოჩნდა. `track-layout.test.tsx`-ის შემთხვევა „reserves the selected-clip row with an aria-hidden
++  placeholder and renders the real line as one truncated full-width row (C-R11-02, C-R15-02)“ კლასების
++  ზუსტ სიას ამოწმებდა, ამიტომ root gate ჩავარდა. Browser-ში ქცევა სწორი იყო.
++  **Solution:** class pin-ები ამოღებულია. იმავე შემთხვევაში სტრუქტურის assertion-ებია: placeholder-ის
++  მშობელი row შეიცავს „Keyboard shortcuts (?)“ ღილაკს, და მონიშნული clip-ის ხაზი და placeholder
++  მონიშვნისა და მოხსნის შემდეგ იმავე row-ში რჩება. Geometry browser-ში მოწმდება.
++- **Problem (C-R226-02, C-R226-03):** `fit` სტრიქონი ამბობდა, რომ ruler-ზე ორმაგი დაწკაპუნება ყოველთვის
++  მთელ პროექტს ატევს, თუმცა time selection-ისას ის selection-ზე აზუმავს. `waveform-zoom` სტრიქონი
++  არარსებულ „1× button“-ს ასახელებდა, რეალური control კი `<select>`-ია.
++  **Solution:** `fit`-ის keys: „Double-click the overview“ და „Double-click the ruler (no selection)“.
++  `waveform-zoom`-ის key: „Waveform Zoom menu“. SC4 ამოწმებს ორივეს და იმას, რომ არცერთი key-ში
++  სიტყვა „button“ არ წერია.
+ 
+ ## ტესტირება
+ 
