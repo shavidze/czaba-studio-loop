@@ -1,0 +1,475 @@
+diff -ruN b231-orig/app/components/arrangement/ArrangementDetailPanel.tsx b231/app/components/arrangement/ArrangementDetailPanel.tsx
+--- b231-orig/app/components/arrangement/ArrangementDetailPanel.tsx	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/components/arrangement/ArrangementDetailPanel.tsx	2026-10-28 16:47:29.514508963 +0000
+@@ -57,7 +57,6 @@
+ import { STUDIO_SCROLLBAR_CLASS } from './studio-scrollbar';
+ 
+ const DETAIL_PANEL_TITLE = studioDetailStrings.panelTitle;
+-const DETAIL_NOTHING_SELECTED = studioDetailStrings.nothingSelected;
+ const DETAIL_NO_SELECTION_HINT = studioDetailStrings.noSelectionHint;
+ const DETAIL_GROUP_NOTE = studioDetailStrings.multiClipNote;
+ const DETAIL_VIDEO_PLACEHOLDER = studioDetailStrings.videoPlaceholder;
+@@ -853,12 +852,20 @@
+   const isGroupState = !clip && group !== null;
+   const isNoneState = !clip && group === null;
+   const rangeReasonNode = inputsReason ? (
+-    <p id={reasonId} className="text-dim" data-testid="arrangement-detail-reason">
++    <p
++      id={reasonId}
++      className={cn('text-dim', isNoneState && 'sr-only')}
++      data-testid="arrangement-detail-reason"
++    >
+       {inputsReason}
+     </p>
+   ) : null;
+   const clipGainReasonNode = clipGainReason ? (
+-    <p id={clipGainReasonId} className="text-dim" data-testid="arrangement-detail-clip-gain-reason">
++    <p
++      id={clipGainReasonId}
++      className={cn('text-dim', isNoneState && 'sr-only')}
++      data-testid="arrangement-detail-clip-gain-reason"
++    >
+       {clipGainReason}
+     </p>
+   ) : null;
+@@ -1236,7 +1243,7 @@
+     ? selection.title
+     : group
+       ? studioDetailStrings.clipCount(group.count)
+-      : DETAIL_NOTHING_SELECTED;
++      : '';
+ 
+   return (
+     <section
+diff -ruN b231-orig/app/components/arrangement/ArrangementLane.tsx b231/app/components/arrangement/ArrangementLane.tsx
+--- b231-orig/app/components/arrangement/ArrangementLane.tsx	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/components/arrangement/ArrangementLane.tsx	2026-10-28 16:47:29.515263840 +0000
+@@ -660,7 +660,7 @@
+       type="button"
+       aria-pressed={track.solo}
+       aria-label={studioLaneStrings.soloLabel(mixLabel)}
+-      title={isVideo ? studioLaneStrings.soloLabel(mixLabel) : studioLaneStrings.soloTitle}
++      title={isVideo ? studioLaneStrings.videoSoloTitle : studioLaneStrings.soloTitle}
+       onClick={(event) => toggleTrackSolo(track.id, event.ctrlKey || event.metaKey)}
+       className={cn(
+         'h-6 w-6 shrink-0 rounded-md border border-transparent bg-foreground/5 text-xs font-medium motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12',
+@@ -885,6 +885,19 @@
+             {`${studioLaneStrings.noVideo} — ${studioLaneStrings.videoEmptyHint}`}
+           </p>
+         ) : null}
++        {!isVideo &&
++        isActive &&
++        density !== 'folded' &&
++        arrangement.clips.length === 0 &&
++        !isFileDragOver &&
++        libraryGhost === null ? (
++          <p
++            className="pointer-events-none sticky left-56 flex h-full max-w-md items-center px-3 text-sm text-muted"
++            data-testid="arrangement-lane-empty-hint"
++          >
++            {studioLaneStrings.audioEmptyHint}
++          </p>
++        ) : null}
+         {isFileDragOver ? (
+           <p
+             className="pointer-events-none sticky left-56 z-30 flex h-full max-w-md items-center px-3 text-sm font-medium text-foreground"
+diff -ruN b231-orig/app/components/arrangement/ArrangementLibrary.tsx b231/app/components/arrangement/ArrangementLibrary.tsx
+--- b231-orig/app/components/arrangement/ArrangementLibrary.tsx	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/components/arrangement/ArrangementLibrary.tsx	2026-10-28 16:47:54.034757034 +0000
+@@ -11,6 +11,7 @@
+   useMemo,
+   useRef,
+   useState,
++  useSyncExternalStore,
+ } from 'react';
+ import {
+   formatArrangementTime,
+@@ -27,6 +28,11 @@
+   moveLibrarySelection,
+   resolveLibraryNode,
+ } from '~/lib/arrangement/library';
++import {
++  dismissLibraryNotice,
++  readLibraryNoticeDismissed,
++  subscribeLibraryNoticeDismissal,
++} from '~/lib/arrangement/library-notice';
+ import { studioLibraryPanelStrings, studioSourceLoadStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
+ import type { WorkspaceSource } from '~/types/arrangement';
+@@ -183,6 +189,11 @@
+   const libraryExpandButtonRef = useRef<HTMLButtonElement>(null);
+   const libraryCollapseButtonRef = useRef<HTMLButtonElement>(null);
+   const librarySearchInputRef = useRef<HTMLInputElement>(null);
++  const isNoticeDismissed = useSyncExternalStore(
++    subscribeLibraryNoticeDismissal,
++    () => readLibraryNoticeDismissed(collection.id),
++    () => false,
++  );
+   const libraryToggleFocusRef = useRef<'expand' | 'collapse' | null>(null);
+   const node = useMemo(() => resolveLibraryNode(tree, nodeId), [tree, nodeId]);
+   const results = useMemo(
+@@ -493,10 +504,28 @@
+                 <span className="text-foreground">{activeNodeLabel}</span>
+               </p>
+             ) : null}
+-            {collection.notice ? (
+-              <p className="text-xs text-muted" data-testid="arrangement-library-notice">
+-                {collection.notice}
+-              </p>
++            {collection.notice && !isNoticeDismissed ? (
++              <div className="flex items-start gap-1">
++                <p
++                  className="min-w-0 flex-1 text-xs text-muted"
++                  data-testid="arrangement-library-notice"
++                >
++                  {collection.notice}
++                </p>
++                <button
++                  type="button"
++                  onClick={() => {
++                    dismissLibraryNotice(collection.id);
++                    librarySearchInputRef.current?.focus();
++                  }}
++                  aria-label={studioLibraryPanelStrings.dismissNotice}
++                  title={studioLibraryPanelStrings.dismissNotice}
++                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted hover:text-foreground"
++                  data-testid="arrangement-library-notice-dismiss"
++                >
++                  <X className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++                </button>
++              </div>
+             ) : null}
+           </div>
+           <div ref={bodyRef} className="flex min-h-0 flex-1">
+diff -ruN b231-orig/app/data/__tests__/studio-lab-demo.test.ts b231/app/data/__tests__/studio-lab-demo.test.ts
+--- b231-orig/app/data/__tests__/studio-lab-demo.test.ts	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/data/__tests__/studio-lab-demo.test.ts	2026-10-28 16:58:15.854719459 +0000
+@@ -239,7 +239,7 @@
+       'Demo collection · CZABA public previews + synthetic sounds',
+     );
+     expect(studioLabDemoCollection.notice).toBe(
+-      'The stems are a synthetic demo — not CZABA catalogue stems and not parts extracted from a mix.',
++      'Synthetic demo stems — not CZABA catalogue audio.',
+     );
+     const collectionLabels = new Set(
+       studioLabDemoCollection.sources.map((source) => source.collectionLabel),
+diff -ruN b231-orig/app/data/studio-lab-demo.ts b231/app/data/studio-lab-demo.ts
+--- b231-orig/app/data/studio-lab-demo.ts	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/data/studio-lab-demo.ts	2026-10-28 16:47:29.512510655 +0000
+@@ -151,8 +151,7 @@
+   id: 'studio-lab-demo',
+   label: DEMO_COLLECTION_LABEL,
+   origin: 'demo',
+-  notice:
+-    'The stems are a synthetic demo — not CZABA catalogue stems and not parts extracted from a mix.',
++  notice: 'Synthetic demo stems — not CZABA catalogue audio.',
+   sources: studioLabDemoSources,
+   loadSource: loadDemoSource,
+ };
+diff -ruN b231-orig/app/lib/arrangement/__tests__/collection-load-status.test.tsx b231/app/lib/arrangement/__tests__/collection-load-status.test.tsx
+--- b231-orig/app/lib/arrangement/__tests__/collection-load-status.test.tsx	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/lib/arrangement/__tests__/collection-load-status.test.tsx	2026-10-28 16:58:16.272165185 +0000
+@@ -48,13 +48,14 @@
+ const encodeMock = vi.fn<ArrangementMp3Encoder['encode']>();
+ 
+ const DEMO_LOADING = 'Loading the demo collection…';
+-const DEMO_READY = 'Demo collection ready. Choose a track and add a sound (Enter or Add).';
++const DEMO_READY =
++  'Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.';
+ const DEMO_EMPTY = 'The demo collection has no sounds — the library is empty.';
+ const DEMO_ONE_FAILED =
+   '1 sound in the demo collection failed to load — details are in the library.';
+ const PURCHASED_LOADING = 'Loading the purchased collection…';
+ const PURCHASED_READY =
+-  'Purchased collection ready. Choose a track and add a sound (Enter or Add).';
++  'Purchased collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.';
+ const PURCHASED_EMPTY = 'The purchased collection has no sounds — the library is empty.';
+ const NOTHING_TO_PLAY = studioPlaybackStrings.nothingToPlay;
+ const ROW_LOADING = 'Loading…';
+diff -ruN b231-orig/app/lib/arrangement/__tests__/collection.test.ts b231/app/lib/arrangement/__tests__/collection.test.ts
+--- b231-orig/app/lib/arrangement/__tests__/collection.test.ts	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/lib/arrangement/__tests__/collection.test.ts	2026-10-28 16:59:49.390732290 +0000
+@@ -374,7 +374,8 @@
+       heading: 'CZABA Studio Lab',
+       badge: 'Demo collection — no sign-in required',
+       loading: 'Loading the demo collection…',
+-      ready: 'Demo collection ready. Choose a track and add a sound (Enter or Add).',
++      ready:
++        'Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.',
+       empty: 'The demo collection has no sounds — the library is empty.',
+       failed: '2 sounds in the demo collection failed to load — details are in the library.',
+       fileStem: 'czaba-studio-lab',
+@@ -387,7 +388,8 @@
+       heading: 'CZABA Studio',
+       badge: 'Purchased collection',
+       loading: 'Loading the purchased collection…',
+-      ready: 'Purchased collection ready. Choose a track and add a sound (Enter or Add).',
++      ready:
++        'Purchased collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.',
+       empty: 'The purchased collection has no sounds — the library is empty.',
+       failed: '2 sounds in the purchased collection failed to load — details are in the library.',
+       fileStem: 'czaba-studio',
+@@ -396,6 +398,6 @@
+       '1 sound in the purchased collection failed to load — details are in the library.',
+     );
+     expect(demo.loading.codePointAt(demo.loading.length - 1)).toBe(0x2026);
+-    expect(demo.ready).toContain('(Enter or Add)');
++    expect(demo.ready).toContain('press Enter to add it. Press ? for shortcuts.');
+   });
+ });
+diff -ruN b231-orig/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx b231/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx
+--- b231-orig/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx	2026-10-28 16:58:15.847349172 +0000
+@@ -194,9 +194,7 @@
+     const { view, panel, separator, toggle } = await mountStringsWorkspace();
+     expect(panel.getAttribute('aria-label')).toBe('Clip details');
+     expect(panel.querySelector('h2')?.textContent).toBe('Clip details');
+-    expect(view.getByTestId('arrangement-detail-header-label').textContent).toBe(
+-      'Nothing selected',
+-    );
++    expect(view.getByTestId('arrangement-detail-header-label').textContent).toBe('');
+     expect(separator.getAttribute('aria-label')).toBe('Details height');
+     const height = separator.getAttribute('aria-valuenow');
+     expect(height).toBeTruthy();
+@@ -206,7 +204,7 @@
+       expect(toggle.textContent).toBe('Collapse');
+       expect(separator.getAttribute('aria-valuetext')).toBe(`${height} px`);
+       expect(view.getByTestId('arrangement-detail-hint').textContent).toBe(
+-        'Select a clip to see its details',
++        'Select a clip to edit its time selection and Clip Gain.',
+       );
+     };
+     const assertCollapsed = () => {
+diff -ruN b231-orig/app/lib/arrangement/__tests__/detail-panel.test.tsx b231/app/lib/arrangement/__tests__/detail-panel.test.tsx
+--- b231-orig/app/lib/arrangement/__tests__/detail-panel.test.tsx	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/lib/arrangement/__tests__/detail-panel.test.tsx	2026-10-28 16:58:15.825929593 +0000
+@@ -397,7 +397,7 @@
+     fireEvent.click(toggle);
+     let inputs = rangeInputs(view);
+     expect(view.getByTestId('arrangement-detail-hint').textContent).toBe(
+-      'Select a clip to see its details',
++      'Select a clip to edit its time selection and Clip Gain.',
+     );
+     expect(inputs.start.disabled).toBe(true);
+     expect(inputs.end.disabled).toBe(true);
+diff -ruN b231-orig/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx b231/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
+--- b231-orig/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx	2026-10-28 16:59:49.391106424 +0000
+@@ -131,7 +131,8 @@
+ const DEMO_BADGE = 'Demo collection — no sign-in required';
+ const DEMO_ONE_FAILED =
+   '1 sound in the demo collection failed to load — details are in the library.';
+-const DEMO_READY = 'Demo collection ready. Choose a track and add a sound (Enter or Add).';
++const DEMO_READY =
++  'Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.';
+ 
+ function rowArrangement(): Arrangement {
+   return createArrangement([
+@@ -356,7 +357,7 @@
+     expect(readyStatus).toBe(DEMO_READY);
+     const addText = ready.view.getByRole('button', { name: 'Add' }).textContent ?? '';
+     expect(addText).toBe('Add');
+-    expect(readyStatus).toContain('(Enter or Add)');
++    expect(readyStatus).toContain('press Enter to add it. Press ? for shortcuts.');
+     ready.view.unmount();
+   });
+ 
+diff -ruN b231-orig/app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx b231/app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx
+--- b231-orig/app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx	2026-10-28 16:58:16.312165181 +0000
+@@ -32,12 +32,13 @@
+ const PURCHASED_BADGE = 'Purchased collection';
+ const PURCHASED_LOADING = 'Loading the purchased collection…';
+ const PURCHASED_READY =
+-  'Purchased collection ready. Choose a track and add a sound (Enter or Add).';
++  'Purchased collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.';
+ const PURCHASED_ONE_FAILED =
+   '1 sound in the purchased collection failed to load — details are in the library.';
+ const DEMO_HEADING = 'CZABA Studio Lab · Workspace';
+ const DEMO_BADGE = 'Demo collection — no sign-in required';
+-const DEMO_READY = 'Demo collection ready. Choose a track and add a sound (Enter or Add).';
++const DEMO_READY =
++  'Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.';
+ 
+ const PURCHASED_STEMS: AudioStem[] = [
+   {
+diff -ruN b231-orig/app/lib/arrangement/__tests__/strings.test.ts b231/app/lib/arrangement/__tests__/strings.test.ts
+--- b231-orig/app/lib/arrangement/__tests__/strings.test.ts	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/lib/arrangement/__tests__/strings.test.ts	2026-10-28 16:59:49.390288927 +0000
+@@ -1929,6 +1929,7 @@
+ const EXPECTED_LANE_PLAIN_STRINGS: Record<string, string> = {
+   videoMixLabel: 'Original video sound',
+   videoMuteTitle: 'Mute — Original video sound',
++  videoSoloTitle: 'Solo — Original video sound (Ctrl/Cmd+click = add to solo)',
+   videoImportLabel: 'Your own video',
+   foldTitle: 'Fold / unfold',
+   soloTitle: 'Solo (Ctrl/Cmd+click = add to solo)',
+@@ -1938,6 +1939,7 @@
+   videoOriginalSound: 'Original sound',
+   noVideo: 'No video',
+   videoEmptyHint: 'use “Your own video” or drop a file here',
++  audioEmptyHint: 'Drag a sound here, or press Enter to add it',
+   dropVideoHere: 'Drop the video here',
+   videoNotOnAudioTrack: 'Video is not added here — drop it on the video track',
+   ghostAudioOnVideoTrack: 'Audio is not added to the video track',
+@@ -2148,8 +2150,7 @@
+ 
+ const EXPECTED_DETAIL_PLAIN_STRINGS: Record<string, string> = {
+   panelTitle: 'Clip details',
+-  nothingSelected: 'Nothing selected',
+-  noSelectionHint: 'Select a clip to see its details',
++  noSelectionHint: 'Select a clip to edit its time selection and Clip Gain.',
+   multiClipNote: 'The selected clips move together · Delete deletes them · Ctrl+D duplicates them',
+   videoPlaceholder: 'Video clip · no waveform',
+   rangeMultiReason: 'A time selection is set on one clip — select only one',
+@@ -2210,7 +2211,6 @@
+         'multiClipNote',
+         'noSelectionHint',
+         'noneReason',
+-        'nothingSelected',
+         'panelTitle',
+         'pendingFull',
+         'pendingLabel',
+@@ -2428,6 +2428,7 @@
+   searchPlaceholder: 'Search: name, type, collection…',
+   searchLabel: 'Search the library',
+   clearSearch: 'Clear search',
++  dismissNotice: 'Dismiss this notice',
+   filterPrefix: 'Filter: ',
+   sidebarLabel: 'Library sidebar',
+   all: 'All',
+@@ -2456,6 +2457,7 @@
+         'all',
+         'clearSearch',
+         'collapse',
++        'dismissNotice',
+         'expand',
+         'filterPrefix',
+         'fold',
+@@ -2475,7 +2477,7 @@
+         'widthLabel',
+       ].sort(),
+     );
+-    expect(Object.keys(EXPECTED_LIBRARY_PANEL_STRINGS)).toHaveLength(22);
++    expect(Object.keys(EXPECTED_LIBRARY_PANEL_STRINGS)).toHaveLength(23);
+     for (const [key, value] of Object.entries(studioLibraryPanelStrings)) {
+       expect(value, key).toBe(EXPECTED_LIBRARY_PANEL_STRINGS[key]);
+       expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
+diff -ruN b231-orig/app/lib/arrangement/collection.ts b231/app/lib/arrangement/collection.ts
+--- b231-orig/app/lib/arrangement/collection.ts	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/lib/arrangement/collection.ts	2026-10-28 16:47:54.045757018 +0000
+@@ -1,6 +1,6 @@
+ import type { WorkspaceCollection, WorkspaceOrigin, WorkspaceSource } from '~/types/arrangement';
+ import type { AudioStem } from '~/types/audio';
+-import { studioLibraryPanelStrings, studioSourceLoadStrings } from './strings';
++import { studioSourceLoadStrings } from './strings';
+ 
+ export interface WorkspaceCollectionCopy {
+   heading: string;
+@@ -16,7 +16,8 @@
+   heading: 'CZABA Studio Lab',
+   badge: 'Demo collection — no sign-in required',
+   loading: 'Loading the demo collection…',
+-  ready: `Demo collection ready. Choose a track and add a sound (Enter or ${studioLibraryPanelStrings.add}).`,
++  ready:
++    'Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.',
+   empty: 'The demo collection has no sounds — the library is empty.',
+   failed: (count) =>
+     count === 1
+@@ -29,7 +30,8 @@
+   heading: 'CZABA Studio',
+   badge: 'Purchased collection',
+   loading: 'Loading the purchased collection…',
+-  ready: `Purchased collection ready. Choose a track and add a sound (Enter or ${studioLibraryPanelStrings.add}).`,
++  ready:
++    'Purchased collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.',
+   empty: 'The purchased collection has no sounds — the library is empty.',
+   failed: (count) =>
+     count === 1
+diff -ruN b231-orig/app/lib/arrangement/library-notice.ts b231/app/lib/arrangement/library-notice.ts
+--- b231-orig/app/lib/arrangement/library-notice.ts	1970-01-01 00:00:00.000000000 +0000
++++ b231/app/lib/arrangement/library-notice.ts	2026-10-28 16:47:29.516746726 +0000
+@@ -0,0 +1,46 @@
++const LIBRARY_NOTICE_STORAGE_PREFIX = 'czaba-studio-notice-dismissed:';
++
++const libraryNoticeListeners = new Set<() => void>();
++const libraryNoticeDismissedInMemory = new Set<string>();
++
++export function libraryNoticeStorageKey(collectionId: string): string {
++  return `${LIBRARY_NOTICE_STORAGE_PREFIX}${collectionId}`;
++}
++
++export function readLibraryNoticeDismissed(collectionId: string): boolean {
++  if (libraryNoticeDismissedInMemory.has(collectionId)) {
++    return true;
++  }
++  if (typeof window === 'undefined') {
++    return false;
++  }
++  try {
++    return window.localStorage.getItem(libraryNoticeStorageKey(collectionId)) === '1';
++  } catch {
++    return false;
++  }
++}
++
++function writeLibraryNoticeDismissed(collectionId: string): boolean {
++  try {
++    window.localStorage.setItem(libraryNoticeStorageKey(collectionId), '1');
++    return true;
++  } catch {
++    return false;
++  }
++}
++
++export function dismissLibraryNotice(collectionId: string): void {
++  libraryNoticeDismissedInMemory.add(collectionId);
++  writeLibraryNoticeDismissed(collectionId);
++  for (const listener of libraryNoticeListeners) {
++    listener();
++  }
++}
++
++export function subscribeLibraryNoticeDismissal(listener: () => void): () => void {
++  libraryNoticeListeners.add(listener);
++  return () => {
++    libraryNoticeListeners.delete(listener);
++  };
++}
+diff -ruN b231-orig/app/lib/arrangement/strings.ts b231/app/lib/arrangement/strings.ts
+--- b231-orig/app/lib/arrangement/strings.ts	2026-10-28 16:02:45.000000000 +0000
++++ b231/app/lib/arrangement/strings.ts	2026-10-28 16:47:29.511490352 +0000
+@@ -652,6 +652,7 @@
+ export const studioLaneStrings = {
+   videoMixLabel: STUDIO_VIDEO_MIX_LABEL,
+   videoMuteTitle: `Mute — ${STUDIO_VIDEO_MIX_LABEL}`,
++  videoSoloTitle: `Solo — ${STUDIO_VIDEO_MIX_LABEL} (Ctrl/Cmd+click = add to solo)`,
+   videoImportLabel: STUDIO_VIDEO_IMPORT_LABEL,
+   foldTitle: 'Fold / unfold',
+   soloLabel: (name: string): string => `Solo — ${name} (Ctrl/Cmd+click = add to solo)`,
+@@ -665,6 +666,7 @@
+   videoOriginalSound: 'Original sound',
+   noVideo: 'No video',
+   videoEmptyHint: `use “${STUDIO_VIDEO_IMPORT_LABEL}” or drop a file here`,
++  audioEmptyHint: 'Drag a sound here, or press Enter to add it',
+   dropVideoHere: 'Drop the video here',
+   videoNotOnAudioTrack: 'Video is not added here — drop it on the video track',
+   ghostAudioOnVideoTrack: 'Audio is not added to the video track',
+@@ -713,8 +715,7 @@
+ 
+ export const studioDetailStrings = {
+   panelTitle: 'Clip details',
+-  nothingSelected: 'Nothing selected',
+-  noSelectionHint: 'Select a clip to see its details',
++  noSelectionHint: 'Select a clip to edit its time selection and Clip Gain.',
+   multiClipNote: 'The selected clips move together · Delete deletes them · Ctrl+D duplicates them',
+   videoPlaceholder: 'Video clip · no waveform',
+   rangeMultiReason: 'A time selection is set on one clip — select only one',
+@@ -775,6 +776,7 @@
+   searchPlaceholder: 'Search: name, type, collection…',
+   searchLabel: 'Search the library',
+   clearSearch: 'Clear search',
++  dismissNotice: 'Dismiss this notice',
+   filterPrefix: 'Filter: ',
+   sidebarLabel: 'Library sidebar',
+   all: 'All',

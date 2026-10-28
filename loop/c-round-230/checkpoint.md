@@ -1,0 +1,11 @@
+# C — Round 230 (RETRO verification) — IN PROGRESS checkpoint
+- SOURCE-SCOPE start (16:28:58Z): HEAD 5da0f50, status empty, frozen rc 0 (1087 entries). Evidence c-round-230/source-scope-start.txt
+- :5199 mock not running (curl 000) → fake Bearer expected 500.
+- G230-3 PASS both viewports (out2/g230.json; out/ 1440 attempt timed out on cold Add-ready wait = env-invalid, 1280 in out/ also PASS). 401 / 500 / no token; /studio/middle-east Sign in required, 0 audio[src]; lab demo badge, auth_user null.
+- STUDIO-SMOKE-230 PASS both viewports x2 runs: fade-in 0→3.000 by real mouse drag; Undo title "Undo: Fade In"; Ctrl+Z → 0.000 and title back to Add; WAV 1–2 s RMS -27.52 dB faded vs -21.54 undone; CALM-2a strips empty, Loop title exact; 0 page errors.
+- RT-SCREEN probe output identical to probe-active-track.txt.
+- RT-NUM: all 11 scripts re-run on copies in c-round-230/rt/ (outputs to rt/); every output byte-identical to B's except collect.txt/rounds json round-229 b_cost (b-round-229-result.json = round-230 planning appeared after B ran; excluded by design; cost.txt identical). All §1/§2/§5/§6/§9 numbers match. 12 review.md files.
+- RT-CAUSE: all quoted lines open and say what retro claims; SABA-B-7 grep 0/0.
+- RT-IDS: SYS-5 closes ids exist & are about disabled reasons; queue SABA-B-8 -> SABA-B-7 -> STUDIO-PERFORMANCE; doc170 l.4 exact; c-221 PASS; RT-FIX-216 in c-216 passed.
+- RT-LESSONS candidates: L26 amended includes TEMPLATE '## Prompt' heading (0/178 docs have it) -> unsatisfiable literally (A's feedback reproduces). lessons.md lost its final newline (NR 52, wc -l 51; L38 byte diff only by EOF newline).
+- RT-SCREEN: 10 candidates visible in PNGs; SR-230-9 '~0:22' true at 1440 only (1280 ~0:18). SR-230-8 (hide '· active') vs calm-studio-review.md l.46 'keep both' and §4 'must not remove: Active track indication'; SR-230-1 vs l.44 'keep'; SR-230-7 vs l.46 'reword library line'; SR-230-4 '40 px/s' vs l.50 'keep (Low, maybe hover)'. Not cited in screen review.

@@ -1,0 +1,65 @@
+{
+  "round": 230,
+  "taskStatus": "FAIL",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-28T16:28:40.3938994Z",
+    "round": 230,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R230-01",
+      "severity": "low",
+      "steps": [
+        "Read lessons.md L26 (amended at round-230 planning): doc '## ' headings must contain every '## ' heading of docs/implementation/TEMPLATE.md, in order",
+        "cd store; grep -n '^## ' docs/implementation/TEMPLATE.md  -> 8 headings, first '## Prompt — როგორ ვწეროთ Implementation Doc' (l.3)",
+        "grep -rl '^## Prompt' docs/implementation | grep -v TEMPLATE | wc -l  -> 0 (of 178 docs)"
+      ],
+      "expected": "A lesson that compliant docs can satisfy and that C can check mechanically (RT-LESSONS: concrete and checkable).",
+      "actual": "Applied literally, L26 fails every implementation doc, because none contains the TEMPLATE's authoring-instructions heading '## Prompt'. Same as A's lesson feedback in a-round-230.md. Proposed fix: compare against the TEMPLATE headings after the '## Prompt' section (კონტექსტი … TODO / შემდეგი ნაბიჯები) as an in-order subsequence; extra headings allowed.",
+      "evidence": "c-round-230.md §RT-LESSONS; lessons.md l.36; store/docs/implementation/TEMPLATE.md l.3"
+    }
+  ],
+  "passed": [
+    "SOURCE-SCOPE",
+    "RT-NUM",
+    "RT-CAUSE",
+    "RT-IDS",
+    "RT-SABA",
+    "RT-SCREEN",
+    "G230-3",
+    "STUDIO-SMOKE-230"
+  ],
+  "failed": [
+    "RT-LESSONS (C-R230-01: amended L26 requires TEMPLATE's '## Prompt' heading; 0/178 docs have it)"
+  ],
+  "blocked": [],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "rows": {
+    "SOURCE-SCOPE": "PASS start+end: HEAD 5da0f50, empty status, frozen rc 0 (c-round-230/source-scope-{start,end}.txt)",
+    "RT-NUM": "PASS: 11 scripts re-run on copies (c-round-230/rt/), outputs byte-identical except round-229 b_cost in collect (round-230 planning result file written after B ran; excluded by design; cost.txt identical). update-backlog.py not run.",
+    "RT-CAUSE": "PASS: every quoted line/id opened and matches; inferences labelled. Info N1: GATE217-S4 is doc 162 l.4 text (dropped note), not 'not status'.",
+    "RT-IDS": "PASS: SYS-5 closes C-R229-01(+alias GATE229-S1), ROOT-R66-L3, C-R130-ADD-DISABLED-NO-REASON, all open and in class; queue SABA-B-8 -> SABA-B-7-ENVELOPE-DB -> STUDIO-PERFORMANCE; scope matches policy; doc 170 l.4 exact; c-221 PASS; RT-FIX-216 in c-216 passed.",
+    "RT-LESSONS": "FAIL: C-R230-01 (L26). Otherwise <=60 lines (52 records, wc -l 51: no final newline, N2), three parts, citations exist, diff limited to header/L23/L26/L28/L29/L41/L42/blank lines (+L38 EOF newline byte only). L28 workable.",
+    "RT-SABA": "PASS: §12 and screen review phrased as proposals; no rule file changed; L39/L41/L42 present; tasks/round-226.md l.93 Why we missed it.",
+    "RT-SCREEN": "PASS: 10 candidates visible in cited PNGs; backlog 10 awaiting_user; probe output byte-identical. Notes N3 (SR-230-9 ~0:22 true at 1440 only) and N4 (SR-230-1/-4/-7/-8 re-open calm-studio-review.md l.44/l.46/l.50/§4 keep verdicts without citing them).",
+    "G230-3": "PASS both viewports (out2/g230.json): lab 200 + demo badge + auth_user null; /studio/middle-east Sign in required, 0 audio[src]; token no header 401, fake Bearer 500 (no :5199 mock); no token issued. Run-1 1440 cold-load timeout env-invalid (out/).",
+    "STUDIO-SMOKE-230": "PASS both viewports x2: real-mouse fade-in 0 -> 3.000 s (live 1.500 mid-drag), one Undo entry 'Fade In', Ctrl+Z -> 0.000 and Undo back to Add; WAV 1-2 s RMS -27.52 dB faded vs -21.54 undone (24-bit/48k/stereo, 101.352 s = dialog); CALM-2a strips empty, Loop title exact; 0 page errors."
+  },
+  "notes": [
+    "N2: lessons.md missing final newline (restore with the L26 fix)",
+    "N3: SR-230-9 '~0:22' is ~0:18 at 1280x720",
+    "N4: screen-review-230 should disclose calm-studio-review.md prior verdicts for SR-230-1/-4/-7/-8 before Saba answers",
+    "N5: 1440 cold-start guard timeout in run 1, environment only"
+  ]
+}

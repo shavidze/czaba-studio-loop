@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T16:02:50.876Z)
+# Active loop summary (2026-10-28T16:40:05.110Z)
 
-- backlog.json 2092 KB -> active view 296 KB
-- status: G_ROOT_GATE round 229
-- servers: `{"checkedUtc":"2026-10-28T15:46:09.9529790Z","round":229,"attempt":1,"store":200}`
+- backlog.json 2109 KB -> active view 297 KB
+- status: G_ROOT_GATE round 230
+- servers: `{"checkedUtc":"2026-10-28T16:28:40.3938994Z","round":230,"attempt":1,"store":200}`
 - last publication: 5da0f506a8d09d851cf34fe7d663b1c4a223b2eb (rounds 229-229)
-- last root gate: round 229 published - commit 5da0f506a8d09d851cf34fe7d663b1c4a223b2eb pushed
+- last root gate: round 230 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -544,6 +544,10 @@
 - GATE228-S4-ARIA-LOOKUPS / info / signal (D-29z288): PERF input only, not scheduled / 7 studioShortcutAria + 2 title lookups per transport render (linear over ~45 rows); negligible
 - GATE228-S5-SC5-COUNT / info / ruled kept (D-29z288): deliberate, a new aria row must be acknowledged in the test (A round 228 §5) / shortcuts.test SC5 pins expect(checked).toBe(8)
 - GATE228-ARCH-STRINGS-SHORTCUTS / info / signal: keep (reviewer verdict); input to ARCH-CHECKPOINT-CALM-DIALOG-KEYMAP / strings.ts now depends on shortcuts.ts (one way; shortcuts.ts stays a leaf)
+- SABA-B-7 / medium / scheduled: queue entry SABA-B-7-ENVELOPE-DB (after CALM-3, before PERF b-ii) / clip volume envelope is linear in gain: one bottom point is silent only for an instant; a line sounds loud for most of the dip
+- C-N229-S3-METHOD / info / ruled D-29z293: future task recipes reach "no time selection" with an empty-lane click; Escape does not clear a time selection (HEAD identical); whether Live Esc deselects is unverified, not a bug; lesson L29 amended / round 229 S3 recipe "clear the time selection with Escape" does not work
+- C-N229-L4-GREP / info / ruled D-29z293: deleted-key greps in later tasks are written as grep -rn ... app --exclude-dir=__tests__ = 0, plus "the only test hits are the mandated '<key>' in absence lines" / round 229 section 2.1 grep-0 rule and section 2.5 absence lines bound the same lines
+- GATE229-S4 / info / routed to CALM-3 C row (D-29z292): caption row height with an empty caption and with a long truncated file name at 1280 / min-h-4 row height covered only by C-BBOX-229 (empty caption and a short file name)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
