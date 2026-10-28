@@ -252,3 +252,19 @@ Saba approved the open-source plan in `/home/runner/czaba-project/docs/technical
 - **zustand** is the external-store library for PERF-8, PERF-10 and the fader stores. If PERF-FADER-a is already dispatched with a hand-rolled store, B does not redo it; PERF-8/PERF-10 move it onto zustand.
 - **New dependencies only through root:** B writes `loop/root-deps-request.json`. Root's job step installs the exact version from `cloud/deps-allowlist.json` and commits `chore(deps): …` on store master before the round (see the doc for the baseline rule). A still never edits `package.json` or installs packages.
 - No code is copied from GPL/AGPL projects; the doc lists them.
+
+## Look back on every issue Saba finds, and guard the whole screen (Saba, 2026-10-28)
+
+Saba found the Studio screen overloaded: a permanent shortcut line, the empty "Arrangement · Overview" strip, and helper sentences on every row. Each was added by a round that verified only its own feature; no round looked at the whole screen. Two standing rules follow.
+
+- **Root cause for every Saba-reported issue.** Every SABA-B-* task carries a short `Why we missed it` section written by B:
+  - which phase should have caught it (B spec, A self-check, C row, gate review, a consult agent);
+  - why it did not;
+  - the rule that would have caught it.
+
+  B adds that rule to `lessons.md` in the same planning step, and C checks that the lesson exists. The next RETRO counts how many Saba-found issues had a lesson and whether the same kind came back.
+- **Screen budget.** A round that adds anything **permanently visible** (helper text, a label, a badge, a control, a strip) attaches before/after full-window screenshots at 1440×900 and 1280×720 of `/studio-lab` in its normal state.
+  - B must justify each new persistent element in the task. Before choosing a persistent place, B considers the quieter homes in this order: tooltip, the `?` shortcut sheet, an empty-state-only line, a first-run-only hint, the status line.
+  - Persistent helper sentences that explain a control are not added. The control's tooltip or the shortcut sheet carries them.
+  - C counts the persistent text lines outside the timeline content before and after. An increase with no justification in the task is a Low bug, and a Medium one when it adds a new always-visible strip.
+- **Whole-screen review at every RETRO.** `design-philosopher` and `first-visit-host` review a fresh full-window screenshot (1440 and 1280, empty project and demo project). They list clutter, duplicated labels and permanent text that could move to a quieter home. Because Saba approves any move of positions, B writes the result as candidates in `loop/user-review/screen-review-<round>.md` and does not implement them until Saba answers.
