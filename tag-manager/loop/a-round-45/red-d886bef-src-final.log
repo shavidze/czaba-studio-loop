@@ -1,0 +1,203 @@
+
+ RUN  v4.0.18 /tmp/a45-red
+
+ ❯ tests/main/recording-tag-contract.test.ts (9 tests | 2 failed) 64ms
+     ✓ D-13: category is the last STANDARD_FIELDS entry and the only ICAT field 3ms
+     ✓ T1-1: writes ICAT, IKEY and UTF-8 ICMT into LIST/INFO with exact sizes and no NUL 13ms
+     ✓ T1-1b: an odd-size ICAT has no NUL, one zero pad byte outside size, and aligned neighbours 8ms
+     ✓ T1-2: meta:read returns category, keywords and comment exactly 4ms
+     ✓ T1-3: the data chunk payload sha256 is unchanged by the write 2ms
+     ✓ T1-4: bext, iXML and data stay byte-identical on a recorder WAV and ICMT is written 6ms
+     ✓ T1-5: batch write of category only keeps title, keywords and comment 10ms
+     × T1-10a (D-10/D-49): empty keywords and category leave no sub-chunk 8ms
+     × T1-10b (D-10/D-49): writing an empty category removes the previous value 4ms
+ ❯ tests/main/metadata-empty-values.test.ts (11 tests | 8 failed) 73ms
+     × (e1) clearing keywords removes IKEY and keeps ICAT and ICMT byte-identical 26ms
+     × (e2) a whitespace-only category or title is empty and removes ICAT or INAM 6ms
+     × (e3) an empty custom text field writes no RNOT and clearing it removes RNOT (C-R27-02) 4ms
+     × (e4) a custom tags field drops blank items and keeps the rest untrimmed and in order 2ms
+     × (e5) a bare WAV saved with every text and tags field empty gets no schema sub-chunk and keeps data 8ms
+     ✓ (e6) stage-1 guard: number 0 still written (TM-B11 stage 2 changes this) 2ms
+     × (e7) meta:write-batch with empty keywords removes IKEY on both files and keeps their other INFO payloads 7ms
+     ✓ (e8) removing an invalid custom ID keeps the D-18 error and leaves the file unchanged 2ms
+     ✓ (e9) an invalid custom ID with an empty value on a file without LIST/INFO still rejects with the D-18 error 1ms
+     × (e10) whitespace-only items in the standard genres field remove IGNR 4ms
+     × (e11) on a file without LIST/INFO, one empty and one non-empty custom value create INFO with only the non-empty ID 3ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF INFO sub-chunk > (e1) clearing keywords removes IKEY and keeps ICAT and ICMT byte-identical
+AssertionError: IKEY removed: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/main/metadata-empty-values.test.ts:124:46
+    122| 
+    123|     const info = parseListInfoSubChunks(readFileSync(filePath));
+    124|     expect(info.has("IKEY"), "IKEY removed").toBe(false);
+       |                                              ^
+    125|     expect(icatBefore && info.get("ICAT")?.equals(icatBefore), "ICAT u…
+    126|     expect(icmtBefore && info.get("ICMT")?.equals(icmtBefore), "ICMT u…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF INFO sub-chunk > (e2) a whitespace-only category or title is empty and removes ICAT or INAM
+AssertionError: expected [ 'ICAT' ] to not include 'ICAT'
+ ❯ tests/main/metadata-empty-values.test.ts:135:41
+    133|     expect(infoPayload(categoryFile, "ICAT")?.equals(Buffer.from("DOOR…
+    134|     await writeMetadataViaIpc(categoryFile, { category: "   " });
+    135|     expect(infoIdsOf(categoryFile)).not.toContain("ICAT");
+       |                                         ^
+    136|     expect((await readMetadataViaIpc(categoryFile)).category).toBe("");
+    137| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF INFO sub-chunk > (e3) an empty custom text field writes no RNOT and clearing it removes RNOT (C-R27-02)
+AssertionError: expected [ 'RNOT' ] to not include 'RNOT'
+ ❯ tests/main/metadata-empty-values.test.ts:149:38
+    147|     const untouched = copySampleWav("e3-untouched.wav");
+    148|     await writeMetadataViaIpc(untouched, { note: "" }, NOTE_SCHEMA);
+    149|     expect(infoIdsOf(untouched)).not.toContain("RNOT");
+       |                                      ^
+    150| 
+    151|     const cleared = copySampleWav("e3-cleared.wav");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF INFO sub-chunk > (e4) a custom tags field drops blank items and keeps the rest untrimmed and in order
+AssertionError: expected [ 'IMIC', 'IMIC' ] to not include 'IMIC'
+ ❯ tests/main/metadata-empty-values.test.ts:162:38
+    160|     const blankOnly = copySampleWav("e4-blank.wav");
+    161|     await writeMetadataViaIpc(blankOnly, { mics: ["", "  "] }, MICS_SC…
+    162|     expect(infoIdsOf(blankOnly)).not.toContain("IMIC");
+       |                                      ^
+    163| 
+    164|     const mixed = copySampleWav("e4-mixed.wav");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF INFO sub-chunk > (e5) a bare WAV saved with every text and tags field empty gets no schema sub-chunk and keeps data
+AssertionError: no IKEY sub-chunk: expected [ 'IKEY', 'ICAT' ] to not include 'IKEY'
+ ❯ tests/main/metadata-empty-values.test.ts:201:45
+    199|     const ids = listInfoSubChunkEntries(after).map((entry) => entry.id…
+    200|     for (const id of schemaIds) {
+    201|       expect(ids, `no ${id} sub-chunk`).not.toContain(id);
+       |                                             ^
+    202|     }
+    203|     expect(ids, "no INFO sub-chunk at all").toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF INFO sub-chunk > (e7) meta:write-batch with empty keywords removes IKEY on both files and keeps their other INFO payloads
+AssertionError: IKEY removed in /tmp/czaba-empty-values-test-8853-1793182620567/e7-first.wav: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/main/metadata-empty-values.test.ts:232:63
+    230|     [first, second].forEach((filePath, index) => {
+    231|       const info = parseListInfoSubChunks(readFileSync(filePath));
+    232|       expect(info.has("IKEY"), `IKEY removed in ${filePath}`).toBe(fal…
+       |                                                               ^
+    233|       const expectedIds = [...before[index].keys()].filter((id) => id …
+    234|       expect([...info.keys()].sort(), `other INFO IDs in ${filePath}`)…
+ ❯ tests/main/metadata-empty-values.test.ts:230:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF INFO sub-chunk > (e10) whitespace-only items in the standard genres field remove IGNR
+AssertionError: expected [ 'IGNR', 'IGNR' ] to not include 'IGNR'
+ ❯ tests/main/metadata-empty-values.test.ts:278:37
+    276|     await writeMetadataViaIpc(filePath, { genres: ["  ", ""] });
+    277| 
+    278|     expect(infoIdsOf(filePath)).not.toContain("IGNR");
+       |                                     ^
+    279|     expect((await readMetadataViaIpc(filePath)).genres).toEqual([]);
+    280|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF INFO sub-chunk > (e11) on a file without LIST/INFO, one empty and one non-empty custom value create INFO with only the non-empty ID
+AssertionError: expected [ 'IKEY', 'ICAT' ] to not include 'IKEY'
+ ❯ tests/main/metadata-empty-values.test.ts:289:21
+    287| 
+    288|     const ids = infoIdsOf(filePath);
+    289|     expect(ids).not.toContain("IKEY");
+       |                     ^
+    290|     expect(infoPayload(filePath, "ICAT")?.equals(Buffer.from("DOORWood…
+    291|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10a (D-10/D-49): empty keywords and category leave no sub-chunk
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/main/recording-tag-contract.test.ts:222:30
+    220| 
+    221|     const info = readInfo(filePath);
+    222|     expect(info.has("IKEY")).toBe(false);
+       |                              ^
+    223|     expect(info.has("ICAT")).toBe(false);
+    224|     const meta = await readMetadataViaIpc(filePath);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10b (D-10/D-49): writing an empty category removes the previous value
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/main/recording-tag-contract.test.ts:237:55
+    235| 
+    236|     const bytes = readFileSync(filePath);
+    237|     expect(parseListInfoSubChunks(bytes).has("ICAT")).toBe(false);
+       |                                                       ^
+    238|     expect(bytes.includes(Buffer.from(CONTRACT_CATEGORY, "ascii"))).to…
+    239|     const meta = await readMetadataViaIpc(filePath);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  10 failed | 10 passed (20)
+   Start at  10:17:00
+   Duration  500ms (transform 192ms, setup 45ms, import 433ms, tests 137ms, environment 0ms)
+
+
+::error file=/tmp/a45-red/tests/main/metadata-empty-values.test.ts,title=tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49%3A an empty text or tags value removes its RIFF INFO sub-chunk > (e1) clearing keywords removes IKEY and keeps ICAT and ICMT byte-identical,line=124,column=46::AssertionError: IKEY removed: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/main/metadata-empty-values.test.ts:124:46%0A%0A
+
+::error file=/tmp/a45-red/tests/main/metadata-empty-values.test.ts,title=tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49%3A an empty text or tags value removes its RIFF INFO sub-chunk > (e2) a whitespace-only category or title is empty and removes ICAT or INAM,line=135,column=41::AssertionError: expected [ 'ICAT' ] to not include 'ICAT'%0A ❯ tests/main/metadata-empty-values.test.ts:135:41%0A%0A
+
+::error file=/tmp/a45-red/tests/main/metadata-empty-values.test.ts,title=tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49%3A an empty text or tags value removes its RIFF INFO sub-chunk > (e3) an empty custom text field writes no RNOT and clearing it removes RNOT (C-R27-02),line=149,column=38::AssertionError: expected [ 'RNOT' ] to not include 'RNOT'%0A ❯ tests/main/metadata-empty-values.test.ts:149:38%0A%0A
+
+::error file=/tmp/a45-red/tests/main/metadata-empty-values.test.ts,title=tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49%3A an empty text or tags value removes its RIFF INFO sub-chunk > (e4) a custom tags field drops blank items and keeps the rest untrimmed and in order,line=162,column=38::AssertionError: expected [ 'IMIC', 'IMIC' ] to not include 'IMIC'%0A ❯ tests/main/metadata-empty-values.test.ts:162:38%0A%0A
+
+::error file=/tmp/a45-red/tests/main/metadata-empty-values.test.ts,title=tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49%3A an empty text or tags value removes its RIFF INFO sub-chunk > (e5) a bare WAV saved with every text and tags field empty gets no schema sub-chunk and keeps data,line=201,column=45::AssertionError: no IKEY sub-chunk: expected [ 'IKEY', 'ICAT' ] to not include 'IKEY'%0A ❯ tests/main/metadata-empty-values.test.ts:201:45%0A%0A
+
+::error file=/tmp/a45-red/tests/main/metadata-empty-values.test.ts,title=tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49%3A an empty text or tags value removes its RIFF INFO sub-chunk > (e7) meta%3Awrite-batch with empty keywords removes IKEY on both files and keeps their other INFO payloads,line=232,column=63::AssertionError: IKEY removed in /tmp/czaba-empty-values-test-8853-1793182620567/e7-first.wav: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/main/metadata-empty-values.test.ts:232:63%0A ❯ tests/main/metadata-empty-values.test.ts:230:21%0A%0A
+
+::error file=/tmp/a45-red/tests/main/metadata-empty-values.test.ts,title=tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49%3A an empty text or tags value removes its RIFF INFO sub-chunk > (e10) whitespace-only items in the standard genres field remove IGNR,line=278,column=37::AssertionError: expected [ 'IGNR', 'IGNR' ] to not include 'IGNR'%0A ❯ tests/main/metadata-empty-values.test.ts:278:37%0A%0A
+
+::error file=/tmp/a45-red/tests/main/metadata-empty-values.test.ts,title=tests/main/metadata-empty-values.test.ts > TM-B11 stage 1 / D-49%3A an empty text or tags value removes its RIFF INFO sub-chunk > (e11) on a file without LIST/INFO%2C one empty and one non-empty custom value create INFO with only the non-empty ID,line=289,column=21::AssertionError: expected [ 'IKEY', 'ICAT' ] to not include 'IKEY'%0A ❯ tests/main/metadata-empty-values.test.ts:289:21%0A%0A
+
+::error file=/tmp/a45-red/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10a (D-10/D-49)%3A empty keywords and category leave no sub-chunk,line=222,column=30::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/main/recording-tag-contract.test.ts:222:30%0A%0A
+
+::error file=/tmp/a45-red/tests/main/recording-tag-contract.test.ts,title=tests/main/recording-tag-contract.test.ts > recording tag contract (T-1) > T1-10b (D-10/D-49)%3A writing an empty category removes the previous value,line=237,column=55::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/main/recording-tag-contract.test.ts:237:55%0A%0A

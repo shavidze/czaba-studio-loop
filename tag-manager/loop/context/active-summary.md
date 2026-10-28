@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T09:50:52.995Z)
+# Active loop summary (2026-10-28T10:27:51.968Z)
 
-- backlog.json 417 KB -> active view 104 KB
-- status: G_ROOT_GATE round 44
+- backlog.json 423 KB -> active view 105 KB
+- status: G_ROOT_GATE round 45
 - servers: `{"servers":"none or skipped"}`
-- last publication: d886bef086628cd2b6a8efed3a7a98eeb8454480 (rounds 43-44)
-- last root gate: round 44 published - commit d886bef086628cd2b6a8efed3a7a98eeb8454480 pushed
+- last publication: c822d7f1a60a03741c5c1052f19e934d39a85d08 (rounds 45-45)
+- last root gate: round 45 published - commit c822d7f1a60a03741c5c1052f19e934d39a85d08 pushed
 
-## Current items: TM-B44
+## Current items: TM-B11, TM-B44
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -91,8 +91,6 @@
 - A-R18-01 / low / open / A non-array malformed object whose toString is not callable throws in String(v) on the non-array sort path; same class of defensive fix, D-2
 - A-R18-02 / info / open / R18-3 M2 (String(value[0])) is killed only by [true] and depends on ICU collation ('true' between Abe and Zed); a neighbour like ['!'] or a 
 - C-R18-01 / info / open / R18-3 M3 was implemented as a direct tie (return 0 when exactly one side is a number) instead of via '' keys; same observable bpm-vs-missing
-- B-R18-01 / info / in_progress / D-28 refreshes Size/Date with one full recursive scanFolder per save because preload is protected; a dedicated fs:stat-files channel (main +
-- RR-R19-01 / medium / in_progress / Performance: every save awaits a full recursive scanFolder (file-system.ts scanFolderRecursive, depth 20, stat per WAV, no timeout) before t
 - RR-R19-02 / low / open / updateFileStats returns a new files array when a path matches, so FileList.tsx:107-109 resets lastClickRef after every successful save (shif
 - RR-R19-03 / info / open / refreshSavedFileStats reads folderPath after the write; a folder opened during a slow save is scanned instead; harmless because only written
 - RR-R19-04 / info / open / Architecture signal: move the stat refresh into a store action backed by a statFiles IPC, or have meta:write / meta:write-batch return the n
@@ -191,7 +189,6 @@
 - RR-R41-03 / info / open / Architecture signal: the 'hover only when the button can act' rule is repeated in Button variants and raw SchemaEditor buttons; a shared hel
 - B-R42-01 / low / open / A schema.json that ALREADY holds both a custom and the standard field with the same key (e.g. custom category/CATE + standard category/ICAT,
 - B-R42-02 / info / open / TM-B11 round must flip T1-10 (recording-tag-contract.test.ts pins the size-0 INFO write for empty keywords/category) and K-4 docs (ffprobe a
-- C-R42-01 / low / in_progress / B's Mp3tag reference R1 (round 42 task, docs/bugs/001 entry 23 **Reference:**) is not supported by the cited sources: the community thread o
 - RR-R42-01 / low / open / findStandardFieldConflict compares riffChunkId case-sensitively (SchemaEditor.tsx:38); a hand-edited custom riffChunkId 'icat' does not bloc
 - RR-R42-02 / low / open / D-47 warning is a plain <p> with no link to the chip it replaces; screen-reader users find it by reading the list (message names the field, 
 - RR-R42-03 / low / open / D-47 applies the block to all 13 standard fields, not only Category; B's generalisation awaits Saba's confirmation
@@ -199,11 +196,14 @@
 - A-R42-01 / info / open / A hand-edited schema.json whose standard field lacks the standard flag is treated as custom, so its own standard twin shows a warning (e.g. 
 - A-R42-02 / info / open / T-e tests the enable-branch guard by mocking useSchemaStore.getState once (stale click); from the UI the path is reachable only through a ra
 - B-R42-03 / info / open / docs/learning/decisions.md:76 says 'contextBridge (13 მეთოდი)'; window.api has 16 methods at cf4e147 and 17 after round 43 (statFiles). Stal
-- C-R43-01 / medium / in_progress / Gate red: tests/renderer/components/schema-change-during-folder-load.test.ts (w7) mocks window.api.scanFolder (:315) to feed the save's stat
 - A-R43-01 / low / open / fs:stat-files uses stat (follows symlinks) and is not limited to the open folder: any .wav path or a .wav symlink returns its target's size/
 - A-R43-02 / info / open / Test gaps: main stat-files tests cover ENOENT but not EACCES; renderer (y) does not assert re-read order (covered by (x))
 - A-R43-03 / info / open / One E2E launch flake 'first window did not appear within 60000 ms' (folder-workflow.spec.ts:29, retries on, passed on retry); C saw 7/7 with
 - B-R43-01 / low / open / Process: round 43 changed which window.api call the save flow uses but owned only the D-28 describe; B did not grep tests/ for other suites 
+- RR-R44-01 / low / open / D-48 is recorded only in STATE_MANAGEMENT.md:26 and test names, not in the D-list of docs/bugs/001-save-and-selection-known-limits.md (D-39.
+- RR-R44-02 / low / open / fs:stat-files accepts any path, not only paths inside the open folder (file-system.ts handler); not a regression (readMetadata/getAudioBuffe
+- RR-R44-03 / low / open / Chunk size 50 defined twice: STAT_FILES_CHUNK_SIZE (MetadataPanel.tsx) and MAX_STAT_FILES_PATHS (file-system.ts); a renderer-side change wou
+- RR-R44-04 / info / open / Intentional empty catch {} in refreshSavedFileStats (MetadataPanel.tsx) keeps a failed refresh silent; Biome passes; no change needed
 
 ## Other open items
 - TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
@@ -214,4 +214,3 @@
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database
 - OOS-03 [out_of_scope] New npm dependencies
-- TM-B11 [todo] With a custom Number field in the schema (e.g. Take/ITKN), every single-file save writes the default 0 as INFO '0' (size 1) into files that 

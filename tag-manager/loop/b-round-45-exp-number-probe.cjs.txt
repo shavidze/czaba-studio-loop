@@ -1,0 +1,12 @@
+const { File, CombinedTag, InfoTag } = require('/home/runner/czaba-project/czaba-tag-manager/node_modules/node-taglib-sharp');
+const p = process.argv[2];
+let f = File.createFromPath(p);
+console.log('bare', f.tag.year, f.tag.track, f.tag.beatsPerMinute);
+f.tag.year = 2024; f.tag.track = 3; f.save(); f.dispose();
+f = File.createFromPath(p); console.log('set', f.tag.year, f.tag.track);
+f.tag.year = 0; f.tag.track = 0; f.save(); f.dispose();
+f = File.createFromPath(p); console.log('zeroed', f.tag.year, f.tag.track);
+const info = f.tag.tags.find(t => t instanceof InfoTag);
+console.log('ICRD', info ? info.getValuesAsStrings('ICRD') : 'noinfo');
+info.setValuesFromStrings('ITKN', ['0']); f.save(); f.dispose();
+f = File.createFromPath(p); const i2 = f.tag.tags.find(t => t instanceof InfoTag); console.log('ITKN', JSON.stringify(i2.getValuesAsStrings('ITKN')), JSON.stringify(i2.getValuesAsStrings('IXXX')));

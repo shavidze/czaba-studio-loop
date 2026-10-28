@@ -1,0 +1,189 @@
+diff --git a/.claude/primitives/WAV_METADATA.md b/.claude/primitives/WAV_METADATA.md
+index b1b108d..7153f55 100644
+--- a/.claude/primitives/WAV_METADATA.md
++++ b/.claude/primitives/WAV_METADATA.md
+@@ -17,6 +17,7 @@
+ **IMPORTANT:** `keywords` field uses `riffChunkId: 'IKEY'`, NOT STANDARD_PROP_MAP.
+ Tag object-ზე `tag.keywords` არ არსებობს - InfoTag path-ით იკითხება.
+ `category` (`Category (UCS)`) იყენებს `riffChunkId: 'ICAT'`-ს და `keywords`-ის მსგავსად InfoTag path-ით იწერება/იკითხება (კონტრაქტი: `docs/recording-tag-contract.md`).
++**ცარიელი მნიშვნელობა არ იწერება (D-49):** ცარიელი/whitespace-only `text` ან ცარიელი `tags` სია STANDARD_PROP_MAP-ში setter-ს `''`/`[]`-ით გადაეცემა, InfoTag path-ზე კი `infoTag.removeValue(riffChunkId)` იძახება — ნულოვანი ზომის sub-chunk არასდროს.
+ 
+ ### Read Pattern
+ ```typescript
+diff --git a/docs/recording-tag-contract.md b/docs/recording-tag-contract.md
+index 653286e..7e731d8 100644
+--- a/docs/recording-tag-contract.md
++++ b/docs/recording-tag-contract.md
+@@ -2,7 +2,7 @@
+ 
+ ეს დოკუმენტი არის **source of truth** იმისთვის, თუ რომელ ველს წერს Czaba Tag Manager WAV ფაილში და როგორ უნდა წაიკითხოს ის backend-ის import tool-მა (`czaba-api/tools/recording-import`, K-4). ველის სახელის, chunk ID-ის ან კოდირების ცვლილება ორივე ნაკადის ცვლილებაა და ახალ D-ID-ს მოითხოვს.
+ 
+-გადაწყვეტილებები: D-01, D-02, D-03, D-04, D-10, D-12, D-13 (loop-ის `feature-status.md`). ქცევა გაზომილია `node-taglib-sharp@6.0.1`-ზე, ტესტები: `tests/main/recording-tag-contract.test.ts`.
++გადაწყვეტილებები: D-01, D-02, D-03, D-04, D-10, D-12, D-13, D-49 (loop-ის `feature-status.md`). ქცევა გაზომილია `node-taglib-sharp@6.0.1`-ზე, ტესტები: `tests/main/recording-tag-contract.test.ts`.
+ 
+ ## ველები
+ 
+@@ -37,16 +37,19 @@
+ - `IKEY` არის **ერთი** string. გამყოფებია `,` და `;` (D-02). importer-ი ორივეზე ყოფს; ნაწილების `trim()` რეკომენდებულია (ეს D-02-ის ინტერპრეტაციაა, არა ცალკე D-ID).
+ - Tag Manager მნიშვნელობას ისე წერს, როგორც მომხმარებელმა აკრიფა (მაგ. `door, slam`), normalization-ის გარეშე.
+ 
+-## ცარიელი მნიშვნელობა (D-10, ღიაა)
++## ცარიელი მნიშვნელობა (D-10/D-49, გადაწყვეტილია)
+ 
+-importer-ის წესი: **sub-chunk-ის არარსებობა ან ცარიელი payload = „მნიშვნელობა არ არის“.**
++importer-ის წესი (უცვლელი): **sub-chunk-ის არარსებობა ან ცარიელი payload = „მნიშვნელობა არ არის“.**
+ 
+-დღევანდელი ქცევა (ტესტით დაფიქსირებული, T1-10):
++Saba-ს გადაწყვეტილება (Q4): ცარიელი მნიშვნელობა არ იწერება. ქცევა (TM-B11 stage 1, ტესტით დაფიქსირებული: T1-10, `metadata-empty-values.test.ts`):
+ 
+-- ცარიელი ველი (`''`) იწერება **ნულოვანი ზომის** sub-chunk-ად (`ICAT` size 0, `IKEY` size 0). sub-chunk ფაილში რჩება.
+-- ძველი მნიშვნელობა ამით იშლება: `category: 'DOORWood'` → `category: ''` ფაილში `DOORWood` აღარ რჩება.
+-- single-file save (Metadata panel) **ყველა** ველს წერს. ამიტომ ფაილზე, რომელსაც category არავინ მიანიჭა, ერთი save-ის შემდეგ `ICAT=""` გაჩნდება. batch save მხოლოდ შეცვლილ ველებს წერს (`modifiedFields`).
+-- Saba-მ უნდა გადაწყვიტოს, დარჩეს ეს ქცევა თუ ცარიელი ველი sub-chunk-ს წაშლის. importer-ის წესი ორივე შემთხვევაში იგივეა.
++- ცარიელი `text` მნიშვნელობა (`''`, ასევე მხოლოდ whitespace, მაგ. `'   '`) ან ცარიელი `tags` სია sub-chunk-ს **შლის**. ნულოვანი ზომის sub-chunk აღარ იწერება.
++- `tags` სიიდან ცარიელი და whitespace-only item-ები იშლება; დანარჩენი item-ები იწერება ზუსტად ისე, როგორც მოვიდა (trim-ის გარეშე, იმავე რიგით).
++- მნიშვნელობის გასუფთავება ძველ ბაიტებს შლის: `category: 'DOORWood'` → `category: ''` ფაილში `DOORWood` აღარ რჩება.
++- single-file save (Metadata panel) ყველა ველს აგზავნის, მაგრამ ფაილზე, რომელსაც category არავინ მიანიჭა, `ICAT` აღარ გაჩნდება. batch save მხოლოდ შეცვლილ ველებს წერს (`modifiedFields`), ამიტომ ერთი ველის გასუფთავება სხვა ველებს არ შლის.
++- `STANDARD_PROP_MAP`-ის ველები node-taglib-sharp-ის setter-ს `''`/`[]`-ით იღებენ და ბიბლიოთეკა item-ს შლის; `riffChunkId` ველები (`IKEY`, `ICAT`, custom) `InfoTag.removeValue(id)`-ით იშლება (D-49).
++- node-taglib-sharp save-ისას ცარიელ `LIST/INFO`-ს მაინც წერს (მხოლოდ list type, size 4). ეს ბიბლიოთეკის ქცევაა და კონტრაქტზე გავლენა არ აქვს.
++- **რიცხვები:** TM-B11 stage 2 ჯერ არ გაკეთებულა. დღეს custom number ველის `0` ისევ `'0'`-ად იწერება (მაგ. `ITKN` size 1).
+ 
+ ## ffprobe-ის ხაფანგები
+ 
+@@ -83,5 +86,6 @@ importer-ის წესი: **sub-chunk-ის არარსებობა
+ ## შემოწმება
+ 
+ - `npm run test:main` — `tests/main/recording-tag-contract.test.ts`: raw `LIST/INFO` ბაიტები, `meta:read`, `data`/`bext`/`iXML` sha256, batch, ცარიელი მნიშვნელობა. ტესტი T1-1-ის ფაილს ინახავს `test-results/recording-tag-contract/contract.wav`-ში.
++- `npm run test:main` — `tests/main/metadata-empty-values.test.ts`: ცარიელი/whitespace-only `text` და `tags` მნიშვნელობა sub-chunk-ს შლის (single და batch), custom ველები, უცნობი ID-ის D-18 შეცდომა, number `0` stage-1 guard (D-49).
+ - `npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts test-results/recording-tag-contract/contract.wav` — ffprobe-ით ამოწმებს `ICAT`, `IKEY` და `comment`-ს (CI step „Tag contract ffprobe cross-check“).
+ - `tests/e2e/recording-tag-contract.spec.ts` — Electron-ში `writeMetadata` → `readMetadata` category-ით, სუფთა `XDG_CONFIG_HOME`-ით.
+diff --git a/src/main/ipc/metadata.ts b/src/main/ipc/metadata.ts
+index cd18ea0..ecff902 100644
+--- a/src/main/ipc/metadata.ts
++++ b/src/main/ipc/metadata.ts
+@@ -102,6 +102,22 @@ const STANDARD_PROP_MAP: Record<
+   },
+ };
+ 
++function normalizeFieldValueForWrite(type: FieldDefinition['type'], value: FieldValue): FieldValue {
++  if (type === 'text' && typeof value === 'string' && value.trim() === '') {
++    return '';
++  }
++  if (type === 'tags' && Array.isArray(value)) {
++    return value.filter((item) => typeof item === 'string' && item.trim() !== '');
++  }
++  return value;
++}
++
++function isEmptyFieldValueForWrite(type: FieldDefinition['type'], value: FieldValue): boolean {
++  if (type === 'text') return value === '';
++  if (type === 'tags') return Array.isArray(value) && value.length === 0;
++  return false;
++}
++
+ function getDefaultValue(type: FieldDefinition['type']): FieldValue {
+   if (type === 'tags') return [];
+   if (type === 'number') return 0;
+@@ -164,11 +180,12 @@ function writeTagsToFile(
+   const file = TagFile.createFromPath(filePath);
+   try {
+     const tag = file.tag as unknown as TagObject;
+-    const customFields: Array<{ riffChunkId: string; value: FieldValue }> = [];
++    const customFields: Array<{ riffChunkId: string; value: FieldValue; isEmpty: boolean }> = [];
+ 
+     for (const field of schema) {
+-      const value = meta[field.key];
+-      if (value === undefined) continue;
++      const rawValue = meta[field.key];
++      if (rawValue === undefined) continue;
++      const value = normalizeFieldValueForWrite(field.type, rawValue);
+ 
+       const standardProp = STANDARD_PROP_MAP[field.key];
+       if (standardProp) {
+@@ -177,26 +194,38 @@ function writeTagsToFile(
+       }
+ 
+       if (field.riffChunkId) {
+-        customFields.push({ riffChunkId: field.riffChunkId, value });
++        customFields.push({
++          riffChunkId: field.riffChunkId,
++          value,
++          isEmpty: isEmptyFieldValueForWrite(field.type, value),
++        });
+       }
+     }
+ 
+     if (customFields.length > 0) {
+       let infoTags = getRiffInfoTags(file.tag);
+-      if (infoTags.length === 0) {
++      const hasValueToWrite = customFields.some((customField) => !customField.isEmpty);
++      if (infoTags.length === 0 && hasValueToWrite) {
+         tag.title = tag.title ?? '';
+         infoTags = getRiffInfoTags(file.tag);
+-      }
+-      if (infoTags.length === 0) {
+-        throw new Error('RIFF INFO tag is not available; custom fields were not written');
++        if (infoTags.length === 0) {
++          throw new Error('RIFF INFO tag is not available; custom fields were not written');
++        }
+       }
+       const failedIds: string[] = [];
+-      for (const { riffChunkId, value } of customFields) {
+-        try {
+-          const strValues = Array.isArray(value) ? value.map(String) : [String(value)];
+-          infoTags[0].setValuesFromStrings(riffChunkId, strValues);
+-        } catch {
+-          failedIds.push(String(riffChunkId));
++      if (infoTags.length > 0) {
++        const infoTag = infoTags[0];
++        for (const { riffChunkId, value, isEmpty } of customFields) {
++          try {
++            if (isEmpty) {
++              infoTag.removeValue(riffChunkId);
++            } else {
++              const strValues = Array.isArray(value) ? value.map(String) : [String(value)];
++              infoTag.setValuesFromStrings(riffChunkId, strValues);
++            }
++          } catch {
++            failedIds.push(String(riffChunkId));
++          }
+         }
+       }
+       if (failedIds.length > 0) {
+diff --git a/tests/main/recording-tag-contract.test.ts b/tests/main/recording-tag-contract.test.ts
+index 3b8bb5e..2b66a7f 100644
+--- a/tests/main/recording-tag-contract.test.ts
++++ b/tests/main/recording-tag-contract.test.ts
+@@ -214,19 +214,19 @@ describe("recording tag contract (T-1)", () => {
+     }
+   });
+ 
+-  it("T1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks", async () => {
++  it("T1-10a (D-10/D-49): empty keywords and category leave no sub-chunk", async () => {
+     const filePath = copySampleWav("t1-10a.wav");
+     await writeMetadataViaIpc(filePath, { keywords: "", category: "" });
+ 
+     const info = readInfo(filePath);
+-    expect(info.get("IKEY")?.length).toBe(0);
+-    expect(info.get("ICAT")?.length).toBe(0);
++    expect(info.has("IKEY")).toBe(false);
++    expect(info.has("ICAT")).toBe(false);
+     const meta = await readMetadataViaIpc(filePath);
+     expect(meta.keywords).toBe("");
+     expect(meta.category).toBe("");
+   });
+ 
+-  it("T1-10b (D-10 pinned): writing an empty category removes the previous value", async () => {
++  it("T1-10b (D-10/D-49): writing an empty category removes the previous value", async () => {
+     const filePath = copySampleWav("t1-10b.wav");
+     await writeMetadataViaIpc(filePath, { category: CONTRACT_CATEGORY });
+     expectInfoPayload(readInfo(filePath), "ICAT", Buffer.from(CONTRACT_CATEGORY, "ascii"));
+@@ -234,7 +234,7 @@ describe("recording tag contract (T-1)", () => {
+     await writeMetadataViaIpc(filePath, { category: "" });
+ 
+     const bytes = readFileSync(filePath);
+-    expect(parseListInfoSubChunks(bytes).get("ICAT")?.length).toBe(0);
++    expect(parseListInfoSubChunks(bytes).has("ICAT")).toBe(false);
+     expect(bytes.includes(Buffer.from(CONTRACT_CATEGORY, "ascii"))).toBe(false);
+     const meta = await readMetadataViaIpc(filePath);
+     expect(meta.category).toBe("");

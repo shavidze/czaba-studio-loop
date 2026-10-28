@@ -1,0 +1,53 @@
+d886bef086628cd2b6a8efed3a7a98eeb8454480
+ M .claude/primitives/WAV_METADATA.md
+ M docs/recording-tag-contract.md
+ M src/main/ipc/metadata.ts
+ M tests/main/recording-tag-contract.test.ts
+?? tests/main/metadata-empty-values.test.ts
+ .claude/primitives/WAV_METADATA.md        |  1 +
+ docs/recording-tag-contract.md            | 20 ++++++-----
+ src/main/ipc/metadata.ts                  | 57 +++++++++++++++++++++++--------
+ tests/main/recording-tag-contract.test.ts | 10 +++---
+ 4 files changed, 61 insertions(+), 27 deletions(-)
+frozen exit=0
+.claude/primitives/WAV_METADATA.md
+docs/recording-tag-contract.md
+src/main/ipc/metadata.ts
+tests/main/recording-tag-contract.test.ts
+diff --git a/tests/main/recording-tag-contract.test.ts b/tests/main/recording-tag-contract.test.ts
+index 3b8bb5e..2b66a7f 100644
+--- a/tests/main/recording-tag-contract.test.ts
++++ b/tests/main/recording-tag-contract.test.ts
+@@ -214,19 +214,19 @@ describe("recording tag contract (T-1)", () => {
+     }
+   });
+ 
+-  it("T1-10a (D-10 pinned): empty keywords and category are written as zero-length sub-chunks", async () => {
++  it("T1-10a (D-10/D-49): empty keywords and category leave no sub-chunk", async () => {
+     const filePath = copySampleWav("t1-10a.wav");
+     await writeMetadataViaIpc(filePath, { keywords: "", category: "" });
+ 
+     const info = readInfo(filePath);
+-    expect(info.get("IKEY")?.length).toBe(0);
+-    expect(info.get("ICAT")?.length).toBe(0);
++    expect(info.has("IKEY")).toBe(false);
++    expect(info.has("ICAT")).toBe(false);
+     const meta = await readMetadataViaIpc(filePath);
+     expect(meta.keywords).toBe("");
+     expect(meta.category).toBe("");
+   });
+ 
+-  it("T1-10b (D-10 pinned): writing an empty category removes the previous value", async () => {
++  it("T1-10b (D-10/D-49): writing an empty category removes the previous value", async () => {
+     const filePath = copySampleWav("t1-10b.wav");
+     await writeMetadataViaIpc(filePath, { category: CONTRACT_CATEGORY });
+     expectInfoPayload(readInfo(filePath), "ICAT", Buffer.from(CONTRACT_CATEGORY, "ascii"));
+@@ -234,7 +234,7 @@ describe("recording tag contract (T-1)", () => {
+     await writeMetadataViaIpc(filePath, { category: "" });
+ 
+     const bytes = readFileSync(filePath);
+-    expect(parseListInfoSubChunks(bytes).get("ICAT")?.length).toBe(0);
++    expect(parseListInfoSubChunks(bytes).has("ICAT")).toBe(false);
+     expect(bytes.includes(Buffer.from(CONTRACT_CATEGORY, "ascii"))).toBe(false);
+     const meta = await readMetadataViaIpc(filePath);
+     expect(meta.category).toBe("");

@@ -1,172 +1,217 @@
-# CURRENT TASK — Round 45: TM-B11 stage 1 (Saba Q4 / D-10 → D-49) — an empty text or tags value removes its RIFF INFO sub-chunk instead of writing a size-0 one
+# CURRENT TASK — Round 46: TM-B11 stage 2 (Saba Q4 / D-10 → D-50) — an unset number field is not written, a typed `0` is
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-28
 
 ## Why this round
-- **Round 44: C PASS** (R44-1..R44-5, `realVerified=true`, bugs 0). Renderer 320/320, main 98/98, E2E 7/7 (`--retries=0` 7/7). The real app refreshes Size/Date and three independent readers confirm the tags. Root published **d886bef** (rounds 43–44). TM-B44 / D-48 are done.
-- No critical or high bug is open. Next in Saba's order: **Q4 → TM-B11 / D-10**.
-- **Saba Q4 (2026-10-28):** "empty values are not written. Skip empty text and unset numbers; a meaningful `0` stays expressible."
-- **Staging, not shrinking.** TM-B11 has two stages. TM-B11 stays `in_progress` until both have C real-app evidence.
-  - **Stage 1 (this round): text and tags fields.** Fixes C-R1-01 (`IKEY=""`), RR-R3-03 (`ICAT=""` on every editor save), C-R27-02 (`RNOT=''`) and B-R42-02 (T1-10 flip + K-4 docs).
-  - **Stage 2 (round 46): number fields.** C-R6-01 (`ITKN='0'`) and RR-R5-03.
-    - Numbers need a renderer-visible "unset vs 0" marker. Today an empty input sends `0`, `0` displays as empty, and an absent sub-chunk reads as `0`. That change touches `src/shared/types.ts`, the read path and the renderer, so it is its own stage.
-- **Where the bug is (B code read of `src/main/ipc/metadata.ts` at d886bef):**
-  - Fields in `STANDARD_PROP_MAP` (title, comment, album, copyright, isrc, publisher, artists, genres, numbers) go through node-taglib-sharp setters. Those already **remove** the item for `''` / `[]` (`infoTag.js:43` `set title(value) { this.setValuesFromStrings("INAM", value ? [value] : undefined); }`; `riffList.js:199` deletes on an empty array).
-  - `keywords` (IKEY), `category` (ICAT) and every custom field take the `riffChunkId` loop instead: `setValuesFromStrings(id, [String(value)])`. For `''` that stores a **size-0 sub-chunk**.
-- **B's probe** (scratch dir `/tmp/b45`, node-taglib-sharp from the repo's `node_modules`, ffmpeg WAVs, not the repository):
-  - `InfoTag.removeValue('IKEY')` after a write removes the sub-chunk; the bytes are gone from the file.
-  - Bare WAV (no LIST), today's path with `IKEY=''` → `LIST/INFO` size **12** (one 8-byte IKEY header, size 0).
-  - Same bare WAV saved with only empty standard values → `LIST/INFO` size **4** (list type only). node-taglib-sharp always renders an INFO list on save. This is pre-existing, the same class as C-R1-01's extra `id3 `/`LIST/MID`/`IDVX`/`JUNK`, and **not** in scope.
-- **Rules:**
-  - `test-on-bugfix`: a failing test first. The flipped T1-10a/b and the new tests are red on d886bef `src/`.
-  - Reference-first: **exempt** (bug fix of a behaviour Saba decided).
-    - In-repo evidence: node-taglib-sharp's own setters already remove an emptied item, and D-49 makes the INFO path consistent with them.
-    - For the record: Mp3tag and Kid3 also remove a field that is emptied. That is B's general knowledge, not checked this round, so it is not cited as a source.
+- **Round 45: C PASS** (R45-1..R45-7, `realVerified=true`, bugs 0). Renderer 320/320, main 109/109, E2E 7/7 (`--retries=0` 7/7).
+  - Real app: an emptied Keywords field is removed in raw INFO, ffprobe and music-metadata. Untouched empty fields are no longer written.
+  - Root published **c822d7f**. D-49 is verified, and TM-B11 stage 1 is done.
+- No critical or high bug is open. Root's one medium finding, RR-R45-01, is an FYI for the importer owner and does not block this round.
+- **TM-B11 stays `in_progress`** until stage 2 (this round) has C real-app evidence.
+- **Saba Q4 (2026-10-28):** "Skip empty text and unset numbers; a meaningful `0` stays expressible."
+- **The bug (C-R6-01).** With a custom Number field in the schema (e.g. Take/ITKN), every single-file save writes `ITKN='0'` into files that never had it. The chain (B code read at c822d7f):
+  1. `metadata.ts` `readTagsFromFile` reads an absent custom number as `0` (`getDefaultValue('number')` = 0).
+  2. The single save sends the whole `editingMetadata` snapshot.
+  3. `writeTagsToFile` writes `String(0)`.
+  - Because absent and typed `0` are the same value, the editor cannot tell them apart. `MetadataPanel.tsx:345` also shows `0` as empty, and an empty input sends `0` (`:347`).
+- **RR-R5-03:** the badge counts a number only when `> 0`, so a meaningful `0` looks untagged.
+- **B probe** (`/tmp/b46`, node-taglib-sharp from the repo, script `b-round-45-exp-number-probe.cjs.txt`):
+  - A bare ffmpeg WAV reads `year`/`track`/`beatsPerMinute` as `0`. After `year=2024, track=3` and then `year=0, track=0`, the values read `0` again and `ICRD` is gone.
+    - So for **standard** numbers the library has no "0" state: setting 0 removes the item.
+  - `InfoTag.setValuesFromStrings('ITKN', ['0'])` is stored, and ffprobe shows `"ITKN": "0"`. An absent ID reads as `[]`.
+
+## Reference
+- **Mp3tag** (community forum, no official doc found; not verified in a current version):
+  - "Mp3tag will never write an empty field": a field set to an empty string is removed. https://community.mp3tag.de/t/15332 , https://community.mp3tag.de/t/remove-track-number-from-all-mp3-files/13440
+  - Its tag panel shows an empty placeholder for a field the file does not hold. Track `0` seen in other players comes from ID3v1, which always stores a track byte. https://community.mp3tag.de/t/zero-numerical-values-and-cant-copy-any-different-information-into-tag-see-image/62921 , https://bitbucket.org/ijabz/jaudiotagger/issues/142/id3v11tag-cant-have-empty-track-number
+- **Kid3:** B found no handbook page on this. A maintainer mail says the Remove action removes a frame, rather than blanking it (https://mail.kde.org/pipermail/kde-mac/2023-July/008846.html). The ID3 dev list concludes that an empty frame should be removed (https://lists.id3.org/pipermail/id3v2/2007-February/000420.html).
+- **Confirmed vs inferred:**
+  - Confirmed (sources above, forum level): empty = removed, and absent = empty field in the editor.
+  - Inferred: a typed `0` is a value that the editor shows and writes. No source says an editor hides `0`.
+- **Deviations (with reasons):**
+  1. Standard Year/Track #/BPM cannot hold `0`. A typed `0` disappears after the re-read, because node-taglib-sharp's setter removes the item at 0 (B probe). This is library behaviour, an FYI for Saba and not a FAIL. Custom number fields keep `0`.
+  2. The number Input keeps its placeholder `'0'` (single) / `'Multiple values'` (batch). An empty field therefore shows a dimmed `0` placeholder, while a real `0` shows as a normal value. Placeholder wording is a UX question for Saba and not part of this fix. C screenshots both states so Saba can judge.
+  3. Files that older builds polluted with `ITKN='0'` now read as `0`, a real value, and show Tagged. The file cannot tell a typed 0 from the old default, so there is no migration.
 
 ## Baseline
-- HEAD `d886bef086628cd2b6a8efed3a7a98eeb8454480`, clean working tree (`git status --porcelain --untracked-files=all` empty).
-  - Exception (project release-commit rule): a root `chore(release): vX.Y.Z` commit directly on d886bef that changes only the two `version` fields counts as the baseline.
+- HEAD `c822d7f1a60a03741c5c1052f19e934d39a85d08`, clean working tree (`git status --porcelain --untracked-files=all` empty).
+  - Exception (release-commit rule): a root `chore(release): vX.Y.Z` commit directly on c822d7f that changes only the two `version` fields counts as the baseline.
   - If HEAD differs or the tree is dirty, **stop and report**.
-- **Frozen:** every path not in the ownership table stays byte-identical to d886bef. That explicitly includes:
-  - `src/shared/types.ts`, `src/main/ipc/schema.ts`, `src/main/ipc/file-system.ts`, `src/main/ipc/channels.ts`;
-  - all of `src/renderer/**` and `src/preload/**`;
-  - `tests/main/riff-chunks.ts`, `tests/main/metadata.test.ts`, `tests/main/riff-info-nul.test.ts`, `tests/main/metadata-write-guard.test.ts`, `tests/main/metadata-write-field-errors.test.ts`;
-  - `tests/contract/**`, `tests/e2e/**`, `tests/renderer/**`, `tests/fixtures/create-fixtures.ts`.
+- **Frozen:** every path not in the ownership table stays byte-identical to c822d7f. That explicitly includes:
+  - `src/shared/types.ts`: `''` is already a `FieldValue`, so no type change is needed;
+  - `src/main/ipc/schema.ts`, `file-system.ts`, `channels.ts`, `src/preload/**`;
+  - `src/renderer/src/stores/**`, `FileList.tsx`, `SchemaEditor.tsx`, `TagsInput.tsx`, `src/renderer/src/components/ui/**`;
+  - every test file not listed below, including `tests/main/riff-chunks.ts`, `riff-info-nul.test.ts`, `metadata.test.ts`, `metadata-write-guard.test.ts`, `metadata-write-field-errors.test.ts`, `recording-tag-contract.test.ts`, `tests/contract/**`, `tests/e2e/**`, `tests/renderer/stores/**`, `tests/renderer/helpers/**`, `tests/renderer/setup.ts`, `tests/fixtures/create-fixtures.ts`.
 - **Protected (never touch):** `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `src/renderer/src/styles/app.css`, `.claude/settings*`, `.claude/hooks/**`.
 
-## Scope
+## Scope (D-50)
 
-### A1. `src/main/ipc/metadata.ts` → `writeTagsToFile` only (D-49)
-Read paths, `emptyMetadata`, `getDefaultValue` and the IPC handlers stay unchanged.
+### A1. `src/main/ipc/metadata.ts`
+The unset marker for a number field is `''`.
 
-**1. Normalise each schema field's value before choosing the standard path or the INFO path:**
-- `field.type === 'text'` and the value is a string whose `trim()` is `''` → empty.
-- `field.type === 'tags'` and the value is an array → drop items that are not strings or whose `trim()` is `''`. If nothing remains → empty. Remaining items are written **exactly as given** (untrimmed, same order).
-- Non-blank text is written exactly as given (untrimmed). Number fields are **unchanged** this round.
+**Read path:**
+- `getDefaultValue('number')` returns `''`. This also changes `emptyMetadata`, so a failed read returns `''` for numbers.
+- **Custom `riffChunkId` number fields:** take the first value after `stripRiffNulTerminator`.
+  - If it is absent, blank after `trim()`, or `Number(v)` is not finite → `''`.
+  - Otherwise → `Number(v)`, so `'0'` reads `0` and `'-2'` reads `-2`.
+- **Standard `year`/`track`/`bpm` getters:** if the library value is `undefined`, `0` or not finite → `''`. Otherwise the number.
 
-**2. Standard-map fields:** an empty text value is passed to its setter as `''`, an empty tags value as `[]`. The library then removes the item.
-- Effect: whitespace-only `title`/`comment` and blank artist/genre items are no longer written.
-- Non-empty values behave exactly as today.
+**Write path, `writeTagsToFile`:** extend the D-49 normalisation to `type === 'number'`.
+- These values count as **empty**:
+  - `''`;
+  - a string whose `trim()` is `''`;
+  - a non-finite number (`NaN`, `±Infinity`).
+- Empty standard field → its setter gets `0` (the library removes the item).
+- Empty `riffChunkId` field → `infoTag.removeValue(id)`. The same `customFields` / `isEmpty` / `failedIds` / workaround rules apply as in D-49.
+- A **finite number, `0` and negatives included**, is written exactly as today: standard setter with the value, INFO `String(value)`.
+- Any other string for a number field is written as today (`String(value)`).
+- No new exports. Helpers stay module-private, named per `AGENT_DISCOVERABLE_CODE.md`. A may extend `normalizeFieldValueForWrite` / `isEmptyFieldValueForWrite` instead.
+- Text/tags behaviour (D-49) is unchanged.
 
-**3. `riffChunkId` fields** (keywords, category, custom text/tags):
-- An empty value calls `infoTags[0].removeValue(riffChunkId)`.
-  - `removeValue(id: string): void` is in `node_modules/node-taglib-sharp/dist/riff/riffListTag.d.ts:52`; A confirms this before use.
-- A non-empty value calls `setValuesFromStrings` as today.
-- The D-18 per-ID error collection still applies: a `removeValue` that throws (e.g. an invalid ID such as `AB`) is added to `failedIds` and produces the same `RIFF INFO fields could not be written: …` error. Existing `metadata-write-field-errors.test.ts` must stay green unchanged.
+### A2. `src/renderer/src/components/metadata-editor/MetadataPanel.tsx`: the number `Input` block only (`field.type === 'number'`, about lines 338-351)
+- **Displayed value:** `String(v)` when `v` is a finite number, `0` included. Otherwise `''`.
+- **onChange:**
+  - `e.target.value === ''` → `updateField(key, '')`;
+  - otherwise `n = Number(e.target.value)`: if `Number.isFinite(n)`, send `n`, else send `''`.
+- Placeholder is unchanged (Deviation 2). Nothing else in the file changes.
 
-**4. INFO-creation workaround:** `tag.title = tag.title ?? ''` and the following `RIFF INFO tag is not available` error run **only when at least one non-empty `riffChunkId` value is to be written**.
-- If every `riffChunkId` value is empty and the file has no InfoTag, nothing is removed and no error is thrown.
-- If an InfoTag exists, the empty IDs are removed from it.
+### A3. `src/renderer/src/lib/file-row-display.ts`: `isNonEmptyFieldValue` only
+- A number counts as tagged when `Number.isFinite(value)`, so `0` and negatives count. `NaN`/`Infinity` do not.
+- This amends D-15 for numbers.
+- String/array rules are unchanged, and `''` stays empty.
 
-**5. Constraints:**
-- No new exports unless a helper is needed. If one is, name it per `AGENT_DISCOVERABLE_CODE.md` (e.g. `isEmptyFieldValueForWrite`) and keep it module-private unless a test needs it.
-- No comments in code (project rule), semicolons, no `any`, no `as unknown as` beyond the existing `TagObject` cast.
+### A4. `src/renderer/src/components/templates/TemplatePicker.tsx`: `handleSaveAsTemplate` filter only (line 130)
+- Drop the `val !== 0` condition, so a typed `0` is saved into the template.
+- `undefined`, `''` and `[]` are still skipped.
+- Nothing else changes: apply, the edit dialog and `dialogStateToTags` already handle numbers.
 
-### A2. Tests, red first (record red/green logs in `a-round-45/`)
-**`tests/main/recording-tag-contract.test.ts`: flip T1-10a and T1-10b only** (titles and assertions). Every other test in the file stays byte-identical.
-- **T1-10a** "(D-10/D-49): empty keywords and category leave no sub-chunk":
-  - writing `{ keywords: '', category: '' }` → `info.has('IKEY') === false`, `info.has('ICAT') === false`;
-  - `meta:read` returns `''` for both.
-- **T1-10b** "(D-10/D-49): writing an empty category removes the previous value":
-  - after `DOORWood` then `''` → `info.has('ICAT') === false`;
-  - the bytes `DOORWood` are not in the file;
-  - read returns `''`.
+### Unaffected (B checked, no change)
+- **`file-store.ts` sort:** `''` is a string, so number vs `''` compares as text (`''` first), the same as missing metadata today (RR-R18-02, R18 (c) "bpm vs missing" uses `undefined`).
+- **`FileList.tsx:100`:** BPM column `meta?.bpm ? meta.bpm : ''`. `''` renders empty. bpm is standard and can never read `0` now.
+- **`isSameFieldValue` / `collectFieldsTypedDuringSave`:** `''` vs `0` compare as different, which is correct.
 
-**New file `tests/main/metadata-empty-values.test.ts`** (main env; use the `riff-chunks.ts` helpers read-only; double quotes like the neighbouring main tests). Cases:
-- **(e1)** Clearing one of several INFO fields: the file has `ICAT=DOORWood`, `IKEY=door, slam`, `ICMT=x`. Write `{ keywords: '' }` → IKEY absent; ICAT and ICMT payloads byte-identical to before.
-- **(e2)** Whitespace-only is empty:
-  - `{ category: '   ' }` on a file with ICAT → ICAT absent;
-  - `{ title: '  ' }` on a file with INAM → INAM absent.
-- **(e3)** Custom text field (schema = STANDARD_FIELDS + `{ key: 'note', type: 'text', riffChunkId: 'RNOT' }`): writing `note: ''` on a file without RNOT → no RNOT (C-R27-02); writing `'n1'` then `''` → RNOT absent.
-- **(e4)** Custom tags field (`{ key: 'mics', type: 'tags', riffChunkId: 'IMIC' }`):
-  - `['', '  ']` → IMIC absent;
-  - `['MKH416', '', ' KM184']` → two IMIC values `MKH416` and ` KM184` (leading space kept, order kept);
-  - read returns `['MKH416', ' KM184']`.
-- **(e5)** Bare WAV with no LIST chunk (build it in the test from `fmt `+`data`, non-empty data), full single-save object with every text/tags field empty:
-  - write succeeds (no `RIFF INFO tag is not available` error);
-  - no INFO sub-chunk with a schema ID exists;
-  - the `data` chunk sha256 is unchanged.
-  - Pin what LIST/INFO is: B's probe shows size 4. If A sees otherwise, A records the observed value and does not weaken the "no schema sub-chunk" assertion.
-- **(e6)** Number fields unchanged (stage 2 guard): custom `{ key: 'take', type: 'number', riffChunkId: 'ITKN' }` with `0` still writes ITKN `'0'` (size 1). Title it `(e6) stage-1 guard: number 0 still written (TM-B11 stage 2 changes this)` so round 46 knows to flip it.
-- **(e7)** Batch: `meta:write-batch` with `{ keywords: '' }` on 2 files that both have IKEY → both lose IKEY; their other INFO payloads are unchanged; `{ succeeded: 2, failed: [] }`.
-- **(e8)** The D-18 error path holds for removal: schema with custom `{ key: 'bad', type: 'text', riffChunkId: 'AB' }` and value `''` → rejects with the existing `RIFF INFO fields could not be written: AB` message.
-  - If node-taglib-sharp's `removeValue` does not throw for `AB`, A records the fact. Then, instead of forcing the error, A pins that the write succeeds and no `AB` chunk exists, and lists it in `a-round-45.md` as a fact for B.
+### A5. Tests, red first (record red/green logs in `a-round-46/`)
+**Main, new file `tests/main/metadata-number-values.test.ts`** (double quotes like the neighbouring main tests; `riff-chunks.ts` helpers read-only):
+- Custom schema: `STANDARD_FIELDS + { key: 'take', label: 'Take', type: 'number', riffChunkId: 'ITKN' }`.
+- **(n1)** A sample WAV without ITKN reads `take === ''`. Bare-WAV `year`, `bpm` and `track` read `''`.
+- **(n2) C-R6-01:** read the whole object of a WAV without ITKN, set `title: 'X'`, write it back → no ITKN sub-chunk, INAM=`X`.
+- **(n3)** Write `{ take: 7 }` then `{ take: '' }` → ITKN absent, and the bytes `7` are not in an ITKN payload. Write `{ take: '  ' }` on a file with ITKN → absent.
+- **(n4)** Write `{ take: 0 }` → ITKN payload `'0'` (size 1). Read returns `0` (number, `toBe(0)`). Write `{ take: -2 }` → `'-2'`, reads `-2`.
+- **(n5)** A planted ITKN payload `'abc'` reads `''`. A planted `'0\0'` reads `0`.
+  - `riff-chunks.ts` has no INFO writer: `writeSampleWavWithInfo` is local to the frozen `riff-info-nul.test.ts`. A copies it, or writes an equivalent, into the new file (also usable for seeding (n3)/(n7)). The frozen file stays untouched.
+- **(n6)** `{ year: 2024 }` then `{ year: '' }` → ICRD absent, reads `''`. `{ year: 0 }` on a file with ICRD → ICRD absent (library limit, Deviation 1), reads `''`.
+- **(n7)** Batch: `meta:write-batch` with `{ take: '' }` on 2 files that both have ITKN and other INFO → both lose ITKN, other payloads unchanged, `{ succeeded: 2, failed: [] }`.
+- **(n8)** `{ take: Number.NaN }` on a file with ITKN → ITKN absent.
+- **(n9)** `meta:read` on a corrupt file (`emptyMetadata`) returns `''` for every number field of the schema.
 
-**Red proof:** T1-10a/b and at least (e1), (e2), (e3), (e4 first half), (e5) or (e7) fail on d886bef `src/main/ipc/metadata.ts` (run in a temp copy outside the repo with `node_modules` symlinked, or before the src edit). (e6) passes on both. Logs go in `a-round-45/`.
+**Main, `tests/main/metadata-empty-values.test.ts`: retitle (e6) only.**
+- New title: `"(e6) a typed number 0 is written (D-50)"`. The body stays byte-identical, because an explicit `{ take: 0 }` must still write `'0'` (Saba Q4).
+- Every other line of the file stays byte-identical. This is a retitle, **not** a flip.
 
-### A3. Docs (Georgian, English technical terms)
-- **`docs/recording-tag-contract.md`, section `## ცარიელი მნიშვნელობა (D-10, ღიაა)`:**
-  - retitle to D-10/D-49, decided;
-  - an empty text value (also whitespace-only) or an empty tags list **removes** the sub-chunk; no size-0 sub-chunk is written;
-  - clearing a value removes the old bytes;
-  - numbers: stage 2 (TM-B11) is pending, and today a custom number `0` is still written as `'0'`;
-  - the importer rule is unchanged (absent or empty payload = no value);
-  - remove the "Saba must decide" sentence;
-  - update header line 5's decision list to include D-49, and the `## შემოწმება` test list with `metadata-empty-values.test.ts`.
-- **`.claude/primitives/WAV_METADATA.md`:** one short Georgian rule under `### STANDARD_PROP_MAP vs riffChunkId`: an empty value is not written; an INFO-path empty value uses `removeValue`; D-49. Use the Edit tool (standing `.claude/**` permission).
+**Renderer, new file `tests/renderer/components/number-field-values.test.ts`** (use `tests/renderer/helpers/*` read-only; render `MetadataPanel` the way `metadata-panel-batch-save.test.ts` does; schema store = `STANDARD_FIELDS + Take/ITKN`):
+- **(r1)** Single file with `take: ''`: the Take input value is `''`. Typing `0` → `editingMetadata.take === 0` **and the input value is `'0'`** (on c822d7f it shows `''`, so this is the red), and Save calls `writeMetadata` with `take: 0`.
+- **(r2)** Single file with `take: 0`: the Take input value is `'0'`. Clearing it → `editingMetadata.take === ''`, and Save sends `take: ''`.
+- **(r3)** Single file with `take: ''`: change only Title and Save → `writeMetadata` gets `take: ''`, not `0`. This is the renderer half of C-R6-01.
+- Helpers: `setup.ts` already mocks `loadTemplates`/`saveTemplate`. `typeInto`, `startSingleSave` and `selectPaths` are local to `metadata-panel-batch-save.test.ts`, so A copies what it needs into the new file. No change to `tests/renderer/helpers/**` or `setup.ts`.
+- **(r4)** Template: `take: 0` typed, Save as template → `window.api.saveTemplate` receives `tags.take === 0`. A field left `''` is not in `tags`.
+
+**Renderer, owned flips (exact lines; round-44 rule):**
+- **`tests/renderer/utils/file-row-display.test.ts`:**
+  - move `["zero", 0]` and `["negative number", -1]` from `emptyValues` to `nonEmptyValues`;
+  - in the two `hasAnyTagValue({... bpm: 0 ...})` cases and the `(c) ... empty defaults returns false` JSON case, change `bpm: 0` / `"bpm":0` to `bpm: ""` / `"bpm":""`;
+  - add one case: `{ title: "", take: 0 }` → true;
+  - nothing else changes.
+- **`tests/renderer/components/file-list.test.ts` line 22 only:** `createDefaultMetadata` number default `0` → `""` (mirrors main's new `emptyMetadata`). Otherwise every row would turn Tagged under A3.
+- **`tests/renderer/components/metadata-panel-batch-save.test.ts` line 44** and **`tests/renderer/components/busy-buttons-focus.test.ts` line 45 only:** `if (type === "number") return 0;` → `return "";` (mirrors main, C-R13-01).
+
+**Stop rule:** if any other existing test fails after A1–A4, **stop and report** its name. Do not edit it.
+
+**Red proof:**
+- On c822d7f `src/` (temp copy outside the repo, `node_modules` symlinked):
+  - must fail: (n1), (n2), (n3), (n5 `'abc'`), (n6 first half), (n8), (n9), (r1), (r2), (r3), (r4), and the flipped file-row-display cases;
+  - must pass on both: (e6) retitled, (n4) and (n5 `'0\0'`).
+  - (n6) second half, (n7) and (r3) are expected red (old reads/sends `0`); A records what it observes and does not weaken an assertion to make it red.
+- A lists the observed pass/fail of every case.
+
+### A6. Docs (Georgian, English technical terms)
+- **`docs/recording-tag-contract.md`, the empty-value section:**
+  - replace the "რიცხვები: stage 2 ჯერ არ გაკეთებულა" bullet with D-50:
+    - an unset number is not written, and clearing removes it;
+    - a typed `0` is written as `'0'` and the importer must treat it as a real 0;
+    - standard Year/Track/BPM cannot hold 0;
+    - older builds may have left `ITKN='0'`;
+  - header decision list + D-50;
+  - `## შემოწმება`: add `metadata-number-values.test.ts` and fix the (e6) wording.
+- **`.claude/primitives/WAV_METADATA.md`:** one short Georgian rule next to the D-49 rule: number unset = `''`, `0` is written, D-50. Use the Edit tool (standing `.claude/**` permission).
+- **`.claude/primitives/STATE_MANAGEMENT.md`:** one line stating that number fields use `''` for unset in `editingMetadata` (D-50).
 
 ### Not in this round
-- Number fields (stage 2, round 46). Read path. Renderer.
-- TM-B05, TM-B08, TM-B06. RR-R44-01..03, A-R43-01 (signals).
-- The extra `id3 `/`LIST/MID`/`IDVX`/`JUNK` chunks and the empty `LIST/INFO` that node-taglib-sharp renders (C-R1-01's second half, library behaviour).
+- RR-R45-02 (workaround pin/cleanup), RR-R45-04, C-R45-01 (shape validation), RR-R45-05 (refactor).
+- Placeholder wording (Deviation 2). The batch-clear UX (Q21).
+- TM-B05, TM-B08, TM-B06.
 
 **Process:**
-- Repository writes go through Edit/Write only (rule from round 18).
-- Read `WAV_METADATA.md`, `TESTING.md`, `TYPESCRIPT_STRICT.md` and `AGENT_DISCOVERABLE_CODE.md` before the first edit.
-- 3+ files change, so run the `code-reviewer` subagent (read-only) and record its findings in `a-round-45.md`.
+- Repository writes go through Edit/Write only.
+- Read `WAV_METADATA.md`, `STATE_MANAGEMENT.md`, `TESTING.md`, `TYPESCRIPT_STRICT.md` and `AGENT_DISCOVERABLE_CODE.md` before the first edit.
+- More than 3 files change, so run the `code-reviewer` subagent (read-only) and record its findings in `a-round-46.md`.
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `src/main/ipc/metadata.ts` | A1: D-49 in `writeTagsToFile` |
-| `tests/main/recording-tag-contract.test.ts` | A2: T1-10a and T1-10b only |
-| `tests/main/metadata-empty-values.test.ts` (new) | A2: (e1)–(e8) |
-| `docs/recording-tag-contract.md` | A3: D-10/D-49 section, header, test list |
-| `.claude/primitives/WAV_METADATA.md` | A3: one rule |
+| `src/main/ipc/metadata.ts` | A1: D-50 read + write |
+| `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` | A2: number Input block only |
+| `src/renderer/src/lib/file-row-display.ts` | A3: number rule in `isNonEmptyFieldValue` |
+| `src/renderer/src/components/templates/TemplatePicker.tsx` | A4: line 130 filter only |
+| `tests/main/metadata-number-values.test.ts` (new) | A5: (n1)–(n9) |
+| `tests/main/metadata-empty-values.test.ts` | A5: (e6) title only |
+| `tests/renderer/components/number-field-values.test.ts` (new) | A5: (r1)–(r4) |
+| `tests/renderer/utils/file-row-display.test.ts` | A5: listed flips + one case |
+| `tests/renderer/components/file-list.test.ts` | A5: line 22 only |
+| `tests/renderer/components/metadata-panel-batch-save.test.ts` | A5: line 44 only |
+| `tests/renderer/components/busy-buttons-focus.test.ts` | A5: line 45 only |
+| `docs/recording-tag-contract.md` | A6 |
+| `.claude/primitives/WAV_METADATA.md` | A6: one rule |
+| `.claude/primitives/STATE_MANAGEMENT.md` | A6: one line |
 
-**B's grep for tests that feed the changed flow** (rule from round 44: `tests/` searched for `IKEY`, `ICAT`, `RNOT`, `ITKN`, `length).toBe(0)`, `toHaveLength(0)`, `D-10`, `meta:write`, `writeMetadata`):
-- Only T1-10a/b pin a size-0 write. They are owned above.
-- These write **non-empty** values or check other things, so they stay green unchanged:
-  - `riff-info-nul.test.ts` (f): whole-object resave, all asserted IDs non-empty;
-  - `metadata-write-guard.test.ts`, `metadata-write-field-errors.test.ts`, `metadata.test.ts`;
-  - `recording-tag-contract.test.ts` T1-1..T1-9;
-  - `tests/contract/check-ffprobe-tags.ts`;
-  - `tests/e2e/recording-tag-contract.spec.ts`, `tests/e2e/folder-workflow.spec.ts`.
-- Renderer suites mock `window.api` and do not reach `metadata.ts`.
-- If any of these fails after A1, **stop and report** its name. Do not edit it.
+**B's grep** for tests that feed the changed flow (`tests/` searched for `bpm`, `year`, `track`, `ITKN`, `ICRD`, `"number"`, `return 0`, `bpm: 0`, `toBe(0)`, `typeInto("BPM"`, `meta:write`):
+- `metadata.test.ts` (year 2024 / bpm 120), `riff-info-nul.test.ts` (d)/(f)/(i) (ITKN 120, ICRD 2024) and `metadata-write-field-errors.test.ts` (ITKN as **text**) write or read non-zero values → unchanged.
+- `metadata-panel-batch-save.test.ts` (y7) types `128` → unchanged.
+- `file-list.test.ts` bpm 1–4 / 120 → unchanged.
+- `file-store.test.ts` (c) → unchanged (`undefined`, not `''`).
+- `metadata-empty-values.test.ts` (e5) sends `bpm/year/track: 0` to standard setters → still no ICRD/IBPM/ITRK → unchanged.
+- No e2e or contract test touches numbers.
 
-A writes only `a-round-45.md` (and `a-round-45/` logs) in the loop folder. C writes `c-round-45.md`/`.json` and evidence under `c-round-45/`.
+A writes only `a-round-46.md` (and `a-round-46/` logs) in the loop folder. C writes `c-round-46.md`/`.json` and evidence under `c-round-46/`.
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R45-1 ownership | `git rev-parse HEAD`; `git status --porcelain --untracked-files=all`; `git diff --stat d886bef`; `git diff --quiet d886bef -- <every frozen/protected path above>` | HEAD d886bef (or the release exception). Changed paths ⊆ the five owned paths. In `recording-tag-contract.test.ts` only the T1-10a/b blocks differ. Frozen and protected paths are byte-identical. |
-| R45-2 red/green | Temp copy outside the repo (`node_modules` symlinked) with d886bef `src/main/ipc/metadata.ts` + A's tests; then A's tree | On d886bef `src/`: T1-10a, T1-10b and the A2-listed new cases fail; (e6) passes. On A's tree: all pass. C also runs 2–3 mutants and records which test kills each: (M1) remove the trim (`''` check only); (M2) write `['']` again instead of `removeValue`; (M3) always run the INFO workaround. Logs go in `c-round-45/`. |
-| R45-3 gate | Clean `verifyCommand` `{ npx --yes tsx@4 tests/fixtures/create-fixtures.ts && npm run check && xvfb-run -a npm run test:e2e; }` + `xvfb-run -a npx playwright test --retries=0` once | Exit 0. Renderer 320/320. Main 98 + A's new count, all passing. E2E 7/7 with no retry. Biome 0 errors, warnings ≤ 8. |
-| R45-4 real app: clear a value | Built app via Playwright `_electron` under `xvfb-run`, temp `XDG_CONFIG_HOME`. A WAV with `ICAT=DOORWood`, `IKEY=door, slam`, `ICMT=მძიმე კარი` (seed it with the app itself or a raw INFO writer; ffmpeg's RIFF writer does not emit ICAT/IKEY). Select it, clear Keywords in the editor, Save Tags. | Toast `Tags saved`. In all three readers (raw INFO parse, `ffprobe -show_entries format_tags -of json`, `music-metadata` with `exif:` namespace): **no IKEY key**, and ICAT=`DOORWood` and ICMT=`მძიმე კარი` unchanged. The editor shows Keywords empty after the re-read. Screenshots before and after. |
-| R45-5 real app: untouched empties | A fresh ffmpeg WAV **without** IKEY/ICAT. Select it, set only Title `R45`, Save Tags. Then add a custom Text field in Customize Fields (e.g. Note → auto ID), leave it empty, change Title to `R45b` (the form must be dirty for Save to be enabled), Save again. | No `IKEY`, `ICAT` or custom-ID key in raw INFO, ffprobe and music-metadata. No size-0 sub-chunk for any schema ID in the raw parse. INAM=`R45` after the first save and `R45b` after the second, in all three. Before this round both IKEY and ICAT appeared as `""` (C R44-4(a)); C may show it on a d886bef build for contrast. |
-| R45-6 real app: batch clear | 3 WAVs with `IKEY=door, slam` and different ICATs (seeded with the app or a raw INFO writer). Select all 3, clear Keywords, `Save to 3 files`. | Toast `Tags saved to 3 files`. In all three readers, each file has no IKEY and keeps its own ICAT. Unselected files are byte-identical (sha256 before/after). `pageErrors` is empty. |
-| R45-7 docs | Read the owned docs diff | `recording-tag-contract.md` states D-10/D-49 as decided, describes removal and the number-stage note, keeps the importer rule, and lists the new test file. `WAV_METADATA.md` has the D-49 rule. Georgian with English technical terms. |
+| R46-1 ownership | `git rev-parse HEAD`; `git status --porcelain --untracked-files=all`; `git diff --stat c822d7f`; `git diff --quiet c822d7f -- <frozen/protected paths>`; per-file diff of every "only" file | HEAD c822d7f (or the release exception). Changed paths ⊆ ownership table. Each "only" file differs exactly in its stated lines. Frozen and protected paths are byte-identical. |
+| R46-2 red/green + mutants | Temp copy outside the repo (`node_modules` symlinked) with c822d7f `src/` + A's tests; then A's tree. Mutants: **M1** read default stays `0`; **M2** renderer onChange sends `0` for an empty input; **M3** badge back to `> 0`; **M4** write path writes number `''` as `String('')` instead of removing; **M5** standard getter keeps `0` instead of `''` | Red/green as A5 lists (C records each case). Every mutant is killed by at least one named test, or C names the survivor and why. Logs go in `c-round-46/`. |
+| R46-3 gate | Clean `verifyCommand` `{ npx --yes tsx@4 tests/fixtures/create-fixtures.ts && npm run check && xvfb-run -a npm run test:e2e; }` + `xvfb-run -a npx playwright test --retries=0` once | Exit 0. Renderer 320 + A's new count, main 109 + A's new count, all passing. E2E 7/7 with no retry. Biome 0 errors, warnings ≤ 8. |
+| R46-4 real app: unset custom number not written (C-R6-01) | Built app via Playwright `_electron`, `xvfb-run`, temp `XDG_CONFIG_HOME`. Customize Fields → add a Number field "Take" (auto ID) → Done. A fresh ffmpeg WAV without that ID: set only Title `R46`, Save Tags. | Toast `Tags saved`. The custom ID is absent in raw INFO, `ffprobe -show_entries format_tags -of json` and `music-metadata` (`exif:`). INAM=`R46` in all three. No size-0 sub-chunk. Take input shows empty (screenshot). Contrast on a c822d7f build: the custom ID appears with `'0'`. |
+| R46-5 real app: typed 0 is written and shown | Same schema. A fresh WAV: type `0` into Take only, Save. | All three readers show the custom ID = `0` (raw payload `'0'`, size 1). After selecting another file and coming back, the Take input shows `0`, not empty, and the row shows **Tagged**. Screenshots of the empty-with-placeholder and the `0` states (Deviation 2). |
+| R46-6 real app: clear a number | Single: a WAV with Take `7` (seeded with the app); clear Take, Save. Batch: 2 WAVs with Take `7` and different ICAT; select both; the batch form starts empty (C-R45-02), so type `1` into Take and press Backspace; `Save to 2 files`. | Single: the ID is absent in all three readers, ICAT and the other fields unchanged. Batch: toast `Tags saved to 2 files`; both files lose the ID and keep their own ICAT. Unselected files are byte-identical (sha256). `pageErrors` is empty. |
+| R46-7 real app: standard number limit (FYI, not a FAIL) | Type Year `2024` → Save → clear → Save. Then type Year `0` → Save. | Year `2024` appears in raw ICRD and in ffprobe, and is removed after clearing. Year `0` writes nothing and the input shows empty after the re-read (Deviation 1). C records it; it is not a FAIL. |
+| R46-8 docs | Read the owned docs diff | `recording-tag-contract.md` states D-50, typed 0 = real 0, the standard limit, old `ITKN='0'`, and the new test file. `WAV_METADATA.md` and `STATE_MANAGEMENT.md` have the D-50 lines. Georgian with English technical terms. |
 
 `build:win` / `build:mac` stay BLOCKED ("Windows packaging is not available in the cloud"). That is not a FAIL.
 
 ## What could break (C re-checks)
-- **Non-empty writes:** T1-1 exact sizes, odd-size padding (T1-1b), UTF-8 ICMT, NUL-free payloads (`riff-info-nul` (f)), ISFT and other non-schema INFO items kept, `data`/`bext`/`iXML` sha256 unchanged (T1 contract tests). All green unchanged.
-- **Standard fields:** title/comment/artists/genres still written when non-empty; the R45-5 INAM check covers this in the real app.
-- **D-18 per-ID error message** (e8 + `metadata-write-field-errors.test.ts`).
-- **The INFO workaround still creates INFO** when a non-empty custom value meets a file without INFO (`metadata-write-guard.test.ts` (d)).
-- **Batch writes only `modifiedFields`:** clearing one field in batch must not remove other fields (R45-6 ICAT kept).
-- **Renderer "Tagged" badge (D-15):** unchanged. An emptied field reads `''` as before.
+- **D-49 text/tags behaviour:** all round-45 tests stay green unchanged except the (e6) title.
+- **Non-zero number round trips:** year 2024, bpm 120 and ITKN 120 with NUL (`riff-info-nul` (d)/(f)/(i)).
+- **D-18 error path** for number fields with a bad ID: the same message.
+- **Dirty-state logic:** `''` vs `0` in `isSameFieldValue`; typing during a save (y7); the single-save snapshot.
+- **Badge** for files with only text values (unchanged). File list BPM column and sort by BPM (unchanged).
+- **Templates:** applying an existing template with numbers is unchanged.
 
 ## Next (orientation only, Saba's order)
-1. **TM-B11 stage 2 (round 46): number fields.**
-   - An absent custom number must read as a distinct unset marker (candidate: `''`, already in `FieldValue`). Otherwise every single-file save resends `0` and C-R6-01 reproduces.
-   - The number input must distinguish empty from `0`. The write path skips unset and keeps a typed `0`.
-   - Ripple: `file-row-display` (D-15), sort (RR-R18-02), TemplatePicker, batch common values.
-   - Standard year/track/bpm cannot store `0` in node-taglib-sharp (`setValueFromUint(0)` removes the item). That is a deviation to report to Saba as an FYI, not a blocker.
-   - The D-ID is chosen at round 46 planning; (e6) flips then.
-2. **Q5 → TM-B05:** per-file error "audio data is empty, cannot tag", with a test.
-3. **Q3 → TM-B08:** docs/test pin (D-12).
-4. **Q6 → TM-B06:** Biome over `tests/**`, relaxed override.
-5. **Q7 → TM-T2-DATA → TM-T2:** waiting on Saba.
-6. **Open for Saba:** Q9–Q17, Q18 (B-R42-01), Q19 (RR-R42-03), Q20 (whitespace-only = empty in D-49 is B's interpretation of Q4; non-blocking).
+1. **Q5 → TM-B05:** per-file error "audio data is empty, cannot tag", with a test.
+2. **Q3 → TM-B08:** docs/test pin (D-12, artists outside K-4).
+3. **Q6 → TM-B06:** Biome over `tests/**`, relaxed override.
+4. **Q7 → TM-T2-DATA → TM-T2:** waiting on Saba.
+5. **Open for Saba (non-blocking):**
+   - Q9–Q20;
+   - Q21: batch clearing needs type-then-delete, C-R45-02;
+   - FYI RR-R45-01: an empty `LIST/INFO` may exist; tell the importer owner;
+   - FYI D-50 Deviations 1–3.
