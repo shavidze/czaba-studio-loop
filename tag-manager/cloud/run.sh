@@ -69,6 +69,25 @@ mkdir -p "$CZ/tmp"
 ln -sfn "$STATE/loop" "$LOOP"
 [ -d "$REPO/.git" ] || { log "Tag Manager repository missing at $REPO"; exit 2; }
 
+# ---------- root release request (Saba): bump the version on master before the round ----------
+# tag-manager/cloud/RELEASE holds a version (e.g. 1.4.0). The Tag Manager's release.yml builds installers on a
+# master push with a new package.json version. Done once; tag-manager/cloud/RELEASE-DONE records it.
+if [ -s "$STATE/cloud/RELEASE" ]; then
+  WANT="$(head -1 "$STATE/cloud/RELEASE" | tr -d '[:space:]')"
+  if [ -n "$WANT" ] && ! grep -qx "$WANT" "$STATE/cloud/RELEASE-DONE" 2>/dev/null; then
+    CUR="$(cd "$REPO" && node -p "require('./package.json').version")"
+    if [ "$CUR" = "$WANT" ] || git -C "$REPO" rev-parse -q --verify "refs/tags/v$WANT" >/dev/null; then
+      log "release $WANT: already at that version or tagged; nothing to do"
+    else
+      ( cd "$REPO" && npm version "$WANT" --no-git-tag-version --allow-same-version >/dev/null \
+        && git add package.json package-lock.json && git commit -qm "chore(release): v$WANT" \
+        && git push -q origin HEAD:master ) && log "release $WANT: pushed $(git -C "$REPO" log -1 --format='%h %s')" \
+        || { notify "Tag Manager loop: release v$WANT bump failed" "Root's version bump to $WANT could not be committed or pushed. The round continues without it."; git -C "$REPO" reset -q --hard origin/master; }
+    fi
+    echo "$WANT" >> "$STATE/cloud/RELEASE-DONE"
+  fi
+fi
+
 # ---------- should this job run? ----------
 PHASE="$(jq -r '.phase // ""' "$LOOP/status.json")"
 ROUND="$(jq -r '.round // 0' "$LOOP/status.json")"
@@ -88,25 +107,6 @@ case "$PHASE" in
 esac
 [ "$START_ROUND" -ge 1 ] || START_ROUND=1
 log "status $PHASE round $ROUND -> start round $START_ROUND phase $START_PHASE"
-
-# ---------- root release request (Saba): bump the version on master before the round ----------
-# tag-manager/cloud/RELEASE holds a version (e.g. 1.4.0). The Tag Manager's release.yml builds installers on a
-# master push with a new package.json version. Done once; tag-manager/cloud/RELEASE-DONE records it.
-if [ -s "$STATE/cloud/RELEASE" ]; then
-  WANT="$(head -1 "$STATE/cloud/RELEASE" | tr -d '[:space:]')"
-  if [ -n "$WANT" ] && ! grep -qx "$WANT" "$STATE/cloud/RELEASE-DONE" 2>/dev/null; then
-    CUR="$(cd "$REPO" && node -p "require('./package.json').version")"
-    if [ "$CUR" = "$WANT" ] || git -C "$REPO" rev-parse -q --verify "refs/tags/v$WANT" >/dev/null; then
-      log "release $WANT: already at that version or tagged; nothing to do"
-    else
-      ( cd "$REPO" && npm version "$WANT" --no-git-tag-version --allow-same-version >/dev/null \
-        && git add package.json package-lock.json && git commit -qm "chore(release): v$WANT" \
-        && git push -q origin HEAD:master ) && log "release $WANT: pushed $(git -C "$REPO" log -1 --format='%h %s')" \
-        || { notify "Tag Manager loop: release v$WANT bump failed" "Root's version bump to $WANT could not be committed or pushed. The round continues without it."; git -C "$REPO" reset -q --hard origin/master; }
-    fi
-    echo "$WANT" >> "$STATE/cloud/RELEASE-DONE"
-  fi
-fi
 
 # ---------- restore uncommitted work from the previous job ----------
 PATCH="$STATE/worktree/patch"
