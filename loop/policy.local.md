@@ -292,3 +292,21 @@ Saba finds the Studio screen overloaded. The design review is in `/home/runner/c
 - C runs the doc's 12 acceptance rows at 1440×900 and 1280×720, empty and demo project, before and after.
 - Reference-first and screen-budget rules apply.
 - `Why we missed it` for this issue is written in CALM-1's task.
+
+## SABA-B-7: clip volume envelope on a dB scale (Saba, 2026-10-28, approved)
+
+Saba dragged a clip envelope point to the bottom and the music "did not go fully silent". Root checked the code on 2d4a93f, and it is not a gain bug. `envelope.ts` stores linear gain 0..1 (0 = −∞ dB). `graph.client.ts` `scheduleClipEnvelopeGain` uses `linearRampToValueAtTime` in linear gain. The drag maps pixels linearly to gain (`ArrangementClipEnvelope.tsx:261–267`). Two effects follow:
+- one bottom point is silent for an instant only;
+- a linear-gain line sounds loud for most of the dip and falls away only at the end.
+
+**Task (Medium, after SABA-B-8 CALM-1…3 and before the next PERF task):**
+- The envelope's vertical axis and its interpolation follow a dB fader taper, the way Live's volume automation does. `ableton-arrangement-expert` and `docs-explorer` confirm Live's exact taper and its clip-envelope behaviour with a manual source before dispatch (reference-first). The bottom stays −∞ dB.
+- Scheduling follows the same curve: dense `setValueCurveAtTime`, or short segments approximating the dB line; no exponential ramp to 0.
+- The tooltip and readout keep showing dB.
+- **Existing projects keep their sound.** Stored points keep their gain values. Only the line between points changes shape, and B states this in the task and records it with a D-ID, because it changes how saved projects sound between points. If B finds that unacceptable, B writes BLOCKED with the options for Saba instead.
+- C checks:
+  - a flat segment of two bottom points renders digital silence in the export;
+  - a straight line from 0 dB to −∞ measured at 25/50/75 % lands on the taper's dB values ±0.5 dB;
+  - existing tests for fades and the envelope still pass;
+  - no click at the points (the existing envelope-click rows).
+- `Why we missed it`: the reference-first rule did not exist when the envelope was built (rounds 82–83).
