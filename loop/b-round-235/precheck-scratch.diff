@@ -1,0 +1,160 @@
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -283,6 +283,7 @@
+   togglePlayback: () => void;
+   pausePlaybackWithStatus: (message: string) => void;
+   seekTo: (time: number) => void;
++  playFrom: (time: number) => void;
+   scrubPlayhead: (time: number) => void;
+   endPlayheadScrub: (time: number) => void;
+   importVideoFiles: (files: readonly File[]) => void;
+@@ -1382,6 +1383,31 @@
+     [startGraph, updatePosition],
+   );
+ 
++  const playFrom = useCallback(
++    (time: number) => {
++      const target = Math.max(0, time);
++      if (isPlayingRef.current) {
++        seekTo(target);
++        return;
++      }
++      const arrangement = historyRef.current.present;
++      const end = projectEnd(arrangement);
++      if (
++        end > 0 &&
++        target >= end - ARRANGEMENT_EPS &&
++        resolveActiveLoop(arrangement.loop, target) === null
++      ) {
++        stopLibraryPreview();
++        seekTo(target);
++        setStatus(playPastEndMessage(target, end));
++        return;
++      }
++      seekTo(target);
++      togglePlayback();
++    },
++    [seekTo, stopLibraryPreview, togglePlayback],
++  );
++
+   const scrubPlayhead = useCallback(
+     (time: number) => {
+       const target = Math.max(0, time);
+@@ -3766,6 +3792,7 @@
+       togglePlayback,
+       pausePlaybackWithStatus,
+       seekTo,
++      playFrom,
+       scrubPlayhead,
+       endPlayheadScrub,
+       importVideoFiles,
+@@ -3876,6 +3903,7 @@
+       togglePlayback,
+       pausePlaybackWithStatus,
+       seekTo,
++      playFrom,
+       scrubPlayhead,
+       endPlayheadScrub,
+       importVideoFiles,
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -1310,11 +1310,7 @@
+   }, [fitTimeline, zoomTimelineToRange]);
+ 
+   const playFromRuler = useCallback((time: number) => {
+-    const latest = workspaceRef.current;
+-    latest.seekTo(time);
+-    if (!latest.isPlaying) {
+-      latest.togglePlayback();
+-    }
++    workspaceRef.current.playFrom(time);
+   }, []);
+   const barsRulerGestures = useMemo<BarsRulerGestures>(
+     () => ({
+--- a/app/components/arrangement/ArrangementTempoRow.tsx
++++ b/app/components/arrangement/ArrangementTempoRow.tsx
+@@ -108,6 +108,7 @@
+   gestures,
+ }: ArrangementBarsRulerProps) {
+   const stripRef = useRef<HTMLDivElement>(null);
++  const pressInStripRef = useRef(false);
+   const navigation = useRulerNavigation({
+     onGestureClaim: gestures.onGestureClaim,
+     getTimelineView,
+@@ -137,12 +138,29 @@
+         interactive && 'cursor-pointer touch-none',
+       )}
+       style={{ width: seconds * pxPerSecond }}
+-      onPointerDown={interactive ? navigation.onPointerDown : undefined}
++      onPointerDown={
++        interactive
++          ? (event) => {
++              pressInStripRef.current =
++                event.target instanceof Node && (stripRef.current?.contains(event.target) ?? false);
++              navigation.onPointerDown(event);
++            }
++          : undefined
++      }
+       onPointerMove={interactive ? navigation.onPointerMove : undefined}
+       onPointerUp={interactive ? navigation.onPointerUp : undefined}
+       onPointerCancel={interactive ? navigation.onPointerCancel : undefined}
+       onLostPointerCapture={interactive ? navigation.onLostPointerCapture : undefined}
+-      onDoubleClick={interactive ? navigation.onDoubleClick : undefined}
++      onDoubleClick={
++        interactive
++          ? () => {
++              if (pressInStripRef.current) {
++                return;
++              }
++              navigation.onDoubleClick();
++            }
++          : undefined
++      }
+       role="presentation"
+       title={interactive ? studioViewStrings.rulerTitle : undefined}
+       data-testid="arrangement-bars-ruler"
+--- a/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
+@@ -400,4 +400,42 @@
+     pressG();
+     expect(barsMarksCalls.count).toBeGreaterThan(calls);
+   });
++
++  it('BR12 a double-click on the strip plays from the point and does not fit; the lower zone still fits', async () => {
++    const mounted = await mountTempo90SnapOn();
++    const root = mounted.bars();
++    act(() => live(mounted.api).setStatus('marker'));
++    clickStrip(mounted, 4.1);
++    clickStrip(mounted, 4.1);
++    fireEvent.doubleClick(root);
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBeCloseTo(4, 3);
++    expect(statusText(mounted.view)).toBe('marker');
++    act(() => live(mounted.api).togglePlayback());
++    clickLower(mounted, 6.3);
++    clickLower(mounted, 6.3);
++    fireEvent.doubleClick(root);
++    expect(statusText(mounted.view)).toMatch(/^Fit: the entire project is visible \(/);
++  });
++
++  it('BR13 a strip click that snaps to the project end reports past-end and does not play from 0', async () => {
++    const mounted = await mountTempo90SnapOn();
++    clickStrip(mounted, 15.95);
++    expect(live(mounted.api).isPlaying).toBe(false);
++    expect(positionOf(mounted.api)).toBeCloseTo(16, 3);
++    expect(statusText(mounted.view)).toBe(playPastEndMessage(16, 16));
++    act(() => live(mounted.api).togglePlayback());
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBe(0);
++  });
++
++  it('BR14 a strip click in the same task as a playback start keeps playing (reads the playing ref)', async () => {
++    const mounted = await mountTempo90SnapOn();
++    act(() => {
++      live(mounted.api).togglePlayback();
++      clickStrip(mounted, 8.2);
++    });
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBeCloseTo(8, 3);
++  });
+ });

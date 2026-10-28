@@ -1,0 +1,73 @@
+{
+  "round": 235,
+  "task": "SABA-B-11a stage 2 — interactive bars ruler + scrub strip",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-28T22:16:36.3437593Z",
+    "round": 235,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R235-01",
+      "severity": "low",
+      "steps": [
+        "Fresh context, /studio-lab, 1440x900 or 1280x720",
+        "Select demo-stem-pulse, click Add (tempo 120, Snap on, 1/4)",
+        "Set arrangement-timeline-scroller.scrollLeft = 300",
+        "Click the scrub strip at x = bars.x + 15.95 s x 40 px/s, y = bars.y + 4 (snaps to 16.000 = project end)"
+      ],
+      "expected": "'Click = play from here' plays from the clicked point (Live 6.1/6.3) or reports the past-end status, as a click at t = 20 does",
+      "actual": "Playback starts from 0.000 (playhead 0 -> 0.84 s after 880 ms), status unchanged. Cause: the existing togglePlayback rule (current >= end - EPS and no loop -> from 0), now reachable by a strip click. Predicted by A from code; C reproduced it at both viewports. Snap band: with Snap on at 1/4 (0.5 s at 120 BPM), clicks from 15.75 to 16.25 s snap to 16.000, a 0.5 s = 20 px band at the default 40 px/s, so it is not a pixel-exact edge. Severity Low: it does not change what a user must learn (the strip still means 'play from here'), no data is affected, and it only occurs at the last grid line of a project with no active loop. Code owner of a fix (no fix proposed): playFromRuler in StudioWorkspace.tsx (granted this round) or togglePlayback in ArrangementContext.tsx (frozen; round 236 holds its grant).",
+      "evidence": "tmp/studio-real-loop/c-round-235/out/c235.json rows edge@1440x900.atEnd, edge@1280x720.atEnd"
+    },
+    {
+      "id": "C-R235-02",
+      "severity": "low",
+      "steps": [
+        "Fresh context, /studio-lab, seed demo-stem-pulse; Follow on",
+        "Experiment A: Space to play; an unmoved click on the bars ruler lower zone (y+15) at 5 s -> Follow state",
+        "Experiment B: Space to play; a 100 px bars-ruler drag (Follow pauses: 'Follow ‖', status 'Follow paused by manual navigation...'); then an unmoved strip click (y+4) -> Follow state"
+      ],
+      "expected": "Live 12 manual §6.2, verbatim (local capture b-round-71/ableton-arrangement-view-20261021.txt, confirmed by WebFetch 2026-10-28): 'Follow will pause if you make an edit or scroll the view horizontally in the Arrangement, or if you click on the beat-time ruler. Follow will start again once you stop or restart playback, or click in the Arrangement or clip scrub area.' So a lower-zone (beat-time ruler) click should pause Follow, and a scrub-strip click should resume it. Otherwise list both as deviations in the task's reference table.",
+      "actual": "A: Follow stays on after a lower-zone click (and after a strip click and a seconds-ruler click; HEAD's seconds ruler is the same). B: after the drag pauses Follow, a strip click keeps it paused ('false|Follow ‖'); a lower-zone click keeps it paused too. Both viewports. Task §3 says a plain beat-time ruler click is 'Not found' and has no Follow row, so both differences are unlisted. Severity Low: the user's gestures (click = play here, drag = scroll, double-click = Fit) match Live; only the Follow side state differs, and the status line says how to resume. B may escalate to Medium if it rules that Follow-resume-on-scrub is part of what a Live user expects to learn. Not measured: a strip click while stopped with Follow paused.",
+      "evidence": "c-round-235/out/follow-work.json, follow-head.json, follow-resume.json; scripts follow.cjs, resume.cjs"
+    }
+  ],
+  "passed": [
+    "C-SCOPE-235",
+    "C-UNIT-235",
+    "C-STRIP-STOPPED",
+    "C-STRIP-PLAYING",
+    "C-LOWER",
+    "C-ALT",
+    "C-DRAG",
+    "C-DBL",
+    "C-EDGE",
+    "C-NO-TEMPO",
+    "C-SECONDS",
+    "C-ZONES",
+    "C-SHEET",
+    "C-BUDGET",
+    "C-REF-235",
+    "AN-REVIEW-235",
+    "LAB-SMOKE-235",
+    "C-SHOTS-235",
+    "Auth"
+  ],
+  "gate": [
+    "full vitest, typecheck, lint, build, npm run verify, e2e smoke (root gate)"
+  ],
+  "blocked": [],
+  "notes": [
+    "C-STRIP-PLAYING: the audio source restarted at offset exactly 8.000 and the button aria-label recorded 0 mutations (no blip). Literal criterion: playhead = 8.000 + elapsed ±50 ms. Measured playhead − (8 + time since pointerup) = −47…−63 ms, so the literal bound is exceeded by up to ~13–17 ms. Cause: the pre-existing 50 ms scheduler start lead (source.start when = 0.05 s) plus sample granularity. HEAD's seconds-ruler seek while playing measured the same −49…−69 ms at 1280x720. The HEAD comparison is one viewport only: headLatency@1440x900 timed out loading :5174. Passed on the audio-source evidence; B should restate the criterion relative to the audio start (or include the 50 ms lead). C-LOWER's playing half shows the same −44…−70 ms lead.",
+    "C-REF-235 passes with one exception, recorded as C-R235-02 (an unlisted Follow-pause difference, Low). All 5 Saba questions exist in backlog.json.",
+    "Info (no bug): double-clicking the scrub strip starts playback (the first click) and fits the view. The manual documents no scrub-area double-click. Recorded for B only.",
+    "A-R235-REVIEW-M1 (isPlaying render-state race): not reproduced by C in any run; it stays B's ruling.",
+    "Library preview stops on a strip click (preview.json); a loop brace 2-6 wraps from 2.19 after a strip click at 3; a click at 9, outside the loop, plays from 9; no longtask during strip-started playback; touch-action none only with a tempo.",
+    "Source tree unchanged during C (git status and sha256 identical to start)."
+  ]
+}

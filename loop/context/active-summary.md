@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T21:28:03.526Z)
+# Active loop summary (2026-10-28T22:41:16.043Z)
 
-- backlog.json 2161 KB -> active view 310 KB
-- status: G_ROOT_GATE round 234
-- servers: `{"checkedUtc":"2026-10-28T21:10:48.8220774Z","round":234,"attempt":1,"store":200}`
-- last publication: c95b8a8966bfedef7c1d3793e23391be512a831e (rounds 234-234)
-- last root gate: round 234 published - commit c95b8a8966bfedef7c1d3793e23391be512a831e pushed
+- backlog.json 2174 KB -> active view 314 KB
+- status: G_ROOT_GATE round 235
+- servers: `{"checkedUtc":"2026-10-28T22:16:36.3437593Z","round":235,"attempt":1,"store":200}`
+- last publication: 49b4c74f193555dd0fee57036060623cfe0aae5a (rounds 235-235)
+- last root gate: round 235 published - commit 49b4c74f193555dd0fee57036060623cfe0aae5a pushed
 
 ## Current items: SRW-21
 
@@ -559,6 +559,16 @@
 - GATE233-S5 / info / duplicate of deferred Low B-R232-DOC180-FOCUS-STALE (D-29z325) / doc 180 l.42-51 still describes the reversed focus rule
 - SABA-Q-TEMPO-UNDO / info / awaiting_user (D-29z324); default kept until answered / CZABA keeps tempo, grid and Snap outside the undo history (D-29z30 R4), so Undo of the clip that seeded the tempo keeps tempo/grid/Snap; in 
 - SABA-Q-ENVELOPE-TAPER / info / awaiting_user (D-29z322): user-review/AGREE-SABA-B-7.md / clip envelope taper: A dB-linear -60 dB floor (lane fader scale) vs B p^3; saved projects change between points; Live measurement request
+- A-R234-REVIEW-M1 / medium / open, scheduled (D-29z329): round 236 SABA-B-11a-FIX; deadline before SABA-B-11b and before SRW-21 resume / any initial-arrangement path. Not reproducible in /studio-lab today because that path does not exist there (C c234reload.json), not because the bug is absent / seed status (placement + seeded + Snap on) is overwritten by the provider's source-loading/ready setStatus when the initial arrangement alre
+- GATE234-S2 / low / scheduled with A-R234-REVIEW-M1 in round 236 (D-29z329); same code, low cost / seed search never closes in a project with no BPM sources: findAssetTempoSeed rebuilds two Maps on every clips/tracks change for the session
+- GATE234-S3 / low / scheduled with A-R234-REVIEW-M1 in round 236 (D-29z329) / [status, ...parts].join(' ') yields a leading space when status is empty
+- GATE234-S5 / info / awaiting_user as SABA-Q-SEED-STATUS-LENGTH (D-29z330) / one aria-live message now carries three sentences (placement, tempo, Snap)
+- GATE234-S7 / info / note for PERF re-baselines (D-29z330); no perf/e2e spec names a source today / a perf scenario that adds a synthetic stem now runs with Snap on, 1/4 and the bars ruler
+- SABA-Q-TIME-RULER-ROLE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live's time ruler (min:sec) only scrolls on drag (6.1); a plain click there and in the beat-time ruler outside the scrub area is undocumente
+- SABA-Q-SCRUB-QUANTIZE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live quantizes a scrub-area jump by the Control Bar Quantization menu (6.3); CZABA has no launch quantization, so the strip uses the editing
+- SABA-Q-SCRUB-HOLD-LOOP / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live: holding the mouse in the scrub area loops a portion by the global launch quantization (6.3). Not built in SABA-B-11a. Wanted?
+- SABA-Q-SCRUB-ADD-LOCATOR / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live (video riOD 2:22-3:08): right-click in the scrub area -> Add Locator. Our marker menu opens only on an existing flag. Wanted (later can
+- SABA-Q-SEED-STATUS-LENGTH / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / The seed status is one aria-live message of three sentences (placement, 'Tempo N BPM from ... Grid only: audio is not stretched.', 'Snap on 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

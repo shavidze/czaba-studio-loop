@@ -26,3 +26,8 @@
 3. Should the adaptive grid (11b) be a pure function of `pxPerSecond`, tempo and density, living in `grid-divisions.ts`, with StudioWorkspace holding only the mode? Or does it belong inside the proposed hook?
 
 Related pending requests (non-blocking, still open): `b-round-231-checkpoint-request.md` (ready), `b-round-229`, `-225`, `-221`, `-211`.
+
+## Addendum (B, round 235 → 236 planning, D-29z337)
+- **Trigger met:** SABA-B-11a is done (round 235 C PASS, published `49b4c74`). The request is still non-blocking; best before SABA-B-11b.
+- **New signal GATE235-ARCH-POINTER-UTIL** (gate 235 Architecture note): `app/hooks/useRulerNavigation.ts` imports `watchUncapturedPointerGesture` from `~/components/arrangement/ArrangementClip`, the first hook-to-component import in `app/hooks/`. The proposal is to move it to `app/lib/arrangement/` and repoint its three callers, with no behaviour change. Question 4: keep, or extract (value, risk, at most 3 sentences)?
+- **Question 2 update:** B's round-236 planning probe shows the provider's plain-string ready write (`ArrangementContext.tsx` l.~3644) also overwrites a status set before all sources settle, in `/studio-lab` too (`b-round-235/probe/out-baseline-noreadywait.json`). Round 237 (SABA-B-11a-FIX-2) will plan the ready-side fix unless the checkpoint says otherwise.
