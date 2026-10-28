@@ -1,0 +1,32 @@
+MUTANT c-gpl-regex-raw
+--- /tmp/mod.bak	2026-10-28 04:54:18.786278961 +0000
++++ app/lib/third-party-licenses.ts	2026-10-28 04:54:18.791566606 +0000
+@@ -260,6 +260,9 @@
+   if (tokens.length === 0) {
+     return 'unknown';
+   }
++  if (/GPL/i.test(expression)) {
++    return 'copyleft';
++  }
+   return new SpdxExpressionParser(tokens).parseWhole() ?? 'unknown';
+ }
+ 
+--- vitest (CI=true, no -u)
+     × TL1 classifies "LGPL-3.0-only" as clean 7ms
+     × TL1 classifies "LGPL-2.1-or-later" as clean 1ms
+     × TL1 classifies "LGPL" as clean 0ms
+     × TL1 classifies "(BSD-3-Clause OR GPL-2.0)" as clean 0ms
+     × TL1 classifies "(MIT OR (GPL-2.0 AND AGPL-3.0))" as clean 1ms
+     × TL4 has no copyleft or unknown runtime package and no stale exception 6ms
+     × TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL1 classifyLicenseExpression (table-driven) > TL1 classifies "LGPL-3.0-only" as clean
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL1 classifyLicenseExpression (table-driven) > TL1 classifies "LGPL-2.1-or-later" as clean
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL1 classifyLicenseExpression (table-driven) > TL1 classifies "LGPL" as clean
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL1 classifyLicenseExpression (table-driven) > TL1 classifies "(BSD-3-Clause OR GPL-2.0)" as clean
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL1 classifyLicenseExpression (table-driven) > TL1 classifies "(MIT OR (GPL-2.0 AND AGPL-3.0))" as clean
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 has no copyleft or unknown runtime package and no stale exception
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real
+      Tests  7 failed | 36 passed (43)
+rc=1
+c-gpl-regex-raw restored OK

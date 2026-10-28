@@ -1,0 +1,22 @@
+function legacyMp3BitsPerSecond(bitrate: string): number | null {
+  switch (bitrate) {
+    case '128k':
+      return 128_000;
+    case '192k':
+      return 192_000;
+    case '320k':
+      return 320_000;
+    default:
+      return null;
+  }
+}
+
+export async function convertWavToMp3(wavBlob: Blob, bitrate: string = '320k'): Promise<Blob> {
+  const bitsPerSecond = legacyMp3BitsPerSecond(bitrate);
+  if (bitsPerSecond === null) {
+    throw new Error(`Unsupported MP3 bitrate: ${bitrate}`);
+  }
+  const { loadArrangementMp3Encoder } = await import('~/lib/arrangement/mp3-encoder.client');
+  const encoder = await loadArrangementMp3Encoder();
+  return encoder.encode(wavBlob, undefined, { bitrate: bitsPerSecond });
+}

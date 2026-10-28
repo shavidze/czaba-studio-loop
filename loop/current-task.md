@@ -1,269 +1,320 @@
-# CURRENT TASK — Round 219: OSS-LIC — third-party notices + a GPL/AGPL licence test for runtime dependencies
+# CURRENT TASK — Round 220: PERF-16b-i — the purchased-Studio MP3 export moves from ffmpeg.wasm (unpkg) onto the shared LAME encoder, plus the licence-classifier fix (C-R219-01)
 
 Decisions:
-- **D-29z223:** round 218 closed. C PASS (14 rows), `browserVerified` and `realVerified` true. Gate 218 published `da5ad69` (PERF-16a). **PERF-16a is done.** PERF-16b remains.
-- **D-29z224:** C-R218-01 is closed by ruling, not deferred. The `/studio/:productId` guard script baseline becomes **41/0**. The next PERF-RUN compares against `c-round-218/perf-run-1.json`. Cause (C's proof): the `@ffmpeg/ffmpeg` class chunk is now inlined into the guard's own chunks. That is not an eager load. PERF-16b will move this number again.
-- **D-29z225:** the OSS-LIC rulings, in §1.
-- **D-29z226:** the notices drift rule, in §1.9. From now on, every round that files a `root-deps-request.json`, or that follows a lock-only change, grants `THIRD_PARTY_NOTICES.md` and regenerates it. Correction to `oss-adoption.md` l.40: the doc says "the LAME wasm ships as its own file". It does not. The LAME wasm is inlined as base64 in the package's JS. B records this here; B does not own that doc.
+- **D-29z227:** round 219 closed. C PASS (10 rows), `browserVerified` and `realVerified` true. Gate 219 published `c54a534`. **OSS-LIC is done.**
+- **D-29z228:** C-R219-01 is ruled (§1.5) and fixed in this round. The other gate-219 review items are ruled in §1.5 as well.
+- **D-29z229:** PERF-16b is split into two stages:
+  - **16b-i (this round):** code. The legacy path delegates to the shared encoder, quality tiers are kept, and the run-time download note leaves the notices.
+  - **16b-ii (next PERF round):** packages. A root remove request for `@ffmpeg/ffmpeg` and `@ffmpeg/util`, a one-line root grant for `vite.config.ts` l.27 (`optimizeDeps.exclude`), and a notices regeneration.
+  - **No `root-deps-request.json` is filed at this planning.** Root's deps step runs before the round starts; a removal now would break the build at the baseline, because `app/utils/ffmpeg.ts` still imports `@ffmpeg/*` at `c54a534`.
+- **D-29z230:** encoder cancel scope (ARCH-R218-ENCODER-CANCEL-SCOPE). The decision is a single consumer per page, written down and pinned by a test. There is no per-call signal (§1.3).
+- **D-29z231:** the smaller rulings and records (§1.6).
 
-Planned by B on 2026-10-28. Dispatcher: B. Implementer: A. Verifier: C. Consulted before dispatch: `tech-lead` (read-only, all of its points adopted; summary in `b-round-218.md` §4) and the advisor.
+Planned by B on 2026-10-28. Dispatcher: B. Implementer: A. Verifier: C. Consulted before dispatch:
+- `tech-lead` (read-only);
+- `performance-optimizer` (read-only);
+- the advisor.
+
+Summaries are in `b-round-219.md` §4.
 
 **Read first:**
-- `lessons.md`. L5, L10, L11, L12, L13, L23, L26, L28, L30, L31, L32 and L33 apply.
-- `/home/runner/czaba-project/docs/technical/performance/oss-adoption.md` l.39–41 (OSS-LIC) and l.57–59 ("Never copy code from").
+- `lessons.md`. L10, L11, L12, L23, L26, L28, L31, L32, L33 and L35 apply. L35 now names TL4 as well as TL5.
+- `/home/runner/czaba-project/docs/technical/performance/oss-adoption.md`: the PERF-16 row and "Never copy code from".
 - Project primitives:
-  - `AGENT_DISCOVERABLE_CODE.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `SECURITY_AUDIT.md`;
-  - `.claude/prompts/new-test.md`;
-  - `.claude/prompts/new-service.md` (for the pure module's shape only).
-- **L23 collision check, done by B.** The new module carries the literals `mediabunny`, `@mediabunny/mp3-encoder`, `unpkg.com`, `@ffmpeg/core@0.12.6`, `GPL`, `LAME` and GitHub URLs.
-  - B grepped `app/**/__tests__` (regex `mediabunny|unpkg|ffmpeg|GPL|LAME|THIRD_PARTY|third-party`, plus every `readdirSync` repo scanner). The hits:
-    - `mp3-encoder.test.ts` (ME9 scans import statements only, plus the encoder module's own text);
-    - `strings.test.ts`, `export-dialog-a11y-copy.test.tsx`, `export-progress-ui.test.tsx`;
-    - the scanners `store-focus-ring`, `store-theme-tokens`, `studio-focus-ring`, `timeline-cursor-map`, `panel-radius-ui` and `studio-theme-obsidian`.
-  - B then put a draft `app/lib/third-party-licenses.ts`, holding all those literals, on a scratch copy of `da5ad69` and ran the 10 files: **166/166 pass** (`b-round-218/l23-scratch-run.txt`). No grant is needed.
-  - **Class ruling R:** the header text must not contain the sequence `import '…mediabunny…'` or `from '…mediabunny…'`. It never uses `import`/`from` before a quoted package name. If A's final file makes any of those 10 files red, that is a STOP.
-- The pattern to copy: the repo-scan test ME9 in `app/lib/arrangement/__tests__/mp3-encoder.test.ts`. It reads files with `node:fs` under the jsdom environment (l.1–3, l.471–482).
+  - `AUDIO_ARCHITECTURE.md`, `AGENT_DISCOVERABLE_CODE.md`, `API_ERROR_HANDLING.md` (only the error-propagation part applies);
+  - `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`;
+  - `.claude/prompts/new-test.md`, `.claude/prompts/studio-feature.md`.
+- `tasks/round-218.md` §1 (the shared encoder contract) and `tasks/round-219.md` §1.3 (the classifier rules).
 
 ## Baseline
-- **Expected HEAD:** `da5ad69a1b771f5f83a043af6cc2e4e058d3355b` (gate 218, `feat(studio): verified loop rounds 218-218`). No deps commit is expected this round. B filed no `root-deps-request.json`.
-- **Working tree at planning:** clean. `b-round-218/git-status-at-planning.txt` is empty.
-- **Frozen: every tracked file.** That is 1,066 files in `b-round-218-r219-tree-sha256.txt`, `package.json` and `package-lock.json` included.
-  - From `store/`, run `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-218-r219-tree-sha256.txt`. B checked it: rc 0.
-- **Grants:** none on existing files.
-- **New files (4):** listed in `b-round-218-r219-new-files.txt`:
-  1. `THIRD_PARTY_NOTICES.md` (repo root);
-  2. `app/lib/third-party-licenses.ts`;
-  3. `app/lib/__tests__/third-party-licenses.test.ts`;
-  4. `docs/implementation/2026/quarter-IV/171-oss-lic-third-party-notices.md` (B checked: 171 is free, 170 is the last).
+- **Expected HEAD:** `c54a534e997b9b5caf98e4294187b3e906c4a285` (gate 219, `feat(studio): verified loop rounds 219-219`). No deps commit is expected; B filed no `root-deps-request.json`.
+- **Working tree at planning:** clean. `b-round-219/git-status-at-planning.txt` is empty.
+- **Frozen:** every tracked file except the 8 grants. That is 1,062 files in `b-round-219-r220-tree-sha256.txt`, `package.json` and `package-lock.json` included.
+  - From `store/`, run `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-219-r220-tree-sha256.txt`. B checked it: rc 0.
+- **Grants (8 existing files):** listed in `b-round-219-r220-grants.txt`. Their start hashes are in `b-round-219-r220-granted-start-sha256.txt`.
+  1. `app/utils/ffmpeg.ts`: the whole file (§1.1).
+  2. `app/lib/arrangement/mp3-encoder.client.ts`: the bitrate option only (§1.2).
+  3. `app/lib/arrangement/__tests__/mp3-encoder.test.ts`: new rows ME10–ME12. Existing rows stay as they are.
+  4. `app/lib/arrangement/__tests__/export-progress-ui.test.tsx`: **only** the `loadFFmpeg` removal. That covers the l.21 import, the l.54 mock factory, the l.60 `loadFFmpegMock` const, the l.255 reset and the l.540 expectation. PU5's other assertions stay as they are.
+  5. `app/lib/third-party-licenses.ts`: §1.4 and §1.5.
+  6. `app/lib/__tests__/third-party-licenses.test.ts`: §1.4 and §1.5.
+  7. `THIRD_PARTY_NOTICES.md`: regenerated only, never edited by hand.
+  8. `docs/technical/diagrams/studio-audio-pipeline.md`: the whole sections listed below (L34). Nothing else in that file changes.
+     - the intro sentence (l.5);
+     - `## 7. Export Pipeline`;
+     - `## 10. Error Handling Paths`;
+     - `## 12. სრული Data Flow`.
+- **New files (2):** listed in `b-round-219-r220-new-files.txt`. B checked that both are free.
+  - `app/utils/__tests__/ffmpeg.test.ts`. This is a new folder; vitest includes `app/**/*.test.{ts,tsx}`.
+  - `docs/implementation/2026/quarter-IV/172-perf-16b-i-legacy-mp3-shared-encoder.md` (171 is the last).
 - **Protected as always:**
   - the auth and purchase files: `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`;
+  - **`app/contexts/StudioContext.tsx` is frozen this round.** Its call `convertWavToMp3(wavBlob, bitrate)` (l.1188–1190) and its catch path (l.1199–1203) stay byte-identical;
+  - `app/contexts/ArrangementContext.tsx` (frozen);
   - `.claude/**`, `CLAUDE.md`, `package*.json`, `vite.config.ts`, `vitest.config.ts`, `biome.json` and every other config file;
   - `perf/**` and `e2e/**`.
 - **Not allowed:**
-  - installing, updating or removing packages (`npm install`, `npm update` and so on);
-  - running `npm audit fix`;
-  - fetching licence data from the network into any file. The source of truth is `package-lock.json` only. `node_modules` may be read to confirm a fact, but the module and the test never read it.
+  - installing, updating or removing packages;
+  - deleting or renaming any file. Deletion needs Saba's permission (CLAUDE.md), so `app/utils/ffmpeg.ts` keeps its path;
+  - copying code from `@ffmpeg/core` or any project on the oss-adoption "Never copy" list.
 
 ## 0. Why this round
-- **The outcome table was fixed in advance** in `tasks/round-218.md` §6: "PASS, and planning before 2026-10-30 → Round 219 = OSS-LIC, then 16b". C passed round 218, and B is planning on 2026-10-28.
-- **The spec** is `oss-adoption.md` l.39–41, approved by Saba:
-  - a `THIRD_PARTY_NOTICES.md` with package, version, licence and link for every runtime dependency, plus the LAME note;
-  - a unit test that reads `package-lock.json` and fails on a runtime dependency whose licence is GPL-* or AGPL-*, with devDependencies excluded and an explicit allow-list for exceptions.
-- **Facts B measured on `da5ad69` (2026-10-28):**
-  - `lockfileVersion` 3. There are 588 lock entries without `dev: true`, which is **563 unique name@version** pairs.
-  - Licences of those entries: MIT 354, Apache-2.0 175, BSD-3-Clause 18, ISC 18, MPL-2.0 14, Unlicense 2, and one each of `(Apache-2.0 AND MIT)`, `(Unlicense OR Apache-2.0)`, `(MIT AND Zlib)`, 0BSD, BSD-2-Clause and **`(BSD-3-Clause OR GPL-2.0)`**.
-    - The last one is `node-forge@1.3.3`, via `firebase-admin`.
-    - The MPL-2.0 entries are `mediabunny`, `@mediabunny/mp3-encoder`, `lightningcss` and its 11 optional platform binaries (via `@tailwindcss/vite` in `dependencies`).
-  - **`limiter@1.1.5` has no `license` field** in the lock. Its path is `firebase-admin > jwks-rsa > limiter` (`npm ls limiter`). Its own `package.json` uses the legacy `"licenses": [{"type": "MIT", …}]`.
-  - 8 entries are `devOptional`: typescript, once, wrappy, readable-stream, string_decoder, stream-shift, util-deprecate and end-of-stream. 11 are `optional` (the lightningcss binaries). 0 entries are `link` or `inBundle`.
-  - **LAME:**
-    - `@mediabunny/mp3-encoder@1.62.1` is MPL-2.0.
-    - Its README, l.94, says: "The LAME MP3 Encoder is licensed under LGPL. On their license page they ask that you give them a shoutout with a link." l.102 says the build is LAME 3.100.
-    - **The WASM is inlined as base64** (it starts with `AGFzbQ`, the WASM magic) in `dist/modules/build/lame.js` and in the four `dist/bundles/*` files. There is no `.wasm` file in the package (README l.150: "the compiled WASM inlined").
-    - `https://lame.sourceforge.io/license.txt`, read by B with WebFetch on 2026-10-28, says LAME is under "the LGPL", with no version stated, and asks users to "Fully acknowledge that you are using LAME, and give a link to our web site, www.mp3dev.org".
-  - **`@ffmpeg/core@0.12.6`** is not in the lock. The legacy path `app/utils/ffmpeg.ts` l.38 fetches it at run time from `https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm` until PERF-16b. Its npm `license` field says MIT (`npm view`, 2026-10-28). `oss-adoption.md` l.26/l.59 records it as GPL-2.0+. B could not confirm either claim from the ffmpeg.wasm README (WebFetch, 2026-10-28), so the notice states both facts and claims neither (§1.6).
+- **The outcome table was fixed in advance** in `tasks/round-219.md` §6: "PASS, and planning before 2026-10-30 → Round 220 = PERF-16b". C passed round 219, and B is planning on 2026-10-28. Regression is due on or after 2026-10-30, per `regression-last.json`.
+- **C bug first.** C-R219-01 is the only C finding. It is fixed here because this round has to own the same two licence files anyway: the run-time download section lives in `third-party-licenses.ts`, and TL6's `@ffmpeg/core` row goes red once the unpkg URL is gone. The 2026-10-23 rule allows a Low to be fixed early when the round already owns the code and the fix is cheap.
+- **The spec** (`oss-adoption.md`, PERF-16 row): MP3 export goes through mediabunny + `@mediabunny/mp3-encoder`, `@ffmpeg/*` and the unpkg URL are removed, and "the export dialog, progress, cancel and file names stay exactly as they are".
+- **Facts B measured on `c54a534` (2026-10-28):**
+  - `app/utils/ffmpeg.ts` imports `FFmpeg`, `fetchFile` and `toBlobURL` from `@ffmpeg/*`. At l.38 it downloads the core from `https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm`. It exports `loadFFmpeg`, `convertWavToMp3(wavBlob, bitrate = '320k')` and `onFFmpegProgress`.
+    - The only app importer is `StudioContext.tsx` l.25, and it imports `convertWavToMp3` only.
+    - `loadFFmpeg` is referenced only by the mock in `export-progress-ui.test.tsx`.
+    - `onFFmpegProgress` has no references.
+  - **The purchased-Studio dialog has quality tiers.** `app/components/studio/ExportDialog.tsx` l.25 and l.197–211 offer Low, Medium and High. `StudioContext.tsx` l.1188–1189 maps them to `'128k'`, `'192k'` and `'320k'`, and renders at 48 kHz (l.1114).
+  - The shared encoder is fixed at `ARRANGEMENT_MP3_BITRATE = 320_000` (`mp3-encoder.client.ts` l.17).
+  - **B's real-Chromium probe** (`b-round-219/bitrate-probe.cjs` and `.log`) used mediabunny 1.62.1 + LAME, `Quality({ bitrate })`, on a 5 s 48 kHz stereo 16-bit WAV. Every audio frame came out MPEG-1 Layer III, 48 kHz, joint stereo: 128000 gave 210 frames at 128 kbps, 192000 gave 210 at 192 kbps, and 320000 gave 210 at 320 kbps. Each file had one 56 kbps Xing frame, and the frame walk ended at EOF. **So all three tiers are CBR at the exact rate.**
+  - **ME9** (`mp3-encoder.test.ts` l.150–193, l.467–477) counts every textual `mp3-encoder.client` in a non-test `app/` file. Each one must be an `import('~/lib/arrangement/mp3-encoder.client')`, either at run time or as `typeof import(...)`. An `import type … from '…mp3-encoder.client'`, or a comment or JSDoc that names the module, is a violation (see class ruling R in §1.1).
+  - **Providers:** `StudioProvider` mounts only in `routes/studio.$productId.tsx` (l.540), and `ArrangementProvider` mounts only in `routes/studio-lab.tsx` (l.26). They are never mounted together.
+  - **L23 scratch check by B.** B made a scratch copy of `c54a534`, applied a draft of §1.1–§1.5, and ran the checks below:
+    - Test files run: `mp3-encoder`, `export-progress-ui`, `export-mp3`, `strings`, `third-party-licenses` (plain and `CI=true`), and the 7 repo-scan files `timeline-cursor-map`, `studio-focus-ring`, `export-dialog-a11y-copy`, `panel-radius-ui`, `studio-theme-obsidian`, `store-focus-ring` and `store-theme-tokens`. Result: **228/228 pass** (`b-round-219/l23-scratch-run.txt`).
+    - `tsc --noEmit`: rc 0.
+    - `npm run build`: rc 0. 0 `unpkg.com` and 0 `@ffmpeg` hits in the build. No ffmpeg worker asset. The `routes/studio.$productId` manifest imports (21) contain no mp3, media or ffmpeg chunk (`b-round-219/scratch-build-facts.txt`).
+    - The drafts are in `b-round-219/draft-*.ts.txt`. They are sketches, not a spec. A writes its own code.
+    - **Not in the scratch run:** the `LicenseRef-* → unknown` rule (§1.5 R-219-2). The round-219 licence census of the lock (MIT 354, Apache-2.0 175, BSD-3-Clause 18, ISC 18, MPL-2.0 14, Unlicense 2, plus six single expressions) has no `LicenseRef-` id, so TL4 stays green. That rule is not a STOP trigger by itself.
+    - B also checked that Vite serves `/app/utils/ffmpeg.ts` to the browser with the `~` alias resolved (`curl` on the dev server: `import { debug } from "/app/lib/debug.ts"`). So FACADE-REAL-220's `import('/app/utils/ffmpeg.ts')` works in the page.
 
-## 1. Rulings (D-29z225). Required.
+## 1. Rulings. Required.
+### 1.1 `app/utils/ffmpeg.ts` becomes a thin facade (StudioContext unchanged)
+- It exports exactly one function: `convertWavToMp3(wavBlob: Blob, bitrate: string = '320k'): Promise<Blob>`. `loadFFmpeg` and `onFFmpegProgress` are removed. The file is not deleted or renamed.
+- **The bitrate map is exact:** `'128k'` → 128000, `'192k'` → 192000, `'320k'` → 320000. Any other string rejects with `Error('Unsupported MP3 bitrate: <value>')` **before** the encoder module is imported. That covers `'256k'`, `''`, `'320'` and `'320K'`.
+- **Delegation:** `await import('~/lib/arrangement/mp3-encoder.client')`, then `loadArrangementMp3Encoder()` on **every call**, so no encoder object is cached across a reset. Then `encoder.encode(wavBlob, undefined, { bitrate })`. The Blob is returned as it is (`audio/mpeg`).
+- **Errors:** a load or encode failure propagates unchanged. It is not wrapped and not swallowed. `StudioContext`'s existing catch then sets `isExporting: false` and `exportProgress: 0`, and rethrows. That is today's behaviour for an ffmpeg failure.
+- **Progress:** unchanged. StudioContext sets 85 before the call and 100 after it, with no intermediate MP3 progress, the same as with ffmpeg today. Intermediate progress is accepted debt (signal LEGACY-MP3-PROGRESS); it is not this round.
+- **Class ruling R (ME9).** Every textual occurrence of `mp3-encoder.client` in `ffmpeg.ts` is an `import('~/lib/arrangement/mp3-encoder.client')`. There is no `import type … from` and no comment that names the module path. If a type is needed, use `typeof import('~/lib/arrangement/mp3-encoder.client')` (the ArrangementContext l.3411 form). If ME9 goes red, that is a STOP.
+- **Naming.** The file name now says ffmpeg while the code does not use it. AGENT_DISCOVERABLE_CODE gets the minimum: one line `// TODO: rename to a legacy-mp3 facade once Saba allows file renames (PERF-16b)`. Project rules allow a TODO comment. The rename is a Saba question (`b-round-219.md` §8).
 
-### 1.1 Where things live
-- `app/lib/third-party-licenses.ts` is a **pure** module: no `node:` imports, no file IO, no React.
-  - Nothing in `app/routes`, `app/components` or `app/contexts` imports it. Only the test does. It never enters a client or server bundle (C checks this in BUNDLE-219).
-  - It exports:
-    - the classifier;
-    - the lock walker;
-    - the copyleft finder;
-    - the exceptions constant;
-    - the MPL source-link constant;
-    - the notices renderer.
+### 1.2 The shared encoder gets an optional bitrate
+- `ArrangementMp3Encoder.encode(wav, onProgress?, options?: ArrangementMp3EncodeOptions)`, where `ArrangementMp3EncodeOptions` is `{ bitrate?: number }`.
+- **Allowed values:** an exported `ARRANGEMENT_MP3_BITRATES: readonly number[] = [128_000, 192_000, 320_000]`. No `as const`: the project forbids assertions.
+- **Default:** 320000, so every lab call site keeps its current behaviour. ArrangementContext is frozen and calls `encode(blob, onProgress)`.
+- **Validation:** a value outside the list rejects with `Error('Unsupported MP3 bitrate: <n>')`. It does so before `new Input(...)` and before `Conversion.init`. No Input is created, so there is nothing to dispose.
+- **Quality:** `new Quality({ bitrate })` receives the chosen value. Nothing else in the module changes:
+  - generation and reset;
+  - `isCancelled` progress gating;
+  - the post-execute generation check;
+  - the error texts.
 
-    Choose clear, greppable names, for example `classifyLicenseExpression`, `listRuntimeLockPackages`, `findCopyleftRuntimePackages`, `THIRD_PARTY_LICENSE_EXCEPTIONS`, `THIRD_PARTY_SOURCE_LINKS` and `renderThirdPartyNotices`.
-  - Strict TypeScript: no `any`, no `@ts-ignore` and **no `as`**. Parse the lock as `unknown` and narrow it with type guards. Every statement ends with `;`.
-- The test reads `package-lock.json`, `package.json` and `THIRD_PARTY_NOTICES.md` with `node:fs`, the same way ME9 does.
-- `THIRD_PARTY_NOTICES.md` is at the repo root and is **generated**: it is exactly `renderThirdPartyNotices(lock)`. A writes no part of it by hand. Its hand-written prose lives as a constant in the module (§1.6).
+### 1.3 Cancel scope (D-29z230)
+- **Ruling: a single consumer per page.** `resetArrangementMp3Encoder()` stays module-wide. Each page has at most one encoder consumer, because the two providers mount on different routes.
+- **Known race, documented and not fixed:** start a lab MP3 export, navigate client-side to `/studio/:id`, then start a legacy MP3 export before the lab's pending `import()` resolves. The lab's late `resetArrangementMp3Encoder()` (ArrangementContext l.3456–3460) can then reject the legacy encode with "MP3 encoder reset during …".
+  - This fails safely: the StudioContext catch resets the state, no file is produced, and the user can export again.
+  - Doc 172 states this. A per-call signal would mean editing the frozen ArrangementContext, and it is not justified by an observed defect.
+- **ME12** pins the invariant (§1.7).
 
-### 1.2 Which lock entries count as runtime
-- Walk `packages`. Skip the `""` root entry.
-- **Exclude only `dev: true`.** `devOptional`, `optional` and `peer` entries count as runtime. This is the conservative choice. Do not "fix" the lightningcss or typescript classification.
-- **Name:** take the entry's `name` field when it exists (aliases, for example `string-width-cjs` → `string-width`). Otherwise take the path segment after the last `node_modules/`, scoped names included (`node_modules/@a/b/node_modules/@c/d` → `@c/d`).
-- **Unknown entries:** an entry with `link: true` or `inBundle: true` is classified **unknown** (it fails, §1.4), not skipped. There are 0 of these today.
-- **Deduplication:** two entries with the same name@version give one notices row. Different versions of the same name give separate rows.
+### 1.4 The notices lose the run-time download entry
+- After §1.1, no app code downloads `@ffmpeg/core`. Remove `NOTICES_RUNTIME_DOWNLOADS_SECTION` and its place in the renderer.
+- The `@ffmpeg/ffmpeg` and `@ffmpeg/util` table rows stay, because they are still in the lock until 16b-ii.
+- TL6 "the run-time downloads section names @ffmpeg/core@0.12.6" becomes **TL6 "there is no run-time downloads section"**. That row checks `notices` does not contain `Run-time downloads`.
+- **New TL8:** no non-test `.ts`/`.tsx` file under `app/` contains `unpkg.com` or a `from '@ffmpeg/` / `import('@ffmpeg/` reference.
+  - It is a repo scan like ME9: `readdirSync`, with `__tests__` excluded.
+  - Its red-proof is a named mutant: a scratch file holding the old l.38 URL is flagged (L23: a repo scan cannot be red on the start copy).
 
-### 1.3 Licence classification (SPDX expression)
-- **Input:** `license` is a string, or a legacy object `{ type }`, whose `type` is used. A missing field, an empty string or a non-string is **unknown**.
-- **Grammar:** parse `OR`, `AND`, `WITH` and parentheses, with ids matched case-insensitively. A malformed expression (unbalanced parentheses, an empty operand, a dangling operator) is **unknown**. Do not regex-scan the whole string.
-- **Copyleft id (flagged):**
-  - an id that starts with `GPL-` or `AGPL-`;
-  - a bare `GPL` or `AGPL`;
-  - deprecated forms such as `GPL-2.0+`, `GPL-3.0`, `GPL-2.0-with-classpath-exception`, `AGPL-1.0`, `AGPL-3.0`.
-- **Not flagged, as a deliberate ruling:** `LGPL-*` and bare `LGPL`.
-  - The spec names GPL-* and AGPL-* only.
-  - LAME, the only LGPL code we ship, is covered by the notice, not by the test.
-  - A naive `/GPL/` regex would wrongly flag LGPL. The test proves this does not happen (TL1).
-- **Combination rules:**
-  - `A OR B` is clean when any alternative is clean.
-  - `A AND B` is copyleft when any part is copyleft.
-  - `X WITH exception` has the class of `X`.
-  - Unknown inside `OR`: the expression is clean if another alternative is clean, otherwise unknown. Unknown inside `AND`: the expression is unknown unless a part is copyleft, in which case it is copyleft.
-- **Text that is not a licence id:** `UNLICENSED` and `SEE LICENSE IN …` are **unknown**.
-- **Result:** the classifier returns `clean`, `copyleft` or `unknown`. The finder returns every runtime entry that is not `clean` and is not covered by an exception.
+### 1.5 C-R219-01 and the gate-219 review (D-29z228)
+- **Severity:** B keeps **Low**. A's code-reviewer and the gate reviewer both rated it Medium. B rules lower because no lock version reachable today has such a spelling: TL4 shows 0 failures, and the only GPL id, `node-forge`, passes by the OR rule. It is fixed now because the grants overlap (§0).
+- **Fix:** `COPYLEFT_ID_PATTERN = /^A?GPL(?:V?\d|[-+]|$)/i`, applied per token, as today. The `^` anchor keeps LGPL clean.
+- **TL1 rows, added:**
 
-### 1.4 Exceptions (the explicit allow-list)
-- `THIRD_PARTY_LICENSE_EXCEPTIONS` has exactly **one** entry today:
-  - name `limiter`;
-  - version `1.1.5`;
-  - **asserted licence `MIT`**;
-  - reason: `lock has no license field; the package's own package.json uses the legacy "licenses": [{"type": "MIT"}]; via firebase-admin > jwks-rsa`.
-- **An exception matches name + version exactly.** A version bump fails the test until the entry is re-checked. Never match by name alone.
-- **Stale exceptions fail.** An exception fails when no runtime entry has that name@version, or when the entry now has a `license` field of its own, which makes the exception unnecessary.
-- **No exception for `node-forge`.** It passes through the OR rule. If it ever ships under a plain GPL licence, the test must fail.
-- **The asserted licence is printed:** the renderer prints the exception's asserted licence in the Licence column, marked `MIT (asserted; see exceptions)`.
+  | Expression | Classification |
+  |---|---|
+  | `GPLv3` | copyleft |
+  | `GPLv2+` | copyleft |
+  | `GPL2` | copyleft |
+  | `AGPLv3` | copyleft |
+  | `MIT AND GPLv2` | copyleft |
+  | `(MIT OR GPLv3)` | clean (OR rule) |
+  | `LGPLv3` | clean |
+  | `LGPL-2.1-only` | clean |
+  | `LicenseRef-Proprietary` | unknown (R-219-2 below) |
 
-### 1.5 The notices table (generated)
-- **One row per unique runtime name@version**, sorted by name and then version, with a **plain code-point comparison** (`<`/`>`), not `localeCompare`.
-- **Columns:** Package · Version · License · Link.
-  - **License** is the raw lock expression, or the asserted exception value (§1.4).
-  - **Link** is `https://www.npmjs.com/package/<name>/v/<version>`, with the scoped name kept literally (`@mediabunny/mp3-encoder`).
-- **Deterministic output:** `\n` line endings, one trailing newline, and no timestamp, date or count that depends on the environment.
-  - The row count may appear, because it comes from the lock.
-  - The header names `package-lock.json` and the regeneration command (§1.8).
+  The existing rows stay.
+- **A's open questions, R-219-2 to R-219-4 (L10, each ruled):**
+  - **R-219-2: changed.** An id beginning `LicenseRef-` (case-insensitive) is **unknown**, so it fails until someone looks at it. Other well-formed ids that are not GPL stay `clean`. Doc 172 states that `clean` means "no GPL/AGPL found", not "permissive". There is no SPDX id list, because the spec's scope is GPL/AGPL. A TL1 row `Proprietary` → clean pins that meaning.
+  - **R-219-3: accepted.** Lowercase `and`, `or` and `with` stay accepted, because npm metadata casing varies. The TL1 row `mit or gpl-3.0` → clean stays.
+  - **R-219-4: accepted.** An empty or whitespace licence string means no licence: it is unknown, and an exception can cover it.
+- **Gate-219 review:**
+  - **S1** is the same finding, and is closed with it.
+  - **S2** (Low), folded: in TL5, `expect(existsSync(NOTICES_PATH)).toBe(true)` comes before the snapshot assertion, so a run without `CI=true` cannot silently recreate a deleted file. GitHub Actions sets `CI=true`, so the gate was already safe.
+  - **S3** (Low), folded: the intro says "lists every runtime (non-dev) entry in `package-lock.json`, a superset of what the store ships", instead of "the third-party software that this store ships".
+  - **S4** (Low), ruled: TL4's version anchors stay, on purpose. The drift rule now names TL4 and TL5 (L35 amended by B, and doc 172 says so).
+  - **S5** (nit, the double exception lookup) goes to `deferred_low_polish`.
+  - **S6** (legal) stays with SABA-Q-LAME-LGPL.
 
-### 1.6 The hand-written header (a constant in the module, rendered above the table)
-The header is in English (it is a legal file, not project docs). It covers, in this order:
-1. **What the file is.** Third-party software shipped as runtime dependencies of this store, generated from `package-lock.json`. Runtime means every lock entry without `dev: true`. Do not edit the file by hand. Include the regeneration command.
-2. **LAME.** State these facts and nothing more:
-   - The MP3 export uses the LAME MP3 Encoder (LAME 3.100), compiled to WebAssembly by the `@mediabunny/mp3-encoder` package (MPL-2.0).
-   - The WebAssembly binary is inlined (base64) in that package's JavaScript and is embedded **unmodified**. The package's JavaScript itself is **bundled and minified together with the application's own code** by the build tool (C round 218: it ships inside the lazy chunk `mp3-encoder.client-*.js`, 687,512 B raw, and the LAME worker starts from a `blob:` URL built inside that chunk). It is loaded only when the user starts an MP3 export.
-   - **Do not** write "ships unmodified, exactly as published on npm" about the package as a whole. Only the WASM bytes pass through the bundler untouched.
-   - LAME is licensed under the LGPL; its licence page does not state a version.
-   - "This product uses LAME", with **four links**:
-     - `https://lame.sourceforge.io/`;
-     - `https://lame.sourceforge.io/license.txt`;
-     - the LAME source download, `https://sourceforge.net/projects/lame/files/lame/`;
-     - the encoder package's source, `https://github.com/Vanilagy/mediabunny/tree/main/packages/mp3-encoder`.
-   - LAME's licence page asks for a link to `www.mp3dev.org`. B fetched it on 2026-10-28 and it redirects to a Google sign-in page, not to LAME. So the notice names it as **text, not a link**, for example: "LAME's licence page names www.mp3dev.org as its web site; the project now lives at lame.sourceforge.io."
-   - **Do not** claim that the file is replaceable, or anything else that would need a legal opinion. That question goes to Saba (§8 of `b-round-218.md`).
-3. **MPL-2.0 sources.** List the source link for every MPL-2.0 package name, from `THIRD_PARTY_SOURCE_LINKS`:
-   - `mediabunny` and `@mediabunny/mp3-encoder` → `https://github.com/Vanilagy/mediabunny`;
-   - `lightningcss` and its `lightningcss-*` binaries → `https://github.com/parcel-bundler/lightningcss`.
-
-   The test fails when an MPL-2.0 runtime package has no source link (TL6). For the binaries, a prefix rule `lightningcss-` is allowed.
-4. **Run-time downloads not in `package-lock.json`.** One entry:
-   - `@ffmpeg/core@0.12.6` is fetched from `unpkg.com` at run time by the legacy purchased-Studio MP3 export only.
-   - Its npm licence field is MIT. The FFmpeg build it contains may include components under other licences; this was not verified.
-   - It is scheduled for removal (no ticket ids or loop jargon in the file).
-
-   PERF-16b must delete this entry when the URL goes. B records that in 16b's scope; this round adds no source-grep assertion for the URL, because it would be red now.
+### 1.6 Smaller rulings and records (D-29z231)
+- **`encoderLoadTimeout`** ("Check your internet connection", C-R218 info): **kept, not changed.** The encoder is a same-origin lazy chunk that still needs the network, so the sentence is still true. `strings.ts` is not granted.
+- **INFO-C219-WARMUP-MP3** becomes harness rule HR-MP3-WARMUP: on a fresh machine, C's warm-up includes one MP3 export (round 219 attempt 1 was invalid because Vite re-optimized and reloaded).
+- **INFO-C219-LAME-DECODER** is attached to SABA-Q-LAME-LGPL as a **hypothesis**, not a fact: the minified WASM has no decoder strings.
+- **DOC169-GUARD-STALE** (performance-optimizer: doc 169 l.167–171 and l.178 still say 42 scripts and the old bytes) goes to `deferred_low_polish`. C's PERF-RUN-220 numbers become the new record.
 
 ### 1.7 Test rows (ids are required; C greps them)
-`app/lib/__tests__/third-party-licenses.test.ts`, one `describe` per group, the id in each test title:
+**`app/utils/__tests__/ffmpeg.test.ts`** mocks `~/lib/arrangement/mp3-encoder.client` with `vi.mock` and a `vi.hoisted` fake, the way `export-progress-ui.test.tsx` l.24–52 does:
+- **LF1:** `'128k'`, `'192k'`, `'320k'` and no argument call `encode(wav, undefined, { bitrate })` with 128000, 192000, 320000 and 320000. The same `wav` reference is passed.
+- **LF2:** `'256k'`, `''`, `'320'` and `'320K'` each reject with `Unsupported MP3 bitrate: <value>`, and `loadArrangementMp3Encoder` is never called.
+- **LF3:**
+  - the encoder's Blob is returned unchanged (same reference);
+  - a load rejection propagates unchanged (same error object);
+  - an encode rejection propagates unchanged.
+- **LF4:** two calls make two `loadArrangementMp3Encoder` calls, so no encoder is cached.
+- **LF5:** a source read of `app/utils/ffmpeg.ts` shows:
+  - no `@ffmpeg`, `unpkg` or `FFmpeg`;
+  - the module's runtime exports (read through `await import`) are exactly `['convertWavToMp3']`.
 
-| Row | What it proves |
+**`mp3-encoder.test.ts`:**
+- **ME10:** `encode(wav, undefined, { bitrate: 128000 })` and `{ bitrate: 192000 }` put that value into `Quality`. `encode(wav)` keeps 320000; the existing ME4 still pins this.
+- **ME11:** `{ bitrate: 256000 }` and `{ bitrate: 0 }` reject with `Unsupported MP3 bitrate: <n>`, with 0 new `FakeInput` instances and `Conversion.init` not called.
+- **ME12 (the single-consumer invariant):**
+  - two encodes run at once, at two different bitrates;
+  - one `resetArrangementMp3Encoder()` rejects **both** and cancels both conversions;
+  - a fresh `loadArrangementMp3Encoder()` after the reset encodes successfully.
+
+  The title says "a reset cancels every in-flight encode, whichever caller started it".
+
+**`third-party-licenses.test.ts`:**
+- TL1: the added rows from §1.5.
+- TL5: the existence check.
+- TL6: the changed row.
+- TL8: the new row from §1.4.
+
+All existing rows stay green.
+
+### 1.8 Red-proof (named mutants, A runs them; each is a temporary edit, followed by a sha256 restore check)
+| Mutant | Must go red |
 |---|---|
-| **TL1** classifier, table-driven | <ul><li>clean: `MIT`, `Apache-2.0`, `MPL-2.0`, `LGPL-3.0-only`, `LGPL-2.1-or-later`, `LGPL`, `(BSD-3-Clause OR GPL-2.0)`, `(MIT OR (GPL-2.0 AND AGPL-3.0))`, `(MIT AND Zlib)`;</li><li>copyleft: `GPL-3.0`, `GPL-2.0+`, `GPL-2.0-or-later`, `gpl-3.0-only`, `GPL`, `AGPL-3.0-only`, `AGPL-1.0`, `(MIT AND GPL-3.0)`, `GPL-2.0 WITH Classpath-exception-2.0`, `(LGPL-3.0 AND AGPL-3.0)`;</li><li>unknown: `''`, `UNLICENSED`, `SEE LICENSE IN LICENSE.md`, `(MIT`, `MIT OR`, `AND MIT`;</li><li>a legacy `{ type: 'GPL-3.0' }` object is copyleft and `{ type: 'MIT' }` is clean.</li></ul> |
-| **TL2** walker on an in-memory fixture lock | <ul><li>The root `""` entry is skipped.</li><li>A `dev: true` GPL entry is not reported.</li><li>`devOptional`, `optional` and `peer` GPL entries are reported.</li><li>An aliased entry is reported under its `name` field.</li><li>A nested scoped path gets the right name.</li><li>`link: true` and `inBundle: true` entries are unknown and reported.</li><li>Duplicate name@version entries give one row.</li></ul> |
-| **TL3** exceptions on fixtures | <ul><li>An entry with no licence and a matching exception is not reported.</li><li>The same entry at another version is reported, and the exception is reported stale.</li><li>An exception whose entry gained a `license` field is reported stale.</li><li>An exception with no matching entry is reported stale.</li></ul> |
-| **TL4** real lock | <ul><li>`findCopyleftRuntimePackages(real lock, THIRD_PARTY_LICENSE_EXCEPTIONS)` returns no failures and no stale exceptions.</li><li>**Anchors, so the row cannot pass vacuously:**<ul><li>`mediabunny@1.62.1` and `@mediabunny/mp3-encoder@1.62.1` are runtime and MPL-2.0;</li><li>`node-forge@1.3.3` is runtime and classifies `clean` through the OR rule;</li><li>`limiter@1.1.5` is runtime, has no licence and is covered by its exception;</li><li>at least one `dev: true` entry exists and is excluded.</li></ul></li></ul> |
-| **TL5** notices in sync | `await expect(renderThirdPartyNotices(realLock)).toMatchFileSnapshot(<repo root>/THIRD_PARTY_NOTICES.md)`. **The `await` is required.** Without it the row silently checks nothing. |
-| **TL6** notices content on the real lock | <ul><li>Every name in `package.json` `dependencies` appears in a table row with its lock version (`node_modules/<name>` entry).</li><li>Every MPL-2.0 runtime package has a source link.</li><li>The LAME section contains the four links of §1.6, the text `www.mp3dev.org` (not as a link), and the words `LGPL`, `inlined` and `bundled`.</li><li>The run-time downloads section names `@ffmpeg/core@0.12.6`.</li><li>The output has no `\r` and ends with exactly one `\n`.</li></ul> |
-| **TL7** renderer determinism | Rendering a fixture lock whose `packages` keys are shuffled gives byte-identical output. The order is by code point: `Zed` sorts before `abc`. |
+| (a) facade maps `'192k'` → 320000 | LF1 |
+| (b) facade accepts any string (no reject) | LF2 |
+| (c) facade adds a static `import { loadArrangementMp3Encoder } from '~/lib/arrangement/mp3-encoder.client'` | ME9 |
+| (d) the encoder ignores `options.bitrate` | ME10 |
+| (e) the encoder validates after `new Input(...)` | ME11 (the Input count) |
+| (f) the old pattern `/^A?GPL(-\|\+\|$)/i` is restored | TL1 `GPLv3` |
+| (g) `LicenseRef-` → clean | TL1 `LicenseRef-Proprietary` |
+| (h) a scratch file with `https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm` | TL8 named mutant |
 
-### 1.8 Regeneration and red-proof
-- **Regenerating the notices:** `npx vitest run app/lib/__tests__/third-party-licenses.test.ts -u`. The header says exactly this.
-  - Under `CI=true` vitest does not write snapshots, so a missing or stale file fails. Commit the generated file in this round. A creates it with `-u` once, then runs **without** `-u` and gets green.
-- **Red-proof (L23).** The real-lock rows scan the repo, so they cannot be red on a start copy. Prove them with named mutants. Apply each one to a scratch copy or as a temporary edit that you revert, and verify the restore with `sha256sum`. Save each log under `a-round-219/mutants/`.
-  - **(a)** the classifier treats `OR` like `AND` → TL1 and TL4 (node-forge) fail;
-  - **(b)** the walker drops the `dev` filter → TL2 fails;
-  - **(c)** the classifier uses `/GPL/i` on the raw string → TL1 (LGPL cases) fails;
-  - **(d)** exception matching ignores the version → TL3 fails;
-  - **(e)** one table row is deleted from `THIRD_PARTY_NOTICES.md` → TL5 fails;
-  - **(f)** `await` is removed from TL5 together with mutant (e) → document what happens. Expected: the stale file is no longer caught. This shows why the `await` is required. It is informational, not a pass condition.
-  - **(g)** `limiter` is removed from the exceptions → TL4 fails.
-
-### 1.9 Drift rule for later rounds (D-29z226; recorded in the backlog, nothing for A to do)
-- After any `chore(deps)` or lock-only change (add, remove, `npm update`, a transitive bump), TL5 is red until the notices are regenerated. So every B task that files a deps request, or that follows such a change, grants `THIRD_PARTY_NOTICES.md` and lists TL5 as a covering test.
-- PERF-16b (removing `@ffmpeg/*`) and PERF-8 (adding zustand) are the next ones.
-- Root's own `chore(deps)` commit will leave TL5 red at that commit until the round that consumes it. This is a root signal (ROOT-DEPS-NOTICES-REGEN), not a blocker.
+### 1.9 Drift rule (L35, amended)
+- After any deps or lock change, TL4's anchors and TL5 can go red.
+- 16b-ii (the `@ffmpeg/*` removal) and PERF-8 (zustand) grant `THIRD_PARTY_NOTICES.md` and the licence test.
+- **16b-ii is filed only when both hold:**
+  - (a) C has confirmed in this round that `grep -rn "@ffmpeg/\|unpkg" app --include=*.ts --include=*.tsx`, excluding `__tests__`, gives 0 hits;
+  - (b) the next round is not a REGRESSION round.
 
 ## 2. A: the files you own. Everything else is frozen.
-1. `app/lib/third-party-licenses.ts`: §1.1–§1.6.
-2. `app/lib/__tests__/third-party-licenses.test.ts`: TL1–TL7 (§1.7).
-3. `THIRD_PARTY_NOTICES.md`: generated only (§1.8).
-4. Doc 171, `docs/implementation/2026/quarter-IV/171-oss-lic-third-party-notices.md`, in Georgian with English terms:
+1. `app/utils/ffmpeg.ts`: §1.1.
+2. `app/lib/arrangement/mp3-encoder.client.ts`: §1.2.
+3. `app/utils/__tests__/ffmpeg.test.ts` (new): LF1–LF5.
+4. `app/lib/arrangement/__tests__/mp3-encoder.test.ts`: ME10–ME12.
+5. `app/lib/arrangement/__tests__/export-progress-ui.test.tsx`: the `loadFFmpeg` removal only (§Baseline grant 4).
+6. `app/lib/third-party-licenses.ts` and `app/lib/__tests__/third-party-licenses.test.ts`: §1.4 and §1.5.
+7. `THIRD_PARTY_NOTICES.md`: regenerate it with `npx vitest run app/lib/__tests__/third-party-licenses.test.ts -u`, then confirm a `CI=true` run passes without `-u`. The diff against HEAD must be only:
+   - the removed run-time downloads section;
+   - the intro paragraph (§1.5 S3; it may reflow over 2–3 lines).
+8. `docs/technical/diagrams/studio-audio-pipeline.md`, the granted sections only, in Georgian:
+   - The intro and §7 describe the MP3 step as the shared LAME encoder (mediabunny), loaded on demand from the same origin, with 128, 192 or 320 kbps from the dialog's Quality.
+   - The Mermaid participant and the steps are updated: no `loadFFmpeg`, no ~31 MB CDN.
+   - §10 E3/E4 are renamed for the encoder load and encode errors.
+   - §12 has no unpkg CDN node.
+   - The Mermaid blocks must still parse: one participant per name, no dangling arrows.
+9. Doc 172, in Georgian with English terms:
    - It has the 7 TEMPLATE `##` headings in order.
-   - l.4 is exactly `**სტატუსი:** Completed (C round 219 PASS)` (L28).
+   - l.4 is exactly `**სტატუსი:** In Progress (stage 1 of 2; C round 220 PASS)` (L28: this is a stage of PERF-16b).
    - It covers:
-     - the runtime definition;
-     - the classifier rules, including the LGPL ruling;
-     - the exception and stale rule;
-     - the regeneration command;
-     - the drift rule;
-     - the LAME facts, with the correction that the WASM is inlined, not a separate file;
-     - the unverified FFmpeg-core statement;
-     - TODOs: PERF-16b removes the run-time downloads entry, and the "For Saba" legal question.
+     - the facade and its bitrate map;
+     - the encoder option;
+     - the single-consumer invariant and the known race;
+     - the StudioContext freeze and its unchanged progress and error path;
+     - the notices change;
+     - C-R219-01 and the R-219-2..4 rulings;
+     - the drift rule (TL4 + TL5);
+     - TODOs: 16b-ii, the rename question for Saba, and intermediate progress.
    - Every test it cites exists (L26).
 
 **Checks A runs (speed rules):**
 - `npm run typecheck`;
-- `npm run lint`: the new `.ts` files are under `app/**`, so Biome processes them (L30). The `.md` file is not linted;
-- `npx vitest run app/lib/__tests__/third-party-licenses.test.ts`, reporting the per-test times. Every test must be under 50 % of the 5 s default (L31/L32);
-- the mutants of §1.8;
+- `npm run lint`;
+- `npx vitest run` on these files, reporting per-test times; each must be under 50 % of its timeout (L31/L32):
+  - `app/utils/__tests__/ffmpeg.test.ts`;
+  - `app/lib/arrangement/__tests__/mp3-encoder.test.ts`;
+  - `app/lib/arrangement/__tests__/export-progress-ui.test.tsx`;
+  - `app/lib/arrangement/__tests__/export-mp3.test.tsx`;
+  - `app/lib/arrangement/__tests__/strings.test.ts`;
+  - `app/lib/__tests__/third-party-licenses.test.ts`;
+  - the 7 repo-scan files listed in §0;
+- the licence test again with `CI=true`;
+- the mutants in §1.8;
 - `sha256sum -c` of the frozen list, which must give rc 0;
-- `git status --short --untracked-files=all`, which must show exactly the 4 new files.
+- `git status --short --untracked-files=all`, which must show the 8 grants as `M` (at most) and the 2 new files as `??`.
 
-A does not run the full suite or `npm run verify`. With 4 new files, A asks the `code-reviewer` (rule: 3+ files) and reports its Architecture note for B.
+A does not run the full suite, `npm run verify` or `npm run build`. With 10 files, A asks the `code-reviewer` and reports its Architecture note for B.
 
 **STOP rules (L11, L32, L33):**
-- If TL4 finds a real copyleft or unknown runtime entry other than `limiter`, A does **not** add an exception. A writes `STOP — needs B ruling: <name@version licence>` with the lock path.
-- If HEAD is not `da5ad69`, or the tree is not clean at the start: STOP.
-- If any frozen file has to change: STOP.
+- HEAD is not `c54a534`, or the tree is not clean at the start.
+- A frozen file has to change. StudioContext and ArrangementContext are included.
+- ME9 or any repo-scan file goes red.
+- The lock gives a real copyleft or unknown runtime entry under the new rules (other than `limiter`, which its exception covers). A writes `STOP — needs B ruling: <name@version licence>` and does not add an exception.
 
 ## 3. C: rows
 **Setup.**
 - Use Playwright Chromium, with the dev server at `http://127.0.0.1:5173`. Do not run the full vitest suite or `npm run verify`.
-- Do one warm-up `goto('/studio-lab')` first (C rounds 216 and 217: the first navigation timed out).
+- **Warm-up (HR-MP3-WARMUP):** one `goto('/studio-lab')` plus one throwaway lab MP3 export, before any measured MP3 row.
 
 | Row | What C does | PASS when |
 |---|---|---|
-| **SCOPE-219** (start + end) | <ul><li>`git log -1 --format='%H %s'`;</li><li>`git status --short --untracked-files=all`;</li><li>`sha256sum -c` of the 1,066-file list.</li></ul> | <ul><li>HEAD is `da5ad69`.</li><li>Status shows exactly the 4 new files (`??`).</li><li>Frozen rc 0.</li></ul> |
-| **LIC-RUN-219** | <ul><li>`npx vitest run app/lib/__tests__/third-party-licenses.test.ts`;</li><li>a rerun with `CI=true` and without `-u`;</li><li>greps for TL1–TL7;</li><li>a read of the module.</li></ul> | <ul><li>Both runs pass.</li><li>Rows TL1–TL7 exist by id.</li><li>TL5 uses `await … toMatchFileSnapshot`.</li><li>The module has no `node:` import, no `as` assertion and no `any`.</li><li>No regex is applied to the whole unparsed expression. Per-token id tests such as `/^A?GPL(-|$)/i` are fine.</li><li>The exceptions list has exactly `limiter@1.1.5`.</li></ul> |
-| **REDPROOF-219** | <ul><li>Read A's mutant logs (a)–(g).</li><li>Add **C's own mutant** on a `/tmp` copy: plant a runtime entry `node_modules/zz-copyleft-probe` `{version:"1.0.0", license:"GPL-3.0-or-later"}` into a copy of `package-lock.json`, then point a copy of the test (or a vite resolve plugin, as in round 218) at that copy. Never edit the repo lock.</li><li>Second C mutant: the same planted entry with `dev: true`.</li></ul> | <ul><li>A's (a)–(e) and (g) each fail the named row.</li><li>C's GPL probe fails TL4 and names `zz-copyleft-probe@1.0.0`.</li><li>The `dev: true` probe passes.</li><li>The repo lock is byte-unchanged afterwards (`sha256sum`).</li></ul> |
-| **NOTICES-INDEP-219** | C writes its own script (not A's module) that computes the unique runtime name@version set from `package-lock.json` (non-`dev`, name from `name` or the path), and compares it with the table rows of `THIRD_PARTY_NOTICES.md`. | <ul><li>The sets are equal: 563 today, or C explains any difference with the lock evidence.</li><li>The licence column equals the lock value for every row, except `limiter` (asserted MIT).</li><li>Every `package.json` dependency is present.</li><li>The order is by code point.</li><li>There is no `\r`, and the file ends with one newline.</li></ul> |
-| **NOTICES-FACTS-219** | Read the header and check every statement against its source: <ul><li>`node_modules/@mediabunny/mp3-encoder/README.md` l.94/102/150;</li><li>`grep -c AGFzbQ` in `dist/modules/build/lame.js`;</li><li>`find … -name '*.wasm'` gives 0;</li><li>`lame.sourceforge.io/license.txt` (WebFetch);</li><li>`app/utils/ffmpeg.ts` l.38;</li><li>after BUNDLE-219's build: `grep -c AGFzbQ build/client/assets/mp3-encoder.client-*.js` ≥ 1, which confirms the WASM bytes are embedded in the app's own bundled chunk.</li></ul> | <ul><li>Every factual sentence is traceable.</li><li>The four LAME links are present, and `www.mp3dev.org` appears as text only.</li><li>The header says the WASM is unmodified and the JS is bundled. It does not say the whole package ships unmodified.</li><li>There is no claim of replaceability or legal sufficiency.</li><li>FFmpeg core is described as "may include … not verified", not as a fact either way.</li><li>The MPL source links are present.</li><li>There is no loop jargon (round, PERF, D-id) in the file.</li></ul> |
-| **BUNDLE-219** | `npm run build` (C's own). Grep `build/client` and `build/server` for `third-party-licenses`, `THIRD_PARTY_LICENSE_EXCEPTIONS` and a distinctive header phrase. Grep `app/` (excluding `__tests__`) for imports of the module. | 0 hits in the builds. 0 importers outside the test. |
-| **MP3-SMOKE-219** (browser, 1440, dev) | Add the demo clip with the real mouse, choose MP3, Export, and capture the download. | <ul><li>`czaba-studio-lab.mp3` arrives.</li><li>Every audio frame (Xing frame excluded) is MPEG-1 Layer III, 320 kbps, 48 kHz, stereo (joint stereo, channel mode `01`, counts as stereo, per C's round-218 note).</li><li>Frame duration is in [101.352, 101.452] s.</li><li>The file is not silent.</li><li>0 page errors.</li></ul> |
-| **STUDIO-SMOKE-219** (browser, 1280, dev) | The round-217 WAV smoke. | <ul><li>`czaba-studio-lab.wav`: PCM, 2 ch, 48 kHz, 24-bit.</li><li>Its length matches "WAV created" within 1 frame.</li><li>The audio is not all zeros.</li><li>0 page errors.</li></ul> |
-| **G219-3** (browser) | Fresh contexts at 1440×900 and 1280×720: <ul><li>`/studio-lab` anonymous;</li><li>`/studio/middle-east`;</li><li>`/api/studio-token?product=middle-east&file=stem1.wav`, with no header and with a fake Bearer.</li></ul> | <ul><li>`/studio-lab` opens anonymously with the demo badge.</li><li>`/studio/middle-east` shows "Sign in required" with 0 `audio[src]`.</li><li>No header → 401.</li><li>Fake Bearer → 403 with the `:5199` mock, or 500 without it.</li><li>**No token is issued.**</li></ul> |
-| **AN-REVIEW-219** | Read doc 171. | <ul><li>The 7 TEMPLATE headings are in order.</li><li>l.4 is byte-exact.</li><li>Every cited row exists (L26).</li><li>The §2 item 4 topics are present, including the "inlined, not a separate file" correction.</li></ul> |
+| **SCOPE-220** (start + end) | <ul><li>`git log -1`;</li><li>`git status --short --untracked-files=all`;</li><li>`sha256sum -c` of the 1,062-file list.</li></ul> | <ul><li>HEAD is `c54a534`.</li><li>Only the 8 grants are `M` and the 2 new files `??`.</li><li>Frozen rc 0, so StudioContext and ArrangementContext are byte-identical.</li></ul> |
+| **UNIT-220** | The A file list from §2, plus the licence test with `CI=true`. Grep LF1–LF5, ME10–ME12, TL8 and the TL1 rows from §1.5. | <ul><li>All pass.</li><li>The ids exist.</li><li>TL5 has the `existsSync` check before the awaited snapshot.</li></ul> |
+| **REDPROOF-220** | <ul><li>Read A's mutant logs (a)–(h).</li><li>**C's own probes**, as in round 219 (a vite transform plugin or `/tmp` copies; never edit the repo lock):<ul><li>(1) re-run `c-round-219/probe/spellings.probe.test.ts` against the new module;</li><li>(2) plant `zz-gplv3-probe@1.0.0` with `license: "GPLv3"` into a lock copy;</li><li>(3) the same entry with `license: "LicenseRef-Foo"`.</li></ul></li></ul> | <ul><li>(a)–(h) each fail the named row.</li><li>(1) `GPLv3`, `GPLv2`, `GPL2`, `AGPLv3` and `MIT AND GPLv2` are copyleft. `(MIT OR GPLv3)`, `Proprietary`, `SSPL-1.0` and `BUSL-1.1` are clean. `LicenseRef-Proprietary` is unknown.</li><li>(2) TL4 fails as copyleft, naming the probe.</li><li>(3) TL4 fails as unknown.</li><li>The repo lock sha256 is unchanged.</li></ul> |
+| **NOTICES-220** | <ul><li>`git diff c54a534 -- THIRD_PARTY_NOTICES.md`;</li><li>re-run C's `c-round-219/notices-indep.cjs`.</li></ul> | <ul><li>The diff is only the removed run-time downloads section and the intro paragraph (§1.5 S3; it may reflow over 2–3 lines).</li><li>Still 563 rows, and the table is byte-identical.</li><li>No `unpkg` or `@ffmpeg/core` remains in the file.</li><li>The `@ffmpeg/ffmpeg` and `@ffmpeg/util` rows are present.</li></ul> |
+| **FACADE-REAL-220** (browser; 1440 and 1280, fresh context each) | On `/studio-lab`, in `page.evaluate`: <ul><li>`const m = await import('/app/utils/ffmpeg.ts')`;</li><li>build a 5 s, 48 kHz, stereo, 16-bit sine WAV in the page (as `b-round-219/bitrate-probe.cjs` does);</li><li>**first** call `m.convertWavToMp3(wav, '256k')`;</li><li>then call it with `'128k'`, `'192k'`, `'320k'` and no argument.</li></ul> Frame-walk each result with C's round-218 parser, and decode it in the page. | <ul><li>`'256k'` rejects with `Unsupported MP3 bitrate: 256k`, and no `mp3-encoder.client` chunk was requested before the first valid call.</li><li>Each valid file: every audio frame (Xing frame excluded) is MPEG-1 Layer III, 48 kHz, stereo or joint stereo, at exactly 128, 192, 320 and 320 kbps.</li><li>Frame duration is in [5.0, 5.1] s.</li><li>Decoded: 2 ch, RMS above −40 dBFS.</li><li>0 page errors.</li><li>Between the first `convertWavToMp3` call and the last result: 0 requests to `unpkg.com` or to any other origin. Page-load requests (the cart `:5199` fetch, fonts) are not counted, per the cloud rule.</li></ul> |
+| **LAB-MP3-220** (browser, 1440, dev) | The round-219 MP3-SMOKE through the UI (Add, Export, MP3, Export MP3), after the warm-up. | <ul><li>`czaba-studio-lab.mp3`;</li><li>every audio frame is 320 kbps, 48 kHz, stereo or joint stereo;</li><li>the duration is in [101.352, 101.452] s;</li><li>RMS within 0.1 dB of round 219 (−15.29 dBFS);</li><li>0 page errors.</li></ul> So the lab default stayed 320k. |
+| **STUDIO-SMOKE-220** (browser, 1280, dev) | The round-219 WAV smoke. | <ul><li>PCM, 2 ch, 48 kHz, 24-bit.</li><li>The length matches "WAV created" within 1 frame.</li><li>Not all zeros.</li><li>0 page errors.</li></ul> |
+| **BUNDLE-220** | Run your own `npm run build`, then remove `build/`. | <ul><li>`build/client` and `build/server`: 0 `unpkg.com`, 0 `@ffmpeg`, 0 `ffmpeg-core`, and no ffmpeg worker asset.</li><li>The `mp3-encoder.client-*.js` client chunk contains `AGFzbQ` once.</li><li>The manifest's `routes/studio.$productId` `imports` contain no mp3-encoder or mediabunny chunk.</li><li>Loading `/studio/middle-east` (dev or the prod build) gives no `modulepreload` link and no request for that chunk.</li></ul> |
+| **PERF-RUN-220** | Run `npx playwright test --config playwright.perf.config.ts perf/studio-lab-resources.perf.spec.ts` once, alone, with sentinels as in round 218. Compare with `c-round-218/perf-run-1.json`. | <ul><li>rc 0, `complete`, `failures []`.</li><li>studio-lab and home `scripts` and `third-party-scripts` are unchanged (43/0, 41/0). Their encoded and decoded bytes are within 4,096 B.</li><li>The guard (`/studio/middle-east`) `scripts` is ≤ 41 and `third-party-scripts` is 0. Its bytes are **recorded**, not judged: the ffmpeg class chunk leaves the guard's chunks, so a decrease is expected.</li><li>Any increase in guard scripts or bytes is a FAIL (an eager load).</li></ul> |
+| **SOURCE-GREP-220** | Run `grep -rn "@ffmpeg/\|unpkg" app --include=*.ts --include=*.tsx`, excluding `__tests__`. | 0 hits. This is the precondition for 16b-ii (§1.9). |
+| **LEGACY-UI-220** (browser) | Purchased `/studio/:productId`, MP3 export at Low, Medium and High through the UI. | **BLOCKED:** "backend unavailable in cloud". List it under `blocked`, not in `passed`. It does not make `browserVerified` false. FACADE-REAL-220 exercises the same function in real Chromium. |
+| **G220-3** (browser) | Fresh contexts at 1440×900 and 1280×720: <ul><li>`/studio-lab` anonymous;</li><li>`/studio/middle-east`;</li><li>`/api/studio-token?product=middle-east&file=stem1.wav`, with no header and with a fake Bearer.</li></ul> | <ul><li>`/studio-lab` opens anonymously with the demo badge.</li><li>`/studio/middle-east` shows "Sign in required" with 0 `audio[src]`.</li><li>No header → 401.</li><li>Fake Bearer → 403 with the `:5199` mock, or 500 without it.</li><li>**No token is issued.**</li></ul> |
+| **AN-REVIEW-220** | Read doc 172 and the four granted sections of `studio-audio-pipeline.md`. | <ul><li>Doc 172: the 7 headings in order, l.4 byte-exact, every cited row exists, and the §2 item 9 topics are present.</li><li>Pipeline doc: no `loadFFmpeg`, `~31MB` or unpkg in the granted sections.</li><li>Its changed Mermaid blocks parse. C checks each one with `mermaid.parse` in a page and records the result.</li><li>Outside the granted sections the file is byte-identical (`git diff` hunks lie only inside them).</li></ul> |
 | **gate** | Full vitest, typecheck, build, Biome, `npm run verify` and the e2e smoke at the gate. | Not claimed by C. |
 
-**`browserVerified`:** MP3-SMOKE-219, STUDIO-SMOKE-219 and G219-3 are browser rows that can run in the cloud. If any one does not run, the flag is false.
+**`browserVerified`:** FACADE-REAL-220, LAB-MP3-220, STUDIO-SMOKE-220, BUNDLE-220's page check, PERF-RUN-220 and G220-3 are browser rows that can run here. If any one of them does not run, the flag is false. LEGACY-UI-220 is backend-blocked and does not count.
 
 ## 4. Reference: how Ableton Live 12 does it
-**Not applicable.** This is a licensing, test and generated-docs round, with no user-visible behaviour (agent-workflow "Reference first": out of scope for test-only and docs-only rounds). Ableton conformance for C is "not applicable" on every row. The MP3 smoke keeps the round-218 confirmation (CBR 320 kbps, Live 12 manual §5.1.3.3) as a regression check only.
+**Not applicable.** This is a performance and refactor round: the encoder engine changes behind an unchanged UI (agent-workflow "Reference first" excludes pure performance and refactor rounds). Ableton conformance for C is "not applicable" on every row.
+
+**Deviations from today's CZABA behaviour:** none intended.
+- The legacy dialog's Low, Medium and High still give 128, 192 and 320 kbps, and the file name, progress and error path are unchanged.
+- The only observable differences:
+  - no ~31 MB third-party download;
+  - the LAME build is mediabunny's 3.100 rather than FFmpeg's libmp3lame (the same encoder family).
 
 ## 5. Adjacent behaviour that could break
-- **The bundle.** If anything imports the module, the server or client bundle grows. BUNDLE-219 covers this.
-- **Vitest under jsdom.** `node:fs` already works there (ME9). The test must not change the environment for other files, and must not use a global `vi.mock`.
-- **Snapshot writing.** A run with `-u` across the whole suite would also rewrite the notices. That is harmless only while the lock is unchanged. The gate runs under `CI=true`, which never writes.
-- **Future deps rounds.** TL5 goes red after any lock change; see §1.9.
-- **MP3 export.** Nothing in the export code changes. MP3-SMOKE-219 is a regression check that the round touched nothing there.
+- **The lab MP3 export.** The encoder's default must stay 320k. LAB-MP3-220 and the existing ME4/ME9 cover it.
+- **The import boundary.** A static reference from the facade would pull mediabunny into `/studio/:id`'s eager set. ME9, BUNDLE-220 and PERF-RUN-220 cover this.
+- **Server render.** `StudioContext` is also evaluated on the server. The `.client` module is an empty stub there (0.22 kB in B's build), and the facade only imports it when an export runs, which happens only in the browser. Nothing runs at module load.
+- **The export-progress UI test.** PU5 keeps asserting that ArrangementContext never mentions `utils/ffmpeg` or `@ffmpeg/`.
+- **Notices.** TL5 is now strict about the file existing (§1.5 S2).
 
 ## 6. Outcome, fixed in advance
-| C result | B at round-220 planning |
+| C result | B at round-221 planning |
 |---|---|
-| PASS, and planning on or after 2026-10-30 | Round 220 = **REGRESSION** (every done/c_pass item, both viewports, plus `npm run test:e2e:smoke`), then PERF-16b. |
-| PASS, and planning before 2026-10-30 | Round 220 = **PERF-16b** (the legacy path delegates to the shared encoder; then the remove request for `@ffmpeg/*` plus the `vite.config.ts` l.27 root grant). It grants `THIRD_PARTY_NOTICES.md` per §1.9. |
-| A's STOP on a real copyleft or unknown runtime entry | B rules: an exception with evidence, or a dependency question for root or Saba. No re-dispatch until it is ruled. |
-| A row fails (classification, sync, facts, bundle) | A bounded fix-up inside the same 4 files. |
-| A smoke or G219-3 finds Medium+ | A bounded fix-up first. A Low goes to `deferred_low_polish`. |
+| PASS, SOURCE-GREP-220 0 hits, and planning before 2026-10-30 | Round 221 = **PERF-16b-ii**. B files `root-deps-request.json` `{"add": [], "remove": ["@ffmpeg/ffmpeg", "@ffmpeg/util"]}` at that planning. The round grants: <ul><li>`THIRD_PARTY_NOTICES.md` and the licence test (L35);</li><li>a root one-line grant for `vite.config.ts` l.27;</li><li>the remaining ffmpeg doc mentions (`docs/technical/studio.md` and `debug-studio.md`; B greps first).</li></ul> The guard baseline becomes C's PERF-RUN-220 numbers. |
+| PASS, and planning on or after 2026-10-30 | Round 221 = **REGRESSION**. Every done/c_pass item is checked at both viewports, plus `npm run test:e2e:smoke`; this round's FACADE-REAL and the round-219 OSS-LIC test are added to the regression's `scope_additions`. 16b-ii follows. No deps request is filed during a regression planning. |
+| A STOP | B rules first. No re-dispatch until it is ruled (L10). |
+| A row fails (unit, red-proof, notices, facade, bundle) | A bounded fix-up inside the same 10 files. |
+| PERF-RUN-220 or BUNDLE-220 shows an eager load | Fix-up: the facade's import boundary. |
+| A smoke or G220-3 finds Medium+ | A bounded fix-up first. A Low goes to `deferred_low_polish`. |
 
 ## 7. Publication
-- After C PASS, root gates this tree: the 4 new files on `da5ad69`.
-- Suggested commit message: `chore(licenses): OSS-LIC third-party notices + GPL/AGPL runtime licence test`.
+- After C PASS, root gates this tree: the 8 grants plus 2 new files on `c54a534`.
+- Suggested commit message: `perf(studio): legacy MP3 export uses the shared LAME encoder (no unpkg ffmpeg core) + GPL spelling fix`.
 - **Root reviewer, please cover:**
-  - the SPDX classifier (the OR/AND/WITH rules and unknowns);
-  - the runtime definition (dev only excluded);
-  - the honesty of the LAME and FFmpeg statements;
-  - the `await` on TL5.
-- Root signal **ROOT-DEPS-NOTICES-REGEN**: from now on, a root `chore(deps)` commit leaves TL5 red until the consuming round regenerates the notices. Optional: root may regenerate the notices in its own deps step.
+  - the facade's error propagation and bitrate map;
+  - encode-time validation before `Input`;
+  - the single-consumer invariant (ME12) and the documented race;
+  - the ME9 boundary;
+  - the classifier change and the `LicenseRef-` ruling;
+  - TL8.
 - Still pending with root, non-blocking: the frontend-architect checkpoint (D-29z195) and `b-round-215-root-request-l28.md`.
+- **At the 16b-ii boundary**, B will request a bounded export-pipeline checkpoint covering the WAV worker, the shared encoder and the legacy StudioContext export (`b-round-218.md` §6).

@@ -1,0 +1,18 @@
+MUTANT d (final code)
+--- /tmp/mod.bak	2026-10-28 05:02:37.703958613 +0000
++++ app/lib/third-party-licenses.ts	2026-10-28 05:02:37.730335705 +0000
+@@ -373,7 +373,7 @@
+ ): ThirdPartyLicenseException | undefined {
+   return exceptions.find(
+     (exception) =>
+-      exception.name === runtimePackage.name && exception.version === runtimePackage.version,
++      exception.name === runtimePackage.name,
+   );
+ }
+ 
+--- CI=true npx vitest run app/lib/__tests__/third-party-licenses.test.ts (no -u)
+rc=1
+TL3 exceptions on fixtures > TL3 the same entry at another version is reported and the exception is stale
+      Tests  1 failed | 50 passed (51)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+restored: sha256 OK

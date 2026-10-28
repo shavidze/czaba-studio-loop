@@ -1,0 +1,28 @@
+MUTANT g (final code)
+--- /tmp/mod.bak	2026-10-28 05:02:41.365134986 +0000
++++ app/lib/third-party-licenses.ts	2026-10-28 05:02:41.392311629 +0000
+@@ -40,15 +40,7 @@
+   sourceUrl: string;
+ }
+ 
+-export const THIRD_PARTY_LICENSE_EXCEPTIONS: readonly ThirdPartyLicenseException[] = [
+-  {
+-    name: 'limiter',
+-    version: '1.1.5',
+-    assertedLicense: 'MIT',
+-    reason:
+-      'lock has no license field; the package\'s own package.json uses the legacy "licenses": [{"type": "MIT"}]; via firebase-admin > jwks-rsa',
+-  },
+-];
++export const THIRD_PARTY_LICENSE_EXCEPTIONS: readonly ThirdPartyLicenseException[] = [];
+ 
+ export const THIRD_PARTY_SOURCE_LINKS: readonly ThirdPartySourceLink[] = [
+   {
+--- CI=true npx vitest run app/lib/__tests__/third-party-licenses.test.ts (no -u)
+rc=1
+TL4 the real package-lock.json > TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real
+TL4 the real package-lock.json > TL4 has no copyleft or unknown runtime package and no stale exception
+TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json > TL5 renderThirdPartyNotices(real lock) matches the committed file
+      Tests  3 failed | 48 passed (51)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+restored: sha256 OK

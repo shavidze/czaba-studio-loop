@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T04:29:25.833Z)
+# Active loop summary (2026-10-28T05:22:29.849Z)
 
-- backlog.json 1963 KB -> active view 277 KB
-- status: G_ROOT_GATE round 218
-- servers: `{"checkedUtc":"2026-10-28T04:08:31.0116145Z","round":218,"attempt":1,"store":200}`
-- last publication: da5ad69a1b771f5f83a043af6cc2e4e058d3355b (rounds 218-218)
-- last root gate: round 218 published - commit da5ad69a1b771f5f83a043af6cc2e4e058d3355b pushed
+- backlog.json 1975 KB -> active view 279 KB
+- status: G_ROOT_GATE round 219
+- servers: `{"checkedUtc":"2026-10-28T05:07:12.6071866Z","round":219,"attempt":1,"store":200}`
+- last publication: c54a534e997b9b5caf98e4294187b3e906c4a285 (rounds 219-219)
+- last root gate: round 219 published - commit c54a534e997b9b5caf98e4294187b3e906c4a285 pushed
 
 ## Current items: -
 
@@ -511,6 +511,9 @@
 - R216-MEM-POLLS-HEADROOM / info / watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled | round 217 (A and C): -1 7-8, -2 14-16, -1.6x 12-13, -2.6x 21-22, all >= 5; notes keep 'observed in round 216' ranges; widen ranges only in PERF-HARNESS-SHARED-LIB (D-29z220) / res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert
 - C-R217-HARNESS-FIRST-NAV / info / harness note applied: warm-up goto in the round-218 C setup; hypothesis (unconfirmed) Vite reload after re-optimisation / first dev-server navigation after a perf run hit a 30 s waitForFunction timeout at 1440 (2x); reruns clean
 - ARCH-GATE217-REPORT-HELPERS / info / signal on PERF-HARNESS-SHARED-LIB (D-29z215, third occurrence); not scheduled by this note / third copy of nowIn/snapshot/waitForQuiet/reactRendererProblem/rateRowId/report builder across the three perf specs
+- ARCH-R218-ENCODER-CANCEL-SCOPE / info / signal attached to PERF-16b scope (b16.scope_notes_round_218); not scheduled by itself / module-wide mp3EncoderGeneration/mp3EncoderRuns: reset cancels every in-flight encode; safe only with one export at a time
+- ROOT-DEPS-NOTICES-REGEN / info / root_signal (D-29z226); optional: root regenerates in its deps step / after OSS-LIC, a root chore(deps) commit leaves TL5 (notices sync) red until the consuming round regenerates THIRD_PARTY_NOTICES.md
+- SABA-Q-LAME-LGPL / info / awaiting_user (Saba); not scheduled; the Export dialog note already names LAME / LAME (LGPL) ships inside a bundled, inlined wasm; whether the notice plus unmodified npm package suffices for LGPL obligations (relink/repla
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

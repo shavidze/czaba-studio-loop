@@ -1,0 +1,31 @@
+MUTANT f-no-await-plus-e
+--- /tmp/tst.bak	2026-10-28 04:54:22.399516278 +0000
++++ app/lib/__tests__/third-party-licenses.test.ts	2026-10-28 04:54:22.405375695 +0000
+@@ -275,7 +275,7 @@
+ 
+ describe('TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json', () => {
+   it('TL5 renderThirdPartyNotices(real lock) matches the committed file', async () => {
+-    await expect(renderThirdPartyNotices(realLock)).toMatchFileSnapshot(NOTICES_PATH);
++    expect(renderThirdPartyNotices(realLock)).toMatchFileSnapshot(NOTICES_PATH);
+   });
+ });
+ 
+--- /tmp/not.bak	2026-10-28 04:54:22.401400022 +0000
++++ THIRD_PARTY_NOTICES.md	2026-10-28 04:54:22.403406612 +0000
+@@ -481,7 +481,6 @@
+ | lightningcss-linux-x64-musl | 1.30.2 | MPL-2.0 | https://www.npmjs.com/package/lightningcss-linux-x64-musl/v/1.30.2 |
+ | lightningcss-win32-arm64-msvc | 1.30.2 | MPL-2.0 | https://www.npmjs.com/package/lightningcss-win32-arm64-msvc/v/1.30.2 |
+ | lightningcss-win32-x64-msvc | 1.30.2 | MPL-2.0 | https://www.npmjs.com/package/lightningcss-win32-x64-msvc/v/1.30.2 |
+-| limiter | 1.1.5 | MIT (asserted; see exceptions) | https://www.npmjs.com/package/limiter/v/1.1.5 |
+ | lodash.camelcase | 4.3.0 | MIT | https://www.npmjs.com/package/lodash.camelcase/v/4.3.0 |
+ | lodash.clonedeep | 4.5.0 | MIT | https://www.npmjs.com/package/lodash.clonedeep/v/4.5.0 |
+ | lodash.includes | 4.3.0 | MIT | https://www.npmjs.com/package/lodash.includes/v/4.3.0 |
+--- vitest (CI=true, no -u)
+     × TL5 renderThirdPartyNotices(real lock) matches the committed file 14ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json > TL5 renderThirdPartyNotices(real lock) matches the committed file
+Error: Snapshot `TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json > TL5 renderThirdPartyNotices(real lock) matches the committed file 1` mismatched
+  Snapshots  1 failed
+      Tests  1 failed | 42 passed (43)
+rc=1
+f-no-await-plus-e restored OK

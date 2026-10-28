@@ -1,0 +1,21 @@
+MUTANT b (final code)
+--- /tmp/mod.bak	2026-10-28 05:02:35.246092614 +0000
++++ app/lib/third-party-licenses.ts	2026-10-28 05:02:35.273351478 +0000
+@@ -332,7 +332,7 @@
+   const entries: [string, unknown][] = Object.entries(packages);
+   const runtimeEntries: RuntimeLockPackage[] = [];
+   for (const [lockPath, entry] of entries) {
+-    if (lockPath === '' || !isPlainRecord(entry) || readTrueProperty(entry, 'dev')) {
++    if (lockPath === '' || !isPlainRecord(entry)) {
+       continue;
+     }
+     runtimeEntries.push({
+--- CI=true npx vitest run app/lib/__tests__/third-party-licenses.test.ts (no -u)
+rc=1
+TL2 listRuntimeLockPackages on an in-memory fixture lock > TL2 skips the root entry and every dev: true entry, and keeps devOptional/optional/peer
+TL4 the real package-lock.json > TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real
+TL4 the real package-lock.json > TL4 has no copyleft or unknown runtime package and no stale exception
+TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json > TL5 renderThirdPartyNotices(real lock) matches the committed file
+      Tests  4 failed | 47 passed (51)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+restored: sha256 OK

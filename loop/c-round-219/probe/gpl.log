@@ -1,0 +1,170 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ❯ app/lib/__tests__/third-party-licenses.test.ts (51 tests | 3 failed) 42ms
+     ✓ TL1 classifies "MIT" as clean 1ms
+     ✓ TL1 classifies "Apache-2.0" as clean 0ms
+     ✓ TL1 classifies "MPL-2.0" as clean 0ms
+     ✓ TL1 classifies "LGPL-3.0-only" as clean 0ms
+     ✓ TL1 classifies "LGPL-2.1-or-later" as clean 0ms
+     ✓ TL1 classifies "LGPL" as clean 0ms
+     ✓ TL1 classifies "(BSD-3-Clause OR GPL-2.0)" as clean 0ms
+     ✓ TL1 classifies "(MIT OR (GPL-2.0 AND AGPL-3.0))" as clean 0ms
+     ✓ TL1 classifies "(MIT AND Zlib)" as clean 0ms
+     ✓ TL1 classifies "GPL-3.0" as copyleft 0ms
+     ✓ TL1 classifies "GPL-2.0+" as copyleft 0ms
+     ✓ TL1 classifies "GPL-2.0-or-later" as copyleft 0ms
+     ✓ TL1 classifies "gpl-3.0-only" as copyleft 0ms
+     ✓ TL1 classifies "GPL" as copyleft 0ms
+     ✓ TL1 classifies "AGPL-3.0-only" as copyleft 0ms
+     ✓ TL1 classifies "AGPL-1.0" as copyleft 0ms
+     ✓ TL1 classifies "(MIT AND GPL-3.0)" as copyleft 0ms
+     ✓ TL1 classifies "GPL-2.0 WITH Classpath-exception-2.0" as copyleft 0ms
+     ✓ TL1 classifies "(LGPL-3.0 AND AGPL-3.0)" as copyleft 0ms
+     ✓ TL1 classifies "" as unknown 0ms
+     ✓ TL1 classifies "UNLICENSED" as unknown 0ms
+     ✓ TL1 classifies "SEE LICENSE IN LICENSE.md" as unknown 0ms
+     ✓ TL1 classifies "(MIT" as unknown 0ms
+     ✓ TL1 classifies "MIT OR" as unknown 0ms
+     ✓ TL1 classifies "AND MIT" as unknown 0ms
+     ✓ TL1 classifies "GPL-2.0 WITH" as unknown 0ms
+     ✓ TL1 classifies "()" as unknown 0ms
+     ✓ TL1 classifies "((MIT))" as clean 0ms
+     ✓ TL1 classifies "GPL-2.0-with-classpath-exception" as copyleft 0ms
+     ✓ TL1 classifies "AGPL-3.0" as copyleft 0ms
+     ✓ TL1 classifies "mit or gpl-3.0" as clean 0ms
+     ✓ TL1 legacy { type } objects: GPL-3.0 is copyleft, MIT is clean, a non-string is unknown 0ms
+     ✓ TL2 skips the root entry and every dev: true entry, and keeps devOptional/optional/peer 2ms
+     ✓ TL2 an aliased entry is reported under its name field, a nested scoped path gets @c/d 0ms
+     ✓ TL2 link: true and inBundle: true entries are unknown and reported 0ms
+     ✓ TL2 a licensed duplicate does not hide an inBundle copy of the same name@version 0ms
+     ✓ TL2 duplicate name@version entries give one row; another version gives its own row 0ms
+     ✓ TL3 an entry with no licence and a matching exception is not reported 0ms
+     ✓ TL3 the same entry at another version is reported and the exception is stale 0ms
+     ✓ TL3 an exception whose entry gained a license field is stale 0ms
+     ✓ TL3 an exception never hides a GPL licence: the entry fails and the exception is stale 0ms
+     ✓ TL3 an exception with no matching entry is stale 0ms
+     × TL4 has no copyleft or unknown runtime package and no stale exception 10ms
+     × TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real 3ms
+     × TL5 renderThirdPartyNotices(real lock) matches the committed file 12ms
+     ✓ TL6 every package.json dependency has a table row with its lock version 2ms
+     ✓ TL6 every MPL-2.0 runtime package has a source link 3ms
+     ✓ TL6 the LAME section has the four links, www.mp3dev.org as text only, LGPL, inlined, bundled 1ms
+     ✓ TL6 the run-time downloads section names @ffmpeg/core@0.12.6 0ms
+     ✓ TL6 the output has no \r and ends with exactly one \n 0ms
+     ✓ TL7 shuffled packages keys give byte-identical output, ordered by code point 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 has no copyleft or unknown runtime package and no stale exception
+AssertionError: expected { failures: [ { …(5) } ], …(1) } to deeply equal { failures: [], staleExceptions: [] }
+
+- Expected
++ Received
+
+  {
+-   "failures": [],
++   "failures": [
++     {
++       "classification": "copyleft",
++       "license": "GPL-3.0-or-later",
++       "lockPath": "node_modules/zz-copyleft-probe",
++       "name": "zz-copyleft-probe",
++       "version": "1.0.0",
++     },
++   ],
+    "staleExceptions": [],
+  }
+
+ ❯ app/lib/__tests__/third-party-licenses.test.ts:304:83
+    302| 
+    303|   it('TL4 has no copyleft or unknown runtime package and no stale exce…
+    304|     expect(findCopyleftRuntimePackages(realLock, THIRD_PARTY_LICENSE_E…
+       |                                                                                   ^
+    305|       failures: [],
+    306|       staleExceptions: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real
+AssertionError: expected [ { name: 'limiter', …(4) }, { …(5) } ] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+@@ -2,6 +2,13 @@
+    ObjectContaining {
+      "classification": "unknown",
+      "name": "limiter",
+      "version": "1.1.5",
+    },
++   {
++     "classification": "copyleft",
++     "license": "GPL-3.0-or-later",
++     "lockPath": "node_modules/zz-copyleft-probe",
++     "name": "zz-copyleft-probe",
++     "version": "1.0.0",
++   },
+  ]
+
+ ❯ app/lib/__tests__/third-party-licenses.test.ts:322:64
+    320|       expect.objectContaining({ name: 'limiter', version: '1.1.5', ass…
+    321|     ]);
+    322|     expect(findCopyleftRuntimePackages(realLock, []).failures).toEqual…
+       |                                                                ^
+    323|       expect.objectContaining({ name: 'limiter', version: '1.1.5', cla…
+    324|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json > TL5 renderThirdPartyNotices(real lock) matches the committed file
+Error: Snapshot `TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json > TL5 renderThirdPartyNotices(real lock) matches the committed file 1` mismatched
+
+- Expected
++ Received
+
+@@ -57,11 +57,11 @@
+
+  Runtime packages whose lock entry has no usable license field, with the license checked by hand:
+
+  - `limiter@1.1.5`: asserted MIT. lock has no license field; the package's own package.json uses the legacy "licenses": [{"type": "MIT"}]; via firebase-admin > jwks-rsa.
+
+- ## Runtime packages (563)
++ ## Runtime packages (564)
+
+  | Package | Version | License | Link |
+  |---|---|---|---|
+  | @aws-crypto/crc32 | 5.2.0 | Apache-2.0 | https://www.npmjs.com/package/@aws-crypto/crc32/v/5.2.0 |
+  | @aws-crypto/crc32c | 5.2.0 | Apache-2.0 | https://www.npmjs.com/package/@aws-crypto/crc32c/v/5.2.0 |
+@@ -624,6 +624,7 @@
+  | y18n | 5.0.8 | ISC | https://www.npmjs.com/package/y18n/v/5.0.8 |
+  | yallist | 4.0.0 | ISC | https://www.npmjs.com/package/yallist/v/4.0.0 |
+  | yargs | 17.7.2 | MIT | https://www.npmjs.com/package/yargs/v/17.7.2 |
+  | yargs-parser | 21.1.1 | ISC | https://www.npmjs.com/package/yargs-parser/v/21.1.1 |
+  | yocto-queue | 0.1.0 | MIT | https://www.npmjs.com/package/yocto-queue/v/0.1.0 |
++ | zz-copyleft-probe | 1.0.0 | GPL-3.0-or-later | https://www.npmjs.com/package/zz-copyleft-probe/v/1.0.0 |
+
+
+ ❯ app/lib/__tests__/third-party-licenses.test.ts:335:5
+    333| describe('TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json…
+    334|   it('TL5 renderThirdPartyNotices(real lock) matches the committed fil…
+    335|     await expect(renderThirdPartyNotices(realLock)).toMatchFileSnapsho…
+       |     ^
+    336|   });
+    337| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+  Snapshots  1 failed
+ Test Files  1 failed (1)
+      Tests  3 failed | 48 passed (51)
+   Start at  05:08:23
+   Duration  694ms (transform 110ms, setup 0ms, import 137ms, tests 42ms, environment 376ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/third-party-licenses.test.ts,title=app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 has no copyleft or unknown runtime package and no stale exception,line=304,column=83::AssertionError: expected { failures: [ { …(5) } ], …(1) } to deeply equal { failures: [], staleExceptions: [] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "failures": [],%0A+   "failures": [%0A+     {%0A+       "classification": "copyleft",%0A+       "license": "GPL-3.0-or-later",%0A+       "lockPath": "node_modules/zz-copyleft-probe",%0A+       "name": "zz-copyleft-probe",%0A+       "version": "1.0.0",%0A+     },%0A+   ],%0A    "staleExceptions": [],%0A  }%0A%0A ❯ app/lib/__tests__/third-party-licenses.test.ts:304:83%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/third-party-licenses.test.ts,title=app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 anchors%3A mediabunny%2C node-forge%2C limiter and the dev filter are real,line=322,column=64::AssertionError: expected [ { name: 'limiter', …(4) }, { …(5) } ] to deeply equal [ ObjectContaining{…} ]%0A%0A- Expected%0A+ Received%0A%0A@@ -2,6 +2,13 @@%0A    ObjectContaining {%0A      "classification": "unknown",%0A      "name": "limiter",%0A      "version": "1.1.5",%0A    },%0A+   {%0A+     "classification": "copyleft",%0A+     "license": "GPL-3.0-or-later",%0A+     "lockPath": "node_modules/zz-copyleft-probe",%0A+     "name": "zz-copyleft-probe",%0A+     "version": "1.0.0",%0A+   },%0A  ]%0A%0A ❯ app/lib/__tests__/third-party-licenses.test.ts:322:64%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/third-party-licenses.test.ts,title=app/lib/__tests__/third-party-licenses.test.ts > TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json > TL5 renderThirdPartyNotices(real lock) matches the committed file,line=335,column=5::Error: Snapshot `TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json > TL5 renderThirdPartyNotices(real lock) matches the committed file 1` mismatched%0A%0A- Expected%0A+ Received%0A%0A@@ -57,11 +57,11 @@%0A%0A  Runtime packages whose lock entry has no usable license field, with the license checked by hand:%0A%0A  - `limiter@1.1.5`: asserted MIT. lock has no license field; the package's own package.json uses the legacy "licenses": [{"type": "MIT"}]; via firebase-admin > jwks-rsa.%0A%0A- ## Runtime packages (563)%0A+ ## Runtime packages (564)%0A%0A  | Package | Version | License | Link |%0A  |---|---|---|---|%0A  | @aws-crypto/crc32 | 5.2.0 | Apache-2.0 | https://www.npmjs.com/package/@aws-crypto/crc32/v/5.2.0 |%0A  | @aws-crypto/crc32c | 5.2.0 | Apache-2.0 | https://www.npmjs.com/package/@aws-crypto/crc32c/v/5.2.0 |%0A@@ -624,6 +624,7 @@%0A  | y18n | 5.0.8 | ISC | https://www.npmjs.com/package/y18n/v/5.0.8 |%0A  | yallist | 4.0.0 | ISC | https://www.npmjs.com/package/yallist/v/4.0.0 |%0A  | yargs | 17.7.2 | MIT | https://www.npmjs.com/package/yargs/v/17.7.2 |%0A  | yargs-parser | 21.1.1 | ISC | https://www.npmjs.com/package/yargs-parser/v/21.1.1 |%0A  | yocto-queue | 0.1.0 | MIT | https://www.npmjs.com/package/yocto-queue/v/0.1.0 |%0A+ | zz-copyleft-probe | 1.0.0 | GPL-3.0-or-later | https://www.npmjs.com/package/zz-copyleft-probe/v/1.0.0 |%0A%0A%0A ❯ app/lib/__tests__/third-party-licenses.test.ts:335:5%0A%0A

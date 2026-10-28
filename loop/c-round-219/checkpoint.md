@@ -1,0 +1,6 @@
+- SCOPE start PASS (da5ad69, 4 ??, frozen rc0). LIC-RUN PASS (51/51 plain + CI). REDPROOF: A finals ok; C gpl probe fails TL4 naming zz-copyleft-probe@1.0.0, dev probe 51/51, control 51/51, lock sha OK.
+- spellings probe: GPLv3/GPLv2/AGPLv3/MIT AND GPLv2 => clean (C-R219-01 spec gap, B ruling).
+- NOTICES-INDEP PASS (563=563). FACTS: README/AGFzbQ/0 wasm/ffmpeg l.38/npm view MIT/license.txt checked; license.txt warns decoder GPL (info).
+- next: BUNDLE (build running), browser MP3/WAV/G219-3, AN-REVIEW, SCOPE end
+- BUNDLE PASS (0 hits; wasm b64 identical). MP3 1440 PASS (attempt1 invalid: vite dep-optimize reload 05:10:04). WAV 1280+1440 PASS. G219-3 PASS both (401/500, no token). AN-REVIEW PASS. SCOPE end PASS; build dir removed. next: report
+- report + json written (PASS, C-R219-01 low)

@@ -1,0 +1,22 @@
+MUTANT a (final code)
+--- /tmp/mod.bak	2026-10-28 05:02:34.028642215 +0000
++++ app/lib/third-party-licenses.ts	2026-10-28 05:02:34.055359282 +0000
+@@ -192,7 +192,7 @@
+       }
+       parts.push(part);
+     } while (this.consumeOperator('OR'));
+-    return combineOrClassifications(parts);
++    return combineAndClassifications(parts);
+   }
+ 
+   private parseAnd(): LicenseClassification | null {
+--- CI=true npx vitest run app/lib/__tests__/third-party-licenses.test.ts (no -u)
+rc=1
+TL1 classifyLicenseExpression (table-driven) > TL1 classifies "(BSD-3-Clause OR GPL-2.0)" as clean
+TL1 classifyLicenseExpression (table-driven) > TL1 classifies "(MIT OR (GPL-2.0 AND AGPL-3.0))" as clean
+TL1 classifyLicenseExpression (table-driven) > TL1 classifies "mit or gpl-3.0" as clean
+TL4 the real package-lock.json > TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real
+TL4 the real package-lock.json > TL4 has no copyleft or unknown runtime package and no stale exception
+      Tests  5 failed | 46 passed (51)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+restored: sha256 OK

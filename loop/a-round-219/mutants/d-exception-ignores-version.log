@@ -1,0 +1,19 @@
+MUTANT d-exception-ignores-version
+--- /tmp/mod.bak	2026-10-28 04:54:20.004486076 +0000
++++ app/lib/third-party-licenses.ts	2026-10-28 04:54:20.009033139 +0000
+@@ -367,7 +367,7 @@
+ ): ThirdPartyLicenseException | undefined {
+   return exceptions.find(
+     (exception) =>
+-      exception.name === runtimePackage.name && exception.version === runtimePackage.version,
++      exception.name === runtimePackage.name,
+   );
+ }
+ 
+--- vitest (CI=true, no -u)
+     × TL3 the same entry at another version is reported and the exception is stale 7ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL3 exceptions on fixtures > TL3 the same entry at another version is reported and the exception is stale
+      Tests  1 failed | 42 passed (43)
+rc=1
+d-exception-ignores-version restored OK

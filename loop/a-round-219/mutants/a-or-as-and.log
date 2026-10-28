@@ -1,0 +1,25 @@
+MUTANT a-or-as-and
+--- /tmp/mod.bak	2026-10-28 04:54:16.375917029 +0000
++++ app/lib/third-party-licenses.ts	2026-10-28 04:54:16.379334091 +0000
+@@ -192,7 +192,7 @@
+       }
+       parts.push(part);
+     } while (this.consumeOperator('OR'));
+-    return combineOrClassifications(parts);
++    return combineAndClassifications(parts);
+   }
+ 
+   private parseAnd(): LicenseClassification | null {
+--- vitest (CI=true, no -u)
+     × TL1 classifies "(BSD-3-Clause OR GPL-2.0)" as clean 7ms
+     × TL1 classifies "(MIT OR (GPL-2.0 AND AGPL-3.0))" as clean 1ms
+     × TL4 has no copyleft or unknown runtime package and no stale exception 6ms
+     × TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL1 classifyLicenseExpression (table-driven) > TL1 classifies "(BSD-3-Clause OR GPL-2.0)" as clean
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL1 classifyLicenseExpression (table-driven) > TL1 classifies "(MIT OR (GPL-2.0 AND AGPL-3.0))" as clean
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 has no copyleft or unknown runtime package and no stale exception
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real
+      Tests  4 failed | 39 passed (43)
+rc=1
+a-or-as-and restored OK

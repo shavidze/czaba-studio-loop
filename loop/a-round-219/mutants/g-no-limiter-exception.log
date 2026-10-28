@@ -1,0 +1,40 @@
+MUTANT g-no-limiter-exception (rerun; first attempt broke the file through shell escaping and did not load)
+--- /tmp/mod.bak	2026-10-28 04:54:48.003398674 +0000
++++ app/lib/third-party-licenses.ts	2026-10-28 04:54:48.026113850 +0000
+@@ -40,15 +40,7 @@
+   sourceUrl: string;
+ }
+ 
+-export const THIRD_PARTY_LICENSE_EXCEPTIONS: readonly ThirdPartyLicenseException[] = [
+-  {
+-    name: 'limiter',
+-    version: '1.1.5',
+-    assertedLicense: 'MIT',
+-    reason:
+-      'lock has no license field; the package\'s own package.json uses the legacy "licenses": [{"type": "MIT"}]; via firebase-admin > jwks-rsa',
+-  },
+-];
++export const THIRD_PARTY_LICENSE_EXCEPTIONS: readonly ThirdPartyLicenseException[] = [];
+ 
+ export const THIRD_PARTY_SOURCE_LINKS: readonly ThirdPartySourceLink[] = [
+   {
+--- vitest (CI=true, no -u)
+      Tests  3 failed | 40 passed (43)
+     × TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real 1ms
+    263|     expect(limiter).toBeDefined();
+    264|     expect(limiter?.license).toBeNull();
+    266|       expect.objectContaining({ name: 'limiter', version: '1.1.5', ass…
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 anchors: mediabunny, node-forge, limiter and the dev filter are real
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 has no copyleft or unknown runtime package and no stale exception
+ FAIL  app/lib/__tests__/third-party-licenses.test.ts > TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json > TL5 renderThirdPartyNotices(real lock) matches the committed file
++       "lockPath": "node_modules/limiter",
++       "name": "limiter",
++ | limiter | 1.1.5 | (no license field in lock) | https://www.npmjs.com/package/limiter/v/1.1.5 |
+-     "name": "limiter",
+- - `limiter@1.1.5`: asserted MIT. lock has no license field; the package's own package.json uses the legacy "licenses": [{"type": "MIT"}]; via firebase-admin > jwks-rsa.
+- | limiter | 1.1.5 | MIT (asserted; see exceptions) | https://www.npmjs.com/package/limiter/v/1.1.5 |
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/third-party-licenses.test.ts,title=app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 anchors%3A mediabunny%2C node-forge
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/third-party-licenses.test.ts,title=app/lib/__tests__/third-party-licenses.test.ts > TL4 the real package-lock.json > TL4 has no copyleft or unknown runtime 
+::error file=/home/runner/czaba-project/store/app/lib/__tests__/third-party-licenses.test.ts,title=app/lib/__tests__/third-party-licenses.test.ts > TL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json > TL5 rende
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+g restored OK
