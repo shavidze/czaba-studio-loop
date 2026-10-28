@@ -1,0 +1,176 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts (14 tests | 10 failed) 69ms
+     × ME1 registers nothing at import, shares one load across concurrent callers and registers exactly once 20ms
+     ✓ ME2 a load whose registration throws clears the in-flight load and the next call registers again 2ms
+     ✓ ME3(a) reset during a pending load: the late resolution does not populate the newer generation and the next call loads fresh 1ms
+     × ME3(b) reset during an encode cancels that Conversion exactly once, rejects the encode and drops later progress 1ms
+     × ME3(b) reset while Conversion.init is pending rejects the encode and never executes or cancels the late Conversion 2ms
+     × ME3(c) an encoder obtained before a reset rejects a new encode and constructs no Conversion 2ms
+     × ME3(d) a reset with nothing in flight is a no-op and does not throw 1ms
+     × ME4 builds the exact Conversion config: WAVE input over the same Blob, MP3 output to a BufferTarget, 320 kbps Quality 1ms
+     × ME5 progress is forwarded clamped to [0, 1], non-finite values are ignored, and onProgress is set before execute 1ms
+     × ME6 an invalid Conversion rejects with the discard reason and execute is never called 4ms
+     × ME7 an execute or init rejection propagates and dispose still runs; a null target buffer rejects 1ms
+     × ME8 our encode code never reads the whole WAV Blob itself (no arrayBuffer, bytes, stream or text call; the fake BlobSource does not read) 2ms
+     ✓ ME9 only mp3-encoder.client imports mediabunny, it is reached only through dynamic import(), and it has no ffmpeg or unpkg 25ms
+     ✓ ME9 named mutant: a scratch copy of a real app file with a static mediabunny import is flagged 3ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME1 registers nothing at import, shares one load across concurrent callers and registers exactly once
+TypeError: wav.arrayBuffer is not a function
+ ❯ encodeArrangementMp3 app/lib/arrangement/mp3-encoder.client.ts:41:13
+     39| ): Promise<Blob> {
+     40|   assertArrangementMp3Generation(generation, 'MP3 encoder was reset — …
+     41|   await wav.arrayBuffer();
+       |             ^
+     42|   const input = new Input({ formats: [WAVE], source: new BlobSource(wa…
+     43|   try {
+ ❯ Object.encode app/lib/arrangement/mp3-encoder.client.ts:81:14
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:275:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(b) reset during an encode cancels that Conversion exactly once, rejects the encode and drops later progress
+Error: Conversion 0 missing
+ ❯ conversionAt app/lib/arrangement/__tests__/mp3-encoder.test.ts:219:11
+    217|   const conversion = FakeConversion.instances[index];
+    218|   if (!conversion) {
+    219|     throw new Error(`Conversion ${index} missing`);
+       |           ^
+    220|   }
+    221|   return conversion;
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:316:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(b) reset while Conversion.init is pending rejects the encode and never executes or cancels the late Conversion
+AssertionError: expected null not to be null
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:339:51
+    337|     );
+    338|     await flushMicrotasks();
+    339|     expect(FakeConversion.releasePendingInit).not.toBeNull();
+       |                                                   ^
+    340|     resetArrangementMp3Encoder();
+    341|     FakeConversion.releasePendingInit?.();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(c) an encoder obtained before a reset rejects a new encode and constructs no Conversion
+TypeError: wav.arrayBuffer is not a function
+ ❯ encodeArrangementMp3 app/lib/arrangement/mp3-encoder.client.ts:41:13
+     39| ): Promise<Blob> {
+     40|   assertArrangementMp3Generation(generation, 'MP3 encoder was reset — …
+     41|   await wav.arrayBuffer();
+       |             ^
+     42|   const input = new Input({ formats: [WAVE], source: new BlobSource(wa…
+     43|   try {
+ ❯ Object.encode app/lib/arrangement/mp3-encoder.client.ts:81:14
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:358:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(d) a reset with nothing in flight is a no-op and does not throw
+TypeError: wav.arrayBuffer is not a function
+ ❯ encodeArrangementMp3 app/lib/arrangement/mp3-encoder.client.ts:41:13
+     39| ): Promise<Blob> {
+     40|   assertArrangementMp3Generation(generation, 'MP3 encoder was reset — …
+     41|   await wav.arrayBuffer();
+       |             ^
+     42|   const input = new Input({ formats: [WAVE], source: new BlobSource(wa…
+     43|   try {
+ ❯ Object.encode app/lib/arrangement/mp3-encoder.client.ts:81:14
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:367:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME4 builds the exact Conversion config: WAVE input over the same Blob, MP3 output to a BufferTarget, 320 kbps Quality
+TypeError: wav.arrayBuffer is not a function
+ ❯ encodeArrangementMp3 app/lib/arrangement/mp3-encoder.client.ts:41:13
+     39| ): Promise<Blob> {
+     40|   assertArrangementMp3Generation(generation, 'MP3 encoder was reset — …
+     41|   await wav.arrayBuffer();
+       |             ^
+     42|   const input = new Input({ formats: [WAVE], source: new BlobSource(wa…
+     43|   try {
+ ❯ Object.encode app/lib/arrangement/mp3-encoder.client.ts:81:14
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:376:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME5 progress is forwarded clamped to [0, 1], non-finite values are ignored, and onProgress is set before execute
+TypeError: wav.arrayBuffer is not a function
+ ❯ encodeArrangementMp3 app/lib/arrangement/mp3-encoder.client.ts:41:13
+     39| ): Promise<Blob> {
+     40|   assertArrangementMp3Generation(generation, 'MP3 encoder was reset — …
+     41|   await wav.arrayBuffer();
+       |             ^
+     42|   const input = new Input({ formats: [WAVE], source: new BlobSource(wa…
+     43|   try {
+ ❯ Object.encode app/lib/arrangement/mp3-encoder.client.ts:81:14
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:415:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME6 an invalid Conversion rejects with the discard reason and execute is never called
+AssertionError: expected [Function] to throw error including 'no_encodable_target_codec' but got 'wav.arrayBuffer is not a function'
+
+Expected: "no_encodable_target_codec"
+Received: "wav.arrayBuffer is not a function"
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME7 an execute or init rejection propagates and dispose still runs; a null target buffer rejects
+AssertionError: expected [Function] to throw error including 'lame crashed' but got 'wav.arrayBuffer is not a function'
+
+Expected: "lame crashed"
+Received: "wav.arrayBuffer is not a function"
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME8 our encode code never reads the whole WAV Blob itself (no arrayBuffer, bytes, stream or text call; the fake BlobSource does not read)
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st vi.fn() call:
+
+    Array []
+
+
+Number of calls: 1
+
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:460:37
+    458|     }
+    459|     await encoder.encode(wav);
+    460|     expect(readers.arrayBuffer).not.toHaveBeenCalled();
+       |                                     ^
+    461|     expect(readers.bytes).not.toHaveBeenCalled();
+    462|     expect(readers.stream).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed | 4 passed (14)
+   Start at  04:03:59
+   Duration  850ms (transform 126ms, setup 0ms, import 134ms, tests 69ms, environment 495ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/mp3-encoder.client.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME1 registers nothing at import%2C shares one load across concurrent callers and registers exactly once,line=41,column=13::TypeError: wav.arrayBuffer is not a function%0A ❯ encodeArrangementMp3 app/lib/arrangement/mp3-encoder.client.ts:41:13%0A ❯ Object.encode app/lib/arrangement/mp3-encoder.client.ts:81:14%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:275:17%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/mp3-encoder.test.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(b) reset during an encode cancels that Conversion exactly once%2C rejects the encode and drops later progress,line=219,column=11::Error: Conversion 0 missing%0A ❯ conversionAt app/lib/arrangement/__tests__/mp3-encoder.test.ts:219:11%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:316:24%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/mp3-encoder.test.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(b) reset while Conversion.init is pending rejects the encode and never executes or cancels the late Conversion,line=339,column=51::AssertionError: expected null not to be null%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:339:51%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/mp3-encoder.client.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(c) an encoder obtained before a reset rejects a new encode and constructs no Conversion,line=41,column=13::TypeError: wav.arrayBuffer is not a function%0A ❯ encodeArrangementMp3 app/lib/arrangement/mp3-encoder.client.ts:41:13%0A ❯ Object.encode app/lib/arrangement/mp3-encoder.client.ts:81:14%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:358:29%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/mp3-encoder.client.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(d) a reset with nothing in flight is a no-op and does not throw,line=41,column=13::TypeError: wav.arrayBuffer is not a function%0A ❯ encodeArrangementMp3 app/lib/arrangement/mp3-encoder.client.ts:41:13%0A ❯ Object.encode app/lib/arrangement/mp3-encoder.client.ts:81:14%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:367:19%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/mp3-encoder.client.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME4 builds the exact Conversion config%3A WAVE input over the same Blob%2C MP3 output to a BufferTarget%2C 320 kbps Quality,line=41,column=13::TypeError: wav.arrayBuffer is not a function%0A ❯ encodeArrangementMp3 app/lib/arrangement/mp3-encoder.client.ts:41:13%0A ❯ Object.encode app/lib/arrangement/mp3-encoder.client.ts:81:14%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:376:31%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/mp3-encoder.client.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME5 progress is forwarded clamped to [0%2C 1]%2C non-finite values are ignored%2C and onProgress is set before execute,line=41,column=13::TypeError: wav.arrayBuffer is not a function%0A ❯ encodeArrangementMp3 app/lib/arrangement/mp3-encoder.client.ts:41:13%0A ❯ Object.encode app/lib/arrangement/mp3-encoder.client.ts:81:14%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:415:19%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/mp3-encoder.test.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME8 our encode code never reads the whole WAV Blob itself (no arrayBuffer%2C bytes%2C stream or text call; the fake BlobSource does not read),line=460,column=37::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array []%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:460:37%0A%0A

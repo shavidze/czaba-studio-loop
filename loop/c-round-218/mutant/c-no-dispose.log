@@ -1,0 +1,132 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/mp3-encoder.test.ts [2m([22m[2m14 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 71[2mms[22m[39m
+     [32m✓[39m ME1 registers nothing at import, shares one load across concurrent callers and registers exactly once[32m 18[2mms[22m[39m
+     [32m✓[39m ME2 a load whose registration throws clears the in-flight load and the next call registers again[32m 2[2mms[22m[39m
+     [32m✓[39m ME3(a) reset during a pending load: the late resolution does not populate the newer generation and the next call loads fresh[32m 1[2mms[22m[39m
+[31m     [31m×[31m ME3(b) reset during an encode cancels that Conversion exactly once, rejects the encode and drops later progress[39m[32m 9[2mms[22m[39m
+[31m     [31m×[31m ME3(b) reset while Conversion.init is pending rejects the encode and never executes or cancels the late Conversion[39m[32m 1[2mms[22m[39m
+     [32m✓[39m ME3(c) an encoder obtained before a reset rejects a new encode and constructs no Conversion[32m 1[2mms[22m[39m
+     [32m✓[39m ME3(d) a reset with nothing in flight is a no-op and does not throw[32m 1[2mms[22m[39m
+[31m     [31m×[31m ME4 builds the exact Conversion config: WAVE input over the same Blob, MP3 output to a BufferTarget, 320 kbps Quality[39m[32m 3[2mms[22m[39m
+     [32m✓[39m ME5 progress is forwarded clamped to [0, 1], non-finite values are ignored, and onProgress is set before execute[32m 1[2mms[22m[39m
+[31m     [31m×[31m ME6 an invalid Conversion rejects with the discard reason and execute is never called[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m ME7 an execute or init rejection propagates and dispose still runs; a null target buffer rejects[39m[32m 1[2mms[22m[39m
+     [32m✓[39m ME8 our encode code never reads the whole WAV Blob itself (no arrayBuffer, bytes, stream or text call; the fake BlobSource does not read)[32m 1[2mms[22m[39m
+     [32m✓[39m ME9 only mp3-encoder.client imports mediabunny, it is reached only through dynamic import(), and it has no ffmpeg or unpkg[32m 21[2mms[22m[39m
+     [32m✓[39m ME9 named mutant: a scratch copy of a real app file with a static mediabunny import is flagged[32m 7[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/mp3-encoder.test.ts[2m > [22mSRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME)[2m > [22mME3(b) reset during an encode cancels that Conversion exactly once, rejects the encode and drops later progress
+[31m[1mAssertionError[22m: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/mp3-encoder.test.ts:[2m326:33[22m[39m
+    [90m324| [39m    [34mexpect[39m(conversion[33m.[39mcancelCalls)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m325| [39m    [34mexpect[39m(fractions)[33m.[39m[34mtoEqual[39m([[34m0.3[39m])[33m;[39m
+    [90m326| [39m    [34mexpect[39m([34minputAt[39m([34m0[39m)[33m.[39mdisposed)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m327| [39m  })[33m;[39m
+    [90m328| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/mp3-encoder.test.ts[2m > [22mSRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME)[2m > [22mME3(b) reset while Conversion.init is pending rejects the encode and never executes or cancels the late Conversion
+[31m[1mAssertionError[22m: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/mp3-encoder.test.ts:[2m346:33[22m[39m
+    [90m344| [39m    [34mexpect[39m(lateConversion[33m.[39mexecuteCalls)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m345| [39m    [34mexpect[39m(lateConversion[33m.[39mcancelCalls)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m346| [39m    [34mexpect[39m([34minputAt[39m([34m0[39m)[33m.[39mdisposed)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m347| [39m  })[33m;[39m
+    [90m348| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/mp3-encoder.test.ts[2m > [22mSRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME)[2m > [22mME4 builds the exact Conversion config: WAVE input over the same Blob, MP3 output to a BufferTarget, 320 kbps Quality
+[31m[1mAssertionError[22m: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/mp3-encoder.test.ts:[2m400:28[22m[39m
+    [90m398| [39m    [34mexpect[39m(mp3[33m.[39mtype)[33m.[39m[34mtoBe[39m([32m'audio/mpeg'[39m)[33m;[39m
+    [90m399| [39m    [34mexpect[39m([35mawait[39m [34mreadBlobBytes[39m(mp3))[33m.[39m[34mtoEqual[39m([[34m1[39m[33m,[39m [34m2[39m[33m,[39m [34m3[39m])[33m;[39m
+    [90m400| [39m    [34mexpect[39m(input[33m.[39mdisposed)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m401| [39m  })[33m;[39m
+    [90m402| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/mp3-encoder.test.ts[2m > [22mSRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME)[2m > [22mME6 an invalid Conversion rejects with the discard reason and execute is never called
+[31m[1mAssertionError[22m: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/mp3-encoder.test.ts:[2m428:33[22m[39m
+    [90m426| [39m    await expect(encoder.encode(new Blob(['wav']))).rejects.toThrow('n…
+    [90m427| [39m    [34mexpect[39m([34mconversionAt[39m([34m0[39m)[33m.[39mexecuteCalls)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m428| [39m    [34mexpect[39m([34minputAt[39m([34m0[39m)[33m.[39mdisposed)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m429| [39m  })[33m;[39m
+    [90m430| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/mp3-encoder.test.ts[2m > [22mSRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME)[2m > [22mME7 an execute or init rejection propagates and dispose still runs; a null target buffer rejects
+[31m[1mAssertionError[22m: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/mp3-encoder.test.ts:[2m436:33[22m[39m
+    [90m434| [39m    [33mFakeConversion[39m[33m.[39mexecuteMode [33m=[39m [32m'reject'[39m[33m;[39m
+    [90m435| [39m    await expect(encoder.encode(new Blob(['wav']))).rejects.toThrow('l…
+    [90m436| [39m    [34mexpect[39m([34minputAt[39m([34m0[39m)[33m.[39mdisposed)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m437| [39m    [33mFakeConversion[39m[33m.[39mexecuteMode [33m=[39m [32m'resolve'[39m[33m;[39m
+    [90m438| [39m    [33mFakeConversion[39m[33m.[39moutput [33m=[39m [35mnull[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 04:09:27
+[2m   Duration [22m 836ms[2m (transform 120ms, setup 0ms, import 128ms, tests 71ms, environment 490ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/mp3-encoder.test.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(b) reset during an encode cancels that Conversion exactly once%2C rejects the encode and drops later progress,line=326,column=33::AssertionError: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:326:33%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/mp3-encoder.test.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(b) reset while Conversion.init is pending rejects the encode and never executes or cancels the late Conversion,line=346,column=33::AssertionError: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:346:33%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/mp3-encoder.test.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME4 builds the exact Conversion config%3A WAVE input over the same Blob%2C MP3 output to a BufferTarget%2C 320 kbps Quality,line=400,column=28::AssertionError: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:400:28%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/mp3-encoder.test.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME6 an invalid Conversion rejects with the discard reason and execute is never called,line=428,column=33::AssertionError: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:428:33%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/mp3-encoder.test.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME7 an execute or init rejection propagates and dispose still runs; a null target buffer rejects,line=436,column=33::AssertionError: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:436:33%0A%0A

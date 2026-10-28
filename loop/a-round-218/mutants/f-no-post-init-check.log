@@ -1,0 +1,48 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts (14 tests | 1 failed) 66ms
+     ✓ ME1 registers nothing at import, shares one load across concurrent callers and registers exactly once 18ms
+     ✓ ME2 a load whose registration throws clears the in-flight load and the next call registers again 2ms
+     ✓ ME3(a) reset during a pending load: the late resolution does not populate the newer generation and the next call loads fresh 1ms
+     ✓ ME3(b) reset during an encode cancels that Conversion exactly once, rejects the encode and drops later progress 2ms
+     × ME3(b) reset while Conversion.init is pending rejects the encode and never executes or cancels the late Conversion 8ms
+     ✓ ME3(c) an encoder obtained before a reset rejects a new encode and constructs no Conversion 1ms
+     ✓ ME3(d) a reset with nothing in flight is a no-op and does not throw 1ms
+     ✓ ME4 builds the exact Conversion config: WAVE input over the same Blob, MP3 output to a BufferTarget, 320 kbps Quality 3ms
+     ✓ ME5 progress is forwarded clamped to [0, 1], non-finite values are ignored, and onProgress is set before execute 1ms
+     ✓ ME6 an invalid Conversion rejects with the discard reason and execute is never called 1ms
+     ✓ ME7 an execute or init rejection propagates and dispose still runs; a null target buffer rejects 1ms
+     ✓ ME8 our encode code never reads the whole WAV Blob itself (no arrayBuffer, bytes, stream or text call; the fake BlobSource does not read) 1ms
+     ✓ ME9 only mp3-encoder.client imports mediabunny, it is reached only through dynamic import(), and it has no ffmpeg or unpkg 21ms
+     ✓ ME9 named mutant: a scratch copy of a real app file with a static mediabunny import is flagged 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(b) reset while Conversion.init is pending rejects the encode and never executes or cancels the late Conversion
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:344:41
+    342|     expect(await settled).toBe('MP3 encoder reset during encode');
+    343|     const lateConversion = conversionAt(0);
+    344|     expect(lateConversion.executeCalls).toBe(0);
+       |                                         ^
+    345|     expect(lateConversion.cancelCalls).toBe(0);
+    346|     expect(inputAt(0).disposed).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 13 passed (14)
+   Start at  04:04:04
+   Duration  843ms (transform 128ms, setup 0ms, import 134ms, tests 66ms, environment 486ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/mp3-encoder.test.ts,title=app/lib/arrangement/__tests__/mp3-encoder.test.ts > SRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME) > ME3(b) reset while Conversion.init is pending rejects the encode and never executes or cancels the late Conversion,line=344,column=41::AssertionError: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/mp3-encoder.test.ts:344:41%0A%0A

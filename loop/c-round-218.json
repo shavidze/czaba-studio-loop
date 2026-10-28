@@ -1,0 +1,59 @@
+{
+  "round": 218,
+  "task": "PERF-16a lab MP3 export through mediabunny + LAME",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-28T04:08:31.0116145Z",
+    "round": 218,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R218-01",
+      "severity": "low",
+      "steps": [
+        "Run `npx playwright test --config playwright.perf.config.ts perf/studio-lab-resources.perf.spec.ts` once, alone, on the round-218 tree (rc 0, complete, failures []).",
+        "Compare with c-round-217/perf-run-1.json: res.js.studio-guard.scripts and res.harness.js-studio-guard-seen.",
+        "Build the baseline 8873ece in /tmp (git archive, node_modules symlink), serve both builds, and list the scripts that /studio/middle-east loads."
+      ],
+      "expected": "PERF-RUN-218 row text: every res.js.*.scripts median unchanged, guard 42/0.",
+      "actual": "Guard 41/0, deterministic ([41,41,41]); guard encoded-bytes -761 B. studio-lab stays 43/0 and home 41/0. Cause: at 8873ece, chunk index-CKxerpgD.js (5,627 B, the @ffmpeg/ffmpeg class code) was shared by the old mp3-encoder.client chunk and the legacy studio.$productId path. Now that mp3-encoder.client no longer imports @ffmpeg, Rollup inlines that code into the guard's own chunks. One script fewer and no eager load. Static route graphs are identical (38/40/38). This is a spec-baseline finding, not a product defect: no change inside the grants can restore 42 without breaking API-218. B must close it with a ruling (new guard baseline 41/0, compared next against c-round-218/perf-run-1.json; 16b will move it again). Do not defer it to polish.",
+      "evidence": "c-round-218/perf-compare.txt, c-round-218/perf-run-1.json, c-round-218/guard-scripts.txt, c-round-218/base-build.log"
+    }
+  ],
+  "passed": [
+    "SCOPE-218",
+    "STRINGS-218",
+    "API-218",
+    "REDPROOF-218",
+    "MP3-REAL",
+    "MP3-NET",
+    "MP3-CANCEL",
+    "MP3-BOTH",
+    "MP3-RANGE",
+    "DIALOG-COPY",
+    "PROD-BUNDLE",
+    "G218-3",
+    "STUDIO-SMOKE-218",
+    "AN-REVIEW-218"
+  ],
+  "notPassed": {
+    "PERF-RUN-218": "ran in the browser (rc 0, complete, failures []); the literal criterion 'guard scripts unchanged 42' is not met (41), see C-R218-01; the eager-load intent is verified clean"
+  },
+  "gate": "full vitest, typecheck, build, Biome, npm run verify, e2e smoke and the gate perf specs: not claimed by C",
+  "blocked": [
+    "legacy /studio/:productId MP3 path (StudioContext -> utils/ffmpeg.ts): not a row of this round; needs a signed-in purchase, backend unavailable in cloud"
+  ],
+  "info": [
+    "Joint stereo: every audio frame has channel mode 01 (joint stereo), and decodeAudioData gives 2 channels. C accepts this as 'stereo'; B should state it in the next MP3 criteria.",
+    "Dev reload: node_modules/.vite/deps already held mediabunny at C start; 0 navigations and 0 504s after Export in all 6 dev runs. A's run-1 re-optimise log is the only evidence: an info note for 16b.",
+    "strings.ts encoderLoadTimeout still says 'Check your internet connection': outside the three strings of section 1.7, info for 16b/B.",
+    "Ableton conformance: 320 kbps CBR confirmed (every audio frame 320 kbps); encoder download not applicable."
+  ],
+  "needsBRuling": [
+    "C-R218-01: adopt guard baseline 41/0 for PERF-RUN (next compare vs c-round-218/perf-run-1.json); not an eager load, no A fix-up possible within grants"
+  ]
+}

@@ -1,0 +1,7 @@
+- SCOPE start PASS; STRINGS PASS; API PASS (8 files 129 tests); REDPROOF PASS (C no-dispose killed by ME4/ME7, control 14/14)
+- next: browser rows
+- G218-3 PASS, SMOKE PASS both; dev MP3-REAL both, CANCEL, BOTH, RANGE, DIALOG-COPY, MP3-NET(dev) PASS (mp3/*.json)
+- next: PROD build+serve 5188, PROD-BUNDLE + MP3-NET prod; then stop prod, PERF-RUN; AN-REVIEW; SCOPE end
+- PROD-BUNDLE PASS (227,410 gz9, encoder only after Export, 43 scripts); PERF-RUN rc0 complete, det medians equal except guard scripts 42->41 (cause: @ffmpeg/ffmpeg shared chunk index-CKxerpgD inlined; base build /tmp/c218-base, guard-scripts.txt). sentinels removed. servers 5188/5189 stopped
+- next: AN-REVIEW doc170, SCOPE end, report
+- report + json written (PASS, C-R218-01 low spec-baseline; PERF-RUN not in passed)

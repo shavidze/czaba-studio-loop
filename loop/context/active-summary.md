@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T03:19:25.758Z)
+# Active loop summary (2026-10-28T04:29:25.833Z)
 
-- backlog.json 1954 KB -> active view 278 KB
-- status: G_ROOT_GATE round 217
-- servers: `{"checkedUtc":"2026-10-28T03:03:46.5442340Z","round":217,"attempt":1,"store":200}`
-- last publication: 8873ecec52219041efc181524d529a6dc279a80b (rounds 215-217)
-- last root gate: round 217 published - commit 8873ecec52219041efc181524d529a6dc279a80b pushed
+- backlog.json 1963 KB -> active view 277 KB
+- status: G_ROOT_GATE round 218
+- servers: `{"checkedUtc":"2026-10-28T04:08:31.0116145Z","round":218,"attempt":1,"store":200}`
+- last publication: da5ad69a1b771f5f83a043af6cc2e4e058d3355b (rounds 218-218)
+- last root gate: round 218 published - commit da5ad69a1b771f5f83a043af6cc2e4e058d3355b pushed
 
 ## Current items: -
 
@@ -508,10 +508,9 @@
 - GATE214-DOC168-STATUS / low / C PASS round 216 (SCOPE-216/DOC-216 sub-checks); closes when root publishes rounds 216+217 | dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212) / doc 168 l.4 published as In Progress (C round 214 check pending) in eb9e76e (gate-214 review item 6)
 - B-R214-DOC160-161-STATUS / low / C PASS round 216 (SCOPE-216/DOC-216 sub-checks); closes when root publishes rounds 216+217 | dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212) / docs 160 and 161 l.4 still In Progress at eb9e76e although C passed (rounds 203, 204/205) and both are published (135b880, c274930); never f
 - C-R215-02 / info / ruled D-29z214: keep exact string, defined as post-PASS value valid only at HEAD; re-dispatch implicitly grants l.4 for N only; root request b-round-215-root-request-l28.md (gate-side Pending -> Completed substitution); L28 switches only after root confirms / L28: A writes "Completed (C round N PASS)" before C runs; premature claim in working/FAIL trees
-- C-R216-01 / low / fix-up dispatched round 217 (D-29z218/D-29z219); deliverable defect, not deferred_low_polish (C note) / doc 169 has no ## არქიტექტურა heading; its Mermaid diagram sits inside ## მიდგომა (TEMPLATE.md l.35; docs 163-168 have it)
-- C-R216-02 / low / fix-up dispatched round 217 (D-29z218/D-29z219); deliverable defect, not deferred_low_polish (C note) / res.harness.mem-polls-1/-1.6x/-2.6x (and -2) labelled deterministic in budgets.resources.json but are timing-dependent poll counts that diff
-- ROOT-R216-LATE-SPEC-REVIEW / info / root signal: gate reviewer to cover at the round 216+217 publication / four late changes in perf/studio-lab-resources.perf.spec.ts (window redesign, window-end heap sample, assert evaluation on incomplete runs, 
-- R216-MEM-POLLS-HEADROOM / info / watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled / res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert
+- R216-MEM-POLLS-HEADROOM / info / watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled | round 217 (A and C): -1 7-8, -2 14-16, -1.6x 12-13, -2.6x 21-22, all >= 5; notes keep 'observed in round 216' ranges; widen ranges only in PERF-HARNESS-SHARED-LIB (D-29z220) / res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert
+- C-R217-HARNESS-FIRST-NAV / info / harness note applied: warm-up goto in the round-218 C setup; hypothesis (unconfirmed) Vite reload after re-optimisation / first dev-server navigation after a perf run hit a 30 s waitForFunction timeout at 1440 (2x); reruns clean
+- ARCH-GATE217-REPORT-HELPERS / info / signal on PERF-HARNESS-SHARED-LIB (D-29z215, third occurrence); not scheduled by this note / third copy of nowIn/snapshot/waitForQuiet/reactRendererProblem/rateRowId/report builder across the three perf specs
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
