@@ -1,0 +1,40 @@
+rows 61 61 ids/order identical True
+res.mem.used-ready-mib ['kind', 'note']
+  - kind wallclock
+  + kind deterministic
+  - note 1x only. Runtime.getHeapUsage().usedSize (MiB, 0.1) at ready after GC, before Add. Left the deterministic set (round 216): A observed [5.1, 5.2, 5.1] in one run. Trend only. Budget owner: PERF-13.
+  + note 1x only. Runtime.getHeapUsage().usedSize (MiB, 0.1) at ready after GC, before Add. Deterministic under the 0.1 MiB rule (round 217, D-29z219): median 5.1 in all four round-216 runs; one sample at 5.2. Budget owner: PERF-13.
+res.export.1.peak-backing-delta-mib ['note']
+  - note 1x pass. Max Runtime.getHeapUsage().backingStorageSize polled every 50 ms in the window, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory).
+  + note 1x pass. Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory).
+res.export.2.peak-backing-delta-mib ['note']
+  - note 1x pass. Max Runtime.getHeapUsage().backingStorageSize polled every 50 ms in the window, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory).
+  + note 1x pass. Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory).
+res.harness.mem-polls-1 ['kind', 'note']
+  - kind deterministic
+  + kind wallclock
+  - note 1x pass. Liveness. Valid backingStorageSize samples polled in the export window.
+  + note 1x pass. Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 7–9.
+res.harness.mem-polls-2 ['kind', 'note']
+  - kind deterministic
+  + kind wallclock
+  - note 1x pass. Liveness. Valid backingStorageSize samples polled in the export window.
+  + note 1x pass. Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 13–15.
+res.export.1.peak-backing-delta-mib.6x ['note']
+  - note 6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize polled every 50 ms in the window, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory).
+  + note 6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory).
+res.export.2.peak-backing-delta-mib.6x ['note']
+  - note 6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize polled every 50 ms in the window, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory).
+  + note 6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory).
+res.harness.mem-polls-1.6x ['kind', 'note']
+  - kind deterministic
+  + kind wallclock
+  - note 6x pass (CPU throttle on after ready and Add). Liveness. Valid backingStorageSize samples polled in the export window.
+  + note 6x pass (CPU throttle on after ready and Add). Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 9–12.
+res.harness.mem-polls-2.6x ['kind', 'note']
+  - kind deterministic
+  + kind wallclock
+  - note 6x pass (CPU throttle on after ready and Add). Liveness. Valid backingStorageSize samples polled in the export window.
+  + note 6x pass (CPU throttle on after ready and Add). Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 17–20.
+changed rows 9
+clips/produced/seen all deterministic

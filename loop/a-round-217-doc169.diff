@@ -1,0 +1,132 @@
+diff --git a/../tmp/studio-real-loop/b-round-216/r217-granted-start/169-perf-resources-baseline.md b/docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md
+index 97f8786..098d930 100644
+--- a/../tmp/studio-real-loop/b-round-216/r217-granted-start/169-perf-resources-baseline.md
++++ b/docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md
+@@ -1,7 +1,7 @@
+ # Studio-ს რესურსების baseline-ები (PERF-1b-ii): WAV export, memory, DOM, JS bytes
+ 
+ **თარიღი:** 2026-10-28
+-**სტატუსი:** Completed (C round 216 PASS)
++**სტატუსი:** Completed (C round 217 PASS)
+ **შეცვლილი პროექტი:** Store (მხოლოდ სატესტო ინფრასტრუქტურა და docs; `app/` არ შეცვლილა)
+ 
+ ## კონტექსტი
+@@ -27,19 +27,6 @@ perf-plan-ის PERF-1-ის მოთხოვნაა: harness-მა "prin
+ 5. **Ctrl+D და მეორე export.** clip header-ზე click, blur, Ctrl+D (dialog დახურულია; ღია dialog-ზე Ctrl+D იგნორდება). `res.harness.clips-2`, `res.dom.page-2`, `res.dom.ruler-2`, `res.dom.page-per-added-clip` (= page-2 − page-1). შემდეგ იგივე export → `res.export.2.*`.
+ 6. **JS bytes.** თითო route-ზე ახალი context, cache გამორთულია (`Network.setCacheDisabled`), CDP `Network` ჩართულია `goto`-მდე; ლოდინი `load` + 1 s ქსელის სიჩუმე (მაქს. 8 s). route-ის key-ები: `studio-lab`, `home`, `studio-guard`.
+ 
+-```mermaid
+-flowchart LR
+-  A[ready + GC heap] --> B[Add: DOM rows]
+-  B --> T{6x?}
+-  T -- yes --> TH[CPU throttle 6x]
+-  T -- no --> C
+-  TH --> C[Export WAV 1 clip: long tasks, LoAF, heap poll, header]
+-  C --> D[1x: GC leak row]
+-  D --> E[Ctrl+D: DOM rows]
+-  E --> F[Export WAV 2 clips]
+-  F --> G[1x: JS bytes per route, fresh contexts]
+-```
+-
+ ### Export-ის მეტრიკები
+ 
+ | მეტრიკა | წესი |
+@@ -50,7 +37,7 @@ flowchart LR
+ | `loaf-blocking-max` | უდიდესი LoAF `blockingDuration` ფანჯარაში. spec-ს აქვს საკუთარი `long-animation-frame` observer, რადგან `perf/lib/instrumentation.ts` მხოლოდ `duration`-ს ინახავს. თუ entry-ს `blockingDuration` არ აქვს, failure იწერება. LoAF `duration` არ გამოიყენება (ის ყოველთვის > 50 ms-ია) |
+ | `peak-backing-delta-mib` | `Runtime.getHeapUsage().backingStorageSize`: ფანჯრის ნიმუშებისა და ერთი **ფანჯრის ბოლოს ნიმუშის** max, მინუს ready-ის მნიშვნელობა. ბოლოს ნიმუში იკითხება ტექსტის აღმოჩენისთანავე (საბოლოო run-ებში 23–50 ms ტექსტის შემდეგ, scratch run-ში 61 ms-მდე; `detail.endSampleLagMs`). `detail`-ში ცალკეა `windowPeakMib` და `endSampleMib` |
+ | `bytes` | ჩამოტვირთული ფაილის ზომა (მხოლოდ მაშინ, თუ header-ის შემოწმება გავიდა) |
+-| `mem-polls-N` (liveness) | ნიმუშები, რომელთა CDP request-ი ფანჯრის დაწყების შემდეგ გაიგზავნა და პასუხი ფანჯრის დასრულებამდე მოვიდა (Node `Date.now()` შედარებულია page-ის `performance.timeOrigin + t`-თან; ერთი მანქანის საათი). loop-ის პერიოდი max(50 ms, CDP round trip)-ია: request-ის დაწყებიდან 50 ms, და ახალი request წინას დასრულებამდე არ იწყება |
++| `mem-polls-N` (liveness; wallclock, D-29z219) | ნიმუშები, რომელთა CDP request-ი ფანჯრის დაწყების შემდეგ გაიგზავნა და პასუხი ფანჯრის დასრულებამდე მოვიდა (Node `Date.now()` შედარებულია page-ის `performance.timeOrigin + t`-თან; ერთი მანქანის საათი). loop-ის პერიოდი max(50 ms, CDP round trip)-ია: request-ის დაწყებიდან 50 ms, და ახალი request წინას დასრულებამდე არ იწყება |
+ 
+ ### WAV header-ის შემოწმება (`export-N-produced`)
+ 
+@@ -75,14 +62,21 @@ flowchart LR
+ 
+ ### Determinism-იდან გასული სტრიქონები
+ 
+-წესი: თუ A-ის ორ run-ში რაოდენობა pass-ებს შორის განსხვავდება, სტრიქონი deterministic სიმრავლიდან გადის `note`-ით (STOP არ არის).
++წესები:
++
++- **რაოდენობის წესი (§2.5):** თუ A-ის ორ run-ში რაოდენობა pass-ებს შორის განსხვავდება, სტრიქონი deterministic სიმრავლიდან გადის `note`-ით (STOP არ არის).
++- **0.1 MiB-ის წესი (D-29z219):** 0.1-მდე დამრგვალებული MiB სტრიქონი deterministic რჩება, თუ მისი median ყველა run-ში (A და C) ერთნაირია და არცერთი ნიმუში median-ს 0.1-ზე მეტით არ სცდება. ერთი 0.1-იანი ნაბიჯის რყევა იმავე median-ით დამრგვალების ხმაურია და არა ქცევის ცვლილება.
++- **poll-ების რაოდენობის წესი (D-29z219):** liveness სტრიქონი, რომლის მნიშვნელობა poll-ების ან ნიმუშების რაოდენობაა, დროზეა დამოკიდებული, ამიტომ `wallclock`-ია; მისი `assert` (`>= 5`) უცვლელია. set-membership liveness სტრიქონები (`clips-*`, `export-*-produced`, `js-*-seen`) deterministic რჩება.
+ 
+-| სტრიქონი | დაკვირვება | მიზეზი |
++| სტრიქონი | დაკვირვება (round 216) | მიზეზი |
+ |---|---|---|
+-| `res.mem.used-ready-mib` | [5.1, 5.2, 5.1] | 0.1 MiB-ის საზღვარზე GC-ის შემდეგი ნარჩენი |
+ | `res.export.2.longtasks-over-50` | [0, 0, 0] და [0, 0, 1] (51 ms) | 2-clip-იანი export-ის ერთი task 50 ms-ის ზღვარზეა (calibration run-ში 50 ms) |
++| `res.harness.mem-polls-1` | 7–9 | poll-ების რაოდენობა დროზეა დამოკიდებული |
++| `res.harness.mem-polls-2` | 13–15 | poll-ების რაოდენობა დროზეა დამოკიდებული |
++| `res.harness.mem-polls-1.6x` | 9–12 | poll-ების რაოდენობა დროზეა დამოკიდებული |
++| `res.harness.mem-polls-2.6x` | 17–20 | poll-ების რაოდენობა დროზეა დამოკიდებული |
+ 
+-ორივე `kind: "wallclock"`-ია და `note`-ში ეს მნიშვნელობები წერია.
++ხუთივე სტრიქონი `kind: "wallclock"`-ია და `note`-ში დაკვირვებული მნიშვნელობები წერია. `res.mem.used-ready-mib` 0.1 MiB-ის წესით deterministic სიმრავლეში დაბრუნდა (round 217, D-29z219): median ოთხივე round-216 run-ში 5.1-ია, ერთი ნიმუში 5.2.
+ 
+ ### GATE206-S5: საერთო `build/` საქაღალდე
+ 
+@@ -91,14 +85,31 @@ flowchart LR
+ - ამიტომ perf run არ უნდა დაემთხვეს `npm run build`-ს, `npm run verify`-ს, gate-ის build-ს ან `build/`-ზე გაშვებულ სხვა `remix-serve`-ს.
+ - config ამ რაუნდში არ შეცვლილა (frozen). ეს სექცია GATE206-S5-ს ხურავს.
+ 
++## არქიტექტურა
++
++Pass-ის ნაკადი:
++
++```mermaid
++flowchart LR
++  A[ready + GC heap] --> B[Add: DOM rows]
++  B --> T{6x?}
++  T -- yes --> TH[CPU throttle 6x]
++  T -- no --> C
++  TH --> C[Export WAV 1 clip: long tasks, LoAF, heap poll, header]
++  C --> D[1x: GC leak row]
++  D --> E[Ctrl+D: DOM rows]
++  E --> F[Export WAV 2 clips]
++  F --> G[1x: JS bytes per route, fresh contexts]
++```
++
+ ## გაზომილი სტრიქონები (A-ის ორი run-ის median)
+ 
+-წყარო: A-ის ორი საბოლოო run (`a-round-216/final-run-1.json`, `final-run-2.json`; Chromium 143, 1440×900, production build). deterministic სტრიქონების median-ები ორ run-ში ერთნაირია; ერთადერთი სხვაობა ცალკეულ ნიმუშებში: `res.export.1.peak-backing-delta-mib` [65, 65, 65] და [65.1, 65, 65] (0.1 MiB-ის დამრგვალება).
++წყარო: A-ის ორი საბოლოო run (`a-round-216/final-run-1.json`, `final-run-2.json`; Chromium 143, 1440×900, production build). deterministic სტრიქონების median-ები ორ run-ში ერთნაირია. ცალკეული ნიმუშების სხვაობა მხოლოდ 0.1 MiB-ის წესის (D-29z219) ფარგლებშია: `res.export.1.peak-backing-delta-mib` [65, 65, 65] და [65.1, 65, 65]. `mem-polls` სტრიქონები `wallclock`-ია (poll-ების რაოდენობა დროზეა დამოკიდებული), ამიტომ მათი median-ების სხვაობა (მაგ. 7 და 9) determinism-ის შემოწმებას არ ეხება.
+ 
+ | სტრიქონი | ერთეული | kind / mode | median, run 1 | median, run 2 |
+ |---|---|---|---|---|
+ | `res.mem.backing-ready-mib` | MiB | deterministic / record | 140.3 | 140.3 |
+-| `res.mem.used-ready-mib` | MiB | wallclock / record | 5.1 | 5.1 |
++| `res.mem.used-ready-mib` | MiB | deterministic / record | 5.1 | 5.1 |
+ | `res.mem.backing-after-export-delta-mib` | MiB | deterministic / record | 0 | 0 |
+ | `res.dom.page-0` | elements | deterministic / record | 666 | 666 |
+ | `res.dom.page-1` | elements | deterministic / record | 906 | 906 |
+@@ -123,8 +134,8 @@ flowchart LR
+ | `res.harness.clips-2` | count | deterministic / assert | 2 | 2 |
+ | `res.harness.export-1-produced` | count | deterministic / assert | 1 | 1 |
+ | `res.harness.export-2-produced` | count | deterministic / assert | 1 | 1 |
+-| `res.harness.mem-polls-1` | count | deterministic / assert | 7 | 9 |
+-| `res.harness.mem-polls-2` | count | deterministic / assert | 14 | 14 |
++| `res.harness.mem-polls-1` | count | wallclock / assert | 7 | 9 |
++| `res.harness.mem-polls-2` | count | wallclock / assert | 14 | 14 |
+ | `res.export.1.wall-ms.6x` | ms | wallclock / record | 836 | 862 |
+ | `res.export.1.longtasks-over-50.6x` | count | wallclock / record | 2 | 2 |
+ | `res.export.1.longtask-max.6x` | ms | wallclock / record | 141 | 136 |
+@@ -141,8 +152,8 @@ flowchart LR
+ | `res.harness.clips-2.6x` | count | deterministic / assert | 2 | 2 |
+ | `res.harness.export-1-produced.6x` | count | deterministic / assert | 1 | 1 |
+ | `res.harness.export-2-produced.6x` | count | deterministic / assert | 1 | 1 |
+-| `res.harness.mem-polls-1.6x` | count | deterministic / assert | 11 | 11 |
+-| `res.harness.mem-polls-2.6x` | count | deterministic / assert | 19 | 20 |
++| `res.harness.mem-polls-1.6x` | count | wallclock / assert | 11 | 11 |
++| `res.harness.mem-polls-2.6x` | count | wallclock / assert | 19 | 20 |
+ | `res.js.studio-lab.encoded-bytes` | bytes | deterministic / record | 355155 | 355155 |
+ | `res.js.studio-lab.decoded-bytes` | bytes | deterministic / record | 1127433 | 1127433 |
+ | `res.js.studio-lab.scripts` | count | deterministic / record | 43 | 43 |
+@@ -179,6 +190,7 @@ flowchart LR
+ - **პრობლემა:** "WAV created" ტექსტის ლოდინი raf polling-ით ყოველ frame-ზე DOM-ს ეძებს და 6×-ზე long task-ებს დაამატებდა; Node-ის polling კი ფანჯრის ბოლოს 100 ms-მდე აგვიანებდა. **გადაწყვეტა:** page-ის `MutationObserver` ტექსტის გამოჩენის ზუსტ დროს იწერს, Node მხოლოდ ამ ცვლადს კითხულობს (code-reviewer M1).
+ - **პრობლემა:** heap-ის loop click-მდე იწყებოდა, ამიტომ `mem-polls` ფანჯრის გარეთა ნიმუშებსაც ითვლიდა (code-reviewer H1). **გადაწყვეტა:** თითო ნიმუშს დროის ნიშნული აქვს და მხოლოდ ფანჯრის შიგნით ითვლება.
+ - **პრობლემა:** Playwright-ის action-ებს default-ად timeout არ აქვთ; დაკარგული download ან dialog ტესტს 15 წთ-მდე გაჭედავდა. **გადაწყვეტა:** action-ებზე `page.setDefaultTimeout(30 s)` (`expect`-ებს Playwright-ის ცალკე 5 s-იანი timeout აქვს), download 60 s, `download.path()` 30 s, ტექსტი 15 s, dialog-ის დახურვა 10 s; ჩავარდნილი ნაბიჯი pass-ს `abortedAt`-ით წყვეტს. დამატებით: 8 წთ-ის time guard ახალ pass-ებზე. CDP-ის `send`-ს საკუთარი timeout არ აქვს (ცნობილი, დაბალი რისკი).
++- **პრობლემა (C-R216-01, C-R216-02):** doc-ს TEMPLATE-ის `## არქიტექტურა` სათაური აკლდა (Mermaid `## მიდგომა`-ში იყო), ოთხი `mem-polls` სტრიქონი კი `deterministic`-ად იყო მონიშნული, თუმცა poll-ების რაოდენობა run-ებს შორის იცვლება. **გადაწყვეტა:** Mermaid ბლოკი უცვლელად გადავიდა `## არქიტექტურა`-ში; `mem-polls` სტრიქონები `wallclock`-ია (D-29z219), `assert >= 5` უცვლელია.
+ - **პრობლემა:** heap-ის წაკითხვა შეიძლება არარიცხვითი იყოს. **გადაწყვეტა:** ერთი `readHeap` helper `Number.isFinite` შემოწმებით. ready-ზე და export-ის შემდეგ GC-ზე `null` failure-ს წერს; polling-ში `null` ნიმუშად არ ითვლება და failure მხოლოდ მაშინ იწერება, თუ ფანჯარაში 5-ზე ნაკლები ვალიდური ნიმუში დარჩა. არცერთი სტრიქონი `NaN`-ს არ ჩაწერს (M3 mutant).
+ - **შეზღუდვა:** frame-ის შემოწმება (`round` ან +1) ზუსტია მხოლოდ მაშინ, როცა clip-ის სიგრძე მილიწამების მთელი რიცხვია (ტექსტი ms-მდე მრგვალდება; demo 101.352 s ასეთია). სხვა სიგრძეზე ~24 frame-მდე სხვაობა შეიძლება. `data:` script URL third-party-ად ჩაითვლებოდა (origin `null`); დღეს ასეთი არ არის.
+ 

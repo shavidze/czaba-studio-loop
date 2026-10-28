@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T02:44:59.339Z)
+# Active loop summary (2026-10-28T03:19:25.758Z)
 
-- backlog.json 1947 KB -> active view 276 KB
-- status: G_ROOT_GATE round 216
-- servers: `{"checkedUtc":"2026-10-28T02:28:24.6352343Z","round":216,"attempt":1,"store":200}`
-- last publication: eb9e76e1bc2b41f6ec1a3e083a391d05cb1a844f (rounds 214-214)
-- last root gate: round 216 skipped - C taskStatus FAIL
+- backlog.json 1954 KB -> active view 278 KB
+- status: G_ROOT_GATE round 217
+- servers: `{"checkedUtc":"2026-10-28T03:03:46.5442340Z","round":217,"attempt":1,"store":200}`
+- last publication: 8873ecec52219041efc181524d529a6dc279a80b (rounds 215-217)
+- last root gate: round 217 published - commit 8873ecec52219041efc181524d529a6dc279a80b pushed
 
 ## Current items: -
 
@@ -475,8 +475,8 @@
 - A-R203-REVIEW-M1 / low / ruled (D-29z169): folded into SYS-3 (see systemic_tasks SYS-3.also_fixes_d29z169); reviewer rated Medium, B rates Low: fail-safe (extra ring only), not reproducible in the cloud browser; Android device check on the Tech Lead list / Android soft keyboard key=Unidentified / IME isComposing keydowns flip focus-source to keyboard (ring mid-typing on Android)
 - A-R203-REVIEW-I1 / info / ruled (D-29z169): folded into SYS-3 with M1 (AltGraph printable keys count as editing) / AltGr (Ctrl+Alt) / macOS Option typing switches focus-source to keyboard
 - B-R203-AUTH-USER-CLIENT-TRUST / info / root_note: not scheduled; no Studio action; protected file (AuthContext.tsx) / A stored localStorage.auth_user without accessToken renders the signed-in header with no backend verification (AuthContext.tsx:93-94 setUser
-- GATE205-DOC162-STATUS / low / dispatched round 216 SYS-4 | queued: SYS-4 (doc 162 l.4 still In Progress at eb9e76e) | dispatched round 206 (D-29z171, R112: one-line status fix, granted) / Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)
-- GATE206-S5 / low / scheduled PERF-1b-ii round 216: document only (D-29z207) | round 216 PERF-1b-ii: doc 169 section (D-29z217) / test:perf webServer rewrites shared build/; collides with a parallel verify/build
+- GATE205-DOC162-STATUS / low / C PASS round 216 (SCOPE-216/DOC-216 sub-checks); closes when root publishes rounds 216+217 | dispatched round 216 SYS-4 | queued: SYS-4 (doc 162 l.4 still In Progress at eb9e76e) | dispatched round 206 (D-29z171, R112: one-line status fix, granted) / Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)
+- GATE206-S5 / low / C PASS round 216 (SCOPE-216/DOC-216 sub-checks); closes when root publishes rounds 216+217 | scheduled PERF-1b-ii round 216: document only (D-29z207) | round 216 PERF-1b-ii: doc 169 section (D-29z217) / test:perf webServer rewrites shared build/; collides with a parallel verify/build
 - I-206-a / info / root_note / fake-Bearer /api/studio-token returns 500 without the :5199 mock (mock not started at job start; no cloud/ folder in the loop folder), 403 w
 - A-R207-01 / low / duplicate_of C-R207-01 / 
 - A-R207-02 / info / tech_lead_manual (non-blocking) / active:cursor-grabbing verified in Chromium only; Firefox/Safari unverified in the cloud
@@ -505,9 +505,13 @@
 - A-R214-DEV-RANGE-LIVE / info / ruled D-29z210: accepted (label-based liveness, red-proved by C mutant C1) / task liveness signal [data-range-end] renders only for all-tracks ranges (ArrangementLane.tsx l.1016-1026); A used the clip range label end 
 - A-R214-DEV-CLICK-LIVE / info / ruled D-29z210: accepted (fader enabled/disabled is the selection signal; count 1 still checked) / Clip Gain fader always rendered; click-live uses enabled after Add -> disabled after empty-lane click -> enabled after header click
 - A-R214-DEV-AUDIO-RUNNING-1X / info / ruled D-29z210: accepted (1x-only row like PERF-1a harness.audio-running; at 6x a non-running play still pushes a failure) / interact.harness.audio-running has no .6x row although step 5 runs at both rates
-- GATE214-DOC168-STATUS / low / dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212) / doc 168 l.4 published as In Progress (C round 214 check pending) in eb9e76e (gate-214 review item 6)
-- B-R214-DOC160-161-STATUS / low / dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212) / docs 160 and 161 l.4 still In Progress at eb9e76e although C passed (rounds 203, 204/205) and both are published (135b880, c274930); never f
+- GATE214-DOC168-STATUS / low / C PASS round 216 (SCOPE-216/DOC-216 sub-checks); closes when root publishes rounds 216+217 | dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212) / doc 168 l.4 published as In Progress (C round 214 check pending) in eb9e76e (gate-214 review item 6)
+- B-R214-DOC160-161-STATUS / low / C PASS round 216 (SCOPE-216/DOC-216 sub-checks); closes when root publishes rounds 216+217 | dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212) / docs 160 and 161 l.4 still In Progress at eb9e76e although C passed (rounds 203, 204/205) and both are published (135b880, c274930); never f
 - C-R215-02 / info / ruled D-29z214: keep exact string, defined as post-PASS value valid only at HEAD; re-dispatch implicitly grants l.4 for N only; root request b-round-215-root-request-l28.md (gate-side Pending -> Completed substitution); L28 switches only after root confirms / L28: A writes "Completed (C round N PASS)" before C runs; premature claim in working/FAIL trees
+- C-R216-01 / low / fix-up dispatched round 217 (D-29z218/D-29z219); deliverable defect, not deferred_low_polish (C note) / doc 169 has no ## არქიტექტურა heading; its Mermaid diagram sits inside ## მიდგომა (TEMPLATE.md l.35; docs 163-168 have it)
+- C-R216-02 / low / fix-up dispatched round 217 (D-29z218/D-29z219); deliverable defect, not deferred_low_polish (C note) / res.harness.mem-polls-1/-1.6x/-2.6x (and -2) labelled deterministic in budgets.resources.json but are timing-dependent poll counts that diff
+- ROOT-R216-LATE-SPEC-REVIEW / info / root signal: gate reviewer to cover at the round 216+217 publication / four late changes in perf/studio-lab-resources.perf.spec.ts (window redesign, window-end heap sample, assert evaluation on incomplete runs, 
+- R216-MEM-POLLS-HEADROOM / info / watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled / res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
