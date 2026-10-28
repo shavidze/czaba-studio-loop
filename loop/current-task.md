@@ -1,317 +1,205 @@
-# Round 232: SABA-B-8 CALM-3 — a quiet Overview in an empty project, and Ctrl+Alt+O to hide or show it (+ GATE229-S2, GATE229-S4 row)
+# Round 233: CALM-3 follow-up — hiding the focused Overview must not drop focus to `body` (GATE232-S1, Medium) + render-budget timeout headroom (C-R232-01)
 
-**Planned by:** B, at the round 231 → 232 planning, 2026-10-28. **Decisions:** D-29z306…D-29z312.
-**Type:** feature stage, the **final stage of SABA-B-8 "Calm Studio"** (CALM-1 done, CALM-2a + CALM-2b done). Saba decision 3 (policy "SABA-B-8 Calm Studio"):
-- "Overview: stays, thin, as a quiet hairline in an empty project. Its full view appears with the first clip, and its bbox is unchanged."
-- "It can be hidden with **Ctrl+Alt+O** as in Live; the choice is remembered, and the shortcut is listed in the sheet."
-- "Collapsing the whole dock row when there is no video is **not** approved (layout change)."
+**Planned by:** B, at the round 232 → 233 planning, 2026-10-28. **Decisions:** D-29z313…D-29z320.
 
-**Read first:** `lessons.md` in full (B, A and C). These lessons apply directly:
-- L4 (one rule per element, §2 rulings);
-- L11, L32, L33 (STOP);
-- L12 (no class pins; the visual empty state is checked in the browser, §5);
+**Type:** bug-fix round. It covers two tightly related findings from the round-232 CALM-3 verification and gate.
+
+- **GATE232-S1 (Medium, a11y; gate 232 code-reviewer suggestion 1).** When the Overview slider has keyboard focus and the user presses Ctrl+Alt+O, the Overview unmounts and focus falls to `document.body`.
+  - C measured this in round 232 (C-TOGGLE-FOCUS: `activeElement` = BODY).
+  - B reproduced it at the baseline (`b-round-232/probe/focus.json`: `afterHide: "BODY"` at both viewports).
+  - The round-232 task chose "focus is not moved by code" (D-29z309). B now rules that choice wrong (D-29z314): a keyboard command that removes the focused control must hand focus to a defined control.
+- **C-R232-01 (Low, test infra; A's L32 STOP in round 232).** `render-budget.test.tsx` › "does not re-render clips, overview bars, library rows or ruler ticks over Play → Pause → Play" declares no timeout, so the vitest default of 5,000 ms applies. Its times:
+  - 2,806 ms (56 %) at **gate 232** (`gates/round-232/verify.log` l.1370);
+  - 2,620–2,790 ms in the A and C covering runs;
+  - 1,485 ms alone.
+
+  This round's covering set contains that test, so without a ruling A would hit the same L32 STOP. **Fix:** declare `15000` on that one test, the value its sibling R11-P1e already declares (l.432).
+
+**Read first:** `lessons.md` in full. These lessons apply directly:
+- L10 (the ruling on A's round-232 STOP, below);
+- L11, L32 and L33 (STOP);
+- L12 (no class selectors);
 - L23 (pre-check done, §0.2);
-- L26, L28 (doc 180, §2.8);
-- L29 (every named signal and recipe was run in the browser at baseline and on B's scratch, §0.3);
+- L26 and L28 (doc 181);
+- L29 (B ran every recipe below in the browser, at the baseline and on a scratch copy);
 - L31 (§0.3);
-- L39 (this round removes persistent paint and adds none; C counts, §5);
-- L40 (changed testid elements, §0.3).
+- L39 (no persistent text);
+- L40;
+- L47 (new: this round names its focus target and C checks it).
+
+**Ruling on A's round-232 L32 STOP (L10).** Accepted as pre-existing load, not caused by the CALM-3 diff: A's HEAD-app control took 2,574 ms, and the test alone takes 1,485 ms. This round resolves it by declaring the timeout (D-29z315). The test's assertion (React commit counts) is unchanged; time is not what it measures.
 
 **Not this round:**
-- Collapsing the dock row when there is no video (not approved; Saba Q3).
-- Any change to the Overview's interactions (click = centre, ↔ drag = scroll, ↕ drag = zoom, double-click = Fit, ← / → = 5 s), its `aria-label`, `title` or role.
-- A visible Overview toggle button or a View menu (Saba: "no new visible control"; calm-studio-review §3 item 3).
-- C-R231-01 / C-R139-02 (stale library ghost after an Escape-cancelled drag): deferred Low; `ArrangementLane.tsx` is not granted (D-29z307).
-- The "any drag active" lane-hint proposal (A round 231 reviewer R1): an architecture signal, not scheduled (D-29z307).
-- Screen-review candidates SR-230-1…10 and SABA-Q-NOTICE-ONE-ROW: awaiting Saba.
+- **GATE232-S2 (AltGr on Windows):** it needs a real Windows AltGr layout. It goes on the Tech Lead list as `TLM-R232-ALTGR-WIN`, next to TLM-R232-MAC, together with C's Firefox suggestion. The guard is not changed on a hypothesis (D-29z316).
+- **GATE232-S4 (the hidden slot repeats the Overview's `h-16`):** deferred Low (D-29z316).
+  - Moving the height into one wrapper would change the Overview root literal.
+  - The frozen `panel-radius-ui.test.tsx` (l.76, l.501) and the OV1 case of `studio-theme-obsidian.test.tsx` pin that literal.
+  - C's bbox rows guard against the slot and the Overview drifting apart.
+- **GATE232-S5, S6 and S7** (Mac copy, cross-tab sync, interactive empty strip): deferred Low or info (D-29z316).
+- **The reviewer's Architecture note** (`studioChordAction` in `shortcuts.ts`): a signal, appended to `b-round-231-checkpoint-request.md` (D-29z317).
+- **SABA-B-7-ENVELOPE-DB:** next round (234). Its reference consults are already saved in `b-round-232/saba-b-7-reference-*.md`.
 
 ## 0. Baseline and scope
 
-**Baseline:** HEAD = `e5507ffe56a4e59234bbb5a66f0537aaad5ceb62` (gate 231 `published`, its `commit`). At the start, `git status --short --untracked-files=all` must be empty (B checked: `b-round-231/git-status-at-planning.txt`, 0 lines).
+**Baseline:** HEAD = `bd71144292b1e82e5f0c8934f23bd28ecef0ae3c` (gate 232 `published`, its `commit`). At the start, `git status --short --untracked-files=all` must be empty. B checked this: `b-round-232/git-status-at-planning.txt` has 0 lines.
 - If HEAD differs, or any path is dirty at the start: **STOP** (L11).
 - One exception: a root commit that touches only the 4 root files. Then re-hash those files and continue.
 
-**Frozen:** `b-round-231-r232-tree-sha256.txt` lists 1,078 tracked files: every tracked file except the 8 grants and the 4 root files. Run it from `store/` with `sha256sum -c --quiet`; it gives rc 0 at planning. The frozen set includes:
+**Frozen:** `b-round-232-r233-tree-sha256.txt` lists 1,087 tracked files: every tracked file except the 3 grants and the 4 root files. From `store/`, `sha256sum -c --quiet` gives rc 0 at planning. The frozen set includes:
 - every protected auth and purchase file: `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/routes/__tests__/download-routes.test.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx` and `entry.server.tsx`;
 - `.claude/**`, `CLAUDE.md` and every config file;
-- `ArrangementLane.tsx`, `ArrangementLibrary.tsx`, `ArrangementDetailPanel.tsx`, `ArrangementShortcutSheet.tsx`, `ArrangementTransport.tsx`, `ArrangementContext.tsx`, `view.ts` and `library-notice.ts`;
-- the tests `track-layout.test.tsx`, `content-colour-ui.test.tsx`, `studio-theme-obsidian.test.tsx`, `shortcut-sheet-ui.test.tsx` and `render-budget.test.tsx`.
+- `ArrangementOverview.tsx`, `ArrangementVideoDock.tsx`, `overview-visibility.ts`, `strings.ts` and `shortcuts.ts`;
+- every other test.
 
-**Root-owned, must equal HEAD:** `b-round-231-r232-root-files.txt` (`package.json`, `package-lock.json`, `vite.config.ts`, `vitest.config.ts`). Start hashes are in `b-round-231-r232-root-files-start-sha256.txt`. No dependency is needed.
+**Root-owned, must equal HEAD:** the files in `b-round-232-r233-root-files.txt` (`package.json`, `package-lock.json`, `vite.config.ts`, `vitest.config.ts`). Their start hashes are in `b-round-232-r233-root-files-start-sha256.txt`. No dependency is needed.
 
 ### 0.1 Grants
-- The list is `b-round-231-r232-grants.txt`. Start hashes are in `b-round-231-r232-granted-start-sha256.txt`; start copies are in `b-round-231/granted-start/`.
-- The new files are listed in `b-round-231-r232-new-files.txt` (N1–N4).
-
-| # | Path | What may change |
+| # | Path | Change |
 |---|---|---|
-| 1 | `app/components/arrangement/ArrangementOverview.tsx` | §2.4 only: the empty state. |
-| 2 | `app/components/arrangement/StudioWorkspace.tsx` | §2.5 only: the visibility read, the hidden slot, the Ctrl+Alt+O branch of the window keydown handler, and the imports these need. |
-| 3 | `app/components/arrangement/ArrangementVideoDock.tsx` | §2.6 only (GATE229-S2): the l.889 caption row loses `justify-between gap-2`. Nothing else. |
-| 4 | `app/lib/arrangement/shortcuts.ts` | §2.2: one new row, `overview-toggle`. |
-| 5 | `app/lib/arrangement/strings.ts` | §2.1: two new `studioViewStrings` keys. Nothing else. |
-| 6 | `app/lib/arrangement/__tests__/strings.test.ts` | The ST17 map and key list gain the two new keys (as in `b-round-231/precheck-tests.py`). **New case ST-C3** (§2.7). |
-| 7 | `app/lib/arrangement/__tests__/shortcuts.test.ts` | SC1 `EXPECTED_ROW_ORDER` gains `overview-toggle` after `overview-scroll`; the SC5 count goes 8 → 9. **New case SC-C3** (§2.7). |
-| 8 | `app/lib/arrangement/__tests__/panel-radius-ui.test.tsx` | l.77 only: the Overview root site literal becomes `'relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-panel'`, because the background token moves into a conditional (§2.4). |
-| N1 | `app/lib/arrangement/overview-visibility.ts` | New (§2.3). |
-| N2 | `app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx` | New (§2.7). |
-| N3 | `docs/implementation/2026/quarter-IV/180-calm-3-overview-empty-toggle.md` | New (§2.8). |
-| N4 | `app/lib/arrangement/__tests__/overview-visibility-persist-ui.test.tsx` | New (§2.7): OV-T3 only, in its own file so the module's in-memory value starts `null`. |
+| 1 | `app/components/arrangement/StudioWorkspace.tsx` | §2.1 only: one module-level helper and one call in the Ctrl+Alt+O branch. |
+| 2 | `app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx` | §2.2: add case OV-T6. Existing cases unchanged. |
+| 3 | `app/lib/arrangement/__tests__/render-budget.test.tsx` | §2.3: l.377 `  });` → `  }, 15000);` and nothing else. |
+| N1 | `docs/implementation/2026/quarter-IV/181-calm-3-overview-focus-rescue.md` | New (§2.4). |
 
-Anything else is out of scope. If a needed edit falls outside the grants, write a **STOP** (L11) and do not make the edit.
+The grants' start hashes are in `b-round-232-r233-granted-start-sha256.txt`. The lists are `b-round-232-r233-grants.txt` and `b-round-232-r233-new-files.txt`.
 
 ### 0.2 B's collision pre-check (L23, done)
-- **Reference implementation.** `b-round-231/precheck-apply.py` (app) and `b-round-231/precheck-tests.py` (test fixes) were applied to a scratch copy of `e5507ff` outside the repo. The full diff is `b-round-231/precheck-scratch.diff`.
-  - A may use it as a starting point and must still meet every clause below. `patch -p0 --dry-run` of it against a fresh `git archive HEAD app` copy gives rc 0; `patch` warns about the absolute `---` names and uses the relative `+++` names. The diff also adds B's two-case sketch as `overview-visibility-ui.test.tsx`; A replaces it with the real N2.
-  - The reference test sketch is `b-round-231/reference-overview-visibility-ui.test.tsx.txt` (two cases). A writes the real N2.
-- **Sweep with the app change only.** Every test file that imports the workspace, the route, the Overview, the dock, `shortcuts` or `strings` was run on the scratch: 121 files, listed in `b-round-231/l23-sweep-files.txt`. Result: **3 files / 4 tests red** (`l23-sweep-raw.log`):
-  - PNR2 (`panel-radius-ui`): the Overview root site literal ended in `bg-background`. Fixed by grant 8.
-  - SC1 and SC5 (`shortcuts.test.ts`): the row order and the aria row count. Fixed by grant 7.
-  - ST17 (`strings.test.ts`): the `studioViewStrings` key list and plain-string map. Fixed by grant 6.
-- **After the test fixes and the sketch file:** 122 files / 1,789 tests green, `tsc --noEmit` rc 0, and Biome clean on the 6 changed app files (`l23-precheck-fixed.log`).
-- **Pins that stay green by design.** Do not break them:
-  - OV1 (`studio-theme-obsidian`, frozen) counts the exact literal `<div className="pointer-events-none absolute inset-0 rounded-panel border border-outline" />` = 1 in `ArrangementOverview.tsx`. Keep that line byte-identical, and render it only when the project has clips (§2.4).
-  - PNR4 (`panel-radius-ui`) counts `rounded-panel` = 3 in the Overview source. The new baseline element must not use `rounded-panel`.
-  - DXC4 (`content-colour-ui`, frozen) and PNR4 read `overview.children[1]` as the bar-rows container. So in the empty state the baseline **replaces** the outline overlay as child 0, and child 1 stays the rows container in both states.
-  - TH5 (frozen) reads the playhead tokens in the empty SSR route. The playhead keeps `bg-accent ring-1 ring-background`.
-- **Mutant shown red on the scratch:** removing `!event.getModifierState('AltGraph')` turns the sketch's REF1 red, so jsdom honours `modifierAltGraph`.
+B applied the §2 sketch on a scratch copy (`git archive HEAD` → `/tmp/b232-scratch`, with `node_modules` symlinked), outside the repo and the loop folder. The diff is `b-round-232/precheck-scratch.diff`.
+- **Static:** `tsc --noEmit` rc 0. `npx biome check` on the 3 files is clean after `biome format`, which wraps the ternary over three lines as in the diff.
+- **Covering set** `b-round-232/covering-files.txt` (the same 32 files as round 232): **32 files / 542 tests green**, rc 0 (`b-round-232/precheck-covering.log`). The render-budget test took 2,799 ms there, now against a 15,000 ms limit.
+- **Grep:** at HEAD, no test asserts `document.activeElement` after Ctrl+Alt+O (`grep -rn "activeElement" app/lib/arrangement/__tests__/overview-visibility*`: 0 hits). No test besides N2/N4 sends the chord.
+- **Mutant MU-1** (remove the `if (hidden) { focusPastHiddenOverview(); }` call): OV-T6 turns red, and the 6 other cases stay green.
+- **Mutant MU-2** (drop the `compareDocumentPosition` filter): OV-T6 stays green, because today no dock button comes before the Overview. The filter is defensive. A may keep it (recommended), but must not claim a test for it.
 
 ### 0.3 Render conditions, timeouts and testids (L29, L31, L40)
-- **Baseline browser probe** (`b-round-231/probe-overview.mjs` → `probe/baseline.json`; both viewports; the running :5173 server at `e5507ff`):
-  - **Heights:** the dock is 107 px tall, set by the 160×90 video box and not by the Overview. The Overview is 64 px (h-16), with the 16 px caption row above it. The scroller `clientHeight` is 516 (1440) / 406 (1280).
-  - **Empty extent:** the empty project's `data-extent` is 10.000 s, so the view frame covers the whole Overview (956 / 796 px wide). That is the "empty frame with a title" look.
-  - **Without the Overview:** taking it out of layout leaves the dock and the scroller unchanged, but the caption row drops 68 px (y 98 → 166 at 1440). Hence the hidden **slot** (§2.5, D-29z309).
-  - **Today:** Ctrl+Alt+O does nothing, whether the body or the Overview has focus. Chromium has no binding for it.
-  - **Tab order around the Overview:** library separator → **Overview** → `arrangement-video-expand`.
-- **B's scratch run** (`b-round-231/probe-calm3.mjs` on a scratch dev server at :5174 → `probe-scratch/scratch.json`, screenshots `probe-scratch/*.png`). Every recipe in §5 was run at both viewports:
-  - **Empty state:** the root is transparent. The baseline is 1 px (956×1 at y 181 at 1440; 796×1 at y 219 at 1280). The outline overlay is absent, and the frame and playhead have `visibility: hidden`.
-  - **Navigation:** ← in the empty Overview still moves `aria-valuenow` 0 → 5.
-  - **Hide:** Ctrl+Alt+O with the Overview focused hides it. The slot is 956×64 / 796×64 at the same place, and the dock, caption and scroller are unchanged. The status reads "Overview hidden. Ctrl+Alt+O shows it again.", and the key is `'1'`.
-  - **Focus:** it falls to `body`, and the next Tab reaches `arrangement-video-expand` (Chromium's sequential focus starting point; D-29z309).
-  - **Persistence:** a reload keeps it hidden. Ctrl+Alt+O shows it again and removes the key.
-  - **First clip:** Enter (from the body) adds a clip → `data-overview-state="full"`, a 1 px outline, and the frame and playhead visible. Ctrl+Z → empty again.
-  - **Sheet:** searching "overview" lists `fit`, `overview-scroll` and `overview-toggle`.
+**Focus targets (L29).** B ran these in Chromium at the baseline (`b-round-232/probe/focus.json`) and on the scratch build (`b-round-232/probe-fix/focus.json` and `focus2.json`, port 5174, now stopped).
+- **Recipe for "Overview focused":** focus `arrangement-library-separator`, then press Tab.
+- **Docked video** (the default `/studio-lab`): after the Overview, the Tab order is `arrangement-video-expand` → `arrangement-snap-toggle` → `arrangement-grid-division`.
+- **Floating video** (click `arrangement-video-expand` once): the dock shows `arrangement-video-placeholder`. After the Overview, the Tab order is `arrangement-video-placeholder-return` → `arrangement-video-drag` → `arrangement-video-expand`.
+- **Dock buttons:** the buttons that follow the Overview in DOM order are exactly those Tab stops. None is `disabled` (`grep -n disabled ArrangementVideoDock.tsx`: 0 hits).
+- **Scratch build, after the fix:**
+  - Hiding moves `activeElement` to `arrangement-video-expand` (docked) or `arrangement-video-placeholder-return` (floating). It matches `:focus-visible`, with a solid 1 px outline.
+  - The next Tab lands on `arrangement-snap-toggle`. Shift+Tab lands on `arrangement-library-separator`.
+  - With focus on the transport Play button or on `body`, hide and show leave focus unchanged.
   - 0 page errors.
-- **Signals and their render branch (L29):**
-  - `data-overview-state` is on the Overview root in both branches. It is `'empty'` exactly when `arrangement.clips.length === 0`.
-  - `arrangement-overview-baseline` renders only in the empty branch.
-  - `arrangement-overview-hidden-slot` renders only while the Overview is hidden; `arrangement-overview` is then absent.
-  - The status text is in `arrangement-status` (existing).
-- **L31:** rows are added to `strings.test.ts` (63 tests, 70 ms total at gate 231), `shortcuts.test.ts` (5 tests, 22 ms) and the new N2. No test in them is near 50 % of its timeout. N2 mounts the workspace the way `shortcut-sheet-ui` does (11 tests, 4,088 ms at gate 231). Keep each N2 case under 2.5 s, or split it.
-- **L40 (changed testid elements):** `arrangement-overview`, `arrangement-overview-frame`, `arrangement-overview-playhead`, and the caption row of `arrangement-video-dock`. Their test hits are in the covering set `b-round-231/covering-files.txt` (32 files with N2 and N4, including `track-layout.test.tsx` per D-29z283). A hit that pins a class in a frozen file is a STOP (L11) with the hit list.
+  - Clips are not focus targets: B's attempt to focus a clip left focus on `body`, so no clip row is set.
+
+**Timeouts (L31).** From gate 232's `verify.log` (l.1369–1373):
+- the render-budget file took 7,506 ms;
+- the l.303 test took 2,806 ms (56 % of 5,000; fixed here);
+- R11-P1e took 1,792 ms against its declared 15,000;
+- the others took < 1,400 ms each.
+
+Each `overview-visibility-ui.test.tsx` case took < 500 ms in B's run.
+
+**Testids (L40).** No element with a `data-testid` changes. The helper only reads `data-timeline-overview` and `data-testid="arrangement-video-dock"`. The same file already uses this pattern in `libraryRailExpandButton` and `trackRowNameButton`.
 
 ## 1. Why
-Saba finds the Studio screen overloaded (SABA-B-8). In an empty project the Overview is a framed 64 px box with nothing in it: form without content (calm-studio-review §3). Live has the same Overview (6.1) and lets the user hide it (42.1, Ctrl+Alt+O). CALM-1 and CALM-2 removed the label and the helper text. This stage makes the empty Overview quiet and adds the keyboard toggle.
+A keyboard or screen-reader user who hides the Overview while it has focus loses their place, because focus falls to `body`.
+- Chromium keeps the sequential-navigation start point, so the next Tab still works (C round 232).
+- But a screen reader's virtual cursor and the visible focus ring are lost, and nothing tells the user where focus went.
 
-**Why we missed it** (policy rule for Saba-reported issues; SABA-B-8 is Saba's report): the full analysis is in CALM-1's task (round 226). In short, no round looked at the whole screen in its empty state, and the Overview was verified only as a navigation control. Lesson L39 (screen budget) is the rule that now catches this. C checks that it exists (C-LESSON-232).
+WCAG 2.4.3 (Focus Order) and the WAI-ARIA APG practice agree: when the focused element is removed, move focus to a logical neighbour. The codebase already does this in two places:
+- `pendingLibraryRailFocusRef` rescues focus to the library rail button;
+- the library notice's dismiss moves focus to search (D-29z307 R6).
 
 ## 2. Changes
 
-### 2.1 `strings.ts` (exact)
-Add these two keys to `studioViewStrings`, directly after `followOn`:
-- `overviewHidden: 'Overview hidden. Ctrl+Alt+O shows it again.'`
-- `overviewShown: 'Overview shown. Ctrl+Alt+O hides it.'`
+### 2.1 `StudioWorkspace.tsx`
+- **New helper.** Add one module-level function next to `isOverviewTarget` (for example `focusPastHiddenOverview`):
+  - It runs **only when hiding**.
+  - If `document.activeElement` is inside `[data-timeline-overview]`, it finds the enclosing `[data-testid="arrangement-video-dock"]`.
+  - It focuses, with `{ preventScroll: true }`, the first `button` in that dock that is not `disabled`, has `tabIndex >= 0`, and follows the Overview in document order.
+  - If there is no such button, or focus is not on the Overview, it does nothing.
+- **The call.** In the Ctrl+Alt+O branch, call it **before** `setOverviewHidden(true)`, while the Overview is still mounted. Put it after the existing `repeat`/gesture return, so every existing guard keeps its order. Nothing else in the branch changes.
+- **Showing** the Overview moves no focus, because nothing unmounts. Focus anywhere else is never moved.
 
-Nothing else changes. `overviewLabel` and `overviewTitle` stay byte-identical.
+**Why this target (L4, one rule).** It is the element the next Tab would have reached (B's baseline probe). Focus moves "forward by one", which is the smallest change a keyboard user can predict.
 
-### 2.2 `shortcuts.ts` (exact)
-In group `zoom-view`, directly after `overview-scroll`, add:
-`{ id: 'overview-toggle', action: 'Show / hide the overview', keys: ['Ctrl+Alt+O'], ariaKeyShortcuts: 'Control+Alt+O Meta+Alt+O' }`.
+B rejected the reviewer's suggestion, the timeline scroller. It has no `tabIndex`, so `.focus()` on it does nothing (`StudioWorkspace.tsx` l.2349–2355). Adding a `tabIndex` there would create a new Tab stop and trigger `revealKeyboardFocusBelowChrome`.
 
-No other row moves. The sheet renders the new row from the source, so the sheet itself does not change.
+### 2.2 Test OV-T6 (`overview-visibility-ui.test.tsx`)
+Add it after OV-T2, as in `b-round-232/precheck-scratch.diff`. A may reword it but keeps every assertion:
+1. Focus a control outside the Overview, preferably the transport Play button (a real user cannot send the chord from the search field, because the text-field guard swallows it; B's scratch sketch used the search field), then send the chord with Meta: focus stays on that control. Send it again to show.
+2. Focus the Overview and send the chord: the Overview is gone, and `document.activeElement` is `arrangement-video-expand`.
+3. Send the chord again (show): focus stays on `arrangement-video-expand`.
+4. Click `arrangement-video-expand` (floating video), focus the Overview and send the chord: `activeElement` is `arrangement-video-placeholder-return`.
 
-### 2.3 New `overview-visibility.ts` (N1)
-It uses the same pattern as `library-notice.ts` (no third storage pattern):
-- `OVERVIEW_HIDDEN_STORAGE_KEY = 'czaba-studio-overview-hidden'`. There is one key per browser, **not** one per collection (D-29z309). It is a view preference of the workspace, like Live's view toggles, not a fact about the content.
-- `readOverviewHidden(): boolean`:
-  - returns the in-memory value first (set by the last `setOverviewHidden`);
-  - else `false` on the server;
-  - else `localStorage.getItem(key) === '1'`;
-  - `false` if storage throws.
-- `setOverviewHidden(hidden: boolean): void` sets the in-memory value. It writes `'1'` when hidden and **removes** the key when shown (in a try/catch, silent on failure), then notifies the listeners.
-- `subscribeOverviewVisibility(listener): () => void`.
-- No `any`, no type assertions, no comments; every statement ends with a semicolon.
+The existing `afterEach` (`setOverviewHidden(false)`) resets the module state.
 
-### 2.4 Overview empty state (`ArrangementOverview.tsx`)
-One rule (L4): **empty** ⇔ `arrangement.clips.length === 0`. It is project-level and counts clips on any track, video included (the same rule as the CALM-2b lane hint). The empty state returns after an Undo back to 0 clips.
-- **Root:** add `data-overview-state={hasClips ? 'full' : 'empty'}`. The background token becomes conditional: `bg-background` when full, `bg-transparent` when empty. Every other root class, `role="slider"`, `tabIndex`, all `aria-*`, `title`, `data-*` and every handler stay unchanged.
-- **Child 0:** when full, the existing outline overlay line, byte-identical (OV1). When empty, a baseline in its place, with no `rounded-panel`: `<div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-outline" data-testid="arrangement-overview-baseline" />`.
-- **Child 1:** the rows container, unchanged.
-- **Frame and playhead:** `arrangement-overview-frame` and `arrangement-overview-playhead` get `invisible` when empty. They stay mounted, so `updateOverviewFrame` keeps writing `aria-valuenow` and `aria-valuetext` in the empty state. Their other tokens are unchanged (TH5, OV1).
-- **Bbox:** unchanged in both states (h-16, full width, ±1 px).
-- **Focus ring:** the existing shared ring, not touched. It stays visible on keyboard focus in both states (C row).
+### 2.3 `render-budget.test.tsx`
+Change line 377 only: the closing `  });` of the l.303 test becomes `  }, 15000);`, the same literal its sibling uses at l.432. No other byte changes. This closes C-R232-01.
 
-### 2.5 Toggle and hidden slot (`StudioWorkspace.tsx`)
-- **Visibility read:** `const isOverviewHidden = useSyncExternalStore(subscribeOverviewVisibility, readOverviewHidden, () => false)`. The server snapshot is "shown" because the route is SSR (the same as the CALM-2b notice).
-- **The dock's `overview` prop:**
-  - hidden → `<div aria-hidden="true" className="h-16 w-full" data-testid="arrangement-overview-hidden-slot" />`. The slot keeps the caption row and every other element in place (D-29z309). The baseline probe showed the caption drops 68 px without it.
-  - shown → the existing `<ArrangementOverview …/>`, with its props unchanged.
-- **Key branch in the window `keydown` handler.** Place it after the floating-video Escape branch and before `const current = workspaceRef.current`. The existing early returns (shortcut sheet open, Export open, typing target) then apply to it too.
-  - **Condition:** `event.code === 'KeyO' && event.altKey && (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.getModifierState('AltGraph')`.
-  - **Effect:** call `preventDefault()`. If `event.repeat` is set or a pointer gesture is active (`workspaceRef.current.isPointerGestureActive()`), stop there. Otherwise:
-    - `hidden = !readOverviewHidden()`;
-    - `setOverviewHidden(hidden)`;
-    - `setStatus(hidden ? studioViewStrings.overviewHidden : studioViewStrings.overviewShown)`.
-  - **View state only:** it adds **no** arrangement history entry, and Undo does not touch it.
-  - **Code-based:** it works on the Georgian layout, where `event.key` is `ო`.
-  - **AltGr:** AltGr (Ctrl+Alt on Windows, e.g. Polish `ó`) is ignored, so the character still types wherever text is allowed.
-- **Focus:** if the Overview has focus when it hides, the code does **not** move focus (D-29z309, the smallest honest behaviour; no new focus target is invented).
-  - Chromium keeps the sequential focus starting point, so the next Tab goes to `arrangement-video-expand` (measured, §0.3).
-  - The status line announces the change.
-  - C measures this. If a browser drops the starting point to the top of the document, C reports a Low. It is not a STOP.
+### 2.4 Doc N1
+Write `docs/implementation/2026/quarter-IV/181-calm-3-overview-focus-rescue.md` in Georgian with English technical terms, following TEMPLATE.md and the L26 headings.
+- Line 4 is exactly `**სტატუსი:** Completed (C round 233 PASS)` (L28).
+- Cite only OV-T6 and the render-budget test by name.
+- State the target rule, the rejected scroller option and why, and that showing moves no focus.
+- TODO: TLM-R232-ALTGR-WIN, TLM-R232-MAC, and B-R232-DOC180-FOCUS-STALE (doc 180 l.42–51 still describes the round-232 "focus is not moved" rule; doc 181 supersedes it; doc 180 is frozen this round and gets a one-line note at the next owner touch or in the polish pass).
 
-### 2.6 GATE229-S2 (`ArrangementVideoDock.tsx`)
-l.889 changes from `<div className="flex min-h-4 items-baseline justify-between gap-2 text-xs leading-4 text-muted">` to `<div className="flex min-h-4 items-baseline text-xs leading-4 text-muted">`. The row has one child, so the bbox does not change (C-BBOX and the GATE229-S4 row check it). Nothing else in the dock changes.
+At planning, `grep -rn 'In Progress (stage' docs/implementation` returns only doc 176, which is tied to the open PERF-HARNESS-SHARED-LIB-b-ii stage. No other doc line is granted.
 
-### 2.7 Tests: new and changed cases
-- **Fixes (grants 6–8):** exactly as in `b-round-231/precheck-tests.py`.
-- **ST-C3** (`strings.test.ts`): both new strings equal their literals. Both mention `Ctrl+Alt+O`, which must equal `findStudioShortcut('overview-toggle')?.keys[0]`, so the status and the sheet cannot drift apart.
-- **SC-C3** (`shortcuts.test.ts`):
-  - `findStudioShortcut('overview-toggle')` has keys `['Ctrl+Alt+O']` and aria `'Control+Alt+O Meta+Alt+O'`;
-  - the row sits in group `zoom-view`, directly after `overview-scroll`;
-  - `filterStudioShortcutGroups('overview')` contains `fit`, `overview-scroll` and `overview-toggle`.
-- **N2 `overview-visibility-ui.test.tsx`.**
-  - **Setup:** mount like `shortcut-sheet-ui`. Reset in `afterEach` with `act(() => setOverviewHidden(false))` and `localStorage.clear()`. Find elements by testid, role and text only; no class assertions (L12).
-  - **Module state (binding):** `setOverviewHidden` sets the in-memory value, and `readOverviewHidden` reads it before `localStorage`. After the first `afterEach`, a preset storage key is therefore never read in N2. No N2 case may depend on reading storage at mount; that case lives in N4.
-  - **OV-E1:** with 0 clips, `data-overview-state="empty"`, the baseline exists, and the root's child 1 is the rows container. Adding one clip through the context API → `full` and no baseline. `undo()` → `empty`.
-  - **OV-E2:** in the empty state, `aria-valuenow` and `aria-valuemax` are present, and ArrowRight on the focused Overview changes `aria-valuenow` (navigation unchanged).
-  - **OV-T1:** Ctrl+Alt+O on the body:
-    - `fireEvent` returns `false` (default prevented);
-    - `arrangement-overview` is absent, and the slot exists with `aria-hidden="true"`;
-    - the storage key is `'1'`;
-    - the status equals `overviewHidden`.
-
-    The Meta variant (`metaKey` + `altKey`) then shows it again: the key is removed and the status equals `overviewShown`.
-  - **OV-T2 (ignored cases).** Each leaves the Overview shown and the key `null`:
-    - `modifierAltGraph: true` (here `fireEvent` also returns `true`);
-    - Shift added;
-    - `repeat: true`;
-    - the target is the library search field;
-    - the shortcut sheet is open;
-    - Ctrl+O without Alt;
-    - Alt+O without Ctrl or Meta.
-  - **OV-T3** is in **N4**, not N2 (see below).
-  - **OV-T4:** the toggle adds no history entry. Undo availability is the same after hide and show, and `undo()` after a toggle undoes the previous edit, not the toggle.
-  - **OV-T5:** when storage throws (a `setItem` / `getItem` spy that throws), the toggle still hides and shows within the session (in memory), with no error.
-- **N4 `overview-visibility-persist-ui.test.tsx`: OV-T3 only.** Vitest isolates module state per file (default `isolate`; `vitest.config.ts` does not change it), so the in-memory value starts `null` here. One test, so the result does not depend on order (A ran `--sequence.shuffle` in round 231):
-  1. set `localStorage` key `'1'`;
-  2. `renderToString` of the workspace tree renders `arrangement-overview` (server snapshot "shown"); `setOverviewHidden` is never called in this file;
-  3. `render` of the same tree mounts hidden: the slot exists and `arrangement-overview` is absent (client snapshot reads storage).
-  Reset storage in `afterEach`. Do not import a helper that calls `setOverviewHidden` at module load.
-  B verified this on the scratch: the sketch `b-round-231/reference-overview-visibility-persist-ui.test.tsx.txt` passes, and MU-4 turns it red.
-- **Mutants A must show red.** Restore each one and keep the logs in `a-round-232/mutants/`.
-
-  | Mutant | Change | Expected |
-  |---|---|---|
-  | MU-1 | Invert the empty-state rule (`hasClips` → `!hasClips`) | red |
-  | MU-2 | Drop the AltGraph guard | red |
-  | MU-3 | Drop the `event.repeat` guard | red |
-  | MU-4 | Server snapshot = `readOverviewHidden` | red (OV-T3 in N4) |
-  | MU-5 | `setOverviewHidden(false)` writes `'0'` instead of removing the key | red (OV-T1) |
-  | MU-6 | Render `null` instead of the slot when hidden | red in N2; C-TOGGLE also checks the caption position in the browser |
-  | MU-7 | Swap the two status strings | red |
-  | MU-8 | Drop `invisible` from the frame | expected green in jsdom, so **browser-only** (C-OVERVIEW-EMPTY). Do not add a class pin (L12). |
-
-### 2.8 Doc (N3)
-`docs/implementation/2026/quarter-IV/180-calm-3-overview-empty-toggle.md`, in Georgian with English technical terms (TEMPLATE.md):
-- l.4 is exactly `**სტატუსი:** Completed (C round 232 PASS)` (L28);
-- the seven TEMPLATE headings after `## Prompt`, in order (L26);
-- cite only test ids that exist (OV-E1, OV-E2, OV-T1…T5, ST-C3, SC-C3), and say that OV-T3 is in N4;
-- state the reason for the hidden slot, the focus ruling and the AltGr limit.
-
-The SABA-B-8 docs 177–179 already read `Completed`, so no other doc line is granted. `grep -rn 'In Progress (stage' docs/implementation` returns only doc 176, which is tied to the open PERF-HARNESS-SHARED-LIB-b-ii stage.
-
-## 3. Reference: how Ableton Live 12 does it
-Sources, re-fetched by B with WebFetch on 2026-10-28 (earlier capture: `b-round-71/ableton-*-20261021.txt`):
-- Live 12 manual **6.1 Layout**: https://www.ableton.com/en/live-manual/12/arrangement-view/
-- Live 12 manual **42.1 Showing and Hiding Views**: https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/
-
-| # | Behaviour | Live 12 (source) | CZABA decision | C check |
-|---|---|---|---|---|
-| R1 | What the Overview is | 6.1: it "displays the Arrangement's entire layout of clips from start to end and can be used for zooming and navigation"; "the black outline represents the currently displayed part" | Same role. The outline is our view frame, unchanged when the project has clips | C-OVERVIEW-FIRSTCLIP |
-| R2 | Gestures | 6.1: drag horizontally = scroll, drag vertically = zoom; double-click inside the outline = the whole Arrangement | Unchanged. Click = centre, double-click anywhere = Fit and ← / → = 5 s are earlier CZABA choices | C-OVERVIEW-EMPTY (gestures still work when empty) |
-| R3 | Hide and show | 42.1: Hide/Show Overview = **Ctrl+Alt+O** (Win) / **Cmd+Option+O** (Mac) | Same keys (Ctrl or Cmd, with Alt/Option) | C-TOGGLE, Mac row TLM-R232-MAC |
-| R4 | Discoverability | 42.1 lists it under "Showing and Hiding Views" | Listed in the sheet's "Zoom & view" group, plus a one-time status line on toggle | C-SHEET-232 |
-| R5 | Empty-project look | No reference found: 6.1 and 42.1 say nothing about the Overview of an empty Arrangement (both pages searched) | CZABA/Saba: a quiet hairline, with no outline, frame or playhead | C-OVERVIEW-EMPTY |
-| R6 | Toggle remembered across sessions | Not confirmed: the manual does not say, and it was not observed | CZABA/Saba: remembered per browser | C-TOGGLE-PERSIST |
-
-**Deviations, with reasons:**
-- **D1.** The empty-state hairline is CZABA's (Saba decision 3). Live documents no empty look.
-- **D2.** No View-menu entry and no visible button. Saba approved only the key ("no new visible control"), and CZABA has no menu bar.
-- **D3.** A one-time status message on toggle. Live documents none. Ours is there because there is no visible control: the status line, the Studio's one feedback channel, confirms the action and teaches the way back.
-- **D4.** The hidden Overview leaves an empty 64 px slot. The video monitor sets the dock row height (Saba did not approve collapsing it), and the slot keeps the caption from jumping. Whether Live gives the space back is an inference, not confirmed (the fetched pages do not say). We could not without the unapproved layout change.
-- **D5.** AltGr+O (Ctrl+Alt on some Windows layouts) is ignored, so that it can still type a character. On those layouts the toggle needs the left Ctrl+Alt.
-- **D6.** `?` opens the sheet, not Info View (CALM-1, unchanged).
-
-**Screen budget (L39):** this round adds no persistent text and no persistent element. It removes the empty Overview's outline, frame and playhead paint. The new status messages appear only after the user presses the key. Quieter homes considered:
-- the Overview's tooltip: adding the key there is allowed but not needed, because the sheet carries it;
-- the `?` sheet: chosen;
-- the status line: chosen, one-time.
+## 3. Reference
+- **Ableton Live 12: no reference found.** Manual 6.1 and 42.1 (re-fetched in round 232) describe the Overview and Ctrl+Alt+O but say nothing about keyboard focus. In Live the Overview is not a Tab stop. CZABA's Overview is a focusable slider (an earlier CZABA choice), so the focus handoff is CZABA's own rule.
+- **Secondary (accessibility):**
+  - WCAG 2.2 SC 2.4.3 Focus Order: https://www.w3.org/WAI/WCAG22/Understanding/focus-order
+  - WAI-ARIA APG, "Developing a Keyboard Interface": https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/ (focus is not lost when content is removed).
+- **Deviation:** none from Live, because Live has no equivalent focus state. The status message ("Overview hidden. Ctrl+Alt+O shows it again.") is unchanged.
+- **Screen budget (L39):** no persistent element or text is added or removed.
 
 ## 4. A: checks to run (speed rule: no full suite, no `verify`)
 1. **Start:**
-   - HEAD is `e5507ff` and the status is empty;
-   - from `store/`, `sha256sum -c --quiet` gives rc 0 on `b-round-231-r232-tree-sha256.txt`, `b-round-231-r232-granted-start-sha256.txt` and `b-round-231-r232-root-files-start-sha256.txt`.
+   - HEAD is `bd71144` and the status is empty;
+   - from `store/`, `sha256sum -c --quiet` gives rc 0 on `b-round-232-r233-tree-sha256.txt`, `b-round-232-r233-granted-start-sha256.txt` and `b-round-232-r233-root-files-start-sha256.txt`.
 2. **Static:**
    - `npm run typecheck` rc 0;
-   - `npm run lint` rc 0, with 0 diagnostics in the grants and new files;
-   - `npx biome check` on the changed app and test paths: clean.
-3. **Covering set:** `npx vitest run $(cat ../tmp/studio-real-loop/b-round-231/covering-files.txt)` (32 files including N2 and N4), all green. Also run N2 and N4 once with `--sequence.shuffle`.
-   - L32: a failure, a timeout, or a test above 50 % of its timeout is a STOP at the top of `a-round-232.md`. Report your time and the gate-231 time.
-   - Add any extra file your own grep finds (L40).
-4. **Mutants:** MU-1…MU-8 as in §2.7. MU-8 is browser-only.
-5. **Optional browser self-check:** copy `b-round-231/probe-calm3.mjs` into `a-round-232/` and run it against :5173. Do not edit B's file. Compare the result with `b-round-231/probe-scratch/scratch.json`.
+   - `npm run lint` rc 0, with 0 diagnostics in the grants and N1;
+   - `npx biome check` on the 3 changed files: clean.
+3. **Covering set:** `npx vitest run $(cat ../tmp/studio-real-loop/b-round-232/covering-files.txt)`, all green. Also run `overview-visibility-ui.test.tsx` once with `--sequence.shuffle`.
+   - L32: a failure, a timeout, or a test above 50 % of its timeout is a STOP at the top of `a-round-233.md`. Report your time and the gate-232 time.
+4. **Mutant:** MU-1 (§0.2) turns OV-T6 red. Restore the file and check with `git diff`.
+5. **Optional browser self-check:** copy `b-round-232/probe-focus.mjs` and `probe-focus2.mjs` into `a-round-233/` and run them against :5173. Do not edit B's files. Compare the results with `b-round-232/probe-fix/`.
 6. **code-reviewer** (3+ files changed): forward its Architecture note to B. Do not act on it outside the grants.
 7. **End:**
-   - `git status` shows exactly 8 `M` and N1–N4 as `??`;
+   - `git status` shows exactly 3 `M` and N1 as `??`;
    - the frozen and root lists give rc 0;
-   - write `a-round-232/changed-end-sha256.txt` and `a-round-232/granted-hunks.diff` (against `b-round-231/granted-start/`; new files against /dev/null).
+   - write `a-round-233/changed-end-sha256.txt` and `a-round-233/granted-hunks.diff`.
 
 ## 5. C: acceptance (real Chromium on `/studio-lab` at 1440×900 and 1280×720)
-B's numbers are in `b-round-231/probe/baseline.json` (before) and `b-round-231/probe-scratch/scratch.json` (after, on B's scratch). The gate rows (full vitest, typecheck, build, lint, verify, e2e smoke) are `gate` and are not claimed.
+B's numbers are in `b-round-232/probe/focus.json` (before) and `b-round-232/probe-fix/focus.json` and `focus2.json` (after, on the scratch build). The gate rows (full vitest, typecheck, build, lint, verify, e2e smoke) are `gate` and are not claimed.
 
 | Row | Check | Pass when |
 |---|---|---|
-| C-SCOPE-232 | HEAD, status, hashes, hunks | <ul><li>HEAD is `e5507ff`;</li><li>8 `M` plus N1–N4;</li><li>the frozen, root and A-end lists give rc 0;</li><li>protected files: `git diff --quiet HEAD` gives rc 0;</li><li>the hunks are §2.1–§2.6 plus the §2.7 test changes.</li></ul> |
-| C-UNIT-232 | Covering set | `covering-files.txt` (32 files) is green. ST-C3, SC-C3, OV-E1/E2, OV-T1, OV-T2, OV-T4, OV-T5 (N2) and OV-T3 (N4) exist. N2 and N4 also pass with `--sequence.shuffle`. |
-| C-OVERVIEW-EMPTY | Fresh context, 0 clips, both viewports | <ul><li>`data-overview-state="empty"`.</li><li>The root background is transparent (computed `rgba(0, 0, 0, 0)`), and no element at the Overview has a 1 px `border-outline` box.</li><li>The frame and playhead have computed `visibility: hidden`.</li><li>The baseline is 1 px tall, the full Overview width, at the Overview's bottom edge.</li><li>**Pixels:** a screenshot crop of the Overview shows no outline or frame rectangle (compare `probe/ov-empty-*` before and after).</li><li>The Overview bbox equals the baseline ±1 px.</li><li>← / → on the focused Overview change `aria-valuenow`.</li><li>Double-click runs Fit (status "Fit: …").</li><li>A horizontal drag in the empty Overview does not throw (0 page errors).</li><li>**Keyboard focus ring:** visible on the empty Overview (brass pixels painted > 0, contrast against the dock ≥ 3:1).</li><li>A mouse press shows no ring.</li></ul> |
-| C-OVERVIEW-FIRSTCLIP | Enter adds a clip; then Ctrl+Z | <ul><li>After Enter: `full`, a 1 px outline overlay, the frame and playhead visible, and the root background back to its before value (`rgb(14, 13, 12)`). The bars are visible.</li><li>After Ctrl+Z: `empty` again.</li><li>The same at both viewports.</li></ul> |
-| C-TOGGLE | Ctrl+Alt+O from the body and from the focused Overview | <ul><li>**Hidden:** `arrangement-overview` is absent, and the slot is at the Overview's former bbox ±1 px.</li><li>The dock bbox, the caption row bbox and the scroller `clientHeight` equal the shown state ±1 px.</li><li>The status is exactly "Overview hidden. Ctrl+Alt+O shows it again."</li><li>Pressing it again shows it, with the status "Overview shown. Ctrl+Alt+O hides it."</li><li>**Negative:** in the library search field the key does nothing to the Overview; while the shortcut sheet is open, nothing happens; Ctrl+O alone and Alt+O alone do nothing; a held key (auto-repeat, ≥ 10 repeats) toggles exactly once.</li></ul> |
-| C-TOGGLE-FOCUS | Overview focused, then Ctrl+Alt+O | After hiding, the next Tab lands on `arrangement-video-expand`. After a fresh hide, Shift+Tab lands on the library separator. Record `document.activeElement` honestly. |
-| C-TOGGLE-PERSIST | Reload; fresh context | <ul><li>A reload keeps it hidden (key `'1'`), with 0 `layout-shift` entries after hydration.</li><li>Measure whether the SSR Overview paints before hydration removes it (C-NOTICE-231 method: FCP versus the removal time, and the per-rAF effective opacity). A visible flash is a Low, not a FAIL.</li><li>A fresh context shows the Overview.</li><li>Showing it removes the key.</li></ul> |
-| C-UNDO-232 | Toggle after an edit | Add a clip, toggle twice, then press Ctrl+Z: the clip is undone (the toggle is not in history). |
-| C-SHEET-232 | `?`, then search "overview" | <ul><li>The rows are `fit`, `overview-scroll` and `overview-toggle`.</li><li>The `overview-toggle` row shows `Ctrl+Alt+O` in the "Zoom & view" group.</li><li>The sheet's row count equals the source count.</li></ul> |
-| C-CAPTION-232 (GATE229-S4) | Caption row at 1280 | <ul><li>The row is 16 px tall with an empty caption.</li><li>It is also 16 px with a long file name: load a local video whose name has ≥ 80 characters through "Your own video" (L25 filechooser recipe). The text truncates on one line, and the Overview below does not move.</li><li>Check both viewports, with the Overview shown and hidden.</li></ul> |
-| C-BBOX-232 | D6 all-element bbox | Every element's bbox delta is ≤ 1 px against the baseline, except the Overview's own children and the listed state changes. |
-| C-BUDGET-232 (L39) | Persistent text rows | Count the rows outside the timeline at S0 and S1, at both viewports, before and after: no increase. |
-| C-LESSON-232 | `lessons.md` | L39 exists (the "Why we missed it" rule). |
-| G232-3 | Purchase protection | <ul><li>`/studio-lab` returns 200, shows the demo badge, and `auth_user` is null.</li><li>`/studio/middle-east` shows "Sign in required", with 0 `audio[src]`.</li><li>`/api/studio-token` with no header → 401.</li><li>No token is issued.</li></ul> |
-| LAB-SMOKE-232 | Real audio | Add, then Export WAV: 24-bit, 48 kHz, stereo. The length and RMS equal C round 231 (101.352 s; −65.21 / −21.59 / −21.54 dB). 0 page errors. |
-| AN-REVIEW-232 | Doc 180 | l.4 is byte-exact `**სტატუსი:** Completed (C round 232 PASS)`; the L26 headings are present; the cited ids exist. |
-| C-REF-232 | §3 table | R1–R4 match or are listed deviations; R5 and R6 are recorded as no reference / not confirmed; no unlisted difference. |
-| C-SHOTS-232 | Screenshots | S0 and S1, before (B's `probe/`) and after, plus the hidden state, at both viewports. |
-| TLM-R232-MAC | Tech Lead manual check | Cmd+Option+O toggles on a Mac. It cannot be claimed in the cloud: mark it `blocked` with the reason "needs a Mac". It is not a FAIL. |
+| C-SCOPE-233 | HEAD, status, hashes, hunks | <ul><li>HEAD is `bd71144`;</li><li>3 `M` plus N1;</li><li>the frozen, root and A-end lists give rc 0;</li><li>protected files: `git diff --quiet HEAD` gives rc 0;</li><li>the hunks are §2.1–§2.3 only (render-budget: exactly one changed line).</li></ul> |
+| C-UNIT-233 | Covering set | <ul><li>`b-round-232/covering-files.txt` (32 files) is green.</li><li>OV-T6 exists (grep: 1 hit).</li><li>`overview-visibility-ui.test.tsx` passes with `--sequence.shuffle`.</li><li>The l.303 render-budget test declares `15000`; report its time.</li></ul> |
+| C-FOCUS-DOCKED-233 | Overview focused (separator → Tab), then Ctrl+Alt+O; both viewports | <ul><li>`activeElement` is `arrangement-video-expand`, it matches `:focus-visible`, and its ring is painted (brass px > 0).</li><li>The status is exactly "Overview hidden. Ctrl+Alt+O shows it again."</li><li>The next Tab lands on `arrangement-snap-toggle`.</li><li>After a fresh hide, Shift+Tab from the expand button lands on `arrangement-library-separator`.</li><li>The same with Meta+Alt+O.</li></ul> |
+| C-FOCUS-FLOAT-233 | Video floating (click expand), Overview focused, then Ctrl+Alt+O; both viewports | `activeElement` is `arrangement-video-placeholder-return`, with a visible ring. Escape still returns the floating video. |
+| C-FOCUS-OTHER-233 | Focus elsewhere | <ul><li>With focus on `body`, on the transport Play button, or on `arrangement-library-separator`, Ctrl+Alt+O hides and shows the Overview, and `activeElement` is unchanged each time.</li><li>Showing from the expand button leaves focus on it.</li></ul> |
+| C-TOGGLE-233 | Round-232 neighbours (short check) | <ul><li>Hide: the slot sits at the Overview's former bbox ±1 px.</li><li>Show: the Overview returns.</li><li>A reload while hidden keeps it hidden.</li><li>A held key toggles once.</li><li>Inside the library search field, nothing happens.</li></ul> |
+| C-BUDGET-233 (L39) | Persistent text rows | The text inventory at S0 and S1, at both viewports, equals C round 232's (`c-round-232/inv/`): 0 added, 0 removed. |
+| G233-3 | Purchase protection | <ul><li>`/studio-lab` returns 200, shows the demo badge, and `auth_user` is null.</li><li>`/studio/middle-east` shows "Sign in required", with 0 `audio[src]`.</li><li>`/api/studio-token` with no header → 401.</li><li>No token is issued.</li></ul> |
+| LAB-SMOKE-233 | Real audio | Add, then Export WAV: 24-bit, 48 kHz, stereo. The length and RMS equal C round 232 (101.352 s; −65.21 / −21.59 / −21.54 dB). 0 page errors. |
+| C-LESSON-233 | `lessons.md` | L47 exists ("a key or action that unmounts the focused element names its focus target"). |
+| AN-REVIEW-233 | Doc 181 | <ul><li>l.4 is byte-exact `**სტატუსი:** Completed (C round 233 PASS)`;</li><li>the L26 headings are present;</li><li>the cited test names exist.</li></ul> |
+| C-REF-233 | §3 | "No reference found" for Live is recorded, and there is no unlisted difference. |
+| C-SHOTS-233 | Screenshots | Before (B's `b-round-232/probe/float-*`) and after: the focused target with its ring, docked and floating, at both viewports. |
+| TLM-R232-MAC, TLM-R232-ALTGR-WIN | Tech Lead manual checks | They cannot be claimed in the cloud. Mark them `blocked`, with the reason "needs a Mac" or "needs a Windows AltGr layout". This is not a FAIL. |
 
-**Ableton conformance** (separate from the CZABA requirement): R1–R3 are confirmed by the manual; R4 is a CZABA addition; R5 has no reference; R6 is not confirmed.
+**Ableton conformance:** not applicable (no reference). Live's Overview is not a focus stop.
 
 ## 6. Neighbouring behaviour that could break (C probes these first)
-- **Overview navigation with clips:** a click outside the frame re-centres, ↔ drag scrolls, ↕ drag zooms, double-click runs Fit, and Space on the focused Overview plays.
-- **Window shortcuts with Alt or Ctrl:** Ctrl+←/→ edge navigation, Alt+drag snap bypass, Ctrl+Z/Y, `?`, and G, A, U, M, 1/2/3. None of them changes.
-- **Floating video:** expand and return, and the placeholder, still sit beside the slot or the Overview. Escape still returns the floating video.
-- **Export dialog open:** Ctrl+Alt+O does nothing.
-- **render-budget:** Play → Pause → Play re-renders the Overview 0 times (covering set).
+- The round-232 Ctrl+Alt+O guards: AltGr, Shift, repeat, text fields, the open sheet, an open Export dialog, a pointer gesture.
+- Space on the focused Overview still plays, and ← / → still move it.
+- The floating video's Escape return and its placeholder.
+- render-budget: Play → Pause → Play still re-renders the Overview 0 times.
 
 ## 7. Outcomes for B's next planning
-- **C PASS and gate PASS:** SABA-B-8 is complete.
-  - B files the bounded frontend-architect checkpoint request (`b-round-231-checkpoint-request.md`, D-29z312).
-  - If round-233 planning falls on or after 2026-10-30, the next round is **REGRESSION** (`regression-last.json` is round 199; carry every `scope_additions` entry, L6).
-  - Otherwise it is **SABA-B-7-ENVELOPE-DB** (reference-first, with the checkpoint addendum `b-round-229-checkpoint-request.md`).
-  - Then SYS-5, then PERF b-ii.
-- **C FAIL on a feature row:** a fix-up on the same grants.
-- **Gate fail:** B re-runs L23 against the actual tree and grants the fix precisely.
+- **C PASS and gate PASS:** GATE232-S1 and C-R232-01 close, and SABA-B-8 is complete (მზადაა). Root runs `b-round-231-checkpoint-request.md` (non-blocking). Then:
+  - If round-234 planning falls on or after 2026-10-30, the next round is **REGRESSION** (carry every `scope_additions` entry, L6).
+  - Otherwise it is **SABA-B-7-ENVELOPE-DB**, using `b-round-232/saba-b-7-reference-*.md`. Before dispatch, B must still define CZABA's taper function with a D-ID, because the manual does not publish Live's fader law.
+- **C FAIL:** a fix-up on the same grants.
 
 ## 8. Root notes
-- **Checkpoint:** SABA-B-8 ends with this round. `b-round-231-checkpoint-request.md` asks for one bounded frontend-architect checkpoint after C PASS. It covers the two `useSyncExternalStore` storage helpers (`library-notice.ts`, `overview-visibility.ts`) and the growth of the `StudioWorkspace` keydown handler (GATE228-S2/S4 signals). It is non-blocking.
-- **Still pending and non-blocking:** `b-round-229-checkpoint-request.md` (wanted before SABA-B-7), and the `b-round-211`, `-221` and `-225` requests.
-- **Saba:** SABA-Q-NOTICE-ONE-ROW (C round 231 N7: the notice fits one row when the library is 56 px wider), SR-230-1…10 and the `screen-review-230.md` addendum await him.
-- **Loop folder:** B's scratch copy and scratch dev server were outside the repo (`/tmp/b231-scratch`, port 5174, now stopped). `store/` was not touched: HEAD `e5507ff`, empty status, and the frozen list gives rc 0 at the end.
+- **Checkpoint:** `b-round-231-checkpoint-request.md` (ARCH-CHECKPOINT-SABA-B-8-END) is **ready to run now**, because its trigger (C round 232 PASS) has happened. It now also carries the gate-232 Architecture note (D-29z317). It is non-blocking.
+- **New Tech Lead check:** TLM-R232-ALTGR-WIN (Windows with a Polish or German layout, left Ctrl+Alt+O; also Firefox). TLM-R232-MAC is unchanged.
+- **Scratch:** B's scratch copy (`/tmp/b232-scratch`) and its dev server (port 5174) were outside the repo, and the server is stopped. `store/` was not touched: HEAD `bd71144`, empty status, and the frozen list gives rc 0.

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T17:53:48.097Z)
+# Active loop summary (2026-10-28T19:16:24.069Z)
 
-- backlog.json 2117 KB -> active view 299 KB
-- status: G_ROOT_GATE round 231
-- servers: `{"checkedUtc":"2026-10-28T17:31:38.2891806Z","round":231,"attempt":1,"store":200}`
-- last publication: e5507ffe56a4e59234bbb5a66f0537aaad5ceb62 (rounds 230-231)
-- last root gate: round 231 published - commit e5507ffe56a4e59234bbb5a66f0537aaad5ceb62 pushed
+- backlog.json 2130 KB -> active view 301 KB
+- status: G_ROOT_GATE round 232
+- servers: `{"checkedUtc":"2026-10-28T18:58:24.7376831Z","round":232,"attempt":1,"store":200}`
+- last publication: bd71144292b1e82e5f0c8934f23bd28ecef0ae3c (rounds 232-232)
+- last root gate: round 232 published - commit bd71144292b1e82e5f0c8934f23bd28ecef0ae3c pushed
 
 ## Current items: -
 
@@ -547,9 +547,10 @@
 - SABA-B-7 / medium / scheduled: queue entry SABA-B-7-ENVELOPE-DB (after CALM-3, before PERF b-ii) / clip volume envelope is linear in gain: one bottom point is silent only for an instant; a line sounds loud for most of the dip
 - C-N229-S3-METHOD / info / ruled D-29z293: future task recipes reach "no time selection" with an empty-lane click; Escape does not clear a time selection (HEAD identical); whether Live Esc deselects is unverified, not a bug; lesson L29 amended / round 229 S3 recipe "clear the time selection with Escape" does not work
 - C-N229-L4-GREP / info / ruled D-29z293: deleted-key greps in later tasks are written as grep -rn ... app --exclude-dir=__tests__ = 0, plus "the only test hits are the mandated '<key>' in absence lines" / round 229 section 2.1 grep-0 rule and section 2.5 absence lines bound the same lines
-- GATE229-S4 / info / routed to CALM-3 C row (D-29z292): caption row height with an empty caption and with a long truncated file name at 1280 / min-h-4 row height covered only by C-BBOX-229 (empty caption and a short file name)
-- C-N230-NOTES / info / N2 fixed (D-29z299); N3 and N4 fixed by an addendum to user-review/screen-review-230.md (D-29z300, original text kept because it was already notified); N1 left as is (count correct, wording only; recorded here); N5 env info / N1 retro-230 l.55 GATE217-S4 wording loose (status-line text, not stale status); N2 lessons.md no final newline; N3 SR-230-9 ~0:22 true at 1
-- SABA-Q-NOTICE-ONE-ROW / info / awaiting_user (D-29z301): CALM-2b ships the exact approved wording on 2 rows; options for Saba: (1) keep (today), (2) a shorter wording that fits one row, e.g. 'Synthetic demo stems — not CZABA audio.', (3) accept a wider default library (layout change) / Saba's exact notice wording 'Synthetic demo stems — not CZABA catalogue audio.' is 291 px at the Studio 12 px text; the library content box 
+- GATE229-S4 / info / dispatched round 232 as C-CAPTION-232 (D-29z310) | routed to CALM-3 C row (D-29z292): caption row height with an empty caption and with a long truncated file name at 1280 / min-h-4 row height covered only by C-BBOX-229 (empty caption and a short file name)
+- SABA-Q-NOTICE-ONE-ROW / info / awaiting_user (D-29z301): CALM-2b ships the exact approved wording on 2 rows; options for Saba: (1) keep (today), (2) a shorter wording that fits one row, e.g. 'Synthetic demo stems — not CZABA audio.', (3) accept a wider default library (layout change) | evidence C round 231 C-NOTICE-231 / N7: 2 rows 236x32 at the default width at both viewports; 1 row when the library is dragged +56 px (288 -> ~344 px) / Saba's exact notice wording 'Synthetic demo stems — not CZABA catalogue audio.' is 291 px at the Studio 12 px text; the library content box 
+- C-N231-NOTES / info / ruled (D-29z307): N1/N4 wording guidance for future rows (B writes 'no source or consumer hit' and 'marquee'); N2 -> deferred Low C-R231-N2-PC10-DUP; N3/N6/N8 info; N5 -> keep per-lane as specified, reviewer proposal recorded as ARCH-A231-ANY-DRAG-ACTIVE; N7 -> evidence on SABA-Q-NOTICE-ONE-ROW / N1 C-UNIT grep nothingSelected = 1 (ST-C2b's own assertion), row wording; N2 duplicate PC10 id in collection.test.ts (l.332 and l.405); N3 L
+- A-R231-REVIEW-RULINGS / info / ruled (D-29z307): R1 keep per-lane (Saba's text and task 2.5; architecture signal ARCH-A231-ANY-DRAG-ACTIVE); R3 contract stands (in-memory set always, so the session stays consistent when storage works but later throws); R6 stands (focus never falls to body when the clicked button unmounts) / R1 cross-lane hint (hint stays on the active lane while a drag is over another lane); R3 suggested adding the id to the in-memory set only w
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

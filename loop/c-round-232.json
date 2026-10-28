@@ -1,0 +1,88 @@
+{
+ "round": 232,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-28T18:58:24.7376831Z",
+  "round": 232,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R232-01",
+   "severity": "low",
+   "steps": [
+    "cd store; npx vitest run $(cat ../tmp/studio-real-loop/b-round-231/covering-files.txt)",
+    "Read the time of render-budget.test.tsx > 'does not re-render clips, overview bars, library rows or ruler ticks over Play → Pause → Play' (default 5000 ms timeout)",
+    "Run the file alone for comparison"
+   ],
+   "expected": "L32: every covering test stays below 50 % of its timeout",
+   "actual": "2620 ms (52 %) in the 32-file covering run (A: 2594-2790 ms); 1485 ms (30 %) alone; gate 231 1749 ms. A's HEAD-app control 2574 ms under the same load, so it is load and not the CALM-3 diff. Passes every run. Info/Low test-infra headroom: grant a {timeout} on the describe or split it.",
+   "evidence": "c-round-232/unit.log (l.155-156); a-round-232/baseline-swap/covering-at-head-app.log; c-round-232.md §3"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-232",
+  "C-UNIT-232",
+  "C-OVERVIEW-EMPTY",
+  "C-OVERVIEW-FIRSTCLIP",
+  "C-TOGGLE",
+  "C-TOGGLE-FOCUS",
+  "C-TOGGLE-PERSIST",
+  "C-UNDO-232",
+  "C-SHEET-232",
+  "C-CAPTION-232",
+  "C-BBOX-232",
+  "C-BUDGET-232",
+  "C-LESSON-232",
+  "G232-3",
+  "LAB-SMOKE-232",
+  "AN-REVIEW-232",
+  "C-REF-232",
+  "C-SHOTS-232"
+ ],
+ "failed": [],
+ "blocked": [
+  "TLM-R232-MAC: needs a Mac (Cmd+Option+O on real macOS); Meta+Alt+O verified only in Linux Chromium",
+  "D5 AltGr-ignored: Playwright on Linux Chromium cannot produce the AltGraph modifier state; verified in jsdom only (not a §5 acceptance row)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome/lint",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "ableton": {
+  "R1": "confirmed",
+  "R2": "confirmed (drag/double-click); click-centre and arrows are CZABA choices",
+  "R3": "confirmed (Mac row blocked)",
+  "R4": "deliberate deviation D3 (status) + sheet row",
+  "R5": "no reference (D1)",
+  "R6": "not confirmed"
+ },
+ "rows": {
+  "C-SCOPE-232": "HEAD e5507ff; 8 M + N1-N4; frozen/root/A-end sha rc 0; protected diff rc 0; hunks = §2.1-§2.6",
+  "C-UNIT-232": "32 files / 541 tests green; N2+N4 shuffle 7/7; render-budget 2620 ms (52%) -> C-R232-01",
+  "C-OVERVIEW-EMPTY": "empty, bg transparent, frame/playhead hidden, baseline 956x1@181 / 796x1@219, 0 bright px vs 2053 before, arrows 0->5->0, dbl Fit, drag 0 errors, kb ring 2000 brass px 5.45:1, mouse press no ring",
+  "C-OVERVIEW-FIRSTCLIP": "full, 1px outline rgb(36,33,30), frame/playhead visible, bg rgb(14,13,12), bars 1; Ctrl+Z empty",
+  "C-TOGGLE": "slot at former bbox exact, dock/caption/scroller equal, exact statuses, Meta variant, negatives (search, sheet, Ctrl+O, Alt+O, Ctrl+Alt+Shift+O, Export, during drag) no-op, held 12 keydowns -> 1 toggle, Georgian layout toggles",
+  "C-TOGGLE-FOCUS": "active BODY; Tab -> arrangement-video-expand; Shift+Tab -> arrangement-library-separator",
+  "C-TOGGLE-PERSIST": "reload hidden, 0 layout-shift, 0 frames with visible SSR overview (slot 740/702 ms < FCP 784/740 ms), show removes key, fresh context shown",
+  "C-UNDO-232": "toggle x2 then Ctrl+Z undoes the Add",
+  "C-SHEET-232": "filter overview -> fit, overview-scroll, overview-toggle; Ctrl+Alt+O under Zoom & view; 44 rows = source 44 same order",
+  "C-CAPTION-232": "16 px empty and with 249-char name (scrollW 1651 > clientW), overview y unchanged shown/hidden; float + Escape fine",
+  "C-BBOX-232": "only new arrangement-overview-baseline; others <=1px vs c-round-231",
+  "C-BUDGET-232": "text multiset identical to round 231 at S0/S1 both viewports; 1440 S0 5, 1280 S0 4 rows unchanged",
+  "C-LESSON-232": "lessons.md l.25 L39",
+  "G232-3": "lab 200 demo badge auth_user null; /studio/middle-east Sign in required 0 audio[src]; token no header 401; fake bearer 500 as in r231; no token",
+  "LAB-SMOKE-232": "WAV 01:41.352 24-bit 48 kHz stereo, 29189420 bytes, RMS -65.21/-21.59/-21.54 dB = r231",
+  "AN-REVIEW-232": "l.4 exact, 7 headings, ids exist",
+  "C-REF-232": "R1-R4 match or listed deviations; R5 no reference; R6 not confirmed",
+  "C-SHOTS-232": "out/S0,S1,hidden,hidden-S1 both viewports + crops"
+ },
+ "evidence": "c-round-232.md, c-round-232/"
+}

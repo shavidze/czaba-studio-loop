@@ -24,3 +24,10 @@
 3. Should "is any drag active" (library ghost, OS file drag) be owned by `StudioWorkspace` and passed to lanes (ARCH-A231-ANY-DRAG-ACTIVE)? Is that worth doing before the deferred C-R139-02 / C-R231-01 ghost fix, which touches the same state?
 
 Related pending requests (still open, non-blocking): `b-round-229-checkpoint-request.md` (SABA-B-7 envelope, wanted before SABA-B-7), plus `b-round-211`, `-221` and `-225`.
+
+## Addendum (B, round 232 → 233 planning, 2026-10-28; D-29z317)
+**Status: ready for root now.** The trigger has happened: C round 232 PASS, and gate 232 published `bd71144`. The request stays non-blocking. Round 233 (GATE232-S1) adds one small module-level helper in the same keydown region.
+
+Two gate-232 Architecture notes (`gates/round-232/review.md`) are added as inputs to questions 1 and 2. Both are signals and are not scheduled:
+- **GATE232-ARCH-CHORD-ACTION** (signal 3, one region changed repeatedly). The proposal is a pure `studioChordAction(event)` in `lib/arrangement/shortcuts.ts` for the modifier-chord branches (floating-video Escape, Ctrl+Alt+O); the handler would only dispatch. Acceptance: the keyboard tests stay green and unchanged, and the branch order stays the same. The reviewer says: keep for now.
+- **GATE232-ARCH-STORE-DUP** (signal 2). `overview-visibility.ts` duplicates `library-notice.ts`. The reviewer says: keep, and revisit if a third copy appears. This is question 1 above. GATE232-S6 (no cross-tab `storage` sync, deferred Low) would be a natural part of a shared helper.

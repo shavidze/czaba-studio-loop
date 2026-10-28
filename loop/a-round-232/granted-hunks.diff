@@ -1,0 +1,962 @@
+--- a/app/components/arrangement/ArrangementOverview.tsx
++++ b/app/components/arrangement/ArrangementOverview.tsx
+@@ -277,6 +277,7 @@
+   };
+ 
+   const roundedExtent = Math.round(extent);
++  const hasClips = arrangement.clips.length > 0;
+ 
+   return (
+     <div
+@@ -290,7 +291,10 @@
+       aria-valuenow={Math.min(visibleStartRef.current, roundedExtent)}
+       aria-valuetext={overviewValueText(visibleStartRef.current, extent)}
+       title={studioViewStrings.overviewTitle}
+-      className="relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-panel bg-background"
++      className={cn(
++        'relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-panel',
++        hasClips ? 'bg-background' : 'bg-transparent',
++      )}
+       onPointerDown={handleOverviewPointerDown}
+       onPointerMove={handleOverviewPointerMove}
+       onPointerUp={handleOverviewPointerEnd}
+@@ -301,8 +305,16 @@
+       data-testid="arrangement-overview"
+       data-timeline-overview=""
+       data-extent={extent.toFixed(3)}
++      data-overview-state={hasClips ? 'full' : 'empty'}
+     >
+-      <div className="pointer-events-none absolute inset-0 rounded-panel border border-outline" />
++      {hasClips ? (
++        <div className="pointer-events-none absolute inset-0 rounded-panel border border-outline" />
++      ) : (
++        <div
++          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-outline"
++          data-testid="arrangement-overview-baseline"
++        />
++      )}
+       <div className="pointer-events-none absolute inset-x-0 inset-y-1 flex flex-col gap-0.5">
+         {arrangement.tracks.map((track) => (
+           <div key={track.id} className="relative min-h-0 flex-1">
+@@ -326,12 +338,18 @@
+       </div>
+       <div
+         ref={frameRef}
+-        className="pointer-events-none absolute inset-y-0 rounded-panel border border-foreground/70 bg-foreground/5"
++        className={cn(
++          'pointer-events-none absolute inset-y-0 rounded-panel border border-foreground/70 bg-foreground/5',
++          !hasClips && 'invisible',
++        )}
+         data-testid="arrangement-overview-frame"
+       />
+       <div
+         ref={playheadRef}
+-        className="pointer-events-none absolute inset-y-0 w-0.5 bg-accent ring-1 ring-background"
++        className={cn(
++          'pointer-events-none absolute inset-y-0 w-0.5 bg-accent ring-1 ring-background',
++          !hasClips && 'invisible',
++        )}
+         data-testid="arrangement-overview-playhead"
+       />
+     </div>
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -8,6 +8,7 @@
+   useMemo,
+   useRef,
+   useState,
++  useSyncExternalStore,
+ } from 'react';
+ import {
+   formatArrangementTime,
+@@ -72,6 +73,11 @@
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
+ import { metronomeStatusMessage } from '~/lib/arrangement/metronome';
+ import {
++  readOverviewHidden,
++  setOverviewHidden,
++  subscribeOverviewVisibility,
++} from '~/lib/arrangement/overview-visibility';
++import {
+   clampTrackHeight,
+   detailPanelOpenHeightCap,
+   type FloatingVideoRect,
+@@ -486,6 +492,11 @@
+   const positionStore = useArrangementPositionStore();
+   const [isExportOpen, setIsExportOpen] = useState(false);
+   const [isShortcutSheetOpen, setIsShortcutSheetOpen] = useState(false);
++  const isOverviewHidden = useSyncExternalStore(
++    subscribeOverviewVisibility,
++    readOverviewHidden,
++    () => false,
++  );
+   const shortcutSheetOpenRef = useRef(isShortcutSheetOpen);
+   shortcutSheetOpenRef.current = isShortcutSheetOpen;
+   const shortcutButtonRef = useRef<HTMLButtonElement>(null);
+@@ -1794,6 +1805,24 @@
+         returnFloatingVideo();
+         return;
+       }
++      if (
++        event.code === 'KeyO' &&
++        event.altKey &&
++        (event.ctrlKey || event.metaKey) &&
++        !event.shiftKey &&
++        !event.getModifierState('AltGraph')
++      ) {
++        event.preventDefault();
++        if (event.repeat || workspaceRef.current.isPointerGestureActive()) {
++          return;
++        }
++        const hidden = !readOverviewHidden();
++        setOverviewHidden(hidden);
++        workspaceRef.current.setStatus(
++          hidden ? studioViewStrings.overviewHidden : studioViewStrings.overviewShown,
++        );
++        return;
++      }
+       const current = workspaceRef.current;
+       const modifier = event.ctrlKey || event.metaKey;
+       const key = shortcutLetter(event);
+@@ -2290,18 +2319,26 @@
+         >
+           <ArrangementVideoDock
+             overview={
+-              <ArrangementOverview
+-                arrangement={arrangement}
+-                extent={extent}
+-                pxPerSecond={pxPerSecond}
+-                getTimelineView={getTimelineView}
+-                getTimelineViewportPx={getTimelineViewportPx}
+-                subscribeTimelineScroll={subscribeTimelineScroll}
+-                applyTimelineView={applyTimelineView}
+-                onNavigationMove={pauseFollowForNavigation}
+-                onFit={fitTimeline}
+-                claimPointerGesture={claimPointerGesture}
+-              />
++              isOverviewHidden ? (
++                <div
++                  aria-hidden="true"
++                  className="h-16 w-full"
++                  data-testid="arrangement-overview-hidden-slot"
++                />
++              ) : (
++                <ArrangementOverview
++                  arrangement={arrangement}
++                  extent={extent}
++                  pxPerSecond={pxPerSecond}
++                  getTimelineView={getTimelineView}
++                  getTimelineViewportPx={getTimelineViewportPx}
++                  subscribeTimelineScroll={subscribeTimelineScroll}
++                  applyTimelineView={applyTimelineView}
++                  onNavigationMove={pauseFollowForNavigation}
++                  onFit={fitTimeline}
++                  claimPointerGesture={claimPointerGesture}
++                />
++              )
+             }
+             isVideoExpanded={isVideoExpanded}
+             videoFloatAnchor={videoFloatAnchor}
+--- a/app/components/arrangement/ArrangementVideoDock.tsx
++++ b/app/components/arrangement/ArrangementVideoDock.tsx
+@@ -886,7 +886,7 @@
+       data-testid="arrangement-video-dock"
+     >
+       <div className="flex min-w-0 flex-1 flex-col justify-end gap-1 self-stretch">
+-        <div className="flex min-h-4 items-baseline justify-between gap-2 text-xs leading-4 text-muted">
++        <div className="flex min-h-4 items-baseline text-xs leading-4 text-muted">
+           <ArrangementVideoCaption arrangement={arrangement} videoSources={videoSources} />
+         </div>
+         {overview}
+--- a/app/lib/arrangement/shortcuts.ts
++++ b/app/lib/arrangement/shortcuts.ts
+@@ -114,6 +114,12 @@
+       },
+       { id: 'overview-scroll', action: 'Overview: scroll 5 s', keys: ['← / → (overview focused)'] },
+       {
++        id: 'overview-toggle',
++        action: 'Show / hide the overview',
++        keys: ['Ctrl+Alt+O'],
++        ariaKeyShortcuts: 'Control+Alt+O Meta+Alt+O',
++      },
++      {
+         id: 'waveform-zoom',
+         action: 'Waveform zoom (view only, the sound does not change)',
+         keys: ['Waveform Zoom menu'],
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -369,6 +369,8 @@
+   followOff: 'Follow off: the view does not move by itself.',
+   followResumed: 'Follow is following the playback position again.',
+   followOn: 'Follow on: the view follows the playback position during playback.',
++  overviewHidden: 'Overview hidden. Ctrl+Alt+O shows it again.',
++  overviewShown: 'Overview shown. Ctrl+Alt+O hides it.',
+   zoomReadout: (value: number): string => `${value} px/s`,
+   overviewVisibleStart: ({ start, extent }: { start: string; extent: string }): string =>
+     `Visible start ${start} / ${extent}`,
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -53,7 +53,7 @@
+ import { createArrangement } from '../model';
+ import { DETAIL_RANGE_INVALID_MESSAGE } from '../panels';
+ import { CLIP_LANE_REFUSAL_MESSAGES, GROUP_MOVE_BLOCKED_MESSAGE } from '../selection';
+-import { studioShortcutTitle } from '../shortcuts';
++import { findStudioShortcut, studioShortcutTitle } from '../shortcuts';
+ import {
+   studioClipEnvelopeStrings,
+   studioClipStrings,
+@@ -992,6 +992,8 @@
+     followOff: 'Follow off: the view does not move by itself.',
+     followResumed: 'Follow is following the playback position again.',
+     followOn: 'Follow on: the view follows the playback position during playback.',
++    overviewHidden: 'Overview hidden. Ctrl+Alt+O shows it again.',
++    overviewShown: 'Overview shown. Ctrl+Alt+O hides it.',
+     waveformZoomLabel: 'Waveform Zoom — view only, the sound does not change',
+   },
+ };
+@@ -1009,7 +1011,9 @@
+     'followPaused',
+     'followPausedTitle',
+     'followResumed',
++    'overviewHidden',
+     'overviewLabel',
++    'overviewShown',
+     'overviewTitle',
+     'overviewVisibleStart',
+     'playheadTitle',
+@@ -2859,3 +2863,14 @@
+     );
+   });
+ });
++
++describe('CALM-3 Overview toggle copy (SABA-B-8)', () => {
++  it('ST-C3: the hide and show status strings are exact and name the sheet key', () => {
++    expect(studioViewStrings.overviewHidden).toBe('Overview hidden. Ctrl+Alt+O shows it again.');
++    expect(studioViewStrings.overviewShown).toBe('Overview shown. Ctrl+Alt+O hides it.');
++    const sheetKey = findStudioShortcut('overview-toggle')?.keys[0];
++    expect(sheetKey).toBe('Ctrl+Alt+O');
++    expect(studioViewStrings.overviewHidden).toContain(`${sheetKey} `);
++    expect(studioViewStrings.overviewShown).toContain(`${sheetKey} `);
++  });
++});
+--- a/app/lib/arrangement/__tests__/shortcuts.test.ts
++++ b/app/lib/arrangement/__tests__/shortcuts.test.ts
+@@ -38,6 +38,7 @@
+   'zoom-range',
+   'fit',
+   'overview-scroll',
++  'overview-toggle',
+   'waveform-zoom',
+   'group',
+   'fold',
+@@ -192,6 +193,24 @@
+         }
+       }
+     }
+-    expect(checked).toBe(8);
++    expect(checked).toBe(9);
++  });
++});
++
++describe('CALM-3 Overview toggle row (SABA-B-8)', () => {
++  it('SC-C3: overview-toggle is Ctrl+Alt+O in Zoom & view, right after overview-scroll, and found by "overview"', () => {
++    const row = findStudioShortcut('overview-toggle');
++    expect(row?.keys).toEqual(['Ctrl+Alt+O']);
++    expect(row?.ariaKeyShortcuts).toBe('Control+Alt+O Meta+Alt+O');
++    const group = STUDIO_SHORTCUT_GROUPS.find((candidate) =>
++      candidate.rows.some((candidateRow) => candidateRow.id === 'overview-toggle'),
++    );
++    expect(group?.id).toBe('zoom-view');
++    const ids = group?.rows.map((candidateRow) => candidateRow.id) ?? [];
++    expect(ids.indexOf('overview-toggle')).toBe(ids.indexOf('overview-scroll') + 1);
++    const found = filterStudioShortcutGroups('overview').flatMap((candidate) =>
++      candidate.rows.map((candidateRow) => candidateRow.id),
++    );
++    expect(found).toEqual(expect.arrayContaining(['fit', 'overview-scroll', 'overview-toggle']));
+   });
+ });
+--- a/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx
+@@ -73,8 +73,7 @@
+   },
+   {
+     file: 'components/arrangement/ArrangementOverview.tsx',
+-    className:
+-      'relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-panel bg-background',
++    className: 'relative h-16 w-full cursor-ew-resize touch-none overflow-hidden rounded-panel',
+   },
+   {
+     file: 'components/arrangement/ArrangementOverview.tsx',
+--- /dev/null
++++ b/app/lib/arrangement/overview-visibility.ts
+@@ -0,0 +1,45 @@
++export const OVERVIEW_HIDDEN_STORAGE_KEY = 'czaba-studio-overview-hidden';
++
++const overviewVisibilityListeners = new Set<() => void>();
++let overviewHiddenInMemory: boolean | null = null;
++
++export function readOverviewHidden(): boolean {
++  if (overviewHiddenInMemory !== null) {
++    return overviewHiddenInMemory;
++  }
++  if (typeof window === 'undefined') {
++    return false;
++  }
++  try {
++    return window.localStorage.getItem(OVERVIEW_HIDDEN_STORAGE_KEY) === '1';
++  } catch {
++    return false;
++  }
++}
++
++function writeOverviewHidden(hidden: boolean): void {
++  try {
++    if (hidden) {
++      window.localStorage.setItem(OVERVIEW_HIDDEN_STORAGE_KEY, '1');
++    } else {
++      window.localStorage.removeItem(OVERVIEW_HIDDEN_STORAGE_KEY);
++    }
++  } catch {
++    return;
++  }
++}
++
++export function setOverviewHidden(hidden: boolean): void {
++  overviewHiddenInMemory = hidden;
++  writeOverviewHidden(hidden);
++  for (const listener of overviewVisibilityListeners) {
++    listener();
++  }
++}
++
++export function subscribeOverviewVisibility(listener: () => void): () => void {
++  overviewVisibilityListeners.add(listener);
++  return () => {
++    overviewVisibilityListeners.delete(listener);
++  };
++}
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx
+@@ -0,0 +1,318 @@
++import { act, fireEvent, render, within } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import {
++  type ArrangementContextValue,
++  ArrangementProvider,
++  useArrangement,
++} from '~/contexts/ArrangementContext';
++import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
++import { OVERVIEW_HIDDEN_STORAGE_KEY, setOverviewHidden } from '../overview-visibility';
++import { studioViewStrings } from '../strings';
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++class FakeParam {
++  value = 0;
++  setTargetAtTime(target: number) {
++    this.value = target;
++  }
++}
++
++class FakeNode {
++  connect(destination: FakeNode) {
++    return destination;
++  }
++  disconnect() {}
++}
++
++class FakeGain extends FakeNode {
++  gain = new FakeParam();
++}
++
++class FakePanner extends FakeNode {
++  pan = new FakeParam();
++}
++
++class FakeSource extends FakeNode {
++  buffer: unknown = null;
++  onended: (() => void) | null = null;
++  start() {}
++  stop() {}
++}
++
++class FakeAudioContext {
++  state = 'running';
++  destination = new FakeNode();
++  sampleRate = 48000;
++  currentTime = 0;
++  resume() {
++    return Promise.resolve();
++  }
++  close() {
++    return Promise.resolve();
++  }
++  createGain() {
++    return new FakeGain();
++  }
++  createStereoPanner() {
++    return new FakePanner();
++  }
++  createBufferSource() {
++    return new FakeSource();
++  }
++}
++
++class FakeOfflineAudioContext {}
++
++class FakeAudioBuffer {
++  readonly length: number;
++  readonly numberOfChannels: number;
++  readonly sampleRate: number;
++  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
++    this.length = options.length;
++    this.numberOfChannels = options.numberOfChannels;
++    this.sampleRate = options.sampleRate;
++  }
++  get duration() {
++    return this.length / this.sampleRate;
++  }
++  getChannelData() {
++    return new Float32Array(this.length);
++  }
++}
++
++class FakeResizeObserver {
++  observe() {}
++  disconnect() {}
++}
++
++const overviewCollection: WorkspaceCollection = {
++  id: 'overview-visibility',
++  label: 'overview-visibility',
++  origin: 'demo',
++  sources: [
++    {
++      id: 'song',
++      title: 'Song',
++      collectionLabel: 'overview-visibility',
++      kind: 'music',
++      origin: 'demo',
++    },
++  ],
++  loadSource: () =>
++    Promise.resolve(new AudioBuffer({ length: 2000, numberOfChannels: 1, sampleRate: 100 })),
++};
++
++function emptyOverviewArrangement(): Arrangement {
++  return createArrangement([
++    { id: 'video', kind: 'video', name: 'Video' },
++    { id: 'music', kind: 'audio', name: 'Music' },
++  ]);
++}
++
++interface OverviewApiRef {
++  current: ArrangementContextValue | null;
++}
++
++function OverviewProbe({ api }: { api: OverviewApiRef }) {
++  api.current = useArrangement();
++  return null;
++}
++
++function live(api: OverviewApiRef): ArrangementContextValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++async function mountOverviewWorkspace() {
++  const api: OverviewApiRef = { current: null };
++  const view = render(
++    <ArrangementProvider
++      collection={overviewCollection}
++      initialArrangement={emptyOverviewArrangement()}
++    >
++      <StudioWorkspace />
++      <OverviewProbe api={api} />
++    </ArrangementProvider>,
++  );
++  for (let attempt = 0; attempt < 4; attempt += 1) {
++    await act(async () => {
++      await new Promise((resolve) => setTimeout(resolve, 0));
++    });
++  }
++  const overview = () => view.queryByTestId('arrangement-overview');
++  const slot = () => view.queryByTestId('arrangement-overview-hidden-slot');
++  const status = () => view.getByTestId('arrangement-status').textContent ?? '';
++  return { api, view, overview, slot, status };
++}
++
++const TOGGLE = { key: 'o', code: 'KeyO', ctrlKey: true, altKey: true };
++
++beforeEach(() => {
++  window.localStorage.clear();
++  vi.stubGlobal('AudioContext', FakeAudioContext);
++  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++  vi.stubGlobal('requestAnimationFrame', () => 1);
++  vi.stubGlobal('cancelAnimationFrame', () => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++  vi.unstubAllGlobals();
++  vi.restoreAllMocks();
++  act(() => setOverviewHidden(false));
++  window.localStorage.clear();
++});
++
++describe('CALM-3 Overview empty state and Ctrl+Alt+O (SABA-B-8)', () => {
++  it('OV-E1: an empty project shows the quiet state; the first clip shows the full view; undo returns', async () => {
++    const { api, overview, view } = await mountOverviewWorkspace();
++    const root = overview();
++    expect(root?.getAttribute('data-overview-state')).toBe('empty');
++    const baseline = view.getByTestId('arrangement-overview-baseline');
++    expect(root?.children[0]).toBe(baseline);
++    expect(root?.children[1]?.getAttribute('data-testid')).toBeNull();
++    expect(root?.children[1]?.children).toHaveLength(2);
++    act(() => live(api).addSourceToActiveTrack('song'));
++    expect(live(api).arrangement.clips).toHaveLength(1);
++    expect(overview()?.getAttribute('data-overview-state')).toBe('full');
++    expect(view.queryByTestId('arrangement-overview-baseline')).toBeNull();
++    act(() => live(api).undo());
++    expect(live(api).arrangement.clips).toHaveLength(0);
++    expect(overview()?.getAttribute('data-overview-state')).toBe('empty');
++    expect(view.queryByTestId('arrangement-overview-baseline')).not.toBeNull();
++  });
++
++  it('OV-E2: the empty Overview keeps its slider values and ← / → navigation', async () => {
++    const { api, overview, view } = await mountOverviewWorkspace();
++    const root = overview();
++    if (!root) {
++      throw new Error('overview missing');
++    }
++    expect(root.getAttribute('data-overview-state')).toBe('empty');
++    expect(root.getAttribute('aria-valuenow')).toBe('0');
++    expect(root.getAttribute('aria-valuemax')).toBe('10');
++    expect(view.getByTestId('arrangement-overview-frame')).toBeDefined();
++    expect(view.getByTestId('arrangement-overview-playhead')).toBeDefined();
++    const scroller = view.getByTestId('arrangement-timeline-scroller');
++    Object.defineProperty(scroller, 'clientWidth', { configurable: true, value: 1200 });
++    act(() => live(api).setPxPerSecond(100));
++    root.focus();
++    expect(fireEvent.keyDown(root, { key: 'ArrowRight', code: 'ArrowRight' })).toBe(false);
++    fireEvent.scroll(scroller);
++    expect(root.getAttribute('aria-valuenow')).toBe('5');
++    fireEvent.keyDown(root, { key: 'ArrowLeft', code: 'ArrowLeft' });
++    fireEvent.scroll(scroller);
++    expect(root.getAttribute('aria-valuenow')).toBe('0');
++  });
++
++  it('OV-T1: Ctrl+Alt+O hides the Overview into a slot, remembers it, and Cmd+Option+O shows it again', async () => {
++    const { overview, slot, status } = await mountOverviewWorkspace();
++    expect(overview()).not.toBeNull();
++    expect(fireEvent.keyDown(document.body, TOGGLE)).toBe(false);
++    expect(overview()).toBeNull();
++    expect(slot()?.getAttribute('aria-hidden')).toBe('true');
++    expect(window.localStorage.getItem(OVERVIEW_HIDDEN_STORAGE_KEY)).toBe('1');
++    expect(status()).toBe(studioViewStrings.overviewHidden);
++    expect(fireEvent.keyDown(document.body, { ...TOGGLE, ctrlKey: false, metaKey: true })).toBe(
++      false,
++    );
++    expect(overview()).not.toBeNull();
++    expect(slot()).toBeNull();
++    expect(window.localStorage.getItem(OVERVIEW_HIDDEN_STORAGE_KEY)).toBeNull();
++    expect(status()).toBe(studioViewStrings.overviewShown);
++  });
++
++  it('OV-T2: AltGr, Shift, auto-repeat, text fields, the open sheet, a pointer gesture and partial modifiers are ignored', async () => {
++    const { api, overview, view } = await mountOverviewWorkspace();
++    const expectShownAndUnstored = () => {
++      expect(overview()).not.toBeNull();
++      expect(window.localStorage.getItem(OVERVIEW_HIDDEN_STORAGE_KEY)).toBeNull();
++    };
++    expect(fireEvent.keyDown(document.body, { ...TOGGLE, modifierAltGraph: true })).toBe(true);
++    expectShownAndUnstored();
++    fireEvent.keyDown(document.body, { ...TOGGLE, shiftKey: true });
++    expectShownAndUnstored();
++    expect(fireEvent.keyDown(document.body, { ...TOGGLE, repeat: true })).toBe(false);
++    expectShownAndUnstored();
++    fireEvent.keyDown(view.getByTestId('arrangement-library-search'), TOGGLE);
++    expectShownAndUnstored();
++    fireEvent.keyDown(document.body, { key: '?', code: 'Slash', shiftKey: true });
++    const sheet = view.getByRole('dialog', { name: 'Keyboard shortcuts' });
++    fireEvent.keyDown(document.body, TOGGLE);
++    expectShownAndUnstored();
++    fireEvent.keyDown(within(sheet).getByRole('searchbox', { name: 'Search shortcuts' }), {
++      key: 'Escape',
++      code: 'Escape',
++    });
++    expect(view.queryByRole('dialog', { name: 'Keyboard shortcuts' })).toBeNull();
++    let release: (() => void) | null = null;
++    act(() => {
++      release = live(api).claimPointerGesture(7, () => undefined);
++    });
++    expect(live(api).isPointerGestureActive()).toBe(true);
++    expect(fireEvent.keyDown(document.body, TOGGLE)).toBe(false);
++    expectShownAndUnstored();
++    act(() => release?.());
++    expect(live(api).isPointerGestureActive()).toBe(false);
++    fireEvent.keyDown(document.body, { key: 'o', code: 'KeyO', ctrlKey: true });
++    expectShownAndUnstored();
++    fireEvent.keyDown(document.body, { key: 'o', code: 'KeyO', altKey: true });
++    expectShownAndUnstored();
++  });
++
++  it('OV-T4: the toggle is view state and adds no history entry', async () => {
++    const { api, overview } = await mountOverviewWorkspace();
++    act(() => live(api).addSourceToActiveTrack('song'));
++    expect(live(api).arrangement.clips).toHaveLength(1);
++    const undoLabel = live(api).undoLabel;
++    expect(undoLabel).not.toBeNull();
++    fireEvent.keyDown(document.body, TOGGLE);
++    expect(overview()).toBeNull();
++    expect(live(api).undoLabel).toBe(undoLabel);
++    fireEvent.keyDown(document.body, TOGGLE);
++    expect(overview()).not.toBeNull();
++    expect(live(api).undoLabel).toBe(undoLabel);
++    act(() => live(api).undo());
++    expect(live(api).arrangement.clips).toHaveLength(0);
++    expect(overview()).not.toBeNull();
++    expect(live(api).undoLabel).toBeNull();
++  });
++
++  it('OV-T5: when storage throws the toggle still hides and shows for this session', async () => {
++    const { overview, slot, status } = await mountOverviewWorkspace();
++    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
++      throw new Error('quota exceeded');
++    });
++    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
++      throw new Error('storage denied');
++    });
++    const removeItem = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
++      throw new Error('storage denied');
++    });
++    fireEvent.keyDown(document.body, TOGGLE);
++    expect(setItem).toHaveBeenCalled();
++    expect(overview()).toBeNull();
++    expect(slot()).not.toBeNull();
++    expect(status()).toBe(studioViewStrings.overviewHidden);
++    fireEvent.keyDown(document.body, TOGGLE);
++    expect(removeItem).toHaveBeenCalled();
++    expect(overview()).not.toBeNull();
++    expect(status()).toBe(studioViewStrings.overviewShown);
++  });
++});
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/180-calm-3-overview-empty-toggle.md
+@@ -0,0 +1,137 @@
++# Calm Studio — Overview-ს მშვიდი ცარიელი მდგომარეობა და Ctrl+Alt+O (SABA-B-8 CALM-3)
++
++**თარიღი:** 2026-10-28
++**სტატუსი:** Completed (C round 232 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++Saba-მ (2026-10-28) Studio-ს ეკრანი გადატვირთულად მიიჩნია (SABA-B-8). CALM-1-მა (doc 177) shortcut
++ხაზი მოხსნა, CALM-2a-მ და CALM-2b-მ (doc 178, 179) — დამხმარე წინადადებები. ცარიელ პროექტში
++Overview მაინც 64 px-იანი ჩარჩოიანი ყუთი იყო შიგთავსის გარეშე: outline, view frame და playhead
++არაფერს აჩვენებდა. ეს CALM-ის ბოლო ეტაპია და Saba-ს decision 3-ს ასრულებს:
++
++- ცარიელ პროექტში Overview რჩება, მაგრამ თხელი, მშვიდი ხაზია; სრული სახე პირველ clip-თან ჩნდება, bbox
++  უცვლელია;
++- Overview იმალება და ჩნდება **Ctrl+Alt+O**-ით (Mac-ზე Cmd+Option+O), როგორც Ableton Live 12-ში
++  (manual 42.1); არჩევანი browser-ს ახსოვს და shortcut sheet-ში ჩანს;
++- ვიდეოს გარეშე მთელი dock row-ის დაკეცვა **არ** არის დამტკიცებული.
++
++## მიდგომა
++
++- **ცარიელის ერთი წესი:** empty ⇔ `arrangement.clips.length === 0` — პროექტის დონეზე, ვიდეო clip-იც
++  ითვლება (იგივე წესი, რაც CALM-2b-ის lane hint-ს აქვს). Undo-თ 0 clip-ზე დაბრუნებისას empty state
++  ბრუნდება.
++- **ცარიელი სახე:** root-ს აქვს `data-overview-state` (`empty` / `full`); ფონი empty-ზე
++  `bg-transparent`-ია. outline overlay-ის ნაცვლად (child 0) ჩნდება 1 px baseline
++  (`arrangement-overview-baseline`, `bg-outline`, `rounded-panel`-ის გარეშე). view frame და playhead
++  DOM-ში რჩება `invisible`-ით, ამიტომ `aria-valuenow` / `aria-valuetext` კვლავ ახლდება და ← / →,
++  click, drag და double-click (Fit) უცვლელად მუშაობს. role, `aria-label`, `title` და handler-ები არ
++  შეცვლილა.
++- **Toggle:** `overview-visibility.ts` იმავე pattern-ს მიჰყვება, რასაც `library-notice.ts`
++  (`useSyncExternalStore`, in-memory მნიშვნელობა, `localStorage`). key ერთია browser-ზე —
++  `czaba-studio-overview-hidden` = `1`, როცა დამალულია; ჩვენებისას key იშლება. ეს view preference-ია
++  და არა content-ის ფაქტი, ამიტომ collection-ზე არ არის მიბმული. storage error-ზე toggle ამ
++  session-ში მაინც მუშაობს.
++- **Key branch:** `StudioWorkspace`-ის window `keydown` handler-ში, floating video Escape-ის შემდეგ.
++  პირობა code-based-ია (`KeyO` + Alt + Ctrl ან Meta, Shift-ის გარეშე), ამიტომ ქართულ layout-ზეც
++  მუშაობს (`event.key` = `ო`). shortcut sheet-ის, Export-ის და text field-ის early return-ები მასაც
++  ეხება. auto-repeat და აქტიური pointer gesture იგნორდება. ეს view state-ია: history-ში ჩანაწერი
++  არ ემატება და Undo მას არ ეხება. status line ერთხელ ადასტურებს მოქმედებას და ასწავლის დაბრუნების
++  გზას („Overview hidden. Ctrl+Alt+O shows it again.“ / „Overview shown. Ctrl+Alt+O hides it.“).
++- **AltGr-ის ზღვარი:** AltGr (Windows-ის ზოგ layout-ზე Ctrl+Alt, მაგ. Polish `ó`) იგნორდება
++  (`getModifierState('AltGraph')`), რომ სიმბოლო აიკრიფოს. ასეთ layout-ზე toggle-ს მარცხენა Ctrl+Alt
++  სჭირდება.
++- **Hidden slot:** დამალვისას Overview-ს ადგილს იკავებს `aria-hidden` ცარიელი 64 px slot
++  (`arrangement-overview-hidden-slot`). dock row-ის სიმაღლეს ვიდეოს monitor ადგენს, ხოლო baseline
++  probe-მა აჩვენა, რომ slot-ის გარეშე caption row 68 px-ით ჩამოიწევს. dock-ის დაკეცვა Saba-ს არ
++  დაუმტკიცებია.
++- **Focus:** თუ დამალვისას Overview-ზეა focus, კოდი focus-ს არ გადაიტანს (ახალი სამიზნე არ
++  იქმნება). Chromium ინახავს sequential focus-ის საწყის წერტილს, ამიტომ შემდეგი Tab
++  `arrangement-video-expand`-ზე გადადის; ცვლილებას status line აცხადებს.
++- **Sheet:** `shortcuts.ts`-ში „Zoom & view“ ჯგუფს `overview-scroll`-ის შემდეგ ემატება
++  `overview-toggle` (`Ctrl+Alt+O`, aria `Control+Alt+O Meta+Alt+O`). sheet row-ს წყაროდან ხატავს.
++- **GATE229-S2:** dock-ის caption row-ს მოეხსნა `justify-between gap-2` — row-ს ერთი child აქვს, bbox
++  არ იცვლება.
++- **Ableton Live 12** (task §3): Overview-ს როლი და gesture-ები (6.1) და Ctrl+Alt+O / Cmd+Option+O
++  (42.1) ემთხვევა. ცარიელი Arrangement-ის Overview-ზე და არჩევანის session-ებს შორის შენახვაზე
++  წყარო ვერ მოიძებნა; View menu-ის ჩანაწერი და ხილული ღილაკი შეგნებულად არ დაემატა (Saba: „no new
++  visible control“).
++
++## არქიტექტურა
++
++```mermaid
++flowchart LR
++  K[window keydown Ctrl/Cmd+Alt+O] -->|readOverviewHidden / setOverviewHidden| V[overview-visibility.ts]
++  V -->|setItem 1 / removeItem| LS[(localStorage)]
++  V -->|subscribe| W[StudioWorkspace useSyncExternalStore]
++  W -->|shown| O[ArrangementOverview]
++  W -->|hidden| S[hidden slot h-16]
++  O -->|clips.length === 0| E[baseline + invisible frame / playhead]
++  O -->|clips > 0| F[outline + frame + playhead]
++  K -->|setStatus| ST[status line]
++```
++
++## შეცვლილი ფაილები
++
++- `app/lib/arrangement/overview-visibility.ts` (ახალი) — storage key, read, set და subscribe.
++- `app/components/arrangement/ArrangementOverview.tsx` — empty state (`data-overview-state`, baseline, `invisible` frame და playhead, ფონის პირობა).
++- `app/components/arrangement/StudioWorkspace.tsx` — visibility read, hidden slot და Ctrl+Alt+O branch.
++- `app/components/arrangement/ArrangementVideoDock.tsx` — caption row-ის კლასები (GATE229-S2).
++- `app/lib/arrangement/shortcuts.ts` — `overview-toggle` row.
++- `app/lib/arrangement/strings.ts` — `overviewHidden`, `overviewShown`.
++- `app/lib/arrangement/__tests__/strings.test.ts` — ST17-ის map და key list, ახალი ST-C3.
++- `app/lib/arrangement/__tests__/shortcuts.test.ts` — SC1-ის row order, SC5-ის რაოდენობა 9, ახალი SC-C3.
++- `app/lib/arrangement/__tests__/panel-radius-ui.test.tsx` — Overview root-ის site literal (ფონი პირობაში გადავიდა).
++- `app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx` (ახალი) — OV-E1, OV-E2, OV-T1, OV-T2, OV-T4, OV-T5.
++- `app/lib/arrangement/__tests__/overview-visibility-persist-ui.test.tsx` (ახალი) — OV-T3.
++
++## პრობლემები და გადაწყვეტები
++
++- **პრობლემა:** frozen ტესტები (OV1, DXC4, PNR4, TH5) outline overlay-ის ზუსტ ხაზს, `rounded-panel`-ის
++  რაოდენობას, `children[1]`-ს როგორც bar rows container-ს და playhead-ის token-ებს ამოწმებენ.
++  **გადაწყვეტა:** empty-ზე baseline ცვლის overlay-ს child 0-ის პოზიციაზე, `rounded-panel`-ის გარეშე;
++  overlay-ის ხაზი byte-identical-ია და მხოლოდ clip-ებით ჩანს; frame და playhead მხოლოდ `invisible`-ს
++  იღებენ.
++- **პრობლემა:** server ვერ ხედავს `localStorage`-ს. **გადაწყვეტა:** server snapshot „ნაჩვენებია“
++  (route SSR-ია, როგორც CALM-2b-ის notice); დამალულ browser-ში client mount storage-ს კითხულობს და
++  slot-ს აჩენს. ეს hydration-ის მოკლე flash-ის რისკია, რომელსაც C ზომავს (C-TOGGLE-PERSIST).
++- **პრობლემა:** in-memory მნიშვნელობა module state-ია და storage-ზე წინ იკითხება, ამიტომ ერთ ფაილში
++  preset key-ის წაკითხვა ტესტების რიგზე იქნებოდა დამოკიდებული. **გადაწყვეტა:** OV-T3 ცალკე ფაილშია
++  (`overview-visibility-persist-ui.test.tsx`), სადაც `setOverviewHidden` არ გამოიძახება და vitest-ის
++  file isolation in-memory მნიშვნელობას `null`-ით იწყებს.
++- **პრობლემა:** frame-ის `invisible` jsdom-ში არ მოწმდება და class pin აკრძალულია. **გადაწყვეტა:**
++  MU-8 browser-only-ა (C-OVERVIEW-EMPTY, computed `visibility: hidden`).
++
++## ტესტირება
++
++- **OV-E1** — 0 clip: `empty`, baseline არის child 0, child 1 bar rows container-ია; ერთი clip-ის
++  დამატებით `full` და baseline-ის გარეშე; `undo()`-ით ისევ `empty`.
++- **OV-E2** — ცარიელ Overview-ზე `aria-valuenow` და `aria-valuemax` არის, ArrowRight/ArrowLeft
++  `aria-valuenow`-ს 0 → 5 → 0 ცვლის.
++- **OV-T1** — Ctrl+Alt+O body-ზე: default prevented, Overview არ არის, slot `aria-hidden="true"`-ით,
++  key = `1`, status = `overviewHidden`; Meta+Alt+O აბრუნებს, key იშლება, status = `overviewShown`.
++- **OV-T2** — AltGr (`fireEvent` აბრუნებს `true`-ს), Shift, `repeat` (default prevented), library search,
++  ღია shortcut sheet, აქტიური pointer gesture, Ctrl+O Alt-ის გარეშე და Alt+O Ctrl/Meta-ს გარეშე —
++  Overview ჩანს და key არ იწერება.
++- **OV-T3** (`overview-visibility-persist-ui.test.tsx`) — key = `1`: `renderToString` Overview-ს
++  ხატავს, client `render` კი slot-ს.
++- **OV-T4** — toggle history-ში არ ჩნდება: `undoLabel` იგივეა დამალვისა და ჩვენების შემდეგ, `undo()`
++  წინა edit-ს აუქმებს.
++- **OV-T5** — storage-ის error-ზე toggle ამ session-ში მაინც მალავს და აჩენს.
++- **ST-C3** — ორი status string ზუსტია და შეიცავს `findStudioShortcut('overview-toggle')`-ის key-ს.
++- **SC-C3** — `overview-toggle`-ის keys, aria, ჯგუფი `zoom-view`, პოზიცია `overview-scroll`-ის შემდეგ;
++  `filterStudioShortcutGroups('overview')` შეიცავს `fit`, `overview-scroll`, `overview-toggle`-ს.
++- **Mutants:** MU-1 (`hasClips`-ის ინვერსია) → OV-E1, OV-E2; MU-2 (AltGraph guard) და MU-3 (`repeat`
++  guard) → OV-T2; MU-9 (pointer gesture guard) → OV-T2; MU-4 (server snapshot = `readOverviewHidden`) → OV-T3; MU-5 (`'0'`-ის ჩაწერა
++  წაშლის ნაცვლად), MU-6 (`null` slot-ის ნაცვლად) და MU-7 (status-ების გაცვლა) → OV-T1, OV-T5; MU-8
++  (frame-ის `invisible`) → browser-only.
++- Covering set: 32 test file, 541 ტესტი მწვანე; N2 და N4 `--sequence.shuffle`-ითაც; `npm run typecheck`
++  და `npm run lint` rc 0.
++
++## TODO / შემდეგი ნაბიჯები
++
++- **TLM-R232-MAC:** Cmd+Option+O რეალურ Mac-ზე (Tech Lead manual check).
++- სხვა tab-ში toggle ამ tab-ს reload-მდე არ ცვლის (`storage` event-ის subscription არ არის).
++- Architecture checkpoint (`b-round-231-checkpoint-request.md`): ორი `useSyncExternalStore` storage
++  helper და `StudioWorkspace`-ის keydown handler-ის ზრდა.
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/overview-visibility-persist-ui.test.tsx
+@@ -0,0 +1,161 @@
++import { act, render } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { renderToString } from 'react-dom/server';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
++import type { WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
++import { OVERVIEW_HIDDEN_STORAGE_KEY } from '../overview-visibility';
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++class FakeParam {
++  value = 0;
++  setTargetAtTime(target: number) {
++    this.value = target;
++  }
++}
++
++class FakeNode {
++  connect(destination: FakeNode) {
++    return destination;
++  }
++  disconnect() {}
++}
++
++class FakeGain extends FakeNode {
++  gain = new FakeParam();
++}
++
++class FakePanner extends FakeNode {
++  pan = new FakeParam();
++}
++
++class FakeSource extends FakeNode {
++  buffer: unknown = null;
++  onended: (() => void) | null = null;
++  start() {}
++  stop() {}
++}
++
++class FakeAudioContext {
++  state = 'running';
++  destination = new FakeNode();
++  sampleRate = 48000;
++  currentTime = 0;
++  resume() {
++    return Promise.resolve();
++  }
++  close() {
++    return Promise.resolve();
++  }
++  createGain() {
++    return new FakeGain();
++  }
++  createStereoPanner() {
++    return new FakePanner();
++  }
++  createBufferSource() {
++    return new FakeSource();
++  }
++}
++
++class FakeOfflineAudioContext {}
++
++class FakeAudioBuffer {
++  readonly length: number;
++  readonly numberOfChannels: number;
++  readonly sampleRate: number;
++  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
++    this.length = options.length;
++    this.numberOfChannels = options.numberOfChannels;
++    this.sampleRate = options.sampleRate;
++  }
++  get duration() {
++    return this.length / this.sampleRate;
++  }
++  getChannelData() {
++    return new Float32Array(this.length);
++  }
++}
++
++class FakeResizeObserver {
++  observe() {}
++  disconnect() {}
++}
++
++const persistCollection: WorkspaceCollection = {
++  id: 'overview-persist',
++  label: 'overview-persist',
++  origin: 'demo',
++  sources: [
++    {
++      id: 'song',
++      title: 'Song',
++      collectionLabel: 'overview-persist',
++      kind: 'music',
++      origin: 'demo',
++    },
++  ],
++  loadSource: () =>
++    Promise.resolve(new AudioBuffer({ length: 2000, numberOfChannels: 1, sampleRate: 100 })),
++};
++
++function persistWorkspace() {
++  return (
++    <ArrangementProvider
++      collection={persistCollection}
++      initialArrangement={createArrangement([
++        { id: 'video', kind: 'video', name: 'Video' },
++        { id: 'music', kind: 'audio', name: 'Music' },
++      ])}
++    >
++      <StudioWorkspace />
++    </ArrangementProvider>
++  );
++}
++
++beforeEach(() => {
++  window.localStorage.clear();
++  vi.stubGlobal('AudioContext', FakeAudioContext);
++  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++  vi.stubGlobal('requestAnimationFrame', () => 1);
++  vi.stubGlobal('cancelAnimationFrame', () => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++  window.localStorage.clear();
++  vi.unstubAllGlobals();
++  vi.restoreAllMocks();
++});
++
++describe('CALM-3 remembered Overview visibility (SABA-B-8)', () => {
++  it('OV-T3: the server renders the Overview; a client mount reads the remembered hidden choice', async () => {
++    window.localStorage.setItem(OVERVIEW_HIDDEN_STORAGE_KEY, '1');
++    const serverError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
++    const html = renderToString(persistWorkspace());
++    serverError.mockRestore();
++    expect(html).toContain('data-testid="arrangement-overview"');
++    expect(html).not.toContain('data-testid="arrangement-overview-hidden-slot"');
++    const view = render(persistWorkspace());
++    await act(async () => {
++      await new Promise((resolve) => setTimeout(resolve, 0));
++    });
++    expect(view.queryByTestId('arrangement-overview')).toBeNull();
++    expect(view.getByTestId('arrangement-overview-hidden-slot').getAttribute('aria-hidden')).toBe(
++      'true',
++    );
++  });
++});

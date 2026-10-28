@@ -1,0 +1,12 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const p = await b.newPage();
+const errs = []; p.on('pageerror', e => errs.push(String(e))); p.on('console', m => { if (m.type()==='error') errs.push('console: '+m.text().slice(0,200)); });
+const r = await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'load', timeout: 90000 });
+await p.waitForTimeout(8000);
+console.log('status', r.status());
+console.log('scroller', await p.locator('[data-testid="arrangement-timeline-scroller"]').count(), 'overview', await p.locator('[data-testid="arrangement-overview"]').count());
+console.log((await p.textContent('body')).slice(0, 400));
+console.log(errs.slice(0, 10).join('\n'));
+await b.close();
