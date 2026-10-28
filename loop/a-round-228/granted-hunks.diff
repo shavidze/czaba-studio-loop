@@ -1,0 +1,816 @@
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/lib/arrangement/shortcuts.ts	2026-10-28 14:38:00.509426844 +0000
++++ app/lib/arrangement/shortcuts.ts	2026-10-28 14:50:46.951469244 +0000
+@@ -16,20 +16,35 @@
+     id: 'transport',
+     title: 'Transport',
+     rows: [
+-      { id: 'play-stop', action: 'Play / Stop', keys: ['Space'] },
+-      { id: 'back-to-start', action: 'Back to start', keys: ['Home'] },
+-      { id: 'loop', action: 'Loop the selection · Loop on / off', keys: ['Ctrl+L'] },
++      { id: 'play-stop', action: 'Play / Stop', keys: ['Space'], ariaKeyShortcuts: 'Space' },
++      { id: 'back-to-start', action: 'Back to start', keys: ['Home'], ariaKeyShortcuts: 'Home' },
++      {
++        id: 'loop',
++        action: 'Loop the selection · Loop on / off',
++        keys: ['Ctrl+L'],
++        ariaKeyShortcuts: 'Control+L Meta+L',
++      },
+     ],
+   },
+   {
+     id: 'edit',
+     title: 'Edit',
+     rows: [
+-      { id: 'undo', action: 'Undo', keys: ['Ctrl+Z'] },
+-      { id: 'redo', action: 'Redo', keys: ['Ctrl+Shift+Z', 'Ctrl+Y'] },
++      { id: 'undo', action: 'Undo', keys: ['Ctrl+Z'], ariaKeyShortcuts: 'Control+Z Meta+Z' },
++      {
++        id: 'redo',
++        action: 'Redo',
++        keys: ['Ctrl+Shift+Z', 'Ctrl+Y'],
++        ariaKeyShortcuts: 'Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y',
++      },
+       { id: 'copy-cut-paste', action: 'Copy · Cut · Paste', keys: ['Ctrl+C', 'Ctrl+X', 'Ctrl+V'] },
+       { id: 'duplicate', action: 'Duplicate', keys: ['Ctrl+D'] },
+-      { id: 'delete', action: 'Delete (the gap remains)', keys: ['Delete', 'Backspace'] },
++      {
++        id: 'delete',
++        action: 'Delete (the gap remains)',
++        keys: ['Delete', 'Backspace'],
++        ariaKeyShortcuts: 'Delete Backspace',
++      },
+       { id: 'select-all', action: 'Select all clips', keys: ['Ctrl+A'] },
+       {
+         id: 'add-to-selection',
+@@ -43,7 +58,12 @@
+     id: 'time-clips',
+     title: 'Time & clips',
+     rows: [
+-      { id: 'split', action: 'Split at the playhead or the selection', keys: ['Ctrl+E'] },
++      {
++        id: 'split',
++        action: 'Split at the playhead or the selection',
++        keys: ['Ctrl+E'],
++        ariaKeyShortcuts: 'Control+E Meta+E',
++      },
+       { id: 'cut-time', action: 'Cut Time (closes the gap on all tracks)', keys: ['Ctrl+Shift+X'] },
+       {
+         id: 'extend-all-tracks',
+@@ -90,7 +110,7 @@
+       {
+         id: 'fit',
+         action: 'Fit the whole project',
+-        keys: ['Double-click the overview', 'Double-click the ruler (no selection)'],
++        keys: ['Double-click the overview', 'Double-click the ruler (no time selection)'],
+       },
+       { id: 'overview-scroll', action: 'Overview: scroll 5 s', keys: ['← / → (overview focused)'] },
+       {
+@@ -173,3 +193,12 @@
+   }
+   return filtered;
+ }
++
++export function studioShortcutTitle(label: string, id: StudioShortcutId): string {
++  const key = findStudioShortcut(id)?.keys[0];
++  return key ? `${label} (${key})` : label;
++}
++
++export function studioShortcutAria(id: StudioShortcutId): string | undefined {
++  return findStudioShortcut(id)?.ariaKeyShortcuts;
++}
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/lib/arrangement/strings.ts	2026-10-28 14:38:00.509426844 +0000
++++ app/lib/arrangement/strings.ts	2026-10-28 14:41:41.871696457 +0000
+@@ -1,3 +1,5 @@
++import { studioShortcutTitle } from './shortcuts';
++
+ interface StudioTimeSpanText {
+   start: string;
+   end: string;
+@@ -137,13 +139,17 @@
+   loopRemoved: 'The loop range was shorter than 0.1 s after the deletion, so it was removed.',
+   pasteMissing: 'Paste failed: the source or track is unavailable. Nothing changed.',
+   clipboardEmpty: 'The clipboard is empty — Copy or Cut first.',
+-  splitRangeTitle: 'Split at both edges of the time selection (Ctrl/Cmd+E)',
+-  splitPlayheadTitle: 'Split at the playhead (Ctrl/Cmd+E)',
++  splitRangeTitle: studioShortcutTitle('Split at both edges of the time selection', 'split'),
++  splitPlayheadTitle: studioShortcutTitle('Split at the playhead', 'split'),
+   deleteRangeHint:
+     'Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
+   deleteRangeAllTracksHint:
+     'Delete time selection on all tracks — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
+-  deleteClipTitle: 'Delete clip — leaves a gap (Delete)',
++  deleteClipTitle: studioShortcutTitle('Delete clip — leaves a gap', 'delete'),
++  undoTitle: (label: string | null): string =>
++    studioShortcutTitle(label ? `Undo: ${label}` : 'Undo', 'undo'),
++  redoTitle: (label: string | null): string =>
++    studioShortcutTitle(label ? `Redo: ${label}` : 'Redo', 'redo'),
+   deleteClipLabel: 'Delete — the selected clip; leaves a gap',
+   deleteButton: 'Delete',
+   historySplitClips: (count: number): string => `Split (${count})`,
+@@ -213,11 +219,11 @@
+     'Web Audio is not available in this browser — playback and export will not work.',
+   nothingToPlay: 'Nothing to play — add a clip from the library first.',
+   backToStartLabel: 'Back to start',
+-  backToStartTitle: 'Back to start (0)',
++  backToStartTitle: studioShortcutTitle('Back to start', 'back-to-start'),
+   playLabel: 'Play',
+   pauseLabel: 'Pause',
+-  playTitle: 'Play (Space)',
+-  pauseTitle: 'Pause (Space)',
++  playTitle: studioShortcutTitle('Play', 'play-stop'),
++  pauseTitle: studioShortcutTitle('Pause', 'play-stop'),
+   projectEndPrefix: '/ end',
+   playPastEnd: ({ position, end }: { position: string; end: string }): string =>
+     `Playhead (${position}) is past the end of the project (${end}) — there is nothing to play here. Home returns to 0.`,
+@@ -263,8 +269,8 @@
+   on: 'Loop is on.',
+   off: 'Loop is off; the range is kept.',
+   historyRange: 'Loop range',
+-  selectionTitle: 'Loop the time selection (Ctrl/Cmd+L)',
+-  toggleTitle: 'Loop on / off (Ctrl/Cmd+L)',
++  selectionTitle: studioShortcutTitle('Loop the time selection', 'loop'),
++  toggleTitle: studioShortcutTitle('Loop on / off', 'loop'),
+   braceHint: 'Loop: make a time selection and press Loop (Ctrl+L)',
+   braceKeyboardHint: '← → nudge · Shift + ← → length',
+   braceStartTitle: 'Loop start',
+@@ -348,7 +354,8 @@
+   zoomBackTitle: 'Back to the previous zoom (X)',
+   zoomBackEmptyTitle:
+     'Previous zoom: the history is empty — use Fit or Zoom to selection first (X)',
+-  fitTitle: 'Fit — the entire project is visible (double-click the ruler or the overview)',
++  fitTitle:
++    'Fit — the entire project is visible (double-click the overview, or the ruler with no time selection)',
+   playheadTitle: 'Playhead — drag · ←/→ = ±0.1 s',
+   rulerTitle:
+     'Click = playhead · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit / Zoom to selection',
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/components/arrangement/ArrangementTransport.tsx	2026-10-28 14:38:00.509104631 +0000
++++ app/components/arrangement/ArrangementTransport.tsx	2026-10-28 14:44:57.891518931 +0000
+@@ -17,6 +17,7 @@
+   useArrangementPositionWriter,
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
++import { studioShortcutAria } from '~/lib/arrangement/shortcuts';
+ import {
+   studioEditStrings,
+   studioLoopStrings,
+@@ -132,6 +133,7 @@
+         onClick={togglePlayback}
+         aria-label={isPlaying ? studioPlaybackStrings.pauseLabel : studioPlaybackStrings.playLabel}
+         title={isPlaying ? studioPlaybackStrings.pauseTitle : studioPlaybackStrings.playTitle}
++        aria-keyshortcuts={studioShortcutAria('play-stop')}
+         className={cn(
+           toolButtonClass,
+           'w-8 justify-center rounded-full px-0 bg-foreground text-background enabled:hover:bg-foreground/92 enabled:active:bg-foreground/88',
+@@ -148,6 +150,7 @@
+         onClick={() => seekTo(0)}
+         aria-label={studioPlaybackStrings.backToStartLabel}
+         title={studioPlaybackStrings.backToStartTitle}
++        aria-keyshortcuts={studioShortcutAria('back-to-start')}
+         className={toolButtonClass}
+       >
+         <ArrowLeftToLine className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+@@ -169,7 +172,8 @@
+         }}
+         onKeyDown={preventRepeatedEnterKeyDown}
+         disabled={!undoLabel}
+-        title={undoLabel ? `Undo: ${undoLabel}` : 'Undo'}
++        title={studioEditStrings.undoTitle(undoLabel)}
++        aria-keyshortcuts={studioShortcutAria('undo')}
+         className={cn(toolButtonClass, 'w-28')}
+       >
+         <Undo2 className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+@@ -184,7 +188,8 @@
+         }}
+         onKeyDown={preventRepeatedEnterKeyDown}
+         disabled={!redoLabel}
+-        title={redoLabel ? `Redo: ${redoLabel}` : 'Redo'}
++        title={studioEditStrings.redoTitle(redoLabel)}
++        aria-keyshortcuts={studioShortcutAria('redo')}
+         className={cn(toolButtonClass, 'w-28')}
+       >
+         <Redo2 className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+@@ -196,6 +201,7 @@
+         onClick={splitSelection}
+         disabled={!range && !selectedClipId}
+         title={range ? studioEditStrings.splitRangeTitle : studioEditStrings.splitPlayheadTitle}
++        aria-keyshortcuts={studioShortcutAria('split')}
+         className={cn(toolButtonClass, 'gap-0.75')}
+       >
+         <Scissors className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+@@ -211,6 +217,7 @@
+         disabled={!range && !selectedClipId}
+         title={rangeDeleteHint ?? studioEditStrings.deleteClipTitle}
+         aria-label={rangeDeleteHint ?? studioEditStrings.deleteClipLabel}
++        aria-keyshortcuts={studioShortcutAria('delete')}
+         className={cn(toolButtonClass, 'gap-0.5', range && 'border-foreground')}
+       >
+         <Delete className="size-5 shrink-0" strokeWidth={1.2} aria-hidden="true" />
+@@ -223,6 +230,7 @@
+         disabled={!range && !loop}
+         aria-pressed={loop?.enabled === true}
+         title={range ? studioLoopStrings.selectionTitle : studioLoopStrings.toggleTitle}
++        aria-keyshortcuts={studioShortcutAria('loop')}
+         className={cn(
+           toolButtonClass,
+           'gap-0.75',
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/lib/arrangement/__tests__/shortcuts.test.ts	2026-10-28 14:38:00.509426844 +0000
++++ app/lib/arrangement/__tests__/shortcuts.test.ts	2026-10-28 14:50:43.920880388 +0000
+@@ -4,6 +4,8 @@
+   findStudioShortcut,
+   STUDIO_SHORTCUT_GROUPS,
+   type StudioShortcutGroup,
++  studioShortcutAria,
++  studioShortcutTitle,
+ } from '../shortcuts';
+ 
+ const EXPECTED_ROW_ORDER = [
+@@ -140,7 +142,7 @@
+   it('SC4: the fit and waveform-zoom keys name the real controls, and no key names a button', () => {
+     expect(findStudioShortcut('fit')?.keys).toEqual([
+       'Double-click the overview',
+-      'Double-click the ruler (no selection)',
++      'Double-click the ruler (no time selection)',
+     ]);
+     expect(findStudioShortcut('waveform-zoom')?.keys).toEqual(['Waveform Zoom menu']);
+     for (const group of STUDIO_SHORTCUT_GROUPS) {
+@@ -151,4 +153,45 @@
+       }
+     }
+   });
++  it('SC5: the title shows the first key and aria-keyshortcuts lists every key in ARIA syntax', () => {
++    expect(studioShortcutTitle('Undo', 'undo')).toBe('Undo (Ctrl+Z)');
++    expect(studioShortcutTitle('Redo: X', 'redo')).toBe('Redo: X (Ctrl+Shift+Z)');
++    expect(studioShortcutAria('play-stop')).toBe('Space');
++    expect(studioShortcutAria('back-to-start')).toBe('Home');
++    expect(studioShortcutAria('loop')).toBe('Control+L Meta+L');
++    expect(studioShortcutAria('undo')).toBe('Control+Z Meta+Z');
++    expect(studioShortcutAria('redo')).toBe('Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y');
++    expect(studioShortcutAria('split')).toBe('Control+E Meta+E');
++    expect(studioShortcutAria('delete')).toBe('Delete Backspace');
++    expect(studioShortcutAria('shortcuts')).toBe('Shift+/');
++    const grammar =
++      /^((Control|Meta|Shift|Alt)\+)*[^\s+]+( ((Control|Meta|Shift|Alt)\+)*[^\s+]+)*$/;
++    const groups: readonly StudioShortcutGroup[] = STUDIO_SHORTCUT_GROUPS;
++    let checked = 0;
++    for (const group of groups) {
++      for (const row of group.rows) {
++        const aria = row.ariaKeyShortcuts;
++        if (!aria) {
++          continue;
++        }
++        checked += 1;
++        expect(aria, row.id).toMatch(grammar);
++        const combos = aria.split(' ');
++        for (const combo of combos) {
++          const modified = /^(Control|Meta)\+(.+)$/.exec(combo);
++          if (modified) {
++            expect(row.keys, `${row.id}: ${combo}`).toContain(`Ctrl+${modified[2]}`);
++          }
++        }
++        for (const key of row.keys) {
++          if (key.startsWith('Ctrl+')) {
++            const rest = key.slice('Ctrl+'.length);
++            expect(combos, `${row.id}: ${key}`).toContain(`Control+${rest}`);
++            expect(combos, `${row.id}: ${key}`).toContain(`Meta+${rest}`);
++          }
++        }
++      }
++    }
++    expect(checked).toBe(8);
++  });
+ });
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-28 14:38:00.509426844 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-28 14:42:07.359968221 +0000
+@@ -407,8 +407,8 @@
+   loopRemoved: 'The loop range was shorter than 0.1 s after the deletion, so it was removed.',
+   pasteMissing: 'Paste failed: the source or track is unavailable. Nothing changed.',
+   clipboardEmpty: 'The clipboard is empty — Copy or Cut first.',
+-  splitRangeTitle: 'Split at both edges of the time selection (Ctrl/Cmd+E)',
+-  splitPlayheadTitle: 'Split at the playhead (Ctrl/Cmd+E)',
++  splitRangeTitle: 'Split at both edges of the time selection (Ctrl+E)',
++  splitPlayheadTitle: 'Split at the playhead (Ctrl+E)',
+   deleteRangeHint:
+     'Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
+   deleteRangeAllTracksHint:
+@@ -450,6 +450,8 @@
+     e.copyRangeDone({ lane: e.allTracks, start: '00:03.000', end: '00:05.000', parts: 3 }),
+   ],
+   copyClipsDone: [e.copyClipsDone(1), e.copyClipsDone(3)],
++  undoTitle: [e.undoTitle(null), e.undoTitle('Add Marker')],
++  redoTitle: [e.redoTitle(null), e.redoTitle('Add Marker')],
+   cutDone: [e.cutDone(1), e.cutDone(3)],
+   cutTimeNothing: [e.cutTimeNothing({ start: '00:15.000', end: '00:15.000' })],
+   cutTimeParts: [e.cutTimeParts(1), e.cutTimeParts(3)],
+@@ -605,6 +607,13 @@
+     );
+   });
+ 
++  it('ST-K1: the Undo and Redo titles name their first key from the shortcut source', () => {
++    expect(e.undoTitle(null)).toBe('Undo (Ctrl+Z)');
++    expect(e.undoTitle('Add Marker')).toBe('Undo: Add Marker (Ctrl+Z)');
++    expect(e.redoTitle(null)).toBe('Redo (Ctrl+Shift+Z)');
++    expect(e.redoTitle('Add Marker')).toBe('Redo: Add Marker (Ctrl+Shift+Z)');
++  });
++
+   it('ST8: no string or formatter output in the module contains a Georgian codepoint', () => {
+     const formatterKeys = Object.entries(studioEditStrings)
+       .filter(([, value]) => typeof value === 'function')
+@@ -653,7 +662,7 @@
+       'Web Audio is not available in this browser — playback and export will not work.',
+     nothingToPlay: 'Nothing to play — add a clip from the library first.',
+     backToStartLabel: 'Back to start',
+-    backToStartTitle: 'Back to start (0)',
++    backToStartTitle: 'Back to start (Home)',
+     playLabel: 'Play',
+     pauseLabel: 'Pause',
+     playTitle: 'Play (Space)',
+@@ -684,8 +693,8 @@
+     on: 'Loop is on.',
+     off: 'Loop is off; the range is kept.',
+     historyRange: 'Loop range',
+-    selectionTitle: 'Loop the time selection (Ctrl/Cmd+L)',
+-    toggleTitle: 'Loop on / off (Ctrl/Cmd+L)',
++    selectionTitle: 'Loop the time selection (Ctrl+L)',
++    toggleTitle: 'Loop on / off (Ctrl+L)',
+     braceHint: 'Loop: make a time selection and press Loop (Ctrl+L)',
+     braceKeyboardHint: '← → nudge · Shift + ← → length',
+     braceStartTitle: 'Loop start',
+@@ -967,7 +976,8 @@
+     zoomBackTitle: 'Back to the previous zoom (X)',
+     zoomBackEmptyTitle:
+       'Previous zoom: the history is empty — use Fit or Zoom to selection first (X)',
+-    fitTitle: 'Fit — the entire project is visible (double-click the ruler or the overview)',
++    fitTitle:
++      'Fit — the entire project is visible (double-click the overview, or the ruler with no time selection)',
+     playheadTitle: 'Playhead — drag · ←/→ = ±0.1 s',
+     rulerTitle:
+       'Click = playhead · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit / Zoom to selection',
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx	2026-10-28 14:38:00.509426844 +0000
++++ app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx	2026-10-28 14:42:31.229022539 +0000
+@@ -9,6 +9,8 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { findStudioShortcut, type StudioShortcutId, studioShortcutAria } from '../shortcuts';
++import { studioEditStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -215,11 +217,11 @@
+     const workspace = await mountNavigationWorkspace();
+     const { api, view } = workspace;
+     expect(workspace.backToStart().getAttribute('aria-label')).toBe('Back to start');
+-    expect(workspace.backToStart().title).toBe('Back to start (0)');
++    expect(workspace.backToStart().title).toBe('Back to start (Home)');
+     const projectEnd = view.getByTestId('arrangement-project-end');
+     expect(projectEnd.textContent).toBe('00:10.000');
+     expect(asElement(projectEnd.parentElement, 'project end').textContent).toBe('/ end 00:10.000');
+-    expect(workspace.split().title).toBe('Split at the playhead (Ctrl/Cmd+E)');
++    expect(workspace.split().title).toBe('Split at the playhead (Ctrl+E)');
+     act(() => live(api).selectClip('music-1'));
+     expect(workspace.remove().title).toBe('Delete clip — leaves a gap (Delete)');
+     expect(workspace.remove().getAttribute('aria-label')).toBe(
+@@ -238,7 +240,7 @@
+       'Previous zoom: the history is empty — use Fit or Zoom to selection first (X)',
+     );
+     expect(workspace.fit().title).toBe(
+-      'Fit — the entire project is visible (double-click the ruler or the overview)',
++      'Fit — the entire project is visible (double-click the overview, or the ruler with no time selection)',
+     );
+     const tempo = view.getByTestId('arrangement-tempo-input');
+     expect(tempo.getAttribute('aria-label')).toBe('Project tempo (BPM)');
+@@ -251,21 +253,21 @@
+     act(() => live(api).setTimeRange(null));
+     expect(live(api).arrangement.loop).not.toBeNull();
+     expect(live(api).range).toBeNull();
+-    expect(workspace.loop().title).toBe('Loop on / off (Ctrl/Cmd+L)');
++    expect(workspace.loop().title).toBe('Loop on / off (Ctrl+L)');
+   });
+ 
+   it('NS2 a one-track and an all-tracks time selection switch the Split, Delete, Loop and Zoom texts', async () => {
+     const workspace = await mountNavigationWorkspace();
+     const { api } = workspace;
+     act(() => live(api).setTimeRange(MUSIC_RANGE));
+-    expect(workspace.split().title).toBe('Split at both edges of the time selection (Ctrl/Cmd+E)');
++    expect(workspace.split().title).toBe('Split at both edges of the time selection (Ctrl+E)');
+     expect(workspace.remove().title).toBe(
+       'Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
+     );
+     expect(workspace.remove().getAttribute('aria-label')).toBe(
+       'Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
+     );
+-    expect(workspace.loop().title).toBe('Loop the time selection (Ctrl/Cmd+L)');
++    expect(workspace.loop().title).toBe('Loop the time selection (Ctrl+L)');
+     expect(workspace.zoomToSelection().title).toBe('Zoom to the time selection (Z)');
+     act(() => live(api).extendRangeToAllTracks());
+     expect(live(api).range?.allTracks).toBe(true);
+@@ -372,4 +374,47 @@
+     expect(view.getByTestId('arrangement-loop-start-edge').title).toBe('Loop start');
+     expect(view.getByTestId('arrangement-loop-end-edge').title).toBe('Loop end');
+   });
++  it('NS5 the transport titles and aria-keyshortcuts come from the shortcut source', async () => {
++    const workspace = await mountNavigationWorkspace();
++    const { api, view } = workspace;
++    const undo = () => view.getByRole('button', { name: /^Undo/ });
++    const redo = () => view.getByRole('button', { name: /^Redo/ });
++    const transport: ReadonlyArray<readonly [StudioShortcutId, () => HTMLElement]> = [
++      ['play-stop', () => view.getByRole('button', { name: 'Play' })],
++      ['back-to-start', workspace.backToStart],
++      ['undo', undo],
++      ['redo', redo],
++      ['split', workspace.split],
++      ['delete', workspace.remove],
++      ['loop', workspace.loop],
++    ];
++    expect(live(api).range).toBeNull();
++    expect(live(api).undoLabel).toBeNull();
++    for (const [id, button] of transport) {
++      const aria = studioShortcutAria(id);
++      const firstKey = findStudioShortcut(id)?.keys[0];
++      if (!aria || !firstKey) {
++        throw new Error(`shortcut row ${id} has no aria or key`);
++      }
++      expect(button().getAttribute('aria-keyshortcuts'), id).toBe(aria);
++      expect(button().title.endsWith(` (${firstKey})`), `${id}: ${button().title}`).toBe(true);
++    }
++    expect(undo().title).toBe(studioEditStrings.undoTitle(null));
++    expect(redo().title).toBe(studioEditStrings.redoTitle(null));
++    act(() => live(api).setTimeRange(MUSIC_RANGE));
++    act(() => live(api).toggleLoopSelection());
++    const label = live(api).undoLabel;
++    if (!label) {
++      throw new Error('the loop edit wrote no history');
++    }
++    expect(undo().title).toBe(studioEditStrings.undoTitle(label));
++    expect(undo().getAttribute('aria-keyshortcuts')).toBe(studioShortcutAria('undo'));
++    const zoomRange = findStudioShortcut('zoom-range');
++    if (!zoomRange) {
++      throw new Error('zoom-range row missing');
++    }
++    expect(workspace.zoomToSelection().getAttribute('aria-keyshortcuts')).toBe(zoomRange.keys[0]);
++    expect(workspace.zoomBack().getAttribute('aria-keyshortcuts')).toBe(zoomRange.keys[1]);
++    expect(workspace.fit().hasAttribute('aria-keyshortcuts')).toBe(false);
++  });
+ });
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx	2026-10-28 14:38:00.509219456 +0000
++++ app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx	2026-10-28 14:41:41.871696457 +0000
+@@ -16,7 +16,7 @@
+ } from '~/types/arrangement';
+ import { LIBRARY_DRAG_MIME } from '../library';
+ import { createArrangement } from '../model';
+-import { studioLibraryStrings, studioLoopStrings } from '../strings';
++import { studioEditStrings, studioLibraryStrings, studioLoopStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -375,7 +375,7 @@
+     const { api, view, laneBody } = await mountLoopDropWorkspace(DROP_FIXTURE);
+     pressG();
+     expect(snapState(view)).toBe('on');
+-    expect(undoTitle(view)).toBe('Undo');
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+     act(() => live(api).beginLibraryDrag('hit'));
+     dragLibraryOver(laneBody('sfx'), 9.4);
+     expect(dropGhost(view)).toEqual({ text: '00:09.000', left: '360px', blocked: 'false' });
+@@ -387,10 +387,12 @@
+     expect(statusText(view)).toBe(
+       studioLibraryStrings.clipAdded({ title: 'Hit', track: 'SFX', time: '00:09.000', suffix: '' }),
+     );
+-    expect(undoTitle(view)).toBe(`Undo: ${studioLibraryStrings.historyAdd('Hit')}`);
++    expect(undoTitle(view)).toBe(
++      studioEditStrings.undoTitle(studioLibraryStrings.historyAdd('Hit')),
++    );
+     pressCtrl('z');
+     expect(live(api).arrangement.clips.map((clip) => clip.id)).toEqual(DROP_FIXTURE_IDS);
+-    expect(undoTitle(view)).toBe('Undo');
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+   });
+ 
+   it('SD3 Alt bypasses Snap for the ghost and the drop', async () => {
+@@ -445,7 +447,7 @@
+     dropLibrary(laneBody('sfx'), 4.6);
+     expect(statusText(view)).toBe(DROP_BLOCKED_STATUS);
+     expect(live(api).arrangement.clips.map((clip) => clip.id)).toEqual(DROP_FIXTURE_IDS);
+-    expect(undoTitle(view)).toBe('Undo');
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+     act(() => live(api).beginLibraryDrag('hit'));
+     dragLibraryOver(laneBody('sfx'), 6.2, true);
+     expect(dropGhost(view)).toEqual({ text: '00:06.200', left: '248px', blocked: 'false' });
+@@ -453,7 +455,9 @@
+     const added = addedClips(api, DROP_FIXTURE_IDS);
+     expect(added).toHaveLength(1);
+     expect(added[0]?.start).toBeCloseTo(6.2, 9);
+-    expect(undoTitle(view)).toBe(`Undo: ${studioLibraryStrings.historyAdd('Hit')}`);
++    expect(undoTitle(view)).toBe(
++      studioEditStrings.undoTitle(studioLibraryStrings.historyAdd('Hit')),
++    );
+   });
+ 
+   it('SD7 the video-lane refusal ghost shows the snapped time and nothing is added', async () => {
+@@ -468,7 +472,7 @@
+     });
+     dropLibrary(laneBody('video'), 9.4);
+     expect(live(api).arrangement.clips.map((clip) => clip.id)).toEqual(DROP_FIXTURE_IDS);
+-    expect(undoTitle(view)).toBe('Undo');
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+   });
+ });
+ 
+@@ -495,7 +499,9 @@
+           suffix: '',
+         }),
+       );
+-      expect(undoTitle(view)).toBe(`Undo: ${studioLibraryStrings.historyAdd('Hit')}`);
++      expect(undoTitle(view)).toBe(
++        studioEditStrings.undoTitle(studioLibraryStrings.historyAdd('Hit')),
++      );
+       pressCtrl('z');
+       expect(live(api).arrangement.clips.map((clip) => clip.id)).toEqual(DROP_FIXTURE_IDS);
+     });
+@@ -555,7 +561,7 @@
+       dropLibrary(laneBody('sfx'), 4.5);
+       expect(addedClips(api, DROP_FIXTURE_IDS)).toHaveLength(0);
+       expect(statusText(view)).toBe(DROP_BLOCKED_STATUS);
+-      expect(undoTitle(view)).toBe('Undo');
++      expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+     });
+ 
+     it('DE5 a source that is not ready snaps to the grid only', async () => {
+@@ -623,7 +629,7 @@
+       });
+       dropLibrary(laneBody('video'), 6.55);
+       expect(live(api).arrangement.clips.map((clip) => clip.id)).toEqual(DROP_FIXTURE_IDS);
+-      expect(undoTitle(view)).toBe('Undo');
++      expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+     });
+   },
+ );
+@@ -638,7 +644,7 @@
+     release();
+     expect(loopOf(api).start).toBeCloseTo(12.55, 9);
+     expect(loopOf(api).end).toBeCloseTo(14.35, 9);
+-    expect(undoTitle(view)).toBe(`Undo: ${studioLoopStrings.historyRange}`);
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(studioLoopStrings.historyRange));
+   });
+ 
+   it('SL2 Snap on 1 s moves the brace start to the nearest line and keeps the length', async () => {
+@@ -652,10 +658,10 @@
+     expect(braceSpan(element)).toBe('Loop 00:13.000 — 00:14.800');
+     expect(loopOf(api)).toEqual({ start: 13, end: 14.8, enabled: true });
+     expect(statusText(view)).toBe('Loop: 00:13.000 — 00:14.800.');
+-    expect(undoTitle(view)).toBe(`Undo: ${studioLoopStrings.historyRange}`);
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(studioLoopStrings.historyRange));
+     pressCtrl('z');
+     expect(loopOf(api)).toEqual(LOOP_FIXTURE);
+-    expect(undoTitle(view)).toBe('Undo');
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+   });
+ 
+   it('SL3 Alt on the moves bypasses Snap for a brace move', async () => {
+@@ -727,7 +733,7 @@
+     expect(braceSpan(element)).toBe('Loop 00:12.000 — 00:14.000');
+     release();
+     expect(loopOf(api)).toEqual({ start: 12, end: 14, enabled: true });
+-    expect(undoTitle(view)).toBe('Undo');
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+   });
+ 
+   it('SL9 Snap on puts a dragged start edge on the nearest line', async () => {
+@@ -763,14 +769,14 @@
+     expect(loopOf(api)).toEqual({ start: 12, end: 13.8, enabled: true });
+     pressBraceKey(element, 'ArrowLeft');
+     expect(loopOf(api)).toEqual({ start: 11, end: 12.8, enabled: true });
+-    expect(undoTitle(view)).toBe(`Undo: ${studioLoopStrings.historyRange}`);
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(studioLoopStrings.historyRange));
+     pressCtrl('z');
+     expect(loopOf(api)).toEqual({ start: 12, end: 13.8, enabled: true });
+     pressCtrl('z');
+     expect(loopOf(api)).toEqual({ start: 13, end: 14.8, enabled: true });
+     pressCtrl('z');
+     expect(loopOf(api)).toEqual(LOOP_FIXTURE);
+-    expect(undoTitle(view)).toBe('Undo');
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+   });
+ 
+   it('SK3 Snap on moves the brace end line to line with Shift', async () => {
+@@ -796,7 +802,7 @@
+     pressBraceKey(element, 'ArrowLeft');
+     expect(loopOf(api)).toEqual({ start: 0, end: 1.2, enabled: true });
+     expect(statusText(view)).toBe(LOOP_BLOCKED_STATUS);
+-    expect(undoTitle(view)).toBe('Undo');
++    expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+   });
+ 
+   it('SK5 Snap on: Shift+ArrowLeft clamps the end to the minimum length, then is blocked', async () => {
+@@ -872,10 +878,10 @@
+       expect(loopOf(api)).toEqual({ start: 13, end: 14.8, enabled: true });
+       expect(braceSpan(element)).toBe('Loop 00:13.000 — 00:14.800');
+       expect(statusText(view)).toBe('Loop: 00:13.000 — 00:14.800.');
+-      expect(undoTitle(view)).toBe(`Undo: ${studioLoopStrings.historyRange}`);
++      expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(studioLoopStrings.historyRange));
+       pressCtrl('z');
+       expect(loopOf(api)).toEqual(LOOP_FIXTURE);
+-      expect(undoTitle(view)).toBe('Undo');
++      expect(undoTitle(view)).toBe(studioEditStrings.undoTitle(null));
+     });
+ 
+     it('SL11 Alt on the release alone does not free the brace', async () => {
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx	2026-10-28 14:38:00.509426844 +0000
++++ app/lib/arrangement/__tests__/status-announcement-ui.test.tsx	2026-10-28 14:41:41.872582623 +0000
+@@ -787,7 +787,9 @@
+     expect(enabled).toEqual([false, false, false, false]);
+     expect(addedTexts(stopWatching(watch))).toEqual([LOOP_OFF_TEXT]);
+     expect(live(api).undoLabel).toBe(studioLoopStrings.historyOff);
+-    expect(view.queryAllByTitle(`Undo: ${studioLoopStrings.historyOff}`).length).toBe(1);
++    expect(
++      view.queryAllByTitle(studioEditStrings.undoTitle(studioLoopStrings.historyOff)).length,
++    ).toBe(1);
+ 
+     act(() => live(api).undo());
+     expect(live(api).arrangement.loop?.enabled).toBe(true);
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/lib/arrangement/__tests__/markers-ui.test.tsx	2026-10-28 14:38:00.509426844 +0000
++++ app/lib/arrangement/__tests__/markers-ui.test.tsx	2026-10-28 14:41:41.872646553 +0000
+@@ -289,7 +289,7 @@
+     expect(document.activeElement).toBe(flag);
+     expect(statusText(view)).not.toContain('already exists');
+     expect(live(api).undoLabel).toBe('Add Marker');
+-    const undoButton = view.getByTitle('Undo: Add Marker');
++    const undoButton = view.getByTitle(studioEditStrings.undoTitle('Add Marker'));
+     expect(undoButton).toBeTruthy();
+     act(() => live(api).undo());
+     expect(live(api).undoLabel).toBeNull();
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx	2026-10-28 14:38:00.509426844 +0000
++++ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx	2026-10-28 14:41:41.872696837 +0000
+@@ -334,7 +334,9 @@
+     expect(live(api).arrangement.clips.length).toBe(0);
+     expect(deleteButton().disabled).toBe(true);
+     expect(document.activeElement).toBe(undoButton());
+-    expect(undoButton().title).toBe(`Undo: ${studioEditStrings.historyDeleteClip}`);
++    expect(undoButton().title).toBe(
++      studioEditStrings.undoTitle(studioEditStrings.historyDeleteClip),
++    );
+   });
+ 
+   it('FL6: Zoom back on its last history step hands focus to Fit', async () => {
+--- ../tmp/studio-real-loop/b-round-227/granted-start/app/lib/arrangement/__tests__/waveform-zoom.test.tsx	2026-10-28 14:38:00.509426844 +0000
++++ app/lib/arrangement/__tests__/waveform-zoom.test.tsx	2026-10-28 14:41:41.872752732 +0000
+@@ -11,6 +11,7 @@
+ import { decodeVideoAudio, probeVideoFile } from '~/lib/arrangement/video.client';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { clipLinearGain, createArrangement } from '../model';
++import { studioEditStrings } from '../strings';
+ import {
+   clipWaveformScale,
+   parseWaveformZoom,
+@@ -602,8 +603,11 @@
+     });
+     const undoBefore = transportButton('Undo');
+     const redoBefore = transportButton('Redo');
+-    expect(undoBefore).toEqual({ title: `Undo: ${CLIP_GAIN_LABEL}`, disabled: false });
+-    expect(redoBefore).toEqual({ title: 'Redo', disabled: true });
++    expect(undoBefore).toEqual({
++      title: studioEditStrings.undoTitle(CLIP_GAIN_LABEL),
++      disabled: false,
++    });
++    expect(redoBefore).toEqual({ title: studioEditStrings.redoTitle(null), disabled: true });
+     chooseZoom('4');
+     expect(transportButton('Undo')).toEqual(undoBefore);
+     expect(transportButton('Redo')).toEqual(redoBefore);
+--- ../tmp/studio-real-loop/b-round-227/granted-start/docs/implementation/2026/quarter-IV/177-calm-1-shortcut-sheet.md	2026-10-28 14:38:00.510319615 +0000
++++ docs/implementation/2026/quarter-IV/177-calm-1-shortcut-sheet.md	2026-10-28 14:50:43.921226466 +0000
+@@ -1,7 +1,7 @@
+-# Calm Studio — `?` shortcut sheet და მუდმივი shortcut ხაზის მოხსნა (SABA-B-8 CALM-1a)
++# Calm Studio — `?` shortcut sheet, მუდმივი shortcut ხაზის მოხსნა და კლავიშები tooltip-ებში (SABA-B-8 CALM-1a, CALM-1b)
+ 
+ **თარიღი:** 2026-10-28
+-**სტატუსი:** In Progress (stage 1 of 2; C round 227 PASS)
++**სტატუსი:** Completed (C round 228 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -12,8 +12,10 @@
+ footer-ის მშვიდი ღილაკით „Shortcuts ?“ იხსნება და Esc-ით იხურება. მუდმივი ხაზი ქრება.
+ 
+ CALM-1 ორ ეტაპად იყოფა (D-29z267):
+-- 1a (ეს რაუნდი): sheet, `?`, footer ღილაკი, ხაზის მოხსნა და lane-move hint-ის გადატანა კონტექსტურ სლოტში.
+-- 1b: ყველა ღილაკის tooltip-ში კლავიში და `aria-keyshortcuts`, იმავე წყაროდან.
++- 1a (რაუნდები 226–227): sheet, `?`, footer ღილაკი, ხაზის მოხსნა და lane-move hint-ის გადატანა კონტექსტურ სლოტში.
++- 1b (რაუნდი 228): transport-ის ღილაკების tooltip-ში კლავიში და `aria-keyshortcuts`, იმავე წყაროდან.
++  მანამდე Undo/Redo-ს title კლავიშს არ ასახელებდა, „Back to start (0)“ არარსებულ კლავიშს ასახელებდა,
++  Split/Loop კი „Ctrl/Cmd+…“-ს წერდა, sheet-ში „Ctrl+…“ ეწერა. ეს ორი წყარო უკვე დაშორდა ერთმანეთს.
+ 
+ ## მიდგომა
+ 
+@@ -37,9 +39,32 @@
+   პრიორიტეტია lane-move hint → selected-clip ხაზი → reserve. მარჯვნივ Shortcuts ღილაკია
+   (`leading-4`, 16 px). footer 69 px-დან 49 px-მდე დაბალდა, timeline კი 20 px-ით გაიზარდა.
+ 
++### CALM-1b — tooltip-ები და `aria-keyshortcuts` ერთი წყაროდან
++- **ერთი წყარო:** `shortcuts.ts`-ს ორი ახალი export აქვს. `studioShortcutTitle(label, id)` აბრუნებს
++  `label (პირველი კლავიში)`-ს, ან უბრალოდ `label`-ს, თუ სტრიქონი არ არსებობს. `studioShortcutAria(id)`
++  აბრუნებს სტრიქონის `ariaKeyShortcuts`-ს. `strings.ts` title-ებს ამ helper-ით აწყობს (Split, Delete,
++  Undo/Redo, Back to start, Play/Pause, Loop). import-ის მიმართულება ცალმხრივია: `strings.ts` →
++  `shortcuts.ts`, `shortcuts.ts` არაფერს აიმპორტებს.
++- **ფორმატის წესი (D-29z279):** title აჩვენებს სტრიქონის **პირველ** კლავიშს („Undo (Ctrl+Z)“,
++  „Redo (Ctrl+Shift+Z)“). `aria-keyshortcuts` ჩამოთვლის **ყველა** მომუშავე კლავიშს, WAI-ARIA-ს
++  სინტაქსით: space-ით გამოყოფილი კომბინაციები, modifier-ები წინ. tooltip ერთი შეხედვით იკითხება,
++  `aria-keyshortcuts` კი სრული machine-readable სიაა. sheet ყველა კლავიშს აჩვენებს.
++- **7 ღილაკი (D-29z280):** Play/Pause `Space`, Back to start `Home`, Loop `Control+L Meta+L`, Undo
++  `Control+Z Meta+Z`, Redo `Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y`, Split `Control+E Meta+E`,
++  Delete `Delete Backspace`. workspace handler `ctrlKey || metaKey`-ს იღებს, ამიტომ ორივე ჩამოთვლილია.
++  Z/X ღილაკები თავიანთ `aria-keyshortcuts="Z"`/`"X"`-ს ინარჩუნებენ; Fit-ს ერთი კლავიში არ აქვს და
++  `aria-keyshortcuts`-ს არ იღებს.
++- **Undo/Redo:** იცვლება მხოლოდ `title`. ხილული ტექსტი (`Undo: <label>`) და accessible name უცვლელია.
++  Delete ინარჩუნებს `aria-label`-ს და time selection-ის title-ს.
++- **„Ctrl/Cmd“ → „Ctrl“ (შეგნებული განსხვავება):** title-ში წერია „Ctrl“, როგორც sheet-ში, რომლის
++  ქვესათაური ამბობს „Ctrl means ⌘ on Mac“. `aria-keyshortcuts` assistive tech-ისთვის `Meta`-საც შეიცავს.
++  ასე title და sheet ერთმანეთს ვეღარ დაშორდება.
++
+ ### Ableton-თან განსხვავებები (შეგნებული)
+ - Live 12-ში `?` Info View-ს ხსნის (2.2.2, 42.1). CZABA-ს Info View არ აქვს, ამიტომ `?` shortcut sheet-ს
+   ხსნის (Saba decision 1).
++- Live 12-ში hover-ის დახმარება Info View-ს panel-ია (2.2.2). CZABA-ში Info View არ არის, ამიტომ კლავიში
++  native `title` tooltip-ში ჩანს (Saba decision 1).
+ - Mac-ის ცალკე სვეტის ნაცვლად ქვესათაურია: „Ctrl means ⌘ on Mac · Alt means ⌥ · Esc closes.“
+   (D-29z271). Chromium-ში ⌘/⌥ რეალური glyph-ით იხატება (DejaVu Sans fallback), ამიტომ fallback ტექსტი
+   არ დაგვჭირდა.
+@@ -63,6 +88,10 @@
+   H -- no --> W[existing Studio shortcuts]
+   D[(STUDIO_SHORTCUT_GROUPS)] --> SH[ArrangementShortcutSheet]
+   D --> F[footer button aria-keyshortcuts]
++  D --> HT[studioShortcutTitle / studioShortcutAria]
++  HT --> STR[strings.ts titles]
++  STR --> TR[ArrangementTransport title]
++  HT --> TR2[ArrangementTransport aria-keyshortcuts]
+ ```
+ 
+ ## შეცვლილი ფაილები
+@@ -71,10 +100,19 @@
+ - `app/components/arrangement/ArrangementShortcutSheet.tsx` (ახალი): modal sheet, ძებნა, focus trap/restore.
+ - `app/components/arrangement/StudioWorkspace.tsx`: sheet-ის state/ref/render, `?` branch, sheet-open early return და footer-ის კონტექსტური სტრიქონი.
+ - `app/lib/arrangement/strings.ts`: `studioShortcutSheetStrings`.
+-- `app/lib/arrangement/__tests__/shortcuts.test.ts` (ახალი): SC1–SC3.
++- `app/lib/arrangement/__tests__/shortcuts.test.ts` (ახალი): SC1–SC5.
+ - `app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx` (ახალი): SS1–SS10.
+ - `app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx`: WSU1.
+ - `app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx`: UC12-ის პირველი assertion.
++- `app/lib/arrangement/__tests__/track-layout.test.tsx` (რაუნდი 227): selected-clip row-ის შემთხვევის class pin-ები სტრუქტურის assertion-ებით შეიცვალა.
++
++CALM-1b (რაუნდი 228):
++- `app/lib/arrangement/shortcuts.ts`: 7 სტრიქონის `ariaKeyShortcuts`, `fit`-ის მეორე კლავიში, `studioShortcutTitle` და `studioShortcutAria`.
++- `app/lib/arrangement/strings.ts`: helper-ზე აწყობილი title-ები, `undoTitle` და `redoTitle`.
++- `app/components/arrangement/ArrangementTransport.tsx`: Undo/Redo-ს `title` helper-იდან და 7 ღილაკზე `aria-keyshortcuts`.
++- `app/lib/arrangement/__tests__/strings.test.ts`: ST6, ST10, ST17-ის literal-ები, ST8-ის `EDIT_FORMATTER_SAMPLES`-ში `undoTitle`/`redoTitle` და ახალი ST-K1.
++- `app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx`: NS1, NS2-ის literal-ები და ახალი NS5.
++- `grid-snap-loop-drop.test.tsx`, `status-announcement-ui.test.tsx`, `markers-ui.test.tsx`, `self-disabling-focus.test.tsx`, `waveform-zoom.test.tsx`: Undo/Redo-ს title literal-ები `studioEditStrings.undoTitle`/`redoTitle`-ით შეიცვალა.
+ 
+ ## პრობლემები და გადაწყვეტები
+ 
+@@ -100,14 +138,27 @@
+ - **Problem (C-R226-02, C-R226-03):** `fit` სტრიქონი ამბობდა, რომ ruler-ზე ორმაგი დაწკაპუნება ყოველთვის
+   მთელ პროექტს ატევს, თუმცა time selection-ისას ის selection-ზე აზუმავს. `waveform-zoom` სტრიქონი
+   არარსებულ „1× button“-ს ასახელებდა, რეალური control კი `<select>`-ია.
+-  **Solution:** `fit`-ის keys: „Double-click the overview“ და „Double-click the ruler (no selection)“.
++  **Solution:** `fit`-ის keys: „Double-click the overview“ და „Double-click the ruler (no selection)“
++  (რაუნდი 228-ში დაზუსტდა, იხ. C-R227-01).
+   `waveform-zoom`-ის key: „Waveform Zoom menu“. SC4 ამოწმებს ორივეს და იმას, რომ არცერთი key-ში
+   სიტყვა „button“ არ წერია.
+ 
++- **Problem (B-R225-BACK-TO-START-KEY):** Back to start-ის title „Back to start (0)“ იყო, მაგრამ `0`
++  კლავიში არ არსებობს; binding Home-ია.
++  **Solution:** title `studioShortcutTitle`-ით იწყობა `back-to-start` სტრიქონიდან: „Back to start (Home)“.
++- **Problem (C-R227-01):** „Double-click the ruler (no selection)“ არაზუსტი იყო: clip-ის მონიშვნისას,
++  time selection-ის გარეშე, ruler-ის ორმაგი დაწკაპუნება მაინც Fit-ს აკეთებს.
++  **Solution:** `fit`-ის მეორე კლავიში „Double-click the ruler (no time selection)“-ია, Fit-ის title კი
++  „Fit — the entire project is visible (double-click the overview, or the ruler with no time selection)“.
++  ერთი ფაქტი, ერთი ფორმულირება. SC4 ამოწმებს.
++- **Problem (C-R227-02):** ამ doc-ის ტესტების სიები SC1–SC3-ს ასახელებდა და changed-files სიაში
++  `track-layout.test.tsx` აკლდა.
++  **Solution:** სიები განახლდა (SC1–SC5, ST-K1, NS5, SS1–SS10) და ფაილი დაემატა.
++
+ ## ტესტირება
+ 
+-- Unit/UI: SC1–SC3 და SS1–SS10, ასევე განახლებული WSU1 და UC12. covering ნაკრები (25 ფაილი, 320 ტესტი)
+-  მწვანეა; repo-scan ტესტები (focus-ring, panel-radius, obsidian, cursor-map, colour suites) მწვანე დარჩა.
++- Unit/UI: SC1–SC5, ST-K1, NS5 და SS1–SS10, ასევე განახლებული WSU1 და UC12. რაუნდი 227-ის covering
++  ნაკრები (25 ფაილი, 320 ტესტი) მწვანე იყო; repo-scan ტესტები (focus-ring, panel-radius, obsidian, cursor-map, colour suites) მწვანე დარჩა.
+ - Mutants: MU-a → SS5, MU-b → SS3, MU-c (open/close) → SS3, MU-d → SS2/SS10, MU-e → SS6, MU-f → SS8.
+ - Code review-ის შემდეგ დამატებული mutants:
+   - MU-g: Esc-ის `preventDefault`-ის მოხსნა → SS2 წითელია;
+@@ -119,8 +170,15 @@
+   - ⌘/⌥ რეალური glyph-ითაა;
+   - `fit` სტრიქონის chip არ იჭრება, sheet-ს ჰორიზონტალური overflow არ აქვს.
+ 
++- CALM-1b (რაუნდი 228):
++  - covering ნაკრები: 27 ფაილი, 488 ტესტი, მწვანე; `npm run typecheck` და `npm run lint` rc 0.
++  - Mutants: MU-1 (`studioShortcutTitle` აბრუნებს `label`-ს) → SC5, NS1, NS2, NS5 წითელია; MU-2 (`undo`-ს
++    `ariaKeyShortcuts`-ის წაშლა) → SC5, NS5; MU-3 (`fit` → „(no selection)“) → SC4; MU-4 (Split-ის
++    `aria-keyshortcuts`-ის მოხსნა) → NS5; MU-5 (`loop` = `Control+L`) → SC5.
++
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- CALM-1b: კლავიშები ყველა ღილაკის tooltip-სა და `aria-keyshortcuts`-ში, იმავე `STUDIO_SHORTCUT_GROUPS`-იდან.
++- Snap (G), grid (1/2/3), Envelope (A) და marker-ის ღილაკები კლავიშს უკვე title-სა და `aria-keyshortcuts`-ში
++  ასახელებენ, მაგრამ ჯერ არა `studioShortcutTitle`-ით. მათი ერთ წყაროზე გადაყვანა ცალკე დავალებაა.
+ - საერთო dialog focus hook (Export + shortcut sheet): checkpoint request `b-round-225-checkpoint-request.md`.
+ - CALM-2 (copy-ს გადატანა) და CALM-3 (Overview).

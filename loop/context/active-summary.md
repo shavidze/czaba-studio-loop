@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T14:18:03.889Z)
+# Active loop summary (2026-10-28T15:06:21.313Z)
 
-- backlog.json 2071 KB -> active view 293 KB
-- status: G_ROOT_GATE round 227
-- servers: `{"checkedUtc":"2026-10-28T14:01:34.1297331Z","round":227,"attempt":1,"store":200}`
-- last publication: d32464ea264e94f7b0aa98c5b64934340c275d33 (rounds 226-227)
-- last root gate: round 227 published - commit d32464ea264e94f7b0aa98c5b64934340c275d33 pushed
+- backlog.json 2080 KB -> active view 294 KB
+- status: G_ROOT_GATE round 228
+- servers: `{"checkedUtc":"2026-10-28T14:52:55.4222822Z","round":228,"attempt":1,"store":200}`
+- last publication: 499c82167aeba92c6edf71af2dd1ddd880b5e098 (rounds 228-228)
+- last root gate: round 228 published - commit 499c82167aeba92c6edf71af2dd1ddd880b5e098 pushed
 
 ## Current items: -
 
@@ -531,13 +531,16 @@
 - R224-WINDOW-BOUNDARY-WATCH / info / watch: if a valid run shows variation, reclassify those classes together with evidence (D-29z259) / windowed rows that stay exact: fader and drag release-commits (split at pointerup) and move-components-per-move (same window as the reclassi
 - C-R225-OBS-01 / info / info - supports D-29z259 wallclock ruling; attached to R224-WINDOW-BOUNDARY-WATCH / windowed drag commit count differs between two clean isolated runs (C 60x3, A 59x3) while render work is constant
 - C-R225-OBS-02 / info / info - outside the round-225 contract; candidate scope for PERF-HARNESS-SHARED-LIB-b-ii (pin every kind), not scheduled / DC-KINDS pins only the 16 RECLASS rows and the 24 fader rows; an unrelated kind flip (interact.harness.hook-live) survives the unit test (eq
-- B-R225-BACK-TO-START-KEY / low / open - fixed in CALM-1b (now round 228, after the round-227 gate fix-up; D-29z272) / transport 'Back to start' title says '(0)' but no 0/Digit0 binding exists; the key is Home (StudioWorkspace l.1993); pinned by navigation-st
+- B-R225-BACK-TO-START-KEY / low / open - fixed in round 228 (backToStartTitle from the shortcut source: Back to start (Home)) / transport 'Back to start' title says '(0)' but no 0/Digit0 binding exists; the key is Home (StudioWorkspace l.1993); pinned by navigation-st
 - R226-PERF-LAYOUT-WATCH / info / watch - perf not run in round 226; PERF-HARNESS-SHARED-LIB-b-ii re-baselines; a shift there is expected, not a regression, if attributed to the 20 px / CALM-1a makes the timeline scroller 20 px taller; PERF-1b deterministic counts that depend on visible rows may shift
-- GATE226-B1 / medium / open - fixed in round 227 (structure assertions instead of class pins, D-29z273) / track-layout.test.tsx (frozen in round 226) pins the class lists of arrangement-selected-clip-reserve (equality) and arrangement-selected-cl
-- C-R226-02 / low / open - fixed in round 227 (owned file, two literals; not deferred) / shortcut sheet row waveform-zoom chip says '1× button' but the control is a <select> (Waveform Zoom)
-- C-R226-03 / low / open - fixed in round 227 (keys: Double-click the overview / Double-click the ruler (no selection)) / shortcut sheet row fit says 'Double-click the ruler or the overview' fits, but with a time selection the ruler double-click zooms to the sel
 - A-R226-REVIEW-L7 / info / info - UC12 title fixed in round 227; SC4 adds key pins for fit and waveform-zoom; rest recorded, not scheduled / SC1 pins keys only for split and shortcuts; SS5 Space has no positive control in jsdom; UC12 title stale
 - C-R226-OBS-KBD-BORDER / info / info - VISUAL polish candidate, not scheduled / kbd chip border rgb(36,33,30) on surface rgb(22,20,18) is very low contrast; decorative (key text >= 6.68:1), no SC applies
+- C-R227-01 / low / open - fixed in round 228 (owned shortcuts.ts: (no time selection); fitTitle aligned, L4) / fit chip 'Double-click the ruler (no selection)' is imprecise: with a clip selected and no time selection the ruler double-click still fits 
+- C-R227-02 / low / open - fixed in round 228 (whole doc 177 granted, stage 2 of 2) / doc 177 l.74/l.109 still say SC1-SC3; changed-files list omits track-layout.test.tsx
+- A-R227-REVIEW-L3-WZ-VISIBLE-NAME / info / info - not verified as a bug by C; CALM-2 copy-pass candidate (B decides at CALM-2 planning) / 'Waveform Zoom menu' names the accessible name, but the select visibly shows only 1x/2x...; a sighted user hovers to see 'Waveform Zoom'
+- GATE227-S1-ESC-DEFAULTPREVENTED / info / signal - input to ARCH-CHECKPOINT-CALM-DIALOG-KEYMAP (activeDialogRef proposal); not scheduled / Esc closing the sheet relies on the floating-video branch checking defaultPrevented; a future Escape branch without it would also run
+- GATE227-S3-TRUNCATE-PIN / info / rejected (D-29z283): a class pin is what caused GATE226-B1 (L8/L12); truncation is a browser row (C-SLOT-227 measured it); jsdom does not lay out / track-layout case title says 'truncated' but no longer checks the truncate class
+- GATE227-S6-FIND-NONOPTIONAL / info / signal, not scheduled (round 228 helpers fall back safely; candidate for the checkpoint) / findStudioShortcut returns | undefined for a typed id union; a throwing non-optional version would fail the build on a wrong id
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
