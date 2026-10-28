@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T07:27:27.613Z)
+# Active loop summary (2026-10-28T08:12:01.498Z)
 
-- backlog.json 2002 KB -> active view 285 KB
-- status: G_ROOT_GATE round 221
-- servers: `{"checkedUtc":"2026-10-28T07:05:59.1640376Z","round":221,"attempt":1,"store":200}`
-- last publication: 6dd45a1eb0f2a756de3168e950707a89aa6942df (rounds 221-221)
-- last root gate: round 221 published - commit 6dd45a1eb0f2a756de3168e950707a89aa6942df pushed
+- backlog.json 2012 KB -> active view 286 KB
+- status: G_ROOT_GATE round 222
+- servers: `{"checkedUtc":"2026-10-28T07:52:50.0313005Z","round":222,"attempt":1,"store":200}`
+- last publication: 2d4a93ff6a214e669dc5a69d6721ae4c1e99b7cd (rounds 222-222)
+- last root gate: round 222 published - commit 2d4a93ff6a214e669dc5a69d6721ae4c1e99b7cd pushed
 
 ## Current items: -
 
@@ -520,9 +520,8 @@
 - INFO-C219-WARMUP-MP3 / info / applied as harness rule HR-MP3-WARMUP (D-29z231) / first MP3 export on a fresh machine can trigger a Vite re-optimize + full reload
 - LEGACY-MP3-PROGRESS / info / deferred_low_polish as GATE220-S4 (gate reviewer Low, D-29z234) | signal (accepted debt; not requested) / purchased-Studio MP3 export shows no intermediate progress (85 -> 100), as with ffmpeg
 - SABA-Q-FFMPEG-FILENAME / info / awaiting_user (Saba); TODO line in the file / app/utils/ffmpeg.ts no longer uses ffmpeg after PERF-16b-i; renaming/deleting the file needs Saba's permission (CLAUDE.md)
-- GATE220-S1 / medium / converted, closes on C PASS of LEGACY-UI-STUBBED-221 (not counted as an open Medium; the open Medium is B-R220-LEGACY-EXPORT-NO-STEMS) | converted (D-29z234): B ran it in real Chromium with page.route stubs on c4e6c9d (b-round-220/legacy-ui-probe/result.json: Low/Medium/High -> 168 frames at exactly 128/192/320 kbps + 1 Xing, 0 page errors); C row LEGACY-UI-STUBBED-221 re-runs it after the package removal; the ownership half stays backend-only (LEGACY-OWNERSHIP-221) / purchased-Studio MP3 export never ran end to end through /studio/:productId (LEGACY-UI-220 backend-blocked)
 - GATE220-S3 / low / awaiting_user (Saba): .claude/**, .codex/**, CLAUDE.md, AGENTS.md are not agent-editable; proposal in b-round-220.md section 8 (D-29z234) / agent/rule files still teach loadFFmpeg/@ffmpeg: .claude/agents/studio-specialist.md:98, .codex/agents/studio-specialist.toml:94, .claude/pr
-- B-R220-LEGACY-EXPORT-NO-STEMS / medium / scheduled round 222 (D-29z236) unless REGRESSION due first; C records it in LEGACY-UI-STUBBED-221 without failing round 221 / purchased-Studio ExportDialog opens with 0 of 10 stems ticked; 'Export Audio' is disabled until the user presses 'Select All' (pre-existing;
+- B-R220-LEGACY-EXPORT-NO-STEMS / medium / dispatched round 222 (D-29z237: contract = selection follows the stem-ID set; same-ID rebuilds and close/reopen keep toggles); closes on C PASS of LEGACY-UI-STUBBED-222 (10/10) + SUBSET-AUDIO-222 + PERSIST-222 | scheduled round 222 (D-29z236) unless REGRESSION due first; C records it in LEGACY-UI-STUBBED-221 without failing round 221 / purchased-Studio ExportDialog opens with 0 of 10 stems ticked; 'Export Audio' is disabled until the user presses 'Select All' (pre-existing;
 - VITE-EXCLUDE-STALE / low / root request b-round-220-root-request-vite.md (grant A, do it in the deps commit, or leave as Low polish) / vite.config.ts l.26-28 optimizeDeps.exclude names @ffmpeg/ffmpeg + @ffmpeg/util after their removal (dead config; B scratch: build and dev s
 - PRE-PROD-CHECKLIST-FFMPEG / low / deferred_low_polish / docs/PRE_PRODUCTION_CHECKLIST.md l.124 still lists 'FFmpeg workers' for StudioContext
 - A-R220-GPLV-NIT / info / signal (not scheduled) / licence classifier treats GPLv, AGPLv and GPL.3 as clean; no lock spelling uses them (consistent with R-219-2)

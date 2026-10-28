@@ -1,0 +1,22 @@
+diff --git a/dev/fd/63 b/tmp/c222-scratch/app/components/studio/ExportDialog.tsx
+index 0000000..4f4d239 100644
+--- a/dev/fd/63
++++ b/tmp/c222-scratch/app/components/studio/ExportDialog.tsx
+@@ -1,5 +1,5 @@
+ import { Check, Download, Music } from 'lucide-react';
+-import { useState } from 'react';
++import { useEffect, useState } from 'react';
+ import { Button } from '~/components/ui/Button';
+ import {
+   Modal,
+@@ -29,6 +29,10 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
+     new Set(state.stems.map((s) => s.id)),
+   );
+ 
++  useEffect(() => {
++    setSelectedStems(new Set(state.stems.map((s) => s.id)));
++  }, [state.stems]);
++
+   const toggleStem = (stemId: string) => {
+     const newSet = new Set(selectedStems);
+     if (newSet.has(stemId)) {

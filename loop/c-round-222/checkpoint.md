@@ -1,0 +1,11 @@
+# C round 222 checkpoint
+- SCOPE start: OK (scope-start.txt)
+- UNIT-222: 7/7 green, tsc rc0 (unit-run.txt, typecheck.txt)
+- REDPROOF-222: mutant1 (HEAD init) ES1,ES5,ES6,ES7 red; mutant2 (useEffect [state.stems]) ES3,ES4 red. Scratch copy /tmp/c222-scratch only.
+- CODE-222: diff only selection state logic (reviewed)
+- next: browser rows via c221-legacy.cjs adaptation
+- LEGACY main 1440: initial 10/10 enabled; Deselect 0 disabled; Select 10; Ableton .als enabled; WAV A vs B not byte-identical (1 LSB, 284 samples); control A1vsA2 also differs (318) -> pre-existing nondeterminism; subset Duduk gap 80.5 dB; MP3 168x320+Xing EOF 2ch
+- PERSIST 1280: 10/10 initial; 9/10 after Cancel reopen and after Mute(Duduk) reopen, Didgeridoo unchecked; label Select All
+- next: spectrumB, normalize-off pair, LAB-SMOKE, G222-3, AN-REVIEW, scope end
+- DONE: report + json written; all rows run
+- FINAL: JSON keys checked vs round 221 (extras precedent ok). Stop.

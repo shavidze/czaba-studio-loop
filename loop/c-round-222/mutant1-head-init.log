@@ -1,0 +1,537 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c222-scratch[39m
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/__tests__/legacy-export-dialog-stems.test.tsx [2m([22m[2m7 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 686[2mms[22m[39m
+[31m     [31m×[31m ES1: stems loaded after a closed mount are all selected when the dialog opens[39m[32m 233[2mms[22m[39m
+     [32m✓[39m ES2: stems present at mount are all selected (initializer path)[32m 33[2mms[22m[39m
+     [32m✓[39m ES3: a same-ID stems rebuild keeps the user toggle, also across close and reopen[32m 103[2mms[22m[39m
+     [32m✓[39m ES4: the same IDs in a different order keep the selection[32m 42[2mms[22m[39m
+[31m     [31m×[31m ES5: a replaced ID set selects every new stem and exports only the new IDs[39m[32m 49[2mms[22m[39m
+[31m     [31m×[31m ES6: a removed ID leaves the selection and Select/Deselect All stay correct[39m[32m 159[2mms[22m[39m
+[31m     [31m×[31m ES7: the Ableton tab export button is enabled once stems load after mount[39m[32m 65[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/legacy-export-dialog-stems.test.tsx[2m > [22mlegacy ExportDialog stem selection (B-R220-LEGACY-EXPORT-NO-STEMS)[2m > [22mES1: stems loaded after a closed mount are all selected when the dialog opens
+[31m[1mAssertionError[22m: expected [] to have a length of 10 but got +0[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 10[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/__tests__/legacy-export-dialog-stems.test.tsx:[2m116:48[22m[39m
+    [90m114| [39m    [35mconst[39m boxes [33m=[39m [34mgetStemCheckboxes[39m()[33m;[39m
+    [90m115| [39m    [34mexpect[39m(boxes)[33m.[39m[34mtoHaveLength[39m([34m10[39m)[33m;[39m
+    [90m116| [39m    [34mexpect[39m(boxes[33m.[39m[34mfilter[39m((box) [33m=>[39m box[33m.[39mchecked))[33m.[39m[34mtoHaveLength[39m([34m10[39m)[33m;[39m
+    [90m   | [39m                                               [31m^[39m
+    [90m117| [39m    expect(getDialogButton('Export Audio').hasAttribute('disabled')).t…
+    [90m118| [39m    expect(within(getDialog()).getAllByRole('button', { name: 'Deselec…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/legacy-export-dialog-stems.test.tsx[2m > [22mlegacy ExportDialog stem selection (B-R220-LEGACY-EXPORT-NO-STEMS)[2m > [22mES5: a replaced ID set selects every new stem and exports only the new IDs
+[31m[1mAssertionError[22m: expected [] to have a length of 2 but got +0[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/__tests__/legacy-export-dialog-stems.test.tsx:[2m169:62[22m[39m
+    [90m167| [39m    [34msetStudioStems[39m([[34mcreateFakeStem[39m([32m'x'[39m)[33m,[39m [34mcreateFakeStem[39m([32m'y'[39m)])[33m;[39m
+    [90m168| [39m    [34mrerender[39m([34mrenderDialogElement[39m([35mtrue[39m))[33m;[39m
+    [90m169| [39m    expect(getStemCheckboxes().filter((box) => box.checked)).toHaveLen…
+    [90m   | [39m                                                             [31m^[39m
+    [90m170| [39m
+    [90m171| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetDialogButton[39m([32m'Export Audio'[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/legacy-export-dialog-stems.test.tsx[2m > [22mlegacy ExportDialog stem selection (B-R220-LEGACY-EXPORT-NO-STEMS)[2m > [22mES6: a removed ID leaves the selection and Select/Deselect All stay correct
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an accessible element with the role "button" and name "Deselect All"
+
+Here are the accessible roles:
+
+  button:
+
+  Name "Close":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Close"[39m
+    [33mclass[39m=[32m"absolute top-4 right-4 text-muted hover:text-foreground transition-colors z-10 cursor-pointer"[39m
+  [36m/>[39m
+
+  Name "Audio Export":
+  [36m<button[39m
+    [33mclass[39m=[32m"flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all bg-surface text-foreground shadow-sm"[39m
+  [36m/>[39m
+
+  Name "Ableton Live":
+  [36m<button[39m
+    [33mclass[39m=[32m"flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all text-muted hover:text-foreground"[39m
+  [36m/>[39m
+
+  Name "WAVLossless":
+  [36m<button[39m
+    [33mclass[39m=[32m"flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all border bg-brand/10 border-brand text-brand"[39m
+  [36m/>[39m
+
+  Name "MP3Compressed":
+  [36m<button[39m
+    [33mclass[39m=[32m"flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"[39m
+  [36m/>[39m
+
+  Name "Low":
+  [36m<button[39m
+    [33mclass[39m=[32m"flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"[39m
+  [36m/>[39m
+
+  Name "Medium":
+  [36m<button[39m
+    [33mclass[39m=[32m"flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"[39m
+  [36m/>[39m
+
+  Name "High":
+  [36m<button[39m
+    [33mclass[39m=[32m"flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-brand/10 border-brand text-brand"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<button[39m
+    [33mclass[39m=[32m"w-11 h-6 rounded-full transition-all relative bg-brand"[39m
+  [36m/>[39m
+
+  Name "Select All":
+  [36m<button[39m
+    [33mclass[39m=[32m"text-xs font-medium text-brand hover:text-brand-hover"[39m
+  [36m/>[39m
+
+  Name "Cancel":
+  [36m<button[39m
+    [33mclass[39m=[32m"inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-elevated text-foreground border border-outline hover:bg-outline hover:border-outline-hover active:opacity-90 px-4 py-2.5 text-sm gap-2"[39m
+  [36m/>[39m
+
+  Name "Export Audio":
+  [36m<button[39m
+    [33mclass[39m=[32m"inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm hover:shadow-glow px-4 py-2.5 text-sm gap-2"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Export Your Mix":
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-2xl font-semibold text-foreground"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-sm text-muted mt-2"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-xs text-muted mt-0.5"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  checkbox:
+
+  Name "Stem a":
+  [36m<input[39m
+    [33mchecked[39m=[32m""[39m
+    [33mclass[39m=[32m"w-4 h-4 rounded border-outline text-brand"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Stem b":
+  [36m<input[39m
+    [33mchecked[39m=[32m""[39m
+    [33mclass[39m=[32m"w-4 h-4 rounded border-outline text-brand"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33maria-modal[39m=[32m"true"[39m
+  [33mclass[39m=[32m"fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-[1000] animate-fade-in cursor-pointer"[39m
+  [33mdata-lenis-prevent[39m=[32m"true"[39m
+  [33mrole[39m=[32m"dialog"[39m
+[36m>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"bg-surface border border-outline rounded-xl w-full mx-4 max-h-[90vh] overflow-auto overscroll-contain styled-scrollbar relative animate-slide-up shadow-2xl cursor-default max-w-[720px]"[39m
+    [33mdata-lenis-prevent[39m=[32m"true"[39m
+  [36m>[39m
+    [36m<button[39m
+      [33maria-label[39m=[32m"Close"[39m
+      [33mclass[39m=[32m"absolute top-4 right-4 text-muted hover:text-foreground transition-colors z-10 cursor-pointer"[39m
+    [36m>[39m
+      [36m<svg[39m
+        [33maria-hidden[39m=[32m"true"[39m
+        [33mclass[39m=[32m"lucide lucide-x"[39m
+        [33mfill[39m=[32m"none"[39m
+        [33mheight[39m=[32m"24"[39m
+        [33mstroke[39m=[32m"currentColor"[39m
+        [33mstroke-linecap[39m=[32m"round"[39m
+        [33mstroke-linejoin[39m=[32m"round"[39m
+        [33mstroke-width[39m=[32m"2"[39m
+        [33mviewBox[39m=[32m"0 0 24 24"[39m
+        [33mwidth[39m=[32m"24"[39m
+        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+      [36m>[39m
+        [36m<path[39m
+          [33md[39m=[32m"M18 6 6 18"[39m
+        [36m/>[39m
+        [36m<path[39m
+          [33md[39m=[32m"m6 6 12 12"[39m
+        [36m/>[39m
+      [36m</svg>[39m
+    [36m</button>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"px-8 pt-8 pb-4 pb-0"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex items-center gap-3"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-10 h-10 rounded-lg flex items-center justify-center bg-brand/20"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"lucide lucide-download text-brand"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"20"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"20"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M12 15V3"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m7 10 5 5 5-5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-2xl font-semibold text-foreground"[39m
+          [36m>[39m
+            [0mExport Your Mix[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-sm text-muted mt-2"[39m
+          [36m>[39m
+            [0mChoose your export format and settings[0m
+          [36m</p>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"px-8 pt-6"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex gap-2 p-1 bg-elevated rounded-lg"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all bg-surface text-foreground shadow-sm"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"lucide lucide-download inline mr-2 -mt-0.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"16"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"16"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M12 15V3"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m7 10 5 5 5-5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [0mAudio Export[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all text-muted hover:text-foreground"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"lucide lucide-music inline mr-2 -mt-0.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"16"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"16"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M9 18V5l12-2v13"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mcx[39m=[32m"6"[39m
+              [33mcy[39m=[32m"18"[39m
+              [33mr[39m=[32m"3"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mcx[39m=[32m"18"[39m
+              [33mcy[39m=[32m"16"[39m
+              [33mr[39m=[32m"3"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [0mAbleton Live[0m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"px-8 py-4 space-y-6"[39m
+    [36m>[39m
+      [36m<div>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"text-sm font-medium text-foreground mb-3 block"[39m
+        [36m>[39m
+          [0mFormat[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex gap-3"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all border bg-brand/10 border-brand text-brand"[39m
+          [36m>[39m
+            [0mWAV[0m
+            [36m<span[39m
+              [33mclass[39m=[32m"block text-xs opacity-70 mt-0.5"[39m
+            [36m>[39m
+              [0mLossless[0m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"[39m
+          [36m>[39m
+            [0mMP3[0m
+            [36m<span[39m
+              [33mclass[39m=[32m"block text-xs opacity-70 mt-0.5"[39m
+            [36m>[39m
+              [0mCompressed[0m
+            [36m</span>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"text-sm font-medium text-foreground mb-3 block"[39m
+        [36m>[39m
+          [0mQuality[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex gap-3"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"[39m
+          [36m>[39m
+            [0mLow[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"[39m
+          [36m>[39m
+            [0mMedium[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-brand/10 border-brand text-brand"[39m
+          [36m>[39m
+            [0mHigh[0m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex items-center justify-between py-3 px-4 bg-elevated rounded-lg border border-outline"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"text-sm font-medium text-foreground"[39m
+          [36m>[39m
+            [0mNormalize Audio[0m
+          [36m</label>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-xs text-muted mt-0.5"[39m
+          [36m>[39m
+            [0mOptimize volume levels[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"w-11 h-6 rounded-full transition-all relative bg-brand"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform left-[22px]"[39m
+          [36m/>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center justify-between mb-3"[39m
+        [36m>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"text-sm font-medium text-foreground"[39m
+          [36m>[39m
+            [0mInclude Stems[0m
+          [36m</label>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"text-xs font-medium text-brand hover:text-brand-hover"[39m
+          [36m>[39m
+            [0mSelect All[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"max-h-48 overflow-y-auto space-y-1 bg-background rounded-lg p-2 border border-outline styled-scrollbar"[39m
+        [36m>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"flex items-center gap-3 p-2.5 hover:bg-elevated rounded-md cursor-pointer transition-colors"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mchecked[39m=[32m""[39m
+              [33mclass[39m=[32m"w-4 h-4 rounded border-outline text-brand"[39m
+              [33mtype[39m=[32m"checkbox"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-foreground text-sm flex-1"[39m
+            [36m>[39m
+              [0mStem a[0m
+            [36m</span>[39m
+          [36m</label>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"flex items-center gap-3 p-2.5 hover:bg-elevated rounded-md cursor-pointer transition-colors"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mchecked[39m=[32m""[39m
+              [33mclass[39m=[32m"w-4 h-4 rounded border-outline text-brand"[39m
+              [33mtype[39m=[32m"checkbox"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-foreground text-sm flex-1"[39m
+            [36m>[39m
+              [0mStem b[0m
+            [36m</span>[39m
+          [36m</label>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"px-8 pb-8 pt-4 flex gap-3 justify-end"[39m
+    [36m>[39m
+      [36m<button[39m
+        [33mclass[39m=[32m"inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-elevated text-foreground border border-outline hover:bg-outline hover:border-outline-hover active:opacity-90 px-4 py-2.5 text-sm gap-2"[39m
+      [36m>[39m
+        [0mCancel[0m
+      [36m</button>[39m
+      [36m<button[39m
+        [33mclass[39m=[32m"inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm hover:shadow-glow px-4 py-2.5 text-sm gap-2"[39m
+      [36m>[39m
+        [36m<svg[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"lucide lucide-download"[39m
+          [33mfill[39m=[32m"none"[39m
+          [33mheight[39m=[32m"16"[39m
+          [33mstroke[39m=[32m"currentColor"[39m
+          [33mstroke-linecap[39m=[32m"round"[39m
+          [33mstroke-linejoin[39m=[32m"round"[39m
+          [33mstroke-width[39m=[32m"2"[39m
+          [33mviewBox[39m=[32m"0 0 24 24"[39m
+          [33mwidth[39m=[32m"16"[39m
+          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+        [36m>[39m
+          [36m<path[39m
+            [33md[39m=[32m"M12 15V3"[39m
+          [36m/>[39m
+          [36m<path[39m
+            [33md[39m=[32m"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"[39m
+          [36m/>[39m
+          [36m<path[39m
+            [33md[39m=[32m"m7 10 5 5 5-5"[39m
+          [36m/>[39m
+        [36m</svg>[39m
+        [0mExport Audio[0m
+      [36m</button>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</div>[39m
+[90m [2m❯[22m Object.getElementError ../../home/runner/czaba-project/store/node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m ../../home/runner/czaba-project/store/node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m ../../home/runner/czaba-project/store/node_modules/@testing-library/dom/dist/query-helpers.js:[2m109:15[22m[39m
+[36m [2m❯[22m app/lib/__tests__/legacy-export-dialog-stems.test.tsx:[2m182:32[22m[39m
+    [90m180| [39m    [34msetStudioStems[39m([[34mcreateFakeStem[39m([32m'a'[39m)[33m,[39m [34mcreateFakeStem[39m([32m'b'[39m)])[33m;[39m
+    [90m181| [39m    [34mrerender[39m([34mrenderDialogElement[39m([35mtrue[39m))[33m;[39m
+    [90m182| [39m    expect(within(getDialog()).getAllByRole('button', { name: 'Deselec…
+    [90m   | [39m                               [31m^[39m
+    [90m183| [39m    expect(getStemCheckboxes().filter((box) => box.checked)).toHaveLen…
+    [90m184| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/__tests__/legacy-export-dialog-stems.test.tsx[2m > [22mlegacy ExportDialog stem selection (B-R220-LEGACY-EXPORT-NO-STEMS)[2m > [22mES7: the Ableton tab export button is enabled once stems load after mount
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/__tests__/legacy-export-dialog-stems.test.tsx:[2m201:71[22m[39m
+    [90m199| [39m
+    [90m200| [39m    fireEvent[33m.[39m[34mclick[39m([34mgetDialogButton[39m([32m'Ableton Live'[39m))[33m;[39m
+    [90m201| [39m    expect(getDialogButton('Download .als').hasAttribute('disabled')).…
+    [90m   | [39m                                                                      [31m^[39m
+    [90m202| [39m  })[33m;[39m
+    [90m203| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 07:53:36
+[2m   Duration [22m 1.98s[2m (transform 367ms, setup 0ms, import 654ms, tests 686ms, environment 487ms)[22m
+
+
+::error file=/tmp/c222-scratch/app/lib/__tests__/legacy-export-dialog-stems.test.tsx,title=app/lib/__tests__/legacy-export-dialog-stems.test.tsx > legacy ExportDialog stem selection (B-R220-LEGACY-EXPORT-NO-STEMS) > ES1%3A stems loaded after a closed mount are all selected when the dialog opens,line=116,column=48::AssertionError: expected [] to have a length of 10 but got +0%0A%0A- Expected%0A+ Received%0A%0A- 10%0A+ 0%0A%0A ❯ app/lib/__tests__/legacy-export-dialog-stems.test.tsx:116:48%0A%0A
+
+::error file=/tmp/c222-scratch/app/lib/__tests__/legacy-export-dialog-stems.test.tsx,title=app/lib/__tests__/legacy-export-dialog-stems.test.tsx > legacy ExportDialog stem selection (B-R220-LEGACY-EXPORT-NO-STEMS) > ES5%3A a replaced ID set selects every new stem and exports only the new IDs,line=169,column=62::AssertionError: expected [] to have a length of 2 but got +0%0A%0A- Expected%0A+ Received%0A%0A- 2%0A+ 0%0A%0A ❯ app/lib/__tests__/legacy-export-dialog-stems.test.tsx:169:62%0A%0A
+
+::error file=/tmp/c222-scratch/app/lib/__tests__/legacy-export-dialog-stems.test.tsx,title=app/lib/__tests__/legacy-export-dialog-stems.test.tsx > legacy ExportDialog stem selection (B-R220-LEGACY-EXPORT-NO-STEMS) > ES6%3A a removed ID leaves the selection and Select/Deselect All stay correct,line=182,column=32::TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Deselect All"%0A%0AHere are the accessible roles:%0A%0A  button:%0A%0A  Name "Close":%0A  <button%0A    aria-label="Close"%0A    class="absolute top-4 right-4 text-muted hover:text-foreground transition-colors z-10 cursor-pointer"%0A  />%0A%0A  Name "Audio Export":%0A  <button%0A    class="flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all bg-surface text-foreground shadow-sm"%0A  />%0A%0A  Name "Ableton Live":%0A  <button%0A    class="flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all text-muted hover:text-foreground"%0A  />%0A%0A  Name "WAVLossless":%0A  <button%0A    class="flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all border bg-brand/10 border-brand text-brand"%0A  />%0A%0A  Name "MP3Compressed":%0A  <button%0A    class="flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"%0A  />%0A%0A  Name "Low":%0A  <button%0A    class="flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"%0A  />%0A%0A  Name "Medium":%0A  <button%0A    class="flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"%0A  />%0A%0A  Name "High":%0A  <button%0A    class="flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-brand/10 border-brand text-brand"%0A  />%0A%0A  Name "":%0A  <button%0A    class="w-11 h-6 rounded-full transition-all relative bg-brand"%0A  />%0A%0A  Name "Select All":%0A  <button%0A    class="text-xs font-medium text-brand hover:text-brand-hover"%0A  />%0A%0A  Name "Cancel":%0A  <button%0A    class="inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-elevated text-foreground border border-outline hover:bg-outline hover:border-outline-hover active:opacity-90 px-4 py-2.5 text-sm gap-2"%0A  />%0A%0A  Name "Export Audio":%0A  <button%0A    class="inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm hover:shadow-glow px-4 py-2.5 text-sm gap-2"%0A  />%0A%0A  --------------------------------------------------%0A  heading:%0A%0A  Name "Export Your Mix":%0A  <h2%0A    class="text-2xl font-semibold text-foreground"%0A  />%0A%0A  --------------------------------------------------%0A  paragraph:%0A%0A  Name "":%0A  <p%0A    class="text-sm text-muted mt-2"%0A  />%0A%0A  Name "":%0A  <p%0A    class="text-xs text-muted mt-0.5"%0A  />%0A%0A  --------------------------------------------------%0A  checkbox:%0A%0A  Name "Stem a":%0A  <input%0A    checked=""%0A    class="w-4 h-4 rounded border-outline text-brand"%0A    type="checkbox"%0A  />%0A%0A  Name "Stem b":%0A  <input%0A    checked=""%0A    class="w-4 h-4 rounded border-outline text-brand"%0A    type="checkbox"%0A  />%0A%0A  --------------------------------------------------%0A%0AIgnored nodes: comments, script, style%0A<div%0A  aria-modal="true"%0A  class="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-[1000] animate-fade-in cursor-pointer"%0A  data-lenis-prevent="true"%0A  role="dialog"%0A>%0A  <div%0A    class="bg-surface border border-outline rounded-xl w-full mx-4 max-h-[90vh] overflow-auto overscroll-contain styled-scrollbar relative animate-slide-up shadow-2xl cursor-default max-w-[720px]"%0A    data-lenis-prevent="true"%0A  >%0A    <button%0A      aria-label="Close"%0A      class="absolute top-4 right-4 text-muted hover:text-foreground transition-colors z-10 cursor-pointer"%0A    >%0A      <svg%0A        aria-hidden="true"%0A        class="lucide lucide-x"%0A        fill="none"%0A        height="24"%0A        stroke="currentColor"%0A        stroke-linecap="round"%0A        stroke-linejoin="round"%0A        stroke-width="2"%0A        viewBox="0 0 24 24"%0A        width="24"%0A        xmlns="http://www.w3.org/2000/svg"%0A      >%0A        <path%0A          d="M18 6 6 18"%0A        />%0A        <path%0A          d="m6 6 12 12"%0A        />%0A      </svg>%0A    </button>%0A    <div%0A      class="px-8 pt-8 pb-4 pb-0"%0A    >%0A      <div%0A        class="flex items-center gap-3"%0A      >%0A        <div%0A          class="w-10 h-10 rounded-lg flex items-center justify-center bg-brand/20"%0A        >%0A          <svg%0A            aria-hidden="true"%0A            class="lucide lucide-download text-brand"%0A            fill="none"%0A            height="20"%0A            stroke="currentColor"%0A            stroke-linecap="round"%0A            stroke-linejoin="round"%0A            stroke-width="2"%0A            viewBox="0 0 24 24"%0A            width="20"%0A            xmlns="http://www.w3.org/2000/svg"%0A          >%0A            <path%0A              d="M12 15V3"%0A            />%0A            <path%0A              d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"%0A            />%0A            <path%0A              d="m7 10 5 5 5-5"%0A            />%0A          </svg>%0A        </div>%0A        <div>%0A          <h2%0A            class="text-2xl font-semibold text-foreground"%0A          >%0A            Export Your Mix%0A          </h2>%0A          <p%0A            class="text-sm text-muted mt-2"%0A          >%0A            Choose your export format and settings%0A          </p>%0A        </div>%0A      </div>%0A    </div>%0A    <div%0A      class="px-8 pt-6"%0A    >%0A      <div%0A        class="flex gap-2 p-1 bg-elevated rounded-lg"%0A      >%0A        <button%0A          class="flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all bg-surface text-foreground shadow-sm"%0A        >%0A          <svg%0A            aria-hidden="true"%0A            class="lucide lucide-download inline mr-2 -mt-0.5"%0A            fill="none"%0A            height="16"%0A            stroke="currentColor"%0A            stroke-linecap="round"%0A            stroke-linejoin="round"%0A            stroke-width="2"%0A            viewBox="0 0 24 24"%0A            width="16"%0A            xmlns="http://www.w3.org/2000/svg"%0A          >%0A            <path%0A              d="M12 15V3"%0A            />%0A            <path%0A              d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"%0A            />%0A            <path%0A              d="m7 10 5 5 5-5"%0A            />%0A          </svg>%0A          Audio Export%0A        </button>%0A        <button%0A          class="flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all text-muted hover:text-foreground"%0A        >%0A          <svg%0A            aria-hidden="true"%0A            class="lucide lucide-music inline mr-2 -mt-0.5"%0A            fill="none"%0A            height="16"%0A            stroke="currentColor"%0A            stroke-linecap="round"%0A            stroke-linejoin="round"%0A            stroke-width="2"%0A            viewBox="0 0 24 24"%0A            width="16"%0A            xmlns="http://www.w3.org/2000/svg"%0A          >%0A            <path%0A              d="M9 18V5l12-2v13"%0A            />%0A            <circle%0A              cx="6"%0A              cy="18"%0A              r="3"%0A            />%0A            <circle%0A              cx="18"%0A              cy="16"%0A              r="3"%0A            />%0A          </svg>%0A          Ableton Live%0A        </button>%0A      </div>%0A    </div>%0A    <div%0A      class="px-8 py-4 space-y-6"%0A    >%0A      <div>%0A        <label%0A          class="text-sm font-medium text-foreground mb-3 block"%0A        >%0A          Format%0A        </label>%0A        <div%0A          class="flex gap-3"%0A        >%0A          <button%0A            class="flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all border bg-brand/10 border-brand text-brand"%0A          >%0A            WAV%0A            <span%0A              class="block text-xs opacity-70 mt-0.5"%0A            >%0A              Lossless%0A            </span>%0A          </button>%0A          <button%0A            class="flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"%0A          >%0A            MP3%0A            <span%0A              class="block text-xs opacity-70 mt-0.5"%0A            >%0A              Compressed%0A            </span>%0A          </button>%0A        </div>%0A      </div>%0A      <div>%0A        <label%0A          class="text-sm font-medium text-foreground mb-3 block"%0A        >%0A          Quality%0A        </label>%0A        <div%0A          class="flex gap-3"%0A        >%0A          <button%0A            class="flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"%0A          >%0A            Low%0A          </button>%0A          <button%0A            class="flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-elevated border-outline text-muted hover:border-outline-hover hover:text-foreground"%0A          >%0A            Medium%0A          </button>%0A          <button%0A            class="flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border bg-brand/10 border-brand text-brand"%0A          >%0A            High%0A          </button>%0A        </div>%0A      </div>%0A      <div%0A        class="flex items-center justify-between py-3 px-4 bg-elevated rounded-lg border border-outline"%0A      >%0A        <div>%0A          <label%0A            class="text-sm font-medium text-foreground"%0A          >%0A            Normalize Audio%0A          </label>%0A          <p%0A            class="text-xs text-muted mt-0.5"%0A          >%0A            Optimize volume levels%0A          </p>%0A        </div>%0A        <button%0A          class="w-11 h-6 rounded-full transition-all relative bg-brand"%0A        >%0A          <div%0A            class="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform left-[22px]"%0A          />%0A        </button>%0A      </div>%0A      <div>%0A        <div%0A          class="flex items-center justify-between mb-3"%0A        >%0A          <label%0A            class="text-sm font-medium text-foreground"%0A          >%0A            Include Stems%0A          </label>%0A          <button%0A            class="text-xs font-medium text-brand hover:text-brand-hover"%0A          >%0A            Select All%0A          </button>%0A        </div>%0A        <div%0A          class="max-h-48 overflow-y-auto space-y-1 bg-background rounded-lg p-2 border border-outline styled-scrollbar"%0A        >%0A          <label%0A            class="flex items-center gap-3 p-2.5 hover:bg-elevated rounded-md cursor-pointer transition-colors"%0A          >%0A            <input%0A              checked=""%0A              class="w-4 h-4 rounded border-outline text-brand"%0A              type="checkbox"%0A            />%0A            <span%0A              class="text-foreground text-sm flex-1"%0A            >%0A              Stem a%0A            </span>%0A          </label>%0A          <label%0A            class="flex items-center gap-3 p-2.5 hover:bg-elevated rounded-md cursor-pointer transition-colors"%0A          >%0A            <input%0A              checked=""%0A              class="w-4 h-4 rounded border-outline text-brand"%0A              type="checkbox"%0A            />%0A            <span%0A              class="text-foreground text-sm flex-1"%0A            >%0A              Stem b%0A            </span>%0A          </label>%0A        </div>%0A      </div>%0A    </div>%0A    <div%0A      class="px-8 pb-8 pt-4 flex gap-3 justify-end"%0A    >%0A      <button%0A        class="inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-elevated text-foreground border border-outline hover:bg-outline hover:border-outline-hover active:opacity-90 px-4 py-2.5 text-sm gap-2"%0A      >%0A        Cancel%0A      </button>%0A      <button%0A        class="inline-flex items-center justify-center font-semibold rounded-md transition-all duration-150 cursor-pointer bg-brand text-background hover:bg-brand-hover active:opacity-90 shadow-sm hover:shadow-glow px-4 py-2.5 text-sm gap-2"%0A      >%0A        <svg%0A          aria-hidden="true"%0A          class="lucide lucide-download"%0A          fill="none"%0A          height="16"%0A          stroke="currentColor"%0A          stroke-linecap="round"%0A          stroke-linejoin="round"%0A          stroke-width="2"%0A          viewBox="0 0 24 24"%0A          width="16"%0A          xmlns="http://www.w3.org/2000/svg"%0A        >%0A          <path%0A            d="M12 15V3"%0A          />%0A          <path%0A            d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"%0A          />%0A          <path%0A            d="m7 10 5 5 5-5"%0A          />%0A        </svg>%0A        Export Audio%0A      </button>%0A    </div>%0A  </div>%0A</div>%0A ❯ Object.getElementError ../../home/runner/czaba-project/store/node_modules/@testing-library/dom/dist/config.js:37:19%0A ❯ ../../home/runner/czaba-project/store/node_modules/@testing-library/dom/dist/query-helpers.js:76:38%0A ❯ ../../home/runner/czaba-project/store/node_modules/@testing-library/dom/dist/query-helpers.js:109:15%0A ❯ app/lib/__tests__/legacy-export-dialog-stems.test.tsx:182:32%0A%0A
+
+::error file=/tmp/c222-scratch/app/lib/__tests__/legacy-export-dialog-stems.test.tsx,title=app/lib/__tests__/legacy-export-dialog-stems.test.tsx > legacy ExportDialog stem selection (B-R220-LEGACY-EXPORT-NO-STEMS) > ES7%3A the Ableton tab export button is enabled once stems load after mount,line=201,column=71::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/__tests__/legacy-export-dialog-stems.test.tsx:201:71%0A%0A
+rc=1
