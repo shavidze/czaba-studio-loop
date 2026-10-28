@@ -1,0 +1,8 @@
+387c387
+<     ...Array.from({ length: zoomKeyCount }, () => '-'),
+---
+>     ...Array.from({ length: clipCount === 1 ? zoomKeyCount - 1 : zoomKeyCount }, () => '-'),
+433c433
+<   const unclamped = values.every((value) => value > sliderMin && value < sliderMax);
+---
+>   const unclamped = values.every((value) => value > sliderMin && value < (clipCount === 30 ? Math.max(...values) : sliderMax));

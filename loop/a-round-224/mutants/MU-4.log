@@ -1,0 +1,81 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/tmp/studio-real-loop/a-round-224/mutants/MU-4
+
+ ❯ perf/lib/report.test.ts (16 tests | 2 failed) 14ms
+     ✓ DC-INT: a count row that differs by 1 is nondeterministic 1ms
+     ✓ DC-INT-OK: identical count samples pass 0ms
+     ✓ DC-RATIO: a numerator change fails the ratio row 0ms
+     ✓ DC-DENOM: a denominator change fails even when the values are identical 0ms
+     ✓ DC-RATIO-ALT: the 1a {commits, moves} pair is used when the window pair is absent 0ms
+     ✓ DC-MISSING: a ratio row without its detail pair fails 0ms
+     ✓ DC-MIB-OK: a MiB spread of 0.1 passes 0ms
+     ✓ DC-MIB: a MiB spread over 0.1 fails 0ms
+     × DC-UNKNOWN: a deterministic row with an unknown unit fails closed, even with 0 or 1 samples 6ms
+     ✓ DC-CONTRACT: every metric and unit class resolves in the documented order 0ms
+     ✓ DC-WALL: a wallclock row is never determinism-checked 0ms
+     ✓ DC-CROSS: a 1x vs 6x median difference fails exactly, with the cross set 0ms
+     ✓ DC-CROSS-OFF: the same 6x shape has no cross failure without the cross set 0ms
+     ✓ DC-PARTIAL: a partial run reports a failed assert only with assertWhenPartial 0ms
+     × DC-ORDER: failures keep the documented order 2ms
+     ✓ DC-RATE: rowRate inverts rateRowId 0ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 14 passed (16)
+   Start at  10:24:46
+   Duration  179ms (transform 70ms, setup 0ms, import 83ms, tests 14ms, environment 0ms)
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-224/mutants/MU-4/perf/lib/report.test.ts,title=perf/lib/report.test.ts > buildPerfReportCore determinism contract > DC-UNKNOWN%3A a deterministic row with an unknown unit fails closed%2C even with 0 or 1 samples,line=188,column=41::AssertionError: expected [] to deeply equal [ Array(1) ]%0A%0A- Expected%0A+ Received%0A%0A- [%0A-   "no determinism contract odd.distance: metric distance, unit furlongs",%0A- ]%0A+ []%0A%0A ❯ ../../../../../../work/czaba-studio-loop/czaba-studio-loop/loop/a-round-224/mutants/MU-4/perf/lib/report.test.ts:188:41%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-224/mutants/MU-4/perf/lib/report.test.ts,title=perf/lib/report.test.ts > buildPerfReportCore determinism contract > DC-ORDER%3A failures keep the documented order,line=325,column=27::AssertionError: expected [ 'guard problem', …(8) ] to deeply equal [ 'guard problem', …(9) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -4,9 +4,8 @@%0A    "measured row without a budget row: z.extra",%0A    "assert failed a.count: measured median 1 [1, 1], budget <= 0",%0A    "nondeterministic count b.count: [1, 2]",%0A    "ratio detail missing d.commits-per-move: needs one of windowCommits/movesInWindow, commits/moves",%0A    "row not measured 2 times: e.distance (0)",%0A-   "no determinism contract e.distance: metric distance, unit furlongs",%0A    "1 rows short of 2 samples because a pass aborted",%0A    "nondeterministic count c.components-per-commit: 1x 5 vs 6x 6",%0A  ]%0A%0A ❯ ../../../../../../work/czaba-studio-loop/czaba-studio-loop/loop/a-round-224/mutants/MU-4/perf/lib/report.test.ts:325:27%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  perf/lib/report.test.ts > buildPerfReportCore determinism contract > DC-UNKNOWN: a deterministic row with an unknown unit fails closed, even with 0 or 1 samples
+AssertionError: expected [] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+- [
+-   "no determinism contract odd.distance: metric distance, unit furlongs",
+- ]
++ []
+
+ ❯ ../../../../../../work/czaba-studio-loop/czaba-studio-loop/loop/a-round-224/mutants/MU-4/perf/lib/report.test.ts:188:41
+    186|     const row = budgetRow('odd.distance', { metric: 'distance', unit: …
+    187|     const text = 'no determinism contract odd.distance: metric distanc…
+    188|     expect(failuresFor(row, [3, 3, 3])).toEqual([text]);
+       |                                         ^
+    189|     expect(failuresFor(row, [3])).toEqual([text]);
+    190|     const empty = buildPerfReportCore({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  perf/lib/report.test.ts > buildPerfReportCore determinism contract > DC-ORDER: failures keep the documented order
+AssertionError: expected [ 'guard problem', …(8) ] to deeply equal [ 'guard problem', …(9) ]
+
+- Expected
++ Received
+
+@@ -4,9 +4,8 @@
+    "measured row without a budget row: z.extra",
+    "assert failed a.count: measured median 1 [1, 1], budget <= 0",
+    "nondeterministic count b.count: [1, 2]",
+    "ratio detail missing d.commits-per-move: needs one of windowCommits/movesInWindow, commits/moves",
+    "row not measured 2 times: e.distance (0)",
+-   "no determinism contract e.distance: metric distance, unit furlongs",
+    "1 rows short of 2 samples because a pass aborted",
+    "nondeterministic count c.components-per-commit: 1x 5 vs 6x 6",
+  ]
+
+ ❯ ../../../../../../work/czaba-studio-loop/czaba-studio-loop/loop/a-round-224/mutants/MU-4/perf/lib/report.test.ts:325:27
+    323|     });
+    324|     expect(core.complete).toBe(true);
+    325|     expect(core.failures).toEqual([
+       |                           ^
+    326|       'guard problem',
+    327|       '1x pass 1: pass problem',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

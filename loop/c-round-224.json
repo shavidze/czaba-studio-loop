@@ -1,0 +1,75 @@
+{
+ "taskStatus": "PASS",
+ "round": 224,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-28T10:38:14.9500331Z",
+  "round": 224,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R224-01",
+   "severity": "medium",
+   "steps": [
+    "Run CI=true npx playwright test --config playwright.perf.config.ts while other CPU work runs on the same machine (C ran vitest/tsc jobs 10:39:37-10:41:46 inside PERF-1b-i 1x passes)",
+    "Read interact.drag.fade.playing.commits-per-move in test-results/perf/latest-interactions.json"
+   ],
+   "expected": "Deterministic row: identical windowCommits/movesInWindow in every pass (60/60 x3), so the exact ratio contract never fails on a correct build",
+   "actual": "numerators [60, 59, 60], denominators [60, 60, 60]; componentsSum 5782 in all passes (one commit coalesced, same render work); report failure 'nondeterministic ratio interact.drag.fade.playing.commits-per-move' and PERF-1b-i failed. The attempt was env-invalid (C's own load); a clean re-run gave 60/60 x3. 6x is always 59/60. The windowCommits numerator depends on scheduling, so a loaded runner produces a false red. B should rule the row kind (task section 8, row 5).",
+   "evidence": "c-round-224/run1-contaminated/latest-interactions.json, c-round-224/run1-contaminated/equiv-1bi.log, c-round-224/rerun-1bi.log"
+  },
+  {
+   "id": "C-R224-02",
+   "severity": "low",
+   "steps": [
+    "Copy perf/lib to scratch and change the tenths check to 'spread > 2'",
+    "Run perf/lib/report.test.ts"
+   ],
+   "expected": "At least one DC case turns red (a MiB spread of 0.2 must fail by the contract)",
+   "actual": "16/16 stay green; DC-MIB uses a spread of 0.3 and DC-MIB-OK a spread of 0.1, so the boundary at 0.2 is not pinned",
+   "evidence": "c-round-224/mutants.log, c-round-224/mutants/result.json"
+  },
+  {
+   "id": "A-R224-REVIEW-TENTHS-NAN",
+   "severity": "medium",
+   "steps": [
+    "Feed buildPerfReportCore a deterministic MiB row with samples [140.3, NaN, 140.3] (C replay with C224_NAN_ID=res.mem.backing-ready-mib)"
+   ],
+   "expected": "Fail closed (a failure line)",
+   "actual": "0 failures: Math.round(NaN) spread > 1 is false. The task formula (section 2.2) is implemented as written; confirmed by C, severity as proposed by A's reviewer, B rules Severity is A's reviewer's proposal, not independently assessed by C (CDP values make NaN unlikely, but the behaviour is fail-open).",
+   "evidence": "c-round-224/replay-ctl.log"
+  }
+ ],
+ "passed": [
+  "SCOPE-224",
+  "BUDGETS-DIFF-224",
+  "CODE-224",
+  "UNIT-224",
+  "REPLAY-224",
+  "EQUIV-224",
+  "S4-224",
+  "UNUSED-224",
+  "LAB-SMOKE-224",
+  "G224-3",
+  "AN-REVIEW-224"
+ ],
+ "gate": [
+  "full suite",
+  "build",
+  "Biome/lint",
+  "verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "notes": [
+  "Section 7 tension: read strictly, section 7 makes EQUIV-224 FAIL on C-R224-01. C reports PASS because the failing attempt was invalid as a measurement (C's own load) and the replacement run passed 3/3. Section 8 row 1 and row 5 both apply; B rules the row kind.",
+  "EQUIV-224 run-1 PERF-1b-i attempt env-invalid (C's concurrent load); replaced by a clean re-run (1 of 2 allowed replacements)",
+  "C-R223-OBS-01 recurred on the first cold 1440 dev load; fresh contexts clean",
+  "PERF-1A-TIMEOUT-HEADROOM: 1a 8.0 min in C run (53% of 15 min)",
+  "report.test.ts is not gate-covered until root adds the include (section 0.3 case 3)",
+  "report.test.ts section 0.2 checks: l.1 pragma, explicit vitest imports, no page.ts/instrumentation.ts import"
+ ]
+}

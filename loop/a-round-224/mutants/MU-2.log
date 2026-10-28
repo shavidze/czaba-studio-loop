@@ -1,0 +1,52 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/tmp/studio-real-loop/a-round-224/mutants/MU-2
+
+ ❯ perf/lib/report.test.ts (16 tests | 1 failed) 13ms
+     ✓ DC-INT: a count row that differs by 1 is nondeterministic 2ms
+     ✓ DC-INT-OK: identical count samples pass 0ms
+     ✓ DC-RATIO: a numerator change fails the ratio row 0ms
+     × DC-DENOM: a denominator change fails even when the values are identical 5ms
+     ✓ DC-RATIO-ALT: the 1a {commits, moves} pair is used when the window pair is absent 0ms
+     ✓ DC-MISSING: a ratio row without its detail pair fails 0ms
+     ✓ DC-MIB-OK: a MiB spread of 0.1 passes 0ms
+     ✓ DC-MIB: a MiB spread over 0.1 fails 0ms
+     ✓ DC-UNKNOWN: a deterministic row with an unknown unit fails closed, even with 0 or 1 samples 0ms
+     ✓ DC-CONTRACT: every metric and unit class resolves in the documented order 1ms
+     ✓ DC-WALL: a wallclock row is never determinism-checked 0ms
+     ✓ DC-CROSS: a 1x vs 6x median difference fails exactly, with the cross set 0ms
+     ✓ DC-CROSS-OFF: the same 6x shape has no cross failure without the cross set 0ms
+     ✓ DC-PARTIAL: a partial run reports a failed assert only with assertWhenPartial 0ms
+     ✓ DC-ORDER: failures keep the documented order 0ms
+     ✓ DC-RATE: rowRate inverts rateRowId 0ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  10:24:45
+   Duration  194ms (transform 67ms, setup 0ms, import 84ms, tests 13ms, environment 0ms)
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-224/mutants/MU-2/perf/lib/report.test.ts,title=perf/lib/report.test.ts > buildPerfReportCore determinism contract > DC-DENOM%3A a denominator change fails even when the values are identical,line=129,column=63::AssertionError: expected [] to deeply equal [ Array(1) ]%0A%0A- Expected%0A+ Received%0A%0A- [%0A-   "nondeterministic ratio drag.commits-per-move: numerators [60, 60, 60], denominators [60, 60, 61]",%0A- ]%0A+ []%0A%0A ❯ ../../../../../../work/czaba-studio-loop/czaba-studio-loop/loop/a-round-224/mutants/MU-2/perf/lib/report.test.ts:129:63%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  perf/lib/report.test.ts > buildPerfReportCore determinism contract > DC-DENOM: a denominator change fails even when the values are identical
+AssertionError: expected [] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+- [
+-   "nondeterministic ratio drag.commits-per-move: numerators [60, 60, 60], denominators [60, 60, 61]",
+- ]
++ []
+
+ ❯ ../../../../../../work/czaba-studio-loop/czaba-studio-loop/loop/a-round-224/mutants/MU-2/perf/lib/report.test.ts:129:63
+    127|       { windowCommits: 60, movesInWindow: 61 },
+    128|     ];
+    129|     expect(failuresFor(ratioRow, [1, 1, 1], denominatorOnly)).toEqual([
+       |                                                               ^
+    130|       'nondeterministic ratio drag.commits-per-move: numerators [60, 6…
+    131|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

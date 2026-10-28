@@ -1,0 +1,23 @@
+## planned latest.json
+PERF-1a: rows 316, deterministic compared 166, reclassified 0, problems 0
+rc=0
+## planned latest-interactions.json
+PERF-1b-i: rows 144, deterministic compared 106, reclassified 16, problems 0
+rc=0
+## planned latest-resources.json
+PERF-1b-ii: rows 61, deterministic compared 37, reclassified 0, problems 0
+rc=0
+## unchanged interactions (must fail)
+PERF-1b-i: rows 144, deterministic compared 122, reclassified 0, problems 17
+  interact.drag.range.stopped.commits-per-move: kind must become wallclock ('deterministic' -> 'deterministic')
+rc=0
+## median shift (must fail)
+PERF-1b-i: rows 144, deterministic compared 106, reclassified 16, problems 1
+  interact.drag.fade.playing.move-components-per-move: deterministic median 96.367 != 97.367 (samples [96.367, 96.367, 96.367] vs [96.367, 96.367, 96.367])
+rc=1
+## note change (must fail)
+PERF-1b-ii: rows 61, deterministic compared 37, reclassified 0, problems 1
+  res.mem.backing-ready-mib: note '1x only. Runtime.getHeapUsage().backingStorageSize (MiB, 0.1) at ready after GC, before Add. Page JS heap only. Budget owner: PERF-13 (backing store at ready).' != '1x only. Runtime.getHeapUsage().backingStorageSize (MiB, 0.1) at ready after GC, before Add. Page JS heap only. Budget owner: PERF-13 (backing store at ready). x'
+rc=1
+## unchanged interactions, rerun without pipe (must fail)
+rc=1

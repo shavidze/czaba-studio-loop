@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T09:51:34.164Z)
+# Active loop summary (2026-10-28T11:15:59.366Z)
 
-- backlog.json 2027 KB -> active view 286 KB
-- status: G_ROOT_GATE round 223
-- servers: `{"checkedUtc":"2026-10-28T09:15:50.7557262Z","round":223,"attempt":1,"store":200}`
-- last publication: e140ab4796d1368a00c2f65fd2b03ec12182a06e (rounds 223-223)
-- last root gate: round 223 published - commit e140ab4796d1368a00c2f65fd2b03ec12182a06e pushed
+- backlog.json 2040 KB -> active view 289 KB
+- status: G_ROOT_GATE round 224
+- servers: `{"checkedUtc":"2026-10-28T10:38:14.9500331Z","round":224,"attempt":1,"store":200}`
+- last publication: bbaea50e44191342c09dde274db83347bf1d8289 (rounds 224-224)
+- last root gate: round 224 published - commit bbaea50e44191342c09dde274db83347bf1d8289 pushed
 
 ## Current items: -
 
@@ -508,7 +508,7 @@
 - GATE214-DOC168-STATUS / low / C PASS round 216 (SCOPE-216/DOC-216 sub-checks); closes when root publishes rounds 216+217 | dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212) / doc 168 l.4 published as In Progress (C round 214 check pending) in eb9e76e (gate-214 review item 6)
 - B-R214-DOC160-161-STATUS / low / C PASS round 216 (SCOPE-216/DOC-216 sub-checks); closes when root publishes rounds 216+217 | dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212) / docs 160 and 161 l.4 still In Progress at eb9e76e although C passed (rounds 203, 204/205) and both are published (135b880, c274930); never f
 - C-R215-02 / info / ruled D-29z214: keep exact string, defined as post-PASS value valid only at HEAD; re-dispatch implicitly grants l.4 for N only; root request b-round-215-root-request-l28.md (gate-side Pending -> Completed substitution); L28 switches only after root confirms / L28: A writes "Completed (C round N PASS)" before C runs; premature claim in working/FAIL trees
-- R216-MEM-POLLS-HEADROOM / info / watch: moved to PERF-HARNESS-SHARED-LIB-b (D-29z244; the export-window filter also feeds peak-backing-delta-mib, so not in the equivalence round) | watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled | round 217 (A and C): -1 7-8, -2 14-16, -1.6x 12-13, -2.6x 21-22, all >= 5; notes keep 'observed in round 216' ranges; widen ranges only in PERF-HARNESS-SHARED-LIB (D-29z220) / res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert
+- R216-MEM-POLLS-HEADROOM / info / watch: queued PERF-HARNESS-SHARED-LIB-b-ii (D-29z252) | watch: moved to PERF-HARNESS-SHARED-LIB-b (D-29z244; the export-window filter also feeds peak-backing-delta-mib, so not in the equivalence round) | watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled | round 217 (A and C): -1 7-8, -2 14-16, -1.6x 12-13, -2.6x 21-22, all >= 5; notes keep 'observed in round 216' ranges; widen ranges only in PERF-HARNESS-SHARED-LIB (D-29z220) / res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert
 - C-R217-HARNESS-FIRST-NAV / info / harness note applied: warm-up goto in the round-218 C setup; hypothesis (unconfirmed) Vite reload after re-optimisation / first dev-server navigation after a perf run hit a 30 s waitForFunction timeout at 1440 (2x); reruns clean
 - ARCH-GATE217-REPORT-HELPERS / info / dispatched round 223 PERF-HARNESS-SHARED-LIB (D-29z245) | signal on PERF-HARNESS-SHARED-LIB (D-29z215, third occurrence); not scheduled by this note / third copy of nowIn/snapshot/waitForQuiet/reactRendererProblem/rateRowId/report builder across the three perf specs
 - ARCH-R218-ENCODER-CANCEL-SCOPE / info / ruled (D-29z230): single consumer per page, ME12 pins the invariant, known race documented in doc 172; round 220 | gate-220 S2 (Low, per-call AbortSignal; neutral app/lib/audio/mp3-encoder.client.ts proposal) attached; input to the export-pipeline checkpoint request at round-222 planning (D-29z234) / module-wide mp3EncoderGeneration/mp3EncoderRuns: reset cancels every in-flight encode; safe only with one export at a time
@@ -525,7 +525,12 @@
 - PRE-PROD-CHECKLIST-FFMPEG / low / deferred_low_polish / docs/PRE_PRODUCTION_CHECKLIST.md l.124 still lists 'FFmpeg workers' for StudioContext
 - A-R220-GPLV-NIT / info / signal (not scheduled) / licence classifier treats GPLv, AGPLv and GPL.3 as clean; no lock spelling uses them (consistent with R-219-2)
 - C-R222-01 / low / deferred_low_polish (D-29z243); criterion LEGACY-UI-STUBBED amended to 'PCM within 1 LSB on every sample + per-stem spectrum delta <= 0.01 dB'; hypothesis (float summation order in the offline render) attached to the export-pipeline checkpoint / legacy WAV export is not bit-deterministic: two exports of the same untouched selection differ by 1 LSB in 318/383996 samples (48 in a secon
-- PERF-1A-TIMEOUT-HEADROOM / info / watch (D-29z250): listed, not a STOP, in round 223; candidate for PERF-HARNESS-SHARED-LIB-b or a root playwright.perf.config.ts change / PERF-1a runs 7-9 min against a 15-min Playwright timeout (47-58 %); B planning run 424.6 s
+- PERF-1A-TIMEOUT-HEADROOM / info / watch: round 223 A 7.1 min, C 7.1 min (new) / 7.4 min (HEAD) of 15; queued PERF-HARNESS-SHARED-LIB-b-ii (measure after GATE214-S1; root playwright.perf.config.ts request if still > 50 %) | watch (D-29z250): listed, not a STOP, in round 223; candidate for PERF-HARNESS-SHARED-LIB-b or a root playwright.perf.config.ts change / PERF-1a runs 7-9 min against a 15-min Playwright timeout (47-58 %); B planning run 424.6 s
+- C-R223-01-GATE214-S2-PREMISE / low / ruled D-29z254 (B's own task error, round-223 section 3): GATE214-S2 re-scoped into b-ii; A's revert accepted; not an A defect / task premise false: the Add clip lands on lane music (no empty right-half point), not stems; implementing GATE214-S2 as written aborts all 6
+- C-R223-OBS-01 / info / attached to VITE-EXCLUDE-STALE / b-round-220-root-request-vite.md (dev optimiser hypothesis, unconfirmed); C re-notes if it recurs / first cold dev-server /studio-lab load logged invalid hook call / hydration error once; not reproduced in 4 later loads; app unchanged
+- PERF-LONGTASKS-DETERMINISTIC-MISCLASS / info / dispatched round 224: both reclassified to wallclock record (D-29z257); play.idle-longtasks-over-50 stays deterministic (== 0 assert, no spread) / load.longtasks-over-50 (kind deterministic) varies within a run ([1,1,2], [1,2,1], [1,2,2]); res.export.1.longtasks-over-50 is the same clas
+- GATE223-S1-DOC175-CLAIM / low / dispatched round 224 (grant 14, doc 175 section testing) / doc 175 'byte-identical report' claim holds for identical passes only; the new finally can add 'observer was not released' on error paths
+- GATE223-S4-ROWRATE-PIN / info / dispatched round 224 (DC-RATE in report.test.ts; rateRowId moves to report.ts) / rateSuffix/rowRate in report.ts and rateRowId/faderRowId suffix logic can drift
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
