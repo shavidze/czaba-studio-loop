@@ -1,18 +1,17 @@
-# Active loop summary (2026-10-28T11:56:02.121Z)
+# Active loop summary (2026-10-28T12:16:24.376Z)
 
-- backlog.json 449 KB -> active view 116 KB
-- status: G_ROOT_GATE round 48
+- backlog.json 457 KB -> active view 121 KB
+- status: G_ROOT_GATE round 49
 - servers: `{"servers":"none or skipped"}`
-- last publication: 2dfd7d6edfc66640336d19e49d74b233226da6f7 (rounds 48-48)
-- last root gate: round 48 published - commit 2dfd7d6edfc66640336d19e49d74b233226da6f7 pushed
+- last publication: a849d29f879b0a9ca7eeecc1de1c4e2352af83b7 (rounds 49-49)
+- last root gate: round 49 published - commit a849d29f879b0a9ca7eeecc1de1c4e2352af83b7 pushed
 
-## Current items: TM-B08, TM-B05
+## Current items: TM-B04, TM-B08, TM-B06
 
 ## Open findings
 - C-R1-01 / low / open / Empty Keywords written as IKEY=""; save also adds id3, LIST/MID, IDVX, JUNK chunks and moves data to the end (audio bytes identical). Contra
 - RR-R1-03 / low / open / check.yml actions pinned to @v4 tags, not SHAs
 - RR-R1-07 / info / open / Architecture signal: after a green check.yml run make it a required status check and add needs: check to release.yml (release.yml frozen; ne
-- C-R2-01 / low / open / Artists written as repeated ISTR while the schema says IART; ffprobe artist shows only the first (pre-existing) -> TM-B08, D-12
 - RR-R2-03 / low / open / skipLibCheck:true also skips the project's own src/preload/index.d.ts; consider dropping it from tsconfig.test.json once dependency types ar
 - RR-R2-04 / info / open / Architecture signal: remaining file.tag as unknown as TagObject casts (metadata.ts:113,158); a RiffTags-typed accessor resolved once per fil
 - A-R3-01 / low / open / tests/renderer/setup.ts (frozen) replaces window with a plain object; schema-editor.test.ts works around it locally with vi.hoisted
@@ -227,11 +226,17 @@
 - C-R47-03 / info / open / Mutant M5 (message.includes('data chunk')) survives (no other library 'data chunk' message known); M6 (read path through the helper) is equi
 - B-R47-01 / low / open / A WAV whose artist was written by another tool as IART (ffmpeg -metadata artist=Rec) shows Artists empty in Tag Manager (library maps IART t
 - B-R47-02 / low / open / SchemaEditor RESERVED_RIFF_IDS comes from STANDARD_FIELDS riffChunkIds, so IART is reserved but ISTR (the chunk artists really write) is not
+- A-R48-01 / low / open / tag.performers also writes LIST/MID IART per value (library MovieId tag); measured by A and C (R48-4), documented, not pinned in a unit test
+- C-R48-01 / info / open / Saving Artists on a file with a pre-existing IART makes the library write ID3 TPE2 'Rec' (album artist), so ffprobe shows album_artist: Rec;
+- C-R48-02 / info / open / metadata-artists.test.ts writeMetadataViaIpc does not assert the handler's { success }; every case would still fail on its raw-byte assertio
+- RR-R48-01 / low / open / metadata-artists.test.ts writes its own encodeRiffSubChunk and listInfoSubChunkEntries; LIST/INFO parsing is duplicated across main tests; m
+- RR-R48-02 / low / open / listInfoSubChunkEntries loop stops silently on a trailing fragment shorter than 8 bytes; optional assert offset === list.length after the lo
+- RR-R48-03 / low / open / If Q25 is answered 'Artists -> IART', files already saved with ISTR would lose their artists on read unless the reader accepts both IART and
+- RR-R48-04 / info / open / Architecture signal: STANDARD_FIELDS artists.riffChunkId 'IART' does not match the chunk written; when Q25 is decided either set it to 'ISTR
 
 ## Other open items
 - TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
 - TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba
-- TM-B06 [todo] Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database
 - OOS-03 [out_of_scope] New npm dependencies

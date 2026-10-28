@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 49: TM-B06 (Saba Q6, D-52) - Biome lints and formats tests/ (tests/** override quoteStyle double), package.json scripts lint/lint:fix/check -> biome check src/ tests/, one mechanical biome check --write tests/ + 2 unused-import Edit fixes; src frozen; baseline 2dfd7d6 clean",
+  "current_task": "Round 50: BLOCKED - no runnable scoped work. TM-T2-DATA (UCS list + licence) needs Saba Q7, TM-T2 depends on it; Q9-Q27 open for Saba. Baseline a849d29",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -413,7 +413,7 @@
     },
     {
       "id": "D-52",
-      "status": "planned round 49 (TM-B06, Saba Q6)",
+      "status": "verified round 49 (C R49 PASS, published a849d29)",
       "decision": "Biome checks tests/ as well as src/. biome.json files.includes = src/**/*.ts, src/**/*.tsx, tests/**/*.ts, tests/**/*.tsx; one override for tests/** sets javascript.formatter.quoteStyle 'double' (the existing test style) and changes nothing else, so lint rules, organizeImports, semicolons, trailing commas, indent and lineWidth 100 apply to tests exactly as to src. package.json scripts lint = 'biome check src/ tests/', lint:fix = 'biome check --write src/ tests/', check = 'biome check src/ tests/ && npm run typecheck && npm run test'. Not chosen: formatter off for tests (14 files touched instead of 37, but semicolons in tests stay unenforced, against CLAUDE.md rule 2).",
       "contract_with": "none (tooling)"
     }
@@ -812,7 +812,7 @@
       "type": "gap",
       "severity": "low",
       "title": "Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check",
-      "status": "in_progress",
+      "status": "done",
       "depends_on": [
         "TM-B04"
       ],
@@ -822,20 +822,25 @@
       ],
       "evidence": [
         "biome.json files.includes src/**; package.json lint 'biome check src/'",
-        "Saba answers 2026-10-28 (policy.local.md) Q6: Biome lints tests/** too with a relaxed override, as its own round"
+        "Saba answers 2026-10-28 (policy.local.md) Q6: Biome lints tests/** too with a relaxed override, as its own round",
+        "C round 49 PASS (c-round-49.md/.json, realVerified=true, bugs 0): R49-1 ownership (40 paths = biome.json, package.json 3 script lines, BIOME_LINTING.md, 37 tests/**/*.ts; src/ unchanged); R49-2 tests/ diff reproduced byte for byte from 2dfd7d6 (Fixed 37 + 2 unsafe import fixes, diff empty, 37 = B list); R49-3 blind-gate contrast: 2dfd7d6 D1/D2/D3 exit 0 (Checked 34 files), A tree D1 noUnusedImports / D2, D3 format fail, D4 control fails on both; R49-4 verifyCommand exit 0, Biome Checked 85 files 0 errors 8 warnings (same src/ warnings), renderer 326/326 main 135/135 E2E 7/7, --retries=0 7/7, check.yml order check -> contract -> E2E exit 0, typecheck still runs tsc -p tsconfig.test.json; R49-5 fixtures sha256 identical; R49-6 out/ 5 files identical, real app sine.wav Title R49 -> ffprobe and music-metadata title R49, sample.wav byte-identical; R49-7 docs. Root gate published a849d29 (review COMMIT OK, RR-R49-01..04)"
       ],
       "note_b_r13": "B R13 (package.json read): scripts.typecheck already runs tsc --noEmit -p tsconfig.test.json (include tests/**/*), so the 'tsconfig.test.json not part of check' half of the title is stale since round 2 (TM-B04/D-11); the open part is Biome lint of tests/ (biome check src/ only). Scope decision still with Saba",
       "note_b_r16": "B R16: RR-R16-01 and A-R16-02 add to the signals on this item (with RR-R14-03, RR-R14-05); scope decision still with Saba",
       "notes": [
         "R20: A's code-reviewer notes '() => {}' placeholders in the new test helpers would meet Biome rules once tests/ is linted (same class as RR-R14-03)",
         "R36: RR-R36-05 (root review) again notes biome check src/ leaves tests/ unlinted; signal only, scope decision still with Saba",
-        "B R48 probe (b-round-48/probe-steps.txt, HEAD 2dfd7d6, biome 2.4.4, /tmp copies): tests/ under today's rules = 65 errors (51 format, 12 organizeImports, 2 noUnusedImports), 0 lint warnings; with quoteStyle double override 50 (36 format); formatter off 14; formatter+organizeImports off 2. Chosen: quoteStyle double (tests keep their existing double quotes) and every other rule as src, so semicolons/trailing commas/line width are enforced in tests (CLAUDE.md rule 2). Feasibility in /tmp: 37 test files reformatted (1142 diff lines), biome check src/ tests/ Checked 85 files 0 errors 8 warnings, typecheck + npm test EXIT 0"
+        "B R48 probe (b-round-48/probe-steps.txt, HEAD 2dfd7d6, biome 2.4.4, /tmp copies): tests/ under today's rules = 65 errors (51 format, 12 organizeImports, 2 noUnusedImports), 0 lint warnings; with quoteStyle double override 50 (36 format); formatter off 14; formatter+organizeImports off 2. Chosen: quoteStyle double (tests keep their existing double quotes) and every other rule as src, so semicolons/trailing commas/line width are enforced in tests (CLAUDE.md rule 2). Feasibility in /tmp: 37 test files reformatted (1142 diff lines), biome check src/ tests/ Checked 85 files 0 errors 8 warnings, typecheck + npm test EXIT 0",
+        "B R49 close: both halves of the title closed - Biome over tests/ by D-52 (round 49), tsconfig.test.json in check by TM-B04 (round 2, re-confirmed by C R49-4)"
       ],
       "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q6: Biome lints tests/** too with a relaxed override, as its own round",
       "round": 49,
       "decisions": [
         "D-52"
-      ]
+      ],
+      "closed_round": 49,
+      "commit": "a849d29f879b0a9ca7eeecc1de1c4e2352af83b7",
+      "realVerified": true
     },
     {
       "id": "OOS-01",
@@ -2378,10 +2383,12 @@
     {
       "id": "RR-R3-04",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "New test files use double quotes vs src single quotes; Biome does not check tests/",
       "round": 3,
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "closed round 49 by D-52 (tests/** keep double quotes by Saba's relaxed override; Biome now enforces the test style), C R49 PASS, a849d29"
     },
     {
       "id": "RR-R3-05",
@@ -2533,10 +2540,12 @@
       "id": "RR-R5-05",
       "source": "root-review",
       "severity": "info",
-      "status": "open",
+      "status": "closed",
       "round": 5,
       "title": "Tests use double quotes vs single quotes in src; Biome passes because tests/ is not linted",
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "closed round 49 by D-52 (tests/** keep double quotes by Saba's relaxed override; Biome now enforces the test style), C R49 PASS, a849d29"
     },
     {
       "id": "RR-R5-06",
@@ -2593,10 +2602,12 @@
       "id": "RR-R6-03",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "round": 6,
       "title": "riff-info-nul.test.ts uses double quotes vs single in src; tests/ not linted",
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "closed round 49 by D-52 (tests/** keep double quotes by Saba's relaxed override; Biome now enforces the test style), C R49 PASS, a849d29"
     },
     {
       "id": "RR-R6-04",
@@ -2723,10 +2734,12 @@
       "id": "RR-R8-02",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "round": 8,
       "title": "metadata-write-field-errors.test.ts uses double quotes vs single in src; tests/ not linted",
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "closed round 49 by D-52 (tests/** keep double quotes by Saba's relaxed override; Biome now enforces the test style), C R49 PASS, a849d29"
     },
     {
       "id": "RR-R8-03",
@@ -2973,9 +2986,11 @@
       "id": "RR-R12-03",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "metadata-panel-batch-save.test.ts uses double quotes vs single in src; tests/ not linted (same as RR-R3-04/RR-R5-05)",
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "closed round 49 by D-52 (tests/** keep double quotes by Saba's relaxed override; Biome now enforces the test style), C R49 PASS, a849d29"
     },
     {
       "round": 12,
@@ -3069,9 +3084,11 @@
       "id": "RR-R14-03",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "create-fixtures.ts:69 empty catch {} would trip Biome noEmptyBlockStatements once tests/ is linted; a small cleanup helper fits the no-comments rule",
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "closed round 49: the prediction did not fire - Biome 2.4.4 recommended set reports no noEmptyBlockStatements on create-fixtures.ts catch {} (C R49 observation, B deviation 3); nothing fixed, nothing to fix today"
     },
     {
       "round": 14,
@@ -3087,9 +3104,11 @@
       "id": "RR-R14-05",
       "source": "root-review",
       "severity": "info",
-      "status": "open",
+      "status": "closed",
       "title": "Architecture signal: add tests/**/*.ts to Biome files.includes (relaxed override if needed) so semicolons, quote style and no-comments rules apply to tests",
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "closed round 49: Biome now checks tests/ (C R49-3 blind-gate contrast, R49-4 Checked 85 files 0 errors), D-52, a849d29"
     },
     {
       "round": 14,
@@ -3192,9 +3211,11 @@
       "id": "RR-R16-01",
       "source": "root-review",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "Biome does not reach the four R16 files (npm run check runs biome check src/ only); e.g. whether organizeImports accepts tests/e2e/electron-launch.ts:5-13 was never checked",
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "closed round 49: Biome now checks tests/ (C R49-3 blind-gate contrast, R49-4 Checked 85 files 0 errors), D-52, a849d29; tests/e2e/electron-launch.ts import order is now checked (organizeImports, R49-2)"
     },
     {
       "round": 16,
@@ -3237,9 +3258,11 @@
       "id": "A-R16-02",
       "source": "A",
       "severity": "info",
-      "status": "open",
+      "status": "closed",
       "title": "With a tests/-including Biome config, tests/e2e/electron-launch.ts gets one organizeImports assist (@playwright/test before node:*); pre-existing on 5854d45",
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "closed round 49: Biome now checks tests/ (C R49-3 blind-gate contrast, R49-4 Checked 85 files 0 errors), D-52, a849d29; the organizeImports assist was applied by the mechanical write (R49-2)"
     },
     {
       "round": 16,
@@ -4857,9 +4880,11 @@
       "id": "RR-R36-05",
       "source": "root-review (gates/round-36/review.md architecture note)",
       "severity": "info",
-      "status": "open",
+      "status": "closed",
       "title": "Architecture signal: Biome checks only src/ (tests/ unlinted) -> same as TM-B06; a shared clickButton(name) helper would replace ~8 per-suite copies",
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "Biome-scope half closed round 49 (D-52, C R49 PASS, a849d29). The shared clickButton(name) helper half is NOT dropped: it continues as signal RR-R49-04 (test helper duplication, with RR-R48-01 / RR-R17-02)"
     },
     {
       "round": 36,
@@ -4938,9 +4963,11 @@
       "id": "RR-R37-02",
       "source": "root-review (gates/round-37/review.md low 2)",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "selection-after-folder-switch.test.ts uses double quotes while biome.json sets quoteStyle single; Biome checks only src/ (same class as RR-R3-04, TM-B06)",
-      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence",
+      "closed_round": 49,
+      "resolution": "closed round 49 by D-52 (tests/** keep double quotes by Saba's relaxed override; Biome now enforces the test style), C R49 PASS, a849d29"
     },
     {
       "round": 37,
@@ -5739,6 +5766,60 @@
       "status": "open",
       "title": "Architecture signal: STANDARD_FIELDS artists.riffChunkId 'IART' does not match the chunk written; when Q25 is decided either set it to 'ISTR' (schema tells the truth) or write artists through the InfoTag path to IART with a reader that accepts both (also fixes B-R47-01)",
       "routed_to": "signal with Q25 / B-R47-02"
+    },
+    {
+      "round": 49,
+      "id": "RR-R49-01",
+      "source": "root-review (gates/round-49/review.md low 1)",
+      "severity": "low",
+      "status": "open",
+      "title": "Two quote styles now coexist (src single, tests double by the D-52 override). Root suggests a later biome check --write tests/ to single quotes and dropping the override",
+      "routed_to": "Saba Q27 (reverses the accepted relaxed override; not scheduled without Saba)"
+    },
+    {
+      "round": 49,
+      "id": "RR-R49-02",
+      "source": "root-review (gates/round-49/review.md low 2)",
+      "severity": "low",
+      "status": "open",
+      "title": "Non-null assertions in tests (tests/main/file-system.test.ts:73-75 entry!.name/path/size) are not flagged. B fact check: biome.json sets style.noNonNullAssertion 'off' for the whole project (not a tests exemption); src/ has no x!. usage today; TYPESCRIPT_STRICT.md does not say whether tests are exempt",
+      "routed_to": "Saba Q27 (turn the rule on for src and tests, or record tests as exempt in the primitive)"
+    },
+    {
+      "round": 49,
+      "id": "RR-R49-03",
+      "source": "root-review (gates/round-49/review.md low 3)",
+      "severity": "low",
+      "status": "open",
+      "title": "8 pre-existing src/ Biome warnings now shown in every npm run check: useKeyWithClickEvents FileList.tsx:82, AudioPlayer.tsx:138, FolderBrowser.tsx:253; noLabelWithoutControl TagsInput.tsx:45, TemplatePicker.tsx:195, ui/input.tsx:13, ui/select.tsx:13; useExhaustiveDependencies toast.tsx (toastKey). Click-only divs are real keyboard gaps",
+      "routed_to": "UX / a11y, reference-first: Saba Q9-Q24 group (with RR-R22-04, RR-R42-02); not scheduled without Saba"
+    },
+    {
+      "round": 49,
+      "id": "RR-R49-04",
+      "source": "root-review (gates/round-49/review.md architecture note)",
+      "severity": "info",
+      "status": "open",
+      "title": "Architecture signal: getHandler(channel) reaching ipcMain._handlers is copied into ~10 tests/main files; one tests/main/helpers/ipc-handlers.ts would remove it (with RR-R48-01, RR-R17-02, and the clickButton half of RR-R36-05). After the 8 warnings are fixed, warnings could fail the lint step",
+      "routed_to": "signal"
+    },
+    {
+      "round": 49,
+      "id": "A-R49-01",
+      "source": "A (code-reviewer pass)",
+      "severity": "low",
+      "status": "open",
+      "title": "BIOME_LINTING.md 'npm run check' line says 'Biome + tsc --noEmit' without '+ tests' (pre-existing); biome.json $schema points at 2.0.0 while 2.4.4 is installed",
+      "routed_to": "signal (next docs/config touch)"
+    },
+    {
+      "round": 49,
+      "id": "B-R49-01",
+      "source": "B (A and C R49 notes)",
+      "severity": "low",
+      "status": "open",
+      "title": "Process: round-49 task said to run tests/contract/check-ffprobe-tags.ts 'after the E2E run'; Playwright clears test-results/ so the contract WAV is gone then. Correct order is check.yml's: npm run check -> contract cross-check -> E2E (C ran it so: exit 0)",
+      "routed_to": "B planning rule: future tasks use check.yml order"
     }
   ],
   "rounds": [
@@ -6763,7 +6844,7 @@
     {
       "round": 49,
       "task": "TM-B06 (Saba Q6, D-52): Biome over tests/ (includes + quoteStyle-double override, scripts lint/lint:fix/check), one mechanical biome --write over tests/ + 2 unused-import fixes; no src change",
-      "status": "planned",
+      "status": "published",
       "baseline": "2dfd7d6edfc66640336d19e49d74b233226da6f7 (clean)",
       "items": [
         "TM-B06"
@@ -6780,7 +6861,20 @@
         "A-R16-02",
         "RR-R36-05",
         "RR-R37-02"
-      ]
+      ],
+      "commit": "a849d29f879b0a9ca7eeecc1de1c4e2352af83b7",
+      "result": "C PASS R49-1..R49-7 realVerified=true; bugs 0; Biome Checked 85 files 0 errors 8 warnings; renderer 326/326 main 135/135 E2E 7/7 (--retries=0 7/7); tests/ diff reproduced mechanically; blind-gate contrast; fixtures and out/ identical; real app save read by ffprobe and music-metadata; root review COMMIT OK (RR-R49-01..04); published a849d29; TM-B06 done, D-52 verified"
+    },
+    {
+      "round": 50,
+      "task": "none: waiting on Saba (Q7 unblocks TM-T2-DATA -> TM-T2; Q9-Q27 open)",
+      "status": "blocked",
+      "baseline": "a849d29f879b0a9ca7eeecc1de1c4e2352af83b7 (published round 49)",
+      "items": [
+        "TM-T2-DATA",
+        "TM-T2"
+      ],
+      "findings": []
     }
   ]
 }

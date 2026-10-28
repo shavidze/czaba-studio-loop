@@ -1,0 +1,143 @@
+2dfd7d6edfc66640336d19e49d74b233226da6f7
+ M .claude/primitives/BIOME_LINTING.md
+ M biome.json
+ M package.json
+ M tests/e2e/app-launch.spec.ts
+ M tests/e2e/electron-launch.ts
+ M tests/e2e/folder-workflow.spec.ts
+ M tests/e2e/recording-tag-contract.spec.ts
+ M tests/fixtures/create-fixtures.ts
+ M tests/main/create-fixtures.test.ts
+ M tests/main/file-system.test.ts
+ M tests/main/metadata-artists.test.ts
+ M tests/main/metadata-empty-audio.test.ts
+ M tests/main/metadata-empty-values.test.ts
+ M tests/main/metadata-number-values.test.ts
+ M tests/main/metadata-write-field-errors.test.ts
+ M tests/main/metadata-write-guard.test.ts
+ M tests/main/metadata.test.ts
+ M tests/main/recording-tag-contract.test.ts
+ M tests/main/riff-info-nul.test.ts
+ M tests/main/schema.test.ts
+ M tests/main/templates.test.ts
+ M tests/renderer/components/busy-buttons-focus.test.ts
+ M tests/renderer/components/folder-read-during-save.test.ts
+ M tests/renderer/components/folder-read-overlap.test.ts
+ M tests/renderer/components/folder-read-rejected-chunk.test.ts
+ M tests/renderer/components/metadata-panel-batch-save.test.ts
+ M tests/renderer/components/metadata-panel-schema-change.test.ts
+ M tests/renderer/components/number-field-values.test.ts
+ M tests/renderer/components/reread-after-folder-switch.test.ts
+ M tests/renderer/components/schema-change-during-folder-load.test.ts
+ M tests/renderer/components/schema-editor-done-busy.test.ts
+ M tests/renderer/components/schema-editor-stale-close.test.ts
+ M tests/renderer/components/schema-editor.test.ts
+ M tests/renderer/components/selection-after-folder-switch.test.ts
+ M tests/renderer/helpers/dom-queries.test.ts
+ M tests/renderer/helpers/dom-queries.ts
+ M tests/renderer/helpers/window-api-mocks.ts
+ M tests/renderer/stores/file-store.test.ts
+ M tests/renderer/utils/file-row-display.test.ts
+ M tests/renderer/utils/utils.test.ts
+ .claude/primitives/BIOME_LINTING.md                |  7 +-
+ biome.json                                         | 10 ++-
+ package.json                                       |  6 +-
+ tests/e2e/app-launch.spec.ts                       |  6 +-
+ tests/e2e/electron-launch.ts                       |  2 +-
+ tests/e2e/folder-workflow.spec.ts                  |  9 +--
+ tests/e2e/recording-tag-contract.spec.ts           |  7 +-
+ tests/fixtures/create-fixtures.ts                  |  4 +-
+ tests/main/create-fixtures.test.ts                 | 10 ++-
+ tests/main/file-system.test.ts                     | 56 +++++++++----
+ tests/main/metadata-artists.test.ts                |  9 ++-
+ tests/main/metadata-empty-audio.test.ts            | 75 ++++++++++++------
+ tests/main/metadata-empty-values.test.ts           | 91 +++++++++++++++-------
+ tests/main/metadata-number-values.test.ts          | 56 +++++++++----
+ tests/main/metadata-write-field-errors.test.ts     | 46 ++++++++---
+ tests/main/metadata-write-guard.test.ts            | 32 ++++++--
+ tests/main/metadata.test.ts                        | 57 ++++++++------
+ tests/main/recording-tag-contract.test.ts          | 12 ++-
+ tests/main/riff-info-nul.test.ts                   | 13 +++-
+ tests/main/schema.test.ts                          | 16 ++--
+ tests/main/templates.test.ts                       | 20 ++---
+ .../renderer/components/busy-buttons-focus.test.ts | 18 ++++-
+ .../components/folder-read-during-save.test.ts     |  9 ++-
+ .../components/folder-read-overlap.test.ts         | 81 ++++++++++++++-----
+ .../components/folder-read-rejected-chunk.test.ts  | 30 +++++--
+ .../components/metadata-panel-batch-save.test.ts   | 80 +++++++++++++++----
+ .../metadata-panel-schema-change.test.ts           | 47 ++++++++---
+ .../components/number-field-values.test.ts         | 29 +++++--
+ .../components/reread-after-folder-switch.test.ts  | 33 ++++++--
+ .../schema-change-during-folder-load.test.ts       | 64 +++++++++++----
+ .../components/schema-editor-done-busy.test.ts     | 29 +++++--
+ .../components/schema-editor-stale-close.test.ts   | 19 ++++-
+ tests/renderer/components/schema-editor.test.ts    | 32 +++++---
+ .../selection-after-folder-switch.test.ts          | 23 ++++--
+ tests/renderer/helpers/dom-queries.test.ts         |  8 +-
+ tests/renderer/helpers/dom-queries.ts              |  7 +-
+ tests/renderer/helpers/window-api-mocks.ts         |  4 +-
+ tests/renderer/stores/file-store.test.ts           | 77 ++++++++++++++----
+ tests/renderer/utils/file-row-display.test.ts      |  9 +--
+ tests/renderer/utils/utils.test.ts                 | 20 +++--
+ 40 files changed, 852 insertions(+), 311 deletions(-)
+diff --git a/.claude/primitives/BIOME_LINTING.md b/.claude/primitives/BIOME_LINTING.md
+index d46ba8b..45ee365 100644
+--- a/.claude/primitives/BIOME_LINTING.md
++++ b/.claude/primitives/BIOME_LINTING.md
+@@ -1,9 +1,9 @@
+ # BIOME_LINTING
+ 
+ ## ბრძანებები
+-- `npm run lint` - Check
+-- `npm run lint:fix` - Auto-fix
+-- `npm run check` - Biome + tsc --noEmit
++- `npm run lint` - Check (`src/` + `tests/`)
++- `npm run lint:fix` - Auto-fix (`src/` + `tests/`)
++- `npm run check` - Biome (`src/` + `tests/`) + tsc --noEmit
+ 
+ ## მთავარი წესები
+ | წესი | დონე |
+@@ -14,3 +14,4 @@
+ | useButtonType | warn |
+ 
+ Formatter: 2 spaces, semicolons always, single quotes, line width 100.
++`tests/**`-ში იგივე წესებია, ოღონდ ორმაგი ბრჭყალებით (`biome.json` override, D-52).
+diff --git a/biome.json b/biome.json
+index b4ebdb1..1cc123c 100644
+--- a/biome.json
++++ b/biome.json
+@@ -63,6 +63,12 @@
+     }
+   },
+   "files": {
+-    "includes": ["src/**/*.ts", "src/**/*.tsx"]
+-  }
++    "includes": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
++  },
++  "overrides": [
++    {
++      "includes": ["tests/**"],
++      "javascript": { "formatter": { "quoteStyle": "double" } }
++    }
++  ]
+ }
+diff --git a/package.json b/package.json
+index d8a20ff..2183742 100644
+--- a/package.json
++++ b/package.json
+@@ -16,10 +16,10 @@
+     "test:watch": "vitest --config vitest.config.renderer.ts",
+     "test:e2e": "npm run build && npx playwright test",
+     "test:coverage": "vitest run --config vitest.config.renderer.ts --coverage && vitest run --config vitest.config.main.ts --coverage",
+-    "lint": "biome check src/",
+-    "lint:fix": "biome check --write src/",
++    "lint": "biome check src/ tests/",
++    "lint:fix": "biome check --write src/ tests/",
+     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.test.json",
+-    "check": "biome check src/ && npm run typecheck && npm run test",
++    "check": "biome check src/ tests/ && npm run typecheck && npm run test",
+     "build:win": "npm run build && electron-builder --win",
+     "build:mac": "npm run build && electron-builder --mac",
+     "build:unpack": "npm run build && electron-builder --dir"
+frozen-exit=0
+.claude/primitives/BIOME_LINTING.md

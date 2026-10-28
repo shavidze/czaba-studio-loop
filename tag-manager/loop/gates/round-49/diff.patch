@@ -1,0 +1,2776 @@
+diff --git a/.claude/primitives/BIOME_LINTING.md b/.claude/primitives/BIOME_LINTING.md
+index d46ba8b..45ee365 100644
+--- a/.claude/primitives/BIOME_LINTING.md
++++ b/.claude/primitives/BIOME_LINTING.md
+@@ -1,9 +1,9 @@
+ # BIOME_LINTING
+ 
+ ## ბრძანებები
+-- `npm run lint` - Check
+-- `npm run lint:fix` - Auto-fix
+-- `npm run check` - Biome + tsc --noEmit
++- `npm run lint` - Check (`src/` + `tests/`)
++- `npm run lint:fix` - Auto-fix (`src/` + `tests/`)
++- `npm run check` - Biome (`src/` + `tests/`) + tsc --noEmit
+ 
+ ## მთავარი წესები
+ | წესი | დონე |
+@@ -14,3 +14,4 @@
+ | useButtonType | warn |
+ 
+ Formatter: 2 spaces, semicolons always, single quotes, line width 100.
++`tests/**`-ში იგივე წესებია, ოღონდ ორმაგი ბრჭყალებით (`biome.json` override, D-52).
+diff --git a/biome.json b/biome.json
+index b4ebdb1..1cc123c 100644
+--- a/biome.json
++++ b/biome.json
+@@ -63,6 +63,12 @@
+     }
+   },
+   "files": {
+-    "includes": ["src/**/*.ts", "src/**/*.tsx"]
+-  }
++    "includes": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
++  },
++  "overrides": [
++    {
++      "includes": ["tests/**"],
++      "javascript": { "formatter": { "quoteStyle": "double" } }
++    }
++  ]
+ }
+diff --git a/package.json b/package.json
+index d8a20ff..2183742 100644
+--- a/package.json
++++ b/package.json
+@@ -16,10 +16,10 @@
+     "test:watch": "vitest --config vitest.config.renderer.ts",
+     "test:e2e": "npm run build && npx playwright test",
+     "test:coverage": "vitest run --config vitest.config.renderer.ts --coverage && vitest run --config vitest.config.main.ts --coverage",
+-    "lint": "biome check src/",
+-    "lint:fix": "biome check --write src/",
++    "lint": "biome check src/ tests/",
++    "lint:fix": "biome check --write src/ tests/",
+     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.test.json",
+-    "check": "biome check src/ && npm run typecheck && npm run test",
++    "check": "biome check src/ tests/ && npm run typecheck && npm run test",
+     "build:win": "npm run build && electron-builder --win",
+     "build:mac": "npm run build && electron-builder --mac",
+     "build:unpack": "npm run build && electron-builder --dir"
+diff --git a/tests/e2e/app-launch.spec.ts b/tests/e2e/app-launch.spec.ts
+index cb37df8..0524ecc 100644
+--- a/tests/e2e/app-launch.spec.ts
++++ b/tests/e2e/app-launch.spec.ts
+@@ -1,4 +1,4 @@
+-import { type ElectronApplication, type Page, expect, test } from "@playwright/test";
++import { type ElectronApplication, expect, type Page, test } from "@playwright/test";
+ import { LAUNCH_HOOK_TIMEOUT_MS, launchTagManagerApp } from "./electron-launch";
+ 
+ let app: ElectronApplication | undefined;
+@@ -33,9 +33,7 @@ test("renderer exposes window.api", async () => {
+ });
+ 
+ test("window.api has required methods", async () => {
+-  const methods = await page.evaluate(() =>
+-    Object.keys(window.api).sort(),
+-  );
++  const methods = await page.evaluate(() => Object.keys(window.api).sort());
+   expect(methods).toContain("openFolderDialog");
+   expect(methods).toContain("scanFolder");
+   expect(methods).toContain("statFiles");
+diff --git a/tests/e2e/electron-launch.ts b/tests/e2e/electron-launch.ts
+index 229a94e..c57243f 100644
+--- a/tests/e2e/electron-launch.ts
++++ b/tests/e2e/electron-launch.ts
+@@ -1,7 +1,7 @@
+-import { type ElectronApplication, type Page, _electron as electron } from "@playwright/test";
+ import type { ChildProcess } from "node:child_process";
+ import { existsSync, statSync } from "node:fs";
+ import { isAbsolute, join } from "node:path";
++import { type ElectronApplication, _electron as electron, type Page } from "@playwright/test";
+ import {
+   buildTagManagerLaunchError,
+   closeFailedTagManagerApp,
+diff --git a/tests/e2e/folder-workflow.spec.ts b/tests/e2e/folder-workflow.spec.ts
+index 22b70ff..ae35667 100644
+--- a/tests/e2e/folder-workflow.spec.ts
++++ b/tests/e2e/folder-workflow.spec.ts
+@@ -1,7 +1,7 @@
+-import { type ElectronApplication, type Page, expect, test } from "@playwright/test";
+ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+-import { join } from "node:path";
+ import { tmpdir } from "node:os";
++import { join } from "node:path";
++import { type ElectronApplication, expect, type Page, test } from "@playwright/test";
+ import { createSineWavBuffer } from "../fixtures/create-fixtures";
+ import { LAUNCH_HOOK_TIMEOUT_MS, launchTagManagerApp } from "./electron-launch";
+ 
+@@ -56,10 +56,7 @@ test("can read and write metadata via IPC", async () => {
+ 
+   const meta = await page.evaluate(
+     async ({ path, schema }: { path: string; schema: unknown[] }) => {
+-      return window.api.readMetadata(
+-        path,
+-        schema as Parameters<typeof window.api.readMetadata>[1],
+-      );
++      return window.api.readMetadata(path, schema as Parameters<typeof window.api.readMetadata>[1]);
+     },
+     { path: filePath, schema },
+   );
+diff --git a/tests/e2e/recording-tag-contract.spec.ts b/tests/e2e/recording-tag-contract.spec.ts
+index 0e6ef65..bdd6116 100644
+--- a/tests/e2e/recording-tag-contract.spec.ts
++++ b/tests/e2e/recording-tag-contract.spec.ts
+@@ -1,7 +1,7 @@
+-import { type ElectronApplication, type Page, expect, test } from "@playwright/test";
+ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+ import { tmpdir } from "node:os";
+ import { join } from "node:path";
++import { type ElectronApplication, expect, type Page, test } from "@playwright/test";
+ import { createSineWavBuffer } from "../fixtures/create-fixtures";
+ import { LAUNCH_HOOK_TIMEOUT_MS, launchTagManagerApp } from "./electron-launch";
+ 
+@@ -49,10 +49,7 @@ test("writes and reads category via IPC with a clean schema (T1-7)", async () =>
+ 
+   const meta = await page.evaluate(
+     async ({ path, schema }: { path: string; schema: unknown[] }) => {
+-      return window.api.readMetadata(
+-        path,
+-        schema as Parameters<typeof window.api.readMetadata>[1],
+-      );
++      return window.api.readMetadata(path, schema as Parameters<typeof window.api.readMetadata>[1]);
+     },
+     { path: filePath, schema },
+   );
+diff --git a/tests/fixtures/create-fixtures.ts b/tests/fixtures/create-fixtures.ts
+index a15cdaa..bf454c2 100644
+--- a/tests/fixtures/create-fixtures.ts
++++ b/tests/fixtures/create-fixtures.ts
+@@ -45,9 +45,7 @@ export function createSineWavBuffer(durationSamples: number, sampleRate = 44100)
+   offset += 4;
+ 
+   for (let i = 0; i < durationSamples; i++) {
+-    const sample = Math.floor(
+-      Math.sin((2 * Math.PI * 440 * i) / sampleRate) * 16000,
+-    );
++    const sample = Math.floor(Math.sin((2 * Math.PI * 440 * i) / sampleRate) * 16000);
+     buffer.writeInt16LE(sample, offset);
+     offset += 2;
+   }
+diff --git a/tests/main/create-fixtures.test.ts b/tests/main/create-fixtures.test.ts
+index 64344a1..dfa59f3 100644
+--- a/tests/main/create-fixtures.test.ts
++++ b/tests/main/create-fixtures.test.ts
+@@ -15,8 +15,10 @@ import { join } from "node:path";
+ import { afterEach, beforeEach, describe, expect, it } from "vitest";
+ import { createWavTestFixtures, isCreateFixturesCliEntry } from "../fixtures/create-fixtures";
+ 
+-const SAMPLE_WAV_SHA256_A652F06 = "cbac699bc2cd6bc08570ddfe27b523054b63a4b366ef2913bc5725d1cd73400c";
+-const CORRUPT_WAV_SHA256_A652F06 = "564867d8781dc7f4f43e66543e9db6631f464c90087e3cf87a04040f2e83217c";
++const SAMPLE_WAV_SHA256_A652F06 =
++  "cbac699bc2cd6bc08570ddfe27b523054b63a4b366ef2913bc5725d1cd73400c";
++const CORRUPT_WAV_SHA256_A652F06 =
++  "564867d8781dc7f4f43e66543e9db6631f464c90087e3cf87a04040f2e83217c";
+ 
+ function sha256OfFile(filePath: string): string {
+   return createHash("sha256").update(readFileSync(filePath)).digest("hex");
+@@ -77,7 +79,9 @@ describe("createWavTestFixtures temp-file cleanup and output (D-23)", () => {
+ describe("isCreateFixturesCliEntry (D-23)", () => {
+   const CLI_EXTENSIONS = ["ts", "mts", "cts", "js", "mjs", "cjs"];
+ 
+-  it.each(CLI_EXTENSIONS)("accepts create-fixtures.%s with POSIX, Windows and bare paths", (ext) => {
++  it.each(
++    CLI_EXTENSIONS,
++  )("accepts create-fixtures.%s with POSIX, Windows and bare paths", (ext) => {
+     expect(isCreateFixturesCliEntry(`/a/b/create-fixtures.${ext}`)).toBe(true);
+     expect(isCreateFixturesCliEntry(`C:\\a\\b\\create-fixtures.${ext}`)).toBe(true);
+     expect(isCreateFixturesCliEntry(`create-fixtures.${ext}`)).toBe(true);
+diff --git a/tests/main/file-system.test.ts b/tests/main/file-system.test.ts
+index c42ab0d..19b0937 100644
+--- a/tests/main/file-system.test.ts
++++ b/tests/main/file-system.test.ts
+@@ -1,8 +1,8 @@
+ import { mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+-import { join } from "node:path";
+ import { tmpdir } from "node:os";
+-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
++import { join } from "node:path";
+ import { ipcMain } from "electron";
++import { afterAll, beforeAll, describe, expect, it } from "vitest";
+ import { registerFileSystemHandlers } from "../../src/main/ipc/file-system";
+ 
+ const testDir = join(tmpdir(), `czaba-fs-test-${Date.now()}`);
+@@ -39,7 +39,9 @@ afterAll(() => {
+ });
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -49,7 +51,7 @@ describe("file-system handlers", () => {
+   describe("fs:scan-folder", () => {
+     it("finds WAV files in directory", async () => {
+       const handler = getHandler("fs:scan-folder");
+-      const results = await handler({}, testDir) as Array<{ name: string }>;
++      const results = (await handler({}, testDir)) as Array<{ name: string }>;
+       const names = results.map((r) => r.name).sort();
+       expect(names).toContain("test1.wav");
+       expect(names).toContain("test2.wav");
+@@ -58,14 +60,14 @@ describe("file-system handlers", () => {
+ 
+     it("finds nested WAV files", async () => {
+       const handler = getHandler("fs:scan-folder");
+-      const results = await handler({}, testDir) as Array<{ name: string }>;
++      const results = (await handler({}, testDir)) as Array<{ name: string }>;
+       const names = results.map((r) => r.name);
+       expect(names).toContain("nested.wav");
+     });
+ 
+     it("returns entries with correct shape", async () => {
+       const handler = getHandler("fs:scan-folder");
+-      const results = await handler({}, testDir) as Array<Record<string, unknown>>;
++      const results = (await handler({}, testDir)) as Array<Record<string, unknown>>;
+       const entry = results.find((r) => r.name === "test1.wav");
+       expect(entry).toBeDefined();
+       expect(entry!.name).toBe("test1.wav");
+@@ -93,11 +95,11 @@ describe("file-system handlers", () => {
+   describe("fs:resolve-dropped-paths", () => {
+     it("classifies folders and wav files", async () => {
+       const handler = getHandler("fs:resolve-dropped-paths");
+-      const result = await handler({}, [
++      const result = (await handler({}, [
+         testDir,
+         join(testDir, "test1.wav"),
+         join(testDir, "not-a-wav.txt"),
+-      ]) as { folders: string[]; wavFiles: string[] };
++      ])) as { folders: string[]; wavFiles: string[] };
+ 
+       expect(result.folders).toContain(testDir);
+       expect(result.wavFiles).toContain(join(testDir, "test1.wav"));
+@@ -106,7 +108,10 @@ describe("file-system handlers", () => {
+ 
+     it("skips inaccessible paths", async () => {
+       const handler = getHandler("fs:resolve-dropped-paths");
+-      const result = await handler({}, ["/nonexistent/path"]) as { folders: string[]; wavFiles: string[] };
++      const result = (await handler({}, ["/nonexistent/path"])) as {
++        folders: string[];
++        wavFiles: string[];
++      };
+       expect(result.folders).toEqual([]);
+       expect(result.wavFiles).toEqual([]);
+     });
+@@ -115,7 +120,7 @@ describe("file-system handlers", () => {
+   describe("audio:get-buffer", () => {
+     it("reads a WAV file as ArrayBuffer", async () => {
+       const handler = getHandler("audio:get-buffer");
+-      const buffer = await handler({}, join(testDir, "test1.wav")) as ArrayBuffer;
++      const buffer = (await handler({}, join(testDir, "test1.wav"))) as ArrayBuffer;
+       expect(buffer).toBeInstanceOf(ArrayBuffer);
+       expect(buffer.byteLength).toBe(44);
+     });
+@@ -148,19 +153,30 @@ describe("file-system handlers", () => {
+ 
+     it("(m1) returns entries in input order with basename, identical path, size and mtime", async () => {
+       const handler = getHandler("fs:stat-files");
+-      const result = await handler({}, [test1, nested]) as StatEntry[];
+-      expect(result).toEqual([expectedEntry(test1, "test1.wav"), expectedEntry(nested, "nested.wav")]);
++      const result = (await handler({}, [test1, nested])) as StatEntry[];
++      expect(result).toEqual([
++        expectedEntry(test1, "test1.wav"),
++        expectedEntry(nested, "nested.wav"),
++      ]);
+     });
+ 
+     it("(m2) skips a missing path between two existing ones", async () => {
+       const handler = getHandler("fs:stat-files");
+-      const result = await handler({}, [test1, join(testDir, "missing.wav"), nested]) as StatEntry[];
++      const result = (await handler({}, [
++        test1,
++        join(testDir, "missing.wav"),
++        nested,
++      ])) as StatEntry[];
+       expect(result.map((e) => e.path)).toEqual([test1, nested]);
+     });
+ 
+     it("(m3) skips a directory named .wav and a non-wav file, includes an upper-case .WAV", async () => {
+       const handler = getHandler("fs:stat-files");
+-      const result = await handler({}, [dirWav, join(testDir, "not-a-wav.txt"), upperWav]) as StatEntry[];
++      const result = (await handler({}, [
++        dirWav,
++        join(testDir, "not-a-wav.txt"),
++        upperWav,
++      ])) as StatEntry[];
+       expect(result).toEqual([expectedEntry(upperWav, "UPPER.WAV")]);
+     });
+ 
+@@ -175,8 +191,16 @@ describe("file-system handlers", () => {
+       await expect(handler({}, null)).rejects.toThrow("Invalid paths");
+       await expect(handler({}, [""])).rejects.toThrow("Invalid paths");
+       await expect(handler({}, [5])).rejects.toThrow("Invalid paths");
+-      await expect(handler({}, Array.from({ length: 51 }, () => test1))).rejects.toThrow("Invalid paths");
+-      const fifty = await handler({}, Array.from({ length: 50 }, () => test1)) as StatEntry[];
++      await expect(
++        handler(
++          {},
++          Array.from({ length: 51 }, () => test1),
++        ),
++      ).rejects.toThrow("Invalid paths");
++      const fifty = (await handler(
++        {},
++        Array.from({ length: 50 }, () => test1),
++      )) as StatEntry[];
+       expect(fifty).toHaveLength(50);
+     });
+   });
+diff --git a/tests/main/metadata-artists.test.ts b/tests/main/metadata-artists.test.ts
+index 8edfbc8..cad34ed 100644
+--- a/tests/main/metadata-artists.test.ts
++++ b/tests/main/metadata-artists.test.ts
+@@ -16,7 +16,9 @@ interface InfoSubChunkValue {
+ }
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -95,7 +97,10 @@ function listInfoSubChunkEntries(wav: Buffer): InfoSubChunkValue[] {
+     if (offset + 8 + size > list.length) {
+       throw new Error(`INFO sub-chunk ${id} at ${offset} overruns LIST/INFO`);
+     }
+-    entries.push({ id, value: stripTrailingNulBytes(list.subarray(offset + 8, offset + 8 + size)) });
++    entries.push({
++      id,
++      value: stripTrailingNulBytes(list.subarray(offset + 8, offset + 8 + size)),
++    });
+     offset += 8 + size + (size % 2);
+   }
+   return entries;
+diff --git a/tests/main/metadata-empty-audio.test.ts b/tests/main/metadata-empty-audio.test.ts
+index bd1b9d8..6fcbe37 100644
+--- a/tests/main/metadata-empty-audio.test.ts
++++ b/tests/main/metadata-empty-audio.test.ts
+@@ -13,7 +13,9 @@ const testDir = join(tmpdir(), `czaba-empty-audio-test-${process.pid}-${Date.now
+ const EMPTY_AUDIO_MESSAGE = "Audio data is empty, cannot tag";
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -49,7 +51,11 @@ function buildDataChunk(sampleCount: number): Buffer {
+ }
+ 
+ function buildListInfoChunk(): Buffer {
+-  const inam = Buffer.concat([Buffer.from("INAM", "latin1"), Buffer.from([4, 0, 0, 0]), Buffer.from("old\0", "latin1")]);
++  const inam = Buffer.concat([
++    Buffer.from("INAM", "latin1"),
++    Buffer.from([4, 0, 0, 0]),
++    Buffer.from("old\0", "latin1"),
++  ]);
+   const body = Buffer.concat([Buffer.from("INFO", "latin1"), inam]);
+   const header = Buffer.alloc(8);
+   header.write("LIST", 0, "latin1");
+@@ -104,10 +110,9 @@ describe("TM-B05 / D-51: a WAV with empty audio data cannot be tagged and gets a
+     expect(readFileSync(filePath).length).toBe(44);
+     const before = sha256OfFile(filePath);
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { title: "R47" }, STANDARD_FIELDS)).rejects.toHaveProperty(
+-      "message",
+-      `Failed to write metadata: ${EMPTY_AUDIO_MESSAGE}`,
+-    );
++    await expect(
++      getHandler("meta:write")({}, filePath, { title: "R47" }, STANDARD_FIELDS),
++    ).rejects.toHaveProperty("message", `Failed to write metadata: ${EMPTY_AUDIO_MESSAGE}`);
+ 
+     expect(sha256OfFile(filePath)).toBe(before);
+   });
+@@ -117,10 +122,22 @@ describe("TM-B05 / D-51: a WAV with empty audio data cannot be tagged and gets a
+     const samplePath = copyFixtureWav("sample.wav", "a2-sample.wav");
+     const before = sha256OfFile(emptyPath);
+ 
+-    const result = await getHandler("meta:write-batch")({}, [emptyPath, samplePath], { title: "R47 batch" }, STANDARD_FIELDS);
++    const result = await getHandler("meta:write-batch")(
++      {},
++      [emptyPath, samplePath],
++      { title: "R47 batch" },
++      STANDARD_FIELDS,
++    );
+ 
+-    expect(result).toEqual({ succeeded: 1, failed: [{ path: emptyPath, error: EMPTY_AUDIO_MESSAGE }] });
+-    const readBack = (await getHandler("meta:read")({}, samplePath, STANDARD_FIELDS)) as WavMetadata;
++    expect(result).toEqual({
++      succeeded: 1,
++      failed: [{ path: emptyPath, error: EMPTY_AUDIO_MESSAGE }],
++    });
++    const readBack = (await getHandler("meta:read")(
++      {},
++      samplePath,
++      STANDARD_FIELDS,
++    )) as WavMetadata;
+     expect(readBack.title).toBe("R47 batch");
+     expect(sha256OfFile(emptyPath)).toBe(before);
+   });
+@@ -129,27 +146,36 @@ describe("TM-B05 / D-51: a WAV with empty audio data cannot be tagged and gets a
+     const filePath = writeTestWav("a3-no-data.wav", buildRiffWave([buildFmtChunk()]));
+     const before = sha256OfFile(filePath);
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { title: "R47" }, STANDARD_FIELDS)).rejects.toHaveProperty(
+-      "message",
+-      `Failed to write metadata: ${EMPTY_AUDIO_MESSAGE}`,
+-    );
++    await expect(
++      getHandler("meta:write")({}, filePath, { title: "R47" }, STANDARD_FIELDS),
++    ).rejects.toHaveProperty("message", `Failed to write metadata: ${EMPTY_AUDIO_MESSAGE}`);
+ 
+     expect(sha256OfFile(filePath)).toBe(before);
+   });
+ 
+   it("(a4) meta:write on a 0-sample WAV whose empty data chunk is followed by LIST/INFO still tags it", async () => {
+-    const filePath = writeTestWav("a4-empty-then-list.wav", buildRiffWave([buildFmtChunk(), buildDataChunk(0), buildListInfoChunk()]));
++    const filePath = writeTestWav(
++      "a4-empty-then-list.wav",
++      buildRiffWave([buildFmtChunk(), buildDataChunk(0), buildListInfoChunk()]),
++    );
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { title: "R47 list" }, STANDARD_FIELDS)).resolves.toBeUndefined();
++    await expect(
++      getHandler("meta:write")({}, filePath, { title: "R47 list" }, STANDARD_FIELDS),
++    ).resolves.toBeUndefined();
+ 
+     const readBack = (await getHandler("meta:read")({}, filePath, STANDARD_FIELDS)) as WavMetadata;
+     expect(readBack.title).toBe("R47 list");
+   });
+ 
+   it("(a5) meta:write on a 1-sample WAV still tags it", async () => {
+-    const filePath = writeTestWav("a5-one-sample.wav", buildRiffWave([buildFmtChunk(), buildDataChunk(1)]));
++    const filePath = writeTestWav(
++      "a5-one-sample.wav",
++      buildRiffWave([buildFmtChunk(), buildDataChunk(1)]),
++    );
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { title: "R47 one" }, STANDARD_FIELDS)).resolves.toBeUndefined();
++    await expect(
++      getHandler("meta:write")({}, filePath, { title: "R47 one" }, STANDARD_FIELDS),
++    ).resolves.toBeUndefined();
+ 
+     const readBack = (await getHandler("meta:read")({}, filePath, STANDARD_FIELDS)) as WavMetadata;
+     expect(readBack.title).toBe("R47 one");
+@@ -158,7 +184,9 @@ describe("TM-B05 / D-51: a WAV with empty audio data cannot be tagged and gets a
+   it("(a6) meta:write on corrupt.wav keeps the library's other error text unchanged", async () => {
+     const filePath = copyFixtureWav("corrupt.wav", "a6-corrupt.wav");
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { title: "R47" }, STANDARD_FIELDS)).rejects.toHaveProperty(
++    await expect(
++      getHandler("meta:write")({}, filePath, { title: "R47" }, STANDARD_FIELDS),
++    ).rejects.toHaveProperty(
+       "message",
+       "Failed to write metadata: WAV file is missing header chunk",
+     );
+@@ -170,10 +198,9 @@ describe("TM-B05 / D-51: a WAV with empty audio data cannot be tagged and gets a
+       throw new Error("WAV file is missing data chunk");
+     });
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { title: "R47" }, STANDARD_FIELDS)).rejects.toHaveProperty(
+-      "message",
+-      "Failed to write metadata: WAV file is missing data chunk",
+-    );
++    await expect(
++      getHandler("meta:write")({}, filePath, { title: "R47" }, STANDARD_FIELDS),
++    ).rejects.toHaveProperty("message", "Failed to write metadata: WAV file is missing data chunk");
+   });
+ 
+   it("(a7) meta:read and meta:read-batch on the empty WAV still return empty metadata (Q22)", async () => {
+@@ -181,6 +208,8 @@ describe("TM-B05 / D-51: a WAV with empty audio data cannot be tagged and gets a
+     const expected = expectedEmptyStandardMetadata();
+ 
+     expect(await getHandler("meta:read")({}, filePath, STANDARD_FIELDS)).toEqual(expected);
+-    expect(await getHandler("meta:read-batch")({}, [filePath], STANDARD_FIELDS)).toEqual({ [filePath]: expected });
++    expect(await getHandler("meta:read-batch")({}, [filePath], STANDARD_FIELDS)).toEqual({
++      [filePath]: expected,
++    });
+   });
+ });
+diff --git a/tests/main/metadata-empty-values.test.ts b/tests/main/metadata-empty-values.test.ts
+index 49f3aaf..4a881e3 100644
+--- a/tests/main/metadata-empty-values.test.ts
++++ b/tests/main/metadata-empty-values.test.ts
+@@ -37,7 +37,9 @@ interface InfoSubChunkEntry {
+ }
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -116,7 +118,10 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+     const icmtBefore = infoPayload(filePath, "ICMT");
+     expect(icatBefore?.equals(Buffer.from("DOORWood", "ascii")), "seeded ICAT").toBe(true);
+     expect(icmtBefore?.equals(Buffer.from("x", "ascii")), "seeded ICMT").toBe(true);
+-    expect(infoPayload(filePath, "IKEY")?.equals(Buffer.from("door, slam", "ascii")), "seeded IKEY").toBe(true);
++    expect(
++      infoPayload(filePath, "IKEY")?.equals(Buffer.from("door, slam", "ascii")),
++      "seeded IKEY",
++    ).toBe(true);
+ 
+     await writeMetadataViaIpc(filePath, { keywords: "" });
+ 
+@@ -124,20 +129,28 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+     expect(info.has("IKEY"), "IKEY removed").toBe(false);
+     expect(icatBefore && info.get("ICAT")?.equals(icatBefore), "ICAT unchanged").toBe(true);
+     expect(icmtBefore && info.get("ICMT")?.equals(icmtBefore), "ICMT unchanged").toBe(true);
+-    expect(readFileSync(filePath).includes(Buffer.from("door, slam", "ascii")), "old IKEY bytes gone").toBe(false);
++    expect(
++      readFileSync(filePath).includes(Buffer.from("door, slam", "ascii")),
++      "old IKEY bytes gone",
++    ).toBe(false);
+   });
+ 
+   it("(e2) a whitespace-only category or title is empty and removes ICAT or INAM", async () => {
+     const categoryFile = copySampleWav("e2-category.wav");
+     await writeMetadataViaIpc(categoryFile, { category: "DOORWood" });
+-    expect(infoPayload(categoryFile, "ICAT")?.equals(Buffer.from("DOORWood", "ascii")), "seeded ICAT").toBe(true);
++    expect(
++      infoPayload(categoryFile, "ICAT")?.equals(Buffer.from("DOORWood", "ascii")),
++      "seeded ICAT",
++    ).toBe(true);
+     await writeMetadataViaIpc(categoryFile, { category: "   " });
+     expect(infoIdsOf(categoryFile)).not.toContain("ICAT");
+     expect((await readMetadataViaIpc(categoryFile)).category).toBe("");
+ 
+     const titleFile = copySampleWav("e2-title.wav");
+     await writeMetadataViaIpc(titleFile, { title: "R45" });
+-    expect(infoPayload(titleFile, "INAM")?.equals(Buffer.from("R45", "ascii")), "seeded INAM").toBe(true);
++    expect(infoPayload(titleFile, "INAM")?.equals(Buffer.from("R45", "ascii")), "seeded INAM").toBe(
++      true,
++    );
+     await writeMetadataViaIpc(titleFile, { title: "  " });
+     expect(infoIdsOf(titleFile)).not.toContain("INAM");
+     expect((await readMetadataViaIpc(titleFile)).title).toBe("");
+@@ -150,7 +163,9 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+ 
+     const cleared = copySampleWav("e3-cleared.wav");
+     await writeMetadataViaIpc(cleared, { note: "n1" }, NOTE_SCHEMA);
+-    expect(infoPayload(cleared, "RNOT")?.equals(Buffer.from("n1", "ascii")), "seeded RNOT").toBe(true);
++    expect(infoPayload(cleared, "RNOT")?.equals(Buffer.from("n1", "ascii")), "seeded RNOT").toBe(
++      true,
++    );
+     await writeMetadataViaIpc(cleared, { note: "" }, NOTE_SCHEMA);
+     expect(infoIdsOf(cleared)).not.toContain("RNOT");
+     expect((await readMetadataViaIpc(cleared, NOTE_SCHEMA)).note).toBe("");
+@@ -192,16 +207,23 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+       category: "",
+     };
+ 
+-    await expect(getHandler("meta:write")({}, filePath, fullSave, STANDARD_FIELDS)).resolves.toBeUndefined();
++    await expect(
++      getHandler("meta:write")({}, filePath, fullSave, STANDARD_FIELDS),
++    ).resolves.toBeUndefined();
+ 
+     const after = readFileSync(filePath);
+-    const schemaIds = STANDARD_FIELDS.flatMap((field) => (field.riffChunkId ? [field.riffChunkId] : []));
++    const schemaIds = STANDARD_FIELDS.flatMap((field) =>
++      field.riffChunkId ? [field.riffChunkId] : [],
++    );
+     const ids = listInfoSubChunkEntries(after).map((entry) => entry.id);
+     for (const id of schemaIds) {
+       expect(ids, `no ${id} sub-chunk`).not.toContain(id);
+     }
+     expect(ids, "no INFO sub-chunk at all").toEqual([]);
+-    expect(findInfoListPayloads(after).map((payload) => payload.length), "LIST/INFO sizes").toEqual([4]);
++    expect(
++      findInfoListPayloads(after).map((payload) => payload.length),
++      "LIST/INFO sizes",
++    ).toEqual([4]);
+     expect(sha256OfRiffChunk(after, "data"), "data sha256").toBe(dataBefore);
+   });
+ 
+@@ -219,12 +241,19 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+     const second = copySampleWav("e7-second.wav");
+     await writeMetadataViaIpc(first, { ...SEED_META, category: "DOORWood" });
+     await writeMetadataViaIpc(second, { ...SEED_META, category: "DOORMetal" });
+-    const before = [first, second].map((filePath) => parseListInfoSubChunks(readFileSync(filePath)));
++    const before = [first, second].map((filePath) =>
++      parseListInfoSubChunks(readFileSync(filePath)),
++    );
+     for (const info of before) {
+       expect(info.has("IKEY"), "seeded IKEY").toBe(true);
+     }
+ 
+-    const result = await getHandler("meta:write-batch")({}, [first, second], { keywords: "" }, STANDARD_FIELDS);
++    const result = await getHandler("meta:write-batch")(
++      {},
++      [first, second],
++      { keywords: "" },
++      STANDARD_FIELDS,
++    );
+ 
+     expect(result).toEqual({ succeeded: 2, failed: [] });
+     [first, second].forEach((filePath, index) => {
+@@ -233,13 +262,19 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+       const expectedIds = [...before[index].keys()].filter((id) => id !== "IKEY").sort();
+       expect([...info.keys()].sort(), `other INFO IDs in ${filePath}`).toEqual(expectedIds);
+       for (const id of expectedIds) {
+-        expect(info.get(id)?.equals(before[index].get(id) ?? Buffer.alloc(0)), `${id} unchanged in ${filePath}`).toBe(
+-          true,
+-        );
++        expect(
++          info.get(id)?.equals(before[index].get(id) ?? Buffer.alloc(0)),
++          `${id} unchanged in ${filePath}`,
++        ).toBe(true);
+       }
+     });
+-    expect(infoPayload(first, "ICAT")?.equals(Buffer.from("DOORWood", "ascii")), "first ICAT").toBe(true);
+-    expect(infoPayload(second, "ICAT")?.equals(Buffer.from("DOORMetal", "ascii")), "second ICAT").toBe(true);
++    expect(infoPayload(first, "ICAT")?.equals(Buffer.from("DOORWood", "ascii")), "first ICAT").toBe(
++      true,
++    );
++    expect(
++      infoPayload(second, "ICAT")?.equals(Buffer.from("DOORMetal", "ascii")),
++      "second ICAT",
++    ).toBe(true);
+   });
+ 
+   it("(e8) removing an invalid custom ID keeps the D-18 error and leaves the file unchanged", async () => {
+@@ -247,10 +282,9 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+     await writeMetadataViaIpc(filePath, { category: "DOORWood" });
+     const before = readFileSync(filePath);
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { bad: "" }, BAD_SCHEMA)).rejects.toHaveProperty(
+-      "message",
+-      `Failed to write metadata: ${FIELD_ERRORS_PREFIX}AB`,
+-    );
++    await expect(
++      getHandler("meta:write")({}, filePath, { bad: "" }, BAD_SCHEMA),
++    ).rejects.toHaveProperty("message", `Failed to write metadata: ${FIELD_ERRORS_PREFIX}AB`);
+ 
+     expect(readFileSync(filePath).equals(before), "file bytes unchanged").toBe(true);
+   });
+@@ -260,10 +294,9 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+     const before = readFileSync(filePath);
+     expect(findInfoListPayloads(before), "no LIST/INFO before").toHaveLength(0);
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { bad: "" }, BAD_SCHEMA)).rejects.toHaveProperty(
+-      "message",
+-      `Failed to write metadata: ${FIELD_ERRORS_PREFIX}AB`,
+-    );
++    await expect(
++      getHandler("meta:write")({}, filePath, { bad: "" }, BAD_SCHEMA),
++    ).rejects.toHaveProperty("message", `Failed to write metadata: ${FIELD_ERRORS_PREFIX}AB`);
+ 
+     expect(readFileSync(filePath).equals(before), "file bytes unchanged").toBe(true);
+   });
+@@ -271,7 +304,10 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+   it("(e10) whitespace-only items in the standard genres field remove IGNR", async () => {
+     const filePath = copySampleWav("e10-genres.wav");
+     await writeMetadataViaIpc(filePath, { genres: ["Foley"] });
+-    expect(infoPayload(filePath, "IGNR")?.equals(Buffer.from("Foley", "ascii")), "seeded IGNR").toBe(true);
++    expect(
++      infoPayload(filePath, "IGNR")?.equals(Buffer.from("Foley", "ascii")),
++      "seeded IGNR",
++    ).toBe(true);
+ 
+     await writeMetadataViaIpc(filePath, { genres: ["  ", ""] });
+ 
+@@ -287,6 +323,9 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+ 
+     const ids = infoIdsOf(filePath);
+     expect(ids).not.toContain("IKEY");
+-    expect(infoPayload(filePath, "ICAT")?.equals(Buffer.from("DOORWood", "ascii")), "ICAT payload").toBe(true);
++    expect(
++      infoPayload(filePath, "ICAT")?.equals(Buffer.from("DOORWood", "ascii")),
++      "ICAT payload",
++    ).toBe(true);
+   });
+ });
+diff --git a/tests/main/metadata-number-values.test.ts b/tests/main/metadata-number-values.test.ts
+index be29aa0..d465602 100644
+--- a/tests/main/metadata-number-values.test.ts
++++ b/tests/main/metadata-number-values.test.ts
+@@ -25,7 +25,9 @@ interface InfoSubChunkEntry {
+ }
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -107,7 +109,9 @@ function infoPayload(filePath: string, id: string): Buffer | undefined {
+ }
+ 
+ function expectNoZeroSizeSubChunk(filePath: string): void {
+-  const empty = listInfoSubChunkEntries(readFileSync(filePath)).filter((entry) => entry.payload.length === 0);
++  const empty = listInfoSubChunkEntries(readFileSync(filePath)).filter(
++    (entry) => entry.payload.length === 0,
++  );
+   expect(
+     empty.map((entry) => entry.id),
+     "no size-0 INFO sub-chunk",
+@@ -116,7 +120,9 @@ function expectNoZeroSizeSubChunk(filePath: string): void {
+ 
+ async function seedTake(filePath: string, extra: MetadataRecord = {}): Promise<void> {
+   await writeTakeMetadataViaIpc(filePath, { take: 7, ...extra });
+-  expect(infoPayload(filePath, "ITKN")?.equals(Buffer.from("7", "ascii")), "seeded ITKN").toBe(true);
++  expect(infoPayload(filePath, "ITKN")?.equals(Buffer.from("7", "ascii")), "seeded ITKN").toBe(
++    true,
++  );
+ }
+ 
+ beforeAll(() => {
+@@ -164,7 +170,10 @@ describe("TM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is",
+       ),
+       "no ITKN payload with 7",
+     ).toBe(false);
+-    expect(infoPayload(cleared, "ICAT")?.equals(Buffer.from("DOORWood", "ascii")), "ICAT kept").toBe(true);
++    expect(
++      infoPayload(cleared, "ICAT")?.equals(Buffer.from("DOORWood", "ascii")),
++      "ICAT kept",
++    ).toBe(true);
+     expectNoZeroSizeSubChunk(cleared);
+     expect((await readTakeMetadataViaIpc(cleared)).take).toBe("");
+ 
+@@ -185,7 +194,9 @@ describe("TM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is",
+ 
+     const negative = copySampleWav("n4-negative.wav");
+     await writeTakeMetadataViaIpc(negative, { take: -2 });
+-    expect(infoPayload(negative, "ITKN")?.equals(Buffer.from("-2", "ascii")), "ITKN payload").toBe(true);
++    expect(infoPayload(negative, "ITKN")?.equals(Buffer.from("-2", "ascii")), "ITKN payload").toBe(
++      true,
++    );
+     expect((await readTakeMetadataViaIpc(negative)).take).toBe(-2);
+   });
+ 
+@@ -202,7 +213,9 @@ describe("TM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is",
+   it("(n6) clearing year with '' removes ICRD and reads as ''", async () => {
+     const cleared = copySampleWav("n6-cleared.wav");
+     await writeTakeMetadataViaIpc(cleared, { year: 2024 });
+-    expect(infoPayload(cleared, "ICRD")?.toString("utf8").replace(/\0+$/, ""), "seeded ICRD").toBe("2024");
++    expect(infoPayload(cleared, "ICRD")?.toString("utf8").replace(/\0+$/, ""), "seeded ICRD").toBe(
++      "2024",
++    );
+     await writeTakeMetadataViaIpc(cleared, { year: "" });
+     expect(infoIdsOf(cleared)).not.toContain("ICRD");
+     expect((await readTakeMetadataViaIpc(cleared)).year).toBe("");
+@@ -222,9 +235,16 @@ describe("TM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is",
+     const second = copySampleWav("n7-second.wav");
+     await seedTake(first, { category: "DOORWood", comment: "x" });
+     await seedTake(second, { category: "DOORMetal", comment: "y" });
+-    const before = [first, second].map((filePath) => parseListInfoSubChunks(readFileSync(filePath)));
++    const before = [first, second].map((filePath) =>
++      parseListInfoSubChunks(readFileSync(filePath)),
++    );
+ 
+-    const result = await getHandler("meta:write-batch")({}, [first, second], { take: "" }, TAKE_SCHEMA);
++    const result = await getHandler("meta:write-batch")(
++      {},
++      [first, second],
++      { take: "" },
++      TAKE_SCHEMA,
++    );
+ 
+     expect(result).toEqual({ succeeded: 2, failed: [] });
+     [first, second].forEach((filePath, index) => {
+@@ -233,13 +253,19 @@ describe("TM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is",
+       const expectedIds = [...before[index].keys()].filter((id) => id !== "ITKN").sort();
+       expect([...info.keys()].sort(), `other INFO IDs in ${filePath}`).toEqual(expectedIds);
+       for (const id of expectedIds) {
+-        expect(info.get(id)?.equals(before[index].get(id) ?? Buffer.alloc(0)), `${id} unchanged in ${filePath}`).toBe(
+-          true,
+-        );
++        expect(
++          info.get(id)?.equals(before[index].get(id) ?? Buffer.alloc(0)),
++          `${id} unchanged in ${filePath}`,
++        ).toBe(true);
+       }
+     });
+-    expect(infoPayload(first, "ICAT")?.equals(Buffer.from("DOORWood", "ascii")), "first ICAT").toBe(true);
+-    expect(infoPayload(second, "ICAT")?.equals(Buffer.from("DOORMetal", "ascii")), "second ICAT").toBe(true);
++    expect(infoPayload(first, "ICAT")?.equals(Buffer.from("DOORWood", "ascii")), "first ICAT").toBe(
++      true,
++    );
++    expect(
++      infoPayload(second, "ICAT")?.equals(Buffer.from("DOORMetal", "ascii")),
++      "second ICAT",
++    ).toBe(true);
+   });
+ 
+   it("(n8) a NaN take is empty and removes ITKN", async () => {
+@@ -254,7 +280,9 @@ describe("TM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is",
+ 
+   it("(n9) meta:read on a corrupt file returns '' for every number field of the schema", async () => {
+     const meta = await readTakeMetadataViaIpc(join(fixturesDir, "corrupt.wav"));
+-    const numberKeys = TAKE_SCHEMA.filter((field) => field.type === "number").map((field) => field.key);
++    const numberKeys = TAKE_SCHEMA.filter((field) => field.type === "number").map(
++      (field) => field.key,
++    );
+     expect(numberKeys.sort()).toEqual(["bpm", "take", "track", "year"]);
+     for (const key of numberKeys) {
+       expect(meta[key], key).toBe("");
+diff --git a/tests/main/metadata-write-field-errors.test.ts b/tests/main/metadata-write-field-errors.test.ts
+index d6631c8..4b95e8c 100644
+--- a/tests/main/metadata-write-field-errors.test.ts
++++ b/tests/main/metadata-write-field-errors.test.ts
+@@ -11,10 +11,15 @@ const fixturesDir = join(__dirname, "..", "fixtures");
+ const testDir = join(tmpdir(), `czaba-write-field-errors-test-${process.pid}-${Date.now()}`);
+ const FIELD_ERRORS_PREFIX = "RIFF INFO fields could not be written: ";
+ 
+-const BAD: FieldDefinition[] = [...STANDARD_FIELDS, { key: "bad", label: "Bad", type: "text", riffChunkId: "AB" }];
++const BAD: FieldDefinition[] = [
++  ...STANDARD_FIELDS,
++  { key: "bad", label: "Bad", type: "text", riffChunkId: "AB" },
++];
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -40,10 +45,9 @@ describe("TM-B13 / D-18: writeTagsToFile fails before save when a custom INFO fi
+     const filePath = copySampleWav("a-single.wav");
+     const before = readFileSync(filePath);
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { category: "DOORWood", bad: "x" }, BAD)).rejects.toHaveProperty(
+-      "message",
+-      `Failed to write metadata: ${FIELD_ERRORS_PREFIX}AB`,
+-    );
++    await expect(
++      getHandler("meta:write")({}, filePath, { category: "DOORWood", bad: "x" }, BAD),
++    ).rejects.toHaveProperty("message", `Failed to write metadata: ${FIELD_ERRORS_PREFIX}AB`);
+ 
+     expect(readFileSync(filePath).equals(before), "file bytes unchanged").toBe(true);
+   });
+@@ -51,7 +55,9 @@ describe("TM-B13 / D-18: writeTagsToFile fails before save when a custom INFO fi
+   it("(b) a bad schema field whose value is undefined is not attempted and the save succeeds", async () => {
+     const filePath = copySampleWav("b-undefined.wav");
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { category: "DOORWood" }, BAD)).resolves.toBeUndefined();
++    await expect(
++      getHandler("meta:write")({}, filePath, { category: "DOORWood" }, BAD),
++    ).resolves.toBeUndefined();
+ 
+     const icat = parseListInfoSubChunks(readFileSync(filePath)).get("ICAT");
+     expect(icat?.equals(Buffer.from("DOORWood", "ascii")), "ICAT payload").toBe(true);
+@@ -63,7 +69,12 @@ describe("TM-B13 / D-18: writeTagsToFile fails before save when a custom INFO fi
+     const firstBefore = readFileSync(first);
+     const secondBefore = readFileSync(second);
+ 
+-    const result = await getHandler("meta:write-batch")({}, [first, second], { category: "BATCHCat", bad: "x" }, BAD);
++    const result = await getHandler("meta:write-batch")(
++      {},
++      [first, second],
++      { category: "BATCHCat", bad: "x" },
++      BAD,
++    );
+ 
+     expect(result).toEqual({
+       succeeded: 0,
+@@ -80,12 +91,19 @@ describe("TM-B13 / D-18: writeTagsToFile fails before save when a custom INFO fi
+     const first = copySampleWav("c2-first.wav");
+     const second = copySampleWav("c2-second.wav");
+ 
+-    const result = await getHandler("meta:write-batch")({}, [first, second], { category: "BATCHCat" }, STANDARD_FIELDS);
++    const result = await getHandler("meta:write-batch")(
++      {},
++      [first, second],
++      { category: "BATCHCat" },
++      STANDARD_FIELDS,
++    );
+ 
+     expect(result).toEqual({ succeeded: 2, failed: [] });
+     for (const filePath of [first, second]) {
+       const icat = parseListInfoSubChunks(readFileSync(filePath)).get("ICAT");
+-      expect(icat?.equals(Buffer.from("BATCHCat", "ascii")), `ICAT payload of ${filePath}`).toBe(true);
++      expect(icat?.equals(Buffer.from("BATCHCat", "ascii")), `ICAT payload of ${filePath}`).toBe(
++        true,
++      );
+     }
+   });
+ 
+@@ -98,7 +116,9 @@ describe("TM-B13 / D-18: writeTagsToFile fails before save when a custom INFO fi
+     const filePath = copySampleWav("d-several.wav");
+     const before = readFileSync(filePath);
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { bad2: ["y"], bad1: "x" }, schema)).rejects.toHaveProperty(
++    await expect(
++      getHandler("meta:write")({}, filePath, { bad2: ["y"], bad1: "x" }, schema),
++    ).rejects.toHaveProperty(
+       "message",
+       `Failed to write metadata: ${FIELD_ERRORS_PREFIX}AB, ICAT5`,
+     );
+@@ -113,7 +133,9 @@ describe("TM-B13 / D-18: writeTagsToFile fails before save when a custom INFO fi
+     ];
+     const filePath = copySampleWav("e-valid.wav");
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { take: "3", category: "X" }, schema)).resolves.toBeUndefined();
++    await expect(
++      getHandler("meta:write")({}, filePath, { take: "3", category: "X" }, schema),
++    ).resolves.toBeUndefined();
+ 
+     const info = parseListInfoSubChunks(readFileSync(filePath));
+     const itkn = info.get("ITKN");
+diff --git a/tests/main/metadata-write-guard.test.ts b/tests/main/metadata-write-guard.test.ts
+index f98cd46..30f6dbf 100644
+--- a/tests/main/metadata-write-guard.test.ts
++++ b/tests/main/metadata-write-guard.test.ts
+@@ -2,7 +2,7 @@ import { copyFileSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+ import { tmpdir } from "node:os";
+ import { join } from "node:path";
+ import { ipcMain } from "electron";
+-import { File as TagFile, Id3v2Tag } from "node-taglib-sharp";
++import { Id3v2Tag, File as TagFile } from "node-taglib-sharp";
+ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+ import { registerMetadataHandlers } from "../../src/main/ipc/metadata";
+ import { STANDARD_FIELDS } from "../../src/shared/types";
+@@ -10,14 +10,17 @@ import { parseListInfoSubChunks } from "./riff-chunks";
+ 
+ const fixturesDir = join(__dirname, "..", "fixtures");
+ const testDir = join(tmpdir(), `czaba-write-guard-test-${process.pid}-${Date.now()}`);
+-const RIFF_INFO_UNAVAILABLE_MESSAGE = "RIFF INFO tag is not available; custom fields were not written";
++const RIFF_INFO_UNAVAILABLE_MESSAGE =
++  "RIFF INFO tag is not available; custom fields were not written";
+ 
+ interface NonRiffTagOverride {
+   saveCalls: () => number;
+ }
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -67,7 +70,10 @@ describe("TM-B12 / D-17: writeTagsToFile fails loudly when custom INFO fields ca
+ 
+     await expect(
+       getHandler("meta:write")({}, filePath, { category: "DOORWood" }, STANDARD_FIELDS),
+-    ).rejects.toHaveProperty("message", `Failed to write metadata: ${RIFF_INFO_UNAVAILABLE_MESSAGE}`);
++    ).rejects.toHaveProperty(
++      "message",
++      `Failed to write metadata: ${RIFF_INFO_UNAVAILABLE_MESSAGE}`,
++    );
+ 
+     expect(override.saveCalls()).toBe(0);
+     expect(readFileSync(filePath).equals(before), "file bytes unchanged").toBe(true);
+@@ -77,7 +83,9 @@ describe("TM-B12 / D-17: writeTagsToFile fails loudly when custom INFO fields ca
+     const filePath = copySampleWav("b-no-custom.wav");
+     const override = overrideNextTagWithNonRiffTag();
+ 
+-    await expect(getHandler("meta:write")({}, filePath, { title: "X" }, STANDARD_FIELDS)).resolves.toBeUndefined();
++    await expect(
++      getHandler("meta:write")({}, filePath, { title: "X" }, STANDARD_FIELDS),
++    ).resolves.toBeUndefined();
+ 
+     expect(override.saveCalls()).toBe(1);
+   });
+@@ -88,7 +96,12 @@ describe("TM-B12 / D-17: writeTagsToFile fails loudly when custom INFO fields ca
+     const firstBefore = readFileSync(first);
+     overrideNextTagWithNonRiffTag();
+ 
+-    const result = await getHandler("meta:write-batch")({}, [first, second], { category: "DOORWood" }, STANDARD_FIELDS);
++    const result = await getHandler("meta:write-batch")(
++      {},
++      [first, second],
++      { category: "DOORWood" },
++      STANDARD_FIELDS,
++    );
+ 
+     expect(result).toEqual({
+       succeeded: 1,
+@@ -104,7 +117,12 @@ describe("TM-B12 / D-17: writeTagsToFile fails loudly when custom INFO fields ca
+   it("(d) a real WAV without the override writes ICAT and IKEY", async () => {
+     const filePath = copySampleWav("d-real.wav");
+ 
+-    await getHandler("meta:write")({}, filePath, { category: "DOORWood", keywords: "door, slam" }, STANDARD_FIELDS);
++    await getHandler("meta:write")(
++      {},
++      filePath,
++      { category: "DOORWood", keywords: "door, slam" },
++      STANDARD_FIELDS,
++    );
+ 
+     const info = parseListInfoSubChunks(readFileSync(filePath));
+     expect(info.get("ICAT")?.equals(Buffer.from("DOORWood", "ascii")), "ICAT payload").toBe(true);
+diff --git a/tests/main/metadata.test.ts b/tests/main/metadata.test.ts
+index 600ad42..f89e273 100644
+--- a/tests/main/metadata.test.ts
++++ b/tests/main/metadata.test.ts
+@@ -1,16 +1,18 @@
+ import { copyFileSync, readFileSync, rmSync } from "node:fs";
+-import { join } from "node:path";
+ import { tmpdir } from "node:os";
+-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
++import { join } from "node:path";
+ import { ipcMain } from "electron";
+-import { STANDARD_FIELDS } from "../../src/shared/types";
++import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+ import { registerMetadataHandlers } from "../../src/main/ipc/metadata";
++import { STANDARD_FIELDS } from "../../src/shared/types";
+ 
+ const fixturesDir = join(__dirname, "..", "fixtures");
+ const testDir = join(tmpdir(), `czaba-meta-test-${Date.now()}`);
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -34,14 +36,20 @@ describe("metadata handlers", () => {
+   describe("meta:read", () => {
+     it("reads empty metadata from a clean WAV", async () => {
+       const handler = getHandler("meta:read");
+-      const meta = await handler({}, join(testDir, "roundtrip.wav"), STANDARD_FIELDS) as Record<string, unknown>;
++      const meta = (await handler({}, join(testDir, "roundtrip.wav"), STANDARD_FIELDS)) as Record<
++        string,
++        unknown
++      >;
+       expect(meta).toBeDefined();
+       expect(typeof meta.title).toBe("string");
+     });
+ 
+     it("returns empty metadata for corrupt files", async () => {
+       const handler = getHandler("meta:read");
+-      const meta = await handler({}, join(fixturesDir, "corrupt.wav"), STANDARD_FIELDS) as Record<string, unknown>;
++      const meta = (await handler({}, join(fixturesDir, "corrupt.wav"), STANDARD_FIELDS)) as Record<
++        string,
++        unknown
++      >;
+       expect(meta).toBeDefined();
+       expect(meta.title).toBe("");
+     });
+@@ -53,16 +61,21 @@ describe("metadata handlers", () => {
+       const readHandler = getHandler("meta:read");
+       const filePath = join(testDir, "roundtrip.wav");
+ 
+-      await writeHandler({}, filePath, {
+-        title: "Test Title",
+-        artists: ["Artist A", "Artist B"],
+-        album: "Test Album",
+-        year: 2024,
+-        bpm: 120,
+-        comment: "A test comment",
+-      }, STANDARD_FIELDS);
++      await writeHandler(
++        {},
++        filePath,
++        {
++          title: "Test Title",
++          artists: ["Artist A", "Artist B"],
++          album: "Test Album",
++          year: 2024,
++          bpm: 120,
++          comment: "A test comment",
++        },
++        STANDARD_FIELDS,
++      );
+ 
+-      const meta = await readHandler({}, filePath, STANDARD_FIELDS) as Record<string, unknown>;
++      const meta = (await readHandler({}, filePath, STANDARD_FIELDS)) as Record<string, unknown>;
+       expect(meta.title).toBe("Test Title");
+       expect(meta.artists).toEqual(["Artist A", "Artist B"]);
+       expect(meta.album).toBe("Test Album");
+@@ -80,7 +93,7 @@ describe("metadata handlers", () => {
+ 
+       await writeHandler({}, filePath, { keywords: "door, slam" }, STANDARD_FIELDS);
+ 
+-      const meta = await readHandler({}, filePath, STANDARD_FIELDS) as Record<string, unknown>;
++      const meta = (await readHandler({}, filePath, STANDARD_FIELDS)) as Record<string, unknown>;
+       expect(meta.keywords).toBe("door, slam");
+ 
+       const bytes = readFileSync(filePath);
+@@ -105,11 +118,11 @@ describe("metadata handlers", () => {
+       copyFileSync(join(fixturesDir, "sample.wav"), join(testDir, "batch2.wav"));
+ 
+       const handler = getHandler("meta:read-batch");
+-      const results = await handler(
++      const results = (await handler(
+         {},
+         [join(testDir, "batch1.wav"), join(testDir, "batch2.wav")],
+         STANDARD_FIELDS,
+-      ) as Record<string, Record<string, unknown>>;
++      )) as Record<string, Record<string, unknown>>;
+ 
+       expect(Object.keys(results)).toHaveLength(2);
+       expect(results[join(testDir, "batch1.wav")]).toBeDefined();
+@@ -123,12 +136,12 @@ describe("metadata handlers", () => {
+       copyFileSync(join(fixturesDir, "sample.wav"), join(testDir, "batchw2.wav"));
+ 
+       const handler = getHandler("meta:write-batch");
+-      const result = await handler(
++      const result = (await handler(
+         {},
+         [join(testDir, "batchw1.wav"), join(testDir, "batchw2.wav")],
+         { title: "Batch Title" },
+         STANDARD_FIELDS,
+-      ) as { succeeded: number; failed: Array<{ path: string; error: string }> };
++      )) as { succeeded: number; failed: Array<{ path: string; error: string }> };
+ 
+       expect(result.succeeded).toBe(2);
+       expect(result.failed).toHaveLength(0);
+@@ -136,12 +149,12 @@ describe("metadata handlers", () => {
+ 
+     it("reports failures for invalid files", async () => {
+       const handler = getHandler("meta:write-batch");
+-      const result = await handler(
++      const result = (await handler(
+         {},
+         [join(testDir, "nonexistent.wav")],
+         { title: "Test" },
+         STANDARD_FIELDS,
+-      ) as { succeeded: number; failed: Array<{ path: string; error: string }> };
++      )) as { succeeded: number; failed: Array<{ path: string; error: string }> };
+ 
+       expect(result.succeeded).toBe(0);
+       expect(result.failed).toHaveLength(1);
+diff --git a/tests/main/recording-tag-contract.test.ts b/tests/main/recording-tag-contract.test.ts
+index 2b66a7f..be62d4a 100644
+--- a/tests/main/recording-tag-contract.test.ts
++++ b/tests/main/recording-tag-contract.test.ts
+@@ -6,11 +6,11 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
+ import { registerMetadataHandlers } from "../../src/main/ipc/metadata";
+ import { STANDARD_FIELDS } from "../../src/shared/types";
+ import {
+-  RECORDER_BEXT_DESCRIPTION,
+   createRecorderWavBuffer,
+   findSingleRiffChunk,
+   parseListInfoSubChunks,
+   parseRiffTopLevelChunks,
++  RECORDER_BEXT_DESCRIPTION,
+   sha256OfRiffChunk,
+ } from "./riff-chunks";
+ 
+@@ -30,7 +30,9 @@ const CONTRACT_META = {
+ type MetadataRecord = Record<string, unknown>;
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -169,7 +171,11 @@ describe("recording tag contract (T-1)", () => {
+     expect(findSingleRiffChunk(afterChunks, "iXML").payload.equals(ixmlBefore)).toBe(true);
+     expect(findSingleRiffChunk(afterChunks, "data").payload.equals(dataBefore)).toBe(true);
+ 
+-    expectInfoPayload(parseListInfoSubChunks(written), "ICMT", Buffer.from(CONTRACT_COMMENT, "utf8"));
++    expectInfoPayload(
++      parseListInfoSubChunks(written),
++      "ICMT",
++      Buffer.from(CONTRACT_COMMENT, "utf8"),
++    );
+     const meta = await readMetadataViaIpc(filePath);
+     expect(meta.comment).toBe(CONTRACT_COMMENT);
+     expect(meta.category).toBe(CONTRACT_CATEGORY);
+diff --git a/tests/main/riff-info-nul.test.ts b/tests/main/riff-info-nul.test.ts
+index b84d37e..e6fbd2e 100644
+--- a/tests/main/riff-info-nul.test.ts
++++ b/tests/main/riff-info-nul.test.ts
+@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+ import { tmpdir } from "node:os";
+ import { join } from "node:path";
+ import { ipcMain } from "electron";
+-import { File as TagFile, Id3v2Tag } from "node-taglib-sharp";
++import { Id3v2Tag, File as TagFile } from "node-taglib-sharp";
+ import { afterAll, beforeAll, describe, expect, it } from "vitest";
+ import { getRiffInfoTags, registerMetadataHandlers } from "../../src/main/ipc/metadata";
+ import { type FieldDefinition, STANDARD_FIELDS } from "../../src/shared/types";
+@@ -21,7 +21,9 @@ type MetadataRecord = Record<string, unknown>;
+ type InfoEntry = [id: string, payload: string];
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -62,7 +64,8 @@ function writeSampleWavWithInfo(name: string, entries: InfoEntry[]): string {
+ function collectStringValues(meta: MetadataRecord): string[] {
+   return Object.values(meta).flatMap((value) => {
+     if (typeof value === "string") return [value];
+-    if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
++    if (Array.isArray(value))
++      return value.filter((item): item is string => typeof item === "string");
+     return [];
+   });
+ }
+@@ -138,7 +141,9 @@ describe("TM-B10 / D-16: meta:read strips the RIFF INFO NUL terminator", () => {
+     expect(info.get("INAM")?.equals(Buffer.from("X", "ascii")), "INAM payload").toBe(true);
+ 
+     const schemaIds = new Set(
+-      NUL_TEST_SCHEMA.map((field) => field.riffChunkId).filter((id): id is string => id !== undefined),
++      NUL_TEST_SCHEMA.map((field) => field.riffChunkId).filter(
++        (id): id is string => id !== undefined,
++      ),
+     );
+     for (const [id, payload] of info) {
+       if (!schemaIds.has(id)) continue;
+diff --git a/tests/main/schema.test.ts b/tests/main/schema.test.ts
+index b2ab90e..8ed6c9f 100644
+--- a/tests/main/schema.test.ts
++++ b/tests/main/schema.test.ts
+@@ -1,10 +1,10 @@
+ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+-import { join } from "node:path";
+ import { tmpdir } from "node:os";
+-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
++import { join } from "node:path";
+ import { app, ipcMain } from "electron";
+-import { STANDARD_FIELDS } from "../../src/shared/types";
++import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+ import { registerSchemaHandlers } from "../../src/main/ipc/schema";
++import { STANDARD_FIELDS } from "../../src/shared/types";
+ 
+ const testUserData = join(tmpdir(), `czaba-schema-test-${Date.now()}`);
+ 
+@@ -28,7 +28,9 @@ afterAll(() => {
+ });
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -47,7 +49,7 @@ describe("schema handlers", () => {
+       writeFileSync(join(testUserData, "schema.json"), JSON.stringify(custom));
+ 
+       const handler = getHandler("schema:load");
+-      const result = await handler({}) as Array<Record<string, unknown>>;
++      const result = (await handler({})) as Array<Record<string, unknown>>;
+       expect(result).toHaveLength(1);
+       expect(result[0].key).toBe("mood");
+     });
+@@ -77,7 +79,7 @@ describe("schema handlers", () => {
+       writeFileSync(join(testUserData, "schema.json"), JSON.stringify(mixed));
+ 
+       const handler = getHandler("schema:load");
+-      const result = await handler({}) as Array<Record<string, unknown>>;
++      const result = (await handler({})) as Array<Record<string, unknown>>;
+       expect(result).toHaveLength(1);
+       expect(result[0].key).toBe("good");
+     });
+@@ -94,7 +96,7 @@ describe("schema handlers", () => {
+       ];
+       await saveHandler({}, fields);
+ 
+-      const loaded = await loadHandler({}) as Array<Record<string, unknown>>;
++      const loaded = (await loadHandler({})) as Array<Record<string, unknown>>;
+       expect(loaded).toHaveLength(2);
+       expect(loaded[0].key).toBe("custom1");
+       expect(loaded[1].key).toBe("custom2");
+diff --git a/tests/main/templates.test.ts b/tests/main/templates.test.ts
+index c4dc997..63bbdeb 100644
+--- a/tests/main/templates.test.ts
++++ b/tests/main/templates.test.ts
+@@ -1,8 +1,8 @@
+-import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+-import { join } from "node:path";
++import { mkdirSync, rmSync } from "node:fs";
+ import { tmpdir } from "node:os";
+-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
++import { join } from "node:path";
+ import { app, ipcMain } from "electron";
++import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+ import { registerTemplateHandlers } from "../../src/main/ipc/templates";
+ 
+ const testUserData = join(tmpdir(), `czaba-tpl-test-${Date.now()}`);
+@@ -23,7 +23,9 @@ afterAll(() => {
+ });
+ 
+ function getHandler(channel: string): (...args: unknown[]) => unknown {
+-  const handlers = (ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> })._handlers;
++  const handlers = (
++    ipcMain as unknown as { _handlers: Map<string, (...args: unknown[]) => unknown> }
++  )._handlers;
+   const handler = handlers.get(channel);
+   if (!handler) throw new Error(`No handler for channel: ${channel}`);
+   return handler;
+@@ -33,7 +35,7 @@ describe("template handlers", () => {
+   describe("tpl:load", () => {
+     it("creates templates dir and seeds defaults on first load", async () => {
+       const handler = getHandler("tpl:load");
+-      const templates = await handler({}) as Array<{ id: string }>;
++      const templates = (await handler({})) as Array<{ id: string }>;
+       expect(templates.length).toBeGreaterThanOrEqual(3);
+       const ids = templates.map((t) => t.id);
+       expect(ids).toContain("czaba-cinematic-track");
+@@ -44,10 +46,10 @@ describe("template handlers", () => {
+     it("does not re-seed when marker exists", async () => {
+       const handler = getHandler("tpl:load");
+       await handler({});
+-      const first = await handler({}) as Array<{ id: string }>;
++      const first = (await handler({})) as Array<{ id: string }>;
+ 
+       rmSync(join(testUserData, "templates", "czaba-cinematic-track.json"), { force: true });
+-      const second = await handler({}) as Array<{ id: string }>;
++      const second = (await handler({})) as Array<{ id: string }>;
+       expect(second.length).toBe(first.length - 1);
+     });
+   });
+@@ -68,7 +70,7 @@ describe("template handlers", () => {
+       };
+       await saveHandler({}, tpl);
+ 
+-      const templates = await loadHandler({}) as Array<{ id: string }>;
++      const templates = (await loadHandler({})) as Array<{ id: string }>;
+       expect(templates.find((t) => t.id === "my-template")).toBeDefined();
+     });
+   });
+@@ -81,7 +83,7 @@ describe("template handlers", () => {
+       const deleteHandler = getHandler("tpl:delete");
+       await deleteHandler({}, "czaba-cinematic-track");
+ 
+-      const templates = await loadHandler({}) as Array<{ id: string }>;
++      const templates = (await loadHandler({})) as Array<{ id: string }>;
+       expect(templates.find((t) => t.id === "czaba-cinematic-track")).toBeUndefined();
+     });
+ 
+diff --git a/tests/renderer/components/busy-buttons-focus.test.ts b/tests/renderer/components/busy-buttons-focus.test.ts
+index 4dfbc88..8ce4eef 100644
+--- a/tests/renderer/components/busy-buttons-focus.test.ts
++++ b/tests/renderer/components/busy-buttons-focus.test.ts
+@@ -6,7 +6,13 @@ import { SchemaEditor } from "~/components/schema/SchemaEditor";
+ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import { useSchemaStore } from "~/stores/schema-store";
+-import type { BatchWriteResult, FieldDefinition, FieldValue, WavFileEntry, WavMetadata } from "~/types";
++import type {
++  BatchWriteResult,
++  FieldDefinition,
++  FieldValue,
++  WavFileEntry,
++  WavMetadata,
++} from "~/types";
+ import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+@@ -168,7 +174,10 @@ describe("busy commit buttons keep focus (TM-B40, D-45)", () => {
+     seed([PATH_A]);
+     const write = createDeferred<void>();
+     vi.mocked(window.api.writeMetadata).mockReturnValueOnce(write.promise);
+-    vi.mocked(window.api.readMetadata).mockResolvedValue({ ...emptyRecordForPanelSchema(), category: "NEWCat" });
++    vi.mocked(window.api.readMetadata).mockResolvedValue({
++      ...emptyRecordForPanelSchema(),
++      category: "NEWCat",
++    });
+     render(createElement(MetadataPanel));
+     fireEvent.change(getCategoryInput(), { target: { value: "NEWCat" } });
+     const save = getButtonByText(/Save Tags/);
+@@ -186,7 +195,10 @@ describe("busy commit buttons keep focus (TM-B40, D-45)", () => {
+     seed([PATH_A]);
+     const write = createDeferred<void>();
+     vi.mocked(window.api.writeMetadata).mockReturnValueOnce(write.promise);
+-    vi.mocked(window.api.readMetadata).mockResolvedValue({ ...emptyRecordForPanelSchema(), category: "NEWCat" });
++    vi.mocked(window.api.readMetadata).mockResolvedValue({
++      ...emptyRecordForPanelSchema(),
++      category: "NEWCat",
++    });
+     render(createElement(MetadataPanel));
+     fireEvent.change(getCategoryInput(), { target: { value: "NEWCat" } });
+     const save = getButtonByText(/Save Tags/);
+diff --git a/tests/renderer/components/folder-read-during-save.test.ts b/tests/renderer/components/folder-read-during-save.test.ts
+index 6bf97a8..d78e4f6 100644
+--- a/tests/renderer/components/folder-read-during-save.test.ts
++++ b/tests/renderer/components/folder-read-during-save.test.ts
+@@ -122,7 +122,9 @@ beforeEach(() => {
+   resetWindowApiMocks();
+   vi.mocked(window.api.openFolderDialog).mockReset().mockResolvedValue(null);
+   vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+-  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
++  vi.mocked(window.api.resolveDroppedPaths)
++    .mockReset()
++    .mockResolvedValue({ folders: [], wavFiles: [] });
+ });
+ 
+ afterEach(() => {
+@@ -226,7 +228,10 @@ describe("folder read during a pending save keeps the saved entry (TM-B30, D-35)
+   it("(r6) App: dropping the same folder during a pending save keeps the saved value", async () => {
+     vi.mocked(window.api.loadSchema).mockResolvedValue(STANDARD_FIELDS);
+     vi.mocked(window.api.scanFolder).mockResolvedValue([FILE_A, FILE_B]);
+-    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValue({ folders: [FOLDER], wavFiles: [] });
++    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValue({
++      folders: [FOLDER],
++      wavFiles: [],
++    });
+     const write = deferred<void>();
+     vi.mocked(window.api.writeMetadata).mockReturnValueOnce(write.promise);
+     vi.mocked(window.api.readMetadata).mockResolvedValue({ ...NEW_A });
+diff --git a/tests/renderer/components/folder-read-overlap.test.ts b/tests/renderer/components/folder-read-overlap.test.ts
+index c0a4df2..b78d5c1 100644
+--- a/tests/renderer/components/folder-read-overlap.test.ts
++++ b/tests/renderer/components/folder-read-overlap.test.ts
+@@ -64,11 +64,15 @@ async function waitMs(ms: number): Promise<void> {
+ }
+ 
+ function readByFolder(paths: string[]): Promise<MetadataByPath> {
+-  return Promise.resolve(Object.fromEntries(paths.map((p) => [p, p.startsWith("/fa") ? A_META : B_META])));
++  return Promise.resolve(
++    Object.fromEntries(paths.map((p) => [p, p.startsWith("/fa") ? A_META : B_META])),
++  );
+ }
+ 
+ function renderBrowserAndPanel(): ReturnType<typeof render> {
+-  return render(createElement(Fragment, null, createElement(FolderBrowser), createElement(MetadataPanel)));
++  return render(
++    createElement(Fragment, null, createElement(FolderBrowser), createElement(MetadataPanel)),
++  );
+ }
+ 
+ function seedFolderA(): void {
+@@ -85,7 +89,10 @@ async function renderAppReady(): Promise<Element> {
+ }
+ 
+ async function dropFolderOn(root: Element, path: string): Promise<void> {
+-  vi.mocked(window.api.resolveDroppedPaths).mockResolvedValueOnce({ folders: [path], wavFiles: [] });
++  vi.mocked(window.api.resolveDroppedPaths).mockResolvedValueOnce({
++    folders: [path],
++    wavFiles: [],
++  });
+   await act(async () => {
+     fireEvent.drop(root, { dataTransfer: { files: [{ path }] } });
+   });
+@@ -97,7 +104,9 @@ beforeEach(() => {
+   resetWindowApiMocks();
+   vi.mocked(window.api.openFolderDialog).mockReset();
+   vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+-  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
++  vi.mocked(window.api.resolveDroppedPaths)
++    .mockReset()
++    .mockResolvedValue({ folders: [], wavFiles: [] });
+ });
+ 
+ afterEach(() => {
+@@ -107,7 +116,9 @@ afterEach(() => {
+ 
+ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+   it("(o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's", async () => {
+-    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fa").mockResolvedValueOnce("/fb");
++    vi.mocked(window.api.openFolderDialog)
++      .mockResolvedValueOnce("/fa")
++      .mockResolvedValueOnce("/fb");
+     vi.mocked(window.api.scanFolder).mockResolvedValueOnce(A_FILES).mockResolvedValueOnce(B_FILES);
+     const aRead = createDeferred<MetadataByPath>();
+     vi.mocked(window.api.readMetadataBatch)
+@@ -125,9 +136,13 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+   });
+ 
+   it("(o2) Open Folder A (scan pending), Open Folder B (done), A's scan lands last -> files stay B's", async () => {
+-    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fa").mockResolvedValueOnce("/fb");
++    vi.mocked(window.api.openFolderDialog)
++      .mockResolvedValueOnce("/fa")
++      .mockResolvedValueOnce("/fb");
+     const aScan = createDeferred<WavFileEntry[]>();
+-    vi.mocked(window.api.scanFolder).mockReturnValueOnce(aScan.promise).mockResolvedValueOnce(B_FILES);
++    vi.mocked(window.api.scanFolder)
++      .mockReturnValueOnce(aScan.promise)
++      .mockResolvedValueOnce(B_FILES);
+     vi.mocked(window.api.readMetadataBatch).mockImplementation(readByFolder);
+     renderBrowserAndPanel();
+     await clickButton(/Open Folder/);
+@@ -140,11 +155,15 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+   });
+ 
+   it("(o3) Open Folder A (read pending), Open Folder B (read pending), A finishes first -> isScanning stays true until B finishes", async () => {
+-    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fa").mockResolvedValueOnce("/fb");
++    vi.mocked(window.api.openFolderDialog)
++      .mockResolvedValueOnce("/fa")
++      .mockResolvedValueOnce("/fb");
+     vi.mocked(window.api.scanFolder).mockResolvedValueOnce(A_FILES).mockResolvedValueOnce(B_FILES);
+     const aRead = createDeferred<MetadataByPath>();
+     const bRead = createDeferred<MetadataByPath>();
+-    vi.mocked(window.api.readMetadataBatch).mockReturnValueOnce(aRead.promise).mockReturnValueOnce(bRead.promise);
++    vi.mocked(window.api.readMetadataBatch)
++      .mockReturnValueOnce(aRead.promise)
++      .mockReturnValueOnce(bRead.promise);
+     renderBrowserAndPanel();
+     await clickButton(/Open Folder/);
+     await clickButton(/Open Folder/);
+@@ -157,7 +176,9 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+   });
+ 
+   it("(o4) Open Folder A (read pending), Open Folder B (done), A's read rejects last -> no stale toast", async () => {
+-    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fa").mockResolvedValueOnce("/fb");
++    vi.mocked(window.api.openFolderDialog)
++      .mockResolvedValueOnce("/fa")
++      .mockResolvedValueOnce("/fb");
+     vi.mocked(window.api.scanFolder).mockResolvedValueOnce(A_FILES).mockResolvedValueOnce(B_FILES);
+     const aRead = createDeferred<MetadataByPath>();
+     vi.mocked(window.api.readMetadataBatch)
+@@ -178,7 +199,9 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+     vi.mocked(window.api.readMetadataBatch).mockReturnValueOnce(aRead.promise);
+     const { container } = renderBrowserAndPanel();
+     await clickButton(/Open Folder/);
+-    const closeButton = container.querySelector('button[type="button"] svg.lucide-x')?.closest("button");
++    const closeButton = container
++      .querySelector('button[type="button"] svg.lucide-x')
++      ?.closest("button");
+     if (!closeButton) throw new Error("close button not found");
+     await settle(() => fireEvent.click(closeButton));
+     await settle(() => aRead.resolve({ [PATH_A]: A_META }));
+@@ -242,9 +265,13 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+   });
+ 
+   it("(o9) Open Folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast", async () => {
+-    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fa").mockResolvedValueOnce("/fb");
++    vi.mocked(window.api.openFolderDialog)
++      .mockResolvedValueOnce("/fa")
++      .mockResolvedValueOnce("/fb");
+     const aScan = createDeferred<WavFileEntry[]>();
+-    vi.mocked(window.api.scanFolder).mockReturnValueOnce(aScan.promise).mockResolvedValueOnce(B_FILES);
++    vi.mocked(window.api.scanFolder)
++      .mockReturnValueOnce(aScan.promise)
++      .mockResolvedValueOnce(B_FILES);
+     vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_B]: B_META });
+     renderBrowserAndPanel();
+     await clickButton(/Open Folder/);
+@@ -261,7 +288,9 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+     vi.mocked(window.api.scanFolder).mockResolvedValueOnce(A_FILES).mockResolvedValueOnce(B_FILES);
+     const aRead = createDeferred<MetadataByPath>();
+     const bRead = createDeferred<MetadataByPath>();
+-    vi.mocked(window.api.readMetadataBatch).mockReturnValueOnce(aRead.promise).mockReturnValueOnce(bRead.promise);
++    vi.mocked(window.api.readMetadataBatch)
++      .mockReturnValueOnce(aRead.promise)
++      .mockReturnValueOnce(bRead.promise);
+     const root = await renderAppReady();
+     await dropFolderOn(root, "/fa");
+     await clickButton(/Open Folder/);
+@@ -278,7 +307,9 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+   it("(o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B", async () => {
+     vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+     const aScan = createDeferred<WavFileEntry[]>();
+-    vi.mocked(window.api.scanFolder).mockReturnValueOnce(aScan.promise).mockResolvedValueOnce(B_FILES);
++    vi.mocked(window.api.scanFolder)
++      .mockReturnValueOnce(aScan.promise)
++      .mockResolvedValueOnce(B_FILES);
+     vi.mocked(window.api.readMetadataBatch).mockImplementation(readByFolder);
+     const root = await renderAppReady();
+     await dropFolderOn(root, "/fa");
+@@ -293,7 +324,9 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+   it("(o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast", async () => {
+     vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+     const aScan = createDeferred<WavFileEntry[]>();
+-    vi.mocked(window.api.scanFolder).mockReturnValueOnce(aScan.promise).mockResolvedValueOnce(B_FILES);
++    vi.mocked(window.api.scanFolder)
++      .mockReturnValueOnce(aScan.promise)
++      .mockResolvedValueOnce(B_FILES);
+     vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_B]: B_META });
+     const root = await renderAppReady();
+     await dropFolderOn(root, "/fa");
+@@ -309,7 +342,9 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+     seedFolderA();
+     vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+     const aScan = createDeferred<WavFileEntry[]>();
+-    vi.mocked(window.api.scanFolder).mockReturnValueOnce(aScan.promise).mockResolvedValueOnce(B_FILES);
++    vi.mocked(window.api.scanFolder)
++      .mockReturnValueOnce(aScan.promise)
++      .mockResolvedValueOnce(B_FILES);
+     vi.mocked(window.api.readMetadataBatch).mockImplementation(readByFolder);
+     renderBrowserAndPanel();
+     await clickButton(/Rescan/);
+@@ -324,7 +359,9 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+     seedFolderA();
+     vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+     const aScan = createDeferred<WavFileEntry[]>();
+-    vi.mocked(window.api.scanFolder).mockReturnValueOnce(aScan.promise).mockResolvedValueOnce(B_FILES);
++    vi.mocked(window.api.scanFolder)
++      .mockReturnValueOnce(aScan.promise)
++      .mockResolvedValueOnce(B_FILES);
+     vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_B]: B_META });
+     renderBrowserAndPanel();
+     await clickButton(/Rescan/);
+@@ -340,7 +377,9 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+     vi.mocked(window.api.scanFolder).mockResolvedValueOnce(A_FILES).mockResolvedValueOnce(B_FILES);
+     const aRead = createDeferred<MetadataByPath>();
+     const bRead = createDeferred<MetadataByPath>();
+-    vi.mocked(window.api.readMetadataBatch).mockReturnValueOnce(aRead.promise).mockReturnValueOnce(bRead.promise);
++    vi.mocked(window.api.readMetadataBatch)
++      .mockReturnValueOnce(aRead.promise)
++      .mockReturnValueOnce(bRead.promise);
+     renderBrowserAndPanel();
+     await clickButton(/Rescan/);
+     await clickButton(/Open Folder/);
+@@ -369,7 +408,9 @@ describe("overlapping folder loads are latest-wins (TM-B33, D-38)", () => {
+     vi.mocked(window.api.readMetadataBatch).mockResolvedValue({ [PATH_A]: A_META });
+     const { container } = renderBrowserAndPanel();
+     await clickButton(/Open Folder/);
+-    const closeButton = container.querySelector('button[type="button"] svg.lucide-x')?.closest("button");
++    const closeButton = container
++      .querySelector('button[type="button"] svg.lucide-x')
++      ?.closest("button");
+     if (!closeButton) throw new Error("close button not found");
+     await settle(() => fireEvent.click(closeButton));
+     await settle(() => aScan.resolve(A_FILES));
+diff --git a/tests/renderer/components/folder-read-rejected-chunk.test.ts b/tests/renderer/components/folder-read-rejected-chunk.test.ts
+index b457530..63885da 100644
+--- a/tests/renderer/components/folder-read-rejected-chunk.test.ts
++++ b/tests/renderer/components/folder-read-rejected-chunk.test.ts
+@@ -132,7 +132,9 @@ beforeEach(() => {
+   resetWindowApiMocks();
+   vi.mocked(window.api.openFolderDialog).mockReset().mockResolvedValue(null);
+   vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+-  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
++  vi.mocked(window.api.resolveDroppedPaths)
++    .mockReset()
++    .mockResolvedValue({ folders: [], wavFiles: [] });
+ });
+ 
+ afterEach(() => {
+@@ -166,7 +168,10 @@ describe("rejected folder-read chunk keeps entries and shows a toast (TM-B31, D-
+ 
+   it("(k3) App: dropping the same folder whose only read chunk rejects keeps both store entries and shows Failed to read 2 files", async () => {
+     vi.mocked(window.api.loadSchema).mockResolvedValue(STANDARD_FIELDS);
+-    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValue({ folders: [FOLDER], wavFiles: [] });
++    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValue({
++      folders: [FOLDER],
++      wavFiles: [],
++    });
+     seedTwoFiles([]);
+     vi.mocked(window.api.readMetadataBatch).mockRejectedValueOnce(new Error("ipc read failed"));
+     const { container } = render(createElement(App));
+@@ -185,7 +190,8 @@ describe("rejected folder-read chunk keeps entries and shows a toast (TM-B31, D-
+     seedManyFiles(files, []);
+     const chunkOnePaths = files.slice(0, 50).map((file) => file.path);
+     const chunkOneRead: Record<string, WavMetadata> = {};
+-    for (const path of chunkOnePaths) chunkOneRead[path] = { ...oldMetaFor(path), category: EXTERNAL_CATEGORY };
++    for (const path of chunkOnePaths)
++      chunkOneRead[path] = { ...oldMetaFor(path), category: EXTERNAL_CATEGORY };
+     vi.mocked(window.api.readMetadataBatch)
+       .mockResolvedValueOnce(chunkOneRead)
+       .mockRejectedValueOnce(new Error("chunk 2 failed"));
+@@ -248,7 +254,10 @@ describe("rejected folder-read chunk keeps entries and shows a toast (TM-B31, D-
+     seedTwoFiles([]);
+     const readA: WavMetadata = { ...OLD_A, category: EXTERNAL_CATEGORY };
+     const readB: WavMetadata = { ...OLD_B, category: EXTERNAL_CATEGORY };
+-    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_A]: { ...readA }, [PATH_B]: { ...readB } });
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({
++      [PATH_A]: { ...readA },
++      [PATH_B]: { ...readB },
++    });
+     renderBrowserAndPanel();
+ 
+     await clickButton(/Rescan/);
+@@ -283,7 +292,10 @@ describe("empty folder clears store metadata (TM-B32, D-37)", () => {
+ 
+   it("(e2) App: dropping an empty folder clears the old folder's store entries and shows no toast", async () => {
+     vi.mocked(window.api.loadSchema).mockResolvedValue(STANDARD_FIELDS);
+-    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValue({ folders: [EMPTY_FOLDER], wavFiles: [] });
++    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValue({
++      folders: [EMPTY_FOLDER],
++      wavFiles: [],
++    });
+     seedTwoFiles([]);
+     vi.mocked(window.api.scanFolder).mockResolvedValue([]);
+     const { container } = render(createElement(App));
+@@ -298,8 +310,12 @@ describe("empty folder clears store metadata (TM-B32, D-37)", () => {
+ 
+   it("(e3) empty folder, then Open Folder of the old folder whose only read chunk rejects: no stale entry comes back and Failed to read 2 files is shown", async () => {
+     seedTwoFiles([]);
+-    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce(EMPTY_FOLDER).mockResolvedValueOnce(FOLDER);
+-    vi.mocked(window.api.scanFolder).mockResolvedValueOnce([]).mockResolvedValueOnce([FILE_A, FILE_B]);
++    vi.mocked(window.api.openFolderDialog)
++      .mockResolvedValueOnce(EMPTY_FOLDER)
++      .mockResolvedValueOnce(FOLDER);
++    vi.mocked(window.api.scanFolder)
++      .mockResolvedValueOnce([])
++      .mockResolvedValueOnce([FILE_A, FILE_B]);
+     vi.mocked(window.api.readMetadataBatch).mockRejectedValueOnce(new Error("ipc read failed"));
+     renderBrowserAndPanel();
+ 
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index 917ca6b..5fe1484 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -5,7 +5,13 @@ import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import { useSchemaStore } from "~/stores/schema-store";
+-import type { BatchWriteResult, FieldDefinition, FieldValue, WavFileEntry, WavMetadata } from "~/types";
++import type {
++  BatchWriteResult,
++  FieldDefinition,
++  FieldValue,
++  WavFileEntry,
++  WavMetadata,
++} from "~/types";
+ import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+@@ -21,8 +27,18 @@ const PATH_A = "/music/a.wav";
+ const PATH_B = "/music/b.wav";
+ const TYPED_CATEGORY = "BATCHCat";
+ 
+-const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 100, modifiedAt: "2026-10-26T00:00:00.000Z" };
+-const FILE_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 100, modifiedAt: "2026-10-26T00:00:00.000Z" };
++const FILE_A: WavFileEntry = {
++  name: "a.wav",
++  path: PATH_A,
++  size: 100,
++  modifiedAt: "2026-10-26T00:00:00.000Z",
++};
++const FILE_B: WavFileEntry = {
++  name: "b.wav",
++  path: PATH_B,
++  size: 100,
++  modifiedAt: "2026-10-26T00:00:00.000Z",
++};
+ 
+ const ALL_FAILED: BatchWriteResult = {
+   succeeded: 0,
+@@ -31,7 +47,10 @@ const ALL_FAILED: BatchWriteResult = {
+     { path: PATH_B, error: "EACCES" },
+   ],
+ };
+-const PARTIAL_FAILED: BatchWriteResult = { succeeded: 1, failed: [{ path: PATH_B, error: "EACCES" }] };
++const PARTIAL_FAILED: BatchWriteResult = {
++  succeeded: 1,
++  failed: [{ path: PATH_B, error: "EACCES" }],
++};
+ const ALL_SUCCEEDED: BatchWriteResult = { succeeded: 2, failed: [] };
+ 
+ function seedFiles(selectedPaths: string[]): void {
+@@ -103,8 +122,13 @@ function expectEditsKept(): void {
+ }
+ 
+ function expectBatchWriteCall(callIndex: number): void {
+-  expect(vi.mocked(window.api.writeMetadataBatch).mock.calls[callIndex]?.[0]).toEqual([PATH_A, PATH_B]);
+-  expect(vi.mocked(window.api.writeMetadataBatch).mock.calls[callIndex]?.[1]).toEqual({ category: TYPED_CATEGORY });
++  expect(vi.mocked(window.api.writeMetadataBatch).mock.calls[callIndex]?.[0]).toEqual([
++    PATH_A,
++    PATH_B,
++  ]);
++  expect(vi.mocked(window.api.writeMetadataBatch).mock.calls[callIndex]?.[1]).toEqual({
++    category: TYPED_CATEGORY,
++  });
+ }
+ 
+ beforeEach(() => {
+@@ -240,7 +264,10 @@ describe("MetadataPanel batch save keeps the store entry of failed files (TM-B16
+     const seedA = taggedSeed("old A");
+     const seedB = taggedSeed("old B");
+     seedTaggedFiles(seedA, seedB);
+-    mockBatchApi(ALL_FAILED, { [PATH_A]: emptyRecordForPanelSchema(), [PATH_B]: emptyRecordForPanelSchema() });
++    mockBatchApi(ALL_FAILED, {
++      [PATH_A]: emptyRecordForPanelSchema(),
++      [PATH_B]: emptyRecordForPanelSchema(),
++    });
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save to 2 files/);
+@@ -258,7 +285,10 @@ describe("MetadataPanel batch save keeps the store entry of failed files (TM-B16
+     const seedA = taggedSeed("old A");
+     const seedB = taggedSeed("old B");
+     seedTaggedFiles(seedA, seedB);
+-    mockBatchApi(ALL_FAILED, { [PATH_A]: emptyRecordForPanelSchema(), [PATH_B]: emptyRecordForPanelSchema() });
++    mockBatchApi(ALL_FAILED, {
++      [PATH_A]: emptyRecordForPanelSchema(),
++      [PATH_B]: emptyRecordForPanelSchema(),
++    });
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save to 2 files/);
+@@ -274,7 +304,10 @@ describe("MetadataPanel batch save keeps the store entry of failed files (TM-B16
+ 
+   it("(i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01)", async () => {
+     seedTaggedFiles(taggedSeed("old A"), taggedSeed("old B"));
+-    mockBatchApi(ALL_FAILED, { [PATH_A]: emptyRecordForPanelSchema(), [PATH_B]: emptyRecordForPanelSchema() });
++    mockBatchApi(ALL_FAILED, {
++      [PATH_A]: emptyRecordForPanelSchema(),
++      [PATH_B]: emptyRecordForPanelSchema(),
++    });
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save to 2 files/);
+@@ -406,7 +439,12 @@ describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22,
+   const OLD_DATE = "2026-10-26T00:00:00.000Z";
+   const SCANNED_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 200, modifiedAt: NEW_DATE };
+   const SCANNED_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 300, modifiedAt: NEW_DATE };
+-  const SCANNED_C: WavFileEntry = { name: "c.wav", path: "/music/c.wav", size: 400, modifiedAt: NEW_DATE };
++  const SCANNED_C: WavFileEntry = {
++    name: "c.wav",
++    path: "/music/c.wav",
++    size: 400,
++    modifiedAt: NEW_DATE,
++  };
+ 
+   function mockStat(entries: WavFileEntry[]): void {
+     vi.mocked(window.api.statFiles).mockResolvedValue(entries);
+@@ -491,7 +529,10 @@ describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22,
+   it("(o) batch, all succeed: statFiles once with both paths, both files are patched and the selection is kept", async () => {
+     seedFiles([PATH_A, PATH_B]);
+     useFileStore.setState({ folderPath: FOLDER });
+-    mockBatchApi(ALL_SUCCEEDED, { [PATH_A]: { category: TYPED_CATEGORY }, [PATH_B]: { category: TYPED_CATEGORY } });
++    mockBatchApi(ALL_SUCCEEDED, {
++      [PATH_A]: { category: TYPED_CATEGORY },
++      [PATH_B]: { category: TYPED_CATEGORY },
++    });
+     mockStat([SCANNED_A, SCANNED_B]);
+     render(createElement(MetadataPanel));
+ 
+@@ -600,7 +641,9 @@ describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22,
+     expectStatCall(0, [PATH_A]);
+     expectRefreshed(PATH_A, 200);
+     expectNotRefreshed(PATH_B);
+-    expect(useMetadataStore.getState().toastMessage).toBe("1 saved, 1 failed. Reloading failed. Rescan to refresh.");
++    expect(useMetadataStore.getState().toastMessage).toBe(
++      "1 saved, 1 failed. Reloading failed. Rescan to refresh.",
++    );
+     expectEditsKept();
+   });
+ 
+@@ -940,7 +983,9 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+ 
+     await settle(pending.release);
+ 
+-    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved, but reloading failed. Rescan to refresh.");
++    expect(useMetadataStore.getState().toastMessage).toBe(
++      "Tags saved, but reloading failed. Rescan to refresh.",
++    );
+     expect(getCategoryInput().value).toBe("BCat");
+     expect(useFileStore.getState().metadata[PATH_A]).toEqual(SEED_A);
+   });
+@@ -1255,7 +1300,9 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+ describe("mock isolation (A-R21-04, RR-R23-01)", () => {
+   it("(i3) resetWindowApiMocks drops once-values queued on the six window.api mocks", async () => {
+     vi.mocked(window.api.writeMetadataBatch).mockRejectedValueOnce(new Error("leaked"));
+-    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ "/leaked.wav": { title: "leaked" } });
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({
++      "/leaked.wav": { title: "leaked" },
++    });
+     vi.mocked(window.api.writeMetadata).mockRejectedValueOnce(new Error("leaked"));
+     vi.mocked(window.api.readMetadata).mockResolvedValueOnce({ title: "leaked" });
+     vi.mocked(window.api.scanFolder).mockRejectedValueOnce(new Error("leaked"));
+@@ -1263,7 +1310,10 @@ describe("mock isolation (A-R21-04, RR-R23-01)", () => {
+ 
+     resetWindowApiMocks();
+ 
+-    await expect(window.api.writeMetadataBatch(["/x.wav"], {}, [])).resolves.toEqual({ succeeded: 0, failed: [] });
++    await expect(window.api.writeMetadataBatch(["/x.wav"], {}, [])).resolves.toEqual({
++      succeeded: 0,
++      failed: [],
++    });
+     await expect(window.api.readMetadataBatch(["/x.wav"], [])).resolves.toEqual({});
+     await expect(window.api.writeMetadata("/x.wav", {}, [])).resolves.toBeUndefined();
+     await expect(window.api.readMetadata("/x.wav", [])).resolves.toEqual({});
+diff --git a/tests/renderer/components/metadata-panel-schema-change.test.ts b/tests/renderer/components/metadata-panel-schema-change.test.ts
+index cb51817..c05f0b7 100644
+--- a/tests/renderer/components/metadata-panel-schema-change.test.ts
++++ b/tests/renderer/components/metadata-panel-schema-change.test.ts
+@@ -23,9 +23,24 @@ const NOTE_KEY = "r24note";
+ const NOTE_FROM_FILE = "fromfile";
+ const TYPED_CATEGORY = "R24Cat";
+ 
+-const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
+-const FILE_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
+-const FILE_C: WavFileEntry = { name: "c.wav", path: PATH_C, size: 100, modifiedAt: "2026-10-27T00:00:00.000Z" };
++const FILE_A: WavFileEntry = {
++  name: "a.wav",
++  path: PATH_A,
++  size: 100,
++  modifiedAt: "2026-10-27T00:00:00.000Z",
++};
++const FILE_B: WavFileEntry = {
++  name: "b.wav",
++  path: PATH_B,
++  size: 100,
++  modifiedAt: "2026-10-27T00:00:00.000Z",
++};
++const FILE_C: WavFileEntry = {
++  name: "c.wav",
++  path: PATH_C,
++  size: 100,
++  modifiedAt: "2026-10-27T00:00:00.000Z",
++};
+ const SEED_A: WavMetadata = { title: "A-title", category: "ACat", comment: "" };
+ const SEED_B: WavMetadata = { title: "B-title", category: "BCat", comment: "" };
+ const ALL_SUCCEEDED: BatchWriteResult = { succeeded: 2, failed: [] };
+@@ -100,7 +115,9 @@ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+ 
+ async function addNoteFieldAndDone(): Promise<void> {
+   fireEvent.click(screen.getByTitle("Customize Fields"));
+-  fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R24note" } });
++  fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), {
++    target: { value: "R24note" },
++  });
+   fireEvent.click(getButtonByText(/Add Field/));
+   await act(async () => {
+     fireEvent.click(getButtonByText(/Done/));
+@@ -278,7 +295,8 @@ function deferBatchReadOnce(value: Record<string, WavMetadata>): PendingWrite {
+ function seedTwoChunkFolder(aFirst: boolean): void {
+   const files = aFirst ? [FILE_A, ...EXTRA_FILES] : [...EXTRA_FILES, FILE_A];
+   const metadata: Record<string, WavMetadata> = { [PATH_A]: { ...SEED_A } };
+-  for (const file of EXTRA_FILES) metadata[file.path] = { title: file.name, category: "", comment: "" };
++  for (const file of EXTRA_FILES)
++    metadata[file.path] = { title: file.name, category: "", comment: "" };
+   useFileStore.setState({ files, metadata, selectedPaths: [PATH_A] });
+ }
+ 
+@@ -331,7 +349,10 @@ describe("MetadataPanel schema re-read ignores reads superseded by a write (B-R2
+ 
+     await typeCategoryAndSave(/Save Tags/);
+     expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
+-    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_A]: FRESH_A, [PATH_B]: SEED_B_WITH_NOTE });
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({
++      [PATH_A]: FRESH_A,
++      [PATH_B]: SEED_B_WITH_NOTE,
++    });
+     await addNoteFieldAndDone();
+ 
+     expect(getInputByLabel("R24note").value).toBe(NOTE_FROM_FILE);
+@@ -349,7 +370,9 @@ describe("MetadataPanel schema re-read ignores reads superseded by a write (B-R2
+     await typeCategoryAndSave(/Save Tags/);
+     await addNoteFieldAndDone();
+     await settle(pendingWrite.release);
+-    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved, but reloading failed. Rescan to refresh.");
++    expect(useMetadataStore.getState().toastMessage).toBe(
++      "Tags saved, but reloading failed. Rescan to refresh.",
++    );
+     await settle(chunk1.release);
+ 
+     expect(useFileStore.getState().metadata[PATH_A]).toEqual(FRESH_A);
+@@ -393,9 +416,15 @@ describe("MetadataPanel schema re-read ignores reads superseded by a write (B-R2
+ 
+   it("(s15) D-34: a path whose batch write failed is not superseded", async () => {
+     seedFiles([PATH_A, PATH_B]);
+-    const pendingWrite = deferBatchWrite({ succeeded: 1, failed: [{ path: PATH_B, error: "locked" }] });
++    const pendingWrite = deferBatchWrite({
++      succeeded: 1,
++      failed: [{ path: PATH_B, error: "locked" }],
++    });
+     const staleSchemaRead = deferBatchReadOnce({ [PATH_A]: STALE_A, [PATH_B]: SEED_B_WITH_NOTE });
+-    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({ [PATH_A]: FRESH_A, [PATH_B]: SEED_B_WITH_NOTE });
++    vi.mocked(window.api.readMetadataBatch).mockResolvedValueOnce({
++      [PATH_A]: FRESH_A,
++      [PATH_B]: SEED_B_WITH_NOTE,
++    });
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save to 2 files/);
+diff --git a/tests/renderer/components/number-field-values.test.ts b/tests/renderer/components/number-field-values.test.ts
+index d11fad8..a1d81af 100644
+--- a/tests/renderer/components/number-field-values.test.ts
++++ b/tests/renderer/components/number-field-values.test.ts
+@@ -5,7 +5,13 @@ import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import { useSchemaStore } from "~/stores/schema-store";
+-import { type FieldDefinition, type FieldValue, STANDARD_FIELDS, type WavFileEntry, type WavMetadata } from "~/types";
++import {
++  type FieldDefinition,
++  type FieldValue,
++  STANDARD_FIELDS,
++  type WavFileEntry,
++  type WavMetadata,
++} from "~/types";
+ import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+@@ -18,7 +24,12 @@ vi.hoisted(() => {
+ });
+ 
+ const PATH_A = "/music/a.wav";
+-const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 100, modifiedAt: "2026-10-28T00:00:00.000Z" };
++const FILE_A: WavFileEntry = {
++  name: "a.wav",
++  path: PATH_A,
++  size: 100,
++  modifiedAt: "2026-10-28T00:00:00.000Z",
++};
+ 
+ const TAKE_SCHEMA: FieldDefinition[] = [
+   ...STANDARD_FIELDS,
+@@ -40,7 +51,11 @@ function emptyRecordForTakeSchema(): WavMetadata {
+ 
+ function seedSingleFile(seed: WavMetadata): void {
+   useSchemaStore.setState({ fields: TAKE_SCHEMA, isLoaded: true });
+-  useFileStore.setState({ files: [FILE_A], metadata: { [PATH_A]: { ...seed } }, selectedPaths: [PATH_A] });
++  useFileStore.setState({
++    files: [FILE_A],
++    metadata: { [PATH_A]: { ...seed } },
++    selectedPaths: [PATH_A],
++  });
+   vi.mocked(window.api.readMetadata).mockResolvedValue({ ...seed });
+ }
+ 
+@@ -140,11 +155,15 @@ describe("MetadataPanel number field: '' is unset, a typed 0 is a value (TM-B11
+ 
+     typeInto("Take", "0");
+     await clickButton("Save as");
+-    fireEvent.change(screen.getByPlaceholderText("Template name"), { target: { value: "Zero take" } });
++    fireEvent.change(screen.getByPlaceholderText("Template name"), {
++      target: { value: "Zero take" },
++    });
+     await clickButton("Save");
+ 
+     expect(window.api.saveTemplate).toHaveBeenCalledTimes(1);
+-    const saved = vi.mocked(window.api.saveTemplate).mock.calls[0]?.[0] as { tags: Record<string, FieldValue> };
++    const saved = vi.mocked(window.api.saveTemplate).mock.calls[0]?.[0] as {
++      tags: Record<string, FieldValue>;
++    };
+     expect(saved.tags.take).toBe(0);
+     expect(Object.keys(saved.tags)).toEqual(["take"]);
+   });
+diff --git a/tests/renderer/components/reread-after-folder-switch.test.ts b/tests/renderer/components/reread-after-folder-switch.test.ts
+index 453b982..3866b01 100644
+--- a/tests/renderer/components/reread-after-folder-switch.test.ts
++++ b/tests/renderer/components/reread-after-folder-switch.test.ts
+@@ -62,7 +62,9 @@ async function clickButton(name: RegExp): Promise<void> {
+ }
+ 
+ async function clickCloseFolder(): Promise<void> {
+-  const closeButton = document.querySelector('button[type="button"] svg.lucide-x')?.closest("button");
++  const closeButton = document
++    .querySelector('button[type="button"] svg.lucide-x')
++    ?.closest("button");
+   if (!closeButton) throw new Error("close button not found");
+   await act(async () => {
+     fireEvent.click(closeButton);
+@@ -95,7 +97,9 @@ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+ 
+ async function addNoteFieldAndDone(): Promise<void> {
+   fireEvent.click(screen.getByTitle("Customize Fields"));
+-  fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R32note" } });
++  fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), {
++    target: { value: "R32note" },
++  });
+   fireEvent.click(getButtonByText(/Add Field/));
+   await clickButton(/Done/);
+ }
+@@ -127,7 +131,9 @@ beforeEach(() => {
+   resetWindowApiMocks();
+   vi.mocked(window.api.openFolderDialog).mockReset().mockResolvedValue(null);
+   vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+-  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
++  vi.mocked(window.api.resolveDroppedPaths)
++    .mockReset()
++    .mockResolvedValue({ folders: [], wavFiles: [] });
+ });
+ 
+ afterEach(() => {
+@@ -197,8 +203,12 @@ describe("save and schema re-reads after a folder switch (D-39)", () => {
+     const write = createDeferred<void>();
+     vi.mocked(window.api.writeMetadata).mockReturnValueOnce(write.promise);
+     vi.mocked(window.api.readMetadata).mockResolvedValue({ ...NEW_A });
+-    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb").mockResolvedValueOnce("/fa");
+-    vi.mocked(window.api.scanFolder).mockImplementation(async (path) => (path === "/fb" ? [FILE_B] : [FILE_A]));
++    vi.mocked(window.api.openFolderDialog)
++      .mockResolvedValueOnce("/fb")
++      .mockResolvedValueOnce("/fa");
++    vi.mocked(window.api.scanFolder).mockImplementation(async (path) =>
++      path === "/fb" ? [FILE_B] : [FILE_A],
++    );
+     vi.mocked(window.api.readMetadataBatch)
+       .mockResolvedValueOnce({ [PATH_B]: { ...B_META } })
+       .mockRejectedValueOnce(new Error("read down"));
+@@ -228,7 +238,9 @@ describe("save and schema re-reads after a folder switch (D-39)", () => {
+     await typeCategoryAndSave(/Save Tags/);
+     await clickButton(/Open Folder/);
+     await settle(() => write.resolve());
+-    await settle(() => parentRead.resolve({ [PATH_A]: { ...A_META }, [PATH_SUB]: { ...SUB_META } }));
++    await settle(() =>
++      parentRead.resolve({ [PATH_A]: { ...A_META }, [PATH_SUB]: { ...SUB_META } }),
++    );
+ 
+     expect(useFileStore.getState().folderPath).toBe("/fa");
+     expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: A_META, [PATH_SUB]: NEW_SUB });
+@@ -288,9 +300,14 @@ describe("save and schema re-reads after a folder switch (D-39)", () => {
+   it("(v9) RR-R31-02: drop A while the schema is loading, Open Folder B finishes, then the schema loads: A is never scanned", async () => {
+     const schemaLoad = createDeferred<FieldDefinition[]>();
+     vi.mocked(window.api.loadSchema).mockReturnValueOnce(schemaLoad.promise);
+-    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValueOnce({ folders: ["/fa"], wavFiles: [] });
++    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValueOnce({
++      folders: ["/fa"],
++      wavFiles: [],
++    });
+     vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+-    vi.mocked(window.api.scanFolder).mockImplementation(async (path) => (path === "/fb" ? [FILE_B] : [FILE_A]));
++    vi.mocked(window.api.scanFolder).mockImplementation(async (path) =>
++      path === "/fb" ? [FILE_B] : [FILE_A],
++    );
+     vi.mocked(window.api.readMetadataBatch).mockResolvedValue({ [PATH_B]: { ...B_META } });
+     const rendered = render(createElement(App));
+     const root = rendered.container.firstChild;
+diff --git a/tests/renderer/components/schema-change-during-folder-load.test.ts b/tests/renderer/components/schema-change-during-folder-load.test.ts
+index 36c49b4..7c74396 100644
+--- a/tests/renderer/components/schema-change-during-folder-load.test.ts
++++ b/tests/renderer/components/schema-change-during-folder-load.test.ts
+@@ -41,8 +41,18 @@ const A2_META: WavMetadata = { title: "A2", category: "A2Cat", comment: "" };
+ const B_META: WavMetadata = { title: "B", category: "BCat", comment: "" };
+ const C_META: WavMetadata = { title: "C", category: "CCat", comment: "" };
+ const NEW_A: WavMetadata = { ...A_META, category: SAVED_CATEGORY };
+-const NOTE_BY_PATH: Record<string, string> = { [PATH_A]: "AN", [PATH_A2]: "A2N", [PATH_B]: "BN", [PATH_C]: "CN" };
+-const BASE_BY_PATH: MetadataByPath = { [PATH_A]: A_META, [PATH_A2]: A2_META, [PATH_B]: B_META, [PATH_C]: C_META };
++const NOTE_BY_PATH: Record<string, string> = {
++  [PATH_A]: "AN",
++  [PATH_A2]: "A2N",
++  [PATH_B]: "BN",
++  [PATH_C]: "CN",
++};
++const BASE_BY_PATH: MetadataByPath = {
++  [PATH_A]: A_META,
++  [PATH_A2]: A2_META,
++  [PATH_B]: B_META,
++  [PATH_C]: C_META,
++};
+ 
+ function createDeferred<T>(): Deferred<T> {
+   let resolve: (value: T) => void = () => {};
+@@ -61,7 +71,9 @@ async function clickButton(name: RegExp): Promise<void> {
+ }
+ 
+ async function clickCloseFolder(): Promise<void> {
+-  const closeButton = document.querySelector('button[type="button"] svg.lucide-x')?.closest("button");
++  const closeButton = document
++    .querySelector('button[type="button"] svg.lucide-x')
++    ?.closest("button");
+   if (!closeButton) throw new Error("close button not found");
+   await act(async () => {
+     fireEvent.click(closeButton);
+@@ -112,7 +124,9 @@ function hasNoteField(schema: FieldDefinition[]): boolean {
+ function readFor(paths: string[], schema: FieldDefinition[]): MetadataByPath {
+   const out: MetadataByPath = {};
+   for (const path of paths) {
+-    out[path] = hasNoteField(schema) ? { ...BASE_BY_PATH[path], [NOTE_KEY]: NOTE_BY_PATH[path] } : { ...BASE_BY_PATH[path] };
++    out[path] = hasNoteField(schema)
++      ? { ...BASE_BY_PATH[path], [NOTE_KEY]: NOTE_BY_PATH[path] }
++      : { ...BASE_BY_PATH[path] };
+   }
+   return out;
+ }
+@@ -132,7 +146,9 @@ async function openCustomize(): Promise<void> {
+ }
+ 
+ async function addNoteField(): Promise<void> {
+-  fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R33note" } });
++  fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), {
++    target: { value: "R33note" },
++  });
+   await act(async () => {
+     fireEvent.click(getButtonByText(/Add Field/));
+   });
+@@ -143,7 +159,9 @@ beforeEach(() => {
+   resetWindowApiMocks();
+   vi.mocked(window.api.openFolderDialog).mockReset().mockResolvedValue(null);
+   vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+-  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
++  vi.mocked(window.api.resolveDroppedPaths)
++    .mockReset()
++    .mockResolvedValue({ folders: [], wavFiles: [] });
+ });
+ 
+ describe("schema change during a pending folder load (D-40)", () => {
+@@ -234,7 +252,10 @@ describe("schema change during a pending folder load (D-40)", () => {
+     await settle(() => rescanRead.resolve({}));
+     await waitMs(20);
+ 
+-    expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: withNote(PATH_A), [PATH_A2]: withNote(PATH_A2) });
++    expect(useFileStore.getState().metadata).toEqual({
++      [PATH_A]: withNote(PATH_A),
++      [PATH_A2]: withNote(PATH_A2),
++    });
+     expect(useFileStore.getState().isScanning).toBe(false);
+   });
+ 
+@@ -243,7 +264,9 @@ describe("schema change during a pending folder load (D-40)", () => {
+     const scanB = createDeferred<WavFileEntry[]>();
+     vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+     vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
+-    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
++    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) =>
++      readFor(paths, schema),
++    );
+     renderBrowserAndPanel();
+ 
+     await openCustomize();
+@@ -264,8 +287,12 @@ describe("schema change during a pending folder load (D-40)", () => {
+     seedFolderA([PATH_A]);
+     const scanB = createDeferred<WavFileEntry[]>();
+     const pendingA: Deferred<MetadataByPath>[] = [];
+-    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb").mockResolvedValueOnce("/fc");
+-    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise).mockResolvedValueOnce([FILE_C]);
++    vi.mocked(window.api.openFolderDialog)
++      .mockResolvedValueOnce("/fb")
++      .mockResolvedValueOnce("/fc");
++    vi.mocked(window.api.scanFolder)
++      .mockReturnValueOnce(scanB.promise)
++      .mockResolvedValueOnce([FILE_C]);
+     vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => {
+       if (paths.includes(PATH_A)) {
+         const pending = createDeferred<MetadataByPath>();
+@@ -296,14 +323,19 @@ describe("schema change during a pending folder load (D-40)", () => {
+ 
+   it("(w6) pin: no folder load pending, Done re-reads the open folder with the new field at once", async () => {
+     seedFolderA([PATH_A]);
+-    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
++    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) =>
++      readFor(paths, schema),
++    );
+     renderBrowserAndPanel();
+ 
+     await openCustomize();
+     await addNoteField();
+     await clickButton(/Done/);
+ 
+-    expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: withNote(PATH_A), [PATH_A2]: withNote(PATH_A2) });
++    expect(useFileStore.getState().metadata).toEqual({
++      [PATH_A]: withNote(PATH_A),
++      [PATH_A2]: withNote(PATH_A2),
++    });
+     expect(batchReadPaths()).toEqual([[PATH_A, PATH_A2]]);
+   });
+ 
+@@ -336,8 +368,12 @@ describe("schema change during a pending folder load (D-40)", () => {
+   it("(w8) C-R33-01: Done while B's scan is pending, Open Folder C supersedes B and C's first read rejects: the schema re-read after the wait fills C", async () => {
+     seedFolderA([PATH_A]);
+     const scanB = createDeferred<WavFileEntry[]>();
+-    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb").mockResolvedValueOnce("/fc");
+-    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise).mockResolvedValueOnce([FILE_C]);
++    vi.mocked(window.api.openFolderDialog)
++      .mockResolvedValueOnce("/fb")
++      .mockResolvedValueOnce("/fc");
++    vi.mocked(window.api.scanFolder)
++      .mockReturnValueOnce(scanB.promise)
++      .mockResolvedValueOnce([FILE_C]);
+     let readsOfC = 0;
+     vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => {
+       if (paths.includes(PATH_C)) {
+diff --git a/tests/renderer/components/schema-editor-done-busy.test.ts b/tests/renderer/components/schema-editor-done-busy.test.ts
+index 1f36a24..d3263ff 100644
+--- a/tests/renderer/components/schema-editor-done-busy.test.ts
++++ b/tests/renderer/components/schema-editor-done-busy.test.ts
+@@ -121,15 +121,22 @@ async function addField(name: string): Promise<void> {
+ }
+ 
+ function readsContaining(path: string): number {
+-  return vi.mocked(window.api.readMetadataBatch).mock.calls.filter(([paths]) => paths.includes(path)).length;
++  return vi
++    .mocked(window.api.readMetadataBatch)
++    .mock.calls.filter(([paths]) => paths.includes(path)).length;
+ }
+ 
+-async function doneDuringPendingOpenFolderB(): Promise<{ scanB: Deferred<WavFileEntry[]>; done: HTMLElement }> {
++async function doneDuringPendingOpenFolderB(): Promise<{
++  scanB: Deferred<WavFileEntry[]>;
++  done: HTMLElement;
++}> {
+   seedFolderA();
+   const scanB = createDeferred<WavFileEntry[]>();
+   vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+   vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
+-  vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
++  vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) =>
++    readFor(paths, schema),
++  );
+   renderBrowserAndPanel();
+   await openCustomize();
+   await clickButton(/Open Folder/);
+@@ -144,7 +151,9 @@ beforeEach(() => {
+   resetWindowApiMocks();
+   vi.mocked(window.api.openFolderDialog).mockReset().mockResolvedValue(null);
+   vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+-  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
++  vi.mocked(window.api.resolveDroppedPaths)
++    .mockReset()
++    .mockResolvedValue({ folders: [], wavFiles: [] });
+ });
+ 
+ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)", () => {
+@@ -212,7 +221,9 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+     seedFolderA();
+     const read1 = createDeferred<MetadataByPath>();
+     const read2 = createDeferred<MetadataByPath>();
+-    vi.mocked(window.api.readMetadataBatch).mockReturnValueOnce(read1.promise).mockReturnValueOnce(read2.promise);
++    vi.mocked(window.api.readMetadataBatch)
++      .mockReturnValueOnce(read1.promise)
++      .mockReturnValueOnce(read2.promise);
+     renderBrowserAndPanel();
+     await openCustomize();
+     await addField("Qone");
+@@ -240,7 +251,9 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+     seedFolderA();
+     const read1 = createDeferred<MetadataByPath>();
+     const read2 = createDeferred<MetadataByPath>();
+-    vi.mocked(window.api.readMetadataBatch).mockReturnValueOnce(read1.promise).mockReturnValueOnce(read2.promise);
++    vi.mocked(window.api.readMetadataBatch)
++      .mockReturnValueOnce(read1.promise)
++      .mockReturnValueOnce(read2.promise);
+     renderBrowserAndPanel();
+     await openCustomize();
+     await addField("Qone");
+@@ -297,7 +310,9 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+     const r2 = reads[2];
+     await settle(() => r2.d.resolve(readFor(r2.paths, r2.schema)));
+     await waitMs(20);
+-    await settle(() => r1.d.resolve({ [PATH_B]: { ...readFor(r1.paths, r1.schema)[PATH_B], title: "STALE1" } }));
++    await settle(() =>
++      r1.d.resolve({ [PATH_B]: { ...readFor(r1.paths, r1.schema)[PATH_B], title: "STALE1" } }),
++    );
+     await waitMs(20);
+     expect(useFileStore.getState().metadata[PATH_B]?.qtwo).toBe(`qtwo@${PATH_B}`);
+     expect(useFileStore.getState().metadata[PATH_B]?.title).toBe("B");
+diff --git a/tests/renderer/components/schema-editor-stale-close.test.ts b/tests/renderer/components/schema-editor-stale-close.test.ts
+index c51e348..dff7b85 100644
+--- a/tests/renderer/components/schema-editor-stale-close.test.ts
++++ b/tests/renderer/components/schema-editor-stale-close.test.ts
+@@ -72,7 +72,12 @@ async function waitMs(ms: number): Promise<void> {
+ }
+ 
+ function renderBrowserAndPanel(strict: boolean): void {
+-  const tree = createElement(Fragment, null, createElement(FolderBrowser), createElement(MetadataPanel));
++  const tree = createElement(
++    Fragment,
++    null,
++    createElement(FolderBrowser),
++    createElement(MetadataPanel),
++  );
+   render(strict ? createElement(StrictMode, null, tree) : tree);
+ }
+ 
+@@ -126,7 +131,9 @@ function armPendingOpenFolderB(): Deferred<WavFileEntry[]> {
+   const scanB = createDeferred<WavFileEntry[]>();
+   vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+   vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
+-  vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
++  vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) =>
++    readFor(paths, schema),
++  );
+   return scanB;
+ }
+ 
+@@ -146,7 +153,9 @@ beforeEach(() => {
+   resetWindowApiMocks();
+   vi.mocked(window.api.openFolderDialog).mockReset().mockResolvedValue(null);
+   vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+-  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
++  vi.mocked(window.api.resolveDroppedPaths)
++    .mockReset()
++    .mockResolvedValue({ folders: [], wavFiles: [] });
+ });
+ 
+ describe("schema editor closed and reopened while Done is pending (D-41)", () => {
+@@ -183,7 +192,9 @@ describe("schema editor closed and reopened while Done is pending (D-41)", () =>
+ 
+   it("(e3) pin under React.StrictMode: Done with no folder load pending closes the editor", async () => {
+     seedFolderA();
+-    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
++    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) =>
++      readFor(paths, schema),
++    );
+     renderBrowserAndPanel(true);
+     await openCustomize();
+     await addNoteField();
+diff --git a/tests/renderer/components/schema-editor.test.ts b/tests/renderer/components/schema-editor.test.ts
+index 164c1cc..0c5df92 100644
+--- a/tests/renderer/components/schema-editor.test.ts
++++ b/tests/renderer/components/schema-editor.test.ts
+@@ -98,13 +98,16 @@ const CUSTOM_ICAT_FIELD: FieldDefinition = {
+   riffChunkId: "ICAT",
+ };
+ 
+-const CATEGORY_KEY_WARNING = 'Category (UCS) is unavailable: custom field "Category" already uses key "category".';
+-const CATEGORY_RIFF_WARNING = 'Category (UCS) is unavailable: custom field "UCS Cat" already uses RIFF ID "ICAT".';
++const CATEGORY_KEY_WARNING =
++  'Category (UCS) is unavailable: custom field "Category" already uses key "category".';
++const CATEGORY_RIFF_WARNING =
++  'Category (UCS) is unavailable: custom field "UCS Cat" already uses RIFF ID "ICAT".';
+ 
+ function queryButtonByText(name: string): HTMLButtonElement | null {
+   return (
+-    Array.from(document.querySelectorAll("button")).find((button) => (button.textContent ?? "").trim() === name) ??
+-    null
++    Array.from(document.querySelectorAll("button")).find(
++      (button) => (button.textContent ?? "").trim() === name,
++    ) ?? null
+   );
+ }
+ 
+@@ -153,7 +156,9 @@ describe("SchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP
+     expect(screen.queryByText(CATEGORY_KEY_WARNING)).not.toBeInTheDocument();
+     fireEvent.click(getButtonByText("+ Category (UCS)"));
+ 
+-    const categoryFields = useSchemaStore.getState().fields.filter((field) => field.key === "category");
++    const categoryFields = useSchemaStore
++      .getState()
++      .fields.filter((field) => field.key === "category");
+     expect(categoryFields).toHaveLength(1);
+     expect(categoryFields[0].standard).toBe(true);
+     expect(categoryFields[0].riffChunkId).toBe("ICAT");
+@@ -170,7 +175,9 @@ describe("SchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP
+ 
+     expect(queryButtonByText("+ Publisher")).toBeNull();
+     expect(
+-      screen.getByText('Publisher is unavailable: custom field "Label" already uses key "publisher".'),
++      screen.getByText(
++        'Publisher is unavailable: custom field "Label" already uses key "publisher".',
++      ),
+     ).toBeInTheDocument();
+     expect(useSchemaStore.getState().fields).toEqual(fields);
+   });
+@@ -202,7 +209,9 @@ describe("SchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP
+ 
+     renderSchemaEditor();
+ 
+-    const warnings = Array.from(document.querySelectorAll("p.text-warning")).map((node) => node.textContent);
++    const warnings = Array.from(document.querySelectorAll("p.text-warning")).map(
++      (node) => node.textContent,
++    );
+     expect(warnings).toEqual([
+       'Title is unavailable: custom field "Name" already uses key "title".',
+       'Category (UCS) is unavailable: custom field "Notes" already uses RIFF ID "ICAT".',
+@@ -212,13 +221,18 @@ describe("SchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP
+ 
+   it("T-g reports key when one custom field matches both key and RIFF ID", () => {
+     useSchemaStore.setState({
+-      fields: [...PRE_T1_STANDARD_FIELDS, { key: "category", label: "Cat Both", type: "text", riffChunkId: "ICAT" }],
++      fields: [
++        ...PRE_T1_STANDARD_FIELDS,
++        { key: "category", label: "Cat Both", type: "text", riffChunkId: "ICAT" },
++      ],
+     });
+ 
+     renderSchemaEditor();
+ 
+     expect(
+-      screen.getByText('Category (UCS) is unavailable: custom field "Cat Both" already uses key "category".'),
++      screen.getByText(
++        'Category (UCS) is unavailable: custom field "Cat Both" already uses key "category".',
++      ),
+     ).toBeInTheDocument();
+   });
+ });
+diff --git a/tests/renderer/components/selection-after-folder-switch.test.ts b/tests/renderer/components/selection-after-folder-switch.test.ts
+index 2f8304c..176abf7 100644
+--- a/tests/renderer/components/selection-after-folder-switch.test.ts
++++ b/tests/renderer/components/selection-after-folder-switch.test.ts
+@@ -68,14 +68,19 @@ async function waitMs(ms: number): Promise<void> {
+   });
+ }
+ 
+-async function clickRow(name: string, init: { ctrlKey?: boolean; shiftKey?: boolean } = {}): Promise<void> {
++async function clickRow(
++  name: string,
++  init: { ctrlKey?: boolean; shiftKey?: boolean } = {},
++): Promise<void> {
+   const row = screen.getByText(name).parentElement?.parentElement;
+   if (!row) throw new Error(`row ${name} not found`);
+   await settle(() => fireEvent.click(row, init));
+ }
+ 
+ function readAll(paths: string[]): Promise<MetadataByPath> {
+-  return Promise.resolve(Object.fromEntries(paths.map((p) => [p, p.startsWith("/fa") ? A_META : B_META])));
++  return Promise.resolve(
++    Object.fromEntries(paths.map((p) => [p, p.startsWith("/fa") ? A_META : B_META])),
++  );
+ }
+ 
+ function seedFolderA(): void {
+@@ -103,7 +108,9 @@ beforeEach(() => {
+   resetWindowApiMocks();
+   vi.mocked(window.api.openFolderDialog).mockReset();
+   vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+-  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
++  vi.mocked(window.api.resolveDroppedPaths)
++    .mockReset()
++    .mockResolvedValue({ folders: [], wavFiles: [] });
+   vi.mocked(window.api.readMetadataBatch).mockImplementation(readAll);
+ });
+ 
+@@ -151,7 +158,10 @@ describe("selection after a folder switch (TM-B39)", () => {
+     if (!(root instanceof Element)) throw new Error("no root");
+     const bScan = createDeferred<WavFileEntry[]>();
+     vi.mocked(window.api.scanFolder).mockReturnValueOnce(bScan.promise);
+-    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValueOnce({ folders: ["/fb"], wavFiles: [] });
++    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValueOnce({
++      folders: ["/fb"],
++      wavFiles: [],
++    });
+     await act(async () => {
+       fireEvent.drop(root, { dataTransfer: { files: [{ path: "/fb" }] } });
+     });
+@@ -221,7 +231,10 @@ describe("selection after a folder switch (TM-B39)", () => {
+   });
+ 
+   it("(x8) C-R37-01: setFiles keeps the remaining selectedPaths in their existing order, not in files order", () => {
+-    useFileStore.setState({ files: [ENTRY_A, ENTRY_A2, ENTRY_A3], selectedPaths: [PATH_A3, PATH_B, PATH_A] });
++    useFileStore.setState({
++      files: [ENTRY_A, ENTRY_A2, ENTRY_A3],
++      selectedPaths: [PATH_A3, PATH_B, PATH_A],
++    });
+     useFileStore.getState().setFiles([ENTRY_A, ENTRY_A2, ENTRY_A3]);
+     expect(useFileStore.getState().selectedPaths).toEqual([PATH_A3, PATH_A]);
+   });
+diff --git a/tests/renderer/helpers/dom-queries.test.ts b/tests/renderer/helpers/dom-queries.test.ts
+index ee7c8d3..eaa2b9d 100644
+--- a/tests/renderer/helpers/dom-queries.test.ts
++++ b/tests/renderer/helpers/dom-queries.test.ts
+@@ -35,7 +35,11 @@ describe("getButtonByText (TM-B41)", () => {
+   it("(q4) RR-R36-03: a RegExp with the g or y flag is rejected, because lastIndex would carry over between buttons and calls", () => {
+     renderButtons("<button>Done</button>");
+ 
+-    expect(() => getButtonByText(/Done/g)).toThrow("button /Done/g: g and y flags are not supported");
+-    expect(() => getButtonByText(/Done/y)).toThrow("button /Done/y: g and y flags are not supported");
++    expect(() => getButtonByText(/Done/g)).toThrow(
++      "button /Done/g: g and y flags are not supported",
++    );
++    expect(() => getButtonByText(/Done/y)).toThrow(
++      "button /Done/y: g and y flags are not supported",
++    );
+   });
+ });
+diff --git a/tests/renderer/helpers/dom-queries.ts b/tests/renderer/helpers/dom-queries.ts
+index 7a69989..f50bf34 100644
+--- a/tests/renderer/helpers/dom-queries.ts
++++ b/tests/renderer/helpers/dom-queries.ts
+@@ -7,8 +7,11 @@ export function getButtonByText(name: string | RegExp): HTMLButtonElement {
+   if (typeof name !== "string" && (name.global || name.sticky)) {
+     throw new Error(`button ${String(name)}: g and y flags are not supported`);
+   }
+-  const matches = Array.from(document.querySelectorAll("button")).filter((button) => matchesButtonName(button, name));
++  const matches = Array.from(document.querySelectorAll("button")).filter((button) =>
++    matchesButtonName(button, name),
++  );
+   if (matches.length === 0) throw new Error(`button ${String(name)} not found`);
+-  if (matches.length > 1) throw new Error(`button ${String(name)} matched ${matches.length} buttons`);
++  if (matches.length > 1)
++    throw new Error(`button ${String(name)} matched ${matches.length} buttons`);
+   return matches[0];
+ }
+diff --git a/tests/renderer/helpers/window-api-mocks.ts b/tests/renderer/helpers/window-api-mocks.ts
+index 6a10602..931ee1f 100644
+--- a/tests/renderer/helpers/window-api-mocks.ts
++++ b/tests/renderer/helpers/window-api-mocks.ts
+@@ -1,7 +1,9 @@
+ import { vi } from "vitest";
+ 
+ export function resetWindowApiMocks(): void {
+-  vi.mocked(window.api.writeMetadataBatch).mockReset().mockResolvedValue({ succeeded: 0, failed: [] });
++  vi.mocked(window.api.writeMetadataBatch)
++    .mockReset()
++    .mockResolvedValue({ succeeded: 0, failed: [] });
+   vi.mocked(window.api.readMetadataBatch).mockReset().mockResolvedValue({});
+   vi.mocked(window.api.writeMetadata).mockReset().mockResolvedValue(undefined);
+   vi.mocked(window.api.readMetadata).mockReset().mockResolvedValue({});
+diff --git a/tests/renderer/stores/file-store.test.ts b/tests/renderer/stores/file-store.test.ts
+index 311eea5..5deed37 100644
+--- a/tests/renderer/stores/file-store.test.ts
++++ b/tests/renderer/stores/file-store.test.ts
+@@ -128,9 +128,24 @@ describe("useFileStore", () => {
+   });
+ 
+   describe("sorting by array fields (TM-B21, D-27)", () => {
+-    const sortFileX: WavFileEntry = { name: "x.wav", path: "/music/x.wav", size: 100, modifiedAt: "2024-01-01T00:00:00Z" };
+-    const sortFileY: WavFileEntry = { name: "y.wav", path: "/music/y.wav", size: 200, modifiedAt: "2024-01-02T00:00:00Z" };
+-    const sortFileZ: WavFileEntry = { name: "z.wav", path: "/music/z.wav", size: 300, modifiedAt: "2024-01-03T00:00:00Z" };
++    const sortFileX: WavFileEntry = {
++      name: "x.wav",
++      path: "/music/x.wav",
++      size: 100,
++      modifiedAt: "2024-01-01T00:00:00Z",
++    };
++    const sortFileY: WavFileEntry = {
++      name: "y.wav",
++      path: "/music/y.wav",
++      size: 200,
++      modifiedAt: "2024-01-02T00:00:00Z",
++    };
++    const sortFileZ: WavFileEntry = {
++      name: "z.wav",
++      path: "/music/z.wav",
++      size: 300,
++      modifiedAt: "2024-01-03T00:00:00Z",
++    };
+     const insertionOrders: WavFileEntry[][] = [
+       [sortFileX, sortFileY, sortFileZ],
+       [sortFileZ, sortFileY, sortFileX],
+@@ -166,10 +181,22 @@ describe("useFileStore", () => {
+     }
+ 
+     const malformedFirstElements: { field: string; json: string }[] = [
+-      { field: "artists", json: '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}}' },
+-      { field: "artists", json: '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}}' },
+-      { field: "artists", json: '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}}' },
+-      { field: "genres", json: '{"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}}' },
++      {
++        field: "artists",
++        json: '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[5]},"/music/z.wav":{"artists":["Abe"]}}',
++      },
++      {
++        field: "artists",
++        json: '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[{}]},"/music/z.wav":{"artists":["Abe"]}}',
++      },
++      {
++        field: "artists",
++        json: '{"/music/x.wav":{"artists":["Zed"]},"/music/y.wav":{"artists":[true]},"/music/z.wav":{"artists":["Abe"]}}',
++      },
++      {
++        field: "genres",
++        json: '{"/music/x.wav":{"genres":["Zed"]},"/music/y.wav":{"genres":[{}]},"/music/z.wav":{"genres":["Abe"]}}',
++      },
+     ];
+ 
+     for (const { field, json } of malformedFirstElements) {
+@@ -258,9 +285,24 @@ describe("useFileStore", () => {
+   describe("updateFileStats (TM-B22, D-28)", () => {
+     const OLD_DATE = "2026-10-26T00:00:00.000Z";
+     const NEW_DATE = "2026-10-27T10:00:00.000Z";
+-    const STAT_A: WavFileEntry = { name: "a.wav", path: "/music/a.wav", size: 100, modifiedAt: OLD_DATE };
+-    const STAT_B: WavFileEntry = { name: "b.wav", path: "/music/b.wav", size: 100, modifiedAt: OLD_DATE };
+-    const STAT_C: WavFileEntry = { name: "c.wav", path: "/music/c.wav", size: 100, modifiedAt: OLD_DATE };
++    const STAT_A: WavFileEntry = {
++      name: "a.wav",
++      path: "/music/a.wav",
++      size: 100,
++      modifiedAt: OLD_DATE,
++    };
++    const STAT_B: WavFileEntry = {
++      name: "b.wav",
++      path: "/music/b.wav",
++      size: 100,
++      modifiedAt: OLD_DATE,
++    };
++    const STAT_C: WavFileEntry = {
++      name: "c.wav",
++      path: "/music/c.wav",
++      size: 100,
++      modifiedAt: OLD_DATE,
++    };
+ 
+     beforeEach(() => {
+       useFileStore.getState().setFiles([{ ...STAT_A }, { ...STAT_B }, { ...STAT_C }]);
+@@ -270,7 +312,12 @@ describe("useFileStore", () => {
+       useFileStore.getState().updateFileStats([{ ...STAT_B, size: 222, modifiedAt: NEW_DATE }]);
+       const files = useFileStore.getState().files;
+       expect(files.map((f) => f.path)).toEqual([STAT_A.path, STAT_B.path, STAT_C.path]);
+-      expect(files[1]).toEqual({ name: "b.wav", path: "/music/b.wav", size: 222, modifiedAt: NEW_DATE });
++      expect(files[1]).toEqual({
++        name: "b.wav",
++        path: "/music/b.wav",
++        size: 222,
++        modifiedAt: NEW_DATE,
++      });
+       expect(files[0]).toEqual(STAT_A);
+       expect(files[2]).toEqual(STAT_C);
+     });
+@@ -278,7 +325,9 @@ describe("useFileStore", () => {
+     it("(s2) ignores an entry whose path is not in files", () => {
+       useFileStore
+         .getState()
+-        .updateFileStats([{ name: "new.wav", path: "/music/new.wav", size: 999, modifiedAt: NEW_DATE }]);
++        .updateFileStats([
++          { name: "new.wav", path: "/music/new.wav", size: 999, modifiedAt: NEW_DATE },
++        ]);
+       const files = useFileStore.getState().files;
+       expect(files).toHaveLength(3);
+       expect(files.map((f) => f.path)).toEqual([STAT_A.path, STAT_B.path, STAT_C.path]);
+@@ -286,7 +335,9 @@ describe("useFileStore", () => {
+     });
+ 
+     it("(s3) keeps the existing name when the entry has the same path but another name", () => {
+-      useFileStore.getState().updateFileStats([{ ...STAT_A, name: "renamed.wav", size: 333, modifiedAt: NEW_DATE }]);
++      useFileStore
++        .getState()
++        .updateFileStats([{ ...STAT_A, name: "renamed.wav", size: 333, modifiedAt: NEW_DATE }]);
+       const fileA = useFileStore.getState().files[0];
+       expect(fileA?.name).toBe("a.wav");
+       expect(fileA?.path).toBe("/music/a.wav");
+diff --git a/tests/renderer/utils/file-row-display.test.ts b/tests/renderer/utils/file-row-display.test.ts
+index 18636b4..d3e2e4c 100644
+--- a/tests/renderer/utils/file-row-display.test.ts
++++ b/tests/renderer/utils/file-row-display.test.ts
+@@ -1,7 +1,6 @@
+ import { describe, expect, it } from "vitest";
+ import { formatFirstFieldValue, hasAnyTagValue } from "~/lib/file-row-display";
+-import type { FieldValue } from "~/types";
+-import type { WavMetadata } from "~/types";
++import type { FieldValue, WavMetadata } from "~/types";
+ 
+ describe("hasAnyTagValue", () => {
+   it("returns false for undefined metadata", () => {
+@@ -39,9 +38,9 @@ describe("hasAnyTagValue", () => {
+   });
+ 
+   it("returns true when one field is set among empty defaults", () => {
+-    expect(
+-      hasAnyTagValue({ title: "", artists: [], bpm: "", keywords: [""], comment: "ok" }),
+-    ).toBe(true);
++    expect(hasAnyTagValue({ title: "", artists: [], bpm: "", keywords: [""], comment: "ok" })).toBe(
++      true,
++    );
+   });
+ 
+   it("returns true when a custom number is a typed 0 (D-50)", () => {
+diff --git a/tests/renderer/utils/utils.test.ts b/tests/renderer/utils/utils.test.ts
+index f31c1d1..2491cd7 100644
+--- a/tests/renderer/utils/utils.test.ts
++++ b/tests/renderer/utils/utils.test.ts
+@@ -136,7 +136,9 @@ describe("readMetadataChunked (TM-B30, D-35)", () => {
+         return Object.fromEntries(chunk.map((path) => [path, { title: path }]));
+       })
+       .mockRejectedValueOnce(new Error("chunk 2 failed"))
+-      .mockImplementationOnce(async (chunk) => Object.fromEntries(chunk.map((path) => [path, { title: path }])));
++      .mockImplementationOnce(async (chunk) =>
++        Object.fromEntries(chunk.map((path) => [path, { title: path }])),
++      );
+ 
+     try {
+       const result = await readMetadataChunked(paths, [], getWriteGeneration);
+@@ -162,9 +164,13 @@ describe("readMetadataChunked failedPaths (TM-B31, D-36)", () => {
+     const readBatch = vi.mocked(window.api.readMetadataBatch);
+     readBatch.mockReset();
+     readBatch
+-      .mockImplementationOnce(async (chunk) => Object.fromEntries(chunk.map((path) => [path, { title: path }])))
++      .mockImplementationOnce(async (chunk) =>
++        Object.fromEntries(chunk.map((path) => [path, { title: path }])),
++      )
+       .mockRejectedValueOnce(new Error("chunk 2 failed"))
+-      .mockImplementationOnce(async (chunk) => Object.fromEntries(chunk.map((path) => [path, { title: path }])));
++      .mockImplementationOnce(async (chunk) =>
++        Object.fromEntries(chunk.map((path) => [path, { title: path }])),
++      );
+ 
+     try {
+       const result = await readMetadataChunked(paths, [], () => 0);
+@@ -185,9 +191,13 @@ describe("readMetadataChunked failedPaths (TM-B31, D-36)", () => {
+     readBatch.mockReset();
+     readBatch
+       .mockRejectedValueOnce(new Error("chunk 1 failed"))
+-      .mockImplementationOnce(async (chunk) => Object.fromEntries(chunk.map((path) => [path, { title: path }])))
++      .mockImplementationOnce(async (chunk) =>
++        Object.fromEntries(chunk.map((path) => [path, { title: path }])),
++      )
+       .mockRejectedValueOnce(new Error("chunk 3 failed"))
+-      .mockImplementationOnce(async (chunk) => Object.fromEntries(chunk.map((path) => [path, { title: path }])));
++      .mockImplementationOnce(async (chunk) =>
++        Object.fromEntries(chunk.map((path) => [path, { title: path }])),
++      );
+ 
+     try {
+       const result = await readMetadataChunked(paths, [], () => 7);
