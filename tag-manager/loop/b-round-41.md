@@ -93,3 +93,58 @@
 - Edit tool-მა loop folder-ის ფაილებზე (`current-task.md`, `b-round-41.md`) რამდენჯერმე მიიღო უარი ("requested permissions … haven't granted it"). იმავე ფაილებზე Write გავიდა. მიზეზი უცნობია.
 - შედეგი კოსმეტიკურია: current-task.md §4-ში D-16 განმარტების გარეშე წერია. მისი მნიშვნელობა ზემოთ §4-შია.
 - Bash-ით ამ შეზღუდვის გვერდის ავლა არ მიცდია. current-task.md-ის შინაარსი სრულია.
+
+---
+
+## Addendum — 2026-10-28, Saba-ს პასუხებისა და root-ის Actions link-ის შემდეგ
+
+B-ის პირველმა pass-მა round 42 BLOCKED-ად დაგეგმა. მას შემდეგ ორი ახალი input მოვიდა (`policy.local.md`):
+- root-ის note: Actions `Check` run `40639002695`, `a5c6a6b`-ზე, success (2026-10-28T05:36Z);
+- Saba-ს პასუხები Q1–Q6-სა და Q8-ზე.
+
+ამიტომ round 42 ხელახლა დაიგეგმა. archive `tasks/round-41.md` უცვლელია. BLOCKED გეგმის ასლი: `tasks/round-42-blocked-superseded.md`.
+
+### A1. backlog-ის ცვლილებები (მტკიცებულებით)
+- **TM-T0-CI, TM-T0-CI-FU, TM-B14 → done**, realVerified=true.
+  - თითოეულის ბოლო real acceptance იყო "root links a green Actions run on `7879ee0` or later". `40639002695` (`a5c6a6b`) ამას აკმაყოფილებს.
+  - Actions-ის ყოველი run fresh (cold) runner-ზე მიდის და hardened `apt-install.sh`-ს, ffprobe step-ს და E2E-ს `--retries=0`-ით უშვებს.
+- **TM-T0 → done.** ყველა depends_on (TM-B01, TM-B02, TM-B03, TM-T0-CI, TM-T0-DOC) done-ია.
+- **TM-T1-MIG → done.**
+  - Saba Q1-მა D-07 მიიღო.
+  - acceptance-ს უკვე ჰქონდა C-ის real UI მტკიცებულება: R3-7, screenshot-ები 20–23 (enable, persist, relaunch).
+  - docs note უკვე არსებობს (`docs/recording-tag-contract.md` § D-07, C R3-10).
+  - round 42 R42-5 მას ახალ კოდზე რეგრესიად ამოწმებს.
+- **TM-T1-DUP → in_progress** (round 42, D-47). RR-R3-01 → in_progress.
+- **გადაწყვეტილებები ჩაიწერა** (`needs_user` მოიხსნა, item-ები ღიაა):
+  - TM-B11 / D-10 (Q4);
+  - TM-B05 (Q5);
+  - TM-B06 (Q6);
+  - TM-B08 / D-12 (Q3).
+  - TM-B08 ღია რჩება საკუთარი პატარა round-ისთვის (docs/test pin), Saba-ს რიგით.
+- **Q8:** RR-R19-01 და B-R18-01-ზე ჩაიწერა ნებართვა (preload მხოლოდ `fs:stat-files`-ისთვის). დაგეგმილია round 43-ისთვის.
+- **დარჩა Saba-ზე:**
+  - Q7 (UCS სია + ლიცენზია): TM-T2-DATA → TM-T2;
+  - Q9–Q17 (UX): ღიაა, არ არის დაგეგმილი.
+- **ახალი signal-ები:**
+  - **B-R42-01** (low, → Q18): `schema.json`, რომელშიც უკვე ორივე ველია (standard + custom ერთი key-ით), არ სწორდება. Hide (X) `removeField(key)`-ით ორივეს შლის.
+  - **B-R42-02** (info): TM-B11-ის round-ში T1-10 (size-0 write-ის pin) უნდა შებრუნდეს.
+- **D-47** დაემატა (planned).
+- D-07, D-10 და D-12-ის status განახლდა `backlog.json`-სა და `feature-status.md`-ში.
+
+### A2. round 42 = TM-T1-DUP (Saba Q2, medium RR-R3-01)
+- **ცვლილება:** სტანდარტული ველის toggle იმალება, როცა მის `key`-ს ან `riffChunkId`-ს custom ველი იყენებს, და ჩანს warning (`text-warning`).
+- **Handler guard:** handler ასეთ ველს არ რთავს.
+- **ტესტები:** renderer T-a…T-d, ჯერ red.
+- **Real app (C):** schema.json-ის ორი plant (`CATE`/`category` და `ICAT`). შემოწმება სამი წამკითხველით (music-metadata, ffprobe, raw INFO), რომ `ICAT`-ს ერთი writer ჰყავს.
+- **Reference:** Mp3tag-ის community thread (ერთი slot ერთ სახელზე). Kid3 და BWF MetaEdit: მოიძებნა, არაფერი იპოვა.
+- **Deviations 1–3** ჩამოთვლილია task-ში.
+- **Q18-ისთვის:** ყველა სტანდარტულ ველზე განზოგადება B-ის არჩევანია, D-47-ში დასადასტურებლადაა ჩაწერილი.
+
+### A3. კითხვები Saba-სთვის (ღია)
+- **Q7:** UCS სია + ლიცენზია.
+- **Q9–Q17:** UX, უცვლელია (`tasks/round-42-blocked-superseded.md` §3).
+- **Q18 (ახალი, B-R42-01):** რა ხდება `schema.json`-ზე, რომელიც უკვე შეიცავს სტანდარტულ და custom ველს ერთი key-ით? B-ის default: load-ისას სტანდარტული ველი რჩება და ჩანს warning, რომელიც დაკარგულ custom ველს ასახელებს. ალტერნატივა: ორივე რჩება და ჩანს warning. round 42-ის R42-6 ამისთვის მონაცემს აგროვებს.
+- **დადასტურება:** D-47-ის განზოგადება ყველა სტანდარტულ ველზე.
+
+### A4. Saba-ს რიგი
+Q2 (round 42) → Q8 (43) → Q4 (TM-B11) → Q5 (TM-B05) → Q3 (TM-B08) → Q6 (TM-B06) → Q7 (T-2, მონაცემს ელოდება).

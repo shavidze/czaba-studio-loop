@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T05:36:42.665Z)
+# Active loop summary (2026-10-28T08:34:13.598Z)
 
-- backlog.json 391 KB -> active view 100 KB
-- status: G_ROOT_GATE round 41
+- backlog.json 396 KB -> active view 106 KB
+- status: B_PLANNING_NEXT round 41
 - servers: `{"servers":"none or skipped"}`
 - last publication: a5c6a6bd74488a99675d251275e850a684d55ce0 (rounds 41-41)
 - last root gate: round 41 published - commit a5c6a6bd74488a99675d251275e850a684d55ce0 pushed
 
-## Current items: TM-B42, TM-B43
+## Current items: TM-T0, TM-T0-CI, TM-T1, TM-T1-MIG, TM-T1-DUP, TM-B08, TM-B05, TM-B06, TM-T0-CI-FU, TM-B14, TM-B43
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -183,27 +183,18 @@
 - A-R39-01 / low / open / (f9) toHaveTextContent('Done') is a substring match; /^Done$/ would be stricter; C mutants C-4/C-5/C-7 still killed by (f9)
 - A-R39-02 / info / open / TESTING.md §6 mentions trim only for strings; the helper also tests RegExp against the trimmed text ((q3)/C-3 pin it) and a RegExp may match
 - B-R39-02 / info / open / Fieldset-disabled reorder arrows keep cursor default while Applying (Add Field Button shows not-allowed); pre-existing in ea4a1cb too
-- C-R40-01 / low / open / docs/design/component-specs.md:376 'Hidden field chip' still says hover:text-foreground hover:border-brand; SchemaEditor.tsx:230 uses enable
-- A-R40-01 / low / open / Same as C-R40-01 (component-specs chip block still plain hover:); outside the frozen prototype.diff
-- A-R40-02 / low / open / D-46 is cited in style-guide.md:215/235 and component-specs.md:50, but docs/bugs/001 decision log ends at D-45
-- RR-R40-01 / low / open / Design docs cite D-46 but no D-46 entry exists; add a short Georgian D-46 entry after D-45 in docs/bugs/001 (variants, SchemaEditor icon but
 - RR-R40-04 / info / open / Architecture signal: a shared forwardRef IconButton under ui/ owning enabled:not-aria-disabled:hover:* and disabled opacity would replace Sc
 - A-R40-03 / info / open / AudioPlayer.tsx:114-117 avoids hover on its disabled state with a conditional class, not enabled:hover:; same behaviour (C H11 identical old
 - A-R40-04 / low / open / (a) component-specs.md:369 field row py-1 vs code py-1.5 (docs); (b) natively disabled plain <button>s in SchemaEditor have no cursor-not-al
+- A-R41-01 / info / open / docs/bugs/001 entry (22) Deviation (4): the list of never-disabled plain-hover: buttons is not exhaustive (missing TagsInput remove-tag, Met
+- RR-R41-01 / low / open / New SchemaEditor spec prose in docs/design/component-specs.md is English while project rules ask for Georgian docs; the file is English thro
+- RR-R41-02 / low / open / D-46 bullet and entry (22) pin exact SchemaEditor.tsx line numbers (:157, :202, :210, :230); correct now, stale after the next edit. Naming 
+- RR-R41-03 / info / open / Architecture signal: the 'hover only when the button can act' rule is repeated in Button variants and raw SchemaEditor buttons; a shared hel
 
 ## Other open items
-- TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04
-- TM-T0-CI [in_progress] New .github/workflows/check.yml (ubuntu-24.04, Node 22, npm ci, ffmpeg+xvfb, check, build, xvfb playwright --retries=0)
-- TM-T1-MIG [todo] Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no aut
-- TM-T1-DUP [todo] Old schema.json custom field colliding with standard category: (a) custom field already using RIFF ID ICAT; (b) custom field with key 'categ
-- TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
 - TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
 - TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba
-- TM-B05 [todo] A WAV whose data chunk is empty cannot be tagged (node-taglib-sharp 6.0.1 boundary bug) and read silently returns empty metadata
-- TM-B06 [todo] Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database
 - OOS-03 [out_of_scope] New npm dependencies
-- TM-T0-CI-FU [in_progress] CI follow-up: apt-install.sh worst-case budget (C-R4-01/RR-R4-02: smaller dpkg recovery bound or step timeout >= 13 min) + Georgian docs not
 - TM-B11 [todo] With a custom Number field in the schema (e.g. Take/ITKN), every single-file save writes the default 0 as INFO '0' (size 1) into files that 
-- TM-B14 [in_progress] E2E cold start: first Electron window can take > 30 s on a cold runner; firstWindow sits inside the test body so the 30 s per-test timeout f

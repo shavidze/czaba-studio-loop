@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 42: BLOCKED on Saba decisions (no A/C work); baseline a5c6a6b",
+  "current_task": "Round 42: TM-T1-DUP (Saba Q2, D-47) hide colliding standard toggle + warning; MIG regression; baseline a5c6a6b",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -150,7 +150,7 @@
     },
     {
       "id": "D-07",
-      "status": "user default, awaiting confirmation",
+      "status": "confirmed by Saba Q1 2026-10-28",
       "decision": "Existing schema.json is NOT auto-migrated to include 'category'; it appears under disabled standard fields; README/doc note."
     },
     {
@@ -165,7 +165,7 @@
     },
     {
       "id": "D-10",
-      "status": "open, awaiting Saba",
+      "status": "decided by Saba Q4 2026-10-28: skip empty text and unset numbers, meaningful 0 stays expressible; implementation TM-B11 (open)",
       "decision": "Empty-value policy for INFO fields: today an empty Keywords field is written as IKEY=\"\" (size 0) and ffprobe shows \"IKEY\": \"\" (C-R1-01). Options: skip empty INFO chunks vs write and document. B default proposal: skip empty (importer treats absent = empty). Decide before/with T-1. Round 2 B: MetadataPanel.tsx:76 single-file save sends all editingMetadata, so once category exists every single-file save writes ICAT=\"\" when empty. A pure skip-empty write could never clear a value; the real options are (a) write \"\" (current) or (b) remove the sub-chunk when empty. Round 3 pins (a); change only with Saba.",
       "contract_with": "K-4"
     },
@@ -176,7 +176,7 @@
     },
     {
       "id": "D-12",
-      "status": "B, round 2 (signal for Saba)",
+      "status": "confirmed by Saba Q3 2026-10-28: K-4 = ICAT/IKEY/ICMT only; artists stay as written",
       "decision": "The K-4 contract covers only category/ICAT, keywords/IKEY, comment/ICMT. riffChunkId on STANDARD_PROP_MAP fields (title, artists, album, genres, year, comment, copyright, track, bpm) is informational and reserved for SchemaEditor; the chunk actually written is decided by node-taglib-sharp (artists -> ISTR per value, C-R2-01). No code change until Saba says artists are part of the contract (TM-B08).",
       "contract_with": "K-4"
     },
@@ -370,13 +370,18 @@
       "id": "D-46",
       "status": "verified (C R40 PASS), published e386cca (TM-B42); decision-log entry D-46 + docs/bugs/001 entry (22) verified by C R41 PASS, published a5c6a6b (TM-B43); UX, reversible",
       "decision": "Hover feedback appears only on buttons that can act: Button variants use enabled:not-aria-disabled:hover:, SchemaEditor fieldset buttons use enabled:hover:. Disabled and aria-disabled buttons keep their resting colour, opacity 0.5 and cursor not-allowed (D-45). pointer-events:none (Bootstrap) is not used because it would drop the not-allowed cursor."
+    },
+    {
+      "id": "D-47",
+      "status": "planned (round 42, TM-T1-DUP); behaviour chosen by Saba Q2 2026-10-28; generalisation to every standard field is B's, listed for Saba confirmation; contract: guarantees a single ICAT writer (K-4)",
+      "decision": "SchemaEditor offers a hidden standard field toggle only when no non-standard field uses its key or its riffChunkId (exact match). A blocked standard field gets a warning line naming the custom field instead of the chip. The toggle handler refuses to enable a blocked standard field. Existing both-present schemas are out of scope (B-R42-01)."
     }
   ],
   "items": [
     {
       "id": "TM-T0",
       "title": "T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04",
-      "status": "in_progress",
+      "status": "done",
       "depends_on": [
         "TM-B01",
         "TM-B02",
@@ -393,9 +398,11 @@
       ],
       "evidence": [
         "C round 1 PASS (c-round-1.md/.json), published c34ee5a: T0-1 R1-1, T0-2 R1-2, T0-3 R1-3, T0-4 R1-8 PASS. Open: 'regression: npm ci postinstall on Linux (Actions run)' = TM-T0-CI realVerified=false",
-        "Root-linked Actions run 40331357825 (c768567) green incl. npm ci step: acceptance 'regression: npm ci postinstall on Linux (Actions run)' observed. TM-T0 stays in_progress only because depends_on TM-T0-CI is in_progress"
+        "Root-linked Actions run 40331357825 (c768567) green incl. npm ci step: acceptance 'regression: npm ci postinstall on Linux (Actions run)' observed. TM-T0 stays in_progress only because depends_on TM-T0-CI is in_progress",
+        "Root-linked Actions run 40639002695 (workflow Check, commit a5c6a6b = round 41 head) completed success 2026-10-28T05:36Z, https://github.com/TCzaba/czaba-tag-manager/actions/runs/40639002695; the seven runs before it (3035ffc..e386cca) green too (policy.local.md root note 2026-10-28). Every Actions run starts on a fresh (cold) ubuntu-24.04 runner and runs the hardened apt-install.sh step, the ffprobe step and E2E --retries=0. B R41 addendum: last real acceptance line (root links a green Actions run on 7879ee0 or later) met -> done; all depends_on (TM-B01, TM-B02, TM-B03, TM-T0-CI, TM-T0-DOC) done"
       ],
-      "acceptance_note": "all five acceptance lines have evidence; closes together with TM-T0-CI"
+      "acceptance_note": "all five acceptance lines have evidence; closes together with TM-T0-CI",
+      "realVerified": true
     },
     {
       "id": "TM-B01",
@@ -452,7 +459,7 @@
     {
       "id": "TM-T0-CI",
       "title": "New .github/workflows/check.yml (ubuntu-24.04, Node 22, npm ci, ffmpeg+xvfb, check, build, xvfb playwright --retries=0)",
-      "status": "in_progress",
+      "status": "done",
       "round": 4,
       "depends_on": [],
       "acceptance": [
@@ -469,9 +476,10 @@
         "Root update (policy.local.md, 13:45 UTC): Actions run 40331357825 (Check, c768567) GREEN, every step success, 1 min 24 s (apt step 19 s, lint/types/unit 16 s, build 4 s, E2E 8 s). First green Actions run of check.yml. Recorded late: B round 3 missed it",
         "C round 4 PASS (c-round-4.md/.json), published 7879ee0: R4-1..R4-8 PASS. apt-install.sh shim cases a-f + mutation (timeout removed -> hangs 30 s), real sudo + real apt on runner 'attempt 1/2 ok' 16 s, fresh ubuntu:24.04 container 26 s with ffprobe/xvfb-run/xauth present, CI-order replay all steps exit 0 (apt 18.5 s, install-deps 2.5 s, check 10.2 s, ffprobe 0.8 s, build 2.4 s, E2E 7/7 3.8 s). realVerified=false: hardened step not yet seen on Actions",
         "Round 9 (499a6f3) changed check.yml again (apt step 13 min, single build path via npm run test:e2e); C R9-5 local CI-order replay x3 green. Actions run on 499a6f3 not yet linked by root",
-        "B round 12: still no root-linked green Actions Check run on 7879ee0 or later; c3bd412 is a fresh push, root can link its Check run"
+        "B round 12: still no root-linked green Actions Check run on 7879ee0 or later; c3bd412 is a fresh push, root can link its Check run",
+        "Root-linked Actions run 40639002695 (workflow Check, commit a5c6a6b = round 41 head) completed success 2026-10-28T05:36Z, https://github.com/TCzaba/czaba-tag-manager/actions/runs/40639002695; the seven runs before it (3035ffc..e386cca) green too (policy.local.md root note 2026-10-28). Every Actions run starts on a fresh (cold) ubuntu-24.04 runner and runs the hardened apt-install.sh step, the ffprobe step and E2E --retries=0. B R41 addendum: last real acceptance line (root links a green Actions run on 7879ee0 or later) met -> done"
       ],
-      "realVerified": false,
+      "realVerified": true,
       "last_round_commit": "7879ee03fce194ec9ccbd544ba862cad9e80e42c",
       "note": "B R10 close: still no root note on an Actions run of 7879ee0..35ed18b (gate-round-10.json has none); stays in_progress. A green Check run on 499a6f3 or later closes TM-T0-CI, TM-T0 and the Actions part of TM-T0-CI-FU; on 35ed18b or later it also closes the Actions part of TM-B14"
     },
@@ -595,7 +603,7 @@
     {
       "id": "TM-T1-MIG",
       "title": "Existing users' schema.json does not show the new category field (schema.ts returns STANDARD_FIELDS only when no file); decision D-07 no auto-migration + doc note",
-      "status": "todo",
+      "status": "done",
       "depends_on": [
         "TM-T1"
       ],
@@ -604,25 +612,30 @@
       ],
       "evidence": [
         "Round 3: C regression check only (a pre-existing 12-field schema.json loads and Category (UCS) is listed under disabled standards); not done until Saba confirms D-07",
-        "C round 3 R3-7 (regression only): 12-field pre-T-1 schema.json loads without Category; Schema Editor lists '+ Category (UCS)' under Hidden Standard Fields; enabling it shows the field and persists (13 keys) across relaunch. Still open: D-07 needs Saba"
+        "C round 3 R3-7 (regression only): 12-field pre-T-1 schema.json loads without Category; Schema Editor lists '+ Category (UCS)' under Hidden Standard Fields; enabling it shows the field and persists (13 keys) across relaunch. Still open: D-07 needs Saba",
+        "Saba answers 2026-10-28 (policy.local.md): Q1 accepted D-07 (no auto-migration, existing schema.json shows category under Hidden Standard Fields, docs note). Acceptance met by C R3-7 real UI (screenshots 20-23, enable + persist + relaunch) and docs note docs/recording-tag-contract.md '## არსებული schema.json (D-07)' (C R3-10). Round 42 R42-5 re-checks it on current code as a regression guard"
       ],
-      "needs_user": "confirm D-07 default (no migration)"
+      "realVerified": true
     },
     {
       "id": "TM-T1-DUP",
       "title": "Old schema.json custom field colliding with standard category: (a) custom field already using RIFF ID ICAT; (b) custom field with key 'category' and another ID (e.g. auto CATE) -> toggle adds a second field with the same key",
-      "status": "todo",
+      "status": "in_progress",
       "depends_on": [
         "TM-T1"
       ],
       "acceptance": [
-        "defined behaviour (warn or dedupe) chosen with user, test proves it"
+        "Saba Q2: hide the standard toggle while its key or RIFF ID is used by a custom field, show a warning, renderer test pins it; round 42 R42-1..R42-7"
       ],
       "evidence": [
         "B round 2 code read: an old custom field with key category (not standard) makes SchemaEditor list the standard category as disabled; toggling it would add a second field with key category (SchemaEditor.tsx:38-39, 45-59). Behaviour needs Saba",
-        "Root review round 3 (gates/round-3/review.md, medium RR-R3-01): same-key case confirmed by code read SchemaEditor.tsx:38-57 + schema.ts:23-34 - one value written to CATE and ICAT, duplicate React keys. Reviewer's proposed default: build enabledStandardKeys from all field keys / reject the toggle when the key exists, plus a renderer test with {key:'category', riffChunkId:'CATE'}. Behaviour choice still Saba's"
+        "Root review round 3 (gates/round-3/review.md, medium RR-R3-01): same-key case confirmed by code read SchemaEditor.tsx:38-57 + schema.ts:23-34 - one value written to CATE and ICAT, duplicate React keys. Reviewer's proposed default: build enabledStandardKeys from all field keys / reject the toggle when the key exists, plus a renderer test with {key:'category', riffChunkId:'CATE'}. Behaviour choice still Saba's",
+        "Saba answers 2026-10-28 (policy.local.md): Q2 behaviour chosen -> hide toggle + warning + renderer test. Planned as round 42 (D-47)"
       ],
-      "needs_user": "choose behaviour for both collision cases (proposed default: hide/reject the standard toggle when its key or RIFF ID is already used, show a warning)"
+      "round": 42,
+      "decisions": [
+        "D-47"
+      ]
     },
     {
       "id": "TM-B08",
@@ -641,9 +654,10 @@
         "decide with Saba whether artists are part of the K-4 contract; if yes, a test pins the chunk and the multi-value encoding"
       ],
       "evidence": [
-        "C round 2 R2-6: c-round-2/r2-6-result.json (LIST/INFO two ISTR, ffprobe artist + ISTR)"
+        "C round 2 R2-6: c-round-2/r2-6-result.json (LIST/INFO two ISTR, ffprobe artist + ISTR)",
+        "Saba answers 2026-10-28 (policy.local.md) Q3: artists are NOT in the K-4 contract (D-12 decided: ICAT/IKEY/ICMT only); artists stay as written today. Open only for its own small round in Saba order (pin/doc), no writer change"
       ],
-      "needs_user": "is artists part of the K-4 contract (D-12)?"
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q3: artists are NOT in the K-4 contract (D-12 decided: ICAT/IKEY/ICMT only); artists stay as written today. Open only for its own small round in Saba order (pin/doc), no writer change"
     },
     {
       "id": "TM-T2",
@@ -721,8 +735,10 @@
         "decide with user: clear user-facing error message vs upstream issue; test pins the behaviour"
       ],
       "evidence": [
-        "B round 0 experiment"
-      ]
+        "B round 0 experiment",
+        "Saba answers 2026-10-28 (policy.local.md) Q5: clear per-file error (\"audio data is empty, cannot tag\"), pinned by a test; no upstream patch"
+      ],
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q5: clear per-file error (\"audio data is empty, cannot tag\"), pinned by a test; no upstream patch"
     },
     {
       "id": "TM-B06",
@@ -737,14 +753,16 @@
         "decide scope; if extended, biome check tests/ green"
       ],
       "evidence": [
-        "biome.json files.includes src/**; package.json lint 'biome check src/'"
+        "biome.json files.includes src/**; package.json lint 'biome check src/'",
+        "Saba answers 2026-10-28 (policy.local.md) Q6: Biome lints tests/** too with a relaxed override, as its own round"
       ],
       "note_b_r13": "B R13 (package.json read): scripts.typecheck already runs tsc --noEmit -p tsconfig.test.json (include tests/**/*), so the 'tsconfig.test.json not part of check' half of the title is stale since round 2 (TM-B04/D-11); the open part is Biome lint of tests/ (biome check src/ only). Scope decision still with Saba",
       "note_b_r16": "B R16: RR-R16-01 and A-R16-02 add to the signals on this item (with RR-R14-03, RR-R14-05); scope decision still with Saba",
       "notes": [
         "R20: A's code-reviewer notes '() => {}' placeholders in the new test helpers would meet Biome rules once tests/ is linted (same class as RR-R14-03)",
         "R36: RR-R36-05 (root review) again notes biome check src/ leaves tests/ unlinted; signal only, scope decision still with Saba"
-      ]
+      ],
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q6: Biome lints tests/** too with a relaxed override, as its own round"
     },
     {
       "id": "OOS-01",
@@ -795,7 +813,7 @@
       "type": "gap",
       "severity": "low",
       "title": "CI follow-up: apt-install.sh worst-case budget (C-R4-01/RR-R4-02: smaller dpkg recovery bound or step timeout >= 13 min) + Georgian docs note for the script and its env knobs (RR-R4-05)",
-      "status": "in_progress",
+      "status": "done",
       "depends_on": [
         "TM-T0-CI"
       ],
@@ -807,7 +825,8 @@
       ],
       "evidence": [
         "C round 4 C-R4-01; root review round 4 Low 2 and Low 5",
-        "C round 9 PASS (c-round-9.md/.json, realVerified=true for local checks), published 499a6f3: R9-1 static (bash -n, shellcheck 0, only shebang #, YAML diff exact), R9-2 shim cases a-h + mutation (d wall 14.03 s = W, h N=3 21.03 s = W, 12 bad-knob cases rc 2 with 0 system calls), R9-3 640 < 780, R9-4 real sudo/apt rc 0 'attempt 1/2 ok after 2s', debconf man-db/auto-update true -> false, R9-5 CI-order replay x3 all steps exit 0 (apt 1.5 s, install-deps 2.2 s, check 10.6 s, ffprobe 0.8 s, Build and E2E 5.9 s), R9-6 gate 107/62/7, R9-7 real-app DOORWood -> ffprobe + music-metadata ICAT, R9-8 ownership. Local acceptance lines 1-3 have real evidence; line 4 (Actions) realVerified=false"
+        "C round 9 PASS (c-round-9.md/.json, realVerified=true for local checks), published 499a6f3: R9-1 static (bash -n, shellcheck 0, only shebang #, YAML diff exact), R9-2 shim cases a-h + mutation (d wall 14.03 s = W, h N=3 21.03 s = W, 12 bad-knob cases rc 2 with 0 system calls), R9-3 640 < 780, R9-4 real sudo/apt rc 0 'attempt 1/2 ok after 2s', debconf man-db/auto-update true -> false, R9-5 CI-order replay x3 all steps exit 0 (apt 1.5 s, install-deps 2.2 s, check 10.6 s, ffprobe 0.8 s, Build and E2E 5.9 s), R9-6 gate 107/62/7, R9-7 real-app DOORWood -> ffprobe + music-metadata ICAT, R9-8 ownership. Local acceptance lines 1-3 have real evidence; line 4 (Actions) realVerified=false",
+        "Root-linked Actions run 40639002695 (workflow Check, commit a5c6a6b = round 41 head) completed success 2026-10-28T05:36Z, https://github.com/TCzaba/czaba-tag-manager/actions/runs/40639002695; the seven runs before it (3035ffc..e386cca) green too (policy.local.md root note 2026-10-28). Every Actions run starts on a fresh (cold) ubuntu-24.04 runner and runs the hardened apt-install.sh step, the ffprobe step and E2E --retries=0. B R41 addendum: last real acceptance line (root links a green Actions run on 7879ee0 or later) met -> done"
       ],
       "note": "B R10 close: unchanged. Stays in_progress only for \"real: the hardened step seen green on Actions\" (rides on TM-T0-CI)",
       "round": 9,
@@ -820,7 +839,7 @@
         "RR-R4-05",
         "RR-R1-01"
       ],
-      "realVerified": false,
+      "realVerified": true,
       "last_round_commit": "499a6f3c8867ed7e9356371df9e83713b652265a"
     },
     {
@@ -868,9 +887,10 @@
         "policy chosen with Saba (write '0' as today vs write size-0 / remove when 0; RR-R5-03: a meaningful 0 must stay expressible); a main test pins the chosen raw INFO bytes and C checks raw INFO + ffprobe after a real-app save"
       ],
       "evidence": [
-        "C round 6 C-R6-01: c-round-6/r6-result.json (commentOnlyAfter.file.riffInfo, catNewFile.riffInfo), r6-before-result.json (same on a8c1b53)"
+        "C round 6 C-R6-01: c-round-6/r6-result.json (commentOnlyAfter.file.riffInfo, catNewFile.riffInfo), r6-before-result.json (same on a8c1b53)",
+        "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written. Skip empty text and unset numbers; a meaningful 0 stays expressible (D-10 decided). Note: T1-10 in recording-tag-contract.test.ts currently pins the size-0 write and must flip in the TM-B11 round"
       ],
-      "needs_user": "extend D-10 to custom number fields: is an unset number written as '0', as an empty sub-chunk, or not at all?"
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written. Skip empty text and unset numbers; a meaningful 0 stays expressible (D-10 decided). Note: T1-10 in recording-tag-contract.test.ts currently pins the size-0 write and must flip in the TM-B11 round"
     },
     {
       "id": "TM-B12",
@@ -932,7 +952,7 @@
       "severity": "low",
       "source": "C-R9-02",
       "title": "E2E cold start: first Electron window can take > 30 s on a cold runner; firstWindow sits inside the test body so the 30 s per-test timeout fails the run with --retries=0 (check.yml), while local verifyCommand masks it with playwright.config retries: 1",
-      "status": "in_progress",
+      "status": "done",
       "round": 10,
       "depends_on": [],
       "decisions": [
@@ -955,10 +975,11 @@
         "B R9 experiment /tmp/b-r9: '-r <file>' before the entry in electron.launch args runs a module that delays app.whenReady -> firstWindow at 5.46 s with a 5 s delay; a 2 s firstWindow timeout fails with 0 windows; NODE_OPTIONS --require is ignored by Electron main",
         "C round 10 PASS (c-round-10.md/.json, realVerified=true for local checks), published 35ed18b: R10-1 static/ownership (no firstWindow in specs, playwright.config.ts identical, check.yml diff only job timeout 30->40, tsc test 0); R10-2 red on 499a6f3 copy with C injector delay 40 s -> 7/7 failed, firstWindow Timeout 30000ms in all 3 spec files; R10-3 green with launchTagManagerApp + same delay x2 -> 7/7 rc 0, no retries, injector log released ~40.2 s; R10-4 (a) delay 75 s -> each spec fails in beforeAll with \"first window did not appear within 60000 ms (elapsed 60031/60034/60035 ms)\" + output tail, 0 electron processes, no temp dirs left; (b) setTimeout removed -> beforeAll hook timeout 30000ms; (c) wait back in test body -> Test timeout 30000ms; R10-5 injector contract (unset/empty -> [--no-sandbox, entry]; relative/missing/dir -> throws naming TAG_MANAGER_E2E_ELECTRON_REQUIRE, no electron; file -> [--no-sandbox, -r, file, entry]); R10-6 verifyCommand 107/62/7, --retries=0 x3, CI-order replay all steps exit 0; R10-7 real app DOORWood -> ffprobe + music-metadata ICAT; R10-8 docs",
         "A round 10 Step 0 cold sample (first Electron launch of the job): 7/7 --retries=0, first tests 408/444 ms; C-R9-02 not reproduced (data only)",
-        "B round 12: still no root-linked green Actions Check run on 7879ee0 or later; c3bd412 is a fresh push, root can link its Check run"
+        "B round 12: still no root-linked green Actions Check run on 7879ee0 or later; c3bd412 is a fresh push, root can link its Check run",
+        "Root-linked Actions run 40639002695 (workflow Check, commit a5c6a6b = round 41 head) completed success 2026-10-28T05:36Z, https://github.com/TCzaba/czaba-tag-manager/actions/runs/40639002695; the seven runs before it (3035ffc..e386cca) green too (policy.local.md root note 2026-10-28). Every Actions run starts on a fresh (cold) ubuntu-24.04 runner and runs the hardened apt-install.sh step, the ffprobe step and E2E --retries=0. B R41 addendum: last real acceptance line (root links a green Actions run on 7879ee0 or later) met -> done"
       ],
       "note": "B R10 close: local acceptance lines 1-4 done (C R10 PASS). Stays in_progress only for \"real: a cold-runner Check run green on Actions\" (rides on TM-T0-CI; root links a Check run on 35ed18b or later). D-20 deviations accepted (decisions D-20 amendment)",
-      "realVerified": false,
+      "realVerified": true,
       "last_round_commit": "35ed18b9211f0da3d7c23e10af5b431d6f33540f"
     },
     {
@@ -2195,10 +2216,10 @@
     {
       "id": "RR-R3-01",
       "severity": "medium",
-      "status": "open",
+      "status": "in_progress",
       "title": "Old custom field key 'category' (auto ID CATE) + standard toggle -> two fields same key, one value in CATE and ICAT, duplicate React keys (SchemaEditor.tsx:38-57, schema.ts:23-34)",
       "round": 3,
-      "routed_to": "TM-T1-DUP (Saba behaviour choice; proposed default recorded)"
+      "routed_to": "TM-T1-DUP round 42 (Saba Q2 answered 2026-10-28, D-47)"
     },
     {
       "id": "RR-R3-02",
@@ -2216,7 +2237,8 @@
       "status": "open",
       "title": "Every editor-panel save writes empty ICAT (D-10 pinned on purpose)",
       "round": 3,
-      "routed_to": "D-10 (Saba)"
+      "routed_to": "D-10 (Saba)",
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written (TM-B11)"
     },
     {
       "id": "RR-R3-04",
@@ -2397,7 +2419,8 @@
       "round": 5,
       "title": "bpm and track read 0 from an INFO-only WAV with and without NUL (IBPM '120', ITRK '7'): node-taglib-sharp does not map IBPM/ITRK; STANDARD_FIELDS riffChunkId IBPM/ITRK is informational only (D-12). year (ICRD) is read. A recorder BPM is not shown and an editor save writes bpm 0 through the taglib path",
       "routed_to": "signal + Saba question together with D-12/TM-B08 (which standard fields belong to the INFO contract)",
-      "evidence": "b-round-5-exp-nul-number.cjs (NUL-terminated) and b-round-5-exp-nonul-number.cjs (no NUL): bpm 0, track 0, year 2024 in both"
+      "evidence": "b-round-5-exp-nul-number.cjs (NUL-terminated) and b-round-5-exp-nonul-number.cjs (no NUL): bpm 0, track 0, year 2024 in both",
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q3: D-12 decided, bpm/track/artists stay outside K-4"
     },
     {
       "id": "C-R6-01",
@@ -3240,7 +3263,8 @@
       "routed_to": "Saba question batch (preload change permission)",
       "notes": [
         "R19: C measured one single save on a 200-file folder at 169 ms click->toast (observation, no d015470 comparison). Root review R19 rates the full rescan per save medium (RR-R19-01); same Saba question"
-      ]
+      ],
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q8: permission to change src/preload/index.ts and index.d.ts ONLY to add the narrow fs:stat-files channel; exact diff listed in the round; C checks nothing else changed. Planned for round 43"
     },
     {
       "round": 19,
@@ -3249,7 +3273,8 @@
       "severity": "medium",
       "status": "open",
       "title": "Performance: every save awaits a full recursive scanFolder (file-system.ts scanFolderRecursive, depth 20, stat per WAV, no timeout) before the re-read while isSaving is true; slow on 1000+ files or a network drive. Fix: a narrow statFiles(paths) IPC (main + protected preload) or write IPCs returning stats; or a non-awaited refresh after the toast",
-      "routed_to": "Saba question B-R18-01 (preload change permission); a non-awaited refresh would change D-28 order, also a Saba/B decision"
+      "routed_to": "Saba question B-R18-01 (preload change permission); a non-awaited refresh would change D-28 order, also a Saba/B decision",
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q8: permission to change src/preload/index.ts and index.d.ts ONLY to add the narrow fs:stat-files channel; exact diff listed in the round; C checks nothing else changed. Planned for round 43"
     },
     {
       "round": 19,
@@ -3941,7 +3966,8 @@
       "severity": "info",
       "status": "open",
       "title": "A save after adding a custom Text field writes RNOT='' (empty value) into the file; D-10 / C-R1-01 class (empty fields are written)",
-      "routed_to": "record (D-10 / TM-B11 class, Saba batch)"
+      "routed_to": "record (D-10 / TM-B11 class, Saba batch)",
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written (TM-B11)"
     },
     {
       "round": 27,
@@ -5059,6 +5085,24 @@
       "status": "open",
       "title": "Architecture signal: the 'hover only when the button can act' rule is repeated in Button variants and raw SchemaEditor buttons; a shared helper/class constant (or IconButton, RR-R40-04) would prevent drift and could carry B-R39-02's cursor; a build-output check for :enabled:hover selectors would replace manual real-app measurement",
       "routed_to": "signal (not a task; with RR-R40-04, B-R39-02)"
+    },
+    {
+      "id": "B-R42-01",
+      "source": "B (round 42 planning, code read a5c6a6b)",
+      "severity": "low",
+      "status": "open",
+      "round": 42,
+      "title": "A schema.json that ALREADY holds both a custom and the standard field with the same key (e.g. custom category/CATE + standard category/ICAT, toggled before D-47) is not deduped: loadSchema (schema.ts:23-34) keeps both, Active Fields renders duplicate React keys, one value is written to both chunks, and Hide (X) calls removeField(key) which drops BOTH fields. Out of round 42 scope; C characterizes it (R42-6 observation)",
+      "routed_to": "Saba question Q18 (proposed default: on load keep the standard field and show a warning naming the dropped custom field; or keep both and warn)"
+    },
+    {
+      "id": "B-R42-02",
+      "source": "B (Saba Q4 planning note)",
+      "severity": "info",
+      "status": "open",
+      "round": 42,
+      "title": "TM-B11 round must flip T1-10 (recording-tag-contract.test.ts pins the size-0 INFO write for empty keywords/category) and K-4 docs (ffprobe absent = empty)",
+      "routed_to": "TM-B11 round"
     }
   ],
   "rounds": [
