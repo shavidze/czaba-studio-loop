@@ -146,6 +146,17 @@ if [ -s "$REQ" ] && [ -s "$ALLOW" ]; then
   fi
 fi
 
+# ---------- root YouTube search step (Saba, 2026-10-28: reference-first includes the best tutorials) ----------
+# B writes loop/youtube-request.json ({"task": "...", "queries": [...]}); root lists ranked candidates in
+# loop/reference/youtube/<task>.md. Runners cannot read transcripts; root reads those on Saba's computer.
+if [ -s "$LOOP/youtube-request.json" ]; then
+  if pip install -q --disable-pip-version-check yt-dlp >/dev/null 2>&1; then
+    python3 -I "$STATE/cloud/yt-search.py" "$LOOP" || log "yt-search: failed, request kept"
+  else
+    log "yt-search: yt-dlp install failed, request kept"
+  fi
+fi
+
 # ---------- restore uncommitted work from the previous job ----------
 PATCH="$STATE/worktree/patch"
 if [ -f "$STATE/worktree/patch.enc" ]; then
