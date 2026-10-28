@@ -1,0 +1,374 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c42-base[39m
+
+[90mstderr[2m | tests/renderer/components/schema-editor.test.ts[2m > [22m[2mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22m[2mT-e a stale Category chip click does nothing once a custom field takes key category
+[22m[39mEncountered two children with the same key, `category`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+
+ [31m❯[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m7 failed[39m[2m)[22m[33m 1249[2mms[22m[39m
+     [32m✓[39m rejects a custom field with RIFF ID ICAT[32m 247[2mms[22m[39m
+     [32m✓[39m rejects a custom field with lowercase RIFF ID icat[32m 162[2mms[22m[39m
+     [32m✓[39m rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use)[32m 173[2mms[22m[39m
+     [32m✓[39m lists Category (UCS) among hidden standard fields for a pre-T-1 schema[32m 104[2mms[22m[39m
+[31m     [31m×[31m T-a hides Category (UCS) and warns when a custom field already uses key category[39m[32m 87[2mms[22m[39m
+[31m     [31m×[31m T-b hides Category (UCS) and warns when a custom field already uses RIFF ID ICAT[39m[32m 81[2mms[22m[39m
+[31m     [31m×[31m T-c brings Category (UCS) back once the colliding custom field is removed[39m[32m 84[2mms[22m[39m
+[31m     [31m×[31m T-d blocks any hidden standard field whose key a custom field uses (Publisher)[39m[32m 85[2mms[22m[39m
+[31m     [31m×[31m T-e a stale Category chip click does nothing once a custom field takes key category[39m[32m 77[2mms[22m[39m
+[31m     [31m×[31m T-f names the first colliding field, prefers key over RIFF ID, and lists warnings in standard order[39m[32m 57[2mms[22m[39m
+[31m     [31m×[31m T-g reports key when one custom field matches both key and RIFF ID[39m[32m 86[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 7 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-a hides Category (UCS) and warns when a custom field already uses key category
+[31m[1mAssertionError[22m: expected <button type="button" …(1)></button> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<button
+  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+  type="button"
+>
+  + 
+  Category (UCS)
+</button>
+
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m125:51[22m[39m
+    [90m123| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m124| [39m
+    [90m125| [39m    [34mexpect[39m([34mqueryButtonByText[39m([32m"+ Category (UCS)"[39m))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m126| [39m    [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([33mCATEGORY_KEY_WARNING[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m127| [39m    expect(screen.getByText(CATEGORY_KEY_WARNING)).toHaveClass("text-[…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-b hides Category (UCS) and warns when a custom field already uses RIFF ID ICAT
+[31m[1mAssertionError[22m: expected <button type="button" …(1)></button> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<button
+  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+  type="button"
+>
+  + 
+  Category (UCS)
+</button>
+
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m138:51[22m[39m
+    [90m136| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m137| [39m
+    [90m138| [39m    [34mexpect[39m([34mqueryButtonByText[39m([32m"+ Category (UCS)"[39m))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m139| [39m    expect(screen.getByText(CATEGORY_RIFF_WARNING)).toBeInTheDocument(…
+    [90m140| [39m    expect(screen.getByText("Hidden Standard Fields")).toBeInTheDocume…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-c brings Category (UCS) back once the colliding custom field is removed
+[31m[1mAssertionError[22m: expected <button type="button" …(1)></button> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<button
+  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+  type="button"
+>
+  + 
+  Category (UCS)
+</button>
+
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m148:51[22m[39m
+    [90m146| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m147| [39m
+    [90m148| [39m    [34mexpect[39m([34mqueryButtonByText[39m([32m"+ Category (UCS)"[39m))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m149| [39m    [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([33mCATEGORY_KEY_WARNING[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m150| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-d blocks any hidden standard field whose key a custom field uses (Publisher)
+[31m[1mAssertionError[22m: expected <button type="button" …(1)></button> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<button
+  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+  type="button"
+>
+  + 
+  Publisher
+</button>
+
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m171:46[22m[39m
+    [90m169| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m170| [39m
+    [90m171| [39m    [34mexpect[39m([34mqueryButtonByText[39m([32m"+ Publisher"[39m))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                             [31m^[39m
+    [90m172| [39m    [34mexpect[39m(
+    [90m173| [39m      screen.getByText('Publisher is unavailable: custom field "Label"…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-e a stale Category chip click does nothing once a custom field takes key category
+[31m[1mAssertionError[22m: expected [ { key: 'title', …(4) }, …(13) ] to deeply equal [ { key: 'title', …(4) }, …(11) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -79,6 +79,19 @@[39m
+[2m      "label": "Keywords",[22m
+[2m      "riffChunkId": "IKEY",[22m
+[2m      "standard": true,[22m
+[2m      "type": "text",[22m
+[2m    },[22m
+[31m+   {[39m
+[31m+     "key": "category",[39m
+[31m+     "label": "Category (UCS)",[39m
+[31m+     "riffChunkId": "ICAT",[39m
+[31m+     "standard": true,[39m
+[31m+     "type": "text",[39m
+[31m+   },[39m
+[31m+   {[39m
+[31m+     "key": "category",[39m
+[31m+     "label": "Category",[39m
+[31m+     "riffChunkId": "CATE",[39m
+[31m+     "type": "text",[39m
+[31m+   },[39m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m191:46[22m[39m
+    [90m189| [39m    getStateSpy[33m.[39m[34mmockRestore[39m()[33m;[39m
+    [90m190| [39m
+    [90m191| [39m    expect(useSchemaStore.getState().fields).toEqual(PRE_T1_STANDARD_F…
+    [90m   | [39m                                             [31m^[39m
+    [90m192| [39m  })[33m;[39m
+    [90m193| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-f names the first colliding field, prefers key over RIFF ID, and lists warnings in standard order
+[31m[1mAssertionError[22m: expected [] to deeply equal [ …(2) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [[39m
+[32m-   "Title is unavailable: custom field \"Name\" already uses key \"title\".",[39m
+[32m-   "Category (UCS) is unavailable: custom field \"Notes\" already uses RIFF ID \"ICAT\".",[39m
+[32m- ][39m
+[31m+ [][39m
+
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m206:22[22m[39m
+    [90m204| [39m
+    [90m205| [39m    const warnings = Array.from(document.querySelectorAll("p.text-warn…
+    [90m206| [39m    [34mexpect[39m(warnings)[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                     [31m^[39m
+    [90m207| [39m      'Title is unavailable: custom field "Name" already uses key "tit…
+    [90m208| [39m      'Category (UCS) is unavailable: custom field "Notes" already use…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-g reports key when one custom field matches both key and RIFF ID
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: Category (UCS) is unavailable: custom field "Cat Both" already uses key "category".. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"px-3 py-2 border-b border-outline flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-muted hover:text-foreground p-0.5 transition-colors"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-arrow-left h-3.5 w-3.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"m12 19-7-7 7-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12H5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"text-xs font-medium text-brand"[39m
+        [36m>[39m
+          [0mCustomize Fields[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-3"[39m
+      [36m>[39m
+        [36m<fieldset[39m
+          [33mclass[39m=[32m"min-w-0 space-y-4 disabled:opacity-60"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"space-y-1.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"text-xs text-muted"[39m
+            [36m>[39m
+              [0mActive Fields[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+              [36m>[39m
+                [0mTitle[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-dim text-[10px]"[39m
+              [36m>[39m
+                [0mtext[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-dim text-[10px] font-mono"[39m
+              [36m>[39m
+                [0mINAM[0m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-0.5"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"text-dim enabled:hover:text-foreground p-0.5 opacity-30"[39m
+                  [33mdisabled[39m=[32m""[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-up h-3 w-3"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 19V5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"text-dim enabled:hover:text-foreground p-0.5"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-down h-3 w-3"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 5v14"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m19 12-7 7-7-7"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</button>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"text-dim enabled:hover:text-destructive p-0.5"[39m
+                  [33mtitle[39m=[32m"Hide standard field"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-x h-3 w-3"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M18 6 6 18"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m6 6 12 12"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"flex-1 text-foreground truncate"[39m
+              [36m>[39m
+            ...
+[90m [2m❯[22m Object.getElementError ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m221:14[22m[39m
+    [90m219| [39m
+    [90m220| [39m    [34mexpect[39m(
+    [90m221| [39m      screen.getByText('Category (UCS) is unavailable: custom field "C…
+    [90m   | [39m             [31m^[39m
+    [90m222| [39m    )[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m223| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m7 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (11)[39m
+[2m   Start at [22m 08:53:40
+[2m   Duration [22m 3.40s[2m (transform 479ms, setup 125ms, import 820ms, tests 1.25s, environment 941ms)[22m
+
+
+::error file=/tmp/c42-base/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-a hides Category (UCS) and warns when a custom field already uses key category,line=125,column=51::AssertionError: expected <button type="button" …(1)></button> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<button%0A  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"%0A  type="button"%0A>%0A  + %0A  Category (UCS)%0A</button>%0A%0A ❯ tests/renderer/components/schema-editor.test.ts:125:51%0A%0A
+
+::error file=/tmp/c42-base/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-b hides Category (UCS) and warns when a custom field already uses RIFF ID ICAT,line=138,column=51::AssertionError: expected <button type="button" …(1)></button> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<button%0A  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"%0A  type="button"%0A>%0A  + %0A  Category (UCS)%0A</button>%0A%0A ❯ tests/renderer/components/schema-editor.test.ts:138:51%0A%0A
+
+::error file=/tmp/c42-base/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-c brings Category (UCS) back once the colliding custom field is removed,line=148,column=51::AssertionError: expected <button type="button" …(1)></button> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<button%0A  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"%0A  type="button"%0A>%0A  + %0A  Category (UCS)%0A</button>%0A%0A ❯ tests/renderer/components/schema-editor.test.ts:148:51%0A%0A
+
+::error file=/tmp/c42-base/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-d blocks any hidden standard field whose key a custom field uses (Publisher),line=171,column=46::AssertionError: expected <button type="button" …(1)></button> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<button%0A  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"%0A  type="button"%0A>%0A  + %0A  Publisher%0A</button>%0A%0A ❯ tests/renderer/components/schema-editor.test.ts:171:46%0A%0A
+
+::error file=/tmp/c42-base/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-e a stale Category chip click does nothing once a custom field takes key category,line=191,column=46::AssertionError: expected [ { key: 'title', …(4) }, …(13) ] to deeply equal [ { key: 'title', …(4) }, …(11) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -79,6 +79,19 @@%0A      "label": "Keywords",%0A      "riffChunkId": "IKEY",%0A      "standard": true,%0A      "type": "text",%0A    },%0A+   {%0A+     "key": "category",%0A+     "label": "Category (UCS)",%0A+     "riffChunkId": "ICAT",%0A+     "standard": true,%0A+     "type": "text",%0A+   },%0A+   {%0A+     "key": "category",%0A+     "label": "Category",%0A+     "riffChunkId": "CATE",%0A+     "type": "text",%0A+   },%0A  ]%0A%0A ❯ tests/renderer/components/schema-editor.test.ts:191:46%0A%0A
+
+::error file=/tmp/c42-base/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-f names the first colliding field%2C prefers key over RIFF ID%2C and lists warnings in standard order,line=206,column=22::AssertionError: expected [] to deeply equal [ …(2) ]%0A%0A- Expected%0A+ Received%0A%0A- [%0A-   "Title is unavailable: custom field \"Name\" already uses key \"title\".",%0A-   "Category (UCS) is unavailable: custom field \"Notes\" already uses RIFF ID \"ICAT\".",%0A- ]%0A+ []%0A%0A ❯ tests/renderer/components/schema-editor.test.ts:206:22%0A%0A
+
+::error file=/tmp/c42-base/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-g reports key when one custom field matches both key and RIFF ID,line=221,column=14::TestingLibraryElementError: Unable to find an element with the text: Category (UCS) is unavailable: custom field "Cat Both" already uses key "category".. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.%0A%0AIgnored nodes: comments, script, style%0A<body>%0A  <div>%0A    <div%0A      class="flex flex-col h-full"%0A    >%0A      <div%0A        class="px-3 py-2 border-b border-outline flex items-center gap-2"%0A      >%0A        <button%0A          class="text-muted hover:text-foreground p-0.5 transition-colors"%0A          type="button"%0A        >%0A          <svg%0A            class="lucide lucide-arrow-left h-3.5 w-3.5"%0A            fill="none"%0A            height="24"%0A            stroke="currentColor"%0A            stroke-linecap="round"%0A            stroke-linejoin="round"%0A            stroke-width="2"%0A            viewBox="0 0 24 24"%0A            width="24"%0A            xmlns="http://www.w3.org/2000/svg"%0A          >%0A            <path%0A              d="m12 19-7-7 7-7"%0A            />%0A            <path%0A              d="M19 12H5"%0A            />%0A          </svg>%0A        </button>%0A        <span%0A          class="text-xs font-medium text-brand"%0A        >%0A          Customize Fields%0A        </span>%0A      </div>%0A      <div%0A        class="flex-1 overflow-y-auto p-3"%0A      >%0A        <fieldset%0A          class="min-w-0 space-y-4 disabled:opacity-60"%0A        >%0A          <div%0A            class="space-y-1.5"%0A          >%0A            <span%0A              class="text-xs text-muted"%0A            >%0A              Active Fields%0A            </span>%0A            <div%0A              class="flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"%0A            >%0A              <span%0A                class="flex-1 text-foreground truncate"%0A              >%0A                Title%0A              </span>%0A              <span%0A                class="text-dim text-[10px]"%0A              >%0A                text%0A              </span>%0A              <span%0A                class="text-dim text-[10px] font-mono"%0A              >%0A                INAM%0A              </span>%0A              <div%0A                class="flex items-center gap-0.5"%0A              >%0A                <button%0A                  class="text-dim enabled:hover:text-foreground p-0.5 opacity-30"%0A                  disabled=""%0A                  type="button"%0A                >%0A                  <svg%0A                    class="lucide lucide-arrow-up h-3 w-3"%0A                    fill="none"%0A                    height="24"%0A                    stroke="currentColor"%0A                    stroke-linecap="round"%0A                    stroke-linejoin="round"%0A                    stroke-width="2"%0A                    viewBox="0 0 24 24"%0A                    width="24"%0A                    xmlns="http://www.w3.org/2000/svg"%0A                  >%0A                    <path%0A                      d="m5 12 7-7 7 7"%0A                    />%0A                    <path%0A                      d="M12 19V5"%0A                    />%0A                  </svg>%0A                </button>%0A                <button%0A                  class="text-dim enabled:hover:text-foreground p-0.5"%0A                  type="button"%0A                >%0A                  <svg%0A                    class="lucide lucide-arrow-down h-3 w-3"%0A                    fill="none"%0A                    height="24"%0A                    stroke="currentColor"%0A                    stroke-linecap="round"%0A                    stroke-linejoin="round"%0A                    stroke-width="2"%0A                    viewBox="0 0 24 24"%0A                    width="24"%0A                    xmlns="http://www.w3.org/2000/svg"%0A                  >%0A                    <path%0A                      d="M12 5v14"%0A                    />%0A                    <path%0A                      d="m19 12-7 7-7-7"%0A                    />%0A                  </svg>%0A                </button>%0A                <button%0A                  class="text-dim enabled:hover:text-destructive p-0.5"%0A                  title="Hide standard field"%0A                  type="button"%0A                >%0A                  <svg%0A                    class="lucide lucide-x h-3 w-3"%0A                    fill="none"%0A                    height="24"%0A                    stroke="currentColor"%0A                    stroke-linecap="round"%0A                    stroke-linejoin="round"%0A                    stroke-width="2"%0A                    viewBox="0 0 24 24"%0A                    width="24"%0A                    xmlns="http://www.w3.org/2000/svg"%0A                  >%0A                    <path%0A                      d="M18 6 6 18"%0A                    />%0A                    <path%0A                      d="m6 6 12 12"%0A                    />%0A                  </svg>%0A                </button>%0A              </div>%0A            </div>%0A            <div%0A              class="flex items-center gap-1.5 rounded px-2 py-1.5 bg-background border border-outline text-xs"%0A            >%0A              <span%0A                class="flex-1 text-foreground truncate"%0A              >%0A            ...%0A ❯ Object.getElementError ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/config.js:37:19%0A ❯ ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:76:38%0A ❯ ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:52:17%0A ❯ ../../home/runner/czaba-project/czaba-tag-manager/node_modules/@testing-library/dom/dist/query-helpers.js:95:19%0A ❯ tests/renderer/components/schema-editor.test.ts:221:14%0A%0A

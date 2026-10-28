@@ -1,0 +1,129 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 429[2mms[22m[39m
+     [32m✓[39m rejects a custom field with RIFF ID ICAT[32m 127[2mms[22m[39m
+     [32m✓[39m rejects a custom field with lowercase RIFF ID icat[32m 78[2mms[22m[39m
+     [32m✓[39m rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use)[32m 66[2mms[22m[39m
+     [32m✓[39m lists Category (UCS) among hidden standard fields for a pre-T-1 schema[32m 38[2mms[22m[39m
+[31m     [31m×[31m T-a hides Category (UCS) and warns when a custom field already uses key category[39m[32m 35[2mms[22m[39m
+[31m     [31m×[31m T-b hides Category (UCS) and warns when a custom field already uses RIFF ID ICAT[39m[32m 32[2mms[22m[39m
+[31m     [31m×[31m T-c brings Category (UCS) back once the colliding custom field is removed[39m[32m 25[2mms[22m[39m
+[31m     [31m×[31m T-d blocks any hidden standard field whose key a custom field uses (Publisher)[39m[32m 26[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-a hides Category (UCS) and warns when a custom field already uses key category
+[31m[1mAssertionError[22m: expected <button type="button" …(1)></button> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<button
+  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+  type="button"
+>
+  + 
+  Category (UCS)
+</button>
+
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m125:51[22m[39m
+    [90m123| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m124| [39m
+    [90m125| [39m    [34mexpect[39m([34mqueryButtonByText[39m([32m"+ Category (UCS)"[39m))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m126| [39m    [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([33mCATEGORY_KEY_WARNING[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m127| [39m    expect(screen.getByText(CATEGORY_KEY_WARNING)).toHaveClass("text-[…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-b hides Category (UCS) and warns when a custom field already uses RIFF ID ICAT
+[31m[1mAssertionError[22m: expected <button type="button" …(1)></button> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<button
+  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+  type="button"
+>
+  + 
+  Category (UCS)
+</button>
+
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m138:51[22m[39m
+    [90m136| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m137| [39m
+    [90m138| [39m    [34mexpect[39m([34mqueryButtonByText[39m([32m"+ Category (UCS)"[39m))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m139| [39m    expect(screen.getByText(CATEGORY_RIFF_WARNING)).toBeInTheDocument(…
+    [90m140| [39m    expect(screen.getByText("Hidden Standard Fields")).toBeInTheDocume…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-c brings Category (UCS) back once the colliding custom field is removed
+[31m[1mAssertionError[22m: expected <button type="button" …(1)></button> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<button
+  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+  type="button"
+>
+  + 
+  Category (UCS)
+</button>
+
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m148:51[22m[39m
+    [90m146| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m147| [39m
+    [90m148| [39m    [34mexpect[39m([34mqueryButtonByText[39m([32m"+ Category (UCS)"[39m))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m149| [39m    [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([33mCATEGORY_KEY_WARNING[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m150| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor.test.ts[2m > [22mSchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)[2m > [22mT-d blocks any hidden standard field whose key a custom field uses (Publisher)
+[31m[1mAssertionError[22m: expected <button type="button" …(1)></button> to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+<button
+  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+  type="button"
+>
+  + 
+  Publisher
+</button>
+
+[36m [2m❯[22m tests/renderer/components/schema-editor.test.ts:[2m171:46[22m[39m
+    [90m169| [39m    [34mrenderSchemaEditor[39m()[33m;[39m
+    [90m170| [39m
+    [90m171| [39m    [34mexpect[39m([34mqueryButtonByText[39m([32m"+ Publisher"[39m))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                             [31m^[39m
+    [90m172| [39m    [34mexpect[39m(
+    [90m173| [39m      screen.getByText('Publisher is unavailable: custom field "Label"…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 08:45:40
+[2m   Duration [22m 1.54s[2m (transform 199ms, setup 94ms, import 337ms, tests 429ms, environment 552ms)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-a hides Category (UCS) and warns when a custom field already uses key category,line=125,column=51::AssertionError: expected <button type="button" …(1)></button> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<button%0A  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"%0A  type="button"%0A>%0A  + %0A  Category (UCS)%0A</button>%0A%0A ❯ tests/renderer/components/schema-editor.test.ts:125:51%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-b hides Category (UCS) and warns when a custom field already uses RIFF ID ICAT,line=138,column=51::AssertionError: expected <button type="button" …(1)></button> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<button%0A  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"%0A  type="button"%0A>%0A  + %0A  Category (UCS)%0A</button>%0A%0A ❯ tests/renderer/components/schema-editor.test.ts:138:51%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-c brings Category (UCS) back once the colliding custom field is removed,line=148,column=51::AssertionError: expected <button type="button" …(1)></button> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<button%0A  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"%0A  type="button"%0A>%0A  + %0A  Category (UCS)%0A</button>%0A%0A ❯ tests/renderer/components/schema-editor.test.ts:148:51%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor.test.ts,title=tests/renderer/components/schema-editor.test.ts > SchemaEditor standard field blocked by a custom field (D-47%2C TM-T1-DUP) > T-d blocks any hidden standard field whose key a custom field uses (Publisher),line=171,column=46::AssertionError: expected <button type="button" …(1)></button> to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A<button%0A  class="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"%0A  type="button"%0A>%0A  + %0A  Publisher%0A</button>%0A%0A ❯ tests/renderer/components/schema-editor.test.ts:171:46%0A%0A

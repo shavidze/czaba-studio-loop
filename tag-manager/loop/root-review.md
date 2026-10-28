@@ -150,3 +150,7 @@ COMMIT OK. Findings for B: gates/round-40/review.md
 ## Round 41 (2026-10-28)
 COMMIT OK. Findings for B: gates/round-41/review.md
 
+
+## Round 42 (2026-10-28)
+COMMIT OK. Findings for B: gates/round-42/review.md
+

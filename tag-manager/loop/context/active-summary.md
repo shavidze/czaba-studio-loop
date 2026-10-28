@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T08:34:13.598Z)
+# Active loop summary (2026-10-28T08:59:52.677Z)
 
-- backlog.json 396 KB -> active view 106 KB
-- status: B_PLANNING_NEXT round 41
+- backlog.json 403 KB -> active view 105 KB
+- status: G_ROOT_GATE round 42
 - servers: `{"servers":"none or skipped"}`
-- last publication: a5c6a6bd74488a99675d251275e850a684d55ce0 (rounds 41-41)
-- last root gate: round 41 published - commit a5c6a6bd74488a99675d251275e850a684d55ce0 pushed
+- last publication: cf4e147d2516a549b4a8c6ae7eebbf65c51a6e42 (rounds 42-42)
+- last root gate: round 42 published - commit cf4e147d2516a549b4a8c6ae7eebbf65c51a6e42 pushed
 
-## Current items: TM-T0, TM-T0-CI, TM-T1, TM-T1-MIG, TM-T1-DUP, TM-B08, TM-B05, TM-B06, TM-T0-CI-FU, TM-B14, TM-B43
+## Current items: TM-T0, TM-T0-CI, TM-T1, TM-T1-MIG, TM-T1-DUP, TM-T0-CI-FU, TM-B14
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -17,7 +17,7 @@
 - RR-R2-03 / low / open / skipLibCheck:true also skips the project's own src/preload/index.d.ts; consider dropping it from tsconfig.test.json once dependency types ar
 - RR-R2-04 / info / open / Architecture signal: remaining file.tag as unknown as TagObject casts (metadata.ts:113,158); a RiffTags-typed accessor resolved once per fil
 - A-R3-01 / low / open / tests/renderer/setup.ts (frozen) replaces window with a plain object; schema-editor.test.ts works around it locally with vi.hoisted
-- RR-R3-01 / medium / open / Old custom field key 'category' (auto ID CATE) + standard toggle -> two fields same key, one value in CATE and ICAT, duplicate React keys (S
+- RR-R3-01 / medium / in_progress / Old custom field key 'category' (auto ID CATE) + standard toggle -> two fields same key, one value in CATE and ICAT, duplicate React keys (S
 - RR-R3-03 / info / open / Every editor-panel save writes empty ICAT (D-10 pinned on purpose)
 - RR-R3-04 / low / open / New test files use double quotes vs src single quotes; Biome does not check tests/
 - RR-R3-05 / info / open / npx --yes tsx@4 downloads a floating major at runtime (verifyCommand + check.yml); consider a pinned devDependency
@@ -190,10 +190,15 @@
 - RR-R41-01 / low / open / New SchemaEditor spec prose in docs/design/component-specs.md is English while project rules ask for Georgian docs; the file is English thro
 - RR-R41-02 / low / open / D-46 bullet and entry (22) pin exact SchemaEditor.tsx line numbers (:157, :202, :210, :230); correct now, stale after the next edit. Naming 
 - RR-R41-03 / info / open / Architecture signal: the 'hover only when the button can act' rule is repeated in Button variants and raw SchemaEditor buttons; a shared hel
+- B-R42-01 / low / open / A schema.json that ALREADY holds both a custom and the standard field with the same key (e.g. custom category/CATE + standard category/ICAT,
+- B-R42-02 / info / open / TM-B11 round must flip T1-10 (recording-tag-contract.test.ts pins the size-0 INFO write for empty keywords/category) and K-4 docs (ffprobe a
 
 ## Other open items
+- TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
 - TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
 - TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba
+- TM-B05 [todo] A WAV whose data chunk is empty cannot be tagged (node-taglib-sharp 6.0.1 boundary bug) and read silently returns empty metadata
+- TM-B06 [todo] Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database
 - OOS-03 [out_of_scope] New npm dependencies

@@ -1,0 +1,12 @@
+# A round 42 checkpoint
+- [x] Baseline: HEAD a5c6a6b, tree clean.
+- [x] Read task, SchemaEditor.tsx, schema-editor.test.ts, primitives.
+- Decision: rule inline in SchemaEditor.tsx (module-level non-exported function); no helper file.
+- [ ] Step 0 red tests
+- [x] Step 0: T-a..T-d added; red on baseline src: 4 failed | 4 passed (8). Log: a-round-42/red.log
+- [ ] Fix SchemaEditor.tsx
+- [x] Fix done; schema-editor 8/8 green; biome src 0 errors (8 pre-existing warnings, same as baseline)
+- [x] Docs done (001 D-47 + #23, README 23/14, contract, component-specs). verifyCommand EXIT see verify.log
+- [x] Review: no code defects. Added T-e (guard, mutant-proven), T-f, T-g; red-final.log 7 failed/4 passed on baseline src; 11/11 green
+- [x] 001 line refs remapped (D-41/42/45/46, entries 17/18/21/22), :93-114 fixed
+- [x] Final verify EXIT=0 (renderer 317, main 93, e2e 7; --retries=0 7/7). Report a-round-42.md written. DONE

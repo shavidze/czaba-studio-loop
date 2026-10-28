@@ -1,0 +1,399 @@
+diff --git a/docs/bugs/001-save-and-selection-known-limits.md b/docs/bugs/001-save-and-selection-known-limits.md
+index b36c34a..b5e662a 100644
+--- a/docs/bugs/001-save-and-selection-known-limits.md
++++ b/docs/bugs/001-save-and-selection-known-limits.md
+@@ -1,8 +1,8 @@
+ # 001 — Save და selection: ცნობილი შეზღუდვები (D-29, D-30, D-31)
+ 
+-**სტატუსი:** ცნობილი შეზღუდვების სია. ბაგი, რომელიც გასწორებას ელოდება, აქ არ არის. გასწორებული ჩანაწერები (3), (9), (11), (12), (13), (14), (15), (16), (17), (18), (20), (21) და (22) ისტორიისთვის რჩება.
+-**წყარო:** TM-B26 (round 23), TM-B27 (round 24), TM-B29 (round 26), TM-B30 (round 28), TM-B31 (round 29), TM-B32 (round 30), TM-B33 (round 31), TM-B34 (round 32), TM-B35 (round 33), TM-B36 (round 34), TM-B37 (round 35), TM-B39 (round 37), TM-B40 (round 38), TM-B42 (round 40). ID-ები loop-ის backlog-იდანაა.
+-**კოდი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` (`handleSave`, `isListedPath`, `waitForFolderLoadIdle`, sync effect, `handleSchemaChanged`, `schemaReadIdRef`, `isSaveBlocked`), `src/renderer/src/components/file-list/FileList.tsx` (`handleClick`, anchor), `src/renderer/src/stores/file-store.ts` (`selectRange`, `markPathsWritten`, `applyMetadataRead`, `beginFolderLoad`/`isFolderLoadCurrent`, `withListedSelection`), `src/renderer/src/components/sidebar/FolderBrowser.tsx` (`handleOpenFolder`, `handleRescan`, `handleCloseFolder`), `src/renderer/src/App.tsx` (`openFolder`, schema-ს ლოდინის loop), `src/renderer/src/lib/utils.ts` (`readMetadataChunked`), `src/renderer/src/components/schema/SchemaEditor.tsx` (`handleSave`, `isMountedRef`, `isApplying`, `reorderArrowClassName`), `src/renderer/src/components/ui/button.tsx` (`aria-disabled:` classes, `variantStyles`).
++**სტატუსი:** ცნობილი შეზღუდვების სია. ბაგი, რომელიც გასწორებას ელოდება, აქ არ არის. გასწორებული ჩანაწერები (3), (9), (11), (12), (13), (14), (15), (16), (17), (18), (20), (21), (22) და (23) ისტორიისთვის რჩება.
++**წყარო:** TM-B26 (round 23), TM-B27 (round 24), TM-B29 (round 26), TM-B30 (round 28), TM-B31 (round 29), TM-B32 (round 30), TM-B33 (round 31), TM-B34 (round 32), TM-B35 (round 33), TM-B36 (round 34), TM-B37 (round 35), TM-B39 (round 37), TM-B40 (round 38), TM-B42 (round 40), TM-T1-DUP (round 42). ID-ები loop-ის backlog-იდანაა.
++**კოდი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` (`handleSave`, `isListedPath`, `waitForFolderLoadIdle`, sync effect, `handleSchemaChanged`, `schemaReadIdRef`, `isSaveBlocked`), `src/renderer/src/components/file-list/FileList.tsx` (`handleClick`, anchor), `src/renderer/src/stores/file-store.ts` (`selectRange`, `markPathsWritten`, `applyMetadataRead`, `beginFolderLoad`/`isFolderLoadCurrent`, `withListedSelection`), `src/renderer/src/components/sidebar/FolderBrowser.tsx` (`handleOpenFolder`, `handleRescan`, `handleCloseFolder`), `src/renderer/src/App.tsx` (`openFolder`, schema-ს ლოდინის loop), `src/renderer/src/lib/utils.ts` (`readMetadataChunked`), `src/renderer/src/components/schema/SchemaEditor.tsx` (`handleSave`, `isMountedRef`, `isApplying`, `reorderArrowClassName`, `findStandardFieldConflict`, `formatStandardFieldConflict`), `src/renderer/src/components/ui/button.tsx` (`aria-disabled:` classes, `variantStyles`).
+ 
+ გადაწყვეტილებები მოკლედ:
+ - **D-29:** თუ save-ის დროს selection შეიცვალა (set-ად შედარებით), ფაილის მხარის განახლებები რჩება, მაგრამ ფორმას ეს save არ ეხება (`skipSyncRef` არ დგება, `setEditingMetadata` არ იძახება).
+@@ -17,12 +17,13 @@
+ - **D-38:** ერთმანეთზე გადაფარული folder load-ები (Open Folder, Rescan, drop, Close Folder) latest-wins-ია. `FileState`-ს აქვს `folderLoadId: number` (`file-store.ts:16`, საწყისი `0`, `:52`), რომელიც მხოლოდ იზრდება და არასოდეს reset-დება (`reset-stores.ts`-იც არ ცვლის). action `beginFolderLoad()` (`:38`, `:155-158`) `folderLoadId`-ს 1-ით ზრდის და ახალ მნიშვნელობას აბრუნებს; `isFolderLoadCurrent(loadId)` (`:161-163`) ამოწმებს, ისევ ეს load არის თუ არა ბოლო. `handleOpenFolder` id-ს dialog-ის შემდეგ იღებს (`FolderBrowser.tsx:99`, `if (!path) return;`-ის შემდეგ, ამიტომ გაუქმებული dialog მიმდინარე load-ს არ აუქმებს), `handleRescan` `if (!folderPath) return;`-ის შემდეგ (`:158`), App-ის `openFolder` პირველივე ხაზზე (`App.tsx:44`, player-ის stop-მდე და schema-ს ლოდინამდე). სამივეში `scanFolder`-ის შემდეგ (`FolderBrowser.tsx:107`, `:165`, `App.tsx:60`), `readMetadataChunked`-ის შემდეგ (`FolderBrowser.tsx:123`, `:181`, `App.tsx:76`) და `catch`-ის პირველ ხაზზე (`FolderBrowser.tsx:134`, `:192`, `App.tsx:87`) load, რომელიც აღარ არის მიმდინარე, store-ში არაფერს წერს და toast-ს არ აჩვენებს; `finally` `isScanning`-ს მხოლოდ მიმდინარე load-ისთვის აქრობს (`FolderBrowser.tsx:141`, `:197`, `App.tsx:94`). `handleCloseFolder` იძახებს `beginFolderLoad()`-ს და `setIsScanning(false)`-ს (`FolderBrowser.tsx:146-147`), ამიტომ pending load დახურულ folder-ს ვეღარ ავსებს და spinner Close-ზე ჩერდება. `setFolderPath`, `clearSelection()` და player-ის stop load-ის დასაწყისში სინქრონულად რჩება; D-35/D-36/D-37 მიმდინარე load-ის შიგნით უცვლელია; Rescan კვლავ `disabled={isScanning}`-ია. ჩანაწერი (14).
+ - **D-39:** გვიანი re-read-ები folder-ის შეცვლის შემდეგ. (a) `handleSave`: module-level ფუნქცია `isListedPath(path)` (`MetadataPanel.tsx:60-62`) ამოწმებს, ისევ არის თუ არა path `useFileStore.getState().files`-ში. single re-read store-ში მხოლოდ მაშინ იწერება, როცა path ჯერ კიდევ სიაშია (`if (isListedPath(path)) updateFileMetadata(path, updated);`, `:168`); batch-ის `savedEntries` `!failedPaths.has(path)`-ის გარდა `isListedPath(path)`-საც მოითხოვს (`:196-198`). write, `markPathsWritten`, `refreshSavedFileStats`, re-read, `skipSyncRef`, D-29/D-30 და ყველა toast უცვლელია. `handleSave` `folderLoadId`-ს და `folderPath`-ს არ ამოწმებს: Rescan და იმავე folder-ის Open Folder-იც `beginFolderLoad()`-ს იძახებს, ამიტომ load id-ის guard D-35-ს გააფუჭებდა, ხოლო `folderPath`-ის snapshot parent folder-ს, რომელიც ფაილს ისევ აჩვენებს, შენახულ მნიშვნელობას წაართმევდა. (b) `handleSchemaChanged` D-40-ის ლოდინის (`await waitForFolderLoadIdle();`, `:229`) შემდეგ load id-ს იღებს `const { files, folderLoadId: loadId } = useFileStore.getState();`-ით (`:230`), `if (files.length === 0) return;`-მდე (`:231`) (D-40, ჩანაწერი (16)), და chunk-ების loop-ის შემდეგ, `currentMetadata`-ს წაკითხვამდე, `if (!isFolderLoadCurrent(loadId)) return;`-ით ბრუნდება (`:250`): superseded schema re-read არც `setMetadata`-ს, არც `setEditingMetadata`-ს და არც toast-ს არ იძახებს. D-33/D-34 უცვლელია. (c) App-ის `openFolder`-ის schema-ს ლოდინის loop-ში, `setTimeout`-ის შემდეგ, `if (!isFolderLoadCurrent(loadId)) return;` (`App.tsx:55`): superseded drop `scanFolder`-ს აღარ იძახებს. ჩანაწერი (15).
+ - **D-40:** schema-ს re-read მიმდინარე folder load-ის დროს. module-level ფუნქცია `waitForFolderLoadIdle()` (`MetadataPanel.tsx:64-73`, `isListedPath`-ის შემდეგ) მაშინვე resolve-დება, თუ `useFileStore`-ის `isScanning` false-ია; სხვა შემთხვევაში `useFileStore.subscribe`-ით ელოდება state-ს, სადაც `isScanning` false-ია, მერე unsubscribe-ს აკეთებს და resolve-დება. `handleSchemaChanged` D-43-ის ორი id ხაზის შემდეგ (`:227-228`) `await waitForFolderLoadIdle();`-ს იძახებს (`:229`), მერე ერთად იღებს იმ მომენტის `files`-ს და `folderLoadId`-ს (`const { files, folderLoadId: loadId } = useFileStore.getState();`, `:230`), ცარიელ `files`-ზე ბრუნდება (`:231`) და `files.map((f) => f.path)`-ს კითხულობს ახალი schema-თი (`:233`). render-ის `allFiles` selector წაიშალა; `useCallback`-ის dependencies `[setMetadata, setEditingMetadata, showToast]`-ია (`:277`). D-39(b)-ის guard (`:250`), D-33, D-34, `handleSave`, `isListedPath`, `refreshSavedFileStats`, sync effect და ყველა toast უცვლელია. load-ის გარეშე `Done` მაშინვე კითხულობს, როგორც ადრე. თუ აპის გაშვებისას schema ჯერ არ ჩატვირთულა (`loadSchema` IPC ნელია ან ჯერ არ დასრულებულა; reject-ებული `loadSchema` `isLoaded`-ს მაშინვე true-ზე აყენებს, `App.tsx:37-39`), drop (App-ის `openFolder`) `isScanning`-ს true-ზე აყენებს (`App.tsx:47`) schema-ს ლოდინამდე, რომელიც 5 წამამდე გრძელდება (`:50-55`), ამიტომ ამ დროს დაჭერილი `Done` 5 წამამდე ელოდება (RR-R33-03). ჩანაწერი (16).
+-- **D-41:** schema editor-ის `Done` მხოლოდ საკუთარ (ჯერ კიდევ mounted) instance-ს ხურავს. `SchemaEditor`-ს აქვს `isMountedRef` (`SchemaEditor.tsx:37`, `useRef(false)`) და mount effect (`:39-44`), რომელიც ref-ს თავად აყენებს `true`-ზე და cleanup-ში `false`-ზე. `handleSave` `await onSave?.();`-ის შემდეგ `if (!isMountedRef.current) return;`-ით ბრუნდება (`:146`) და `onClose()` (`:148`) მხოლოდ მაშინ იძახება, როცა ეს instance ისევ mounted-ია. dependencies D-41-ში `[fields, onSave, onClose]` დარჩა; D-45-მა მათ `isApplying` დაამატა (`[fields, isApplying, onSave, onClose]`, `:149`). Back (`onClick={onClose}`, `:156`) მაშინვე ხურავს editor-ს; `Done`-ის busy state D-42-შია; ტექსტები და `MetadataPanel.tsx` (D-40-ის ჩათვლით) უცვლელია, ამიტომ pending re-read unmount-ის შემდეგაც ბოლომდე სრულდება და store-ში წერს, თუ მის შემდეგ ახალი `Done` არ დაწყებულა (D-43). ჩანაწერი (17).
+-- **D-42:** schema editor-ის `Done` pending-ის დროს busy-ა. `SchemaEditor`-ს აქვს state `isApplying` (`SchemaEditor.tsx:45`, `useState(false)`, mount effect-ის შემდეგ). `handleSave` (`:137-149`) ცარიელ `fields`-ზე ისევ მაშინვე ბრუნდება, მერე `setIsApplying(true)`-ს იძახებს (`:139`) და `await onSave?.();`-ს `try`-ში ელოდება. reject-ზე `catch` `if (isMountedRef.current) setIsApplying(false);`-ს იძახებს (`:143`) და ბრუნდება: editor ღია რჩება, `onClose` არ იძახება, unhandled rejection აღარ არის, toast აქ არ ჩნდება (read-ის შეცდომებს `MetadataPanel` თვითონ აჩვენებს). წარმატებაზე `if (!isMountedRef.current) return;` (`:146`, D-41), `setIsApplying(false);` (`:147`) და `onClose();` (`:148`). dependencies D-42-ში `[fields, onSave, onClose]` დარჩა; D-45-მა `isApplying` დაამატა (`:149`). რედაქტირების არე (`<div className="flex-1 overflow-y-auto p-3">`) შიგნით `<fieldset disabled={isApplying} className="min-w-0 space-y-4 disabled:opacity-60">`-ს შეიცავს (`:165`, დახურვა `:271`), რომელიც სამივე სექციას (Active Fields, Hidden Standard Fields, Add Custom Field) ფარავს: pending-ის დროს ველის სახელი, RIFF ID, type `select`, Add Field, ისრები, trash/hide და hidden standard-ის ღილაკები disabled-ია და არე მკრთალია. `legend` არ არის; Tailwind preflight fieldset-ის border-ს, margin-ს და padding-ს აშორებს, `min-w-0` კი default `min-inline-size`-ს. `Done` (`:280-283`) კითხულობს `Applying...`-ს pending-ის დროს, სხვა შემთხვევაში `Done`-ს; მისი "მიუწვდომელი" მდგომარეობა round 38-დან D-45-შია (`aria-disabled` + `aria-busy` native `disabled`-ის ნაცვლად). Back header-შია, fieldset-ის გარეთ, და ყოველთვის enabled რჩება. ჩანაწერი (18).
++- **D-41:** schema editor-ის `Done` მხოლოდ საკუთარ (ჯერ კიდევ mounted) instance-ს ხურავს. `SchemaEditor`-ს აქვს `isMountedRef` (`SchemaEditor.tsx:67`, `useRef(false)`) და mount effect (`:69-74`), რომელიც ref-ს თავად აყენებს `true`-ზე და cleanup-ში `false`-ზე. `handleSave` `await onSave?.();`-ის შემდეგ `if (!isMountedRef.current) return;`-ით ბრუნდება (`:190`) და `onClose()` (`:192`) მხოლოდ მაშინ იძახება, როცა ეს instance ისევ mounted-ია. dependencies D-41-ში `[fields, onSave, onClose]` დარჩა; D-45-მა მათ `isApplying` დაამატა (`[fields, isApplying, onSave, onClose]`, `:193`). Back (`onClick={onClose}`, `:200`) მაშინვე ხურავს editor-ს; `Done`-ის busy state D-42-შია; ტექსტები და `MetadataPanel.tsx` (D-40-ის ჩათვლით) უცვლელია, ამიტომ pending re-read unmount-ის შემდეგაც ბოლომდე სრულდება და store-ში წერს, თუ მის შემდეგ ახალი `Done` არ დაწყებულა (D-43). ჩანაწერი (17).
++- **D-42:** schema editor-ის `Done` pending-ის დროს busy-ა. `SchemaEditor`-ს აქვს state `isApplying` (`SchemaEditor.tsx:75`, `useState(false)`, mount effect-ის შემდეგ). `handleSave` (`:181-193`) ცარიელ `fields`-ზე ისევ მაშინვე ბრუნდება, მერე `setIsApplying(true)`-ს იძახებს (`:183`) და `await onSave?.();`-ს `try`-ში ელოდება. reject-ზე `catch` `if (isMountedRef.current) setIsApplying(false);`-ს იძახებს (`:187`) და ბრუნდება: editor ღია რჩება, `onClose` არ იძახება, unhandled rejection აღარ არის, toast აქ არ ჩნდება (read-ის შეცდომებს `MetadataPanel` თვითონ აჩვენებს). წარმატებაზე `if (!isMountedRef.current) return;` (`:190`, D-41), `setIsApplying(false);` (`:191`) და `onClose();` (`:192`). dependencies D-42-ში `[fields, onSave, onClose]` დარჩა; D-45-მა `isApplying` დაამატა (`:193`). რედაქტირების არე (`<div className="flex-1 overflow-y-auto p-3">`) შიგნით `<fieldset disabled={isApplying} className="min-w-0 space-y-4 disabled:opacity-60">`-ს შეიცავს (`:209`, დახურვა `:322`), რომელიც სამივე სექციას (Active Fields, Hidden Standard Fields, Add Custom Field) ფარავს: pending-ის დროს ველის სახელი, RIFF ID, type `select`, Add Field, ისრები, trash/hide და hidden standard-ის ღილაკები disabled-ია და არე მკრთალია. `legend` არ არის; Tailwind preflight fieldset-ის border-ს, margin-ს და padding-ს აშორებს, `min-w-0` კი default `min-inline-size`-ს. `Done` (`:331-334`) კითხულობს `Applying...`-ს pending-ის დროს, სხვა შემთხვევაში `Done`-ს; მისი "მიუწვდომელი" მდგომარეობა round 38-დან D-45-შია (`aria-disabled` + `aria-busy` native `disabled`-ის ნაცვლად). Back header-შია, fieldset-ის გარეთ, და ყოველთვის enabled რჩება. ჩანაწერი (18).
+ - **D-43:** ბოლო `Done` იმარჯვებს. `MetadataPanel`-ს აქვს `schemaReadIdRef` (`MetadataPanel.tsx:225`, `useRef(0)`, უშუალოდ `handleSchemaChanged`-ის ზემოთ, `if (showSchemaEditor)`-ის early return-მდე). `handleSchemaChanged`-ის პირველი ორი ხაზი, D-40-ის ლოდინამდე, არის `schemaReadIdRef.current += 1;` და `const schemaReadId = schemaReadIdRef.current;` (`:227-228`); ლოდინი ამის შემდეგ მოდის (`:229`). chunk-ების loop-ის შემდეგ, D-39(b)-ის guard-ის (`:250`) უშუალოდ წინ, `if (schemaReadId !== schemaReadIdRef.current) return;` (`:249`): თუ ამ re-read-ის შემდეგ სხვა `Done` დაიწყო, ეს re-read არც `setMetadata`-ს, არც `setEditingMetadata`-ს და არც toast-ს არ იძახებს, რა რიგითაც არ უნდა დასრულდეს read-ები. ერთი `Done` თავის re-read-ს ისევ იყენებს. D-40-ის ლოდინი, D-34-ის generation-ები, toast, dependencies `[setMetadata, setEditingMetadata, showToast]`, `handleSave` და sync effect უცვლელია. ჩანაწერები (18), (19).
+ - **D-44:** selection ჩამოთვლილი ფაილების შიგნით რჩება. `useFileStore.setFiles(files)` (`file-store.ts:55`) private ფუნქციას `withListedSelection` (`:242-250`) იძახებს: `selectedPaths`-ში რჩება მხოლოდ ის path-ები, რომლებიც ახალ `files`-შია, არსებული რიგით. თუ არაფერი ამოიშალა, update-ში `selectedPaths` არ შედის და array identity ინახება (ზედმეტი `MetadataPanel` sync არ ხდება). load-ის დასაწყისის `clearSelection()`, `selectRange`, `selectAll` და D-31-ის anchor-ის წესები უცვლელია. უარყოფილი: selection-ის სრული გაწმენდა load-ის გამოყენებისას (Rescan-ის დროს იმავე სიაში დარჩენილ row-ზე შეგნებულ click-ს დაკარგავდა). ჩანაწერი (20).
+-- **D-45:** `Done` და Save Tags / `Save to N files` "მიუწვდომელს" `aria-disabled`-ით აჩვენებენ native `disabled`-ის ნაცვლად, ამიტომ focused ღილაკი focus-ს აღარ კარგავს. `Done` (`SchemaEditor.tsx:280-281`): `aria-disabled={isApplying || fields.length === 0}` და `aria-busy={isApplying}`; `handleSave` მაშინვე ბრუნდება, როცა `fields` ცარიელია ან `isApplying` true-ა (`:138`), dependencies `[fields, isApplying, onSave, onClose]` (`:149`). Save Tags (`MetadataPanel.tsx:373-374`): `aria-disabled={isSaving || !isDirty}` და `aria-busy={isSaving}`; `handleSave` მაშინვე ბრუნდება, როცა `selectedFiles` ცარიელია ან `isSaveBlocked()` true-ა (`:143`). `isSaveBlocked` ფაილის ბოლოს დამატებული private module-level ფუნქციაა, რომელიც `useMetadataStore.getState()`-ს სინქრონულად კითხულობს (`isSaving || !isDirty`), ამიტომ `useCallback`-ის dependencies არ იცვლება. `Button` (`ui/button.tsx:36`) იღებს `aria-disabled:opacity-50 aria-disabled:cursor-not-allowed`-ს, native disabled-ის იგივე იერს; `aria-disabled="true"`-ის გარეშე Button-ზე გავლენა არ აქვს. reorder ისრები native `disabled`-ს საკუთარ კიდეზე ინარჩუნებენ (`index === 0` / ბოლო), class კი private `reorderArrowClassName(isEdge)`-დან მოდის (`SchemaEditor.tsx:186`, `:194`): საკუთარი `opacity-30` მხოლოდ კიდის ისარს აქვს, ამიტომ Applying-ის დროს შუა ისარი fieldset-ის 60%-ზეა, კიდის ისარი 18%-ზე. fieldset, Back, label-ები `Applying...` / `Saving...`, D-41/D-42/D-43 და D-29/D-30/D-39 უცვლელია. ჩანაწერი (21).
+-- **D-46:** hover-ის ფერი მხოლოდ იმ ღილაკზე იცვლება, რომელსაც მოქმედება შეუძლია. `Button`-ის ხუთივე variant (`ui/button.tsx`, `variantStyles`: primary, secondary, ghost, accent, destructive) `hover:<x>`-ის ნაცვლად `enabled:not-aria-disabled:hover:<x>`-ს იყენებს, ამიტომ native `disabled` და `aria-disabled="true"` ღილაკი (D-45) hover-ზე resting ფერს ინარჩუნებს; opacity 0.5, `cursor-not-allowed`, focus ring და click guard უცვლელია. `SchemaEditor`-ის fieldset-ის შიგნით მყოფი ღილაკები `enabled:hover:`-ს იყენებენ: reorder ისრები (`reorderArrowClassName`, ფაილის ბოლოს), Trash2 (`SchemaEditor.tsx:202`), Hide standard X (`:210`) და hidden-standard chip (`:230`). ამიტომ Applying-ის დროს და კიდის (native disabled) ისარზე hover ფერს არ ცვლის. Back (`:157`) fieldset-ის გარეთაა, არასოდეს არის disabled და plain `hover:`-ს ინარჩუნებს; `AudioPlayer`-ის play ღილაკი ამ წესს უკვე conditional class-ით მისდევდა. cue D-45-ის regression არ იყო: Chromium `:hover`-ს native disabled ღილაკზეც ამთხვევს (B-R39-01). უარყოფილი: `pointer-events-none` (Bootstrap) — `not-allowed` cursor დაიკარგებოდა, მოქმედებას კი D-45-ის click guard უკვე ბლოკავს. ჩანაწერი (22).
++- **D-45:** `Done` და Save Tags / `Save to N files` "მიუწვდომელს" `aria-disabled`-ით აჩვენებენ native `disabled`-ის ნაცვლად, ამიტომ focused ღილაკი focus-ს აღარ კარგავს. `Done` (`SchemaEditor.tsx:331-332`): `aria-disabled={isApplying || fields.length === 0}` და `aria-busy={isApplying}`; `handleSave` მაშინვე ბრუნდება, როცა `fields` ცარიელია ან `isApplying` true-ა (`:182`), dependencies `[fields, isApplying, onSave, onClose]` (`:193`). Save Tags (`MetadataPanel.tsx:373-374`): `aria-disabled={isSaving || !isDirty}` და `aria-busy={isSaving}`; `handleSave` მაშინვე ბრუნდება, როცა `selectedFiles` ცარიელია ან `isSaveBlocked()` true-ა (`:143`). `isSaveBlocked` ფაილის ბოლოს დამატებული private module-level ფუნქციაა, რომელიც `useMetadataStore.getState()`-ს სინქრონულად კითხულობს (`isSaving || !isDirty`), ამიტომ `useCallback`-ის dependencies არ იცვლება. `Button` (`ui/button.tsx:36`) იღებს `aria-disabled:opacity-50 aria-disabled:cursor-not-allowed`-ს, native disabled-ის იგივე იერს; `aria-disabled="true"`-ის გარეშე Button-ზე გავლენა არ აქვს. reorder ისრები native `disabled`-ს საკუთარ კიდეზე ინარჩუნებენ (`index === 0` / ბოლო), class კი private `reorderArrowClassName(isEdge)`-დან მოდის (`SchemaEditor.tsx:230`, `:238`): საკუთარი `opacity-30` მხოლოდ კიდის ისარს აქვს, ამიტომ Applying-ის დროს შუა ისარი fieldset-ის 60%-ზეა, კიდის ისარი 18%-ზე. fieldset, Back, label-ები `Applying...` / `Saving...`, D-41/D-42/D-43 და D-29/D-30/D-39 უცვლელია. ჩანაწერი (21).
++- **D-46:** hover-ის ფერი მხოლოდ იმ ღილაკზე იცვლება, რომელსაც მოქმედება შეუძლია. `Button`-ის ხუთივე variant (`ui/button.tsx`, `variantStyles`: primary, secondary, ghost, accent, destructive) `hover:<x>`-ის ნაცვლად `enabled:not-aria-disabled:hover:<x>`-ს იყენებს, ამიტომ native `disabled` და `aria-disabled="true"` ღილაკი (D-45) hover-ზე resting ფერს ინარჩუნებს; opacity 0.5, `cursor-not-allowed`, focus ring და click guard უცვლელია. `SchemaEditor`-ის fieldset-ის შიგნით მყოფი ღილაკები `enabled:hover:`-ს იყენებენ: reorder ისრები (`reorderArrowClassName`, ფაილის ბოლოს), Trash2 (`SchemaEditor.tsx:246`), Hide standard X (`:254`) და hidden-standard chip (`:275`). ამიტომ Applying-ის დროს და კიდის (native disabled) ისარზე hover ფერს არ ცვლის. Back (`:201`) fieldset-ის გარეთაა, არასოდეს არის disabled და plain `hover:`-ს ინარჩუნებს; `AudioPlayer`-ის play ღილაკი ამ წესს უკვე conditional class-ით მისდევდა. cue D-45-ის regression არ იყო: Chromium `:hover`-ს native disabled ღილაკზეც ამთხვევს (B-R39-01). უარყოფილი: `pointer-events-none` (Bootstrap) — `not-allowed` cursor დაიკარგებოდა, მოქმედებას კი D-45-ის click guard უკვე ბლოკავს. ჩანაწერი (22).
++- **D-47:** standard ველი, რომლის key-ს ან RIFF ID-ს custom ველი უკვე იყენებს, Schema Editor-ში ვერ ჩაირთვება. `findStandardFieldConflict(standardField, fields)` (`SchemaEditor.tsx:31-43`) schema-ს რიგით პირველ არა-standard ველს პოულობს, რომლის `key` ემთხვევა, ან (თუ standard ველს `riffChunkId` აქვს) რომლის `riffChunkId` ზუსტად (case-sensitive) ემთხვევა; ორივე დამთხვევისას მიზეზი `key`-ა. ასეთ დამალულ standard ველს `+ <label>` chip არ აქვს; „Hidden Standard Fields“-ში chip-ების შემდეგ ჩანს warning `<p className="text-[10px] text-warning">` (`:282-286`): `<label> is unavailable: custom field "<custom label>" already uses key "<key>".` ან `... already uses RIFF ID "<ID>".`. სექცია ჩანს, თუ ერთი chip ან ერთი warning მაინც არის. custom ველის წაშლა (Trash2) chip-ს მაშინვე აბრუნებს. `handleToggleStandard`-ის enable branch-ი (`:101`) blocked ველზე არაფერს ცვლის. წესი 13-ვე standard ველს ეხება და არა მხოლოდ Category-ს (B-ის არჩევანი, Saba-მ უნდა დაადასტუროს). schema, რომელშიც ორივე ველი უკვე არის, არ სწორდება (B-R42-01, Q18).
+ 
+ სტატუსები: `ცნობილი შეზღუდვა` ნიშნავს, რომ ქცევა გადაწყვეტილებას მიჰყვება და ცვლილება დაგეგმილი არ არის. `Saba-ს კითხვა` ნიშნავს, რომ ქცევის შეცვლაზე Saba წყვეტს. `გასწორდა` ნიშნავს, რომ ქცევა შეიცვალა და ტესტით არის დაცული.
+ 
+@@ -252,7 +253,7 @@
+ 
+ - **ID:** C-R33-02, QA-R33-01, A-R33-02, TM-B36
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:37` (`isMountedRef`), `:39-44` (mount effect: `isMountedRef.current = true;` და cleanup `isMountedRef.current = false;`), `:146` (`handleSave`, `if (!isMountedRef.current) return;`)
++- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:67` (`isMountedRef`), `:69-74` (mount effect: `isMountedRef.current = true;` და cleanup `isMountedRef.current = false;`), `:190` (`handleSave`, `if (!isMountedRef.current) return;`)
+ - **მიღწევადობა:** Back (`ArrowLeft`) schema editor-ში ყოველთვის ხელმისაწვდომია, ხოლო sidebar გამოყენებადი რჩება, სანამ `Done` pending-ია (C-R27-01, D-40). ამიტომ Back, ფაილის მონიშვნა და `Customize Fields`-ის ხელახლა გახსნა pending `Done`-ის დროს მიღწევადია.
+ - **Reproduction:**
+   1. (a) folder load. საწყისი მდგომარეობა: folder `slow` გახსნილია, `s.wav` მონიშნულია, `Customize Fields` ღიაა. მოქმედება: `Open Folder` `fast` (scan ჯერ არ დასრულებულა) → Text ველი `R34note` → `Done` (D-40-ით editor ღიად რჩება) → Back → `s.wav`-ის row-ზე click → `Customize Fields` → ველის სახელში `QTyped` იკრიფება. შედეგი გასწორებამდე: `fast`-ის load და schema-ს re-read სრულდება, ხელახლა გახსნილი editor თავისით იხურება და `QTyped` იკარგება (C-ის `run-new-Q.txt`).
+@@ -267,7 +268,7 @@
+ 
+ - **ID:** RR-R33-01, QA-R33-02, A-R33-02, RR-R34-02, QA-R34-01, RR-R34-01, TM-B37
+ - **Severity:** medium
+-- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:45` (`isApplying`), `:137-149` (`handleSave`: `setIsApplying(true)` `:139`, `catch` `:142-145`, `setIsApplying(false)` `:147`), `:165` (`<fieldset disabled={isApplying} …>`, დახურვა `:271`), `:280-282` (`Done`-ის `disabled` და label `Applying...`); `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:225` (`schemaReadIdRef`), `:227-228` (id `handleSchemaChanged`-ის დასაწყისში, D-40-ის ლოდინამდე), `:249` (`if (schemaReadId !== schemaReadIdRef.current) return;`)
++- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:75` (`isApplying`), `:181-193` (`handleSave`: `setIsApplying(true)` `:183`, `catch` `:186-189`, `setIsApplying(false)` `:191`), `:209` (`<fieldset disabled={isApplying} …>`, დახურვა `:322`), `:331-333` (`Done`-ის `disabled` და label `Applying...`); `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:225` (`schemaReadIdRef`), `:227-228` (id `handleSchemaChanged`-ის დასაწყისში, D-40-ის ლოდინამდე), `:249` (`if (schemaReadId !== schemaReadIdRef.current) return;`)
+ - **მიღწევადობა:** `Done` pending-ია D-40-ის ლოდინის (folder load) ან ნელი re-read-ის დროს. Back და sidebar ამ დროს გამოყენებადია (D-40, D-41), ამიტომ განმეორებითი click და Back → `Customize Fields` → `Done` #2 მიღწევადია.
+ - **Reproduction (გასწორებამდე):**
+   1. (a) busy state-ის და feedback-ის გარეშე (RR-R33-01, QA-R33-02, A-R33-02, RR-R34-02). საწყისი მდგომარეობა: folder `/fa` გახსნილია, `a.wav` მონიშნულია, `Customize Fields` ღიაა. მოქმედება: `Open Folder` `/fb` (scan ჯერ არ დასრულებულა) → Text ველი `R35note` → `Done` → `Done` კიდევ ერთხელ. შედეგი: `Done` enabled რჩებოდა `Done` ტექსტით, რედაქტირების ველები აქტიური იყო, არაფერი აჩვენებდა, რომ ცვლილება მიმდინარეობს; ყოველი დამატებითი click ახალ schema re-read-ს იწყებდა (`/fb/b.wav`-ის `readMetadataBatch` 3-ჯერ: load + ორი re-read).
+@@ -315,7 +316,7 @@
+ 
+ - **ID:** RR-R35-01, RR-R35-04, C-R35-01, RR-R36-01, TM-B40
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:138` (`handleSave`: `isApplying`-ის guard), `:149` (dependencies), `:186`, `:194` (ისრების `className={reorderArrowClassName(…)}`), `:280-281` (`Done`-ის `aria-disabled` და `aria-busy`), `reorderArrowClassName` (ფაილის ბოლოს); `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:143` (`handleSave`: `isSaveBlocked()`-ის guard), `:373-374` (Save Tags-ის `aria-disabled` და `aria-busy`), `isSaveBlocked` (ფაილის ბოლოს); `src/renderer/src/components/ui/button.tsx:36` (`aria-disabled:` classes)
++- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:182` (`handleSave`: `isApplying`-ის guard), `:193` (dependencies), `:230`, `:238` (ისრების `className={reorderArrowClassName(…)}`), `:331-332` (`Done`-ის `aria-disabled` და `aria-busy`), `reorderArrowClassName` (ფაილის ბოლოს); `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:143` (`handleSave`: `isSaveBlocked()`-ის guard), `:373-374` (Save Tags-ის `aria-disabled` და `aria-busy`), `isSaveBlocked` (ფაილის ბოლოს); `src/renderer/src/components/ui/button.tsx:36` (`aria-disabled:` classes)
+ - **მიღწევადობა:** ყოველი keyboard ან screen-reader მომხმარებელი, რომელიც `Done`-ს ან Save Tags-ს Enter-ით / Space-ით აჭერს. Save Tags ყოველი წარმატებული save-ის შემდეგ `!isDirty`-ით მიუწვდომელი ხდება, ამიტომ focus ყოველ save-ზე იკარგებოდა.
+ - **Reproduction (გასწორებამდე):**
+   1. (a) focus (RR-R35-01). საწყისი მდგომარეობა: folder გახსნილია, ფაილი მონიშნულია, Category-ში ტექსტი აკრეფილია (ან `Customize Fields` ღიაა და `Open Folder`-ის scan pending-ია). მოქმედება: Tab Save Tags-მდე (ან `Done`-მდე) → Enter. შედეგი real app-ში: ღილაკი native `disabled` ხდებოდა და `document.activeElement` `<body>` ხდებოდა; მომხმარებელს გვერდის თავიდან უნდა გაევლო Tab. jsdom ამას არ აჩვენებს: იქ native `disabled` ღილაკი focus-ს ინარჩუნებს, ამიტომ focus-ის მტკიცება მხოლოდ real app-შია.
+@@ -333,7 +334,7 @@
+ 
+ - **ID:** RR-R38-01, RR-R38-04, B-R39-01, TM-B42
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/ui/button.tsx` (`variantStyles`, ხუთი variant), `src/renderer/src/components/schema/SchemaEditor.tsx:202`, `:210`, `:230`, `reorderArrowClassName` (ფაილის ბოლოს)
++- **ფაილი:** `src/renderer/src/components/ui/button.tsx` (`variantStyles`, ხუთი variant), `src/renderer/src/components/schema/SchemaEditor.tsx:246`, `:254`, `:275`, `reorderArrowClassName` (ფაილის ბოლოს)
+ - **მიღწევადობა:** mouse-ის ყოველი მომხმარებელი: სუფთა ან `Saving...` Save Tags, `Applying...` `Done`, Applying-ის დროს fieldset-ის ღილაკები (ისრები, X, Trash2, chip, Add Field), scan-ის დროს Rescan და კიდის reorder ისარი.
+ - **Reproduction (გასწორებამდე):**
+   1. საწყისი მდგომარეობა: folder გახსნილია, ფაილი მონიშნულია, ფორმა სუფთაა. მოქმედება: mouse Save Tags-ზე. შედეგი: background `rgb(18, 217, 200)` → `rgb(29, 237, 219)`, თუმცა ღილაკი `aria-disabled`-ია და click არაფერს წერს.
+@@ -345,3 +346,18 @@
+ - **გადაწყვეტილება:** D-46.
+ - **ტესტი:** unit ტესტი არ არის: მხოლოდ Tailwind class-ები შეიცვალა (`test-on-bugfix`-ის გამონაკლისი), jsdom კი `:hover`-ს და Tailwind CSS-ს არ ითვლის. დაცვა: round 40-ის real-app გაზომვა (Playwright `_electron`, mouse hover, `getComputedStyle`, ძველი `24e9723` vs ახალი) და build-ის CSS-ის selector-ები `:enabled:not([aria-disabled="true"]):hover` და `:enabled:hover`.
+ - **სტატუსი:** გასწორდა (D-46, TM-B42)
++
++## 23. standard ველის ჩართვა custom ველის key-ზე ან RIFF ID-ზე მეორე ველს ქმნიდა
++
++- **ID:** RR-R3-01, TM-T1-DUP
++- **Severity:** medium
++- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:77` (`enabledStandardKeys`, მხოლოდ `standard: true` ველებიდან; გასწორებამდე `:47`), `:93-114` (`handleToggleStandard`), `:265-288` („Hidden Standard Fields“)
++- **მიღწევადობა:** მხოლოდ ძველი ან ხელით შეცვლილი `schema.json`-ით. ფორმა (`handleAddCustomField`) standard key-ს და რეზერვირებულ RIFF ID-ს უარყოფს, ამიტომ ახალი collision UI-დან არ იქმნება.
++- **Reproduction (გასწორებამდე):**
++  1. (a) საწყისი მდგომარეობა: `schema.json`-ში 12 pre-T-1 standard ველი და custom `{key:'category', label:'Category', type:'text', riffChunkId:'CATE'}`. მოქმედება: Customize Fields → `+ Category (UCS)`. შედეგი: schema-ში ორი ველია key-ით `category`; ერთი მნიშვნელობა `CATE`-შიც და `ICAT`-შიც იწერება, React duplicate key-ს აფრთხილებს.
++  2. (b) საწყისი მდგომარეობა: 12 pre-T-1 standard ველი და custom `{key:'ucs_cat', label:'UCS Cat', type:'text', riffChunkId:'ICAT'}`. მოქმედება: Customize Fields → `+ Category (UCS)`. შედეგი: `ICAT`-ს ორი ველი წერს.
++- **Reference:** Saba-ს გადაწყვეტილება Q2 (2026-10-28). R1 Mp3tag (community.mp3tag.de, "Suggestion: distinct custom vs. standard MP3 tag fields in the Extended Tags window", https://community.mp3tag.de/t/suggestion-distinct-custom-vs-standard-mp3-tag-fields-in-the-extended-tags-window/59902; https://docs.mp3tag.de/mapping): standard frame-ის სახელის მქონე custom ველი ყოველთვის standard frame-ში ინახება — ერთ სახელს ერთი slot აქვს (community დაკვირვება, არა ოფიციალური docs). Kid3 და BWF MetaEdit: ძებნამ შედეგი არ მისცა. in-app პრეცედენტი: `Input`-ის inline error (`ui/input.tsx:27`); warning-ს design token `--color-warning` (`text-warning`) აქვს.
++- **Deviations:** (1) Mp3tag ჩუმად აერთიანებს standard slot-ში; აქ toggle იმალება და warning ჩანს (Q2): ჩუმი გაერთიანება მომხმარებლის მნიშვნელობებს (`CATE` → `ICAT`) შეუტყობინებლად გადაიტანდა. (2) წესი 13-ვე standard ველს ეხება და არა მხოლოდ Category-ს: იგივე code path-ს იგივე ბაგი აქვს (მაგ. ძველი custom `publisher`); B-ის არჩევანი, D-47-ში Saba-ს დასადასტურებლად. (3) `schema.json`, რომელშიც standard და custom ველი ერთი key-ით უკვე ერთად არის, არ სწორდება: Q2 მხოლოდ toggle-ს ეხება, შეკეთება კი შენახულ მონაცემს ცვლის (B-R42-01, Q18).
++- **გადაწყვეტილება:** D-47.
++- **ტესტი:** `tests/renderer/components/schema-editor.test.ts` — `T-a hides Category (UCS) and warns when a custom field already uses key category`, `T-b hides Category (UCS) and warns when a custom field already uses RIFF ID ICAT`, `T-c brings Category (UCS) back once the colliding custom field is removed`, `T-d blocks any hidden standard field whose key a custom field uses (Publisher)`
++- **სტატუსი:** გასწორდა (D-47, TM-T1-DUP)
+diff --git a/docs/bugs/README.md b/docs/bugs/README.md
+index 138ab11..d090be3 100644
+--- a/docs/bugs/README.md
++++ b/docs/bugs/README.md
+@@ -4,6 +4,6 @@
+ 
+ | # | აღწერა | სტატუსი |
+ |---|--------|---------|
+-| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (22 ჩანაწერი; 13 გასწორდა; დანარჩენი 9-დან 5 Saba-ს კითხვაა) |
++| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (23 ჩანაწერი; 14 გასწორდა; დანარჩენი 9-დან 5 Saba-ს კითხვაა) |
+ 
+ ფორმატი: `{NNN}-{short-description}.md`
+diff --git a/docs/design/component-specs.md b/docs/design/component-specs.md
+index bbfc2fe..4a4de24 100644
+--- a/docs/design/component-specs.md
++++ b/docs/design/component-specs.md
+@@ -397,6 +397,12 @@ text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline
+ text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors
+ ```
+ 
++**Hidden field warning:**
++```
++text-[10px] text-warning
++```
++A hidden standard field whose key or RIFF ID a custom field already uses gets this `<p>` line instead of its chip, after the chips (`<label> is unavailable: custom field "<custom label>" already uses key "<key>".` or `... RIFF ID "<ID>".`); the Hidden Standard Fields section renders when it has at least one chip or one warning (D-47).
++
+ **Done:** label `Applying...` while `onSave` is pending, otherwise `Done`; `aria-disabled={isApplying || fields.length === 0}` and `aria-busy={isApplying}` instead of native `disabled` (D-45).
+ 
+ Back sits outside the fieldset and is never disabled, so it keeps plain `hover:`. The icon buttons and the chip inside the fieldset use `enabled:hover:`, and Add Field is a ghost `Button` (`enabled:not-aria-disabled:hover:`), so none of them has a hover shift while disabled (D-46).
+diff --git a/docs/recording-tag-contract.md b/docs/recording-tag-contract.md
+index d78e26e..653286e 100644
+--- a/docs/recording-tag-contract.md
++++ b/docs/recording-tag-contract.md
+@@ -65,7 +65,9 @@ importer-ის წესი: **sub-chunk-ის არარსებობა
+ 
+ - `schema.json` (`%APPDATA%`/`XDG_CONFIG_HOME`-ში) უკვე თუ არსებობს, `Category (UCS)` ველი Metadata panel-ში **ავტომატურად არ გამოჩნდება** — ავტომატური migration არ არის (D-07, TM-T1-MIG).
+ - ჩასართავად: **Customize Fields** (Schema Editor) → „Hidden Standard Fields“ → `+ Category (UCS)` → **Done**.
+-- `ICAT` რეზერვირებულია: custom ველს `ICAT` RIFF ID-ით Schema Editor არ ქმნის (`RIFF ID "ICAT" is already in use`). ძველ `schema.json`-ში უკვე არსებული custom `ICAT` ველი ღია საკითხია (TM-T1-DUP).
++- `ICAT` რეზერვირებულია: custom ველს `ICAT` RIFF ID-ით Schema Editor არ ქმნის (`RIFF ID "ICAT" is already in use`).
++- თუ ძველ `schema.json`-ში custom ველი უკვე იყენებს key-ს `category` ან RIFF ID-ს `ICAT`, Schema Editor `+ Category (UCS)`-ს **არ** აჩვენებს და მის ნაცვლად warning-ს წერს (მაგ. `Category (UCS) is unavailable: custom field "Category" already uses key "category".`). ჩასართავად ეს custom ველი წაშალე (Trash2), ან `schema.json`-ში გადაარქვი key/RIFF ID — chip მაშინვე დაბრუნდება. ასე `ICAT`-ს ყოველთვის ერთი ველი წერს (D-47, TM-T1-DUP).
++- `schema.json`, რომელშიც standard `category` და იგივე key-ის custom ველი უკვე ერთად არის (ეს D-47-მდე იყო შესაძლებელი), ავტომატურად არ სწორდება (B-R42-01).
+ 
+ ## ჩაწერის შეცდომები (all-or-nothing, D-17, D-18)
+ 
+diff --git a/src/renderer/src/components/schema/SchemaEditor.tsx b/src/renderer/src/components/schema/SchemaEditor.tsx
+index 487c96b..fef8d9a 100644
+--- a/src/renderer/src/components/schema/SchemaEditor.tsx
++++ b/src/renderer/src/components/schema/SchemaEditor.tsx
+@@ -23,6 +23,36 @@ const RESERVED_RIFF_IDS = new Set(
+   STANDARD_FIELDS.map((f) => f.riffChunkId).filter(Boolean) as string[],
+ );
+ 
++interface StandardFieldConflict {
++  field: FieldDefinition;
++  reason: 'key' | 'riffChunkId';
++}
++
++function findStandardFieldConflict(
++  standardField: FieldDefinition,
++  fields: FieldDefinition[],
++): StandardFieldConflict | null {
++  for (const field of fields) {
++    if (field.standard === true) continue;
++    if (field.key === standardField.key) return { field, reason: 'key' };
++    if (standardField.riffChunkId && field.riffChunkId === standardField.riffChunkId) {
++      return { field, reason: 'riffChunkId' };
++    }
++  }
++  return null;
++}
++
++function formatStandardFieldConflict(
++  standardField: FieldDefinition,
++  conflict: StandardFieldConflict,
++): string {
++  const usage =
++    conflict.reason === 'key'
++      ? `key "${standardField.key}"`
++      : `RIFF ID "${standardField.riffChunkId}"`;
++  return `${standardField.label} is unavailable: custom field "${conflict.field.label}" already uses ${usage}.`;
++}
++
+ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.ReactElement {
+   const fields = useSchemaStore((s) => s.fields);
+   const setFields = useSchemaStore((s) => s.setFields);
+@@ -46,6 +76,19 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+ 
+   const enabledStandardKeys = new Set(fields.filter((f) => f.standard).map((f) => f.key));
+   const disabledStandards = STANDARD_FIELDS.filter((f) => !enabledStandardKeys.has(f.key));
++  const availableStandards: FieldDefinition[] = [];
++  const blockedStandardWarnings: Array<{ key: string; message: string }> = [];
++  for (const standardField of disabledStandards) {
++    const conflict = findStandardFieldConflict(standardField, fields);
++    if (conflict) {
++      blockedStandardWarnings.push({
++        key: standardField.key,
++        message: formatStandardFieldConflict(standardField, conflict),
++      });
++    } else {
++      availableStandards.push(standardField);
++    }
++  }
+ 
+   const handleToggleStandard = useCallback(
+     (field: FieldDefinition) => {
+@@ -55,6 +98,7 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+       if (enabled) {
+         removeField(field.key);
+       } else {
++        if (findStandardFieldConflict(field, currentFields)) return;
+         const stdIndex = STANDARD_FIELDS.findIndex((f) => f.key === field.key);
+         const updated = [...currentFields];
+         let insertAt = 0;
+@@ -218,21 +262,28 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+             ))}
+           </div>
+ 
+-          {disabledStandards.length > 0 && (
++          {(availableStandards.length > 0 || blockedStandardWarnings.length > 0) && (
+             <div className="space-y-1.5">
+               <span className="text-xs text-muted">Hidden Standard Fields</span>
+-              <div className="flex flex-wrap gap-1">
+-                {disabledStandards.map((field) => (
+-                  <button
+-                    key={field.key}
+-                    type="button"
+-                    onClick={() => handleToggleStandard(field)}
+-                    className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+-                  >
+-                    + {field.label}
+-                  </button>
+-                ))}
+-              </div>
++              {availableStandards.length > 0 && (
++                <div className="flex flex-wrap gap-1">
++                  {availableStandards.map((field) => (
++                    <button
++                      key={field.key}
++                      type="button"
++                      onClick={() => handleToggleStandard(field)}
++                      className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
++                    >
++                      + {field.label}
++                    </button>
++                  ))}
++                </div>
++              )}
++              {blockedStandardWarnings.map((warning) => (
++                <p key={warning.key} className="text-[10px] text-warning">
++                  {warning.message}
++                </p>
++              ))}
+             </div>
+           )}
+ 
+diff --git a/tests/renderer/components/schema-editor.test.ts b/tests/renderer/components/schema-editor.test.ts
+index a01b777..164c1cc 100644
+--- a/tests/renderer/components/schema-editor.test.ts
++++ b/tests/renderer/components/schema-editor.test.ts
+@@ -3,6 +3,7 @@ import { createElement } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { SchemaEditor } from "~/components/schema/SchemaEditor";
+ import { useSchemaStore } from "~/stores/schema-store";
++import type { FieldDefinition } from "~/types";
+ import { STANDARD_FIELDS } from "~/types";
+ import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+@@ -82,3 +83,142 @@ describe("SchemaEditor reserved ICAT (T1-9)", () => {
+     expect(screen.queryByText("ICAT")).not.toBeInTheDocument();
+   });
+ });
++
++const CUSTOM_CATEGORY_KEY_FIELD: FieldDefinition = {
++  key: "category",
++  label: "Category",
++  type: "text",
++  riffChunkId: "CATE",
++};
++
++const CUSTOM_ICAT_FIELD: FieldDefinition = {
++  key: "ucs_cat",
++  label: "UCS Cat",
++  type: "text",
++  riffChunkId: "ICAT",
++};
++
++const CATEGORY_KEY_WARNING = 'Category (UCS) is unavailable: custom field "Category" already uses key "category".';
++const CATEGORY_RIFF_WARNING = 'Category (UCS) is unavailable: custom field "UCS Cat" already uses RIFF ID "ICAT".';
++
++function queryButtonByText(name: string): HTMLButtonElement | null {
++  return (
++    Array.from(document.querySelectorAll("button")).find((button) => (button.textContent ?? "").trim() === name) ??
++    null
++  );
++}
++
++function clickTrashForActiveField(label: string): void {
++  const row = screen.getByText(label, { selector: "span" }).parentElement;
++  if (!row) throw new Error(`row for ${label} not found`);
++  const buttons = row.querySelectorAll("button");
++  fireEvent.click(buttons[buttons.length - 1]);
++}
++
++describe("SchemaEditor standard field blocked by a custom field (D-47, TM-T1-DUP)", () => {
++  it("T-a hides Category (UCS) and warns when a custom field already uses key category", () => {
++    const fields = [...PRE_T1_STANDARD_FIELDS, CUSTOM_CATEGORY_KEY_FIELD];
++    useSchemaStore.setState({ fields });
++
++    renderSchemaEditor();
++
++    expect(queryButtonByText("+ Category (UCS)")).toBeNull();
++    expect(screen.getByText(CATEGORY_KEY_WARNING)).toBeInTheDocument();
++    expect(screen.getByText(CATEGORY_KEY_WARNING)).toHaveClass("text-[10px]", "text-warning");
++    expect(screen.getByText("Hidden Standard Fields")).toBeInTheDocument();
++    expect(useSchemaStore.getState().fields).toEqual(fields);
++  });
++
++  it("T-b hides Category (UCS) and warns when a custom field already uses RIFF ID ICAT", () => {
++    const fields = [...PRE_T1_STANDARD_FIELDS, CUSTOM_ICAT_FIELD];
++    useSchemaStore.setState({ fields });
++
++    renderSchemaEditor();
++
++    expect(queryButtonByText("+ Category (UCS)")).toBeNull();
++    expect(screen.getByText(CATEGORY_RIFF_WARNING)).toBeInTheDocument();
++    expect(screen.getByText("Hidden Standard Fields")).toBeInTheDocument();
++    expect(useSchemaStore.getState().fields).toEqual(fields);
++  });
++
++  it("T-c brings Category (UCS) back once the colliding custom field is removed", () => {
++    useSchemaStore.setState({ fields: [...PRE_T1_STANDARD_FIELDS, CUSTOM_CATEGORY_KEY_FIELD] });
++    renderSchemaEditor();
++
++    expect(queryButtonByText("+ Category (UCS)")).toBeNull();
++    expect(screen.getByText(CATEGORY_KEY_WARNING)).toBeInTheDocument();
++
++    clickTrashForActiveField("Category");
++
++    expect(screen.queryByText(CATEGORY_KEY_WARNING)).not.toBeInTheDocument();
++    fireEvent.click(getButtonByText("+ Category (UCS)"));
++
++    const categoryFields = useSchemaStore.getState().fields.filter((field) => field.key === "category");
++    expect(categoryFields).toHaveLength(1);
++    expect(categoryFields[0].standard).toBe(true);
++    expect(categoryFields[0].riffChunkId).toBe("ICAT");
++  });
++
++  it("T-d blocks any hidden standard field whose key a custom field uses (Publisher)", () => {
++    const fields: FieldDefinition[] = [
++      ...STANDARD_FIELDS.filter((field) => field.key !== "publisher"),
++      { key: "publisher", label: "Label", type: "text", riffChunkId: "LABL" },
++    ];
++    useSchemaStore.setState({ fields });
++
++    renderSchemaEditor();
++
++    expect(queryButtonByText("+ Publisher")).toBeNull();
++    expect(
++      screen.getByText('Publisher is unavailable: custom field "Label" already uses key "publisher".'),
++    ).toBeInTheDocument();
++    expect(useSchemaStore.getState().fields).toEqual(fields);
++  });
++
++  it("T-e a stale Category chip click does nothing once a custom field takes key category", () => {
++    useSchemaStore.setState({ fields: PRE_T1_STANDARD_FIELDS });
++    renderSchemaEditor();
++    const chip = getButtonByText("+ Category (UCS)");
++    const realState = useSchemaStore.getState();
++    const collidingFields = [...PRE_T1_STANDARD_FIELDS, CUSTOM_CATEGORY_KEY_FIELD];
++    const getStateSpy = vi
++      .spyOn(useSchemaStore, "getState")
++      .mockReturnValueOnce({ ...realState, fields: collidingFields });
++
++    fireEvent.click(chip);
++    getStateSpy.mockRestore();
++
++    expect(useSchemaStore.getState().fields).toEqual(PRE_T1_STANDARD_FIELDS);
++  });
++
++  it("T-f names the first colliding field, prefers key over RIFF ID, and lists warnings in standard order", () => {
++    const fields: FieldDefinition[] = [
++      ...STANDARD_FIELDS.filter((field) => field.key !== "category" && field.key !== "title"),
++      { key: "notes", label: "Notes", type: "text", riffChunkId: "ICAT" },
++      { key: "category", label: "Cat Both", type: "text", riffChunkId: "ICAT" },
++      { key: "title", label: "Name", type: "text", riffChunkId: "NAME" },
++    ];
++    useSchemaStore.setState({ fields });
++
++    renderSchemaEditor();
++
++    const warnings = Array.from(document.querySelectorAll("p.text-warning")).map((node) => node.textContent);
++    expect(warnings).toEqual([
++      'Title is unavailable: custom field "Name" already uses key "title".',
++      'Category (UCS) is unavailable: custom field "Notes" already uses RIFF ID "ICAT".',
++    ]);
++    expect(document.querySelector(".flex.flex-wrap.gap-1")).toBeNull();
++  });
++
++  it("T-g reports key when one custom field matches both key and RIFF ID", () => {
++    useSchemaStore.setState({
++      fields: [...PRE_T1_STANDARD_FIELDS, { key: "category", label: "Cat Both", type: "text", riffChunkId: "ICAT" }],
++    });
++
++    renderSchemaEditor();
++
++    expect(
++      screen.getByText('Category (UCS) is unavailable: custom field "Cat Both" already uses key "category".'),
++    ).toBeInTheDocument();
++  });
++});
