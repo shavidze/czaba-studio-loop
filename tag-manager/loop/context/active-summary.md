@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T05:19:23.746Z)
+# Active loop summary (2026-10-28T05:36:42.665Z)
 
-- backlog.json 366 KB -> active view 100 KB
-- status: G_ROOT_GATE round 40
+- backlog.json 391 KB -> active view 100 KB
+- status: G_ROOT_GATE round 41
 - servers: `{"servers":"none or skipped"}`
-- last publication: e386cca619e44be8dc3fe0217600beae9608d804 (rounds 40-40)
-- last root gate: round 40 published - commit e386cca619e44be8dc3fe0217600beae9608d804 pushed
+- last publication: a5c6a6bd74488a99675d251275e850a684d55ce0 (rounds 41-41)
+- last root gate: round 41 published - commit a5c6a6bd74488a99675d251275e850a684d55ce0 pushed
 
-## Current items: TM-B41, TM-B42
+## Current items: TM-B42, TM-B43
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -176,16 +176,20 @@
 - RR-R37-03 / info / open / Architecture signal: selection hygiene is spread across setFiles (D-44), selectRange's visible filter and FileList's anchor ref. A store hel
 - B-R37-01 / info / open / After Done succeeds the schema editor unmounts and focus goes to <body>; returning focus to the Customize Fields button (APG dialog-close co
 - B-R37-03 / info / open / While Applying..., Inputs and Add Field inside the fieldset are at 0.6 x 0.5 = 0.3 effective opacity (their own disabled:opacity-50 stacks o
-- RR-R38-01 / low / open / button.tsx: a Button with aria-disabled='true' still gets its variant hover: colours; review says native disabled got no mouse events so thi
 - RR-R38-02 / low / open / SchemaEditor handleSave reads isApplying from the render closure; correct for real clicks (React flushes before the next event, (f2) covers 
-- RR-R38-04 / low / open / SchemaEditor middle reorder arrows inside the disabled fieldset keep hover:text-foreground while Applying (visual cue only; clicks blocked n
 - RR-R38-05 / info / open / Architecture signal: the focusable-but-disabled pattern (aria-disabled prop + separate handler guard) now repeats in SchemaEditor and Metada
 - RR-R39-02 / low / open / (x8) is a pure store test placed in a component suite (selection-after-folder-switch.test.ts); could move to tests/renderer/stores/file-stor
 - RR-R39-03 / info / open / Architecture signal: a sibling queryButtonByText returning null would let absence checks avoid getByRole; store-only checks belong in stores
 - A-R39-01 / low / open / (f9) toHaveTextContent('Done') is a substring match; /^Done$/ would be stricter; C mutants C-4/C-5/C-7 still killed by (f9)
 - A-R39-02 / info / open / TESTING.md §6 mentions trim only for strings; the helper also tests RegExp against the trimmed text ((q3)/C-3 pin it) and a RegExp may match
-- B-R39-01 / info / open / Fact: Chromium matches :hover on natively disabled buttons; ea4a1cb (native disabled) and 24e9723 (aria-disabled) show the same hover backgr
 - B-R39-02 / info / open / Fieldset-disabled reorder arrows keep cursor default while Applying (Add Field Button shows not-allowed); pre-existing in ea4a1cb too
+- C-R40-01 / low / open / docs/design/component-specs.md:376 'Hidden field chip' still says hover:text-foreground hover:border-brand; SchemaEditor.tsx:230 uses enable
+- A-R40-01 / low / open / Same as C-R40-01 (component-specs chip block still plain hover:); outside the frozen prototype.diff
+- A-R40-02 / low / open / D-46 is cited in style-guide.md:215/235 and component-specs.md:50, but docs/bugs/001 decision log ends at D-45
+- RR-R40-01 / low / open / Design docs cite D-46 but no D-46 entry exists; add a short Georgian D-46 entry after D-45 in docs/bugs/001 (variants, SchemaEditor icon but
+- RR-R40-04 / info / open / Architecture signal: a shared forwardRef IconButton under ui/ owning enabled:not-aria-disabled:hover:* and disabled opacity would replace Sc
+- A-R40-03 / info / open / AudioPlayer.tsx:114-117 avoids hover on its disabled state with a conditional class, not enabled:hover:; same behaviour (C H11 identical old
+- A-R40-04 / low / open / (a) component-specs.md:369 field row py-1 vs code py-1.5 (docs); (b) natively disabled plain <button>s in SchemaEditor have no cursor-not-al
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

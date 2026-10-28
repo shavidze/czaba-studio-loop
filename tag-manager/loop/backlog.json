@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 41: TM-B43 docs only (SchemaEditor spec section + D-46 decision log) on baseline e386cca",
+  "current_task": "Round 42: BLOCKED on Saba decisions (no A/C work); baseline a5c6a6b",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -368,7 +368,7 @@
     },
     {
       "id": "D-46",
-      "status": "verified (C R40 PASS), published e386cca (TM-B42); UX, reversible; decision-log entry in docs/bugs/001 missing until TM-B43 (round 41)",
+      "status": "verified (C R40 PASS), published e386cca (TM-B42); decision-log entry D-46 + docs/bugs/001 entry (22) verified by C R41 PASS, published a5c6a6b (TM-B43); UX, reversible",
       "decision": "Hover feedback appears only on buttons that can act: Button variants use enabled:not-aria-disabled:hover:, SchemaEditor fieldset buttons use enabled:hover:. Disabled and aria-disabled buttons keep their resting colour, opacity 0.5 and cursor not-allowed (D-45). pointer-events:none (Bootstrap) is not used because it would drop the not-allowed cursor."
     }
   ],
@@ -1971,7 +1971,7 @@
       "severity": "low",
       "source": "C-R40-01 / A-R40-01 (component-specs chip block), A-R40-02 / RR-R40-01 (D-46 missing from the decision log), A-R40-04(a) (row py-1)",
       "title": "Docs only: SchemaEditor section of component-specs.md matches SchemaEditor.tsx (structure, row py-1.5, icon buttons and chip enabled:hover:, Done aria-disabled/aria-busy); D-46 bullet + entry (22) in docs/bugs/001; README 22/13/9",
-      "status": "in_progress",
+      "status": "done",
       "depends_on": [
         "TM-B42"
       ],
@@ -1992,9 +1992,12 @@
         "001 counts: 22 entries, 13 'გასწორდა', status line lists (22); README 22/13/9",
         "gate verifyCommand green, renderer 310, main 93, E2E 7/7, Biome 0/8 same list"
       ],
-      "realVerified": false,
+      "realVerified": true,
       "round": 41,
-      "evidence_b": "B R40 (b-round-40-exp/): prototype applied to git archive e386cca by patch -p1 dry-run + apply, result == B's proto tree; 22 entries / 13 fixed counted on the proto"
+      "evidence_b": "B R40 (b-round-40-exp/): prototype applied to git archive e386cca by patch -p1 dry-run + apply, result == B's proto tree; 22 entries / 13 fixed counted on the proto",
+      "evidence": [
+        "C round 41 PASS (c-round-41.md/.json, realVerified=true, bugs []), published a5c6a6b (root gate round 41, review COMMIT OK, 0 critical/high/medium): R41-1 only the 3 owned docs paths changed, 57 sorted +/- body lines == prototype.diff (cmp EQUAL), 3 files cmp-identical to b-round-40-exp copies, src/tests/.claude/.github/style-guide byte-identical; R41-2 every spec class string/attribute verbatim in SchemaEditor.tsx (:152-:291 listed), refs :157 Back, :202 Trash2, :210 X, :230 chip, button.tsx variantStyles resolve; R41-3 real app (built out/, Playwright _electron + xvfb): DOM className of header, Back, title, content, fieldset, footer, row, edge/middle arrow, X, chip, Trash2 contain exactly the spec tokens (missing [], extra []), Done aria-disabled=false aria-busy=false, pageErrors [], r41-schema-editor.png; R41-4 22 entries / 13 fixed, line 3 (22), README 22/13/9, D-46 at line 25 ends 'ჩანაწერი (22).', entry (22) field order == (21), Bootstrap/Tailwind reference URLs WebFetched; R41-5 clean verifyCommand exit 0, Biome 0/8 same list, renderer 310/310, main 93/93, E2E 7/7, --retries=0 7/7"
+      ]
     }
   ],
   "findings": [
@@ -4929,36 +4932,40 @@
       "id": "C-R40-01",
       "source": "C R40-7 (c-round-40.json bug; same as A-R40-01)",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "docs/design/component-specs.md:376 'Hidden field chip' still says hover:text-foreground hover:border-brand; SchemaEditor.tsx:230 uses enabled:hover:. The whole SchemaEditor spec section was stale at baseline (container mt-3 ... border-brand does not exist, row py-1 vs py-1.5)",
-      "routed_to": "TM-B43 round 41"
+      "routed_to": "TM-B43 round 41",
+      "closed_by": "TM-B43 round 41 (C PASS R41-1..R41-5, published a5c6a6b)"
     },
     {
       "round": 40,
       "id": "A-R40-01",
       "source": "A R40 (a-round-40.md)",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "Same as C-R40-01 (component-specs chip block still plain hover:); outside the frozen prototype.diff",
-      "routed_to": "TM-B43 round 41 (duplicate of C-R40-01)"
+      "routed_to": "TM-B43 round 41 (duplicate of C-R40-01)",
+      "closed_by": "TM-B43 round 41 (C PASS R41-1..R41-5, published a5c6a6b)"
     },
     {
       "round": 40,
       "id": "A-R40-02",
       "source": "A R40 (a-round-40.md); C R40 note",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "D-46 is cited in style-guide.md:215/235 and component-specs.md:50, but docs/bugs/001 decision log ends at D-45",
-      "routed_to": "TM-B43 round 41"
+      "routed_to": "TM-B43 round 41",
+      "closed_by": "TM-B43 round 41 (C PASS R41-1..R41-5, published a5c6a6b)"
     },
     {
       "round": 40,
       "id": "RR-R40-01",
       "source": "root-review (gates/round-40/review.md low 1)",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "Design docs cite D-46 but no D-46 entry exists; add a short Georgian D-46 entry after D-45 in docs/bugs/001 (variants, SchemaEditor icon buttons, rejected alternative, why no test)",
-      "routed_to": "TM-B43 round 41 (same as A-R40-02)"
+      "routed_to": "TM-B43 round 41 (same as A-R40-02)",
+      "closed_by": "TM-B43 round 41 (C PASS R41-1..R41-5, published a5c6a6b)"
     },
     {
       "round": 40,
@@ -5003,7 +5010,55 @@
       "severity": "low",
       "status": "open",
       "title": "(a) component-specs.md:369 field row py-1 vs code py-1.5 (docs); (b) natively disabled plain <button>s in SchemaEditor have no cursor-not-allowed (related to B-R39-02)",
-      "routed_to": "(a) TM-B43 round 41; (b) record with B-R39-02 (UX, needs reference-first)"
+      "routed_to": "(a) closed TM-B43 round 41; (b) record with B-R39-02 (UX, needs reference-first)",
+      "notes": [
+        "R41: part (a) closed by TM-B43 (C PASS, a5c6a6b, spec row py-1.5 == DOM); part (b) stays open with B-R39-02 (UX, reference-first)"
+      ]
+    },
+    {
+      "round": 41,
+      "id": "A-R41-01",
+      "source": "A R41 code-reviewer (a-round-41.md); C R41 agrees (info)",
+      "severity": "info",
+      "status": "open",
+      "title": "docs/bugs/001 entry (22) Deviation (4): the list of never-disabled plain-hover: buttons is not exhaustive (missing TagsInput remove-tag, MetadataPanel, FolderBrowser buttons); the claim itself is true. Fix on the next docs touch: mark as 'მაგ.' or complete it",
+      "routed_to": "record (next docs touch of docs/bugs/001)"
+    },
+    {
+      "round": 41,
+      "id": "A-R41-02",
+      "source": "A R41 code-reviewer (a-round-41.md)",
+      "severity": "info",
+      "status": "closed",
+      "title": "'cue' in the D-46 bullet flagged as a possible stray word",
+      "routed_to": "closed: C R41 confirms intentional English technical wording (task text and B-R39-01 'hover cue'); not a bug"
+    },
+    {
+      "round": 41,
+      "id": "RR-R41-01",
+      "source": "root-review (gates/round-41/review.md low 1)",
+      "severity": "low",
+      "status": "open",
+      "title": "New SchemaEditor spec prose in docs/design/component-specs.md is English while project rules ask for Georgian docs; the file is English throughout, so the round kept its style. Reviewer: no change needed",
+      "routed_to": "record (docs language convention of docs/design/*, Saba may choose)"
+    },
+    {
+      "round": 41,
+      "id": "RR-R41-02",
+      "source": "root-review (gates/round-41/review.md low 2)",
+      "severity": "low",
+      "status": "open",
+      "title": "D-46 bullet and entry (22) pin exact SchemaEditor.tsx line numbers (:157, :202, :210, :230); correct now, stale after the next edit. Naming the symbol/title next to each number would last longer (same class as RR-R30-02)",
+      "routed_to": "record (next docs touch, with RR-R30-02)"
+    },
+    {
+      "round": 41,
+      "id": "RR-R41-03",
+      "source": "root-review (gates/round-41/review.md architecture note)",
+      "severity": "info",
+      "status": "open",
+      "title": "Architecture signal: the 'hover only when the button can act' rule is repeated in Button variants and raw SchemaEditor buttons; a shared helper/class constant (or IconButton, RR-R40-04) would prevent drift and could carry B-R39-02's cursor; a build-output check for :enabled:hover selectors would replace manual real-app measurement",
+      "routed_to": "signal (not a task; with RR-R40-04, B-R39-02)"
     }
   ],
   "rounds": [
@@ -5879,7 +5934,7 @@
     {
       "round": 41,
       "task": "TM-B43 docs only: SchemaEditor spec section matches code; D-46 decision-log bullet + entry (22); README counts",
-      "status": "planned",
+      "status": "published",
       "baseline": "e386cca619e44be8dc3fe0217600beae9608d804 (clean)",
       "items": [
         "TM-B43"
@@ -5890,6 +5945,31 @@
         "A-R40-02",
         "RR-R40-01",
         "A-R40-04"
+      ],
+      "commit": "a5c6a6bd74488a99675d251275e850a684d55ce0",
+      "result": "C PASS R41-1..R41-5, realVerified=true, bugs []; review COMMIT OK (low RR-R41-01, RR-R41-02; info RR-R41-03); A info A-R41-01, A-R41-02 (closed)"
+    },
+    {
+      "round": 42,
+      "task": "BLOCKED: every remaining scoped item waits on a Saba decision/data (or root's Actions link); no A/C work",
+      "status": "blocked",
+      "baseline": "a5c6a6bd74488a99675d251275e850a684d55ce0 (clean)",
+      "items": [],
+      "waiting_on_saba": [
+        "TM-T1-MIG (D-07)",
+        "TM-T1-DUP (RR-R3-01)",
+        "TM-B08 (D-12, B-R6-01)",
+        "TM-B11 (D-10)",
+        "TM-B05",
+        "TM-B06",
+        "TM-T2-DATA -> TM-T2",
+        "B-R18-01/RR-R19-01 (preload change permission)"
+      ],
+      "waiting_on_root": [
+        "TM-T0",
+        "TM-T0-CI",
+        "TM-T0-CI-FU",
+        "TM-B14 (green Actions Check run on 7879ee0 or later, e.g. a5c6a6b)"
       ]
     }
   ]
