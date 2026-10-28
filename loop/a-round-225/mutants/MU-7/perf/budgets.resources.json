@@ -1,0 +1,718 @@
+[
+  {
+    "id": "res.mem.backing-ready-mib",
+    "scenario": "ready, after HeapProfiler.collectGarbage",
+    "metric": "backing-ready-mib",
+    "unit": "MiB",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Runtime.getHeapUsage().backingStorageSize (MiB, 0.1) at ready after GC, before Add. Page JS heap only. Budget owner: PERF-13 (backing store at ready)."
+  },
+  {
+    "id": "res.mem.used-ready-mib",
+    "scenario": "ready, after HeapProfiler.collectGarbage",
+    "metric": "used-ready-mib",
+    "unit": "MiB",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Runtime.getHeapUsage().usedSize (MiB, 0.1) at ready after GC, before Add. Deterministic under the 0.1 MiB rule (round 217, D-29z219): median 5.1 in all four round-216 runs; one sample at 5.2. Budget owner: PERF-13."
+  },
+  {
+    "id": "res.mem.backing-after-export-delta-mib",
+    "scenario": "after the 1-clip WAV export, after GC",
+    "metric": "backing-after-export-delta-mib",
+    "unit": "MiB",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Leak row: backingStorageSize after the 1-clip export and GC minus the ready value (MiB, 0.1); about 0 expected. Budget owner: PERF-12 (export peak memory)."
+  },
+  {
+    "id": "res.dom.page-0",
+    "scenario": "ready, before Add",
+    "metric": "page-0",
+    "unit": "elements",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. document.querySelectorAll(\"*\").length at ready. Budget owner: PERF-14 (DOM and ruler)."
+  },
+  {
+    "id": "res.dom.page-1",
+    "scenario": "after library Add (1 clip, selected)",
+    "metric": "page-1",
+    "unit": "elements",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Whole page elements with 1 clip. Budget owner: PERF-14 (DOM and ruler)."
+  },
+  {
+    "id": "res.dom.clip-subtree",
+    "scenario": "after library Add (1 clip)",
+    "metric": "clip-subtree",
+    "unit": "elements",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. The first [data-clip-kind=\"audio\"] element plus its descendants. Budget owner: PERF-14 (DOM and ruler)."
+  },
+  {
+    "id": "res.dom.ruler-1",
+    "scenario": "after library Add (1 clip)",
+    "metric": "ruler-1",
+    "unit": "elements",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. [data-testid=\"arrangement-ruler\"] plus its descendants with 1 clip; the ruler grows with project length. Budget owner: PERF-14 (DOM and ruler)."
+  },
+  {
+    "id": "res.dom.page-2",
+    "scenario": "after Ctrl+D (2 clips, copy selected)",
+    "metric": "page-2",
+    "unit": "elements",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Whole page elements with 2 clips. Budget owner: PERF-14 (DOM and ruler)."
+  },
+  {
+    "id": "res.dom.ruler-2",
+    "scenario": "after Ctrl+D (2 clips)",
+    "metric": "ruler-2",
+    "unit": "elements",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Ruler subtree with 2 clips. Budget owner: PERF-14 (DOM and ruler)."
+  },
+  {
+    "id": "res.dom.page-per-added-clip",
+    "scenario": "derived",
+    "metric": "page-per-added-clip",
+    "unit": "elements",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. page-2 minus page-1: clip subtree + ruler growth + overview. Budget owner: PERF-14 (DOM and ruler)."
+  },
+  {
+    "id": "res.export.1.wall-ms",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "wall-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (±30 %). Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.1.longtasks-over-50",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "longtasks-over-50",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Count of longtask entries over 50 ms inside the window. Budget owner: PERF-12 (export long tasks). Wall-clock since round 224 (doc 176): a long-task count depends on scheduling, as load.longtasks-over-50 shows."
+  },
+  {
+    "id": "res.export.1.longtask-max",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "longtask-max",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Largest longtask entry in the window (0 when none). Trend only. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.1.loaf-blocking-max",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "loaf-blocking-max",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Largest long-animation-frame blockingDuration in the window (0 when none); LoAF duration is not used. Trend only. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.1.peak-backing-delta-mib",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "peak-backing-delta-mib",
+    "unit": "MiB",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+  },
+  {
+    "id": "res.export.1.bytes",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Size of the downloaded czaba-studio-lab.wav (44 + frames x 6). Budget owner: PERF-12 (export)."
+  },
+  {
+    "id": "res.export.2.wall-ms",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "wall-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (±30 %). Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.2.longtasks-over-50",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "longtasks-over-50",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Count of longtask entries over 50 ms inside the window. Left the deterministic set (round 216): one export task sits at the 50 ms threshold; A observed [0, 0, 0] and [0, 0, 1] (51 ms). Trend only. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.2.longtask-max",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "longtask-max",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Largest longtask entry in the window (0 when none). Trend only. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.2.loaf-blocking-max",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "loaf-blocking-max",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Largest long-animation-frame blockingDuration in the window (0 when none); LoAF duration is not used. Trend only. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.2.peak-backing-delta-mib",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "peak-backing-delta-mib",
+    "unit": "MiB",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+  },
+  {
+    "id": "res.export.2.bytes",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Size of the downloaded czaba-studio-lab.wav (44 + frames x 6). Budget owner: PERF-12 (export)."
+  },
+  {
+    "id": "res.harness.clips-1",
+    "scenario": "after library Add",
+    "metric": "clips-1",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 1
+    },
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Liveness. [data-clip-kind=\"audio\"] count after Add."
+  },
+  {
+    "id": "res.harness.clips-2",
+    "scenario": "after Ctrl+D",
+    "metric": "clips-2",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 2
+    },
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Liveness. [data-clip-kind=\"audio\"] count after one Ctrl+D on the selected clip."
+  },
+  {
+    "id": "res.harness.export-1-produced",
+    "scenario": "Export WAV, 1 clip",
+    "metric": "export-1-produced",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 1
+    },
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Liveness. 1 only when the download arrived within 60 s, is named czaba-studio-lab.wav, its RIFF header is PCM / 2 ch / 48000 Hz / 24-bit, data size = file size - 44, and frames (= data / 6) equal round(seconds x 48000) or +1, seconds from the \"WAV created: mm:ss.mmm\" text."
+  },
+  {
+    "id": "res.harness.export-2-produced",
+    "scenario": "Export WAV, 2 clips",
+    "metric": "export-2-produced",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 1
+    },
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Liveness. Same checks as export-1-produced, on the 2-clip export."
+  },
+  {
+    "id": "res.harness.mem-polls-1",
+    "scenario": "Export WAV, 1 clip",
+    "metric": "mem-polls-1",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "assert",
+    "budget": {
+      "op": ">=",
+      "value": 5
+    },
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 7–9."
+  },
+  {
+    "id": "res.harness.mem-polls-2",
+    "scenario": "Export WAV, 2 clips",
+    "metric": "mem-polls-2",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "assert",
+    "budget": {
+      "op": ">=",
+      "value": 5
+    },
+    "owner": "PERF-1b-ii",
+    "note": "1x pass. Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 13–15."
+  },
+  {
+    "id": "res.export.1.wall-ms.6x",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "wall-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (±30 %). Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.1.longtasks-over-50.6x",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "longtasks-over-50",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Count of longtask entries over 50 ms inside the window. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.1.longtask-max.6x",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "longtask-max",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Largest longtask entry in the window (0 when none). Trend only. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.1.loaf-blocking-max.6x",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "loaf-blocking-max",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Largest long-animation-frame blockingDuration in the window (0 when none); LoAF duration is not used. Trend only. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.1.peak-backing-delta-mib.6x",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "peak-backing-delta-mib",
+    "unit": "MiB",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+  },
+  {
+    "id": "res.export.1.bytes.6x",
+    "scenario": "Export WAV, 1 clip, click -> \"WAV created\" text",
+    "metric": "bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Size of the downloaded czaba-studio-lab.wav (44 + frames x 6). Budget owner: PERF-12 (export)."
+  },
+  {
+    "id": "res.export.2.wall-ms.6x",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "wall-ms",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (±30 %). Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.2.longtasks-over-50.6x",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "longtasks-over-50",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Count of longtask entries over 50 ms inside the window. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.2.longtask-max.6x",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "longtask-max",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Largest longtask entry in the window (0 when none). Trend only. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.2.loaf-blocking-max.6x",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "loaf-blocking-max",
+    "unit": "ms",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Largest long-animation-frame blockingDuration in the window (0 when none); LoAF duration is not used. Trend only. Budget owner: PERF-12 (export long tasks)."
+  },
+  {
+    "id": "res.export.2.peak-backing-delta-mib.6x",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "peak-backing-delta-mib",
+    "unit": "MiB",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+  },
+  {
+    "id": "res.export.2.bytes.6x",
+    "scenario": "Export WAV, 2 clips, click -> \"WAV created\" text",
+    "metric": "bytes",
+    "unit": "bytes",
+    "kind": "wallclock",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Size of the downloaded czaba-studio-lab.wav (44 + frames x 6). Budget owner: PERF-12 (export)."
+  },
+  {
+    "id": "res.harness.clips-1.6x",
+    "scenario": "after library Add",
+    "metric": "clips-1",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 1
+    },
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add). Liveness. [data-clip-kind=\"audio\"] count after Add."
+  },
+  {
+    "id": "res.harness.clips-2.6x",
+    "scenario": "after Ctrl+D",
+    "metric": "clips-2",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 2
+    },
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add). Liveness. [data-clip-kind=\"audio\"] count after one Ctrl+D on the selected clip."
+  },
+  {
+    "id": "res.harness.export-1-produced.6x",
+    "scenario": "Export WAV, 1 clip",
+    "metric": "export-1-produced",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 1
+    },
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add). Liveness. 1 only when the download arrived within 60 s, is named czaba-studio-lab.wav, its RIFF header is PCM / 2 ch / 48000 Hz / 24-bit, data size = file size - 44, and frames (= data / 6) equal round(seconds x 48000) or +1, seconds from the \"WAV created: mm:ss.mmm\" text."
+  },
+  {
+    "id": "res.harness.export-2-produced.6x",
+    "scenario": "Export WAV, 2 clips",
+    "metric": "export-2-produced",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": "==",
+      "value": 1
+    },
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add). Liveness. Same checks as export-1-produced, on the 2-clip export."
+  },
+  {
+    "id": "res.harness.mem-polls-1.6x",
+    "scenario": "Export WAV, 1 clip",
+    "metric": "mem-polls-1",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "assert",
+    "budget": {
+      "op": ">=",
+      "value": 5
+    },
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add). Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 9–12."
+  },
+  {
+    "id": "res.harness.mem-polls-2.6x",
+    "scenario": "Export WAV, 2 clips",
+    "metric": "mem-polls-2",
+    "unit": "count",
+    "kind": "wallclock",
+    "mode": "assert",
+    "budget": {
+      "op": ">=",
+      "value": 5
+    },
+    "owner": "PERF-1b-ii",
+    "note": "6x pass (CPU throttle on after ready and Add). Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 17–20."
+  },
+  {
+    "id": "res.js.studio-lab.encoded-bytes",
+    "scenario": "/studio-lab, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "encoded-bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.js.studio-lab.decoded-bytes",
+    "scenario": "/studio-lab, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "decoded-bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Sum of Network.dataReceived.dataLength for the same Script requests. Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.js.studio-lab.scripts",
+    "scenario": "/studio-lab, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "scripts",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Script responses counted. Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.js.studio-lab.third-party-scripts",
+    "scenario": "/studio-lab, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "third-party-scripts",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Script URLs whose origin is not the page origin. Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.harness.js-studio-lab-seen",
+    "scenario": "/studio-lab, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "js-studio-lab-seen",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": ">=",
+      "value": 1
+    },
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Liveness: Script responses counted, 0 when the document status is not 200."
+  },
+  {
+    "id": "res.js.home.encoded-bytes",
+    "scenario": "/, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "encoded-bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.js.home.decoded-bytes",
+    "scenario": "/, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "decoded-bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Sum of Network.dataReceived.dataLength for the same Script requests. Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.js.home.scripts",
+    "scenario": "/, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "scripts",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Script responses counted. Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.js.home.third-party-scripts",
+    "scenario": "/, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "third-party-scripts",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Script URLs whose origin is not the page origin. Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.harness.js-home-seen",
+    "scenario": "/, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "js-home-seen",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": ">=",
+      "value": 1
+    },
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Liveness: Script responses counted, 0 when the document status is not 200."
+  },
+  {
+    "id": "res.js.studio-guard.encoded-bytes",
+    "scenario": "/studio/middle-east, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "encoded-bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Measures the sign-in guard screen bundle by design, not the Studio. Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.js.studio-guard.decoded-bytes",
+    "scenario": "/studio/middle-east, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "decoded-bytes",
+    "unit": "bytes",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Sum of Network.dataReceived.dataLength for the same Script requests. Measures the sign-in guard screen bundle by design, not the Studio. Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.js.studio-guard.scripts",
+    "scenario": "/studio/middle-east, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "scripts",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Script responses counted. Measures the sign-in guard screen bundle by design, not the Studio. Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.js.studio-guard.third-party-scripts",
+    "scenario": "/studio/middle-east, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "third-party-scripts",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "record",
+    "budget": null,
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Script URLs whose origin is not the page origin. Measures the sign-in guard screen bundle by design, not the Studio. Budget owner: PERF-11 (JS bytes per route)."
+  },
+  {
+    "id": "res.harness.js-studio-guard-seen",
+    "scenario": "/studio/middle-east, fresh context, cache disabled, load + 1 s network quiet (cap 8 s)",
+    "metric": "js-studio-guard-seen",
+    "unit": "count",
+    "kind": "deterministic",
+    "mode": "assert",
+    "budget": {
+      "op": ">=",
+      "value": 1
+    },
+    "owner": "PERF-1b-ii",
+    "note": "1x only. Liveness: Script responses counted, 0 when the document status is not 200. Measures the sign-in guard screen bundle by design, not the Studio."
+  }
+]

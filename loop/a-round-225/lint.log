@@ -1,0 +1,414 @@
+
+> music-store@1.0.0 lint
+> biome lint ./app
+
+app/components/animations/ScrollReveal.tsx:283:20 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    281 │     >
+    282 │       {words.map((word, wordIndex) => (
+  > 283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+        │                    ^^^^^^^^^
+    284 │           {word.split('').map((char, charIndex) => (
+    285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+  
+  i This is the source of the key value.
+  
+    280 │       aria-label={text}
+    281 │     >
+  > 282 │       {words.map((word, wordIndex) => (
+        │                         ^^^^^^^^^
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+    284 │           {word.split('').map((char, charIndex) => (
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/animations/ScrollReveal.tsx:285:31 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+    284 │           {word.split('').map((char, charIndex) => (
+  > 285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+        │                               ^^^^^^^^^
+    286 │               {char}
+    287 │             </motion.span>
+  
+  i This is the source of the key value.
+  
+    282 │       {words.map((word, wordIndex) => (
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+  > 284 │           {word.split('').map((char, charIndex) => (
+        │                                      ^^^^^^^^^
+    285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+    286 │               {char}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/audio/AudioPlayer.tsx:48:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    46 │           </div>
+    47 │           {/* Close Button */}
+  > 48 │           <button
+       │           ^^^^^^^
+  > 49 │             onClick={closePlayer}
+  > 50 │             className="absolute top-1/2 right-0 -translate-y-1/2 bg-transparent border-none text-muted p-2 flex items-center justify-center rounded-full transition-all duration-200 opacity-60 hover:bg-white/10 hover:text-error hover:opacity-100 hover:scale-110 cursor-pointer"
+  > 51 │             aria-label="Close player"
+  > 52 │             title="Close player"
+  > 53 │           >
+       │           ^
+    54 │             <X size={18} />
+    55 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPlayer.tsx:61:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    59 │         <div className="flex flex-col items-center gap-4">
+    60 │           <div className="flex items-center gap-6">
+  > 61 │             <button
+       │             ^^^^^^^
+  > 62 │               onClick={skipPrevious}
+  > 63 │               className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+  > 64 │               aria-label="Previous track"
+  > 65 │             >
+       │             ^
+    66 │               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    67 │                 <path
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPlayer.tsx:76:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    74 │             </button>
+    75 │ 
+  > 76 │             <button
+       │             ^^^^^^^
+  > 77 │               onClick={togglePlayPause}
+  > 78 │               className="audio-player-button-play flex items-center justify-center rounded-full cursor-pointer"
+  > 79 │               aria-busy={isLoading}
+  > 80 │               aria-label={isLoading ? 'Cancel loading preview' : isPlaying ? 'Pause' : 'Play'}
+  > 81 │             >
+       │             ^
+    82 │               {isLoading ? (
+    83 │                 <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPlayer.tsx:95:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+     93 │             </button>
+     94 │ 
+   > 95 │             <button
+        │             ^^^^^^^
+   > 96 │               onClick={skipNext}
+   > 97 │               className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+   > 98 │               aria-label="Next track"
+   > 99 │             >
+        │             ^
+    100 │               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    101 │                 <path
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/AudioPlayer.tsx:139:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    137 │         {/* Volume Control */}
+    138 │         <div className="flex items-center gap-4 justify-end">
+  > 139 │           <button
+        │           ^^^^^^^
+  > 140 │             onClick={() => setVolume(volume === 0 ? 0.7 : 0)}
+  > 141 │             className="bg-transparent border-none text-foreground p-2 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10 hover:text-brand cursor-pointer"
+  > 142 │             aria-label={volume === 0 ? 'Unmute' : 'Mute'}
+  > 143 │           >
+        │           ^
+    144 │             {volume === 0 ? (
+    145 │               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/StemControl.tsx:19:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    18 │       {/* Solo Button */}
+  > 19 │       <button
+       │       ^^^^^^^
+  > 20 │         onClick={() => toggleSolo(stemId)}
+        ...
+  > 27 │         title={isSoloed ? 'Unsolo' : 'Solo'}
+  > 28 │       >
+       │       ^
+    29 │         S
+    30 │       </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/components/audio/StemControl.tsx:33:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    32 │       {/* Mute Button */}
+  > 33 │       <button
+       │       ^^^^^^^
+  > 34 │         onClick={() => toggleMute(stemId)}
+        ...
+  > 41 │         title={isMuted ? 'Unmute' : 'Mute'}
+  > 42 │       >
+       │       ^
+    43 │         M
+    44 │       </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:103:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    102 │   return (
+  > 103 │     <div
+        │     ^^^^
+  > 104 │       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+  > 105 │       onClick={onClose}
+  > 106 │     >
+        │     ^
+    107 │       <div
+    108 │         className="bg-surface rounded-lg border border-outline shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/routes/studio.$productId.tsx:107:7 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    105 │       onClick={onClose}
+    106 │     >
+  > 107 │       <div
+        │       ^^^^
+  > 108 │         className="bg-surface rounded-lg border border-outline shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+  > 109 │         onClick={(e) => e.stopPropagation()}
+  > 110 │       >
+        │       ^
+    111 │         <div className="sticky top-0 bg-surface border-b border-outline px-6 py-4 flex items-center justify-between">
+    112 │           <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+app/routes/studio.$productId.tsx:116:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    114 │             Keyboard Shortcuts
+    115 │           </h2>
+  > 116 │           <button onClick={onClose} className="text-muted hover:text-foreground transition-colors">
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    117 │             <X size={20} />
+    118 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:348:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    346 │             )}
+    347 │             <span className="text-muted text-xs truncate max-w-[120px]">{product.title}</span>
+  > 348 │             <button
+        │             ^^^^^^^
+  > 349 │               onClick={() => setIsExportOpen(true)}
+  > 350 │               disabled={!state.allLoaded}
+  > 351 │               className="p-1.5 rounded hover:bg-elevated text-muted hover:text-brand transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+  > 352 │               title="Export Mix"
+  > 353 │             >
+        │             ^
+    354 │               <Download size={14} />
+    355 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:356:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    354 │               <Download size={14} />
+    355 │             </button>
+  > 356 │             <button
+        │             ^^^^^^^
+  > 357 │               onClick={() => setIsShortcutsOpen(true)}
+  > 358 │               className="p-1.5 rounded hover:bg-elevated text-muted hover:text-foreground transition-colors"
+  > 359 │               title="Keyboard shortcuts (?)"
+  > 360 │             >
+        │             ^
+    361 │               <Keyboard size={14} />
+    362 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:374:11 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    372 │         {/* Video Sync Section - Collapsible */}
+    373 │         <div className="bg-surface border-b border-outline">
+  > 374 │           <button
+        │           ^^^^^^^
+  > 375 │             onClick={() => setVideoPanelExpanded(!state.videoPanelExpanded)}
+  > 376 │             className="w-full px-4 py-2 flex items-center justify-between hover:bg-background/50 transition-colors"
+  > 377 │           >
+        │           ^
+    378 │             <div className="flex items-center gap-2">
+    379 │               {state.videoPanelExpanded ? (
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:438:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    436 │                 <h2 className="text-2xl font-bold text-foreground mb-4">Access Error</h2>
+    437 │                 <p className="text-muted mb-6">{tokenError}</p>
+  > 438 │                 <button
+        │                 ^^^^^^^
+  > 439 │                   onClick={() => window.location.reload()}
+  > 440 │                   className="px-6 py-3 bg-brand text-foreground rounded-lg hover:bg-brand/90 transition-colors cursor-pointer"
+  > 441 │                 >
+        │                 ^
+    442 │                   Retry
+    443 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/studio.$productId.tsx:469:17 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    467 │                   We couldn't load the audio stems for this track. Please try refreshing the page.
+    468 │                 </p>
+  > 469 │                 <button
+        │                 ^^^^^^^
+  > 470 │                   onClick={() => window.location.reload()}
+  > 471 │                   className="px-6 py-3 bg-brand text-foreground rounded-lg hover:bg-brand/90 transition-colors cursor-pointer"
+  > 472 │                 >
+        │                 ^
+    473 │                   Retry
+    474 │                 </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/support.tsx:84:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    82 │               />
+    83 │             </div>
+  > 84 │             <button
+       │             ^^^^^^^
+  > 85 │               onClick={handleCloseChat}
+  > 86 │               className="mt-6 w-full text-center text-muted hover:text-foreground transition-colors"
+  > 87 │             >
+       │             ^
+    88 │               Back to support options
+    89 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/routes/support.tsx:93:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    91 │         ) : (
+    92 │           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  > 93 │             <button
+       │             ^^^^^^^
+  > 94 │               onClick={handleOpenChat}
+  > 95 │               className="group p-8 bg-surface border border-outline rounded-2xl text-left hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5 transition-all"
+  > 96 │             >
+       │             ^
+    97 │               <div className="w-12 h-12 bg-brand/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand/20 transition-colors">
+    98 │                 <MessageCircle className="w-6 h-6 text-brand" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+app/utils/ableton-export.ts:36:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable projectName is unused.
+  
+    34 │  */
+    35 │ function generateALSXml(options: ExportOptions): string {
+  > 36 │   const { projectName, bpm, stems } = options;
+       │           ^^^^^^^^^^^
+    37 │ 
+    38 │   // Ableton uses a specific volume curve
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 186.
+Checked 515 files in 1179ms. No fixes applied.
+Found 205 warnings.
+Found 1 info.

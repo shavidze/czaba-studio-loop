@@ -1,0 +1,58 @@
+{
+ "taskStatus": "PASS",
+ "round": 225,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-28T11:49:11.4877270Z",
+  "round": 225,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SCOPE-225",
+  "BUDGETS-DIFF-225",
+  "CODE-225",
+  "UNIT-225",
+  "REPLAY-225",
+  "EQUIV-225",
+  "DET-REMAINING-225",
+  "LAB-SMOKE-225",
+  "G225-3",
+  "AN-REVIEW-225"
+ ],
+ "gate": [
+  "full suite",
+  "build",
+  "Biome/lint",
+  "verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "closes_for_B": [
+  "C-R224-01",
+  "A-R224-REVIEW-TENTHS-NAN",
+  "C-R224-02"
+ ],
+ "observations": [
+  {
+   "id": "C-R225-OBS-01",
+   "severity": "info",
+   "text": "In C's isolated clean run, interact.drag.fade.playing.commits-per-move (1x) gave windowCommits [60,60,60]. A's clean run gave [59,59,59]. The count differs between clean runs, which supports the D-29z259 wallclock ruling. Watch rows (drag release-commits [1,1,1] and move-components-per-move) were constant in every pass.",
+   "evidence": "c-round-225/det-remaining.log"
+  },
+  {
+   "id": "C-R225-OBS-02",
+   "severity": "info",
+   "text": "DC-KINDS pins only the 16 regex rows and the 24 fader rows. A flip of an unrelated interactions row (K-3: interact.harness.hook-live to wallclock) survives the unit test. It is outside the task contract; equiv-check-b2 catches it. Not a bug.",
+   "evidence": "c-round-225/mutants.log"
+  },
+  {
+   "id": "C-R223-OBS-01 recurrence",
+   "severity": "info",
+   "text": "The first 1440 /studio-lab dev load again logged 'Cannot read properties of null (reading useState)' plus a hydration error. Two fresh 1440 contexts were clean. This is the dev-server optimizeDeps issue under the open root request b-round-220-root-request-vite.md, not round-225 scope.",
+   "evidence": "c-round-225/g225.json, c-round-225/recheck-1440.json"
+  }
+ ]
+}

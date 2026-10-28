@@ -1,0 +1,14 @@
+diff --git a/perf/lib/report.ts b/perf/lib/report.ts
+index 435228a..539df19 100644
+--- a/perf/lib/report.ts
++++ b/perf/lib/report.ts
+@@ -77,6 +77,9 @@ function determinismFailure(row: PerfBudgetRow, samples: readonly PerfSample[]):
+       return allEqual(values) ? null : `nondeterministic count ${row.id}: [${values.join(', ')}]`;
+     case 'tenths': {
+       if (values.length === 0) return null;
++      if (!values.every((value) => Number.isFinite(value))) {
++        return `nondeterministic MiB ${row.id}: [${values.join(', ')}] (non-finite sample)`;
++      }
+       const spread = Math.round(Math.max(...values) * 10) - Math.round(Math.min(...values) * 10);
+       return spread > 1
+         ? `nondeterministic MiB ${row.id}: [${values.join(', ')}] (spread over 0.1)`

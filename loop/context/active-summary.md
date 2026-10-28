@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T11:15:59.366Z)
+# Active loop summary (2026-10-28T12:06:12.912Z)
 
-- backlog.json 2040 KB -> active view 289 KB
-- status: G_ROOT_GATE round 224
-- servers: `{"checkedUtc":"2026-10-28T10:38:14.9500331Z","round":224,"attempt":1,"store":200}`
-- last publication: bbaea50e44191342c09dde274db83347bf1d8289 (rounds 224-224)
-- last root gate: round 224 published - commit bbaea50e44191342c09dde274db83347bf1d8289 pushed
+- backlog.json 2055 KB -> active view 290 KB
+- status: G_ROOT_GATE round 225
+- servers: `{"checkedUtc":"2026-10-28T11:49:11.4877270Z","round":225,"attempt":1,"store":200}`
+- last publication: 80fbb3b99d6fe991c4e150a9cc05b1b7332d068c (rounds 225-225)
+- last root gate: round 225 published - commit 80fbb3b99d6fe991c4e150a9cc05b1b7332d068c pushed
 
 ## Current items: -
 
@@ -525,12 +525,13 @@
 - PRE-PROD-CHECKLIST-FFMPEG / low / deferred_low_polish / docs/PRE_PRODUCTION_CHECKLIST.md l.124 still lists 'FFmpeg workers' for StudioContext
 - A-R220-GPLV-NIT / info / signal (not scheduled) / licence classifier treats GPLv, AGPLv and GPL.3 as clean; no lock spelling uses them (consistent with R-219-2)
 - C-R222-01 / low / deferred_low_polish (D-29z243); criterion LEGACY-UI-STUBBED amended to 'PCM within 1 LSB on every sample + per-stem spectrum delta <= 0.01 dB'; hypothesis (float summation order in the offline render) attached to the export-pipeline checkpoint / legacy WAV export is not bit-deterministic: two exports of the same untouched selection differ by 1 LSB in 318/383996 samples (48 in a secon
-- PERF-1A-TIMEOUT-HEADROOM / info / watch: round 223 A 7.1 min, C 7.1 min (new) / 7.4 min (HEAD) of 15; queued PERF-HARNESS-SHARED-LIB-b-ii (measure after GATE214-S1; root playwright.perf.config.ts request if still > 50 %) | watch (D-29z250): listed, not a STOP, in round 223; candidate for PERF-HARNESS-SHARED-LIB-b or a root playwright.perf.config.ts change / PERF-1a runs 7-9 min against a 15-min Playwright timeout (47-58 %); B planning run 424.6 s
+- PERF-1A-TIMEOUT-HEADROOM / info / watch: round 224 A 5.8 min, C 8.0 min (53 % of 15 min, after C's build and 1b runs) -> above the 50 % rule; queued PERF-HARNESS-SHARED-LIB-b-ii (measure after GATE214-S1; root playwright.perf.config.ts request if still > 50 %) | watch: round 223 A 7.1 min, C 7.1 min (new) / 7.4 min (HEAD) of 15; queued PERF-HARNESS-SHARED-LIB-b-ii (measure after GATE214-S1; root playwright.perf.config.ts request if still > 50 %) | watch (D-29z250): listed, not a STOP, in round 223; candidate for PERF-HARNESS-SHARED-LIB-b or a root playwright.perf.config.ts change / PERF-1a runs 7-9 min against a 15-min Playwright timeout (47-58 %); B planning run 424.6 s
 - C-R223-01-GATE214-S2-PREMISE / low / ruled D-29z254 (B's own task error, round-223 section 3): GATE214-S2 re-scoped into b-ii; A's revert accepted; not an A defect / task premise false: the Add clip lands on lane music (no empty right-half point), not stems; implementing GATE214-S2 as written aborts all 6
-- C-R223-OBS-01 / info / attached to VITE-EXCLUDE-STALE / b-round-220-root-request-vite.md (dev optimiser hypothesis, unconfirmed); C re-notes if it recurs / first cold dev-server /studio-lab load logged invalid hook call / hydration error once; not reproduced in 4 later loads; app unchanged
-- PERF-LONGTASKS-DETERMINISTIC-MISCLASS / info / dispatched round 224: both reclassified to wallclock record (D-29z257); play.idle-longtasks-over-50 stays deterministic (== 0 assert, no spread) / load.longtasks-over-50 (kind deterministic) varies within a run ([1,1,2], [1,2,1], [1,2,2]); res.export.1.longtasks-over-50 is the same clas
-- GATE223-S1-DOC175-CLAIM / low / dispatched round 224 (grant 14, doc 175 section testing) / doc 175 'byte-identical report' claim holds for identical passes only; the new finally can add 'observer was not released' on error paths
-- GATE223-S4-ROWRATE-PIN / info / dispatched round 224 (DC-RATE in report.test.ts; rateRowId moves to report.ts) / rateSuffix/rowRate in report.ts and rateRowId/faderRowId suffix logic can drift
+- C-R223-OBS-01 / info / recurred C round 224 (first cold 1440 dev load: invalid hook call + hydration error; fresh contexts clean) | attached to VITE-EXCLUDE-STALE / b-round-220-root-request-vite.md (dev optimiser hypothesis, unconfirmed); C re-notes if it recurs / first cold dev-server /studio-lab load logged invalid hook call / hydration error once; not reproduced in 4 later loads; app unchanged
+- C-R224-01 / medium / ruled D-29z259 (L10): the 16 windowed drag commits-per-move rows -> wallclock record; 24 whole-gesture fader rows stay exact; dispatched round 225 / interact.drag.fade.playing.commits-per-move (deterministic, exact ratio) gave windowCommits [60,59,60] / movesInWindow [60,60,60] under conc
+- A-R224-REVIEW-TENTHS-NAN / medium / severity assessed by B as Medium (D-29z260: fail-open against a fail-closed contract; low real-world probability); dispatched round 225 (non-finite guard + DC-MIB-NONFINITE) / tenths contract fail-open on NaN/Infinity samples (Math.round(NaN) spread > 1 is false)
+- C-R224-02 / low / dispatched round 225 (DC-MIB-EDGE [65.2,65,65]; owned file, cheap, not deferred; D-29z261) / no DC case pins the tenths threshold at a spread of 2 tenths (CM-3 spread>2 survives)
+- R224-WINDOW-BOUNDARY-WATCH / info / watch: if a valid run shows variation, reclassify those classes together with evidence (D-29z259) / windowed rows that stay exact: fader and drag release-commits (split at pointerup) and move-components-per-move (same window as the reclassi
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
