@@ -1,0 +1,270 @@
+# Czaba Tag Manager - Style Guide
+
+## Design Philosophy
+
+Czaba Tag Manager is a dark-themed, professional-grade desktop tool for audio metadata management. The visual language prioritizes **information density**, **low eye strain** for long sessions, and **clear visual hierarchy** in a 3-panel layout.
+
+### Core Principles
+
+1. **Dark-first** - HSL-based dark palette with teal (`brand`) as the primary accent
+2. **Token-driven** - Every color, radius, and duration comes from `@theme` tokens in `app.css` -- no hardcoded values
+3. **Tailwind-first** - All styling via Tailwind classes; no custom CSS beyond `@theme` and `@layer base`
+4. **Density** - Compact UI (`text-xs`, `py-1.5`, `gap-1.5`) to maximize visible information
+5. **Quiet chrome** - Borders and surfaces recede (`outline`, `surface`); content and actions stand out (`foreground`, `brand`)
+
+---
+
+## Color Usage Rules
+
+### Backgrounds (dark to light)
+
+| Layer | Token | When |
+|-------|-------|------|
+| Page | `bg-background` | Root `<body>`, empty areas |
+| Panel | `bg-surface` | Sidebar, editor, footer, titlebar |
+| Hover | `bg-elevated` | Interactive element hover |
+| Muted fill | `bg-muted-bg` | Badge muted variant |
+
+### Text Hierarchy
+
+| Role | Token | Example |
+|------|-------|---------|
+| Primary | `text-foreground` | File names, input values |
+| Secondary | `text-muted` | Labels, column headers |
+| Tertiary | `text-dim` | Placeholders, file sizes, hints |
+| Brand emphasis | `text-brand` | Titlebar logo, tag chips |
+| Action emphasis | `text-accent` | Batch selection count |
+| Danger | `text-destructive` | Error messages, delete icons |
+| Success | `text-positive` | Success toast icon |
+
+### Border Hierarchy
+
+| State | Token |
+|-------|-------|
+| Default | `border-outline` |
+| Hover | `border-outline-hover` |
+| Strong | `border-outline-strong` |
+| Active/Focus | `border-brand` |
+
+### Semantic Colors
+
+| Meaning | Token | Use |
+|---------|-------|-----|
+| Primary action | `brand` / `brand-hover` | Buttons, focus rings, links |
+| Secondary action | `accent` (#f9a91f) | Highlights, orange badges |
+| Success | `positive` (#00d26a) | Toast success, checkmarks |
+| Error | `destructive` | Toast error, delete buttons |
+| Warning | `warning` (#f59e0b) | Caution states |
+| Info | `info` (#3b82f6) | Informational elements |
+
+---
+
+## Typography
+
+### Font Stack
+
+- **Body / UI:** `'Inter', system-ui, sans-serif` (`font-sans`)
+- **Brand / Display:** `'Playfair Display', Georgia, serif` (`font-serif`)
+
+### Type Scale
+
+| Class | Size | Usage |
+|-------|------|-------|
+| `text-[10px]` | 10px | RIFF IDs, file counts, micro labels |
+| `text-xs` | 12px | Labels, buttons, most UI text |
+| `text-sm` | 14px | Input values, toast messages, body text |
+| `text-base` | 16px | Large button text (lg size only) |
+
+### Font Weight
+
+| Class | Usage |
+|-------|-------|
+| `font-normal` | Body text |
+| `font-medium` | Labels, button text, section headers |
+| `font-bold` | Titlebar brand text only |
+
+### Text Patterns
+
+```
+Label:       text-xs font-medium text-muted
+Value:       text-sm text-foreground
+Hint:        text-xs text-dim
+Error:       text-xs text-destructive
+Heading:     text-xs font-medium text-foreground
+Brand:       text-brand font-bold text-xs tracking-wider
+```
+
+---
+
+## Spacing
+
+### Base Unit: 4px
+
+All spacing uses Tailwind's default scale mapped through `@theme`. Common values:
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `1` | 4px | Tight gaps (gap-1), micro padding |
+| `1.5` | 6px | Standard gap (gap-1.5), form spacing |
+| `2` | 8px | Panel padding (p-2), section gaps |
+| `3` | 12px | Content padding (p-3), larger gaps |
+| `4` | 16px | Standard padding (px-4) |
+| `6` | 24px | Large padding, empty state margins |
+
+### Layout Spacing
+
+- **Panel content:** `p-3` with `space-y-3` between sections
+- **Section headers:** `px-3 py-2 border-b border-outline`
+- **Compact lists:** `px-2 py-1.5` per row with `space-y-1`
+- **Form fields:** `space-y-1` (label to input), `space-y-3` (field to field)
+- **Button groups:** `gap-1.5` horizontal, `gap-2` vertical
+
+---
+
+## Borders & Radius
+
+### Border Radius
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `rounded-sm` | 6px | Tags, badges, small chips |
+| `rounded-md` | 8px | Buttons, inputs, cards |
+| `rounded-lg` | 12px | Toast notifications |
+| `rounded-xl` | 16px | Drag overlay container |
+| `rounded-full` | 9999px | Progress bar, scrollbar thumb |
+
+### Border Width
+
+- **Standard:** `border` (1px) - panels, inputs, cards
+- **Emphasis:** `border-2` - drag-drop overlay (dashed)
+- **None:** Interactive elements without visible border
+
+---
+
+## Motion
+
+### Duration
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `duration-fast` | 150ms | Button color changes, icon reveals |
+| `duration-normal` | 250ms | Standard transitions |
+| `duration-slow` | 400ms | Complex animations |
+
+### Easing
+
+| Token | Curve | Usage |
+|-------|-------|-------|
+| `ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | Spring-like exits |
+| `ease-in-out` | `cubic-bezier(0.65, 0, 0.35, 1)` | Smooth transitions |
+
+### Standard Transitions
+
+```
+Color change:      transition-colors (150ms default)
+All properties:    transition-all
+Opacity:           transition-opacity
+```
+
+### Animations
+
+- **Spinner:** `animate-spin` on `RefreshCw` icon during scanning
+- **Toast entry:** `animate-in slide-in-from-bottom-4`
+- **Progress bar:** `transition-all` on width change
+
+---
+
+## Iconography
+
+### Library: Lucide React
+
+All icons from `lucide-react`. Tree-shakeable, consistent 24x24 viewbox.
+
+### Size Scale
+
+| Class | Px | Usage |
+|-------|-----|-------|
+| `h-3 w-3` | 12px | Close buttons, small actions |
+| `h-3.5 w-3.5` | 14px | Toolbar icons, window controls |
+| `h-4 w-4` | 16px | Status icons (play, toast) |
+| `h-5 w-5` | 20px | Loading spinners |
+| `h-8 w-8` | 32px | Empty state illustrations |
+| `h-12 w-12` | 48px | Drop zone illustration |
+
+### Icon Color Rules
+
+- **Default:** `text-dim` or `text-muted`
+- **On hover:** `text-foreground`
+- **Active/brand:** `text-brand`
+- **Danger:** `text-destructive`
+- **Success:** `text-positive`
+- **Hidden-until-hover:** `opacity-0 group-hover:opacity-100`
+
+---
+
+## Interactive States
+
+### Focus
+
+- **Inputs:** `focus:outline-none focus:ring-1 focus:ring-brand focus:border-brand`
+- **Buttons:** `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand`
+- **TagsInput:** `focus-within:ring-1 focus-within:ring-brand focus-within:border-brand`
+
+### Hover
+
+- **Buttons:** Variant-specific background shift, only while the button can act: `enabled:not-aria-disabled:hover:…` (D-46)
+- **Icon buttons that can be disabled** (for example inside a disabled `fieldset`): `enabled:hover:…`
+- **List rows:** `hover:bg-elevated`
+- **Text links:** `hover:text-foreground` (from muted/dim)
+- **Borders:** `hover:border-outline-hover`
+- **Reveal actions:** `opacity-0 group-hover:opacity-100`
+
+### Selection
+
+- **File row selected:** `bg-brand/10 text-foreground`
+- **Active template:** `border-brand`
+- **Default unselected:** `border-outline hover:border-outline-hover`
+
+### Disabled
+
+```
+disabled:opacity-50 disabled:cursor-not-allowed
+aria-disabled:opacity-50 aria-disabled:cursor-not-allowed
+```
+
+- A `disabled` or `aria-disabled="true"` button keeps its resting colours on hover: no hover shift (D-46).
+
+---
+
+## Scrollbars
+
+Custom WebKit scrollbars matching the dark theme:
+
+```
+Width/Height:     6px
+Track:            transparent
+Thumb:            outline color (hsl 220, 15%, 22%)
+Thumb hover:      lighter outline (hsl 220, 15%, 30%)
+Border radius:    3px
+```
+
+---
+
+## Electron-Specific
+
+### Titlebar
+
+- **Height:** 32px (`h-8`)
+- **Drag region:** `.draggable` class (`-webkit-app-region: drag`)
+- **Non-drag buttons:** `.no-drag` class (`-webkit-app-region: no-drag`)
+
+### Selection Behavior
+
+- **Body:** `user-select: none` (prevent accidental text selection)
+- **Inputs:** `user-select: text` (allow text selection in forms)
+
+### Window Controls
+
+Right-aligned minimize/maximize/close buttons:
+- Base: `px-3 h-8 text-muted hover:text-foreground hover:bg-elevated`
+- Close override: `hover:bg-destructive`

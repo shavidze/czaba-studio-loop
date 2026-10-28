@@ -1,156 +1,250 @@
-# CURRENT TASK — Round 39: TM-B41 — test hygiene: `getButtonByText` semantics pinned and `g`/`y` RegExp rejected; D-44 order pin; empty-list Done pin; TESTING.md §6
+# CURRENT TASK — Round 40: TM-B42 — hover feedback only on buttons that can act (D-46)
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-28
 
 ## Why this round
-- **Round 38: C PASS** (R38-1…R38-6, realVerified=true). Root published `96f1e45`. The review returned COMMIT OK with 0 critical/high/medium findings. TM-B40 (D-45) is **done**. `96f1e45` is the baseline.
-- **No critical, high or medium bug is open.** TM-B41 is next in dependency order (TM-B40 → TM-B41). It is a **test-only** round: no file under `src/` changes. It has three groups. All of them are test gaps or test-helper defects:
-  1. **`getButtonByText` helper (`tests/renderer/helpers/dom-queries.ts`):**
-     - **C-R36-01:** helper mutants HM-1 (the uniqueness throw is removed), HM-2 (string `===` becomes `includes`) and HM-3 (no `trim`) survive every suite. No test pins what the helper does.
-     - **RR-R36-03 = R36-A-02: a real helper bug (B probe on `96f1e45`, `b-round-38-exp/gflag-probe.log`).** With a `g` or `y` RegExp, `.test()` moves `lastIndex`:
-       - `getButtonByText(/Done/g)` returns `Done` on the first call, then throws `button /Done/g not found` on the second call with the same RegExp;
-       - with two `Done` buttons, `/Done/g` returns one button instead of throwing. The uniqueness check is defeated. Plain `/Done/` throws `matched 2 buttons`, as it should;
-       - `/Done/y` behaves the same as `g`.
+- **Round 39: C PASS** (R39-1…R39-5, realVerified=true, no bug). Root published `24e9723`. The review returned COMMIT OK with 0 critical/high/medium findings. TM-B41 is **done**. `24e9723` is the baseline.
+- **No critical, high or medium bug is open.** TM-B42 (low) is next in dependency order (TM-B41 → TM-B42).
+- **B measured TM-B42's opening question** (`b-round-39-exp/`; throwaway builds in `/tmp/b40`; the repository was not touched).
+  - **Method:** `hover-probe.mjs` launches the real Electron app with Playwright `_electron` under `xvfb-run`. It reuses C's round-38 harness for the delayed scan and write. It moves the mouse onto a button and reads `getComputedStyle` at rest and on hover.
+  - `matchMedia('(hover: hover)')` is true under xvfb, so Tailwind's `hover:` rules apply.
+  - **`ea4a1cb` (native `disabled`) and `24e9723` (`aria-disabled`) behave the same on every step** (`hover-old.json`, `hover-new.json`, `hover-summary.txt`):
+    - clean Save Tags, busy `Saving...` and `Applying...` Done: bg `rgb(18, 217, 200)` → `rgb(29, 237, 219)` on hover;
+    - inside the disabled fieldset, the middle reorder arrow and the Hide-standard X change text colour on hover;
+    - Add Field (disabled by the fieldset) and Rescan (disabled during a scan) change bg on hover.
+  - **Conclusion:** Chromium matches `:hover` on natively disabled buttons. The cue that RR-R38-01 called new is **older** and is not a D-45 regression (finding B-R39-01). Under TM-B42's own rule ("red only if they differ") there is no regression.
+  - **Why TM-B42 still runs:** the cue contradicts the reference (see Reference). The project rule says that a difference from the reference with no listed reason is a bug. So TM-B42 goes on as a fix of the pre-existing cue. Scope is not reduced: it covers RR-R38-01 and RR-R38-04, and also Rescan and Add Field, which share the cause.
+- **B's prototype** (`b-round-39-exp/prototype.diff`, applied to a `git archive` of `24e9723`):
+  - `hover-proto.json`: on every disabled or `aria-disabled` step rest == hover; every enabled control still changes on hover;
+  - renderer 310/310 (`proto-renderer.log`);
+  - `tsc -p tsconfig.web.json` 0;
+  - Biome `src/` 0 errors / 8 warnings once `biome format` wrapped the `secondary` line (the wrap is already in the diff);
+  - the built CSS has `:enabled:not([aria-disabled="true"]):hover` for the 5 variants and `:enabled:hover` for the fieldset buttons;
+  - `pageErrors` was empty in all runs.
 
-       No caller uses `g` or `y` today (grep, C R36 probe). So it is latent, but it is a defect in the helper itself, not only a missing test.
-  2. **Missing pins for decisions that already ship:**
-     - **C-R37-01:** PM-6 (the pruned selection rebuilt in `files` order) survives. D-44's "existing order" clause is not pinned.
-     - **C-R38-01:** CM-3 (Done `aria-disabled={isApplying}`, dropping `fields.length === 0`) survives. Nothing pins an empty-field-list Done as `aria-disabled="true"` (D-45).
-     - **RR-R38-03:** (b1)'s name still says "is disabled", although round 38 changed it to check `aria-disabled`.
-  3. **TESTING.md §6:**
-     - **RR-R36-04:** "B-ის გაზომვით" names a loop agent. It becomes "measured on one runner".
-     - **RR-R36-02:** a11y-name checks still use `getByRole`.
-     - **B-R37-02:** jsdom does not model focus loss on native `disabled`.
-     - One sentence records the helper's whole-string and `g`/`y` contract.
-- **Reference-first rule: exempt.** This is a test-only and docs-only round with no change to visible behaviour (project rule "Reference first": pure fix, refactor, test-only and docs-only rounds are exempt). There is no Reference section, and C does not look for one.
-- **Not in this round:**
-  - **RR-R38-01 / RR-R38-04** (hover colour on an `aria-disabled` Button; middle arrows keep their hover inside the disabled fieldset). The fix would change `src/`, so it cannot go in a test-only round. They become new item **TM-B42** (low, todo), which starts with an old-vs-new real-app measurement.
-  - **RR-R38-02** is recorded only (one caller; (f2) covers it).
-  - **RR-R38-05** is an architecture signal.
-  - **RR-R35-02** (timeout) stays an open **Saba question**. It is not dropped and not deferred.
-  - **R36-A-01** (inner whitespace is not collapsed) is recorded and unreachable. Its semantics are not changed.
-- **B's prototype on `96f1e45`** (`b-round-38-exp/`, throwaway copy from `git archive`):
-  - `prototype.diff`: the full diff for all 7 owned paths;
-  - drafts `dom-queries.test.ts.txt` and `dom-queries.ts.txt`;
-  - `red-run.log`: draft tests with the HEAD helper → **1 failed ((q4)) / 309 passed of 310**;
-  - green runs: `green-run-1.log`, `green-run-2.log` → **310/310 in 21 files, twice**;
-  - `tsc` (test and web) 0; Biome on `src/` 0 errors / 8 warnings;
-  - `mutants.log` (`mut.py.txt`): HM-1…HM-5, PM-6, CM-3 and CM-8 are all killed (see R39-3).
+## Reference
+- **R1 (in-app):** `src/renderer/src/components/player/AudioPlayer.tsx:114-118`. The disabled play button drops `hover:bg-elevated` and shows `text-dim cursor-not-allowed`. This is the app's own pattern: a disabled control gives no hover feedback.
+- **R2:** Bootstrap 5.3, Buttons → "Disabled state", https://getbootstrap.com/docs/5.3/components/buttons/: "Disabled buttons have `pointer-events: none` applied to, preventing hover and active states from triggering." B fetched it with WebFetch on 2026-10-28.
+- **R3:** Tailwind CSS docs, "Hover, focus, and other states", https://tailwindcss.com/docs/hover-focus-and-other-states:
+  - the `enabled` variant is "most helpful when you only want to apply another style when an element is not disabled", with the example `enabled:hover:border-gray-400 disabled:opacity-75`;
+  - the `aria-disabled` variant is `&[aria-disabled="true"]`;
+  - `not-*` combines with other variants;
+  - `hover` = `@media (hover: hover) { &:hover }`.
+- **R4:** the round-38 references for D-45 (MDN `aria-disabled`). With `aria-disabled`, the author must supply the disabled look and suppress the action. D-45 did this for opacity, cursor and click, but not for hover.
+
+## Deviations (each with its reason)
+1. **No `pointer-events: none`, although R2 uses it.** Pointer events stay on:
+   - D-45 shows `cursor-not-allowed` on a disabled button, and `pointer-events: none` would hide that cursor;
+   - the `aria-disabled` click guard (D-45) stays the only place that blocks the action.
+
+   Only the hover colour is suppressed.
+2. **The fieldset-disabled reorder arrows keep `cursor: default`** while Applying (B-R39-02; `ea4a1cb` does the same). This round removes only their hover colour. The cursor is not part of RR-R38-01/04 and is recorded separately.
+3. **The focus ring stays** on a focused `aria-disabled` button (`focus-visible:ring-2`). Keyboard users must see where focus is (D-45, round-38 K1–K3). R2 does not cover this case: its disabled buttons cannot be focused at all.
+4. **Buttons that can never be disabled keep plain `hover:`**: Back, TitleBar, toast close, and the template and FileList controls. The rule only matters where a button can be disabled. AudioPlayer already follows R1 and does not change.
 
 ## Baseline
-- HEAD `96f1e45ff18fb23b77a348af90139a233f51f8e6`; working tree clean (`git status --porcelain --untracked-files=all` empty). If HEAD differs or the tree is dirty, stop and report.
-  - Exception (project policy release-commit rule): a root `chore(release): vX.Y.Z` commit directly on `96f1e45` that changes only the two `version` fields counts as the baseline.
-- **Frozen (byte-identical to `96f1e45`):** every path not listed under File ownership. In particular:
-  - **all of `src/**`**, which is what makes this round test-only;
-  - every other test file, `tests/renderer/helpers/reset-stores.ts`, `tests/renderer/helpers/window-api-mocks.ts`, `tests/renderer/setup.ts`, `tests/e2e/**`, `tests/main/**`, `tests/fixtures/**`;
-  - every `docs/**` file except `docs/bugs/001-save-and-selection-known-limits.md`, and in that file every line except 279, 310 and 328. `docs/bugs/README.md` does not change: no new entry, and the counts stay 21/12/5;
-  - every `.claude/**` file except `.claude/primitives/TESTING.md`, and in that file every section except §6;
-  - `vitest.config.*.ts`, `playwright.config.ts`, `biome.json`, `tsconfig*.json`, `electron.vite.config.ts`, `.github/**`.
+- HEAD `24e9723557fb82d572a655136ff7a0849a8e61f3`; working tree clean (`git status --porcelain --untracked-files=all` empty). If HEAD differs or the tree is dirty, stop and report.
+  - Exception (project policy release-commit rule): a root `chore(release): vX.Y.Z` commit directly on `24e9723` that changes only the two `version` fields counts as the baseline.
+- **Frozen (byte-identical to `24e9723`):** every path not listed under File ownership. In particular:
+  - every other `src/**` file, including `MetadataPanel.tsx`, `AudioPlayer.tsx` and `FolderBrowser.tsx`;
+  - all of `tests/**`, `.claude/**`, `vitest.config.*.ts`, `playwright.config.ts`, `biome.json`, `tsconfig*.json`, `electron.vite.config.ts` and `.github/**`;
+  - every `docs/**` file except the three listed. In `docs/bugs/001-save-and-selection-known-limits.md`, only lines 24 and 317 change; `docs/bugs/README.md` does not change.
 - **Protected (never touch):** `src/preload/index.ts`, `src/preload/index.d.ts`, `src/renderer/src/styles/app.css`, `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `.claude/settings*`, `.claude/hooks/**`.
 
 ## Scope
-All test code follows the sibling suites' style: double quotes, semicolons, no comments, no `any`, no `{ timeout }`. A copies B's drafts as they are (C compares byte for byte, see R39-1). The canonical text of every change is `b-round-38-exp/prototype.diff`. Apply it as is with `patch -p1 < <loop>/b-round-38-exp/prototype.diff` from the repository root. `-p1` removes the `b39head/` and `b39/` prefixes; do not strip them by hand. B dry-ran this on a fresh `git archive` of `96f1e45`, and all 7 files applied. Copying the drafts also works.
+The canonical text of every change is `b-round-39-exp/prototype.diff` (42 `+`/`-` lines, without the `---`/`+++` headers).
+- Apply it from the repository root: `patch -p1 < <loop>/b-round-39-exp/prototype.diff`.
+- B dry-ran it on a fresh `git archive` of `24e9723`. All 5 files applied, and the result equals B's prototype tree.
+- Full-file copies: `b-round-39-exp/button.tsx.txt`, `SchemaEditor.tsx.txt` and `style-guide.md.txt`.
 
-### 1. Tests first (test-on-bugfix for the helper bug)
-**1a. New file `tests/renderer/helpers/dom-queries.test.ts`** = `b-round-38-exp/dom-queries.test.ts.txt`, byte for byte. It has one describe block, `getButtonByText (TM-B41)`, with four tests:
-- **(q1) C-R36-01 HM-1:** two buttons with the same text throw instead of returning the first. Both the string `"Done"` and `/^Done$/` must throw `matched 2 buttons`.
-- **(q2) C-R36-01 HM-2:** a string matches the whole button text, not a part of it. `"Save"` throws `button Save not found`; `"Save Tags"` returns the first button.
-- **(q3) C-R36-01 HM-3:** leading and trailing whitespace of the button text is ignored. A `<div>Done</div>` sits next to `<button>\n  Done  \n</button>`; `"Done"` and `/^Done$/` both return the button.
-- **(q4) RR-R36-03:** a RegExp with the `g` or `y` flag is rejected, because `lastIndex` would carry over between buttons and calls. Both `/Done/g` and `/Done/y` throw `button /Done/<flag>: g and y flags are not supported`.
+### 1. `src/renderer/src/components/ui/button.tsx` (D-46)
+- In `variantStyles`, each of the 5 variants changes `hover:<x>` to `enabled:not-aria-disabled:hover:<x>`:
 
-The file uses `document.body.innerHTML` and clears it in `afterEach`. It needs no `vi.hoisted` window swap: `document` is jsdom's global. B ran it this way.
+  | Variant | `<x>` |
+  |---|---|
+  | `primary` | `bg-brand-hover` |
+  | `secondary` | `bg-elevated` |
+  | `ghost` | `bg-elevated` |
+  | `accent` | `bg-accent/90` |
+  | `destructive` | `bg-destructive/90` |
 
-**Red first:** run the new file against the **HEAD** helper, before you change `dom-queries.ts`. (q4) must fail with `expected [Function] to throw an error`, and (q1)–(q3) must pass, because they pin today's semantics. Record this in `a-round-39.md`. Full renderer suite: 1 failed / 309 passed of 310 once 1b is in.
+- Biome's formatter wraps the `secondary` line onto two lines, as the diff shows. This moves the base-class lines down by 1, so `aria-disabled:opacity-50 …` is now line 36.
+- The base classes, `sizeStyles`, the props and the export do not change.
 
-**1b. Pins added to existing files**, appended at the end of their describe blocks. Nothing else in these files changes:
-- **`tests/renderer/components/selection-after-folder-switch.test.ts`:** after (x7), add
-  `(x8) C-R37-01: setFiles keeps the remaining selectedPaths in their existing order, not in files order`.
-  - Seed: `files: [ENTRY_A, ENTRY_A2, ENTRY_A3]`, `selectedPaths: [PATH_A3, PATH_B, PATH_A]`.
-  - Call `setFiles([ENTRY_A, ENTRY_A2, ENTRY_A3])`.
-  - Expect `selectedPaths` to equal `[PATH_A3, PATH_A]`. `PATH_B` is pruned, so the rebuild path runs; PM-6 would give `[PATH_A, PATH_A3]`.
-- **`tests/renderer/components/busy-buttons-focus.test.ts`:** after (f8), add
-  `(f9) C-R38-01: with an empty field list Done is aria-disabled, not busy, keeps focus, and a click runs no onSave`.
-  - Set `useSchemaStore.setState({ fields: [] })`, render a standalone `SchemaEditor`, then `focusAndClick(Done)`.
-  - Expect: text `Done`; no `disabled` attribute; `aria-disabled="true"`; `aria-busy="false"`; `activeElement` is Done; `onSave` and `onClose` are not called.
-- **`tests/renderer/components/schema-editor-done-busy.test.ts`, line 155, rename only (RR-R38-03):**
-  - old: `… reads Applying... and is disabled, the editing controls …`
-  - new: `… reads Applying... and is aria-disabled, the editing controls …`
-  - The test body does not change.
+### 2. `src/renderer/src/components/schema/SchemaEditor.tsx` (D-46)
+- In 4 places, `hover:` becomes `enabled:hover:`. Each is a same-line edit, so no line numbers move:
 
-(x8) and (f9) are **pins**. They pass on HEAD `src/`, which is correct, because the behaviour already ships. Their red signal is a mutant (R39-3), not HEAD.
+  | Line | Button | New class |
+  |---|---|---|
+  | 202 | Trash2 | `text-destructive enabled:hover:text-destructive/80 p-0.5` |
+  | 210 | Hide-standard X | `text-dim enabled:hover:text-destructive p-0.5` |
+  | 230 | hidden-standard chip | `… text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors` |
+  | 291 | `reorderArrowClassName` | `cn('text-dim enabled:hover:text-foreground p-0.5', isEdge && 'opacity-30')` |
 
-### 2. Helper fix: `tests/renderer/helpers/dom-queries.ts` = `b-round-38-exp/dom-queries.ts.txt`
-Three lines are inserted at the top of `getButtonByText`, before `matches` is computed:
-```ts
-  if (typeof name !== "string" && (name.global || name.sticky)) {
-    throw new Error(`button ${String(name)}: g and y flags are not supported`);
-  }
-```
-- `matchesButtonName`, the export and the other two error messages are unchanged.
-- **Chosen:** reject `g`/`y`. It is stateless, and a caller learns about the problem at once.
-- **Rejected:** resetting `lastIndex` before each `.test()`. It would silently mutate the caller's RegExp and needs a second rule to explain.
-- No D-ID: this is test infrastructure, not product behaviour.
+- Back (line 157) is outside the fieldset and is never disabled, so it does not change (Deviation 4).
 
-### 3. TESTING.md §6 (`.claude/primitives/TESTING.md`; Edit tool, path (b); only §6 changes)
-Exactly the §6 hunk of `prototype.diff`:
-- **RR-R36-04:** `ეს ძვირია. B-ის გაზომვით ერთ runner-ზე ერთი ფაილი` → `ეს ძვირია. ერთ runner-ზე გაზომილი: ერთი ფაილი`.
-- **New line** after the "ზუსტად ერთ დამთხვევას" line. It says that a string must match the whole trimmed `textContent`, that a `g`/`y` RegExp throws because `lastIndex` carries over, and that `dom-queries.test.ts` pins this.
-- **RR-R36-02, new line** after the `getByTitle` line: the helper ignores visibility and `aria-label`, so a test that checks an accessible name uses `screen.getByRole("button", { name })`.
-- **B-R37-02, new line:** jsdom keeps `document.activeElement` on a focused button that becomes natively `disabled`. Only the real app (Playwright `_electron`) proves a focus bug; a unit test checks the attribute and the click guard.
-- The last line, `სინელის დასამალად test timeout-ს არ ვზრდით.`, stays last.
+### 3. Docs (the 3 files, exactly as in the diff)
+- **`docs/design/style-guide.md`** (stays English, like the rest of the file):
+  - **Hover → Buttons:** add the `enabled:not-aria-disabled:hover:…` rule (D-46) and one line for icon buttons that can be disabled (`enabled:hover:…`);
+  - **Disabled:** add the `aria-disabled:` line and one sentence: a disabled button has no hover shift.
+- **`docs/design/component-specs.md`:**
+  - the Hover column of the Button variants table gets the `enabled:not-aria-disabled:` prefix;
+  - the base-class block gets the `aria-disabled:` line, which has been missing since round 38;
+  - one English sentence (the file is English) names D-46.
+- **`docs/bugs/001-save-and-selection-known-limits.md`:** on lines 24 and 317, `ui/button.tsx:35` → `ui/button.tsx:36`, because of the line shift from §1. Nothing else changes.
 
-Use the Edit tool. Never write `.claude/**` through Bash. If Edit is refused, stop and report BLOCKED for this item only. Do not work around the refusal.
+### Tests
+None.
+- The repository rule `test-on-bugfix` exempts styling-only changes ("მხოლოდ UI/styling ცვლილებაა (Tailwind classes)").
+- jsdom computes neither `:hover` nor Tailwind CSS, so a test of the class strings would only repeat the diff.
+- The proof is C's real-app hover measurement (R40-3) and the CSS check (R40-2).
+- No test file changes; the renderer stays at 310.
 
-### 4. docs/bugs/001 test-name index (only lines 279, 310, 328)
-- **Line 279 (entry 18):** the (b1) name is updated to match §1b.
-- **Line 310 (entry 20):** after the (x7) name, append ``, `(x8) C-R37-01: setFiles keeps the remaining selectedPaths in their existing order, not in files order` (round 39, TM-B41)``.
-- **Line 328 (entry 21):** after the (f8) name, append ``, `(f9) C-R38-01: with an empty field list Done is aria-disabled, not busy, keeps focus, and a click runs no onSave` (round 39, TM-B41)`` before `. 12 assertion`.
-- `docs/bugs/README.md` does not change.
+### Not in this round
+- **B-R39-02** (arrow cursor while Applying): see Deviation 2.
+- **RR-R38-05** (a `Button` `busy`/`inert` prop): an architecture signal.
+- **RR-R35-02** (timeout): an open Saba question. It is not dropped.
 
 ## File ownership (nothing else may change)
-| May modify or create | Why |
+| May modify | Why |
 |---|---|
-| `tests/renderer/helpers/dom-queries.test.ts` (new) | §1a |
-| `tests/renderer/helpers/dom-queries.ts` | §2, three inserted lines |
-| `tests/renderer/components/selection-after-folder-switch.test.ts` | §1b (x8), appended only |
-| `tests/renderer/components/busy-buttons-focus.test.ts` | §1b (f9), appended only |
-| `tests/renderer/components/schema-editor-done-busy.test.ts` | §1b, line 155 name only |
-| `.claude/primitives/TESTING.md` | §3, §6 only |
-| `docs/bugs/001-save-and-selection-known-limits.md` | §4, lines 279/310/328 only |
+| `src/renderer/src/components/ui/button.tsx` | §1 |
+| `src/renderer/src/components/schema/SchemaEditor.tsx` | §2, lines 202/210/230/291 only |
+| `docs/design/style-guide.md` | §3 |
+| `docs/design/component-specs.md` | §3 |
+| `docs/bugs/001-save-and-selection-known-limits.md` | §3, lines 24/317 only |
 
-A also writes `a-round-39.md` (and any `a-round-39/` logs) in the loop folder. Gitignored output is allowed: `out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`, `coverage/`.
+A also writes `a-round-40.md` (and any `a-round-40/` logs) in the loop folder. Gitignored output is allowed: `out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`, `coverage/`.
 
 ## Acceptance (C)
-| ID | Check | Evidence that means PASS |
-|---|---|---|
-| R39-1 ownership | <ul><li>`git diff --quiet 96f1e45 -- src/` **first**;</li><li>`git status --porcelain --untracked-files=all`;</li><li>`git diff --stat 96f1e45`;</li><li>`git diff --quiet 96f1e45 -- . ':!<7 owned paths>'`.</li></ul>Read the full diff and compare it with `b-round-38-exp/prototype.diff`. | <ul><li>`src/` exit 0.</li><li>Only owned paths changed; the only untracked file is `dom-queries.test.ts`.</li><li>`dom-queries.test.ts` and `dom-queries.ts` are `cmp`-identical to B's drafts.</li><li>The hunks of the other 5 files equal `prototype.diff` (C diffs the `+`/`-` lines).</li><li>TESTING.md: only §6 changes; `.claude/settings*` / `hooks/**` untouched; A reports the Edit tool, no Bash write.</li><li>docs/bugs/001: only lines 279/310/328 differ (`diff <(git show 96f1e45:…) …`); README unchanged.</li><li>No comment, no `any`, no `{ timeout }`.</li></ul> |
-| R39-2 red → green | <ul><li>In a throwaway copy, run A's tests with the HEAD `dom-queries.ts`.</li><li>Then run A's tree.</li><li>Then each changed test file alone.</li></ul> | <ul><li>**Red:** only (q4) fails (`expected [Function] to throw an error`); **1 failed / 309 passed of 310**; no other failure.</li><li>**Green:** renderer **310/310 in 21 files, twice**.</li><li>Each changed file alone is green; each new test < 1.5 s.</li></ul> |
-| R39-3 mutants | On copies of A's tree, run `b-round-38-exp/mut.py.txt`, plus C's own mutants. The third column of B's `mutants.log` is noise: the regex picked up the `Failed Tests` rule line. The killed-by column is the evidence. | <ul><li>Killed at least by: HM-1 (q1), HM-2 (q2), HM-3 (q3), HM-4 (`g`/`y` guard removed = HEAD helper) (q4), HM-5 (only `g` rejected) (q4), PM-6 (x8), CM-3 (f9), CM-8 (Done guard without `fields.length === 0`) (f9).</li><li>A survivor is acceptable only with C's equivalence argument, recorded as a low finding.</li><li>The copy is restored afterwards (`diff -r` empty).</li></ul> |
-| R39-4 gate (real Electron) | On A's tree, from a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0`. | <ul><li>Exit 0.</li><li>Biome: 0 errors and **8** warnings, the same list as `c-round-35/biome-new.txt`.</li><li>Typecheck node/web/test 0.</li><li>Renderer **310**, main **93/93**, E2E **7/7**.</li><li>`--retries=0`: **7/7**.</li></ul> |
-| R39-5 docs | Read `git diff 96f1e45 -- .claude/ docs/`. | <ul><li>Georgian with English technical terms.</li><li>TESTING.md §6 holds the four changes in §3; no agent name is left in §6; the last line is unchanged.</li><li>Each of the 4 new or renamed test names has exactly 1 match in its test file. The (x8), (f9) and new (b1) names each have 1 match in docs/bugs/001; the old (b1) name has 0.</li><li>TESTING.md §6 states the three rules the helper enforces: whole trimmed string, 0 or >1 matches throw, `g`/`y` throws. C reads both files.</li></ul> |
+
+### R40-1 ownership
+**Check:**
+- `git status --porcelain --untracked-files=all`
+- `git diff --stat 24e9723`
+- `git diff --quiet 24e9723 -- . ':!<5 owned paths>'`
+- Compare the `+`/`-` lines with `prototype.diff`.
+- `diff <(git show 24e9723:docs/bugs/001-…) docs/bugs/001-…`
+
+**PASS when:**
+- only the 5 owned paths changed, and nothing is untracked;
+- the `+`/`-` lines equal `prototype.diff` (42 lines);
+- docs/bugs/001 shows only `24c24` and `317c317`;
+- `--quiet` exits 0 for `tests/` and for the protected paths;
+- there is no comment, no `any` and no new export.
+
+### R40-2 CSS
+**Check:** run `npm run build`, then grep `out/renderer/assets/*.css`.
+
+**PASS when:**
+- there are `…:enabled:not([aria-disabled="true"]):hover` rules for `bg-brand-hover`, `bg-elevated`, `bg-accent/90` and `bg-destructive/90`;
+- there are `:enabled:hover` rules for `text-foreground`, `text-destructive`, `text-destructive/80` and `border-brand`;
+- no `.hover\:bg-brand-hover` selector is left.
+
+### R40-3 real app, old vs new (hover)
+**Check:**
+- Run Playwright `_electron` under `xvfb-run` on two builds: `24e9723` (old) and A's tree (new).
+- Hover with the mouse. Read `getComputedStyle` at rest and again after at least 300 ms of hover.
+- Use a copy of B's `b-round-39-exp/hover-probe.mjs` in `c-round-40/` with `OUT` set to `c-round-40/` (B's folder is not C's to write; `HARNESS` stays read-only from `c-round-38/`), args `<appRoot> <label>`, or C's own driver. The harness may delay scan and write, as in round 38.
+  - B's probe reads `/tmp/b40/sample.wav`, which does not survive the job. Recreate it first: `mkdir -p /tmp/b40 && ffmpeg -v error -f lavfi -i sine=frequency=440:duration=1 -ar 44100 -ac 2 -y /tmp/b40/sample.wav`.
+  - The old build comes from `git archive 24e9723` + a `node_modules` symlink + `npx electron-vite build`.
+- Cover steps H0–H8 from `hover-summary.txt`, plus C's own steps:
+  - **H9:** Trash2 on a custom field, enabled and while Applying;
+  - **H10:** a hidden-standard chip (hide one standard field first), enabled and while Applying;
+  - **H11:** the AudioPlayer play button, disabled (no file playing) and enabled.
+- Take screenshots of H1, H4 and H5 on new.
+
+**PASS when:**
+- **new, disabled steps:** on every disabled or `aria-disabled` step, the rest colour equals the hover colour. These steps are H1, H2, H4, H5, H6, H7, H8, H9-applying, H10-applying and H11-disabled;
+- **new, enabled controls:** they still change on hover, with the same values as old. These are H0 (dirty Save), H3 (arrow), H3b (Done), H6b (X), H7b (Add Field) and H9/H10-enabled;
+- **old, disabled steps:** they change colour on hover. This shows the cue existed;
+- **new, unchanged:** opacity (0.5 / 0.6 / 0.3), cursor (`not-allowed` / `default`), `aria-disabled` and `aria-busy`;
+- H11 is identical on old and new;
+- `pageErrors` is empty.
+
+### R40-4 behaviour unchanged (keyboard + save)
+**Check:** on new, repeat the round-38 K2 path once: select a.wav, type a Category, focus Save Tags, press Enter.
+
+**PASS when:**
+- focus stays on the button during the save and after it (D-45);
+- there is exactly one `meta:write`;
+- ffprobe `format_tags` and music-metadata (`exif:ICAT` / RIFF INFO) both read the new ICAT value;
+- every other file's sha256 is unchanged.
+
+### R40-5 mutants
+**Check:** on a copy of A's tree, revert one class edit at a time, build, and re-run the matching H step.
+
+**PASS when:**
+- each revert brings back a hover change on its step:
+
+  | Reverted edit | Step where the hover change returns |
+  |---|---|
+  | primary: `not-aria-disabled:` dropped | H1 / H2 / H4 (aria-disabled) |
+  | ghost: `enabled:` dropped | H7 / H8 (native disabled) |
+  | reorder arrow (`enabled:` dropped) | H5 |
+  | Hide-standard X | H6 |
+  | Trash2 | H9 |
+  | hidden-standard chip | H10 |
+
+- **Expected survivors (equivalent today; C confirms by grep and records them, not a FAIL):**
+  - primary with `enabled:` dropped: no natively disabled primary Button exists;
+  - ghost with `not-aria-disabled:` dropped: no `aria-disabled` ghost Button exists;
+  - both halves of secondary, accent and destructive: none is ever disabled (`grep -rn 'variant="secondary\|accent\|destructive"' src/`);
+- the copy is restored afterwards.
+
+### R40-6 gate (real Electron)
+**Check:** on A's tree, start from a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`). Run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0`.
+
+**PASS when:**
+- exit code is 0;
+- Biome reports 0 errors and **8** warnings, the same list as `c-round-35/biome-new.txt`;
+- typecheck node/web/test is 0;
+- renderer **310/310**, main **93/93**, E2E **7/7**;
+- `--retries=0` gives **7/7**.
+
+### R40-7 Reference / Deviations / docs
+**Check:**
+- Open R2 and R3 with WebFetch.
+- Check Deviations 1–4 in the app.
+- Read `git diff 24e9723 -- docs/`.
+
+**PASS when:**
+- R2 still says that disabled buttons get no hover or active state;
+- R3 shows the `enabled` and `aria-disabled` variants;
+- Deviation 1: the `not-allowed` cursor still shows on hover;
+- Deviation 2: the arrow cursor is `default`;
+- Deviation 3: the focus ring shows on a focused `aria-disabled` Save Tags (screenshot);
+- Deviation 4: the Back arrow still changes colour on hover;
+- the docs match the code, and the D-46 sentence is in component-specs;
+- lines 24 and 317 point to `button.tsx:36`, and `sed -n 36p` shows the `aria-disabled:` line.
 
 ## What could break (C re-checks)
-- **Every component suite** goes through `getButtonByText`. The new guard must not reject any existing call: no caller passes `g` or `y`. 310/310 proves this. C also greps `tests/` for RegExp literals with `g`/`y` flags passed to `getButtonByText` or `clickButton`. The expected result is none.
-- **(x8)** must not change (x6)/(x7) results. It seeds the store directly and does not render.
-- **(f9)** sets `useSchemaStore` fields to `[]`. `resetAllStores` in `beforeEach` restores `STANDARD_FIELDS`, so no state leaks to the next test. C runs the file alone and in the full suite.
-- **E2E** does not use the helper (`tests/e2e` has no import of `dom-queries`); 7/7 is a regression guard.
+- **Every `Button` in the app**: Open Folder, Rescan, Close Folder, Add Field, the template buttons and the Save/Done variants. Their enabled hover must look exactly as before. Compare H0, H3b and H7b on old and new, plus one secondary or ghost button outside the fieldset.
+- **D-45** (focus kept, click guard, `aria-busy`): covered by R40-4. The class change must not touch the guards.
+- **SchemaEditor at rest**: the arrows, X, Trash2 and chip must hover as before (H3, H6b, H9-enabled, H10-enabled).
+- **Edge arrows** are natively disabled at the list ends, so they lose their hover colour even when not Applying. This is intended: a disabled arrow does nothing, and R1–R3 agree. C notes it with one measurement.
+- **E2E 7/7**: the specs do not depend on hover.
 
 ## What realVerified means here
-- `src/` is byte-identical to `96f1e45` (R39-1), so the built app is the one C verified in the real app in round 38 (R38-4). This round's real checks are:
-  - the tests themselves, run red/green with mutants (R39-2, R39-3);
-  - the gate's real Electron E2E under xvfb (R39-4).
-
-  No new UI scenario is required, because no behaviour changes. No file is saved, so ffprobe and music-metadata do not apply.
-- B's red/green numbers are a hypothesis until C reproduces them (R39-2).
-- PASS on all five closes:
-  - TM-B41;
-  - findings C-R36-01, RR-R36-02, RR-R36-03, R36-A-02, RR-R36-04, C-R37-01, B-R37-02, C-R38-01, RR-R38-03.
+- PASS needs real-app evidence of two kinds:
+  - computed styles under a real mouse hover in the built Electron app, old vs new (R40-3);
+  - the keyboard save, checked with independent readers (R40-4).
+- B's numbers are a hypothesis until C reproduces them.
+- PASS on all 7 checks closes:
+  - TM-B42 and D-46;
+  - findings RR-R38-01, RR-R38-04 and B-R39-01.
 - Windows packaging is BLOCKED: Windows packaging is not available in the cloud. It is not part of this round.
 
 ## Next (orientation only)
-- If C finds a FAIL, round 40 fixes it first.
-- Otherwise round 40 is **TM-B42** (RR-R38-01, RR-R38-04). It starts with C/B measuring the computed hover background of a busy and a clean Save Tags in `ea4a1cb` (native `disabled`) vs `96f1e45` (`aria-disabled`). It is a fix only if they differ, and as a UX change it needs Reference + Deviations.
-- After that, the remaining items need Saba or root:
-  - Saba's question batch (`b-round-23.md` §5; B-R36-01 list lock during a scan; RR-R35-02 timeout);
-  - TM-T2 / TM-T2-DATA (UCS list and its licence);
-  - root's Actions link for TM-T0-CI / TM-B14.
+- If C finds a FAIL, round 41 fixes it first.
+- After TM-B42, the todo items that need Saba's decision before they can be planned:
+  - TM-B08 (artists ISTR vs IART, D-12);
+  - TM-B11 (Number default `0`, D-10);
+  - TM-B05 (empty data chunk);
+  - TM-B06 (Biome on `tests/`);
+  - TM-T1-DUP (old custom field vs category);
+  - TM-T2 / TM-T2-DATA (UCS list and licence);
+  - RR-R35-02 (timeout);
+  - B-R36-01 (list lock during a scan).
+- **TM-T1-MIG** may not need Saba: its acceptance is a C real-UI check under D-07's default (an existing schema.json lists category under hidden standards, and it can be enabled), plus a doc note. B checks in round 41 whether today's build already behaves this way.
+- TM-T0 / TM-T0-CI / TM-T0-CI-FU / TM-B14 wait for root to link a green Actions `Check` run on `7879ee0` or later.

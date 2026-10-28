@@ -1,0 +1,13 @@
+diff -ruN '--exclude=node_modules' '--exclude=out' b39head/tests/renderer/helpers/dom-queries.ts b39/tests/renderer/helpers/dom-queries.ts
+--- b39head/tests/renderer/helpers/dom-queries.ts	2026-10-28 04:14:41.000000000 +0000
++++ b39/tests/renderer/helpers/dom-queries.ts	2026-10-28 04:20:23.056551740 +0000
+@@ -4,6 +4,9 @@
+ }
+ 
+ export function getButtonByText(name: string | RegExp): HTMLButtonElement {
++  if (typeof name !== "string" && (name.global || name.sticky)) {
++    throw new Error(`button ${String(name)}: g and y flags are not supported`);
++  }
+   const matches = Array.from(document.querySelectorAll("button")).filter((button) => matchesButtonName(button, name));
+   if (matches.length === 0) throw new Error(`button ${String(name)} not found`);
+   if (matches.length > 1) throw new Error(`button ${String(name)} matched ${matches.length} buttons`);

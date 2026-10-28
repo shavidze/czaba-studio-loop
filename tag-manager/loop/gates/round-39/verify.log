@@ -1,0 +1,247 @@
+Fixtures created successfully
+
+> czaba-tag-manager@1.4.0 check
+> biome check src/ && npm run typecheck && npm run test
+
+src/renderer/src/components/file-list/FileList.tsx:82:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    81 │   return (
+  > 82 │     <div
+       │     ^^^^
+  > 83 │       onClick={handleClick}
+        ...
+  > 89 │       )}
+  > 90 │     >
+       │     ^
+    91 │       <div className="flex items-center gap-2 min-w-0">
+    92 │         <Music className="h-3.5 w-3.5 shrink-0 text-dim" />
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src/renderer/src/components/metadata-editor/TagsInput.tsx:45:17 lint/a11y/noLabelWithoutControl ━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    43 │   return (
+    44 │     <div className="space-y-1">
+  > 45 │       {label && <label className="text-xs font-medium text-muted">{label}</label>}
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │       <div
+    47 │         className={cn(
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/renderer/src/components/player/AudioPlayer.tsx:138:11 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    136 │           </span>
+    137 │ 
+  > 138 │           <div
+        │           ^^^^
+  > 139 │             className="flex-1 h-1 bg-elevated rounded-full cursor-pointer group"
+  > 140 │             onClick={handleSeek}
+  > 141 │           >
+        │           ^
+    142 │             <div
+    143 │               className="h-full bg-brand rounded-full relative transition-all"
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src/renderer/src/components/sidebar/FolderBrowser.tsx:253:11 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    252 │         {!isScanning && !folderPath && (
+  > 253 │           <div
+        │           ^^^^
+  > 254 │             className="flex flex-col items-center justify-center py-12 text-dim text-xs text-center px-4 cursor-pointer hover:text-muted transition-colors"
+  > 255 │             onClick={handleOpenFolder}
+  > 256 │           >
+        │           ^
+    257 │             <FolderOpen className="h-8 w-8 mb-2 text-outline" />
+    258 │             <p>Open a folder to start tagging WAV files</p>
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src/renderer/src/components/templates/TemplatePicker.tsx:195:9 lint/a11y/noLabelWithoutControl ━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    193 │     <div className="space-y-2">
+    194 │       <div className="flex items-center justify-between">
+  > 195 │         <label className="text-xs font-medium text-muted flex items-center gap-1">
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 196 │           <BookTemplate className="h-3 w-3" />
+  > 197 │           Templates
+  > 198 │         </label>
+        │         ^^^^^^^^
+    199 │         <Button variant="ghost" size="sm" onClick={() => setShowSaveDialog(!showSaveDialog)}>
+    200 │           <Plus className="h-3 w-3" />
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/renderer/src/components/ui/input.tsx:13:19 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    11 │     return (
+    12 │       <div className="space-y-1">
+  > 13 │         {label && <label className="text-xs font-medium text-muted">{label}</label>}
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │         <input
+    15 │           ref={ref}
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/renderer/src/components/ui/select.tsx:13:19 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    11 │     return (
+    12 │       <div className="space-y-1">
+  > 13 │         {label && <label className="text-xs font-medium text-muted">{label}</label>}
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │         <select
+    15 │           ref={ref}
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/renderer/src/components/ui/toast.tsx:12:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: toastKey.
+  
+    10 │   const hide = useMetadataStore((s) => s.hideToast);
+    11 │ 
+  > 12 │   useEffect(() => {
+       │   ^^^^^^^^^
+    13 │     if (!message) return;
+    14 │     const timer = setTimeout(hide, 3000);
+  
+  i This dependency can be removed from the list.
+  
+    14 │     const timer = setTimeout(hide, 3000);
+    15 │     return () => clearTimeout(timer);
+  > 16 │   }, [message, toastKey, hide]);
+       │                ^^^^^^^^
+    17 │ 
+    18 │   if (!message) return null;
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    16 │ ··},·[message,·toastKey,·hide]);
+       │                ----------       
+
+Checked 34 files in 48ms. No fixes applied.
+Found 8 warnings.
+
+> czaba-tag-manager@1.4.0 typecheck
+> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.test.json
+
+
+> czaba-tag-manager@1.4.0 test
+> vitest run --config vitest.config.renderer.ts && vitest run --config vitest.config.main.ts
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [32m✓[39m tests/renderer/components/metadata-panel-schema-change.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 1865[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor-done-busy.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1990[2mms[22m[39m
+     [33m[2m✓[22m[39m (b1) RR-R33-01: while Done is pending the button reads Applying... and is aria-disabled, the editing controls are disabled and Back stays enabled [33m 468[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m49 tests[22m[2m)[22m[33m 2023[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/reread-after-folder-switch.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 993[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-change-during-folder-load.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1576[2mms[22m[39m
+     [33m[2m✓[22m[39m (w1) A-R32-01: Done while Open Folder B's scan is pending, B loads, A's schema read would land: metadata holds only B with the new field [33m 460[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-overlap.test.ts [2m([22m[2m18 tests[22m[2m)[22m[33m 1490[2mms[22m[39m
+     [33m[2m✓[22m[39m (o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata [33m 320[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 939[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-during-save.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 680[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor-stale-close.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 1528[2mms[22m[39m
+     [33m[2m✓[22m[39m (e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name [33m 638[2mms[22m[39m
+     [33m[2m✓[22m[39m (e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name [33m 312[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/busy-buttons-focus.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 690[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/file-list.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 783[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 558[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/template-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 89[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-rejected-chunk.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 435[2mms[22m[39m
+ [32m✓[39m tests/renderer/helpers/dom-queries.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/utils.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/schema-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/file-row-display.test.ts [2m([22m[2m36 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/player-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/metadata-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m21 passed[39m[22m[90m (21)[39m
+[2m      Tests [22m [1m[32m310 passed[39m[22m[90m (310)[39m
+[2m   Start at [22m 04:45:26
+[2m   Duration [22m 14.96s[2m (transform 1.42s, setup 1.83s, import 6.47s, tests 15.75s, environment 16.33s)[22m
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [32m✓[39m tests/main/metadata-write-field-errors.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32m✓[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m tests/main/electron-launch-failure.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 246[2mms[22m[39m
+ [32m✓[39m tests/main/templates.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m tests/main/metadata.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m tests/main/riff-info-nul.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-write-guard.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m tests/main/create-fixtures.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m tests/main/file-system.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m tests/main/schema.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m tests/main/check-ffprobe-tags.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m11 passed[39m[22m[90m (11)[39m
+[2m      Tests [22m [1m[32m93 passed[39m[22m[90m (93)[39m
+[2m   Start at [22m 04:45:41
+[2m   Duration [22m 1.29s[2m (transform 371ms, setup 142ms, import 1.16s, tests 582ms, environment 2ms)[22m
+
+
+> czaba-tag-manager@1.4.0 test:e2e
+> npm run build && npx playwright test
+
+
+> czaba-tag-manager@1.4.0 build
+> electron-vite build
+
+[36mvite v6.4.1 [32mbuilding SSR bundle for production...[36m[39m
+transforming...
+[32m✓[39m 8 modules transformed.
+rendering chunks...
+[2mout/main/[22m[36mindex.js  [39m[1m[2m22.73 kB[22m[1m[22m
+[32m✓ built in 121ms[39m
+[36mvite v6.4.1 [32mbuilding SSR bundle for production...[36m[39m
+transforming...
+[32m✓[39m 2 modules transformed.
+rendering chunks...
+[2mout/preload/[22m[36mindex.js  [39m[1m[2m2.41 kB[22m[1m[22m
+[32m✓ built in 13ms[39m
+[36mvite v6.4.1 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 1629 modules transformed.
+[33m[plugin vite:reporter] 
+(!) /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/stores/metadata-store.ts is dynamically imported by /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/stores/schema-store.ts but also statically imported by /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/App.tsx, /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/metadata-editor/MetadataPanel.tsx, /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/player/AudioPlayer.tsx, /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/sidebar/FolderBrowser.tsx, /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/templates/TemplatePicker.tsx, /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/ui/toast.tsx, dynamic import will not move module into another chunk.
+[39m
+rendering chunks...
+[2m../../out/renderer/[22m[32mindex.html                 [39m[1m[2m  0.40 kB[22m[1m[22m
+[2m../../out/renderer/[22m[2massets/[22m[35mindex-BPbd_tNE.css  [39m[1m[2m 28.76 kB[22m[1m[22m
+[2m../../out/renderer/[22m[2massets/[22m[36mindex-CuzZeV4E.js   [39m[1m[33m760.02 kB[39m[22m
+[32m✓ built in 2.12s[39m
+
+Running 7 tests using 2 workers
+·······
+  7 passed (3.2s)

@@ -1,0 +1,14 @@
+diff -ruN '--exclude=node_modules' '--exclude=out' b39head/tests/renderer/components/selection-after-folder-switch.test.ts b39/tests/renderer/components/selection-after-folder-switch.test.ts
+--- b39head/tests/renderer/components/selection-after-folder-switch.test.ts	2026-10-28 04:14:41.000000000 +0000
++++ b39/tests/renderer/components/selection-after-folder-switch.test.ts	2026-10-28 04:18:36.813194282 +0000
+@@ -219,4 +219,10 @@
+     await clickRow("a3.wav", { shiftKey: true });
+     expect(useFileStore.getState().selectedPaths).toEqual([PATH_A3]);
+   });
++
++  it("(x8) C-R37-01: setFiles keeps the remaining selectedPaths in their existing order, not in files order", () => {
++    useFileStore.setState({ files: [ENTRY_A, ENTRY_A2, ENTRY_A3], selectedPaths: [PATH_A3, PATH_B, PATH_A] });
++    useFileStore.getState().setFiles([ENTRY_A, ENTRY_A2, ENTRY_A3]);
++    expect(useFileStore.getState().selectedPaths).toEqual([PATH_A3, PATH_A]);
++  });
+ });

@@ -1,0 +1,292 @@
+import { ArrowDown, ArrowLeft, ArrowUp, Plus, Trash2, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
+import { Select } from '~/components/ui/select';
+import { cn, generateRiffId, isValidRiffId } from '~/lib/utils';
+import { useSchemaStore } from '~/stores/schema-store';
+import type { FieldDefinition, FieldType } from '~/types';
+import { STANDARD_FIELDS } from '~/types';
+
+interface SchemaEditorProps {
+  onClose: () => void;
+  onSave?: () => void | Promise<void>;
+}
+
+const FIELD_TYPE_OPTIONS = [
+  { value: 'text', label: 'Text' },
+  { value: 'tags', label: 'Tags (list)' },
+  { value: 'number', label: 'Number' },
+];
+
+const RESERVED_RIFF_IDS = new Set(
+  STANDARD_FIELDS.map((f) => f.riffChunkId).filter(Boolean) as string[],
+);
+
+export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.ReactElement {
+  const fields = useSchemaStore((s) => s.fields);
+  const setFields = useSchemaStore((s) => s.setFields);
+  const addField = useSchemaStore((s) => s.addField);
+  const removeField = useSchemaStore((s) => s.removeField);
+  const reorderFields = useSchemaStore((s) => s.reorderFields);
+
+  const [newFieldName, setNewFieldName] = useState('');
+  const [newFieldType, setNewFieldType] = useState<FieldType>('text');
+  const [newFieldRiffId, setNewFieldRiffId] = useState('');
+  const [fieldError, setFieldError] = useState('');
+  const isMountedRef = useRef(false);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+  const [isApplying, setIsApplying] = useState(false);
+
+  const enabledStandardKeys = new Set(fields.filter((f) => f.standard).map((f) => f.key));
+  const disabledStandards = STANDARD_FIELDS.filter((f) => !enabledStandardKeys.has(f.key));
+
+  const handleToggleStandard = useCallback(
+    (field: FieldDefinition) => {
+      const currentFields = useSchemaStore.getState().fields;
+      const enabled = currentFields.some((f) => f.key === field.key && f.standard);
+
+      if (enabled) {
+        removeField(field.key);
+      } else {
+        const stdIndex = STANDARD_FIELDS.findIndex((f) => f.key === field.key);
+        const updated = [...currentFields];
+        let insertAt = 0;
+        for (let i = 0; i < stdIndex; i++) {
+          const idx = updated.findIndex((f) => f.key === STANDARD_FIELDS[i].key);
+          if (idx >= 0) insertAt = idx + 1;
+        }
+        updated.splice(insertAt, 0, field);
+        setFields(updated);
+      }
+    },
+    [removeField, setFields],
+  );
+
+  const handleAddCustomField = useCallback(() => {
+    setFieldError('');
+    const name = newFieldName.trim();
+    if (!name) {
+      setFieldError('Field name is required');
+      return;
+    }
+
+    const key = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_|_$/g, '');
+
+    if (!key) {
+      setFieldError('Name must contain letters or numbers');
+      return;
+    }
+
+    const currentFields = useSchemaStore.getState().fields;
+    if (currentFields.some((f) => f.key === key)) {
+      setFieldError(`Field "${name}" already exists`);
+      return;
+    }
+    if (STANDARD_FIELDS.some((f) => f.key === key)) {
+      setFieldError('This name conflicts with a standard field');
+      return;
+    }
+
+    const existingIds = new Set(
+      currentFields.map((f) => f.riffChunkId).filter(Boolean) as string[],
+    );
+    const manualId = newFieldRiffId.trim().toUpperCase();
+
+    if (manualId) {
+      if (!isValidRiffId(manualId)) {
+        setFieldError('RIFF ID must be exactly 4 uppercase letters/digits');
+        return;
+      }
+      if (RESERVED_RIFF_IDS.has(manualId) || existingIds.has(manualId)) {
+        setFieldError(`RIFF ID "${manualId}" is already in use`);
+        return;
+      }
+    }
+
+    const allReserved = new Set([...existingIds, ...RESERVED_RIFF_IDS]);
+    const riffId = manualId || generateRiffId(key, allReserved);
+    if (!riffId) {
+      setFieldError('Could not generate a unique RIFF ID');
+      return;
+    }
+
+    const field: FieldDefinition = {
+      key,
+      label: name,
+      type: newFieldType,
+      riffChunkId: riffId,
+    };
+
+    addField(field);
+    setNewFieldName('');
+    setNewFieldType('text');
+    setNewFieldRiffId('');
+    setFieldError('');
+  }, [newFieldName, newFieldType, newFieldRiffId, addField]);
+
+  const handleSave = useCallback(async () => {
+    if (fields.length === 0 || isApplying) return;
+    setIsApplying(true);
+    try {
+      await onSave?.();
+    } catch {
+      if (isMountedRef.current) setIsApplying(false);
+      return;
+    }
+    if (!isMountedRef.current) return;
+    setIsApplying(false);
+    onClose();
+  }, [fields, isApplying, onSave, onClose]);
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="px-3 py-2 border-b border-outline flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-muted hover:text-foreground p-0.5 transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+        </button>
+        <span className="text-xs font-medium text-brand">Customize Fields</span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-3">
+        <fieldset disabled={isApplying} className="min-w-0 space-y-4 disabled:opacity-60">
+          <div className="space-y-1.5">
+            <span className="text-xs text-muted">Active Fields</span>
+            {fields.map((field, index) => (
+              <div
+                key={field.key}
+                className={cn(
+                  'flex items-center gap-1.5 rounded px-2 py-1.5',
+                  'bg-background border border-outline text-xs',
+                )}
+              >
+                <span className="flex-1 text-foreground truncate">{field.label}</span>
+                <span className="text-dim text-[10px]">{field.type}</span>
+                {field.riffChunkId && (
+                  <span className="text-dim text-[10px] font-mono">{field.riffChunkId}</span>
+                )}
+                <div className="flex items-center gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => index > 0 && reorderFields(index, index - 1)}
+                    disabled={index === 0}
+                    className={reorderArrowClassName(index === 0)}
+                  >
+                    <ArrowUp className="h-3 w-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => index < fields.length - 1 && reorderFields(index, index + 1)}
+                    disabled={index === fields.length - 1}
+                    className={reorderArrowClassName(index === fields.length - 1)}
+                  >
+                    <ArrowDown className="h-3 w-3" />
+                  </button>
+                  {!field.standard ? (
+                    <button
+                      type="button"
+                      onClick={() => removeField(field.key)}
+                      className="text-destructive enabled:hover:text-destructive/80 p-0.5"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStandard(field)}
+                      className="text-dim enabled:hover:text-destructive p-0.5"
+                      title="Hide standard field"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {disabledStandards.length > 0 && (
+            <div className="space-y-1.5">
+              <span className="text-xs text-muted">Hidden Standard Fields</span>
+              <div className="flex flex-wrap gap-1">
+                {disabledStandards.map((field) => (
+                  <button
+                    key={field.key}
+                    type="button"
+                    onClick={() => handleToggleStandard(field)}
+                    className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+                  >
+                    + {field.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2 border-t border-outline pt-3">
+            <span className="text-xs text-muted">Add Custom Field</span>
+            <Input
+              value={newFieldName}
+              onChange={(e) => {
+                setNewFieldName(e.target.value);
+                if (fieldError) setFieldError('');
+              }}
+              placeholder="Field name (e.g. Client)"
+              error={fieldError || undefined}
+            />
+            <div className="grid grid-cols-2 gap-1.5">
+              <Select
+                options={FIELD_TYPE_OPTIONS}
+                value={newFieldType}
+                onChange={(e) => setNewFieldType(e.target.value as FieldType)}
+              />
+              <Input
+                value={newFieldRiffId}
+                onChange={(e) => {
+                  setNewFieldRiffId(e.target.value.slice(0, 4).toUpperCase());
+                  if (fieldError) setFieldError('');
+                }}
+                placeholder="RIFF ID (auto)"
+                maxLength={4}
+              />
+            </div>
+            <Button variant="ghost" size="sm" className="w-full" onClick={handleAddCustomField}>
+              <Plus className="h-3 w-3" />
+              Add Field
+            </Button>
+          </div>
+        </fieldset>
+      </div>
+
+      <div className="p-3 border-t border-outline">
+        <Button
+          variant="primary"
+          size="sm"
+          className="w-full"
+          onClick={handleSave}
+          aria-disabled={isApplying || fields.length === 0}
+          aria-busy={isApplying}
+        >
+          {isApplying ? 'Applying...' : 'Done'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function reorderArrowClassName(isEdge: boolean): string {
+  return cn('text-dim enabled:hover:text-foreground p-0.5', isEdge && 'opacity-30');
+}

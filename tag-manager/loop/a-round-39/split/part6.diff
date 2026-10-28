@@ -1,0 +1,45 @@
+diff -ruN '--exclude=node_modules' '--exclude=out' b39head/tests/renderer/helpers/dom-queries.test.ts b39/tests/renderer/helpers/dom-queries.test.ts
+--- b39head/tests/renderer/helpers/dom-queries.test.ts	1970-01-01 00:00:00.000000000 +0000
++++ b39/tests/renderer/helpers/dom-queries.test.ts	2026-10-28 04:18:25.701334316 +0000
+@@ -0,0 +1,41 @@
++import { afterEach, describe, expect, it } from "vitest";
++import { getButtonByText } from "./dom-queries";
++
++function renderButtons(html: string): HTMLButtonElement[] {
++  document.body.innerHTML = html;
++  return Array.from(document.querySelectorAll("button"));
++}
++
++afterEach(() => {
++  document.body.innerHTML = "";
++});
++
++describe("getButtonByText (TM-B41)", () => {
++  it("(q1) C-R36-01 HM-1: two buttons with the same text throw instead of returning the first", () => {
++    renderButtons("<button>Done</button><button>Done</button>");
++
++    expect(() => getButtonByText("Done")).toThrow("button Done matched 2 buttons");
++    expect(() => getButtonByText(/^Done$/)).toThrow("button /^Done$/ matched 2 buttons");
++  });
++
++  it("(q2) C-R36-01 HM-2: a string matches the whole button text, not a part of it", () => {
++    const [saveTags] = renderButtons("<button>Save Tags</button><button>Save to 2 files</button>");
++
++    expect(() => getButtonByText("Save")).toThrow("button Save not found");
++    expect(getButtonByText("Save Tags")).toBe(saveTags);
++  });
++
++  it("(q3) C-R36-01 HM-3: leading and trailing whitespace of the button text is ignored", () => {
++    const [done] = renderButtons("<div>Done</div><button>\n  Done  \n</button>");
++
++    expect(getButtonByText("Done")).toBe(done);
++    expect(getButtonByText(/^Done$/)).toBe(done);
++  });
++
++  it("(q4) RR-R36-03: a RegExp with the g or y flag is rejected, because lastIndex would carry over between buttons and calls", () => {
++    renderButtons("<button>Done</button>");
++
++    expect(() => getButtonByText(/Done/g)).toThrow("button /Done/g: g and y flags are not supported");
++    expect(() => getButtonByText(/Done/y)).toThrow("button /Done/y: g and y flags are not supported");
++  });
++});

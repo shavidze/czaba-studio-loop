@@ -1,0 +1,25 @@
+diff -ruN '--exclude=node_modules' '--exclude=out' b39head/tests/renderer/components/busy-buttons-focus.test.ts b39/tests/renderer/components/busy-buttons-focus.test.ts
+--- b39head/tests/renderer/components/busy-buttons-focus.test.ts	2026-10-28 04:14:41.000000000 +0000
++++ b39/tests/renderer/components/busy-buttons-focus.test.ts	2026-10-28 04:18:36.813396098 +0000
+@@ -245,4 +245,21 @@
+     expect(downs.map(hasOwnDimClass)).toEqual(downs.map((_, index) => index === downs.length - 1));
+     await settle(() => save.resolve());
+   });
++
++  it("(f9) C-R38-01: with an empty field list Done is aria-disabled, not busy, keeps focus, and a click runs no onSave", async () => {
++    useSchemaStore.setState({ fields: [] });
++    const onClose = vi.fn();
++    const onSave = vi.fn(() => Promise.resolve());
++    render(createElement(SchemaEditor, { onClose, onSave }));
++    const done = getButtonByText(/^Done$/);
++    await focusAndClick(done);
++
++    expect(done).toHaveTextContent("Done");
++    expect(done).not.toHaveAttribute("disabled");
++    expect(done).toHaveAttribute("aria-disabled", "true");
++    expect(done).toHaveAttribute("aria-busy", "false");
++    expect(document.activeElement).toBe(done);
++    expect(onSave).not.toHaveBeenCalled();
++    expect(onClose).not.toHaveBeenCalled();
++  });
+ });

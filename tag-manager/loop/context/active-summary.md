@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T04:14:43.442Z)
+# Active loop summary (2026-10-28T04:46:13.275Z)
 
-- backlog.json 349 KB -> active view 102 KB
-- status: G_ROOT_GATE round 38
+- backlog.json 358 KB -> active view 102 KB
+- status: G_ROOT_GATE round 39
 - servers: `{"servers":"none or skipped"}`
-- last publication: 96f1e45ff18fb23b77a348af90139a233f51f8e6 (rounds 38-38)
-- last root gate: round 38 published - commit 96f1e45ff18fb23b77a348af90139a233f51f8e6 pushed
+- last publication: 24e9723557fb82d572a655136ff7a0849a8e61f3 (rounds 39-39)
+- last root gate: round 39 published - commit 24e9723557fb82d572a655136ff7a0849a8e61f3 pushed
 
-## Current items: TM-B39, TM-B40, TM-B41
+## Current items: TM-B40, TM-B41, TM-B42
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -166,14 +166,10 @@
 - QA-R33-03 / info / open / A scanFolder that never settles keeps Done waiting forever (no busy indicator); Back, Open Folder and Close Folder still work and end the wa
 - RR-R34-05 / info / open / Architecture signal: MetadataPanel could own the whole 'save schema -> re-read -> close' flow and return a token or AbortSignal per open edi
 - B-R34-03 / low / open / Known limit kept by D-42/D-43: Done #1 pending, Back, reopen, add a field, and do NOT press Done again: if #1 was still waiting for a folder
-- C-R35-01 / low / open / While Done is Applying..., the fieldset's disabled:opacity-60 multiplies with the Active Fields arrows' own disabled:opacity-30 (~18%): arro
-- RR-R35-01 / low / open / Focus is lost when Done is clicked: the focused button becomes natively disabled, focus drops to <body>; keyboard/screen-reader users tab ba
 - RR-R35-02 / low / open / Busy state can last forever if onSave never settles (scan that never finishes, QA-R33-03): Applying... until Back / Open Folder / Close Fold
 - RR-R35-03 / info / open / A superseded schema re-read drops its own 'Failed to read N files' toast (MetadataPanel.tsx:249). Correct: the later Done re-reads every fil
-- RR-R35-04 / low / open / (b2) cannot fail on its own: React never fires onClick on a natively disabled button; (b1)'s disabled check is what protects it. Becomes mea
 - RR-R35-05 / info / open / Architecture signal: schema re-read guards are spread (schemaReadIdRef, folderLoadId, write generations, isMountedRef); a file-store action 
 - C-R36-01 / low / open / Helper mutants HM-1 (uniqueness throw removed), HM-2 (string === -> includes), HM-3 (no trim) survive 289/289; equivalent on all 257 current
-- RR-R36-01 / low / open / (b7)'s reads[1].schema.some(qtwo) assertion likely cannot tell Done #1's read from Done #2's (both read the schema at run time); outcome che
 - RR-R36-02 / low / open / getButtonByText has no visibility filter and ignores aria-label; safe because of the unique-match throw, but tests no longer show accessible
 - RR-R36-03 / low / open / getButtonByText RegExp with g/y keeps lastIndex between calls; no current caller uses g/y (C probe)
 - RR-R36-04 / low / open / TESTING.md §6 names a loop agent ('B-ის გაზომვით'); write 'measured on one runner'
@@ -182,14 +178,17 @@
 - R36-A-02 / low / open / RegExp g/y lastIndex (= RR-R36-03); unreachable today
 - B-R36-01 / info / open / The old file listing stays clickable while a folder scan is pending; locking/blanking it would be a new UX (Saba-question candidate). D-44 m
 - C-R37-01 / low / open / PM-6 (pruned selection rebuilt in files order instead of the existing order) survives 7/7. It is equivalent today: the order is used only at
-- C-R37-02 / low / in_progress / The docs/bugs/001 header (lines 3-22: fixed-entry list, sources, code list, decision summary) is not updated for entry 20 / D-44; the R37 ta
-- A-R37-01 / low / in_progress / = C-R37-02 (docs/bugs/001 header not updated for entry 20 / D-44)
-- RR-R37-01 / low / in_progress / docs/bugs/001 entry 20's file:line refs (FolderBrowser.tsx:103/108/161/166, App.tsx:48/61) go stale easily; add the function names (handleOp
 - RR-R37-02 / low / open / selection-after-folder-switch.test.ts uses double quotes while biome.json sets quoteStyle single; Biome checks only src/ (same class as RR-R
 - RR-R37-03 / info / open / Architecture signal: selection hygiene is spread across setFiles (D-44), selectRange's visible filter and FileList's anchor ref. A store hel
 - B-R37-01 / info / open / After Done succeeds the schema editor unmounts and focus goes to <body>; returning focus to the Customize Fields button (APG dialog-close co
 - B-R37-02 / info / open / Fact: in jsdom a focused button that becomes natively disabled keeps document.activeElement; focus-loss bugs cannot be reproduced in Vitest 
 - B-R37-03 / info / open / While Applying..., Inputs and Add Field inside the fieldset are at 0.6 x 0.5 = 0.3 effective opacity (their own disabled:opacity-50 stacks o
+- C-R38-01 / low / open / CM-3 (Done aria-disabled={isApplying}, fields.length === 0 dropped) survives 304/304: no test pins aria-disabled='true' on an empty-field-li
+- RR-R38-01 / low / open / button.tsx: a Button with aria-disabled='true' still gets its variant hover: colours; review says native disabled got no mouse events so thi
+- RR-R38-02 / low / open / SchemaEditor handleSave reads isApplying from the render closure; correct for real clicks (React flushes before the next event, (f2) covers 
+- RR-R38-03 / low / open / schema-editor-done-busy (b1) name still says 'is disabled' although it now checks aria-disabled
+- RR-R38-04 / low / open / SchemaEditor middle reorder arrows inside the disabled fieldset keep hover:text-foreground while Applying (visual cue only; clicks blocked n
+- RR-R38-05 / info / open / Architecture signal: the focusable-but-disabled pattern (aria-disabled prop + separate handler guard) now repeats in SchemaEditor and Metada
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

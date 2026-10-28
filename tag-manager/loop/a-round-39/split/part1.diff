@@ -1,0 +1,17 @@
+diff -ruN '--exclude=node_modules' '--exclude=out' b39head/.claude/primitives/TESTING.md b39/.claude/primitives/TESTING.md
+--- b39head/.claude/primitives/TESTING.md	2026-10-28 04:14:41.000000000 +0000
++++ b39/.claude/primitives/TESTING.md	2026-10-28 04:22:07.050239006 +0000
+@@ -93,9 +93,12 @@
+ 
+ ### 6. ღილაკის ძებნა component ტესტებში
+ component suite-ებში ღილაკს ვეძებთ `getButtonByText`-ით (`tests/renderer/helpers/dom-queries.ts`), არა `screen.getByRole("button", …)`-ით.
+-მიზეზი: `getByRole` accessible name-ს მთელი DOM tree-სთვის ითვლის და ეს ძვირია. B-ის გაზომვით ერთ runner-ზე ერთი ფაილი 23 s → 1.9 s, ყველაზე ნელი ტესტი 4.05 s → 0.61 s.
++მიზეზი: `getByRole` accessible name-ს მთელი DOM tree-სთვის ითვლის და ეს ძვირია. ერთ runner-ზე გაზომილი: ერთი ფაილი 23 s → 1.9 s, ყველაზე ნელი ტესტი 4.05 s → 0.61 s.
+ helper ზუსტად ერთ დამთხვევას მოითხოვს: 0 ან 1-ზე მეტი ღილაკი → error, პირველ დამთხვევას არ აბრუნებს.
++string ღილაკის trim-ებულ `textContent`-ს მთლიანად უნდა ემთხვეოდეს (ნაწილი არ კმარა). RegExp `g` ან `y` flag-ით → error, რადგან `lastIndex` ღილაკებსა და call-ებს შორის რჩება. ეს სემანტიკა `tests/renderer/helpers/dom-queries.test.ts`-შია დაფიქსირებული.
+ helper მხოლოდ `textContent`-ს ადარებს: icon-only ან `title`-ით მონიშნული ღილაკისთვის ისევ `getByTitle` გამოიყენე.
++helper visibility-ს და `aria-label`-ს არ ითვალისწინებს: როცა ტესტი accessible name-ს (a11y) ამოწმებს, გამოიყენე `screen.getByRole("button", { name })`.
++jsdom focus-ის დაკარგვას არ ასახავს: focused ღილაკი native `disabled`-ის შემდეგაც `document.activeElement` რჩება. focus-ის ბაგს მხოლოდ real app (Playwright `_electron`) ამტკიცებს; unit ტესტი attribute-ს და click guard-ს ამოწმებს.
+ სინელის დასამალად test timeout-ს არ ვზრდით.
+ 
+ ## Main Process ტესტის pattern
