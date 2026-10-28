@@ -1,0 +1,40 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R34-01",
+      "severity": "low",
+      "steps": [
+        "Open folder slow (s.wav), select s.wav",
+        "Open Folder fast with a slow scan (harness scan delay 4000 ms)",
+        "While the scan is pending, click the s.wav row of the old listing",
+        "Wait until fast has loaded"
+      ],
+      "expected": "Selection contains only listed files (or is cleared); toolbar count matches visible selection",
+      "actual": "Toolbar shows '1 selected · 1 files' with no highlighted row (stale /slow/s.wav path); old build's panel shows 'Select a file to edit metadata' at the same time. Pre-existing on 9f5ac51 and on A's tree; not caused by D-41.",
+      "evidence": "c-round-34/r34-5-old-Q-03-after-wait.png, c-round-34/r34-5-new-Q-03-after-wait.png, r34-5-*-Q.json"
+    },
+    {
+      "id": "C-R34-02",
+      "severity": "low",
+      "steps": [
+        "cd A's tree copy; npx vitest run --config vitest.config.renderer.ts -t \"^.*\\(e2\\) \""
+      ],
+      "expected": "New D-41 tests run well inside the 5 s default timeout",
+      "actual": "Alone: (e1) 3687 ms, (e2) 3954 ms, (e3) 2889 ms, (e4) 3667 ms, (e5) 3551 ms, (w8) 3819 ms; (e1) 3698 ms in the full red suite. All < 4 s (not a FAIL), but the margin to 5 s is small; A's qa-engineer already saw an (e1) timeout under load. Flakiness risk on CI.",
+      "evidence": "c-round-34/r34-2-alone.log, c-round-34/r34-2-red.log, c-round-34/r34-2-green.log"
+    }
+  ],
+  "passed": [
+    "R34-1",
+    "R34-2",
+    "R34-3",
+    "R34-4",
+    "R34-5",
+    "R34-6"
+  ],
+  "blocked": [
+    "Windows packaging is not available in the cloud (not part of this round)"
+  ],
+  "realVerified": true
+}

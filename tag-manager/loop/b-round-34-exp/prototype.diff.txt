@@ -1,0 +1,269 @@
+--- /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/schema/SchemaEditor.tsx	2026-10-28 00:49:00.624596442 +0000
++++ src/renderer/src/components/schema/SchemaEditor.tsx	2026-10-28 01:32:04.309542146 +0000
+@@ -34,6 +34,7 @@
+   const [newFieldType, setNewFieldType] = useState<FieldType>('text');
+   const [newFieldRiffId, setNewFieldRiffId] = useState('');
+   const [fieldError, setFieldError] = useState('');
++  const [isApplying, setIsApplying] = useState(false);
+   const isMountedRef = useRef(false);
+ 
+   useEffect(() => {
+@@ -135,8 +136,15 @@
+ 
+   const handleSave = useCallback(async () => {
+     if (fields.length === 0) return;
+-    await onSave?.();
++    setIsApplying(true);
++    try {
++      await onSave?.();
++    } catch {
++      if (isMountedRef.current) setIsApplying(false);
++      return;
++    }
+     if (!isMountedRef.current) return;
++    setIsApplying(false);
+     onClose();
+   }, [fields, onSave, onClose]);
+ 
+@@ -153,112 +161,114 @@
+         <span className="text-xs font-medium text-brand">Customize Fields</span>
+       </div>
+ 
+-      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+-        <div className="space-y-1.5">
+-          <span className="text-xs text-muted">Active Fields</span>
+-          {fields.map((field, index) => (
+-            <div
+-              key={field.key}
+-              className={cn(
+-                'flex items-center gap-1.5 rounded px-2 py-1.5',
+-                'bg-background border border-outline text-xs',
+-              )}
+-            >
+-              <span className="flex-1 text-foreground truncate">{field.label}</span>
+-              <span className="text-dim text-[10px]">{field.type}</span>
+-              {field.riffChunkId && (
+-                <span className="text-dim text-[10px] font-mono">{field.riffChunkId}</span>
+-              )}
+-              <div className="flex items-center gap-0.5">
+-                <button
+-                  type="button"
+-                  onClick={() => index > 0 && reorderFields(index, index - 1)}
+-                  disabled={index === 0}
+-                  className="text-dim hover:text-foreground disabled:opacity-30 p-0.5"
+-                >
+-                  <ArrowUp className="h-3 w-3" />
+-                </button>
+-                <button
+-                  type="button"
+-                  onClick={() => index < fields.length - 1 && reorderFields(index, index + 1)}
+-                  disabled={index === fields.length - 1}
+-                  className="text-dim hover:text-foreground disabled:opacity-30 p-0.5"
+-                >
+-                  <ArrowDown className="h-3 w-3" />
+-                </button>
+-                {!field.standard ? (
++      <div className="flex-1 overflow-y-auto p-3">
++        <fieldset disabled={isApplying} className="min-w-0 space-y-4 disabled:opacity-60">
++          <div className="space-y-1.5">
++            <span className="text-xs text-muted">Active Fields</span>
++            {fields.map((field, index) => (
++              <div
++                key={field.key}
++                className={cn(
++                  'flex items-center gap-1.5 rounded px-2 py-1.5',
++                  'bg-background border border-outline text-xs',
++                )}
++              >
++                <span className="flex-1 text-foreground truncate">{field.label}</span>
++                <span className="text-dim text-[10px]">{field.type}</span>
++                {field.riffChunkId && (
++                  <span className="text-dim text-[10px] font-mono">{field.riffChunkId}</span>
++                )}
++                <div className="flex items-center gap-0.5">
+                   <button
+                     type="button"
+-                    onClick={() => removeField(field.key)}
+-                    className="text-destructive hover:text-destructive/80 p-0.5"
++                    onClick={() => index > 0 && reorderFields(index, index - 1)}
++                    disabled={index === 0}
++                    className="text-dim hover:text-foreground disabled:opacity-30 p-0.5"
+                   >
+-                    <Trash2 className="h-3 w-3" />
++                    <ArrowUp className="h-3 w-3" />
+                   </button>
+-                ) : (
+                   <button
+                     type="button"
+-                    onClick={() => handleToggleStandard(field)}
+-                    className="text-dim hover:text-destructive p-0.5"
+-                    title="Hide standard field"
++                    onClick={() => index < fields.length - 1 && reorderFields(index, index + 1)}
++                    disabled={index === fields.length - 1}
++                    className="text-dim hover:text-foreground disabled:opacity-30 p-0.5"
+                   >
+-                    <X className="h-3 w-3" />
++                    <ArrowDown className="h-3 w-3" />
+                   </button>
+-                )}
++                  {!field.standard ? (
++                    <button
++                      type="button"
++                      onClick={() => removeField(field.key)}
++                      className="text-destructive hover:text-destructive/80 p-0.5"
++                    >
++                      <Trash2 className="h-3 w-3" />
++                    </button>
++                  ) : (
++                    <button
++                      type="button"
++                      onClick={() => handleToggleStandard(field)}
++                      className="text-dim hover:text-destructive p-0.5"
++                      title="Hide standard field"
++                    >
++                      <X className="h-3 w-3" />
++                    </button>
++                  )}
++                </div>
+               </div>
+-            </div>
+-          ))}
+-        </div>
++            ))}
++          </div>
+ 
+-        {disabledStandards.length > 0 && (
+-          <div className="space-y-1.5">
+-            <span className="text-xs text-muted">Hidden Standard Fields</span>
+-            <div className="flex flex-wrap gap-1">
+-              {disabledStandards.map((field) => (
+-                <button
+-                  key={field.key}
+-                  type="button"
+-                  onClick={() => handleToggleStandard(field)}
+-                  className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim hover:text-foreground hover:border-brand transition-colors"
+-                >
+-                  + {field.label}
+-                </button>
+-              ))}
++          {disabledStandards.length > 0 && (
++            <div className="space-y-1.5">
++              <span className="text-xs text-muted">Hidden Standard Fields</span>
++              <div className="flex flex-wrap gap-1">
++                {disabledStandards.map((field) => (
++                  <button
++                    key={field.key}
++                    type="button"
++                    onClick={() => handleToggleStandard(field)}
++                    className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim hover:text-foreground hover:border-brand transition-colors"
++                  >
++                    + {field.label}
++                  </button>
++                ))}
++              </div>
+             </div>
+-          </div>
+-        )}
++          )}
+ 
+-        <div className="space-y-2 border-t border-outline pt-3">
+-          <span className="text-xs text-muted">Add Custom Field</span>
+-          <Input
+-            value={newFieldName}
+-            onChange={(e) => {
+-              setNewFieldName(e.target.value);
+-              if (fieldError) setFieldError('');
+-            }}
+-            placeholder="Field name (e.g. Client)"
+-            error={fieldError || undefined}
+-          />
+-          <div className="grid grid-cols-2 gap-1.5">
+-            <Select
+-              options={FIELD_TYPE_OPTIONS}
+-              value={newFieldType}
+-              onChange={(e) => setNewFieldType(e.target.value as FieldType)}
+-            />
++          <div className="space-y-2 border-t border-outline pt-3">
++            <span className="text-xs text-muted">Add Custom Field</span>
+             <Input
+-              value={newFieldRiffId}
++              value={newFieldName}
+               onChange={(e) => {
+-                setNewFieldRiffId(e.target.value.slice(0, 4).toUpperCase());
++                setNewFieldName(e.target.value);
+                 if (fieldError) setFieldError('');
+               }}
+-              placeholder="RIFF ID (auto)"
+-              maxLength={4}
++              placeholder="Field name (e.g. Client)"
++              error={fieldError || undefined}
+             />
++            <div className="grid grid-cols-2 gap-1.5">
++              <Select
++                options={FIELD_TYPE_OPTIONS}
++                value={newFieldType}
++                onChange={(e) => setNewFieldType(e.target.value as FieldType)}
++              />
++              <Input
++                value={newFieldRiffId}
++                onChange={(e) => {
++                  setNewFieldRiffId(e.target.value.slice(0, 4).toUpperCase());
++                  if (fieldError) setFieldError('');
++                }}
++                placeholder="RIFF ID (auto)"
++                maxLength={4}
++              />
++            </div>
++            <Button variant="ghost" size="sm" className="w-full" onClick={handleAddCustomField}>
++              <Plus className="h-3 w-3" />
++              Add Field
++            </Button>
+           </div>
+-          <Button variant="ghost" size="sm" className="w-full" onClick={handleAddCustomField}>
+-            <Plus className="h-3 w-3" />
+-            Add Field
+-          </Button>
+-        </div>
++        </fieldset>
+       </div>
+ 
+       <div className="p-3 border-t border-outline">
+@@ -267,9 +277,9 @@
+           size="sm"
+           className="w-full"
+           onClick={handleSave}
+-          disabled={fields.length === 0}
++          disabled={isApplying || fields.length === 0}
+         >
+-          Done
++          {isApplying ? 'Applying...' : 'Done'}
+         </Button>
+       </div>
+     </div>
+--- /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-28 00:46:29.003519630 +0000
++++ src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-28 01:31:39.950508822 +0000
+@@ -103,6 +103,7 @@
+   const isBatch = selectedFiles.length > 1;
+   const prevSelectionRef = useRef<string>('');
+   const skipSyncRef = useRef(false);
++  const schemaReadIdRef = useRef(0);
+ 
+   useEffect(() => {
+     const selectionKey = selectedPaths.join('\0');
+@@ -223,6 +224,8 @@
+   }, [selectedFiles, fields, setIsSaving, setEditingMetadata, showToast, updateFileMetadata]);
+ 
+   const handleSchemaChanged = useCallback(async () => {
++    schemaReadIdRef.current += 1;
++    const schemaReadId = schemaReadIdRef.current;
+     await waitForFolderLoadIdle();
+     const { files, folderLoadId: loadId } = useFileStore.getState();
+     if (files.length === 0) return;
+@@ -243,6 +246,7 @@
+         for (const path of chunk) keptPaths.add(path);
+       }
+     }
++    if (schemaReadId !== schemaReadIdRef.current) return;
+     if (!isFolderLoadCurrent(loadId)) return;
+     const { metadata: currentMetadata, pathWriteGenerations } = useFileStore.getState();
+     const accumulated: Record<string, WavMetadata> = {};

@@ -1,0 +1,128 @@
+
+ RUN  v4.0.18 /home/runner/czaba-project/czaba-tag-manager
+
+ ✓ tests/renderer/components/folder-read-overlap.test.ts (18 tests) 4200ms
+     ✓ (o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's  574ms
+     ✓ (o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata  486ms
+     ✓ (o10) App: drop folder A (read pending), Open Folder B (read pending), A lands first -> scanning stays, then B  453ms
+     ✓ (o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B  420ms
+     ✓ (o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast  478ms
+ ✓ tests/renderer/stores/file-store.test.ts (38 tests) 40ms
+ ✓ tests/renderer/components/metadata-panel-batch-save.test.ts (49 tests) 8988ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  780ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store  336ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success  397ms
+ ✓ tests/renderer/components/folder-read-rejected-chunk.test.ts (11 tests) 1615ms
+     ✓ (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files  464ms
+     ✓ (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time  386ms
+ ✓ tests/renderer/components/folder-read-during-save.test.ts (8 tests) 3325ms
+     ✓ (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value  734ms
+     ✓ (r2) batch save of a+b pending + Rescan: both saved entries survive the stale rescan read  400ms
+     ✓ (r3) single save pending + Open Folder on the same folder: the store keeps the saved value  421ms
+     ✓ (r6) App: dropping the same folder during a pending save keeps the saved value  480ms
+     ✓ (r7) 51 files: a stale chunk-1 read keeps the saved first file, and chunk 2 still applies its read  393ms
+     ✓ (r8) pin: 51 files, save of the chunk-2 file with a rejected re-read: chunk 2 read after the write applies the saved value  382ms
+ ✓ tests/renderer/components/metadata-panel-schema-change.test.ts (15 tests) 23584ms
+     ✓ (s1) pin: single selection, no save: the form shows the new field read with the new schema  2013ms
+     ✓ (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field  1347ms
+     ✓ (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form  1683ms
+     ✓ (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema  1738ms
+     ✓ (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema  1650ms
+     ✓ (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects  1490ms
+     ✓ (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)  1656ms
+     ✓ (s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects  1529ms
+     ✓ (s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read  1890ms
+     ✓ (s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save  1302ms
+     ✓ (s11) D-34 pin: a schema re-read issued after the write resolved is applied  1378ms
+     ✓ (s12) D-34 pin: a chunk issued after the write resolved is applied even when the save's re-read failed  1555ms
+     ✓ (s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks  1427ms
+     ✓ (s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time  1296ms
+     ✓ (s15) D-34: a path whose batch write failed is not superseded  1629ms
+ ✓ tests/renderer/components/file-list.test.ts (20 tests) 1012ms
+     ✓ (R18-e) sorts a malformed artist row as empty in both directions without throwing  437ms
+ ✓ tests/renderer/components/reread-after-folder-switch.test.ts (9 tests) 8132ms
+     ✓ (v1) single save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B  710ms
+     ✓ (v2) batch save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B  440ms
+     ✓ (v4) RR-R30-01: save lands after Open Folder B, then reopening A with a rejected read shows no entry for a.wav  510ms
+     ✓ (v5) pin: single save pending, Open Folder of a parent that still lists the file, stale parent read: the saved value stays  429ms
+     ✓ (v6) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read lands: metadata holds only B  1986ms
+     ✓ (v7) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read rejects: no toast, metadata holds B  1433ms
+     ✓ (v8) A-R31-01: schema re-read pending, Close Folder, the schema re-read lands: metadata stays empty  1957ms
+     ✓ (v9) RR-R31-02: drop A while the schema is loading, Open Folder B finishes, then the schema loads: A is never scanned  395ms
+ ✓ tests/renderer/utils/utils.test.ts (26 tests) 24ms
+ ✓ tests/renderer/utils/file-row-display.test.ts (36 tests) 28ms
+ ✓ tests/renderer/components/schema-change-during-folder-load.test.ts (8 tests) 21900ms
+     ✓ (w1) A-R32-01: Done while Open Folder B's scan is pending, B loads, A's schema read would land: metadata holds only B with the new field  3478ms
+     ✓ (w2) A-R32-01: as (w1), A's schema read rejects: no stale toast, metadata holds B  3157ms
+     ✓ (w3) RR-R32-04: Rescan's read starts with the old schema, field added, Done, the Rescan read lands after the schema read: metadata keeps the new field  2462ms
+     ✓ (w4) pin: Done while Open Folder B's scan is pending, then Close Folder: folder stays closed, no toast  2794ms
+     ✓ (w5) pin: Done while B's scan is pending, Open Folder C supersedes B: metadata holds only C with the new field  2841ms
+     ✓ (w6) pin: no folder load pending, Done re-reads the open folder with the new field at once  1887ms
+     ✓ (w7) pin: a save's stats refresh replaces the files array while the schema re-read is pending: the schema re-read still applies  2316ms
+     ✓ (w8) C-R33-01: Done while B's scan is pending, Open Folder C supersedes B and C's first read rejects: the schema re-read after the wait fills C  2963ms
+ ✓ tests/renderer/stores/schema-store.test.ts (8 tests) 11ms
+ ✓ tests/renderer/stores/metadata-store.test.ts (9 tests) 11ms
+ ✓ tests/renderer/stores/player-store.test.ts (9 tests) 19ms
+ ✓ tests/renderer/stores/template-store.test.ts (8 tests) 12ms
+ ✓ tests/renderer/components/schema-editor.test.ts (4 tests) 2822ms
+     ✓ rejects a custom field with RIFF ID ICAT  1240ms
+     ✓ rejects a custom field with lowercase RIFF ID icat  567ms
+     ✓ rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use)  525ms
+     ✓ lists Category (UCS) among hidden standard fields for a pre-T-1 schema  489ms
+ ❯ tests/renderer/components/schema-editor-stale-close.test.ts (5 tests | 2 failed) 10380ms
+     × (e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name 3376ms
+     × (e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name 2754ms
+     ✓ (e3) pin under React.StrictMode: Done with no folder load pending closes the editor  1160ms
+     ✓ (e4) pin: Done during a pending Open Folder with the editor left open: the editor closes after the load and the re-read  1556ms
+     ✓ (e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the panel stays on the form  1532ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/components/schema-editor-stale-close.test.ts > schema editor closed and reopened while Done is pending (D-41) > (e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name
+AssertionError: expected undefined to be 'QTyped' // Object.is equality
+
+- Expected: 
+"QTyped"
+
++ Received: 
+undefined
+
+ ❯ tests/renderer/components/schema-editor-stale-close.test.ts:166:37
+    164|     await waitMs(20);
+    165| 
+    166|     expect(fieldNameInput()?.value).toBe("QTyped");
+       |                                     ^
+    167|     expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: withN…
+    168|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/renderer/components/schema-editor-stale-close.test.ts > schema editor closed and reopened while Done is pending (D-41) > (e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name
+AssertionError: expected undefined to be 'QTyped' // Object.is equality
+
+- Expected: 
+"QTyped"
+
++ Received: 
+undefined
+
+ ❯ tests/renderer/components/schema-editor-stale-close.test.ts:178:37
+    176|     await waitMs(20);
+    177| 
+    178|     expect(fieldNameInput()?.value).toBe("QTyped");
+       |                                     ^
+    179|   });
+    180| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  2 failed | 279 passed (281)
+   Start at  00:48:14
+   Duration  39.37s (transform 1.56s, setup 1.48s, import 5.13s, tests 86.10s, environment 13.56s)
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor-stale-close.test.ts,title=tests/renderer/components/schema-editor-stale-close.test.ts > schema editor closed and reopened while Done is pending (D-41) > (e1) C-R33-02%3A Done during a pending Open Folder%2C Back%2C reopen Customize Fields and type%3A the reopened editor stays open with the typed name,line=166,column=37::AssertionError: expected undefined to be 'QTyped' // Object.is equality%0A%0A- Expected: %0A"QTyped"%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/renderer/components/schema-editor-stale-close.test.ts:166:37%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor-stale-close.test.ts,title=tests/renderer/components/schema-editor-stale-close.test.ts > schema editor closed and reopened while Done is pending (D-41) > (e2) C-R33-02 under React.StrictMode%3A the reopened editor stays open with the typed name,line=178,column=37::AssertionError: expected undefined to be 'QTyped' // Object.is equality%0A%0A- Expected: %0A"QTyped"%0A%0A+ Received: %0Aundefined%0A%0A ❯ tests/renderer/components/schema-editor-stale-close.test.ts:178:37%0A%0A

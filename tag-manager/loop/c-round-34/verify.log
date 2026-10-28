@@ -1,0 +1,295 @@
+Fixtures created successfully
+
+> czaba-tag-manager@1.4.0 check
+> biome check src/ && npm run typecheck && npm run test
+
+src/renderer/src/components/file-list/FileList.tsx:82:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    81 │   return (
+  > 82 │     <div
+       │     ^^^^
+  > 83 │       onClick={handleClick}
+        ...
+  > 89 │       )}
+  > 90 │     >
+       │     ^
+    91 │       <div className="flex items-center gap-2 min-w-0">
+    92 │         <Music className="h-3.5 w-3.5 shrink-0 text-dim" />
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src/renderer/src/components/metadata-editor/TagsInput.tsx:45:17 lint/a11y/noLabelWithoutControl ━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    43 │   return (
+    44 │     <div className="space-y-1">
+  > 45 │       {label && <label className="text-xs font-medium text-muted">{label}</label>}
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │       <div
+    47 │         className={cn(
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/renderer/src/components/player/AudioPlayer.tsx:138:11 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    136 │           </span>
+    137 │ 
+  > 138 │           <div
+        │           ^^^^
+  > 139 │             className="flex-1 h-1 bg-elevated rounded-full cursor-pointer group"
+  > 140 │             onClick={handleSeek}
+  > 141 │           >
+        │           ^
+    142 │             <div
+    143 │               className="h-full bg-brand rounded-full relative transition-all"
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src/renderer/src/components/sidebar/FolderBrowser.tsx:253:11 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━
+
+  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    252 │         {!isScanning && !folderPath && (
+  > 253 │           <div
+        │           ^^^^
+  > 254 │             className="flex flex-col items-center justify-center py-12 text-dim text-xs text-center px-4 cursor-pointer hover:text-muted transition-colors"
+  > 255 │             onClick={handleOpenFolder}
+  > 256 │           >
+        │           ^
+    257 │             <FolderOpen className="h-8 w-8 mb-2 text-outline" />
+    258 │             <p>Open a folder to start tagging WAV files</p>
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src/renderer/src/components/templates/TemplatePicker.tsx:195:9 lint/a11y/noLabelWithoutControl ━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    193 │     <div className="space-y-2">
+    194 │       <div className="flex items-center justify-between">
+  > 195 │         <label className="text-xs font-medium text-muted flex items-center gap-1">
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 196 │           <BookTemplate className="h-3 w-3" />
+  > 197 │           Templates
+  > 198 │         </label>
+        │         ^^^^^^^^
+    199 │         <Button variant="ghost" size="sm" onClick={() => setShowSaveDialog(!showSaveDialog)}>
+    200 │           <Plus className="h-3 w-3" />
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/renderer/src/components/ui/input.tsx:13:19 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    11 │     return (
+    12 │       <div className="space-y-1">
+  > 13 │         {label && <label className="text-xs font-medium text-muted">{label}</label>}
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │         <input
+    15 │           ref={ref}
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/renderer/src/components/ui/select.tsx:13:19 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    11 │     return (
+    12 │       <div className="space-y-1">
+  > 13 │         {label && <label className="text-xs font-medium text-muted">{label}</label>}
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │         <select
+    15 │           ref={ref}
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/renderer/src/components/ui/toast.tsx:12:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: toastKey.
+  
+    10 │   const hide = useMetadataStore((s) => s.hideToast);
+    11 │ 
+  > 12 │   useEffect(() => {
+       │   ^^^^^^^^^
+    13 │     if (!message) return;
+    14 │     const timer = setTimeout(hide, 3000);
+  
+  i This dependency can be removed from the list.
+  
+    14 │     const timer = setTimeout(hide, 3000);
+    15 │     return () => clearTimeout(timer);
+  > 16 │   }, [message, toastKey, hide]);
+       │                ^^^^^^^^
+    17 │ 
+    18 │   if (!message) return null;
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    16 │ ··},·[message,·toastKey,·hide]);
+       │                ----------       
+
+Checked 34 files in 50ms. No fixes applied.
+Found 8 warnings.
+
+> czaba-tag-manager@1.4.0 typecheck
+> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.test.json
+
+
+> czaba-tag-manager@1.4.0 test
+> vitest run --config vitest.config.renderer.ts && vitest run --config vitest.config.main.ts
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [32m✓[39m tests/renderer/components/schema-editor-stale-close.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 13852[2mms[22m[39m
+     [33m[2m✓[22m[39m (e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name [33m 3217[2mms[22m[39m
+     [33m[2m✓[22m[39m (e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name [33m 3036[2mms[22m[39m
+     [33m[2m✓[22m[39m (e3) pin under React.StrictMode: Done with no folder load pending closes the editor [33m 2021[2mms[22m[39m
+     [33m[2m✓[22m[39m (e4) pin: Done during a pending Open Folder with the editor left open: the editor closes after the load and the re-read [33m 2680[2mms[22m[39m
+     [33m[2m✓[22m[39m (e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the panel stays on the form [33m 2895[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-change-during-folder-load.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 20764[2mms[22m[39m
+     [33m[2m✓[22m[39m (w1) A-R32-01: Done while Open Folder B's scan is pending, B loads, A's schema read would land: metadata holds only B with the new field [33m 3507[2mms[22m[39m
+     [33m[2m✓[22m[39m (w2) A-R32-01: as (w1), A's schema read rejects: no stale toast, metadata holds B [33m 2130[2mms[22m[39m
+     [33m[2m✓[22m[39m (w3) RR-R32-04: Rescan's read starts with the old schema, field added, Done, the Rescan read lands after the schema read: metadata keeps the new field [33m 3014[2mms[22m[39m
+     [33m[2m✓[22m[39m (w4) pin: Done while Open Folder B's scan is pending, then Close Folder: folder stays closed, no toast [33m 2232[2mms[22m[39m
+     [33m[2m✓[22m[39m (w5) pin: Done while B's scan is pending, Open Folder C supersedes B: metadata holds only C with the new field [33m 3054[2mms[22m[39m
+     [33m[2m✓[22m[39m (w6) pin: no folder load pending, Done re-reads the open folder with the new field at once [33m 1591[2mms[22m[39m
+     [33m[2m✓[22m[39m (w7) pin: a save's stats refresh replaces the files array while the schema re-read is pending: the schema re-read still applies [33m 2217[2mms[22m[39m
+     [33m[2m✓[22m[39m (w8) C-R33-01: Done while B's scan is pending, Open Folder C supersedes B and C's first read rejects: the schema re-read after the wait fills C [33m 3017[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m49 tests[22m[2m)[22m[33m 7574[2mms[22m[39m
+     [33m[2m✓[22m[39m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept [33m 656[2mms[22m[39m
+       [33m[2m✓[22m[39m (y5) pin: an equal tag array with a new reference during the write is not a change [32m 300[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/metadata-panel-schema-change.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 24096[2mms[22m[39m
+     [33m[2m✓[22m[39m (s1) pin: single selection, no save: the form shows the new field read with the new schema [33m 2340[2mms[22m[39m
+     [33m[2m✓[22m[39m (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field [33m 1720[2mms[22m[39m
+     [33m[2m✓[22m[39m (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form [33m 1789[2mms[22m[39m
+     [33m[2m✓[22m[39m (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema [33m 1214[2mms[22m[39m
+     [33m[2m✓[22m[39m (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema [33m 1231[2mms[22m[39m
+     [33m[2m✓[22m[39m (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects [33m 1492[2mms[22m[39m
+     [33m[2m✓[22m[39m (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30) [33m 1377[2mms[22m[39m
+     [33m[2m✓[22m[39m (s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects [33m 1018[2mms[22m[39m
+     [33m[2m✓[22m[39m (s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read [33m 1141[2mms[22m[39m
+     [33m[2m✓[22m[39m (s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save [33m 1509[2mms[22m[39m
+     [33m[2m✓[22m[39m (s11) D-34 pin: a schema re-read issued after the write resolved is applied [33m 1931[2mms[22m[39m
+     [33m[2m✓[22m[39m (s12) D-34 pin: a chunk issued after the write resolved is applied even when the save's re-read failed [33m 1927[2mms[22m[39m
+     [33m[2m✓[22m[39m (s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks [33m 1827[2mms[22m[39m
+     [33m[2m✓[22m[39m (s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time [33m 1714[2mms[22m[39m
+     [33m[2m✓[22m[39m (s15) D-34: a path whose batch write failed is not superseded [33m 1863[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-during-save.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 2997[2mms[22m[39m
+     [33m[2m✓[22m[39m (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value [33m 731[2mms[22m[39m
+     [33m[2m✓[22m[39m (r2) batch save of a+b pending + Rescan: both saved entries survive the stale rescan read [33m 481[2mms[22m[39m
+     [33m[2m✓[22m[39m (r3) single save pending + Open Folder on the same folder: the store keeps the saved value [33m 314[2mms[22m[39m
+     [33m[2m✓[22m[39m (r6) App: dropping the same folder during a pending save keeps the saved value [33m 376[2mms[22m[39m
+     [33m[2m✓[22m[39m (r7) 51 files: a stale chunk-1 read keeps the saved first file, and chunk 2 still applies its read [33m 348[2mms[22m[39m
+     [33m[2m✓[22m[39m (r8) pin: 51 files, save of the chunk-2 file with a rejected re-read: chunk 2 read after the write applies the saved value [33m 326[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-overlap.test.ts [2m([22m[2m18 tests[22m[2m)[22m[33m 4202[2mms[22m[39m
+     [33m[2m✓[22m[39m (o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's [33m 593[2mms[22m[39m
+     [33m[2m✓[22m[39m (o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata [33m 602[2mms[22m[39m
+     [33m[2m✓[22m[39m (o10) App: drop folder A (read pending), Open Folder B (read pending), A lands first -> scanning stays, then B [33m 461[2mms[22m[39m
+     [33m[2m✓[22m[39m (o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B [33m 421[2mms[22m[39m
+     [33m[2m✓[22m[39m (o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast [33m 423[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/reread-after-folder-switch.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 7919[2mms[22m[39m
+     [33m[2m✓[22m[39m (v1) single save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B [33m 761[2mms[22m[39m
+     [33m[2m✓[22m[39m (v2) batch save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B [33m 384[2mms[22m[39m
+     [33m[2m✓[22m[39m (v4) RR-R30-01: save lands after Open Folder B, then reopening A with a rejected read shows no entry for a.wav [33m 367[2mms[22m[39m
+     [33m[2m✓[22m[39m (v5) pin: single save pending, Open Folder of a parent that still lists the file, stale parent read: the saved value stays [33m 306[2mms[22m[39m
+     [33m[2m✓[22m[39m (v6) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read lands: metadata holds only B [33m 2126[2mms[22m[39m
+     [33m[2m✓[22m[39m (v7) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read rejects: no toast, metadata holds B [33m 1489[2mms[22m[39m
+     [33m[2m✓[22m[39m (v8) A-R31-01: schema re-read pending, Close Folder, the schema re-read lands: metadata stays empty [33m 1810[2mms[22m[39m
+     [33m[2m✓[22m[39m (v9) RR-R31-02: drop A while the schema is loading, Open Folder B finishes, then the schema loads: A is never scanned [33m 432[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-rejected-chunk.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1997[2mms[22m[39m
+     [33m[2m✓[22m[39m (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files [33m 471[2mms[22m[39m
+     [33m[2m✓[22m[39m (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time [33m 526[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/file-list.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 1138[2mms[22m[39m
+     [33m[2m✓[22m[39m (R18-e) sorts a malformed artist row as empty in both directions without throwing [33m 479[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/utils.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 4461[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a custom field with RIFF ID ICAT [33m 1594[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a custom field with lowercase RIFF ID icat [33m 1049[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use) [33m 919[2mms[22m[39m
+     [33m[2m✓[22m[39m lists Category (UCS) among hidden standard fields for a pre-T-1 schema [33m 897[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/template-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/schema-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/player-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/file-row-display.test.ts [2m([22m[2m36 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/metadata-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m17 passed[39m[22m[90m (17)[39m
+[2m      Tests [22m [1m[32m281 passed[39m[22m[90m (281)[39m
+[2m   Start at [22m 00:59:53
+[2m   Duration [22m 37.65s[2m (transform 1.57s, setup 1.50s, import 5.34s, tests 89.15s, environment 13.26s)[22m
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [32m✓[39m tests/main/metadata.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 58[2mms[22m[39m
+ [32m✓[39m tests/main/electron-launch-failure.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 243[2mms[22m[39m
+ [32m✓[39m tests/main/templates.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m tests/main/create-fixtures.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+ [32m✓[39m tests/main/riff-info-nul.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m tests/main/file-system.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-write-field-errors.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-write-guard.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m tests/main/schema.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m tests/main/check-ffprobe-tags.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m11 passed[39m[22m[90m (11)[39m
+[2m      Tests [22m [1m[32m93 passed[39m[22m[90m (93)[39m
+[2m   Start at [22m 01:00:31
+[2m   Duration [22m 1.32s[2m (transform 305ms, setup 144ms, import 1.17s, tests 593ms, environment 2ms)[22m
+
+
+> czaba-tag-manager@1.4.0 test:e2e
+> npm run build && npx playwright test
+
+
+> czaba-tag-manager@1.4.0 build
+> electron-vite build
+
+[36mvite v6.4.1 [32mbuilding SSR bundle for production...[36m[39m
+transforming...
+[32m✓[39m 8 modules transformed.
+rendering chunks...
+[2mout/main/[22m[36mindex.js  [39m[1m[2m22.73 kB[22m[1m[22m
+[32m✓ built in 128ms[39m
+[36mvite v6.4.1 [32mbuilding SSR bundle for production...[36m[39m
+transforming...
+[32m✓[39m 2 modules transformed.
+rendering chunks...
+[2mout/preload/[22m[36mindex.js  [39m[1m[2m2.41 kB[22m[1m[22m
+[32m✓ built in 13ms[39m
+[36mvite v6.4.1 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 1629 modules transformed.
+[33m[plugin vite:reporter] 
+(!) /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/stores/metadata-store.ts is dynamically imported by /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/stores/schema-store.ts but also statically imported by /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/App.tsx, /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/metadata-editor/MetadataPanel.tsx, /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/player/AudioPlayer.tsx, /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/sidebar/FolderBrowser.tsx, /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/templates/TemplatePicker.tsx, /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/components/ui/toast.tsx, dynamic import will not move module into another chunk.
+[39m
+rendering chunks...
+[2m../../out/renderer/[22m[32mindex.html                 [39m[1m[2m  0.40 kB[22m[1m[22m
+[2m../../out/renderer/[22m[2massets/[22m[35mindex-BtDx6a7W.css  [39m[1m[2m 28.55 kB[22m[1m[22m
+[2m../../out/renderer/[22m[2massets/[22m[36mindex-v90TRX7j.js   [39m[1m[33m758.69 kB[39m[22m
+[32m✓ built in 2.15s[39m
+
+Running 7 tests using 2 workers
+·······
+  7 passed (3.3s)
+EXIT=0

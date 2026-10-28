@@ -1,0 +1,85 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/b35[39m
+
+ [32m✓[39m tests/renderer/components/schema-editor-done-busy.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 1577[2mms[22m[39m
+     [33m[2m✓[22m[39m (b1) RR-R33-01: while Done is pending the button reads Applying... and is disabled, the editing controls are disabled and Back stays enabled [33m 426[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor-stale-close.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 14083[2mms[22m[39m
+     [33m[2m✓[22m[39m (e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name [33m 3901[2mms[22m[39m
+     [33m[2m✓[22m[39m (e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name [33m 3367[2mms[22m[39m
+     [33m[2m✓[22m[39m (e3) pin under React.StrictMode: Done with no folder load pending closes the editor [33m 1631[2mms[22m[39m
+     [33m[2m✓[22m[39m (e4) pin: Done during a pending Open Folder with the editor left open: the editor closes after the load and the re-read [33m 3100[2mms[22m[39m
+     [33m[2m✓[22m[39m (e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the panel stays on the form [33m 2081[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/metadata-panel-schema-change.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 22557[2mms[22m[39m
+     [33m[2m✓[22m[39m (s1) pin: single selection, no save: the form shows the new field read with the new schema [33m 2416[2mms[22m[39m
+     [33m[2m✓[22m[39m (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field [33m 1801[2mms[22m[39m
+     [33m[2m✓[22m[39m (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form [33m 1186[2mms[22m[39m
+     [33m[2m✓[22m[39m (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema [33m 1265[2mms[22m[39m
+     [33m[2m✓[22m[39m (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema [33m 1283[2mms[22m[39m
+     [33m[2m✓[22m[39m (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects [33m 1098[2mms[22m[39m
+     [33m[2m✓[22m[39m (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30) [33m 1228[2mms[22m[39m
+     [33m[2m✓[22m[39m (s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects [33m 1705[2mms[22m[39m
+     [33m[2m✓[22m[39m (s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read [33m 1154[2mms[22m[39m
+     [33m[2m✓[22m[39m (s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save [33m 1131[2mms[22m[39m
+     [33m[2m✓[22m[39m (s11) D-34 pin: a schema re-read issued after the write resolved is applied [33m 1145[2mms[22m[39m
+     [33m[2m✓[22m[39m (s12) D-34 pin: a chunk issued after the write resolved is applied even when the save's re-read failed [33m 1664[2mms[22m[39m
+     [33m[2m✓[22m[39m (s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks [33m 1827[2mms[22m[39m
+     [33m[2m✓[22m[39m (s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time [33m 1821[2mms[22m[39m
+     [33m[2m✓[22m[39m (s15) D-34: a path whose batch write failed is not superseded [33m 1830[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-change-during-folder-load.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 24182[2mms[22m[39m
+     [33m[2m✓[22m[39m (w1) A-R32-01: Done while Open Folder B's scan is pending, B loads, A's schema read would land: metadata holds only B with the new field [33m 3479[2mms[22m[39m
+     [33m[2m✓[22m[39m (w2) A-R32-01: as (w1), A's schema read rejects: no stale toast, metadata holds B [33m 2916[2mms[22m[39m
+     [33m[2m✓[22m[39m (w3) RR-R32-04: Rescan's read starts with the old schema, field added, Done, the Rescan read lands after the schema read: metadata keeps the new field [33m 3247[2mms[22m[39m
+     [33m[2m✓[22m[39m (w4) pin: Done while Open Folder B's scan is pending, then Close Folder: folder stays closed, no toast [33m 2590[2mms[22m[39m
+     [33m[2m✓[22m[39m (w5) pin: Done while B's scan is pending, Open Folder C supersedes B: metadata holds only C with the new field [33m 4208[2mms[22m[39m
+     [33m[2m✓[22m[39m (w6) pin: no folder load pending, Done re-reads the open folder with the new field at once [33m 2088[2mms[22m[39m
+     [33m[2m✓[22m[39m (w7) pin: a save's stats refresh replaces the files array while the schema re-read is pending: the schema re-read still applies [33m 1793[2mms[22m[39m
+     [33m[2m✓[22m[39m (w8) C-R33-01: Done while B's scan is pending, Open Folder C supersedes B and C's first read rejects: the schema re-read after the wait fills C [33m 3859[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m49 tests[22m[2m)[22m[33m 8540[2mms[22m[39m
+     [33m[2m✓[22m[39m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept [33m 555[2mms[22m[39m
+     [33m[2m✓[22m[39m (c) retry after a failure writes the same fields to all selected files and clears on success [33m 408[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-overlap.test.ts [2m([22m[2m18 tests[22m[2m)[22m[33m 4009[2mms[22m[39m
+     [33m[2m✓[22m[39m (o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's [33m 506[2mms[22m[39m
+     [33m[2m✓[22m[39m (o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata [33m 485[2mms[22m[39m
+     [33m[2m✓[22m[39m (o10) App: drop folder A (read pending), Open Folder B (read pending), A lands first -> scanning stays, then B [33m 468[2mms[22m[39m
+     [33m[2m✓[22m[39m (o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B [33m 450[2mms[22m[39m
+     [33m[2m✓[22m[39m (o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast [33m 363[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 4321[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a custom field with RIFF ID ICAT [33m 1326[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a custom field with lowercase RIFF ID icat [33m 1044[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use) [33m 1027[2mms[22m[39m
+     [33m[2m✓[22m[39m lists Category (UCS) among hidden standard fields for a pre-T-1 schema [33m 922[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/reread-after-folder-switch.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 9565[2mms[22m[39m
+     [33m[2m✓[22m[39m (v1) single save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B [33m 725[2mms[22m[39m
+     [33m[2m✓[22m[39m (v2) batch save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B [33m 471[2mms[22m[39m
+     [33m[2m✓[22m[39m (v4) RR-R30-01: save lands after Open Folder B, then reopening A with a rejected read shows no entry for a.wav [33m 440[2mms[22m[39m
+     [33m[2m✓[22m[39m (v5) pin: single save pending, Open Folder of a parent that still lists the file, stale parent read: the saved value stays [33m 397[2mms[22m[39m
+     [33m[2m✓[22m[39m (v6) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read lands: metadata holds only B [33m 2918[2mms[22m[39m
+     [33m[2m✓[22m[39m (v7) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read rejects: no toast, metadata holds B [33m 2502[2mms[22m[39m
+     [33m[2m✓[22m[39m (v8) A-R31-01: schema re-read pending, Close Folder, the schema re-read lands: metadata stays empty [33m 1452[2mms[22m[39m
+     [33m[2m✓[22m[39m (v9) RR-R31-02: drop A while the schema is loading, Open Folder B finishes, then the schema loads: A is never scanned [33m 408[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-during-save.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 3433[2mms[22m[39m
+     [33m[2m✓[22m[39m (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value [33m 695[2mms[22m[39m
+     [33m[2m✓[22m[39m (r2) batch save of a+b pending + Rescan: both saved entries survive the stale rescan read [33m 436[2mms[22m[39m
+     [33m[2m✓[22m[39m (r3) single save pending + Open Folder on the same folder: the store keeps the saved value [33m 417[2mms[22m[39m
+     [33m[2m✓[22m[39m (r4) pin: a Rescan issued after the save completed applies the file's current value [33m 457[2mms[22m[39m
+     [33m[2m✓[22m[39m (r6) App: dropping the same folder during a pending save keeps the saved value [33m 463[2mms[22m[39m
+     [33m[2m✓[22m[39m (r7) 51 files: a stale chunk-1 read keeps the saved first file, and chunk 2 still applies its read [33m 384[2mms[22m[39m
+     [33m[2m✓[22m[39m (r8) pin: 51 files, save of the chunk-2 file with a rejected re-read: chunk 2 read after the write applies the saved value [33m 392[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-rejected-chunk.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 2017[2mms[22m[39m
+     [33m[2m✓[22m[39m (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files [33m 417[2mms[22m[39m
+     [33m[2m✓[22m[39m (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time [33m 462[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/file-list.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 1216[2mms[22m[39m
+     [33m[2m✓[22m[39m (R18-e) sorts a malformed artist row as empty in both directions without throwing [33m 539[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/utils.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/player-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/schema-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/file-row-display.test.ts [2m([22m[2m36 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/template-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/metadata-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m18 passed[39m[22m[90m (18)[39m
+[2m      Tests [22m [1m[32m287 passed[39m[22m[90m (287)[39m
+[2m   Start at [22m 01:25:52
+[2m   Duration [22m 40.26s[2m (transform 1.76s, setup 1.58s, import 5.31s, tests 95.65s, environment 14.46s)[22m
+

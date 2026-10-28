@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T00:30:42.962Z)
+# Active loop summary (2026-10-28T01:16:24.704Z)
 
-- backlog.json 309 KB -> active view 90 KB
-- status: G_ROOT_GATE round 33
+- backlog.json 322 KB -> active view 95 KB
+- status: G_ROOT_GATE round 34
 - servers: `{"servers":"none or skipped"}`
-- last publication: 9f5ac51fa93096b1940b6609db203d92ff53fdfc (rounds 33-33)
-- last root gate: round 33 published - commit 9f5ac51fa93096b1940b6609db203d92ff53fdfc pushed
+- last publication: 3035ffca98bbb8af4020c3a799b0d5b20515dacf (rounds 34-34)
+- last root gate: round 34 published - commit 3035ffca98bbb8af4020c3a799b0d5b20515dacf pushed
 
-## Current items: TM-B34, TM-B35
+## Current items: TM-B35, TM-B36, TM-B37
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -157,13 +157,22 @@
 - RR-R32-01 / low / open / MetadataPanel.tsx:60-62,186-188 isListedPath scans the whole files list once per saved path in the batch filter (O(files x paths), ~1e6 comp
 - RR-R32-02 / low / open / refreshSavedFileStats reads folderPath when it runs, so a save finishing after Open Folder B scans folder B; the written-paths filter discar
 - RR-R32-03 / info / open / App.tsx:55 the superseded early return sits before try/finally and so skips setIsScanning(false); correct (only the current load owns isScan
-- RR-R32-04 / low / in_progress / A folder load (Rescan / Open Folder) whose chunked read began with the old schema and lands after the schema re-read applies old-schema data
 - RR-R32-05 / info / open / Architecture signal: folder-switch safety rests on three rules (load id for loads and schema re-read, listed path for save re-read, write ge
-- A-R32-01 / low / in_progress / handleSchemaChanged takes folderLoadId at start; Done pressed after Open Folder B's beginFolderLoad() but before its setFiles(B) captures B'
 - A-R32-02 / info / open / Single save: skipSyncRef.current = true (MetadataPanel.tsx:157) is still set when selectionUnchanged is true but isListedPath(path) is false
 - C-R32-01 / info / open / (s1) (metadata-panel-schema-change.test.ts) timed out once at 5000 ms when C ran two renderer suites in parallel on the 4-core runner; alone
 - B-R32-01 / info / open / Under D-40 a Done pressed during a pending folder load keeps the schema editor open until that load finishes and the re-read completes (Sche
-- B-R32-02 / info / open / Equivalent mutant DM-3: taking folderLoadId before the D-40 wait instead of after survives; a load that starts during the wait begins after 
+- C-R33-01 / low / in_progress / Test gap: DM-3 (folderLoadId taken before the D-40 wait) passes all 117 tests of the mutation set but is not equivalent: Done while B's scan
+- C-R33-02 / low / in_progress / A Done still pending (D-40 wait or slow schema re-read) closes a schema editor that the user reopened after Back: SchemaEditor handleSave ca
+- QA-R33-01 / low / in_progress / Duplicate of C-R33-02 (stale onClose closes the reopened schema editor); qa-engineer rated medium
+- QA-R33-02 / low / open / Done clicked twice during a pending folder load starts two schema re-reads (readMetadataBatch 3x [b] instead of 2); the result is correct, a
+- RR-R33-01 / medium / open / Done gives no feedback while it waits (SchemaEditor.tsx:128-131): during a pending load and re-read the editor stays open, the button is not
+- RR-R33-02 / low / open / waitForFolderLoadIdle's subscription can outlive MetadataPanel: if the panel unmounts while waiting, the re-read still runs at the next idle
+- RR-R33-03 / low / in_progress / Undocumented D-40 edge: if the schema fails to load at startup, App openFolder (drop) sets isScanning true (App.tsx:47) before its up-to-5 s
+- A-R33-01 / low / open / D-40 relies on handleCloseFolder being synchronous (FolderBrowser.tsx:147 setIsScanning(false) runs before setFiles([])/setMetadata({}) :149
+- A-R33-02 / low / in_progress / Done stays clickable while it waits: (1) each click adds a waiter and a re-read (= QA-R33-02); (2) Back, reopen Customize, the pending onClo
+- A-R33-03 / low / open / Test hygiene: a module-level waitForFolderLoadIdle subscription could leak into the next test if a future test ends with isScanning true (re
+- A-R33-04 / low / in_progress / docs/bugs/README.md row 001 '(16 ჩანაწერი; 8 გასწორდა, 5 მათგანი Saba-ს კითხვაა)' reads as if the 5 were among the 8 fixed; they are among t
+- QA-R33-03 / info / open / A scanFolder that never settles keeps Done waiting forever (no busy indicator); Back, Open Folder and Close Folder still work and end the wa
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

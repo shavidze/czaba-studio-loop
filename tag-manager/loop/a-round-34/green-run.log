@@ -1,0 +1,84 @@
+
+ RUN  v4.0.18 /home/runner/czaba-project/czaba-tag-manager
+
+ ✓ tests/renderer/components/schema-editor-stale-close.test.ts (5 tests) 11649ms
+     ✓ (e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name  3671ms
+     ✓ (e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name  2398ms
+     ✓ (e3) pin under React.StrictMode: Done with no folder load pending closes the editor  1236ms
+     ✓ (e4) pin: Done during a pending Open Folder with the editor left open: the editor closes after the load and the re-read  1690ms
+     ✓ (e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the panel stays on the form  2651ms
+ ✓ tests/renderer/components/schema-change-during-folder-load.test.ts (8 tests) 20516ms
+     ✓ (w1) A-R32-01: Done while Open Folder B's scan is pending, B loads, A's schema read would land: metadata holds only B with the new field  3139ms
+     ✓ (w2) A-R32-01: as (w1), A's schema read rejects: no stale toast, metadata holds B  3088ms
+     ✓ (w3) RR-R32-04: Rescan's read starts with the old schema, field added, Done, the Rescan read lands after the schema read: metadata keeps the new field  3036ms
+     ✓ (w4) pin: Done while Open Folder B's scan is pending, then Close Folder: folder stays closed, no toast  1641ms
+     ✓ (w5) pin: Done while B's scan is pending, Open Folder C supersedes B: metadata holds only C with the new field  2539ms
+     ✓ (w6) pin: no folder load pending, Done re-reads the open folder with the new field at once  1820ms
+     ✓ (w7) pin: a save's stats refresh replaces the files array while the schema re-read is pending: the schema re-read still applies  2099ms
+     ✓ (w8) C-R33-01: Done while B's scan is pending, Open Folder C supersedes B and C's first read rejects: the schema re-read after the wait fills C  3151ms
+ ✓ tests/renderer/components/metadata-panel-batch-save.test.ts (49 tests) 8749ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  571ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store  314ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success  431ms
+ ✓ tests/renderer/components/metadata-panel-schema-change.test.ts (15 tests) 24107ms
+     ✓ (s1) pin: single selection, no save: the form shows the new field read with the new schema  2414ms
+     ✓ (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field  1268ms
+     ✓ (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form  1161ms
+     ✓ (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema  2008ms
+     ✓ (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema  1964ms
+     ✓ (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects  1768ms
+     ✓ (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)  1671ms
+     ✓ (s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects  1667ms
+     ✓ (s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read  1231ms
+     ✓ (s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save  1586ms
+     ✓ (s11) D-34 pin: a schema re-read issued after the write resolved is applied  1382ms
+     ✓ (s12) D-34 pin: a chunk issued after the write resolved is applied even when the save's re-read failed  1094ms
+     ✓ (s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks  1177ms
+     ✓ (s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time  1886ms
+     ✓ (s15) D-34: a path whose batch write failed is not superseded  1826ms
+ ✓ tests/renderer/components/folder-read-overlap.test.ts (18 tests) 4472ms
+     ✓ (o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's  587ms
+     ✓ (o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata  456ms
+     ✓ (o10) App: drop folder A (read pending), Open Folder B (read pending), A lands first -> scanning stays, then B  447ms
+     ✓ (o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B  456ms
+     ✓ (o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast  420ms
+ ✓ tests/renderer/components/folder-read-during-save.test.ts (8 tests) 3040ms
+     ✓ (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value  641ms
+     ✓ (r2) batch save of a+b pending + Rescan: both saved entries survive the stale rescan read  381ms
+     ✓ (r3) single save pending + Open Folder on the same folder: the store keeps the saved value  356ms
+     ✓ (r4) pin: a Rescan issued after the save completed applies the file's current value  374ms
+     ✓ (r6) App: dropping the same folder during a pending save keeps the saved value  358ms
+     ✓ (r7) 51 files: a stale chunk-1 read keeps the saved first file, and chunk 2 still applies its read  359ms
+     ✓ (r8) pin: 51 files, save of the chunk-2 file with a rejected re-read: chunk 2 read after the write applies the saved value  356ms
+ ✓ tests/renderer/components/reread-after-folder-switch.test.ts (9 tests) 8012ms
+     ✓ (v1) single save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B  825ms
+     ✓ (v2) batch save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B  468ms
+     ✓ (v4) RR-R30-01: save lands after Open Folder B, then reopening A with a rejected read shows no entry for a.wav  498ms
+     ✓ (v5) pin: single save pending, Open Folder of a parent that still lists the file, stale parent read: the saved value stays  448ms
+     ✓ (v6) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read lands: metadata holds only B  1834ms
+     ✓ (v7) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read rejects: no toast, metadata holds B  1461ms
+     ✓ (v8) A-R31-01: schema re-read pending, Close Folder, the schema re-read lands: metadata stays empty  1799ms
+     ✓ (v9) RR-R31-02: drop A while the schema is loading, Open Folder B finishes, then the schema loads: A is never scanned  518ms
+ ✓ tests/renderer/components/folder-read-rejected-chunk.test.ts (11 tests) 1938ms
+     ✓ (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files  441ms
+     ✓ (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time  526ms
+ ✓ tests/renderer/components/file-list.test.ts (20 tests) 1137ms
+     ✓ (R18-e) sorts a malformed artist row as empty in both directions without throwing  515ms
+ ✓ tests/renderer/components/schema-editor.test.ts (4 tests) 3814ms
+     ✓ rejects a custom field with RIFF ID ICAT  1252ms
+     ✓ rejects a custom field with lowercase RIFF ID icat  961ms
+     ✓ rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use)  778ms
+     ✓ lists Category (UCS) among hidden standard fields for a pre-T-1 schema  821ms
+ ✓ tests/renderer/stores/file-store.test.ts (38 tests) 49ms
+ ✓ tests/renderer/utils/file-row-display.test.ts (36 tests) 11ms
+ ✓ tests/renderer/utils/utils.test.ts (26 tests) 24ms
+ ✓ tests/renderer/stores/player-store.test.ts (9 tests) 10ms
+ ✓ tests/renderer/stores/template-store.test.ts (8 tests) 13ms
+ ✓ tests/renderer/stores/schema-store.test.ts (8 tests) 11ms
+ ✓ tests/renderer/stores/metadata-store.test.ts (9 tests) 11ms
+
+ Test Files  17 passed (17)
+      Tests  281 passed (281)
+   Start at  00:49:03
+   Duration  37.36s (transform 1.50s, setup 1.52s, import 5.07s, tests 87.56s, environment 13.90s)
+

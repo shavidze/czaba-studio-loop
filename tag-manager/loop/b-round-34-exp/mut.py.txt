@@ -1,0 +1,32 @@
+import subprocess, sys, re
+SE='src/renderer/src/components/schema/SchemaEditor.tsx'
+MP='src/renderer/src/components/metadata-editor/MetadataPanel.tsx'
+TESTS=['tests/renderer/components/schema-editor-done-busy.test.ts','tests/renderer/components/schema-editor-stale-close.test.ts','tests/renderer/components/schema-change-during-folder-load.test.ts','tests/renderer/components/metadata-panel-schema-change.test.ts','tests/renderer/components/schema-editor.test.ts','tests/renderer/components/reread-after-folder-switch.test.ts']
+M=[
+ ('BM-0 control',SE,None,None),
+ ('BM-1 Done disabled ignores isApplying',SE,'disabled={isApplying || fields.length === 0}','disabled={fields.length === 0}'),
+ ('BM-2 fieldset never disabled',SE,'<fieldset disabled={isApplying}','<fieldset disabled={false}'),
+ ('BM-3 catch does not reset isApplying',SE,'if (isMountedRef.current) setIsApplying(false);\n      return;','return;'),
+ ('BM-4 label unchanged',SE,"{isApplying ? 'Applying...' : 'Done'}",'Done'),
+ ('BM-5 setIsApplying(true) removed',SE,'setIsApplying(true);\n',''),
+ ('BM-6 setIsApplying(false) before onClose removed (expected equivalent)',SE,'    setIsApplying(false);\n    onClose();','    onClose();'),
+ ('DM-8 schema read id guard removed',MP,'    if (schemaReadId !== schemaReadIdRef.current) return;\n',''),
+ ('DM-9 id taken after the wait',MP,'    schemaReadIdRef.current += 1;\n    const schemaReadId = schemaReadIdRef.current;\n    await waitForFolderLoadIdle();','    await waitForFolderLoadIdle();\n    schemaReadIdRef.current += 1;\n    const schemaReadId = schemaReadIdRef.current;'),
+ ('DM-10 guard checked right after the wait instead of after the reads',MP,'    if (schemaReadId !== schemaReadIdRef.current) return;\n    if (!isFolderLoadCurrent(loadId)) return;','    if (!isFolderLoadCurrent(loadId)) return;'),
+]
+for name,f,old,new in M:
+    orig=open(f).read()
+    if old is not None:
+        if orig.count(old)!=1: print(name,'PATTERN COUNT',orig.count(old)); continue
+        src=orig.replace(old,new)
+        if name.startswith('DM-10'):
+            src=src.replace('    await waitForFolderLoadIdle();\n','    await waitForFolderLoadIdle();\n    if (schemaReadId !== schemaReadIdRef.current) return;\n',1)
+        open(f,'w').write(src)
+    try:
+        r=subprocess.run(['npx','vitest','run','--config','vitest.config.renderer.ts']+TESTS,capture_output=True,text=True)
+        out=re.sub(r'\x1b\[[0-9;]*m','',r.stdout+r.stderr)
+        failed=sorted(set(re.findall(r'× (\([a-z]+\d+\))',out)))
+        summ=[l.strip() for l in out.splitlines() if l.strip().startswith(('Tests ','Errors '))]
+        print(name,'|',' '.join(summ),'| failed:',failed or 'none')
+    finally:
+        open(f,'w').write(orig)
