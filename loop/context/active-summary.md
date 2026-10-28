@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T08:12:01.498Z)
+# Active loop summary (2026-10-28T09:51:34.164Z)
 
-- backlog.json 2012 KB -> active view 286 KB
-- status: G_ROOT_GATE round 222
-- servers: `{"checkedUtc":"2026-10-28T07:52:50.0313005Z","round":222,"attempt":1,"store":200}`
-- last publication: 2d4a93ff6a214e669dc5a69d6721ae4c1e99b7cd (rounds 222-222)
-- last root gate: round 222 published - commit 2d4a93ff6a214e669dc5a69d6721ae4c1e99b7cd pushed
+- backlog.json 2027 KB -> active view 286 KB
+- status: G_ROOT_GATE round 223
+- servers: `{"checkedUtc":"2026-10-28T09:15:50.7557262Z","round":223,"attempt":1,"store":200}`
+- last publication: e140ab4796d1368a00c2f65fd2b03ec12182a06e (rounds 223-223)
+- last root gate: round 223 published - commit e140ab4796d1368a00c2f65fd2b03ec12182a06e pushed
 
 ## Current items: -
 
@@ -508,9 +508,9 @@
 - GATE214-DOC168-STATUS / low / C PASS round 216 (SCOPE-216/DOC-216 sub-checks); closes when root publishes rounds 216+217 | dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212) / doc 168 l.4 published as In Progress (C round 214 check pending) in eb9e76e (gate-214 review item 6)
 - B-R214-DOC160-161-STATUS / low / C PASS round 216 (SCOPE-216/DOC-216 sub-checks); closes when root publishes rounds 216+217 | dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212) / docs 160 and 161 l.4 still In Progress at eb9e76e although C passed (rounds 203, 204/205) and both are published (135b880, c274930); never f
 - C-R215-02 / info / ruled D-29z214: keep exact string, defined as post-PASS value valid only at HEAD; re-dispatch implicitly grants l.4 for N only; root request b-round-215-root-request-l28.md (gate-side Pending -> Completed substitution); L28 switches only after root confirms / L28: A writes "Completed (C round N PASS)" before C runs; premature claim in working/FAIL trees
-- R216-MEM-POLLS-HEADROOM / info / watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled | round 217 (A and C): -1 7-8, -2 14-16, -1.6x 12-13, -2.6x 21-22, all >= 5; notes keep 'observed in round 216' ranges; widen ranges only in PERF-HARNESS-SHARED-LIB (D-29z220) / res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert
+- R216-MEM-POLLS-HEADROOM / info / watch: moved to PERF-HARNESS-SHARED-LIB-b (D-29z244; the export-window filter also feeds peak-backing-delta-mib, so not in the equivalence round) | watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled | round 217 (A and C): -1 7-8, -2 14-16, -1.6x 12-13, -2.6x 21-22, all >= 5; notes keep 'observed in round 216' ranges; widen ranges only in PERF-HARNESS-SHARED-LIB (D-29z220) / res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert
 - C-R217-HARNESS-FIRST-NAV / info / harness note applied: warm-up goto in the round-218 C setup; hypothesis (unconfirmed) Vite reload after re-optimisation / first dev-server navigation after a perf run hit a 30 s waitForFunction timeout at 1440 (2x); reruns clean
-- ARCH-GATE217-REPORT-HELPERS / info / signal on PERF-HARNESS-SHARED-LIB (D-29z215, third occurrence); not scheduled by this note / third copy of nowIn/snapshot/waitForQuiet/reactRendererProblem/rateRowId/report builder across the three perf specs
+- ARCH-GATE217-REPORT-HELPERS / info / dispatched round 223 PERF-HARNESS-SHARED-LIB (D-29z245) | signal on PERF-HARNESS-SHARED-LIB (D-29z215, third occurrence); not scheduled by this note / third copy of nowIn/snapshot/waitForQuiet/reactRendererProblem/rateRowId/report builder across the three perf specs
 - ARCH-R218-ENCODER-CANCEL-SCOPE / info / ruled (D-29z230): single consumer per page, ME12 pins the invariant, known race documented in doc 172; round 220 | gate-220 S2 (Low, per-call AbortSignal; neutral app/lib/audio/mp3-encoder.client.ts proposal) attached; input to the export-pipeline checkpoint request at round-222 planning (D-29z234) / module-wide mp3EncoderGeneration/mp3EncoderRuns: reset cancels every in-flight encode; safe only with one export at a time
 - ROOT-DEPS-NOTICES-REGEN / info / root_signal (D-29z226); optional: root regenerates in its deps step / after OSS-LIC, a root chore(deps) commit leaves TL5 (notices sync) red until the consuming round regenerates THIRD_PARTY_NOTICES.md
 - SABA-Q-LAME-LGPL / info / awaiting_user (Saba); not scheduled; the Export dialog note already names LAME / LAME (LGPL) ships inside a bundled, inlined wasm; whether the notice plus unmodified npm package suffices for LGPL obligations (relink/repla
@@ -521,10 +521,11 @@
 - LEGACY-MP3-PROGRESS / info / deferred_low_polish as GATE220-S4 (gate reviewer Low, D-29z234) | signal (accepted debt; not requested) / purchased-Studio MP3 export shows no intermediate progress (85 -> 100), as with ffmpeg
 - SABA-Q-FFMPEG-FILENAME / info / awaiting_user (Saba); TODO line in the file / app/utils/ffmpeg.ts no longer uses ffmpeg after PERF-16b-i; renaming/deleting the file needs Saba's permission (CLAUDE.md)
 - GATE220-S3 / low / awaiting_user (Saba): .claude/**, .codex/**, CLAUDE.md, AGENTS.md are not agent-editable; proposal in b-round-220.md section 8 (D-29z234) / agent/rule files still teach loadFFmpeg/@ffmpeg: .claude/agents/studio-specialist.md:98, .codex/agents/studio-specialist.toml:94, .claude/pr
-- B-R220-LEGACY-EXPORT-NO-STEMS / medium / dispatched round 222 (D-29z237: contract = selection follows the stem-ID set; same-ID rebuilds and close/reopen keep toggles); closes on C PASS of LEGACY-UI-STUBBED-222 (10/10) + SUBSET-AUDIO-222 + PERSIST-222 | scheduled round 222 (D-29z236) unless REGRESSION due first; C records it in LEGACY-UI-STUBBED-221 without failing round 221 / purchased-Studio ExportDialog opens with 0 of 10 stems ticked; 'Export Audio' is disabled until the user presses 'Select All' (pre-existing;
 - VITE-EXCLUDE-STALE / low / root request b-round-220-root-request-vite.md (grant A, do it in the deps commit, or leave as Low polish) / vite.config.ts l.26-28 optimizeDeps.exclude names @ffmpeg/ffmpeg + @ffmpeg/util after their removal (dead config; B scratch: build and dev s
 - PRE-PROD-CHECKLIST-FFMPEG / low / deferred_low_polish / docs/PRE_PRODUCTION_CHECKLIST.md l.124 still lists 'FFmpeg workers' for StudioContext
 - A-R220-GPLV-NIT / info / signal (not scheduled) / licence classifier treats GPLv, AGPLv and GPL.3 as clean; no lock spelling uses them (consistent with R-219-2)
+- C-R222-01 / low / deferred_low_polish (D-29z243); criterion LEGACY-UI-STUBBED amended to 'PCM within 1 LSB on every sample + per-stem spectrum delta <= 0.01 dB'; hypothesis (float summation order in the offline render) attached to the export-pipeline checkpoint / legacy WAV export is not bit-deterministic: two exports of the same untouched selection differ by 1 LSB in 318/383996 samples (48 in a secon
+- PERF-1A-TIMEOUT-HEADROOM / info / watch (D-29z250): listed, not a STOP, in round 223; candidate for PERF-HARNESS-SHARED-LIB-b or a root playwright.perf.config.ts change / PERF-1a runs 7-9 min against a 15-min Playwright timeout (47-58 %); B planning run 424.6 s
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

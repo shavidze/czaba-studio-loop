@@ -1,0 +1,37 @@
+NEW  studio-lab                 complete                       EQUAL (head failures=3)
+NEW  studio-lab                 abortedShort                   EQUAL (head failures=5)
+NEW  studio-lab                 partialAssertOver              EQUAL (head failures=0)
+NEW  studio-lab                 crossRateMismatch              EQUAL (head failures=4)
+NEW  studio-lab                 guardProblem                   EQUAL (head failures=3)
+NEW  studio-lab                 wallclockDeterministicMetric   EQUAL (head failures=4)
+NEW  studio-lab                 unbudgetedId                   EQUAL (head failures=4)
+NEW  studio-lab-interactions    complete                       EQUAL (head failures=3)
+NEW  studio-lab-interactions    abortedShort                   EQUAL (head failures=5)
+NEW  studio-lab-interactions    partialAssertOver              EQUAL (head failures=0)
+NEW  studio-lab-interactions    crossRateMismatch              EQUAL (head failures=3)
+NEW  studio-lab-interactions    guardProblem                   EQUAL (head failures=3)
+NEW  studio-lab-interactions    wallclockDeterministicMetric   EQUAL (head failures=3)
+NEW  studio-lab-interactions    unbudgetedId                   EQUAL (head failures=4)
+NEW  studio-lab-resources       complete                       EQUAL (head failures=3)
+NEW  studio-lab-resources       abortedShort                   EQUAL (head failures=5)
+NEW  studio-lab-resources       partialAssertOver              EQUAL (head failures=1)
+NEW  studio-lab-resources       crossRateMismatch              EQUAL (head failures=3)
+NEW  studio-lab-resources       guardProblem                   EQUAL (head failures=4)
+NEW  studio-lab-resources       wallclockDeterministicMetric   EQUAL (head failures=3)
+NEW  studio-lab-resources       unbudgetedId                   EQUAL (head failures=4)
+mutA RED studio-lab-resources partialAssertOver
+mutB RED studio-lab-interactions wallclockDeterministicMetric
+mutC RED studio-lab crossRateMismatch
+SUMMARY new==head 21/21
+SAMPLE head 1b-ii partialAssertOver failures: [ 'assert failed a.limit: measured median 50 [50, 50], budget <= 10' ]
+SAMPLE head 1a crossRateMismatch failures: [
+  'row not measured 3 times: w.components-per-commit (6)',
+  'row not measured 3 times: w.commits (6)',
+  'row not measured 3 times: w.page-0 (6)',
+  'nondeterministic count d.components-per-commit: 1x 5 vs 6x 40'
+]
+SAMPLE head 1b-i wallclockDeterministicMetric failures: [
+  'row not measured 3 times: w.components-per-commit (6)',
+  'row not measured 3 times: w.commits (6)',
+  'row not measured 3 times: w.page-0 (6)'
+]

@@ -1,0 +1,66 @@
+{
+  "round": 223,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-28T09:15:50.7557262Z",
+    "round": 223,
+    "attempt": 1,
+    "store": 200
+  },
+  "passed": [
+    "SCOPE-223",
+    "BUDGETS-DIFF-223",
+    "CODE-223",
+    "REPORT-EQUIV-223",
+    "EQUIV-223",
+    "UNUSED-223",
+    "LOWS-223:GATE214-S3",
+    "LOWS-223:GATE214-S5",
+    "LOWS-223:GATE217-S1",
+    "LOWS-223:GATE217-S2",
+    "LAB-SMOKE-223",
+    "G223-3",
+    "AN-REVIEW-223"
+  ],
+  "notPassed": [
+    "LOWS-223:GATE214-S2"
+  ],
+  "passedNotes": {
+    "EQUIV-223": "3 passed rc 0 (13.4 min). 1b-i and 1b-ii equiv rc 0. 1a differs from the oracle only on load.longtasks-over-50 ([2,2,2] vs [1,1,2]). The HEAD clause was applied: HEAD 2d4a93f on this machine gave [1,2,1] (HEAD-vs-oracle rc 1 on the same row), and new-vs-HEAD rc 0 on all 167 deterministic rows. Environment, not a FAIL. Reports are C's own run: startedAt/finishedAt 09:16:30Z-09:29:40Z (Chromium 143.0.7499.4), log end 09:29:41Z.",
+    "LAB-SMOKE-223": "0 page errors in both smoke runs and in 2 fresh 1440 rechecks. The first cold dev-server load in the 1440 guard context logged an invalid-hook-call/hydration error that did not reproduce (C-R223-OBS-01, info, environment).",
+    "AN-REVIEW-223": "DOC-PERF-LINEREF-DRIFT-223 confirmed (doc 168 l.216 cites doc 163 l.67; the row is now l.73). Pre-ruled deferred Low, not a finding.",
+    "SECTION-8": "Task §8 row 1 applies minus GATE214-S2: do not close GATE214-S2 with this PASS (it is in blocked/notPassed and C-R223-01)."
+  },
+  "bugs": [
+    {
+      "id": "C-R223-01-GATE214-S2-PREMISE",
+      "severity": "low",
+      "steps": [
+        "Open /studio-lab in a fresh context (1440x900 or 1280x720)",
+        "Click the library Add button (as PERF-1b-i does)",
+        "Read the added [data-clip-kind=audio] clip's closest('[data-track-id]') and run the emptyLanePoint scan (right half of the viewport, no clip, no control) on each lane"
+      ],
+      "expected": "Task §3 GATE214-S2: the measured clip's lane resolves to 'stems', so reading the lane from the clip keeps the same deselect click",
+      "actual": "The clip lands on lane 'music' (left 512 px, width 4054 px), which has no empty right-half point at either viewport. 'stems' has one (x 724 at 1440, x 644 at 1280). Implementing S2 as written aborts all 6 PERF-1b-i passes (A run 1). A reverted to the HEAD literal 'stems'; S2 is not closed. This is a task-premise issue, not an A defect; B must rule (L10).",
+      "evidence": "tmp/studio-real-loop/c-round-223/g223.json (smoke.*.lane), a-round-223/run-1/perf-run.log"
+    }
+  ],
+  "observations": [
+    "C-R223-OBS-01 (info, environment): the first cold dev-server /studio-lab load in the 1440 guard context logged an invalid hook call / hydration error. It did not reproduce in 4 later loads. App code is unchanged. See c-round-223/g223.json g.1440x900.console and recheck-1440.json.",
+    "PERF-1A-TIMEOUT-HEADROOM (watch): PERF-1a took 7.1 min on the new tree and 7.4 min on HEAD, against a 15 min timeout.",
+    "load.longtasks-over-50 (1a, deterministic record) varies run to run on this runner: oracle [2,2,2], HEAD [1,2,1], new [1,1,2], A run 1 [1,1,1]. Input for PERF-HARNESS-SHARED-LIB-b."
+  ],
+  "gate": [
+    "full test suite",
+    "build",
+    "Biome",
+    "npm run verify",
+    "test:e2e:smoke"
+  ],
+  "blocked": [
+    "LOWS-223:GATE214-S2: A STOP confirmed by C in the browser. The task premise (the clip lane is 'stems') is false: the clip is on 'music', which has no empty right-half point. Awaits a B ruling (L10, task §8 row 3). Not PASS."
+  ],
+  "ableton": "not applicable (test-only harness refactor)"
+}
