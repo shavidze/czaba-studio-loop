@@ -1,0 +1,36 @@
+name: Admin - YouTube probe
+
+# Root-only, read-only: checks whether a GitHub runner can search YouTube and read transcripts.
+on:
+  push:
+    paths: ["cloud/YT-PROBE"]
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Probe
+        run: |
+          set -u
+          out=cloud/yt-probe.txt; : > "$out"
+          pip install -q youtube-transcript-api yt-dlp >> "$out" 2>&1 || true
+          {
+            echo "== search"
+            yt-dlp --flat-playlist --print '%(id)s|%(title)s|%(channel)s|%(view_count)s' 'ytsearch3:Ableton Live 12 insert marker tutorial' 2>&1 | tail -5
+            echo "== transcript"
+            python3 -c "
+          from youtube_transcript_api import YouTubeTranscriptApi
+          t = YouTubeTranscriptApi().fetch('B9ze4m6C-RQ')
+          print(len(t.snippets), t.snippets[0].text)
+          " 2>&1 | tail -2
+          } >> "$out"
+          cat "$out"
+          git config user.name "Saba Shavidze"; git config user.email "sabashavidze@gmail.com"
+          git add "$out"; git commit -qm "admin: YouTube probe" || { echo "no change"; exit 0; }
+          for i in 1 2 3; do git push -q origin HEAD:main && break; git pull -q --rebase origin main; done
