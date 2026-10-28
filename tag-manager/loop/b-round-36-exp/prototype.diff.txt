@@ -1,0 +1,25 @@
+--- /home/runner/czaba-project/czaba-tag-manager/src/renderer/src/stores/file-store.ts	2026-10-28 02:38:07.469787781 +0000
++++ src/renderer/src/stores/file-store.ts	2026-10-28 02:59:32.577456905 +0000
+@@ -52,7 +52,7 @@
+   folderLoadId: 0,
+ 
+   setFolderPath: (path) => set({ folderPath: path }),
+-  setFiles: (files) => set({ files }),
++  setFiles: (files) => set((state) => withListedSelection(state, files)),
+ 
+   updateFileStats: (entries) =>
+     set((state) => {
+@@ -238,3 +238,13 @@
+ export function useSelectionCount(): number {
+   return useFileStore((s) => s.selectedPaths.length);
+ }
++
++function withListedSelection(
++  state: FileState,
++  files: WavFileEntry[],
++): Pick<FileState, 'files'> | Pick<FileState, 'files' | 'selectedPaths'> {
++  const listedPaths = new Set(files.map((file) => file.path));
++  const selectedPaths = state.selectedPaths.filter((path) => listedPaths.has(path));
++  if (selectedPaths.length === state.selectedPaths.length) return { files };
++  return { files, selectedPaths };
++}

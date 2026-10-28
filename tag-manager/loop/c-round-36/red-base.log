@@ -1,0 +1,141 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c36/red[39m
+
+ [31m❯[39m tests/renderer/components/schema-editor-done-busy.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 843[2mms[22m[39m
+[31m     [31m×[31m (b1) RR-R33-01: while Done is pending the button reads Applying... and is disabled, the editing controls are disabled and Back stays enabled[39m[32m 127[2mms[22m[39m
+[31m     [31m×[31m (b2) QA-R33-02: a second click on the pending Done starts no second schema re-read[39m[32m 137[2mms[22m[39m
+     [32m✓[39m (b3) pin with D-41: Done pending, Back, reopen Customize Fields: the new editor's Done reads Done and is enabled, its inputs are enabled[32m 140[2mms[22m[39m
+     [32m✓[39m (b4) review R34 low 1: onSave rejects: the editor stays open, onClose is not called, Done reads Done and is enabled again[32m 44[2mms[22m[39m
+[31m     [31m×[31m (b5) QA-R34-01: Done #1 (field Qone) pending, Back, reopen, add Qtwo, Done #2; #2's read lands first, #1's last: the store keeps #2's result with both fields[39m[32m 114[2mms[22m[39m
+     [32m✓[39m (b6) pin: Done #1 pending, Back, reopen, Done #2; #1's read lands first, #2's last: the store holds #2's result[32m 106[2mms[22m[39m
+[31m     [31m×[31m (b7) pin for C-R35-03 (DM-9): two Done calls both waiting on the same pending Open Folder, re-reads land #2 first then #1: store keeps #2[39m[32m 145[2mms[22m[39m
+     [32m✓[39m (b8) pin for C-R35-03 (BM-6): standalone SchemaEditor with a no-op onClose returns to Done after a resolved onSave[32m 30[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor-done-busy.test.ts[2m > [22mschema editor Done busy state and latest schema re-read (D-42, D-43)[2m > [22m(b1) RR-R33-01: while Done is pending the button reads Applying... and is disabled, the editing controls are disabled and Back stays enabled
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toBeDisabled()[22m
+
+Received element is not disabled:
+  [31m<button
+  class="inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-50 disabled:cursor-not-allowed bg-brand text-brand-foreground hover:bg-brand-hover px-2.5 py-1 text-xs w-full"
+  type="button"
+/>[31m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor-done-busy.test.ts:[2m158:18[22m[39m
+    [90m156| [39m    [35mconst[39m { scanB[33m,[39m done } [33m=[39m [35mawait[39m [34mdoneDuringPendingOpenFolderB[39m()[33m;[39m
+    [90m157| [39m
+    [90m158| [39m    [34mexpect[39m(done)[33m.[39m[34mtoBeDisabled[39m()[33m;[39m
+    [90m   | [39m                 [31m^[39m
+    [90m159| [39m    [34mexpect[39m(done)[33m.[39m[34mtoHaveTextContent[39m([32m"Applying..."[39m)[33m;[39m
+    [90m160| [39m    [34mexpect[39m([34mfieldNameInput[39m())[33m.[39m[34mtoBeDisabled[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor-done-busy.test.ts[2m > [22mschema editor Done busy state and latest schema re-read (D-42, D-43)[2m > [22m(b2) QA-R33-02: a second click on the pending Done starts no second schema re-read
+[31m[1mAssertionError[22m: expected 3 to be 2 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 3[39m
+
+[36m [2m❯[22m tests/renderer/components/schema-editor-done-busy.test.ts:[2m177:37[22m[39m
+    [90m175| [39m    [35mawait[39m [34mwaitMs[39m([34m20[39m)[33m;[39m
+    [90m176| [39m
+    [90m177| [39m    [34mexpect[39m([34mreadsContaining[39m([33mPATH_B[39m))[33m.[39m[34mtoBe[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m178| [39m    expect(useFileStore.getState().metadata[PATH_B]?.r35note).toBe(`r3…
+    [90m179| [39m    [34mexpect[39m([34mfieldNameInput[39m())[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor-done-busy.test.ts[2m > [22mschema editor Done busy state and latest schema re-read (D-42, D-43)[2m > [22m(b5) QA-R34-01: Done #1 (field Qone) pending, Back, reopen, add Qtwo, Done #2; #2's read lands first, #1's last: the store keeps #2's result with both fields
+[31m[1mAssertionError[22m: expected { '/fa/a.wav': { title: 'A', …(3) } } to deeply equal { '/fa/a.wav': { title: 'A', …(4) } }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "/fa/a.wav": {[22m
+[2m      "category": "ACat",[22m
+[2m      "comment": "",[22m
+[2m      "qone": "qone@/fa/a.wav",[22m
+[32m-     "qtwo": "qtwo@/fa/a.wav",[39m
+[2m      "title": "A",[22m
+[2m    },[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/renderer/components/schema-editor-done-busy.test.ts:[2m235:46[22m[39m
+    [90m233| [39m    [35mconst[39m expected [33m=[39m [34mreadFor[39m([[33mPATH_A[39m][33m,[39m schemaAtDone2)[[33mPATH_A[39m][33m;[39m
+    [90m234| [39m    [34mexpect[39m(expected[33m.[39mqtwo)[33m.[39m[34mtoBe[39m([32m`qtwo@[39m[36m${[39m[33mPATH_A[39m[36m}[39m[32m`[39m)[33m;[39m
+    [90m235| [39m    expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: expec…
+    [90m   | [39m                                             [31m^[39m
+    [90m236| [39m    expect(useMetadataStore.getState().editingMetadata).toEqual(expect…
+    [90m237| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor-done-busy.test.ts[2m > [22mschema editor Done busy state and latest schema re-read (D-42, D-43)[2m > [22m(b7) pin for C-R35-03 (DM-9): two Done calls both waiting on the same pending Open Folder, re-reads land #2 first then #1: store keeps #2
+[31m[1mAssertionError[22m: expected 'STALE1' to be 'B' // Object.is equality[39m
+
+Expected: [32m"B"[39m
+Received: [31m"STALE1"[39m
+
+[36m [2m❯[22m tests/renderer/components/schema-editor-done-busy.test.ts:[2m302:61[22m[39m
+    [90m300| [39m    [35mawait[39m [34mwaitMs[39m([34m20[39m)[33m;[39m
+    [90m301| [39m    expect(useFileStore.getState().metadata[PATH_B]?.qtwo).toBe(`qtwo@…
+    [90m302| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mmetadata[[33mPATH_B[39m][33m?.[39mtitle)[33m.[39m[34mtoBe[39m([32m"B"[39m)[33m;[39m
+    [90m   | [39m                                                            [31m^[39m
+    [90m303| [39m    [34mexpect[39m([34mfieldNameInput[39m())[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m304| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Unhandled Errors [49m[22m[31m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯[39m[1m[41m Unhandled Rejection [49m[22m[31m⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: reread failed[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor-done-busy.test.ts:[2m199:47[22m[39m
+    [90m197| [39m  it("(b4) review R34 low 1: onSave rejects: the editor stays open, on…
+    [90m198| [39m    [35mconst[39m onClose [33m=[39m vi[33m.[39m[34mfn[39m()[33m;[39m
+    [90m199| [39m    const onSave = vi.fn(() => Promise.reject(new Error("reread failed…
+    [90m   | [39m                                              [31m^[39m
+    [90m200| [39m    [34mrender[39m([34mcreateElement[39m([33mSchemaEditor[39m[33m,[39m { onClose[33m,[39m onSave }))[33m;[39m
+    [90m201| [39m    [35mawait[39m [34mclickButton[39m([36m/Done/[39m)[33m;[39m
+[90m [2m❯[22m Mock ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/@vitest/spy/dist/index.js:[2m285:34[22m[39m
+[90m [2m❯[22m src/renderer/src/components/schema/SchemaEditor.tsx:[2m138:11[22m[39m
+[90m [2m❯[22m executeDispatch ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:[2m19116:9[22m[39m
+[90m [2m❯[22m runWithFiberInDEV ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:[2m874:13[22m[39m
+[90m [2m❯[22m processDispatchQueue ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:[2m19166:19[22m[39m
+[90m [2m❯[22m ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:[2m19767:9[22m[39m
+[90m [2m❯[22m batchedUpdates$1 ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:[2m3255:40[22m[39m
+[90m [2m❯[22m dispatchEventForPluginEventSystem ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:[2m19320:7[22m[39m
+[90m [2m❯[22m dispatchEvent ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:[2m23585:11[22m[39m
+
+[31mThis error originated in "[1mtests/renderer/components/schema-editor-done-busy.test.ts[22m" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.[39m
+[31mThe latest test that might've caused the error is "[1m(b4) review R34 low 1: onSave rejects: the editor stays open, onClose is not called, Done reads Done and is enabled again[22m". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.[39m
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (8)[39m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 02:52:47
+[2m   Duration [22m 1.75s[2m (transform 203ms, setup 71ms, import 322ms, tests 843ms, environment 410ms)[22m
+
+
+::error file=/tmp/c36/red/tests/renderer/components/schema-editor-done-busy.test.ts,title=Unhandled error,line=199,column=47::Error: reread failed%0A ❯ tests/renderer/components/schema-editor-done-busy.test.ts:199:47%0A ❯ src/renderer/src/components/schema/SchemaEditor.tsx:138:11%0A ❯ executeDispatch ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:19116:9%0A ❯ runWithFiberInDEV ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:874:13%0A ❯ processDispatchQueue ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:19166:19%0A ❯ ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:19767:9%0A ❯ batchedUpdates$1 ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:3255:40%0A ❯ dispatchEventForPluginEventSystem ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:19320:7%0A ❯ dispatchEvent ../../../home/runner/czaba-project/czaba-tag-manager/node_modules/react-dom/cjs/react-dom-client.development.js:23585:11%0A%0AThis error originated in "tests/renderer/components/schema-editor-done-busy.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.%0AThe latest test that might've caused the error is "(b4) review R34 low 1: onSave rejects: the editor stays open, onClose is not called, Done reads Done and is enabled again". It might mean one of the following:%0A- The error was thrown, while Vitest was running this test.%0A- If the error occurred after the test had been completed, this was the last documented test before it was thrown.%0A
+
+::error file=/tmp/c36/red/tests/renderer/components/schema-editor-done-busy.test.ts,title=tests/renderer/components/schema-editor-done-busy.test.ts > schema editor Done busy state and latest schema re-read (D-42%2C D-43) > (b1) RR-R33-01%3A while Done is pending the button reads Applying... and is disabled%2C the editing controls are disabled and Back stays enabled,line=158,column=18::Error: expect(element).toBeDisabled()%0A%0AReceived element is not disabled:%0A  <button%0A  class="inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-50 disabled:cursor-not-allowed bg-brand text-brand-foreground hover:bg-brand-hover px-2.5 py-1 text-xs w-full"%0A  type="button"%0A/>%0A ❯ tests/renderer/components/schema-editor-done-busy.test.ts:158:18%0A%0A
+
+::error file=/tmp/c36/red/tests/renderer/components/schema-editor-done-busy.test.ts,title=tests/renderer/components/schema-editor-done-busy.test.ts > schema editor Done busy state and latest schema re-read (D-42%2C D-43) > (b2) QA-R33-02%3A a second click on the pending Done starts no second schema re-read,line=177,column=37::AssertionError: expected 3 to be 2 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 2%0A+ 3%0A%0A ❯ tests/renderer/components/schema-editor-done-busy.test.ts:177:37%0A%0A
+
+::error file=/tmp/c36/red/tests/renderer/components/schema-editor-done-busy.test.ts,title=tests/renderer/components/schema-editor-done-busy.test.ts > schema editor Done busy state and latest schema re-read (D-42%2C D-43) > (b5) QA-R34-01%3A Done #1 (field Qone) pending%2C Back%2C reopen%2C add Qtwo%2C Done #2; #2's read lands first%2C #1's last%3A the store keeps #2's result with both fields,line=235,column=46::AssertionError: expected { '/fa/a.wav': { title: 'A', …(3) } } to deeply equal { '/fa/a.wav': { title: 'A', …(4) } }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "/fa/a.wav": {%0A      "category": "ACat",%0A      "comment": "",%0A      "qone": "qone@/fa/a.wav",%0A-     "qtwo": "qtwo@/fa/a.wav",%0A      "title": "A",%0A    },%0A  }%0A%0A ❯ tests/renderer/components/schema-editor-done-busy.test.ts:235:46%0A%0A
+
+::error file=/tmp/c36/red/tests/renderer/components/schema-editor-done-busy.test.ts,title=tests/renderer/components/schema-editor-done-busy.test.ts > schema editor Done busy state and latest schema re-read (D-42%2C D-43) > (b7) pin for C-R35-03 (DM-9)%3A two Done calls both waiting on the same pending Open Folder%2C re-reads land #2 first then #1%3A store keeps #2,line=302,column=61::AssertionError: expected 'STALE1' to be 'B' // Object.is equality%0A%0AExpected: "B"%0AReceived: "STALE1"%0A%0A ❯ tests/renderer/components/schema-editor-done-busy.test.ts:302:61%0A%0A

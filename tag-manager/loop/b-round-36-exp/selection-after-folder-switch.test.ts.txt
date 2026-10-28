@@ -1,0 +1,222 @@
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createElement, Fragment } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import App from "~/App";
+import { FileList } from "~/components/file-list/FileList";
+import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+import { FolderBrowser } from "~/components/sidebar/FolderBrowser";
+import { useFileStore } from "~/stores/file-store";
+import { useMetadataStore } from "~/stores/metadata-store";
+import type { WavFileEntry, WavMetadata } from "~/types";
+import { STANDARD_FIELDS } from "~/types";
+import { getButtonByText } from "../helpers/dom-queries";
+import { resetAllStores } from "../helpers/reset-stores";
+import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+
+vi.hoisted(() => {
+  const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+  const mockApi = globalScope.window.api;
+  globalScope.window = globalThis as unknown as { api: unknown };
+  globalScope.api = mockApi;
+});
+
+type MetadataByPath = Record<string, WavMetadata>;
+
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (error: Error) => void;
+}
+
+const MODIFIED_AT = "2026-10-28T00:00:00.000Z";
+const PATH_A = "/fa/a.wav";
+const PATH_A2 = "/fa/a2.wav";
+const PATH_A3 = "/fa/a3.wav";
+const PATH_B = "/fb/b.wav";
+const ENTRY_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 1, modifiedAt: MODIFIED_AT };
+const ENTRY_A2: WavFileEntry = { name: "a2.wav", path: PATH_A2, size: 1, modifiedAt: MODIFIED_AT };
+const ENTRY_A3: WavFileEntry = { name: "a3.wav", path: PATH_A3, size: 1, modifiedAt: MODIFIED_AT };
+const ENTRY_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 1, modifiedAt: MODIFIED_AT };
+const A_META: WavMetadata = { title: "A", category: "ACat", comment: "" };
+const B_META: WavMetadata = { title: "B", category: "BCat", comment: "" };
+
+function createDeferred<T>(): Deferred<T> {
+  let resolve: (value: T) => void = () => {};
+  let reject: (error: Error) => void = () => {};
+  const promise = new Promise<T>((onResolve, onReject) => {
+    resolve = onResolve;
+    reject = onReject;
+  });
+  return { promise, resolve, reject };
+}
+
+async function clickButton(name: RegExp): Promise<void> {
+  await act(async () => {
+    fireEvent.click(getButtonByText(name));
+  });
+}
+
+async function settle(action: () => void): Promise<void> {
+  await act(async () => {
+    action();
+  });
+}
+
+async function waitMs(ms: number): Promise<void> {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  });
+}
+
+async function clickRow(name: string, init: { ctrlKey?: boolean; shiftKey?: boolean } = {}): Promise<void> {
+  const row = screen.getByText(name).parentElement?.parentElement;
+  if (!row) throw new Error(`row ${name} not found`);
+  await settle(() => fireEvent.click(row, init));
+}
+
+function readAll(paths: string[]): Promise<MetadataByPath> {
+  return Promise.resolve(Object.fromEntries(paths.map((p) => [p, p.startsWith("/fa") ? A_META : B_META])));
+}
+
+function seedFolderA(): void {
+  useFileStore.setState({
+    folderPath: "/fa",
+    files: [ENTRY_A, ENTRY_A2],
+    metadata: { [PATH_A]: A_META, [PATH_A2]: A_META },
+  });
+}
+
+function renderBrowserListPanel(): void {
+  render(
+    createElement(
+      Fragment,
+      null,
+      createElement(FolderBrowser),
+      createElement(FileList),
+      createElement(MetadataPanel),
+    ),
+  );
+}
+
+beforeEach(() => {
+  resetAllStores();
+  resetWindowApiMocks();
+  vi.mocked(window.api.openFolderDialog).mockReset();
+  vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
+  vi.mocked(window.api.readMetadataBatch).mockImplementation(readAll);
+});
+
+afterEach(() => {
+  cleanup();
+  resetAllStores();
+});
+
+describe("selection after a folder switch (TM-B39)", () => {
+  it("(x1) Open Folder B pending, row of A clicked, B applies -> no stale selection", async () => {
+    seedFolderA();
+    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+    const bScan = createDeferred<WavFileEntry[]>();
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(bScan.promise);
+    renderBrowserListPanel();
+    await clickButton(/Open Folder/);
+    await clickRow("a.wav");
+    expect(useFileStore.getState().selectedPaths).toEqual([PATH_A]);
+    await settle(() => bScan.resolve([ENTRY_B]));
+    await waitMs(10);
+    expect(useFileStore.getState().selectedPaths).toEqual([]);
+    expect(screen.queryByText(/selected ·/)).toBeNull();
+  });
+
+  it("(x2) Rescan pending, row a2 clicked, a2 still listed -> kept; removed row pruned", async () => {
+    seedFolderA();
+    const scan = createDeferred<WavFileEntry[]>();
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scan.promise);
+    renderBrowserListPanel();
+    await clickButton(/Rescan/);
+    await clickRow("a.wav");
+    await clickRow("a2.wav", { ctrlKey: true });
+    expect(useFileStore.getState().selectedPaths).toEqual([PATH_A, PATH_A2]);
+    await settle(() => scan.resolve([ENTRY_A2]));
+    await waitMs(10);
+    expect(useFileStore.getState().selectedPaths).toEqual([PATH_A2]);
+  });
+
+  it("(x3) App drop B while A listed, row of A clicked during scan -> pruned", async () => {
+    vi.mocked(window.api.loadSchema).mockResolvedValue(STANDARD_FIELDS);
+    const rendered = render(createElement(App));
+    await waitMs(100);
+    await settle(() => seedFolderA());
+    const root = rendered.container.firstChild;
+    if (!(root instanceof Element)) throw new Error("no root");
+    const bScan = createDeferred<WavFileEntry[]>();
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(bScan.promise);
+    vi.mocked(window.api.resolveDroppedPaths).mockResolvedValueOnce({ folders: ["/fb"], wavFiles: [] });
+    await act(async () => {
+      fireEvent.drop(root, { dataTransfer: { files: [{ path: "/fb" }] } });
+    });
+    await waitMs(20);
+    await clickRow("a.wav");
+    expect(useFileStore.getState().selectedPaths).toEqual([PATH_A]);
+    await settle(() => bScan.resolve([ENTRY_B]));
+    await waitMs(10);
+    expect(useFileStore.getState().selectedPaths).toEqual([]);
+  });
+
+  it("(x4) Open Folder B scan rejects after a row of A was clicked -> selection empty", async () => {
+    seedFolderA();
+    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+    const bScan = createDeferred<WavFileEntry[]>();
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(bScan.promise);
+    renderBrowserListPanel();
+    await clickButton(/Open Folder/);
+    await clickRow("a.wav");
+    await settle(() => bScan.reject(new Error("scan failed")));
+    await waitMs(10);
+    expect(useFileStore.getState().selectedPaths).toEqual([]);
+  });
+
+  it("(x5) typed in A's row during pending Open Folder B, B applies -> discard toast, editor empty", async () => {
+    seedFolderA();
+    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+    const bScan = createDeferred<WavFileEntry[]>();
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(bScan.promise);
+    renderBrowserListPanel();
+    await clickButton(/Open Folder/);
+    await clickRow("a.wav");
+    const label = screen.getByText("Category (UCS)");
+    const input = label.parentElement?.querySelector("input");
+    if (!input) throw new Error("no input");
+    await settle(() => fireEvent.change(input, { target: { value: "Typed" } }));
+    expect(useMetadataStore.getState().isDirty).toBe(true);
+    await settle(() => bScan.resolve([ENTRY_B]));
+    await waitMs(10);
+    expect(useFileStore.getState().selectedPaths).toEqual([]);
+    expect(useMetadataStore.getState().toastMessage).toBe("Unsaved changes were discarded");
+    expect(useMetadataStore.getState().editingMetadata).toEqual({});
+  });
+
+  it("(x6) store: setFiles keeps the same selectedPaths array when nothing is pruned", () => {
+    useFileStore.setState({ files: [ENTRY_A], selectedPaths: [PATH_A] });
+    const before = useFileStore.getState().selectedPaths;
+    useFileStore.getState().setFiles([ENTRY_A, ENTRY_B]);
+    expect(useFileStore.getState().selectedPaths).toBe(before);
+    useFileStore.getState().setFiles([ENTRY_B]);
+    expect(useFileStore.getState().selectedPaths).toEqual([]);
+  });
+
+  it("(x7) pin with D-31: anchor row pruned by Rescan, another selected row kept, Shift-click -> plain single selection", async () => {
+    seedFolderA();
+    const scan = createDeferred<WavFileEntry[]>();
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scan.promise);
+    renderBrowserListPanel();
+    await clickButton(/Rescan/);
+    await clickRow("a2.wav");
+    await clickRow("a.wav", { ctrlKey: true });
+    await settle(() => scan.resolve([ENTRY_A2, ENTRY_A3]));
+    await waitMs(10);
+    expect(useFileStore.getState().selectedPaths).toEqual([PATH_A2]);
+    await clickRow("a3.wav", { shiftKey: true });
+    expect(useFileStore.getState().selectedPaths).toEqual([PATH_A3]);
+  });
+});

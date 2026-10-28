@@ -1,0 +1,39 @@
+== PM1
+248c248
+<   if (selectedPaths.length === state.selectedPaths.length) return { files };
+---
+>   return { files };
+     × (x1) Open Folder B pending, row of A clicked, B applies -> no stale selection 147ms
+     × (x2) Rescan pending, row a2 clicked, a2 still listed -> kept; removed row pruned 101ms
+     × (x3) App drop B while A listed, row of A clicked during scan -> pruned 206ms
+     × (x4) Open Folder B scan rejects after a row of A was clicked -> selection empty 58ms
+     × (x5) typed in A's row during pending Open Folder B, B applies -> discard toast, editor empty 101ms
+     × (x6) store: setFiles keeps the same selectedPaths array when nothing is pruned 5ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/renderer/components/selection-after-folder-switch.test.ts > selection after a folder switch (TM-B39) > (x1) Open Folder B pending, row of A clicked, B applies -> no stale selection
+ FAIL  tests/renderer/components/selection-after-folder-switch.test.ts > selection after a folder switch (TM-B39) > (x2) Rescan pending, row a2 clicked, a2 still listed -> kept; removed row pruned
+ FAIL  tests/renderer/components/selection-after-folder-switch.test.ts > selection after a folder switch (TM-B39) > (x3) App drop B while A listed, row of A clicked during scan -> pruned
+ FAIL  tests/renderer/components/selection-after-folder-switch.test.ts > selection after a folder switch (TM-B39) > (x4) Open Folder B scan rejects after a row of A was clicked -> selection empty
+ FAIL  tests/renderer/components/selection-after-folder-switch.test.ts > selection after a folder switch (TM-B39) > (x5) typed in A's row during pending Open Folder B, B applies -> discard toast, editor empty
+== PM2
+248,249c248,249
+<   if (selectedPaths.length === state.selectedPaths.length) return { files };
+<   return { files, selectedPaths };
+---
+>   if (state.selectedPaths.length === 0) return { files };
+>   return { files, selectedPaths: [] };
+     × (x2) Rescan pending, row a2 clicked, a2 still listed -> kept; removed row pruned 107ms
+     × (x6) store: setFiles keeps the same selectedPaths array when nothing is pruned 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/renderer/components/selection-after-folder-switch.test.ts > selection after a folder switch (TM-B39) > (x2) Rescan pending, row a2 clicked, a2 still listed -> kept; removed row pruned
+ FAIL  tests/renderer/components/selection-after-folder-switch.test.ts > selection after a folder switch (TM-B39) > (x6) store: setFiles keeps the same selectedPaths array when nothing is pruned
+      Tests  2 failed | 293 passed (295)
+== PM3
+248c248
+<   if (selectedPaths.length === state.selectedPaths.length) return { files };
+---
+> 
+     × (x6) store: setFiles keeps the same selectedPaths array when nothing is pruned 7ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/renderer/components/selection-after-folder-switch.test.ts > selection after a folder switch (TM-B39) > (x6) store: setFiles keeps the same selectedPaths array when nothing is pruned
+      Tests  1 failed | 294 passed (295)

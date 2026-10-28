@@ -1,0 +1,13 @@
+--- src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -226,8 +226,9 @@
+   const handleSchemaChanged = useCallback(async () => {
+     schemaReadIdRef.current += 1;
+     const schemaReadId = schemaReadIdRef.current;
++    const loadId = useFileStore.getState().folderLoadId;
+     await waitForFolderLoadIdle();
+-    const { files, folderLoadId: loadId } = useFileStore.getState();
++    const { files } = useFileStore.getState();
+     if (files.length === 0) return;
+     const newSchema = useSchemaStore.getState().fields;
+     const paths = files.map((f) => f.path);

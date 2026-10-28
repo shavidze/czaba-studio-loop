@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T02:25:07.125Z)
+# Active loop summary (2026-10-28T02:56:15.545Z)
 
-- backlog.json 337 KB -> active view 99 KB
-- status: G_ROOT_GATE round 35
+- backlog.json 346 KB -> active view 99 KB
+- status: G_ROOT_GATE round 36
 - servers: `{"servers":"none or skipped"}`
-- last publication: 46bd74b4f8d18121e981038c9b8a0659070f017e (rounds 35-35)
-- last root gate: round 35 published - commit 46bd74b4f8d18121e981038c9b8a0659070f017e pushed
+- last publication: 51969a270d9642b8d2e9ae4fb9ab309b43fbcece (rounds 36-36)
+- last root gate: round 36 published - commit 51969a270d9642b8d2e9ae4fb9ab309b43fbcece pushed
 
-## Current items: TM-B36, TM-B37, TM-B38, TM-B39
+## Current items: TM-B37, TM-B38, TM-B39, TM-B40
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -160,23 +160,24 @@
 - RR-R32-05 / info / open / Architecture signal: folder-switch safety rests on three rules (load id for loads and schema re-read, listed path for save re-read, write ge
 - A-R32-02 / info / open / Single save: skipSyncRef.current = true (MetadataPanel.tsx:157) is still set when selectionUnchanged is true but isListedPath(path) is false
 - C-R32-01 / info / open / (s1) (metadata-panel-schema-change.test.ts) timed out once at 5000 ms when C ran two renderer suites in parallel on the 4-core runner; alone
-- B-R32-01 / info / open / Under D-40 a Done pressed during a pending folder load keeps the schema editor open until that load finishes and the re-read completes (Sche
-- QA-R33-02 / low / in_progress / Done clicked twice during a pending folder load starts two schema re-reads (readMetadataBatch 3x [b] instead of 2); the result is correct, a
-- RR-R33-01 / medium / in_progress / Done gives no feedback while it waits (SchemaEditor.tsx:128-131): during a pending load and re-read the editor stays open, the button is not
 - RR-R33-02 / low / open / waitForFolderLoadIdle's subscription can outlive MetadataPanel: if the panel unmounts while waiting, the re-read still runs at the next idle
 - A-R33-01 / low / open / D-40 relies on handleCloseFolder being synchronous (FolderBrowser.tsx:147 setIsScanning(false) runs before setFiles([])/setMetadata({}) :149
-- A-R33-02 / low / in_progress / Done stays clickable while it waits: (1) each click adds a waiter and a re-read (= QA-R33-02); (2) Back, reopen Customize, the pending onClo
 - A-R33-03 / low / open / Test hygiene: a module-level waitForFolderLoadIdle subscription could leak into the next test if a future test ends with isScanning true (re
 - QA-R33-03 / info / open / A scanFolder that never settles keeps Done waiting forever (no busy indicator); Back, Open Folder and Close Folder still work and end the wa
 - C-R34-01 / low / open / Stale selection after a folder switch: while Open Folder fast's scan is pending, a click on a row of the old listing (s.wav) selects /slow/s
-- C-R34-02 / low / open / Renderer test timing margin: on C's runner (e1)-(e5), (w8) take 2.9-3.95 s alone (5 s default timeout); A's qa-engineer saw an (e1) timeout 
-- QA-R34-01 / low / in_progress / Two concurrent schema re-reads are last-writer-wins with the older schema: Done #1 (Qone, slow read) -> Back -> reopen -> add Qtwo -> Done #
-- RR-R34-01 / low / in_progress / SchemaEditor handleSave: if onSave rejects, the await throws, onClose is never called and the promise from the Done click is unhandled (pre-
-- RR-R34-02 / low / in_progress / Clicking Done several times still starts several re-reads (no busy state / re-entrancy guard); deferred to TM-B37
+- C-R34-02 / low / in_progress / Renderer test timing margin: on C's runner (e1)-(e5), (w8) take 2.9-3.95 s alone (5 s default timeout); A's qa-engineer saw an (e1) timeout 
 - RR-R34-05 / info / open / Architecture signal: MetadataPanel could own the whole 'save schema -> re-read -> close' flow and return a token or AbortSignal per open edi
-- C-R34-03 / info / open / (e5)'s name says 'the panel stays on the form', but Open Folder clears the selection so the panel shows the empty state
-- B-R34-02 / info / open / TESTING.md rule candidate: in component suites that render FolderBrowser + MetadataPanel, screen.getByRole('button', {name}) costs ~1.5-2 s 
+- C-R34-03 / info / in_progress / (e5)'s name says 'the panel stays on the form', but Open Folder clears the selection so the panel shows the empty state
+- B-R34-02 / info / in_progress / TESTING.md rule candidate: in component suites that render FolderBrowser + MetadataPanel, screen.getByRole('button', {name}) costs ~1.5-2 s 
 - B-R34-03 / low / open / Known limit kept by D-42/D-43: Done #1 pending, Back, reopen, add a field, and do NOT press Done again: if #1 was still waiting for a folder
+- C-R35-01 / low / open / While Done is Applying..., the fieldset's disabled:opacity-60 multiplies with the Active Fields arrows' own disabled:opacity-30 (~18%): arro
+- C-R35-02 / low / in_progress / docs/bugs/001: D-41 bullet still says the pending re-read always writes to the store after unmount (since D-43 only if no later Done started
+- C-R35-03 / low / in_progress / Test gap: BM-6 (setIsApplying(false) before onClose removed) and the DM-9 shape (two Done calls waiting on the same isScanning flip, reads o
+- RR-R35-01 / low / open / Focus is lost when Done is clicked: the focused button becomes natively disabled, focus drops to <body>; keyboard/screen-reader users tab ba
+- RR-R35-02 / low / open / Busy state can last forever if onSave never settles (scan that never finishes, QA-R33-03): Applying... until Back / Open Folder / Close Fold
+- RR-R35-03 / info / open / A superseded schema re-read drops its own 'Failed to read N files' toast (MetadataPanel.tsx:249). Correct: the later Done re-reads every fil
+- RR-R35-04 / low / open / (b2) cannot fail on its own: React never fires onClick on a natively disabled button; (b1)'s disabled check is what protects it. Becomes mea
+- RR-R35-05 / info / open / Architecture signal: schema re-read guards are spread (schemaReadIdRef, folderLoadId, write generations, isMountedRef); a file-store action 
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

@@ -1,0 +1,496 @@
+diff --git a/.claude/primitives/TESTING.md b/.claude/primitives/TESTING.md
+index f03eeef..96ae3b9 100644
+--- a/.claude/primitives/TESTING.md
++++ b/.claude/primitives/TESTING.md
+@@ -91,6 +91,13 @@ expect(meta.title).toBeTruthy();
+ expect(meta.title).toBe("Test Title");
+ ```
+ 
++### 6. ღილაკის ძებნა component ტესტებში
++component suite-ებში ღილაკს ვეძებთ `getButtonByText`-ით (`tests/renderer/helpers/dom-queries.ts`), არა `screen.getByRole("button", …)`-ით.
++მიზეზი: `getByRole` accessible name-ს მთელი DOM tree-სთვის ითვლის და ეს ძვირია. B-ის გაზომვით ერთ runner-ზე ერთი ფაილი 23 s → 1.9 s, ყველაზე ნელი ტესტი 4.05 s → 0.61 s.
++helper ზუსტად ერთ დამთხვევას მოითხოვს: 0 ან 1-ზე მეტი ღილაკი → error, პირველ დამთხვევას არ აბრუნებს.
++helper მხოლოდ `textContent`-ს ადარებს: icon-only ან `title`-ით მონიშნული ღილაკისთვის ისევ `getByTitle` გამოიყენე.
++სინელის დასამალად test timeout-ს არ ვზრდით.
++
+ ## Main Process ტესტის pattern
+ 
+ ```typescript
+diff --git a/docs/bugs/001-save-and-selection-known-limits.md b/docs/bugs/001-save-and-selection-known-limits.md
+index 830d97f..3c1b1f7 100644
+--- a/docs/bugs/001-save-and-selection-known-limits.md
++++ b/docs/bugs/001-save-and-selection-known-limits.md
+@@ -16,8 +16,8 @@
+ - **D-37:** ცარიელი folder (scan აბრუნებს `[]`) `metadata`-ს წმენდს სამივე გამომძახებელში: `handleOpenFolder` (`FolderBrowser.tsx:130-132`), `handleRescan` (`:188-190`, უკვე round 30-მდე) და App-ის `openFolder` (`App.tsx:83-85`, drop) `if (wavFiles.length > 0)`-ის `else`-ში `setMetadata({})`-ს იძახებენ. `readMetadataBatch` არ იძახება, toast არ ჩნდება, `setFiles(wavFiles)` უცვლელია. ასე ცარიელი folder-ის შემდეგ ძველი folder-ის entry-ები store-ში აღარ რჩება და ძველი folder-ის ხელახლა გახსნისას reject-ებული read მათ მიმდინარედ აღარ აჩვენებს (ისევე, როგორც D-36 (k5) სხვა არაცარიელ folder-ზე). ჩანაწერი (13).
+ - **D-38:** ერთმანეთზე გადაფარული folder load-ები (Open Folder, Rescan, drop, Close Folder) latest-wins-ია. `FileState`-ს აქვს `folderLoadId: number` (`file-store.ts:16`, საწყისი `0`, `:52`), რომელიც მხოლოდ იზრდება და არასოდეს reset-დება (`reset-stores.ts`-იც არ ცვლის). action `beginFolderLoad()` (`:38`, `:155-158`) `folderLoadId`-ს 1-ით ზრდის და ახალ მნიშვნელობას აბრუნებს; `isFolderLoadCurrent(loadId)` (`:161-163`) ამოწმებს, ისევ ეს load არის თუ არა ბოლო. `handleOpenFolder` id-ს dialog-ის შემდეგ იღებს (`FolderBrowser.tsx:99`, `if (!path) return;`-ის შემდეგ, ამიტომ გაუქმებული dialog მიმდინარე load-ს არ აუქმებს), `handleRescan` `if (!folderPath) return;`-ის შემდეგ (`:158`), App-ის `openFolder` პირველივე ხაზზე (`App.tsx:44`, player-ის stop-მდე და schema-ს ლოდინამდე). სამივეში `scanFolder`-ის შემდეგ (`FolderBrowser.tsx:107`, `:165`, `App.tsx:60`), `readMetadataChunked`-ის შემდეგ (`FolderBrowser.tsx:123`, `:181`, `App.tsx:76`) და `catch`-ის პირველ ხაზზე (`FolderBrowser.tsx:134`, `:192`, `App.tsx:87`) load, რომელიც აღარ არის მიმდინარე, store-ში არაფერს წერს და toast-ს არ აჩვენებს; `finally` `isScanning`-ს მხოლოდ მიმდინარე load-ისთვის აქრობს (`FolderBrowser.tsx:141`, `:197`, `App.tsx:94`). `handleCloseFolder` იძახებს `beginFolderLoad()`-ს და `setIsScanning(false)`-ს (`FolderBrowser.tsx:146-147`), ამიტომ pending load დახურულ folder-ს ვეღარ ავსებს და spinner Close-ზე ჩერდება. `setFolderPath`, `clearSelection()` და player-ის stop load-ის დასაწყისში სინქრონულად რჩება; D-35/D-36/D-37 მიმდინარე load-ის შიგნით უცვლელია; Rescan კვლავ `disabled={isScanning}`-ია. ჩანაწერი (14).
+ - **D-39:** გვიანი re-read-ები folder-ის შეცვლის შემდეგ. (a) `handleSave`: module-level ფუნქცია `isListedPath(path)` (`MetadataPanel.tsx:60-62`) ამოწმებს, ისევ არის თუ არა path `useFileStore.getState().files`-ში. single re-read store-ში მხოლოდ მაშინ იწერება, როცა path ჯერ კიდევ სიაშია (`if (isListedPath(path)) updateFileMetadata(path, updated);`, `:168`); batch-ის `savedEntries` `!failedPaths.has(path)`-ის გარდა `isListedPath(path)`-საც მოითხოვს (`:196-198`). write, `markPathsWritten`, `refreshSavedFileStats`, re-read, `skipSyncRef`, D-29/D-30 და ყველა toast უცვლელია. `handleSave` `folderLoadId`-ს და `folderPath`-ს არ ამოწმებს: Rescan და იმავე folder-ის Open Folder-იც `beginFolderLoad()`-ს იძახებს, ამიტომ load id-ის guard D-35-ს გააფუჭებდა, ხოლო `folderPath`-ის snapshot parent folder-ს, რომელიც ფაილს ისევ აჩვენებს, შენახულ მნიშვნელობას წაართმევდა. (b) `handleSchemaChanged` D-40-ის ლოდინის (`await waitForFolderLoadIdle();`, `:229`) შემდეგ load id-ს იღებს `const { files, folderLoadId: loadId } = useFileStore.getState();`-ით (`:230`), `if (files.length === 0) return;`-მდე (`:231`) (D-40, ჩანაწერი (16)), და chunk-ების loop-ის შემდეგ, `currentMetadata`-ს წაკითხვამდე, `if (!isFolderLoadCurrent(loadId)) return;`-ით ბრუნდება (`:250`): superseded schema re-read არც `setMetadata`-ს, არც `setEditingMetadata`-ს და არც toast-ს არ იძახებს. D-33/D-34 უცვლელია. (c) App-ის `openFolder`-ის schema-ს ლოდინის loop-ში, `setTimeout`-ის შემდეგ, `if (!isFolderLoadCurrent(loadId)) return;` (`App.tsx:55`): superseded drop `scanFolder`-ს აღარ იძახებს. ჩანაწერი (15).
+-- **D-40:** schema-ს re-read მიმდინარე folder load-ის დროს. module-level ფუნქცია `waitForFolderLoadIdle()` (`MetadataPanel.tsx:64-73`, `isListedPath`-ის შემდეგ) მაშინვე resolve-დება, თუ `useFileStore`-ის `isScanning` false-ია; სხვა შემთხვევაში `useFileStore.subscribe`-ით ელოდება state-ს, სადაც `isScanning` false-ია, მერე unsubscribe-ს აკეთებს და resolve-დება. `handleSchemaChanged` პირველივე ხაზზე `await waitForFolderLoadIdle();`-ს იძახებს (`:229`), მერე ერთად იღებს იმ მომენტის `files`-ს და `folderLoadId`-ს (`const { files, folderLoadId: loadId } = useFileStore.getState();`, `:230`), ცარიელ `files`-ზე ბრუნდება (`:231`) და `files.map((f) => f.path)`-ს კითხულობს ახალი schema-თი (`:233`). render-ის `allFiles` selector წაიშალა; `useCallback`-ის dependencies `[setMetadata, setEditingMetadata, showToast]`-ია (`:277`). D-39(b)-ის guard (`:250`), D-33, D-34, `handleSave`, `isListedPath`, `refreshSavedFileStats`, sync effect და ყველა toast უცვლელია. load-ის გარეშე `Done` მაშინვე კითხულობს, როგორც ადრე. თუ აპის გაშვებისას schema ჯერ არ ჩატვირთულა (`loadSchema` IPC ნელია ან ჯერ არ დასრულებულა; reject-ებული `loadSchema` `isLoaded`-ს მაშინვე true-ზე აყენებს, `App.tsx:37-39`), drop (App-ის `openFolder`) `isScanning`-ს true-ზე აყენებს (`App.tsx:47`) schema-ს ლოდინამდე, რომელიც 5 წამამდე გრძელდება (`:50-55`), ამიტომ ამ დროს დაჭერილი `Done` 5 წამამდე ელოდება (RR-R33-03). ჩანაწერი (16).
+-- **D-41:** schema editor-ის `Done` მხოლოდ საკუთარ (ჯერ კიდევ mounted) instance-ს ხურავს. `SchemaEditor`-ს აქვს `isMountedRef` (`SchemaEditor.tsx:37`, `useRef(false)`) და mount effect (`:39-44`), რომელიც ref-ს თავად აყენებს `true`-ზე და cleanup-ში `false`-ზე. `handleSave` `await onSave?.();`-ის შემდეგ `if (!isMountedRef.current) return;`-ით ბრუნდება (`:146`) და `onClose()` (`:148`) მხოლოდ მაშინ იძახება, როცა ეს instance ისევ mounted-ია. dependencies `[fields, onSave, onClose]` უცვლელია. Back (`onClick={onClose}`, `:156`) მაშინვე ხურავს editor-ს; `Done`-ის busy state D-42-შია; ტექსტები და `MetadataPanel.tsx` (D-40-ის ჩათვლით) უცვლელია, ამიტომ pending re-read unmount-ის შემდეგაც ბოლომდე სრულდება და store-ში წერს. ჩანაწერი (17).
++- **D-40:** schema-ს re-read მიმდინარე folder load-ის დროს. module-level ფუნქცია `waitForFolderLoadIdle()` (`MetadataPanel.tsx:64-73`, `isListedPath`-ის შემდეგ) მაშინვე resolve-დება, თუ `useFileStore`-ის `isScanning` false-ია; სხვა შემთხვევაში `useFileStore.subscribe`-ით ელოდება state-ს, სადაც `isScanning` false-ია, მერე unsubscribe-ს აკეთებს და resolve-დება. `handleSchemaChanged` D-43-ის ორი id ხაზის შემდეგ (`:227-228`) `await waitForFolderLoadIdle();`-ს იძახებს (`:229`), მერე ერთად იღებს იმ მომენტის `files`-ს და `folderLoadId`-ს (`const { files, folderLoadId: loadId } = useFileStore.getState();`, `:230`), ცარიელ `files`-ზე ბრუნდება (`:231`) და `files.map((f) => f.path)`-ს კითხულობს ახალი schema-თი (`:233`). render-ის `allFiles` selector წაიშალა; `useCallback`-ის dependencies `[setMetadata, setEditingMetadata, showToast]`-ია (`:277`). D-39(b)-ის guard (`:250`), D-33, D-34, `handleSave`, `isListedPath`, `refreshSavedFileStats`, sync effect და ყველა toast უცვლელია. load-ის გარეშე `Done` მაშინვე კითხულობს, როგორც ადრე. თუ აპის გაშვებისას schema ჯერ არ ჩატვირთულა (`loadSchema` IPC ნელია ან ჯერ არ დასრულებულა; reject-ებული `loadSchema` `isLoaded`-ს მაშინვე true-ზე აყენებს, `App.tsx:37-39`), drop (App-ის `openFolder`) `isScanning`-ს true-ზე აყენებს (`App.tsx:47`) schema-ს ლოდინამდე, რომელიც 5 წამამდე გრძელდება (`:50-55`), ამიტომ ამ დროს დაჭერილი `Done` 5 წამამდე ელოდება (RR-R33-03). ჩანაწერი (16).
++- **D-41:** schema editor-ის `Done` მხოლოდ საკუთარ (ჯერ კიდევ mounted) instance-ს ხურავს. `SchemaEditor`-ს აქვს `isMountedRef` (`SchemaEditor.tsx:37`, `useRef(false)`) და mount effect (`:39-44`), რომელიც ref-ს თავად აყენებს `true`-ზე და cleanup-ში `false`-ზე. `handleSave` `await onSave?.();`-ის შემდეგ `if (!isMountedRef.current) return;`-ით ბრუნდება (`:146`) და `onClose()` (`:148`) მხოლოდ მაშინ იძახება, როცა ეს instance ისევ mounted-ია. dependencies `[fields, onSave, onClose]` უცვლელია. Back (`onClick={onClose}`, `:156`) მაშინვე ხურავს editor-ს; `Done`-ის busy state D-42-შია; ტექსტები და `MetadataPanel.tsx` (D-40-ის ჩათვლით) უცვლელია, ამიტომ pending re-read unmount-ის შემდეგაც ბოლომდე სრულდება და store-ში წერს, თუ მის შემდეგ ახალი `Done` არ დაწყებულა (D-43). ჩანაწერი (17).
+ - **D-42:** schema editor-ის `Done` pending-ის დროს busy-ა. `SchemaEditor`-ს აქვს state `isApplying` (`SchemaEditor.tsx:45`, `useState(false)`, mount effect-ის შემდეგ). `handleSave` (`:137-149`) ცარიელ `fields`-ზე ისევ მაშინვე ბრუნდება, მერე `setIsApplying(true)`-ს იძახებს (`:139`) და `await onSave?.();`-ს `try`-ში ელოდება. reject-ზე `catch` `if (isMountedRef.current) setIsApplying(false);`-ს იძახებს (`:143`) და ბრუნდება: editor ღია რჩება, `onClose` არ იძახება, unhandled rejection აღარ არის, toast აქ არ ჩნდება (read-ის შეცდომებს `MetadataPanel` თვითონ აჩვენებს). წარმატებაზე `if (!isMountedRef.current) return;` (`:146`, D-41), `setIsApplying(false);` (`:147`) და `onClose();` (`:148`). dependencies `[fields, onSave, onClose]` უცვლელია. რედაქტირების არე (`<div className="flex-1 overflow-y-auto p-3">`) შიგნით `<fieldset disabled={isApplying} className="min-w-0 space-y-4 disabled:opacity-60">`-ს შეიცავს (`:165`, დახურვა `:271`), რომელიც სამივე სექციას (Active Fields, Hidden Standard Fields, Add Custom Field) ფარავს: pending-ის დროს ველის სახელი, RIFF ID, type `select`, Add Field, ისრები, trash/hide და hidden standard-ის ღილაკები disabled-ია და არე მკრთალია. `legend` არ არის; Tailwind preflight fieldset-ის border-ს, margin-ს და padding-ს აშორებს, `min-w-0` კი default `min-inline-size`-ს. `Done` (`:280-282`) არის `disabled={isApplying || fields.length === 0}` და კითხულობს `Applying...`-ს pending-ის დროს, სხვა შემთხვევაში `Done`-ს; `aria-*` prop არ აქვს (native `disabled`, როგორც Save Tags-ს). Back header-შია, fieldset-ის გარეთ, და ყოველთვის enabled რჩება. ჩანაწერი (18).
+ - **D-43:** ბოლო `Done` იმარჯვებს. `MetadataPanel`-ს აქვს `schemaReadIdRef` (`MetadataPanel.tsx:225`, `useRef(0)`, უშუალოდ `handleSchemaChanged`-ის ზემოთ, `if (showSchemaEditor)`-ის early return-მდე). `handleSchemaChanged`-ის პირველი ორი ხაზი, D-40-ის ლოდინამდე, არის `schemaReadIdRef.current += 1;` და `const schemaReadId = schemaReadIdRef.current;` (`:227-228`); ლოდინი ამის შემდეგ მოდის (`:229`). chunk-ების loop-ის შემდეგ, D-39(b)-ის guard-ის (`:250`) უშუალოდ წინ, `if (schemaReadId !== schemaReadIdRef.current) return;` (`:249`): თუ ამ re-read-ის შემდეგ სხვა `Done` დაიწყო, ეს re-read არც `setMetadata`-ს, არც `setEditingMetadata`-ს და არც toast-ს არ იძახებს, რა რიგითაც არ უნდა დასრულდეს read-ები. ერთი `Done` თავის re-read-ს ისევ იყენებს. D-40-ის ლოდინი, D-34-ის generation-ები, toast, dependencies `[setMetadata, setEditingMetadata, showToast]`, `handleSave` და sync effect უცვლელია. ჩანაწერები (18), (19).
+ 
+@@ -257,7 +257,7 @@
+   3. მიზეზი: `handleSave` `await onSave?.()`-ის შემდეგ იძახებდა `onClose`-ს, რომელიც click-ის დროს აიღო. `MetadataPanel` გადასცემს `() => setShowSchemaEditor(false)`-ს, რომელიც panel-ის state-ს ცვლის და ამიტომ ახალ, ხელახლა გახსნილ editor-საც ხურავს.
+   4. დისკზე არაფერი იცვლება: იკარგება მხოლოდ editor-ში აკრეფილი, ჯერ არ დამატებული ტექსტი. pending re-read კვლავ სრულდება და store-ში წერს.
+ - **გადაწყვეტილება:** D-41: mount ref editor-ის შიგნით და არა token `MetadataPanel`-ში. stale callback unmounted instance-ს ეკუთვნის, ამიტომ თვითონ ამ instance-მა უნდა იცოდეს, რომ ის აღარ არის mounted; `MetadataPanel.tsx` (D-40-ის ჩათვლით) უცვლელი რჩება. effect ref-ს თავად აყენებს `true`-ზე: `useRef(true)` მხოლოდ cleanup-ით `React.StrictMode`-ში (`main.tsx:7`) `Done`-ს არღვევს, რადგან StrictMode-ის effect replay ref-ს `false`-ად ტოვებს და `Done` editor-ს აღარ ხურავს (mutant SM-2, (e3)). `Done`-ის busy state და განმეორებითი click-ები (re-entrancy) **არ** შეცვლილა: ეს TM-B37-ია (RR-R33-01, QA-R33-02).
+-- **ტესტი:** `tests/renderer/components/schema-editor-stale-close.test.ts` — `(e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name`, `(e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name`, `(e3) pin under React.StrictMode: Done with no folder load pending closes the editor`, `(e4) pin: Done during a pending Open Folder with the editor left open: the editor closes after the load and the re-read`, `(e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the panel stays on the form`
++- **ტესტი:** `tests/renderer/components/schema-editor-stale-close.test.ts` — `(e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name`, `(e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name`, `(e3) pin under React.StrictMode: Done with no folder load pending closes the editor`, `(e4) pin: Done during a pending Open Folder with the editor left open: the editor closes after the load and the re-read`, `(e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the editor stays closed`
+ - **სტატუსი:** გასწორდა (D-41, TM-B36)
+ 
+ ## 18. schema editor-ის `Done` ლოდინისას feedback-ს არ აჩვენებდა და ხელახლა დაჭერადი იყო; ორი re-read-იდან ბოლოს დასრულებული იმარჯვებდა
+diff --git a/tests/renderer/components/file-list.test.ts b/tests/renderer/components/file-list.test.ts
+index b5a70a8..30c1c50 100644
+--- a/tests/renderer/components/file-list.test.ts
++++ b/tests/renderer/components/file-list.test.ts
+@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { FileList } from "~/components/file-list/FileList";
+ import { useFileStore } from "~/stores/file-store";
+ import { STANDARD_FIELDS, type WavFileEntry, type WavMetadata } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ 
+ vi.hoisted(() => {
+@@ -187,10 +188,10 @@ describe("FileList sort by Artist with a non-string first element (TM-B21, D-27)
+       "c.wav": { artists: ["Abe"] },
+     });
+ 
+-    expect(() => fireEvent.click(screen.getByRole("button", { name: "Artist" }))).not.toThrow();
++    expect(() => fireEvent.click(getButtonByText("Artist"))).not.toThrow();
+     expect(getRowNamesInOrder()).toEqual(["b.wav", "c.wav", "a.wav"]);
+ 
+-    expect(() => fireEvent.click(screen.getByRole("button", { name: "Artist" }))).not.toThrow();
++    expect(() => fireEvent.click(getButtonByText("Artist"))).not.toThrow();
+     expect(getRowNamesInOrder()).toEqual(["a.wav", "c.wav", "b.wav"]);
+ 
+     expectUntagged("b.wav");
+diff --git a/tests/renderer/components/folder-read-during-save.test.ts b/tests/renderer/components/folder-read-during-save.test.ts
+index b82c86e..6bf97a8 100644
+--- a/tests/renderer/components/folder-read-during-save.test.ts
++++ b/tests/renderer/components/folder-read-during-save.test.ts
+@@ -7,6 +7,7 @@ import { FolderBrowser } from "~/components/sidebar/FolderBrowser";
+ import { useFileStore } from "~/stores/file-store";
+ import type { BatchWriteResult, WavFileEntry, WavMetadata } from "~/types";
+ import { STANDARD_FIELDS } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+@@ -94,13 +95,13 @@ function getInputByLabel(labelText: string): HTMLInputElement {
+ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+   fireEvent.change(getInputByLabel("Category (UCS)"), { target: { value: SAVED_CATEGORY } });
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: saveButtonName }));
++    fireEvent.click(getButtonByText(saveButtonName));
+   });
+ }
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+diff --git a/tests/renderer/components/folder-read-overlap.test.ts b/tests/renderer/components/folder-read-overlap.test.ts
+index 15d10bc..c0a4df2 100644
+--- a/tests/renderer/components/folder-read-overlap.test.ts
++++ b/tests/renderer/components/folder-read-overlap.test.ts
+@@ -8,6 +8,7 @@ import { isFolderLoadCurrent, useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import type { WavFileEntry, WavMetadata } from "~/types";
+ import { STANDARD_FIELDS } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+@@ -46,7 +47,7 @@ function createDeferred<T>(): Deferred<T> {
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+diff --git a/tests/renderer/components/folder-read-rejected-chunk.test.ts b/tests/renderer/components/folder-read-rejected-chunk.test.ts
+index 1fcae25..b457530 100644
+--- a/tests/renderer/components/folder-read-rejected-chunk.test.ts
++++ b/tests/renderer/components/folder-read-rejected-chunk.test.ts
+@@ -8,6 +8,7 @@ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import type { WavFileEntry, WavMetadata } from "~/types";
+ import { STANDARD_FIELDS } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+@@ -96,13 +97,13 @@ function getInputByLabel(labelText: string): HTMLInputElement {
+ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+   fireEvent.change(getInputByLabel("Category (UCS)"), { target: { value: SAVED_CATEGORY } });
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: saveButtonName }));
++    fireEvent.click(getButtonByText(saveButtonName));
+   });
+ }
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index 25d8077..aba80c3 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -6,6 +6,7 @@ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import { useSchemaStore } from "~/stores/schema-store";
+ import type { BatchWriteResult, FieldDefinition, FieldValue, WavFileEntry, WavMetadata } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+@@ -77,7 +78,7 @@ function getCategoryInput(): HTMLInputElement {
+ }
+ 
+ function getBatchSaveButton(): HTMLButtonElement {
+-  return screen.getByRole("button", { name: /Save to 2 files/ });
++  return getButtonByText(/Save to 2 files/);
+ }
+ 
+ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+@@ -88,7 +89,7 @@ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+ 
+ async function clickSave(saveButtonName: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: saveButtonName }));
++    fireEvent.click(getButtonByText(saveButtonName));
+   });
+ }
+ 
+@@ -207,7 +208,7 @@ describe("MetadataPanel batch save keeps edits on failure (TM-B15, D-21)", () =>
+     expect(state.toastType).toBe("error");
+     expect(state.isDirty).toBe(true);
+     expect(getCategoryInput().value).toBe(TYPED_CATEGORY);
+-    expect(screen.getByRole("button", { name: /Save Tags/ })).toBeEnabled();
++    expect(getButtonByText(/Save Tags/)).toBeEnabled();
+   });
+ });
+ 
+@@ -377,7 +378,7 @@ describe("MetadataPanel save whose write succeeded but whose re-read rejects (TM
+     expect(state.modifiedFields).toEqual(new Set(["category"]));
+     expect(state.isDirty).toBe(true);
+     expect(state.isSaving).toBe(false);
+-    expect(screen.getByRole("button", { name: /Save Tags/ })).toBeEnabled();
++    expect(getButtonByText(/Save Tags/)).toBeEnabled();
+     expectNoStaleSkipSync(seedA);
+   });
+ 
+@@ -949,7 +950,7 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+       expect(getCategoryInput().value).toBe("R20Cat");
+       expect(state.isDirty).toBe(true);
+       expect(state.modifiedFields).toEqual(new Set(["title"]));
+-      expect(screen.getByRole("button", { name: /Save Tags/ })).toBeEnabled();
++      expect(getButtonByText(/Save Tags/)).toBeEnabled();
+       expect(useFileStore.getState().metadata[PATH_A]).toEqual(REREAD_A);
+       expect(state.toastMessage).toBe("Tags saved");
+       expect(state.isSaving).toBe(false);
+@@ -990,7 +991,7 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+       expect(getCategoryInput().value).toBe("R20Cat");
+       expect(state.isDirty).toBe(false);
+       expect(state.modifiedFields).toEqual(new Set());
+-      expect(screen.getByRole("button", { name: /Save Tags/ })).toBeDisabled();
++      expect(getButtonByText(/Save Tags/)).toBeDisabled();
+     });
+ 
+     it("(y5) pin: an equal tag array with a new reference during the write is not a change", async () => {
+@@ -1002,7 +1003,7 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+       const state = useMetadataStore.getState();
+       expect(state.isDirty).toBe(false);
+       expect(state.modifiedFields).toEqual(new Set());
+-      expect(screen.getByRole("button", { name: /Save Tags/ })).toBeDisabled();
++      expect(getButtonByText(/Save Tags/)).toBeDisabled();
+     });
+ 
+     it("(y5b) tag order changed during the write is a change", async () => {
+diff --git a/tests/renderer/components/metadata-panel-schema-change.test.ts b/tests/renderer/components/metadata-panel-schema-change.test.ts
+index c2507ad..cb51817 100644
+--- a/tests/renderer/components/metadata-panel-schema-change.test.ts
++++ b/tests/renderer/components/metadata-panel-schema-change.test.ts
+@@ -5,6 +5,7 @@ import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import type { BatchWriteResult, FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+@@ -93,16 +94,16 @@ function getInputByLabel(labelText: string): HTMLInputElement {
+ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+   fireEvent.change(getInputByLabel("Category (UCS)"), { target: { value: TYPED_CATEGORY } });
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: saveButtonName }));
++    fireEvent.click(getButtonByText(saveButtonName));
+   });
+ }
+ 
+ async function addNoteFieldAndDone(): Promise<void> {
+   fireEvent.click(screen.getByTitle("Customize Fields"));
+   fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R24note" } });
+-  fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
++  fireEvent.click(getButtonByText(/Add Field/));
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: /Done/ }));
++    fireEvent.click(getButtonByText(/Done/));
+   });
+ }
+ 
+diff --git a/tests/renderer/components/reread-after-folder-switch.test.ts b/tests/renderer/components/reread-after-folder-switch.test.ts
+index 229b6e6..453b982 100644
+--- a/tests/renderer/components/reread-after-folder-switch.test.ts
++++ b/tests/renderer/components/reread-after-folder-switch.test.ts
+@@ -8,6 +8,7 @@ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import type { BatchWriteResult, FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
+ import { STANDARD_FIELDS } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+@@ -56,7 +57,7 @@ function createDeferred<T>(): Deferred<T> {
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+@@ -95,7 +96,7 @@ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+ async function addNoteFieldAndDone(): Promise<void> {
+   fireEvent.click(screen.getByTitle("Customize Fields"));
+   fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R32note" } });
+-  fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
++  fireEvent.click(getButtonByText(/Add Field/));
+   await clickButton(/Done/);
+ }
+ 
+diff --git a/tests/renderer/components/schema-change-during-folder-load.test.ts b/tests/renderer/components/schema-change-during-folder-load.test.ts
+index a0c6cfd..00db1ee 100644
+--- a/tests/renderer/components/schema-change-during-folder-load.test.ts
++++ b/tests/renderer/components/schema-change-during-folder-load.test.ts
+@@ -6,6 +6,7 @@ import { FolderBrowser } from "~/components/sidebar/FolderBrowser";
+ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import type { FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+@@ -55,7 +56,7 @@ function createDeferred<T>(): Deferred<T> {
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+@@ -133,7 +134,7 @@ async function openCustomize(): Promise<void> {
+ async function addNoteField(): Promise<void> {
+   fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R33note" } });
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
++    fireEvent.click(getButtonByText(/Add Field/));
+   });
+ }
+ 
+diff --git a/tests/renderer/components/schema-editor-done-busy.test.ts b/tests/renderer/components/schema-editor-done-busy.test.ts
+index bdf9dd9..d2fe39e 100644
+--- a/tests/renderer/components/schema-editor-done-busy.test.ts
++++ b/tests/renderer/components/schema-editor-done-busy.test.ts
+@@ -7,6 +7,7 @@ import { FolderBrowser } from "~/components/sidebar/FolderBrowser";
+ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import type { FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+@@ -43,12 +44,6 @@ function createDeferred<T>(): Deferred<T> {
+   return { promise, resolve };
+ }
+ 
+-function buttonByText(name: RegExp): HTMLButtonElement {
+-  const found = Array.from(document.querySelectorAll("button")).find((button) => name.test(button.textContent ?? ""));
+-  if (!found) throw new Error(`button ${name} not found`);
+-  return found;
+-}
+-
+ function typeSelect(): HTMLSelectElement {
+   const select = document.querySelector("select");
+   if (!select) throw new Error("type select not found");
+@@ -62,7 +57,7 @@ async function clickElement(element: HTMLElement): Promise<void> {
+ }
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+-  await clickElement(buttonByText(name));
++  await clickElement(getButtonByText(name));
+ }
+ 
+ function backButton(): HTMLButtonElement {
+@@ -139,7 +134,7 @@ async function doneDuringPendingOpenFolderB(): Promise<{ scanB: Deferred<WavFile
+   await openCustomize();
+   await clickButton(/Open Folder/);
+   await addField("R35note");
+-  const done = buttonByText(/Done/);
++  const done = getButtonByText(/Done/);
+   await clickElement(done);
+   return { scanB, done };
+ }
+@@ -163,7 +158,7 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+     expect(done).toBeDisabled();
+     expect(done).toHaveTextContent("Applying...");
+     expect(fieldNameInput()).toBeDisabled();
+-    expect(buttonByText(/Add Field/)).toBeDisabled();
++    expect(getButtonByText(/Add Field/)).toBeDisabled();
+     expect(screen.getByPlaceholderText("RIFF ID (auto)")).toBeDisabled();
+     expect(typeSelect()).toBeDisabled();
+     expect(backButton()).toBeEnabled();
+@@ -190,7 +185,7 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+     await settle(() => useFileStore.getState().setSelectedPaths([PATH_A]));
+     await openCustomize();
+ 
+-    const reopenedDone = buttonByText(/^Done$/);
++    const reopenedDone = getButtonByText(/^Done$/);
+     expect(reopenedDone).toBeEnabled();
+     expect(fieldNameInput()).toBeEnabled();
+ 
+@@ -208,7 +203,7 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+ 
+     expect(onSave).toHaveBeenCalledTimes(1);
+     expect(onClose).not.toHaveBeenCalled();
+-    const done = buttonByText(/^Done$/);
++    const done = getButtonByText(/^Done$/);
+     expect(done).toBeEnabled();
+     expect(fieldNameInput()).toBeEnabled();
+   });
+@@ -267,4 +262,54 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+     expect(useMetadataStore.getState().editingMetadata).toEqual(expected);
+     expect(fieldNameInput()).toBeNull();
+   });
++
++  it("(b7) pin for C-R35-03 (DM-9): two Done calls both waiting on the same pending Open Folder, re-reads land #2 first then #1: store keeps #2", async () => {
++    seedFolderA();
++    const scanB = createDeferred<WavFileEntry[]>();
++    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
++    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
++    const reads: { schema: FieldDefinition[]; paths: string[]; d: Deferred<MetadataByPath> }[] = [];
++    vi.mocked(window.api.readMetadataBatch).mockImplementation((paths, schema) => {
++      const d = createDeferred<MetadataByPath>();
++      reads.push({ schema, paths, d });
++      return d.promise;
++    });
++    renderBrowserAndPanel();
++    await openCustomize();
++    await clickButton(/Open Folder/);
++    await addField("Qone");
++    await clickButton(/^Done$/);
++    await clickElement(backButton());
++    await settle(() => useFileStore.getState().setSelectedPaths([PATH_A]));
++    await openCustomize();
++    await addField("Qtwo");
++    await clickButton(/^Done$/);
++    await settle(() => scanB.resolve([FILE_B]));
++    await waitMs(20);
++    expect(reads.length).toBe(1);
++    const load = reads[0];
++    await settle(() => load.d.resolve(readFor(load.paths, load.schema)));
++    await waitMs(20);
++    expect(reads.length).toBe(3);
++    expect(reads[1].schema.some((f) => f.key === "qtwo")).toBe(true);
++    const r1 = reads[1];
++    const r2 = reads[2];
++    await settle(() => r2.d.resolve(readFor(r2.paths, r2.schema)));
++    await waitMs(20);
++    await settle(() => r1.d.resolve({ [PATH_B]: { ...readFor(r1.paths, r1.schema)[PATH_B], title: "STALE1" } }));
++    await waitMs(20);
++    expect(useFileStore.getState().metadata[PATH_B]?.qtwo).toBe(`qtwo@${PATH_B}`);
++    expect(useFileStore.getState().metadata[PATH_B]?.title).toBe("B");
++    expect(fieldNameInput()).toBeNull();
++  });
++
++  it("(b8) pin for C-R35-03 (BM-6): standalone SchemaEditor with a no-op onClose returns to Done after a resolved onSave", async () => {
++    const onClose = vi.fn();
++    const onSave = vi.fn(() => Promise.resolve());
++    render(createElement(SchemaEditor, { onClose, onSave }));
++    await clickButton(/^Done$/);
++    await waitMs(20);
++    expect(onClose).toHaveBeenCalledTimes(1);
++    expect(getButtonByText(/^(Done|Applying\.\.\.)$/)).toHaveTextContent(/^Done$/);
++  });
+ });
+diff --git a/tests/renderer/components/schema-editor-stale-close.test.ts b/tests/renderer/components/schema-editor-stale-close.test.ts
+index 227fed1..c51e348 100644
+--- a/tests/renderer/components/schema-editor-stale-close.test.ts
++++ b/tests/renderer/components/schema-editor-stale-close.test.ts
+@@ -6,6 +6,7 @@ import { FolderBrowser } from "~/components/sidebar/FolderBrowser";
+ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import type { FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+@@ -46,7 +47,7 @@ function createDeferred<T>(): Deferred<T> {
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+@@ -203,7 +204,7 @@ describe("schema editor closed and reopened while Done is pending (D-41)", () =>
+     expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: withNote(PATH_B) });
+   });
+ 
+-  it("(e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the panel stays on the form", async () => {
++  it("(e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the editor stays closed", async () => {
+     const scanB = await doneDuringPendingOpenFolderB(false);
+     await clickBack();
+     await settle(() => scanB.resolve([FILE_B]));
+diff --git a/tests/renderer/components/schema-editor.test.ts b/tests/renderer/components/schema-editor.test.ts
+index 2d16278..a01b777 100644
+--- a/tests/renderer/components/schema-editor.test.ts
++++ b/tests/renderer/components/schema-editor.test.ts
+@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { SchemaEditor } from "~/components/schema/SchemaEditor";
+ import { useSchemaStore } from "~/stores/schema-store";
+ import { STANDARD_FIELDS } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ 
+ vi.hoisted(() => {
+@@ -26,7 +27,7 @@ function addCustomFieldViaForm(name: string, riffId: string): void {
+   fireEvent.change(screen.getByPlaceholderText("RIFF ID (auto)"), {
+     target: { value: riffId },
+   });
+-  fireEvent.click(screen.getByRole("button", { name: "Add Field" }));
++  fireEvent.click(getButtonByText("Add Field"));
+ }
+ 
+ beforeEach(() => {
+@@ -77,7 +78,7 @@ describe("SchemaEditor reserved ICAT (T1-9)", () => {
+     renderSchemaEditor();
+ 
+     expect(screen.getByText("Hidden Standard Fields")).toBeInTheDocument();
+-    expect(screen.getByRole("button", { name: "+ Category (UCS)" })).toBeInTheDocument();
++    expect(getButtonByText("+ Category (UCS)")).toBeInTheDocument();
+     expect(screen.queryByText("ICAT")).not.toBeInTheDocument();
+   });
+ });
