@@ -1,15 +1,15 @@
-# Active loop summary (2026-10-28T11:09:50.970Z)
+# Active loop summary (2026-10-28T11:34:37.188Z)
 
-- backlog.json 431 KB -> active view 107 KB
-- status: G_ROOT_GATE round 46
+- backlog.json 440 KB -> active view 112 KB
+- status: G_ROOT_GATE round 47
 - servers: `{"servers":"none or skipped"}`
-- last publication: 1ea34df5215a87f386a07f9808b969a834b144d2 (rounds 46-46)
-- last root gate: round 46 published - commit 1ea34df5215a87f386a07f9808b969a834b144d2 pushed
+- last publication: ede35de5e5ef06521cede8eef43a92417527c131 (rounds 47-47)
+- last root gate: round 47 published - commit ede35de5e5ef06521cede8eef43a92417527c131 pushed
 
-## Current items: TM-B11
+## Current items: TM-B05, TM-B11
 
 ## Open findings
-- B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
+- B-R0-03 / low / in_progress / node-taglib-sharp empty data chunk boundary bug (TM-B05)
 - C-R1-01 / low / open / Empty Keywords written as IKEY=""; save also adds id3, LIST/MID, IDVX, JUNK chunks and moves data to the end (audio bytes identical). Contra
 - RR-R1-03 / low / open / check.yml actions pinned to @v4 tags, not SHAs
 - RR-R1-07 / info / open / Architecture signal: after a green check.yml run make it a required status check and add needs: check to release.yml (release.yml frozen; ne
@@ -24,12 +24,10 @@
 - RR-R4-04 / info / open / tests/main/check-ffprobe-tags.test.ts second test only checks a constant + existsSync (low value; acceptable as a guard against a renamed pr
 - RR-R4-06 / info / open / Architecture signal: move the ffprobe cross-check into recording-tag-contract.test.ts (skip when ffprobe is missing) or into a dedicated npm
 - RR-R5-01 / low / open / Badge now counts every field (year/track/ISRC-only file shows Tagged); fits D-15, add a docs/ note
-- RR-R5-03 / info / in_progress / number field counts as tagged only when > 0; a future custom number field where 0/negative is meaningful would look empty
 - RR-R5-04 / low / open / file-list.test.ts getFileRow walks exactly two parents from the file name; brittle to row markup (data-testid/role=row would need a componen
 - RR-R5-05 / info / open / Tests use double quotes vs single quotes in src; Biome passes because tests/ is not linted
 - RR-R5-06 / info / open / Architecture signal: three different 'is this value empty' rules (file-row-display isNonEmptyFieldValue, TemplatePicker.tsx:130 val !== '' &
 - B-R6-01 / low / open / bpm and track read 0 from an INFO-only WAV with and without NUL (IBPM '120', ITRK '7'): node-taglib-sharp does not map IBPM/ITRK; STANDARD_F
-- C-R6-01 / low / in_progress / Custom Number field in schema -> every save writes ITKN='0' (size 1) into files that never had it; pre-existing
 - RR-R6-03 / low / open / riff-info-nul.test.ts uses double quotes vs single in src; tests/ not linted
 - RR-R6-05 / info / open / Architecture signal: one RIFF value normalisation layer readRiffValue(tag, chunkId): string[] for standard and custom fields, plus a write-s
 - C-R6-02 / info / open / Observation: music-metadata decodes RIFF INFO UTF-8 Georgian as mojibake (also on the original ffmpeg file); ffprobe and ID3 COMM are correc
@@ -209,12 +207,21 @@
 - C-R45-01 / low / open / Emptiness is decided by field.type, not value shape: [''] for a text field or '' for a tags field still writes size 0; renderer never sends 
 - C-R45-02 / info / open / The batch form shows every field empty (D-21 / C-R19-01), so clearing a field in batch needs type-then-delete; fill('') on an empty field do
 - A-R45-01 / info / open / A added (e9)-(e11) beyond the planned (e1)-(e8) after its code-reviewer pass (additions only, in the owned new file); (e9) pins D-18 removeV
+- RR-R46-01 / low / open / Typing 0 into standard Year / Track # / BPM: the library removes the item on save and the field turns blank after 'Tags saved' with no hint 
+- RR-R46-02 / low / open / Sort by a number column now compares unset '' with numbers via localeCompare; root checked the order holds ('' first, numbers numeric) but n
+- RR-R46-03 / info / open / type=number inputs report '' for partial input ('-', '1e', '1.'), so the field is unset while the user is still typing; consistent (before D
+- RR-R46-04 / info / open / Files that older builds wrote with ITKN='0' now show Take 0 and Tagged; documented in the contract, no migration (D-50 Deviation 3)
+- RR-R46-05 / low / open / Architecture signal: number meaning lives in three places (main normalizeFieldValueForWrite/parseRiffNumberValue, panel input, TemplatePicke
+- C-R46-01 / low / open / Process: A changed three getter lines in src/main/ipc/metadata.ts with sed -i instead of the Edit tool, against the round's 'repository writ
+- A-R46-01 / info / open / A2 built value={v} (number) instead of the spec's String(v): a controlled String value rewrites '1.0' -> '1' (1.05 typed became 15); A added
+- C-R46-02 / info / open / (r3) was listed as must-fail but is green on c822d7f: the old 0 came from main's read default, not the renderer; the red side of C-R6-01 is 
+- C-R46-03 / info / open / music-metadata reads ICMT 'კარი' as latin1 mojibake while ffprobe reads it correctly; same reader behaviour as C-R6-02
+- B-R46-01 / info / open / meta:write handler's msg.includes('Corrupt'/'corrupt') branch never fires for node-taglib-sharp CorruptFileError: its messages are 'WAV file
 
 ## Other open items
 - TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
 - TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
 - TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba
-- TM-B05 [todo] A WAV whose data chunk is empty cannot be tagged (node-taglib-sharp 6.0.1 boundary bug) and read silently returns empty metadata
 - TM-B06 [todo] Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check
 - OOS-01 [out_of_scope] Windows/macOS build and NSIS installer (build:win, build:mac)
 - OOS-02 [out_of_scope] Backend import tool (czaba-api tools/recording-import) and database

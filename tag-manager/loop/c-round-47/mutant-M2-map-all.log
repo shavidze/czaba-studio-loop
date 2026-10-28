@@ -1,0 +1,37 @@
+
+ RUN  v4.0.18 /tmp/c47/mut
+
+ ❯ tests/main/metadata-empty-audio.test.ts (8 tests | 2 failed) 61ms
+     ✓ (a1) meta:write on a 44-byte WAV with an empty last data chunk rejects with the clear message and leaves the file unchanged 8ms
+     ✓ (a2) meta:write-batch reports the bare message for the empty WAV and still tags the next file 21ms
+     ✓ (a3) meta:write on a WAV with fmt and no data chunk rejects with the same clear message 1ms
+     ✓ (a4) meta:write on a 0-sample WAV whose empty data chunk is followed by LIST/INFO still tags it 10ms
+     ✓ (a5) meta:write on a 1-sample WAV still tags it 4ms
+     × (a6) meta:write on corrupt.wav keeps the library's other error text unchanged 8ms
+     × (a8) a plain Error with the library's text that is not a CorruptFileError passes through unchanged 2ms
+     ✓ (a7) meta:read and meta:read-batch on the empty WAV still return empty metadata (Q22) 1ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+   Start at  11:27:56
+   Duration  697ms (transform 168ms, setup 35ms, import 358ms, tests 61ms, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/main/metadata-empty-audio.test.ts > TM-B05 / D-51: a WAV with empty audio data cannot be tagged and gets a clear error > (a6) meta:write on corrupt.wav keeps the library's other error text unchanged
+AssertionError: expected Error: Failed to write metadata: Audio da… to have property "message" with value 'Failed to write metadata: WAV file is…'
+
+Expected: "Failed to write metadata: WAV file is missing header chunk"
+Received: "Failed to write metadata: Audio data is empty, cannot tag"
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/main/metadata-empty-audio.test.ts > TM-B05 / D-51: a WAV with empty audio data cannot be tagged and gets a clear error > (a8) a plain Error with the library's text that is not a CorruptFileError passes through unchanged
+AssertionError: expected Error: Failed to write metadata: Audio da… to have property "message" with value 'Failed to write metadata: WAV file is…'
+
+Expected: "Failed to write metadata: WAV file is missing data chunk"
+Received: "Failed to write metadata: Audio data is empty, cannot tag"
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

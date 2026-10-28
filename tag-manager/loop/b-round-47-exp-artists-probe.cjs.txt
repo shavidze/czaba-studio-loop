@@ -1,0 +1,14 @@
+const path=require('path');const fs=require('fs');
+const repo='/home/runner/czaba-project/czaba-tag-manager';
+const {File}=require(repo+'/node_modules/node-taglib-sharp');
+const {execFileSync}=require('child_process');
+function chunks(buf){const out=[];let o=12;while(o+8<=buf.length){const id=buf.toString('latin1',o,o+4);const sz=buf.readUInt32LE(o+4);const e={id,sz};if(id==='LIST'){const t=buf.toString('latin1',o+8,o+12);e.type=t;if(t==='INFO'){e.items=[];let p=o+12;while(p+8<=o+8+sz){const sid=buf.toString('latin1',p,p+4);const ss=buf.readUInt32LE(p+4);e.items.push([sid,buf.toString('utf8',p+8,p+8+ss)]);p+=8+ss+(ss&1);}}}out.push(e);o+=8+sz+(sz&1);}return out;}
+for (const vals of [['A','B'],['Solo'],['A','B','C']]){
+ const f=`/tmp/b48/t${vals.length}.wav`;
+ execFileSync('ffmpeg',['-y','-v','error','-f','lavfi','-i','sine=d=0.1','-ac','1',f]);
+ const tf=File.createFromPath(f);tf.tag.performers=vals;tf.save();tf.dispose();
+ const b=fs.readFileSync(f);
+ console.log(JSON.stringify(vals), JSON.stringify(chunks(b)));
+ console.log(' ffprobe', execFileSync('ffprobe',['-v','error','-show_entries','format_tags','-of','json',f]).toString().replace(/\s+/g,' '));
+ const r=File.createFromPath(f);console.log(' readback', JSON.stringify(r.tag.performers));r.dispose();
+}

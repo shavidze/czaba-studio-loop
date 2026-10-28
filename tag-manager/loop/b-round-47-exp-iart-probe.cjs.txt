@@ -1,0 +1,8 @@
+const fs=require('fs');const {File}=require('/home/runner/czaba-project/czaba-tag-manager/node_modules/node-taglib-sharp');
+const {execFileSync}=require('child_process');
+const f='/tmp/b48/iart.wav';
+let t=File.createFromPath(f);console.log('read performers',JSON.stringify(t.tag.performers),'albumArtists',JSON.stringify(t.tag.albumArtists),'title',JSON.stringify(t.tag.title));t.dispose();
+fs.copyFileSync(f,'/tmp/b48/iart2.wav');
+t=File.createFromPath('/tmp/b48/iart2.wav');t.tag.performers=['New'];t.save();t.dispose();
+console.log(execFileSync('ffprobe',['-v','error','-show_entries','format_tags','-of','json','/tmp/b48/iart2.wav']).toString().replace(/\s+/g,' '));
+t=File.createFromPath('/tmp/b48/iart2.wav');console.log('after',JSON.stringify(t.tag.performers));t.dispose();

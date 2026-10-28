@@ -1,0 +1,90 @@
+diff --git a/.claude/primitives/WAV_METADATA.md b/.claude/primitives/WAV_METADATA.md
+index 9f2cdf2..babf485 100644
+--- a/.claude/primitives/WAV_METADATA.md
++++ b/.claude/primitives/WAV_METADATA.md
+@@ -19,6 +19,7 @@ Tag object-ზე `tag.keywords` არ არსებობს - InfoTag path-
+ `category` (`Category (UCS)`) იყენებს `riffChunkId: 'ICAT'`-ს და `keywords`-ის მსგავსად InfoTag path-ით იწერება/იკითხება (კონტრაქტი: `docs/recording-tag-contract.md`).
+ **ცარიელი მნიშვნელობა არ იწერება (D-49):** ცარიელი/whitespace-only `text` ან ცარიელი `tags` სია STANDARD_PROP_MAP-ში setter-ს `''`/`[]`-ით გადაეცემა, InfoTag path-ზე კი `infoTag.removeValue(riffChunkId)` იძახება — ნულოვანი ზომის sub-chunk არასდროს.
+ **დაუყენებელი number = `''` (D-50):** number ველი წაკითხვისას არარსებულზე/არა-რიცხვზე `''`-ს აბრუნებს; `''`/whitespace/`NaN` არ იწერება (სტანდარტული setter-ს `0`, InfoTag-ზე `removeValue`), აკრეფილი `0` კი `'0'`-ად იწერება.
++**ცარიელი audio data (D-51):** ფაილის ბოლოს მდგარი ცარიელი ან არარსებული `data` chunk (library: `WAV file is missing data chunk`) ჩაწერისას იძლევა `Audio data is empty, cannot tag`-ს; ფაილი არ იწერება, წაკითხვის ქცევა კი უცვლელია (ცარიელი ველები).
+ 
+ ### Read Pattern
+ ```typescript
+diff --git a/docs/recording-tag-contract.md b/docs/recording-tag-contract.md
+index 1b8fea5..7803bd3 100644
+--- a/docs/recording-tag-contract.md
++++ b/docs/recording-tag-contract.md
+@@ -2,7 +2,7 @@
+ 
+ ეს დოკუმენტი არის **source of truth** იმისთვის, თუ რომელ ველს წერს Czaba Tag Manager WAV ფაილში და როგორ უნდა წაიკითხოს ის backend-ის import tool-მა (`czaba-api/tools/recording-import`, K-4). ველის სახელის, chunk ID-ის ან კოდირების ცვლილება ორივე ნაკადის ცვლილებაა და ახალ D-ID-ს მოითხოვს.
+ 
+-გადაწყვეტილებები: D-01, D-02, D-03, D-04, D-10, D-12, D-13, D-49, D-50 (loop-ის `feature-status.md`). ქცევა გაზომილია `node-taglib-sharp@6.0.1`-ზე, ტესტები: `tests/main/recording-tag-contract.test.ts`.
++გადაწყვეტილებები: D-01, D-02, D-03, D-04, D-10, D-12, D-13, D-49, D-50, D-51 (loop-ის `feature-status.md`). ქცევა გაზომილია `node-taglib-sharp@6.0.1`-ზე, ტესტები: `tests/main/recording-tag-contract.test.ts`.
+ 
+ ## ველები
+ 
+@@ -87,11 +87,19 @@ Saba-ს გადაწყვეტილება (Q4): ცარიელი
+ - batch save ასეთ ფაილს `failed`-ში წერს და დანარჩენ ფაილებს აგრძელებს.
+ - `riffChunkId` ზუსტად **4 ბაიტი** (4 ASCII სიმბოლო) უნდა იყოს. Schema Editor ამას ამოწმებს, ხელით შეცვლილი `schema.json` კი არა. თუ schema-ში ასეთი ველია, Metadata panel-ის **ყოველი** save ჩავარდება, რადგან panel ყველა ველს აგზავნის. batch save მხოლოდ მაშინ ჩავარდება, თუ ეს ველი შეიცვალა (`modifiedFields`).
+ - წაკითხვისას ასეთი ველი default მნიშვნელობას აჩვენებს (`''` ან `[]`; number ველისთვისაც `''`, D-50).
++- **ცარიელი audio data (D-51, TM-B05):** `node-taglib-sharp` ვერ ხსნის WAV-ს, რომლის `data` chunk ცარიელია და ბოლოშია, და აგდებს `WAV file is missing data chunk`-ს. Tag Manager ამ შეცდომას ცვლის შეტყობინებით `Audio data is empty, cannot tag`.
++  - ერთი შეტყობინება სამ ფორმას ფარავს: ცარიელი `data` chunk ფაილის ბოლოს (მაგ. 44-byte WAV), `fmt ` chunk `data` chunk-ის გარეშე და truncated `data` chunk (გამოცხადებული ზომა ფაილზე დიდია), რომლის header-ს ბაიტი აღარ მოსდევს. არცერთ მათგანში არ არის დასაკრავი audio. truncated `data`, რომლის header-ს ერთი ბაიტი მაინც მოსდევს, library-სთვის „არსებობს“ და ჩვეულებრივად იწერება (A-ს ექსპერიმენტი, round 47).
++  - single-file save-ში ჩანს `Failed to write metadata: Audio data is empty, cannot tag` (toast-ში Electron-ის `Error invoking remote method 'meta:write': Error: ` prefix-ით).
++  - batch save შეტყობინებას prefix-ის გარეშე წერს `failed[].error`-ში და დანარჩენ ფაილებს აგრძელებს.
++  - ფაილი **არ იცვლება** (ბაიტები იგივე რჩება).
++  - 0-sample WAV, რომლის ცარიელ `data`-ს `LIST/INFO` chunk მოსდევს, ჩვეულებრივად იწერება. სხვა library შეცდომები (მაგ. `WAV file is missing header chunk`) უცვლელად გადის.
++  - წაკითხვა უცვლელია: `meta:read` / `meta:read-batch` ასეთ ფაილზე ცარიელ ველებს აბრუნებს, ამიტომ შეცდომა მხოლოდ save-ისას ჩანს (წაკითხვისას მონიშვნა — ღია კითხვა Q22).
+ 
+ ## შემოწმება
+ 
+ - `npm run test:main` — `tests/main/recording-tag-contract.test.ts`: raw `LIST/INFO` ბაიტები, `meta:read`, `data`/`bext`/`iXML` sha256, batch, ცარიელი მნიშვნელობა. ტესტი T1-1-ის ფაილს ინახავს `test-results/recording-tag-contract/contract.wav`-ში.
+ - `npm run test:main` — `tests/main/metadata-empty-values.test.ts`: ცარიელი/whitespace-only `text` და `tags` მნიშვნელობა sub-chunk-ს შლის (single და batch), custom ველები, უცნობი ID-ის D-18 შეცდომა (D-49); (e6) აკრეფილი number `0` იწერება `'0'`-ად (D-50).
+ - `npm run test:main` — `tests/main/metadata-number-values.test.ts`: დაუყენებელი number (`''`, whitespace, `NaN`) არ იწერება და გასუფთავება `ITKN`/`ICRD`-ს შლის (single და batch), read-then-save `ITKN`-ს არ ქმნის (C-R6-01), `0`/`-2` round trip, `'abc'` → `''`, corrupt ფაილზე number ველები `''` (D-50).
++- `npm run test:main` — `tests/main/metadata-empty-audio.test.ts`: ცარიელი/არარსებული `data` chunk-ის მქონე WAV-ზე `meta:write` და `meta:write-batch` აბრუნებს `Audio data is empty, cannot tag`-ს და ფაილის sha256 არ იცვლება; `LIST/INFO`-იანი 0-sample და 1-sample WAV იწერება; `corrupt.wav`-ის შეცდომა უცვლელია; წაკითხვა ცარიელ ველებს აბრუნებს (D-51).
+ - `npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts test-results/recording-tag-contract/contract.wav` — ffprobe-ით ამოწმებს `ICAT`, `IKEY` და `comment`-ს (CI step „Tag contract ffprobe cross-check“).
+ - `tests/e2e/recording-tag-contract.spec.ts` — Electron-ში `writeMetadata` → `readMetadata` category-ით, სუფთა `XDG_CONFIG_HOME`-ით.
+diff --git a/src/main/ipc/metadata.ts b/src/main/ipc/metadata.ts
+index 2cbaaf2..88bf900 100644
+--- a/src/main/ipc/metadata.ts
++++ b/src/main/ipc/metadata.ts
+@@ -1,5 +1,11 @@
+ import { ipcMain } from 'electron';
+-import { CombinedTag, InfoTag, type Tag, File as TagFile } from 'node-taglib-sharp';
++import {
++  CombinedTag,
++  CorruptFileError,
++  InfoTag,
++  type Tag,
++  File as TagFile,
++} from 'node-taglib-sharp';
+ import type {
+   BatchWriteResult,
+   FieldDefinition,
+@@ -186,12 +192,26 @@ function readTagsFromFile(filePath: string, schema: FieldDefinition[]): WavMetad
+   }
+ }
+ 
++const LIBRARY_MISSING_DATA_CHUNK_MESSAGE = 'WAV file is missing data chunk';
++const EMPTY_AUDIO_DATA_ERROR_MESSAGE = 'Audio data is empty, cannot tag';
++
++function openTagFileForWrite(filePath: string): TagFile {
++  try {
++    return TagFile.createFromPath(filePath);
++  } catch (err) {
++    if (err instanceof CorruptFileError && err.message === LIBRARY_MISSING_DATA_CHUNK_MESSAGE) {
++      throw new Error(EMPTY_AUDIO_DATA_ERROR_MESSAGE);
++    }
++    throw err;
++  }
++}
++
+ function writeTagsToFile(
+   filePath: string,
+   meta: Partial<WavMetadata>,
+   schema: FieldDefinition[],
+ ): void {
+-  const file = TagFile.createFromPath(filePath);
++  const file = openTagFileForWrite(filePath);
+   try {
+     const tag = file.tag as unknown as TagObject;
+     const customFields: Array<{ riffChunkId: string; value: FieldValue; isEmpty: boolean }> = [];

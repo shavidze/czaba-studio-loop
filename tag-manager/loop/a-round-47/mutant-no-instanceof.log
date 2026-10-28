@@ -1,0 +1,29 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/a47-baseline[39m
+
+ [31m❯[39m tests/main/metadata-empty-audio.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 34[2mms[22m[39m
+     [32m✓[39m (a1) meta:write on a 44-byte WAV with an empty last data chunk rejects with the clear message and leaves the file unchanged[32m 5[2mms[22m[39m
+     [32m✓[39m (a2) meta:write-batch reports the bare message for the empty WAV and still tags the next file[32m 12[2mms[22m[39m
+     [32m✓[39m (a3) meta:write on a WAV with fmt and no data chunk rejects with the same clear message[32m 1[2mms[22m[39m
+     [32m✓[39m (a4) meta:write on a 0-sample WAV whose empty data chunk is followed by LIST/INFO still tags it[32m 4[2mms[22m[39m
+     [32m✓[39m (a5) meta:write on a 1-sample WAV still tags it[32m 2[2mms[22m[39m
+     [32m✓[39m (a6) meta:write on corrupt.wav keeps the library's other error text unchanged[32m 1[2mms[22m[39m
+[31m     [31m×[31m (a8) a plain Error with the library's text that is not a CorruptFileError passes through unchanged[39m[32m 5[2mms[22m[39m
+     [32m✓[39m (a7) meta:read and meta:read-batch on the empty WAV still return empty metadata (Q22)[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-empty-audio.test.ts[2m > [22mTM-B05 / D-51: a WAV with empty audio data cannot be tagged and gets a clear error[2m > [22m(a8) a plain Error with the library's text that is not a CorruptFileError passes through unchanged
+[31m[1mAssertionError[22m: expected Error: Failed to write metadata: Audio da… to have property "message" with value 'Failed to write metadata: WAV file is…'[39m
+
+Expected: [32m"Failed to write metadata: [7mWAV file is missing data chunk[27m"[39m
+Received: [31m"Failed to write metadata: [7mAudio data is empty, cannot tag[27m"[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 11:25:02
+[2m   Duration [22m 392ms[2m (transform 69ms, setup 20ms, import 164ms, tests 34ms, environment 0ms)[22m
+

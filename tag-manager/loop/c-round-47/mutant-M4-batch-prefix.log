@@ -1,0 +1,50 @@
+
+ RUN  v4.0.18 /tmp/c47/mut
+
+ ❯ tests/main/metadata-empty-audio.test.ts (8 tests | 1 failed) 37ms
+     ✓ (a1) meta:write on a 44-byte WAV with an empty last data chunk rejects with the clear message and leaves the file unchanged 5ms
+     × (a2) meta:write-batch reports the bare message for the empty WAV and still tags the next file 17ms
+     ✓ (a3) meta:write on a WAV with fmt and no data chunk rejects with the same clear message 1ms
+     ✓ (a4) meta:write on a 0-sample WAV whose empty data chunk is followed by LIST/INFO still tags it 6ms
+     ✓ (a5) meta:write on a 1-sample WAV still tags it 2ms
+     ✓ (a6) meta:write on corrupt.wav keeps the library's other error text unchanged 0ms
+     ✓ (a8) a plain Error with the library's text that is not a CorruptFileError passes through unchanged 1ms
+     ✓ (a7) meta:read and meta:read-batch on the empty WAV still return empty metadata (Q22) 1ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  11:27:59
+   Duration  396ms (transform 74ms, setup 21ms, import 164ms, tests 37ms, environment 0ms)
+
+
+::error file=/tmp/c47/mut/tests/main/metadata-empty-audio.test.ts,title=tests/main/metadata-empty-audio.test.ts > TM-B05 / D-51%3A a WAV with empty audio data cannot be tagged and gets a clear error > (a2) meta%3Awrite-batch reports the bare message for the empty WAV and still tags the next file,line=122,column=20::AssertionError: expected { succeeded: 1, failed: [ { …(2) } ] } to deeply equal { succeeded: 1, failed: [ { …(2) } ] }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "failed": [%0A      {%0A-       "error": "Audio data is empty, cannot tag",%0A+       "error": "Failed to write metadata: Audio data is empty, cannot tag",%0A        "path": "/tmp/czaba-empty-audio-test-9664-1793186879816/a2-empty.wav",%0A      },%0A    ],%0A    "succeeded": 1,%0A  }%0A%0A ❯ tests/main/metadata-empty-audio.test.ts:122:20%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/main/metadata-empty-audio.test.ts > TM-B05 / D-51: a WAV with empty audio data cannot be tagged and gets a clear error > (a2) meta:write-batch reports the bare message for the empty WAV and still tags the next file
+AssertionError: expected { succeeded: 1, failed: [ { …(2) } ] } to deeply equal { succeeded: 1, failed: [ { …(2) } ] }
+
+- Expected
++ Received
+
+  {
+    "failed": [
+      {
+-       "error": "Audio data is empty, cannot tag",
++       "error": "Failed to write metadata: Audio data is empty, cannot tag",
+        "path": "/tmp/czaba-empty-audio-test-9664-1793186879816/a2-empty.wav",
+      },
+    ],
+    "succeeded": 1,
+  }
+
+ ❯ tests/main/metadata-empty-audio.test.ts:122:20
+    120|     const result = await getHandler("meta:write-batch")({}, [emptyPath…
+    121| 
+    122|     expect(result).toEqual({ succeeded: 1, failed: [{ path: emptyPath,…
+       |                    ^
+    123|     const readBack = (await getHandler("meta:read")({}, samplePath, ST…
+    124|     expect(readBack.title).toBe("R47 batch");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
